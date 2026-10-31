@@ -12,6 +12,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /** Who made a report: the build and the phone, written at the top of each one (Plan F1 part 2 Decision 1). */
 data class BuildFacts(val versionName: String, val versionCode: Int, val device: String, val android: String) {
@@ -48,6 +51,14 @@ class CrashLog(
     private val now: () -> Long = System::currentTimeMillis,
 ) {
     private val lastSeenFile = File(dir, ".last-exit")
+    private val acknowledgedFile = File(dir, ".acknowledged")
+    private val _notice = MutableStateFlow<CrashReport?>(null)
+
+    /**
+     * The newest report the user hasn't answered yet, for Home's "Granger closed unexpectedly" line (Decision 3).
+     * Filled once the start has read past exits ([recordExits]); null after [acknowledge] or [clear].
+     */
+    val notice: StateFlow<CrashReport?> = _notice.asStateFlow()
 
     /** Records [error] on [thread], then hands it to [previous] so Android still ends the process the usual way. */
     fun handler(previous: Thread.UncaughtExceptionHandler?) = Thread.UncaughtExceptionHandler { thread, error ->
@@ -75,7 +86,22 @@ class CrashLog(
             dir.mkdirs()
             lastSeenFile.writeText(fresh.last().timestamp.toString())
         }
+        refreshNotice()
         return fresh.size
+    }
+
+    /** The user sent a report or said not now: Home stops asking until the next crash. */
+    fun acknowledge() {
+        list().firstOrNull()?.let {
+            dir.mkdirs()
+            acknowledgedFile.writeText(it.timestamp.toString())
+        }
+        refreshNotice()
+    }
+
+    fun refreshNotice() {
+        val acknowledged = runCatching { acknowledgedFile.readText().trim().toLong() }.getOrDefault(0L)
+        _notice.value = list().firstOrNull()?.takeIf { it.timestamp > acknowledged }
     }
 
     fun list(): List<CrashReport> =
@@ -85,6 +111,7 @@ class CrashLog(
 
     fun clear() {
         list().forEach { it.file.delete() }
+        refreshNotice()
     }
 
     private fun write(timestamp: Long, kind: CrashKind, body: String) {

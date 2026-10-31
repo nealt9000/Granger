@@ -1,5 +1,10 @@
 package app.granger
 
+import app.granger.feedback.FeedbackFacts
+import app.granger.feedback.FeedbackMail
+import app.granger.feedback.FeedbackSheet
+import app.granger.home.CrashNotice
+import android.content.ActivityNotFoundException
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.EnterTransition
@@ -618,6 +623,36 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
 
     // What Define does in the e-book reader; the selection menu reads it live through SelectionBridge.
     val appContext = LocalContext.current.applicationContext
+
+    // Send feedback and the crash log (Plan F1 part 2): one sheet, opened from Settings → About or Home's crash line.
+    val activityContext = LocalContext.current
+    val crashLog = remember { (appContext as? GrangerApp)?.crashLog }
+    val crashNotice = crashLog?.notice?.let { it.collectAsStateWithLifecycle().value }
+    var feedbackOpen by rememberSaveable { mutableStateOf(false) }
+    var crashesCleared by remember { mutableStateOf(0) }
+    val crashReports = remember(feedbackOpen, crashNotice, crashesCleared) { crashLog?.list()?.size ?: 0 }
+    if (feedbackOpen && crashLog != null) {
+        val facts by produceState<FeedbackFacts?>(null, crashesCleared) { value = FeedbackMail.facts(container, crashLog) }
+        FeedbackSheet(
+            facts,
+            onSend = { withCrashes ->
+                facts?.let { f ->
+                    try {
+                        activityContext.startActivity(FeedbackMail.intent(activityContext, f, withCrashes))
+                        crashLog.acknowledge()
+                        feedbackOpen = false
+                    } catch (e: ActivityNotFoundException) {
+                        Toast.makeText(activityContext, "No mail app on this phone. Write to ${BuildConfig.FEEDBACK_EMAIL}.", Toast.LENGTH_LONG).show()
+                    }
+                }
+            },
+            onClearCrashes = {
+                crashLog.clear()
+                crashesCleared++
+            },
+            onDismiss = { feedbackOpen = false },
+        )
+    }
     val dictionary by produceState<DictionaryChoice>(DictionaryChoice.None) {
         val handler = try {
             withContext(Dispatchers.IO) { Dictionary.hasProcessTextHandler(appContext) }
@@ -1146,6 +1181,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         ?.title ?: "No offline voice on this phone",
                     onMediaSettings = if (Features.PLAYER) ({ nav.navigate(MediaSettingsRoute) { launchSingleTop = true } }) else null,
                     audiobooks = remember { container.shelves.audioShelves }.collectAsStateWithLifecycle(AudioShelves.NONE).value.audiobooks,
+                    onFeedback = if (crashLog != null) ({ feedbackOpen = true }) else null,
+                    crashReports = crashReports,
                 )
             }
             composable<MediaSettingsRoute> {
@@ -1228,6 +1265,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     onReadiness = { nav.navigate(ReadinessRoute) { launchSingleTop = true } },
                     onOpenDownloads = { nav.navigate(DownloadsRoute) { launchSingleTop = true } },
+                    crashNotice = if (crashNotice != null) CrashNotice(onSend = { feedbackOpen = true }, onDismiss = { crashLog?.acknowledge() }) else null,
                     onOpenTab = ::showTab,
                     onPlay = ::resumePlay,
                     onOpenCard = { card ->

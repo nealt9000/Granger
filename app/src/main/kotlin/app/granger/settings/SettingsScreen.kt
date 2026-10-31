@@ -64,6 +64,10 @@ fun SettingsScreen(
     onMediaSettings: (() -> Unit)? = null,
     /** The phone holds an audiobook: the row reads "Music & audiobooks", else "Music" (Plan U2 Decision 7). */
     audiobooks: Boolean = false,
+    /** Settings → About → Send feedback (Plan F1 part 2); null leaves the row out. */
+    onFeedback: (() -> Unit)? = null,
+    /** Crash reports kept on this phone, for the row's summary. */
+    crashReports: Int = 0,
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
@@ -142,6 +146,17 @@ fun SettingsScreen(
             }
             item(key = "about") {
                 SettingsHeader("About")
+                if (onFeedback != null) {
+                    LinkRow(
+                        "Send feedback",
+                        when (crashReports) {
+                            0 -> "An email from your mail app; you see what's included first"
+                            1 -> "An email from your mail app · 1 crash report kept on this phone"
+                            else -> "An email from your mail app · $crashReports crash reports kept on this phone"
+                        },
+                        onFeedback,
+                    )
+                }
                 About()
             }
         }

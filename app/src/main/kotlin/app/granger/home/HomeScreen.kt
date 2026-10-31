@@ -91,6 +91,7 @@ fun HomeScreen(
     onOpenCard: (Card) -> Unit,
     /** The downloads card opens Downloads, where the whole queue is (Plan DL Decision 7). */
     onOpenDownloads: () -> Unit = {},
+    crashNotice: CrashNotice? = null,
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -104,8 +105,11 @@ fun HomeScreen(
             viewModel::removeSmaller, viewModel::keepBoth,
         )
     }
-    HomeContent(ui, onReadiness, onOpenTab, onPlay, onOpenCard, actions, onOpenDownloads, cardActions)
+    HomeContent(ui, onReadiness, onOpenTab, onPlay, onOpenCard, actions, onOpenDownloads, cardActions, crashNotice)
 }
+
+/** After a crash, Home asks once (Plan F1 part 2 Decision 3): Send report opens Send feedback; Not now lets it be. */
+class CrashNotice(val onSend: () -> Unit, val onDismiss: () -> Unit)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -119,6 +123,7 @@ fun HomeContent(
     /** The downloads card opens Downloads, where the whole queue is (Plan DL Decision 7). */
     onOpenDownloads: () -> Unit = {},
     downloadsActions: DownloadsCardActions = DownloadsCardActions(),
+    crashNotice: CrashNotice? = null,
 ) {
     var adding by rememberSaveable { mutableStateOf(false) }
     Scaffold(
@@ -131,6 +136,7 @@ fun HomeContent(
     ) { padding ->
         LazyColumn(Modifier.padding(padding).fillMaxSize().testTag("home-list")) {
             item(key = "strip") { ReadinessStrip(ui.strip, onReadiness) }
+            crashNotice?.let { notice -> item(key = "crash") { CrashNoticeRow(notice) } }
             ui.downloads?.let { card -> item(key = "downloads") { DownloadsCardView(card, onOpenDownloads, downloadsActions) } }
             for (offer in ui.tidy) {
                 item(key = "tidy-${offer.key}") {
@@ -390,4 +396,16 @@ fun homeDownloadsText(card: DownloadsCard.Active): String {
     )
     card.timeLeftMillis?.let { parts += "${app.granger.core.downloads.QueueText.timeLeft(it)} left" }
     return parts.joinToString(" · ")
+}
+
+@Composable
+private fun CrashNoticeRow(notice: CrashNotice) {
+    Row(
+        Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 4.dp).testTag("crash-notice"),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text("Granger closed unexpectedly. Send a report?", Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+        TextButton(onClick = notice.onDismiss) { Text("Not now") }
+        TextButton(onClick = notice.onSend) { Text("Send") }
+    }
 }

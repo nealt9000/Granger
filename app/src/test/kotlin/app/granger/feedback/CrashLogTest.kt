@@ -101,4 +101,29 @@ class CrashLogTest {
         val input = ByteArray(20_000) { 1 }.inputStream()
         assertThat(CrashLog.readAtMost(input, 10_000)).hasLength(10_000)
     }
+
+    /** Plan F1 part 2 Decision 3: Home asks about the newest crash once, until the user answers or a new one comes. */
+    @Test fun theNoticeShowsTheNewestUnansweredCrash() {
+        assertThat(log.notice.value).isNull()
+        log.recordExits(listOf(PastExit(5_000L, CrashKind.NATIVE, null, null)))
+        assertThat(log.notice.value?.timestamp).isEqualTo(5_000L)
+
+        log.acknowledge()
+        assertThat(log.notice.value).isNull()
+        log.recordExits(emptyList())
+        assertThat(log.notice.value).isNull()
+
+        log.recordExits(listOf(PastExit(6_000L, CrashKind.ANR, null, null)))
+        assertThat(log.notice.value?.kind).isEqualTo(CrashKind.ANR)
+        log.clear()
+        assertThat(log.notice.value).isNull()
+    }
+
+    @Test fun aJavaCrashFromTheLastRunIsNoticedOnTheNextStart() {
+        log.record(Thread("main"), RuntimeException("boom"))
+        // The next start reads past exits (none native here), which refreshes the notice from the files.
+        val next = CrashLog(tmp.root.resolve("crashes"), facts) { clock }
+        next.recordExits(emptyList())
+        assertThat(next.notice.value?.summary).isEqualTo("java.lang.RuntimeException: boom")
+    }
 }

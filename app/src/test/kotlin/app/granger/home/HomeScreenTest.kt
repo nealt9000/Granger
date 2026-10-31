@@ -1,6 +1,7 @@
 package app.granger.home
 
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasTestTag
@@ -55,7 +56,7 @@ class HomeScreenTest {
         onMove = { id, up -> calls += "move:$id:$up" },
     )
 
-    private fun show(ui: HomeUi) = compose.setContent {
+    private fun show(ui: HomeUi, crashNotice: CrashNotice? = null) = compose.setContent {
         HomeContent(
             ui,
             onReadiness = { calls += "readiness" },
@@ -63,7 +64,22 @@ class HomeScreenTest {
             onPlay = { calls += "play:${it.playKey}" },
             onOpenCard = { calls += "card:${it.title}" },
             actions = actions,
+            crashNotice = crashNotice,
         )
+    }
+
+    /** Plan F1 part 2 Decision 3: after a crash Home asks once; Send opens Send feedback, Not now lets it be. */
+    @Test fun afterACrashHomeOffersToSendAReport() {
+        show(HomeUi(strip = report), CrashNotice(onSend = { calls += "send" }, onDismiss = { calls += "not now" }))
+        compose.onNodeWithText("Granger closed unexpectedly. Send a report?").assertExists()
+        compose.onNodeWithText("Send").performClick()
+        compose.onNodeWithText("Not now").performClick()
+        assertThat(calls).containsExactly("send", "not now").inOrder()
+    }
+
+    @Test fun withoutACrashHomeDoesNotAsk() {
+        show(HomeUi(strip = report))
+        compose.onAllNodesWithTag("crash-notice").assertCountEquals(0)
     }
 
     @Test fun theStripShowsNineDotsAndTheFirstSignalAndOpensReadiness() {
