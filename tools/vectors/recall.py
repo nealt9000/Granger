@@ -134,10 +134,13 @@ def cmd_eval(a):
 GATE = 0.78  # R1 Task 7's gate: the best dense hit must reach this, or the dense side returns nothing
 
 
-def first_dense_hit(passages, answers):
-    """The rank of the first passage that holds an answer (by location or quote, as `dense.hit`), or None."""
+def first_dense_hit(passages, answers, any_source=False):
+    """The rank of the first passage that holds an answer (by location or quote, as `dense.hit`), or None. With
+    [any_source], the same article from another pack counts too (a subject pack holds Top's articles)."""
     import dense
-    return next((r for r, p in enumerate(passages) if dense.hit(p, answers)), None)
+    def ok(p):
+        return dense.hit(p, [dict(x, source=p["source"]) for x in answers] if any_source else answers)
+    return next((r for r, p in enumerate(passages) if ok(p)), None)
 
 
 def covered(item, labels):
@@ -176,6 +179,8 @@ def cmd_dataset(a):
         dims = dims or head["dims"]
         assert head["dims"] == dims, f
         files.append((q, scales))
+    if not files:
+        raise SystemExit("no vector files in %s" % " ".join(a.work))
     labels = {label for _, _, _, label in srcs}
     from sentence_transformers import SentenceTransformer
     model = SentenceTransformer(MODEL, device="mps")
@@ -194,7 +199,7 @@ def cmd_dataset(a):
     firsts, top = {}, {}
     for item, row in zip(items, best):
         passages = [dict(chunks[(fi, r)], source=srcs[fi][3], location=chunks[(fi, r)]["key"]) for _, fi, r in row]
-        firsts[item["id"]] = first_dense_hit(passages, item["answers"]) if item["answerable"] else None
+        firsts[item["id"]] = first_dense_hit(passages, item["answers"], a.any_source) if item["answerable"] else None
         top[item["id"]] = row[0][0] if row else 0.0
     print("%d questions; %d files, %d rows, %d dims" % (len(items), len(files), sum(len(q) for q, _ in files), dims))
     for line in recall_table(items, firsts, top, labels, ks):
@@ -211,7 +216,8 @@ def main(argv=None):
     q = s.add_parser("queries"); q.add_argument("run"); q.add_argument("out"); q.set_defaults(f=cmd_queries)
     e = s.add_parser("eval"); e.add_argument("work"); e.add_argument("run"); e.add_argument("--phone-queries"); e.set_defaults(f=cmd_eval)
     d = s.add_parser("dataset"); d.add_argument("dataset"); d.add_argument("work", nargs="+")
-    d.add_argument("--k", default="4,12,50"); d.set_defaults(f=cmd_dataset)
+    d.add_argument("--k", default="4,12,50"); d.add_argument("--any-source", action="store_true")
+    d.set_defaults(f=cmd_dataset)
     a = ap.parse_args(argv)
     return a.f(a)
 

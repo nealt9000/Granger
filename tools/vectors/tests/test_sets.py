@@ -44,3 +44,10 @@ def test_first_dense_hit_by_location_or_quote():
     assert recall.first_dense_hit([miss, by_quote], answers) == 1
     assert recall.first_dense_hit([miss, by_loc], answers) == 1
     assert recall.first_dense_hit([miss], answers) is None
+
+
+def test_any_source_counts_the_same_article_from_a_subject_pack():
+    answers = [{"source": "wikipedia_es_top", "location": "Átomo", "quote": "zzz"}]
+    other = {"source": "wikipedia_es_physics", "location": "Átomo", "heading": "", "text": "nada"}
+    assert recall.first_dense_hit([other], answers) is None
+    assert recall.first_dense_hit([other], answers, any_source=True) == 0
