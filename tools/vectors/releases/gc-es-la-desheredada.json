@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-la-desheredada",
+ "kind": "book",
+ "fileName": "gc-es-la-desheredada_2026-10-30.gvec",
+ "sizeBytes": 317064,
+ "sha256": "e0f268f409ddcaf9a2379a51a7a1630241205d46082ad3394fba19f84affa8b1",
+ "count": 1078,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "5aa7aa25211689ab4e48e608971fb9ecaff58744db5b4762487c6774983053cb",
+ "url": null
+}

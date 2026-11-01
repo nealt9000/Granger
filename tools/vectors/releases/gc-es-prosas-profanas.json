@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-prosas-profanas",
+ "kind": "book",
+ "fileName": "gc-es-prosas-profanas_2026-10-30.gvec",
+ "sizeBytes": 58344,
+ "sha256": "d4994d75b9a4359427ed664e7f69ba6aaac165b06ab7f08291b6966ecd66faf0",
+ "count": 198,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "4f620e6151fecdf2dd2a1f65a5f7be8563e1b7cb7182109d04c7032689dfcbc1",
+ "url": null
+}

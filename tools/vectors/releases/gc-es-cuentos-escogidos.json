@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-cuentos-escogidos",
+ "kind": "book",
+ "fileName": "gc-es-cuentos-escogidos_2026-10-30.gvec",
+ "sizeBytes": 263262,
+ "sha256": "6301815cf0ee97b1f78576c492b298b3e0eddf2942ed8cbec31246be9e793d66",
+ "count": 895,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "af0378f9e03c5a5ada7c744aca4c752176c9275c5a342c1341f100ad35d6963d",
+ "url": null
+}

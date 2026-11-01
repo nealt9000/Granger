@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-fortunata-y-jacinta",
+ "kind": "book",
+ "fileName": "gc-es-fortunata-y-jacinta_2026-10-30.gvec",
+ "sizeBytes": 825684,
+ "sha256": "06761dc4f80f895deeb30cc584a5263718547b0ccfc7d3f3e62c09049054f5a4",
+ "count": 2808,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "4c7c45ec292589562366890a1e5ab9d32cffd3e4a8f3addc487959f65ad3e056",
+ "url": null
+}

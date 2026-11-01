@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-los-pazos-de-ulloa",
+ "kind": "book",
+ "fileName": "gc-es-los-pazos-de-ulloa_2026-10-30.gvec",
+ "sizeBytes": 174180,
+ "sha256": "5b50fe8fae90739c54bde8a186ddf3136254fc7bb0025329623e90c8eb2c69e2",
+ "count": 592,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "f7edf66be96e0cc035329e980ad093fb81eef2293fc14aeb12514db233c29933",
+ "url": null
+}

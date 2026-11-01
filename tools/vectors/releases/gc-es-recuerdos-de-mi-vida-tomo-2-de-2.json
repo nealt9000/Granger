@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-recuerdos-de-mi-vida-tomo-2-de-2",
+ "kind": "book",
+ "fileName": "gc-es-recuerdos-de-mi-vida-tomo-2-de-2_2026-10-30.gvec",
+ "sizeBytes": 387330,
+ "sha256": "3301c0fd7178eb64d40765241f08369c3e915086c58a8d1e4cf13cbe74fcd2ed",
+ "count": 1317,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "ed30a13cf3fed8d30e8fb454e603c407b74c5511f84ae805bab37be37cd8b8a0",
+ "url": null
+}

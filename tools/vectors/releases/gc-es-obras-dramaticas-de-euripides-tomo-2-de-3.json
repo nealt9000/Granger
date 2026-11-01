@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-obras-dramaticas-de-euripides-tomo-2-de-3",
+ "kind": "book",
+ "fileName": "gc-es-obras-dramaticas-de-euripides-tomo-2-de-3_2026-10-30.gvec",
+ "sizeBytes": 237096,
+ "sha256": "7463c62dd041088ec3322ae3d90770f751c1648a9fbe29715f55a3564378ac93",
+ "count": 806,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "b9b1ab911149a3574b0a0c7ff6189455b166ce2520d900ffcc5ca3d60b905b82",
+ "url": null
+}

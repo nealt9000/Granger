@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-sonata-de-estio",
+ "kind": "book",
+ "fileName": "gc-es-sonata-de-estio_2026-10-30.gvec",
+ "sizeBytes": 53052,
+ "sha256": "91bff5c027793c90d4ce3c3131e41159e7671e5137161480c01bb8a095a954c6",
+ "count": 180,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "ae97b82978d6a3461806bce0852adefa7f49f78596345f115e3695bc7519812e",
+ "url": null
+}

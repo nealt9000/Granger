@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-trafalgar",
+ "kind": "book",
+ "fileName": "gc-es-trafalgar_2026-10-30.gvec",
+ "sizeBytes": 113028,
+ "sha256": "0b10843a6a0bfb00a8a952c9c3a10a7b0f965fa89027cbd78cfe7636266d66c1",
+ "count": 384,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "794b6c9f84d1c6e7a8972510857c613bc9c271c018000545c0ef553963e7f853",
+ "url": null
+}

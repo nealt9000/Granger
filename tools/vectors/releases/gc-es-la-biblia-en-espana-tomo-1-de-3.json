@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-la-biblia-en-espana-tomo-1-de-3",
+ "kind": "book",
+ "fileName": "gc-es-la-biblia-en-espana-tomo-1-de-3_2026-10-30.gvec",
+ "sizeBytes": 140370,
+ "sha256": "85983a1827a2c191046c3f7bbbe58c56ae18e5d54e661890016e401dccf715d3",
+ "count": 477,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "742266a94f0ee1a76a8659b964b9085c6bfcf919a94134cd5f2ecab7e1f18186",
+ "url": null
+}

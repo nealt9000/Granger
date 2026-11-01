@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-historia-natural-y-moral-de-las-indias-tomo-1-de-2",
+ "kind": "book",
+ "fileName": "gc-es-historia-natural-y-moral-de-las-indias-tomo-1-de-2_2026-10-30.gvec",
+ "sizeBytes": 137724,
+ "sha256": "b5bb68d933ebf319e76667a03faea88724d78ffbfd623c1c15ce130b4fbf3b8e",
+ "count": 468,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "2263aba2779f6bfaa1f24988c210c10343ab908c967ea494bf3836956f8e3b65",
+ "url": null
+}

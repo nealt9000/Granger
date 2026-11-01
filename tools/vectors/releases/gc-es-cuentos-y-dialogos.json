@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-cuentos-y-dialogos",
+ "kind": "book",
+ "fileName": "gc-es-cuentos-y-dialogos_2026-10-30.gvec",
+ "sizeBytes": 92154,
+ "sha256": "9b81792f745527c4d81c130cc05de7506c43e3f5f089f908e48b8fcfe9754699",
+ "count": 313,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "ddb6bf94c9e09a2facb9145752f1407fc0c8b7c0a4733728a3c581cfb5dfacd8",
+ "url": null
+}

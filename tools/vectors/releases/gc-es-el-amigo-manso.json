@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-el-amigo-manso",
+ "kind": "book",
+ "fileName": "gc-es-el-amigo-manso_2026-10-30.gvec",
+ "sizeBytes": 203286,
+ "sha256": "2aa0d095ba7ec01a7e04935a16cf8f4849533caf968ab51bccf3675761d40e4c",
+ "count": 691,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "7237c77fde757f6c66ad32a36392fcb28bdd288ac97587e85d7b8369c4c23fa8",
+ "url": null
+}

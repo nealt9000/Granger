@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-insolacion-y-morrina",
+ "kind": "book",
+ "fileName": "gc-es-insolacion-y-morrina_2026-10-30.gvec",
+ "sizeBytes": 188586,
+ "sha256": "6d7f5aa8aac29c7c55073ef2813ca119d2fc5028433bfb62d71f03a29a5c6966",
+ "count": 641,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "461ec6fef8837d3085b1ab9b4eb1a6ea5ea60aed082546515a72fa1797aca7b5",
+ "url": null
+}

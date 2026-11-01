@@ -1,0 +1,14 @@
+{
+ "id": "wikipedia_es_chemistry_nopic",
+ "kind": "pack",
+ "fileName": "wikipedia_es_chemistry_nopic_2026-10-15.gvec",
+ "sizeBytes": 7692716,
+ "sha256": "97ee8568f08e9ce60cefe95036c4fe0604d5b7d8f20ac3fd2d634e6b46e60019",
+ "count": 25932,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "7d937dc1b5493e3e0307e8d11478506a000b8b4488e9add46e9655be8494147b",
+ "url": null
+}

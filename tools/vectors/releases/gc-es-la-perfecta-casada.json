@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-la-perfecta-casada",
+ "kind": "book",
+ "fileName": "gc-es-la-perfecta-casada_2026-10-30.gvec",
+ "sizeBytes": 67752,
+ "sha256": "0929a012064710621a3b89cd843e1f9f0fdb8cf35ae4e4a95c51c7098b8d25fe",
+ "count": 230,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "a7240275bc343da8b43c605456683bcfe1e51ed0c4401311c4d7b04164a20552",
+ "url": null
+}

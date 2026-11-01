@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-romance-de-lobos",
+ "kind": "book",
+ "fileName": "gc-es-romance-de-lobos_2026-10-30.gvec",
+ "sizeBytes": 74514,
+ "sha256": "27b516d3801bd116b924883a20e527cad950cbd44963a36e0f09f35dcdbbd74f",
+ "count": 253,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "9388fb792315a3133c0e3e99875c20561faf1eea0795e8db54ec68692ad37889",
+ "url": null
+}

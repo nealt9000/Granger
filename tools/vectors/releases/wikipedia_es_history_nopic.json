@@ -1,0 +1,14 @@
+{
+ "id": "wikipedia_es_history_nopic",
+ "kind": "pack",
+ "fileName": "wikipedia_es_history_nopic_2026-10-14.gvec",
+ "sizeBytes": 30332804,
+ "sha256": "54aaae085b68f0a9bf76840d1d7e632c04a0f7d54ce7ecf3683c8ef22fe6f9c5",
+ "count": 101992,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "e30aa60ec881f7b33164689a3eda03daa91dee94b83aaf5123857e211801e21d",
+ "url": null
+}

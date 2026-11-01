@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-niebla",
+ "kind": "book",
+ "fileName": "gc-es-niebla_2026-10-30.gvec",
+ "sizeBytes": 158892,
+ "sha256": "76fd81e0327e49980863cf6a05040680fa6aa00679227cd1330a9b3777af2f2e",
+ "count": 540,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "1d5d40ddea4c49d2fd8a48ba632d400a26e9d7ce997aef122cf010e64635655a",
+ "url": null
+}

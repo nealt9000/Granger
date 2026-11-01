@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-epistola-de-san-pablo-a-los-romanos",
+ "kind": "book",
+ "fileName": "gc-es-epistola-de-san-pablo-a-los-romanos_2026-10-30.gvec",
+ "sizeBytes": 93624,
+ "sha256": "7d4461f64a051641378d9a44cfda168738ede51e04217f45a86232a4a6866a11",
+ "count": 318,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "847d9aa898a0f127725f8df8bcd628b1ff7d776142b7b5c8c0ede51ce9750885",
+ "url": null
+}

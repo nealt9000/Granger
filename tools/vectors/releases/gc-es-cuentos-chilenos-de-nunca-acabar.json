@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-cuentos-chilenos-de-nunca-acabar",
+ "kind": "book",
+ "fileName": "gc-es-cuentos-chilenos-de-nunca-acabar_2026-10-30.gvec",
+ "sizeBytes": 33060,
+ "sha256": "179f0a826d5fd67f005093639ad4072356b11b67565a2df455a17b79ff28a41f",
+ "count": 112,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "3c0dc9d7db889dd8b7267e2c0ae7823c80260fa20bfc462c515bb986ac4e6dc2",
+ "url": null
+}

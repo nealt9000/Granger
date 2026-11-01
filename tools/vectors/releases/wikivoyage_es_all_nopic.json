@@ -1,0 +1,14 @@
+{
+ "id": "wikivoyage_es_all_nopic",
+ "kind": "pack",
+ "fileName": "wikivoyage_es_all_nopic_2026-09-17.gvec",
+ "sizeBytes": 21734580,
+ "sha256": "d44960f4a9ff7df272109fdf7a1926dbe95e40021fdabb4590d9dd6549b21323",
+ "count": 74903,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "6f39fcea4dcb213c8a42302e548349d0f835330b74c9e7253daa4821611a289c",
+ "url": null
+}

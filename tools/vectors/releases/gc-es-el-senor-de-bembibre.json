@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-el-senor-de-bembibre",
+ "kind": "book",
+ "fileName": "gc-es-el-senor-de-bembibre_2026-10-30.gvec",
+ "sizeBytes": 235626,
+ "sha256": "307fe13b78924365d842e679580c93fe665112f4b163626674ddc56a0921608d",
+ "count": 801,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "597db3da4c38c17e7d0df0a24b93a4703e211c285be3755d0b37e382b18aacce",
+ "url": null
+}

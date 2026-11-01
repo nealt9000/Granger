@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-las-helenicas",
+ "kind": "book",
+ "fileName": "gc-es-las-helenicas_2026-10-30.gvec",
+ "sizeBytes": 170064,
+ "sha256": "abb6664c637e0ddd45d8e8ded5d1522a32a08592fddf0c21d00333929e5fcd36",
+ "count": 578,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "11123b5671a66105ead91951d09e40eca027a89a53d3b9ad96943c48161566e9",
+ "url": null
+}
