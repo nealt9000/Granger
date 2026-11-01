@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-cuentos-valencianos",
+ "kind": "book",
+ "fileName": "gc-es-cuentos-valencianos_2026-10-30.gvec",
+ "sizeBytes": 120084,
+ "sha256": "5d7ceb20705ca20834f6218994c057d16650b3076c0d2ca7e715e3761b3f5f3c",
+ "count": 408,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "c9e28cb8902750b70a3bd91a61f482b853b99c8100e225a9aeda9ff97f5dec29",
+ "url": null
+}

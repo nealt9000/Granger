@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-cantos-de-vida-y-esperanza",
+ "kind": "book",
+ "fileName": "gc-es-cantos-de-vida-y-esperanza_2026-10-30.gvec",
+ "sizeBytes": 36588,
+ "sha256": "f1312ce56447a647cf00f791c3133e76c881bbff0b69be030bbbec3d8944a8ae",
+ "count": 124,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "a9cc8eb4ef74b0b4b9ad93a5c9276e5d09d692a45a99ef7ff79431d1826612d2",
+ "url": null
+}

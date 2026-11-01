@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-en-tranvia",
+ "kind": "book",
+ "fileName": "gc-es-en-tranvia_2026-10-30.gvec",
+ "sizeBytes": 125670,
+ "sha256": "70b9cd551a637e284fedd82ad2a242d04c0159648efd6f7b61a1c249eeb60882",
+ "count": 427,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "11d3bf20fc58b28fcc0d412e9963499f5aacb2455e1a97d766f7ddc93b78a38e",
+ "url": null
+}

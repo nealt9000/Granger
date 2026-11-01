@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-el-arte-de-amar",
+ "kind": "book",
+ "fileName": "gc-es-el-arte-de-amar_2026-10-30.gvec",
+ "sizeBytes": 47760,
+ "sha256": "9f793718265eddc465943d80c63606d3a60689aef03d995c8bb375c4bbd16c9f",
+ "count": 162,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "75110d7b79ef035c93b6c0faceeba726c6cda8df9cdf170d8267323d9c9d67b4",
+ "url": null
+}

@@ -76,3 +76,56 @@ This closes the whole-word, `GENERIC_TITLE_WORDS` and `multistep.amount` items a
   - The folding applies to `[EN, ES]` questions too: keyword-only English questions such as "Lake Como villas". There, "cafe" now matches "café". `LanguageLayerTest`, `LibraryLanguageTest` and the 28 replays show no change on the eval sets.
   - For amounts, only an ES-first item reads Spanish numbers, so English-led ones stay byte-identical.
   - ï, ö and the like aren't folded, since Spanish doesn't use them.
+
+## Spanish vectors (2026-10-31 to 11-01)
+
+Spec §6.1, built on the Mac with `tools/vectors` the same way as R1. Branch `l4-spanish-vectors`.
+
+**The set** (`tools/vectors/set-es.json`): the Spanish essential tier, Wikipedia history (English has it too), and the 185 Clásicos Granger books.
+- Each Wikipedia pack is built from its `_nopic` file. The nopic and maxi files share a snapshot date in the catalog, so `catalog_gen attach_vectors` puts the vectors on both flavours, as R1 did for medicine, top and history.
+- I checked that nopic and maxi chunk the same way: 400 random chemistry articles gave 3,858 chunks from each file, all identical. iFixit has one flavour.
+- `keywordOnly` lists the comprehensive extras: wikipedia_es_all (2.1M articles), Wiktionary, Wikisource, Wikiquote, MedlinePlus, Ready.gov, Scoutwiki, Low-tech Magazine, molcell, climate change, geography, Wikibooks, Wikiversity, Vikidia and Spanish Language SE.
+- Snapshots and sha256s come from a dry `catalog_gen build` of the live Kiwix feed on 2026-10-31 (scratch only, not committed or signed), saved as `vectors-work/catalog-es-dry-2026-10-31.json`. `count.py` and `build.py` now take `--set` and `--catalog`. The defaults are unchanged, so English output is the same.
+
+**Counts, trims, time.** At set.json's caps the set came to 1.80M chunks: iFixit 580k at 8 and Top 536k at 12. That's about 18 h at 100k/h, and the Mac measured 75–81k/h on Wikipedia. So I trimmed it the way R1 trimmed the English set:
+
+| Pack | Cap | Chunks | .gvec MB |
+|---|---:|---:|---:|
+| wikipedia_es_top_nopic (2026-10-10) | 12 → 8 | 382,318 | 112.5 |
+| ifixit_es_all (2026-03-06) | 8 → 4, the Stack Exchanges' cap | 339,340 | 111.4 |
+| wikipedia_es_medicine_nopic (10-15) | 12 | 132,840 | 39.6 |
+| wikipedia_es_history_nopic (10-14) | 12 → 8 | 101,992 | 30.3 |
+| wikipedia_es_computer_nopic (10-15) | 12 → 8 | 83,771 | 24.6 |
+| wikivoyage_es_all_nopic (09-17) | none | 74,903 | 21.7 |
+| wikipedia_es_physics_nopic (10-15) | 12 | 59,736 | 17.8 |
+| wikipedia_es_mathematics_nopic (10-14) | 12 | 59,623 | 17.8 |
+| wikipedia_es_chemistry_nopic (10-15) | 12 | 25,932 | 7.7 |
+| Clásicos Granger (185 books, 2026-10-30) | none | 111,928 | 32.9 |
+| **Total** | | **1,372,383** | **416.4** |
+
+- **Why Top at 8:** of the 46 tune-es answers whose quote appears in their Top article, 45 sit in the first 8 chunks (38 of them in chunk 0). At 10, all 46 are kept.
+- **Build time:** 13.6 h wall clock, 17:56 to 07:32, including one restart to apply the trims. Wikipedia ran at about 78k chunks/h. iFixit's short chunks ran at about 250k/h.
+- The log is `vectors-work/es.log` and the work folder is `vectors-work/build-es/`.
+
+**Recall** (`recall.py dataset`). Questions are embedded on the Mac with the prior question first. The vector files are scanned as the phone scans them (256-dim int8). A hit is by location or quote. The table counts only answerable questions whose answer source has vectors; `--any-source` also counts the same article from a subject pack.
+
+| Set → vectors | top 4 | top 12 | top 50 | best hit ≥ 0.78 (answerable / unanswerable) |
+|---|---|---|---|---|
+| tune-es → Spanish | 45/58 (48 any-source) | 54/58 (55) | 57/58 | 57/58 / 16/41 |
+| tune-es → Spanish + English (R1's 372 files) | 48/58 any-source | 53/58 | 57/58 | 57/58 / 19/41 |
+| mixed-es, Spanish questions → English vectors | 8/12 | 8/12 | 10/12 | 9/12 / 1/3 |
+| mixed-es, English questions → Spanish vectors | 6/9 | 8/9 | 8/9 | 9/9 / 0/3 |
+| mixed-es, both directions → both sets | 11/21 | 14/21 | 18/21 | 20/21 / 4/6 |
+
+- tune-es's 5 *words* answers are in Wiktionary (keyword only). In mixed-es, 3 of the English-question answers are too. Neither is counted.
+- Science misses all 4 at top 4 but finds all 4 at top 12: the physics and chemistry packs' related articles outrank Top's.
+- With both sets installed, Spanish questions about English packs drop from 8 to 5 at top 4. Spanish passages from the Spanish packs take those places; they're in Spanish, so the English answer locations don't count.
+- For comparison, English R1's "dense alone" ranker found 58/126 at top 4 on the English tuning split (a harder, larger set, and before every pack was built). The two numbers measure different sets and aren't directly comparable.
+- `heldout-es.json` was not opened.
+
+**Parity.** There are no Spanish phone runs yet, so `parity.py` has nothing to check against. The chunker is the app's own (`:core:text`, version 1), and the nopic/maxi check above passed.
+
+**Left for Neal**
+1. **Upload:** the 194 files in `vectors-work/build-es/out` (416.4 MB) go to a GitHub release. Either a new tag such as `vectors-es-2026-11-01`, or added to `vectors-2026-10-23` as R1 did.
+2. **Catalog:** when L3's catalog is next built, run `catalog_gen.py vectors --releases tools/vectors/releases --release-url <that release>`, then check-links and sign. A dry attach on the scratch catalog put vectors on 17 Spanish pack entries (nopic and maxi) and all 185 Clásicos books.
+3. The vectors match these snapshots only. If Kiwix publishes a newer Spanish snapshot before the catalog is built, that pack's vectors are reported and left out ("rebuild it").

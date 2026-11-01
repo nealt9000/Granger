@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-los-lusiadas",
+ "kind": "book",
+ "fileName": "gc-es-los-lusiadas_2026-10-30.gvec",
+ "sizeBytes": 233274,
+ "sha256": "814eeb7e35d891e9ff5a374c12360ed05fc54e35419ae71ce77051ae411a14a2",
+ "count": 793,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "ea59c30f3ace5501d6df63af9b921141f4fc75426e4cde10412f57145639eac4",
+ "url": null
+}

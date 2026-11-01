@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-tres-novelas-ejemplares-y-un-prologo",
+ "kind": "book",
+ "fileName": "gc-es-tres-novelas-ejemplares-y-un-prologo_2026-10-30.gvec",
+ "sizeBytes": 82158,
+ "sha256": "de9c628f90d3a80875c94ce6bb93a750760fca85554b60263d92d3d23b56ff13",
+ "count": 279,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "423d13d872faf25e1e7fe7613a59c23236f63d662494011d7bc6fa0c1cd47178",
+ "url": null
+}

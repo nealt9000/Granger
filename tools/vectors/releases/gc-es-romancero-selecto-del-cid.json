@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-romancero-selecto-del-cid",
+ "kind": "book",
+ "fileName": "gc-es-romancero-selecto-del-cid_2026-10-30.gvec",
+ "sizeBytes": 148896,
+ "sha256": "4b6720027ddaf48217e4ae76c091be844c09c1bc8bc4f7f3299176bd3970c5a5",
+ "count": 506,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "02c377e16528c4f38374efb2a24e69f58d8e77aa497baf3224dd3d08c8800956",
+ "url": null
+}

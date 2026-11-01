@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-las-fuerzas-extranas",
+ "kind": "book",
+ "fileName": "gc-es-las-fuerzas-extranas_2026-10-30.gvec",
+ "sizeBytes": 127140,
+ "sha256": "321c4e7d2f4a48c7a01a70aa9f1b141b98bf16672ab6e7719d1e8604fa78cdbe",
+ "count": 432,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "23df63ce7be324598967c479289c6dc9a28c1cb684092bec7eb8a59dd4d8ced5",
+ "url": null
+}

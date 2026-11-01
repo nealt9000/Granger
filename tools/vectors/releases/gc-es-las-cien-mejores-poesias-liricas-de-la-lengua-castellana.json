@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-las-cien-mejores-poesias-liricas-de-la-lengua-castellana",
+ "kind": "book",
+ "fileName": "gc-es-las-cien-mejores-poesias-liricas-de-la-lengua-castellana_2026-10-30.gvec",
+ "sizeBytes": 237978,
+ "sha256": "bbcc653b4663b4768a8c15ffe2a35f370d3a31d04cb1fd08a7358fccc9d145ae",
+ "count": 809,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "b558af3b62351e3728c38ca8a92f13c065ad54d12b2480cbf0f1a90986ee34fe",
+ "url": null
+}

@@ -4,6 +4,7 @@
   recall.py prepare WORK_DIR       # app chunks of R0's books; R0's vectors reused where the text is the same
   recall.py queries RUN OUT.json   # query texts for ResearchBenchmarkActivity --es queries
   recall.py eval WORK_DIR RUN [--phone-queries OUT.json.out.json]
+  recall.py dataset DATASET.json WORK_DIR [WORK_DIR ...]   # dense recall of a question set over built vector files (Plan L4)
 
 WORK_DIR holds chunks.jsonl and f768.npy (float16, titled "title: <book> | text: ...", normalized).
 """
@@ -130,12 +131,93 @@ def cmd_eval(a):
     return 0
 
 
+GATE = 0.78  # R1 Task 7's gate: the best dense hit must reach this, or the dense side returns nothing
+
+
+def first_dense_hit(passages, answers, any_source=False):
+    """The rank of the first passage that holds an answer (by location or quote, as `dense.hit`), or None. With
+    [any_source], the same article from another pack counts too (a subject pack holds Top's articles)."""
+    import dense
+    def ok(p):
+        return dense.hit(p, [dict(x, source=p["source"]) for x in answers] if any_source else answers)
+    return next((r for r, p in enumerate(passages) if ok(p)), None)
+
+
+def covered(item, labels):
+    """Does any of the item's answers come from a source that has vectors in [labels]?"""
+    return any(x["source"] in labels for x in item["answers"])
+
+
+def recall_table(items, firsts, top, labels, ks):
+    """Lines of the report: recall at each k per group and overall, on answerable questions with an answer in the vectors."""
+    groups = {}
+    for item in items:
+        groups.setdefault(item["group"], []).append(item)
+    lines = ["%-22s %8s %s %s" % ("group", "in set", "  ".join("top%-3d" % k for k in ks), "  gate %.2f" % GATE)]
+    rows = sorted(groups.items()) + [("all", items)]
+    for name, its in rows:
+        ans = [i for i in its if i["answerable"]]
+        cov = [i for i in ans if covered(i, labels)]
+        hits = ["%2d/%-3d" % (sum(1 for i in cov if firsts[i["id"]] is not None and firsts[i["id"]] < k), len(cov)) for k in ks]
+        un = [i for i in its if not i["answerable"]]
+        gate = "%d/%d ans, %d/%d unans" % (sum(top[i["id"]] >= GATE for i in cov), len(cov),
+                                           sum(top[i["id"]] >= GATE for i in un), len(un))
+        lines.append("%-22s %3d/%-4d %s  %s" % (name, len(cov), len(ans), "  ".join(hits), gate))
+    return lines
+
+
+def cmd_dataset(a):
+    """Every question embedded on the Mac (prior question first, as the phone does), scanned over the vector files in
+    WORK_DIR/out as the phone scans them (`hits.scan`), with the first hit by location or quote."""
+    import hits
+    items = json.loads(Path(a.dataset).read_text(encoding="utf-8"))
+    ks = tuple(int(k) for k in a.k.split(","))
+    srcs = [s for w in a.work for s in hits.sources(Path(w))]
+    files, dims = [], None
+    for f, _, _, _ in srcs:
+        head, q, scales, _, _ = gvec.read(f)
+        dims = dims or head["dims"]
+        assert head["dims"] == dims, f
+        files.append((q, scales))
+    if not files:
+        raise SystemExit("no vector files in %s" % " ".join(a.work))
+    labels = {label for _, _, _, label in srcs}
+    from sentence_transformers import SentenceTransformer
+    model = SentenceTransformer(MODEL, device="mps")
+    queries = model.encode([QUERY % query_text(i, "prior") for i in items], normalize_embeddings=True)
+    best = hits.scan(gvec.truncate(queries, dims), files, max(ks))
+    wanted = {}
+    for row in best:
+        for _, fi, r in row:
+            wanted.setdefault(fi, set()).add(r)
+    chunks = {}
+    for fi, rows in wanted.items():
+        with srcs[fi][1].open(encoding="utf-8") as f:
+            for n, line in enumerate(f):
+                if n in rows:
+                    chunks[(fi, n)] = json.loads(line)
+    firsts, top = {}, {}
+    for item, row in zip(items, best):
+        passages = [dict(chunks[(fi, r)], source=srcs[fi][3], location=chunks[(fi, r)]["key"]) for _, fi, r in row]
+        firsts[item["id"]] = first_dense_hit(passages, item["answers"], a.any_source) if item["answerable"] else None
+        top[item["id"]] = row[0][0] if row else 0.0
+    print("%d questions; %d files, %d rows, %d dims" % (len(items), len(files), sum(len(q) for q, _ in files), dims))
+    for line in recall_table(items, firsts, top, labels, ks):
+        print(line)
+    missed = [i["id"] for i in items if i["answerable"] and covered(i, labels) and (firsts[i["id"]] is None or firsts[i["id"]] >= ks[0])]
+    print("missed at top%d: %s" % (ks[0], " ".join(missed) or "none"))
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     s = ap.add_subparsers(dest="cmd", required=True)
     p = s.add_parser("prepare"); p.add_argument("work"); p.add_argument("--chunks", required=True); p.set_defaults(f=cmd_prepare)
     q = s.add_parser("queries"); q.add_argument("run"); q.add_argument("out"); q.set_defaults(f=cmd_queries)
     e = s.add_parser("eval"); e.add_argument("work"); e.add_argument("run"); e.add_argument("--phone-queries"); e.set_defaults(f=cmd_eval)
+    d = s.add_parser("dataset"); d.add_argument("dataset"); d.add_argument("work", nargs="+")
+    d.add_argument("--k", default="4,12,50"); d.add_argument("--any-source", action="store_true")
+    d.set_defaults(f=cmd_dataset)
     a = ap.parse_args(argv)
     return a.f(a)
 

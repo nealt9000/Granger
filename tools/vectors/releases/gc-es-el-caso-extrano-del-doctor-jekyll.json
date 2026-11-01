@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-el-caso-extrano-del-doctor-jekyll",
+ "kind": "book",
+ "fileName": "gc-es-el-caso-extrano-del-doctor-jekyll_2026-10-30.gvec",
+ "sizeBytes": 61284,
+ "sha256": "d75b5411d502017b1097907a7b8654b9f5cf8bcea2a99ebdaccab860df856be6",
+ "count": 208,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "76affed140984ca65a9b7954e5d1fa52b71cef034656aafdafe8f17b2314b166",
+ "url": null
+}

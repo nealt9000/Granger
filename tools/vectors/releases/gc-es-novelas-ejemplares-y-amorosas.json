@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-novelas-ejemplares-y-amorosas",
+ "kind": "book",
+ "fileName": "gc-es-novelas-ejemplares-y-amorosas_2026-10-30.gvec",
+ "sizeBytes": 586368,
+ "sha256": "7e015c516984a10e6fd6997076ec34abfd17ccfec1d913b91b52ee2cb0495bf9",
+ "count": 1994,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "49821ac306e7633b2fb456aaadb833aca40fd3f46b929aec42ac1ab72667b7b2",
+ "url": null
+}

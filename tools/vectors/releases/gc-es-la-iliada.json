@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-la-iliada",
+ "kind": "book",
+ "fileName": "gc-es-la-iliada_2026-10-30.gvec",
+ "sizeBytes": 389388,
+ "sha256": "9102e39ff2a202176a01e825d54598de61b72b2e7a863db30365ca81699b2cc3",
+ "count": 1324,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "4e4cf44a3dcde3f5ba2261bc4bbc71ebfd2edcfa015b28d7b922efb43b2682de",
+ "url": null
+}

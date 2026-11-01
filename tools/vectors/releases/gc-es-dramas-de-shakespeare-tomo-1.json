@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-dramas-de-shakespeare-tomo-1",
+ "kind": "book",
+ "fileName": "gc-es-dramas-de-shakespeare-tomo-1_2026-10-30.gvec",
+ "sizeBytes": 237390,
+ "sha256": "11538b593d6de36f65fae3543007952ac24df653e1641866da9542d6a6fbd586",
+ "count": 807,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "b98ee626e09c0c9b27a9f52f2affd8a639b85f9b18280b5267a1d8b34f63046e",
+ "url": null
+}

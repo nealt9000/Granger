@@ -1,0 +1,72 @@
+{
+ "comment": "The Spanish vector set (languages spec §6.1, Plan L4): the Spanish essential tier plus Wikipedia history (as English has) and Clásicos Granger, with set.json's caps for the same kinds of pack. Each pack is built from its _nopic file, whose snapshot matches the _maxi entry the tiers list, so catalog_gen's attach_vectors puts the vectors on both flavours (as R1 did for medicine, top and history). Snapshots are those of the catalog built from the live Kiwix feed on 2026-10-31. Trimmed 2026-10-31 to fit about 14 h of Mac embedding (1.80M chunks at set.json's caps): top, history and computer 12 to 8, iFixit 8 to 4 (as the Stack Exchanges). Top at 8 still holds 45 of the 46 tune-es answers whose quote is found in an article.",
+ "language": "es",
+ "packs": [
+  {
+   "id": "wikipedia_es_medicine_nopic",
+   "domain": "medicine",
+   "maxChunksPerArticle": 12
+  },
+  {
+   "id": "ifixit_es_all",
+   "domain": "making",
+   "maxChunksPerArticle": 4
+  },
+  {
+   "id": "wikipedia_es_physics_nopic",
+   "domain": "science",
+   "maxChunksPerArticle": 12
+  },
+  {
+   "id": "wikipedia_es_chemistry_nopic",
+   "domain": "science",
+   "maxChunksPerArticle": 12
+  },
+  {
+   "id": "wikipedia_es_mathematics_nopic",
+   "domain": "science",
+   "maxChunksPerArticle": 12
+  },
+  {
+   "id": "wikipedia_es_computer_nopic",
+   "domain": "technology",
+   "maxChunksPerArticle": 8
+  },
+  {
+   "id": "wikivoyage_es_all_nopic",
+   "domain": "maps"
+  },
+  {
+   "id": "wikipedia_es_top_nopic",
+   "domain": "reference",
+   "maxChunksPerArticle": 8
+  },
+  {
+   "id": "wikipedia_es_history_nopic",
+   "domain": "thought",
+   "maxChunksPerArticle": 8
+  }
+ ],
+ "keywordOnly": {
+  "wikipedia_es_all": "2.1M articles, tens of millions of chunks; comprehensive only (English leaves its all and top1m out too)",
+  "wiktionary_es_all_nopic": "comprehensive only; short dictionary entries, as English leaves wiktionary out",
+  "wikisource_es_all": "comprehensive only; whole texts, too big (English leaves wikisource out)",
+  "wikiquote_es_all": "comprehensive only; quotes, as English's wikiquote was trimmed 2026-10-21",
+  "medlineplus.gov_es_all": "comprehensive only",
+  "ready.gov_es_all": "comprehensive only",
+  "scoutwiki.org_es_all_maxi": "comprehensive only",
+  "solar.lowtechmagazine.com_mul_all": "comprehensive only",
+  "wikipedia_es_molcell_maxi": "comprehensive only",
+  "wikipedia_es_climate-change_maxi": "comprehensive only",
+  "wikipedia_es_geography_maxi": "comprehensive only",
+  "wikibooks_es_all_maxi": "comprehensive only",
+  "wikiversity_es_all_maxi": "comprehensive only",
+  "vikidia_es_all_maxi": "comprehensive only",
+  "spanish.stackexchange.com_mul_all": "comprehensive only"
+ },
+ "books": {
+  "collection": "clasicos-granger",
+  "domainByCategory": {},
+  "defaultDomain": "literature"
+ }
+}

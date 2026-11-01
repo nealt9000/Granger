@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-la-madre-naturaleza",
+ "kind": "book",
+ "fileName": "gc-es-la-madre-naturaleza_2026-10-30.gvec",
+ "sizeBytes": 189174,
+ "sha256": "82174188b286a25b16a064067f6256287b7431d555786f199e021dda4e6d87da",
+ "count": 643,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "f5c66db0172ea2896a790fc15ea1066d48c579a5aade9f51c7a1fee8ea6f3d11",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-cuentos-de-fray-mocho",
+ "kind": "book",
+ "fileName": "gc-es-cuentos-de-fray-mocho_2026-10-30.gvec",
+ "sizeBytes": 176238,
+ "sha256": "ae1c3dc7e72294b5b6f08b6d09c4fbba9e94926ca3cd31902641e941fcbe2ef2",
+ "count": 599,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "e3aec8c10ed75f3696b21661c4e53ce5d148f5b2d90b127b18cf32e0f505c810",
+ "url": null
+}
