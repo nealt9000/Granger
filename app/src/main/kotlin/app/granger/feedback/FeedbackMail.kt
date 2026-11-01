@@ -42,6 +42,10 @@ object FeedbackMail {
         return send
     }
 
+    /** [email] without its mail-only selector, in the share sheet: for a phone where no mail app answers mailto. */
+    fun shareInstead(email: Intent): Intent =
+        Intent.createChooser(Intent(email).apply { selector = null }, "Send feedback with")
+
     /** The facts for this phone, read off the main thread. */
     suspend fun facts(container: AppContainer, crashLog: CrashLog): FeedbackFacts = withContext(Dispatchers.IO) {
         val volumes = runCatching { container.volumes.list() }.getOrDefault(emptyList())

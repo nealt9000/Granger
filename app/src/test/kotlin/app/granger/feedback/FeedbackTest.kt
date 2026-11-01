@@ -71,12 +71,36 @@ class FeedbackTest {
         assertThat(stream.authority).isEqualTo("${context.packageName}.reports")
         assertThat(intent.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION).isNotEqualTo(0)
         assertThat(context.contentResolver.openInputStream(stream)!!.use { String(it.readBytes()) }).contains("boom")
+
+        // With no mail app, the same email goes to the share sheet. (One test: FileProvider caches its root per process.)
+        val share = FeedbackMail.shareInstead(intent)
+        assertThat(share.action).isEqualTo(Intent.ACTION_CHOOSER)
+        @Suppress("DEPRECATION")
+        val target = share.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)!!
+        assertThat(target.selector).isNull()
+        assertThat(target.action).isEqualTo(Intent.ACTION_SEND)
+        assertThat(target.getStringExtra(Intent.EXTRA_SUBJECT)).isEqualTo("Granger feedback · 0.1.850 (850)")
+        @Suppress("DEPRECATION")
+        assertThat(target.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)).isEqualTo(stream)
+        assertThat(intent.selector).isNotNull() // the original is left as it was
     }
 
     @Test fun withoutCrashesTheEmailHasNoAttachment() {
         val intent = FeedbackMail.intent(context, facts(), withCrashes = true)
         @Suppress("DEPRECATION")
         assertThat(intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)).isNull()
+    }
+
+    /**
+     * Found on the Pixel 7 in release 849: without this query Gmail and Outlook are invisible to Granger, the mailto
+     * selector resolves to nothing and the phone looks as if it had no mail app. Robolectric doesn't filter by package
+     * visibility, so the manifest is checked directly.
+     */
+    @Test fun theManifestLetsGrangerSeeMailApps() {
+        val manifest = java.io.File("src/main/AndroidManifest.xml").readText()
+        val queries = manifest.substringAfter("<queries>").substringBefore("</queries>")
+        assertThat(queries).contains("android.intent.action.SENDTO")
+        assertThat(queries).contains("android:scheme=\"mailto\"")
     }
 
     @Test fun theSheetShowsWhatIsIncludedAndTheSwitchLeavesCrashesOut() {

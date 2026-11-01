@@ -637,8 +637,14 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             facts,
             onSend = { withCrashes ->
                 facts?.let { f ->
+                    val email = FeedbackMail.intent(activityContext, f, withCrashes)
                     try {
-                        activityContext.startActivity(FeedbackMail.intent(activityContext, f, withCrashes))
+                        try {
+                            activityContext.startActivity(email)
+                        } catch (e: ActivityNotFoundException) {
+                            // No mail app found through the selector: offer the same email to anything that can send it.
+                            activityContext.startActivity(FeedbackMail.shareInstead(email))
+                        }
                         crashLog.acknowledge()
                         feedbackOpen = false
                     } catch (e: ActivityNotFoundException) {
