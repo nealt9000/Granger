@@ -65,24 +65,46 @@ class FeedbackTest {
         assertThat(intent.action).isEqualTo(Intent.ACTION_SEND)
         assertThat(intent.getStringArrayExtra(Intent.EXTRA_EMAIL)).asList().containsExactly(BuildConfig.FEEDBACK_EMAIL)
         assertThat(intent.getStringExtra(Intent.EXTRA_SUBJECT)).isEqualTo("Granger feedback · 0.1.850 (850)")
-        assertThat(intent.selector?.data).isEqualTo(Uri.parse("mailto:"))
         @Suppress("DEPRECATION")
         val stream = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)!!
         assertThat(stream.authority).isEqualTo("${context.packageName}.reports")
         assertThat(intent.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION).isNotEqualTo(0)
         assertThat(context.contentResolver.openInputStream(stream)!!.use { String(it.readBytes()) }).contains("boom")
 
-        // With no mail app, the same email goes to the share sheet. (One test: FileProvider caches its root per process.)
+        // Aimed at the mail apps: straight to one, or a choice of only them; the share sheet when there are none.
+        // (One test: FileProvider caches its root per process.)
+        val toGmail = FeedbackMail.toMailApps(intent, listOf("com.google.android.gm"))!!
+        assertThat(toGmail.`package`).isEqualTo("com.google.android.gm")
+        @Suppress("DEPRECATION")
+        assertThat(toGmail.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)).isEqualTo(stream)
+        assertThat(intent.`package`).isNull() // the original is left as it was
+
+        val choice = FeedbackMail.toMailApps(intent, listOf("com.google.android.gm", "com.microsoft.office.outlook"))!!
+        assertThat(choice.action).isEqualTo(Intent.ACTION_CHOOSER)
+        @Suppress("DEPRECATION")
+        assertThat(choice.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)!!.`package`).isEqualTo("com.google.android.gm")
+        @Suppress("DEPRECATION")
+        val others = choice.getParcelableArrayExtra(Intent.EXTRA_INITIAL_INTENTS)!!.map { (it as Intent).`package` }
+        assertThat(others).containsExactly("com.microsoft.office.outlook")
+
+        assertThat(FeedbackMail.toMailApps(intent, emptyList())).isNull()
         val share = FeedbackMail.shareInstead(intent)
         assertThat(share.action).isEqualTo(Intent.ACTION_CHOOSER)
         @Suppress("DEPRECATION")
-        val target = share.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)!!
-        assertThat(target.selector).isNull()
-        assertThat(target.action).isEqualTo(Intent.ACTION_SEND)
-        assertThat(target.getStringExtra(Intent.EXTRA_SUBJECT)).isEqualTo("Granger feedback · 0.1.850 (850)")
-        @Suppress("DEPRECATION")
-        assertThat(target.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)).isEqualTo(stream)
-        assertThat(intent.selector).isNotNull() // the original is left as it was
+        assertThat(share.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)!!.getStringExtra(Intent.EXTRA_SUBJECT))
+            .isEqualTo("Granger feedback · 0.1.850 (850)")
+    }
+
+    /** As on the Pixel 7: Gmail and Outlook, with the work profile's forwarder (package `android`) among them. */
+    @Test fun thePhonesDefaultMailAppIsUsedWhenItHasOne() {
+        val found = listOf("com.google.android.gm", "com.microsoft.office.outlook", "android")
+        val own = "app.granger"
+
+        assertThat(FeedbackMail.pick(found, preferred = "com.google.android.gm", own)).containsExactly("com.google.android.gm")
+        // No default: the system's resolver comes back, which isn't a mail app, so every mail app is offered.
+        assertThat(FeedbackMail.pick(found, preferred = "android", own))
+            .containsExactly("com.google.android.gm", "com.microsoft.office.outlook").inOrder()
+        assertThat(FeedbackMail.pick(listOf("android"), preferred = null, own)).isEmpty()
     }
 
     @Test fun withoutCrashesTheEmailHasNoAttachment() {
