@@ -130,16 +130,27 @@ class CrashLog(
         return time to kind
     }
 
-    /** The first line of the trace that says what went wrong, for the list in Settings. */
+    /**
+     * The line of the trace that says what went wrong, for the list in Settings: a native crash's abort message when
+     * the tombstone has one (`Reason: crash` says nothing), else the first line of the trace.
+     */
     private fun summaryOf(file: File): String =
         file.useLines { lines ->
-            lines.drop(3).map { it.trim() }.firstOrNull { it.isNotEmpty() && !it.startsWith("Thread:") } ?: ""
+            val body = lines.drop(3).map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("Thread:") }.toList()
+            body.firstNotNullOfOrNull(::abortMessage) ?: body.firstOrNull() ?: ""
         }.take(160)
 
     companion object {
         const val KEEP = 5
         const val MAX_BYTES = 64 * 1024
         private const val PREFIX = "crash-"
+
+        /** `[FATAL:file.cc:93] Uncaught exception` or `Abort message: '…'` as the message alone; null for other lines. */
+        fun abortMessage(line: String): String? = when {
+            line.startsWith("[FATAL:") -> line.substringAfter("] ", "").takeIf { it.isNotBlank() }
+            line.startsWith("Abort message:") -> line.removePrefix("Abort message:").trim().trim('\'').takeIf { it.isNotBlank() }
+            else -> null
+        }
 
         fun stamp(timestamp: Long): String =
             SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.US).apply { timeZone = TimeZone.getDefault() }.format(Date(timestamp))

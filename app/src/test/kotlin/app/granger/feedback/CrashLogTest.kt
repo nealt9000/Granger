@@ -90,6 +90,17 @@ class CrashLogTest {
         assertThat(log.list()).isEmpty()
     }
 
+    /** Seen on the Pixel 7 (release 849): the list said only "Reason: crash" for a WebView renderer abort. */
+    @Test fun aNativeCrashIsSummedUpByItsAbortMessage() {
+        val tombstone = "Dgoogle/panther/panther:16/CP1A.260405.005\napp.grangerR\"\nSIGTRAP\n" +
+            "[FATAL:third_party/crashpad/crashpad/client/crashpad_client_linux.cc:763] Render process (31383)'s crash wasn't handled\n"
+        log.recordExits(listOf(PastExit(5_000L, CrashKind.NATIVE, "crash", tombstone)))
+
+        assertThat(log.list().single().summary).isEqualTo("Render process (31383)'s crash wasn't handled")
+        assertThat(CrashLog.abortMessage("Abort message: 'NoSuchMethodError: invoke([F)'")).isEqualTo("NoSuchMethodError: invoke([F)")
+        assertThat(CrashLog.abortMessage("SIGTRAP")).isNull()
+    }
+
     @Test fun aNativeTombstoneKeepsItsReadableRuns() {
         val bytes = byteArrayOf(0x0a, 0x12) + "Abort message".toByteArray() + byteArrayOf(0x00, 0x01, 0x41, 0x42) +
             byteArrayOf(0x1a) + "libsherpa-onnx-jni.so".toByteArray()
