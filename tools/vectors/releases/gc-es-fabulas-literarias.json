@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-fabulas-literarias",
+ "kind": "book",
+ "fileName": "gc-es-fabulas-literarias_2026-10-30.gvec",
+ "sizeBytes": 67164,
+ "sha256": "0b37f8288e7aa54476cb73aa8e1981d682420fe7a7ad9d17be7fa211a4072a95",
+ "count": 228,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "13153f4740313a09d5cedbeaece3db26b6754b136217cea20bf9eded11a0f616",
+ "url": null
+}

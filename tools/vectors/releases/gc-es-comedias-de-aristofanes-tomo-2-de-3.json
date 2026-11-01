@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-comedias-de-aristofanes-tomo-2-de-3",
+ "kind": "book",
+ "fileName": "gc-es-comedias-de-aristofanes-tomo-2-de-3_2026-10-30.gvec",
+ "sizeBytes": 210636,
+ "sha256": "5824d7ce15e766d9991349e60598bf9385b41d3935931f5f84c4e0575200d879",
+ "count": 716,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "76e9e14f985f53801e3972f5bb267006a8ce983699dc05e432fdc619e192da43",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-orlando-furioso-tomo-1-de-2",
+ "kind": "book",
+ "fileName": "gc-es-orlando-furioso-tomo-1-de-2_2026-10-30.gvec",
+ "sizeBytes": 324120,
+ "sha256": "15268e2922c979f50b6625b4211f9c250c891a2dc4a278cfc87a2733d1a85d0d",
+ "count": 1102,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "63d5142ad27e598700ece697c013f6731af634a64acf2123904ac0bf7ee7f9c6",
+ "url": null
+}

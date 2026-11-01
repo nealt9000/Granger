@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-corazon-diario-de-un-nino",
+ "kind": "book",
+ "fileName": "gc-es-corazon-diario-de-un-nino_2026-10-30.gvec",
+ "sizeBytes": 114204,
+ "sha256": "72aad074ee0b4faecc12793079f4b5092910a5a90a163725df263d2a73572fa5",
+ "count": 388,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "113c1b1bdefd61e0d3f5e1c78ade9afb3bd9658d7798a832f4737f4c35fb55fc",
+ "url": null
+}

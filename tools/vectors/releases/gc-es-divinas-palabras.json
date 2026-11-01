@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-divinas-palabras",
+ "kind": "book",
+ "fileName": "gc-es-divinas-palabras_2026-10-30.gvec",
+ "sizeBytes": 67752,
+ "sha256": "46b0c1af88507741e7d396ca950bfb95cc4ba3d1139e29913630a47c2d298b74",
+ "count": 230,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "b72c066bb757d8cbe872695e3649112a3f73359c939260783e9f6e6f60934ec9",
+ "url": null
+}

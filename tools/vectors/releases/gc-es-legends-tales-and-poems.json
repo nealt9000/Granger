@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-legends-tales-and-poems",
+ "kind": "book",
+ "fileName": "gc-es-legends-tales-and-poems_2026-10-30.gvec",
+ "sizeBytes": 329118,
+ "sha256": "8086b7ecd2ac1a5bedb2eb1c26a115b9ee82002303d668aed318992506f35c28",
+ "count": 1119,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "e34400e759834f84d607773e0c14582a617735fcf12f23ac603e82d3d952e0ce",
+ "url": null
+}

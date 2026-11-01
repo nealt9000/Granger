@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-la-gaviota",
+ "kind": "book",
+ "fileName": "gc-es-la-gaviota_2026-10-30.gvec",
+ "sizeBytes": 248562,
+ "sha256": "494bc9c0de630726816951c188a64f5061b70bc8598c01418d2a103cfa082c4a",
+ "count": 845,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "d57a4cb4fe6fb7e6b0bac70d62988c76738029c00b173b0f25a43f6c3d7fdb37",
+ "url": null
+}

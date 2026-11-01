@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-mas-vale-mana-que-fuerza",
+ "kind": "book",
+ "fileName": "gc-es-mas-vale-mana-que-fuerza_2026-10-30.gvec",
+ "sizeBytes": 74808,
+ "sha256": "eafcdbeb0abcf713fbcbf20e84a80559b4af24e49500efd40c69ab8ada11271f",
+ "count": 254,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "5d27c1158af19931daddfee7cebf4cc09eb38377006a3c015a596b58ca7d49ca",
+ "url": null
+}

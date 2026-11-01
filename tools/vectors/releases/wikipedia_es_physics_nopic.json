@@ -1,0 +1,14 @@
+{
+ "id": "wikipedia_es_physics_nopic",
+ "kind": "pack",
+ "fileName": "wikipedia_es_physics_nopic_2026-10-15.gvec",
+ "sizeBytes": 17793435,
+ "sha256": "e2a4acc0914c8ee18d1a340fc0c45ab2487df6e602ec33f51a77bd1846f1ca61",
+ "count": 59736,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "9bf0ab816f24c64b77059197b117838073cc3401a795c44d23dd4392b4a48dc7",
+ "url": null
+}

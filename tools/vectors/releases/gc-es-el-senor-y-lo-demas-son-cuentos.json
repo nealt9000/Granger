@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-el-senor-y-lo-demas-son-cuentos",
+ "kind": "book",
+ "fileName": "gc-es-el-senor-y-lo-demas-son-cuentos_2026-10-30.gvec",
+ "sizeBytes": 110676,
+ "sha256": "ead787947d32a8732cb7f555206fb6c08b3c5ec6e66ca10e0d38658e43edbb5c",
+ "count": 376,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "772a0a08996c87f3192e0e9d5b7e2ba626753b78b2cc687106a923a5f0702950",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-el-si-de-las-ninas",
+ "kind": "book",
+ "fileName": "gc-es-el-si-de-las-ninas_2026-10-30.gvec",
+ "sizeBytes": 58050,
+ "sha256": "84db4a7f105f5adc895facc3c02323bd7a2e84e54761038cad244feed2e640fe",
+ "count": 197,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "b4e86bb0c64f3b374524109843ffa80c508d4de5a549c7007ca8f898a97ae8e9",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-historia-de-la-guerra-del-peloponeso-tomo-2-de-2",
+ "kind": "book",
+ "fileName": "gc-es-historia-de-la-guerra-del-peloponeso-tomo-2-de-2_2026-10-30.gvec",
+ "sizeBytes": 272082,
+ "sha256": "161bb897c95e506e6cf7b5748ead09af6394b6c5c9e2d3e655f9ba323f699754",
+ "count": 925,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "137cbff0429cedd552faf20663c1f711bb89d0d01c1676904218aa3744ac7596",
+ "url": null
+}

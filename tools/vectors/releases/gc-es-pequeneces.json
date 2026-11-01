@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-pequeneces",
+ "kind": "book",
+ "fileName": "gc-es-pequeneces_2026-10-30.gvec",
+ "sizeBytes": 364104,
+ "sha256": "85d7ee453c9b163fb5dc5c4f7247954319b0e646828a51c9a7698e76a06f0944",
+ "count": 1238,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "d1adef9efb20112c6aff09c5735fa442b30dc04625badbdbff9ce0fa34522bfd",
+ "url": null
+}

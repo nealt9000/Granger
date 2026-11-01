@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-pepita-jimenez",
+ "kind": "book",
+ "fileName": "gc-es-pepita-jimenez_2026-10-30.gvec",
+ "sizeBytes": 117438,
+ "sha256": "4bf0d0be5d19115496ba5caf80dbbf55245c0280973ca815c701dd23dd9b8cfe",
+ "count": 399,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "bf988c8bf17fc6e8ac5c21e11dddfe194f5103fe987ca4b653dfc67ccfe0a38a",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-cuentos-de-navidad-y-reyes-cuentos-de-la-patria-cuentos-antiguos",
+ "kind": "book",
+ "fileName": "gc-es-cuentos-de-navidad-y-reyes-cuentos-de-la-patria-cuentos-antiguos_2026-10-30.gvec",
+ "sizeBytes": 111558,
+ "sha256": "82c4b809a4783151e67adfced72c98bdaf6a3e2e5ff80bba366c915c61884154",
+ "count": 379,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "0674bd1a5f06a1b33fe7c3cdf3eaabf02c7caeac985e73ae9e04ddbd13e5aeca",
+ "url": null
+}

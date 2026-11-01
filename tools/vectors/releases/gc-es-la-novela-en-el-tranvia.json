@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-la-novela-en-el-tranvia",
+ "kind": "book",
+ "fileName": "gc-es-la-novela-en-el-tranvia_2026-10-30.gvec",
+ "sizeBytes": 20712,
+ "sha256": "c465af49d8139b77909ca0a324be26f65f797a1bd70d8a010cd0acb860d47716",
+ "count": 70,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "2a3175f9dd70218565e4838a51f21eaf91e18b68b8030b56f15612992d0732ae",
+ "url": null
+}

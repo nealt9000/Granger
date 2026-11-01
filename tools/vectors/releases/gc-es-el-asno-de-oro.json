@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-el-asno-de-oro",
+ "kind": "book",
+ "fileName": "gc-es-el-asno-de-oro_2026-10-30.gvec",
+ "sizeBytes": 230040,
+ "sha256": "045b8f58912f9fad1f000be54f87eb0bda6526a55bf33b9d2e4c2b6aa90603c8",
+ "count": 782,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "ee11e5b7a7bd70a4f5e3381b340b6cac25698ce99b129e6ea1ef3f9ea12a587a",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-3-de-3",
+ "kind": "book",
+ "fileName": "gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-3-de-3_2026-10-30.gvec",
+ "sizeBytes": 181824,
+ "sha256": "17924c58239df0859651163676f97aa60b5a6d80194f99d0f2e0395c7f7ab4a3",
+ "count": 618,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "51304f468600e65a52e2f58765a7ec86f98527ee64d61180cf99e4918a2cbdea",
+ "url": null
+}

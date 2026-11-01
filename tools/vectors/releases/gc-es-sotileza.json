@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-sotileza",
+ "kind": "book",
+ "fileName": "gc-es-sotileza_2026-10-30.gvec",
+ "sizeBytes": 259734,
+ "sha256": "b20ce4c20a727bfdaada55739e751cb20af37ec3c9b89ee2e695a1df7d050218",
+ "count": 883,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "009570ff49818be88c0dfba31592618aec3bfd56c1130336ff3468054b653c35",
+ "url": null
+}

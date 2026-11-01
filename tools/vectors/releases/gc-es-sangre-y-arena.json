@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-sangre-y-arena",
+ "kind": "book",
+ "fileName": "gc-es-sangre-y-arena_2026-10-30.gvec",
+ "sizeBytes": 298248,
+ "sha256": "6047eadb83320d2546e491f925d3ccc14d225a5bbb8633dd1fdec8bc21856b4d",
+ "count": 1014,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "959eaaa812cca63a9603b72c644b9ffc18a80596ced65a52bbdde1d58273eb85",
+ "url": null
+}

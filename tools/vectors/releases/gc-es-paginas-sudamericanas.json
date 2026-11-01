@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-paginas-sudamericanas",
+ "kind": "book",
+ "fileName": "gc-es-paginas-sudamericanas_2026-10-30.gvec",
+ "sizeBytes": 106266,
+ "sha256": "760691bd6c16cbd56bb458fef688f6ecf33d8b6c77e4474e4d9f65e1ca67add8",
+ "count": 361,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "3dd2ab004cc6769bb11f012a1d3287182f87078d75ee5fc3ac15772fa7769b80",
+ "url": null
+}

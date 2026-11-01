@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-naufragios",
+ "kind": "book",
+ "fileName": "gc-es-naufragios_2026-10-30.gvec",
+ "sizeBytes": 72750,
+ "sha256": "469dc8438b4126b42d5c7e52c3a341fe22abf6d137b16c21fa8d49a5a1460984",
+ "count": 247,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "a45134840617961c474b3ef22135b5fea93873b181524ce0a30c5047b7ccddd2",
+ "url": null
+}

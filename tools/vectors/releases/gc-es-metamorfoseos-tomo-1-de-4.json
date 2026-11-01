@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-metamorfoseos-tomo-1-de-4",
+ "kind": "book",
+ "fileName": "gc-es-metamorfoseos-tomo-1-de-4_2026-10-30.gvec",
+ "sizeBytes": 57168,
+ "sha256": "042f6f4730692cf5f7f2e50a9e83d7d52f670b4ce8cfee74143a1f05482867ad",
+ "count": 194,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "b429b2f8a3ef2de7cb010a6866a4910d556318d0903059f87aa638931a459d15",
+ "url": null
+}

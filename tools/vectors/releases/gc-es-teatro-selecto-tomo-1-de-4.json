@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-teatro-selecto-tomo-1-de-4",
+ "kind": "book",
+ "fileName": "gc-es-teatro-selecto-tomo-1-de-4_2026-10-30.gvec",
+ "sizeBytes": 287958,
+ "sha256": "1a79bae71aba01570b03967398ac52e9e50ee3dcd2185064f77241a93d77912c",
+ "count": 979,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "166447651fe54f25b48245093639773d8b8e91d0888906edd4fbdf2b1313da23",
+ "url": null
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-el-tratado-de-la-pintura",
+ "kind": "book",
+ "fileName": "gc-es-el-tratado-de-la-pintura_2026-10-30.gvec",
+ "sizeBytes": 141546,
+ "sha256": "0be58cab324059290871bffbe97b67eaa2f2f6e7ede84a207582ed5181be4cf3",
+ "count": 481,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "5fd0a964b7ddbbde782c8ca6d62324512bbd0851762f1f3a6e12bc566dbe5d1a",
+ "url": null
+}

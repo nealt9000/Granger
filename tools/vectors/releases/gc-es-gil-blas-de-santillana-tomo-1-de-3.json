@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-gil-blas-de-santillana-tomo-1-de-3",
+ "kind": "book",
+ "fileName": "gc-es-gil-blas-de-santillana-tomo-1-de-3_2026-10-30.gvec",
+ "sizeBytes": 102444,
+ "sha256": "d58e896c67e6de5cde64b669d5698a6b5f1c2db93e111f4da988a89a4ebbb8d8",
+ "count": 348,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "621ef7f4ac495513fb8e6c9c2413332a0b6a2120f7fce84f1cddcf69686f6f4a",
+ "url": null
+}
