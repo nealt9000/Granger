@@ -44,6 +44,9 @@ class ReaderWebView(
 ) : WebView(context) {
     private val bridge = GrangerBridge(onToggleChrome, onUserScroll)
 
+    /** Set when the renderer died: nothing may be asked of this WebView again but [destroy]. */
+    var rendererGone = false
+
     init {
         // Compose's AndroidView adds views with wrap-content params, which puts WebView in "zero layout height" mode:
         // percentage heights then resolve to 0 and pages built on them (Kiwix main pages) render blank.
