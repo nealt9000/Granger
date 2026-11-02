@@ -166,7 +166,7 @@ class ScriptedGenerator(
 ) : TextGenerator {
     val prompts = mutableListOf<String>()
     var gateAt: Int? = null
-    val gate = CompletableDeferred<Unit>()
+    var gate = CompletableDeferred<Unit>()
     var failAt: Int? = null
 
     val answerPrompts get() = prompts.filterNot { it.startsWith("Turn the question into search words") }

@@ -591,4 +591,69 @@ class ResearchPipelineTest {
         assertThat((outcome(events) as Outcome.Answered).passages).containsExactly(water)
         assertThat(dense.queries).isEmpty()
     }
+
+    // ---- the owl's instant reaction ----
+
+    private val waterTopics = TopicCentroids(
+        mapOf(ReactionTopic.SCIENCE to floatArrayOf(1f, 0f), ReactionTopic.HISTORY to floatArrayOf(0f, 1f)), floor = 0.5f, margin = 0.1f,
+    )
+
+    @Test
+    fun theReactionComesFirstAndItsVectorIsTheDenseQuery() = runTest {
+        val embedded = mutableListOf<String>()
+        val queryEmbedder = PassageEmbedder { texts, _ -> embedded += texts; texts.map { floatArrayOf(1f, 0f) } }
+        val dense = FakeDense(emptyList())
+        val events = ResearchPipeline(
+            FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = queryEmbedder), dense = dense, reactions = { waterTopics },
+        ).run(ResearchRequest("At what temperature does water boil?")).toList()
+        assertThat(events.first()).isEqualTo(ResearchEvent.Reaction(ReactionTopic.SCIENCE))
+        assertThat(events[1]).isEqualTo(ResearchEvent.Progress(Stage.LOADING_MODEL))
+        // Embedded once, for the reaction, and that vector searched by meaning.
+        assertThat(embedded).containsExactly("At what temperature does water boil?")
+        assertThat(dense.queries).hasSize(1)
+    }
+
+    @Test
+    fun aFollowUpReactsAtOnceAndEmbedsWithItsPrior() = runTest {
+        val embedded = mutableListOf<String>()
+        val queryEmbedder = PassageEmbedder { texts, _ -> embedded += texts; texts.map { floatArrayOf(1f, 0f) } }
+        val events = ResearchPipeline(
+            FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = queryEmbedder), dense = FakeDense(emptyList()), reactions = { waterTopics },
+        ).run(ResearchRequest("At what temperature does it boil?", priorQuestion = "Tell me about water")).toList()
+        assertThat(events.first()).isEqualTo(ResearchEvent.Reaction(ReactionTopic.FOLLOW_UP))
+        assertThat(embedded).containsExactly("Tell me about water At what temperature does it boil?")
+    }
+
+    @Test
+    fun aHealthQuestionReactsPlainWithoutTheEmbedder() = runTest {
+        val embedded = mutableListOf<String>()
+        val queryEmbedder = PassageEmbedder { texts, _ -> embedded += texts; texts.map { floatArrayOf(0f, 1f) } }
+        val events = ResearchPipeline(
+            FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = queryEmbedder), dense = FakeDense(emptyList()),
+            reactions = { waterTopics },
+        ).run(ResearchRequest("What are the symptoms of a fever?")).toList()
+        assertThat(events.first()).isEqualTo(ResearchEvent.Reaction(ReactionTopic.MEDICAL))
+        // Embedded once, for the search by meaning, not before the reaction.
+        assertThat(embedded).containsExactly("What are the symptoms of a fever?")
+    }
+
+    @Test
+    fun withoutTopicsOrDenseOrAWorkingEmbedderTheReactionIsTheDefault() = runTest {
+        suspend fun first(pipeline: ResearchPipeline) = pipeline.run(ResearchRequest("At what temperature does water boil?")).toList().first()
+        val models = FakeModels(FakeGenerator(), embedder = embedder)
+        assertThat(first(ResearchPipeline(FakeFinder(listOf(water)), models, dense = FakeDense(emptyList()))))
+            .isEqualTo(ResearchEvent.Reaction(ReactionTopic.DEFAULT))
+        // Topics, but no dense retrieval: the embedder isn't loaded just to react.
+        assertThat(first(ResearchPipeline(FakeFinder(listOf(water)), models, reactions = { waterTopics })))
+            .isEqualTo(ResearchEvent.Reaction(ReactionTopic.DEFAULT))
+        // Topics built for another embedder (the provider has none).
+        assertThat(first(ResearchPipeline(FakeFinder(listOf(water)), models, dense = FakeDense(emptyList()), reactions = { null })))
+            .isEqualTo(ResearchEvent.Reaction(ReactionTopic.DEFAULT))
+        val broken = PassageEmbedder { _, _ -> error("embedder crashed") }
+        val events = ResearchPipeline(
+            FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = broken), dense = FakeDense(emptyList()), reactions = { waterTopics },
+        ).run(ResearchRequest("At what temperature does water boil?")).toList()
+        assertThat(events.first()).isEqualTo(ResearchEvent.Reaction(ReactionTopic.DEFAULT))
+        assertThat(outcome(events)).isInstanceOf(Outcome.Answered::class.java)
+    }
 }

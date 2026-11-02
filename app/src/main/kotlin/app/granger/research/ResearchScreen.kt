@@ -65,6 +65,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -80,6 +81,7 @@ import app.granger.formatBytes
 import app.granger.player.ListenButtons
 import app.granger.player.VoiceButton
 import app.granger.research.ResearchViewModel.TurnUi
+import app.granger.theme.Spectral
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -101,6 +103,16 @@ private const val SOURCE_GONE = "That source is no longer in your library."
 
 /** How long a source card stays outlined after its citation is tapped. */
 private const val FLASH_MS = 1_500L
+
+/** The owl's instant reaction to the question, in its voice: Spectral italic, until the answer settles. */
+@Composable
+private fun OwlReaction(line: String) {
+    Text(
+        line,
+        style = MaterialTheme.typography.bodyLarge.copy(fontFamily = Spectral, fontStyle = FontStyle.Italic),
+        color = MaterialTheme.colorScheme.onSurface,
+    )
+}
 
 private fun Stage.label() = when (this) {
     Stage.LOADING_MODEL -> "Loading the model…"
@@ -409,6 +421,7 @@ private fun AnswerBlock(
         if (ui.medical) Banner(MEDICAL)
         when (turn.outcome) {
             TurnOutcome.PENDING -> {
+                ui.reaction?.let { OwlReaction(it) }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                     ui.stage?.let { Text(it.label(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
