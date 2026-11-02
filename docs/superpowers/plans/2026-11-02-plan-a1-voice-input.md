@@ -41,7 +41,7 @@
 
 ## Global Constraints
 
-- **Coordinate with the Ask session.** It owns `ResearchScreen.kt` and `ResearchViewModel.kt` (and has unmerged work on `cl-cleanup`). Task 6 touches the ask box only through one slot and one view-model hook, and starts after a word with that session about which branch to build on. Search's files are changed by L2 (unmerged), so Task 5 rebases on whatever has merged by then.
+- **The Ask session is done** (Neal, 2026-11-02; its owl work is on main), so the ask box is free to change. Task 6 still keeps to one slot and one view-model hook. Search's files are changed by L2 (unmerged), so Task 5 rebases on whatever has merged by then.
 - **Strings:** L1's guard fails on any literal in UI code. Every new string goes in `values/strings.xml` with a Spanish entry in `values-es/strings.xml`, following L1's naming (`voice_input_*`). If L1 hasn't merged when this starts, start after it does, or rebase before Task 4.
 - **No new download in the base app.** No model, no library. The permission is the only manifest change.
 - **Release:** `RECORD_AUDIO` reaches the Play build. The data safety form and the privacy policy draft (`docs/friend-testing/privacy-policy.md`, on `cl-cleanup`) get one line each: audio is recognized on the phone and never collected or sent (Task 8).
@@ -100,7 +100,7 @@
 
 ### Task 6: The mic in the Research ask box
 
-**Files:** modify `app/src/main/kotlin/app/granger/research/ResearchScreen.kt` (one slot beside Send), `ResearchViewModel.kt` (one hook); tests in `ResearchViewModelTest.kt`. **Talk to the Ask session first** (Global Constraints).
+**Files:** modify `app/src/main/kotlin/app/granger/research/ResearchScreen.kt` (one slot beside Send), `ResearchViewModel.kt` (one hook); tests in `ResearchViewModelTest.kt`.
 
 - [ ] A `MicButton` beside Send, hidden while an answer is running and when the app's language has no Ask (Spanish while Spanish Ask is off). Partials fill `input`; the final replaces it.
 - [ ] With **Ask as soon as I stop talking** on, the final sends if `canSend`; otherwise it waits in the box with the cursor at the end.
