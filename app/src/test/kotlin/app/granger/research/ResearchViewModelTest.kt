@@ -352,6 +352,22 @@ class ResearchViewModelTest {
         assertThat(vm.state.value.turns.single().reading).isNull()
     }
 
+    @Test fun eachAnswerWakesTheOwlWithANewLine() = runTest(main.dispatcher) {
+        val vm = vm()
+        val woken = mutableListOf<String>()
+        repeat(OwlLines.WAKING.size) { n ->
+            small.gateAt = 0
+            small.gate = kotlinx.coroutines.CompletableDeferred()
+            vm.ask("Why is the sky blue, part $n?")
+            testScheduler.advanceUntilIdle()
+            woken += vm.state.value.turns.last().waking!!
+            small.gate.complete(Unit)
+            testScheduler.advanceUntilIdle()
+            assertThat(vm.state.value.turns.last().waking).isNull()
+        }
+        assertThat(woken).containsExactlyElementsIn(OwlLines.WAKING)
+    }
+
     @Test fun medicalBannerShowsWhileTheAnswerStreams() = runTest(main.dispatcher) {
         small.rewrite = "keywords: photosynthesis, light\nmedical: yes"
         small.answer = listOf("Cool the burn under running water [1].", " Then")
