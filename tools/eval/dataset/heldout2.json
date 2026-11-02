@@ -1,0 +1,3396 @@
+[
+ {
+  "id": "h2-bible-001",
+  "group": "bible",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how old was methuselah when he died",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-king-james-bible",
+    "location": "c002.xhtml",
+    "quote": "all the days of methuselah were nine hundred sixty and nine years"
+   }
+  ],
+  "reference": "969 years (Genesis 5:27).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-bible-002",
+  "group": "bible",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "Which disciple refused to believe Jesus had risen until he could touch the wounds?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-king-james-bible",
+    "location": "c054.xhtml",
+    "quote": "except i shall see in his hands the print of the nails"
+   }
+  ],
+  "reference": "Thomas, called Didymus (John 20:24-25).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-bible-003",
+  "group": "bible",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who got swallowed by a huge fish in the bible",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-king-james-bible",
+    "location": "c042.xhtml",
+    "quote": "the lord had prepared a great fish to swallow up jonah"
+   }
+  ],
+  "reference": "Jonah; he was in the fish three days and three nights (Jonah 1:17).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-bible-004",
+  "group": "bible",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "does jesus say anything about worrying about the future",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-king-james-bible",
+    "location": "c050.xhtml",
+    "quote": "take therefore no thought for the morrow"
+   }
+  ],
+  "reference": "Yes: in the Sermon on the Mount he says to take no thought for the morrow, for the morrow shall take thought for itself; sufficient unto the day is the evil thereof (Matthew 6:34).",
+  "goodGuess": null,
+  "notes": "vocabulary: worry -> take no thought; future -> the morrow"
+ },
+ {
+  "id": "h2-bible-005",
+  "group": "bible",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what does the quran say about drinking and gambling",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-koran-sale",
+    "location": "c016.xhtml",
+    "quote": "in both there is great sin, and also some things of use unto men"
+   },
+   {
+    "source": "book:granger:gc-koran-rodwell",
+    "location": "c090.xhtml",
+    "quote": "in both is great sin, and advantage also, to men"
+   }
+  ],
+  "reference": "In both wine and games of chance there is great sin and also some use to men, but their sin is greater than their use (Koran 2:219).",
+  "goodGuess": null,
+  "notes": "either translation counts"
+ },
+ {
+  "id": "h2-bible-006",
+  "group": "bible",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "did confucius have a version of the golden rule",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-analects",
+    "location": "c016.xhtml",
+    "quote": "what you do not want done to yourself, do not do to others"
+   }
+  ],
+  "reference": "Yes: asked for one word to live by, the Master named reciprocity: what you do not want done to yourself, do not do to others (Analects XV.23).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-bible-007",
+  "group": "bible",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "which angel went along with tobias on his journey",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-apocrypha-deuterocanonical-books",
+    "location": "c004.xhtml",
+    "quote": "he found raphael that was an angel"
+   }
+  ],
+  "reference": "Raphael, who hired on as his companion without Tobias knowing he was an angel (Tobit 5:4).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-bible-008",
+  "group": "bible",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how did judith kill holofernes",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-apocrypha-deuterocanonical-books",
+    "location": "c005.xhtml",
+    "quote": "she smote twice upon his neck with all her might"
+   }
+  ],
+  "reference": "She took down his own sword (fauchion) from the bedpost, struck his neck twice and cut off his head, which her maid carried away in a bag (Judith 13:6-10).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-vocab-gap-001",
+  "group": "vocab-gap",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "where is the bible passage about love being patient and kind",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-king-james-bible",
+    "location": "c057.xhtml",
+    "quote": "charity suffereth long, and is kind"
+   }
+  ],
+  "reference": "1 Corinthians 13:4, where the King James text says charity suffereth long and is kind.",
+  "goodGuess": null,
+  "notes": "gap: love -> charity, patient -> suffereth long"
+ },
+ {
+  "id": "h2-vocab-gap-002",
+  "group": "vocab-gap",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "is charging interest on a loan allowed according to the koran",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-koran-rodwell",
+    "location": "c090.xhtml",
+    "quote": "god hath allowed selling, and forbidden usury"
+   },
+   {
+    "source": "book:granger:gc-koran-sale",
+    "location": "c016.xhtml",
+    "quote": "god hath permitted selling and forbidden usury"
+   }
+  ],
+  "reference": "No: God has permitted selling but forbidden usury; those who return to it are threatened with the fire (Koran 2:275).",
+  "goodGuess": null,
+  "notes": "gap: interest -> usury"
+ },
+ {
+  "id": "h2-vocab-gap-003",
+  "group": "vocab-gap",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "is frankensteins creature a vegetarian",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-frankenstein",
+    "location": "c022.xhtml",
+    "quote": "i do not destroy the lamb and the kid to glut my appetite"
+   }
+  ],
+  "reference": "Yes: he says his food is not that of man, he does not kill the lamb or the kid, and acorns and berries are enough for him.",
+  "goodGuess": null,
+  "notes": "gap: vegetarian -> does not destroy the lamb and the kid"
+ },
+ {
+  "id": "h2-vocab-gap-004",
+  "group": "vocab-gap",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "did darwin know anything about genetics",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-on-the-origin-of-species",
+    "location": "c004.xhtml",
+    "quote": "the laws governing inheritance are quite unknown"
+   }
+  ],
+  "reference": "No: in the Origin he writes that the laws governing inheritance are quite unknown, though he treats inheritance as the rule and non-inheritance as the anomaly.",
+  "goodGuess": null,
+  "notes": "gap: genetics -> inheritance"
+ },
+ {
+  "id": "h2-vocab-gap-005",
+  "group": "vocab-gap",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "which old novel imagines machines evolving minds of their own",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-erewhon",
+    "location": "c028.xhtml",
+    "quote": "there may be even yet new channels dug out for consciousness"
+   }
+  ],
+  "reference": "Erewhon (Samuel Butler), in its Book of the Machines chapters, which argue consciousness could arise in machines as it once arose from lifeless matter.",
+  "goodGuess": null,
+  "notes": "gap: artificial intelligence / robots -> machines, consciousness"
+ },
+ {
+  "id": "h2-vocab-gap-006",
+  "group": "vocab-gap",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what does mores utopia say about ending the life of someone in hopeless pain",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-utopia",
+    "location": "c009.xhtml",
+    "quote": "choose rather to die since they cannot live but in much misery"
+   }
+  ],
+  "reference": "Priests and magistrates urge those with incurable, torturing pain to choose death; the persuaded starve themselves or take opium and die without pain, but no one is forced.",
+  "goodGuess": null,
+  "notes": "gap: euthanasia / assisted dying -> choose rather to die"
+ },
+ {
+  "id": "h2-who-wrote-001",
+  "group": "who-wrote",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who wrote the story about a scientist who turns himself invisible and goes mad",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-invisible-man",
+    "location": "c001.xhtml",
+    "quote": "the invisible man a grotesque romance by h. g. wells"
+   }
+  ],
+  "reference": "H. G. Wells, The Invisible Man.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-who-wrote-002",
+  "group": "who-wrote",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the novel where a woman in puritan new england has to wear a red letter on her dress",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-scarlet-letter",
+    "location": "c001.xhtml",
+    "quote": "the scarlet letter by nathaniel hawthorne"
+   }
+  ],
+  "reference": "The Scarlet Letter, by Nathaniel Hawthorne.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-who-wrote-003",
+  "group": "who-wrote",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "Which Russian novel has a poor student murder an old pawnbroker?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-crime-and-punishment",
+    "location": "c001.xhtml",
+    "quote": "crime and punishment by fyodor dostoevsky"
+   }
+  ],
+  "reference": "Crime and Punishment, by Fyodor Dostoevsky.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-who-wrote-004",
+  "group": "who-wrote",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "the one about a lonely weaver whose gold gets stolen and then a little girl wanders into his cottage, who wrote that",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-silas-marner",
+    "location": "c001.xhtml",
+    "quote": "silas marner the weaver of raveloe by george eliot"
+   }
+  ],
+  "reference": "George Eliot (Mary Anne Evans), Silas Marner.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-who-wrote-005",
+  "group": "who-wrote",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who wrote the play about a scholar who sells his soul to the devil",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-doctor-faustus",
+    "location": "c001.xhtml",
+    "quote": "the tragical history of doctor faustus by christopher marlowe"
+   },
+   {
+    "source": "book:granger:gc-faust-part-one",
+    "location": "c001.xhtml",
+    "quote": "faust by johann wolfgang von goethe"
+   }
+  ],
+  "reference": "Christopher Marlowe (Doctor Faustus) or Goethe (Faust); both are in the library.",
+  "goodGuess": null,
+  "notes": "either counts"
+ },
+ {
+  "id": "h2-who-wrote-006",
+  "group": "who-wrote",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "which play ends with the wife walking out on her husband and kids and slamming the door",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-doll-s-house",
+    "location": "c005.xhtml",
+    "quote": "the sound of a door shutting is heard from below"
+   },
+   {
+    "source": "book:granger:gc-doll-s-house",
+    "location": "c001.xhtml",
+    "quote": "a doll's house henrik ibsen"
+   }
+  ],
+  "reference": "A Doll's House, by Henrik Ibsen: Nora leaves Helmer and the play ends with the sound of the door shutting below.",
+  "goodGuess": null,
+  "notes": "straight apostrophe in the front-matter quote; checked"
+ },
+ {
+  "id": "h2-literature-001",
+  "group": "literature",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "where did gatsby actually come from and what was his real name",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-great-gatsby",
+    "location": "c007.xhtml",
+    "quote": "a source of satisfaction to james gatz of north dakota"
+   }
+  ],
+  "reference": "He was born James Gatz in North Dakota and changed his name at seventeen.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-literature-002",
+  "group": "literature",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "How long was Robinson Crusoe stranded on his island?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-robinson-crusoe",
+    "location": "c021.xhtml",
+    "quote": "eight-and-twenty years, two months, and nineteen days"
+   }
+  ],
+  "reference": "Twenty-eight years, two months and nineteen days; he left on 19 December 1686.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-literature-003",
+  "group": "literature",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what does the narrator of the yellow wallpaper think is moving behind the pattern",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-yellow-wallpaper",
+    "location": "c001.xhtml",
+    "quote": "the woman behind shakes it"
+   }
+  ],
+  "reference": "A woman (sometimes many women) creeping behind the pattern and shaking it.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-literature-004",
+  "group": "literature",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why does the ancient mariner get cursed",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-rime-of-the-ancient-mariner",
+    "location": "c002.xhtml",
+    "quote": "with my cross-bow i shot the albatross"
+   }
+  ],
+  "reference": "He shot the albatross with his crossbow.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-literature-005",
+  "group": "literature",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the first terrible thing we hear about mr hyde doing",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-strange-case-of-dr-jekyll-and-mr-hyde",
+    "location": "c003.xhtml",
+    "quote": "the man trampled calmly over the child"
+   }
+  ],
+  "reference": "He trampled over a little girl in the street at night and left her screaming.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-literature-006",
+  "group": "literature",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what does jonathan harker notice about the count while he is shaving",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-dracula",
+    "location": "c004.xhtml",
+    "quote": "there was no reflection of him in the mirror"
+   }
+  ],
+  "reference": "The Count has no reflection in the shaving mirror.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-follow-up-001",
+  "group": "follow-up",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what sentence did he get",
+  "priorQuestion": "who brought the charges against socrates at his trial",
+  "answers": [
+   {
+    "source": "book:granger:gc-apology",
+    "location": "c003.xhtml",
+    "quote": "condemned by you to suffer the penalty of death"
+   }
+  ],
+  "reference": "Death.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-follow-up-002",
+  "group": "follow-up",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what presents had he promised the kids from that trip",
+  "priorQuestion": "where did old mr earnshaw find heathcliff",
+  "answers": [
+   {
+    "source": "book:granger:gc-wuthering-heights",
+    "location": "c004.xhtml",
+    "quote": "hindley named a fiddle, and then he asked miss cathy"
+   }
+  ],
+  "reference": "A fiddle for Hindley and a whip for Cathy (and apples and pears for Nelly).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-follow-up-003",
+  "group": "follow-up",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how does it end for him",
+  "priorQuestion": "what does dorian gray wish for when he first sees his portrait",
+  "answers": [
+   {
+    "source": "book:granger:gc-picture-of-dorian-gray",
+    "location": "c022.xhtml",
+    "quote": "with a knife in his heart. he was withered, wrinkled"
+   }
+  ],
+  "reference": "He is found dead with a knife in his heart, withered and old, while the portrait is young again.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-follow-up-004",
+  "group": "follow-up",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who made it",
+  "priorQuestion": "what is the sampo in the kalevala",
+  "answers": [
+   {
+    "source": "book:granger:gc-kalevala",
+    "location": "c022.xhtml",
+    "quote": "when for thee i forged the sampo"
+   }
+  ],
+  "reference": "Ilmarinen the smith forged the Sampo.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-follow-up-005",
+  "group": "follow-up",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "did my grandfather own a copy of it",
+  "priorQuestion": "how many years was robinson crusoe stuck on the island",
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "unanswerable follow-up: personal"
+ },
+ {
+  "id": "h2-multi-step-001",
+  "group": "multi-step",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "who taught the man who wrote the nicomachean ethics",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-nicomachean-ethics",
+    "location": "c001.xhtml",
+    "quote": "the nicomachean ethics of aristotle by aristotle"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "Aristotle",
+    "quote": "he joined plato 's academy in athens"
+   }
+  ],
+  "reference": "Aristotle wrote it, and he studied under Plato at the Academy in Athens.",
+  "goodGuess": null,
+  "notes": "chain: book -> Aristotle -> Plato"
+ },
+ {
+  "id": "h2-multi-step-002",
+  "group": "multi-step",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "how old was dickens when a christmas carol came out",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Charles_Dickens",
+    "quote": "charles john huffam dickens was born on 7 february 1812"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "A_Christmas_Carol",
+    "quote": "first published in london by chapman & hall in 1843"
+   }
+  ],
+  "reference": "31: he was born 7 February 1812 and the book came out in December 1843.",
+  "goodGuess": null,
+  "notes": "arithmetic: 1843 - 1812"
+ },
+ {
+  "id": "h2-multi-step-003",
+  "group": "multi-step",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "was thoreau still alive when darwins origin of species was published",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Henry_David_Thoreau",
+    "quote": "henry david (1817–1862) died at age 44, of tuberculosis"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "On_the_Origin_of_Species",
+    "quote": "it was published on 24 november 1859"
+   }
+  ],
+  "reference": "Yes: the Origin came out in November 1859 and Thoreau died in 1862.",
+  "goodGuess": null,
+  "notes": "comparison of two dates"
+ },
+ {
+  "id": "h2-cooking-001",
+  "group": "cooking",
+  "domain": "food",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "my bread starter has been in the fridge for months, how do i tell if its woken up enough to bake with",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "based.cooking_en_all",
+    "location": "based.cooking/sourdough-starter/",
+    "quote": "an active starter will float"
+   }
+  ],
+  "reference": "Feed it once or twice and watch for bubbles; you can also drop a small piece into a glass of water, and if it floats the starter is active.",
+  "goodGuess": null,
+  "notes": "Same recipe text also exists in foss.cooking at foss.cooking/recipe/vili-kangas/sourdough-starter."
+ },
+ {
+  "id": "h2-cooking-002",
+  "group": "cooking",
+  "domain": "food",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how can i tell when homemade jerky is dried enough",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "based.cooking_en_all",
+    "location": "based.cooking/beef-jerky/",
+    "quote": "meat should bend but not break when properly dried"
+   }
+  ],
+  "reference": "Properly dried jerky bends but does not break.",
+  "goodGuess": null,
+  "notes": "Duplicate in foss.cooking at foss.cooking/recipe/elias-howell/beef-jerky."
+ },
+ {
+  "id": "h2-cooking-003",
+  "group": "cooking",
+  "domain": "food",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the point of soaking the sliced red onion in cold water before mixing it into raw fish and lime juice",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "based.cooking_en_all",
+    "location": "based.cooking/ceviche/",
+    "quote": "make it so that their flavor is not as strong"
+   }
+  ],
+  "reference": "Soaking the onion slices tones down their flavor so the onion does not overpower everything else in the ceviche.",
+  "goodGuess": null,
+  "notes": "Duplicate in foss.cooking at foss.cooking/recipe/jacob-smith/ceviche."
+ },
+ {
+  "id": "h2-cooking-004",
+  "group": "cooking",
+  "domain": "food",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "is there a reason to soak raw oats for 12 hours instead of just eating them straight with milk",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "foss.cooking_en_all",
+    "location": "foss.cooking/recipe/maxwell-stelmack/overnight-oats",
+    "quote": "reduces the amount of phytate, which is a digestion inhibitor"
+   }
+  ],
+  "reference": "Soaking lets the oats expand safely outside the gut and reduces phytate, which inhibits digestion.",
+  "goodGuess": null,
+  "notes": "foss.cooking only; page present in both the 2026-05-06 and 2026-11-02 snapshots. The page also makes a dubious nutrition claim nearby; the phytate sentence is the plain fact."
+ },
+ {
+  "id": "h2-cooking-005",
+  "group": "cooking",
+  "domain": "food",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "would a clay pot in pot cooler still keep veg fresh somewhere humid",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "appropedia_en_all",
+    "location": "Zeer_pot_refrigerator",
+    "quote": "low humidity climates (less than 40% relative humidity)"
+   }
+  ],
+  "reference": "It works best in low humidity, under about 40% relative humidity, along with hot days above 25 °C, water added one to three times a day, and a shady well-ventilated spot.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-cooking-006",
+  "group": "cooking",
+  "domain": "food",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how much sugar does homemade jam need so it doesnt go mouldy",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "appropedia_en_all",
+    "location": "Making_jam,_jelly_and_marmalade",
+    "quote": "sugar content of the preserve is at least 68%"
+   }
+  ],
+  "reference": "At least 68% sugar; below that, moulds and yeasts can spoil the preserve.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-cooking-007",
+  "group": "cooking",
+  "domain": "food",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "can i dry sliced vegetables outside in the sun or does that only work for fruit",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "appropedia_en_all",
+    "location": "Preserving_Food_by_Drying",
+    "quote": "sun drying is only appropriate for fruit"
+   }
+  ],
+  "reference": "Sun drying is only appropriate for fruit, and only when there is enough heat, such as long hot summer days with warm nights.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-cooking-008",
+  "group": "cooking",
+  "domain": "food",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why does meat have to be cured before it goes in a cold smoker",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "appropedia_en_all",
+    "location": "Cold_smoking",
+    "quote": "the smoke only penetrates the surface of the food"
+   }
+  ],
+  "reference": "Because the smoke only penetrates the surface and leaves the centre of the food unaffected; curing can only be skipped if the food is cut very thin or small.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-multi-step-004",
+  "group": "multi-step",
+  "domain": "food",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "does the finnish oven pancake bake at a hotter or cooler temp than the no knead loaf, and by how much",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "based.cooking_en_all",
+    "location": "based.cooking/no-knead-bread/",
+    "quote": "preheat oven and pan to 450 f (230 c)"
+   },
+   {
+    "source": "foss.cooking_en_all",
+    "location": "foss.cooking/recipe/albert-elmore/kropsua",
+    "quote": "set oven to preheat 400 degrees f"
+   }
+  ],
+  "reference": "Cooler: the Finnish baked pancake (kropsua) bakes at 400 °F while the no-knead bread bakes at 450 °F (230 °C), so the pancake is 50 °F lower.",
+  "goodGuess": null,
+  "notes": "Spans two packs. The no-knead recipe also exists in foss.cooking at foss.cooking/recipe/enthdegree/no-knead-bread; kropsua is foss.cooking only."
+ },
+ {
+  "id": "h2-multi-step-005",
+  "group": "multi-step",
+  "domain": "food",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "can i leave a jar of salted cabbage to ferment down in my root cellar or is it too cold there",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "based.cooking_en_all",
+    "location": "based.cooking/sauerkraut/",
+    "quote": "culture at room temperature (60-70°f/15-20°c is preferred)"
+   },
+   {
+    "source": "appropedia_en_all",
+    "location": "Root_cellar",
+    "quote": "the temperature needs to be constant, between 0 and 4,5°c"
+   }
+  ],
+  "reference": "Too cold for the ferment itself: sauerkraut should culture at room temperature, about 15-20 °C (60-70 °F), while a root cellar is held at a constant 0-4.5 °C.",
+  "goodGuess": null,
+  "notes": "Spans two packs; comparison of two stated temperature ranges. The sauerkraut page separately says to move the finished kraut to cold storage, which a root cellar would suit, but that is not part of the reference. Sauerkraut recipe also in foss.cooking at foss.cooking/recipe/andrej-kirchmaier/sauerkraut."
+ },
+ {
+  "id": "h2-repair-001",
+  "group": "repair",
+  "domain": "making",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "cant find where my bike tube is leaking, any trick",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "ifixit_en_all",
+    "location": "Guide/Patching+a+Bicycle+Tire+Inner+Tube/9862",
+    "quote": "place the tire under water and look for bubbles to find the leak"
+   }
+  ],
+  "reference": "Over-inflate the tube, then hold it under water and look for bubbles to find the leak.",
+  "goodGuess": null,
+  "notes": "A second copy of this guide exists at Guide/Patching+a+Bicycle+Tire+Inner+Tube/3794 with the same step text; either citation is correct."
+ },
+ {
+  "id": "h2-repair-002",
+  "group": "repair",
+  "domain": "making",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "ge top loader wont start. how do i get it to show me its error codes",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "ifixit_en_all",
+    "location": "Guide/How+to+Troubleshoot+a+GE+Top+Load+Washing+Machine+Not+Starting/181837",
+    "quote": "hold the start button for ten seconds, then release it to view error codes"
+   }
+  ],
+  "reference": "Press and hold the start button for ten seconds, then release it; the blinking lights (with the pause and lid lock indicators) show the stored error codes.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-repair-003",
+  "group": "repair",
+  "domain": "making",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what size socket pulls the plug on a briggs 675 mower engine",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "ifixit_en_all",
+    "location": "Guide/Briggs+and+Stratton+675+Series+Spark+Plug+Replacement/37232",
+    "quote": "use a socket wrench with a 13/16"
+   }
+  ],
+  "reference": "A 13/16-inch spark plug socket on a socket wrench (a long bit helps reach it).",
+  "goodGuess": null,
+  "notes": "The quote stops just before the inch mark (a double-quote character) in '13/16\" hex bit'."
+ },
+ {
+  "id": "h2-repair-004",
+  "group": "repair",
+  "domain": "making",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "the zip on my jacket stopped working, do i have to sew in a whole new one?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "ifixit_en_all",
+    "location": "Guide/Replace+a+jacket+zipper+(without+unraveling)/152549",
+    "quote": "sometimes it is enough to clean and grease it or replace the zipper/slider"
+   }
+  ],
+  "reference": "Not always; sometimes cleaning and greasing the zipper or replacing just the slider is enough, and other zipper damage can be repaired without a full replacement.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-repair-005",
+  "group": "repair",
+  "domain": "making",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "which screwdriver fits the two screws on the bottom of an iphone 11",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "ifixit_en_all",
+    "location": "Guide/iPhone+11+Battery+Replacement/127450",
+    "quote": "remove the two 6.7 mm-long pentalobe p2 screws at the bottom edge of the iphone"
+   }
+  ],
+  "reference": "A P2 pentalobe screwdriver; the two bottom-edge screws are 6.7 mm-long pentalobe P2 screws.",
+  "goodGuess": null,
+  "notes": "This step text is probably shared by other iPhone 11 guides (display, speaker, etc.); any of them would support the answer."
+ },
+ {
+  "id": "h2-multi-step-006",
+  "group": "multi-step",
+  "domain": "making",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "my console has hac-001 printed on the back. what is it, and what kind of screws will i hit when i swap its battery?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "ifixit_en_all",
+    "location": "Device/Nintendo_Switch",
+    "quote": "the model number ( hac-001 ) is also located on the back of the device"
+   },
+   {
+    "source": "ifixit_en_all",
+    "location": "Guide/Nintendo+Switch+Battery+Replacement/112995",
+    "quote": "the nintendo switch uses jis screws, which are slightly different than phillips"
+   }
+  ],
+  "reference": "HAC-001 is the model number of the Nintendo Switch, and its battery replacement guide says the Switch uses JIS screws, which are slightly different from Phillips (a plain Phillips driver is not recommended).",
+  "goodGuess": null,
+  "notes": "Chain: device page identifies HAC-001 as the Switch; the battery guide states the screw type. The JIS sentence is not in the other two Switch battery guides (139947, 105302)."
+ },
+ {
+  "id": "h2-knots-001",
+  "group": "knots",
+  "domain": "making",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "is a square knot ok for joining two ropes end to end",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_knots",
+    "location": "Reef_knot",
+    "quote": "the reef knot is not recommended for tying two ropes together"
+   }
+  ],
+  "reference": "No; the reef (square) knot is not recommended for joining two ropes because it can be unstable when not stabilized, which has caused accidental deaths.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-knots-002",
+  "group": "knots",
+  "domain": "making",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "i need a loop partway along a rope but both ends are already tied off. which knot?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_knots",
+    "location": "Butterfly_loop",
+    "quote": "it can be made in a rope without access to either of the ends"
+   }
+  ],
+  "reference": "The butterfly loop (alpine butterfly / lineman's loop): tied in the bight, it forms a fixed loop in the middle of a rope without needing access to either end.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-knots-003",
+  "group": "knots",
+  "domain": "making",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "is there a hitch i can let go with one pull while theres still weight on it",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_knots",
+    "location": "Highwayman's_hitch",
+    "quote": "can be untied with a tug of the working end, even when under tension"
+   }
+  ],
+  "reference": "Yes, the highwayman's hitch, a quick-release draw hitch that comes undone with a tug on the working end even while under tension.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-multi-step-007",
+  "group": "multi-step",
+  "domain": "making",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "the slide-to-tighten knot for tent guy lines is built around another hitch. which one, and what do sailors use that hitch for?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_knots",
+    "location": "Taut-line_hitch",
+    "quote": "made by tying a rolling hitch around the standing part"
+   },
+   {
+    "source": "wikipedia_en_knots",
+    "location": "Rolling_hitch",
+    "quote": "rigging a stopper to relax the tension on a sheet"
+   }
+  ],
+  "reference": "The taut-line hitch is a rolling hitch tied around the standing part; sailors use the rolling hitch to rig a stopper that relaxes the tension on a sheet so a jammed winch or block can be cleared.",
+  "goodGuess": null,
+  "notes": "Chain: Taut-line_hitch names the rolling hitch as its basis; Rolling_hitch gives the sailing use. Both quotes FOUND in the 2026-07-20 and 2026-10-18 snapshots."
+ },
+ {
+  "id": "h2-physics-001",
+  "group": "physics",
+  "domain": "science",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what actually makes the big bang noise when lightning strikes",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_physics",
+    "location": "Thunder",
+    "quote": "the sudden increase in temperature and hence pressure caused by the lightning produces rapid expansion"
+   }
+  ],
+  "reference": "The lightning heats the air in its path so suddenly that the air expands explosively, and that expansion creates a shock wave which is heard as thunder.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-physics-002",
+  "group": "physics",
+  "domain": "science",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why does an ambulance siren sound higher pitched while its coming towards me",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_physics",
+    "location": "Doppler_effect",
+    "quote": "each successive cycle of the wave is emitted from a position closer to the observer"
+   }
+  ],
+  "reference": "Because the siren is moving toward you, each successive sound wave is sent out from a point closer to you than the last, so the waves arrive more often (higher frequency), which you hear as a higher pitch.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-physics-003",
+  "group": "physics",
+  "domain": "science",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "which metal was the first one found to lose all its electrical resistance when cooled right down, and who found that",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_physics",
+    "location": "Superconductivity",
+    "quote": "superconductivity was discovered in solid mercury on april 8, 1911, by heike kamerlingh onnes"
+   }
+  ],
+  "reference": "Solid mercury; Heike Kamerlingh Onnes discovered it on 8 April 1911.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-multi-step-008",
+  "group": "multi-step",
+  "domain": "science",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "how many years after the electron was discovered did somebody find the neutron",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_physics",
+    "location": "Electron",
+    "quote": "in 1897, the british physicist j. j. thomson"
+   },
+   {
+    "source": "wikipedia_en_physics",
+    "location": "Neutron",
+    "quote": "the neutron was discovered by james chadwick in 1932"
+   }
+  ],
+  "reference": "35 years: J. J. Thomson's experiments identified the electron in 1897, and James Chadwick discovered the neutron in 1932.",
+  "goodGuess": null,
+  "notes": "Arithmetic across two entries: 1932 − 1897 = 35. The Electron body credits Thomson with the discovery via his 1897 experiments (the infobox says the same)."
+ },
+ {
+  "id": "h2-chemistry-001",
+  "group": "chemistry",
+  "domain": "science",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why does iron go orange and flaky when its left out in the rain",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_chemistry",
+    "location": "Rust",
+    "quote": "reaction of iron and oxygen in the catalytic presence of water or air moisture"
+   }
+  ],
+  "reference": "The iron reacts with oxygen, with water or moisture helping the reaction along, forming reddish-brown iron oxide (rust).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-chemistry-002",
+  "group": "chemistry",
+  "domain": "science",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who came up with the first widely accepted chart of the chemical elements and what year was that",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_chemistry",
+    "location": "Periodic_table",
+    "quote": "generally accepted was that of the russian chemist dmitri mendeleev in 1869"
+   }
+  ],
+  "reference": "The Russian chemist Dmitri Mendeleev, in 1869.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-chemistry-003",
+  "group": "chemistry",
+  "domain": "science",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "which metal takes the most heat to melt and how hot does it have to get",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_chemistry",
+    "location": "Tungsten",
+    "quote": "tungsten has the highest melting point ( 3,422 °c"
+   }
+  ],
+  "reference": "Tungsten, which has the highest melting point of any pure metal, about 3,422 °C.",
+  "goodGuess": null,
+  "notes": "Body text, not just the infobox. The lead also states it has the highest melting point of all known elements."
+ },
+ {
+  "id": "h2-multi-step-009",
+  "group": "multi-step",
+  "domain": "science",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "was hydrogen or oxygen identified first, and roughly how many years apart",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_chemistry",
+    "location": "Hydrogen",
+    "quote": "in 1766, henry cavendish was the first to recognize hydrogen gas as a discrete substance"
+   },
+   {
+    "source": "wikipedia_en_chemistry",
+    "location": "Oxygen",
+    "quote": "scheele, in uppsala, in 1773 or earlier, and joseph priestley in wiltshire, in 1774"
+   }
+  ],
+  "reference": "Hydrogen came first: Cavendish recognised it as a distinct substance in 1766, while oxygen was discovered by Scheele in about 1773 and Priestley in 1774, so roughly seven or eight years later.",
+  "goodGuess": null,
+  "notes": "Comparison across two element entries. Oxygen's date is given as a range (Scheele 1773 or earlier, Priestley 1774), so accept 'about 7-8 years'."
+ },
+ {
+  "id": "h2-mathematics-001",
+  "group": "mathematics",
+  "domain": "science",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who proved the old puzzle about walking over every bridge in a city exactly once couldnt be done, and when",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_mathematics",
+    "location": "Seven_Bridges_of_Königsberg",
+    "quote": "proof of impossibility by leonhard euler , in 1736"
+   }
+  ],
+  "reference": "Leonhard Euler, in 1736.",
+  "goodGuess": null,
+  "notes": "Location contains the non-ASCII ö; the same sentence says the proof laid the foundations of graph theory."
+ },
+ {
+  "id": "h2-mathematics-002",
+  "group": "mathematics",
+  "domain": "science",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "game show with 3 doors, i pick one, the host opens another one with a goat behind it. should i switch, and what are my odds if i do",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_mathematics",
+    "location": "Monty_Hall_problem",
+    "quote": "the switching strategy has a 2/3 probability of winning the car"
+   }
+  ],
+  "reference": "Yes, switch: switching wins the car with probability 2/3, while sticking with the first choice wins only 1/3 of the time.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-programming-001",
+  "group": "programming",
+  "domain": "technology",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "my shell script pipeline exits 0 even when the first command in it fails, how do i make the whole pipeline count as failed",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_bash",
+    "location": "pipelines",
+    "quote": "unless the pipefail option is enabled (see the set builtin"
+   }
+  ],
+  "reference": "By default a pipeline's exit status is that of its last command; enable the pipefail option (set -o pipefail) so the pipeline returns the status of the last command that exited non-zero.",
+  "goodGuess": null,
+  "notes": "Bash manual, Pipelines section."
+ },
+ {
+  "id": "h2-programming-002",
+  "group": "programming",
+  "domain": "technology",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "forgot to add a file to my last commit. how do i get it in there without retyping the commit message",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_git",
+    "location": "git-commit",
+    "quote": "git commit --amend --no-edit amends a commit without changing its commit message"
+   }
+  ],
+  "reference": "Stage the file and run git commit --amend --no-edit, which replaces the last commit while keeping its message unchanged.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-programming-003",
+  "group": "programming",
+  "domain": "technology",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "my api already checked the users token and it is valid, they just arent allowed to do this one action. which status code is right, since unauthorized sounds wrong",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_http",
+    "location": "reference/status/401",
+    "quote": "a 403 is returned when a request contains valid credentials"
+   }
+  ],
+  "reference": "403 Forbidden: it is returned when the request carries valid credentials but the client lacks permission for the action, whereas 401 Unauthorized means valid credentials are missing.",
+  "goodGuess": null,
+  "notes": "The fact lives on the 401 page (its comparison with 403); the 403 page may say it too. Quote shortened to stay under 15 words; the permission clause follows it in context."
+ },
+ {
+  "id": "h2-programming-004",
+  "group": "programming",
+  "domain": "technology",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "in c how do i allocate an array on the heap so every element starts out as zero, without looping over it myself",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_c",
+    "location": "memory/calloc",
+    "quote": "initializes all bytes in the allocated storage to zero"
+   }
+  ],
+  "reference": "Use calloc(num, size): it allocates memory for an array of num objects of the given size and initializes all bytes of the storage to zero.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-programming-005",
+  "group": "programming",
+  "domain": "technology",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "in javascript whats the actual difference between comparing with two equals signs and with three",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_javascript",
+    "location": "operators/strict_equality",
+    "quote": "the strict equality operator always considers operands of different types to be different"
+   }
+  ],
+  "reference": "Triple equals (strict equality) never converts types, so operands of different types are always unequal; double equals tries to convert both operands to the same type before comparing.",
+  "goodGuess": null,
+  "notes": "The == conversion point is stated later on the same page (most notable difference paragraph)."
+ },
+ {
+  "id": "h2-programming-006",
+  "group": "programming",
+  "domain": "technology",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "i have a list of tuples in python and want them sorted by the third item of each tuple instead of the first. whats the clean way",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_python",
+    "location": "howto/sorting",
+    "quote": "have a key parameter to specify a function (or other callable)"
+   }
+  ],
+  "reference": "Pass a key function to sorted() or list.sort(), e.g. sorted(items, key=lambda t: t[2]) or key=operator.itemgetter(2); the key is called on each element to produce the value that is compared.",
+  "goodGuess": null,
+  "notes": "The page shows exactly this example: sorted(student_tuples, key=lambda student: student[2]) and key=itemgetter(2)."
+ },
+ {
+  "id": "h2-multi-step-010",
+  "group": "multi-step",
+  "domain": "technology",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "the api im hitting says im sending too many requests. which response header tells me how long to back off, and what can its value look like",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_http",
+    "location": "reference/status/429",
+    "quote": "a retry-after header may be included to this response"
+   },
+   {
+    "source": "devdocs_en_http",
+    "location": "reference/headers/retry-after",
+    "quote": "syntax retry-after: <http-date> retry-after: <delay-seconds> directives <http-date> a date after which to retry"
+   }
+  ],
+  "reference": "The Retry-After header; its value is either an HTTP date after which to retry or a delay given as a number of seconds.",
+  "goodGuess": null,
+  "notes": "Chain: 429 page names the header; the Retry-After page gives its two value forms (delay-seconds is defined right after the quote as a non-negative decimal integer of seconds)."
+ },
+ {
+  "id": "h2-multi-step-011",
+  "group": "multi-step",
+  "domain": "technology",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "when i store a python float through the standard library sqlite module, what type does sqlite keep it as and how many bytes does that take",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_python",
+    "location": "library/sqlite3",
+    "quote": "none null int integer float real str text bytes blob"
+   },
+   {
+    "source": "devdocs_en_sqlite",
+    "location": "datatype3",
+    "quote": "stored as an 8-byte ieee floating point number"
+   }
+  ],
+  "reference": "A Python float is sent to SQLite as REAL, and a REAL value is stored as an 8-byte IEEE floating point number.",
+  "goodGuess": null,
+  "notes": "Chain: Python sqlite3 page maps float -> REAL (fact 1 is the small Python-type/SQLite-type mapping table on that page); SQLite datatypes page gives REAL's storage size."
+ },
+ {
+  "id": "h2-programming-007",
+  "group": "programming",
+  "domain": "technology",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "i run a command with sudo and redirect its output into a root-owned file with >, but bash still says permission denied. why doesnt sudo cover that",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "unix.stackexchange.com_en_all",
+    "location": "questions/148592/why-do-i-get-permission-denied-when-redirecting-the-output-of-sudo-echo-xyz-to",
+    "quote": "the output redirection is handled by your (non-root) shell"
+   }
+  ],
+  "reference": "Only the command itself runs as root; the > redirection is performed by your own non-root shell, so have a root command do the writing instead, e.g. echo xyz | sudo tee file.",
+  "goodGuess": null,
+  "notes": "Only answer on the page (score 17)."
+ },
+ {
+  "id": "h2-programming-008",
+  "group": "programming",
+  "domain": "technology",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "people keep insisting a framework is not the same thing as a library. if both are just code i reuse, what actually separates them",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "softwareengineering.stackexchange.com_en_all",
+    "location": "questions/54451/library-vs-framework-vs-api",
+    "quote": "a framework as the skeleton of the application"
+   }
+  ],
+  "reference": "A library is a collection of functions or objects for one purpose that you add to your application as a piece of it, while a framework is the skeleton of the application that you build within.",
+  "goodGuess": null,
+  "notes": "Top answer (score 35, gsto)."
+ },
+ {
+  "id": "h2-travel-001",
+  "group": "travel",
+  "domain": "maps",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "landing in mexico city, can i take the metro from the airport and which line is it",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Mexico_City",
+    "quote": "use line 5 (yellow) to connect to the mexico city international airport (terminal aérea)"
+   }
+  ],
+  "reference": "Yes: Line 5 (yellow) serves the airport at the Terminal Aérea station (not Boulevard Puerto Aéreo on Line 1, which is a kilometre away).",
+  "goodGuess": null,
+  "notes": "City page, North America, airport-to-town. The page warns that Line 1's 'aeropuerto' stop is not the airport."
+ },
+ {
+  "id": "h2-travel-002",
+  "group": "travel",
+  "domain": "maps",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "my phone charger says input 100-240v 50/60hz, do i need a voltage converter when i go abroad",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Electrical_systems",
+    "quote": "it will work anywhere in the world with the right plugs"
+   }
+  ],
+  "reference": "No converter needed: a device whose input reads 100-240 V, 50/60 Hz works anywhere in the world; you only need the right plug adapter.",
+  "goodGuess": null,
+  "notes": "Travel topic (electrical plugs)."
+ },
+ {
+  "id": "h2-travel-003",
+  "group": "travel",
+  "domain": "maps",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "should i leave something extra for the waiter when eating out in japan",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Japan",
+    "quote": "tipping is not a part of japanese culture"
+   }
+  ],
+  "reference": "No. Tipping is not part of Japanese culture; people are uncomfortable being tipped and may be confused or even offended.",
+  "goodGuess": null,
+  "notes": "Country page, Asia, tipping custom. The page notes exceptions (high-end ryokan, guides) but the general rule is no tipping."
+ },
+ {
+  "id": "h2-travel-004",
+  "group": "travel",
+  "domain": "maps",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how do you say thanks in swahili",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Swahili_phrasebook",
+    "quote": "please. tafadhali. thank you (very much). asante (sana)."
+   }
+  ],
+  "reference": "Asante (asante sana for thank you very much).",
+  "goodGuess": null,
+  "notes": "Phrasebook page, Africa."
+ },
+ {
+  "id": "h2-travel-005",
+  "group": "travel",
+  "domain": "maps",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "hiking in sweden or norway, am i allowed to camp overnight on land i dont own?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Hiking_in_the_Nordic_countries",
+    "quote": "the right to stay overnight in a tent"
+   }
+  ],
+  "reference": "Yes: the Nordic freedom to roam (allemansrätten etc.) gives everyone the right to use undeveloped land regardless of ownership, including staying overnight in a tent and picking berries and mushrooms.",
+  "goodGuess": null,
+  "notes": "Hiking travel topic, Europe. Page says details vary between countries (e.g. Iceland)."
+ },
+ {
+  "id": "h2-travel-006",
+  "group": "travel",
+  "domain": "maps",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "is there a time of year when you cant walk the inca trail",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Inca_Trail",
+    "quote": "the trail is closed in february to clean up the garbage left behind"
+   }
+  ],
+  "reference": "Yes, the trail is closed for the whole of February for clean-up (it is also the wet season, January to April).",
+  "goodGuess": null,
+  "notes": "Itinerary page, South America."
+ },
+ {
+  "id": "h2-travel-007",
+  "group": "travel",
+  "domain": "maps",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "im staying in asakusa in tokyo, whats the one sight i shouldnt miss there",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Tokyo/Asakusa",
+    "quote": "best known for its many temples, particularly sensō-ji"
+   }
+  ],
+  "reference": "Sensō-ji, the Buddhist temple Asakusa is best known for (Tokyo's largest).",
+  "goodGuess": null,
+  "notes": "District page, Asia, main sight. The text right after the quote calls it 'tokyo's largest buddhist temple' (quote stops before the apostrophe)."
+ },
+ {
+  "id": "h2-travel-008",
+  "group": "travel",
+  "domain": "maps",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "i dont need a visa for europe, how long can i stay in the schengen countries before i have to leave",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Travelling_around_the_Schengen_Area",
+    "quote": "short stays (those that are 90 days or less within a 180-day period"
+   }
+  ],
+  "reference": "Up to 90 days within any 180-day period, counted across the whole Schengen area; a longer stay needs a national long-stay visa.",
+  "goodGuess": null,
+  "notes": "Visa travel topic, Europe."
+ },
+ {
+  "id": "h2-multi-step-012",
+  "group": "multi-step",
+  "domain": "maps",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "heading to istanbul: what cash should i carry for the metro, and how much do people tip at restaurants there?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Istanbul",
+    "quote": "only cash in turkish lira is accepted at ticket kiosks of public transport"
+   },
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Turkey",
+    "quote": "it is very common to leave a 10% tip in restaurants"
+   }
+  ],
+  "reference": "Carry Turkish lira in cash (transit ticket kiosks take nothing else); tipping is not obligatory but leaving about 10% in restaurants, in cash, is very common.",
+  "goodGuess": null,
+  "notes": "Multi-step: currency fact from the city page (Istanbul), tipping custom from the country page (Turkey)."
+ },
+ {
+  "id": "h2-multi-step-013",
+  "group": "multi-step",
+  "domain": "maps",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "do japan and mainland china drive on the same side of the road?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Driving_in_Japan",
+    "quote": "driving is on the left as normally found in the united kingdom"
+   },
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Driving_in_China",
+    "quote": "in mainland china, traffic drives on the right-hand side of the road"
+   }
+  ],
+  "reference": "No: Japan drives on the left, mainland China on the right.",
+  "goodGuess": null,
+  "notes": "Multi-step comparison across two driving topic pages. Neither page mentions the other country, so both are needed."
+ },
+ {
+  "id": "h2-history-001",
+  "group": "history",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how did the big fire that burned down london in the 1600s get going",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Great_Fire_of_London",
+    "quote": "the fire started in a bakery in pudding lane shortly after midnight"
+   }
+  ],
+  "reference": "It began in a bakery on Pudding Lane shortly after midnight on Sunday 2 September 1666 and spread rapidly.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-history-002",
+  "group": "history",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who finally worked out how to read egyptian hieroglyphs and when",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Rosetta_Stone",
+    "quote": "jean-françois champollion announced the transliteration of the egyptian scripts in paris in 1822"
+   }
+  ],
+  "reference": "Jean-François Champollion, who announced his transliteration of the Egyptian scripts in Paris in 1822.",
+  "goodGuess": null,
+  "notes": "The Champollion or Egyptian hieroglyphs articles may also state this; the Rosetta Stone lead says it plainly."
+ },
+ {
+  "id": "h2-history-003",
+  "group": "history",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what was the point of east germany walling off west berlin",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Berlin_Wall",
+    "quote": "to prevent east german citizens from fleeing to the west"
+   }
+  ],
+  "reference": "Its main purpose was to stop East German citizens from fleeing to the West.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-multi-step-014",
+  "group": "multi-step",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "how old was the first man on the moon when he actually stepped onto it",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Neil_Armstrong",
+    "quote": "neil alden armstrong (august 5, 1930 – august 25, 2012) was an american astronaut"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "Apollo_11",
+    "quote": "apollo 11 (july 16–24, 1969) was the american spaceflight that first landed humans"
+   }
+  ],
+  "reference": "38: Neil Armstrong was born on 5 August 1930 and walked on the Moon during Apollo 11 in July 1969 (landing on 20 July), a couple of weeks before his 39th birthday.",
+  "goodGuess": null,
+  "notes": "Chain plus arithmetic: identify Armstrong as the first person to walk on the Moon (Neil_Armstrong lead), take his birth date there, and the mission dates from Apollo_11 (lead gives July 16–24, 1969; body gives the landing on July 20 at 20:17 UTC). Neither article states his age at the landing."
+ },
+ {
+  "id": "h2-science-001",
+  "group": "science",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what makes the northern lights happen",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Aurora",
+    "quote": "caused by charged particles from the sun colliding with atoms in the atmosphere"
+   }
+  ],
+  "reference": "Charged particles from the Sun collide with atoms in Earth's upper atmosphere, exciting oxygen and nitrogen, which then give off light of different colours.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-science-002",
+  "group": "science",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the reason flamingos are pink",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Flamingo",
+    "quote": "the pink or reddish colour of flamingos comes from carotenoids in their diet"
+   }
+  ],
+  "reference": "Their pink or reddish colour comes from carotenoid pigments in their diet of animal and plant plankton, which liver enzymes break down into pigments.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-geography-general-001",
+  "group": "geography-general",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why didnt sydney end up being australias capital",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Canberra",
+    "quote": "a compromise was reached: the new capital would be built in new south wales"
+   }
+  ],
+  "reference": "Sydney and Melbourne disputed which should be the capital, so a compromise was reached: a new capital (Canberra) would be built in New South Wales at least 100 miles from Sydney, with Melbourne as the temporary seat of government while it was built.",
+  "goodGuess": null,
+  "notes": "The Canberra lead also says it was 'a compromise between sydney and melbourne'."
+ },
+ {
+  "id": "h2-literature-007",
+  "group": "literature",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "did anyone ever find out what killed edgar allan poe",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Death_of_Edgar_Allan_Poe",
+    "quote": "has remained mysterious in regard to both the cause of death"
+   }
+  ],
+  "reference": "No. The cause of Poe's death on 7 October 1849 remains undetermined; he was found delirious at a Baltimore tavern on 3 October, was taken to hospital, and died there at 40 without explaining what had happened to him.",
+  "goodGuess": null,
+  "notes": "The main Edgar_Allan_Poe article likely covers this too."
+ },
+ {
+  "id": "h2-literature-008",
+  "group": "literature",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who wrote that story where a salesman wakes up and hes turned into a giant bug",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Franz_Kafka",
+    "quote": "the story begins with a travelling salesman waking to find himself transformed"
+   }
+  ],
+  "reference": "Franz Kafka; the story is The Metamorphosis (Die Verwandlung), written in 1912 and published in 1915.",
+  "goodGuess": null,
+  "notes": "This pack has no separate article for The Metamorphosis; the Kafka article describes it."
+ },
+ {
+  "id": "h2-multi-step-015",
+  "group": "multi-step",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "when 1984 was published how old was orwell",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "George_Orwell",
+    "quote": "eric arthur blair (25 june 1903 – 21 january 1950) was an english novelist"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "Nineteen_Eighty-Four",
+    "quote": "it was published on 8 june 1949 by secker & warburg"
+   }
+  ],
+  "reference": "45: Orwell (Eric Arthur Blair) was born on 25 June 1903 and Nineteen Eighty-Four was published on 8 June 1949, a little over two weeks before his 46th birthday.",
+  "goodGuess": null,
+  "notes": "Arithmetic across two articles: birth date from George_Orwell, publication date from Nineteen_Eighty-Four. Neither article states his age at publication (Orwell's article gives only 'aged 46' at death)."
+ },
+ {
+  "id": "h2-philosophy-001",
+  "group": "philosophy",
+  "domain": "thought",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "according to hume where does our feeling that one event has to produce another actually come from",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "internet-encyclopedia-philosophy_en_all",
+    "location": "iep.utm.edu/hume-causation/",
+    "quote": "the idea of necessity that supplements constant conjunction is a psychological projection"
+   }
+  ],
+  "reference": "From the mind, not from the events themselves: after repeatedly experiencing two kinds of event together, the mind projects a feeling of necessity onto them; the idea of necessary connection is a psychological projection added to the observed constant conjunction.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-philosophy-002",
+  "group": "philosophy",
+  "domain": "thought",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats kants simple test for spotting an immoral action",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "internet-encyclopedia-philosophy_en_all",
+    "location": "iep.utm.edu/kantview/",
+    "quote": "the mark of immorality, then, is that one makes an exception for oneself"
+   }
+  ],
+  "reference": "An action is permissible only if the maxim behind it could be willed as a universal law that everyone obeys without exception; the mark of an immoral action is that the agent makes an exception for themselves, acting in a way they would not want everyone else to.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-philosophy-003",
+  "group": "philosophy",
+  "domain": "thought",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "epictetus keeps saying most things arent in our control so what does he think actually is",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "internet-encyclopedia-philosophy_en_all",
+    "location": "iep.utm.edu/epictetu/",
+    "quote": "what qualities our characters come to have is completely up to us"
+   }
+  ],
+  "reference": "Our own character: what qualities our character comes to have is completely up to us, and therefore so is how well we flourish; externals like sickness, wealth and status are not in our power.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-philosophy-004",
+  "group": "philosophy",
+  "domain": "thought",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who first showed that a true belief backed by good evidence can still fail to be knowledge, and when",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "internet-encyclopedia-philosophy_en_all",
+    "location": "iep.utm.edu/gettier/",
+    "quote": "named in honor of the american philosopher edmund gettier, who discovered them in 1963"
+   }
+  ],
+  "reference": "The American philosopher Edmund Gettier, in 1963; his cases challenged the traditional definition of knowledge as justified true belief.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-multi-step-016",
+  "group": "multi-step",
+  "domain": "thought",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "who taught the philosopher who tutored alexander the great",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "internet-encyclopedia-philosophy_en_all",
+    "location": "iep.utm.edu/aristotle/",
+    "quote": "aristotle was employed by philip, serving as tutor to his son, alexander the great"
+   },
+   {
+    "source": "internet-encyclopedia-philosophy_en_all",
+    "location": "iep.utm.edu/plato/",
+    "quote": "he was the student of socrates and the teacher of aristotle"
+   }
+  ],
+  "reference": "Plato: Aristotle was the tutor of Alexander the Great, and Aristotle's teacher was Plato.",
+  "goodGuess": null,
+  "notes": "Chain: Alexander's tutor (Aristotle entry) -> Aristotle's teacher (Plato entry). The Aristotle entry also says he studied under Plato at the Academy for twenty years, so a single-entry answer is possible too."
+ },
+ {
+  "id": "h2-history-004",
+  "group": "history",
+  "domain": "thought",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what kicked off the really long war between england and france in the 1300s",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_history",
+    "location": "Hundred_Years'_War",
+    "quote": "was triggered by a claim to the french throne made by edward iii of england"
+   }
+  ],
+  "reference": "It grew out of feudal disputes over the duchy of Aquitaine and was triggered by Edward III of England claiming the French throne.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-history-005",
+  "group": "history",
+  "domain": "thought",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who got rid of the last emperor in the western half of the roman empire",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_history",
+    "location": "Odoacer",
+    "quote": "deposed the western roman child emperor romulus augustulus to become the ruler of italy"
+   }
+  ],
+  "reference": "Odoacer, a soldier of non-Roman heritage serving as an officer of the Roman army, deposed the child emperor Romulus Augustulus in 476 and became ruler of Italy; his takeover is traditionally taken as the end of the Western Roman Empire.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-history-006",
+  "group": "history",
+  "domain": "thought",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "was the big 1066 battle actually fought in hastings or somewhere else",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_history",
+    "location": "Battle_of_Hastings",
+    "quote": "approximately 7 mi (11 km) northwest of hastings, close to the present-day town of battle"
+   }
+  ],
+  "reference": "Not in Hastings itself: it was fought about 7 miles (11 km) northwest of Hastings, near the present-day town of Battle, East Sussex.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-history-007",
+  "group": "history",
+  "domain": "thought",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "which law made the colonists angry enough to dump all that tea into the harbor",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_history",
+    "location": "Boston_Tea_Party",
+    "quote": "the passage of the tea act by the parliament of great britain"
+   }
+  ],
+  "reference": "The Tea Act, passed by the British Parliament on 10 May 1773, which allowed the East India Company to sell tea in the colonies without paying taxes other than those imposed by the Townshend Acts.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "h2-multi-step-017",
+  "group": "multi-step",
+  "domain": "thought",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "how many years between king john sealing the barons charter at runnymede and the catholic plot to blow up parliament under james i",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_history",
+    "location": "Magna_Carta",
+    "quote": "sealed by king john of england at runnymede, near windsor, on 15 june 1215"
+   },
+   {
+    "source": "wikipedia_en_history",
+    "location": "Gunpowder_Plot",
+    "quote": "the state opening of parliament on tuesday 5 november 1605"
+   }
+  ],
+  "reference": "390 years: the charter was sealed at Runnymede on 15 June 1215 and the Gunpowder Plot was set for 5 November 1605.",
+  "goodGuess": null,
+  "notes": "Arithmetic across two articles: 1605 - 1215 = 390."
+ },
+ {
+  "id": "h2-medical-001",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "what illness gives you a fever, a splitting headache and a neck you cant bend all at once",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Meningitis",
+    "quote": "the most common symptoms are fever , intense headache , vomiting , neck stiffness"
+   }
+  ],
+  "reference": "Those are the most common symptoms of meningitis, inflammation of the membranes covering the brain and spinal cord.",
+  "goodGuess": null,
+  "notes": "Symptoms-first phrasing; the article lead lists exactly these as the most common symptoms."
+ },
+ {
+  "id": "h2-medical-002",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "will antibiotics help my cold go away faster",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Common_cold",
+    "quote": "antibiotics have no effect against viral infections, including the common cold"
+   }
+  ],
+  "reference": "No; a cold is a viral infection and antibiotics have no effect against viral infections, including the common cold.",
+  "goodGuess": null,
+  "notes": "'my' phrasing but the fact is general (antibiotics do not act on viral colds), so it is answerable without knowing anything about the asker."
+ },
+ {
+  "id": "h2-multi-step-018",
+  "group": "multi-step",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": true,
+  "multiStep": true,
+  "question": "strep throat versus an ordinary cold, which one is bacterial and which one is a virus",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Streptococcal_pharyngitis",
+    "quote": "caused by streptococcus pyogenes , a gram-positive , group a streptococcus"
+   },
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Common_cold",
+    "quote": "is a viral infectious disease of the upper respiratory tract"
+   }
+  ],
+  "reference": "Strep throat is bacterial (caused by Streptococcus pyogenes, a group A streptococcus); the common cold is a viral infection of the upper respiratory tract.",
+  "goodGuess": null,
+  "notes": "Multi-step: one fact from each of two articles, combined by comparison."
+ },
+ {
+  "id": "h2-multi-step-019",
+  "group": "multi-step",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": true,
+  "multiStep": true,
+  "question": "which organ makes insulin, and what does that same organ do for digesting food",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Insulin",
+    "quote": "is a peptide hormone produced by beta cells of the pancreatic islets"
+   },
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Pancreas",
+    "quote": "digestive enzymes which break down carbohydrates, proteins, and fats in food"
+   }
+  ],
+  "reference": "Insulin is made by the beta cells of the pancreatic islets, i.e. the pancreas; the pancreas also secretes pancreatic juice into the duodenum containing digestive enzymes that break down carbohydrates, proteins and fats.",
+  "goodGuess": null,
+  "notes": "Multi-step chain: hormone -> organ (Insulin article) -> that organ's exocrine job (Pancreas article)."
+ },
+ {
+  "id": "h2-medical-003",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "is that seal-bark cough little kids get at night from a virus or from bacteria",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Croup",
+    "quote": "is a type of respiratory infection that is usually caused by a virus"
+   }
+  ],
+  "reference": "It is usually caused by a virus (croup); bacterial cases are rare.",
+  "goodGuess": null,
+  "notes": "Children item. The question describes the cough rather than naming croup."
+ },
+ {
+  "id": "h2-medical-004",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "how long can someone go with no vitamin c at all before they actually get sick from it",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Scurvy",
+    "quote": "at least a month of little to no vitamin c in the diet"
+   }
+  ],
+  "reference": "It takes at least a month of little or no vitamin C in the diet before symptoms of scurvy appear.",
+  "goodGuess": null,
+  "notes": "Nutrition item; the answer is a plain statement in the Scurvy lead."
+ },
+ {
+  "id": "h2-medical-005",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "whats the pill most people with type 2 diabetes get put on first",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Metformin",
+    "quote": "is the main first-line medication for the treatment of type 2 diabetes"
+   }
+  ],
+  "reference": "Metformin (sold as Glucophage, among other names) is the main first-line medication for type 2 diabetes.",
+  "goodGuess": null,
+  "notes": "Drug item: what a drug is for. The lead sits after a long infobox, so search must reach the body."
+ },
+ {
+  "id": "h2-medical-006",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "why does eating a lot of sugar rot your teeth",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Tooth_decay",
+    "quote": "the acid is produced by the bacteria when they break down food debris or sugar"
+   }
+  ],
+  "reference": "Bacteria on the tooth surface break down sugar and food debris and produce acid, and that acid dissolves the hard tissues of the teeth.",
+  "goodGuess": null,
+  "notes": "Dental item."
+ },
+ {
+  "id": "h2-medical-007",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "can a panic attack actually hurt you physically or is it just terrifying",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Panic_attack",
+    "quote": "panic attacks themselves are not physically dangerous"
+   }
+  ],
+  "reference": "Panic attacks can be extremely distressing but are not physically dangerous.",
+  "goodGuess": null,
+  "notes": "Mental health item."
+ },
+ {
+  "id": "h2-medical-008",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "is it ok to put ice on a fresh burn",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Burn",
+    "quote": "and not ice water as the latter can cause further injury"
+   }
+  ],
+  "reference": "No; cooling should be done with cool water, not ice water, because ice water can cause further injury.",
+  "goodGuess": null,
+  "notes": "First aid item; fact is in the wound care section, not the lead."
+ },
+ {
+  "id": "h2-medical-009",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "someone next to me is choking and cant breathe, what do you do",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Choking",
+    "quote": "recommend the use of back blows (back slaps) to aid a choking victim"
+   }
+  ],
+  "reference": "Give back blows: bend the person forward and deliver firm slaps with the heel of the hand on the back between the shoulder blades.",
+  "goodGuess": null,
+  "notes": "First aid item; asks the general first-aid step the article describes."
+ },
+ {
+  "id": "h2-medical-010",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "the diabetes blood test that comes back as a percentage, how far back in time does it actually look",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Glycated_hemoglobin",
+    "quote": "measured primarily to determine the three-month average blood sugar level"
+   }
+  ],
+  "reference": "HbA1c reflects the average blood sugar over about three months, because a red blood cell lives three to four months.",
+  "goodGuess": null,
+  "notes": "What a test measures."
+ },
+ {
+  "id": "h2-medical-011",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "is it normal that my baby still has a soft spot on top of her head, when is it supposed to close",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Fontanelle",
+    "quote": "it persists until approximately 18 months after birth"
+   }
+  ],
+  "reference": "Yes; the soft spot on top (the anterior fontanelle) normally persists until about 18 months after birth.",
+  "goodGuess": null,
+  "notes": "'my' phrasing but the fact asked is general (when the anterior fontanelle closes), so it is answerable. Children/anatomy item."
+ },
+ {
+  "id": "h2-medical-012",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "why are women who are trying to get pregnant told to take folic acid",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Folate",
+    "quote": "to reduce the risk of neural tube defects (ntds) in the baby"
+   }
+  ],
+  "reference": "To reduce the risk of neural tube defects, such as anencephaly and spina bifida, in the baby.",
+  "goodGuess": null,
+  "notes": "Pregnancy item."
+ },
+ {
+  "id": "h2-medical-013",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "can you catch lockjaw from being around someone who has it",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Tetanus",
+    "quote": "the disease does not spread between people"
+   }
+  ],
+  "reference": "No; tetanus does not spread between people. The bacteria enter through a break in the skin such as a cut or puncture wound.",
+  "goodGuess": null,
+  "notes": "Transmission item; question uses the common name rather than the article title."
+ },
+ {
+  "id": "h2-medical-014",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "my watch says my pulse drops into the 40s while I sleep, is that normal",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Heart_rate",
+    "quote": "a heartbeat with rates around 40–50 bpm is common and considered normal"
+   }
+  ],
+  "reference": "Yes; during sleep a heart rate of around 40-50 bpm is common and considered normal.",
+  "goodGuess": null,
+  "notes": "'my' phrasing but the fact is general (sleeping heart rate range), so it is answerable. Normal-range item."
+ },
+ {
+  "id": "h2-medical-015",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "how many ibuprofen can I take at once for my back, I'm about 50 kg and on a couple of other meds",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say for you; ask your doctor or pharmacist.",
+  "notes": "Personal dosing: depends on the asker's weight, health and other medicines, which the library cannot know."
+ },
+ {
+  "id": "h2-medical-016",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "theres a mole on my back thats got darker and a bit raised over the summer, is it cancer",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say for you; a doctor needs to look at it.",
+  "notes": "Diagnosing the asker's own mole from a description; needs examination, not general facts."
+ },
+ {
+  "id": "h2-medical-017",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "itchy red patches on both elbows for about a week now, what have I got",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say for you; ask your doctor or pharmacist.",
+  "notes": "Diagnosing the asker's rash from a short description; no general fact answers it."
+ },
+ {
+  "id": "h2-medical-018",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "my blood pressure readings have been fine for months, can I just stop taking the tablets",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say for you; ask your doctor before changing your medicine.",
+  "notes": "Whether to stop a prescribed medicine depends on the asker's own case and prescriber."
+ },
+ {
+  "id": "h2-medical-019",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "cholesterol came back at 230 on my blood test, what does that mean for me",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say for you; ask your doctor to go over the result.",
+  "notes": "Interpreting the asker's own lab number depends on their history, other results and risk factors."
+ },
+ {
+  "id": "h2-medical-020",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "can I take ibuprofen alongside the blood thinner I'm on",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say for you; ask your doctor or pharmacist.",
+  "notes": "Interaction with the asker's own prescription; which thinner, dose and condition are unknown."
+ },
+ {
+  "id": "h2-medical-021",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "when will there finally be a cure for type 1 diabetes",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "No one can say when; the library has no answer to that.",
+  "notes": "Medical future; not a fact any article states."
+ },
+ {
+  "id": "h2-medical-022",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "is a cure for alzheimers coming in the next few years",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "No one can say; the library has no answer to that.",
+  "notes": "Medical future; a prediction, not a fact in the library."
+ },
+ {
+  "id": "h2-medical-023",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "does the walk-in clinic on main street take blue cross",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say; call the clinic or check with your insurer.",
+  "notes": "Local fact about a specific clinic and the asker's insurance; not in an encyclopedia pack."
+ },
+ {
+  "id": "h2-medical-024",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "which pharmacy near me is open right now",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say; the library has no local or live information.",
+  "notes": "Local, time-dependent fact; needs the asker's location and current opening hours."
+ },
+ {
+  "id": "h2-medical-025",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "whats the wait at the ER closest to me tonight",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say; the library has no local or live information.",
+  "notes": "Local, live fact; depends on the asker's location and the hospital right now."
+ },
+ {
+  "id": "h2-unanswerable-001",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what time does my sister's flight land tomorrow",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "personal"
+ },
+ {
+  "id": "h2-unanswerable-002",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "remind me what the combination to the shed padlock is",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's private and isn't in any library.",
+  "notes": "personal/private"
+ },
+ {
+  "id": "h2-unanswerable-003",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "Which of my cousins is the oldest?",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "personal"
+ },
+ {
+  "id": "h2-unanswerable-004",
+  "group": "unanswerable",
+  "domain": "food",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "is the chicken I left in the fridge on tuesday still ok to eat",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know about your fridge; general food-storage guidance is all a library can give.",
+  "notes": "personal situation; not a general food-safety fact"
+ },
+ {
+  "id": "h2-unanswerable-005",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what did i name my first dog",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "personal"
+ },
+ {
+  "id": "h2-unanswerable-006",
+  "group": "unanswerable",
+  "domain": "technology",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "why does my laptop keep rebooting after I ran the update last night",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know about your machine without its logs; nothing in a library covers it.",
+  "notes": "personal device; looks like an ordinary tech question"
+ },
+ {
+  "id": "h2-unanswerable-007",
+  "group": "unanswerable",
+  "domain": "making",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "where did I put the spare key to the garage",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "personal"
+ },
+ {
+  "id": "h2-unanswerable-008",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "how much is in my checking account right now",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's private and isn't in any library.",
+  "notes": "personal/private"
+ },
+ {
+  "id": "h2-unanswerable-009",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "who wins the 2027 super bowl",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: it hasn't happened yet.",
+  "notes": "future (February 2027)"
+ },
+ {
+  "id": "h2-unanswerable-010",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what will the weather be like in Denver on christmas day",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's a forecast for a day that hasn't come.",
+  "notes": "future"
+ },
+ {
+  "id": "h2-unanswerable-011",
+  "group": "unanswerable",
+  "domain": "science",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "who is going to win the nobel prize in physics in 2027",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: it hasn't been awarded yet.",
+  "notes": "future"
+ },
+ {
+  "id": "h2-unanswerable-012",
+  "group": "unanswerable",
+  "domain": "technology",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what new features are in the python release coming out next year",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: a release that hasn't happened isn't in any offline docs.",
+  "notes": "future; the python docs pack (2026-10-31) can't describe a 2027 release"
+ },
+ {
+  "id": "h2-unanswerable-013",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "When is the next total solar eclipse visible from my town?",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know without knowing where you are; eclipse paths are specific to a place.",
+  "notes": "depends on the asker's location (personal/local); also a future event"
+ },
+ {
+  "id": "h2-unanswerable-014",
+  "group": "unanswerable",
+  "domain": "maps",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "will the tokyo subway be running on new years day 2027",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: a future timetable isn't in an offline guide.",
+  "notes": "future"
+ },
+ {
+  "id": "h2-unanswerable-015",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what is the price of bitcoin right now",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: a live price isn't in any offline library.",
+  "notes": "live data; the packs' snapshots end 2026-11-02"
+ },
+ {
+  "id": "h2-unanswerable-016",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "who won the world series last week",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: the 2026 World Series ended after every pack's snapshot.",
+  "notes": "after-snapshot: the 2026 World Series ends around 1 November 2026; the newest pack snapshot is foss.cooking 2026-11-02 and the newest Wikipedia pack is 2026-10-15 (chemistry), so no pack holds the result"
+ },
+ {
+  "id": "h2-unanswerable-017",
+  "group": "unanswerable",
+  "domain": "thought",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what were the results of the november 2026 midterm elections",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: the 3 November 2026 election is after every pack's snapshot.",
+  "notes": "after-snapshot: 3 November 2026 is after the newest snapshot (2026-11-02) and after the writing date"
+ },
+ {
+  "id": "h2-unanswerable-018",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what happened in the news today",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: today's news isn't in an offline library.",
+  "notes": "after-snapshot: today is always after the snapshots"
+ },
+ {
+  "id": "h2-unanswerable-019",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "Who won the Oscar for best picture in 2027?",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: the 2027 ceremony hasn't happened.",
+  "notes": "after-snapshot / future: March 2027"
+ },
+ {
+  "id": "h2-unanswerable-020",
+  "group": "unanswerable",
+  "domain": "technology",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what did the git maintainers announce at the december 2026 contributor summit",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: December 2026 is after the git docs snapshot (2026-10-02).",
+  "notes": "after-snapshot: December 2026 is after every snapshot"
+ },
+ {
+  "id": "h2-unanswerable-021",
+  "group": "unanswerable",
+  "domain": "maps",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "is the eiffel tower open today or is it closed for the strike",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: today's opening status isn't in an offline guide.",
+  "notes": "after-snapshot/live"
+ },
+ {
+  "id": "h2-unanswerable-022",
+  "group": "unanswerable",
+  "domain": "science",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "how strong was the earthquake that hit this morning",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: this morning is after every pack's snapshot.",
+  "notes": "after-snapshot; surface looks like an ordinary science question"
+ },
+ {
+  "id": "h2-unanswerable-023",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the score in the game tonight",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: a live score isn't in any offline library.",
+  "notes": "after-snapshot/live"
+ },
+ {
+  "id": "h2-unanswerable-024",
+  "group": "unanswerable",
+  "domain": "maps",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what time does the hardware store on elm street close on sundays",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: a local shop's hours aren't in any library.",
+  "notes": "local"
+ },
+ {
+  "id": "h2-unanswerable-025",
+  "group": "unanswerable",
+  "domain": "maps",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "which bus goes from my house to the hospital",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know where you live; local bus routes aren't in an offline guide.",
+  "notes": "local/personal"
+ },
+ {
+  "id": "h2-unanswerable-026",
+  "group": "unanswerable",
+  "domain": "thought",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "who is my representative in the state legislature",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know without your address; that's local and changes with elections.",
+  "notes": "local"
+ },
+ {
+  "id": "h2-unanswerable-027",
+  "group": "unanswerable",
+  "domain": "food",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "does the pizza place on the corner deliver after 10pm",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: a local restaurant's hours aren't in any library.",
+  "notes": "local"
+ },
+ {
+  "id": "h2-unanswerable-028",
+  "group": "unanswerable",
+  "domain": "maps",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "Is there still parking at the trailhead near Pine Ridge Road on weekends?",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's a local, current condition.",
+  "notes": "local/current"
+ },
+ {
+  "id": "h2-unanswerable-029",
+  "group": "unanswerable",
+  "domain": "making",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "who's the cheapest plumber in my area",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: local businesses and prices aren't in any library.",
+  "notes": "local"
+ },
+ {
+  "id": "h2-unanswerable-030",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what's the wifi password at the public library downtown",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's local and private.",
+  "notes": "local/private"
+ },
+ {
+  "id": "h2-unanswerable-031",
+  "group": "unanswerable",
+  "domain": "maps",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "when is garbage pickup on my street this week",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's a local schedule.",
+  "notes": "local"
+ },
+ {
+  "id": "h2-unanswerable-032",
+  "group": "unanswerable",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what was jane austen's favourite breakfast",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "No record of it; an honest guess would say so rather than invent one.",
+  "notes": "no-record fact about a covered author"
+ },
+ {
+  "id": "h2-unanswerable-033",
+  "group": "unanswerable",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "how many words a day did dostoevsky write while working on crime and punishment",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "No record of a daily word count; say so.",
+  "notes": "no-record fact about a covered book"
+ },
+ {
+  "id": "h2-unanswerable-034",
+  "group": "unanswerable",
+  "domain": "classics",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what was mark twains favorite dessert",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "No record of it; an honest guess would say so rather than invent one.",
+  "notes": "no-record fact about a covered author"
+ },
+ {
+  "id": "h2-unanswerable-035",
+  "group": "unanswerable",
+  "domain": "thought",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what did socrates eat on the morning of his trial",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "No record of it; say so.",
+  "notes": "no-record fact about a covered topic (Apology, IEP)"
+ },
+ {
+  "id": "h2-unanswerable-036",
+  "group": "unanswerable",
+  "domain": "science",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what was marie curie's shoe size",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "No record of it; say so.",
+  "notes": "no-record fact about a covered person"
+ },
+ {
+  "id": "h2-unanswerable-037",
+  "group": "unanswerable",
+  "domain": "making",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "who tied the first bowline",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Nobody knows; the knot is ancient and its inventor is unrecorded.",
+  "notes": "no-record fact about a covered topic; the knots article gives history but no inventor"
+ },
+ {
+  "id": "h2-unanswerable-038",
+  "group": "unanswerable",
+  "domain": "maps",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "how many tourists visited lisbon last month",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: last month is after the guide's snapshot and the figure isn't published offline.",
+  "notes": "after-snapshot statistic; looks like an ordinary travel question"
+ },
+ {
+  "id": "h2-unanswerable-039",
+  "group": "unanswerable",
+  "domain": "food",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what was the exact recipe for the bread served at the last supper",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "No record of it; the gospels say only that bread was broken.",
+  "notes": "no-record fact about a covered topic (the Bible, cooking)"
+ },
+ {
+  "id": "h2-unanswerable-040",
+  "group": "unanswerable",
+  "domain": "technology",
+  "split": "heldout2",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "how many lines of code are in my company's main repository",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's private to your company.",
+  "notes": "private; looks like an ordinary programming question"
+ }
+]

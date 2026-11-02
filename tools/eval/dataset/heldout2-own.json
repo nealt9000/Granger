@@ -1,0 +1,170 @@
+[
+ {
+  "id": "h2-own-book-001",
+  "group": "own-book",
+  "domain": "own-book",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what does dorothy have to do with the silver shoes to get home",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:import:pg55",
+    "location": "55-h-24.htm",
+    "quote": "knock the heels together three times and command the shoes"
+   }
+  ],
+  "reference": "Knock the heels together three times and command the shoes to carry her where she wishes; they take her anywhere in three steps.",
+  "goodGuess": null,
+  "notes": "own book: The Wonderful Wizard of Oz (Gutenberg 55)"
+ },
+ {
+  "id": "h2-own-book-002",
+  "group": "own-book",
+  "domain": "own-book",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what did the wizard actually stuff into the scarecrows head when he asked for brains",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:import:pg55",
+    "location": "55-h-17.htm",
+    "quote": "a measure of bran, which he mixed with a great many pins and needles"
+   }
+  ],
+  "reference": "Bran mixed with a great many pins and needles, topped up with straw.",
+  "goodGuess": null,
+  "notes": "own book: The Wonderful Wizard of Oz (Gutenberg 55)"
+ },
+ {
+  "id": "h2-own-book-003",
+  "group": "own-book",
+  "domain": "own-book",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how does the wicked witch of the west die",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:import:pg55",
+    "location": "55-h-13.htm",
+    "quote": "picked up the bucket of water that stood near and dashed it over the witch"
+   }
+  ],
+  "reference": "Dorothy, angry that the witch stole her shoe, throws a bucket of water over her and she melts away to nothing.",
+  "goodGuess": null,
+  "notes": "own book: The Wonderful Wizard of Oz (Gutenberg 55)"
+ },
+ {
+  "id": "h2-own-book-004",
+  "group": "own-book",
+  "domain": "own-book",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who first started teaching frederick douglass his letters",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:import:pg23",
+    "location": "23-h-9.htm",
+    "quote": "she very kindly commenced to teach me the a, b, c"
+   }
+  ],
+  "reference": "His mistress Mrs. Auld in Baltimore, who taught him the ABC and short words until her husband forbade it.",
+  "goodGuess": null,
+  "notes": "own book: Narrative of the Life of Frederick Douglass (Gutenberg 23)"
+ },
+ {
+  "id": "h2-own-book-005",
+  "group": "own-book",
+  "domain": "own-book",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why did mr auld say a slave must not be taught to read",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:import:pg23",
+    "location": "23-h-9.htm",
+    "quote": "it would forever unfit him to be a slave"
+   }
+  ],
+  "reference": "Because it would make him unmanageable, discontented and of no value to his master; it would forever unfit him to be a slave.",
+  "goodGuess": null,
+  "notes": "own book: Narrative of the Life of Frederick Douglass (Gutenberg 23)"
+ },
+ {
+  "id": "h2-own-book-006",
+  "group": "own-book",
+  "domain": "own-book",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what changed after douglass fought back against covey",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:import:pg23",
+    "location": "23-h-13.htm",
+    "quote": "he never laid the weight of his finger upon me in anger"
+   }
+  ],
+  "reference": "Covey never touched him in anger again for the remaining six months; Douglass calls the fight the turning-point in his life as a slave.",
+  "goodGuess": null,
+  "notes": "own book: Narrative of the Life of Frederick Douglass (Gutenberg 23)"
+ },
+ {
+  "id": "h2-own-book-007",
+  "group": "own-book",
+  "domain": "own-book",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what shape are the women in flatland",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:import:pg201",
+    "location": "201-h-0.htm",
+    "quote": "our women are straight lines"
+   }
+  ],
+  "reference": "Straight lines.",
+  "goodGuess": null,
+  "notes": "own book: Flatland (Gutenberg 201)"
+ },
+ {
+  "id": "h2-own-book-008",
+  "group": "own-book",
+  "domain": "own-book",
+  "split": "heldout2",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "in flatland which shape is the priestly class",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:import:pg201",
+    "location": "201-h-1.htm",
+    "quote": "assert their claim to be really and truly circles"
+   }
+  ],
+  "reference": "Circles (in truth very many-sided polygons that claim to be circles).",
+  "goodGuess": null,
+  "notes": "own book: Flatland (Gutenberg 201)"
+ }
+]
