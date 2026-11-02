@@ -38,6 +38,15 @@ class KeywordsTest {
         assertThat(Medical.looksMedical("How does a steam engine work?")).isFalse()
     }
 
+    @Test fun oneBodyIsPersonal() {
+        assertThat(PersonalMedical.matches("why does my left knee click when i go up stairs", medicalSignal = true)).isTrue()
+        assertThat(PersonalMedical.matches("my back hurts when I bend over", medicalSignal = true)).isTrue()
+        // Needs the medical signal, and a general question about knees stays answerable.
+        assertThat(PersonalMedical.matches("why does my left knee click", medicalSignal = false)).isFalse()
+        assertThat(PersonalMedical.matches("why do knees click", medicalSignal = true)).isFalse()
+        assertThat(PersonalMedical.matches("will antibiotics help my cold", medicalSignal = true)).isFalse()
+    }
+
     @Test fun titlesAndSensesWithAMedicalWordArentMedical() {
         assertThat(Medical.looksMedical("Who wrote Doctor Zhivago?")).isFalse()
         assertThat(Medical.looksMedical("How does a computer virus spread?")).isFalse()

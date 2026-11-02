@@ -82,10 +82,16 @@ object Citations {
      */
     private fun declinesInProse(answer: String, spanish: Boolean): Boolean {
         val sentence = firstSentence(answer, spanish)
-        val lacks = lacksAnswer.containsMatchIn(sentence) || (spanish && lacksAnswerEs.containsMatchIn(sentence)) ||
-            (lacksAnswerUncited.containsMatchIn(sentence) && !group.containsMatchIn(sentence))
-        val goesOn = goesOnToAnswer.containsMatchIn(sentence) || (spanish && goesOnToAnswerEs.containsMatchIn(sentence))
-        return lacks && !goesOn
+        val lack = listOfNotNull(
+            lacksAnswer.find(sentence),
+            if (spanish) lacksAnswerEs.find(sentence) else null,
+            lacksAnswerUncited.find(sentence)?.takeIf { !group.containsMatchIn(sentence) },
+        ).minOfOrNull { it.range.first } ?: return false
+        val goesOn = listOfNotNull(goesOnToAnswer.find(sentence), if (spanish) goesOnToAnswerEs.find(sentence) else null)
+            .minOfOrNull { it.range.first } ?: return true
+        // "Not in the passages, but here's what they say" answers; "There is a park, but the passages don't say
+        // whether it has parking" (R5 unanswerable-059) still declines: the lack comes after the turn.
+        return lack > goesOn
     }
 
     /** [languages] are the question's ([ResearchLanguage.of]); English alone by default. */

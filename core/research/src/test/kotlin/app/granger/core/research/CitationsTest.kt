@@ -152,4 +152,12 @@ class CitationsTest {
         assertThat(Citations.check("His birthplace was not found. [1]", 1)).isEqualTo(CitationCheck.ModelDeclined)
         assertThat(Citations.check("His birthplace is not mentioned [1].", 1)).isEqualTo(CitationCheck.ModelDeclined)
     }
+
+    @Test fun aLackAfterTheTurnStillDeclines() {
+        // R5 unanswerable-059: the hedge comes first and the lack after "but".
+        assertThat(Citations.check("There is a park on Elm Street [1], but the provided passages do not specify whether it has parking.", 1))
+            .isEqualTo(CitationCheck.ModelDeclined)
+        // The other way round answers, as before.
+        assertThat(Citations.check("The passages do not give the exact day, but he died in 1616 [2].", 2)).isEqualTo(CitationCheck.Valid(setOf(2)))
+    }
 }

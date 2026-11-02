@@ -68,20 +68,28 @@ these same questions, which is why only the held-out set can say what they're wo
 
 ## Task 2: the decline check
 
-A deterministic check after the answer, before it's shown: an answer that cites only passages that can't be about the
-question becomes "Not in your library". In `:core:research`, pure, run in `ResearchPipeline` after `Citations.check`.
+Deterministic declines, in `DeclineCheck` (`:core:research`), wired into `ResearchPipeline`.
 
-- [ ] Rules, each its own function with tests, each measured alone on the recorded tuning replies:
-  - **Question cues**: personal ("my", "our", "near me", "here"), local, live or future ("this season", "tonight",
-    "right now", "when will", "next year") that no library can answer. A medical question `PersonalMedical` already
-    routes is left to it, so "will antibiotics help my cold" still answers.
-  - **Year mismatch**: the question names a year, and no cited passage's title or heading has it while some has another.
-  - **Place mismatch**: the question names a place no cited passage names (prototype catches 2; check it costs nothing).
-  - **"but … the passages do not"**: a first sentence that hedges and then declines (`Citations.goesOnToAnswer` lets
-    it through today).
-- [ ] `PersonalMedical` misses "my left knee" style questions: widen it with tests.
-- [ ] Mac replay over `r5-t7-all`: declines gained, grounded lost (gate: no grounded lost that a rule could avoid).
-- [ ] Spoken and on-screen copy: a check-declined turn reads as an ordinary decline, and Best guess stays offered.
+- [x] **Before search** (`DeclineCheck.unknowable`, English only): somewhere near the asker ("near me", "down the street",
+  "my street / town", opening hours), the asker's own records ("my" within two words of password, birthday, package,
+  flight, representative, insurance and the like), or live ("right now", "tonight", "last night", "this season / weekend",
+  "next week"). It declines at once, with no search or model run. Kept narrow on purpose, and each exclusion is tested:
+  "my" alone ("fix my bike chain", "my car's oil", "my IP address", "my wifi"), "nearby" (stars), street names (Baker
+  Street, Abbey Road, *On the Road*) and "when will" (Halley's comet).
+- [x] **After the answer** (`DeclineCheck.offTopic`): the question names a year that none of the cited passages has, so the
+  answer is another year's event. Questions that work with dates (`Entities.asked`) are left out.
+- [x] **"…, but the passages do not specify"**: a lack that comes after the turn now declines (`Citations`).
+- [x] `PersonalMedical` covers one person's body ("why does my left knee click", "my back hurts"), with the medical signal.
+- [x] Tuning split (`DeclineCheckTest.tuningSplit`): `unknowable` catches 31 of 76 unanswerables and 0 of 126 answerables;
+  the floor is pinned.
+- [x] Replay over `r5-t7-all`'s recorded replies: **8 more unanswerables declined** (001, 026, 035, 041, 054, 057, 058,
+  059), **0 answerables changed**. Declined 63 → 71/76 (93%) on the tuning split. medical-027 should follow through
+  `PersonalMedical`, but it depends on the rewrite's flag, so only a phone run shows it. The rules were written from
+  these questions, so the held-out set decides what they're worth.
+- [ ] Phone check: a check-declined turn reads as an ordinary decline, Best guess is offered, and the guess says it
+  can't be known.
+- [ ] Not caught, left to the model or later rules: 025 (the 2026 World Series answered from a passage that has "2026"),
+  medical-029 ("when will there be a cure"), follow-up-011, 045.
 
 ## Task 3: the dates block says its conclusion
 

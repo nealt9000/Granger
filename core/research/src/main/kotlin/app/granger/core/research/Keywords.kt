@@ -170,6 +170,8 @@ object Medical {
  */
 object PersonalMedical {
     private val NUMBER = "(\\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)"
+    private val BODY = "knee|knees|back|neck|shoulder|hip|ankle|wrist|elbow|foot|feet|toe|finger|hand|jaw|tooth|teeth|gum|" +
+        "eye|ear|throat|chest|stomach|belly|head|skin|leg|arm|joint|joints"
     private val RELATIVE = "newborn|infant|baby|toddler|child|kid|son|daughter|husband|wife|partner|mom|mum|mother|dad|father|grandma|grandpa|grandmother|grandfather"
     private val STRONG = listOf(
         "\\bis it (safe|ok|okay)\\b[^.?!;]*\\bwith (my|the) (meds|medication|medicine|pills)\\b",
@@ -182,6 +184,9 @@ object PersonalMedical {
         "\\bmy doctor (said|told|meant|mean|says)\\b",
     ).map { Regex(it, RegexOption.IGNORE_CASE) }
     private val GENERIC = listOf(
+        // One person's body (R2 Task 2: "why does my left knee click when i go up stairs").
+        "\\b(why|what) (does|do|is|are|makes?) my (\\w+ )?($BODY)\\b",
+        "\\bmy (\\w+ )?($BODY) (hurts?|aches?|clicks?|pops?|cracks?|itch(es)?|burns?|throbs?|is (swollen|sore|numb|red))\\b",
         "\\b(should|can|could|may) i (take|stop|double|skip|increase|lower|mix|combine|have)\\b",
         "\\bhow much \\w+( \\w+)? should i (take|give)\\b",
         "\\bmy (\\w+ ){0,2}(test|results?|scan|levels?|numbers|readings?|blood ?work|labs?|x-?ray|mri|biopsy)\\b",

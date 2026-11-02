@@ -208,6 +208,11 @@ class ResearchPipeline(
         emit(ResearchEvent.Reaction(topic))
         // The question's languages, worked out once: they pick every word list below (languages spec §6.2).
         val languages = ResearchLanguage.of(request.question)
+        if (request.quote == null && DeclineCheck.unknowable(request.question, languages)) {
+            // Near the asker, their own records, or live (Plan R2 Task 2): no library holds it, so no search or model.
+            emit(ResearchEvent.Done(Outcome.Declined(medical = false, emptyList())))
+            return
+        }
         // The search by meaning, before the model loads. A follow-up that leans on the question before it is searched
         // with that question first (Plan R1 Task 3); otherwise the reaction's vector is reused.
         val byMeaning = dense?.let { finder ->
@@ -298,6 +303,10 @@ class ResearchPipeline(
         }
 
         val outcome = when (val check = Citations.check(reply, passages.size, languages)) {
+            // An answer whose cited passages can't be about the question (another year's event) is a decline (R2 Task 2).
+            is CitationCheck.Valid if quote == null &&
+                DeclineCheck.offTopic(request.question, check.cited.map { passages[it - 1] }, languages) ->
+                Outcome.Declined(medical, keywords, passages, reply)
             is CitationCheck.Valid if quoted -> {
                 val text = MedicalQuotes.build(reply, passages, check.cited, languages)
                 if (text.isBlank()) {
