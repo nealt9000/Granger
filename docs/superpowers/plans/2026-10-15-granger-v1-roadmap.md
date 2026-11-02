@@ -91,16 +91,17 @@ Neal's calls from the review: **feature freeze** until the closed test is runnin
 **A. Start the closed test (starts the 14-day clock)**
 - [x] F1 part 2: 853 from Play opens Gmail straight from Write email; policy check (`cl-cleanup`); tester note in English (`docs/friend-testing/round-1-tester-note.md`, shared as a doc); fresh install on the Pixel 7; merged 2026-11-02.
 - [ ] The tester note and Play's "What's new" in Spanish.
-- [ ] **Fresh-install findings (Pixel 7, 853; Neal: fix all before friends):**
-  - [ ] **The default start is too big.** Efficient start (18 GB) and Ask (2.2 GB) are both ticked, so tapping Next gets about 20 GB. Neal: 20 GB is a middle tier, not an efficient start. Settle the default (a smaller first set, or nothing ticked) in the tier calibration session below.
-  - [ ] Regions: the US is offered only whole (17 GB), with no states; Puerto Rico only inside "Central America" (1.7 GB). Offer states (Geofabrik has them) and small territories on their own.
-  - [ ] Onboarding, Travel: "your region's map comes from the picker above" points at the previous screen.
-  - [ ] Downloads run one at a time, so a 699 KB book waits behind a 2 GB model. Let small items through first, or run a small item beside a big one.
-  - [ ] "A Library of Knots" (zimgit) matches titles only, so "bowline" finds nothing; the tester note sends people to search. Say when a pack is title-only, or point knots at "Knots (Wikipedia)".
-  - [ ] Listen from the start of a Classics book reads the front matter, in Pride and Prejudice a list of 61 chapter numerals. Start at the first chapter, or skip the contents list.
-  - [ ] Send feedback's count says "12 books" for Pride and Prejudice plus the knots pack's books; count packs' books with the packs.
+- [x] **Fresh-install findings (Pixel 7, 853; Neal: fix all before friends):** fixed on `pf-prefriends` 2026-11-02, a phone check left (below).
+  - [x] **The default start is too big.** Efficient start (18 GB) and Ask (2.2 GB) are both ticked, so tapping Next gets about 20 GB. Neal: 20 GB is a middle tier, not an efficient start. Neal picked Starter: Pick a start offers Starter (Top Wikipedia, WikiMed, Classics: 9.3 GB, 11.5 with Ask) first and chosen; Spanish, with no Starter of its own, starts at its Efficient start (9.8 GB). The Efficient/Comprehensive calibration below still stands.
+  - [x] Regions: the US is offered only whole (17 GB), with no states; Puerto Rico only inside "Central America" (1.7 GB). Kiwix has no state or territory map packs (checked download.kiwix.org); building our own from Geofabrik is a new pipeline, so Neal moved it **after launch**. A search for Puerto Rico already offers "Puerto Rico · in Central America · 1.7 GB".
+  - [x] Onboarding, Travel: "your region's map comes from the picker above" points at the previous screen. Now "…your region's map is chosen under Your region" (and the Spanish copy); catalog re-signed.
+  - [x] Downloads run one at a time, so a 699 KB book waits behind a 2 GB model. A file of 50 MB or less now goes first, and a big file under way steps back for it (part file kept, resumes after).
+  - [x] "A Library of Knots" (zimgit) matches titles only, so "bowline" finds nothing; the tester note sends people to search. Search now names the installed packs with no text search under its results.
+  - [x] Listen from the start of a Classics book reads the front matter, in Pride and Prejudice a list of 61 chapter numerals. Listen now starts past the cover and entries titled Front matter, Contents or List of Illustrations (the Preface, in Pride and Prejudice).
+  - [x] Send feedback's count says "12 books" for Pride and Prejudice plus the knots pack's books; a pack's books now count with the pack.
   - [x] A fresh start reported crashes from before it (the system keeps exits across a cleared storage). F1 762aad09.
   - [x] A queued Wi-Fi-only download said "Waiting for Wi-Fi" while on Wi-Fi. F1 762aad09.
+  - [ ] Phone check of the fixes above on the next internal build: a fresh install's Pick a start, a book got while a model downloads, Search for "bowline" with the knots pack, Listen on Pride and Prejudice from its cover.
 - [ ] Ask (for the Ask session), from the same run with Pride and Prejudice and its vectors installed: "Who does Elizabeth Bennet marry?" declined as not in the library, and the best guess said Mr. Bingley; "Who is Mr. Darcy?" cited the book but gave Darcy lines that describe Bingley in the same passage.
 - [ ] Ask: a **Report this answer** action on every reply (Play's AI-generated content policy), sending through Send feedback with the question, the answer and its sources.
 - [ ] Ask: in release, a **medical** question shows the banner and the quoted passages, without generated prose.
@@ -132,7 +133,7 @@ Neal's calls from the review: **feature freeze** until the closed test is runnin
 **Decisions from the clean-up list (Neal, 2026-11-02):**
 - **Ask** (handed to the Ask session, `docs/ask/handoff-from-cleanup-2026-11-02.md`): keep the model loaded while Ask is open and unload it 5 minutes after no Ask screen is open; "What do I have on X?" is a fast follow after launch (a basic Ask function); Report this answer, medical answers as quoted passages and the model self-check are that session's.
 - **Full screen reflow:** settled. The web reader has no full screen; the e-book reader's text is a little asymmetric in full screen, the best answer so far.
-- **After launch:** video packs (TED, Khan Academy), cover-art lookup, the swipeable domain strip on Home.
+- **After launch:** video packs (TED, Khan Academy), cover-art lookup, the swipeable domain strip on Home, map packs for US states and small territories (built from Geofabrik; Kiwix has none).
 - **Closed:** the Physics pack replacement (Wikipedia's Physics subject covers it); Search grouped by kind (U1 D6).
 - **Starter / Efficient / Comprehensive** stay in onboarding only, but need **calibrating across the tiers** again (a session with Neal; the GC and WF catalog changes moved the sizes).
 - **Telemetry** leaves Plan 10: no telemetry at all; Send feedback covers it.
