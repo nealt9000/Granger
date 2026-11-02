@@ -74,6 +74,7 @@ import app.granger.R
 import app.granger.core.ai.ResearchReadiness
 import app.granger.core.library.ChatSummary
 import app.granger.core.library.TurnOutcome
+import app.granger.core.research.OwlLines
 import app.granger.core.research.Passage
 import app.granger.core.research.SourceKind
 import app.granger.core.research.Stage
@@ -92,7 +93,6 @@ private const val PERSONAL_MEDICAL = "I can't answer questions about your own he
 private const val UNVERIFIED = "Couldn't answer from these passages."
 private const val MEDICAL = AnswerText.MEDICAL
 
-private const val BEST_GUESS_LABEL = "I couldn't find this in your library. Here's my best guess, so take it with a grain of salt."
 private const val MODELS_MISSING = "Ask needs the librarian on this phone. Get it in Settings → Models."
 private const val INTRO = "Ask a question; the librarian answers from your library and shows where each part came from. " +
     "It's a preview: it can be wrong, so check the sources."
@@ -434,7 +434,13 @@ private fun AnswerBlock(
             }
             TurnOutcome.UNVERIFIED -> Text(UNVERIFIED, style = MaterialTheme.typography.bodyLarge)
             TurnOutcome.DECLINED -> {
-                Text(if (ui.personalMedical) PERSONAL_MEDICAL else DECLINED, style = MaterialTheme.typography.bodyLarge)
+                // The owl's wry decline, steady per turn; a health question keeps the plain words.
+                val declined = when {
+                    ui.personalMedical -> PERSONAL_MEDICAL
+                    ui.medical -> DECLINED
+                    else -> OwlLines.decline(turn.id)
+                }
+                Text(declined, style = MaterialTheme.typography.bodyLarge)
                 if (ui.guessing && ui.guessShown) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
@@ -450,7 +456,7 @@ private fun AnswerBlock(
                     ui.guessing -> ui.partial.orEmpty()
                     else -> turn.guess
                 }
-                if (guessText.isNotBlank()) GuessCard(guessText)
+                if (guessText.isNotBlank()) GuessCard(OwlLines.guessLabel(turn.id), guessText)
                 if (guessText.isNotBlank() && !ui.guessing) ReadAloudRow(ui.voice, onRead, onPauseResume, onStopReading)
                 if (!(ui.guessing && ui.guessShown)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -495,7 +501,7 @@ private fun ReadAloudRow(voice: VoiceButton, onRead: () -> Unit, onPauseResume: 
 
 /** The model's own guess, outlined and set apart from cited answers; it has no sources, so no chips or cards. */
 @Composable
-private fun GuessCard(text: String) {
+private fun GuessCard(label: String, text: String) {
     val shape = RoundedCornerShape(8.dp)
     Column(
         Modifier
@@ -506,7 +512,7 @@ private fun GuessCard(text: String) {
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Text(
-            BEST_GUESS_LABEL,
+            label,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
         )
