@@ -23,11 +23,15 @@ class PublishedCatalogTest {
         assertThat(catalog.packs.size).isEqualTo((raw["packs"] as kotlinx.serialization.json.JsonArray).size)
         assertThat(catalog.models.size).isEqualTo((raw["models"] as kotlinx.serialization.json.JsonArray).size)
         assertThat(catalog.books.size).isEqualTo((raw["books"] as kotlinx.serialization.json.JsonArray).size)
-        assertThat(catalog.books).hasSize(372)
+        // Granger Classics (GC, 2026-10-30) and Clásicos Granger (Plan L3).
+        assertThat(catalog.books.count { it.language == "en" }).isEqualTo(372)
+        assertThat(catalog.books.count { it.language == "es" }).isEqualTo(185)
+        assertThat(catalog.books).hasSize(557)
         assertThat(catalog.packs.map { it.id }).doesNotContain("granger_classics_en")
         // Starter: the 4 non-Classics items plus the 372 books (GC, 2026-10-30).
         assertThat(catalog.presets.single { it.id == "starter" }.items).hasSize(376)
         assertThat(catalog.presets.single { it.id == "granger-classics" }.items).hasSize(372)
+        assertThat(catalog.presets.single { it.id == "clasicos-granger" }.items).hasSize(185)
     }
 
     /** Plan H1: the readiness model rides in the catalog, and every pack and book names its domain or is storage-only. */
@@ -88,7 +92,9 @@ class PublishedCatalogTest {
         val key = Base64.getDecoder().decode(repoFile("catalog/public-key.txt").readText().trim())
         val catalog = (CatalogParser.parse(bytes, repoFile("catalog/catalog.json.sig").readBytes(), key) as ParseResult.Ok).catalog
 
-        val books = catalog.packs.filter { it.isBookPack }
+        // English (and multilingual) packs; the Spanish ones are checked below (Plan L3).
+        val english = catalog.packs.filterNot { it.language == "es" }
+        val books = english.filter { it.isBookPack }
         assertThat(books).hasSize(50)
         assertThat(books.count { it.family == "gutenberg" }).isEqualTo(41)
         assertThat(catalog.packs.filter { it.family == "gutenberg" }.all { it.isBookPack }).isTrue()
@@ -98,8 +104,10 @@ class PublishedCatalogTest {
             "prunelle_en_interactive-books",
         )
         assertThat(catalog.packs.filter { it.flavour.isNotEmpty() }.all { it.id == "${it.zimName}_${it.flavour}" }).isTrue()
-        assertThat(catalog.packs.groupingBy { it.flavour }.eachCount())
+        assertThat(english.groupingBy { it.flavour }.eachCount())
             .containsExactly("", 771, "maxi", 92, "nopic", 50, "mini", 10)
+        // Spanish: Project Gutenberg's Spanish pack is a book pack too (the walkthrough, 2026-11-02).
+        assertThat(catalog.packs.filter { it.language == "es" && it.isBookPack }.map { it.zimName }).contains("gutenberg_es_all")
     }
 
     /** Plan WF: Wikipedia and Wikivoyage as sets, the subjects with what they add, the sample marked. */
@@ -120,9 +128,13 @@ class PublishedCatalogTest {
         val voyage = catalog.packs.filter { it.setId == "wikivoyage_en" }
         assertThat(voyage.map { it.setLabel }.distinct()).containsExactly("Europe", "The whole world")
 
-        val subjects = catalog.packs.filter { it.isSubject }
+        val subjects = catalog.packs.filter { it.isSubject && it.subjectOf == "wikipedia_en" }
         assertThat(subjects.map { it.zimName }.distinct()).hasSize(24)
-        assertThat(subjects.all { it.subjectOf == "wikipedia_en" && it.articles > 0 }).isTrue()
+        assertThat(subjects.all { it.articles > 0 }).isTrue()
+        // Spanish Wikipedia's subjects belong to its own set (Plan L3).
+        val subjectsEs = catalog.packs.filter { it.isSubject && it.subjectOf == "wikipedia_es" }
+        assertThat(subjectsEs.map { it.zimName }.distinct()).hasSize(14)
+        assertThat(catalog.packs.filter { it.isSubject }.all { it.subjectOf in setOf("wikipedia_en", "wikipedia_es") }).isTrue()
         val med = catalog.packs.single { it.id == "wikipedia_en_medicine_maxi" }
         assertThat(med.adds.getValue("wikipedia_en_top")).isWithin(0.001).of(0.955)
         assertThat(med.adds.getValue("wikipedia_en_top1m")).isWithin(0.001).of(0.656)
