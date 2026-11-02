@@ -4,7 +4,7 @@ import kotlin.random.Random
 
 /**
  * What the owl says the moment a question is sent, by topic, and when the answer isn't in the library: Neal's lines
- * from docs/ask/owl-lines-draft.md (sections A to D), generated from it. MEDICAL lines are plain, never a joke. A topic guess can be wrong, so every line hints rather than
+ * from docs/ask/owl-lines-draft.md (sections A to E), generated from it. MEDICAL lines are plain, never a joke. A topic guess can be wrong, so every line hints rather than
  * announces, and none claims to know the answer.
  */
 object OwlLines {
@@ -148,10 +148,12 @@ object OwlLines {
     )
 
     /** A line for [topic] not in [used] (the chat's lines so far); once every line is used, any line. */
-    fun pick(topic: ReactionTopic, used: Set<String>, random: Random = Random.Default): String {
-        val lines = LINES.getValue(topic)
-        return lines.filter { it !in used }.ifEmpty { lines }.random(random)
-    }
+    fun pick(topic: ReactionTopic, used: Set<String>, random: Random = Random.Default): String =
+        pickFrom(LINES.getValue(topic), used, random)
+
+    /** A line of [lines] not in [used]; once every line is used, any line. */
+    fun pickFrom(lines: List<String>, used: Set<String>, random: Random = Random.Default): String =
+        lines.filter { it !in used }.ifEmpty { lines }.random(random)
 
     /**
      * The owl's clean declines (the doc's section D), for a non-medical turn whose answer isn't in the library. Each
@@ -210,8 +212,8 @@ object OwlLines {
     }
 
     /**
-     * While the model loads, in turn every few seconds (Neal, 2026-11-02): the owl getting ready, never the question, so
-     * they suit a health question too.
+     * While the model loads, one per answer (Neal, 2026-11-02): the owl getting ready, never the question, so they suit
+     * a health question too.
      */
     val WAKING: List<String> = listOf(
         "Waking the librarian…",
@@ -227,4 +229,11 @@ object OwlLines {
         "Shuffling the index cards…",
         "Turning up the lamp…",
     )
+
+    /** Section E: no words yet after [SLOW_MS] of a turn. */
+    const val SLOW = "Still reading. Good books don't hurry."
+    const val SLOW_MS = 10_000L
+
+    /** Section E: a turn stopped before its answer. */
+    const val STOPPED = "Very well. I'll put the books back."
 }

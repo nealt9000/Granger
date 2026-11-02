@@ -83,7 +83,6 @@ import app.granger.player.ListenButtons
 import app.granger.player.VoiceButton
 import app.granger.research.ResearchViewModel.TurnUi
 import app.granger.theme.Spectral
-import kotlin.random.Random
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -99,27 +98,27 @@ private const val INTRO = "Ask a question; the librarian answers from your libra
     "It's a preview: it can be wrong, so check the sources."
 private const val MODEL_FAILED = "The model needs repair. Check it in Readiness."
 private const val SEARCH_FAILED = "Couldn't search your library. Try again."
-private const val INTERRUPTED = "Stopped before an answer."
+private const val INTERRUPTED = OwlLines.STOPPED
 private const val SOURCE_GONE = "That source is no longer in your library."
 
 /** How long a source card stays outlined after its citation is tapped. */
 private const val FLASH_MS = 1_500L
 
-/** While the model loads: the owl's [OwlLines.WAKING] lines in turn, from a random one, a new one every few seconds. */
+/** The running turn's progress label: section E's slow line after [OwlLines.SLOW_MS] with no words, then the owl's. */
 @Composable
-private fun wakingLine(): String {
-    val lines = OwlLines.WAKING
-    var at by remember { mutableIntStateOf(Random.nextInt(lines.size)) }
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(WAKING_EVERY_MS)
-            at = (at + 1) % lines.size
-        }
+private fun progressLabel(ui: TurnUi, reading: String?): String? {
+    var slow by remember(ui.turn.id) { mutableStateOf(false) }
+    LaunchedEffect(ui.turn.id) {
+        delay(OwlLines.SLOW_MS)
+        slow = true
     }
-    return lines[at]
+    return when {
+        slow && ui.partial.isNullOrBlank() -> OwlLines.SLOW
+        reading != null -> reading
+        ui.stage == Stage.LOADING_MODEL -> ui.waking ?: ui.stage.label()
+        else -> ui.stage?.label()
+    }
 }
-
-private const val WAKING_EVERY_MS = 3_000L
 
 /** The owl's instant reaction to the question, in its voice: Spectral italic, until the answer settles. */
 @Composable
@@ -446,8 +445,7 @@ private fun AnswerBlock(
                 val reading = ui.reading?.takeIf { ui.stage == Stage.WRITING && ui.partial.isNullOrBlank() }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                    val label = reading ?: if (ui.stage == Stage.LOADING_MODEL) wakingLine() else ui.stage?.label()
-                    label?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                    progressLabel(ui, reading)?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
                 ui.partial?.takeIf { it.isNotBlank() }?.let { AnswerBody(it, onCite) }
             }
@@ -467,8 +465,7 @@ private fun AnswerBlock(
                 if (ui.guessing && ui.guessShown) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                        val label = if (ui.stage == Stage.LOADING_MODEL) wakingLine() else ui.stage?.label()
-                        label?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                        progressLabel(ui, null)?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                     }
                 }
                 if (ui.guessFailed) {

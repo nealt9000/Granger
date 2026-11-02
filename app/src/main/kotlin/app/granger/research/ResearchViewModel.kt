@@ -108,6 +108,8 @@ class ResearchViewModel(
         val lookingIn: String? = null,
         /** What the owl is reading ("Reading 4 passages…"), from just before the answer streams; not stored. */
         val reading: String? = null,
+        /** The owl's waking line while the model loads, one per answer; not stored. */
+        val waking: String? = null,
         /** A best guess is being written for this (declined) turn; [partial] is the guess so far. */
         val guessing: Boolean = false,
         /**
@@ -163,6 +165,7 @@ class ResearchViewModel(
         val reaction: String? = null,
         val lookingIn: String? = null,
         val reading: String? = null,
+        val waking: String? = null,
     )
 
     private data class Header(val chatId: Long?, val title: String, val quote: Passage?, val recent: List<ChatSummary>)
@@ -185,6 +188,9 @@ class ResearchViewModel(
     @Volatile private var stopRequested = false
     /** The owl's lines said in this chat, so it doesn't repeat itself until it has said them all. */
     private val saidLines = mutableSetOf<String>()
+
+    /** A waking line for a new answer or guess, not one this chat has had until all have been. */
+    private fun wakingLine(): String = OwlLines.pickFrom(OwlLines.WAKING, saidLines).also { saidLines += it }
 
     /** The question field, as Compose state written synchronously on every keystroke (see SearchViewModel.searchText). */
     var input by mutableStateOf("")
@@ -277,7 +283,7 @@ class ResearchViewModel(
         val turns = chats.turns(chatId).first()
         val at = turns.indexOfFirst { it.id == turnId }
         val turn = turns.getOrNull(at)?.takeIf { it.outcome == TurnOutcome.DECLINED && it.guess.isBlank() && !it.medical } ?: return
-        live.value = Live(turnId, null, null, guessing = true)
+        live.value = Live(turnId, null, null, guessing = true, waking = wakingLine())
         var settled = false
         // The guess goes to the model alone: no passages, and no earlier answer or guess, only the question before it.
         pipeline.guess(turn.question, turns.getOrNull(at - 1)?.question) { stopRequested }.flowOn(cpu).collect { event ->
@@ -450,7 +456,7 @@ class ResearchViewModel(
             // Not cancellable, so a turn that was stored is always known here and can be settled.
             withContext(NonCancellable) {
                 turnId = chats.startTurn(chatId, ask.question, ask.quote)
-                live.value = Live(turnId, null, null)
+                live.value = Live(turnId, null, null, waking = wakingLine())
             }
             pipeline.run(request) { stopRequested }.flowOn(cpu).collect { event ->
                 when (event) {
@@ -577,6 +583,7 @@ class ResearchViewModel(
             reaction = running?.reaction,
             lookingIn = running?.lookingIn,
             reading = running?.reading,
+            waking = running?.waking,
             medical = medical || running?.medical == true,
             guessing = running?.guessing == true,
             offersGuess = outcome == TurnOutcome.DECLINED && !medical && !(id in shown && hasGuess) &&
