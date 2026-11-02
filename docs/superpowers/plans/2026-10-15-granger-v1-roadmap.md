@@ -863,3 +863,9 @@ Still open:
 - On a Kiwix main page that scrolls in its own box, the saved place and read-aloud's follow-scroll still act on the window.
 - `PlayerEngineTest.chapterChangeUpdatesTheTitleWithoutRepreparing` failed once in a full run and passed alone: a timing flake to settle.
 - Browse lists packs flat within a section; a pack family with many sizes could group further.
+
+## Carried forward from L4 (Spanish vectors, 2026-11-01)
+
+The Spanish vectors (194 files, 416 MB, release `vectors-es-2026-11-01`, descriptors on `l4-spanish-eval` and `l3-spanish-knowledge`) were built on the Mac on 2026-10-31 to 11-01. Two things for the next catalog build:
+- **English Python docs vectors are stale.** Kiwix published `devdocs_en_python` 2026-10-31; the vectors were built from 2026-08-02. Vectors fit one snapshot only, so the next catalog build reports them ("rebuild it") and leaves them out: that pack falls back to keyword search until its vectors are rebuilt (a few minutes on the Mac).
+- **The Spanish vectors can go stale the same way.** They match the Kiwix snapshots of 2026-10 (iFixit 2026-03). If Kiwix publishes a newer Spanish snapshot before L3's catalog is built and signed, that pack's vectors are left out; check the build's "Search vectors left out" report and rebuild any pack it names before signing.
