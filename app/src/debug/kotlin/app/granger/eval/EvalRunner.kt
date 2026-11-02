@@ -179,13 +179,13 @@ class EvalRunner(
     private val prompts: PromptRecorder? = null,
     /** The dense finder the pipeline was given, when dense retrieval is on for the run. */
     private val dense: RecordingDenseFinder? = null,
-    private val clock: () -> Long,
     /**
      * Plan L4: stop each question after the rewrite, when the search would start. The record keeps the rewrite's
      * prompt and output and the pipeline's medical flag (model, lexicon or strong phrasing) with outcome "rewrite";
      * enough for `rewrite.py medical` over hundreds of labels without writing an answer for each.
      */
     private val rewriteOnly: Boolean = false,
+    private val clock: () -> Long,
 ) {
     /** Called before each item with the item and its place (1-based) among the items still to run. */
     var onItem: (EvalItem, Int, Int) -> Unit = { _, _, _ -> }

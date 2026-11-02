@@ -119,7 +119,7 @@ class EvalActivity : ComponentActivity() {
             c.embedderWanted.set(denseOn)
             try {
                 val pipeline = ResearchPipeline(finder, prompts, c.rankingConfig, rewriteAlternates = alternates, rewritePlain = plain, rewritePlainFollowUps = plainAll, reserveNamed = named, yearFacts = facts, sourceWeight = fiction, dense = dense)
-                val runner = EvalRunner(pipeline, finder, sourceName, prompts, dense, clock, rewriteOnly)
+                val runner = EvalRunner(pipeline, finder, sourceName, prompts, dense, rewriteOnly, clock)
                 runner.onItem = { item, n, total -> log("$n / $total ${item.id}") }
                 log("run $runId: ${items.size} items, guesses=$guesses${if (alternates) ", rewrite=alternates" else ""}${if (plainAll) ", rewrite=plain-all" else if (plain) ", rewrite=plain" else ""}${if (named) ", entities=on" else ""}${if (facts) ", facts=on" else ""}" +
                     "${if (fiction != null) ", fiction weighted" else ""}${if (denseOn) ", dense" else ""}${if (rewriteOnly) ", stop=rewrite" else ""}")
