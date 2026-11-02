@@ -656,4 +656,48 @@ class ResearchPipelineTest {
         assertThat(events.first()).isEqualTo(ResearchEvent.Reaction(ReactionTopic.DEFAULT))
         assertThat(outcome(events)).isInstanceOf(Outcome.Answered::class.java)
     }
+
+    // ---- "Looking in…" (the doc's section B) ----
+
+    private val boilingTitles = listOf(
+        passage("B", "Boiling is a liquid turning to vapour.", "Boiling").copy(cosine = 0.85),
+        passage("B", "More on boiling.", "Boiling", n = 1).copy(cosine = 0.84),
+        passage("S", "Steam is water vapour.", "Steam").copy(cosine = 0.8),
+    )
+
+    @Test
+    fun theTitlesComeBeforeTheModelLoadsAndTheSearchIsntRepeated() = runTest {
+        val dense = FakeDense(boilingTitles)
+        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = embedder), dense = dense)
+            .run(ResearchRequest("At what temperature does water boil?")).toList()
+        assertThat(events.take(3)).containsExactly(
+            ResearchEvent.Reaction(ReactionTopic.DEFAULT),
+            ResearchEvent.LookingIn(listOf("Boiling", "Steam")),
+            ResearchEvent.Progress(Stage.LOADING_MODEL),
+        ).inOrder()
+        assertThat(dense.queries).hasSize(1)
+        assertThat((outcome(events) as Outcome.Answered).passages).contains(boilingTitles[0])
+    }
+
+    @Test
+    fun aFailedSearchByMeaningNamesNothingAndKeywordsCarryOn() = runTest {
+        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = embedder), dense = FakeDense(emptyList(), fail = true))
+            .run(ResearchRequest("At what temperature does water boil?")).toList()
+        assertThat(events.none { it is ResearchEvent.LookingIn }).isTrue()
+        assertThat((outcome(events) as Outcome.Answered).passages).containsExactly(water)
+    }
+
+    @Test
+    fun noHitsNoTitles() = runTest {
+        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = embedder), dense = FakeDense(emptyList()))
+            .run(ResearchRequest("At what temperature does water boil?")).toList()
+        assertThat(events.none { it is ResearchEvent.LookingIn }).isTrue()
+    }
+
+    @Test
+    fun titlesAreDistinctFewAndShort() {
+        val long = "A".repeat(80)
+        val hits = listOf("Moon", "Moon", "Tides", " ", long, "Sun").map { passage("X", "text", it) }
+        assertThat(lookingInTitles(hits)).containsExactly("Moon", "Tides", "A".repeat(47) + "…").inOrder()
+    }
 }

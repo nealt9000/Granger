@@ -78,9 +78,10 @@ class ResearchViewModelTest {
         sessions: ReadingSessions = this@ResearchViewModelTest.sessions,
         player: PlayerHub? = null,
         speakAnswers: Boolean = false,
+        dense: app.granger.core.research.DenseFinder? = null,
     ): ResearchViewModel {
         return ResearchViewModel(
-            chatId, quote, chats, ResearchPipeline(finder, models), manager, sessions, library, bookshelf,
+            chatId, quote, chats, ResearchPipeline(finder, models, dense = dense), manager, sessions, library, bookshelf,
             MediaIndex(mediaLibrary, backgroundScope, main.dispatcher), backgroundScope, savedState, cpu,
             player = player, speakAnswers = { speakAnswers }, now = { 42L },
         )
@@ -320,6 +321,21 @@ class ResearchViewModelTest {
             testScheduler.advanceUntilIdle()
         }
         assertThat(said).containsExactlyElementsIn(OwlLines.LINES.getValue(ReactionTopic.DEFAULT))
+    }
+
+    @Test fun theOwlSaysWhereItIsLookingWhileTheTurnRuns() = runTest(main.dispatcher) {
+        models.embedder = app.granger.core.research.PassageEmbedder { texts, _ -> texts.map { floatArrayOf(1f, 0f) } }
+        small.answer = listOf("Plants use light [1].", " More.")
+        small.gateAt = 1
+        val vm = vm(dense = { listOf(article(1).copy(cosine = 0.9), article(2).copy(cosine = 0.88)) })
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        val line = vm.state.value.turns.single().lookingIn!!
+        assertThat(line).contains("Article 1 · Article 2")
+        assertThat(OwlLines.LOOKING_IN.map { it.replace("{titles}", "Article 1 · Article 2") }).contains(line)
+        small.gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().lookingIn).isNull()
     }
 
     @Test fun medicalBannerShowsWhileTheAnswerStreams() = runTest(main.dispatcher) {

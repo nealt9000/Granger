@@ -122,6 +122,8 @@ sealed interface Outcome {
 sealed interface ResearchEvent {
     /** The owl's instant reaction: the question's topic, first of all a run's events, before the model loads. */
     data class Reaction(val topic: ReactionTopic) : ResearchEvent
+    /** The search by meaning's first titles, best first (up to [LOOKING_IN_TITLES]), while the model is still at work. */
+    data class LookingIn(val titles: List<String>) : ResearchEvent
     data class Progress(val stage: Stage) : ResearchEvent
     /** The reply so far. */
     data class Partial(val text: String) : ResearchEvent
@@ -171,22 +173,38 @@ class ResearchPipeline(
      */
     private val reactions: (suspend () -> TopicCentroids?)? = null,
 ) {
-    /** [stop] is polled after each chunk of the reply; when it turns true the reply so far is checked and finished. */
-    fun run(request: ResearchRequest, stop: () -> Boolean = { false }): Flow<ResearchEvent> = flow {
+    /**
+     * [stop] is polled after each chunk of the reply; when it turns true the reply so far is checked and finished.
+     *
+     * With dense retrieval the search by meaning runs first, before the model loads, and its titles come out as
+     * [ResearchEvent.LookingIn]. Not alongside the model: on the Pixel 6 the vector scan took ~8 s instead of ~0.9 s
+     * while the model loaded and rewrote (run ob-looking-1, 2026-11-02); the GPU and CPU share memory bandwidth.
+     */
+    fun run(request: ResearchRequest, stop: () -> Boolean = { false }): Flow<ResearchEvent> = flow { answer(request, stop) }
+
+    private suspend fun FlowCollector<ResearchEvent>.answer(request: ResearchRequest, stop: () -> Boolean) {
         var questionVector: FloatArray? = null
         val topic = OwlReaction.lexical(request.question, request.priorQuestion) ?: run {
             val centroids = if (dense == null) null else reactions?.invoke()
             if (centroids == null) return@run ReactionTopic.DEFAULT
-            questionVector = embedQuestion(request.question)
+            questionVector = embedQuery(request.question)
             questionVector?.let(centroids::classify) ?: ReactionTopic.DEFAULT
         }
         emit(ResearchEvent.Reaction(topic))
+        // The search by meaning, before the model loads. A follow-up that leans on the question before it is searched
+        // with that question first (Plan R1 Task 3); otherwise the reaction's vector is reused.
+        val byMeaning = dense?.let { finder ->
+            val prior = request.priorQuestion?.takeIf { FollowUp.refersBack(request.question) }
+            val query = questionVector?.takeIf { prior == null } ?: embedQuery(listOfNotNull(prior, request.question).joinToString(" "))
+            query?.let { searchByMeaning(finder, it) }
+        }
+        byMeaning?.let(::lookingInTitles)?.takeIf { it.isNotEmpty() }?.let { emit(ResearchEvent.LookingIn(it)) }
         emit(ResearchEvent.Progress(Stage.LOADING_MODEL))
         val model = try {
             models.generator()
         } catch (e: ModelUnavailableException) {
             emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, false, emptyList(), e)))
-            return@flow
+            return
         }
 
         val asked = MediaCues.asked(request.question)
@@ -197,20 +215,17 @@ class ResearchPipeline(
         if (request.quote == null && PersonalMedical.matches(request.question, medical)) {
             // One person's own health: the app's medical copy, whatever the library holds. No search, no answer.
             emit(ResearchEvent.Done(Outcome.Declined(medical = true, keywords)))
-            return@flow
+            return
         }
         emit(ResearchEvent.Progress(Stage.SEARCHING))
-        var hits: List<Passage>? = null
+        val hits: List<Passage>? = byMeaning
         val all = try {
-            coroutineScope {
-                val byMeaning = dense?.let { d -> async { denseHits(d, request, questionVector) } }
-                finder.find(Keywords.searchTerms(keywords)).also { hits = byMeaning?.await() }
-            }
+            finder.find(Keywords.searchTerms(keywords))
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             emit(ResearchEvent.Done(Outcome.Failed(FailReason.SEARCH_FAILED, medical, keywords, e)))
-            return@flow
+            return
         }
         val weight = sourceWeight?.of(request.question, keywords, all + hits.orEmpty()) ?: Ranking.NO_WEIGHT
         val found = Ranking.preselect(all, keywords, config, weight)
@@ -228,7 +243,7 @@ class ResearchPipeline(
         } catch (e: Exception) {
             // The embedder failed: a model failure, reported with what the pipeline knows.
             emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, medical, keywords, e)))
-            return@flow
+            return
         }
 
         val quote = request.quote
@@ -236,7 +251,7 @@ class ResearchPipeline(
         val capped = Ranking.capMedia(ranked, asked, config)
         if (quote == null && capped.isEmpty()) {
             emit(ResearchEvent.Done(Outcome.Declined(medical, keywords)))
-            return@flow
+            return
         }
         val pool = (listOfNotNull(quote) + capped.filter { it != quote }).take(config.large)
         fun worked(passages: List<Passage>): String? =
@@ -252,7 +267,7 @@ class ResearchPipeline(
         if (reply == null) {
             // Reported here, not thrown: a failure would reach the collector without the flags the pipeline knows.
             emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, medical, keywords, streamed.cause)))
-            return@flow
+            return
         }
 
         val outcome = when (val check = Citations.check(reply, passages.size)) {
@@ -354,22 +369,18 @@ class ResearchPipeline(
      * The dense hits for [request], or null for keyword ranking alone: no embedder, no vector files, or a failure.
      * Dense retrieval only ever adds; a question it can't help with is ranked as it was without it.
      */
-    /** [questionVector] is the question's own vector, embedded for the reaction; reused when the query is the question alone. */
-    private suspend fun denseHits(finder: DenseFinder, request: ResearchRequest, questionVector: FloatArray?): List<Passage>? = try {
-        val prior = request.priorQuestion?.takeIf { FollowUp.refersBack(request.question) }
-        val query = questionVector?.takeIf { prior == null } ?: models.embedder()?.let { embedder ->
-            embedder.embed(listOf(listOfNotNull(prior, request.question).joinToString(" ")), isQuery = true).single()
-        }
-        query?.let { finder.find(it).takeIf { hits -> hits.isNotEmpty() } }
+    /** The passages nearest [query] by meaning; null when there are none or the search fails (keywords carry on alone). */
+    private suspend fun searchByMeaning(finder: DenseFinder, query: FloatArray): List<Passage>? = try {
+        finder.find(query).takeIf { it.isNotEmpty() }
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
         null
     }
 
-    /** The question's query vector, or null when there is no embedder or it fails: the reaction is then the default. */
-    private suspend fun embedQuestion(question: String): FloatArray? = try {
-        models.embedder()?.embed(listOf(question), isQuery = true)?.single()
+    /** [text]'s query vector, or null when there is no embedder or it fails. */
+    private suspend fun embedQuery(text: String): FloatArray? = try {
+        models.embedder()?.embed(listOf(text), isQuery = true)?.single()
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
@@ -395,3 +406,12 @@ class ResearchPipeline(
         const val ANSWER_TOKENS = 512
     }
 }
+
+/** How many titles [ResearchEvent.LookingIn] names. */
+const val LOOKING_IN_TITLES = 3
+private const val LOOKING_IN_CHARS = 48
+
+/** The first [LOOKING_IN_TITLES] different source titles among [hits], each cut to a readable length. */
+internal fun lookingInTitles(hits: List<Passage>): List<String> =
+    hits.map { it.sourceTitle.trim() }.filter { it.isNotEmpty() }.distinct().take(LOOKING_IN_TITLES)
+        .map { if (it.length <= LOOKING_IN_CHARS) it else it.take(LOOKING_IN_CHARS - 1).trimEnd() + "…" }
