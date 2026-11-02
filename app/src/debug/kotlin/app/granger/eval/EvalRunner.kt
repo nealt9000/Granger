@@ -1,5 +1,6 @@
 package app.granger.eval
 
+import kotlinx.coroutines.flow.takeWhile
 import app.granger.core.library.DensePassageFinder
 import app.granger.core.library.DenseTimings
 import app.granger.core.library.KeywordTimings
@@ -179,6 +180,12 @@ class EvalRunner(
     /** The dense finder the pipeline was given, when dense retrieval is on for the run. */
     private val dense: RecordingDenseFinder? = null,
     private val clock: () -> Long,
+    /**
+     * Plan L4: stop each question after the rewrite, when the search would start. The record keeps the rewrite's
+     * prompt and output and the pipeline's medical flag (model, lexicon or strong phrasing) with outcome "rewrite";
+     * enough for `rewrite.py medical` over hundreds of labels without writing an answer for each.
+     */
+    private val rewriteOnly: Boolean = false,
 ) {
     /** Called before each item with the item and its place (1-based) among the items still to run. */
     var onItem: (EvalItem, Int, Int) -> Unit = { _, _, _ -> }
@@ -241,7 +248,7 @@ class EvalRunner(
         return ids
     }
 
-    private class Run(val outcome: Outcome?, val ms: JSONObject)
+    private class Run(val outcome: Outcome?, val ms: JSONObject, val medical: Boolean = false)
 
     /** Runs the pipeline to its Done event, timing the stages from the Progress events. */
     private suspend fun execute(flow: kotlinx.coroutines.flow.Flow<ResearchEvent>): Run {
@@ -250,7 +257,9 @@ class EvalRunner(
         var stageStart = start
         var outcome: Outcome? = null
         var first = false
-        flow.collect { event ->
+        var medical = false
+        val events = if (rewriteOnly) flow.takeWhile { !(it is ResearchEvent.Progress && it.stage == Stage.SEARCHING) } else flow
+        events.collect { event ->
             val now = clock()
             when (event) {
                 is ResearchEvent.Progress -> {
@@ -266,11 +275,13 @@ class EvalRunner(
                 }
                 is ResearchEvent.Partial -> if (!first) { first = true; ms.put("firstWords", now - start) }
                 is ResearchEvent.Done -> outcome = event.outcome
+                ResearchEvent.Medical -> medical = true
                 else -> Unit
             }
         }
+        if (rewriteOnly && outcome == null) ms.put("rewrite", clock() - start)
         ms.put("total", clock() - start)
-        return Run(outcome, ms)
+        return Run(outcome, ms, medical)
     }
 
     private suspend fun record(runId: String, item: EvalItem, guesses: GuessModels): JSONObject {
@@ -305,12 +316,12 @@ class EvalRunner(
             .put("keywords", JSONArray(keywords))
             // The pipeline doesn't say; equal keywords means the plain fallback was used (or the model chose the same words).
             .put("rewriteFallback", keywords.isNotEmpty() && keywords == fallbackKeywords)
-            .put("medical", outcome?.medical ?: false)
+            .put("medical", outcome?.medical ?: main.medical)
             .put("found", JSONArray(finder.scored().take(FOUND_CAP).map { (p, lexical) ->
                 JSONObject().put("kind", p.kind.name).put("source", sourceName(p)).put("title", p.sourceTitle)
                     .put("location", p.location).put("heading", p.heading).put("lexical", lexical)
             }))
-        describe(outcome).into(record)
+        (if (rewriteOnly && outcome == null) Described("rewrite", "", emptyList(), emptyList()) else describe(outcome)).into(record)
         record.put("ms", main.ms)
 
         if (outcome is Outcome.Declined && !outcome.medical && guesses == GuessModels.SMALL) {

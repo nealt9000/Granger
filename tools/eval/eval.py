@@ -2,7 +2,7 @@
 """Drives the Research eval (docs/superpowers/specs/2026-10-17-research-eval-design.md).
 
   eval.py validate dataset/tune.json [--packs DIR] [--books DIR] [--media EXPORT.json]   # EXPORT from media_library.py
-  eval.py run dataset/tune.json --run-id ID [--ids a,b] [--groups g1,g2] [--guesses none|small] [--rewrite alternates] [--fiction FILE]
+  eval.py run dataset/tune.json --run-id ID [--ids a,b] [--groups g1,g2] [--guesses none|small] [--rewrite alternates] [--fiction FILE] [--stop rewrite]
   eval.py worksheet ID                       # runs/ID/worksheet.md: replies that still need a grade
   eval.py report --dataset-only dataset/tune.json dataset/heldout.json
   eval.py report ID [--totals-only] [--compare OTHER]
@@ -46,7 +46,7 @@ def cmd_validate(a):
 
 def cmd_run(a):
     items = dataset.load(a.dataset)
-    out = adb.run_eval(adb.real_runner, a.dataset, a.run_id, RUNS, ids=a.ids, groups=a.groups, guesses=a.guesses, fresh=a.fresh, rewrite=a.rewrite, fiction=a.fiction, dense=a.dense, entities=a.entities, facts=a.facts)
+    out = adb.run_eval(adb.real_runner, a.dataset, a.run_id, RUNS, ids=a.ids, groups=a.groups, guesses=a.guesses, fresh=a.fresh, rewrite=a.rewrite, fiction=a.fiction, dense=a.dense, entities=a.entities, facts=a.facts, stop=a.stop)
     print("results in %s (%d items in the dataset)" % (out, len(items)))
     return 0
 
@@ -98,6 +98,7 @@ def main(argv=None):
     r.add_argument("--rewrite", choices=["alternates", "plain", "plain-all"], help="a debug rewrite variant (Plan R0; plain: first questions without the model, plain-all: follow-ups too; Plan R5 Task 6)")
     r.add_argument("--entities", choices=["on"], help="each thing a date question names gets a passage (Plan R5 Task 4)")
     r.add_argument("--facts", choices=["on"], help="dates and the sums between them worked out in code (Plan R5 Task 4)")
+    r.add_argument("--stop", choices=["rewrite"], help="end each question after the rewrite: the medical flag over many labels (Plan L4)")
     r.add_argument("--fiction", help="a file of fiction book ids to weight 0.7 on non-literature questions (Plan R0, Task 6)")
     r.add_argument("--dense", choices=["on", "off"], help="dense retrieval for the run (Plan R1); the app's DENSE_RETRIEVAL when not given"); r.set_defaults(f=cmd_run)
     w = s.add_parser("worksheet"); w.add_argument("run"); w.set_defaults(f=cmd_worksheet)
