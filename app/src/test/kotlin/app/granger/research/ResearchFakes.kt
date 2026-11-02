@@ -197,5 +197,8 @@ class FakeResearchModels(val model: ScriptedGenerator = ScriptedGenerator()) : R
         return model
     }
 
-    override suspend fun embedder(): PassageEmbedder? = null
+    /** Null, as with no embedder installed, unless a test sets one. */
+    var embedder: PassageEmbedder? = null
+
+    override suspend fun embedder(): PassageEmbedder? = embedder
 }

@@ -31,6 +31,7 @@ import app.granger.core.research.OwlLines
 import app.granger.core.research.Passage
 import app.granger.core.research.PersonalMedical
 import app.granger.core.research.PriorTurn
+import app.granger.core.research.ReactionTopic
 import app.granger.core.research.ResearchEvent
 import app.granger.core.research.ResearchPipeline
 import app.granger.core.research.ResearchRequest
@@ -103,6 +104,8 @@ class ResearchViewModel(
         val medical: Boolean,
         /** The owl's instant reaction while the turn runs; not stored. */
         val reaction: String? = null,
+        /** Where the owl is looking ("Looking in Boiling · Steam…") while the turn runs; not stored. */
+        val lookingIn: String? = null,
         /** A best guess is being written for this (declined) turn; [partial] is the guess so far. */
         val guessing: Boolean = false,
         /**
@@ -156,6 +159,7 @@ class ResearchViewModel(
         val medical: Boolean = false,
         val guessing: Boolean = false,
         val reaction: String? = null,
+        val lookingIn: String? = null,
     )
 
     private data class Header(val chatId: Long?, val title: String, val quote: Passage?, val recent: List<ChatSummary>)
@@ -289,7 +293,7 @@ class ResearchViewModel(
                     }
                 }
                 // run() events; guess() doesn't emit them.
-                ResearchEvent.Medical, is ResearchEvent.Reaction -> Unit
+                ResearchEvent.Medical, is ResearchEvent.Reaction, is ResearchEvent.LookingIn -> Unit
             }
         }
     }
@@ -433,6 +437,8 @@ class ResearchViewModel(
         var settled = false
         // The pipeline's verdict once known (it can be ahead of the stored turn); a turn cut short keeps it.
         var medical = false
+        // The reaction placed it as a health question, before the pipeline's verdict: "Looking in…" stays plain.
+        var healthReaction = false
         // Neal's feel test (Plan R5): a decline goes straight on to the model's best guess. Since 2026-11-02 it is written
         // out of sight and opened with the Best guess button, so "Not in your library" stands until the user asks.
         // Not for a medical turn, a question about a selection, or a stopped one.
@@ -447,7 +453,12 @@ class ResearchViewModel(
                 when (event) {
                     is ResearchEvent.Reaction -> {
                         val line = OwlLines.pick(event.topic, saidLines).also { saidLines += it }
+                        healthReaction = event.topic == ReactionTopic.MEDICAL
                         live.update { it?.copy(reaction = line) }
+                    }
+                    is ResearchEvent.LookingIn -> {
+                        val line = OwlLines.lookingIn(event.titles, medical = healthReaction || medical)
+                        live.update { it?.copy(lookingIn = line) }
                     }
                     is ResearchEvent.Progress -> live.update { it?.copy(stage = event.stage) }
                     is ResearchEvent.Partial -> {
@@ -560,6 +571,7 @@ class ResearchViewModel(
             partial = running?.partial,
             stage = running?.stage,
             reaction = running?.reaction,
+            lookingIn = running?.lookingIn,
             medical = medical || running?.medical == true,
             guessing = running?.guessing == true,
             offersGuess = outcome == TurnOutcome.DECLINED && !medical && !(id in shown && hasGuess) &&

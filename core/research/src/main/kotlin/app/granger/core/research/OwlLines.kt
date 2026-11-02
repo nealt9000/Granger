@@ -4,7 +4,7 @@ import kotlin.random.Random
 
 /**
  * What the owl says the moment a question is sent, by topic, and when the answer isn't in the library: Neal's lines
- * from docs/ask/owl-lines-draft.md (sections A and D), generated from it. MEDICAL lines are plain, never a joke. A topic guess can be wrong, so every line hints rather than
+ * from docs/ask/owl-lines-draft.md (sections A, B and D), generated from it. MEDICAL lines are plain, never a joke. A topic guess can be wrong, so every line hints rather than
  * announces, and none claims to know the answer.
  */
 object OwlLines {
@@ -180,4 +180,19 @@ object OwlLines {
 
     /** [turnId]'s best-guess label, steady as [decline]. */
     fun guessLabel(turnId: Long): String = GUESS_LABELS[Math.floorMod(turnId, GUESS_LABELS.size)]
+
+    /** Where the owl is looking (section B), once the search by meaning is back; `{titles}` is the titles joined. */
+    val LOOKING_IN: List<String> = listOf(
+        "Looking in {titles}…",
+        "I've pulled down {titles}…",
+        "Leafing through {titles}…",
+        "Now then: {titles}…",
+    )
+
+    /** Section B's plain form, for a health question. */
+    const val LOOKING_IN_MEDICAL = "Checking {titles}…"
+
+    /** A section B line naming [titles], plain when [medical]. */
+    fun lookingIn(titles: List<String>, medical: Boolean, random: Random = Random.Default): String =
+        (if (medical) LOOKING_IN_MEDICAL else LOOKING_IN.random(random)).replace("{titles}", titles.joinToString(" · "))
 }
