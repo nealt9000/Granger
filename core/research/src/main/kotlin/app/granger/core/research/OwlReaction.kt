@@ -8,10 +8,16 @@ enum class ReactionTopic { DEFAULT, HISTORY, SCIENCE, LITERATURE, SCRIPTURE, WOR
 /**
  * Topic centroids: the mean query vector of each topic's anchor questions (tools/owl/anchors.json), embedded by the
  * phone's EmbeddingGemma. A question takes the nearest topic when its cosine is at least [floor] and beats the
- * runner-up by [margin]; else [ReactionTopic.DEFAULT]. MEDICAL nearest is MEDICAL whatever the scores, so a health
- * question the lexicon misses still gets the plain lines.
+ * runner-up by [margin]; else [ReactionTopic.DEFAULT]. MEDICAL nearest is MEDICAL whatever the margin (from
+ * [medicalFloor] up), so a health question the lexicon misses still gets the plain lines.
  */
-class TopicCentroids(private val topics: Map<ReactionTopic, FloatArray>, private val floor: Float, private val margin: Float) {
+class TopicCentroids(
+    private val topics: Map<ReactionTopic, FloatArray>,
+    private val floor: Float,
+    private val margin: Float,
+    /** Nearest MEDICAL below this is [ReactionTopic.DEFAULT]: everyday personal questions sit near it weakly. */
+    private val medicalFloor: Float = 0f,
+) {
     init {
         require(topics.size >= 2) { "need two topics or more" }
         require(topics.values.map { it.size }.toSet().size == 1) { "centroids differ in size" }
@@ -23,7 +29,7 @@ class TopicCentroids(private val topics: Map<ReactionTopic, FloatArray>, private
         val scored = topics.map { (topic, c) -> topic to cosine(question, c, n) }.sortedByDescending { it.second }
         val (topic, best) = scored[0]
         return when {
-            topic == ReactionTopic.MEDICAL -> ReactionTopic.MEDICAL
+            topic == ReactionTopic.MEDICAL -> if (best >= medicalFloor) ReactionTopic.MEDICAL else ReactionTopic.DEFAULT
             best >= floor && best - scored[1].second >= margin -> topic
             else -> ReactionTopic.DEFAULT
         }
@@ -47,13 +53,14 @@ class TopicCentroids(private val topics: Map<ReactionTopic, FloatArray>, private
 
     companion object {
         /**
-         * Lines of `key value...`: `embedder SHA`, `floor F`, `margin M`, then one `TOPIC x1 x2 ...` per topic; `#` lines
+         * Lines of `key value...`: `embedder SHA`, `floor F`, `margin M`, optionally `medicalFloor F`, then one `TOPIC x1 x2 ...` per topic; `#` lines
          * are comments. Throws [IllegalArgumentException] on anything else.
          */
         fun parse(text: String): Parsed {
             var sha: String? = null
             var floor: Float? = null
             var margin: Float? = null
+            var medicalFloor = 0f
             val topics = LinkedHashMap<ReactionTopic, FloatArray>()
             for (raw in text.lineSequence()) {
                 val line = raw.trim()
@@ -63,6 +70,7 @@ class TopicCentroids(private val topics: Map<ReactionTopic, FloatArray>, private
                     "embedder" -> sha = parts.getOrNull(1)
                     "floor" -> floor = parts.getOrNull(1)?.toFloatOrNull()
                     "margin" -> margin = parts.getOrNull(1)?.toFloatOrNull()
+                    "medicalFloor" -> medicalFloor = parts.getOrNull(1)?.toFloatOrNull() ?: 0f
                     else -> {
                         val topic = ReactionTopic.entries.firstOrNull { it.name == parts[0] }
                             ?: throw IllegalArgumentException("unknown topic ${parts[0]}")
@@ -73,7 +81,7 @@ class TopicCentroids(private val topics: Map<ReactionTopic, FloatArray>, private
                 }
             }
             require(sha != null && floor != null && margin != null) { "embedder, floor and margin are required" }
-            return Parsed(TopicCentroids(topics, floor!!, margin!!), sha!!)
+            return Parsed(TopicCentroids(topics, floor!!, margin!!, medicalFloor), sha!!)
         }
     }
 }

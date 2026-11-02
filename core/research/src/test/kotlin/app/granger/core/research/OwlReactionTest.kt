@@ -35,6 +35,15 @@ class OwlReactionTest {
     }
 
     @Test
+    fun aWeakMedicalNearestIsTheDefault() {
+        val guarded = TopicCentroids(
+            mapOf(ReactionTopic.HISTORY to floatArrayOf(1f, 0f), ReactionTopic.MEDICAL to floatArrayOf(0f, 1f)), 0f, 0.1f, medicalFloor = 0.8f,
+        )
+        assertThat(guarded.classify(floatArrayOf(0.1f, 1f))).isEqualTo(ReactionTopic.MEDICAL)   // cosine 0.995
+        assertThat(guarded.classify(floatArrayOf(0.9f, 1f))).isEqualTo(ReactionTopic.DEFAULT)   // cosine 0.74
+    }
+
+    @Test
     fun theLexiconPlacesHealthAndFollowUpsWithoutTheEmbedder() {
         assertThat(OwlReaction.lexical("What are the symptoms of measles?", null)).isEqualTo(ReactionTopic.MEDICAL)
         assertThat(OwlReaction.lexical("Can I give my toddler ibuprofen?", null)).isEqualTo(ReactionTopic.MEDICAL)

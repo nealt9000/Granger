@@ -54,11 +54,11 @@ def dot(a, b):
     return sum(x * y for x, y in zip(a, b))
 
 
-def classify(v, centroids, floor, margin):
+def classify(v, centroids, floor, margin, medical_floor=0.0):
     scored = sorted(((dot(v, c), t) for t, c in centroids.items()), reverse=True)
     (best, topic), (second, _) = scored[0], scored[1]
     if topic == "MEDICAL":
-        return "MEDICAL", best, best - second
+        return ("MEDICAL" if best >= medical_floor else "DEFAULT"), best, best - second
     if best >= floor and best - second >= margin:
         return topic, best, best - second
     return "DEFAULT", best, best - second
@@ -93,7 +93,7 @@ def cmd_build(a):
         v = vectors.get(item["question"])
         if v is None:
             continue
-        got, best, gap = classify(v, centroids, a.floor, a.margin)
+        got, best, gap = classify(v, centroids, a.floor, a.margin, a.medical_floor)
         want = GROUPS.get(group_of(item))
         if item.get("medical"):
             want = "MEDICAL"
@@ -110,7 +110,7 @@ def cmd_build(a):
         else:
             wrong += 1
             confusions.append((want, got, round(best, 3), round(gap, 3), item["question"]))
-    print(f"floor {a.floor} margin {a.margin}: labelled {labelled}: right {right}, default {default}, wrong {wrong}")
+    print(f"floor {a.floor} margin {a.margin} medical floor {a.medical_floor}: labelled {labelled}: right {right}, default {default}, wrong {wrong}")
     print(f"medical to DEFAULT (the lexicon still catches most): {len(medical_miss)}")
     for c in confusions:
         print("  WRONG", *c)
@@ -129,7 +129,7 @@ def cmd_build(a):
         out.parent.mkdir(parents=True, exist_ok=True)
         lines = ["# Ask's owl reaction topics: centroids of tools/owl/anchors.json, embedded by the phone's EmbeddingGemma",
                  "# (query side). Rebuild with tools/owl/topics.py when the embedder changes.",
-                 f"embedder {a.embedder}", f"floor {a.floor}", f"margin {a.margin}"]
+                 f"embedder {a.embedder}", f"floor {a.floor}", f"margin {a.margin}", f"medicalFloor {a.medical_floor}"]
         lines += [t + " " + " ".join(f"{x:.5f}" for x in c) for t, c in centroids.items()]
         out.write_text("\n".join(lines) + "\n", encoding="utf-8")
         print(f"asset -> {out}")
@@ -140,7 +140,8 @@ def main():
     s = p.add_subparsers(required=True)
     t = s.add_parser("texts"); t.add_argument("out"); t.set_defaults(f=cmd_texts)
     b = s.add_parser("build"); b.add_argument("vectors")
-    b.add_argument("--floor", type=float, default=0.45); b.add_argument("--margin", type=float, default=0.03)
+    b.add_argument("--floor", type=float, default=0.0); b.add_argument("--margin", type=float, default=0.03)
+    b.add_argument("--medical-floor", type=float, default=0.0)
     b.add_argument("--asset", nargs="?", const=str(ASSET)); b.add_argument("--embedder")
     b.add_argument("--verbose", action="store_true")
     b.set_defaults(f=cmd_build)
