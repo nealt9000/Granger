@@ -87,10 +87,11 @@
 
 **Files:** modify `core/library/.../Daos.kt` and `MediaDaos.kt` (lightweight name queries: pack titles, book titles and authors, distinct albums and artists, audiobook titles); create `app/src/main/kotlin/app/granger/voiceinput/SpokenTitles.kt` and its test.
 
-- [ ] Port `short_title` / `short_author` from `tools/asr/bias_list.py` (drop subtitles after `:`/`;`, "by" forms, split multi-artist fields), remove duplicates, and keep only names with at least one letter.
-- [ ] Exposed as a `StateFlow<List<String>>` that rebuilds when the library's tables change (Room `Flow`s), so a pack or book added today is matched today (the Task 5 lesson: the spike's list was two days stale).
-- [ ] Test with an in-memory database: a book, a pack and an album with two artists give the expected names.
-- [ ] **Commit.** `A1: the library's names for the title matcher`
+- [x] Port `short_title` / `short_author` from `tools/asr/bias_list.py` (drop subtitles after `:`/`;`, "by" forms, split multi-artist fields), remove duplicates, and keep only names with at least one letter.
+- [x] Exposed as a `StateFlow<List<String>>` that rebuilds when the library's tables change (Room `Flow`s), so a pack or book added today is matched today (the Task 5 lesson: the spike's list was two days stale).
+- [x] Test with an in-memory database: a book, a pack and an album with two artists give the expected names.
+- [x] *Done 2026-11-02.* One `LibraryNameDao.observe()` query (a `UNION` over packs, books and their authors, audiobooks and their authors, albums, artists and album artists; missing files and audiobook file tracks left out), so Room re-emits on any change. `LibraryNames` in `:core:library` does the shortening. Artists are split on `;` only, not on commas (*Crosby, Stills & Nash*). `SpokenTitles` in the app shares it while watched (`AppContainer.spokenTitles`). On Neal's library: 1,477 rows → **1,417 names**, the query 8 ms on the Mac. Tests: 4 with an in-memory database, 1 for the shared list.
+- [x] **Commit.** `A1: the library's names for the title matcher`
 
 ### Task 4: The permission, `Dictation` and `MicButton`
 

@@ -317,6 +317,9 @@ class AppContainer(context: Context) {
     )
     val bookIndex = BookIndex(libraryDb)
 
+    /** The library's names for the spoken title matcher (Plan A1). */
+    val spokenTitles = app.granger.voiceinput.SpokenTitles(libraryDb.libraryNameDao().observe(), appScope)
+
     /** PDFs inside Kiwix packs, copied out to the internal volume's `books/packs` when tapped (Plan P2). */
     val packDocuments = PackDocuments(bookshelf, library::archive, dir = { File(bookDirs().first(), "packs") })
 
