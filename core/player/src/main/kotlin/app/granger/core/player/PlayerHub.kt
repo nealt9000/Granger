@@ -1,5 +1,7 @@
 package app.granger.core.player
 
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.Flow
 import app.granger.core.library.AudioBookmark
 import app.granger.core.library.Audiobook
 import app.granger.core.library.AudiobookChapter
@@ -107,6 +109,9 @@ data class SavedModes(
  */
 interface PlayerHub {
     val ui: StateFlow<PlayerUi>
+
+    /** One-off lines for the user when the player had to give up on something ("Couldn't play …"). */
+    val notices: Flow<String> get() = emptyFlow()
 
     /** The music queue in play order (empty while an audiobook is the active player). */
     val queue: StateFlow<List<Track>>

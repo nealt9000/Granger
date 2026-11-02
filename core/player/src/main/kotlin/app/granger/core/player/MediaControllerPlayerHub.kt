@@ -1,5 +1,7 @@
 package app.granger.core.player
 
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.Flow
 import android.content.ComponentName
 import android.content.Context
 import android.net.Uri
@@ -76,6 +78,8 @@ class MediaControllerPlayerHub(
     override val ui: StateFlow<PlayerUi> = PlaybackService.engine
         .flatMapLatest { it?.ui ?: flowOf(PlayerUi.IDLE) }
         .stateIn(scope, SharingStarted.Eagerly, PlayerUi.IDLE)
+
+    override val notices: Flow<String> = PlaybackService.engine.flatMapLatest { it?.notices ?: emptyFlow() }
 
     override val queue: StateFlow<List<Track>> = PlaybackService.engine
         .flatMapLatest { it?.queue ?: flowOf(emptyList()) }

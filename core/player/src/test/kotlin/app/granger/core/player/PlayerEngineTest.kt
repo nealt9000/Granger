@@ -758,8 +758,10 @@ class PlayerEngineTest {
         runBlocking { playback.upsertAudiobookState(old) }
 
         val first = newEngine()
+        val notices = noticesOf(first)
         first.playAudiobook(book.id)
         idle()
+        assertThat(notices.single()).startsWith("Couldn't find your place in this book")
         run(first.player).untilPosition(0, 7_000)      // past a tick save
         first.playPause()
         idle()
@@ -804,6 +806,7 @@ class PlayerEngineTest {
         runBlocking { db.mediaDao().upsertTracks(tracks) }
         val engine = newEngine()
         val errors = countErrors(engine)
+        val notices = noticesOf(engine)
         engine.playTracks(tracks.map { it.id }, 0, false, PlaySource("songs", "Songs"))
         engine.cycleRepeat()                             // off → all
         runMainLooperUntil { !engine.player.playWhenReady || errors() > 10 }
@@ -812,6 +815,15 @@ class PlayerEngineTest {
         assertThat(errors()).isEqualTo(3)
         assertThat(engine.player.playWhenReady).isFalse()
         assertThat(engine.ui.value.playing).isFalse()
+        // And it says why it stopped (clean-up list: it used to stop without a word).
+        assertThat(notices.single()).startsWith("Couldn't play any of these songs")
+    }
+
+    /** Lines the engine has for the user, as the app's toast would show them. */
+    private fun noticesOf(engine: PlayerEngine): List<String> {
+        val seen = mutableListOf<String>()
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Unconfined).launch { engine.notices.collect { seen += it } }
+        return seen
     }
 
     /** One broken song in a repeating queue is skipped every time round: a song that plays resets the count. */
@@ -835,9 +847,11 @@ class PlayerEngineTest {
         val book = saveBook(id, "broken", listOf(file), listOf(AudiobookChapter(id, 0, "One", file.id, 0L, 2_500L)))
         val engine = newEngine()
         val errors = countErrors(engine)
+        val notices = noticesOf(engine)
         engine.playAudiobook(book.id)
         runMainLooperUntil { errors() >= 1 }
         idle()
+        assertThat(notices.single()).startsWith("Couldn't play this chapter")
         assertThat(engine.player.playWhenReady).isFalse()
         assertThat(engine.ui.value.playing).isFalse()
         assertThat(bookState(book.id)).isNull()          // nothing confirmed, nothing saved

@@ -531,6 +531,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     } else {
         null
     }
+    // The player's one-off lines (a bookmark kept, a queue that couldn't play), wherever the user is.
+    val noticeContext = LocalContext.current.applicationContext
+    LaunchedEffect(player) {
+        player?.notices?.collect { Toast.makeText(noticeContext, it, Toast.LENGTH_LONG).show() }
+    }
     val playerUi by (player?.ui ?: remember { MutableStateFlow(PlayerUi.IDLE) }).collectAsStateWithLifecycle()
     val miniUi by (player?.mini ?: remember { MutableStateFlow(PlayerUi.IDLE) }).collectAsStateWithLifecycle()
 

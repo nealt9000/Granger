@@ -1,5 +1,6 @@
 package app.granger.player
 
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.MutableSharedFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -315,8 +316,13 @@ class PlayerViewModel(
     fun startSleepTimer(setting: SleepSetting) = hub.startSleepTimer(setting)
     fun cancelSleepTimer() = hub.cancelSleepTimer()
 
-    /** A short line for the screen to show once ("Bookmarked: Chapter 3 · 12:04"). */
-    val notices = MutableSharedFlow<String>(extraBufferCapacity = 4)
+    private val ownNotices = MutableSharedFlow<String>(extraBufferCapacity = 4)
+
+    /**
+     * Short lines for the app to show once: this screen's ("Bookmarked: Chapter 3 · 12:04") and the player's when it
+     * gives up on something ("Couldn't play any of these songs …"). Shown by the nav host, wherever the user is.
+     */
+    val notices: Flow<String> = merge(ownNotices, hub.notices)
 
     /** A bookmark here, titled with the chapter and the time in it; [notices] says whether it was kept. */
     fun addBookmark() {
@@ -332,7 +338,7 @@ class PlayerViewModel(
                 android.util.Log.w("Granger", "Couldn't add bookmark", e)
                 -1L
             }
-            notices.tryEmit(if (id > 0) "Bookmarked: $title" else "Couldn't add a bookmark here.")
+            ownNotices.tryEmit(if (id > 0) "Bookmarked: $title" else "Couldn't add a bookmark here.")
         }
     }
 
