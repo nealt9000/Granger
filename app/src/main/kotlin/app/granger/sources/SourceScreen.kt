@@ -701,12 +701,14 @@ private fun PreviewButton(url: String) {
             try {
                 context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
             } catch (e: ActivityNotFoundException) {
-                // No browser installed; nothing more to do.
+                android.widget.Toast.makeText(context, NO_BROWSER, android.widget.Toast.LENGTH_LONG).show()
             }
         },
         modifier = Modifier.testTag(SourceTags.PREVIEW),
     ) { Text("Preview") }
 }
+
+internal const val NO_BROWSER = "There's no web browser on this phone to open it in."
 
 /** Test tags for a pack row with flavours. */
 internal object SourceTags {

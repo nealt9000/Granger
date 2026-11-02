@@ -4,7 +4,9 @@ import app.granger.MainDispatcherRule
 import app.granger.core.speech.VoiceId
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -132,9 +134,13 @@ class PlayerViewModelTest {
         vm.addBookmark()
         val book = audiobook("b")
         hub.ui.value = bookUi(book, chapter(book, 2, 600_000L, title = "The Storm"), chapterCount = 5, positionMs = 125_000L)
+        val notice = async { vm.notices.first() }
+        testScheduler.advanceUntilIdle()
         vm.addBookmark()
         testScheduler.advanceUntilIdle()
         assertThat(hub.calls).containsExactly("bookmark:The Storm · 2:05")
+        // It says so (clean-up list: adding a bookmark gave no feedback).
+        assertThat(notice.await()).isEqualTo("Bookmarked: The Storm · 2:05")
     }
 
     @Test fun speedsAndSleepChoicesMatchTheSpec() {

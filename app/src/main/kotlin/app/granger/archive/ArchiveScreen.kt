@@ -112,7 +112,7 @@ fun ArchiveScreen(
         try {
             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(detailsUrl(identifier))))
         } catch (e: ActivityNotFoundException) {
-            // No browser installed; nothing more to do.
+            android.widget.Toast.makeText(context, app.granger.sources.NO_BROWSER, android.widget.Toast.LENGTH_LONG).show()
         }
     }
 
