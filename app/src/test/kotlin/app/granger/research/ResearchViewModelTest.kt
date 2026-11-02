@@ -28,7 +28,9 @@ import app.granger.core.library.ReadingSessions
 import app.granger.core.library.TurnOutcome
 import app.granger.core.player.PlayerHub
 import app.granger.core.player.PlaySource
+import app.granger.core.research.OwlLines
 import app.granger.core.research.Passage
+import app.granger.core.research.ReactionTopic
 import app.granger.core.research.ResearchPipeline
 import app.granger.core.research.SourceKind
 import app.granger.core.research.Stage
@@ -293,6 +295,31 @@ class ResearchViewModelTest {
         assertThat(turn.outcome).isEqualTo(TurnOutcome.ANSWERED)
         assertThat(turn.answer).isEqualTo("Plants use light [1]. And")
         assertThat(vm.state.value.running).isFalse()
+    }
+
+    @Test fun theOwlReactsWhileTheTurnRunsAndDoesntRepeatItself() = runTest(main.dispatcher) {
+        small.answer = listOf("Plants use light [1].", " More.")
+        small.gateAt = 1
+        val vm = vm()
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        // No topics in this pipeline: a default line, shown while the turn runs.
+        val first = vm.state.value.turns.single().reaction
+        assertThat(first).isIn(OwlLines.LINES.getValue(ReactionTopic.DEFAULT))
+        small.gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().reaction).isNull()
+        val said = mutableSetOf(first!!)
+        repeat(OwlLines.LINES.getValue(ReactionTopic.DEFAULT).size - 1) { n ->
+            small.gateAt = 1
+            small.gate = kotlinx.coroutines.CompletableDeferred()
+            vm.ask("Why is the sky blue, part $n?")
+            testScheduler.advanceUntilIdle()
+            said += vm.state.value.turns.last().reaction!!
+            small.gate.complete(Unit)
+            testScheduler.advanceUntilIdle()
+        }
+        assertThat(said).containsExactlyElementsIn(OwlLines.LINES.getValue(ReactionTopic.DEFAULT))
     }
 
     @Test fun medicalBannerShowsWhileTheAnswerStreams() = runTest(main.dispatcher) {

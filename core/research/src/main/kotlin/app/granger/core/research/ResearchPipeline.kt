@@ -120,6 +120,8 @@ sealed interface Outcome {
 }
 
 sealed interface ResearchEvent {
+    /** The owl's instant reaction: the question's topic, first of all a run's events, before the model loads. */
+    data class Reaction(val topic: ReactionTopic) : ResearchEvent
     data class Progress(val stage: Stage) : ResearchEvent
     /** The reply so far. */
     data class Partial(val text: String) : ResearchEvent
@@ -161,9 +163,24 @@ class ResearchPipeline(
      * the sums between them worked out in code ([YearFacts]), after the passages. On in the app from Plan R5 Task 7.
      */
     private val yearFacts: Boolean = false,
+    /**
+     * The owl's reaction topics. With them and [dense], a question the lexicon doesn't place ([OwlReaction.lexical]) is
+     * embedded first, before the model loads, and its vector is the dense query too when that is the question alone.
+     * Without them (or when the provider has none for the installed embedder), such a question reacts as
+     * [ReactionTopic.DEFAULT].
+     */
+    private val reactions: (suspend () -> TopicCentroids?)? = null,
 ) {
     /** [stop] is polled after each chunk of the reply; when it turns true the reply so far is checked and finished. */
     fun run(request: ResearchRequest, stop: () -> Boolean = { false }): Flow<ResearchEvent> = flow {
+        var questionVector: FloatArray? = null
+        val topic = OwlReaction.lexical(request.question, request.priorQuestion) ?: run {
+            val centroids = if (dense == null) null else reactions?.invoke()
+            if (centroids == null) return@run ReactionTopic.DEFAULT
+            questionVector = embedQuestion(request.question)
+            questionVector?.let(centroids::classify) ?: ReactionTopic.DEFAULT
+        }
+        emit(ResearchEvent.Reaction(topic))
         emit(ResearchEvent.Progress(Stage.LOADING_MODEL))
         val model = try {
             models.generator()
@@ -186,7 +203,7 @@ class ResearchPipeline(
         var hits: List<Passage>? = null
         val all = try {
             coroutineScope {
-                val byMeaning = dense?.let { d -> async { denseHits(d, request) } }
+                val byMeaning = dense?.let { d -> async { denseHits(d, request, questionVector) } }
                 finder.find(Keywords.searchTerms(keywords)).also { hits = byMeaning?.await() }
             }
         } catch (e: CancellationException) {
@@ -337,15 +354,22 @@ class ResearchPipeline(
      * The dense hits for [request], or null for keyword ranking alone: no embedder, no vector files, or a failure.
      * Dense retrieval only ever adds; a question it can't help with is ranked as it was without it.
      */
-    private suspend fun denseHits(finder: DenseFinder, request: ResearchRequest): List<Passage>? = try {
-        val embedder = models.embedder()
-        if (embedder == null) {
-            null
-        } else {
-            val prior = request.priorQuestion?.takeIf { FollowUp.refersBack(request.question) }
-            val text = listOfNotNull(prior, request.question).joinToString(" ")
-            finder.find(embedder.embed(listOf(text), isQuery = true).single()).takeIf { it.isNotEmpty() }
+    /** [questionVector] is the question's own vector, embedded for the reaction; reused when the query is the question alone. */
+    private suspend fun denseHits(finder: DenseFinder, request: ResearchRequest, questionVector: FloatArray?): List<Passage>? = try {
+        val prior = request.priorQuestion?.takeIf { FollowUp.refersBack(request.question) }
+        val query = questionVector?.takeIf { prior == null } ?: models.embedder()?.let { embedder ->
+            embedder.embed(listOf(listOfNotNull(prior, request.question).joinToString(" ")), isQuery = true).single()
         }
+        query?.let { finder.find(it).takeIf { hits -> hits.isNotEmpty() } }
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        null
+    }
+
+    /** The question's query vector, or null when there is no embedder or it fails: the reaction is then the default. */
+    private suspend fun embedQuestion(question: String): FloatArray? = try {
+        models.embedder()?.embed(listOf(question), isQuery = true)?.single()
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {

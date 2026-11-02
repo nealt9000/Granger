@@ -53,6 +53,14 @@ class KeywordsTest {
     @Test fun geographyIsNotMedical() {
         assertThat(Medical.looksMedical("What is the average temperature in Death Valley?")).isFalse()
         assertThat(Medical.looksMedical("What is the capital of Colombia?")).isFalse()
+        // Named illnesses (2026-11-02).
+        for (q in listOf("how does malaria spread", "how do people get tetanus", "when will there be a cure for alzheimers",
+            "what body temperature counts as heat stroke", "Is HIV curable?", "What causes pneumonia?", "signs of dehydration")) {
+            assertWithMessage(q).that(Medical.looksMedical(q)).isTrue()
+        }
+        for (q in listOf("When did the Black Death reach Europe?", "Who lived in the hive?", "What did the Romans build?")) {
+            assertWithMessage(q).that(Medical.looksMedical(q)).isFalse()
+        }
     }
 
     @Test fun personalQuestionsMatch() {

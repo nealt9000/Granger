@@ -116,6 +116,7 @@ import app.granger.media.hasAudioPermission
 import app.granger.core.zim.KiwixZimOpener
 import app.granger.core.research.RankingConfig
 import app.granger.core.research.ResearchPipeline
+import app.granger.core.research.TopicCentroids
 import app.granger.core.zim.ZimResolver
 import app.granger.ebook.BookOpener
 import app.granger.ebook.ReadingPrefsStore
@@ -757,9 +758,22 @@ class AppContainer(context: Context) {
     /** Research's thresholds, set from the Pixel 6 measurements (Plan 8 Task 9) and Plan R1's merging sweep. */
     val rankingConfig = RankingConfig()
 
+    /** The owl's reaction topics (assets/owl/topics.txt), read once; null when unreadable. */
+    private val owlTopics by lazy {
+        runCatching { context.assets.open("owl/topics.txt").bufferedReader().use { TopicCentroids.parse(it.readText()) } }
+            .onFailure { android.util.Log.w("Granger", "Owl topics unreadable", it) }
+            .getOrNull()
+    }
+
+    /** The topics, when they were built from the embedder installed now; else the owl reacts with its default lines. */
+    private suspend fun owlCentroids(): TopicCentroids? {
+        val parsed = owlTopics ?: return null
+        return parsed.centroids.takeIf { installedEmbedderSha() == parsed.embedderSha }
+    }
+
     val research = ResearchPipeline(
         passageFinder, ModelsAdapter(modelManager), rankingConfig,
         sourceWeight = fictionWeight, dense = if (DENSE_RETRIEVAL) denseFinder else null,
-        reserveNamed = true, yearFacts = true,
+        reserveNamed = true, yearFacts = true, reactions = ::owlCentroids,
     )
 }

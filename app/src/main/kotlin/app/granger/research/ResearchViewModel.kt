@@ -27,6 +27,7 @@ import app.granger.player.VoiceButton
 import kotlinx.coroutines.flow.map
 import app.granger.core.research.FailReason
 import app.granger.core.research.Outcome
+import app.granger.core.research.OwlLines
 import app.granger.core.research.Passage
 import app.granger.core.research.PersonalMedical
 import app.granger.core.research.PriorTurn
@@ -100,6 +101,8 @@ class ResearchViewModel(
         val partial: String?,
         val stage: Stage?,
         val medical: Boolean,
+        /** The owl's instant reaction while the turn runs; not stored. */
+        val reaction: String? = null,
         /** A best guess is being written for this (declined) turn; [partial] is the guess so far. */
         val guessing: Boolean = false,
         /**
@@ -152,6 +155,7 @@ class ResearchViewModel(
         val stage: Stage?,
         val medical: Boolean = false,
         val guessing: Boolean = false,
+        val reaction: String? = null,
     )
 
     private data class Header(val chatId: Long?, val title: String, val quote: Passage?, val recent: List<ChatSummary>)
@@ -172,6 +176,8 @@ class ResearchViewModel(
     private val shownGuesses = MutableStateFlow<Set<Long>>(emptySet())
     private var job: Job? = null
     @Volatile private var stopRequested = false
+    /** The owl's lines said in this chat, so it doesn't repeat itself until it has said them all. */
+    private val saidLines = mutableSetOf<String>()
 
     /** The question field, as Compose state written synchronously on every keystroke (see SearchViewModel.searchText). */
     var input by mutableStateOf("")
@@ -282,8 +288,8 @@ class ResearchViewModel(
                         guessFailed.value = turnId
                     }
                 }
-                // A run() event; guess() doesn't emit it.
-                ResearchEvent.Medical -> Unit
+                // run() events; guess() doesn't emit them.
+                ResearchEvent.Medical, is ResearchEvent.Reaction -> Unit
             }
         }
     }
@@ -439,6 +445,10 @@ class ResearchViewModel(
             }
             pipeline.run(request) { stopRequested }.flowOn(cpu).collect { event ->
                 when (event) {
+                    is ResearchEvent.Reaction -> {
+                        val line = OwlLines.pick(event.topic, saidLines).also { saidLines += it }
+                        live.update { it?.copy(reaction = line) }
+                    }
                     is ResearchEvent.Progress -> live.update { it?.copy(stage = event.stage) }
                     is ResearchEvent.Partial -> {
                         live.update { it?.copy(partial = event.text) }
@@ -549,6 +559,7 @@ class ResearchViewModel(
             turn = this,
             partial = running?.partial,
             stage = running?.stage,
+            reaction = running?.reaction,
             medical = medical || running?.medical == true,
             guessing = running?.guessing == true,
             offersGuess = outcome == TurnOutcome.DECLINED && !medical && !(id in shown && hasGuess) &&
