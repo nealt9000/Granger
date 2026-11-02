@@ -30,7 +30,11 @@ enum class ResearchReadiness { UNSUPPORTED, MODELS_MISSING, READY }
 /** Loading the LLM or the embedder failed. */
 class ModelLoadException(cause: Throwable) : Exception(cause)
 
-/** Keeps the LLM, and the embedder beside it, resident while in use; both are released after a quiet spell ([releaseSoon]). */
+/**
+ * Keeps the LLM, and the embedder beside it, resident while in use and while an Ask screen is open ([keepWhileOpen]);
+ * both are released a quiet spell after the last Ask screen closes ([releaseSoon]), or at once when the app is hidden
+ * ([releaseNow]).
+ */
 class ModelManager(
     private val tier: DeviceTier,
     private val installed: Flow<InstalledModels>,
@@ -40,7 +44,8 @@ class ModelManager(
     /** Read on each [embedder] call, so a debug run can turn dense retrieval on without a new manager. */
     private val useEmbedder: () -> Boolean,
     private val backend: LlmBackend = LlmBackend.GPU,
-    private val releaseAfterMs: Long = 120_000,
+    /** Neal, 2026-11-02: five minutes after no Ask screen is open. */
+    private val releaseAfterMs: Long = RELEASE_AFTER_MS,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     /** How long a load waits for its file to be listed: the list is empty until the catalog has loaded at startup. */
     private val installWaitMs: Long = 10_000,
@@ -66,6 +71,8 @@ class ModelManager(
     private val sync = Any()
     private var holds = 0
     private var pending = Pending.NONE
+    /** Ask screens open now ([keepWhileOpen]); a quiet-spell release waits until none is. */
+    private var open = 0
 
     /** The resident engine, loading it first if needed. Throws [ModelLoadException]. */
     suspend fun engine(): LlmEngine {
@@ -153,9 +160,36 @@ class ModelManager(
         }
     }
 
-    /** Closes everything after [releaseAfterMs] unless [engine] or [embedder] is called first. */
+    /**
+     * An Ask screen is showing: the models stay loaded while it is (Neal, 2026-11-02), and a quiet-spell release starts
+     * only when the returned function (idempotent) says the last one has closed. [releaseNow] still applies: a hidden
+     * app gives its memory back.
+     */
+    fun keepWhileOpen(): () -> Unit {
+        synchronized(sync) { open++ }
+        cancelRelease()
+        var closed = false
+        return {
+            val last = synchronized(sync) {
+                if (closed) {
+                    false
+                } else {
+                    closed = true
+                    open--
+                    open == 0
+                }
+            }
+            if (last) releaseSoon()
+        }
+    }
+
+    /**
+     * Closes everything after [releaseAfterMs] unless [engine] or [embedder] is called first. With an Ask screen open
+     * it does nothing: closing the last one asks again.
+     */
     fun releaseSoon() {
         stopTimer()
+        if (synchronized(sync) { open > 0 }) return
         if (deferIfHeld(Pending.SOON)) return
         releaseJob = scope.launch {
             delay(releaseAfterMs)
@@ -188,6 +222,8 @@ class ModelManager(
     }
 
     private suspend fun closeIfFree(kind: Pending) = lock.withLock {
+        // An Ask screen opened since the timer started keeps a quiet-spell release from happening.
+        if (kind == Pending.SOON && synchronized(sync) { open > 0 }) return@withLock
         if (!deferIfHeld(kind)) closeAll()
     }
 
@@ -218,5 +254,10 @@ class ModelManager(
     private fun closeEmbedder() {
         runCatching { embedder?.close() }
         embedder = null
+    }
+
+    companion object {
+        /** How long the models stay loaded after the last Ask screen closes. */
+        const val RELEASE_AFTER_MS = 300_000L
     }
 }
