@@ -29,7 +29,12 @@ class FakeSpeech(var languages: RecognizerLanguages? = RecognizerLanguages(listO
         return take.consumeAsFlow().onCompletion { if (it != null) cancelled = true }
     }
     override fun stop() { stops++ }
-    override suspend fun download(tag: String, onProgress: (Int) -> Unit) = DownloadOutcome.DONE
+    var downloadOutcome = DownloadOutcome.DONE
+    override suspend fun download(tag: String, onProgress: (Int) -> Unit): DownloadOutcome {
+        onProgress(50)
+        if (downloadOutcome == DownloadOutcome.DONE) languages = languages?.let { it.copy(installed = it.installed + tag) }
+        return downloadOutcome
+    }
     fun send(vararg e: DictationEvent) = e.forEach { events.trySend(it) }
     fun end(vararg e: DictationEvent) { send(*e); events.close() }
 }

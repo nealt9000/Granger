@@ -43,7 +43,7 @@ class DictationTest {
 
     @Test fun theMicListensInTheAppLanguageAndHidesWithout() = runTest(UnconfinedTestDispatcher()) {
         val s = setup()
-        assertThat(s.voice.status.value).isEqualTo(VoiceInputStatus("en-US", Availability.READY))
+        assertThat(s.voice.status.value).isEqualTo(VoiceInputStatus("en-US", Availability.READY, phoneCanListen = true))
         s.prefs.setEnglishTag(RecognizerTags.ENGLISH_UK)
         assertThat(s.voice.status.first { it.tag == "en-GB" }.micShown).isFalse() // downloadable only
         s.language.value = "es"

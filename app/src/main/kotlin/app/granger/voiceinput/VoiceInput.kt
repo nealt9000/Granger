@@ -1,6 +1,7 @@
 package app.granger.voiceinput
 
 import app.granger.core.speech.Availability
+import app.granger.core.speech.DownloadOutcome
 import app.granger.core.speech.RecognizerTags
 import app.granger.core.speech.SpeechInput
 import kotlinx.coroutines.CoroutineScope
@@ -12,9 +13,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /** Which recognizer language the mic would listen in now ([tag], null for none) and whether it's installed. */
-data class VoiceInputStatus(val tag: String? = null, val availability: Availability = Availability.UNAVAILABLE) {
+data class VoiceInputStatus(
+    val tag: String? = null,
+    val availability: Availability = Availability.UNAVAILABLE,
+    /** The phone has an on-device recognizer at all (Settings → Voice input shows only then). */
+    val phoneCanListen: Boolean = false,
+) {
     /** The mic is shown only when the language is installed (Neal: hidden on phones that can't). */
     val micShown: Boolean get() = tag != null && availability == Availability.READY
 }
@@ -31,14 +38,44 @@ class VoiceInput(
     val prefs: VoiceInputPrefs,
     appLanguage: Flow<String>,
     private val stopReadAloud: () -> Unit,
-    scope: CoroutineScope,
+    private val scope: CoroutineScope,
 ) {
     private val generation = MutableStateFlow(0)
 
+    /** A language model being installed from Settings → Voice input. */
+    sealed interface Download {
+        data object Idle : Download
+        /** [percent] when the system reports it. */
+        data class Running(val percent: Int? = null) : Download
+        /** The system will finish it later (on Wi-Fi, typically). */
+        data object Scheduled : Download
+        data object Failed : Download
+    }
+
+    private val _download = MutableStateFlow<Download>(Download.Idle)
+    val download: StateFlow<Download> = _download
+
+    /** Installs the current language's model (UK English, say); keeps going if Settings is left. */
+    fun downloadCurrent() {
+        val tag = status.value.tag ?: return
+        if (_download.value is Download.Running) return
+        _download.value = Download.Running()
+        scope.launch {
+            val outcome = speech.download(tag) { percent -> _download.value = Download.Running(percent.coerceIn(0, 100)) }
+            _download.value = when (outcome) {
+                DownloadOutcome.DONE -> Download.Idle
+                DownloadOutcome.SCHEDULED -> Download.Scheduled
+                DownloadOutcome.FAILED -> Download.Failed
+            }
+            refresh()
+        }
+    }
+
     val status: StateFlow<VoiceInputStatus> = combine(appLanguage, prefs.englishTag, generation) { language, english, _ -> language to english }
         .mapLatest { (language, english) ->
-            val tag = RecognizerTags.forApp(language, english, speech.languages())
-            VoiceInputStatus(tag, tag?.let { speech.availability(it) } ?: Availability.UNAVAILABLE)
+            val languages = speech.languages()
+            val tag = RecognizerTags.forApp(language, english, languages)
+            VoiceInputStatus(tag, tag?.let { speech.availability(it) } ?: Availability.UNAVAILABLE, phoneCanListen = languages != null)
         }
         .stateIn(scope, SharingStarted.WhileSubscribed(5_000), VoiceInputStatus())
 

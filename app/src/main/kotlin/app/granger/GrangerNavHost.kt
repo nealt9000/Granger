@@ -1218,6 +1218,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     ),
                     onFeedback = if (crashLog != null) ({ feedbackOpen = true }) else null,
                     crashReports = crashReports,
+                    voiceInput = container.voiceInput,
                 )
             }
             composable<LanguageRoute> {

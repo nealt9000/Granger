@@ -127,10 +127,11 @@
 
 **Files:** modify `app/src/main/kotlin/app/granger/settings/SettingsScreen.kt`, `SettingsViewModel.kt` (or a small `VoiceInputSettings` section beside `MediaSettingsSection.kt`); strings.
 
-- [ ] A **Voice input** section, hidden when the phone has no on-device recognition. It shows the language the mic listens in (follows the app language), and for English a US / UK choice.
-- [ ] For a chosen language that is `Downloadable`: a **Download** button with progress through `SpeechInput.download`, and the size if the system reports it. Record the `en-GB` size and time in this plan. A scheduled download says so ("The phone will finish this on Wi-Fi").
-- [ ] **Ask as soon as I stop talking**, a switch, off by default, with one line underneath: *"Otherwise the question waits in the box for you to check it."*
-- [ ] **Commit.** `A1: Settings → Voice input`
+- [x] A **Voice input** section, hidden when the phone has no on-device recognition. It shows the language the mic listens in (follows the app language), and for English a US / UK choice.
+- [x] For a chosen language that is `Downloadable`: a **Download** button with progress through `SpeechInput.download`, and the size if the system reports it. Record the `en-GB` size and time in this plan. A scheduled download says so ("The phone will finish this on Wi-Fi").
+- [x] **Ask as soon as I stop talking**, a switch, off by default, with one line underneath: *"Otherwise the question waits in the box for you to check it."*
+- [x] *Done 2026-11-02 (phone check and the `en-GB` size still to do).* `VoiceInputSettingsSection` sits under Ask in Settings. It shows the language the mic listens in, the US / UK choice when it's English, the download (progress, "later, on Wi-Fi", failed), the switch, and one privacy line. The download runs in `VoiceInput`'s app scope, so leaving Settings doesn't stop it. Hidden when the phone has no on-device recognizer (`VoiceInputStatus.phoneCanListen`). 2 `VoiceInputTest`s.
+- [x] **Commit.** `A1: Settings → Voice input`
 
 ### Task 8: Release notes, the phone walkthrough, merge
 
