@@ -11,10 +11,9 @@ import app.granger.feedback.FeedbackMail
 import app.granger.feedback.ReportSheet
 import app.granger.voiceinput.Dictation
 import app.granger.voiceinput.MicButton
-import app.granger.voiceinput.rememberMicStart
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.SmallFloatingActionButton
-import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.FilledTonalIconToggleButton
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import app.granger.voiceinput.VoiceInputPrefs
@@ -389,19 +388,6 @@ fun ResearchScreen(
                 },
                 title = { AskTitle() },
                 actions = {
-                    val offered by viewModel.conversationShown.collectAsStateWithLifecycle()
-                    if (offered && voicePrefs != null) {
-                        val startConversation = rememberMicStart(voicePrefs, viewModel::startConversation)
-                        if (conversation) {
-                            FilledTonalIconButton(onClick = viewModel::endConversation, modifier = Modifier.testTag(CONVERSATION_TAG)) {
-                                Icon(painterResource(R.drawable.ic_conversation), contentDescription = stringResource(R.string.research_conversation_end))
-                            }
-                        } else {
-                            IconButton(onClick = startConversation, enabled = state.readiness == ResearchReadiness.READY, modifier = Modifier.testTag(CONVERSATION_TAG)) {
-                                Icon(painterResource(R.drawable.ic_conversation), contentDescription = stringResource(R.string.research_conversation_start))
-                            }
-                        }
-                    }
                     // Recent chats live behind their own button, not in the new chat (Neal, U3a walkthrough).
                     val others = state.recentChats.filter { it.id != state.chatId }
                     if (others.isNotEmpty()) {
@@ -461,6 +447,7 @@ fun ResearchScreen(
                     canSend = viewModel.input.isNotBlank() || state.quote != null,
                     focus = focusInput,
                     voicePrefs = voicePrefs,
+                    conversation = conversation,
                 )
             }
         },
@@ -529,7 +516,7 @@ private fun ConversationBar(status: String, onEnd: () -> Unit) {
             .padding(start = 16.dp, end = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(painterResource(R.drawable.ic_conversation), contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(18.dp))
+        Icon(painterResource(R.drawable.ic_mic), contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(8.dp))
         Text(status, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.weight(1f))
         TextButton(onClick = onEnd) { Text(stringResource(R.string.research_conversation_end)) }
@@ -537,11 +524,20 @@ private fun ConversationBar(status: String, onEnd: () -> Unit) {
 }
 
 internal const val CONVERSATION_TAG = "research-conversation"
+internal const val SPEAK_TAG = "research-speak"
 internal const val LATEST_TAG = "research-latest"
 
 /** The question field, with Send, or Stop while a turn runs. */
 @Composable
-private fun QuestionField(viewModel: ResearchViewModel, enabled: Boolean, running: Boolean, canSend: Boolean, focus: Boolean, voicePrefs: VoiceInputPrefs?) {
+private fun QuestionField(
+    viewModel: ResearchViewModel,
+    enabled: Boolean,
+    running: Boolean,
+    canSend: Boolean,
+    focus: Boolean,
+    voicePrefs: VoiceInputPrefs?,
+    conversation: Boolean,
+) {
     val requester = remember { FocusRequester() }
     // Once per chat, not again after rotation or Back.
     var focused by rememberSaveable { mutableStateOf(false) }
@@ -565,17 +561,35 @@ private fun QuestionField(viewModel: ResearchViewModel, enabled: Boolean, runnin
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
             keyboardActions = KeyboardActions(onSend = { if (!running && canSend) viewModel.send() }),
         )
-        // Voice input (Plan A1): beside Send, hidden while an answer is running.
+        // Speak replies: every reply read aloud as it arrives, the owl's lines first (the Settings → Voice switch).
+        if (viewModel.canPlay) {
+            val speak by viewModel.speakReplies.collectAsStateWithLifecycle()
+            FilledTonalIconToggleButton(
+                checked = speak || conversation,
+                onCheckedChange = viewModel::setSpeakReplies,
+                enabled = !conversation,
+                modifier = Modifier.testTag(SPEAK_TAG),
+            ) {
+                Icon(painterResource(R.drawable.ic_voice), contentDescription = stringResource(R.string.research_speak_replies))
+            }
+        }
+        // The mic is a conversation (Neal, 2026-11-02): it listens, sends, the reply is spoken, and it listens again.
+        // Hidden while a reply is written; Stop ends the conversation then.
         val dictation = viewModel.dictation
-        val micShown by viewModel.micShown.collectAsStateWithLifecycle()
-        val dictationState = dictation?.state?.collectAsStateWithLifecycle()?.value
-        if (!running && micShown && dictation != null && voicePrefs != null) {
+        val offered by viewModel.conversationShown.collectAsStateWithLifecycle()
+        val listening = dictation?.state?.collectAsStateWithLifecycle()?.value is Dictation.State.Listening
+        if (!running && offered && dictation != null && voicePrefs != null) {
             MicButton(
-                listening = dictationState is Dictation.State.Listening,
+                listening = listening || conversation,
                 prefs = voicePrefs,
-                onStart = viewModel::speak,
-                onStop = dictation::stop,
+                onStart = viewModel::startConversation,
+                // Listening: the take ends now and sends what it heard. Between takes (the reply being read): End.
+                onStop = { if (listening) dictation.stop() else viewModel.endConversation() },
                 enabled = enabled,
+                pulse = listening,
+                startLabel = stringResource(R.string.research_conversation_start),
+                stopLabel = stringResource(if (listening) R.string.voice_input_stop else R.string.research_conversation_end),
+                modifier = Modifier.testTag(CONVERSATION_TAG),
             )
         }
         if (running) {
@@ -893,7 +907,9 @@ internal fun AskTitle() {
         Text(stringResource(R.string.research_title))
         Text(
             stringResource(R.string.research_preview),
-            Modifier
+            maxLines = 1,
+            softWrap = false,
+            modifier = Modifier
                 .padding(start = 10.dp)
                 .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
                 .padding(horizontal = 6.dp, vertical = 1.dp),

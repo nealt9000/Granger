@@ -66,4 +66,5 @@
     <string name="research_conversation_speaking">Respondiendo en voz alta…</string>
     <string name="research_conversation_on">Conversación activada</string>
     <string name="research_show_latest">Ver lo más reciente</string>
+    <string name="research_speak_replies">Leer las respuestas en voz alta</string>
 </resources>

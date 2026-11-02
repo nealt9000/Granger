@@ -91,4 +91,5 @@
     <string name="research_conversation_on">Conversation on</string>
     <!-- A button over the thread when the user has scrolled up from a reply that's still arriving. -->
     <string name="research_show_latest">Show the latest</string>
+    <string name="research_speak_replies">Speak replies</string>
 </resources>

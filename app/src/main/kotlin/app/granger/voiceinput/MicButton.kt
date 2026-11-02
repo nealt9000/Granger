@@ -48,6 +48,10 @@ fun MicButton(
     onStop: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    /** Pulses while it hears; Ask's conversation stays filled, without the pulse, while its reply is read. */
+    pulse: Boolean = listening,
+    startLabel: String = stringResource(R.string.voice_input_speak),
+    stopLabel: String = stringResource(R.string.voice_input_stop),
 ) {
     val start = rememberMicStart(prefs, onStart)
 
@@ -56,16 +60,16 @@ fun MicButton(
     }
 
     if (listening) {
-        val pulse by rememberInfiniteTransition(label = "mic").animateFloat(
-            initialValue = 1f, targetValue = 0.55f,
+        val alpha by rememberInfiniteTransition(label = "mic").animateFloat(
+            initialValue = 1f, targetValue = if (pulse) 0.55f else 1f,
             animationSpec = infiniteRepeatable(tween(700), RepeatMode.Reverse), label = "mic-pulse",
         )
         FilledIconButton(onClick = ::tap, modifier = modifier) {
-            Icon(painterResource(R.drawable.ic_mic), contentDescription = stringResource(R.string.voice_input_stop), Modifier.alpha(pulse))
+            Icon(painterResource(R.drawable.ic_mic), contentDescription = stopLabel, Modifier.alpha(alpha))
         }
     } else {
         IconButton(onClick = ::tap, modifier = modifier, enabled = enabled) {
-            Icon(painterResource(R.drawable.ic_mic), contentDescription = stringResource(R.string.voice_input_speak))
+            Icon(painterResource(R.drawable.ic_mic), contentDescription = startLabel)
         }
     }
 }

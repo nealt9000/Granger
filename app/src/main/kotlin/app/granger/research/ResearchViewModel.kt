@@ -92,8 +92,12 @@ class ResearchViewModel(
     private val cpu: CoroutineDispatcher = Dispatchers.Default,
     /** Reads answers aloud (Plan V2) and plays cited songs and chapters (Plan R3); null leaves both out. */
     private val player: PlayerHub? = null,
-    /** Settings → Voice → "Speak answers as they arrive": a new answer is read as its sentences close. */
-    private val speakAnswers: () -> Boolean = { false },
+    /**
+     * Speak replies: the ask box's speaker, the same setting as Settings → Voice → "Speak answers as they arrive". A
+     * new reply is read as it arrives, the owl's lines first.
+     */
+    private val speakAnswers: StateFlow<Boolean> = MutableStateFlow(false),
+    private val setSpeakAnswers: (Boolean) -> Unit = {},
     private val now: () -> Long = System::currentTimeMillis,
     /**
      * Whether the owl speaks ([OwlLines]): its lines are English copy, so with the app in another language Ask shows the
@@ -264,35 +268,43 @@ class ResearchViewModel(
         ?: MutableStateFlow(false)
 
     /**
-     * The mic: the words go into the box after anything already typed. The question then waits for Send, or sends
-     * itself with "Ask as soon as I stop talking" on (Settings → Voice input).
+     * One take of the conversation's mic: the words go into the box after anything already typed, and the question
+     * sends itself when the take ends. A take that hears nothing ends the conversation, so the mic is never left open.
      */
-    fun speak() {
+    private fun listen() {
         val dictation = dictation ?: return
         if (live.value != null) return
         val typed = input.trimEnd()
         val prefix = if (typed.isEmpty()) "" else "$typed "
         val started = dictation.start(
             onText = { input = prefix + it },
-            // In conversation mode a take that hears nothing ends the conversation, so the mic is never left open.
-            onFailed = { if (conversing.value) endConversation() },
+            onFailed = { endConversation() },
         ) { heard ->
             input = prefix + heard
-            when {
-                conversing.value && input.isBlank() -> endConversation()
-                (conversing.value || voice?.prefs?.askWhenDone?.value == true) && input.isNotBlank() -> send()
-            }
+            if (conversing.value && input.isNotBlank()) send() else endConversation()
         }
-        if (!started && conversing.value && !dictation.listening) endConversation()
+        if (!started && !dictation.listening) endConversation()
     }
+
+    /** The ask box's speaker: whether replies are read aloud as they arrive. */
+    val speakReplies: StateFlow<Boolean> = speakAnswers
+
+    /** Turning it off stops a reply being read now. */
+    fun setSpeakReplies(on: Boolean) {
+        setSpeakAnswers(on)
+        if (!on && !conversing.value && state.value.turns.any { it.voice != VoiceButton.IDLE }) player?.stopVoice()
+    }
+
+    /** Replies are spoken: the speaker is on, or a conversation is. */
+    private fun speaking() = speakAnswers.value || conversing.value
 
     // ---- conversation mode ----
 
     private val conversing = MutableStateFlow(false)
 
     /**
-     * Conversation mode (Neal, 2026-11-02): speak, the answer is read aloud as it arrives, then the mic listens again,
-     * hands-free until a take hears nothing, Stop, End, or the chat leaves the screen. Not stored: each chat starts typed.
+     * Conversation mode (Neal, 2026-11-02), the ask box's mic: speak, the reply is read aloud as it arrives, then the
+     * mic listens again, hands-free until a take hears nothing, Stop, End, or the chat leaves the screen. Not stored.
      */
     val conversation: StateFlow<Boolean> = conversing
 
@@ -312,7 +324,7 @@ class ResearchViewModel(
     fun startConversation() {
         if (!conversationShown.value || conversing.value) return
         conversing.value = true
-        if (live.value == null) speak()
+        if (live.value == null) listen()
     }
 
     fun endConversation() {
@@ -323,40 +335,28 @@ class ResearchViewModel(
     }
 
     /**
-     * After a turn in conversation mode: says the outcome if nothing was read as it streamed, waits for the voice to
-     * finish (or be stopped), then listens again. Pausing the voice waits. The mic stops the voice before it listens
-     * ([VoiceInput.beforeListening]), so it never hears Granger.
+     * After a turn in conversation mode: waits for its reply to be read out (or stopped; pausing waits), then listens
+     * again. The mic stops the voice before it listens ([VoiceInput.beforeListening]), so it never hears Granger.
      */
     private fun answerThenListen(turnId: Long) {
         val hub = player ?: return
         nextTake?.cancel()
         nextTake = viewModelScope.launch {
-            val key = answerKey(turnId)
-            if (streamedTurn != turnId) {
-                val ui = state.first { s -> s.turns.any { it.turn.id == turnId && it.turn.outcome != TurnOutcome.PENDING } }
-                    .turns.first { it.turn.id == turnId }
-                val text = when (ui.turn.outcome) {
-                    TurnOutcome.ANSWERED -> AnswerText.spoken(ui.turn.answer, ui.turn.medical)
-                    else -> outcomeLine(ui)
+            if (streamedTurn == turnId) {
+                val key = answerKey(turnId)
+                fun onThis(p: PlayerUi) = (p.now as? NowPlaying.Voice)?.takeIf { it.sourceKey == key && !it.ended }
+                // The read may take a moment to start; one that never does still lets the conversation go on.
+                if (withTimeoutOrNull(READ_START_MS) { hub.ui.first { onThis(it) != null } } != null) {
+                    hub.ui.first { onThis(it) == null }
                 }
-                if (text.isNullOrBlank()) {
-                    listenAgain()
-                    return@launch
-                }
-                hub.readAloud(TextReadSource(key, ui.turn.question, text))
+                delay(AFTER_VOICE_MS)
             }
-            fun onThis(p: PlayerUi) = (p.now as? NowPlaying.Voice)?.takeIf { it.sourceKey == key && !it.ended }
-            // The read may take a moment to start; one that never does still lets the conversation go on.
-            if (withTimeoutOrNull(READ_START_MS) { hub.ui.first { onThis(it) != null } } != null) {
-                hub.ui.first { onThis(it) == null }
-            }
-            delay(AFTER_VOICE_MS)
             listenAgain()
         }
     }
 
     private fun listenAgain() {
-        if (conversing.value && onScreen && live.value == null) speak()
+        if (conversing.value && onScreen && live.value == null) listen()
     }
 
     fun send() {
@@ -615,6 +615,9 @@ class ResearchViewModel(
             // Not cancellable, so a turn that was stored is always known here and can be settled.
             withContext(NonCancellable) {
                 turnId = chats.startTurn(chatId, ask.question, ask.quote)
+                spokenLead = ""
+                answerSpoken = false
+                spokenAnswer = ""
                 live.value = Live(turnId, null, null, waking = wakingLine())
             }
             pipeline.run(request) { stopRequested }.flowOn(cpu).collect { event ->
@@ -624,27 +627,39 @@ class ResearchViewModel(
                         if (owlSpeaks()) {
                             val line = OwlLines.pick(event.topic, saidLines).also { saidLines += it }
                             live.update { it?.copy(reaction = line) }
+                            sayLead(turnId, ask.question, line)
                         }
                     }
-                    is ResearchEvent.Reading -> if (owlSpeaks()) live.update { it?.copy(reading = OwlLines.reading(event.passages)) }
+                    is ResearchEvent.Reading -> if (owlSpeaks()) {
+                        val line = OwlLines.reading(event.passages)
+                        live.update { it?.copy(reading = line) }
+                        sayLead(turnId, ask.question, line)
+                    }
                     is ResearchEvent.LookingIn -> if (owlSpeaks()) {
                         val line = OwlLines.lookingIn(event.titles, medical = healthReaction || medical)
                         live.update { it?.copy(lookingIn = line) }
+                        sayLead(turnId, ask.question, line.replace(" · ", ", "))
                     }
-                    is ResearchEvent.Progress -> live.update { it?.copy(stage = event.stage) }
+                    is ResearchEvent.Progress -> {
+                        live.update { it?.copy(stage = event.stage) }
+                        // The owl's waking line shows while the model loads; it's said then too.
+                        if (event.stage == Stage.LOADING_MODEL) live.value?.waking?.let { sayLead(turnId, ask.question, it) }
+                    }
                     is ResearchEvent.Partial -> {
                         live.update { it?.copy(partial = event.text) }
-                        speakPartial(turnId, ask.question, medical, event.text)
+                        speakPartial(turnId, ask.question, event.text)
                     }
                     ResearchEvent.Medical -> {
                         medical = true
                         live.update { it?.copy(medical = true) }
+                        sayLead(turnId, ask.question, AnswerText.MEDICAL)
                     }
                     is ResearchEvent.Done -> withContext(NonCancellable) {
                         (event.outcome as? Outcome.Failed)?.cause?.let { runCatching { android.util.Log.w("Granger", "Research turn failed", it) } }
                         settle(checkNotNull(turnId), event.outcome, kept)
                         settled = true
                         lastSettled = turnId
+                        sayOutcome(chatId, checkNotNull(turnId), ask.question, event.outcome)
                         // Not in conversation mode: the guess would hold the model while the mic waits for the next question.
                         guessNext = event.outcome.let { it is Outcome.Declined && !it.medical } && ask.quote == null && !stopRequested &&
                             !conversing.value
@@ -679,24 +694,66 @@ class ResearchViewModel(
 
     // ---- read aloud (Plan V2) ----
 
-    /** The answer being read as it streams, while "Speak answers as they arrive" is on; one turn at a time. */
+    /** The reply being read as it arrives, while replies are spoken; one turn at a time. */
     private var streaming: StreamingTextReadSource? = null
+    /** What the owl has said before the answer (its reaction, where it's looking, what it's reading), as paragraphs. */
+    private var spokenLead = ""
+    /** Whether the answer itself has begun to be read, so the outcome isn't read twice. */
+    private var answerSpoken = false
+    /** The answer's spoken text so far, for a line said after it. */
+    private var spokenAnswer = ""
 
-    /** A new piece of the answer: starts the read on the first one (with the setting on), then feeds it. */
-    private fun speakPartial(turnId: Long?, question: String, medical: Boolean, text: String) {
-        val hub = player ?: return
-        val id = turnId ?: return
-        val source = streaming ?: run {
-            if (!speakAnswers() && !conversing.value) return
-            StreamingTextReadSource(answerKey(id), question, preface = if (medical) AnswerText.MEDICAL else null).also {
+    /** This turn's spoken reply, started on its first line while replies are spoken; null while they aren't. */
+    private fun stream(turnId: Long?, question: String): StreamingTextReadSource? {
+        val hub = player ?: return null
+        val id = turnId ?: return null
+        return streaming ?: run {
+            if (!speaking()) return null
+            StreamingTextReadSource(answerKey(id), question).also {
                 streaming = it
                 streamedTurn = id
                 hub.readAloud(it)
             }
         }
+    }
+
+    /** One of the owl's lines before the answer: said in order, each as soon as it shows. */
+    private fun sayLead(turnId: Long?, question: String, line: String) {
+        if (answerSpoken || line.isBlank()) return
+        val source = stream(turnId, question) ?: return
+        spokenLead = if (spokenLead.isEmpty()) line else "$spokenLead\n\n$line"
+        // A trailing break: every line is whole, so it is read now rather than waiting for more.
+        source.append("$spokenLead\n\n")
+    }
+
+    /** A new piece of the answer, read after the owl's lines. */
+    private fun speakPartial(turnId: Long?, question: String, text: String) {
+        val source = stream(turnId, question) ?: return
+        answerSpoken = true
+        spokenAnswer = AnswerText.spoken(text)
         // The spoken form is trimmed; the trailing space says whether the last sentence may still be growing.
         val trailing = if (text.endsWith(" ") || text.endsWith("\n")) " " else ""
-        source.append(AnswerText.spoken(text) + trailing)
+        source.append(withLead(spokenAnswer) + trailing)
+    }
+
+    private fun withLead(text: String) = listOf(spokenLead, text).filter { it.isNotBlank() }.joinToString("\n\n")
+
+    /**
+     * The settled turn, while replies are spoken: an answer that didn't stream is read whole, and a decline or failure
+     * is said in the screen's words ([outcomeLine]), after the owl's lines.
+     */
+    private suspend fun sayOutcome(chatId: Long, turnId: Long, question: String, outcome: Outcome) {
+        if (!speaking()) return
+        val text = when (outcome) {
+            is Outcome.Answered -> if (answerSpoken) return else AnswerText.spoken(outcome.text)
+            else -> {
+                val ui = chats.turns(chatId).first().firstOrNull { it.id == turnId }?.toUi(null, null, emptySet(), null) ?: return
+                outcomeLine(ui) ?: return
+            }
+        }
+        val source = stream(turnId, question) ?: return
+        // After an answer that streamed and then didn't stand (unverified), the line follows what was read.
+        source.append(withLead(listOf(if (answerSpoken) spokenAnswer else "", text).filter { it.isNotBlank() }.joinToString("\n\n")))
     }
 
     /** Reads [turnId]'s answer (or its kept guess) aloud through the player, from the start. */

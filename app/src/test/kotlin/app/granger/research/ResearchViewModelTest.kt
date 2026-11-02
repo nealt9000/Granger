@@ -87,7 +87,7 @@ class ResearchViewModelTest {
         return ResearchViewModel(
             chatId, quote, chats, ResearchPipeline(finder, models, dense = dense), manager, sessions, library, bookshelf,
             MediaIndex(mediaLibrary, backgroundScope, main.dispatcher), backgroundScope, savedState, cpu,
-            player = player, speakAnswers = { speakAnswers }, now = { 42L }, voice = voice, outcomeLine = outcomeLine,
+            player = player, speakAnswers = MutableStateFlow(speakAnswers), now = { 42L }, voice = voice, outcomeLine = outcomeLine,
         )
     }
 
@@ -103,40 +103,6 @@ class ResearchViewModelTest {
         voice.status.first { it.tag != null }
         testScheduler.advanceUntilIdle()
         return Triple(vm, speech, prefs)
-    }
-
-    @Test fun aSpokenQuestionWaitsInTheBoxForSend() = runTest(main.dispatcher) {
-        val (vm, speech) = spoken()
-        assertThat(vm.micShown.value).isTrue()
-        vm.speak()
-        testScheduler.advanceUntilIdle()
-        speech.send(app.granger.core.speech.DictationEvent.Partial("How do plants"))
-        testScheduler.advanceUntilIdle()
-        assertThat(vm.input).isEqualTo("How do plants")
-        speech.end(app.granger.core.speech.DictationEvent.Final("How do plants use light?"))
-        testScheduler.advanceUntilIdle()
-        assertThat(vm.input).isEqualTo("How do plants use light?")
-        assertThat(chats.turnList.value).isEmpty()
-    }
-
-    @Test fun withAskWhenDoneTheSpokenQuestionSendsItself() = runTest(main.dispatcher) {
-        val (vm, speech) = spoken(askWhenDone = true)
-        vm.speak()
-        testScheduler.advanceUntilIdle()
-        speech.end(app.granger.core.speech.DictationEvent.Final("How do plants use light?"))
-        testScheduler.advanceUntilIdle()
-        assertThat(vm.input).isEmpty()
-        assertThat(chats.turnList.value.single().question).isEqualTo("How do plants use light?")
-    }
-
-    @Test fun speakingKeepsWhatWasAlreadyTyped() = runTest(main.dispatcher) {
-        val (vm, speech) = spoken()
-        vm.input = "Tell me  "
-        vm.speak()
-        testScheduler.advanceUntilIdle()
-        speech.end(app.granger.core.speech.DictationEvent.Final("about Kant"))
-        testScheduler.advanceUntilIdle()
-        assertThat(vm.input).isEqualTo("Tell me about Kant")
     }
 
     @Test fun aSpanishAppHasNoMicInTheAskBoxUntilSpanishAsk() = runTest(main.dispatcher) {
@@ -212,7 +178,10 @@ class ResearchViewModelTest {
         val turn = chats.turnList.value.single()
         assertThat(turn.outcome).isEqualTo(TurnOutcome.DECLINED)
         assertThat(turn.guess).isEmpty()
-        assertThat(t.hub.lastSource!!.utterances(null, 10).map { it.text }).containsExactly("Not in your library.")
+        // The owl's lines before it are said too, then the decline.
+        val said = t.hub.lastSource!!.utterances(null, 20).map { it.text }
+        assertThat(said.size).isGreaterThan(1)
+        assertThat(said.last()).isEqualTo("Not in your library.")
         // A reading that never shows up doesn't strand the conversation.
         assertThat(t.speech.tags).hasSize(2)
     }
@@ -265,7 +234,10 @@ class ResearchViewModelTest {
         assertThat(hub.calls).containsExactly("readAloud:text:answer:${turn.id}@null")
         val source = hub.lastSource as app.granger.core.speech.StreamingTextReadSource
         assertThat(source.isComplete).isTrue()
-        assertThat(source.utterances(null, 10).map { it.text }).containsExactly("Plants turn light into sugar.")
+        // The owl's reaction and what it is reading come first, in the order shown, then the answer.
+        val said = source.utterances(null, 20).map { it.text }
+        assertThat(said.last()).isEqualTo("Plants turn light into sugar.")
+        assertThat(said.size).isGreaterThan(1)
         // A second question reads its own answer afresh.
         vm.ask("And at night?")
         testScheduler.advanceUntilIdle()
@@ -291,6 +263,18 @@ class ResearchViewModelTest {
     }
 
     private fun ResearchViewModel.clear() = ViewModelStore().also { it.put("vm", this) }.clear()
+
+    @Test fun turningTheSpeakerOffStopsAReplyBeingRead() = runTest(main.dispatcher) {
+        val hub = app.granger.player.FakePlayerHub()
+        val vm = vm(player = hub, speakAnswers = true)
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        val turn = chats.turnList.value.single()
+        hub.voiceOn("text:answer:${turn.id}")
+        testScheduler.advanceUntilIdle()
+        vm.setSpeakReplies(false)
+        assertThat(hub.calls.last()).isEqualTo("stopVoice")
+    }
 
     @Test fun searchInsteadUsesTheFirstKeyword() {
         assertThat(searchInsteadQuery(listOf("world cup", "2031", "football"), "Who won the 2031 World Cup?")).isEqualTo("world cup")

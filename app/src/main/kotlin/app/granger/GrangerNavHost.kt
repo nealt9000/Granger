@@ -1092,7 +1092,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             container.library, container.bookshelf, container.mediaIndex, container.appScope,
                             savedState = createSavedStateHandle(),
                             player = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub else null,
-                            speakAnswers = { container.voicePrefs.speakAnswers.value },
+                            speakAnswers = container.voicePrefs.speakAnswers,
+                            setSpeakAnswers = container.voicePrefs::setSpeakAnswers,
                             voice = container.voiceInput,
                             // Conversation mode is English-only (its mic is), so the owl's decline is the one heard.
                             outcomeLine = { ui -> spokenOutcome(appContext.resources, ui, owl = java.util.Locale.getDefault().language == "en") },
