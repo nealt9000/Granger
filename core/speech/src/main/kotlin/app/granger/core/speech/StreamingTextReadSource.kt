@@ -46,7 +46,11 @@ class StreamingTextReadSource(override val key: String, override val title: Stri
             val v = version.value
             val all = ready
             val start = if (from == null) 0 else all.indexOfFirst { it.address == from }
-            if (start in all.indices) return all.subList(start, minOf(all.size, start + limit))
+            // Asked from the last sentence ready while more may come (the player continuing from what it has read): wait
+            // for the next one. Returning only that sentence read as "nothing new" and ended the read, which the owl's
+            // lines before an answer hit every turn (Neal, 2026-11-02: the reaction was said, then nothing).
+            val caughtUp = from != null && start == all.lastIndex && !complete
+            if (start in all.indices && !caughtUp) return all.subList(start, minOf(all.size, start + limit))
             if (complete) return emptyList()
             version.first { it != v }        // more text, or the end
         }

@@ -16,7 +16,22 @@ class StreamingTextReadSourceTest {
         s.append("Light scatters. Blue scatters most. ")
         assertThat(s.utterances(null, 10).map { it.text }).containsExactly("Light scatters.", "Blue scatters most.").inOrder()
         s.append("Light scatters. Blue scatters most. So the")
-        assertThat(s.utterances(ReadAddress.Text("answer:1", 0, 1), 10).map { it.text }).containsExactly("Blue scatters most.")
+        assertThat(s.utterances(ReadAddress.Text("answer:1", 0, 0), 10).map { it.text }).containsExactly("Light scatters.", "Blue scatters most.").inOrder()
+    }
+
+    @Test fun aReaderCaughtUpWithTheTextWaitsForTheNextSentenceInsteadOfEnding() = runTest {
+        val s = StreamingTextReadSource("answer:1", "Q")
+        s.append("Hold on to your hat.\n\n")                    // the owl's reaction, long before the answer
+        val last = s.utterances(null, 10).last().address
+        val next = async { s.utterances(last, 10) }
+        advanceUntilIdle()
+        assertThat(next.isCompleted).isFalse()
+        s.append("Hold on to your hat.\n\nReading the likeliest 4…\n\n")
+        assertThat(next.await().map { it.text }).containsExactly("Hold on to your hat.", "Reading the likeliest 4…").inOrder()
+        // Once complete, the last sentence is served on its own and then nothing.
+        s.complete()
+        val end = s.utterances(null, 10).last().address
+        assertThat(s.utterances(end, 10).map { it.text }).containsExactly("Reading the likeliest 4…")
     }
 
     @Test fun utterancesWaitForMoreTextAndCompleteEndsTheSource() = runTest {

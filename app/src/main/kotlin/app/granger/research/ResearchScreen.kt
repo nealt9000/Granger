@@ -388,6 +388,18 @@ fun ResearchScreen(
                 },
                 title = { AskTitle() },
                 actions = {
+                    // Speak replies: every reply read aloud as it arrives, the owl's lines first (the Settings → Voice switch).
+                    if (viewModel.canPlay) {
+                        val speak by viewModel.speakReplies.collectAsStateWithLifecycle()
+                        FilledTonalIconToggleButton(
+                            checked = speak || conversation,
+                            onCheckedChange = viewModel::setSpeakReplies,
+                            enabled = !conversation,
+                            modifier = Modifier.testTag(SPEAK_TAG),
+                        ) {
+                            Icon(painterResource(R.drawable.ic_voice), contentDescription = stringResource(R.string.research_speak_replies))
+                        }
+                    }
                     // Recent chats live behind their own button, not in the new chat (Neal, U3a walkthrough).
                     val others = state.recentChats.filter { it.id != state.chatId }
                     if (others.isNotEmpty()) {
@@ -561,18 +573,6 @@ private fun QuestionField(
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
             keyboardActions = KeyboardActions(onSend = { if (!running && canSend) viewModel.send() }),
         )
-        // Speak replies: every reply read aloud as it arrives, the owl's lines first (the Settings → Voice switch).
-        if (viewModel.canPlay) {
-            val speak by viewModel.speakReplies.collectAsStateWithLifecycle()
-            FilledTonalIconToggleButton(
-                checked = speak || conversation,
-                onCheckedChange = viewModel::setSpeakReplies,
-                enabled = !conversation,
-                modifier = Modifier.testTag(SPEAK_TAG),
-            ) {
-                Icon(painterResource(R.drawable.ic_voice), contentDescription = stringResource(R.string.research_speak_replies))
-            }
-        }
         // The mic is a conversation (Neal, 2026-11-02): it listens, sends, the reply is spoken, and it listens again.
         // Hidden while a reply is written; Stop ends the conversation then.
         val dictation = viewModel.dictation
@@ -910,9 +910,9 @@ internal fun AskTitle() {
             maxLines = 1,
             softWrap = false,
             modifier = Modifier
-                .padding(start = 10.dp)
+                .padding(start = 6.dp)
                 .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
-                .padding(horizontal = 6.dp, vertical = 1.dp),
+                .padding(horizontal = 4.dp, vertical = 1.dp),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
