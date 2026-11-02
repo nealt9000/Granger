@@ -147,5 +147,4 @@
     <string name="settings_voice_no_storage">No storage to download to.</string>
     <!-- %1$s is the voice's title. -->
     <string name="settings_voice_no_space">Not enough free space for %1$s.</string>
-    <string name="settings_voice_over_cap">Over the storage cap.</string>
 </resources>

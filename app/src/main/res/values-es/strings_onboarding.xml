@@ -76,7 +76,6 @@
     <string name="onboarding_store_on">Guardar en</string>
     <string name="onboarding_volume_free">%1$s · %2$s libres</string>
     <string name="onboarding_no_space">No hay espacio suficiente en %1$s: libera %2$s o desmarca algo.</string>
-    <string name="onboarding_over_cap">Con eso tus descargas llegarían a %1$s, por encima del límite de %2$s.</string>
 
     <string name="onboarding_held_slice">%1$s %2$s incluye %3$s, así que solo se pone en cola %2$s.</string>
     <string name="onboarding_held">%1$s incluye %2$s, así que no se pone en cola.</string>

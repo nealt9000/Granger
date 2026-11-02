@@ -354,7 +354,6 @@ class OnboardingViewModel(
             val problem = when (val result = enqueue(group, order, volume, wifiOnly.value)) {
                 EnqueueResult.Queued, EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> null
                 is EnqueueResult.NoSpace -> UiText.Res(R.string.onboarding_no_space, volume.label, formatBytes(result.neededBytes))
-                is EnqueueResult.OverCap -> UiText.Res(R.string.onboarding_over_cap, formatBytes(result.wouldUseBytes), formatBytes(result.capBytes))
             }
             if (problem != null) {
                 starting.value = false

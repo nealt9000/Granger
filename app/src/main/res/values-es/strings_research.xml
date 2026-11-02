@@ -49,6 +49,5 @@
     <string name="research_delete_all">Eliminar todos</string>
 
     <string name="research_librarian_no_space">No hay espacio suficiente en %1$s: libera %2$s.</string>
-    <string name="research_librarian_over_cap">Eso llevaría tus descargas por encima del límite de %1$s.</string>
     <string name="research_personal_medical">No puedo responder preguntas sobre tu propia salud. Un médico, enfermero o farmacéutico sí puede. Buscar en su lugar muestra lo que dice tu biblioteca sobre el tema.</string>
 </resources>

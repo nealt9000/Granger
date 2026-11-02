@@ -1,5 +1,7 @@
 package app.granger.core.archive
 
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -12,6 +14,7 @@ class ArchiveOrgClient(
     private val client: OkHttpClient,
     private val userAgent: String,
     private val baseUrl: String = "https://archive.org",
+    private val io: CoroutineDispatcher = Dispatchers.IO,
 ) {
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -65,7 +68,7 @@ class ArchiveOrgClient(
     fun detailsUrl(identifier: String): String = "$baseUrl/details/$identifier"
 
     private suspend fun fetch(url: HttpUrl): JsonObject {
-        val reply = client.getText(url, userAgent) { ArchiveError(ArchiveProblem.UNREACHABLE, "Couldn't reach archive.org") }
+        val reply = client.getText(url, userAgent, io) { ArchiveError(ArchiveProblem.UNREACHABLE, "Couldn't reach archive.org") }
         if (!reply.isSuccessful) throw ArchiveError(ArchiveProblem.ANSWERED, "archive.org answered ${reply.code}", reply.code)
         return parse { json.parseToJsonElement(reply.body).jsonObject }
     }

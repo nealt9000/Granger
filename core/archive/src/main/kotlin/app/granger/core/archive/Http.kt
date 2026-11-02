@@ -1,6 +1,7 @@
 package app.granger.core.archive
 
 import android.util.Log
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
@@ -15,7 +16,7 @@ internal class HttpReply(val code: Int, val body: String) {
 }
 
 /**
- * One GET with Granger's User-Agent, on [Dispatchers.IO], shared by the archive.org and LibriVox clients. The caller
+ * One GET with Granger's User-Agent, on [io] (tests pass their own, so no reply lands after a test ends), shared by the archive.org and LibriVox clients. The caller
  * maps statuses to its own errors; an [IOException] becomes [unreachable]'s error.
  *
  * A failure is tried once more on a new connection, and a call gets [CALL_TIMEOUT_S] in all. The shared client keeps
@@ -23,8 +24,10 @@ internal class HttpReply(val code: Int, val body: String) {
  * each search for the client's 60 s read timeout and then failed, until the pool let it go: "Couldn't reach
  * archive.org" for a few minutes, then fine again (Pixel 6 walkthrough, 2026-10-30).
  */
-internal suspend fun OkHttpClient.getText(url: HttpUrl, userAgent: String, unreachable: () -> Exception): HttpReply =
-    withContext(Dispatchers.IO) {
+internal suspend fun OkHttpClient.getText(
+    url: HttpUrl, userAgent: String, io: CoroutineDispatcher = Dispatchers.IO, unreachable: () -> Exception,
+): HttpReply =
+    withContext(io) {
         val request = Request.Builder().url(url).header("User-Agent", userAgent).build()
         // Shares this client's pool and dispatcher; only the timeout differs.
         val client = newBuilder().callTimeout(CALL_TIMEOUT_S, TimeUnit.SECONDS).build()

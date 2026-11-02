@@ -1250,7 +1250,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 chunksOf = container.bookIndex::chunks,
                                 bookSearch = { container.bookIndex.search(it) },
                                 librarySearch = container.search,
-                                thumbnail = ArticleThumbnails(File(appContext.cacheDir, "home-thumbs"))::thumbnail,
+                                thumbnail = ArticleThumbnails(File(appContext.cacheDir, "home-thumbs")).let { thumbs ->
+                                    // Once per Home: the cache trimmed to its cap, in the background.
+                                    container.appScope.launch(Dispatchers.IO) { thumbs.prune() }
+                                    thumbs::thumbnail
+                                },
                                 languages = { container.knowledgeNow.value },
                             ),
                             container.shelves, container.media, container.homePrefs, tidyDismissals = container.tidyDismissals,

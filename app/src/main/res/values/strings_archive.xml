@@ -75,7 +75,6 @@
     <!-- %1$s is the storage, such as Internal storage; %2$s the item; %3$s the space needed. -->
     <string name="archive_no_space">Not enough space on %1$s for %2$s: free up %3$s.</string>
     <!-- %1$s is the item; %2$s the total it would make; %3$s the downloads limit. -->
-    <string name="archive_over_cap">%1$s would bring your downloads to %2$s, over the %3$s limit.</string>
     <string name="archive_already_in_audiobooks">This is already in your Audiobooks.</string>
     <string name="archive_already_in_music">This is already in your Music.</string>
     <!-- %1$d is the first year left out, such as 1926. -->

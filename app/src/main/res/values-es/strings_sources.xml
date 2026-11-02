@@ -131,7 +131,6 @@
     <string name="sources_couldnt_delete">No se pudo eliminar %1$s.</string>
     <string name="sources_no_storage">No hay almacenamiento disponible en este momento.</string>
     <string name="sources_no_space">No hay espacio suficiente en %1$s para %2$s: libera %3$s.</string>
-    <string name="sources_over_cap">Con %1$s tus descargas llegarían a %2$s, por encima del límite de %3$s.</string>
     <plurals name="sources_queued_before">
         <item quantity="one">%1$s Se puso en cola %2$d antes de eso.</item>
         <item quantity="many">%1$s Se pusieron en cola %2$d antes de eso.</item>

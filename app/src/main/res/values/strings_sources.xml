@@ -173,7 +173,6 @@
     <!-- %1$s is the storage, %2$s the item, %3$s the space needed. -->
     <string name="sources_no_space">Not enough space on %1$s for %2$s: free up %3$s.</string>
     <!-- %1$s is the item, %2$s the total it would make, %3$s the downloads limit. -->
-    <string name="sources_over_cap">%1$s would bring your downloads to %2$s, over the %3$s limit.</string>
     <!-- After a problem part-way through a set: %1$s is the problem, %2$d how many were queued first. -->
     <plurals name="sources_queued_before">
         <item quantity="one">%1$s Queued %2$d before that.</item>

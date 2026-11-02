@@ -100,8 +100,6 @@ class MediaDownloader(
                 if (!existed) withContext(io) { dir.deleteRecursively() }
                 UiText.Res(R.string.sources_no_space, volume.label, title, formatBytes(result.neededBytes))
             }
-            // Groups are never capped (no storage cap); kept for the exhaustive when.
-            is EnqueueResult.OverCap -> null
         }
     }
 

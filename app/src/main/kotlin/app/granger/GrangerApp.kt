@@ -616,14 +616,6 @@ class AppContainer(context: Context) {
         // Deferred: the queue needs the runner, made below.
         progress = flow { emitAll(downloadQueue.progress) },
         unmetered = unmeteredFlow(context),
-        // Every installed pack and book counts towards the cap, SD card included (spec "Storage cap").
-        // Books are not in the library yet, so they come from the downloads ledger.
-        installedPackBytes = {
-            library.packs.first().sumOf { it.sizeBytes } +
-                downloadDao.getAll().filter { it.kind == ItemKind.BOOK && it.state == DownloadState.INSTALLED }.sumOf { it.sizeBytes }
-        },
-        // Uncapped until Plan 8 wires :core:billing.
-        capBytes = { Long.MAX_VALUE },
     )
 
     val downloadRunner = DownloadRunner(

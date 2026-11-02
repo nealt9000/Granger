@@ -57,7 +57,6 @@ class Librarian(
             when (val result = downloads.enqueue(item, volume.root, prefs.wifiOnly)) {
                 EnqueueResult.Queued, EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> Unit
                 is EnqueueResult.NoSpace -> return UiText.Res(R.string.research_librarian_no_space, volume.label, formatBytes(result.neededBytes))
-                is EnqueueResult.OverCap -> return UiText.Res(R.string.research_librarian_over_cap, formatBytes(result.capBytes))
             }
         }
         return null

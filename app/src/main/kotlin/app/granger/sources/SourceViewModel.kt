@@ -511,8 +511,6 @@ class SourceViewModel(
                 EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> null
                 is EnqueueResult.NoSpace ->
                     UiText.Res(R.string.sources_no_space, volume.label, item.title, formatBytes(result.neededBytes))
-                is EnqueueResult.OverCap ->
-                    UiText.Res(R.string.sources_over_cap, item.title, formatBytes(result.wouldUseBytes), formatBytes(result.capBytes))
             }
             if (problem != null) return if (queued > 0) UiText.Plural(R.plurals.sources_queued_before, queued, problem, queued) else problem
         }

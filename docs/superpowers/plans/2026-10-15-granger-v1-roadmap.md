@@ -142,7 +142,7 @@ Plan 1's measurements feed directly into Plans 6–8 (backend choice, model file
 - Kiwix's Gutenberg packs (`gutenberg_en_lcc-b`, `lcc-pr`) have no full-text index (`hasFulltextIndex: false`, checked 2026-10-16), so Ask can't search them; Granger Classics (Plan 4, built with the index on) covers that ground.
 - Plan 6's `ModelManager` finds installed models through the `downloads` ledger: an `INSTALLED` record of kind `MODEL`, file at `filePath`.
 - Plan 8 replaces `capBytes = { Long.MAX_VALUE }` in `AppContainer` with `:core:billing`'s cap, and shows the Pro upsell for `EnqueueResult.OverCap`.
-- No longer planned (2026-10-19): Neal dropped the storage cap, so there's no limit but the phone's storage. `capBytes` stays `Long.MAX_VALUE` until the unused cap plumbing is removed (left for later in `2026-10-19-plan-m2-media-sources.md`).
+- ~~No longer planned (2026-10-19): Neal dropped the storage cap, so there's no limit but the phone's storage. `capBytes` stays `Long.MAX_VALUE` until the unused cap plumbing is removed (left for later in `2026-10-19-plan-m2-media-sources.md`).~~ Fixed 2026-11-02: the cap plumbing is gone, `cl-cleanup`.
 - SD cards were tested only in JVM tests (the Pixel 6 has no slot). Try a phone with one before the beta.
 - Android 15 limits `dataSync` foreground services to 6 hours a day; a very slow multi-GB download pauses at the limit and resumes when WorkManager next runs it.
 - The Ray Charles sample pack's main page (`index`) renders blank: the ZIM's own `_res_/script.js` throws `$ is not defined` because the page never loads jQuery, so its masonry article list never lays out. Articles open and render fine. Reader item for a later plan (Kiwix injects jQuery for such main pages).
@@ -168,7 +168,7 @@ Neal's direction, 2026-10-16, to brainstorm before the next plan: the library wi
 
 Deferred, low priority (from Plan 2):
 - ~~Opening the reader after the OS killed the app shows the article it was first opened on, not the last page.~~ Fixed by Plan 5: tabs keep the path and scroll position.
-- Large media entries are read whole into memory.
+- ~~Large media entries are read whole into memory.~~ Fixed 2026-11-02: a stored entry of 256 KB or more (not HTML) streams from its range of the `.zim`, with byte ranges for seeking; compressed entries are still read whole, `cl-cleanup`.
 - No device test yet for a ZIM truncated or ejected (SD card) while it is open.
 
 ## Carried forward from Plan 5
@@ -390,7 +390,7 @@ Data and scanner:
 - A playlist row's position is its entry ordinal, which is right only while every entry has a track row (true today: the scanner never deletes rows).
 - The artist list takes an artist sort tag only from single-artist tracks.
 - Orphaned cover files are never cleaned up (old `<fingerprint>.jpg` files and shared covers nothing uses).
-- The TagLib skip list never resets, so a file whose tag read was cut short by any process death is skipped for tags forever.
+- ~~The TagLib skip list never resets, so a file whose tag read was cut short by any process death is skipped for tags forever.~~ Fixed 2026-11-02: two strikes (one death only makes a file suspect, a clean read clears it; old one-strike skips get one more read), `cl-cleanup`.
 - Parity gaps, later: original dates are read and stored but not shown or sorted by; no way to exclude folders from the scan.
 
 Player and engine:
@@ -427,7 +427,7 @@ Device checks still to do:
 
 Environment:
 - Development is in `~/Developer/Granger/Granger`. The old copy on `~/Desktop` (perhaps iCloud-synced) is stale: it spawned "X 2" duplicate files in `build/` directories that broke dexing.
-- `gradle.properties` still has the Linux machine's limits (2 workers, 2 GB heap, in-process Kotlin); they could be raised on the Mac.
+- ~~`gradle.properties` still has the Linux machine's limits (2 workers, 2 GB heap, in-process Kotlin); they could be raised on the Mac.~~ Fixed 2026-11-02: sized for the Mac Studio (full rerun 99 s vs 116 s), `cl-cleanup`.
 - `:core:zim`'s androidTest assets now include `testdata/audio` (about 200 KB). Harmless.
 
 ## Carried forward from M2
@@ -465,7 +465,7 @@ Downloads:
 - SD cards (the Pixel 6 has no slot); two volumes whose `StorageVolume` is null both key as `primary` (the first wins). The same item on two volumes: the first root wins.
 - A crash can leave a stray `.granger-item.json.*.tmp` (a dotfile, harmless). Embedded chapters in downloaded files are ignored (one file, one chapter).
 - ~~Readiness's row text says "the file", not "a file".~~ Fixed 2026-11-02: "Missing: it isn't on the phone", `cl-cleanup`.
-- The left-over cap plumbing (`capBytes`, `OverCap`) is still there, unused (Plan 10 removes it).
+- ~~The left-over cap plumbing (`capBytes`, `OverCap`) is still there, unused (Plan 10 removes it).~~ Fixed 2026-11-02: removed, `cl-cleanup`.
 
 Library and player:
 - `MediaLibrary.forget()` deletes a book's file tracks only when the caller passes their ids (`MediaDownloader.remove` does).
@@ -521,7 +521,7 @@ Research and the eval:
 - `LexicalScore` doesn't fold accents, but the media gate does.
 - A CORRUPT (not MISSING) audiobook still opens from a citation.
 - `media.json` has to be re-exported and validated if Holst is re-tagged or moved, or the album-key rules change. The "Venus" album's artist tag is "Release - Topic".
-- The Mac's system Python has no pytest. `tools/dev` should say how to make the eval venv.
+- ~~The Mac's system Python has no pytest. `tools/dev` should say how to make the eval venv.~~ Fixed 2026-11-02: `tools/dev/MAC-SETUP.md` lists the venvs and how to make them, `cl-cleanup`.
 
 Search and the media index:
 - After a library change, a search can briefly use the previous snapshot. If the library flow itself fails, the index keeps its last snapshot until restart.
@@ -552,8 +552,8 @@ Widget:
 Readers and Search after the follow-ups:
 - Toggling full screen reflows the page (see above). A better feel may need a different model: a bar that slides with scrolling, or an animated resize. Not chosen yet.
 - Titles ask every pack for 20 suggestions per keystroke; not timed on the Pixel.
-- `ArchiveViewModelTest.overCapShowsTheLimitNotice` failed once ("Main looper not mocked") and passed on reruns. It looks flaky, and the cap code is due to go in Plan 10.
-- Agent worktrees don't check out the taglib submodule: run `git submodule update --init --recursive` in a new worktree before building.
+- ~~`ArchiveViewModelTest.overCapShowsTheLimitNotice` failed once ("Main looper not mocked") and passed on reruns. It looks flaky, and the cap code is due to go in Plan 10.~~ Fixed 2026-11-02: not the cap code; any test in the class could fail. A reply on the real `Dispatchers.IO` landed after a test ended and Main was reset. The archive.org client now takes its dispatcher and the test passes its own (8 in 8 under load), `cl-cleanup`.
+- ~~Agent worktrees don't check out the taglib submodule: run `git submodule update --init --recursive` in a new worktree before building.~~ Fixed 2026-11-02: `tools/dev/new-worktree.sh` does it (and copies `local.properties`), `cl-cleanup`.
 
 Device checks still to do:
 - Deleting a phone file in the Files app, then restoring it (skipped in M1, M2 and M3).
@@ -821,7 +821,7 @@ Still open (for H3 and later):
 - ~~A day feed over a pack without the day article says "October 22" over search hits; a "Mentions October 22" subtitle would be clearer.~~ Fixed 2026-11-02: titled "Mentions October 22", `cl-cleanup`.
 - ~~`family:wikipedia` picks the first whole pack of the family; a preference for the fullest (by size) would favour a full Wikipedia over "Best of".~~ Fixed 2026-11-02: every pack is tried for the day page, `cl-cleanup`.
 - H3 needs: Start → Home (`StartScreen.Home` exists), the default feeds for a fresh library (they seed on first Home with no packs and resolve as packs arrive), and the strip's first signal as the onboarding nudge.
-- The thumbnail cache lives under `cacheDir` and is never pruned by the app; the OS may clear it, and the card then shows its icon.
+- ~~The thumbnail cache lives under `cacheDir` and is never pruned by the app; the OS may clear it, and the card then shows its icon.~~ Fixed 2026-11-02: pruned to 50 MB at start, oldest shown first, `cl-cleanup`.
 - Cached draws carry `Cards.VERSION` (1 since thumbnails); a draw from an older format is redrawn, so a feature that changes what a card carries bumps the version rather than waiting for midnight.
 
 ## Carried forward from H3
@@ -908,7 +908,7 @@ Fixed during the walkthroughs:
 Still open:
 - The "Food for Preppers" PDFs are old web-page printouts: no outline, no links, the contents page is text. A contents list worked out from the text (and for old scans) is its own session. More broadly, making the Kiwix catalog friendlier to find things in is a big value add for the app (Neal, 2026-10-29).
 - On a Kiwix main page that scrolls in its own box, the saved place and read-aloud's follow-scroll still act on the window.
-- `PlayerEngineTest.chapterChangeUpdatesTheTitleWithoutRepreparing` failed once in a full run and passed alone: a timing flake to settle.
+- ~~`PlayerEngineTest.chapterChangeUpdatesTheTitleWithoutRepreparing` failed once in a full run and passed alone: a timing flake to settle.~~ Fixed 2026-11-02: it waits for the title, not a position (2 in 10 failed under load before, 12 in 12 passed after), `cl-cleanup`.
 - Browse lists packs flat within a section; a pack family with many sizes could group further.
 
 ## Carried forward from L4 (Spanish vectors, 2026-11-01)

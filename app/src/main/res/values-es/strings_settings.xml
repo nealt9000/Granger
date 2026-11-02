@@ -112,5 +112,4 @@
     <string name="settings_voice_speak_answers_summary">Preguntar lee en voz alta cada respuesta nueva mientras se escribe. Cualquier respuesta se puede escuchar con su botón de altavoz.</string>
     <string name="settings_voice_no_storage">No hay almacenamiento para descargar.</string>
     <string name="settings_voice_no_space">No hay espacio libre suficiente para %1$s.</string>
-    <string name="settings_voice_over_cap">Supera el límite de almacenamiento.</string>
 </resources>

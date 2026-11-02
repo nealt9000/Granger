@@ -53,7 +53,6 @@
 
     <string name="archive_no_storage">No hay almacenamiento disponible en este momento.</string>
     <string name="archive_no_space">No hay espacio suficiente en %1$s para %2$s: libera %3$s.</string>
-    <string name="archive_over_cap">Con %1$s tus descargas llegarían a %2$s, por encima del límite de %3$s.</string>
     <string name="archive_already_in_audiobooks">Esto ya está en tus audiolibros.</string>
     <string name="archive_already_in_music">Esto ya está en tu música.</string>
     <string name="archive_recording_too_new">Esta grabación no se publicó antes de %1$d. Activa Mostrar todo para descargarla.</string>

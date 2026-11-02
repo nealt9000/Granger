@@ -484,15 +484,13 @@ class ArchiveViewModel(
             throw e
         }
         // A refused enqueue leaves no sidecar; an installed book keeps its (now refreshed) one for later repairs.
-        if (ownsSidecar && (result is EnqueueResult.NoSpace || result is EnqueueResult.OverCap)) {
+        if (ownsSidecar && result is EnqueueResult.NoSpace) {
             withContext(io) { sidecar.delete() }
         }
         return when (result) {
             EnqueueResult.Queued, EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> null
             is EnqueueResult.NoSpace ->
                 UiText.Res(R.string.archive_no_space, volume.label, spec.title, formatBytes(result.neededBytes))
-            is EnqueueResult.OverCap ->
-                UiText.Res(R.string.archive_over_cap, spec.title, formatBytes(result.wouldUseBytes), formatBytes(result.capBytes))
         }
     }
 
@@ -534,10 +532,6 @@ class ArchiveViewModel(
                 is EnqueueResult.NoSpace -> {
                     withContext(io) { sidecar.delete() }
                     return UiText.Res(R.string.archive_no_space, label, spec.title, formatBytes(result.neededBytes))
-                }
-                is EnqueueResult.OverCap -> {
-                    withContext(io) { sidecar.delete() }
-                    return UiText.Res(R.string.archive_over_cap, spec.title, formatBytes(result.wouldUseBytes), formatBytes(result.capBytes))
                 }
             }
         }

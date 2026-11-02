@@ -101,7 +101,6 @@ class VoiceSettingsViewModel(
             notice.value = when (downloads.enqueue(entry, root, downloadPrefs.wifiOnly)) {
                 EnqueueResult.Queued, EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> null
                 is EnqueueResult.NoSpace -> UiText.Res(R.string.settings_voice_no_space, entry.title)
-                is EnqueueResult.OverCap -> UiText.Res(R.string.settings_voice_over_cap)
             }
         }
     }

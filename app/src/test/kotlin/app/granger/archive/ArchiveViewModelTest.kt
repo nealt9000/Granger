@@ -92,7 +92,13 @@ class ArchiveViewModelTest {
         Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).message("").code(200)
             .body(body.toResponseBody()).build()
     }
-    private val client = ArchiveOrgClient(OkHttpClient.Builder().addInterceptor(server).build(), "Granger/1.0 (+test)")
+    // The test's own dispatcher: a reply on Dispatchers.IO could land after the test ended and Main was reset,
+    // failing whichever test ran next ("Looper not mocked", 2026-11-02). A test that needs a reply held back on
+    // another thread swaps in [clientOn] Dispatchers.IO and waits for every reply before it ends.
+    private var client = clientOn(main.dispatcher)
+
+    private fun clientOn(io: kotlinx.coroutines.CoroutineDispatcher) =
+        ArchiveOrgClient(OkHttpClient.Builder().addInterceptor(server).build(), "Granger/1.0 (+test)", io = io)
 
     private val downloads = FakeDownloads()
     private val bookshelf = FakeBookshelf()
@@ -202,6 +208,7 @@ class ArchiveViewModelTest {
     }
 
     @Test fun staleResultsFromTheOtherViewAreDropped() = runTest(main.dispatcher) {
+        client = clientOn(kotlinx.coroutines.Dispatchers.IO)   // the filtered reply is held on its own thread
         val release = CountDownLatch(1)
         val filteredServed = CountDownLatch(1)
         searchBody = { q, _ ->
@@ -384,14 +391,12 @@ class ArchiveViewModelTest {
 
     @Test fun openItemFillsTheSheetWithOfferAndSize() = runTest(main.dispatcher) {
         val vm = viewModel()
-        val gate = CountDownLatch(1)
-        val serve = itemBody
-        itemBody = { id -> gate.await(5, TimeUnit.SECONDS); serve(id) }
+        val shown = mutableListOf<Boolean>()
+        backgroundScope.launch { vm.ui.collect { ui -> ui.sheet?.let { shown += it.loading } } }
         vm.openItem(scanId)
-        testScheduler.runCurrent()
-        assertThat(vm.ui.value.sheet!!.loading).isTrue()
-        gate.countDown()
         settle { vm.ui.value.sheet?.loading == false }
+        testScheduler.runCurrent()   // the collector's last delivery
+        assertThat(shown.distinct()).containsExactly(true, false).inOrder()   // a spinner, then the item
         val sheet = vm.ui.value.sheet!!
         assertThat(sheet.identifier).isEqualTo(scanId)
         assertThat(sheet.error).isNull()
@@ -553,18 +558,6 @@ class ArchiveViewModelTest {
         assertThat(vm.ui.value.notice).isEqualTo(UiText.Res(R.string.archive_nothing_to_download))
         assertThat(downloads.enqueuedSpecs).isEmpty()
         assertThat(sidecars.listFiles()!!.toList()).isEmpty()
-    }
-
-    @Test fun overCapShowsTheLimitNotice() = runTest(main.dispatcher) {
-        downloads.nextResult = EnqueueResult.OverCap(10_000_000_000, 11_000_000_000)
-        val vm = viewModel()
-        vm.get(epubId)
-        settle { vm.ui.value.notice != null }
-        val notice = vm.ui.value.notice as UiText.Res
-        assertThat(notice.id).isEqualTo(R.string.archive_over_cap)
-        assertThat(notice.args.last()).isEqualTo("10 GB")
-        // No orphan sidecar is left behind.
-        assertThat(File(sidecars, "$epubId.json").exists()).isFalse()
     }
 
     @Test fun noSpaceExplainsWhere() = runTest(main.dispatcher) {
