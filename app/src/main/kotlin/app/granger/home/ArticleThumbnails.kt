@@ -18,7 +18,10 @@ class ArticleThumbnails(private val dir: File) {
     fun thumbnail(archive: ZimArchive, articlePath: String, html: String): String? = try {
         val imagePath = candidates(html, articlePath).firstNotNullOfOrNull { archive.resolvePath(it) } ?: return null
         val file = File(dir, "${sha1("${archive.uuid}/$imagePath")}.jpg")
-        if (file.isFile && file.length() > 0L) return file.path
+        if (file.isFile && file.length() > 0L) {
+            file.setLastModified(System.currentTimeMillis())    // last shown: the pruning keeps the ones in use
+            return file.path
+        }
         val bytes = archive.read(imagePath)?.bytes?.takeIf { it.isNotEmpty() } ?: return null
         val bitmap = decode(bytes) ?: return null
         dir.mkdirs()
@@ -27,6 +30,22 @@ class ArticleThumbnails(private val dir: File) {
         if (tmp.renameTo(file)) file.path else null
     } catch (_: Throwable) { // Includes OutOfMemoryError: a bad image never takes Home down.
         null
+    }
+
+    /**
+     * Keeps the cache under [maxBytes] by deleting the thumbnails shown longest ago (clean-up list: it was never pruned).
+     * A deleted one is made again when its card next shows. Blocking; call off the main thread.
+     */
+    fun prune(maxBytes: Long = MAX_CACHE_BYTES) {
+        val files = dir.listFiles { f -> f.isFile }?.toList() ?: return
+        val staleTmp = System.currentTimeMillis() - 60_000L    // a newer .tmp may still be being written
+        files.filter { it.name.endsWith(".tmp") && it.lastModified() < staleTmp }.forEach { it.delete() }
+        val kept = files.filterNot { it.name.endsWith(".tmp") }.sortedByDescending { it.lastModified() }
+        var total = 0L
+        for (f in kept) {
+            total += f.length()
+            if (total > maxBytes) f.delete()
+        }
     }
 
     private fun decode(bytes: ByteArray): Bitmap? {
@@ -43,6 +62,9 @@ class ArticleThumbnails(private val dir: File) {
     companion object {
         /** The shorter side of a kept thumbnail, about three card widths on a phone. */
         const val TARGET_PX = 400
+
+        /** About 1,000 thumbnails: far more than a month of Home's daily draws. */
+        const val MAX_CACHE_BYTES = 50L * 1024 * 1024
         private const val MIN_SIDE = 64
         private val SKIPPED_EXTENSIONS = setOf("svg", "ico")
 
