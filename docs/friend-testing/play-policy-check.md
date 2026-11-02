@@ -98,7 +98,7 @@ Expect a teen or 12+ rating in most regions. That's right for a general library.
 ## 11. Models and licences
 
 - Gemma 4 E2B: Apache-2.0 (catalog entry). EmbeddingGemma: Apache-2.0.
-- Piper voices: Owl, Nanny, Professor and Maggie/Martin are Granger's own trained voices, built from public-domain or CC BY sources; credit them in About.
+- Piper voices: Owl, Nanny and Professor are Granger's own trained voices (Maggie and Martin left the catalog on 2026-11-02), built from public-domain or CC BY sources; credit them in About.
 - Credit list in About: libkiwix (GPL-3.0), Readium (BSD-3), sherpa-onnx (Apache-2.0), LiteRT-LM (Apache-2.0), TagLib (LGPL), Kiwix content licences per pack.
 
 ## Store listing notes
