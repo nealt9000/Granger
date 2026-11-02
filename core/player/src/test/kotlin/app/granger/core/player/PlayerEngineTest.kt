@@ -636,7 +636,33 @@ class PlayerEngineTest {
         assertThat(engine.ui.value.now).isInstanceOf(NowPlaying.Music::class.java)
         engine.unload("audiobook:phone:none", setOf(ids[1]))           // a queued song's album was removed
         idle()
+        // Only that song leaves the queue; the rest keeps playing (clean-up list: it used to empty the player).
+        assertThat(engine.ui.value.now).isInstanceOf(NowPlaying.Music::class.java)
+        assertThat(engine.queue.value.map { it.id }).isEqualTo(ids - ids[1])
+        assertThat(engine.player.currentMediaItem!!.mediaId).isEqualTo(ids[0])
+        engine.unload("audiobook:phone:none", ids.toSet())             // the whole queue removed: the player empties
+        idle()
         assertThat(engine.ui.value).isEqualTo(PlayerUi.IDLE)
+    }
+
+    @Test fun tappingTheSongAlreadyOnCarriesOn() {
+        // Long synthetic songs, so playback can't run past the end while the test looks.
+        val tracks = listOf(track("long-a", "fake://60000/long-a", 60_000), track("long-b", "fake://60000/long-b", 60_000))
+        runBlocking { db.mediaDao().upsertTracks(tracks) }
+        val ids = tracks.map { it.id }
+        val engine = newEngine()
+        engine.playTracks(ids, 0, false, PlaySource("songs", "Songs"))
+        idle()
+        run(engine.player).untilPosition(0, 5_000)
+        engine.pause()
+        idle()
+        val at = engine.player.currentPosition
+        engine.playQueueItem(0)
+        // Only the engine's own step: a full idle would let the test clock play on through the song.
+        shadowOf(Looper.getMainLooper()).runOneTask()
+        assertThat(engine.player.currentMediaItem!!.mediaId).isEqualTo(ids[0])
+        assertThat(engine.player.currentPosition).isAtLeast(at)          // not back to the top (clean-up list)
+        assertThat(engine.player.playWhenReady).isTrue()
     }
 
     /**
