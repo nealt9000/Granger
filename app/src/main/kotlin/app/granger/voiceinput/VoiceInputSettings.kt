@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -34,7 +33,6 @@ fun VoiceInputSettingsSection(voiceInput: VoiceInput) {
     val status by voiceInput.status.collectAsStateWithLifecycle()
     val download by voiceInput.download.collectAsStateWithLifecycle()
     val english by voiceInput.prefs.englishTag.collectAsStateWithLifecycle()
-    val askWhenDone by voiceInput.prefs.askWhenDone.collectAsStateWithLifecycle()
     // Back from the phone's settings or a finished download: ask the phone again.
     LifecycleResumeEffect(Unit) {
         voiceInput.refresh()
@@ -96,11 +94,6 @@ fun VoiceInputSettingsSection(voiceInput: VoiceInput) {
                 )
             }
         }
-        ListItem(
-            headlineContent = { Text(stringResource(R.string.voice_input_settings_ask_when_done)) },
-            supportingContent = { Text(stringResource(R.string.voice_input_settings_ask_when_done_summary)) },
-            trailingContent = { Switch(checked = askWhenDone, onCheckedChange = voiceInput.prefs::setAskWhenDone) },
-        )
         Text(
             stringResource(R.string.voice_input_settings_privacy),
             style = MaterialTheme.typography.bodySmall,

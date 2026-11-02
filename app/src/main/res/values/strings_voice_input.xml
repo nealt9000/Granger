@@ -27,7 +27,5 @@
     <string name="voice_input_settings_downloading">Downloading %1$s…</string>
     <string name="voice_input_settings_scheduled">The phone will finish this download later, on Wi-Fi</string>
     <string name="voice_input_settings_download_failed">The download didn\'t work. Try again.</string>
-    <string name="voice_input_settings_ask_when_done">Ask as soon as I stop talking</string>
-    <string name="voice_input_settings_ask_when_done_summary">Otherwise the question waits in the box for you to check it.</string>
     <string name="voice_input_settings_privacy">Speech is turned into text on this phone. Nothing is recorded, kept or sent.</string>
 </resources>
