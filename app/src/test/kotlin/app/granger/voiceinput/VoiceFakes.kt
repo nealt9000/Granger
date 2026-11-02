@@ -21,20 +21,31 @@ class FakeSpeech(var languages: RecognizerLanguages? = RecognizerLanguages(listO
     val tags = mutableListOf<String>()
     var stops = 0
     var cancelled = false
-    override suspend fun languages() = languages
-    override suspend fun availability(tag: String) = languages?.availability(tag) ?: Availability.UNAVAILABLE
+    override suspend fun languages(): RecognizerLanguages? {
+        pendingInstall?.let { tag -> if (installLag-- <= 0) { install(tag); pendingInstall = null } }
+        return languages
+    }
+    override suspend fun availability(tag: String) = languages()?.availability(tag) ?: Availability.UNAVAILABLE
     override fun listen(tag: String): Flow<DictationEvent> {
         tags += tag
         val take = Channel<DictationEvent>(Channel.UNLIMITED).also { events = it }
         return take.consumeAsFlow().onCompletion { if (it != null) cancelled = true }
     }
     override fun stop() { stops++ }
+    var forgets = 0
+    override fun forget() { forgets++ }
     var downloadOutcome = DownloadOutcome.DONE
+    /** After a finished download, how many more language checks still say "not installed" (the Pixel 6 lags). */
+    var installLag = 0
+    private var pendingInstall: String? = null
     override suspend fun download(tag: String, onProgress: (Int) -> Unit): DownloadOutcome {
         onProgress(50)
-        if (downloadOutcome == DownloadOutcome.DONE) languages = languages?.let { it.copy(installed = it.installed + tag) }
+        if (downloadOutcome == DownloadOutcome.DONE) {
+            if (installLag == 0) install(tag) else pendingInstall = tag
+        }
         return downloadOutcome
     }
+    private fun install(tag: String) { languages = languages?.let { it.copy(installed = it.installed + tag) } }
     fun send(vararg e: DictationEvent) = e.forEach { events.trySend(it) }
     fun end(vararg e: DictationEvent) { send(*e); events.close() }
 }

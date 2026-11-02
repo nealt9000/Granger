@@ -6,6 +6,7 @@ import app.granger.core.speech.RecognizerTags
 import app.granger.core.speech.SpeechInput
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -62,6 +63,15 @@ class VoiceInput(
         _download.value = Download.Running()
         scope.launch {
             val outcome = speech.download(tag) { percent -> _download.value = Download.Running(percent.coerceIn(0, 100)) }
+            if (outcome == DownloadOutcome.DONE) {
+                // The phone can report success a moment before it lists the language as installed (seen on the
+                // Pixel 6, 2026-11-02: the mic stayed hidden after a finished en-GB download), so ask again until it does.
+                for (check in 1..INSTALL_CHECKS) {
+                    speech.forget()
+                    if (speech.availability(tag) == Availability.READY) break
+                    delay(INSTALL_CHECK_MS)
+                }
+            }
             _download.value = when (outcome) {
                 DownloadOutcome.DONE -> Download.Idle
                 DownloadOutcome.SCHEDULED -> Download.Scheduled
@@ -79,8 +89,16 @@ class VoiceInput(
         }
         .stateIn(scope, SharingStarted.WhileSubscribed(5_000), VoiceInputStatus())
 
-    /** Ask the phone again (after a download, or coming back from its settings). */
-    fun refresh() { generation.value++ }
+    /** Ask the phone again (after a download, or coming back to Settings): what it said before is forgotten. */
+    fun refresh() {
+        speech.forget()
+        generation.value++
+    }
+
+    private companion object {
+        const val INSTALL_CHECKS = 5
+        const val INSTALL_CHECK_MS = 1_000L
+    }
 
     /** Called just before every take. */
     fun beforeListening() = stopReadAloud()

@@ -12,6 +12,9 @@ interface SpeechInput {
     /** The languages the recognizer has installed and could download; null when the phone can't say (or has none). */
     suspend fun languages(): RecognizerLanguages?
 
+    /** Forget what the phone said about its languages, so the next [languages] asks again (after a download, say). */
+    fun forget()
+
     /** Whether [tag] can be listened in now, after a download, or not at all. */
     suspend fun availability(tag: String): Availability
 

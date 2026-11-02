@@ -43,6 +43,8 @@ class OnDeviceSpeechInput(
         }
     }
 
+    override fun forget() { cached = null }
+
     override suspend fun availability(tag: String): Availability =
         languages()?.availability(tag) ?: Availability.UNAVAILABLE
 

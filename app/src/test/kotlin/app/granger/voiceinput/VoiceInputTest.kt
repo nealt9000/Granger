@@ -28,6 +28,26 @@ class VoiceInputTest {
         assertThat(voice.download.value).isEqualTo(VoiceInput.Download.Idle)
     }
 
+    @Test fun aDownloadThePhoneListsLateStillBringsTheMicBack() = runTest {
+        val prefs = FakePrefs()
+        val speech = FakeSpeech().apply { installLag = 2 }
+        val voice = fakeVoiceInput(backgroundScope, speech, prefs = prefs)
+        backgroundScope.launch { voice.status.collect {} }
+        prefs.setEnglishTag(RecognizerTags.ENGLISH_UK)
+        voice.status.first { it.tag == "en-GB" }
+        voice.downloadCurrent()
+        // advanceUntilIdle stops when only backgroundScope work is left, so wait on the status itself.
+        assertThat(voice.status.first { it.micShown }.tag).isEqualTo("en-GB")
+        assertThat(voice.download.first { it == VoiceInput.Download.Idle }).isEqualTo(VoiceInput.Download.Idle)
+    }
+
+    @Test fun refreshForgetsWhatThePhoneSaid() = runTest(UnconfinedTestDispatcher()) {
+        val speech = FakeSpeech()
+        val voice = fakeVoiceInput(backgroundScope, speech)
+        voice.refresh()
+        assertThat(speech.forgets).isEqualTo(1)
+    }
+
     @Test fun aScheduledOrFailedDownloadSaysSo() = runTest(UnconfinedTestDispatcher()) {
         val prefs = FakePrefs()
         val speech = FakeSpeech()
