@@ -1,5 +1,9 @@
 package app.granger.player
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.Icons
+import app.granger.music.AddToPlaylistSheet
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -47,6 +51,7 @@ import app.granger.core.player.PlayerUi
 internal fun MusicPlayer(ui: PlayerUi, queue: List<Track>, live: Boolean, viewModel: PlayerViewModel, onShelf: () -> Unit) {
     val music = ui.now as? NowPlaying.Music ?: return
     var showQueue by rememberSaveable { mutableStateOf(false) }
+    var addingToPlaylist by rememberSaveable { mutableStateOf(false) }
     fun control(action: PlayerViewModel.() -> Unit) = if (live) viewModel.action() else viewModel.activate(PlayerMode.MUSIC, action)
 
     BoxWithConstraints(Modifier.fillMaxSize().playerInsets()) {
@@ -100,14 +105,32 @@ internal fun MusicPlayer(ui: PlayerUi, queue: List<Track>, live: Boolean, viewMo
                     )
                 }
             }
-            TextButton(onClick = { showQueue = true }) {
-                Icon(painterResource(R.drawable.ic_queue_music), contentDescription = null)
-                Spacer(Modifier.size(8.dp))
-                Text("Queue")
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = { showQueue = true }) {
+                    Icon(painterResource(R.drawable.ic_queue_music), contentDescription = null)
+                    Spacer(Modifier.size(8.dp))
+                    Text("Queue")
+                }
+                if (viewModel.canAddToPlaylist) {
+                    TextButton(onClick = { addingToPlaylist = true }) {
+                        Icon(Icons.Filled.Add, contentDescription = null)
+                        Spacer(Modifier.size(8.dp))
+                        Text("Add to playlist")
+                    }
+                }
             }
             ShelfLink(PlayerMode.MUSIC, onShelf)
             Spacer(Modifier.height(8.dp))
         }
+    }
+    if (addingToPlaylist) {
+        val lists by viewModel.allPlaylists.collectAsStateWithLifecycle()
+        AddToPlaylistSheet(
+            playlists = lists,
+            onPick = { viewModel.addNowPlayingToPlaylist(it); addingToPlaylist = false },
+            onNew = { viewModel.newPlaylistWithNowPlaying(it); addingToPlaylist = false },
+            onDismiss = { addingToPlaylist = false },
+        )
     }
     if (showQueue) {
         QueueSheet(

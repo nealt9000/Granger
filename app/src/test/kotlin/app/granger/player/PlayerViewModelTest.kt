@@ -143,6 +143,24 @@ class PlayerViewModelTest {
         assertThat(notice.await()).isEqualTo("Bookmarked: The Storm · 2:05")
     }
 
+    @Test fun theFullPlayerAddsTheSongThatsOnToAPlaylist() = runTest(main.dispatcher) {
+        val lists = app.granger.music.FakePlaylists(app.granger.music.FakeMediaLibrary())
+        val road = lists.create("Road trip")
+        val hub = FakePlayerHub(musicUi(track("a", "Song A")))
+        val vm = PlayerViewModel(hub, playlists = lists)
+        val collecting = backgroundScope.launch { vm.allPlaylists.collect {} }
+        testScheduler.advanceUntilIdle()
+        vm.addNowPlayingToPlaylist(road)
+        testScheduler.advanceUntilIdle()
+        assertThat(lists.entries.value[road]).containsExactly(track("a").id)
+        vm.newPlaylistWithNowPlaying("  Mornings ")
+        testScheduler.advanceUntilIdle()
+        assertThat(lists.lists.value.map { it.name }).containsExactly("Road trip", "Mornings")
+        assertThat(lists.entries.value.values.last()).containsExactly(track("a").id)
+        assertThat(PlayerViewModel(hub).canAddToPlaylist).isFalse()
+        collecting.cancel()
+    }
+
     @Test fun speedsAndSleepChoicesMatchTheSpec() {
         assertThat(PlayerViewModel.SPEEDS.first()).isEqualTo(0.5f)
         assertThat(PlayerViewModel.SPEEDS.last()).isEqualTo(3.0f)

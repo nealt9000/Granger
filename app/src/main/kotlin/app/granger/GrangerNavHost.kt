@@ -526,6 +526,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 chooseVoice = container.voicePrefs::setVoice,
                 chooseVoiceSpeed = container.voicePrefs::setSpeed,
                 focus = container.playerFocus,
+                playlists = container.playlists,
             )
         }
     } else {
