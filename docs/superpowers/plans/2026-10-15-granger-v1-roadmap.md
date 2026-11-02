@@ -82,6 +82,41 @@ Neal's goal is an app that's shareable for friend testing, with the iPhone on th
 
 V4 continues on the Mac throughout. Its voices reach the Reading tab whenever they ship, each as a new voice id. **2026-10-28:** with Think deeper and E4B gone, the space they took goes to voice: one pack per voice, more voices over time, and speech input (A1) from the phone's own recognizer so it costs no download. Plan 10's telemetry opt-in stays in Plan 10. F1's crash log and Send feedback stay on the phone until the user sends them.
 
+### Release checklist (project review, 2026-11-02)
+
+Neal's calls from the review: **feature freeze** until the closed test is running, except Ask, which keeps improving alongside; **Spanish ships in the closed test** (many testers speak Spanish), with Spanish Ask off until it passes; **Ask goes out as a Preview** with a Report action and medical answers shown as quoted passages; **the Play build keeps archive.org's 1930 filter fixed** (the waiver lives in F-Droid and direct builds only); **NLnet application** submitted 2026-11-03. The long pole is Play's closed-testing rule for new personal accounts (at the last check, 12 testers opted in for 14 days in a row; confirm in Play Console), so the closed track starts as soon as A is done.
+
+**A. Start the closed test (starts the 14-day clock)**
+- [ ] F1 part 2: upload 853 and check Write email opens Gmail; ~~Task 6 policy check~~ (done on `cl-cleanup`: `docs/friend-testing/play-policy-check.md`, draft `privacy-policy.md`); Task 7 tester note in English and Spanish; Task 8 fresh install on the Pixel 7; Task 9 merge and push.
+- [ ] Ask: a **Report this answer** action on every reply (Play's AI-generated content policy), sending through Send feedback with the question, the answer and its sources.
+- [ ] Ask: in release, a **medical** question shows the banner and the quoted passages, without generated prose.
+- [ ] Ask: on any phone where the model fails a short self-check on load, hide Ask and say why, instead of crashing.
+- [x] archive.org: the 1930 filter is fixed in the Play build (`Features.ARCHIVE_WAIVER`, off in release; Plan 10's flavours take it over). `cl-cleanup` a3442365.
+- [ ] Clásicos Granger: check each work's first publication year; keep works first published after 1930 out of what the Play build offers (US copyright, restored works; the policy check §3).
+- [ ] Privacy policy: Neal picks the contact address and hosts `docs/friend-testing/privacy-policy.md` at a public URL.
+- [ ] Spanish: walkthroughs and merges for L1, L2, L3 (with Clásicos) and L4 (Spanish Ask off); Spanish-speaking friends review the translation.
+- [ ] A second phone that isn't a Pixel: a fresh install and Ask on at least one Samsung or Snapdragon phone.
+- [ ] Device checks the clean-up list marks as blockers (`docs/friend-testing/device-checks.md`): an SD card (needs a tester's phone with a slot), the player's hardware controls one by one on the Pixel 6, read-aloud on a 4 GB phone.
+- [x] Best guess behind a tap (Neal, 2026-11-02): written ahead out of sight after a decline, opened at once by the button, no second model run. `cl-cleanup` 94cf18bd.
+- [x] A personal health question says to ask a doctor, nurse or pharmacist instead of "Not in your library". `cl-cleanup` 8006c64c.
+- [x] Storage errors in the rail and when opening a spoken answer's chat no longer crash the app (Ask's own flows were already guarded). `cl-cleanup` 23726628.
+- [ ] Play Console: a **closed testing** track (internal testing doesn't count toward production access), privacy policy URL, data safety form, content rating, foreground-service declarations (media playback, downloads), target audience.
+- [ ] 15–20 testers recruited and opted in (the margin covers drop-off), Spanish speakers included.
+
+**B. During the 14 days**
+- [ ] F2: feedback triaged weekly; fix what blocks, log the rest here.
+- [ ] Ask, the librarian's reaction: instant lines tied to real search progress ("Let me look…", "Found something in WikiMed and two of your books…") before E2B's answer; no extra model call.
+- [ ] Ask, a behaviour LoRA spike: can LiteRT-LM load a LoRA on Gemma 4 E2B on the GPU (or must it be merged and converted)? Train on grounded behaviour (passages → cited answer or clean decline, two-fact questions) built from Top 50k and Classics, not on the content itself; score on the existing eval set against 80% grounded / 90% declined.
+- [ ] Store listing in English and Spanish: the fair deal, screenshots, feature graphic, 512 px icon; lead with the library, Ask as the Preview on capable phones.
+- [ ] Two or three institution discovery calls (a library, a school or an NGO): what they use now, their devices, what they'd need offline; offer a free pilot for feedback and a letter of support.
+
+**C. Production**
+- [ ] Apply for production access once the closed test qualifies; release free.
+- [ ] F-Droid submission (the same app, uncapped, a Support link).
+- [ ] Then Plan 10 (Supporter), in an order F2's findings set with I1+, R2 and S1.
+
+**Parked during the freeze:** `i0-iphone-spike` (226 commits behind main) and `a0-asr-spike` stay parked, not merged; V4 voices that are already shipping are unaffected.
+
 Development moved to Neal's Mac Studio with M1 (setup: `tools/dev/MAC-SETUP.md`).
 
 Library redesign spec (2026-10-16): `docs/superpowers/specs/2026-10-16-library-redesign-design.md` amends the v1 spec and set this order.
