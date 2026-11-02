@@ -52,6 +52,14 @@ class ZimLibrarySearchTest {
         File(dir, name).writeText(name)
     }
 
+    @Test fun titleOnlyNamesPacksWithoutTextSearchButNotMaps() = test {
+        assertThat(search.titleOnly()).isEmpty()
+        install("knots.zim", FakeZimArchive("u-knots", "A Library of Knots", hasFulltextIndex = false, name = "zimgit-knots_en"))
+        install("peru.zim", FakeZimArchive("u-peru", "Peru", hasFulltextIndex = false, name = "maps_en_peru"))
+        library.refresh()
+        assertThat(search.titleOnly()).containsExactly("A Library of Knots")
+    }
+
     @Test fun titlesComeFromEveryPackWithPackNames() = test {
         val hits = search.titles("as").hits
         assertThat(hits.map { it.title }).containsExactly("Aspirin", "Asthma", "As You Like It")

@@ -73,6 +73,8 @@ class SearchViewModel(
         /** Hits inside books, one per book: its first (best) hit, which says how many places [BookHit.matches]. */
         val books: List<BookHit> = emptyList(),
         val searching: Boolean = false,
+        /** Packs whose text isn't searched, only their titles ([LibrarySearch.titleOnly]); said under the results. */
+        val titleOnly: List<String> = emptyList(),
         /** Recent searches, newest first; shown while the field is empty. */
         val recent: List<String> = emptyList(),
         /** Groups opened with Show all; closed again by a new query. */
@@ -155,11 +157,13 @@ class SearchViewModel(
                 val shown = titles.hits.map { it.packId to it.path }.toSet()
                 // Counted before the titles are taken out: the search stopped at its limit either way.
                 val allText = search.fullText(q)
+                val titleOnly = search.titleOnly()
                 _state.update {
                     it.copy(
                         fullText = allText.filterNot { hit -> (hit.packId to hit.path) in shown }
                             .map { hit -> hit.copy(snippet = hit.snippet?.takeIf { s -> SearchRows.snippetMatches(s, q) }) },
                         searching = false,
+                        titleOnly = titleOnly,
                         capped = it.capped.cap(SearchGroup.FULL_TEXT, allText.size),
                     )
                 }

@@ -34,6 +34,16 @@ class SearchRowsTest {
         assertThat(SearchRows.audiobook(book.copy(narrator = "Kara Shallenberg")).text()).isEqualTo("Rudyard Kipling · read by Kara Shallenberg")
     }
 
+    @Test fun titleOnlyNamesThreeAndCountsTheRest() {
+        assertThat(SearchRows.titleOnly(emptyList())).isNull()
+        assertThat(SearchRows.titleOnly(listOf("A Library of Knots")).text())
+            .isEqualTo("A Library of Knots has no text search, so only its titles were searched.")
+        assertThat(SearchRows.titleOnly(listOf("A", "B")).text())
+            .isEqualTo("A, B have no text search, so only their titles were searched.")
+        assertThat(SearchRows.titleOnly(listOf("A", "B", "C", "D", "E")).text())
+            .isEqualTo("A, B, C and 2 more have no text search, so only their titles were searched.")
+    }
+
     @Test fun showAllSaysHowManyAndOwnsUpToACap() {
         assertThat(SearchRows.showAll(SearchGroup.TITLES, 12, capped = false).text()).isEqualTo("Show all 12 titles")
         assertThat(SearchRows.showAll(SearchGroup.SONGS, 25, capped = true).text()).isEqualTo("Show the first 25 songs")

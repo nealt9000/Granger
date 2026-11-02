@@ -30,6 +30,12 @@ interface LibrarySearch {
 
     /** Full-text hits inside books; empty where books aren't searchable. */
     suspend fun books(query: String): List<BookHit> = emptyList()
+
+    /**
+     * The titles of OK packs with no full-text index, so only their titles are searched ("bowline" finds nothing in
+     * A Library of Knots; the fresh-install walkthrough, 2026-11-02). Maps are left out: nobody searches a map's text.
+     */
+    suspend fun titleOnly(): List<String> = emptyList()
 }
 
 class ZimLibrarySearch(
@@ -85,6 +91,12 @@ class ZimLibrarySearch(
             .map { it.second }
 
     override suspend fun books(query: String): List<BookHit> = bookIndex?.search(query) ?: emptyList()
+
+    override suspend fun titleOnly(): List<String> = library.packs.first()
+        .filter { it.status == PackStatus.OK && !it.hasFulltextIndex && !it.name.startsWith("maps_") }
+        .map { it.title }
+        .distinct()
+        .sortedBy { it.lowercase() }
 
     /** One pack's hits; [returned] counts them as the pack gave them, before redirects are merged. */
     private class PackHits(val hits: List<Pair<ZimHit, SearchHit>>, val returned: Int)

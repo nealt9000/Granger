@@ -101,4 +101,12 @@
     <string name="search_show_fewer_audiobooks">Show fewer audiobooks</string>
     <string name="search_show_fewer_articles">Show fewer article matches</string>
     <string name="search_show_fewer_books">Show fewer books</string>
+    <plurals name="search_title_only">
+        <item quantity="one">%1$s has no text search, so only its titles were searched.</item>
+        <item quantity="other">%1$s have no text search, so only their titles were searched.</item>
+    </plurals>
+    <plurals name="search_title_only_more">
+        <item quantity="one">%1$s and %2$d more have no text search, so only their titles were searched.</item>
+        <item quantity="other">%1$s and %2$d more have no text search, so only their titles were searched.</item>
+    </plurals>
 </resources>

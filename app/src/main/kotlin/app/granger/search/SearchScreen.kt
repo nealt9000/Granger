@@ -137,7 +137,12 @@ fun SearchScreen(
         Box(Modifier.padding(padding).fillMaxSize()) {
             if (state.searching) LinearProgressIndicator(Modifier.fillMaxWidth())
             if (nothingFound) {
-                Text(stringResource(R.string.search_nothing_found), Modifier.align(Alignment.Center).padding(24.dp))
+                Column(Modifier.align(Alignment.Center).padding(24.dp)) {
+                    Text(stringResource(R.string.search_nothing_found))
+                    SearchRows.titleOnly(state.titleOnly)?.let {
+                        Text(it.resolve(), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
             }
             LazyColumn(Modifier.fillMaxSize(), state = list) {
                 if (state.query.isBlank() && state.recent.isNotEmpty()) {
@@ -212,6 +217,18 @@ fun SearchScreen(
                 results(state, SearchGroup.AUDIOBOOKS, music.audiobooks, { _, book -> "mk:${book.id}" }, ::toggle) { book ->
                     MediaRow(book.title, SearchRows.audiobook(book).resolve(), { AudiobookCover(book.coverPath, book.title, it) }) {
                         media { onOpenAudiobook(book.id) }
+                    }
+                }
+                if (!nothingFound && state.query.isNotBlank() && !state.searching) {
+                    SearchRows.titleOnly(state.titleOnly)?.let { note ->
+                        item(key = "title-only") {
+                            Text(
+                                note.resolve(),
+                                Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                 }
             }
@@ -308,6 +325,18 @@ internal object SearchRows {
         hit.matches > 1 -> UiText.Plural(R.plurals.search_book_matches, hit.matches, hit.matches)
         hit.author.isNotBlank() -> UiText.Raw(hit.author)
         else -> null
+    }
+
+    /**
+     * Under the results: the packs searched by title only (no full-text index), three named and the rest counted; null
+     * when there are none.
+     */
+    fun titleOnly(titles: List<String>): UiText? {
+        if (titles.isEmpty()) return null
+        val named = titles.take(3).joinToString(", ")
+        val rest = titles.size - 3
+        return if (rest > 0) UiText.Plural(R.plurals.search_title_only_more, rest, named, rest)
+        else UiText.Plural(R.plurals.search_title_only, titles.size, named)
     }
 
     /**
