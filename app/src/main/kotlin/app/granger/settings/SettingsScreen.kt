@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import app.granger.BuildConfig
 import app.granger.R
@@ -71,6 +72,10 @@ fun SettingsScreen(
     onLanguage: (() -> Unit)? = null,
     /** The language row's summary: the current choice, as the Language screen names it. */
     languageSummary: String = "",
+    /** Settings → About → Send feedback (Plan F1 part 2); null leaves the row out. */
+    onFeedback: (() -> Unit)? = null,
+    /** Crash reports kept on this phone, for the row's summary. */
+    crashReports: Int = 0,
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
@@ -151,6 +156,17 @@ fun SettingsScreen(
             }
             item(key = "about") {
                 SettingsHeader(stringResource(R.string.settings_section_about))
+                if (onFeedback != null) {
+                    LinkRow(
+                        stringResource(R.string.settings_feedback),
+                        if (crashReports == 0) {
+                            stringResource(R.string.settings_feedback_summary)
+                        } else {
+                            pluralStringResource(R.plurals.settings_feedback_summary_crashes, crashReports, crashReports)
+                        },
+                        onFeedback,
+                    )
+                }
                 About()
             }
         }

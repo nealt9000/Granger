@@ -44,4 +44,7 @@
 
     <string name="home_strip_status">&gt; %1$s aquí, todo listo sin conexión.</string>
     <string name="home_feed_day_mentions">Menciones del %2$d de %1$s</string>
+    <string name="home_crash_notice">Granger se cerró inesperadamente. ¿Enviar un informe?</string>
+    <string name="home_crash_not_now">Ahora no</string>
+    <string name="home_crash_send">Enviar</string>
 </resources>

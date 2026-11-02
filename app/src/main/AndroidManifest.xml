@@ -9,11 +9,17 @@
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
 
-    <!-- Lets the e-book reader's Define ask which apps handle ACTION_PROCESS_TEXT (package visibility, Android 11+). -->
+    <!-- Package visibility, Android 11+. PROCESS_TEXT: the e-book reader's Define asks which apps handle it.
+         mailto: Send feedback's mailto selector resolves only against mail apps Granger can see; without this the
+         start fails as if the phone had none. -->
     <queries>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT" />
             <data android:mimeType="text/plain" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <data android:scheme="mailto" />
         </intent>
     </queries>
 
@@ -66,5 +72,13 @@
             android:authorities="${applicationId}.artwork"
             android:exported="true"
             android:grantUriPermissions="false" />
+        <!-- Send feedback's report, lent read-only to the mail app the user picks (Plan F1 part 2). -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.reports"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/report_paths" />
+        </provider>
     </application>
 </manifest>

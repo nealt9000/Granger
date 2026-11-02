@@ -33,6 +33,8 @@ android {
             "String", "CATALOG_URL",
             "\"${findProperty("catalogUrl") ?: "https://raw.githubusercontent.com/nealt9000/Granger/main/catalog/catalog.json"}\"",
         )
+        // Settings → Send feedback writes here (Plan F1 part 2; Neal, 2026-10-31).
+        buildConfigField("String", "FEEDBACK_EMAIL", "\"nealt900@gmail.com\"")
         buildConfigField(
             "String", "CATALOG_PUBLIC_KEY",
             "\"${rootProject.file("catalog/public-key.txt").readText().trim()}\"",

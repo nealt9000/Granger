@@ -69,4 +69,15 @@
     <string name="media_auto_audiobooks">Audiolibros</string>
     <string name="media_auto_nothing">Aún no hay nada aquí</string>
     <string name="media_unmounted">%1$s está en un almacenamiento que no está disponible ahora. Vuelve a conectarlo para terminar, o quita la descarga primero.</string>
+    <string name="media_queued">En cola</string>
+    <plurals name="media_queued_tracks">
+        <item quantity="one">En cola: %1$d de %2$d pista</item>
+        <item quantity="many">En cola: %1$d de %2$d pistas</item>
+        <item quantity="other">En cola: %1$d de %2$d pistas</item>
+    </plurals>
+    <plurals name="media_queued_chapters">
+        <item quantity="one">En cola: %1$d de %2$d capítulo</item>
+        <item quantity="many">En cola: %1$d de %2$d capítulos</item>
+        <item quantity="other">En cola: %1$d de %2$d capítulos</item>
+    </plurals>
 </resources>

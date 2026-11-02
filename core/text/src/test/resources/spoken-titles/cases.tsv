@@ -1,0 +1,86 @@
+# id	heard	expect: titles joined by |, - for no title, * for not asserted, ~word for any title containing it
+c01	Read aloud	*
+c02	Stop reading	*
+c03	Next chapter	*
+c04	Go back a chapter	*
+c05	Pause the music	*
+c06	Play The Dark Side of the Moon	*
+c07	Play Holst the planets	*
+c08	Search Roman Rhodes	*
+c09	Search knots that hold under load	*
+c10	Find books by Thomas Hardy	*
+c11	Search wikivoyage for Lisbon	*
+c12	Open the medical library	*
+c13	Go to home	*
+c14	Read from where I left off	*
+c15	Bookmark this page	*
+n01	Open Wiki Voyage	Wikivoyage
+n02	Open apropedia	Appropedia
+n03	Open iFixit	iFixit
+n04	Open meiodaya	Mi Yodeya
+n05	Open wikimed	WikiMed
+n06	Openready.gov	Ready.gov
+n07	Open tone deer	Toned Ear
+n08	Open the domapada	The Dhammapada
+n09	Open Credo	Crito
+n10	Open the metaphysics of morals	the Metaphysic of Morals
+n11	Open the mayor of Castor bridge	The Mayor of Casterbridge
+n12	Open Riders to the Sea	Riders to the Sea
+n13	Open Hector berleos	Hector Berlioz
+n14	Open geo Como Puccini	Giacomo Puccini
+n15	Open how to study fiorio	How to Study Fiorillo
+n16	Open harpsichords and clavichords	Harpsichords and Clavichords
+n17	Open the castle of Andalusia	The Castle of Andalusia
+n18	Open meditations by Marcus aurulius	Meditations by Marcus Aurelius
+n19	Open discourses of Epictetus	Discourses of Epictetus
+n20	Open the tale of Genji	The Tale of Genji
+q01	What's a normal blood pressure	-
+q02	What does half-life mean	-
+q03	Did Jesus say we should pay taxes	-
+q04	What did Jon Stewart Mill think about peer pressure and having to conform	-
+q05	Who wrote the yellow wallpaper	-
+q06	What should you do right after you burn yourself	-
+q07	What's Adam Smith's example of how specialization makes workers more productive	-
+q08	How does Pride and Prejudice start	-
+q09	What is bhagavad Gita say about doing your work without worrying about the outcome	-
+q10	Who wrote The Tale of Genji	-
+q11	What did the stoics say about only worrying about what you can control	-
+q12	How tall is Mount Everest	-
+q13	Who wrote the book with big brother in it	-
+q14	What did Thorough say about minimalism	-
+q15	Who was Scrooge's business partner	-
+q16	What's the deepest lake in the world	-
+q17	Is it true salary comes from Roman soldiers getting paid in salt	-
+q18	In Old novels people die of dropsy What is that	-
+q19	What's wrong with the granny knot	-
+q20	What was the ship called in Treasure Island	-
+q21	Who lived longer in the Bible Methuselah or Noah and by how much	-
+q22	Who wrote Don Quixote	-
+q23	How many years after the Magna Carta did the Black Death reach Europe	-
+q24	Where in the Bible does it talk about alcohol	-
+q25	What did thucyides say about the plague in Athens	-
+live60	In the Bible what happened to Noah after the ark had landed	-
+live61	What's the story of Esther about	-
+live62	What did Kant add to philosophy	-
+live63	How do I change the oil in a 2013 Honda CRV	-
+live64	What's the best pesticide for tomato plants	-
+live65	What languages do they speak in Western Tanzania	-
+live66	Are there any other references to the Tower of Babel outside of the Bible	-
+live67	What are the oldest known civilizations	-
+live68	Where did the Peloponnesian people come from	-
+live69	Open the Bible	The King James Bible|World English Bible
+live70	Open meditations by Marcus Aurelius	Meditations by Marcus Aurelius
+live71	Open Peter Pan	Peter Pan
+live72	Open Wikipedia	~wikipedia
+live73	Open audiobooks	*
+live74	Open music	*
+live75	Start a background music playlist	*
+live76	Start a workout music playlist	*
+live77	Read Mary Poppins	*
+live78	Read me a line from Shakespeare	William Shakespeare
+live79	Read measure for measure by Shakespeare	Measure for Measure
+live80	Play Mary Poppins	*
+live81	Read to me a shade screen	*
+live82	Read War of the Worlds	The War of the Worlds
+live83	Stop the music	*
+live84	Who is Pocahontas	-

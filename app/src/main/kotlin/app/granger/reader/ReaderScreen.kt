@@ -127,6 +127,8 @@ fun ReaderScreen(
     val context = LocalContext.current
     val night = GrangerTheme.extras.night
     var webView by remember { mutableStateOf<ReaderWebView?>(null) }
+    // Bumped when the page's renderer dies, to build a new WebView on the page it was showing.
+    var rendererDeaths by remember { mutableIntStateOf(0) }
     // Set when Back loads the tab's previous page from its stored stack: once shown, the WebView's history is cleared
     // so it holds only that page, and the next Back goes on down the stored stack instead of forward again.
     var clearHistoryOnShow by remember { mutableStateOf(false) }
@@ -261,7 +263,7 @@ fun ReaderScreen(
                 }
                 // A new reader theme builds the WebView again (its history kept, as for a rotation): a WebView
                 // darkens pages only when its context's theme is dark.
-                startUrl != null -> key(pageNight) { AndroidView(
+                startUrl != null -> key(pageNight, rendererDeaths) { AndroidView(
                     modifier = Modifier.fillMaxSize(),
                     factory = { activity ->
                         val context = ContextThemeWrapper(activity, if (pageNight) R.style.Theme_Granger_Night else R.style.Theme_Granger_Field)
@@ -287,6 +289,13 @@ fun ReaderScreen(
                                 // Leaving the article for the document: keep the place on the page, as any link does.
                                 webView?.let { viewModel.savePosition(it.url, it.scrollFraction()) }
                                 onOpenDocument(packId, path, linkText)
+                            },
+                            onRendererGone = { view ->
+                                // The dead WebView's history can't be saved: the new one opens on the page shown last.
+                                (view as ReaderWebView).rendererGone = true
+                                viewModel.webViewState = null
+                                webView = null
+                                rendererDeaths++
                             },
                         )
                         ReaderWebView(
@@ -316,8 +325,10 @@ fun ReaderScreen(
                         }
                     },
                     onRelease = {
-                        viewModel.savePosition(it.url, it.scrollFraction())
-                        viewModel.webViewState = Bundle().apply { it.saveState(this) }
+                        if (!it.rendererGone) {
+                            viewModel.savePosition(it.url, it.scrollFraction())
+                            viewModel.webViewState = Bundle().apply { it.saveState(this) }
+                        }
                         it.destroy()
                     },
                 ) }

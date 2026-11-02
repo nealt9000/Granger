@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feedback_intro">Tu app de correo se abre con un correo para %1$s. Cuenta qué intentaste y qué pasó, y envíalo desde ahí. Nada sale de este teléfono hasta que lo envíes.</string>
+    <string name="feedback_reading">Leyendo este teléfono…</string>
+    <string name="feedback_includes">El correo incluye</string>
+    <string name="feedback_attach_crashes">Adjuntar informes de error</string>
+    <string name="feedback_attach_crashes_summary">Lo que hacía la app cuando se cerró. Sin títulos ni búsquedas.</string>
+    <string name="feedback_view">Ver</string>
+    <string name="feedback_clear_crashes">Borrar informes de error</string>
+    <string name="feedback_write_email">Escribir correo</string>
+    <string name="feedback_no_mail_app">No hay una app de correo en este teléfono. Escribe a %1$s.</string>
+    <string name="feedback_kind_crash">Cierre inesperado</string>
+    <string name="feedback_kind_native">Cierre inesperado (nativo)</string>
+    <string name="feedback_kind_anr">No responde</string>
+</resources>

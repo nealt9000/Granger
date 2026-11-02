@@ -14,10 +14,12 @@ import org.robolectric.annotation.Config
 class DownloadTextTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
-    private fun text(status: ItemStatus, done: Int, total: Int, unit: DownloadUnit) = downloadText(status, done, total, unit)?.resolve(context)
+    private fun text(status: ItemStatus, done: Int, total: Int, unit: DownloadUnit, onWifi: Boolean = false) =
+        downloadText(status, done, total, unit, onWifi)?.resolve(context)
 
     @Test fun aStoppedDownloadSaysWhatItsWaitingFor() {
         assertThat(text(ItemStatus.Queued(wifiOnly = true), 5, 13, DownloadUnit.CHAPTERS)).isEqualTo("Waiting for Wi-Fi: 5 of 13 chapters")
+        assertThat(text(ItemStatus.Queued(wifiOnly = true), 5, 13, DownloadUnit.CHAPTERS, onWifi = true)).isEqualTo("Queued: 5 of 13 chapters")
         assertThat(text(ItemStatus.Queued(wifiOnly = false), 5, 13, DownloadUnit.CHAPTERS)).isEqualTo("Waiting for a connection: 5 of 13 chapters")
         assertThat(text(ItemStatus.Queued(wifiOnly = true, lastError = "a.test answered 503"), 2, 7, DownloadUnit.TRACKS)).isEqualTo("Retrying: 2 of 7 tracks")
         assertThat(text(ItemStatus.Downloading(0.5f), 5, 13, DownloadUnit.CHAPTERS)).isEqualTo("Downloading: 5 of 13 chapters")

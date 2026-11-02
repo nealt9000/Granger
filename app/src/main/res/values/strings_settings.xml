@@ -147,4 +147,11 @@
     <string name="settings_voice_no_storage">No storage to download to.</string>
     <!-- %1$s is the voice's title. -->
     <string name="settings_voice_no_space">Not enough free space for %1$s.</string>
+    <!-- Settings → About → Send feedback (Plan F1 part 2). -->
+    <string name="settings_feedback">Send feedback</string>
+    <string name="settings_feedback_summary">An email from your mail app; you see what\'s included first</string>
+    <plurals name="settings_feedback_summary_crashes">
+        <item quantity="one">An email from your mail app · %1$d crash report kept on this phone</item>
+        <item quantity="other">An email from your mail app · %1$d crash reports kept on this phone</item>
+    </plurals>
 </resources>

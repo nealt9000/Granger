@@ -43,7 +43,7 @@ class SettingsScreenTest {
 
     private val calls = mutableListOf<String>()
 
-    private fun show(listening: Boolean = true, audiobooks: Boolean = true) = compose.setContent {
+    private fun show(listening: Boolean = true, audiobooks: Boolean = true, crashReports: Int = 0) = compose.setContent {
         SettingsScreen(
             SettingsViewModel(
                 FakeDownloads(), FakeVolumes(listOf(volume("/internal", "Internal storage"))), FakePrefs(), NoWaiver(), FakeAppearancePrefs(),
@@ -57,6 +57,8 @@ class SettingsScreenTest {
             audiobooks = audiobooks,
             onLanguage = { calls += "language" },
             languageSummary = "Follow the phone (English)",
+            onFeedback = { calls += "feedback" },
+            crashReports = crashReports,
         )
     }
 
@@ -77,6 +79,19 @@ class SettingsScreenTest {
     }
 
     /** Plan U2 Decision 7: audiobooks are named only once there's one on the phone. */
+    /** Plan F1 part 2: Send feedback sits in About, and says when crash reports are kept. */
+    @Test fun sendFeedbackIsInAboutAndCountsCrashReports() {
+        show(crashReports = 2)
+        compose.onNodeWithText("An email from your mail app · 2 crash reports kept on this phone").assertExists()
+        compose.onNodeWithText("Send feedback").performClick()
+        assertThat(calls).containsExactly("feedback")
+    }
+
+    @Test fun withoutCrashReportsSendFeedbackSaysWhatItDoes() {
+        show()
+        compose.onNodeWithText("An email from your mail app; you see what's included first").assertExists()
+    }
+
     @Test fun withoutAnAudiobookTheRowIsMusic() {
         show(audiobooks = false)
         compose.onNodeWithText("Music").performClick()

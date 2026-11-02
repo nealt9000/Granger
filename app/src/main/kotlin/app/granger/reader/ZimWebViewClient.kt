@@ -3,6 +3,7 @@ package app.granger.reader
 import android.text.TextUtils
 import app.granger.R
 import android.content.res.AssetManager
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -32,6 +33,11 @@ class ZimWebViewClient(
      * [linkText] is the link's words, when the page reported them ([ReaderWebView.tappedLinkText]); else empty.
      */
     private val onOpenDocument: (packId: String, path: String, linkText: String) -> Unit = { _, _, _ -> },
+    /**
+     * The page's renderer died (killed for memory, or crashed). The WebView is dead and must be dropped for a new one;
+     * returning false instead would take the whole app down with it (found on the Pixel 7, release 849).
+     */
+    private val onRendererGone: (WebView) -> Unit = {},
 ) : WebViewClient() {
     /** File names under `assets/reader/`; nothing else is ever served from the app. */
     private val appFiles: Set<String> by lazy { assets.list(ASSET_DIR).orEmpty().toSet() }
@@ -98,6 +104,11 @@ class ZimWebViewClient(
         view.evaluateJavascript(ReaderPageScript.SOURCE, null)
         view.evaluateJavascript(ReadAloudScript.SOURCE, null)
         onPageShown(view, url)
+    }
+
+    override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
+        onRendererGone(view)
+        return true
     }
 
     override fun doUpdateVisitedHistory(view: WebView, url: String, isReload: Boolean) {

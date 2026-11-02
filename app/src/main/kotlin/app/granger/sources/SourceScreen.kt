@@ -82,6 +82,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import app.granger.R
 import app.granger.UiText
+import app.granger.core.downloads.isUnmetered
 import app.granger.formatBytes
 import app.granger.core.library.ShelfKey
 import app.granger.library.shelf.ShelfList
@@ -774,14 +775,18 @@ private fun RemoveMenu(title: String, onRemove: () -> Unit) {
     }
 }
 
-/** The status line under an item: queue or progress, failure, installed. Shared with the archive.org rows. */
+/**
+ * The status line under an item: queue or progress, failure, installed. Shared with the archive.org rows. The network
+ * is read when a queued row is drawn: on Wi-Fi, a Wi-Fi-only item is waiting its turn (found on the Pixel 7, release
+ * 853, where a pack queued behind the model said "Waiting for Wi-Fi" on Wi-Fi).
+ */
 @Composable
 internal fun ItemStatusText(status: ItemStatus) {
     when (status) {
         is ItemStatus.Queued -> Text(
             when {
                 status.lastError != null -> stringResource(R.string.sources_retrying, status.lastError)
-                status.wifiOnly -> stringResource(R.string.sources_waiting_wifi)
+                status.wifiOnly && !isUnmetered(LocalContext.current) -> stringResource(R.string.sources_waiting_wifi)
                 else -> stringResource(R.string.sources_queued_status)
             },
         )

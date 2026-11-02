@@ -2,8 +2,11 @@ package app.granger
 
 /** Features whose code paths exist but stay hidden until they ship. */
 object Features {
-    /** Research, the on-device librarian (Plan 8); also needs a phone of the ASK tier. Debug builds only until the eval passes. */
-    val RESEARCH = BuildConfig.DEBUG
+    /**
+     * Research, the on-device librarian (Plan 8), shown as Ask with its Preview tag. On in release since the friend build
+     * (Plan F1 part 2); the device tier still keeps it to ASK phones, and release builds offer only evalPassed models.
+     */
+    const val RESEARCH = true
 
     /** The music and audiobook players, the mini-player and the Player tool (Plan M1). */
     val PLAYER = true

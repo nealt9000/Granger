@@ -64,4 +64,14 @@
     <string name="media_auto_nothing">Nothing here yet</string>
     <!-- A download already part-way onto storage that's now gone (an SD card taken out); %1$s is its title. -->
     <string name="media_unmounted">%1$s is on storage that isn\'t available right now. Put it back to finish it, or remove it first.</string>
+    <!-- A Wi-Fi-only download on Wi-Fi, waiting its turn in the queue. -->
+    <string name="media_queued">Queued</string>
+    <plurals name="media_queued_tracks">
+        <item quantity="one">Queued: %1$d of %2$d track</item>
+        <item quantity="other">Queued: %1$d of %2$d tracks</item>
+    </plurals>
+    <plurals name="media_queued_chapters">
+        <item quantity="one">Queued: %1$d of %2$d chapter</item>
+        <item quantity="other">Queued: %1$d of %2$d chapters</item>
+    </plurals>
 </resources>

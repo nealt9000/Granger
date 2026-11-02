@@ -61,4 +61,7 @@
     <!-- The readiness strip's status line. %1$s is how much Granger holds, such as 11.5 GB. -->
     <string name="home_strip_status">&gt; %1$s here, ready offline.</string>
     <string name="home_feed_day_mentions">Mentions %1$s %2$d</string>
+    <string name="home_crash_notice">Granger closed unexpectedly. Send a report?</string>
+    <string name="home_crash_not_now">Not now</string>
+    <string name="home_crash_send">Send</string>
 </resources>

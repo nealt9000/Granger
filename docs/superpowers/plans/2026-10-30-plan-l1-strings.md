@@ -98,6 +98,15 @@ Each task converts its packages under the conventions, lowers or removes those f
 | 7 | `core/` modules: downloads, media, player, speech, taglib, books, zim, ai, archive | Android library modules get their own `res/values/strings.xml` (`<module>_` names). Pure-Kotlin messages become types mapped in `app/`. `ArchiveQuery` shelf titles become an enum mapped in `app/archive` |
 | 8 (last) | sources, library, widget, top-level files (`Bytes.kt`, `GrangerNavHost.kt`, `MainActivity.kt`, `GrangerApp.kt`) | The open `gb-gutenberg` branch touches `sources/`, `library/` and `MainActivity.kt`, and `bugs-2026-10-30` touches `widget/WidgetUpdater.kt`, so convert these after those branches merge. `Bytes.kt` uses the locale's decimal separator; its tests pin `Locale.US`. **widget done** (2026-10-30): `WidgetModel` holds `UiText`; `WidgetModelStore` keeps it as JSON with stable resource names |
 
+**Text added since this plan was written (F1 part 2, merged 2026-11-02; converted in the languages merge, 2026-11-02):** a new `feedback/` package and lines in packages the tasks above already cover. Convert them with their group; `feedback/` goes with Task 8.
+- `feedback/FeedbackSheet.kt` (Task 8): "Send feedback", the intro ("Your mail app opens with an email to …"), "Reading this phone…", "The email includes", "Attach crash reports" and its line, "View", "Close", "Clear crash reports", "Write email".
+- `feedback/CrashLog.kt` (Task 8): the kind labels "Crash", "Native crash", "Not responding", shown in the sheet's list. The crash file's own text ("Thread:", "Reason:", the header) is a log and stays English.
+- `feedback/FeedbackReport.kt` and `FeedbackMail.kt` (Task 8): the email's subject and fact lines ("This phone: …", "63 GB free", "3 packs and 1 book (counts only, no titles)", "2 crash reports, attached", "Library and Ask"/"Library only") and the chooser title "Send feedback with". The sheet shows the fact lines, so they translate; the subject stays English so Neal can filter on it.
+- `GrangerNavHost.kt` (Task 8): the toast "No mail app on this phone. Write to …".
+- `home/HomeScreen.kt` (Task 2): "Granger closed unexpectedly. Send a report?", "Not now", "Send".
+- `settings/SettingsScreen.kt` (Task 3): the "Send feedback" row and its three supporting lines (a plural for crash reports).
+- `media/DownloadControls.kt` (Task 4) and `sources/SourceScreen.kt` (Task 8): "Queued" for a Wi-Fi-only download waiting its turn on Wi-Fi.
+
 Steps for each package *(all of Tasks 2–8 done; Task 8 on 2026-10-30 after merging main's KB, WF, GB, IA, DL, LV and bug-pass work: sources, library, `Bytes.kt` and the top-level files, one commit each; `MainActivity.kt` and `GrangerApp.kt` had no strings of their own beyond 8b's)*:
 - [x] **Step 1:** List the package's literals with the guard's patterns plus `grep -nE '"[A-Z][^"]{2,}"'`. Sort each into translate or keep (convention 6).
 - [x] **Step 2:** Add the strings and plurals to `strings_<package>.xml`. Each gets a one-line comment where the context isn't obvious; translators read these comments.

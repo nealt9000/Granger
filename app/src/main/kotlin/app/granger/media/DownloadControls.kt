@@ -13,9 +13,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import app.granger.R
 import app.granger.UiText
+import app.granger.core.downloads.isUnmetered
 import app.granger.library.ConfirmDialog
 import app.granger.sources.ItemStatus
 import app.granger.sources.failedText
@@ -23,14 +25,19 @@ import app.granger.sources.failedText
 /** What a downloaded item's files are: an album's tracks or an audiobook's chapters. */
 enum class DownloadUnit { TRACKS, CHAPTERS }
 
-/** What a downloaded book or album page says about its files; null when there's nothing to say (all in). */
-internal fun downloadText(status: ItemStatus, done: Int, total: Int, unit: DownloadUnit): UiText? {
+/**
+ * What a downloaded book or album page says about its files; null when there's nothing to say (all in). [onWifi]: a
+ * Wi-Fi-only download queued while on Wi-Fi is waiting its turn, not for Wi-Fi.
+ */
+internal fun downloadText(status: ItemStatus, done: Int, total: Int, unit: DownloadUnit, onWifi: Boolean = false): UiText? {
     val tracks = unit == DownloadUnit.TRACKS
     fun count(trackId: Int, chapterId: Int, d: Int = done, t: Int = total) = UiText.Plural(if (tracks) trackId else chapterId, t, d, t)
     return when (status) {
         is ItemStatus.Queued -> when {
             status.lastError != null ->
                 if (total > 0) count(R.plurals.media_retrying_tracks, R.plurals.media_retrying_chapters) else UiText.Res(R.string.media_retrying)
+            status.wifiOnly && onWifi ->
+                if (total > 0) count(R.plurals.media_queued_tracks, R.plurals.media_queued_chapters) else UiText.Res(R.string.media_queued)
             status.wifiOnly ->
                 if (total > 0) count(R.plurals.media_waiting_wifi_tracks, R.plurals.media_waiting_wifi_chapters) else UiText.Res(R.string.media_waiting_wifi)
             else -> if (total > 0) {
@@ -56,7 +63,7 @@ internal fun downloadText(status: ItemStatus, done: Int, total: Int, unit: Downl
 fun DownloadControls(title: String, status: ItemStatus, done: Int, total: Int, unit: DownloadUnit, onRemove: () -> Unit, modifier: Modifier = Modifier) {
     var confirming by rememberSaveable { mutableStateOf(false) }
     Column(modifier.padding(horizontal = 16.dp, vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        downloadText(status, done, total, unit)?.let {
+        downloadText(status, done, total, unit, onWifi = status is ItemStatus.Queued && isUnmetered(LocalContext.current))?.let {
             Text(
                 it.resolve(), style = MaterialTheme.typography.bodySmall,
                 color = if (status is ItemStatus.Failed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,

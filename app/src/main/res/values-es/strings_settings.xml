@@ -112,4 +112,11 @@
     <string name="settings_voice_speak_answers_summary">Preguntar lee en voz alta cada respuesta nueva mientras se escribe. Cualquier respuesta se puede escuchar con su botón de altavoz.</string>
     <string name="settings_voice_no_storage">No hay almacenamiento para descargar.</string>
     <string name="settings_voice_no_space">No hay espacio libre suficiente para %1$s.</string>
+    <string name="settings_feedback">Enviar comentarios</string>
+    <string name="settings_feedback_summary">Un correo desde tu app de correo; antes ves lo que incluye</string>
+    <plurals name="settings_feedback_summary_crashes">
+        <item quantity="one">Un correo desde tu app de correo · %1$d informe de error guardado en este teléfono</item>
+        <item quantity="many">Un correo desde tu app de correo · %1$d informes de error guardados en este teléfono</item>
+        <item quantity="other">Un correo desde tu app de correo · %1$d informes de error guardados en este teléfono</item>
+    </plurals>
 </resources>

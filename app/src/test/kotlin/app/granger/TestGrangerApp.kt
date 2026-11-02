@@ -13,6 +13,7 @@ class TestGrangerApp : GrangerApp() {
         mediaStarted = true
     }
 
+    override fun startCrashLog() = Unit
     override fun startVectorDownloads() = Unit
     override fun startGutenbergSync() = Unit
     override fun resumeDownloads() = Unit

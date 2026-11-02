@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Send feedback (Plan F1 part 2). The email it writes stays English: it is read by the developer. -->
+    <string name="feedback_intro">Your mail app opens with an email to %1$s. Say what you tried and what happened, then send it from there. Nothing leaves this phone until you do.</string>
+    <string name="feedback_reading">Reading this phone…</string>
+    <string name="feedback_includes">The email includes</string>
+    <string name="feedback_attach_crashes">Attach crash reports</string>
+    <string name="feedback_attach_crashes_summary">What the app was doing when it closed. No titles or searches.</string>
+    <string name="feedback_view">View</string>
+    <string name="feedback_clear_crashes">Clear crash reports</string>
+    <string name="feedback_write_email">Write email</string>
+    <string name="feedback_no_mail_app">No mail app on this phone. Write to %1$s.</string>
+    <!-- The kinds of crash report, in the sheet's list. -->
+    <string name="feedback_kind_crash">Crash</string>
+    <string name="feedback_kind_native">Native crash</string>
+    <string name="feedback_kind_anr">Not responding</string>
+</resources>
