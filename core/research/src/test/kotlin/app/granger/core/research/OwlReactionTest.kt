@@ -110,4 +110,16 @@ class OwlReactionTest {
         assertThat(OwlLines.DECLINES.none { '*' in it }).isTrue()
         for (label in OwlLines.GUESS_LABELS) assertThat(label.lowercase()).containsMatch("book|guess|memory")
     }
+
+    @Test
+    fun readingCountsItsPassagesInGoodEnglish() {
+        for (seed in 0..5) {
+            val one = OwlLines.reading(1, Random(seed))
+            assertThat(one).isIn(OwlLines.READING.map { it.second })
+            assertThat(one).doesNotContain("passages")
+            val four = OwlLines.reading(4, Random(seed))
+            assertThat(four).contains("4")
+            assertThat(four).doesNotContain("{n}")
+        }
+    }
 }

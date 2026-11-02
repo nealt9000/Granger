@@ -115,7 +115,7 @@ private fun OwlReaction(line: String) {
 }
 
 private fun Stage.label() = when (this) {
-    Stage.LOADING_MODEL -> "Loading the model…"
+    Stage.LOADING_MODEL -> "Waking the librarian…"
     Stage.SEARCHING -> "Searching your library…"
     Stage.RANKING -> "Ranking passages…"
     Stage.WRITING -> "Writing…"
@@ -425,9 +425,11 @@ private fun AnswerBlock(
                 ui.lookingIn?.let {
                     Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
+                // Until the first words, the owl says what it is reading (section C); then plain "Writing…".
+                val reading = ui.reading?.takeIf { ui.stage == Stage.WRITING && ui.partial.isNullOrBlank() }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                    ui.stage?.let { Text(it.label(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                    (reading ?: ui.stage?.label())?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
                 ui.partial?.takeIf { it.isNotBlank() }?.let { AnswerBody(it, onCite) }
             }

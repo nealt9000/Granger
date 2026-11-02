@@ -338,6 +338,20 @@ class ResearchViewModelTest {
         assertThat(vm.state.value.turns.single().lookingIn).isNull()
     }
 
+    @Test fun theOwlSaysWhatItIsReadingUntilTheTurnEnds() = runTest(main.dispatcher) {
+        small.answer = listOf("Plants use light [1].", " More.")
+        small.gateAt = 0
+        val vm = vm()
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        val live = vm.state.value.turns.single()
+        assertThat(live.stage).isEqualTo(Stage.WRITING)
+        assertThat(live.reading).matches("Reading [0-9]+ passages…|Reading the likeliest [0-9]+…|[0-9]+ passages look promising\\. Reading…")
+        small.gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().reading).isNull()
+    }
+
     @Test fun medicalBannerShowsWhileTheAnswerStreams() = runTest(main.dispatcher) {
         small.rewrite = "keywords: photosynthesis, light\nmedical: yes"
         small.answer = listOf("Cool the burn under running water [1].", " Then")
