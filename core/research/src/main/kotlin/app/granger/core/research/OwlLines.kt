@@ -3,8 +3,8 @@ package app.granger.core.research
 import kotlin.random.Random
 
 /**
- * What the owl says the moment a question is sent, by topic: Neal's lines from docs/ask/owl-lines-draft.md (section A),
- * generated from it. MEDICAL lines are plain, never a joke. A topic guess can be wrong, so every line hints rather than
+ * What the owl says the moment a question is sent, by topic, and when the answer isn't in the library: Neal's lines
+ * from docs/ask/owl-lines-draft.md (sections A and D), generated from it. MEDICAL lines are plain, never a joke. A topic guess can be wrong, so every line hints rather than
  * announces, and none claims to know the answer.
  */
 object OwlLines {
@@ -152,4 +152,32 @@ object OwlLines {
         val lines = LINES.getValue(topic)
         return lines.filter { it !in used }.ifEmpty { lines }.random(random)
     }
+
+    /**
+     * The owl's clean declines (the doc's section D), for a non-medical turn whose answer isn't in the library. Each
+     * says the answer isn't there, not that the topic isn't: the library may hold nearby books.
+     */
+    val DECLINES: List<String> = listOf(
+        "I've turned out every shelf, and it isn't here. Most vexing.",
+        "Your library is admirably stocked, but not with that.",
+        "Not a word of it in your books, and I looked properly.",
+        "The shelves are silent on this one, and they're rarely silent.",
+        "Nothing. I checked twice, which is once more than I usually allow.",
+        "Your books talk around it, but never quite about it.",
+        "A gap in the collection. Libraries have them; so do owls.",
+        "I found the neighbourhood, but not the house.",
+    )
+
+    /** The label over a best guess (section D): the guess is from memory, unchecked by any book. */
+    val GUESS_LABELS: List<String> = listOf(
+        "Off the record, then: my best guess, unchecked by any book.",
+        "From memory, which is old and not to be trusted: my best guess.",
+        "No book backs me up here, so weigh this lightly.",
+    )
+
+    /** [turnId]'s decline line: the same one every time the turn is shown. */
+    fun decline(turnId: Long): String = DECLINES[Math.floorMod(turnId, DECLINES.size)]
+
+    /** [turnId]'s best-guess label, steady as [decline]. */
+    fun guessLabel(turnId: Long): String = GUESS_LABELS[Math.floorMod(turnId, GUESS_LABELS.size)]
 }

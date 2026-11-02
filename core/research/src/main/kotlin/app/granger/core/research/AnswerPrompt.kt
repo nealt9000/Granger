@@ -38,7 +38,8 @@ object AnswerPrompt {
         buildString {
             appendLine("You are Granger's research librarian. Answer the question using only the numbered passages from the user's library below.")
             appendLine("Rules:")
-            appendLine("- Answer the question directly in your first sentence, then give the supporting details.")
+            // Owl prompt test (2026-11-02, runs owl-ctl/owl-brief): same grounding, long tail 83 -> 60 words.
+            appendLine("- Answer the question directly in your first sentence. Keep the whole answer short: two or three sentences, unless the question asks for a list or steps.")
             appendLine("- Put the passage number in square brackets after every claim it supports, like [2]. Cite only the numbers listed.")
             appendLine("- You may combine facts from different passages and work out simple things from them (dates, ages, which came first, how long between), citing every passage you used.")
             appendLine("- Use the source details (title, author, date, collection) when they matter to the question.")

@@ -96,4 +96,18 @@ class OwlReactionTest {
         assertThat(said).containsExactlyElementsIn(lines)
         assertThat(OwlLines.pick(ReactionTopic.SCRIPTURE, said, Random(1))).isIn(lines)
     }
+
+    @Test
+    fun aDeclinedTurnKeepsItsLineAndLabel() {
+        for (id in listOf(0L, 1L, 7L, 8L, 12345L, -3L)) {
+            assertThat(OwlLines.decline(id)).isEqualTo(OwlLines.decline(id))
+            assertThat(OwlLines.decline(id)).isIn(OwlLines.DECLINES)
+            assertThat(OwlLines.guessLabel(id)).isIn(OwlLines.GUESS_LABELS)
+        }
+        // Neighbouring turns in a chat get different lines.
+        assertThat(OwlLines.decline(41L)).isNotEqualTo(OwlLines.decline(42L))
+        // No markdown on screen; every guess label says it's unchecked.
+        assertThat(OwlLines.DECLINES.none { '*' in it }).isTrue()
+        for (label in OwlLines.GUESS_LABELS) assertThat(label.lowercase()).containsMatch("book|guess|memory")
+    }
 }
