@@ -69,3 +69,36 @@ Airplane mode on, phone on a table and on power. All 60 WAVs replayed through th
 **The name rule fails, but the plan's fallback applies:** Neal chooses between shipping as is, holding A1, or Task 6 (sherpa-onnx). The builder's suggestion is to **ship the system recognizer without biasing, plus a title matcher after recognition**: 19/20 in the quick check, no new model and no download. Task 6 would only make sense if the matcher falls short in live use.
 
 **Neal's decision (2026-11-02): ship as is for now.** The system on-device recognizer, no biasing, with a title matcher after recognition. Task 5's live mode includes the matcher (`TitleMatcher`: edit-distance ratio against the library titles after dropping "open / read / play / search for", threshold 0.55). On the replay transcripts it gets **20/20** names (Crito at 0.60, Mi Yodeya at 0.56). Commands score ≤ 0.54 unless they name a real title (*The Dark Side of the Moon* 1.0, *the medical library* 0.79).
+
+## Task 5: live, for feel (2026-11-02)
+
+Neal, phone in hand, `LiveListener` (on-device recognizer, `en-US`, partials, no biasing), airplane mode on (Wi-Fi was also on; the recognizer is the on-device one either way, and Task 4 showed it needs no network). The recognizer's endpointer ended every take by itself; Stop was never needed. Logs: `tools/asr/out/task5-*.log` (git-ignored).
+
+**Session 1 (20 takes): 9 questions of Neal's own, 11 names and commands.** No errors.
+
+- **End of speech → final: median 32 ms, p90 408 ms** (rule: ≤ 800 / 1,500 ms) ✅. `onEndOfSpeech` often arrives together with the result, so the wait a person feels is mostly the endpointer's own silence detection before that, as noted in Task 1.
+- **First word on screen about 0.6 s** after speech begins (median).
+- **The transcripts look clean:** *What did Kant add to philosophy*, *Where did the Peloponnesian people come from*, *How do I change the oil in a 2013 Honda CRV*, *Are there any other references to the Tower of Babel outside of the Bible*. This was judged from the text alone, because the exact wording Neal said wasn't recorded.
+
+**The title matcher, live.** No question scored as a title (all ≤ 0.50). Names and commands:
+
+| Said | Matched | |
+|---|---|---|
+| Open meditations by Marcus Aurelius | Meditations by Marcus Aurelius | ✅ |
+| Open Peter Pan | Peter Pan | ✅ |
+| Read measure for measure by Shakespeare | Measure for Measure | ✅ |
+| Read me a line from Shakespeare | William Shakespeare | ✅ (the author) |
+| Read War of the Worlds (with music) | War of the Worlds | ✅ |
+| Open the Bible | *The Rivals* | ❌ *The King James Bible* is in the list; whole-string ratio favours short titles |
+| Open Wikipedia | *WikiMed* | ❌ only "… by Wikipedia" collections in the list |
+| Open music | *Music* (a book) | ❌ an app section, not a title |
+| Stop the music (with music) | *Last of the Mohicans* | ❌ a command |
+| Open audiobooks, Start a … music playlist, Play/Read Mary Poppins, Who is Pocahontas | no title | ✅ (none in the library) |
+
+**Lessons for A1's matcher:** (1) match commands and app sections (*music*, *audiobooks*, *stop*, *next chapter*) **before** titles; (2) score on words as well as the whole string (all of a short spoken name's words found in a longer title, as with *Bible* → *The King James Bible*); (3) match against the live library, not a snapshot (this list was built on 2026-10-30, before *World English Bible* arrived).
+
+**Session 2, with music playing from Granger (5 takes).** Music **kept playing, did not duck or pause, and none of it reached the transcript.** Playback state was still `PLAYING` afterwards. One take came back odd: *"Read to me a shade screen"*.
+
+**Neal's verdict on feel:** *(to come)*
+
+**Debug menu:** the "Granger debug" screen had no way into the voice input spike, so it was opened over adb. A **Voice input spike** button is added there.
