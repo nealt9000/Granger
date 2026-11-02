@@ -56,10 +56,17 @@ these same questions, which is why only the held-out set can say what they're wo
 
 ## Task 1: the fresh held-out set
 
-- [ ] Written blind on Fable from `tools/eval/AUTHORING.md` and spec §8: `tools/eval/dataset/heldout2.json`, split
-  `heldout2`, ids `h2-<group>-NNN`, a `domain` on every item. At least 10 answerable per domain with content on disk,
-  about a third unanswerable, medical, multi-step and follow-ups as in Plan 9, and an own-book group on 2–3 imported
-  public-domain EPUBs (not Classics). Validator: 0 problems.
+- [x] Written blind on Fable (2026-11-02): `tools/eval/dataset/heldout2.json` (171 items) and `heldout2-own.json`
+  (8 on imported books). 127 answerable, 52 unanswerable (29%), 27 medical (16 answerable), 19 multi-step, 5 follow-ups.
+  Answerable per domain: classics 33 (27 books), medicine 16, food, making, science, technology, maps, reference and
+  thought 10 each, own-book 8. Validator 0 problems. The newest snapshot is now 2026-11-02 (foss.cooking), so its
+  after-snapshot items are after that or live. The writer's subagents were briefed the same way and every quote was
+  re-checked. Only these totals reached the tuning session.
+- [ ] Own-book EPUBs to import to the test phone, stems kept (sources are `book:import:<stem>`):
+  `~/.cache/granger/eval-books/own/pg55.epub` (The Wonderful Wizard of Oz), `pg23.epub` (Narrative of the Life of
+  Frederick Douglass), `pg201.epub` (Flatland). Map the source when scoring if the app ids them differently.
+- [ ] The eval library on the Mac: 18 pack links added to `~/.cache/granger/eval-packs/`; the Classics release in
+  `~/.cache/granger/eval-books/dl/`, linked into `by-ref/`.
 - [ ] Neal reviews it (as with Plan 9's set). Fixes go back through the author, not this session.
 - [ ] The test library on the Pixel 6 matches the set: every pack and snapshot it cites, the Classics release, the own-book
   EPUBs imported. Recorded in the set's notes.
