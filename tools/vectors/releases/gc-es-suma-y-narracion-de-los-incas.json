@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-suma-y-narracion-de-los-incas",
+ "kind": "book",
+ "fileName": "gc-es-suma-y-narracion-de-los-incas_2026-10-30.gvec",
+ "sizeBytes": 56286,
+ "sha256": "43c1b8d85665157cbe3f938fccec4b5ed0deb1f518ed086ae4b33db5dfa70b84",
+ "count": 191,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "051c45ed2b773b87668d8a5b83b0a3043b95168baab4f3c585aa1721f8e63101",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-suma-y-narracion-de-los-incas_2026-10-30.gvec"
+}

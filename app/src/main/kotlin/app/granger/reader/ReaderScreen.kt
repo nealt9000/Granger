@@ -1,5 +1,7 @@
 package app.granger.reader
 
+import androidx.compose.ui.res.stringResource
+import app.granger.UiText
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -207,7 +209,7 @@ fun ReaderScreen(
         onRandom = {
             scope.launch {
                 val url = viewModel.randomUrl()
-                if (url != null) navigate(url) else Toast.makeText(context, NO_RANDOM_ARTICLE, Toast.LENGTH_SHORT).show()
+                if (url != null) navigate(url) else Toast.makeText(context, R.string.reader_no_random_article, Toast.LENGTH_SHORT).show()
             }
         },
         onFind = viewModel::startFind,
@@ -255,7 +257,7 @@ fun ReaderScreen(
             val startUrl = state.url
             when {
                 error != null -> Box(Modifier.fillMaxSize().padding(32.dp), Alignment.Center) {
-                    Text(error, textAlign = TextAlign.Center)
+                    Text(error.resolve(), textAlign = TextAlign.Center)
                 }
                 // A new reader theme builds the WebView again (its history kept, as for a rotation): a WebView
                 // darkens pages only when its context's theme is dark.
@@ -348,7 +350,7 @@ fun ReaderScreen(
                 )
                 AssistChip(
                     onClick = viewModel::follow,
-                    label = { Text("Follow") },
+                    label = { Text(stringResource(R.string.reader_follow)) },
                     leadingIcon = { Icon(painterResource(R.drawable.ic_replay), contentDescription = null, Modifier.size(18.dp)) },
                     // Above the bottom bar while it shows.
                     modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = followLift + 16.dp).testTag(ReaderTags.FOLLOW),
@@ -432,8 +434,8 @@ internal fun wikiBarActions(
         onMainPage = onHome.takeIf { hasPack && hasHome },
         onListen = onListen?.takeIf { hasPage && voice == VoiceButton.IDLE },
         menu = if (!hasPack) emptyList() else listOfNotNull(
-            ReaderMenuItem("Random article", onRandom),
-            ReaderMenuItem("Find in page", onFind).takeIf { hasPage },
+            ReaderMenuItem(R.string.reader_random_article, onRandom),
+            ReaderMenuItem(R.string.reader_find_in_page, onFind).takeIf { hasPage },
         ),
         onContents = onContents.takeIf { hasPage },
         onSearch = onSearchPack.takeIf { hasPack },
@@ -444,7 +446,8 @@ internal fun wikiBarActions(
     )
 
 /** The pack search's prompt: "Search Wikipedia", or "Search this pack" when the pack's title isn't known. */
-internal fun searchLabel(packTitle: String?) = if (packTitle != null) "Search $packTitle" else "Search this pack"
+internal fun searchLabel(packTitle: String?): UiText =
+    if (packTitle != null) UiText.Res(R.string.reader_search_pack, packTitle) else UiText.Res(R.string.reader_search_this_pack)
 
 /** The search field in place of the top bar, with the results listed under it. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -466,7 +469,7 @@ private fun PackSearchPanel(
                     value = search.query,
                     onValueChange = onQueryChange,
                     modifier = Modifier.fillMaxWidth().focusRequester(focus),
-                    placeholder = { Text(searchLabel(packTitle), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                    placeholder = { Text(searchLabel(packTitle).resolve(), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = { onSubmit() }),
@@ -477,11 +480,11 @@ private fun PackSearchPanel(
                 )
             },
             navigationIcon = {
-                IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = "Close search") }
+                IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.reader_close_search)) }
             },
         )
         if (search.searched && search.hits.isEmpty()) {
-            Text("No matches in this pack.", Modifier.padding(16.dp), style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.reader_no_pack_matches), Modifier.padding(16.dp), style = MaterialTheme.typography.bodyMedium)
         }
         LazyColumn(Modifier.fillMaxWidth().imePadding().navigationBarsPadding()) {
             items(search.hits, key = { it.path }) { hit ->
@@ -515,15 +518,15 @@ private fun FindBar(
                 value = query,
                 onValueChange = onQueryChange,
                 modifier = Modifier.fillMaxWidth().focusRequester(focus),
-                placeholder = { Text("Find in page") },
+                placeholder = { Text(stringResource(R.string.reader_find_in_page)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(onSearch = { onNext(true) }),
                 suffix = {
                     val count = when {
                         query.isEmpty() || matches == null -> null
-                        matches.count > 0 -> "${matches.active + 1} of ${matches.count}"
-                        matches.done -> "No matches"
+                        matches.count > 0 -> stringResource(R.string.reader_find_count, matches.active + 1, matches.count)
+                        matches.done -> stringResource(R.string.reader_find_no_matches)
                         else -> null
                     }
                     if (count != null) Text(count, style = MaterialTheme.typography.bodySmall)
@@ -535,15 +538,15 @@ private fun FindBar(
             )
         },
         navigationIcon = {
-            IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = "Close find") }
+            IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.reader_close_find)) }
         },
         actions = {
             val any = (matches?.count ?: 0) > 0
             IconButton(onClick = { onNext(false) }, enabled = any) {
-                Icon(Icons.Filled.KeyboardArrowUp, contentDescription = "Previous match")
+                Icon(Icons.Filled.KeyboardArrowUp, contentDescription = stringResource(R.string.reader_previous_match))
             }
             IconButton(onClick = { onNext(true) }, enabled = any) {
-                Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Next match")
+                Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.reader_next_match))
             }
         },
     )
@@ -631,11 +634,9 @@ private fun openExternal(context: Context, url: String) {
     try {
         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
     } catch (e: ActivityNotFoundException) {
-        Toast.makeText(context, "No app on this phone can open that link.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, R.string.reader_no_app_for_link, Toast.LENGTH_SHORT).show()
     }
 }
-
-private const val NO_RANDOM_ARTICLE = "This pack has no articles to pick from."
 
 /** A shell edge-swipe request counts only when it is newer than the counter value this reader started with. */
 internal fun isNewChromeRequest(atEntry: Int, current: Int): Boolean = current > atEntry

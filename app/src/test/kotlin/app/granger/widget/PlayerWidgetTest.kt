@@ -7,6 +7,7 @@ import androidx.glance.appwidget.testing.unit.runGlanceAppWidgetUnitTest
 import androidx.glance.testing.unit.hasTestTag
 import androidx.glance.testing.unit.hasText
 import androidx.test.core.app.ApplicationProvider
+import app.granger.UiText
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -16,7 +17,7 @@ import org.robolectric.annotation.Config
 @Config(sdk = [35])
 class PlayerWidgetTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val music = WidgetModel("Mars", "Holst", null, playing = true, secondary = Secondary.NEXT, progress = 0.5f, empty = false)
+    private val music = WidgetModel(UiText.Raw("Mars"), UiText.Raw("Holst"), null, playing = true, secondary = Secondary.NEXT, progress = 0.5f, empty = false)
 
     @Test fun smallSizeShowsCoverAndPlay() = runGlanceAppWidgetUnitTest {
         setContext(context)
@@ -54,5 +55,15 @@ class PlayerWidgetTest {
         onNode(hasText("Nothing playing")).assertExists()
         onNode(hasText("Open Granger")).assertExists()
         onNode(hasTestTag(PlayerWidgetTags.PLAY_PAUSE)).assertDoesNotExist()
+    }
+
+    /** Plan L2 Task 3 Step 5: under Spanish the widget reads in Spanish. */
+    @Config(qualifiers = "es")
+    @Test fun emptyInSpanish() = runGlanceAppWidgetUnitTest {
+        setContext(context)
+        setAppWidgetSize(PlayerWidget.MEDIUM)
+        provideComposable { PlayerWidgetContent(WidgetModel.EMPTY, cover = null) }
+        onNode(hasText("No se está reproduciendo nada")).assertExists()
+        onNode(hasText("Abrir Granger")).assertExists()
     }
 }

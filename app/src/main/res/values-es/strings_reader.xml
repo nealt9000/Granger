@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reader_main_page">Página principal</string>
+    <string name="reader_listen">Escuchar</string>
+    <string name="reader_contents">Índice</string>
+    <string name="reader_text_settings">Ajustes de texto</string>
+    <string name="reader_remove_bookmark">Quitar marcador</string>
+    <string name="reader_add_bookmark">Agregar marcador</string>
+
+    <string name="reader_random_article">Artículo al azar</string>
+    <string name="reader_find_in_page">Buscar en la página</string>
+    <string name="reader_no_random_article">Este paquete no tiene artículos para elegir.</string>
+
+    <string name="reader_search_pack">Buscar en %1$s</string>
+    <string name="reader_search_this_pack">Buscar en este paquete</string>
+    <string name="reader_close_search">Cerrar la búsqueda</string>
+    <string name="reader_no_pack_matches">No hay coincidencias en este paquete.</string>
+
+    <string name="reader_find_count">%1$d de %2$d</string>
+    <string name="reader_find_no_matches">No hay coincidencias</string>
+    <string name="reader_close_find">Cerrar la búsqueda en la página</string>
+    <string name="reader_previous_match">Coincidencia anterior</string>
+    <string name="reader_next_match">Coincidencia siguiente</string>
+
+    <string name="reader_follow">Seguir</string>
+    <string name="reader_no_app_for_link">Ninguna app de este teléfono puede abrir ese enlace.</string>
+
+    <string name="reader_contents_title">Índice</string>
+    <string name="reader_no_sections">Esta página no tiene secciones.</string>
+
+    <string name="reader_select_ask">Preguntar</string>
+    <string name="reader_select_read_from_here">Leer desde aquí</string>
+
+    <string name="reader_pack_unavailable">Este paquete no está o está dañado. Revisa que su archivo siga en el teléfono o en la tarjeta SD.</string>
+    <string name="reader_no_main_page">Este paquete no tiene página principal. Usa Buscar para abrir un artículo.</string>
+    <string name="reader_tab_gone">Este marcador se quitó.</string>
+    <string name="reader_page_not_in_pack">Esta página no está en este paquete.</string>
+
+    <string name="reader_pdf_unreadable_pack">No se pudo abrir este PDF: el paquete no se puede leer.</string>
+    <string name="reader_pdf_not_in_pack">No se pudo abrir este PDF: no está en este paquete.</string>
+    <string name="reader_pdf_no_space">No se pudo abrir este PDF: no hay espacio suficiente.</string>
+    <string name="reader_pdf_copy_failed">No se pudo abrir este PDF: falló la copia desde el paquete.</string>
+    <string name="reader_pdf_damaged">No se pudo abrir este PDF: está dañado o protegido.</string>
+    <string name="reader_devdocs_contents">Índice</string>
+</resources>

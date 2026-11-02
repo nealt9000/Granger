@@ -41,6 +41,15 @@ subject gets `subjectOf`, `adds` and `articles`, and a sample `sample: true`. Ev
 curated title less its flavour words ("WikiMed", never "WikiMed (no pictures)"). `build` applies them when curated.json
 has a "sets" setting; `sets` applies them to a built catalog with a fresh generatedAt.
 
+Languages (Plan L3): every `language` is BCP-47 primary subtags ("en", "es", "en,es" for Kiwix's "eng,spa"); `bcp47`
+maps Kiwix's ISO 639-3 codes. English stays where it was, and `formatVersion` stays 1, so older builds still read the
+catalog: a readiness domain keeps its English `essential` and `comprehensive` and gains `languages: {"es": {...}}`; a use
+case keeps its English `items` and gains `languages: {"es": {"items": [...]}}`; and `efficient-<code>` and
+`comprehensive-<code>` presets with `language` sit beside the English two. Copy keeps its English field and gains
+`i18n: {"es": {"title": ..., "blurb": ...}}` (domains, presets, use cases, sets and their slices, curated packs); the app
+shows the app language's copy and falls back to English. A family row's `flavours` lists the only flavours it lists
+(the stale unflavoured `wiktionary_es_all`). `tier_sizes` takes a language, and `build` prints a table per language.
+
 The app trusts only catalogs signed by the key whose public half is in catalog/public-key.txt.
 """
 import argparse
@@ -76,8 +85,35 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 RELEASE_KEYS = ("id", "description", "language", "sizeBytes", "sha256", "urls", "snapshotDate",
                 "hasFulltextIndex", "zimUuid", "zimName")
 # Readiness (Plan H1): a Classics book's domain comes from its section; what isn't scripture or philosophy is literature.
+# A descriptor whose manifest names each section's domain (Clásicos Granger, Plan L3) carries it per book, and that wins.
 BOOK_DOMAINS = {"Scripture & religion": "thought", "Philosophy": "thought"}
 BOOK_DOMAIN_DEFAULT = "literature"
+
+
+# Plan L3: Kiwix's ISO 639-3 codes as BCP-47 primary subtags (every code in its catalog with a two-letter form, 2026-10-30).
+# A code not in the table passes through: "mul", and the codes with no two-letter form ("nso", "efi").
+ISO639_3 = {"afr": "af", "aka": "ak", "amh": "am", "ara": "ar", "aym": "ay", "aze": "az", "bel": "be", "ben": "bn",
+            "bis": "bi", "bod": "bo", "bos": "bs", "bre": "br", "bul": "bg", "cat": "ca", "ces": "cs", "cym": "cy",
+            "dan": "da", "deu": "de", "ell": "el", "eng": "en", "epo": "eo", "est": "et", "eus": "eu", "ewe": "ee",
+            "fao": "fo", "fas": "fa", "fin": "fi", "fra": "fr", "fry": "fy", "gle": "ga", "glg": "gl", "guj": "gu",
+            "hat": "ht", "hau": "ha", "heb": "he", "hin": "hi", "hrv": "hr", "hun": "hu", "hye": "hy", "ibo": "ig",
+            "iku": "iu", "ina": "ia", "ind": "id", "isl": "is", "ita": "it", "jpn": "ja", "kan": "kn", "kat": "ka",
+            "kaz": "kk", "khm": "km", "kik": "ki", "kin": "rw", "kor": "ko", "kur": "ku", "lao": "lo", "lat": "la",
+            "lav": "lv", "lit": "lt", "lug": "lg", "mal": "ml", "mar": "mr", "mkd": "mk", "mlg": "mg", "mlt": "mt",
+            "mon": "mn", "mri": "mi", "msa": "ms", "mya": "my", "nep": "ne", "nld": "nl", "nno": "nn", "nob": "nb",
+            "nor": "no", "nya": "ny", "oci": "oc", "ori": "or", "orm": "om", "pol": "pl", "por": "pt", "pus": "ps",
+            "que": "qu", "ron": "ro", "rus": "ru", "san": "sa", "sin": "si", "slk": "sk", "slv": "sl", "sme": "se",
+            "sna": "sn", "snd": "sd", "sot": "st", "spa": "es", "sqi": "sq", "srp": "sr", "swa": "sw", "swe": "sv",
+            "tam": "ta", "tel": "te", "tgk": "tg", "tgl": "tl", "tha": "th", "tir": "ti", "tsn": "tn", "tuk": "tk",
+            "tur": "tr", "twi": "tw", "ukr": "uk", "urd": "ur", "uzb": "uz", "vie": "vi", "wol": "wo", "xho": "xh",
+            "yid": "yi", "yor": "yo", "zho": "zh", "zul": "zu"}
+LANGUAGE_CODE = re.compile(r"^[a-z]{2,3}$")
+
+
+def bcp47(code):
+    """[code] as BCP-47 primary subtags: "eng" -> "en", "eng,spa" -> "en,es" (order kept, duplicates dropped)."""
+    codes = [ISO639_3.get(c.strip().lower(), c.strip().lower()) for c in (code or "").split(",") if c.strip()]
+    return ",".join(dict.fromkeys(codes))
 
 
 def http_get(url):
@@ -105,7 +141,7 @@ def opds_entries(xml_bytes):
             "uuid": text("id").removeprefix("urn:uuid:"),
             "title": text("title"),
             "summary": text("summary"),
-            "language": text("language"),
+            "language": bcp47(text("language")),
             "name": text("name"),
             "flavour": text("flavour"),
             "updated": text("updated"),
@@ -182,6 +218,10 @@ def pin(entry, row, fetch=http_get):
     }
     if row.get("nonCommercial"):
         result["nonCommercial"] = True
+    # Plan L3: a curated row's copy in other languages ("i18n": {"en": {"title": …}} on a Spanish pack).
+    i18n = check_i18n(result["id"], row.get("i18n"))
+    if i18n:
+        result["i18n"] = i18n
     return result
 
 
@@ -206,6 +246,7 @@ def load_contents(root=None, path=CONTENTS):
 # Plan GB: the two everything-packs, whose summaries describe the producer rather than a subject.
 GUTENBERG_EVERYTHING = {
     "gutenberg_en_all": "Every English book",
+    "gutenberg_es_all": "Todos los libros en español",  # Plan L3: named in its own language, as the app's GutenbergNames
     "gutenberg_mul_all": "Every book, all languages",
 }
 
@@ -239,7 +280,7 @@ def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=
     Every pack in [feed] in one of the configured languages whose family has a license and no hold, pinned, except
     the curated ones ([curated_keys], (name, flavour) pairs). Returns (packs, report lines).
     """
-    languages = set(config["languages"])
+    languages = {bcp47(code) for code in config["languages"]}
     newest = {}
     for e in feed:
         if languages & set(e["language"].split(",")):
@@ -254,9 +295,10 @@ def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=
         family = row["family"] if row else e["name"].split("_")[0]
         if row is None:
             no_row[family] = no_row.get(family, 0) + 1
-        elif row.get("hold"):
-            held.setdefault(row["hold"], {}).setdefault(family, 0)
-            held[row["hold"]][family] += 1
+        elif row.get("hold") or ("flavours" in row and e["flavour"] not in row["flavours"]):
+            hold = row.get("hold") or "flavour"  # Plan L3: a row's `flavours` are the only ones it lists
+            held.setdefault(hold, {}).setdefault(family, 0)
+            held[hold][family] += 1
         elif not row.get("license"):
             no_license[family] = no_license.get(family, 0) + 1
         elif not SAFE_NAME.match(f"{e['name']}_{e['flavour']}" if e["flavour"] else e["name"]):
@@ -284,8 +326,14 @@ def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=
     packs = sorted((p for p, _ in results if p), key=lambda p: (p["category"], p["title"].lower(), p["id"]))
     failed = [f for _, f in results if f]
 
-    report = [f"Kiwix packs in {', '.join(sorted(languages))}: {len(newest)}; listed {len(packs)}, "
-              f"curated {len(curated_keys & set(newest))}", ""]
+    report = [f"Kiwix packs in {', '.join(sorted(config['languages']))}: {len(newest)}; listed {len(packs)}, "
+              f"curated {len(curated_keys & set(newest))}"]
+    if len(languages) > 1:  # Plan L3: a multilingual pack counts in each of its languages
+        for code in sorted(languages):
+            has = [k for k, e in newest.items() if code in e["language"].split(",")]
+            report.append(f"  {code}: {len(has)}; listed {sum(1 for p in packs if code in p['language'].split(','))}, "
+                          f"curated {len(curated_keys & set(has))}")
+    report.append("")
     by_family = {}
     for p in packs:
         by_family[(p["category"], p["family"])] = by_family.get((p["category"], p["family"]), 0) + 1
@@ -318,12 +366,12 @@ def release_entry(curated, head=http_head, root=None):
         served = head(url)
         if served != descriptor["sizeBytes"]:
             raise SystemExit(f"{url} serves {served} bytes; the descriptor says {descriptor['sizeBytes']}")
-    return {
+    return with_i18n({
         "id": descriptor["id"],
         "title": curated["title"],
         "description": descriptor["description"],
         "category": curated["category"],
-        "language": descriptor["language"],
+        "language": bcp47(descriptor["language"]),
         "sizeBytes": descriptor["sizeBytes"],
         "sha256": descriptor["sha256"],
         "urls": descriptor["urls"],
@@ -338,7 +386,7 @@ def release_entry(curated, head=http_head, root=None):
         "domain": curated.get("domain", ""),
         "content": curated.get("content", ""),
         "flavour": "",
-    }
+    }, check_i18n(descriptor["id"], curated.get("i18n")))
 
 
 BOOK_KEYS = ("releaseDate", "collection", "books")
@@ -365,11 +413,11 @@ def book_entries(curated, head=http_head, root=None):
                 raise SystemExit(f"{url} serves {served} bytes; the descriptor says {book['sizeBytes']}")
         entries.append({
             "id": book["id"], "title": book["title"], "author": book["author"], "description": "",
-            "category": book["section"], "language": book["language"], "sizeBytes": book["sizeBytes"],
+            "category": book["section"], "language": bcp47(book["language"]), "sizeBytes": book["sizeBytes"],
             "sha256": book["sha256"], "urls": book["urls"], "releaseDate": descriptor["releaseDate"],
             "license": curated["license"], "collection": descriptor["collection"],
             "published": book["published"],
-            "domain": BOOK_DOMAINS.get(book["section"], BOOK_DOMAIN_DEFAULT),
+            "domain": book.get("domain") or BOOK_DOMAINS.get(book["section"], BOOK_DOMAIN_DEFAULT),
         })
     return descriptor["collection"], entries
 
@@ -402,11 +450,12 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
             report += lines
     models = curated["models"]
     voices = curated.get("voices", [])       # Plan V1: one zip per voice, hand-written like models
-    books, collections = [], {}
+    books, collections, collection_rows = [], {}, {}
     for row in curated.get("books", []):
         collection, entries = book_entries(row, head)
         books += entries
         collections[collection] = [e["id"] for e in entries]
+        collection_rows[collection] = row
     for item in packs + models + voices:
         for key in ("id", "fileName"):
             if key in item and not SAFE_NAME.match(item[key]):
@@ -418,11 +467,18 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
     if len(ids) != len(set(ids)):
         raise SystemExit(f"duplicate ids in {ids}")
     # "@<collection>" in a preset stands for every book of that collection.
-    presets = [{**p, "items": [i for item in p["items"] for i in
-                               (collections.get(item[1:], [item]) if item.startswith("@") else [item])]}
+    presets = [with_i18n({**{k: v for k, v in p.items() if k != "i18n"},
+                          "items": [i for item in p["items"] for i in
+                                    (collections.get(item[1:], [item]) if item.startswith("@") else [item])]},
+                         check_i18n(f"preset {p['id']}", p.get("i18n")))
                for p in curated["presets"]]
-    presets += [{"id": name, "title": "Granger Classics: all books", "items": ids_}
-                for name, ids_ in collections.items()]
+    # A collection's preset takes its books row's `title`, `language` and `i18n` when given (Plan L3: Clásicos Granger).
+    for name, ids_ in collections.items():
+        row = collection_rows[name]
+        preset = {"id": name, "title": row.get("title") or "Granger Classics: all books", "items": ids_}
+        if row.get("language"):
+            preset["language"] = bcp47(row["language"])
+        presets.append(with_i18n(preset, check_i18n(f"books {name}", row.get("i18n"))))
     vector_lines = []
     if "vectors" in curated:
         v = curated["vectors"]
@@ -463,13 +519,28 @@ VECTOR_KEYS = ("id", "kind", "fileName", "sizeBytes", "sha256", "dims", "dtype",
                "sourceSha256")
 
 
-FLAVOUR_WORDS = re.compile(r"\s*\((no|with) pictures\)\s*$", re.IGNORECASE)
-SET_FIELDS = ("set", "setRank", "setLabel", "subjectOf", "adds", "articles", "sample")
+FLAVOUR_WORDS = re.compile(r"\s*\(((no|with) pictures|(sin|con) imágenes)\)\s*$", re.IGNORECASE)  # Spanish: Plan L3
+SET_FIELDS = ("set", "setRank", "setLabel", "setTitle", "setDescription", "subjectOf", "adds", "articles", "sample")
 
 
 def base_title(title):
-    """[title] less a flavour's words: "WikiMed (no pictures)" -> "WikiMed"."""
+    """[title] less a flavour's words: "WikiMed (no pictures)" -> "WikiMed", "Wikcionario (sin imágenes)" -> "Wikcionario"."""
     return FLAVOUR_WORDS.sub("", title).strip()
+
+
+def slice_i18n(s, x):
+    """
+    A slice's copy in each language its set has copy for (Plan L3): `title` "<set>: <label>", `setLabel`, `setTitle`
+    and `setDescription`, each falling back to the set's own where that language lacks one.
+    """
+    out = {}
+    for code, copy in (s.get("i18n") or {}).items():
+        label = ((x.get("i18n") or {}).get(code) or {}).get("label", x["label"])
+        title = copy.get("title", s["title"])
+        out[code] = {"title": f"{title}: {label}", "setLabel": label, "setTitle": title}
+        if copy.get("description") or s.get("description"):
+            out[code]["setDescription"] = copy.get("description") or s["description"]
+    return out
 
 
 def load_sets(path):
@@ -480,8 +551,10 @@ def load_sets(path):
         ranks = [x["rank"] for x in s["slices"]]
         if ranks != list(range(1, len(ranks) + 1)):
             raise SystemExit(f"{path}: set {key} ranks {ranks}, not 1..{len(ranks)}")
+        check_i18n(f"{path}: set {key}", s.get("i18n"))
         for x in s["slices"]:
             slices[x["zimName"]] = key
+            check_i18n(f"{path}: {x['zimName']}", x.get("i18n"))
     for name, subject in sets["subjects"].items():
         if subject["subjectOf"] not in sets["sets"]:
             raise SystemExit(f"{path}: {name} is a subject of unknown set {subject['subjectOf']}")
@@ -503,8 +576,13 @@ def apply_sets(packs, sets, curated_rows=()):
             by_zim.setdefault(p["zimName"], []).append(p)
     for row in curated_rows:
         if row.get("title") and "release" not in row:
+            i18n = {code: {**copy, "title": base_title(copy["title"])} if "title" in copy else copy
+                    for code, copy in (row.get("i18n") or {}).items()}
             for p in by_zim.get(row["name"], []):
                 p["title"] = base_title(row["title"])
+                p.pop("i18n", None)
+                if i18n:
+                    p["i18n"] = {code: dict(copy) for code, copy in i18n.items()}
     missing = []
     for key, s in sets.get("sets", {}).items():
         for x in s["slices"]:
@@ -514,7 +592,14 @@ def apply_sets(packs, sets, curated_rows=()):
                 for f in SET_FIELDS:
                     p.pop(f, None)
                 p.update({"set": key, "setRank": x["rank"], "setLabel": x["label"], "articles": x["articles"],
-                          "title": f"{s['title']}: {x['label']}"})
+                          "title": f"{s['title']}: {x['label']}", "setTitle": s["title"]})
+                if s.get("description"):
+                    p["setDescription"] = s["description"]
+                # Plan L3: the set's copy in other languages, as "<set>: <label>" like the title.
+                i18n = slice_i18n(s, x)
+                p.pop("i18n", None)
+                if i18n:
+                    p["i18n"] = i18n
     for name, subject in sets.get("subjects", {}).items():
         if name not in by_zim:
             missing.append(name)
@@ -578,6 +663,49 @@ def attach_vectors(catalog, descriptors, release_url=None):
     return used, lines
 
 
+def check_i18n(scope, i18n):
+    """
+    [i18n] checked (Plan L3): a map from a language code to a map of string fields, {"es": {"title": "…"}}. Anything
+    else fails the build. Returns a copy, or None when there's nothing to copy.
+    """
+    if i18n is None:
+        return None
+    if not isinstance(i18n, dict):
+        raise SystemExit(f"{scope}: i18n must map a language code to its copy, got {i18n!r}")
+    out = {}
+    for code, copy in i18n.items():
+        if not LANGUAGE_CODE.match(code) or not isinstance(copy, dict) or not copy:
+            raise SystemExit(f"{scope}: i18n {code!r} must be a language code mapping to string fields")
+        bad = [k for k, v in copy.items() if not isinstance(k, str) or not isinstance(v, str) or not v.strip()]
+        if bad:
+            raise SystemExit(f"{scope}: i18n {code} fields {bad} must be text")
+        out[code] = dict(copy)
+    return out or None
+
+
+def with_i18n(item, i18n):
+    """[item] with an `i18n` key when [i18n] has any copy; older catalogs and English-only items stay as they were."""
+    return {**item, "i18n": i18n} if i18n else item
+
+
+def language_lists(scope, languages, keys):
+    """
+    A `languages` object (Plan L3), {"es": {"essential": [...], ...}}, checked: language codes, each with lists under
+    [keys] only. Returns {code: {key: list}} in the file's order.
+    """
+    if not isinstance(languages or {}, dict):
+        raise SystemExit(f"{scope}: languages must map a language code to its lists")
+    out = {}
+    for code, lists in (languages or {}).items():
+        if not LANGUAGE_CODE.match(code) or code == "en" or not isinstance(lists, dict):
+            raise SystemExit(f"{scope}: languages {code!r} must be a language code other than en mapping to its lists")
+        unknown = set(lists) - set(keys)
+        if unknown or not all(isinstance(lists.get(k, []), list) for k in keys):
+            raise SystemExit(f"{scope}: languages {code} takes lists {list(keys)}, got {sorted(lists)}")
+        out[code] = {k: list(lists.get(k, [])) for k in keys}
+    return out
+
+
 def check_token(scope, token, pack_ids, book_ids, families, collections):
     """A readiness-style token names a catalog item, "@<collection>" or "family:<name>"; anything else fails the build."""
     if token.startswith("@"):
@@ -610,7 +738,18 @@ def onboarding_block(block, packs, books, collections):
             raise SystemExit(f"onboarding {uid}: no items")
         for token in items:
             check_token(f"onboarding {uid}", token, pack_ids, book_ids, families, collections)
-        use_cases.append({"id": uid, "title": title, "blurb": u.get("blurb") or "", "items": items})
+        use_case = {"id": uid, "title": title, "blurb": u.get("blurb") or "", "items": items}
+        # Plan L3: the use case's items in other languages; one with no items in a language isn't offered in it.
+        languages = {}
+        for code, lists in language_lists(f"onboarding {uid}", u.get("languages"), ("items",)).items():
+            lang_items = list(dict.fromkeys(lists["items"]))
+            for token in lang_items:
+                check_token(f"onboarding {uid} ({code})", token, pack_ids, book_ids, families, collections)
+            if lang_items:
+                languages[code] = {"items": lang_items}
+        if languages:
+            use_case["languages"] = languages
+        use_cases.append(with_i18n(use_case, check_i18n(f"onboarding {uid}", u.get("i18n"))))
     regions = block.get("regions", {})
     larger = list(dict.fromkeys(regions.get("larger", [])))
     for pack_id in larger:
@@ -626,13 +765,22 @@ def onboarding_block(block, packs, books, collections):
     return {"useCases": use_cases, "larger": larger, "covered": covered}
 
 
+# The generated tier presets: id, English title, other languages' titles. Friend review (L2): "Comienzo eficiente" and
+# "Biblioteca completa" wait for the native speaker's read, like the rest of L2's Spanish. Not "Inicio eficiente": the
+# L2 glossary gives "Inicio" to Home, and L2's own strings say "el comienzo Eficiente".
+TIER_PRESETS = (("efficient", "Efficient start", {"es": {"title": "Comienzo eficiente"}}),
+                ("comprehensive", "Comprehensive library", {"es": {"title": "Biblioteca completa"}}))
+
+
 def readiness_block(block, packs, books, collections):
     """
-    The catalog's `readiness` object (Plan H1, spec §3.2) and the two presets it generates. Every tier token is checked:
+    The catalog's `readiness` object (Plan H1, spec §3.2) and the presets it generates. Every tier token is checked:
     a catalog id, "@<collection>" (that collection's books of the domain) or "family:<name>" (any pack of the family).
     Essential items are folded into comprehensive. A pack or book whose domain isn't one of the block's ids fails the build.
     `contains` (Plan H4) maps a ZIM name to the ZIM names it holds ("prefix*" allowed); the presets carry one pack per ZIM
     (the flavour the bigger tier names) and leave out a ZIM held by another in the same preset.
+    Plan L3: a domain's `languages.<code>` lists are checked and folded the same way, and each language with any gets
+    its own `efficient-<code>` and `comprehensive-<code>` presets carrying `language`; `i18n` copy is passed through.
     """
     zim_names = {p["zimName"] for p in packs if p.get("zimName")}
     contains = block.get("contains", {})
@@ -646,17 +794,20 @@ def readiness_block(block, packs, books, collections):
     books_by_domain = {}
     for b in books:
         books_by_domain.setdefault((b["collection"], b["domain"]), []).append(b["id"])
-    ids, domains, efficient, comprehensive = set(), [], [], []
+    ids, domains = set(), []
+    tiers = {"en": ([], [])}  # language -> (efficient, comprehensive) items, English first
     for d in block.get("domains", []):
         did, title = d.get("id") or "", d.get("title") or ""
         if not did or not title or did in ids:
             raise SystemExit(f"readiness: bad or duplicate domain id {did!r}")
         ids.add(did)
-        essential = list(dict.fromkeys(d.get("essential", [])))
-        full = list(dict.fromkeys(essential + list(d.get("comprehensive", []))))
-        for token in full:
-            check_token(f"readiness {did}", token, pack_ids, book_ids, families, collections)
-        domains.append({"id": did, "title": title, "essential": essential, "comprehensive": full})
+
+        def folded(scope, essential, comprehensive):
+            essential = list(dict.fromkeys(essential))
+            full = list(dict.fromkeys(essential + list(comprehensive)))
+            for token in full:
+                check_token(scope, token, pack_ids, book_ids, families, collections)
+            return essential, full
 
         def expand(tokens):
             out = []
@@ -667,14 +818,34 @@ def readiness_block(block, packs, books, collections):
                     out.append(token)
             return out
 
-        efficient += expand(essential)
-        comprehensive += expand(full)
+        essential, full = folded(f"readiness {did}", d.get("essential", []), d.get("comprehensive", []))
+        domain = {"id": did, "title": title, "essential": essential, "comprehensive": full}
+        by_language = {"en": (essential, full)}
+        for code, lists in language_lists(f"readiness {did}", d.get("languages"), ("essential", "comprehensive")).items():
+            by_language[code] = folded(f"readiness {did} ({code})", lists["essential"], lists["comprehensive"])
+        languages = {code: {"essential": e, "comprehensive": c} for code, (e, c) in by_language.items()
+                     if code != "en" and c}
+        if languages:
+            domain["languages"] = languages
+        domains.append(with_i18n(domain, check_i18n(f"readiness {did}", d.get("i18n"))))
+        for code, (e, c) in by_language.items():
+            efficient, comprehensive = tiers.setdefault(code, ([], []))
+            efficient += expand(e)
+            comprehensive += expand(c)
     for item in packs + books:
         if item.get("domain") and item["domain"] not in ids:
             raise SystemExit(f"{item['id']}: domain {item['domain']!r} is not in the readiness block")
     zim_of = {p["id"]: p.get("zimName") for p in packs}
-    presets = [{"id": "efficient", "title": "Efficient start", "items": one_per_zim(efficient, zim_of, contains)},
-               {"id": "comprehensive", "title": "Comprehensive library", "items": one_per_zim(comprehensive, zim_of, contains)}]
+    presets = []
+    for code, lists in tiers.items():
+        if code != "en" and not any(lists):
+            continue
+        for (pid, title, i18n), items in zip(TIER_PRESETS, lists):
+            preset = {"id": pid if code == "en" else f"{pid}-{code}", "title": title,
+                      "items": one_per_zim(items, zim_of, contains)}
+            if code != "en":
+                preset["language"] = code
+            presets.append(with_i18n(preset, i18n))
     out = {"domains": domains}
     if contains:
         out["contains"] = contains
@@ -703,10 +874,11 @@ def one_per_zim(items, zim_of, contains):
     return out
 
 
-def tier_sizes(catalog):
+def tier_sizes(catalog, language="en"):
     """
     Per readiness domain and for "All", (essential, comprehensive) bytes as the presets count them: one pack per ZIM,
-    a held ZIM left out, `family:` tokens (the region's map) left out.
+    a held ZIM left out, `family:` tokens (the region's map) left out. [language]'s lists (Plan L3); a domain with none
+    in it counts nothing.
     """
     readiness = catalog.get("readiness") or {}
     contains = readiness.get("contains", {})
@@ -734,12 +906,21 @@ def tier_sizes(catalog):
 
     sizes, all_e, all_c = {}, [], []
     for d in readiness.get("domains", []):
-        e, c = expand(d["essential"], d["id"]), expand(d["comprehensive"], d["id"])
+        lists = d if language == "en" else d.get("languages", {}).get(language, {})
+        e, c = expand(lists.get("essential", []), d["id"]), expand(lists.get("comprehensive", []), d["id"])
         sizes[d["id"]] = (total(e), total(c))
         all_e += e
         all_c += c
     sizes["All"] = (total(all_e), total(all_c))
     return sizes
+
+
+def tier_languages(catalog):
+    """The languages the readiness block has tiers for: English, then the others in the order the domains name them."""
+    codes = ["en"]
+    for d in (catalog.get("readiness") or {}).get("domains", []):
+        codes += [c for c in d.get("languages", {}) if c not in codes]
+    return codes
 
 
 def catalog_urls(catalog):
@@ -870,17 +1051,22 @@ def main(argv):
     if args.command == "keygen":
         print(keygen(args.out))
     elif args.command == "build":
-        report = []
+        report, tables = [], []
         catalog = build(json.loads(pathlib.Path(args.curated).read_text()), report=report)
         if catalog.get("readiness"):
-            report += ["", "Readiness tiers, essential / comprehensive (one pack per ZIM, held ZIMs and the region's map left out):"]
-            report += [f"  {d}: {e / 1e9:.1f} GB / {c / 1e9:.1f} GB" for d, (e, c) in tier_sizes(catalog).items()]
+            for language in tier_languages(catalog):  # one table per language (Plan L3)
+                tables += ["", f"Readiness tiers in {language}, essential / comprehensive "
+                               "(one pack per ZIM, held ZIMs and the region's map left out):"]
+                tables += [f"  {d}: {e / 1e9:.1f} GB / {c / 1e9:.1f} GB" for d, (e, c) in tier_sizes(catalog, language).items()]
+        report += tables
         out = pathlib.Path(args.out)
         out.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         if report:
             (out.parent / "kiwix-report.txt").write_text("\n".join(report) + "\n", encoding="utf-8")
         print(f"{args.out}: {len(catalog['packs'])} packs, {len(catalog['models'])} models, "
               f"{out.stat().st_size / 1e6:.2f} MB")
+        for line in tables:
+            print(line)
     elif args.command == "check-links":
         count, dead = check_links(args.file)
         if dead:

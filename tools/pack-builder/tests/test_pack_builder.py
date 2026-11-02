@@ -189,3 +189,37 @@ def test_ebible_rows_build_through_usfm_and_describe_like_any_book(tmp_path):
     assert "sup.v" in css and css.count(".gv-l {") == 1  # the verse rules once, from verse.CSS
     d = describe_epubs(out, "https://example.test/classics", m)
     assert d["books"][0]["id"] == "gc-test-bible" and d["books"][0]["title"] == "The Test Bible"
+
+
+def test_describe_epubs_for_clasicos_carries_prefix_collection_domain_and_learner(tmp_path):
+    from pack_builder import build_epubs, describe_epubs
+    works = [{"gutenberg": 1342, "slug": "marianela", "title": "Marianela", "author": "Benito Pérez Galdós",
+              "translator": None, "published": 1878, "section": "novelas", "learner": True},
+             {"gutenberg": 2800, "slug": "nuevo-testamento", "title": "Nuevo Testamento", "author": "",
+              "translator": "Casiodoro de Reina", "published": 1909, "section": "escritura"}]
+    data = {"name": "clasicos_test", "title": "Clásicos Granger", "language": "spa", "description": "Prueba",
+            "collection": "clasicos-granger", "bookIdPrefix": "gc-es-",
+            "sections": [{"id": "novelas", "title": "Novelas", "domain": "literature"},
+                         {"id": "escritura", "title": "Escritura y religión", "domain": "thought"}],
+            "works": works}
+    path = tmp_path / "manifest_es.json"
+    path.write_text(json.dumps(data))
+    m = load(path)
+    out = tmp_path / "out"
+    out.mkdir()
+    files = build_epubs(m, FakeSource(), out, "2026-10-30")
+    assert sorted(f.name for f in files) == ["gc-es-marianela_2026-10-30.epub", "gc-es-nuevo-testamento_2026-10-30.epub"]
+    d = describe_epubs(out, "https://example.org/r", m)
+    assert d["collection"] == "clasicos-granger"
+    marianela, nt = d["books"]
+    assert marianela["language"] == "es" and marianela["domain"] == "literature" and marianela["learner"] is True
+    assert nt["title"] == "Nuevo Testamento (trad. Casiodoro de Reina)" and nt["domain"] == "thought"
+    assert "learner" not in nt
+
+
+def test_describe_epubs_for_english_adds_no_domain_or_learner(tmp_path):
+    from pack_builder import build_epubs, describe_epubs
+    m = two_works(tmp_path)
+    build_epubs(m, FakeSource(), tmp_path, "2026-10-17")
+    for book in describe_epubs(tmp_path, "https://example.org/r", m)["books"]:
+        assert "domain" not in book and "learner" not in book

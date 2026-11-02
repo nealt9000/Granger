@@ -291,3 +291,30 @@ def test_a_title_opening_word_on_its_own_line_keeps_its_capital():
     from chapters import title_case
     assert title_case("THE")[0] == "The"                    # "THE / TALE OF GENJI"
     assert title_case("A")[0] == "A"
+
+
+# --- Clásicos Granger (Plan L3) ---
+
+def test_spanish_clean_title_drops_byline_and_indice_but_keeps_por_que():
+    from chapters import clean_title
+    author = "Benito Pérez Galdós"
+    assert clean_title("Marianela — por B. Pérez Galdós — I", "Marianela", author, 0, "es") == "I"
+    assert clean_title("ÍNDICE", "Marianela", author, 3, "es") == "Parte 4"
+    assert clean_title("Por qué no me caso", "Cuentos", author, 0, "es") == "Por qué no me caso"
+    assert clean_title("Capítulo III — La Nela", "Marianela", author, 0, "es") == "Capítulo III — La Nela"
+
+
+def test_spanish_clean_title_translates_the_titles_split_makes_up():
+    from chapters import clean_title
+    assert clean_title("Front matter", "X", "", 0, "es") == "Preliminares"
+    assert clean_title("Part 2", "X", "", 1, "es") == "Parte 2"
+    assert clean_title("Capítulo I (part 3)", "X", "", 1, "es") == "Capítulo I (parte 3)"
+    assert clean_title("Front matter (part 2)", "X", "", 1, "es") == "Preliminares (parte 2)"
+    assert clean_title("Front matter", "X", "", 0) == "Front matter"
+
+
+def test_spanish_clean_title_keeps_its_capitals():
+    """Title case follows English rules, so a Spanish heading in capitals stays as the Spanish branch built it."""
+    from chapters import clean_title
+    assert clean_title("CAPÍTULO PRIMERO. DE LA CONDICIÓN", "X", "", 0, "es") == "CAPÍTULO PRIMERO. DE LA CONDICIÓN"
+    assert clean_title("BOOK I.", "X", "", 0) == "Book I"

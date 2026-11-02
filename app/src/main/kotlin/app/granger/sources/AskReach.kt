@@ -1,12 +1,14 @@
 package app.granger.sources
 
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.catalog.PackEntry
 
 /** How Ask can search a pack (Plan U3b Decision 8). */
-enum class AskReach(val text: String) {
-    MEANING("Ask: by meaning and keywords"),
-    KEYWORDS("Ask: keywords only"),
-    NONE("Ask can't search this"),
+enum class AskReach(val text: UiText) {
+    MEANING(UiText.Res(R.string.sources_ask_meaning)),
+    KEYWORDS(UiText.Res(R.string.sources_ask_keywords)),
+    NONE(UiText.Res(R.string.sources_ask_none)),
 }
 
 /**

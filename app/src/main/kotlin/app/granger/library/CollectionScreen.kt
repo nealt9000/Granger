@@ -26,6 +26,9 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import app.granger.R
 import app.granger.core.library.Book
 import app.granger.core.library.isBookPack
 import app.granger.core.library.isPackBook
@@ -113,25 +116,25 @@ fun CollectionScreen(
                     // A Gutenberg collection is called by its subject (Plan GB Decision 2), often long: two lines, smaller.
                     if (gutenberg != null) {
                         Text(
-                            loaded?.collection?.name.orEmpty(),
+                            loaded?.collection?.shownName()?.resolve().orEmpty(),
                             style = MaterialTheme.typography.titleMedium,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                         )
                     } else {
-                        Text(loaded?.collection?.name.orEmpty())
+                        Text(loaded?.collection?.shownName()?.resolve().orEmpty())
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) }
                 },
                 actions = {
                     if (loaded != null && !loaded.isFolder) Box {
-                        IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More") }
+                        IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.common_more)) }
                         DropdownMenu(menuOpen, { menuOpen = false }) {
                             gutenberg?.let { g ->
                                 if (g.progress == null && g.searchable < g.books) DropdownMenuItem(
-                                    text = { Text("Make all searchable…") },
+                                    text = { Text(stringResource(R.string.library_make_searchable_menu)) },
                                     onClick = {
                                         menuOpen = false
                                         scope.launch { viewModel.searchableCost()?.let { dialog = CollectionDialog.MakeSearchable(it) } }
@@ -139,25 +142,25 @@ fun CollectionScreen(
                                 )
                                 val pack = g.pack
                                 if (pack != null && pack.status == PackStatus.OK) DropdownMenuItem(
-                                    text = { Text("Open the pack's own pages") },
+                                    text = { Text(stringResource(R.string.library_open_pack_pages)) },
                                     onClick = { menuOpen = false; onOpenPack(pack.id) },
                                 )
                                 if (pack != null) DropdownMenuItem(
-                                    text = { Text("Remove pack") },
+                                    text = { Text(stringResource(R.string.library_remove_pack)) },
                                     onClick = { menuOpen = false; dialog = CollectionDialog.RemovePack(pack) },
                                 )
                             }
                             DropdownMenuItem(
-                                text = { Text("Move collection to…") },
+                                text = { Text(stringResource(R.string.library_move_collection)) },
                                 onClick = { menuOpen = false; dialog = CollectionDialog.MoveCollection },
                             )
                             if (loaded.collection.userCreated) {
                                 DropdownMenuItem(
-                                    text = { Text("Rename") },
+                                    text = { Text(stringResource(R.string.library_rename)) },
                                     onClick = { menuOpen = false; dialog = CollectionDialog.Rename },
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Delete") },
+                                    text = { Text(stringResource(R.string.common_delete)) },
                                     onClick = { menuOpen = false; dialog = CollectionDialog.Delete },
                                 )
                             }
@@ -171,8 +174,8 @@ fun CollectionScreen(
             items(loaded.children, key = { it.collection.id }) { child ->
                 ListItem(
                     modifier = Modifier.clickable { onOpenCollection(child.collection.id) },
-                    headlineContent = { Text(child.collection.name) },
-                    supportingContent = { Text(rowCountText(child)) },
+                    headlineContent = { Text(child.collection.shownName().resolve()) },
+                    supportingContent = { Text(rowCountText(child).resolve()) },
                 )
             }
         } else if (loaded != null) {
@@ -191,11 +194,11 @@ fun CollectionScreen(
                             )
                             DropdownMenu(packMenu, { packMenu = false }) {
                                 DropdownMenuItem(
-                                    text = { Text("Move to collection…") },
+                                    text = { Text(stringResource(R.string.library_move_to_collection)) },
                                     onClick = { packMenu = false; dialog = CollectionDialog.MovePack(pack) },
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Remove from phone") },
+                                    text = { Text(stringResource(R.string.library_remove_from_phone)) },
                                     onClick = { packMenu = false; dialog = CollectionDialog.RemovePack(pack) },
                                 )
                             }
@@ -211,10 +214,10 @@ fun CollectionScreen(
                         OutlinedTextField(
                             value = viewModel.findText,
                             onValueChange = viewModel::setQuery,
-                            placeholder = { Text("Find a title or author") },
+                            placeholder = { Text(stringResource(R.string.library_find_title_author)) },
                             leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                             trailingIcon = if (viewModel.findText.isEmpty()) null else {
-                                { IconButton(onClick = { viewModel.setQuery("") }) { Icon(Icons.Filled.Close, contentDescription = "Clear") } }
+                                { IconButton(onClick = { viewModel.setQuery("") }) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.library_clear)) } }
                             },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
@@ -229,7 +232,7 @@ fun CollectionScreen(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
                                 items(BookSort.entries, key = { it.name }) { option ->
-                                    FilterChip(selected = sort == option, onClick = { viewModel.setSort(option) }, label = { Text(option.label) })
+                                    FilterChip(selected = sort == option, onClick = { viewModel.setSort(option) }, label = { Text(stringResource(option.label)) })
                                 }
                             }
                             ViewToggle(view, viewModel::toggleView)
@@ -239,7 +242,7 @@ fun CollectionScreen(
                     if (shown.categories.isNotEmpty()) add(HeadItem("categories", "chips") {
                         LazyRow(contentPadding = PaddingValues(horizontal = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             item(key = "all") {
-                                FilterChip(selected = shown.category == null, onClick = { viewModel.setCategory(null) }, label = { Text("All") })
+                                FilterChip(selected = shown.category == null, onClick = { viewModel.setCategory(null) }, label = { Text(stringResource(R.string.sources_all)) })
                             }
                             items(shown.categories, key = { it }) { category ->
                                 FilterChip(
@@ -252,7 +255,7 @@ fun CollectionScreen(
                     })
                     if (shown.books.isEmpty()) add(HeadItem("none", "none") {
                         Text(
-                            "No books match.",
+                            stringResource(R.string.library_no_books_match),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
@@ -310,18 +313,17 @@ fun CollectionScreen(
             onDismiss = { dialog = null },
         )
         is CollectionDialog.RemoveBook -> ConfirmDialog(
-            title = "Remove from phone?",
-            message = "${d.book.title} will be deleted from this phone. Your place, bookmarks and highlights are kept.",
-            confirm = "Remove",
+            title = stringResource(R.string.library_remove_from_phone_title),
+            message = stringResource(R.string.library_remove_book_body, d.book.title),
+            confirm = stringResource(R.string.common_remove),
             onConfirm = { viewModel.removeBook(d.book) },
             onDismiss = { dialog = null },
         )
         is CollectionDialog.MakeSearchable -> MakeSearchableDialog(d.cost, onConfirm = viewModel::makeAllSearchable, onDismiss = { dialog = null })
         is CollectionDialog.RemovePack -> ConfirmDialog(
-            title = "Remove from phone?",
-            message = "${d.pack.title} will be deleted from this phone. You can download it again later." +
-                if (d.pack.isBookPack) " Its books go with it; your places, bookmarks and highlights are kept." else "",
-            confirm = "Remove",
+            title = stringResource(R.string.library_remove_from_phone_title),
+            message = stringResource(if (d.pack.isBookPack) R.string.library_remove_book_pack_body else R.string.library_remove_pack_body, d.pack.title),
+            confirm = stringResource(R.string.common_remove),
             onConfirm = { viewModel.remove(d.pack) },
             onDismiss = { dialog = null },
         )
@@ -333,17 +335,17 @@ fun CollectionScreen(
             onDismiss = { dialog = null },
         )
         CollectionDialog.Rename -> NameDialog(
-            title = "Rename collection",
-            label = "Collection name",
-            confirm = "Rename",
+            title = stringResource(R.string.library_rename_collection),
+            label = stringResource(R.string.library_collection_name),
+            confirm = stringResource(R.string.library_rename),
             initial = collection.name,
             onConfirm = { viewModel.rename(it); dialog = null },
             onDismiss = { dialog = null },
         )
         CollectionDialog.Delete -> ConfirmDialog(
-            title = "Delete collection?",
-            message = "Its packs go back to their usual collections. Nothing is removed from the phone.",
-            confirm = "Delete",
+            title = stringResource(R.string.library_delete_collection_title),
+            message = stringResource(R.string.library_delete_collection_body),
+            confirm = stringResource(R.string.common_delete),
             onConfirm = viewModel::delete,
             onDismiss = { dialog = null },
         )
@@ -363,18 +365,20 @@ private fun BookMenu(book: Book, open: Boolean, onClose: () -> Unit, onMove: () 
         if (book.origin.isPackBook) DropdownMenuItem(
             text = {
                 Text(
-                    when {
-                        book.searchableInFull -> "Searchable in full"
-                        book.indexedAt != null && !book.searchable -> "Title only: it's a scan"
-                        else -> "Titles only until you open it"
-                    },
+                    stringResource(
+                        when {
+                            book.searchableInFull -> R.string.library_searchable_full
+                            book.indexedAt != null && !book.searchable -> R.string.library_title_only_scan
+                            else -> R.string.library_titles_only
+                        },
+                    ),
                 )
             },
             onClick = {},
             enabled = false,
         )
-        DropdownMenuItem(text = { Text("Move to collection…") }, onClick = { onClose(); onMove() })
-        if (!book.origin.isPackBook) DropdownMenuItem(text = { Text("Remove from phone") }, onClick = { onClose(); onRemove() })
+        DropdownMenuItem(text = { Text(stringResource(R.string.library_move_to_collection)) }, onClick = { onClose(); onMove() })
+        if (!book.origin.isPackBook) DropdownMenuItem(text = { Text(stringResource(R.string.library_remove_from_phone)) }, onClick = { onClose(); onRemove() })
     }
 }
 
@@ -385,14 +389,15 @@ private fun BookMenu(book: Book, open: Boolean, onClose: () -> Unit, onMove: () 
 @Composable
 private fun GutenbergHead(header: GutenbergHeader) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Column(Modifier.clearAndSetSemantics { contentDescription = header.text }) {
-            Text(header.provenance, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(header.searchableText, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        val all = header.text.resolve()
+        Column(Modifier.clearAndSetSemantics { contentDescription = all }) {
+            Text(header.provenance.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(header.searchableText.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         header.progress?.let { p ->
             val number = java.text.NumberFormat.getIntegerInstance()
             Text(
-                "Making searchable: ${number.format(p.done)} of ${number.format(p.total)} copied",
+                stringResource(R.string.library_making_searchable, number.format(p.done), number.format(p.total)),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -414,16 +419,15 @@ private fun MakeSearchableDialog(cost: SearchableCost, onConfirm: () -> Unit, on
     if (!cost.fits) {
         androidx.compose.material3.AlertDialog(
             onDismissRequest = onDismiss,
-            title = { Text("Not enough space") },
-            text = { Text("Making all $count books searchable needs about $size more, and this phone has $free free.") },
-            confirmButton = { androidx.compose.material3.TextButton(onClick = onDismiss) { Text("OK") } },
+            title = { Text(stringResource(R.string.library_not_enough_space)) },
+            text = { Text(pluralStringResource(R.plurals.library_searchable_no_room, cost.books, count, size, free)) },
+            confirmButton = { androidx.compose.material3.TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_ok)) } },
         )
     } else {
         ConfirmDialog(
-            title = "Make all searchable?",
-            message = "Copies the $count books not yet opened out of the pack, so Search and Ask can read them in full. " +
-                "That takes about $size more ($free free). It runs in the background; you can leave this screen.",
-            confirm = "Make searchable",
+            title = stringResource(R.string.library_make_searchable_title),
+            message = pluralStringResource(R.plurals.library_make_searchable_body, cost.books, count, size, free),
+            confirm = stringResource(R.string.library_make_searchable),
             onConfirm = onConfirm,
             onDismiss = onDismiss,
         )
@@ -450,8 +454,8 @@ private fun PackRow(pack: Pack, replaced: Boolean, onClick: () -> Unit, onLongCl
         .joinToString(" · ")
     val problem = when (pack.status) {
         PackStatus.OK -> null
-        PackStatus.MISSING -> "File not found. Reinsert the SD card or download the pack again."
-        PackStatus.CORRUPT -> "This file is damaged and can't be opened."
+        PackStatus.MISSING -> stringResource(R.string.library_pack_missing)
+        PackStatus.CORRUPT -> stringResource(R.string.library_pack_corrupt)
     }
     ListItem(
         modifier = Modifier.combinedClickable(
@@ -464,11 +468,11 @@ private fun PackRow(pack: Pack, replaced: Boolean, onClick: () -> Unit, onLongCl
             Column {
                 Text(details)
                 if (problem != null) Text(problem, color = MaterialTheme.colorScheme.error)
-                if (replaced) Text("Replaced by the Granger Classics e-books", color = MaterialTheme.colorScheme.primary)
+                if (replaced) Text(stringResource(R.string.library_replaced_by_classics), color = MaterialTheme.colorScheme.primary)
             }
         },
         trailingContent = if (replaced) {
-            { Button(onClick = onGetBooks) { Text("Get the e-books") } }
+            { Button(onClick = onGetBooks) { Text(stringResource(R.string.library_get_ebooks)) } }
         } else {
             null
         },
@@ -484,10 +488,10 @@ internal fun BookRow(book: Book, progress: Double?, onClick: () -> Unit, onLongC
     val readable = book.status == PackStatus.OK
     val problem = when (book.status) {
         PackStatus.OK -> null
-        PackStatus.MISSING -> "File not found"
-        PackStatus.CORRUPT -> "Damaged"
+        PackStatus.MISSING -> stringResource(R.string.library_file_not_found)
+        PackStatus.CORRUPT -> stringResource(R.string.library_damaged)
     }
-    val label = formatLabel(book)
+    val label = formatLabel(book)?.resolve()
     val fullText = book.searchableInFull
     ShelfRow(
         title = book.title,
@@ -504,7 +508,7 @@ internal fun BookRow(book: Book, progress: Double?, onClick: () -> Unit, onLongC
             }
         },
         trailing = progress?.takeIf { readable && it > 0.0 }?.let { p ->
-            { Text("${(p * 100).roundToInt().coerceIn(1, 100)}%", style = MaterialTheme.typography.labelMedium.readout, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            { Text(stringResource(R.string.library_percent, (p * 100).roundToInt().coerceIn(1, 100)), style = MaterialTheme.typography.labelMedium.readout, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         },
     )
 }
@@ -537,7 +541,7 @@ internal fun BookCell(book: Book, progress: Double?, onClick: () -> Unit, onLong
             overflow = TextOverflow.Ellipsis,
         )
         formatLabel(book)?.let {
-            Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(it.resolve(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         if (book.searchableInFull) FullTextMark()
         when (book.status) {
@@ -545,8 +549,8 @@ internal fun BookCell(book: Book, progress: Double?, onClick: () -> Unit, onLong
                 progress = { (progress ?: 0.0).toFloat().coerceIn(0f, 1f) },
                 modifier = Modifier.fillMaxWidth().height(3.dp),
             )
-            PackStatus.MISSING -> Text("File not found", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
-            PackStatus.CORRUPT -> Text("Damaged", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+            PackStatus.MISSING -> Text(stringResource(R.string.library_file_not_found), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+            PackStatus.CORRUPT -> Text(stringResource(R.string.library_damaged), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
         }
     }
 }
@@ -557,8 +561,9 @@ internal fun BookCell(book: Book, progress: Double?, onClick: () -> Unit, onLong
  */
 @Composable
 internal fun FullTextMark() {
+    val described = stringResource(R.string.library_searchable_full)
     Text(
-        "Full text",
+        stringResource(R.string.library_full_text),
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.primary,
         maxLines = 1,
@@ -566,6 +571,6 @@ internal fun FullTextMark() {
             .padding(vertical = 2.dp)
             .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp))
             .padding(horizontal = 5.dp, vertical = 1.dp)
-            .clearAndSetSemantics { contentDescription = "Searchable in full" },
+            .clearAndSetSemantics { contentDescription = described },
     )
 }

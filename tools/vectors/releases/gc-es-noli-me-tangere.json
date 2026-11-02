@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-noli-me-tangere",
+ "kind": "book",
+ "fileName": "gc-es-noli-me-tangere_2026-10-30.gvec",
+ "sizeBytes": 395856,
+ "sha256": "f4545f3c620a56363fc6c25a60da0426caca77df2a7ba2cb693a8aa1ad83ea2d",
+ "count": 1346,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "c2f8d52eb36c1eb75a27557870dc48154817f4618fbea159be5266b83f5c41b8",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-noli-me-tangere_2026-10-30.gvec"
+}

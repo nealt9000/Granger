@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-los-argonautas",
+ "kind": "book",
+ "fileName": "gc-es-los-argonautas_2026-10-30.gvec",
+ "sizeBytes": 479058,
+ "sha256": "7e3b3b0a1e043474c69e4423e057443c195e58a266ae7b5809b26b3d303a016f",
+ "count": 1629,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "191ddb685dea595be59baa9c046860378ff6bfd2df47296e99d641bf7efcc6f6",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-los-argonautas_2026-10-30.gvec"
+}

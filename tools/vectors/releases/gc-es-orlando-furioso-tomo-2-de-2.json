@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-orlando-furioso-tomo-2-de-2",
+ "kind": "book",
+ "fileName": "gc-es-orlando-furioso-tomo-2-de-2_2026-10-30.gvec",
+ "sizeBytes": 308244,
+ "sha256": "977a01e9afb3cdb96384f4cbc5ed60a3d30e0c6f561f383a3f330dcb42b7079f",
+ "count": 1048,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "ea9a90bd8bea6925365ea049b2d87ffc38eeedfbcca0b9f8ff00fbabe6b7d4ab",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-orlando-furioso-tomo-2-de-2_2026-10-30.gvec"
+}

@@ -1,5 +1,8 @@
 package app.granger.music
 
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import app.granger.core.library.MediaNames
 import app.granger.library.SourceLink
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -43,6 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.R
+import app.granger.UiText
 import app.granger.core.library.AlbumSummary
 import app.granger.core.library.Albums
 import app.granger.core.library.PackStatus
@@ -70,15 +74,33 @@ data class MusicNav(
     val onMediaSettings: (() -> Unit)? = null,
 )
 
+/**
+ * A name as shown: the library's "Unknown artist", "Unknown album" and "Unknown genre" placeholders are data (stored,
+ * sorted and compared in English), so only their display goes through resources.
+ */
+@Composable
+internal fun shownName(name: String): String = shownNameText(name).resolve()
+
+/** [shownName] for code without Compose: a placeholder's resource, else the name itself. */
+internal fun shownNameText(name: String): UiText = when (name) {
+    Albums.UNKNOWN_ARTIST -> UiText.Res(R.string.music_unknown_artist)
+    Albums.UNKNOWN_ALBUM -> UiText.Res(R.string.music_unknown_album)
+    MediaNames.UNKNOWN_GENRE -> UiText.Res(R.string.music_unknown_genre)
+    else -> UiText.Raw(name)
+}
+
 /** Display names, with the "Unknown …" fallbacks applied here rather than stored. */
 internal fun trackTitle(t: Track) = t.title.ifBlank { t.uri.substringAfterLast('/') }
-internal fun trackArtist(t: Track) = MusicCatalog.trackArtistsOf(t).joinToString(", ")
-internal fun trackAlbum(t: Track) = Albums.title(t)
+@Composable internal fun trackArtist(t: Track) = MusicCatalog.trackArtistsOf(t).map { shownName(it) }.joinToString(", ")
+@Composable internal fun trackAlbum(t: Track) = shownName(Albums.title(t))
 internal fun albumArtistNames(a: AlbumSummary): List<String> =
     a.albumArtist.split("; ").map { it.trim() }.filter { it.isNotEmpty() }.ifEmpty { listOf(Albums.UNKNOWN_ARTIST) }
 
-internal fun songCount(n: Int) = if (n == 1) "1 song" else "$n songs"
-internal fun albumCount(n: Int) = if (n == 1) "1 album" else "$n albums"
+@Composable internal fun songCount(n: Int) = pluralStringResource(R.plurals.music_songs_count, n, n)
+@Composable internal fun albumCount(n: Int) = pluralStringResource(R.plurals.common_albums, n, n)
+
+/** An album's artists as shown, joined. */
+@Composable internal fun shownArtists(album: AlbumSummary) = albumArtistNames(album).map { shownName(it) }.joinToString(", ")
 
 /** What the long-press menus open: a playlist picker for some tracks or an album, or the move dialog for an album. */
 @Stable
@@ -169,7 +191,7 @@ fun SongRow(
             supportingContent = {
                 val parts = listOfNotNull(trackArtist(track), if (showAlbum) trackAlbum(track) else null)
                 Text(
-                    if (playable) parts.joinToString(" · ") else "File not found",
+                    if (playable) parts.joinToString(" · ") else stringResource(R.string.music_file_not_found),
                     maxLines = 1, overflow = TextOverflow.Ellipsis,
                 )
             },
@@ -177,13 +199,13 @@ fun SongRow(
         )
         DropdownMenu(menu, { menu = false }) {
             val close = { menu = false }
-            DropdownMenuItem(text = { Text("Play next") }, enabled = playable, onClick = { close(); vm.playNext(listOf(track)) })
-            DropdownMenuItem(text = { Text("Add to queue") }, enabled = playable, onClick = { close(); vm.addToQueue(listOf(track)) })
-            DropdownMenuItem(text = { Text("Add to playlist…") }, onClick = { close(); dialogs.addTracks = listOf(track) })
+            DropdownMenuItem(text = { Text(stringResource(R.string.music_play_next)) }, enabled = playable, onClick = { close(); vm.playNext(listOf(track)) })
+            DropdownMenuItem(text = { Text(stringResource(R.string.music_add_to_queue)) }, enabled = playable, onClick = { close(); vm.addToQueue(listOf(track)) })
+            DropdownMenuItem(text = { Text(stringResource(R.string.music_add_to_playlist_menu)) }, onClick = { close(); dialogs.addTracks = listOf(track) })
             extraMenu(close)
-            DropdownMenuItem(text = { Text("Go to album") }, onClick = { close(); nav.onAlbum(track.albumKey) })
+            DropdownMenuItem(text = { Text(stringResource(R.string.music_go_to_album)) }, onClick = { close(); nav.onAlbum(track.albumKey) })
             for (artist in MusicCatalog.trackArtistsOf(track).take(3)) {
-                DropdownMenuItem(text = { Text("Go to $artist") }, onClick = { close(); nav.onArtist(artist) })
+                DropdownMenuItem(text = { Text(stringResource(R.string.music_go_to, shownName(artist))) }, onClick = { close(); nav.onArtist(artist) })
             }
         }
     }
@@ -213,10 +235,10 @@ fun AlbumCell(album: AlbumSummary, vm: MusicViewModel, dialogs: MusicDialogs, na
             Modifier.combinedClickable(onClick = { nav.onAlbum(album.key) }, onLongClick = { menu = true }).alpha(if (playable) 1f else 0.4f),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            AlbumCover(album.coverPath, album.title, Modifier.fillMaxWidth())
-            Text(album.title, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            AlbumCover(album.coverPath, shownName(album.title), Modifier.fillMaxWidth())
+            Text(shownName(album.title), style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(
-                albumArtistNames(album).joinToString(", "), style = MaterialTheme.typography.bodySmall,
+                shownArtists(album), style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis,
             )
         }
@@ -230,9 +252,9 @@ fun AlbumListRow(album: AlbumSummary, vm: MusicViewModel, dialogs: MusicDialogs,
     var menu by remember { mutableStateOf(false) }
     Box {
         ShelfRow(
-            title = album.title,
-            subtitle = (listOf(albumArtistNames(album).joinToString(", ")) + listOfNotNull(album.year.ifEmpty { null })).joinToString(" · "),
-            cover = { AlbumCover(album.coverPath, album.title, Modifier.size(ShelfCoverSize)) },
+            title = shownName(album.title),
+            subtitle = (listOf(shownArtists(album)) + listOfNotNull(album.year.ifEmpty { null })).joinToString(" · "),
+            cover = { AlbumCover(album.coverPath, shownName(album.title), Modifier.size(ShelfCoverSize)) },
             onClick = { nav.onAlbum(album.key) },
             onLongClick = { menu = true },
             dimmed = album.status != PackStatus.OK,
@@ -245,13 +267,13 @@ fun AlbumListRow(album: AlbumSummary, vm: MusicViewModel, dialogs: MusicDialogs,
 fun AlbumMenu(album: AlbumSummary, open: Boolean, onClose: () -> Unit, vm: MusicViewModel, dialogs: MusicDialogs, nav: MusicNav, showArtists: Boolean = true) {
     val playable = album.status == PackStatus.OK
     DropdownMenu(open, onClose) {
-        DropdownMenuItem(text = { Text("Play next") }, enabled = playable, onClick = { onClose(); vm.playNextAlbum(album) })
-        DropdownMenuItem(text = { Text("Add to queue") }, enabled = playable, onClick = { onClose(); vm.queueAlbum(album) })
-        DropdownMenuItem(text = { Text("Add to playlist…") }, onClick = { onClose(); dialogs.addAlbum = album })
+        DropdownMenuItem(text = { Text(stringResource(R.string.music_play_next)) }, enabled = playable, onClick = { onClose(); vm.playNextAlbum(album) })
+        DropdownMenuItem(text = { Text(stringResource(R.string.music_add_to_queue)) }, enabled = playable, onClick = { onClose(); vm.queueAlbum(album) })
+        DropdownMenuItem(text = { Text(stringResource(R.string.music_add_to_playlist_menu)) }, onClick = { onClose(); dialogs.addAlbum = album })
         if (showArtists) for (artist in albumArtistNames(album).take(3)) {
-            DropdownMenuItem(text = { Text("Go to $artist") }, onClick = { onClose(); nav.onArtist(artist) })
+            DropdownMenuItem(text = { Text(stringResource(R.string.music_go_to, shownName(artist))) }, onClick = { onClose(); nav.onArtist(artist) })
         }
-        DropdownMenuItem(text = { Text("Move to collection…") }, onClick = { onClose(); dialogs.moveAlbum = album })
+        DropdownMenuItem(text = { Text(stringResource(R.string.music_move_to_collection)) }, onClick = { onClose(); dialogs.moveAlbum = album })
     }
 }
 
@@ -266,11 +288,11 @@ fun PlayShuffleRow(enabled: Boolean, onPlay: () -> Unit, onShuffle: () -> Unit, 
             Button(onClick = onStop) {
                 Icon(painterResource(R.drawable.ic_stop), contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Stop")
+                Text(stringResource(R.string.common_stop))
             }
         } else {
-            Button(onClick = onPlay, enabled = enabled) { Text("Play") }
+            Button(onClick = onPlay, enabled = enabled) { Text(stringResource(R.string.common_play)) }
         }
-        OutlinedButton(onClick = onShuffle, enabled = enabled) { Text("Shuffle") }
+        OutlinedButton(onClick = onShuffle, enabled = enabled) { Text(stringResource(R.string.music_shuffle)) }
     }
 }

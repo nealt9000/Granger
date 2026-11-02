@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-amor-y-pedagogia",
+ "kind": "book",
+ "fileName": "gc-es-amor-y-pedagogia_2026-10-30.gvec",
+ "sizeBytes": 127728,
+ "sha256": "3c4f924b90eebbffd87e4a1f484df1960aae30a34e941c9cf78e2aa4a32fabe4",
+ "count": 434,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "79ae708190e020550d6479f4a99ff2bc5087939403e31304ce5b78f63fbc7461",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-amor-y-pedagogia_2026-10-30.gvec"
+}

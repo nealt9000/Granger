@@ -74,9 +74,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import app.granger.R
+import app.granger.UiText
 import app.granger.formatBytes
 import app.granger.core.library.ShelfKey
 import app.granger.library.shelf.ShelfList
@@ -100,14 +105,14 @@ fun SourceScreen(
     }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
+    val context = LocalContext.current
     LaunchedEffect(ui.notice) {
         val notice = ui.notice ?: return@LaunchedEffect
-        snackbar.showSnackbar(notice)
+        snackbar.showSnackbar(notice.resolve(context))
         viewModel.dismissNotice()
     }
 
     // Ask once for notifications so download progress can show; downloads work either way.
-    val context = LocalContext.current
     var askedForNotifications by rememberSaveable { mutableStateOf(false) }
     val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
     fun beforeDownload() {
@@ -135,13 +140,13 @@ fun SourceScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(ui.familyTitle ?: title) },
+                title = { Text(ui.familyTitle?.resolve() ?: title) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) }
                 },
                 actions = {
                     IconButton(onClick = viewModel::refreshCatalog, enabled = !ui.refreshing) {
-                        Icon(Icons.Filled.Refresh, contentDescription = "Check for updates")
+                        Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.sources_check_updates))
                     }
                 },
             )
@@ -153,7 +158,7 @@ fun SourceScreen(
                 OutlinedTextField(
                     value = viewModel.searchText,
                     onValueChange = viewModel::setQuery,
-                    placeholder = { Text("Search ${ui.familyTitle ?: title}") },
+                    placeholder = { Text(stringResource(R.string.sources_search, ui.familyTitle?.resolve() ?: title)) },
                     leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
@@ -167,7 +172,7 @@ fun SourceScreen(
                             selected = true,
                             onClick = viewModel::clearDomain,
                             label = { Text(domainTitle) },
-                            trailingIcon = { Icon(Icons.Filled.Close, contentDescription = "Show all of Kiwix") },
+                            trailingIcon = { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.sources_show_all_kiwix)) },
                         )
                     }
                 }
@@ -178,7 +183,7 @@ fun SourceScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         item(key = "all") {
-                            FilterChip(selected = ui.category == null, onClick = { viewModel.setCategory(null) }, label = { Text("All") })
+                            FilterChip(selected = ui.category == null, onClick = { viewModel.setCategory(null) }, label = { Text(stringResource(R.string.sources_all)) })
                         }
                         items(ui.categories, key = { it }) { category ->
                             FilterChip(
@@ -190,17 +195,29 @@ fun SourceScreen(
                     }
                 }
             }
+            if (ui.languageChip) {
+                // Plan L3: the list shows the library's languages; this shows every language's packs.
+                item(key = "languages") {
+                    Row(Modifier.padding(horizontal = 16.dp)) {
+                        FilterChip(
+                            selected = ui.allLanguages,
+                            onClick = { viewModel.setAllLanguages(!ui.allLanguages) },
+                            label = { Text(stringResource(R.string.sources_all_languages)) },
+                        )
+                    }
+                }
+            }
             item(key = "tabs") {
                 PrimaryTabRow(selectedTabIndex = ui.tab.ordinal) {
                     for (tab in SourceTab.entries) {
-                        Tab(selected = ui.tab == tab, onClick = { viewModel.setTab(tab) }, text = { Text(tab.title) })
+                        Tab(selected = ui.tab == tab, onClick = { viewModel.setTab(tab) }, text = { app.granger.theme.FitText(stringResource(tab.title), minSize = 11.sp) })
                     }
                 }
             }
             storageSummary(ui)?.let { summary ->
                 item(key = "storage") {
                     Text(
-                        summary,
+                        summary.resolve(),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -209,7 +226,7 @@ fun SourceScreen(
             }
             ui.catalogProblem?.let { problem ->
                 item(key = "problem") {
-                    Text(problem, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(16.dp))
+                    Text(problem.resolve(), color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(16.dp))
                 }
             }
             if (ui.loading) {
@@ -220,7 +237,7 @@ fun SourceScreen(
             if (!ui.loading && ui.catalogProblem == null && ui.sections.isEmpty()) {
                 item(key = "empty") {
                     Text(
-                        if (ui.query.isNotBlank()) "Nothing matches that search." else "Nothing here yet.",
+                        stringResource(if (ui.query.isNotBlank()) R.string.sources_no_match else R.string.sources_nothing_yet),
                         modifier = Modifier.padding(16.dp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -269,7 +286,7 @@ fun SourceScreen(
                 // Indexed: a pack category and a book category can share a name.
                 item(key = sectionKey(index, section)) {
                     Text(
-                        section.title,
+                        section.heading.resolve(),
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 4.dp),
@@ -278,7 +295,13 @@ fun SourceScreen(
                 items(section.rows, key = { it.id }) { row -> rowItem(row) }
                 if (section.foldable) {
                     item(key = moreKey(index, section)) {
-                        val text = if (section.rows.size < section.total) "Show all ${section.total} ${section.noun}" else "Show fewer ${section.noun}"
+                        val text = when {
+                            section.rows.size < section.total -> pluralStringResource(
+                                if (section.noun == SectionNoun.BOOKS) R.plurals.sources_show_all_books else R.plurals.sources_show_all_packs,
+                                section.total, section.total,
+                            )
+                            else -> stringResource(if (section.noun == SectionNoun.BOOKS) R.string.sources_show_fewer_books else R.string.sources_show_fewer_packs)
+                        }
                         ListItem(
                             modifier = Modifier.clickable { toggle(index, section) },
                             headlineContent = { Text(text, color = MaterialTheme.colorScheme.primary) },
@@ -304,41 +327,44 @@ fun SourceScreen(
     confirmRemove?.let { row ->
         AlertDialog(
             onDismissRequest = { confirmRemove = null },
-            title = { Text("Remove ${row.slices.firstOrNull { it.chosen }?.let { "${row.title}: ${it.label}" } ?: row.title}?") },
-            text = {
+            title = {
+                val slice = row.slices.firstOrNull { it.chosen }
                 Text(
-                    if (row.packId != null) "This deletes the file, and the bookmarks and reading places you saved in it."
-                    else "This deletes the file.",
+                    if (slice != null) stringResource(R.string.sources_remove_slice_title, row.title, slice.label)
+                    else stringResource(R.string.sources_remove_title, row.title),
                 )
+            },
+            text = {
+                Text(stringResource(if (row.packId != null) R.string.sources_remove_pack_body else R.string.sources_remove_body))
             },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.remove(row.id)
                     confirmRemove = null
-                }) { Text("Remove") }
+                }) { Text(stringResource(R.string.common_remove)) }
             },
-            dismissButton = { TextButton(onClick = { confirmRemove = null }) { Text("Keep") } },
+            dismissButton = { TextButton(onClick = { confirmRemove = null }) { Text(stringResource(R.string.common_keep)) } },
         )
     }
 }
 
 /** "38.2 GB free on Phone · Granger uses 4.1 GB" for the volume downloads will go to. */
-private fun storageSummary(ui: SourceUi): String? {
+private fun storageSummary(ui: SourceUi): UiText? {
     val volume = ui.volumes.firstOrNull { it.path == ui.selectedVolume } ?: return null
-    return "${formatBytes(volume.freeBytes)} free on ${volume.label} · Granger uses ${formatBytes(volume.grangerBytes)}"
+    return UiText.Res(R.string.sources_storage_summary, formatBytes(volume.freeBytes), volume.label, formatBytes(volume.grangerBytes))
 }
 
 @Composable
 private fun PresetItem(preset: PresetRow, onGet: () -> Unit) {
     ListItem(
-        headlineContent = { Text("${preset.title} set") },
+        headlineContent = { Text(stringResource(R.string.sources_preset_title, preset.title)) },
         supportingContent = {
             Column {
-                Text(PresetText.summary(preset))
-                Text(PresetText.status(preset))
+                Text(PresetText.summary(preset).resolve())
+                Text(PresetText.status(preset).resolve())
             }
         },
-        trailingContent = { if (preset.remainingCount > 0) Button(onClick = onGet) { Text("Get all") } },
+        trailingContent = { if (preset.remainingCount > 0) Button(onClick = onGet) { Text(stringResource(R.string.sources_get_all)) } },
     )
 }
 
@@ -347,8 +373,8 @@ private fun PresetItem(preset: PresetRow, onGet: () -> Unit) {
 internal fun FamilyRow(row: ItemRow, onOpen: () -> Unit) {
     ListItem(
         modifier = Modifier.clickable(onClick = onOpen),
-        headlineContent = { Text(row.title) },
-        supportingContent = { Text(row.details, style = MaterialTheme.typography.bodySmall) },
+        headlineContent = { Text(row.familyLabel?.resolve() ?: row.title) },
+        supportingContent = { Text(row.details.resolve(), style = MaterialTheme.typography.bodySmall) },
         trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
     )
 }
@@ -361,20 +387,26 @@ internal fun FamilyRow(row: ItemRow, onOpen: () -> Unit) {
 internal fun SizeCheckDialog(check: SizeCheck, onGet: (itemId: String) -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("${check.title} is ${formatBytes(check.sizeBytes)}") },
+        title = { Text(stringResource(R.string.sources_size_check_title, check.title, formatBytes(check.sizeBytes))) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("You have ${formatBytes(check.freeBytes)} free on ${check.volumeLabel}.")
-                if (check.sizeBytes > check.freeBytes) Text("That isn't enough room for it.", color = MaterialTheme.colorScheme.error)
+                val free = formatBytes(check.freeBytes)
+                Text(
+                    check.volumeLabel?.let { stringResource(R.string.sources_size_check_free, free, it) }
+                        ?: stringResource(R.string.sources_size_check_free_phone, free),
+                )
+                if (check.sizeBytes > check.freeBytes) Text(stringResource(R.string.sources_size_check_no_room), color = MaterialTheme.colorScheme.error)
             }
         },
         confirmButton = {
             Column(horizontalAlignment = Alignment.End) {
                 check.smaller?.let { smaller ->
-                    TextButton(onClick = { onGet(smaller.id) }) { Text("Get ${smaller.label.lowercase()}, ${formatBytes(smaller.sizeBytes)}") }
+                    TextButton(onClick = { onGet(smaller.id) }) {
+                        Text(stringResource(R.string.sources_get_smaller, smaller.label.resolve().lowercase(), formatBytes(smaller.sizeBytes)))
+                    }
                 }
-                TextButton(onClick = { onGet(check.itemId) }) { Text("Get ${formatBytes(check.sizeBytes)}") }
-                TextButton(onClick = onDismiss) { Text("Cancel") }
+                TextButton(onClick = { onGet(check.itemId) }) { Text(stringResource(R.string.sources_get_size, formatBytes(check.sizeBytes))) }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
             }
         },
     )
@@ -410,13 +442,14 @@ internal fun CatalogItemRow(
         headlineContent = { Text(row.title) },
         supportingContent = {
             Column {
-                if (row.description.isNotBlank()) {
-                    Text(row.description, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                val description = row.description.resolve()
+                if (description.isNotBlank()) {
+                    Text(description, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
-                Text("${formatBytes(row.sizeBytes)} · ${row.details}", style = MaterialTheme.typography.bodySmall)
-                if (licenceShown) Text("Licence: ${row.license}", style = MaterialTheme.typography.bodySmall)
-                row.adds?.let { AddsText(it) }
-                row.ask?.let { Text(it.text, style = MaterialTheme.typography.bodySmall) }
+                Text(stringResource(R.string.sources_dotted, formatBytes(row.sizeBytes), row.details.resolve()), style = MaterialTheme.typography.bodySmall)
+                if (licenceShown) Text(stringResource(R.string.sources_licence, row.license), style = MaterialTheme.typography.bodySmall)
+                row.adds?.let { AddsText(it.resolve()) }
+                row.ask?.let { Text(it.text.resolve(), style = MaterialTheme.typography.bodySmall) }
                 ItemStatusText(status)
                 // Under the text, so the trailing actions stay one button wide on a narrow phone.
                 if (status == ItemStatus.NotInstalled) row.previewUrl?.let { PreviewButton(it) }
@@ -442,17 +475,18 @@ private fun FlavouredRow(
         // The title and description show the full licence on a tap, as a compact row does; the choices are their own.
         Column(Modifier.fillMaxWidth().then(toggleLicence)) {
             Text(row.title, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
-            if (row.description.isNotBlank()) {
-                Text(row.description, style = MaterialTheme.typography.bodyMedium, color = variant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            val description = row.description.resolve()
+            if (description.isNotBlank()) {
+                Text(description, style = MaterialTheme.typography.bodyMedium, color = variant, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
         }
         Column(Modifier.padding(vertical = 4.dp).selectableGroup().testTag(SourceTags.FLAVOURS)) {
             for (flavour in row.flavours) FlavourOption(flavour) { onChooseFlavour(flavour.id) }
         }
-        Text(row.details, style = MaterialTheme.typography.bodySmall, color = variant)
-        if (licenceShown) Text("Licence: ${row.license}", style = MaterialTheme.typography.bodySmall, color = variant)
-        row.adds?.let { AddsText(it) }
-        row.ask?.let { Text(it.text, style = MaterialTheme.typography.bodySmall, color = variant) }
+        Text(row.details.resolve(), style = MaterialTheme.typography.bodySmall, color = variant)
+        if (licenceShown) Text(stringResource(R.string.sources_licence, row.license), style = MaterialTheme.typography.bodySmall, color = variant)
+        row.adds?.let { AddsText(it.resolve()) }
+        row.ask?.let { Text(it.text.resolve(), style = MaterialTheme.typography.bodySmall, color = variant) }
         // Installed is on its choice; what's left is a download's progress or trouble, or an update.
         if (row.status != ItemStatus.Installed && !row.switches) {
             CompositionLocalProvider(LocalContentColor provides variant) { ItemStatusText(row.status) }
@@ -490,26 +524,27 @@ private fun SetRow(
     Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 4.dp)) {
         Column(Modifier.fillMaxWidth().then(toggleLicence)) {
             Text(row.title, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
-            if (row.description.isNotBlank()) {
-                Text(row.description, style = MaterialTheme.typography.bodyMedium, color = variant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            val description = row.description.resolve()
+            if (description.isNotBlank()) {
+                Text(description, style = MaterialTheme.typography.bodyMedium, color = variant, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
         }
-        Text("How much", style = MaterialTheme.typography.labelMedium, color = variant, modifier = Modifier.padding(top = 8.dp))
+        Text(stringResource(R.string.sources_how_much), style = MaterialTheme.typography.labelMedium, color = variant, modifier = Modifier.padding(top = 8.dp))
         Column(Modifier.selectableGroup().testTag(SourceTags.SLICES)) {
             for (slice in row.slices) SliceOption(slice) { onChooseSlice(slice.zimName) }
         }
         if (row.pictures.size > 1) {
-            Text("Pictures", style = MaterialTheme.typography.labelMedium, color = variant, modifier = Modifier.padding(top = 4.dp))
+            Text(stringResource(R.string.sources_pictures), style = MaterialTheme.typography.labelMedium, color = variant, modifier = Modifier.padding(top = 4.dp))
             Column(Modifier.selectableGroup().testTag(SourceTags.PICTURES)) {
                 for (choice in row.pictures) PictureOption(choice) { onChoosePictures(choice.flavour) }
             }
         }
         if (row.subjects != null) {
-            TextButton(onClick = onAddSubject, modifier = Modifier.testTag(SourceTags.ADD_SUBJECT)) { Text("Add a subject") }
+            TextButton(onClick = onAddSubject, modifier = Modifier.testTag(SourceTags.ADD_SUBJECT)) { Text(stringResource(R.string.sources_add_subject)) }
         }
-        Text(row.details, style = MaterialTheme.typography.bodySmall, color = variant)
-        if (licenceShown) Text("Licence: ${row.license}", style = MaterialTheme.typography.bodySmall, color = variant)
-        row.ask?.let { Text(it.text, style = MaterialTheme.typography.bodySmall, color = variant) }
+        Text(row.details.resolve(), style = MaterialTheme.typography.bodySmall, color = variant)
+        if (licenceShown) Text(stringResource(R.string.sources_licence, row.license), style = MaterialTheme.typography.bodySmall, color = variant)
+        row.ask?.let { Text(it.text.resolve(), style = MaterialTheme.typography.bodySmall, color = variant) }
         if (row.status != ItemStatus.Installed && !row.switches && row.insideOf == null) {
             CompositionLocalProvider(LocalContentColor provides variant) { ItemStatusText(row.status) }
         }
@@ -518,12 +553,14 @@ private fun SetRow(
             val inside = row.insideOf
             when {
                 row.switches -> {
-                    if (row.packId != null) TextButton(onClick = onOpen) { Text("Open") }
-                    TextButton(onClick = { confirmSwitch = true }) { Text("Switch to ${row.switchTo?.label ?: "this"}") }
+                    if (row.packId != null) TextButton(onClick = onOpen) { Text(stringResource(R.string.common_open)) }
+                    TextButton(onClick = { confirmSwitch = true }) {
+                        Text(row.switchTo?.let { stringResource(R.string.sources_switch_to, it.label.resolve()) } ?: stringResource(R.string.sources_switch_to_this))
+                    }
                 }
                 inside != null && row.status == ItemStatus.NotInstalled -> {
-                    Text(inside, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-                    if (row.packId != null) TextButton(onClick = onOpen) { Text("Open") }
+                    Text(inside.resolve(), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                    if (row.packId != null) TextButton(onClick = onOpen) { Text(stringResource(R.string.common_open)) }
                 }
                 else -> RowActions(row, onGet, onCancel, onRetry, onRemove, onOpen)
             }
@@ -540,24 +577,25 @@ private fun SetRow(
 @Composable
 private fun SliceOption(slice: SliceChoice, onChoose: () -> Unit) {
     val size = formatBytes(slice.sizeBytes)
-    val extra = slice.inside ?: slice.note
+    val extra = (slice.inside ?: slice.note)?.resolve()
+    val installed = stringResource(R.string.sources_installed_lower)
     Row(
         Modifier
             .fillMaxWidth()
             .heightIn(min = 48.dp)
             .selectable(selected = slice.chosen, role = Role.RadioButton, onClick = onChoose)
             .clearAndSetSemantics {
-                contentDescription = listOfNotNull(slice.label, size, extra, "installed".takeIf { slice.installed }).joinToString(", ")
+                contentDescription = listOfNotNull(slice.label, size, extra, installed.takeIf { slice.installed }).joinToString(", ")
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         RadioButton(selected = slice.chosen, onClick = null)
         Column(Modifier.padding(start = 12.dp).weight(1f)) {
-            Text("${slice.label} · $size", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.sources_dotted, slice.label, size), style = MaterialTheme.typography.bodyMedium)
             if (extra != null) Text(extra, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         if (slice.installed) {
-            Text("Installed", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.sources_installed), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
         }
     }
 }
@@ -565,37 +603,38 @@ private fun SliceOption(slice: SliceChoice, onChoose: () -> Unit) {
 /** One pictures choice; one the chosen slice doesn't offer is greyed, with why. */
 @Composable
 private fun PictureOption(choice: PictureChoice, onChoose: () -> Unit) {
+    val label = choice.label.resolve()
+    val reason = choice.reason?.resolve()
     Row(
         Modifier
             .fillMaxWidth()
             .heightIn(min = 48.dp)
             .selectable(selected = choice.chosen, enabled = choice.enabled, role = Role.RadioButton, onClick = onChoose)
             .clearAndSetSemantics {
-                contentDescription = listOfNotNull(choice.label, choice.reason).joinToString(", ")
+                contentDescription = listOfNotNull(label, reason).joinToString(", ")
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         RadioButton(selected = choice.chosen, onClick = null, enabled = choice.enabled)
         Column(Modifier.padding(start = 12.dp).weight(1f)) {
             val color = if (choice.enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-            Text(choice.label, style = MaterialTheme.typography.bodyMedium, color = color)
-            choice.reason?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            Text(label, style = MaterialTheme.typography.bodyMedium, color = color)
+            reason?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         }
     }
 }
 
 /** What Switch says it trades (Plan KB walkthrough 2): "Switch WikiMed from No pictures (1.1 GB) to With pictures (1.9 GB)?…" */
-internal fun switchText(title: String, from: FlavourChoice, to: FlavourChoice): String =
-    "Switch $title from ${from.label} (${formatBytes(from.sizeBytes)}) to ${to.label} (${formatBytes(to.sizeBytes)})? " +
-        "The ${from.label} version is removed once the new one has downloaded. Your places and bookmarks carry over."
+internal fun switchText(title: String, from: FlavourChoice, to: FlavourChoice): UiText =
+    UiText.Res(R.string.sources_switch_text, title, from.label, formatBytes(from.sizeBytes), to.label, formatBytes(to.sizeBytes))
 
 @Composable
 internal fun SwitchDialog(title: String, from: FlavourChoice, to: FlavourChoice, onSwitch: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        text = { Text(switchText(title, from, to)) },
-        confirmButton = { TextButton(onClick = onSwitch) { Text("Switch") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        text = { Text(switchText(title, from, to).resolve()) },
+        confirmButton = { TextButton(onClick = onSwitch) { Text(stringResource(R.string.sources_switch)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }
 
@@ -603,24 +642,26 @@ internal fun SwitchDialog(title: String, from: FlavourChoice, to: FlavourChoice,
 @Composable
 private fun FlavourOption(flavour: FlavourChoice, onChoose: () -> Unit) {
     val size = formatBytes(flavour.sizeBytes)
+    val label = flavour.label.resolve()
+    val installed = stringResource(R.string.sources_installed_lower)
     Row(
         Modifier
             .fillMaxWidth()
             .heightIn(min = 48.dp)
             .selectable(selected = flavour.chosen, role = Role.RadioButton, onClick = onChoose)
             .clearAndSetSemantics {
-                contentDescription = listOfNotNull(flavour.label, size, "installed".takeIf { flavour.installed }).joinToString(", ")
+                contentDescription = listOfNotNull(label, size, installed.takeIf { flavour.installed }).joinToString(", ")
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         RadioButton(selected = flavour.chosen, onClick = null)
         Text(
-            "${flavour.label} · $size",
+            stringResource(R.string.sources_dotted, label, size),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(start = 12.dp).weight(1f),
         )
         if (flavour.installed) {
-            Text("Installed", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.sources_installed), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
         }
     }
 }
@@ -639,16 +680,18 @@ private fun RowActions(
     val opens = row.packId != null
     if (row.switches) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (opens) TextButton(onClick = onOpen) { Text("Open") }
-            TextButton(onClick = onSwitch) { Text(row.flavours.firstOrNull { it.chosen }?.let { "Switch to ${it.label}" } ?: "Switch") }
+            if (opens) TextButton(onClick = onOpen) { Text(stringResource(R.string.common_open)) }
+            TextButton(onClick = onSwitch) {
+                Text(row.flavours.firstOrNull { it.chosen }?.let { stringResource(R.string.sources_switch_to, it.label.resolve()) } ?: stringResource(R.string.sources_switch))
+            }
         }
         return
     }
     if (row.status == ItemStatus.Installed && opens && row.flavours.size > 1 && row.flavours.any { it.installed }) {
         // The flavour on the phone is the one chosen: nothing to switch to yet.
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onOpen) { Text("Open") }
-            TextButton(onClick = {}, enabled = false) { Text("Switch") }
+            TextButton(onClick = onOpen) { Text(stringResource(R.string.common_open)) }
+            TextButton(onClick = {}, enabled = false) { Text(stringResource(R.string.sources_switch)) }
             RemoveMenu(row.title, onRemove)
         }
         return
@@ -658,32 +701,32 @@ private fun RowActions(
         ItemStatus.NotInstalled -> Row(verticalAlignment = Alignment.CenterVertically) {
             if (preview) row.previewUrl?.let { PreviewButton(it) }
             if (row.covered) {
-                TextButton(onClick = onGet) { Text("Get", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                TextButton(onClick = onGet) { Text(stringResource(R.string.common_get), color = MaterialTheme.colorScheme.onSurfaceVariant) }
             } else {
-                TextButton(onClick = onGet) { Text("Get") }
+                TextButton(onClick = onGet) { Text(stringResource(R.string.common_get)) }
             }
         }
         ItemStatus.UpdateAvailable -> Row(verticalAlignment = Alignment.CenterVertically) {
-            if (opens) TextButton(onClick = onOpen) { Text("Open") } else TextButton(onClick = onRemove) { Text("Remove") }
-            TextButton(onClick = onGet) { Text("Update") }
+            if (opens) TextButton(onClick = onOpen) { Text(stringResource(R.string.common_open)) } else TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
+            TextButton(onClick = onGet) { Text(stringResource(R.string.sources_update)) }
             if (opens) RemoveMenu(row.title, onRemove)
         }
-        is ItemStatus.Queued, is ItemStatus.Downloading -> TextButton(onClick = onCancel) { Text("Cancel") }
+        is ItemStatus.Queued, is ItemStatus.Downloading -> TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) }
         is ItemStatus.Failed -> Row {
-            TextButton(onClick = onCancel) { Text("Cancel") }
-            TextButton(onClick = onRetry) { Text("Retry") }
+            TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) }
+            TextButton(onClick = onRetry) { Text(stringResource(R.string.common_retry)) }
         }
         ItemStatus.Installed -> if (opens) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = onOpen) { Text("Open") }
+                TextButton(onClick = onOpen) { Text(stringResource(R.string.common_open)) }
                 RemoveMenu(row.title, onRemove)
             }
         } else {
-            TextButton(onClick = onRemove) { Text("Remove") }
+            TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
         }
         is ItemStatus.Partial -> Row {
-            TextButton(onClick = onRemove) { Text("Remove") }
-            TextButton(onClick = onGet) { Text("Get the rest") }
+            TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
+            TextButton(onClick = onGet) { Text(stringResource(R.string.archive_get_the_rest)) }
         }
         ItemStatus.NeedsMoreMemory, is ItemStatus.InLibrary -> Unit
     }
@@ -701,14 +744,13 @@ private fun PreviewButton(url: String) {
             try {
                 context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
             } catch (e: ActivityNotFoundException) {
-                android.widget.Toast.makeText(context, NO_BROWSER, android.widget.Toast.LENGTH_LONG).show()
+                android.widget.Toast.makeText(context, context.getString(R.string.sources_no_browser), android.widget.Toast.LENGTH_LONG).show()
             }
         },
         modifier = Modifier.testTag(SourceTags.PREVIEW),
-    ) { Text("Preview") }
+    ) { Text(stringResource(R.string.sources_preview)) }
 }
 
-internal const val NO_BROWSER = "There's no web browser on this phone to open it in."
 
 /** Test tags for a pack row with flavours. */
 internal object SourceTags {
@@ -725,9 +767,9 @@ internal object SourceTags {
 private fun RemoveMenu(title: String, onRemove: () -> Unit) {
     var open by remember { mutableStateOf(false) }
     Box {
-        IconButton(onClick = { open = true }) { Icon(Icons.Filled.MoreVert, contentDescription = "More for $title") }
+        IconButton(onClick = { open = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.sources_more_for, title)) }
         DropdownMenu(open, { open = false }) {
-            DropdownMenuItem(text = { Text("Remove") }, onClick = { open = false; onRemove() })
+            DropdownMenuItem(text = { Text(stringResource(R.string.common_remove)) }, onClick = { open = false; onRemove() })
         }
     }
 }
@@ -738,9 +780,9 @@ internal fun ItemStatusText(status: ItemStatus) {
     when (status) {
         is ItemStatus.Queued -> Text(
             when {
-                status.lastError != null -> "Retrying: ${status.lastError}"
-                status.wifiOnly -> "Waiting for Wi-Fi"
-                else -> "Queued"
+                status.lastError != null -> stringResource(R.string.sources_retrying, status.lastError)
+                status.wifiOnly -> stringResource(R.string.sources_waiting_wifi)
+                else -> stringResource(R.string.sources_queued_status)
             },
         )
         is ItemStatus.Downloading -> {
@@ -748,14 +790,14 @@ internal fun ItemStatusText(status: ItemStatus) {
                 progress = { status.fraction },
                 modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
             )
-            Text("${(status.fraction * 100).toInt()}%")
+            Text(stringResource(R.string.sources_percent, (status.fraction * 100).toInt()))
         }
-        is ItemStatus.Failed -> Text(status.reason, color = MaterialTheme.colorScheme.error)
-        ItemStatus.Installed -> Text("Installed", color = MaterialTheme.colorScheme.primary)
-        ItemStatus.UpdateAvailable -> Text("A newer version is available")
-        ItemStatus.NeedsMoreMemory -> Text("Needs a phone with more memory")
-        is ItemStatus.Partial -> Text("Partly downloaded: ${status.done} of ${status.total}")
-        is ItemStatus.InLibrary -> Text("In your ${status.shelf}", color = MaterialTheme.colorScheme.primary)
+        is ItemStatus.Failed -> Text(failedText(status).resolve(), color = MaterialTheme.colorScheme.error)
+        ItemStatus.Installed -> Text(stringResource(R.string.sources_installed), color = MaterialTheme.colorScheme.primary)
+        ItemStatus.UpdateAvailable -> Text(stringResource(R.string.sources_update_available))
+        ItemStatus.NeedsMoreMemory -> Text(stringResource(R.string.sources_needs_memory))
+        is ItemStatus.Partial -> Text(stringResource(R.string.sources_partly_downloaded, status.done, status.total))
+        is ItemStatus.InLibrary -> Text(inLibraryText(status).resolve(), color = MaterialTheme.colorScheme.primary)
         ItemStatus.NotInstalled -> Unit
     }
 }

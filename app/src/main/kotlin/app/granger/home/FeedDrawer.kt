@@ -1,5 +1,7 @@
 package app.granger.home
 
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.library.Book
 import app.granger.core.library.BookChunk
 import app.granger.core.library.BookHit
@@ -12,6 +14,8 @@ import app.granger.core.library.Pack
 import app.granger.core.library.PageTitles
 import app.granger.core.zim.ZimArchive
 import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
 import kotlin.random.Random
 import org.jsoup.Jsoup
 
@@ -27,19 +31,21 @@ class FeedDrawer(
     /** Full-text hits inside books. */
     private val bookSearch: suspend (query: String) -> List<BookHit>,
     private val librarySearch: LibrarySearch,
-    /** A cached thumbnail for an article (its lead image), or null; see [ArticleThumbnails]. */
+    /** The library's languages, main first (Plan L3): On this day reads the first one's encyclopedia. */
+    private val languages: () -> List<String> = { listOf("en") },
+    /** A cached thumbnail for an article (its lead image), or null; see [ArticleThumbnails]. Last, for a trailing lambda. */
     private val thumbnail: (archive: ZimArchive, path: String, html: String) -> String? = { _, _, _ -> null },
 ) {
     /** The feed's row for the day, or null when it has nothing to show. */
     suspend fun draw(feed: HomeFeed, scope: Resolved, day: LocalDate): Drawn? {
         val random = Random(seed(day, feed.id))
         val drawn = when (feed.kind) {
-            FeedKind.RANDOM -> Drawn("Random from ${scope.name}", random(scope, random))
+            FeedKind.RANDOM -> Drawn(random(scope, random))
             FeedKind.ON_THIS_DAY -> onThisDay(scope, day, random)
             FeedKind.SEARCH -> {
                 val query = feed.query.trim()
                 if (query.isEmpty()) return null
-                Drawn("$query · ${scope.name}", search(scope, query, random))
+                Drawn(search(scope, query, random))
             }
         }
         return drawn.takeIf { it.cards.isNotEmpty() }
@@ -97,32 +103,56 @@ class FeedDrawer(
     }
 
     /**
-     * The day's page from the first pack in [scope] that has one (a full Wikipedia does, a "Best of" slice may not:
-     * every pack is tried, not only the first). With none, articles that mention the date, titled "Mentions October
-     * 22" so they aren't taken for the day's own page; books only search their text the same way.
+     * The day's page from the encyclopedias in [scope], in the library's languages first ([encyclopedias]); every pack
+     * is tried, not only the first (a full Wikipedia has the page, a "Best of" slice may not). With none, articles that
+     * mention the date, marked [Drawn.mentions] so the row says so rather than passing them off as the day's own page;
+     * books only search their text the same way.
      */
     private suspend fun onThisDay(scope: Resolved, day: LocalDate, random: Random): Drawn {
-        val title = DayPage.title(day)
-        val mentions = "Mentions $title"
-        if (scope.packs.isEmpty()) {
-            return Drawn(mentions, bookSearch(title).shuffled(random).take(CARDS).map { bookCard(it) })
+        val langs = languages().ifEmpty { listOf("en") }
+        val candidates = encyclopedias(scope.packs, langs)
+        if (candidates.isEmpty()) {
+            // Books only: the date in the text, as the main language writes it.
+            val title = DayPage.title(day, dayLanguage(langs.first()))
+            return Drawn(bookSearch(title).shuffled(random).take(CARDS).map { bookCard(it) }, mentions = true)
         }
-        for (pack in scope.packs) {
+        for ((pack, lang) in candidates) {
             val archive = archiveOf(pack) ?: continue
-            val path = DayPage.paths(day).firstNotNullOfOrNull { archive.resolvePath(it) } ?: continue
-            val page = archive.read(path)?.let { DayPage.parse(String(it.bytes, Charsets.UTF_8)) } ?: continue
+            val path = DayPage.paths(day, lang).firstNotNullOfOrNull { archive.resolvePath(it) } ?: continue
+            val page = archive.read(path)?.let { DayPage.parse(String(it.bytes, Charsets.UTF_8), lang) } ?: continue
             if (page.isEmpty) continue
             fun pick(lines: List<String>, n: Int, section: String) =
                 lines.shuffled(random).take(n).map { Card(it, section, CardTarget.Article(pack.id, path, fragment = section)) }
-            return Drawn(title, pick(page.events, 3, "Events") + pick(page.births, 1, "Births") + pick(page.deaths, 1, "Deaths"))
+            // The section names are the pack's Wikipedia's (the card's line and its anchor): data, not UI (Plan L3).
+            val (events, births, deaths) = DayPage.sections(lang)
+            return Drawn(pick(page.events, 3, events) + pick(page.births, 1, births) + pick(page.deaths, 1, deaths))
         }
-        val pack = scope.packs.first()
-        val archive = archiveOf(pack) ?: return Drawn(mentions, emptyList())
+        val (pack, lang) = candidates.first()
+        val archive = archiveOf(pack) ?: return Drawn(emptyList(), mentions = true)
         return Drawn(
-            mentions,
-            archive.search(title, SEARCH_LIMIT).filterNot { IndexPages.isIndex(it.path) }.shuffled(random).take(CARDS).map { articleCard(archive, pack, it.path) },
+            archive.search(DayPage.title(day, lang), SEARCH_LIMIT).filterNot { IndexPages.isIndex(it.path) }.shuffled(random).take(CARDS)
+                .map { articleCard(archive, pack, it.path) },
+            mentions = true,
         )
     }
+
+    /**
+     * The encyclopedias On this day reads (Plan L3), each with the language its day article is in, in the order tried:
+     * the packs in each library language in turn, then the rest in their own. A general one (Everything, Top) before a
+     * subject.
+     */
+    private fun encyclopedias(packs: List<Pack>, langs: List<String>): List<Pair<Pack, String>> {
+        val ordered = packs.sortedBy { !GENERAL.containsMatchIn(it.name) }
+        val chosen = LinkedHashMap<Pack, String>()
+        for (lang in langs) {
+            ordered.filter { app.granger.core.catalog.Languages.has(it.language, lang) }.forEach { chosen.putIfAbsent(it, dayLanguage(lang)) }
+        }
+        ordered.forEach { chosen.putIfAbsent(it, dayLanguage(app.granger.core.catalog.Languages.codes(it.language).firstOrNull() ?: "en")) }
+        return chosen.toList()
+    }
+
+    /** [lang] when its Wikipedia's day articles are read here, else English. */
+    private fun dayLanguage(lang: String) = if (lang in DayPage.LANGUAGES) lang else "en"
 
     private suspend fun search(scope: Resolved, query: String, random: Random): List<Card> {
         val cards = ArrayList<Card>()
@@ -182,8 +212,26 @@ class FeedDrawer(
         const val CARDS = 5
         private const val SEARCH_LIMIT = 30
 
+        /** A whole encyclopedia's ZIM name, not a subject's: `wikipedia_es_all`, `wikipedia_en_top`. */
+        private val GENERAL = Regex("^wikipedia_[a-z]{2,3}_(all|top|top1m|100)(_|$)")
+
         /** Subjects (lower-cased substrings) of books one dips into rather than reads through. */
         val DIP_IN = listOf("poetry", "poem", "scripture", "religion", "philosophy", "quotation", "aphorism", "essay", "proverb")
+
+        /**
+         * A feed's row title for [day]: "Random from Wikipedia", "October 22", "cats · Wikipedia"; "Mentions October 22"
+         * when the day's cards are only [mentions] of it.
+         */
+        fun title(feed: HomeFeed, scope: Resolved, day: LocalDate, mentions: Boolean = false): UiText = when (feed.kind) {
+            FeedKind.RANDOM ->
+                if (scope.name == LIBRARY_NAME) UiText.Res(R.string.home_feed_random_from_library) else UiText.Res(R.string.home_feed_random_from, scope.name)
+            // In the app's language; DayPage.title is the English page title it looks up.
+            FeedKind.ON_THIS_DAY -> UiText.Res(
+                if (mentions) R.string.home_feed_day_mentions else R.string.home_feed_day,
+                day.month.getDisplayName(TextStyle.FULL, Locale.getDefault()), day.dayOfMonth,
+            )
+            FeedKind.SEARCH -> UiText.Res(R.string.home_feed_search, feed.query.trim(), scope.name)
+        }
 
         /** The same day and feed draw the same cards; another day draws others. */
         fun seed(day: LocalDate, feedId: Long): Long = day.toEpochDay() xor (feedId * 0x9E3779B97F4A7C15uL.toLong())

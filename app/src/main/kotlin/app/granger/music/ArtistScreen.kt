@@ -23,8 +23,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.R
 import app.granger.core.library.AlbumSummary
 import app.granger.core.library.PackStatus
 import app.granger.core.library.Track
@@ -39,8 +41,8 @@ fun ArtistScreen(vm: MusicViewModel, name: String, nav: MusicNav) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(loaded?.name ?: name) },
-                navigationIcon = { IconButton(onClick = nav.onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } },
+                title = { Text(shownName(loaded?.name ?: name)) },
+                navigationIcon = { IconButton(onClick = nav.onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) } },
             )
         },
     ) { padding ->
@@ -48,8 +50,8 @@ fun ArtistScreen(vm: MusicViewModel, name: String, nav: MusicNav) {
         val source = MusicSources.artist(loaded.name)
         AlbumsAndSongs(
             Modifier.padding(padding),
-            sections = loaded.sections.map { it.group.label to it.albums } +
-                listOfNotNull(loaded.appearsOn.takeIf { it.isNotEmpty() }?.let { "Appears on" to it }),
+            sections = loaded.sections.map { stringResource(it.group.label) to it.albums } +
+                listOfNotNull(loaded.appearsOn.takeIf { it.isNotEmpty() }?.let { stringResource(R.string.music_appears_on) to it }),
             songs = loaded.songs,
             vm = vm, dialogs = dialogs, nav = nav,
             onPlay = { i, shuffle -> vm.play(loaded.songs, i, source, shuffle) },
@@ -72,6 +74,7 @@ internal fun AlbumsAndSongs(
     nav: MusicNav,
     onPlay: (index: Int?, shuffle: Boolean) -> Unit,
 ) {
+    val songsHeading = stringResource(R.string.music_songs)
     LazyVerticalGrid(
         columns = GridCells.Adaptive(150.dp),
         modifier = modifier.fillMaxSize(),
@@ -92,7 +95,7 @@ internal fun AlbumsAndSongs(
                 androidx.compose.foundation.layout.Box(Modifier.padding(horizontal = 8.dp)) { AlbumCell(album, vm, dialogs, nav) }
             }
         }
-        if (songs.isNotEmpty()) heading("Songs")
+        if (songs.isNotEmpty()) heading(songsHeading)
         itemsIndexed(songs, key = { _, t -> "song:${t.id}" }, span = { _, _ -> GridItemSpan(maxLineSpan) }) { i, track ->
             SongRow(track, vm, dialogs, nav, onPlay = { onPlay(i, false) })
         }

@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-figaro-articulos-selectos",
+ "kind": "book",
+ "fileName": "gc-es-figaro-articulos-selectos_2026-10-30.gvec",
+ "sizeBytes": 204462,
+ "sha256": "66803b19ce56b1c9d3a28940244b6ce2d71aa272f4fad5f9be2a688d9f3762fd",
+ "count": 695,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "40d186db392a9c3b7bbc202610ce6647a557533a7c45575e69af307e250ea004",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-figaro-articulos-selectos_2026-10-30.gvec"
+}

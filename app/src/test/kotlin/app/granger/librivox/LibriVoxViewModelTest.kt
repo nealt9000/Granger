@@ -23,6 +23,8 @@ import app.granger.music.FakeMediaLibrary
 import app.granger.record
 import app.granger.sources.ItemStatus
 import app.granger.volume
+import app.granger.R
+import app.granger.UiText
 import com.google.common.truth.Truth.assertThat
 import java.io.File
 import java.io.IOException
@@ -73,6 +75,7 @@ class LibriVoxViewModelTest {
                     url.queryParameter("sort_field") != null -> 200 to resource("librivox-recent.json")
                     url.queryParameter("genre") != null -> 200 to resource("librivox-search-time-machine.json")
                     url.queryParameter("title") == "Time Machine" -> 200 to resource("librivox-search-time-machine.json")
+                    url.queryParameter("title") == "Quijote" -> 200 to resource("librivox-mixed-languages.json")
                     else -> 404 to resource("librivox-not-found.json")
                 }
             }
@@ -110,6 +113,9 @@ class LibriVoxViewModelTest {
         }
     }
 
+    /** The library's languages (Plan L3). */
+    private var languages = listOf("en")
+
     private fun TestScope.viewModel(settle: Boolean = true): LibriVoxViewModel {
         // Remove forgets the book's rows; nothing here is filed, so there's nothing to forget.
         val library = object : MediaLibrary by FakeMediaLibrary() {
@@ -118,7 +124,7 @@ class LibriVoxViewModelTest {
         val scanner = DownloadedMediaScanner({ listOf(mediaRoot) }, library, TagReader { _, _ -> FileTags(null, emptyList()) })
         val volumes = FakeVolumes(listOf(volume(mediaRoot.path, "Internal storage")))
         val media = MediaDownloader(downloads, scanner, library, volumes, downloadPrefs, backgroundScope, io = main.dispatcher)
-        val vm = LibriVoxViewModel(librivox, archive, media, downloads, appScope = this, io = main.dispatcher, now = { 5L })
+        val vm = LibriVoxViewModel(librivox, archive, media, downloads, appScope = this, io = main.dispatcher, now = { 5L }, languages = { languages })
         backgroundScope.launch { vm.ui.collect {} }
         if (settle) settle { !vm.ui.value.loading && requests.isNotEmpty() }
         return vm
@@ -171,7 +177,9 @@ class LibriVoxViewModelTest {
         assertThat(ui.shelf).isNull()
         assertThat(ui.rows.first().id).isEqualTo("817")
         assertThat(ui.rows.first().title).isEqualTo("Time Machine")
-        assertThat(ui.rows.first().details).isEqualTo("H. G. Wells · 4 h 9 min")
+        assertThat(ui.rows.first().details).isEqualTo(
+            UiText.Res(R.string.librivox_row_details, "H. G. Wells", UiText.Res(R.string.librivox_duration_hours_minutes, 4, 9)),
+        )
         // Clearing the box goes back to Recently added.
         vm.setQuery("")
         settle { lists().size == 3 && !vm.ui.value.loading }
@@ -192,7 +200,7 @@ class LibriVoxViewModelTest {
     @Test fun busyShowsTheMessageWithRetry() = runTest(main.dispatcher) {
         librivoxStatus = 429
         val vm = viewModel()
-        assertThat(vm.ui.value.error).isEqualTo("LibriVox is busy right now. Try again in a minute.")
+        assertThat(vm.ui.value.error).isEqualTo(UiText.Res(app.granger.core.archive.LibriVoxProblem.BUSY.text))
         assertThat(vm.ui.value.rows).isEmpty()
         assertThat(vm.ui.value.loading).isFalse()
         librivoxStatus = null
@@ -274,7 +282,7 @@ class LibriVoxViewModelTest {
         assertThat(vm.ui.value.sheet!!.sizeBytes).isNull()
         vm.get("817")
         settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).isEqualTo("This book's files aren't all on archive.org.")
+        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res(R.string.librivox_incomplete))
         assertThat(downloads.enqueuedGroups).isEmpty()
         assertThat(File(mediaRoot, "audiobooks/librivox/817").exists()).isFalse()
     }
@@ -292,7 +300,7 @@ class LibriVoxViewModelTest {
         assertThat(requests.none { it.host == "archive.org" }).isTrue()
         vm.get("817")
         settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).isEqualTo("This book isn't on archive.org yet.")
+        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res(R.string.librivox_not_on_archive))
         assertThat(downloads.enqueuedGroups).isEmpty()
     }
 
@@ -300,7 +308,7 @@ class LibriVoxViewModelTest {
         offline = true
         downloads.list.value = installed(13) + record("med", DownloadState.INSTALLED)
         val vm = viewModel()
-        assertThat(vm.ui.value.error).contains("Couldn't reach LibriVox")
+        assertThat(vm.ui.value.error).isEqualTo(UiText.Res(R.string.librivox_offline))
         vm.setTab(LibriVoxTab.INSTALLED)
         testScheduler.advanceUntilIdle()
         val row = vm.ui.value.rows.single()
@@ -346,5 +354,38 @@ class LibriVoxViewModelTest {
         vm.cancel("../x")
         testScheduler.advanceUntilIdle()
         assertThat(downloads.calls.none { "../x" in it }).isTrue()
+    }
+
+    @Test fun theListKeepsTheLibrarysLanguages() = runTest(main.dispatcher) {
+        languages = listOf("es")
+        val vm = viewModel()
+        vm.setQuery("El Quijote")
+        settle { vm.ui.value.rows.any { it.title == "Don Quijote" } }
+        // The French and English items leave; Spanish stays.
+        assertThat(vm.ui.value.rows.map { it.title }).containsExactly("Don Quijote")
+        // Spanish's articles come off a title search, as English's do.
+        assertThat(lists().mapNotNull { it.queryParameter("title") }).contains("Quijote")
+    }
+
+    @Test fun anEnglishLibrarySeesEveryLanguage() = runTest(main.dispatcher) {
+        languages = listOf("en")
+        val vm = viewModel()
+        vm.setQuery("Quijote")
+        settle { vm.ui.value.rows.size >= 3 }
+        assertThat(vm.ui.value.rows.map { it.title }).containsExactly("Don Quijote", "Don Quixote", "Don Quichotte")
+    }
+
+    @Test fun languageNamesMatchTheLibrarysCodes() {
+        assertThat(inLanguages("Spanish", listOf("es"))).isTrue()
+        assertThat(inLanguages("English", listOf("es"))).isFalse()
+        assertThat(inLanguages("English", listOf("es", "en"))).isTrue()
+        assertThat(inLanguages("Multilingual", listOf("en"))).isTrue()
+        assertThat(inLanguages("", listOf("en"))).isTrue()
+        // An English-only library sees every LibriVox language, as before L3.
+        assertThat(inLanguages("French", listOf("en"))).isTrue()
+        assertThat(inLanguages("Spanish", listOf("en"))).isTrue()
+        // A Spanish library: Spanish, multilingual and unnamed only.
+        assertThat(inLanguages("French", listOf("es"))).isFalse()
+        assertThat(inLanguages("English", listOf("es"))).isFalse()
     }
 }

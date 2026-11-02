@@ -7,6 +7,7 @@ import java.util.Locale
  * index and Android Auto agree.
  */
 object MediaNames {
+    /** A placeholder like [Albums.UNKNOWN_ARTIST]: the app shows it through its own string. */
     const val UNKNOWN_GENRE = "Unknown genre"
     private const val JOIN = "; "
 

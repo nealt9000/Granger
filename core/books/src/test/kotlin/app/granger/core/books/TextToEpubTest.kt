@@ -138,4 +138,15 @@ class TextToEpubTest {
             assertThat(chapters(file).joinToString("")).contains("bad text  ok")
         }
     }
+
+    private fun opf(file: File): String = ZipFile(file).use { z -> z.getInputStream(z.getEntry("OEBPS/content.opf")).readBytes().toString(Charsets.UTF_8) }
+
+    @Test fun theLanguageIsDeclaredElseGuessed() {
+        val spanish = "En un lugar de la Mancha, de cuyo nombre no quiero acordarme, no ha mucho tiempo que vivía un hidalgo de los de lanza en astillero."
+        val english = "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife."
+        assertThat(opf(convert(spanish))).contains("<dc:language>es</dc:language>")
+        assertThat(opf(convert(english))).contains("<dc:language>en</dc:language>")
+        val declared = ByteArrayOutputStream().also { TextToEpub.convert(english, "T", false, it, language = "spa") }
+        assertThat(opf(tmp.newFile().apply { writeBytes(declared.toByteArray()) })).contains("<dc:language>es</dc:language>")
+    }
 }

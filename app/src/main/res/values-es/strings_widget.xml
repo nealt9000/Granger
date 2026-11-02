@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_name">Reproductor de Granger</string>
+    <string name="widget_description">Muestra y controla lo que se está reproduciendo</string>
+    <string name="widget_nothing_playing">No se está reproduciendo nada</string>
+    <string name="widget_open_granger">Abrir Granger</string>
+    <string name="widget_play">Reproducir</string>
+    <string name="widget_pause">Pausar</string>
+    <string name="widget_back">Retroceder</string>
+    <string name="widget_next_track">Pista siguiente</string>
+    <string name="widget_open_player">Abrir el reproductor</string>
+    <string name="widget_back_seconds">Retroceder %1$d segundos</string>
+</resources>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The e-book and PDF reader (Plan L1). -->
+
+    <!-- In-book search: a row that matched one of the reader's own highlights or notes. -->
+    <string name="ebook_your_highlight">Your highlight</string>
+    <string name="ebook_your_note">Your note</string>
+    <!-- %1$s is the chapter the highlight is in. -->
+    <string name="ebook_your_highlight_in">Your highlight · %1$s</string>
+    <!-- %1$s is the chapter the note is in. -->
+    <string name="ebook_your_note_in">Your note · %1$s</string>
+    <string name="ebook_search_in_this_book">Search in this book</string>
+    <!-- %1$s is what the reader searched for. -->
+    <string name="ebook_nothing_found">Nothing found for “%1$s”.</string>
+    <!-- TalkBack for the bottom bar's search button. -->
+    <string name="ebook_search_in_book">Search in book</string>
+
+    <!-- The progress line over the book's slider. %1$d is the page, %2$d the book's page count. -->
+    <string name="ebook_page_of">p. %1$d of %2$d</string>
+    <!-- %1$d is a percent of the book read. -->
+    <string name="ebook_percent">%1$d%%</string>
+    <!-- %1$s is the chapter, %2$s the place in the book ("p. 120 of 410" or "29%"). -->
+    <string name="ebook_chapter_and_place">%1$s · %2$s</string>
+
+    <!-- The Contents side sheet's tabs and empty states. -->
+    <string name="ebook_tab_contents">Contents</string>
+    <string name="ebook_tab_bookmarks">Bookmarks</string>
+    <string name="ebook_tab_highlights">Highlights</string>
+    <string name="ebook_no_contents">This book has no contents list.</string>
+    <string name="ebook_no_pdf_contents">This PDF has no contents list of its own. If it has a contents page, it\'s in the pages.</string>
+    <!-- A contents entry with no title. -->
+    <string name="ebook_untitled">Untitled</string>
+    <!-- A bookmark with no text of its own. -->
+    <string name="ebook_bookmark">Bookmark</string>
+    <string name="ebook_no_bookmarks">No bookmarks yet. Tap the star on the page you want to keep.</string>
+    <string name="ebook_no_highlights">No highlights yet. Select text in the book to highlight it.</string>
+    <!-- Under a highlight whose place the book's current edition no longer has. -->
+    <string name="ebook_cant_find">Can\'t find this passage in the current edition</string>
+
+    <!-- The chip that brings the page back to the sentence being read aloud. -->
+    <string name="ebook_follow">Follow</string>
+
+    <!-- Define, on selected text. %1$s is the word. -->
+    <string name="ebook_no_wiktionary_entry">No entry for “%1$s” in Wiktionary</string>
+    <string name="ebook_no_dictionary_app">No dictionary app is installed</string>
+    <!-- %1$s is the word. -->
+    <string name="ebook_lookup_failed">Couldn’t look up “%1$s”</string>
+
+    <!-- The text-selection menu. -->
+    <string name="ebook_select_copy">Copy</string>
+    <string name="ebook_select_highlight">Highlight</string>
+    <!-- Add a note to the selected text. -->
+    <string name="ebook_select_note">Note</string>
+    <string name="ebook_select_define">Define</string>
+    <!-- Ask Research about the selected text. -->
+    <string name="ebook_select_ask">Ask</string>
+    <!-- Start reading aloud at the selected text. -->
+    <string name="ebook_select_read_from_here">Read from here</string>
+
+    <!-- The highlight sheet. TalkBack for each colour swatch, lower case as it's read. -->
+    <string name="ebook_highlight_yellow">yellow highlight</string>
+    <string name="ebook_highlight_green">green highlight</string>
+    <string name="ebook_highlight_blue">blue highlight</string>
+    <string name="ebook_highlight_pink">pink highlight</string>
+    <!-- The highlight's note field. -->
+    <string name="ebook_note">Note</string>
+
+    <!-- The text settings sheet (Aa). -->
+    <string name="ebook_typeface">Typeface</string>
+    <string name="ebook_typeface_serif">Serif</string>
+    <!-- A typeface without serifs. -->
+    <string name="ebook_typeface_sans">Sans</string>
+    <!-- Text size. -->
+    <string name="ebook_size">Size</string>
+    <string name="ebook_line_spacing">Line spacing</string>
+    <string name="ebook_margins">Margins</string>
+    <string name="ebook_alignment">Alignment</string>
+    <string name="ebook_align_left">Left</string>
+    <string name="ebook_align_justified">Justified</string>
+    <string name="ebook_theme">Theme</string>
+    <!-- Reading theme that follows the app's light or dark look. -->
+    <string name="ebook_theme_match_app">Match app</string>
+    <string name="ebook_theme_day">Day</string>
+    <string name="ebook_theme_sepia">Sepia</string>
+    <string name="ebook_theme_night">Night</string>
+    <!-- A PDF's settings: how pages follow each other. -->
+    <string name="ebook_pdf_pages">Pages</string>
+    <string name="ebook_pdf_page_by_page">Page by page</string>
+    <!-- Pages run on in one continuous scroll. -->
+    <string name="ebook_pdf_scroll">Scroll</string>
+    <!-- A PDF's settings: how a page fits the screen. -->
+    <string name="ebook_pdf_fit">Fit</string>
+    <string name="ebook_pdf_whole_page">Whole page</string>
+    <string name="ebook_pdf_width">Width</string>
+    <!-- The wiki reader's Aa sheet. -->
+    <string name="ebook_text_size">Text size</string>
+    <string name="ebook_smaller_text">Smaller text</string>
+    <string name="ebook_larger_text">Larger text</string>
+
+    <!-- Why a book couldn't be shown. -->
+    <!-- Shown in place of the book when the rail item that opened it no longer exists. -->
+    <string name="ebook_tab_gone">This bookmark was removed.</string>
+    <string name="ebook_book_gone">This book isn\'t on the phone any more. Check the SD card, or download it again from Granger.</string>
+    <string name="ebook_book_damaged">This book couldn\'t be opened. Try removing it, then download or import it again.</string>
+
+    <!-- An ebook made from a PDF (Plan IA): the PDF it came from, "the original pages". -->
+    <string name="ebook_original_pages">Original pages</string>
+    <!-- %1$s is the PDF's size. -->
+    <string name="ebook_remove_original_pages">Remove original pages · %1$s</string>
+    <string name="ebook_remove_original_title">Remove the original pages?</string>
+    <string name="ebook_remove_original_body">The PDF this ebook was made from goes, and with it the book as printed. The ebook stays.</string>
+    <string name="ebook_original_pages_removed">Original pages removed</string>
+    <string name="ebook_original_pages_not_removed">Couldn\'t remove the original pages</string>
+    <!-- Turns a PDF into an ebook whose text reflows. -->
+    <string name="ebook_read_as_ebook">Read as ebook</string>
+    <string name="ebook_making_ebook">Making an ebook of this PDF…</string>
+    <string name="ebook_cant_make_ebook">Couldn\'t make an ebook of this PDF</string>
+    <!-- %1$s is the converter's reason, in English, such as "no chapters". -->
+    <string name="ebook_pdf_reads_badly">This PDF doesn\'t read well as an ebook (%1$s), so it stays as pages.</string>
+    <!-- Define found the word in a Wiktionary that is neither the library's main language's nor the book's (Plan L3). %1$s
+         is that Wiktionary's language, named in the app's language: "Defined in English Wiktionary". -->
+    <string name="ebook_defined_in">Defined in %1$s Wiktionary</string>
+</resources>

@@ -80,7 +80,7 @@ class PlayerFocusTest {
     @Test fun listensCardShowsThePlayingMusic() {
         val card = nowPlayingCardFor(mixed(reading = false, musicPlaying = true))
         assertThat(card?.kind).isEqualTo(app.granger.listen.CardKind.MUSIC)
-        assertThat(card?.label).isEqualTo("Now playing")
+        assertThat(card?.label).isEqualTo(app.granger.R.string.listen_now_playing)
     }
 
     private fun idle() = main.dispatcher.scheduler.advanceUntilIdle()

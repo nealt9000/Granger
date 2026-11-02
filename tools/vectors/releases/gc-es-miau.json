@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-miau",
+ "kind": "book",
+ "fileName": "gc-es-miau_2026-10-30.gvec",
+ "sizeBytes": 190350,
+ "sha256": "65d2b0880b1b202c1c2b97fa469ea3d5e0a6cc94b7a8304d223b69543b201961",
+ "count": 647,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "ef1f494c42d288ce692a4842a95d7eabb920eced79e4f7c25f9f79a32ace3b1e",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-miau_2026-10-30.gvec"
+}

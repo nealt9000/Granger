@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-lazarillo-de-tormes",
+ "kind": "book",
+ "fileName": "gc-es-lazarillo-de-tormes_2026-10-30.gvec",
+ "sizeBytes": 45996,
+ "sha256": "925b6fd803b3a6799febaef182e8fe646f0d62a141fe660f22d54cb888ca49b7",
+ "count": 156,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "510618662cefc95a05d53d91c4611e722ef9b90648a47526e6566cd40cd7d7e9",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-lazarillo-de-tormes_2026-10-30.gvec"
+}

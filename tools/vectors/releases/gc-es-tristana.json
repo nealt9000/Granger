@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-tristana",
+ "kind": "book",
+ "fileName": "gc-es-tristana_2026-10-30.gvec",
+ "sizeBytes": 98034,
+ "sha256": "eeaa75fb4926ed9f30b30b535a784c20c0513c663a43cc1f5d963f77af8bf769",
+ "count": 333,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "f7f4233185fa9be3b149d148d71f401fae63fa86f6270ea103b146e2dfa8aac7",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-tristana_2026-10-30.gvec"
+}

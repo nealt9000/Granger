@@ -1,5 +1,8 @@
 package app.granger.home
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import app.granger.UiText
 import app.granger.FakeBookshelf
 import app.granger.FakeCatalogSource
 import app.granger.FakeDownloads
@@ -41,8 +44,15 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35])
 class HomeViewModelTest {
+    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private fun UiText?.text() = this?.resolve(context)
     @get:Rule val main = MainDispatcherRule()
 
     private val library = FakeLibrary()
@@ -87,7 +97,7 @@ class HomeViewModelTest {
     }
 
     private fun tab(id: Long, title: String) =
-        RailEntry.Tab(RailTabUi(id, title, "A pack", title.first(), available = true, current = false), at = id)
+        RailEntry.Tab(RailTabUi(id, title, app.granger.UiText.Raw("A pack"), title.first(), available = true, current = false), at = id)
 
     private fun installWikipedia() {
         library.packList.value = listOf(wikipedia)
@@ -101,7 +111,7 @@ class HomeViewModelTest {
         val ui = viewModel().ui.value
         assertThat(ui.strip.domains.map { it.id to it.coverage })
             .containsExactly("medicine" to Coverage.COMPREHENSIVE, "food" to Coverage.NONE).inOrder()
-        assertThat(ui.strip.signals.single().text).startsWith("Nothing yet for Food, water & survival.")
+        assertThat(ui.strip.signals.single().text.text()).startsWith("Nothing yet for Food, water & survival.")
         assertThat(ui.strip.needsCatalogRefresh).isFalse()
     }
 
@@ -109,7 +119,7 @@ class HomeViewModelTest {
         val ui = viewModel().ui.value
         assertThat(ui.strip.domains).isEmpty()
         assertThat(ui.strip.needsCatalogRefresh).isTrue()
-        assertThat(stripText(ui.strip)).isEqualTo("Refresh the catalog to see your coverage.")
+        assertThat(stripText(ui.strip).text()).isEqualTo("Refresh the catalog to see your coverage.")
     }
 
     @Test fun continueIsTheRailsTabsAndPlaysInTheRailsOrder() = runTest(main.dispatcher) {
@@ -129,19 +139,19 @@ class HomeViewModelTest {
     @Test fun continueLeavesOutMainPagesAndIndexPages() = runTest(main.dispatcher) {
         installWikipedia()
         fun page(id: Long, packId: String, path: String) =
-            RailEntry.Tab(RailTabUi(id, path, "A pack", 'P', available = true, current = false, packId = packId, path = path), at = id)
+            RailEntry.Tab(RailTabUi(id, path, app.granger.UiText.Raw("A pack"), 'P', available = true, current = false, packId = packId, path = path), at = id)
         val cat = page(1, "u1", "Cat")
         val front = page(2, "u1", "index")
         val user = page(3, "se", "users/7/apocalypse")
         val tags = page(4, "se", "tags")
         val question = page(5, "se", "questions/12/the-end")
-        val book = RailEntry.Tab(RailTabUi(6, "Emma", "Jane Austen", 'E', available = true, current = false, packId = "book:granger:1"), at = 6)
+        val book = RailEntry.Tab(RailTabUi(6, "Emma", app.granger.UiText.Raw("Jane Austen"), 'E', available = true, current = false, packId = "book:granger:1"), at = 6)
         rail.value = RailUi(listOf(cat, front, user, tags, question, book))
         assertThat(viewModel().ui.value.continueCards).containsExactly(cat, question, book).inOrder()
     }
 
     @Test fun continueCardsIsPureOverTheMainPaths() {
-        val front = RailEntry.Tab(RailTabUi(1, "WikEM", "WikEM", 'W', true, false, packId = "w", path = "Main_Page"), at = 1)
+        val front = RailEntry.Tab(RailTabUi(1, "WikEM", app.granger.UiText.Raw("WikEM"), 'W', true, false, packId = "w", path = "Main_Page"), at = 1)
         assertThat(HomeViewModel.continueCards(RailUi(listOf(front)))).containsExactly(front)
         assertThat(HomeViewModel.continueCards(RailUi(listOf(front)), mapOf("w" to "Main_Page"))).isEmpty()
     }
@@ -151,7 +161,14 @@ class HomeViewModelTest {
         assertThat(dotAlpha(Coverage.BASIC)).isLessThan(dotAlpha(Coverage.COMPREHENSIVE))
         assertThat(dotAlpha(Coverage.COMPREHENSIVE)).isEqualTo(1f)
         val ready = ReadinessReport(emptyList(), emptyList(), emptyList(), needsCatalogRefresh = false)
-        assertThat(stripText(ready)).isEqualTo("Ready.")
+        assertThat(stripText(ready).text()).isEqualTo("Ready.")
+    }
+
+    @Test fun theDefaultClassicsFeedIsTheLibraryLanguagesCollection() {
+        fun collections(langs: List<String>) = HomeViewModel.defaults(langs).map { it.first.text }.filter { it.startsWith("collection:") }
+        assertThat(collections(listOf("en"))).containsExactly("collection:c:granger-classics")
+        assertThat(collections(listOf("es"))).containsExactly("collection:c:clasicos-granger")
+        assertThat(collections(listOf("es", "en"))).containsExactly("collection:c:clasicos-granger", "collection:c:granger-classics").inOrder()
     }
 
     @Test fun theDefaultsAreSeededOnceAndDormantOnesStayHidden() = runTest(main.dispatcher) {
@@ -163,7 +180,7 @@ class HomeViewModelTest {
         assertThat(prefs.seeded).isTrue()
         // Wikipedia is installed, the Classics and Wikiquote are not: two rows show, two are hidden.
         assertThat(vm.ui.value.feeds.map { it.feed.kind }).containsExactly(FeedKind.ON_THIS_DAY, FeedKind.RANDOM).inOrder()
-        assertThat(vm.ui.value.feeds.map { it.scopeName }.distinct()).containsExactly("Wikipedia")
+        assertThat(vm.ui.value.feeds.map { it.scopeName.text() }.distinct()).containsExactly("Wikipedia")
 
         // Removing every row and starting again seeds nothing: the mark is set.
         homeFeeds.list.value.forEach { homeFeeds.remove(it.id) }
@@ -177,12 +194,12 @@ class HomeViewModelTest {
         val id = homeFeeds.add("pack:wikipedia_en_all", FeedKind.RANDOM)
         val vm = viewModel()
         val row = vm.ui.value.feeds.single()
-        assertThat(row.drawn!!.title).isEqualTo("Random from Wikipedia")
+        assertThat(row.title.text()).isEqualTo("Random from Wikipedia")
         assertThat(row.drawn!!.cards.single().title).isEqualTo("Cat")
         assertThat(homeFeeds.draws[id]!!.day).isEqualTo("2026-10-22")
 
         // A fresh look the same day shows the cache as is, even when the archive would now say otherwise.
-        val cached = Drawn("Random from Wikipedia", listOf(Card("Cached", "Wikipedia", CardTarget.Article("u1", "Cached"))))
+        val cached = Drawn(listOf(Card("Cached", "Wikipedia", CardTarget.Article("u1", "Cached"))))
         homeFeeds.draws[id] = HomeDraw(id, "2026-10-22", Cards.encode(cached))
         val again = viewModel()
         assertThat(again.ui.value.feeds.single().drawn!!.cards.single().title).isEqualTo("Cached")
@@ -199,7 +216,7 @@ class HomeViewModelTest {
         installWikipedia()
         prefs.seeded = true
         val id = homeFeeds.add("pack:wikipedia_en_all", FeedKind.RANDOM)
-        val stale = Drawn("Random from Wikipedia", listOf(Card("Old", "Gone pack", CardTarget.Article("u-gone", "Old"))))
+        val stale = Drawn(listOf(Card("Old", "Gone pack", CardTarget.Article("u-gone", "Old"))))
         homeFeeds.draws[id] = HomeDraw(id, "2026-10-22", Cards.encode(stale))
         val vm = viewModel()
         assertThat(vm.ui.value.feeds.single().drawn!!.cards.single().title).isEqualTo("Cat")
@@ -213,7 +230,7 @@ class HomeViewModelTest {
         vm.addFeed(FeedScope.Library, FeedKind.RANDOM)
         testScheduler.advanceUntilIdle()
         assertThat(homeFeeds.list.value.map { it.scope }).containsExactly("pack:wikipedia_en_all", "library").inOrder()
-        assertThat(vm.ui.value.feeds.map { it.drawn!!.title }).containsExactly("cats · Wikipedia", "Random from the library").inOrder()
+        assertThat(vm.ui.value.feeds.map { it.title.text() }).containsExactly("cats · Wikipedia", "Random from the library").inOrder()
         vm.moveFeed(homeFeeds.list.value.last().id, up = true)
         testScheduler.advanceUntilIdle()
         assertThat(homeFeeds.list.value.map { it.scope }).containsExactly("library", "pack:wikipedia_en_all").inOrder()
@@ -232,8 +249,8 @@ class HomeViewModelTest {
         downloads.liveFlow.value = DownloadLive(QueueProgress("b", SHA_A, 150, null), batchStartedAt = 5)
         val vm = viewModel()
         val card = vm.ui.value.downloads as DownloadsCard.Active
-        assertThat(homeDownloadsTitle(card)).isEqualTo("Downloading Wikivoyage")
-        assertThat(homeDownloadsText(card)).isEqualTo("1 of 2 · 250 B of 400 B")
+        assertThat(homeDownloadsTitle(card).text()).isEqualTo("Downloading Wikivoyage")
+        assertThat(homeDownloadsText(context.resources, card).text()).isEqualTo("1 of 2 · 250 B of 400 B")
         assertThat(card.fraction).isEqualTo(250f / 400f)
     }
 
@@ -243,8 +260,8 @@ class HomeViewModelTest {
         downloads.liveFlow.value = DownloadLive(paused = true)
         val vm = viewModel()
         val card = vm.ui.value.downloads as DownloadsCard.Active
-        assertThat(homeDownloadsTitle(card)).isEqualTo("Downloads paused")
-        assertThat(homeDownloadsText(card)).isEqualTo("Paused · 2 waiting")
+        assertThat(homeDownloadsTitle(card).text()).isEqualTo("Downloads paused")
+        assertThat(homeDownloadsText(context.resources, card).text()).isEqualTo("Paused · 2 waiting")
         vm.resumeDownloads()
         vm.pauseDownloads()
         testScheduler.advanceUntilIdle()
@@ -294,7 +311,7 @@ class HomeViewModelTest {
         library.packList.value = listOf(wikipedia, pack("u2", "Gone", status = PackStatus.MISSING).copy(name = "x_en"), pack("u3", "No name"))
         prefs.seeded = true
         val choices = viewModel().ui.value.scopeChoices
-        assertThat(choices.map { it.label }).containsExactly("Whole library", "Wikipedia").inOrder()
+        assertThat(choices.map { it.label.text() }).containsExactly("Whole library", "Wikipedia").inOrder()
         assertThat(choices.last().scope).isEqualTo(FeedScope.Pack("wikipedia_en_all"))
     }
 
@@ -324,7 +341,7 @@ class HomeViewModelTest {
     @Test fun homeOffersToRemoveTheSmallerSliceAndRemovesItOnlyOnAYes() = runTest(main.dispatcher) {
         val vm = tidyViewModel(app.granger.sources.TidyDismissals())
         val offer = vm.ui.value.tidy.single()
-        assertThat(offer.text).isEqualTo("Top 1 million is in. Remove Best 50,000 (2.7 GB)? Your places and bookmarks move across.")
+        assertThat(offer.text.text()).isEqualTo("Top 1 million is in. Remove Best 50,000 (2.7 GB)? Your places and bookmarks move across.")
         // Nothing has been removed by just showing it.
         assertThat(library.superseded).isEmpty()
         assertThat(downloads.calls).isEmpty()

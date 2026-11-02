@@ -2,6 +2,7 @@ package app.granger.shell
 
 import android.widget.Toast
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -54,6 +55,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -68,17 +70,17 @@ import app.granger.theme.MediaKind
 import app.granger.theme.MediaTile
 
 /** The rail's tools. Settings is pinned to the bottom; the rest sit at the top, in this order. */
-enum class RailTool(val label: String, val shown: Boolean) {
-    HOME("Home", true),
-    SEARCH("Search", true),
-    RESEARCH("Ask", Features.RESEARCH),
+enum class RailTool(@StringRes val label: Int, val shown: Boolean) {
+    HOME(R.string.shell_tool_home, true),
+    SEARCH(R.string.shell_tool_search, true),
+    RESEARCH(R.string.shell_tool_ask, Features.RESEARCH),
     /** The wiki and Kiwix packs and the maps, browsed as linked sites (Plan U3c Decision 1). */
-    BROWSE("Browse", true),
+    BROWSE(R.string.shell_tool_browse, true),
     /** Books: what you read through (Plan U3c Decision 2). */
-    LIBRARY("Library", true),
+    LIBRARY(R.string.shell_tool_library, true),
     /** Your player and your audio collection (Plan U2 Decision 4). */
-    LISTEN("Listen", Features.PLAYER),
-    SETTINGS("Settings", true),
+    LISTEN(R.string.shell_tool_listen, Features.PLAYER),
+    SETTINGS(R.string.shell_tool_settings, true),
 }
 
 /** What a long press on a rail item offers: Pin to top or Unpin, then Remove from rail. */
@@ -156,12 +158,17 @@ private fun RailEntry.painter(): Painter = when (this) {
 
 /** What TalkBack reads for an item's tile in the narrow rail. */
 private val RailEntry.description: String
-    get() = when (this) {
-        is RailEntry.Tab -> (if (tab.available) tab.title else "${tab.title}, not available") + if (tab.readingAloud) ", reading aloud" else ""
-        is RailEntry.Search -> "Recent search: $query"
-        is RailEntry.Chat -> "Ask chat: $title"
-        is RailEntry.Play -> "Play again: $title"
-        is RailEntry.Reading -> "Reading aloud: $title"
+    @Composable get() = when (this) {
+        is RailEntry.Tab -> when {
+            tab.available && !tab.readingAloud -> tab.title
+            tab.available -> stringResource(R.string.shell_tab_reading_aloud, tab.title)
+            !tab.readingAloud -> stringResource(R.string.shell_tab_not_available, tab.title)
+            else -> stringResource(R.string.shell_tab_not_available_reading_aloud, tab.title)
+        }
+        is RailEntry.Search -> stringResource(R.string.shell_recent_search, query)
+        is RailEntry.Chat -> stringResource(R.string.shell_ask_chat, title)
+        is RailEntry.Play -> stringResource(R.string.shell_play_again, title)
+        is RailEntry.Reading -> stringResource(R.string.shell_reading_aloud, title)
     }
 
 /**
@@ -215,7 +222,7 @@ internal fun NarrowRail(
                 }
                 if (shown.history) {
                     IconButton(onClick = onHistory) {
-                        Icon(painterResource(R.drawable.ic_history), contentDescription = "History", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(painterResource(R.drawable.ic_history), contentDescription = stringResource(R.string.shell_history), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
@@ -254,19 +261,19 @@ internal fun ExpandedRail(
             .width(ExpandedRailWidth)
             .padding(vertical = 8.dp),
     ) {
-        topTools(showResearch).forEach { tool -> LabelledRow(tool.painter(), tool.label, selected == tool) { onTool(tool) } }
+        topTools(showResearch).forEach { tool -> LabelledRow(tool.painter(), stringResource(tool.label), selected == tool) { onTool(tool) } }
         RailDivider(Modifier.fillMaxWidth().padding(horizontal = 12.dp))
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-            if (rail.entries.any { it.pinned }) SectionLabel("Pinned")
+            if (rail.entries.any { it.pinned }) SectionLabel(stringResource(R.string.shell_pinned))
             rail.entries.forEach { entry ->
                 val open = openAction(entry, onTab, onSearch, onChat, onPlay, onReading)
-                EntryTarget(entry, actions, open, onClickLabel = "Open", Modifier.fillMaxWidth()) {
+                EntryTarget(entry, actions, open, onClickLabel = stringResource(R.string.common_open), Modifier.fillMaxWidth()) {
                     if (entry is RailEntry.Tab) TabRowContent(entry) else EntryRowContent(entry)
                 }
             }
-            LabelledRow(painterResource(R.drawable.ic_history), "History", selected = false, onClick = onHistory)
+            LabelledRow(painterResource(R.drawable.ic_history), stringResource(R.string.shell_history), selected = false, onClick = onHistory)
         }
-        LabelledRow(RailTool.SETTINGS.painter(), RailTool.SETTINGS.label, selected == RailTool.SETTINGS) {
+        LabelledRow(RailTool.SETTINGS.painter(), stringResource(RailTool.SETTINGS.label), selected == RailTool.SETTINGS) {
             onTool(RailTool.SETTINGS)
         }
     }
@@ -287,7 +294,7 @@ private fun openAction(
         is RailEntry.Tab -> {
             {
                 if (entry.tab.available) onTab(entry.tab.tabId)
-                else Toast.makeText(context, UNAVAILABLE_MESSAGE, Toast.LENGTH_LONG).show()
+                else Toast.makeText(context, context.getString(R.string.shell_unavailable), Toast.LENGTH_LONG).show()
             }
         }
         is RailEntry.Search -> { { onSearch(entry.query) } }
@@ -302,7 +309,7 @@ private fun ToolIcon(tool: RailTool, selected: Boolean, onClick: () -> Unit) {
     IconButton(onClick = onClick) {
         Icon(
             tool.painter(),
-            contentDescription = tool.label,
+            contentDescription = stringResource(tool.label),
             tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
@@ -438,8 +445,6 @@ private fun IconTile(entry: RailEntry) {
     }
 }
 
-private const val UNAVAILABLE_MESSAGE = "This pack or book isn't available. Check that it's still on the phone or SD card."
-
 internal const val PIN_DOT_TAG = "railPinDot"
 
 internal const val READING_BADGE_TAG = "railReadingBadge"
@@ -465,20 +470,20 @@ private fun EntryTarget(
                     onClickLabel = onClickLabel,
                     onClick = onClick,
                     onLongClick = { menu = true },
-                    onLongClickLabel = if (entry.pinned) "Unpin or remove from rail" else "Pin to top or remove from rail",
+                    onLongClickLabel = stringResource(if (entry.pinned) R.string.shell_unpin_or_remove else R.string.shell_pin_or_remove),
                 )
                 .then(semantics),
         ) { content() }
         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
             DropdownMenuItem(
-                text = { Text(if (entry.pinned) "Unpin" else "Pin to top") },
+                text = { Text(stringResource(if (entry.pinned) R.string.shell_unpin else R.string.shell_pin_to_top)) },
                 onClick = {
                     menu = false
                     if (entry.pinned) actions.onUnpin(entry) else actions.onPin(entry)
                 },
             )
             DropdownMenuItem(
-                text = { Text("Remove from rail") },
+                text = { Text(stringResource(R.string.shell_remove_from_rail)) },
                 onClick = {
                     menu = false
                     actions.onRemove(entry)
@@ -492,11 +497,12 @@ private fun EntryTarget(
 @Composable
 private fun EntryTile(entry: RailEntry, onOpen: () -> Unit, actions: RailEntryActions) {
     val description = entry.description
+    val pinned = stringResource(R.string.shell_pinned)
     val modifier = Modifier.semantics {
         contentDescription = description
-        if (entry.pinned) stateDescription = "Pinned"
+        if (entry.pinned) stateDescription = pinned
     }
-    EntryTarget(entry, actions, onOpen, onClickLabel = "Open", semantics = modifier) {
+    EntryTarget(entry, actions, onOpen, onClickLabel = stringResource(R.string.common_open), semantics = modifier) {
         WithPinDot(entry.pinned) {
             if (entry is RailEntry.Tab) LetterTile(entry.tab) else IconTile(entry)
         }
@@ -506,11 +512,12 @@ private fun EntryTile(entry: RailEntry, onOpen: () -> Unit, actions: RailEntryAc
 @Composable
 private fun TabRowContent(entry: RailEntry.Tab) {
     val tab = entry.tab
+    val pinned = stringResource(R.string.shell_pinned)
     Row(
         Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 6.dp)
-            .semantics { if (entry.pinned) stateDescription = "Pinned" },
+            .semantics { if (entry.pinned) stateDescription = pinned },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
@@ -523,8 +530,14 @@ private fun TabRowContent(entry: RailEntry.Tab) {
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+            val subtitle = tab.subtitle.resolve()
             Text(
-                (if (tab.available) tab.subtitle else "${tab.subtitle} · not available") + if (tab.readingAloud) " · reading aloud" else "",
+                when {
+                    tab.available && !tab.readingAloud -> subtitle
+                    tab.available -> stringResource(R.string.shell_subtitle_reading_aloud, subtitle)
+                    !tab.readingAloud -> stringResource(R.string.shell_subtitle_not_available, subtitle)
+                    else -> stringResource(R.string.shell_subtitle_not_available_reading_aloud, subtitle)
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
@@ -542,13 +555,14 @@ private fun EntryRowContent(entry: RailEntry) {
         is RailEntry.Chat -> entry.title
         is RailEntry.Play -> entry.title
         is RailEntry.Tab -> entry.tab.title
-        is RailEntry.Reading -> "Reading aloud: ${entry.title}"
+        is RailEntry.Reading -> stringResource(R.string.shell_reading_aloud, entry.title)
     }
+    val pinned = stringResource(R.string.shell_pinned)
     Row(
         Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 10.dp)
-            .semantics { if (entry.pinned) stateDescription = "Pinned" },
+            .semantics { if (entry.pinned) stateDescription = pinned },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {

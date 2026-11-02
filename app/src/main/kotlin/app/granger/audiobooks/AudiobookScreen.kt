@@ -39,15 +39,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.R
 import app.granger.core.library.AudioBookmark
 import app.granger.library.ConfirmDialog
 import app.granger.media.DownloadControls
+import app.granger.media.DownloadUnit
 import app.granger.media.citedMark
 import app.granger.media.citedTint
+import app.granger.player.chapterName
 import app.granger.player.formatTime
 import app.granger.theme.readout
 
@@ -66,7 +70,7 @@ fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> 
         topBar = {
             TopAppBar(
                 title = { Text(loaded?.book?.title.orEmpty(), maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) } },
             )
         },
     ) { padding ->
@@ -84,13 +88,13 @@ fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> 
                     AudiobookCover(book.coverPath, book.title, Modifier.width(140.dp).alpha(if (loaded.missing) 0.4f else 1f))
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(book.title, style = MaterialTheme.typography.titleLarge)
-                        Text(book.author.ifBlank { UNKNOWN_AUTHOR }, style = MaterialTheme.typography.bodyMedium)
+                        Text(authorOf(book.author), style = MaterialTheme.typography.bodyMedium)
                         if (book.narrator.isNotBlank()) {
-                            Text("Read by ${book.narrator}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.audiobooks_read_by, book.narrator), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         Text(formatTime(loaded.progress.durationMs), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         if (loaded.missing) {
-                            Text("Missing: its files aren't on this phone", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.error)
+                            Text(stringResource(R.string.audiobooks_missing_files), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.error)
                         }
                     }
                 }
@@ -101,9 +105,9 @@ fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> 
                     val left = (loaded.progress.durationMs - loaded.progress.positionMs).coerceAtLeast(0L)
                     Text(
                         when (loaded.listening) {
-                            Listening.FINISHED -> "Finished"
-                            Listening.UNPLAYED -> "Not started"
-                            Listening.IN_PROGRESS -> "${(loaded.fraction * 100).toInt()}% · ${formatTime(left)} left"
+                            Listening.FINISHED -> stringResource(R.string.audiobooks_finished)
+                            Listening.UNPLAYED -> stringResource(R.string.audiobooks_not_started)
+                            Listening.IN_PROGRESS -> stringResource(R.string.audiobooks_percent_left, (loaded.fraction * 100).toInt(), formatTime(left))
                         },
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -111,20 +115,20 @@ fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> 
             }
             item {
                 Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Button(onClick = { vm.play(book.id) }, enabled = loaded.playable) { Text(loaded.playLabel) }
+                    Button(onClick = { vm.play(book.id) }, enabled = loaded.playable) { Text(stringResource(loaded.playLabel)) }
                     val finished = loaded.listening == Listening.FINISHED
                     OutlinedButton(onClick = { vm.setFinished(book.id, !finished) }, enabled = loaded.chapters.isNotEmpty()) {
-                        Text(if (finished) "Mark as unfinished" else "Mark as finished")
+                        Text(stringResource(if (finished) R.string.audiobooks_mark_unfinished else R.string.audiobooks_mark_finished))
                     }
                 }
             }
             if (download != null && remove != null) {
                 item(key = "download") {
-                    DownloadControls(book.title, download, loaded.filesDone, loaded.filesTotal, "chapters", onRemove = remove)
+                    DownloadControls(book.title, download, loaded.filesDone, loaded.filesTotal, DownloadUnit.CHAPTERS, onRemove = remove)
                 }
             }
             if (book.description.isNotBlank()) item { Description(book.description) }
-            item { SectionTitle("Chapters") }
+            item { SectionTitle(stringResource(R.string.player_chapters)) }
             items(loaded.chapters, key = { "chapter:${it.ordinal}" }) { chapter ->
                 val current = chapter.ordinal == loaded.currentChapter
                 ListItem(
@@ -133,7 +137,7 @@ fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> 
                     leadingContent = { Text("${chapter.ordinal + 1}", style = MaterialTheme.typography.labelLarge.readout) },
                     headlineContent = {
                         Text(
-                            chapter.title.ifBlank { "Chapter ${chapter.ordinal + 1}" }, maxLines = 2, overflow = TextOverflow.Ellipsis,
+                            chapterName(chapter.title, chapter.ordinal).resolve(), maxLines = 2, overflow = TextOverflow.Ellipsis,
                             fontWeight = if (current) FontWeight.Bold else null,
                             color = if (current) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                         )
@@ -142,11 +146,11 @@ fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> 
                 )
             }
             item { HorizontalDivider(Modifier.padding(top = 8.dp)) }
-            item { SectionTitle("Bookmarks") }
+            item { SectionTitle(stringResource(R.string.player_bookmarks)) }
             if (loaded.bookmarks.isEmpty()) {
                 item {
                     Text(
-                        "No bookmarks yet. Add them from the player.", style = MaterialTheme.typography.bodyMedium,
+                        stringResource(R.string.audiobooks_no_bookmarks), style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     )
                 }
@@ -160,8 +164,8 @@ fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> 
                     },
                     trailingContent = {
                         Row {
-                            IconButton(onClick = { editing = mark }) { Icon(Icons.Filled.Edit, contentDescription = "Edit note") }
-                            IconButton(onClick = { deleting = mark }) { Icon(Icons.Filled.Delete, contentDescription = "Delete bookmark ${mark.title}") }
+                            IconButton(onClick = { editing = mark }) { Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.audiobooks_edit_note)) }
+                            IconButton(onClick = { deleting = mark }) { Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.player_delete_bookmark, mark.title)) }
                         }
                     },
                 )
@@ -173,7 +177,7 @@ fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> 
     }
     deleting?.let { mark ->
         ConfirmDialog(
-            title = "Delete bookmark?", message = mark.title, confirm = "Delete",
+            title = stringResource(R.string.audiobooks_delete_bookmark), message = mark.title, confirm = stringResource(R.string.common_delete),
             onConfirm = { vm.deleteBookmark(mark) }, onDismiss = { deleting = null },
         )
     }
@@ -211,9 +215,9 @@ private fun NoteDialog(initial: String, onSave: (String) -> Unit, onDismiss: () 
     var note by rememberSaveable { mutableStateOf(initial) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Note") },
-        text = { OutlinedTextField(note, { note = it }, label = { Text("Note") }, minLines = 3) },
-        confirmButton = { TextButton(onClick = { onSave(note) }) { Text("Save") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        title = { Text(stringResource(R.string.audiobooks_note)) },
+        text = { OutlinedTextField(note, { note = it }, label = { Text(stringResource(R.string.audiobooks_note)) }, minLines = 3) },
+        confirmButton = { TextButton(onClick = { onSave(note) }) { Text(stringResource(R.string.audiobooks_save)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }

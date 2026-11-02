@@ -1,7 +1,12 @@
 package app.granger.sources
 
+import androidx.annotation.PluralsRes
+import androidx.annotation.StringRes
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.catalog.PackEntry
 import app.granger.core.library.SearchText
+import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -30,7 +35,7 @@ data class PackGroup(
     fun flavour(id: String): PackEntry? = flavours.firstOrNull { it.id == id }
 }
 
-/** The Kiwix list's packs, grouped and in plain words (Plan KB Decisions 8 and 9). Pure. */
+/** The Kiwix list's packs, grouped and in plain words (Plan KB Decisions 8 and 9). Pure: its words are [UiText]. */
 object KiwixList {
     /** Flavours in the order they're offered: with pictures, without, mini, then an unflavoured ZIM. */
     private val FLAVOUR_ORDER = listOf("maxi", "nopic", "mini", "")
@@ -51,39 +56,46 @@ object KiwixList {
         return suffix?.takeIf { it in FLAVOURS }.orEmpty()
     }
 
-    const val WITH_PICTURES = "With pictures"
-    const val NO_PICTURES = "No pictures"
-    const val MINI = "Mini (intro paragraphs only)"
-
-    /** What a flavour is called on a row: [WITH_PICTURES], [NO_PICTURES], [MINI]; "Standard" for an unflavoured ZIM. */
-    fun flavourLabel(flavour: String): String = when (flavour) {
-        "maxi" -> WITH_PICTURES
-        "nopic" -> NO_PICTURES
-        "mini" -> MINI
-        else -> "Standard"
-    }
+    /** What a flavour is called on a row: With pictures, No pictures, Mini; Standard for an unflavoured ZIM. */
+    fun flavourLabel(flavour: String): UiText = UiText.Res(
+        when (flavour) {
+            "maxi" -> R.string.sources_flavour_with_pictures
+            "nopic" -> R.string.sources_flavour_no_pictures
+            "mini" -> R.string.sources_flavour_mini
+            else -> R.string.sources_flavour_standard
+        },
+    )
 
     /** [entry]'s flavour as a row says it. */
-    fun flavourLabel(entry: PackEntry): String = flavourLabel(flavourOf(entry))
+    fun flavourLabel(entry: PackEntry): UiText = flavourLabel(flavourOf(entry))
 
     /**
      * Each of [group]'s flavours as its choice says it, by id, no two the same (Plan KB walkthrough 2): the flavour, and
      * where two share one, what else differs: the month updated, the language, the title, else the id.
      */
-    fun flavourLabels(group: PackGroup): Map<String, String> {
+    fun flavourLabels(group: PackGroup): Map<String, UiText> {
         val labels = group.flavours.associate { it.id to flavourLabel(it) }.toMutableMap()
-        val distinctions = listOf<(PackEntry) -> String>(
-            { updated(it.snapshotDate) },
-            { e -> e.language.split(',').joinToString(", ") { languageName(it) } },
-            { it.title },
-            { it.id },
+        val distinctions = listOf<(PackEntry) -> UiText>(
+            { updated(it.snapshotDate) ?: UiText.Raw("") },
+            { e -> UiText.Raw(e.language.split(',').joinToString(", ") { languageName(it) }) },
+            { UiText.Raw(it.title) },
+            { UiText.Raw(it.id) },
         )
         for ((label, same) in group.flavours.groupBy { labels.getValue(it.id) }) {
             if (same.size < 2) continue
             val by = distinctions.firstOrNull { d -> same.map(d).distinct().size == same.size } ?: distinctions.last()
-            for (entry in same) labels[entry.id] = "$label · ${by(entry)}"
+            for (entry in same) labels[entry.id] = dotted(label, by(entry))
         }
         return labels
+    }
+
+    /** Two parts of a line with a dot between: "No pictures · March 2026". */
+    fun dotted(a: Any, b: Any): UiText = UiText.Res(R.string.sources_dotted, a, b)
+
+    /** [parts] in a line, a dot between each; blank parts left out. */
+    fun dotted(parts: List<UiText>): UiText {
+        val shown = parts.filterNot { it is UiText.Raw && it.text.isBlank() }
+        return shown.drop(1).fold(shown.firstOrNull() ?: UiText.Raw("")) { line, part -> dotted(line, part) }
     }
 
     /**
@@ -117,24 +129,50 @@ object KiwixList {
 
     // --- Sets (Plan WF) ---
 
-    /** A set's name and line, by set id; a set this doesn't know takes its slices' title before the colon. */
+    /**
+     * The English sets' lines as resources, so the Spanish app has them in Spanish (the catalog writes no Spanish copy
+     * for an English set). A set this doesn't know takes its catalog copy (Plan L3).
+     */
     private val SET_TEXT = mapOf(
-        "wikipedia_en" to ("Wikipedia" to "The free encyclopedia, from 100 essential articles to all of it."),
-        "wikivoyage_en" to ("Wikivoyage" to "The free travel guide, from Europe to the whole world."),
+        "wikipedia_en" to ("Wikipedia" to R.string.sources_set_wikipedia),
+        "wikivoyage_en" to ("Wikivoyage" to R.string.sources_set_wikivoyage),
     )
 
-    fun setTitle(setId: String, entries: List<PackEntry>): String =
-        SET_TEXT[setId]?.first ?: entries.firstOrNull()?.title?.substringBefore(": ").orEmpty()
+    /** The app's language: catalog copy is picked by it (Plan L3), as [languageName] names languages in it. */
+    private fun appLanguage(): String = Locale.getDefault().language
 
-    fun setDescription(setId: String, entries: List<PackEntry>): String =
-        SET_TEXT[setId]?.second ?: entries.maxByOrNull { it.setRank }?.description.orEmpty()
+    /** [entry]'s copy in the app's language, when the catalog has one. */
+    private fun copy(entry: PackEntry): app.granger.core.catalog.Copy? = entry.i18n[app.granger.core.catalog.Languages.normalise(appLanguage())]
+
+    /**
+     * A set's name (Plan L3): the catalog's copy in the app's language ("Wikipedia in Spanish" for an English reader),
+     * else its own name ("Wikipedia en español"), else (older catalogs) the English sets' names, else its slices' title
+     * before the colon.
+     */
+    fun setTitle(setId: String, entries: List<PackEntry>): String =
+        entries.firstNotNullOfOrNull { copy(it)?.setTitle?.ifBlank { null } }
+            ?: entries.firstNotNullOfOrNull { it.setTitle.ifBlank { null } }
+            ?: SET_TEXT[setId]?.first ?: entries.firstOrNull()?.title?.substringBefore(": ").orEmpty()
+
+    /** A set's line: the catalog's copy in the app's language, else the English sets' resources, else the catalog's own. */
+    fun setDescription(setId: String, entries: List<PackEntry>): UiText =
+        entries.firstNotNullOfOrNull { copy(it)?.setDescription?.ifBlank { null } }?.let { UiText.Raw(it) }
+            ?: SET_TEXT[setId]?.second?.let { UiText.Res(it) }
+            ?: entries.firstNotNullOfOrNull { it.setDescription.ifBlank { null } }?.let { UiText.Raw(it) }
+            ?: UiText.Raw(entries.maxByOrNull { it.setRank }?.description.orEmpty())
+
+    /** A slice's label in the app's language: "Best 50,000 articles" for an English reader of Spanish Top. */
+    fun label(entry: PackEntry): String = copy(entry)?.setLabel?.ifBlank { null } ?: entry.setLabel
+
+    /** An item's title in the app's language: a pack's curated copy (Plan L3), else the catalog's own. */
+    fun title(item: app.granger.core.catalog.CatalogItem): String = (item as? PackEntry)?.title(appLanguage()) ?: item.title
 
     /** One slice of a set's row: its ZIM name, rank, label and flavours (with pictures first). */
     data class Slice(val zimName: String, val rank: Int, val label: String, val entries: List<PackEntry>)
 
     /** [group]'s slices, smallest first. */
     fun slices(group: PackGroup): List<Slice> = group.flavours.groupBy { it.zimName }.values
-        .map { e -> Slice(e.first().zimName, e.first().setRank, e.first().setLabel, e.sortedBy(::flavourRank)) }
+        .map { e -> Slice(e.first().zimName, e.first().setRank, label(e.first()), e.sortedBy(::flavourRank)) }
         .sortedBy { it.rank }
 
     /** The pictures choice a slice entry is: its flavour, an unflavoured slice (the 100) counting as with pictures. */
@@ -144,32 +182,44 @@ object KiwixList {
     fun entryFor(slice: Slice, pictures: String): PackEntry =
         slice.entries.firstOrNull { picturesOf(it) == pictures } ?: slice.entries.first()
 
-    /** A slice's name in a sentence: "Best 50,000", "Top 1 million", "Everything". */
-    fun shortLabel(label: String): String = label.removeSuffix(" articles")
+    /** A slice's name in a sentence: "Best 50,000", "Top 1 million", "Everything"; "Los 50.000 mejores" in Spanish. */
+    fun shortLabel(label: String): String = label.removeSuffix(" articles").removeSuffix(" artículos")
+
+    /** [entry]'s slice name in a sentence, in the app's language. */
+    fun shortLabel(entry: PackEntry): String = shortLabel(label(entry))
 
     /** Whether [slice] (of rank [slice].setRank, the set's top rank [topRank]) holds [subject]'s articles. */
     fun covers(slice: PackEntry, subject: PackEntry, topRank: Int): Boolean =
         slice.setRank >= topRank || (subject.adds[slice.zimName]?.let { it < app.granger.core.catalog.COVERED_SHARE } ?: false)
 
     /** What a subject's row says about [slice] (Plan WF Decision 4): its [text], and whether it is [covered] already. */
-    data class Adds(val text: String, val covered: Boolean)
+    data class Adds(val text: UiText, val covered: Boolean)
 
     /**
      * "Adds about 69,600 articles to your Best 50,000 (95% new)" against the [installed] slice, or "… to Top 1 million …"
      * against a chosen one; "Already inside your Wikipedia" when the slice covers it. Null when the catalog doesn't say.
      */
     fun adds(subject: PackEntry, slice: PackEntry, topRank: Int, setTitle: String, installed: Boolean): Adds? {
-        val name = shortLabel(slice.setLabel)
+        val name = shortLabel(slice)
         if (covers(slice, subject, topRank)) {
-            return Adds(if (installed) "Already inside your $setTitle" else "Already inside $name", covered = installed)
+            return Adds(
+                if (installed) UiText.Res(R.string.sources_adds_inside_your, setTitle) else UiText.Res(R.string.sources_adds_inside, name),
+                covered = installed,
+            )
         }
         val share = subject.adds[slice.zimName] ?: return null
-        val your = if (installed) "your " else ""
         // Half rounds down: the shares are stored to three places, so 0.955 is a 95.499 % measured.
-        val percent = "${ceil(share * 100 - 0.5).toInt().coerceIn(1, 100)}% new"
-        if (subject.articles <= 0) return Adds("Adds to $your$name ($percent)", false)
-        val count = String.format(Locale.ENGLISH, "%,d", roundCount((subject.articles * share).roundToLong()))
-        return Adds("Adds about $count articles to $your$name ($percent)", false)
+        val percent = ceil(share * 100 - 0.5).toInt().coerceIn(1, 100)
+        if (subject.articles <= 0) {
+            return Adds(UiText.Res(if (installed) R.string.sources_adds_to_your else R.string.sources_adds_to, name, percent), false)
+        }
+        val n = roundCount((subject.articles * share).roundToLong())
+        val count = NumberFormat.getIntegerInstance(Locale.getDefault()).format(n)
+        val plural = n.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+        return Adds(
+            UiText.Plural(if (installed) R.plurals.sources_adds_about_your else R.plurals.sources_adds_about, plural, count, name, percent),
+            false,
+        )
     }
 
     /** A count as a line says it: to the nearest 10 under 1,000, 100 under 10,000, else to three figures. */
@@ -193,7 +243,7 @@ object KiwixList {
     fun groupTitle(group: PackGroup): String {
         group.setId?.let { return setTitle(it, group.flavours) }
         val named = group.flavours.firstOrNull { flavourOf(it) == "maxi" } ?: group.default
-        return named.title.replace(FLAVOUR_WORDS, "").trim()
+        return title(named).replace(FLAVOUR_WORDS, "").trim()
     }
 
     private val FLAVOUR_WORDS = Regex("\\s*\\((no|with) pictures\\)\\s*$", RegexOption.IGNORE_CASE)
@@ -204,20 +254,26 @@ object KiwixList {
 
     // --- Folded families (Decision 10) ---
 
-    /** A big family the Kiwix list shows as one row, "[label] · 243 [noun]", opening its own A–Z list. */
-    data class Folded(val family: String, val label: String, val noun: String)
+    /**
+     * A big family the Kiwix list shows as one row, "[label] · 243 [noun]", opening its own A–Z list. [words] are what a
+     * search finds it by, in English like the catalog's own words (L3).
+     */
+    data class Folded(val family: String, @StringRes val label: Int, @PluralsRes val noun: Int, val words: String)
 
     /** The families folded away; a new row here folds another (Plan KB Decision 10). */
     val FOLDED = listOf(
-        Folded("devdocs", "Developer docs", "packs"),
-        Folded("stack_exchange", "Q&A sites", "packs"),
-        Folded("maps", "Maps", "regions"),
+        Folded("devdocs", R.string.sources_family_devdocs, R.plurals.sources_packs, "Developer docs"),
+        Folded("stack_exchange", R.string.sources_family_stack_exchange, R.plurals.sources_packs, "Q&A sites"),
+        Folded("maps", R.string.sources_family_maps, R.plurals.sources_regions, "Maps"),
     )
 
     fun folded(family: String): Folded? = FOLDED.firstOrNull { it.family == family }
 
+    /** A folded family's count: "243 packs". */
+    fun foldedCount(folded: Folded, count: Int): UiText = UiText.Plural(folded.noun, count, count)
+
     /** A folded family's row text: "Developer docs · 243 packs". */
-    fun foldedText(folded: Folded, count: Int): String = "${folded.label} · $count ${folded.noun}"
+    fun foldedText(folded: Folded, count: Int): UiText = dotted(UiText.Res(folded.label), foldedCount(folded, count))
 
     // --- Search (Decision 11) ---
 
@@ -247,44 +303,42 @@ object KiwixList {
             add(entry.zimName)
             add(entry.category)
             add(entry.family)
-            folded(entry.family)?.let { add(it.label) }
+            folded(entry.family)?.let { add(it.words) }
             entry.language.split(',').forEach { add(languageName(it)) }
         }
     }.joinToString(" ")
 
     // --- Plain words (Decision 9) ---
 
-    /** Languages ISO 639-3 doesn't name the same way as Java's 639-1 table; the rest come from [Locale]. */
-    private val LANGUAGE_NAMES = mapOf(
-        "zho" to "Chinese", "fas" to "Persian", "bod" to "Tibetan", "nhe" to "Nahuatl", "ces" to "Czech",
-        "deu" to "German", "fra" to "French", "nld" to "Dutch", "ell" to "Greek", "ron" to "Romanian", "slk" to "Slovak",
-        "isl" to "Icelandic", "cym" to "Welsh", "mri" to "Maori", "msa" to "Malay", "sqi" to "Albanian", "hye" to "Armenian",
-        "eus" to "Basque", "kat" to "Georgian", "mkd" to "Macedonian", "mya" to "Burmese",
+    /** ISO 639-3 codes [Locale] names only by another code (its 639-1 one, or 639-2's for Nahuatl). */
+    private val LANGUAGE_CODES = mapOf(
+        "zho" to "zh", "fas" to "fa", "bod" to "bo", "nhe" to "nah", "ces" to "cs",
+        "deu" to "de", "fra" to "fr", "nld" to "nl", "ell" to "el", "ron" to "ro", "slk" to "sk",
+        "isl" to "is", "cym" to "cy", "mri" to "mi", "msa" to "ms", "sqi" to "sq", "hye" to "hy",
+        "eus" to "eu", "kat" to "ka", "mkd" to "mk", "mya" to "my",
     )
 
-    /** One language code's English name: "eng" → "English"; the code itself when nothing names it. */
+    /** One language code's name in the phone's language: "eng" → "English"; the code itself when nothing names it. */
     fun languageName(code: String): String {
         val c = code.trim().lowercase()
         if (c.isEmpty()) return ""
-        LANGUAGE_NAMES[c]?.let { return it }
-        val name = Locale(c).getDisplayLanguage(Locale.ENGLISH)
+        val name = Locale(LANGUAGE_CODES[c] ?: c).getDisplayLanguage(Locale.getDefault())
         return if (name.isBlank() || name.equals(c, ignoreCase = true)) c else name
     }
 
     /** "English", "English, Russian", or with more than three "English, French, German and 8 more". */
-    fun languages(codes: String): String {
+    fun languages(codes: String): UiText {
         val names = codes.split(',').map(::languageName).filter { it.isNotEmpty() }.distinct()
-        return if (names.size <= 3) names.joinToString(", ") else names.take(3).joinToString(", ") + " and ${names.size - 3} more"
+        return if (names.size <= 3) UiText.Raw(names.joinToString(", "))
+        else UiText.Plural(R.plurals.sources_languages_more, names.size - 3, names.take(3).joinToString(", "), names.size - 3)
     }
 
-    /** "Updated March 2026" from a snapshot date ("2026-03-05"); the date as it is when it won't parse. */
-    fun updated(snapshotDate: String): String = try {
-        "Updated " + LocalDate.parse(snapshotDate.take(10)).format(MONTH_YEAR)
+    /** "Updated March 2026" from a snapshot date ("2026-03-05"); the date as it is when it won't parse; null when blank. */
+    fun updated(snapshotDate: String): UiText? = try {
+        UiText.Res(R.string.sources_updated, LocalDate.parse(snapshotDate.take(10)).format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())))
     } catch (_: DateTimeParseException) {
-        if (snapshotDate.isBlank()) "" else "Updated $snapshotDate"
+        if (snapshotDate.isBlank()) null else UiText.Res(R.string.sources_updated, snapshotDate)
     }
-
-    private val MONTH_YEAR = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH)
 
     private val CC = Regex("^(CC BY(?:-(?:SA|NC|ND))*)(?:\\s+[\\d.]+)?$", RegexOption.IGNORE_CASE)
 
@@ -292,20 +346,21 @@ object KiwixList {
      * A licence's short name for a row: "CC BY-SA" for "CC BY-SA 4.0", "Open licences" for the mixed and per-project
      * ones, "Public domain", "Licence not stated"; the full string goes in the row's details.
      */
-    fun licence(full: String): String {
+    fun licence(full: String): UiText {
         val text = full.trim()
         val lower = text.lowercase()
-        CC.matchEntire(text)?.let { return it.groupValues[1].uppercase() }
+        // The licences' own names (CC BY-SA, CC0, ODbL, GFDL) are the same in every language.
+        CC.matchEntire(text)?.let { return UiText.Raw(it.groupValues[1].uppercase()) }
         return when {
-            text.isEmpty() || lower.startsWith("not stated") -> "Licence not stated"
-            lower.startsWith("public domain") || lower.startsWith("public information") -> "Public domain"
-            lower.startsWith("open licen") || lower.startsWith("mixed open licen") -> "Open licences"
-            lower.startsWith("cc0") -> "CC0"
-            lower.startsWith("odbl") -> "ODbL"
-            lower.startsWith("gfdl") -> "GFDL"
-            lower.startsWith("cc by") -> "CC licences"
-            text.length <= 24 -> text
-            else -> "See licence"
+            text.isEmpty() || lower.startsWith("not stated") -> UiText.Res(R.string.sources_licence_not_stated)
+            lower.startsWith("public domain") || lower.startsWith("public information") -> UiText.Res(R.string.sources_licence_public_domain)
+            lower.startsWith("open licen") || lower.startsWith("mixed open licen") -> UiText.Res(R.string.sources_licence_open)
+            lower.startsWith("cc0") -> UiText.Raw("CC0")
+            lower.startsWith("odbl") -> UiText.Raw("ODbL")
+            lower.startsWith("gfdl") -> UiText.Raw("GFDL")
+            lower.startsWith("cc by") -> UiText.Res(R.string.sources_licence_cc)
+            text.length <= 24 -> UiText.Raw(text)
+            else -> UiText.Res(R.string.sources_licence_see)
         }
     }
 
@@ -324,8 +379,10 @@ object KiwixList {
     private const val KIWIX_DOWNLOADS = "https://download.kiwix.org/zim/"
     private const val KIWIX_LIBRARY = "https://library.kiwix.org/content/"
 
-    fun details(entry: PackEntry): String = listOf(
-        languages(entry.language), updated(entry.snapshotDate),
-        licence(entry.license).let { if (entry.nonCommercial) "$it · provided by Kiwix" else it },
-    ).filter { it.isNotBlank() }.joinToString(" · ")
+    fun details(entry: PackEntry): UiText = dotted(
+        listOfNotNull(
+            languages(entry.language), updated(entry.snapshotDate),
+            licence(entry.license).let { if (entry.nonCommercial) UiText.Res(R.string.sources_licence_kiwix, it) else it },
+        ),
+    )
 }

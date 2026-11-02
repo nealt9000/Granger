@@ -3,6 +3,8 @@ package app.granger.ebook
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.ui.res.stringResource
+import app.granger.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -49,10 +51,6 @@ import app.granger.theme.readout
 /** The swatch for a highlight colour name. */
 internal fun highlightColor(name: String): Color = Color(HighlightColors.argb(name))
 
-internal const val CANT_FIND = "Can't find this passage in the current edition"
-
-/** What Contents says for a PDF with no outline: its own contents page, if it has one, is among its pages. */
-internal const val NO_PDF_CONTENTS = "This PDF has no contents list of its own. If it has a contents page, it's in the pages."
 
 /** The stored locator's share of the book, as a percent; null when it can't be read. */
 internal fun markPercent(mark: BookAnnotation): Int? = try {
@@ -90,16 +88,16 @@ fun ContentsPanel(
             Column(Modifier.windowInsetsPadding(SidePanelInsets)) {
                 TabRow(selectedTabIndex = tab, containerColor = MaterialTheme.colorScheme.surface) {
                     // A PDF can't be highlighted (Readium's PDF navigator has no selection), so it has no Highlights tab.
-                    listOf("Contents", "Bookmarks", "Highlights").take(if (state.isPdf) 2 else 3).forEachIndexed { i, label ->
-                        Tab(selected = tab == i, onClick = { tab = i }, text = { Text(label, maxLines = 1) })
+                    listOf(R.string.ebook_tab_contents, R.string.ebook_tab_bookmarks, R.string.ebook_tab_highlights).take(if (state.isPdf) 2 else 3).forEachIndexed { i, label ->
+                        Tab(selected = tab == i, onClick = { tab = i }, text = { Text(stringResource(label), maxLines = 1) })
                     }
                 }
                 when (tab) {
-                    0 -> if (state.toc.isEmpty()) Empty(if (state.isPdf) NO_PDF_CONTENTS else "This book has no contents list.") else LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
+                    0 -> if (state.toc.isEmpty()) Empty(stringResource(if (state.isPdf) R.string.ebook_no_pdf_contents else R.string.ebook_no_contents)) else LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
                         itemsIndexed(state.toc) { i, row ->
                             val current = i == state.currentTocIndex
                             Text(
-                                row.title.ifEmpty { "Untitled" },
+                                row.title.ifEmpty { stringResource(R.string.ebook_untitled) },
                                 color = if (current) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.fillMaxWidth().clickable { onGoTo(row.href) }
@@ -107,17 +105,17 @@ fun ContentsPanel(
                             )
                         }
                     }
-                    1 -> if (state.bookmarks.isEmpty()) Empty("No bookmarks yet. Tap the star on the page you want to keep.") else LazyColumn {
+                    1 -> if (state.bookmarks.isEmpty()) Empty(stringResource(R.string.ebook_no_bookmarks)) else LazyColumn {
                         items(state.bookmarks, key = { it.id }) { mark ->
                             Column(Modifier.fillMaxWidth().clickable { onMark(mark) }.padding(horizontal = 16.dp, vertical = 12.dp)) {
-                                Text(mark.text.ifEmpty { "Bookmark" }, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text(mark.text.ifEmpty { stringResource(R.string.ebook_bookmark) }, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                 markPercent(mark)?.let {
-                                    Text("$it%", style = MaterialTheme.typography.labelMedium.readout, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text(stringResource(R.string.ebook_percent, it), style = MaterialTheme.typography.labelMedium.readout, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
                         }
                     }
-                    else -> if (state.highlights.isEmpty()) Empty("No highlights yet. Select text in the book to highlight it.") else LazyColumn {
+                    else -> if (state.highlights.isEmpty()) Empty(stringResource(R.string.ebook_no_highlights)) else LazyColumn {
                         items(state.highlights, key = { it.id }) { mark ->
                             val lost = mark.id in state.unplaceable
                             Row(
@@ -129,7 +127,7 @@ fun ContentsPanel(
                                 Column {
                                     Text(mark.text, maxLines = 3, overflow = TextOverflow.Ellipsis)
                                     if (lost) {
-                                        Text(CANT_FIND, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                                        Text(stringResource(R.string.ebook_cant_find), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                                     }
                                     if (mark.note.isNotBlank()) {
                                         Text(mark.note, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

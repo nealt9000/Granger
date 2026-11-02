@@ -9,9 +9,13 @@ package app.granger.core.library
 object GutenbergNames {
     const val PROVIDER = "Project Gutenberg"
 
-    /** The two everything-packs, whose descriptions are about the producer, not a subject. */
+    /**
+     * The everything-packs, whose descriptions are about the producer, not a subject: named in their own language, as a
+     * Gutenberg subject is named in its pack's (Plan L3: the Spanish one in Spanish).
+     */
     private val EVERYTHING = mapOf(
         "gutenberg_en_all" to "Every English book",
+        "gutenberg_es_all" to "Todos los libros en español",
         "gutenberg_mul_all" to "Every book, all languages",
     )
 

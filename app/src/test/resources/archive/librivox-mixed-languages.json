@@ -1,0 +1,55 @@
+{
+ "books": [
+  {
+   "id": "9001",
+   "title": "Don Quijote",
+   "language": "Spanish",
+   "num_sections": "13",
+   "totaltime": "4:09:29",
+   "totaltimesecs": 14969,
+   "authors": [
+    {
+     "id": "146",
+     "first_name": "H. G.",
+     "last_name": "Wells",
+     "dob": "1866",
+     "dod": "1946"
+    }
+   ]
+  },
+  {
+   "id": "9002",
+   "title": "Don Quixote",
+   "language": "English",
+   "num_sections": "13",
+   "totaltime": "4:09:29",
+   "totaltimesecs": 14969,
+   "authors": [
+    {
+     "id": "146",
+     "first_name": "H. G.",
+     "last_name": "Wells",
+     "dob": "1866",
+     "dod": "1946"
+    }
+   ]
+  },
+  {
+   "id": "9003",
+   "title": "Don Quichotte",
+   "language": "French",
+   "num_sections": "13",
+   "totaltime": "4:09:29",
+   "totaltimesecs": 14969,
+   "authors": [
+    {
+     "id": "146",
+     "first_name": "H. G.",
+     "last_name": "Wells",
+     "dob": "1866",
+     "dod": "1946"
+    }
+   ]
+  }
+ ]
+}

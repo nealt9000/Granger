@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.content.res.Resources
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
@@ -135,7 +136,7 @@ internal class DownloadNotifications(private val context: Context) {
     private val manager = context.getSystemService(NotificationManager::class.java)
 
     init {
-        manager.createNotificationChannel(NotificationChannel(CHANNEL, "Downloads", NotificationManager.IMPORTANCE_LOW))
+        manager.createNotificationChannel(NotificationChannel(CHANNEL, context.getString(R.string.downloads_channel), NotificationManager.IMPORTANCE_LOW))
     }
 
     fun foregroundInfo(summary: QueueSummary) =
@@ -155,7 +156,7 @@ internal class DownloadNotifications(private val context: Context) {
             PendingIntent.getActivity(context, 0, downloadsIntent(it), PendingIntent.FLAG_IMMUTABLE)
         }
         val pause = PendingIntent.getBroadcast(context, 0, pauseIntent(context), PendingIntent.FLAG_IMMUTABLE)
-        val (title, text) = notificationText(summary)
+        val (title, text) = notificationText(context.resources, summary)
         val permille = (summary.fraction * 1000).toInt()
         return Notification.Builder(context, CHANNEL)
             .setSmallIcon(android.R.drawable.stat_sys_download)
@@ -163,7 +164,7 @@ internal class DownloadNotifications(private val context: Context) {
             .setContentText(text)
             .setProgress(1000, permille, summary.bytes <= 0)
             .setContentIntent(open)
-            .addAction(Notification.Action.Builder(null, PAUSE, pause).build())
+            .addAction(Notification.Action.Builder(null, context.getString(R.string.downloads_pause), pause).build())
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .build()
@@ -174,18 +175,17 @@ internal class DownloadNotifications(private val context: Context) {
 
         /** The queue's one notification. */
         const val NOTIFICATION_ID = 0x6772616e
-
-        const val PAUSE = "Pause"
     }
 }
 
 /** "Downloading Wikipedia Top" over "3 of 14 · about 25 min left". */
-fun notificationText(summary: QueueSummary): Pair<String, String> {
-    val title = summary.current?.title?.let { "Downloading $it" } ?: "Downloading"
+fun notificationText(res: Resources, summary: QueueSummary): Pair<String, String> {
+    val title = summary.current?.title?.let { res.getString(R.string.downloads_notification_title, it) }
+        ?: res.getString(R.string.downloads_notification_title_plain)
     val parts = mutableListOf<String>()
-    if (summary.files > 0) parts += "${summary.filesDone} of ${summary.files}"
-    summary.timeLeftMillis?.let { parts += "${QueueText.timeLeft(it)} left" }
-    return title to parts.joinToString(" · ").ifEmpty { "Starting…" }
+    if (summary.files > 0) parts += res.getString(R.string.downloads_notification_files, summary.filesDone, summary.files)
+    summary.timeLeftMillis?.let { parts += res.getString(R.string.downloads_notification_time_left, QueueText.timeLeft(res, it)) }
+    return title to parts.joinToString(" · ").ifEmpty { res.getString(R.string.downloads_notification_starting) }
 }
 
 /** What the notification's Pause sends: [DownloadActionReceiver], inside the app only. */

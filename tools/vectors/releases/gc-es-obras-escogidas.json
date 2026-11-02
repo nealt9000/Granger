@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-obras-escogidas",
+ "kind": "book",
+ "fileName": "gc-es-obras-escogidas_2026-10-30.gvec",
+ "sizeBytes": 217398,
+ "sha256": "16ea6da45b7a0e2275db77529f673f902c901be9f5a6bd2637f7e25544536ca0",
+ "count": 739,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "9c41c62477566bb26a883afce43f20ded45f5bc6813fe2721f9a6171f82cb122",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-obras-escogidas_2026-10-30.gvec"
+}

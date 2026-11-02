@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-romancero-gitano",
+ "kind": "book",
+ "fileName": "gc-es-romancero-gitano_2026-10-30.gvec",
+ "sizeBytes": 25416,
+ "sha256": "f6a5ebb54654d317a012bc9f722c849fd6ede0d0e121d00b2aa3cf0f19027a34",
+ "count": 86,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "e77c2ecf2a9ef47ec28a997c3750a814d7bfb500b6fc41eb2e99299e5b5cf02f",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-romancero-gitano_2026-10-30.gvec"
+}

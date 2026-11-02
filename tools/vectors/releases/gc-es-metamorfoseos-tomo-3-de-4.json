@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-metamorfoseos-tomo-3-de-4",
+ "kind": "book",
+ "fileName": "gc-es-metamorfoseos-tomo-3-de-4_2026-10-30.gvec",
+ "sizeBytes": 70104,
+ "sha256": "de9a72d2f31a28c4d2f462e115bc33c522cd2eda464afc2d58a914d3be7f3b07",
+ "count": 238,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "967270ec565eb7e94f28feac20ef346f30d29269277bb1a7ce1439e82d37590e",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-metamorfoseos-tomo-3-de-4_2026-10-30.gvec"
+}

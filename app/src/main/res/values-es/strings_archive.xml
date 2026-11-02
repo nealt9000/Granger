@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="archive_title">Archive.org</string>
+    <string name="archive_disclaimer">El contenido de Archive.org lo ofrece Internet Archive. Granger no lo aloja ni responde por él.</string>
+    <string name="archive_unfiltered_note">Se muestra todo lo que archive.org ofrece abiertamente. Tú eres responsable de lo que descargas.</string>
+    <string name="archive_spoken_word_note">Archive.org fecha las grabaciones habladas por el texto, no por la grabación, así que Granger no puede saber cuáles son de dominio público. Las grabaciones de LibriVox lo son todas.</string>
+    <string name="archive_texts_note">Solo se muestran textos de dominio público: publicados en 1930 o antes.</string>
+    <string name="archive_recordings_note">Solo se muestran grabaciones de dominio público: publicadas antes de %1$d.</string>
+    <string name="archive_search_texts">Buscar textos en archive.org</string>
+    <string name="archive_search_audiobooks">Buscar audiolibros en archive.org</string>
+    <string name="archive_search_music">Buscar música en archive.org</string>
+    <string name="archive_tab_browse">Explorar</string>
+    <string name="archive_tab_installed">Descargado</string>
+    <string name="archive_librivox">LibriVox</string>
+    <string name="archive_show_everything">Mostrar todo</string>
+    <string name="archive_empty_installed">Aún no has descargado nada de archive.org.</string>
+    <string name="archive_empty_search">Nada coincide con esa búsqueda.</string>
+    <string name="archive_load_more">Cargar más</string>
+    <string name="archive_remove_title">¿Quitar %1$s?</string>
+    <string name="archive_remove_text_body">Se eliminará el archivo. Se conservan tu lugar y tus resaltados.</string>
+    <string name="archive_remove_audio_body">Se eliminarán sus archivos. Se conservan tu lugar y tus marcadores.</string>
+    <string name="archive_large_pdf">Este PDF pesa %1$s. ¿Descargarlo?</string>
+    <string name="archive_large_download">Esta descarga pesa %1$s. ¿Descargarla?</string>
+    <string name="archive_dont_ask_again">No volver a preguntar</string>
+    <string name="archive_download">Descargar</string>
+    <string name="archive_get_the_rest">Descargar el resto</string>
+
+    <string name="archive_offer_plain_text">Texto plano</string>
+    <string name="archive_offer_ocr">Texto OCR: puede tener errores</string>
+    <string name="archive_offer_ocr_pdf">Texto OCR: puede tener errores · PDF</string>
+    <string name="archive_borrow">Pedir prestado en archive.org</string>
+    <string name="archive_no_text">No hay texto para descargar</string>
+    <string name="archive_no_audio">No hay audio para descargar</string>
+    <plurals name="archive_tracks">
+        <item quantity="one">%1$d pista · %2$s</item>
+        <item quantity="many">%1$d pistas · %2$s</item>
+        <item quantity="other">%1$d pistas · %2$s</item>
+    </plurals>
+
+    <string name="archive_downloading_files">Descargando: %1$d de %2$d</string>
+    <string name="archive_get_pdf">Descargar PDF · %1$s</string>
+    <string name="archive_pdf_in_library">PDF en tu biblioteca</string>
+    <string name="archive_pdf_queued">PDF: en cola</string>
+    <string name="archive_pdf_downloading">PDF: descargando, %1$d%%</string>
+    <string name="archive_pdf_failed">PDF: falló</string>
+    <string name="archive_pdf_other">"PDF: "</string>
+    <string name="archive_view_on_site">Ver en archive.org</string>
+    <string name="archive_get_size">Descargar · %1$s</string>
+
+    <string name="archive_waiver_title">¿Mostrar todo lo de archive.org?</string>
+    <string name="archive_waiver_body">Granger es un navegador para archive.org. No aloja, revisa ni responde por nada de lo que hay allí, y mucho de eso todavía tiene derechos de autor. Tú eres responsable de tener derecho a descargar y usar lo que tomes.</string>
+    <string name="archive_waiver_accept">Acepto</string>
+
+    <string name="archive_no_storage">No hay almacenamiento disponible en este momento.</string>
+    <string name="archive_no_space">No hay espacio suficiente en %1$s para %2$s: libera %3$s.</string>
+    <string name="archive_over_cap">Con %1$s tus descargas llegarían a %2$s, por encima del límite de %3$s.</string>
+    <string name="archive_already_in_audiobooks">Esto ya está en tus audiolibros.</string>
+    <string name="archive_already_in_music">Esto ya está en tu música.</string>
+    <string name="archive_recording_too_new">Esta grabación no se publicó antes de %1$d. Activa Mostrar todo para descargarla.</string>
+    <string name="archive_nothing_to_download">No se puede descargar nada de este elemento.</string>
+    <string name="archive_not_public_domain">Este elemento no se publicó en 1930 o antes. Activa Mostrar todo para descargarlo.</string>
+    <string name="archive_spoken_word_get">Activa Mostrar todo para descargar grabaciones habladas de archive.org.</string>
+    <string name="archive_offline">No se pudo conectar con archive.org. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="archive_offer_epub_scan_pdf">EPUB hecho a partir de un escaneo · PDF</string>
+    <string name="archive_offer_comic">Cómic: sus páginas, para hacer zoom</string>
+
+    <plurals name="archive_offer_parts">
+        <item quantity="one">%2$s · %1$d parte</item>
+        <item quantity="many">%2$s · %1$d partes</item>
+        <item quantity="other">%2$s · %1$d partes</item>
+    </plurals>
+    <string name="archive_label_size">%1$s · %2$s</string>
+    <string name="archive_choose_parts">Elegir partes</string>
+    <string name="archive_get_all">Descargar todo</string>
+    <string name="archive_get_all_size">Descargar todo · %1$s</string>
+    <plurals name="archive_parts">
+        <item quantity="one">%d parte</item>
+        <item quantity="many">%d partes</item>
+        <item quantity="other">%d partes</item>
+    </plurals>
+    <string name="archive_find_part">Buscar una parte</string>
+    <string name="archive_part_queued">%1$s · en cola</string>
+    <string name="archive_part_downloading">%1$s · descargando, %2$d%%</string>
+    <string name="archive_part_stopped">%1$s · detenida: %2$s</string>
+    <string name="archive_part_in_library">%1$s · en tu biblioteca</string>
+    <string name="archive_large_part">Esta parte pesa %1$s. ¿Descargarla?</string>
+    <string name="archive_large_set">Este conjunto pesa %1$s. ¿Descargarlo?</string>
+    <plurals name="archive_large_parts">
+        <item quantity="one">Esta parte pesa %2$s. ¿Descargarla?</item>
+        <item quantity="many">Estas %1$d partes pesan %2$s. ¿Descargarlas?</item>
+        <item quantity="other">Estas %1$d partes pesan %2$s. ¿Descargarlas?</item>
+    </plurals>
+    <plurals name="archive_row_parts">
+        <item quantity="one">%1$d parte · %2$s</item>
+        <item quantity="many">%1$d partes · %2$s</item>
+        <item quantity="other">%1$d partes · %2$s</item>
+    </plurals>
+</resources>

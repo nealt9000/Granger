@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_page_moved">Esa página ya no está en este paquete.</string>
+    <string name="app_book_not_in_pack">No se pudo abrir este libro: no está en la lista de este paquete.</string>
+</resources>

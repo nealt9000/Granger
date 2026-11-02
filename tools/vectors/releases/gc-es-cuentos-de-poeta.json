@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-cuentos-de-poeta",
+ "kind": "book",
+ "fileName": "gc-es-cuentos-de-poeta_2026-10-30.gvec",
+ "sizeBytes": 74514,
+ "sha256": "c169e2e01674b4f4b938ed0ad2aaa36e974d96b1a4569b767269bf90b9d19c9b",
+ "count": 253,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "567d00ae5160a53b89ff7892bd23f2a9e6c654ac7041932f69b31f66bda15d04",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-cuentos-de-poeta_2026-10-30.gvec"
+}

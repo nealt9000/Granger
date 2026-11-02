@@ -1,5 +1,7 @@
 package app.granger.research
 
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.catalog.Catalog
 import app.granger.core.catalog.CatalogSource
 import app.granger.core.catalog.ModelEntry
@@ -39,12 +41,12 @@ class Librarian(
     }
 
     /** Queues what isn't on the phone, retries what stopped; a problem comes back as a sentence, else null. */
-    suspend fun get(): String? {
+    suspend fun get(): UiText? {
         val items = catalog.state.value.catalog?.let { models(it, dense) }.orEmpty()
         if (items.isEmpty()) return null
         val all = withContext(io) { volumes.list() }
         val volume = all.firstOrNull { it.root.path == prefs.volumePath } ?: all.firstOrNull()
-            ?: return "No storage is available right now."
+            ?: return UiText.Res(R.string.sources_no_storage)
         val records = downloads.records.first()
         for (item in items) {
             val record = records.firstOrNull { it.itemId == item.id && it.hash == item.sha256 }
@@ -54,8 +56,8 @@ class Librarian(
             }
             when (val result = downloads.enqueue(item, volume.root, prefs.wifiOnly)) {
                 EnqueueResult.Queued, EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> Unit
-                is EnqueueResult.NoSpace -> return "Not enough space on ${volume.label}: free up ${formatBytes(result.neededBytes)}."
-                is EnqueueResult.OverCap -> return "That would bring your downloads over the ${formatBytes(result.capBytes)} limit."
+                is EnqueueResult.NoSpace -> return UiText.Res(R.string.research_librarian_no_space, volume.label, formatBytes(result.neededBytes))
+                is EnqueueResult.OverCap -> return UiText.Res(R.string.research_librarian_over_cap, formatBytes(result.capBytes))
             }
         }
         return null

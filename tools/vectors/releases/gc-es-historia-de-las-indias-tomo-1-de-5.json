@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-historia-de-las-indias-tomo-1-de-5",
+ "kind": "book",
+ "fileName": "gc-es-historia-de-las-indias-tomo-1-de-5_2026-10-30.gvec",
+ "sizeBytes": 191820,
+ "sha256": "68d023f622cf55caee008ba67cb68fcb88d538e595be7e7596aea040077aac71",
+ "count": 652,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "3207e68bd7322297279757865eb6a3371a6c49e960e21ccf5ac2e37ba4c38b5a",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-historia-de-las-indias-tomo-1-de-5_2026-10-30.gvec"
+}

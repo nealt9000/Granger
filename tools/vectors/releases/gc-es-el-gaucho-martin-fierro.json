@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-el-gaucho-martin-fierro",
+ "kind": "book",
+ "fileName": "gc-es-el-gaucho-martin-fierro_2026-10-30.gvec",
+ "sizeBytes": 39822,
+ "sha256": "76ced672924d3e50904832202efe70ec76077e2aa8433fd5bf0f22daa83f226d",
+ "count": 135,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "44a2fb012b36bd8dee38e835c086d9ea4656c82106b72741f001cfa49a0b63b4",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-el-gaucho-martin-fierro_2026-10-30.gvec"
+}

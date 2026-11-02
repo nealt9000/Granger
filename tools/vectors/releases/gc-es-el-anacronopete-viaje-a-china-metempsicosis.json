@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-el-anacronopete-viaje-a-china-metempsicosis",
+ "kind": "book",
+ "fileName": "gc-es-el-anacronopete-viaje-a-china-metempsicosis_2026-10-30.gvec",
+ "sizeBytes": 241506,
+ "sha256": "0cb6b4a6cd0c66f9c73707c0cfc9c4cb561c03e5b67795a6da9c2c9ab142ce7c",
+ "count": 821,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "9d53586dba827b721ffcdd3b4422dfe88eba75b93c1d3042e449ec076bf7647a",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-el-anacronopete-viaje-a-china-metempsicosis_2026-10-30.gvec"
+}

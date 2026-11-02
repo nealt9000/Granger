@@ -80,8 +80,8 @@ class ListenTabsTest {
         assertThat(mediaMode(idle, SavedModes(null, null, PlayerMode.AUDIOBOOK), audiobooks = false)).isEqualTo(PlayerMode.MUSIC)
         assertThat(mediaMode(voice, SavedModes(null, null, null, lastWasVoice = true, lastMedia = PlayerMode.AUDIOBOOK), audiobooks = false))
             .isEqualTo(PlayerMode.MUSIC)
-        assertThat(tabTitle(ListenTab.MEDIA, PlayerMode.AUDIOBOOK)).isEqualTo("Audiobook")
-        assertThat(tabTitle(ListenTab.READER, PlayerMode.AUDIOBOOK)).isEqualTo("Reader")
+        assertThat(tabTitle(ListenTab.MEDIA, PlayerMode.AUDIOBOOK)).isEqualTo(app.granger.R.string.player_audiobook)
+        assertThat(tabTitle(ListenTab.READER, PlayerMode.AUDIOBOOK)).isEqualTo(app.granger.R.string.player_tab_reader)
     }
 
     @Test fun theOpeningTabFollowsWhatsLiveThenTheLastUsed() {

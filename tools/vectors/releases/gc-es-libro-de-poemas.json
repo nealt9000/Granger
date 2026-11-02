@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-libro-de-poemas",
+ "kind": "book",
+ "fileName": "gc-es-libro-de-poemas_2026-10-30.gvec",
+ "sizeBytes": 56874,
+ "sha256": "9f901a8e2aca074bfc34551652e6dea169afb0fd507fe6f2a779040df361e27f",
+ "count": 193,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "bc2c39caeba130aeeea421a079002b34d5c05c46ae7a0ddf32e29f5bc9f2ccf5",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-libro-de-poemas_2026-10-30.gvec"
+}

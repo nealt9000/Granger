@@ -64,6 +64,7 @@ internal class PlayerTestRig {
             player = player, media = media, playback = playback, prefs = prefs, focus = FocusPolicy(focus),
             scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate), writer = Dispatchers.Unconfined,
             random = Random(7), speechOutput = speechOutput, voices = voices, readSources = readSources, preferredVoice = preferredVoice,
+            readingTitle = { context.getString(R.string.player_reading_title, it) },
             musicUnderFactory = if (!musicUnder) null else ({
                 TestExoPlayerBuilder(context).setClock(clock).setMediaSourceFactory(TestSources(context)).build() to null
             }),

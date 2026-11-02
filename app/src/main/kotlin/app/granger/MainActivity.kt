@@ -2,6 +2,7 @@ package app.granger
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
@@ -34,6 +35,8 @@ import app.granger.launch.LaunchFacts
 import app.granger.launch.StartScreen
 import app.granger.launch.isBookResumable
 import app.granger.launch.isPackResumable
+import app.granger.settings.AppLanguage
+import app.granger.settings.AppLanguages
 import app.granger.theme.GrangerTheme
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CancellationException
@@ -60,6 +63,14 @@ class MainActivity : FragmentActivity() {
     /** The theme this activity was created in; a different choice later recreates it (Plan T1, Task 3). */
     private var createdNight = false
 
+    /** The language this activity was created in; below API 33 a different choice later recreates it (Plan L2 Task 3). */
+    private var createdLanguage = AppLanguage.SYSTEM
+
+    /** Below API 33, the language chosen in Settings; on 33+ Android localizes the activity itself. */
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLanguages.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // The user's theme before the window exists, so the first frame, the bars and the reader's WebView all agree.
         createdNight = (application as GrangerApp).container.appearancePrefs.theme.value.night(phoneDark())
@@ -78,6 +89,9 @@ class MainActivity : FragmentActivity() {
         // moves it on, so nothing restored waits on a container Compose hasn't made yet.
         dropNavigatorStandIns(supportFragmentManager)
         container = (application as GrangerApp).container
+        // On 33+ the phone's own Language screen may have changed it (that recreates the activity too).
+        container.appLanguages.refresh()
+        createdLanguage = container.appLanguages.language.value
         // So rail availability reflects the files on disk now, not the last scan.
         container.appScope.launch { runCatching { container.library.refresh() } }
         startBookWork(container.booksScannedThisProcess, container.appScope, container.bookshelf) { container.bookIndex.indexPending() }
@@ -111,6 +125,12 @@ class MainActivity : FragmentActivity() {
             LaunchedEffect(night) {
                 container.readingPrefs.setAppNight(night)
                 if (night != createdNight) recreate()
+            }
+            // Below API 33 the app applies the language itself, so a change in Settings recreates the activity; on 33+
+            // Android recreates it. Either way the back stack restores itself and nothing else is reset.
+            val language by container.appLanguages.language.collectAsState()
+            LaunchedEffect(language) {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU && language != createdLanguage) recreate()
             }
             GrangerTheme(night = night) {
                 val decided = start.value

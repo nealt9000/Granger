@@ -194,6 +194,8 @@ abstract class LibraryDatabase : RoomDatabase() {
          * collection each, made when they're filed), unless the user moved one there; the collection goes once empty.
          * No table changes.
          */
+        // Plan L3: no Spanish here. A migration renames what was installed when it ran; `gutenberg_es_all` takes its
+        // name from GutenbergNames when it's installed.
         val MIGRATION_13_14 = object : Migration(13, 14) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 val provider = GutenbergNames.PROVIDER
@@ -230,7 +232,7 @@ abstract class LibraryDatabase : RoomDatabase() {
          */
         private val IN_KIWIX_FOLDER =
             "userCreated = 0 AND mediaTypeId = 'literature' AND defaultKey IS NOT NULL " +
-                "AND defaultKey NOT IN ('granger-classics', 'my-books', 'archive-org', 'other', 'maps', '${Filing.FOLDER_KEY}') " +
+                "AND defaultKey NOT IN ('granger-classics', 'clasicos-granger', 'my-books', 'archive-org', 'other', 'maps', '${Filing.FOLDER_KEY}') " +
                 "AND (defaultKey LIKE 'pack:%' OR defaultKey NOT LIKE '%:%')"
 
         /**

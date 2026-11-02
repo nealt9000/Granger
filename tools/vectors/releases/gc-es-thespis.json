@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-thespis",
+ "kind": "book",
+ "fileName": "gc-es-thespis_2026-10-30.gvec",
+ "sizeBytes": 156246,
+ "sha256": "085ccd6ca9182acdbd5af85bca1816f9d7890881786c90b737de4dfe79d1ef55",
+ "count": 531,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "5d22a9717c4de106b83b6978e1c78709464b2a690d67b5f3ea58b39ff0470f5c",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-thespis_2026-10-30.gvec"
+}

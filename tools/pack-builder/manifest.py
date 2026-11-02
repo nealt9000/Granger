@@ -1,8 +1,14 @@
 """A pack's manifest: its title list and source ids, and the checks every entry must pass.
 
-Each Gutenberg work is checked against its RDF record: public domain in the USA, English, and a title that
-matches, so a mistyped id can't slip a different book into the pack. `published` is checked against the
-US public-domain line: the year the reproduced edition or translation first appeared.
+Each work is checked against its Gutenberg RDF record: public domain in the USA, in the manifest's language,
+and a title that matches, so a mistyped id can't slip a different book into the pack. `published` is checked
+against the US public-domain line: the year the reproduced edition or translation first appeared.
+
+A manifest with `"checkDeaths": true` (Clásicos Granger) must also be public domain where its readers live:
+every named author, translator and editor is listed in the work's `people` with the year they `died` and a
+`diedSource`, and each died in `PD_DEATH_LINE` or earlier (Spain's life + 80 for authors who died before 1987,
+stricter than Argentina's life + 70). An unknown year fails, except for a work published before 1800 that says
+why in its `note`; an anonymous work has no `people` and a `note`.
 
 An eBible work (`"source": "ebible"`, `"ebible": "<id>"`) is a modern translation its makers dedicated to
 the public domain, so it skips the year line; its `licence` must quote that dedication with its URL, and the
@@ -26,13 +32,25 @@ PD_LINE = 1930
 PD_RIGHTS = "Public domain in the USA."
 VERSE_SECTIONS = {"poetry", "drama", "libretti", "scripture"}
 LINE_NUMBERS = ("margin", "drop")
+PD_DEATH_LINE = 1945  # life + 80 leaves authors who died in 1945 or earlier free in 2026
+EARLY_LINE = 1800  # before this, an unknown death year passes with a note
 SLUG = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
-STOP_WORDS = {"the", "a", "an", "of", "and", "or"}
+STOP_WORDS = {"the", "a", "an", "of", "and", "or",
+              "el", "la", "los", "las", "lo", "un", "una", "de", "del", "y", "o", "e"}
+LANGUAGE_CODES = {"eng": "en", "spa": "es"}  # a manifest's ZIM language (ISO 639-3) as Gutenberg's 2-letter code
 NS = {
     "dcterms": "http://purl.org/dc/terms/",
     "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     "pgterms": "http://www.gutenberg.org/2009/pgterms/",
 }
+
+
+@dataclass
+class Person:
+    name: str
+    role: str
+    died: int | None
+    died_source: str
 
 
 @dataclass
@@ -54,6 +72,9 @@ class WorkSpec:
     licence: str | None = None
     cut_after: str | None = None
     pack_sections: bool = False
+    learner: bool = False
+    people: list[Person] | None = None
+    note: str = ""
 
     @property
     def reads_as_verse(self) -> bool:
@@ -74,6 +95,15 @@ class Manifest:
     language: str
     sections: list[tuple[str, str]]
     works: list[WorkSpec]
+    collection: str = "granger-classics"
+    book_id_prefix: str = "gc-"
+    domains: dict[str, str] | None = None  # section id -> readiness domain, when the manifest names one
+    check_deaths: bool = False
+
+    @property
+    def code(self) -> str:
+        """The 2-letter language code EPUBs, descriptors and Gutenberg's RDF use."""
+        return language_code(self.language)
 
 
 @dataclass
@@ -81,6 +111,17 @@ class Rdf:
     title: str
     languages: list[str]
     rights: str
+
+
+def language_code(language: str) -> str:
+    return LANGUAGE_CODES.get(language, language)
+
+
+def _people(entries: list[dict] | None) -> list[Person] | None:
+    if entries is None:
+        return None
+    return [Person(name=p["name"], role=p["role"], died=p.get("died"), died_source=p.get("diedSource", ""))
+            for p in entries]
 
 
 def load(path: Path) -> Manifest:
@@ -91,11 +132,15 @@ def load(path: Path) -> Manifest:
                       title_check=w.get("titleCheck", True), verse=w.get("verse"),
                       line_numbers=w.get("lineNumbers", "margin"), title_overrides=w.get("titleOverrides", {}),
                       source=w.get("source", "gutenberg"), ebible=w.get("ebible"), licence=w.get("licence"),
-                      cut_after=w.get("cutAfter"), pack_sections=w.get("packSections", False))
+                      cut_after=w.get("cutAfter"), pack_sections=w.get("packSections", False),
+                      learner=w.get("learner", False), people=_people(w.get("people")), note=w.get("note", ""))
              for w in data["works"]]
+    domains = {s["id"]: s["domain"] for s in data["sections"] if s.get("domain")}
     return Manifest(name=data["name"], title=data["title"], description=data["description"],
                     language=data["language"], sections=[(s["id"], s["title"]) for s in data["sections"]],
-                    works=works)
+                    works=works, collection=data.get("collection", "granger-classics"),
+                    book_id_prefix=data.get("bookIdPrefix", "gc-"), domains=domains or None,
+                    check_deaths=data.get("checkDeaths", False))
 
 
 def parse_rdf(data: bytes) -> Rdf:
@@ -144,8 +189,10 @@ def validate(m: Manifest, rdf_for: Callable[[int], Rdf],
         rdf = rdf_for(w.gutenberg)
         if " ".join(rdf.rights.split()) != PD_RIGHTS:
             errors.append(f"{where}: rights are {rdf.rights!r}")
-        if "en" not in rdf.languages:
-            errors.append(f"{where}: language is {rdf.languages}, not English")
+        if m.code not in rdf.languages:
+            errors.append(f"{where}: language is {rdf.languages}, not {m.code!r}")
+        if m.check_deaths:
+            errors += _death_errors(where, w)
         if w.title_check and not _words(w.title) <= _words(rdf.title):
             errors.append(f"{where}: title {w.title!r} doesn't match Gutenberg's {rdf.title!r}")
     return errors
@@ -182,4 +229,22 @@ def _validate_ebible(w: WorkSpec, ebibles: Counter, page_for: Callable[[str], by
         page = page_for(w.ebible).decode("utf-8", "replace").lower()
         if "public domain" not in page:
             errors.append(f"{w.where}: the eBible details page no longer says Public Domain")
+    return errors
+
+
+def _death_errors(where: str, w: WorkSpec) -> list[str]:
+    """The life + 80 rule: every named person died by PD_DEATH_LINE, and the year is known and sourced."""
+    if w.people is None:
+        return [f"{where}: no people listed; name every author, translator and editor, or [] for an anonymous work"]
+    if not w.people and not w.note:
+        return [f"{where}: an anonymous work needs a note"]
+    errors = []
+    for p in w.people:
+        if p.died is None:
+            if not (w.published < EARLY_LINE and w.note):
+                errors.append(f"{where}: {p.name} ({p.role}): death year unknown")
+        elif p.died > PD_DEATH_LINE:
+            errors.append(f"{where}: {p.name} ({p.role}) died {p.died}, after the {PD_DEATH_LINE} line")
+        elif not p.died_source.startswith("https://"):
+            errors.append(f"{where}: {p.name} ({p.role}): no diedSource")
     return errors

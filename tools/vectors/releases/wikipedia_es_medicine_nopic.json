@@ -1,0 +1,14 @@
+{
+ "id": "wikipedia_es_medicine_nopic",
+ "kind": "pack",
+ "fileName": "wikipedia_es_medicine_nopic_2026-10-15.gvec",
+ "sizeBytes": 39564743,
+ "sha256": "65295b1edcd28d839b37f7ed15907dac69d7f97c40c2a051caa1e79d5567c950",
+ "count": 132840,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "d52b3fddfb5cb4fb0bd79b9eb38fa0734ef247e3695ee01d1cdc7ffc89e00fb0",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/wikipedia_es_medicine_nopic_2026-10-15.gvec"
+}

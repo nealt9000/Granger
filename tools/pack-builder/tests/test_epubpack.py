@@ -423,3 +423,43 @@ def test_start_of_text_skips_front_matter_pages(tmp_path):
     assert landmark(build(tmp_path, w)) == "c004.xhtml"
     w = work(html="<h2>Contents</h2><p>a</p><h2>Dedication</h2><p>b</p><h2>Contents</h2><p>c</p>")
     assert landmark(build(tmp_path, w)) == "c001.xhtml"  # nothing but front matter: the first page
+
+
+# --- Clásicos Granger (Plan L3) ---
+
+def test_book_id_takes_the_manifest_prefix():
+    assert epubpack.book_id("marianela", "gc-es-") == "gc-es-marianela"
+
+
+def test_spanish_translation_title_says_trad():
+    w = Work("biblia", "Nuevo Testamento", "", "Casiodoro de Reina", 1909, "escritura", [])
+    assert epubpack.display_title(w, "es") == "Nuevo Testamento (trad. Casiodoro de Reina)"
+
+
+def test_spanish_book_speaks_spanish(tmp_path):
+    w = work(title="Marianela", author="Benito Pérez Galdós")
+    z = build(tmp_path, w, language="es", collection="Clásicos Granger", section_title="Novelas")
+    opf = etree.fromstring(z.read("OEBPS/content.opf"))
+    text = lambda tag: [e.text for e in opf.iter(DC + tag)]
+    assert text("language") == ["es"] and text("rights") == ["Dominio público en los Estados Unidos."]
+    props = {m.get("property"): m.text for m in opf.iter(OPF + "meta") if m.get("property")}
+    assert props["belongs-to-collection"] == "Clásicos Granger"
+    nav = z.read("OEBPS/nav.xhtml").decode()
+    assert "<h1>Índice</h1>" in nav and "Portada" in nav and "Contents" not in nav
+    assert 'lang="es"' in z.read("OEBPS/c001.xhtml").decode()
+
+
+def test_spanish_colophon_speaks_spanish_and_keeps_its_capitals(tmp_path):
+    w = work(title="Marianela", author="Benito Pérez Galdós", translator="T. Raductor",
+             html="<h2>CAPÍTULO I</h2><p>a</p><h2>CAPÍTULO II</h2><p>b</p><h2>CAPÍTULO III</h2><p>c</p>")
+    z = build(tmp_path, w, language="es", collection="Clásicos Granger",
+              source_line="Del libro electrónico n.º 1 de Project Gutenberg")
+    text = z.read("OEBPS/colophon.xhtml").decode()
+    for expected in ("Clásicos Granger", "Traducción de T. Raductor",
+                     "Esta traducción se publicó por primera vez en 1920",
+                     "Del libro electrónico n.º 1 de Project Gutenberg", "Dominio público en los Estados Unidos.",
+                     "El conocimiento del mundo. Tuyo para siempre.", "— Colofón</title>"):
+        assert expected in text, expected
+    assert "Granger Classics" not in text and "Translated" not in text
+    assert "Colofón" in z.read("OEBPS/nav.xhtml").decode()
+    assert "<h2>CAPÍTULO I</h2>" in z.read("OEBPS/c001.xhtml").decode()

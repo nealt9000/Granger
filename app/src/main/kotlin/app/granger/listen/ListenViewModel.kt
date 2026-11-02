@@ -1,5 +1,7 @@
 package app.granger.listen
 
+import androidx.annotation.StringRes
+import app.granger.R
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.core.library.Shelves
@@ -12,6 +14,7 @@ import app.granger.library.KindRow
 import app.granger.library.listenKinds
 import app.granger.player.PlayerFocus
 import app.granger.player.oneSide
+import app.granger.UiText
 import app.granger.widget.WidgetModel
 import app.granger.widget.resumeMode
 import kotlinx.coroutines.flow.Flow
@@ -30,9 +33,9 @@ enum class CardKind { MUSIC, AUDIOBOOK, VOICE }
  * which ("Now playing", "Paused", "Last played"); [title] and [subtitle] are the widget's lines.
  */
 data class NowPlayingCard(
-    val label: String,
-    val title: String,
-    val subtitle: String,
+    @StringRes val label: Int,
+    val title: UiText,
+    val subtitle: UiText,
     val coverPath: String?,
     val kind: CardKind,
     val live: Boolean,
@@ -64,10 +67,10 @@ fun nowPlayingCard(ui: PlayerUi, saved: SavedModes): NowPlayingCard? {
     }
     val live = now != NowPlaying.Idle
     val label = when {
-        !live -> if (kind == CardKind.VOICE) "Last read" else "Last played"
-        !ui.playing -> "Paused"
-        kind == CardKind.VOICE -> "Reading aloud"
-        else -> "Now playing"
+        !live -> if (kind == CardKind.VOICE) R.string.listen_last_read else R.string.listen_last_played
+        !ui.playing -> R.string.listen_paused
+        kind == CardKind.VOICE -> R.string.listen_reading_aloud
+        else -> R.string.listen_now_playing
     }
     return NowPlayingCard(label, model.title, model.subtitle, model.coverPath, kind, live, playing = live && ui.playing)
 }

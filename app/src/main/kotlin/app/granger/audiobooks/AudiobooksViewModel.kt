@@ -1,7 +1,10 @@
 package app.granger.audiobooks
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.library.AudioBookmark
 import app.granger.core.library.Audiobook
 import app.granger.core.library.AudiobookChapter
@@ -49,9 +52,6 @@ import kotlinx.coroutines.launch
 /** The Audiobooks media type's id (seeded). */
 const val AUDIOBOOKS_TYPE_ID = "audiobooks"
 
-/** The unscoped shelf, mirroring Music's "All music". */
-const val ALL_AUDIOBOOKS = "All audiobooks"
-
 /** The listener's audiobook rows: positions and bookmarks ([PlaybackDao] in the app). */
 interface AudiobookListening {
     val states: Flow<List<AudiobookState>>
@@ -83,7 +83,9 @@ data class ShelfBook(val book: Audiobook, val listening: Listening, val progress
 }
 
 /** How the audiobook shelf is ordered (Plan LV Decision 5); Recent is by last played, with no letters. */
-enum class AudiobookSort(val label: String) { TITLE("Title"), AUTHOR("Author"), RECENT("Recent") }
+enum class AudiobookSort(@StringRes val label: Int) {
+    TITLE(R.string.audiobooks_sort_title), AUTHOR(R.string.audiobooks_sort_author), RECENT(R.string.audiobooks_sort_recent),
+}
 
 /**
  * The shelf: every book as [sections] (A–Z under letters when long and sorted by name), and [continueRow], the books
@@ -91,7 +93,8 @@ enum class AudiobookSort(val label: String) { TITLE("Title"), AUTHOR("Author"), 
  * in the order shown.
  */
 data class AudiobookShelfUi(
-    val title: String,
+    /** "All audiobooks", or the collection's name. */
+    val title: UiText,
     val sections: ShelfSections<ShelfBook>,
     val continueRow: List<ShelfBook> = emptyList(),
     val sort: AudiobookSort = AudiobookSort.TITLE,
@@ -121,12 +124,13 @@ data class AudiobookPage(
     val missing: Boolean get() = book.status != PackStatus.OK
     val playable: Boolean get() = !missing && chapters.isNotEmpty()
     val fraction: Float get() = fractionOf(progress)
-    val playLabel: String get() = when {
-        missing -> "Missing"
-        inPlayer && playing -> "Pause"
-        listening == Listening.FINISHED -> "Play from start"
-        listening == Listening.IN_PROGRESS || inPlayer -> "Resume"
-        else -> "Play"
+    @get:StringRes
+    val playLabel: Int get() = when {
+        missing -> R.string.audiobooks_missing
+        inPlayer && playing -> R.string.common_pause
+        listening == Listening.FINISHED -> R.string.audiobooks_play_from_start
+        listening == Listening.IN_PROGRESS || inPlayer -> R.string.audiobooks_resume
+        else -> R.string.common_play
     }
 }
 
@@ -225,13 +229,13 @@ class AudiobooksViewModel(
     private val mediaRecords: Flow<List<DownloadRecord>> =
         downloads.map { all -> all.filter { it.groupId?.startsWith(MediaDownloads.PREFIX) == true } }.distinctUntilChanged()
 
-    private val scope: Flow<Pair<String, List<Audiobook>>> =
+    private val scope: Flow<Pair<UiText, List<Audiobook>>> =
         if (collectionId == null) {
-            media.audiobooks.map { ALL_AUDIOBOOKS to it }
+            media.audiobooks.map { UiText.Res(R.string.audiobooks_all) to it }
         } else {
             combine(media.audiobooks, shelves.collection(collectionId)) { books, row ->
                 val ids = row?.audiobooks.orEmpty().mapTo(HashSet()) { it.id }
-                row?.collection?.name.orEmpty() to books.filter { it.id in ids }
+                UiText.Raw(row?.collection?.name.orEmpty()) to books.filter { it.id in ids }
             }
         }.distinctUntilChanged()
 

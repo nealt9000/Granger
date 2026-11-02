@@ -43,7 +43,10 @@ object AnswerText {
     /** `[1]`, `[2, 3]`: one or more passage numbers in square brackets. */
     private val CITATION = Regex("""\[(\d+(?:\s*,\s*\d+)*)]""")
 
-    /** The banner over a medical answer; spoken first when an answer is read aloud. */
+    /**
+     * The banner over a medical answer as the voice speaks it, first when an answer is read aloud. The screen shows
+     * R.string.research_medical, which says the same; the voice's text is L4/L5's (SpokenText) to translate.
+     */
     const val MEDICAL = "Not medical advice. If you can reach emergency services or a professional, do so."
 
     private val HEADING = Regex("""^\s{0,3}#{1,6}\s+""")

@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-naturaleza-de-las-cosas",
+ "kind": "book",
+ "fileName": "gc-es-naturaleza-de-las-cosas_2026-10-30.gvec",
+ "sizeBytes": 141546,
+ "sha256": "c23a3277df9aaf8721e85f7997c65fa0fe03f5d667c41c5ec12b1f678c3e55ee",
+ "count": 481,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "99264de032db7aa48000b75ad218500ea07981d1ac3fa99815ac81146e6c6324",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-naturaleza-de-las-cosas_2026-10-30.gvec"
+}

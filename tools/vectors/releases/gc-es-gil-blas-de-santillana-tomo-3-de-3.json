@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-gil-blas-de-santillana-tomo-3-de-3",
+ "kind": "book",
+ "fileName": "gc-es-gil-blas-de-santillana-tomo-3-de-3_2026-10-30.gvec",
+ "sizeBytes": 187116,
+ "sha256": "95a1394c8f50bf4ecb7c3fcf187a72b531fce247cfacabfc2ba65d79524b5462",
+ "count": 636,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "41e34a1087a9479b54a69f08e8b0515662544351ae11b52429c0d3abf93e5b5d",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-gil-blas-de-santillana-tomo-3-de-3_2026-10-30.gvec"
+}

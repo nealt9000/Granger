@@ -112,6 +112,8 @@ class PlayerEngine(
      * Null (the default, and tests without one): starting the voice pauses music, as in V1.
      */
     private val musicUnderFactory: (() -> Pair<ExoPlayer, ReplayGainProcessor?>)? = null,
+    /** The voice's notification title for a source's title: "Reading · <title>" from [R.string.player_reading_title]. */
+    private val readingTitle: (String) -> String = { it },
 ) : PlayerHub {
     private enum class Mode { NONE, MUSIC, BOOK, VOICE }
 
@@ -324,9 +326,9 @@ class PlayerEngine(
                 player.pause()
                 _notices.tryEmit(
                     when (mode) {
-                        Mode.MUSIC -> if (player.mediaItemCount > 1) NOTICE_QUEUE_FAILED else NOTICE_SONG_FAILED
-                        Mode.BOOK -> NOTICE_BOOK_FAILED
-                        else -> NOTICE_SONG_FAILED
+                        Mode.MUSIC -> if (player.mediaItemCount > 1) PlayerNotices.QUEUE_FAILED else PlayerNotices.SONG_FAILED
+                        Mode.BOOK -> PlayerNotices.BOOK_FAILED
+                        else -> PlayerNotices.SONG_FAILED
                     },
                 )
             }
@@ -1098,7 +1100,7 @@ class PlayerEngine(
     private fun carrier(source: ReadSource, section: String?): MediaSource {
         val item = MediaItem.Builder()
             .setMediaId("voice:${source.key}")
-            .setMediaMetadata(MediaMetadata.Builder().setTitle("Reading · ${source.title}").setArtist(section).setAlbumTitle(source.title).build())
+            .setMediaMetadata(MediaMetadata.Builder().setTitle(readingTitle(source.title)).setArtist(section).setAlbumTitle(source.title).build())
             .build()
         return CarrierSource(item, CARRIER_US)
     }
@@ -1214,7 +1216,7 @@ class PlayerEngine(
         val fileIndex = startTrack?.let { m.files.indexOf(it) }?.takeIf { it >= 0 }
         // A saved row whose file can't be found: kept as it is until the user picks a place.
         restoreUnresolved = fileIndex == null && state != null
-        if (restoreUnresolved) _notices.tryEmit(NOTICE_PLACE_LOST)
+        if (restoreUnresolved) _notices.tryEmit(PlayerNotices.PLACE_LOST)
         val position = when {
             fileIndex == null -> 0L
             restart -> first.positionMs
@@ -1718,10 +1720,6 @@ class PlayerEngine(
     fun setScreenState(state: () -> String) { screenState = state }
 
     private companion object {
-        const val NOTICE_QUEUE_FAILED = "Couldn't play any of these songs. Their files may be missing or damaged."
-        const val NOTICE_SONG_FAILED = "Couldn't play this. The file may be missing or damaged."
-        const val NOTICE_BOOK_FAILED = "Couldn't play this chapter. Its file may be missing or damaged: Readiness can check it."
-        const val NOTICE_PLACE_LOST = "Couldn't find your place in this book, so it starts at the beginning. Pick a chapter to go on."
         const val TAG = "PlayerEngine"
         const val VOICE_TAG = "GrangerVoice"
         const val FOCUS_TAG = FocusPolicy.TAG

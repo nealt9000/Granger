@@ -12,8 +12,12 @@ object PageTitles {
     private val STACK_EXCHANGE = Regex("$DASH[^-–—|]*Stack Exchange$", RegexOption.IGNORE_CASE)
     private val SITE = Regex("\\s+\\|\\s+[^|]+$")
 
-    /** What packs call their front page; a tab named so says nothing, so it takes the pack's name. */
-    private val MAIN_PAGE_NAMES = setOf("main page", "home", "home page", "index")
+    /**
+     * What packs call their front page; a tab named so says nothing, so it takes the pack's name. Spanish packs' too
+     * (Plan L3): "Portada", "Página principal". The suffixes above need nothing for Spanish: mwoffliner titles a Spanish
+     * Wikipedia page by its name alone ("22 de octubre"), and Kiwix's Spanish Stack Exchange is titled in English.
+     */
+    private val MAIN_PAGE_NAMES = setOf("main page", "home", "home page", "index", "portada", "página principal")
 
     /**
      * [title] with a trailing " - Wikipedia", " - <X> Stack Exchange", " | <site>" or " - <packTitle>" taken off. A

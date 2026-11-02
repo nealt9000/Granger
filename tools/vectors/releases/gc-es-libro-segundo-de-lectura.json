@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-libro-segundo-de-lectura",
+ "kind": "book",
+ "fileName": "gc-es-libro-segundo-de-lectura_2026-10-30.gvec",
+ "sizeBytes": 52170,
+ "sha256": "e3bac519bdfff28f2b39d4b6b8557d5a24763fad105d2dcea5a9eb84a6ffe8a9",
+ "count": 177,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "6f6ce26d23a7226d71aab53470c0dd6986df0549c45e9987ee5bf4135431718a",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-libro-segundo-de-lectura_2026-10-30.gvec"
+}

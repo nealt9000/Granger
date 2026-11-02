@@ -1,7 +1,11 @@
 package app.granger.shell
 
+import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.R
 import app.granger.core.library.Book
 import app.granger.core.library.BookIds
 import app.granger.core.library.BookPosition
@@ -38,8 +42,8 @@ import kotlin.math.roundToInt
 data class RailTabUi(
     val tabId: Long,
     val title: String,
-    /** The pack's title. */
-    val subtitle: String,
+    /** The pack's title; a book's author, or where it is; "Removed pack" or "Removed book". */
+    val subtitle: app.granger.UiText,
     val initial: Char,
     /** False when the pack is missing, damaged or gone; the tile is greyed out. */
     val available: Boolean,
@@ -80,16 +84,20 @@ sealed interface RailEntry {
         override val key get() = "$PLAY$playKey"
 
         /** What was played, by its key: "Album", "Audiobook", "Read aloud" (Plan U3b Decision 12). */
-        val kind: String get() = when {
-            playKey.startsWith("audiobook:") -> "Audiobook"
-            playKey.startsWith("voice:") -> "Read aloud"
-            playKey.startsWith("playlist:") -> "Playlist"
-            playKey.startsWith("artist:") -> "Artist"
-            playKey.startsWith("genre:") -> "Genre"
-            playKey.startsWith("folder:") -> "Folder"
-            playKey == "songs" -> "Songs"
-            else -> "Album"
+        @get:StringRes
+        val kindRes: Int get() = when {
+            playKey.startsWith("audiobook:") -> R.string.shell_kind_audiobook
+            playKey.startsWith("voice:") -> R.string.shell_kind_read_aloud
+            playKey.startsWith("playlist:") -> R.string.shell_kind_playlist
+            playKey.startsWith("artist:") -> R.string.shell_kind_artist
+            playKey.startsWith("genre:") -> R.string.shell_kind_genre
+            playKey.startsWith("folder:") -> R.string.shell_kind_folder
+            playKey == "songs" -> R.string.shell_kind_songs
+            else -> R.string.shell_kind_album
         }
+
+        /** [kindRes] as text, read in composition (Home's Continue card shows it). */
+        val kind: String @Composable get() = stringResource(kindRes)
     }
 
     /** The voice reading [title] now (Plan V2): heads the list while it is loaded; tapping it opens the page. Not pinnable. */
@@ -158,10 +166,10 @@ class RailViewModel(
     )
 
     /**
-     * Plays [item] again. Null when it started; otherwise the notice the Library shows (the album, playlist or book is
-     * gone, or nothing in it can play now).
+     * Plays [item] again. Null when it started; otherwise the notice the Library shows, with the item's title (the album,
+     * playlist or book is gone, or nothing in it can play now).
      */
-    suspend fun resume(item: RailEntry.Play): String? {
+    suspend fun resume(item: RailEntry.Play): app.granger.launch.LibraryNotice? {
         val played = try {
             resumer?.resume(item.playKey, item.title) == true
         } catch (e: CancellationException) {
@@ -169,7 +177,7 @@ class RailViewModel(
         } catch (e: Exception) {
             false
         }
-        return if (played) null else "“${item.title}” can't be played: it's no longer in the library, or none of its files are on the phone."
+        return if (played) null else app.granger.launch.LibraryNotice.CANT_PLAY
     }
 
     /** The voice reading now, held for [remove] to tell whether it reads the item removed. */
@@ -295,7 +303,7 @@ class RailViewModel(
             RailTabUi(
                 tabId = tab.id,
                 title = book?.title ?: tab.title,
-                subtitle = book?.let { bookSubtitle(it, shelf.positions[it.id]) } ?: HistoryViewModel.REMOVED_BOOK,
+                subtitle = book?.let { bookSubtitle(it, shelf.positions[it.id]) } ?: REMOVED_BOOK,
                 initial = initialOf(book?.title ?: tab.title),
                 available = book?.status == PackStatus.OK,
                 current = tab.id == current,
@@ -306,7 +314,7 @@ class RailViewModel(
             RailTabUi(
                 tabId = tab.id,
                 title = tab.title,
-                subtitle = pack?.title ?: HistoryViewModel.REMOVED_PACK,
+                subtitle = pack?.title?.let { app.granger.UiText.Raw(it) } ?: REMOVED_PACK,
                 initial = initialOf(tab.title),
                 available = pack?.status == PackStatus.OK,
                 current = tab.id == current,
@@ -318,14 +326,15 @@ class RailViewModel(
     }
 
     /** "Chapter 3 · 43%" once the book has been opened; its author before that. */
-    private fun bookSubtitle(book: Book, position: BookPosition?): String {
-        if (position == null) return book.author
-        val percent = "${(position.totalProgression * 100).roundToInt().coerceIn(0, 100)}%"
-        return if (position.chapterTitle.isBlank()) percent else "${position.chapterTitle} · $percent"
+    private fun bookSubtitle(book: Book, position: BookPosition?): app.granger.UiText {
+        if (position == null) return app.granger.UiText.Raw(book.author)
+        val percent = (position.totalProgression * 100).roundToInt().coerceIn(0, 100)
+        return if (position.chapterTitle.isBlank()) app.granger.UiText.Res(R.string.shell_percent, percent)
+        else app.granger.UiText.Res(R.string.shell_chapter_percent, position.chapterTitle, percent)
     }
 
     /** Long-press "Pin to top". Null when pinned; otherwise the notice to show (all [MAX_RAIL_PINS] are taken). */
-    suspend fun pin(entry: RailEntry): String? = when (pins.pin(entry.key)) {
+    suspend fun pin(entry: RailEntry): app.granger.UiText? = when (pins.pin(entry.key)) {
         PinResult.FULL -> PINS_FULL
         PinResult.PINNED, PinResult.ALREADY_PINNED -> null
     }
@@ -386,7 +395,12 @@ class RailViewModel(
         /** How many of each kind the rail watches; every recent search (50 are kept). */
         const val SCAN = 50
 
-        const val PINS_FULL = "$MAX_RAIL_PINS items are pinned already. Unpin one first."
+        /** GrangerNavHost toasts this. */
+        val PINS_FULL: app.granger.UiText = app.granger.UiText.Plural(R.plurals.shell_pins_full, MAX_RAIL_PINS, MAX_RAIL_PINS)
+
+        /** A gone pack's or book's subtitle. */
+        val REMOVED_PACK: app.granger.UiText = app.granger.UiText.Res(R.string.shell_removed_pack)
+        val REMOVED_BOOK: app.granger.UiText = app.granger.UiText.Res(R.string.shell_removed_book)
 
         /** A read-aloud play's key prefix: "voice:" and the source key. */
         private const val VOICE_PLAY = "voice:"

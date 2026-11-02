@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_title">Inicio</string>
+    <!-- "Feed" is a "sección" here: a row of suggestions on Inicio. "Fuente" would clash with Fuentes (Sources). -->
+    <string name="home_add_feed">Agregar sección</string>
+    <string name="home_continue">Continuar</string>
+    <string name="home_drawing">Eligiendo…</string>
+    <string name="home_move_up">Subir</string>
+    <string name="home_move_down">Bajar</string>
+
+    <string name="home_add_from">De</string>
+    <string name="home_add_show">Mostrar</string>
+    <string name="home_add_search_for">Buscar</string>
+    <string name="home_add">Agregar</string>
+
+    <string name="home_kind_random">Al azar</string>
+    <string name="home_kind_on_this_day">Un día como hoy</string>
+    <string name="home_kind_search">Búsqueda</string>
+
+    <string name="home_scope_whole_library">Toda la biblioteca</string>
+    <string name="home_scope_the_library">la biblioteca</string>
+    <string name="home_scope_music">Música</string>
+    <string name="home_scope_audiobooks">Audiolibros</string>
+
+    <string name="home_feed_random_from">Al azar de %1$s</string>
+    <string name="home_feed_random_from_library">Al azar de la biblioteca</string>
+    <!-- "22 de octubre": the month's name comes from the phone in lower case, as Spanish writes it. -->
+    <string name="home_feed_day">%2$d de %1$s</string>
+    <string name="home_feed_search">%1$s · %2$s</string>
+    <string name="home_feed_pending">%1$s · %2$s</string>
+
+    <string name="home_downloads_paused">Descargas en pausa</string>
+    <string name="home_downloads_paused_waiting">En pausa · %1$d en espera</string>
+    <string name="home_downloads_progress">%1$d de %2$d · %3$s de %4$s</string>
+    <!-- %5$s is "unos 25 min", so this reads "… · faltan unos 25 min". -->
+    <string name="home_downloads_progress_left">%1$d de %2$d · %3$s de %4$s · faltan %5$s</string>
+    <string name="home_downloads_resume">Reanudar descargas</string>
+    <string name="home_downloads_pause">Pausar descargas</string>
+    <plurals name="home_downloads_stopped">
+        <item quantity="one">%1$d detenida</item>
+        <item quantity="many">%1$d detenidas</item>
+        <item quantity="other">%1$d detenidas</item>
+    </plurals>
+
+    <string name="home_strip_status">&gt; %1$s aquí, todo listo sin conexión.</string>
+    <string name="home_feed_day_mentions">Menciones del %2$d de %1$s</string>
+</resources>

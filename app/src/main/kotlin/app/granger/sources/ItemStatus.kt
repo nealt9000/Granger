@@ -1,5 +1,7 @@
 package app.granger.sources
 
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.CatalogItem
@@ -18,7 +20,11 @@ sealed interface ItemStatus {
     /** [lastError] is why the previous attempt stopped, when this is a retry. */
     data class Queued(val wifiOnly: Boolean, val lastError: String? = null) : ItemStatus
     data class Downloading(val fraction: Float) : ItemStatus
-    data class Failed(val reason: String) : ItemStatus
+    /**
+     * [reason] is the downloader's own, stored in downloads.db as English text (a stored error code is L2's); null when
+     * it gave none, which reads "Download failed".
+     */
+    data class Failed(val reason: String?) : ItemStatus
     data object Installed : ItemStatus
     data object UpdateAvailable : ItemStatus
 
@@ -27,13 +33,16 @@ sealed interface ItemStatus {
 
     /**
      * An archive.org audio item got from the other audio view: one item is one download, so it's on the [shelf]
-     * ("Music" or "Audiobooks") it was got for. It offers Open (there), never Get or Remove here.
+     * (Music or Audiobooks) it was got for. It offers Open (there), never Get or Remove here.
      */
-    data class InLibrary(val shelf: String) : ItemStatus
+    data class InLibrary(val shelf: LibraryShelf) : ItemStatus
 
     /** A model this phone doesn't have the memory to run (spec "Device tiers"). */
     data object NeedsMoreMemory : ItemStatus
 }
+
+/** The two audio shelves an archive.org item can be in: [ItemStatus.InLibrary]. */
+enum class LibraryShelf { MUSIC, AUDIOBOOKS }
 
 fun statusOf(item: CatalogItem, records: List<DownloadRecord>, packs: List<Pack>, tier: DeviceTier): ItemStatus {
     val versions = records.filter { it.itemId == item.id }
@@ -42,7 +51,7 @@ fun statusOf(item: CatalogItem, records: List<DownloadRecord>, packs: List<Pack>
             DownloadState.QUEUED -> ItemStatus.Queued(active.wifiOnly, active.error)
             DownloadState.RUNNING ->
                 ItemStatus.Downloading(if (active.sizeBytes > 0) active.bytesDone.toFloat() / active.sizeBytes else 0f)
-            else -> ItemStatus.Failed(active.error ?: "Download failed")
+            else -> ItemStatus.Failed(active.error)
         }
     }
     val currentInstalled = when (item) {
@@ -69,3 +78,14 @@ fun DeviceTier.canRun(role: ModelRole): Boolean = when (role) {
     // Gemma 4 E4B: too slow and too big on the phones measured (Plan R5 Task 8), and nothing uses it.
     ModelRole.LARGE -> false
 }
+
+/** A failed download's line: the downloader's own reason, else "Download failed". */
+fun failedText(status: ItemStatus.Failed): UiText = status.reason?.let { UiText.Raw(it) } ?: UiText.Res(R.string.sources_download_failed)
+
+/** Where an item got from the other audio view is: "In your Music", "In your Audiobooks". */
+fun inLibraryText(status: ItemStatus.InLibrary): UiText = UiText.Res(
+    when (status.shelf) {
+        LibraryShelf.MUSIC -> R.string.sources_in_your_music
+        LibraryShelf.AUDIOBOOKS -> R.string.sources_in_your_audiobooks
+    },
+)

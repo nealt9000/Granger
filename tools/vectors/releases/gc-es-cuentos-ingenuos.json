@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-cuentos-ingenuos",
+ "kind": "book",
+ "fileName": "gc-es-cuentos-ingenuos_2026-10-30.gvec",
+ "sizeBytes": 63930,
+ "sha256": "8383e78464c96bd097ba62230f03a05be5c39044169641fbb88541994ec72c9c",
+ "count": 217,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "3a45d9c168a7543a716e467cba393bd570a7a89bf8385c0d5eb64d34a7f1b9bc",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-cuentos-ingenuos_2026-10-30.gvec"
+}

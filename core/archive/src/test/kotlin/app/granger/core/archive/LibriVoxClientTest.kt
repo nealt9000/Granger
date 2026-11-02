@@ -134,12 +134,15 @@ class LibriVoxClientTest {
         val e = assertThrows(LibriVoxError::class.java) { runBlocking { client.search(LibriVoxQuery.Recent, offset = 0) } }
         assertThat(e).hasMessageThat().startsWith("LibriVox is busy")
         assertThat(e).hasMessageThat().isEqualTo("LibriVox is busy right now. Try again in a minute.")
+        assertThat(e.problem).isEqualTo(LibriVoxProblem.BUSY)
     }
 
     @Test fun otherFailuresAreLibriVoxErrors() {
         server.status = 500 // an unknown genre: HTTP 500, empty body
         val e = assertThrows(LibriVoxError::class.java) { runBlocking { client.search(LibriVoxQuery.Genre("Nope"), offset = 0) } }
         assertThat(e).hasMessageThat().isEqualTo("LibriVox answered 500")
+        assertThat(e.problem).isEqualTo(LibriVoxProblem.ANSWERED)
+        assertThat(e.textArgs).containsExactly(500)
         server.status = 404
         server.statusBody = "<html>gone</html>"
         val e404 = assertThrows(LibriVoxError::class.java) { runBlocking { client.search(LibriVoxQuery.Recent, offset = 0) } }
@@ -185,7 +188,9 @@ class LibriVoxClientTest {
 
     @Test fun shelvesAreRecentlyAddedAndSixGenres() {
         assertThat(LibriVoxShelf.entries.map { it.title }).containsExactly(
-            "Recently added", "Fiction", "Poetry", "Children's", "Science fiction", "Mystery & detective", "Philosophy",
+            R.string.archive_librivox_shelf_recent, R.string.archive_librivox_shelf_fiction, R.string.archive_librivox_shelf_poetry,
+            R.string.archive_librivox_shelf_children, R.string.archive_librivox_shelf_science_fiction,
+            R.string.archive_librivox_shelf_detective, R.string.archive_librivox_shelf_philosophy,
         ).inOrder()
         assertThat(LibriVoxShelf.entries.drop(1).map { (it.query as LibriVoxQuery.Genre).name }).containsExactly(
             "General Fiction", "Poetry", "Children's Fiction", "Science Fiction", "Detective Fiction", "Philosophy",

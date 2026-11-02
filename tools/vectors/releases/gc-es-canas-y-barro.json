@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-canas-y-barro",
+ "kind": "book",
+ "fileName": "gc-es-canas-y-barro_2026-10-30.gvec",
+ "sizeBytes": 190938,
+ "sha256": "54d33627615621fbb530342681c80db01918432c1f8b70754e7d751b2e2099cc",
+ "count": 649,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "25b0485b9cf20f14fed9df3a4a0115d09059da2b7250becbfc275f90db66cc03",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-canas-y-barro_2026-10-30.gvec"
+}

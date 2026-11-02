@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-novelas-ejemplares",
+ "kind": "book",
+ "fileName": "gc-es-novelas-ejemplares_2026-10-30.gvec",
+ "sizeBytes": 372336,
+ "sha256": "7ea806021c1350c42f6c53cd95ace09114095530ea70332ce9e3c8cebcec9e69",
+ "count": 1266,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "ee00d8c2195a12819124106407bffee2ae7a7fd4a5363bfb296bc5440bd10d35",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-novelas-ejemplares_2026-10-30.gvec"
+}

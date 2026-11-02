@@ -1,5 +1,6 @@
 package app.granger.ebook
 
+import app.granger.UiText
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
@@ -132,7 +133,7 @@ class EbookChromeTest {
         assertThat(vm.state.value.chromeVisible).isFalse()
         vm.toggleChrome()
         vm.open(Panel.SEARCH)
-        vm.goToHit(BookSearchRow(page(0.5), "", "", "x", "", null))
+        vm.goToHit(BookSearchRow(page(0.5), UiText.Raw(""), "", "x", "", null))
         assertThat(vm.state.value.panel).isNull()
         assertThat(vm.state.value.chromeVisible).isFalse()
         // The slider is on the chrome: its move keeps it.

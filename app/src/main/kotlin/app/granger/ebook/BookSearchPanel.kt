@@ -3,6 +3,8 @@ package app.granger.ebook
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.ui.res.stringResource
+import app.granger.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -64,7 +66,7 @@ fun BookSearchPanel(
                 OutlinedTextField(
                     value = text,
                     onValueChange = { text = it },
-                    label = { Text("Search in this book") },
+                    label = { Text(stringResource(R.string.ebook_search_in_this_book)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = { onSearch(text) }),
@@ -75,14 +77,15 @@ fun BookSearchPanel(
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                     ui.query.isNotBlank() && ui.results.isEmpty() -> Box(Modifier.fillMaxSize().padding(24.dp), Alignment.Center) {
-                        Text("Nothing found for “${ui.query.trim()}”.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.ebook_nothing_found, ui.query.trim()), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     else -> LazyColumn {
                         items(ui.results) { row ->
                             Column(Modifier.fillMaxWidth().clickable { onPick(row) }.padding(horizontal = 16.dp, vertical = 10.dp)) {
-                                if (row.chapter.isNotEmpty()) {
+                                val chapter = row.chapter.resolve()
+                                if (chapter.isNotEmpty()) {
                                     Text(
-                                        row.chapter,
+                                        chapter,
                                         style = MaterialTheme.typography.labelMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         maxLines = 1,

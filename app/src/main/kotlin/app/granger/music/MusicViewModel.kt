@@ -1,7 +1,10 @@
 package app.granger.music
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.library.AlbumSummary
 import app.granger.core.library.Albums
 import app.granger.core.library.MediaLibrary
@@ -47,23 +50,24 @@ import kotlinx.coroutines.launch
 /** The Music media type's id (seeded). */
 const val MUSIC_TYPE_ID = "music"
 
-/** The name of the unscoped Music view (exact, per the plan). */
-const val ALL_MUSIC = "All music"
-
 const val UNKNOWN_GENRE = MediaNames.UNKNOWN_GENRE
 
 /** How the Songs tab is ordered; [byName] sorts file under letters (Plan LV Decision 4). */
-enum class SongSort(val label: String, val byName: Boolean) {
-    TITLE("Title", true), ARTIST("Artist", true), ALBUM("Album", true), YEAR("Year", false), DATE_ADDED("Date added", false),
+enum class SongSort(@StringRes val label: Int, val byName: Boolean) {
+    TITLE(R.string.music_sort_title, true), ARTIST(R.string.music_sort_artist, true), ALBUM(R.string.music_sort_album, true),
+    YEAR(R.string.music_sort_year, false), DATE_ADDED(R.string.music_sort_date_added, false),
 }
 
 /** How the Albums tab is ordered (Plan LV Decision 5): by title, by artist then year then title, or by year. */
-enum class AlbumSort(val label: String, val byName: Boolean) { TITLE("Title", true), ARTIST("Artist", true), YEAR("Year", false) }
+enum class AlbumSort(@StringRes val label: Int, val byName: Boolean) {
+    TITLE(R.string.music_sort_title, true), ARTIST(R.string.music_sort_artist, true), YEAR(R.string.music_sort_year, false),
+}
 
 /** How an artist page groups albums, in display order (Auxio). Untyped albums are [ALBUMS]. */
-enum class ReleaseGroup(val label: String) {
-    ALBUMS("Albums"), EPS("EPs"), SINGLES("Singles"), COMPILATIONS("Compilations"), LIVE("Live"),
-    SOUNDTRACKS("Soundtracks"), OTHERS("Other releases"),
+enum class ReleaseGroup(@StringRes val label: Int) {
+    ALBUMS(R.string.music_release_albums), EPS(R.string.music_release_eps), SINGLES(R.string.music_release_singles),
+    COMPILATIONS(R.string.music_release_compilations), LIVE(R.string.music_release_live),
+    SOUNDTRACKS(R.string.music_release_soundtracks), OTHERS(R.string.music_release_others),
 }
 
 /** [shelfKey] is the [ShelfKey] the Artists tab sorts and files [name] by (its sort tag when tagged). */
@@ -103,7 +107,8 @@ data class PlaylistPage(val playlist: Playlist, val items: List<PlaylistItem>) {
  * them in the order shown.
  */
 data class MusicUi(
-    val title: String,
+    /** "All music", or the collection's name. */
+    val title: UiText,
     val sort: SongSort,
     val songSections: ShelfSections<Track>,
     val albumSort: AlbumSort,
@@ -411,17 +416,17 @@ class MusicViewModel(
     /** The Albums tab's view: List (the default) or the cover grid. */
     val albumView: StateFlow<ShelfView> = viewPrefs.view(ShelfKind.ALBUMS)
 
-    private data class Scope(val title: String, val tracks: List<Track>)
+    private data class Scope(val title: UiText, val tracks: List<Track>)
 
     private val present: Flow<List<Track>> = media.tracks.map(Albums::present)
 
     private val scope: Flow<Scope> =
         if (collectionId == null) {
-            present.map { Scope(ALL_MUSIC, it) }
+            present.map { Scope(UiText.Res(R.string.music_all), it) }
         } else {
             combine(present, shelves.collection(collectionId)) { tracks, row ->
                 val keys = row?.albums.orEmpty().mapTo(HashSet()) { it.key }
-                Scope(row?.collection?.name.orEmpty(), tracks.filter { it.albumKey in keys })
+                Scope(UiText.Raw(row?.collection?.name.orEmpty()), tracks.filter { it.albumKey in keys })
             }
         }.distinctUntilChanged()
 

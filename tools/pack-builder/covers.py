@@ -26,7 +26,8 @@ DANGLING_WORDS = LONE_WORDS - {"and", "or"}  # a line may end "Pride and", not "
 
 
 def cover_jpeg(title: str, author: str, translator: str | None, section_id: str, section_title: str,
-               size: tuple[int, int] = (600, 900)) -> bytes:
+               size: tuple[int, int] = (600, 900), wordmark: str = WORDMARK,
+               translated_by: str = "translated by") -> bytes:
     width, height = size
     ground = GROUNDS.get(section_id, DEFAULT_GROUND)
     image = Image.new("RGB", size, ground)
@@ -35,9 +36,10 @@ def cover_jpeg(title: str, author: str, translator: str | None, section_id: str,
     _tracked(draw, width / 2, 96, section_title.upper(), _font("semibold", 20), PHOSPHOR)
     owl_top = height - 210
     _paste_owl(image, OWL_SIZE, ((width - OWL_SIZE) // 2, owl_top), ground)
-    _tracked(draw, width / 2, height - 70, WORDMARK, _font("semibold", 20), PHOSPHOR)
+    _tracked(draw, width / 2, height - 70, wordmark, _font("semibold", 20), PHOSPHOR)
 
-    blocks = _layout(draw, title, author, translator, int(width * 0.78), int(width * 0.88), owl_top - 40)
+    blocks = _layout(draw, title, author, translator, int(width * 0.78), int(width * 0.88), owl_top - 40,
+                     translated_by)
     for i, (y, lines, font, step) in enumerate(blocks):
         for line in lines:
             if line is None:  # the rule under the title
@@ -51,14 +53,15 @@ def cover_jpeg(title: str, author: str, translator: str | None, section_id: str,
     return out.getvalue()
 
 
-def _layout(draw, title: str, author: str, translator: str | None, box: int, name_box: int, bottom: int):
+def _layout(draw, title: str, author: str, translator: str | None, box: int, name_box: int, bottom: int,
+            translated_by: str = "translated by"):
     """The title, rule and names as (top, lines, font, line step) blocks that end above `bottom`.
 
     The names keep their size where they can. A long block first rises (up to TITLE_TOP_MIN), then the title
     shrinks, then the names shrink. Every text wraps at word boundaries and nothing is cut.
     """
     author = author.strip()
-    credit = f"translated by {translator.strip()}" if translator and translator.strip() else ""
+    credit = f"{translated_by} {translator.strip()}" if translator and translator.strip() else ""
     names = [(text, style, start, floor, spacing) for text, style, start, floor, spacing in
              ((author, "italic", 32, 24, 46 / 32), (credit, "regular", 22, 18, 30 / 22)) if text]
 

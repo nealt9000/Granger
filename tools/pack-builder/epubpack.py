@@ -21,8 +21,23 @@ from chapters import PAGE_NUMBER, clean_title, drop_full_stop, shouting, title_c
 from zimpack import Work
 
 COLLECTION = "Granger Classics"
-RIGHTS = "Public domain in the USA."
-TAGLINE = "The world’s knowledge. Yours to keep."
+# The words a book's own pages show, by its 2-letter language.
+LABELS = {
+    "en": {"contents": "Contents", "landmarks": "Landmarks", "cover": "Cover", "start": "Start of text",
+           "colophon": "Colophon", "translated": "tr.", "rights": "Public domain in the USA.",
+           "translated_by": "Translated by", "translation_published": "This translation first published {year}",
+           "edition_published": "This edition first published {year}",
+           "from_gutenberg": "From Project Gutenberg ebook #{id}", "from_ebible": "From eBible.org ({id})",
+           "tagline": "The world’s knowledge. Yours to keep."},
+    "es": {"contents": "Índice", "landmarks": "Puntos de referencia", "cover": "Portada", "start": "Comienzo del texto",
+           "colophon": "Colofón", "translated": "trad.", "rights": "Dominio público en los Estados Unidos.",
+           "translated_by": "Traducción de",
+           "translation_published": "Esta traducción se publicó por primera vez en {year}",
+           "edition_published": "Esta edición se publicó por primera vez en {year}",
+           "from_gutenberg": "Del libro electrónico n.º {id} de Project Gutenberg",
+           "from_ebible": "De eBible.org ({id})",
+           "tagline": "El conocimiento del mundo. Tuyo para siempre."},
+}
 ZIP_TIME = (1980, 1, 1, 0, 0, 0)
 NS = 'xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"'
 
@@ -86,19 +101,24 @@ class BookMeta:
     source_url: str
     date: str
     source_line: str = ""  # the colophon's credit, e.g. "From Project Gutenberg ebook #1342"
+    collection: str = COLLECTION
 
 
-def book_id(slug: str) -> str:
-    return f"gc-{slug}"
+def labels(language: str) -> dict[str, str]:
+    return LABELS.get(language, LABELS["en"])
+
+
+def book_id(slug: str, prefix: str = "gc-") -> str:
+    return f"{prefix}{slug}"
 
 
 def chapter_href(index: int) -> str:
     return f"c{index + 1:03d}.xhtml"
 
 
-def display_title(work: Work) -> str:
+def display_title(work: Work, language: str = "en") -> str:
     if not work.author and work.translator:
-        return f"{work.title} (tr. {work.translator})"
+        return f"{work.title} ({labels(language)['translated']} {work.translator})"
     return work.title
 
 
@@ -249,7 +269,8 @@ def _wrap_stray_definitions(soup: BeautifulSoup) -> None:
             items[-1].insert_after(soup.new_tag("dd"))
 
 
-def _prepare(html: str, line_numbers: str = "margin", reads_as_verse: bool = False) -> BeautifulSoup:
+def _prepare(html: str, line_numbers: str = "margin", reads_as_verse: bool = False,
+             language: str = "en") -> BeautifulSoup:
     soup = BeautifulSoup(html, "lxml")
     _drop_page_numbers(soup)
     if line_numbers == "drop":
@@ -257,7 +278,8 @@ def _prepare(html: str, line_numbers: str = "margin", reads_as_verse: bool = Fal
     if reads_as_verse:
         verse.flatten_word_export(soup)
         verse.mark(soup)
-    _quiet_headings(soup)
+    if language == "en":  # title case follows English rules
+        _quiet_headings(soup)
     _fix_attributes(soup)
     _wrap_stray_definitions(soup)
     return soup
@@ -305,12 +327,12 @@ def _page(title: str, language: str, body: str) -> str:
             f"</head><body>{body}</body></html>")
 
 
-def _titles(work: Work) -> list[str]:
+def _titles(work: Work, language: str = "en") -> list[str]:
     """Contents titles: the manifest's override for a page ("3" is the third), else its cleaned heading."""
     missing = sorted(set(work.title_overrides) - {str(i + 1) for i in range(len(work.chapters))}, key=int)
     if missing:
         raise ValueError(f"titleOverrides name pages {missing}, but the book has {len(work.chapters)}")
-    return [work.title_overrides.get(str(i + 1)) or clean_title(c.title, work.title, work.author, i)
+    return [work.title_overrides.get(str(i + 1)) or clean_title(c.title, work.title, work.author, i, language)
             for i, c in enumerate(work.chapters)]
 
 
@@ -327,15 +349,16 @@ def _start_of_text(titles: list[str], headings: list[str]) -> int:
 
 
 def _nav(work: Work, meta: BookMeta, titles: list[str]) -> str:
+    words = labels(meta.language)
     items = "".join(f'<li><a href="{chapter_href(i)}">{escape(t, quote=False)}</a></li>' for i, t in enumerate(titles))
     headings = ["" if str(i + 1) in work.title_overrides else c.title for i, c in enumerate(work.chapters)]
     first = chapter_href(_start_of_text(titles, headings)) if titles else "cover.xhtml"
-    body = (f'<nav epub:type="toc" id="toc"><h1>Contents</h1><ol>{items}</ol></nav>'
-            '<nav epub:type="landmarks" hidden="hidden"><h1>Landmarks</h1><ol>'
-            '<li><a epub:type="cover" href="cover.xhtml">Cover</a></li>'
-            f'<li><a epub:type="bodymatter" href="{first}">Start of text</a></li>'
-            '<li><a epub:type="backmatter" href="colophon.xhtml">Colophon</a></li></ol></nav>')
-    return _page(display_title(work), meta.language, body)
+    body = (f'<nav epub:type="toc" id="toc"><h1>{words["contents"]}</h1><ol>{items}</ol></nav>'
+            f'<nav epub:type="landmarks" hidden="hidden"><h1>{words["landmarks"]}</h1><ol>'
+            f'<li><a epub:type="cover" href="cover.xhtml">{words["cover"]}</a></li>'
+            f'<li><a epub:type="bodymatter" href="{first}">{words["start"]}</a></li>'
+            f'<li><a epub:type="backmatter" href="colophon.xhtml">{words["colophon"]}</a></li></ol></nav>')
+    return _page(display_title(work, meta.language), meta.language, body)
 
 
 def _ncx(work: Work, meta: BookMeta, titles: list[str]) -> str:
@@ -344,7 +367,7 @@ def _ncx(work: Work, meta: BookMeta, titles: list[str]) -> str:
         f'<content src="{chapter_href(i)}"/></navPoint>' for i, t in enumerate(titles))
     return ('<?xml version="1.0" encoding="utf-8"?>\n<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">'
             f'<head><meta name="dtb:uid" content="urn:granger:{escape(meta.id)}"/></head>'
-            f'<docTitle><text>{escape(display_title(work), quote=False)}</text></docTitle><navMap>{points}</navMap></ncx>')
+            f'<docTitle><text>{escape(display_title(work, meta.language), quote=False)}</text></docTitle><navMap>{points}</navMap></ncx>')
 
 
 def _opf(work: Work, meta: BookMeta, count: int) -> str:
@@ -373,12 +396,12 @@ def _opf(work: Work, meta: BookMeta, count: int) -> str:
         '<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="book-id">'
         '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">'
         f'<dc:identifier id="book-id">urn:granger:{escape(meta.id)}</dc:identifier>'
-        f'<dc:title>{escape(display_title(work), quote=False)}</dc:title>{people}'
+        f'<dc:title>{escape(display_title(work, meta.language), quote=False)}</dc:title>{people}'
         f'<dc:date>{meta.published}</dc:date><dc:subject>{escape(meta.section_title, quote=False)}</dc:subject>'
         f'<dc:language>{escape(meta.language)}</dc:language><dc:publisher>Granger</dc:publisher>'
-        f'<dc:source>{escape(meta.source_url, quote=False)}</dc:source><dc:rights>{RIGHTS}</dc:rights>'
+        f'<dc:source>{escape(meta.source_url, quote=False)}</dc:source><dc:rights>{labels(meta.language)["rights"]}</dc:rights>'
         f'<meta property="dcterms:modified">{escape(modified)}</meta>'
-        f'<meta property="belongs-to-collection" id="collection">{COLLECTION}</meta>'
+        f'<meta property="belongs-to-collection" id="collection">{escape(meta.collection, quote=False)}</meta>'
         '<meta refines="#collection" property="collection-type">set</meta>'
         f'</metadata><manifest>{manifest}</manifest><spine toc="ncx">{spine}</spine>'
         '<guide><reference type="cover" title="Cover" href="cover.xhtml"/></guide></package>')
@@ -395,25 +418,26 @@ def _owl_svg() -> str:
 
 def _colophon(work: Work, meta: BookMeta) -> str:
     """The last page: the owl, the collection, the book and where its text came from."""
+    words = labels(meta.language)
     lines = [f"<h1>{escape(work.title, quote=False)}</h1>"]
     if meta.author:
         lines.append(f'<p class="author">{escape(meta.author, quote=False)}</p>')
     if meta.translator:
-        lines.append(f"<p>Translated by {escape(meta.translator, quote=False)}</p>")
-    facts = [f"This {'translation' if meta.translator else 'edition'} first published {meta.published}"]
+        lines.append(f"<p>{words['translated_by']} {escape(meta.translator, quote=False)}</p>")
+    facts = [words["translation_published" if meta.translator else "edition_published"].format(year=meta.published)]
     if meta.source_line:
         facts.append(meta.source_line)
-    facts.append(RIGHTS)
+    facts.append(words["rights"])
     body = (f'<section class="colophon" epub:type="colophon">{_owl_svg()}'
-            f'<p class="collection">{COLLECTION}</p>{"".join(lines)}'
+            f'<p class="collection">{escape(meta.collection, quote=False)}</p>{"".join(lines)}'
             f'<div class="facts">{"".join(f"<p>{escape(f, quote=False)}</p>" for f in facts)}</div>'
-            f'<p class="tagline">{escape(TAGLINE, quote=False)}</p></section>')
-    return _page(f"{display_title(work)} — Colophon", meta.language, body)
+            f'<p class="tagline">{escape(words["tagline"], quote=False)}</p></section>')
+    return _page(f"{display_title(work, meta.language)} — {words['colophon']}", meta.language, body)
 
 
 def write_epub(out: Path, work: Work, meta: BookMeta, cover_jpeg: bytes) -> None:
-    title = display_title(work)
-    titles = _titles(work)
+    title = display_title(work, meta.language)
+    titles = _titles(work, meta.language)
     files: list[tuple[str, bytes | str]] = [
         ("META-INF/container.xml",
          '<?xml version="1.0" encoding="utf-8"?>\n<container version="1.0" '
@@ -429,7 +453,7 @@ def write_epub(out: Path, work: Work, meta: BookMeta, cover_jpeg: bytes) -> None
                                     f'<div class="cover"><img src="cover.jpg" alt="{escape(title)}"/></div>')),
         ("OEBPS/colophon.xhtml", _colophon(work, meta)),
     ]
-    soups = [_prepare(chapter.html, work.line_numbers, work.verse) for chapter in work.chapters]
+    soups = [_prepare(chapter.html, work.line_numbers, work.verse, meta.language) for chapter in work.chapters]
     _unwrap_dangling_links(soups)
     for i, soup in enumerate(soups):
         body = to_xhtml(_body(soup))

@@ -1,10 +1,14 @@
 package app.granger.readiness
 
+import androidx.annotation.StringRes
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.catalog.downloadBytes
 import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.Catalog
 import app.granger.core.catalog.CatalogItem
 import app.granger.core.catalog.Domain
+import app.granger.core.catalog.ENGLISH
 import app.granger.core.catalog.PackEntry
 import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.DownloadState
@@ -19,6 +23,8 @@ import app.granger.sources.CatalogScope
 import app.granger.sources.scopeOf
 import java.net.URI
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 /** How much of a knowledge domain the phone holds (spec §3.4). */
 enum class Coverage { NONE, BASIC, COMPREHENSIVE }
@@ -36,32 +42,34 @@ data class DomainCoverage(
     /** Essential items not installed, smallest first; `family:` items are left out (onboarding picks the region). */
     val missingEssential: List<CatalogItem>,
     /** Tier items a bigger pack on the phone holds (Plan WF Decision 5): "Wikipedia Top 1 million covers Best 50,000". */
-    val covers: List<String> = emptyList(),
+    val covers: List<UiText> = emptyList(),
+    /** The domain has no tiers in any knowledge language (Plan L3): "No Spanish packs for this area yet". */
+    val emptyNote: UiText? = null,
 )
 
 /** One sentence about a gap, with what the screen can do about it (spec §4). */
 sealed interface Signal {
-    val text: String
+    val text: UiText
 
     /** Nothing of the domain is installed; [item] is the smallest missing essential. */
-    data class EmptyDomain(val domain: String, val item: CatalogItem, override val text: String) : Signal
+    data class EmptyDomain(val domain: String, val item: CatalogItem, override val text: UiText) : Signal
 
     /** An installed pack over a year old whose catalog entry has a newer snapshot. */
-    data class Stale(val domain: String?, val packId: String, override val text: String) : Signal
+    data class Stale(val domain: String?, val packId: String, override val text: UiText) : Signal
 
     /** An installed pack without a full-text index: Search and Research can't look inside it. */
-    data class Unsearchable(val packId: String, override val text: String) : Signal
+    data class Unsearchable(val packId: String, override val text: UiText) : Signal
 }
 
-enum class Source(val title: String) {
-    KIWIX("Kiwix"),
-    GRANGER("Granger"),
-    ARCHIVE_ORG("Archive.org"),
-    LIBRIVOX("LibriVox"),
-    MY_BOOKS("My books"),
-    MODELS("AI models"),
-    VOICES("Voices"),
-    PHONE_MEDIA("Music & audiobooks on the phone"),
+enum class Source(@StringRes val title: Int) {
+    KIWIX(R.string.readiness_source_kiwix),
+    GRANGER(R.string.readiness_source_granger),
+    ARCHIVE_ORG(R.string.readiness_source_archive_org),
+    LIBRIVOX(R.string.readiness_source_librivox),
+    MY_BOOKS(R.string.readiness_source_my_books),
+    MODELS(R.string.readiness_source_models),
+    VOICES(R.string.readiness_source_voices),
+    PHONE_MEDIA(R.string.readiness_source_phone_media),
 }
 
 data class StorageRow(
@@ -92,12 +100,25 @@ data class ReadinessReport(
 object ReadinessModel {
     private const val STALE_AFTER_DAYS = 365L
 
-    fun report(catalog: Catalog?, packs: List<Pack>, books: List<Book>, records: List<DownloadRecord>, today: LocalDate): ReadinessReport {
+    /**
+     * [languages] are the knowledge languages, main first (Plan L3): each domain is measured over all of them, its best
+     * coverage. [appLanguage] picks the domain titles' copy.
+     */
+    fun report(
+        catalog: Catalog?,
+        packs: List<Pack>,
+        books: List<Book>,
+        records: List<DownloadRecord>,
+        today: LocalDate,
+        languages: List<String> = listOf(ENGLISH),
+        appLanguage: String = ENGLISH,
+    ): ReadinessReport {
         val installed = records.filter { it.state == DownloadState.INSTALLED }
         val wholePacks = packs.filter { it.status == PackStatus.OK }
         val wholeBooks = books.filter { it.status == PackStatus.OK }
         val resolved = Resolved(catalog, wholePacks, wholeBooks)
-        val domains = catalog?.readiness?.domains.orEmpty().map { resolved.coverage(it) }
+        val langs = languages.ifEmpty { listOf(ENGLISH) }
+        val domains = catalog?.readiness?.domains.orEmpty().map { resolved.coverage(it, langs, appLanguage) }
         return ReadinessReport(
             domains = domains,
             signals = signals(domains, resolved, wholePacks, installed, today),
@@ -131,12 +152,15 @@ object ReadinessModel {
             if (zimName in installedNames) null else containment.containers(zimName).firstOrNull { it in installedNames }
 
         /** "Wikipedia Top 1 million covers Best 50,000": within a set by its labels, else by the packs' titles. */
-        private fun coversText(container: PackEntry, item: PackEntry): String =
+        private fun coversText(container: PackEntry, item: PackEntry): UiText =
             if (container.isSlice && item.isSlice && container.setId == item.setId) {
                 val set = app.granger.sources.KiwixList.setTitle(container.setId, listOf(container))
-                "$set ${app.granger.sources.KiwixList.shortLabel(container.setLabel)} covers ${app.granger.sources.KiwixList.shortLabel(item.setLabel)}"
+                UiText.Res(
+                    R.string.readiness_covers_slice, set,
+                    app.granger.sources.KiwixList.shortLabel(container), app.granger.sources.KiwixList.shortLabel(item),
+                )
             } else {
-                "${container.title} covers ${item.title}"
+                UiText.Res(R.string.readiness_covers, app.granger.sources.KiwixList.title(container), app.granger.sources.KiwixList.title(item))
             }
 
         /** Granger books that are whole, with their entries. */
@@ -146,31 +170,51 @@ object ReadinessModel {
 
         fun entryOf(pack: Pack): PackEntry? = packEntries[pack]
 
-        fun coverage(domain: Domain): DomainCoverage {
+        /**
+         * [domain] over the knowledge [languages] (Plan L3): Comprehensive when one language's comprehensive tier is all
+         * here, Basic when any language's essential tier is started (or, for a language whose list has no essential
+         * tier, its comprehensive one: Spanish Food), else None. The bar's sizes are the first language's with tiers,
+         * the missing essentials the first language's with an essential tier. English alone is today's model.
+         */
+        fun coverage(domain: Domain, languages: List<String>, appLanguage: String): DomainCoverage {
             val installedBytes = packEntries.entries.sumOf { (pack, entry) -> if (entry?.domain == domain.id) pack.sizeBytes else 0L } +
                 granger.entries.sumOf { (book, entry) -> if (entry.domain == domain.id) book.sizeBytes else 0L }
-            val essential = domain.essential.map { token(it, domain.id) }
-            val comprehensive = domain.comprehensive.map { token(it, domain.id) }
-            val coverage = when {
-                comprehensive.isNotEmpty() && comprehensive.all { it.complete } -> Coverage.COMPREHENSIVE
-                essential.any { it.started } -> Coverage.BASIC
-                else -> Coverage.NONE
+            class Lang(val essentialIds: List<String>, val comprehensiveIds: List<String>) {
+                val essential = essentialIds.map { token(it, domain.id) }
+                val comprehensive = comprehensiveIds.map { token(it, domain.id) }
+                val coverage = when {
+                    comprehensive.isNotEmpty() && comprehensive.all { it.complete } -> Coverage.COMPREHENSIVE
+                    essential.any { it.started } -> Coverage.BASIC
+                    essential.isEmpty() && comprehensive.any { it.started } -> Coverage.BASIC
+                    else -> Coverage.NONE
+                }
             }
+            val langs = languages.map { Lang(domain.essential(it), domain.comprehensive(it)) }
+                .filter { it.essentialIds.isNotEmpty() || it.comprehensiveIds.isNotEmpty() }
+            val main = langs.firstOrNull()
+            val withEssential = langs.firstOrNull { it.essential.isNotEmpty() }
             return DomainCoverage(
                 id = domain.id,
-                title = domain.title,
-                coverage = coverage,
+                title = domain.title(appLanguage),
+                coverage = langs.maxOfOrNull { it.coverage } ?: Coverage.NONE,
                 installedBytes = installedBytes,
-                essentialBytes = tierBytes(essential),
-                comprehensiveBytes = tierBytes(comprehensive),
-                missingEssential = essential.filterNot { it.started }.mapNotNull { it.missing }.sortedBy { it.sizeBytes },
-                covers = (domain.essential + domain.comprehensive).distinct().mapNotNull { id ->
+                essentialBytes = main?.let { tierBytes(it.essential) } ?: 0L,
+                comprehensiveBytes = main?.let { tierBytes(it.comprehensive) } ?: 0L,
+                missingEssential = withEssential?.essential.orEmpty().filterNot { it.started }.mapNotNull { it.missing }.sortedBy { it.sizeBytes },
+                covers = langs.flatMap { it.essentialIds + it.comprehensiveIds }.distinct().mapNotNull { id ->
                     val item = catalog?.packs?.firstOrNull { it.id == id } ?: return@mapNotNull null
                     val by = heldBy(item.zimName) ?: return@mapNotNull null
                     val container = packEntries.values.filterNotNull().firstOrNull { it.zimName == by } ?: byName[by]?.firstOrNull() ?: return@mapNotNull null
                     coversText(container, item)
                 }.distinct(),
+                emptyNote = if (main == null) emptyNote(languages) else null,
             )
+        }
+
+        /** "No Spanish packs for this area yet", the language named in the app's; several languages in one line. */
+        private fun emptyNote(languages: List<String>): UiText = when (languages.size) {
+            1 -> UiText.Res(R.string.readiness_no_packs_in, app.granger.sources.KiwixList.languageName(languages.single()))
+            else -> UiText.Res(R.string.readiness_no_packs_in_yours)
         }
 
         /** What a tier token stands for and whether it's installed; [zimName] for a pack token. */
@@ -225,8 +269,8 @@ object ReadinessModel {
         val empty = domains.filter { it.coverage == Coverage.NONE && it.missingEssential.isNotEmpty() }.map { d ->
             val item = d.missingEssential.first()
             // A domain can hold packs outside its tiers (Stack Overflow in Technology): its bar isn't empty, only its essentials.
-            val lead = if (d.installedBytes > 0L) "No essentials yet for" else "Nothing yet for"
-            Signal.EmptyDomain(d.id, item, "$lead ${d.title}. Get ${item.title}, ${formatBytes(item.downloadBytes)}.")
+            val text = if (d.installedBytes > 0L) R.string.readiness_signal_no_essentials_for else R.string.readiness_signal_nothing_for
+            Signal.EmptyDomain(d.id, item, UiText.Res(text, d.title, app.granger.sources.KiwixList.title(item), formatBytes(item.downloadBytes)))
         }
         val recordByPath = installed.associateBy { it.filePath }
         val stale = packs.sortedBy { it.title.lowercase() }.mapNotNull { pack ->
@@ -234,14 +278,17 @@ object ReadinessModel {
             val installedDate = parseDate(recordByPath[pack.filePath]?.snapshotDate ?: pack.date) ?: return@mapNotNull null
             val newest = parseDate(entry.snapshotDate) ?: return@mapNotNull null
             if (installedDate.plusDays(STALE_AFTER_DAYS) < today && newest > installedDate) {
-                Signal.Stale(entry.domain.ifBlank { null }, entry.id, "${pack.title} is from $installedDate; a newer one is in the catalog.")
+                Signal.Stale(
+                    entry.domain.ifBlank { null }, entry.id,
+                    UiText.Res(R.string.readiness_signal_stale, pack.title, installedDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))),
+                )
             } else {
                 null
             }
         }
         // A map has nothing to search by text: its missing index isn't a gap (Neal, U3a walkthrough).
         val unsearchable = packs.filterNot { it.hasFulltextIndex || resolved.entryOf(it)?.family == "maps" }.sortedBy { it.title.lowercase() }.map { pack ->
-            Signal.Unsearchable(pack.id, "${pack.title} can't be searched: the pack has no index.")
+            Signal.Unsearchable(pack.id, UiText.Res(R.string.readiness_signal_unsearchable, pack.title))
         }
         return empty + stale + unsearchable
     }

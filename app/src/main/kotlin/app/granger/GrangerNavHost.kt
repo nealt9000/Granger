@@ -8,6 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -108,7 +109,9 @@ import app.granger.settings.MediaSettingsScreen
 import app.granger.settings.ResolverFolderGrants
 import app.granger.settings.ScanSummary
 import app.granger.settings.SettingsScreen
+import app.granger.settings.LanguageSettingsScreen
 import app.granger.settings.VoiceSettingsScreen
+import app.granger.settings.languageLabel
 import app.granger.settings.VoiceSettingsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -153,8 +156,11 @@ import app.granger.research.citationTab
 import app.granger.research.ResearchScreen
 import app.granger.research.ResearchViewModel
 
-/** [notice] is shown once as a snackbar, e.g. why the app didn't resume reading. */
-@Serializable data class LibraryRoute(val notice: String? = null)
+/** [notice] is shown once as a snackbar, e.g. why the app didn't resume reading; [noticeTitle] is the item it names. */
+@Serializable data class LibraryRoute(val notice: app.granger.launch.LibraryNotice? = null, val noticeTitle: String? = null)
+
+/** The Library route's notice in words. */
+internal fun LibraryRoute.noticeText(): UiText? = notice?.let { UiText.Res(it.text, *listOfNotNull(noticeTitle).toTypedArray()) }
 
 /** Home (Plan H2): the readiness strip, Continue and the feeds. A rail tool, pushed over the Library. */
 @Serializable object HomeRoute
@@ -183,8 +189,6 @@ private fun NavDestination.isMusic() = hasRoute<MusicRoute>() || hasRoute<AlbumR
 @Serializable data class AudiobookRoute(val audiobookId: String, val chapter: Int? = null)
 
 private fun NavDestination.isAudiobooks() = hasRoute<AudiobookShelfRoute>() || hasRoute<AudiobookRoute>()
-/** Said when a cited article's page is gone from its pack, so its main page opened instead (research spec §7). */
-const val PAGE_MOVED = "That page is no longer in this pack."
 
 /** An article; [fragment] scrolls its first page to that section (a cited passage's heading), and [quote] is marked there. */
 @Serializable data class ReaderRoute(val tabId: Long, val fragment: String? = null, val quote: String? = null)
@@ -354,6 +358,8 @@ internal fun inLibraryRoute(kind: ArchiveKind, identifier: String): Any =
 @Serializable object DownloadsRoute
 /** Settings → Voice (Plan V1). */
 @Serializable object VoiceRoute
+/** Settings → Appearance → Language (Plan L2 Task 3). */
+@Serializable object LanguageRoute
 
 /**
  * The rail tool a destination belongs to. Get more and its sources are part of the Library, as is everything they lead
@@ -382,7 +388,7 @@ internal fun railToolOf(
         destination.hasRoute<DownloadsRoute>() || destination.hasRoute<GetMoreRoute>() || destination.hasRoute<ReadinessRoute>() -> RailTool.LIBRARY
     destination.hasRoute<SearchRoute>() -> RailTool.SEARCH
     destination.hasRoute<ResearchRoute>() -> RailTool.RESEARCH
-    destination.hasRoute<SettingsRoute>() || destination.hasRoute<MediaSettingsRoute>() -> RailTool.SETTINGS
+    destination.hasRoute<SettingsRoute>() || destination.hasRoute<MediaSettingsRoute>() || destination.hasRoute<LanguageRoute>() -> RailTool.SETTINGS
     else -> null
 }
 
@@ -535,7 +541,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     // The player's one-off lines (a bookmark kept, a queue that couldn't play), wherever the user is.
     val noticeContext = LocalContext.current.applicationContext
     LaunchedEffect(player) {
-        player?.notices?.collect { Toast.makeText(noticeContext, it, Toast.LENGTH_LONG).show() }
+        player?.notices?.collect { Toast.makeText(noticeContext, it.resolve(noticeContext), Toast.LENGTH_LONG).show() }
     }
     val playerUi by (player?.ui ?: remember { MutableStateFlow(PlayerUi.IDLE) }).collectAsStateWithLifecycle()
     val miniUi by (player?.mini ?: remember { MutableStateFlow(PlayerUi.IDLE) }).collectAsStateWithLifecycle()
@@ -658,7 +664,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         if (path.endsWith(".epub", ignoreCase = true)) {
             val book = container.gutenbergBooks.bookFor(packId, path)
             if (book == null) {
-                android.widget.Toast.makeText(appContext, "Couldn't open this book: it isn't in this pack's list.", android.widget.Toast.LENGTH_LONG).show()
+                android.widget.Toast.makeText(appContext, R.string.app_book_not_in_pack, android.widget.Toast.LENGTH_LONG).show()
                 return
             }
             val tab = container.sessions.openTab(book.id, "", book.title).let { container.sessions.tab(it) } ?: return
@@ -689,13 +695,22 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         }
     }
 
-    /** Opens [word]'s Wiktionary entry over the book, so Back returns to the page; false when there is none. */
-    suspend fun lookUpInWiktionary(packId: String, word: String): Boolean {
-        val hit = withContext(Dispatchers.IO) { container.library.archive(packId)?.suggest(word, 5) }
-            ?.let { Dictionary.pick(it, word) } ?: return false
-        val tab = container.sessions.openTab(packId, hit.path, hit.title).let { container.sessions.tab(it) } ?: return false
-        nav.showTab(tab, keepCurrent = true)
-        return true
+    /**
+     * Opens [word]'s Wiktionary entry over the book, so Back returns to the page, at the section for the book's language
+     * (Plan L3: the Wiktionary [Dictionary.choose] picks for a book in [bookLanguage]; [packId] when it picks none).
+     */
+    suspend fun lookUpInWiktionary(packId: String, word: String, bookLanguage: String?): app.granger.ebook.LookUp {
+        val definer = Dictionary.choose(container.library.packs.first(), bookLanguage, container.knowledgeNow.value)
+        val id = definer?.packId ?: packId
+        val hit = withContext(Dispatchers.IO) { container.library.archive(id)?.suggest(word, 5) }
+            ?.let { Dictionary.pick(it, word) } ?: return app.granger.ebook.LookUp.NotFound
+        val tab = container.sessions.openTab(id, hit.path, hit.title).let { container.sessions.tab(it) } ?: return app.granger.ebook.LookUp.NotFound
+        nav.showTab(tab, keepCurrent = true, fragment = definer?.anchor)
+        return app.granger.ebook.LookUp.Found(
+            definer?.takeIf { it.fallback }?.let {
+                UiText.Res(R.string.ebook_defined_in, app.granger.sources.KiwixList.languageName(it.wiktionaryLanguage))
+            },
+        )
     }
 
     val selected = entry?.let { e ->
@@ -745,7 +760,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     fun resumePlay(item: RailEntry.Play) {
         scope.launch {
             val notice = railViewModel.resume(item) ?: return@launch
-            nav.navigate(LibraryRoute(notice)) { popUpTo<LibraryRoute> { inclusive = true } }
+            nav.navigate(LibraryRoute(notice, item.title)) { popUpTo<LibraryRoute> { inclusive = true } }
         }
     }
 
@@ -788,7 +803,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     scope.launch {
                         // All six are taken: say to unpin one first.
                         val notice = railViewModel.pin(entry) ?: return@launch
-                        Toast.makeText(appContext, notice, Toast.LENGTH_LONG).show()
+                        Toast.makeText(appContext, notice.resolve(appContext), Toast.LENGTH_LONG).show()
                     }
                 },
                 onUnpin = railViewModel::unpin,
@@ -843,7 +858,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             container.appScope,
                         )
                     },
-                    notice = backStackEntry.toRoute<LibraryRoute>().notice,
+                    notice = backStackEntry.toRoute<LibraryRoute>().noticeText(),
                     onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
                     onSearch = { nav.navigate(SearchRoute()) },
                     onReadiness = { nav.navigate(ReadinessRoute) },
@@ -857,7 +872,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             }
             composable<BrowseRoute> {
                 BrowseScreen(
-                    viewModel { BrowseViewModel(container.shelves, container.library, container.catalog, container.downloads.records) },
+                    viewModel { BrowseViewModel(container.shelves, container.library, container.catalog, container.downloads.records, knowledge = container.knowledgeLanguages.languages) },
                     packsFolder = container.packDirs().firstOrNull()?.path.orEmpty(),
                     downloadsBadge = downloadsBadge,
                     actions = BrowseActions(
@@ -1049,7 +1064,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             when (target) {
                                 is CitationTarget.Article -> {
                                     nav.showTab(tab, fragment = target.fragment, quote = target.quote)
-                                    if (target.moved) Toast.makeText(appContext, PAGE_MOVED, Toast.LENGTH_LONG).show()
+                                    if (target.moved) Toast.makeText(appContext, R.string.app_page_moved, Toast.LENGTH_LONG).show()
                                 }
                                 is CitationTarget.Book -> nav.showTab(tab, target.at)
                                 is CitationTarget.Album, is CitationTarget.Audiobook, CitationTarget.Gone -> Unit
@@ -1062,7 +1077,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onGetLibrarian = {
                         container.appScope.launch {
                             container.librarian.get()?.let { problem ->
-                                withContext(Dispatchers.Main) { Toast.makeText(appContext, problem, Toast.LENGTH_LONG).show() }
+                                withContext(Dispatchers.Main) { Toast.makeText(appContext, problem.resolve(appContext), Toast.LENGTH_LONG).show() }
                             }
                         }
                     },
@@ -1098,10 +1113,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         SourceViewModel(
                             source, container.catalog, container.downloads, container.library, container.bookshelf, container.volumes,
                             container.downloadPrefs, container.deviceTier, container.appScope, domain = route.domain,
-                            family = route.family,
+                            family = route.family, knowledge = container.knowledgeLanguages.languages,
                         )
                     },
-                    title = source.title,
+                    title = stringResource(source.title),
                     onBack = { nav.popBackStack() },
                     // An installed book pack opens as its books, in the Library (Plan GB, Plan KB Decision 6), from any list.
                     onOpenPack = ::openPackOrCollection,
@@ -1115,7 +1130,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         ArchiveViewModel(
                             container.archiveClient, container.downloads, container.bookshelf, container.archivePrefs,
                             container.volumes, container.downloadPrefs, { container.archiveSidecarDir }, container.appScope,
-                            kind = kind, media = container.mediaDownloader,
+                            kind = kind, media = container.mediaDownloader, languages = { container.knowledgeNow.value },
                         )
                     },
                     detailsUrl = container.archiveClient::detailsUrl,
@@ -1129,7 +1144,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     viewModel = viewModel {
                         LibriVoxViewModel(
                             container.librivoxClient, container.archiveClient, container.mediaDownloader, container.downloads,
-                            container.appScope,
+                            container.appScope, languages = { container.knowledgeNow.value },
                         )
                     },
                     onBack = { nav.popBackStack() },
@@ -1150,10 +1165,17 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onVoice = if (Features.PLAYER && Features.READ_ALOUD) ({ nav.navigate(VoiceRoute) }) else null,
                     voiceSummary = container.installedVoices.voices.collectAsStateWithLifecycle().value
                         .let { voices -> container.voicePrefs.voiceId.collectAsStateWithLifecycle().value?.let { id -> voices.firstOrNull { v -> v.id == id } } ?: voices.firstOrNull() }
-                        ?.title ?: "No offline voice on this phone",
+                        ?.title ?: stringResource(R.string.settings_voice_none),
                     onMediaSettings = if (Features.PLAYER) ({ nav.navigate(MediaSettingsRoute) { launchSingleTop = true } }) else null,
                     audiobooks = remember { container.shelves.audioShelves }.collectAsStateWithLifecycle(AudioShelves.NONE).value.audiobooks,
+                    onLanguage = { nav.navigate(LanguageRoute) { launchSingleTop = true } },
+                    languageSummary = languageLabel(
+                        container.appLanguages.language.collectAsStateWithLifecycle().value, container.appLanguages.phoneLocale(),
+                    ),
                 )
+            }
+            composable<LanguageRoute> {
+                LanguageSettingsScreen(container.appLanguages, container.knowledgeLanguages, onBack = { nav.popBackStack() })
             }
             composable<MediaSettingsRoute> {
                 MediaSettingsScreen(
@@ -1229,8 +1251,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 bookSearch = { container.bookIndex.search(it) },
                                 librarySearch = container.search,
                                 thumbnail = ArticleThumbnails(File(appContext.cacheDir, "home-thumbs"))::thumbnail,
+                                languages = { container.knowledgeNow.value },
                             ),
                             container.shelves, container.media, container.homePrefs, tidyDismissals = container.tidyDismissals,
+                            knowledge = container.knowledgeLanguages.languages, appLanguage = container.appLanguages.code,
                         )
                     },
                     onReadiness = { nav.navigate(ReadinessRoute) { launchSingleTop = true } },
@@ -1261,6 +1285,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         OnboardingViewModel(
                             container.catalog, container.library, container.downloads, container.volumes, container.downloadPrefs,
                             container.deviceTier, container.totalRamBytes, container.onboardingPrefs,
+                            knowledge = container.knowledgeLanguages.languages,
+                            setKnowledge = container.knowledgeLanguages::set,
+                            phoneLocales = container.appLanguages::phoneLocales,
+                            appLanguage = container.appLanguages::currentCode,
                         )
                     },
                     onDone = { nav.popBackStack() },
@@ -1296,6 +1324,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         ReadinessViewModel(
                             container.downloads, container.library, container.bookshelf, container.catalog, container.volumes,
                             container.deviceTier, container.totalRamBytes, container.appScope,
+                            knowledge = container.knowledgeLanguages.languages, appLanguage = container.appLanguages.code,
                         )
                     },
                     onBack = { nav.popBackStack() },

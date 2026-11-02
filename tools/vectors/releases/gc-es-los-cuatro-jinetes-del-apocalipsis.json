@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-los-cuatro-jinetes-del-apocalipsis",
+ "kind": "book",
+ "fileName": "gc-es-los-cuatro-jinetes-del-apocalipsis_2026-10-30.gvec",
+ "sizeBytes": 320592,
+ "sha256": "0baa8e04ba1a15e94f977cb517962dfb1eefc2c3001de916f6b0fcb607de3b12",
+ "count": 1090,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "93e6edaac90018c5b2df4f78cd9b21c32423d6942b8318d2a36c3671dd516f07",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-los-cuatro-jinetes-del-apocalipsis_2026-10-30.gvec"
+}

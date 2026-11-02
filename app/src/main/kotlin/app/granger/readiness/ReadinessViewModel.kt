@@ -84,6 +84,9 @@ class ReadinessViewModel(
         IntegrityChecker.full(record, io, progress)
     },
     private val today: () -> LocalDate = LocalDate::now,
+    /** The library's languages, main first, and the app's (Plan L3): each domain is measured over the first, titled in the second. */
+    knowledge: kotlinx.coroutines.flow.Flow<List<String>> = kotlinx.coroutines.flow.flowOf(listOf(app.granger.core.catalog.ENGLISH)),
+    appLanguage: kotlinx.coroutines.flow.Flow<String> = kotlinx.coroutines.flow.flowOf(app.granger.core.catalog.ENGLISH),
 ) : ViewModel() {
     private val volumeList = MutableStateFlow<List<Volume>>(emptyList())
     private val progress = MutableStateFlow<Map<String, Float>>(emptyMap())
@@ -91,10 +94,10 @@ class ReadinessViewModel(
     private val checks = mutableMapOf<String, Job>()
 
     private data class Checks(val vols: List<Volume>, val prog: Map<String, Float>, val res: Map<String, Integrity>)
-    private data class Sources(val catalog: Catalog?, val books: List<Book>)
+    private data class Sources(val catalog: Catalog?, val books: List<Book>, val languages: List<String>, val appLanguage: String)
 
     private val checkState = combine(volumeList, progress, results, ::Checks)
-    private val sources = combine(catalog.state, bookshelf.books) { state, books -> Sources(state.catalog, books) }
+    private val sources = combine(catalog.state, bookshelf.books, knowledge, appLanguage) { state, books, langs, app -> Sources(state.catalog, books, langs, app) }
 
     val ui: StateFlow<ReadinessUi> =
         combine(downloads.records, library.packs, sources, checkState) { records, packs, src, chk ->
@@ -251,7 +254,7 @@ class ReadinessViewModel(
             voices = rows.filter { it.key in voiceKeys },
             packs = rows.filterNot { it.isModel || it.key in voiceKeys } + byHand,
             media = media.sortedBy { it.title.lowercase() },
-            report = ReadinessModel.report(src.catalog, packs, src.books, records, today()),
+            report = ReadinessModel.report(src.catalog, packs, src.books, records, today(), src.languages, src.appLanguage),
         )
     }
 

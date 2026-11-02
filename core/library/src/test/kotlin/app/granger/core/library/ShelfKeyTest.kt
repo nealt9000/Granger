@@ -62,4 +62,12 @@ class ShelfKeyTest {
         assertThat(ShelfKey.of("The Who", "  ")).isEqualTo("who")
         assertThat(ShelfKey.of("The Who", null)).isEqualTo("who")
     }
+
+    @Test fun aSpanishTitleDropsItsArticle() {
+        assertThat(ShelfKey.of("El Quijote", language = "es")).isEqualTo("quijote")
+        assertThat(ShelfKey.of("Las mil y una noches", language = "spa")).isEqualTo("mil y una noches")
+        // An English title keeps "El", "La" and "Los": El Paso, Los Angeles.
+        assertThat(ShelfKey.of("El Paso", language = "en")).isEqualTo("el paso")
+        assertThat(ShelfKey.of("Los Angeles")).isEqualTo("los angeles")
+    }
 }

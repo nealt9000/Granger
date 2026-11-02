@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-luces-de-bohemia",
+ "kind": "book",
+ "fileName": "gc-es-luces-de-bohemia_2026-10-30.gvec",
+ "sizeBytes": 73926,
+ "sha256": "e07434a3ff750ca877deabeb884796debb2f7faeec9601c3b63c632699e6d9be",
+ "count": 251,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "9b76fbc95fced5c029f0fb3efc2bcfc6caf1d40e0d2f3da749518ac9bc10b7ce",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-luces-de-bohemia_2026-10-30.gvec"
+}

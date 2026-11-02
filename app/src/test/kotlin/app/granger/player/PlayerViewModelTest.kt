@@ -1,6 +1,8 @@
 package app.granger.player
 
 import app.granger.MainDispatcherRule
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.speech.VoiceId
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -131,16 +133,20 @@ class PlayerViewModelTest {
 
         // A bookmark only with a book loaded, titled with the chapter and the time in it.
         hub.calls.clear()
-        vm.addBookmark()
+        val resolved = mutableListOf<UiText>()
+        val resolve = { it: UiText -> resolved += it; "The Storm · 2:05" }
+        vm.addBookmark(resolve)
+        assertThat(resolved).isEmpty()
         val book = audiobook("b")
         hub.ui.value = bookUi(book, chapter(book, 2, 600_000L, title = "The Storm"), chapterCount = 5, positionMs = 125_000L)
         val notice = async { vm.notices.first() }
         testScheduler.advanceUntilIdle()
-        vm.addBookmark()
+        vm.addBookmark(resolve)
         testScheduler.advanceUntilIdle()
         assertThat(hub.calls).containsExactly("bookmark:The Storm · 2:05")
         // It says so (clean-up list: adding a bookmark gave no feedback).
-        assertThat(notice.await()).isEqualTo("Bookmarked: The Storm · 2:05")
+        assertThat(notice.await()).isEqualTo(UiText.Res(R.string.player_bookmarked, "The Storm · 2:05"))
+        assertThat(resolved).containsExactly(UiText.Res(R.string.player_bookmark_title, UiText.Raw("The Storm"), "2:05"))
     }
 
     @Test fun theFullPlayerAddsTheSongThatsOnToAPlaylist() = runTest(main.dispatcher) {
@@ -159,6 +165,11 @@ class PlayerViewModelTest {
         assertThat(lists.entries.value.values.last()).containsExactly(track("a").id)
         assertThat(PlayerViewModel(hub).canAddToPlaylist).isFalse()
         collecting.cancel()
+    }
+
+    @Test fun thePlayersOwnLinesAreShownInTheUsersLanguage() {
+        assertThat(playerNotice(app.granger.core.player.PlayerNotices.BOOK_FAILED)).isEqualTo(UiText.Res(R.string.player_notice_book_failed))
+        assertThat(playerNotice("Something else")).isEqualTo(UiText.Raw("Something else"))
     }
 
     @Test fun speedsAndSleepChoicesMatchTheSpec() {

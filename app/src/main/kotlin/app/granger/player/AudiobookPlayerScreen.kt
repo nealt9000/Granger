@@ -33,8 +33,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -73,6 +76,8 @@ internal fun AudiobookPlayer(
     var sheet by rememberSaveable { mutableStateOf<BookSheet?>(null) }
     val back = viewModel.skipBackS()
     val forward = viewModel.skipForwardS()
+    val context = LocalContext.current
+    val addBookmark = { viewModel.addBookmark { it.resolve(context) } }
     fun control(action: PlayerViewModel.() -> Unit) = if (live) viewModel.action() else viewModel.activate(PlayerMode.AUDIOBOOK, action)
     // The saved book's chapter steps go by its own list; the live one's by the player's ([PlayerViewModel.nextChapter]).
     val at = chapters.indexOfFirst { it.ordinal == book.chapter.ordinal }
@@ -98,12 +103,12 @@ internal fun AudiobookPlayer(
                     Text(book.book.author, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                 }
                 Text(
-                    "${chapterTitle(book)} · ${book.chapter.ordinal + 1} of ${book.chapterCount}",
+                    stringResource(R.string.player_chapter_of, chapterName(book).resolve(), book.chapter.ordinal + 1, book.chapterCount),
                     style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            SeekBar(ui.positionMs, ui.durationMs, { p -> control { seekTo(p) } }, label = "Seek in chapter")
+            SeekBar(ui.positionMs, ui.durationMs, { p -> control { seekTo(p) } }, label = stringResource(R.string.player_seek_chapter))
             progress?.let { BookProgressLine(it) }
             Row(
                 Modifier.fillMaxWidth(),
@@ -111,37 +116,37 @@ internal fun AudiobookPlayer(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 IconButton(onClick = { stepChapter(-1) }, enabled = book.chapter.ordinal > 0) {
-                    Icon(painterResource(R.drawable.ic_skip_previous), contentDescription = "Previous chapter")
+                    Icon(painterResource(R.drawable.ic_skip_previous), contentDescription = stringResource(R.string.player_previous_chapter))
                 }
                 IconButton(onClick = { control { skipBack() } }, modifier = Modifier.size(64.dp)) {
-                    Icon(painterResource(R.drawable.ic_replay), contentDescription = "Back $back seconds", modifier = Modifier.size(40.dp))
+                    Icon(painterResource(R.drawable.ic_replay), contentDescription = pluralStringResource(R.plurals.player_back_seconds, back, back), modifier = Modifier.size(40.dp))
                 }
                 BigPlayPause(ui.playing, { if (live) viewModel.playPause() else viewModel.activate(PlayerMode.AUDIOBOOK) })
                 IconButton(onClick = { control { skipForward() } }, modifier = Modifier.size(64.dp)) {
-                    Icon(painterResource(R.drawable.ic_forward), contentDescription = "Forward $forward seconds", modifier = Modifier.size(40.dp))
+                    Icon(painterResource(R.drawable.ic_forward), contentDescription = pluralStringResource(R.plurals.player_forward_seconds, forward, forward), modifier = Modifier.size(40.dp))
                 }
                 IconButton(onClick = { stepChapter(+1) }, enabled = book.chapter.ordinal < book.chapterCount - 1) {
-                    Icon(painterResource(R.drawable.ic_skip_next), contentDescription = "Next chapter")
+                    Icon(painterResource(R.drawable.ic_skip_next), contentDescription = stringResource(R.string.player_next_chapter))
                 }
             }
             if (live) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    PlayerAction(rememberVectorPainter(Icons.AutoMirrored.Filled.List), "Chapters", "Chapters") { sheet = BookSheet.CHAPTERS }
-                    PlayerAction(painterResource(R.drawable.ic_speed), speedLabel(book.speed), "Playback speed ${speedLabel(book.speed)}") {
+                    PlayerAction(rememberVectorPainter(Icons.AutoMirrored.Filled.List), stringResource(R.string.player_chapters), stringResource(R.string.player_chapters)) { sheet = BookSheet.CHAPTERS }
+                    PlayerAction(painterResource(R.drawable.ic_speed), speedLabel(book.speed), stringResource(R.string.player_playback_speed_value, speedLabel(book.speed))) {
                         sheet = BookSheet.SPEED
                     }
                     val sleep = ui.sleepRemainingMs
                     PlayerAction(
                         painterResource(R.drawable.ic_timer),
-                        if (sleep != null) formatTime(sleep) else "Sleep",
-                        if (sleep != null) "Sleep timer, ${formatTime(sleep)} left" else "Sleep timer",
+                        if (sleep != null) formatTime(sleep) else stringResource(R.string.player_sleep),
+                        if (sleep != null) stringResource(R.string.player_sleep_timer_left, formatTime(sleep)) else stringResource(R.string.player_sleep_timer),
                         active = sleep != null,
                     ) { sheet = BookSheet.SLEEP }
-                    PlayerAction(painterResource(R.drawable.ic_bookmark_border), "Bookmark", "Add bookmark", onClick = viewModel::addBookmark)
-                    PlayerAction(rememberVectorPainter(Icons.Filled.Star), "Bookmarks", "Bookmarks") { sheet = BookSheet.BOOKMARKS }
+                    PlayerAction(painterResource(R.drawable.ic_bookmark_border), stringResource(R.string.player_bookmark), stringResource(R.string.player_add_bookmark), onClick = addBookmark)
+                    PlayerAction(rememberVectorPainter(Icons.Filled.Star), stringResource(R.string.player_bookmarks), stringResource(R.string.player_bookmarks)) { sheet = BookSheet.BOOKMARKS }
                 }
-                ToggleRow("Skip silence", book.skipSilence, viewModel::setSkipSilence)
-                ToggleRow("Volume boost", book.volumeBoostMb > 0, viewModel::setVolumeBoost)
+                ToggleRow(stringResource(R.string.player_skip_silence), book.skipSilence, viewModel::setSkipSilence)
+                ToggleRow(stringResource(R.string.player_volume_boost), book.volumeBoostMb > 0, viewModel::setVolumeBoost)
             }
             ShelfLink(PlayerMode.AUDIOBOOK, onShelf)
             Spacer(Modifier.height(8.dp))
@@ -160,7 +165,7 @@ internal fun AudiobookPlayer(
         )
         BookSheet.BOOKMARKS -> AudioBookmarksSheet(
             bookmarks,
-            onAdd = viewModel::addBookmark,
+            onAdd = addBookmark,
             onPlay = { viewModel.playBookmark(it); sheet = null },
             onDelete = viewModel::removeBookmark,
             onDismiss = { sheet = null },
@@ -185,7 +190,7 @@ private fun BookProgressLine(progress: BookProgress) {
         Spacer(Modifier.height(4.dp))
         val percent = (fraction(progress.positionMs, progress.durationMs) * 100).toInt()
         Text(
-            "Book: ${formatTime(progress.positionMs)} of ${formatTime(progress.durationMs)} · $percent%",
+            stringResource(R.string.player_book_progress, formatTime(progress.positionMs), formatTime(progress.durationMs), percent),
             style = MaterialTheme.typography.labelMedium.readout, color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }

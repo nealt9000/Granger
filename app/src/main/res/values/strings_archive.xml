@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The archive.org screen's title: the site's name. -->
+    <string name="archive_title">Archive.org</string>
+    <string name="archive_disclaimer">Archive.org content is provided by the Internet Archive. Granger doesn\'t host or vouch for it.</string>
+    <string name="archive_unfiltered_note">Showing everything archive.org serves openly. You\'re responsible for what you download.</string>
+    <string name="archive_spoken_word_note">Archive.org dates spoken-word recordings by their text, not the recording, so Granger can\'t tell which are in the public domain. LibriVox recordings all are.</string>
+    <string name="archive_texts_note">Showing public-domain texts only: published 1930 or earlier.</string>
+    <!-- %1$d is the first year left out, such as 1926. -->
+    <string name="archive_recordings_note">Showing public-domain recordings only: published before %1$d.</string>
+    <!-- The search box's placeholder in each archive.org view. -->
+    <string name="archive_search_texts">Search archive.org texts</string>
+    <string name="archive_search_audiobooks">Search archive.org audiobooks</string>
+    <string name="archive_search_music">Search archive.org music</string>
+    <!-- Tabs: archive.org's results, and what's been downloaded from it. -->
+    <string name="archive_tab_browse">Browse</string>
+    <string name="archive_tab_installed">Installed</string>
+    <!-- The button to LibriVox, the free audiobook site; its name. -->
+    <string name="archive_librivox">LibriVox</string>
+    <!-- Opens the waiver to turn off the public-domain filter. -->
+    <string name="archive_show_everything">Show everything</string>
+    <string name="archive_empty_installed">Nothing downloaded from archive.org yet.</string>
+    <string name="archive_empty_search">Nothing matches that search.</string>
+    <string name="archive_load_more">Load more</string>
+    <!-- %1$s is the item's title. -->
+    <string name="archive_remove_title">Remove %1$s?</string>
+    <string name="archive_remove_text_body">This deletes the file. Your place and highlights are kept.</string>
+    <string name="archive_remove_audio_body">This deletes its files. Your place and bookmarks are kept.</string>
+    <!-- Asks before a big download; %1$s is its size, such as 212 MB. -->
+    <string name="archive_large_pdf">This PDF is %1$s. Download it?</string>
+    <string name="archive_large_download">This download is %1$s. Download it?</string>
+    <string name="archive_dont_ask_again">Don\'t ask again</string>
+    <string name="archive_download">Download</string>
+    <!-- Gets what's left of a partly downloaded item. -->
+    <string name="archive_get_the_rest">Get the rest</string>
+
+    <!-- What an item offers. -->
+    <string name="archive_offer_plain_text">Plain text</string>
+    <!-- Text read from a scan by a machine (optical character recognition). -->
+    <string name="archive_offer_ocr">OCR text: may have errors</string>
+    <string name="archive_offer_ocr_pdf">OCR text: may have errors · PDF</string>
+    <!-- The item can only be borrowed, on archive.org's own site. -->
+    <string name="archive_borrow">Borrow on archive.org</string>
+    <string name="archive_no_text">No downloadable text</string>
+    <string name="archive_no_audio">No downloadable audio</string>
+    <!-- An audio item's files and their format: 7 tracks · VBR MP3. -->
+    <plurals name="archive_tracks">
+        <item quantity="one">%1$d track · %2$s</item>
+        <item quantity="other">%1$d tracks · %2$s</item>
+    </plurals>
+
+    <!-- The item sheet. %1$d of %2$d files are in. -->
+    <string name="archive_downloading_files">Downloading: %1$d of %2$d</string>
+    <!-- %1$s is the PDF's size. -->
+    <string name="archive_get_pdf">Get PDF · %1$s</string>
+    <string name="archive_pdf_in_library">PDF in your library</string>
+    <!-- Where the PDF's own download stands. -->
+    <string name="archive_pdf_queued">PDF: queued</string>
+    <!-- %1$d is the percent done. -->
+    <string name="archive_pdf_downloading">PDF: downloading, %1$d%%</string>
+    <string name="archive_pdf_failed">PDF: failed</string>
+    <!-- The PDF line's lead when it has no other status; the trailing space is kept. -->
+    <string name="archive_pdf_other">"PDF: "</string>
+    <string name="archive_view_on_site">View on archive.org</string>
+    <!-- Get, with the download's size. -->
+    <string name="archive_get_size">Get · %1$s</string>
+
+    <!-- The waiver that turns off the public-domain filter. -->
+    <string name="archive_waiver_title">Show everything on archive.org?</string>
+    <string name="archive_waiver_body">Granger is a browser for archive.org. It doesn\'t host, check or vouch for anything there, and much of it is still under copyright. You\'re responsible for having the right to download and use what you take.</string>
+    <string name="archive_waiver_accept">I accept</string>
+
+    <!-- Notices after Get. -->
+    <string name="archive_no_storage">No storage is available right now.</string>
+    <!-- %1$s is the storage, such as Internal storage; %2$s the item; %3$s the space needed. -->
+    <string name="archive_no_space">Not enough space on %1$s for %2$s: free up %3$s.</string>
+    <!-- %1$s is the item; %2$s the total it would make; %3$s the downloads limit. -->
+    <string name="archive_over_cap">%1$s would bring your downloads to %2$s, over the %3$s limit.</string>
+    <string name="archive_already_in_audiobooks">This is already in your Audiobooks.</string>
+    <string name="archive_already_in_music">This is already in your Music.</string>
+    <!-- %1$d is the first year left out, such as 1926. -->
+    <string name="archive_recording_too_new">This recording wasn\'t published before %1$d. Show everything to download it.</string>
+    <string name="archive_nothing_to_download">Nothing on this item can be downloaded.</string>
+    <string name="archive_not_public_domain">This item wasn\'t published in 1930 or earlier. Show everything to download it.</string>
+    <string name="archive_spoken_word_get">Show everything to download archive.org spoken word.</string>
+    <string name="archive_offline">Couldn\'t reach archive.org. Check your connection and try again.</string>
+    <!-- An archive.org item whose EPUB was made from a scan, with the scan's PDF too. -->
+    <string name="archive_offer_epub_scan_pdf">EPUB made from a scan · PDF</string>
+    <!-- An archive.org comic: its page images, opened to zoom. -->
+    <string name="archive_offer_comic">Comic: its pages, to zoom</string>
+
+    <!-- An archive.org set (a comic run, a multi-volume work): what it offers and how many parts, such as "Comic: its pages, to zoom · 4 parts". -->
+    <plurals name="archive_offer_parts">
+        <item quantity="one">%2$s · %1$d part</item>
+        <item quantity="other">%2$s · %1$d parts</item>
+    </plurals>
+    <!-- A set's offer line with its size in all: "Comic: its pages, to zoom · 4 parts · 234 MB". -->
+    <string name="archive_label_size">%1$s · %2$s</string>
+    <!-- Opens the list of a set's parts, to get some of them. -->
+    <string name="archive_choose_parts">Choose parts</string>
+    <!-- Gets every part of a set; with the size: Get all · 234 MB. -->
+    <string name="archive_get_all">Get all</string>
+    <string name="archive_get_all_size">Get all · %1$s</string>
+    <!-- The parts list's heading. -->
+    <plurals name="archive_parts">
+        <item quantity="one">%d part</item>
+        <item quantity="other">%d parts</item>
+    </plurals>
+    <!-- The filter over a long list of parts. -->
+    <string name="archive_find_part">Find a part</string>
+    <!-- A part's size, then where its download stands. %1$s is the size. -->
+    <string name="archive_part_queued">%1$s · queued</string>
+    <!-- %2$d is the percent done. -->
+    <string name="archive_part_downloading">%1$s · downloading, %2$d%%</string>
+    <!-- %2$s is why it stopped. -->
+    <string name="archive_part_stopped">%1$s · stopped: %2$s</string>
+    <string name="archive_part_in_library">%1$s · in your library</string>
+    <!-- Asks before a big Get of a set's parts; %1$s is the size. -->
+    <string name="archive_large_part">This part is %1$s. Download it?</string>
+    <string name="archive_large_set">This set is %1$s. Download it?</string>
+    <!-- Some of a set's parts: %1$d of them, %2$s in all. -->
+    <plurals name="archive_large_parts">
+        <item quantity="one">This part is %2$s. Download it?</item>
+        <item quantity="other">These %1$d parts are %2$s. Download them?</item>
+    </plurals>
+    <!-- A set on Installed: its parts and their size in all, such as "2 parts · 110 MB". -->
+    <plurals name="archive_row_parts">
+        <item quantity="one">%1$d part · %2$s</item>
+        <item quantity="other">%1$d parts · %2$s</item>
+    </plurals>
+</resources>

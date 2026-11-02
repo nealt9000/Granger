@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_placeholder">Buscar en tu biblioteca</string>
+    <string name="search_nothing_found">Nada de tu biblioteca coincide.</string>
+    <string name="search_recent">Recientes</string>
+    <string name="search_titles">Títulos</string>
+    <string name="search_articles">Artículos</string>
+    <string name="search_books">Libros</string>
+    <string name="search_music">Música</string>
+    <string name="search_audiobooks">Audiolibros</string>
+    <string name="search_page">pág. %1$d</string>
+
+    <plurals name="search_artist_line">
+        <item quantity="one">Artista · %1$d álbum</item>
+        <item quantity="many">Artista · %1$d álbumes</item>
+        <item quantity="other">Artista · %1$d álbumes</item>
+    </plurals>
+    <string name="search_album_line">Álbum · %1$s</string>
+    <string name="search_song_line">Canción · %1$s · %2$s</string>
+    <string name="search_audiobook_read_by">%1$s · narrado por %2$s</string>
+    <plurals name="search_book_matches_by">
+        <item quantity="one">%2$s · %1$d coincidencia</item>
+        <item quantity="many">%2$s · %1$d coincidencias</item>
+        <item quantity="other">%2$s · %1$d coincidencias</item>
+    </plurals>
+    <plurals name="search_book_matches">
+        <item quantity="one">%1$d coincidencia</item>
+        <item quantity="many">%1$d coincidencias</item>
+        <item quantity="other">%1$d coincidencias</item>
+    </plurals>
+
+    <plurals name="search_show_all_titles">
+        <item quantity="one">Mostrar %1$d título</item>
+        <item quantity="many">Mostrar los %1$d títulos</item>
+        <item quantity="other">Mostrar los %1$d títulos</item>
+    </plurals>
+    <plurals name="search_show_all_artists">
+        <item quantity="one">Mostrar %1$d artista</item>
+        <item quantity="many">Mostrar los %1$d artistas</item>
+        <item quantity="other">Mostrar los %1$d artistas</item>
+    </plurals>
+    <plurals name="search_show_all_albums">
+        <item quantity="one">Mostrar %1$d álbum</item>
+        <item quantity="many">Mostrar los %1$d álbumes</item>
+        <item quantity="other">Mostrar los %1$d álbumes</item>
+    </plurals>
+    <plurals name="search_show_all_songs">
+        <item quantity="one">Mostrar %1$d canción</item>
+        <item quantity="many">Mostrar las %1$d canciones</item>
+        <item quantity="other">Mostrar las %1$d canciones</item>
+    </plurals>
+    <plurals name="search_show_all_audiobooks">
+        <item quantity="one">Mostrar %1$d audiolibro</item>
+        <item quantity="many">Mostrar los %1$d audiolibros</item>
+        <item quantity="other">Mostrar los %1$d audiolibros</item>
+    </plurals>
+    <plurals name="search_show_all_articles">
+        <item quantity="one">Mostrar %1$d coincidencia en artículos</item>
+        <item quantity="many">Mostrar las %1$d coincidencias en artículos</item>
+        <item quantity="other">Mostrar las %1$d coincidencias en artículos</item>
+    </plurals>
+    <plurals name="search_show_all_books">
+        <item quantity="one">Mostrar %1$d libro</item>
+        <item quantity="many">Mostrar los %1$d libros</item>
+        <item quantity="other">Mostrar los %1$d libros</item>
+    </plurals>
+
+    <plurals name="search_show_first_titles">
+        <item quantity="one">Mostrar %1$d título</item>
+        <item quantity="many">Mostrar los primeros %1$d títulos</item>
+        <item quantity="other">Mostrar los primeros %1$d títulos</item>
+    </plurals>
+    <plurals name="search_show_first_artists">
+        <item quantity="one">Mostrar %1$d artista</item>
+        <item quantity="many">Mostrar los primeros %1$d artistas</item>
+        <item quantity="other">Mostrar los primeros %1$d artistas</item>
+    </plurals>
+    <plurals name="search_show_first_albums">
+        <item quantity="one">Mostrar %1$d álbum</item>
+        <item quantity="many">Mostrar los primeros %1$d álbumes</item>
+        <item quantity="other">Mostrar los primeros %1$d álbumes</item>
+    </plurals>
+    <plurals name="search_show_first_songs">
+        <item quantity="one">Mostrar %1$d canción</item>
+        <item quantity="many">Mostrar las primeras %1$d canciones</item>
+        <item quantity="other">Mostrar las primeras %1$d canciones</item>
+    </plurals>
+    <plurals name="search_show_first_audiobooks">
+        <item quantity="one">Mostrar %1$d audiolibro</item>
+        <item quantity="many">Mostrar los primeros %1$d audiolibros</item>
+        <item quantity="other">Mostrar los primeros %1$d audiolibros</item>
+    </plurals>
+    <plurals name="search_show_first_articles">
+        <item quantity="one">Mostrar %1$d coincidencia en artículos</item>
+        <item quantity="many">Mostrar las primeras %1$d coincidencias en artículos</item>
+        <item quantity="other">Mostrar las primeras %1$d coincidencias en artículos</item>
+    </plurals>
+    <plurals name="search_show_first_books">
+        <item quantity="one">Mostrar %1$d libro</item>
+        <item quantity="many">Mostrar los primeros %1$d libros</item>
+        <item quantity="other">Mostrar los primeros %1$d libros</item>
+    </plurals>
+
+    <string name="search_show_fewer_titles">Mostrar menos títulos</string>
+    <string name="search_show_fewer_artists">Mostrar menos artistas</string>
+    <string name="search_show_fewer_albums">Mostrar menos álbumes</string>
+    <string name="search_show_fewer_audiobooks">Mostrar menos audiolibros</string>
+    <string name="search_show_fewer_songs">Mostrar menos canciones</string>
+    <string name="search_show_fewer_articles">Mostrar menos coincidencias en artículos</string>
+    <string name="search_show_fewer_books">Mostrar menos libros</string>
+</resources>

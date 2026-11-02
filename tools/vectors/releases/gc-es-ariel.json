@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-ariel",
+ "kind": "book",
+ "fileName": "gc-es-ariel_2026-10-30.gvec",
+ "sizeBytes": 35412,
+ "sha256": "abb69f1299923545c55db7aaf0d633f923e777ba131d6f3c9e96a2928ba4687f",
+ "count": 120,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "42579414e5d63e51d25e41f933c95ededfe836564d198e93b683c49803c59167",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-ariel_2026-10-30.gvec"
+}

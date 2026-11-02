@@ -51,13 +51,13 @@ class LibriVoxClient(
 
     /** One book with its sections, readers and genres (`extended=1`). */
     suspend fun book(id: String): LibriVoxBook {
-        if (!isValidId(id)) throw LibriVoxError(NOT_FOUND)
+        if (!isValidId(id)) throw LibriVoxError(LibriVoxProblem.NOT_FOUND, NOT_FOUND)
         val books = fetch(url {
             addQueryParameter("id", id)
             addQueryParameter("extended", "1")
             addQueryParameter("coverart", "1")
         })
-        return books.firstOrNull { it.id == id } ?: throw LibriVoxError(NOT_FOUND)
+        return books.firstOrNull { it.id == id } ?: throw LibriVoxError(LibriVoxProblem.NOT_FOUND, NOT_FOUND)
     }
 
     private fun page(limit: Int, books: List<LibriVoxBook>) = LibriVoxPage(books, hasMore = books.size >= limit)
@@ -82,12 +82,12 @@ class LibriVoxClient(
                 if (wait > 0) sleep(wait)
             }
             lastSentAt = clock()
-            client.getText(url, userAgent) { LibriVoxError("Couldn't reach LibriVox") }
+            client.getText(url, userAgent) { LibriVoxError(LibriVoxProblem.UNREACHABLE, "Couldn't reach LibriVox") }
         }
         when {
             reply.code == 404 && NO_RESULTS in reply.body -> return emptyList()
-            reply.code == 429 -> throw LibriVoxError(BUSY)
-            !reply.isSuccessful -> throw LibriVoxError("LibriVox answered ${reply.code}")
+            reply.code == 429 -> throw LibriVoxError(LibriVoxProblem.BUSY, BUSY)
+            !reply.isSuccessful -> throw LibriVoxError(LibriVoxProblem.ANSWERED, "LibriVox answered ${reply.code}", reply.code)
         }
         return parse {
             val root = json.parseToJsonElement(reply.body).jsonObject
@@ -100,7 +100,7 @@ class LibriVoxClient(
     } catch (e: LibriVoxError) {
         throw e
     } catch (e: Exception) {
-        throw LibriVoxError("LibriVox sent something Granger couldn't read")
+        throw LibriVoxError(LibriVoxProblem.UNREADABLE, "LibriVox sent something Granger couldn't read")
     }
 
     private fun JsonObject.toBook(): LibriVoxBook {
@@ -139,7 +139,8 @@ class LibriVoxClient(
 
     companion object {
         private val ID = Regex("[0-9]+")
-        private val LEADING_ARTICLE = Regex("^(the|a|an)\\s+", RegexOption.IGNORE_CASE)
+        /** A leading article a title search drops: English, and Spanish beside it (Plan L3). */
+        private val LEADING_ARTICLE = Regex("^(the|a|an|el|la|los|las|un|una)\\s+", RegexOption.IGNORE_CASE)
         private val SPACES = Regex("\\s+")
         private const val SEARCH_FIELDS = "{id,title,authors,language,totaltime,totaltimesecs,num_sections}"
         private const val NO_RESULTS = "could not be found"

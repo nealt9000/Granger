@@ -12,6 +12,7 @@ import app.granger.FakeAppearancePrefs
 import app.granger.FakeDownloads
 import app.granger.FakePrefs
 import app.granger.FakeVolumes
+import app.granger.LanguageRoute
 import app.granger.MediaSettingsRoute
 import app.granger.SettingsRoute
 import app.granger.archive.ArchivePrefs
@@ -54,6 +55,8 @@ class SettingsScreenTest {
             onVoice = if (listening) ({ calls += "voice" }) else null,
             onMediaSettings = if (listening) ({ calls += "media" }) else null,
             audiobooks = audiobooks,
+            onLanguage = { calls += "language" },
+            languageSummary = "Follow the phone (English)",
         )
     }
 
@@ -94,9 +97,21 @@ class SettingsScreenTest {
             NavHost(nav, startDestination = SettingsRoute) {
                 composable<SettingsRoute> {}
                 composable<MediaSettingsRoute> {}
+                composable<LanguageRoute> {}
             }
         }
         compose.runOnIdle { nav.navigate(MediaSettingsRoute) }
         compose.runOnIdle { assertThat(railToolOf(nav.currentDestination!!)).isEqualTo(RailTool.SETTINGS) }
+        compose.runOnIdle { nav.navigate(LanguageRoute) }
+        compose.runOnIdle { assertThat(railToolOf(nav.currentDestination!!)).isEqualTo(RailTool.SETTINGS) }
+    }
+
+    /** Plan L2 Task 3: Appearance → Language, its summary the current choice. */
+    @Test fun appearanceOpensLanguage() {
+        show()
+        assertThat(listOf("Appearance", "Open to", "Language", "About").map(::top)).isInStrictOrder()
+        compose.onNodeWithText("Follow the phone (English)").assertExists()
+        compose.onNodeWithText("Language").performClick()
+        assertThat(calls).containsExactly("language")
     }
 }

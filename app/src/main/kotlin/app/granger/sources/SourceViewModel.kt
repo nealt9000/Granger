@@ -6,7 +6,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.annotation.StringRes
 import app.granger.DENSE_RETRIEVAL
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.CatalogError
 import app.granger.core.catalog.CatalogItem
@@ -60,9 +63,9 @@ data class VolumeRow(
 data class ItemRow(
     val id: String,
     val title: String,
-    val details: String,
+    val details: UiText,
     /** What the entry is, from the catalog; blank when it has none. */
-    val description: String,
+    val description: UiText,
     val sizeBytes: Long,
     val status: ItemStatus,
     /** The library pack this entry is installed as, if any: Open opens it (Plan U3b Decision 3). */
@@ -71,14 +74,14 @@ data class ItemRow(
     val ask: AskReach? = null,
     /** The pack's flavours, when it has more than one (Plan KB Decision 8); the [id] is the chosen one's. */
     val flavours: List<FlavourChoice> = emptyList(),
-    /** The flavour on the phone, as a row says it ("no pictures"), when the pack has flavours and one is installed. */
-    val installedFlavour: String? = null,
     /** Get fetches another flavour than the one on the phone: the action reads Switch. */
     val switches: Boolean = false,
     /** The full licence, for the row's details (its short name is in [details]); blank for anything but a pack. */
     val license: String = "",
     /** A folded family's row (Plan KB Decision 10): the family it opens, its packs A–Z. */
     val opensFamily: String? = null,
+    /** A folded family's row: its name as shown ([title] is its English name, which sorts and searches). */
+    val familyLabel: UiText? = null,
     /** The set a set's row is of (Plan WF Decision 3); null for any other row. */
     val setId: String? = null,
     /** A set's row: How much, smallest first; the [id] is the chosen slice's chosen pictures. */
@@ -86,14 +89,14 @@ data class ItemRow(
     /** A set's row: the pictures choices for the chosen slice. */
     val pictures: List<PictureChoice> = emptyList(),
     /** A set's chosen slice is inside a bigger one on the phone: "Inside your Top 1 million", with no Get. */
-    val insideOf: String? = null,
+    val insideOf: UiText? = null,
     /** A set's Switch, between flavours of one slice: what goes and what comes. */
     val switchFrom: FlavourChoice? = null,
     val switchTo: FlavourChoice? = null,
     /** A set's row: the subjects list it opens with Add a subject ("subjects:wikipedia_en:wikipedia_en_top"). */
     val subjects: String? = null,
     /** A subject's line (Plan WF Decision 4): "Adds about 69,600 articles to your Best 50,000 (95% new)". */
-    val adds: String? = null,
+    val adds: UiText? = null,
     /** The subject is inside the Wikipedia on the phone: Get is quiet. */
     val covered: Boolean = false,
     /** The pack on Kiwix's online library, for Preview before Get; null for anything Kiwix doesn't host. */
@@ -110,39 +113,44 @@ data class SliceChoice(
     val sizeBytes: Long,
     val chosen: Boolean,
     val installed: Boolean = false,
-    val inside: String? = null,
-    val note: String? = null,
+    val inside: UiText? = null,
+    val note: UiText? = null,
 )
 
 /** One pictures choice of a set's row; one the chosen slice doesn't offer is not [enabled], with its [reason]. */
-data class PictureChoice(val flavour: String, val label: String, val chosen: Boolean, val enabled: Boolean = true, val reason: String? = null)
+data class PictureChoice(val flavour: String, val label: UiText, val chosen: Boolean, val enabled: Boolean = true, val reason: UiText? = null)
 
 /** One flavour of a pack's row: "With pictures · 6.9 GB"; [installed] when it is the one on the phone. */
-data class FlavourChoice(val id: String, val label: String, val sizeBytes: Long, val chosen: Boolean, val installed: Boolean = false)
+data class FlavourChoice(val id: String, val label: UiText, val sizeBytes: Long, val chosen: Boolean, val installed: Boolean = false)
 
 /**
- * A Get that asks first (Plan KB Decision 9): [title] is [sizeBytes], [freeBytes] free on [volumeLabel]; [smaller] is
- * the pack's next smaller flavour, offered instead, when it has one.
+ * A Get that asks first (Plan KB Decision 9): [title] is [sizeBytes], [freeBytes] free on [volumeLabel] (null when no
+ * volume is known: "this phone"); [smaller] is the pack's next smaller flavour, offered instead, when it has one.
  */
 data class SizeCheck(
     val itemId: String,
     val title: String,
     val sizeBytes: Long,
     val freeBytes: Long,
-    val volumeLabel: String,
+    val volumeLabel: String?,
     val smaller: FlavourChoice? = null,
 )
 
+/** What a folded section's rows are, for its "Show all 40 books" and "Show fewer books". */
+enum class SectionNoun { PACKS, BOOKS }
+
 /**
  * A heading and the rows shown under it. A [foldable] section shows its first [SourceViewModel.FOLDED_ROWS] rows until
- * Show all; [total] counts all of them, which are [noun] ("Show all 40 books").
+ * Show all; [total] counts all of them, which are [noun] ("Show all 40 books"). [title] is the section's key: a catalog
+ * category, or one of [SourceViewModel]'s own; [heading] is what it says.
  */
 data class Section(
     val title: String,
     val rows: List<ItemRow>,
     val total: Int = rows.size,
     val foldable: Boolean = false,
-    val noun: String = "packs",
+    val noun: SectionNoun = SectionNoun.PACKS,
+    val heading: UiText = UiText.Raw(title),
 )
 
 /**
@@ -166,45 +174,50 @@ data class PresetRow(
 /** A preset's lines (Plan U3b Decision 13). */
 object PresetText {
     /** "12 packs and 347 books · 17.7 GB". */
-    fun summary(row: PresetRow): String {
+    fun summary(row: PresetRow): UiText {
         val kinds = listOfNotNull(
-            count(row.packs, "pack", "packs"), count(row.books, "book", "books"), count(row.others, "model", "models"),
+            count(row.packs, R.plurals.sources_packs), count(row.books, R.plurals.common_books), count(row.others, R.plurals.sources_models),
         )
-        val joined = if (kinds.size <= 1) kinds.joinToString() else kinds.dropLast(1).joinToString(", ") + " and " + kinds.last()
-        return "$joined · ${formatBytes(row.totalBytes)}"
+        val joined = when (kinds.size) {
+            0 -> UiText.Raw("")
+            1 -> kinds[0]
+            2 -> UiText.Res(R.string.sources_two_kinds, kinds[0], kinds[1])
+            else -> UiText.Res(R.string.sources_three_kinds, kinds[0], kinds[1], kinds[2])
+        }
+        return KiwixList.dotted(listOf(joined, UiText.Raw(formatBytes(row.totalBytes))))
     }
 
     /** "All on this phone"; else "3 downloading", "9 of 12 to get", or both. */
-    fun status(row: PresetRow): String {
-        if (row.onPhone >= row.itemCount) return "All on this phone"
+    fun status(row: PresetRow): UiText {
+        if (row.onPhone >= row.itemCount) return UiText.Res(R.string.sources_preset_all_here)
         val toGet = row.itemCount - row.onPhone - row.downloading
-        return listOfNotNull(
-            if (row.downloading > 0) "${row.downloading} downloading" else null,
-            if (toGet > 0) "$toGet of ${row.itemCount} to get" else null,
-        ).joinToString(" · ")
+        return KiwixList.dotted(
+            listOfNotNull(
+                if (row.downloading > 0) UiText.Res(R.string.sources_preset_downloading, row.downloading) else null,
+                if (toGet > 0) UiText.Res(R.string.sources_preset_to_get, toGet, row.itemCount) else null,
+            ),
+        )
     }
 
-    private fun count(n: Int, one: String, many: String) = when (n) {
-        0 -> null
-        1 -> "1 $one"
-        else -> "$n $many"
-    }
+    private fun count(n: Int, plural: Int): UiText? = if (n == 0) null else UiText.Plural(plural, n, n)
 }
 
-enum class SourceTab(val title: String) { BROWSE("Browse"), INSTALLED("Installed"), UPDATES("Updates") }
+enum class SourceTab(@StringRes val title: Int) {
+    BROWSE(R.string.sources_tab_browse), INSTALLED(R.string.sources_tab_installed), UPDATES(R.string.sources_tab_updates),
+}
 
 data class SourceUi(
     val tab: SourceTab = SourceTab.BROWSE,
     val query: String = "",
     val loading: Boolean = true,
     val refreshing: Boolean = false,
-    val catalogProblem: String? = null,
+    val catalogProblem: UiText? = null,
     val volumes: List<VolumeRow> = emptyList(),
     val selectedVolume: String? = null,
     val wifiOnly: Boolean = true,
     val presets: List<PresetRow> = emptyList(),
     val sections: List<Section> = emptyList(),
-    val notice: String? = null,
+    val notice: UiText? = null,
     /** The Kiwix screen's category chips, in order; empty elsewhere. */
     val categories: List<String> = emptyList(),
     /** The chosen chip; null is All. */
@@ -214,7 +227,13 @@ data class SourceUi(
     /** A big Get waiting on its question (Plan KB Decision 9). */
     val sizeCheck: SizeCheck? = null,
     /** One folded family's A–Z list ("Developer docs"), when this screen is one (Plan KB Decision 10); else null. */
-    val familyTitle: String? = null,
+    val familyTitle: UiText? = null,
+    /**
+     * The All languages chip (Plan L3): shown when the list leaves out packs in other languages than the library's, or
+     * while it's on; [allLanguages] is whether it's on.
+     */
+    val languageChip: Boolean = false,
+    val allLanguages: Boolean = false,
 )
 
 /** One row per volume, with what is still to download onto it. */
@@ -250,14 +269,16 @@ class SourceViewModel(
     private val domain: String? = null,
     /** Opened from a folded family's row: that family's packs A–Z, with their own search (Plan KB Decision 10). */
     private val family: String? = null,
+    /** The library's languages, main first (Plan L3): the lists show their packs, until All languages. */
+    knowledge: kotlinx.coroutines.flow.Flow<List<String>> = kotlinx.coroutines.flow.flowOf(listOf(app.granger.core.catalog.ENGLISH)),
 ) : ViewModel() {
-    private data class Choices(val volumes: List<Volume>, val selectedPath: String?, val wifiOnly: Boolean, val notice: String?, val domainCleared: Boolean)
+    private data class Choices(val volumes: List<Volume>, val selectedPath: String?, val wifiOnly: Boolean, val notice: UiText?, val domainCleared: Boolean)
 
     private data class Settings(
         val volumes: List<Volume>,
         val selectedPath: String?,
         val wifiOnly: Boolean,
-        val notice: String?,
+        val notice: UiText?,
         val tab: SourceTab,
         val query: String,
         val expanded: Set<String>,
@@ -268,13 +289,16 @@ class SourceViewModel(
         val sets: SetChoice = SetChoice(),
     )
 
+    /** The library's languages and whether the list shows every language (Plan L3). */
+    private data class LanguageChoice(val languages: List<String>, val all: Boolean)
+
     /** Each set's chosen slice (ZIM name) and pictures (flavour), by set id (Plan WF Decision 3). */
     private data class SetChoice(val slices: Map<String, String> = emptyMap(), val pictures: Map<String, String> = emptyMap())
 
     private val volumeList = MutableStateFlow<List<Volume>>(emptyList())
     private val selectedPath = MutableStateFlow(prefs.volumePath)
     private val wifiOnly = MutableStateFlow(prefs.wifiOnly)
-    private val notice = MutableStateFlow<String?>(null)
+    private val notice = MutableStateFlow<UiText?>(null)
     private val tab = MutableStateFlow(SourceTab.BROWSE)
     private val query = MutableStateFlow("")
     /** Sections opened with Show all, by title; closed again by a new query. */
@@ -285,6 +309,8 @@ class SourceViewModel(
     private val flavourChoice = MutableStateFlow<Map<String, String>>(emptyMap())
     private val sizeCheck = MutableStateFlow<SizeCheck?>(null)
     private val setChoice = MutableStateFlow(SetChoice())
+    private val allLanguages = MutableStateFlow(false)
+    private val languageChoice = combine(knowledge, allLanguages) { langs, all -> LanguageChoice(langs.ifEmpty { listOf(app.granger.core.catalog.ENGLISH) }, all) }
 
     /**
      * The search field's text, as Compose state written synchronously on every keystroke. The field must not read its
@@ -309,7 +335,7 @@ class SourceViewModel(
     ) { settings, flavours, check, sets -> settings.copy(flavours = flavours, sizeCheck = check, sets = sets) }
 
     val ui: StateFlow<SourceUi> =
-        combine(catalog.state, downloads.records, library.packs, settings, ::buildUi)
+        combine(catalog.state, downloads.records, library.packs, settings, languageChoice, ::buildUi)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SourceUi())
 
     init {
@@ -344,7 +370,7 @@ class SourceViewModel(
                     FlavourChoice(it.id, group?.let(KiwixList::flavourLabels)?.get(it.id) ?: KiwixList.flavourLabel(it), it.downloadBytes, chosen = false)
                 }
                 sizeCheck.value = SizeCheck(
-                    item.id, group?.title ?: item.title, item.downloadBytes, volume?.freeBytes ?: 0L, volume?.label ?: "this phone", smaller,
+                    item.id, group?.title ?: item.title, item.downloadBytes, volume?.freeBytes ?: 0L, volume?.label, smaller,
                 )
             }
             return
@@ -400,7 +426,7 @@ class SourceViewModel(
             val todo = preset.items.mapNotNull { current.item(it) }.filter { wanted(statusOf(it, records, packs, tier)) }
                 .filter { item -> item !is PackEntry || containment.containers(item.zimName).none { it in names || it in presetZims } }
             notice.value = if (todo.isEmpty()) {
-                "Everything in ${preset.title} is already here or on its way."
+                UiText.Res(R.string.sources_preset_already, preset.title)
             } else {
                 enqueue(todo)
             }
@@ -425,7 +451,7 @@ class SourceViewModel(
             val entry = catalog.state.value.catalog?.item(itemId) as? PackEntry
             val packId = entry?.let { installedPackId(it, downloads.records.first(), library.packs.first()) }
             if (packId != null && !library.remove(packId)) {
-                notice.value = "Couldn't delete ${entry.title}."
+                notice.value = UiText.Res(R.string.sources_couldnt_delete, entry.title)
                 return@launch
             }
             downloads.remove(itemId)
@@ -457,6 +483,11 @@ class SourceViewModel(
         category.value = value
     }
 
+    /** The All languages chip: every pack, or only the library's languages' (Plan L3). */
+    fun setAllLanguages(on: Boolean) {
+        allLanguages.value = on
+    }
+
     /** Show all, or Show fewer, for the section titled [title]. */
     fun toggleSection(title: String) {
         expanded.value = expanded.value.let { if (title in it) it - title else it + title }
@@ -469,27 +500,26 @@ class SourceViewModel(
     private fun wanted(status: ItemStatus) = status == ItemStatus.NotInstalled || status == ItemStatus.UpdateAvailable
 
     /** Queues [items] in order and stops at the first one that doesn't fit. Returns the notice to show. */
-    private suspend fun enqueue(items: List<CatalogItem>): String? {
+    private suspend fun enqueue(items: List<CatalogItem>): UiText? {
         val all = volumeList.value.ifEmpty { withContext(io) { volumes.list() } }
         val volume = all.firstOrNull { it.root.path == prefs.volumePath } ?: all.firstOrNull()
-            ?: return "No storage is available right now."
+            ?: return UiText.Res(R.string.sources_no_storage)
         var queued = 0
         for (item in items) {
             val problem = when (val result = downloads.enqueue(item, volume.root, prefs.wifiOnly)) {
                 EnqueueResult.Queued -> null.also { queued++ }
                 EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> null
                 is EnqueueResult.NoSpace ->
-                    "Not enough space on ${volume.label} for ${item.title}: free up ${formatBytes(result.neededBytes)}."
+                    UiText.Res(R.string.sources_no_space, volume.label, item.title, formatBytes(result.neededBytes))
                 is EnqueueResult.OverCap ->
-                    "${item.title} would bring your downloads to ${formatBytes(result.wouldUseBytes)}, " +
-                        "over the ${formatBytes(result.capBytes)} limit."
+                    UiText.Res(R.string.sources_over_cap, item.title, formatBytes(result.wouldUseBytes), formatBytes(result.capBytes))
             }
-            if (problem != null) return if (queued > 0) "$problem Queued $queued before that." else problem
+            if (problem != null) return if (queued > 0) UiText.Plural(R.plurals.sources_queued_before, queued, problem, queued) else problem
         }
-        return if (items.size > 1 && queued > 0) "Queued $queued downloads." else null
+        return if (items.size > 1 && queued > 0) UiText.Plural(R.plurals.sources_queued, queued, queued) else null
     }
 
-    private fun buildUi(state: CatalogState, records: List<DownloadRecord>, packs: List<Pack>, s: Settings): SourceUi {
+    private fun buildUi(state: CatalogState, records: List<DownloadRecord>, packs: List<Pack>, s: Settings, lang: LanguageChoice): SourceUi {
         val current = state.catalog
         val gutenberg = scope == CatalogScope.GUTENBERG
         val kiwixBooks = scope == CatalogScope.KIWIX_BOOKS
@@ -503,6 +533,23 @@ class SourceViewModel(
         fun status(item: CatalogItem): ItemStatus =
             statuses.getOrPut(item.id) { statusOf(item, recordsById[item.id].orEmpty(), packs, tier) }
         val installedStates = setOf(ItemStatus.Installed, ItemStatus.UpdateAvailable)
+        /**
+         * Whether [item] is in one of the library's languages (Plan L3): a multilingual pack counts for each of its
+         * languages, `mul` and an item with no language for every one. An installed pack (or one downloading) in another
+         * language always shows. Models and voices have no language here.
+         */
+        fun inLanguage(item: CatalogItem): Boolean {
+            val code = when (item) {
+                is PackEntry -> item.language
+                is BookEntry -> item.language
+                else -> return true
+            }
+            val codes = app.granger.core.catalog.Languages.codes(code)
+            if (codes.isEmpty() || MULTILINGUAL in codes || codes.any { it in lang.languages }) return true
+            return status(item) in installedStates || recordsById[item.id].orEmpty().any { it.isActive }
+        }
+        // A search looks in every language, as it looks inside the folded families (Plan L3): "Diderot" finds the French pack.
+        fun shownInLanguage(item: CatalogItem) = lang.all || s.query.isNotBlank() || inLanguage(item)
         // Plan WF: the subjects list's own set and slice, from its token "subjects:<set>:<slice ZIM name>".
         val subjectsToken = family?.takeIf { scope == CatalogScope.KIWIX && it.startsWith(SUBJECTS_PREFIX) }
             ?.removePrefix(SUBJECTS_PREFIX)?.split(':')
@@ -530,27 +577,27 @@ class SourceViewModel(
         fun row(item: CatalogItem): ItemRow {
             val details = when (item) {
                 // Plain words (Plan KB Decision 9): "English · Updated March 2026 · CC BY-SA".
-                is PackEntry -> listOf(KiwixList.details(item))
-                is BookEntry -> listOf(item.author, item.license)
-                is ModelEntry -> listOf(item.license)
-                is VoiceEntry -> listOf("Read-aloud voice", item.language, item.license)
-            }.filter { it.isNotBlank() }.joinToString(" · ")
+                is PackEntry -> KiwixList.details(item)
+                is BookEntry -> KiwixList.dotted(listOf(UiText.Raw(item.author), UiText.Raw(item.license)))
+                is ModelEntry -> UiText.Raw(item.license)
+                is VoiceEntry -> KiwixList.dotted(listOf(UiText.Res(R.string.sources_voice), UiText.Raw(item.language), UiText.Raw(item.license)))
+            }
             val packId = (item as? PackEntry)?.let { installedPackId(it, recordsById[it.id].orEmpty(), packs) }
             val description = when (item) {
-                is PackEntry -> item.description
-                is BookEntry -> item.description
+                is PackEntry -> UiText.Raw(item.description)
+                is BookEntry -> UiText.Raw(item.description)
                 // Research embeds its questions with it once dense retrieval is on (Plan R1); until then nothing uses it.
                 // The large model's catalog entry stays, but Research no longer uses it (Plan R5 Task 8).
                 is ModelEntry -> when (item.role) {
-                    ModelRole.SMALL -> ""
-                    ModelRole.LARGE -> "Not used"
-                    ModelRole.EMBEDDER -> if (DENSE_RETRIEVAL) "Used by Ask" else "Not used yet"
+                    ModelRole.SMALL -> UiText.Raw("")
+                    ModelRole.LARGE -> UiText.Res(R.string.sources_model_not_used)
+                    ModelRole.EMBEDDER -> UiText.Res(if (DENSE_RETRIEVAL) R.string.sources_model_used_by_ask else R.string.sources_model_not_used_yet)
                 }
-                is VoiceEntry -> item.attribution
+                is VoiceEntry -> UiText.Raw(item.attribution)
             }
             val ask = (item as? PackEntry)?.let { askReach(it, installedVectorParents) }
             // On Project Gutenberg's own screen, each pack is its subject alone.
-            val title = if (gutenberg) item.title.removeSuffix(GUTENBERG_SUFFIX) else item.title
+            val title = if (gutenberg) item.title.removeSuffix(GUTENBERG_SUFFIX) else KiwixList.title(item)
             val adds = (item as? PackEntry)?.let(::addsOf)
             return ItemRow(
                 item.id, title, details, description, item.downloadBytes, status(item), packId, ask,
@@ -562,8 +609,9 @@ class SourceViewModel(
         }
         /** A folded family's row: "Developer docs", "243 packs". */
         fun familyRow(folded: KiwixList.Folded, count: Int) = ItemRow(
-            "family:${folded.family}", folded.label, "$count ${folded.noun}", "", 0L, ItemStatus.NotInstalled, null,
+            "family:${folded.family}", folded.words, KiwixList.foldedCount(folded, count), UiText.Raw(""), 0L, ItemStatus.NotInstalled, null,
             opensFamily = folded.family,
+            familyLabel = UiText.Res(folded.label),
         )
         /**
          * A set's one row (Plan WF Decision 3): How much (the slices) × Pictures. The chosen slice is the one chosen, else
@@ -585,8 +633,8 @@ class SourceViewModel(
             val base = row(entry)
             fun bigger(slice: KiwixList.Slice): PackEntry? =
                 installed.filter { it.setRank > slice.rank }.maxByOrNull { it.setRank }?.takeIf { slice.entries.none { e -> e in installed } }
-            fun insideText(e: PackEntry) = "Inside your ${KiwixList.shortLabel(e.setLabel)}"
-            fun choiceLabel(e: PackEntry) = "${e.setLabel}, ${KiwixList.flavourLabel(KiwixList.picturesOf(e))}"
+            fun insideText(e: PackEntry) = UiText.Res(R.string.sources_inside_your, KiwixList.shortLabel(e))
+            fun choiceLabel(e: PackEntry) = UiText.Res(R.string.sources_slice_and_pictures, KiwixList.label(e), KiwixList.flavourLabel(KiwixList.picturesOf(e)))
             val covering = bigger(chosenSlice)
             val switches = onPhone != null && onPhone.id != entry.id && status(entry) == ItemStatus.NotInstalled
             val offered = group.flavours.mapTo(HashSet(), KiwixList::picturesOf)
@@ -601,13 +649,13 @@ class SourceViewModel(
                         slice.zimName, slice.label, e.downloadBytes, chosen = slice === chosenSlice,
                         installed = slice.entries.any { it in installed },
                         inside = bigger(slice)?.let(::insideText),
-                        note = if (KiwixList.picturesOf(e) != pictures) "${KiwixList.flavourLabel(KiwixList.picturesOf(e))} only" else null,
+                        note = if (KiwixList.picturesOf(e) != pictures) UiText.Res(R.string.sources_pictures_only, KiwixList.flavourLabel(KiwixList.picturesOf(e))) else null,
                     )
                 },
                 pictures = PICTURES.filter { it in offered }.map { f ->
                     PictureChoice(
                         f, KiwixList.flavourLabel(f), chosen = KiwixList.picturesOf(entry) == f, enabled = f in chosenOffers,
-                        reason = if (f in chosenOffers) null else "Not offered for ${chosenSlice.label}",
+                        reason = if (f in chosenOffers) null else UiText.Res(R.string.sources_not_offered_for, chosenSlice.label),
                     )
                 },
                 insideOf = covering?.let(::insideText),
@@ -635,7 +683,6 @@ class SourceViewModel(
                 flavours = group.flavours.map {
                     FlavourChoice(it.id, labels.getValue(it.id), it.downloadBytes, it.id == entry.id, installed = it.id == installed?.id)
                 },
-                installedFlavour = installed?.let { labels.getValue(it.id).lowercase() },
                 switches = switches,
                 packId = base.packId ?: if (switches) installedPackId(installed!!, recordsById[installed.id].orEmpty(), packs) else null,
             )
@@ -644,7 +691,7 @@ class SourceViewModel(
         val kiwix = scope == CatalogScope.KIWIX
         // A domain the catalog's model doesn't name shows the whole list, with no chip (Plan H1 Task 5).
         val domainId = s.domain?.takeIf { kiwix }
-        val domainTitle = domainId?.let { id -> current?.readiness?.domains?.firstOrNull { it.id == id }?.title }
+        val domainTitle = domainId?.let { id -> current?.readiness?.domains?.firstOrNull { it.id == id }?.title(java.util.Locale.getDefault().language) }
         val inDomain = domainTitle != null
         val familyView = family?.takeIf { kiwix }?.let(KiwixList::folded)
         val words = app.granger.core.library.SearchText.words(needle)
@@ -652,6 +699,7 @@ class SourceViewModel(
         fun inList(item: CatalogItem): Boolean {
             // The 2 MB Ray Charles sample is a test pack (Plan WF Decision 4).
             if (item is PackEntry && item.sample) return false
+            if (!shownInLanguage(item)) return false
             // The subjects list (Plan WF Decision 4): its set's subject packs.
             if (subjectsSet != null) return item is PackEntry && item.subjectOf == subjectsSet
             // A readiness domain lists its packs whichever scope they're offered in: Food keeps Water and Food for
@@ -681,7 +729,7 @@ class SourceViewModel(
             return inTab && (needle.isEmpty() || texts.any { it.contains(needle, ignoreCase = true) })
         }
         val categories = if (!kiwix || current == null || inDomain || familyView != null || subjectsSet != null) emptyList() else
-            current.packs.filter { scopeOf(it) == scope }.map { it.category }.distinct()
+            current.packs.filter { scopeOf(it) == scope && shownInLanguage(it) }.map { it.category }.distinct()
                 .sortedWith(compareBy({ categoryRank(it) }, { it }))
         // A chip shows one category whole; a category that has left the catalog falls back to All.
         val chosen = s.category?.takeIf { it in categories }
@@ -689,14 +737,14 @@ class SourceViewModel(
         val folds = kiwix && needle.isEmpty() && chosen == null && !inDomain
         // Granger's book categories fold the same way, so Classics' ~350 books don't load as one list (Plan U3b Decision 13).
         val booksFold = scope == CatalogScope.GRANGER && needle.isEmpty()
-        fun section(title: String, entries: List<CatalogItem>, folding: Boolean = folds, noun: String = "packs"): Section {
+        fun section(title: String, entries: List<CatalogItem>, folding: Boolean = folds, noun: SectionNoun = SectionNoun.PACKS): Section {
             val open = !folding || title in s.expanded || entries.size <= FOLDED_ROWS
             val rows = (if (open) entries else entries.take(FOLDED_ROWS)).map(::row)
             return Section(title, rows, entries.size, foldable = folding && entries.size > FOLDED_ROWS, noun = noun)
         }
         val sections = if (current == null) emptyList() else buildList {
             val models = current.models.filter(::shown)
-            if (models.isNotEmpty()) add(Section("AI models", models.map(::row)))
+            if (models.isNotEmpty()) add(Section(AI_MODELS, models.map(::row), heading = UiText.Res(R.string.sources_section_models)))
             if (kiwix) {
                 // One row per pack, whatever its flavours (Plan KB Decision 8): chips, search and Recommended work on them.
                 val free = volumeRows.firstOrNull { it.path == s.selectedPath }?.freeBytes ?: volumeRows.firstOrNull()?.freeBytes
@@ -707,7 +755,7 @@ class SourceViewModel(
                 val groups = KiwixList.group(
                     current.packs.filter { inList(it) && (chosen == null || it.category == chosen) }, free, sets = true,
                 ).filter { group -> group.flavours.any(::inTab) && KiwixList.matches(group, words) }
-                    .filterNot { subjectsAway && it.default.isSubject && it.default.zimName !in OWN_ROW_SUBJECTS }
+                    .filterNot { subjectsAway && it.default.isSubject && !ownRow(it.default.zimName) }
                     .sortedByDescending { KiwixList.titleMatches(it, words) }
                 if (subjectsSet != null) {
                     // Add a subject's list: A–Z, for the letter strip, each saying what it adds, named without "by Wikipedia".
@@ -715,18 +763,18 @@ class SourceViewModel(
                     fun subjectTitle(title: String) = title.removeSuffix(" by $setTitle").removeSuffix(" ($setTitle)").trim()
                     val rows = groups.map { g -> groupRow(g).let { it.copy(title = subjectTitle(it.title)) } }
                         .sortedByShelfKey({ app.granger.core.library.ShelfKey.of(it.title) })
-                    if (rows.isNotEmpty()) add(Section(SUBJECTS, rows))
+                    if (rows.isNotEmpty()) add(Section(SUBJECTS, rows, heading = UiText.Res(R.string.sources_section_subjects)))
                     return@buildList
                 }
                 if (familyView != null) {
                     // A folded family's own list: its packs A–Z, for the letter strip.
                     val rows = groups.sortedByShelfKey({ app.granger.core.library.ShelfKey.of(it.title) }).map(::groupRow)
-                    if (rows.isNotEmpty()) add(Section(familyView.label, rows))
+                    if (rows.isNotEmpty()) add(Section(familyView.words, rows, heading = UiText.Res(familyView.label)))
                     return@buildList
                 }
                 val (featured, rest) = if (inDomain) {
                     val domain = current.readiness!!.domains.first { it.id == domainId }
-                    val tierIds = (domain.essential + domain.comprehensive).distinct()
+                    val tierIds = lang.languages.flatMap { domain.essential(it) + domain.comprehensive(it) }.distinct()
                     val byFlavour = groups.flatMap { g -> g.flavours.map { it.id to g } }.toMap()
                     val tier = tierIds.mapNotNull { byFlavour[it] }.distinct()
                         .sortedBy { g -> g.flavours.any { status(it) == ItemStatus.Installed } }
@@ -734,7 +782,7 @@ class SourceViewModel(
                 } else {
                     groups.partition { chosen == null && it.featured }
                 }
-                if (featured.isNotEmpty()) add(Section(RECOMMENDED, featured.map(::groupRow)))
+                if (featured.isNotEmpty()) add(Section(RECOMMENDED, featured.map(::groupRow), heading = UiText.Res(R.string.sources_section_recommended)))
                 // The big families fold to one row each, in their category, until a search looks inside (Decision 10).
                 val foldFamilies = needle.isEmpty() && !inDomain
                 rest.groupBy { it.default.category }
@@ -756,7 +804,7 @@ class SourceViewModel(
             val (featured, rest) = if (inDomain) {
                 // Recommended in a domain: its tier items (essential first), the uninstalled before the installed.
                 val domain = current.readiness!!.domains.first { it.id == domainId }
-                val tierIds = (domain.essential + domain.comprehensive).distinct()
+                val tierIds = lang.languages.flatMap { domain.essential(it) + domain.comprehensive(it) }.distinct()
                 val byId = packs.associateBy { it.id }
                 val tier = tierIds.mapNotNull { byId[it] }.sortedBy { status(it) == ItemStatus.Installed }
                 tier to packs.filterNot { it.id in tierIds }
@@ -766,34 +814,48 @@ class SourceViewModel(
             if (gutenberg) {
                 // Project Gutenberg (Plan GB Decision 7): the subject packs A–Z, then the two everything-packs, each with its size.
                 val (everything, subjects) = packs.partition { it.zimName.endsWith("_all") }
-                if (subjects.isNotEmpty()) add(Section(SUBJECTS, subjects.sortedBy { it.title.lowercase() }.map(::row)))
-                if (everything.isNotEmpty()) add(Section(EVERYTHING, everything.sortedBy { it.sizeBytes }.map(::row)))
+                if (subjects.isNotEmpty()) {
+                    add(Section(SUBJECTS, subjects.sortedBy { it.title.lowercase() }.map(::row), heading = UiText.Res(R.string.sources_section_subjects)))
+                }
+                if (everything.isNotEmpty()) {
+                    add(Section(EVERYTHING, everything.sortedBy { it.sizeBytes }.map(::row), heading = UiText.Res(R.string.sources_section_everything)))
+                }
                 return@buildList
             }
             if (kiwixBooks) {
                 // Kiwix libraries (Plan KB Decision 7): the nautilus packs A–Z, each with its size.
-                if (packs.isNotEmpty()) add(Section(LIBRARIES, packs.sortedBy { it.title.lowercase() }.map(::row)))
+                if (packs.isNotEmpty()) {
+                    add(Section(LIBRARIES, packs.sortedBy { it.title.lowercase() }.map(::row), heading = UiText.Res(R.string.sources_section_libraries)))
+                }
                 return@buildList
             }
-            if (featured.isNotEmpty()) add(Section(RECOMMENDED, featured.map(::row)))
+            if (featured.isNotEmpty()) add(Section(RECOMMENDED, featured.map(::row), heading = UiText.Res(R.string.sources_section_recommended)))
             rest.groupBy { it.category }
                 .toList()
                 .sortedWith(compareBy({ categoryRank(it.first) }, { it.first }))
                 .forEach { (category, entries) -> add(section(category, entries)) }
             // Books come after the packs, grouped by category in catalog order.
             current.books.filter(::shown).groupBy { it.category }
-                .forEach { (category, entries) -> add(section(category, entries, folding = booksFold, noun = "books")) }
+                .forEach { (category, entries) -> add(section(category, entries, folding = booksFold, noun = SectionNoun.BOOKS)) }
         }
         // Granger's screen is Get more's Granger Classics, under Books: only a set of books is offered there. Starter,
         // Efficient and Comprehensive bring Kiwix's wikis and the models, which aren't books (Plan GB walkthrough).
         val presets = if (scope != CatalogScope.GRANGER) emptyList() else current?.presets.orEmpty().filter { preset ->
-            preset.items.isNotEmpty() && preset.items.all { current?.item(it) is BookEntry }
-        }.sortedByDescending { it.id == CLASSICS_PRESET }.map { preset ->
+            preset.items.isNotEmpty() && preset.items.all { current?.item(it) is BookEntry } &&
+                // A collection in another language (Clásicos Granger for an English library) waits for All languages (Plan L3).
+                (lang.all || app.granger.core.catalog.Languages.normalise(preset.language) in lang.languages)
+        }.sortedWith(
+            // Granger's own collections first (Granger Classics, Clásicos Granger: Plan L3), the main language's first.
+            compareBy(
+                { it.id !in GRANGER_PRESETS },
+                { lang.languages.indexOf(app.granger.core.catalog.Languages.normalise(it.language)).let { i -> if (i < 0) Int.MAX_VALUE else i } },
+            ),
+        ).map { preset ->
             val items = preset.items.mapNotNull { current?.item(it) }
             val statuses = items.map(::status)
             val todo = items.filterIndexed { i, _ -> wanted(statuses[i]) }
             PresetRow(
-                preset.id, preset.title, items.size, todo.size, todo.sumOf { it.downloadBytes },
+                preset.id, preset.title(java.util.Locale.getDefault().language), items.size, todo.size, todo.sumOf { it.downloadBytes },
                 packs = items.count { it is PackEntry }, books = items.count { it is BookEntry },
                 others = items.count { it !is PackEntry && it !is BookEntry }, totalBytes = items.sumOf { it.downloadBytes },
                 onPhone = statuses.count { it == ItemStatus.Installed },
@@ -816,19 +878,23 @@ class SourceViewModel(
             category = chosen,
             domainTitle = domainTitle,
             sizeCheck = s.sizeCheck,
-            familyTitle = familyView?.label ?: subjectsSet?.let { set -> "${setGroup(set)?.title ?: "Wikipedia"} subjects" },
+            familyTitle = familyView?.let { UiText.Res(it.label) }
+                ?: subjectsSet?.let { set -> UiText.Res(R.string.sources_set_subjects, setGroup(set)?.title ?: "Wikipedia") },
+            languageChip = current != null && (lang.all || (scope in PACK_SCOPES || scope == CatalogScope.GRANGER) &&
+                (current.packs.any { scopeOf(it) == scope && !it.sample && !inLanguage(it) } || current.books.any { scopeOf(it) == scope && !inLanguage(it) })),
+            allLanguages = lang.all,
         )
     }
 
-    private fun catalogProblem(state: CatalogState): String? {
+    private fun catalogProblem(state: CatalogState): UiText? {
         if (state.catalog == null) {
-            return if (state.error != null) "Couldn't load the catalog. Connect to the internet and try again." else null
+            return if (state.error != null) UiText.Res(R.string.sources_catalog_unloaded) else null
         }
         return when (state.error) {
-            CatalogError.NETWORK -> "Offline: showing the catalog from your last connection."
-            CatalogError.BAD_SIGNATURE -> "The latest catalog failed its security check. Showing the last good copy."
-            CatalogError.UNSUPPORTED_FORMAT -> "A newer catalog needs an app update. Showing the last copy that works."
-            CatalogError.MALFORMED -> "Couldn't read the latest catalog. Showing the last good copy."
+            CatalogError.NETWORK -> UiText.Res(R.string.sources_catalog_offline)
+            CatalogError.BAD_SIGNATURE -> UiText.Res(R.string.sources_catalog_bad_signature)
+            CatalogError.UNSUPPORTED_FORMAT -> UiText.Res(R.string.sources_catalog_unsupported)
+            CatalogError.MALFORMED -> UiText.Res(R.string.sources_catalog_malformed)
             CatalogError.OLDER_THAN_CACHED, null -> null
         }
     }
@@ -836,17 +902,28 @@ class SourceViewModel(
     companion object {
         /** Rows a folded section shows before Show all. */
         const val FOLDED_ROWS = 8
+        // The keys of the sections the screen names itself; each shows its own heading (Section.heading).
         const val RECOMMENDED = "Recommended"
         const val SUBJECTS = "Subjects"
         const val EVERYTHING = "Everything"
         const val LIBRARIES = "Libraries"
+        const val AI_MODELS = "AI models"
         /** A subjects list's family token: "subjects:<set id>:<slice ZIM name>" (Plan WF Decision 4). */
         const val SUBJECTS_PREFIX = "subjects:"
-        /** Subjects that keep their own row in the Kiwix list (Plan WF Decision 4): WikiMed, Medicine's essential. */
-        val OWN_ROW_SUBJECTS = setOf("wikipedia_en_medicine")
+        /**
+         * Subjects that keep their own row in the Kiwix list (Plan WF Decision 4): WikiMed, Medicine's essential, in
+         * every language (Plan L3: `wikipedia_es_medicine`).
+         */
+        private val OWN_ROW_SUBJECTS = Regex("^wikipedia_[a-z]{2,3}_medicine$")
+
+        fun ownRow(zimName: String): Boolean = OWN_ROW_SUBJECTS.matches(zimName)
+
+        /** The catalog's code for a pack in many languages: it shows in every language's list. */
+        private const val MULTILINGUAL = "mul"
         private val PICTURES = listOf("maxi", "nopic", "mini")
         private const val GUTENBERG_SUFFIX = " · Project Gutenberg"
-        private const val CLASSICS_PRESET = "granger-classics"
+        /** Granger's collection presets, one per knowledge language (Plan L3). */
+        private val GRANGER_PRESETS = app.granger.core.library.Filing.GRANGER_COLLECTIONS.values.toSet()
 
         /** The family table's categories (tools/catalog-gen/kiwix_families.json); any other sorts after, by name. */
         private val CATEGORY_ORDER = listOf(

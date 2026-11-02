@@ -9,7 +9,9 @@ import app.granger.library.shelf.ShelfSections
 import app.granger.library.shelf.sortedByShelfKey
 
 /** How a collection's books are ordered (Plan U2 Decision 3). */
-enum class BookSort(val label: String) { TITLE("Title"), AUTHOR("Author"), RECENT("Recently read") }
+enum class BookSort(@androidx.annotation.StringRes val label: Int) {
+    TITLE(app.granger.R.string.library_sort_title), AUTHOR(app.granger.R.string.library_sort_author), RECENT(app.granger.R.string.library_sort_recent),
+}
 
 /**
  * The books a collection shows: [books] after the Find text, the category and the sort, and as [sections] under their
@@ -50,7 +52,7 @@ fun collectionBooks(
     }
     // Titles A–Z skipping The, A and An (Plan LV Decision 3); one title's copies by their full title, then id.
     val byTitle = compareBy<Book>({ SearchText.fold(it.title) }, { it.id })
-    fun titleKey(book: Book) = ShelfKey.of(book.title)
+    fun titleKey(book: Book) = ShelfKey.of(book.title, language = book.language)
     val sections = when (sort) {
         BookSort.TITLE -> ShelfSections.of(shown.sortedByShelfKey(::titleKey, byTitle), byName = true, key = ::bookKey) { ShelfKey.letter(titleKey(it)) }
         // By surname, filed under its letter; unknown authors last (under #), one author's books by title.

@@ -91,9 +91,6 @@ class BookshelfTest {
         val source = PdfFixtures.passwordLocked(src)
         val result = pdfShelf.import("locked.pdf") { source.inputStream() }
         assertThat(result).isEqualTo(ImportResult.Protected(DrmKind.PDF_ENCRYPTED))
-        assertThat(result.message("locked.pdf")).isEqualTo(
-            "locked.pdf is password-protected or encrypted. Granger can't open it and won't remove the protection.",
-        )
         assertThat(importFiles()).isEmpty()
     }
 
@@ -494,8 +491,6 @@ class BookshelfTest {
         val source = TestEpubs.build(src, "locked.epub", drmFiles = mapOf("META-INF/license.lcpl" to "{}"))
         val result = shelf.import("locked.epub") { source.inputStream() }
         assertThat(result).isEqualTo(ImportResult.Protected(DrmKind.LCP))
-        assertThat(result.message("locked.epub"))
-            .isEqualTo("locked.epub is copy-protected (DRM). Granger can't open it and won't remove the protection.")
         assertThat(importFiles()).isEmpty()
         assertThat(shelf.books.first()).isEmpty()
     }
@@ -504,15 +499,12 @@ class BookshelfTest {
         val zipLike = File(src, "broken.epub").apply { writeBytes("PK\u0003\u0004garbage".toByteArray()) }
         val result = shelf.import("broken.epub") { zipLike.inputStream() }
         assertThat(result).isInstanceOf(ImportResult.Damaged::class.java)
-        assertThat(result.message("broken.epub")).isEqualTo("broken.epub is damaged or isn't a complete e-book.")
 
         val empty = File(src, "empty.epub").apply { writeBytes(ByteArray(0)) }
         assertThat(shelf.import("empty.epub") { empty.inputStream() }).isInstanceOf(ImportResult.Damaged::class.java)
 
         val binary = File(src, "scan.pdf").apply { writeBytes(byteArrayOf(0x25, 0x50, 0x44, 0x46, 0, 1, 2, 0)) }
         assertThat(shelf.import("scan.pdf") { binary.inputStream() }).isInstanceOf(ImportResult.Damaged::class.java)
-        assertThat(ImportResult.Unsupported.message("story.docx"))
-            .isEqualTo("story.docx isn't an EPUB, PDF, TXT or Markdown file.")
 
         assertThat(importFiles()).isEmpty()
         assertThat(shelf.books.first()).isEmpty()

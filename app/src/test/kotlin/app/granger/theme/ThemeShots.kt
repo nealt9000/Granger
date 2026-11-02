@@ -126,11 +126,18 @@ import org.robolectric.annotation.GraphicsMode
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [35], qualifiers = "w360dp-h640dp-xxhdpi")
-class ThemeShots {
+open class ThemeShots {
     @get:Rule val compose = createComposeRule()
-    private val out = System.getProperty("granger.themeShots").orEmpty()
+
+    /** A subfolder for a language's shots ([ThemeShotsSpanish]); empty for English. */
+    protected open val language: String get() = ""
+    private val out = System.getProperty("granger.themeShots").orEmpty().let { if (it.isEmpty() || language.isEmpty()) it else "$it/$language" }
 
     @Before fun onlyWhenAsked() = assumeTrue(out.isNotEmpty())
+
+    /** A resource in the shot's language, for finding what to tap. */
+    private fun text(id: Int, vararg args: Any): String =
+        androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>().getString(id, *args)
 
     private fun shoot(name: String, content: @Composable () -> Unit) {
         var night by mutableStateOf(true)
@@ -147,15 +154,15 @@ class ThemeShots {
     private val ids = listOf("medicine", "food", "making", "science", "technology", "maps", "reference", "literature", "thought")
     private val report = ReadinessReport(
         domains = ids.mapIndexed { i, id -> DomainCoverage(id, id, if (i < 3) Coverage.BASIC else Coverage.NONE, 0, 100, 400, emptyList()) },
-        signals = listOf(Signal.Unsearchable("p", "Owls can't be searched: the pack has no index.")),
+        signals = listOf(Signal.Unsearchable("p", app.granger.UiText.Raw("Owls can't be searched: the pack has no index."))),
         storage = listOf(StorageRow(Source.KIWIX, 11_100_000_000, 40)),
         needsCatalogRefresh = false,
     )
-    private val owls = RailEntry.Tab(RailTabUi(1L, "Owls", "Birds of the world", 'O', available = true, current = true), at = 5L, pinned = true)
+    private val owls = RailEntry.Tab(RailTabUi(1L, "Owls", app.granger.UiText.Raw("Birds of the world"), 'O', available = true, current = true), at = 5L, pinned = true)
     private val blue = RailEntry.Play("album:Blue", "Blue", at = 1L)
     private val dayFeed = FeedUi(
-        HomeFeed(1, "family:wikipedia", FeedKind.ON_THIS_DAY, "", 0, 0), "Wikipedia",
-        Drawn("October 26", listOf(Card("1863 – The Football Association is founded in London.", "Events", CardTarget.Article("u1", "October_26", "Events")))),
+        HomeFeed(1, "family:wikipedia", FeedKind.ON_THIS_DAY, "", 0, 0), app.granger.UiText.Raw("Wikipedia"), app.granger.UiText.Raw("October 26"),
+        Drawn(listOf(Card("1863 – The Football Association is founded in London.", "Events", CardTarget.Article("u1", "October_26", "Events")))),
     )
 
     @Test fun home() = shoot("home") {
@@ -255,12 +262,12 @@ class ThemeShots {
             BrowseContent(
                 BrowseUi(
                     listOf(
-                        BrowseSection("medicine", "Medicine & first aid", medicine),
-                        BrowseSection("making", "Making, repair & engineering", making),
-                        BrowseSection("maps", "Maps, places & travel", travel),
-                        BrowseSection("reference", "General reference", reference),
-                        BrowseSection(OTHER_SECTION, "Other", other),
-                        BrowseSection(MAPS_SECTION, "Maps", maps),
+                        BrowseSection("medicine", app.granger.UiText.Raw("Medicine & first aid"), medicine),
+                        BrowseSection("making", app.granger.UiText.Raw("Making, repair & engineering"), making),
+                        BrowseSection("maps", app.granger.UiText.Raw("Maps, places & travel"), travel),
+                        BrowseSection("reference", app.granger.UiText.Raw("General reference"), reference),
+                        BrowseSection(OTHER_SECTION, app.granger.UiText.Raw("Other"), other),
+                        BrowseSection(MAPS_SECTION, app.granger.UiText.Raw("Maps"), maps),
                     ),
                 ),
                 "/packs", downloadsBadge = 0, BrowseActions(),
@@ -300,7 +307,7 @@ class ThemeShots {
      * sizes they're drawn (queue, Browse, mini player, search, Listen), the rail's tab, play, search and chat, and
      * the mini player, all on the themed tile.
      */
-    @Config(qualifiers = "w360dp-h720dp-xxhdpi")
+    @Config(qualifiers = "+w360dp-h720dp")
     @Test fun tiles() = shoot("tiles") {
         val rail = RailUi(
             listOf(
@@ -341,14 +348,14 @@ class ThemeShots {
     @Test fun listen() = shoot("listen") {
         val phone = CollectionRow(ShelfCollection("c:phone", "Phone", "music", false, defaultKey = "phone"), emptyList(), albums = emptyList())
         val librivox = CollectionRow(ShelfCollection("c:lv", "LibriVox", "audiobooks", false, defaultKey = "lv"), emptyList(), audiobooks = listOf(audiobook("t")))
-        val card = NowPlayingCard("Now playing", "Blue in Green", "Miles Davis", null, CardKind.MUSIC, live = true, playing = true)
+        val card = NowPlayingCard(app.granger.R.string.listen_now_playing, app.granger.UiText.Raw("Blue in Green"), app.granger.UiText.Raw("Miles Davis"), null, CardKind.MUSIC, live = true, playing = true)
         GrangerShell(
             rail = RailUi(listOf(owls, blue)), expanded = false, railVisible = true, selected = RailTool.LISTEN,
             onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {}, onChat = {}, onPlay = {},
             actions = RailEntryActions(onPin = {}, onUnpin = {}, onRemove = {}),
         ) {
             ListenContent(
-                ListenUi(card, listOf(KindRow("music", "Music", "music", listOf(phone)), KindRow("audiobooks", "Audiobooks", "audiobooks", listOf(librivox)))),
+                ListenUi(card, listOf(KindRow("music", app.granger.UiText.Raw("Music"), "music", listOf(phone)), KindRow("audiobooks", app.granger.UiText.Raw("Audiobooks"), "audiobooks", listOf(librivox)))),
                 ListenActions(),
             )
         }
@@ -367,7 +374,7 @@ class ThemeShots {
      * PNG: Field on the left, Night on the right. Each column is the narrow rail's tools with Listen selected at the
      * foot, and the full rail's Listen row at 20 dp.
      */
-    @Config(qualifiers = "w720dp-h520dp-xxhdpi")
+    @Config(qualifiers = "+w720dp-h520dp")
     @Test fun listenIcons() {
         val candidates = listOf(
             "headphones" to R.drawable.ic_headphones,
@@ -392,7 +399,7 @@ class ThemeShots {
      * rail's order with the other tools, Browse selected at the foot and the full rail's Browse row at 20 dp. Field on
      * the left, Night on the right.
      */
-    @Config(qualifiers = "w720dp-h560dp-xxhdpi")
+    @Config(qualifiers = "+w720dp-h560dp")
     @Test fun browseIcons() {
         val candidates = listOf("globe" to R.drawable.ic_browse, "compass" to R.drawable.ic_browse_alt)
         compose.setContent {
@@ -544,8 +551,8 @@ class ThemeShots {
     @Test fun shelfDrag() {
         var night by mutableStateOf(true)
         compose.setContent { GrangerTheme(night = night) { ShelfShot(ShelfView.LIST) } }
-        compose.onNode(androidx.compose.ui.test.hasContentDescription("Jump to A")).performTouchInput { down(center) }
-        compose.onNode(androidx.compose.ui.test.hasContentDescription("Jump to A")).performTouchInput { moveBy(androidx.compose.ui.geometry.Offset(0f, height * 11.5f)) }
+        compose.onNode(androidx.compose.ui.test.hasContentDescription(text(R.string.library_jump_to, "A"))).performTouchInput { down(center) }
+        compose.onNode(androidx.compose.ui.test.hasContentDescription(text(R.string.library_jump_to, "A"))).performTouchInput { moveBy(androidx.compose.ui.geometry.Offset(0f, height * 11.5f)) }
         for (n in listOf(true, false)) {
             night = n
             compose.waitForIdle()
@@ -708,28 +715,28 @@ class ThemeShots {
      */
     @Test fun kiwixRows() = shoot("kiwix-rows") {
         val flavours = listOf(
-            app.granger.sources.FlavourChoice("top_maxi", "With pictures", 6_990_000_000, chosen = true),
-            app.granger.sources.FlavourChoice("top_nopic", "No pictures", 2_750_000_000, chosen = false),
-            app.granger.sources.FlavourChoice("top_mini", "Mini (intro paragraphs only)", 300_000_000, chosen = false),
+            app.granger.sources.FlavourChoice("top_maxi", app.granger.UiText.Raw("With pictures"), 6_990_000_000, chosen = true),
+            app.granger.sources.FlavourChoice("top_nopic", app.granger.UiText.Raw("No pictures"), 2_750_000_000, chosen = false),
+            app.granger.sources.FlavourChoice("top_mini", app.granger.UiText.Raw("Mini (intro paragraphs only)"), 300_000_000, chosen = false),
         )
         val rows = listOf(
             app.granger.sources.ItemRow(
-                "top_maxi", "Wikipedia: best articles", "English · Updated October 2026 · CC BY-SA",
-                "The 50,000 best Wikipedia articles", 6_990_000_000, app.granger.sources.ItemStatus.NotInstalled, null,
+                "top_maxi", "Wikipedia: best articles", app.granger.UiText.Raw("English · Updated October 2026 · CC BY-SA"),
+                app.granger.UiText.Raw("The 50,000 best Wikipedia articles"), 6_990_000_000, app.granger.sources.ItemStatus.NotInstalled, null,
                 flavours = flavours, license = "CC BY-SA 4.0",
             ),
             app.granger.sources.ItemRow(
-                "med_maxi", "WikiMed", "English · Updated October 2026 · CC BY-SA", "The largest medical encyclopedia, from Wikipedia",
+                "med_maxi", "WikiMed", app.granger.UiText.Raw("English · Updated October 2026 · CC BY-SA"), app.granger.UiText.Raw("The largest medical encyclopedia, from Wikipedia"),
                 1_860_000_000, app.granger.sources.ItemStatus.NotInstalled, "u-med",
                 flavours = listOf(
-                    app.granger.sources.FlavourChoice("med_maxi", "With pictures", 1_860_000_000, chosen = true),
-                    app.granger.sources.FlavourChoice("med_nopic", "No pictures", 1_050_000_000, chosen = false, installed = true),
+                    app.granger.sources.FlavourChoice("med_maxi", app.granger.UiText.Raw("With pictures"), 1_860_000_000, chosen = true),
+                    app.granger.sources.FlavourChoice("med_nopic", app.granger.UiText.Raw("No pictures"), 1_050_000_000, chosen = false, installed = true),
                 ),
-                installedFlavour = "no pictures", switches = true, license = "CC BY-SA 4.0",
+                switches = true, license = "CC BY-SA 4.0",
             ),
             app.granger.sources.ItemRow(
-                "survivor", "Survivor Library", "English · Updated September 2026 · Licence not stated",
-                "Books and manuals on how things were done before electricity", 220_350_000_000,
+                "survivor", "Survivor Library", app.granger.UiText.Raw("English · Updated September 2026 · Licence not stated"),
+                app.granger.UiText.Raw("Books and manuals on how things were done before electricity"), 220_350_000_000,
                 app.granger.sources.ItemStatus.NotInstalled, null, license = "Not stated by the source",
             ),
         )
@@ -747,8 +754,8 @@ class ThemeShots {
     @Test fun switchFlavour() = shootDialog("switch-flavour") {
         app.granger.sources.SwitchDialog(
             "WikiMed",
-            app.granger.sources.FlavourChoice("med_nopic", "No pictures", 1_050_000_000, chosen = false, installed = true),
-            app.granger.sources.FlavourChoice("med_maxi", "With pictures", 1_860_000_000, chosen = true),
+            app.granger.sources.FlavourChoice("med_nopic", app.granger.UiText.Raw("No pictures"), 1_050_000_000, chosen = false, installed = true),
+            app.granger.sources.FlavourChoice("med_maxi", app.granger.UiText.Raw("With pictures"), 1_860_000_000, chosen = true),
             onSwitch = {}, onDismiss = {},
         )
     }
@@ -758,7 +765,7 @@ class ThemeShots {
         app.granger.sources.SizeCheckDialog(
             app.granger.sources.SizeCheck(
                 "wikipedia_en_all_maxi", "Wikipedia", 115_000_000_000, 41_000_000_000, "Phone",
-                smaller = app.granger.sources.FlavourChoice("wikipedia_en_all_nopic", "No pictures", 48_000_000_000, chosen = false),
+                smaller = app.granger.sources.FlavourChoice("wikipedia_en_all_nopic", app.granger.UiText.Raw("No pictures"), 48_000_000_000, chosen = false),
             ),
             onGet = {}, onDismiss = {},
         )
@@ -865,7 +872,8 @@ class ThemeShots {
             app.granger.sources.TidyOfferCard(
                 app.granger.sources.TidyOffer(
                     "a>b", "wikipedia_en_top1m_nopic", "wikipedia_en_top_nopic", "u-1m", "u-top", 2_700_000_000,
-                    "Top 1 million is in. Remove Best 50,000 (2.7 GB)? Your places and bookmarks move across.", "Best 50,000",
+                    app.granger.UiText.Res(app.granger.R.string.sources_tidy_text, "Top 1 million", "Best 50,000", "2.7 GB"),
+                    "Best 50,000",
                 ),
                 onRemove = {}, onKeep = {},
             )
@@ -915,7 +923,7 @@ class ThemeShots {
     @Test fun booksGrid() = booksShot("books-grid", ShelfView.GRID)
 
     /** All music, forty albums of two songs, at 360 dp; [tab] is clicked before the shot. */
-    private fun musicShot(name: String, tab: String, albumView: ShelfView = ShelfView.LIST) {
+    private fun musicShot(name: String, tab: Int, albumView: ShelfView = ShelfView.LIST) {
         val tracks = classics.take(40).flatMapIndexed { i, (title, author) ->
             (1..2).map { n ->
                 app.granger.music.song("s$i-$n", title = if (n == 1) title else "$title, part two", album = title, albumArtists = author.ifEmpty { "Anonymous" },
@@ -938,7 +946,7 @@ class ThemeShots {
                 ) { app.granger.music.MusicScreen(vm, nav) }
             }
         }
-        compose.onNode(androidx.compose.ui.test.hasText(tab) and androidx.compose.ui.test.hasClickAction()).performClick()
+        compose.onNode(androidx.compose.ui.test.hasText(text(tab)) and androidx.compose.ui.test.hasClickAction()).performClick()
         for (n in listOf(true, false)) {
             night = n
             compose.waitForIdle()
@@ -948,13 +956,13 @@ class ThemeShots {
         }
     }
 
-    @Test fun musicSongs() = musicShot("music-songs", "Songs")
+    @Test fun musicSongs() = musicShot("music-songs", R.string.music_tab_songs)
 
-    @Test fun musicAlbumsList() = musicShot("music-albums-list", "Albums")
+    @Test fun musicAlbumsList() = musicShot("music-albums-list", R.string.music_tab_albums)
 
-    @Test fun musicAlbumsGrid() = musicShot("music-albums-grid", "Albums", ShelfView.GRID)
+    @Test fun musicAlbumsGrid() = musicShot("music-albums-grid", R.string.music_tab_albums, ShelfView.GRID)
 
-    @Test fun musicArtists() = musicShot("music-artists", "Artists")
+    @Test fun musicArtists() = musicShot("music-artists", R.string.music_tab_artists)
 
     /** Forty audiobooks, three part-way, two finished, one missing, at 360 dp. */
     private fun audiobooksShot(name: String, view: ShelfView) {
@@ -1061,7 +1069,7 @@ class ThemeShots {
         )
     }
 
-    @Config(qualifiers = "w360dp-h1400dp-xxhdpi")
+    @Config(qualifiers = "+w360dp-h1400dp")
     @Test fun downloadsTrouble() = shoot("downloads-trouble") {
         val trouble = dlRound.map {
             when (it.itemId) {
@@ -1078,4 +1086,13 @@ class ThemeShots {
             ),
         )
     }
+}
+
+/**
+ * The same screens in Spanish (Plan L2 Task 4), under app/build/theme-shots/es, for clipped or wrapped labels:
+ * ./gradlew :app:testDebugUnitTest --tests '*ThemeShotsSpanish*' -PthemeShots
+ */
+@Config(qualifiers = "+es")
+class ThemeShotsSpanish : ThemeShots() {
+    override val language: String get() = "es"
 }

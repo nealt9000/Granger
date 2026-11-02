@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-la-letra-escarlata",
+ "kind": "book",
+ "fileName": "gc-es-la-letra-escarlata_2026-10-30.gvec",
+ "sizeBytes": 155364,
+ "sha256": "b0756cfbaea842aaa6eaf13fb04c3e9d0ed291310ccc5182606210a0fe9c6cc8",
+ "count": 528,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "18633247d0662addd5f516021ab17d0609b8f14c2be84719e01e716eadc86ddb",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-la-letra-escarlata_2026-10-30.gvec"
+}

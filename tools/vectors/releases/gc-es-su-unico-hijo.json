@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-su-unico-hijo",
+ "kind": "book",
+ "fileName": "gc-es-su-unico-hijo_2026-10-30.gvec",
+ "sizeBytes": 167124,
+ "sha256": "9e9e2bcb29f514278509c5b5b3bb59941a33fa4a3522ae4af5cdb425e6902912",
+ "count": 568,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "ef737394e94197f22ff5f77b98ec7b1a5ccd9cccea041b8f29e1e92e49d10aed",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-su-unico-hijo_2026-10-30.gvec"
+}

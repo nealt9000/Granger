@@ -19,6 +19,8 @@ class InstalledVoices(
     private val granger: SpeechFactory,
     private val system: SpeechFactory,
     private val io: CoroutineDispatcher = Dispatchers.IO,
+    /** How the Granger voices are named: the app passes [VoiceTitles.of]. */
+    private val titles: VoiceTitles = VoiceTitles.BARE,
 ) {
     private val _voices = MutableStateFlow<List<Voice>>(emptyList())
     val voices: StateFlow<List<Voice>> = _voices.asStateFlow()
@@ -29,8 +31,8 @@ class InstalledVoices(
             .sortedWith(compareBy<SherpaVoice> { rank(it.id) }.thenBy { it.id })
             .flatMap { voice ->
                 val names = SherpaVoice.speakerNames(voice)
-                if (names.isEmpty()) listOf(Voice(VoiceId.Granger(voice.id), SherpaSpeech.title(voice.id), "en-US"))
-                else names.mapIndexed { i, name -> Voice(VoiceId.Granger(voice.id, i), SherpaSpeech.speakerTitle(name), "en-US", speakers = names.size) }
+                if (names.isEmpty()) listOf(Voice(VoiceId.Granger(voice.id), SherpaSpeech.title(voice.id, titles), "en-US"))
+                else names.mapIndexed { i, name -> Voice(VoiceId.Granger(voice.id, i), SherpaSpeech.speakerTitle(name, titles), "en-US", speakers = names.size) }
             }
         val remote = runCatching { systemVoices() }.getOrDefault(emptyList())
         return (local + remote).also { _voices.value = it }

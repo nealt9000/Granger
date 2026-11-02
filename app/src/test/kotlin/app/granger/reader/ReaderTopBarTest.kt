@@ -66,7 +66,7 @@ class ReaderTopBarTest {
         val lefts = listOf(
             compose.onNodeWithContentDescription("Back").left(),
             compose.onNodeWithTag(ReaderBarTags.TITLE).left(),
-            compose.onNodeWithContentDescription(MAIN_PAGE).left(),
+            compose.onNodeWithContentDescription("Main page").left(),
             compose.onNodeWithContentDescription("Listen").left(),
             compose.onNodeWithContentDescription("More").left(),
         )
@@ -96,7 +96,7 @@ class ReaderTopBarTest {
         bars(voice = voice)
         for (n in listOf("Listen", "Pause", "Play", "Stop")) compose.onNodeWithContentDescription(n).assertDoesNotExist()
         // Main page stays in the bar, and the star in the bottom one.
-        assertThat(compose.onNodeWithContentDescription(MAIN_PAGE).left()).isLessThan(compose.onNodeWithContentDescription("More").left())
+        assertThat(compose.onNodeWithContentDescription("Main page").left()).isLessThan(compose.onNodeWithContentDescription("More").left())
         compose.onNodeWithContentDescription("Add bookmark").assertExists()
     }
 
@@ -108,7 +108,7 @@ class ReaderTopBarTest {
     /** The pack's main page is one tap, in the top bar (the walkthrough); ⋯ keeps Random article and Find in page. */
     @Test fun mainPageIsAButtonAndMoreHoldsRandomAndFind() {
         bars()
-        compose.onNodeWithContentDescription(MAIN_PAGE).performClick()
+        compose.onNodeWithContentDescription("Main page").performClick()
         compose.onNodeWithContentDescription("More").performClick()
         compose.onNodeWithText("Random article").performClick()
         compose.onNodeWithContentDescription("More").performClick()
@@ -123,15 +123,15 @@ class ReaderTopBarTest {
     /** While the page is read Main page stays in the bar, one tap, and ⋯ doesn't repeat it. */
     @Test fun whileThePageIsReadMainPageStaysInTheBar() {
         bars(voice = VoiceButton.READING)
-        compose.onNodeWithContentDescription(MAIN_PAGE).performClick()
+        compose.onNodeWithContentDescription("Main page").performClick()
         compose.onNodeWithContentDescription("More").performClick()
-        compose.onNodeWithText(MAIN_PAGE).assertDoesNotExist()
+        compose.onNodeWithText("Main page").assertDoesNotExist()
         assertThat(calls).containsExactly("home")
     }
 
     @Test fun theMainPageIsLeftOutWhenThePackHasNone() {
         bars(hasHome = false)
-        compose.onNodeWithContentDescription(MAIN_PAGE).assertDoesNotExist()
+        compose.onNodeWithContentDescription("Main page").assertDoesNotExist()
         compose.onNodeWithContentDescription("More").performClick()
         compose.onNodeWithText("Random article").assertExists()
     }
@@ -152,7 +152,7 @@ class ReaderTopBarTest {
     @Test fun anErrorLeavesOnlyBack() {
         bars(hasPack = false, hasPage = false)
         compose.onNodeWithContentDescription("Back").assertExists()
-        for (n in listOf("More", MAIN_PAGE, "Search Wikipedia", "Contents", "Listen")) compose.onNodeWithContentDescription(n).assertDoesNotExist()
+        for (n in listOf("More", "Main page", "Search Wikipedia", "Contents", "Listen")) compose.onNodeWithContentDescription(n).assertDoesNotExist()
     }
 
     @Test fun theBottomBarsSearchOpensThePackSearchWithFocus() {

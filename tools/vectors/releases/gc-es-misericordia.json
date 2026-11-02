@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-misericordia",
+ "kind": "book",
+ "fileName": "gc-es-misericordia_2026-10-30.gvec",
+ "sizeBytes": 175944,
+ "sha256": "d7a866e2f3fa290e80969e4bc47373356698e07fb00fa896938da85e0bb67884",
+ "count": 598,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "2fff17aea5e5f8650441f9a7d64e3976ce93f50408fe6ffa4abcb279930adfab",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-misericordia_2026-10-30.gvec"
+}

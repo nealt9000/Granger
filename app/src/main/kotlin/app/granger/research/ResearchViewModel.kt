@@ -89,6 +89,11 @@ class ResearchViewModel(
     /** Settings → Voice → "Speak answers as they arrive": a new answer is read as its sentences close. */
     private val speakAnswers: () -> Boolean = { false },
     private val now: () -> Long = System::currentTimeMillis,
+    /**
+     * Whether the owl speaks ([OwlLines]): its lines are English copy, so with the app in another language Ask shows the
+     * plain progress labels and declines instead (Plan L2; Spanish owl lines wait for the translation review).
+     */
+    private val owlSpeaks: () -> Boolean = { java.util.Locale.getDefault().language == "en" },
 ) : ViewModel() {
     /** The answer the voice is on ([turnId]) and whether it is speaking; null when the voice is elsewhere or has run out. */
     data class Reading(val turnId: Long, val playing: Boolean)
@@ -190,7 +195,8 @@ class ResearchViewModel(
     private val saidLines = mutableSetOf<String>()
 
     /** A waking line for a new answer or guess, not one this chat has had until all have been. */
-    private fun wakingLine(): String = OwlLines.pickFrom(OwlLines.WAKING, saidLines).also { saidLines += it }
+    private fun wakingLine(): String? =
+        if (owlSpeaks()) OwlLines.pickFrom(OwlLines.WAKING, saidLines).also { saidLines += it } else null
 
     /** The question field, as Compose state written synchronously on every keystroke (see SearchViewModel.searchText). */
     var input by mutableStateOf("")
@@ -241,6 +247,7 @@ class ResearchViewModel(
         pendingQuote.value = null
         if (quote != null) savedState[QUOTE_USED] = true
         val newTitle = if (quote != null && question == EMPTY_QUOTE_QUESTION) {
+            // Stored as the chat's title, so it stays a literal until a chat can carry its quote instead (L2).
             "About: " + quote.text.trim().take(QUOTE_TITLE).trimEnd()
         } else {
             cutAtWord(question, TITLE)
@@ -461,12 +468,14 @@ class ResearchViewModel(
             pipeline.run(request) { stopRequested }.flowOn(cpu).collect { event ->
                 when (event) {
                     is ResearchEvent.Reaction -> {
-                        val line = OwlLines.pick(event.topic, saidLines).also { saidLines += it }
                         healthReaction = event.topic == ReactionTopic.MEDICAL
-                        live.update { it?.copy(reaction = line) }
+                        if (owlSpeaks()) {
+                            val line = OwlLines.pick(event.topic, saidLines).also { saidLines += it }
+                            live.update { it?.copy(reaction = line) }
+                        }
                     }
-                    is ResearchEvent.Reading -> live.update { it?.copy(reading = OwlLines.reading(event.passages)) }
-                    is ResearchEvent.LookingIn -> {
+                    is ResearchEvent.Reading -> if (owlSpeaks()) live.update { it?.copy(reading = OwlLines.reading(event.passages)) }
+                    is ResearchEvent.LookingIn -> if (owlSpeaks()) {
                         val line = OwlLines.lookingIn(event.titles, medical = healthReaction || medical)
                         live.update { it?.copy(lookingIn = line) }
                     }
@@ -623,13 +632,13 @@ internal const val ALBUM_SOURCE = "album:"
 
 /**
  * A source card's second line: the author (or the pack, for an article without one) and the heading; for an album or
- * audiobook, the artist or author (else "Your music" / "Your audiobooks"), "Album" or "Audiobook", and the cited song or
- * chapter.
+ * audiobook, the artist or author (else "Your music" / "Your audiobooks"), [album] or [audiobook] ("Album", "Audiobook"),
+ * and the cited song or chapter.
  */
-internal fun sourceByline(passage: Passage): String {
+internal fun sourceByline(passage: Passage, album: String, audiobook: String): String {
     val who = passage.meta.author.ifBlank { passage.packTitle }
     val what = if (passage.kind != SourceKind.MEDIA) passage.heading
-    else if (passage.sourceId.startsWith(ALBUM_SOURCE)) "Album" else "Audiobook"
+    else if (passage.sourceId.startsWith(ALBUM_SOURCE)) album else audiobook
     // A card focused on a song or chapter names it too.
     val part = if (passage.kind == SourceKind.MEDIA) passage.heading else ""
     return listOf(who, what, part).filter { it.isNotBlank() }.joinToString(" · ")

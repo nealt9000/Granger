@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The home-screen widget (PlayerWidget). -->
+    <string name="widget_name">Granger player</string>
+    <string name="widget_description">Shows and controls what\'s playing</string>
+    <string name="widget_nothing_playing">Nothing playing</string>
+    <string name="widget_open_granger">Open Granger</string>
+    <!-- Spoken labels (content descriptions) for the widget's buttons and cover. -->
+    <string name="widget_play">Play</string>
+    <string name="widget_pause">Pause</string>
+    <!-- Skips back a little in a book or the voice. -->
+    <string name="widget_back">Back</string>
+    <string name="widget_next_track">Next track</string>
+    <string name="widget_open_player">Open player</string>
+    <string name="widget_back_seconds">Back %1$d seconds</string>
+</resources>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Onboarding, the setup flow on first run (Plan L1). Ask is Granger's question-answering tool, the librarian. -->
+    <!-- The wordmark's description: the app's name. -->
+    <string name="onboarding_brand" translatable="false">Granger</string>
+
+    <!-- Step titles. -->
+    <string name="onboarding_step_welcome">Welcome</string>
+    <string name="onboarding_step_phone">This phone</string>
+    <!-- A step title: pick a starter library, Efficient or Comprehensive. -->
+    <string name="onboarding_step_start">Pick a start</string>
+    <!-- A step title, and the heading of the region's map in the review. -->
+    <string name="onboarding_your_region">Your region</string>
+    <!-- A step title, and the heading of the use cases' packs in the review. -->
+    <string name="onboarding_uses">What you\'ll use it for</string>
+    <string name="onboarding_step_review">Review and start</string>
+
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_get_started">Get started</string>
+    <string name="onboarding_finish">Finish</string>
+    <string name="onboarding_starting">Starting…</string>
+    <!-- Starts the downloads. -->
+    <string name="onboarding_start">Start</string>
+    <string name="onboarding_next">Next</string>
+
+    <!-- Welcome. The line break is part of the design. -->
+    <string name="onboarding_tagline">The world’s knowledge.\nYours to keep.</string>
+    <string name="onboarding_intro">Encyclopedias, maps, manuals, books and your own music, with a reader and a librarian you can ask: all on your phone, all working with no signal.</string>
+    <!-- Welcome's offer of a second library language (Plan L3), when the phone lists two the catalog has. %1$s is the
+         language named in the app's language: "Spanish" here, "inglés" in Spanish. -->
+    <string name="onboarding_also_language">Also %1$s?</string>
+    <string name="onboarding_also_language_blurb">Adds its encyclopedia to your start, and its packs to Get more.</string>
+
+    <!-- This phone. %1$s is the phone's memory, like "8.0 GB". -->
+    <string name="onboarding_tier_library">A library phone, with %1$s of memory.</string>
+    <string name="onboarding_tier_ask">A library phone that can run Ask, with %1$s of memory.</string>
+    <string name="onboarding_research_needs_memory">Ask, the AI librarian, needs a phone with 6 GB of memory, so on this one Granger is the library.</string>
+    <string name="onboarding_research_offered">Ask, the librarian, runs on this phone. You can get it on the next screen.</string>
+    <string name="onboarding_research_runs">Ask, the librarian, runs on this phone.</string>
+    <string name="onboarding_storage">Storage</string>
+    <!-- %1$s is the storage's name, %2$s its free space, %3$s its size. -->
+    <string name="onboarding_volume_free_of">%1$s: %2$s free of %3$s</string>
+    <!-- Efficient and Comprehensive are the two starts; %1$s and %2$s their sizes. -->
+    <string name="onboarding_start_sizes">The Efficient start is %1$s; the Comprehensive library is %2$s. A full Wikipedia alone is about 100 GB.</string>
+
+    <!-- Pick a start. -->
+    <string name="onboarding_catalog_failed">Couldn\'t reach the catalog. Check the connection and try again.</string>
+    <string name="onboarding_try_again">Try again</string>
+    <string name="onboarding_catalog_failed_next">Or tap Next: Home and the Library are yours either way.</string>
+    <string name="onboarding_catalog_loading">Getting the list of packs…</string>
+    <string name="onboarding_blurb_efficient">The essentials of every domain: enough to answer most questions, in the least space.</string>
+    <string name="onboarding_blurb_comprehensive">Everything the readiness model counts, for a phone that can hold it.</string>
+    <!-- The third choice, beside the Efficient and Comprehensive starts. -->
+    <string name="onboarding_neither">Neither, I\'ll choose later</string>
+    <string name="onboarding_neither_blurb">Home and the Library are yours either way.</string>
+    <!-- The line that gets Ask's AI models. -->
+    <string name="onboarding_ask_line">Ask (Preview)</string>
+    <string name="onboarding_ask_blurb">The librarian answers questions from your library, on this phone. It\'s a preview: it can be wrong.</string>
+    <!-- Ask's models in the review, under the heading "Ask (Preview)". -->
+    <string name="onboarding_the_librarian">The librarian</string>
+    <!-- The line that gets the Granger voice. -->
+    <string name="onboarding_voice_line">Read aloud</string>
+    <string name="onboarding_voice_blurb">A Granger voice reads books and articles to you, with no signal.</string>
+    <string name="onboarding_save_space">Save space</string>
+    <string name="onboarding_save_space_blurb">Encyclopedias without their pictures: the same articles, a poorer read.</string>
+    <!-- The name of Granger's own collection of English public-domain books. Plan L3: Spanish keeps "Granger Classics", since "Clásicos Granger" is now the Spanish books' own collection. -->
+    <string name="onboarding_granger_classics">Granger Classics</string>
+    <!-- A title and its size: "Peru · 500 MB". -->
+    <string name="onboarding_title_size">%1$s · %2$s</string>
+    <!-- After an item's title and size: it is installed already. -->
+    <string name="onboarding_on_the_phone">%1$s · on the phone</string>
+    <!-- %1$s is the download's size, %2$s the free space. -->
+    <string name="onboarding_of_free">%1$s of %2$s free</string>
+    <!-- The review's heading when the start was trimmed. -->
+    <string name="onboarding_your_picks">Your picks</string>
+
+    <!-- Your region. -->
+    <string name="onboarding_region_intro">A map of where you are, for finding your way with no signal.</string>
+    <string name="onboarding_region_search">Country or area</string>
+    <string name="onboarding_region_suggested">Suggested from this phone</string>
+    <string name="onboarding_no_region">No region</string>
+    <string name="onboarding_other_countries">Other countries</string>
+    <string name="onboarding_larger_areas">Larger areas</string>
+    <!-- A place inside a larger map: %1$s the place, %2$s the map, %3$s its size. "Corsica · in France · 4 GB". -->
+    <string name="onboarding_region_in">%1$s · in %2$s · %3$s</string>
+
+    <!-- What you'll use it for. -->
+    <string name="onboarding_uses_intro">Add packs for what you\'ll use Granger for. You can change this later in Settings.</string>
+    <!-- Opens the packs of a use case's subject. -->
+    <string name="onboarding_see">See</string>
+    <!-- %1$s is the use case's description, a sentence. -->
+    <string name="onboarding_use_covered">%1$s Already covered by your choices.</string>
+    <!-- %1$s is the use case's description, %2$s the size, %3$s a count of items: "Clinical. Adds 1.0 GB · 3 items." -->
+    <string name="onboarding_use_adds">%1$s Adds %2$s · %3$s.</string>
+    <plurals name="onboarding_items">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+
+    <!-- Review and start. -->
+    <string name="onboarding_review_empty">Nothing to download yet. Home and the Library are ready; the Kiwix screen has everything else.</string>
+    <string name="onboarding_quick_voice_classics">Quick ones first: the voice and the Classics land in a few minutes.</string>
+    <string name="onboarding_quick_voice">Quick ones first: the voice lands in a few minutes.</string>
+    <string name="onboarding_quick_classics">Quick ones first: the Classics land in a few minutes.</string>
+    <!-- %1$s is a size. -->
+    <string name="onboarding_indexes">Includes %1$s of indexes for Ask, fetched after their packs.</string>
+    <string name="onboarding_wifi_only">Download on Wi-Fi only</string>
+    <!-- Which storage the downloads go to. -->
+    <string name="onboarding_store_on">Store on</string>
+    <!-- %1$s is the storage's name, %2$s its free space. -->
+    <string name="onboarding_volume_free">%1$s · %2$s free</string>
+    <!-- %1$s is the storage's name, %2$s the space needed. -->
+    <string name="onboarding_no_space">Not enough space on %1$s: free up %2$s or untick something.</string>
+    <!-- %1$s is the total downloads would reach, %2$s the limit. -->
+    <string name="onboarding_over_cap">That would bring your downloads to %1$s, over the %2$s limit.</string>
+    <!-- Of two slices of one set, only the bigger is queued (Plan WF). %1$s is the set, such as Wikipedia; %2$s the bigger slice, such as Top 1 million; %3$s the smaller, such as Best 50,000. -->
+    <string name="onboarding_held_slice">%1$s %2$s covers %3$s, so only %2$s is queued.</string>
+    <!-- %1$s is the bigger pack's title; %2$s the one it holds. -->
+    <string name="onboarding_held">%1$s covers %2$s, so it isn\'t queued.</string>
+    <!-- Pick a start's line, and the review's heading, for a second library language's encyclopedia (Plan L3). %1$s is the
+         language named in the app's language: "Encyclopedia in Spanish". -->
+    <string name="onboarding_second_encyclopedia">Encyclopedia in %1$s</string>
+    <string name="onboarding_second_blurb">Your second language\'s encyclopedia, beside the start.</string>
+</resources>

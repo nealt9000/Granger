@@ -51,13 +51,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.R
 import app.granger.core.archive.LibriVoxShelf
 import app.granger.sources.ItemStatus
 import app.granger.sources.ItemStatusText
-
-private const val FOOTER = "LibriVox recordings are in the public domain. Files are served by the Internet Archive."
 
 /** Browse and search LibriVox, with a book sheet to Get its chapters (64 kbps) or open its LibriVox page. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,14 +65,14 @@ private const val FOOTER = "LibriVox recordings are in the public domain. Files 
 fun LibriVoxScreen(viewModel: LibriVoxViewModel, onBack: () -> Unit) {
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
+    val context = LocalContext.current
     LaunchedEffect(ui.notice) {
         val notice = ui.notice ?: return@LaunchedEffect
-        snackbar.showSnackbar(notice)
+        snackbar.showSnackbar(notice.resolve(context))
         viewModel.dismissNotice()
     }
 
     // Ask once for notifications so download progress can show; downloads work either way.
-    val context = LocalContext.current
     var askedForNotifications by rememberSaveable { mutableStateOf(false) }
     val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
     fun beforeDownload() {
@@ -91,14 +91,15 @@ fun LibriVoxScreen(viewModel: LibriVoxViewModel, onBack: () -> Unit) {
         }
     }
 
-    var confirmRemove by remember { mutableStateOf<Pair<String, String>?>(null) }
+    // The book to remove and its title (null when it has none to show).
+    var confirmRemove by remember { mutableStateOf<Pair<String, String?>?>(null) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("LibriVox") },
+                title = { Text(stringResource(R.string.librivox_title)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) }
                 },
             )
         },
@@ -109,7 +110,7 @@ fun LibriVoxScreen(viewModel: LibriVoxViewModel, onBack: () -> Unit) {
                 OutlinedTextField(
                     value = viewModel.searchText,
                     onValueChange = viewModel::setQuery,
-                    placeholder = { Text("Search LibriVox by title or author") },
+                    placeholder = { Text(stringResource(R.string.librivox_search_placeholder)) },
                     leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
@@ -118,7 +119,7 @@ fun LibriVoxScreen(viewModel: LibriVoxViewModel, onBack: () -> Unit) {
             item(key = "tabs") {
                 PrimaryTabRow(selectedTabIndex = ui.tab.ordinal) {
                     for (tab in LibriVoxTab.entries) {
-                        Tab(selected = ui.tab == tab, onClick = { viewModel.setTab(tab) }, text = { Text(tab.title) })
+                        Tab(selected = ui.tab == tab, onClick = { viewModel.setTab(tab) }, text = { Text(stringResource(tab.title)) })
                     }
                 }
             }
@@ -132,7 +133,7 @@ fun LibriVoxScreen(viewModel: LibriVoxViewModel, onBack: () -> Unit) {
                             FilterChip(
                                 selected = ui.shelf == shelf,
                                 onClick = { viewModel.selectShelf(shelf) },
-                                label = { Text(shelf.title) },
+                                label = { Text(androidx.compose.ui.res.stringResource(shelf.title)) },
                             )
                         }
                     }
@@ -141,15 +142,15 @@ fun LibriVoxScreen(viewModel: LibriVoxViewModel, onBack: () -> Unit) {
             ui.error?.let { problem ->
                 item(key = "problem") {
                     Column(Modifier.padding(16.dp)) {
-                        Text(problem, color = MaterialTheme.colorScheme.error)
-                        TextButton(onClick = viewModel::retry) { Text("Retry") }
+                        Text(problem.resolve(), color = MaterialTheme.colorScheme.error)
+                        TextButton(onClick = viewModel::retry) { Text(stringResource(R.string.common_retry)) }
                     }
                 }
             }
             if (!ui.loading && ui.error == null && ui.rows.isEmpty()) {
                 item(key = "empty") {
                     Text(
-                        if (ui.tab == LibriVoxTab.INSTALLED) "Nothing downloaded from LibriVox yet." else "Nothing matches that search.",
+                        stringResource(if (ui.tab == LibriVoxTab.INSTALLED) R.string.librivox_empty_installed else R.string.librivox_empty_search),
                         modifier = Modifier.padding(16.dp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -176,12 +177,12 @@ fun LibriVoxScreen(viewModel: LibriVoxViewModel, onBack: () -> Unit) {
             }
             if (ui.canLoadMore) {
                 item(key = "more") {
-                    TextButton(onClick = viewModel::loadMore, modifier = Modifier.fillMaxWidth().padding(8.dp)) { Text("Load more") }
+                    TextButton(onClick = viewModel::loadMore, modifier = Modifier.fillMaxWidth().padding(8.dp)) { Text(stringResource(R.string.librivox_load_more)) }
                 }
             }
             item(key = "footer") {
                 Text(
-                    FOOTER,
+                    stringResource(R.string.librivox_footer),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(16.dp),
@@ -202,7 +203,7 @@ fun LibriVoxScreen(viewModel: LibriVoxViewModel, onBack: () -> Unit) {
             onCancel = { viewModel.cancel(sheet.id) },
             onRetry = { viewModel.retryDownload(sheet.id) },
             onRemove = {
-                confirmRemove = sheet.id to (sheet.book?.title?.let(::decodeEntities)?.ifBlank { null } ?: rowTitle ?: "this book")
+                confirmRemove = sheet.id to (sheet.book?.title?.let(::decodeEntities)?.ifBlank { null } ?: rowTitle)
             },
             onOpenPage = ::openPage,
             onDismiss = viewModel::closeBook,
@@ -212,15 +213,15 @@ fun LibriVoxScreen(viewModel: LibriVoxViewModel, onBack: () -> Unit) {
     confirmRemove?.let { (id, title) ->
         AlertDialog(
             onDismissRequest = { confirmRemove = null },
-            title = { Text("Remove $title?") },
-            text = { Text("This deletes its files. Your place and bookmarks are kept.") },
+            title = { Text(title?.let { stringResource(R.string.librivox_remove_title, it) } ?: stringResource(R.string.librivox_remove_this_book)) },
+            text = { Text(stringResource(R.string.librivox_remove_body)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.remove(id)
                     confirmRemove = null
-                }) { Text("Remove") }
+                }) { Text(stringResource(R.string.common_remove)) }
             },
-            dismissButton = { TextButton(onClick = { confirmRemove = null }) { Text("Keep") } },
+            dismissButton = { TextButton(onClick = { confirmRemove = null }) { Text(stringResource(R.string.common_keep)) } },
         )
     }
 }
@@ -239,23 +240,24 @@ private fun BookRow(
         headlineContent = { Text(row.title) },
         supportingContent = {
             Column {
-                if (row.details.isNotBlank()) Text(row.details, style = MaterialTheme.typography.bodySmall)
+                val details = row.details.resolve()
+                if (details.isNotBlank()) Text(details, style = MaterialTheme.typography.bodySmall)
                 ItemStatusText(row.status)
             }
         },
         trailingContent = {
             // A row doesn't know whether the book's files are all on archive.org: Get says why when they aren't.
             when (row.status) {
-                ItemStatus.NotInstalled -> TextButton(onClick = onGet) { Text("Get") }
-                is ItemStatus.Queued, is ItemStatus.Downloading -> TextButton(onClick = onCancel) { Text("Cancel") }
+                ItemStatus.NotInstalled -> TextButton(onClick = onGet) { Text(stringResource(R.string.common_get)) }
+                is ItemStatus.Queued, is ItemStatus.Downloading -> TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) }
                 is ItemStatus.Failed -> Row {
-                    TextButton(onClick = onCancel) { Text("Cancel") }
-                    TextButton(onClick = onRetry) { Text("Retry") }
+                    TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) }
+                    TextButton(onClick = onRetry) { Text(stringResource(R.string.common_retry)) }
                 }
-                ItemStatus.Installed, ItemStatus.UpdateAvailable -> TextButton(onClick = onRemove) { Text("Remove") }
+                ItemStatus.Installed, ItemStatus.UpdateAvailable -> TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
                 is ItemStatus.Partial -> Row {
-                    TextButton(onClick = onRemove) { Text("Remove") }
-                    TextButton(onClick = onGet) { Text("Get the rest") }
+                    TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
+                    TextButton(onClick = onGet) { Text(stringResource(R.string.librivox_get_the_rest)) }
                 }
                 ItemStatus.NeedsMoreMemory, is ItemStatus.InLibrary -> Unit
             }

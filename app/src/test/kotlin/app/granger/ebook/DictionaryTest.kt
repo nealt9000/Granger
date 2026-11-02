@@ -48,4 +48,36 @@ class DictionaryTest {
         assertThat(Dictionary.pick(listOf(ZimHit("a", "Fires")), "fire")!!.path).isEqualTo("a")
         assertThat(Dictionary.pick(emptyList(), "fire")).isNull()
     }
+
+    // Plan L3: which Wiktionary, and where in it.
+    private val en = pack("en-w").copy(name = "wiktionary_en_all", date = "2026-01-01")
+    private val es = pack("es-w").copy(name = "wiktionary_es_all", date = "2026-02-01", language = "spa")
+    private val fr = pack("fr-w").copy(name = "wiktionary_fr_all", date = "2026-03-01", language = "fra")
+
+    @Test fun aLearnerReadsTheMainLanguagesWiktionary() {
+        // An English library reading a Spanish book: English Wiktionary, at its Spanish section.
+        assertThat(Dictionary.choose(listOf(en, es), "es", listOf("en"))).isEqualTo(Definer("en-w", "en", "Spanish", fallback = false))
+    }
+
+    @Test fun elseTheBooksOwnLanguagesWiktionary() {
+        // A Spanish library reading a Spanish book: Spanish Wiktionary at Español.
+        assertThat(Dictionary.choose(listOf(en, es), "spa", listOf("es"))).isEqualTo(Definer("es-w", "es", "Español", fallback = false))
+        // A Spanish library reading an English book, with no Spanish Wiktionary: English's, at English.
+        assertThat(Dictionary.choose(listOf(en), "en", listOf("es"))).isEqualTo(Definer("en-w", "en", "English", fallback = false))
+        // A book that doesn't say is in the main language.
+        assertThat(Dictionary.choose(listOf(en, es), null, listOf("en"))).isEqualTo(Definer("en-w", "en", "English", fallback = false))
+    }
+
+    @Test fun elseAnyWiktionaryWithANote() {
+        // A Spanish library, a Spanish book, only English Wiktionary... is case 1. Only French Wiktionary: a fallback.
+        assertThat(Dictionary.choose(listOf(fr), "es", listOf("es"))).isEqualTo(Definer("fr-w", "fr", "Espagnol", fallback = true))
+        assertThat(Dictionary.choose(listOf(fr, en), "de", listOf("es"))!!.packId).isEqualTo("fr-w")
+        assertThat(Dictionary.choose(listOf(pack("a")), "es", listOf("es"))).isNull()
+    }
+
+    @Test fun theAnchorIsTheBookLanguageInTheWiktionarysLanguage() {
+        assertThat(Dictionary.anchor("es", "en")).isEqualTo("Spanish")
+        assertThat(Dictionary.anchor("es", "es")).isEqualTo("Español")
+        assertThat(Dictionary.anchor("en", "es")).isEqualTo("Inglés")
+    }
 }

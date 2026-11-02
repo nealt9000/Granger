@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-paginas-escogidas",
+ "kind": "book",
+ "fileName": "gc-es-paginas-escogidas_2026-10-30.gvec",
+ "sizeBytes": 55992,
+ "sha256": "b534adbd3b619ae5df246fafd39ffe3667fcfc543b4a1ec1f812dccae27769cd",
+ "count": 190,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "cde161c55abcb366b1cab4fbf80edd5868d0044f01a842653e41f1502bde5728",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-paginas-escogidas_2026-10-30.gvec"
+}

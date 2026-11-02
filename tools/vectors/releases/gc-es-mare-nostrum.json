@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-mare-nostrum",
+ "kind": "book",
+ "fileName": "gc-es-mare-nostrum_2026-10-30.gvec",
+ "sizeBytes": 424668,
+ "sha256": "b75eeb9443a84b41ffd74ad933dca88101cb53ce75f46ad080765be0817bf553",
+ "count": 1444,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "7bc2478b60e59988e7feb0c256cb55013d6fedb6c8d231a4f8c1e0c2e7f3e34e",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-mare-nostrum_2026-10-30.gvec"
+}

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_placeholder">Search your library</string>
+    <string name="search_nothing_found">Nothing in your library matches.</string>
+    <!-- Section headings in the search results. -->
+    <string name="search_recent">Recent</string>
+    <string name="search_titles">Titles</string>
+    <string name="search_articles">Articles</string>
+    <string name="search_books">Books</string>
+    <string name="search_music">Music</string>
+    <string name="search_audiobooks">Audiobooks</string>
+    <!-- A page number under a PDF result. %1$d is the page. -->
+    <string name="search_page">p. %1$d</string>
+
+    <!-- The line under an artist result. -->
+    <plurals name="search_artist_line">
+        <item quantity="one">Artist · %1$d album</item>
+        <item quantity="other">Artist · %1$d albums</item>
+    </plurals>
+    <!-- The line under an album result. %1$s is the album's artist. -->
+    <string name="search_album_line">Album · %1$s</string>
+    <!-- The line under a song result. %1$s is the song's artists, %2$s the album. -->
+    <string name="search_song_line">Song · %1$s · %2$s</string>
+    <!-- The line under an audiobook result. %1$s is the author, %2$s the narrator. -->
+    <string name="search_audiobook_read_by">%1$s · read by %2$s</string>
+    <!-- Under a book result, when the book matched in more than one place. %2$s is the author. -->
+    <plurals name="search_book_matches_by">
+        <item quantity="one">%2$s · %1$d match</item>
+        <item quantity="other">%2$s · %1$d matches</item>
+    </plurals>
+    <plurals name="search_book_matches">
+        <item quantity="one">%1$d match</item>
+        <item quantity="other">%1$d matches</item>
+    </plurals>
+
+    <!-- The row at the foot of a group that shows all its results. -->
+    <plurals name="search_show_all_titles">
+        <item quantity="one">Show all %1$d title</item>
+        <item quantity="other">Show all %1$d titles</item>
+    </plurals>
+    <plurals name="search_show_all_artists">
+        <item quantity="one">Show all %1$d artist</item>
+        <item quantity="other">Show all %1$d artists</item>
+    </plurals>
+    <plurals name="search_show_all_albums">
+        <item quantity="one">Show all %1$d album</item>
+        <item quantity="other">Show all %1$d albums</item>
+    </plurals>
+    <plurals name="search_show_all_songs">
+        <item quantity="one">Show all %1$d song</item>
+        <item quantity="other">Show all %1$d songs</item>
+    </plurals>
+    <plurals name="search_show_all_audiobooks">
+        <item quantity="one">Show all %1$d audiobook</item>
+        <item quantity="other">Show all %1$d audiobooks</item>
+    </plurals>
+    <plurals name="search_show_all_articles">
+        <item quantity="one">Show all %1$d article match</item>
+        <item quantity="other">Show all %1$d article matches</item>
+    </plurals>
+    <plurals name="search_show_all_books">
+        <item quantity="one">Show all %1$d book</item>
+        <item quantity="other">Show all %1$d books</item>
+    </plurals>
+
+    <!-- The foot row when the group may hold more than were fetched, so it can't promise all of them. -->
+    <plurals name="search_show_first_titles">
+        <item quantity="one">Show the first %1$d title</item>
+        <item quantity="other">Show the first %1$d titles</item>
+    </plurals>
+    <plurals name="search_show_first_artists">
+        <item quantity="one">Show the first %1$d artist</item>
+        <item quantity="other">Show the first %1$d artists</item>
+    </plurals>
+    <plurals name="search_show_first_albums">
+        <item quantity="one">Show the first %1$d album</item>
+        <item quantity="other">Show the first %1$d albums</item>
+    </plurals>
+    <plurals name="search_show_first_songs">
+        <item quantity="one">Show the first %1$d song</item>
+        <item quantity="other">Show the first %1$d songs</item>
+    </plurals>
+    <plurals name="search_show_first_audiobooks">
+        <item quantity="one">Show the first %1$d audiobook</item>
+        <item quantity="other">Show the first %1$d audiobooks</item>
+    </plurals>
+    <plurals name="search_show_first_articles">
+        <item quantity="one">Show the first %1$d article match</item>
+        <item quantity="other">Show the first %1$d article matches</item>
+    </plurals>
+    <plurals name="search_show_first_books">
+        <item quantity="one">Show the first %1$d book</item>
+        <item quantity="other">Show the first %1$d books</item>
+    </plurals>
+
+    <!-- The foot row of an open group, folding it back. -->
+    <string name="search_show_fewer_titles">Show fewer titles</string>
+    <string name="search_show_fewer_artists">Show fewer artists</string>
+    <string name="search_show_fewer_albums">Show fewer albums</string>
+    <string name="search_show_fewer_songs">Show fewer songs</string>
+    <string name="search_show_fewer_audiobooks">Show fewer audiobooks</string>
+    <string name="search_show_fewer_articles">Show fewer article matches</string>
+    <string name="search_show_fewer_books">Show fewer books</string>
+</resources>

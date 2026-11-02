@@ -15,6 +15,7 @@ wrapper (`.poem p.i2`) still match on every page. Only the first copy keeps the 
 """
 import math
 import re
+import unicodedata
 from dataclasses import dataclass
 from typing import Callable
 
@@ -45,14 +46,27 @@ def page_name(index: int) -> str:
     return f"{index + 1:03d}"
 
 
-def clean_title(title: str, work_title: str, author: str, index: int) -> str:
+# Per language: a byline's opening word, the contents headings to drop, and the words for titles `split` makes up.
+TITLE_WORDS = {
+    "en": {"by": "by", "contents": ("contents", "table of contents"), "part": "Part", "front": "Front matter"},
+    "es": {"by": "por", "contents": tuple(t + dot for t in ("índice", "indice", "índice general", "indice general",
+                                                            "índice de materias", "contenido", "tabla de materias")
+                                     for dot in ("", ".")),
+           "part": "Parte", "front": "Preliminares"},
+}
+
+
+def clean_title(title: str, work_title: str, author: str, index: int, language: str = "en") -> str:
     """A chapter title for a reader's contents list: no byline, no "Contents", no repeat of the work's title,
-    and no shouting ("BOOK I." reads "Book I")."""
-    segments = (s.strip() for s in re.sub(r"<\d+>", "", title).split(" — "))
+    and, in English, no shouting ("BOOK I." reads "Book I"; title case follows English rules)."""
+    words = TITLE_WORDS.get(language, TITLE_WORDS["en"])
+    segments = (_translate_made_up(s.strip(), words) for s in re.sub(r"<\d+>", "", title).split(" — "))
     kept = [s for s in segments
-            if s and not re.match(r"by\s", s, re.I) and s.lower() not in ("contents", "table of contents")
+            if s and not _byline(s, author, words) and s.lower() not in words["contents"]
             and s.lower() != work_title.strip().lower()]
-    return " — ".join(map(_quieter, kept)) or f"Part {index + 1}"
+    if language == "en":
+        kept = [_quieter(s) for s in kept]
+    return " — ".join(kept) or f"{words['part']} {index + 1}"
 
 
 def _quieter(segment: str) -> str:
@@ -105,6 +119,29 @@ def drop_full_stop(text: str) -> str:
     if stripped.endswith(".") and "." not in stripped.split()[-1][:-1]:
         return stripped[:-1] + text[len(stripped):]
     return text
+
+
+def _fold(text: str) -> str:
+    return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode().lower()
+
+
+def _byline(segment: str, author: str, words: dict) -> bool:
+    """"by …" is always a byline. "por …" is one only when it names the author, since "Por qué…" is a title."""
+    if not re.match(rf"{words['by']}\s", segment, re.I):
+        return False
+    if words is TITLE_WORDS["en"]:
+        return True
+    names = {w for w in re.findall(r"[a-z]+", _fold(author)) if len(w) > 3}
+    return bool(names & set(re.findall(r"[a-z]+", _fold(segment))))
+
+
+def _translate_made_up(segment: str, words: dict) -> str:
+    """The titles `split` invents ("Front matter", "Part 2", "… (part 2)") in the book's language."""
+    if words is TITLE_WORDS["en"]:
+        return segment
+    segment = re.sub(r"^Front matter\b", words["front"], segment)
+    segment = re.sub(r"^Part (\d+)$", rf"{words['part']} \1", segment)
+    return re.sub(r" \(part (\d+)\)$", rf" ({words['part'].lower()} \1)", segment)
 
 
 def split(body: Tag, split_at: str | None = None, max_bytes: int = 150_000,

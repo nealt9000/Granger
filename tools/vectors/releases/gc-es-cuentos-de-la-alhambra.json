@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-cuentos-de-la-alhambra",
+ "kind": "book",
+ "fileName": "gc-es-cuentos-de-la-alhambra_2026-10-30.gvec",
+ "sizeBytes": 61872,
+ "sha256": "0fc5dd2edd97d2dee9f126503a85de4db1fa9feb27400401fdb4159294c2d26f",
+ "count": 210,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "10fb3996501bfd798900c73af03830e07dfe8e8c17e081b8361435a6aeacc616",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-cuentos-de-la-alhambra_2026-10-30.gvec"
+}

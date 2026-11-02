@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="media_retrying">Reintentando</string>
+    <string name="media_waiting_wifi">Esperando Wi-Fi</string>
+    <string name="media_waiting_connection">Esperando conexión</string>
+
+    <!-- "%1$d de %2$d pistas": the noun follows the total (%2$d), so the quantity is the total's. -->
+    <plurals name="media_retrying_tracks">
+        <item quantity="one">Reintentando: %1$d de %2$d pista</item>
+        <item quantity="many">Reintentando: %1$d de %2$d pistas</item>
+        <item quantity="other">Reintentando: %1$d de %2$d pistas</item>
+    </plurals>
+    <plurals name="media_waiting_wifi_tracks">
+        <item quantity="one">Esperando Wi-Fi: %1$d de %2$d pista</item>
+        <item quantity="many">Esperando Wi-Fi: %1$d de %2$d pistas</item>
+        <item quantity="other">Esperando Wi-Fi: %1$d de %2$d pistas</item>
+    </plurals>
+    <plurals name="media_waiting_connection_tracks">
+        <item quantity="one">Esperando conexión: %1$d de %2$d pista</item>
+        <item quantity="many">Esperando conexión: %1$d de %2$d pistas</item>
+        <item quantity="other">Esperando conexión: %1$d de %2$d pistas</item>
+    </plurals>
+    <plurals name="media_downloading_tracks">
+        <item quantity="one">Descargando: %1$d de %2$d pista</item>
+        <item quantity="many">Descargando: %1$d de %2$d pistas</item>
+        <item quantity="other">Descargando: %1$d de %2$d pistas</item>
+    </plurals>
+    <plurals name="media_partial_tracks">
+        <item quantity="one">Descarga parcial: %1$d de %2$d pista</item>
+        <item quantity="many">Descarga parcial: %1$d de %2$d pistas</item>
+        <item quantity="other">Descarga parcial: %1$d de %2$d pistas</item>
+    </plurals>
+    <plurals name="media_retrying_chapters">
+        <item quantity="one">Reintentando: %1$d de %2$d capítulo</item>
+        <item quantity="many">Reintentando: %1$d de %2$d capítulos</item>
+        <item quantity="other">Reintentando: %1$d de %2$d capítulos</item>
+    </plurals>
+    <plurals name="media_waiting_wifi_chapters">
+        <item quantity="one">Esperando Wi-Fi: %1$d de %2$d capítulo</item>
+        <item quantity="many">Esperando Wi-Fi: %1$d de %2$d capítulos</item>
+        <item quantity="other">Esperando Wi-Fi: %1$d de %2$d capítulos</item>
+    </plurals>
+    <plurals name="media_waiting_connection_chapters">
+        <item quantity="one">Esperando conexión: %1$d de %2$d capítulo</item>
+        <item quantity="many">Esperando conexión: %1$d de %2$d capítulos</item>
+        <item quantity="other">Esperando conexión: %1$d de %2$d capítulos</item>
+    </plurals>
+    <plurals name="media_downloading_chapters">
+        <item quantity="one">Descargando: %1$d de %2$d capítulo</item>
+        <item quantity="many">Descargando: %1$d de %2$d capítulos</item>
+        <item quantity="other">Descargando: %1$d de %2$d capítulos</item>
+    </plurals>
+    <plurals name="media_partial_chapters">
+        <item quantity="one">Descarga parcial: %1$d de %2$d capítulo</item>
+        <item quantity="many">Descarga parcial: %1$d de %2$d capítulos</item>
+        <item quantity="other">Descarga parcial: %1$d de %2$d capítulos</item>
+    </plurals>
+
+    <string name="media_remove_download">Quitar la descarga</string>
+    <string name="media_remove_title">¿Quitar %1$s?</string>
+    <string name="media_remove_message">Se eliminarán los archivos descargados. Se conservan tu lugar y tus marcadores.</string>
+
+    <string name="media_documents_summary">Música y audiolibros</string>
+    <string name="media_documents_music">Música</string>
+    <string name="media_documents_audiobooks">Audiolibros</string>
+
+    <string name="media_auto_recent">Recientes</string>
+    <string name="media_auto_music">Música</string>
+    <string name="media_auto_audiobooks">Audiolibros</string>
+    <string name="media_auto_nothing">Aún no hay nada aquí</string>
+    <string name="media_unmounted">%1$s está en un almacenamiento que no está disponible ahora. Vuelve a conectarlo para terminar, o quita la descarga primero.</string>
+</resources>

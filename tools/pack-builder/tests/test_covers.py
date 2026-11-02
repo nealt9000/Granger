@@ -105,3 +105,17 @@ def test_owl_mask_is_even_odd():
     view, (eyes, pupils, mark) = covers.owl_paths()
     mask = covers._mask(mark, view, 96)
     assert mask.size == (96, 96) and 0 < sum(mask.get_flattened_data()) < 96 * 96 * 255
+
+
+def test_a_clasicos_cover_carries_its_own_wordmark_and_credit(monkeypatch):
+    drawn = []
+    real = covers._tracked
+    monkeypatch.setattr(covers, "_tracked",
+                        lambda draw, cx, y, text, *a: drawn.append(text) or real(draw, cx, y, text, *a))
+    credits = []
+    real_fit = covers._fit
+    monkeypatch.setattr(covers, "_fit", lambda draw, text, *a: credits.append(text) or real_fit(draw, text, *a))
+    covers.cover_jpeg("Nuevo Testamento", "", "Casiodoro de Reina", "escritura", "Escritura",
+                      wordmark="CLÁSICOS GRANGER", translated_by="traducción de")
+    assert "CLÁSICOS GRANGER" in drawn and covers.WORDMARK not in drawn
+    assert "traducción de Casiodoro de Reina" in credits

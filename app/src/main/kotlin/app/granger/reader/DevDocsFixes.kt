@@ -3,7 +3,7 @@ package app.granger.reader
 /**
  * DevDocs packs (`devdocs_*`) lay their page out beside a fixed-width nav, `<devdocs-navbar>`, which has no rule for
  * narrow screens: in portrait it takes half the page. Below [NARROW_PX] of CSS width the nav is hidden and the page
- * gets a "☰ Contents" button that opens it as a drawer over the page. A link loads a new page, which closes it.
+ * gets a "☰ Contents" button (its word from `reader_devdocs_contents`) that opens it as a drawer over the page. A link loads a new page, which closes it.
  * The navbar renders without a shadow DOM, so the pack's own `._sidebar` and `._container` can be styled from outside.
  */
 object DevDocsFixes {
@@ -39,14 +39,14 @@ object DevDocsFixes {
     """.trimIndent()
 
     // The drawer closes on a tap outside it; taps inside it don't reach the reader's middle-tap toggle.
-    private val SCRIPT = """
+    private fun script(label: String) = """
         <script>
         document.addEventListener('DOMContentLoaded', function () {
           var root = document.documentElement;
           var button = document.createElement('button');
           button.className = 'granger-nav';
           button.type = 'button';
-          button.textContent = '☰ Contents';
+          button.textContent = ${jsString("☰ $label")};
           button.addEventListener('click', function (e) { e.stopPropagation(); root.classList.toggle('granger-nav-open'); });
           document.body.appendChild(button);
           // Out of the way while reading down the page; back on the way up, and always near the top.
@@ -69,10 +69,24 @@ object DevDocsFixes {
     private val HEAD_END = Regex("</head\\s*>", RegexOption.IGNORE_CASE)
     private val BODY_START = Regex("<body\\b[^>]*>", RegexOption.IGNORE_CASE)
 
-    /** Adds the drawer to a DevDocs page; any other page, or one already patched, comes back as [html]. */
-    fun patch(html: String): String {
+    /** [s] as a JavaScript string literal, safe inside a `<script>`. */
+    private fun jsString(s: String): String = buildString {
+        append('"')
+        for (c in s) when {
+            c == '"' || c == '\\' -> append('\\').append(c)
+            c == '<' || c == '>' || c == '&' || c < ' ' || c == '\u2028' || c == '\u2029' -> append(String.format(java.util.Locale.ROOT, "\\u%04x", c.code))
+            else -> append(c)
+        }
+        append('"')
+    }
+
+    /**
+     * Adds the drawer to a DevDocs page, its button reading "☰ [contents]"; any other page, or one already patched,
+     * comes back as [html].
+     */
+    fun patch(html: String, contents: String): String {
         if (!html.contains(NAVBAR) || html.contains(MARKER)) return html
-        val fix = STYLE + SCRIPT
+        val fix = STYLE + script(contents)
         HEAD_END.find(html)?.let { return html.substring(0, it.range.first) + fix + html.substring(it.range.first) }
         BODY_START.find(html)?.let { return html.substring(0, it.range.last + 1) + fix + html.substring(it.range.last + 1) }
         return fix + html

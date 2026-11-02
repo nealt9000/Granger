@@ -1,5 +1,7 @@
 package app.granger.sources
 
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.catalog.Catalog
 import app.granger.core.catalog.PackEntry
 import app.granger.core.downloads.DownloadRecord
@@ -19,6 +21,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,7 +37,7 @@ data class TidyOffer(
     val bigPackId: String,
     val smallPackId: String,
     val smallBytes: Long,
-    val text: String,
+    val text: UiText,
     /** The smaller slice in a few words, for the button: "Best 50,000". */
     val smallLabel: String = "",
 )
@@ -78,16 +81,15 @@ object SetTidy {
                 val bytes = ok.firstOrNull { it.id == smallPackId }?.sizeBytes ?: small.sizeBytes
                 TidyOffer(
                     "${small.id}>${big.id}", big.id, small.id, bigPackId, smallPackId, bytes, text(big, small, bytes),
-                    KiwixList.shortLabel(small.setLabel),
+                    KiwixList.shortLabel(small),
                 )
             }.filterNot { it.key in dismissed }
         }
     }
 
     /** "Top 1 million is in. Remove Best 50,000 (2.7 GB)? Your places and bookmarks move across." */
-    fun text(big: PackEntry, small: PackEntry, smallBytes: Long): String =
-        "${KiwixList.shortLabel(big.setLabel)} is in. Remove ${KiwixList.shortLabel(small.setLabel)} (${formatBytes(smallBytes)})? " +
-            "Your places and bookmarks move across."
+    fun text(big: PackEntry, small: PackEntry, smallBytes: Long): UiText =
+        UiText.Res(R.string.sources_tidy_text, KiwixList.shortLabel(big), KiwixList.shortLabel(small), formatBytes(smallBytes))
 
     /** Yes: the smaller slice gives way to the bigger, its places and bookmarks moving across. False when it couldn't. */
     suspend fun remove(offer: TidyOffer, library: Library, downloads: Downloads): Boolean {
@@ -101,10 +103,12 @@ object SetTidy {
 @Composable
 fun TidyOfferCard(offer: TidyOffer, onRemove: () -> Unit, onKeep: () -> Unit) {
     Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 8.dp).testTag("tidy-offer")) {
-        Text(offer.text, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(end = 12.dp))
+        Text(offer.text.resolve(), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(end = 12.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            TextButton(onClick = onKeep) { Text("Keep both") }
-            TextButton(onClick = onRemove) { Text("Remove ${offer.smallLabel}".trim()) }
+            TextButton(onClick = onKeep) { Text(stringResource(R.string.sources_tidy_keep_both)) }
+            TextButton(onClick = onRemove) {
+                Text(if (offer.smallLabel.isBlank()) stringResource(R.string.common_remove) else stringResource(R.string.sources_tidy_remove, offer.smallLabel))
+            }
         }
     }
 }

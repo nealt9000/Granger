@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings (Plan L1). Section headings. -->
+    <string name="settings_section_library">Library &amp; storage</string>
+    <string name="settings_section_listening">Reading &amp; listening</string>
+    <!-- The Ask section: Research, the app's question-answering tool. -->
+    <string name="settings_section_ask">Ask</string>
+    <string name="settings_section_about">About</string>
+
+    <string name="settings_wifi_only">Download on Wi-Fi only</string>
+    <string name="settings_wifi_only_summary">Turn off to use mobile data</string>
+    <!-- A switch: confirm before any download over 100 MB. -->
+    <string name="settings_ask_large">Ask before downloads over 100 MB</string>
+    <string name="settings_ask_large_summary">Turn off to get large scans and comic runs without a prompt</string>
+    <string name="settings_archive_everything">Archive.org: show everything</string>
+    <string name="settings_archive_everything_on">On: everything archive.org serves openly. Turning it off keeps downloaded files.</string>
+    <string name="settings_archive_everything_off">Only public-domain texts, published 1930 or earlier, are shown. Downloaded files stay. Turning it on asks you to accept responsibility.</string>
+    <string name="settings_set_up_again">Set up suggestions again</string>
+    <string name="settings_set_up_again_summary">Pick a start, your region and what you\'ll use Granger for</string>
+    <string name="settings_voice">Voice</string>
+    <!-- The Voice row's summary when no voice is named. -->
+    <string name="settings_voice_summary_default">Read aloud</string>
+    <string name="settings_media_summary">Folders on this phone, and the player</string>
+    <!-- The AI models screen. -->
+    <string name="settings_models">Models</string>
+    <string name="settings_models_summary">AI models for this phone</string>
+    <!-- The Music settings row and screen: named with audiobooks only once the phone holds one. -->
+    <string name="settings_music_and_audiobooks">Music &amp; audiobooks</string>
+    <string name="settings_music">Music</string>
+
+    <!-- Appearance. -->
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <!-- Which side of the screen the rail of tools sits on. -->
+    <string name="settings_toolbar_side">Toolbar side</string>
+    <!-- What the app opens to. -->
+    <string name="settings_open_to">Open to</string>
+    <string name="settings_side_left">Left</string>
+    <string name="settings_side_right">Right</string>
+    <string name="settings_theme_system">Follow the phone</string>
+    <!-- Field and Night are the names of the app's two themes. -->
+    <string name="settings_theme_field">Field (light)</string>
+    <string name="settings_theme_night">Night (dark)</string>
+    <string name="settings_open_to_resume">Where I left off</string>
+    <string name="settings_open_to_home">Home</string>
+    <!-- Settings → Appearance → Language (Plan L2): the row, and the screen it opens. -->
+    <string name="settings_language">Language</string>
+    <!-- The Language screen's section for the app's own words (Plan L3 adds one for the library's languages). -->
+    <string name="settings_language_app">App language</string>
+    <!-- %1$s is the phone's language, named in itself, such as Español. -->
+    <string name="settings_language_system">Follow the phone (%1$s)</string>
+    <!-- Each language is named in itself, whatever the app is in. -->
+    <string name="settings_language_english" translatable="false">English</string>
+    <string name="settings_language_spanish" translatable="false">Español</string>
+    <!-- The Language screen's second section (Plan L3): which languages the library's packs, starts and Readiness are in. -->
+    <string name="settings_language_library">Your library\'s languages</string>
+    <string name="settings_language_library_blurb">Starts, Readiness and Get more use these. The first is your main one.</string>
+    <!-- Under the main library language, when more than one is on. -->
+    <string name="settings_language_main">Main language</string>
+    <!-- A short button beside another library language: makes it the main one. -->
+    <string name="settings_language_make_main">Make main</string>
+
+    <!-- Storage. %1$s is free space, %2$s what Granger uses, both like "2.0 GB". -->
+    <string name="settings_storage_usage">%1$s free · Granger uses %2$s</string>
+    <!-- As above; %3$s is the size still to download. -->
+    <string name="settings_storage_usage_queued">%1$s free · Granger uses %2$s · %3$s to download</string>
+    <string name="settings_storage_selected">New downloads go to the selected storage.</string>
+    <string name="settings_storage_uninstall">Uninstalling Granger deletes everything it downloaded.</string>
+    <!-- A picked folder at the root of the phone's own storage. -->
+    <string name="settings_internal_storage">Internal storage</string>
+
+    <!-- About. -->
+    <string name="settings_about_tagline">The world’s knowledge. Yours to keep.</string>
+    <string name="settings_about_motto">Knowledge is a human right.</string>
+    <string name="settings_about_version">Version %1$s</string>
+    <string name="settings_about_license">GPLv3 · source on GitHub</string>
+
+    <!-- Music & audiobooks settings. -->
+    <string name="settings_media_permission">Find music and audiobooks on this phone</string>
+    <string name="settings_media_permission_granted">Granger reads them where they are and never changes them.</string>
+    <string name="settings_media_permission_denied">Not allowed. Granger works without it; folders you add below still need it.</string>
+    <string name="settings_media_permission_permanently_denied">Not allowed. Android won\'t ask again: allow Music and audio in Granger\'s app settings.</string>
+    <string name="settings_media_allowed">Allowed</string>
+    <string name="settings_media_allow_access">Allow access</string>
+    <string name="settings_media_open_app_settings">Open app settings</string>
+    <string name="settings_media_add_folder">Add a folder</string>
+    <string name="settings_media_add_folder_summary">For files the phone\'s media list misses. Granger only reads them.</string>
+    <string name="settings_media_music_folder">Music folder</string>
+    <string name="settings_media_audiobooks_folder">Audiobooks folder</string>
+    <!-- %1$s is the folder's name. -->
+    <string name="settings_media_remove_folder">Remove %1$s</string>
+    <!-- Look through the phone for music and audiobooks again. -->
+    <string name="settings_media_rescan">Rescan now</string>
+    <string name="settings_media_rescan_idle">Granger rescans on start and when the phone\'s media changes.</string>
+    <string name="settings_media_scanning">Scanning…</string>
+    <!-- %1$s is a count of songs, %2$s of audiobooks: "Found 12 songs and 1 audiobook." -->
+    <string name="settings_media_found">Found %1$s and %2$s.</string>
+    <plurals name="settings_songs">
+        <item quantity="one">%d song</item>
+        <item quantity="other">%d songs</item>
+    </plurals>
+    <plurals name="settings_audiobooks">
+        <item quantity="one">%d audiobook</item>
+        <item quantity="other">%d audiobooks</item>
+    </plurals>
+    <string name="settings_media_scan_failed">The scan didn\'t finish. Try again.</string>
+    <string name="settings_media_other_apps">Show in other apps</string>
+    <string name="settings_media_other_apps_summary">Granger\'s downloaded music and audiobooks appear in the Files app and in other apps\' file pickers, read-only. Music players that only read the phone\'s media list won\'t list them.</string>
+    <!-- ReplayGain is a loudness standard; usually not translated. -->
+    <string name="settings_replaygain">ReplayGain</string>
+    <string name="settings_replaygain_summary">Evens out loudness. Auto uses album gain when an album plays in order, else track gain.</string>
+    <string name="settings_replaygain_off">Off</string>
+    <string name="settings_replaygain_track">Track</string>
+    <string name="settings_replaygain_album">Album</string>
+    <string name="settings_replaygain_auto">Auto</string>
+    <!-- How far the skip buttons jump, chosen from chips of seconds. -->
+    <string name="settings_skip_back">Skip back</string>
+    <string name="settings_skip_forward">Skip forward</string>
+    <!-- Which media the skip settings apply to. -->
+    <string name="settings_skip_audiobooks">Audiobooks</string>
+    <!-- A number of seconds, on a chip: "30 s". -->
+    <string name="settings_seconds_short">%1$d s</string>
+    <string name="settings_headset_autoplay">Play when headphones connect</string>
+    <string name="settings_headset_autoplay_summary">Resumes where you left off</string>
+
+    <!-- Settings → Voice. -->
+    <string name="settings_voice_reads_with">Reads with</string>
+    <string name="settings_voice_none">No offline voice on this phone</string>
+    <string name="settings_voice_none_summary">Get the Granger voice below, or install an offline voice for the phone\'s text-to-speech.</string>
+    <!-- %1$s is the voice's language. -->
+    <string name="settings_voice_granger">Granger voice · %1$s</string>
+    <string name="settings_voice_system">System voice · %1$s</string>
+    <!-- A button showing the other system voices; %1$d is how many. -->
+    <string name="settings_voice_system_more">System voices (%1$d)</string>
+    <string name="settings_voice_catalog">Granger voices</string>
+    <string name="settings_voice_catalog_empty">The catalog lists no voices yet.</string>
+    <!-- %1$s is the size, like "60 MB"; %2$s the voice's licence. -->
+    <string name="settings_voice_download_size">%1$s download · %2$s</string>
+    <!-- %1$s is the error. -->
+    <string name="settings_voice_download_failed">Download failed: %1$s</string>
+    <string name="settings_voice_speed">Speed</string>
+    <!-- The reading speed: "1.2×". -->
+    <string name="settings_voice_speed_value">%1$.1f×</string>
+    <string name="settings_voice_mark">Mark the sentence being read</string>
+    <string name="settings_voice_speak_answers">Speak answers as they arrive</string>
+    <string name="settings_voice_speak_answers_summary">Ask reads a new answer aloud while it is written. Any answer can be read from its speaker button.</string>
+    <string name="settings_voice_no_storage">No storage to download to.</string>
+    <!-- %1$s is the voice's title. -->
+    <string name="settings_voice_no_space">Not enough free space for %1$s.</string>
+    <string name="settings_voice_over_cap">Over the storage cap.</string>
+</resources>

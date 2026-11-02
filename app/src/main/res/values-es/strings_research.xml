@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="research_title">Preguntar</string>
+    <string name="research_preview">Versión preliminar</string>
+    <string name="research_chats">Chats</string>
+    <string name="research_new_chat">Nuevo chat</string>
+    <string name="research_delete_chat">Eliminar el chat</string>
+    <string name="research_send">Enviar</string>
+    <string name="research_placeholder">Pregunta sobre lo que haya en tu biblioteca</string>
+    <string name="research_intro">Haz una pregunta: el bibliotecario responde con lo que hay en tu biblioteca y muestra de dónde salió cada parte. Es una versión preliminar y puede equivocarse, así que revisa las fuentes.</string>
+
+    <string name="research_models_missing">Para usar Preguntar, necesitas el bibliotecario en este teléfono. Consíguelo en Ajustes → Modelos.</string>
+    <string name="research_get_models">Conseguir modelos</string>
+    <string name="research_unsupported">Para usar Preguntar, necesitas un teléfono con 6 GB de memoria.</string>
+
+    <string name="research_librarian_downloading">Descargando el bibliotecario · %1$s de %2$s</string>
+    <string name="research_librarian_stopped">La descarga del bibliotecario se detuvo.</string>
+    <string name="research_try_again">Intentar de nuevo</string>
+    <string name="research_librarian_needed">Para usar Preguntar, necesitas el bibliotecario en este teléfono: %1$s, %2$s.</string>
+    <string name="research_get_librarian">Descargar el bibliotecario · %1$s</string>
+
+    <string name="research_stage_loading_model">Despertando al bibliotecario…</string>
+    <string name="research_stage_searching">Buscando en tu biblioteca…</string>
+    <string name="research_stage_ranking">Ordenando pasajes…</string>
+    <string name="research_stage_writing">Escribiendo…</string>
+
+    <string name="research_medical">Esto no es consejo médico. Si puedes contactar a los servicios de emergencia o a un profesional, hazlo.</string>
+
+    <string name="research_declined">No está en tu biblioteca.</string>
+    <string name="research_unverified">No se pudo responder con estos pasajes.</string>
+    <string name="research_best_guess_label">No encontré esto en tu biblioteca. Esta es mi mejor suposición, así que tómala con cautela.</string>
+    <string name="research_model_failed">El modelo necesita reparación. Revísalo en Preparación.</string>
+    <string name="research_search_failed">No se pudo buscar en tu biblioteca. Inténtalo de nuevo.</string>
+    <string name="research_interrupted">Se detuvo antes de responder.</string>
+    <string name="research_source_gone">Esa fuente ya no está en tu biblioteca.</string>
+    <string name="research_readiness">Preparación</string>
+    <string name="research_search_instead">Buscar en su lugar</string>
+    <string name="research_best_guess">Mejor suposición</string>
+
+    <string name="research_quoted">“%1$s”</string>
+    <string name="research_play_source">Reproducir %1$s</string>
+    <string name="research_source_album">Álbum</string>
+    <string name="research_source_audiobook">Audiolibro</string>
+
+    <string name="research_recent_chats">Chats recientes</string>
+    <string name="research_delete_all_chats">Eliminar todos los chats</string>
+    <string name="research_delete_all_chats_title">¿Eliminar todos los chats?</string>
+    <string name="research_delete_all_chats_body">Se eliminarán todos los chats, también este, con sus respuestas y fuentes.</string>
+    <string name="research_delete_all">Eliminar todos</string>
+
+    <string name="research_librarian_no_space">No hay espacio suficiente en %1$s: libera %2$s.</string>
+    <string name="research_librarian_over_cap">Eso llevaría tus descargas por encima del límite de %1$s.</string>
+    <string name="research_personal_medical">No puedo responder preguntas sobre tu propia salud. Un médico, enfermero o farmacéutico sí puede. Buscar en su lugar muestra lo que dice tu biblioteca sobre el tema.</string>
+</resources>

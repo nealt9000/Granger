@@ -1,5 +1,7 @@
 package app.granger.media
 
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.archive.ArchiveQuery
 import app.granger.core.archive.LibriVoxClient
 import app.granger.core.downloads.DownloadRecord
@@ -66,7 +68,7 @@ class MediaDownloader(
     @Volatile private var scannedUpTo = 0L
 
     /** Writes the manifest (and `.nomedia` in the media root), then queues the group. Returns the notice to show, or null. An item already on another volume is completed there. */
-    suspend fun get(m: MediaManifest): String? = ops.withLock {
+    suspend fun get(m: MediaManifest): UiText? = ops.withLock {
         val title = MediaManifests.displayTitle(m)
         val group = MediaDownloads.groupId(m)
         require(sourceAndRef(group) != null) { "Bad media ref ${m.source}:${m.ref}" }
@@ -77,9 +79,9 @@ class MediaDownloader(
         val records = downloads.records.first().filter { it.groupId == group }
         val volume = when (val placed = placedOn(all, relativeDir, records)) {
             Placed.Nowhere -> all.firstOrNull { it.root.path == prefs.volumePath } ?: all.firstOrNull()
-            Placed.Unmounted -> return@withLock "$title is on storage that isn't available right now. Put it back to finish it, or remove it first."
+            Placed.Unmounted -> return@withLock UiText.Res(R.string.media_unmounted, title)
             is Placed.On -> placed.volume
-        } ?: return@withLock "No storage is available right now."
+        } ?: return@withLock UiText.Res(R.string.sources_no_storage)
 
         val dir = File(volume.root, relativeDir)
         val existed = withContext(io) {
@@ -96,7 +98,7 @@ class MediaDownloader(
             is EnqueueResult.NoSpace -> {
                 // A fresh item leaves nothing behind; a partly downloaded one keeps its files.
                 if (!existed) withContext(io) { dir.deleteRecursively() }
-                "Not enough space on ${volume.label} for $title: free up ${formatBytes(result.neededBytes)}."
+                UiText.Res(R.string.sources_no_space, volume.label, title, formatBytes(result.neededBytes))
             }
             // Groups are never capped (no storage cap); kept for the exhaustive when.
             is EnqueueResult.OverCap -> null

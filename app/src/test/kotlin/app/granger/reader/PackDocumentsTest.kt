@@ -110,7 +110,7 @@ class PackDocumentsTest {
         pack.failCopy = true
         val docs = documents(UnconfinedTestDispatcher(testScheduler))
         val failed = docs.open("zim1", PdfPack.PATH) as PackDocuments.Opened.Failed
-        assertThat(failed.message).startsWith("Couldn't open this PDF")
+        assertThat(failed.message).isEqualTo(app.granger.R.string.reader_pdf_copy_failed)
         assertThat(File(dir, "zim1").listFiles().orEmpty()).isEmpty()
         assertThat(bookshelf.packDocuments).isEmpty()
         assertThat(docs.open("other", PdfPack.PATH)).isInstanceOf(PackDocuments.Opened.Failed::class.java)

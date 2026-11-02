@@ -95,4 +95,30 @@ class ArchiveQueryTest {
 
     @Test fun textsIgnoreTheDate() = assertThat(ArchiveQuery.build("x", null, true, ArchiveKind.TEXTS, LocalDate.of(2099, 1, 1)))
         .isEqualTo("mediatype:texts AND (x) AND year:[* TO 1930]")
+
+    // Plan L3: the library's languages.
+    @Test fun anEnglishLibraryAsksAsBefore() = assertThat(ArchiveQuery.build("steam", ArchiveShelf.SCIENCE, filtered = true, languages = listOf("en")))
+        .isEqualTo("mediatype:texts AND (steam) AND subject:(science OR engineering OR mechanics OR chemistry OR physics) AND year:[* TO 1930]")
+
+    @Test fun aSpanishLibraryAsksForSpanish() = assertThat(ArchiveQuery.build("quijote", null, filtered = true, languages = listOf("es")))
+        .isEqualTo("mediatype:texts AND (quijote) AND language:(spa OR Spanish) AND year:[* TO 1930]")
+
+    @Test fun aBilingualLibraryAsksForBothInItsOrder() {
+        assertThat(ArchiveQuery.build("", null, filtered = false, languages = listOf("en", "es")))
+            .isEqualTo("mediatype:texts AND language:(eng OR English OR spa OR Spanish)")
+        assertThat(ArchiveQuery.languageClause(listOf("es", "en"))).isEqualTo("language:(spa OR Spanish OR eng OR English)")
+    }
+
+    @Test fun aSpanishLibrarysShelvesAddSpanishSubjects() {
+        assertThat(ArchiveQuery.build("", ArchiveShelf.LITERATURE, filtered = true, languages = listOf("es")))
+            .isEqualTo(
+                "mediatype:texts AND subject:(fiction OR literature OR poetry OR drama OR literatura OR novela OR cuentos OR poesía OR teatro)" +
+                    " AND language:(spa OR Spanish) AND year:[* TO 1930]",
+            )
+        assertThat(ArchiveShelf.SPOKEN_POETRY.clause(listOf("es"))).isEqualTo("subject:(poetry OR poesía)")
+        assertThat(ArchiveShelf.MANUALS.clause(listOf("es"))).isEqualTo("collection:manuals")
+    }
+
+    @Test fun musicHasNoLanguageClause() =
+        assertThat(ArchiveQuery.languageClause(listOf("es"), ArchiveKind.MUSIC)).isNull()
 }

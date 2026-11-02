@@ -6,11 +6,14 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.MutableSharedFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.granger.R
+import app.granger.UiText
 import app.granger.core.library.AudioBookmark
 import app.granger.core.library.AudiobookChapter
 import app.granger.core.library.Track
 import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerHub
+import app.granger.core.player.PlayerNotices
 import app.granger.core.player.PlayerMode
 import app.granger.core.player.PlayerUi
 import app.granger.core.player.SavedBook
@@ -169,7 +172,7 @@ class PlayerViewModel(
         viewModelScope.launch {
             lists.add(playlistId, listOf(track.id))
             val name = allPlaylists.value.firstOrNull { it.id == playlistId }?.name
-            ownNotices.tryEmit(if (name != null) "Added to $name" else "Added to the playlist")
+            ownNotices.tryEmit(if (name != null) UiText.Res(R.string.player_added_to, name) else UiText.Res(R.string.player_added_to_playlist))
         }
     }
 
@@ -180,7 +183,7 @@ class PlayerViewModel(
         if (name.isBlank()) return
         viewModelScope.launch {
             lists.create(name.trim(), listOf(track.id))
-            ownNotices.tryEmit("Added to ${name.trim()}")
+            ownNotices.tryEmit(UiText.Res(R.string.player_added_to, name.trim()))
         }
     }
 
@@ -349,19 +352,22 @@ class PlayerViewModel(
     fun startSleepTimer(setting: SleepSetting) = hub.startSleepTimer(setting)
     fun cancelSleepTimer() = hub.cancelSleepTimer()
 
-    private val ownNotices = MutableSharedFlow<String>(extraBufferCapacity = 4)
+    private val ownNotices = MutableSharedFlow<UiText>(extraBufferCapacity = 4)
 
     /**
      * Short lines for the app to show once: this screen's ("Bookmarked: Chapter 3 · 12:04") and the player's when it
      * gives up on something ("Couldn't play any of these songs …"). Shown by the nav host, wherever the user is.
      */
-    val notices: Flow<String> = merge(ownNotices, hub.notices)
+    val notices: Flow<UiText> = merge(ownNotices, hub.notices.map(::playerNotice))
 
-    /** A bookmark here, titled with the chapter and the time in it; [notices] says whether it was kept. */
-    fun addBookmark() {
+    /**
+     * A bookmark here, titled with the chapter and the time in it; [resolve] turns that title into text to save, and
+     * [notices] says whether it was kept.
+     */
+    fun addBookmark(resolve: (UiText) -> String) {
         val ui = hub.ui.value
         val book = ui.now as? NowPlaying.Book ?: return
-        val title = "${book.chapter.title.ifBlank { "Chapter ${book.chapter.ordinal + 1}" }} · ${formatTime(ui.positionMs)}"
+        val title = resolve(UiText.Res(R.string.player_bookmark_title, chapterName(book), formatTime(ui.positionMs)))
         viewModelScope.launch {
             val id = try {
                 hub.addBookmark(title)
@@ -371,7 +377,7 @@ class PlayerViewModel(
                 android.util.Log.w("Granger", "Couldn't add bookmark", e)
                 -1L
             }
-            ownNotices.tryEmit(if (id > 0) "Bookmarked: $title" else "Couldn't add a bookmark here.")
+            ownNotices.tryEmit(if (id > 0) UiText.Res(R.string.player_bookmarked, title) else UiText.Res(R.string.player_bookmark_failed))
         }
     }
 
@@ -414,4 +420,13 @@ fun formatTime(ms: Long): String {
     val m = (s % 3600) / 60
     val sec = s % 60
     return if (h > 0) "%d:%02d:%02d".format(h, m, sec) else "%d:%02d".format(m, sec)
+}
+
+/** One of the player's own lines ([PlayerNotices]) in the user's language; anything else as it came. */
+internal fun playerNotice(line: String): UiText = when (line) {
+    PlayerNotices.QUEUE_FAILED -> UiText.Res(R.string.player_notice_queue_failed)
+    PlayerNotices.SONG_FAILED -> UiText.Res(R.string.player_notice_song_failed)
+    PlayerNotices.BOOK_FAILED -> UiText.Res(R.string.player_notice_book_failed)
+    PlayerNotices.PLACE_LOST -> UiText.Res(R.string.player_notice_place_lost)
+    else -> UiText.Raw(line)
 }

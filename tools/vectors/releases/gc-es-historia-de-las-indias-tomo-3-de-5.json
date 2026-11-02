@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-historia-de-las-indias-tomo-3-de-5",
+ "kind": "book",
+ "fileName": "gc-es-historia-de-las-indias-tomo-3-de-5_2026-10-30.gvec",
+ "sizeBytes": 156540,
+ "sha256": "a60449ee2279f8840a2424b82452e78c6e8b9d2160942ca25c190010690cea5e",
+ "count": 532,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "af668c769c773748a6a83fc600bc29d3efc7a9808e5d29629ca12a3faba995f9",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-historia-de-las-indias-tomo-3-de-5_2026-10-30.gvec"
+}

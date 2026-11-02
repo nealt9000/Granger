@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="readiness_title">Readiness</string>
+    <!-- Section headings on the Readiness screen. -->
+    <string name="readiness_this_phone">This phone</string>
+    <string name="readiness_what_you_hold">What you hold offline</string>
+    <string name="readiness_storage">Storage</string>
+    <string name="readiness_by_source">By source</string>
+
+    <!-- %1$s is the phone's memory, such as 8.0 GB. -->
+    <string name="readiness_memory">%1$s of memory</string>
+    <string name="readiness_tier_library_only">Library only: Ask needs a phone with 6 GB of memory</string>
+    <string name="readiness_tier_ask">Library and Ask</string>
+    <string name="readiness_refresh_catalog">Refresh the catalog to see your coverage.</string>
+    <!-- The Home strip's sentence when nothing needs doing. -->
+    <string name="readiness_ready">Ready.</string>
+
+    <!-- A knowledge area's status line. %1$s and %2$s are sizes, such as 1.2 GB. -->
+    <string name="readiness_coverage_nothing">Nothing yet</string>
+    <string name="readiness_coverage_nothing_essentials">Nothing yet · the essentials are %1$s</string>
+    <!-- The area holds packs (%1$s is their size, such as 1.2 GB) but none of its essentials. -->
+    <string name="readiness_coverage_held">No essentials yet · %1$s held</string>
+    <string name="readiness_coverage_held_essentials">No essentials yet · %1$s held · the essentials are %2$s</string>
+    <!-- %1$s is how much is held, %2$s the size of the full set. -->
+    <!-- Basic and Comprehensive are how well an area is covered. -->
+    <string name="readiness_coverage_basic">Basic · %1$s of %2$s</string>
+    <string name="readiness_coverage_comprehensive">Comprehensive · %1$s</string>
+
+    <!-- A gap in a knowledge area. %1$s is the area, %2$s the suggested pack, %3$s its size. -->
+    <string name="readiness_signal_nothing_for">Nothing yet for %1$s. Get %2$s, %3$s.</string>
+    <string name="readiness_signal_no_essentials_for">No essentials yet for %1$s. Get %2$s, %3$s.</string>
+    <!-- %1$s is a pack, %2$s the date of its snapshot. -->
+    <string name="readiness_signal_stale">%1$s is from %2$s; a newer one is in the catalog.</string>
+    <!-- %1$s is a pack. -->
+    <string name="readiness_signal_unsearchable">%1$s can\'t be searched: the pack has no index.</string>
+    <!-- A button beside a gap: see the packs that fill it. -->
+    <string name="readiness_see">See</string>
+    <!-- Shows every gap. %1$d is how many. -->
+    <string name="readiness_show_all">Show all %1$d</string>
+
+    <!-- A storage volume. %1$s is free space, %2$s its size, %3$s what Granger uses. -->
+    <string name="readiness_volume">%1$s free of %2$s · Granger uses %3$s</string>
+
+    <!-- Where files came from. Kiwix, Granger, Archive.org and LibriVox are names. -->
+    <string name="readiness_source_kiwix" translatable="false">Kiwix</string>
+    <string name="readiness_source_granger" translatable="false">Granger</string>
+    <string name="readiness_source_archive_org" translatable="false">Archive.org</string>
+    <string name="readiness_source_librivox" translatable="false">LibriVox</string>
+    <string name="readiness_source_my_books">My books</string>
+    <string name="readiness_source_models">AI models</string>
+    <string name="readiness_source_voices">Voices</string>
+    <string name="readiness_source_phone_media">Music &amp; audiobooks on the phone</string>
+    <!-- The phone's own music and audiobooks: Granger points at them but doesn't keep a copy. -->
+    <string name="readiness_not_stored">Not stored by Granger</string>
+    <!-- A source's size and file count. %1$s is the size. -->
+    <plurals name="readiness_source_items">
+        <item quantity="one">%1$s · %2$d item</item>
+        <item quantity="other">%1$s · %2$d items</item>
+    </plurals>
+    <!-- %1$s is the size and count above; %2$d is how many files have a problem. -->
+    <plurals name="readiness_source_trouble">
+        <item quantity="one">%1$s · %2$d needs attention</item>
+        <item quantity="other">%1$s · %2$d need attention</item>
+    </plurals>
+    <!-- Expand or collapse a source's files. %1$s is the source. -->
+    <string name="readiness_show_source">Show %1$s</string>
+    <string name="readiness_hide_source">Hide %1$s</string>
+
+    <!-- A file's check status. -->
+    <string name="readiness_verified">Verified</string>
+    <!-- %1$s is the date it was checked. -->
+    <string name="readiness_verified_on">Verified on %1$s</string>
+    <string name="readiness_size_ok">Size is right; not fully checked yet</string>
+    <string name="readiness_incomplete">Incomplete: not all of it downloaded</string>
+    <string name="readiness_corrupted">Corrupted: the contents don\'t match</string>
+    <string name="readiness_missing">Missing: it isn\'t on the phone</string>
+    <string name="readiness_damaged">Damaged: it can\'t be opened</string>
+    <string name="readiness_not_from_catalog">Added by hand; can\'t be verified</string>
+    <!-- %1$d is the percent done. -->
+    <string name="readiness_checking">Checking… %1$d%%</string>
+    <!-- Verify a file against the catalog. -->
+    <string name="readiness_check">Check</string>
+    <string name="readiness_download_again">Download again</string>
+    <!-- A bigger pack on the phone holds one this domain lists (Plan WF). %1$s is the set, such as Wikipedia; %2$s the bigger slice, such as Top 1 million; %3$s the smaller, such as Best 50,000. -->
+    <string name="readiness_covers_slice">%1$s %2$s covers %3$s</string>
+    <!-- %1$s is the bigger pack's title; %2$s the one it holds. -->
+    <string name="readiness_covers">%1$s covers %2$s</string>
+    <!-- A domain with no packs in the library's language (Plan L3). %1$s is the language, named in the app's language: "Spanish". -->
+    <string name="readiness_no_packs_in">No %1$s packs for this area yet</string>
+    <!-- As above, with more than one library language. -->
+    <string name="readiness_no_packs_in_yours">No packs in your library\'s languages for this area yet</string>
+</resources>

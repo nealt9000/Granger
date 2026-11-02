@@ -58,8 +58,8 @@ The `core/` modules with text: `downloads`, `media`, `player`, `speech`, `taglib
 
 ## Task 0: Worktree
 
-- [ ] **Step 1:** `git worktree add .claude/worktrees/l1 -b l1-strings main`, then `git submodule update --init` in the worktree, then copy `local.properties`.
-- [ ] **Step 2:** Baseline run: `./gradlew testDebugUnitTest`. Record the test count.
+- [x] **Step 1:** `git worktree add .claude/worktrees/l1 -b l1-strings main`, then `git submodule update --init` in the worktree, then copy `local.properties`.
+- [x] **Step 2:** Baseline run: `./gradlew testDebugUnitTest`. Record the test count. *(2026-10-30: 2315 tests across app and the ten Android core modules, 35 skipped, 0 failures.)*
 
 ## Task 1: Foundation: `UiText`, the guard test, common strings
 
@@ -70,9 +70,9 @@ The `core/` modules with text: `downloads`, `media`, `player`, `speech`, `taglib
 - Create `app/src/test/resources/hardcoded-strings-baseline.txt`
 - Create `app/src/main/res/values/strings_common.xml`
 
-- [ ] **Step 1: `UiText`.** A sealed interface with three cases: `Res(@StringRes id, vararg args)`, `Plural(@PluralsRes id, count, vararg args)`, and `Raw(text)` for content such as titles that isn't translated. It has `@Composable fun resolve(): String` and `fun resolve(context: Context): String`. Args can themselves be `UiText` and are resolved recursively.
-- [ ] **Step 2: Unit tests.** Under Robolectric: `Res` with and without format args, `Plural` for counts 1 and 2, `Raw`, and nested args.
-- [ ] **Step 3: The guard test.** It scans `app/src/main/kotlin` and each `core/*/src/main/kotlin` and counts, per file:
+- [x] **Step 1: `UiText`.** A sealed interface with three cases: `Res(@StringRes id, vararg args)`, `Plural(@PluralsRes id, count, vararg args)`, and `Raw(text)` for content such as titles that isn't translated. It has `@Composable fun resolve(): String` and `fun resolve(context: Context): String`. Args can themselves be `UiText` and are resolved recursively.
+- [x] **Step 2: Unit tests.** Under Robolectric: `Res` with and without format args, `Plural` for counts 1 and 2, `Raw`, and nested args.
+- [x] **Step 3: The guard test.** It scans `app/src/main/kotlin` and each `core/*/src/main/kotlin` and counts, per file:
   - `Text("<Capital or digit>…")`
   - `contentDescription = "…"` with a non-empty value
   - `label|title|text|message|placeholder|body|supportingText = "<Capital>…"` when used as a named argument
@@ -80,9 +80,9 @@ The `core/` modules with text: `downloads`, `media`, `player`, `speech`, `taglib
   - `setContentTitle("…"` and `setContentText("…"`
 
   Files whose name contains `Spike` or `Debug` are skipped, as are lines marked `// l10n-ignore: <why>`. The test fails if any file's count is above its line in `hardcoded-strings-baseline.txt` (`path<TAB>count`, sorted), or if a file has hits but no line. When a count goes down it prints a reminder to lower the baseline.
-- [ ] **Step 4: Generate the baseline.** Do it with a one-off `main` in the test, or a `-PwriteBaseline` property. Commit it.
-- [ ] **Step 5: Common strings.** Move the common words used in three or more packages into `strings_common.xml`: Back, Cancel, OK, Retry, Remove, Delete, Close, More options, Open, Play, Pause, Search, Settings, Done, Get, Downloading…. Find them with `grep -rhoE '"(Back|Cancel|…)"' | sort | uniq -c`. Don't convert any call sites yet.
-- [ ] **Step 6:** `./gradlew :app:testDebugUnitTest --tests '*UiText*' --tests '*HardcodedStrings*'` passes. Commit "L1: UiText, the hardcoded-strings guard, common strings".
+- [x] **Step 4: Generate the baseline.** Do it with a one-off `main` in the test, or a `-PwriteBaseline` property. Commit it. *(Done with `-PwriteBaseline`; first baseline 458 hits in 61 files.)*
+- [x] **Step 5: Common strings.** Move the common words used in three or more packages into `strings_common.xml`: Back, Cancel, OK, Retry, Remove, Delete, Close, More options, Open, Play, Pause, Search, Settings, Done, Get, Downloading…. Find them with `grep -rhoE '"(Back|Cancel|…)"' | sort | uniq -c`. Don't convert any call sites yet.
+- [x] **Step 6:** `./gradlew :app:testDebugUnitTest --tests '*UiText*' --tests '*HardcodedStrings*'` passes. Commit "L1: UiText, the hardcoded-strings guard, common strings".
 
 ## Tasks 2–8: Convert by package group
 
@@ -96,23 +96,84 @@ Each task converts its packages under the conventions, lowers or removes those f
 | 5 | ebook, reader, research | The medical banner in `research/AnswerText.kt` becomes a string. Prompts stay (L4). `ReaderBars`/`ReaderViewModel` constants become ids |
 | 6 | archive, librivox, shell | `shell` holds the rail labels; keep them short |
 | 7 | `core/` modules: downloads, media, player, speech, taglib, books, zim, ai, archive | Android library modules get their own `res/values/strings.xml` (`<module>_` names). Pure-Kotlin messages become types mapped in `app/`. `ArchiveQuery` shelf titles become an enum mapped in `app/archive` |
-| 8 (last) | sources, library, widget, top-level files (`Bytes.kt`, `GrangerNavHost.kt`, `MainActivity.kt`, `GrangerApp.kt`) | The open `gb-gutenberg` branch touches `sources/`, `library/` and `MainActivity.kt`, and `bugs-2026-10-30` touches `widget/WidgetUpdater.kt`, so convert these after those branches merge. `Bytes.kt` uses the locale's decimal separator; its tests pin `Locale.US` |
+| 8 (last) | sources, library, widget, top-level files (`Bytes.kt`, `GrangerNavHost.kt`, `MainActivity.kt`, `GrangerApp.kt`) | The open `gb-gutenberg` branch touches `sources/`, `library/` and `MainActivity.kt`, and `bugs-2026-10-30` touches `widget/WidgetUpdater.kt`, so convert these after those branches merge. `Bytes.kt` uses the locale's decimal separator; its tests pin `Locale.US`. **widget done** (2026-10-30): `WidgetModel` holds `UiText`; `WidgetModelStore` keeps it as JSON with stable resource names |
 
-Steps for each package:
-- [ ] **Step 1:** List the package's literals with the guard's patterns plus `grep -nE '"[A-Z][^"]{2,}"'`. Sort each into translate or keep (convention 6).
-- [ ] **Step 2:** Add the strings and plurals to `strings_<package>.xml`. Each gets a one-line comment where the context isn't obvious; translators read these comments.
-- [ ] **Step 3:** Replace the call sites. Use `UiText` in view models and helpers, and turn string-building helpers (such as `SearchScreen.artist()`) into `@Composable` functions or `UiText`-returning ones.
-- [ ] **Step 4:** Fix the tests: assertions keep their English text where Robolectric supplies it, and JVM tests move to Robolectric or assert `UiText`.
-- [ ] **Step 5:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.<package>.*' --tests '*HardcodedStrings*'` passes. Commit "L1: <package> strings to resources".
+Steps for each package *(all of Tasks 2–8 done; Task 8 on 2026-10-30 after merging main's KB, WF, GB, IA, DL, LV and bug-pass work: sources, library, `Bytes.kt` and the top-level files, one commit each; `MainActivity.kt` and `GrangerApp.kt` had no strings of their own beyond 8b's)*:
+- [x] **Step 1:** List the package's literals with the guard's patterns plus `grep -nE '"[A-Z][^"]{2,}"'`. Sort each into translate or keep (convention 6).
+- [x] **Step 2:** Add the strings and plurals to `strings_<package>.xml`. Each gets a one-line comment where the context isn't obvious; translators read these comments.
+- [x] **Step 3:** Replace the call sites. Use `UiText` in view models and helpers, and turn string-building helpers (such as `SearchScreen.artist()`) into `@Composable` functions or `UiText`-returning ones.
+- [x] **Step 4:** Fix the tests: assertions keep their English text where Robolectric supplies it, and JVM tests move to Robolectric or assert `UiText`.
+- [x] **Step 5:** `./gradlew :app:testDebugUnitTest --tests 'app.granger.<package>.*' --tests '*HardcodedStrings*'` passes. Commit "L1: <package> strings to resources".
+
+The merge of main (2026-10-30) put main's new English in the converted packages into their strings files too: archive.org sets (parts, Choose parts, Get all, the large-download prompt per kind), Read as ebook and an ebook's original pages, the voices' names, and Plan WF's "covers" lines in Readiness and onboarding.
+
+## Task 8b: Follow-ups found while merging
+
+Things the package tasks left for after the merge, because they cross task boundaries:
+
+- [x] `LaunchDecider.MISSING_NOTICE` goes through `LibraryRoute(notice: String?)` in `GrangerNavHost.kt`. Make the route carry a string id (Task 3, with Task 8's files). *Done: `LibraryRoute(notice: LibraryNotice?, noticeTitle: String?)`; `LibraryNotice` is an enum holding its string (an id that survives a rebuild, unlike a resource int).*
+- [x] `ArchiveViewModel.messageOf` and `LibriVoxViewModel.messageOf` switch to `UiText.Res(e.problem.text, *e.textArgs.toTypedArray())`. `ArchiveKind.noun`'s "Search archive.org ${noun}" becomes one string per kind (Task 7 → Task 6's packages).
+- [x] `HomeScreen.kt` and `DownloadsModel.kt` move to `QueueText`'s `(res, …)` functions. Then delete the deprecated English ones (Task 7 → Task 2's packages).
+- [x] `core/library`: `ImportResult.message` and the `Albums` `UNKNOWN_*` display names. Separate each sentinel from the text it displays. *Done: `ImportResult.message` moved to the app as `library.importProblem`. The `UNKNOWN_*` values stay as placeholders (stored, sorted, compared) and are shown only through music's strings, now in Search and Android Auto too.*
+- [x] `Librarian.get()` messages are shown as a Toast `String` in `GrangerNavHost`. Make them `UiText` when Task 8 converts that file (Task 5).
+- [x] DevDocsFixes.kt's injected "☰ Contents" button: pass the label into the script from a resource (Task 5).
+- [ ] **Saved in the database, decide in L2:**
+  - PDF bookmark "p. N"
+  - PDF place title "Page N"
+  - the chat title "About: …"
+  - an ebook's original pages' tab title, "… (original pages)" (Plan IA)
+  - Home's drawn cards (`Cards`, stored in `home_feeds`): `chunkLabel`'s "Chapter N" / "Page N" in a card's subtitle
+  - the default collection and media type names (`Filing`: Granger Classics, My books, On this phone; Music, Audiobooks), and Gutenberg's pack titles ("Every English book", `LibraryDatabase` migration)
+
+  The voice's copy of the medical text (`AnswerText.MEDICAL`) follows `SpokenText`'s language in L4. A test pins it to the banner's English (Task 5).
+- [x] Strings left as `UiText.Raw` or `String` at task boundaries:
+  - `MediaDownloader.get()` notices (Task 4's packages): `UiText`
+  - `ItemStatus.Failed` / `InLibrary` (sources, Task 8): `Failed(reason: String?)` keeps the downloader's stored reason (L2), null reads "Download failed"; `InLibrary(LibraryShelf)`
+  - `RailViewModel.pin()` / `resume()` notices, read by GrangerNavHost (`shell_pins_full` and `shell_cant_play` exist): `pin` hands back `UiText`, `resume` a `LibraryNotice`
+  - `RailTabUi.subtitle` "Removed pack/book" as Home builds it (`shell_removed_*` exist): `RailTabUi.subtitle` is `UiText`
+
+  (Task 6)
+- [ ] **Saved in book data:** archive.org's OCR note and the "(PDF)" suffix, matched with `removePrefix`. Decide in L2 with the other saved strings (Task 6). *Plan IA's set parts also save "Part N" as a part's title when it has none (`ArchiveParts`), and Nautilus books "(2 of 3)" (`NautilusBooks`).*
+- [x] **Android Auto:** `media/AutoBrowseTree` folder names ("Recent", "Music", "Nothing here yet"…). Take a `(Int) -> String` from `GrangerApp.kt` (Task 4).
+- [x] **English constants kept for other packages:**
+  - ~~`chapterTitle` and `voiceSubtitle` (widget)~~ done: deleted, the widget uses `chapterName`/`voiceState`
+  - ~~`ALL_MUSIC` and `ALL_AUDIOBOOKS` (library)~~ deleted: the Library uses `music_all` / `audiobooks_all`
+  - ~~`UNKNOWN_AUTHOR`~~ deleted: Search uses `audiobooks_unknown_author`
+  - ~~`MediaDownloader`'s "Download failed"~~ `sources_download_failed`, through `failedText`
+
+  (Task 4)
+- [x] **Passed through as English by Task 2:**
+  - ~~`QueueText`~~ done (see the Task 7 item)
+  - `row.error` (the stored download error, L2)
+  - `chunkLabel`: written into Home's stored cards, so L2 (above)
+  - ~~`AskReach.text`~~ `UiText`
+  - ~~`GetMoreLink`~~ string ids
+  - ~~`formatBytes`~~ the locale's decimal separator (neutral Latin American Spanish, `es-419`, writes "2.0 GB" like English; `es` writes "2,0 GB")
+  - ~~`WidgetModel`~~ done with the widget (Listen's card now takes `UiText`)
+  - ~~the volume label~~ the system's description, else `downloads_volume_*` (Task 7)
+- [ ] **Changes to the English the walkthrough should confirm:**
+  - Readiness's "is from" date is now localised ("Jan 10, 2025", not "2025-01-10"). Task 2; a one-line revert if Neal prefers ISO.
+  - Downloads say "1 of 1 track" and "1 of 1 chapter" (Tasks 4 and 6).
+  - archive.org's large-download prompt for some of a set's parts: main said "This 3 parts is 234 MB. Download it?"; now "These 3 parts are 234 MB. Download them?" (one: "This part is …").
+  - "Queued 1 downloads." is now "Queued 1 download." (a preset or a set of one queued).
+  - Kiwix's "Adds about 1 articles…" reads "Adds about 1 article…" at one.
+  - Making a pack's books searchable with one book left says "Making 1 book searchable…" / "Copies the 1 book not yet opened…, so Search and Ask can read it in full."
+  - Pack row language names now come from the phone's locale (same English names; a Spanish phone shows "inglés").
+- [ ] **Not in L1, noted for L2:**
+  - Download error messages are stored in `downloads.db`, and `isGone` matches them as text. Translating them needs a stored error code (a schema change).
+  - `TextToEpub`'s "Part N" / "Contents" are written into the generated book, so they follow the book's language (L3). So do `PdfToEpub`'s "Notes", "Opening pages", "Pages N–M" and its EPUB's "Contents" (Plan IA).
+  - `PdfToEpub.Report.why` (why a PDF won't make an ebook, "no chapters") is the converter's English; the notice wraps it in a translated sentence.
+  - Kiwix's set names and slice labels (`setLabel`, "Best 50,000 articles", and `shortLabel`'s " articles") are catalog data (L3).
+  - Search matches a folded family by its English words (`KiwixList.Folded.words`), like the catalog's own words (L3/L4).
 
 ## Task 9: Zero and lock
 
-- [ ] **Step 1:** The baseline is empty. Delete the file, and make the guard fail on any hit outside `// l10n-ignore`.
-- [ ] **Step 2: Pseudo-locale check.**
+- [x] **Step 1:** The baseline is empty. Delete the file, and make the guard fail on any hit outside `// l10n-ignore`. *(2026-10-30: deleted with `-PwriteBaseline`; `HardcodedStringsTest.noFileHasHardcodedUiText` fails on any hit.)*
+- [x] **Step 2: Pseudo-locale check.** *(2026-10-30: `isPseudoLocalesEnabled` on the debug build; `PseudoLocaleTest` works under Robolectric (`qualifiers = "en-rXA"` reads "[Çåñçéļ one two]") and checks Home, the Library, Search, Settings and the player. Each screen's own data (titles, names) is listed as allowed, with sizes and times; names kept `translatable="false"` (Granger, Kiwix, LibriVox, Project Gutenberg, Archive.org) stay plain under en-XA, so the test allows "Granger".)*
   - Add `pseudoLocalesEnabled = true` to the debug build type.
   - A Robolectric test renders five screens (Home, Library, Search, Settings, the player) under `qualifiers = "en-rXA"` and checks that no visible text node is in plain ASCII. A plain-ASCII node means a literal was missed.
-- [ ] **Step 3:** The full `./gradlew testDebugUnitTest` passes with the test count at or above the baseline from Task 0.
-- [ ] **Step 4:** `git grep -c '<string name=' app/src/main/res core/*/src/main/res` gives the real string count. Write it in the roadmap row.
+- [x] **Step 3:** The full `./gradlew testDebugUnitTest` passes with the test count at or above the baseline from Task 0. *(2026-10-30: 2574 tests, 53 skipped, 0 failures, against 2315 at Task 0. `core/player`'s `PlayerEngineTest.audiobookPositionSavedOnPauseAndEveryFiveSeconds` failed once in four runs on timing, 6990 ms against 7000; not a strings change.)*
+- [x] **Step 4:** `git grep -c '<string name=' app/src/main/res core/*/src/main/res` gives the real string count. Write it in the roadmap row. *(2026-10-30: 1,042 strings and 74 plurals in 28 files (24 in app, 4 in core modules), 15 of the strings `translatable="false"`: about 1,100 to translate for L2.)*
 
 ## Task 10: Walkthrough (needs the phone)
 

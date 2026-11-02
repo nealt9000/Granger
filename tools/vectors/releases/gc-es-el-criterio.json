@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-el-criterio",
+ "kind": "book",
+ "fileName": "gc-es-el-criterio_2026-10-30.gvec",
+ "sizeBytes": 175062,
+ "sha256": "4c7f5b944efe381adbdd9809ca175c5cbf27a8ed28868f0c85cf17a133e71ed2",
+ "count": 595,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "e6be1372d38383a4de2a2613a228b67f5c93ba96c6713975e8e5bc8a47e96841",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-el-criterio_2026-10-30.gvec"
+}

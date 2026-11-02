@@ -1,0 +1,14 @@
+{
+ "id": "gc-es-historia-de-la-vida-del-buscon",
+ "kind": "book",
+ "fileName": "gc-es-historia-de-la-vida-del-buscon_2026-10-30.gvec",
+ "sizeBytes": 100680,
+ "sha256": "7d7163026302e31800acc3775bbb9f42c8c59a33d25e06e6f0fa2bedd94f7756",
+ "count": 342,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "d9a74441ac21ebb7a81d8514c22dd424294bf4a23c0b0cc8582e4dd431f547bb",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-historia-de-la-vida-del-buscon_2026-10-30.gvec"
+}

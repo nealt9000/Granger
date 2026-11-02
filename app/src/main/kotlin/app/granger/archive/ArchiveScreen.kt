@@ -54,9 +54,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.Features
+import app.granger.R
 import app.granger.core.archive.ArchiveKind
 import app.granger.core.archive.ArchiveShelf
 import app.granger.core.archive.AudioOffer
@@ -64,18 +67,24 @@ import app.granger.core.archive.Offer
 import app.granger.sources.ItemStatus
 import app.granger.sources.ItemStatusText
 
-private const val DISCLAIMER = "Archive.org content is provided by the Internet Archive. Granger doesn't host or vouch for it."
-private const val UNFILTERED_NOTE = "Showing everything archive.org serves openly. You're responsible for what you download."
-private const val SPOKEN_WORD_NOTE = "Archive.org dates spoken-word recordings by their text, not the recording, so Granger can't tell " +
-    "which are in the public domain. LibriVox recordings all are."
-
 /** The filter note for [ui]'s view: public-domain texts, public-domain recordings, or the spoken-word note before the waiver. */
+@Composable
 internal fun filterNote(ui: ArchiveUi): String = when {
-    !ui.filtered -> UNFILTERED_NOTE
-    ui.waiverNeeded -> SPOKEN_WORD_NOTE
-    ui.kind == ArchiveKind.TEXTS -> "Showing public-domain texts only: published 1930 or earlier."
-    else -> "Showing public-domain recordings only: published before ${ui.filterYear}."
+    !ui.filtered -> stringResource(R.string.archive_unfiltered_note)
+    ui.waiverNeeded -> stringResource(R.string.archive_spoken_word_note)
+    ui.kind == ArchiveKind.TEXTS -> stringResource(R.string.archive_texts_note)
+    else -> stringResource(R.string.archive_recordings_note, ui.filterYear)
 }
+
+/** The search box's placeholder for [kind]'s view. */
+@Composable
+private fun searchPlaceholder(kind: ArchiveKind): String = stringResource(
+    when (kind) {
+        ArchiveKind.TEXTS -> R.string.archive_search_texts
+        ArchiveKind.SPOKEN_WORD -> R.string.archive_search_audiobooks
+        ArchiveKind.MUSIC -> R.string.archive_search_music
+    },
+)
 
 /**
  * Browse and search archive.org texts, spoken word or music (public domain until the waiver), with an item sheet to
@@ -92,14 +101,14 @@ fun ArchiveScreen(
 ) {
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
+    val context = LocalContext.current
     LaunchedEffect(ui.notice) {
         val notice = ui.notice ?: return@LaunchedEffect
-        snackbar.showSnackbar(notice)
+        snackbar.showSnackbar(notice.resolve(context))
         viewModel.dismissNotice()
     }
 
     // Ask once for notifications so download progress can show; downloads work either way.
-    val context = LocalContext.current
     var askedForNotifications by rememberSaveable { mutableStateOf(false) }
     val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
     fun beforeDownload() {
@@ -112,7 +121,7 @@ fun ArchiveScreen(
         try {
             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(detailsUrl(identifier))))
         } catch (e: ActivityNotFoundException) {
-            android.widget.Toast.makeText(context, app.granger.sources.NO_BROWSER, android.widget.Toast.LENGTH_LONG).show()
+            android.widget.Toast.makeText(context, context.getString(R.string.sources_no_browser), android.widget.Toast.LENGTH_LONG).show()
         }
     }
 
@@ -177,20 +186,21 @@ fun ArchiveScreen(
     confirmRemove?.let { (identifier, title) ->
         AlertDialog(
             onDismissRequest = { confirmRemove = null },
-            title = { Text("Remove $title?") },
+            title = { Text(stringResource(R.string.archive_remove_title, title)) },
             text = {
                 Text(
-                    if (ui.kind == ArchiveKind.TEXTS) "This deletes the file. Your place and highlights are kept."
-                    else "This deletes its files. Your place and bookmarks are kept.",
+                    stringResource(
+                        if (ui.kind == ArchiveKind.TEXTS) R.string.archive_remove_text_body else R.string.archive_remove_audio_body,
+                    ),
                 )
             },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.remove(identifier)
                     confirmRemove = null
-                }) { Text("Remove") }
+                }) { Text(stringResource(R.string.common_remove)) }
             },
-            dismissButton = { TextButton(onClick = { confirmRemove = null }) { Text("Keep") } },
+            dismissButton = { TextButton(onClick = { confirmRemove = null }) { Text(stringResource(R.string.common_keep)) } },
         )
     }
 }
@@ -201,7 +211,18 @@ internal fun LargeDownloadDialog(confirm: ConfirmLarge, onDownload: (dontAskAgai
     var dontAsk by remember { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("This ${confirm.title} is ${app.granger.formatBytes(confirm.bytes)}. Download it?") },
+        title = {
+            val size = app.granger.formatBytes(confirm.bytes)
+            Text(
+                when (confirm.what) {
+                    LargeWhat.PDF -> stringResource(R.string.archive_large_pdf, size)
+                    LargeWhat.DOWNLOAD -> stringResource(R.string.archive_large_download, size)
+                    LargeWhat.PART -> stringResource(R.string.archive_large_part, size)
+                    LargeWhat.SET -> stringResource(R.string.archive_large_set, size)
+                    LargeWhat.PARTS -> pluralStringResource(R.plurals.archive_large_parts, confirm.count, confirm.count, size)
+                },
+            )
+        },
         text = {
             // The whole row toggles, not just the box: the label is the bigger target.
             Row(
@@ -209,11 +230,11 @@ internal fun LargeDownloadDialog(confirm: ConfirmLarge, onDownload: (dontAskAgai
                 verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
             ) {
                 androidx.compose.material3.Checkbox(checked = dontAsk, onCheckedChange = null)
-                Text("Don't ask again")
+                Text(stringResource(R.string.archive_dont_ask_again))
             }
         },
-        confirmButton = { TextButton(onClick = { onDownload(dontAsk) }) { Text("Download") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        confirmButton = { TextButton(onClick = { onDownload(dontAsk) }) { Text(stringResource(R.string.archive_download)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
     )
 }
 
@@ -247,9 +268,9 @@ internal fun ArchiveContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Archive.org") },
+                title = { Text(stringResource(R.string.archive_title)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) }
                 },
             )
         },
@@ -260,7 +281,7 @@ internal fun ArchiveContent(
                 OutlinedTextField(
                     value = searchText,
                     onValueChange = onQuery,
-                    placeholder = { Text("Search archive.org ${ui.kind.noun}") },
+                    placeholder = { Text(searchPlaceholder(ui.kind)) },
                     leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
@@ -269,7 +290,7 @@ internal fun ArchiveContent(
             item(key = "tabs") {
                 PrimaryTabRow(selectedTabIndex = ui.tab.ordinal) {
                     for (tab in ArchiveTab.entries) {
-                        Tab(selected = ui.tab == tab, onClick = { onTab(tab) }, text = { Text(tab.title) })
+                        Tab(selected = ui.tab == tab, onClick = { onTab(tab) }, text = { Text(stringResource(tab.title)) })
                     }
                 }
             }
@@ -282,11 +303,11 @@ internal fun ArchiveContent(
                     )
                     if (ui.waiverNeeded) {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            OutlinedButton(onClick = onOpenLibriVox) { Text("LibriVox") }
-                            if (Features.ARCHIVE_WAIVER) OutlinedButton(onClick = { showWaiver = true }) { Text("Show everything") }
+                            OutlinedButton(onClick = onOpenLibriVox) { Text(stringResource(R.string.archive_librivox)) }
+                            if (Features.ARCHIVE_WAIVER) OutlinedButton(onClick = { showWaiver = true }) { Text(stringResource(R.string.archive_show_everything)) }
                         }
                     } else if (ui.filtered && Features.ARCHIVE_WAIVER) {
-                        OutlinedButton(onClick = { showWaiver = true }) { Text("Show everything") }
+                        OutlinedButton(onClick = { showWaiver = true }) { Text(stringResource(R.string.archive_show_everything)) }
                     }
                 }
             }
@@ -300,7 +321,7 @@ internal fun ArchiveContent(
                             FilterChip(
                                 selected = ui.shelf == shelf,
                                 onClick = { onShelf(shelf) },
-                                label = { Text(shelf.title) },
+                                label = { Text(androidx.compose.ui.res.stringResource(shelf.title)) },
                             )
                         }
                     }
@@ -309,8 +330,8 @@ internal fun ArchiveContent(
             ui.error?.let { problem ->
                 item(key = "problem") {
                     Column(Modifier.padding(16.dp)) {
-                        Text(problem, color = MaterialTheme.colorScheme.error)
-                        TextButton(onClick = onRetry) { Text("Retry") }
+                        Text(problem.resolve(), color = MaterialTheme.colorScheme.error)
+                        TextButton(onClick = onRetry) { Text(stringResource(R.string.common_retry)) }
                     }
                 }
             }
@@ -318,8 +339,8 @@ internal fun ArchiveContent(
                 item(key = "empty") {
                     Text(
                         when {
-                            ui.tab == ArchiveTab.INSTALLED -> "Nothing downloaded from archive.org yet."
-                            else -> "Nothing matches that search."
+                            ui.tab == ArchiveTab.INSTALLED -> stringResource(R.string.archive_empty_installed)
+                            else -> stringResource(R.string.archive_empty_search)
                         },
                         modifier = Modifier.padding(16.dp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -345,12 +366,12 @@ internal fun ArchiveContent(
             }
             if (ui.canLoadMore) {
                 item(key = "more") {
-                    TextButton(onClick = onLoadMore, modifier = Modifier.fillMaxWidth().padding(8.dp)) { Text("Load more") }
+                    TextButton(onClick = onLoadMore, modifier = Modifier.fillMaxWidth().padding(8.dp)) { Text(stringResource(R.string.archive_load_more)) }
                 }
             }
             item(key = "disclaimer") {
                 Text(
-                    DISCLAIMER,
+                    stringResource(R.string.archive_disclaimer),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(16.dp),
@@ -385,7 +406,11 @@ private fun ArchiveResultRow(
         headlineContent = { Text(row.title) },
         supportingContent = {
             Column {
-                if (row.details.isNotBlank()) Text(row.details, style = MaterialTheme.typography.bodySmall)
+                if (row.parts > 0) {
+                    Text(pluralStringResource(R.plurals.archive_row_parts, row.parts, row.parts, row.details), style = MaterialTheme.typography.bodySmall)
+                } else if (row.details.isNotBlank()) {
+                    Text(row.details, style = MaterialTheme.typography.bodySmall)
+                }
                 (audioLabel(row.audio) ?: offerLabel(row.preview))?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
                 ItemStatusText(row.status)
             }
@@ -393,19 +418,19 @@ private fun ArchiveResultRow(
         trailingContent = {
             when (row.status) {
                 ItemStatus.NotInstalled -> if (row.preview is Offer.Download || row.audio is AudioOffer.Tracks) {
-                    TextButton(onClick = onGet) { Text("Get") }
+                    TextButton(onClick = onGet) { Text(stringResource(R.string.common_get)) }
                 }
-                is ItemStatus.Queued, is ItemStatus.Downloading -> TextButton(onClick = onCancel) { Text("Cancel") }
+                is ItemStatus.Queued, is ItemStatus.Downloading -> TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) }
                 is ItemStatus.Failed -> Row {
-                    TextButton(onClick = onCancel) { Text("Cancel") }
-                    TextButton(onClick = onRetry) { Text("Retry") }
+                    TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) }
+                    TextButton(onClick = onRetry) { Text(stringResource(R.string.common_retry)) }
                 }
-                ItemStatus.Installed, ItemStatus.UpdateAvailable -> TextButton(onClick = onRemove) { Text("Remove") }
+                ItemStatus.Installed, ItemStatus.UpdateAvailable -> TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
                 is ItemStatus.Partial -> Row {
-                    TextButton(onClick = onRemove) { Text("Remove") }
-                    TextButton(onClick = onGet) { Text("Get the rest") }
+                    TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
+                    TextButton(onClick = onGet) { Text(stringResource(R.string.archive_get_the_rest)) }
                 }
-                is ItemStatus.InLibrary -> TextButton(onClick = onOpenInLibrary) { Text("Open") }
+                is ItemStatus.InLibrary -> TextButton(onClick = onOpenInLibrary) { Text(stringResource(R.string.common_open)) }
                 ItemStatus.NeedsMoreMemory -> Unit
             }
         },
