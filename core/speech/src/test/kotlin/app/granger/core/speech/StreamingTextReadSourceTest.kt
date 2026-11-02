@@ -34,6 +34,21 @@ class StreamingTextReadSourceTest {
         assertThat(s.utterances(end, 10).map { it.text }).containsExactly("Reading the likeliest 4…")
     }
 
+    @Test fun aSentenceCutAtAWordBoundaryWaitsForItsEnd() = runTest {
+        val s = StreamingTextReadSource("answer:1", "Q")
+        s.append("Plants turn light into ")                       // the model streams word by word
+        val first = async { s.utterances(null, 10) }
+        advanceUntilIdle()
+        assertThat(first.isCompleted).isFalse()                   // not "Plants turn light into", cut short
+        s.append("Plants turn light into sugar. They ")
+        assertThat(first.await().map { it.text }).containsExactly("Plants turn light into sugar.")
+        s.append("Plants turn light into sugar. They store it as \u201cstarch.\u201d ")
+        assertThat(s.utterances(null, 10).map { it.text }).containsExactly("Plants turn light into sugar.", "They store it as \u201cstarch.\u201d").inOrder()
+        s.append("Plants turn light into sugar. They store it as \u201cstarch.\u201d\n\nSee also")
+        s.complete()
+        assertThat(s.utterances(null, 10).map { it.text }.last()).isEqualTo("See also")
+    }
+
     @Test fun utterancesWaitForMoreTextAndCompleteEndsTheSource() = runTest {
         val s = StreamingTextReadSource("answer:1", "Q")
         s.append("First one.")

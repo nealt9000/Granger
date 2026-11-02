@@ -35,10 +35,20 @@ class StreamingTextReadSource(override val key: String, override val title: Stri
         val whole = listOfNotNull(preface?.takeIf { it.isNotBlank() }, text).joinToString("\n\n")
         val blocks = whole.split(Regex("\\n\\s*\\n")).mapIndexed { i, para -> Block(i.toString(), BlockKind.PARAGRAPH, para) }.filter { it.text.isNotBlank() }
         val made = Utterances.fromBlocks(blocks) { blockId, n -> ReadAddress.Text(key, blockId.toInt(), n) }
-        // The last sentence may still be growing unless the text ends with whitespace (or is finished).
-        val settled = complete || text.isEmpty() || text.last().isWhitespace()
+        // The last sentence may still be growing unless it has closed: sentence punctuation then whitespace, or a
+        // paragraph break (or the text is finished). Whitespace alone is only a word boundary: the model streams word by
+        // word, so "Plants turn light into " was spoken as a sentence and "sugar." never was (Neal, 2026-11-02).
+        val tail = text.trimEnd()
+        val gap = text.substring(tail.length)
+        val settled = complete || text.isEmpty() ||
+            (gap.isNotEmpty() && (SENTENCE_END.containsMatchIn(tail) || gap.count { it == '\n' } >= 2))
         ready = if (settled || made.isEmpty()) made else made.dropLast(1)
         version.value++
+    }
+
+    private companion object {
+        /** A sentence's last character: . ! ? or …, then any closing quotes or brackets. */
+        val SENTENCE_END = Regex("[.!?…][\"'”’)\\]]*$")
     }
 
     override suspend fun utterances(from: ReadAddress?, limit: Int): List<Utterance> {
