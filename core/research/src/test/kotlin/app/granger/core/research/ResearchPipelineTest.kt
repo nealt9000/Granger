@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -522,11 +521,10 @@ class ResearchPipelineTest {
     }
 
     /** Returns [hits] for any query, recording each one; [fail] throws instead. */
-    private class FakeDense(val hits: List<Passage>, val fail: Boolean = false, val delayMs: Long = 0) : DenseFinder {
+    private class FakeDense(val hits: List<Passage>, val fail: Boolean = false) : DenseFinder {
         val queries = mutableListOf<FloatArray>()
         override suspend fun find(query: FloatArray): List<Passage> {
             queries += query
-            if (delayMs > 0) delay(delayMs)
             if (fail) error("vector file damaged")
             return hits
         }
@@ -668,28 +666,25 @@ class ResearchPipelineTest {
     )
 
     @Test
-    fun theTitlesComeWhileTheModelIsStillRewriting() = runTest {
-        val slowRewrite = FakeGenerator(rewrite = { flow { delay(2_000); emit("keywords: water, boils\nmedical: no") } })
-        val dense = FakeDense(boilingTitles, delayMs = 500)
-        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(slowRewrite, embedder = embedder), dense = dense)
+    fun theTitlesComeBeforeTheModelLoadsAndTheSearchIsntRepeated() = runTest {
+        val dense = FakeDense(boilingTitles)
+        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = embedder), dense = dense)
             .run(ResearchRequest("At what temperature does water boil?")).toList()
-        val looking = events.indexOf(ResearchEvent.LookingIn(listOf("Boiling", "Steam")))
-        assertThat(looking).isGreaterThan(events.indexOf(ResearchEvent.Progress(Stage.LOADING_MODEL)))
-        assertThat(looking).isLessThan(events.indexOf(ResearchEvent.Progress(Stage.SEARCHING)))
-        // Searched once: the ranking uses the early search's passages.
+        assertThat(events.take(3)).containsExactly(
+            ResearchEvent.Reaction(ReactionTopic.DEFAULT),
+            ResearchEvent.LookingIn(listOf("Boiling", "Steam")),
+            ResearchEvent.Progress(Stage.LOADING_MODEL),
+        ).inOrder()
         assertThat(dense.queries).hasSize(1)
         assertThat((outcome(events) as Outcome.Answered).passages).contains(boilingTitles[0])
     }
 
     @Test
-    fun aSlowSearchNamesItsTitlesAtTheSearchInstead() = runTest {
-        val dense = FakeDense(boilingTitles, delayMs = 5_000)
-        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = embedder), dense = dense)
+    fun aFailedSearchByMeaningNamesNothingAndKeywordsCarryOn() = runTest {
+        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = embedder), dense = FakeDense(emptyList(), fail = true))
             .run(ResearchRequest("At what temperature does water boil?")).toList()
-        val looking = events.indexOfFirst { it is ResearchEvent.LookingIn }
-        assertThat(looking).isGreaterThan(events.indexOf(ResearchEvent.Progress(Stage.SEARCHING)))
-        assertThat(looking).isLessThan(events.indexOfFirst { it is ResearchEvent.Done })
-        assertThat(events.count { it is ResearchEvent.LookingIn }).isEqualTo(1)
+        assertThat(events.none { it is ResearchEvent.LookingIn }).isTrue()
+        assertThat((outcome(events) as Outcome.Answered).passages).containsExactly(water)
     }
 
     @Test
@@ -697,16 +692,6 @@ class ResearchPipelineTest {
         val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = embedder), dense = FakeDense(emptyList()))
             .run(ResearchRequest("At what temperature does water boil?")).toList()
         assertThat(events.none { it is ResearchEvent.LookingIn }).isTrue()
-    }
-
-    @Test
-    fun anEarlyEndDoesntWaitForTheSearch() = runTest {
-        val dense = FakeDense(boilingTitles, delayMs = 60_000)
-        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(null, embedder = embedder), dense = dense)
-            .run(ResearchRequest("At what temperature does water boil?")).toList()
-        assertThat(outcome(events)).isInstanceOf(Outcome.Failed::class.java)
-        assertThat(events.none { it is ResearchEvent.LookingIn }).isTrue()
-        assertThat(currentTime).isLessThan(60_000)
     }
 
     @Test

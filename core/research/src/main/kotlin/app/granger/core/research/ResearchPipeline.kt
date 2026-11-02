@@ -8,12 +8,10 @@ import kotlinx.coroutines.flow.fold
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.selects.select
 import kotlin.coroutines.cancellation.CancellationException
 
 /** Finds passages by meaning: the [query] vector against precomputed passage vectors, best first. */
@@ -178,27 +176,13 @@ class ResearchPipeline(
     /**
      * [stop] is polled after each chunk of the reply; when it turns true the reply so far is checked and finished.
      *
-     * With dense retrieval the search by meaning starts as soon as the query is embedded, alongside the model's load and
-     * rewrite, and its titles come out as [ResearchEvent.LookingIn] the moment it finishes, or at the search if later.
+     * With dense retrieval the search by meaning runs first, before the model loads, and its titles come out as
+     * [ResearchEvent.LookingIn]. Not alongside the model: on the Pixel 6 the vector scan took ~8 s instead of ~0.9 s
+     * while the model loaded and rewrote (run ob-looking-1, 2026-11-02); the GPU and CPU share memory bandwidth.
      */
-    fun run(request: ResearchRequest, stop: () -> Boolean = { false }): Flow<ResearchEvent> = flow {
-        coroutineScope {
-            var early: Deferred<List<Passage>?>? = null
-            try {
-                answer(request, stop) { finder, query -> async { searchByMeaning(finder, query) }.also { early = it } }
-            } finally {
-                // An answer that ends before the search (no model, one person's health) doesn't wait for it.
-                early?.cancel()
-            }
-        }
-    }
+    fun run(request: ResearchRequest, stop: () -> Boolean = { false }): Flow<ResearchEvent> = flow { answer(request, stop) }
 
-    /** [run]'s events; [startEarly] starts the search by meaning in [run]'s scope. */
-    private suspend fun FlowCollector<ResearchEvent>.answer(
-        request: ResearchRequest,
-        stop: () -> Boolean,
-        startEarly: (DenseFinder, FloatArray) -> Deferred<List<Passage>?>,
-    ) {
+    private suspend fun FlowCollector<ResearchEvent>.answer(request: ResearchRequest, stop: () -> Boolean) {
         var questionVector: FloatArray? = null
         val topic = OwlReaction.lexical(request.question, request.priorQuestion) ?: run {
             val centroids = if (dense == null) null else reactions?.invoke()
@@ -207,40 +191,24 @@ class ResearchPipeline(
             questionVector?.let(centroids::classify) ?: ReactionTopic.DEFAULT
         }
         emit(ResearchEvent.Reaction(topic))
-        // The search by meaning, under way while the model loads and rewrites. A follow-up that leans on the question
-        // before it is searched with that question first (Plan R1 Task 3); otherwise the reaction's vector is reused.
-        val early = dense?.let { finder ->
+        // The search by meaning, before the model loads. A follow-up that leans on the question before it is searched
+        // with that question first (Plan R1 Task 3); otherwise the reaction's vector is reused.
+        val byMeaning = dense?.let { finder ->
             val prior = request.priorQuestion?.takeIf { FollowUp.refersBack(request.question) }
             val query = questionVector?.takeIf { prior == null } ?: embedQuery(listOfNotNull(prior, request.question).joinToString(" "))
-            query?.let { startEarly(finder, it) }
+            query?.let { searchByMeaning(finder, it) }
         }
+        byMeaning?.let(::lookingInTitles)?.takeIf { it.isNotEmpty() }?.let { emit(ResearchEvent.LookingIn(it)) }
         emit(ResearchEvent.Progress(Stage.LOADING_MODEL))
-        var announced = false
-        // Says where it is looking the moment the search by meaning is back, even mid-load or mid-rewrite.
-        suspend fun <T> looking(work: suspend () -> T): T {
-            val search = early
-            if (search == null || announced) return work()
-            return coroutineScope {
-                val job = async { work() }
-                select<Unit> {
-                    job.onAwait { }
-                    search.onAwait { hits ->
-                        announced = true
-                        hits?.let(::lookingInTitles)?.takeIf { it.isNotEmpty() }?.let { emit(ResearchEvent.LookingIn(it)) }
-                    }
-                }
-                job.await()
-            }
-        }
         val model = try {
-            looking { models.generator() }
+            models.generator()
         } catch (e: ModelUnavailableException) {
             emit(ResearchEvent.Done(Outcome.Failed(FailReason.MODEL_UNAVAILABLE, false, emptyList(), e)))
             return
         }
 
         val asked = MediaCues.asked(request.question)
-        val rewrite = looking { rewrite(model, request) }
+        val rewrite = rewrite(model, request)
         val medical = rewrite.medical == true || Medical.looksMedical(request.question) || PersonalMedical.strong(request.question)
         if (medical) emit(ResearchEvent.Medical)
         val keywords = rewrite.keywords
@@ -250,13 +218,9 @@ class ResearchPipeline(
             return
         }
         emit(ResearchEvent.Progress(Stage.SEARCHING))
-        var hits: List<Passage>? = null
+        val hits: List<Passage>? = byMeaning
         val all = try {
-            finder.find(Keywords.searchTerms(keywords)).also {
-                hits = early?.await()
-                if (!announced) hits?.let(::lookingInTitles)?.takeIf { t -> t.isNotEmpty() }?.let { t -> emit(ResearchEvent.LookingIn(t)) }
-                announced = true
-            }
+            finder.find(Keywords.searchTerms(keywords))
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
