@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -418,7 +420,7 @@ private fun AnswerBlock(
             TurnOutcome.UNVERIFIED -> Text(UNVERIFIED, style = MaterialTheme.typography.bodyLarge)
             TurnOutcome.DECLINED -> {
                 Text(DECLINED, style = MaterialTheme.typography.bodyLarge)
-                if (ui.guessing) {
+                if (ui.guessing && ui.guessShown) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                         ui.stage?.let { Text(it.label(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
@@ -428,13 +430,26 @@ private fun AnswerBlock(
                     Text(MODEL_FAILED, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
                     OutlinedButton(onClick = onReadiness) { Text("Readiness") }
                 }
-                val guessText = if (ui.guessing) ui.partial.orEmpty() else turn.guess
+                val guessText = when {
+                    !ui.guessShown -> ""
+                    ui.guessing -> ui.partial.orEmpty()
+                    else -> turn.guess
+                }
                 if (guessText.isNotBlank()) GuessCard(guessText)
                 if (guessText.isNotBlank() && !ui.guessing) ReadAloudRow(ui.voice, onRead, onPauseResume, onStopReading)
-                if (!ui.guessing) {
+                if (!(ui.guessing && ui.guessShown)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedButton(onClick = onSearch) { Text("Search instead") }
-                        if (ui.offersGuess) OutlinedButton(onClick = onGuess, enabled = !running) { Text("Best guess") }
+                        if (ui.offersGuess) {
+                            OutlinedButton(onClick = onGuess) {
+                                // Still being written out of sight: the tap opens it as it comes.
+                                if (ui.guessing) {
+                                    CircularProgressIndicator(Modifier.size(14.dp), strokeWidth = 2.dp)
+                                    Spacer(Modifier.width(8.dp))
+                                }
+                                Text("Best guess")
+                            }
+                        }
                     }
                 }
             }

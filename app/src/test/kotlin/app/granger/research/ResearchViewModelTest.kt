@@ -340,8 +340,50 @@ class ResearchViewModelTest {
         val ui = vm.state.value.turns.single()
         assertThat(ui.turn.outcome).isEqualTo(TurnOutcome.DECLINED)
         assertThat(ui.turn.guess).isEqualTo("Probably Rayleigh scattering.")
-        assertThat(ui.offersGuess).isFalse()
+        // Written ahead, but behind the button until asked for (Neal, 2026-11-02).
+        assertThat(ui.offersGuess).isTrue()
+        assertThat(ui.guessShown).isFalse()
         assertThat(vm.state.value.running).isFalse()
+    }
+
+    @Test fun theButtonOpensTheGuessWrittenAheadWithoutAnotherModelRun() = runTest(main.dispatcher) {
+        small.answer = listOf("Probably ", "Rayleigh scattering.")
+        finder.passages = emptyList()
+        val vm = vm()
+        vm.ask("Why is the sky blue?")
+        testScheduler.advanceUntilIdle()
+        val prompts = small.prompts.size
+        val loads = models.loads
+        vm.bestGuess(vm.state.value.turns.single().turn.id)
+        testScheduler.advanceUntilIdle()
+        val ui = vm.state.value.turns.single()
+        assertThat(ui.guessShown).isTrue()
+        assertThat(ui.offersGuess).isFalse()
+        assertThat(ui.turn.guess).isEqualTo("Probably Rayleigh scattering.")
+        assertThat(small.prompts.size).isEqualTo(prompts)
+        assertThat(models.loads).isEqualTo(loads)
+        assertThat(vm.state.value.running).isFalse()
+    }
+
+    @Test fun theButtonDuringTheHiddenGuessOpensItAsItIsWritten() = runTest(main.dispatcher) {
+        small.answer = listOf("Probably ", "Rayleigh scattering.")
+        small.gateAt = 1
+        finder.passages = emptyList()
+        val vm = vm()
+        vm.ask("Why is the sky blue?")
+        testScheduler.advanceUntilIdle()
+        val hidden = vm.state.value.turns.single()
+        assertThat(hidden.guessing).isTrue()
+        assertThat(hidden.offersGuess).isTrue()
+        assertThat(hidden.guessShown).isFalse()
+        val prompts = small.prompts.size
+        vm.bestGuess(hidden.turn.id)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().guessShown).isTrue()
+        small.gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().turn.guess).isEqualTo("Probably Rayleigh scattering.")
+        assertThat(small.prompts.size).isEqualTo(prompts)
     }
 
     @Test fun theAutomaticGuessStreamsUnderTheDeclinedTurn() = runTest(main.dispatcher) {

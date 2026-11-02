@@ -101,8 +101,13 @@ class ResearchViewModel(
         val medical: Boolean,
         /** A best guess is being written for this (declined) turn; [partial] is the guess so far. */
         val guessing: Boolean = false,
-        /** The Best guess button is shown: a declined, non-medical turn with no guess yet, while nothing runs. */
+        /**
+         * The Best guess button is shown: a declined, non-medical turn whose guess isn't open yet, and either has one
+         * (kept or being written) or can start one because nothing runs.
+         */
         val offersGuess: Boolean = false,
+        /** The guess is open (Neal, 2026-11-02: it sits behind a tap, written ahead so the tap shows it at once). */
+        val guessShown: Boolean = false,
         /** The last Best guess for this turn failed (the model won't load); shown once, not stored. */
         val guessFailed: Boolean = false,
         /** The speaker button's state for this turn (Plan V2): read, pause or resume. */
@@ -160,6 +165,8 @@ class ResearchViewModel(
     private val live = MutableStateFlow<Live?>(null)
     /** The turn whose Best guess just failed; cleared when anything else starts. */
     private val guessFailed = MutableStateFlow<Long?>(null)
+    /** Turns whose guess was opened with the button; not stored, so a reopened chat shows the button again. */
+    private val shownGuesses = MutableStateFlow<Set<Long>>(emptySet())
     private var job: Job? = null
     @Volatile private var stopRequested = false
 
@@ -180,14 +187,14 @@ class ResearchViewModel(
     val state: StateFlow<State> = combine(
         turns,
         live,
-        combine(models.readiness, guessFailed, ::Pair),
+        combine(models.readiness, guessFailed, shownGuesses, ::Triple),
         combine(chat, title, pendingQuote, chats.recent(RECENT_CHATS).emptyOnError("Recent research chats"), ::Header),
         reading,
-    ) { turns, live, (readiness, guessFailedId), header, reading ->
+    ) { turns, live, (readiness, guessFailedId, shown), header, reading ->
         State(
             chatId = header.chatId,
             title = header.title,
-            turns = turns.map { it.toUi(live, guessFailedId, reading) },
+            turns = turns.map { it.toUi(live, guessFailedId, shown, reading) },
             running = live != null,
             readiness = readiness,
             quote = header.quote,
@@ -236,13 +243,16 @@ class ResearchViewModel(
     }
 
     /**
-     * Asks the model for its own best guess at a declined turn's question. A declined turn that may have one gets it by
-     * itself (see [runTurn]); this is the button, for a turn whose guess was stopped, failed or never came. The guess is
-     * kept on that turn when it finishes or is stopped; if the app dies first nothing is kept and the button returns.
-     * Never for a medical turn.
+     * The Best guess button: opens [turnId]'s guess. A declined turn that may have one gets it written by itself, out
+     * of sight (see [runTurn]), so the tap shows a kept guess, or the one still being written, without another model
+     * run. Only a turn whose guess was stopped, failed or never came asks the model now. The guess is kept on that turn
+     * when it finishes or is stopped; if the app dies first nothing is kept and the button returns. Never for a
+     * medical turn.
      */
     fun bestGuess(turnId: Long) {
+        shownGuesses.update { it + turnId }
         if (live.value != null) return
+        if (state.value.turns.any { it.turn.id == turnId && it.turn.guess.isNotBlank() }) return
         val id = chat.value ?: return
         begin { guess(id, turnId) }
     }
@@ -414,8 +424,9 @@ class ResearchViewModel(
         var settled = false
         // The pipeline's verdict once known (it can be ahead of the stored turn); a turn cut short keeps it.
         var medical = false
-        // Neal's feel test (Plan R5): a decline goes straight on to the model's best guess, under its label, rather than
-        // stopping at "Not in your library". Not for a medical turn, a question about a selection, or a stopped one.
+        // Neal's feel test (Plan R5): a decline goes straight on to the model's best guess. Since 2026-11-02 it is written
+        // out of sight and opened with the Best guess button, so "Not in your library" stands until the user asks.
+        // Not for a medical turn, a question about a selection, or a stopped one.
         var guessNext = false
         try {
             // Not cancellable, so a turn that was stored is always known here and can be settled.
@@ -523,8 +534,9 @@ class ResearchViewModel(
         }
     }
 
-    private fun ChatTurn.toUi(live: Live?, guessFailedId: Long?, reading: Reading?): TurnUi {
+    private fun ChatTurn.toUi(live: Live?, guessFailedId: Long?, shown: Set<Long>, reading: Reading?): TurnUi {
         val running = live?.takeIf { it.turnId == id }
+        val hasGuess = guess.isNotBlank() || running?.guessing == true
         return TurnUi(
             voice = when {
                 reading?.turnId != id -> VoiceButton.IDLE
@@ -536,7 +548,10 @@ class ResearchViewModel(
             stage = running?.stage,
             medical = medical || running?.medical == true,
             guessing = running?.guessing == true,
-            offersGuess = live == null && outcome == TurnOutcome.DECLINED && guess.isBlank() && !medical,
+            offersGuess = outcome == TurnOutcome.DECLINED && !medical && !(id in shown && hasGuess) &&
+                (hasGuess || live == null),
+            // Opened and there is something to show; a failed or empty guess brings the button back.
+            guessShown = id in shown && hasGuess,
             guessFailed = guessFailedId == id && live == null,
         )
     }
