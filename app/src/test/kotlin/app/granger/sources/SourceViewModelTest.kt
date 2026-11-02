@@ -1018,7 +1018,8 @@ class SourceViewModelTest {
         assertThat(libraries.categories).isEmpty()
 
         val gutenberg = viewModel(CatalogScope.GUTENBERG).ui.value.sections.flatMap { it.rows }
-        assertThat(gutenberg.map { it.id }).containsExactlyElementsIn(published.packs.filter(::isGutenberg).map { it.id })
+        // With the knowledge language English (the default), the English, multilingual and untagged ones (Plan L3).
+        assertThat(gutenberg.map { it.id }).containsExactlyElementsIn(published.packs.filter { isGutenberg(it) && inEnglish(it.language) }.map { it.id })
 
         val kiwix = viewModel(CatalogScope.KIWIX).ui.value.sections.flatMap { it.rows }.map { it.id }
         assertThat(kiwix).containsNoneIn(nautilus + gutenberg.map { it.id })
@@ -1211,7 +1212,7 @@ class SourceViewModelTest {
         val ui = vm.ui.value
         assertThat(ui.familyTitle.en()).isEqualTo("Wikipedia subjects")
         val rows = ui.sections.single().rows
-        val expected = published.packs.filter { it.isSubject && !it.sample }.map { it.zimName }.distinct()
+        val expected = published.packs.filter { it.isSubject && !it.sample && inEnglish(it.language) }.map { it.zimName }.distinct()
         assertThat(rows).hasSize(expected.size)
         assertThat(rows.map { it.title }).isInOrder(compareBy<String> { app.granger.core.library.ShelfKey.of(it) })
         assertThat(rows.all { it.adds.en()?.contains("to Top 1 million") == true }).isTrue()
@@ -1291,4 +1292,8 @@ class SourceViewModelTest {
         testScheduler.advanceUntilIdle()
         assertThat(downloads.enqueued.map { it.first }).containsExactly(million.id)
     }
+
+    /** Whether an English-language library lists an entry in [language]: English, multilingual or untagged (Plan L3). */
+    private fun inEnglish(language: String) = app.granger.core.catalog.Languages.codes(language)
+        .let { it.isEmpty() || "mul" in it || app.granger.core.catalog.ENGLISH in it }
 }

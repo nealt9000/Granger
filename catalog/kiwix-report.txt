@@ -1,4 +1,6 @@
-Kiwix packs in eng: 1309; listed 906, curated 17
+Kiwix packs in eng, spa: 1378; listed 959, curated 26
+  en: 1309; listed 906, curated 17
+  es: 430; listed 58, curated 9
 
 Listed, by category and family:
   Games & Hobbies / alexandria.dk: 1
@@ -42,10 +44,11 @@ Listed, by category and family:
   How-to / gardenology: 1
   How-to / gramps-project.org: 1
   How-to / grimgrains: 1
+  How-to / ifixit: 1
   How-to / privacydefence.org: 1
   How-to / publicdomainrecipes.com: 1
   How-to / rabbitwaves.ca: 1
-  How-to / ready.gov: 1
+  How-to / ready.gov: 2
   How-to / restarters: 1
   How-to / solar.lowtechmagazine.com: 1
   How-to / survivorlibrary.com: 1
@@ -62,21 +65,21 @@ Listed, by category and family:
   Literature & Drama / chopin.lib.uchicago.edu: 1
   Literature & Drama / coppermind.net: 1
   Literature & Drama / folgerpedia.folger.edu: 1
-  Literature & Drama / gutenberg: 39
+  Literature & Drama / gutenberg: 40
   Literature & Drama / kiwix.westeros: 1
   Literature & Drama / mutopiaproject.org: 1
   Literature & Drama / prunelle: 3
   Literature & Drama / smbc-comics.com: 1
   Literature & Drama / tomlehrersongs.com: 1
-  Literature & Drama / wikiquote: 2
-  Literature & Drama / wikisource: 1
+  Literature & Drama / wikiquote: 4
+  Literature & Drama / wikisource: 3
   Literature & Drama / xkcd.com: 1
   Maps / maps: 193
   Maps / openstreetmap-wiki: 2
   Medical / irp.fas.org: 1
   Medical / librepathology: 1
   Medical / mdwiki: 2
-  Medical / medlineplus.gov: 1
+  Medical / medlineplus.gov: 2
   Medical / nhs.uk: 1
   Medical / wikivet.net: 1
   Medical / wwwnc.cdc.gov: 1
@@ -89,7 +92,7 @@ Listed, by category and family:
   Other / permacomputing.net: 1
   Other / phzh: 2
   Other / ragajunglism.org: 1
-  Other / scoutwiki.org: 1
+  Other / scoutwiki.org: 2
   Programming / alpinelinux: 1
   Programming / archlinux: 1
   Programming / cheatography.com: 1
@@ -98,7 +101,7 @@ Listed, by category and family:
   Programming / devdocs: 243
   Programming / devhints.io: 1
   Programming / docs.python.org: 1
-  Programming / freecodecamp: 5
+  Programming / freecodecamp: 10
   Programming / gentoo: 1
   Programming / getbootstrap.com: 1
   Programming / gobyexample.com: 1
@@ -132,10 +135,10 @@ Listed, by category and family:
   Reference / psiram: 1
   Reference / rationalwiki: 2
   Reference / theworldfactbook: 1
-  Reference / vikidia: 2
-  Reference / wikibooks: 2
-  Reference / wikipedia: 54
-  Reference / wikiversity: 2
+  Reference / vikidia: 4
+  Reference / wikibooks: 4
+  Reference / wikipedia: 86
+  Reference / wikiversity: 4
   Reference / wiktionary: 1
   Reference / womenshistory.si.edu: 1
   Regional / citizensinformation.ie: 1
@@ -156,7 +159,7 @@ Listed, by category and family:
   Science & Math / mspeekenbrink: 1
   Science & Math / ncase.me: 1
   Science & Math / openmusictheory.com: 1
-  Science & Math / phet: 2
+  Science & Math / phet: 3
   Science & Math / planetmath.org: 1
   Science & Math / proofwiki: 1
   Science & Math / proofwiki.org: 1
@@ -214,25 +217,34 @@ Book packs (Plan KB): 48
   zimgit-water_en
 
 Listed, by readiness domain:
-  (storage only): 59
-  food: 25
-  literature: 78
-  making: 23
-  maps: 203
-  medicine: 13
-  reference: 77
-  science: 55
-  technology: 356
-  thought: 17
+  (storage only): 65
+  food: 27
+  literature: 85
+  making: 24
+  maps: 205
+  medicine: 14
+  reference: 87
+  science: 70
+  technology: 363
+  thought: 19
 
-Held back (video): 384
+Held back (flavour): 1
+  wiktionary: 1
+
+Held back (licence-mixed): 1
+  marxists.org: 1
+
+Held back (licence-nc): 1
+  kiwix.ecured: 1
+
+Held back (video): 385
   biologycourses: 1
   canadian-prepper: 4
   coreyms: 8
   crashcourse: 1
   diksha-std5ssc: 1
   genomicseducation: 1
-  khanacademy: 1
+  khanacademy: 2
   kris-occhipinti: 1
   lrnselfreliance: 1
   project-fuel: 1
@@ -247,9 +259,12 @@ Held back (video): 384
 
 No license found: 0
 
-No family-table row: 2
+No family-table row: 5
   bulbapedia.bulbagarden.net: 1
+  inciclopedia: 1
+  partituras-gratis.es: 1
   wiki.nura.eco: 1
+  wikidex: 1
 
 Unsafe ids: 0
 
@@ -258,14 +273,26 @@ Failed to pin: 0
 Search vectors left out:
   none
 
-Readiness tiers, essential / comprehensive (one pack per ZIM, held ZIMs and the region's map left out):
+Readiness tiers in en, essential / comprehensive (one pack per ZIM, held ZIMs and the region's map left out):
   medicine: 2.0 GB / 4.2 GB
   food: 0.1 GB / 5.0 GB
   making: 3.8 GB / 12.6 GB
   science: 2.4 GB / 13.8 GB
   technology: 0.9 GB / 11.3 GB
   maps: 1.2 GB / 4.2 GB
-  reference: 7.2 GB / 35.0 GB
+  reference: 7.2 GB / 34.6 GB
   literature: 0.2 GB / 9.9 GB
   thought: 0.0 GB / 3.9 GB
-  All: 17.8 GB / 99.7 GB
+  All: 17.8 GB / 99.4 GB
+
+Readiness tiers in es, essential / comprehensive (one pack per ZIM, held ZIMs and the region's map left out):
+  medicine: 0.5 GB / 2.3 GB
+  food: 0.0 GB / 2.1 GB
+  making: 3.8 GB / 4.5 GB
+  science: 0.9 GB / 1.1 GB
+  technology: 0.3 GB / 0.3 GB
+  maps: 0.2 GB / 0.5 GB
+  reference: 4.2 GB / 37.7 GB
+  literature: 0.1 GB / 0.6 GB
+  thought: 0.0 GB / 0.7 GB
+  All: 9.8 GB / 46.9 GB
