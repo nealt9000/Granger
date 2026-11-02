@@ -46,7 +46,8 @@ sealed interface QueueRest {
 
 /**
  * The one download queue (Plan DL Decision 1): one file at a time, lowest [DownloadRecord.queueOrder] first, run with
- * the existing [DownloadRunner]. The `download-queue` worker calls [drain]; the rest of the app reaches it through
+ * the existing [DownloadRunner]; a small file ([jumpsAhead]) goes before bigger ones, pausing a big one under way.
+ * The `download-queue` worker calls [drain]; the rest of the app reaches it through
  * [DownloadScheduler].
  *
  * A record is runnable while it is QUEUED (or left RUNNING by a run that died), its [DownloadRecord.retryAt] has come,
@@ -122,7 +123,9 @@ class DownloadQueue(
                 val waiting = dao.waiting()
                 val t = now()
                 val metered = !unmetered()
-                val next = waiting.firstOrNull { it.isRunnable(t, metered) }
+                // A small file goes ahead of a big one, so a book doesn't wait behind a 2 GB model (Pixel 7 walkthrough).
+                val next = waiting.firstOrNull { it.isRunnable(t, metered) && it.jumpsAhead }
+                    ?: waiting.firstOrNull { it.isRunnable(t, metered) }
                 if (next != null) {
                     runOne(next, waiting, onProgress)
                     continue
@@ -149,6 +152,14 @@ class DownloadQueue(
 
     private fun DownloadRecord.isRunnable(t: Long, metered: Boolean) =
         (retryAt ?: 0) <= t && !(wifiOnly && metered)
+
+    /** True when a runnable small file waits behind [running], a big one: it is paused (part file kept) to let it by. */
+    private suspend fun smallWaitsBehind(running: DownloadRecord): Boolean {
+        if (running.jumpsAhead) return false
+        val t = now()
+        val metered = !unmetered()
+        return dao.waiting().any { it.itemId != running.itemId && it.jumpsAhead && it.isRunnable(t, metered) }
+    }
 
     private fun restOf(waiting: List<DownloadRecord>, t: Long, metered: Boolean): QueueRest {
         if (waiting.isEmpty()) return QueueRest.Idle
@@ -189,11 +200,13 @@ class DownloadQueue(
                     }
                 }
                 synchronized(lock) { run = job }
-                // Wi-Fi lost, or Wi-Fi only turned on, while on mobile data: the file goes back to waiting.
+                // Wi-Fi lost, or Wi-Fi only turned on, while on mobile data: the file goes back to waiting. So does a big
+                // file while a small one waits: it resumes from its part file once the small ones are through.
                 val watch = launch {
                     while (job.isActive) {
                         delay(networkCheckMillis)
                         if (!unmetered() && dao.get(record.itemId, record.hash)?.wifiOnly == true) job.cancel()
+                        else if (smallWaitsBehind(record)) job.cancel()
                     }
                 }
                 try {
@@ -223,6 +236,15 @@ class DownloadQueue(
     }
 
     companion object {
+        /** A file at most this big goes ahead of bigger ones ([jumpsAhead]). */
+        const val SMALL_BYTES = 50L * 1000 * 1000
+
+        /**
+         * Whether this record goes ahead of bigger ones: a small file. An Ask index may too, since it is queued only
+         * once the pack it indexes is installed ([VectorDownloads]).
+         */
+        val DownloadRecord.jumpsAhead: Boolean get() = sizeBytes in 1..SMALL_BYTES
+
         /** WorkManager's old rule, kept: 30 s after the first failure, doubling, at most 5 hours. */
         fun backoffMillis(attempts: Int): Long =
             (30_000L shl (attempts - 1).coerceIn(0, 20)).coerceAtMost(5 * 60 * 60 * 1000L)
