@@ -4,7 +4,7 @@ import kotlin.random.Random
 
 /**
  * What the owl says the moment a question is sent, by topic, and when the answer isn't in the library: Neal's lines
- * from docs/ask/owl-lines-draft.md (sections A, B and D), generated from it. MEDICAL lines are plain, never a joke. A topic guess can be wrong, so every line hints rather than
+ * from docs/ask/owl-lines-draft.md (sections A to D), generated from it. MEDICAL lines are plain, never a joke. A topic guess can be wrong, so every line hints rather than
  * announces, and none claims to know the answer.
  */
 object OwlLines {
@@ -195,4 +195,36 @@ object OwlLines {
     /** A section B line naming [titles], plain when [medical]. */
     fun lookingIn(titles: List<String>, medical: Boolean, random: Random = Random.Default): String =
         (if (medical) LOOKING_IN_MEDICAL else LOOKING_IN.random(random)).replace("{titles}", titles.joinToString(" · "))
+
+    /** Section C, just before the answer streams: the passages being read, as `(plural, singular)` forms of each line. */
+    val READING: List<Pair<String, String>> = listOf(
+        "Reading {n} passages…" to "Reading 1 passage…",
+        "Reading the likeliest {n}…" to "Reading the likeliest one…",
+        "{n} passages look promising. Reading…" to "1 passage looks promising. Reading…",
+    )
+
+    /** A section C line for [passages] passages. */
+    fun reading(passages: Int, random: Random = Random.Default): String {
+        val (plural, singular) = READING.random(random)
+        return if (passages == 1) singular else plural.replace("{n}", passages.toString())
+    }
+
+    /**
+     * While the model loads, in turn every few seconds (Neal, 2026-11-02): the owl getting ready, never the question, so
+     * they suit a health question too.
+     */
+    val WAKING: List<String> = listOf(
+        "Waking the librarian…",
+        "Fetching my spectacles…",
+        "Lighting the reading lamp…",
+        "Shaking the dust off my feathers…",
+        "Climbing down from the high shelf…",
+        "Finding my place in the catalogue…",
+        "Sharpening a quill…",
+        "Stirring the old owl…",
+        "Pulling on my reading gloves…",
+        "Opening the library doors…",
+        "Shuffling the index cards…",
+        "Turning up the lamp…",
+    )
 }

@@ -700,4 +700,24 @@ class ResearchPipelineTest {
         val hits = listOf("Moon", "Moon", "Tides", " ", long, "Sun").map { passage("X", "text", it) }
         assertThat(lookingInTitles(hits)).containsExactly("Moon", "Tides", "A".repeat(47) + "…").inOrder()
     }
+
+    // ---- "Reading 4 passages…" (the doc's section C) ----
+
+    @Test
+    fun theOwlSaysHowManyPassagesItReadsJustBeforeWriting() = runTest {
+        val events = ResearchPipeline(FakeFinder(listOf(water, kettle)), FakeModels(FakeGenerator(), embedder = embedder))
+            .run(ResearchRequest("At what temperature does water boil?")).toList()
+        val reading = events.indexOfFirst { it is ResearchEvent.Reading }
+        assertThat(events[reading + 1]).isEqualTo(ResearchEvent.Progress(Stage.WRITING))
+        val out = outcome(events) as Outcome.Answered
+        assertThat((events[reading] as ResearchEvent.Reading).passages).isEqualTo(out.passages.size)
+    }
+
+    @Test
+    fun aDeclineBeforeWritingReadsNothing() = runTest {
+        val events = ResearchPipeline(FakeFinder(emptyList()), FakeModels(FakeGenerator(), embedder = embedder))
+            .run(ResearchRequest("At what temperature does water boil?")).toList()
+        assertThat(outcome(events)).isInstanceOf(Outcome.Declined::class.java)
+        assertThat(events.none { it is ResearchEvent.Reading }).isTrue()
+    }
 }

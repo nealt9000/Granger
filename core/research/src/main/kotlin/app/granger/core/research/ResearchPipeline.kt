@@ -124,6 +124,8 @@ sealed interface ResearchEvent {
     data class Reaction(val topic: ReactionTopic) : ResearchEvent
     /** The search by meaning's first titles, best first (up to [LOOKING_IN_TITLES]), while the model is still at work. */
     data class LookingIn(val titles: List<String>) : ResearchEvent
+    /** How many passages the answer is written from, just before [Stage.WRITING]: the owl's "Reading 4 passages…". */
+    data class Reading(val passages: Int) : ResearchEvent
     data class Progress(val stage: Stage) : ResearchEvent
     /** The reply so far. */
     data class Partial(val text: String) : ResearchEvent
@@ -261,6 +263,7 @@ class ResearchPipeline(
         val passages = AnswerPrompt.fit(request.question, wanted, medical, request.prior, hasQuote = quote != null, worked(wanted))
         val candidates = pool.drop(passages.size)
 
+        emit(ResearchEvent.Reading(passages.size))
         emit(ResearchEvent.Progress(Stage.WRITING))
         val streamed = streamReply(model, AnswerPrompt.build(request.question, passages, medical, request.prior, hasQuote = quote != null, worked(passages)), stop)
         val reply = streamed.text

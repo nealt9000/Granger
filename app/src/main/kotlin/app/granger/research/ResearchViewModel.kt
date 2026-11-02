@@ -106,6 +106,8 @@ class ResearchViewModel(
         val reaction: String? = null,
         /** Where the owl is looking ("Looking in Boiling · Steam…") while the turn runs; not stored. */
         val lookingIn: String? = null,
+        /** What the owl is reading ("Reading 4 passages…"), from just before the answer streams; not stored. */
+        val reading: String? = null,
         /** A best guess is being written for this (declined) turn; [partial] is the guess so far. */
         val guessing: Boolean = false,
         /**
@@ -160,6 +162,7 @@ class ResearchViewModel(
         val guessing: Boolean = false,
         val reaction: String? = null,
         val lookingIn: String? = null,
+        val reading: String? = null,
     )
 
     private data class Header(val chatId: Long?, val title: String, val quote: Passage?, val recent: List<ChatSummary>)
@@ -293,7 +296,7 @@ class ResearchViewModel(
                     }
                 }
                 // run() events; guess() doesn't emit them.
-                ResearchEvent.Medical, is ResearchEvent.Reaction, is ResearchEvent.LookingIn -> Unit
+                ResearchEvent.Medical, is ResearchEvent.Reaction, is ResearchEvent.LookingIn, is ResearchEvent.Reading -> Unit
             }
         }
     }
@@ -456,6 +459,7 @@ class ResearchViewModel(
                         healthReaction = event.topic == ReactionTopic.MEDICAL
                         live.update { it?.copy(reaction = line) }
                     }
+                    is ResearchEvent.Reading -> live.update { it?.copy(reading = OwlLines.reading(event.passages)) }
                     is ResearchEvent.LookingIn -> {
                         val line = OwlLines.lookingIn(event.titles, medical = healthReaction || medical)
                         live.update { it?.copy(lookingIn = line) }
@@ -572,6 +576,7 @@ class ResearchViewModel(
             stage = running?.stage,
             reaction = running?.reaction,
             lookingIn = running?.lookingIn,
+            reading = running?.reading,
             medical = medical || running?.medical == true,
             guessing = running?.guessing == true,
             offersGuess = outcome == TurnOutcome.DECLINED && !medical && !(id in shown && hasGuess) &&
