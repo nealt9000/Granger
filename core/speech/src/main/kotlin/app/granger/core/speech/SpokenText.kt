@@ -7,7 +7,7 @@ package app.granger.core.speech
  * writes those out in words, in this order: ranges, circa, decades, years, degrees, units after a number.
  *
  * A bare four-digit number from 1000 to 2099 is a year unless a unit, a per-cent sign or an ordinal suffix follows
- * it, or a currency sign, "#" or "No." precedes it; "1500 people" becomes "fifteen hundred people", which is how it is
+ * it, or a currency sign, "#", "No." or "number" (as [SpokenWords] writes "No.") precedes it; "1500 people" becomes "fifteen hundred people", which is how it is
  * said anyway. Digit runs of other lengths, decimals, thousands with commas and times are left alone.
  *
  * It runs on one sentence at a time inside the engine, after splitting, so the reader's highlight offsets (the
@@ -100,7 +100,7 @@ object SpokenText {
      * before; no per-cent sign, ordinal suffix or unit after.
      */
     private val YEAR = Regex(
-        "(?<!(?:No|Nos)\\.\\s{0,3})(?<![\\d$£€#])(?<![\\d][,.])\\b(1\\d{3}|20\\d{2})\\b(?![,.]\\d)(?!\\s*%)(?!\\s*(?:th|st|nd|rd|$UNITS)\\b)",
+        "(?<!(?:No|Nos)\\.\\s{0,3})(?<!\\b(?:[Nn]umbers?|[Pp]ages?)\\s{1,3})(?<![\\d$£€#])(?<![\\d][,.])\\b(1\\d{3}|20\\d{2})\\b(?![,.]\\d)(?!\\s*%)(?!\\s*(?:th|st|nd|rd|$UNITS)\\b)",
     )
 
     private val DEGREES_C = Regex("(\\d)\\s*°\\s*C\\b")

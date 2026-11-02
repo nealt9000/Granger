@@ -423,7 +423,8 @@ class PlayerEngine(
         // text was last read in); the text's own voice only stands in while the chosen one isn't installed.
         val saved = VoiceId.decode(state.voiceId)
         val voice = voices?.forResume(preferredVoice(), saved) ?: saved
-        startVoice(source, ReadAddress.decode(state.address), voice, state.speed, play = false)
+        // The same for the speed: the user's, not the one the text was last read at.
+        startVoice(source, ReadAddress.decode(state.address), voice, defaultVoiceSpeed(), play = false)
     }
 
     /**

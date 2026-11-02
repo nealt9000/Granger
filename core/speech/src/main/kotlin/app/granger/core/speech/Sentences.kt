@@ -68,7 +68,8 @@ object Sentences {
     }
 
     private val ABBREVIATION_END = Regex(
-        "(?:\\b(?:Dr|Mr|Mrs|Ms|Mme|Mlle|Prof|Rev|Hon|Sr|Jr|St|Mt|Ft|No|Nos|Fig|Figs|vs|cf|ca|approx|Lt|Col|Gen|Capt|Sgt|Op)|\\b[A-Z]|\\b(?:e\\.g|i\\.e))\\.$",
+        "(?:\\b(?:Dr|Mr|Mrs|Ms|Messrs|Mme|Mlle|Prof|Rev|Revd|Hon|Sr|Jr|St|Mt|Ft|No|Nos|Fig|Figs|Vol|Ch|Chap|vs|v|cf|viz|ca|approx|al|" +
+            "Lt|Col|Gen|Maj|Capt|Sgt|Cpl|Adm|Cmdr|Gov|Sen|Rep|Supt|Insp|Fr|Op|p|pp)|\\b[A-Z]|\\b(?:e\\.g|i\\.e))\\.$",
     )
 
     /** Whitespace runs become one space; the result is what the offsets in [sentences] index. */

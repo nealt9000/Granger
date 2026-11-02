@@ -142,6 +142,8 @@ class PlayerViewModel(
     audiobooks: Flow<Boolean> = flowOf(true),
     /** Keeps the voice picked in Reader as the user's choice (Settings' voice), so the next read uses it too. */
     private val chooseVoice: (VoiceId) -> Unit = {},
+    /** Keeps the speed picked in Reader as the user's (Settings' speed), so the next read starts at it too. */
+    private val chooseVoiceSpeed: (Float) -> Unit = {},
     /** Which side the one-item views show while the voice has music under it; the app's one. */
     private val focus: PlayerFocus = PlayerFocus(),
 ) : ViewModel() {
@@ -301,6 +303,12 @@ class PlayerViewModel(
     fun playQueueItem(position: Int) = hub.playQueueItem(position)
 
     fun setSpeed(speed: Float) = hub.setSpeed(speed)
+
+    /** The voice's speed, kept as the user's for every read after this one. */
+    fun setVoiceSpeed(speed: Float) {
+        chooseVoiceSpeed(speed)
+        hub.setSpeed(speed)
+    }
     fun setSkipSilence(on: Boolean) = hub.setSkipSilence(on)
     fun setVolumeBoost(on: Boolean) = hub.setVolumeBoost(if (on) VOLUME_BOOST_MB else 0)
     fun startSleepTimer(setting: SleepSetting) = hub.startSleepTimer(setting)

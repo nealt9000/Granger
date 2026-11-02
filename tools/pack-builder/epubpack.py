@@ -12,14 +12,17 @@ from html import escape
 from pathlib import Path
 
 import lxml.html
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString, Tag
 from lxml import etree
 
-from chapters import PAGE_NUMBER, clean_title
+import covers
+import verse
+from chapters import PAGE_NUMBER, clean_title, drop_full_stop, shouting, title_case
 from zimpack import Work
 
 COLLECTION = "Granger Classics"
 RIGHTS = "Public domain in the USA."
+TAGLINE = "The world’s knowledge. Yours to keep."
 ZIP_TIME = (1980, 1, 1, 0, 0, 0)
 NS = 'xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"'
 
@@ -35,11 +38,40 @@ td, th { padding: .2em .5em; vertical-align: top; }
 img { max-width: 100%; }
 .cover { text-align: center; margin: 0; padding: 0; }
 .cover img { max-height: 100vh; }
+.colophon { text-align: center; margin: 3em 0 0; }
+.colophon svg { width: 5em; height: 5em; }
+.colophon .collection { font-variant: small-caps; letter-spacing: .14em; margin: .4em 0 2.5em; }
+.colophon h1 { margin: 0 0 .4em; }
+.colophon .author { font-style: italic; }
+.colophon .facts { margin-top: 2.5em; font-size: .9em; }
+.colophon .facts p { margin: 0 0 .3em; }
+.colophon .tagline { margin-top: 2.5em; font-style: italic; }
 """.strip()
+
+LINE_NUMBER = {"linenum", "linenumber", "lineno", "line-number", "linenr"}
 
 _RULE = re.compile(r"([^{}]+)\{([^{}]*)\}")
 _DROPPED_PROPERTY = re.compile(r"^(color|background(-.*)?|font-family)$", re.I)
-_PAGE_NUMBER_SELECTOR = re.compile(r"\.(" + "|".join(map(re.escape, sorted(PAGE_NUMBER))) + r")(?![\w-])", re.I)
+
+
+def _class_selector(classes: set[str]) -> re.Pattern:
+    return re.compile(r"\.(" + "|".join(map(re.escape, sorted(classes))) + r")(?![\w-])", re.I)
+
+
+_PAGE_NUMBER_SELECTOR = _class_selector(PAGE_NUMBER)
+_LINE_NUMBER_SELECTOR = _class_selector(LINE_NUMBER)
+_SIDES = {"margin-left", "margin-right", "padding-left", "padding-right"}
+_PERCENT = re.compile(r"(\d*\.?\d+)%")
+_EM = re.compile(r"(\d*\.?\d+)em")
+_IMPORTANT = re.compile(r"\s*!\s*important\s*$", re.I)
+# Where an absolutely placed mark (a line number at `left: 60%`) goes instead of on top of the words.
+_MARGIN_NOTE = "float: right; font-size: .75em; opacity: .65; margin-left: .75em"
+_PLACEMENT = {"position", "left", "right", "top", "bottom"} | {d.split(":")[0].strip() for d in _MARGIN_NOTE.split(";")}
+# Readium sets every <p> to the reader's alignment with `text-align: inherit !important` at specificity
+# (0,3,3); four :root pseudo-classes outrank it, so a work's centred or right-aligned paragraphs stay so.
+_BOOST = ":root:root:root:root"
+_PARAGRAPH = re.compile(r"(^|[\s>+~])p([.#:\[]|$)")
+_BARE_CLASS = re.compile(r"\.[\w-]+")
 
 
 @dataclass
@@ -53,6 +85,7 @@ class BookMeta:
     language: str
     source_url: str
     date: str
+    source_line: str = ""  # the colophon's credit, e.g. "From Project Gutenberg ebook #1342"
 
 
 def book_id(slug: str) -> str:
@@ -69,19 +102,64 @@ def display_title(work: Work) -> str:
     return work.title
 
 
-def scrub_css(css: str) -> str:
-    """The work's own rules without colours, backgrounds, font families or page-number styling."""
+def scrub_css(css: str, line_numbers: str = "margin") -> str:
+    """The work's own rules without colours, backgrounds, font families or page-number styling, fitted to a phone.
+
+    Wide side margins are clamped, absolutely placed marks move to the right margin (or, with line numbers
+    dropped, their rules go), and centred or right-aligned paragraphs are restated so the reader keeps them.
+    """
     css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
-    rules = []
+    rules, boosts = [], []
     for selector, body in _RULE.findall(css):
         selector = selector.strip()
-        if selector.startswith("@") or _PAGE_NUMBER_SELECTOR.search(selector):
+        if (selector.startswith("@") or _PAGE_NUMBER_SELECTOR.search(selector)
+                or (line_numbers == "drop" and _LINE_NUMBER_SELECTOR.search(selector))):
             continue
-        declarations = [d.strip() for d in body.split(";") if d.strip()]
-        kept = [d for d in declarations if not _DROPPED_PROPERTY.match(d.split(":", 1)[0].strip())]
+        declarations = [d.strip().partition(":") for d in body.split(";") if d.strip()]
+        declarations = [(k.strip().lower(), v.strip()) for k, colon, v in declarations
+                        if colon and not _DROPPED_PROPERTY.match(k.strip())]
+        placed = any(k == "position" and re.match(r"(absolute|fixed)\b", v, re.I) for k, v in declarations)
+        kept = [f"{k}: {_fit_sides(k, v)}" for k, v in declarations if not (placed and k in _PLACEMENT)]
+        if placed:
+            kept.append(_MARGIN_NOTE)
+        for k, v in declarations:
+            align = _IMPORTANT.sub("", v).lower()
+            if k == "text-align" and align in ("center", "right", "end"):
+                paragraphs = [s for s in map(str.strip, selector.split(","))
+                              if _PARAGRAPH.search(s) or _BARE_CLASS.fullmatch(s)]
+                boosts += [f"{_BOOST} {s} {{ text-align: {align} !important }}" for s in paragraphs]
         if kept:
             rules.append(f"{selector} {{ {'; '.join(kept)} }}")
-    return "\n".join(rules)
+    return "\n".join(rules + boosts)
+
+
+def _book_css(work: Work) -> str:
+    """Granger's rules, then the work's, then the verse rules, which must outrank the work's at equal weight
+    (`p.poem { text-indent: 2em }` against `p.gv`)."""
+    parts = [BOOK_CSS, scrub_css(work.styles, work.line_numbers), verse.CSS]
+    if work.verse:
+        parts.append(verse.WRAPPER_CSS)
+    return "\n".join(p for p in parts if p) + "\n"
+
+
+def _fit_sides(prop: str, value: str) -> str:
+    """Side margins and paddings that won't squeeze a phone's column: over 5% to at most 2em, over 6em to 30%."""
+    important = _IMPORTANT.search(value)
+    plain = value[:important.start()] if important else value
+    if prop in _SIDES:
+        plain = _clamp(plain)
+    elif prop in ("margin", "padding"):
+        parts = plain.split()
+        plain = " ".join(_clamp(p) if len(parts) == 1 or i % 2 == 1 else p for i, p in enumerate(parts))
+    return plain + (" !important" if important else "")
+
+
+def _clamp(length: str) -> str:
+    if (m := _PERCENT.fullmatch(length)) and float(m.group(1)) > 5:
+        return f"min({length}, 2em)"
+    if (m := _EM.fullmatch(length)) and float(m.group(1)) > 6:
+        return f"min({length}, 30%)"
+    return length
 
 
 def to_xhtml(html: str) -> str:
@@ -99,16 +177,13 @@ _OBSOLETE_ATTRIBUTES = ("align", "valign", "bgcolor", "border", "cellpadding", "
                         "frame", "hspace", "vspace", "noshade", "nowrap", "rules", "summary", "char", "charoff",
                         "text", "link", "vlink", "alink", "background")
 _NO_PHRASING_CHILDREN = {"ul", "ol", "dl", "table", "thead", "tbody", "tfoot", "tr", "colgroup", "select"}
+_MEDIA = {"img", "svg", "canvas", "video", "iframe", "object", "embed", "input", "source"}
 _SCHEME = re.compile(r"^[a-z][a-z0-9+.-]*:", re.I)
 
 
-def _is_page_number(tag) -> bool:
-    return bool(PAGE_NUMBER.intersection(tag.get("class") or ()))
-
-
-def _drop_page_numbers(soup: BeautifulSoup) -> None:
-    """Removes page-number marks but keeps the ids on them, so links to a page still land."""
-    for tag in soup.find_all(_is_page_number):
+def _drop_page_numbers(soup: BeautifulSoup, classes: set[str] = PAGE_NUMBER) -> None:
+    """Removes page-number (or line-number) marks but keeps the ids on them, so links to a page still land."""
+    for tag in soup.find_all(lambda t: bool(classes.intersection(t.get("class") or ()))):
         if tag.decomposed:
             continue
         ids = [t["id"] for t in [tag, *tag.find_all(id=True)] if t.get("id")]
@@ -129,7 +204,8 @@ def _fix_attributes(soup: BeautifulSoup) -> None:
         for attr in _OBSOLETE_ATTRIBUTES:
             if tag.name != "meta":
                 tag.attrs.pop(attr, None)
-        if tag.name not in ("img", "svg", "canvas", "video", "iframe", "object", "embed", "input", "source"):
+        media = tag.name in _MEDIA
+        if not media:
             tag.attrs.pop("width", None)
             tag.attrs.pop("height", None)
         if tag.name == "a" and "name" in tag.attrs:
@@ -139,8 +215,12 @@ def _fix_attributes(soup: BeautifulSoup) -> None:
             elif tag["id"] != name:
                 tag.insert_before(soup.new_tag("span", attrs={"id": name}))
         if tag.get("style"):
+            # A fixed width (an emptied figure's `width: 500px`) would only narrow the column on a phone.
             declarations = [d for d in tag["style"].split(";") if d.strip() and d.count("'") % 2 == 0
-                            and d.count('"') % 2 == 0]
+                            and d.count('"') % 2 == 0 and (media or d.split(":", 1)[0].strip().lower() != "width")]
+            if tag.name == "p":  # like a centred class, inline centring must outrank the reader's alignment
+                declarations = [d + " !important" if re.match(r"\s*text-align\s*:\s*(center|right|end)\s*$", d, re.I)
+                                else d for d in declarations]
             if declarations:
                 tag["style"] = "; ".join(d.strip() for d in declarations)
             else:
@@ -148,8 +228,9 @@ def _fix_attributes(soup: BeautifulSoup) -> None:
 
 
 def _wrap_stray_definitions(soup: BeautifulSoup) -> None:
-    """A definition list split across chapters leaves dt/dd runs without their dl."""
-    wrapper, created = None, []
+    """A definition list split across chapters leaves dt/dd runs without their dl, or a dl that ends in a dt or
+    starts with a dd; an empty dt or dd makes each valid."""
+    wrapper = None
     for item in soup.find_all(["dt", "dd"]):
         if item.parent is None or item.parent.name == "dl":
             continue
@@ -159,22 +240,44 @@ def _wrap_stray_definitions(soup: BeautifulSoup) -> None:
         if wrapper is None or previous is not wrapper:
             wrapper = soup.new_tag("dl")
             item.insert_before(wrapper)
-            created.append(wrapper)
         wrapper.append(item.extract())
-    for wrapper in created:
-        items = wrapper.find_all(["dt", "dd"], recursive=False)
-        if items[0].name == "dd":  # its dt ended the previous chapter
-            wrapper.insert(0, soup.new_tag("dt"))
-        if items[-1].name == "dt":  # its dd starts the next one
-            wrapper.append(soup.new_tag("dd"))
+    for dl in soup.find_all("dl"):  # the new lists, and a list's copies on either side of a page break
+        items = dl.find_all(["dt", "dd"], recursive=False)
+        if items and items[0].name == "dd":  # its dt ended the previous chapter
+            items[0].insert_before(soup.new_tag("dt"))
+        if items and items[-1].name == "dt":  # its dd starts the next one
+            items[-1].insert_after(soup.new_tag("dd"))
 
 
-def _prepare(html: str) -> BeautifulSoup:
+def _prepare(html: str, line_numbers: str = "margin", reads_as_verse: bool = False) -> BeautifulSoup:
     soup = BeautifulSoup(html, "lxml")
     _drop_page_numbers(soup)
+    if line_numbers == "drop":
+        _drop_page_numbers(soup, LINE_NUMBER)
+    if reads_as_verse:
+        verse.flatten_word_export(soup)
+        verse.mark(soup)
+    _quiet_headings(soup)
     _fix_attributes(soup)
     _wrap_stray_definitions(soup)
     return soup
+
+
+def _quiet_headings(soup: BeautifulSoup) -> None:
+    """Headings in capitals in title case, without a closing full stop, as in the contents ("BOOK I." -> "Book I")."""
+    for heading in soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"]):
+        if not shouting(heading.get_text()):
+            continue
+        first = True
+        for node in list(heading.descendants):
+            if isinstance(node, Tag):
+                first = first or node.name == "br"  # a heading set on two lines starts again on the second
+            elif type(node) is NavigableString:
+                text, first = title_case(str(node), first)
+                node.replace_with(text)
+        last = next((s for s in reversed(heading.find_all(string=True)) if s.strip()), None)
+        if last is not None:
+            last.replace_with(drop_full_stop(str(last)))
 
 
 def _body(soup: BeautifulSoup) -> str:
@@ -203,16 +306,35 @@ def _page(title: str, language: str, body: str) -> str:
 
 
 def _titles(work: Work) -> list[str]:
-    return [clean_title(c.title, work.title, work.author, i) for i, c in enumerate(work.chapters)]
+    """Contents titles: the manifest's override for a page ("3" is the third), else its cleaned heading."""
+    missing = sorted(set(work.title_overrides) - {str(i + 1) for i in range(len(work.chapters))}, key=int)
+    if missing:
+        raise ValueError(f"titleOverrides name pages {missing}, but the book has {len(work.chapters)}")
+    return [work.title_overrides.get(str(i + 1)) or clean_title(c.title, work.title, work.author, i)
+            for i, c in enumerate(work.chapters)]
+
+
+_FRONT_MATTER = {"title page", "contents", "table of contents", "front matter", "dedication"}
+
+
+def _start_of_text(titles: list[str], headings: list[str]) -> int:
+    """The first page that isn't a title page, contents, dedication or the splitter's "Front matter", going by
+    its contents title or its heading (a "CONTENTS" heading's contents title is only "Part N")."""
+    def front(title: str) -> bool:
+        plain = " ".join(title.split()).rstrip(".").lower()
+        return plain in _FRONT_MATTER or plain.endswith(("’s dedication", "'s dedication"))
+    return next((i for i, (t, h) in enumerate(zip(titles, headings)) if not (front(t) or front(h))), 0)
 
 
 def _nav(work: Work, meta: BookMeta, titles: list[str]) -> str:
     items = "".join(f'<li><a href="{chapter_href(i)}">{escape(t, quote=False)}</a></li>' for i, t in enumerate(titles))
-    first = chapter_href(0) if titles else "cover.xhtml"
+    headings = ["" if str(i + 1) in work.title_overrides else c.title for i, c in enumerate(work.chapters)]
+    first = chapter_href(_start_of_text(titles, headings)) if titles else "cover.xhtml"
     body = (f'<nav epub:type="toc" id="toc"><h1>Contents</h1><ol>{items}</ol></nav>'
             '<nav epub:type="landmarks" hidden="hidden"><h1>Landmarks</h1><ol>'
             '<li><a epub:type="cover" href="cover.xhtml">Cover</a></li>'
-            f'<li><a epub:type="bodymatter" href="{first}">Start of text</a></li></ol></nav>')
+            f'<li><a epub:type="bodymatter" href="{first}">Start of text</a></li>'
+            '<li><a epub:type="backmatter" href="colophon.xhtml">Colophon</a></li></ol></nav>')
     return _page(display_title(work), meta.language, body)
 
 
@@ -240,10 +362,12 @@ def _opf(work: Work, meta: BookMeta, count: int) -> str:
                 '<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>'
                 '<item id="css" href="book.css" media-type="text/css"/>'
                 '<item id="cover-image" href="cover.jpg" media-type="image/jpeg" properties="cover-image"/>'
-                '<item id="cover" href="cover.xhtml" media-type="application/xhtml+xml"/>')
+                '<item id="cover" href="cover.xhtml" media-type="application/xhtml+xml"/>'
+                '<item id="colophon" href="colophon.xhtml" media-type="application/xhtml+xml" properties="svg"/>')
     manifest += "".join(f'<item id="c{i + 1:03d}" href="{chapter_href(i)}" media-type="application/xhtml+xml"/>'
                         for i in range(count))
-    spine = '<itemref idref="cover"/>' + "".join(f'<itemref idref="c{i + 1:03d}"/>' for i in range(count))
+    spine = ('<itemref idref="cover"/>' + "".join(f'<itemref idref="c{i + 1:03d}"/>' for i in range(count))
+             + '<itemref idref="colophon"/>')
     return (
         '<?xml version="1.0" encoding="utf-8"?>\n'
         '<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="book-id">'
@@ -260,6 +384,33 @@ def _opf(work: Work, meta: BookMeta, count: int) -> str:
         '<guide><reference type="cover" title="Cover" href="cover.xhtml"/></guide></package>')
 
 
+def _owl_svg() -> str:
+    """The owl inline: the mark in the text colour so it suits any reader theme, lantern eyes, ink pupils."""
+    view, (eyes, pupils, mark) = covers.owl_paths()
+    paths = "".join(f'<path fill="{fill}" fill-rule="evenodd" d="{d}"/>'
+                    for d, fill in ((mark, "currentColor"), (eyes, covers.LANTERN), (pupils, "#1F1813")))
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {view:g} {view:g}" role="img" '
+            f'aria-label="Granger">{paths}</svg>')
+
+
+def _colophon(work: Work, meta: BookMeta) -> str:
+    """The last page: the owl, the collection, the book and where its text came from."""
+    lines = [f"<h1>{escape(work.title, quote=False)}</h1>"]
+    if meta.author:
+        lines.append(f'<p class="author">{escape(meta.author, quote=False)}</p>')
+    if meta.translator:
+        lines.append(f"<p>Translated by {escape(meta.translator, quote=False)}</p>")
+    facts = [f"This {'translation' if meta.translator else 'edition'} first published {meta.published}"]
+    if meta.source_line:
+        facts.append(meta.source_line)
+    facts.append(RIGHTS)
+    body = (f'<section class="colophon" epub:type="colophon">{_owl_svg()}'
+            f'<p class="collection">{COLLECTION}</p>{"".join(lines)}'
+            f'<div class="facts">{"".join(f"<p>{escape(f, quote=False)}</p>" for f in facts)}</div>'
+            f'<p class="tagline">{escape(TAGLINE, quote=False)}</p></section>')
+    return _page(f"{display_title(work)} — Colophon", meta.language, body)
+
+
 def write_epub(out: Path, work: Work, meta: BookMeta, cover_jpeg: bytes) -> None:
     title = display_title(work)
     titles = _titles(work)
@@ -272,12 +423,13 @@ def write_epub(out: Path, work: Work, meta: BookMeta, cover_jpeg: bytes) -> None
         ("OEBPS/content.opf", _opf(work, meta, len(work.chapters))),
         ("OEBPS/nav.xhtml", _nav(work, meta, titles)),
         ("OEBPS/toc.ncx", _ncx(work, meta, titles)),
-        ("OEBPS/book.css", BOOK_CSS + "\n" + scrub_css(work.styles) + "\n"),
+        ("OEBPS/book.css", _book_css(work)),
         ("OEBPS/cover.jpg", cover_jpeg),
         ("OEBPS/cover.xhtml", _page(title, meta.language,
                                     f'<div class="cover"><img src="cover.jpg" alt="{escape(title)}"/></div>')),
+        ("OEBPS/colophon.xhtml", _colophon(work, meta)),
     ]
-    soups = [_prepare(chapter.html) for chapter in work.chapters]
+    soups = [_prepare(chapter.html, work.line_numbers, work.verse) for chapter in work.chapters]
     _unwrap_dangling_links(soups)
     for i, soup in enumerate(soups):
         body = to_xhtml(_body(soup))

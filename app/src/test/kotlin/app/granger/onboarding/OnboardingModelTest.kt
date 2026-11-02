@@ -183,10 +183,10 @@ class OnboardingModelTest {
         url = "https://v.test/$id.zip", license = "CC BY 4.0",
     )
     private val ljspeech = voice("vits-piper-en_US-ljspeech-medium", "Granger voice (ljspeech)", 67)
-    private val nanny = voice(OnboardingModel.VOICE_ID, "Granger voice (Nanny)", 80)
+    private val owl = voice(OnboardingModel.VOICE_ID, "Granger voice (Owl)", 80)
 
-    @Test fun theVoiceLineIsTheNannyUntilAnyCatalogVoiceIsHere() {
-        val withVoices = catalog.copy(voices = listOf(ljspeech, nanny))
+    @Test fun theVoiceLineIsTheOwlUntilAnyCatalogVoiceIsHere() {
+        val withVoices = catalog.copy(voices = listOf(ljspeech, owl))
         val line = OnboardingModel.voiceLine(withVoices, emptySet())!!
         assertThat(line.title).isEqualTo("Read aloud")
         assertThat(line.items.single().id).isEqualTo(OnboardingModel.VOICE_ID)
@@ -194,7 +194,7 @@ class OnboardingModelTest {
         assertThat(OnboardingModel.voiceLine(catalog, emptySet())).isNull()
         val review = OnboardingModel.review(null, emptySet(), null, emptyList(), 1_000, voice = line)
         assertThat(review.groups.single().title).isEqualTo("Read aloud")
-        assertThat(review.groups.single().lines.single().title).isEqualTo("Granger voice (Nanny)")
+        assertThat(review.groups.single().lines.single().title).isEqualTo("Granger voice (Owl)")
     }
 
     @Test fun saveSpaceSwapsEachPackForItsNoPicturesFlavour() {

@@ -73,3 +73,106 @@ def test_bad_split_at_is_an_error(tmp_path):
 
 def test_parse_rdf_reads_title_language_rights():
     assert parse_rdf(fixture("pg2800.rdf")) == Rdf("The Koran (Al-Qur'an)", ["en"], PD)
+
+
+def test_rights_must_be_exactly_public_domain_in_the_usa(tmp_path):
+    def rdf(_):
+        return Rdf("The Koran", ["en"], "Public domain in the USA, but see the notes.")
+    assert any("rights" in e for e in validate(manifest(tmp_path), rdf))
+
+
+def test_reading_settings_default_from_the_section(tmp_path):
+    w = manifest(tmp_path).works[0]
+    assert (w.verse, w.line_numbers, w.title_overrides, w.source, w.licence) == (None, "margin", {}, "gutenberg", None)
+    assert w.reads_as_verse                                  # scripture is a verse section
+    assert not manifest(tmp_path, verse=False).works[0].reads_as_verse
+    novel = manifest(tmp_path, section="novels").works[0]
+    assert not novel.reads_as_verse and manifest(tmp_path, section="novels", verse=True).works[0].reads_as_verse
+
+
+def test_reading_settings_are_read(tmp_path):
+    w = manifest(tmp_path, verse=True, lineNumbers="drop", titleOverrides={"3": "Book I"}).works[0]
+    assert (w.verse, w.line_numbers, w.title_overrides) == (True, "drop", {"3": "Book I"})
+    assert validate(manifest(tmp_path, lineNumbers="drop", titleOverrides={"3": "Book I"}), rdf_ok) == []
+
+
+def test_bad_reading_settings_are_errors(tmp_path):
+    assert any("verse" in e for e in validate(manifest(tmp_path, verse="yes"), rdf_ok))
+    assert any("lineNumbers" in e for e in validate(manifest(tmp_path, lineNumbers="left"), rdf_ok))
+    assert any("titleOverrides" in e for e in validate(manifest(tmp_path, titleOverrides={"x": "Book I"}), rdf_ok))
+    assert any("titleOverrides" in e for e in validate(manifest(tmp_path, titleOverrides=["Book I"]), rdf_ok))
+
+
+def test_unknown_source_is_an_error(tmp_path):
+    assert any("source" in e for e in validate(manifest(tmp_path, source="wikisource"), rdf_ok))
+
+
+def test_non_gutenberg_work_needs_a_public_domain_licence_with_its_url(tmp_path):
+    def no_rdf(_):
+        raise AssertionError("only Gutenberg works have an RDF record")
+    ebible = dict(source="ebible", gutenberg=None, ebible="engwebu")
+    assert any("licence" in e for e in validate(manifest(tmp_path, **ebible), no_rdf))
+    assert any("licence" in e for e in validate(manifest(tmp_path, **ebible, licence="Public domain"), no_rdf))
+    assert any("licence" in e for e in validate(
+        manifest(tmp_path, **ebible, licence="CC BY-SA 4.0 https://ebible.org/engwebu/copyright.htm"), no_rdf))
+    good = "Public domain (no copyright) https://ebible.org/engwebu/copyright.htm"
+    m = manifest(tmp_path, **ebible, licence=good)
+    assert m.works[0].gutenberg is None and m.works[0].licence == good
+    assert validate(m, no_rdf) == []
+
+
+def ebible_row(**work):
+    row = {"source": "ebible", "ebible": "engbsb", "slug": "berean-standard-bible", "title": "Berean Standard Bible",
+           "author": "", "translator": None, "published": 2016, "section": "scripture", "splitAt": None,
+           "licence": 'https://berean.bible/terms.htm: "officially dedicated to the public domain"'}
+    row.update(work)
+    return row
+
+
+def ebible_manifest(tmp_path, **work):
+    m = manifest(tmp_path)
+    data = json.loads((tmp_path / "manifest.json").read_text())
+    data["works"].append(ebible_row(**work))
+    (tmp_path / "manifest.json").write_text(json.dumps(data))
+    return load(tmp_path / "manifest.json")
+
+
+def test_ebible_rows_load_and_skip_the_rdf_and_year_checks(tmp_path):
+    m = ebible_manifest(tmp_path)
+    w = m.works[1]
+    assert (w.source, w.ebible, w.gutenberg, w.published) == ("ebible", "engbsb", None, 2016)
+    assert m.works[0].source == "gutenberg" and m.works[0].licence is None
+    looked_up = []
+    assert validate(m, lambda i: looked_up.append(i) or rdf_ok(i), lambda i: b"<b>Public Domain</b>") == []
+    assert looked_up == [2800]
+
+
+def test_ebible_rows_need_a_quoted_licence_with_its_url_and_a_public_domain_page(tmp_path):
+    errors = validate(ebible_manifest(tmp_path, licence="free"), rdf_ok, lambda i: b"Public Domain")
+    assert any("licence" in e and "berean-standard-bible (ebible engbsb)" in e for e in errors)
+    errors = validate(ebible_manifest(tmp_path), rdf_ok, lambda i: b"All rights reserved")
+    assert any("Public Domain" in e for e in errors)
+    assert any("ebible id" in e for e in validate(ebible_manifest(tmp_path, ebible="../x"), rdf_ok))
+    assert any("source" in e for e in validate(manifest(tmp_path, source="wikisource"), rdf_ok))
+
+
+def test_cut_after_is_read_and_must_be_text(tmp_path):
+    assert manifest(tmp_path).works[0].cut_after is None
+    assert manifest(tmp_path, cutAfter="bury us all!”").works[0].cut_after == "bury us all!”"
+    assert validate(manifest(tmp_path, cutAfter="bury us all!”"), rdf_ok) == []
+    assert any("cutAfter" in e for e in validate(manifest(tmp_path, cutAfter=""), rdf_ok))
+    assert any("cutAfter" in e for e in validate(manifest(tmp_path, cutAfter=3), rdf_ok))
+
+
+def test_pack_sections_is_read_and_must_be_true_or_false(tmp_path):
+    assert manifest(tmp_path).works[0].pack_sections is False
+    assert manifest(tmp_path, packSections=True).works[0].pack_sections is True
+    assert any("packSections" in e for e in validate(manifest(tmp_path, packSections="yes"), rdf_ok))
+
+
+def test_title_check_treats_dashes_as_word_breaks(tmp_path):
+    def rdf(_):
+        return Rdf("The Metamorphoses of Ovid, Books VIII-XV", ["en"], PD)
+    assert validate(manifest(tmp_path, title="Metamorphoses, Books VIII–XV"), rdf) == []
+    assert validate(manifest(tmp_path, title="Metamorphoses, Books VIII—XV"), rdf) == []
+    assert validate(manifest(tmp_path, title="Metamorphoses, Books VIII–XVI"), rdf)

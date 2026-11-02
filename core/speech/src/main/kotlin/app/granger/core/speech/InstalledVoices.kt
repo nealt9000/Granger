@@ -71,9 +71,9 @@ class InstalledVoices(
             else -> CATALOG_VOICES.size + 1
         }
 
-        /** The catalog's voices, best first: the Nanny (V4, Neal's pick 2026-10-30) leads, so with no choice made it reads (U3a). */
+        /** The catalog's voices, best first: the Owl (V5, Neal's pick 2026-10-30) leads, so with no choice made it reads (U3a). */
         val CATALOG_VOICES = listOf(
-            "vits-piper-en_GB-granger_nanny-medium", "vits-piper-en_GB-granger_professor-medium",
+            "vits-piper-en_GB-granger_owl-medium", "vits-piper-en_GB-granger_nanny-medium", "vits-piper-en_GB-granger_professor-medium",
             "vits-piper-en_US-granger_libritts-medium", "vits-piper-en_US-ljspeech-medium",
         )
     }

@@ -10,9 +10,11 @@
                            --manifest classics/manifest.json     # writes releases/granger_classics_books.json
 
 `build` validates first and stops on any error. `describe` writes the release descriptor that
-tools/catalog-gen turns into a catalog entry. Sources are cached in ~/.cache/granger/gutenberg/.
+tools/catalog-gen turns into a catalog entry. Sources are cached in ~/.cache/granger/gutenberg/, and the
+eBible Bibles (`"source": "ebible"` rows, converted by usfm.py) in ~/.cache/granger/ebible/.
 """
 import argparse
+import dataclasses
 import datetime
 import hashlib
 import json
@@ -26,21 +28,39 @@ import covers
 import epubpack
 import gutenberg
 import manifest as manifests
+import usfm
+import verse
 import zimpack
-from manifest import Manifest
-from sources import GutenbergSource
+from manifest import Manifest, WorkSpec
+from sources import EBibleSource, GutenbergSource, ebible_details_url
 
 
-def build(m: Manifest, source: GutenbergSource, out: Path, date: str) -> Path:
+def _ebible_work(spec: WorkSpec, ebible: EBibleSource) -> zimpack.Work:
+    pages, skipped, unknown = usfm.convert(ebible.books(spec.ebible), zimpack.chapter_budget(spec.title, usfm.CSS))
+    print(f"{spec.ebible:>8} {spec.slug:<40} {len(pages):>4} chapters  skipped {', '.join(skipped) or 'nothing'}")
+    if unknown:
+        print(f"WARNING {spec.where}: USFM markers dropped, text kept: {dict(unknown)}")
+    return zimpack.Work(slug=spec.slug, title=spec.title, author=spec.author, translator=spec.translator,
+                        published=spec.published, section=spec.section, chapters=pages, styles=usfm.CSS,
+                        verse=spec.reads_as_verse, title_overrides=spec.title_overrides)
+
+
+def build(m: Manifest, source: GutenbergSource, out: Path, date: str, ebible: EBibleSource | None = None) -> Path:
     works = []
     for spec in m.works:
+        if spec.source == "ebible":
+            ebible = ebible or EBibleSource()
+            work = _ebible_work(spec, ebible)
+            works.append(dataclasses.replace(work, styles=work.styles + "\n" + verse.CSS))
+            continue
         try:
-            cleaned = gutenberg.clean(source.html(spec.gutenberg))
+            cleaned = gutenberg.clean(source.html(spec.gutenberg), spec.cut_after)
         except gutenberg.CleaningError as error:
             raise type(error)(f"{spec.slug} (#{spec.gutenberg}): {error}") from error
         for notice in gutenberg.later_edition_notices(cleaned.body):
             print(f"WARNING {spec.slug} (#{spec.gutenberg}): later edition? {notice[:160]}")
-        pages = chapters.split(cleaned.body, spec.split_at, zimpack.chapter_budget(spec.title, cleaned.styles))
+        pages = chapters.split(cleaned.body, spec.split_at, zimpack.chapter_budget(spec.title, cleaned.styles),
+                               pack=spec.pack_sections)
         print(f"{spec.gutenberg:>6} {spec.slug:<40} {len(pages):>4} chapters  {cleaned.branding_removed} branding blocks")
         works.append(zimpack.Work(slug=spec.slug, title=spec.title, author=spec.author, translator=spec.translator,
                                   published=spec.published, section=spec.section, chapters=pages,
@@ -54,35 +74,55 @@ def build(m: Manifest, source: GutenbergSource, out: Path, date: str) -> Path:
 
 
 class BuildError(Exception):
-    """A work failed to build; the message starts with its slug and Gutenberg id."""
+    """A work failed to build; the message starts with its slug and source id."""
 
 
-def _work(spec, source) -> zimpack.Work:
-    cleaned = gutenberg.clean(source.html(spec.gutenberg))
+def _work(spec, source, ebible) -> zimpack.Work:
+    if spec.source == "ebible":
+        return _ebible_work(spec, ebible)
+    cleaned = gutenberg.clean(source.html(spec.gutenberg), spec.cut_after)
     for notice in gutenberg.later_edition_notices(cleaned.body):
         print(f"WARNING {spec.slug} (#{spec.gutenberg}): later edition? {notice[:160]}")
     pages = chapters.split(cleaned.body, spec.split_at, zimpack.chapter_budget(spec.title, cleaned.styles),
-                           page_href=epubpack.chapter_href)
+                           page_href=epubpack.chapter_href, pack=spec.pack_sections)
     print(f"{spec.gutenberg:>6} {spec.slug:<40} {len(pages):>4} chapters  {cleaned.branding_removed} branding blocks")
     return zimpack.Work(slug=spec.slug, title=spec.title, author=spec.author, translator=spec.translator,
-                        published=spec.published, section=spec.section, chapters=pages, styles=cleaned.styles)
+                        published=spec.published, section=spec.section, chapters=pages, styles=cleaned.styles,
+                        line_numbers=spec.line_numbers, verse=spec.reads_as_verse,
+                        title_overrides=spec.title_overrides)
 
 
-def build_epubs(m: Manifest, source: GutenbergSource, out: Path, date: str) -> list[Path]:
+def _source_url(spec: WorkSpec) -> str:
+    if spec.source == "ebible":
+        return ebible_details_url(spec.ebible)
+    return f"https://www.gutenberg.org/ebooks/{spec.gutenberg}"
+
+
+def _source_line(spec: WorkSpec) -> str:
+    if spec.source == "ebible":
+        return f"From eBible.org ({spec.ebible})"
+    return f"From Project Gutenberg ebook #{spec.gutenberg}"
+
+
+def build_epubs(m: Manifest, source: GutenbergSource, out: Path, date: str,
+                ebible: EBibleSource | None = None) -> list[Path]:
     """One EPUB 3 per work: `<out>/gc-<slug>_<date>.epub`. Any failure names the work."""
     sections = dict(m.sections)
     files = []
     for spec in m.works:
+        if spec.source == "ebible":
+            ebible = ebible or EBibleSource()
         try:
-            work = _work(spec, source)
+            work = _work(spec, source, ebible)
             meta = epubpack.BookMeta(
                 id=epubpack.book_id(spec.slug), title=epubpack.display_title(work), author=spec.author,
                 translator=spec.translator, published=spec.published, section_title=sections[spec.section],
-                language="en", source_url=f"https://www.gutenberg.org/ebooks/{spec.gutenberg}", date=date)
+                language="en", source_url=_source_url(spec), date=date, source_line=_source_line(spec))
             path = Path(out) / f"{meta.id}_{date}.epub"
-            epubpack.write_epub(path, work, meta, covers.cover_jpeg(meta.title, spec.author))
+            cover = covers.cover_jpeg(spec.title, spec.author, spec.translator, spec.section, sections[spec.section])
+            epubpack.write_epub(path, work, meta, cover)
         except Exception as error:
-            raise BuildError(f"{spec.slug} (#{spec.gutenberg}): {error}") from error
+            raise BuildError(f"{spec.where}: {error}") from error
         files.append(path)
     return files
 
@@ -134,8 +174,8 @@ def describe(zim: Path, url: str) -> dict:
     }
 
 
-def _validate(m: Manifest, source: GutenbergSource) -> list[str]:
-    return manifests.validate(m, lambda book_id: manifests.parse_rdf(source.rdf(book_id)))
+def _validate(m: Manifest, source: GutenbergSource, ebible: EBibleSource) -> list[str]:
+    return manifests.validate(m, lambda book_id: manifests.parse_rdf(source.rdf(book_id)), ebible.details)
 
 
 def main(argv):
@@ -154,8 +194,8 @@ def main(argv):
     args = parser.parse_args(argv)
 
     if args.command in ("validate", "build", "build-epubs"):
-        m, source = manifests.load(Path(args.manifest)), GutenbergSource()
-        errors = _validate(m, source)
+        m, source, ebible = manifests.load(Path(args.manifest)), GutenbergSource(), EBibleSource()
+        errors = _validate(m, source, ebible)
         for error in errors:
             print(error, file=sys.stderr)
         print(f"{args.manifest}: {len(m.works)} works, {len(errors)} errors")
@@ -165,9 +205,9 @@ def main(argv):
             out_dir = Path(args.out_dir).expanduser()
             out_dir.mkdir(parents=True, exist_ok=True)
             if args.command == "build":
-                build(m, source, out_dir, args.date)
+                build(m, source, out_dir, args.date, ebible)
             else:
-                files = build_epubs(m, source, out_dir, args.date)
+                files = build_epubs(m, source, out_dir, args.date, ebible)
                 print(f"{out_dir}: {len(files)} EPUBs, {sum(f.stat().st_size for f in files) / 1e6:.1f} MB")
     elif args.command == "describe-epubs":
         descriptor = describe_epubs(Path(args.directory).expanduser(), args.release_url_base,

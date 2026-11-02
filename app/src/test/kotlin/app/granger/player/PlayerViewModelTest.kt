@@ -50,6 +50,19 @@ class PlayerViewModelTest {
         assertThat(hub.calls).containsExactly("setVoice:${professor.encode()}")
     }
 
+    @Test fun aSpeedPickedInReaderIsKeptForTheNextRead() {
+        // Neal, 2026-10-31: the speed set in Reader applied to that text only; the next read started at Settings' speed.
+        val hub = FakePlayerHub(voiceUi())
+        val chosen = mutableListOf<Float>()
+        val vm = PlayerViewModel(hub, chooseVoiceSpeed = { chosen += it })
+        vm.setVoiceSpeed(0.9f)
+        assertThat(chosen).containsExactly(0.9f)
+        assertThat(hub.calls).containsExactly("speed:0.9")
+        // The audiobook's speed is the book's own.
+        vm.setSpeed(1.5f)
+        assertThat(chosen).containsExactly(0.9f)
+    }
+
     @Test fun bookProgressAddsEarlierChaptersToThePositionInThisOne() = runTest(main.dispatcher) {
         val book = audiobook("b", durationMs = 999_000L)
         // Given out of order on purpose: the offset is by ordinal, not list position.
