@@ -1,5 +1,8 @@
 package app.granger.sources
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -416,9 +419,11 @@ internal fun CatalogItemRow(
                 row.adds?.let { AddsText(it) }
                 row.ask?.let { Text(it.text, style = MaterialTheme.typography.bodySmall) }
                 ItemStatusText(status)
+                // Under the text, so the trailing actions stay one button wide on a narrow phone.
+                if (status == ItemStatus.NotInstalled) row.previewUrl?.let { PreviewButton(it) }
             }
         },
-        trailingContent = { RowActions(row, onGet, onCancel, onRetry, onRemove, onOpen) },
+        trailingContent = { RowActions(row, onGet, onCancel, onRetry, onRemove, onOpen, preview = false) },
     )
 }
 
@@ -630,6 +635,7 @@ private fun FlavourOption(flavour: FlavourChoice, onChoose: () -> Unit) {
 private fun RowActions(
     row: ItemRow, onGet: () -> Unit, onCancel: () -> Unit, onRetry: () -> Unit, onRemove: () -> Unit, onOpen: () -> Unit,
     onSwitch: () -> Unit = onGet,
+    preview: Boolean = true,
 ) {
     val opens = row.packId != null
     if (row.switches) {
@@ -650,10 +656,13 @@ private fun RowActions(
     }
     when (val status = row.status) {
         // A subject already inside the Wikipedia on the phone (Plan WF Decision 4): Get stays, quietly.
-        ItemStatus.NotInstalled -> if (row.covered) {
-            TextButton(onClick = onGet) { Text("Get", color = MaterialTheme.colorScheme.onSurfaceVariant) }
-        } else {
-            TextButton(onClick = onGet) { Text("Get") }
+        ItemStatus.NotInstalled -> Row(verticalAlignment = Alignment.CenterVertically) {
+            if (preview) row.previewUrl?.let { PreviewButton(it) }
+            if (row.covered) {
+                TextButton(onClick = onGet) { Text("Get", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            } else {
+                TextButton(onClick = onGet) { Text("Get") }
+            }
         }
         ItemStatus.UpdateAvailable -> Row(verticalAlignment = Alignment.CenterVertically) {
             if (opens) TextButton(onClick = onOpen) { Text("Open") } else TextButton(onClick = onRemove) { Text("Remove") }
@@ -681,6 +690,27 @@ private fun RowActions(
     }
 }
 
+/**
+ * Preview: the pack on Kiwix's online library in the phone's browser, to look through before a multi-GB Get (Neal,
+ * 2026-11-02). Needs a connection, as Get does; with no browser it does nothing.
+ */
+@Composable
+private fun PreviewButton(url: String) {
+    val context = LocalContext.current
+    TextButton(
+        onClick = {
+            try {
+                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            } catch (e: ActivityNotFoundException) {
+                android.widget.Toast.makeText(context, NO_BROWSER, android.widget.Toast.LENGTH_LONG).show()
+            }
+        },
+        modifier = Modifier.testTag(SourceTags.PREVIEW),
+    ) { Text("Preview") }
+}
+
+internal const val NO_BROWSER = "There's no web browser on this phone to open it in."
+
 /** Test tags for a pack row with flavours. */
 internal object SourceTags {
     const val FLAVOURS = "source-flavours"
@@ -688,6 +718,7 @@ internal object SourceTags {
     const val SLICES = "source-slices"
     const val PICTURES = "source-pictures"
     const val ADD_SUBJECT = "source-add-subject"
+    const val PREVIEW = "source-preview"
 }
 
 /** A row's overflow, holding Remove (which still asks first). */

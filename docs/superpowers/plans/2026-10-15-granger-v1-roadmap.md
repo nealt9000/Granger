@@ -27,7 +27,7 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | V2 | The voice: a better voice, the mix, the full view, spoken answers | `SpokenText` (years, decades, ranges, units before Piper), the second catalog voice after a licence check and a listening session (clean candidates: `libritts-high` CC BY 4.0 from scratch; `norman`, `kristin`, `kusal`, `john` public domain) with named speakers, pause/stop in the readers, music under the voice with the mix level and the transport driving the voice (`SessionPlayer` over `ForwardingSimpleBasePlayer`), the full-view sheet, spoken Research answers (streamed with the setting on), `ReadAloud.start` for project 4, the rail's live entry, the widget's voice resume | **Done:** `2026-10-22-plan-v2-voice.md` (2026-10-22; 1789 JVM tests; Neal's walkthrough passed after two fixes: the sherpa engine freed under a sentence in flight on a voice switch, and the Music tab's play button stuck on play under the voice. Task 3, the second catalog voice, moved to V3: `libritts-high` is eight times too slow and the medium LibriVox voices sound no better than `ljspeech`) |
 | V3 | The voice: a Granger voice of our own | Spike with a trained artefact: a medium Piper model fine-tuned from the public-domain `ljspeech` checkpoint on LibriTTS-R speakers (CC BY 4.0), to get the LibriTTS sound Neal rated best at `ljspeech`'s speed (`libritts-high` is clean but eight times too slow on the Pixel 6; `libritts_r` is `lessac`-derived). Recipe under `tools/voices/train/`, GPU fine-tune, Pixel 6 numbers, listening, then the catalog through V2 Task 3 | **Done:** `2026-10-22-plan-v3-trained-voice.md` (2026-10-26). `vits-piper-en_US-granger_libritts-medium` on `voices-v1` and in the catalog: two speakers, **Maggie** and **Martin** (LibriTTS-R readers 3922, 4535), round 2's epoch 796 (two rounds on RunPod 4090s); Pixel 6 RTF 0.16 screen off, 0.10 on; Neal: good enough to ship, still short of `libritts` on inflection and flow. Speakers through V2 Task 3's plumbing (`granger:<dir>@<n>`) |
 | V4 | The voice: a British voice from a teacher model | A voice designed in Qwen3-TTS (Apache-2.0) on the Mac, cloned for steady speaker identity, then distilled into the Piper medium model with `en-gb` phonemes; Neal's pilot picks NorthLondonNanny and SouthLondonProfessor; ships as a new voice id. These are the high-quality voices the Reading tab (U2) waits on to take over audiobook duties | **In progress:** branch `v4-teacher-voice` (pilot tools f9c653b, c0041be; round 2 7a9e884); no plan file yet. Runs on the Mac beside the UX work. **Pilot (2026-10-28):** about 55 min per voice, one two-speaker model; timbre and British vowels held, delivery flat with artifacts, and at livelier settings the Nanny drifts into the Professor's accent. **Round 2:** about 2 h more per voice as 2–4-sentence passages (LibriTTS-R plus public-domain Gutenberg novels), then **one single-speaker voice per speaker**, each its own pack (about 73 MB) with its own playback settings. Neal, 2026-10-28: with Think deeper gone the size budget goes to voice, a core feature, and more voices are planned. Piper `high` (about 110 MB, 2–3× slower) only after a Pixel 6 speed check |
-| A1 | Voice input | Speech input for Research questions and commands through the **phone's own on-device recognizer**, not a bundled model: `SpeechRecognizer.createOnDeviceSpeechRecognizer` (API 31+), with `checkRecognitionSupport` / `triggerModelDownload` and `EXTRA_BIASING_STRINGS` (titles and names from the library) on API 33+. Support detected at runtime and the feature hidden or degraded without it (phones without Google's speech services, de-Googled ROMs). An optional downloadable sherpa-onnx model (already in the app; about 20–70 MB) as the fallback later, never in the base download. Starts with a Pixel 6 spike: latency, accuracy on book titles, whether the English model is preinstalled. Dictation-shaped: short utterances, no word timings | Neal, 2026-10-28. Not scheduled; the iPhone path goes in I0 |
+| A1 | Voice input | Speech input for Research questions and commands through the **phone's own on-device recognizer**, not a bundled model: `SpeechRecognizer.createOnDeviceSpeechRecognizer` (API 31+), with `checkRecognitionSupport` / `triggerModelDownload` on API 33+. **No biasing** (the spike found it adds at most 5 points on names); names are fixed after recognition by a **title matcher** against the live library: commands and app sections first, then titles by words and edit distance. Support detected at runtime and the feature hidden or degraded without it (phones without Google's speech services, de-Googled ROMs). An optional downloadable sherpa-onnx model (already in the app; about 20–70 MB) as the fallback later, never in the base download. Dictation-shaped: short utterances, no word timings. **A0 spike done (2026-11-02, `docs/superpowers/spikes/2026-10-voice-input-spike-results.md`):** offline, questions 3.3% word error rate, end of speech → final p90 ≈ 0.4 s, unaffected by a resident E2B or music playing; names 40–45% exact without the matcher, 20/20 on the replays with it. **Decided (Neal, 2026-11-02):** ship the system recognizer as is; the mic in both the Research ask box and Search; hidden on phones without on-device recognition; `en-US` installed, **`en-GB` offered** (a download through `triggerModelDownload`). Allow for a slow first use (16.6 s once, cold). How it feels in the app waits on the ongoing Ask improvements | Neal, 2026-10-28; spike done 2026-11-02. **Next: write the A1 plan.** The iPhone path goes in I0 |
 | R1 | Project 2: dense retrieval | `:core:text` (one chunker for phone and Mac), `tools/vectors` (the vector set across the nine domains, built on the Mac), `:core:vectors` (int8 search on the phone), `DensePassageFinder`, hybrid ranking, fiction weighting on by default, parallel keyword search, vectors in the catalog. Spec: `docs/superpowers/specs/2026-10-21-research-library-design.md` | **Done:** `2026-10-21-plan-r1-dense-retrieval.md` (2026-10-24; all 20 `.gvec` built; merged and pushed; dense search about 14 s on the full set) |
 | R2 | Project 2: books you add, the held-out set, pass or stop | Books imported on the phone are embedded on the phone, the parallel keyword search tuned, tuning-split additions per domain, a fresh held-out set written and graded by a separate subagent, the pass-or-stop scoring against the 80% / 90% bar (spec §8, §13), the media cue words "movement", "piece", "suite" and "chapter" (from R3's walkthrough) | After R1 |
 | R3 | Project 2: deep links | An address for every citation kind, article highlights at the passage, better book quotes, media addresses and play buttons, the Pixel 6 walkthrough (spec §7, §13). Independent of R1 and R2; can run in a second session | **Done:** `2026-10-22-plan-r3-deep-links.md` (2026-10-22; 1871 JVM tests; Neal's Pixel 6 walkthrough passed for every citation kind but the moved-page note; findings in "Carried forward from R3") |
@@ -38,7 +38,7 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | H3 | Onboarding | Welcome (the brand), This phone, Pick a start (Efficient / Comprehensive from the readiness model), Your situation (region → maps and Wikivoyage; use-case chips), Review and start → Home; "Set up suggestions again" in Settings. Billing and the telemetry opt-in stay in Plan 10 | **Done:** `2026-10-22-plan-h3-onboarding.md` (2026-10-22; 1936 JVM tests; Neal's Pixel 6 walkthrough passed every step with two fixes: one line per ZIM flavour, an installed flavour covers the other). Task 5, the Welcome brand, shipped 2026-10-26 with the mark from Neal's sketch C (launcher, themed icon, Welcome, About); the catalog with the onboarding tables is signed on the branch |
 | H4 | Readiness calibration | The tiers at about 90 GB (Comprehensive 90.3 GB, Efficient 11.1 GB, plus the region's map): Stack Overflow, Gutenberg LCC-PR and math/stats Stack Exchange leave the tiers, Top 1M replaces the full Wikipedia, Wiktionary moves to comprehensive; tier bytes count one entry per ZIM; `readiness.contains` (a pack inside an installed one counts as held); the presets carry one flavour per ZIM. From "Carried forward from H1" and H3. The walkthrough added: each By source row opens to its own files (the Files lists go) | **Done:** `2026-10-22-plan-h4-readiness-calibration.md` (2026-10-23; 1949 JVM tests, 50 catalog-gen tests; Neal's Pixel 6 walkthrough: "looking better across the board"; see Carried forward) |
 | T1 | Field and Night | The brand brief's theme pass (§10 step 3): Field (paper, ink, enamel) and Night (night, gunmetal, lantern, phosphor) as two schemes, Settings → Appearance → Theme (follow the phone by default), every screen and the widget on the scheme, the flame palette gone, Spectral and Courier Prime bundled, the status voice | **Done 2026-10-27:** `2026-10-26-plan-t1-field-and-night.md`. Pixel walkthrough passed; with it came the owl mark (launcher, themed icon, status bar), the Spectral wordmark and tagline, Courier kept for the status line and readouts, the e-reader's Match app theme, and the revised palette (A Field, C Night). 1,861 JVM tests |
-| S1 | Slim and Park | Slim (swap a pack for a smaller flavour of the same family, same `zimName`, bookmarks and places kept); Park only if Neal is sold on it (2026-10-21: not yet; the anti-goal is a user thinking they hold something they don't). Spec to write | Needs a decision |
+| S1 | Slim | Slim (swap a pack for a smaller flavour of the same family, same `zimName`, bookmarks and places kept). **Park is out** (Neal, 2026-11-02); Preview on library.kiwix.org takes its place for looking before a big download. Spec to write | After launch |
 | P2 | The PDF pass | PDFs in the e-book reader (Readium's PDFium adapter: page, outline, bookmarks, place; no selection or highlights), PDF import (encrypted refused), archive.org Get PDF (Text PDF first) and PDF-only items with a 100 MB prompt and Don't ask again, PDFs in Kiwix packs as pack documents, page text in the book index for Search and Research (scans marked Not searchable); library v13 | **Done:** `2026-10-23-plan-p2-pdf.md` (2026-10-24; 2063 JVM tests after the rebase on R1; a 318-page archive.org Text PDF indexes in 31 s on the Pixel 6; merged to main) |
 | U1 | The UX pass: audit and spec | Every screen walked on the Pixel 6 with screenshots, both from a fresh install and from Neal's library. Lists the awkward cases from features added one plan at a time, ranks them against the core mission (own the world's knowledge, read it, ask it) and redraws the navigation map: rail tools, Home, Library, Sources, Readiness, Settings depth. It folds in the rough spots already logged in Carried forward (nothing shows active downloads in one place; sources with hundreds of files; Search grouping; edge-swipe discoverability; the Player's tabs) and specs U2 | **Done 2026-10-28:** spec `2026-10-28-ux-audit-design.md` (D1–D6 decided by Neal: rail holds up to 4 open items; Get more + Downloads off the Library header; reading chrome slides away; the model ticked in onboarding as Ask (Preview); Research → Ask; Search by kind). Walk on the Pixel 6, library install + Granger Fresh (`installDebug -Pfresh`); notes and shots in `docs/superpowers/u1-notes.md`, `u1-shots/` |
 | U2 | Listen: the reader takes the Player's place | The Player tool becomes **Listen**, with a **Reading** tab and **Music**. Reading is read-aloud of the open book or article as a full player: the sentences, chapters from the book's contents, speed, voice, sleep timer, a saved place per book, music under it. **Audiobooks become passive:** their tab, shelf, Home feed scope, Home default and library type appear only once an audiobook is on the phone. LibriVox stays under Sources as the way to add one, but Home, onboarding and the Player stop promoting it. The audiobook player's tools (chapters, bookmarks, sleep, speed) carry over to every text in the app, and Reading becomes the main way to listen as V4's voices land | After U1's spec |
@@ -56,7 +56,9 @@ The spec spans nine milestones across independent subsystems. Each milestone get
 | I1+ | iPhone: the port | Plans written from I0's decisions, built on the overhauled UI; TestFlight for friends | After F2 |
 | PC | Podcasts | A **Podcasts** shelf in Listen beside Music and Audiobooks (Neal, 2026-10-28): subscribe to feeds while online, episodes downloaded to keep and play offline, the same player and saved places as audiobooks. Spec to write | After F2 |
 | L0 | Languages: research, Spanish first | What a second language takes, end to end: the app's own text in Spanish (strings out of Compose, per-app language on Android 13+), Spanish content in the catalog (Kiwix `es` packs, Spanish public-domain books, LibriVox), the readiness tiers per language, Research in Spanish (E2B and EmbeddingGemma quality, prompts, keyword search), a Spanish voice with a licence check, speech input, and the iPhone's path. Ends in a spec and the L1+ plans (Neal, 2026-10-30) | **Research started 2026-10-30:** notes in `docs/superpowers/spikes/2026-10-30-language-research.md` (code audit, Spanish packs and books, model quality, voice licences, suggested L1–L5 order). **Neal's calls (2026-10-30):** the app in Spanish and Spanish knowledge both, built together, both before shipping; neutral Latin American Spanish; proceed now with everything that doesn't need the phone; plan the Spanish voice training, don't start it yet. Spec `2026-10-30-languages-design.md` (decided: Spanish-speaking friends review the translation first; glossary stands for now; Clásicos Granger is its own collection, for learners too; a second language is offered only when the phone lists one); plan L1 `2026-10-30-plan-l1-strings.md` (strings out of Compose, branch `l1-strings`: Tasks 1–7 and the bug pass merged, 2588 tests pass; Task 8 waits for GB, Task 10 for the phone). Plan L2 `2026-10-30-plan-l2-spanish-app.md` on `l2-spanish`: the 849-string Spanish draft and its completeness tests done, the review sheet `docs/superpowers/l2-review.md`; the language setting waits for GB (MainActivity). L3 research `spikes/2026-10-30-l3-spanish-catalog.md` with Neal's calls (Spanish Comprehensive with the full Wikipedia with pictures, about 48 GB; Efficient about 9.5 GB, both with iFixit; iFixit treated as in English; Clásicos public domain where readers live too, 244 → about 230 works) **Late 2026-10-30 / 2026-10-31:** L1 finished on `l1-strings` a7870f8e (main merged, 1,042 strings and 74 plurals, the guard locked, a pseudo-locale test; the phone walkthrough is left). L2 desk work done on `l2-spanish` 62ebf325 (the language setting, Spanish for every string, fit and formats; the walkthrough and friend review are left). Plan L3 `2026-10-30-plan-l3-spanish-knowledge.md`: Tasks 0–10 done on `l3-spanish-knowledge` 1ab63873, with 2720 tests. Neal signed off the Spanish tiers: Efficient 9.4 / 5.4 GB, Comprehensive 46.7 / 22.9 GB, packs only. Clásicos Granger has 185 works (dead by 1945, Spain + Argentina), on GitHub release `clasicos-es-2026-10-30`. LibriVox is unchanged for English-only libraries. Task 11 (sign, phone, merge with L1/L2) waits for the phone. The L4 Spanish eval set is on `l4-spanish-eval` ed158a27 (104 tuning, 55 held-out, 30 mixed, 141 medical labels). **2026-10-31:** the L4 language layer and Spanish medical layer are on `l4-spanish-eval` c733a165 (English results unchanged; notes `2026-10-30-plan-l4-research-spanish.md`). On a fresh list it was never tuned on, the Spanish medical keywords catch 73/110. The English keywords catch 46/106 and the model's flag does the rest, so Spanish Ask's medical bar is keywords OR model flag, measured at the phone baseline. Spanish Ask stays off until it passes. |
-| 10 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), **Supporter instead of Pro** (brand brief §6, 2026-10-23: one-time, extras only, import free for everyone; replaces import gating), onboarding, `:core:telemetry`; no storage cap (Neal, 2026-10-19: no limit but the phone's storage; remove the unused cap plumbing) | |
+| SW | Swahili, right behind Spanish | The third language, built on L0's work: the app's text in Swahili, Swahili knowledge in the catalog (Kiwix `sw` Wikipedia and Wiktionary, public-domain books where they exist), readiness tiers, a Swahili eval set and Research in Swahili (E2B and EmbeddingGemma quality to measure; Ask off until it passes), and the phone's voice for read-aloud until a Swahili voice is chosen after a licence check. Testers from Neal's contacts in Tanzania. Spec to write, reusing the languages spec (Neal, 2026-11-02: on his plan already) | After Spanish ships (L1–L4); the feature freeze holds until the closed test runs |
+| PS | Share phone to phone | Pass Granger and its packs from one phone to another with no internet: open packs from an SD card, USB drive or shared folder (ZIM sideloading, a v1 non-goal, comes in here); send packs over a local link (Wi-Fi Direct is in Android itself; Nearby Connections needs Google Play services, which de-Googled and F-Droid phones may lack); send the app itself (Play installs split APKs, so the share needs a universal APK, and Play policy on apps that hand out their own APK must be checked: app sharing may live only in F-Droid and direct builds, like the archive.org waiver); every received pack checked against the signed catalog's sha256 so an altered copy is flagged. For shutdowns and places where data is costly or filtered (Neal, 2026-11-02; the OTF concept note's Objective 1). Spec to write | After the closed test starts; the feature freeze holds until then |
+| 10 | Monetization + onboarding + telemetry | `:core:billing` (Play + F-Droid flavors), **Supporter instead of Pro** (brand brief §6, 2026-10-23: one-time, extras only, import free for everyone; replaces import gating), onboarding; **no telemetry** (Neal, 2026-11-02: Send feedback covers it); the F-Droid flavour turns `Features.ARCHIVE_WAIVER` back on; no storage cap (Neal, 2026-10-19: no limit but the phone's storage; remove the unused cap plumbing) | |
 | 11 | Beta | The Play listing and closed or open testing on to production. F1 takes signing, the internal track and the policy check. Check the current rule for new personal developer accounts: a closed test with a minimum number of testers for a minimum number of days before production access | After F2 and Plan 10 |
 
 Media spec (2026-10-19): `docs/superpowers/specs/2026-10-19-media-design.md` replaces the old "After v1: Media" row. Media (M1–M3) is built before Plans 10 and 11. It is the first of four projects, in this order (spec §1):
@@ -82,6 +84,51 @@ Neal's goal is an app that's shareable for friend testing, with the iPhone on th
 
 V4 continues on the Mac throughout. Its voices reach the Reading tab whenever they ship, each as a new voice id. **2026-10-28:** with Think deeper and E4B gone, the space they took goes to voice: one pack per voice, more voices over time, and speech input (A1) from the phone's own recognizer so it costs no download. Plan 10's telemetry opt-in stays in Plan 10. F1's crash log and Send feedback stay on the phone until the user sends them.
 
+### Release checklist (project review, 2026-11-02)
+
+Neal's calls from the review: **feature freeze** until the closed test is running, except Ask, which keeps improving alongside; **Spanish ships in the closed test** (many testers speak Spanish), with Spanish Ask off until it passes; **Ask goes out as a Preview** with a Report action and medical answers shown as quoted passages; **the Play build keeps archive.org's 1930 filter fixed** (the waiver lives in F-Droid and direct builds only); **NLnet application** submitted 2026-11-03. The long pole is Play's closed-testing rule for new personal accounts (at the last check, 12 testers opted in for 14 days in a row; confirm in Play Console), so the closed track starts as soon as A is done.
+
+**A. Start the closed test (starts the 14-day clock)**
+- [ ] F1 part 2: upload 853 and check Write email opens Gmail; ~~Task 6 policy check~~ (done on `cl-cleanup`: `docs/friend-testing/play-policy-check.md`, draft `privacy-policy.md`); Task 7 tester note in English and Spanish; Task 8 fresh install on the Pixel 7; Task 9 merge and push.
+- [ ] Ask: a **Report this answer** action on every reply (Play's AI-generated content policy), sending through Send feedback with the question, the answer and its sources.
+- [ ] Ask: in release, a **medical** question shows the banner and the quoted passages, without generated prose.
+- [ ] Ask: on any phone where the model fails a short self-check on load, hide Ask and say why, instead of crashing.
+- [x] archive.org: the 1930 filter is fixed in the Play build (`Features.ARCHIVE_WAIVER`, off in release; Plan 10's flavours take it over). `cl-cleanup` a3442365.
+- [ ] Clásicos Granger: check each work's first publication year; keep works first published after 1930 out of what the Play build offers (US copyright, restored works; the policy check §3).
+- [ ] Privacy policy: Neal picks the contact address and hosts `docs/friend-testing/privacy-policy.md` at a public URL.
+- [ ] Spanish: walkthroughs and merges for L1, L2, L3 (with Clásicos) and L4 (Spanish Ask off); Spanish-speaking friends review the translation.
+- [ ] A second phone that isn't a Pixel: a fresh install and Ask on at least one Samsung or Snapdragon phone.
+- [ ] Device checks the clean-up list marks as blockers (`docs/friend-testing/device-checks.md`): an SD card (needs a tester's phone with a slot), the player's hardware controls one by one on the Pixel 6, read-aloud on a 4 GB phone.
+- [x] Best guess behind a tap (Neal, 2026-11-02): written ahead out of sight after a decline, opened at once by the button, no second model run. `cl-cleanup` 94cf18bd.
+- [x] A personal health question says to ask a doctor, nurse or pharmacist instead of "Not in your library". `cl-cleanup` 8006c64c.
+- [x] Storage errors in the rail and when opening a spoken answer's chat no longer crash the app (Ask's own flows were already guarded). `cl-cleanup` 23726628.
+- [ ] Play Console: a **closed testing** track (internal testing doesn't count toward production access), privacy policy URL, data safety form, content rating, foreground-service declarations (media playback, downloads), target audience.
+- [ ] 15–20 testers recruited and opted in (the margin covers drop-off), Spanish speakers included.
+
+**B. During the 14 days**
+- [ ] F2: feedback triaged weekly; fix what blocks, log the rest here.
+- [ ] Ask, the librarian's reaction: instant lines tied to real search progress ("Let me look…", "Found something in WikiMed and two of your books…") before E2B's answer; no extra model call.
+- [ ] Ask, a behaviour LoRA spike: can LiteRT-LM load a LoRA on Gemma 4 E2B on the GPU (or must it be merged and converted)? Train on grounded behaviour (passages → cited answer or clean decline, two-fact questions) built from Top 50k and Classics, not on the content itself; score on the existing eval set against 80% grounded / 90% declined.
+- [ ] Store listing in English and Spanish: the fair deal, screenshots, feature graphic, 512 px icon; lead with the library, Ask as the Preview on capable phones.
+- [ ] Two or three institution discovery calls (a library, a school or an NGO): what they use now, their devices, what they'd need offline; offer a free pilot for feedback and a letter of support.
+
+**C. Production**
+- [ ] Apply for production access once the closed test qualifies; release free.
+- [ ] F-Droid submission (the same app, uncapped, a Support link).
+- [ ] Then Plan 10 (Supporter), in an order F2's findings set with I1+, R2 and S1.
+
+**Decisions from the clean-up list (Neal, 2026-11-02):**
+- **Ask** (handed to the Ask session, `docs/ask/handoff-from-cleanup-2026-11-02.md`): keep the model loaded while Ask is open and unload it 5 minutes after no Ask screen is open; "What do I have on X?" is a fast follow after launch (a basic Ask function); Report this answer, medical answers as quoted passages and the model self-check are that session's.
+- **Full screen reflow:** settled. The web reader has no full screen; the e-book reader's text is a little asymmetric in full screen, the best answer so far.
+- **After launch:** video packs (TED, Khan Academy), cover-art lookup, the swipeable domain strip on Home.
+- **Closed:** the Physics pack replacement (Wikipedia's Physics subject covers it); Search grouped by kind (U1 D6).
+- **Starter / Efficient / Comprehensive** stay in onboarding only, but need **calibrating across the tiers** again (a session with Neal; the GC and WF catalog changes moved the sizes).
+- **Telemetry** leaves Plan 10: no telemetry at all; Send feedback covers it.
+- **Maggie & Martin retired:** out of the catalog (`cl-cleanup` 1498ae85); phones that have the voice keep it.
+- **Park is out.** In its place, **Preview**: a Kiwix pack not on the phone opens on library.kiwix.org in the phone's browser before Get (`cl-cleanup`).
+
+**Parked during the freeze:** `i0-iphone-spike` (226 commits behind main) and `a0-asr-spike` stay parked, not merged; V4 voices that are already shipping are unaffected.
+
 Development moved to Neal's Mac Studio with M1 (setup: `tools/dev/MAC-SETUP.md`).
 
 Library redesign spec (2026-10-16): `docs/superpowers/specs/2026-10-16-library-redesign-design.md` amends the v1 spec and set this order.
@@ -95,7 +142,7 @@ Plan 1's measurements feed directly into Plans 6–8 (backend choice, model file
 - Kiwix's Gutenberg packs (`gutenberg_en_lcc-b`, `lcc-pr`) have no full-text index (`hasFulltextIndex: false`, checked 2026-10-16), so Ask can't search them; Granger Classics (Plan 4, built with the index on) covers that ground.
 - Plan 6's `ModelManager` finds installed models through the `downloads` ledger: an `INSTALLED` record of kind `MODEL`, file at `filePath`.
 - Plan 8 replaces `capBytes = { Long.MAX_VALUE }` in `AppContainer` with `:core:billing`'s cap, and shows the Pro upsell for `EnqueueResult.OverCap`.
-- No longer planned (2026-10-19): Neal dropped the storage cap, so there's no limit but the phone's storage. `capBytes` stays `Long.MAX_VALUE` until the unused cap plumbing is removed (left for later in `2026-10-19-plan-m2-media-sources.md`).
+- ~~No longer planned (2026-10-19): Neal dropped the storage cap, so there's no limit but the phone's storage. `capBytes` stays `Long.MAX_VALUE` until the unused cap plumbing is removed (left for later in `2026-10-19-plan-m2-media-sources.md`).~~ Fixed 2026-11-02: the cap plumbing is gone, `cl-cleanup`.
 - SD cards were tested only in JVM tests (the Pixel 6 has no slot). Try a phone with one before the beta.
 - Android 15 limits `dataSync` foreground services to 6 hours a day; a very slow multi-GB download pauses at the limit and resumes when WorkManager next runs it.
 - The Ray Charles sample pack's main page (`index`) renders blank: the ZIM's own `_res_/script.js` throws `$ is not defined` because the page never loads jQuery, so its masonry article list never lays out. Articles open and render fine. Reader item for a later plan (Kiwix injects jQuery for such main pages).
@@ -103,7 +150,7 @@ Plan 1's measurements feed directly into Plans 6–8 (backend choice, model file
 - Device testing a network drop: `adb shell cmd connectivity airplane-mode enable` alone did not stop an in-flight download on the Pixel 6 (it kept growing); add `adb shell svc wifi disable`. With both off the row shows "Waiting for Wi-Fi" and the `.part` file holds its size; on reconnect it resumes from the same size. A force-stop plus relaunch also resumes by itself.
 - Kiwix retires snapshots; the catalog pins exact URLs and hashes, so regenerate and re-sign it at least monthly (or schedule it). Downloads of a retired snapshot now fail with a reason and a Retry button.
 - Plan 8: `installedPackBytes` counts every pack row, including MISSING ones (e.g. a removed SD card); decide whether the cap should.
-- raw.githubusercontent.com caches `catalog.json` and `.sig` separately; for a few minutes after a push the app may report a failed security check and keep the last good catalog.
+- ~~raw.githubusercontent.com caches `catalog.json` and `.sig` separately; for a few minutes after a push the app may report a failed security check and keep the last good catalog.~~ Fixed 2026-11-02: asks past the cache once before warning, `cl-cleanup`.
 
 ## Carried forward from Plan 4
 
@@ -121,7 +168,7 @@ Neal's direction, 2026-10-16, to brainstorm before the next plan: the library wi
 
 Deferred, low priority (from Plan 2):
 - ~~Opening the reader after the OS killed the app shows the article it was first opened on, not the last page.~~ Fixed by Plan 5: tabs keep the path and scroll position.
-- Large media entries are read whole into memory.
+- ~~Large media entries are read whole into memory.~~ Fixed 2026-11-02: a stored entry of 256 KB or more (not HTML) streams from its range of the `.zim`, with byte ranges for seeking; compressed entries are still read whole, `cl-cleanup`.
 - No device test yet for a ZIM truncated or ejected (SD card) while it is open.
 
 ## Carried forward from Plan 5
@@ -165,9 +212,9 @@ Still open:
 - Classics pushed by hand into `books/granger/` show "Get", not installed: installed status comes from download records only.
 - A page turn within ~0.3 s before Back is lost (the outgoing reader's reports are ignored once it leaves the screen).
 - System Back from a book opened through the rail goes to the Library, not the previous book (rail destinations replace each other).
-- Contents panel tab labels are cut off in landscape.
-- Imported text books are titled by file name, not by their first heading.
-- Book search results are unranked (`LIMIT 400`); TXT files with single-newline paragraphs become one paragraph per chapter; the shared cover cache (4 MB) re-decodes while scrolling a long grid.
+- ~~Contents panel tab labels are cut off in landscape.~~ Fixed 2026-11-02: side panels grow by the end inset, `cl-cleanup`.
+- ~~Imported text books are titled by file name, not by their first heading.~~ Fixed 2026-11-02: the title the text names (Markdown heading, Gutenberg Title:, a standalone first line), `cl-cleanup`.
+- Book search results are unranked (`LIMIT 400`); ~~TXT files with single-newline paragraphs become one paragraph per chapter~~ (fixed 2026-11-02, `cl-cleanup`); the shared cover cache (4 MB) re-decodes while scrolling a long grid.
 - Plan 10: import is Pro-only; queueing the whole Classics preset must be checked against the cap as one group (spec §13); `Features.IMPORT` becomes the entitlement check.
 - ~~Plan 7: archive.org books go to `books/archive-org/` with origin `ARCHIVE_ORG`; `Bookshelf.addDownloaded` needs an origin parameter then.~~ Done in Plan 7.
 - ~~Plan 8: `BookIndex` and `BookHit` are the e-book retrieval path for Inquire & Abstract; the `INQUIRE` selection action is already wired.~~ Done in Plan 8 (`BookIndex.passages`; the action is now `RESEARCH`).
@@ -302,7 +349,7 @@ Still open:
   - `Citations` treats a first sentence like "The ruins were not found until 1911 [1]." as a decline; skip the decline phrases when the sentence carries a citation.
   - The wider medical lexicon flags "Doctor Zhivago", "computer virus" and "Tropic of Cancer", which then get the banner and no Best guess.
   - `AnswerText` italicises the middle of "2*3*4" and drops the asterisks.
-  - iFixit's catalog description is Kiwix's summary cut off at "Let's …", now visible in the Kiwix listing; give it a curated description.
+  - ~~iFixit's catalog description is Kiwix's summary cut off at "Let's …", now visible in the Kiwix listing; give it a curated description.~~ Fixed 2026-11-02: already has a curated description (checked 2026-11-02).
 - The eval needs the phone: `tools/eval` runs over adb (Wi-Fi works), about 70 s a question. The held-out split stays unread by whoever tunes.
 
 
@@ -343,22 +390,22 @@ Data and scanner:
 - A playlist row's position is its entry ordinal, which is right only while every entry has a track row (true today: the scanner never deletes rows).
 - The artist list takes an artist sort tag only from single-artist tracks.
 - Orphaned cover files are never cleaned up (old `<fingerprint>.jpg` files and shared covers nothing uses).
-- The TagLib skip list never resets, so a file whose tag read was cut short by any process death is skipped for tags forever.
+- ~~The TagLib skip list never resets, so a file whose tag read was cut short by any process death is skipped for tags forever.~~ Fixed 2026-11-02: two strikes (one death only makes a file suspect, a clean read clears it; old one-strike skips get one more read), `cl-cleanup`.
 - Parity gaps, later: original dates are read and stored but not shown or sorted by; no way to exclude folders from the scan.
 
 Player and engine:
 - Parity gaps for M3, with the service work for Android Auto: tapping a queue row doesn't play it (`PlayerHub` has no play-at-index call); no `onPlaybackResumption`, so a headset play press after process death does nothing; a single-file book shows no next/previous in the notification, which shows the book's title, not the chapter's.
 - `MediaControllerPlayerHub` and `PlaybackService` have no automated test; they're covered only through `PlayerEngine`.
 - The focus content type (speech or music) isn't requested again when the mode switches while focus is held.
-- Pressing play in the mini-player on a book that just ended, without leaving it, hits the end again at once; reloading it from the book page restarts it.
+- ~~Pressing play in the mini-player on a book that just ended, without leaving it, hits the end again at once; reloading it from the book page restarts it.~~ Fixed 2026-11-02: play on an ended book starts it over, `cl-cleanup`.
 - A finished book restored after process death loads at the start, but the database says finished until the next save.
 - The chapter-lookup rule exists twice, in the app (`chapterAt`) and in the engine (`ChapterMap`, internal); keep them in step.
 - Worst-case position loss after process death is about 6 s (a 1 s tick on a 5 s interval).
 - ~~After play is refused mid-call, the end of the call doesn't resume.~~ Fixed in `c41b868` (`playDuringACallPlaysWhenTheCallEnds`).
 
 UI:
-- No signal when a book's saved place can't be found, or when a queue stops because every item failed.
-- Adding a bookmark gives no feedback beyond the list.
+- ~~No signal when a book's saved place can't be found, or when a queue stops because every item failed.~~ Fixed 2026-11-02: `PlayerHub.notices` toasts, `cl-cleanup`.
+- ~~Adding a bookmark gives no feedback beyond the list.~~ Fixed 2026-11-02: it toasts "Bookmarked: …", `cl-cleanup`.
 - On the Player's inactive tab, starting music writes no Recent row; shuffle, repeat, speed, sleep timer and bookmarks can't be changed there; and a saved book's chapters are read again on each state change rather than live.
 - Album, artist, genre, playlist and folder pages aren't scoped to a collection (their routes carry no `collectionId`).
 - Playlists reorder through Move up / Move down only, no drag.
@@ -366,7 +413,7 @@ UI:
 - The "songs" Recent row replays all music by title (its key has no collection or sort).
 - Settings scrolls to Music & audiobooks by a fixed item index (5).
 - The music Compose screens have no UI tests (view model and DAO only).
-- Parity gaps, later: "Add to playlist" isn't in the full player or the queue; only Songs can be sorted; no cover replacement for audiobooks (M2's LibriVox downloads bring their own covers).
+- Parity gaps, later: "Add to playlist" isn't in ~~the full player~~ (fixed 2026-11-02, `cl-cleanup`) or the queue; only Songs can be sorted; no cover replacement for audiobooks (M2's LibriVox downloads bring their own covers).
 
 Device checks still to do:
 - Deleting a file in the Files app, then restoring it (skipped in the walkthrough).
@@ -380,7 +427,7 @@ Device checks still to do:
 
 Environment:
 - Development is in `~/Developer/Granger/Granger`. The old copy on `~/Desktop` (perhaps iCloud-synced) is stale: it spawned "X 2" duplicate files in `build/` directories that broke dexing.
-- `gradle.properties` still has the Linux machine's limits (2 workers, 2 GB heap, in-process Kotlin); they could be raised on the Mac.
+- ~~`gradle.properties` still has the Linux machine's limits (2 workers, 2 GB heap, in-process Kotlin); they could be raised on the Mac.~~ Fixed 2026-11-02: sized for the Mac Studio (full rerun 99 s vs 116 s), `cl-cleanup`.
 - `:core:zim`'s androidTest assets now include `testdata/audio` (about 200 KB). Harmless.
 
 ## Carried forward from M2
@@ -406,7 +453,7 @@ Sources and search:
 - Audio search ranks matches by downloads, not the website's relevance, so its order can differ from archive.org's.
 - Archive.org track titles keep the album prefix ("The Planets Op. 32, H. 125_ I. Mars…"); trimming it was offered, not chosen.
 - Archive.org items have no versions, so no updates (as for books).
-- LibriVox descriptions keep HTML entities (`&amp;`); tags are stripped, entities aren't decoded.
+- ~~LibriVox descriptions keep HTML entities (`&amp;`); tags are stripped, entities aren't decoded.~~ Fixed 2026-11-02: decoded when the book is kept, `cl-cleanup`.
 - An empty text query isn't treated specially; `choose()` doesn't check that the fetched item's id is the identifier asked for.
 - A Browse row always offers Get (search results don't say whether an item has files); an item without them gets a notice on tap.
 - The same archive.org identifier got under both Music and Audiobooks shares one group id (rare, unhandled). An item got from Music shows as downloaded in Audiobooks' Browse too (status per group); Open on one still downloading in the other view can land on an empty page until its first file is filed.
@@ -417,12 +464,12 @@ Downloads:
 - Android 15's 6-hour `dataSync` limit on very long books.
 - SD cards (the Pixel 6 has no slot); two volumes whose `StorageVolume` is null both key as `primary` (the first wins). The same item on two volumes: the first root wins.
 - A crash can leave a stray `.granger-item.json.*.tmp` (a dotfile, harmless). Embedded chapters in downloaded files are ignored (one file, one chapter).
-- Readiness's row text says "the file", not "a file".
-- The left-over cap plumbing (`capBytes`, `OverCap`) is still there, unused (Plan 10 removes it).
+- ~~Readiness's row text says "the file", not "a file".~~ Fixed 2026-11-02: "Missing: it isn't on the phone", `cl-cleanup`.
+- ~~The left-over cap plumbing (`capBytes`, `OverCap`) is still there, unused (Plan 10 removes it).~~ Fixed 2026-11-02: removed, `cl-cleanup`.
 
 Library and player:
 - `MediaLibrary.forget()` deletes a book's file tracks only when the caller passes their ids (`MediaDownloader.remove` does).
-- `PlayerHub.unload` empties the whole music queue when any removed track is in it, rather than taking those tracks out.
+- ~~`PlayerHub.unload` empties the whole music queue when any removed track is in it, rather than taking those tracks out.~~ Fixed 2026-11-02: only those tracks leave the queue, `cl-cleanup`.
 - An empty Music collection shows "No music yet" on every tab except Playlists. The LibriVox screen and sheet have no Compose tests beyond navigation.
 - M1's `unknown|<folder>` album-key collision corner case is left as is.
 
@@ -474,7 +521,7 @@ Research and the eval:
 - `LexicalScore` doesn't fold accents, but the media gate does.
 - A CORRUPT (not MISSING) audiobook still opens from a citation.
 - `media.json` has to be re-exported and validated if Holst is re-tagged or moved, or the album-key rules change. The "Venus" album's artist tag is "Release - Topic".
-- The Mac's system Python has no pytest. `tools/dev` should say how to make the eval venv.
+- ~~The Mac's system Python has no pytest. `tools/dev` should say how to make the eval venv.~~ Fixed 2026-11-02: `tools/dev/MAC-SETUP.md` lists the venvs and how to make them, `cl-cleanup`.
 
 Search and the media index:
 - After a library change, a search can briefly use the previous snapshot. If the library flow itself fails, the index keeps its last snapshot until restart.
@@ -486,7 +533,7 @@ Search and the media index:
 Player, session and Auto:
 - In book mode, a controller's `seekTo(index, ms)` goes straight to ExoPlayer.
 - `SessionPlayer.isEngines` compares media ids only, so a re-send of the same queue with another start index is swallowed.
-- Tapping the current song's queue row restarts it from 0.
+- ~~Tapping the current song's queue row restarts it from 0.~~ Fixed 2026-11-02: carries on instead, `cl-cleanup`.
 - The queue-row tap has no Compose UI test.
 - Artwork tokens depend on the order of the roots, and the key changes on reinstall or clear data, so URIs cached by Auto or the launcher can stop resolving.
 - A cover written after the queue loads stays `file://` until the items are rebuilt.
@@ -499,14 +546,14 @@ Player, session and Auto:
 Widget:
 - No `previewLayout`; the picker uses the generic preview, which Neal found usable.
 - The cover is decoded on the drawing path (cached, ≤ 300 px). Every change also calls `updateAll` (not profiled).
-- The second button's label is "Back" and doesn't follow the skip setting.
+- ~~The second button's label is "Back" and doesn't follow the skip setting.~~ Fixed 2026-11-02: "Back 30 seconds" from the setting, `cl-cleanup`.
 - A boot or resize update starts the process, which binds the service and restores the player paused.
 
 Readers and Search after the follow-ups:
 - Toggling full screen reflows the page (see above). A better feel may need a different model: a bar that slides with scrolling, or an animated resize. Not chosen yet.
 - Titles ask every pack for 20 suggestions per keystroke; not timed on the Pixel.
-- `ArchiveViewModelTest.overCapShowsTheLimitNotice` failed once ("Main looper not mocked") and passed on reruns. It looks flaky, and the cap code is due to go in Plan 10.
-- Agent worktrees don't check out the taglib submodule: run `git submodule update --init --recursive` in a new worktree before building.
+- ~~`ArchiveViewModelTest.overCapShowsTheLimitNotice` failed once ("Main looper not mocked") and passed on reruns. It looks flaky, and the cap code is due to go in Plan 10.~~ Fixed 2026-11-02: not the cap code; any test in the class could fail. A reply on the real `Dispatchers.IO` landed after a test ended and Main was reset. The archive.org client now takes its dispatcher and the test passes its own (8 in 8 under load), `cl-cleanup`.
+- ~~Agent worktrees don't check out the taglib submodule: run `git submodule update --init --recursive` in a new worktree before building.~~ Fixed 2026-11-02: `tools/dev/new-worktree.sh` does it (and copies `local.properties`), `cl-cleanup`.
 
 Device checks still to do:
 - Deleting a phone file in the Files app, then restoring it (skipped in M1, M2 and M3).
@@ -597,7 +644,7 @@ Builder's calls (see the plan and the Task 3 report):
 
 Still open:
 - Some Kiwix packs are mostly PDFs (irp.fas.org military medicine). They open, but show little until the reader handles PDFs (done in P2: a tapped PDF opens in the e-book reader).
-- The DevDocs Contents button stays pinned over the page once you scroll.
+- ~~The DevDocs Contents button stays pinned over the page once you scroll.~~ Fixed 2026-11-02: it slides away scrolling down, back scrolling up, `cl-cleanup` (check on the phone).
 
 ## Carried forward from R0
 
@@ -771,10 +818,10 @@ Builder's calls:
 Still open (for H3 and later):
 - **The strip as a swipeable reader** (Neal): each dot a page you can swipe through for a quick read of that domain. H3's Welcome screen or a Home follow-up.
 - **A cover-art scraper** for albums, e-books and audiobooks without art (Neal): Granger has none; a Plan 10-era item with its own licence questions.
-- A day feed over a pack without the day article says "October 22" over search hits; a "Mentions October 22" subtitle would be clearer.
-- `family:wikipedia` picks the first whole pack of the family; a preference for the fullest (by size) would favour a full Wikipedia over "Best of".
+- ~~A day feed over a pack without the day article says "October 22" over search hits; a "Mentions October 22" subtitle would be clearer.~~ Fixed 2026-11-02: titled "Mentions October 22", `cl-cleanup`.
+- ~~`family:wikipedia` picks the first whole pack of the family; a preference for the fullest (by size) would favour a full Wikipedia over "Best of".~~ Fixed 2026-11-02: every pack is tried for the day page, `cl-cleanup`.
 - H3 needs: Start → Home (`StartScreen.Home` exists), the default feeds for a fresh library (they seed on first Home with no packs and resolve as packs arrive), and the strip's first signal as the onboarding nudge.
-- The thumbnail cache lives under `cacheDir` and is never pruned by the app; the OS may clear it, and the card then shows its icon.
+- ~~The thumbnail cache lives under `cacheDir` and is never pruned by the app; the OS may clear it, and the card then shows its icon.~~ Fixed 2026-11-02: pruned to 50 MB at start, oldest shown first, `cl-cleanup`.
 - Cached draws carry `Cards.VERSION` (1 since thumbnails); a draw from an older format is redrawn, so a feature that changes what a card carries bumps the version rather than waiting for midnight.
 
 ## Carried forward from H3
@@ -861,5 +908,11 @@ Fixed during the walkthroughs:
 Still open:
 - The "Food for Preppers" PDFs are old web-page printouts: no outline, no links, the contents page is text. A contents list worked out from the text (and for old scans) is its own session. More broadly, making the Kiwix catalog friendlier to find things in is a big value add for the app (Neal, 2026-10-29).
 - On a Kiwix main page that scrolls in its own box, the saved place and read-aloud's follow-scroll still act on the window.
-- `PlayerEngineTest.chapterChangeUpdatesTheTitleWithoutRepreparing` failed once in a full run and passed alone: a timing flake to settle.
+- ~~`PlayerEngineTest.chapterChangeUpdatesTheTitleWithoutRepreparing` failed once in a full run and passed alone: a timing flake to settle.~~ Fixed 2026-11-02: it waits for the title, not a position (2 in 10 failed under load before, 12 in 12 passed after), `cl-cleanup`.
 - Browse lists packs flat within a section; a pack family with many sizes could group further.
+
+## Carried forward from L4 (Spanish vectors, 2026-11-01)
+
+The Spanish vectors (194 files, 416 MB, release `vectors-es-2026-11-01`, descriptors on `l4-spanish-eval` and `l3-spanish-knowledge`) were built on the Mac on 2026-10-31 to 11-01. Two things for the next catalog build:
+- **English Python docs vectors are stale.** Kiwix published `devdocs_en_python` 2026-10-31; the vectors were built from 2026-08-02. Vectors fit one snapshot only, so the next catalog build reports them ("rebuild it") and leaves them out: that pack falls back to keyword search until its vectors are rebuilt (a few minutes on the Mac).
+- **The Spanish vectors can go stale the same way.** They match the Kiwix snapshots of 2026-10 (iFixit 2026-03). If Kiwix publishes a newer Spanish snapshot before L3's catalog is built and signed, that pack's vectors are left out; check the build's "Search vectors left out" report and rebuild any pack it names before signing.

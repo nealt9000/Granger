@@ -56,6 +56,7 @@ import app.granger.core.library.BookDetails
 import app.granger.core.library.BookOrigin
 import app.granger.archive.ArchiveDownloads
 import app.granger.archive.ArchivePrefs
+import app.granger.archive.FixedFilterArchivePrefs
 import app.granger.archive.SharedArchivePrefs
 import app.granger.settings.AppearancePrefs
 import app.granger.settings.SharedAppearancePrefs
@@ -115,6 +116,7 @@ import app.granger.media.hasAudioPermission
 import app.granger.core.zim.KiwixZimOpener
 import app.granger.core.research.RankingConfig
 import app.granger.core.research.ResearchPipeline
+import app.granger.core.research.TopicCentroids
 import app.granger.core.zim.ZimResolver
 import app.granger.ebook.BookOpener
 import app.granger.ebook.ReadingPrefsStore
@@ -560,7 +562,7 @@ class AppContainer(context: Context) {
 
     val archiveClient = ArchiveOrgClient(http, archiveUserAgent)
     val librivoxClient = LibriVoxClient(http, archiveUserAgent)
-    val archivePrefs: ArchivePrefs = SharedArchivePrefs(context)
+    val archivePrefs: ArchivePrefs = if (Features.ARCHIVE_WAIVER) SharedArchivePrefs(context) else FixedFilterArchivePrefs
     val appearancePrefs: AppearancePrefs = SharedAppearancePrefs(context)
     val homePrefs: HomePrefs = SharedHomePrefs(context)
     /** The tidy offers Keep both answered (Plan WF Decision 5), shared by Home and Downloads. */
@@ -589,14 +591,6 @@ class AppContainer(context: Context) {
         // Deferred: the queue needs the runner, made below.
         progress = flow { emitAll(downloadQueue.progress) },
         unmetered = unmeteredFlow(context),
-        // Every installed pack and book counts towards the cap, SD card included (spec "Storage cap").
-        // Books are not in the library yet, so they come from the downloads ledger.
-        installedPackBytes = {
-            library.packs.first().sumOf { it.sizeBytes } +
-                downloadDao.getAll().filter { it.kind == ItemKind.BOOK && it.state == DownloadState.INSTALLED }.sumOf { it.sizeBytes }
-        },
-        // Uncapped until Plan 8 wires :core:billing.
-        capBytes = { Long.MAX_VALUE },
     )
 
     val downloadRunner = DownloadRunner(
@@ -771,9 +765,22 @@ class AppContainer(context: Context) {
     /** Research's thresholds, set from the Pixel 6 measurements (Plan 8 Task 9) and Plan R1's merging sweep. */
     val rankingConfig = RankingConfig()
 
+    /** The owl's reaction topics (assets/owl/topics.txt), read once; null when unreadable. */
+    private val owlTopics by lazy {
+        runCatching { context.assets.open("owl/topics.txt").bufferedReader().use { TopicCentroids.parse(it.readText()) } }
+            .onFailure { android.util.Log.w("Granger", "Owl topics unreadable", it) }
+            .getOrNull()
+    }
+
+    /** The topics, when they were built from the embedder installed now; else the owl reacts with its default lines. */
+    private suspend fun owlCentroids(): TopicCentroids? {
+        val parsed = owlTopics ?: return null
+        return parsed.centroids.takeIf { installedEmbedderSha() == parsed.embedderSha }
+    }
+
     val research = ResearchPipeline(
         passageFinder, ModelsAdapter(modelManager), rankingConfig,
         sourceWeight = fictionWeight, dense = if (DENSE_RETRIEVAL) denseFinder else null,
-        reserveNamed = true, yearFacts = true,
+        reserveNamed = true, yearFacts = true, reactions = ::owlCentroids,
     )
 }

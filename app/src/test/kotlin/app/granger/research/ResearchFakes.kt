@@ -166,7 +166,7 @@ class ScriptedGenerator(
 ) : TextGenerator {
     val prompts = mutableListOf<String>()
     var gateAt: Int? = null
-    val gate = CompletableDeferred<Unit>()
+    var gate = CompletableDeferred<Unit>()
     var failAt: Int? = null
 
     val answerPrompts get() = prompts.filterNot { it.startsWith("Turn the question into search words") }
@@ -197,5 +197,8 @@ class FakeResearchModels(val model: ScriptedGenerator = ScriptedGenerator()) : R
         return model
     }
 
-    override suspend fun embedder(): PassageEmbedder? = null
+    /** Null, as with no embedder installed, unless a test sets one. */
+    var embedder: PassageEmbedder? = null
+
+    override suspend fun embedder(): PassageEmbedder? = embedder
 }

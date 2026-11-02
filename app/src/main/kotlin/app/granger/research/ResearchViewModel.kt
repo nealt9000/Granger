@@ -27,8 +27,11 @@ import app.granger.player.VoiceButton
 import kotlinx.coroutines.flow.map
 import app.granger.core.research.FailReason
 import app.granger.core.research.Outcome
+import app.granger.core.research.OwlLines
 import app.granger.core.research.Passage
+import app.granger.core.research.PersonalMedical
 import app.granger.core.research.PriorTurn
+import app.granger.core.research.ReactionTopic
 import app.granger.core.research.ResearchEvent
 import app.granger.core.research.ResearchPipeline
 import app.granger.core.research.ResearchRequest
@@ -99,10 +102,25 @@ class ResearchViewModel(
         val partial: String?,
         val stage: Stage?,
         val medical: Boolean,
+        /** The owl's instant reaction while the turn runs; not stored. */
+        val reaction: String? = null,
+        /** Where the owl is looking ("Looking in Boiling · Steam…") while the turn runs; not stored. */
+        val lookingIn: String? = null,
+        /** What the owl is reading ("Reading 4 passages…"), from just before the answer streams; not stored. */
+        val reading: String? = null,
+        /** The owl's waking line while the model loads, one per answer; not stored. */
+        val waking: String? = null,
         /** A best guess is being written for this (declined) turn; [partial] is the guess so far. */
         val guessing: Boolean = false,
-        /** The Best guess button is shown: a declined, non-medical turn with no guess yet, while nothing runs. */
+        /**
+         * The Best guess button is shown: a declined, non-medical turn whose guess isn't open yet, and either has one
+         * (kept or being written) or can start one because nothing runs.
+         */
         val offersGuess: Boolean = false,
+        /** The guess is open (Neal, 2026-11-02: it sits behind a tap, written ahead so the tap shows it at once). */
+        val guessShown: Boolean = false,
+        /** Declined as one person's own health question (no search ran): the screen points to a professional. */
+        val personalMedical: Boolean = false,
         /** The last Best guess for this turn failed (the model won't load); shown once, not stored. */
         val guessFailed: Boolean = false,
         /** The speaker button's state for this turn (Plan V2): read, pause or resume. */
@@ -144,6 +162,10 @@ class ResearchViewModel(
         val stage: Stage?,
         val medical: Boolean = false,
         val guessing: Boolean = false,
+        val reaction: String? = null,
+        val lookingIn: String? = null,
+        val reading: String? = null,
+        val waking: String? = null,
     )
 
     private data class Header(val chatId: Long?, val title: String, val quote: Passage?, val recent: List<ChatSummary>)
@@ -160,8 +182,15 @@ class ResearchViewModel(
     private val live = MutableStateFlow<Live?>(null)
     /** The turn whose Best guess just failed; cleared when anything else starts. */
     private val guessFailed = MutableStateFlow<Long?>(null)
+    /** Turns whose guess was opened with the button; not stored, so a reopened chat shows the button again. */
+    private val shownGuesses = MutableStateFlow<Set<Long>>(emptySet())
     private var job: Job? = null
     @Volatile private var stopRequested = false
+    /** The owl's lines said in this chat, so it doesn't repeat itself until it has said them all. */
+    private val saidLines = mutableSetOf<String>()
+
+    /** A waking line for a new answer or guess, not one this chat has had until all have been. */
+    private fun wakingLine(): String = OwlLines.pickFrom(OwlLines.WAKING, saidLines).also { saidLines += it }
 
     /** The question field, as Compose state written synchronously on every keystroke (see SearchViewModel.searchText). */
     var input by mutableStateOf("")
@@ -180,14 +209,14 @@ class ResearchViewModel(
     val state: StateFlow<State> = combine(
         turns,
         live,
-        combine(models.readiness, guessFailed, ::Pair),
+        combine(models.readiness, guessFailed, shownGuesses, ::Triple),
         combine(chat, title, pendingQuote, chats.recent(RECENT_CHATS).emptyOnError("Recent research chats"), ::Header),
         reading,
-    ) { turns, live, (readiness, guessFailedId), header, reading ->
+    ) { turns, live, (readiness, guessFailedId, shown), header, reading ->
         State(
             chatId = header.chatId,
             title = header.title,
-            turns = turns.map { it.toUi(live, guessFailedId, reading) },
+            turns = turns.map { it.toUi(live, guessFailedId, shown, reading) },
             running = live != null,
             readiness = readiness,
             quote = header.quote,
@@ -236,13 +265,16 @@ class ResearchViewModel(
     }
 
     /**
-     * Asks the model for its own best guess at a declined turn's question. A declined turn that may have one gets it by
-     * itself (see [runTurn]); this is the button, for a turn whose guess was stopped, failed or never came. The guess is
-     * kept on that turn when it finishes or is stopped; if the app dies first nothing is kept and the button returns.
-     * Never for a medical turn.
+     * The Best guess button: opens [turnId]'s guess. A declined turn that may have one gets it written by itself, out
+     * of sight (see [runTurn]), so the tap shows a kept guess, or the one still being written, without another model
+     * run. Only a turn whose guess was stopped, failed or never came asks the model now. The guess is kept on that turn
+     * when it finishes or is stopped; if the app dies first nothing is kept and the button returns. Never for a
+     * medical turn.
      */
     fun bestGuess(turnId: Long) {
+        shownGuesses.update { it + turnId }
         if (live.value != null) return
+        if (state.value.turns.any { it.turn.id == turnId && it.turn.guess.isNotBlank() }) return
         val id = chat.value ?: return
         begin { guess(id, turnId) }
     }
@@ -251,7 +283,7 @@ class ResearchViewModel(
         val turns = chats.turns(chatId).first()
         val at = turns.indexOfFirst { it.id == turnId }
         val turn = turns.getOrNull(at)?.takeIf { it.outcome == TurnOutcome.DECLINED && it.guess.isBlank() && !it.medical } ?: return
-        live.value = Live(turnId, null, null, guessing = true)
+        live.value = Live(turnId, null, null, guessing = true, waking = wakingLine())
         var settled = false
         // The guess goes to the model alone: no passages, and no earlier answer or guess, only the question before it.
         pipeline.guess(turn.question, turns.getOrNull(at - 1)?.question) { stopRequested }.flowOn(cpu).collect { event ->
@@ -269,8 +301,8 @@ class ResearchViewModel(
                         guessFailed.value = turnId
                     }
                 }
-                // A run() event; guess() doesn't emit it.
-                ResearchEvent.Medical -> Unit
+                // run() events; guess() doesn't emit them.
+                ResearchEvent.Medical, is ResearchEvent.Reaction, is ResearchEvent.LookingIn, is ResearchEvent.Reading -> Unit
             }
         }
     }
@@ -414,17 +446,30 @@ class ResearchViewModel(
         var settled = false
         // The pipeline's verdict once known (it can be ahead of the stored turn); a turn cut short keeps it.
         var medical = false
-        // Neal's feel test (Plan R5): a decline goes straight on to the model's best guess, under its label, rather than
-        // stopping at "Not in your library". Not for a medical turn, a question about a selection, or a stopped one.
+        // The reaction placed it as a health question, before the pipeline's verdict: "Looking in…" stays plain.
+        var healthReaction = false
+        // Neal's feel test (Plan R5): a decline goes straight on to the model's best guess. Since 2026-11-02 it is written
+        // out of sight and opened with the Best guess button, so "Not in your library" stands until the user asks.
+        // Not for a medical turn, a question about a selection, or a stopped one.
         var guessNext = false
         try {
             // Not cancellable, so a turn that was stored is always known here and can be settled.
             withContext(NonCancellable) {
                 turnId = chats.startTurn(chatId, ask.question, ask.quote)
-                live.value = Live(turnId, null, null)
+                live.value = Live(turnId, null, null, waking = wakingLine())
             }
             pipeline.run(request) { stopRequested }.flowOn(cpu).collect { event ->
                 when (event) {
+                    is ResearchEvent.Reaction -> {
+                        val line = OwlLines.pick(event.topic, saidLines).also { saidLines += it }
+                        healthReaction = event.topic == ReactionTopic.MEDICAL
+                        live.update { it?.copy(reaction = line) }
+                    }
+                    is ResearchEvent.Reading -> live.update { it?.copy(reading = OwlLines.reading(event.passages)) }
+                    is ResearchEvent.LookingIn -> {
+                        val line = OwlLines.lookingIn(event.titles, medical = healthReaction || medical)
+                        live.update { it?.copy(lookingIn = line) }
+                    }
                     is ResearchEvent.Progress -> live.update { it?.copy(stage = event.stage) }
                     is ResearchEvent.Partial -> {
                         live.update { it?.copy(partial = event.text) }
@@ -523,8 +568,9 @@ class ResearchViewModel(
         }
     }
 
-    private fun ChatTurn.toUi(live: Live?, guessFailedId: Long?, reading: Reading?): TurnUi {
+    private fun ChatTurn.toUi(live: Live?, guessFailedId: Long?, shown: Set<Long>, reading: Reading?): TurnUi {
         val running = live?.takeIf { it.turnId == id }
+        val hasGuess = guess.isNotBlank() || running?.guessing == true
         return TurnUi(
             voice = when {
                 reading?.turnId != id -> VoiceButton.IDLE
@@ -534,9 +580,19 @@ class ResearchViewModel(
             turn = this,
             partial = running?.partial,
             stage = running?.stage,
+            reaction = running?.reaction,
+            lookingIn = running?.lookingIn,
+            reading = running?.reading,
+            waking = running?.waking,
             medical = medical || running?.medical == true,
             guessing = running?.guessing == true,
-            offersGuess = live == null && outcome == TurnOutcome.DECLINED && guess.isBlank() && !medical,
+            offersGuess = outcome == TurnOutcome.DECLINED && !medical && !(id in shown && hasGuess) &&
+                (hasGuess || live == null),
+            // Opened and there is something to show; a failed or empty guess brings the button back.
+            guessShown = id in shown && hasGuess,
+            // The pipeline's own rule (ResearchPipeline: PersonalMedical with the medical flag, no selection).
+            personalMedical = outcome == TurnOutcome.DECLINED && medical && quote() == null &&
+                PersonalMedical.matches(question, medicalSignal = true),
             guessFailed = guessFailedId == id && live == null,
         )
     }

@@ -416,15 +416,6 @@ class SourceViewModelTest {
         assertThat(vm.ui.value.notice).isNull()
     }
 
-    @Test fun overTheCapTalksAboutDownloadsNotPacks() = runTest(main.dispatcher) {
-        downloads.nextResult = EnqueueResult.OverCap(10_000_000_000, 11_000_000_000)
-        val vm = viewModel()
-        vm.get("med")
-        testScheduler.advanceUntilIdle()
-        assertThat(vm.ui.value.notice).contains("your downloads")
-        assertThat(vm.ui.value.notice).doesNotContain("packs")
-    }
-
     @Test fun grangerListsBooksByCategory() = runTest(main.dispatcher) {
         catalog.mutable.value = CatalogState(
             catalog = catalogOf(
@@ -550,14 +541,6 @@ class SourceViewModelTest {
         vm.setTab(SourceTab.INSTALLED)
         testScheduler.advanceUntilIdle()
         assertThat(vm.rowIds()).containsExactly("emma")
-    }
-
-    @Test fun overTheCapExplains() = runTest(main.dispatcher) {
-        downloads.nextResult = EnqueueResult.OverCap(10_000_000_000, 11_000_000_000)
-        val vm = viewModel()
-        vm.get("med")
-        testScheduler.advanceUntilIdle()
-        assertThat(vm.ui.value.notice).contains("10 GB")
     }
 
     @Test fun presetSkipsInstalledAndActiveItems() = runTest(main.dispatcher) {
@@ -980,6 +963,17 @@ class SourceViewModelTest {
             testScheduler.advanceUntilIdle()
             assertThat(vm.ui.value.sections.flatMap { it.rows }.map { it.title }).containsExactly("Encyclopédie de Diderot")
         }
+    }
+
+    /** Preview (Neal, 2026-11-02): every Kiwix pack in the published catalog has its page on Kiwix's online library. */
+    @Test fun everyKiwixPackHasAPreviewOnKiwixsLibrary() {
+        val packs = publishedCatalog().packs
+        val med = packs.single { it.id == "wikipedia_en_medicine_nopic" }
+        val file = med.urls.first().substringAfterLast('/').removeSuffix(".zim")
+        assertThat(KiwixList.previewUrl(med)).isEqualTo("https://library.kiwix.org/content/$file/")
+        val kiwix = packs.filter { p -> p.urls.any { it.startsWith("https://download.kiwix.org/zim/") } }
+        assertThat(kiwix).isNotEmpty()
+        assertThat(kiwix.filter { KiwixList.previewUrl(it) == null }).isEmpty()
     }
 
     /** The catalog in catalog/, as the phone gets it once it is published. */

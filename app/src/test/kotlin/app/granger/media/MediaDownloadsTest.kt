@@ -98,11 +98,28 @@ class MediaDownloadsTest {
         assertThat(m.readers).isNotEmpty()
     }
 
+    @Test fun aLibriVoxBookIsKeptWithItsEntitiesDecoded() {
+        val offer = MediaFixtures.timeMachineOffer
+        val book = offer.book.copy(
+            title = "Tom &amp; Jerry", description = "&ldquo;A tale&rdquo; &mdash; told", genres = listOf("Action &amp; Adventure"),
+        )
+        val (section, file) = offer.files.first()
+        val m = MediaDownloads.bookManifest(
+            offer.copy(book = book, files = listOf(section.copy(title = "Part 1 &amp; 2", readers = listOf("Ann &amp; Bob")) to file)),
+            MediaFixtures.archive, 2L,
+        )
+        assertThat(m.title).isEqualTo("Tom & Jerry")
+        assertThat(m.description).isEqualTo("“A tale” — told")
+        assertThat(m.genres).containsExactly("Action & Adventure")
+        assertThat(m.files.single().title).isEqualTo("Part 1 & 2")
+        assertThat(m.files.single().readers).containsExactly("Ann & Bob")
+    }
+
     @Test fun audioSpecsAreGrouped() {
         val m = MediaFixtures.timeMachine()
         val specs = MediaDownloads.specs(m)
         assertThat(specs).hasSize(14)
-        assertThat(specs.all { it.kind == ItemKind.AUDIO && it.groupId == "media:librivox:817" && !it.capped }).isTrue()
+        assertThat(specs.all { it.kind == ItemKind.AUDIO && it.groupId == "media:librivox:817" }).isTrue()
         assertThat(specs.map { it.itemId }).isEqualTo((0..13).map { "media:librivox:817/%03d".format(it) })
         assertThat(specs.none { it.itemId.startsWith("archive-org:") }).isTrue()
         assertThat(specs[1].relativePath).isEqualTo("audiobooks/librivox/817/${m.files[0].name}")

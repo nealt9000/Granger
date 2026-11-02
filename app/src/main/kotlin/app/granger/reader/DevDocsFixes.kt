@@ -17,12 +17,16 @@ object DevDocsFixes {
         @media (max-width: ${NARROW_PX}px) {
           devdocs-navbar ._sidebar { display: none !important; }
           ._container { margin-left: 0 !important; }
-          /* Room for the button above the page's title; it stays pinned over the page once scrolled. */
+          /* Room for the button above the page's title. Scrolling down hides it; scrolling up brings it back. */
           main._content { padding-top: 48px !important; }
           .granger-nav {
             display: block; position: fixed; top: 8px; left: 8px; z-index: 1001;
             padding: 6px 10px; border: 0; border-radius: 6px; font: inherit; font-size: 14px;
             background: rgba(0, 0, 0, 0.55); color: #fff;
+            transition: opacity 0.2s, transform 0.2s;
+          }
+          html.granger-nav-away:not(.granger-nav-open) .granger-nav {
+            opacity: 0; transform: translateY(-56px); pointer-events: none;
           }
           html.granger-nav-open devdocs-navbar ._sidebar {
             display: block !important; position: fixed !important; top: 0; bottom: 0; left: 0;
@@ -45,6 +49,14 @@ object DevDocsFixes {
           button.textContent = '☰ Contents';
           button.addEventListener('click', function (e) { e.stopPropagation(); root.classList.toggle('granger-nav-open'); });
           document.body.appendChild(button);
+          // Out of the way while reading down the page; back on the way up, and always near the top.
+          var lastY = window.scrollY;
+          window.addEventListener('scroll', function () {
+            var y = window.scrollY;
+            if (y < 48 || y < lastY - 8) root.classList.remove('granger-nav-away');
+            else if (y > lastY + 8) root.classList.add('granger-nav-away');
+            if (Math.abs(y - lastY) > 8) lastY = y;
+          }, { passive: true });
           document.addEventListener('click', function (e) {
             if (!root.classList.contains('granger-nav-open')) return;
             if (e.target.closest && e.target.closest('devdocs-navbar ._sidebar')) { e.stopPropagation(); return; }

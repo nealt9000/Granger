@@ -39,7 +39,6 @@ class ArchiveDownloadsTest {
         assertThat(spec.relativePath).isEqualTo("books/archive-org/$id.epub")
         assertThat(spec.hashAlgorithm).isEqualTo(HashAlgorithm.SHA1)
         assertThat(spec.hash).isEqualTo(epub.sha1)
-        assertThat(spec.capped).isTrue()
         assertThat(spec.kind).isEqualTo(ItemKind.BOOK)
         assertThat(spec.snapshotDate).isEmpty()
         assertThat(spec.urls).containsExactly(client.downloadUrl(id, epub.name))

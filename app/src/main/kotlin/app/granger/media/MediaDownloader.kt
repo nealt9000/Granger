@@ -98,8 +98,6 @@ class MediaDownloader(
                 if (!existed) withContext(io) { dir.deleteRecursively() }
                 "Not enough space on ${volume.label} for $title: free up ${formatBytes(result.neededBytes)}."
             }
-            // Groups are never capped (no storage cap); kept for the exhaustive when.
-            is EnqueueResult.OverCap -> null
         }
     }
 

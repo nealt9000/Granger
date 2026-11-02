@@ -23,11 +23,11 @@ class PublishedCatalogTest {
         assertThat(catalog.packs.size).isEqualTo((raw["packs"] as kotlinx.serialization.json.JsonArray).size)
         assertThat(catalog.models.size).isEqualTo((raw["models"] as kotlinx.serialization.json.JsonArray).size)
         assertThat(catalog.books.size).isEqualTo((raw["books"] as kotlinx.serialization.json.JsonArray).size)
-        assertThat(catalog.books).hasSize(347)
+        assertThat(catalog.books).hasSize(372)
         assertThat(catalog.packs.map { it.id }).doesNotContain("granger_classics_en")
-        // Starter: the 4 non-Classics items plus the 347 books.
-        assertThat(catalog.presets.single { it.id == "starter" }.items).hasSize(351)
-        assertThat(catalog.presets.single { it.id == "granger-classics" }.items).hasSize(347)
+        // Starter: the 4 non-Classics items plus the 372 books (GC, 2026-10-30).
+        assertThat(catalog.presets.single { it.id == "starter" }.items).hasSize(376)
+        assertThat(catalog.presets.single { it.id == "granger-classics" }.items).hasSize(372)
     }
 
     /** Plan H1: the readiness model rides in the catalog, and every pack and book names its domain or is storage-only. */
@@ -99,7 +99,7 @@ class PublishedCatalogTest {
         )
         assertThat(catalog.packs.filter { it.flavour.isNotEmpty() }.all { it.id == "${it.zimName}_${it.flavour}" }).isTrue()
         assertThat(catalog.packs.groupingBy { it.flavour }.eachCount())
-            .containsExactly("", 771, "maxi", 93, "nopic", 50, "mini", 10)
+            .containsExactly("", 771, "maxi", 92, "nopic", 50, "mini", 10)
     }
 
     /** Plan WF: Wikipedia and Wikivoyage as sets, the subjects with what they add, the sample marked. */

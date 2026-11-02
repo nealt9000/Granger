@@ -1,5 +1,6 @@
 package app.granger.media
 
+import app.granger.librivox.decodeEntities
 import app.granger.core.archive.ArchiveFile
 import app.granger.core.archive.ArchiveItem
 import app.granger.core.archive.ArchiveKind
@@ -81,7 +82,7 @@ object MediaDownloads {
         require(ArchiveQuery.isValidIdentifier(identifier)) { "Bad archive.org identifier" }
         val files = offer.files.mapIndexed { i, (section, f) ->
             manifestFile(MediaManifests.localName(i, section.title, f.name), f, client.downloadUrl(identifier, f.name)).copy(
-                title = section.title.trim(), trackNo = i + 1, readers = section.readers,
+                title = decodeEntities(section.title.trim()), trackNo = i + 1, readers = section.readers.map(::decodeEntities),
                 durationMs = section.playtimeMs.takeIf { it > 0 } ?: f.lengthMs, sectionId = section.id,
             )
         }
@@ -91,12 +92,13 @@ object MediaDownloads {
             ref = book.id,
             archiveIdentifier = identifier,
             pageUrl = book.pageUrl,
-            title = book.title,
-            creators = book.authors,
-            readers = offer.files.flatMap { it.first.readers }.distinct(),
-            description = book.description,
+            // LibriVox sends HTML entities ("Tom &amp; Jerry"); the kept book carries plain text, as the sheet shows it.
+            title = decodeEntities(book.title),
+            creators = book.authors.map(::decodeEntities),
+            readers = offer.files.flatMap { it.first.readers }.distinct().map(::decodeEntities),
+            description = decodeEntities(book.description),
             language = book.language,
-            genres = book.genres,
+            genres = book.genres.map(::decodeEntities),
             date = book.copyrightYear,
             totalTimeMs = book.totalTimeMs.takeIf { it > 0 } ?: files.sumOf { it.durationMs ?: 0L },
             cover = offer.cover?.let { manifestFile(COVER_NAME, it, client.downloadUrl(identifier, it.name)) },
@@ -129,8 +131,6 @@ object MediaDownloads {
             hashAlgorithm = HashAlgorithm.valueOf(f.hashAlgorithm),
             relativePath = "$dir/${f.name}",
             snapshotDate = "",
-            // Left-over cap plumbing: nothing in Media reads it (no storage cap).
-            capped = false,
             groupId = group,
         )
         return listOfNotNull(m.cover?.let { spec(0, it) }) + m.files.mapIndexed { i, f -> spec(i + 1, f) }

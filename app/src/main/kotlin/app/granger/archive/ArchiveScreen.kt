@@ -56,6 +56,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.Features
 import app.granger.core.archive.ArchiveKind
 import app.granger.core.archive.ArchiveShelf
 import app.granger.core.archive.AudioOffer
@@ -111,7 +112,7 @@ fun ArchiveScreen(
         try {
             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(detailsUrl(identifier))))
         } catch (e: ActivityNotFoundException) {
-            // No browser installed; nothing more to do.
+            android.widget.Toast.makeText(context, app.granger.sources.NO_BROWSER, android.widget.Toast.LENGTH_LONG).show()
         }
     }
 
@@ -282,9 +283,9 @@ internal fun ArchiveContent(
                     if (ui.waiverNeeded) {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             OutlinedButton(onClick = onOpenLibriVox) { Text("LibriVox") }
-                            OutlinedButton(onClick = { showWaiver = true }) { Text("Show everything") }
+                            if (Features.ARCHIVE_WAIVER) OutlinedButton(onClick = { showWaiver = true }) { Text("Show everything") }
                         }
-                    } else if (ui.filtered) {
+                    } else if (ui.filtered && Features.ARCHIVE_WAIVER) {
                         OutlinedButton(onClick = { showWaiver = true }) { Text("Show everything") }
                     }
                 }

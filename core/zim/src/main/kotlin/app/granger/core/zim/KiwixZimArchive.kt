@@ -61,6 +61,17 @@ internal class KiwixZimArchive(private val archive: Archive, fallbackTitle: Stri
         ZimEntry(item.path, item.title, item.mimetype, item.size)
     }
 
+    override fun storedRange(path: String): ZimRange? = reading(null) {
+        if (!archive.hasEntryByPath(path)) return@reading null
+        val item = archive.getEntryByPath(path).getItem(true)
+        val direct = item.directAccessInformation
+        if (direct != null && direct.filename.isNotEmpty()) {
+            ZimRange(item.path, item.mimetype, File(direct.filename), direct.offset, item.size)
+        } else {
+            null
+        }
+    }
+
     /**
      * A stored (uncompressed) entry, as PDFs in a ZIM usually are, is copied as a byte range of the `.zim` file
      * itself; a compressed one has no such range and is read whole, as [read] does.

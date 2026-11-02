@@ -83,7 +83,7 @@ SPLITS = {"v1": SPLIT, "v2": SPLIT_V2}
 
 RULES = """You are Granger's research librarian. Answer the question using only the numbered passages from the user's library below.
 Rules:
-- Answer the question directly in your first sentence, then give the supporting details.
+- Answer the question directly in your first sentence. Keep the whole answer short: two or three sentences, unless the question asks for a list or steps.
 - Put the passage number in square brackets after every claim it supports, like [2]. Cite only the numbers listed.
 - You may combine facts from different passages and work out simple things from them (dates, ages, which came first, how long between), citing every passage you used.
 - Use the source details (title, author, date, collection) when they matter to the question.

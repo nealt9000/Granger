@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -63,6 +65,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -71,6 +74,7 @@ import app.granger.R
 import app.granger.core.ai.ResearchReadiness
 import app.granger.core.library.ChatSummary
 import app.granger.core.library.TurnOutcome
+import app.granger.core.research.OwlLines
 import app.granger.core.research.Passage
 import app.granger.core.research.SourceKind
 import app.granger.core.research.Stage
@@ -78,28 +82,56 @@ import app.granger.formatBytes
 import app.granger.player.ListenButtons
 import app.granger.player.VoiceButton
 import app.granger.research.ResearchViewModel.TurnUi
+import app.granger.theme.Spectral
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private const val PLACEHOLDER = "Ask about anything in your library"
 private const val DECLINED = "Not in your library."
+private const val PERSONAL_MEDICAL = "I can't answer questions about your own health. A doctor, nurse or pharmacist can. " +
+    "Search instead shows what your library says on the subject."
 private const val UNVERIFIED = "Couldn't answer from these passages."
 private const val MEDICAL = AnswerText.MEDICAL
 
-private const val BEST_GUESS_LABEL = "I couldn't find this in your library. Here's my best guess, so take it with a grain of salt."
 private const val MODELS_MISSING = "Ask needs the librarian on this phone. Get it in Settings → Models."
 private const val INTRO = "Ask a question; the librarian answers from your library and shows where each part came from. " +
     "It's a preview: it can be wrong, so check the sources."
 private const val MODEL_FAILED = "The model needs repair. Check it in Readiness."
 private const val SEARCH_FAILED = "Couldn't search your library. Try again."
-private const val INTERRUPTED = "Stopped before an answer."
+private const val INTERRUPTED = OwlLines.STOPPED
 private const val SOURCE_GONE = "That source is no longer in your library."
 
 /** How long a source card stays outlined after its citation is tapped. */
 private const val FLASH_MS = 1_500L
 
+/** The running turn's progress label: section E's slow line after [OwlLines.SLOW_MS] with no words, then the owl's. */
+@Composable
+private fun progressLabel(ui: TurnUi, reading: String?): String? {
+    var slow by remember(ui.turn.id) { mutableStateOf(false) }
+    LaunchedEffect(ui.turn.id) {
+        delay(OwlLines.SLOW_MS)
+        slow = true
+    }
+    return when {
+        slow && ui.partial.isNullOrBlank() -> OwlLines.SLOW
+        reading != null -> reading
+        ui.stage == Stage.LOADING_MODEL -> ui.waking ?: ui.stage.label()
+        else -> ui.stage?.label()
+    }
+}
+
+/** The owl's instant reaction to the question, in its voice: Spectral italic, until the answer settles. */
+@Composable
+private fun OwlReaction(line: String) {
+    Text(
+        line,
+        style = MaterialTheme.typography.bodyLarge.copy(fontFamily = Spectral, fontStyle = FontStyle.Italic),
+        color = MaterialTheme.colorScheme.onSurface,
+    )
+}
+
 private fun Stage.label() = when (this) {
-    Stage.LOADING_MODEL -> "Loading the model…"
+    Stage.LOADING_MODEL -> "Waking the librarian…"
     Stage.SEARCHING -> "Searching your library…"
     Stage.RANKING -> "Ranking passages…"
     Stage.WRITING -> "Writing…"
@@ -405,9 +437,15 @@ private fun AnswerBlock(
         if (ui.medical) Banner(MEDICAL)
         when (turn.outcome) {
             TurnOutcome.PENDING -> {
+                ui.reaction?.let { OwlReaction(it) }
+                ui.lookingIn?.let {
+                    Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                }
+                // Until the first words, the owl says what it is reading (section C); then plain "Writing…".
+                val reading = ui.reading?.takeIf { ui.stage == Stage.WRITING && ui.partial.isNullOrBlank() }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                    ui.stage?.let { Text(it.label(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                    progressLabel(ui, reading)?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
                 ui.partial?.takeIf { it.isNotBlank() }?.let { AnswerBody(it, onCite) }
             }
@@ -417,24 +455,43 @@ private fun AnswerBlock(
             }
             TurnOutcome.UNVERIFIED -> Text(UNVERIFIED, style = MaterialTheme.typography.bodyLarge)
             TurnOutcome.DECLINED -> {
-                Text(DECLINED, style = MaterialTheme.typography.bodyLarge)
-                if (ui.guessing) {
+                // The owl's wry decline, steady per turn; a health question keeps the plain words.
+                val declined = when {
+                    ui.personalMedical -> PERSONAL_MEDICAL
+                    ui.medical -> DECLINED
+                    else -> OwlLines.decline(turn.id)
+                }
+                Text(declined, style = MaterialTheme.typography.bodyLarge)
+                if (ui.guessing && ui.guessShown) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                        ui.stage?.let { Text(it.label(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                        progressLabel(ui, null)?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                     }
                 }
                 if (ui.guessFailed) {
                     Text(MODEL_FAILED, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
                     OutlinedButton(onClick = onReadiness) { Text("Readiness") }
                 }
-                val guessText = if (ui.guessing) ui.partial.orEmpty() else turn.guess
-                if (guessText.isNotBlank()) GuessCard(guessText)
+                val guessText = when {
+                    !ui.guessShown -> ""
+                    ui.guessing -> ui.partial.orEmpty()
+                    else -> turn.guess
+                }
+                if (guessText.isNotBlank()) GuessCard(OwlLines.guessLabel(turn.id), guessText)
                 if (guessText.isNotBlank() && !ui.guessing) ReadAloudRow(ui.voice, onRead, onPauseResume, onStopReading)
-                if (!ui.guessing) {
+                if (!(ui.guessing && ui.guessShown)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedButton(onClick = onSearch) { Text("Search instead") }
-                        if (ui.offersGuess) OutlinedButton(onClick = onGuess, enabled = !running) { Text("Best guess") }
+                        if (ui.offersGuess) {
+                            OutlinedButton(onClick = onGuess) {
+                                // Still being written out of sight: the tap opens it as it comes.
+                                if (ui.guessing) {
+                                    CircularProgressIndicator(Modifier.size(14.dp), strokeWidth = 2.dp)
+                                    Spacer(Modifier.width(8.dp))
+                                }
+                                Text("Best guess")
+                            }
+                        }
                     }
                 }
             }
@@ -465,7 +522,7 @@ private fun ReadAloudRow(voice: VoiceButton, onRead: () -> Unit, onPauseResume: 
 
 /** The model's own guess, outlined and set apart from cited answers; it has no sources, so no chips or cards. */
 @Composable
-private fun GuessCard(text: String) {
+private fun GuessCard(label: String, text: String) {
     val shape = RoundedCornerShape(8.dp)
     Column(
         Modifier
@@ -476,7 +533,7 @@ private fun GuessCard(text: String) {
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Text(
-            BEST_GUESS_LABEL,
+            label,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
         )

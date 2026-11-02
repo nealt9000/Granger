@@ -28,7 +28,9 @@ import app.granger.core.library.ReadingSessions
 import app.granger.core.library.TurnOutcome
 import app.granger.core.player.PlayerHub
 import app.granger.core.player.PlaySource
+import app.granger.core.research.OwlLines
 import app.granger.core.research.Passage
+import app.granger.core.research.ReactionTopic
 import app.granger.core.research.ResearchPipeline
 import app.granger.core.research.SourceKind
 import app.granger.core.research.Stage
@@ -76,9 +78,10 @@ class ResearchViewModelTest {
         sessions: ReadingSessions = this@ResearchViewModelTest.sessions,
         player: PlayerHub? = null,
         speakAnswers: Boolean = false,
+        dense: app.granger.core.research.DenseFinder? = null,
     ): ResearchViewModel {
         return ResearchViewModel(
-            chatId, quote, chats, ResearchPipeline(finder, models), manager, sessions, library, bookshelf,
+            chatId, quote, chats, ResearchPipeline(finder, models, dense = dense), manager, sessions, library, bookshelf,
             MediaIndex(mediaLibrary, backgroundScope, main.dispatcher), backgroundScope, savedState, cpu,
             player = player, speakAnswers = { speakAnswers }, now = { 42L },
         )
@@ -295,6 +298,76 @@ class ResearchViewModelTest {
         assertThat(vm.state.value.running).isFalse()
     }
 
+    @Test fun theOwlReactsWhileTheTurnRunsAndDoesntRepeatItself() = runTest(main.dispatcher) {
+        small.answer = listOf("Plants use light [1].", " More.")
+        small.gateAt = 1
+        val vm = vm()
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        // No topics in this pipeline: a default line, shown while the turn runs.
+        val first = vm.state.value.turns.single().reaction
+        assertThat(first).isIn(OwlLines.LINES.getValue(ReactionTopic.DEFAULT))
+        small.gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().reaction).isNull()
+        val said = mutableSetOf(first!!)
+        repeat(OwlLines.LINES.getValue(ReactionTopic.DEFAULT).size - 1) { n ->
+            small.gateAt = 1
+            small.gate = kotlinx.coroutines.CompletableDeferred()
+            vm.ask("Why is the sky blue, part $n?")
+            testScheduler.advanceUntilIdle()
+            said += vm.state.value.turns.last().reaction!!
+            small.gate.complete(Unit)
+            testScheduler.advanceUntilIdle()
+        }
+        assertThat(said).containsExactlyElementsIn(OwlLines.LINES.getValue(ReactionTopic.DEFAULT))
+    }
+
+    @Test fun theOwlSaysWhereItIsLookingWhileTheTurnRuns() = runTest(main.dispatcher) {
+        models.embedder = app.granger.core.research.PassageEmbedder { texts, _ -> texts.map { floatArrayOf(1f, 0f) } }
+        small.answer = listOf("Plants use light [1].", " More.")
+        small.gateAt = 1
+        val vm = vm(dense = { listOf(article(1).copy(cosine = 0.9), article(2).copy(cosine = 0.88)) })
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        val line = vm.state.value.turns.single().lookingIn!!
+        assertThat(line).contains("Article 1 · Article 2")
+        assertThat(OwlLines.LOOKING_IN.map { it.replace("{titles}", "Article 1 · Article 2") }).contains(line)
+        small.gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().lookingIn).isNull()
+    }
+
+    @Test fun theOwlSaysWhatItIsReadingUntilTheTurnEnds() = runTest(main.dispatcher) {
+        small.answer = listOf("Plants use light [1].", " More.")
+        small.gateAt = 0
+        val vm = vm()
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        val live = vm.state.value.turns.single()
+        assertThat(live.stage).isEqualTo(Stage.WRITING)
+        assertThat(live.reading).matches("Reading [0-9]+ passages…|Reading the likeliest [0-9]+…|[0-9]+ passages look promising\\. Reading…")
+        small.gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().reading).isNull()
+    }
+
+    @Test fun eachAnswerWakesTheOwlWithANewLine() = runTest(main.dispatcher) {
+        val vm = vm()
+        val woken = mutableListOf<String>()
+        repeat(OwlLines.WAKING.size) { n ->
+            small.gateAt = 0
+            small.gate = kotlinx.coroutines.CompletableDeferred()
+            vm.ask("Why is the sky blue, part $n?")
+            testScheduler.advanceUntilIdle()
+            woken += vm.state.value.turns.last().waking!!
+            small.gate.complete(Unit)
+            testScheduler.advanceUntilIdle()
+            assertThat(vm.state.value.turns.last().waking).isNull()
+        }
+        assertThat(woken).containsExactlyElementsIn(OwlLines.WAKING)
+    }
+
     @Test fun medicalBannerShowsWhileTheAnswerStreams() = runTest(main.dispatcher) {
         small.rewrite = "keywords: photosynthesis, light\nmedical: yes"
         small.answer = listOf("Cool the burn under running water [1].", " Then")
@@ -340,8 +413,50 @@ class ResearchViewModelTest {
         val ui = vm.state.value.turns.single()
         assertThat(ui.turn.outcome).isEqualTo(TurnOutcome.DECLINED)
         assertThat(ui.turn.guess).isEqualTo("Probably Rayleigh scattering.")
-        assertThat(ui.offersGuess).isFalse()
+        // Written ahead, but behind the button until asked for (Neal, 2026-11-02).
+        assertThat(ui.offersGuess).isTrue()
+        assertThat(ui.guessShown).isFalse()
         assertThat(vm.state.value.running).isFalse()
+    }
+
+    @Test fun theButtonOpensTheGuessWrittenAheadWithoutAnotherModelRun() = runTest(main.dispatcher) {
+        small.answer = listOf("Probably ", "Rayleigh scattering.")
+        finder.passages = emptyList()
+        val vm = vm()
+        vm.ask("Why is the sky blue?")
+        testScheduler.advanceUntilIdle()
+        val prompts = small.prompts.size
+        val loads = models.loads
+        vm.bestGuess(vm.state.value.turns.single().turn.id)
+        testScheduler.advanceUntilIdle()
+        val ui = vm.state.value.turns.single()
+        assertThat(ui.guessShown).isTrue()
+        assertThat(ui.offersGuess).isFalse()
+        assertThat(ui.turn.guess).isEqualTo("Probably Rayleigh scattering.")
+        assertThat(small.prompts.size).isEqualTo(prompts)
+        assertThat(models.loads).isEqualTo(loads)
+        assertThat(vm.state.value.running).isFalse()
+    }
+
+    @Test fun theButtonDuringTheHiddenGuessOpensItAsItIsWritten() = runTest(main.dispatcher) {
+        small.answer = listOf("Probably ", "Rayleigh scattering.")
+        small.gateAt = 1
+        finder.passages = emptyList()
+        val vm = vm()
+        vm.ask("Why is the sky blue?")
+        testScheduler.advanceUntilIdle()
+        val hidden = vm.state.value.turns.single()
+        assertThat(hidden.guessing).isTrue()
+        assertThat(hidden.offersGuess).isTrue()
+        assertThat(hidden.guessShown).isFalse()
+        val prompts = small.prompts.size
+        vm.bestGuess(hidden.turn.id)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().guessShown).isTrue()
+        small.gate.complete(Unit)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.turns.single().turn.guess).isEqualTo("Probably Rayleigh scattering.")
+        assertThat(small.prompts.size).isEqualTo(prompts)
     }
 
     @Test fun theAutomaticGuessStreamsUnderTheDeclinedTurn() = runTest(main.dispatcher) {
@@ -374,6 +489,23 @@ class ResearchViewModelTest {
         assertThat(ui.turn.outcome).isEqualTo(TurnOutcome.DECLINED)
         assertThat(ui.offersGuess).isTrue()
         assertThat(ui.guessing).isFalse()
+    }
+
+    @Test fun aPersonalMedicalQuestionPointsToAProfessional() = runTest(main.dispatcher) {
+        val vm = vm()
+        vm.ask("Should I go to the ER for my chest pain?")
+        testScheduler.advanceUntilIdle()
+        val ui = vm.state.value.turns.single()
+        assertThat(ui.turn.outcome).isEqualTo(TurnOutcome.DECLINED)
+        assertThat(ui.personalMedical).isTrue()
+        assertThat(ui.offersGuess).isFalse()
+    }
+
+    @Test fun aGeneralMedicalDeclineIsNotPersonal() = runTest(main.dispatcher) {
+        small.rewrite = "keywords: burn\nmedical: yes"
+        val vm = vm()
+        declined(vm, "How do I treat a burn?")
+        assertThat(vm.state.value.turns.single().personalMedical).isFalse()
     }
 
     @Test fun answeredTurnOffersNoBestGuess() = runTest(main.dispatcher) {

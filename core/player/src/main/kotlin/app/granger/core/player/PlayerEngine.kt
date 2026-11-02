@@ -1,5 +1,7 @@
 package app.granger.core.player
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import android.content.SharedPreferences
 import android.net.Uri
 import android.util.Log
@@ -234,6 +236,11 @@ class PlayerEngine(
     }
 
     private var errorRun = 0              // playback errors since an item last got ready: stops a queue of broken files
+
+    private val _notices = MutableSharedFlow<String>(extraBufferCapacity = 4)
+
+    /** Lines for the user when playback gives up on something (clean-up list: it used to stop without a word). */
+    override val notices: Flow<String> = _notices
     private var pausedAt = 0L
     private var pausedForFocus = false
     private var duck = 1f
@@ -315,6 +322,13 @@ class PlayerEngine(
                 player.prepare()
             } else {
                 player.pause()
+                _notices.tryEmit(
+                    when (mode) {
+                        Mode.MUSIC -> if (player.mediaItemCount > 1) NOTICE_QUEUE_FAILED else NOTICE_SONG_FAILED
+                        Mode.BOOK -> NOTICE_BOOK_FAILED
+                        else -> NOTICE_SONG_FAILED
+                    },
+                )
             }
         }
 
@@ -656,11 +670,23 @@ class PlayerEngine(
             Mode.NONE -> false
         }
         if (!loadedHere) return@submit
+        val q = musicQueue
+        if (mode == Mode.MUSIC && q != null && !q.ids.all { it in trackIds }) {
+            // Only some of the queue is going: take those tracks out and keep playing the rest (clean-up list).
+            for (i in q.playOrder.indices.reversed()) {
+                if (q.ids[q.playOrder[i]] in trackIds) removeQueueItem(q, i)
+            }
+            musicChanged()
+            return@submit
+        }
         stopCurrent()
         refresh()
     }
 
-    override fun playPause() = submit { if (player.playWhenReady) userPause() else resume() }
+    override fun playPause() = submit {
+        // At its end the player still says play-when-ready, but nothing plays and the button shows Play: that press plays.
+        if (player.playWhenReady && player.playbackState != Player.STATE_ENDED) userPause() else resume()
+    }
 
     /** Play (from the session: notification, Bluetooth, lock screen). */
     fun play() = submit { resume() }
@@ -766,6 +792,12 @@ class PlayerEngine(
         val q = musicQueue ?: return@submit
         if (mode != Mode.MUSIC || i !in q.ids.indices) return@submit
         if (q.ids.size == 1) return@submit                     // the queue never empties itself; play something else
+        removeQueueItem(q, i)
+        musicChanged()
+    }
+
+    /** Takes play-order position [i] out of [q] and the player; the caller says the music changed. */
+    private fun removeQueueItem(q: MusicQueue, i: Int) {
         val removedIndex = q.playOrder[i]
         q.remove(i)
         editing = true
@@ -777,13 +809,14 @@ class PlayerEngine(
         } finally {
             editing = false
         }
-        musicChanged()
     }
 
     override fun playQueueItem(position: Int) = submit {
         val q = musicQueue ?: return@submit
         if (mode != Mode.MUSIC || position !in q.ids.indices) return@submit
-        playItem(q.playOrder[position], 0L)
+        val index = q.playOrder[position]
+        // The song already on: a tap carries on with it (starting it if paused), not from the top (clean-up list).
+        if (index == player.currentMediaItemIndex) resume() else playItem(index, 0L)
     }
 
     /** A controller's seek to playlist item [index] (Auto's queue): plays it, as a tap on its queue row does. */
@@ -1181,6 +1214,7 @@ class PlayerEngine(
         val fileIndex = startTrack?.let { m.files.indexOf(it) }?.takeIf { it >= 0 }
         // A saved row whose file can't be found: kept as it is until the user picks a place.
         restoreUnresolved = fileIndex == null && state != null
+        if (restoreUnresolved) _notices.tryEmit(NOTICE_PLACE_LOST)
         val position = when {
             fileIndex == null -> 0L
             restart -> first.positionMs
@@ -1270,6 +1304,9 @@ class PlayerEngine(
         pausedForFocus = false
         errorRun = 0
         if (mode == Mode.BOOK) finished = false
+        // A book that played to its end starts over (below), as reloading it does; a pause's rewind would first move it
+        // off the end and so replay its last seconds and end again (clean-up list).
+        if (mode == Mode.BOOK && player.playbackState == Player.STATE_ENDED) pausedAt = 0L
         if (mode == Mode.BOOK && pausedAt > 0L) {
             val rewind = AutoRewind.rewindMs(now() - pausedAt)
             pausedAt = 0L
@@ -1681,6 +1718,10 @@ class PlayerEngine(
     fun setScreenState(state: () -> String) { screenState = state }
 
     private companion object {
+        const val NOTICE_QUEUE_FAILED = "Couldn't play any of these songs. Their files may be missing or damaged."
+        const val NOTICE_SONG_FAILED = "Couldn't play this. The file may be missing or damaged."
+        const val NOTICE_BOOK_FAILED = "Couldn't play this chapter. Its file may be missing or damaged: Readiness can check it."
+        const val NOTICE_PLACE_LOST = "Couldn't find your place in this book, so it starts at the beginning. Pick a chapter to go on."
         const val TAG = "PlayerEngine"
         const val VOICE_TAG = "GrangerVoice"
         const val FOCUS_TAG = FocusPolicy.TAG

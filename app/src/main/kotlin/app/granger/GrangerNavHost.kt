@@ -531,10 +531,16 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 chooseVoice = container.voicePrefs::setVoice,
                 chooseVoiceSpeed = container.voicePrefs::setSpeed,
                 focus = container.playerFocus,
+                playlists = container.playlists,
             )
         }
     } else {
         null
+    }
+    // The player's one-off lines (a bookmark kept, a queue that couldn't play), wherever the user is.
+    val noticeContext = LocalContext.current.applicationContext
+    LaunchedEffect(player) {
+        player?.notices?.collect { Toast.makeText(noticeContext, it, Toast.LENGTH_LONG).show() }
     }
     val playerUi by (player?.ui ?: remember { MutableStateFlow(PlayerUi.IDLE) }).collectAsStateWithLifecycle()
     val miniUi by (player?.mini ?: remember { MutableStateFlow(PlayerUi.IDLE) }).collectAsStateWithLifecycle()
@@ -611,7 +617,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             is ReadSourceKey.Text -> {
                 // A spoken Research answer (Plan V2) opens its chat.
                 val turnId = ResearchViewModel.answerTurnId(voice.sourceKey) ?: return null
-                val chatId = container.researchChats.turn(turnId)?.chatId ?: return null
+                // A storage error leaves the voice playing rather than crashing the app.
+                val chatId = runCatching { container.researchChats.turn(turnId) }.getOrNull()?.chatId ?: return null
                 nav.navigate(ResearchRoute(chatId))
                 return Unit
             }
@@ -1262,7 +1269,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 chunksOf = container.bookIndex::chunks,
                                 bookSearch = { container.bookIndex.search(it) },
                                 librarySearch = container.search,
-                                thumbnail = ArticleThumbnails(File(appContext.cacheDir, "home-thumbs"))::thumbnail,
+                                thumbnail = ArticleThumbnails(File(appContext.cacheDir, "home-thumbs")).let { thumbs ->
+                                    // Once per Home: the cache trimmed to its cap, in the background.
+                                    container.appScope.launch(Dispatchers.IO) { thumbs.prune() }
+                                    thumbs::thumbnail
+                                },
                             ),
                             container.shelves, container.media, container.homePrefs, tidyDismissals = container.tidyDismissals,
                         )

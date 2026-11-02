@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.lazy.LazyColumn
+import app.granger.Features
 import app.granger.media.MediaPermissionState
 import app.granger.media.rememberMediaPermission
 import androidx.compose.foundation.selection.selectable
@@ -111,7 +112,7 @@ fun SettingsScreen(
                     supportingContent = { Text("Turn off to get large scans and comic runs without a prompt") },
                     trailingContent = { Switch(checked = ui.askBeforeLarge, onCheckedChange = viewModel::setAskBeforeLarge) },
                 )
-                ListItem(
+                if (Features.ARCHIVE_WAIVER) ListItem(
                     headlineContent = { Text("Archive.org: show everything") },
                     supportingContent = {
                         Text(

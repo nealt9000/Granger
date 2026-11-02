@@ -70,8 +70,15 @@ object Medical {
         "shingles", "scurvy", "tuberculosis", "anemi", "anaemi", "iron deficien", "lyme disease", "migraine", "asthma",
         "headache", "vomit", "cough", "breathing", "lump", "swelling", "doctor", "biopsy",
         "tylenol", "advil", "motrin", "benadryl", "xanax", "sertraline", "amoxicillin", "blood test", "cholesterol",
+        // Named illnesses (Neal, 2026-11-02, after "how does malaria spread" got a science reaction). Not "plague":
+        // history asks about the Black Death.
+        "malaria", "cholera", "typhoid", "typhus", "dengue", "ebola", "rabies", "tetanus", "polio", "smallpox",
+        "hepatitis", "pneumonia", "bronchitis", "sepsis", "leprosy", "dysentery", "diarrh", "covid", "coronavirus",
+        "yellow fever", "whooping cough", "mumps", "rubella", "diphtheria", "syphilis", "gonorrh", "meningitis",
+        "arthritis", "dementia", "alzheimer", "parkinson", "epilep", "eczema", "psoriasis", "hypotherm", "heatstroke",
+        "heat stroke", "dehydrat", "frostbite", "sunburn", "sprain", "snakebite", "snake bite",
     ).map { "\\b" + Regex.escape(it) }
-    private val WHOLE_WORDS = listOf("flu", "gout", "burn(s|ed|t|ing)?", "liver(s)?", "mole(s)?", "rash(es)?", "scan(s|ned|ning)?")
+    private val WHOLE_WORDS = listOf("flu", "gout", "hiv", "burn(s|ed|t|ing)?", "liver(s)?", "mole(s)?", "rash(es)?", "scan(s|ned|ning)?")
         .map { "\\b$it\\b" }
     private val PATTERN = Regex((TERMS + WHOLE_WORDS).joinToString("|"), RegexOption.IGNORE_CASE)
 

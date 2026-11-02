@@ -56,6 +56,29 @@ class SourceScreenTest {
         compose.onNodeWithText("Licence: CC BY-SA 4.0").assertIsDisplayed()
     }
 
+    @Test fun previewOpensThePackInTheBrowser() {
+        val url = "https://library.kiwix.org/content/wikipedia_en_top_maxi_2026-10/"
+        compose.setContent {
+            CatalogItemRow(top.copy(previewUrl = url), onGet = {}, onCancel = {}, onRetry = {}, onRemove = {})
+        }
+        compose.onNodeWithText("Preview").performClick()
+        val app = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.app.Application>()
+        val started = org.robolectric.Shadows.shadowOf(app).nextStartedActivity
+        assertThat(started.action).isEqualTo(android.content.Intent.ACTION_VIEW)
+        assertThat(started.dataString).isEqualTo(url)
+    }
+
+    @Test fun anInstalledPackOffersNoPreview() {
+        val url = "https://library.kiwix.org/content/wikipedia_en_top_maxi_2026-10/"
+        compose.setContent {
+            CatalogItemRow(
+                top.copy(flavours = emptyList(), status = ItemStatus.Installed, packId = "p", previewUrl = url),
+                onGet = {}, onCancel = {}, onRetry = {}, onRemove = {},
+            )
+        }
+        compose.onNodeWithText("Preview").assertDoesNotExist()
+    }
+
     @Test fun anInstalledFlavourSaysSoAndOffersSwitch() {
         val calls = mutableListOf<String>()
         compose.setContent {

@@ -16,4 +16,11 @@ object Features {
 
     /** Read aloud in both readers (Plan V1). Debug builds while V1 is built; `true` once the Pixel 6 walkthrough passes. */
     val READ_ALOUD = true
+
+    /**
+     * archive.org's "Show everything" waiver. Off in the Play build (release), so the 1930 public-domain filter is
+     * fixed there (Neal, 2026-11-02: Play's intellectual-property policy); Plan 10's F-Droid and direct flavour turns
+     * it back on. Debug builds keep it for testing.
+     */
+    val ARCHIVE_WAIVER = BuildConfig.DEBUG
 }

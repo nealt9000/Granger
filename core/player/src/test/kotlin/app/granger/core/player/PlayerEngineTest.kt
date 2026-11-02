@@ -554,6 +554,19 @@ class PlayerEngineTest {
 
     // ---- finished books (Task 11) ----
 
+    @Test fun playOnABookThatJustEndedStartsItOver() {
+        val book = fakeBook("ending", 20_000, 20_000)
+        val engine = newEngine()
+        engine.playAudiobook(book.id)
+        idle()
+        run(engine.player).untilState(Player.STATE_ENDED)
+        engine.playPause()                                    // the mini-player's play, without leaving the book
+        shadowOf(Looper.getMainLooper()).runOneTask()
+        assertThat(engine.player.currentMediaItemIndex).isEqualTo(0)
+        assertThat(engine.player.currentPosition).isLessThan(1_000L)
+        assertThat(engine.player.playWhenReady).isTrue()
+    }
+
     @Test fun finishedBookResumesFromTheStartAndIsUnfinishedOncePlaying() {
         val book = fakeBook("done", 30_000, 30_000)
         runBlocking {
@@ -636,7 +649,33 @@ class PlayerEngineTest {
         assertThat(engine.ui.value.now).isInstanceOf(NowPlaying.Music::class.java)
         engine.unload("audiobook:phone:none", setOf(ids[1]))           // a queued song's album was removed
         idle()
+        // Only that song leaves the queue; the rest keeps playing (clean-up list: it used to empty the player).
+        assertThat(engine.ui.value.now).isInstanceOf(NowPlaying.Music::class.java)
+        assertThat(engine.queue.value.map { it.id }).isEqualTo(ids - ids[1])
+        assertThat(engine.player.currentMediaItem!!.mediaId).isEqualTo(ids[0])
+        engine.unload("audiobook:phone:none", ids.toSet())             // the whole queue removed: the player empties
+        idle()
         assertThat(engine.ui.value).isEqualTo(PlayerUi.IDLE)
+    }
+
+    @Test fun tappingTheSongAlreadyOnCarriesOn() {
+        // Long synthetic songs, so playback can't run past the end while the test looks.
+        val tracks = listOf(track("long-a", "fake://60000/long-a", 60_000), track("long-b", "fake://60000/long-b", 60_000))
+        runBlocking { db.mediaDao().upsertTracks(tracks) }
+        val ids = tracks.map { it.id }
+        val engine = newEngine()
+        engine.playTracks(ids, 0, false, PlaySource("songs", "Songs"))
+        idle()
+        run(engine.player).untilPosition(0, 5_000)
+        engine.pause()
+        idle()
+        val at = engine.player.currentPosition
+        engine.playQueueItem(0)
+        // Only the engine's own step: a full idle would let the test clock play on through the song.
+        shadowOf(Looper.getMainLooper()).runOneTask()
+        assertThat(engine.player.currentMediaItem!!.mediaId).isEqualTo(ids[0])
+        assertThat(engine.player.currentPosition).isAtLeast(at)          // not back to the top (clean-up list)
+        assertThat(engine.player.playWhenReady).isTrue()
     }
 
     /**
@@ -719,8 +758,10 @@ class PlayerEngineTest {
         runBlocking { playback.upsertAudiobookState(old) }
 
         val first = newEngine()
+        val notices = noticesOf(first)
         first.playAudiobook(book.id)
         idle()
+        assertThat(notices.single()).startsWith("Couldn't find your place in this book")
         run(first.player).untilPosition(0, 7_000)      // past a tick save
         first.playPause()
         idle()
@@ -765,6 +806,7 @@ class PlayerEngineTest {
         runBlocking { db.mediaDao().upsertTracks(tracks) }
         val engine = newEngine()
         val errors = countErrors(engine)
+        val notices = noticesOf(engine)
         engine.playTracks(tracks.map { it.id }, 0, false, PlaySource("songs", "Songs"))
         engine.cycleRepeat()                             // off → all
         runMainLooperUntil { !engine.player.playWhenReady || errors() > 10 }
@@ -773,6 +815,15 @@ class PlayerEngineTest {
         assertThat(errors()).isEqualTo(3)
         assertThat(engine.player.playWhenReady).isFalse()
         assertThat(engine.ui.value.playing).isFalse()
+        // And it says why it stopped (clean-up list: it used to stop without a word).
+        assertThat(notices.single()).startsWith("Couldn't play any of these songs")
+    }
+
+    /** Lines the engine has for the user, as the app's toast would show them. */
+    private fun noticesOf(engine: PlayerEngine): List<String> {
+        val seen = mutableListOf<String>()
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Unconfined).launch { engine.notices.collect { seen += it } }
+        return seen
     }
 
     /** One broken song in a repeating queue is skipped every time round: a song that plays resets the count. */
@@ -796,9 +847,11 @@ class PlayerEngineTest {
         val book = saveBook(id, "broken", listOf(file), listOf(AudiobookChapter(id, 0, "One", file.id, 0L, 2_500L)))
         val engine = newEngine()
         val errors = countErrors(engine)
+        val notices = noticesOf(engine)
         engine.playAudiobook(book.id)
         runMainLooperUntil { errors() >= 1 }
         idle()
+        assertThat(notices.single()).startsWith("Couldn't play this chapter")
         assertThat(engine.player.playWhenReady).isFalse()
         assertThat(engine.ui.value.playing).isFalse()
         assertThat(bookState(book.id)).isNull()          // nothing confirmed, nothing saved
@@ -924,7 +977,7 @@ class PlayerEngineTest {
     /**
      * The chapter's title replaces the item's metadata in place, mid-file and while playing: the item isn't
      * re-prepared (the state stays READY, no discontinuity, the position runs on), so no gap. The chapter check runs
-     * on the engine's 1 s tick, so the boundary is early (0.5 s) and the run long enough for a tick to cross it.
+     * on the engine's 1 s tick, so the boundary is early (0.5 s) and the test waits for the title itself.
      */
     @Test fun chapterChangeUpdatesTheTitleWithoutRepreparing() {
         val id = "audiobook:phone:mid"
@@ -949,14 +1002,16 @@ class PlayerEngineTest {
             }
             override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) { titles += mediaMetadata.title.toString() }
         })
-        run(engine.player).untilPosition(0, 2_500)
+        // Wait for the title, not a position: under load the playback thread can push the fake clock past a position
+        // before the main looper runs the queued tick (it failed 2 in 10 that way, 2026-11-02). 30 s of real time, not
+        // the helper's 10, for a loaded machine.
+        runMainLooperUntil({ titles.contains("Middle") }, 30_000L, androidx.media3.common.util.Clock.DEFAULT)
         assertThat(engine.player.currentMediaItem!!.mediaMetadata.title.toString()).isEqualTo("Middle")
         assertThat(engine.player.mediaMetadata.title.toString()).isEqualTo("Middle")
-        assertThat(titles).contains("Middle")
         assertThat(states).isEmpty()                       // never left READY: not re-prepared
         assertThat(discontinuities).isEmpty()               // the position ran on
         assertThat(engine.player.playbackState).isEqualTo(Player.STATE_READY)
-        assertThat(engine.player.currentPosition).isAtLeast(2_480L)
+        assertThat(engine.player.currentPosition).isIn(com.google.common.collect.Range.closedOpen(500L, 3_000L))
         assertThat(engine.player.mediaItemCount).isEqualTo(1)
     }
 

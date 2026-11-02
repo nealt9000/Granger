@@ -224,9 +224,9 @@ private fun Check(row: CheckRow, onVerify: (String) -> Unit, onRepair: (String) 
             "Verified$date" to true
         }
         CheckStatus.SIZE_OK -> "Size is right; not fully checked yet" to true
-        CheckStatus.INCOMPLETE -> "Incomplete: the file is the wrong size" to false
+        CheckStatus.INCOMPLETE -> "Incomplete: not all of it downloaded" to false
         CheckStatus.CORRUPTED -> "Corrupted: the contents don't match" to false
-        CheckStatus.MISSING -> "Missing: the file isn't there" to false
+        CheckStatus.MISSING -> "Missing: it isn't on the phone" to false
         CheckStatus.DAMAGED -> "Damaged: it can't be opened" to false
         CheckStatus.NOT_FROM_CATALOG -> "Added by hand; can't be verified" to true
     }

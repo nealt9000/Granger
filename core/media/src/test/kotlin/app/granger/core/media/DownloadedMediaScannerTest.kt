@@ -248,6 +248,7 @@ class DownloadedMediaScannerTest {
         val guardDir = tmp.newFolder("guard")
         val crashing = TagReader { _, f -> throw StackOverflowError(f.uri) }   // an Error: the stand-in for a native crash
         runCatching { scanner(FileTagReadGuard(guardDir), crashing).scan() }
+        runCatching { scanner(FileTagReadGuard(guardDir), crashing).scan() }   // twice: once is only suspect
 
         // The next run skips it, and files it under its own name.
         assertThat(scanner(FileTagReadGuard(guardDir)).scan()).isEqualTo(0)

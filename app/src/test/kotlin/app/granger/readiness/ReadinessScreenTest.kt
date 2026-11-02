@@ -100,7 +100,7 @@ class ReadinessScreenTest {
         compose.onNodeWithText("Kiwix").performClick()
         scrollTo("Wikipedia Top")
         scrollTo("MedlinePlus")
-        compose.onNodeWithText("Missing: the file isn't there").assertExists()
+        compose.onNodeWithText("Missing: it isn't on the phone").assertExists()
         // Another source's files stay behind its own row.
         compose.onNodeWithText("Gemma E2B").assertDoesNotExist()
         scrollTo("Kiwix")

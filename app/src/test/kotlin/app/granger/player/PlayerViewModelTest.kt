@@ -4,7 +4,9 @@ import app.granger.MainDispatcherRule
 import app.granger.core.speech.VoiceId
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -132,9 +134,31 @@ class PlayerViewModelTest {
         vm.addBookmark()
         val book = audiobook("b")
         hub.ui.value = bookUi(book, chapter(book, 2, 600_000L, title = "The Storm"), chapterCount = 5, positionMs = 125_000L)
+        val notice = async { vm.notices.first() }
+        testScheduler.advanceUntilIdle()
         vm.addBookmark()
         testScheduler.advanceUntilIdle()
         assertThat(hub.calls).containsExactly("bookmark:The Storm · 2:05")
+        // It says so (clean-up list: adding a bookmark gave no feedback).
+        assertThat(notice.await()).isEqualTo("Bookmarked: The Storm · 2:05")
+    }
+
+    @Test fun theFullPlayerAddsTheSongThatsOnToAPlaylist() = runTest(main.dispatcher) {
+        val lists = app.granger.music.FakePlaylists(app.granger.music.FakeMediaLibrary())
+        val road = lists.create("Road trip")
+        val hub = FakePlayerHub(musicUi(track("a", "Song A")))
+        val vm = PlayerViewModel(hub, playlists = lists)
+        val collecting = backgroundScope.launch { vm.allPlaylists.collect {} }
+        testScheduler.advanceUntilIdle()
+        vm.addNowPlayingToPlaylist(road)
+        testScheduler.advanceUntilIdle()
+        assertThat(lists.entries.value[road]).containsExactly(track("a").id)
+        vm.newPlaylistWithNowPlaying("  Mornings ")
+        testScheduler.advanceUntilIdle()
+        assertThat(lists.lists.value.map { it.name }).containsExactly("Road trip", "Mornings")
+        assertThat(lists.entries.value.values.last()).containsExactly(track("a").id)
+        assertThat(PlayerViewModel(hub).canAddToPlaylist).isFalse()
+        collecting.cancel()
     }
 
     @Test fun speedsAndSleepChoicesMatchTheSpec() {

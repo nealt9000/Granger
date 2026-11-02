@@ -9,8 +9,12 @@ class FakeZimArchive(
     override val hasFulltextIndex: Boolean = true,
     override val metadata: ZimMetadata = ZimMetadata("Fake", "", "eng", "2026-10-15", "fake"),
     var random: String? = null,
+    /** Entries stored uncompressed, by path: what [storedRange] gives (the entry must also be in [entries]). */
+    private val stored: Map<String, ZimRange> = emptyMap(),
 ) : ZimArchive {
     override fun resolvePath(path: String): String? = (redirects[path] ?: path).takeIf { it in entries }
+
+    override fun storedRange(path: String): ZimRange? = resolvePath(path)?.let { stored[it] }
 
     override fun read(path: String): ZimItem? = resolvePath(path)?.let { p ->
         val (mimeType, body) = entries.getValue(p)
