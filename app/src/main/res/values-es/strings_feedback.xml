@@ -12,4 +12,22 @@
     <string name="feedback_kind_crash">Cierre inesperado</string>
     <string name="feedback_kind_native">Cierre inesperado (nativo)</string>
     <string name="feedback_kind_anr">No responde</string>
+    <string name="report_action">Reportar</string>
+    <string name="report_title">Reportar esta respuesta</string>
+    <string name="report_title_guess">Reportar esta mejor suposición</string>
+    <string name="report_what">¿Qué está mal?</string>
+    <string name="report_reason_wrong">Incorrecta o inventada</string>
+    <string name="report_reason_offensive">Ofensiva</string>
+    <string name="report_reason_unsafe">Peligrosa o dañina</string>
+    <string name="report_reason_other">Otra cosa</string>
+    <string name="report_note">Algo que añadir (opcional)</string>
+    <string name="report_includes_question">Tu pregunta</string>
+    <string name="report_includes_answer">La respuesta</string>
+    <string name="report_includes_guess">La mejor suposición</string>
+    <plurals name="report_includes_sources">
+        <item quantity="one">El título de su fuente</item>
+        <item quantity="other">Los títulos de sus %1$d fuentes</item>
+    </plurals>
+    <string name="report_includes_build">La versión de Granger y el modelo de tu teléfono</string>
+    <string name="report_privacy">Tu app de correo se abre con este correo a %1$s. No se envía nada más de tus chats, y nada sale de este teléfono hasta que lo envíes.</string>
 </resources>

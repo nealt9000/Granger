@@ -14,4 +14,23 @@
     <string name="feedback_kind_crash">Crash</string>
     <string name="feedback_kind_native">Native crash</string>
     <string name="feedback_kind_anr">Not responding</string>
+    <!-- Report this answer (Play's AI-generated content policy): a flag on an Ask reply. The email stays English. -->
+    <string name="report_action">Report</string>
+    <string name="report_title">Report this answer</string>
+    <string name="report_title_guess">Report this best guess</string>
+    <string name="report_what">What\'s wrong?</string>
+    <string name="report_reason_wrong">Wrong or made up</string>
+    <string name="report_reason_offensive">Offensive</string>
+    <string name="report_reason_unsafe">Unsafe or harmful</string>
+    <string name="report_reason_other">Something else</string>
+    <string name="report_note">Anything to add (optional)</string>
+    <string name="report_includes_question">Your question</string>
+    <string name="report_includes_answer">The answer</string>
+    <string name="report_includes_guess">The best guess</string>
+    <plurals name="report_includes_sources">
+        <item quantity="one">The title of its %1$d source</item>
+        <item quantity="other">The titles of its %1$d sources</item>
+    </plurals>
+    <string name="report_includes_build">Granger\'s version and your phone\'s model</string>
+    <string name="report_privacy">Your mail app opens with this email to %1$s. Nothing else from your chats is sent, and nothing leaves this phone until you send it.</string>
 </resources>

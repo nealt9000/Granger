@@ -498,6 +498,49 @@ class ResearchPipelineTest {
     }
 
     @Test
+    fun withMedicalQuotesAMedicalAnswerIsTheCitedSentencesWithNoStreamedProse() = runTest {
+        val pulse = passage(
+            "H",
+            "The heart pumps blood. A normal resting heart rate for adults is 60 to 100 beats per minute. Athletes may be lower.",
+            "Heart",
+        )
+        val gen = FakeGenerator(
+            rewrite = { flowOf("keywords: heart rate, resting\nmedical: yes") },
+            answer = { flowOf("For adults, a normal resting heart rate ", "is 60 to 100 beats per minute [1].") },
+        )
+        val events = ResearchPipeline(FakeFinder(listOf(pulse)), FakeModels(gen), medicalQuotes = true)
+            .run(ResearchRequest("what's a normal resting heart rate")).toList()
+        val partials = events.filterIsInstance<ResearchEvent.Partial>().map { it.text }
+        val quoted = "\u201cA normal resting heart rate for adults is 60 to 100 beats per minute.\u201d [1]"
+        // The model's prose never reaches the screen: the one Partial is the quote.
+        assertThat(partials).containsExactly(quoted)
+        val out = outcome(events) as Outcome.Answered
+        assertThat(out.text).isEqualTo(quoted)
+        assertThat(out.medical).isTrue()
+        assertThat(out.cited).containsExactly(1)
+    }
+
+    @Test
+    fun withMedicalQuotesAMedicalDeclineStaysADecline() = runTest {
+        val gen = FakeGenerator(
+            rewrite = { flowOf("keywords: water, boils\nmedical: yes") },
+            answer = { flowOf("NOT IN LIBRARY") },
+        )
+        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(gen), medicalQuotes = true)
+            .run(ResearchRequest("Is boiling water safe to drink after a flood?")).toList()
+        assertThat(events.filterIsInstance<ResearchEvent.Partial>()).isEmpty()
+        assertThat(outcome(events)).isInstanceOf(Outcome.Declined::class.java)
+    }
+
+    @Test
+    fun withMedicalQuotesANonMedicalAnswerStreamsAsBefore() = runTest {
+        val events = ResearchPipeline(FakeFinder(listOf(water)), FakeModels(FakeGenerator(), embedder = embedder), medicalQuotes = true)
+            .run(ResearchRequest("At what temperature does water boil?")).toList()
+        assertThat(events.filterIsInstance<ResearchEvent.Partial>().last().text).isEqualTo("Water boils at 100 °C [1].")
+        assertThat((outcome(events) as Outcome.Answered).text).isEqualTo("Water boils at 100 °C [1].")
+    }
+
+    @Test
     fun lexiconMarksMedicalWhenRewriteSaysNo() = runTest {
         val gen = FakeGenerator(rewrite = { flowOf("keywords: stroke, warning signs\nmedical: no") })
         val out = outcome(

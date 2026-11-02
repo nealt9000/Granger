@@ -440,15 +440,38 @@ class ResearchViewModel(
         title.value = ""
     }
 
+    /** Why Ask is off on this phone (the model failed its self-check), or null. */
+    val checkFailure = models.checkFailure
+
+    /** Try again after a failed self-check: the next question tests the model afresh. */
+    fun retryCheck() {
+        appScope.launch { logErrors { models.retryCheck() } }
+    }
+
+    /** Set while this chat is on screen: the models stay loaded (Neal, 2026-11-02); null while it isn't. */
+    private var keepOpen: (() -> Unit)? = null
+
+    /** The chat is on screen (started): the models stay loaded until [hidden] and five minutes after. */
+    fun shown() {
+        if (keepOpen == null) keepOpen = models.keepWhileOpen()
+    }
+
+    /** The chat left the screen (a reader on top, another tool, the app hidden): the quiet spell may start. */
+    fun hidden() {
+        keepOpen?.invoke()
+        keepOpen = null
+    }
+
     override fun onCleared() {
         job?.cancel()
+        hidden()
         models.releaseSoon()
     }
 
     /**
      * Runs [work] as the one running turn; nothing else starts until it ends. The turn holds the models, so a release
      * asked for meanwhile (the app going to the background) waits for its end rather than reloading between stages;
-     * after it, they go after a quiet spell, so a chat left open (or under a reader) doesn't keep them.
+     * after it, they stay while an Ask screen is open ([shown]) and go a quiet spell after the last one closes.
      */
     private fun begin(work: suspend () -> Unit) {
         stopRequested = false

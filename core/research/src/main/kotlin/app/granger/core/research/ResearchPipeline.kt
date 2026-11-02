@@ -181,6 +181,12 @@ class ResearchPipeline(
      * [ReactionTopic.DEFAULT].
      */
     private val reactions: (suspend () -> TopicCentroids?)? = null,
+    /**
+     * Ask Preview's medical rule (Neal, 2026-11-02): a medical question's reply is written out of sight, with no
+     * [ResearchEvent.Partial]s, and an answer becomes the cited passages' own sentences ([MedicalQuotes]). A decline
+     * stays a decline. On in the app; the eval harness leaves it off to score the prose.
+     */
+    private val medicalQuotes: Boolean = false,
 ) {
     /**
      * [stop] is polled after each chunk of the reply; when it turns true the reply so far is checked and finished.
@@ -281,7 +287,9 @@ class ResearchPipeline(
 
         emit(ResearchEvent.Reading(passages.size))
         emit(ResearchEvent.Progress(Stage.WRITING))
-        val streamed = streamReply(model, AnswerPrompt.build(request.question, passages, medical, request.prior, hasQuote = quote != null, worked(passages)), stop)
+        val quoted = medical && medicalQuotes
+        val prompt = AnswerPrompt.build(request.question, passages, medical, request.prior, hasQuote = quote != null, worked(passages))
+        val streamed = streamReply(model, prompt, stop, show = !quoted)
         val reply = streamed.text
         if (reply == null) {
             // Reported here, not thrown: a failure would reach the collector without the flags the pipeline knows.
@@ -290,6 +298,16 @@ class ResearchPipeline(
         }
 
         val outcome = when (val check = Citations.check(reply, passages.size, languages)) {
+            is CitationCheck.Valid if quoted -> {
+                val text = MedicalQuotes.build(reply, passages, check.cited, languages)
+                if (text.isBlank()) {
+                    Outcome.Unverified(reply, passages, candidates, medical, keywords)
+                } else {
+                    // One piece, so the screen and "Speak answers as they arrive" have it before the turn settles.
+                    emit(ResearchEvent.Partial(text))
+                    Outcome.Answered(text, passages, check.cited, candidates, medical, keywords)
+                }
+            }
             is CitationCheck.Valid ->
                 Outcome.Answered(reply, passages, check.cited, candidates, medical, keywords)
             CitationCheck.ModelDeclined -> Outcome.Declined(medical, keywords, passages, reply)
@@ -317,8 +335,11 @@ class ResearchPipeline(
         emit(ResearchEvent.Done(Outcome.Guessed(reply)))
     }
 
-    /** Streams the reply as [ResearchEvent.Partial]s, polling [stop] after each chunk; returns the text so far, or the failure. */
-    private suspend fun FlowCollector<ResearchEvent>.streamReply(model: TextGenerator, prompt: String, stop: () -> Boolean): StreamResult {
+    /**
+     * Streams the reply as [ResearchEvent.Partial]s (none when not [show]), polling [stop] after each chunk; returns the
+     * text so far, or the failure.
+     */
+    private suspend fun FlowCollector<ResearchEvent>.streamReply(model: TextGenerator, prompt: String, stop: () -> Boolean, show: Boolean = true): StreamResult {
         var failure: Throwable? = null
         val text = model.generate(prompt, ANSWER_TOKENS)
             .catch { e ->
@@ -331,7 +352,7 @@ class ResearchPipeline(
             }
             .fold("") { soFar, chunk ->
                 val text = soFar + chunk
-                emit(ResearchEvent.Partial(text))
+                if (show) emit(ResearchEvent.Partial(text))
                 text
             }
         return if (failure != null) StreamResult(null, failure) else StreamResult(text, null)
