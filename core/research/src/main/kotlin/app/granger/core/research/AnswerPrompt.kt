@@ -60,7 +60,7 @@ object AnswerPrompt {
                 if (i > 0) appendLine()
                 appendLine(header(i + 1, p))
                 val limit = if (p.kind == SourceKind.SELECTION) QUOTE_CHARS else TEXT_CHARS
-                appendLine(cut(p.text, limit))
+                appendLine(cutKeepingKind(p.text, limit))
             }
             appendLine()
             if (worked != null) {
@@ -79,6 +79,19 @@ object AnswerPrompt {
         if (p.meta.collection.isNotBlank()) append(" · ${p.meta.collection}")
         if (p.heading.isNotBlank()) append(" · ${p.heading}")
     }.let { cut(it, MAX_HEADER) }
+
+    /**
+     * As [cut], but a card's last line, "In your library as: …" (LibraryPassageFinder, MediaCards), survives the cut:
+     * it is what tells the model a book, album or pack is on the phone.
+     */
+    private fun cutKeepingKind(text: String, max: Int): String {
+        if (text.length <= max) return text
+        val last = text.substringAfterLast('\n')
+        if ('\n' !in text || !last.startsWith(LIBRARY_AS) || last.length > max / 4) return cut(text, max)
+        return cut(text.substringBeforeLast('\n'), max - last.length - 1) + "\n" + last
+    }
+
+    private const val LIBRARY_AS = "In your library as:"
 
     /** Cuts to at most [max] characters at a word boundary and appends an ellipsis. */
     private fun cut(text: String, max: Int): String {

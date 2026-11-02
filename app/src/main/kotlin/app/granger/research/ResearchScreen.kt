@@ -650,6 +650,7 @@ private fun AnswerBlock(
                 // The owl's wry decline, steady per turn; a health question keeps the plain words.
                 val declined = when {
                     ui.personalMedical -> stringResource(R.string.research_personal_medical)
+                    ui.englishOnly -> stringResource(R.string.research_english_only)
                     ui.medical || !owlSpeaks() -> stringResource(R.string.research_declined)
                     else -> OwlLines.decline(turn.id)
                 }
@@ -967,6 +968,7 @@ private fun Notice(text: String, action: String? = null, onAction: () -> Unit = 
 internal fun spokenOutcome(res: android.content.res.Resources, ui: TurnUi, owl: Boolean): String? = when (ui.turn.outcome) {
     TurnOutcome.DECLINED -> when {
         ui.personalMedical -> res.getString(R.string.research_personal_medical)
+        ui.englishOnly -> res.getString(R.string.research_english_only)
         ui.medical || !owl -> res.getString(R.string.research_declined)
         else -> OwlLines.decline(ui.turn.id)
     }

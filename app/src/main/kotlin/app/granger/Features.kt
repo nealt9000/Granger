@@ -23,4 +23,11 @@ object Features {
      * it back on. Debug builds keep it for testing.
      */
     val ARCHIVE_WAIVER = BuildConfig.DEBUG
+
+    /**
+     * Ask answering a question in Spanish. Off in release (Neal, 2026-11-02: Spanish ships in the closed test, Spanish
+     * Ask stays off until its medical bar passes at the phone baseline, Plan L4), so a Spanish question is declined
+     * with "Ask answers in English for now". Debug builds keep it for the L4 baseline.
+     */
+    val SPANISH_ASK = BuildConfig.DEBUG
 }

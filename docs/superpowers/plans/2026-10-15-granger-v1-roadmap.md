@@ -108,6 +108,7 @@ Neal's calls from the review: **feature freeze** until the closed test is runnin
 - [x] Ask: a **medical** question shows the banner and the quoted passages, without generated prose: the reply is written out of sight and only picks the sentences of the passages it cited; a decline stays a decline. On in every app build; the eval harness keeps scoring the prose. `ask-release` a433efdb.
 - [x] Ask: on any phone where the model fails a short self-check on its first load ("What is 2 + 2?", with a marker on disk first, so a native crash shows at the next launch), Ask leaves the rail and the selection menus, Ask and Readiness say why, and Try again checks afresh. `ask-release` 5a88a734.
 - [x] Ask: the model stays loaded while an Ask screen is open and is released 5 minutes after the last one closes (Neal's decision); the app being hidden still releases it at once. `ask-release` 2267514a.
+- [x] Ask: Spanish Ask stays off in release (Neal's call): a Spanish-led question is declined as "Ask answers in English for now", with Search instead; `Features.SPANISH_ASK` keeps it on in debug for the L4 baseline. `ask-cleanup` 554a84dc.
 - [ ] Phone check of the four Ask items above on the next internal build: Report opens Gmail with the reply; a medical question ("what is a normal resting heart rate?") shows quotes under the banner; the self-check passes on the Pixel 6 and 7 (logcat "Model self-check replied"); the model is still loaded after six minutes in a chat.
 - [x] archive.org: the 1930 filter is fixed in the Play build (`Features.ARCHIVE_WAIVER`, off in release; Plan 10's flavours take it over). `cl-cleanup` a3442365.
 - [ ] Clásicos Granger: check each work's first publication year; keep works first published after 1930 out of what the Play build offers (US copyright, restored works; the policy check §3).
@@ -304,19 +305,19 @@ For Plan 9 (all done in Plan 9 except the SD-card measurement, which is carried 
 - Lexical ranking reaches the model on the right questions but sometimes with off-topic passages: "Tell me about the life of Ray Charles" was answered from the Hank Crawford article's references, and the Hamlet follow-up from a Ben Jonson introduction. "Why was Ray banned from playing in Georgia?" got a misread rewrite (`ray turner, georgia baseball, ban reason…`) and the model declined it. Rewrite quality and passage choice are for the eval.
 - Tune `lexicalThreshold` (0.32) and `cosineThreshold` (0.40) on the eval set; the rerank decision above; the 9 s target is met only with lexical ranking (6.4–7 s to the first words for "Who wrote Hamlet?" after this change, once the benchmark's own recording time is taken off).
 - Models are still `evalPassed: false`.
-- "Search instead" passes every rewrite keyword joined, which the library's Search rarely matches ("world cup 2031 football soccer…" found nothing).
+- ~~"Search instead" passes every rewrite keyword joined, which the library's Search rarely matches ("world cup 2031 football soccer…" found nothing).~~ Fixed: it searches the first keyword (87c3b844). (2026-11-02)
 - With rerank off, EmbeddingGemma (165 MB) is still listed in Settings → Models but unused; hide it or say so.
-- Answers can carry Markdown (`*Hamlet*`), shown as typed.
+- ~~Answers can carry Markdown (`*Hamlet*`), shown as typed.~~ Fixed: Markdown is laid out (U3c); "2*3*4" keeps its stars, `ask-cleanup` 37d14fdd. (2026-11-02)
 - The last scroll once stopped short of a finished turn's source cards (after Retry).
-- Any failure reads "The model needs repair". Tell search and storage (IO) failures apart from the model's.
-- Enforce the prompt budget at runtime; chars/4 undercounts tokens in non-English text.
-- The rail's Research tool does nothing while a kept chat is open (`launchSingleTop` keeps it); only **+** starts a new chat, unlike `openResearch`.
+- ~~Any failure reads "The model needs repair". Tell search and storage (IO) failures apart from the model's.~~ Fixed: a search failure has its own outcome (8de3c58d); an unexpected error mid-turn (storage, a bug) now reads as one too, not as the model, `ask-cleanup` 96613ab4. (2026-11-02)
+- ~~Enforce the prompt budget at runtime; chars/4 undercounts tokens in non-English text.~~ Fixed: `AnswerPrompt.fit` drops passages to 3,400 tokens, chars/3 for mostly non-ASCII text (8de3c58d). (2026-11-02)
+- ~~The rail's Research tool does nothing while a kept chat is open (`launchSingleTop` keeps it); only **+** starts a new chat, unlike `openResearch`.~~ Fixed: the rail opens a new chat (5642b21b). (2026-11-02)
 - Gate `Features.RESEARCH`, or flip `evalPassed`, before any release build.
 - Measure the per-keyword ZIM search cost on a full Wikipedia on the SD card before the beta.
 - Add a JVM test for ranking with `corpus` = all the passages found.
-- Only one model use runs at a time, and the wait for it counts toward the rewrite's 5 s timeout, so a question asked while another chat answers can fall back to plain keywords. Start the timeout once the model is free.
-- A background release requested mid-turn still runs at the turn's end even if the app is back in front, so the next question reloads the model.
-- A medical turn that is stopped or fails before its first words stores the question's medical hint rather than the pipeline's flag, so its banner can vanish once settled.
+- ~~Only one model use runs at a time, and the wait for it counts toward the rewrite's 5 s timeout, so a question asked while another chat answers can fall back to plain keywords. Start the timeout once the model is free.~~ Fixed: the rewrite's timer starts once the model is free (8de3c58d). (2026-11-02)
+- ~~A background release requested mid-turn still runs at the turn's end even if the app is back in front, so the next question reloads the model.~~ Fixed: `appReturned()` turns a pending release into the quiet spell, and none runs while an Ask screen is open (8de3c58d). (2026-11-02)
+- ~~A medical turn that is stopped or fails before its first words stores the question's medical hint rather than the pipeline's flag, so its banner can vanish once settled.~~ Fixed: the turn stores the pipeline's own flag, set right after the rewrite (8de3c58d). (2026-11-02)
 - `deleteChat` and the Room `turns`/`recent` flows behind `stateIn` still have no error guard; a storage failure there can crash the app.
 - No JVM tests for the citation tab-lookup catch or the card-matching dispatcher move.
 - Minor polish deferred from the reviews: no `--release 17` on `:core:research`; `HtmlPassages` doesn't split on no-break spaces; `Rewrite.parse` doesn't cap at 6 keywords or reject an echoed placeholder; `Keywords` drops apostrophes (O'Brien → obrien) that passage text keeps; the question is capped at 1,000 characters, but the prompt header isn't length-capped; `Ranking.cosine` doesn't check vector sizes; `Citations.strip` eats newlines before a group; `ModelManager` closes the resident model before checking the requested file exists and doesn't enforce the tier; a large-model reload failure mid-answer fails the turn instead of falling back; `BookIndex.passages` takes its rows without `ORDER BY` and one damaged book drops all book passages; a citation to a vanished reading tab does nothing; `ZimUrls.forEntry` doesn't encode the fragment.
@@ -362,9 +363,9 @@ Still open:
 - Plan 10: packs marked non-commercial (spec §10a) never count toward the Free cap.
 - Plan 11: the Play policy check covers non-commercial packs as well as the archive.org source.
 - Minor findings from the final review (Research ones are debug-only):
-  - `Citations` treats a first sentence like "The ruins were not found until 1911 [1]." as a decline; skip the decline phrases when the sentence carries a citation.
-  - The wider medical lexicon flags "Doctor Zhivago", "computer virus" and "Tropic of Cancer", which then get the banner and no Best guess.
-  - `AnswerText` italicises the middle of "2*3*4" and drops the asterisks.
+  - ~~`Citations` treats a first sentence like "The ruins were not found until 1911 [1]." as a decline; skip the decline phrases when the sentence carries a citation.~~ Fixed: "not found / covered / included / listed" declines only when the sentence cites nothing, `ask-cleanup` 37d14fdd. (2026-11-02)
+  - ~~The wider medical lexicon flags "Doctor Zhivago", "computer virus" and "Tropic of Cancer", which then get the banner and no Best guess.~~ Fixed: those titles (and Doctor Who, Doctor Strange) are blanked before the lexicon runs, `ask-cleanup` 37d14fdd. (2026-11-02)
+  - ~~`AnswerText` italicises the middle of "2*3*4" and drops the asterisks.~~ Fixed: a star between digits stays as typed, `ask-cleanup` 37d14fdd. (2026-11-02)
   - ~~iFixit's catalog description is Kiwix's summary cut off at "Let's …", now visible in the Kiwix listing; give it a curated description.~~ Fixed 2026-11-02: already has a curated description (checked 2026-11-02).
 - The eval needs the phone: `tools/eval` runs over adb (Wi-Fi works), about 70 s a question. The held-out split stays unread by whoever tunes.
 
@@ -533,9 +534,9 @@ Research and the eval:
 - The word-by-word fallback runs for every question. Watch for media intrusion in later runs.
 - Folder-named albums have no artist, so the model adds "Gustav" to "Holst" from its own knowledge.
 - The cue list also catches non-media phrasings ("composed of", "world record", "track and field", "rubber band"). That means a cap of 2 and a lifted card there. Cues read only the question, so follow-ups stay at a cap of 1.
-- A card over 1,200 characters loses its tail, including "In your library as", to `AnswerPrompt`'s cut.
+- ~~A card over 1,200 characters loses its tail, including "In your library as", to `AnswerPrompt`'s cut.~~ Fixed: the cut keeps a card's last "In your library as" line, `ask-cleanup` 96613ab4. (2026-11-02)
 - `LexicalScore` doesn't fold accents, but the media gate does.
-- A CORRUPT (not MISSING) audiobook still opens from a citation.
+- ~~A CORRUPT (not MISSING) audiobook still opens from a citation.~~ Fixed: an audiobook that isn't OK is left out of the media index, as the player already refuses it, `ask-cleanup` 70926345. (2026-11-02)
 - `media.json` has to be re-exported and validated if Holst is re-tagged or moved, or the album-key rules change. The "Venus" album's artist tag is "Release - Topic".
 - ~~The Mac's system Python has no pytest. `tools/dev` should say how to make the eval venv.~~ Fixed 2026-11-02: `tools/dev/MAC-SETUP.md` lists the venvs and how to make them, `cl-cleanup`.
 
@@ -808,7 +809,7 @@ Neal's findings from the walkthrough, outside R3's scope:
 - **Vocabulary-gap questions still miss:** "what book has a marooned guy wanting a bit of cheese?" (Ben Gunn, *Treasure Island*) gives "not in your library", and Best guess calls it too vague; "a bit of toasted cheese" finds recipes. This is R1's dense retrieval, not merged yet; worth adding to R2's tuning or held-out set.
 - **"Loading model" on nearly every question:** the model unloads after two quiet minutes (`ModelManager.releaseAfterMs = 120_000`); Neal's questions were 2½–6 minutes apart (10 loads in 33 minutes). A longer timer keeps about 2 GB resident longer: a trade-off to decide.
 - **Think deeper (the larger model) has never added value for Neal**, as R0 found; whether it stays is open.
-- **Research UX:** + doesn't start a fresh, clean chat; Back leaves Research across the app instead of going to the chat list (today the list is reached only by deleting the current chat).
+- ~~**Research UX:** + doesn't start a fresh, clean chat; Back leaves Research across the app instead of going to the chat list (today the list is reached only by deleting the current chat).~~ Fixed: + opens a fresh chat (a3fac579); Back returns to the earlier chat only when this one came from the Chats sheet (U3a Decision 9). (2026-11-02)
 - **V2 follow-up:** with read-aloud on, a speaker icon for the Research chat does nothing when tapped (R3 doesn't touch those lines; the spoken-answer button or the rail's live entry, not yet narrowed down).
 - **E-book reader:** copying and pasting a selection is sometimes jittery and buggy.
 
@@ -932,7 +933,7 @@ Still open:
 The Spanish vectors (194 files, 416 MB, release `vectors-es-2026-11-01`, descriptors on `l4-spanish-eval` and `l3-spanish-knowledge`) were built on the Mac on 2026-10-31 to 11-01. Two things for the next catalog build:
 - **English Python docs vectors are stale.** Kiwix published `devdocs_en_python` 2026-10-31; the vectors were built from 2026-08-02. Vectors fit one snapshot only, so the next catalog build reports them ("rebuild it") and leaves them out: that pack falls back to keyword search until its vectors are rebuilt (a few minutes on the Mac).
 - **The Spanish vectors can go stale the same way.** They match the Kiwix snapshots of 2026-10 (iFixit 2026-03). If Kiwix publishes a newer Spanish snapshot before L3's catalog is built and signed, that pack's vectors are left out; check the build's "Search vectors left out" report and rebuild any pack it names before signing.
-- **Spanish Ask isn't gated in code.** Ask is debug-only on main (`Features.RESEARCH`), so no release build reaches it. Before Ask goes on in release (F1 part 2, `f1-friend-build`), a Spanish-led question (`ResearchLanguage.main`) must stay off there until Spanish Ask's medical bar passes at the phone baseline (lexicon OR model flag on all three Spanish label sets; Plan L4).
+- ~~**Spanish Ask isn't gated in code.** Ask is debug-only on main (`Features.RESEARCH`), so no release build reaches it. Before Ask goes on in release (F1 part 2, `f1-friend-build`), a Spanish-led question (`ResearchLanguage.main`) must stay off there until Spanish Ask's medical bar passes at the phone baseline (lexicon OR model flag on all three Spanish label sets; Plan L4).~~ Fixed: `Features.SPANISH_ASK` (debug only) — in release a Spanish-led question is declined as English only, with no search, model run or best guess, `ask-cleanup` 554a84dc. (2026-11-02)
 - **From the Spanish walkthrough (2026-11-02, Pixel 6, build 1051):**
   - Get more's search doesn't fold accents: "tranvia" doesn't find "La novela en el tranvía" (Clásicos; likely Kiwix too). Phones type without accents.
   - Kiwix category names stay English in Spanish: the chips and section headings ("Medical", "Reference", "Literature & Drama"); likewise the Classics' English section names ("Scripture & religion") and the licence label "Public domain (US)".

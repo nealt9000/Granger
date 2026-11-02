@@ -26,6 +26,14 @@ class AnswerPromptTest {
     }
 
     @Test
+    fun aLongCardKeepsItsInYourLibraryAsLine() {
+        val card = darwin.copy(text = "Title: Origin\n" + "word ".repeat(400) + "\nIn your library as: e-book")
+        val p = build(listOf(card))
+        assertThat(p).contains("…\nIn your library as: e-book")
+        assertThat(p).doesNotContain("word ".repeat(250))
+    }
+
+    @Test
     fun theHeaderIsLengthCapped() {
         val long = darwin.copy(sourceTitle = "T".repeat(5_000), meta = SourceMeta(author = "A".repeat(5_000)))
         val header = build(listOf(long)).lines().first { it.startsWith("[1]") }

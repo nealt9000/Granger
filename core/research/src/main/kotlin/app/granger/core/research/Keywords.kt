@@ -136,6 +136,15 @@ object Medical {
     private val PATTERN = Regex((TERMS + WHOLE_WORDS).joinToString("|"), RegexOption.IGNORE_CASE)
 
     /**
+     * Titles and senses that hold a medical word but aren't about health, blanked before [PATTERN] runs: a novel, a
+     * film, a TV series, malware, the line of latitude. The question stays medical if another term is in it.
+     */
+    private val NOT_MEDICAL = Regex(
+        "\\b(doctor zhivago|doctor who|doctor strange|computer (virus|viruses)|tropic of cancer)\\b",
+        RegexOption.IGNORE_CASE,
+    )
+
+    /**
      * Each language's lexicon that [text] may be in ([ResearchLanguage.of]): English unless it's clearly Spanish
      * (Spanish "mole" is a sauce), Spanish ([MedicalEs]) unless it's clearly English, so an English question gets
      * exactly what it got before Spanish.
@@ -146,7 +155,7 @@ object Medical {
     }
 
     /** The English lexicon alone, as it was before Spanish. */
-    internal fun english(text: String): Boolean = PATTERN.containsMatchIn(text)
+    internal fun english(text: String): Boolean = PATTERN.containsMatchIn(NOT_MEDICAL.replace(text, " "))
 }
 
 /**

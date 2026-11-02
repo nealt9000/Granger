@@ -213,7 +213,8 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, private val compute
         val chapters = inputs.chapters.groupBy { it.audiobookId }
         val books = mutableListOf<Doc<Audiobook>>()
         for (b in inputs.books) {
-            if (b.status == PackStatus.MISSING) continue
+            // Missing or damaged: not searched, cited or opened, as the player won't play it (AudiobooksViewModel.playableBook).
+            if (b.status != PackStatus.OK) continue
             val sorted = chapters[b.id].orEmpty().sortedBy { it.ordinal }
             val parts = sorted.map { it.title }
             val fields = listOf(

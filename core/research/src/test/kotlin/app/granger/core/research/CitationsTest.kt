@@ -144,4 +144,12 @@ class CitationsTest {
     fun stripKeepsNewlines() {
         assertThat(Citations.strip("One.\n\n[1] Two [2].")).contains("\n\n")
     }
+
+    @Test fun aCitedFactWithNotFoundIsNoDecline() {
+        assertThat(Citations.check("The ruins were not found until 1911 [1]. Bingham led the dig [2].", 2))
+            .isEqualTo(CitationCheck.Valid(setOf(1, 2)))
+        // Uncited, it still reads as the model saying the passages lack it; and meta words decline even when cited.
+        assertThat(Citations.check("His birthplace was not found. [1]", 1)).isEqualTo(CitationCheck.ModelDeclined)
+        assertThat(Citations.check("His birthplace is not mentioned [1].", 1)).isEqualTo(CitationCheck.ModelDeclined)
+    }
 }
