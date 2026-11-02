@@ -1089,8 +1089,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             savedState = createSavedStateHandle(),
                             player = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub else null,
                             speakAnswers = { container.voicePrefs.speakAnswers.value },
+                            voice = container.voiceInput,
                         )
                     },
+                    voicePrefs = container.voiceInput.prefs,
                     focusInput = route.quote != null,
                     onOpenCitation = { target ->
                         // Pushed over the chat (Research isn't a reader), so Back returns to it.

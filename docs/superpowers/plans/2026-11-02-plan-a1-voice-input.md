@@ -117,10 +117,11 @@
 
 **Files:** modify `app/src/main/kotlin/app/granger/research/ResearchScreen.kt` (one slot beside Send), `ResearchViewModel.kt` (one hook); tests in `ResearchViewModelTest.kt`.
 
-- [ ] A `MicButton` beside Send, hidden while an answer is running and when the app's language has no Ask (Spanish while Spanish Ask is off). *Note 2026-11-02: no code switch for "Spanish Ask off" was found on main after L4. Check with Neal what gates it before building this.* Partials fill `input`; the final replaces it.
-- [ ] With **Ask as soon as I stop talking** on, the final sends if `canSend`; otherwise it waits in the box with the cursor at the end.
-- [ ] A view-model test for each: the final waits; the final sends with the setting on; the mic hides while running.
-- [ ] **Commit.** `A1: speak a Research question`
+- [x] A `MicButton` beside Send, hidden while an answer is running and when the app's language has no Ask (Spanish while Spanish Ask is off). *Note 2026-11-02: no code switch for "Spanish Ask off" was found on main after L4. Check with Neal what gates it before building this.* Partials fill `input`; the final replaces it.
+- [x] With **Ask as soon as I stop talking** on, the final sends if `canSend`; otherwise it waits in the box with the cursor at the end.
+- [x] A view-model test for each: the final waits; the final sends with the setting on; the mic hides while running.
+- [x] *Done 2026-11-02 (phone check still to do).* There's no Spanish Ask switch yet (Neal: not built), so `ResearchViewModel.ASK_VOICE_LANGUAGES = setOf("en")` keeps the ask box's mic to English for now; change it when Spanish Ask lands. Spoken words go after anything already typed. 4 tests in `ResearchViewModelTest` (80 pass). Test quirk: in that class `advanceUntilIdle` can return before the voice status is looked up, so the helper waits on it with `first { }`.
+- [x] **Commit.** `A1: speak a Research question`
 
 ### Task 7: Settings → Voice input
 
