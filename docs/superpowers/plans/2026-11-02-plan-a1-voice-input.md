@@ -37,6 +37,8 @@
 - **The microphone permission** is asked for on the first mic tap, with one line saying why. If you refuse twice, the mic stays and its tap explains how to allow it in the phone's settings.
 - **Spanish recognizer tag:** the best match among the installed languages (`es-ES` on the Pixel 6, else `es-US`, else any `es-*`). If none is installed but one is supported, Settings offers the download.
 
+- **Built for conversation mode next** (Neal, 2026-11-02: the next thing to use A1 is a conversation mode in Ask, where you speak, the answer is read aloud, and it listens again). So `Dictation` knows nothing about a screen: it can be started from code as well as by a tap, its final text goes to a callback, and it never hears Granger's own voice (it starts only after read-aloud has stopped, and read-aloud stops before it starts). The "Ask as soon as I stop talking" path is the same send that conversation mode will make. A1 builds none of the loop.
+
 ## Global Constraints
 
 - **Coordinate with the Ask session.** It owns `ResearchScreen.kt` and `ResearchViewModel.kt` (and has unmerged work on `cl-cleanup`). Task 6 touches the ask box only through one slot and one view-model hook, and starts after a word with that session about which branch to build on. Search's files are changed by L2 (unmerged), so Task 5 rebases on whatever has merged by then.
@@ -125,6 +127,7 @@
 
 ## Later (not A1)
 
+- **Conversation mode in Ask (next):** speak, the answer is read aloud (V2's spoken answers), then the mic listens again, hands-free until you stop. It builds on `Dictation`, auto-send, and read-aloud's end-of-speech signal. Open questions for its own plan: how a turn ends (the endpointer, as in the spike), how to interrupt an answer by speaking (that needs echo handling, since the recognizer would hear the speaker), and what the screen shows.
 - **Spoken commands:** *Open/Play/Read <title>* acting straight away, app sections (*Open music*), reader and player commands (*Next chapter*, *Pause*). The matcher's command-first rule from Task 5 of the spike belongs here.
 - **Correcting names inside a question** (*Thorough* → Thoreau) against the library's entities before the pipeline sees it.
 - **The iPhone path** (I0): `SFSpeechRecognizer` with `requiresOnDeviceRecognition`, the same `SpokenTitleMatcher`.
