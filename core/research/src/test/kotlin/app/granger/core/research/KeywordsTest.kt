@@ -38,6 +38,17 @@ class KeywordsTest {
         assertThat(Medical.looksMedical("How does a steam engine work?")).isFalse()
     }
 
+    @Test fun titlesAndSensesWithAMedicalWordArentMedical() {
+        assertThat(Medical.looksMedical("Who wrote Doctor Zhivago?")).isFalse()
+        assertThat(Medical.looksMedical("How does a computer virus spread?")).isFalse()
+        assertThat(Medical.looksMedical("Which countries lie on the Tropic of Cancer?")).isFalse()
+        assertThat(Medical.looksMedical("When did Doctor Who first air?")).isFalse()
+        // Another term still counts, and the words alone still do.
+        assertThat(Medical.looksMedical("Did the author of Doctor Zhivago have cancer?")).isTrue()
+        assertThat(Medical.looksMedical("How does a virus spread?")).isTrue()
+        assertThat(Medical.looksMedical("When should I see a doctor?")).isTrue()
+    }
+
     @Test fun apostrophesInNamesStayAsInPassageText() {
         assertThat(Keywords.extract("Who was O'Brien?")).containsExactly("o'brien")
         assertThat(Keywords.normalize("O\u2019Brien")).isEqualTo("o'brien")

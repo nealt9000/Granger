@@ -110,6 +110,7 @@ object AnswerText {
 
     /**
      * A mark opens only before a non-space and with a closing mark later on the same line; it closes after a non-space.
+     * A single star between two digits is multiplication and stays as typed.
      * With [code], a backtick with another later on the line opens a code span, taken as typed: no emphasis or
      * citations inside it.
      */
@@ -121,11 +122,13 @@ object AnswerText {
         var b = false
         var i = false
         var k = 0
+        // A single star between digits is a times sign ("2*3*4"), never emphasis.
+        fun times(at: Int) = at > 0 && answer[at - 1].isDigit() && at + 1 < answer.length && answer[at + 1].isDigit()
         fun closes(at: Int, mark: String): Boolean {
             var j = at
             while (j < answer.length && answer[j] != '\n') {
                 if (answer.startsWith(mark, j) && j > at && !answer[j - 1].isWhitespace() &&
-                    (mark.length == 2 || !answer.startsWith("**", j))
+                    (mark.length == 2 || (!answer.startsWith("**", j) && !times(j)))
                 ) return true
                 j++
             }
@@ -141,7 +144,7 @@ object AnswerText {
                     continue
                 }
             }
-            if (c == '*') {
+            if (c == '*' && !times(k)) {
                 val double = answer.startsWith("**", k)
                 val mark = if (double) "**" else "*"
                 val after = k + mark.length

@@ -21,10 +21,15 @@ object Citations {
             "(the |these |provided |given )*(passages?|library|sources?|texts?) (contain|provide|include|mention|say|state)s? no|" +
             "there is no information|no information (is|was) (given|provided|available)|" +
             "i (cannot|can['’]t|could not|couldn['’]t) find|" +
-            "(is|are|was|were) not (mentioned|stated|specified|provided|given|found|covered|included|listed)\\b|" +
+            "(is|are|was|were) not (mentioned|stated|specified|provided|given)\\b|" +
             "not (mentioned|stated|found|covered) in the passages",
         RegexOption.IGNORE_CASE,
     )
+    /**
+     * "X was not found / covered / included / listed": a decline, unless the sentence cites a passage, when it is a fact
+     * ("The ruins were not found until 1911 [1].").
+     */
+    private val lacksAnswerUncited = Regex("(is|are|was|were) not (found|covered|included|listed)\\b", RegexOption.IGNORE_CASE)
     private val goesOnToAnswer = Regex("\\b(but|however|although|though|while|yet)\\b|[;:]\\s*\\S", RegexOption.IGNORE_CASE)
     private val leadingGroup = Regex("^\\s*" + group.pattern + "\\s*")
     private val sentenceEnd = Regex("[.!?](?=\\s)|\\n")
@@ -77,7 +82,8 @@ object Citations {
      */
     private fun declinesInProse(answer: String, spanish: Boolean): Boolean {
         val sentence = firstSentence(answer, spanish)
-        val lacks = lacksAnswer.containsMatchIn(sentence) || (spanish && lacksAnswerEs.containsMatchIn(sentence))
+        val lacks = lacksAnswer.containsMatchIn(sentence) || (spanish && lacksAnswerEs.containsMatchIn(sentence)) ||
+            (lacksAnswerUncited.containsMatchIn(sentence) && !group.containsMatchIn(sentence))
         val goesOn = goesOnToAnswer.containsMatchIn(sentence) || (spanish && goesOnToAnswerEs.containsMatchIn(sentence))
         return lacks && !goesOn
     }

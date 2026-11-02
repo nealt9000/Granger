@@ -53,6 +53,13 @@ class AnswerTextTest {
         ).inOrder()
     }
 
+    @Test fun starsBetweenDigitsAreTimesSigns() {
+        assertThat(AnswerText.segments("So 2*3*4 is 24.")).containsExactly(Segment.Text("So 2*3*4 is 24.")).inOrder()
+        assertThat(AnswerText.segments("Area 3*4 in *Euclid*")).containsExactly(
+            Segment.Text("Area 3*4 in "), Segment.Text("Euclid", italic = true),
+        ).inOrder()
+    }
+
     @Test fun citationsInsideItalicStillLink() {
         assertThat(AnswerText.segments("*As said [1] here* ok")).containsExactly(
             Segment.Text("As said ", italic = true), Segment.Cite(1, italic = true),
