@@ -85,6 +85,8 @@ import kotlinx.coroutines.launch
 
 private const val PLACEHOLDER = "Ask about anything in your library"
 private const val DECLINED = "Not in your library."
+private const val PERSONAL_MEDICAL = "I can't answer questions about your own health. A doctor, nurse or pharmacist can. " +
+    "Search instead shows what your library says on the subject."
 private const val UNVERIFIED = "Couldn't answer from these passages."
 private const val MEDICAL = AnswerText.MEDICAL
 
@@ -419,7 +421,7 @@ private fun AnswerBlock(
             }
             TurnOutcome.UNVERIFIED -> Text(UNVERIFIED, style = MaterialTheme.typography.bodyLarge)
             TurnOutcome.DECLINED -> {
-                Text(DECLINED, style = MaterialTheme.typography.bodyLarge)
+                Text(if (ui.personalMedical) PERSONAL_MEDICAL else DECLINED, style = MaterialTheme.typography.bodyLarge)
                 if (ui.guessing && ui.guessShown) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)

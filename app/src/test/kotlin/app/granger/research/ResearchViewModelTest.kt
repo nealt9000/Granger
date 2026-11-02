@@ -418,6 +418,23 @@ class ResearchViewModelTest {
         assertThat(ui.guessing).isFalse()
     }
 
+    @Test fun aPersonalMedicalQuestionPointsToAProfessional() = runTest(main.dispatcher) {
+        val vm = vm()
+        vm.ask("Should I go to the ER for my chest pain?")
+        testScheduler.advanceUntilIdle()
+        val ui = vm.state.value.turns.single()
+        assertThat(ui.turn.outcome).isEqualTo(TurnOutcome.DECLINED)
+        assertThat(ui.personalMedical).isTrue()
+        assertThat(ui.offersGuess).isFalse()
+    }
+
+    @Test fun aGeneralMedicalDeclineIsNotPersonal() = runTest(main.dispatcher) {
+        small.rewrite = "keywords: burn\nmedical: yes"
+        val vm = vm()
+        declined(vm, "How do I treat a burn?")
+        assertThat(vm.state.value.turns.single().personalMedical).isFalse()
+    }
+
     @Test fun answeredTurnOffersNoBestGuess() = runTest(main.dispatcher) {
         val vm = vm()
         vm.ask("How do plants use light?")

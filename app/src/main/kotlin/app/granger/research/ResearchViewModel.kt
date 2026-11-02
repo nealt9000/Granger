@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.map
 import app.granger.core.research.FailReason
 import app.granger.core.research.Outcome
 import app.granger.core.research.Passage
+import app.granger.core.research.PersonalMedical
 import app.granger.core.research.PriorTurn
 import app.granger.core.research.ResearchEvent
 import app.granger.core.research.ResearchPipeline
@@ -108,6 +109,8 @@ class ResearchViewModel(
         val offersGuess: Boolean = false,
         /** The guess is open (Neal, 2026-11-02: it sits behind a tap, written ahead so the tap shows it at once). */
         val guessShown: Boolean = false,
+        /** Declined as one person's own health question (no search ran): the screen points to a professional. */
+        val personalMedical: Boolean = false,
         /** The last Best guess for this turn failed (the model won't load); shown once, not stored. */
         val guessFailed: Boolean = false,
         /** The speaker button's state for this turn (Plan V2): read, pause or resume. */
@@ -552,6 +555,9 @@ class ResearchViewModel(
                 (hasGuess || live == null),
             // Opened and there is something to show; a failed or empty guess brings the button back.
             guessShown = id in shown && hasGuess,
+            // The pipeline's own rule (ResearchPipeline: PersonalMedical with the medical flag, no selection).
+            personalMedical = outcome == TurnOutcome.DECLINED && medical && quote() == null &&
+                PersonalMedical.matches(question, medicalSignal = true),
             guessFailed = guessFailedId == id && live == null,
         )
     }
