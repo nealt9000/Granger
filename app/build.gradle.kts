@@ -28,9 +28,10 @@ android {
         versionName = "0.1.$gitCommitCount"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders["appLabel"] = "Granger"
+        // -PcatalogUrl=http://localhost:8765/catalog.json (with `adb reverse`) tries a catalog before it's on main.
         buildConfigField(
             "String", "CATALOG_URL",
-            "\"https://raw.githubusercontent.com/nealt9000/Granger/main/catalog/catalog.json\"",
+            "\"${findProperty("catalogUrl") ?: "https://raw.githubusercontent.com/nealt9000/Granger/main/catalog/catalog.json"}\"",
         )
         buildConfigField(
             "String", "CATALOG_PUBLIC_KEY",

@@ -12,7 +12,8 @@
     </queries>
     <!-- Plan A0 only: the main manifest gets RECORD_AUDIO in A1, if voice input is adopted. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <application>
+    <!-- A catalog served from the Mac over `adb reverse` (-PcatalogUrl). -->
+    <application android:networkSecurityConfig="@xml/network_security_config">
         <activity
             android:name="app.granger.spike.SpikeActivity"
             android:exported="true"
