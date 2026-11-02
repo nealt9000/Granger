@@ -160,6 +160,7 @@ import app.granger.core.research.SourceKind
 import app.granger.research.CitationTarget
 import app.granger.research.citationTab
 import app.granger.research.ResearchScreen
+import app.granger.research.spokenOutcome
 import app.granger.research.ResearchViewModel
 
 /** [notice] is shown once as a snackbar, e.g. why the app didn't resume reading; [noticeTitle] is the item it names. */
@@ -1093,6 +1094,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             player = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub else null,
                             speakAnswers = { container.voicePrefs.speakAnswers.value },
                             voice = container.voiceInput,
+                            // Conversation mode is English-only (its mic is), so the owl's decline is the one heard.
+                            outcomeLine = { ui -> spokenOutcome(appContext.resources, ui, owl = java.util.Locale.getDefault().language == "en") },
                         )
                     },
                     voicePrefs = container.voiceInput.prefs,

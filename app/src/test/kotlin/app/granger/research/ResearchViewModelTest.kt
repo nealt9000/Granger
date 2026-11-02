@@ -82,11 +82,12 @@ class ResearchViewModelTest {
         speakAnswers: Boolean = false,
         dense: app.granger.core.research.DenseFinder? = null,
         voice: app.granger.voiceinput.VoiceInput? = null,
+        outcomeLine: (ResearchViewModel.TurnUi) -> String? = { null },
     ): ResearchViewModel {
         return ResearchViewModel(
             chatId, quote, chats, ResearchPipeline(finder, models, dense = dense), manager, sessions, library, bookshelf,
             MediaIndex(mediaLibrary, backgroundScope, main.dispatcher), backgroundScope, savedState, cpu,
-            player = player, speakAnswers = { speakAnswers }, now = { 42L }, voice = voice,
+            player = player, speakAnswers = { speakAnswers }, now = { 42L }, voice = voice, outcomeLine = outcomeLine,
         )
     }
 
@@ -141,6 +142,93 @@ class ResearchViewModelTest {
     @Test fun aSpanishAppHasNoMicInTheAskBoxUntilSpanishAsk() = runTest(main.dispatcher) {
         val (vm) = spoken(language = "es")
         assertThat(vm.micShown.value).isFalse()
+    }
+
+    // ---- conversation mode ----
+
+    private class Talk(val vm: ResearchViewModel, val speech: app.granger.voiceinput.FakeSpeech, val hub: app.granger.player.FakePlayerHub)
+
+    private suspend fun TestScope.talk(outcomeLine: (ResearchViewModel.TurnUi) -> String? = { null }): Talk {
+        val speech = app.granger.voiceinput.FakeSpeech()
+        val hub = app.granger.player.FakePlayerHub()
+        val voice = app.granger.voiceinput.fakeVoiceInput(backgroundScope, speech, "en", app.granger.voiceinput.FakePrefs()) { hub.stopVoice() }
+        val vm = vm(voice = voice, player = hub, outcomeLine = outcomeLine)
+        backgroundScope.launch { vm.micShown.collect {} }
+        voice.status.first { it.tag != null }
+        testScheduler.advanceUntilIdle()
+        vm.shown()
+        return Talk(vm, speech, hub)
+    }
+
+    private fun app.granger.player.FakePlayerHub.voiceOn(key: String, ended: Boolean = false) {
+        ui.value = app.granger.player.voiceUi(ended = ended).let {
+            it.copy(now = (it.now as app.granger.core.player.NowPlaying.Voice).copy(sourceKey = key))
+        }
+    }
+
+    @Test fun aConversationListensSendsReadsTheAnswerAsItArrivesThenListensAgain() = runTest(main.dispatcher) {
+        val (vm, speech, hub) = talk().let { Triple(it.vm, it.speech, it.hub) }
+        assertThat(vm.conversationShown.value).isTrue()
+        vm.startConversation()
+        testScheduler.advanceUntilIdle()
+        assertThat(speech.tags).hasSize(1)
+        // Sends itself when the take ends, without "Ask as soon as I stop talking".
+        speech.end(app.granger.core.speech.DictationEvent.Final("How do plants use light?"))
+        // Short of the wait for a reading that never starts.
+        testScheduler.advanceTimeBy(ResearchViewModel.READ_START_MS / 2)
+        testScheduler.runCurrent()
+        val turn = chats.turnList.value.single()
+        assertThat(turn.question).isEqualTo("How do plants use light?")
+        assertThat(hub.calls).contains("readAloud:text:answer:${turn.id}@null")   // read as it streamed, with the setting off
+        // Still reading: the mic waits.
+        hub.voiceOn("text:answer:${turn.id}")
+        testScheduler.advanceUntilIdle()
+        assertThat(speech.tags).hasSize(1)
+        // The reading ends: it listens again.
+        hub.voiceOn("text:answer:${turn.id}", ended = true)
+        testScheduler.advanceUntilIdle()
+        assertThat(speech.tags).hasSize(2)
+        assertThat(vm.conversation.value).isTrue()
+    }
+
+    @Test fun aTakeThatHearsNothingEndsTheConversation() = runTest(main.dispatcher) {
+        val (vm, speech) = talk().let { it.vm to it.speech }
+        vm.startConversation()
+        testScheduler.advanceUntilIdle()
+        speech.end(app.granger.core.speech.DictationEvent.Failed(app.granger.core.speech.DictationFailure.NO_MATCH))
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.conversation.value).isFalse()
+        assertThat(chats.turnList.value).isEmpty()
+    }
+
+    @Test fun inAConversationADeclineIsSaidAndNoGuessIsWritten() = runTest(main.dispatcher) {
+        small.answer = listOf("Probably ", "Rayleigh scattering.")
+        finder.passages = emptyList()
+        val t = talk(outcomeLine = { "Not in your library." })
+        t.vm.startConversation()
+        testScheduler.advanceUntilIdle()
+        t.speech.end(app.granger.core.speech.DictationEvent.Final("Why is the sky blue?"))
+        testScheduler.advanceUntilIdle()
+        val turn = chats.turnList.value.single()
+        assertThat(turn.outcome).isEqualTo(TurnOutcome.DECLINED)
+        assertThat(turn.guess).isEmpty()
+        assertThat(t.hub.lastSource!!.utterances(null, 10).map { it.text }).containsExactly("Not in your library.")
+        // A reading that never shows up doesn't strand the conversation.
+        assertThat(t.speech.tags).hasSize(2)
+    }
+
+    @Test fun leavingTheScreenOrStopEndsTheConversation() = runTest(main.dispatcher) {
+        val t = talk()
+        t.vm.startConversation()
+        testScheduler.advanceUntilIdle()
+        t.vm.hidden()
+        testScheduler.advanceUntilIdle()
+        assertThat(t.vm.conversation.value).isFalse()
+        assertThat(t.speech.cancelled).isTrue()
+        t.vm.shown()
+        t.vm.startConversation()
+        t.vm.stop()
+        assertThat(t.vm.conversation.value).isFalse()
     }
 
     // ---- read aloud (Plan V2) ----

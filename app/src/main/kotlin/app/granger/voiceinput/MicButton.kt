@@ -49,25 +49,10 @@ fun MicButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
 ) {
-    val context = LocalContext.current
-    val start by rememberUpdatedState(onStart)
-    var dialog by remember { mutableStateOf<MicDialog?>(null) }
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) start()
-    }
-
-    fun ask() {
-        prefs.setMicAsked()
-        launcher.launch(Manifest.permission.RECORD_AUDIO)
-    }
+    val start = rememberMicStart(prefs, onStart)
 
     fun tap() {
-        if (listening) { onStop(); return }
-        when (micPermission(context, prefs.micAsked)) {
-            MediaPermissionStatus.GRANTED -> onStart()
-            MediaPermissionStatus.DENIED -> dialog = MicDialog.WHY
-            MediaPermissionStatus.PERMANENTLY_DENIED -> dialog = MicDialog.SETTINGS
-        }
+        if (listening) onStop() else start()
     }
 
     if (listening) {
@@ -82,6 +67,26 @@ fun MicButton(
         IconButton(onClick = ::tap, modifier = modifier, enabled = enabled) {
             Icon(painterResource(R.drawable.ic_mic), contentDescription = stringResource(R.string.voice_input_speak))
         }
+    }
+}
+
+/**
+ * Starting something that listens (the mic, Ask's conversation mode): the returned function runs [onStart] once the
+ * microphone is allowed, asking for it first after one line saying why, or saying how to allow it in the phone's
+ * settings once refused for good. Shows its own dialogs.
+ */
+@Composable
+fun rememberMicStart(prefs: VoiceInputPrefs, onStart: () -> Unit): () -> Unit {
+    val context = LocalContext.current
+    val start by rememberUpdatedState(onStart)
+    var dialog by remember { mutableStateOf<MicDialog?>(null) }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) start()
+    }
+
+    fun ask() {
+        prefs.setMicAsked()
+        launcher.launch(Manifest.permission.RECORD_AUDIO)
     }
 
     when (dialog) {
@@ -104,6 +109,14 @@ fun MicButton(
             dismissButton = { TextButton(onClick = { dialog = null }) { Text(stringResource(R.string.voice_input_not_now)) } },
         )
         null -> Unit
+    }
+
+    return {
+        when (micPermission(context, prefs.micAsked)) {
+            MediaPermissionStatus.GRANTED -> start()
+            MediaPermissionStatus.DENIED -> dialog = MicDialog.WHY
+            MediaPermissionStatus.PERMANENTLY_DENIED -> dialog = MicDialog.SETTINGS
+        }
     }
 }
 

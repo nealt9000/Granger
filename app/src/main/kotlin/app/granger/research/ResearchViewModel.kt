@@ -47,6 +47,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -100,6 +102,11 @@ class ResearchViewModel(
     private val owlSpeaks: () -> Boolean = { java.util.Locale.getDefault().language == "en" },
     /** Voice input (Plan A1); null leaves the ask box without a mic. */
     private val voice: VoiceInput? = null,
+    /**
+     * In conversation mode, what is said for a turn that has no streamed answer to read (a decline, a failure), in the
+     * screen's words; null says nothing and listens again.
+     */
+    private val outcomeLine: (TurnUi) -> String? = { null },
 ) : ViewModel() {
     /** The answer the voice is on ([turnId]) and whether it is speaking; null when the voice is elsewhere or has run out. */
     data class Reading(val turnId: Long, val playing: Boolean)
@@ -265,10 +272,91 @@ class ResearchViewModel(
         if (live.value != null) return
         val typed = input.trimEnd()
         val prefix = if (typed.isEmpty()) "" else "$typed "
-        dictation.start(onText = { input = prefix + it }) { heard ->
+        val started = dictation.start(
+            onText = { input = prefix + it },
+            // In conversation mode a take that hears nothing ends the conversation, so the mic is never left open.
+            onFailed = { if (conversing.value) endConversation() },
+        ) { heard ->
             input = prefix + heard
-            if (voice?.prefs?.askWhenDone?.value == true && input.isNotBlank()) send()
+            when {
+                conversing.value && input.isBlank() -> endConversation()
+                (conversing.value || voice?.prefs?.askWhenDone?.value == true) && input.isNotBlank() -> send()
+            }
         }
+        if (!started && conversing.value && !dictation.listening) endConversation()
+    }
+
+    // ---- conversation mode ----
+
+    private val conversing = MutableStateFlow(false)
+
+    /**
+     * Conversation mode (Neal, 2026-11-02): speak, the answer is read aloud as it arrives, then the mic listens again,
+     * hands-free until a take hears nothing, Stop, End, or the chat leaves the screen. Not stored: each chat starts typed.
+     */
+    val conversation: StateFlow<Boolean> = conversing
+
+    /** Whether the chat offers conversation mode: the ask box has a mic, and there's a voice to answer with. */
+    val conversationShown: StateFlow<Boolean> =
+        if (player == null) MutableStateFlow(false) else micShown
+
+    /** Waits for the answer's reading to end, then listens again; one at a time. */
+    private var nextTake: Job? = null
+    /** The turn [runTurn] just settled, for conversation mode to answer and listen after. */
+    private var lastSettled: Long? = null
+    /** The turn whose answer was read as it streamed, so conversation mode doesn't read it twice. */
+    private var streamedTurn: Long? = null
+    /** On screen (started); conversation mode ends when it isn't. */
+    private var onScreen = false
+
+    fun startConversation() {
+        if (!conversationShown.value || conversing.value) return
+        conversing.value = true
+        if (live.value == null) speak()
+    }
+
+    fun endConversation() {
+        conversing.value = false
+        nextTake?.cancel()
+        nextTake = null
+        dictation?.takeIf { it.listening }?.cancel()
+    }
+
+    /**
+     * After a turn in conversation mode: says the outcome if nothing was read as it streamed, waits for the voice to
+     * finish (or be stopped), then listens again. Pausing the voice waits. The mic stops the voice before it listens
+     * ([VoiceInput.beforeListening]), so it never hears Granger.
+     */
+    private fun answerThenListen(turnId: Long) {
+        val hub = player ?: return
+        nextTake?.cancel()
+        nextTake = viewModelScope.launch {
+            val key = answerKey(turnId)
+            if (streamedTurn != turnId) {
+                val ui = state.first { s -> s.turns.any { it.turn.id == turnId && it.turn.outcome != TurnOutcome.PENDING } }
+                    .turns.first { it.turn.id == turnId }
+                val text = when (ui.turn.outcome) {
+                    TurnOutcome.ANSWERED -> AnswerText.spoken(ui.turn.answer, ui.turn.medical)
+                    else -> outcomeLine(ui)
+                }
+                if (text.isNullOrBlank()) {
+                    listenAgain()
+                    return@launch
+                }
+                hub.readAloud(TextReadSource(key, ui.turn.question, text))
+            }
+            fun onThis(p: PlayerUi) = (p.now as? NowPlaying.Voice)?.takeIf { it.sourceKey == key && !it.ended }
+            // The read may take a moment to start; one that never does still lets the conversation go on.
+            if (withTimeoutOrNull(READ_START_MS) { hub.ui.first { onThis(it) != null } } != null) {
+                hub.ui.first { onThis(it) == null }
+            }
+            delay(AFTER_VOICE_MS)
+            listenAgain()
+        }
+    }
+
+    private fun listenAgain() {
+        if (conversing.value && onScreen && live.value == null) speak()
     }
 
     fun send() {
@@ -300,6 +388,7 @@ class ResearchViewModel(
      * reading the prompt, with no chunk to stop after), the turn is interrupted.
      */
     fun stop() {
+        endConversation()
         val running = live.value ?: return
         if (running.stage == Stage.WRITING && running.partial != null) stopRequested = true else job?.cancel()
     }
@@ -453,11 +542,14 @@ class ResearchViewModel(
 
     /** The chat is on screen (started): the models stay loaded until [hidden] and five minutes after. */
     fun shown() {
+        onScreen = true
         if (keepOpen == null) keepOpen = models.keepWhileOpen()
     }
 
     /** The chat left the screen (a reader on top, another tool, the app hidden): the quiet spell may start. */
     fun hidden() {
+        onScreen = false
+        endConversation()
         keepOpen?.invoke()
         keepOpen = null
     }
@@ -476,6 +568,8 @@ class ResearchViewModel(
     private fun begin(work: suspend () -> Unit) {
         stopRequested = false
         guessFailed.value = null
+        lastSettled = null
+        nextTake?.cancel()
         live.value = Live(null, null, null)
         job = viewModelScope.launch {
             val letGo = models.hold()
@@ -486,6 +580,7 @@ class ResearchViewModel(
                 // Asked while still held, so a background release waiting on the hold isn't replaced by the timer.
                 models.releaseSoon()
                 letGo()
+                lastSettled?.takeIf { conversing.value }?.let(::answerThenListen)
             }
         }
     }
@@ -549,7 +644,10 @@ class ResearchViewModel(
                         (event.outcome as? Outcome.Failed)?.cause?.let { runCatching { android.util.Log.w("Granger", "Research turn failed", it) } }
                         settle(checkNotNull(turnId), event.outcome, kept)
                         settled = true
-                        guessNext = event.outcome.let { it is Outcome.Declined && !it.medical } && ask.quote == null && !stopRequested
+                        lastSettled = turnId
+                        // Not in conversation mode: the guess would hold the model while the mic waits for the next question.
+                        guessNext = event.outcome.let { it is Outcome.Declined && !it.medical } && ask.quote == null && !stopRequested &&
+                            !conversing.value
                     }
                 }
             }
@@ -589,9 +687,10 @@ class ResearchViewModel(
         val hub = player ?: return
         val id = turnId ?: return
         val source = streaming ?: run {
-            if (!speakAnswers()) return
+            if (!speakAnswers() && !conversing.value) return
             StreamingTextReadSource(answerKey(id), question, preface = if (medical) AnswerText.MEDICAL else null).also {
                 streaming = it
+                streamedTurn = id
                 hub.readAloud(it)
             }
         }
@@ -669,6 +768,10 @@ class ResearchViewModel(
     companion object {
         /** The app languages Ask answers in, so the ask box's mic shows (Plan A1): English until Spanish Ask is built. */
         val ASK_VOICE_LANGUAGES = setOf("en")
+
+        /** Conversation mode: how long a reply's reading may take to start, and the pause after it before listening. */
+        const val READ_START_MS = 5_000L
+        const val AFTER_VOICE_MS = 300L
 
         /** The read-source key of a spoken answer (Plan V2), and the turn it names. */
         fun answerKey(turnId: Long) = "text:answer:$turnId"

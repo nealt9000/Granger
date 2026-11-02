@@ -81,4 +81,14 @@
     <string name="research_check_retry">Try again</string>
     <!-- A failed turn while Ask is off on this phone: the reason is in the notice below. -->
     <string name="research_check_turn">The librarian didn\'t pass its check on this phone. See below.</string>
+
+    <!-- Conversation mode: speak a question, hear the answer, and the mic listens again, hands-free. -->
+    <string name="research_conversation_start">Start a conversation</string>
+    <string name="research_conversation_end">End</string>
+    <string name="research_conversation_listening">Listening…</string>
+    <string name="research_conversation_thinking">Looking it up…</string>
+    <string name="research_conversation_speaking">Answering aloud…</string>
+    <string name="research_conversation_on">Conversation on</string>
+    <!-- A button over the thread when the user has scrolled up from a reply that's still arriving. -->
+    <string name="research_show_latest">Show the latest</string>
 </resources>

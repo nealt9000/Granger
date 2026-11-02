@@ -35,10 +35,13 @@ class Dictation(
 
     val listening: Boolean get() = _state.value is State.Listening
 
-    /** Starts a take in the mic's current language. Does nothing while one is under way or when there's no mic. */
-    fun start(onText: (String) -> Unit = {}, onFinal: (String) -> Unit) {
-        if (take?.isActive == true) return
-        val tag = voiceInput.status.value.tag ?: return
+    /**
+     * Starts a take in the mic's current language; false (and nothing starts) while one is under way or when there's
+     * no mic. [onFailed] hears a take that ends without words (silence, no permission, a busy recognizer).
+     */
+    fun start(onText: (String) -> Unit = {}, onFailed: (DictationFailure) -> Unit = {}, onFinal: (String) -> Unit): Boolean {
+        if (take?.isActive == true) return false
+        val tag = voiceInput.status.value.tag ?: return false
         clear?.cancel()
         _state.value = State.Listening()
         take = scope.launch {
@@ -47,12 +50,13 @@ class Dictation(
                 when (event) {
                     is DictationEvent.Partial -> { _state.value = State.Listening(event.text); onText(event.text) }
                     is DictationEvent.Final -> { _state.value = State.Idle; onFinal(event.text) }
-                    is DictationEvent.Failed -> fail(event.reason)
+                    is DictationEvent.Failed -> { fail(event.reason); onFailed(event.reason) }
                     DictationEvent.Listening, DictationEvent.EndOfSpeech -> Unit
                 }
             }
             if (_state.value is State.Listening) _state.value = State.Idle
         }
+        return true
     }
 
     /** Ends the take now instead of waiting for the recognizer to hear the end; its final text still arrives. */

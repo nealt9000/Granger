@@ -58,4 +58,12 @@
     <string name="research_check_too_slow">Preguntar está desactivado en este teléfono: el bibliotecario tardó demasiado en su prueba.</string>
     <string name="research_check_retry">Volver a intentar</string>
     <string name="research_check_turn">El bibliotecario no pasó su prueba en este teléfono. Mira abajo.</string>
+
+    <string name="research_conversation_start">Empezar una conversación</string>
+    <string name="research_conversation_end">Terminar</string>
+    <string name="research_conversation_listening">Escuchando…</string>
+    <string name="research_conversation_thinking">Buscando…</string>
+    <string name="research_conversation_speaking">Respondiendo en voz alta…</string>
+    <string name="research_conversation_on">Conversación activada</string>
+    <string name="research_show_latest">Ver lo más reciente</string>
 </resources>

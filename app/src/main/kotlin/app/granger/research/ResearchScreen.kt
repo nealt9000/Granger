@@ -11,6 +11,12 @@ import app.granger.feedback.FeedbackMail
 import app.granger.feedback.ReportSheet
 import app.granger.voiceinput.Dictation
 import app.granger.voiceinput.MicButton
+import app.granger.voiceinput.rememberMicStart
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import app.granger.voiceinput.VoiceInputPrefs
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
@@ -251,8 +257,9 @@ fun ResearchScreen(
     var userScrolling by remember { mutableStateOf(false) }
 
     suspend fun scrollToEnd() {
-        if (rows.isEmpty()) return
-        list.scrollToItem(rows.lastIndex)
+        val last = list.layoutInfo.totalItemsCount - 1
+        if (last < 0) return
+        list.scrollToItem(last)
         // The list stops at its end; this reaches the bottom of a last row taller than the screen.
         list.scrollBy(Float.MAX_VALUE / 2)
     }
@@ -313,6 +320,20 @@ fun ResearchScreen(
         if (follow && (live || wasLive)) scrollToEnd()
         wasLive = live
     }
+    // The keyboard opening or closing resizes the thread: keep the latest words in view while following.
+    LaunchedEffect(list) {
+        snapshotFlow { list.layoutInfo.viewportSize.height }.collect { if (follow && turnCount > 0) scrollToEnd() }
+    }
+    // Once a question is asked (typed, spoken or retried) the keyboard goes, so the answer has the screen.
+    val conversation by viewModel.conversation.collectAsStateWithLifecycle()
+    val keyboard = LocalSoftwareKeyboardController.current
+    val focus = LocalFocusManager.current
+    LaunchedEffect(state.running, conversation) {
+        if (state.running || conversation) {
+            keyboard?.hide()
+            focus.clearFocus()
+        }
+    }
 
     // Report this answer (release checklist A): the turn and whether it's the best guess being reported.
     var reporting by remember { mutableStateOf<Pair<Long, Boolean>?>(null) }
@@ -368,6 +389,19 @@ fun ResearchScreen(
                 },
                 title = { AskTitle() },
                 actions = {
+                    val offered by viewModel.conversationShown.collectAsStateWithLifecycle()
+                    if (offered && voicePrefs != null) {
+                        val startConversation = rememberMicStart(voicePrefs, viewModel::startConversation)
+                        if (conversation) {
+                            FilledTonalIconButton(onClick = viewModel::endConversation, modifier = Modifier.testTag(CONVERSATION_TAG)) {
+                                Icon(painterResource(R.drawable.ic_conversation), contentDescription = stringResource(R.string.research_conversation_end))
+                            }
+                        } else {
+                            IconButton(onClick = startConversation, enabled = state.readiness == ResearchReadiness.READY, modifier = Modifier.testTag(CONVERSATION_TAG)) {
+                                Icon(painterResource(R.drawable.ic_conversation), contentDescription = stringResource(R.string.research_conversation_start))
+                            }
+                        }
+                    }
                     // Recent chats live behind their own button, not in the new chat (Neal, U3a walkthrough).
                     val others = state.recentChats.filter { it.id != state.chatId }
                     if (others.isNotEmpty()) {
@@ -405,6 +439,21 @@ fun ResearchScreen(
                     ResearchReadiness.READY -> Unit
                 }
                 state.quote?.let { QuoteCard(it, Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) }
+                if (conversation) {
+                    val listening = viewModel.dictation?.state?.collectAsStateWithLifecycle()?.value is Dictation.State.Listening
+                    val speaking = state.turns.lastOrNull()?.voice?.let { it != VoiceButton.IDLE } == true
+                    ConversationBar(
+                        stringResource(
+                            when {
+                                listening -> R.string.research_conversation_listening
+                                state.running -> R.string.research_conversation_thinking
+                                speaking -> R.string.research_conversation_speaking
+                                else -> R.string.research_conversation_on
+                            },
+                        ),
+                        onEnd = viewModel::endConversation,
+                    )
+                }
                 QuestionField(
                     viewModel = viewModel,
                     enabled = state.readiness == ResearchReadiness.READY,
@@ -416,8 +465,9 @@ fun ResearchScreen(
             }
         },
     ) { padding ->
+      Box(Modifier.padding(padding).fillMaxSize()) {
         LazyColumn(
-            Modifier.padding(padding).fillMaxSize(),
+            Modifier.fillMaxSize(),
             state = list,
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -452,8 +502,42 @@ fun ResearchScreen(
                 }
             }
         }
+        // Scrolled up from the thread's end: one tap back to the latest words, and following them again.
+        if (!follow && list.canScrollForward) {
+            SmallFloatingActionButton(
+                onClick = {
+                    follow = true
+                    scope.launch { scrollToEnd() }
+                },
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp).testTag(LATEST_TAG),
+            ) {
+                Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.research_show_latest))
+            }
+        }
+      }
     }
 }
+
+/** Conversation mode's line above the ask box: what it's doing now, and End. */
+@Composable
+private fun ConversationBar(status: String, onEnd: () -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(24.dp))
+            .padding(start = 16.dp, end = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(painterResource(R.drawable.ic_conversation), contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(8.dp))
+        Text(status, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.weight(1f))
+        TextButton(onClick = onEnd) { Text(stringResource(R.string.research_conversation_end)) }
+    }
+}
+
+internal const val CONVERSATION_TAG = "research-conversation"
+internal const val LATEST_TAG = "research-latest"
 
 /** The question field, with Send, or Stop while a turn runs. */
 @Composable
@@ -858,4 +942,21 @@ private fun Notice(text: String, action: String? = null, onAction: () -> Unit = 
         Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         if (action != null) OutlinedButton(onClick = onAction) { Text(action) }
     }
+}
+
+/**
+ * What conversation mode says for a turn without an answer to read: the screen's own words for a decline or failure
+ * (the owl's decline in English), so what is heard matches what is shown. Null for an answer.
+ */
+internal fun spokenOutcome(res: android.content.res.Resources, ui: TurnUi, owl: Boolean): String? = when (ui.turn.outcome) {
+    TurnOutcome.DECLINED -> when {
+        ui.personalMedical -> res.getString(R.string.research_personal_medical)
+        ui.medical || !owl -> res.getString(R.string.research_declined)
+        else -> OwlLines.decline(ui.turn.id)
+    }
+    TurnOutcome.UNVERIFIED -> res.getString(R.string.research_unverified)
+    TurnOutcome.INTERRUPTED -> if (owl) OwlLines.STOPPED else res.getString(R.string.research_interrupted)
+    TurnOutcome.SEARCH_FAILED -> res.getString(R.string.research_search_failed)
+    TurnOutcome.FAILED -> res.getString(R.string.research_model_failed)
+    TurnOutcome.ANSWERED, TurnOutcome.PENDING -> null
 }
