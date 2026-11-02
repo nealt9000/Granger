@@ -62,16 +62,16 @@
 ### Task 3: The phrases and Neal's reading
 
 - [x] Write `tools/asr/phrases.json` (ids, kind `question` / `name` / `command`, the text, accepted alternatives for names). Neal looks it over before the reading. *Written: 25 questions (24 with eval ids, plus a new Thucydides one), 20 names from the phone's library said as "Open …", 15 commands. `tools/asr/bias_list.py` builds `bias-library.json` (1,396 strings) and `bias-names.json` from a copy of `library.db`.*
-- [ ] **Neal's session (about 15 minutes):** read all 60 into `PhraseRecorder`. Pull the WAVs to `tools/asr/audio/` on the Mac (git-ignored; Neal's voice stays off GitHub).
+- [x] **Neal's session (about 15 minutes):** read all 60 into `PhraseRecorder`. Pull the WAVs to `tools/asr/audio/` on the Mac (git-ignored; Neal's voice stays off GitHub). *Done 2026-11-02: 60 WAVs on the Mac.*
 - [x] `tools/asr/score.py`: reads the logcat JSON, scores word error rate and name hits per condition, prints a table. Two unit tests on the normaliser (numbers, punctuation). *Four tests, passing (`~/.venvs/granger-vectors/bin/python -m pytest tools/asr/tests`). Name hits are scored exact and with spaces ignored.*
-- [ ] **Commit.** `Voice input spike: phrases and the scorer`
+- [x] **Commit.** `Voice input spike: phrases and the scorer` *(in 89bd14bb)*
 
 ### Task 4: Accuracy and speed, replayed
 
-- [ ] Airplane mode on. Replay all 60, warm, in four conditions: no biasing; biasing with the 20 names only; biasing with the whole library list (Task 1's cap); E2B loaded on the GPU with the whole list. Cold run once for the first condition.
-- [ ] Record per condition: word error rate on questions and commands, name hit rate, median and p90 end-of-audio → final, first partial. During the E2B condition, sample `dumpsys meminfo` and watch logcat for `lowmemorykiller`.
-- [ ] Write the numbers into the results doc against the adopt rules.
-- [ ] **Commit.** `Voice input spike: replay results`
+- [x] Airplane mode on. Replay all 60, warm, in four conditions: no biasing; biasing with the 20 names only; biasing with the whole library list (Task 1's cap); E2B loaded on the GPU with the whole list. Cold run once for the first condition.
+- [x] Record per condition: word error rate on questions and commands, name hit rate, median and p90 end-of-audio → final, first partial. During the E2B condition, sample `dumpsys meminfo` and watch logcat for `lowmemorykiller`.
+- [x] Write the numbers into the results doc against the adopt rules. *Done 2026-11-02: questions 3.3% WER, names 40–45% (fails), biasing +5 points (fails), E2B no effect. A title matcher after recognition gets 19/20; see the results doc.*
+- [x] **Commit.** `Voice input spike: replay results`
 
 ### Task 5: Live, for feel
 

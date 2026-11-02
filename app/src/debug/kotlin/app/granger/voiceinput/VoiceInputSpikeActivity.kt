@@ -31,12 +31,18 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
+import app.granger.core.ai.LiteRtLlmEngine
+import app.granger.core.ai.LlmBackend
+import app.granger.core.ai.RssMemorySampler
+import app.granger.core.ai.SystemMonoClock
+import app.granger.core.ai.spike.SpikeModels
 import app.granger.core.speech.Wav
 import java.io.File
 import org.json.JSONObject
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -47,7 +53,7 @@ import kotlinx.coroutines.withContext
  *
  * Unattended runs take `--es run probe|download|replay|bias` (comma-separated allowed), `--es lang en-US`,
  * `--ez paced false` (replay as fast as the pipe takes it), `--ei tail 300` (ms of silence after each WAV), `--ez partials false`, `--ez segmented false` (a plain session; its final results come back empty), `--es bias names|library`
- * (`files/asr/bias-<name>.json`), `--es only q,n` (WAVs whose names start so). The run ends with an `Asr: auto done` line.
+ * (`files/asr/bias-<name>.json`), `--es only q,n` (WAVs whose names start so), `--ez llm true` (E2B resident on the GPU first, as in the voice spike). The run ends with an `Asr: auto done` line.
  * `RECORD_AUDIO` is asked for on first open; `adb shell pm grant app.granger android.permission.RECORD_AUDIO` also works.
  */
 class VoiceInputSpikeActivity : ComponentActivity() {
@@ -60,6 +66,7 @@ class VoiceInputSpikeActivity : ComponentActivity() {
     private var partials = true
     // Plan A0 Task 1: only a segmented session returns final results over the pipe.
     private var segmented = true
+    private var llm: LiteRtLlmEngine? = null
     private val recorder = PhraseRecorder()
     private var recording by mutableStateOf(false)
 
@@ -93,7 +100,9 @@ class VoiceInputSpikeActivity : ComponentActivity() {
             segmented = intent.getBooleanExtra("segmented", segmented)
             val biasName = intent.getStringExtra("bias")
             val only = intent.getStringExtra("only")?.split(',')?.map { it.trim() }?.filter { it.isNotEmpty() }
+            val withLlm = intent.getBooleanExtra("llm", false)
             launchRun {
+                if (withLlm) loadLlm()
                 for (run in runs.split(',').map { it.trim() }) when (run) {
                     "probe" -> probeAll()
                     "download" -> download(lang)
@@ -101,7 +110,7 @@ class VoiceInputSpikeActivity : ComponentActivity() {
                     "bias" -> biasCap(lang)
                     else -> log("Asr: unknown run $run")
                 }
-                log("Asr: auto done run=$runs")
+                log("Asr: auto done run=$runs llm=${llm != null}")
             }
         }
     }
@@ -252,6 +261,33 @@ class VoiceInputSpikeActivity : ComponentActivity() {
         Log.i(TAG, line)
         lines += line
         runCatching { logFile.appendText(line + "\n") }
+    }
+
+    /** Plan A0 Task 4: the GPU E2B loaded and warmed with one short reply, held until the activity goes. */
+    private suspend fun loadLlm() {
+        val file = withContext(Dispatchers.IO) {
+            getExternalFilesDirs(null).filterNotNull().asSequence()
+                .flatMap { it.walkTopDown().maxDepth(3) }
+                .firstOrNull { it.isFile && it.name == SpikeModels.SMALL_GPU }
+        }
+        if (file == null) { log("Asr: no ${SpikeModels.SMALL_GPU} under the app's files; download E2B in Settings → Models first"); return }
+        val start = SystemMonoClock.nanos()
+        val (engine, rss) = RssMemorySampler().peakRssMb {
+            withContext(Dispatchers.IO) {
+                LiteRtLlmEngine(file.path, LlmBackend.GPU, cacheDir.path).also { e ->
+                    e.load()
+                    e.generate("Reply with one short sentence: hello.", 16).first()
+                }
+            }
+        }
+        llm = engine
+        log("Asr: E2B resident loadMs=${(SystemMonoClock.nanos() - start) / 1_000_000} rssMb=$rss")
+    }
+
+    override fun onDestroy() {
+        llm?.close()
+        llm = null
+        super.onDestroy()
     }
 
     private companion object {
