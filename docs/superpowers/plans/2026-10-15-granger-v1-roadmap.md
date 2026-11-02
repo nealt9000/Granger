@@ -166,7 +166,7 @@ Neal's direction, 2026-10-16, to brainstorm before the next plan: the library wi
 
 Deferred, low priority (from Plan 2):
 - ~~Opening the reader after the OS killed the app shows the article it was first opened on, not the last page.~~ Fixed by Plan 5: tabs keep the path and scroll position.
-- Large media entries are read whole into memory.
+- ~~Large media entries are read whole into memory.~~ Fixed 2026-11-02: a stored entry of 256 KB or more (not HTML) streams from its range of the `.zim`, with byte ranges for seeking; compressed entries are still read whole, `cl-cleanup`.
 - No device test yet for a ZIM truncated or ejected (SD card) while it is open.
 
 ## Carried forward from Plan 5
@@ -550,7 +550,7 @@ Widget:
 Readers and Search after the follow-ups:
 - Toggling full screen reflows the page (see above). A better feel may need a different model: a bar that slides with scrolling, or an animated resize. Not chosen yet.
 - Titles ask every pack for 20 suggestions per keystroke; not timed on the Pixel.
-- ~~`ArchiveViewModelTest.overCapShowsTheLimitNotice` failed once ("Main looper not mocked") and passed on reruns. It looks flaky, and the cap code is due to go in Plan 10.~~ Fixed 2026-11-02: the test went with the cap code, `cl-cleanup`.
+- ~~`ArchiveViewModelTest.overCapShowsTheLimitNotice` failed once ("Main looper not mocked") and passed on reruns. It looks flaky, and the cap code is due to go in Plan 10.~~ Fixed 2026-11-02: not the cap code; any test in the class could fail. A reply on the real `Dispatchers.IO` landed after a test ended and Main was reset. The archive.org client now takes its dispatcher and the test passes its own (8 in 8 under load), `cl-cleanup`.
 - ~~Agent worktrees don't check out the taglib submodule: run `git submodule update --init --recursive` in a new worktree before building.~~ Fixed 2026-11-02: `tools/dev/new-worktree.sh` does it (and copies `local.properties`), `cl-cleanup`.
 
 Device checks still to do:
