@@ -167,3 +167,33 @@ def test_media_metrics_absent_without_media_items():
     items, recs = make()
     out = metrics.compute(items, recs, {})
     assert "media" not in out and set(out["pass"]) == {"unanswerable", "answerable"}
+
+
+def test_recall_by_quote_needs_the_quote_in_the_passage_text():
+    ans = [{"source": "wikipedia_en_top", "location": "Federalist_Papers", "quote": "hamilton , james madison"}]
+    assert metrics.quote_in({"text": "Written by Alexander Hamilton, James Madison and John Jay."}, ans)
+    # The right article without the quote doesn't count.
+    assert not metrics.quote_in({"text": "The Federalist Papers are 85 essays."}, ans)
+    # Words only: "art" isn't found inside "smart".
+    assert not metrics.quote_in({"text": "smart"}, [{"quote": "art"}])
+
+
+def test_quote_recall_and_domains_are_reported():
+    items = [
+        {"id": "a", "answerable": True, "medical": False, "domain": "food",
+         "answers": [{"source": "s", "location": "L", "quote": "boil the water"}]},
+        {"id": "b", "answerable": True, "medical": False, "domain": "food",
+         "answers": [{"source": "s", "location": "L", "quote": "add salt"}]},
+        {"id": "u", "answerable": False, "medical": False, "domain": "maps", "answers": []},
+    ]
+    recs = [
+        {"id": "a", "outcome": "answered", "reply": "Boil it [1].", "chosen": [{"source": "s", "location": "L", "text": "First, boil the water."}]},
+        {"id": "b", "outcome": "declined", "chosen": [{"source": "s", "location": "L", "text": "Stir well."}]},
+        {"id": "u", "outcome": "declined"},
+    ]
+    from grading import reply_hash
+    grades = {("a", "answer", reply_hash("Boil it [1].")): {"grade": "grounded", "reason": ""}}
+    m = metrics.compute(items, recs, grades)
+    assert m["retrieval"]["quoted"] == 1 and m["retrieval"]["recallAt4"] == 1.0
+    assert m["domains"] == {"food": {"answerable": 2, "grounded": 1, "unanswerable": 0, "declined": 0},
+                            "maps": {"answerable": 0, "grounded": 0, "unanswerable": 1, "declined": 1}}

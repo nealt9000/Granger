@@ -107,10 +107,9 @@ class PipelineReplayTest {
     )
 
     private val marks = Regex("\\p{M}+")
-    private val spaces = Regex("\\s+")
+    private val words = Regex("[\\p{L}\\p{N}_]+")
 
-    /** As the validator matches quotes: case and whitespace folded (accents too, and curly quotes straightened). */
-    private fun fold(s: String) = spaces.replace(
-        marks.replace(Normalizer.normalize(s, Normalizer.Form.NFD), "").lowercase().replace('’', '\''), " ",
-    )
+    /** Words only, as `metrics.fold_words` folds them: accents, case, punctuation and spacing. */
+    private fun fold(s: String) =
+        " " + words.findAll(marks.replace(Normalizer.normalize(s, Normalizer.Form.NFD), "").lowercase().replace('’', '\'')).joinToString(" ") { it.value } + " "
 }

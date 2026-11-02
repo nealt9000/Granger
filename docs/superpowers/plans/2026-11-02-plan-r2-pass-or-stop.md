@@ -67,7 +67,7 @@ these same questions, which is why only the held-out set can say what they're wo
   Frederick Douglass), `pg201.epub` (Flatland). Map the source when scoring if the app ids them differently.
 - [ ] The eval library on the Mac: 18 pack links added to `~/.cache/granger/eval-packs/`; the Classics release in
   `~/.cache/granger/eval-books/dl/`, linked into `by-ref/`.
-- [ ] Neal reviews it (as with Plan 9's set). Fixes go back through the author, not this session.
+- [x] Neal reviewed it (2026-11-02): "looks good". Fixes, if any later, go back through the author, not this session.
 - [ ] The test library on the Pixel 6 matches the set: every pack and snapshot it cites, the Classics release, the own-book
   EPUBs imported. Recorded in the set's notes.
 - [ ] A media group (track and chapter citations, spec §8) needs the phone's library export; written by the same author
@@ -134,12 +134,27 @@ Deterministic declines, in `DeclineCheck` (`:core:research`), wired into `Resear
 
 ## Task 5: eval fixes
 
-- [ ] Recall by quote: a passage counts as found when it contains an answer quote, not when its chapter or article
-  matches (location matching overstates recall@4: who-wrote-004, literature-005 and -006).
-- [ ] A second grader on the 4 borderline tuning grades (history-001, geography-general-001, who-wrote-009,
-  medical-002); fix tune items whose expected answers are wrong (medical-029's "no known cure" is grounded). Tuning
-  split only.
-- [ ] The report shows grounded per domain (spec §8; R1 Task 11 never produced it).
+- [x] **Recall by quote**: `metrics.quote_in` counts a passage as found when an answer quote is in its text (words only:
+  accents, case, punctuation and spacing folded, so "hamilton , james" matches "Hamilton, James"). The report shows it
+  first and keeps recall by location, marked as overstating. `PipelineReplayTest` folds the same way. On `r5-t7-all`:
+  **63/126 (50%) by quote** in the first 4, 48% by location: close in total, but not the same questions.
+- [x] **Domains**: every tuning item has a `domain` (from its first answer's source; unanswerables medicine or reference),
+  and the report shows grounded and declined per domain. `r5-t7-all` by domain:
+
+  | Domain | Grounded | Declined |
+  |---|---|---|
+  | classics | 21/32 (66%) | – |
+  | reference | 36/55 (65%) | 50/61 (82%) |
+  | medicine | 23/25 (92%) | 13/15 (87%) |
+  | science | 11/12 (92%) | – |
+  | making | 0/2 | – |
+
+- [x] The four "strict" grades (history-001, geography-general-001, who-wrote-009, medical-002) were reread against
+  `RUBRIC.md`: each applies it as written ("torn down" isn't what [1] says; a wrong passage number is not-grounded).
+  They stand. medical-029 ("when will there be a cure for Alzheimer's") is a future question, rightly unanswerable.
+- [ ] **The tuning split is blind in five domains**: it has no food, technology, maps or thought questions and two in
+  making (spec §8 asks the tuning session to add them). Write about 10 per domain into `tune.json`, from the packs on
+  disk, before tuning anything those domains depend on.
 
 ## Task 6: search reaches older wording and dictionary entries
 

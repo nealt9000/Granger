@@ -7,6 +7,8 @@ media passage), with their bars in `pass`; without media items neither appears. 
 """
 import copy
 import math
+import re
+import unicodedata
 
 from dataset import MEDIA_CONTROL, is_media, location_matches
 from grading import current_grade, replies
@@ -22,6 +24,20 @@ def _rate(a, b):
 
 def matches(passage, answers):
     return any(passage.get("source") == a["source"] and location_matches(a["source"], a["location"], passage.get("location") or "") for a in answers)
+
+
+def fold_words(text):
+    """Words only: accents, case, punctuation and spacing folded, so a quote copied from stripped HTML ("hamilton ,
+    james") matches the app's passage text ("Hamilton, James")."""
+    t = "".join(c for c in unicodedata.normalize("NFD", text or "") if not unicodedata.combining(c))
+    return " " + " ".join(re.findall(r"\w+", t.lower().replace("\u2019", "'"))) + " "
+
+
+def quote_in(passage, answers):
+    """An answer's quote is in the passage's text: recall by quote (Plan R2 Task 5). Matching by location says only
+    that the passage is from the right article or chapter, which overstates recall."""
+    text = fold_words(passage.get("text"))
+    return any(a.get("quote") and fold_words(a["quote"]) in text for a in answers)
 
 
 def percentile(values, p):
@@ -91,17 +107,37 @@ def compute(items, records, grades):
     for r in recs:
         out["outcomes"][r["outcome"]] = out["outcomes"].get(r["outcome"], 0) + 1
 
-    hit = fnc = nf = 0
+    hit = fnc = nf = quoted = 0
     with_answers = [r for r in an if by_id[r["id"]].get("answers")]  # media controls have none
     for r in with_answers:
         ans = by_id[r["id"]]["answers"]
+        if any(quote_in(p, ans) for p in r.get("chosen", [])[:4]):
+            quoted += 1
         if any(matches(p, ans) for p in r.get("chosen", [])[:4]):
             hit += 1
         elif any(matches(p, ans) for p in r.get("found", [])):
             fnc += 1
         else:
             nf += 1
-    out["retrieval"] = {"n": len(with_answers), "recallAt4": _rate(hit, len(with_answers)), "foundNotChosen": fnc, "neverFound": nf}
+    out["retrieval"] = {"n": len(with_answers), "recallAt4": _rate(hit, len(with_answers)), "foundNotChosen": fnc, "neverFound": nf,
+                        "quoteAt4": _rate(quoted, len(with_answers)), "quoted": quoted}
+
+    # Per domain (spec §8), for datasets whose items carry one.
+    domains = {}
+    for r in recs:
+        it = by_id[r["id"]]
+        if not it.get("domain"):
+            continue
+        d = domains.setdefault(it["domain"], {"answerable": 0, "grounded": 0, "unanswerable": 0, "declined": 0})
+        if it["answerable"]:
+            d["answerable"] += 1
+            if r["outcome"] == "answered" and (current_grade(grades, r["id"], "answer", r.get("reply", "")) or {}).get("grade") == "grounded":
+                d["grounded"] += 1
+        else:
+            d["unanswerable"] += 1
+            d["declined"] += r["outcome"] == "declined"
+    if domains:
+        out["domains"] = dict(sorted(domains.items()))
 
     flagged = [(by_id[r["id"]]["medical"], bool(r.get("medical"))) for r in recs]
     med = [pair for pair in flagged if pair[0]]

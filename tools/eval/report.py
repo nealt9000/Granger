@@ -27,7 +27,8 @@ def totals_rows(m):
     rows = [
         row("Unanswerable declined (%d of %d)" % (u["handled"], u["n"]), pct(u["rate"]), "bar 90%", m["pass"]["unanswerable"]),
         row("Answerable grounded (%d of %d, %d answered but ungraded)" % (a["grounded"], a["n"], a["ungraded"]), pct(a["rate"]), "bar 80%", m["pass"]["answerable"]),
-        row("Retrieval recall@4", pct(r["recallAt4"]), "not gating", None),
+        row("Retrieval recall@4 by quote (%d of %d): an answer quote in the first 4" % (r.get("quoted", 0), r["n"]), pct(r.get("quoteAt4")), "not gating", None),
+        row("Retrieval recall@4 by location (article or chapter)", pct(r["recallAt4"]), "overstates; not gating", None),
         row("Answer found but not chosen / never found", "%d / %d" % (r["foundNotChosen"], r["neverFound"]), "not gating", None),
         row("Medical flag accuracy / recall", "%s / %s" % (pct(f["accuracy"]), pct(f["recall"])), "recall aim 95%", None if f["recall"] is None else f["recall"] >= 0.95),
     ]
@@ -43,7 +44,20 @@ def totals_rows(m):
     t = m["timings"]
     rows.append(row("Send to first words, median / p90 (ms)", "%s / %s" % (t["firstWords"]["median"], t["firstWords"]["p90"]), "target 9000", None))
     rows.append(row("Total, median / p90 (ms)", "%s / %s" % (t["total"]["median"], t["total"]["p90"]), "", None))
-    return "<table><tr><th>Metric</th><th>Value</th><th>Bar</th></tr>%s</table>" % "".join(rows)
+    table = "<table><tr><th>Metric</th><th>Value</th><th>Bar</th></tr>%s</table>" % "".join(rows)
+    return table + domains_table(m)
+
+
+def domains_table(m):
+    """Grounded and declined per domain (spec §8), when the dataset's items carry one."""
+    if not m.get("domains"):
+        return ""
+    rows = "".join(
+        "<tr><td>%s</td><td>%d of %d (%s)</td><td>%d of %d (%s)</td></tr>" % (
+            e(name), d["grounded"], d["answerable"], pct(d["grounded"] / d["answerable"] if d["answerable"] else None),
+            d["declined"], d["unanswerable"], pct(d["declined"] / d["unanswerable"] if d["unanswerable"] else None))
+        for name, d in m["domains"].items())
+    return "<table><tr><th>Domain</th><th>Grounded</th><th>Declined</th></tr>%s</table>" % rows
 
 
 def totals_text(m):

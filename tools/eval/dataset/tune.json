@@ -2,6 +2,7 @@
   {
     "id": "bible-001",
     "group": "bible",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -32,6 +33,7 @@
   {
     "id": "bible-002",
     "group": "bible",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -57,6 +59,7 @@
   {
     "id": "bible-003",
     "group": "bible",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -77,6 +80,7 @@
   {
     "id": "bible-004",
     "group": "bible",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -97,6 +101,7 @@
   {
     "id": "bible-005",
     "group": "bible",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -117,6 +122,7 @@
   {
     "id": "bible-006",
     "group": "bible",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -137,6 +143,7 @@
   {
     "id": "bible-007",
     "group": "bible",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -157,6 +164,7 @@
   {
     "id": "bible-008",
     "group": "bible",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -177,6 +185,7 @@
   {
     "id": "bible-009",
     "group": "bible",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -197,6 +206,7 @@
   {
     "id": "bible-010",
     "group": "bible",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -217,6 +227,7 @@
   {
     "id": "vocab-gap-001",
     "group": "vocab-gap",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -237,6 +248,7 @@
   {
     "id": "vocab-gap-002",
     "group": "vocab-gap",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -257,6 +269,7 @@
   {
     "id": "vocab-gap-003",
     "group": "vocab-gap",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -282,6 +295,7 @@
   {
     "id": "vocab-gap-004",
     "group": "vocab-gap",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -307,6 +321,7 @@
   {
     "id": "vocab-gap-005",
     "group": "vocab-gap",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -332,6 +347,7 @@
   {
     "id": "vocab-gap-006",
     "group": "vocab-gap",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -352,6 +368,7 @@
   {
     "id": "vocab-gap-007",
     "group": "vocab-gap",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -377,6 +394,7 @@
   {
     "id": "vocab-gap-008",
     "group": "vocab-gap",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -397,6 +415,7 @@
   {
     "id": "vocab-gap-009",
     "group": "vocab-gap",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -417,6 +436,7 @@
   {
     "id": "vocab-gap-010",
     "group": "vocab-gap",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -437,6 +457,7 @@
   {
     "id": "who-wrote-001",
     "group": "who-wrote",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -457,6 +478,7 @@
   {
     "id": "who-wrote-002",
     "group": "who-wrote",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -482,6 +504,7 @@
   {
     "id": "who-wrote-003",
     "group": "who-wrote",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -507,6 +530,7 @@
   {
     "id": "who-wrote-004",
     "group": "who-wrote",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -532,6 +556,7 @@
   {
     "id": "who-wrote-005",
     "group": "who-wrote",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -552,6 +577,7 @@
   {
     "id": "who-wrote-006",
     "group": "who-wrote",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -572,6 +598,7 @@
   {
     "id": "who-wrote-007",
     "group": "who-wrote",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -592,6 +619,7 @@
   {
     "id": "who-wrote-008",
     "group": "who-wrote",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -612,6 +640,7 @@
   {
     "id": "who-wrote-009",
     "group": "who-wrote",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -637,6 +666,7 @@
   {
     "id": "who-wrote-010",
     "group": "who-wrote",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -662,6 +692,7 @@
   {
     "id": "who-wrote-011",
     "group": "who-wrote",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -682,6 +713,7 @@
   {
     "id": "follow-up-001",
     "group": "follow-up",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -702,6 +734,7 @@
   {
     "id": "follow-up-002",
     "group": "follow-up",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -722,6 +755,7 @@
   {
     "id": "follow-up-003",
     "group": "follow-up",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -742,6 +776,7 @@
   {
     "id": "follow-up-004",
     "group": "follow-up",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -767,6 +802,7 @@
   {
     "id": "follow-up-005",
     "group": "follow-up",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -787,6 +823,7 @@
   {
     "id": "follow-up-006",
     "group": "follow-up",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -807,6 +844,7 @@
   {
     "id": "follow-up-007",
     "group": "follow-up",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -827,6 +865,7 @@
   {
     "id": "follow-up-008",
     "group": "follow-up",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -852,6 +891,7 @@
   {
     "id": "follow-up-009",
     "group": "follow-up",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -872,6 +912,7 @@
   {
     "id": "follow-up-010",
     "group": "follow-up",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -892,6 +933,7 @@
   {
     "id": "follow-up-011",
     "group": "follow-up",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -906,6 +948,7 @@
   {
     "id": "history-001",
     "group": "history",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -926,6 +969,7 @@
   {
     "id": "history-002",
     "group": "history",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -946,6 +990,7 @@
   {
     "id": "history-003",
     "group": "history",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -966,6 +1011,7 @@
   {
     "id": "history-004",
     "group": "history",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -986,6 +1032,7 @@
   {
     "id": "history-005",
     "group": "history",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1006,6 +1053,7 @@
   {
     "id": "history-006",
     "group": "history",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1026,6 +1074,7 @@
   {
     "id": "science-001",
     "group": "science",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1046,6 +1095,7 @@
   {
     "id": "science-002",
     "group": "science",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1066,6 +1116,7 @@
   {
     "id": "science-003",
     "group": "science",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1086,6 +1137,7 @@
   {
     "id": "science-004",
     "group": "science",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1106,6 +1158,7 @@
   {
     "id": "science-005",
     "group": "science",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1126,6 +1179,7 @@
   {
     "id": "science-006",
     "group": "science",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1146,6 +1200,7 @@
   {
     "id": "literature-001",
     "group": "literature",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1166,6 +1221,7 @@
   {
     "id": "literature-002",
     "group": "literature",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1186,6 +1242,7 @@
   {
     "id": "literature-003",
     "group": "literature",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1206,6 +1263,7 @@
   {
     "id": "literature-004",
     "group": "literature",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1231,6 +1289,7 @@
   {
     "id": "literature-005",
     "group": "literature",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1251,6 +1310,7 @@
   {
     "id": "literature-006",
     "group": "literature",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1276,6 +1336,7 @@
   {
     "id": "literature-007",
     "group": "literature",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1296,6 +1357,7 @@
   {
     "id": "geography-general-001",
     "group": "geography-general",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1316,6 +1378,7 @@
   {
     "id": "geography-general-002",
     "group": "geography-general",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1336,6 +1399,7 @@
   {
     "id": "geography-general-003",
     "group": "geography-general",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1356,6 +1420,7 @@
   {
     "id": "geography-general-004",
     "group": "geography-general",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1376,6 +1441,7 @@
   {
     "id": "multi-step-001",
     "group": "multi-step",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1401,6 +1467,7 @@
   {
     "id": "multi-step-002",
     "group": "multi-step",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1426,6 +1493,7 @@
   {
     "id": "multi-step-003",
     "group": "multi-step",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1451,6 +1519,7 @@
   {
     "id": "multi-step-004",
     "group": "multi-step",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1476,6 +1545,7 @@
   {
     "id": "multi-step-005",
     "group": "multi-step",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1501,6 +1571,7 @@
   {
     "id": "multi-step-006",
     "group": "multi-step",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1526,6 +1597,7 @@
   {
     "id": "multi-step-007",
     "group": "multi-step",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1551,6 +1623,7 @@
   {
     "id": "multi-step-008",
     "group": "multi-step",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1576,6 +1649,7 @@
   {
     "id": "multi-step-009",
     "group": "multi-step",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1601,6 +1675,7 @@
   {
     "id": "multi-step-010",
     "group": "multi-step",
+    "domain": "classics",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1626,6 +1701,7 @@
   {
     "id": "multi-step-011",
     "group": "multi-step",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1651,6 +1727,7 @@
   {
     "id": "multi-step-012",
     "group": "multi-step",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1676,6 +1753,7 @@
   {
     "id": "multi-step-013",
     "group": "multi-step",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1701,6 +1779,7 @@
   {
     "id": "multi-step-014",
     "group": "multi-step",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1726,6 +1805,7 @@
   {
     "id": "multi-step-015",
     "group": "multi-step",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -1751,6 +1831,7 @@
   {
     "id": "medical-001",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -1771,6 +1852,7 @@
   {
     "id": "medical-002",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -1791,6 +1873,7 @@
   {
     "id": "medical-003",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -1811,6 +1894,7 @@
   {
     "id": "medical-004",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -1831,6 +1915,7 @@
   {
     "id": "medical-005",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -1851,6 +1936,7 @@
   {
     "id": "medical-006",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -1871,6 +1957,7 @@
   {
     "id": "medical-007",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -1891,6 +1978,7 @@
   {
     "id": "medical-008",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -1911,6 +1999,7 @@
   {
     "id": "medical-009",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -1931,6 +2020,7 @@
   {
     "id": "medical-010",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -1951,6 +2041,7 @@
   {
     "id": "medical-011",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -1971,6 +2062,7 @@
   {
     "id": "medical-012",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -1991,6 +2083,7 @@
   {
     "id": "medical-013",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -2011,6 +2104,7 @@
   {
     "id": "medical-014",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -2031,6 +2125,7 @@
   {
     "id": "medical-015",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -2051,6 +2146,7 @@
   {
     "id": "medical-016",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -2071,6 +2167,7 @@
   {
     "id": "medical-017",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -2091,6 +2188,7 @@
   {
     "id": "medical-018",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -2111,6 +2209,7 @@
   {
     "id": "medical-019",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -2131,6 +2230,7 @@
   {
     "id": "medical-020",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -2151,6 +2251,7 @@
   {
     "id": "medical-021",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": false,
     "medical": true,
@@ -2165,6 +2266,7 @@
   {
     "id": "medical-022",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": false,
     "medical": true,
@@ -2179,6 +2281,7 @@
   {
     "id": "medical-023",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": false,
     "medical": true,
@@ -2193,6 +2296,7 @@
   {
     "id": "medical-024",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": false,
     "medical": true,
@@ -2207,6 +2311,7 @@
   {
     "id": "medical-025",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": false,
     "medical": true,
@@ -2221,6 +2326,7 @@
   {
     "id": "medical-026",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": false,
     "medical": true,
@@ -2235,6 +2341,7 @@
   {
     "id": "medical-027",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": false,
     "medical": true,
@@ -2249,6 +2356,7 @@
   {
     "id": "medical-028",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": false,
     "medical": true,
@@ -2263,6 +2371,7 @@
   {
     "id": "medical-029",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": false,
     "medical": true,
@@ -2277,6 +2386,7 @@
   {
     "id": "medical-030",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": false,
     "medical": true,
@@ -2291,6 +2401,7 @@
   {
     "id": "medical-031",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": false,
     "medical": true,
@@ -2305,6 +2416,7 @@
   {
     "id": "unanswerable-001",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2319,6 +2431,7 @@
   {
     "id": "unanswerable-002",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2333,6 +2446,7 @@
   {
     "id": "unanswerable-003",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2347,6 +2461,7 @@
   {
     "id": "unanswerable-004",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2361,6 +2476,7 @@
   {
     "id": "unanswerable-005",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2375,6 +2491,7 @@
   {
     "id": "unanswerable-006",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2389,6 +2506,7 @@
   {
     "id": "unanswerable-007",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2403,6 +2521,7 @@
   {
     "id": "unanswerable-008",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2417,6 +2536,7 @@
   {
     "id": "unanswerable-009",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2431,6 +2551,7 @@
   {
     "id": "unanswerable-010",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2445,6 +2566,7 @@
   {
     "id": "unanswerable-011",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2459,6 +2581,7 @@
   {
     "id": "unanswerable-012",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2473,6 +2596,7 @@
   {
     "id": "unanswerable-013",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2487,6 +2611,7 @@
   {
     "id": "unanswerable-014",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2501,6 +2626,7 @@
   {
     "id": "unanswerable-015",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2515,6 +2641,7 @@
   {
     "id": "unanswerable-016",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2529,6 +2656,7 @@
   {
     "id": "unanswerable-017",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2543,6 +2671,7 @@
   {
     "id": "unanswerable-018",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2557,6 +2686,7 @@
   {
     "id": "unanswerable-019",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2571,6 +2701,7 @@
   {
     "id": "unanswerable-020",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2585,6 +2716,7 @@
   {
     "id": "unanswerable-021",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2599,6 +2731,7 @@
   {
     "id": "unanswerable-022",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2613,6 +2746,7 @@
   {
     "id": "unanswerable-023",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2627,6 +2761,7 @@
   {
     "id": "unanswerable-024",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2641,6 +2776,7 @@
   {
     "id": "unanswerable-025",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2655,6 +2791,7 @@
   {
     "id": "unanswerable-026",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2669,6 +2806,7 @@
   {
     "id": "unanswerable-027",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2683,6 +2821,7 @@
   {
     "id": "unanswerable-028",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2697,6 +2836,7 @@
   {
     "id": "unanswerable-029",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2711,6 +2851,7 @@
   {
     "id": "unanswerable-030",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2725,6 +2866,7 @@
   {
     "id": "unanswerable-031",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2739,6 +2881,7 @@
   {
     "id": "unanswerable-032",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2753,6 +2896,7 @@
   {
     "id": "unanswerable-033",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2767,6 +2911,7 @@
   {
     "id": "unanswerable-034",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2781,6 +2926,7 @@
   {
     "id": "unanswerable-035",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2795,6 +2941,7 @@
   {
     "id": "unanswerable-036",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2809,6 +2956,7 @@
   {
     "id": "unanswerable-037",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2823,6 +2971,7 @@
   {
     "id": "unanswerable-038",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2837,6 +2986,7 @@
   {
     "id": "unanswerable-039",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2851,6 +3001,7 @@
   {
     "id": "unanswerable-040",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2865,6 +3016,7 @@
   {
     "id": "unanswerable-041",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2879,6 +3031,7 @@
   {
     "id": "unanswerable-042",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2893,6 +3046,7 @@
   {
     "id": "unanswerable-043",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2907,6 +3061,7 @@
   {
     "id": "unanswerable-044",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2921,6 +3076,7 @@
   {
     "id": "unanswerable-045",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2935,6 +3091,7 @@
   {
     "id": "unanswerable-046",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -2949,6 +3106,7 @@
   {
     "id": "words-001",
     "group": "words",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -2969,6 +3127,7 @@
   {
     "id": "words-002",
     "group": "words",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -2989,6 +3148,7 @@
   {
     "id": "words-003",
     "group": "words",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3009,6 +3169,7 @@
   {
     "id": "words-004",
     "group": "words",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3029,6 +3190,7 @@
   {
     "id": "geography-001",
     "group": "geography",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3049,6 +3211,7 @@
   {
     "id": "geography-002",
     "group": "geography",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3069,6 +3232,7 @@
   {
     "id": "geography-003",
     "group": "geography",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3089,6 +3253,7 @@
   {
     "id": "physics-001",
     "group": "physics",
+    "domain": "science",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3109,6 +3274,7 @@
   {
     "id": "physics-002",
     "group": "physics",
+    "domain": "science",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3129,6 +3295,7 @@
   {
     "id": "physics-003",
     "group": "physics",
+    "domain": "science",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3149,6 +3316,7 @@
   {
     "id": "chemistry-001",
     "group": "chemistry",
+    "domain": "science",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3169,6 +3337,7 @@
   {
     "id": "chemistry-002",
     "group": "chemistry",
+    "domain": "science",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3189,6 +3358,7 @@
   {
     "id": "chemistry-003",
     "group": "chemistry",
+    "domain": "science",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3209,6 +3379,7 @@
   {
     "id": "mathematics-001",
     "group": "mathematics",
+    "domain": "science",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3229,6 +3400,7 @@
   {
     "id": "mathematics-002",
     "group": "mathematics",
+    "domain": "science",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3249,6 +3421,7 @@
   {
     "id": "knots-001",
     "group": "knots",
+    "domain": "making",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3269,6 +3442,7 @@
   {
     "id": "knots-002",
     "group": "knots",
+    "domain": "making",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3289,6 +3463,7 @@
   {
     "id": "multi-step-016",
     "group": "multi-step",
+    "domain": "reference",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3314,6 +3489,7 @@
   {
     "id": "multi-step-017",
     "group": "multi-step",
+    "domain": "science",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3339,6 +3515,7 @@
   {
     "id": "multi-step-018",
     "group": "multi-step",
+    "domain": "science",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3364,6 +3541,7 @@
   {
     "id": "multi-step-019",
     "group": "multi-step",
+    "domain": "science",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3389,6 +3567,7 @@
   {
     "id": "multi-step-020",
     "group": "multi-step",
+    "domain": "science",
     "split": "tune",
     "answerable": true,
     "medical": false,
@@ -3414,6 +3593,7 @@
   {
     "id": "medical-032",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -3434,6 +3614,7 @@
   {
     "id": "medical-033",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -3454,6 +3635,7 @@
   {
     "id": "medical-034",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -3474,6 +3656,7 @@
   {
     "id": "medical-035",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -3494,6 +3677,7 @@
   {
     "id": "medical-036",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": true,
     "medical": true,
@@ -3514,6 +3698,7 @@
   {
     "id": "medical-037",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": false,
     "medical": true,
@@ -3528,6 +3713,7 @@
   {
     "id": "medical-038",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": false,
     "medical": true,
@@ -3542,6 +3728,7 @@
   {
     "id": "medical-039",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": false,
     "medical": true,
@@ -3556,6 +3743,7 @@
   {
     "id": "medical-040",
     "group": "medical",
+    "domain": "medicine",
     "split": "tune",
     "answerable": false,
     "medical": true,
@@ -3570,6 +3758,7 @@
   {
     "id": "unanswerable-047",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -3584,6 +3773,7 @@
   {
     "id": "unanswerable-048",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -3598,6 +3788,7 @@
   {
     "id": "unanswerable-049",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -3612,6 +3803,7 @@
   {
     "id": "unanswerable-050",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -3626,6 +3818,7 @@
   {
     "id": "unanswerable-051",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -3640,6 +3833,7 @@
   {
     "id": "unanswerable-052",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -3654,6 +3848,7 @@
   {
     "id": "unanswerable-053",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -3668,6 +3863,7 @@
   {
     "id": "unanswerable-054",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -3682,6 +3878,7 @@
   {
     "id": "unanswerable-055",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -3696,6 +3893,7 @@
   {
     "id": "unanswerable-056",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -3710,6 +3908,7 @@
   {
     "id": "unanswerable-057",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -3724,6 +3923,7 @@
   {
     "id": "unanswerable-058",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -3738,6 +3938,7 @@
   {
     "id": "unanswerable-059",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
@@ -3752,6 +3953,7 @@
   {
     "id": "unanswerable-060",
     "group": "unanswerable",
+    "domain": "reference",
     "split": "tune",
     "answerable": false,
     "medical": false,
