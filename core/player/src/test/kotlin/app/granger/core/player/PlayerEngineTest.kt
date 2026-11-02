@@ -554,6 +554,19 @@ class PlayerEngineTest {
 
     // ---- finished books (Task 11) ----
 
+    @Test fun playOnABookThatJustEndedStartsItOver() {
+        val book = fakeBook("ending", 20_000, 20_000)
+        val engine = newEngine()
+        engine.playAudiobook(book.id)
+        idle()
+        run(engine.player).untilState(Player.STATE_ENDED)
+        engine.playPause()                                    // the mini-player's play, without leaving the book
+        shadowOf(Looper.getMainLooper()).runOneTask()
+        assertThat(engine.player.currentMediaItemIndex).isEqualTo(0)
+        assertThat(engine.player.currentPosition).isLessThan(1_000L)
+        assertThat(engine.player.playWhenReady).isTrue()
+    }
+
     @Test fun finishedBookResumesFromTheStartAndIsUnfinishedOncePlaying() {
         val book = fakeBook("done", 30_000, 30_000)
         runBlocking {

@@ -669,7 +669,10 @@ class PlayerEngine(
         refresh()
     }
 
-    override fun playPause() = submit { if (player.playWhenReady) userPause() else resume() }
+    override fun playPause() = submit {
+        // At its end the player still says play-when-ready, but nothing plays and the button shows Play: that press plays.
+        if (player.playWhenReady && player.playbackState != Player.STATE_ENDED) userPause() else resume()
+    }
 
     /** Play (from the session: notification, Bluetooth, lock screen). */
     fun play() = submit { resume() }
@@ -1286,6 +1289,9 @@ class PlayerEngine(
         pausedForFocus = false
         errorRun = 0
         if (mode == Mode.BOOK) finished = false
+        // A book that played to its end starts over (below), as reloading it does; a pause's rewind would first move it
+        // off the end and so replay its last seconds and end again (clean-up list).
+        if (mode == Mode.BOOK && player.playbackState == Player.STATE_ENDED) pausedAt = 0L
         if (mode == Mode.BOOK && pausedAt > 0L) {
             val rewind = AutoRewind.rewindMs(now() - pausedAt)
             pausedAt = 0L
