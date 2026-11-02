@@ -114,6 +114,7 @@ class VoiceInputSpikeActivity : ComponentActivity() {
                     "probe" -> probeAll()
                     "download" -> download(lang)
                     "replay" -> replay(lang, paced, biasName, only)
+                    "warm" -> warm(intent.getStringExtra("warm") ?: "none", lang)
                     "bias" -> biasCap(lang)
                     else -> log("Asr: unknown run $run")
                 }
@@ -215,6 +216,38 @@ class VoiceInputSpikeActivity : ComponentActivity() {
             Recorder()
             lines.forEach { Text(it, fontFamily = FontFamily.Monospace, fontSize = 10.sp) }
         }
+    }
+
+    /**
+     * Plan A1 Task 1: does anything warm the recognizer after its service was stopped? [how] is `none`, `support`
+     * (A1's `languages()` check) or `session` (a recognizer opened and cancelled at once); then, 2 s later, the
+     * first WAV starting with `c01` is replayed and logged as usual (beginMs is the cold cost).
+     */
+    private suspend fun warm(how: String, lang: String) {
+        val start = SystemMonoClock.nanos()
+        when (how) {
+            "support" -> log("Asr: warm support ${probe.support(lang)}")
+            "session" -> {
+                val r = android.speech.SpeechRecognizer.createOnDeviceSpeechRecognizer(this)
+                r.setRecognitionListener(object : android.speech.RecognitionListener {
+                    override fun onReadyForSpeech(params: Bundle?) {}
+                    override fun onBeginningOfSpeech() {}
+                    override fun onRmsChanged(rmsdB: Float) {}
+                    override fun onBufferReceived(buffer: ByteArray?) {}
+                    override fun onEndOfSpeech() {}
+                    override fun onError(error: Int) {}
+                    override fun onResults(results: Bundle?) {}
+                    override fun onPartialResults(partialResults: Bundle?) {}
+                    override fun onEvent(eventType: Int, params: Bundle?) {}
+                })
+                r.startListening(android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH).putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, lang))
+                delay(300)
+                r.cancel(); r.destroy()
+            }
+        }
+        log("Asr: warm how=$how ms=${(SystemMonoClock.nanos() - start) / 1_000_000}")
+        delay(2_000)
+        replay(lang, paced = true, only = listOf("c01"))
     }
 
     /**

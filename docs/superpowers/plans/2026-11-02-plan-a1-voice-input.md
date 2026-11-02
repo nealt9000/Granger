@@ -32,9 +32,10 @@
 
 - **Search's "Did you mean …?"** appears only after a spoken search. It shows when the best library name scores at least the threshold and isn't already what was searched. Tapping it searches that name. Typed searches never see it. This is the matcher's only job in A1, because questions go to the ask box as heard and you fix any word before sending.
 - **Ask with auto-send on:** a misheard name goes straight to the pipeline. That's accepted (you chose it), and Stop still works.
-- **Cold first use:** "Listening…" holds for up to 25 s before giving up, and the ask box and Search warm the recognizer when they open (Task 1 measures whether a support check warms it). No warm-up runs in the background.
+- **Cold first use:** the microphone gets 25 s to open, and after that "Listening…" waits for the first words with no timeout: the model can load after the microphone opens while the audio waits in a buffer (Task 1). No warm-up (Task 1 measured it).
 - **While read-aloud is speaking** (an answer or a book), tapping the mic stops it first, so the recognizer doesn't hear Granger. Music keeps playing, as the spike showed it does no harm.
 - **The microphone permission** is asked for on the first mic tap, with one line saying why. If you refuse twice, the mic stays and its tap explains how to allow it in the phone's settings.
+- **Android 13 (API 33) and up only.** Below that, `checkRecognitionSupport` doesn't exist, so the app can't tell whether a language is installed, and the mic is hidden. The app's floor stays at API 29.
 - **Spanish recognizer tag:** the best match among the installed languages (`es-ES` on the Pixel 6, else `es-US`, else any `es-*`). If none is installed but one is supported, Settings offers the download.
 
 - **Built for conversation mode next** (Neal, 2026-11-02: the next thing to use A1 is a conversation mode in Ask, where you speak, the answer is read aloud, and it listens again). So `Dictation` knows nothing about a screen: it can be started from code as well as by a tap, its final text goes to a callback, and it never hears Granger's own voice (it starts only after read-aloud has stopped, and read-aloud stops before it starts). The "Ask as soon as I stop talking" path is the same send that conversation mode will make. A1 builds none of the loop.
@@ -59,7 +60,17 @@
 - [ ] `OnDeviceSpeechInput`: one recognizer per take, created on the main thread, and destroyed on final, error, cancel or flow cancellation. Partials on, `EXTRA_PREFER_OFFLINE`, max results 5, no biasing. Final text falls back to the last partial when the result comes back empty (the live listener does the same; it never happened in 25 takes). A 25 s timeout to the first `onReadyForSpeech`, for the cold start. After a take ends, a new recognizer opens only 500 ms later (the spike's `SERVER_DISCONNECTED` lesson).
 - [ ] `availability(tag)`: `isOnDeviceRecognitionAvailable`, then `checkRecognitionSupport` (installed → `Ready`, supported → `Downloadable`, else `Unavailable`), cached per tag for the process. `download(tag)` wraps `triggerModelDownload` with its progress.
 - [ ] `RecognizerTags.forApp(locale, englishVariant, installed, supported)`: `en` → `en-US` / `en-GB`; `es` → the best installed `es-*` (see Builder's calls); any other language → null (no mic). Unit-tested.
-- [ ] **Warm-up check (on the phone):** force-stop Android System Intelligence, then time the first take with and without a support check made 2 s before. Record it in the plan. If the check doesn't help, the screens don't warm.
+- [x] *Built 2026-11-02:* `SpeechInput.kt`, `OnDeviceSpeechInput.kt` (the spike's rules: 25 s for the mic to open, takes 500 ms apart, one retry on busy, the last partial for an empty final), `AndroidRecognizerBackend.kt` (thin, main thread), `RecognizerTags.kt`. 17 unit tests with a fake backend in virtual time.
+- [x] **Warm-up check (on the phone):** force-stop Android System Intelligence, then time the first take with and without a support check made 2 s before. Record it in the plan. If the check doesn't help, the screens don't warm. *Found while setting it up: in the spike's cold run the microphone opened in 40 ms, but speech was only taken up at 18.3 s. The model loads **after** "ready", and the audio waits in a buffer (no words lost). So the cold cost shows as a long wait for the first words, not as a slow start, and the check measures time to the first words, with one replayed WAV (`--es run warm --es warm none|support|session` on the spike screen).*
+  *Result (2026-11-02, Pixel 6, `c01.wav` "Read aloud", 2.06 s, three rounds each, Android System Intelligence force-stopped before every run):*
+
+  | Before the take | Speech taken up (`onBeginningOfSpeech`) | First final segment |
+  |---|---|---|
+  | nothing | 2.5 / 2.0 / 1.9 s | 2.8 / 2.3 / 2.4 s |
+  | `languages()` support check, 2 s before | 1.6 / 1.9 / 1.6 s | 2.4 / 2.3 / 2.4 s |
+  | a recognizer opened and cancelled, 2 s before | 0.9 / 0.8 / 0.7 s | 2.3 / 2.3 / 2.3 s |
+
+  *A force-stop alone costs about 2 s, not the spike's 18 s; that state wasn't reproduced. The final text barely changes (the buffered audio catches up). **Decision: the screens don't warm.** A support check hardly helps, and opening a recognizer early would switch on the microphone (and the green privacy dot) without the user asking, for about a second earlier first words. Once the mic is open, A1 waits for the first words without a timeout, so a very cold first take is slow but not lost.*
 - [ ] **Commit.** `A1: SpeechInput, the phone's on-device recognizer`
 
 ### Task 2: `SpokenTitleMatcher` in `:core:text`
