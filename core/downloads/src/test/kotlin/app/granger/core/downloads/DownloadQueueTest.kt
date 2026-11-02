@@ -84,7 +84,7 @@ class DownloadQueueTest {
     private val manager = managerOf(scheduler)
 
     private fun managerOf(scheduler: DownloadScheduler) = DownloadManager(
-        dao, scheduler, prefs, installedPackBytes = { 0 }, freeBytes = { Long.MAX_VALUE / 2 }, io = Dispatchers.Unconfined, now = { clock },
+        dao, scheduler, prefs, freeBytes = { Long.MAX_VALUE / 2 }, io = Dispatchers.Unconfined, now = { clock },
     )
 
     private fun queueOf(recordRunner: RecordRunner, networkCheckMillis: Long = Long.MAX_VALUE) =
@@ -99,7 +99,7 @@ class DownloadQueueTest {
 
     private fun spec(id: String, group: String? = null, kind: ItemKind = ItemKind.PACK) = DownloadSpec(
         itemId = id, kind = kind, title = "Title $id", urls = listOf("https://a.test/$id.zim"), sizeBytes = 100, hash = SHA_1,
-        hashAlgorithm = HashAlgorithm.SHA256, relativePath = "packs/$id.zim", snapshotDate = "", capped = false, groupId = group,
+        hashAlgorithm = HashAlgorithm.SHA256, relativePath = "packs/$id.zim", snapshotDate = "", groupId = group,
     )
 
     private suspend fun group(id: String, vararg items: String, wifiOnly: Boolean = true) =

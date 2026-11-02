@@ -57,7 +57,6 @@ class VectorDownloads(private val downloads: Downloads, private val wifiOnly: ()
         fun specOf(item: CatalogItem, vectors: VectorsEntry): DownloadSpec = DownloadSpec(
             itemIdOf(item.id), ItemKind.VECTORS, item.title, listOf(vectors.url), vectors.sizeBytes, vectors.sha256,
             HashAlgorithm.SHA256, "vectors/${item.id}_${vectors.sha256.take(12)}.gvec", downloadSpecOf(item).snapshotDate,
-            capped = false,
         )
     }
 }

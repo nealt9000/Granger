@@ -480,9 +480,6 @@ class SourceViewModel(
                 EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> null
                 is EnqueueResult.NoSpace ->
                     "Not enough space on ${volume.label} for ${item.title}: free up ${formatBytes(result.neededBytes)}."
-                is EnqueueResult.OverCap ->
-                    "${item.title} would bring your downloads to ${formatBytes(result.wouldUseBytes)}, " +
-                        "over the ${formatBytes(result.capBytes)} limit."
             }
             if (problem != null) return if (queued > 0) "$problem Queued $queued before that." else problem
         }

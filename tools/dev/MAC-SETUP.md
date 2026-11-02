@@ -116,10 +116,31 @@ The DHU reads commands from its terminal and exits when stdin closes, so from a 
 (`sleep 86400 | ./desktop-head-unit`). The first connection runs Android Auto's setup on the phone; accept its prompts. If it
 won't connect after a disconnect, stop and start the head unit server on the phone and run `adb forward` again.
 
+## Python tools
+
+Each tool runs from its own virtualenv under `~/.venvs` (Homebrew Python 3.14, except ASR). Make one with
+`python3 -m venv ~/.venvs/<name>` and the `pip install` below, then run the tool or its tests with that venv's
+`bin/python` (for example `~/.venvs/granger-catalog/bin/python -m pytest tools/catalog-gen`).
+
+| Venv | Runs | Install |
+|---|---|---|
+| `granger-catalog` | `tools/catalog-gen` (build, check-links, sign, verify; signing needs `~/.config/granger/catalog-signing.key`) | `pip install -r tools/catalog-gen/requirements.txt` |
+| `granger-pack` | `tools/pack-builder`, `tools/test-zim`, and `tools/eval` (its tests pass here: 125) | `pip install -r tools/pack-builder/requirements.txt numpy` |
+| `granger-vectors` | `tools/vectors` (see `tools/vectors/BUILD.md`), `tools/owl` | `pip install libzim numpy sentence-transformers pillow torchvision pytest` |
+| `granger-asr` | `tools/asr` (Python 3.11 for the speech models) | `pip install numpy torch` and the spike's own notes |
+
+Two gotchas: `catalog_gen.py sign` refuses a file that hasn't passed `check-links` since it changed (about 1,850
+links, a few minutes), and `/usr/bin/python3` has none of these packages.
+
+## A new worktree
+
+`tools/dev/new-worktree.sh <name> <branch> [base]` makes `.claude/worktrees/<name>` on a new branch, copies
+`local.properties` and initialises the TagLib submodule, the three things a bare `git worktree add` leaves out.
+
 ## Case-insensitive file system
 
 macOS volumes are case-insensitive by default, so two classes in one package whose names differ only in case overwrite each other's `.class` files in `build/`. `core/library` had both `Bookmark` and `BookMark`. `BookMark` is now `BookAnnotation` (its table is still `book_marks`, so the schema didn't change), and the build runs from the normal checkout. Don't reintroduce names that differ only in case.
 
 Baseline on 2026-10-19 (commit `80b20e9` from a case-sensitive volume, then again after the rename from the normal checkout): `./gradlew testDebugUnitTest` BUILD SUCCESSFUL, 835 tests, 0 failures, 0 skipped (`:app` 409, `:core:library` 154, `:core:downloads` 79, `:core:books` 54, `:core:ai` 52, `:core:archive` 38, `:core:catalog` 28, `:core:zim` 21). No Linux test count was recorded to compare against.
 
-`gradle.properties` still has the Linux machine's limits (`org.gradle.workers.max=2`, `-Xmx2g`, in-process Kotlin). They work on the Mac but are slower than they need to be.
+`gradle.properties` is sized for the Mac since 2026-11-02 (6 GB Gradle heap, parallel, build cache, the Kotlin daemon); its comment says what to set back on a small machine.

@@ -3,6 +3,24 @@ package app.granger.core.zim
 /** What the reader's WebView gets for one request. */
 sealed interface ZimResponse {
     class Content(val mimeType: String, val encoding: String?, val bytes: ByteArray) : ZimResponse
+
+    /**
+     * A large stored entry (audio, video, a big image) streamed from the `.zim` file, never whole in memory. [status]
+     * is 200, 206 for a byte range the WebView asked for (so media can seek), or 416 for a range past the end;
+     * [headers] carry the length and range. [open] gives the bytes to send.
+     */
+    class Stream(
+        val mimeType: String,
+        val encoding: String?,
+        val status: Int,
+        val headers: Map<String, String>,
+        private val range: ZimRange,
+        val from: Long,
+        val count: Long,
+    ) : ZimResponse {
+        fun open(): java.io.InputStream = if (count > 0) range.open(from, count) else java.io.ByteArrayInputStream(ByteArray(0))
+        val reason: String get() = when (status) { 206 -> "Partial Content"; 416 -> "Range Not Satisfiable"; else -> "OK" }
+    }
     data object NotFound : ZimResponse
     /** Anything that is not a reader URL. Answered locally so it never reaches the network. */
     data object Blocked : ZimResponse
@@ -30,11 +48,43 @@ class ZimResolver(
     private val archiveFor: (packId: String) -> ZimArchive?,
     private val cachedArchiveFor: (packId: String) -> ZimArchive? = archiveFor,
 ) {
-    fun response(url: String): ZimResponse {
+    /** [rangeHeader] is the request's `Range` header, if any; only a streamed entry answers it. */
+    fun response(url: String, rangeHeader: String? = null): ZimResponse {
         val zim = ZimUrls.parse(url) ?: return ZimResponse.Blocked
-        val item = archiveFor(zim.packId)?.read(zim.path) ?: return ZimResponse.NotFound
+        val archive = archiveFor(zim.packId) ?: return ZimResponse.NotFound
+        // HTML is read whole: the reader patches it, and pages are small.
+        archive.storedRange(zim.path)
+            ?.takeIf { it.length >= STREAM_MIN_BYTES && splitMimeType(it.mimeType).first != "text/html" }
+            ?.let { return stream(it, rangeHeader) }
+        val item = archive.read(zim.path) ?: return ZimResponse.NotFound
         val (mimeType, encoding) = splitMimeType(item.mimeType)
         return ZimResponse.Content(mimeType, encoding, item.bytes)
+    }
+
+    private fun stream(range: ZimRange, rangeHeader: String?): ZimResponse.Stream {
+        val (mimeType, encoding) = splitMimeType(range.mimeType)
+        val length = range.length
+        val asked = rangeHeader?.let { byteRange(it, length) }
+        return when {
+            asked == null -> ZimResponse.Stream(
+                mimeType, encoding, 200, mapOf("Accept-Ranges" to "bytes", "Content-Length" to "$length"), range, 0L, length,
+            )
+            asked.first > asked.last -> ZimResponse.Stream(
+                mimeType, encoding, 416, mapOf("Accept-Ranges" to "bytes", "Content-Range" to "bytes */$length"), range, 0L, 0L,
+            )
+            else -> {
+                val count = asked.last - asked.first + 1
+                ZimResponse.Stream(
+                    mimeType, encoding, 206,
+                    mapOf(
+                        "Accept-Ranges" to "bytes",
+                        "Content-Range" to "bytes ${asked.first}-${asked.last}/$length",
+                        "Content-Length" to "$count",
+                    ),
+                    range, asked.first, count,
+                )
+            }
+        }
     }
 
     fun linkAction(url: String): LinkAction {
@@ -59,6 +109,34 @@ class ZimResolver(
 
     companion object {
         private val EXTERNAL_SCHEMES = setOf("http", "https", "mailto", "tel", "geo")
+        /** Smaller entries are read whole, as before: the WebView takes a byte array fastest. */
+        const val STREAM_MIN_BYTES = 256L * 1024
+
+        /**
+         * One `bytes=` range of an entry of [length] bytes: `a-b`, `a-` or `-n` (the last n). Null to answer with the
+         * whole entry (no header, or one this doesn't take, such as several ranges); an empty range (first > last)
+         * when it starts past the end.
+         */
+        fun byteRange(header: String, length: Long): LongRange? {
+            val spec = header.trim().takeIf { it.startsWith("bytes=", ignoreCase = true) }?.substring(6)?.trim() ?: return null
+            if (',' in spec || '-' !in spec) return null
+            val start = spec.substringBefore('-').trim()
+            val end = spec.substringAfter('-').trim()
+            return when {
+                start.isEmpty() -> {
+                    val n = end.toLongOrNull()?.takeIf { it > 0 } ?: return null
+                    maxOf(0L, length - n)..(length - 1)
+                }
+                else -> {
+                    val a = start.toLongOrNull() ?: return null
+                    if (a >= length) return LongRange.EMPTY
+                    val b = if (end.isEmpty()) length - 1 else (end.toLongOrNull() ?: return null)
+                    if (b < a) return null
+                    a..minOf(b, length - 1)
+                }
+            }
+        }
+
         private val TEXT_TYPES = setOf("application/javascript", "application/json", "application/xml", "image/svg+xml")
 
         fun isPdf(mimeType: String?): Boolean = mimeType != null && splitMimeType(mimeType).first == "application/pdf"

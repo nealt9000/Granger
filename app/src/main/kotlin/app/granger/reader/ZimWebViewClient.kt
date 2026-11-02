@@ -37,10 +37,16 @@ class ZimWebViewClient(
     override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse {
         val url = request.url.toString()
         ZimUrls.parse(url)?.takeIf { it.packId == APP_PACK }?.let { return appAsset(it.path) }
-        return when (val response = resolver.response(url)) {
+        val range = request.requestHeaders?.entries?.firstOrNull { it.key.equals("Range", ignoreCase = true) }?.value
+        return when (val response = resolver.response(url, range)) {
             is ZimResponse.Content -> {
                 val bytes = if (response.mimeType == "text/html") patched(response.bytes, response.encoding) else response.bytes
                 WebResourceResponse(response.mimeType, response.encoding, ByteArrayInputStream(bytes))
+            }
+            is ZimResponse.Stream -> try {
+                WebResourceResponse(response.mimeType, response.encoding, response.status, response.reason, response.headers, response.open())
+            } catch (e: java.io.IOException) {
+                notFound()   // the pack went away (SD card out) between the lookup and the open
             }
             ZimResponse.NotFound -> notFound()
             ZimResponse.Blocked ->

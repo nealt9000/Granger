@@ -302,7 +302,6 @@ class OnboardingViewModel(
             val problem = when (val result = enqueue(group, order, volume, wifiOnly.value)) {
                 EnqueueResult.Queued, EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> null
                 is EnqueueResult.NoSpace -> "Not enough space on ${volume.label}: free up ${formatBytes(result.neededBytes)} or untick something."
-                is EnqueueResult.OverCap -> "That would bring your downloads to ${formatBytes(result.wouldUseBytes)}, over the ${formatBytes(result.capBytes)} limit."
             }
             if (problem != null) {
                 starting.value = false

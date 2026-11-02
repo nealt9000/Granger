@@ -107,7 +107,6 @@ object ArchiveDownloads {
             hashAlgorithm = algorithm,
             relativePath = "books/archive-org/$key.$extension",
             snapshotDate = "",
-            capped = true,
             groupId = part?.let { setGroupId(identifier) },
         )
     }

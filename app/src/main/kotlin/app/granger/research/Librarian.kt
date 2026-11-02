@@ -55,7 +55,6 @@ class Librarian(
             when (val result = downloads.enqueue(item, volume.root, prefs.wifiOnly)) {
                 EnqueueResult.Queued, EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> Unit
                 is EnqueueResult.NoSpace -> return "Not enough space on ${volume.label}: free up ${formatBytes(result.neededBytes)}."
-                is EnqueueResult.OverCap -> return "That would bring your downloads over the ${formatBytes(result.capBytes)} limit."
             }
         }
         return null

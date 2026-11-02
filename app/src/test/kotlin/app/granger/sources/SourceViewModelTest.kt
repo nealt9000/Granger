@@ -416,15 +416,6 @@ class SourceViewModelTest {
         assertThat(vm.ui.value.notice).isNull()
     }
 
-    @Test fun overTheCapTalksAboutDownloadsNotPacks() = runTest(main.dispatcher) {
-        downloads.nextResult = EnqueueResult.OverCap(10_000_000_000, 11_000_000_000)
-        val vm = viewModel()
-        vm.get("med")
-        testScheduler.advanceUntilIdle()
-        assertThat(vm.ui.value.notice).contains("your downloads")
-        assertThat(vm.ui.value.notice).doesNotContain("packs")
-    }
-
     @Test fun grangerListsBooksByCategory() = runTest(main.dispatcher) {
         catalog.mutable.value = CatalogState(
             catalog = catalogOf(
@@ -550,14 +541,6 @@ class SourceViewModelTest {
         vm.setTab(SourceTab.INSTALLED)
         testScheduler.advanceUntilIdle()
         assertThat(vm.rowIds()).containsExactly("emma")
-    }
-
-    @Test fun overTheCapExplains() = runTest(main.dispatcher) {
-        downloads.nextResult = EnqueueResult.OverCap(10_000_000_000, 11_000_000_000)
-        val vm = viewModel()
-        vm.get("med")
-        testScheduler.advanceUntilIdle()
-        assertThat(vm.ui.value.notice).contains("10 GB")
     }
 
     @Test fun presetSkipsInstalledAndActiveItems() = runTest(main.dispatcher) {
