@@ -31,9 +31,13 @@
     <string name="research_stage_searching">Searching your library…</string>
     <string name="research_stage_ranking">Ranking passages…</string>
     <string name="research_stage_writing">Writing…</string>
+    <!-- A health question: the model only chooses which sentences of the passages to quote. -->
+    <string name="research_stage_quoting">Choosing passages to quote…</string>
 
     <!-- Above an answer about health. Keep in step with AnswerText.MEDICAL, which the voice reads. -->
     <string name="research_medical">Not medical advice. If you can reach emergency services or a professional, do so.</string>
+    <!-- Above a health answer made only of sentences quoted from the library, not written by the model. -->
+    <string name="research_medical_quoted">In your library\'s own words:</string>
 
     <!-- Why a turn has no answer, and what to do next. -->
     <string name="research_declined">Not in your library.</string>

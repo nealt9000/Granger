@@ -80,6 +80,7 @@ import app.granger.R
 import app.granger.core.ai.ResearchReadiness
 import app.granger.core.library.ChatSummary
 import app.granger.core.library.TurnOutcome
+import app.granger.core.research.MedicalQuotes
 import app.granger.core.research.OwlLines
 import app.granger.core.research.Passage
 import app.granger.core.research.SourceKind
@@ -114,6 +115,8 @@ private fun progressLabel(ui: TurnUi, reading: String?): String? {
         slow && ui.partial.isNullOrBlank() && owlSpeaks() -> OwlLines.SLOW
         reading != null -> reading
         ui.stage == Stage.LOADING_MODEL -> ui.waking ?: ui.stage.label()
+        // A medical reply is written out of sight and only chooses the quotes (MedicalQuotes).
+        ui.stage == Stage.WRITING && ui.medical && !ui.guessing -> stringResource(R.string.research_stage_quoting)
         else -> ui.stage?.label()
     }
 }
@@ -465,9 +468,13 @@ private fun AnswerBlock(
                     CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                     progressLabel(ui, reading)?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
-                ui.partial?.takeIf { it.isNotBlank() }?.let { AnswerBody(it, onCite) }
+                ui.partial?.takeIf { it.isNotBlank() }?.let {
+                    if (ui.medical && MedicalQuotes.isQuoted(it)) QuotedLabel()
+                    AnswerBody(it, onCite)
+                }
             }
             TurnOutcome.ANSWERED -> {
+                if (ui.medical && MedicalQuotes.isQuoted(turn.answer)) QuotedLabel()
                 AnswerBody(turn.answer, onCite)
                 if (!running || ui.voice != VoiceButton.IDLE) ReadAloudRow(ui.voice, onRead, onPauseResume, onStopReading)
             }
@@ -651,6 +658,12 @@ private fun SourceCard(n: Int, passage: Passage, flash: Boolean, onOpen: () -> U
             overflow = TextOverflow.Ellipsis,
         )
     }
+}
+
+/** Above a medical answer made of the library's own sentences (MedicalQuotes), so it isn't read as the model's words. */
+@Composable
+private fun QuotedLabel() {
+    Text(stringResource(R.string.research_medical_quoted), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 
 @Composable

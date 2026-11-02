@@ -825,5 +825,7 @@ class AppContainer(context: Context) {
         passageFinder, ModelsAdapter(modelManager), rankingConfig,
         sourceWeight = fictionWeight, dense = if (DENSE_RETRIEVAL) denseFinder else null,
         reserveNamed = true, yearFacts = true, reactions = ::owlCentroids,
+        // Ask Preview: a medical question shows the banner and quoted passages, no generated prose (Neal, 2026-11-02).
+        medicalQuotes = true,
     )
 }
