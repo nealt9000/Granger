@@ -122,4 +122,14 @@ class OwlReactionTest {
             assertThat(four).doesNotContain("{n}")
         }
     }
+
+    @Test
+    fun wakingLinesAreAllDifferentAndAboutTheOwl() {
+        assertThat(OwlLines.WAKING.toSet()).hasSize(OwlLines.WAKING.size)
+        assertThat(OwlLines.WAKING.size).isAtLeast(8)
+        for (line in OwlLines.WAKING) {
+            assertThat(line).endsWith("…")
+            assertThat(line.length).isAtMost(40)
+        }
+    }
 }

@@ -83,6 +83,7 @@ import app.granger.player.ListenButtons
 import app.granger.player.VoiceButton
 import app.granger.research.ResearchViewModel.TurnUi
 import app.granger.theme.Spectral
+import kotlin.random.Random
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -103,6 +104,22 @@ private const val SOURCE_GONE = "That source is no longer in your library."
 
 /** How long a source card stays outlined after its citation is tapped. */
 private const val FLASH_MS = 1_500L
+
+/** While the model loads: the owl's [OwlLines.WAKING] lines in turn, from a random one, a new one every few seconds. */
+@Composable
+private fun wakingLine(): String {
+    val lines = OwlLines.WAKING
+    var at by remember { mutableIntStateOf(Random.nextInt(lines.size)) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(WAKING_EVERY_MS)
+            at = (at + 1) % lines.size
+        }
+    }
+    return lines[at]
+}
+
+private const val WAKING_EVERY_MS = 3_000L
 
 /** The owl's instant reaction to the question, in its voice: Spectral italic, until the answer settles. */
 @Composable
@@ -429,7 +446,8 @@ private fun AnswerBlock(
                 val reading = ui.reading?.takeIf { ui.stage == Stage.WRITING && ui.partial.isNullOrBlank() }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                    (reading ?: ui.stage?.label())?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                    val label = reading ?: if (ui.stage == Stage.LOADING_MODEL) wakingLine() else ui.stage?.label()
+                    label?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
                 ui.partial?.takeIf { it.isNotBlank() }?.let { AnswerBody(it, onCite) }
             }
@@ -449,7 +467,8 @@ private fun AnswerBlock(
                 if (ui.guessing && ui.guessShown) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                        ui.stage?.let { Text(it.label(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                        val label = if (ui.stage == Stage.LOADING_MODEL) wakingLine() else ui.stage?.label()
+                        label?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                     }
                 }
                 if (ui.guessFailed) {

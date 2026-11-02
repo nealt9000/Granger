@@ -208,4 +208,23 @@ object OwlLines {
         val (plural, singular) = READING.random(random)
         return if (passages == 1) singular else plural.replace("{n}", passages.toString())
     }
+
+    /**
+     * While the model loads, in turn every few seconds (Neal, 2026-11-02): the owl getting ready, never the question, so
+     * they suit a health question too.
+     */
+    val WAKING: List<String> = listOf(
+        "Waking the librarian…",
+        "Fetching my spectacles…",
+        "Lighting the reading lamp…",
+        "Shaking the dust off my feathers…",
+        "Climbing down from the high shelf…",
+        "Finding my place in the catalogue…",
+        "Sharpening a quill…",
+        "Stirring the old owl…",
+        "Pulling on my reading gloves…",
+        "Opening the library doors…",
+        "Shuffling the index cards…",
+        "Turning up the lamp…",
+    )
 }
