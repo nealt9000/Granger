@@ -30,8 +30,14 @@ object Ranking {
      * the other passages are preselected exactly as if there were none, and the media ones (the finder sends at most
      * two) are carried alongside, in their best-first place, for ranking and the media cap to judge.
      * [weight] multiplies each passage's lexical score (Plan R0's debug source weighting; none in the app). */
-    fun preselect(passages: List<Passage>, keywords: List<String>, config: RankingConfig, weight: (Passage) -> Double = NO_WEIGHT): List<Passage> {
-        val lexical = LexicalScore.scorer(keywords)
+    fun preselect(
+        passages: List<Passage>,
+        keywords: List<String>,
+        config: RankingConfig,
+        weight: (Passage) -> Double = NO_WEIGHT,
+        languages: List<ResearchLanguage> = Keywords.ENGLISH,
+    ): List<Passage> {
+        val lexical = LexicalScore.scorer(keywords, languages)
         val score = { p: Passage -> lexical(p) * weight(p) }
         // Scored once each: a sort comparator would score every passage many times over.
         val sorted = passages
@@ -119,8 +125,9 @@ object Ranking {
         keywords: List<String>,
         config: RankingConfig,
         weight: (Passage) -> Double = NO_WEIGHT,
+        languages: List<ResearchLanguage> = Keywords.ENGLISH,
     ): List<Passage> {
-        val lexical = LexicalScore.scorer(keywords)
+        val lexical = LexicalScore.scorer(keywords, languages)
         val kept = found.map { it to lexical(it) * weight(it) }
             .sortedByDescending { it.second }
             .filter { it.second >= config.lexicalThreshold }
@@ -158,8 +165,9 @@ object Ranking {
         config: RankingConfig,
         limit: Int = config.large,
         weight: (Passage) -> Double = NO_WEIGHT,
+        languages: List<ResearchLanguage> = Keywords.ENGLISH,
     ): List<Passage> {
-        val lexical = LexicalScore.scorer(keywords)
+        val lexical = LexicalScore.scorer(keywords, languages)
         val score = { p: Passage -> lexical(p) * weight(p) }
         return candidates
             .map { it to score(it) }

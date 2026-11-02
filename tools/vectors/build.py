@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Plan R1 Task 4: build vector files for the set.
 
-  build.py SOURCES_DIR BOOKS_DIR WORK_DIR [--only ID ...] [--dims 256] [--books-release DESCRIPTOR]
+  build.py SOURCES_DIR BOOKS_DIR WORK_DIR [--only ID ...] [--dims 256] [--books-release DESCRIPTOR] [--set set-es.json]
+           [--catalog CATALOG]
 
 --books-release reads the Classics from a release descriptor (pack-builder's describe-epubs output) instead of
 the catalog, so a new release's vectors can be built before the catalog is regenerated.
@@ -117,18 +118,21 @@ def main(argv=None):
     ap.add_argument("sources")
     ap.add_argument("books")
     ap.add_argument("work")
-    ap.add_argument("--only", nargs="*", help="these sources only, in this order (granger-classics for the books)")
+    ap.add_argument("--only", nargs="*", help="these sources only, in this order (the books collection, e.g. granger-classics, for the books)")
     ap.add_argument("--dims", type=int, default=256)
     ap.add_argument("--books-release", help="take the books from this release descriptor, not the catalog")
+    ap.add_argument("--set", help="the set file (default set.json)")
+    ap.add_argument("--catalog", help="the catalog naming each source's snapshot and sha256 (default catalog/catalog.json)")
     a = ap.parse_args(argv)
+    catalog = json.loads(Path(a.catalog).read_text()) if a.catalog else CATALOG
     import subprocess, os
     version = subprocess.run([str(sources.CHUNKER), "--version"], capture_output=True, text=True,
                              env=dict(os.environ, JAVA_HOME=sources.JAVA_HOME)).stdout.strip()
     assert version == str(CHUNKER_VERSION), "chunker is version %s, build.py expects %d" % (version, CHUNKER_VERSION)
     work_root, out_dir = Path(a.work), Path(a.work) / "out"
     out_dir.mkdir(parents=True, exist_ok=True)
-    packs = {p["id"]: p for p in CATALOG["packs"]}
-    vset = count.load_set()
+    packs = {p["id"]: p for p in catalog["packs"]}
+    vset = count.load_set(a.set)
     model_box = [None]
     order = {pid: i for i, pid in enumerate(a.only or [])}
     for p in sorted(vset["packs"], key=lambda p: order.get(p["id"], len(order))):
@@ -142,13 +146,13 @@ def main(argv=None):
             write_chunks(work, count.selected(p, str(zim)))
         chunks, full = embed(work, model_box)
         finish(p["id"], entry["snapshotDate"], work, out_dir, chunks, full, a.dims, entry["sha256"], "pack")
-    books = {b["id"]: b for b in CATALOG["books"] if b.get("collection") == vset["books"]["collection"]}
+    books = {b["id"]: b for b in catalog["books"] if b.get("collection") == vset["books"]["collection"]}
     if a.books_release:
         release = json.loads(Path(a.books_release).read_text())
         books = {b["id"]: dict(b, releaseDate=release["releaseDate"]) for b in release["books"]}
     for path in sorted(Path(a.books).glob("*.epub")):
         bid = path.stem.split("_")[0]
-        if bid not in books or (a.only and bid not in a.only and "granger-classics" not in a.only):
+        if bid not in books or (a.only and bid not in a.only and count.books_label(vset) not in a.only):
             continue
         entry = books[bid]
         actual = sha256(path)

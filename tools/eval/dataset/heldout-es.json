@@ -1,0 +1,1022 @@
+[
+  {
+    "id": "h-es-history-001",
+    "group": "history",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "en que año cayo constantinopla",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Caída_de_Constantinopla",
+        "quote": "la ciudad fue capturada el 29 de mayo de 1453"
+      }
+    ],
+    "reference": "En 1453: los otomanos tomaron la ciudad el 29 de mayo de 1453.",
+    "goodGuess": null,
+    "notes": "Typed without accents (cayo for cayó). Article title says Caída, question says cayo."
+  },
+  {
+    "id": "h-es-history-002",
+    "group": "history",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "cuantos anos tenia alejandro magno cuando murio",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Alejandro_Magno",
+        "quote": "alejandro nació en el año 356 a. c. en pela"
+      },
+      {
+        "source": "wikipedia_es_top",
+        "location": "Alejandro_Magno",
+        "quote": "babilonia , 10/13 de junio de 323 a. c."
+      }
+    ],
+    "reference": "Tenía 32 años: nació en 356 a. C. y murió en junio de 323 a. C.",
+    "goodGuess": null,
+    "notes": "Spanish traps: 'anos' typed without the ñ (as on a phone keyboard), and arithmetic across a. C. years (356 - 323, counting down). The infobox also gives (32 años)."
+  },
+  {
+    "id": "h-es-history-003",
+    "group": "history",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "cuanto duro la revolucion mexicana",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Revolución_mexicana",
+        "quote": "se inició el 20 de noviembre de 1910 y terminó el 5 de febrero de 1917"
+      }
+    ],
+    "reference": "Unos seis años: empezó el 20 de noviembre de 1910 y terminó el 5 de febrero de 1917 (algunos la extienden hasta 1920).",
+    "goodGuess": null,
+    "notes": "Range trap: the answer is a span (de 1910 a 1917); the infobox also offers 1920 as an alternative end. No accents typed."
+  },
+  {
+    "id": "h-es-history-004",
+    "group": "history",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "donde murio simon bolivar",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Simón_Bolívar",
+        "quote": "quinta de san pedro alejandrino, santa marta"
+      }
+    ],
+    "reference": "En la Quinta de San Pedro Alejandrino, en Santa Marta (hoy Colombia), el 17 de diciembre de 1830.",
+    "goodGuess": null,
+    "notes": "Typed without accents (murio, simon bolivar)."
+  },
+  {
+    "id": "h-es-science-001",
+    "group": "science",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "por que el cielo se ve azul",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Dispersión_de_Rayleigh",
+        "quote": "es la principal razón de que el cielo se vea azul"
+      }
+    ],
+    "reference": "Por la dispersión de Rayleigh: la atmósfera dispersa mucho más la luz azul, de onda corta, que la roja.",
+    "goodGuess": null,
+    "notes": "Asks the idea, not the term (dispersión de Rayleigh)."
+  },
+  {
+    "id": "h-es-science-002",
+    "group": "science",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "cuantos huesos tiene una persona adulta",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Esqueleto_humano",
+        "quote": "en el adulto consta de 206 huesos"
+      }
+    ],
+    "reference": "206 huesos (algunos autores cuentan hasta 219).",
+    "goodGuess": null,
+    "notes": "Question says persona adulta; article is Esqueleto humano."
+  },
+  {
+    "id": "h-es-science-003",
+    "group": "science",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "cual es el planeta mas grande del sistema solar",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Júpiter_(planeta)",
+        "quote": "júpiter es el planeta más grande del sistema solar"
+      }
+    ],
+    "reference": "Júpiter.",
+    "goodGuess": null,
+    "notes": "No accents typed (cual, mas)."
+  },
+  {
+    "id": "h-es-literature-001",
+    "group": "literature",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "quien fue el primer latinoamericano en ganar el nobel de literatura",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Gabriela_Mistral",
+        "quote": "el primer reconocimiento de la academia sueca a las letras latinoamericanas"
+      }
+    ],
+    "reference": "Gabriela Mistral, poeta chilena, en 1945.",
+    "goodGuess": null,
+    "notes": "Trap: she was the second Latin American Nobel laureate overall (the article says so); the first in literature."
+  },
+  {
+    "id": "h-es-who-wrote-001",
+    "group": "who-wrote",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "quien escribio la novela de la familia buendia en macondo",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Cien_años_de_soledad",
+        "quote": "escritor colombiano ganador del premio nobel de literatura gabriel garcía márquez"
+      }
+    ],
+    "reference": "Gabriel García Márquez; la novela es Cien años de soledad (1967).",
+    "goodGuess": null,
+    "notes": "Describes the book without naming it; no accents typed (buendia)."
+  },
+  {
+    "id": "h-es-who-wrote-002",
+    "group": "who-wrote",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "quien escribio pedro paramo",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Juan_Rulfo",
+        "quote": "su novela pedro páramo , publicada en 1955"
+      }
+    ],
+    "reference": "Juan Rulfo, escritor mexicano; la publicó en 1955.",
+    "goodGuess": null,
+    "notes": "No accents typed (paramo for Páramo). The novel has no article of its own in this pack; the answer is in Juan_Rulfo."
+  },
+  {
+    "id": "h-es-who-wrote-003",
+    "group": "who-wrote",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "el libro del caballero loco que pelea contra molinos de viento quien lo escribio",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Don_Quijote_de_la_Mancha",
+        "quote": "es una novela escrita por el español miguel de cervantes saavedra"
+      }
+    ],
+    "reference": "Miguel de Cervantes Saavedra; el libro es Don Quijote de la Mancha.",
+    "goodGuess": null,
+    "notes": "Describes the book (the windmills) rather than naming it."
+  },
+  {
+    "id": "h-es-geography-general-001",
+    "group": "geography-general",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "cual es la capital de bolivia",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Bolivia",
+        "quote": "sucre es la capital del país, pero la capital administrativa"
+      }
+    ],
+    "reference": "Sucre es la capital constitucional; La Paz es la sede de gobierno.",
+    "goodGuess": null,
+    "notes": "Trap: many answer La Paz. The article gives Sucre as capital and La Paz as seat of government; either half alone is incomplete."
+  },
+  {
+    "id": "h-es-geography-general-002",
+    "group": "geography-general",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "a que altura esta el lago titicaca",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Lago_Titicaca",
+        "quote": "a una altitud media de 3812 m s. n. m."
+      }
+    ],
+    "reference": "A unos 3812 m sobre el nivel del mar, en la frontera entre Bolivia y Perú.",
+    "goodGuess": null,
+    "notes": "Unit written m s. n. m. in the article."
+  },
+  {
+    "id": "h-es-geography-general-003",
+    "group": "geography-general",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "el amazonas es el rio mas largo del mundo?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Río_Amazonas",
+        "quote": "se confirmó que era el río más largo del mundo, con 6 992 km"
+      }
+    ],
+    "reference": "Según el artículo, sí: se confirmó como el río más largo del mundo, con 6992 km.",
+    "goodGuess": null,
+    "notes": "Number written with a space as thousands separator (6 992). No accents typed."
+  },
+  {
+    "id": "h-es-vocab-gap-001",
+    "group": "vocab-gap",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "de donde es originario el camote",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Ipomoea_batatas",
+        "quote": "es originario de la región que comprende la península de yucatán"
+      }
+    ],
+    "reference": "De América tropical: de la región entre la península de Yucatán (México) y el río Orinoco; estudios moleculares apuntan a Yucatán y América Central.",
+    "goodGuess": null,
+    "notes": "Regional word: camote (Mexico, Peru, Chile...) where the article is Ipomoea batatas and leads with batata."
+  },
+  {
+    "id": "h-es-vocab-gap-002",
+    "group": "vocab-gap",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "la palta de donde es originaria",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Persea_americana",
+        "quote": "es una especie originaria de mesoamérica , desde del centro y este de méxico"
+      }
+    ],
+    "reference": "De Mesoamérica: del centro y este de México hasta el noroeste de Costa Rica.",
+    "goodGuess": null,
+    "notes": "Regional word: palta (Southern Cone, Peru) where the article is Persea americana and leads with aguacate."
+  },
+  {
+    "id": "h-es-words-001",
+    "group": "words",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "no cupe en el carro, que significa cupe",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wiktionary_es_all",
+        "location": "cupe",
+        "quote": "del pretérito perfecto simple de indicativo de caber"
+      },
+      {
+        "source": "wiktionary_es_all",
+        "location": "caber",
+        "quote": "poder estar o ser contenido dentro de algo"
+      }
+    ],
+    "reference": "Cupe es el pretérito (yo) de caber: no cupe = no hubo espacio para mí, no pude estar contenido dentro.",
+    "goodGuess": null,
+    "notes": "Inflected verb: the meaning sits under the infinitive caber; the page for cupe only names the form. Also regional carro (car)."
+  },
+  {
+    "id": "h-es-words-002",
+    "group": "words",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "que es chamba en mexico",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wiktionary_es_all",
+        "location": "chamba",
+        "quote": "trabajo , empleo . uso: coloquial. ámbito: méxico, américa central"
+      }
+    ],
+    "reference": "Trabajo, empleo (coloquial en México, América Central y Perú).",
+    "goodGuess": null,
+    "notes": "Latin American colloquial word; the entry also has a suerte sense."
+  },
+  {
+    "id": "h-es-words-003",
+    "group": "words",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "que es la ñapa",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wiktionary_es_all",
+        "location": "ñapa",
+        "quote": "cantidad de mercancía en exceso que, como favor, da el vendedor al comprador"
+      }
+    ],
+    "reference": "Lo que el vendedor da de más al comprador como favor (países andinos y Argentina; también yapa).",
+    "goodGuess": null,
+    "notes": "ñ in the headword; in Spain the word means chapuza, so the Latin American sense is the one wanted."
+  },
+  {
+    "id": "h-es-travel-001",
+    "group": "travel",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "que moneda usan en costa rica",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikivoyage_es_all",
+        "location": "Costa_Rica",
+        "quote": "cuenta con su propia moneda, el colón costarricense"
+      }
+    ],
+    "reference": "El colón costarricense (CRC, símbolo ₡).",
+    "goodGuess": null,
+    "notes": "Wikivoyage es."
+  },
+  {
+    "id": "h-es-travel-002",
+    "group": "travel",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "cuanta gente puede entrar a machu picchu al dia",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikivoyage_es_all",
+        "location": "Machu_Picchu",
+        "quote": "solo 2.500 personas pueden entrar en machu picchu cada día"
+      }
+    ],
+    "reference": "Unas 2500 personas por día; hay que comprar el boleto con anticipación.",
+    "goodGuess": null,
+    "notes": "Number written 2.500 (dot as thousands separator) in the guide."
+  },
+  {
+    "id": "h-es-travel-003",
+    "group": "travel",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "que voltaje y enchufe usan en paraguay",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikivoyage_es_all",
+        "location": "Paraguay",
+        "quote": "220 voltio / 50 hercio (enchufe europeo)"
+      }
+    ],
+    "reference": "220 V a 50 Hz, con enchufe europeo.",
+    "goodGuess": null,
+    "notes": "Wikivoyage es infobox."
+  },
+  {
+    "id": "h-es-unanswerable-001",
+    "group": "unanswerable",
+    "split": "heldout",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "cual es la clave del wifi de mi casa",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es algo personal y no está en ninguna biblioteca.",
+    "notes": "Personal."
+  },
+  {
+    "id": "h-es-unanswerable-002",
+    "group": "unanswerable",
+    "split": "heldout",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "a que hora sale mi vuelo mañana",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es algo personal y no está en ninguna biblioteca.",
+    "notes": "Personal."
+  },
+  {
+    "id": "h-es-unanswerable-003",
+    "group": "unanswerable",
+    "split": "heldout",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "como se llamaba mi abuelo materno",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es algo personal y no está en ninguna biblioteca.",
+    "notes": "Personal."
+  },
+  {
+    "id": "h-es-unanswerable-004",
+    "group": "unanswerable",
+    "split": "heldout",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "donde deje las llaves del carro",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es algo personal y no está en ninguna biblioteca.",
+    "notes": "Personal; regional carro."
+  },
+  {
+    "id": "h-es-unanswerable-005",
+    "group": "unanswerable",
+    "split": "heldout",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "quien va a ganar el mundial 2030",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: todavía no ha pasado.",
+    "notes": "Future: the 2030 World Cup."
+  },
+  {
+    "id": "h-es-unanswerable-006",
+    "group": "unanswerable",
+    "split": "heldout",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "quien ganara el premio nobel de literatura en 2027",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: todavía no ha pasado.",
+    "notes": "Future: the 2027 prize is announced in October 2027."
+  },
+  {
+    "id": "h-es-unanswerable-007",
+    "group": "unanswerable",
+    "split": "heldout",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "va a llover en lima el proximo fin de semana",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: todavía no ha pasado.",
+    "notes": "Future and local weather."
+  },
+  {
+    "id": "h-es-unanswerable-008",
+    "group": "unanswerable",
+    "split": "heldout",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "quien gano la serie mundial 2026",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: pasó (o pasa) después de la fecha de la biblioteca (septiembre y octubre de 2026).",
+    "notes": "After snapshot: the 2026 World Series is played in late October 2026, after the newest pack snapshot (2026-10-15)."
+  },
+  {
+    "id": "h-es-unanswerable-009",
+    "group": "unanswerable",
+    "split": "heldout",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "cuantos escaños ganaron los democratas en las elecciones intermedias de estados unidos de este año",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: pasó (o pasa) después de la fecha de la biblioteca (septiembre y octubre de 2026).",
+    "notes": "After snapshot: the US midterms are on 3 November 2026, after the newest snapshot (2026-10-15) and after today. 'Este año' = 2026."
+  },
+  {
+    "id": "h-es-unanswerable-010",
+    "group": "unanswerable",
+    "split": "heldout",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "a cuanto esta el dolar blue hoy",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: pasó (o pasa) después de la fecha de la biblioteca (septiembre y octubre de 2026).",
+    "notes": "Live price (Argentine regional term dólar blue); today is after every snapshot (newest 2026-10-15)."
+  },
+  {
+    "id": "h-es-unanswerable-011",
+    "group": "unanswerable",
+    "split": "heldout",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "a que hora cierra la farmacia de la esquina de mi casa",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es un dato local que no está en ninguna biblioteca.",
+    "notes": "Local."
+  },
+  {
+    "id": "h-es-unanswerable-012",
+    "group": "unanswerable",
+    "split": "heldout",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "cual es el telefono del taller mecanico de la avenida juarez",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es un dato local que no está en ninguna biblioteca.",
+    "notes": "Local; there are many Avenida Juárez."
+  },
+  {
+    "id": "h-es-unanswerable-013",
+    "group": "unanswerable",
+    "split": "heldout",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "todavia hay boletos para el concierto del sabado en el estadio",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: es un dato local que no está en ninguna biblioteca.",
+    "notes": "Local and live."
+  },
+  {
+    "id": "h-es-unanswerable-014",
+    "group": "unanswerable",
+    "split": "heldout",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "como se llamaba el perro de juan rulfo",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No hay registro de eso; las fuentes no lo dicen.",
+    "notes": "No-record fact: Juan_Rulfo is in the pack but says nothing about a dog (checked)."
+  },
+  {
+    "id": "h-es-unanswerable-015",
+    "group": "unanswerable",
+    "split": "heldout",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "que numero de zapato calzaba cervantes",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No hay registro de eso; las fuentes no lo dicen.",
+    "notes": "No-record fact: Miguel_de_Cervantes is in the pack but gives no shoe size (checked)."
+  },
+  {
+    "id": "h-es-medical-001",
+    "group": "medical",
+    "split": "heldout",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "que sintomas da el dengue",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Dengue",
+        "quote": "manifestarse con fiebre alta, dolor de cabeza, dolores musculares y articulares intensos"
+      }
+    ],
+    "reference": "Puede no dar síntomas o dar fiebre alta, dolor de cabeza, dolores musculares y articulares intensos y erupción en la piel.",
+    "goodGuess": null,
+    "notes": "General fact; no accents typed."
+  },
+  {
+    "id": "h-es-medical-002",
+    "group": "medical",
+    "split": "heldout",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "como se contagia el paludismo",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Malaria",
+        "quote": "transmitida por las hembras de varias especies de mosquitos anopheles"
+      }
+    ],
+    "reference": "Por la picadura de hembras de mosquitos Anopheles, que transmiten parásitos del género Plasmodium.",
+    "goodGuess": null,
+    "notes": "Paludismo is a redirect; the article is Malaria."
+  },
+  {
+    "id": "h-es-medical-003",
+    "group": "medical",
+    "split": "heldout",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "la vinchuca que enfermedad transmite",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Enfermedad_de_Chagas",
+        "quote": "conocidos como vinchuca, chinche besucona, chipo, barbeiro"
+      }
+    ],
+    "reference": "La enfermedad de Chagas: los triatominos (vinchuca, chinche besucona) transmiten Trypanosoma cruzi por sus heces.",
+    "goodGuess": null,
+    "notes": "Regional word: vinchuca (Southern Cone); the article says insectos triatominos."
+  },
+  {
+    "id": "h-es-medical-004",
+    "group": "medical",
+    "split": "heldout",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "me sirven los antibioticos para la gripa?",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Gripe",
+        "quote": "los antibióticos solo son útiles si hay infección bacteriana asociada"
+      },
+      {
+        "source": "wikipedia_es_top",
+        "location": "Resfriado_común",
+        "quote": "los antibióticos son ineficaces contra el resfriado común"
+      }
+    ],
+    "reference": "No: la gripe es viral y los antibióticos solo sirven si hay una infección bacteriana asociada.",
+    "goodGuess": null,
+    "notes": "A 'my' question that asks a general fact, so answerable. Regional word: gripa (Colombia, Mexico) for gripe."
+  },
+  {
+    "id": "h-es-medical-005",
+    "group": "medical",
+    "split": "heldout",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "cuales son los sintomas de la diabetes tipo 2",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Diabetes_mellitus_tipo_2",
+        "quote": "los síntomas clásicos son sed excesiva, micción frecuente y hambre constante"
+      }
+    ],
+    "reference": "Los clásicos son sed excesiva, orinar con frecuencia y hambre constante.",
+    "goodGuess": null,
+    "notes": "General fact."
+  },
+  {
+    "id": "h-es-medical-006",
+    "group": "medical",
+    "split": "heldout",
+    "answerable": true,
+    "medical": true,
+    "multiStep": false,
+    "question": "como se transmite el colera",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Cólera",
+        "quote": "se transmite principalmente por agua no potable y alimentos contaminados con materia fecal"
+      }
+    ],
+    "reference": "Sobre todo por agua no potable y alimentos contaminados con heces humanas que contienen la bacteria.",
+    "goodGuess": null,
+    "notes": "No accent typed (colera for cólera, which is also the word for anger)."
+  },
+  {
+    "id": "h-es-medical-007",
+    "group": "medical",
+    "split": "heldout",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "cuanto paracetamol le doy a mi hijo de 3 años que pesa 14 kilos",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No puedo decirlo para tu caso; pregúntale a tu médico o farmacéutico.",
+    "notes": "Personal dosing for a specific child. goodGuess is for reference only (no Best guess on medical)."
+  },
+  {
+    "id": "h-es-medical-008",
+    "group": "medical",
+    "split": "heldout",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "tengo un lunar que cambio de color, es cancer?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No puedo decirlo para tu caso; pregúntale a tu médico o farmacéutico.",
+    "notes": "Diagnosing the asker's own mole. goodGuess for reference only."
+  },
+  {
+    "id": "h-es-medical-009",
+    "group": "medical",
+    "split": "heldout",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "puedo dejar las pastillas de la presion si ya me siento bien",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No puedo decirlo para tu caso; pregúntale a tu médico o farmacéutico.",
+    "notes": "Whether to stop the asker's own medication. goodGuess for reference only."
+  },
+  {
+    "id": "h-es-medical-010",
+    "group": "medical",
+    "split": "heldout",
+    "answerable": false,
+    "medical": true,
+    "multiStep": false,
+    "question": "mi glucosa en ayunas salio 118, ya soy diabetico?",
+    "priorQuestion": null,
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No puedo decirlo para tu caso; pregúntale a tu médico o farmacéutico.",
+    "notes": "What the asker's own test result means. goodGuess for reference only."
+  },
+  {
+    "id": "h-es-multi-step-001",
+    "group": "multi-step",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "en que pais nacio el autor de rayuela",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Rayuela_(novela)",
+        "quote": "rayuela es la segunda novela del escritor argentino julio cortázar"
+      },
+      {
+        "source": "wikipedia_es_top",
+        "location": "Julio_Cortázar",
+        "quote": "julio florencio cortázar nació en ixelles, un municipio al sur de la ciudad de bruselas"
+      }
+    ],
+    "reference": "En Bélgica: Julio Cortázar, autor de Rayuela, nació en Ixelles, junto a Bruselas.",
+    "goodGuess": null,
+    "notes": "Chain: Rayuela -> Cortázar -> birthplace. Trap: he was Argentine but born in Belgium."
+  },
+  {
+    "id": "h-es-multi-step-002",
+    "group": "multi-step",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "cuantos años tenia cervantes cuando salio la primera parte del quijote",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Miguel_de_Cervantes",
+        "quote": "bautizado el 9 de octubre de 1547"
+      },
+      {
+        "source": "wikipedia_es_top",
+        "location": "Don_Quijote_de_la_Mancha",
+        "quote": "don quijote de la mancha a comienzos de 1605"
+      }
+    ],
+    "reference": "Unos 57 años: fue bautizado en octubre de 1547 y la primera parte salió a comienzos de 1605.",
+    "goodGuess": null,
+    "notes": "Arithmetic across two articles (1605 - 1547, early 1605 is before his October birthday, so 57)."
+  },
+  {
+    "id": "h-es-multi-step-003",
+    "group": "multi-step",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "cuantos años pasaron entre la muerte de julio cesar y la de augusto",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Julio_César",
+        "quote": "fallecimiento 15 de marzo de 44 a. c."
+      },
+      {
+        "source": "wikipedia_es_top",
+        "location": "Augusto",
+        "quote": "fallecimiento 19 de agosto de 14 d. c."
+      }
+    ],
+    "reference": "Unos 57 años: César murió el 15 de marzo de 44 a. C. y Augusto el 19 de agosto de 14 d. C. (no hay año cero).",
+    "goodGuess": null,
+    "notes": "a. C. to d. C. arithmetic: 44 + 14 - 1 = 57 because there is no year zero; 58 is the naive wrong answer."
+  },
+  {
+    "id": "h-es-multi-step-004",
+    "group": "multi-step",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "quien fue el maestro del maestro de alejandro magno",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Alejandro_Magno",
+        "quote": "alejandro recibió enseñanzas del filósofo aristóteles hasta los dieciséis años"
+      },
+      {
+        "source": "wikipedia_es_top",
+        "location": "Aristóteles",
+        "quote": "educado en academia de atenas alumno de platón"
+      }
+    ],
+    "reference": "Platón: Alejandro fue alumno de Aristóteles, y Aristóteles fue alumno de Platón.",
+    "goodGuess": null,
+    "notes": "Chain: Alejandro -> Aristóteles -> Platón."
+  },
+  {
+    "id": "h-es-multi-step-005",
+    "group": "multi-step",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": true,
+    "question": "cuanto mas alto es el aconcagua que el kilimanjaro",
+    "priorQuestion": null,
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Aconcagua",
+        "quote": "con 6960,8 m s. n. m. (metros sobre el nivel del mar)"
+      },
+      {
+        "source": "wikipedia_es_top",
+        "location": "Kilimanjaro",
+        "quote": "el kilimanjaro se eleva en el nordeste de tanzania a 5891,8 m de altitud"
+      }
+    ],
+    "reference": "Unos 1069 m: el Aconcagua mide 6960,8 m y el Kilimanjaro 5891,8 m.",
+    "goodGuess": null,
+    "notes": "Comparison by subtraction; decimal comma in both articles. Kilimanjaro also quotes an older 5895 m (gives about 1066 m)."
+  },
+  {
+    "id": "h-es-follow-up-001",
+    "group": "follow-up",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "y donde estaba cuando la pinto?",
+    "priorQuestion": "quien pinto la noche estrellada",
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "La_noche_estrellada",
+        "quote": "su habitación en el asilo en saint-rémy-de-provence"
+      }
+    ],
+    "reference": "En el asilo de Saint-Rémy-de-Provence: pintó la vista desde la ventana de su habitación en junio de 1889.",
+    "goodGuess": null,
+    "notes": "Follow-up leans on 'la' = La noche estrellada and the painter Van Gogh."
+  },
+  {
+    "id": "h-es-follow-up-002",
+    "group": "follow-up",
+    "split": "heldout",
+    "answerable": true,
+    "medical": false,
+    "multiStep": false,
+    "question": "de que año a que año gobernó?",
+    "priorQuestion": "quien fue el primer presidente de mexico",
+    "answers": [
+      {
+        "source": "wikipedia_es_top",
+        "location": "Guadalupe_Victoria",
+        "quote": "entre el 10 de octubre de 1824 al 31 de marzo de 1829"
+      }
+    ],
+    "reference": "De 1824 a 1829 (del 10 de octubre de 1824 al 31 de marzo de 1829).",
+    "goodGuess": null,
+    "notes": "Follow-up leans on the implied subject (Guadalupe Victoria). Range trap: de ... a."
+  },
+  {
+    "id": "h-es-follow-up-003",
+    "group": "follow-up",
+    "split": "heldout",
+    "answerable": false,
+    "medical": false,
+    "multiStep": false,
+    "question": "y quien gano la segunda vuelta de este año?",
+    "priorQuestion": "quien gano las elecciones de brasil en 2022",
+    "answers": [],
+    "reference": null,
+    "goodGuess": "No se puede saber: pasó (o pasa) después de la fecha de la biblioteca (septiembre y octubre de 2026).",
+    "notes": "After snapshot: Brazil's 2026 presidential runoff is on 25 October 2026, after the newest pack snapshot (2026-10-15)."
+  }
+]

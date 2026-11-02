@@ -23,6 +23,7 @@ import sys
 from dataclasses import replace
 
 import kinds
+import language
 import replay
 from metrics import matches
 
@@ -57,7 +58,7 @@ def _fw(p, w):
 def _keyword(question, corpus, cfg, w):
     """The app's keyword ranking with fiction weighted (filter mode), before the media cap and the cut to 4."""
     kw, ps = corpus["keywords"], corpus["passages"]
-    raw = replay.scorer(kw)
+    raw = replay.scorer(kw, language.of(question))
 
     def weighted(p):
         return raw(p) * _fw(p, w)
@@ -102,7 +103,7 @@ def _hybrid_scored(question, corpus, cfg, hits, alpha, floor):
         c = cos.get(text_key(p))
         scored.append((p, (alpha * lex(p) + (1 - alpha) * c * _fw(p, w)) if c is not None else alpha * lex(p) + (1 - alpha) * floor))
     for p in _dense(hits, floor, w):
-        scored.append((p, alpha * replay.scorer(corpus["keywords"])(p) * _fw(p, w) + (1 - alpha) * p["cosine"] * _fw(p, w)))
+        scored.append((p, alpha * replay.scorer(corpus["keywords"], language.of(question))(p) * _fw(p, w) + (1 - alpha) * p["cosine"] * _fw(p, w)))
     seen, out = set(), []
     for p, sc in sorted(scored, key=lambda x: -x[1]):
         k = text_key(p)

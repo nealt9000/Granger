@@ -46,8 +46,11 @@ class ResearchPipelineTest {
 
     private class FakeFinder(val results: List<Passage>) : PassageFinder {
         val calls = mutableListOf<List<String>>()
-        override suspend fun find(keywords: List<String>): List<Passage> {
+        val languages = mutableListOf<List<ResearchLanguage>>()
+        override suspend fun find(keywords: List<String>): List<Passage> = find(keywords, Keywords.ENGLISH)
+        override suspend fun find(keywords: List<String>, languages: List<ResearchLanguage>): List<Passage> {
             calls += keywords
+            this.languages += languages
             return results
         }
     }
@@ -86,6 +89,15 @@ class ResearchPipelineTest {
         assertThat(finder.calls).containsExactly(listOf("water", "boils"))
         assertThat(gen.maxTokens).containsExactly(32, 512).inOrder()
         assertThat(events.filterIsInstance<ResearchEvent.Partial>().last().text).isEqualTo("Water boils at 100 °C [1].")
+    }
+
+    @Test
+    fun theFinderGetsTheQuestionsLanguages() = runTest {
+        val finder = FakeFinder(listOf(water))
+        val pipeline = ResearchPipeline(finder, FakeModels(FakeGenerator(), embedder = embedder), rewritePlain = true)
+        pipeline.run(ResearchRequest("At what temperature does water boil?")).toList()
+        pipeline.run(ResearchRequest("¿A qué temperatura hierve el agua?")).toList()
+        assertThat(finder.languages).containsExactly(listOf(ResearchLanguage.EN), listOf(ResearchLanguage.ES)).inOrder()
     }
 
     @Test

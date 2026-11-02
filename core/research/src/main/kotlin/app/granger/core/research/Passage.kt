@@ -29,4 +29,10 @@ data class Passage(
     val searchScore: Double = 0.0,
     /** The query's cosine with this passage's precomputed vector, for passages found by dense search; null otherwise. */
     val cosine: Double? = null,
+    /**
+     * The language the passage is written in, from its source's metadata ([ResearchLanguage.ofCode]): a pack's ZIM
+     * `Language`, a book's language. Null when unknown: cards, media, a source in another language, and passages
+     * read back from a kept chat (the chat tables don't store it).
+     */
+    val language: ResearchLanguage? = null,
 )

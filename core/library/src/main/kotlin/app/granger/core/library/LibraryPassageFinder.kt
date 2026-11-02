@@ -6,6 +6,7 @@ import app.granger.core.research.Keywords
 import app.granger.core.research.LexicalScore
 import app.granger.core.research.Passage
 import app.granger.core.research.PassageFinder
+import app.granger.core.research.ResearchLanguage
 import app.granger.core.research.SourceKind
 import app.granger.core.research.SourceMeta
 import app.granger.core.zim.ZimArchive
@@ -65,7 +66,10 @@ class LibraryPassageFinder(
     private val packMs = ConcurrentHashMap<String, Long>()
     @Volatile private var fulltextMs = 0L
 
-    override suspend fun find(keywords: List<String>): List<Passage> {
+    override suspend fun find(keywords: List<String>): List<Passage> = find(keywords, Keywords.ENGLISH)
+
+    /** [languages] are the question's: whose stopwords the book, card and media matching leave out (English by default). */
+    override suspend fun find(keywords: List<String>, languages: List<ResearchLanguage>): List<Passage> {
         lastTimings = null
         val words = keywords.map { it.trim() }.filter { it.isNotEmpty() }
         if (words.isEmpty()) return emptyList()
@@ -80,9 +84,9 @@ class LibraryPassageFinder(
                     SliceDedupe.apply(found, packs, slices, library::archive, { p -> p.sourceId.takeIf { p.kind == SourceKind.ARTICLE } }, { it.location })
                 }
             }
-            val books = async { timed { books(words, collections) } }
-            val cards = async { timed { cards(words, packs, collections) } }
-            val media = async { timed { mediaCards(words) } }
+            val books = async { timed { books(words, collections, languages) } }
+            val cards = async { timed { cards(words, packs, collections, languages) } }
+            val media = async { timed { mediaCards(words, languages) } }
             val (a, b, c, m) = awaitAll(articles, books, cards, media)
             lastTimings = KeywordTimings(fulltextMs, a.second - fulltextMs, b.second, c.second, m.second, packMs.toMap())
             a.first + b.first + c.first + m.first
@@ -116,7 +120,7 @@ class LibraryPassageFinder(
      * keywords' lexical score, at most [mediaCards]. A keyword of several words that matches nothing is tried word by
      * word, stopwords left out: the rewrite's "money from" still finds the song *Money*.
      */
-    private suspend fun mediaCards(words: List<String>): List<Passage> {
+    private suspend fun mediaCards(words: List<String>, languages: List<ResearchLanguage>): List<Passage> {
         val index = media ?: return emptyList()
         if (mediaCards <= 0) return emptyList()
         return try {
@@ -124,14 +128,14 @@ class LibraryPassageFinder(
                 index.works(listOf(keyword), MEDIA_PER_KEYWORD).ifEmpty {
                     val parts = Keywords.words(keyword)
                     if (parts.size < 2) emptyList()
-                    else parts.filterNot(Keywords::isStopword).flatMap { index.works(listOf(it), MEDIA_PER_KEYWORD) }
+                    else parts.filterNot { Keywords.isStopword(it, languages) }.flatMap { index.works(listOf(it), MEDIA_PER_KEYWORD) }
                 }
             }.distinctBy { it.id }
-            val score = LexicalScore.scorer(words)
+            val score = LexicalScore.scorer(words, languages)
             // Stable: equal scores keep the index's order. Scored as whole works, so focusing a card on a song or
             // chapter that matched doesn't change which works are kept.
             works.map { it to score(MediaCards.passage(it)) }.sortedByDescending { it.second }.take(mediaCards)
-                .map { (work, _) -> MediaCards.passage(work, MediaCards.bestPart(work, words)) }
+                .map { (work, _) -> MediaCards.passage(work, MediaCards.bestPart(work, words, languages)) }
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {
@@ -190,14 +194,15 @@ class LibraryPassageFinder(
                 text = it.text,
                 meta = SourceMeta(date = pack.date, collection = collection),
                 searchScore = hit.score.toDouble(),
+                language = ResearchLanguage.ofCode(pack.language),
             )
         }
     }
 
-    private suspend fun books(words: List<String>, collections: Map<String, String>): List<Passage> =
+    private suspend fun books(words: List<String>, collections: Map<String, String>, languages: List<ResearchLanguage>): List<Passage> =
         try {
             val named = try {
-                namedBookPassages(words)
+                namedBookPassages(words, languages)
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {
@@ -215,6 +220,7 @@ class LibraryPassageFinder(
                     heading = if (it.book.format == BookFormat.PDF) PdfText.pageOf(it.href)?.let { n -> "p. $n" }.orEmpty() else "",
                     text = it.text,
                     meta = SourceMeta(it.book.author, it.book.date, it.book.subjects, collections[it.book.id].orEmpty()),
+                    language = ResearchLanguage.ofCode(it.book.language),
                 )
             }
         } catch (e: CancellationException) {
@@ -223,9 +229,16 @@ class LibraryPassageFinder(
             emptyList()
         }
 
-    /** For up to [NAMED_BOOKS] books the keywords name, a search inside the book for the keywords that don't. */
-    private suspend fun namedBookPassages(words: List<String>): List<BookPassage> {
-        val keywordWords = words.flatMap { Keywords.words(it) }.map { it.lowercase() }.filterNot(Keywords::isStopword).toSet()
+    /**
+     * For up to [NAMED_BOOKS] books the keywords name, a search inside the book for the keywords that don't. For a
+     * Spanish question, keyword and title words meet with accented vowels folded, and Spanish generic title words
+     * ([GENERIC_TITLE_WORDS_ES]) don't name a book either.
+     */
+    private suspend fun namedBookPassages(words: List<String>, languages: List<ResearchLanguage>): List<BookPassage> {
+        val fold = ResearchLanguage.foldsVowels(languages)
+        val folded: (String) -> String = if (fold) ResearchLanguage::foldVowels else { w -> w }
+        val generic = if (fold) GENERIC_TITLE_WORDS + GENERIC_TITLE_WORDS_ES else GENERIC_TITLE_WORDS
+        val keywordWords = words.flatMap { Keywords.words(it) }.map { it.lowercase() }.filterNot { Keywords.isStopword(it, languages) }.map(folded).toSet()
         if (keywordWords.isEmpty()) return emptyList()
         val books = try {
             bookshelf.books.first().filter { it.status == PackStatus.OK && it.onShelf }
@@ -235,17 +248,17 @@ class LibraryPassageFinder(
             return emptyList()
         }
         val named = books.mapNotNull { book ->
-            val titleWords = Keywords.words(book.title).map { it.lowercase() }.filter { it !in GENERIC_TITLE_WORDS && !Keywords.isStopword(it) }.toSet()
+            val titleWords = Keywords.words(book.title).map { it.lowercase() }.filter { !Keywords.isStopword(it, languages) }.map(folded).filter { it !in generic }.toSet()
             val naming = keywordWords.filter { word -> Keywords.alternatives(word).any { it in titleWords } }.toSet()
             if (naming.isEmpty()) null else book to naming
         }.sortedByDescending { it.second.size }.take(NAMED_BOOKS)
         return named.flatMap { (book, naming) ->
-            val rest = words.map { k -> Keywords.words(k).filter { it.lowercase() !in naming }.joinToString(" ") }.filter { it.isNotEmpty() }
+            val rest = words.map { k -> Keywords.words(k).filter { folded(it.lowercase()) !in naming }.joinToString(" ") }.filter { it.isNotEmpty() }
             if (rest.isEmpty()) emptyList() else bookIndex.passagesIn(book.id, rest)
         }
     }
 
-    private suspend fun cards(words: List<String>, packs: List<Pack>, collections: Map<String, String>): List<Passage> {
+    private suspend fun cards(words: List<String>, packs: List<Pack>, collections: Map<String, String>, languages: List<ResearchLanguage>): List<Passage> {
         val books = try {
             bookshelf.books.first().filter { it.status == PackStatus.OK && it.onShelf }
         } catch (e: CancellationException) {
@@ -254,11 +267,11 @@ class LibraryPassageFinder(
             emptyList()
         }
         // Regex matching over every book and pack: off the caller's (main) thread.
-        return withContext(io) { matchCards(words, books, packs, collections) }
+        return withContext(io) { matchCards(words, books, packs, collections, languages) }
     }
 
-    private fun matchCards(words: List<String>, books: List<Book>, packs: List<Pack>, collections: Map<String, String>): List<Passage> {
-        val mentions = mentions(words)
+    private fun matchCards(words: List<String>, books: List<Book>, packs: List<Pack>, collections: Map<String, String>, languages: List<ResearchLanguage>): List<Passage> {
+        val mentions = mentions(words, languages)
         val made = books.mapNotNull { book ->
             attempt {
                 if (!mentions(arrayOf(book.title, book.author, book.subjects, book.description))) return@attempt null
@@ -282,7 +295,7 @@ class LibraryPassageFinder(
                 Passage(SourceKind.CARD, pack.id, pack.title, packTitle = pack.title, text = text, meta = SourceMeta(date = pack.date, collection = collections[pack.id].orEmpty()))
             }
         }
-        val score = LexicalScore.scorer(words)
+        val score = LexicalScore.scorer(words, languages)
         return made.map { it to score(it) }.sortedByDescending { it.second }.take(cards).map { it.first }
     }
 
@@ -299,15 +312,22 @@ class LibraryPassageFinder(
 
     /**
      * Whether every word of some keyword appears in the fields, as whole words. The patterns are compiled once per
-     * search, not once per book and field.
+     * search, not once per book and field. For a Spanish question ([ResearchLanguage.foldsVowels]) both sides have
+     * their accented vowels folded, each field once per book.
      */
-    private fun mentions(keywords: List<String>): (Array<out String>) -> Boolean {
+    private fun mentions(keywords: List<String>, languages: List<ResearchLanguage>): (Array<out String>) -> Boolean {
+        val fold = ResearchLanguage.foldsVowels(languages)
         val patterns = keywords.map { keyword ->
             Keywords.words(keyword).map { word ->
-                Regex("(?<![\\p{L}\\p{N}])${Regex.escape(word)}(?![\\p{L}\\p{N}])", RegexOption.IGNORE_CASE)
+                val w = if (fold) ResearchLanguage.foldVowels(word) else word
+                Regex("(?<![\\p{L}\\p{N}])${Regex.escape(w)}(?![\\p{L}\\p{N}])", RegexOption.IGNORE_CASE)
             }
         }.filter { it.isNotEmpty() }
-        return { fields -> patterns.any { words -> words.all { whole -> fields.any { whole.containsMatchIn(it) } } } }
+        if (!fold) return { fields -> patterns.any { words -> words.all { whole -> fields.any { whole.containsMatchIn(it) } } } }
+        return { fields ->
+            val texts = fields.map(ResearchLanguage::foldVowels)
+            patterns.any { words -> words.all { whole -> texts.any { whole.containsMatchIn(it) } } }
+        }
     }
 
     private companion object {
@@ -323,6 +343,18 @@ class LibraryPassageFinder(
         val GENERIC_TITLE_WORDS = setOf(
             "book", "books", "complete", "works", "volume", "vol", "collected", "selected", "edition",
             "translated", "tr", "english", "version", "standard",
+        )
+
+        /**
+         * [GENERIC_TITLE_WORDS]' Spanish counterparts, vowels folded ([ResearchLanguage.foldVowels]), for a Spanish
+         * question: "Obras completas de X" is not named by "obras". The kinds of book (antología, poesías, cuentos,
+         * novelas) are here too, as Spanish collections are titled by them.
+         */
+        val GENERIC_TITLE_WORDS_ES = setOf(
+            "libro", "libros", "obra", "obras", "completa", "completas", "completo", "completos", "tomo", "tomos",
+            "volumen", "volumenes", "reunidas", "coleccion", "selectas", "escogidas", "seleccion", "edicion", "traducido",
+            "traducida", "traduccion", "trad", "espanol", "castellano", "version", "antologia", "poesias", "cuentos",
+            "novelas",
         )
     }
 }

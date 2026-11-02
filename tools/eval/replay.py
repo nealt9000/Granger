@@ -7,6 +7,9 @@
 A port of `Ranking` and `LexicalScore` (core/research) as the app runs them with the embedder off: preselect,
 `byLexical`, `liftMedia`, `capMedia`, then the small model's 4. `found.jsonl` holds every passage the search found,
 so a ranking idea can be scored here in seconds instead of in a phone run.
+
+Each question's languages (`language.of`, the app's `ResearchLanguage.of`) pick the stopwords and media cues, as on the
+phone: an `-es` dataset replays with the Spanish lists, an English one exactly as before.
 """
 import argparse
 import json
@@ -16,7 +19,9 @@ import unicodedata
 from dataclasses import dataclass, replace
 from pathlib import Path
 
+import language
 from dataset import _norm
+from language import ENGLISH_ONLY
 from metrics import matches
 
 HERE = Path(__file__).resolve().parent
@@ -66,6 +71,11 @@ def words(keyword):
     return WORD.findall(keyword)
 
 
+def is_stopword(word, languages=ENGLISH_ONLY):
+    """Keywords.isStopword: English alone by default; Spanish's (folded) when the question may be Spanish."""
+    return ("en" in languages and word.lower() in STOPWORDS) or language.spanish_stopword(word, languages)
+
+
 def alternatives(word):
     w = word.lower()
     return {w, ALIASES[w]} if w in ALIASES else {w}
@@ -88,14 +98,16 @@ def is_lead(p):
     return p["kind"] == "ARTICLE" and (not heading or heading.lower() == (p.get("title") or "").strip().lower())
 
 
-def scorer(keywords):
+def scorer(keywords, languages=ENGLISH_ONLY):
     """LexicalScore.scorer: each keyword counts for the share of its words present; title and lead bonuses."""
     # Each keyword is a list of alternatives (`wine|strong drink`, or just itself), each a list of words.
+    # A Spanish question's words meet with accented vowels folded on both sides (ResearchLanguage.foldVowels).
+    fold = language.fold_vowels if language.folds_vowels(languages) else (lambda s: s)
     groups = []
     for k in keywords:
         alts = []
         for v in (x.strip() for x in k.split("|")):
-            g = list(dict.fromkeys(w.lower() for w in words(v) if w.lower() not in STOPWORDS))
+            g = list(dict.fromkeys(fold(w.lower()) for w in words(v) if not is_stopword(w.lower(), languages)))
             if g:
                 alts.append(g)
         if alts:
@@ -105,9 +117,9 @@ def scorer(keywords):
     patterns = {w: _whole_word(w) for alts in groups for g in alts for w in g}
 
     def score(p):
-        text = _ascii_lower("%s %s" % (p.get("heading") or "", p.get("text") or ""))
+        text = _ascii_lower(fold("%s %s" % (p.get("heading") or "", p.get("text") or "")))
         present = {w for w, rx in patterns.items() if rx.search(text)}
-        title_words = {w.lower() for w in words(p.get("title") or "")}
+        title_words = {w.lower() for w in words(fold(p.get("title") or ""))}
         in_title = any(all(alternatives(w) & title_words for w in g) for alts in groups for g in alts)
         # A keyword counts for its best alternative.
         found = sum(max(sum(1 for w in g if w in present) / len(g) for g in alts) for alts in groups)
@@ -116,14 +128,18 @@ def scorer(keywords):
     return score
 
 
-def media_asked(question):
+def media_asked(question, languages=None):
+    """MediaCues.asked; [languages] are the question's, `language.of` when not given."""
+    languages = language.of(question) if languages is None else languages
     folded = "".join(c for c in unicodedata.normalize("NFKD", question) if not unicodedata.category(c).startswith("M")).lower()
     ws = words(folded)
-    return any(w in CUES for w in ws) or any(ws[i:i + len(ph)] == ph for ph in PHRASES for i in range(len(ws)))
+    if "en" in languages and (any(w in CUES for w in ws) or any(ws[i:i + len(ph)] == ph for ph in PHRASES for i in range(len(ws)))):
+        return True
+    return language.spanish_media(question, languages)
 
 
-def preselect(passages, keywords, cfg, score=None):
-    score = score or scorer(keywords)
+def preselect(passages, keywords, cfg, score=None, languages=ENGLISH_ONLY):
+    score = score or scorer(keywords, languages)
     scored = sorted(((p, score(p)) for p in passages), key=lambda x: (-x[1], -(x[0].get("searchScore") or 0.0)))
     seen, others, media, out = {}, 0, 0, []
     for p, _ in scored:
@@ -141,8 +157,8 @@ def preselect(passages, keywords, cfg, score=None):
     return out
 
 
-def by_lexical(candidates, keywords, cfg):
-    score = scorer(keywords)
+def by_lexical(candidates, keywords, cfg, languages=ENGLISH_ONLY):
+    score = scorer(keywords, languages)
     kept = [(p, s) for p, s in ((p, score(p)) for p in candidates) if s >= cfg.lexical_threshold]
     return [p for p, _ in sorted(kept, key=lambda x: -x[1])]
 
@@ -170,9 +186,10 @@ def cap_media(passages, asked, cfg):
 
 def rank(question, corpus, cfg):
     """The passages the small model's prompt would get, before AnswerPrompt.fit trims any for length."""
-    asked = media_asked(question)
-    found = preselect(corpus["passages"], corpus["keywords"], cfg)
-    ranked = lift_media(by_lexical(found, corpus["keywords"], cfg), found, asked)
+    languages = language.of(question)
+    asked = media_asked(question, languages)
+    found = preselect(corpus["passages"], corpus["keywords"], cfg, languages=languages)
+    ranked = lift_media(by_lexical(found, corpus["keywords"], cfg, languages), found, asked)
     return cap_media(ranked, asked, cfg)[:cfg.large][:cfg.small]
 
 

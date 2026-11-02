@@ -2,6 +2,7 @@ package app.granger.research
 
 import app.granger.BookTarget
 import app.granger.core.books.TextQuote
+import app.granger.core.library.BookIds
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.Library
 import app.granger.core.library.MediaIndex
@@ -9,7 +10,10 @@ import app.granger.core.library.PackStatus
 import app.granger.core.library.PassageAddress
 import app.granger.core.library.ReadingSessions
 import app.granger.core.research.CitedQuote
+import app.granger.core.research.Keywords
 import app.granger.core.research.Passage
+import app.granger.core.research.ResearchLanguage
+import app.granger.core.research.SourceKind
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -30,9 +34,13 @@ class CitationOpener(
     private val media: MediaIndex,
     private val io: CoroutineDispatcher = Dispatchers.IO,
 ) {
-    /** Cited passage `[n]` of [answer]: its address, with the sentence the answer used and that sentence's context. */
-    suspend fun open(passage: Passage, answer: String, n: Int): CitationTarget {
-        val quote = PassageAddress.quoteOf(passage, answer, n)
+    /**
+     * Cited passage `[n]` of [answer]: its address, with the sentence the answer used and that sentence's context.
+     * [languages] are the question's; a passage read back from a kept chat has lost its language, so its pack's or
+     * book's is looked up here.
+     */
+    suspend fun open(passage: Passage, answer: String, n: Int, languages: List<ResearchLanguage> = Keywords.ENGLISH): CitationTarget {
+        val quote = PassageAddress.quoteOf(passage.withLanguage(), answer, n, languages)
         val address = PassageAddress.of(passage, quote?.sentence)
         val target = open(address, quote, passage.sourceTitle)
         // A cited song that's gone still has its album on the card.
@@ -62,6 +70,18 @@ class CitationOpener(
                 else -> CitationTarget.Audiobook(work.id)
             }
         }
+    }
+
+    /** [passage] with its source's language when it has none of its own and opens at text; as it was otherwise. */
+    private suspend fun Passage.withLanguage(): Passage {
+        if (language != null) return this
+        val book = BookIds.isBook(sourceId)
+        val code = when {
+            kind == SourceKind.BOOK || (kind == SourceKind.SELECTION && book) -> bookshelf.book(sourceId)?.language
+            kind == SourceKind.ARTICLE || (kind == SourceKind.SELECTION && !book) -> library.packs.first().firstOrNull { it.id == sourceId }?.language
+            else -> null
+        }
+        return ResearchLanguage.ofCode(code)?.let { copy(language = it) } ?: this
     }
 
     private suspend fun article(packId: String, path: String, anchor: String?, quote: String?, title: String?): CitationTarget {

@@ -19,9 +19,16 @@ fun interface DenseFinder {
     suspend fun find(query: FloatArray): List<Passage>
 }
 
-/** Searches the library for passages matching the keywords. */
+/**
+ * Searches the library for passages matching the keywords. [languages] are the question's ([ResearchLanguage.of]):
+ * whose stopwords a finder leaves out when it matches words itself. A finder that matches no words of its own needs
+ * only the one-argument [find]; the pipeline calls the two-argument one, which is the English [find] unless overridden.
+ * (A fun interface's one abstract method can't have a default value, hence the two.)
+ */
 fun interface PassageFinder {
     suspend fun find(keywords: List<String>): List<Passage>
+
+    suspend fun find(keywords: List<String>, languages: List<ResearchLanguage>): List<Passage> = find(keywords)
 }
 
 /** Streams a model's reply to [prompt] in chunks. */
@@ -193,10 +200,12 @@ class ResearchPipeline(
             questionVector?.let(centroids::classify) ?: ReactionTopic.DEFAULT
         }
         emit(ResearchEvent.Reaction(topic))
+        // The question's languages, worked out once: they pick every word list below (languages spec §6.2).
+        val languages = ResearchLanguage.of(request.question)
         // The search by meaning, before the model loads. A follow-up that leans on the question before it is searched
         // with that question first (Plan R1 Task 3); otherwise the reaction's vector is reused.
         val byMeaning = dense?.let { finder ->
-            val prior = request.priorQuestion?.takeIf { FollowUp.refersBack(request.question) }
+            val prior = request.priorQuestion?.takeIf { FollowUp.refersBack(request.question, languages) }
             val query = questionVector?.takeIf { prior == null } ?: embedQuery(listOfNotNull(prior, request.question).joinToString(" "))
             query?.let { searchByMeaning(finder, it) }
         }
@@ -209,8 +218,8 @@ class ResearchPipeline(
             return
         }
 
-        val asked = MediaCues.asked(request.question)
-        val rewrite = rewrite(model, request)
+        val asked = MediaCues.asked(request.question, languages)
+        val rewrite = rewrite(model, request, languages)
         val medical = rewrite.medical == true || Medical.looksMedical(request.question) || PersonalMedical.strong(request.question)
         if (medical) emit(ResearchEvent.Medical)
         val keywords = rewrite.keywords
@@ -222,7 +231,7 @@ class ResearchPipeline(
         emit(ResearchEvent.Progress(Stage.SEARCHING))
         val hits: List<Passage>? = byMeaning
         val all = try {
-            finder.find(Keywords.searchTerms(keywords))
+            finder.find(Keywords.searchTerms(keywords), languages)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -230,13 +239,16 @@ class ResearchPipeline(
             return
         }
         val weight = sourceWeight?.of(request.question, keywords, all + hits.orEmpty()) ?: Ranking.NO_WEIGHT
-        val found = Ranking.preselect(all, keywords, config, weight)
+        val found = Ranking.preselect(all, keywords, config, weight, languages)
         emit(ResearchEvent.Progress(Stage.RANKING))
         val ranked = try {
-            val merged = hits?.let { Ranking.hybrid(found, it, keywords, config, weight) }
-            val lifted = Ranking.liftMedia(merged ?: rank(request.question, found, keywords, weight), found, asked)
-            if (reserveNamed && Entities.asked(request.question)) {
-                Entities.reserve(lifted, all + hits.orEmpty(), Entities.named(request.question, keywords), config.small)
+            val merged = hits?.let { Ranking.hybrid(found, it, keywords, config, weight, languages) }
+            val lifted = Ranking.liftMedia(merged ?: rank(request.question, found, keywords, weight, languages), found, asked)
+            if (reserveNamed && Entities.asked(request.question, languages)) {
+                Entities.reserve(
+                    lifted, all + hits.orEmpty(), Entities.named(request.question, keywords, languages), config.small,
+                    languages = languages,
+                )
             } else {
                 lifted
             }
@@ -257,7 +269,11 @@ class ResearchPipeline(
         }
         val pool = (listOfNotNull(quote) + capped.filter { it != quote }).take(config.large)
         fun worked(passages: List<Passage>): String? =
-            if (yearFacts && quote == null && Entities.asked(request.question)) YearFacts.block(request.question, keywords, passages) else null
+            if (yearFacts && quote == null && Entities.asked(request.question, languages)) {
+                YearFacts.block(request.question, keywords, passages, languages)
+            } else {
+                null
+            }
         val wanted = pool.take(config.small)
         // Dropped for the prompt's budget, a passage can't be cited; the rest of the pool stays as candidates.
         val passages = AnswerPrompt.fit(request.question, wanted, medical, request.prior, hasQuote = quote != null, worked(wanted))
@@ -273,7 +289,7 @@ class ResearchPipeline(
             return
         }
 
-        val outcome = when (val check = Citations.check(reply, passages.size)) {
+        val outcome = when (val check = Citations.check(reply, passages.size, languages)) {
             is CitationCheck.Valid ->
                 Outcome.Answered(reply, passages, check.cited, candidates, medical, keywords)
             CitationCheck.ModelDeclined -> Outcome.Declined(medical, keywords, passages, reply)
@@ -328,13 +344,13 @@ class ResearchPipeline(
      * The model's keywords, or the plain keyword fallback when it times out, errors, or replies with nothing usable.
      * The medical lexicon decides whenever the model didn't say.
      */
-    private suspend fun rewrite(generator: TextGenerator, request: ResearchRequest): RewriteResult {
+    private suspend fun rewrite(generator: TextGenerator, request: ResearchRequest, languages: List<ResearchLanguage>): RewriteResult {
         if (rewritePlain && request.priorQuestion == null) {
-            return RewriteResult(Keywords.extract(request.question), Medical.looksMedical(request.question))
+            return RewriteResult(Keywords.extract(request.question, languages = languages), Medical.looksMedical(request.question))
         }
         if (rewritePlain && rewritePlainFollowUps) {
             val text = listOfNotNull(request.question, request.priorQuestion).joinToString(" ")
-            return RewriteResult(Keywords.extract(text), Medical.looksMedical(text))
+            return RewriteResult(Keywords.extract(text, languages = languages), Medical.looksMedical(text))
         }
         val parsed = try {
             var result: RewriteResult? = null
@@ -365,7 +381,7 @@ class ResearchPipeline(
         val keywords = parsed?.keywords.orEmpty().map(Keywords::normalize).filter { it.isNotBlank() }.distinct()
         val text = listOfNotNull(request.question, request.priorQuestion).joinToString(" ")
         if (parsed != null && keywords.isNotEmpty()) return RewriteResult(keywords, parsed.medical ?: Medical.looksMedical(text))
-        return RewriteResult(Keywords.extract(text), Medical.looksMedical(text))
+        return RewriteResult(Keywords.extract(text, languages = languages), Medical.looksMedical(text))
     }
 
     /**
@@ -390,12 +406,18 @@ class ResearchPipeline(
         null
     }
 
-    private suspend fun rank(question: String, candidates: List<Passage>, keywords: List<String>, weight: (Passage) -> Double): List<Passage> {
+    private suspend fun rank(
+        question: String,
+        candidates: List<Passage>,
+        keywords: List<String>,
+        weight: (Passage) -> Double,
+        languages: List<ResearchLanguage>,
+    ): List<Passage> {
         if (candidates.isEmpty()) return emptyList()
         // Every candidate that passes is kept: the pool is cut to `large` after the media cap. With dense retrieval the
         // embedder is for the query alone: reranking 12 passages with it takes 4 s on the Pixel 6.
         val embedder = (if (dense == null) models.embedder() else null)
-            ?: return Ranking.byLexical(candidates, keywords, config, limit = candidates.size, weight = weight)
+            ?: return Ranking.byLexical(candidates, keywords, config, limit = candidates.size, weight = weight, languages = languages)
         val query = embedder.embed(listOf(question), isQuery = true).single()
         val vectors = embedder.embed(candidates.map { it.text }, isQuery = false)
         return Ranking.byEmbedding(candidates, query, vectors, config, limit = candidates.size)

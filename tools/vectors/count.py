@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Plan R1 Task 2: how big the vector set is.
 
-  count.py SOURCES_DIR BOOKS_DIR [--jobs 6] [--out counts.json]
+  count.py SOURCES_DIR BOOKS_DIR [--jobs 6] [--out counts.json] [--set set-es.json] [--catalog CATALOG]
 
 Chunks every source in set.json through the app's chunker and reports chunks and characters per pack, the vector file
 size at 768 and 256 dims (int8 plus a float32 scale per vector, plus keys), and the embedding time at RATE chunks a second.
@@ -19,8 +19,14 @@ CATALOG = HERE.parents[1] / "catalog/catalog.json"
 RATE = 249391 / (126 * 60)  # R0: 249,391 book chunks in 2 h 6 min on the Mac's GPU
 
 
-def load_set():
-    return json.loads((HERE / "set.json").read_text())
+def load_set(path=None):
+    """The vector set: set.json (English) unless [path] names another, such as set-es.json (Plan L4)."""
+    return json.loads(Path(path or HERE / "set.json").read_text())
+
+
+def books_label(vset):
+    """The books' row name in counts: the collection's ("granger-classics", "clasicos-granger")."""
+    return vset["books"]["collection"]
 
 
 def zim_file(sources_dir, pack):
@@ -77,9 +83,11 @@ def main(argv=None):
     ap.add_argument("books")
     ap.add_argument("--jobs", type=int, default=6)
     ap.add_argument("--out", default=str(HERE / "counts.json"))
+    ap.add_argument("--set", help="the set file (default set.json)")
+    ap.add_argument("--catalog", default=str(CATALOG), help="the catalog naming each pack's snapshot")
     a = ap.parse_args(argv)
-    catalog = {p["id"]: p for p in json.loads(CATALOG.read_text())["packs"]}
-    vset = load_set()
+    catalog = {p["id"]: p for p in json.loads(Path(a.catalog).read_text())["packs"]}
+    vset = load_set(a.set)
     jobs = []
     for p in vset["packs"]:
         path = zim_file(a.sources, catalog[p["id"]])
@@ -93,8 +101,9 @@ def main(argv=None):
             out[pid] = c
             print("%-45s %9d chunks" % (pid, c["chunks"]), flush=True)
     books = sorted(Path(a.books).glob("*.epub"))
-    out["granger-classics"] = count_books(books)
-    print("%-45s %9d chunks" % ("granger-classics", out["granger-classics"]["chunks"]))
+    label = books_label(vset)
+    out[label] = count_books(books)
+    print("%-45s %9d chunks" % (label, out[label]["chunks"]))
     domains = {p["id"]: p["domain"] for p in vset["packs"]}
     print()
     print("%-45s %-10s %9s %8s %8s %7s" % ("source", "domain", "chunks", "768 MB", "256 MB", "embed h"))

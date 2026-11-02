@@ -936,6 +936,19 @@ class ResearchViewModelTest {
         assertThat(placed.at?.href).isEqualTo("ch1.xhtml")
     }
 
+    @Test fun aKeptPassagesQuoteUsesItsBooksLanguage() = runTest(main.dispatcher) {
+        // A passage read back from a kept chat has no language; the opener looks up its book's. Spanish-only function
+        // words in the answer then aren't matched, so the quote stays on the first sentence.
+        val text = "Jorge Manrique escribió las coplas famosas. Pero cuando y donde, nadie sabe por qué."
+        val passage = Passage(SourceKind.BOOK, "book:granger:coplas", "Coplas", location = "ch1.xhtml", text = text)
+        val answer = "pero cuando donde nadie [1]"
+        bookshelf.bookList.value = listOf(book("book:granger:coplas", title = "Coplas").copy(language = "es"))
+        val vm = vm()
+        assertThat((vm.open(passage, answer, 1) as CitationTarget.Book).at?.quote?.highlight).startsWith("Jorge Manrique")
+        bookshelf.bookList.value = listOf(book("book:granger:coplas", title = "Coplas").copy(language = "en"))
+        assertThat((vm.open(passage, answer, 1) as CitationTarget.Book).at?.quote?.highlight).startsWith("Pero cuando")
+    }
+
     // ---- Play on a media citation (Plan R3) ----
 
     /** A kept chat (id 7) whose one answered turn (id 1) cites [card] as [1]. */

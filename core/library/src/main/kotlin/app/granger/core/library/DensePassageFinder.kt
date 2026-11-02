@@ -4,6 +4,7 @@ import app.granger.core.books.XhtmlText
 import app.granger.core.research.DenseFinder
 import app.granger.core.research.HtmlPassages
 import app.granger.core.research.Passage
+import app.granger.core.research.ResearchLanguage
 import app.granger.core.research.SourceKind
 import app.granger.core.research.SourceMeta
 import app.granger.core.text.Chunkers
@@ -128,6 +129,7 @@ class DensePassageFinder(
                     text = part.text,
                     meta = SourceMeta(date = pack.date, collection = collection),
                     cosine = hit.score.toDouble(),
+                    language = ResearchLanguage.ofCode(pack.language),
                 )
             }
         }
@@ -153,6 +155,7 @@ class DensePassageFinder(
                         text = chunk.text,
                         meta = SourceMeta(book.author, book.date, book.subjects, collections[book.id].orEmpty()),
                         cosine = hit.score.toDouble(),
+                        language = ResearchLanguage.ofCode(book.language),
                     )
                 }
             }

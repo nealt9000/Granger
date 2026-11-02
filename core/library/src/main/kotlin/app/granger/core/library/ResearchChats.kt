@@ -2,6 +2,7 @@ package app.granger.core.library
 
 import androidx.room.withTransaction
 import app.granger.core.research.Passage
+import app.granger.core.research.ResearchLanguage
 import app.granger.core.research.SourceMeta
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -26,8 +27,14 @@ data class ChatTurn(
     val guess: String = "",
 )
 
-/** Where each shown passage lives, as the answer cites it (`[1]` is the first); read-aloud and plans reuse these. */
-fun ChatTurn.addresses(): List<PassageAddress> = shown.mapIndexed { i, passage -> PassageAddress.cited(passage, answer, i + 1) }
+/**
+ * Where each shown passage lives, as the answer cites it (`[1]` is the first); read-aloud and plans reuse these. The
+ * quotes are picked in the question's languages; a kept passage's own language isn't stored, so it's unknown here.
+ */
+fun ChatTurn.addresses(): List<PassageAddress> {
+    val languages = ResearchLanguage.of(question)
+    return shown.mapIndexed { i, passage -> PassageAddress.cited(passage, answer, i + 1, languages) }
+}
 
 data class ChatSummary(val id: Long, val title: String, val updatedAt: Long)
 
