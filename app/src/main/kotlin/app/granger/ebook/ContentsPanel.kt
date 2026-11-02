@@ -1,5 +1,8 @@
 package app.granger.ebook
 
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -75,10 +78,13 @@ fun ContentsPanel(
     onDismiss: () -> Unit,
 ) {
     var tab by remember { mutableIntStateOf(0) }
+    // In landscape the navigation bar or cutout sits at the end: the sheet grows by it, so its tabs keep their 320 dp
+    // instead of cutting their labels short.
+    val endInset = SidePanelInsets.asPaddingValues().calculateEndPadding(LocalLayoutDirection.current)
     Box(Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f)).clickable(onClick = onDismiss))
         Surface(
-            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().width(320.dp),
+            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().width(320.dp + endInset),
             color = MaterialTheme.colorScheme.surface,
         ) {
             Column(Modifier.windowInsetsPadding(SidePanelInsets)) {
