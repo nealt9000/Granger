@@ -97,43 +97,50 @@
 
 **Files:** modify `app/src/main/AndroidManifest.xml` (`RECORD_AUDIO`), `app/src/debug/AndroidManifest.xml` (drop its own copy); create `app/src/main/kotlin/app/granger/voiceinput/Dictation.kt`, `MicButton.kt`, `VoiceInputPrefs.kt`, strings; tests in `app/src/test/.../voiceinput/`.
 
-- [ ] `VoiceInputPrefs` (as `VoicePrefs`, SharedPreferences `voice_input`): `englishVariant` (`US` default, `GB`), `askWhenDone` (off).
-- [ ] `Dictation(speech, tagFor, scope)`: `state` (`Idle`, `Listening(partial)`, `Failed(message)`), `start(onText, onFinal)`, `stop()`, `cancel()`. Partial text goes to `onText` as it arrives; `onFinal` gets the final text once. Starting while read-aloud speaks stops read-aloud first. Tested with the fake `SpeechInput`: partials then a final, a no-match, a cancel mid-take, a timeout.
-- [ ] `MicButton`: shown only when `availability(tag)` is `Ready`. A mic icon; while listening, a filled, gently pulsing mic that stops the take when tapped; content descriptions *"Speak"* / *"Stop listening"*. The permission request on first tap with a one-line reason; a refusal message with the way to the phone's settings. *Didn't catch that* on no-match, which clears after 3 s.
-- [ ] **Commit.** `A1: the mic button, dictation state and the microphone permission`
+- [x] `VoiceInputPrefs` (as `VoicePrefs`, SharedPreferences `voice_input`): `englishVariant` (`US` default, `GB`), `askWhenDone` (off).
+- [x] `Dictation(speech, tagFor, scope)`: `state` (`Idle`, `Listening(partial)`, `Failed(message)`), `start(onText, onFinal)`, `stop()`, `cancel()`. Partial text goes to `onText` as it arrives; `onFinal` gets the final text once. Starting while read-aloud speaks stops read-aloud first. Tested with the fake `SpeechInput`: partials then a final, a no-match, a cancel mid-take, a timeout.
+- [x] `MicButton`: shown only when `availability(tag)` is `Ready`. A mic icon; while listening, a filled, gently pulsing mic that stops the take when tapped; content descriptions *"Speak"* / *"Stop listening"*. The permission request on first tap with a one-line reason; a refusal message with the way to the phone's settings. *Didn't catch that* on no-match, which clears after 3 s.
+- [x] *Done 2026-11-02.* `RECORD_AUDIO` and the `RecognitionService` query moved from the debug manifest to the main one. `VoiceInput` (app-wide, `AppContainer.voiceInput`) works out the language and whether the mic shows (`status`), asks the phone only while a mic screen watches, and stops read-aloud through `playerHub.stopVoice()` before each take. `Dictation` (per view model) and `MicButton`. The permission logic reuses the media permission's "asked before" rule and its settings link. The mic icon is one vector drawable, not the large extended icon set. Strings are in `strings_voice_input.xml` with a Spanish twin. 7 `DictationTest`s; the string guards pass. Fixed on the way: `OnDeviceSpeechInput.languages()` and `download()` now run on the main thread, as `SpeechRecognizer` requires.
+- [x] **Commit.** `A1: the mic button, dictation state and the microphone permission`
 
 ### Task 5: The mic in Search
 
 **Files:** modify `app/src/main/kotlin/app/granger/search/SearchScreen.kt`, `SearchViewModel.kt`; tests in `SearchViewModelTest.kt`.
 
-- [ ] A `MicButton` as the field's trailing icon (when the field is empty, or always if it fits; check on the phone). Partials fill the field; the final runs the search as Search on the keyboard does, and drops the keyboard.
-- [ ] After a spoken search, `SpokenTitleMatcher.best(query, spokenTitles)`. If it scores at least the threshold and the name isn't the query already, a **"Did you mean *The King James Bible*?"** line sits above the results; tapping it searches that name. Typing clears it.
-- [ ] View-model tests: a spoken *the domapada* shows *The Dhammapada*; a typed one doesn't; a spoken exact title shows nothing.
-- [ ] **Commit.** `A1: speak a search, with "Did you mean"`
+- [x] A `MicButton` as the field's trailing icon (when the field is empty, or always if it fits; check on the phone). Partials fill the field; the final runs the search as Search on the keyboard does, and drops the keyboard.
+- [x] After a spoken search, `SpokenTitleMatcher.best(query, spokenTitles)`. If it scores at least the threshold and the name isn't the query already, a **"Did you mean *The King James Bible*?"** line sits above the results; tapping it searches that name. Typing clears it.
+- [x] View-model tests: a spoken *the domapada* shows *The Dhammapada*; a typed one doesn't; a spoken exact title shows nothing.
+- [x] *Done 2026-11-02 (phone check still to do).* The mic is the field's trailing icon while `micShown`, and the placeholder reads "Listening…" during a take. A failure shows as a line above the results for 3 s. The library's names start loading at the first mic tap, and "Did you mean" waits up to 2 s for them. The matcher runs on an injected dispatcher (`Dispatchers.Default` in the app). Tests: 5 in `SearchVoiceTest`; the voice fakes moved to `VoiceFakes.kt` for Task 6.
+- [x] **Commit.** `A1: speak a search, with "Did you mean"`
 
 ### Task 6: The mic in the Research ask box
 
 **Files:** modify `app/src/main/kotlin/app/granger/research/ResearchScreen.kt` (one slot beside Send), `ResearchViewModel.kt` (one hook); tests in `ResearchViewModelTest.kt`.
 
-- [ ] A `MicButton` beside Send, hidden while an answer is running and when the app's language has no Ask (Spanish while Spanish Ask is off). Partials fill `input`; the final replaces it.
-- [ ] With **Ask as soon as I stop talking** on, the final sends if `canSend`; otherwise it waits in the box with the cursor at the end.
-- [ ] A view-model test for each: the final waits; the final sends with the setting on; the mic hides while running.
-- [ ] **Commit.** `A1: speak a Research question`
+- [x] A `MicButton` beside Send, hidden while an answer is running and when the app's language has no Ask (Spanish while Spanish Ask is off). *Note 2026-11-02: no code switch for "Spanish Ask off" was found on main after L4. Check with Neal what gates it before building this.* Partials fill `input`; the final replaces it.
+- [x] With **Ask as soon as I stop talking** on, the final sends if `canSend`; otherwise it waits in the box with the cursor at the end.
+- [x] A view-model test for each: the final waits; the final sends with the setting on; the mic hides while running.
+- [x] *Done 2026-11-02 (phone check still to do).* There's no Spanish Ask switch yet (Neal: not built), so `ResearchViewModel.ASK_VOICE_LANGUAGES = setOf("en")` keeps the ask box's mic to English for now; change it when Spanish Ask lands. Spoken words go after anything already typed. 4 tests in `ResearchViewModelTest` (80 pass). Test quirk: in that class `advanceUntilIdle` can return before the voice status is looked up, so the helper waits on it with `first { }`.
+- [x] **Commit.** `A1: speak a Research question`
 
 ### Task 7: Settings → Voice input
 
 **Files:** modify `app/src/main/kotlin/app/granger/settings/SettingsScreen.kt`, `SettingsViewModel.kt` (or a small `VoiceInputSettings` section beside `MediaSettingsSection.kt`); strings.
 
-- [ ] A **Voice input** section, hidden when the phone has no on-device recognition. It shows the language the mic listens in (follows the app language), and for English a US / UK choice.
-- [ ] For a chosen language that is `Downloadable`: a **Download** button with progress through `SpeechInput.download`, and the size if the system reports it. Record the `en-GB` size and time in this plan. A scheduled download says so ("The phone will finish this on Wi-Fi").
-- [ ] **Ask as soon as I stop talking**, a switch, off by default, with one line underneath: *"Otherwise the question waits in the box for you to check it."*
-- [ ] **Commit.** `A1: Settings → Voice input`
+- [x] A **Voice input** section, hidden when the phone has no on-device recognition. It shows the language the mic listens in (follows the app language), and for English a US / UK choice.
+- [x] For a chosen language that is `Downloadable`: a **Download** button with progress through `SpeechInput.download`, and the size if the system reports it. Record the `en-GB` size and time in this plan. A scheduled download says so ("The phone will finish this on Wi-Fi").
+- [x] **Ask as soon as I stop talking**, a switch, off by default, with one line underneath: *"Otherwise the question waits in the box for you to check it."*
+- [x] *Done 2026-11-02 (phone check and the `en-GB` size still to do).* `VoiceInputSettingsSection` sits under Ask in Settings. It shows the language the mic listens in, the US / UK choice when it's English, the download (progress, "later, on Wi-Fi", failed), the switch, and one privacy line. The download runs in `VoiceInput`'s app scope, so leaving Settings doesn't stop it. Hidden when the phone has no on-device recognizer (`VoiceInputStatus.phoneCanListen`). 2 `VoiceInputTest`s.
+- [x] **Commit.** `A1: Settings → Voice input`
 
 ### Task 8: Release notes, the phone walkthrough, merge
 
-- [ ] Privacy policy draft and the data safety notes: one line each. The microphone is used only while the mic is on; speech is recognized on the phone by the system's on-device recognizer; nothing is recorded, kept or sent. (If `cl-cleanup` hasn't merged, add the line there in coordination, or note it in the release checklist.)
-- [ ] **Pixel 6 walkthrough, airplane mode on:** in English, five spoken searches including two misheard titles (does "Did you mean" catch them?) and five spoken questions with auto-send off, then on. The cold first use after force-stopping Android System Intelligence. With music playing, and with an answer being read aloud (it stops). TalkBack reads the mic's labels. The app in Spanish: the mic in Search listens in Spanish, and the ask box has no mic. UK English downloaded and used once.
-- [ ] **A phone that isn't a Pixel** (the release checklist's second phone, when it's here): the mic either works or is hidden, and never crashes.
+- [x] Privacy policy draft and the data safety notes: one line each. The microphone is used only while the mic is on; speech is recognized on the phone by the system's on-device recognizer; nothing is recorded, kept or sent. (If `cl-cleanup` hasn't merged, add the line there in coordination, or note it in the release checklist.)
+- [x] *Walkthrough 1 (Neal, 2026-11-02):* Search, Ask (auto-send off and on), Settings, music, read-aloud and TalkBack all good; no crashes in the log. Two findings:
+  - **British English downloaded but the mic stayed hidden.** The phone did install it (`installed: [en-GB, en-US]`), but `OnDeviceSpeechInput` kept its first answer for the life of the process, and `refresh()` didn't clear it. Fixed: `SpeechInput.forget()`, called by `VoiceInput.refresh()`, and after a finished download the phone is asked again, up to 5 times a second apart, until it lists the language. 3 new tests.
+  - **No Search mic in Spanish.** Correct for what the phone reported: **es-ES was no longer installed** (installed on 2026-10-30, only downloadable by now; cause unknown, perhaps the system drops unused models). Downloading en-GB did *not* push it out: es-ES downloaded afterwards in **45 s** (through the spike screen), and all three were then installed together. When a language is missing, A1 offers the download in Settings (in Spanish when the app is in Spanish).
+- [x] *Recheck after the fix (Neal, 2026-11-02): British English and the Spanish Search mic both work.* **Pixel 6 walkthrough, airplane mode on:** in English, five spoken searches including two misheard titles (does "Did you mean" catch them?) and five spoken questions with auto-send off, then on. The cold first use after force-stopping Android System Intelligence. With music playing, and with an answer being read aloud (it stops). TalkBack reads the mic's labels. The app in Spanish: the mic in Search listens in Spanish, and the ask box has no mic. UK English downloaded and used once.
+- [ ] **A phone that isn't a Pixel** *Not done: no non-Pixel phone here. It goes with the release checklist's second-phone item.* (the release checklist's second phone, when it's here): the mic either works or is hidden, and never crashes.
 - [ ] Roadmap A1 row updated; results in this plan. **Commit**, then merge to main and push with Neal's OK.
 
 ---

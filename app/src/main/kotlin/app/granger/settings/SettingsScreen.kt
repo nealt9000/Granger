@@ -76,6 +76,8 @@ fun SettingsScreen(
     onFeedback: (() -> Unit)? = null,
     /** Crash reports kept on this phone, for the row's summary. */
     crashReports: Int = 0,
+    /** Settings → Voice input (Plan A1); null leaves the section out. */
+    voiceInput: app.granger.voiceinput.VoiceInput? = null,
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
@@ -148,6 +150,9 @@ fun SettingsScreen(
                 SettingsHeader(stringResource(R.string.settings_section_ask))
                 LinkRow(stringResource(R.string.settings_models), stringResource(R.string.settings_models_summary), onModels)
                 HorizontalDivider()
+            }
+            if (voiceInput != null) item(key = "voice_input") {
+                app.granger.voiceinput.VoiceInputSettingsSection(voiceInput)
             }
             item(key = "appearance") {
                 AppearanceSection(railSide, viewModel::setRailSide, openTo, viewModel::setOpenTo, theme, viewModel::setTheme)

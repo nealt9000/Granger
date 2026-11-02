@@ -94,7 +94,7 @@ class ModelManagerTest {
         r.manager.engine()
         r.manager.embedder()
         r.manager.releaseSoon()
-        advanceTimeBy(119_000)
+        advanceTimeBy(299_000)
         assertThat(r.llms.openEngines).isNotEmpty()
         advanceTimeBy(2_000)
         runCurrent()
@@ -106,9 +106,9 @@ class ModelManagerTest {
         val r = rig()
         r.manager.engine()
         r.manager.releaseSoon()
-        advanceTimeBy(60_000)
+        advanceTimeBy(150_000)
         r.manager.engine()
-        advanceTimeBy(200_000)
+        advanceTimeBy(400_000)
         runCurrent()
         assertThat(r.llms.openEngines).hasSize(1)
     }
@@ -198,7 +198,7 @@ class ModelManagerTest {
         turn()
         runCurrent()
         assertThat(r.llms.openEngines).hasSize(1) // not closed at the turn's end...
-        advanceTimeBy(121_000)
+        advanceTimeBy(301_000)
         runCurrent()
         assertThat(r.llms.openEngines).isEmpty() // ...but a quiet spell later it still goes
     }
@@ -210,7 +210,7 @@ class ModelManagerTest {
         r.manager.releaseSoon() // the turn's end asks for a quiet-spell release
         r.manager.appReturned()
         turn()
-        advanceTimeBy(121_000)
+        advanceTimeBy(301_000)
         runCurrent()
         assertThat(r.llms.openEngines).isEmpty()
     }
@@ -220,11 +220,11 @@ class ModelManagerTest {
         r.manager.engine()
         val letGo = r.manager.hold()
         r.manager.releaseSoon()
-        advanceTimeBy(150_000)
+        advanceTimeBy(350_000)
         runCurrent()
         assertThat(r.llms.openEngines).hasSize(1)
         letGo()
-        advanceTimeBy(119_000)
+        advanceTimeBy(299_000)
         assertThat(r.llms.openEngines).hasSize(1)
         advanceTimeBy(2_000)
         runCurrent()
@@ -241,6 +241,62 @@ class ModelManagerTest {
         runCurrent()
         assertThat(r.llms.openEngines).hasSize(1) // b still holds
         b()
+        runCurrent()
+        assertThat(r.llms.openEngines).isEmpty()
+    }
+
+    @Test fun anOpenAskScreenKeepsTheModelsPastTheQuietSpell() = runTest {
+        val r = rig()
+        r.manager.engine()
+        val close = r.manager.keepWhileOpen()
+        r.manager.releaseSoon() // a turn ends while Ask is open
+        advanceTimeBy(30 * 60_000L)
+        runCurrent()
+        assertThat(r.llms.openEngines).hasSize(1)
+        close()
+        advanceTimeBy(299_000)
+        runCurrent()
+        assertThat(r.llms.openEngines).hasSize(1)
+        advanceTimeBy(2_000)
+        runCurrent()
+        assertThat(r.llms.openEngines).isEmpty()
+    }
+
+    @Test fun anAskScreenOpenedDuringTheQuietSpellStopsIt() = runTest {
+        val r = rig()
+        r.manager.engine()
+        r.manager.releaseSoon()
+        advanceTimeBy(200_000)
+        val close = r.manager.keepWhileOpen()
+        advanceTimeBy(200_000)
+        runCurrent()
+        assertThat(r.llms.openEngines).hasSize(1)
+        close(); close() // idempotent: counts once
+        advanceTimeBy(301_000)
+        runCurrent()
+        assertThat(r.llms.openEngines).isEmpty()
+    }
+
+    @Test fun twoAskScreensReleaseOnlyAfterBothClose() = runTest {
+        val r = rig()
+        r.manager.engine()
+        val a = r.manager.keepWhileOpen()
+        val b = r.manager.keepWhileOpen()
+        a()
+        advanceTimeBy(400_000)
+        runCurrent()
+        assertThat(r.llms.openEngines).hasSize(1)
+        b()
+        advanceTimeBy(301_000)
+        runCurrent()
+        assertThat(r.llms.openEngines).isEmpty()
+    }
+
+    @Test fun releaseNowStillAppliesWithAskOpen() = runTest {
+        val r = rig()
+        r.manager.engine()
+        r.manager.keepWhileOpen()
+        r.manager.releaseNow() // the app was hidden
         runCurrent()
         assertThat(r.llms.openEngines).isEmpty()
     }

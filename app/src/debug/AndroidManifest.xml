@@ -5,13 +5,7 @@
         <intent>
             <action android:name="android.intent.action.TTS_SERVICE" />
         </intent>
-        <!-- Lets the voice input spike list the phone's speech recognizers (Plan A0). -->
-        <intent>
-            <action android:name="android.speech.RecognitionService" />
-        </intent>
     </queries>
-    <!-- Plan A0 only: the main manifest gets RECORD_AUDIO in A1, if voice input is adopted. -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- A catalog served from the Mac over `adb reverse` (-PcatalogUrl). -->
     <application android:networkSecurityConfig="@xml/network_security_config">
         <activity

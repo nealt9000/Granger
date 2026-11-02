@@ -46,6 +46,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -79,12 +81,66 @@ class ResearchViewModelTest {
         player: PlayerHub? = null,
         speakAnswers: Boolean = false,
         dense: app.granger.core.research.DenseFinder? = null,
+        voice: app.granger.voiceinput.VoiceInput? = null,
     ): ResearchViewModel {
         return ResearchViewModel(
             chatId, quote, chats, ResearchPipeline(finder, models, dense = dense), manager, sessions, library, bookshelf,
             MediaIndex(mediaLibrary, backgroundScope, main.dispatcher), backgroundScope, savedState, cpu,
-            player = player, speakAnswers = { speakAnswers }, now = { 42L },
+            player = player, speakAnswers = { speakAnswers }, now = { 42L }, voice = voice,
         )
+    }
+
+    // ---- voice input (Plan A1) ----
+
+    private suspend fun TestScope.spoken(language: String = "en", askWhenDone: Boolean = false): Triple<ResearchViewModel, app.granger.voiceinput.FakeSpeech, app.granger.voiceinput.FakePrefs> {
+        val speech = app.granger.voiceinput.FakeSpeech()
+        val prefs = app.granger.voiceinput.FakePrefs().apply { setAskWhenDone(askWhenDone) }
+        val voice = app.granger.voiceinput.fakeVoiceInput(backgroundScope, speech, language, prefs)
+        val vm = vm(voice = voice)
+        backgroundScope.launch { vm.micShown.collect {} }
+        // Wait for the phone's languages to be looked up (advanceUntilIdle alone can return first in this class).
+        voice.status.first { it.tag != null }
+        testScheduler.advanceUntilIdle()
+        return Triple(vm, speech, prefs)
+    }
+
+    @Test fun aSpokenQuestionWaitsInTheBoxForSend() = runTest(main.dispatcher) {
+        val (vm, speech) = spoken()
+        assertThat(vm.micShown.value).isTrue()
+        vm.speak()
+        testScheduler.advanceUntilIdle()
+        speech.send(app.granger.core.speech.DictationEvent.Partial("How do plants"))
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.input).isEqualTo("How do plants")
+        speech.end(app.granger.core.speech.DictationEvent.Final("How do plants use light?"))
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.input).isEqualTo("How do plants use light?")
+        assertThat(chats.turnList.value).isEmpty()
+    }
+
+    @Test fun withAskWhenDoneTheSpokenQuestionSendsItself() = runTest(main.dispatcher) {
+        val (vm, speech) = spoken(askWhenDone = true)
+        vm.speak()
+        testScheduler.advanceUntilIdle()
+        speech.end(app.granger.core.speech.DictationEvent.Final("How do plants use light?"))
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.input).isEmpty()
+        assertThat(chats.turnList.value.single().question).isEqualTo("How do plants use light?")
+    }
+
+    @Test fun speakingKeepsWhatWasAlreadyTyped() = runTest(main.dispatcher) {
+        val (vm, speech) = spoken()
+        vm.input = "Tell me  "
+        vm.speak()
+        testScheduler.advanceUntilIdle()
+        speech.end(app.granger.core.speech.DictationEvent.Final("about Kant"))
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.input).isEqualTo("Tell me about Kant")
+    }
+
+    @Test fun aSpanishAppHasNoMicInTheAskBoxUntilSpanishAsk() = runTest(main.dispatcher) {
+        val (vm) = spoken(language = "es")
+        assertThat(vm.micShown.value).isFalse()
     }
 
     // ---- read aloud (Plan V2) ----
@@ -628,7 +684,27 @@ class ResearchViewModelTest {
         vm.ask("How do plants use light?")
         testScheduler.advanceUntilIdle()
         assertThat(vm.state.value.running).isFalse()
-        testScheduler.advanceTimeBy(119_000)
+        testScheduler.advanceTimeBy(299_000)
+        testScheduler.runCurrent()
+        assertThat(llm.closed).isFalse()
+        testScheduler.advanceTimeBy(2_000)
+        testScheduler.runCurrent()
+        assertThat(llm.closed).isTrue()
+    }
+
+    @Test fun theModelStaysWhileTheChatIsOnScreenAndGoesFiveMinutesAfter() = runTest(main.dispatcher) {
+        val llm = ClosingLlm()
+        val manager = manager(LlmEngineFactory { _, _ -> llm })
+        manager.engine()
+        val vm = vm(manager = manager)
+        vm.shown()
+        vm.ask("How do plants use light?")
+        testScheduler.advanceUntilIdle()
+        testScheduler.advanceTimeBy(20 * 60_000L)
+        testScheduler.runCurrent()
+        assertThat(llm.closed).isFalse()
+        vm.hidden()
+        testScheduler.advanceTimeBy(299_000)
         testScheduler.runCurrent()
         assertThat(llm.closed).isFalse()
         testScheduler.advanceTimeBy(2_000)

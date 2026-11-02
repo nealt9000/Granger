@@ -8,6 +8,8 @@ Draft, 2 November 2026, for Neal to review and host at a public URL for Play Con
 
 Everything you do in Granger stays on your phone: your library, what you read and listen to, your bookmarks and highlights, your questions to Ask and its answers, your settings, and the app's crash log. Ask's model runs on your phone, so your questions never leave it. If you uninstall Granger, Android deletes all of it.
 
+**The microphone.** If you allow it, Granger listens only while you've tapped the mic in Search or Ask. Your speech is turned into text by your phone's own on-device speech recognition, and Granger receives only the text. Nothing is recorded, kept or sent anywhere. On a phone that can't recognize speech on the device, Granger doesn't offer the mic at all.
+
 ## When Granger uses the internet
 
 Granger connects only to fetch what you ask for, and to check its catalog:

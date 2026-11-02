@@ -15,6 +15,7 @@ import app.granger.core.ai.InstalledModels
 import app.granger.core.ai.LiteRtLlmEngine
 import app.granger.core.ai.LiteRtTextEmbedder
 import app.granger.core.ai.LlmBackend
+import app.granger.core.ai.ModelCheckStore
 import app.granger.core.ai.ModelManager
 import app.granger.core.catalog.CatalogRepository
 import app.granger.core.catalog.CatalogSource
@@ -598,6 +599,17 @@ class AppContainer(context: Context) {
     val appearancePrefs: AppearancePrefs = SharedAppearancePrefs(context)
     val appLanguages: AppLanguages = AppLanguages.create(context, onLegacyChange = { (context as? GrangerApp)?.relocalize() })
 
+    /** Voice input (Plan A1): the phone's on-device recognizer, in the app's language; read-aloud stops before a take. */
+    val voiceInput by lazy {
+        app.granger.voiceinput.VoiceInput(
+            speech = app.granger.core.speech.OnDeviceSpeechInput(app.granger.core.speech.AndroidRecognizerBackend(context)),
+            prefs = app.granger.voiceinput.SharedVoiceInputPrefs(context),
+            appLanguage = appLanguages.code,
+            stopReadAloud = { playerHub.stopVoice() },
+            scope = appScope,
+        )
+    }
+
     /** The languages of the user's library (Plan L3): the app language's by default, when the catalog has tiers for it. */
     val knowledgeLanguages: KnowledgeLanguages = KnowledgeLanguages.create(
         context, appLanguages.code, catalog.state.map { it.catalog?.languages.orEmpty() }.distinctUntilChanged(),
@@ -722,6 +734,8 @@ class AppContainer(context: Context) {
         { path, backend -> LiteRtLlmEngine(path, backend, modelCacheDir) },
         { path -> LiteRtTextEmbedder(path, modelCacheDir, EMBEDDER_BACKEND) },
         appScope, useEmbedder = embedderWanted::get,
+        // The self-check (release checklist A): kept in files/, so a crash mid-check is found at the next launch.
+        checks = ModelCheckStore(java.io.File(context.filesDir, "model-check.txt")),
     )
 
     /** Ask's models, fetched from Ask's own empty state (Plan U3a). */
@@ -825,5 +839,7 @@ class AppContainer(context: Context) {
         passageFinder, ModelsAdapter(modelManager), rankingConfig,
         sourceWeight = fictionWeight, dense = if (DENSE_RETRIEVAL) denseFinder else null,
         reserveNamed = true, yearFacts = true, reactions = ::owlCentroids,
+        // Ask Preview: a medical question shows the banner and quoted passages, no generated prose (Neal, 2026-11-02).
+        medicalQuotes = true,
     )
 }

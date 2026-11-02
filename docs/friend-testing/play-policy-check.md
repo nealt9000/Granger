@@ -72,6 +72,7 @@ Some Kiwix families are CC BY-NC. Granger is free with no ads or purchases, and 
 - **Data shared:** none.
 - **Send feedback** composes an email in the user's own mail app, which the user reviews and sends. Granger itself transmits nothing. If the Console wording leaves doubt, the conservative answer is: "App activity: other user-generated content and crash logs, collected optionally, not shared, used for app functionality and analytics."
 - **Network requests** go to GitHub (the signed catalog), Hugging Face (models), Kiwix mirrors, archive.org, LibriVox and Project Gutenberg, all over HTTPS. They fetch content; no user data is sent beyond what any HTTP request carries.
+- **Microphone (voice input, Plan A1, 2026-11-02):** `RECORD_AUDIO`, asked for on the first mic tap with a one-line reason (prominent disclosure). Speech goes to the system's **on-device** recognizer (`SpeechRecognizer.createOnDeviceSpeechRecognizer`; on Pixels, Android System Intelligence), and Granger receives only the text. Nothing is recorded, stored or transmitted, and the mic is hidden on phones without on-device recognition. So under Play's definition (data processed only on the device isn't "collected"), **Audio → Voice or sound recordings: not collected, not shared.** `RECORD_AUDIO` isn't a restricted permission, so no declaration form is needed.
 - **Encrypted in transit:** yes. **Users can request deletion:** not applicable (nothing collected); everything is on the phone and goes with the app.
 
 ## 8. Health apps declaration

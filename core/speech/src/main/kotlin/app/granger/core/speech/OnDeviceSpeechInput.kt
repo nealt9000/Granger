@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 /**
  * [SpeechInput] over a [RecognizerBackend] ([AndroidRecognizerBackend] on the phone). What the A0 spike taught is
@@ -36,10 +37,13 @@ class OnDeviceSpeechInput(
 
     override suspend fun languages(): RecognizerLanguages? = cacheLock.withLock {
         cached ?: run {
-            if (!backend.onDeviceAvailable()) return@withLock null
-            backend.support()?.also { cached = it }
+            withContext(main) {
+                if (!backend.onDeviceAvailable()) null else backend.support()
+            }?.also { cached = it }
         }
     }
+
+    override fun forget() { cached = null }
 
     override suspend fun availability(tag: String): Availability =
         languages()?.availability(tag) ?: Availability.UNAVAILABLE
@@ -116,7 +120,7 @@ class OnDeviceSpeechInput(
     override fun stop() { current?.stop() }
 
     override suspend fun download(tag: String, onProgress: (Int) -> Unit): DownloadOutcome {
-        val outcome = backend.download(tag, onProgress)
+        val outcome = withContext(main) { backend.download(tag, onProgress) }
         cacheLock.withLock { cached = null }
         return outcome
     }

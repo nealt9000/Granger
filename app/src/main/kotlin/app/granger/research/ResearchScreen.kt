@@ -1,5 +1,17 @@
 package app.granger.research
 
+import android.content.ActivityNotFoundException
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import app.granger.BuildConfig
+import app.granger.feedback.AskReport
+import app.granger.feedback.BuildFacts
+import app.granger.feedback.FeedbackMail
+import app.granger.feedback.ReportSheet
+import app.granger.voiceinput.Dictation
+import app.granger.voiceinput.MicButton
+import app.granger.voiceinput.VoiceInputPrefs
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -52,6 +64,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -71,11 +84,15 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.R
 import app.granger.core.ai.ResearchReadiness
 import app.granger.core.library.ChatSummary
 import app.granger.core.library.TurnOutcome
+import app.granger.core.research.MedicalQuotes
 import app.granger.core.research.OwlLines
 import app.granger.core.research.Passage
 import app.granger.core.research.SourceKind
@@ -110,6 +127,8 @@ private fun progressLabel(ui: TurnUi, reading: String?): String? {
         slow && ui.partial.isNullOrBlank() && owlSpeaks() -> OwlLines.SLOW
         reading != null -> reading
         ui.stage == Stage.LOADING_MODEL -> ui.waking ?: ui.stage.label()
+        // A medical reply is written out of sight and only chooses the quotes (MedicalQuotes).
+        ui.stage == Stage.WRITING && ui.medical && !ui.guessing -> stringResource(R.string.research_stage_quoting)
         else -> ui.stage?.label()
     }
 }
@@ -197,9 +216,27 @@ fun ResearchScreen(
     onOpenChat: (Long) -> Unit,
     onNewChat: () -> Unit,
     onBack: () -> Unit,
+    /** Voice input's settings (Plan A1), for the mic's permission prompt; null hides the mic. */
+    voicePrefs: VoiceInputPrefs? = null,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    // The models stay loaded while this chat is on screen (started), and five minutes after it leaves.
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle, viewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_START -> viewModel.shown()
+                Lifecycle.Event.ON_STOP -> viewModel.hidden()
+                else -> Unit
+            }
+        }
+        lifecycle.addObserver(observer)
+        onDispose {
+            lifecycle.removeObserver(observer)
+            viewModel.hidden()
+        }
+    }
     val snackbar = remember { SnackbarHostState() }
     val list = rememberLazyListState()
     val rows = rows(state)
@@ -277,6 +314,37 @@ fun ResearchScreen(
         wasLive = live
     }
 
+    // Report this answer (release checklist A): the turn and whether it's the best guess being reported.
+    var reporting by remember { mutableStateOf<Pair<Long, Boolean>?>(null) }
+    val context = LocalContext.current
+    reporting?.let { (turnId, guess) ->
+        val turn = state.turns.firstOrNull { it.turn.id == turnId }?.turn
+        if (turn == null) {
+            reporting = null
+        } else {
+            val album = stringResource(R.string.research_source_album)
+            val audiobook = stringResource(R.string.research_source_audiobook)
+            val sources = if (guess) emptyList() else turn.shown.map { p ->
+                listOf(p.sourceTitle, sourceByline(p, album, audiobook)).filter { it.isNotBlank() }.joinToString(" · ")
+            }
+            ReportSheet(
+                guess = guess,
+                sources = sources.size,
+                onSend = { reason, note ->
+                    val report = AskReport(reason, note, turn.question, if (guess) turn.guess else turn.answer, guess, sources, BuildFacts.ofThisPhone())
+                    val email = report.intent()
+                    try {
+                        context.startActivity(FeedbackMail.toMailApps(email, FeedbackMail.mailApps(context)) ?: FeedbackMail.shareInstead(email))
+                        reporting = null
+                    } catch (e: ActivityNotFoundException) {
+                        Toast.makeText(context, context.getString(R.string.feedback_no_mail_app, BuildConfig.FEEDBACK_EMAIL), Toast.LENGTH_LONG).show()
+                    }
+                },
+                onDismiss = { reporting = null },
+            )
+        }
+    }
+
     var chatsOpen by remember { mutableStateOf(false) }
     if (chatsOpen) {
         ChatsSheet(
@@ -330,6 +398,10 @@ fun ResearchScreen(
                     ResearchReadiness.MODELS_MISSING ->
                         if (librarian != null) LibrarianNotice(librarian, onGetLibrarian) else Notice(stringResource(R.string.research_models_missing), stringResource(R.string.research_get_models), onGetModels)
                     ResearchReadiness.UNSUPPORTED -> Notice(stringResource(R.string.research_unsupported))
+                    ResearchReadiness.FAILED_CHECK -> {
+                        val why by viewModel.checkFailure.collectAsStateWithLifecycle()
+                        why?.let { Notice(stringResource(checkText(it)), stringResource(R.string.research_check_retry), viewModel::retryCheck) }
+                    }
                     ResearchReadiness.READY -> Unit
                 }
                 state.quote?.let { QuoteCard(it, Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) }
@@ -339,6 +411,7 @@ fun ResearchScreen(
                     running = state.running,
                     canSend = viewModel.input.isNotBlank() || state.quote != null,
                     focus = focusInput,
+                    voicePrefs = voicePrefs,
                 )
             }
         },
@@ -362,7 +435,9 @@ fun ResearchScreen(
                         onSearch = { onSearch(searchInsteadQuery(row.turn.turn.keywords, row.turn.turn.question)) },
                         onRetry = { viewModel.retry(row.turn.turn.id) },
                         onGuess = { viewModel.bestGuess(row.turn.turn.id) },
+                        onReport = { guess -> reporting = row.turn.turn.id to guess },
                         onReadiness = onReadiness,
+                        checkFailed = state.readiness == ResearchReadiness.FAILED_CHECK,
                     )
                     is ThreadRow.Source -> SourceCard(
                         row.n, row.passage, flashing == row.key, onOpen = { open(row.turnId, row.n) },
@@ -382,7 +457,7 @@ fun ResearchScreen(
 
 /** The question field, with Send, or Stop while a turn runs. */
 @Composable
-private fun QuestionField(viewModel: ResearchViewModel, enabled: Boolean, running: Boolean, canSend: Boolean, focus: Boolean) {
+private fun QuestionField(viewModel: ResearchViewModel, enabled: Boolean, running: Boolean, canSend: Boolean, focus: Boolean, voicePrefs: VoiceInputPrefs?) {
     val requester = remember { FocusRequester() }
     // Once per chat, not again after rotation or Back.
     var focused by rememberSaveable { mutableStateOf(false) }
@@ -406,6 +481,19 @@ private fun QuestionField(viewModel: ResearchViewModel, enabled: Boolean, runnin
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
             keyboardActions = KeyboardActions(onSend = { if (!running && canSend) viewModel.send() }),
         )
+        // Voice input (Plan A1): beside Send, hidden while an answer is running.
+        val dictation = viewModel.dictation
+        val micShown by viewModel.micShown.collectAsStateWithLifecycle()
+        val dictationState = dictation?.state?.collectAsStateWithLifecycle()?.value
+        if (!running && micShown && dictation != null && voicePrefs != null) {
+            MicButton(
+                listening = dictationState is Dictation.State.Listening,
+                prefs = voicePrefs,
+                onStart = viewModel::speak,
+                onStop = dictation::stop,
+                enabled = enabled,
+            )
+        }
         if (running) {
             TextButton(onClick = viewModel::stop) { Text(stringResource(R.string.common_stop)) }
         } else {
@@ -429,6 +517,10 @@ private fun AnswerBlock(
     onRetry: () -> Unit,
     onGuess: () -> Unit,
     onReadiness: () -> Unit,
+    /** Report this answer (true: the best guess). */
+    onReport: (guess: Boolean) -> Unit = {},
+    /** The model failed its self-check: a failed turn points to the notice below, not to Readiness. */
+    checkFailed: Boolean = false,
 ) {
     val turn = ui.turn
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -445,11 +537,15 @@ private fun AnswerBlock(
                     CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                     progressLabel(ui, reading)?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
-                ui.partial?.takeIf { it.isNotBlank() }?.let { AnswerBody(it, onCite) }
+                ui.partial?.takeIf { it.isNotBlank() }?.let {
+                    if (ui.medical && MedicalQuotes.isQuoted(it)) QuotedLabel()
+                    AnswerBody(it, onCite)
+                }
             }
             TurnOutcome.ANSWERED -> {
+                if (ui.medical && MedicalQuotes.isQuoted(turn.answer)) QuotedLabel()
                 AnswerBody(turn.answer, onCite)
-                if (!running || ui.voice != VoiceButton.IDLE) ReadAloudRow(ui.voice, onRead, onPauseResume, onStopReading)
+                if (!running || ui.voice != VoiceButton.IDLE) ReadAloudRow(ui.voice, onRead, onPauseResume, onStopReading) { onReport(false) }
             }
             TurnOutcome.UNVERIFIED -> Text(stringResource(R.string.research_unverified), style = MaterialTheme.typography.bodyLarge)
             TurnOutcome.DECLINED -> {
@@ -478,7 +574,7 @@ private fun AnswerBlock(
                 if (guessText.isNotBlank()) {
                     GuessCard(if (owlSpeaks()) OwlLines.guessLabel(turn.id) else stringResource(R.string.research_best_guess_label), guessText)
                 }
-                if (guessText.isNotBlank() && !ui.guessing) ReadAloudRow(ui.voice, onRead, onPauseResume, onStopReading)
+                if (guessText.isNotBlank() && !ui.guessing) ReadAloudRow(ui.voice, onRead, onPauseResume, onStopReading) { onReport(true) }
                 if (!(ui.guessing && ui.guessShown)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedButton(onClick = onSearch) { Text(stringResource(R.string.research_search_instead)) }
@@ -503,7 +599,9 @@ private fun AnswerBlock(
                 Text(stringResource(R.string.research_search_failed), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
                 OutlinedButton(onClick = onRetry, enabled = !running) { Text(stringResource(R.string.common_retry)) }
             }
-            TurnOutcome.FAILED -> {
+            TurnOutcome.FAILED -> if (checkFailed) {
+                Text(stringResource(R.string.research_check_turn), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
+            } else {
                 Text(stringResource(R.string.research_model_failed), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
                 OutlinedButton(onClick = onReadiness) { Text(stringResource(R.string.research_readiness)) }
             }
@@ -516,9 +614,20 @@ private fun AnswerBlock(
  * Play and a separate Stop. Hidden only while a turn runs and nothing is being read.
  */
 @Composable
-private fun ReadAloudRow(voice: VoiceButton, onRead: () -> Unit, onPauseResume: () -> Unit, onStop: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) { ListenButtons(voice, onRead, onPauseResume, onStop) }
+private fun ReadAloudRow(voice: VoiceButton, onRead: () -> Unit, onPauseResume: () -> Unit, onStop: () -> Unit, onReport: () -> Unit) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        ListenButtons(voice, onRead, onPauseResume, onStop)
+        Spacer(Modifier.weight(1f))
+        // Report this answer (Play's AI-generated content policy): on every reply and best guess.
+        TextButton(onClick = onReport, modifier = Modifier.testTag(REPORT_TAG)) {
+            Icon(painterResource(R.drawable.ic_flag), contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(6.dp))
+            Text(stringResource(R.string.report_action))
+        }
+    }
 }
+
+internal const val REPORT_TAG = "research-report"
 
 /** The model's own guess, outlined and set apart from cited answers; it has no sources, so no chips or cards. */
 @Composable
@@ -631,6 +740,12 @@ private fun SourceCard(n: Int, passage: Passage, flash: Boolean, onOpen: () -> U
             overflow = TextOverflow.Ellipsis,
         )
     }
+}
+
+/** Above a medical answer made of the library's own sentences (MedicalQuotes), so it isn't read as the model's words. */
+@Composable
+private fun QuotedLabel() {
+    Text(stringResource(R.string.research_medical_quoted), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 
 @Composable

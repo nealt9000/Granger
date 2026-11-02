@@ -23,8 +23,10 @@
     <string name="research_stage_searching">Buscando en tu biblioteca…</string>
     <string name="research_stage_ranking">Ordenando pasajes…</string>
     <string name="research_stage_writing">Escribiendo…</string>
+    <string name="research_stage_quoting">Eligiendo pasajes para citar…</string>
 
     <string name="research_medical">Esto no es consejo médico. Si puedes contactar a los servicios de emergencia o a un profesional, hazlo.</string>
+    <string name="research_medical_quoted">Con las palabras de tu biblioteca:</string>
 
     <string name="research_declined">No está en tu biblioteca.</string>
     <string name="research_unverified">No se pudo responder con estos pasajes.</string>
@@ -50,4 +52,10 @@
 
     <string name="research_librarian_no_space">No hay espacio suficiente en %1$s: libera %2$s.</string>
     <string name="research_personal_medical">No puedo responder preguntas sobre tu propia salud. Un médico, enfermero o farmacéutico sí puede. Buscar en su lugar muestra lo que dice tu biblioteca sobre el tema.</string>
+    <string name="research_check_crashed">Preguntar está desactivado en este teléfono: Granger se cerró mientras arrancaba el bibliotecario. Si lo cerraste tú, vuelve a intentarlo.</string>
+    <string name="research_check_load_failed">Preguntar está desactivado en este teléfono: el bibliotecario no pudo arrancar aquí.</string>
+    <string name="research_check_wrong_reply">Preguntar está desactivado en este teléfono: la respuesta de prueba del bibliotecario salió ilegible.</string>
+    <string name="research_check_too_slow">Preguntar está desactivado en este teléfono: el bibliotecario tardó demasiado en su prueba.</string>
+    <string name="research_check_retry">Volver a intentar</string>
+    <string name="research_check_turn">El bibliotecario no pasó su prueba en este teléfono. Mira abajo.</string>
 </resources>
