@@ -26,12 +26,13 @@
     <string name="onboarding_research_runs">Preguntar, el bibliotecario, funciona en este teléfono.</string>
     <string name="onboarding_storage">Almacenamiento</string>
     <string name="onboarding_volume_free_of">%1$s: %2$s libres de %3$s</string>
-    <string name="onboarding_start_sizes">El comienzo Eficiente ocupa %1$s; la biblioteca Completa, %2$s. Solo una Wikipedia completa ocupa unos 100 GB.</string>
+    <string name="onboarding_start_sizes">%1$s ocupa %2$s; la biblioteca Completa, %3$s. Solo una Wikipedia completa ocupa unos 100 GB.</string>
 
     <string name="onboarding_catalog_failed">No se pudo conectar con el catálogo. Revisa la conexión e inténtalo de nuevo.</string>
     <string name="onboarding_try_again">Intentar de nuevo</string>
     <string name="onboarding_catalog_failed_next">O toca Siguiente: Inicio y la Biblioteca son tuyos de todos modos.</string>
     <string name="onboarding_catalog_loading">Obteniendo la lista de paquetes…</string>
+    <string name="onboarding_blurb_starter">La Wikipedia más leída, una enciclopedia médica y los libros clásicos: una buena biblioteca en poco espacio.</string>
     <string name="onboarding_blurb_efficient">Lo esencial de cada área: suficiente para responder a la mayoría de las preguntas, en el menor espacio.</string>
     <string name="onboarding_blurb_comprehensive">Todo lo que cuenta el modelo de preparación, para un teléfono que pueda guardarlo.</string>
     <string name="onboarding_neither">Ninguno, elegiré después</string>

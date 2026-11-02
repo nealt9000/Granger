@@ -43,7 +43,9 @@ data class PhoneUi(
     /** Whether this phone can run Ask, and where to get it; null when there's nothing to say. */
     val researchLine: UiText?,
     val volumes: List<Volume>,
-    val efficientBytes: Long,
+    /** The smallest start offered (Starter, or a language's Efficient start), and what it would download. */
+    val smallestTitle: String,
+    val smallestBytes: Long,
     val comprehensiveBytes: Long,
 )
 
@@ -54,10 +56,10 @@ data class OnboardingUi(
     val refreshing: Boolean = false,
     /** The fetch onboarding started failed; Pick a start offers Try again, and Next still works. */
     val catalogFailed: Boolean = false,
-    val phone: PhoneUi = PhoneUi(UiText.Raw(""), null, emptyList(), 0, 0),
+    val phone: PhoneUi = PhoneUi(UiText.Raw(""), null, emptyList(), "", 0, 0),
     val starts: List<StartChoice> = emptyList(),
-    /** [OnboardingModel.EFFICIENT], [OnboardingModel.COMPREHENSIVE], or null for "I'll choose later". */
-    val startId: String? = OnboardingModel.EFFICIENT,
+    /** A start choice's id (the first, smallest, until the user picks), or null for "I'll choose later". */
+    val startId: String? = null,
     val unticked: Set<String> = emptySet(),
     val regions: Regions = Regions(emptyList(), emptyList()),
     val regionQuery: String = "",
@@ -129,7 +131,7 @@ class OnboardingViewModel(
         { group, items, volume, wifi -> downloads.enqueueGroup(group, items.map { downloadSpecOf(it, group) }, volume.root, wifi) },
 ) : ViewModel() {
     private val step = MutableStateFlow(Step.WELCOME)
-    private val startId = MutableStateFlow<String?>(OnboardingModel.EFFICIENT)
+    private val startId = MutableStateFlow<String?>(OnboardingModel.DEFAULT_START)
     private val unticked = MutableStateFlow<Set<String>>(emptySet())
     private val regionQuery = MutableStateFlow("")
     /** The user's pick, or [UNCHOSEN] until they pick (the suggestion stands until then; null is "No region"). */
@@ -202,7 +204,8 @@ class OnboardingViewModel(
         // The main library language's starts; a second language adds its encyclopedia as its own line (Plan L3).
         val starts = catalog?.let { OnboardingModel.startChoices(it, f.installed, c.saveSpace, f.languages.first(), appLang) }.orEmpty()
         val secondLine = f.languages.getOrNull(1)?.let { lang -> catalog?.let { OnboardingModel.secondLine(it, lang, f.installed, c.saveSpace) } }
-        val start = starts.firstOrNull { it.id == c.startId }
+        val startId = if (c.startId == OnboardingModel.DEFAULT_START) starts.firstOrNull()?.id else c.startId
+        val start = starts.firstOrNull { it.id == startId }
         val regions = catalog?.let { OnboardingModel.regions(it, f.installed) } ?: Regions(emptyList(), emptyList())
         val suggestion = OnboardingModel.suggestedRegion(regions, countryCode)
         val suggested = c.regionId == UNCHOSEN
@@ -235,11 +238,12 @@ class OnboardingViewModel(
                 tierLine = tierLine(),
                 researchLine = researchLine(offered = askLine != null),
                 volumes = f.volumes,
-                efficientBytes = starts.firstOrNull { it.id == OnboardingModel.EFFICIENT }?.bytes() ?: 0L,
+                smallestTitle = starts.firstOrNull()?.title.orEmpty(),
+                smallestBytes = starts.firstOrNull()?.bytes() ?: 0L,
                 comprehensiveBytes = starts.firstOrNull { it.id == OnboardingModel.COMPREHENSIVE }?.bytes() ?: 0L,
             ),
             starts = starts,
-            startId = c.startId,
+            startId = startId,
             unticked = c.unticked,
             regions = regions.matching(c.regionQuery),
             regionQuery = c.regionQuery,

@@ -220,6 +220,32 @@ class BookReadSource(
     }
 
     /**
+     * [at], or when it falls in the book's front matter, the first sentence after it. Listen from the start of a
+     * Classics book read the contents list (in Pride and Prejudice, 61 chapter numerals; the Pixel 7 walkthrough,
+     * 2026-11-02). Front matter is the files before the first contents entry (the cover) and the entries titled as
+     * front matter ([FRONT_MATTER]: the Classics builder's "Front matter", a contents list, a list of illustrations).
+     * A book whose every entry is front matter, or with no contents, is left at [at].
+     */
+    suspend fun pastFrontMatter(at: ReadAddress.Book): ReadAddress.Book {
+        val here = placeOf(at) ?: return at
+        val placed = toc.withIndex().filter { it.value.order >= 0 }
+        if (placed.isEmpty()) return at
+        val firstOrder = placed.minOf { it.value.order }
+        val entry = chapterAt(at)
+        val front = here.order < firstOrder || (entry != null && isFrontMatter(toc[entry].title))
+        if (!front) return at
+        val next = placed.firstOrNull { (i, e) -> e.order >= here.order && i != entry && !isFrontMatter(e.title) && (entryPlace(i)?.let { it > here } ?: false) }
+            ?: return at
+        return chapterStart(next.index) ?: at
+    }
+
+    /** The start of the book past its front matter ([pastFrontMatter]): where Listen starts a book from nowhere in it. */
+    suspend fun firstAfterFrontMatter(): ReadAddress.Book? {
+        val first = addressAt(null) ?: return null
+        return pastFrontMatter(first)
+    }
+
+    /**
      * The first sentence of the chapter a contents entry's [href] points into (Plan V2, `ReadAloud.start`); null when
      * the book has no such resource.
      */
@@ -340,15 +366,22 @@ class BookReadSource(
 
     private fun parse(json: String): Locator? = runCatching { Locator.fromJSON(JSONObject(json)) }.getOrNull()
 
-    private companion object {
-        const val CONTEXT = 60
+    companion object {
+        /** Contents titles that name front matter, not reading ([pastFrontMatter]); compared folded, without end stops. */
+        private val FRONT_MATTER = setOf(
+            "front matter", "cover", "title page", "contents", "table of contents", "list of illustrations", "illustrations",
+        )
+
+        fun isFrontMatter(title: String): Boolean = title.trim().trimEnd('.', ':').lowercase() in FRONT_MATTER
+
+        private const val CONTEXT = 60
         /** How many elements after a selection's locator are searched for its text (a selection's locator can point at its page, not its paragraph). */
-        const val SELECTION_SCAN = 8
+        private const val SELECTION_SCAN = 8
         /** How many utterances past a reopened iterator's start are searched for the asked-for sentence. */
-        const val REOPEN_SCAN = 600
+        private const val REOPEN_SCAN = 600
         /** How many elements of a chapter are searched for the page's first words, and how many of those words count. */
-        const val RESOURCE_SCAN = 3_000
-        const val NEEDLE = 40
-        const val NEEDLE_MIN = 12
+        private const val RESOURCE_SCAN = 3_000
+        private const val NEEDLE = 40
+        private const val NEEDLE_MIN = 12
     }
 }

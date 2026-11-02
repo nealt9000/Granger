@@ -7,6 +7,7 @@ import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.Catalog
 import app.granger.core.catalog.CatalogItem
 import app.granger.core.catalog.ENGLISH
+import app.granger.core.catalog.Languages
 import app.granger.core.catalog.ModelEntry
 import app.granger.core.catalog.ModelRole
 import app.granger.core.catalog.PackEntry
@@ -91,15 +92,21 @@ data class Review(
 
 /** The onboarding flow's data, computed from the cached catalog and what is installed. Pure. */
 object OnboardingModel {
+    const val STARTER = "starter"
     const val EFFICIENT = "efficient"
+
+    /** Pick a start's choice before the user picks: the smallest start offered ([startChoices]' first). */
+    const val DEFAULT_START = "default"
     const val COMPREHENSIVE = "comprehensive"
     const val ASK = "ask"
     const val VOICE = "voice"
     const val VOICE_ID = "vits-piper-en_GB-granger_owl-medium"
 
     /**
-     * The two start choices, each from its generated preset; a catalog without them (older) gives an empty list.
-     * [saveSpace] swaps each pack for its no-pictures flavour where the catalog has one (Neal, 2026-10-28: pictures are
+     * The start choices, smallest first: Starter where the language has one (Neal, 2026-11-02: the ~20 GB Efficient
+     * start is a middle tier, so Starter is the default), then the generated Efficient and Comprehensive presets; a
+     * catalog without them (older) gives an empty list. Ask's models are left out of a start (the Starter preset lists
+     * them), since Ask is its own line under the choices. [saveSpace] swaps each pack for its no-pictures flavour where the catalog has one (Neal, 2026-10-28: pictures are
      * the default, no-pictures the space-saving fallback).
      */
     fun startChoices(
@@ -110,13 +117,17 @@ object OnboardingModel {
         appLanguage: String = ENGLISH,
     ): List<StartChoice> {
         val blurbs = mapOf(
+            STARTER to UiText.Res(R.string.onboarding_blurb_starter),
             EFFICIENT to UiText.Res(R.string.onboarding_blurb_efficient),
             COMPREHENSIVE to UiText.Res(R.string.onboarding_blurb_comprehensive),
         )
         // The main knowledge language's tier presets (Plan L3): `efficient-es` is still the Efficient choice.
-        return catalog.tierPresets(language).mapNotNull { preset ->
-            val id = Catalog.TIER_PRESETS.firstOrNull { preset.id == it || preset.id.startsWith("$it-") } ?: return@mapNotNull null
-            val items = preset.items.mapNotNull { catalog.item(it) }.map { if (saveSpace) withoutPictures(catalog, it) else it }.distinctBy { it.id }
+        val code = Languages.normalise(language)
+        val starterId = if (code == ENGLISH) STARTER else "$STARTER-$code"
+        val starter = catalog.presets.firstOrNull { it.id == starterId && it.language == code }
+        return (listOfNotNull(starter) + catalog.tierPresets(language)).mapNotNull { preset ->
+            val id = (listOf(STARTER) + Catalog.TIER_PRESETS).firstOrNull { preset.id == it || preset.id.startsWith("$it-") } ?: return@mapNotNull null
+            val items = preset.items.mapNotNull { catalog.item(it) }.filter { it !is ModelEntry }.map { if (saveSpace) withoutPictures(catalog, it) else it }.distinctBy { it.id }
             StartChoice(id, preset.title(appLanguage), blurbs.getValue(id), lines(items, installed))
         }
     }

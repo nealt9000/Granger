@@ -733,8 +733,9 @@ class EbookReaderViewModel(
 
     /**
      * Starts the voice at the sentence holding [visibleText] (the page's first words) in [from]'s chapter; without
-     * the words, at the first element at [from] (a chapter's start), else where the book is open. The book's saved
-     * place wins when the page is at or before it ([listenStart]).
+     * the words, at the first element at [from] (a chapter's start), else where the book is open; past the front
+     * matter when that is where it is ([BookReadSource.pastFrontMatter]). The book's saved place wins when the page is
+     * at or before it ([listenStart]).
      */
     fun readAloud(from: Locator?, visibleText: String? = null) {
         val hub = player ?: return
@@ -744,7 +745,9 @@ class EbookReaderViewModel(
             val address = visibleText?.let { words -> page?.let { src.addressAtText(it, words) } }
                 ?: src.addressAt(page)
                 ?: return@launch
-            val start = listenStart(src, address, runCatching { savedPlace(src.key) }.getOrNull())
+            // On the cover or the contents list, the voice starts at the first page of reading.
+            val visible = runCatching { src.pastFrontMatter(address) }.getOrDefault(address)
+            val start = listenStart(src, visible, runCatching { savedPlace(src.key) }.getOrNull())
             following = true
             hub.readAloud(src, start)
         }

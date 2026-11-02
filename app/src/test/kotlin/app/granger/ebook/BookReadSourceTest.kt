@@ -67,6 +67,30 @@ class BookReadSourceTest {
         assertThat(s.sectionTitle(all[1].address)).isEqualTo("c002.xhtml")
     }
 
+    @Test fun listenSkipsTheCoverAndContentsListButNotAPreface() = runTest {
+        // A Classics book as the builder makes it: a cover outside the contents, then "Front matter" (the chapter list).
+        val book = testPublicationWithContent(
+            title = "Pride and Prejudice",
+            chapters = linkedMapOf(
+                "cover.xhtml" to "<p>Cover.</p>",
+                "c001.xhtml" to "<p>I., II., III.</p>",
+                "c002.xhtml" to "<h1>Preface</h1><p>Walt Whitman has somewhere a fine distinction.</p>",
+                "c003.xhtml" to "<h1>Chapter I.</h1><p>It is a truth universally acknowledged.</p>",
+            ),
+            toc = listOf("c001.xhtml" to emptyList(), "c002.xhtml" to emptyList(), "c003.xhtml" to emptyList()),
+            tocTitles = mapOf("c001.xhtml" to "Front matter", "c002.xhtml" to "Preface", "c003.xhtml" to "Chapter I."),
+        )
+        val s = BookReadSource(book, "book:granger:pride", "Pride and Prejudice", Dispatchers.Unconfined)
+        assertThat(s.utterances(s.firstAfterFrontMatter(), 1).single().text).isEqualTo("Preface")
+        val contents = s.addressAtHref("c001.xhtml")!!
+        assertThat(s.utterances(s.pastFrontMatter(contents), 1).single().text).isEqualTo("Preface")
+        // Anywhere past the front matter, Listen starts where it is.
+        val chapter = s.addressAtHref("c003.xhtml")!!
+        assertThat(s.pastFrontMatter(chapter)).isEqualTo(chapter)
+        assertThat(BookReadSource.isFrontMatter("List of Illustrations.")).isTrue()
+        assertThat(BookReadSource.isFrontMatter("Preface")).isFalse()
+    }
+
     @Test fun addressAtHrefStartsAChapter() = runTest {
         val at = source.addressAtHref("c002.xhtml")!!
         assertThat(source.utterances(at, 1).single().text).isEqualTo("Act II")

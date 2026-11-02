@@ -437,6 +437,8 @@ fun testPublicationWithContent(
     title: String = "Test Book",
     chapters: Map<String, String>,
     toc: List<Pair<String, List<String>>> = emptyList(),
+    /** Contents titles by href; an entry without one is titled with its href. */
+    tocTitles: Map<String, String> = emptyMap(),
 ): Publication {
     val resources = chapters.mapKeys { Url.fromDecodedPath(it.key)!! }.mapValues { (_, body) ->
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?><html xmlns=\"http://www.w3.org/1999/xhtml\"><head><title>c</title></head><body>$body</body></html>".toByteArray()
@@ -451,7 +453,7 @@ fun testPublicationWithContent(
             metadata = Metadata(localizedTitle = LocalizedString(title)),
             readingOrder = chapters.keys.map { Link(Url.fromDecodedPath(it)!!, mediaType = MediaType.XHTML) },
             tableOfContents = toc.map { (href, children) ->
-                Link(Url(href)!!, title = href, children = children.map { Link(Url(it)!!, title = it) })
+                Link(Url(href)!!, title = tocTitles[href] ?: href, children = children.map { Link(Url(it)!!, title = tocTitles[it] ?: it) })
             },
         ),
         container = container,

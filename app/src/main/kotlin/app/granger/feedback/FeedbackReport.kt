@@ -1,5 +1,7 @@
 package app.granger.feedback
 
+import app.granger.core.library.Book
+import app.granger.core.library.BookOrigin
 import app.granger.formatBytes
 
 /**
@@ -18,6 +20,15 @@ data class FeedbackFacts(
 
 /** The email Send feedback hands to the user's mail app, built from [FeedbackFacts] alone. */
 object FeedbackReport {
+    /**
+     * The books counted on their own: the user's own and the ones got one by one (Classics, archive.org). A book pack's
+     * books are counted with its pack, and the hidden rows behind a pack's PDF or an ebook's original pages not at all
+     * (the Pixel 7 walkthrough: Pride and Prejudice and the knots pack read as "12 books").
+     */
+    fun bookCount(books: List<Book>): Int = books.count { it.origin in OWN_BOOKS }
+
+    private val OWN_BOOKS = setOf(BookOrigin.GRANGER, BookOrigin.IMPORT, BookOrigin.ARCHIVE_ORG)
+
     fun subject(build: BuildFacts) = "Granger feedback · ${build.versionName} (${build.versionCode})"
 
     /** What the sheet lists before the mail app opens, one line each, in the order the email carries them. */

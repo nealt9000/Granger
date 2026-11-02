@@ -35,6 +35,13 @@ class FeedbackTest {
         return CrashReport(file, time, CrashKind.NATIVE, text.lineSequence().first())
     }
 
+    @Test fun aPacksBooksCountWithThePackNotAsBooks() {
+        val pride = app.granger.book("pride")
+        val knots = (1..11).map { app.granger.book("knot$it").copy(origin = app.granger.core.library.BookOrigin.NAUTILUS) }
+        val hidden = app.granger.book("pdf").copy(origin = app.granger.core.library.BookOrigin.PACK)
+        assertThat(FeedbackReport.bookCount(listOf(pride) + knots + hidden)).isEqualTo(1)
+    }
+
     @Test fun theEmailCarriesTheBuildAndCountsOnly() {
         assertThat(FeedbackReport.subject(build)).isEqualTo("Granger feedback · 0.1.850 (850)")
         assertThat(FeedbackReport.included(facts(), withCrashes = true)).containsExactly(
