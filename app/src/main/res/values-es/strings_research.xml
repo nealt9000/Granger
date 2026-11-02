@@ -52,6 +52,7 @@
 
     <string name="research_librarian_no_space">No hay espacio suficiente en %1$s: libera %2$s.</string>
     <string name="research_personal_medical">No puedo responder preguntas sobre tu propia salud. Un médico, enfermero o farmacéutico sí puede. Buscar en su lugar muestra lo que dice tu biblioteca sobre el tema.</string>
+    <string name="research_english_only">Por ahora, Preguntar solo responde en inglés; las preguntas en español llegarán más adelante. Buscar en su lugar muestra lo que tiene tu biblioteca sobre el tema.</string>
     <string name="research_check_crashed">Preguntar está desactivado en este teléfono: Granger se cerró mientras arrancaba el bibliotecario. Si lo cerraste tú, vuelve a intentarlo.</string>
     <string name="research_check_load_failed">Preguntar está desactivado en este teléfono: el bibliotecario no pudo arrancar aquí.</string>
     <string name="research_check_wrong_reply">Preguntar está desactivado en este teléfono: la respuesta de prueba del bibliotecario salió ilegible.</string>

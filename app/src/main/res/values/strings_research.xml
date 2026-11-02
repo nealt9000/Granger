@@ -72,6 +72,7 @@
     <string name="research_librarian_no_space">Not enough space on %1$s: free up %2$s.</string>
     <!-- %1$s is the downloads limit. -->
     <string name="research_personal_medical">I can\'t answer questions about your own health. A doctor, nurse or pharmacist can. Search instead shows what your library says on the subject.</string>
+    <string name="research_english_only">Ask answers in English for now; questions in Spanish come later. Search instead shows what your library has on it.</string>
     <!-- The librarian model failed its first check on this phone, so Ask is hidden. Shown in Ask and in Readiness. -->
     <string name="research_check_crashed">Ask is off on this phone: Granger closed while the librarian was starting. If you closed it yourself, try again.</string>
     <string name="research_check_load_failed">Ask is off on this phone: the librarian couldn\'t start here.</string>

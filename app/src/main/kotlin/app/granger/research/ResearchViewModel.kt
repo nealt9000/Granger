@@ -111,6 +111,11 @@ class ResearchViewModel(
      * screen's words; null says nothing and listens again.
      */
     private val outcomeLine: (TurnUi) -> String? = { null },
+    /**
+     * Whether Ask answers a question in Spanish ([Features.SPANISH_ASK]); when it doesn't, a Spanish-led question
+     * ([ResearchLanguage.main]) is declined at once as English only, with no search, model run or best guess.
+     */
+    private val spanishAsk: Boolean = app.granger.Features.SPANISH_ASK,
 ) : ViewModel() {
     /** The answer the voice is on ([turnId]) and whether it is speaking; null when the voice is elsewhere or has run out. */
     data class Reading(val turnId: Long, val playing: Boolean)
@@ -143,6 +148,8 @@ class ResearchViewModel(
         val guessShown: Boolean = false,
         /** Declined as one person's own health question (no search ran): the screen points to a professional. */
         val personalMedical: Boolean = false,
+        /** Declined because it's in Spanish and Spanish Ask is off ([Features.SPANISH_ASK]); no search ran. */
+        val englishOnly: Boolean = false,
         /** The last Best guess for this turn failed (the model won't load); shown once, not stored. */
         val guessFailed: Boolean = false,
         /** The speaker button's state for this turn (Plan V2): read, pause or resume. */
@@ -411,7 +418,9 @@ class ResearchViewModel(
     private suspend fun guess(chatId: Long, turnId: Long) {
         val turns = chats.turns(chatId).first()
         val at = turns.indexOfFirst { it.id == turnId }
-        val turn = turns.getOrNull(at)?.takeIf { it.outcome == TurnOutcome.DECLINED && it.guess.isBlank() && !it.medical } ?: return
+        val turn = turns.getOrNull(at)?.takeIf {
+            it.outcome == TurnOutcome.DECLINED && it.guess.isBlank() && !it.medical && !isEnglishOnly(it.question)
+        } ?: return
         live.value = Live(turnId, null, null, guessing = true, waking = wakingLine())
         var settled = false
         // The guess goes to the model alone: no passages, and no earlier answer or guess, only the question before it.
@@ -620,6 +629,15 @@ class ResearchViewModel(
                 spokenAnswer = ""
                 live.value = Live(turnId, null, null, waking = wakingLine())
             }
+            if (!spanishAsk && ResearchLanguage.main(ask.question) == ResearchLanguage.ES) {
+                withContext(NonCancellable) {
+                    chats.finishTurn(checkNotNull(turnId), TurnOutcome.DECLINED, "", false, emptyList(), kept, emptyList())
+                    settled = true
+                    lastSettled = turnId
+                    sayOutcome(chatId, checkNotNull(turnId), ask.question, Outcome.Declined(false, emptyList()))
+                }
+                return
+            }
             pipeline.run(request) { stopRequested }.flowOn(cpu).collect { event ->
                 when (event) {
                     is ResearchEvent.Reaction -> {
@@ -793,6 +811,7 @@ class ResearchViewModel(
     private fun ChatTurn.toUi(live: Live?, guessFailedId: Long?, shown: Set<Long>, reading: Reading?): TurnUi {
         val running = live?.takeIf { it.turnId == id }
         val hasGuess = guess.isNotBlank() || running?.guessing == true
+        val englishOnly = outcome == TurnOutcome.DECLINED && isEnglishOnly(question)
         return TurnUi(
             voice = when {
                 reading?.turnId != id -> VoiceButton.IDLE
@@ -808,16 +827,20 @@ class ResearchViewModel(
             waking = running?.waking,
             medical = medical || running?.medical == true,
             guessing = running?.guessing == true,
-            offersGuess = outcome == TurnOutcome.DECLINED && !medical && !(id in shown && hasGuess) &&
+            offersGuess = outcome == TurnOutcome.DECLINED && !medical && !englishOnly && !(id in shown && hasGuess) &&
                 (hasGuess || live == null),
             // Opened and there is something to show; a failed or empty guess brings the button back.
             guessShown = id in shown && hasGuess,
             // The pipeline's own rule (ResearchPipeline: PersonalMedical with the medical flag, no selection).
             personalMedical = outcome == TurnOutcome.DECLINED && medical && quote() == null &&
                 PersonalMedical.matches(question, medicalSignal = true),
+            englishOnly = englishOnly,
             guessFailed = guessFailedId == id && live == null,
         )
     }
+
+    /** A question Ask declines unasked because it's in Spanish and Spanish Ask is off. */
+    private fun isEnglishOnly(question: String) = !spanishAsk && ResearchLanguage.main(question) == ResearchLanguage.ES
 
     /** The selection this turn was asked about, kept as its first shown passage. */
     private fun ChatTurn.quote(): Passage? = shown.firstOrNull()?.takeIf { it.kind == SourceKind.SELECTION }

@@ -83,11 +83,13 @@ class ResearchViewModelTest {
         dense: app.granger.core.research.DenseFinder? = null,
         voice: app.granger.voiceinput.VoiceInput? = null,
         outcomeLine: (ResearchViewModel.TurnUi) -> String? = { null },
+        spanishAsk: Boolean = true,
     ): ResearchViewModel {
         return ResearchViewModel(
             chatId, quote, chats, ResearchPipeline(finder, models, dense = dense), manager, sessions, library, bookshelf,
             MediaIndex(mediaLibrary, backgroundScope, main.dispatcher), backgroundScope, savedState, cpu,
             player = player, speakAnswers = MutableStateFlow(speakAnswers), now = { 42L }, voice = voice, outcomeLine = outcomeLine,
+            spanishAsk = spanishAsk,
         )
     }
 
@@ -627,6 +629,35 @@ class ResearchViewModelTest {
         assertThat(ui.turn.outcome).isEqualTo(TurnOutcome.DECLINED)
         assertThat(ui.personalMedical).isTrue()
         assertThat(ui.offersGuess).isFalse()
+    }
+
+    @Test fun withSpanishAskOffASpanishQuestionIsDeclinedAsEnglishOnly() = runTest(main.dispatcher) {
+        val vm = vm(spanishAsk = false)
+        vm.ask("¿Cómo se purifica el agua hirviéndola?")
+        testScheduler.advanceUntilIdle()
+        val ui = vm.state.value.turns.single()
+        assertThat(ui.turn.outcome).isEqualTo(TurnOutcome.DECLINED)
+        assertThat(ui.englishOnly).isTrue()
+        assertThat(ui.offersGuess).isFalse()
+        // No search, no model: nothing loaded, no guess written behind the decline.
+        assertThat(models.loads).isEqualTo(0)
+        assertThat(ui.turn.guess).isEmpty()
+        assertThat(vm.state.value.running).isFalse()
+    }
+
+    @Test fun withSpanishAskOffAnEnglishQuestionStillRuns() = runTest(main.dispatcher) {
+        val vm = vm(spanishAsk = false)
+        declined(vm, "Who founded Los Angeles?")
+        val ui = vm.state.value.turns.single()
+        assertThat(ui.englishOnly).isFalse()
+        assertThat(models.loads).isAtLeast(1)
+    }
+
+    @Test fun withSpanishAskOnASpanishQuestionRuns() = runTest(main.dispatcher) {
+        val vm = vm()
+        declined(vm, "¿Cómo se purifica el agua hirviéndola?")
+        assertThat(vm.state.value.turns.single().englishOnly).isFalse()
+        assertThat(models.loads).isAtLeast(1)
     }
 
     @Test fun aGeneralMedicalDeclineIsNotPersonal() = runTest(main.dispatcher) {
