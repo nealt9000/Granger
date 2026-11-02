@@ -26,6 +26,13 @@ class YearFactsTest {
 
     private fun block(id: String): String? = items.getValue(id).let { (q, k, p) -> YearFacts.block(q, k, p) }
 
+    // R2 Task 3: the block ends with the comparison the question asks, in words.
+    @Test fun theBlockSaysItsConclusion() {
+        assertThat(block("multi-step-004")).contains("So, for the question: Neither is older: Charles Darwin and Abraham Lincoln were born on the same day, 12 February 1809 [3][4].")
+        assertThat(block("multi-step-011")).contains("So, for the question: Yes, as far as the dates go: in 1492 (Christopher Columbus), Niccolò Machiavelli was alive [2][3].")
+        assertThat(block("multi-step-002")).contains("So, for the question: No: in 1818 (Frankenstein), Jane Austen had already died (18 July 1817) [3][4].")
+    }
+
     @Test fun anAgeAtAPublication() {
         assertThat(block("multi-step-001")).contains("In 1818 (Frankenstein), Mary Shelley was alive, aged 20 or 21")
     }

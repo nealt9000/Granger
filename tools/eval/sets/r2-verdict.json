@@ -1,0 +1,11 @@
+{
+  "stage": "answer",
+  "base": "r2-t3-base",
+  "ids": [
+    "multi-step-002",
+    "multi-step-004",
+    "multi-step-011",
+    "multi-step-020"
+  ],
+  "about": "Plan R2 Task 3: the year questions whose dates block now ends with its verdict (r5-t7-all's passages)"
+}

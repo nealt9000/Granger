@@ -231,7 +231,67 @@ object YearFacts {
             things.forEach { appendLine("- ${describe(it)}") }
             appendLine("Worked out from those dates:")
             worked.forEach { appendLine("- $it") }
+            if (languages.firstOrNull() != ResearchLanguage.ES) verdict(question, things)?.let { appendLine("So, for the question: $it") }
         }.trimEnd()
+    }
+
+    private val OLDER = Regex("\\b(older|younger|oldest|youngest|born first|born earlier|born later)\\b", RegexOption.IGNORE_CASE)
+    private val DIED_FIRST = Regex("\\b(died|die) (first|earlier|sooner)\\b", RegexOption.IGNORE_CASE)
+    private val LIVED_LONGER = Regex("\\blived (longer|longest)\\b", RegexOption.IGNORE_CASE)
+    private val WHETHER = Regex("^\\s*(could|did|was|were|would)\\b", RegexOption.IGNORE_CASE)
+
+    /**
+     * The worked lines' conclusion for the comparison the question asks, in words (R2 Task 3: E2B had "born on the same
+     * day" and still said Lincoln was older; had "Jane Austen had died" and still declined "could she have read
+     * Frankenstein"). Only the comparison words the block already treats as cues; no other reading of the question.
+     * English only; null when the question asks none of these or the dates can't settle it.
+     */
+    internal fun verdict(question: String, things: List<Thing>): String? {
+        val people = things.filter { it.born != null && it.event == null }
+        if (people.size == 2) {
+            val (a, b) = people
+            when {
+                OLDER.containsMatchIn(question) -> return olderOf(a, b)
+                DIED_FIRST.containsMatchIn(question) && a.died != null && b.died != null -> {
+                    val o = order(a.died, b.died)
+                    if (o == 0 || a.died.year == b.died.year && !(a.died.exact && b.died.exact)) return null
+                    val (first, second) = if (o < 0) a to b else b to a
+                    return "${first.label} died first, before ${second.label} [${cite(a.lifeAt, b.lifeAt)}]."
+                }
+                LIVED_LONGER.containsMatchIn(question) && a.died != null && b.died != null -> {
+                    val ageA = years(a.born!!, a.died).n
+                    val ageB = years(b.born!!, b.died).n
+                    if (ageA == ageB) return null
+                    val (longer, shorter) = if (ageA > ageB) a to b else b to a
+                    return "${longer.label} lived longer than ${shorter.label} [${cite(a.lifeAt, b.lifeAt)}]."
+                }
+            }
+        }
+        if (WHETHER.containsMatchIn(question)) {
+            val person = things.firstOrNull { it.born != null && it.event == null } ?: return null
+            val at = things.firstOrNull { it.event != null && it !== person } ?: return null
+            val c = cite(person.lifeAt, at.eventAt)
+            val then = "${on(at.event!!).lowercase()} (${at.label})"
+            return when {
+                order(at.event, person.born!!) < 0 -> "No: $then, ${person.label} was not yet born [$c]."
+                person.died != null && order(at.event, person.died) > 0 ->
+                    "No: $then, ${person.label} had already died (${person.died}) [$c]."
+                else -> "Yes, as far as the dates go: $then, ${person.label} was alive [$c]."
+            }
+        }
+        return null
+    }
+
+    private fun olderOf(a: Thing, b: Thing): String? {
+        val x = a.born!!
+        val y = b.born!!
+        val c = cite(a.lifeAt, b.lifeAt)
+        return when {
+            x == y && x.exact -> "Neither is older: ${a.label} and ${b.label} were born on the same day, $x [$c]."
+            x.year == y.year && !(x.exact && y.exact) -> null
+            order(x, y) < 0 -> "${a.label} was older than ${b.label} [$c]."
+            else -> "${b.label} was older than ${a.label} [$c]."
+        }
     }
 
     /** The named things with dates, in the question's order, at most three. */

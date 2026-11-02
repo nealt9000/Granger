@@ -95,10 +95,18 @@ Deterministic declines, in `DeclineCheck` (`:core:research`), wired into `Resear
 
 `YearFacts` gives E2B both dates; E2B still drew the wrong conclusion twice (multi-step-002, -004).
 
-- [ ] The block ends with the comparison in words ("So: Austen died a year before Frankenstein was published"; "So:
-  born the same day"). Unit tests on the recorded passages.
+- [x] The block ends with "So, for the question: …" for the comparison the question asks: who was older (or neither,
+  same day), who died first, who lived longer, and could / did / was X (alive at the event, not yet born, or had died).
+  English only. **On R5 decision 2 ("no question parsing"):** this reads only the comparison words the block already
+  treats as cues (older, younger, died first, lived longer, and a leading could / did / was), no other parsing; Neal to
+  confirm it fits the rule.
+- [x] Rebuilt from `r5-t7-all`'s recorded passages, every block matches what was recorded, and 4 prompts gain a verdict:
+  002 ("No: … Jane Austen had already died"), 004 ("Neither is older: … the same day"), 011 and 020 (both "Yes, as far
+  as the dates go", both already grounded).
+- [ ] Phone replay: `answerers.py run r2-t3-base r2-t3 --set r2-verdict --model <E2B>` (base `r2-t3-base` is r5-t7-all
+  with those 4 prompts; set `sets/r2-verdict.json`). Gate: 002 and 004 grounded, 011 and 020 still grounded. Waits for
+  the phone: the L4 Spanish medical run had it on 2026-11-02 evening.
 - [ ] A reply that contradicts the block's verdict is flagged in the eval report (not hidden in the app this round).
-- [ ] Phone replay of the multi-step prompts; gate: no multi-step loss.
 
 ## Task 4: ranking
 
