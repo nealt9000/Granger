@@ -1065,6 +1065,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         SearchViewModel(
                             container.search, container.sessions, query,
                             media = if (Features.PLAYER) MediaSearch { container.mediaIndex.searchForGroups(it) } else MediaSearch { MediaResults() },
+                            voice = container.voiceInput,
+                            spokenNames = container.spokenTitles.names,
                         )
                     },
                     onOpenTab = ::showTab,
@@ -1076,6 +1078,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onOpenAudiobook = { nav.navigate(AudiobookRoute(it)) },
                     onPlaySong = { track -> scope.launch { songs.play(track) } },
                     onBack = { nav.popBackStack() },
+                    voicePrefs = container.voiceInput.prefs,
                 )
             }
             composable<ResearchRoute> { backStackEntry ->
@@ -1089,8 +1092,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             savedState = createSavedStateHandle(),
                             player = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub else null,
                             speakAnswers = { container.voicePrefs.speakAnswers.value },
+                            voice = container.voiceInput,
                         )
                     },
+                    voicePrefs = container.voiceInput.prefs,
                     focusInput = route.quote != null,
                     onOpenCitation = { target ->
                         // Pushed over the chat (Research isn't a reader), so Back returns to it.
@@ -1216,6 +1221,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     ),
                     onFeedback = if (crashLog != null) ({ feedbackOpen = true }) else null,
                     crashReports = crashReports,
+                    voiceInput = container.voiceInput,
                 )
             }
             composable<LanguageRoute> {

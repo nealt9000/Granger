@@ -109,4 +109,6 @@
         <item quantity="one">%1$s and %2$d more have no text search, so only their titles were searched.</item>
         <item quantity="other">%1$s and %2$d more have no text search, so only their titles were searched.</item>
     </plurals>
+    <!-- After a spoken search (Plan A1): the library name the words most likely meant. -->
+    <string name="search_did_you_mean">Did you mean %1$s?</string>
 </resources>

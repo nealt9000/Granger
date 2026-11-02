@@ -118,4 +118,5 @@
         <item quantity="many">%1$s y %2$d más no tienen búsqueda de texto, así que solo se buscó en sus títulos.</item>
         <item quantity="other">%1$s y %2$d más no tienen búsqueda de texto, así que solo se buscó en sus títulos.</item>
     </plurals>
+    <string name="search_did_you_mean">¿Querías decir %1$s?</string>
 </resources>

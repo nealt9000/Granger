@@ -24,6 +24,8 @@ import app.granger.core.player.PlayerUi
 import app.granger.core.speech.StreamingTextReadSource
 import app.granger.core.speech.TextReadSource
 import app.granger.player.VoiceButton
+import app.granger.voiceinput.Dictation
+import app.granger.voiceinput.VoiceInput
 import kotlinx.coroutines.flow.map
 import app.granger.core.research.FailReason
 import app.granger.core.research.Keywords
@@ -96,6 +98,8 @@ class ResearchViewModel(
      * plain progress labels and declines instead (Plan L2; Spanish owl lines wait for the translation review).
      */
     private val owlSpeaks: () -> Boolean = { java.util.Locale.getDefault().language == "en" },
+    /** Voice input (Plan A1); null leaves the ask box without a mic. */
+    private val voice: VoiceInput? = null,
 ) : ViewModel() {
     /** The answer the voice is on ([turnId]) and whether it is speaking; null when the voice is elsewhere or has run out. */
     data class Reading(val turnId: Long, val playing: Boolean)
@@ -240,6 +244,33 @@ class ResearchViewModel(
     }
 
     /** Asks what is in [input]; a blank input asks [EMPTY_QUOTE_QUESTION] about the quote, or does nothing without one. */
+    /** Speaking a question (Plan A1): null when there's no mic. */
+    val dictation: Dictation? = voice?.let { Dictation(it, viewModelScope) }
+
+    /**
+     * Whether the ask box shows its mic: the phone can listen in the app's language, and Ask answers in it. Ask is
+     * English-only until Spanish Ask is built (Neal, 2026-11-02), so a Spanish app has a mic in Search but not here.
+     */
+    val micShown: StateFlow<Boolean> = voice?.status
+        ?.map { it.micShown && it.tag?.substringBefore('-') in ASK_VOICE_LANGUAGES }
+        ?.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+        ?: MutableStateFlow(false)
+
+    /**
+     * The mic: the words go into the box after anything already typed. The question then waits for Send, or sends
+     * itself with "Ask as soon as I stop talking" on (Settings → Voice input).
+     */
+    fun speak() {
+        val dictation = dictation ?: return
+        if (live.value != null) return
+        val typed = input.trimEnd()
+        val prefix = if (typed.isEmpty()) "" else "$typed "
+        dictation.start(onText = { input = prefix + it }) { heard ->
+            input = prefix + heard
+            if (voice?.prefs?.askWhenDone?.value == true && input.isNotBlank()) send()
+        }
+    }
+
     fun send() {
         if (live.value != null) return
         val quote = pendingQuote.value
@@ -636,6 +667,9 @@ class ResearchViewModel(
     private fun ChatTurn.quote(): Passage? = shown.firstOrNull()?.takeIf { it.kind == SourceKind.SELECTION }
 
     companion object {
+        /** The app languages Ask answers in, so the ask box's mic shows (Plan A1): English until Spanish Ask is built. */
+        val ASK_VOICE_LANGUAGES = setOf("en")
+
         /** The read-source key of a spoken answer (Plan V2), and the turn it names. */
         fun answerKey(turnId: Long) = "text:answer:$turnId"
         fun answerTurnId(key: String): Long? = key.removePrefix("text:answer:").takeIf { it != key }?.toLongOrNull()

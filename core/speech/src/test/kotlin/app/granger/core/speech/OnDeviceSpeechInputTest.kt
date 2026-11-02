@@ -219,6 +219,18 @@ class OnDeviceSpeechInputTest {
     }
 
     @Test
+    fun forgetAsksThePhoneAgain() = runTest {
+        val backend = FakeBackend()
+        val speech = input(backend)
+        speech.availability("en-GB")
+        backend.languages = RecognizerLanguages(listOf("en-US", "en-GB"), emptyList())
+        assertThat(speech.availability("en-GB")).isEqualTo(Availability.DOWNLOADABLE)
+        speech.forget()
+        assertThat(speech.availability("en-GB")).isEqualTo(Availability.READY)
+        assertThat(backend.supportCalls).isEqualTo(2)
+    }
+
+    @Test
     fun aPhoneWithoutOnDeviceRecognitionHasNothing() = runTest {
         val speech = input(FakeBackend(available = false))
         assertThat(speech.languages()).isNull()

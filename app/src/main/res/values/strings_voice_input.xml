@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Voice input (Plan A1): the mic in the ask box and Search. -->
+    <string name="voice_input_speak">Speak</string>
+    <string name="voice_input_stop">Stop listening</string>
+    <string name="voice_input_listening">Listening…</string>
+    <string name="voice_input_no_match">Didn\'t catch that</string>
+    <string name="voice_input_no_permission">Granger needs the microphone to hear you</string>
+    <string name="voice_input_unavailable">Voice input isn\'t available in this language</string>
+    <string name="voice_input_failed">Voice input isn\'t working right now. Try again.</string>
+    <string name="voice_input_permission_title">Use the microphone?</string>
+    <string name="voice_input_permission_why">So you can speak instead of typing. Your speech is turned into text on this phone, and nothing is recorded or sent anywhere.</string>
+    <string name="voice_input_permission_continue">Continue</string>
+    <string name="voice_input_permission_settings">The microphone is off for Granger. To speak instead of typing, turn it on in the phone\'s settings, under Permissions.</string>
+    <string name="voice_input_open_settings">Open settings</string>
+    <string name="voice_input_not_now">Not now</string>
+    <!-- Settings → Voice input (Plan A1). -->
+    <string name="voice_input_settings_section">Voice input</string>
+    <string name="voice_input_settings_listens_in">The mic listens in</string>
+    <string name="voice_input_settings_no_language">Not available in Granger\'s language on this phone</string>
+    <string name="voice_input_settings_needs_download">%1$s (download it below to use the mic)</string>
+    <string name="voice_input_settings_english_us">American English</string>
+    <string name="voice_input_settings_english_uk">British English</string>
+    <string name="voice_input_settings_download">Download %1$s</string>
+    <string name="voice_input_settings_download_summary">The phone\'s own speech recognition for this language</string>
+    <string name="voice_input_settings_download_button">Download</string>
+    <string name="voice_input_settings_downloading">Downloading %1$s…</string>
+    <string name="voice_input_settings_scheduled">The phone will finish this download later, on Wi-Fi</string>
+    <string name="voice_input_settings_download_failed">The download didn\'t work. Try again.</string>
+    <string name="voice_input_settings_ask_when_done">Ask as soon as I stop talking</string>
+    <string name="voice_input_settings_ask_when_done_summary">Otherwise the question waits in the box for you to check it.</string>
+    <string name="voice_input_settings_privacy">Speech is turned into text on this phone. Nothing is recorded, kept or sent.</string>
+</resources>

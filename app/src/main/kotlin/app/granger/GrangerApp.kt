@@ -599,6 +599,17 @@ class AppContainer(context: Context) {
     val appearancePrefs: AppearancePrefs = SharedAppearancePrefs(context)
     val appLanguages: AppLanguages = AppLanguages.create(context, onLegacyChange = { (context as? GrangerApp)?.relocalize() })
 
+    /** Voice input (Plan A1): the phone's on-device recognizer, in the app's language; read-aloud stops before a take. */
+    val voiceInput by lazy {
+        app.granger.voiceinput.VoiceInput(
+            speech = app.granger.core.speech.OnDeviceSpeechInput(app.granger.core.speech.AndroidRecognizerBackend(context)),
+            prefs = app.granger.voiceinput.SharedVoiceInputPrefs(context),
+            appLanguage = appLanguages.code,
+            stopReadAloud = { playerHub.stopVoice() },
+            scope = appScope,
+        )
+    }
+
     /** The languages of the user's library (Plan L3): the app language's by default, when the catalog has tiers for it. */
     val knowledgeLanguages: KnowledgeLanguages = KnowledgeLanguages.create(
         context, appLanguages.code, catalog.state.map { it.catalog?.languages.orEmpty() }.distinctUntilChanged(),

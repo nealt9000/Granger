@@ -9,6 +9,9 @@ import app.granger.feedback.AskReport
 import app.granger.feedback.BuildFacts
 import app.granger.feedback.FeedbackMail
 import app.granger.feedback.ReportSheet
+import app.granger.voiceinput.Dictation
+import app.granger.voiceinput.MicButton
+import app.granger.voiceinput.VoiceInputPrefs
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -213,6 +216,8 @@ fun ResearchScreen(
     onOpenChat: (Long) -> Unit,
     onNewChat: () -> Unit,
     onBack: () -> Unit,
+    /** Voice input's settings (Plan A1), for the mic's permission prompt; null hides the mic. */
+    voicePrefs: VoiceInputPrefs? = null,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
@@ -406,6 +411,7 @@ fun ResearchScreen(
                     running = state.running,
                     canSend = viewModel.input.isNotBlank() || state.quote != null,
                     focus = focusInput,
+                    voicePrefs = voicePrefs,
                 )
             }
         },
@@ -451,7 +457,7 @@ fun ResearchScreen(
 
 /** The question field, with Send, or Stop while a turn runs. */
 @Composable
-private fun QuestionField(viewModel: ResearchViewModel, enabled: Boolean, running: Boolean, canSend: Boolean, focus: Boolean) {
+private fun QuestionField(viewModel: ResearchViewModel, enabled: Boolean, running: Boolean, canSend: Boolean, focus: Boolean, voicePrefs: VoiceInputPrefs?) {
     val requester = remember { FocusRequester() }
     // Once per chat, not again after rotation or Back.
     var focused by rememberSaveable { mutableStateOf(false) }
@@ -475,6 +481,19 @@ private fun QuestionField(viewModel: ResearchViewModel, enabled: Boolean, runnin
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
             keyboardActions = KeyboardActions(onSend = { if (!running && canSend) viewModel.send() }),
         )
+        // Voice input (Plan A1): beside Send, hidden while an answer is running.
+        val dictation = viewModel.dictation
+        val micShown by viewModel.micShown.collectAsStateWithLifecycle()
+        val dictationState = dictation?.state?.collectAsStateWithLifecycle()?.value
+        if (!running && micShown && dictation != null && voicePrefs != null) {
+            MicButton(
+                listening = dictationState is Dictation.State.Listening,
+                prefs = voicePrefs,
+                onStart = viewModel::speak,
+                onStop = dictation::stop,
+                enabled = enabled,
+            )
+        }
         if (running) {
             TextButton(onClick = viewModel::stop) { Text(stringResource(R.string.common_stop)) }
         } else {
