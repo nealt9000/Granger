@@ -36,6 +36,7 @@ abstract class LibraryDatabase : RoomDatabase() {
     abstract fun mediaDao(): MediaDao
     abstract fun playbackDao(): PlaybackDao
     abstract fun homeDao(): HomeDao
+    abstract fun libraryNameDao(): LibraryNameDao
 
     companion object {
         /** Adds media types, collections, placements, reading tabs, history and recent searches. */
