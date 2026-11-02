@@ -977,7 +977,7 @@ class PlayerEngineTest {
     /**
      * The chapter's title replaces the item's metadata in place, mid-file and while playing: the item isn't
      * re-prepared (the state stays READY, no discontinuity, the position runs on), so no gap. The chapter check runs
-     * on the engine's 1 s tick, so the boundary is early (0.5 s) and the run long enough for a tick to cross it.
+     * on the engine's 1 s tick, so the boundary is early (0.5 s) and the test waits for the title itself.
      */
     @Test fun chapterChangeUpdatesTheTitleWithoutRepreparing() {
         val id = "audiobook:phone:mid"
@@ -1002,14 +1002,16 @@ class PlayerEngineTest {
             }
             override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) { titles += mediaMetadata.title.toString() }
         })
-        run(engine.player).untilPosition(0, 2_500)
+        // Wait for the title, not a position: under load the playback thread can push the fake clock past a position
+        // before the main looper runs the queued tick (it failed 2 in 10 that way, 2026-11-02). 30 s of real time, not
+        // the helper's 10, for a loaded machine.
+        runMainLooperUntil({ titles.contains("Middle") }, 30_000L, androidx.media3.common.util.Clock.DEFAULT)
         assertThat(engine.player.currentMediaItem!!.mediaMetadata.title.toString()).isEqualTo("Middle")
         assertThat(engine.player.mediaMetadata.title.toString()).isEqualTo("Middle")
-        assertThat(titles).contains("Middle")
         assertThat(states).isEmpty()                       // never left READY: not re-prepared
         assertThat(discontinuities).isEmpty()               // the position ran on
         assertThat(engine.player.playbackState).isEqualTo(Player.STATE_READY)
-        assertThat(engine.player.currentPosition).isAtLeast(2_480L)
+        assertThat(engine.player.currentPosition).isIn(com.google.common.collect.Range.closedOpen(500L, 3_000L))
         assertThat(engine.player.mediaItemCount).isEqualTo(1)
     }
 
