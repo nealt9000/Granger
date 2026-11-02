@@ -65,6 +65,20 @@ class CatalogRepositoryTest {
         assertThat(File(cacheDir, "catalog.json").readBytes()).isEqualTo(goodBytes)
     }
 
+    @Test fun aSignatureCachedFromBeforeAPublishIsAskedForAgainPastTheCache() = test {
+        serve(catalogJson())
+        val repo = repo()
+        repo.refresh()
+        // Just published: the host's cache still has the old signature beside the new catalog.
+        val next = catalogJson(packTitle = "WikiMed 2")
+        serve(next, sig = TestKeys.sign(catalogJson()))
+        http.routes["$url?fresh=42"] = next
+        http.routes["$url.sig?fresh=42"] = TestKeys.sign(next)
+        repo.refresh()
+        assertThat(repo.state.value.error).isNull()
+        assertThat(repo.state.value.catalog!!.packs.single().title).isEqualTo("WikiMed 2")
+    }
+
     @Test fun offlineOrMissingSignatureKeepsTheLastGoodCatalog() = test {
         serve(catalogJson())
         val repo = repo()
