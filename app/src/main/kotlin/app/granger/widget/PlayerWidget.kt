@@ -1,5 +1,7 @@
 package app.granger.widget
 
+import app.granger.player.PlayerViewModel
+import app.granger.core.player.PlayerSettingsKeys
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -169,7 +171,7 @@ fun PlayerWidgetContent(model: WidgetModel, cover: ImageProvider?) {
                     val back = model.secondary == Secondary.BACK
                     Button(
                         if (back) R.drawable.ic_replay else R.drawable.ic_skip_next,
-                        if (back) "Back" else "Next track",
+                        if (back) "Back ${skipBackSeconds(context)} seconds" else "Next track",
                         actionRunCallback<SecondaryAction>(), PlayerWidgetTags.SECONDARY,
                     )
                 }
@@ -267,3 +269,8 @@ private fun scaleDown(bitmap: Bitmap, maxPx: Int): Bitmap {
     val h = (bitmap.height * scale).toInt().coerceAtLeast(1)
     return Bitmap.createScaledBitmap(bitmap, w, h, true).also { if (it !== bitmap) bitmap.recycle() }
 }
+
+/** The user's skip-back setting, so the widget's Back says what it does ("Back 15 seconds"), as the player screen does. */
+private fun skipBackSeconds(context: Context): Int =
+    context.getSharedPreferences(PlayerSettingsKeys.PREFS, Context.MODE_PRIVATE)
+        .getInt(PlayerSettingsKeys.SKIP_BACK_S, PlayerViewModel.DEFAULT_SKIP_S)

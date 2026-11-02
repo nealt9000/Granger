@@ -1,5 +1,7 @@
 package app.granger.core.player
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import android.content.SharedPreferences
 import android.net.Uri
 import android.util.Log
@@ -234,6 +236,11 @@ class PlayerEngine(
     }
 
     private var errorRun = 0              // playback errors since an item last got ready: stops a queue of broken files
+
+    private val _notices = MutableSharedFlow<String>(extraBufferCapacity = 4)
+
+    /** Lines for the user when playback gives up on something (clean-up list: it used to stop without a word). */
+    override val notices: Flow<String> = _notices
     private var pausedAt = 0L
     private var pausedForFocus = false
     private var duck = 1f
@@ -315,6 +322,13 @@ class PlayerEngine(
                 player.prepare()
             } else {
                 player.pause()
+                _notices.tryEmit(
+                    when (mode) {
+                        Mode.MUSIC -> if (player.mediaItemCount > 1) NOTICE_QUEUE_FAILED else NOTICE_SONG_FAILED
+                        Mode.BOOK -> NOTICE_BOOK_FAILED
+                        else -> NOTICE_SONG_FAILED
+                    },
+                )
             }
         }
 
@@ -1200,6 +1214,7 @@ class PlayerEngine(
         val fileIndex = startTrack?.let { m.files.indexOf(it) }?.takeIf { it >= 0 }
         // A saved row whose file can't be found: kept as it is until the user picks a place.
         restoreUnresolved = fileIndex == null && state != null
+        if (restoreUnresolved) _notices.tryEmit(NOTICE_PLACE_LOST)
         val position = when {
             fileIndex == null -> 0L
             restart -> first.positionMs
@@ -1703,6 +1718,10 @@ class PlayerEngine(
     fun setScreenState(state: () -> String) { screenState = state }
 
     private companion object {
+        const val NOTICE_QUEUE_FAILED = "Couldn't play any of these songs. Their files may be missing or damaged."
+        const val NOTICE_SONG_FAILED = "Couldn't play this. The file may be missing or damaged."
+        const val NOTICE_BOOK_FAILED = "Couldn't play this chapter. Its file may be missing or damaged: Readiness can check it."
+        const val NOTICE_PLACE_LOST = "Couldn't find your place in this book, so it starts at the beginning. Pick a chapter to go on."
         const val TAG = "PlayerEngine"
         const val VOICE_TAG = "GrangerVoice"
         const val FOCUS_TAG = FocusPolicy.TAG

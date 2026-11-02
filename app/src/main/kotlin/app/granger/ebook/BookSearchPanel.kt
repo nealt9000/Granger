@@ -1,5 +1,8 @@
 package app.granger.ebook
 
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -53,7 +56,8 @@ fun BookSearchPanel(
     Box(Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f)).clickable(onClick = onDismiss))
         Surface(
-            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().width(320.dp),
+            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight()
+                .width(320.dp + SidePanelInsets.asPaddingValues().calculateEndPadding(LocalLayoutDirection.current)),
             color = MaterialTheme.colorScheme.surface,
         ) {
             Column(Modifier.windowInsetsPadding(SidePanelInsets)) {

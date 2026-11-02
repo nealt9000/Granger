@@ -1,8 +1,5 @@
 package app.granger.player
 
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -74,10 +71,6 @@ internal fun AudiobookPlayer(
 ) {
     val book = ui.now as? NowPlaying.Book ?: return
     var sheet by rememberSaveable { mutableStateOf<BookSheet?>(null) }
-    val context = LocalContext.current
-    LaunchedEffect(viewModel) {
-        viewModel.notices.collect { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
-    }
     val back = viewModel.skipBackS()
     val forward = viewModel.skipForwardS()
     fun control(action: PlayerViewModel.() -> Unit) = if (live) viewModel.action() else viewModel.activate(PlayerMode.AUDIOBOOK, action)

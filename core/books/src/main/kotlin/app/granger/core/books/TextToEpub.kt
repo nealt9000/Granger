@@ -31,6 +31,29 @@ object TextToEpub {
         write(chapters, stripInvalidXml(title), clean, out)
     }
 
+    /**
+     * The title a text names for itself, or null to keep the file name: Markdown's first `# heading`; Project
+     * Gutenberg's "Title:" line or its "The Project Gutenberg eBook of X" opening; else a short first line that stands
+     * alone (a blank line after it, no closing full stop, not "Chapter 1").
+     */
+    fun titleOf(text: String, markdown: Boolean): String? {
+        val lines = text.lineSequence().take(TITLE_SCAN_LINES).toList()
+        fun ok(t: String?) = t?.trim()?.trim('*', '_', '#', ' ')?.takeIf { it.length in 2..MAX_TITLE && it.any(Char::isLetter) }
+        if (markdown) return ok(lines.firstOrNull { it.startsWith("# ") }?.removePrefix("# "))
+        lines.firstNotNullOfOrNull { GUTENBERG_TITLE.matchEntire(it.trim())?.groupValues?.get(1) }?.let { t -> ok(t)?.let { return it } }
+        lines.firstNotNullOfOrNull { GUTENBERG_OPENING.find(it)?.groupValues?.get(1) }?.let { t -> ok(t.substringBefore(", by "))?.let { return it } }
+        val first = lines.indexOfFirst { it.isNotBlank() }.takeIf { it >= 0 } ?: return null
+        val line = lines[first].trim()
+        val standsAlone = lines.getOrNull(first + 1)?.isBlank() ?: true
+        if (!standsAlone || line.endsWith('.') || line.endsWith(',') || HEADING.matches(line)) return null
+        return ok(line)
+    }
+
+    private const val TITLE_SCAN_LINES = 60
+    private const val MAX_TITLE = 80
+    private val GUTENBERG_TITLE = Regex("Title:\\s+(.+)")
+    private val GUTENBERG_OPENING = Regex("The Project Gutenberg e[Bb]ook,? of (.+)")
+
     // ---- TXT ----
 
     private fun txtChapters(text: String, max: Int): List<Chapter> {
@@ -66,8 +89,23 @@ object TextToEpub {
         return chapters
     }
 
+    /**
+     * Paragraphs split at blank lines. A long block whose lines are themselves long is a file with one paragraph per
+     * line (no blank lines between): each line is a paragraph. Hard-wrapped text (lines of about 70 characters) and
+     * verse keep their lines together as before.
+     */
     private fun paragraphList(text: String): List<String> =
-        text.split(BLANK_LINES).map { it.trim() }.filter { it.isNotEmpty() }
+        text.split(BLANK_LINES).map { it.trim() }.filter { it.isNotEmpty() }.flatMap { block ->
+            val lines = block.lines().map { it.trim() }.filter { it.isNotEmpty() }
+            if (block.length > LINE_PARAGRAPH_BLOCK && lines.size > 1 && lines.sumOf { it.length } / lines.size > LINE_PARAGRAPH_AVG) {
+                lines
+            } else {
+                listOf(block)
+            }
+        }
+
+    private const val LINE_PARAGRAPH_BLOCK = 1_500
+    private const val LINE_PARAGRAPH_AVG = 120
 
     private fun paragraphs(text: String): String {
         val sb = StringBuilder()

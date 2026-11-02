@@ -210,9 +210,9 @@ Still open:
 - Classics pushed by hand into `books/granger/` show "Get", not installed: installed status comes from download records only.
 - A page turn within ~0.3 s before Back is lost (the outgoing reader's reports are ignored once it leaves the screen).
 - System Back from a book opened through the rail goes to the Library, not the previous book (rail destinations replace each other).
-- Contents panel tab labels are cut off in landscape.
-- Imported text books are titled by file name, not by their first heading.
-- Book search results are unranked (`LIMIT 400`); TXT files with single-newline paragraphs become one paragraph per chapter; the shared cover cache (4 MB) re-decodes while scrolling a long grid.
+- ~~Contents panel tab labels are cut off in landscape.~~ Fixed 2026-11-02: side panels grow by the end inset, `cl-cleanup`.
+- ~~Imported text books are titled by file name, not by their first heading.~~ Fixed 2026-11-02: the title the text names (Markdown heading, Gutenberg Title:, a standalone first line), `cl-cleanup`.
+- Book search results are unranked (`LIMIT 400`); ~~TXT files with single-newline paragraphs become one paragraph per chapter~~ (fixed 2026-11-02, `cl-cleanup`); the shared cover cache (4 MB) re-decodes while scrolling a long grid.
 - Plan 10: import is Pro-only; queueing the whole Classics preset must be checked against the cap as one group (spec §13); `Features.IMPORT` becomes the entitlement check.
 - ~~Plan 7: archive.org books go to `books/archive-org/` with origin `ARCHIVE_ORG`; `Bookshelf.addDownloaded` needs an origin parameter then.~~ Done in Plan 7.
 - ~~Plan 8: `BookIndex` and `BookHit` are the e-book retrieval path for Inquire & Abstract; the `INQUIRE` selection action is already wired.~~ Done in Plan 8 (`BookIndex.passages`; the action is now `RESEARCH`).
@@ -402,7 +402,7 @@ Player and engine:
 - ~~After play is refused mid-call, the end of the call doesn't resume.~~ Fixed in `c41b868` (`playDuringACallPlaysWhenTheCallEnds`).
 
 UI:
-- No signal when a book's saved place can't be found, or when a queue stops because every item failed.
+- ~~No signal when a book's saved place can't be found, or when a queue stops because every item failed.~~ Fixed 2026-11-02: `PlayerHub.notices` toasts, `cl-cleanup`.
 - ~~Adding a bookmark gives no feedback beyond the list.~~ Fixed 2026-11-02: it toasts "Bookmarked: …", `cl-cleanup`.
 - On the Player's inactive tab, starting music writes no Recent row; shuffle, repeat, speed, sleep timer and bookmarks can't be changed there; and a saved book's chapters are read again on each state change rather than live.
 - Album, artist, genre, playlist and folder pages aren't scoped to a collection (their routes carry no `collectionId`).
@@ -411,7 +411,7 @@ UI:
 - The "songs" Recent row replays all music by title (its key has no collection or sort).
 - Settings scrolls to Music & audiobooks by a fixed item index (5).
 - The music Compose screens have no UI tests (view model and DAO only).
-- Parity gaps, later: "Add to playlist" isn't in the full player or the queue; only Songs can be sorted; no cover replacement for audiobooks (M2's LibriVox downloads bring their own covers).
+- Parity gaps, later: "Add to playlist" isn't in ~~the full player~~ (fixed 2026-11-02, `cl-cleanup`) or the queue; only Songs can be sorted; no cover replacement for audiobooks (M2's LibriVox downloads bring their own covers).
 
 Device checks still to do:
 - Deleting a file in the Files app, then restoring it (skipped in the walkthrough).
@@ -544,7 +544,7 @@ Player, session and Auto:
 Widget:
 - No `previewLayout`; the picker uses the generic preview, which Neal found usable.
 - The cover is decoded on the drawing path (cached, ≤ 300 px). Every change also calls `updateAll` (not profiled).
-- The second button's label is "Back" and doesn't follow the skip setting.
+- ~~The second button's label is "Back" and doesn't follow the skip setting.~~ Fixed 2026-11-02: "Back 30 seconds" from the setting, `cl-cleanup`.
 - A boot or resize update starts the process, which binds the service and restores the player paused.
 
 Readers and Search after the follow-ups:
@@ -642,7 +642,7 @@ Builder's calls (see the plan and the Task 3 report):
 
 Still open:
 - Some Kiwix packs are mostly PDFs (irp.fas.org military medicine). They open, but show little until the reader handles PDFs (done in P2: a tapped PDF opens in the e-book reader).
-- The DevDocs Contents button stays pinned over the page once you scroll.
+- ~~The DevDocs Contents button stays pinned over the page once you scroll.~~ Fixed 2026-11-02: it slides away scrolling down, back scrolling up, `cl-cleanup` (check on the phone).
 
 ## Carried forward from R0
 

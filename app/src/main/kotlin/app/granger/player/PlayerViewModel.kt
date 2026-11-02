@@ -1,5 +1,8 @@
 package app.granger.player
 
+import app.granger.core.library.Playlist
+import app.granger.core.library.Playlists
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.MutableSharedFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -147,8 +150,39 @@ class PlayerViewModel(
     private val chooseVoiceSpeed: (Float) -> Unit = {},
     /** Which side the one-item views show while the voice has music under it; the app's one. */
     private val focus: PlayerFocus = PlayerFocus(),
+    /** The user's playlists, for Add to playlist from the full player; null leaves the button out. */
+    private val playlists: Playlists? = null,
 ) : ViewModel() {
     val ui: StateFlow<PlayerUi> = hub.ui
+
+    /** Whether the full player offers Add to playlist. */
+    val canAddToPlaylist: Boolean get() = playlists != null
+
+    /** Every playlist, by name, for the Add to playlist sheet. */
+    val allPlaylists: StateFlow<List<Playlist>> = (playlists?.all ?: flowOf(emptyList()))
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** Adds the song that's on to [playlistId] (clean-up list: the full player had no Add to playlist). */
+    fun addNowPlayingToPlaylist(playlistId: Long) {
+        val track = (hub.ui.value.now as? NowPlaying.Music)?.track ?: return
+        val lists = playlists ?: return
+        viewModelScope.launch {
+            lists.add(playlistId, listOf(track.id))
+            val name = allPlaylists.value.firstOrNull { it.id == playlistId }?.name
+            ownNotices.tryEmit(if (name != null) "Added to $name" else "Added to the playlist")
+        }
+    }
+
+    /** Makes a playlist named [name] holding the song that's on. */
+    fun newPlaylistWithNowPlaying(name: String) {
+        val track = (hub.ui.value.now as? NowPlaying.Music)?.track ?: return
+        val lists = playlists ?: return
+        if (name.isBlank()) return
+        viewModelScope.launch {
+            lists.create(name.trim(), listOf(track.id))
+            ownNotices.tryEmit("Added to ${name.trim()}")
+        }
+    }
 
     /** What the mini-player shows: the voice, or the music under it ([PlayerFocus]). */
     val mini: StateFlow<PlayerUi> = combine(hub.ui, focus.prefersMusic, PlayerUi::oneSide)
@@ -315,8 +349,13 @@ class PlayerViewModel(
     fun startSleepTimer(setting: SleepSetting) = hub.startSleepTimer(setting)
     fun cancelSleepTimer() = hub.cancelSleepTimer()
 
-    /** A short line for the screen to show once ("Bookmarked: Chapter 3 · 12:04"). */
-    val notices = MutableSharedFlow<String>(extraBufferCapacity = 4)
+    private val ownNotices = MutableSharedFlow<String>(extraBufferCapacity = 4)
+
+    /**
+     * Short lines for the app to show once: this screen's ("Bookmarked: Chapter 3 · 12:04") and the player's when it
+     * gives up on something ("Couldn't play any of these songs …"). Shown by the nav host, wherever the user is.
+     */
+    val notices: Flow<String> = merge(ownNotices, hub.notices)
 
     /** A bookmark here, titled with the chapter and the time in it; [notices] says whether it was kept. */
     fun addBookmark() {
@@ -332,7 +371,7 @@ class PlayerViewModel(
                 android.util.Log.w("Granger", "Couldn't add bookmark", e)
                 -1L
             }
-            notices.tryEmit(if (id > 0) "Bookmarked: $title" else "Couldn't add a bookmark here.")
+            ownNotices.tryEmit(if (id > 0) "Bookmarked: $title" else "Couldn't add a bookmark here.")
         }
     }
 
