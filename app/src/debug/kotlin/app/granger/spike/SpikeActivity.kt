@@ -129,6 +129,11 @@ private fun SpikeScreen(
                 Spacer(Modifier.width(8.dp))
             }
         }
+        val context = androidx.compose.ui.platform.LocalContext.current
+        // Plan A0: the voice input spike, so it can be opened on top of a playing Granger without adb.
+        Button(onClick = { context.startActivity(android.content.Intent(context, app.granger.voiceinput.VoiceInputSpikeActivity::class.java)) }) {
+            Text("Voice input spike")
+        }
         log.forEach { Text(it, fontFamily = FontFamily.Monospace, fontSize = 12.sp) }
     }
 }
