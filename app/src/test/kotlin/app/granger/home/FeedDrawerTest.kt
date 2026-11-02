@@ -105,6 +105,19 @@ class FeedDrawerTest {
         assertThat(drawn.cards).hasSize(FeedDrawer.CARDS)
         assertThat(drawn.cards.map { it.subtitle }.distinct()).containsExactly("Wikiquote")
         assertThat(drawn.cards.map { it.title }.toSet()).hasSize(FeedDrawer.CARDS)
+        // Search hits, so it says so rather than passing them off as the day's own page.
+        assertThat(drawn.title).isEqualTo("Mentions October 22")
+    }
+
+    @Test fun theDayPageComesFromWhicheverPackHasIt() = runTest {
+        // A "Best of" slice first, without the day's page; the full Wikipedia after it has one.
+        val slice = FakeZimArchive(uuid = "u2", paths = setOf("index"), results = (1..8).map { ZimHit("Hit_$it", "Hit $it") })
+        val drawer = FeedDrawer({ if (it.id == "u1") archive else slice }, { emptyList() }, { emptyList() }, librarySearch)
+        val drawn = drawer.draw(
+            feed(FeedKind.ON_THIS_DAY), Resolved("Wikipedia", packs = listOf(pack("u2", "Best of Wikipedia"), wikipedia)), day,
+        )!!
+        assertThat(drawn.title).isEqualTo("October 22")
+        assertThat(drawn.cards.first().target).isEqualTo(CardTarget.Article("u1", "October_22", fragment = "Events"))
     }
 
     @Test fun cardTitlesLoseTheirSite() = runTest {

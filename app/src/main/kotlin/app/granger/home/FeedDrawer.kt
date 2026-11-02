@@ -35,7 +35,7 @@ class FeedDrawer(
         val random = Random(seed(day, feed.id))
         val drawn = when (feed.kind) {
             FeedKind.RANDOM -> Drawn("Random from ${scope.name}", random(scope, random))
-            FeedKind.ON_THIS_DAY -> Drawn(DayPage.title(day), onThisDay(scope, day, random))
+            FeedKind.ON_THIS_DAY -> onThisDay(scope, day, random)
             FeedKind.SEARCH -> {
                 val query = feed.query.trim()
                 if (query.isEmpty()) return null
@@ -96,22 +96,32 @@ class FeedDrawer(
         )
     }
 
-    private suspend fun onThisDay(scope: Resolved, day: LocalDate, random: Random): List<Card> {
+    /**
+     * The day's page from the first pack in [scope] that has one (a full Wikipedia does, a "Best of" slice may not:
+     * every pack is tried, not only the first). With none, articles that mention the date, titled "Mentions October
+     * 22" so they aren't taken for the day's own page; books only search their text the same way.
+     */
+    private suspend fun onThisDay(scope: Resolved, day: LocalDate, random: Random): Drawn {
         val title = DayPage.title(day)
-        val pack = scope.packs.firstOrNull()
-        if (pack == null) {
-            // Books only: the date in the text.
-            return bookSearch(title).shuffled(random).take(CARDS).map { bookCard(it) }
+        val mentions = "Mentions $title"
+        if (scope.packs.isEmpty()) {
+            return Drawn(mentions, bookSearch(title).shuffled(random).take(CARDS).map { bookCard(it) })
         }
-        val archive = archiveOf(pack) ?: return emptyList()
-        val path = DayPage.paths(day).firstNotNullOfOrNull { archive.resolvePath(it) }
-        val page = path?.let { archive.read(it) }?.let { DayPage.parse(String(it.bytes, Charsets.UTF_8)) }
-        if (path == null || page == null || page.isEmpty) {
-            return archive.search(title, SEARCH_LIMIT).filterNot { IndexPages.isIndex(it.path) }.shuffled(random).take(CARDS).map { articleCard(archive, pack, it.path) }
+        for (pack in scope.packs) {
+            val archive = archiveOf(pack) ?: continue
+            val path = DayPage.paths(day).firstNotNullOfOrNull { archive.resolvePath(it) } ?: continue
+            val page = archive.read(path)?.let { DayPage.parse(String(it.bytes, Charsets.UTF_8)) } ?: continue
+            if (page.isEmpty) continue
+            fun pick(lines: List<String>, n: Int, section: String) =
+                lines.shuffled(random).take(n).map { Card(it, section, CardTarget.Article(pack.id, path, fragment = section)) }
+            return Drawn(title, pick(page.events, 3, "Events") + pick(page.births, 1, "Births") + pick(page.deaths, 1, "Deaths"))
         }
-        fun pick(lines: List<String>, n: Int, section: String) =
-            lines.shuffled(random).take(n).map { Card(it, section, CardTarget.Article(pack.id, path, fragment = section)) }
-        return pick(page.events, 3, "Events") + pick(page.births, 1, "Births") + pick(page.deaths, 1, "Deaths")
+        val pack = scope.packs.first()
+        val archive = archiveOf(pack) ?: return Drawn(mentions, emptyList())
+        return Drawn(
+            mentions,
+            archive.search(title, SEARCH_LIMIT).filterNot { IndexPages.isIndex(it.path) }.shuffled(random).take(CARDS).map { articleCard(archive, pack, it.path) },
+        )
     }
 
     private suspend fun search(scope: Resolved, query: String, random: Random): List<Card> {
