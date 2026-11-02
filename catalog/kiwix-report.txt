@@ -166,7 +166,7 @@ Listed, by category and family:
   Science & Math / stacks.math.columbia.edu: 1
   Science & Math / wikispecies: 2
 
-Book packs (Plan KB): 48
+Book packs (Plan KB): 49
   gutenberg_en_all
   gutenberg_en_lcc-a
   gutenberg_en_lcc-c
@@ -205,6 +205,7 @@ Book packs (Plan KB): 48
   gutenberg_en_lcc-u
   gutenberg_en_lcc-v
   gutenberg_en_lcc-z
+  gutenberg_es_all
   gutenberg_mul_all
   prunelle_en_budding-authors
   prunelle_en_draw-your-african-story

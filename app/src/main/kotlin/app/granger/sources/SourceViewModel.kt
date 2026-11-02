@@ -724,7 +724,10 @@ class SourceViewModel(
                 is BookEntry -> listOf(item.title, item.author, item.description)
                 else -> listOf(item.title)
             }
-            return inTab && (needle.isEmpty() || texts.any { it.contains(needle, ignoreCase = true) })
+            // As the Kiwix list matches (KiwixList.matches): every word, in any order, accents folded, so "tranvia"
+            // finds "La novela en el tranvía".
+            val haystack by lazy { app.granger.core.library.SearchText.fold(texts.joinToString(" ")) }
+            return inTab && (words.isEmpty() || words.all { it in haystack })
         }
         val categories = if (!kiwix || current == null || inDomain || familyView != null || subjectsSet != null) emptyList() else
             current.packs.filter { scopeOf(it) == scope && shownInLanguage(it) }.map { it.category }.distinct()

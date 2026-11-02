@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-11-02T19:42:48Z",
+  "generatedAt": "2026-11-02T21:26:36Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -205,7 +205,8 @@
       "sha256": "a0804b170cac5215edd673559fca430e07ef2ab4c4fe73a060fd37eab1b0b95e",
       "urls": [
         "https://download.kiwix.org/zim/wikipedia/wikipedia_en_ray-charles_maxi_2026-10.zim",
-        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_ray-charles_maxi_2026-10.zim"
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_ray-charles_maxi_2026-10.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_en_ray-charles_maxi_2026-10.zim"
       ],
       "snapshotDate": "2026-10-31",
       "license": "CC BY-SA 4.0",
@@ -3564,7 +3565,7 @@
       "featured": false,
       "family": "gutenberg",
       "domain": "literature",
-      "content": "",
+      "content": "books",
       "flavour": ""
     },
     {
@@ -22225,7 +22226,8 @@
       "sha256": "ad37a9355a356b12cc4f2e339fcd15940dd93099de0c2851b6a25cc5b9c33c31",
       "urls": [
         "https://download.kiwix.org/zim/wikipedia/wikipedia_en_ray-charles_mini_2026-10.zim",
-        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_ray-charles_mini_2026-10.zim"
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_ray-charles_mini_2026-10.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_en_ray-charles_mini_2026-10.zim"
       ],
       "snapshotDate": "2026-10-31",
       "license": "CC BY-SA 4.0",
@@ -22257,7 +22259,8 @@
       "sha256": "c79ed45e13a1bf277e94c5c177931b97b79647d9feb628f8d0d98e9091336b66",
       "urls": [
         "https://download.kiwix.org/zim/wikipedia/wikipedia_en_ray-charles_nopic_2026-10.zim",
-        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_ray-charles_nopic_2026-10.zim"
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_en_ray-charles_nopic_2026-10.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_en_ray-charles_nopic_2026-10.zim"
       ],
       "snapshotDate": "2026-10-31",
       "license": "CC BY-SA 4.0",
@@ -22991,7 +22994,8 @@
       "sha256": "745bb4de7abb255fa31520cf2be0ca558b57d85419d63b142ec370a97e4a7735",
       "urls": [
         "https://download.kiwix.org/zim/wikiversity/wikiversity_en_all_maxi_2026-11.zim",
-        "https://ftpmirror.your.org/pub/kiwix/zim/wikiversity/wikiversity_en_all_maxi_2026-11.zim"
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikiversity/wikiversity_en_all_maxi_2026-11.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikiversity/wikiversity_en_all_maxi_2026-11.zim"
       ],
       "snapshotDate": "2026-11-02",
       "license": "CC BY-SA 4.0",

@@ -473,6 +473,22 @@ class SourceViewModelTest {
         assertThat(vm.ui.value.sections.flatMap { it.rows }.map { it.id }).containsExactly("pan")
     }
 
+    @Test fun bookSearchIgnoresAccentsAndWordOrder() = runTest(main.dispatcher) {
+        // Phones type without accents: "tranvia" finds "La novela en el tranvía" (the languages walkthrough, 2026-11-02).
+        val tranvia = bookEntry("tranvia", author = "Benito Pérez Galdós").copy(title = "La novela en el tranvía", language = "spa")
+        catalog.mutable.value = CatalogState(catalog = catalogOf(books = listOf(tranvia, bookEntry("pan", author = "J. M. Barrie"))))
+        val vm = viewModel()
+        fun ids() = vm.ui.value.sections.flatMap { it.rows }.map { it.id }
+        for (query in listOf("tranvia", "TRANVÍA", "galdos novela", "pérez")) {
+            vm.setQuery(query)
+            testScheduler.advanceUntilIdle()
+            assertWithMessage(query).that(ids()).containsExactly("tranvia")
+        }
+        vm.setQuery("tranvia barrie")
+        testScheduler.advanceUntilIdle()
+        assertThat(ids()).isEmpty()
+    }
+
     @Test fun presetsCountByKindAndSayWhatsOnThePhone() = runTest(main.dispatcher) {
         catalog.mutable.value = CatalogState(
             catalog = catalogOf(

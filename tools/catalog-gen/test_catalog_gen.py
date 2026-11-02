@@ -1032,11 +1032,13 @@ def test_a_release_pack_has_no_content_or_flavour(tmp_path):
     assert (pack["content"], pack["flavour"]) == ("", "")
 
 
-def test_real_pack_contents_name_fifty_book_packs():
+def test_real_pack_contents_name_fifty_one_book_packs():
     contents = cg.load_contents()
     books = sorted(name for name in contents if cg.content_of(name, contents) == "books")
-    assert len(books) == 50
-    assert sum(1 for b in books if b.startswith("gutenberg_")) == 41
+    # 50 English and multilingual, and Project Gutenberg's Spanish pack (Plan L3).
+    assert len(books) == 51
+    assert "gutenberg_es_all" in books
+    assert sum(1 for b in books if b.startswith("gutenberg_")) == 42
     assert sorted(b for b in books if not b.startswith("gutenberg_")) == [
         "prunelle_en_budding-authors", "prunelle_en_draw-your-african-story", "prunelle_en_interactive-books",
         "usda-2015_en", "zimgit-food-preparation_en", "zimgit-knots_en", "zimgit-medicine_en",

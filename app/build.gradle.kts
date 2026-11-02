@@ -87,6 +87,8 @@ android {
             it.jvmArgs("--add-opens=java.base/java.io=ALL-UNNAMED")
             // ThemeShots renders the main screens to PNGs only when asked: ./gradlew testDebugUnitTest --tests '*ThemeShots*' -PthemeShots
             it.systemProperty("granger.themeShots", if (project.hasProperty("themeShots")) layout.buildDirectory.dir("theme-shots").get().asFile.path else "")
+            // Tests read the published catalog straight from the repo: rerun them when it changes.
+            it.inputs.files(rootProject.files("catalog/catalog.json", "catalog/catalog.json.sig")).withPathSensitivity(PathSensitivity.NONE)
         }
     }
     compileOptions {

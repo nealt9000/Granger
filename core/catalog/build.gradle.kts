@@ -23,3 +23,8 @@ dependencies {
     testImplementation(libs.truth)
     testImplementation(libs.kotlinx.coroutines.test)
 }
+
+// PublishedCatalogTest reads the published catalog straight from the repo: rerun it when the catalog changes.
+tasks.withType<Test>().configureEach {
+    inputs.files(rootProject.files("catalog/catalog.json", "catalog/catalog.json.sig")).withPathSensitivity(PathSensitivity.NONE)
+}
