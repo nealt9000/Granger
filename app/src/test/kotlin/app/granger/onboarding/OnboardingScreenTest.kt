@@ -46,7 +46,7 @@ class OnboardingScreenTest {
     private val line = Line(med.id, UiText.Raw(med.title), listOf(med), installed = false)
     private val efficient = StartChoice("efficient", "Efficient start", UiText.Raw("The essentials."), listOf(line))
     private val internal = volume("/internal", "Internal storage", free = 10_000, total = 64_000)
-    private val phone = PhoneUi(UiText.Raw("A library phone, with about 7 GB of memory."), UiText.Raw("Ask needs 6 GB."), listOf(internal), 1_000, 1_375)
+    private val phone = PhoneUi(UiText.Raw("A library phone, with about 7 GB of memory."), UiText.Raw("Ask needs 6 GB."), listOf(internal), "Efficient start", 1_000, 1_375)
 
     private fun show(ui: OnboardingUi) = compose.setContent { OnboardingContent(ui, actions) }
 
@@ -92,7 +92,7 @@ class OnboardingScreenTest {
     @Test fun pickAStartListsChoicesAndLinesWithTheTotal() {
         show(OnboardingUi(step = Step.START, noCatalog = false, phone = phone, starts = listOf(efficient), startId = "efficient"))
         compose.onNodeWithText("Efficient start · 1.0 KB").assertIsSelected()
-        compose.onNodeWithText("Neither, I'll choose later").performClick()
+        compose.onNodeWithText("None, I'll choose later").performClick()
         compose.onNodeWithText("WikiMed (no pictures)").performClick()
         compose.onNodeWithText("1.0 KB of 10 KB free").assertIsDisplayed()
         assertThat(calls).containsExactly("start:null", "line:wikipedia_en_medicine_nopic").inOrder()

@@ -241,7 +241,9 @@ class OnboardingViewModelTest {
         val vm = viewModel()
         assertThat(vm.ui.value.noCatalog).isFalse()
         assertThat(vm.ui.value.starts.map { it.id }).containsExactly("efficient", "comprehensive").inOrder()
-        assertThat(vm.ui.value.phone.efficientBytes).isEqualTo(1_010)
+        // Before the user picks, the first (smallest) start is chosen.
+        assertThat(vm.ui.value.startId).isEqualTo("efficient")
+        assertThat(vm.ui.value.phone.smallestBytes).isEqualTo(1_010)
         // Comprehensive adds nothing for MedlinePlus: it is installed.
         assertThat(vm.ui.value.phone.comprehensiveBytes).isEqualTo(1_010)
 

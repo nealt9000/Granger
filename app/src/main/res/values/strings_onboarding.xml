@@ -41,17 +41,18 @@
     <!-- %1$s is the storage's name, %2$s its free space, %3$s its size. -->
     <string name="onboarding_volume_free_of">%1$s: %2$s free of %3$s</string>
     <!-- Efficient and Comprehensive are the two starts; %1$s and %2$s their sizes. -->
-    <string name="onboarding_start_sizes">The Efficient start is %1$s; the Comprehensive library is %2$s. A full Wikipedia alone is about 100 GB.</string>
+    <string name="onboarding_start_sizes">%1$s is %2$s; the Comprehensive library is %3$s. A full Wikipedia alone is about 100 GB.</string>
 
     <!-- Pick a start. -->
     <string name="onboarding_catalog_failed">Couldn\'t reach the catalog. Check the connection and try again.</string>
     <string name="onboarding_try_again">Try again</string>
     <string name="onboarding_catalog_failed_next">Or tap Next: Home and the Library are yours either way.</string>
     <string name="onboarding_catalog_loading">Getting the list of packs…</string>
+    <string name="onboarding_blurb_starter">The most-read Wikipedia, a medical encyclopedia and the classic books: a good library in little space.</string>
     <string name="onboarding_blurb_efficient">The essentials of every domain: enough to answer most questions, in the least space.</string>
     <string name="onboarding_blurb_comprehensive">Everything the readiness model counts, for a phone that can hold it.</string>
     <!-- The third choice, beside the Efficient and Comprehensive starts. -->
-    <string name="onboarding_neither">Neither, I\'ll choose later</string>
+    <string name="onboarding_neither">None, I\'ll choose later</string>
     <string name="onboarding_neither_blurb">Home and the Library are yours either way.</string>
     <!-- The line that gets Ask's AI models. -->
     <string name="onboarding_ask_line">Ask (Preview)</string>

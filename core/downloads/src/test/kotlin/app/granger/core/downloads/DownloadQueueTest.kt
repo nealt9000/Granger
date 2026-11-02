@@ -97,8 +97,8 @@ class DownloadQueueTest {
         queue = queueOf(runner)
     }
 
-    private fun spec(id: String, group: String? = null, kind: ItemKind = ItemKind.PACK) = DownloadSpec(
-        itemId = id, kind = kind, title = "Title $id", urls = listOf("https://a.test/$id.zim"), sizeBytes = 100, hash = SHA_1,
+    private fun spec(id: String, group: String? = null, kind: ItemKind = ItemKind.PACK, size: Long = 100) = DownloadSpec(
+        itemId = id, kind = kind, title = "Title $id", urls = listOf("https://a.test/$id.zim"), sizeBytes = size, hash = SHA_1,
         hashAlgorithm = HashAlgorithm.SHA256, relativePath = "packs/$id.zim", snapshotDate = "", groupId = group,
     )
 
@@ -144,6 +144,22 @@ class DownloadQueueTest {
         runner.holds.getValue("knots").complete(Unit)
         drain.join()
         assertThat(runner.ran).containsExactly("med", "med.vectors", "knots", "cooking", "atlas").inOrder()
+    }
+
+    @Test fun aSmallFileGoesAheadOfABigOneAndPausesIt() = runTest {
+        val big = 2_000_000_000L
+        manager.enqueueGroup("onboarding:1", listOf(spec("model", "onboarding:1", ItemKind.MODEL, big), spec("top", "onboarding:1", size = big)), root, true)
+        queue = queueOf(runner, networkCheckMillis = 1_000)
+        runner.holds["model"] = CompletableDeferred()
+        val drain = drainInBackground()
+        runner.started.getOrPut("model") { CompletableDeferred() }.await()
+        // A book is got while the model downloads: the model pauses (its part file kept) and the book goes through.
+        manager.enqueue(spec("book", kind = ItemKind.BOOK, size = 699_000), root, true)
+        advanceTimeBy(1_500)
+        runner.holds.remove("model")
+        drain.join()
+        assertThat(runner.ran).containsExactly("model", "book", "model", "top").inOrder()
+        assertThat(dao.getAll().map { it.state }.distinct()).containsExactly(DownloadState.INSTALLED)
     }
 
     @Test fun downloadNextStartsRightAfterTheCurrentFileWithoutCuttingItOff() = runTest {

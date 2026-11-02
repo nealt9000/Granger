@@ -85,7 +85,7 @@ object FeedbackMail {
             tier = if (container.deviceTier >= DeviceTier.ASK) "Library and Ask" else "Library only",
             freeBytes = chosen?.freeBytes,
             packs = container.library.packs.first().size,
-            books = container.bookshelf.books.first().size,
+            books = FeedbackReport.bookCount(container.bookshelf.books.first()),
             crashes = crashLog.list(),
         )
     }

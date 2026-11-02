@@ -37,7 +37,11 @@ class ReadAloud(
             is ReadTarget.Answer -> ResearchViewModel.answerKey(target.turnId) to ""
         }
         val source = runCatching { sources(key, title) }.getOrNull() ?: return false
-        val at = from ?: (target as? ReadTarget.Book)?.chapterHref?.let { href -> (source as? BookReadSource)?.addressAtHref(href) }
+        // A book started from nowhere in it starts past its front matter, not on its contents list.
+        val book = source as? BookReadSource
+        val at = from ?: (target as? ReadTarget.Book)?.let { t ->
+            if (t.chapterHref != null) book?.addressAtHref(t.chapterHref) else runCatching { book?.firstAfterFrontMatter() }.getOrNull()
+        }
         hub.readAloud(source, at, voice)
         return true
     }

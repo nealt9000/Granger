@@ -108,5 +108,15 @@
     <string name="search_show_fewer_songs">Mostrar menos canciones</string>
     <string name="search_show_fewer_articles">Mostrar menos coincidencias en artículos</string>
     <string name="search_show_fewer_books">Mostrar menos libros</string>
+    <plurals name="search_title_only">
+        <item quantity="one">%1$s no tiene búsqueda de texto, así que solo se buscó en sus títulos.</item>
+        <item quantity="many">%1$s no tienen búsqueda de texto, así que solo se buscó en sus títulos.</item>
+        <item quantity="other">%1$s no tienen búsqueda de texto, así que solo se buscó en sus títulos.</item>
+    </plurals>
+    <plurals name="search_title_only_more">
+        <item quantity="one">%1$s y %2$d más no tienen búsqueda de texto, así que solo se buscó en sus títulos.</item>
+        <item quantity="many">%1$s y %2$d más no tienen búsqueda de texto, así que solo se buscó en sus títulos.</item>
+        <item quantity="other">%1$s y %2$d más no tienen búsqueda de texto, así que solo se buscó en sus títulos.</item>
+    </plurals>
     <string name="search_did_you_mean">¿Querías decir %1$s?</string>
 </resources>
