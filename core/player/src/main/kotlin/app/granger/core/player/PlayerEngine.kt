@@ -656,11 +656,23 @@ class PlayerEngine(
             Mode.NONE -> false
         }
         if (!loadedHere) return@submit
+        val q = musicQueue
+        if (mode == Mode.MUSIC && q != null && !q.ids.all { it in trackIds }) {
+            // Only some of the queue is going: take those tracks out and keep playing the rest (clean-up list).
+            for (i in q.playOrder.indices.reversed()) {
+                if (q.ids[q.playOrder[i]] in trackIds) removeQueueItem(q, i)
+            }
+            musicChanged()
+            return@submit
+        }
         stopCurrent()
         refresh()
     }
 
-    override fun playPause() = submit { if (player.playWhenReady) userPause() else resume() }
+    override fun playPause() = submit {
+        // At its end the player still says play-when-ready, but nothing plays and the button shows Play: that press plays.
+        if (player.playWhenReady && player.playbackState != Player.STATE_ENDED) userPause() else resume()
+    }
 
     /** Play (from the session: notification, Bluetooth, lock screen). */
     fun play() = submit { resume() }
@@ -766,6 +778,12 @@ class PlayerEngine(
         val q = musicQueue ?: return@submit
         if (mode != Mode.MUSIC || i !in q.ids.indices) return@submit
         if (q.ids.size == 1) return@submit                     // the queue never empties itself; play something else
+        removeQueueItem(q, i)
+        musicChanged()
+    }
+
+    /** Takes play-order position [i] out of [q] and the player; the caller says the music changed. */
+    private fun removeQueueItem(q: MusicQueue, i: Int) {
         val removedIndex = q.playOrder[i]
         q.remove(i)
         editing = true
@@ -777,13 +795,14 @@ class PlayerEngine(
         } finally {
             editing = false
         }
-        musicChanged()
     }
 
     override fun playQueueItem(position: Int) = submit {
         val q = musicQueue ?: return@submit
         if (mode != Mode.MUSIC || position !in q.ids.indices) return@submit
-        playItem(q.playOrder[position], 0L)
+        val index = q.playOrder[position]
+        // The song already on: a tap carries on with it (starting it if paused), not from the top (clean-up list).
+        if (index == player.currentMediaItemIndex) resume() else playItem(index, 0L)
     }
 
     /** A controller's seek to playlist item [index] (Auto's queue): plays it, as a tap on its queue row does. */
@@ -1270,6 +1289,9 @@ class PlayerEngine(
         pausedForFocus = false
         errorRun = 0
         if (mode == Mode.BOOK) finished = false
+        // A book that played to its end starts over (below), as reloading it does; a pause's rewind would first move it
+        // off the end and so replay its last seconds and end again (clean-up list).
+        if (mode == Mode.BOOK && player.playbackState == Player.STATE_ENDED) pausedAt = 0L
         if (mode == Mode.BOOK && pausedAt > 0L) {
             val rewind = AutoRewind.rewindMs(now() - pausedAt)
             pausedAt = 0L

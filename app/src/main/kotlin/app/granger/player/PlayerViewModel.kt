@@ -1,5 +1,6 @@
 package app.granger.player
 
+import kotlinx.coroutines.flow.MutableSharedFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.core.library.AudioBookmark
@@ -314,12 +315,25 @@ class PlayerViewModel(
     fun startSleepTimer(setting: SleepSetting) = hub.startSleepTimer(setting)
     fun cancelSleepTimer() = hub.cancelSleepTimer()
 
-    /** A bookmark here, titled with the chapter and the time in it. */
+    /** A short line for the screen to show once ("Bookmarked: Chapter 3 · 12:04"). */
+    val notices = MutableSharedFlow<String>(extraBufferCapacity = 4)
+
+    /** A bookmark here, titled with the chapter and the time in it; [notices] says whether it was kept. */
     fun addBookmark() {
         val ui = hub.ui.value
         val book = ui.now as? NowPlaying.Book ?: return
         val title = "${book.chapter.title.ifBlank { "Chapter ${book.chapter.ordinal + 1}" }} · ${formatTime(ui.positionMs)}"
-        viewModelScope.launch { hub.addBookmark(title) }
+        viewModelScope.launch {
+            val id = try {
+                hub.addBookmark(title)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                android.util.Log.w("Granger", "Couldn't add bookmark", e)
+                -1L
+            }
+            notices.tryEmit(if (id > 0) "Bookmarked: $title" else "Couldn't add a bookmark here.")
+        }
     }
 
     fun playBookmark(bookmark: AudioBookmark) = hub.playAudiobook(bookmark.audiobookId, bookmark)

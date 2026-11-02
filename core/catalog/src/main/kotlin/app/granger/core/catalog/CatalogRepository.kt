@@ -78,9 +78,18 @@ class CatalogRepository(
 
     /** Null on success; otherwise why the shown catalog was kept. */
     private fun fetchAndCache(): CatalogError? {
-        val bytes = get(url) ?: return CatalogError.NETWORK
-        val signature = get("$url.sig") ?: return CatalogError.NETWORK
-        val catalog = when (val parsed = CatalogParser.parse(bytes, signature, publicKey)) {
+        var bytes = get(url) ?: return CatalogError.NETWORK
+        var signature = get("$url.sig") ?: return CatalogError.NETWORK
+        var parsed = CatalogParser.parse(bytes, signature, publicKey)
+        if (parsed is ParseResult.Invalid && parsed.error == CatalogError.BAD_SIGNATURE) {
+            // Just after a catalog is published the host's cache can serve the new file with the old signature (or the
+            // reverse) for a few minutes. Ask once more past the cache before calling it a failed check.
+            val fresh = "fresh=${now()}"
+            bytes = get(withQuery(url, fresh)) ?: return CatalogError.BAD_SIGNATURE
+            signature = get(withQuery("$url.sig", fresh)) ?: return CatalogError.BAD_SIGNATURE
+            parsed = CatalogParser.parse(bytes, signature, publicKey)
+        }
+        val catalog = when (parsed) {
             is ParseResult.Invalid -> return parsed.error
             is ParseResult.Ok -> parsed.catalog
         }
@@ -93,6 +102,8 @@ class CatalogRepository(
         show(catalog, now())
         return null
     }
+
+    private fun withQuery(target: String, query: String) = if ('?' in target) "$target&$query" else "$target?$query"
 
     private fun show(catalog: Catalog, fetchedAt: Long) {
         current = catalog
