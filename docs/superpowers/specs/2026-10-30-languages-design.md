@@ -20,7 +20,7 @@ Granger's promise, "The world's knowledge. Yours to keep.", reaches only English
 
 **Non-goals (this round)**
 - Machine translation of content. A Spanish speaker reading an English pack reads English.
-- Languages beyond Spanish. The design must make a third language mostly a data task (strings, catalog rows, word lists, an eval set), but nothing beyond Spanish is built.
+- Languages beyond Spanish. The design must make a third language mostly a data task (strings, catalog rows, word lists, an eval set), but nothing beyond Spanish is built. Swahili is the third language, next after Spanish ships (Neal, 2026-11-02; roadmap row SW).
 - Right-to-left layout.
 - A Granger Spanish voice. That's L5, planned but not started (§8).
 - Castilian-specific copy. No `values-es-rES` overrides unless a walkthrough finds a string that reads wrong in Spain.

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://fundingjson.org/schema/v1.1.0.json",
+  "version": "v1.1.0",
+  "entity": {
+    "type": "individual",
+    "role": "owner",
+    "name": "Neal Thompson",
+    "email": "nealt900@gmail.com",
+    "description": "Independent developer in Puerto Rico. I design, test and maintain Granger, directing AI coding assistants (Claude Code) and reviewing every change.",
+    "webpageUrl": { "url": "https://github.com/nealt9000/Granger" }
+  },
+  "projects": [
+    {
+      "guid": "granger",
+      "name": "Granger",
+      "description": "Granger is an offline library for Android. It downloads Wikipedia, reference works, public-domain books and audiobooks to the phone, then works with no connection. An on-device librarian, a small open model, answers questions only from the files on the phone, quotes the passage it used, and declines when its files do not cover the question. Nothing a reader searches or asks leaves the device, and there is no telemetry. Content comes from Kiwix, Project Gutenberg, LibriVox and others through a signed catalog. Granger reads aloud with its own open voices. An interface and starter library in Spanish are in testing, with Swahili next and phone-to-phone sharing planned. It is built for people who lose the internet to disasters, cost or censorship, and for anyone who wants to own their library.",
+      "webpageUrl": { "url": "https://github.com/nealt9000/Granger" },
+      "repositoryUrl": { "url": "https://github.com/nealt9000/Granger" },
+      "licenses": ["spdx:GPL-3.0-only"],
+      "tags": ["offline", "android", "wikipedia", "kiwix", "education", "on-device-ai", "privacy", "spanish", "swahili", "library"]
+    }
+  ],
+  "funding": {
+    "channels": [
+      {
+        "guid": "bank",
+        "type": "bank",
+        "description": "US bank transfer. Details on request."
+      }
+    ],
+    "plans": [
+      {
+        "guid": "maintainer-half-time",
+        "status": "active",
+        "name": "Half-time maintainer",
+        "description": "Half of one developer's time for a year: maintenance, the Spanish and Swahili libraries and librarian, phone-to-phone sharing, low-end phone support, releases on F-Droid and Google Play.",
+        "amount": 50000,
+        "currency": "USD",
+        "frequency": "yearly",
+        "channels": ["bank"]
+      },
+      {
+        "guid": "any-amount",
+        "status": "active",
+        "name": "Any amount",
+        "amount": 0,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": ["bank"]
+      }
+    ],
+    "history": []
+  }
+}
