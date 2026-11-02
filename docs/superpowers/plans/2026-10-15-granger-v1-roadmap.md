@@ -411,7 +411,7 @@ UI:
 - The "songs" Recent row replays all music by title (its key has no collection or sort).
 - Settings scrolls to Music & audiobooks by a fixed item index (5).
 - The music Compose screens have no UI tests (view model and DAO only).
-- Parity gaps, later: "Add to playlist" isn't in the full player or the queue; only Songs can be sorted; no cover replacement for audiobooks (M2's LibriVox downloads bring their own covers).
+- Parity gaps, later: "Add to playlist" isn't in ~~the full player~~ (fixed 2026-11-02, `cl-cleanup`) or the queue; only Songs can be sorted; no cover replacement for audiobooks (M2's LibriVox downloads bring their own covers).
 
 Device checks still to do:
 - Deleting a file in the Files app, then restoring it (skipped in the walkthrough).
@@ -544,7 +544,7 @@ Player, session and Auto:
 Widget:
 - No `previewLayout`; the picker uses the generic preview, which Neal found usable.
 - The cover is decoded on the drawing path (cached, ≤ 300 px). Every change also calls `updateAll` (not profiled).
-- The second button's label is "Back" and doesn't follow the skip setting.
+- ~~The second button's label is "Back" and doesn't follow the skip setting.~~ Fixed 2026-11-02: "Back 30 seconds" from the setting, `cl-cleanup`.
 - A boot or resize update starts the process, which binds the service and restores the player paused.
 
 Readers and Search after the follow-ups:
