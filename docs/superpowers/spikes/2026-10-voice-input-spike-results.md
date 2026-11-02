@@ -99,6 +99,16 @@ Neal, phone in hand, `LiveListener` (on-device recognizer, `en-US`, partials, no
 
 **Session 2, with music playing from Granger (5 takes).** Music **kept playing, did not duck or pause, and none of it reached the transcript.** Playback state was still `PLAYING` afterwards. One take came back odd: *"Read to me a shade screen"*.
 
-**Neal's verdict on feel:** *(to come)*
+**Neal's verdict on feel:** it works as expected on the spike screen. How it feels in the app can only be judged there, and he expects it to need the Ask improvements now under way before it feels usable.
 
 **Debug menu:** the "Granger debug" screen had no way into the voice input spike, so it was opened over adb. A **Voice input spike** button is added there.
+
+## Task 7: decisions (Neal, 2026-11-02)
+
+- **Adopt the system on-device recognizer for A1, as is.** It passes offline, latency, question accuracy and the E2B rule. It fails the name rule alone (45%), and a title matcher after recognition covers that instead (20/20 on the replays; live lessons in Task 5).
+- **Biasing: off.** It failed its rule (+5 points at best, and it broke *Toned Ear*).
+- **The mic goes in both** the Research ask box and Search.
+- **Phones with no on-device recognizer: hide the mic.** No fallback to the online recognizer.
+- **Languages:** `en-US` (installed on the Pixel 6) and **`en-GB`, offered** as a download through `triggerModelDownload`. Its size is still unknown; A1 measures it.
+- **Not done:** Task 6 (sherpa-onnx). It's only needed if the system recognizer or the matcher falls short in the app.
+- **For A1's plan:** the matcher lessons in Task 5; a slow first use (16.6 s after the recognition service was stopped), so allow a long first wait or warm the recognizer when the ask box opens; the endpointer decides the end of speech by itself, and Stop was never needed live; the feel depends on the ongoing Ask work.

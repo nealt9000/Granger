@@ -77,15 +77,15 @@
 
 - [x] A live mode: a mic button, partial text as it arrives, the final text, the end-of-speech → final time (from `onEndOfSpeech` to `onResults`). Earcons and the system's own beep noted. *Built 2026-11-02 (`LiveListener`), with the title matcher Neal asked for (`TitleMatcher`, unit-tested); no biasing, per his decision after Task 4.*
 - [x] **Neal's session (about 10 minutes):** ask ten Research questions of his own and say five names, airplane mode on. Then the same with music playing through the app (does input duck or stop it, and does the recognizer hear the music?). *Done 2026-11-02: 25 takes; music neither ducked nor reached the text.*
-- [ ] Record latency, what went wrong, and Neal's verdict on feel: is it quicker than typing?
-- [ ] **Commit.** `Voice input spike: live mode`
+- [x] Record latency, what went wrong, and Neal's verdict on feel: is it quicker than typing?
+- [x] **Commit.** `Voice input spike: live mode`
 
 ### Task 6 (optional, Neal's call): a sherpa-onnx reference
 
-- [ ] Only if Neal asks after Task 4. One small English model through the `OfflineRecognizer` already in the vendored AAR (licence checked first), the same WAVs, the same scorer. Answers whether the fallback is worth building, not whether to ship it.
+- [ ] Only if Neal asks after Task 4. *Not done: Neal chose to ship as is.* One small English model through the `OfflineRecognizer` already in the vendored AAR (licence checked first), the same WAVs, the same scorer. Answers whether the fallback is worth building, not whether to ship it.
 
 ### Task 7: Decisions
 
-- [ ] Results doc: the numbers, the adopt rules met or not, and the questions for Neal: adopt for A1 or not; biasing on or off; where the mic goes (Research ask box, Search, both); what the app does on a phone with no on-device recognizer (hide the mic, or offer the system's online one with a clear note).
-- [ ] Neal's decisions recorded; the A1 row in the roadmap updated (the spike's result, then the plan to write).
-- [ ] **Commit.** `Voice input spike: results and decisions`
+- [x] Results doc: the numbers, the adopt rules met or not, and the questions for Neal: adopt for A1 or not; biasing on or off; where the mic goes (Research ask box, Search, both); what the app does on a phone with no on-device recognizer (hide the mic, or offer the system's online one with a clear note).
+- [x] Neal's decisions recorded; the A1 row in the roadmap updated (the spike's result, then the plan to write).
+- [x] **Commit.** `Voice input spike: results and decisions`
