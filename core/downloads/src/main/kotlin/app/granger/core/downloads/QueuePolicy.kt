@@ -7,9 +7,6 @@ sealed interface EnqueueResult {
 
     /** The volume is [neededBytes] short, counting other queued downloads and the reserve. */
     data class NoSpace(val neededBytes: Long) : EnqueueResult
-
-    /** Packs (installed + queued + this one) would total [wouldUseBytes], over [capBytes]. */
-    data class OverCap(val capBytes: Long, val wouldUseBytes: Long) : EnqueueResult
 }
 
 object QueuePolicy {
@@ -17,23 +14,10 @@ object QueuePolicy {
     const val RESERVE_BYTES = 256L * 1024 * 1024
 
     /**
-     * The checks made when queueing (spec "Storage cap", "Insufficient space"). The cap covers packs
-     * and books ([isPack] means "is capped"); models are excluded. An update's old snapshot ([replacedPackBytes]) is not counted twice.
+     * The check made when queueing (spec "Insufficient space"): this download, the rest still to come on the same
+     * volume, and the reserve must fit in its free space. There is no storage cap (the fair deal, 2026-11-02).
      */
-    fun check(
-        itemBytes: Long,
-        isPack: Boolean,
-        installedPackBytes: Long,
-        queuedPackBytes: Long,
-        replacedPackBytes: Long,
-        capBytes: Long,
-        freeBytes: Long,
-        queuedOnVolumeBytes: Long,
-    ): EnqueueResult {
-        if (isPack) {
-            val wouldUse = installedPackBytes - replacedPackBytes + queuedPackBytes + itemBytes
-            if (wouldUse > capBytes) return EnqueueResult.OverCap(capBytes, wouldUse)
-        }
+    fun check(itemBytes: Long, freeBytes: Long, queuedOnVolumeBytes: Long): EnqueueResult {
         val needed = itemBytes + queuedOnVolumeBytes + RESERVE_BYTES - freeBytes
         if (needed > 0) return EnqueueResult.NoSpace(needed)
         return EnqueueResult.Queued

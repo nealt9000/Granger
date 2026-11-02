@@ -23,15 +23,11 @@ class DownloadManagerTest {
     private val dao = db.downloadDao()
     private val scheduler = FakeScheduler()
     private val dispatcher = StandardTestDispatcher()
-    private var installedPackBytes = 0L
-    private var cap = Long.MAX_VALUE
     private val free = mutableMapOf<String, Long>()
     private val internal by lazy { tmp.newFolder("internal") }
     private val sd by lazy { tmp.newFolder("sd") }
     private val manager = DownloadManager(
         dao, scheduler,
-        installedPackBytes = { installedPackBytes },
-        capBytes = { cap },
         freeBytes = { free[it.path] ?: Long.MAX_VALUE / 2 },
         io = dispatcher,
         now = { 7L },
@@ -92,12 +88,6 @@ class DownloadManagerTest {
         assertThat(record.snapshotDate).isEqualTo("2026-10-17")
     }
 
-    @Test fun booksCountTowardTheCap() = test {
-        cap = 1_500
-        assertThat(manager.enqueue(bookEntry(size = 600), internal, true)).isEqualTo(EnqueueResult.Queued)
-        assertThat(manager.enqueue(packEntry(size = 1_000), internal, true)).isEqualTo(EnqueueResult.OverCap(1_500, 1_600))
-    }
-
     @Test fun enqueueTwiceIsOneDownload() = test {
         manager.enqueue(packEntry(), internal, true)
         assertThat(manager.enqueue(packEntry(), internal, true)).isEqualTo(EnqueueResult.AlreadyActive)
@@ -118,21 +108,6 @@ class DownloadManagerTest {
             .containsExactly(SHA_1 to DownloadState.INSTALLED, SHA_2 to DownloadState.QUEUED)
     }
 
-    @Test fun capRefusesPacksButNotModels() = test {
-        cap = 1_500
-        installedPackBytes = 1_000
-        assertThat(manager.enqueue(packEntry(size = 1_000), internal, true)).isEqualTo(EnqueueResult.OverCap(1_500, 2_000))
-        assertThat(manager.enqueue(modelEntry(size = 5_000), internal, true)).isEqualTo(EnqueueResult.Queued)
-    }
-
-    @Test fun queuedPacksCountTowardsTheCap() = test {
-        cap = 2_500
-        manager.enqueue(packEntry(id = "a", size = 1_000), internal, true)
-        manager.enqueue(packEntry(id = "b", size = 1_000), internal, true)
-        assertThat(manager.enqueue(packEntry(id = "c", size = 1_000), internal, true))
-            .isEqualTo(EnqueueResult.OverCap(2_500, 3_000))
-    }
-
     @Test fun queuedDownloadsOnTheSameVolumeCount() = test {
         free[internal.path] = QueuePolicy.RESERVE_BYTES + 1_500
         free[sd.path] = QueuePolicy.RESERVE_BYTES + 1_500
@@ -141,10 +116,10 @@ class DownloadManagerTest {
         assertThat(manager.enqueue(packEntry(id = "b"), sd, true)).isEqualTo(EnqueueResult.Queued)
     }
 
-    private fun spec(hash: String = "a".repeat(40), size: Long = 20, capped: Boolean = true) = DownloadSpec(
+    private fun spec(hash: String = "a".repeat(40), size: Long = 20) = DownloadSpec(
         itemId = "archive-org:x", kind = ItemKind.BOOK, title = "X", urls = listOf("https://archive.org/download/x/x.epub"),
         sizeBytes = size, hash = hash, hashAlgorithm = HashAlgorithm.SHA1, relativePath = "books/archive-org/x.epub",
-        snapshotDate = "2026-10-17", capped = capped,
+        snapshotDate = "2026-10-17",
     )
 
     @Test fun specIsQueuedAtItsRelativePathWithItsAlgorithm() = test {
@@ -156,18 +131,6 @@ class DownloadManagerTest {
         assertThat(record.kind).isEqualTo(ItemKind.BOOK)
         assertThat(record.snapshotDate).isEqualTo("2026-10-17")
         assertThat(scheduler.ensured).hasSize(1)
-    }
-
-    @Test fun cappedSpecCountsAgainstTheCap() = test {
-        cap = 100
-        installedPackBytes = 90
-        assertThat(manager.enqueue(spec(size = 20), internal, true)).isEqualTo(EnqueueResult.OverCap(100, 110))
-    }
-
-    @Test fun uncappedSpecIgnoresTheCap() = test {
-        cap = 100
-        installedPackBytes = 90
-        assertThat(manager.enqueue(spec(size = 20, capped = false), internal, true)).isEqualTo(EnqueueResult.Queued)
     }
 
     @Test fun specWithTheInstalledHashIsAlreadyInstalled() = test {
@@ -318,7 +281,7 @@ class DownloadManagerTest {
     private fun member(n: Int, size: Long = 100, group: String = "g") = DownloadSpec(
         itemId = "$group/%03d".format(n), kind = ItemKind.AUDIO, title = "Album", urls = listOf("https://archive.org/download/x/$n.mp3"),
         sizeBytes = size, hash = n.toString().repeat(40).take(40), hashAlgorithm = HashAlgorithm.SHA1,
-        relativePath = "music/archive-org/$group/%02d.mp3".format(n), snapshotDate = "", capped = false, groupId = group,
+        relativePath = "music/archive-org/$group/%02d.mp3".format(n), snapshotDate = "", groupId = group,
     )
 
     private fun fileOf(spec: DownloadSpec, root: File = internal) = File(root, spec.relativePath)
@@ -367,12 +330,6 @@ class DownloadManagerTest {
         manager.enqueue(packEntry(size = 1_000), internal, true)
         assertThat(manager.enqueueGroup("g", listOf(member(0), member(1)), internal, true)).isEqualTo(EnqueueResult.NoSpace(50))
         assertThat(manager.enqueueGroup("g", listOf(member(0)), internal, true)).isEqualTo(EnqueueResult.Queued)
-    }
-
-    @Test fun groupIgnoresTheStorageCap() = test {
-        cap = 10
-        installedPackBytes = 1_000
-        assertThat(manager.enqueueGroup("g", listOf(member(0), member(1)), internal, true)).isEqualTo(EnqueueResult.Queued)
     }
 
     @Test fun groupSkipsFilesAlreadyInstalled() = test {

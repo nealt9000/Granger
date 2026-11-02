@@ -131,8 +131,6 @@ object MediaDownloads {
             hashAlgorithm = HashAlgorithm.valueOf(f.hashAlgorithm),
             relativePath = "$dir/${f.name}",
             snapshotDate = "",
-            // Left-over cap plumbing: nothing in Media reads it (no storage cap).
-            capped = false,
             groupId = group,
         )
         return listOfNotNull(m.cover?.let { spec(0, it) }) + m.files.mapIndexed { i, f -> spec(i + 1, f) }

@@ -119,7 +119,7 @@ class MediaDownloadsTest {
         val m = MediaFixtures.timeMachine()
         val specs = MediaDownloads.specs(m)
         assertThat(specs).hasSize(14)
-        assertThat(specs.all { it.kind == ItemKind.AUDIO && it.groupId == "media:librivox:817" && !it.capped }).isTrue()
+        assertThat(specs.all { it.kind == ItemKind.AUDIO && it.groupId == "media:librivox:817" }).isTrue()
         assertThat(specs.map { it.itemId }).isEqualTo((0..13).map { "media:librivox:817/%03d".format(it) })
         assertThat(specs.none { it.itemId.startsWith("archive-org:") }).isTrue()
         assertThat(specs[1].relativePath).isEqualTo("audiobooks/librivox/817/${m.files[0].name}")

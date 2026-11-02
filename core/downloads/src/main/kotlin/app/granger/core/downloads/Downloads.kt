@@ -20,8 +20,7 @@ import java.io.File
 
 /**
  * One file to download, whether or not it is in the catalog. [relativePath] is under the volume root,
- * e.g. `books/archive-org/x.epub`; [capped] says whether it counts toward the storage cap. [groupId] names the
- * download group (one book or album) the file belongs to; see [Downloads.enqueueGroup].
+ * e.g. `books/archive-org/x.epub`. [groupId] names the download group (one book or album) the file belongs to; see [Downloads.enqueueGroup].
  */
 data class DownloadSpec(
     val itemId: String,
@@ -33,7 +32,6 @@ data class DownloadSpec(
     val hashAlgorithm: HashAlgorithm,
     val relativePath: String,
     val snapshotDate: String,
-    val capped: Boolean,
     val groupId: String? = null,
 )
 
@@ -134,8 +132,6 @@ class DownloadManager(
     private val prefs: QueuePrefs = MemoryQueuePrefs(),
     progress: Flow<QueueProgress> = flowOf(QueueProgress()),
     unmetered: Flow<Boolean> = flowOf(true),
-    private val installedPackBytes: suspend () -> Long,
-    private val capBytes: () -> Long = { Long.MAX_VALUE },
     private val freeBytes: (File) -> Long = { it.usableSpace },
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
@@ -194,11 +190,6 @@ class DownloadManager(
         val active = dao.getAll().filter { it.isActive }
         val verdict = QueuePolicy.check(
             itemBytes = spec.sizeBytes,
-            isPack = spec.capped,
-            installedPackBytes = installedPackBytes(),
-            queuedPackBytes = active.filter { it.kind == ItemKind.PACK || it.kind == ItemKind.BOOK }.sumOf { it.sizeBytes },
-            replacedPackBytes = if (spec.capped) versions.sumOf { it.sizeBytes } else 0L,
-            capBytes = capBytes(),
             freeBytes = withContext(io) { freeBytes(root) },
             queuedOnVolumeBytes = active
                 .filter { it.filePath.startsWith(root.path + File.separator) }
@@ -250,15 +241,10 @@ class DownloadManager(
         if (toFetch.isEmpty()) {
             return@withLock if (anyActive) EnqueueResult.AlreadyActive else EnqueueResult.AlreadyInstalled
         }
-        // Only free space is checked (no cap for media): the group's bytes, other queued bytes on the volume, the reserve.
+        // The group's bytes, other queued bytes on the volume, the reserve.
         val active = all.filter { it.isActive }
         val verdict = QueuePolicy.check(
             itemBytes = toFetch.sumOf { it.sizeBytes },
-            isPack = false,
-            installedPackBytes = 0,
-            queuedPackBytes = 0,
-            replacedPackBytes = 0,
-            capBytes = Long.MAX_VALUE,
             freeBytes = withContext(io) { freeBytes(root) },
             queuedOnVolumeBytes = active
                 .filter { it.filePath.startsWith(root.path + File.separator) }
@@ -435,25 +421,24 @@ val DownloadRecord.isFromCatalog: Boolean
     }
 
 /**
- * The spec a catalog item downloads as. Packs and books count against the storage cap; models and voices do not. Each
- * pack snapshot and book release gets its own file, so an update never overwrites the pack being read. [groupId] puts
+ * The spec a catalog item downloads as. Each pack snapshot and book release gets its own file, so an update never overwrites the pack being read. [groupId] puts
  * the item in a group (one file at a time, one progress), as onboarding's setup does (Plan H3).
  */
 fun downloadSpecOf(item: CatalogItem, groupId: String? = null): DownloadSpec = when (item) {
     is PackEntry -> DownloadSpec(
         item.id, ItemKind.PACK, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
-        "packs/${item.id}_${item.snapshotDate}.zim", item.snapshotDate, capped = true, groupId = groupId,
+        "packs/${item.id}_${item.snapshotDate}.zim", item.snapshotDate, groupId = groupId,
     )
     is BookEntry -> DownloadSpec(
         item.id, ItemKind.BOOK, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
-        "books/granger/${item.id}_${item.releaseDate}.epub", item.releaseDate, capped = true, groupId = groupId,
+        "books/granger/${item.id}_${item.releaseDate}.epub", item.releaseDate, groupId = groupId,
     )
     is ModelEntry -> DownloadSpec(
         item.id, ItemKind.MODEL, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
-        "models/${item.fileName}", "", capped = false, groupId = groupId,
+        "models/${item.fileName}", "", groupId = groupId,
     )
     is VoiceEntry -> DownloadSpec(
         item.id, ItemKind.VOICE, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
-        "voices/${item.id}.zip", "", capped = false, groupId = groupId,
+        "voices/${item.id}.zip", "", groupId = groupId,
     )
 }

@@ -552,17 +552,6 @@ class ArchiveViewModelTest {
         assertThat(sidecars.listFiles()!!.toList()).isEmpty()
     }
 
-    @Test fun overCapShowsTheLimitNotice() = runTest(main.dispatcher) {
-        downloads.nextResult = EnqueueResult.OverCap(10_000_000_000, 11_000_000_000)
-        val vm = viewModel()
-        vm.get(epubId)
-        settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).contains("would bring your downloads to")
-        assertThat(vm.ui.value.notice).contains("10 GB limit")
-        // No orphan sidecar is left behind.
-        assertThat(File(sidecars, "$epubId.json").exists()).isFalse()
-    }
-
     @Test fun noSpaceExplainsWhere() = runTest(main.dispatcher) {
         downloads.nextResult = EnqueueResult.NoSpace(2_000_000_000)
         val vm = viewModel()

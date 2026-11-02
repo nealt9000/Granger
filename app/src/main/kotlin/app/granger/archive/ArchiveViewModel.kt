@@ -472,16 +472,13 @@ class ArchiveViewModel(
             throw e
         }
         // A refused enqueue leaves no sidecar; an installed book keeps its (now refreshed) one for later repairs.
-        if (ownsSidecar && (result is EnqueueResult.NoSpace || result is EnqueueResult.OverCap)) {
+        if (ownsSidecar && result is EnqueueResult.NoSpace) {
             withContext(io) { sidecar.delete() }
         }
         return when (result) {
             EnqueueResult.Queued, EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> null
             is EnqueueResult.NoSpace ->
                 "Not enough space on ${volume.label} for ${spec.title}: free up ${formatBytes(result.neededBytes)}."
-            is EnqueueResult.OverCap ->
-                "${spec.title} would bring your downloads to ${formatBytes(result.wouldUseBytes)}, " +
-                    "over the ${formatBytes(result.capBytes)} limit."
         }
     }
 
@@ -521,11 +518,6 @@ class ArchiveViewModel(
                 is EnqueueResult.NoSpace -> {
                     withContext(io) { sidecar.delete() }
                     return "Not enough space on $label for ${spec.title}: free up ${formatBytes(result.neededBytes)}."
-                }
-                is EnqueueResult.OverCap -> {
-                    withContext(io) { sidecar.delete() }
-                    return "${spec.title} would bring your downloads to ${formatBytes(result.wouldUseBytes)}, " +
-                        "over the ${formatBytes(result.capBytes)} limit."
                 }
             }
         }

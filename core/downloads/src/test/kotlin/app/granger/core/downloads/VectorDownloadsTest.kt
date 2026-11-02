@@ -26,7 +26,7 @@ class VectorDownloadsTest {
     private val dao = db.downloadDao()
     private val scheduler = FakeScheduler()
     private val dispatcher = StandardTestDispatcher()
-    private val manager = DownloadManager(dao, scheduler, installedPackBytes = { 0L }, io = dispatcher, now = { 7L })
+    private val manager = DownloadManager(dao, scheduler, io = dispatcher, now = { 7L })
     private val vectors = VectorDownloads(manager, wifiOnly = { true })
     private val sd by lazy { tmp.newFolder("sd") }
 
