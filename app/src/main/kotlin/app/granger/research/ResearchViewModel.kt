@@ -693,13 +693,14 @@ class ResearchViewModel(
             }
             throw e
         } catch (e: Exception) {
-            // A model or search error mid-run: the turn failed, and Readiness can check the model.
+            // The pipeline reports model and search errors as outcomes, so this is storage or a bug, not the model:
+            // "Couldn't search your library. Try again", not "The model needs repair".
             runCatching { android.util.Log.w("Granger", "Research turn failed", e) }
             val id = turnId
             if (id != null && !settled) {
                 // The error may be the database's own; the turn then stays PENDING until the next launch interrupts it.
                 withContext(NonCancellable) {
-                    logErrors { chats.finishTurn(id, TurnOutcome.FAILED, "", medical, emptyList(), kept, emptyList()) }
+                    logErrors { chats.finishTurn(id, TurnOutcome.SEARCH_FAILED, "", medical, emptyList(), kept, emptyList()) }
                 }
             }
         } finally {
