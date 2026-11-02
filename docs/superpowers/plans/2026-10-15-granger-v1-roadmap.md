@@ -388,7 +388,7 @@ Data and scanner:
 - A playlist row's position is its entry ordinal, which is right only while every entry has a track row (true today: the scanner never deletes rows).
 - The artist list takes an artist sort tag only from single-artist tracks.
 - Orphaned cover files are never cleaned up (old `<fingerprint>.jpg` files and shared covers nothing uses).
-- The TagLib skip list never resets, so a file whose tag read was cut short by any process death is skipped for tags forever.
+- ~~The TagLib skip list never resets, so a file whose tag read was cut short by any process death is skipped for tags forever.~~ Fixed 2026-11-02: two strikes (one death only makes a file suspect, a clean read clears it; old one-strike skips get one more read), `cl-cleanup`.
 - Parity gaps, later: original dates are read and stored but not shown or sorted by; no way to exclude folders from the scan.
 
 Player and engine:

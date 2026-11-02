@@ -211,8 +211,9 @@ class PhoneScannerTest {
     private class NativeCrash : Error()
 
     /**
-     * A file whose tags crashed the app mid-scan is never handed to the tag reader again (the crash would recur on
-     * every launch); it becomes a track named from its file, and the rest of the library is read as usual.
+     * A file whose tags crashed the app twice is never handed to the tag reader again (the crash would recur on
+     * every launch); it becomes a track named from its file, and the rest of the library is read as usual. Once is
+     * only suspect: any process death mid-read leaves the same mark.
      */
     @Test fun fileThatCrashedTheTagReaderIsNeverReadForTagsAgain() = runTest {
         val guardDir = tmp.newFolder("guard")
@@ -232,8 +233,12 @@ class PhoneScannerTest {
         fun newScanner() = PhoneScanner(listOf(source), opener, media, playback, coversDir, { true }, reader, FileTagReadGuard(guardDir))
 
         assertThat(runCatching { newScanner().scan() }.exceptionOrNull()).isInstanceOf(NativeCrash::class.java)
+        // The next launch reads it again (one death may not be the file's fault), and it crashes again.
+        read.clear()
+        assertThat(runCatching { newScanner().scan() }.exceptionOrNull()).isInstanceOf(NativeCrash::class.java)
+        assertThat(read).contains("bad.mp3")
 
-        // The next launch: the file it died on isn't handed to the reader; everything else is read.
+        // The launch after: the file it died on twice isn't handed to the reader; everything else is read.
         read.clear()
         assertThat(newScanner().scan()).isEqualTo(3)
         assertThat(read).containsExactly("good.mp3", "after.mp3")
