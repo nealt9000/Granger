@@ -477,7 +477,7 @@ class BookshelfTest {
         val source = File(src, "README").apply { writeText("# Title\n\nSome words.") }
         val result = shelf.import("README") { source.inputStream() }
         val book = shelf.book((result as ImportResult.Imported).bookId)!!
-        assertThat(book.title).isEqualTo("README")
+        assertThat(book.title).isEqualTo("Title")              // the text names its own title (clean-up list)
         assertThat(File(book.filePath).name).endsWith("-README.epub")
     }
 

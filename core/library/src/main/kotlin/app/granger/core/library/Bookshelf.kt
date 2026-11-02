@@ -337,9 +337,11 @@ class RoomBookshelf(
                 if (incoming.length() > maxTextBytes) return@withContext ImportResult.Damaged("Too large")
                 val markdown = displayName.lowercase().let { it.endsWith(".md") || it.endsWith(".markdown") }
                 val text = TextDecoding.decode(incoming.readBytes())
-                converted.outputStream().use { TextToEpub.convert(text, title, markdown, it) }
+                // The text's own title when it names one ("Title: Walden", "# Field notes"); else the file name.
+                val textTitle = TextToEpub.titleOf(text, markdown) ?: title
+                converted.outputStream().use { TextToEpub.convert(text, textTitle, markdown, it) }
                 epub = converted
-                meta = when (val inspection = EpubInspector.inspect(converted, title)) {
+                meta = when (val inspection = EpubInspector.inspect(converted, textTitle)) {
                     is Inspection.Ok -> inspection.meta
                     is Inspection.Protected -> return@withContext ImportResult.Protected(inspection.kind)
                     is Inspection.Invalid -> return@withContext ImportResult.Damaged(inspection.reason)

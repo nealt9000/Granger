@@ -52,6 +52,30 @@ class TextToEpubTest {
         assertThat(total).isEqualTo(paragraphs)
     }
 
+    @Test fun aFileWithOneParagraphPerLineSplitsAtEachLine() {
+        val para = "This sentence is a whole paragraph of a file written without blank lines, the way many notes are. ".repeat(2).trim()
+        val ps = Regex("<p>(.*?)</p>").findAll(chapters(convert((1..20).joinToString("\n") { "$it $para" })).single()).toList()
+        assertThat(ps).hasSize(20)
+    }
+
+    @Test fun hardWrappedTextKeepsItsLinesTogether() {
+        val wrapped = (1..40).joinToString("\n") { "a line of an ordinary hard-wrapped book, about seventy characters" }
+        val ps = Regex("<p>(.*?)</p>", RegexOption.DOT_MATCHES_ALL).findAll(chapters(convert(wrapped + "\n\n" + wrapped)).single()).toList()
+        assertThat(ps).hasSize(2)
+    }
+
+    @Test fun aTextNamesItsOwnTitle() {
+        assertThat(TextToEpub.titleOf("# Field notes\n\nSome text.", markdown = true)).isEqualTo("Field notes")
+        assertThat(TextToEpub.titleOf("The Project Gutenberg eBook of Walden, by Henry David Thoreau\n\nTitle: Walden\n\nAuthor: Thoreau", false))
+            .isEqualTo("Walden")
+        assertThat(TextToEpub.titleOf("\uFEFFThe Project Gutenberg eBook of Walden, by Henry David Thoreau\n", false)).isEqualTo("Walden")
+        assertThat(TextToEpub.titleOf("\n\nThe Wind in the Willows\n\nby Kenneth Grahame\n\nChapter 1", false)).isEqualTo("The Wind in the Willows")
+        // A first line that's a sentence, a heading or runs on is no title: the file name stays.
+        assertThat(TextToEpub.titleOf("Bought milk today.\n\nThen eggs.", false)).isNull()
+        assertThat(TextToEpub.titleOf("Chapter 1\n\nIt began.", false)).isNull()
+        assertThat(TextToEpub.titleOf("first line of a paragraph\nthat carries on here", false)).isNull()
+    }
+
     @Test fun overlongParagraphIsCutAtSpace() {
         val para = "abc ".repeat(100).trim()
         val cs = chapters(convert(para, max = 50))
