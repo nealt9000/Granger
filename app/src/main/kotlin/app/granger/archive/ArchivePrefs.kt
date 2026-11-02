@@ -11,6 +11,13 @@ interface ArchivePrefs {
     fun withdraw()
 }
 
+/** The Play build's archive.org: the waiver can't be accepted, so the public-domain filter always applies. */
+object FixedFilterArchivePrefs : ArchivePrefs {
+    override val waiverAccepted: StateFlow<Boolean> = MutableStateFlow(false)
+    override fun accept() = Unit
+    override fun withdraw() = Unit
+}
+
 class SharedArchivePrefs(context: Context) : ArchivePrefs {
     private val prefs = context.getSharedPreferences("archive", Context.MODE_PRIVATE)
     private val state = MutableStateFlow(prefs.getLong(KEY, 0L) != 0L)

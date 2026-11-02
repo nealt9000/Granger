@@ -56,6 +56,7 @@ import app.granger.core.library.BookDetails
 import app.granger.core.library.BookOrigin
 import app.granger.archive.ArchiveDownloads
 import app.granger.archive.ArchivePrefs
+import app.granger.archive.FixedFilterArchivePrefs
 import app.granger.archive.SharedArchivePrefs
 import app.granger.settings.AppearancePrefs
 import app.granger.settings.SharedAppearancePrefs
@@ -545,7 +546,7 @@ class AppContainer(context: Context) {
 
     val archiveClient = ArchiveOrgClient(http, archiveUserAgent)
     val librivoxClient = LibriVoxClient(http, archiveUserAgent)
-    val archivePrefs: ArchivePrefs = SharedArchivePrefs(context)
+    val archivePrefs: ArchivePrefs = if (Features.ARCHIVE_WAIVER) SharedArchivePrefs(context) else FixedFilterArchivePrefs
     val appearancePrefs: AppearancePrefs = SharedAppearancePrefs(context)
     val homePrefs: HomePrefs = SharedHomePrefs(context)
     /** The tidy offers Keep both answered (Plan WF Decision 5), shared by Home and Downloads. */
