@@ -14,16 +14,29 @@ import app.granger.core.library.MediaResults
 import app.granger.core.library.ReadingSessions
 import app.granger.core.library.SearchHit
 import app.granger.core.library.ZimLibrarySearch
+import app.granger.core.text.SpokenTitleMatcher
+import app.granger.voiceinput.Dictation
+import app.granger.voiceinput.VoiceInput
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** The music and audiobooks matching a query ([app.granger.core.library.MediaIndex.search] in the app). */
 fun interface MediaSearch { suspend fun search(query: String): MediaResults }
@@ -62,6 +75,12 @@ class SearchViewModel(
     private val sessions: ReadingSessions,
     initialQuery: String = "",
     private val media: MediaSearch = MediaSearch { MediaResults() },
+    /** Voice input (Plan A1); null leaves Search without a mic. */
+    voice: VoiceInput? = null,
+    /** The library's names, for "Did you mean" after a spoken search ([app.granger.voiceinput.SpokenTitles]). */
+    private val spokenNames: Flow<List<String>> = emptyFlow(),
+    /** Where the title matcher runs (a few milliseconds over a large library); tests pass their own. */
+    private val matching: CoroutineDispatcher = Dispatchers.Default,
 ) : ViewModel() {
     data class State(
         val query: String = "",
@@ -79,6 +98,11 @@ class SearchViewModel(
         val expanded: Set<SearchGroup> = emptySet(),
         /** Groups whose search returned as many as it was asked for, so more may match than are listed. */
         val capped: Set<SearchGroup> = emptySet(),
+        /**
+         * After a spoken search, the library name the words most likely meant, when it isn't what was searched
+         * (Plan A1: the recognizer misspells names, *the domapada*). Typing clears it.
+         */
+        val didYouMean: String? = null,
     ) {
         /** The rows of [group] on screen: its preview, or all of [all] once expanded. */
         fun <T> shown(group: SearchGroup, all: List<T>): List<T> = if (group in expanded) all else all.take(group.preview)
@@ -168,9 +192,52 @@ class SearchViewModel(
     }
 
     fun onQueryChange(text: String) {
+        setQuery(text)
+        _state.update { it.copy(didYouMean = null) }
+    }
+
+    private fun setQuery(text: String) {
         searchText = text
         query.update { it.copy(text = text.trim()) }
         _state.update { it.copy(query = text) }
+    }
+
+    /** Speaking a search (Plan A1): null when there's no mic. The words fill the field as they come. */
+    val dictation: Dictation? = voice?.let { Dictation(it, viewModelScope) }
+
+    /** Whether the mic shows: voice input is set up and the phone can listen in the app's language now. */
+    val micShown: StateFlow<Boolean> = voice?.status?.map { it.micShown }?.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+        ?: MutableStateFlow(false)
+
+    /** Read from the first spoken search on, so the names are ready by the time the speaker stops. */
+    private val names: StateFlow<List<String>> by lazy { spokenNames.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList()) }
+
+    /** The mic: listens, fills the field as the words come, then searches at once and offers "Did you mean". */
+    fun speak() {
+        val dictation = dictation ?: return
+        names.value // starts reading the library's names
+        _state.update { it.copy(didYouMean = null) }
+        dictation.start(onText = ::setQuery) { heard ->
+            setQuery(heard)
+            refresh()
+            viewModelScope.launch { suggest(heard) }
+        }
+    }
+
+    private suspend fun suggest(heard: String) {
+        val library = withTimeoutOrNull(NAMES_WAIT_MS) { names.first { it.isNotEmpty() } } ?: names.value
+        val match = withContext(matching) { SpokenTitleMatcher.best(heard, library) } ?: return
+        val said = SpokenTitleMatcher.stripVerb(SpokenTitleMatcher.normalize(heard))
+        if (SpokenTitleMatcher.normalize(match.name) == said) return
+        // Only if the field still holds what was heard: typing since then has moved on.
+        if (searchText == heard) _state.update { it.copy(didYouMean = match.name) }
+    }
+
+    /** "Did you mean …?" tapped: searches that name instead. */
+    fun acceptSuggestion() {
+        val name = state.value.didYouMean ?: return
+        onQueryChange(name)
+        refresh()
     }
 
     /**
@@ -216,5 +283,7 @@ class SearchViewModel(
 
     companion object {
         const val DEBOUNCE_MS = 250L
+        /** How long "Did you mean" waits for the library's names on the very first spoken search. */
+        const val NAMES_WAIT_MS = 2_000L
     }
 }

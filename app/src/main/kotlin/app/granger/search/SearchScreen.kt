@@ -46,6 +46,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.granger.voiceinput.Dictation
+import app.granger.voiceinput.MicButton
+import app.granger.voiceinput.VoiceInputPrefs
 import app.granger.BookTarget
 import app.granger.R
 import app.granger.UiText
@@ -77,6 +80,8 @@ fun SearchScreen(
     /** Plays the song within its album (`SongPlayer`). */
     onPlaySong: (Track) -> Unit,
     onBack: () -> Unit,
+    /** Voice input's settings (Plan A1), for the mic's permission prompt; null hides the mic. */
+    voicePrefs: VoiceInputPrefs? = null,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     // Back from a book opened since (and so indexed) searches again, so the book is found (Plan GB walkthrough).
@@ -102,6 +107,11 @@ fun SearchScreen(
     }
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { focus.requestFocus() }
+    // Voice input (Plan A1): the mic in the field, while the phone can listen in the app's language.
+    val dictation = viewModel.dictation
+    val micShown by viewModel.micShown.collectAsStateWithLifecycle()
+    val dictationState = dictation?.state?.collectAsStateWithLifecycle()?.value
+    val listening = dictationState is Dictation.State.Listening
     val keyboard = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     /** Submitting or scrolling puts the keyboard away, so the results have the screen (Plan U3b Decision 10). */
@@ -122,10 +132,22 @@ fun SearchScreen(
                     TextField(
                         value = viewModel.searchText,
                         onValueChange = viewModel::onQueryChange,
-                        placeholder = { Text(stringResource(R.string.search_placeholder)) },
+                        placeholder = { Text(stringResource(if (listening) R.string.voice_input_listening else R.string.search_placeholder)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(onSearch = { dropKeyboard(); viewModel.refresh() }),
+                        trailingIcon = if (micShown && dictation != null && voicePrefs != null) {
+                            {
+                                MicButton(
+                                    listening = listening,
+                                    prefs = voicePrefs,
+                                    onStart = { dropKeyboard(); viewModel.speak() },
+                                    onStop = dictation::stop,
+                                )
+                            }
+                        } else {
+                            null
+                        },
                         modifier = Modifier.fillMaxWidth().focusRequester(focus),
                     )
                 },
@@ -140,6 +162,19 @@ fun SearchScreen(
                 Text(stringResource(R.string.search_nothing_found), Modifier.align(Alignment.Center).padding(24.dp))
             }
             LazyColumn(Modifier.fillMaxSize(), state = list) {
+                (dictationState as? Dictation.State.Failed)?.let { failed ->
+                    item(key = "voice-failed") {
+                        Text(failed.message.resolve(), Modifier.padding(horizontal = 16.dp, vertical = 8.dp), style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+                state.didYouMean?.let { name ->
+                    item(key = "did-you-mean") {
+                        ListItem(
+                            modifier = Modifier.clickable { viewModel.acceptSuggestion() },
+                            headlineContent = { Text(stringResource(R.string.search_did_you_mean, name)) },
+                        )
+                    }
+                }
                 if (state.query.isBlank() && state.recent.isNotEmpty()) {
                     item { SectionHeader(stringResource(R.string.search_recent)) }
                     items(state.recent, key = { "r:$it" }) { recent ->

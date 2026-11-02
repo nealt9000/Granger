@@ -28,34 +28,6 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DictationTest {
-    /** A recognizer whose events the test sends; each take is a fresh channel. */
-    private class FakeSpeech(var languages: RecognizerLanguages? = RecognizerLanguages(listOf("en-US", "es-ES"), listOf("en-GB"))) : SpeechInput {
-        var events = Channel<DictationEvent>(Channel.UNLIMITED)
-        val tags = mutableListOf<String>()
-        var stops = 0
-        var cancelled = false
-        override suspend fun languages() = languages
-        override suspend fun availability(tag: String) = languages?.availability(tag) ?: Availability.UNAVAILABLE
-        override fun listen(tag: String): Flow<DictationEvent> {
-            tags += tag
-            val take = Channel<DictationEvent>(Channel.UNLIMITED).also { events = it }
-            return take.consumeAsFlow().onCompletion { if (it != null) cancelled = true }
-        }
-        override fun stop() { stops++ }
-        override suspend fun download(tag: String, onProgress: (Int) -> Unit) = DownloadOutcome.DONE
-        fun send(vararg e: DictationEvent) = e.forEach { events.trySend(it) }
-        fun end(vararg e: DictationEvent) { send(*e); events.close() }
-    }
-
-    private class FakePrefs : VoiceInputPrefs {
-        override val englishTag = MutableStateFlow(RecognizerTags.ENGLISH_US)
-        override val askWhenDone: StateFlow<Boolean> = MutableStateFlow(false)
-        override var micAsked = false
-        override fun setEnglishTag(tag: String) { englishTag.value = tag }
-        override fun setAskWhenDone(on: Boolean) {}
-        override fun setMicAsked() { micAsked = true }
-    }
-
     private class Setup(val speech: FakeSpeech, val language: MutableStateFlow<String>, val prefs: FakePrefs, val voice: VoiceInput, var readAloudStops: Int = 0)
 
     private fun TestScope.setup(speech: FakeSpeech = FakeSpeech(), language: String = "en"): Setup {

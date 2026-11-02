@@ -1062,6 +1062,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         SearchViewModel(
                             container.search, container.sessions, query,
                             media = if (Features.PLAYER) MediaSearch { container.mediaIndex.searchForGroups(it) } else MediaSearch { MediaResults() },
+                            voice = container.voiceInput,
+                            spokenNames = container.spokenTitles.names,
                         )
                     },
                     onOpenTab = ::showTab,
@@ -1073,6 +1075,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onOpenAudiobook = { nav.navigate(AudiobookRoute(it)) },
                     onPlaySong = { track -> scope.launch { songs.play(track) } },
                     onBack = { nav.popBackStack() },
+                    voicePrefs = container.voiceInput.prefs,
                 )
             }
             composable<ResearchRoute> { backStackEntry ->

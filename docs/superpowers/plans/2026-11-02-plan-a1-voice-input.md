@@ -107,10 +107,11 @@
 
 **Files:** modify `app/src/main/kotlin/app/granger/search/SearchScreen.kt`, `SearchViewModel.kt`; tests in `SearchViewModelTest.kt`.
 
-- [ ] A `MicButton` as the field's trailing icon (when the field is empty, or always if it fits; check on the phone). Partials fill the field; the final runs the search as Search on the keyboard does, and drops the keyboard.
-- [ ] After a spoken search, `SpokenTitleMatcher.best(query, spokenTitles)`. If it scores at least the threshold and the name isn't the query already, a **"Did you mean *The King James Bible*?"** line sits above the results; tapping it searches that name. Typing clears it.
-- [ ] View-model tests: a spoken *the domapada* shows *The Dhammapada*; a typed one doesn't; a spoken exact title shows nothing.
-- [ ] **Commit.** `A1: speak a search, with "Did you mean"`
+- [x] A `MicButton` as the field's trailing icon (when the field is empty, or always if it fits; check on the phone). Partials fill the field; the final runs the search as Search on the keyboard does, and drops the keyboard.
+- [x] After a spoken search, `SpokenTitleMatcher.best(query, spokenTitles)`. If it scores at least the threshold and the name isn't the query already, a **"Did you mean *The King James Bible*?"** line sits above the results; tapping it searches that name. Typing clears it.
+- [x] View-model tests: a spoken *the domapada* shows *The Dhammapada*; a typed one doesn't; a spoken exact title shows nothing.
+- [x] *Done 2026-11-02 (phone check still to do).* The mic is the field's trailing icon while `micShown`, and the placeholder reads "Listening…" during a take. A failure shows as a line above the results for 3 s. The library's names start loading at the first mic tap, and "Did you mean" waits up to 2 s for them. The matcher runs on an injected dispatcher (`Dispatchers.Default` in the app). Tests: 5 in `SearchVoiceTest`; the voice fakes moved to `VoiceFakes.kt` for Task 6.
+- [x] **Commit.** `A1: speak a search, with "Did you mean"`
 
 ### Task 6: The mic in the Research ask box
 

@@ -108,4 +108,5 @@
     <string name="search_show_fewer_songs">Mostrar menos canciones</string>
     <string name="search_show_fewer_articles">Mostrar menos coincidencias en artículos</string>
     <string name="search_show_fewer_books">Mostrar menos libros</string>
+    <string name="search_did_you_mean">¿Querías decir %1$s?</string>
 </resources>

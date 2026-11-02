@@ -101,4 +101,6 @@
     <string name="search_show_fewer_audiobooks">Show fewer audiobooks</string>
     <string name="search_show_fewer_articles">Show fewer article matches</string>
     <string name="search_show_fewer_books">Show fewer books</string>
+    <!-- After a spoken search (Plan A1): the library name the words most likely meant. -->
+    <string name="search_did_you_mean">Did you mean %1$s?</string>
 </resources>
