@@ -606,7 +606,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             is ReadSourceKey.Text -> {
                 // A spoken Research answer (Plan V2) opens its chat.
                 val turnId = ResearchViewModel.answerTurnId(voice.sourceKey) ?: return null
-                val chatId = container.researchChats.turn(turnId)?.chatId ?: return null
+                // A storage error leaves the voice playing rather than crashing the app.
+                val chatId = runCatching { container.researchChats.turn(turnId) }.getOrNull()?.chatId ?: return null
                 nav.navigate(ResearchRoute(chatId))
                 return Unit
             }
