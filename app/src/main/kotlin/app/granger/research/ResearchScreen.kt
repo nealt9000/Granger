@@ -1,5 +1,14 @@
 package app.granger.research
 
+import android.content.ActivityNotFoundException
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import app.granger.BuildConfig
+import app.granger.feedback.AskReport
+import app.granger.feedback.BuildFacts
+import app.granger.feedback.FeedbackMail
+import app.granger.feedback.ReportSheet
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -300,6 +309,37 @@ fun ResearchScreen(
         wasLive = live
     }
 
+    // Report this answer (release checklist A): the turn and whether it's the best guess being reported.
+    var reporting by remember { mutableStateOf<Pair<Long, Boolean>?>(null) }
+    val context = LocalContext.current
+    reporting?.let { (turnId, guess) ->
+        val turn = state.turns.firstOrNull { it.turn.id == turnId }?.turn
+        if (turn == null) {
+            reporting = null
+        } else {
+            val album = stringResource(R.string.research_source_album)
+            val audiobook = stringResource(R.string.research_source_audiobook)
+            val sources = if (guess) emptyList() else turn.shown.map { p ->
+                listOf(p.sourceTitle, sourceByline(p, album, audiobook)).filter { it.isNotBlank() }.joinToString(" · ")
+            }
+            ReportSheet(
+                guess = guess,
+                sources = sources.size,
+                onSend = { reason, note ->
+                    val report = AskReport(reason, note, turn.question, if (guess) turn.guess else turn.answer, guess, sources, BuildFacts.ofThisPhone())
+                    val email = report.intent()
+                    try {
+                        context.startActivity(FeedbackMail.toMailApps(email, FeedbackMail.mailApps(context)) ?: FeedbackMail.shareInstead(email))
+                        reporting = null
+                    } catch (e: ActivityNotFoundException) {
+                        Toast.makeText(context, context.getString(R.string.feedback_no_mail_app, BuildConfig.FEEDBACK_EMAIL), Toast.LENGTH_LONG).show()
+                    }
+                },
+                onDismiss = { reporting = null },
+            )
+        }
+    }
+
     var chatsOpen by remember { mutableStateOf(false) }
     if (chatsOpen) {
         ChatsSheet(
@@ -389,6 +429,7 @@ fun ResearchScreen(
                         onSearch = { onSearch(searchInsteadQuery(row.turn.turn.keywords, row.turn.turn.question)) },
                         onRetry = { viewModel.retry(row.turn.turn.id) },
                         onGuess = { viewModel.bestGuess(row.turn.turn.id) },
+                        onReport = { guess -> reporting = row.turn.turn.id to guess },
                         onReadiness = onReadiness,
                         checkFailed = state.readiness == ResearchReadiness.FAILED_CHECK,
                     )
@@ -457,6 +498,8 @@ private fun AnswerBlock(
     onRetry: () -> Unit,
     onGuess: () -> Unit,
     onReadiness: () -> Unit,
+    /** Report this answer (true: the best guess). */
+    onReport: (guess: Boolean) -> Unit = {},
     /** The model failed its self-check: a failed turn points to the notice below, not to Readiness. */
     checkFailed: Boolean = false,
 ) {
@@ -483,7 +526,7 @@ private fun AnswerBlock(
             TurnOutcome.ANSWERED -> {
                 if (ui.medical && MedicalQuotes.isQuoted(turn.answer)) QuotedLabel()
                 AnswerBody(turn.answer, onCite)
-                if (!running || ui.voice != VoiceButton.IDLE) ReadAloudRow(ui.voice, onRead, onPauseResume, onStopReading)
+                if (!running || ui.voice != VoiceButton.IDLE) ReadAloudRow(ui.voice, onRead, onPauseResume, onStopReading) { onReport(false) }
             }
             TurnOutcome.UNVERIFIED -> Text(stringResource(R.string.research_unverified), style = MaterialTheme.typography.bodyLarge)
             TurnOutcome.DECLINED -> {
@@ -512,7 +555,7 @@ private fun AnswerBlock(
                 if (guessText.isNotBlank()) {
                     GuessCard(if (owlSpeaks()) OwlLines.guessLabel(turn.id) else stringResource(R.string.research_best_guess_label), guessText)
                 }
-                if (guessText.isNotBlank() && !ui.guessing) ReadAloudRow(ui.voice, onRead, onPauseResume, onStopReading)
+                if (guessText.isNotBlank() && !ui.guessing) ReadAloudRow(ui.voice, onRead, onPauseResume, onStopReading) { onReport(true) }
                 if (!(ui.guessing && ui.guessShown)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedButton(onClick = onSearch) { Text(stringResource(R.string.research_search_instead)) }
@@ -552,9 +595,20 @@ private fun AnswerBlock(
  * Play and a separate Stop. Hidden only while a turn runs and nothing is being read.
  */
 @Composable
-private fun ReadAloudRow(voice: VoiceButton, onRead: () -> Unit, onPauseResume: () -> Unit, onStop: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) { ListenButtons(voice, onRead, onPauseResume, onStop) }
+private fun ReadAloudRow(voice: VoiceButton, onRead: () -> Unit, onPauseResume: () -> Unit, onStop: () -> Unit, onReport: () -> Unit) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        ListenButtons(voice, onRead, onPauseResume, onStop)
+        Spacer(Modifier.weight(1f))
+        // Report this answer (Play's AI-generated content policy): on every reply and best guess.
+        TextButton(onClick = onReport, modifier = Modifier.testTag(REPORT_TAG)) {
+            Icon(painterResource(R.drawable.ic_flag), contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(6.dp))
+            Text(stringResource(R.string.report_action))
+        }
+    }
 }
+
+internal const val REPORT_TAG = "research-report"
 
 /** The model's own guess, outlined and set apart from cited answers; it has no sources, so no chips or cards. */
 @Composable
