@@ -67,3 +67,5 @@ Airplane mode on, phone on a table and on power. All 60 WAVs replayed through th
 | Beside E2B: nothing killed, latency ≤ 1.5× | Nothing of ours killed; 1.0× | ✅ |
 
 **The name rule fails, but the plan's fallback applies:** Neal chooses between shipping as is, holding A1, or Task 6 (sherpa-onnx). The builder's suggestion is to **ship the system recognizer without biasing, plus a title matcher after recognition**: 19/20 in the quick check, no new model and no download. Task 6 would only make sense if the matcher falls short in live use.
+
+**Neal's decision (2026-11-02): ship as is for now.** The system on-device recognizer, no biasing, with a title matcher after recognition. Task 5's live mode includes the matcher (`TitleMatcher`: edit-distance ratio against the library titles after dropping "open / read / play / search for", threshold 0.55). On the replay transcripts it gets **20/20** names (Crito at 0.60, Mi Yodeya at 0.56). Commands score ≤ 0.54 unless they name a real title (*The Dark Side of the Moon* 1.0, *the medical library* 0.79).

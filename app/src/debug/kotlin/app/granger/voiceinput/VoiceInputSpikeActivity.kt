@@ -69,6 +69,13 @@ class VoiceInputSpikeActivity : ComponentActivity() {
     private var llm: LiteRtLlmEngine? = null
     private val recorder = PhraseRecorder()
     private var recording by mutableStateOf(false)
+    private val live by lazy { LiveListener(this) }
+    private val matcher by lazy {
+        runCatching {
+            val array = org.json.JSONArray(File(asrDir, "bias-library.json").readText())
+            TitleMatcher(List(array.length()) { array.getString(it) })
+        }.getOrElse { TitleMatcher(emptyList()) }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -204,6 +211,7 @@ class VoiceInputSpikeActivity : ComponentActivity() {
                 Spacer(Modifier.width(8.dp))
                 Button(enabled = !running, onClick = { launchRun { biasCap("en-US") } }) { Text("Bias cap") }
             }
+            Live()
             Recorder()
             lines.forEach { Text(it, fontFamily = FontFamily.Monospace, fontSize = 10.sp) }
         }
@@ -257,6 +265,54 @@ class VoiceInputSpikeActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Plan A0 Task 5: live, for feel. Tap the mic, speak; the text grows as partials arrive. Stop ends at once, or
+     * the recognizer stops by itself when it hears the end. Shows the final text, the closest library title (when
+     * it scores at least [TitleMatcher.THRESHOLD]) and end-of-speech → final. Logs `Asr: live {...}`.
+     */
+    @Composable
+    private fun Live() {
+        var listening by androidx.compose.runtime.remember { mutableStateOf(false) }
+        var text by androidx.compose.runtime.remember { mutableStateOf("") }
+        var result by androidx.compose.runtime.remember { mutableStateOf<JSONObject?>(null) }
+        var takes by androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(0) }
+        Column(Modifier.padding(top = 16.dp)) {
+            Text("Live · take ${takes + 1} · en-US, no biasing · ${matcherSize()} titles", fontSize = 12.sp)
+            Row(Modifier.padding(top = 8.dp)) {
+                if (!listening) {
+                    Button(enabled = !running && !recording, onClick = {
+                        listening = true; text = ""; result = null
+                        live.start(onPartial = { text = it }) { json ->
+                            val final = json.optString("final")
+                            matcher.best(final)?.let { m ->
+                                json.put("match", m.title).put("matchScore", Math.round(m.score * 100) / 100.0).put("matched", m.score >= TitleMatcher.THRESHOLD)
+                            }
+                            takes++
+                            json.put("take", takes)
+                            log("Asr: live $json")
+                            text = final; result = json; listening = false
+                        }
+                    }) { Text("🎤 Speak") }
+                } else {
+                    Button(onClick = { live.stop() }) { Text("Stop") }
+                }
+            }
+            Text(text.ifEmpty { if (listening) "Listening…" else "" }, Modifier.padding(vertical = 12.dp), fontSize = 24.sp, lineHeight = 30.sp)
+            result?.let { r ->
+                if (r.has("error")) Text("Error: ${r.optString("error")}", fontSize = 14.sp)
+                if (r.optBoolean("matched")) Text("Title: ${r.optString("match")}  (${r.optDouble("matchScore")})", fontSize = 18.sp)
+                else if (r.has("match")) Text("No title (closest ${r.optString("match")}, ${r.optDouble("matchScore")})", fontSize = 12.sp)
+                Text(
+                    "end of speech → final ${r.optLong("eosToFinalMs", -1)} ms · first word ${r.optLong("firstPartialMs", -1) - r.optLong("beginMs", 0)} ms after speech began" +
+                        (if (r.optBoolean("finalFromPartial")) " · final empty, used last partial" else ""),
+                    fontSize = 11.sp,
+                )
+            }
+        }
+    }
+
+    private fun matcherSize() = runCatching { org.json.JSONArray(File(asrDir, "bias-library.json").readText()).length() }.getOrDefault(0)
+
     private fun log(line: String) {
         Log.i(TAG, line)
         lines += line
@@ -285,6 +341,7 @@ class VoiceInputSpikeActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        live.cancel()
         llm?.close()
         llm = null
         super.onDestroy()
