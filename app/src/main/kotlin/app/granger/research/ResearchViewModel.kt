@@ -409,6 +409,14 @@ class ResearchViewModel(
         title.value = ""
     }
 
+    /** Why Ask is off on this phone (the model failed its self-check), or null. */
+    val checkFailure = models.checkFailure
+
+    /** Try again after a failed self-check: the next question tests the model afresh. */
+    fun retryCheck() {
+        appScope.launch { logErrors { models.retryCheck() } }
+    }
+
     /** Set while this chat is on screen: the models stay loaded (Neal, 2026-11-02); null while it isn't. */
     private var keepOpen: (() -> Unit)? = null
 

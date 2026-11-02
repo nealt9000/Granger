@@ -154,6 +154,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import app.granger.core.books.TextQuote
 import app.granger.core.ai.DeviceTier
+import app.granger.core.ai.ResearchReadiness
 import app.granger.core.research.Passage
 import app.granger.core.research.SourceKind
 import app.granger.research.CitationTarget
@@ -769,7 +770,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     )
 
     // Research runs only on phones of the ASK tier or better; below that, the rail and the selection menus leave it out.
-    val showResearch = container.deviceTier >= DeviceTier.ASK
+    // So does a phone whose model failed its self-check; Readiness says why and can try again.
+    val askReadiness by container.modelManager.readiness.collectAsStateWithLifecycle()
+    val showResearch = container.deviceTier >= DeviceTier.ASK && askReadiness != ResearchReadiness.FAILED_CHECK
     SideEffect {
         SelectionBridge.researchAvailable = showResearch
         SelectionBridge.readAloudAvailable = Features.READ_ALOUD && Features.PLAYER
@@ -1375,6 +1378,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     onBack = { nav.popBackStack() },
                     onOpenKiwix = { domain -> nav.navigate(SourceRoute(CatalogScope.KIWIX, domain)) },
+                    askCheck = container.modelManager.checkFailure.collectAsStateWithLifecycle().value,
+                    onRetryAsk = { container.appScope.launch { container.modelManager.retryCheck() } },
                 )
             }
         }

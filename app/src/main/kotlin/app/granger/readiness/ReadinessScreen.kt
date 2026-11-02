@@ -1,5 +1,8 @@
 package app.granger.readiness
 
+import app.granger.core.ai.CheckFailure
+import app.granger.research.checkText
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -73,13 +76,20 @@ fun coverageText(domain: DomainCoverage): UiText {
 
 /** [onOpenKiwix] opens the Kiwix source screen filtered to a domain, or the whole of it for null. */
 @Composable
-fun ReadinessScreen(viewModel: ReadinessViewModel, onBack: () -> Unit, onOpenKiwix: (domain: String?) -> Unit) {
+fun ReadinessScreen(
+    viewModel: ReadinessViewModel,
+    onBack: () -> Unit,
+    onOpenKiwix: (domain: String?) -> Unit,
+    /** Why Ask is off on this phone (its model failed the self-check), or null. */
+    askCheck: CheckFailure? = null,
+    onRetryAsk: () -> Unit = {},
+) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
         onPauseOrDispose {}
     }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
-    ReadinessContent(ui, onBack, onOpenKiwix, viewModel::verify, viewModel::repair)
+    ReadinessContent(ui, onBack, onOpenKiwix, viewModel::verify, viewModel::repair, askCheck, onRetryAsk)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,6 +100,8 @@ fun ReadinessContent(
     onOpenKiwix: (domain: String?) -> Unit,
     onVerify: (String) -> Unit,
     onRepair: (String) -> Unit,
+    askCheck: CheckFailure? = null,
+    onRetryAsk: () -> Unit = {},
 ) {
     var showAllSignals by rememberSaveable { mutableStateOf(false) }
     var expanded by rememberSaveable { mutableStateOf(emptyList<String>()) }
@@ -110,6 +122,12 @@ fun ReadinessContent(
                     headlineContent = { Text(stringResource(tierText(ui.tier))) },
                     supportingContent = { Text(stringResource(R.string.readiness_memory, formatBytes(ui.totalRamBytes))) },
                 )
+                askCheck?.let { why ->
+                    ListItem(
+                        headlineContent = { Text(stringResource(checkText(why)), color = MaterialTheme.colorScheme.error) },
+                        trailingContent = { TextButton(onClick = onRetryAsk) { Text(stringResource(R.string.research_check_retry)) } },
+                    )
+                }
             }
 
             item(key = "coverage") { Heading(stringResource(R.string.readiness_what_you_hold)) }

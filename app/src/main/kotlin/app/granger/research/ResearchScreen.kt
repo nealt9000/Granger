@@ -353,6 +353,10 @@ fun ResearchScreen(
                     ResearchReadiness.MODELS_MISSING ->
                         if (librarian != null) LibrarianNotice(librarian, onGetLibrarian) else Notice(stringResource(R.string.research_models_missing), stringResource(R.string.research_get_models), onGetModels)
                     ResearchReadiness.UNSUPPORTED -> Notice(stringResource(R.string.research_unsupported))
+                    ResearchReadiness.FAILED_CHECK -> {
+                        val why by viewModel.checkFailure.collectAsStateWithLifecycle()
+                        why?.let { Notice(stringResource(checkText(it)), stringResource(R.string.research_check_retry), viewModel::retryCheck) }
+                    }
                     ResearchReadiness.READY -> Unit
                 }
                 state.quote?.let { QuoteCard(it, Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) }
@@ -386,6 +390,7 @@ fun ResearchScreen(
                         onRetry = { viewModel.retry(row.turn.turn.id) },
                         onGuess = { viewModel.bestGuess(row.turn.turn.id) },
                         onReadiness = onReadiness,
+                        checkFailed = state.readiness == ResearchReadiness.FAILED_CHECK,
                     )
                     is ThreadRow.Source -> SourceCard(
                         row.n, row.passage, flashing == row.key, onOpen = { open(row.turnId, row.n) },
@@ -452,6 +457,8 @@ private fun AnswerBlock(
     onRetry: () -> Unit,
     onGuess: () -> Unit,
     onReadiness: () -> Unit,
+    /** The model failed its self-check: a failed turn points to the notice below, not to Readiness. */
+    checkFailed: Boolean = false,
 ) {
     val turn = ui.turn
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -530,7 +537,9 @@ private fun AnswerBlock(
                 Text(stringResource(R.string.research_search_failed), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
                 OutlinedButton(onClick = onRetry, enabled = !running) { Text(stringResource(R.string.common_retry)) }
             }
-            TurnOutcome.FAILED -> {
+            TurnOutcome.FAILED -> if (checkFailed) {
+                Text(stringResource(R.string.research_check_turn), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
+            } else {
                 Text(stringResource(R.string.research_model_failed), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
                 OutlinedButton(onClick = onReadiness) { Text(stringResource(R.string.research_readiness)) }
             }

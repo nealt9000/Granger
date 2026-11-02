@@ -15,6 +15,7 @@ import app.granger.core.ai.InstalledModels
 import app.granger.core.ai.LiteRtLlmEngine
 import app.granger.core.ai.LiteRtTextEmbedder
 import app.granger.core.ai.LlmBackend
+import app.granger.core.ai.ModelCheckStore
 import app.granger.core.ai.ModelManager
 import app.granger.core.catalog.CatalogRepository
 import app.granger.core.catalog.CatalogSource
@@ -722,6 +723,8 @@ class AppContainer(context: Context) {
         { path, backend -> LiteRtLlmEngine(path, backend, modelCacheDir) },
         { path -> LiteRtTextEmbedder(path, modelCacheDir, EMBEDDER_BACKEND) },
         appScope, useEmbedder = embedderWanted::get,
+        // The self-check (release checklist A): kept in files/, so a crash mid-check is found at the next launch.
+        checks = ModelCheckStore(java.io.File(context.filesDir, "model-check.txt")),
     )
 
     /** Ask's models, fetched from Ask's own empty state (Plan U3a). */

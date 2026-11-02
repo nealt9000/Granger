@@ -72,4 +72,13 @@
     <string name="research_librarian_no_space">Not enough space on %1$s: free up %2$s.</string>
     <!-- %1$s is the downloads limit. -->
     <string name="research_personal_medical">I can\'t answer questions about your own health. A doctor, nurse or pharmacist can. Search instead shows what your library says on the subject.</string>
+    <!-- The librarian model failed its first check on this phone, so Ask is hidden. Shown in Ask and in Readiness. -->
+    <string name="research_check_crashed">Ask is off on this phone: Granger closed while the librarian was starting. If you closed it yourself, try again.</string>
+    <string name="research_check_load_failed">Ask is off on this phone: the librarian couldn\'t start here.</string>
+    <string name="research_check_wrong_reply">Ask is off on this phone: the librarian\'s test answer came out garbled.</string>
+    <string name="research_check_too_slow">Ask is off on this phone: the librarian took too long over its test.</string>
+    <!-- A button: forget the failed check and test the librarian again with the next question. -->
+    <string name="research_check_retry">Try again</string>
+    <!-- A failed turn while Ask is off on this phone: the reason is in the notice below. -->
+    <string name="research_check_turn">The librarian didn\'t pass its check on this phone. See below.</string>
 </resources>
