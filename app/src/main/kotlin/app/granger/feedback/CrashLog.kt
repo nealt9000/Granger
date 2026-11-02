@@ -71,8 +71,16 @@ class CrashLog(
         write(now(), CrashKind.JAVA, "Thread: ${thread.name}\n\n$trace")
     }
 
-    /** Records the exits newer than the last one recorded, oldest first; returns how many were new. */
+    /**
+     * Records the exits newer than the last one recorded, oldest first; returns how many were new. The first read
+     * (a new install, or storage cleared) records none and starts from now: the system keeps exits across a cleared
+     * storage, and those crashes belong to the data that's gone (found on the Pixel 7, release 853).
+     */
     fun recordExits(exits: List<PastExit>): Int {
+        if (!lastSeenFile.exists()) {
+            dir.mkdirs()
+            lastSeenFile.writeText(now().toString())
+        }
         val lastSeen = runCatching { lastSeenFile.readText().trim().toLong() }.getOrDefault(0L)
         val fresh = exits.filter { it.timestamp > lastSeen }.sortedBy { it.timestamp }
         for (exit in fresh) {

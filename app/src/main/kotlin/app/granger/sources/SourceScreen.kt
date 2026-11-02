@@ -74,6 +74,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
+import app.granger.core.downloads.isUnmetered
 import app.granger.formatBytes
 import app.granger.core.library.ShelfKey
 import app.granger.library.shelf.ShelfList
@@ -701,14 +702,18 @@ private fun RemoveMenu(title: String, onRemove: () -> Unit) {
     }
 }
 
-/** The status line under an item: queue or progress, failure, installed. Shared with the archive.org rows. */
+/**
+ * The status line under an item: queue or progress, failure, installed. Shared with the archive.org rows. The network
+ * is read when a queued row is drawn: on Wi-Fi, a Wi-Fi-only item is waiting its turn (found on the Pixel 7, release
+ * 853, where a pack queued behind the model said "Waiting for Wi-Fi" on Wi-Fi).
+ */
 @Composable
 internal fun ItemStatusText(status: ItemStatus) {
     when (status) {
         is ItemStatus.Queued -> Text(
             when {
                 status.lastError != null -> "Retrying: ${status.lastError}"
-                status.wifiOnly -> "Waiting for Wi-Fi"
+                status.wifiOnly && !isUnmetered(LocalContext.current) -> "Waiting for Wi-Fi"
                 else -> "Queued"
             },
         )

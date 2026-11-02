@@ -12,14 +12,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import app.granger.core.downloads.isUnmetered
 import app.granger.library.ConfirmDialog
 import app.granger.sources.ItemStatus
 
-/** What a downloaded book or album page says about its files; null when there's nothing to say (all in). */
-internal fun downloadText(status: ItemStatus, done: Int, total: Int, unit: String): String? = when (status) {
+/**
+ * What a downloaded book or album page says about its files; null when there's nothing to say (all in). [onWifi]: a
+ * Wi-Fi-only download queued while on Wi-Fi is waiting its turn, not for Wi-Fi.
+ */
+internal fun downloadText(status: ItemStatus, done: Int, total: Int, unit: String, onWifi: Boolean = false): String? = when (status) {
     is ItemStatus.Queued -> when {
         status.lastError != null -> "Retrying"
+        status.wifiOnly && onWifi -> "Queued"
         status.wifiOnly -> "Waiting for Wi-Fi"
         else -> "Waiting for a connection"
     } + if (total > 0) ": $done of $total $unit" else ""
@@ -37,7 +43,7 @@ internal fun downloadText(status: ItemStatus, done: Int, total: Int, unit: Strin
 fun DownloadControls(title: String, status: ItemStatus, done: Int, total: Int, unit: String, onRemove: () -> Unit, modifier: Modifier = Modifier) {
     var confirming by rememberSaveable { mutableStateOf(false) }
     Column(modifier.padding(horizontal = 16.dp, vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        downloadText(status, done, total, unit)?.let {
+        downloadText(status, done, total, unit, onWifi = status is ItemStatus.Queued && isUnmetered(LocalContext.current))?.let {
             Text(
                 it, style = MaterialTheme.typography.bodySmall,
                 color = if (status is ItemStatus.Failed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,

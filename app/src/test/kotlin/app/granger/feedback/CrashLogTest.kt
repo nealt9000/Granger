@@ -74,6 +74,19 @@ class CrashLogTest {
         assertThat(log.list().last().file.readText()).contains("(no trace kept by the system)")
     }
 
+    /**
+     * Found on the Pixel 7 (release 853): after storage was cleared, Home asked about a crash from the day before,
+     * because the system keeps exits across a cleared storage. The first read starts from now.
+     */
+    @Test fun exitsFromBeforeTheFirstStartAreNotRecorded() {
+        clock = 10_000L
+        assertThat(log.recordExits(listOf(PastExit(5_000L, CrashKind.NATIVE, "crash", null)))).isEqualTo(0)
+        assertThat(log.notice.value).isNull()
+
+        assertThat(log.recordExits(listOf(PastExit(5_000L, CrashKind.NATIVE, null, null), PastExit(12_000L, CrashKind.ANR, null, null))))
+            .isEqualTo(1)
+    }
+
     @Test fun theHandlerRecordsThenPassesTheCrashOn() {
         val passed = mutableListOf<Throwable>()
         val error = RuntimeException("boom")
