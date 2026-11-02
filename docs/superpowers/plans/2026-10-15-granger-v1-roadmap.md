@@ -148,7 +148,7 @@ Plan 1's measurements feed directly into Plans 6–8 (backend choice, model file
 - Device testing a network drop: `adb shell cmd connectivity airplane-mode enable` alone did not stop an in-flight download on the Pixel 6 (it kept growing); add `adb shell svc wifi disable`. With both off the row shows "Waiting for Wi-Fi" and the `.part` file holds its size; on reconnect it resumes from the same size. A force-stop plus relaunch also resumes by itself.
 - Kiwix retires snapshots; the catalog pins exact URLs and hashes, so regenerate and re-sign it at least monthly (or schedule it). Downloads of a retired snapshot now fail with a reason and a Retry button.
 - Plan 8: `installedPackBytes` counts every pack row, including MISSING ones (e.g. a removed SD card); decide whether the cap should.
-- raw.githubusercontent.com caches `catalog.json` and `.sig` separately; for a few minutes after a push the app may report a failed security check and keep the last good catalog.
+- ~~raw.githubusercontent.com caches `catalog.json` and `.sig` separately; for a few minutes after a push the app may report a failed security check and keep the last good catalog.~~ Fixed 2026-11-02: asks past the cache once before warning, `cl-cleanup`.
 
 ## Carried forward from Plan 4
 
@@ -347,7 +347,7 @@ Still open:
   - `Citations` treats a first sentence like "The ruins were not found until 1911 [1]." as a decline; skip the decline phrases when the sentence carries a citation.
   - The wider medical lexicon flags "Doctor Zhivago", "computer virus" and "Tropic of Cancer", which then get the banner and no Best guess.
   - `AnswerText` italicises the middle of "2*3*4" and drops the asterisks.
-  - iFixit's catalog description is Kiwix's summary cut off at "Let's …", now visible in the Kiwix listing; give it a curated description.
+  - ~~iFixit's catalog description is Kiwix's summary cut off at "Let's …", now visible in the Kiwix listing; give it a curated description.~~ Fixed 2026-11-02: already has a curated description (checked 2026-11-02).
 - The eval needs the phone: `tools/eval` runs over adb (Wi-Fi works), about 70 s a question. The held-out split stays unread by whoever tunes.
 
 
@@ -395,7 +395,7 @@ Player and engine:
 - Parity gaps for M3, with the service work for Android Auto: tapping a queue row doesn't play it (`PlayerHub` has no play-at-index call); no `onPlaybackResumption`, so a headset play press after process death does nothing; a single-file book shows no next/previous in the notification, which shows the book's title, not the chapter's.
 - `MediaControllerPlayerHub` and `PlaybackService` have no automated test; they're covered only through `PlayerEngine`.
 - The focus content type (speech or music) isn't requested again when the mode switches while focus is held.
-- Pressing play in the mini-player on a book that just ended, without leaving it, hits the end again at once; reloading it from the book page restarts it.
+- ~~Pressing play in the mini-player on a book that just ended, without leaving it, hits the end again at once; reloading it from the book page restarts it.~~ Fixed 2026-11-02: play on an ended book starts it over, `cl-cleanup`.
 - A finished book restored after process death loads at the start, but the database says finished until the next save.
 - The chapter-lookup rule exists twice, in the app (`chapterAt`) and in the engine (`ChapterMap`, internal); keep them in step.
 - Worst-case position loss after process death is about 6 s (a 1 s tick on a 5 s interval).
@@ -403,7 +403,7 @@ Player and engine:
 
 UI:
 - No signal when a book's saved place can't be found, or when a queue stops because every item failed.
-- Adding a bookmark gives no feedback beyond the list.
+- ~~Adding a bookmark gives no feedback beyond the list.~~ Fixed 2026-11-02: it toasts "Bookmarked: …", `cl-cleanup`.
 - On the Player's inactive tab, starting music writes no Recent row; shuffle, repeat, speed, sleep timer and bookmarks can't be changed there; and a saved book's chapters are read again on each state change rather than live.
 - Album, artist, genre, playlist and folder pages aren't scoped to a collection (their routes carry no `collectionId`).
 - Playlists reorder through Move up / Move down only, no drag.
@@ -451,7 +451,7 @@ Sources and search:
 - Audio search ranks matches by downloads, not the website's relevance, so its order can differ from archive.org's.
 - Archive.org track titles keep the album prefix ("The Planets Op. 32, H. 125_ I. Mars…"); trimming it was offered, not chosen.
 - Archive.org items have no versions, so no updates (as for books).
-- LibriVox descriptions keep HTML entities (`&amp;`); tags are stripped, entities aren't decoded.
+- ~~LibriVox descriptions keep HTML entities (`&amp;`); tags are stripped, entities aren't decoded.~~ Fixed 2026-11-02: decoded when the book is kept, `cl-cleanup`.
 - An empty text query isn't treated specially; `choose()` doesn't check that the fetched item's id is the identifier asked for.
 - A Browse row always offers Get (search results don't say whether an item has files); an item without them gets a notice on tap.
 - The same archive.org identifier got under both Music and Audiobooks shares one group id (rare, unhandled). An item got from Music shows as downloaded in Audiobooks' Browse too (status per group); Open on one still downloading in the other view can land on an empty page until its first file is filed.
@@ -462,12 +462,12 @@ Downloads:
 - Android 15's 6-hour `dataSync` limit on very long books.
 - SD cards (the Pixel 6 has no slot); two volumes whose `StorageVolume` is null both key as `primary` (the first wins). The same item on two volumes: the first root wins.
 - A crash can leave a stray `.granger-item.json.*.tmp` (a dotfile, harmless). Embedded chapters in downloaded files are ignored (one file, one chapter).
-- Readiness's row text says "the file", not "a file".
+- ~~Readiness's row text says "the file", not "a file".~~ Fixed 2026-11-02: "Missing: it isn't on the phone", `cl-cleanup`.
 - The left-over cap plumbing (`capBytes`, `OverCap`) is still there, unused (Plan 10 removes it).
 
 Library and player:
 - `MediaLibrary.forget()` deletes a book's file tracks only when the caller passes their ids (`MediaDownloader.remove` does).
-- `PlayerHub.unload` empties the whole music queue when any removed track is in it, rather than taking those tracks out.
+- ~~`PlayerHub.unload` empties the whole music queue when any removed track is in it, rather than taking those tracks out.~~ Fixed 2026-11-02: only those tracks leave the queue, `cl-cleanup`.
 - An empty Music collection shows "No music yet" on every tab except Playlists. The LibriVox screen and sheet have no Compose tests beyond navigation.
 - M1's `unknown|<folder>` album-key collision corner case is left as is.
 
@@ -531,7 +531,7 @@ Search and the media index:
 Player, session and Auto:
 - In book mode, a controller's `seekTo(index, ms)` goes straight to ExoPlayer.
 - `SessionPlayer.isEngines` compares media ids only, so a re-send of the same queue with another start index is swallowed.
-- Tapping the current song's queue row restarts it from 0.
+- ~~Tapping the current song's queue row restarts it from 0.~~ Fixed 2026-11-02: carries on instead, `cl-cleanup`.
 - The queue-row tap has no Compose UI test.
 - Artwork tokens depend on the order of the roots, and the key changes on reinstall or clear data, so URIs cached by Auto or the launcher can stop resolving.
 - A cover written after the queue loads stays `file://` until the items are rebuilt.
@@ -816,8 +816,8 @@ Builder's calls:
 Still open (for H3 and later):
 - **The strip as a swipeable reader** (Neal): each dot a page you can swipe through for a quick read of that domain. H3's Welcome screen or a Home follow-up.
 - **A cover-art scraper** for albums, e-books and audiobooks without art (Neal): Granger has none; a Plan 10-era item with its own licence questions.
-- A day feed over a pack without the day article says "October 22" over search hits; a "Mentions October 22" subtitle would be clearer.
-- `family:wikipedia` picks the first whole pack of the family; a preference for the fullest (by size) would favour a full Wikipedia over "Best of".
+- ~~A day feed over a pack without the day article says "October 22" over search hits; a "Mentions October 22" subtitle would be clearer.~~ Fixed 2026-11-02: titled "Mentions October 22", `cl-cleanup`.
+- ~~`family:wikipedia` picks the first whole pack of the family; a preference for the fullest (by size) would favour a full Wikipedia over "Best of".~~ Fixed 2026-11-02: every pack is tried for the day page, `cl-cleanup`.
 - H3 needs: Start → Home (`StartScreen.Home` exists), the default feeds for a fresh library (they seed on first Home with no packs and resolve as packs arrive), and the strip's first signal as the onboarding nudge.
 - The thumbnail cache lives under `cacheDir` and is never pruned by the app; the OS may clear it, and the card then shows its icon.
 - Cached draws carry `Cards.VERSION` (1 since thumbnails); a draw from an older format is redrawn, so a feature that changes what a card carries bumps the version rather than waiting for midnight.
