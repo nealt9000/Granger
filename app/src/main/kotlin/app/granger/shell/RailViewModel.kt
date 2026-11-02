@@ -23,6 +23,7 @@ import app.granger.media.PlayResumer
 import app.granger.music.MusicSources
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOf
 import app.granger.core.player.NowPlaying
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -189,7 +190,12 @@ class RailViewModel(
     }
 
     // Wider than the list, so pinned and removed items don't leave it short.
-    private val opened = combine(sessions.railTabs(SCAN), sessions.recentSearchRows(SCAN), chats.recent(SCAN), plays) { tabs, searches, chats, plays ->
+    private val opened = combine(
+        sessions.railTabs(SCAN).emptyOnError("Rail tabs"),
+        sessions.recentSearchRows(SCAN).emptyOnError("Rail searches"),
+        chats.recent(SCAN).emptyOnError("Rail chats"),
+        plays.emptyOnError("Rail plays"),
+    ) { tabs, searches, chats, plays ->
         Opened(tabs, searches, chats, plays)
     }
 
@@ -385,4 +391,10 @@ class RailViewModel(
         /** A read-aloud play's key prefix: "voice:" and the source key. */
         private const val VOICE_PLAY = "voice:"
     }
+}
+
+/** A storage error empties that part of the rail (and is logged) rather than crashing the app. */
+private fun <T> Flow<List<T>>.emptyOnError(what: String): Flow<List<T>> = catch { e ->
+    runCatching { android.util.Log.w("Granger", "$what failed", e) }
+    emit(emptyList())
 }

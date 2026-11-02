@@ -310,6 +310,20 @@ object KiwixList {
     }
 
     /** A pack row's details: "English · Updated March 2026 · CC BY-SA", and Kiwix's credit where the licence asks. */
+    /**
+     * The pack on Kiwix's online library, to look through in the phone's browser before a multi-GB download (Neal,
+     * 2026-11-02): library.kiwix.org serves each ZIM at /content/<file name without .zim>/. Null for a pack Kiwix
+     * doesn't host.
+     */
+    fun previewUrl(entry: PackEntry): String? {
+        val url = entry.urls.firstOrNull { it.startsWith(KIWIX_DOWNLOADS) } ?: return null
+        val name = url.substringAfterLast('/').removeSuffix(".zim").takeIf { it.isNotBlank() && '?' !in it } ?: return null
+        return "$KIWIX_LIBRARY$name/"
+    }
+
+    private const val KIWIX_DOWNLOADS = "https://download.kiwix.org/zim/"
+    private const val KIWIX_LIBRARY = "https://library.kiwix.org/content/"
+
     fun details(entry: PackEntry): String = listOf(
         languages(entry.language), updated(entry.snapshotDate),
         licence(entry.license).let { if (entry.nonCommercial) "$it · provided by Kiwix" else it },

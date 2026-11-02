@@ -982,6 +982,17 @@ class SourceViewModelTest {
         }
     }
 
+    /** Preview (Neal, 2026-11-02): every Kiwix pack in the published catalog has its page on Kiwix's online library. */
+    @Test fun everyKiwixPackHasAPreviewOnKiwixsLibrary() {
+        val packs = publishedCatalog().packs
+        val med = packs.single { it.id == "wikipedia_en_medicine_nopic" }
+        val file = med.urls.first().substringAfterLast('/').removeSuffix(".zim")
+        assertThat(KiwixList.previewUrl(med)).isEqualTo("https://library.kiwix.org/content/$file/")
+        val kiwix = packs.filter { p -> p.urls.any { it.startsWith("https://download.kiwix.org/zim/") } }
+        assertThat(kiwix).isNotEmpty()
+        assertThat(kiwix.filter { KiwixList.previewUrl(it) == null }).isEmpty()
+    }
+
     /** The catalog in catalog/, as the phone gets it once it is published. */
     private fun publishedCatalog(): app.granger.core.catalog.Catalog {
         var dir: File? = File("").absoluteFile

@@ -89,6 +89,14 @@ class RailViewModelTest {
         ).inOrder()
     }
 
+    @Test fun aChatStorageErrorEmptiesChatsAndKeepsTheRest() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("a", "Classics"))
+        sessions.tabs.value = listOf(tab(3, "a", "Hamlet"))
+        chats.flowFailure = IllegalStateException("disk")
+        val ui = vm().ui.first { it.entries.isNotEmpty() }
+        assertThat(ui.tabs.map { it.title }).containsExactly("Hamlet")
+    }
+
     @Test fun currentTabIsMarked() = runTest(main.dispatcher) {
         library.packList.value = listOf(pack("a"))
         sessions.tabs.value = listOf(tab(1, "a", "One"), tab(2, "a", "Two"))
