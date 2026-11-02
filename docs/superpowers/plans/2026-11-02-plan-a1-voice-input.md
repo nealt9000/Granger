@@ -97,10 +97,11 @@
 
 **Files:** modify `app/src/main/AndroidManifest.xml` (`RECORD_AUDIO`), `app/src/debug/AndroidManifest.xml` (drop its own copy); create `app/src/main/kotlin/app/granger/voiceinput/Dictation.kt`, `MicButton.kt`, `VoiceInputPrefs.kt`, strings; tests in `app/src/test/.../voiceinput/`.
 
-- [ ] `VoiceInputPrefs` (as `VoicePrefs`, SharedPreferences `voice_input`): `englishVariant` (`US` default, `GB`), `askWhenDone` (off).
-- [ ] `Dictation(speech, tagFor, scope)`: `state` (`Idle`, `Listening(partial)`, `Failed(message)`), `start(onText, onFinal)`, `stop()`, `cancel()`. Partial text goes to `onText` as it arrives; `onFinal` gets the final text once. Starting while read-aloud speaks stops read-aloud first. Tested with the fake `SpeechInput`: partials then a final, a no-match, a cancel mid-take, a timeout.
-- [ ] `MicButton`: shown only when `availability(tag)` is `Ready`. A mic icon; while listening, a filled, gently pulsing mic that stops the take when tapped; content descriptions *"Speak"* / *"Stop listening"*. The permission request on first tap with a one-line reason; a refusal message with the way to the phone's settings. *Didn't catch that* on no-match, which clears after 3 s.
-- [ ] **Commit.** `A1: the mic button, dictation state and the microphone permission`
+- [x] `VoiceInputPrefs` (as `VoicePrefs`, SharedPreferences `voice_input`): `englishVariant` (`US` default, `GB`), `askWhenDone` (off).
+- [x] `Dictation(speech, tagFor, scope)`: `state` (`Idle`, `Listening(partial)`, `Failed(message)`), `start(onText, onFinal)`, `stop()`, `cancel()`. Partial text goes to `onText` as it arrives; `onFinal` gets the final text once. Starting while read-aloud speaks stops read-aloud first. Tested with the fake `SpeechInput`: partials then a final, a no-match, a cancel mid-take, a timeout.
+- [x] `MicButton`: shown only when `availability(tag)` is `Ready`. A mic icon; while listening, a filled, gently pulsing mic that stops the take when tapped; content descriptions *"Speak"* / *"Stop listening"*. The permission request on first tap with a one-line reason; a refusal message with the way to the phone's settings. *Didn't catch that* on no-match, which clears after 3 s.
+- [x] *Done 2026-11-02.* `RECORD_AUDIO` and the `RecognitionService` query moved from the debug manifest to the main one. `VoiceInput` (app-wide, `AppContainer.voiceInput`) works out the language and whether the mic shows (`status`), asks the phone only while a mic screen watches, and stops read-aloud through `playerHub.stopVoice()` before each take. `Dictation` (per view model) and `MicButton`. The permission logic reuses the media permission's "asked before" rule and its settings link. The mic icon is one vector drawable, not the large extended icon set. Strings are in `strings_voice_input.xml` with a Spanish twin. 7 `DictationTest`s; the string guards pass. Fixed on the way: `OnDeviceSpeechInput.languages()` and `download()` now run on the main thread, as `SpeechRecognizer` requires.
+- [x] **Commit.** `A1: the mic button, dictation state and the microphone permission`
 
 ### Task 5: The mic in Search
 
@@ -115,7 +116,7 @@
 
 **Files:** modify `app/src/main/kotlin/app/granger/research/ResearchScreen.kt` (one slot beside Send), `ResearchViewModel.kt` (one hook); tests in `ResearchViewModelTest.kt`.
 
-- [ ] A `MicButton` beside Send, hidden while an answer is running and when the app's language has no Ask (Spanish while Spanish Ask is off). Partials fill `input`; the final replaces it.
+- [ ] A `MicButton` beside Send, hidden while an answer is running and when the app's language has no Ask (Spanish while Spanish Ask is off). *Note 2026-11-02: no code switch for "Spanish Ask off" was found on main after L4. Check with Neal what gates it before building this.* Partials fill `input`; the final replaces it.
 - [ ] With **Ask as soon as I stop talking** on, the final sends if `canSend`; otherwise it waits in the box with the cursor at the end.
 - [ ] A view-model test for each: the final waits; the final sends with the setting on; the mic hides while running.
 - [ ] **Commit.** `A1: speak a Research question`

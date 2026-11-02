@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="voice_input_speak">Hablar</string>
+    <string name="voice_input_stop">Dejar de escuchar</string>
+    <string name="voice_input_listening">Escuchando…</string>
+    <string name="voice_input_no_match">No te he entendido</string>
+    <string name="voice_input_no_permission">Granger necesita el micrófono para oírte</string>
+    <string name="voice_input_unavailable">La entrada por voz no está disponible en este idioma</string>
+    <string name="voice_input_failed">La entrada por voz no funciona ahora mismo. Inténtalo de nuevo.</string>
+    <string name="voice_input_permission_title">¿Usar el micrófono?</string>
+    <string name="voice_input_permission_why">Para que puedas hablar en lugar de escribir. Tu voz se convierte en texto en este teléfono, y no se graba ni se envía nada.</string>
+    <string name="voice_input_permission_continue">Continuar</string>
+    <string name="voice_input_permission_settings">El micrófono está desactivado para Granger. Para hablar en lugar de escribir, actívalo en los ajustes del teléfono, en Permisos.</string>
+    <string name="voice_input_open_settings">Abrir ajustes</string>
+    <string name="voice_input_not_now">Ahora no</string>
+</resources>
