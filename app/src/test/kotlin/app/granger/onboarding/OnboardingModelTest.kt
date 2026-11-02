@@ -51,6 +51,20 @@ class OnboardingModelTest {
         ),
     )
 
+    @Test fun starterComesFirstWithoutItsModels() {
+        // Neal, 2026-11-02: Starter is the default start; Ask's models are its own line, not part of a start.
+        val withStarter = catalog.copy(
+            models = listOf(modelEntry("gemma-4-e2b-gpu", size = 2_000)),
+            presets = listOf(Preset("starter", "Starter", listOf("gemma-4-e2b-gpu", "wikipedia_en_medicine_nopic", "gc-bible"))) + catalog.presets,
+        )
+        val choices = OnboardingModel.startChoices(withStarter, emptySet())
+        assertThat(choices.map { it.id }).containsExactly("starter", "efficient", "comprehensive").inOrder()
+        assertThat(choices[0].lines.map { it.id }).containsExactly("wikipedia_en_medicine_nopic", "collection:granger-classics").inOrder()
+        assertThat(choices[0].bytes()).isEqualTo(1_010)
+        // A language with no Starter of its own (Spanish, 2026-11-02) starts at its Efficient start.
+        assertThat(OnboardingModel.startChoices(withStarter, emptySet(), language = "es").map { it.id }).doesNotContain("starter")
+    }
+
     @Test fun startChoicesFoldBooksIntoOneLineAndSkipInstalledOnes() {
         val choices = OnboardingModel.startChoices(catalog, installed = setOf("medlineplus.gov_en_all"))
         assertThat(choices.map { it.id }).containsExactly("efficient", "comprehensive").inOrder()

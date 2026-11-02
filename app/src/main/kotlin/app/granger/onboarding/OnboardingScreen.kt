@@ -212,10 +212,10 @@ private fun androidx.compose.foundation.lazy.LazyListScope.phone(ui: OnboardingU
     items(ui.phone.volumes, key = { it.root.path }) { volume ->
         Text(stringResource(R.string.onboarding_volume_free_of, volume.label, formatBytes(volume.freeBytes), formatBytes(volume.totalBytes)), Modifier.padding(top = 4.dp))
     }
-    if (ui.phone.efficientBytes > 0L) {
+    if (ui.phone.smallestBytes > 0L) {
         item {
             Text(
-                stringResource(R.string.onboarding_start_sizes, formatBytes(ui.phone.efficientBytes), formatBytes(ui.phone.comprehensiveBytes)),
+                stringResource(R.string.onboarding_start_sizes, ui.phone.smallestTitle, formatBytes(ui.phone.smallestBytes), formatBytes(ui.phone.comprehensiveBytes)),
                 Modifier.padding(top = 20.dp),
                 style = MaterialTheme.typography.bodyMedium,
             )
