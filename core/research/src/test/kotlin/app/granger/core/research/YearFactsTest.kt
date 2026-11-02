@@ -33,6 +33,14 @@ class YearFactsTest {
         assertThat(block("multi-step-002")).contains("So, for the question: No: in 1818 (Frankenstein), Jane Austen had already died (18 July 1817) [3][4].")
     }
 
+    @Test fun cueOnlyKeywords() {
+        assertThat(YearFacts.cueOnly("years passed")).isTrue()
+        assertThat(YearFacts.cueOnly("how old")).isTrue()
+        assertThat(YearFacts.cueOnly("berlin wall")).isFalse()
+        assertThat(YearFacts.cueOnly("years of solitude")).isFalse()
+        assertThat(YearFacts.cueOnly("")).isFalse()
+    }
+
     @Test fun anAgeAtAPublication() {
         assertThat(block("multi-step-001")).contains("In 1818 (Frankenstein), Mary Shelley was alive, aged 20 or 21")
     }

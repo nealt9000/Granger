@@ -93,6 +93,16 @@ object YearFacts {
         "dead", "born",
     )
 
+    /**
+     * A rewrite keyword made only of the words a question uses to ask how long or whether ("years passed", "how old"),
+     * which no passage about the things themselves needs to hold (R2 Task 4: "years passed" kept every passage of the
+     * Declaration and the Berlin Wall from matching all keywords, so ranking kept none). English words only.
+     */
+    fun cueOnly(keyword: String): Boolean {
+        val words = WORD.findAll(keyword.lowercase()).map { it.value }.toList()
+        return words.isNotEmpty() && words.all { it in STOP }
+    }
+
     /** A question word and the words a passage may use for it. */
     private val GROUPS = listOf(
         setOf("came", "publish", "published", "publishing", "publication", "appeared", "released", "release", "printed", "written", "wrote"),

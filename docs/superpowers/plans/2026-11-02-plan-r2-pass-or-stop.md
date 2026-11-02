@@ -117,11 +117,20 @@ Deterministic declines, in `DeclineCheck` (`:core:research`), wired into `Resear
 
 ## Task 4: ranking
 
-- [ ] Entity cue words ("years passed", "how long") don't count toward the all-keywords gate (multi-step-012).
-- [ ] "How does X start / begin / open" ranks the book's first chapter (literature-001).
-- [ ] Within a found chapter, passages that match the question's terms rank above the chapter's opening
-  (literature-006, vocab-gap-009).
-- [ ] Mac replay on the tuning split; gate: recall@4 by quote (not by chapter, below) up, no grounded lost.
+- [x] **A replay of the app's own ranking on the Mac**: `PipelineReplayTest` runs the real `ResearchPipeline`, configured as
+  `GrangerApp` builds it, on a run's recorded searches (`found.jsonl`, dense hits with cosines, the rewrite's keywords),
+  with a fake model that captures the prompt. It reports passages chosen as recorded and recall by quote (an answer
+  quote in the prompt). `GRANGER_REPLAY=r5-t7-all ./gradlew :core:research:test --tests '*PipelineReplayTest'`, about
+  30 s. On `r5-t7-all`: 193/202 choose the recorded passages (the 9 others are Task 2's new declines); recall by quote
+  **65/126**. Tuning runs only (it refuses a held-out dataset).
+- [x] Keywords that only ask how long or whether ("years passed", "how old": `YearFacts.cueOnly`) don't count toward
+  ranking. multi-step-012 goes from no passages to its answer; recall by quote 65 → **66/126**, no other question's
+  passage count or quote changes.
+- [x] Looked at and left to other tasks, since a rule for each would fit the tuning split and not much else:
+  literature-006 (the book says "whitewash", the question "painting") and vocab-gap-009 ("social tyranny" for "peer
+  pressure") are wording gaps (Task 6); literature-001 ("how does X start") and -002 (Holmes's first words) want the
+  opening and the first meeting (Task 7's cards); multi-step-010 (Methuselah and Noah) has its verses only among the
+  dense hits at 0.80 and 0.74, while a "Methuselah Foundation" article takes a slot (two-fact retrieval, after this round).
 
 ## Task 5: eval fixes
 

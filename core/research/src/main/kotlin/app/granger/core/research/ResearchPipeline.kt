@@ -250,11 +250,13 @@ class ResearchPipeline(
             return
         }
         val weight = sourceWeight?.of(request.question, keywords, all + hits.orEmpty()) ?: Ranking.NO_WEIGHT
-        val found = Ranking.preselect(all, keywords, config, weight, languages)
+        // Keywords that only ask how long or whether ("years passed") don't count toward a passage's match (R2 Task 4).
+        val topical = keywords.filterNot(YearFacts::cueOnly).ifEmpty { keywords }
+        val found = Ranking.preselect(all, topical, config, weight, languages)
         emit(ResearchEvent.Progress(Stage.RANKING))
         val ranked = try {
-            val merged = hits?.let { Ranking.hybrid(found, it, keywords, config, weight, languages) }
-            val lifted = Ranking.liftMedia(merged ?: rank(request.question, found, keywords, weight, languages), found, asked)
+            val merged = hits?.let { Ranking.hybrid(found, it, topical, config, weight, languages) }
+            val lifted = Ranking.liftMedia(merged ?: rank(request.question, found, topical, weight, languages), found, asked)
             if (reserveNamed && Entities.asked(request.question, languages)) {
                 Entities.reserve(
                     lifted, all + hits.orEmpty(), Entities.named(request.question, keywords, languages), config.small,
