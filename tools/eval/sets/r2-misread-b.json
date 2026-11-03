@@ -1,0 +1,19 @@
+{
+ "base": "r2-t8-srcb",
+ "stage": "answer",
+ "ids": [
+  "geography-general-003",
+  "geography-general-004",
+  "geography-003",
+  "science-006",
+  "follow-up-005",
+  "multi-step-015",
+  "multi-step-017",
+  "multi-step-012",
+  "multi-step-009",
+  "multi-step-018",
+  "bible-005",
+  "multi-step-006"
+ ],
+ "about": "Plan R2 Task 8 variant b: the 12 misreads, a check just before the question"
+}

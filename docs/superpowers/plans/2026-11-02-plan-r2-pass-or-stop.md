@@ -228,8 +228,21 @@ too (keyword search only until Task 9).
 
 ## Task 8: prompt rules for misreads
 
-- [ ] Superlatives ("a passage calling X the second longest means X isn't the longest") and round trips. A/B on the
+- [x] Superlatives ("a passage calling X the second longest means X isn't the longest") and round trips. A/B on the
   phone by prompt replay over the misread set and sample-40; gate: no grounded or decline loss.
+  **Result 2026-11-03: not met; nothing ships.** The misread set is `r2-t7-notes`'s 12 answerables graded wrong with the
+  answer in the prompt (China "most populous" when [4] says second, Yangtze "longest" when [4] says third, Sahara without
+  its "excluding ice deserts", "the passages don't say" beside the blue whale, Curie's three Nobels, the Moon's round trip,
+  the thunder rule, three date sums, "the love of money", the teacher chain); `sets/r2-misread.json` adds sample-40.
+  The replay is deterministic: the control (`r2-t8-ctl`, prompts as recorded) gave all 45 replies as recorded.
+  - Variant a (`r2-t8a`): two rules after "Don't add facts" (keep a passage's ranking and its conditions; work out one
+    part, one way or one case from a total, round trip or rule). 0 of 12 fixed; the thunder reply got worse ("six miles
+    or nine kilometers") and the teacher chain named Anaximenes.
+  - Variant b (`r2-t8b`): one check just before the question. 0 of 12 fixed; the biggest animal became the woolly
+    mammoth.
+  - E2B doesn't act on reading rules, wherever they sit. Stopped there rather than tune wording to 12 questions. What's
+    left for misreads is the model (the LoRA, or a newer one) or code that does the reading, which R5 ruled out beyond
+    the year cues.
 
 ## Task 9: books you add (the own-book group)
 
