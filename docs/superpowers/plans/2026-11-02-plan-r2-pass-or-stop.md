@@ -187,6 +187,19 @@ These need full phone runs, so they're batched into one run.
 - [ ] Per Classics book, a short card: what happens, the main characters, the first line. Written on the Mac from the text,
   checked against it, shipped with the vectors. Covers "how does X begin", "who is X" (the P&P Darcy/Bingley mix-up)
   and the literature misses. Start with the 50 most read; measure before doing the rest.
+- [x] **The 50 cards** (2026-11-02, 04665c9d): the 50 narrative Classics with the most Gutenberg downloads (novels,
+  plays, epics; philosophy and scripture left out). `tools/pack-builder/classics/cards/<slug>.json`, built by
+  `cards.py build` into one EPUB, *Granger Classics: Book Notes*, three passages a book that each name it: how it begins
+  (the first line verbatim, checked mechanically), what happens, who's who. Written by five subagents from the text,
+  then checked claim by claim by five others (819 claims: 46 wrong and 20 unfound, all corrected; logs in `verify/`).
+  A translated work gives both dates (War and Peace "1865–1869; tr. Aylmer Maude and Louise Maude, 1923").
+- [x] **Shipping, decided for the measurement:** a separate notes book, not a chapter added to each Classics EPUB. It
+  measures with no release and no app change: `eval.py import` (a debug import over adb) puts it in the phone's library
+  and indexes it, and `tools/vectors/book.py` embeds it on the CPU for the pushed-vectors directory. If it passes, it
+  ships as one more catalog book with its own vectors.
+- [ ] Measure: import the notes, push their vectors, rerun the tuning split; compare with `r2-t5` per domain (classics
+  answerables, and no losses elsewhere).
+- [ ] Neal reads a sample of cards before they ship.
 
 ## Task 8: prompt rules for misreads
 
