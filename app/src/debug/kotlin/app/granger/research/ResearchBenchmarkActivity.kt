@@ -249,6 +249,7 @@ class ResearchBenchmarkActivity : ComponentActivity() {
         fun finder(finder: PassageFinder) = object : PassageFinder {
             override suspend fun find(keywords: List<String>) = find(keywords, Keywords.ENGLISH)
             override suspend fun find(keywords: List<String>, languages: List<ResearchLanguage>) = record(finder, keywords, languages)
+            override suspend fun headword(word: String, languages: List<ResearchLanguage>) = finder.headword(word, languages)
         }
 
         private suspend fun record(finder: PassageFinder, words: List<String>, languages: List<ResearchLanguage>): List<Passage> {

@@ -74,6 +74,10 @@ class RecordingFinder(private val inner: PassageFinder, private val clock: () ->
         }
     }
 
+    /** Plan R2 Task 6: the dictionary entry the pipeline reads by headword, after the search; kept with its passages. */
+    override suspend fun headword(word: String, languages: List<ResearchLanguage>): List<Passage> =
+        inner.headword(word, languages).also { passages = passages + it }
+
     /** The passages with their lexical score (as Ranking.preselect scores them), best first. */
     fun scored(): List<Pair<Passage, Double>> {
         val score = LexicalScore.scorer(keywords, languages)
