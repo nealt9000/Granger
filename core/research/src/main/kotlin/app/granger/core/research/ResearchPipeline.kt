@@ -187,6 +187,8 @@ class ResearchPipeline(
      * stays a decline. On in the app; the eval harness leaves it off to score the prose.
      */
     private val medicalQuotes: Boolean = false,
+    /** Plan R2 Task 6's debug variant: keywords get [OlderWords]' alternates before the search. Off in the app until measured. */
+    private val olderWords: Boolean = false,
 ) {
     /**
      * [stop] is polled after each chunk of the reply; when it turns true the reply so far is checked and finished.
@@ -233,7 +235,7 @@ class ResearchPipeline(
         val rewrite = rewrite(model, request, languages)
         val medical = rewrite.medical == true || Medical.looksMedical(request.question) || PersonalMedical.strong(request.question)
         if (medical) emit(ResearchEvent.Medical)
-        val keywords = rewrite.keywords
+        val keywords = if (olderWords) OlderWords.expand(rewrite.keywords, languages) else rewrite.keywords
         if (request.quote == null && PersonalMedical.matches(request.question, medical)) {
             // One person's own health: the app's medical copy, whatever the library holds. No search, no answer.
             emit(ResearchEvent.Done(Outcome.Declined(medical = true, keywords)))

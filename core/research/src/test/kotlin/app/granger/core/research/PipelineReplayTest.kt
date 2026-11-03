@@ -25,7 +25,8 @@ import java.text.Normalizer
  * captures the answer prompt. It reports how many prompts match the recorded ones (the replay's fidelity) and, for each
  * answerable item, whether an answer quote is in the prompt: recall by quote, not by article or chapter (Task 5).
  *
- * Runs only when asked: `GRANGER_REPLAY=r5-t7-all ./gradlew :core:research:test --tests '*PipelineReplayTest'`.
+ * Runs only when asked: `GRANGER_REPLAY=r5-t7-all ./gradlew :core:research:test --tests '*PipelineReplayTest'`
+ * (`GRANGER_REPLAY_OLDER=on` adds [OlderWords]; its new search terms find nothing new here, since the search is recorded).
  * Writes `build/replay/<run>.tsv` (id, answerable, quote in the prompt, passages as recorded). Tuning runs only.
  */
 class PipelineReplayTest {
@@ -76,7 +77,7 @@ class PipelineReplayTest {
             val pipeline = ResearchPipeline(
                 PassageFinder { passages }, models, RankingConfig(),
                 sourceWeight = FictionWeight({ fiction }), dense = DenseFinder { dense },
-                reserveNamed = true, yearFacts = true,
+                reserveNamed = true, yearFacts = true, olderWords = System.getenv("GRANGER_REPLAY_OLDER") == "on",
             )
             val events = pipeline.run(ResearchRequest(item.str("question")!!, priorQuestion = item.str("priorQuestion"))).toList()
             val prompt = answerPrompts.lastOrNull().orEmpty()

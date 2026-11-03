@@ -160,12 +160,23 @@ Deterministic declines, in `DeclineCheck` (`:core:research`), wired into `Resear
 
 These need full phone runs, so they're batched into one run.
 
-- [ ] A small term table for the rewrite: modern → older words the Classics use (alcohol → wine, strong drink;
-  immigrant → stranger; tax → tribute; intelligence → spies; dropsy → edema), and common knot names to their articles.
-  Built from the tuning misses plus a general list, so it isn't fitted to the split alone.
-- [ ] "What does X mean" and "what is a X" look up the exact Wiktionary headword first (words-001, -002).
-- [ ] The media cue words "movement", "piece", "suite" and "chapter" (R3's walkthrough), with tuning questions
-  for them and the media-intrusion check (bar 0).
+- [x] `OlderWords`: about 30 well-known pairs, modern → the Classics' words (alcohol → wine, strong drink; immigrants →
+  strangers, sojourners; taxes → tribute; pregnant → with child; suicide → self-slaughter; slaves → bondservants) and
+  old disease names → modern ones (dropsy → edema, consumption → tuberculosis, apoplexy → stroke, ague → malaria).
+  A general list, not the misses alone. An entry matches a **whole keyword only** ("energy consumption" isn't
+  tuberculosis), and is added as alternates (`alcohol|wine|strong drink`), which the search already handles.
+- [x] Behind a debug flag: `ResearchPipeline(olderWords = …)`, `eval.py run … --older on`, off in the app until measured.
+  8 tuning questions get alternates (bible-001, vocab-gap-001 to -004 and -010, medical-032, -033). Mac replay on
+  recorded searches: no change in recall by quote (64/126; the alternates' own search hits need the phone), and no
+  loss among passages already found.
+- [ ] Phone run of the tuning split with `--older on` against the same build without it. Gate: grounded up, no loss on
+  the 8, declines unchanged.
+- [x] **Found: the phone's test library lacks Wiktionary and Knots.** No passage from either appears in any
+  `r5-t7-all` search, so 6 tuning answerables (words-001 to -004, knots-001, -002) could never be answered there: the
+  ceiling was 120/126. The dictionary-headword lookup waits until Wiktionary is on the phone; the held-out set has 3
+  knots questions, so Knots (with its full-text index) must be on the phone before held-out scoring.
+- [ ] The media cue words "movement", "piece", "suite" and "chapter": with media questions for them and the
+  media-intrusion check (bar 0), which need the phone's library export (`dataset/media.json`). Not started.
 
 ## Task 7: Classics plot and opening cards
 
