@@ -37,7 +37,7 @@ Ranked by how much they would hurt his first week.
 
 ### 2. The Granger voice on a 4 GB phone
 Pick a start offers the Granger voice on every tier (`OnboardingModel.voiceLine` has no tier check). Synthesis grows ONNX Runtime's arena by about 420 MB and keeps it; with a WebView, libkiwix and the player service, a 4 GB phone is likely to kill it during long reads. Neal expects it not to work; it hasn't been measured (device check 3 is still open).
-**Do (the fallback device-checks.md already names):** under `ASK_MIN_BYTES`, no voice line in Pick a start, the phone's own voice is the default, and Get more lists the Granger voices with "May stop on this phone" rather than hiding them, so he can still run device check 3 once and report it. Also check that the phone has an English offline voice in Speech Services by Google (and whether Swahili is offered), and say how to get one if not. *Small to medium.*
+**Do (the fallback device-checks.md already names):** under `ASK_MIN_BYTES`, no voice line in Pick a start, the phone's own voice is the default, and Settings → Voice lists the Granger voices under a "may stop partway" line rather than hiding them, so he can still run device check 3 once and report it. Also check that the phone has an English offline voice in Speech Services by Google (and whether Swahili is offered), and say how to get one if not. *Small to medium.*
 
 ### 3. Downloads on Tanzanian networks
 - A MiFi or a phone's hotspot often counts as **metered**, so `NetworkType.UNMETERED` never holds and Wi-Fi-only downloads wait forever while the phone is "on Wi-Fi". The F1 fix for "Waiting for Wi-Fi" on Wi-Fi was about a different case.
@@ -93,6 +93,6 @@ His results fill these lines of the release checklist: *a second phone that isn'
 
 - **Add a pack from a file: now**, a freeze exception for the closed test (item 4).
 - **Swahili packs in Get more now**, content only; the app's text stays English or Spanish (item 9).
-- **The Granger voices on phones under 6 GB: listed with "May stop on this phone"**, not offered in Pick a start; the phone's own voice is the default (item 2).
+- **The Granger voices on phones under 6 GB: listed in Settings → Voice with a "may stop partway" line**, not offered in Pick a start; the phone's own voice is the default (item 2).
 
 So the order's step 4 moves up beside step 2.
