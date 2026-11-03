@@ -1,6 +1,8 @@
 # Granger
 
-Civilization, backed up. An offline library for Android with a local AI librarian that always cites its source.
+Your door to knowledge. Always open.
+
+An offline library for Android, with a librarian that answers from your books and shows you the page. Granger keeps Wikipedia, reference works, books and audiobooks on your phone and waits, with no signal, for whenever you need it: on a plane, off the grid, or wherever the network doesn't reach or isn't allowed to. Nothing you read or ask leaves the device.
 
 Licensed under GPL-3.0 (see `LICENSE`).
 

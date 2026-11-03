@@ -14,7 +14,7 @@
     <string name="onboarding_start">Empezar</string>
     <string name="onboarding_next">Siguiente</string>
 
-    <string name="onboarding_tagline">El conocimiento del mundo.\nTuyo para siempre.</string>
+    <string name="onboarding_tagline">Tu puerta al conocimiento.\nSiempre abierta.</string>
     <string name="onboarding_intro">Enciclopedias, mapas, manuales, libros y tu propia música, con un lector y un bibliotecario al que puedes preguntar: todo en tu teléfono y sin necesidad de señal.</string>
     <string name="onboarding_also_language">¿También en %1$s?</string>
     <string name="onboarding_also_language_blurb">Suma su enciclopedia a tu comienzo, y sus paquetes a Conseguir más.</string>
