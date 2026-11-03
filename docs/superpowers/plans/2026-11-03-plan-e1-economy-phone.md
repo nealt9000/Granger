@@ -89,6 +89,19 @@ His results fill these lines of the release checklist: *a second phone that isn'
 4. Add a pack from a file (4) and Swahili packs (9): if Neal lifts the freeze for them.
 5. Memory (8) and everything else: from his reports.
 
+## Progress (2026-11-03, branch `e1-economy-phone`)
+
+- [x] 1. The suggested map from the network's country, then the SIM's, then the locale (`device/PhoneCountry`).
+- [x] 2. Granger voices under 6 GB: not offered in Pick a start; Settings → Voice lists them under a "may stop partway" line.
+- [x] 3. Metered Wi-Fi: a Wi-Fi-only download on Wi-Fi Android marks metered says "this Wi-Fi is marked as metered", and Downloads explains with a Wi-Fi settings button. A run that got 1 MB or more before its line dropped starts the retry count again, so a big file on a flaky link isn't given up after 10 drops.
+- [x] 4. Get more → Knowledge packs → Add a pack from a file. The picked `.zim`'s header gives its UUID; a file the catalog lists (same UUID and size) is filed as that entry and checksummed, any other ZIM is kept under its own name unchecked (`UNVERIFIED_PREFIX`). The copy goes through the download queue from its `content://` address (resume, progress, space check, notification); a local copy runs with no network (WorkManager `NOT_REQUIRED`, `connected()` in the queue) and never waits for Wi-Fi. The read grant is kept, so a copy resumes after a restart.
+- [x] 5. The start goes to the SD card when it has more free space than the phone; Save space starts on when the start with pictures would leave under 10 GB free and the one without fits. The first start stores the volume, so later downloads go there too.
+- [ ] 6. Baseline Profile: waits for Neal (generating one installs a benchmark build on the Pixel 6).
+- [x] 7. Battery audit: nothing to change. The only background work is the download queue, which the user starts; book indexing runs in the app's scope while it is open, and Make all searchable asks first. No `setRequiresBatteryNotLow`: a download the user asked for in town shouldn't stop at 15 %.
+- [ ] 8. Memory: from his reports.
+- [ ] 9. Swahili packs: curated rows and `swa` in `kiwix.languages`; merged into the signed catalog without moving other packs' snapshots (their vectors are tied to the exact files).
+- [x] Tester addendum: `docs/friend-testing/economy-phone-note.md`.
+
 ## Decisions (Neal, 2026-11-03)
 
 - **Add a pack from a file: now**, a freeze exception for the closed test (item 4).
