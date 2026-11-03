@@ -133,6 +133,8 @@
     <!-- A button showing the other system voices; %1$d is how many. -->
     <string name="settings_voice_system_more">System voices (%1$d)</string>
     <string name="settings_voice_catalog">Granger voices</string>
+    <!-- Above the Granger voices on a phone with less than 6 GB of memory (Plan E1). -->
+    <string name="settings_voice_may_stop">These voices need more memory than this phone has, so they may stop partway through a long read. The phone\'s own voice works on any phone.</string>
     <string name="settings_voice_catalog_empty">The catalog lists no voices yet.</string>
     <!-- %1$s is the size, like "60 MB"; %2$s the voice's licence. -->
     <string name="settings_voice_download_size">%1$s download · %2$s</string>

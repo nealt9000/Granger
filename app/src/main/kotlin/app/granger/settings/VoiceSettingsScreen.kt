@@ -111,6 +111,9 @@ fun VoiceSettingsScreen(viewModel: VoiceSettingsViewModel, onBack: () -> Unit) {
                 }
             }
             item(key = "catalog") { Heading(stringResource(R.string.settings_voice_catalog)) }
+            if (ui.mayStop && ui.catalog.isNotEmpty()) item(key = "may-stop") {
+                ListItem(supportingContent = { Text(stringResource(R.string.settings_voice_may_stop)) }, headlineContent = {})
+            }
             if (ui.catalog.isEmpty()) item(key = "no-catalog") { ListItem(headlineContent = { Text(stringResource(R.string.settings_voice_catalog_empty)) }) }
             items(ui.catalog.size, key = { "catalog-${ui.catalog[it].entry.id}" }) { i ->
                 val row = ui.catalog[i]

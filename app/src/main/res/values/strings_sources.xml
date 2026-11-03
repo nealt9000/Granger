@@ -197,6 +197,8 @@
     <string name="sources_model_used_by_ask">Used by Ask</string>
     <string name="sources_model_not_used_yet">Not used yet</string>
     <string name="sources_voice">Read-aloud voice</string>
+    <!-- A Granger voice on a phone with less than 6 GB of memory; %1$s is the voice's attribution. -->
+    <string name="sources_voice_may_stop">May stop partway on this phone: it needs more memory than the phone has. The phone\'s own voice works on any phone. %1$s</string>
 
     <!-- A pack row's details. %1$s is the month and year, such as March 2026. -->
     <string name="sources_updated">Updated %1$s</string>

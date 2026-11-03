@@ -915,7 +915,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             }
             composable<BrowseRoute> {
                 BrowseScreen(
-                    viewModel { BrowseViewModel(container.shelves, container.library, container.catalog, container.downloads.records, knowledge = container.knowledgeLanguages.languages) },
+                    viewModel { BrowseViewModel(container.shelves, container.library, container.catalog, container.downloads.records, countryCode = container.phoneCountry, knowledge = container.knowledgeLanguages.languages) },
                     packsFolder = container.packDirs().firstOrNull()?.path.orEmpty(),
                     downloadsBadge = downloadsBadge,
                     actions = BrowseActions(
@@ -1288,6 +1288,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         VoiceSettingsViewModel(
                             container.voicePrefs, container.installedVoices, container.catalog, container.downloads, container.volumes,
                             container.downloadPrefs, container.appScope,
+                            lowMemory = container.deviceTier < DeviceTier.ASK,
                         )
                     },
                     onBack = { nav.popBackStack() },
@@ -1348,6 +1349,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             setKnowledge = container.knowledgeLanguages::set,
                             phoneLocales = container.appLanguages::phoneLocales,
                             appLanguage = container.appLanguages::currentCode,
+                            countryCode = container.phoneCountry,
                         )
                     },
                     onDone = { nav.popBackStack() },

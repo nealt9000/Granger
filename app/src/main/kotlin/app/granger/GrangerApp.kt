@@ -573,6 +573,9 @@ class AppContainer(context: Context) {
         .also { context.getSystemService(ActivityManager::class.java).getMemoryInfo(it) }
         .totalMem
     val deviceTier: DeviceTier = DeviceTiers.forTotalRam(totalRamBytes)
+    /** Where the phone is, for the suggested map: network, then SIM, then locale (Plan E1 item 1). */
+    private val appContext: Context = context.applicationContext
+    val phoneCountry: String get() = app.granger.device.PhoneCountry.of(appContext)
 
     private val archiveUserAgent = "Granger/${BuildConfig.VERSION_NAME} (+https://github.com/nealt9000/Granger)"
 

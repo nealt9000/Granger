@@ -220,6 +220,8 @@ class OnboardingViewModelTest {
         assertThat(vm.ui.value.review.groups.map { it.title.en() }).doesNotContain("Read aloud")
         // Read-aloud off in this build: no line.
         assertThat(viewModel(offerVoice = false).ui.value.voiceLine).isNull()
+        // Under 6 GB (Plan E1 item 2): not offered; the phone's own voice reads.
+        assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.voiceLine).isNull()
     }
 
     @Test fun stepsGoForwardAndBackAndBackOnWelcomeIsSkip() = runTest(main.dispatcher) {

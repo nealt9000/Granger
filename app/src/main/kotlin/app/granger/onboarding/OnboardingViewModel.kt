@@ -218,7 +218,8 @@ class OnboardingViewModel(
         val picked = additions.filter { it.useCase.id in c.useCaseIds }
         val volume = f.volumes.firstOrNull { it.root.path == s.volumePath } ?: f.volumes.firstOrNull()
         val askLine = catalog?.let { OnboardingModel.askLine(it, tier, dense, f.installed) }
-        val voiceLine = catalog?.takeIf { offerVoice }?.let { OnboardingModel.voiceLine(it, f.installed) }
+        // Under 6 GB the Granger voices may stop mid-read (ONNX Runtime keeps ~420 MB): the phone's voice instead (Plan E1 item 2).
+        val voiceLine = catalog?.takeIf { offerVoice && tier >= DeviceTier.ASK }?.let { OnboardingModel.voiceLine(it, f.installed) }
         val review = OnboardingModel.review(
             start, c.unticked, region, picked, volume?.freeBytes ?: 0L, askLine?.takeIf { c.askChosen }, voiceLine?.takeIf { c.voiceChosen },
             containment = catalog?.let { app.granger.core.catalog.Containment(it) },
