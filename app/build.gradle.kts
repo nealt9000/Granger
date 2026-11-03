@@ -56,6 +56,19 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfigs.findByName("upload")?.let { signingConfig = it }
         }
+        // The Baseline Profile's build (Plan E1 item 6): release code without R8, so the profile's names are the
+        // source's, installed beside the real app as app.granger.benchmark with its own empty data. Generate with
+        // tools/dev/baseline-profile.sh; it never touches an installed app.granger.
+        create("benchmark") {
+            initWith(getByName("release"))
+            isMinifyEnabled = false
+            isShrinkResources = false
+            applicationIdSuffix = ".benchmark"
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+            isProfileable = true
+            manifestPlaceholders["appLabel"] = "Granger Benchmark"
+        }
         // A second debug install beside the first, with its own empty data, for fresh-install walkthroughs:
         // ./gradlew installDebug -Pfresh
         getByName("debug") {
@@ -116,6 +129,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.compose.material.icons)
+    // Installs the Baseline Profile (src/main/baseline-prof.txt) on phones that didn't get it from Play (Plan E1).
+    implementation(libs.androidx.profileinstaller)
     implementation(libs.jsoup)   // Home's "On this day": the day article's sections (Plan H2)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.room.runtime)
