@@ -183,11 +183,13 @@ class DownloadQueue(
         _progress.value = QueueProgress(record.itemId, record.hash, record.bytesDone, rate.bytesPerSecond(elapsed()))
         // The first report is what the part file already held: only bytes after it are counted as speed.
         var last = -1L
+        var first = -1L
         val outcome = try {
             coroutineScope {
                 val job = async {
                     runner.run(record.itemId, record.hash) { done, total ->
                         if (last >= 0 && done > last) rate.add(done - last, elapsed())
+                        if (first < 0) first = done
                         last = done
                         bytesNow = done
                         onProgress(running, done, total)
@@ -225,7 +227,10 @@ class DownloadQueue(
             _current.value = null
         }
         if (outcome == RunOutcome.RETRY) {
-            val attempts = record.attempts + 1
+            // A run that got somewhere before the line dropped starts the count again (Plan E1 item 3): on a flaky rural
+            // link a 7 GB file can drop far more than MAX_ATTEMPTS times and still finish from its part file.
+            val progressed = first >= 0 && last - first >= PROGRESS_RESETS_BYTES
+            val attempts = if (progressed) 1 else record.attempts + 1
             if (attempts >= MAX_ATTEMPTS) {
                 runner.giveUp(record.itemId, record.hash)
             } else {
@@ -238,6 +243,9 @@ class DownloadQueue(
     companion object {
         /** A file at most this big goes ahead of bigger ones ([jumpsAhead]). */
         const val SMALL_BYTES = 50L * 1000 * 1000
+
+        /** A failed run that downloaded at least this much counts as the first failed try, not one more (Plan E1). */
+        const val PROGRESS_RESETS_BYTES = 1L * 1000 * 1000
 
         /**
          * Whether this record goes ahead of bigger ones: a small file. An Ask index may too, since it is queued only
