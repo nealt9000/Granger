@@ -250,6 +250,15 @@ keyword passages, 92 vs 93 of 126 answers found at k = 24), but at 256 a deeper 
 48 and 100, and `PipelineReplayTest` ranked them as the app does: an answer quote in the prompt 62, 63, 63 of 126. The
 one gain is multi-step-015 (light to the Moon), a misread. The extra hits rank below the top 4, so `k = 24` stays.
 
+**A named-source boost (2026-11-03, Mac only; reverted).** Every question not about dates got a passage from each work
+or article it names among its first 4 (`Entities.boostNamed`), names from the question's capitals, or those and the
+rewrite's keywords. Replay of `r2-t7-base`: quote in the prompt 64 → 64 either way (keywords: +geography-general-002,
+-medical-009, 45 prompts changed). The misses it aimed at already had the named source in the prompt, just the wrong
+part: four Kalevala passages without the answer, the Gita's and Moby-Dick's wrong chapters, Sale's Koran instead of
+Rodwell's. Of 90 answerables whose quote is found, 64 reach the prompt; what's left is "right source, wrong passage",
+which lexical and embedding scores don't separate. A reranker that reads question and passage together is the next test
+(offline first).
+
 ## Task 9: books you add (the own-book group)
 
 - [ ] Imported EPUBs are chunked with `:core:text` and embedded on the phone with EmbeddingGemma, in the background,
