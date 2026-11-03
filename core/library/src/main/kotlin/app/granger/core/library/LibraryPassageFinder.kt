@@ -49,7 +49,7 @@ class LibraryPassageFinder(
     private val bookshelf: Bookshelf,
     private val shelves: Shelves,
     private val io: CoroutineDispatcher = Dispatchers.IO,
-    private val docs: Int = 8,
+    private val docs: Int = 16,
     private val perPack: Int = 8,
     private val cards: Int = 3,
     private val bookLimit: Int = 40,
@@ -81,7 +81,7 @@ class LibraryPassageFinder(
         return coroutineScope {
             val articles = async {
                 timed {
-                    val found = withoutClassicsTwins(articles(words, packs, collections), packs)
+                    val found = articles(words, packs, collections)
                     SliceDedupe.apply(found, packs, slices, library::archive, { p -> p.sourceId.takeIf { p.kind == SourceKind.ARTICLE } }, { it.location })
                 }
             }
@@ -152,19 +152,21 @@ class LibraryPassageFinder(
 
     /**
      * Granger Classics ships as a ZIM and as EPUBs. A work whose EPUB is installed is found through the book (and its
-     * vectors), so the ZIM's pages for that work (`<slug>` and `<slug>/<page>`) are dropped rather than take a second slot.
+     * vectors), so the ZIM's pages for that work (`<slug>` and `<slug>/<page>`) are skipped rather than take a place.
      */
-    private suspend fun withoutClassicsTwins(articles: List<Passage>, packs: List<Pack>): List<Passage> {
+    private suspend fun classicsTwins(packs: List<Pack>): (Pack, String) -> Boolean {
         val classics = packs.filter { it.name == CLASSICS_ZIM }.map { it.id }.toSet()
-        if (classics.isEmpty() || articles.none { it.sourceId in classics }) return articles
+        if (classics.isEmpty()) return { _, _ -> false }
         val installed = try {
             bookshelf.books.first().filter { it.status == PackStatus.OK }.map { it.id }.toSet()
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {
-            return articles
+            return { _, _ -> false }
         }
-        return articles.filterNot { it.sourceId in classics && BookIds.of(BookOrigin.GRANGER, "gc-" + it.location.substringBefore('/')) in installed }
+        return { pack, path ->
+            pack.id in classics && BookIds.of(BookOrigin.GRANGER, "gc-" + path.removePrefix("A/").substringBefore('/')) in installed
+        }
     }
 
     /**
@@ -197,19 +199,39 @@ class LibraryPassageFinder(
 
     /** Pack ids and book ids to the name of the collection they are filed in (a folder's child by its own name). */
     /** Each keyword is searched on its own (the full-text engine wants every word of a query); an article found twice keeps its best score. */
+    /** One article a pack's search found: by how many of the keywords, its best place among their hits, its best score. */
+    private class ArticleHit(val pack: Pack, val archive: ZimArchive, val hit: ZimHit, val order: Int, val keywords: Int, val rank: Int)
+
+    /**
+     * The [docs] articles to read, of every pack's top [perPack] hits for each keyword. Kiwix's score is a percentage
+     * and the top hits tie at 100 (R2: 154 of 159 tuning questions read eight 100s), so on the score alone the packs'
+     * order decided ("the bible on alcohol" read Appropedia and Based Cooking first). Instead: an article whose title
+     * holds a whole keyword first, then the one more keywords found, then its best place in a keyword's hits, then the
+     * score and the packs' order (`tools/eval/experiments/article_cut.py`: the answer's article read for 46 of 95
+     * tuning questions at 8, 54 at 16, against 36). Classics ZIM pages of works installed as books are dropped before
+     * the cut, not after, so they don't take a place.
+     */
     private suspend fun articles(words: List<String>, packs: List<Pack>, collections: Map<String, String>): List<Passage> =
         withContext(io) {
             // Packs are searched [searchParallelism] at a time: one after another, search time grew with every pack added.
             val searching = io.limitedParallelism(searchParallelism)
             val searchStart = clock()
-            val hits = packs.filter { it.hasFulltextIndex }.map { pack ->
+            val twins = classicsTwins(packs)
+            val hits = packs.filter { it.hasFulltextIndex }.mapIndexed { order, pack ->
                 async(searching) {
                     try {
                         val packStart = clock()
                         val archive = library.archive(pack.id) ?: return@async emptyList()
                         // Research never shows a snippet, and libzim builds each one from the article.
-                        words.flatMap { archive.searchWithoutSnippets(it, perPack) }
-                            .groupBy { it.path }.values.map { same -> Triple(pack, archive, same.maxBy { it.score }) }
+                        words.flatMapIndexed { k, word -> archive.searchWithoutSnippets(word, perPack).mapIndexed { rank, hit -> Triple(k, rank, hit) } }
+                            .groupBy { it.third.path }.values
+                            .filterNot { same -> twins(pack, same.first().third.path) }
+                            .map { same ->
+                                ArticleHit(
+                                    pack, archive, same.maxBy { it.third.score }.third, order,
+                                    keywords = same.map { it.first }.distinct().size, rank = same.minOf { it.second },
+                                )
+                            }
                             .also { packMs[pack.name] = clock() - packStart }
                     } catch (e: CancellationException) {
                         throw e
@@ -219,9 +241,16 @@ class LibraryPassageFinder(
                 }
             }.awaitAll().flatten()
             fulltextMs = clock() - searchStart
-            hits.sortedByDescending { it.third.score }.take(docs).flatMap { (pack, archive, hit) ->
+            val titled = titleMatcher(words)
+            hits.sortedWith(
+                compareByDescending<ArticleHit> { titled(it.hit.title) }
+                    .thenByDescending { it.keywords }
+                    .thenBy { it.rank }
+                    .thenByDescending { it.hit.score }
+                    .thenBy { it.order },
+            ).take(docs).flatMap { h ->
                 try {
-                    articlePassages(pack, archive, hit, collections[pack.id].orEmpty())
+                    articlePassages(h.pack, h.archive, h.hit, collections[h.pack.id].orEmpty())
                 } catch (e: CancellationException) {
                     throw e
                 } catch (_: Exception) {
@@ -229,6 +258,15 @@ class LibraryPassageFinder(
                 }
             }
         }
+
+    /** Whether a title holds every word of one of [words] (stopwords aside): "The King James Bible" for "bible". */
+    private fun titleMatcher(words: List<String>): (String) -> Boolean {
+        val keywords = words.map { k -> Keywords.words(k).map { it.lowercase() }.filterNot { Keywords.isStopword(it) }.toSet() }.filter { it.isNotEmpty() }
+        return { title ->
+            val t = Keywords.words(title).map { it.lowercase() }.toSet()
+            keywords.any { t.containsAll(it) }
+        }
+    }
 
     private fun articlePassages(pack: Pack, archive: ZimArchive, hit: ZimHit, collection: String): List<Passage> {
         val item = archive.read(hit.path) ?: return emptyList()

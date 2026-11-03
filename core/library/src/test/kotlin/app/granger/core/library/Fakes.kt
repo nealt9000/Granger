@@ -21,6 +21,8 @@ class FakeZimArchive(
     override val hasFulltextIndex: Boolean = true,
     var suggestions: List<ZimHit> = emptyList(),
     var results: List<ZimHit> = emptyList(),
+    /** Per query, when given; else [results] for every query. */
+    var resultsFor: Map<String, List<ZimHit>> = emptyMap(),
     var failSearch: Boolean = false,
     name: String = uuid,
     private val html: Map<String, String> = emptyMap(),
@@ -56,7 +58,7 @@ class FakeZimArchive(
         searches++
         queries += query
         if (failSearch) error("native failure")
-        return results.take(limit)
+        return (resultsFor[query] ?: results).take(limit)
     }
 
     override fun close() { closed = true }

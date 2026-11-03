@@ -164,7 +164,8 @@ class LibraryPassageFinderTest {
             val names = (0 until 8).map { "$id$it" }
             return FakeZimArchive(
                 id, paths = names.toSet(),
-                results = names.mapIndexed { i, n -> ZimHit(n, n, score = i * 2 + base) },
+                // Best first, as a search returns them.
+                results = names.mapIndexed { i, n -> ZimHit(n, n, score = i * 2 + base) }.reversed(),
                 html = names.associateWith { page("text of $it") },
             )
         }
@@ -174,6 +175,28 @@ class LibraryPassageFinderTest {
 
         // Scores: a_i = 2i, b_i = 2i + 1, so the best eight interleave the two packs.
         assertThat(found.map { it.sourceTitle }).containsExactly("b7", "a7", "b6", "a6", "b5", "a5", "b4", "a4")
+    }
+
+    // R2: Kiwix's top hits tie at 100, so the packs' order decided which articles were read.
+    @Test fun aTitleWithAKeywordIsReadBeforeTiedHitsOfEarlierPacks() = test {
+        fun archive(id: String, titles: List<String>) = FakeZimArchive(
+            id, paths = titles.toSet(), results = titles.map { ZimHit(it, it, score = 100) }, html = titles.associateWith { page("text of $it") },
+        )
+        val found = finder(
+            listOf(pack("a"), pack("b")),
+            mapOf("a" to archive("a", listOf("Limoncello", "Solar drying")), "b" to archive("b", listOf("Wine", "Christian views on alcohol"))),
+            docs = 2,
+        ).find(listOf("alcohol", "wine"))
+        assertThat(found.map { it.sourceTitle }).containsExactly("Wine", "Christian views on alcohol").inOrder()
+    }
+
+    @Test fun anArticleMoreKeywordsFindIsReadFirst() = test {
+        val one = ZimHit("One", "One", score = 100)
+        val both = ZimHit("Both", "Both", score = 100)
+        val a = FakeZimArchive("a", paths = setOf("One", "Both"), resultsFor = mapOf("tattoos" to listOf(one, both), "marks" to listOf(both)),
+            html = mapOf("One" to page("x"), "Both" to page("y")))
+        val found = finder(listOf(pack("a")), mapOf("a" to a), docs = 1).find(listOf("tattoos", "marks"))
+        assertThat(found.map { it.sourceTitle }).containsExactly("Both")
     }
 
     @Test fun bookCardForAnAuthorQuery() = test {

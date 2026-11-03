@@ -337,6 +337,14 @@ of Mac CPU per question (more on the phone). Ranking is left as it is.
   the 95 answerables with an article answer, but among the 8 read for 36. Title match first (an article whose title
   holds a whole keyword), then most keywords, then rank: 46 at 8 (+16, -6), 50 at 12, 54 at 16, 60 at 24. Most
   keywords first: 37 at 8; best rank first: 40. Reading 8 articles is 0.47 s median, alongside the books' 1.2 s.
+- [x] **Title first, 16 articles, Classics twins dropped before the cut; full tuning run `r2-t10-cut` (2026-11-03).**
+  101/126 grounded (80%, bar 80%), 71/76 declined (93%). Against `r2-t10-all` (100): +5 (literature-005,
+  literature-007, multi-step-002, -003, -012), -4 (vocab-gap-002, science-006, multi-step-001, -008), all four lost
+  with the answer in the prompt (model misreads: a misquoted verse, "not stated" beside the blue whale, an uncited
+  "elected 1860", "20 or 21"). The multi-step gains are the date work; multi-step-009 fell back to 127 years. The cut
+  moved answers from never found (48 to 45) to found but not chosen (12 to 17); in the first 4 by quote 68 (69). Cost:
+  keyword search 1.49 to 2.21 s median (reading 16 articles, 0.47 to 1.36 s), now longer than the books' 1.2 s; first
+  words 12.2 s median (12.8). Run-to-run noise on answered items is about 4 either way.
 - [ ] **Held-out scoring 1 of 2**: the whole set on the Pixel 6, graded by a separate session per `RUBRIC.md`. Totals and
   per-domain numbers only reach this session.
 - [ ] **Best guess** re-scored on E2B: confidently wrong ≤ 10% (eval spec; E2B was 20% on the Plan 9 held-out set, and
