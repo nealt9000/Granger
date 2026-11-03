@@ -5,7 +5,7 @@
 
 Chunks the EPUB with the app's chunker, embeds the chunks as build.py does, and writes WORK_DIR/out/<file>.gvec with
 an index.tsv line (`<file>\\tBOOK\\t<BOOK_ID>`) for push.py's directory. BOOK_ID is the id the phone gave the book when
-it was imported (`book:import:<stem>`, from `eval.py import`). A small book embeds in seconds on the CPU, so the shared
+it was imported (`book:import:<sha256 of the file>`, printed by `eval.py import`). A small book embeds in seconds on the CPU, so the shared
 GPU isn't needed.
 """
 import argparse

@@ -202,8 +202,13 @@ These need full phone runs, so they're batched into one run.
   measures with no release and no app change: `eval.py import` (a debug import over adb) puts it in the phone's library
   and indexes it, and `tools/vectors/book.py` embeds it on the CPU for the pushed-vectors directory. If it passes, it
   ships as one more catalog book with its own vectors.
-- [ ] Measure: import the notes, push their vectors, rerun the tuning split; compare with `r2-t5` per domain (classics
-  answerables, and no losses elsewhere). Held until the test library is settled (below).
+- [x] Measured (2026-11-03), against a new baseline `r2-t7-base` on the restored library (below), both with older words
+  on: grounded 97 → 98 of 126 (classics 20 → 21 of 32), declined 68/76 both, no losses. Only 3 replies changed: "how
+  does Pride and Prejudice start" is now grounded from the notes (first line verbatim), Scrooge's partner and Odysseus's
+  journey reworded and still grounded. The notes were found for 23 questions but chosen for 2. The classics questions
+  still failing are mostly scripture and detail (the fence, Holmes's first words, Lilliputian height) that a card
+  doesn't cover; "Who's telling the story?" found the notes and still declined. Small gain, no harm: ship as a catalog
+  book is reasonable but won't move the bar alone.
 
 **`r2-t5`, the full tuning split on Tasks 2–4 (2026-11-02):** declined 69/76 (91%), grounded 93/126 (74%), recall by
 quote 64/126. Not comparable with `r5-t7-all` (63/76, 91/126): the phone's library changed between them. Gone: IEP,
@@ -211,6 +216,12 @@ WikEM, devdocs C/Git/JavaScript/Python, six Stack Exchange sites, foss.cooking, 
 ZIM; new: Knots, Wikipedia Computer and Movies, Spanish packs. Attributable to the code: 9 unanswerables newly declined
 by the decline check (none of them answerable) and multi-step-004 by the verdict. Neal to decide the test library
 before held-out scoring.
+
+**Test library restored (2026-11-03):** IEP, WikEM, the Classics ZIM (`classics-2026-10-16` release, sha256 checked),
+devdocs C/Git/JavaScript/Python, foss.cooking, cs/unix/softwareengineering/reverseengineering Stack Exchange pushed back
+from `vectors-work/sources` with their vectors (`files/vectors/index.tsv`); engineering and hermeneutics Stack Exchange and
+Wikipedia Geography (maxi) re-downloaded from Kiwix (2026-10 builds, sha256 checked), no vectors, as before. The packs
+added since stay. Baseline on it, `r2-t7-base`: declined 68/76 (89%), grounded 97/126 (77%).
 - [ ] Neal reads a sample of cards before they ship.
 
 ## Task 8: prompt rules for misreads
