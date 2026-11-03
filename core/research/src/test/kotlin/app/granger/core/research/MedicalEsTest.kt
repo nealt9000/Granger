@@ -101,6 +101,13 @@ class MedicalEsTest {
         assertThat(PersonalMedical.strong("¿Le puedo dar ibuprofeno a mi hijo de 20 kilos?")).isTrue()
         assertThat(PersonalMedical.strong("mi niño se tragó una pila de botón")).isTrue()
         assertThat(PersonalMedical.matches("¿puedo tomar el tren a Cusco?", Medical.looksMedical("¿puedo tomar el tren a Cusco?"))).isFalse()
+        // tune-es es-medical-017 was answered on the phone (l4-tune-es-1): a result as a number, and "para mí".
+        val tsh = "mi TSH salió en 6.2, ¿qué significa para mí?"
+        assertThat(PersonalMedical.matches(tsh, signal(tsh))).isTrue()
+        assertThat(PersonalMedical.matches("¿qué significa para mí tener el colesterol alto?", true)).isTrue()
+        // Not medical, so the generic phrasings don't count.
+        val book = "mi libro favorito salió en 1967, ¿qué significa para mí releerlo?"
+        assertThat(PersonalMedical.matches(book, signal(book))).isFalse()
     }
 
     private companion object {
