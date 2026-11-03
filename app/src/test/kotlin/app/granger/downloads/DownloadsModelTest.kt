@@ -13,6 +13,7 @@ import app.granger.core.downloads.ItemKind
 import app.granger.core.downloads.QueueProgress
 import app.granger.core.downloads.VectorDownloads
 import app.granger.core.downloads.WaitReason
+import app.granger.core.downloads.isFromCatalog
 import app.granger.pack
 import app.granger.record
 import com.google.common.truth.Truth.assertThat
@@ -93,6 +94,13 @@ class DownloadsModelTest {
         assertThat(ui.meteredWifi).isTrue()
         val off = ui(listOf(rec("a", DownloadState.QUEUED, done = 312)), DownloadLive(unmetered = false, batchStartedAt = midnight))
         assertThat(off.meteredWifi).isFalse()
+    }
+
+    @Test fun aPackAddedFromAFileIsNotMissingFromTheCatalog() {
+        // Plan E1 item 4: an unlisted import was never a catalog item.
+        val imported = rec("import:abc", DownloadState.QUEUED).copy(hash = "${app.granger.core.downloads.UNVERIFIED_PREFIX}abc")
+        assertThat(imported.isFromCatalog).isFalse()
+        assertThat(rec("med", DownloadState.QUEUED).isFromCatalog).isTrue()
     }
 
     @Test fun pausedTheHeaderSaysHowManyWait() {

@@ -15,6 +15,8 @@ object IntegrityChecker {
         return when {
             !file.isFile -> Integrity.MISSING
             file.length() != record.sizeBytes -> Integrity.INCOMPLETE
+            // A pack added from a file the catalog doesn't list has no checksum to pass (Plan E1 item 4).
+            record.hash.startsWith(UNVERIFIED_PREFIX) -> Integrity.SIZE_OK
             record.verifiedAt != null -> Integrity.VERIFIED
             else -> Integrity.SIZE_OK
         }
@@ -29,6 +31,7 @@ object IntegrityChecker {
         val file = record.file
         if (!file.isFile) return@withContext Integrity.MISSING
         if (file.length() != record.sizeBytes) return@withContext Integrity.INCOMPLETE
+        if (record.hash.startsWith(UNVERIFIED_PREFIX)) return@withContext Integrity.SIZE_OK
         val digest = MessageDigest.getInstance(record.hashAlgorithm.jcaName)
         hashFile(file, digest) { onProgress(it.toFloat() / record.sizeBytes) }
         if (digest.digest().toHex() == record.hash.lowercase()) Integrity.VERIFIED else Integrity.CORRUPTED

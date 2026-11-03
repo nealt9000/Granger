@@ -421,7 +421,9 @@ class DownloadManager(
  */
 val DownloadRecord.isFromCatalog: Boolean
     get() = when (kind) {
-        ItemKind.PACK, ItemKind.MODEL, ItemKind.VOICE -> true
+        // A pack added from a file that the catalog doesn't list (Plan E1 item 4) never was a catalog item.
+        ItemKind.PACK -> !hash.startsWith(UNVERIFIED_PREFIX)
+        ItemKind.MODEL, ItemKind.VOICE -> true
         ItemKind.BOOK -> filePath.contains("${File.separator}books${File.separator}granger${File.separator}")
         ItemKind.AUDIO, ItemKind.VECTORS -> false
     }

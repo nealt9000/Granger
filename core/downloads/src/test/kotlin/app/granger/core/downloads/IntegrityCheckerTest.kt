@@ -29,6 +29,14 @@ class IntegrityCheckerTest {
         assertThat(IntegrityChecker.quick(record(file, verifiedAt = 5))).isEqualTo(Integrity.VERIFIED)
     }
 
+    @Test fun anUnlistedImportIsSizeCheckedOnly() = runTest {
+        // Plan E1 item 4: no checksum to pass, so never "verified" and never "damaged" for want of one.
+        val file = tmp.newFile("x.zim").apply { writeBytes(content) }
+        val imported = record(file, verifiedAt = 5).copy(hash = "${UNVERIFIED_PREFIX}abc")
+        assertThat(IntegrityChecker.quick(imported)).isEqualTo(Integrity.SIZE_OK)
+        assertThat(IntegrityChecker.full(imported)).isEqualTo(Integrity.SIZE_OK)
+    }
+
     @Test fun fullCheckVerifiesWithProgress() = runTest {
         val file = File(tmp.root, "med.zim").apply { writeBytes(content) }
         val progress = mutableListOf<Float>()
