@@ -1,0 +1,41 @@
+{
+ "slug": "emma",
+ "title": "Emma",
+ "author": "Jane Austen",
+ "published": 1815,
+ "kind": "novel",
+ "firstLine": "Emma Woodhouse, handsome, clever, and rich, with a comfortable home and happy disposition, seemed to unite some of the best blessings of existence; and had lived nearly twenty-one years in the world with very little to distress or vex her.",
+ "begins": "Chapter I introduces Emma Woodhouse, mistress of Hartfield, her fussy, devoted father, and the wedding of her governess Miss Taylor to Mr. Weston. Mr. Knightley, a family friend, visits and discusses the match with her.",
+ "happens": "Emma Woodhouse, a rich young woman in the village of Highbury, plays matchmaker. She persuades her protegee Harriet Smith to refuse the farmer Robert Martin, hoping Mr. Elton will propose to Harriet; instead Mr. Elton makes violent love to Emma and then marries Augusta Hawkins. Frank Churchill arrives and flirts with Emma, while secretly engaged to Jane Fairfax. At Box Hill, Emma is witty at Miss Bates's expense, and Mr. Knightley rebukes her. Harriet's hopes of Mr. Knightley make Emma see that she loves him herself. He declares his love, and she accepts; Harriet marries Robert Martin.",
+ "characters": [
+  {
+   "name": "Emma Woodhouse",
+   "who": "the heroine, handsome, clever and rich"
+  },
+  {
+   "name": "Mr. Woodhouse",
+   "who": "her anxious, devoted father"
+  },
+  {
+   "name": "Mr. Knightley",
+   "who": "neighbour and family friend, who speaks plainly to Emma"
+  },
+  {
+   "name": "Harriet Smith",
+   "who": "Emma's young protegee"
+  },
+  {
+   "name": "Mr. Elton",
+   "who": "Highbury's vicar"
+  },
+  {
+   "name": "Frank Churchill",
+   "who": "Mr. Weston's charming son"
+  },
+  {
+   "name": "Jane Fairfax",
+   "who": "Miss Bates's accomplished niece"
+  }
+ ],
+ "checks": "First line copied from Chapter I; read Chapter I and the closing chapter. Names and places searched. Matchmaking sequence, Box Hill and the engagements from memory plus name search; Frank/Jane secret engagement not re-read."
+}

@@ -1,0 +1,41 @@
+{
+ "slug": "room-with-a-view",
+ "title": "A Room with a View",
+ "author": "E. M. Forster",
+ "published": 1908,
+ "kind": "novel",
+ "firstLine": "“The Signora had no business to do it,” said Miss Bartlett, “no business at all.",
+ "begins": "Part One, Chapter I (The Bertolini): at a pension in Florence, Lucy Honeychurch and her older cousin and chaperone Miss Bartlett complain that they were promised south rooms with a view but given north rooms facing a courtyard. Two English guests, Mr. Emerson and his son George, offer to swap rooms with them.",
+ "happens": "Lucy Honeychurch visits Florence with her cousin Charlotte Bartlett and meets George Emerson and his father. George kisses her in a field of violets, and Miss Bartlett hurries her home. In Surrey, Lucy becomes engaged to the fastidious Cecil Vyse. When the Emersons rent Cissie Villa nearby, George declares his love again. Lucy breaks with Cecil, but denies her feelings and plans to go abroad to Greece, until old Mr. Emerson tells her she loves George. She marries George, and the novel ends with the couple in Florence, where they guess that Miss Bartlett secretly hoped for it.",
+ "characters": [
+  {
+   "name": "Lucy Honeychurch",
+   "who": "young Englishwoman torn between Cecil and George; the heroine"
+  },
+  {
+   "name": "George Emerson",
+   "who": "moody, honest young man who loves Lucy"
+  },
+  {
+   "name": "Mr. Emerson",
+   "who": "George's outspoken father"
+  },
+  {
+   "name": "Charlotte Bartlett",
+   "who": "Lucy's fussy older cousin and chaperone"
+  },
+  {
+   "name": "Cecil Vyse",
+   "who": "Lucy's snobbish fiancé"
+  },
+  {
+   "name": "Freddy Honeychurch",
+   "who": "Lucy's brother"
+  },
+  {
+   "name": "Mr. Beebe",
+   "who": "rector of Summer Street, a family friend"
+  }
+ ],
+ "checks": "Verified first line, Part One Ch. I opening, names (Cissie Villa, Vyse, Beebe, Miss Alan) and the closing Florence scene by search. Greece plan and Mr. Emerson's speech from memory of chapters XVIII-XX, not re-read in full."
+}

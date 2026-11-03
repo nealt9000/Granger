@@ -1,0 +1,41 @@
+{
+ "slug": "crime-and-punishment",
+ "title": "Crime and Punishment",
+ "author": "Fyodor Dostoevsky",
+ "published": 1866,
+ "kind": "novel",
+ "firstLine": "On an exceptionally hot evening early in July a young man came out of the garret in which he lodged in S. Place and walked slowly, as though in hesitation, towards K. bridge.",
+ "begins": "On a hot July evening in St. Petersburg, a young man slips out of his cramped garret past his landlady, to whom he is hopelessly in debt, and walks slowly toward a bridge, overstrained and cut off from other people.",
+ "happens": "Raskolnikov, a destitute student, murders an old pawnbroker and her sister with an axe. Fevered and guilt-ridden, he is drawn to the drunken Marmeladov’s family, especially his daughter Sonia. His mother Pulcheria and his sister Dounia come to St. Petersburg, where Dounia’s fiancé Luzhin is exposed as a schemer. His friend Razumihin helps them; Porfiry Petrovitch, the head of the Investigation Department, suspects him; Svidrigaïlov, who pursues Dounia, learns the secret and later shoots himself. Urged by Sonia, Raskolnikov confesses and gets eight years’ penal servitude in Siberia, where she follows him and he begins to be renewed.",
+ "characters": [
+  {
+   "name": "Raskolnikov",
+   "who": "the poor ex-student who kills"
+  },
+  {
+   "name": "Sonia",
+   "who": "Marmeladov’s daughter, who follows him to Siberia"
+  },
+  {
+   "name": "Porfiry Petrovitch",
+   "who": "head of the Investigation Department"
+  },
+  {
+   "name": "Razumihin",
+   "who": "Raskolnikov’s loyal friend"
+  },
+  {
+   "name": "Dounia",
+   "who": "his sister"
+  },
+  {
+   "name": "Svidrigaïlov",
+   "who": "a dissolute landowner pursuing Dounia"
+  },
+  {
+   "name": "Pulcheria",
+   "who": "Raskolnikov’s mother"
+  }
+ ],
+ "checks": "First sentence copied from file (Garnett translation, complete; seven parts plus Epilogue). Names grepped (Sonia, Dounia, Pulcheria, Svidrigaïlov spelled as found). Svidrigaïlov’s suicide and ‘eight years’ confirmed by grep; ending read in the last lines. Murder details from memory."
+}

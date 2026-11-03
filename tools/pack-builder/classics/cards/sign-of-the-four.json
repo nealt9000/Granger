@@ -1,0 +1,45 @@
+{
+ "slug": "sign-of-the-four",
+ "title": "The Sign of the Four",
+ "author": "Arthur Conan Doyle",
+ "published": 1890,
+ "kind": "novel",
+ "firstLine": "Sherlock Holmes took his bottle from the corner of the mantel-piece and his hypodermic syringe from its neat morocco case.",
+ "begins": "In Baker Street, Dr. Watson watches Sherlock Holmes inject himself with a drug and protests. Holmes then reads the history of Watson's brother from a watch and calls himself the only unofficial consulting detective.",
+ "happens": "Miss Mary Morstan asks Holmes to explain why she receives a pearl every year and has been summoned to a meeting about her father, Captain Morstan, who disappeared in 1878. Holmes and Watson go with her to Thaddeus Sholto, who tells of a hidden Agra treasure. They find his brother Bartholomew dead at Pondicherry Lodge, killed by a poisoned thorn. Following Toby the dog, they chase the launch Aurora down the Thames. Tonga, the Andaman islander who made the kill, is shot, and Jonathan Small is captured. The treasure chest is empty, for Small threw its contents into the river. Watson becomes engaged to Miss Morstan.",
+ "characters": [
+  {
+   "name": "Sherlock Holmes",
+   "who": "the consulting detective"
+  },
+  {
+   "name": "Dr. Watson",
+   "who": "Holmes's friend and the narrator"
+  },
+  {
+   "name": "Miss Mary Morstan",
+   "who": "a governess whose father vanished; Watson's love"
+  },
+  {
+   "name": "Thaddeus Sholto",
+   "who": "the nervous, collecting son of Major Sholto"
+  },
+  {
+   "name": "Bartholomew Sholto",
+   "who": "his brother, murdered"
+  },
+  {
+   "name": "Jonathan Small",
+   "who": "the one-legged convict seeking the Agra treasure"
+  },
+  {
+   "name": "Tonga",
+   "who": "Small's Andaman Islander companion, who kills with poisoned darts"
+  },
+  {
+   "name": "Athelney Jones",
+   "who": "the Scotland Yard detective"
+  }
+ ],
+ "checks": "First line copied from Chapter I; read Chapter I opening and the final pages (engagement, Jones, Holmes). Names searched. Watch deduction, thorn, launch chase and empty box from memory plus search of Tonga/Small/Aurora/Agra lines; Chapter XII Small's story not re-read."
+}

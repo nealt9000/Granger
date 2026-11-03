@@ -1,0 +1,37 @@
+{
+ "slug": "around-the-world-in-eighty-days",
+ "title": "Around the World in Eighty Days",
+ "author": "Jules Verne",
+ "published": 1873,
+ "kind": "novel",
+ "firstLine": "Mr. Phileas Fogg lived, in 1872, at No. 7, Saville Row, Burlington Gardens, the house in which Sheridan died in 1814.",
+ "begins": "In 1872 the precise, mysterious Phileas Fogg lives in Saville Row, London, and belongs to the Reform Club. He hires a new French servant, Passepartout, and that evening bets club friends he can go around the world in eighty days.",
+ "happens": "Phileas Fogg wagers £20,000 at the Reform Club and leaves with Passepartout. The detective Fix, thinking Fogg a bank robber, trails them. In India they rescue Aouda from a funeral pyre, and she travels with them. After many delays across Asia and America, Fogg is arrested in Liverpool by Fix and reaches London five minutes late, as he thinks, and is ruined. He proposes to Aouda; then Passepartout, sent to arrange the wedding, finds it is still Saturday, because they gained a day travelling east. Fogg dashes to the club and wins, and marries Aouda two days later. Earlier, in Bombay, Passepartout enters a temple in his shoes and has to flee.",
+ "characters": [
+  {
+   "name": "Phileas Fogg",
+   "who": "calm, exact English gentleman"
+  },
+  {
+   "name": "Passepartout",
+   "who": "his French valet"
+  },
+  {
+   "name": "Fix",
+   "who": "detective who suspects Fogg"
+  },
+  {
+   "name": "Aouda",
+   "who": "Indian widow Fogg rescues; later his wife"
+  },
+  {
+   "name": "Sir Francis Cromarty",
+   "who": "British officer in India"
+  },
+  {
+   "name": "Andrew Stuart",
+   "who": "club member who bets with Fogg"
+  }
+ ],
+ "checks": "First sentence copied from file. Names grepped. Ending read in the last chapters (wedding, ‘still Saturday’, £20,000, five minutes late). Middle journey from memory, not re-read."
+}

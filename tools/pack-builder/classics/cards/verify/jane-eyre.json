@@ -1,0 +1,91 @@
+{
+ "slug": "jane-eyre",
+ "claims": [
+  {
+   "claim": "Jane is a ten-year-old",
+   "status": "verified",
+   "evidence": "'Ten years.' (her answer to Mr. Brocklehurst)"
+  },
+  {
+   "claim": "cold winter day at Gateshead; aunt Mrs. Reed",
+   "status": "verified",
+   "evidence": "'the cold winter wind had...' line 144; 'that winter afternoon'"
+  },
+  {
+   "claim": "bullied by cousin John Reed",
+   "status": "verified",
+   "evidence": "'Boh! Madam Mope!' cried the voice of John Reed"
+  },
+  {
+   "claim": "hides in window seat with picture book",
+   "status": "verified",
+   "evidence": "'one stored with pictures. I mounted into the window-seat'"
+  },
+  {
+   "claim": "sent to Lowood; Helen Burns dies",
+   "status": "verified",
+   "evidence": "Helen Burns's deathbed chapter: 'I must embrace her before she died'"
+  },
+  {
+   "claim": "Jane teacher at Lowood after pupil",
+   "status": "verified",
+   "evidence": "'eight years: six as pupil, and two as teacher'"
+  },
+  {
+   "claim": "governess to Ad\u00e8le, Rochester's ward at Thornfield Hall",
+   "status": "verified",
+   "evidence": "'She is Mr. Rochester's ward; he commissioned me to find a governess'"
+  },
+  {
+   "claim": "Rochester proposes/agrees to marry; wedding interrupted, he has a wife",
+   "status": "verified",
+   "evidence": "'I have been married, and the woman to whom I was married lives!'"
+  },
+  {
+   "claim": "Bertha Mason, mad",
+   "status": "verified",
+   "evidence": "'Bertha Mason is mad'"
+  },
+  {
+   "claim": "hidden in the attic",
+   "status": "wrong",
+   "evidence": "Bertha is found in 'a room without a window' on the third storey; attics are a separate place",
+   "fix": "mad and locked in a room on the third storey"
+  },
+  {
+   "claim": "Diana, Mary and St. John Rivers are her cousins",
+   "status": "verified",
+   "evidence": "'You three, then, are my cousins'"
+  },
+  {
+   "claim": "After St. John proposes (marriage)",
+   "status": "verified",
+   "evidence": "'Refuse to be my wife' (St. John's proposal, with India)"
+  },
+  {
+   "claim": "hears Rochester call her",
+   "status": "verified",
+   "evidence": "'Jane! Jane! Jane!' voice"
+  },
+  {
+   "claim": "Thornfield burnt, Rochester blind and maimed",
+   "status": "verified",
+   "evidence": "'a blackened ruin'; 'blind tenant'; 'mutilated' arm"
+  },
+  {
+   "claim": "Jane marries him",
+   "status": "verified",
+   "evidence": "'Reader, I married him.'"
+  },
+  {
+   "claim": "Mrs. Fairfax housekeeper",
+   "status": "verified",
+   "evidence": "Mrs. Fairfax at Thornfield (widow's cap, parlour)"
+  },
+  {
+   "claim": "St. John wants to take her to India",
+   "status": "verified",
+   "evidence": "'I go in six weeks; I have taken my berth in an East Indiaman'"
+  }
+ ]
+}

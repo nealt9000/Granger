@@ -1,0 +1,33 @@
+{
+ "slug": "works-of-edgar-allan-poe-volume-2",
+ "title": "The Works of Edgar Allan Poe, Volume 2",
+ "author": "Edgar Allan Poe",
+ "published": 1850,
+ "kind": "story collection",
+ "firstLine": "At Paris, just after dark one gusty evening in the autumn of 18-, I was enjoying the twofold luxury of meditation and a meerschaum, in company with my friend C. Auguste Dupin, in his little back library, or book-closet, au troisième, No. 33, Rue Dunôt, Faubourg St. Germain.",
+ "begins": "First story: The Purloined Letter. Dupin and his friend the narrator are visited by the police Prefect G——.",
+ "happens": "Twenty-two tales. In The Purloined Letter Dupin recovers a stolen letter from Minister D——. The Fall of the House of Usher ends with the house collapsing. The Black Cat's narrator murders his wife and walls her up with the cat, whose cry betrays him. M. Valdemar is mesmerized at the point of death and held there for months. In The Masque of the Red Death, a masked figure of plague enters Prince Prospero's ball and all die. In The Cask of Amontillado, Montresor lures and walls up Fortunato. The Pit and the Pendulum tortures an Inquisition prisoner. William Wilson is haunted by a double. The Tell-Tale Heart's killer, hearing the dead man's heart, confesses.",
+ "characters": [
+  {
+   "name": "C. Auguste Dupin",
+   "who": "Paris detective"
+  },
+  {
+   "name": "Roderick Usher",
+   "who": "last of his house, with his sister Madeline"
+  },
+  {
+   "name": "Prince Prospero",
+   "who": "ruler in the Red Death"
+  },
+  {
+   "name": "Montresor and Fortunato",
+   "who": "murderer and victim in the Amontillado"
+  },
+  {
+   "name": "William Wilson",
+   "who": "man pursued by his double"
+  }
+ ],
+ "checks": "Verified first line (copied exactly, including '18-'), contents list (22 tales) and character names by search. The 'Twenty-two' count excludes the Notes. Plots of the stories are from memory, not re-read; this is a selection, not a complete works."
+}

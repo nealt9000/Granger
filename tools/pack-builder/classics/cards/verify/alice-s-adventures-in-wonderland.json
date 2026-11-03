@@ -1,0 +1,81 @@
+{
+ "slug": "alice-s-adventures-in-wonderland",
+ "claims": [
+  {
+   "claim": "Alice sits bored on a riverbank beside her sister, who is reading a book without pictures",
+   "status": "verified",
+   "evidence": "'sitting by her sister on the bank... no pictures or conversations in it'"
+  },
+  {
+   "claim": "A White Rabbit with pink eyes runs by talking to himself about being late",
+   "status": "verified",
+   "evidence": "'a White Rabbit with pink eyes ran close by her'; 'Oh dear! I shall be late!'"
+  },
+  {
+   "claim": "Alice follows him down a rabbit-hole",
+   "status": "verified",
+   "evidence": "'pop down a large rabbit-hole under the hedge'"
+  },
+  {
+   "claim": "She shrinks and grows by eating and drinking strange things",
+   "status": "verified",
+   "evidence": "'DRINK ME', 'EAT ME'"
+  },
+  {
+   "claim": "She meets the Caterpillar, the Duchess and the grinning Cheshire Cat",
+   "status": "verified",
+   "evidence": "'large blue caterpillar'; 'It's a Cheshire cat... always grinned'"
+  },
+  {
+   "claim": "Tea with March Hare, Hatter and sleepy Dormouse",
+   "status": "verified",
+   "evidence": "'Hare and the Hatter were having tea at it: a Dormouse was sitting between them'; 'The Dormouse is asleep again'"
+  },
+  {
+   "claim": "Queen of Hearts' garden; croquet with flamingos and hedgehogs",
+   "status": "verified",
+   "evidence": "'the balls were live hedgehogs, the mallets live flamingoes'"
+  },
+  {
+   "claim": "The Knave of Hearts is tried for stealing tarts",
+   "status": "verified",
+   "evidence": "'The Knave of Hearts, he stole those tarts'; chapter 'Who Stole the Tarts?'"
+  },
+  {
+   "claim": "King and Queen lead the trial",
+   "status": "verified",
+   "evidence": "'The judge, by the way, was the King'; Queen: 'Sentence first—verdict afterwards'"
+  },
+  {
+   "claim": "Queen cries 'Off with her head!'; Alice, grown large, calls them a pack of cards, which fly at her",
+   "status": "verified",
+   "evidence": "'she had grown to her full size'; 'You're nothing but a pack of cards!' 'the whole pack rose up into the air'"
+  },
+  {
+   "claim": "She wakes on the bank, sister brushing leaves from her face, tells her dream",
+   "status": "verified",
+   "evidence": "'gently brushing away some dead leaves'; 'she told her sister'"
+  },
+  {
+   "claim": "White Rabbit: the hurrying rabbit Alice follows",
+   "status": "verified",
+   "evidence": "text"
+  },
+  {
+   "claim": "Hatter hosts the endless tea-party with March Hare and Dormouse",
+   "status": "verified",
+   "evidence": "Chapter VII, 'A Mad Tea-Party'; the text calls him 'Hatter'"
+  },
+  {
+   "claim": "King of Hearts: her mild husband, judge at the trial",
+   "status": "unfound",
+   "evidence": "'The judge... was the King' found; 'mild' not established",
+   "fix": "her husband, who sits as judge at the trial"
+  },
+  {
+   "claim": "Queen of Hearts: the tyrant who orders beheadings",
+   "status": "verified",
+   "evidence": "'Off with her head!'"
+  }
+ ]
+}

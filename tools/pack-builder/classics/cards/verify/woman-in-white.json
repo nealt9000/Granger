@@ -1,0 +1,108 @@
+{
+ "slug": "woman-in-white",
+ "claims": [
+  {
+   "claim": "Opens with a preface written by Walter Hartright, drawing-master",
+   "status": "verified",
+   "evidence": "'(of Clement's Inn, Teacher of Drawing)'; 'the writer of these introductory lines (Walter Hartright by name)'"
+  },
+  {
+   "claim": "Story will be told by several witnesses",
+   "status": "verified",
+   "evidence": "'the story here presented will be told by more than one pen'"
+  },
+  {
+   "claim": "On the last day of July he walks toward Hampstead",
+   "status": "verified",
+   "evidence": "'It was the last day of July'; 'I turned my steps northward in the direction of Hampstead'"
+  },
+  {
+   "claim": "He meets a lone woman dressed all in white",
+   "status": "verified",
+   "evidence": "'the figure of a solitary Woman, dressed from head to foot in white'"
+  },
+  {
+   "claim": "Anne Catherick escaped from an asylum",
+   "status": "verified",
+   "evidence": "'She has escaped from my Asylum'"
+  },
+  {
+   "claim": "Walter teaches at Limmeridge, Marian is Laura's half-sister",
+   "status": "verified",
+   "evidence": "'Limmeridge House'; 'my half-sister Laura'; 'My name is Marian Halcombe'"
+  },
+  {
+   "claim": "Laura is engaged to Sir Percival; Walter leaves",
+   "status": "verified",
+   "evidence": "Marriage settlement clauses re Sir Percival; Walter's departure (read from settlement/plot scenes)"
+  },
+  {
+   "claim": "Glyde and Fosco want Laura's money",
+   "status": "verified",
+   "evidence": "marriage-settlement £20,000 clause; 'in the case of Lady Glyde's death, what do...'"
+  },
+  {
+   "claim": "They have Anne die",
+   "status": "wrong",
+   "evidence": "Anne died on 25 July 1850 'at No. 5 Forest Road'; death not shown as engineered",
+   "fix": "When Anne dies at Fosco's house, she is buried as Lady Glyde"
+  },
+  {
+   "claim": "declare her to be Laura, who is shut in an asylum",
+   "status": "wrong",
+   "evidence": "'Anne Catherick had been introduced into Count Fosco's house as Lady Glyde...Lady Glyde had taken the dead woman's place in the Asylum'",
+   "fix": "the dead woman is passed off as Lady Glyde, while Laura is shut in the asylum in Anne's place"
+  },
+  {
+   "claim": "Marian and Walter rescue Laura",
+   "status": "verified",
+   "evidence": "Lady Glyde taken from the Asylum; 'My wife and Marian were both upstairs'"
+  },
+  {
+   "claim": "Glyde is no baronet's legitimate son",
+   "status": "wrong",
+   "evidence": "text shows forgery: 'there, at Old Welmingham, was the forgery committed in the register of the church'",
+   "fix": "Walter discovers that Glyde forged an entry in a church register"
+  },
+  {
+   "claim": "Glyde dies in a fire in the vestry",
+   "status": "verified",
+   "evidence": "'purposely setting the vestry on fire'; 'the fire and the death'; 'Sir Percival's death'"
+  },
+  {
+   "claim": "Fosco killed in Paris by the Brotherhood",
+   "status": "verified",
+   "evidence": "'taken out of the Seine'; 'The hand that struck him'; 'member of the Brotherhood'; Morgue"
+  },
+  {
+   "claim": "Walter marries Laura; their son is heir",
+   "status": "verified",
+   "evidence": "'when our little Walter was six months old'; 'Mr. Walter Hartright—the Heir of Limmeridge'"
+  },
+  {
+   "claim": "Mr. Fairlie is Laura's uncle",
+   "status": "verified",
+   "evidence": "'My uncle, Mr. Fairlie'; 'Mr. Fairlie's invalid condition'"
+  },
+  {
+   "claim": "Pesca is Walter's Italian friend",
+   "status": "verified",
+   "evidence": "'my worthy Italian friend, Professor Pesca'"
+  },
+  {
+   "claim": "Anne looks like Laura",
+   "status": "verified",
+   "evidence": "'the personal resemblance between the woman in white and Lady Glyde'"
+  },
+  {
+   "claim": "Sir Percival is a baronet",
+   "status": "verified",
+   "evidence": "'one Baronet that you don't...'; 'baronet, the possessor of a fine estate'"
+  },
+  {
+   "claim": "Fosco is fat",
+   "status": "verified",
+   "evidence": "'Count Fosco, as fat as Henry the...'"
+  }
+ ]
+}

@@ -1,0 +1,72 @@
+{
+ "slug": "adventures-of-tom-sawyer",
+ "claims": [
+  {
+   "claim": "Aunt Polly calls, no answer",
+   "status": "verified",
+   "evidence": "'Y-o-u-u TOM!' ... 'No Tom.'"
+  },
+  {
+   "claim": "finds him hiding in closet with jam on his hands",
+   "status": "wrong",
+   "evidence": "she seizes him ('I might 'a' thought of that closet'); 'It's jam'; he flees over the fence - he is not 'hiding' and doesn't 'slip away' from her grasp until a trick",
+   "fix": "catches him coming out of the closet with jam on hands and mouth, and he escapes over the fence"
+  },
+  {
+   "claim": "plays truant, Sid tells on him",
+   "status": "wrong",
+   "evidence": "text: Tom goes swimming; Polly spots the black thread; 'She'd never noticed if it hadn't been for Sid'; 'truant' not stated",
+   "fix": "Sid gives him away over the black thread on his collar"
+  },
+  {
+   "claim": "village of St. Petersburg on the Mississippi",
+   "status": "verified",
+   "evidence": "'the poor little shabby village of St. Petersburg'; 'the broad Mississippi'"
+  },
+  {
+   "claim": "Sid half-brother",
+   "status": "verified",
+   "evidence": "'younger brother (or rather half-brother) Sid'"
+  },
+  {
+   "claim": "Tom whitewashes fence, falls for Becky Thatcher",
+   "status": "verified",
+   "evidence": "'Tom appeared on the sidewalk with a bucket of whitewash'; chapter 'Becky Thatcher'"
+  },
+  {
+   "claim": "graveyard: Injun Joe murders Doctor Robinson, blamed on Muff Potter",
+   "status": "verified",
+   "evidence": "'young Doctor Robinson'; 'A gory knife... belonging to Muff Potter'"
+  },
+  {
+   "claim": "Tom, Huck, Joe Harper pirates; at own funeral",
+   "status": "verified",
+   "evidence": "'Huck Finn the Red-Handed, and Joe Harper the Terror of the Seas'; 'listening to their own funeral sermon'"
+  },
+  {
+   "claim": "Tom testifies and saves Potter; Injun Joe flees",
+   "status": "verified",
+   "evidence": "'Muff Potter Saved'; 'the halfbreed sprang for a window, tore his way'"
+  },
+  {
+   "claim": "Tom and Becky lost in cave; Joe dies there",
+   "status": "verified",
+   "evidence": "'Lost in the Cave'; 'Injun Joe lay stretched upon the ground, dead'"
+  },
+  {
+   "claim": "Tom and Huck find treasure; Widow Douglas takes Huck in",
+   "status": "verified",
+   "evidence": "'the treasure-box'; 'now under the Widow Douglas' protection'"
+  },
+  {
+   "claim": "Huck a homeless boy / pariah",
+   "status": "verified",
+   "evidence": "'the juvenile pariah of the village, Huckleberry'"
+  },
+  {
+   "claim": "Becky Judge Thatcher's daughter",
+   "status": "verified",
+   "evidence": "Judge Thatcher's family at picnic; Becky Thatcher"
+  }
+ ]
+}

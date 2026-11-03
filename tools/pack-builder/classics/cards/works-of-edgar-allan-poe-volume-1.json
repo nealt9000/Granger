@@ -1,0 +1,33 @@
+{
+ "slug": "works-of-edgar-allan-poe-volume-1",
+ "title": "The Works of Edgar Allan Poe, Volume 1",
+ "author": "Edgar Allan Poe",
+ "published": 1850,
+ "kind": "story collection",
+ "firstLine": "By late accounts from Rotterdam, that city seems to be in a high state of philosophical excitement.",
+ "begins": "After an appreciation, a preface and a Life of Poe, the first tale is The Unparalleled Adventures of One Hans Pfaall, which opens with the news of an astonishing event in Rotterdam.",
+ "happens": "Eight tales. Hans Pfaall, a Rotterdam man in debt, flies a balloon to the moon. In The Gold-Bug, William Legrand and Jupiter decode a cipher and unearth Captain Kidd's treasure. In The Murders in the Rue Morgue, Dupin shows that an escaped orang-outang killed Madame and Mademoiselle L'Espanaye. The Mystery of Marie Roget has Dupin reason from newspaper accounts about a perfumery girl's death. The Balloon-Hoax reports an Atlantic crossing. A sailor in MS. Found in a Bottle is carried toward the South Pole. Four Beasts in One is set in Antioch under Antiochus Epiphanes. In The Oval Portrait a painter's young wife dies as he finishes her portrait.",
+ "characters": [
+  {
+   "name": "C. Auguste Dupin",
+   "who": "Paris detective of the Rue Morgue and Marie Roget"
+  },
+  {
+   "name": "William Legrand",
+   "who": "Gold-Bug treasure hunter"
+  },
+  {
+   "name": "Jupiter",
+   "who": "Legrand's servant"
+  },
+  {
+   "name": "Hans Pfaall",
+   "who": "balloonist to the moon"
+  },
+  {
+   "name": "Madame L'Espanaye",
+   "who": "murder victim in the Rue Morgue, with her daughter Camille"
+  }
+ ],
+ "checks": "Verified first line, contents (8 tales) and character names by search. Plots from memory, not re-read; Camille's name is a single mention."
+}

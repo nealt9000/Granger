@@ -1,0 +1,37 @@
+{
+ "slug": "middlemarch",
+ "title": "Middlemarch",
+ "author": "George Eliot",
+ "published": 1872,
+ "kind": "novel",
+ "firstLine": "Who that cares much to know the history of man, and how the mysterious mixture behaves under the varying experiments of Time, has not dwelt, at least briefly, on the life of Saint Theresa, has not smiled with some gentleness at the thought of the little girl walking forth one morning hand-in-hand with her still smaller brother, to go and seek martyrdom in the country of the Moors?",
+ "begins": "The Prelude compares modern women to Saint Theresa, whose epic ideals found no outlet. Book I then introduces Dorothea Brooke, a beautiful, earnest young woman who lives with her sister Celia and uncle Mr. Brooke and longs to do some great good.",
+ "happens": "In a provincial English town, idealistic Dorothea Brooke marries the dry scholar Mr. Casaubon, hoping to aid his great work, and finds him cold. Ambitious young doctor Tertius Lydgate marries the vain Rosamond Vincy, and their debts ruin his hopes. Casaubon, jealous of his cousin Will Ladislaw, dies leaving a will that cuts Dorothea off if she marries Will. Lydgate is tainted by the banker Bulstrode's exposed past. Fred Vincy, who has lost Mr. Featherstone's inheritance, reforms and marries Mary Garth. Dorothea gives up her fortune, marries Will, and lives a useful private life; Lydgate dies at fifty.",
+ "characters": [
+  {
+   "name": "Dorothea Brooke",
+   "who": "idealistic heroine; marries Casaubon, then Will Ladislaw"
+  },
+  {
+   "name": "Mr. Casaubon",
+   "who": "middle-aged clergyman and scholar, her first husband"
+  },
+  {
+   "name": "Will Ladislaw",
+   "who": "Casaubon's young cousin, who sketches and wanders"
+  },
+  {
+   "name": "Lydgate",
+   "who": "ambitious doctor newly arrived in Middlemarch"
+  },
+  {
+   "name": "Rosamond Vincy",
+   "who": "pretty, accomplished Vincy daughter, Lydgate's wife"
+  },
+  {
+   "name": "Fred Vincy",
+   "who": "her brother, loves Mary Garth"
+  }
+ ],
+ "checks": "First line from the Prelude, copied by search; read Prelude and Book I ch.1, the Finale. Names searched in text. Casaubon's will, Lydgate dying at fifty and Dorothea marrying Will checked in the Finale; Bulstrode/Raffles details not re-read."
+}

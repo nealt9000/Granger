@@ -1,0 +1,33 @@
+{
+ "slug": "heart-of-darkness",
+ "title": "Heart of Darkness",
+ "author": "Joseph Conrad",
+ "published": 1899,
+ "kind": "novella",
+ "firstLine": "The Nellie, a cruising yawl, swung to her anchor without a flutter of the sails, and was at rest.",
+ "begins": "On the yawl Nellie, anchored in the Thames at Gravesend at dusk, an unnamed narrator waits for the tide with the Director of Companies, a Lawyer, an Accountant and Marlow. Marlow begins to tell of the time he went after a steamboat on a great river for a trading Company.",
+ "happens": "Marlow tells how he took work with a trading Company and went to its river to captain a steamboat. He sees cruelty and waste at the stations and hears of Kurtz, the Company's gifted agent, the chief of the Inner Station. Marlow's steamboat is shot at with arrows on the river; at the station he finds Kurtz ill and adored by the local people, and a young Russian devoted to him. Kurtz dies on the voyage downriver with the words ‘The horror!’ Back in Europe, Marlow tells Kurtz’s Intended that his last word was her name.",
+ "characters": [
+  {
+   "name": "Marlow",
+   "who": "the sailor who tells the story"
+  },
+  {
+   "name": "Kurtz",
+   "who": "gifted ivory agent, chief of the Inner Station"
+  },
+  {
+   "name": "the Intended",
+   "who": "Kurtz’s fiancée"
+  },
+  {
+   "name": "the Russian",
+   "who": "young trader devoted to Kurtz"
+  },
+  {
+   "name": "the Director of Companies",
+   "who": "captain and host of the Nellie"
+  }
+ ],
+ "checks": "First line copied from file (three parts). Read the opening. Names grepped; the Intended’s lie (‘The last word he pronounced was—your name’) and ‘The horror!’ found in text. Africa detail from memory, not re-read."
+}

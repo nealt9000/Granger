@@ -1,0 +1,82 @@
+{
+ "slug": "yellow-wallpaper",
+ "claims": [
+  {
+   "claim": "woman writes in secret journal",
+   "status": "verified",
+   "evidence": "'he hates to have me write'; 'I must not let her find me writing'"
+  },
+  {
+   "claim": "husband John a physician; rented country house for summer",
+   "status": "verified",
+   "evidence": "'John is a physician'; 'secure ancestral halls for the summer'; 'let so cheaply'"
+  },
+  {
+   "claim": "John does not believe she is ill",
+   "status": "verified",
+   "evidence": "'You see, he does not believe I am sick!'"
+  },
+  {
+   "claim": "narrator has nervous condition",
+   "status": "verified",
+   "evidence": "'temporary nervous depression—a slight hysterical tendency'"
+  },
+  {
+   "claim": "John forbids work and writing",
+   "status": "verified",
+   "evidence": "'absolutely forbidden to \"work\" until I am well again'"
+  },
+  {
+   "claim": "confined to upstairs nursery with barred windows",
+   "status": "verified",
+   "evidence": "'So we took the nursery, at the top of the house'; 'the windows are barred for little children'"
+  },
+  {
+   "claim": "rest cure",
+   "status": "verified",
+   "evidence": "'perfect rest'; Weir Mitchell mentioned"
+  },
+  {
+   "claim": "ugly yellow wallpaper",
+   "status": "verified",
+   "evidence": "'a dull yet lurid orange... sickly sulphur tint'"
+  },
+  {
+   "claim": "sister-in-law Jennie keeps house",
+   "status": "verified",
+   "evidence": "'There comes John's sister... enthusiastic housekeeper'; 'Jennie sees to everything now'"
+  },
+  {
+   "claim": "baby cared for by others",
+   "status": "verified",
+   "evidence": "'Mary is so good with the baby'"
+  },
+  {
+   "claim": "obsessed with pattern, sees woman creeping behind it",
+   "status": "verified",
+   "evidence": "'a woman stooping down and creeping about behind that pattern'"
+  },
+  {
+   "claim": "decides to free the woman, tears the paper off",
+   "status": "wrong",
+   "evidence": "she 'ran to help her', 'peeled off yards of that paper' (no stated aim to free her until the end)",
+   "fix": "runs to help the woman, peels the paper off"
+  },
+  {
+   "claim": "locks herself in",
+   "status": "verified",
+   "evidence": "'I have locked the door and thrown the key down into the front path.'"
+  },
+  {
+   "claim": "believes she is the woman who got out; creeps",
+   "status": "verified",
+   "evidence": "'I've got out at last, in spite of you'"
+  },
+  {
+   "claim": "John faints in the doorway",
+   "status": "wrong",
+   "evidence": "'he fainted, and right across my path by the wall' - no doorway",
+   "fix": "John faints right across her path"
+  }
+ ]
+}

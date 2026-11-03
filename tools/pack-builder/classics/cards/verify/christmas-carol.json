@@ -1,0 +1,62 @@
+{
+ "slug": "christmas-carol",
+ "claims": [
+  {
+   "claim": "Marley, Scrooge's partner, is dead, and Scrooge signed the burial register",
+   "status": "verified",
+   "evidence": "'Marley was dead: to begin with... The register of his burial was signed... Scrooge signed it'"
+  },
+  {
+   "claim": "Scrooge is a tight-fisted old moneylender",
+   "status": "unfound",
+   "evidence": "Searched moneylend/usur/loan/banker: text calls him 'squeezing, wrenching, grasping, scraping, clutching, covetous, old sinner' with a counting-house and a banker's-book; no moneylending",
+   "fix": "tight-fisted old man of business"
+  },
+  {
+   "claim": "Scrooge spends Christmas Eve in his counting-house refusing his nephew and the charity collectors",
+   "status": "verified",
+   "evidence": "'old Scrooge sat busy in his counting-house'; 'Provision for the Poor and destitute'; nephew's invitation refused"
+  },
+  {
+   "claim": "Scrooge rebuffs Fred and grudges Bob Cratchit Christmas Day off",
+   "status": "verified",
+   "evidence": "'I suppose you must have the whole day. Be here all the more early next morning'"
+  },
+  {
+   "claim": "Marley's ghost warns him of three spirits",
+   "status": "verified",
+   "evidence": "Marley's Ghost announces the spirits in Stave One"
+  },
+  {
+   "claim": "Ghost of Christmas Past shows his lonely youth and Fezziwig's ball",
+   "status": "verified",
+   "evidence": "'a lonely boy was reading near a feeble fire'; 'Mr. Fezziwig's Ball'"
+  },
+  {
+   "claim": "Ghost of Christmas Present shows the Cratchits' dinner and the sickly Tiny Tim",
+   "status": "verified",
+   "evidence": "'Tiny Tim upon his shoulder. Alas for Tiny Tim, he bore a little crutch, and had his limbs supported by an iron frame!'"
+  },
+  {
+   "claim": "Ghost of Christmas Yet to Come shows Tiny Tim's death and Scrooge's own grave",
+   "status": "verified",
+   "evidence": "'The colour? Ah, poor Tiny Tim!'; 'read upon the stone of the neglected grave his own name, Ebenezer Scrooge'"
+  },
+  {
+   "claim": "Scrooge wakes reformed, sends a prize turkey to the Cratchits, joins Fred's party, raises Bob's salary, and is a second father to Tiny Tim",
+   "status": "verified",
+   "evidence": "'the prize Turkey'; 'I am about to raise your salary!'; 'to Tiny Tim, who did not die, he was a second father'"
+  },
+  {
+   "claim": "Tiny Tim is Cratchit's youngest son",
+   "status": "unfound",
+   "evidence": "No statement of birth order found",
+   "fix": "sickly little son, who walks with a crutch"
+  },
+  {
+   "claim": "Fezziwig is Scrooge's old master; Fred cheerful nephew; Bob Cratchit clerk",
+   "status": "verified",
+   "evidence": "'it's old Fezziwig! Bless his heart; it's Fezziwig alive again!' (Scrooge apprenticed to him)"
+  }
+ ]
+}

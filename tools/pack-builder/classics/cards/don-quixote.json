@@ -1,0 +1,37 @@
+{
+ "slug": "don-quixote",
+ "title": "Don Quixote",
+ "author": "Miguel de Cervantes",
+ "published": 1605,
+ "kind": "novel",
+ "firstLine": "In a village of La Mancha, the name of which I have no desire to call to mind, there lived not long since one of those gentlemen that keep a lance in the lance-rack, an old buckler, a lean hack, and a greyhound for coursing.",
+ "begins": "This is John Ormsby's translation, with his introduction, the author's preface and verses before Chapter I. Chapter I describes a gentleman of La Mancha, about fifty and thin, who reads so many books of chivalry that he loses his wits. He names his horse Rocinante, himself Don Quixote, and his lady Dulcinea del Toboso.",
+ "happens": "Alonso Quixano, a gentleman of La Mancha, loses his wits from reading books of chivalry and sets out as a knight-errant, Don Quixote, on his horse Rocinante. He takes the labourer Sancho Panza as squire, and he attacks windmills and takes inns for castles. The curate and the barber condemn his books to a bonfire. In Part II he is entertained by a duke and duchess, and Sancho governs the island of Barataria. Defeated by the Knight of the White Moon, who is the bachelor Samson Carrasco, he goes home, regains his senses as Alonso Quixano the Good, makes his will and dies.",
+ "characters": [
+  {
+   "name": "Don Quixote",
+   "who": "the gentleman Alonso Quixano who plays the knight"
+  },
+  {
+   "name": "Sancho Panza",
+   "who": "his squire, a labourer, with his ass Dapple"
+  },
+  {
+   "name": "Dulcinea del Toboso",
+   "who": "the peasant woman Aldonza Lorenzo he imagines as his lady"
+  },
+  {
+   "name": "the curate",
+   "who": "Quixote's village priest"
+  },
+  {
+   "name": "Master Nicholas",
+   "who": "the barber"
+  },
+  {
+   "name": "Samson Carrasco",
+   "who": "the bachelor who finally beats him"
+  }
+ ],
+ "checks": "Checked first line, Chapter I, names (Sancho Panza, Dulcinea, Rocinante, Aldonza Lorenzo, Alonso Quixano, Samson Carrasco, Knight of the White Moon, Barataria, Master Nicholas) and the Chapter LXXIV death title by search. Quixote is called \"Quixano\" in the text. Plot from memory; the final chapters were not re-read in full. Cervantes's 1605 date is for Part I; Part II is 1615."
+}

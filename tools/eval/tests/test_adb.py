@@ -196,3 +196,25 @@ def test_a_replaced_app_process_stops_the_wait(tmp_path):
 
     with pytest.raises(SystemExit, match="app died"):
         adb.run_eval(Replaced(done_after=99), ds, "r1", tmp_path / "runs", sleep=lambda s: None)
+
+
+def test_import_pushes_the_books_and_reads_back_their_ids(tmp_path):
+    book = tmp_path / "notes.epub"
+    book.write_bytes(b"x")
+    out = tmp_path / "runs" / "imp"
+    out.mkdir(parents=True)
+    (out / "imported.tsv").write_text("notes.epub\tImported\tbook:import:notes\n")
+    f = Fake()
+    rows = adb.import_books(f, [book], "imp", tmp_path / "runs", sleep=lambda s: None)
+    cmds = [" ".join(c) for c in f.calls]
+    assert any(c.startswith("push") and c.endswith("files/eval/notes.epub") for c in cmds)
+    start = [c for c in cmds if "am start" in c][0]
+    assert "runId imp" in start and "import notes.epub" in start
+    assert rows == [("notes.epub", "Imported", "book:import:notes")]
+
+
+def test_import_refuses_a_comma_in_a_file_name(tmp_path):
+    book = tmp_path / "a,b.epub"
+    book.write_bytes(b"x")
+    with pytest.raises(SystemExit, match="comma"):
+        adb.import_books(Fake(), [book], "imp", tmp_path / "runs", sleep=lambda s: None)

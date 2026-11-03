@@ -1,0 +1,118 @@
+{
+ "slug": "great-expectations",
+ "claims": [
+  {
+   "claim": "Pip explains his name (Pirrip, Philip, Pip)",
+   "status": "verified",
+   "evidence": "Philip Pirrip, late of this parish ... was Pip"
+  },
+  {
+   "claim": "graves of parents and five brothers in marsh churchyard",
+   "status": "verified",
+   "evidence": "five little stone lozenges ... five little brothers of mine"
+  },
+  {
+   "claim": "a frightening convict suddenly seizes him there",
+   "status": "verified",
+   "evidence": "a man started up from among the graves ... as he seized me by"
+  },
+  {
+   "claim": "Pip is an orphan raised by sister and Joe Gargery, a blacksmith",
+   "status": "verified",
+   "evidence": "my sister,—Mrs. Joe Gargery, who married the blacksmith"
+  },
+  {
+   "claim": "Pip helps an escaped convict on the marshes",
+   "status": "verified",
+   "evidence": "convict with iron on leg; Pip brings food and file"
+  },
+  {
+   "claim": "Miss Havisham has Pip play with Estella, whom he loves",
+   "status": "verified",
+   "evidence": "going to play at Miss Havisham's; Pip's love of Estella throughout"
+  },
+  {
+   "claim": "Estella is Miss Havisham's ward",
+   "status": "wrong",
+   "evidence": "'I adopted her, to be loved. I bred her and educated her'; Pip: 'adopted'",
+   "fix": "Miss Havisham's adopted daughter"
+  },
+  {
+   "claim": "Estella is cold",
+   "status": "verified",
+   "evidence": "'I have no heart'"
+  },
+  {
+   "claim": "Jaggers, a London lawyer, tells Pip of a secret benefactor",
+   "status": "verified",
+   "evidence": "I am a lawyer in London ... your liberal benefactor remains a profound secret"
+  },
+  {
+   "claim": "Pip goes to London assuming Miss Havisham is benefactor",
+   "status": "verified",
+   "evidence": "whether Miss Havisham intended me for Estella"
+  },
+  {
+   "claim": "Pip neglects Joe",
+   "status": "verified",
+   "evidence": "Joe's visit to London, Pip's shame; later forgiveness scene"
+  },
+  {
+   "claim": "Benefactor is Magwitch, who returns (alias Provis)",
+   "status": "verified",
+   "evidence": "I took the name of Provis"
+  },
+  {
+   "claim": "Pip tries to smuggle him abroad; he is caught and dies",
+   "status": "verified",
+   "evidence": "Magwitch in prison infirmary, 'wasted ... day by day' after trial"
+  },
+  {
+   "claim": "Pip falls ill and is nursed by Joe",
+   "status": "verified",
+   "evidence": "Joe sat beside bed; 'Arter you was took ill'"
+  },
+  {
+   "claim": "Pip goes abroad with Herbert",
+   "status": "wrong",
+   "evidence": "Herbert says 'I fear I shall soon have to leave you ... going to Cairo'; Pip: 'I went out and joined Herbert. Within a month, I had quitted England'",
+   "fix": "goes abroad to join Herbert"
+  },
+  {
+   "claim": "Years later Pip meets Estella in the ruins of Satis House",
+   "status": "verified",
+   "evidence": "we went out of the ruined place ... evening mists"
+  },
+  {
+   "claim": "They leave hand in hand, apparently to stay together",
+   "status": "wrong",
+   "evidence": "'I took her hand in mine, and we went out ... no shadow of another parting'",
+   "fix": "they leave together, seeing no shadow of another parting"
+  },
+  {
+   "claim": "Joe Gargery is the blacksmith, Pip's gentle brother-in-law",
+   "status": "verified",
+   "evidence": "Mrs. Joe Gargery, who married the blacksmith"
+  },
+  {
+   "claim": "Miss Havisham is a wealthy jilted woman in Satis House",
+   "status": "verified",
+   "evidence": "the wedding dresses were bought ... (line 7085 on)"
+  },
+  {
+   "claim": "Mr. Jaggers is a London lawyer",
+   "status": "verified",
+   "evidence": "I am a lawyer in London"
+  },
+  {
+   "claim": "Biddy is a village girl who teaches Pip",
+   "status": "verified",
+   "evidence": "Biddy ... immediately said she would [impart all her learning]"
+  },
+  {
+   "claim": "Herbert Pocket is Pip's friend in London",
+   "status": "verified",
+   "evidence": "Herbert chapters; Clarriker's"
+  }
+ ]
+}

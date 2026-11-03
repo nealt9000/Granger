@@ -1,0 +1,111 @@
+{
+ "slug": "ulysses",
+ "claims": [
+  {
+   "claim": "Episode opens on morning of 16 June 1904",
+   "status": "verified",
+   "evidence": "'16 June 1904' appears in text (Ithaca/ catechism, and Mulligan morning scene)"
+  },
+  {
+   "claim": "At a Martello tower near Dublin",
+   "status": "verified",
+   "evidence": "'Martello you call it?' (line 850); 'I want Sandycove milk'; 'this tower'"
+  },
+  {
+   "claim": "Mulligan shaves on the roof and mocks Stephen",
+   "status": "verified",
+   "evidence": "'Stately, plump Buck Mulligan ... bearing a bowl of lather'"
+  },
+  {
+   "claim": "Mulligan is a medical student",
+   "status": "verified",
+   "evidence": "'Are you a medical student, sir?' 'I am, ma'am'"
+  },
+  {
+   "claim": "Stephen lodges at the tower with the Englishman Haines",
+   "status": "verified",
+   "evidence": "'How long is Haines going to stay in this tower?'; Haines in the livingroom"
+  },
+  {
+   "claim": "Stephen is a young teacher haunted by his mother's death",
+   "status": "verified",
+   "evidence": "'Whose mother is beastly dead'; 'Mr Deasy is calling you'; 'Mother's deathbed'"
+  },
+  {
+   "claim": "Stephen leaves the tower, teaches at Mr Deasy's school",
+   "status": "verified",
+   "evidence": "school scene, 'Mr Deasy told me to write them out'"
+  },
+  {
+   "claim": "Stephen walks the strand",
+   "status": "verified",
+   "evidence": "Proteus chapter"
+  },
+  {
+   "claim": "Bloom is a Jewish advertising canvasser",
+   "status": "verified",
+   "evidence": "'He does some canvassing for ads'; 'Why will you jews not accept our culture'"
+  },
+  {
+   "claim": "Bloom makes breakfast for wife Molly",
+   "status": "verified",
+   "evidence": "'breakfast things on the humpy tray ... She didn't like her plate full'"
+  },
+  {
+   "claim": "Bloom attends Paddy Dignam's funeral",
+   "status": "verified",
+   "evidence": "'Poor Dignam! His last lie on the earth in his box'; Dignam among those in bed/ the grave"
+  },
+  {
+   "claim": "Bloom knows Molly will meet lover Boylan that afternoon",
+   "status": "verified",
+   "evidence": "'At four she.' 'Who said four?'; Boylan: 'What time is that? Four?'"
+  },
+  {
+   "claim": "Bloom finds drunken Stephen in brothel quarter",
+   "status": "verified",
+   "evidence": "Nighttown, Mabbot Street entrance; Bella Cohen"
+  },
+  {
+   "claim": "Bloom takes Stephen home to Eccles Street",
+   "status": "verified",
+   "evidence": "Eccles street; Ithaca catechism 'temporary guest'"
+  },
+  {
+   "claim": "Stephen leaves",
+   "status": "verified",
+   "evidence": "'How did they take leave ... in separation?'"
+  },
+  {
+   "claim": "Bloom goes to bed beside Molly",
+   "status": "verified",
+   "evidence": "'entered the bed' (Ithaca)"
+  },
+  {
+   "claim": "Molly's thoughts close the book with 'yes I will Yes'",
+   "status": "verified",
+   "evidence": "final line 'I said yes I will Yes.'"
+  },
+  {
+   "claim": "Molly is a singer",
+   "status": "verified",
+   "evidence": "'Madame Marion Tweedy ... the soprano'"
+  },
+  {
+   "claim": "Boylan is a concert manager",
+   "status": "unfound",
+   "evidence": "searched Boylan/manager/impresario; text only shows him 'mixed up' in the tour",
+   "fix": "a jaunty Dubliner mixed up in her concert tour"
+  },
+  {
+   "claim": "Bloom's hearing: Molly will meet Boylan at four ('knowing')",
+   "status": "verified",
+   "evidence": "as above"
+  },
+  {
+   "claim": "Dignam is the dead man whose funeral Bloom attends",
+   "status": "verified",
+   "evidence": "as above"
+  }
+ ]
+}

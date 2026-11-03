@@ -1,0 +1,37 @@
+{
+ "slug": "man-who-was-thursday",
+ "title": "The Man Who Was Thursday",
+ "author": "G. K. Chesterton",
+ "published": 1908,
+ "kind": "novel",
+ "firstLine": "The suburb of Saffron Park lay on the sunset side of London, as red and ragged as a cloud of sunset.",
+ "begins": "Chapter I (The Two Poets of Saffron Park) describes an artistic London suburb at sunset. There the red-haired anarchist poet Lucian Gregory, whose sister is Rosamond, argues with Gabriel Syme, a poet who defends order.",
+ "happens": "Gabriel Syme, a poet, is recruited into a secret police force against philosophical anarchists. He joins the Central Anarchist Council, whose seven members are named after the days of the week, and is elected Thursday in place of Gregory. Led by the President, Sunday, the Council plots a bombing. One by one the others unmask: five are also detectives, each believing the rest anarchists. The six pursue Sunday across England. Syme learns Sunday is also the man in the dark room who made them police. Syme faints before Sunday's face and comes to walking at dawn with Gregory, beside Saffron Park.",
+ "characters": [
+  {
+   "name": "Gabriel Syme",
+   "who": "poet turned detective; Thursday"
+  },
+  {
+   "name": "Sunday",
+   "who": "huge President of the Council"
+  },
+  {
+   "name": "Lucian Gregory",
+   "who": "red-haired anarchist poet, Syme's rival"
+  },
+  {
+   "name": "Professor de Worms",
+   "who": "Friday, an elderly Council member"
+  },
+  {
+   "name": "Dr. Bull",
+   "who": "Saturday"
+  },
+  {
+   "name": "The Marquis de St. Eustache",
+   "who": "Wednesday"
+  }
+ ],
+ "checks": "Verified first line (Ch. I, after the dedication poem), council titles, Ratcliffe/Wilks as detectives, 'the man in the dark room', and the Saffron Park ending by search. Ordering of the mid-book chapters from memory."
+}

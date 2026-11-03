@@ -1,0 +1,97 @@
+{
+ "slug": "don-quixote",
+ "claims": [
+  {
+   "claim": "Ormsby's translation",
+   "status": "verified",
+   "evidence": "'Translated by John Ormsby'; his 'Prefaratory' begins 'It was with considerable reluctance that I abandoned...'"
+  },
+  {
+   "claim": "Introduction, author's preface and verses before Chapter I",
+   "status": "verified",
+   "evidence": "Contents list: INTRODUCTION, THE AUTHOR'S PREFACE, COMMENDATORY VERSES, CHAPTER I"
+  },
+  {
+   "claim": "Chapter I: gentleman of La Mancha about fifty and spare",
+   "status": "verified",
+   "evidence": "'bordering on fifty; he was of a hardy habit, spare, gaunt-featured'"
+  },
+  {
+   "claim": "Reads so many chivalry books he loses wits",
+   "status": "verified",
+   "evidence": "'his brains got so dry that he lost his wits'"
+  },
+  {
+   "claim": "Names himself Don Quixote, horse Rocinante, lady Dulcinea del Toboso",
+   "status": "verified",
+   "evidence": "Chapter I names; 'lady Dulcinea del Toboso'; 'Rocinante'"
+  },
+  {
+   "claim": "Dulcinea is the peasant Aldonza Lorenzo",
+   "status": "verified",
+   "evidence": "'Aldonza Lorenzo, and upon her he thought fit to confer the title of Lady'"
+  },
+  {
+   "claim": "Alonso Quixano",
+   "status": "verified",
+   "evidence": "'Alonso Quixano the Good is indeed dying'"
+  },
+  {
+   "claim": "Sancho Panza is a farmer",
+   "status": "wrong",
+   "evidence": "'Sancho Panza (for so the labourer was called)'",
+   "fix": "labourer"
+  },
+  {
+   "claim": "Sancho's ass Dapple",
+   "status": "verified",
+   "evidence": "'I envy thee thy Dapple, and thy name'"
+  },
+  {
+   "claim": "windmills",
+   "status": "verified",
+   "evidence": "Chapter VIII 'ADVENTURE OF THE WINDMILLS'"
+  },
+  {
+   "claim": "inns for castles",
+   "status": "verified",
+   "evidence": "Ch. XVI 'THE INN WHICH HE TOOK TO BE A CASTLE'"
+  },
+  {
+   "claim": "The priest and barber burn most of his books",
+   "status": "wrong",
+   "evidence": "Ch. VI scrutiny: 'a bonfire can be made'; curate and barber condemn books",
+   "fix": "The curate and the barber condemn his books to a bonfire"
+  },
+  {
+   "claim": "Duke and duchess",
+   "status": "verified",
+   "evidence": "'Don Quixote and the duke and duchess'"
+  },
+  {
+   "claim": "Sancho governs Barataria",
+   "status": "verified",
+   "evidence": "'acknowledged him as perpetual governor of the island of Barataria'"
+  },
+  {
+   "claim": "Knight of the White Moon is Samson Carrasco, defeats Quixote",
+   "status": "verified",
+   "evidence": "'I am called the bachelor Samson Carrasco'; Ch. LXV"
+  },
+  {
+   "claim": "Goes home, regains his senses, renounces chivalry, dies",
+   "status": "verified",
+   "evidence": "'Now I see through their absurdities'; 'Alonso Quixano the Good is indeed dying, and is indeed in his right mind'; makes his will"
+  },
+  {
+   "claim": "Curate and Master Nicholas the barber",
+   "status": "verified",
+   "evidence": "'the curate of his village'; 'Master Nicholas, the village barber'"
+  },
+  {
+   "claim": "Quixote called Quixano",
+   "status": "verified",
+   "evidence": "'Quixada or Quesada...Quexana'; 'Alonso Quixano'"
+  }
+ ]
+}

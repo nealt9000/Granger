@@ -1,0 +1,41 @@
+{
+ "slug": "romeo-and-juliet",
+ "title": "Romeo and Juliet",
+ "author": "William Shakespeare",
+ "published": 1597,
+ "kind": "play",
+ "firstLine": "SAMPSON. Gregory, on my word, we’ll not carry coals.",
+ "begins": "After a Chorus prologue about two feuding households in Verona, Act I opens in a public place where armed Capulet servants Sampson and Gregory pick a quarrel with Montague servants; the brawl spreads until the Prince stops it.",
+ "happens": "Romeo, a Montague, goes masked to the Capulets’ feast and falls in love with Juliet, Capulet’s daughter. Friar Lawrence secretly marries them. Tybalt kills Mercutio, Romeo kills Tybalt, and the Prince banishes Romeo to Mantua. Capulet plans to marry Juliet to Paris; the Friar gives her a potion to feign death, but Friar John, sent to Mantua with his letter, is shut in by plague-searchers, and Romeo never gets it. Hearing she is dead, Romeo buys poison and kills Paris and himself in the Capulet tomb. Juliet wakes and stabs herself. Their deaths end the feud. Juliet’s Nurse carries their messages between them.",
+ "characters": [
+  {
+   "name": "Romeo",
+   "who": "son of Montague; the lover"
+  },
+  {
+   "name": "Juliet",
+   "who": "Capulet’s daughter, not yet fourteen"
+  },
+  {
+   "name": "Friar Lawrence",
+   "who": "marries them and plans the potion"
+  },
+  {
+   "name": "Mercutio",
+   "who": "Romeo’s friend, kinsman to the Prince"
+  },
+  {
+   "name": "Tybalt",
+   "who": "Juliet’s hot-tempered cousin"
+  },
+  {
+   "name": "Nurse",
+   "who": "Juliet’s go-between"
+  },
+  {
+   "name": "Paris",
+   "who": "nobleman Capulet wants Juliet to marry"
+  }
+ ],
+ "checks": "Read the Dramatis Personae, Prologue and opening scene; first speaker confirmed in file. Names grepped; ‘not fourteen’, Rosaline, Paris and the closing ‘O brother Montague’ handshake found by grep. Tomb deaths and the letter from memory of the complete play. Chose Sampson’s line, not the Chorus’s prologue, as first spoken line."
+}

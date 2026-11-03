@@ -1,0 +1,41 @@
+{
+ "slug": "count-of-monte-cristo",
+ "title": "The Count of Monte Cristo",
+ "author": "Alexandre Dumas",
+ "published": 1846,
+ "kind": "novel",
+ "firstLine": "On the 24th of February, 1815, the look-out at Notre-Dame de la Garde signalled the three-master, the Pharaon from Smyrna, Trieste, and Naples.",
+ "begins": "In Marseilles the ship Pharaon returns to port. Young mate Edmond Dantès, who took command when Captain Leclere died at sea, is greeted by the owner Morrel, while the supercargo Danglars resents him.",
+ "happens": "Edmond Dantès, a sailor of Marseilles about to be made captain and to marry Mercédès, is denounced as a Bonapartist by Danglars and Fernand. Villefort, the deputy prosecutor, buries the case to protect his own father, and Dantès is jailed in the Château d'If. There the Abbé Faria teaches him and tells him of a treasure on Monte Cristo. After fourteen years Dantès escapes, finds the treasure and returns as the Count of Monte Cristo. In Paris he destroys his enemies: Fernand, now Count de Morcerf, is exposed and kills himself; Danglars is ruined; Villefort is exposed and goes mad. He frees Haydée, and unites Valentine with Maximilian Morrel, writing \"Wait and hope.\"",
+ "characters": [
+  {
+   "name": "Edmond Dantès",
+   "who": "sailor wrongly imprisoned; later the Count of Monte Cristo"
+  },
+  {
+   "name": "Danglars",
+   "who": "ship's supercargo; later a banker"
+  },
+  {
+   "name": "Fernand Mondego",
+   "who": "Dantès's rival for Mercédès; later Count de Morcerf"
+  },
+  {
+   "name": "Mercédès",
+   "who": "Dantès's betrothed, later Fernand's wife"
+  },
+  {
+   "name": "Villefort",
+   "who": "deputy prosecutor who imprisons Dantès"
+  },
+  {
+   "name": "Abbé Faria",
+   "who": "fellow prisoner who teaches Dantès"
+  },
+  {
+   "name": "Maximilian Morrel",
+   "who": "son of Dantès's old employer; loves Valentine"
+  }
+ ],
+ "checks": "Verified first line (joined across a line break), Ch. 1 opening, Leclere, Haydée, the final letter ('Wait and hope') by search. Edition is the full five-volume text, 117 chapters. Details of the middle chapters (Fernand's fate, Villefort's madness) are from memory of the book, not re-read."
+}

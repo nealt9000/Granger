@@ -1,0 +1,85 @@
+{
+ "slug": "count-of-monte-cristo",
+ "claims": [
+  {
+   "claim": "Pharaon returns to Marseilles; Leclere died at sea",
+   "status": "verified",
+   "evidence": "'Off Civita Vecchia we lost our brave Captain Leclere'"
+  },
+  {
+   "claim": "Dantès took command",
+   "status": "verified",
+   "evidence": "'he assumed the command' / Morrel: 'that was his duty as captain's mate'"
+  },
+  {
+   "claim": "greeted by owner Morrel; Danglars supercargo resents him",
+   "status": "verified",
+   "evidence": "'here is your supercargo, M. Danglars'; 'Danglars did not lose one pang that Fernand endured'"
+  },
+  {
+   "claim": "about to be captain and marry Mercédès",
+   "status": "verified",
+   "evidence": "'Is it really your intention to make me captain of the Pharaon?'; 'the lovely Mercédès'"
+  },
+  {
+   "claim": "denounced as Bonapartist by Danglars and Fernand",
+   "status": "verified",
+   "evidence": "'I will denounce him!' ; 'agent of the Bonapartist faction'"
+  },
+  {
+   "claim": "Villefort buries case to protect father",
+   "status": "verified",
+   "evidence": "'Oh, my father, must your past career always interfere' ; burns the letter"
+  },
+  {
+   "claim": "jailed in Château d'If",
+   "status": "verified",
+   "evidence": "Chapter 8. The Château d'If"
+  },
+  {
+   "claim": "Abbé Faria teaches him, tells of treasure on Monte Cristo",
+   "status": "verified",
+   "evidence": "Faria, Cardinal Spada's secretary; Ch.18 The Treasure"
+  },
+  {
+   "claim": "after fourteen years escapes",
+   "status": "verified",
+   "evidence": "'It was fourteen years, day for day, since Dantès' arrest'"
+  },
+  {
+   "claim": "Fernand, Count de Morcerf, exposed, kills himself",
+   "status": "verified",
+   "evidence": "'The general has just blown his brains out'; Ch. 92 The Suicide"
+  },
+  {
+   "claim": "Danglars ruined",
+   "status": "verified",
+   "evidence": "Ch. 115 captured by Vampa's bandits, 'Keep the 50,000 francs' left to him"
+  },
+  {
+   "claim": "Villefort exposed and goes mad",
+   "status": "verified",
+   "evidence": "Ch.109-111; wife and child dead, 'Oh, he is mad!'; 'one is mad, the other dead'"
+  },
+  {
+   "claim": "frees Haydée",
+   "status": "verified",
+   "evidence": "'tomorrow, Haydée, you will be free'"
+  },
+  {
+   "claim": "unites Valentine with Maximilian; 'Wait and hope'",
+   "status": "verified",
+   "evidence": "'Wait and hope.—Your friend'"
+  },
+  {
+   "claim": "Danglars later banker",
+   "status": "verified",
+   "evidence": "'murmured the banker' (Danglars)"
+  },
+  {
+   "claim": "Maximilian Morrel son of Dantès's old employer; loves Valentine",
+   "status": "verified",
+   "evidence": "Morrel & Son; 'Maximilian ... Valentine' scenes"
+  }
+ ]
+}

@@ -1,0 +1,70 @@
+{
+ "slug": "works-of-edgar-allan-poe-volume-2",
+ "claims": [
+  {
+   "claim": "First story is The Purloined Letter; Dupin and the narrator are visited by the police Prefect G——",
+   "status": "verified",
+   "evidence": "Contents lists THE PURLOINED LETTER first; 'our old acquaintance, Monsieur G——, the Prefect of the Parisian police'"
+  },
+  {
+   "claim": "Twenty-two tales",
+   "status": "verified",
+   "evidence": "Contents lists 22 titles before 'Notes to the Second Volume'"
+  },
+  {
+   "claim": "In The Purloined Letter Dupin recovers a stolen letter from Minister D——",
+   "status": "verified",
+   "evidence": "'The thief is the Minister D——'; Dupin's substituted 'fac-simile' of the letter"
+  },
+  {
+   "claim": "The Fall of the House of Usher ends with the house collapsing",
+   "status": "verified",
+   "evidence": "'the deep and dank tarn at my feet closed sullenly and silently over the fragments of the \"House of Usher.\"'"
+  },
+  {
+   "claim": "The Black Cat's narrator murders his wife and walls her up with the cat, whose cry betrays him",
+   "status": "verified",
+   "evidence": "'buried the axe in her brain'; 'I had walled the monster up within the tomb!'; the cry 'consigned me to the hangman'"
+  },
+  {
+   "claim": "M. Valdemar is mesmerized at the point of death and held there for months",
+   "status": "verified",
+   "evidence": "'mesmerized in articulo mortis'; 'an interval of nearly seven months'"
+  },
+  {
+   "claim": "In The Masque of the Red Death a masked figure of plague enters Prince Prospero's ball and all die",
+   "status": "verified",
+   "evidence": "'a masked figure'; Prince Prospero 'fell prostrate in death'; 'one by one dropped the revellers... and died'"
+  },
+  {
+   "claim": "In The Cask of Amontillado Montresor lures and walls up Fortunato",
+   "status": "verified",
+   "evidence": "'I began vigorously to wall up the entrance of the niche'"
+  },
+  {
+   "claim": "The Pit and the Pendulum tortures an Inquisition prisoner",
+   "status": "verified",
+   "evidence": "'the dungeons of the Inquisition'; Toledo; the pendulum"
+  },
+  {
+   "claim": "William Wilson is haunted by a double",
+   "status": "verified",
+   "evidence": "'my namesake'; 'The same name! the same contour of person!'"
+  },
+  {
+   "claim": "The Tell-Tale Heart's killer, hearing the dead man's heart, confesses",
+   "status": "verified",
+   "evidence": "'It was the beating of the old man's heart'; the killer is driven to tear up the planks before the officers"
+  },
+  {
+   "claim": "Roderick Usher, last of his house, with his sister Madeline",
+   "status": "verified",
+   "evidence": "'the last of the ancient race of the Ushers'; 'the lady Madeline'"
+  },
+  {
+   "claim": "Dupin a Paris detective; Prospero a ruler; Montresor and Fortunato murderer and victim; Wilson pursued by his double",
+   "status": "verified",
+   "evidence": "Dupin at Paris consulted by the Prefect of police; 'Prince Prospero'; walling-up scene; namesake passages"
+  }
+ ]
+}

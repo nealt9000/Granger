@@ -1,0 +1,76 @@
+{
+ "slug": "war-and-peace",
+ "claims": [
+  {
+   "claim": "July 1805, Anna Pávlovna Schérer, maid of honor, reception; Prince Vasíli first to arrive",
+   "status": "verified",
+   "evidence": "'It was in July, 1805... Anna Pávlovna Schérer, maid of honor... Prince Vasíli Kurágin... the first to arrive at her reception'"
+  },
+  {
+   "claim": "talk of Napoleon, war, match for Anatole",
+   "status": "verified",
+   "evidence": "'this means war'; 'Have you never thought of marrying your prodigal son Anatole?'"
+  },
+  {
+   "claim": "Rostóvs, Bolkónskis, Bezúkhovs families",
+   "status": "verified",
+   "evidence": "family names throughout"
+  },
+  {
+   "claim": "Pierre illegitimate son of count, inherits",
+   "status": "verified",
+   "evidence": "'an illegitimate son of Count Bezúkhov'; 'will become Count Bezúkhov, and will then inherit'"
+  },
+  {
+   "claim": "Pierre marries Hélène; duel with Dólokhov",
+   "status": "verified",
+   "evidence": "'Pierre felt that Hélène... must be his wife'; 'Dólokhov's duel with Bezúkhov'"
+  },
+  {
+   "claim": "Andrew wounded at Austerlitz",
+   "status": "verified",
+   "evidence": "'Prince Andrew, with others fatally wounded, was left to the care of the inhabitants'"
+  },
+  {
+   "claim": "his wife dies",
+   "status": "verified",
+   "evidence": "'Prince Andrew had loved his wife, she died'"
+  },
+  {
+   "claim": "engaged to Natásha, drawn to Anatole",
+   "status": "verified",
+   "evidence": "'After Prince Andrew's engagement to Natásha'; 'Natásha had made a strong impression on Kurágin'"
+  },
+  {
+   "claim": "Andrew breaks it off",
+   "status": "wrong",
+   "evidence": "'Natásha's note to Princess Mary breaking off her engagement'; 'his betrothed had broken faith with him'",
+   "fix": "her note to Princess Mary breaks off the engagement"
+  },
+  {
+   "claim": "1812 Pierre at Borodinó, captured",
+   "status": "verified",
+   "evidence": "Pierre at Raévski's battery; 'I am your prisoner—take me!'"
+  },
+  {
+   "claim": "Andrew mortally wounded at Borodinó, dies with Natásha and Mary",
+   "status": "verified",
+   "evidence": "'Prince Andrew is here, mortally wounded'; 'Natásha put down the stocking...'; 'Prince Andrew died'; Mary arrived"
+  },
+  {
+   "claim": "Moscow burns, French retreat; Pétya killed",
+   "status": "verified",
+   "evidence": "'Pétya fell heavily... A bullet had pierced his skull.'"
+  },
+  {
+   "claim": "Pierre marries Natásha; Nicholas marries Mary",
+   "status": "verified",
+   "evidence": "'In the winter of 1813 Nicholas married Princess Mary'; 'Natásha had married in the early spring of 1813'"
+  },
+  {
+   "claim": "Hélène Pierre's first wife, Vasíli's daughter; died",
+   "status": "verified",
+   "evidence": "'Countess Hélène Bezúkhova had suddenly died'"
+  }
+ ]
+}

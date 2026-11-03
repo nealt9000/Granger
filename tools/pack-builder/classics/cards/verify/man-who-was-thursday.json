@@ -1,0 +1,61 @@
+{
+ "slug": "man-who-was-thursday",
+ "claims": [
+  {
+   "claim": "Chapter I describes an artistic London suburb at sunset",
+   "status": "verified",
+   "evidence": "'The suburb of Saffron Park lay on the sunset side of London... described with some justice as an artistic colony'"
+  },
+  {
+   "claim": "Lucian Gregory is a red-haired anarchist poet whose sister is Rosamond; he argues with Gabriel Syme, a poet who defends order",
+   "status": "verified",
+   "evidence": "'His dark red hair'; 'Gregory's sister Rosamond'; Syme and Gregory argue in the opening chapter"
+  },
+  {
+   "claim": "Syme is recruited into a secret police force against philosophical anarchists",
+   "status": "verified",
+   "evidence": "'The work of the philosophical policeman... we go to artistic tea-parties to detect pessimists'"
+  },
+  {
+   "claim": "The Central Anarchist Council has seven members named after days of the week",
+   "status": "verified",
+   "evidence": "Sunday, Monday (Secretary), Tuesday (Gogol), Wednesday (Marquis), Thursday, Friday (Professor), Saturday (Dr. Bull); 'a post of Thursday'"
+  },
+  {
+   "claim": "Syme is elected Thursday in place of Gregory",
+   "status": "verified",
+   "evidence": "'I move that Comrade Gregory be elected Thursday'; 'Comrade Syme be elected to the post of Thursday'"
+  },
+  {
+   "claim": "Led by Sunday the Council plots a bombing",
+   "status": "verified",
+   "evidence": "'the Czar was to meet the President of the French Republic in Paris'; 'Paris to throw a bomb!'"
+  },
+  {
+   "claim": "One by one the others unmask as detectives, each believing the rest anarchists",
+   "status": "verified",
+   "evidence": "Gogol unmasked first ('the first of all the sham anarchists who had been exposed'); the Secretary: 'I am a detective'"
+  },
+  {
+   "claim": "The six pursue Sunday across England",
+   "status": "verified",
+   "evidence": "chapter titles 'The Criminals Chase the Police', 'The Pursuit of the President'; 'The six detectives'"
+  },
+  {
+   "claim": "Sunday is also the man in the dark room who made them police",
+   "status": "verified",
+   "evidence": "'the man in the dark room, who made you all policemen'; 'if you were the man in the dark room, why were you also Sunday'"
+  },
+  {
+   "claim": "Sunday vanishes, and Syme wakes in Saffron Park with Gregory",
+   "status": "wrong",
+   "evidence": "Syme swoons before Sunday's face; then finds himself 'walking along a country lane' with Gregory and sees 'the red, irregular buildings of Saffron Park'; no vanishing of Sunday",
+   "fix": "Syme faints before Sunday's face and comes to walking at dawn with Gregory, beside Saffron Park"
+  },
+  {
+   "claim": "Characters: Professor de Worms is Friday, Dr. Bull Saturday, the Marquis de St. Eustache Wednesday, Sunday huge President",
+   "status": "verified",
+   "evidence": "Council scenes and the 'Professor', 'Dr. Bull', 'Marquis' passages; 'the President'"
+  }
+ ]
+}

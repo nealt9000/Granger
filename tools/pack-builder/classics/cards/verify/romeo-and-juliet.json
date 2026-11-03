@@ -1,0 +1,116 @@
+{
+ "slug": "romeo-and-juliet",
+ "claims": [
+  {
+   "claim": "A Chorus prologue about two feuding households in Verona",
+   "status": "verified",
+   "evidence": "'Two households, both alike in dignity, In fair Verona'"
+  },
+  {
+   "claim": "Act I opens in a public place with armed Capulet servants Sampson and Gregory",
+   "status": "verified",
+   "evidence": "'SCENE I. A public place. Enter Sampson and Gregory armed with swords and bucklers'; Dramatis Personae: servants to Capulet"
+  },
+  {
+   "claim": "They pick a quarrel with Montague servants; brawl spreads until the Prince stops it",
+   "status": "verified",
+   "evidence": "'Draw thy tool; here comes of the house of Montagues'; 'Enter Prince Escalus'"
+  },
+  {
+   "claim": "Romeo, a Montague, sneaks into the Capulets' feast and falls in love with Juliet",
+   "status": "verified",
+   "evidence": "masks, 'ancient feast of Capulet's'; Romeo and Juliet meet; text does not say 'sneaks'",
+   "fix": "Romeo, a Montague, goes masked to the Capulets' feast and falls in love with Juliet."
+  },
+  {
+   "claim": "Friar Lawrence secretly marries them",
+   "status": "verified",
+   "evidence": "Friar Lawrence's cell scenes (II.vi)"
+  },
+  {
+   "claim": "Tybalt kills Mercutio, Romeo kills Tybalt, Prince banishes Romeo to Mantua",
+   "status": "verified",
+   "evidence": "'Mercutio slain'; 'Tybalt slain'; 'Romeo banished'; 'Welcome from Mantua'"
+  },
+  {
+   "claim": "Capulet plans to marry Juliet to Paris",
+   "status": "verified",
+   "evidence": "'Enter Capulet, Paris'; Paris 'a young Nobleman'"
+  },
+  {
+   "claim": "The Friar gives her a potion to feign death",
+   "status": "verified",
+   "evidence": "Friar Lawrence's plan; Juliet 'dies' and is placed in the tomb"
+  },
+  {
+   "claim": "His letter to Romeo goes astray",
+   "status": "verified",
+   "evidence": "Friar John: 'I could not send it,—here it is again'"
+  },
+  {
+   "claim": "Hearing she is dead, Romeo buys poison",
+   "status": "verified",
+   "evidence": "Apothecary scene; 'Poison hath residence'"
+  },
+  {
+   "claim": "Romeo kills Paris and himself in the Capulet tomb",
+   "status": "verified",
+   "evidence": "Paris: 'O, I am slain!'; Romeo '[Dies.]'; 'A churchyard; in it a Monument belonging to the Capulets'"
+  },
+  {
+   "claim": "Juliet wakes and stabs herself",
+   "status": "verified",
+   "evidence": "'O happy dagger... [stabs herself]'"
+  },
+  {
+   "claim": "Their deaths end the feud",
+   "status": "verified",
+   "evidence": "'O brother Montague, give me thy hand'; 'Poor sacrifices of our enmity'"
+  },
+  {
+   "claim": "Juliet's Nurse carries their messages",
+   "status": "verified",
+   "evidence": "Nurse to Juliet, go-between scenes"
+  },
+  {
+   "claim": "Friar John, sent with the letter, is delayed",
+   "status": "verified",
+   "evidence": "searchers 'Seal'd up the doors'; 'my speed to Mantua there was stay'd'"
+  },
+  {
+   "claim": "Romeo: son of Montague",
+   "status": "verified",
+   "evidence": "'ROMEO, son to Montague'"
+  },
+  {
+   "claim": "Juliet: Capulet's daughter, not yet fourteen",
+   "status": "verified",
+   "evidence": "'JULIET, daughter to Capulet'; 'She's not fourteen'"
+  },
+  {
+   "claim": "Friar Lawrence marries them and plans the potion",
+   "status": "verified",
+   "evidence": "text"
+  },
+  {
+   "claim": "Mercutio: Romeo's friend, kinsman to the Prince",
+   "status": "verified",
+   "evidence": "'MERCUTIO, kinsman to the Prince, and friend to Romeo'"
+  },
+  {
+   "claim": "Tybalt: Juliet's hot-tempered cousin",
+   "status": "verified",
+   "evidence": "'Tybalt, my cousin! O my brother's child!' (Lady Capulet)"
+  },
+  {
+   "claim": "Nurse: Juliet's go-between",
+   "status": "verified",
+   "evidence": "'NURSE to Juliet'"
+  },
+  {
+   "claim": "Paris: nobleman Capulet wants Juliet to marry",
+   "status": "verified",
+   "evidence": "'PARIS, a young Nobleman'"
+  }
+ ]
+}

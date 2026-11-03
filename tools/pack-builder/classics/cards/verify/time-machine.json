@@ -1,0 +1,76 @@
+{
+ "slug": "time-machine",
+ "claims": [
+  {
+   "claim": "At a dinner at the Time Traveller's house he explains time as a fourth dimension to Filby, the Psychologist and the Medical Man; they are sceptical",
+   "status": "verified",
+   "evidence": "'Really this is what is meant by the Fourth Dimension'; 'It's against reason,' said Filby; 'though it's all humbug, you know'"
+  },
+  {
+   "claim": "He shows a small model time machine",
+   "status": "verified",
+   "evidence": "'this is only a model. It is my plan for a machine to travel through time'; the Psychologist sent the model into the air"
+  },
+  {
+   "claim": "A week later he tells them he built a full-size machine and travelled to the year 802,701",
+   "status": "verified",
+   "evidence": "'The next Thursday I went again to Richmond'; 'Eight Hundred and Two Thousand Seven Hundred and One, A.D.'"
+  },
+  {
+   "claim": "He finds the gentle, childlike Eloi",
+   "status": "verified",
+   "evidence": "'the same soft hairless visage, and the same girlish rotundity of limb'; 'extremely precocious'; no lasting work or struggle"
+  },
+  {
+   "claim": "He saves Weena from drowning",
+   "status": "verified",
+   "evidence": "'I caught the poor mite and drew her safe to land'; 'Weena' named at line 1533"
+  },
+  {
+   "claim": "The Morlocks steal his machine",
+   "status": "verified",
+   "evidence": "'Why had the Morlocks taken my Time Machine?'"
+  },
+  {
+   "claim": "The Morlocks are pale, ape-like underground creatures that feed on the Eloi",
+   "status": "verified",
+   "evidence": "'ape-like creature'; 'dull white'; 'These Eloi were mere fatted cattle'"
+  },
+  {
+   "claim": "Humanity has split into two",
+   "status": "verified",
+   "evidence": "the Eloi above ground and Morlocks below (chapter 'The Morlocks')"
+  },
+  {
+   "claim": "He and Weena flee through a forest fire, which kills her",
+   "status": "verified",
+   "evidence": "'I felt the intensest wretchedness for the horrible death of little Weena'; she is lost in the burning forest"
+  },
+  {
+   "claim": "He regains the machine and travels far ahead to a dying Earth",
+   "status": "verified",
+   "evidence": "'the same red sun... the same dying sea'; crab-like creatures"
+  },
+  {
+   "claim": "After telling his story he leaves on another trip and never comes back",
+   "status": "verified",
+   "evidence": "'The Time Traveller was not there... The Time Machine had gone'; 'The Time Traveller vanished three years ago'"
+  },
+  {
+   "claim": "The narrator is left with two white flowers",
+   "status": "verified",
+   "evidence": "'two strange white flowers—shrivelled now'"
+  },
+  {
+   "claim": "Weena is an Eloi woman",
+   "status": "unfound",
+   "evidence": "Text calls her 'little Weena', 'the poor mite', a drowning child-sized figure; 'woman' not stated",
+   "fix": "a little Eloi he rescues from drowning"
+  },
+  {
+   "claim": "Time Traveller never named",
+   "status": "verified",
+   "evidence": "'The Time Traveller (for so it will be convenient to speak of him)'"
+  }
+ ]
+}

@@ -1,0 +1,108 @@
+{
+ "slug": "sense-and-sensibility",
+ "claims": [
+  {
+   "claim": "Old Mr. Dashwood's Norland estate passes to nephew Henry, then at Henry's death to Henry's son John",
+   "status": "wrong",
+   "evidence": "'he left it to him on such terms as destroyed half the value ... to his son, and his son's son, a child of four years old'",
+   "fix": "estate left to Henry but tied up for John and John's small son"
+  },
+  {
+   "claim": "Henry's widow and three daughters are poorly provided for",
+   "status": "verified",
+   "evidence": "ten thousand pounds ... was all that remained for his widow and daughters"
+  },
+  {
+   "claim": "Henry Dashwood dies within a year of his uncle",
+   "status": "verified",
+   "evidence": "He survived his uncle no longer [than] one twelvemonth"
+  },
+  {
+   "claim": "John is Henry's son by a former marriage",
+   "status": "verified",
+   "evidence": "By a former marriage, Mr. Henry Dashwood had one son"
+  },
+  {
+   "claim": "Fanny pushes out stepmother and half-sisters",
+   "status": "wrong",
+   "evidence": "'Mrs. John Dashwood ... arrived with her child'; 'ungracious behaviour' to Mrs. Dashwood; Mrs. D. then leaves of her own accord",
+   "fix": "Fanny takes over Norland and makes them unwelcome"
+  },
+  {
+   "claim": "Mrs. Dashwood, Elinor, Marianne and Margaret move to Barton Cottage in Devonshire",
+   "status": "verified",
+   "evidence": "removing into Devonshire; 'Barton Cottage, though small, was comfortable'"
+  },
+  {
+   "claim": "Elinor loves Edward Ferrars",
+   "status": "verified",
+   "evidence": "Elinor's attachment throughout; 'marriage of Edward and Elinor'"
+  },
+  {
+   "claim": "Edward is secretly engaged to Lucy Steele",
+   "status": "verified",
+   "evidence": "'four years' engagement'"
+  },
+  {
+   "claim": "Willoughby charms Marianne",
+   "status": "verified",
+   "evidence": "Willoughby and Marianne at Barton cottage"
+  },
+  {
+   "claim": "Willoughby abandons her to marry a rich heiress, Miss Grey",
+   "status": "verified",
+   "evidence": "'Miss Grey has fifty thousand pounds'; 'every thing was then just settled between Miss Grey and me'"
+  },
+  {
+   "claim": "Marianne falls gravely ill",
+   "status": "verified",
+   "evidence": "'delirium on Marianne's side' at Cleveland"
+  },
+  {
+   "claim": "Colonel Brandon nurses her back",
+   "status": "wrong",
+   "evidence": "Elinor 'scarcely stirring from her sister's bed'; Mrs. Jennings 'attentive care'; Brandon only fetches their mother",
+   "fix": "nursed by Elinor"
+  },
+  {
+   "claim": "Marianne learns restraint",
+   "status": "verified",
+   "evidence": "'to counteract, by her conduct, her most favourite maxims'"
+  },
+  {
+   "claim": "Lucy marries Robert Ferrars",
+   "status": "verified",
+   "evidence": "'my brother is lately married to ... Miss Lucy Steele'"
+  },
+  {
+   "claim": "Lucy's marriage frees Edward; Edward marries Elinor",
+   "status": "verified",
+   "evidence": "'Edward was free'; 'marriage of Edward and Elinor'"
+  },
+  {
+   "claim": "Marianne marries Colonel Brandon",
+   "status": "verified",
+   "evidence": "'a wife, the mistress of a family' ... 'Colonel Brandon was now as happy'"
+  },
+  {
+   "claim": "Elinor eldest sister, sensible; Marianne passionate, romantic",
+   "status": "verified",
+   "evidence": "chapter characterisation"
+  },
+  {
+   "claim": "Willoughby dashing young man who jilts Marianne",
+   "status": "verified",
+   "evidence": "as above"
+  },
+  {
+   "claim": "Colonel Brandon older, steady friend who loves Marianne",
+   "status": "verified",
+   "evidence": "'Colonel Brandon loves Marianne. He has told me so himself.'; 'too old to be married'"
+  },
+  {
+   "claim": "Mrs. Jennings warm, gossiping friend",
+   "status": "verified",
+   "evidence": "'talked a great deal ... full of jokes and laughter'"
+  }
+ ]
+}

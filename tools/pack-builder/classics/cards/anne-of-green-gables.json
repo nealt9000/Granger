@@ -1,0 +1,41 @@
+{
+ "slug": "anne-of-green-gables",
+ "title": "Anne of Green Gables",
+ "author": "L. M. Montgomery",
+ "published": 1908,
+ "kind": "novel",
+ "firstLine": "MRS. Rachel Lynde lived just where the Avonlea main road dipped down into a little hollow, fringed with alders and ladies’ eardrops and traversed by a brook that had its source away back in the woods of the old Cuthbert place;",
+ "begins": "The book opens in the village of Avonlea, with the nosy neighbour Mrs. Rachel Lynde watching from her window. She sees Matthew Cuthbert driving off in his buggy, dressed up, and goes to find out why.",
+ "happens": "Elderly siblings Matthew and Marilla Cuthbert of Green Gables ask for a boy of about ten or eleven to help on the farm, but a talkative red-haired eleven-year-old girl, Anne Shirley, is sent. Marilla means to send her back, but keeps her. Anne befriends Diana Barry, gets into scrapes, and breaks her slate over the head of Gilbert Blythe, who called her \"carrots\". She wins over Marilla and Matthew, does well at school, and wins the Avery scholarship. Matthew dies of a sudden shock on reading that the Abbey Bank has failed. Marilla's eyesight is failing, so Anne gives up the scholarship to stay and teach at Avonlea, and makes peace with Gilbert.",
+ "characters": [
+  {
+   "name": "Anne Shirley",
+   "who": "imaginative red-haired orphan, the heroine"
+  },
+  {
+   "name": "Marilla Cuthbert",
+   "who": "stern, kind spinster at Green Gables"
+  },
+  {
+   "name": "Matthew Cuthbert",
+   "who": "her shy brother, who loves Anne"
+  },
+  {
+   "name": "Diana Barry",
+   "who": "Anne's best friend, her neighbour"
+  },
+  {
+   "name": "Gilbert Blythe",
+   "who": "clever schoolmate who becomes a friend"
+  },
+  {
+   "name": "Mrs. Rachel Lynde",
+   "who": "gossiping neighbour"
+  },
+  {
+   "name": "Miss Stacy",
+   "who": "teacher at Avonlea school"
+  }
+ ],
+ "checks": "Found the chapter I opening; the first sentence is about 800 characters, so firstLine is its first clause only, cut at the first semicolon, verbatim; read the opening and the last pages; counted names (Gilbert Blythe, Miss Stacy, Abbey Bank). Details mid-plot (slate, scholarship) from memory."
+}

@@ -1,0 +1,76 @@
+{
+ "slug": "odyssey",
+ "claims": [
+  {
+   "claim": "Samuel Butler's prose translation, Ulysses and Minerva names",
+   "status": "verified",
+   "evidence": "'Butler's Translation of the Odyssey appeared originally in 1900'; Ulysses, Minerva throughout"
+  },
+  {
+   "claim": "Book I opens with invocation to the Muse",
+   "status": "verified",
+   "evidence": "'Tell me, O Muse, of that ingenious hero'"
+  },
+  {
+   "claim": "Gods pity Ulysses, held by Calypso",
+   "status": "verified",
+   "evidence": "'all the gods had pity on him save Poseidon' / 'now begun to pity him except Neptune'; Calypso on the Ogygian island"
+  },
+  {
+   "claim": "Minerva goes to Ithaca to urge Telemachus to seek news while suitors waste the house",
+   "status": "verified",
+   "evidence": "book I heading 'MINERVA'S VISIT TO ITHACA'; 'I will also conduct him to Sparta and to Pylos'"
+  },
+  {
+   "claim": "Ulysses, king of Ithaca",
+   "status": "verified",
+   "evidence": "'Ulysses, who ruled them as though he were their father'"
+  },
+  {
+   "claim": "Held for years on Calypso's island, Ogygia",
+   "status": "verified",
+   "evidence": "text names it 'the Ogygian' island ('Ogygia' not written)",
+   "fix": "Held for years on Calypso's island, the Ogygian island"
+  },
+  {
+   "claim": "The gods free him; he reaches the Phaeacians, who send him home",
+   "status": "verified",
+   "evidence": "Mercury sent to Calypso (l.395); 'RECEPTION OF ULYSSES AT THE PALACE OF KING ALCINOUS'; 'conveyed' home"
+  },
+  {
+   "claim": "He tells of the Cyclops, Circe, the Sirens and his lost men",
+   "status": "verified",
+   "evidence": "'savage Cyclops'; 'Circe'; 'First you will come to the Sirens'; 'could not save his men'"
+  },
+  {
+   "claim": "Penelope holds off suitors; Telemachus goes seeking news",
+   "status": "verified",
+   "evidence": "loom/web; 'TELEMACHUS... STARTS FOR PYLOS'"
+  },
+  {
+   "claim": "Home in disguise, Ulysses meets the swineherd Eumaeus and his son",
+   "status": "verified",
+   "evidence": "'ULYSSES IN THE HUT WITH EUMAEUS'; Telemachus meets him there"
+  },
+  {
+   "claim": "Strings the great bow, kills the suitors with Telemachus",
+   "status": "verified",
+   "evidence": "'whomsoever of you shall string it'; Minerva 'doomed him to fall by the hand of Telemachus'"
+  },
+  {
+   "claim": "Is known by Penelope",
+   "status": "verified",
+   "evidence": "book XXIII; Butler note 'why could she not at once ask to see the scar'"
+  },
+  {
+   "claim": "Minerva makes peace with the dead suitors' kin",
+   "status": "verified",
+   "evidence": "'presently made a covenant of peace between the'"
+  },
+  {
+   "claim": "Characters: Ulysses, Penelope, Telemachus, Minerva, Eumaeus, Calypso, Alcinous",
+   "status": "verified",
+   "evidence": "'swineherd Eumaeus'; 'King Alcinous'; 'Calypso, daughter of Atlas'"
+  }
+ ]
+}

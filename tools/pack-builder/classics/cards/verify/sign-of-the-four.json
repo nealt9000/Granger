@@ -1,0 +1,102 @@
+{
+ "slug": "sign-of-the-four",
+ "claims": [
+  {
+   "claim": "Opens with Holmes injecting from bottle and syringe",
+   "status": "verified",
+   "evidence": "'Sherlock Holmes took his bottle...hypodermic syringe from its neat morocco case'"
+  },
+  {
+   "claim": "Watson protests",
+   "status": "verified",
+   "evidence": "'Which is it to-day?...morphine or cocaine' (Watson's protest)"
+  },
+  {
+   "claim": "Holmes reads Watson's brother's history from a watch",
+   "status": "verified",
+   "evidence": "Chapter I deduction from watch (read opening of the chapter; 'brother' appears)"
+  },
+  {
+   "claim": "Holmes is the only unofficial consulting detective",
+   "status": "verified",
+   "evidence": "'The only unofficial consulting detective,' he answered"
+  },
+  {
+   "claim": "Mary Morstan receives a pearl every year",
+   "status": "verified",
+   "evidence": "'every year upon the same date there has always appeared a similar box, containing a similar pearl'"
+  },
+  {
+   "claim": "Her father Captain Morstan disappeared",
+   "status": "verified",
+   "evidence": "'He disappeared upon the 3rd of December, 1878'"
+  },
+  {
+   "claim": "Mary Morstan is a governess",
+   "status": "verified",
+   "evidence": "'in the capacity of governess'"
+  },
+  {
+   "claim": "Thaddeus Sholto tells of the Agra treasure",
+   "status": "verified",
+   "evidence": "Chapter IV 'The Story of the Bald-Headed Man'; 'Brother Bartholomew'; Agra treasure"
+  },
+  {
+   "claim": "Thaddeus is nervous, a collector",
+   "status": "verified",
+   "evidence": "'writhed his hands'; 'perpetual jerk'; 'An oasis of art'; 'hypochondriac'"
+  },
+  {
+   "claim": "Bartholomew is murdered at Pondicherry Lodge with a thorn",
+   "status": "verified",
+   "evidence": "'Tragedy of Pondicherry Lodge'; 'It is a thorn'; 'the poison acts so quickly that the man was dead'"
+  },
+  {
+   "claim": "Toby the dog leads them",
+   "status": "verified",
+   "evidence": "'Toby ran along'; 'Toby led us to the...wharf'"
+  },
+  {
+   "claim": "Chase of launch Aurora down the Thames",
+   "status": "verified",
+   "evidence": "'The Aurora, sir'; 'the Aurora thundered on, and still we followed'"
+  },
+  {
+   "claim": "The killer's accomplice, Tonga, is shot",
+   "status": "wrong",
+   "evidence": "Small: 'I'd have half killed Tonga'; Tonga, the black man, 'threw up his arms...fell sideways into the swirl'; Tonga is the one who killed Sholto; Small is the other",
+   "fix": "Tonga, the Andaman islander who made the kill, is shot"
+  },
+  {
+   "claim": "Jonathan Small is captured",
+   "status": "verified",
+   "evidence": "'we were able to haul him out'; 'You are under the charge of Mr. Athelney Jones'"
+  },
+  {
+   "claim": "Small is one-legged",
+   "status": "verified",
+   "evidence": "'wooden pin', 'wooden leg'"
+  },
+  {
+   "claim": "He tells his story, but the treasure box is empty, thrown into river",
+   "status": "wrong",
+   "evidence": "'Small threw it into the Thames'; 'showed him the empty box'",
+   "fix": "The treasure chest is empty, for Small threw its contents into the river"
+  },
+  {
+   "claim": "Watson engaged to Miss Morstan",
+   "status": "verified",
+   "evidence": "'Miss Morstan has done me the honour to accept me as a husband in prospective'"
+  },
+  {
+   "claim": "Athelney Jones is Scotland Yard",
+   "status": "verified",
+   "evidence": "'You are under the charge of Mr. Athelney Jones, of Scotland Yard'"
+  },
+  {
+   "claim": "Small is a convict seeking Agra treasure",
+   "status": "verified",
+   "evidence": "'building a breakwater in the Andamans...Dartmoor'; 'Agra treasure'"
+  }
+ ]
+}

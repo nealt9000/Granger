@@ -1,0 +1,29 @@
+{
+ "slug": "adventures-of-sherlock-holmes",
+ "title": "The Adventures of Sherlock Holmes",
+ "author": "Arthur Conan Doyle",
+ "published": 1892,
+ "kind": "story collection",
+ "firstLine": "To Sherlock Holmes she is always the woman.",
+ "begins": "The first story, \"A Scandal in Bohemia\", opens with Dr. Watson, now married, recalling Irene Adler, \"the woman\" to Holmes. Passing Baker Street one night, Watson calls on his old friend, who deduces from the paper of an unsigned note that its writer is a German from Bohemia.",
+ "happens": "Twelve cases told by Dr. Watson. The King of Bohemia hires Holmes to retrieve a photograph from Irene Adler, who outwits him. Holmes exposes the Red-Headed League as a cover for a bank robbery, unmasks a stepfather who plays a fiancé, and solves the Boscombe Valley killing. He traces the Orange Pips threats, finds the beggar Hugh Boone is the missing Neville St. Clair, and follows a stolen blue carbuncle to a goose. He defeats Dr. Roylott in the Speckled Band, helps the Engineer, the Noble Bachelor and the Beryl Coronet, and ends at the Copper Beeches.",
+ "characters": [
+  {
+   "name": "Sherlock Holmes",
+   "who": "consulting detective of Baker Street"
+  },
+  {
+   "name": "Dr. Watson",
+   "who": "his friend, who narrates"
+  },
+  {
+   "name": "Irene Adler",
+   "who": "the adventuress who outwits Holmes in the first story"
+  },
+  {
+   "name": "Lestrade",
+   "who": "a Scotland Yard detective who meets Holmes and Watson at Ross in the Boscombe Valley case"
+  }
+ ],
+ "checks": "Checked first line, story list and names (Adler, Wilson, Clay, Hosmer Angel, Roylott, Boone, Lestrade) by search. Plot summary from memory of the twelve stories; only the opening was read closely. Mycroft and Moriarty do not appear in this edition. Watson's given name \"John\" not confirmed in this text."
+}

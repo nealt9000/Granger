@@ -1,0 +1,37 @@
+{
+ "slug": "christmas-carol",
+ "title": "A Christmas Carol",
+ "author": "Charles Dickens",
+ "published": 1843,
+ "kind": "novella",
+ "firstLine": "Marley was dead: to begin with.",
+ "begins": "The story says Marley, Scrooge’s partner, is dead, and that Scrooge signed the burial register. Scrooge, a tight-fisted old man of business, then spends Christmas Eve in his counting-house refusing his nephew and charity collectors.",
+ "happens": "On Christmas Eve, miserly Ebenezer Scrooge rebuffs his nephew Fred and grudges his clerk Bob Cratchit Christmas Day off. Marley’s ghost warns him of three spirits. The Ghost of Christmas Past shows his lonely youth and Fezziwig’s ball. The Ghost of Christmas Present shows the Cratchits’ dinner and the sickly Tiny Tim. The Ghost of Christmas Yet to Come shows Tiny Tim’s death and Scrooge’s own grave. Scrooge wakes reformed on Christmas morning, sends a prize turkey to the Cratchits, joins Fred’s party, raises Bob’s salary and becomes a second father to Tiny Tim.",
+ "characters": [
+  {
+   "name": "Ebenezer Scrooge",
+   "who": "miserly old man of business"
+  },
+  {
+   "name": "Jacob Marley",
+   "who": "his dead partner; a ghost"
+  },
+  {
+   "name": "Bob Cratchit",
+   "who": "Scrooge’s clerk"
+  },
+  {
+   "name": "Tiny Tim",
+   "who": "Cratchit's sickly little son, who walks with a crutch"
+  },
+  {
+   "name": "Fred",
+   "who": "Scrooge’s cheerful nephew"
+  },
+  {
+   "name": "Fezziwig",
+   "who": "Scrooge’s old master"
+  }
+ ],
+ "checks": "First line copied from file (after the Preface). Names grepped; the three spirits’ names, the turkey, the salary raise and ‘second father’ confirmed by grep. Middle staves from memory."
+}

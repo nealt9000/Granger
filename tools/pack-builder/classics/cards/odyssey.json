@@ -1,0 +1,41 @@
+{
+ "slug": "odyssey",
+ "title": "The Odyssey",
+ "author": "Homer",
+ "published": 1900,
+ "kind": "epic poem",
+ "firstLine": "Tell me, O Muse, of that ingenious hero who travelled far and wide after he had sacked the famous town of Troy.",
+ "begins": "This is Samuel Butler's prose translation, so Odysseus is Ulysses and Athena is Minerva. Book I opens with the invocation to the Muse, then the gods on Olympus pity Ulysses, held by Calypso. Minerva goes to Ithaca to urge his son Telemachus to seek news of him while suitors waste his house.",
+ "happens": "Ulysses, king of Ithaca, is held for years on Calypso's Ogygian island, after the Trojan War. The gods free him; he reaches the Phaeacians, who send him home, and he tells of the Cyclops, Circe, the Sirens and his lost men. Meanwhile his wife Penelope holds off suitors in his house, and Telemachus goes seeking news. Home in disguise, Ulysses meets the swineherd Eumaeus and his son, then strings the great bow, kills the suitors with Telemachus, and is known by Penelope. Minerva makes peace with the dead suitors' kin.",
+ "characters": [
+  {
+   "name": "Ulysses",
+   "who": "king of Ithaca, the wanderer and hero"
+  },
+  {
+   "name": "Penelope",
+   "who": "his wife, besieged by suitors"
+  },
+  {
+   "name": "Telemachus",
+   "who": "their son"
+  },
+  {
+   "name": "Minerva",
+   "who": "goddess who helps Ulysses and Telemachus"
+  },
+  {
+   "name": "Eumaeus",
+   "who": "Ulysses' loyal swineherd"
+  },
+  {
+   "name": "Calypso",
+   "who": "the nymph who holds Ulysses"
+  },
+  {
+   "name": "Alcinous",
+   "who": "king of the Phaeacians"
+  }
+ ],
+ "checks": "Checked first line, Book I opening, names (Ulysses, Minerva, Telemachus, Penelope, Eumaeus, Calypso, Alcinous, Euryclea) and the closing peace in Book XXIV by search. Middle events from memory. The text contains Butler's footnotes."
+}

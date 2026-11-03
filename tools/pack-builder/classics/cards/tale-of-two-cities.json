@@ -1,0 +1,41 @@
+{
+ "slug": "tale-of-two-cities",
+ "title": "A Tale of Two Cities",
+ "author": "Charles Dickens",
+ "published": 1859,
+ "kind": "novel",
+ "firstLine": "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity, it was the season of Light, it was the season of Darkness, it was the spring of hope, it was the winter of despair, we had everything before us, we had nothing before us, we were all going direct to Heaven, we were all going direct the other way—in short, the period was so far like the present period, that some of its noisiest authorities insisted on its being received, for good or for evil, in the superlative degree of comparison only.",
+ "begins": "Book the First opens in 1775. Jarvis Lorry of Tellson's Bank rides the Dover mail to meet Lucie Manette and tell her that her father, thought dead, is found.",
+ "happens": "Dr. Manette, freed after eighteen years in the Bastille, is brought to London by his daughter Lucie. Charles Darnay, a French exile, is tried for treason and freed because the lawyer Sydney Carton looks like him. Both men love Lucie, and Darnay marries her and they have a child. In Paris the wine-sellers Defarge lead the revolution. Darnay returns to help an old servant, is arrested, and is condemned by Dr. Manette's own old letter. Carton takes Darnay's place and is guillotined, while Miss Pross kills Madame Defarge in a struggle.",
+ "characters": [
+  {
+   "name": "Lucie Manette",
+   "who": "Manette's daughter; Darnay's wife"
+  },
+  {
+   "name": "Dr. Manette",
+   "who": "physician long held in the Bastille"
+  },
+  {
+   "name": "Charles Darnay",
+   "who": "French exile, born Evrémonde"
+  },
+  {
+   "name": "Sydney Carton",
+   "who": "English lawyer who loves Lucie"
+  },
+  {
+   "name": "Jarvis Lorry",
+   "who": "Tellson's banker, family friend"
+  },
+  {
+   "name": "Madame Defarge",
+   "who": "knitting revolutionary"
+  },
+  {
+   "name": "Miss Pross",
+   "who": "Lucie's devoted nurse"
+  }
+ ],
+ "checks": "Checked first line, Book the First opening, names (Manette, Darnay, Carton, Lorry, Defarge, Pross, Evrémonde, Cruncher) and Carton's last words by search. Plot from memory. The full opening sentence is long; copied whole."
+}

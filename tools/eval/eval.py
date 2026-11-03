@@ -51,6 +51,12 @@ def cmd_run(a):
     return 0
 
 
+def cmd_import(a):
+    for name, result, book_id in adb.import_books(adb.real_runner, a.files, a.run_id, RUNS):
+        print("%s\t%s\t%s" % (name, result, book_id))
+    return 0
+
+
 def cmd_worksheet(a):
     d, items, recs = load_run(a.run)
     text = grading.worksheet(items, recs, grading.load_grades(GRADES))
@@ -101,6 +107,8 @@ def main(argv=None):
     r.add_argument("--older", choices=["on"], help="keywords get older and modern words as alternates (Plan R2 Task 6)")
     r.add_argument("--fiction", help="a file of fiction book ids to weight 0.7 on non-literature questions (Plan R0, Task 6)")
     r.add_argument("--dense", choices=["on", "off"], help="dense retrieval for the run (Plan R1); the app's DENSE_RETRIEVAL when not given"); r.set_defaults(f=cmd_run)
+    im = s.add_parser("import", help="import book files into the phone's library and index them (Plan R2)")
+    im.add_argument("files", nargs="+"); im.add_argument("--run-id", required=True); im.set_defaults(f=cmd_import)
     w = s.add_parser("worksheet"); w.add_argument("run"); w.set_defaults(f=cmd_worksheet)
     rp = s.add_parser("report"); rp.add_argument("targets", nargs="+"); rp.add_argument("--dataset-only", action="store_true")
     rp.add_argument("--totals-only", action="store_true"); rp.add_argument("--compare"); rp.set_defaults(f=cmd_report)

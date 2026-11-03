@@ -1,0 +1,37 @@
+{
+ "slug": "picture-of-dorian-gray",
+ "title": "The Picture of Dorian Gray",
+ "author": "Oscar Wilde",
+ "published": 1890,
+ "kind": "novel",
+ "firstLine": "The studio was filled with the rich odour of roses, and when the light summer wind stirred amidst the trees of the garden, there came through the open door the heavy scent of the lilac, or the more delicate perfume of the pink-flowering thorn.",
+ "begins": "In Basil Hallward's studio, Lord Henry Wotton watches the painter finish a portrait of a strikingly beautiful young man, Dorian Gray, and tells Basil he thinks it his best work. Basil is reluctant to exhibit it.",
+ "happens": "Basil paints Dorian Gray. Under Lord Henry's influence, Dorian wishes the portrait might age instead of him, and it does. He falls for the actress Sibyl Vane, then cruelly rejects her; she kills herself. The portrait shows his cruelty, so he hides it. Dorian pursues a life of pleasure, remaining young. He murders Basil, who has seen the portrait, and blackmails the scientist Alan Campbell into disposing of the body. Sibyl's brother James Vane, hunting him, is accidentally shot dead. Hoping to destroy his conscience, Dorian stabs the portrait; the servants find it restored to beauty, and a withered, dead old man with a knife in his heart.",
+ "characters": [
+  {
+   "name": "Dorian Gray",
+   "who": "beautiful young man whose portrait ages in his place"
+  },
+  {
+   "name": "Lord Henry Wotton",
+   "who": "witty, cynical aristocrat who shapes Dorian's views"
+  },
+  {
+   "name": "Basil Hallward",
+   "who": "the painter of the portrait"
+  },
+  {
+   "name": "Sibyl Vane",
+   "who": "young actress Dorian loves and rejects"
+  },
+  {
+   "name": "James Vane",
+   "who": "her brother, seeks revenge"
+  },
+  {
+   "name": "Alan Campbell",
+   "who": "scientist, forced to dispose of Basil's body"
+  }
+ ],
+ "checks": "First line copied from Chapter I (the text has a Preface of aphorisms before it, not used). Names searched; read Chapter I and the final pages. Plot beats from memory: wish, Sibyl, Basil, Campbell, James Vane; only the ending was re-read."
+}

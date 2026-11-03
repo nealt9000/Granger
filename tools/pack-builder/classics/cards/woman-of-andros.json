@@ -1,0 +1,41 @@
+{
+ "slug": "woman-of-andros",
+ "title": "The Woman of Andros",
+ "author": "Thornton Wilder",
+ "published": 1930,
+ "kind": "novel",
+ "firstLine": "The earth sighed as it turned in its course; the shadow of night crept gradually along the Mediterranean, and Asia was left in darkness.",
+ "begins": "The book begins with a sweep across the dark Mediterranean at nightfall, over \"the land that was soon to be called Holy\". It settles on the Greek island of Brynos, where two fathers, Simo and Chremes, talk in a wineshop about Simo's son Pamphilus and marriage.",
+ "happens": "On the island of Brynos, Chrysis, a courtesan from Andros, holds banquets for the island's young men and shelters stray, helpless people in her house, including her insane friend Philocles, a former sea-captain. Pamphilus, Simo's son, is expected to marry Philumena, Chremes's daughter, but loves Chrysis's young sister Glycerium. After Chrysis dies, the Fathers of the Island order her household sold as slaves to pay its debts. Simo buys Glycerium from the Leno, a dealer in slaves, and Pamphilus's mother tends her. On the third day Glycerium's pains begin, and by sunset she and the child are dead. That night, after months of drought, rain begins to fall.",
+ "characters": [
+  {
+   "name": "Chrysis",
+   "who": "a courtesan from Andros who leads banquets and cares for dependents; she dies"
+  },
+  {
+   "name": "Pamphilus",
+   "who": "Simo's son, who loves Glycerium"
+  },
+  {
+   "name": "Simo",
+   "who": "his father, a merchant"
+  },
+  {
+   "name": "Glycerium",
+   "who": "Chrysis's young sister, whom Pamphilus loves"
+  },
+  {
+   "name": "Chremes",
+   "who": "Simo's friend; Philumena's father"
+  },
+  {
+   "name": "Mysis",
+   "who": "Chrysis's old servant"
+  },
+  {
+   "name": "Philocles",
+   "who": "insane old sea-captain"
+  }
+ ],
+ "checks": "Searched for the first line; read the opening and the closing pages; read the chapter-length key scenes for Chrysis's death, the Leno's sale, and the ending (mother and child die; the rain). This edition has no chapter titles. Names are spelled 'Glycerium' in the text. Philumena's fate is not shown."
+}

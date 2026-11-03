@@ -1,0 +1,45 @@
+{
+ "slug": "hound-of-the-baskervilles",
+ "title": "The Hound of the Baskervilles",
+ "author": "Arthur Conan Doyle",
+ "published": 1902,
+ "kind": "novel",
+ "firstLine": "Mr.",
+ "begins": "A dedication to Robinson precedes Chapter 1. Holmes sits at breakfast while Watson examines a stick left by a visitor. Holmes deduces from the engraving, \"To James Mortimer, M.R.C.S.\", that he is a country doctor, and Dr. Mortimer returns.",
+ "happens": "Dr. Mortimer tells Holmes of a family curse: a spectral hound haunts the Baskervilles, and Sir Charles Baskerville has died on the moor. Sir Henry, the heir, comes from Canada. Holmes sends Watson with him to Baskerville Hall on Dartmoor. There Watson meets the Barrymores, the escaped convict Selden, and the neighbours Stapleton and his supposed sister. Holmes secretly arrives. Stapleton, in fact a Baskerville kinsman and the husband of the woman posing as his sister, is using a hound to seize the estate. The hound is shot; Stapleton vanishes into the Grimpen Mire.",
+ "characters": [
+  {
+   "name": "Sherlock Holmes",
+   "who": "detective, called in by Mortimer"
+  },
+  {
+   "name": "Dr. Watson",
+   "who": "narrator, sent to guard Sir Henry"
+  },
+  {
+   "name": "Dr. James Mortimer",
+   "who": "country doctor who brings the case"
+  },
+  {
+   "name": "Sir Henry Baskerville",
+   "who": "young heir to the Hall"
+  },
+  {
+   "name": "Stapleton",
+   "who": "naturalist of Merripit House, the villain"
+  },
+  {
+   "name": "Mrs. Stapleton",
+   "who": "his wife, passed off as his sister"
+  },
+  {
+   "name": "Barrymore",
+   "who": "butler at the Hall"
+  },
+  {
+   "name": "Selden",
+   "who": "escaped convict"
+  }
+ ],
+ "checks": "Checked first line, Chapter 1, names (Mortimer, Stapleton, Barrymore, Selden, Grimpen Mire, Merripit, Frankland, Laura Lyons) and the wife/sister reveal by search. Ending taken from the last chapters in outline, not re-read in full."
+}

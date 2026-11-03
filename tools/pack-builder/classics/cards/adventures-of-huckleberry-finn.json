@@ -1,0 +1,45 @@
+{
+ "slug": "adventures-of-huckleberry-finn",
+ "title": "Adventures of Huckleberry Finn",
+ "author": "Mark Twain",
+ "published": 1884,
+ "kind": "novel",
+ "firstLine": "You don’t know about me without you have read a book by the name of The Adventures of Tom Sawyer; but that ain’t no matter.",
+ "begins": "Huck, who narrates in his own dialect, says Mr. Twain told the truth about him in Tom Sawyer, mostly. The Widow Douglas and her sister Miss Watson try to civilize him, and Tom Sawyer’s gang comes for him at night.",
+ "happens": "Huck is kept by the Widow Douglas until his drunken father, Pap, takes him. He fakes his death and escapes down the Mississippi on a raft with Jim, Miss Watson’s slave, who is running away. They meet two con men, the Duke and the King; the King sells Jim, and Huck, after much struggle, decides to free him even at the cost of damnation. At the Phelps farm, Tom Sawyer turns the rescue into an elaborate game. Jim turns out to be already free by Miss Watson’s will, and Pap is dead. Huck means to light out for the Territory.",
+ "characters": [
+  {
+   "name": "Huckleberry Finn",
+   "who": "the narrator"
+  },
+  {
+   "name": "Jim",
+   "who": "Miss Watson’s runaway slave, Huck’s friend"
+  },
+  {
+   "name": "Tom Sawyer",
+   "who": "Huck’s romantic friend"
+  },
+  {
+   "name": "Pap",
+   "who": "Huck’s drunken father"
+  },
+  {
+   "name": "Widow Douglas",
+   "who": "Huck’s guardian"
+  },
+  {
+   "name": "Miss Watson",
+   "who": "her sister, Jim’s owner"
+  },
+  {
+   "name": "the Duke and the King",
+   "who": "two river swindlers"
+  },
+  {
+   "name": "Aunt Sally",
+   "who": "Mrs. Phelps, Tom’s aunt"
+  }
+ ],
+ "checks": "First sentence copied from file. Names grepped. Ending (Jim freed by will, Pap dead, ‘light out for the Territory’) confirmed in the last chapters; the middle from memory, not re-read."
+}

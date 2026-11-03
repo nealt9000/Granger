@@ -1,0 +1,41 @@
+{
+ "slug": "moonstone",
+ "title": "The Moonstone",
+ "author": "Wilkie Collins",
+ "published": 1868,
+ "kind": "novel",
+ "firstLine": "I address these lines—written in India—to my relatives in England.",
+ "begins": "The Prologue is a family paper about the storming of Seringapatam in 1799, where John Herncastle seizes a sacred yellow diamond. The story then begins with the house-steward Gabriel Betteredge in 1848, citing Robinson Crusoe.",
+ "happens": "The Moonstone, a diamond taken from an Indian shrine, passes to Rachel Verinder on her eighteenth birthday and vanishes from her room that night. Sergeant Cuff suspects Rachel herself. The housemaid Rosanna Spearman, who loves Franklin Blake, kills herself at the Shivering Sand. Rachel refuses to explain and breaks with Franklin. The truth emerges through Ezra Jennings: Franklin took the stone while unknowingly drugged with opium, and gave it to Godfrey Ablewhite, who kept it. Godfrey is smothered in a London lodging, and the evidence points to the Indians. Rachel marries Franklin, and the diamond is back in the forehead of the deity.",
+ "characters": [
+  {
+   "name": "Rachel Verinder",
+   "who": "Lady Verinder's daughter, owner of the diamond"
+  },
+  {
+   "name": "Franklin Blake",
+   "who": "her cousin and suitor"
+  },
+  {
+   "name": "Gabriel Betteredge",
+   "who": "the Verinders' steward and first narrator"
+  },
+  {
+   "name": "Godfrey Ablewhite",
+   "who": "charming cousin who proposes to Rachel"
+  },
+  {
+   "name": "Sergeant Cuff",
+   "who": "police detective"
+  },
+  {
+   "name": "Rosanna Spearman",
+   "who": "housemaid with a past"
+  },
+  {
+   "name": "Ezra Jennings",
+   "who": "doctor's assistant who solves the drugging"
+  }
+ ],
+ "checks": "Verified first line, Prologue, Betteredge's opening, names, Shivering Sand, Kattiawar and the closing shrine scene by search. Godfrey's pawning and murder, and Jennings's experiment, are from memory of the story, not re-read."
+}

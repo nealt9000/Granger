@@ -130,3 +130,31 @@ def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, gues
     if rc:
         raise SystemExit("adb pull failed: " + o)
     return out
+
+
+def import_books(runner, files, run_id, runs_dir, sleep=time.sleep):
+    """Plan R2: pushes book files to eval/ and has the eval screen import and index them as the Library's import does.
+    Returns the rows of the phone's imported.tsv: (file name, result, book id)."""
+    check_front(runner)
+    runner(["shell", "mkdir", "-p", REMOTE])
+    runner(["shell", "rm", "-rf", "%s/%s" % (REMOTE, run_id)])
+    names = []
+    for f in files:
+        f = Path(f)
+        if "," in f.name:
+            raise SystemExit("a file name with a comma can't be imported: " + f.name)
+        rc, o = runner(["push", str(f), "%s/%s" % (REMOTE, f.name)])
+        if rc:
+            raise SystemExit("adb push failed: " + o)
+        names.append(f.name)
+    rc, o = runner(["shell", "am", "start", "-S", "-n", PKG + "/.eval.EvalActivity", "--es", "runId", run_id,
+                    "--es", "import", ",".join(names)])
+    if rc:
+        raise SystemExit("could not start the eval activity: " + o)
+    wait_done(runner, run_id, sleep)
+    out = Path(runs_dir) / run_id
+    out.mkdir(parents=True, exist_ok=True)
+    rc, o = runner(["pull", "%s/%s/imported.tsv" % (REMOTE, run_id), str(out) + "/"])
+    if rc:
+        raise SystemExit("adb pull failed: " + o)
+    return [tuple(line.split("\t")) for line in (out / "imported.tsv").read_text(encoding="utf-8").splitlines() if line]

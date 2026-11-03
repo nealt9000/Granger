@@ -1,0 +1,101 @@
+{
+ "slug": "room-with-a-view",
+ "claims": [
+  {
+   "claim": "At a pension in Florence, Lucy Honeychurch and her cousin and chaperone Miss Bartlett complain",
+   "status": "verified",
+   "evidence": "Ch. I 'The Bertolini'; 'the chaperon of my young cousin, Lucy'"
+  },
+  {
+   "claim": "They were promised south rooms with a view but given north rooms facing a courtyard",
+   "status": "verified",
+   "evidence": "'south rooms with a view... north rooms, looking into a courtyard'"
+  },
+  {
+   "claim": "Mr. Emerson and his son George offer to swap rooms",
+   "status": "verified",
+   "evidence": "'you can have our rooms, and we'll have yours'; George: 'It's so obvious they should have the rooms'"
+  },
+  {
+   "claim": "Lucy visits Florence with her cousin Charlotte Bartlett and meets the Emersons",
+   "status": "verified",
+   "evidence": "Ch. I"
+  },
+  {
+   "claim": "George kisses her in a field of violets",
+   "status": "verified",
+   "evidence": "'a little open terrace, which was covered with violets... He stepped quickly forward and kissed her.'"
+  },
+  {
+   "claim": "Miss Bartlett hurries her home",
+   "status": "verified",
+   "evidence": "Miss Bartlett calls 'Lucy!'; Ch. VII 'They Return' (Charlotte parts them)"
+  },
+  {
+   "claim": "In Surrey, Lucy becomes engaged to the fastidious Cecil Vyse",
+   "status": "verified",
+   "evidence": "'after the engagement was announced'; Cecil like 'those fastidious saints'; Summer Street / Windy Corner"
+  },
+  {
+   "claim": "The Emersons rent Cissie Villa nearby, George declares his love again",
+   "status": "verified",
+   "evidence": "Freddy: 'Emerson'; 'the tenants moved into Cissie Villa'; George's later approach"
+  },
+  {
+   "claim": "Lucy breaks with Cecil but denies her feelings",
+   "status": "verified",
+   "evidence": "'I broke off my engagement because I did not love George'"
+  },
+  {
+   "claim": "She plans to go to Greece (with the Miss Alans)",
+   "status": "verified",
+   "evidence": "'I would give anything to go with them'; 'I must go to Greece because I do not love George'"
+  },
+  {
+   "claim": "Old Mr. Emerson tells her she loves George",
+   "status": "verified",
+   "evidence": "'You love George!'"
+  },
+  {
+   "claim": "She marries George; novel ends in Florence where they guess Miss Bartlett secretly hoped",
+   "status": "verified",
+   "evidence": "'Siamo sposati'; 'we return to the Pension Bertolini'; George: 'she hoped, far down in her mind'"
+  },
+  {
+   "claim": "Lucy: young Englishwoman between Cecil and George",
+   "status": "verified",
+   "evidence": "text"
+  },
+  {
+   "claim": "George: moody, honest young man who loves Lucy",
+   "status": "verified",
+   "evidence": "text"
+  },
+  {
+   "claim": "Mr. Emerson: George's outspoken father",
+   "status": "verified",
+   "evidence": "'This is my son... his name's George'"
+  },
+  {
+   "claim": "Charlotte Bartlett: Lucy's fussy older cousin and chaperone",
+   "status": "verified",
+   "evidence": "'chaperon of my young cousin'"
+  },
+  {
+   "claim": "Cecil Vyse: Lucy's snobbish fiance",
+   "status": "verified",
+   "evidence": "'He was a snob'"
+  },
+  {
+   "claim": "Freddy: Lucy's cheerful younger brother",
+   "status": "unfound",
+   "evidence": "'the boy, who was Freddy, Lucy's brother' found; 'younger' and 'cheerful' not established",
+   "fix": "Lucy's brother"
+  },
+  {
+   "claim": "Mr. Beebe: clergyman, family friend",
+   "status": "verified",
+   "evidence": "'the new rector of Summer Street'"
+  }
+ ]
+}

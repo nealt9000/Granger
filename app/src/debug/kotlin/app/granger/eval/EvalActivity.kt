@@ -22,6 +22,7 @@ import app.granger.GrangerApp
 import app.granger.core.ai.LiteRtLlmEngine
 import app.granger.core.ai.LlmBackend
 import app.granger.core.ai.RssMemorySampler
+import app.granger.core.library.ImportResult
 import app.granger.core.research.FictionWeight
 import app.granger.core.research.ResearchPipeline
 import app.granger.research.ModelsAdapter
@@ -78,6 +79,7 @@ class EvalActivity : ComponentActivity() {
         }
         intent.getStringExtra("replay")?.let { replay(root, runId, it); return }
         intent.getStringExtra("embed")?.let { embed(root, runId, it); return }
+        intent.getStringExtra("import")?.let { importBooks(root, runId, it); return }
         val c = (application as GrangerApp).container
         val ids = intent.getStringExtra("ids")
         val groups = intent.getStringExtra("groups")
@@ -136,6 +138,35 @@ class EvalActivity : ComponentActivity() {
             EvalSession.Start.ATTACHED -> log("run $runId is already running; showing its progress")
             EvalSession.Start.BUSY -> log("another eval is running; $runId was not started")
         }
+    }
+
+    /**
+     * Plan R2: `import` names book files under `eval/`, comma-separated, imported as the Library's import does (then
+     * indexed), for the test library's own books and Classics notes. Writes `eval/<runId>/imported.tsv` (file, result,
+     * book id), then `done`.
+     */
+    private fun importBooks(root: File, runId: String, names: String) {
+        val c = (application as GrangerApp).container
+        val result = EvalSession.start(runId, root, ::log) {
+            val dir = File(root, runId).apply { mkdirs() }
+            val lines = names.split(',').map { it.trim() }.filter { it.isNotEmpty() && '/' !in it && ".." !in it }.map { name ->
+                val file = File(root, name)
+                log("importing $name")
+                val r = c.bookshelf.import(name) { file.inputStream() }
+                val id = when (r) {
+                    is ImportResult.Imported -> r.bookId
+                    is ImportResult.AlreadyThere -> r.bookId
+                    else -> ""
+                }
+                "$name\t${r::class.simpleName}\t$id"
+            }
+            log("indexing")
+            c.bookIndex.indexPending()
+            File(dir, "imported.tsv").writeText(lines.joinToString("\n", postfix = "\n"))
+            File(dir, "done").writeText("done\n")
+            log("done $runId")
+        }
+        if (result != EvalSession.Start.STARTED) log("another eval is running; $runId was not started")
     }
 
     /**

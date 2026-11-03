@@ -1,0 +1,37 @@
+{
+ "slug": "ulysses",
+ "title": "Ulysses",
+ "author": "James Joyce",
+ "published": 1922,
+ "kind": "novel",
+ "firstLine": "Stately, plump Buck Mulligan came from the stairhead, bearing a bowl of lather on which a mirror and a razor lay crossed.",
+ "begins": "Episode 1 opens on the morning of 16 June 1904 at a Martello tower near Dublin, where the jovial medical student Buck Mulligan shaves on the roof and mocks Stephen Dedalus, who lodges there with the Englishman Haines.",
+ "happens": "One day in Dublin, 16 June 1904. Stephen Dedalus, a young teacher haunted by his mother's death, leaves the tower, teaches at Mr Deasy's school, and walks the strand. Leopold Bloom, an advertising canvasser, makes breakfast for his wife Molly, attends Paddy Dignam's funeral, works, lunches, and wanders the city, knowing Molly will receive her lover Blazes Boylan that afternoon at four. At night Bloom finds the drunken Stephen in Dublin's brothel quarter and takes him home to Eccles Street. Stephen leaves, and Bloom goes to bed beside Molly, whose long thoughts close the book with her \"yes I will Yes.\"",
+ "characters": [
+  {
+   "name": "Leopold Bloom",
+   "who": "Dublin advertising canvasser of Jewish descent; the book's main figure"
+  },
+  {
+   "name": "Stephen Dedalus",
+   "who": "young Irish teacher and would-be writer"
+  },
+  {
+   "name": "Molly Bloom",
+   "who": "Leopold's wife, a singer"
+  },
+  {
+   "name": "Buck Mulligan",
+   "who": "Stephen's mocking medical-student friend"
+  },
+  {
+   "name": "Blazes Boylan",
+   "who": "Molly's lover, a jaunty Dubliner mixed up in her concert tour"
+  },
+  {
+   "name": "Paddy Dignam",
+   "who": "dead man whose funeral Bloom attends"
+  }
+ ],
+ "checks": "Verified first line, opening scene, names (Haines, Deasy, Boylan, Dignam, Eccles Street, Bella Cohen) and the last words by search. Scene order and the Stephen-and-Bloom night chapters are from memory of the book, not re-read; Boylan's occupation (concert manager) not confirmed in the text."
+}

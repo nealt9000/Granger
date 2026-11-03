@@ -1,0 +1,96 @@
+{
+ "slug": "adventures-of-huckleberry-finn",
+ "claims": [
+  {
+   "claim": "Huck narrates in his own dialect; Twain told the truth about him in Tom Sawyer, mainly",
+   "status": "verified",
+   "evidence": "'Mark Twain, and he told the truth, mainly.'"
+  },
+  {
+   "claim": "Widow Douglas and her sister Miss Watson try to civilize him",
+   "status": "verified",
+   "evidence": "'The Widow Douglas she took me for her son, and allowed she would sivilize me'; 'Her sister, Miss Watson'"
+  },
+  {
+   "claim": "Tom Sawyer's gang comes for him at night",
+   "status": "verified",
+   "evidence": "'call it Tom Sawyer's Gang'; Tom's signal at Huck's window"
+  },
+  {
+   "claim": "Huck is kept by the Widow Douglas until Pap takes him",
+   "status": "verified",
+   "evidence": "pap and the cabin up the river on the Illinois shore"
+  },
+  {
+   "claim": "Pap is a drunkard",
+   "status": "verified",
+   "evidence": "'pap took it and got drunk'"
+  },
+  {
+   "claim": "Huck fakes his death",
+   "status": "verified",
+   "evidence": "'blooded the axe good'; Tom: 'it was reckoned I was murdered'"
+  },
+  {
+   "claim": "Huck escapes down the Mississippi on a raft with Jim",
+   "status": "verified",
+   "evidence": "raft chapters"
+  },
+  {
+   "claim": "Jim is Miss Watson's slave, running away",
+   "status": "verified",
+   "evidence": "'Miss Watson would sell him South, sure'"
+  },
+  {
+   "claim": "They meet the Duke and the King",
+   "status": "verified",
+   "evidence": "the king and the duke appear in the doggery/raft chapters"
+  },
+  {
+   "claim": "Huck sees the King sell Jim",
+   "status": "wrong",
+   "evidence": "Huck returns to find the raft gone; the Duke tells him 'That old fool sold him, and never divided with me' — Huck does not witness the sale",
+   "fix": "the King sells Jim"
+  },
+  {
+   "claim": "Huck decides to free Jim even at cost of damnation",
+   "status": "verified",
+   "evidence": "'All right, then, I'll go to hell'—and tore it up"
+  },
+  {
+   "claim": "Tom Sawyer turns the rescue into an elaborate game at the Phelps farm",
+   "status": "verified",
+   "evidence": "Tom's evasion plans; Tom: 'what he had planned in his head from the start'"
+  },
+  {
+   "claim": "Jim is already free by Miss Watson's will",
+   "status": "verified",
+   "evidence": "'she set him free in her will'"
+  },
+  {
+   "claim": "Pap is dead",
+   "status": "verified",
+   "evidence": "Jim: the dead man in the floating house 'wuz him'"
+  },
+  {
+   "claim": "Huck means to light out for the Territory",
+   "status": "verified",
+   "evidence": "'I got to light out for the Territory ahead of the rest'"
+  },
+  {
+   "claim": "Tom is Huck's romantic friend",
+   "status": "verified",
+   "evidence": "Tom's robber-book schemes"
+  },
+  {
+   "claim": "Aunt Sally is Mrs. Phelps, Tom's aunt",
+   "status": "verified",
+   "evidence": "'Mrs. Phelps'; 'Don't say yes'm—say Aunt Sally'; Aunt Polly is Tom's aunt, Sally is Tom's aunt by marriage ('Sid')"
+  },
+  {
+   "claim": "Widow Douglas is Huck's guardian",
+   "status": "verified",
+   "evidence": "'took me for her son'"
+  }
+ ]
+}

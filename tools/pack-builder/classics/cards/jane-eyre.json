@@ -1,0 +1,45 @@
+{
+ "slug": "jane-eyre",
+ "title": "Jane Eyre",
+ "author": "Charlotte Brontë",
+ "published": 1847,
+ "kind": "novel",
+ "firstLine": "There was no possibility of taking a walk that day.",
+ "begins": "The narrator, Jane, a ten-year-old orphan, is stuck indoors on a cold winter day at Gateshead Hall, home of her aunt Mrs. Reed. She is bullied by her cousin John Reed and hides in a window seat with a picture book.",
+ "happens": "Orphaned Jane is mistreated by Mrs. Reed and her children, then sent to the harsh Lowood school, where her friend Helen Burns dies. She stays eight years, the last two as a teacher, then becomes governess to Adèle at Thornfield Hall. She loves the master, Mr. Rochester, and agrees to marry him, but at the altar it is revealed that he already has a wife, Bertha Mason, mad and locked in a room on the third storey. Jane flees and is taken in by Diana, Mary and St. John Rivers, who prove to be her cousins. After St. John asks her to go to India with him, she hears Rochester call her, and returns. Thornfield is a burnt ruin and he is blind and maimed. Jane marries him.",
+ "characters": [
+  {
+   "name": "Jane Eyre",
+   "who": "the orphan narrator, later governess"
+  },
+  {
+   "name": "Mr. Rochester",
+   "who": "brooding master of Thornfield Hall"
+  },
+  {
+   "name": "Bertha Mason",
+   "who": "Rochester's first wife, mad, kept locked in a third-storey room"
+  },
+  {
+   "name": "Adèle",
+   "who": "Rochester's young ward, Jane's pupil"
+  },
+  {
+   "name": "Mrs. Reed",
+   "who": "Jane's cruel aunt at Gateshead"
+  },
+  {
+   "name": "Helen Burns",
+   "who": "Jane's friend at Lowood"
+  },
+  {
+   "name": "St. John Rivers",
+   "who": "clergyman, Jane's cousin; wants to take her to India"
+  },
+  {
+   "name": "Mrs. Fairfax",
+   "who": "housekeeper of Thornfield"
+  }
+ ],
+ "checks": "Found the first sentence in Chapter I; read the opening; counted names (Bertha Mason, Mrs. Fairfax, Ferndean 7); found 'Reader, I married him' near the end and read the last pages (St. John). Plot details from memory."
+}

@@ -1,0 +1,65 @@
+{
+ "slug": "turn-of-the-screw",
+ "claims": [
+  {
+   "claim": "On Christmas Eve a group round the fire tells ghost stories",
+   "status": "verified",
+   "evidence": "'The story had held us, round the fire... on Christmas Eve in an old house, a strange tale should essentially be'"
+  },
+  {
+   "claim": "Douglas offers a manuscript about two children and sends for it",
+   "status": "verified",
+   "evidence": "'I shall have to send to town... The story's written. It's in a locked drawer'; 'a small nephew and a small niece'"
+  },
+  {
+   "claim": "The account was written years ago by a young governess hired by a man in Harley Street and sent to his country house",
+   "status": "verified",
+   "evidence": "'it has not been out for years'; 'a house in Harley Street'; 'his country home, an old family place in Essex'"
+  },
+  {
+   "claim": "The governess is never named",
+   "status": "verified",
+   "evidence": "searched the text; she is only 'the governess' / 'my friend' in the frame, never given a name"
+  },
+  {
+   "claim": "Miles and Flora at Bly, an Essex country house",
+   "status": "verified",
+   "evidence": "'an old family place in Essex'; Bly named in the text"
+  },
+  {
+   "claim": "Their uncle tells her never to trouble him",
+   "status": "verified",
+   "evidence": "'That she should never trouble him—but never, never'"
+  },
+  {
+   "claim": "Miles has been dismissed from school",
+   "status": "verified",
+   "evidence": "'The child's dismissed his school.'"
+  },
+  {
+   "claim": "She sees Peter Quint, a dead valet, and Miss Jessel, the dead former governess",
+   "status": "verified",
+   "evidence": "'Peter Quint—his own man, his valet'; 'He died.'; Miss Jessel discussed as the earlier governess who has died"
+  },
+  {
+   "claim": "Mrs. Grose is the housekeeper and helps protect the children",
+   "status": "verified",
+   "evidence": "'housekeeper and was also acting for the time as superintendent'"
+  },
+  {
+   "claim": "Flora falls ill and Mrs. Grose takes her away",
+   "status": "verified",
+   "evidence": "'Flora was so markedly feverish'; governess to Mrs. Grose: 'It's you who must go. You must take [Flora]'"
+  },
+  {
+   "claim": "Alone with Miles, the governess makes him name Quint, and he dies in her arms",
+   "status": "verified",
+   "evidence": "'Peter Quint—you devil!'; 'his little heart, dispossessed, had stopped'"
+  },
+  {
+   "claim": "Douglas reads the manuscript aloud",
+   "status": "verified",
+   "evidence": "'he began to read to our hushed little circle on the night of the fourth'"
+  }
+ ]
+}

@@ -1,0 +1,41 @@
+{
+ "slug": "peter-pan",
+ "title": "Peter Pan",
+ "author": "J. M. Barrie",
+ "published": 1911,
+ "kind": "novel",
+ "firstLine": "All children, except one, grow up.",
+ "begins": "Chapter I, 'Peter Breaks Through', introduces the Darling family at 14, their nursemaid Nana the dog, and how Wendy first learned she would grow up. Wendy talks of a boy named Peter who visits the nursery at night; Mrs. Darling finds strange leaves and dreams of him.",
+ "happens": "Peter Pan, a boy who will not grow up, loses his shadow in the Darling nursery. He teaches Wendy, John and Michael to fly, and they follow him to Neverland. There they meet the lost boys, mermaids and Tiger Lily, and face Captain Hook and his pirates. Wendy becomes a mother to the boys. Hook captures them and plans to poison Peter, but Tinker Bell drinks the poison; Peter saves them and in a duel Hook falls to the crocodile. The children return home, and Mr. and Mrs. Darling adopt the lost boys. Years later, Wendy is grown, and Peter takes her daughter Jane to Neverland.",
+ "characters": [
+  {
+   "name": "Peter Pan",
+   "who": "the boy who never grows up"
+  },
+  {
+   "name": "Wendy Darling",
+   "who": "the eldest Darling child, who mothers the lost boys"
+  },
+  {
+   "name": "John and Michael",
+   "who": "her younger brothers"
+  },
+  {
+   "name": "Captain Hook",
+   "who": "the pirate captain with an iron hook"
+  },
+  {
+   "name": "Tinker Bell",
+   "who": "Peter's jealous fairy"
+  },
+  {
+   "name": "Mr. and Mrs. Darling",
+   "who": "the children's parents"
+  },
+  {
+   "name": "Nana",
+   "who": "the nursemaid dog"
+  }
+ ],
+ "checks": "First line copied; read Chapter I (the shadow comes in Chapter II) and the last two chapters. Hook's death (jumps to the crocodile) and the ending read; names searched. Poison/Tinker Bell and the lost boys' adoption (line 5488 'adopted all the other boys') from memory plus search. Text is the Peter and Wendy novel."
+}

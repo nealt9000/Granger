@@ -1,0 +1,67 @@
+{
+ "slug": "brothers-karamazov",
+ "claims": [
+  {
+   "claim": "Book I 'The History of a Family' is told by a local narrator",
+   "status": "verified",
+   "evidence": "'well known in our district'; 'my hero'; narrator speaks as one of the district"
+  },
+  {
+   "claim": "Fyodor Pavlovitch is a lecherous buffoon, married twice, with three sons Dmitri, Ivan, Alexey",
+   "status": "verified",
+   "evidence": "'He was married twice, and had three sons, the eldest, Dmitri... Ivan and Alexey'; chapters 'The Old Buffoon', 'The Sensualists'"
+  },
+  {
+   "claim": "He neglected his sons",
+   "status": "verified",
+   "evidence": "the servant Grigory took charge: 'old Grigory's charge'; the sons were brought up elsewhere (second wife's affairs neglected)"
+  },
+  {
+   "claim": "Fyodor Pavlovitch and Dmitri both pursue Grushenka and quarrel over money and inheritance",
+   "status": "verified",
+   "evidence": "Dmitri 'in open quarrel with his father'; 'openly abandoned his betrothed for her'"
+  },
+  {
+   "claim": "Ivan intellectual; Alyosha a devout novice under Father Zossima",
+   "status": "verified",
+   "evidence": "'wearing the cassock of a novice'; chapter 'Father Zossima and His Visitors'"
+  },
+  {
+   "claim": "Fyodor Pavlovitch is found murdered; Mitya, who had threatened him, is arrested and tried",
+   "status": "verified",
+   "evidence": "'he threatened to murder'; trial and 'I am not guilty of my father's blood'"
+  },
+  {
+   "claim": "Smerdyakov, who did the deed, confesses to Ivan and hangs himself",
+   "status": "verified",
+   "evidence": "'It was only with you, with your help, I killed him'; 'An hour ago Smerdyakov hanged himself'"
+  },
+  {
+   "claim": "Ivan falls into brain fever",
+   "status": "verified",
+   "evidence": "'on the very eve of an attack of brain fever'"
+  },
+  {
+   "claim": "Mitya is found guilty and faces Siberia, with an escape planned",
+   "status": "verified",
+   "evidence": "'Yes, guilty!'; Epilogue 'Plans For Mitya's Escape'; 'one is going to Siberia'"
+  },
+  {
+   "claim": "Alyosha speaks to the schoolboys at Ilusha's funeral",
+   "status": "wrong",
+   "evidence": "The speech is at Ilusha's stone after the funeral: chapter 'Ilusha's Funeral. The Speech At The Stone'",
+   "fix": "ends the book speaking to them at Ilusha's stone after the boy's funeral"
+  },
+  {
+   "claim": "Smerdyakov is the Karamazovs' sullen servant",
+   "status": "unfound",
+   "evidence": "Searched sullen/morose; text says 'second servant... employed as cook' and he 'mumbled... with a grin', not sullen",
+   "fix": "Fyodor Pavlovitch's servant, employed as cook"
+  },
+  {
+   "claim": "Katerina Ivanovna is Dmitri's fiancée; Zossima the elder Alyosha follows; Grushenka wanted by father and son",
+   "status": "verified",
+   "evidence": "'surrender his betrothed to him to be rid of her, and escape to Grushenka'; 'Father Zossima' with novice Alyosha"
+  }
+ ]
+}

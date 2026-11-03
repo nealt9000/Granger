@@ -1,0 +1,65 @@
+{
+ "slug": "strange-case-of-dr-jekyll-and-mr-hyde",
+ "claims": [
+  {
+   "claim": "Story of the Door introduces the austere lawyer Mr. Utterson",
+   "status": "verified",
+   "evidence": "Opening chapter on Mr. Utterson, 'a lawyer... austere with himself'"
+  },
+  {
+   "claim": "Enfield is Utterson's kinsman and they take Sunday walks",
+   "status": "verified",
+   "evidence": "'Mr. Richard Enfield, his distant kinsman... in their Sunday walks'"
+  },
+  {
+   "claim": "Enfield points out a sinister door",
+   "status": "verified",
+   "evidence": "the door in the by-street told in chapter 1 (Enfield's story)"
+  },
+  {
+   "claim": "A brutal man trampled a child",
+   "status": "verified",
+   "evidence": "'the man trampled calmly over the child's body and left her screaming'"
+  },
+  {
+   "claim": "He then paid her family with a cheque from a respected man",
+   "status": "verified",
+   "evidence": "'pay them in a cheque'; 'the person that drew the cheque is the very pink of the proprieties'; 'The cheque was genuine'"
+  },
+  {
+   "claim": "Jekyll's will leaves everything to Mr. Hyde, a small, loathsome man",
+   "status": "verified",
+   "evidence": "Hyde 'pale and dwarfish... something downright detestable'; will naming Edward Hyde"
+  },
+  {
+   "claim": "Hyde murders Sir Danvers Carew",
+   "status": "verified",
+   "evidence": "chapter 'The Carew Murder Case': 'Sir Danvers Carew'; broken stick"
+  },
+  {
+   "claim": "Dr. Lanyon dies after a shock",
+   "status": "verified",
+   "evidence": "'I have had a shock,' he said, 'and I shall never recover'"
+  },
+  {
+   "claim": "Poole fears foul play; he and Utterson break in and find Hyde dead in Jekyll's clothes",
+   "status": "verified",
+   "evidence": "'I think there's been foul play,' said Poole; 'clothes far too large for him, clothes of the doctor's bigness'; the face of Edward Hyde"
+  },
+  {
+   "claim": "Jekyll drank a drug that turned him into Hyde, lost control of the change, and ran out of the salt",
+   "status": "verified",
+   "evidence": "'My provision of the salt... began to run low... I drank it and it was without efficacy'"
+  },
+  {
+   "claim": "Hyde's handwriting matches Jekyll's, making Utterson suspect forgery",
+   "status": "verified",
+   "evidence": "'the two hands are in many points identical'; 'Henry Jekyll forge for a murderer!'"
+  },
+  {
+   "claim": "Characters: Poole Jekyll's butler; Lanyon Jekyll's old friend, a physician",
+   "status": "verified",
+   "evidence": "Poole the servant of Jekyll's household; Lanyon's narrative of Jekyll"
+  }
+ ]
+}

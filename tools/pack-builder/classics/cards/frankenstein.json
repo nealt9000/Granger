@@ -1,0 +1,37 @@
+{
+ "slug": "frankenstein",
+ "title": "Frankenstein",
+ "author": "Mary Wollstonecraft Shelley",
+ "published": 1818,
+ "kind": "novel",
+ "firstLine": "You will rejoice to hear that no disaster has accompanied the commencement of an enterprise which you have regarded with such evil forebodings.",
+ "begins": "The book opens with letters from Robert Walton, an English explorer writing from St. Petersburgh to his sister Mrs. Saville, as he sets out on a voyage toward the North Pole. In later letters his ship meets Victor Frankenstein on the ice; Chapter 1 begins Victor's own story.",
+ "happens": "Walton hears Victor Frankenstein's story. A Genevese student at Ingolstadt, Victor makes a living creature from dead matter, is horrified, and flees. The abandoned creature teaches himself language by watching the De Lacey family, is driven away by them, and turns vengeful. He kills Victor's young brother William; the servant Justine is condemned for it. He demands a female companion; Victor begins, then destroys her. The creature kills Henry Clerval and, on the wedding night, Elizabeth; Victor's father dies of grief. Victor pursues the creature north and dies aboard Walton's ship. The creature mourns over the body, vows to burn himself on a funeral pile, and is lost on the ice.",
+ "characters": [
+  {
+   "name": "Victor Frankenstein",
+   "who": "Genevese student of natural philosophy who creates the creature"
+  },
+  {
+   "name": "The creature",
+   "who": "Victor's unnamed creation, intelligent and articulate, rejected by all who see him"
+  },
+  {
+   "name": "Robert Walton",
+   "who": "English sea captain who writes the letters and records Victor's tale"
+  },
+  {
+   "name": "Elizabeth Lavenza",
+   "who": "Victor's adopted cousin, raised in his family, and his bride"
+  },
+  {
+   "name": "Henry Clerval",
+   "who": "Victor's loyal childhood friend"
+  },
+  {
+   "name": "Justine Moritz",
+   "who": "servant in the Frankenstein household"
+  }
+ ],
+ "checks": "Verified first line, Letters 1-4, Chapter 1 opening, ending (Ch. 24), wedding-night threat, Clerval, Justine's condemnation and De Lacey by search. Edition is the 24-chapter form with Letters 1-4 at the start. Not checked line by line: exact order of Clerval's and Elizabeth's deaths (from memory, consistent with the wedding-night threat in the text)."
+}

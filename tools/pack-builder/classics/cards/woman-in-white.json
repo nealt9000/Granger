@@ -1,0 +1,45 @@
+{
+ "slug": "woman-in-white",
+ "title": "The Woman in White",
+ "author": "Wilkie Collins",
+ "published": 1859,
+ "kind": "novel",
+ "firstLine": "This is the story of what a Woman’s patience can endure, and what a Man’s resolution can achieve.",
+ "begins": "The opening is a short preface by the drawing-master Walter Hartright. He says the story will be told by several witnesses. Then, on the last day of July, he walks to Hampstead and meets a lost woman dressed all in white.",
+ "happens": "Walter Hartright, a drawing-master, meets a mysterious woman in white, Anne Catherick, who has escaped from an asylum. He then teaches at Limmeridge House, falls in love with Laura Fairlie, and her half-sister Marian Halcombe befriends him. Laura is engaged to Sir Percival Glyde, and Walter leaves. After the marriage, Glyde and his friend Count Fosco want Laura's money. When Anne dies at Fosco's house, she is buried as Lady Glyde, while Laura is shut in an asylum in Anne's place. Marian and Walter rescue Laura, and Walter discovers that Glyde forged an entry in a church register. Glyde dies in a fire in the church vestry. Fosco is found dead in the Seine, killed by the Brotherhood. Walter marries Laura, and their son is heir of Limmeridge.",
+ "characters": [
+  {
+   "name": "Walter Hartright",
+   "who": "drawing-master and chief narrator"
+  },
+  {
+   "name": "Laura Fairlie",
+   "who": "the heiress he loves"
+  },
+  {
+   "name": "Marian Halcombe",
+   "who": "Laura's brave, clever half-sister"
+  },
+  {
+   "name": "Anne Catherick",
+   "who": "the woman in white, who looks like Laura"
+  },
+  {
+   "name": "Sir Percival Glyde",
+   "who": "baronet who marries Laura for her money"
+  },
+  {
+   "name": "Count Fosco",
+   "who": "Glyde's fat, charming ally"
+  },
+  {
+   "name": "Mr. Fairlie",
+   "who": "Laura's selfish invalid uncle"
+  },
+  {
+   "name": "Professor Pesca",
+   "who": "Walter's Italian friend"
+  }
+ ],
+ "checks": "Found the first line (the preface starts the work); read the preface and first scene; counted names (Brotherhood, vestry, Paris, Morgue); read the last page (Marian: 'the Heir of Limmeridge'). Plot from memory; the Fosco death and the register forgery not re-read."
+}

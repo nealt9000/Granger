@@ -1,0 +1,98 @@
+{
+ "slug": "heart-of-darkness",
+ "claims": [
+  {
+   "claim": "Nellie, a yawl, at anchor on the Thames at Gravesend",
+   "status": "verified",
+   "evidence": "'The Nellie, a cruising yawl, swung to her anchor'; 'dark above Gravesend'"
+  },
+  {
+   "claim": "Waiting for the tide",
+   "status": "verified",
+   "evidence": "'the only thing for it was to come to and wait for the turn of the tide'"
+  },
+  {
+   "claim": "Director of Companies is captain and host",
+   "status": "verified",
+   "evidence": "'The Director of Companies was our captain and our host'"
+  },
+  {
+   "claim": "Others: Lawyer, Accountant, Marlow",
+   "status": "verified",
+   "evidence": "'The Lawyer...The Accountant had brought out already a box of dominoes'"
+  },
+  {
+   "claim": "At dusk",
+   "status": "verified",
+   "evidence": "'The sun set; the dusk fell on the stream'"
+  },
+  {
+   "claim": "Marlow begins to tell of his time in Africa",
+   "status": "unfound",
+   "evidence": "'Africa' appears only as a childhood map ('South America, or Africa, or Australia'); river is not named",
+   "fix": "Marlow begins to tell of going after a steamboat on a great river for a trading Company"
+  },
+  {
+   "claim": "a Belgian trading company",
+   "status": "unfound",
+   "evidence": "searched Belgian, Brussels, Congo: no hits; text says only 'a Company for trade on that river'",
+   "fix": "a trading Company"
+  },
+  {
+   "claim": "went to the Congo",
+   "status": "unfound",
+   "evidence": "no 'Congo' in the text; 'one river especially, a mighty big river'",
+   "fix": "its river"
+  },
+  {
+   "claim": "to captain a river steamer",
+   "status": "verified",
+   "evidence": "'Why shouldn't I try to get charge of one?'; 'skipper of a river steamboat'"
+  },
+  {
+   "claim": "sees cruelty and waste at the stations",
+   "status": "verified",
+   "evidence": "'dying slowly'; 'grove of death'; 'dying like flies here'"
+  },
+  {
+   "claim": "hears of Kurtz, a brilliant ivory agent",
+   "status": "verified",
+   "evidence": "'a first-class agent'; 'a gifted creature'; 'gifted Kurtz'"
+  },
+  {
+   "claim": "Kurtz chief of the Inner Station",
+   "status": "verified",
+   "evidence": "'The chief of the Inner Station'"
+  },
+  {
+   "claim": "steamer attacked on the river",
+   "status": "verified",
+   "evidence": "'Arrows, by Jove! We were being shot at!'"
+  },
+  {
+   "claim": "Kurtz ill and worshipped by local people",
+   "status": "verified",
+   "evidence": "'had been very ill'; 'getting himself adored'; 'adored him'"
+  },
+  {
+   "claim": "young Russian devoted to Kurtz",
+   "status": "verified",
+   "evidence": "'The Russian'; 'The young man looked at me'; harlequin; 'adored him'"
+  },
+  {
+   "claim": "Kurtz dies on the voyage downriver with 'The horror!'",
+   "status": "verified",
+   "evidence": "on the steamer: 'I am lying here in the dark waiting for death'; 'The horror! The horror!'"
+  },
+  {
+   "claim": "Marlow tells the Intended his last word was her name",
+   "status": "verified",
+   "evidence": "'The last word he pronounced was—your name.'"
+  },
+  {
+   "claim": "Intended is Kurtz's fiancee",
+   "status": "verified",
+   "evidence": "'My Intended' said by Kurtz; Marlow visits her in the sepulchral city"
+  }
+ ]
+}

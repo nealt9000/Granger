@@ -1,0 +1,71 @@
+{
+ "slug": "tom-jones",
+ "claims": [
+  {
+   "claim": "Chapter i is Fielding's introduction, bill of fare",
+   "status": "verified",
+   "evidence": "'Chapter i. — The introduction to the work, or bill of fare to the feast.'"
+  },
+  {
+   "claim": "Ch ii-iv Allworthy, Somersetshire, Miss Bridget, baby in bed",
+   "status": "verified",
+   "evidence": "Chapter ii 'description of Squire Allworthy... Miss Bridget Allworthy'; 'child which you found in your bed'; 'called Somersetshire'"
+  },
+  {
+   "claim": "Allworthy raises Tom beside nephew Blifil",
+   "status": "verified",
+   "evidence": "'Allworthy's scheming nephew' Blifil; Tom's schooling with Blifil in Book III"
+  },
+  {
+   "claim": "Tom loves Sophia, Squire Western's daughter",
+   "status": "verified",
+   "evidence": "'Tom applied to Mr Western's daughter'"
+  },
+  {
+   "claim": "Blifil's schemes cast Tom out; Sophia flees marriage to Blifil",
+   "status": "verified",
+   "evidence": "Allworthy banishes Jones; Sophia flees her father's plan (Blifil as intended husband)"
+  },
+  {
+   "claim": "both travel to London; Mrs Waters rescued by Tom from Northerton",
+   "status": "verified",
+   "evidence": "'Containing a fuller account of Mrs Waters... from which she was rescued by Jones'"
+  },
+  {
+   "claim": "meeting highwaymen",
+   "status": "wrong",
+   "evidence": "only one highwayman appears: 'pulling out a pistol, demanded ...' (single man)",
+   "fix": "a highwayman"
+  },
+  {
+   "claim": "Lady Bellaston",
+   "status": "verified",
+   "evidence": "'visit to Lady Bellaston'"
+  },
+  {
+   "claim": "Tom jailed in danger of gallows",
+   "status": "verified",
+   "evidence": "Ch. 'Mrs Miller and Mr Nightingale visit Jones in the prison'; 'preserving him from the gallows'"
+  },
+  {
+   "claim": "mother is Bridget, so he is Allworthy's nephew",
+   "status": "verified",
+   "evidence": "Mrs Waters: 'concerning this young man, to whom you have given my maiden name of Jones'; 'you have at last discovered your nephew'"
+  },
+  {
+   "claim": "Blifil exposed; Tom marries Sophia",
+   "status": "verified",
+   "evidence": "'Jones was married to his Sophia.'"
+  },
+  {
+   "claim": "Partridge barber",
+   "status": "verified",
+   "evidence": "'Partridge the barber'; Mrs Waters/Jenny Jones link: 'my maiden name of Jones'"
+  },
+  {
+   "claim": "Mrs Waters once called Jenny Jones",
+   "status": "verified",
+   "evidence": "Book I 'Jenny Jones'; 'my maiden name of Jones'"
+  }
+ ]
+}

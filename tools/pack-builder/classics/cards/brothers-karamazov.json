@@ -1,0 +1,45 @@
+{
+ "slug": "brothers-karamazov",
+ "title": "The Brothers Karamazov",
+ "author": "Fyodor Dostoevsky",
+ "published": 1912,
+ "kind": "novel",
+ "firstLine": "Alexey Fyodorovitch Karamazov was the third son of Fyodor Pavlovitch Karamazov, a land owner well known in our district in his own day, and still remembered among us owing to his gloomy and tragic death, which happened thirteen years ago, and which I shall describe in its proper place.",
+ "begins": "Book I, 'The History of a Family', is told by a local narrator. It describes the lecherous buffoon Fyodor Pavlovitch Karamazov, his two marriages, and how he neglected his sons Dmitri, Ivan and Alexey.",
+ "happens": "Old Fyodor Pavlovitch Karamazov and his eldest son Dmitri (Mitya) both pursue Grushenka, and quarrel over money and inheritance. Ivan, the intellectual, and the devout Alyosha, a novice under Father Zossima, are the other sons. Fyodor Pavlovitch is found murdered. Mitya, who had threatened him, is arrested and tried. The servant Smerdyakov, who did the deed, confesses to Ivan and hangs himself; Ivan falls into brain fever. Despite this, Mitya is found guilty and faces Siberia, with an escape planned. Alyosha, who has befriended a group of schoolboys, ends the book speaking to them at Ilusha's stone after the boy's funeral.",
+ "characters": [
+  {
+   "name": "Fyodor Pavlovitch Karamazov",
+   "who": "the sensual, scheming father"
+  },
+  {
+   "name": "Dmitri (Mitya)",
+   "who": "his eldest son, passionate and reckless"
+  },
+  {
+   "name": "Ivan",
+   "who": "the second son, rational and tormented"
+  },
+  {
+   "name": "Alyosha (Alexey)",
+   "who": "the youngest, gentle and devout"
+  },
+  {
+   "name": "Smerdyakov",
+   "who": "Fyodor Pavlovitch's servant, employed as cook"
+  },
+  {
+   "name": "Grushenka",
+   "who": "the woman Dmitri and his father both want"
+  },
+  {
+   "name": "Katerina Ivanovna",
+   "who": "Dmitri's proud fiancée"
+  },
+  {
+   "name": "Father Zossima",
+   "who": "the elder Alyosha follows"
+  }
+ ],
+ "checks": "First line copied from Book I Chapter I; read opening and last pages (Ilusha's funeral); names searched. Guilty verdict, Smerdyakov's hanging, escape plan checked by search; Mitya's twenty-year sentence is only rumoured in the text, so not stated. Zossima's death not mentioned."
+}

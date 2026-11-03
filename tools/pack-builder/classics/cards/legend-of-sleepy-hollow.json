@@ -1,0 +1,33 @@
+{
+ "slug": "legend-of-sleepy-hollow",
+ "title": "The Legend of Sleepy Hollow",
+ "author": "Washington Irving",
+ "published": 1820,
+ "kind": "tale",
+ "firstLine": "In the bosom of one of those spacious coves which indent the eastern shore of the Hudson, at that broad expansion of the river denominated by the ancient Dutch navigators the Tappan Zee, and where they always prudently shortened sail and implored the protection of St. Nicholas when they crossed, there lies a small market town or rural port, which by some is called Greensburgh, but which is more generally and properly known by the name of Tarry Town.",
+ "begins": "The narrator describes Tarry Town on the Hudson and the nearby glen of Sleepy Hollow, a drowsy place said to be haunted by a headless Hessian trooper. He then introduces the lanky schoolmaster Ichabod Crane.",
+ "happens": "Ichabod Crane, a gullible, greedy schoolmaster, courts Katrina Van Tassel, the daughter of a rich Dutch farmer, hoping for her father's wealth. His rival is the rowdy Brom Bones. After a party at the Van Tassels', Ichabod, spooked by ghost stories, rides home at night and meets a headless rider, who hurls his head at him. Next morning his trampled saddle is found, and by the brook his hat beside a shattered pumpkin. He is never seen again in the Hollow; the villagers suppose the ghost carried him off, though an old farmer reports he is alive elsewhere. Brom marries Katrina and always seems to laugh at the mention of the pumpkin.",
+ "characters": [
+  {
+   "name": "Ichabod Crane",
+   "who": "lean, superstitious schoolmaster from Connecticut"
+  },
+  {
+   "name": "Katrina Van Tassel",
+   "who": "plump, coquettish daughter of a wealthy farmer"
+  },
+  {
+   "name": "Brom Bones",
+   "who": "Abraham Van Brunt, the boisterous local hero and rival"
+  },
+  {
+   "name": "Baltus Van Tassel",
+   "who": "Katrina's wealthy father"
+  },
+  {
+   "name": "Headless Horseman",
+   "who": "the Galloping Hessian of the Hollow, a local ghost"
+  }
+ ],
+ "checks": "First line copied; read opening and the final section. Names searched (Hessian, Brom Van Brunt, pumpkin). Ending (hat and pumpkin, Brom marrying) and the Hessian's hurled head from memory plus search."
+}

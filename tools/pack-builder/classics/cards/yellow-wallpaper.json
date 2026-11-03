@@ -1,0 +1,29 @@
+{
+ "slug": "yellow-wallpaper",
+ "title": "The Yellow Wallpaper",
+ "author": "Charlotte Perkins Gilman",
+ "published": 1892,
+ "kind": "novella",
+ "firstLine": "It is very seldom that mere ordinary people like John and myself secure ancestral halls for the summer.",
+ "begins": "A woman writes in secret in her journal. She and her husband John, a physician, have rented a grand old country house for the summer. She thinks there is something queer about it, and says John does not believe she is ill.",
+ "happens": "The unnamed narrator is ill with what John calls a nervous condition. He forbids her work and writing and confines her to a big upstairs nursery, rest cure, with barred windows and ugly yellow wallpaper. Her sister-in-law Jennie keeps house. Her baby is cared for by others. The narrator becomes obsessed with the wallpaper's pattern and then sees a woman creeping behind it. She runs to help the woman, peels the paper off, and locks herself in. At the end she believes she is the woman who has got out, creeps around the room; John faints right across her path, and she goes on creeping over him.",
+ "characters": [
+  {
+   "name": "the narrator",
+   "who": "a woman recovering from depression, who writes the journal and is never named"
+  },
+  {
+   "name": "John",
+   "who": "her husband, a physician, who forbids her to work or write"
+  },
+  {
+   "name": "Jennie",
+   "who": "John's sister, who keeps house"
+  },
+  {
+   "name": "the woman behind the paper",
+   "who": "a creeping figure the narrator sees in the pattern"
+  }
+ ],
+ "checks": "Found the first sentence; read the opening and the last 25 lines. Jennie is named 11 times as John's sister; the ending line says 'you and Jane', which I left out. Middle of the story from memory."
+}

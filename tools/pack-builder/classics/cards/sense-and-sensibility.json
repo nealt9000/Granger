@@ -1,0 +1,41 @@
+{
+ "slug": "sense-and-sensibility",
+ "title": "Sense and Sensibility",
+ "author": "Jane Austen",
+ "published": 1811,
+ "kind": "novel",
+ "firstLine": "The family of Dashwood had long been settled in Sussex.",
+ "begins": "Chapter I tells how old Mr. Dashwood leaves Norland to his nephew Henry Dashwood, but tied up for Henry's son John and John's small boy. Henry dies within a year, leaving his widow and three daughters only ten thousand pounds.",
+ "happens": "After Mr. Henry Dashwood dies, his estate goes to his son John, whose wife Fanny takes over Norland and makes his stepmother and half-sisters unwelcome. Mrs. Dashwood, sensible Elinor, romantic Marianne and young Margaret move to Barton Cottage in Devonshire. Elinor loves Edward Ferrars, but he is long engaged to Lucy Steele. Marianne is swept away by the charming Willoughby, who abandons her to marry a rich heiress, Miss Grey. Marianne falls gravely ill at Cleveland, is nursed by Elinor, and learns restraint. Lucy marries Edward's brother Robert, freeing Edward to marry Elinor; Marianne marries Colonel Brandon.",
+ "characters": [
+  {
+   "name": "Elinor Dashwood",
+   "who": "the eldest sister, sensible and reserved"
+  },
+  {
+   "name": "Marianne Dashwood",
+   "who": "the second sister, passionate and romantic"
+  },
+  {
+   "name": "Edward Ferrars",
+   "who": "Elinor's gentle suitor"
+  },
+  {
+   "name": "Willoughby",
+   "who": "dashing young man who charms and jilts Marianne"
+  },
+  {
+   "name": "Colonel Brandon",
+   "who": "the older, steady friend who loves Marianne"
+  },
+  {
+   "name": "Lucy Steele",
+   "who": "Edward's secret fiancée"
+  },
+  {
+   "name": "Mrs. Jennings",
+   "who": "warm, gossiping friend of the family"
+  }
+ ],
+ "checks": "First line copied from Chapter I; read chapter I and the closing pages. Names searched (Barton, Delaford, Devonshire, Miss Grey, Robert Ferrars). Cleveland illness and Robert/Lucy marriage from memory plus name search."
+}

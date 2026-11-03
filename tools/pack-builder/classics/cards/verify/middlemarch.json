@@ -1,0 +1,93 @@
+{
+ "slug": "middlemarch",
+ "claims": [
+  {
+   "claim": "The Prelude compares modern women to Saint Theresa, whose ideals found no outlet",
+   "status": "verified",
+   "evidence": "'there is born a Saint Theresa, foundress of nothing'"
+  },
+  {
+   "claim": "Dorothea Brooke: beautiful, earnest, lives with sister Celia and uncle Mr. Brooke, longs to do good",
+   "status": "verified",
+   "evidence": "Celia 'her sister'; 'their bachelor uncle and guardian'"
+  },
+  {
+   "claim": "Dorothea marries Casaubon hoping to aid his great work",
+   "status": "verified",
+   "evidence": "'progress of his great work—the Key to all Mythologies'"
+  },
+  {
+   "claim": "She finds him cold",
+   "status": "verified",
+   "evidence": "Book II-IV passages of her disappointment; Casaubon 'a dried bookworm towards fifty'"
+  },
+  {
+   "claim": "Lydgate, ambitious young doctor, marries Rosamond Vincy",
+   "status": "verified",
+   "evidence": "Finale: 'charming a wife'; Rosamond in his household"
+  },
+  {
+   "claim": "Their debts ruin his hopes",
+   "status": "verified",
+   "evidence": "'Lydgate was in debt'; Finale: 'he always regarded himself as a failure'"
+  },
+  {
+   "claim": "Casaubon, jealous of his cousin Will Ladislaw, dies",
+   "status": "verified",
+   "evidence": "'Mr. Casaubon jealous'; 'my cousin, Mr. Ladislaw'; 'since Mr. Casaubon's death'"
+  },
+  {
+   "claim": "His will cuts Dorothea off if she marries Will",
+   "status": "verified",
+   "evidence": "'if Mrs. Casaubon marries you she is to forfeit all her property'"
+  },
+  {
+   "claim": "Lydgate is tainted by banker Bulstrode's exposed past",
+   "status": "verified",
+   "evidence": "Raffles; Bulstrode's thousand-pound advance; Bulstrode believed 'Lydgate suspected his orders'"
+  },
+  {
+   "claim": "Fred Vincy lost Featherstone's inheritance, reforms, marries Mary Garth",
+   "status": "verified",
+   "evidence": "Finale: 'Fred Vincy and Mary Garth... achieved a solid mutual happiness'; Featherstone's will"
+  },
+  {
+   "claim": "Dorothea gives up her fortune, marries Will, lives a useful private life",
+   "status": "verified",
+   "evidence": "'she had given up position and fortune to marry Will Ladislaw'; 'beneficent activity'"
+  },
+  {
+   "claim": "Lydgate dies at fifty",
+   "status": "verified",
+   "evidence": "'He died when he was only fifty'"
+  },
+  {
+   "claim": "Casaubon: elderly clergyman and scholar",
+   "status": "wrong",
+   "evidence": "'the Reverend Edward Casaubon'; 'a dried bookworm towards fifty'; 'must be fifty'",
+   "fix": "middle-aged clergyman and scholar, her first husband"
+  },
+  {
+   "claim": "Will Ladislaw: Casaubon's young cousin, an artist and drifter",
+   "status": "unfound",
+   "evidence": "cousin, sketch-book ('You are an artist, I see') found; 'drifter' not as such",
+   "fix": "Casaubon's young cousin, who sketches and wanders"
+  },
+  {
+   "claim": "Rosamond: beautiful, spoiled, Lydgate's wife",
+   "status": "unfound",
+   "evidence": "'pretty face', 'musical execution quite exceptional' found; 'spoiled' not established of her",
+   "fix": "pretty, accomplished Vincy daughter, Lydgate's wife"
+  },
+  {
+   "claim": "Fred Vincy: Rosamond's brother, loves Mary Garth",
+   "status": "verified",
+   "evidence": "'My brother Fred' (Rosamond); Finale"
+  },
+  {
+   "claim": "Lydgate: ambitious doctor newly arrived in Middlemarch",
+   "status": "verified",
+   "evidence": "newcomer, 'Lydgate' profession doctor"
+  }
+ ]
+}

@@ -1,0 +1,41 @@
+{
+ "slug": "great-gatsby",
+ "title": "The Great Gatsby",
+ "author": "F. Scott Fitzgerald",
+ "published": 1925,
+ "kind": "novel",
+ "firstLine": "In my younger and more vulnerable years my father gave me some advice that I’ve been turning over in my mind ever since.",
+ "begins": "The narrator, Nick Carraway, recalls his father’s advice to reserve judgement. He came East from the Middle West to work in the bond business and rents a small house on Long Island next to a huge mansion.",
+ "happens": "Nick lives next door to the mysterious millionaire Jay Gatsby, who throws lavish parties. Nick’s cousin Daisy lives across the bay with her wealthy husband Tom Buchanan, who has a mistress, Myrtle Wilson. Gatsby loves Daisy and has Nick arrange a meeting; they begin an affair. After a tense scene in a New York hotel, Daisy, driving Gatsby’s car, kills Myrtle. Tom tells Myrtle’s husband George that Gatsby was the driver; Wilson shoots Gatsby in his pool and then himself. Almost no one comes to the funeral, and Nick returns West.",
+ "characters": [
+  {
+   "name": "Nick Carraway",
+   "who": "the narrator, a bond salesman"
+  },
+  {
+   "name": "Jay Gatsby",
+   "who": "mysterious rich host, in love with Daisy"
+  },
+  {
+   "name": "Daisy Buchanan",
+   "who": "Nick’s cousin"
+  },
+  {
+   "name": "Tom Buchanan",
+   "who": "Daisy’s husband"
+  },
+  {
+   "name": "Jordan Baker",
+   "who": "golfer; Daisy’s friend"
+  },
+  {
+   "name": "Myrtle Wilson",
+   "who": "Tom’s mistress"
+  },
+  {
+   "name": "George Wilson",
+   "who": "Myrtle’s husband, a garage owner"
+  }
+ ],
+ "checks": "First line copied from file (after dedication and epigraph). Names grepped (Wolfshiem is spelled so in this edition; left out). Gatsby shot at the pool and the funeral confirmed by grep; the hit-and-run and Wilson’s suicide from memory, not re-read."
+}

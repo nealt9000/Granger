@@ -1,0 +1,45 @@
+{
+ "slug": "adventures-of-tom-sawyer",
+ "title": "The Adventures of Tom Sawyer",
+ "author": "Mark Twain",
+ "published": 1876,
+ "kind": "novel",
+ "firstLine": "“TOM!”",
+ "begins": "Aunt Polly calls for Tom and gets no answer. She catches him coming out of the closet with jam on his hands and mouth, and he escapes over the fence. In the village of St. Petersburg his half-brother Sid gives him away over the black thread on his collar.",
+ "happens": "Tom Sawyer, a mischievous boy raised by Aunt Polly, tricks friends into whitewashing his fence and falls for Becky Thatcher. In a graveyard at night he and Huckleberry Finn see Injun Joe murder Doctor Robinson and blame Muff Potter. Tom, Huck and Joe Harper play pirates on an island and show up at their own funeral. Tom testifies and saves Potter; Injun Joe flees. Tom and Becky get lost in a cave, where Joe later dies. Tom and Huck find a robbers’ treasure, and the Widow Douglas takes Huck in.",
+ "characters": [
+  {
+   "name": "Tom Sawyer",
+   "who": "a mischievous, imaginative boy"
+  },
+  {
+   "name": "Aunt Polly",
+   "who": "his aunt and guardian"
+  },
+  {
+   "name": "Huckleberry Finn",
+   "who": "a homeless boy, his friend"
+  },
+  {
+   "name": "Becky Thatcher",
+   "who": "Judge Thatcher’s daughter; Tom’s sweetheart"
+  },
+  {
+   "name": "Injun Joe",
+   "who": "the murderer and villain"
+  },
+  {
+   "name": "Muff Potter",
+   "who": "the drunk Joe frames"
+  },
+  {
+   "name": "Sid",
+   "who": "Tom’s half-brother"
+  },
+  {
+   "name": "Joe Harper",
+   "who": "Tom’s friend, a pirate"
+  }
+ ],
+ "checks": "First line is the book’s opening ‘TOM!’ (short, then ‘No answer.’). Read chapter I opening; names grepped (Doctor Robinson, Sid ‘half-brother’, cousin Mary, Widow Douglas). Joe’s death in the cave and the ending (Widow Douglas, Huck’s money) checked by grep; the rest from memory."
+}

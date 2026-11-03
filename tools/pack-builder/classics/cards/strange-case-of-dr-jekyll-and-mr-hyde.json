@@ -1,0 +1,41 @@
+{
+ "slug": "strange-case-of-dr-jekyll-and-mr-hyde",
+ "title": "Strange Case of Dr. Jekyll and Mr. Hyde",
+ "author": "Robert Louis Stevenson",
+ "published": 1886,
+ "kind": "novella",
+ "firstLine": "Mr. Utterson the lawyer was a man of a rugged countenance, that was never lighted by a smile; cold, scanty and embarrassed in discourse; backward in sentiment; lean, long, dusty, dreary, and yet somehow lovable.",
+ "begins": "‘Story of the Door’ introduces the austere London lawyer Mr. Utterson. On a Sunday walk his kinsman Mr. Enfield points out a sinister door and tells how a brutal man trampled a child, then paid her family from a respected man’s cheque.",
+ "happens": "Utterson learns that his friend Dr. Jekyll’s will leaves everything to Mr. Hyde, a small, loathsome man. Hyde murders Sir Danvers Carew. Dr. Lanyon dies after a shock. Jekyll shuts himself in his laboratory; his butler Poole fears foul play, and he and Utterson break in and find Hyde dead in Jekyll’s clothes. Lanyon’s narrative and Jekyll’s statement reveal that Jekyll drank a drug that turned him into Hyde, lost control of the change, and ran out of the salt he needed to be himself again. Hyde’s handwriting matches Jekyll’s, which first makes Utterson suspect forgery.",
+ "characters": [
+  {
+   "name": "Mr. Utterson",
+   "who": "the lawyer who investigates"
+  },
+  {
+   "name": "Dr. Jekyll",
+   "who": "respected London doctor"
+  },
+  {
+   "name": "Mr. Hyde",
+   "who": "small, brutal man; Jekyll’s other self"
+  },
+  {
+   "name": "Mr. Enfield",
+   "who": "Utterson’s kinsman"
+  },
+  {
+   "name": "Dr. Lanyon",
+   "who": "Jekyll’s old friend, a physician"
+  },
+  {
+   "name": "Poole",
+   "who": "Jekyll’s butler"
+  },
+  {
+   "name": "Sir Danvers Carew",
+   "who": "old gentleman Hyde kills"
+  }
+ ],
+ "checks": "First sentence copied from file. Names grepped (Carew only 5 mentions). Salt and suicide references found by grep in Jekyll’s statement; Lanyon’s shock and the door-breaking from memory, not re-read."
+}

@@ -1,0 +1,37 @@
+{
+ "slug": "alice-s-adventures-in-wonderland",
+ "title": "Alice's Adventures in Wonderland",
+ "author": "Lewis Carroll",
+ "published": 1865,
+ "kind": "novel",
+ "firstLine": "Alice was beginning to get very tired of sitting by her sister on the bank, and of having nothing to do: once or twice she had peeped into the book her sister was reading, but it had no pictures or conversations in it, “and what is the use of a book,” thought Alice “without pictures or conversations?”",
+ "begins": "Alice sits bored on a riverbank beside her sister, who is reading a book without pictures. A White Rabbit with pink eyes runs by, talking to himself about being late; Alice follows him down a rabbit-hole.",
+ "happens": "Alice falls down a rabbit-hole into Wonderland, where she shrinks and grows by eating and drinking strange things. She meets the Caterpillar, the Duchess and the grinning Cheshire Cat, and takes tea with the March Hare, the Hatter and the sleepy Dormouse. She enters the Queen of Hearts' garden and plays croquet with flamingos and hedgehogs. The Knave of Hearts is tried for stealing tarts; the King and Queen lead a nonsensical trial. When the Queen cries 'Off with her head!', Alice, grown large, calls them only a pack of cards, which fly at her. She wakes on the bank, her sister brushing leaves from her face, and tells her dream.",
+ "characters": [
+  {
+   "name": "Alice",
+   "who": "a curious girl, the heroine"
+  },
+  {
+   "name": "White Rabbit",
+   "who": "the hurrying rabbit Alice follows"
+  },
+  {
+   "name": "Cheshire Cat",
+   "who": "a grinning cat who appears and vanishes"
+  },
+  {
+   "name": "Hatter",
+   "who": "hosts the endless tea-party with the March Hare and Dormouse"
+  },
+  {
+   "name": "Queen of Hearts",
+   "who": "the tyrant who orders beheadings"
+  },
+  {
+   "name": "King of Hearts",
+   "who": "her husband, who sits as judge at the trial"
+  }
+ ],
+ "checks": "First line, 'March Hare', 'Dormouse', 'Cheshire', 'Knave of Hearts', 'Dinah' found by search; read chapter I and the closing page. The Hatter appears in the text as 'Hatter' (the text says 'Hatter', not 'Mad Hatter'). Chapter XII verified as the last chapter."
+}

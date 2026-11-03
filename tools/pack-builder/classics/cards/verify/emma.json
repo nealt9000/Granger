@@ -1,0 +1,91 @@
+{
+ "slug": "emma",
+ "claims": [
+  {
+   "claim": "Emma Woodhouse is handsome, clever and rich; Chapter I",
+   "status": "verified",
+   "evidence": "'Emma Woodhouse, handsome, clever, and rich'"
+  },
+  {
+   "claim": "Her governess Miss Taylor marries Mr. Weston",
+   "status": "verified",
+   "evidence": "'Miss Taylor married... Mr. Weston was a man of unexceptionable character'"
+  },
+  {
+   "claim": "Mr. Knightley, family friend, discusses the match with her in Chapter I",
+   "status": "verified",
+   "evidence": "Chapter I continues; 'Mr. Knightley' conversation about match (read chapter opening; Knightley a general friend)"
+  },
+  {
+   "claim": "Father is anxious and devoted",
+   "status": "verified",
+   "evidence": "'a most affectionate, indulgent father'; his constitution and habits"
+  },
+  {
+   "claim": "Emma persuades Harriet to refuse Robert Martin",
+   "status": "verified",
+   "evidence": "Harriet: 'to refuse Mr. Martin. Do you think I am right?' Emma: 'Perfectly, perfectly right'"
+  },
+  {
+   "claim": "Mr. Elton proposes to Emma in the carriage",
+   "status": "verified",
+   "evidence": "'Mr. Elton actually making violent love to her'"
+  },
+  {
+   "claim": "Elton then marries someone else",
+   "status": "verified",
+   "evidence": "'The charming Augusta Hawkins'; Mrs. Elton"
+  },
+  {
+   "claim": "Frank Churchill secretly engaged to Jane Fairfax",
+   "status": "verified",
+   "evidence": "'Engaged since October,—secretly engaged.'"
+  },
+  {
+   "claim": "Emma misreads Frank's attentions",
+   "status": "unfound",
+   "evidence": "text: 'Mr. Frank Churchill and Miss Woodhouse flirted together excessively'; 'Fancying you to have fathomed his secret'; not shown Emma misread in the way stated",
+   "fix": "Frank Churchill arrives and flirts with Emma, while secretly engaged to Jane Fairfax"
+  },
+  {
+   "claim": "At Box Hill Emma insults Miss Bates; Knightley rebukes her",
+   "status": "verified",
+   "evidence": "'How could you be so insolent in your wit to a woman of her character, age, and situation?'"
+  },
+  {
+   "claim": "Harriet loves Mr. Knightley and this makes Emma realise she loves him",
+   "status": "verified",
+   "evidence": "'Mr. Knightley and Harriet Smith!—It was a union to distance every wonder'; 'Mr. Knightley is the last man...'"
+  },
+  {
+   "claim": "Knightley proposes, Emma accepts",
+   "status": "verified",
+   "evidence": "'have been in love with you ever since you were thirteen'; he is 'in love' and wanted 'to ask her to marry him'"
+  },
+  {
+   "claim": "Harriet marries Robert Martin",
+   "status": "verified",
+   "evidence": "'Robert Martin and Harriet Smith, the latest couple engaged'; 'marriage of Mr. and Mrs. Robert Martin'"
+  },
+  {
+   "claim": "Mr. Elton is Highbury's vicar",
+   "status": "verified",
+   "evidence": "'the vicarage of Highbury was not large'"
+  },
+  {
+   "claim": "Frank is Mr. Weston's son",
+   "status": "verified",
+   "evidence": "'Mr. Weston and his son'"
+  },
+  {
+   "claim": "Jane Fairfax is Miss Bates's niece",
+   "status": "verified",
+   "evidence": "'Miss Bates and her niece'"
+  },
+  {
+   "claim": "Emma is the heroine, handsome clever and rich",
+   "status": "verified",
+   "evidence": "Chapter I first sentence"
+  }
+ ]
+}

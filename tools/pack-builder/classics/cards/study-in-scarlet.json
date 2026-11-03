@@ -1,0 +1,45 @@
+{
+ "slug": "study-in-scarlet",
+ "title": "A Study in Scarlet",
+ "author": "Arthur Conan Doyle",
+ "published": 1887,
+ "kind": "novel",
+ "firstLine": "In the year 1878 I took my degree of Doctor of Medicine of the University of London, and proceeded to Netley to go through the course prescribed for surgeons in the army.",
+ "begins": "Chapter I, narrated by Dr. John Watson, tells how he is wounded in the Afghan war and returns to London. His friend Stamford introduces him to Sherlock Holmes in a hospital laboratory, and they agree to share rooms at Baker Street.",
+ "happens": "Watson and Holmes share rooms, and Holmes is called to an empty house in Lauriston Gardens, off the Brixton Road, where the American Enoch Drebber lies dead, with the word RACHE on the wall. Joseph Stangerson is then found stabbed. Holmes's rivals Gregson and Lestrade chase the wrong men. Part II goes back to Utah, where Jefferson Hope loves Lucy Ferrier, forced into marriage with young Drebber and dying within a month. Hope hunts both men for revenge. Holmes has the cabman called up to help with his luggage and handcuffs him. Hope tells his story, and the night after his capture his aneurism bursts.",
+ "characters": [
+  {
+   "name": "Sherlock Holmes",
+   "who": "consulting detective"
+  },
+  {
+   "name": "Dr. John H. Watson",
+   "who": "army surgeon, narrator"
+  },
+  {
+   "name": "Jefferson Hope",
+   "who": "the murderer, a cab-driver and former hunter"
+  },
+  {
+   "name": "Enoch J. Drebber",
+   "who": "American found dead in Lauriston Gardens, off the Brixton Road"
+  },
+  {
+   "name": "Joseph Stangerson",
+   "who": "Drebber's secretary"
+  },
+  {
+   "name": "Lucy Ferrier",
+   "who": "Hope's lost love"
+  },
+  {
+   "name": "Tobias Gregson",
+   "who": "Scotland Yard detective"
+  },
+  {
+   "name": "Lestrade",
+   "who": "Scotland Yard detective"
+  }
+ ],
+ "checks": "Checked first line, Chapter I, names (Drebber, Stangerson, Hope, Ferrier, Gregson, Lestrade, Stamford), RACHE, the cabman, the wedding ring and the aneurism death by search. Rest of the plot from memory. Place of the first murder (Brixton) not re-checked in text."
+}

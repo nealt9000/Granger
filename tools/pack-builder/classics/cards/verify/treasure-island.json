@@ -1,0 +1,101 @@
+{
+ "slug": "treasure-island",
+ "claims": [
+  {
+   "claim": "Jim writes at the request of Squire Trelawney and Dr. Livesey",
+   "status": "verified",
+   "evidence": "first sentence"
+  },
+  {
+   "claim": "Jim's father kept the Admiral Benbow inn; brown old seaman with sabre cut lodged",
+   "status": "verified",
+   "evidence": "first sentence"
+  },
+  {
+   "claim": "Billy Bones dies at the Admiral Benbow",
+   "status": "verified",
+   "evidence": "'struck dead by thundering apoplexy'; doctor: 'you have had a stroke'"
+  },
+  {
+   "claim": "Jim takes Bones's map of Captain Flint's treasure from his chest",
+   "status": "verified",
+   "evidence": "'picking up the oilskin packet'; 'the map of an island'; Flint's treasure per Livesey"
+  },
+  {
+   "claim": "Trelawney and Livesey fit out the Hispaniola",
+   "status": "verified",
+   "evidence": "Trelawney: 'The ship is bought and fitted ... name, Hispaniola.'"
+  },
+  {
+   "claim": "Captain Smollett captains the Hispaniola",
+   "status": "verified",
+   "evidence": "'Captain Smollett, sir, axing to speak with you'"
+  },
+  {
+   "claim": "Silver is a one-legged cook who leads the mutiny",
+   "status": "verified",
+   "evidence": "'sea-cook'; 'that man with the one leg'"
+  },
+  {
+   "claim": "Jim overhears the mutiny plan from an apple barrel",
+   "status": "verified",
+   "evidence": "'What I Heard in the Apple-Barrel'"
+  },
+  {
+   "claim": "Loyalists fight from a stockade",
+   "status": "verified",
+   "evidence": "'Narrative Resumed by Jim Hawkins: The Garrison in the Stockade'"
+  },
+  {
+   "claim": "Jim kills Israel Hands",
+   "status": "verified",
+   "evidence": "'both my pistols went off ... Hands ... was dead enough, being both shot and drowned'"
+  },
+  {
+   "claim": "Ben Gunn, a marooned man, had already moved the treasure",
+   "status": "verified",
+   "evidence": "'he had dug it up ... carried it ... to a cave he had on the two-pointed hill'"
+  },
+  {
+   "claim": "They sail home with the treasure",
+   "status": "verified",
+   "evidence": "'we made a good cruise home, and the Hispaniola reached Bristol'"
+  },
+  {
+   "claim": "Silver slips away",
+   "status": "verified",
+   "evidence": "'Silver was gone ... escape in a shore boat'"
+  },
+  {
+   "claim": "Silver takes a bag of coins",
+   "status": "wrong",
+   "evidence": "'removed one of the sacks of coin, worth perhaps three or four hundred guineas' (a sack, not a bag; sentence also duplicated)",
+   "fix": "Silver slips away with a sack of coin"
+  },
+  {
+   "claim": "The rest is shared among the survivors",
+   "status": "verified",
+   "evidence": "'Five men only ... returned'; 'All of us had an ample share of the treasure'"
+  },
+  {
+   "claim": "Jim never wants to return",
+   "status": "verified",
+   "evidence": "'Oxen and wain-ropes would not bring me back again to that accursed island'"
+  },
+  {
+   "claim": "Billy Bones is an old buccaneer at the inn; Gunn marooned former pirate",
+   "status": "verified",
+   "evidence": "'rifled it' Gunn passages; 'half-idiot maroon'"
+  },
+  {
+   "claim": "Livesey is a doctor and magistrate",
+   "status": "verified",
+   "evidence": "'I'm a magistrate'"
+  },
+  {
+   "claim": "Squire Trelawney backs the voyage",
+   "status": "verified",
+   "evidence": "'The ship is bought and fitted'"
+  }
+ ]
+}

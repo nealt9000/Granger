@@ -1,0 +1,65 @@
+{
+ "slug": "tale-of-two-cities",
+ "claims": [
+  {
+   "claim": "Book the First opens in 1775",
+   "status": "verified",
+   "evidence": "'It was the year of Our Lord one thousand seven hundred and seventy-five.'"
+  },
+  {
+   "claim": "Lorry of Tellson's rides the Dover mail",
+   "status": "verified",
+   "evidence": "'I belong to Tellson's Bank'; 'the Dover mail'"
+  },
+  {
+   "claim": "tells Lucie her father is found",
+   "status": "verified",
+   "evidence": "'But he has been—been found. He is alive.'"
+  },
+  {
+   "claim": "Manette freed after eighteen years",
+   "status": "verified",
+   "evidence": "'Almost eighteen years.' (Recalled to Life)"
+  },
+  {
+   "claim": "Darnay tried for treason, freed because Carton looks like him",
+   "status": "verified",
+   "evidence": "'The Treason case'; 'the strong resemblance he undoubtedly bore to the prisoner'"
+  },
+  {
+   "claim": "both men love Lucie; Darnay marries her; child",
+   "status": "verified",
+   "evidence": "Carton: 'I love your daughter fondly'; 'her little Lucie lay on her bosom'"
+  },
+  {
+   "claim": "Defarges lead revolution in Paris",
+   "status": "verified",
+   "evidence": "Ch. V The Wine-shop; 'The Bastille!'; Madame Defarge's knitted registers"
+  },
+  {
+   "claim": "Darnay returns for old servant Gabelle, arrested",
+   "status": "verified",
+   "evidence": "'Gabelle's letter'; 'the unfortunate Gabelle in prison'"
+  },
+  {
+   "claim": "condemned by Manette's old letter",
+   "status": "verified",
+   "evidence": "'he is denounced—and gravely—by the Citizen and Citizeness Defarge. And by one other.' then the Bastille writing"
+  },
+  {
+   "claim": "Carton takes Darnay's place, guillotined",
+   "status": "verified",
+   "evidence": "'It is a far, far better thing that I do'"
+  },
+  {
+   "claim": "Miss Pross kills Madame Defarge in struggle",
+   "status": "verified",
+   "evidence": "'struck out a flash and a crash... body lay lifeless on the ground'"
+  },
+  {
+   "claim": "Darnay born Evrémonde; Carton lawyer; Lucie's nurse",
+   "status": "verified",
+   "evidence": "'the emigrant Evrémonde'; Carton and Stryver at the bar; Miss Pross with Lucie"
+  }
+ ]
+}

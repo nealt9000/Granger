@@ -1,0 +1,95 @@
+{
+ "slug": "frankenstein",
+ "claims": [
+  {
+   "claim": "Opens with letters from Robert Walton writing from St. Petersburgh to his sister Mrs. Saville",
+   "status": "verified",
+   "evidence": "'To Mrs. Saville, England. St. Petersburgh, Dec. 11th'; 'my dear sister'"
+  },
+  {
+   "claim": "Walton is an English explorer setting out toward the North Pole",
+   "status": "verified",
+   "evidence": "'a voyage of discovery towards the northern pole'"
+  },
+  {
+   "claim": "His ship meets Victor Frankenstein on the ice",
+   "status": "verified",
+   "evidence": "sledge drifted on a fragment of ice; a European addresses him in English"
+  },
+  {
+   "claim": "Chapter 1 begins Victor's own story",
+   "status": "verified",
+   "evidence": "Chapter 1: 'I am by birth a Genevese'"
+  },
+  {
+   "claim": "Victor is a Genevese student at Ingolstadt",
+   "status": "verified",
+   "evidence": "'I am by birth a Genevese'; 'student at the university of Ingolstadt'"
+  },
+  {
+   "claim": "Victor makes a living creature, is horrified and flees",
+   "status": "verified",
+   "evidence": "'I rushed out of the room'; 'hideous'"
+  },
+  {
+   "claim": "The creature learns language watching the De Lacey family, is driven away",
+   "status": "verified",
+   "evidence": "'I learned and applied the words, fire, milk, bread'; 'enraged Felix tearing me from his father's feet'"
+  },
+  {
+   "claim": "The creature kills William; Justine is condemned",
+   "status": "verified",
+   "evidence": "'William is dead!'; 'Justine was condemned'"
+  },
+  {
+   "claim": "He demands a female companion; Victor begins, then destroys her",
+   "status": "verified",
+   "evidence": "'You must create a female for me'; 'remains of the half-finished creature, whom I had destroyed'"
+  },
+  {
+   "claim": "Creature kills Clerval",
+   "status": "verified",
+   "evidence": "'lifeless form of Henry Clerval'; 'strangled'"
+  },
+  {
+   "claim": "Creature kills Elizabeth on the wedding night",
+   "status": "verified",
+   "evidence": "'I shall be with you on your wedding-night'; Elizabeth's murder"
+  },
+  {
+   "claim": "Victor's father dies of grief",
+   "status": "verified",
+   "evidence": "'he died in my arms' after tidings"
+  },
+  {
+   "claim": "Victor pursues the creature north, dies aboard Walton's ship",
+   "status": "verified",
+   "evidence": "'the cabin where lay the remains of my ill-fated friend'"
+  },
+  {
+   "claim": "Creature mourns, vows to burn himself on a funeral pile, lost on the ice",
+   "status": "verified",
+   "evidence": "'I shall collect my funeral pile'; 'borne away by the waves and lost in darkness'"
+  },
+  {
+   "claim": "Walton is an English sea captain who records Victor's tale",
+   "status": "verified",
+   "evidence": "'Here is our captain'; letters to sister"
+  },
+  {
+   "claim": "Elizabeth Lavenza: Victor's adopted cousin, raised in his family, his bride",
+   "status": "verified",
+   "evidence": "'Elizabeth Lavenza became the inmate of my parents' house'; 'familiarly by the name of cousin'"
+  },
+  {
+   "claim": "Henry Clerval: Victor's loyal childhood friend",
+   "status": "verified",
+   "evidence": "'Henry Clerval was the son of a merchant of Geneva' (boyhood companion)"
+  },
+  {
+   "claim": "Justine Moritz: servant in the Frankenstein household",
+   "status": "verified",
+   "evidence": "'Justine, thus received in our family'; servant"
+  }
+ ]
+}

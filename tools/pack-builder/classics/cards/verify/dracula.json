@@ -1,0 +1,115 @@
+{
+ "slug": "dracula",
+ "claims": [
+  {
+   "claim": "Opens with Jonathan Harker's journal, kept in shorthand",
+   "status": "verified",
+   "evidence": "'(Kept in shorthand.)'"
+  },
+  {
+   "claim": "Harker is an English solicitor travelling east across Europe to Transylvania",
+   "status": "verified",
+   "evidence": "Munich, Vienna, Buda-Pesth, Bistritz; 'Solicitor—for just before leaving'"
+  },
+  {
+   "claim": "Going to the Carpathians to see Count Dracula about a property purchase",
+   "status": "verified",
+   "evidence": "'explain the purchase of a London estate to a foreigner'; 'Carpathians'"
+  },
+  {
+   "claim": "He notes food and trains, reads up on the country",
+   "status": "verified",
+   "evidence": "'paprika hendl'; 'hour late'; 'He clearly had studied beforehand' / reading in the library"
+  },
+  {
+   "claim": "Harker finds himself a prisoner in the castle",
+   "status": "verified",
+   "evidence": "'The castle is a veritable prison, and I am a prisoner!'"
+  },
+  {
+   "claim": "He escapes",
+   "status": "verified",
+   "evidence": "later letter from Hospital of St. Joseph and Ste. Mary, Buda-Pesth: 'brain fever'"
+  },
+  {
+   "claim": "Dracula sails to Whitby (Demeter, from Varna)",
+   "status": "verified",
+   "evidence": "'Whitby from Varna in the Demeter'"
+  },
+  {
+   "claim": "Preys on Lucy Westenra, who dies and becomes a vampire",
+   "status": "verified",
+   "evidence": "'Lucy was bitten by such a bat'; 'she is Un-Dead'"
+  },
+  {
+   "claim": "Seward, Van Helsing, Holmwood, Morris and Jonathan with Mina destroy Lucy and hunt the Count",
+   "status": "verified",
+   "evidence": "'Count me in'; Kukri/bowie; band of men"
+  },
+  {
+   "claim": "The Count has bitten Mina",
+   "status": "verified",
+   "evidence": "'Unclean, unclean!'; bedroom scene"
+  },
+  {
+   "claim": "He flees by ship to Varna; they follow to Transylvania",
+   "status": "verified",
+   "evidence": "'for Varna, and thence on to other parts and up the...'; 'we can travel overland'"
+  },
+  {
+   "claim": "Just before sunset they catch his cart",
+   "status": "verified",
+   "evidence": "'finishing their task before the sun should set'; 'The sun was almost down'"
+  },
+  {
+   "claim": "Jonathan cuts his throat, Quincey stabs his heart, he crumbles to dust",
+   "status": "verified",
+   "evidence": "'Jonathan's great knife... shear through the throat; Mr. Morris's bowie knife plunged into the heart'; 'crumbled into dust'"
+  },
+  {
+   "claim": "Quincey dies of his wounds",
+   "status": "verified",
+   "evidence": "'the day on which Quincey Morris died'; 'blood was spurting through his fingers'"
+  },
+  {
+   "claim": "Jonathan Harker: English solicitor, Mina's husband",
+   "status": "verified",
+   "evidence": "text"
+  },
+  {
+   "claim": "Mina Harker: born Mina Murray, schoolmistress, Lucy's friend",
+   "status": "verified",
+   "evidence": "'Mina Murray's Journal'; 'The life of an assistant schoolmistress'"
+  },
+  {
+   "claim": "Dracula: Transylvanian nobleman who is a vampire",
+   "status": "verified",
+   "evidence": "text"
+  },
+  {
+   "claim": "Lucy: courted by three men, Dracula's first English victim",
+   "status": "verified",
+   "evidence": "'THREE proposals in one day!'"
+  },
+  {
+   "claim": "Seward: asylum doctor, Lucy's suitor, phonograph diary",
+   "status": "verified",
+   "evidence": "'immense lunatic asylum'; 'Dr. Seward's Phonograph Diary'"
+  },
+  {
+   "claim": "Van Helsing: Dutch professor, Seward's old teacher",
+   "status": "verified",
+   "evidence": "'my old friend and master, Professor Van Helsing, of Amsterdam'; 'the Dutchman'"
+  },
+  {
+   "claim": "Arthur Holmwood: Lord Godalming, Lucy's fiance",
+   "status": "verified",
+   "evidence": "'Lord Godalming'; Lucy's engagement"
+  },
+  {
+   "claim": "Quincey Morris: Texan, Lucy's other suitor",
+   "status": "verified",
+   "evidence": "'an American from Texas'; 'Mr. Quincey Morris, of Texas'"
+  }
+ ]
+}

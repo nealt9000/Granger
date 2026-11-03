@@ -1,0 +1,97 @@
+{
+ "slug": "crime-and-punishment",
+ "claims": [
+  {
+   "claim": "A hot July evening; a young man leaves his garret in S. Place and walks toward K. bridge",
+   "status": "verified",
+   "evidence": "first sentence; 'exceptionally hot evening early in July'"
+  },
+  {
+   "claim": "In St. Petersburg",
+   "status": "verified",
+   "evidence": "'examination of the Petersburg school of Engineering'; 'Petersburg stench'"
+  },
+  {
+   "claim": "He slips out past his landlady, hopelessly in debt to her",
+   "status": "verified",
+   "evidence": "'He had successfully avoided meeting his landlady'; 'hopelessly in debt to his landlady'"
+  },
+  {
+   "claim": "Overstrained and cut off from other people",
+   "status": "verified",
+   "evidence": "'overstrained irritable condition... isolated from his fellows'"
+  },
+  {
+   "claim": "Raskolnikov is a destitute student",
+   "status": "verified",
+   "evidence": "'A student then, or formerly a student'; 'crushed by poverty'"
+  },
+  {
+   "claim": "He murders an old pawnbroker and her sister",
+   "status": "verified",
+   "evidence": "'the old pawnbroker, Alyona Ivanovna'; Lizaveta 'the old woman's sister'"
+  },
+  {
+   "claim": "The murder is with an axe",
+   "status": "verified",
+   "evidence": "'examining the axe'; 'I shall strike her on the head'"
+  },
+  {
+   "claim": "Fevered and guilt-ridden, he is drawn to the Marmeladov family, especially his daughter Sonia",
+   "status": "verified",
+   "evidence": "Marmeladov in the tavern; Sonia 'Marmeladov's daughter'"
+  },
+  {
+   "claim": "His friend Razumihin and sister Dounia care for him",
+   "status": "verified",
+   "evidence": "'Razumihin'; 'Love Dounia your sister, Rodya'"
+  },
+  {
+   "claim": "The magistrate Porfiry Petrovitch suspects him",
+   "status": "wrong",
+   "evidence": "text: 'Porfiry Petrovitch, the head of the Investigation Department'; 'magistrate' not used",
+   "fix": "The head of the Investigation Department, Porfiry Petrovitch, suspects him"
+  },
+  {
+   "claim": "Svidrigaïlov pursues Dounia, learns the secret",
+   "status": "verified",
+   "evidence": "'proposals of Mr. Svidrigaïlov'; 'Svidrigaïlov... listening'; l.17462"
+  },
+  {
+   "claim": "Svidrigaïlov later shoots himself",
+   "status": "verified",
+   "evidence": "'Svidrigaïlov has shot himself!'"
+  },
+  {
+   "claim": "Urged by Sonia, Raskolnikov confesses",
+   "status": "verified",
+   "evidence": "'You want me to go to Siberia'"
+  },
+  {
+   "claim": "Gets eight years' penal servitude in Siberia",
+   "status": "verified",
+   "evidence": "'penal servitude in the second class for a term of eight years only'"
+  },
+  {
+   "claim": "Sonia follows him and he begins to be renewed",
+   "status": "verified",
+   "evidence": "'Sonia and he at last set off'; 'full resurrection into a new life. They were renewed'"
+  },
+  {
+   "claim": "Pulcheria and Dounia come to St. Petersburg",
+   "status": "verified",
+   "evidence": "mother's letter; 'Pulcheria Alexandrovna'"
+  },
+  {
+   "claim": "Dounia's fiance Luzhin is exposed as a schemer",
+   "status": "verified",
+   "evidence": "Luzhin accuses Sonia of stealing; Lebeziatnikov: 'What vileness!'"
+  },
+  {
+   "claim": "Characters: Sonia devout; Porfiry examining magistrate; Pulcheria mother; Dounia sister; Svidrigaïlov dissolute landowner",
+   "status": "wrong",
+   "evidence": "Porfiry is 'head of the Investigation Department'; Svidrigaïlov described as the landowner in whose house Dounia was insulted; 'devout' not established",
+   "fix": "Porfiry: head of the Investigation Department; Sonia: Marmeladov's daughter, who goes with him to Siberia"
+  }
+ ]
+}

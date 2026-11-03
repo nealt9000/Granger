@@ -1,0 +1,41 @@
+{
+ "slug": "cranford",
+ "title": "Cranford",
+ "author": "Elizabeth Cleghorn Gaskell",
+ "published": 1853,
+ "kind": "novel",
+ "firstLine": "In the first place, Cranford is in possession of the Amazons; all the holders of houses above a certain rent are women.",
+ "begins": "Chapter I, 'Our Society', describes the country town of Cranford, ruled by genteel, economical ladies, and its rules of etiquette. It introduces the Misses Jenkyns and the narrator Mary Smith, who visits.",
+ "happens": "Mary Smith, a young visitor, narrates episodes in Cranford, a town of genteel spinsters and widows. Captain Brown, a poor half-pay officer, is killed by a train, and his daughters are befriended. Miss Matty Jenkyns recalls her suitor Mr. Holbrook, who dies; after the conjuror Signor Brunoni's visit a panic about robbers grips the town. Lady Glenmire marries the surgeon Mr. Hoggins. Miss Matty loses her money when the Town and County Bank fails and sells tea to live. Mary arranges the return of Matty's long-lost brother Peter from India, and Cranford's quarrels are healed.",
+ "characters": [
+  {
+   "name": "Miss Matty (Matilda Jenkyns)",
+   "who": "gentle, timid spinster; the heart of the book"
+  },
+  {
+   "name": "Mary Smith",
+   "who": "the narrator, a young friend"
+  },
+  {
+   "name": "Miss Jenkyns",
+   "who": "Matty's dictatorial sister Deborah"
+  },
+  {
+   "name": "Miss Pole",
+   "who": "neighbour who affects great bravery"
+  },
+  {
+   "name": "Mrs Jamieson",
+   "who": "the proud Honourable widow"
+  },
+  {
+   "name": "Peter Jenkyns",
+   "who": "Matty's brother, who ran away to sea"
+  },
+  {
+   "name": "Captain Brown",
+   "who": "the poor officer killed by a train"
+  }
+ ],
+ "checks": "First line copied from Chapter I; read chapter I and the last page; searched names. Episodes checked by search (railway death, Brunoni, bank, tea licence, Peter). Mary Smith named once in text; Miss Jenkyns's death and the daughters' befriending from memory."
+}

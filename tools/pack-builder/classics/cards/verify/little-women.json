@@ -1,0 +1,107 @@
+{
+ "slug": "little-women",
+ "claims": [
+  {
+   "claim": "Chapter One: sisters by the fire grumbling about no presents",
+   "status": "verified",
+   "evidence": "'Christmas won't be Christmas without any presents,' grumbled Jo"
+  },
+  {
+   "claim": "on a snowy Christmas Eve",
+   "status": "unfound",
+   "evidence": "text says 'December snow fell quietly'; 'Christmas Eve' not found (Christmas morning is next scene)",
+   "fix": "a snowy December evening"
+  },
+  {
+   "claim": "Father is away at the war",
+   "status": "verified",
+   "evidence": "'thinking of Father far away, where the fighting was'"
+  },
+  {
+   "claim": "Each decides to spend their dollar on gifts for mother",
+   "status": "verified",
+   "evidence": "'I thought I'd get her some with my dollar'; 'let's each get her something for Christmas'"
+  },
+  {
+   "claim": "in New England during the Civil War",
+   "status": "unfound",
+   "evidence": "searched 'Civil War', 'New England', 'Massachusetts': no hits",
+   "fix": "drop the place and war name: 'away at the war'"
+  },
+  {
+   "claim": "grow up poor",
+   "status": "verified",
+   "evidence": "'It's so dreadful to be poor!'"
+  },
+  {
+   "claim": "Mother is Marmee",
+   "status": "verified",
+   "evidence": "'Marmee must have a new pair'"
+  },
+  {
+   "claim": "Meg courted by John Brooke, Laurie's tutor; marries him",
+   "status": "verified",
+   "evidence": "'Mr. Brooke, my tutor'; 'For Mrs. John Brooke'; Meg's wedding"
+  },
+  {
+   "claim": "Jo refuses Laurie's proposal",
+   "status": "verified",
+   "evidence": "'can't love you as you want me to. I've tried, but I can't'"
+  },
+  {
+   "claim": "Jo goes to New York and meets Professor Bhaer",
+   "status": "verified",
+   "evidence": "'To New York...Mrs. Kirke'; 'Professor Bhaer was there'"
+  },
+  {
+   "claim": "Beth is gentle and musical",
+   "status": "verified",
+   "evidence": "'Elizabeth, or Beth...shy manner, a timid voice'; plays piano (musical, in chapter)"
+  },
+  {
+   "claim": "Beth dies",
+   "status": "verified",
+   "evidence": "Ch. 40 'The Valley of the Shadow': 'thanked God that Beth was well at last'"
+  },
+  {
+   "claim": "Laurie marries Amy",
+   "status": "verified",
+   "evidence": "'Please, Madam Mother, could you lend me my wife...Amy's Paris finery'"
+  },
+  {
+   "claim": "Amy traveled in Europe",
+   "status": "verified",
+   "evidence": "Nice chapters: 'Laurie went to Nice...Amy's familiar presence'"
+  },
+  {
+   "claim": "Jo marries Professor Bhaer",
+   "status": "verified",
+   "evidence": "'Oh, yes!' said Jo...'proposing under difficulties' (Under the Umbrella)"
+  },
+  {
+   "claim": "They open a school at Plumfield, left by Aunt March",
+   "status": "verified",
+   "evidence": "'Aunt March died...she had left Plumfield to Jo'; 'a flourishing school...for boys'"
+  },
+  {
+   "claim": "Bhaer is a German",
+   "status": "verified",
+   "evidence": "'he was from Berlin'; 'A regular German'"
+  },
+  {
+   "claim": "Laurie is the Laurence boy next door",
+   "status": "verified",
+   "evidence": "'old Mr. Laurence'; neighbour Laurie"
+  },
+  {
+   "claim": "Jo is a tomboy and writer",
+   "status": "verified",
+   "evidence": "'If Jo is a tomboy and Amy a goose'; she plans stories"
+  },
+  {
+   "claim": "Amy youngest, artistic",
+   "status": "verified",
+   "evidence": "'Amy, though the youngest'; drawing pencils"
+  }
+ ]
+}

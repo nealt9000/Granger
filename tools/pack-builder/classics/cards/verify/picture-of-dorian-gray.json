@@ -1,0 +1,50 @@
+{
+ "slug": "picture-of-dorian-gray",
+ "claims": [
+  {
+   "claim": "Lord Henry watches Basil in studio; portrait of Dorian Gray",
+   "status": "verified",
+   "evidence": "Chapter I; 'It is your best work, Basil, the best thing you have ever done'"
+  },
+  {
+   "claim": "Basil reluctant to exhibit",
+   "status": "verified",
+   "evidence": "'I can't exhibit it. I have put too much of myself into it.'"
+  },
+  {
+   "claim": "Dorian wishes portrait would age instead of him",
+   "status": "verified",
+   "evidence": "'I who was to be always young, and the picture that was to grow old! ... I would give my soul for that!'"
+  },
+  {
+   "claim": "falls for Sibyl, rejects her, she kills herself",
+   "status": "verified",
+   "evidence": "'Sibyl Vane was my sister. She killed herself.'; 'Sibyl Vane is dead.'"
+  },
+  {
+   "claim": "portrait shows cruelty; he hides it",
+   "status": "verified",
+   "evidence": "'The portrait had altered.'; 'The portrait must be hidden away at all costs.'"
+  },
+  {
+   "claim": "murders Basil, who has seen the portrait",
+   "status": "verified",
+   "evidence": "'the knife that had stabbed Basil Hallward'; Hallward: 'Let me see it.'"
+  },
+  {
+   "claim": "blackmails scientist Alan Campbell",
+   "status": "verified",
+   "evidence": "Campbell studied chemistry in a laboratory; Dorian: 'I have a letter written already... I must send it.'"
+  },
+  {
+   "claim": "James Vane hunting him accidentally shot dead",
+   "status": "verified",
+   "evidence": "Sir Geoffrey fires: 'I have hit a beater!'; 'The man who had been shot in the thicket was James Vane.'"
+  },
+  {
+   "claim": "Dorian stabs portrait; servants find it restored and a withered old man with knife in his heart",
+   "status": "verified",
+   "evidence": "'a dead man ... with a knife in his heart. He was withered, wrinkled, and loathsome'"
+  }
+ ]
+}

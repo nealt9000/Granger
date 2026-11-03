@@ -1,0 +1,101 @@
+{
+ "slug": "pride-and-prejudice",
+ "claims": [
+  {
+   "claim": "Chapter I: Mrs. Bennet tells her husband Netherfield Park has been let to a rich young man",
+   "status": "verified",
+   "evidence": "Netherfield Park is let at last? ... a young man of large fortune"
+  },
+  {
+   "claim": "She hopes he will marry one of their daughters",
+   "status": "verified",
+   "evidence": "I am thinking of his marrying one of them"
+  },
+  {
+   "claim": "Mr. Bennet teases her but agrees (to visit)",
+   "status": "wrong",
+   "evidence": "Ch.1: 'I see no occasion for that'; 'It is more than I engage for'. Ch.2: he reveals 'I have actually paid the visit'",
+   "fix": "Mr. Bennet teases her and will not promise to call; in Chapter II he reveals he has already visited Mr. Bingley."
+  },
+  {
+   "claim": "Mrs. Bennet has five daughters, wants them married",
+   "status": "verified",
+   "evidence": "a woman has five grown-up daughters; business of her life was to get her daughters married"
+  },
+  {
+   "claim": "Bingley takes Netherfield and falls for eldest, Jane",
+   "status": "verified",
+   "evidence": "Netherfield is taken by ... Bingley; 'preferred your elder sister to any other'"
+  },
+  {
+   "claim": "Darcy slights Elizabeth",
+   "status": "verified",
+   "evidence": "She is tolerable: but not handsome enough to tempt me"
+  },
+  {
+   "claim": "Elizabeth believes Wickham's lies about Darcy",
+   "status": "verified",
+   "evidence": "Wickham's account of the living and Darcy's treatment of his father's favourite"
+  },
+  {
+   "claim": "Elizabeth refuses Darcy's proposal; his letter shows her she was wrong",
+   "status": "verified",
+   "evidence": "scene 'I am not to be intimidated'/ letter chapters; later 'When I wrote that letter'"
+  },
+  {
+   "claim": "Visiting Pemberley she sees Darcy's better nature",
+   "status": "verified",
+   "evidence": "housekeeper scene at Pemberley"
+  },
+  {
+   "claim": "Lydia elopes with Wickham",
+   "status": "verified",
+   "evidence": "Lydia 'deliberately engaging in an elopement'"
+  },
+  {
+   "claim": "Darcy secretly pays to force the marriage",
+   "status": "verified",
+   "evidence": "Mrs. Gardiner's letter: Darcy found them, 'His debts are to be paid... commission purchased'; 'must go no further'"
+  },
+  {
+   "claim": "Bingley returns and proposes to Jane",
+   "status": "verified",
+   "evidence": "Bingley, who wanted to be alone with Jane, proposed a walk; engagement follows"
+  },
+  {
+   "claim": "Lady Catherine tries to stop Elizabeth marrying Darcy, fails",
+   "status": "verified",
+   "evidence": "'I am not to be intimidated into...' (Ch. LVI)"
+  },
+  {
+   "claim": "Elizabeth accepts Darcy; both couples marry",
+   "status": "verified",
+   "evidence": "'Engaged to Mr. Darcy!'; 'rid of her two most deserving daughters'"
+  },
+  {
+   "claim": "Elizabeth: second of five daughters, quick-witted",
+   "status": "verified",
+   "evidence": "'his second daughter'; 'Lizzy has something more of quickness'"
+  },
+  {
+   "claim": "Darcy: Bingley's friend, owner of Pemberley, Elizabeth's husband",
+   "status": "verified",
+   "evidence": "text"
+  },
+  {
+   "claim": "Jane eldest, loved by Bingley; Lydia youngest",
+   "status": "verified",
+   "evidence": "'the eldest Miss Bennet'; Lydia: 'youngest, I'm the tallest'"
+  },
+  {
+   "claim": "Wickham: officer who charms Elizabeth then runs off with Lydia",
+   "status": "verified",
+   "evidence": "militia regiment; 'very pleasing address'"
+  },
+  {
+   "claim": "Mr. Bennet her husband, Elizabeth's father, ironic",
+   "status": "verified",
+   "evidence": "sarcastic humour"
+  }
+ ]
+}

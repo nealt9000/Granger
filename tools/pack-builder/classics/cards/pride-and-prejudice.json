@@ -1,0 +1,45 @@
+{
+ "slug": "pride-and-prejudice",
+ "title": "Pride and Prejudice",
+ "author": "Jane Austen",
+ "published": 1813,
+ "kind": "novel",
+ "firstLine": "IT is a truth universally acknowledged, that a single man in possession of a good fortune must be in want of a wife.",
+ "begins": "In the first chapter Mrs. Bennet tells her husband that Netherfield Park has been let to a rich young man. She wants him to visit the newcomer, because she hopes he will marry one of their daughters. Mr. Bennet teases her and will not promise; in Chapter II he reveals he has already called on Mr. Bingley.",
+ "happens": "Mrs. Bennet is determined to marry off her five daughters. Rich Mr. Bingley takes Netherfield and falls for the eldest, Jane, while his proud friend Mr. Darcy slights Elizabeth. Elizabeth believes the charming Wickham's lies about Darcy and refuses Darcy's proposal, but his letter shows her she was wrong. Visiting Pemberley, she sees Darcy's better nature. Then her sister Lydia elopes with Wickham, and Darcy secretly pays to force the marriage and save the family. Bingley returns and proposes to Jane. Lady Catherine de Bourgh, Darcy's aunt, tries to stop Elizabeth marrying him, but fails. Elizabeth accepts Darcy, and both couples marry.",
+ "characters": [
+  {
+   "name": "Elizabeth Bennet",
+   "who": "second of the five Bennet daughters, quick-witted; the heroine"
+  },
+  {
+   "name": "Mr. Darcy",
+   "who": "wealthy, proud owner of Pemberley, Bingley's friend; Elizabeth's husband in the end"
+  },
+  {
+   "name": "Jane Bennet",
+   "who": "the eldest, gentle sister; loved by Bingley"
+  },
+  {
+   "name": "Mr. Bingley",
+   "who": "amiable rich bachelor who rents Netherfield"
+  },
+  {
+   "name": "Mrs. Bennet",
+   "who": "silly mother set on marrying her daughters"
+  },
+  {
+   "name": "Mr. Bennet",
+   "who": "her dry, ironic husband, Elizabeth's father"
+  },
+  {
+   "name": "Wickham",
+   "who": "officer who charms Elizabeth, then runs off with Lydia"
+  },
+  {
+   "name": "Lydia Bennet",
+   "who": "youngest, reckless Bennet sister"
+  }
+ ],
+ "checks": "Searched the text for the first line (it is in Chapter I, set as 'IT is a truth'); read Chapter I; counted every name in the text; read the end of the last chapter. Plot from memory, consistent with names and places found by search."
+}

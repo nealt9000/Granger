@@ -1,0 +1,41 @@
+{
+ "slug": "importance-of-being-earnest",
+ "title": "The Importance of Being Earnest",
+ "author": "Oscar Wilde",
+ "published": 1895,
+ "kind": "play",
+ "firstLine": "ALGERNON. Did you hear what I was playing, Lane?",
+ "begins": "In the morning-room of Algernon Moncrieff's flat in Half-Moon Street, Algernon plays the piano while his manservant Lane arranges tea. Algernon's friend Jack Worthing arrives, calling himself Ernest, to propose to Gwendolen.",
+ "happens": "In town, Jack Worthing calls himself Ernest, and Algernon uses an invalid friend, Bunbury, as an excuse to leave town. Jack proposes to Gwendolen Fairfax, but her mother Lady Bracknell forbids it after learning that Jack was found as a baby in a hand-bag. Algernon poses as Jack's brother Ernest at Jack's country house and loves his ward Cecily Cardew. Both girls want only a man named Ernest. Miss Prism reveals she left a baby in a hand-bag, so Jack is Algernon's elder brother, and his name is Ernest after all.",
+ "characters": [
+  {
+   "name": "Jack Worthing",
+   "who": "guardian of Cecily; calls himself Ernest in town"
+  },
+  {
+   "name": "Algernon Moncrieff",
+   "who": "Jack's friend, a fashionable bachelor"
+  },
+  {
+   "name": "Gwendolen Fairfax",
+   "who": "Lady Bracknell's daughter, loved by Jack"
+  },
+  {
+   "name": "Cecily Cardew",
+   "who": "Jack's young ward"
+  },
+  {
+   "name": "Lady Bracknell",
+   "who": "Algernon's aunt and Gwendolen's mother"
+  },
+  {
+   "name": "Miss Prism",
+   "who": "Cecily's governess"
+  },
+  {
+   "name": "Rev. Canon Chasuble",
+   "who": "local rector"
+  }
+ ],
+ "checks": "Checked first line, opening scene, names and the hand-bag, Army Lists and Ernest John ending by search. Third-act details not read in full. This edition has the three-act version."
+}

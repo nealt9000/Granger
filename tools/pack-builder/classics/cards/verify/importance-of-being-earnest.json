@@ -1,0 +1,95 @@
+{
+ "slug": "importance-of-being-earnest",
+ "claims": [
+  {
+   "claim": "Opens in Algernon Moncrieff's morning-room flat in Half-Moon Street",
+   "status": "verified",
+   "evidence": "'Morning-room in Algernon's flat in Half-Moon Street.'"
+  },
+  {
+   "claim": "Algernon plays piano while manservant Lane arranges tea",
+   "status": "verified",
+   "evidence": "'The sound of a piano ... Lane is arranging afternoon tea'"
+  },
+  {
+   "claim": "Jack Worthing arrives, calling himself Ernest, to propose to Gwendolen",
+   "status": "verified",
+   "evidence": "'Mr. Ernest Worthing.'; 'come up to town expressly to propose to'"
+  },
+  {
+   "claim": "In town Jack calls himself Ernest",
+   "status": "verified",
+   "evidence": "'my name is Ernest in town and Jack in the country'"
+  },
+  {
+   "claim": "Algernon uses invalid friend Bunbury as excuse to leave town",
+   "status": "verified",
+   "evidence": "'invaluable permanent invalid called Bunbury, in order that I may be able to go down into the country'"
+  },
+  {
+   "claim": "Jack proposes to Gwendolen Fairfax",
+   "status": "verified",
+   "evidence": "'Gwendolen ... My own Ernest!'"
+  },
+  {
+   "claim": "Lady Bracknell forbids it after learning Jack was found as a baby in a hand-bag",
+   "status": "verified",
+   "evidence": "'I was in a hand-bag'; 'To be born, or at any rate bred, in a hand-bag'"
+  },
+  {
+   "claim": "Algernon poses as Jack's brother Ernest at Jack's country house",
+   "status": "verified",
+   "evidence": "'Ask Mr. Ernest Worthing to come here'; 'my wicked cousin Ernest'"
+  },
+  {
+   "claim": "Algernon loves Jack's ward Cecily Cardew",
+   "status": "verified",
+   "evidence": "Act II Algernon and Cecily scene; 'an excessively pretty ward'"
+  },
+  {
+   "claim": "Both girls want only a man named Ernest",
+   "status": "verified",
+   "evidence": "'my ideal has always been to love some one of the name of Ernest'"
+  },
+  {
+   "claim": "Miss Prism reveals she left a baby in a hand-bag",
+   "status": "verified",
+   "evidence": "'placed the baby in the hand-bag'"
+  },
+  {
+   "claim": "Jack is Algernon's elder brother",
+   "status": "verified",
+   "evidence": "'Algernon's elder brother.'; 'Algy's elder brother! Then I have a brother after all'"
+  },
+  {
+   "claim": "His name is Ernest after all",
+   "status": "verified",
+   "evidence": "'Christian names, Ernest John.'"
+  },
+  {
+   "claim": "Lady Bracknell is Algernon's aunt and Gwendolen's mother",
+   "status": "verified",
+   "evidence": "'Aunt Augusta'; Gwendolen's mother in Act I"
+  },
+  {
+   "claim": "Miss Prism is Cecily's governess",
+   "status": "verified",
+   "evidence": "'Miss Prism, Governess'"
+  },
+  {
+   "claim": "Chasuble is local rector",
+   "status": "verified",
+   "evidence": "'when the Rector came in'; 'Rev. Canon Chasuble, D.D.'"
+  },
+  {
+   "claim": "Cecily is Jack's young ward; Jack is her guardian",
+   "status": "verified",
+   "evidence": "'excessively pretty ward'; 'addresses me as her uncle'"
+  },
+  {
+   "claim": "Gwendolen Fairfax is Lady Bracknell's daughter, loved by Jack",
+   "status": "verified",
+   "evidence": "Act I"
+  }
+ ]
+}

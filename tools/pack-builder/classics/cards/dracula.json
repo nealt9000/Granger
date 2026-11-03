@@ -1,0 +1,45 @@
+{
+ "slug": "dracula",
+ "title": "Dracula",
+ "author": "Bram Stoker",
+ "published": 1897,
+ "kind": "novel",
+ "firstLine": "3 May. Bistritz.—Left Munich at 8:35 P. M., on 1st May, arriving at Vienna early next morning; should have arrived at 6:46, but train was an hour late.",
+ "begins": "The novel opens with the shorthand journal of Jonathan Harker, a young English solicitor travelling east across Europe toward Transylvania. He is going to the Carpathians to see a nobleman, Count Dracula, about a property purchase. He notes the food and trains and reads up on the country.",
+ "happens": "Jonathan Harker visits Count Dracula's castle in Transylvania to arrange the Count's purchase of a house in England, and finds himself a prisoner. He escapes. Dracula sails to Whitby and begins to prey on Lucy Westenra, who dies and becomes a vampire. Dr. Seward, Van Helsing, Arthur Holmwood (Lord Godalming), Quincey Morris and Jonathan, with Jonathan's wife Mina, destroy Lucy and hunt the Count, who has bitten Mina. He flees by ship to Varna, and they follow him to Transylvania. Just before sunset they catch his cart; Jonathan cuts his throat and Quincey stabs his heart, and he crumbles to dust. Quincey dies of his wounds.",
+ "characters": [
+  {
+   "name": "Jonathan Harker",
+   "who": "English solicitor who visits Dracula's castle; Mina's husband"
+  },
+  {
+   "name": "Mina Harker",
+   "who": "born Mina Murray, his wife, a schoolmistress; friend of Lucy"
+  },
+  {
+   "name": "Count Dracula",
+   "who": "Transylvanian nobleman who is a vampire"
+  },
+  {
+   "name": "Lucy Westenra",
+   "who": "Mina's friend, courted by three men; Dracula's first English victim"
+  },
+  {
+   "name": "Dr. Seward",
+   "who": "asylum doctor and Lucy's suitor; keeps a phonograph diary"
+  },
+  {
+   "name": "Van Helsing",
+   "who": "Dutch professor, Seward's old teacher and the vampire hunter"
+  },
+  {
+   "name": "Arthur Holmwood",
+   "who": "Lord Godalming, Lucy's fiance"
+  },
+  {
+   "name": "Quincey Morris",
+   "who": "Texan, Lucy's other suitor"
+  }
+ ],
+ "checks": "Grepped the first line (Chapter I, Jonathan Harker's Journal); read the opening pages; counted all names and place names (Whitby, Varna, Purfleet); read the last pages (Van Helsing's closing words, child). The exact killing of Dracula and Quincey's death are from memory; not re-read."
+}

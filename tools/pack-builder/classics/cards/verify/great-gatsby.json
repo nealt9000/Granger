@@ -1,0 +1,70 @@
+{
+ "slug": "great-gatsby",
+ "claims": [
+  {
+   "claim": "Nick recalls father's advice to reserve judgement",
+   "status": "verified",
+   "evidence": "line 50: 'reserving all judgments' (father's advice)"
+  },
+  {
+   "claim": "came East from the Middle West for the bond business",
+   "status": "verified",
+   "evidence": "'this Middle Western city'; 'I'm a bond man'"
+  },
+  {
+   "claim": "rents a small house next to a huge mansion",
+   "status": "verified",
+   "evidence": "'a weather-beaten cardboard bungalow at eighty a month'; neighbour's 'colossal affair' like a Hôtel de Ville"
+  },
+  {
+   "claim": "Gatsby mysterious millionaire with lavish parties",
+   "status": "verified",
+   "evidence": "party chapters; stories of 'James Gatz of North Dakota'"
+  },
+  {
+   "claim": "Daisy is Nick's cousin, across the bay, husband Tom Buchanan",
+   "status": "verified",
+   "evidence": "'I looked back at my cousin'; 'Across the courtesy bay'"
+  },
+  {
+   "claim": "Tom has mistress Myrtle Wilson",
+   "status": "verified",
+   "evidence": "'Tom and Myrtle (after the first drink Mrs. Wilson and I called each other...'"
+  },
+  {
+   "claim": "Gatsby loves Daisy; Nick arranges meeting; they begin an affair",
+   "status": "verified",
+   "evidence": "Jordan Baker's tea-garden account; 'She had told him that she loved him, and Tom Buchanan saw'"
+  },
+  {
+   "claim": "tense scene in New York hotel",
+   "status": "verified",
+   "evidence": "'we had left the Plaza'; confrontation in the hotel suite"
+  },
+  {
+   "claim": "Daisy driving Gatsby's car kills Myrtle",
+   "status": "verified",
+   "evidence": "'Was Daisy driving?' ... 'Daisy stepped on it.'; 'yellow car'"
+  },
+  {
+   "claim": "Tom tells George Wilson whose car it was",
+   "status": "verified",
+   "evidence": "'He was crazy enough to kill me if I hadn't told him who owned the car.'"
+  },
+  {
+   "claim": "Wilson shoots Gatsby in pool, then himself",
+   "status": "verified",
+   "evidence": "'heard the shots'; mattress in the pool; 'Wilson's body a little way off in the grass'"
+  },
+  {
+   "claim": "Almost no one at funeral; Nick returns West",
+   "status": "verified",
+   "evidence": "'I began to look involuntarily out the windows for other cars'; 'coming back West'"
+  },
+  {
+   "claim": "Jordan golfer, George garage owner",
+   "status": "verified",
+   "evidence": "'she was a golf champion'; Wilson's garage"
+  }
+ ]
+}

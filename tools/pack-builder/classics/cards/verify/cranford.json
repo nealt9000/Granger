@@ -1,0 +1,77 @@
+{
+ "slug": "cranford",
+ "claims": [
+  {
+   "claim": "Chapter I Our Society; town ruled by ladies",
+   "status": "verified",
+   "evidence": "'Cranford is in possession of the Amazons'; CHAPTER I. OUR SOCIETY"
+  },
+  {
+   "claim": "Mary Smith narrates, a visitor",
+   "status": "verified",
+   "evidence": "'Is your name Mary Smith?'; Miss Smith 'familiarly known as Mary'"
+  },
+  {
+   "claim": "Captain Brown poor half-pay officer killed by train",
+   "status": "verified",
+   "evidence": "'He was a half-pay captain'; 'Captain Brown is killed by them nasty cruel railroads!'"
+  },
+  {
+   "claim": "daughters befriended",
+   "status": "verified",
+   "evidence": "Miss Jessie and sister befriended by Miss Matty, Mary and others"
+  },
+  {
+   "claim": "Miss Matty recalls suitor Mr. Holbrook, who dies",
+   "status": "verified",
+   "evidence": "'Miss Pole brought us word that Mr Holbrook was dead'"
+  },
+  {
+   "claim": "the conjuror Brunoni causes a panic about robbers",
+   "status": "wrong",
+   "evidence": "'a series of circumstances dated from Signor Brunoni's visit... I don't know that he had anything really to do with them'",
+   "fix": "after the conjuror Signor Brunoni's visit a panic about robbers grips the town"
+  },
+  {
+   "claim": "Lady Glenmire marries Mr. Hoggins (surgeon)",
+   "status": "verified",
+   "evidence": "'announce a married couple as Lady Glenmire and Mr Hoggins'; 'the Cranford surgeon' chapter XII"
+  },
+  {
+   "claim": "Matty loses money when Town and County Bank fails",
+   "status": "verified",
+   "evidence": "Town and County Bank notes refused; Chapter XIII Stopped Payment"
+  },
+  {
+   "claim": "Matty sells tea",
+   "status": "verified",
+   "evidence": "'Miss Matty sell tea... licensed to sell tea'"
+  },
+  {
+   "claim": "Mary arranges Peter's return from India",
+   "status": "verified",
+   "evidence": "Mary writes a letter 'to the Aga Jenkyns... if he were Peter'; Chapter XV A Happy Return"
+  },
+  {
+   "claim": "Peter ran away to sea",
+   "status": "verified",
+   "evidence": "'you would never have gone away'; ship at the Mersey; 'Then Peter went to sea again'"
+  },
+  {
+   "claim": "Miss Pole brave",
+   "status": "wrong",
+   "evidence": "'Miss Pole, who affected great bravery herself'",
+   "fix": "neighbour who affects great bravery"
+  },
+  {
+   "claim": "Miss Jenkyns Matty's sister Deborah",
+   "status": "verified",
+   "evidence": "'Deborah thought differently'; Miss Jenkyns and Miss Matty"
+  },
+  {
+   "claim": "Mrs Jamieson the proud Honourable widow",
+   "status": "verified",
+   "evidence": "'Honourable Mrs Jamieson... sister-in-law to the late Earl'"
+  }
+ ]
+}

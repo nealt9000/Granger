@@ -1,0 +1,37 @@
+{
+ "slug": "war-and-peace",
+ "title": "War and Peace",
+ "author": "Leo Tolstoy",
+ "published": 1923,
+ "kind": "novel",
+ "firstLine": "“Well, Prince, so Genoa and Lucca are now just family estates of the Buonapartes.",
+ "begins": "Book One, Chapter I: in July 1805 Anna Pávlovna Schérer, maid of honor to the Empress, holds an evening reception in St. Petersburg. Prince Vasíli Kurágin arrives first and they talk of Napoleon, war, and a match for his son Anatole.",
+ "happens": "Russian families, the Rostóvs, Bolkónskis and Bezúkhovs, live through the Napoleonic wars. Pierre Bezúkhov inherits a fortune, marries the faithless Hélène and fights a duel with Dólokhov. Prince Andrew is wounded at Austerlitz; after his wife dies he is engaged to Natásha Rostóva, but she is drawn to Anatole Kurágin and her note to Princess Mary breaks off the engagement. When Napoleon invades in 1812, Pierre is at Borodinó, then captured by the French. Andrew is mortally wounded at Borodinó and dies with Natásha and Princess Mary beside him. Moscow burns, the French retreat, and Pétya Rostóv is killed. In the epilogue Pierre marries Natásha and Nicholas Rostóv marries Princess Mary.",
+ "characters": [
+  {
+   "name": "Pierre Bezúkhov",
+   "who": "clumsy, kind illegitimate son of a count who inherits his fortune"
+  },
+  {
+   "name": "Prince Andrew Bolkónski",
+   "who": "proud, intelligent officer; Mary's brother"
+  },
+  {
+   "name": "Natásha Rostóva",
+   "who": "lively young Rostóv daughter"
+  },
+  {
+   "name": "Nicholas Rostóv",
+   "who": "her brother, a hussar officer"
+  },
+  {
+   "name": "Princess Mary",
+   "who": "Andrew's devout sister"
+  },
+  {
+   "name": "Hélène",
+   "who": "Prince Vasíli's daughter, Pierre's first wife"
+  }
+ ],
+ "checks": "Verified first line, Book One Ch. I, name spellings (Maude-style translation, accented), Hélène's death, Nicholas marrying Princess Mary by search. The text ends with an essay on history after the epilogue. Plot beyond that from memory; Andrew's death and Pierre's capture not re-read."
+}

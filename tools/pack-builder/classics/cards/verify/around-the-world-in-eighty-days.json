@@ -1,0 +1,91 @@
+{
+ "slug": "around-the-world-in-eighty-days",
+ "claims": [
+  {
+   "claim": "1872, Fogg lives at Saville Row, member of the Reform Club",
+   "status": "verified",
+   "evidence": "'Mr. Phileas Fogg lived, in 1872, at No. 7, Saville Row'; 'Reform Club, an imposing edifice in Pall Mall'"
+  },
+  {
+   "claim": "Precise",
+   "status": "verified",
+   "evidence": "'whatever he did was so exactly the same thing'; 'exactly at midnight'"
+  },
+  {
+   "claim": "Hires French servant Passepartout the same day",
+   "status": "verified",
+   "evidence": "'On this very 2nd of October he had dismissed James Forster'; 'a Frenchman, named Passepartout'"
+  },
+  {
+   "claim": "That evening bets club friends he can go around the world in 80 days",
+   "status": "verified",
+   "evidence": "'This very evening?' 'This very evening,' returned Phileas Fogg; 'twenty thousand pounds'"
+  },
+  {
+   "claim": "Wager of £20,000",
+   "status": "verified",
+   "evidence": "'twenty thousand pounds against anyone who wishes'"
+  },
+  {
+   "claim": "Leaves with Passepartout",
+   "status": "verified",
+   "evidence": "'Bring down my mackintosh and traveling-cloak'; train leaves (twenty minutes before nine)"
+  },
+  {
+   "claim": "Fix thinks Fogg a bank robber",
+   "status": "verified",
+   "evidence": "'I've found the bank robber, Phileas Fogg. Send without delay warrant'"
+  },
+  {
+   "claim": "In India they rescue Aouda from a funeral pyre",
+   "status": "verified",
+   "evidence": "'A suttee'; Passepartout takes the place of the dead rajah; Aouda carried off"
+  },
+  {
+   "claim": "Aouda is an Indian widow",
+   "status": "verified",
+   "evidence": "'a young widow asked permission' (suttee)"
+  },
+  {
+   "claim": "Fogg arrested in England by Fix",
+   "status": "verified",
+   "evidence": "'I arrest you in the Queen's name!' at the Liverpool quay"
+  },
+  {
+   "claim": "Reaches London five minutes late and thinks he is ruined",
+   "status": "verified",
+   "evidence": "'all the clocks in London were striking ten minutes before nine...behind-hand five minutes. He had lost the wager!'"
+  },
+  {
+   "claim": "He marries Aouda; then Passepartout finds it is still Saturday",
+   "status": "wrong",
+   "evidence": "wedding set for next day; Passepartout: 'Because to-morrow—is Sunday!' 'to-day is Saturday'; 'the marriage took place forty-eight hours after'",
+   "fix": "He proposes to Aouda; then Passepartout, sent to arrange the wedding, finds it is still Saturday; marries two days later"
+  },
+  {
+   "claim": "They gained a day travelling east",
+   "status": "verified",
+   "evidence": "'In journeying eastward he had gone towards the sun, and the days therefore...'"
+  },
+  {
+   "claim": "Fogg dashes to the club and wins",
+   "status": "verified",
+   "evidence": "'Here I am, gentlemen!'; 'Phileas Fogg had won his wager of twenty thousand pounds!'"
+  },
+  {
+   "claim": "Bombay: Passepartout enters temple in his shoes",
+   "status": "verified",
+   "evidence": "pagoda on Malabar Hill; 'went in without first leaving their shoes'; beaten, 'shoeless'"
+  },
+  {
+   "claim": "Sir Francis Cromarty British officer in India",
+   "status": "verified",
+   "evidence": "'Sir Francis Cromarty, one of Mr. Fogg's whist partners'; the general / brigadier"
+  },
+  {
+   "claim": "Andrew Stuart club member who bets with Fogg",
+   "status": "verified",
+   "evidence": "'Andrew Stuart, an engineer' whist; 'This very evening?' asked Stuart"
+  }
+ ]
+}

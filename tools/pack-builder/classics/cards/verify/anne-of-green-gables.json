@@ -1,0 +1,72 @@
+{
+ "slug": "anne-of-green-gables",
+ "claims": [
+  {
+   "claim": "Opens in Avonlea with Mrs. Rachel Lynde watching from her window",
+   "status": "verified",
+   "evidence": "Mrs. Rachel was sitting at her window, keeping a sharp eye on everything that passed"
+  },
+  {
+   "claim": "She sees Matthew driving in a buggy, dressed up, and goes to find out why",
+   "status": "verified",
+   "evidence": "white collar and his best suit... the buggy; 'I'll just step over to Green Gables after tea and find out from Marilla where he's gone and why'"
+  },
+  {
+   "claim": "Matthew and Marilla are elderly siblings at Green Gables who asked for an orphan boy to help",
+   "status": "verified",
+   "evidence": "'bring us a smart, likely boy of about ten or eleven'; 'old enough to be of some use in doing chores'"
+  },
+  {
+   "claim": "Anne is a talkative red-haired eleven-year-old girl",
+   "status": "verified",
+   "evidence": "'I was eleven last March'; 'two braids of very thick, decidedly red hair'"
+  },
+  {
+   "claim": "Marilla tries to send her back, then keeps her",
+   "status": "verified",
+   "evidence": "'Mrs. Spencer will probably make arrangements to send her back to Nova Scotia'; later she keeps Anne"
+  },
+  {
+   "claim": "Anne befriends Diana Barry",
+   "status": "verified",
+   "evidence": "'Diana is to be my bosom friend'; 'you are my bosom friend'"
+  },
+  {
+   "claim": "Anne breaks a slate over Gilbert's head after he called her carrots",
+   "status": "verified",
+   "evidence": "Anne had brought her slate down on Gilbert's head and cracked it; 'she had been called \"carrots.\"'"
+  },
+  {
+   "claim": "Anne wins a scholarship at Queen's",
+   "status": "wrong",
+   "evidence": "She wins the Avery scholarship (Arts course at Redmond College) after Queen's: 'Three cheers for Miss Shirley, winner of the Avery!'",
+   "fix": "wins the Avery scholarship"
+  },
+  {
+   "claim": "Matthew dies of a heart attack after hearing of a bank failure",
+   "status": "wrong",
+   "evidence": "'death had been instantaneous... caused in all likelihood by some sudden shock... an account of the failure of the Abbey Bank'; heart is only mentioned as troubling him earlier",
+   "fix": "Matthew dies of a sudden shock on reading that the Abbey Bank has failed"
+  },
+  {
+   "claim": "Marilla's eyesight is failing",
+   "status": "verified",
+   "evidence": "'I may lose my sight altogether'"
+  },
+  {
+   "claim": "Anne gives up the scholarship to stay and teach at Avonlea",
+   "status": "verified",
+   "evidence": "'I'm not going to take the scholarship'; 'The trustees have decided to give you the school' at Avonlea"
+  },
+  {
+   "claim": "Anne makes peace with Gilbert",
+   "status": "verified",
+   "evidence": "'We are going to be the best of friends,' said Gilbert"
+  },
+  {
+   "claim": "Characters: Miss Stacy teacher at Avonlea school; Gilbert clever schoolmate; Diana neighbour; Mrs. Lynde gossiping neighbour",
+   "status": "verified",
+   "evidence": "'In the new teacher she found another true and helpful friend. Miss Stacy'; Gilbert head of the spelling class; Mrs. Rachel keeping a sharp eye on neighbours' business"
+  }
+ ]
+}

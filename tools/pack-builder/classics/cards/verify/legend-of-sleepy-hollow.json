@@ -1,0 +1,96 @@
+{
+ "slug": "legend-of-sleepy-hollow",
+ "claims": [
+  {
+   "claim": "Narrator describes Tarry Town on the Hudson and Sleepy Hollow",
+   "status": "verified",
+   "evidence": "'Tarry Town'; 'this enchanted region'"
+  },
+  {
+   "claim": "Sleepy Hollow is haunted by a headless Hessian trooper",
+   "status": "verified",
+   "evidence": "'the ghost of a Hessian trooper, whose head had been carried away by a cannon-ball'"
+  },
+  {
+   "claim": "He then introduces the lanky schoolmaster Ichabod Crane",
+   "status": "verified",
+   "evidence": "'tall, but exceedingly lank'"
+  },
+  {
+   "claim": "Ichabod is gullible",
+   "status": "verified",
+   "evidence": "'No tale was too gross or monstrous for his capacious swallow'"
+  },
+  {
+   "claim": "Ichabod is greedy / hopes for father's wealth",
+   "status": "verified",
+   "evidence": "'scene of rural wealth, on which he had so often gloated'; Katrina 'her vast expectations'"
+  },
+  {
+   "claim": "Katrina is daughter of a rich Dutch farmer",
+   "status": "verified",
+   "evidence": "'daughter and only child of a substantial Dutch farmer'"
+  },
+  {
+   "claim": "Brom Bones is his rowdy rival",
+   "status": "verified",
+   "evidence": "'burly, roaring, roystering blade ... Brom Van Brunt'"
+  },
+  {
+   "claim": "Party at the Van Tassels'; ghost stories",
+   "status": "verified",
+   "evidence": "stories of Doffue Martling, Brom and the Galloping Hessian"
+  },
+  {
+   "claim": "Ichabod rides home at night and meets a headless rider who hurls his head",
+   "status": "verified",
+   "evidence": "'the goblin rising in his stirrups, and in the very act of hurling his head at him'"
+  },
+  {
+   "claim": "Next morning only hat and shattered pumpkin found",
+   "status": "wrong",
+   "evidence": "'found the saddle trampled in the dirt ... was found the hat ... and close beside it a shattered pumpkin'",
+   "fix": "trampled saddle found, and by the brook his hat beside a shattered pumpkin"
+  },
+  {
+   "claim": "Never seen again in the Hollow; villagers suppose the ghost carried him off",
+   "status": "verified",
+   "evidence": "'came to the conclusion that Ichabod had been carried off by the Galloping Hessian'"
+  },
+  {
+   "claim": "An old farmer reports he is alive elsewhere",
+   "status": "verified",
+   "evidence": "'brought home the intelligence that Ichabod Crane was still alive'"
+  },
+  {
+   "claim": "Brom marries Katrina and laughs at mention of the pumpkin",
+   "status": "verified",
+   "evidence": "'conducted the blooming Katrina in triumph to the altar ... always burst into a hearty laugh at the mention of the pumpkin'"
+  },
+  {
+   "claim": "Ichabod is from Connecticut, lean, superstitious",
+   "status": "verified",
+   "evidence": "'native of Connecticut'; 'lank'; superstition passages"
+  },
+  {
+   "claim": "Katrina plump, coquettish",
+   "status": "verified",
+   "evidence": "'plump as a partridge ... a little of a coquette'"
+  },
+  {
+   "claim": "Brom Bones is Abraham Van Brunt",
+   "status": "verified",
+   "evidence": "'Abraham, or ... Brom Van Brunt'"
+  },
+  {
+   "claim": "Baltus Van Tassel is Katrina's wealthy father",
+   "status": "verified",
+   "evidence": "'Old Baltus Van Tassel ... satisfied with his wealth'"
+  },
+  {
+   "claim": "Headless Horseman is the Galloping Hessian",
+   "status": "verified",
+   "evidence": "'Galloping Hessian of the Hollow'"
+  }
+ ]
+}

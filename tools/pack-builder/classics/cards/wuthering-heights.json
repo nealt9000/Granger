@@ -1,0 +1,45 @@
+{
+ "slug": "wuthering-heights",
+ "title": "Wuthering Heights",
+ "author": "Emily Brontë",
+ "published": 1847,
+ "kind": "novel",
+ "firstLine": "1801—I have just returned from a visit to my landlord—the solitary neighbour that I shall be troubled with.",
+ "begins": "In 1801, Mr. Lockwood, a new tenant, visits his landlord Heathcliff at Wuthering Heights on the Yorkshire moors. He finds the master gruff, the household unwelcoming, and a snowstorm traps him there overnight.",
+ "happens": "Mr. Earnshaw brings the orphan Heathcliff home to Wuthering Heights from Liverpool. Heathcliff and Catherine Earnshaw grow close, but her brother Hindley degrades him. Catherine marries the wealthy Edgar Linton of Thrushcross Grange, and Heathcliff leaves, returning after three years, rich. He marries Edgar's sister Isabella, and Catherine dies after giving birth to a daughter, Cathy. Heathcliff gains the Heights and the Grange and tyrannizes Hindley's son Hareton and the younger generation. Cathy is made to marry Heathcliff's sickly son Linton, who dies, and Heathcliff himself is later found dead. Cathy and Hareton are to marry on New Year's Day. Nelly Dean tells the story to Lockwood.",
+ "characters": [
+  {
+   "name": "Heathcliff",
+   "who": "foundling raised at Wuthering Heights; vengeful"
+  },
+  {
+   "name": "Catherine Earnshaw",
+   "who": "wild daughter of the house, loves Heathcliff but marries Edgar"
+  },
+  {
+   "name": "Edgar Linton",
+   "who": "gentle master of Thrushcross Grange"
+  },
+  {
+   "name": "Hindley Earnshaw",
+   "who": "Catherine's brother"
+  },
+  {
+   "name": "Nelly Dean",
+   "who": "servant who tells most of the story"
+  },
+  {
+   "name": "Mr. Lockwood",
+   "who": "tenant narrator"
+  },
+  {
+   "name": "Hareton Earnshaw",
+   "who": "Hindley's son"
+  },
+  {
+   "name": "Cathy",
+   "who": "Catherine's daughter"
+  }
+ ],
+ "checks": "Found the opening line; read Chapter I; counted names (Nelly, Mrs. Dean, Kenneth, Zillah); read the last paragraphs (three headstones). Plot details from memory; Isabella's marriage and Linton's death not re-read."
+}

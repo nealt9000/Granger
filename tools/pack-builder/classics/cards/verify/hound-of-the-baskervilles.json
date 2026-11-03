@@ -1,0 +1,70 @@
+{
+ "slug": "hound-of-the-baskervilles",
+ "claims": [
+  {
+   "claim": "A dedication to Robinson precedes Chapter 1",
+   "status": "verified",
+   "evidence": "'My dear Robinson,'"
+  },
+  {
+   "claim": "Holmes sits at breakfast while Watson examines a stick left by a visitor",
+   "status": "verified",
+   "evidence": "'breakfast table. I stood upon the hearth-rug and picked up the stick'"
+  },
+  {
+   "claim": "Holmes deduces from 'To James Mortimer, M.R.C.S.' that he is a country doctor, and Mortimer returns",
+   "status": "verified",
+   "evidence": "'To James Mortimer, M.R.C.S., from his friends of the C.C.H.'; 'a country doctor, as you very astutely observed'"
+  },
+  {
+   "claim": "Mortimer tells of a family curse of a spectral hound haunting the Baskervilles; Sir Charles died on the moor",
+   "status": "verified",
+   "evidence": "legend of the hound read by Mortimer; Sir Charles found dead"
+  },
+  {
+   "claim": "Sir Henry, the heir, comes from Canada",
+   "status": "verified",
+   "evidence": "'found that he had been farming in Canada'"
+  },
+  {
+   "claim": "Holmes sends Watson with Sir Henry to Baskerville Hall on Dartmoor",
+   "status": "verified",
+   "evidence": "Watson goes to the Hall; Mortimer's address 'Grimpen, Dartmoor, Devon'"
+  },
+  {
+   "claim": "Watson meets the Barrymores, the escaped convict Selden, and the Stapletons",
+   "status": "verified",
+   "evidence": "'Barrymore, the husband acting as butler'; 'Selden, the Notting Hill murderer'; 'introducing you to my sister'"
+  },
+  {
+   "claim": "Selden is Mrs. Barrymore's brother",
+   "status": "verified",
+   "evidence": "'my name was Selden, and he is my younger brother'; 'his brother-in-law' (mentioned, not part of card)"
+  },
+  {
+   "claim": "Holmes secretly arrives",
+   "status": "verified",
+   "evidence": "Holmes joins them on the moor after Watson's reports"
+  },
+  {
+   "claim": "Stapleton is a Baskerville kinsman and husband of the woman posing as his sister, using a hound to seize the estate",
+   "status": "verified",
+   "evidence": "'Rodger Baskerville, the younger brother of Sir Charles, who fled'; 'his sister'... 'my wife brought it'"
+  },
+  {
+   "claim": "The hound is shot",
+   "status": "verified",
+   "evidence": "'Holmes and I both fired together, and the creature gave a...'"
+  },
+  {
+   "claim": "Stapleton vanishes into the Grimpen Mire",
+   "status": "verified",
+   "evidence": "'No one could find his way into the Grimpen Mire tonight'; 'down in the foul slime of the huge morass'"
+  },
+  {
+   "claim": "Characters: Stapleton naturalist of Merripit House; Barrymore butler; Mortimer country doctor",
+   "status": "verified",
+   "evidence": "Stapleton's zoology work; Barrymore butler; Mortimer 'typical country practitioner'"
+  }
+ ]
+}

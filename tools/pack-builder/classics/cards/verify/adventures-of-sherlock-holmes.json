@@ -1,0 +1,99 @@
+{
+ "slug": "adventures-of-sherlock-holmes",
+ "claims": [
+  {
+   "claim": "First story is 'A Scandal in Bohemia'; opens with Watson recalling Irene Adler, 'the woman' to Holmes",
+   "status": "verified",
+   "evidence": "'To Sherlock Holmes she is always the woman'; 'the late Irene Adler'"
+  },
+  {
+   "claim": "Watson is now married",
+   "status": "verified",
+   "evidence": "'My marriage had drifted us away'; 'Wedlock suits you'"
+  },
+  {
+   "claim": "Watson visits his old friend at 221B Baker Street",
+   "status": "wrong",
+   "evidence": "Baker Street and the rooms found; '221B' not in the text; Watson passes by on a chance night walk",
+   "fix": "Watson, passing Baker Street one night, calls on his old friend."
+  },
+  {
+   "claim": "Holmes deduces his visitor's business from a note",
+   "status": "wrong",
+   "evidence": "Holmes first deduces Watson's marriage and return to practice; then from the unsigned note's paper (Gesellschaft, Bohemia) deduces its writer is a German from Bohemia; the note only announces a visitor",
+   "fix": "Holmes deduces from the paper of an unsigned note that its writer is a German from Bohemia."
+  },
+  {
+   "claim": "Twelve cases told by Dr. Watson",
+   "status": "verified",
+   "evidence": "contents list I-XII"
+  },
+  {
+   "claim": "King of Bohemia hires Holmes to retrieve a photograph from Irene Adler, who outwits him",
+   "status": "verified",
+   "evidence": "'My photograph.'; 'plans of Mr. Sherlock Holmes were beaten by a woman's wit'"
+  },
+  {
+   "claim": "Red-Headed League is a cover for a bank robbery",
+   "status": "verified",
+   "evidence": "Pawnbroker's business at Coburg Square; John Clay; Merryweather, bank director"
+  },
+  {
+   "claim": "Stepfather plays a fiancé",
+   "status": "verified",
+   "evidence": "'my stepfather'; 'Hosmer Angel' (Windibank)"
+  },
+  {
+   "claim": "Boscombe Valley killing",
+   "status": "verified",
+   "evidence": "'The Boscombe Valley Mystery'; McCarthy"
+  },
+  {
+   "claim": "Orange Pips threats",
+   "status": "verified",
+   "evidence": "'The Five Orange Pips'"
+  },
+  {
+   "claim": "Beggar Hugh Boone is the missing Neville St. Clair",
+   "status": "verified",
+   "evidence": "'His name is Hugh Boone'; 'Neville St. Clair has entered it never...'"
+  },
+  {
+   "claim": "Stolen blue carbuncle traced to a goose",
+   "status": "verified",
+   "evidence": "'the stone came from the goose'"
+  },
+  {
+   "claim": "Holmes defeats Dr. Roylott in the Speckled Band",
+   "status": "verified",
+   "evidence": "'Dr. Grimesby Roylott' of Stoke Moran; story VIII"
+  },
+  {
+   "claim": "Holmes helps the Engineer, the Noble Bachelor and the Beryl Coronet; ends at the Copper Beeches",
+   "status": "verified",
+   "evidence": "contents IX-XII; 'Lord St. Simon'"
+  },
+  {
+   "claim": "Dr. John Watson: friend and flatmate, who narrates",
+   "status": "unfound",
+   "evidence": "'John' appears only as other people; text says 'Dr. Watson'; 'flatmate' now married, lodging in Baker Street no longer his",
+   "fix": "Dr. Watson: Holmes's friend, who narrates"
+  },
+  {
+   "claim": "Holmes: consulting detective of Baker Street",
+   "status": "verified",
+   "evidence": "'remained in our lodgings in Baker Street'"
+  },
+  {
+   "claim": "Irene Adler adventuress who outwits Holmes in the first story",
+   "status": "verified",
+   "evidence": "'the late Irene Adler, of dubious and questionable memory'"
+  },
+  {
+   "claim": "Lestrade: Scotland Yard detective who calls on Holmes",
+   "status": "wrong",
+   "evidence": "'I had no difficulty in recognising Lestrade, of Scotland Yard' waiting at Ross station in Boscombe Valley; he does not call on Holmes",
+   "fix": "a Scotland Yard detective who meets Holmes and Watson at Ross in the Boscombe Valley case"
+  }
+ ]
+}

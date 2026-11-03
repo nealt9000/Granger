@@ -1,0 +1,41 @@
+{
+ "slug": "tom-jones",
+ "title": "Tom Jones",
+ "author": "Henry Fielding",
+ "published": 1749,
+ "kind": "novel",
+ "firstLine": "An author ought to consider himself, not as a gentleman who gives a private or eleemosynary treat, but rather as one who keeps a public ordinary, at which all persons are welcome for their money.",
+ "begins": "Chapter i is Fielding's own introduction, likening the book to a bill of fare. Chapters ii to iv then describe Squire Allworthy of Somersetshire and his sister Miss Bridget, and Allworthy finds a baby in his bed.",
+ "happens": "Squire Allworthy finds a foundling, Tom Jones, and raises him beside his nephew Blifil. Tom, good-hearted but wild, loves Sophia, daughter of the neighbouring Squire Western. Blifil's schemes get Tom cast out, and Sophia flees her father's plan to marry her to Blifil. Both travel to London, with Tom meeting Mrs Waters, a highwayman and Lady Bellaston along the way. Tom is jailed, in danger of the gallows. At last it is shown that his mother is Bridget Allworthy, so he is Allworthy's nephew; Blifil is exposed, and Tom marries Sophia.",
+ "characters": [
+  {
+   "name": "Tom Jones",
+   "who": "the foundling hero"
+  },
+  {
+   "name": "Squire Allworthy",
+   "who": "kind landowner who raises Tom"
+  },
+  {
+   "name": "Sophia Western",
+   "who": "Tom's beloved, daughter of Squire Western"
+  },
+  {
+   "name": "Squire Western",
+   "who": "her hard-drinking, fox-hunting father"
+  },
+  {
+   "name": "Blifil",
+   "who": "Allworthy's scheming nephew"
+  },
+  {
+   "name": "Partridge",
+   "who": "barber who becomes Tom's follower"
+  },
+  {
+   "name": "Mrs Waters",
+   "who": "woman Tom rescues, once called Jenny Jones"
+  }
+ ],
+ "checks": "Checked first line, early chapters and the closing pages by search. Names confirmed by counts (Allworthy, Western, Blifil, Partridge, Waters, Bellaston, Nightingale). The final revelation (Mr Summer as father) confirmed in text; the middle plot from memory. Exact chapter order not re-read."
+}

@@ -1,0 +1,113 @@
+{
+ "slug": "grimms-fairy-tales",
+ "claims": [
+  {
+   "claim": "First story is The Golden Bird",
+   "status": "verified",
+   "evidence": "Contents list begins THE GOLDEN BIRD; story text follows"
+  },
+  {
+   "claim": "King's golden apples are stolen each night",
+   "status": "verified",
+   "evidence": "every night one of them was gone"
+  },
+  {
+   "claim": "Gardener's youngest son keeps watch and shoots at the golden bird",
+   "status": "verified",
+   "evidence": "the third son ... jumped up and shot an arrow at it"
+  },
+  {
+   "claim": "Bird drops a golden feather",
+   "status": "verified",
+   "evidence": "it dropped a golden feather from its tail"
+  },
+  {
+   "claim": "Sixty-two tales",
+   "status": "verified",
+   "evidence": "Contents list counted: 62 entries"
+  },
+  {
+   "claim": "Translated by Edgar Taylor and Marian Edwardes",
+   "status": "verified",
+   "evidence": "The text is based on translations ... by Edgar Taylor and Marian Edwardes"
+  },
+  {
+   "claim": "Hansel and Gretel are abandoned in a wood",
+   "status": "wrong",
+   "evidence": "parents plan to take the children 'into the forest to where it is the thickest'; the father is reluctant",
+   "fix": "two children taken into a forest"
+  },
+  {
+   "claim": "A witch catches them; Gretel pushes her into her oven",
+   "status": "verified",
+   "evidence": "Then Gretel gave her a push that drove her far into [the oven]"
+  },
+  {
+   "claim": "Wolf eats Red-Cap and grandmother; huntsman cuts them out",
+   "status": "verified",
+   "evidence": "devoured her ... swallowed up Red-Cap ... cut open the stomach"
+  },
+  {
+   "claim": "Ashputtel helped by hazel tree and birds, marries the prince",
+   "status": "verified",
+   "evidence": "Shake, shake, hazel-tree ... the prince ... 'This is the right bride'"
+  },
+  {
+   "claim": "Snowdrop eats the queen's poisoned apple",
+   "status": "verified",
+   "evidence": "the apple was so made up that one side was ... poisoned ... said the queen"
+  },
+  {
+   "claim": "Snowdrop is woken by a prince",
+   "status": "wrong",
+   "evidence": "'the moment he lifted it up to carry it home ... the piece of apple fell from between her lips, and Snowdrop awoke'",
+   "fix": "wakes when the piece falls from her lips as a prince carries her coffin"
+  },
+  {
+   "claim": "Rumpelstiltskin spins straw into gold for a miller's daughter until she guesses his name",
+   "status": "verified",
+   "evidence": "the manikin once more spun the heap into gold; 'Can your name be RUMPELSTILTSKIN?'"
+  },
+  {
+   "claim": "Fisherman's wife's greed returns them to their hovel",
+   "status": "wrong",
+   "evidence": "'Go home ... to your pigsty again.'",
+   "fix": "sending them back to their pigsty"
+  },
+  {
+   "claim": "Briar Rose sleeps a hundred years with the whole castle",
+   "status": "verified",
+   "evidence": "fall asleep for a hundred years ... the dogs ... the horses ... asleep too"
+  },
+  {
+   "claim": "Hansel and Gretel outwit a witch",
+   "status": "verified",
+   "evidence": "as above"
+  },
+  {
+   "claim": "Ashputtel is a mistreated girl who marries a prince",
+   "status": "verified",
+   "evidence": "little dirty Ashputtel ... took Ashputtel on his horse"
+  },
+  {
+   "claim": "Snowdrop is a princess hunted by her stepmother",
+   "status": "verified",
+   "evidence": "king soon married another wife ... 'a king's daughter' on coffin"
+  },
+  {
+   "claim": "Rumpelstiltskin is a dwarf",
+   "status": "verified",
+   "evidence": "that dwarf came in"
+  },
+  {
+   "claim": "Little Red-Cap meets the wolf",
+   "status": "verified",
+   "evidence": "text of Little Red-Cap"
+  },
+  {
+   "claim": "Briar Rose is a princess who sleeps a hundred years",
+   "status": "verified",
+   "evidence": "the beautiful sleeping Briar Rose"
+  }
+ ]
+}

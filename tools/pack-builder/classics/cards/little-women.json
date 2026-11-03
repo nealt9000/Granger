@@ -1,0 +1,41 @@
+{
+ "slug": "little-women",
+ "title": "Little Women",
+ "author": "Louisa May Alcott",
+ "published": 1868,
+ "kind": "novel",
+ "firstLine": "“Christmas won’t be Christmas without any presents,” grumbled Jo, lying on the rug.",
+ "begins": "Chapter One finds the four March sisters by the fire on a snowy December evening, grumbling about having no presents. Their father is away where the fighting is. The girls decide to spend their dollar each on gifts for their mother.",
+ "happens": "The four March sisters grow up poor, with their mother, Marmee, while their father is away at the war. Meg is courted by John Brooke, the tutor of their neighbour Laurie, and marries him. Jo, who writes, refuses Laurie's proposal and goes to New York, where she meets Professor Bhaer. Beth, who is gentle and musical, falls ill and dies. Laurie marries Amy, whom he meets in Nice during her travels. Jo marries Professor Bhaer, and together they open a school for boys at Plumfield, a house left to Jo by Aunt March.",
+ "characters": [
+  {
+   "name": "Meg March",
+   "who": "eldest sister, pretty and domestic"
+  },
+  {
+   "name": "Jo March",
+   "who": "second sister, a tomboy and writer"
+  },
+  {
+   "name": "Beth March",
+   "who": "third sister, shy and musical"
+  },
+  {
+   "name": "Amy March",
+   "who": "youngest sister, artistic"
+  },
+  {
+   "name": "Marmee",
+   "who": "the sisters' mother"
+  },
+  {
+   "name": "Laurie",
+   "who": "the Laurence boy next door"
+  },
+  {
+   "name": "Professor Bhaer",
+   "who": "German teacher Jo marries"
+  }
+ ],
+ "checks": "Checked first line, Chapter One, names (Laurie, Brooke, Bhaer, Aunt March, Hannah, Plumfield) and part-two chapter titles (Daisy and Demi, Harvest Time) by search. Plot from memory; the chapters on Beth's death and Jo's refusal were not re-read. Plumfield as Aunt March's bequest is from memory."
+}

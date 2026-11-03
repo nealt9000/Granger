@@ -1,0 +1,45 @@
+{
+ "slug": "time-machine",
+ "title": "The Time Machine",
+ "author": "H. G. Wells",
+ "published": 1895,
+ "kind": "novella",
+ "firstLine": "The Time Traveller (for so it will be convenient to speak of him) was expounding a recondite matter to us.",
+ "begins": "At a dinner party in the Time Traveller's house, he explains to his guests, including Filby, the Psychologist and the Medical Man, that time is a fourth dimension. His listeners are sceptical.",
+ "happens": "The Time Traveller shows friends a small model time machine, then a week later tells them that he built a full-size one and travelled to the year 802,701. There he finds the childlike, gentle Eloi, and meets Weena, whom he saves from drowning. His machine is stolen by the Morlocks, pale underground creatures who feed on the Eloi. He sees that humanity has split into two. He and Weena flee through a forest fire, which kills her, and he regains the machine. He travels far ahead to a dying Earth. After telling his story he leaves on another trip and never comes back; the narrator is left with two white flowers.",
+ "characters": [
+  {
+   "name": "The Time Traveller",
+   "who": "an inventor, never named, who builds the machine"
+  },
+  {
+   "name": "Weena",
+   "who": "a little Eloi he rescues from drowning"
+  },
+  {
+   "name": "the Eloi",
+   "who": "small, gentle, idle people of the future"
+  },
+  {
+   "name": "the Morlocks",
+   "who": "ape-like underground race that eats the Eloi"
+  },
+  {
+   "name": "Filby",
+   "who": "argumentative guest"
+  },
+  {
+   "name": "the Psychologist",
+   "who": "dinner guest"
+  },
+  {
+   "name": "the Medical Man",
+   "who": "dinner guest"
+  },
+  {
+   "name": "the narrator",
+   "who": "one of the guests, who tells the frame story"
+  }
+ ],
+ "checks": "Found the first sentence; read the introduction; counted names (Weena 54, Morlocks 49, Eloi 8); read the end of the epilogue (the two flowers). The text spells the year in words ('Eight Hundred and Two Thousand Seven Hundred and One'); I wrote it as digits."
+}

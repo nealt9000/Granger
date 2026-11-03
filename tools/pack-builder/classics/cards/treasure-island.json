@@ -1,0 +1,41 @@
+{
+ "slug": "treasure-island",
+ "title": "Treasure Island",
+ "author": "Robert Louis Stevenson",
+ "published": 1883,
+ "kind": "novel",
+ "firstLine": "Squire Trelawney, Dr. Livesey, and the rest of these gentlemen having asked me to write down the whole particulars about Treasure Island, from the beginning to the end, keeping nothing back but the bearings of the island, and that only because there is still treasure not yet lifted, I take up my pen in the year of grace 17—, and go back to the time when my father kept the Admiral Benbow inn and the brown old seaman with the sabre cut first took up his lodging under our roof.",
+ "begins": "Jim Hawkins writes down the story at the request of Squire Trelawney and Dr. Livesey, and goes back to when his father kept the Admiral Benbow inn and a brown old seaman with a sabre cut came to lodge.",
+ "happens": "The old buccaneer Billy Bones dies at the Admiral Benbow; Jim takes the map of Captain Flint’s treasure from his chest. Squire Trelawney and Dr. Livesey fit out the Hispaniola under Captain Smollett to find the island. Long John Silver, the one-legged cook, leads a pirate mutiny, which Jim overhears from an apple barrel. The loyalists fight from a stockade, Jim kills Israel Hands, and Ben Gunn, a marooned man, has already moved the treasure to his cave. They sail home with it; Silver slips away with a sack of coin. The rest is shared among the five survivors, and Jim never wants to return.",
+ "characters": [
+  {
+   "name": "Jim Hawkins",
+   "who": "narrator, an innkeeper’s son"
+  },
+  {
+   "name": "Long John Silver",
+   "who": "one-legged cook and pirate leader"
+  },
+  {
+   "name": "Dr. Livesey",
+   "who": "doctor and magistrate"
+  },
+  {
+   "name": "Squire Trelawney",
+   "who": "backer of the voyage"
+  },
+  {
+   "name": "Captain Smollett",
+   "who": "captain of the Hispaniola"
+  },
+  {
+   "name": "Ben Gunn",
+   "who": "marooned former pirate"
+  },
+  {
+   "name": "Billy Bones",
+   "who": "old buccaneer at the inn"
+  }
+ ],
+ "checks": "First sentence copied from file. Names grepped (Billy Bones, Ben Gunn, Israel Hands, Hispaniola present). Ending read in the last lines: Gunn gets a lodge, Silver is not heard of again. The mutiny, stockade and Hands from memory, not re-read."
+}

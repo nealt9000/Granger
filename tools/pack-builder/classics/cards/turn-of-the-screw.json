@@ -1,0 +1,41 @@
+{
+ "slug": "turn-of-the-screw",
+ "title": "The Turn of the Screw",
+ "author": "Henry James",
+ "published": 1898,
+ "kind": "novella",
+ "firstLine": "The story had held us, round the fire, sufficiently breathless, but except the obvious remark that it was gruesome, as, on Christmas Eve in an old house, a strange tale should essentially be, I remember no comment uttered till somebody happened to say that it was the only case he had met in which such a visitation had fallen on a child.",
+ "begins": "A frame story: on Christmas Eve a group tells ghost stories round the fire. Douglas offers a manuscript about two children and sends for it. It is the account, written years ago, of a young governess who is hired by a man in Harley Street and sent to his country house.",
+ "happens": "A young governess, never named, takes charge of Miles and Flora at Bly, an Essex country house, for their uncle, who tells her never to trouble him. Miles has been dismissed from school. She sees the ghosts of Peter Quint, a dead valet, and Miss Jessel, the dead former governess, and fears they are corrupting the children. With the housekeeper Mrs. Grose she tries to protect them. Flora falls ill and Mrs. Grose takes her away. Alone with Miles, the governess makes him name Quint, and he dies in her arms.",
+ "characters": [
+  {
+   "name": "the governess",
+   "who": "the unnamed young woman who tells the story"
+  },
+  {
+   "name": "Miles",
+   "who": "the boy, sent home from school"
+  },
+  {
+   "name": "Flora",
+   "who": "his little sister"
+  },
+  {
+   "name": "Mrs. Grose",
+   "who": "housekeeper at Bly"
+  },
+  {
+   "name": "Peter Quint",
+   "who": "dead valet whose ghost appears"
+  },
+  {
+   "name": "Miss Jessel",
+   "who": "the former governess, now a ghost"
+  },
+  {
+   "name": "Douglas",
+   "who": "the man who reads the manuscript aloud"
+  }
+ ],
+ "checks": "Checked first line, the frame opening, names, Miles's dismissal from school, Mrs. Grose taking Flora away and the final scene (Quint named, the heart stopping) by search. Whether the ghosts are real is left open in the text and is not stated."
+}

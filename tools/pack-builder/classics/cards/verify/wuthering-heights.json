@@ -1,0 +1,112 @@
+{
+ "slug": "wuthering-heights",
+ "claims": [
+  {
+   "claim": "In 1801 Lockwood, a new tenant, visits his landlord Heathcliff at Wuthering Heights",
+   "status": "verified",
+   "evidence": "'Mr. Lockwood, your new tenant'; 'Thrushcross Grange is my own, sir'"
+  },
+  {
+   "claim": "Heights is on the Yorkshire moors; Heathcliff gruff, household unwelcoming",
+   "status": "verified",
+   "evidence": "'closed teeth ... Go to the Deuce!'"
+  },
+  {
+   "claim": "A snowstorm traps Lockwood there overnight",
+   "status": "verified",
+   "evidence": "'The snow began to drive thickly' ... he stays the night"
+  },
+  {
+   "claim": "Mr. Earnshaw brings the orphan Heathcliff home",
+   "status": "verified",
+   "evidence": "'Liverpool ... gipsy brat'; 'in the streets of Liverpool, where he picked it up'"
+  },
+  {
+   "claim": "Heathcliff and Catherine grow close",
+   "status": "verified",
+   "evidence": "Catherine: 'I am Heathcliff'; locked up Heathcliff, dancing scene"
+  },
+  {
+   "claim": "Hindley abuses/degrades Heathcliff",
+   "status": "verified",
+   "evidence": "'Heathcliff bore his degradation pretty well at first'"
+  },
+  {
+   "claim": "Catherine marries wealthy Edgar Linton of Thrushcross Grange",
+   "status": "verified",
+   "evidence": "Catherine becomes Mrs. Linton"
+  },
+  {
+   "claim": "Heathcliff leaves and returns rich",
+   "status": "verified",
+   "evidence": "'absent and silent for three years'; Nelly: 'how has he got rich?'"
+  },
+  {
+   "claim": "He marries Isabella to hurt the Lintons",
+   "status": "unfound",
+   "evidence": "searched Isabella/revenge passages; motive not stated in any passage I read; marriage itself confirmed ('Mrs. Heathcliff')",
+   "fix": "He marries Edgar's sister Isabella"
+  },
+  {
+   "claim": "Catherine dies after giving birth to daughter Cathy",
+   "status": "verified",
+   "evidence": "'was born the Catherine ... and two hours after the mother died'"
+  },
+  {
+   "claim": "Heathcliff gains the Heights and the Grange",
+   "status": "verified",
+   "evidence": "Hindley mortgaged all to Heathcliff; Grange claimed 'in his wife's right and his also'"
+  },
+  {
+   "claim": "Heathcliff tyrannizes Hareton and the younger generation",
+   "status": "verified",
+   "evidence": "Hareton in the kitchen, Cathy and Linton imprisoned"
+  },
+  {
+   "claim": "Heathcliff forces Cathy to marry his sickly son Linton",
+   "status": "verified",
+   "evidence": "Heathcliff locks them up: 'I'll marry him within this hour'; 'an ailing, peevish creature'"
+  },
+  {
+   "claim": "Linton dies",
+   "status": "verified",
+   "evidence": "Heathcliff 'let her be till after the funeral'; 'Mrs. Heathcliff ... He's safe, and I'm free'"
+  },
+  {
+   "claim": "Heathcliff weakens and dies",
+   "status": "unfound",
+   "evidence": "death confirmed ('he was dead and stark!'); weakening not read",
+   "fix": "Heathcliff himself is later found dead"
+  },
+  {
+   "claim": "Cathy and Hareton fall in love and plan to marry",
+   "status": "verified",
+   "evidence": "'as soon as they are married, and that will be on New Year's Day'"
+  },
+  {
+   "claim": "Nelly Dean tells the story to Lockwood",
+   "status": "verified",
+   "evidence": "Mrs. Dean narrates throughout"
+  },
+  {
+   "claim": "Heathcliff is a foundling raised at Wuthering Heights; vengeful",
+   "status": "verified",
+   "evidence": "as above"
+  },
+  {
+   "claim": "Hindley Earnshaw is Catherine's brother; Hareton is Hindley's son",
+   "status": "verified",
+   "evidence": "'Young Earnshaw'; 'my cousin Hareton'"
+  },
+  {
+   "claim": "Edgar is gentle master of Thrushcross Grange; Cathy is Catherine's daughter",
+   "status": "verified",
+   "evidence": "as above"
+  },
+  {
+   "claim": "Mr. Lockwood three headstones: Edgar, Catherine, Heathcliff (end)",
+   "status": "verified",
+   "evidence": "'the three headstones on the slope next the moor'"
+  }
+ ]
+}

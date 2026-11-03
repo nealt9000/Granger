@@ -1,0 +1,45 @@
+{
+ "slug": "great-expectations",
+ "title": "Great Expectations",
+ "author": "Charles Dickens",
+ "published": 1861,
+ "kind": "novel",
+ "firstLine": "My father’s family name being Pirrip, and my Christian name Philip, my infant tongue could make of both names nothing longer or more explicit than Pip.",
+ "begins": "Pip, the narrator, explains how he got his name and describes the graves of his parents and five brothers in the marsh churchyard. A frightening convict suddenly seizes him there.",
+ "happens": "Pip, an orphan raised by his sister and her kind husband Joe Gargery, helps an escaped convict on the marshes. Eccentric Miss Havisham has him play with her cold adopted daughter Estella, whom he loves. A lawyer, Jaggers, tells him a secret benefactor will make him rich, and he goes to London, assuming it is Miss Havisham, and neglects Joe. The benefactor is the convict, Magwitch, who returns. Pip tries to smuggle him abroad, but Magwitch is caught and dies in prison. Pip falls ill, is nursed by Joe, and goes abroad to join Herbert. Years later he meets Estella in the ruins of Satis House, and they leave together, seeing no shadow of another parting.",
+ "characters": [
+  {
+   "name": "Pip",
+   "who": "Philip Pirrip, the narrator, a blacksmith's apprentice who becomes a gentleman"
+  },
+  {
+   "name": "Joe Gargery",
+   "who": "the blacksmith, Pip's gentle brother-in-law"
+  },
+  {
+   "name": "Miss Havisham",
+   "who": "wealthy jilted woman in Satis House"
+  },
+  {
+   "name": "Estella",
+   "who": "Miss Havisham's adopted daughter, beautiful and cold"
+  },
+  {
+   "name": "Magwitch",
+   "who": "the convict, Pip's secret benefactor (also called Provis)"
+  },
+  {
+   "name": "Mr. Jaggers",
+   "who": "London lawyer"
+  },
+  {
+   "name": "Herbert Pocket",
+   "who": "Pip's friend in London"
+  },
+  {
+   "name": "Biddy",
+   "who": "village girl who teaches Pip"
+  }
+ ],
+ "checks": "Found the first sentence (line break after 'My'); read Chapter I; counted names; read the last pages: this edition's ending has Pip and Estella meet at Satis House and leave together, with 'no shadow of another parting'. Middle plot from memory."
+}

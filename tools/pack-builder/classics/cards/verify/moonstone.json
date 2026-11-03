@@ -1,0 +1,97 @@
+{
+ "slug": "moonstone",
+ "claims": [
+  {
+   "claim": "Prologue is a family paper about Seringapatam 1799",
+   "status": "verified",
+   "evidence": "'The Storming of Seringapatam (1799): (Extracted from a Family Paper.)'"
+  },
+  {
+   "claim": "Herncastle seizes the yellow diamond",
+   "status": "verified",
+   "evidence": "Prologue: 'a Yellow Diamond' among the treasure; storming of Seringapatam (not read to the seizure line in detail)"
+  },
+  {
+   "claim": "Story begins with Gabriel Betteredge, house-steward, 1848, citing Robinson Crusoe",
+   "status": "verified",
+   "evidence": "'The Events related by Gabriel Betteredge, house-steward'; 'In the first part of Robinson Crusoe'"
+  },
+  {
+   "claim": "Diamond stolen from an Indian shrine",
+   "status": "verified",
+   "evidence": "Somnauth shrine, god of the Moon; epilogue 'in the forehead of the deity, gleamed the yellow Diamond'"
+  },
+  {
+   "claim": "Passes to Rachel on her eighteenth birthday",
+   "status": "verified",
+   "evidence": "'My young lady's eighteenth birthday'; Colonel's will: 'I give and bequeath to my niece, Rachel Verinder'"
+  },
+  {
+   "claim": "Vanishes from her room that night",
+   "status": "verified",
+   "evidence": "Cuff's inquiry into the missing Diamond, Rachel's bedroom (Chapters on the loss)"
+  },
+  {
+   "claim": "Sergeant Cuff suspects Rachel herself",
+   "status": "verified",
+   "evidence": "'Miss Rachel has stolen her own Diamond?'"
+  },
+  {
+   "claim": "Rosanna loves Franklin and kills herself at Shivering Sand",
+   "status": "verified",
+   "evidence": "'Rosanna has fallen in love with Mr. Franklin Blake'; 'Rosanna's suicide'; 'Shivering Sand is sucked down'"
+  },
+  {
+   "claim": "Rachel refuses to explain and breaks with Franklin",
+   "status": "verified",
+   "evidence": "'I won't tell you!'; 'engagement is broken off'"
+  },
+  {
+   "claim": "Ezra Jennings is Mr. Candy's assistant",
+   "status": "verified",
+   "evidence": "'Mr. Candy's assistant...Ezra Jennings'"
+  },
+  {
+   "claim": "Franklin took the stone while drugged with opium",
+   "status": "verified",
+   "evidence": "'You put the Diamond into his hand'; 'I can't take it back...My head's like lead' (Godfrey's account); Jennings's opium plan"
+  },
+  {
+   "claim": "Franklin gave it to Godfrey",
+   "status": "verified",
+   "evidence": "'You put the Diamond into his hand. ... Take it back, Godfrey, to your father's bank.'"
+  },
+  {
+   "claim": "Godfrey pawned it",
+   "status": "wrong",
+   "evidence": "Luker offered to lend on pledge; 'Mr. Godfrey indignantly refused...Mr. Luker thereupon, handed him back the Diamond'",
+   "fix": "Godfrey, who kept it"
+  },
+  {
+   "claim": "Godfrey is murdered by the Indians",
+   "status": "wrong",
+   "evidence": "Report: 'moral, if not legal, evidence'; coroner: 'Wilful Murder against some person, or persons, unknown'; 'smothered Mr. Ablewhite'",
+   "fix": "Godfrey is smothered in a London lodging, and the evidence points to the Indians"
+  },
+  {
+   "claim": "Rachel marries Franklin",
+   "status": "verified",
+   "evidence": "'the marriage of Miss Rachel and Mr. Franklin Blake'"
+  },
+  {
+   "claim": "Diamond restored to its shrine",
+   "status": "verified",
+   "evidence": "'in the forehead of the deity, gleamed the yellow Diamond'"
+  },
+  {
+   "claim": "Godfrey is Rachel's charming cousin, engaged to her",
+   "status": "verified",
+   "evidence": "'Rachel's withdrawal from her engagement to him'"
+  },
+  {
+   "claim": "Betteredge is the Verinders' steward and first narrator",
+   "status": "verified",
+   "evidence": "'house-steward in the service of Julia, Lady Verinder'"
+  }
+ ]
+}

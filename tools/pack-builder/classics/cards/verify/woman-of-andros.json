@@ -1,0 +1,98 @@
+{
+ "slug": "woman-of-andros",
+ "claims": [
+  {
+   "claim": "Opens with night spreading along the Mediterranean",
+   "status": "verified",
+   "evidence": "The earth sighed as it turned...the shadow of night crept gradually along the Mediterranean"
+  },
+  {
+   "claim": "on the eve of the Christian era",
+   "status": "unfound",
+   "evidence": "text only says 'the land that was soon to be called Holy prepared in the dark its wonderful burden'",
+   "fix": "quote the text's phrase"
+  },
+  {
+   "claim": "island of Brynos; Simo and Chremes in a wineshop",
+   "status": "verified",
+   "evidence": "'Brynos'; 'Simo and Chremes, had outstayed their companions' in a wineshop"
+  },
+  {
+   "claim": "they talk about Pamphilus",
+   "status": "verified",
+   "evidence": "'your boy is twenty-five now' ... 'what is he waiting for?'"
+  },
+  {
+   "claim": "Chrysis is a courtesan from Andros who holds banquets for young men",
+   "status": "verified",
+   "evidence": "'Chrysis, the Andrian'; 'hetaira's banquet'; 'luxury of talking to these young men'"
+  },
+  {
+   "claim": "shelters the old and helpless / dependents",
+   "status": "verified",
+   "evidence": "'she adopted stray human beings that needed her ... dependents'"
+  },
+  {
+   "claim": "Philocles is an insane former sea-captain",
+   "status": "verified",
+   "evidence": "'He was formerly a sea-captain... now he is not only ill; he is insane'"
+  },
+  {
+   "claim": "Pamphilus is expected to marry Philumena, Chremes's daughter",
+   "status": "verified",
+   "evidence": "'understood between our families for years that he will marry Philumena'; 'my daughter is ready to marry him'"
+  },
+  {
+   "claim": "Pamphilus loves Glycerium, Chrysis's younger sister",
+   "status": "verified",
+   "evidence": "'He loves me. He will marry me'; Glycerium 'her sister' at the funeral"
+  },
+  {
+   "claim": "Simo hears the islanders say Glycerium must go",
+   "status": "wrong",
+   "evidence": "text: 'the Fathers of the Island ordered that we should be sold as slaves to pay our debts'",
+   "fix": "the Fathers of the Island order her household sold as slaves to pay its debts"
+  },
+  {
+   "claim": "Chrysis dies",
+   "status": "verified",
+   "evidence": "'Farewell.' then 'Simo arose early to witness Chrysis's funeral'"
+  },
+  {
+   "claim": "Simo buys Glycerium from the Leno, a slave dealer",
+   "status": "verified",
+   "evidence": "'I shall come down to the harbor...buy your mistress from the Leno'; 'dealer in slaves'"
+  },
+  {
+   "claim": "Pamphilus's mother tends her",
+   "status": "verified",
+   "evidence": "'Glycerium sleeping peacefully under his mother's care'"
+  },
+  {
+   "claim": "Glycerium and the child die the same day",
+   "status": "verified",
+   "evidence": "'on the noon of the third day Glycerium's pains began and by sunset both mother and child were dead'"
+  },
+  {
+   "claim": "rain falls after drought",
+   "status": "verified",
+   "evidence": "'That night after many months of drought it began to rain'"
+  },
+  {
+   "claim": "Simo is a merchant",
+   "status": "verified",
+   "evidence": "'he was a trader and had three ships'; ok"
+  },
+  {
+   "claim": "Mysis is Chrysis's old servant",
+   "status": "verified",
+   "evidence": "'the old woman'; 'Mysis'; Chrysis found her (Alexandrian, ex-slave)"
+  },
+  {
+   "claim": "Pamphilus a thoughtful young man",
+   "status": "unfound",
+   "evidence": "no supporting description found",
+   "fix": "Simo's son, who loves Glycerium"
+  }
+ ]
+}

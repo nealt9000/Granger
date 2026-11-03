@@ -1,0 +1,76 @@
+{
+ "slug": "works-of-edgar-allan-poe-volume-1",
+ "claims": [
+  {
+   "claim": "Front matter: appreciation, preface, Life of Poe",
+   "status": "verified",
+   "evidence": "Contents: PREFACE, LIFE OF POE, DEATH OF POE, then the tales; 'An Appreciation' precedes"
+  },
+  {
+   "claim": "After a preface and a Life of Poe (omitted the Appreciation)",
+   "status": "wrong",
+   "evidence": "text begins with 'Edgar Allan Poe an Appreciation'",
+   "fix": "After an appreciation, a preface and a Life of Poe"
+  },
+  {
+   "claim": "First tale is Hans Pfaall, opening with Rotterdam news",
+   "status": "verified",
+   "evidence": "'By late accounts from Rotterdam, that city seems to be in a high state of philosophical excitement'"
+  },
+  {
+   "claim": "Eight tales",
+   "status": "verified",
+   "evidence": "Contents list names eight tales Hans Pfaall..Oval Portrait"
+  },
+  {
+   "claim": "Hans Pfaall, Rotterdam man in debt, flies balloon to moon",
+   "status": "verified",
+   "evidence": "'having given my creditors the slip'; 'nineteenth day of my departure from Rotterdam, arrived in safety at the...moon'"
+  },
+  {
+   "claim": "Gold-Bug: Legrand and Jupiter decode a cipher, unearth Kidd's treasure",
+   "status": "verified",
+   "evidence": "'Mr. William Legrand'; 'old negro, called Jupiter'; 'cipher'; 'Captain Kidd'; 'estimated the entire contents of the chest'"
+  },
+  {
+   "claim": "Rue Morgue: Dupin shows an escaped orang-outang killed Madame and Mademoiselle L'Espanaye",
+   "status": "verified",
+   "evidence": "'C. Auguste Dupin'; 'Ourang-Outang may have escaped'; daughter corpse thrust up chimney; 'razor in hand'"
+  },
+  {
+   "claim": "Marie Roget: Dupin reasons from newspaper accounts about a perfumery girl",
+   "status": "verified",
+   "evidence": "'attracted the notice of a perfumer...his perfumery'; Rogêt; Dupin reasoning from journals"
+  },
+  {
+   "claim": "Balloon-Hoax reports an Atlantic crossing",
+   "status": "verified",
+   "evidence": "'The Atlantic crossed in Three Days! ... Steering Balloon'"
+  },
+  {
+   "claim": "MS. Found in a Bottle: sailor carried toward South Pole",
+   "status": "verified",
+   "evidence": "'farther to the southward than any'; whirlpool; 'pole itself'"
+  },
+  {
+   "claim": "Four Beasts in One set in Antioch under Antiochus Epiphanes",
+   "status": "verified",
+   "evidence": "'Antiochus Epiphanes'; 'Antioch'"
+  },
+  {
+   "claim": "Oval Portrait: painter's young wife dies as he finishes",
+   "status": "verified",
+   "evidence": "'one brush upon the mouth...She was dead!'"
+  },
+  {
+   "claim": "Dupin is Parisian",
+   "status": "verified",
+   "evidence": "'Monsieur C. Auguste Dupin'; Parisian setting of Rue Morgue"
+  },
+  {
+   "claim": "Madame L'Espanaye's daughter is Camille",
+   "status": "verified",
+   "evidence": "'Madame L'Espanaye, and her daughter, Mademoiselle Camille L'Espanaye'"
+  }
+ ]
+}

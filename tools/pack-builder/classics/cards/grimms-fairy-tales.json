@@ -1,0 +1,37 @@
+{
+ "slug": "grimms-fairy-tales",
+ "title": "Grimms' Fairy Tales",
+ "author": "Jacob and Wilhelm Grimm",
+ "published": 1884,
+ "kind": "story collection",
+ "firstLine": "A certain king had a beautiful garden, and in the garden stood a tree which bore golden apples.",
+ "begins": "The first story is The Golden Bird: a king's golden apples are stolen each night, and the gardener's youngest son, keeping watch, shoots at the golden bird, which drops a golden feather.",
+ "happens": "Sixty-two tales (translated by Edgar Taylor and Marian Edwardes). In Hansel and Gretel, two children taken into a forest are caught by a witch, and Gretel pushes her into her oven. In Little Red-Cap a wolf devours a girl and her grandmother, and a huntsman cuts them out. Ashputtel is helped by a hazel tree and birds to marry the prince. Snowdrop eats the queen's poisoned apple, and wakes when the piece falls from her lips as a prince carries her coffin. Rumpelstiltskin spins straw into gold for a miller's daughter until she guesses his name. The Fisherman and his Wife ends with the wife's greed sending them back to their pigsty. Briar Rose sleeps a hundred years with the whole castle.",
+ "characters": [
+  {
+   "name": "Hansel and Gretel",
+   "who": "brother and sister who outwit a witch"
+  },
+  {
+   "name": "Ashputtel",
+   "who": "mistreated girl who marries a prince"
+  },
+  {
+   "name": "Snowdrop",
+   "who": "princess hunted by her stepmother"
+  },
+  {
+   "name": "Rumpelstiltskin",
+   "who": "dwarf who spins straw into gold"
+  },
+  {
+   "name": "Little Red-Cap",
+   "who": "girl who meets the wolf"
+  },
+  {
+   "name": "Briar Rose",
+   "who": "princess who sleeps a hundred years"
+  }
+ ],
+ "checks": "Verified first line, the contents list (62 tales), and that Hansel and Gretel, Ashputtel, Snowdrop, Rumpelstiltskin, Little Red-Cap, Briar Rose and Rapunzel appear by search. Fairy-tale outcomes in happens are from memory of these versions; Ashputtel's hazel tree and Snowdrop's wake-up not re-read."
+}

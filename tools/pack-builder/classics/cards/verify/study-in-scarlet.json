@@ -1,0 +1,102 @@
+{
+ "slug": "study-in-scarlet",
+ "claims": [
+  {
+   "claim": "Watson is wounded in the Afghan war and returns to London",
+   "status": "verified",
+   "evidence": "struck on the shoulder by a Jezail bullet ... landed ... on Portsmouth jetty; Holmes later 'Afghanistan'"
+  },
+  {
+   "claim": "Stamford introduces Watson to Holmes in a hospital laboratory",
+   "status": "verified",
+   "evidence": "'Dr. Watson, Mr. Sherlock Holmes,' said Stamford"
+  },
+  {
+   "claim": "They agree to share rooms at Baker Street",
+   "status": "verified",
+   "evidence": "'a suite in Baker Street'; 221b, Baker Street"
+  },
+  {
+   "claim": "Drebber lies dead in a house in Brixton",
+   "status": "wrong",
+   "evidence": "'3, Lauriston Gardens, off the Brixton Road' (an empty house)",
+   "fix": "an empty house in Lauriston Gardens, off the Brixton Road"
+  },
+  {
+   "claim": "Drebber is American",
+   "status": "verified",
+   "evidence": "'an American gentleman'"
+  },
+  {
+   "claim": "The word RACHE is on the wall",
+   "status": "verified",
+   "evidence": "RACHE."
+  },
+  {
+   "claim": "Stangerson is then found stabbed",
+   "status": "verified",
+   "evidence": "blood under the door at the hotel; Hope: 'I stabbed him to the heart'"
+  },
+  {
+   "claim": "Gregson and Lestrade chase the wrong men",
+   "status": "verified",
+   "evidence": "Gregson: 'I have made my case out, and it seems I was wrong. Young Charpentier ... Lestrade went after his man, Stangerson ... wrong too'"
+  },
+  {
+   "claim": "Part II is set in Utah; Hope loves Lucy Ferrier",
+   "status": "verified",
+   "evidence": "Lucy Ferrier and the young hunter; 'plan of vengeance'"
+  },
+  {
+   "claim": "Lucy is forced into marriage with Drebber and dies of grief",
+   "status": "verified",
+   "evidence": "'married yesterday to young Drebber'; 'hateful marriage into which she had been forced ... pined away and died within a month'"
+  },
+  {
+   "claim": "Hope hunts both men for revenge",
+   "status": "verified",
+   "evidence": "'fierce desire for vengeance'"
+  },
+  {
+   "claim": "Holmes tricks Hope into the cab he drives and arrests him",
+   "status": "wrong",
+   "evidence": "Holmes asks the cabman to step up to help with his boxes and handcuffs him in the room",
+   "fix": "Holmes has the cabman called up to help with his luggage and handcuffs him"
+  },
+  {
+   "claim": "Hope tells his story",
+   "status": "verified",
+   "evidence": "narrative in Chapter I of Part II"
+  },
+  {
+   "claim": "Hope dies of an aneurism before trial",
+   "status": "verified",
+   "evidence": "'On the very night after his capture the aneurism burst'"
+  },
+  {
+   "claim": "Holmes is a consulting detective",
+   "status": "verified",
+   "evidence": "Holmes' occupation described in Part I"
+  },
+  {
+   "claim": "Watson is an army surgeon and narrator",
+   "status": "verified",
+   "evidence": "'I took my degree of Doctor of Medicine ... surgeons in the army'"
+  },
+  {
+   "claim": "Hope is a cab-driver and former hunter",
+   "status": "verified",
+   "evidence": "'the cabman entered'; 'the young hunter from Nevada'"
+  },
+  {
+   "claim": "Stangerson is Drebber's secretary",
+   "status": "verified",
+   "evidence": "'his secretary, Mr. Joseph Stangerson'"
+  },
+  {
+   "claim": "Gregson and Lestrade are Scotland Yard detectives",
+   "status": "verified",
+   "evidence": "'Gregson is the smartest of the Scotland Yarders'; 'Lestrade is a well-known detective'"
+  }
+ ]
+}
