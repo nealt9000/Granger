@@ -1373,3 +1373,10 @@
 {"id": "multi-step-015", "kind": "answer", "replyHash": "a73a3b4f91b756ebbdc9f069def9aef43e18a714", "grade": "not-grounded", "reason": "Gives a homework question's round-trip estimate (2.57 s) from [3], not the one-way time asked."}
 {"id": "words-002", "kind": "answer", "replyHash": "55ae8e8892512e320b7c4e264bec8d3e8dfa527d", "grade": "not-grounded", "reason": "No passage defines betimes; 'early' is inferred from Sir Toby's usage in [4]."}
 {"id": "words-004", "kind": "answer", "replyHash": "b7f396e63011ded705e8b67b6cd2ba8e8b29bdc7", "grade": "grounded", "reason": "Salary from the Latin for salt, and the salt-pay claim baseless, as [1] and [4] both say."}
+{"id": "words-001", "kind": "answer", "replyHash": "b8ed474c11b58c4607664421157f51fb2413dba8", "grade": "grounded", "reason": "Wiktionary's adverb sense [2]: why, for what reason, because of what; interrogative, archaic."}
+{"id": "words-002", "kind": "answer", "replyHash": "620ac9b392019111b068faf596b8da67b5862416", "grade": "grounded", "reason": "Sense from Wiktionary's adverb [2] verbatim, etymology from [1]."}
+{"id": "words-003", "kind": "answer", "replyHash": "c9adfe2ae633053e3e6488679f6096ebb98af91e", "grade": "grounded", "reason": "Venetian quarantena, 'forty days', and the 40-day isolation of ships, per [3] and [4]."}
+{"id": "geography-002", "kind": "answer", "replyHash": "0ff473b1463fb9bb476dc601d315148318ab8557", "grade": "grounded", "reason": "Challenger Deep with [1]'s depth range and [2]'s 10,935 m."}
+{"id": "physics-003", "kind": "answer", "replyHash": "df633328b5681148be8f523d5777676383bf7d95", "grade": "grounded", "reason": "Definition from [3], the nuclear sense from Wiktionary [2], usage from [3]."}
+{"id": "mathematics-001", "kind": "answer", "replyHash": "9053e9749ba98d8c96cee74ce1b459559b0ce4ef", "grade": "grounded", "reason": "Andrew Wiles, published 1995, 'stunning advance' in the 2016 Abel Prize citation: all in [1]'s lead."}
+{"id": "medical-033", "kind": "answer", "replyHash": "3e6dd214d7a9403733ed881dd28e3972d8a93480", "grade": "grounded", "reason": "Both sentences restate [4]'s historical meaning closely; nothing added."}

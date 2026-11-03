@@ -179,6 +179,18 @@ These need full phone runs, so they're batched into one run.
   `r5-t7-all` search, so 6 tuning answerables (words-001 to -004, knots-001, -002) could never be answered there: the
   ceiling was 120/126. The dictionary-headword lookup waits until Wiktionary is on the phone; the held-out set has 3
   knots questions, so Knots (with its full-text index) must be on the phone before held-out scoring.
+- [x] **Dictionary lookup by headword, measured and on (2026-11-03).** `Headword.word` names the word a question asks the
+  meaning or origin of ("what does X mean", "the word X", "qué significa X", "la palabra X"; not "comes from" alone, not
+  "what did my doctor mean"); `LibraryPassageFinder.headword` reads its entry from the question's Wiktionary by path, the
+  language's section only, without pronunciation and translations (at most 2 passages: etymology, senses); they go
+  first. Wiktionary EN (`wiktionary_en_all_nopic_2026-08`, 8.5 GB, sha256 checked) is on the test phone.
+  `r2-t6-head` against `r2-t6-lib` (same build and library, headwords off): grounded 98 → **100/126**, declined 71/76
+  both, no losses; words-001 (wherefore: "why, for what reason") and words-002 (betimes) now grounded from the entry.
+  The first run found nothing: the eval's `RecordingFinder` didn't pass `headword` through (fixed, 7201f545); the app
+  calls `LibraryPassageFinder` directly. `headwords = true` in `GrangerApp`; the eval keeps `--headwords on` explicit.
+- [x] **"What did I search for"** declines before search (`DeclineCheck`, the asker's own searches and lookups):
+  unknowable catches 32/76 tuning unanswerables, 0 answerables. With the trimmed library, `r2-t6-lib` declines
+  **71/76 (93%)**.
 - [ ] The media cue words "movement", "piece", "suite" and "chapter": with media questions for them and the
   media-intrusion check (bar 0), which need the phone's library export (`dataset/media.json`). Not started.
 - [x] **Measured and on (2026-11-02).** `r2-t6-older`: the 8 tuning questions whose rewrite keywords hit the table, run
@@ -217,7 +229,11 @@ ZIM; new: Knots, Wikipedia Computer and Movies, Spanish packs. Attributable to t
 by the decline check (none of them answerable) and multi-step-004 by the verdict. Neal to decide the test library
 before held-out scoring.
 
-**Test library restored (2026-11-03):** IEP, WikEM, the Classics ZIM (`classics-2026-10-16` release, sha256 checked),
+**Test library restored (2026-11-03), then trimmed:** 20 packs no eval set cites or lists and that gave `r5-t7-all`
+no passage were removed through the app (`eval.py remove`): six Stack Exchange religion and philosophy sites, Wikipedia
+Computer, Movies and Spanish climate change, Gutenberg LCC-M, the Central America maps, the OSM wiki, prunelle, ready.gov,
+tonedear, trueprepper and the four zimgit packs. foss.cooking and devdocs Python went to the held-out set's snapshots
+(2026-11-02, 2026-10-31) and devdocs HTTP and SQLite were added, matching `~/.cache/granger/eval-packs`. Before that: IEP, WikEM, the Classics ZIM (`classics-2026-10-16` release, sha256 checked),
 devdocs C/Git/JavaScript/Python, foss.cooking, cs/unix/softwareengineering/reverseengineering Stack Exchange pushed back
 from `vectors-work/sources` with their vectors (`files/vectors/index.tsv`); engineering and hermeneutics Stack Exchange and
 Wikipedia Geography (maxi) re-downloaded from Kiwix (2026-10 builds, sha256 checked), no vectors, as before. The packs

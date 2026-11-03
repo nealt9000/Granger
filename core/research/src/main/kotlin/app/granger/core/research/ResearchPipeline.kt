@@ -197,7 +197,7 @@ class ResearchPipeline(
     private val olderWords: Boolean = false,
     /**
      * Plan R2 Task 6's debug variant: a question that asks what a word means or where it comes from ([Headword]) gets the
-     * word's dictionary entry ([PassageFinder.headword]) first among its passages. Off in the app until measured.
+     * word's dictionary entry ([PassageFinder.headword]) first among its passages. On in the app from 2026-11-03 (r2-t6-head).
      */
     private val headwords: Boolean = false,
 ) {
