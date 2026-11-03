@@ -221,7 +221,9 @@ before held-out scoring.
 devdocs C/Git/JavaScript/Python, foss.cooking, cs/unix/softwareengineering/reverseengineering Stack Exchange pushed back
 from `vectors-work/sources` with their vectors (`files/vectors/index.tsv`); engineering and hermeneutics Stack Exchange and
 Wikipedia Geography (maxi) re-downloaded from Kiwix (2026-10 builds, sha256 checked), no vectors, as before. The packs
-added since stay. Baseline on it, `r2-t7-base`: declined 68/76 (89%), grounded 97/126 (77%).
+added since stay. Baseline on it, `r2-t7-base`: declined 68/76 (89%), grounded 97/126 (77%). The book notes stay
+imported for held-out scoring (Neal, 2026-11-03), and the own-book group's EPUBs (`pg55`, `pg23`, `pg201`) are imported
+too (keyword search only until Task 9).
 - [ ] Neal reads a sample of cards before they ship.
 
 ## Task 8: prompt rules for misreads
