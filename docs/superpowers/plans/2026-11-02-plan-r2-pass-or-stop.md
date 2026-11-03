@@ -244,6 +244,12 @@ too (keyword search only until Task 9).
     left for misreads is the model (the LoRA, or a newer one) or code that does the reading, which R5 ruled out beyond
     the year cues.
 
+**A deeper dense search (2026-11-03, Mac only).** granger-1a's `runs/dims-256v768`: 768 dims isn't worth it (with the
+keyword passages, 92 vs 93 of 126 answers found at k = 24), but at 256 a deeper k finds more (92, 93, 98 at k 24, 48,
+100). Does it reach the prompt? `tools/eval/experiments/dense_k.py` rebuilt `r2-t7-base`'s dense hits offline at k 24,
+48 and 100, and `PipelineReplayTest` ranked them as the app does: an answer quote in the prompt 62, 63, 63 of 126. The
+one gain is multi-step-015 (light to the Moon), a misread. The extra hits rank below the top 4, so `k = 24` stays.
+
 ## Task 9: books you add (the own-book group)
 
 - [ ] Imported EPUBs are chunked with `:core:text` and embedded on the phone with EmbeddingGemma, in the background,
