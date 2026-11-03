@@ -110,9 +110,13 @@ Deterministic declines, in `DeclineCheck` (`:core:research`), wired into `Resear
 - [x] Rebuilt from `r5-t7-all`'s recorded passages, every block matches what was recorded, and 4 prompts gain a verdict:
   002 ("No: … Jane Austen had already died"), 004 ("Neither is older: … the same day"), 011 and 020 (both "Yes, as far
   as the dates go", both already grounded).
-- [ ] Phone replay: `answerers.py run r2-t3-base r2-t3 --set r2-verdict --model <E2B>` (base `r2-t3-base` is r5-t7-all
-  with those 4 prompts; set `sets/r2-verdict.json`). Gate: 002 and 004 grounded, 011 and 020 still grounded. Waits for
-  the phone: the L4 Spanish medical run had it on 2026-11-02 evening.
+- [x] Phone replay: `answerers.py run r2-t3-base r2-t3 --set r2-verdict --model <E2B>` (base `r2-t3-base` is r5-t7-all
+  with those 4 prompts; set `sets/r2-verdict.json`). Gate: 002 and 004 grounded, 011 and 020 still grounded.
+  **Result 2026-11-02: half met.** 004 now answers "Neither … born on the same day, February 12, 1809 [3][4]"; 011 and
+  020 stay grounded. 002 (could Jane Austen have read Frankenstein) still says NOT IN LIBRARY, under the verdict as
+  built and two rewordings tried on the same prompt (`r2-t3a`, `r2-t3b`); the most explicit drew "the passages do not
+  state whether Jane Austen could have read Frankenstein". E2B reads "could she have…" as asking whether a passage
+  says so; no further wording tuned to one question. The verdict stays: +1 grounded, no losses.
 - [ ] A reply that contradicts the block's verdict is flagged in the eval report (not hidden in the app this round).
 
 ## Task 4: ranking
