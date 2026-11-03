@@ -2,7 +2,7 @@
 
 **Goal:** Granger on a 4 GB, 2020 mid-range phone, used off-grid day to day, is a complete library and doesn't feel like a cut-down Pixel. The tester picks the **Efficient** start, adds what his situation needs, and reports back. His phone stands in for the phones in the places Granger matters most, so this tier gets the same finish as the top one.
 
-**Counts toward:** release checklist A (a non-Pixel phone; the device checks for an SD card and read-aloud on a 4 GB phone) and the NLnet application (field evidence on a low-cost phone, off-grid, outside the US).
+**Counts toward:** release checklist A (a non-Pixel phone; the device checks for an SD card and read-aloud on a 4 GB phone) and the grant applications, OTF first (field evidence on a low-cost phone, off-grid, outside the US).
 
 ## The phone
 
