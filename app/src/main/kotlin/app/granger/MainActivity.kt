@@ -94,7 +94,7 @@ class MainActivity : FragmentActivity() {
         createdLanguage = container.appLanguages.language.value
         // So rail availability reflects the files on disk now, not the last scan.
         container.appScope.launch { runCatching { container.library.refresh() } }
-        startBookWork(container.booksScannedThisProcess, container.appScope, container.bookshelf) { container.bookIndex.indexPending() }
+        startBookWork(container.booksScannedThisProcess, container.appScope, container.bookshelf) { container.prepareBooks() }
         if (container.chatsSettledThisProcess.compareAndSet(false, true)) {
             // A turn still PENDING was cut off when its process died.
             container.appScope.launch { container.researchChats.interruptPending() }

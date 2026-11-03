@@ -174,6 +174,8 @@ import app.granger.core.library.bookSource
 import app.granger.library.GutenbergCovers
 import app.granger.library.GutenbergShelf
 import app.granger.core.library.DensePassageFinder
+import app.granger.core.library.BookVectors
+import kotlinx.coroutines.sync.withLock
 import app.granger.core.library.CombinedVectorSources
 import app.granger.core.library.DirectoryVectorSources
 import app.granger.core.library.ListedVectorSources
@@ -777,11 +779,37 @@ class AppContainer(context: Context) {
     }
 
     /**
+     * Plan R2 Task 9: vectors for the books you add, made on the phone in the background, a few chunks per turn of the
+     * model, so a question asked meanwhile waits for one batch at most.
+     */
+    val bookVectors = BookVectors(
+        bookshelf, File(context.getExternalFilesDir(null), "vectors-own"),
+        embed = { docs ->
+            app.granger.research.ModelsAdapter.MODELS_IN_USE.withLock {
+                modelManager.embedder()?.let { e -> withContext(Dispatchers.IO) { e.embedDocuments(docs) } }
+            }
+        },
+        // At a cold start the catalog loads from its cache a moment after the books are scanned: wait for it.
+        embedderSha = {
+            kotlinx.coroutines.withTimeoutOrNull(30_000) { catalog.state.first { it.catalog != null } }
+            installedEmbedderSha()
+        },
+        log = { Log.i("Granger", it) },
+    )
+
+    /** A new or found book: its words are indexed first, so the keyword search has it at once; its vectors follow. */
+    suspend fun prepareBooks() {
+        bookIndex.indexPending()
+        bookVectors.embedPending()
+    }
+
+    /**
      * Plan R1's vector files: the installed vectors downloads (a pack's under its ZIM name, a Classic's under its book id;
      * the newest version of each), then any pushed to `files/vectors/` with an index for the eval.
      */
     val vectorSources = CombinedVectorSources(
         ListedVectorSources(::installedVectors, ::installedEmbedderSha),
+        bookVectors.sources,
         DirectoryVectorSources(File(context.getExternalFilesDir(null), "vectors")),
     )
 

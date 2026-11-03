@@ -234,3 +234,13 @@ def test_remove_asks_the_eval_screen_and_reads_back_the_outcomes(tmp_path):
 def test_remove_refuses_a_path(tmp_path):
     with pytest.raises(SystemExit, match="folder"):
         adb.remove_packs(Fake(), ["../a.zim"], "rm", tmp_path / "runs", sleep=lambda s: None)
+
+
+def test_embed_books_starts_the_eval_screen_and_reads_the_count(tmp_path):
+    out = tmp_path / "runs" / "eb"
+    out.mkdir(parents=True)
+    (out / "embedded.tsv").write_text("3\t125000\n")
+    f = Fake()
+    assert adb.embed_books(f, "eb", tmp_path / "runs", sleep=lambda s: None) == (3, 125000)
+    start = [" ".join(c) for c in f.calls if "am start" in " ".join(c)][0]
+    assert "runId eb" in start and "embedbooks 1" in start

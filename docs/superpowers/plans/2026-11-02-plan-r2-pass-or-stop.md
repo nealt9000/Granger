@@ -285,11 +285,26 @@ of Mac CPU per question (more on the phone). Ranking is left as it is.
 
 ## Task 9: books you add (the own-book group)
 
-- [ ] Imported EPUBs are chunked with `:core:text` and embedded on the phone with EmbeddingGemma, in the background,
-  stored beside the catalog vectors (R1's format). PDFs' text chunks too (`PdfText`). Builder's call: when it runs
-  (charging, idle) and how progress shows.
-- [ ] Without this the own-book group can only be answered by keyword search; it's scored and reported separately
-  until this lands.
+- [x] **Done (2026-11-03).** `BookVectors` (`:core:library`) makes the vectors of every book you import, on the phone:
+  the keyword index's chunks (an EPUB's chapters through `XhtmlText`, a PDF's pages through `PdfText`), embedded as
+  `build.py` embeds a catalog book (`title: <book title> | text: <chunk>`, `TextEmbedder.embedDocuments`), 8 at a time,
+  each batch taking the model's turn (`ModelsAdapter.MODELS_IN_USE`), so a question asked meanwhile waits one batch at
+  most. Written whole to `files/vectors-own/import-<sha>.gvec` (R1's format, 256 dims) and listed under the book's id
+  for the installed embedder only (a new embedder means new vectors). `DensePassageFinder` rebuilds a PDF hit from its
+  page. Tests: `BookVectorsTest` (5: an EPUB found by meaning, once per embedder, nothing without one, only imports, a
+  PDF by page).
+- [x] **Builder's call, when it runs:** right after an import is indexed, and at app start for any book still without
+  vectors (`GrangerApp.prepareBooks`: words first, so a new book is searchable by keyword at once, then vectors), while
+  the app is open; no charging or idle condition, since a typical book takes a minute or two. **Progress:** a
+  `StateFlow` (`BookVectors.progress`: title, chunks done of total, books left) and a log line per book; no UI yet.
+- [x] **On the Pixel 6** (`eval.py embed-books`): the 3 own-book EPUBs and the Classics notes, 1,063 chunks in 248 s,
+  about 0.23 s a chunk (Flatland 286 in 60 s, Douglass 215 in 72 s, Oz 412 in 87 s, the notes 150 in 27 s). Parity with
+  the Mac (the notes, embedded by both): the same 150 chunks and hashes, cosine 0.966–0.980 between the two, and every
+  phone vector's nearest Mac vector is its own chunk. A probe question about Douglass gets 12 of its 24 dense hits from
+  the imported book.
+- [x] Found on the way: at a cold start the catalog loads after the books are scanned, so the installed embedder was
+  unknown and the job stopped; it now waits up to 30 s for the catalog.
+- Other books you add (archive.org, Gutenberg) aren't embedded yet: `BookVectors(origins = …)` covers them when wanted.
 
 ## Task 10: scoring
 

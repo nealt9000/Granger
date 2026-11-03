@@ -896,7 +896,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 container.bookshelf,
                                 open = { uri -> context.contentResolver.openInputStream(uri) },
                                 nameOf = { uri -> displayNameOf(context, uri) },
-                                onImported = { container.appScope.launch { container.bookIndex.indexPending() } },
+                                onImported = { container.appScope.launch { container.prepareBooks() } },
                             ),
                             container.appScope,
                         )

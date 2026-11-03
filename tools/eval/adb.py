@@ -179,3 +179,20 @@ def remove_packs(runner, names, run_id, runs_dir, sleep=time.sleep):
     if rc:
         raise SystemExit("adb pull failed: " + o)
     return [tuple(line.split("\t")) for line in (out / "removed.tsv").read_text(encoding="utf-8").splitlines() if line]
+
+
+def embed_books(runner, run_id, runs_dir, sleep=time.sleep):
+    """Plan R2 Task 9: has the eval screen make the vectors of every added book that has none. Returns (books, ms)."""
+    check_front(runner)
+    runner(["shell", "rm", "-rf", "%s/%s" % (REMOTE, run_id)])
+    rc, o = runner(["shell", "am", "start", "-S", "-n", PKG + "/.eval.EvalActivity", "--es", "runId", run_id, "--es", "embedbooks", "1"])
+    if rc:
+        raise SystemExit("could not start the eval activity: " + o)
+    wait_done(runner, run_id, sleep)
+    out = Path(runs_dir) / run_id
+    out.mkdir(parents=True, exist_ok=True)
+    rc, o = runner(["pull", "%s/%s/embedded.tsv" % (REMOTE, run_id), str(out) + "/"])
+    if rc:
+        raise SystemExit("adb pull failed: " + o)
+    books, ms = (out / "embedded.tsv").read_text(encoding="utf-8").split()
+    return int(books), int(ms)

@@ -51,6 +51,12 @@ def cmd_run(a):
     return 0
 
 
+def cmd_embed_books(a):
+    books, ms = adb.embed_books(adb.real_runner, a.run_id, RUNS)
+    print("%d books embedded in %.1f s" % (books, ms / 1000))
+    return 0
+
+
 def cmd_remove(a):
     for name, outcome in adb.remove_packs(adb.real_runner, a.files, a.run_id, RUNS):
         print("%s\t%s" % (name, outcome))
@@ -116,6 +122,8 @@ def main(argv=None):
     r.add_argument("--dense", choices=["on", "off"], help="dense retrieval for the run (Plan R1); the app's DENSE_RETRIEVAL when not given"); r.set_defaults(f=cmd_run)
     im = s.add_parser("import", help="import book files into the phone's library and index them (Plan R2)")
     im.add_argument("files", nargs="+"); im.add_argument("--run-id", required=True); im.set_defaults(f=cmd_import)
+    eb = s.add_parser("embed-books", help="make the vectors of every added book that has none, on the phone (Plan R2 Task 9)")
+    eb.add_argument("--run-id", required=True); eb.set_defaults(f=cmd_embed_books)
     rm = s.add_parser("remove", help="remove packs from the phone's library by file name, as Sources' Remove does (Plan R2)")
     rm.add_argument("files", nargs="+"); rm.add_argument("--run-id", required=True); rm.set_defaults(f=cmd_remove)
     w = s.add_parser("worksheet"); w.add_argument("run"); w.set_defaults(f=cmd_worksheet)

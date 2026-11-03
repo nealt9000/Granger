@@ -96,7 +96,8 @@ class ModelsAdapter(
         }
     }
 
-    private companion object {
+    internal companion object {
+        /** One model use at a time: the pipeline's, and the books' vectors made in the background (Plan R2 Task 9). */
         val MODELS_IN_USE = Mutex()
     }
 }

@@ -81,6 +81,7 @@ class EvalActivity : ComponentActivity() {
         intent.getStringExtra("embed")?.let { embed(root, runId, it); return }
         intent.getStringExtra("import")?.let { importBooks(root, runId, it); return }
         intent.getStringExtra("remove")?.let { removePacks(root, runId, it); return }
+        if (intent.getStringExtra("embedbooks") != null) { embedBooks(root, runId); return }
         val c = (application as GrangerApp).container
         val ids = intent.getStringExtra("ids")
         val groups = intent.getStringExtra("groups")
@@ -176,6 +177,25 @@ class EvalActivity : ComponentActivity() {
     }
 
     /**
+     * Plan R2 Task 9: makes the vectors of every added book that has none, as the app does in the background, and writes
+     * `eval/<runId>/embedded.tsv` (books written, milliseconds), then `done`.
+     */
+    private fun embedBooks(root: File, runId: String) {
+        val c = (application as GrangerApp).container
+        val result = EvalSession.start(runId, root, ::log) {
+            val dir = File(root, runId).apply { mkdirs() }
+            c.embedderWanted.set(true)
+            val start = System.nanoTime()
+            val written = c.bookVectors.embedPending()
+            val ms = (System.nanoTime() - start) / 1_000_000
+            File(dir, "embedded.tsv").writeText("$written\t$ms\n")
+            File(dir, "done").writeText("done\n")
+            log("done $runId: $written books in $ms ms")
+        }
+        if (result != EvalSession.Start.STARTED) log("another eval is running; $runId was not started")
+    }
+
+    /**
      * Plan R2: `import` names book files under `eval/`, comma-separated, imported as the Library's import does (then
      * indexed), for the test library's own books and Classics notes. Writes `eval/<runId>/imported.tsv` (file, result,
      * book id), then `done`.
@@ -195,8 +215,8 @@ class EvalActivity : ComponentActivity() {
                 }
                 "$name\t${r::class.simpleName}\t$id"
             }
-            log("indexing")
-            c.bookIndex.indexPending()
+            log("indexing and embedding")
+            c.prepareBooks()
             File(dir, "imported.tsv").writeText(lines.joinToString("\n", postfix = "\n"))
             File(dir, "done").writeText("done\n")
             log("done $runId")

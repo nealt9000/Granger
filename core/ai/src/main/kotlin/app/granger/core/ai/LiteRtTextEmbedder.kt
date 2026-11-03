@@ -34,6 +34,12 @@ class LiteRtTextEmbedder(
         return e.computeEmbeddingBatch(inputs).map { it.embedding }
     }
 
+    override fun embedDocuments(docs: List<Pair<String, String>>): List<FloatArray> {
+        val e = checkNotNull(engine) { "load() first" }
+        val inputs = docs.map { (title, text) -> listOf(InputData.Text("title: ${title.trim().ifEmpty { "none" }} | text: $text")) }
+        return e.computeEmbeddingBatch(inputs).map { it.embedding }
+    }
+
     override fun close() {
         engine?.close()
         engine = null

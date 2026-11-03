@@ -1,5 +1,7 @@
 package app.granger.core.library
 
+import app.granger.core.books.PdfText
+import app.granger.core.books.TextChunk
 import app.granger.core.books.XhtmlText
 import app.granger.core.research.DenseFinder
 import app.granger.core.research.HtmlPassages
@@ -136,29 +138,38 @@ class DensePassageFinder(
     }
 
     private fun chapters(book: Book, hits: List<VectorHit>, collections: Map<String, String>, out: MutableMap<VectorHit, Passage>) {
+        // A PDF's chunks are its pages' (Plan R2 Task 9: vectors made on the phone for the PDFs you add).
+        if (book.format == BookFormat.PDF) {
+            PdfText.open(java.io.File(book.filePath))?.use { reader ->
+                hits.groupBy { it.file.key(it.row).key }.forEach { (href, same) -> rebuild(book, reader.chunks(href), same, collections, out) }
+            }
+            return
+        }
         val zip = try { ZipFile(book.filePath) } catch (_: IOException) { return }
         zip.use {
-            hits.groupBy { it.file.key(it.row).key }.forEach { (href, same) ->
-                val chunks = XhtmlText.chunks(zip, href)
-                for (hit in same) {
-                    val chunk = chunks.getOrNull(hit.file.key(hit.row).ordinal)
-                    if (chunk == null || Chunkers.hash(chunk.text) != hit.file.hash(hit.row)) {
-                        mismatches.incrementAndGet()
-                        continue
-                    }
-                    out[hit] = Passage(
-                        kind = SourceKind.BOOK,
-                        sourceId = book.id,
-                        sourceTitle = book.title,
-                        location = href,
-                        progression = chunk.progression,
-                        text = chunk.text,
-                        meta = SourceMeta(book.author, book.date, book.subjects, collections[book.id].orEmpty()),
-                        cosine = hit.score.toDouble(),
-                        language = ResearchLanguage.ofCode(book.language),
-                    )
-                }
+            hits.groupBy { it.file.key(it.row).key }.forEach { (href, same) -> rebuild(book, XhtmlText.chunks(zip, href), same, collections, out) }
+        }
+    }
+
+    private fun rebuild(book: Book, chunks: List<TextChunk>, same: List<VectorHit>, collections: Map<String, String>, out: MutableMap<VectorHit, Passage>) {
+        for (hit in same) {
+            val chunk = chunks.getOrNull(hit.file.key(hit.row).ordinal)
+            if (chunk == null || Chunkers.hash(chunk.text) != hit.file.hash(hit.row)) {
+                mismatches.incrementAndGet()
+                continue
             }
+            out[hit] = Passage(
+                kind = SourceKind.BOOK,
+                sourceId = book.id,
+                sourceTitle = book.title,
+                location = chunk.href,
+                heading = if (book.format == BookFormat.PDF) PdfText.pageOf(chunk.href)?.let { n -> "p. $n" }.orEmpty() else "",
+                progression = chunk.progression,
+                text = chunk.text,
+                meta = SourceMeta(book.author, book.date, book.subjects, collections[book.id].orEmpty()),
+                cosine = hit.score.toDouble(),
+                language = ResearchLanguage.ofCode(book.language),
+            )
         }
     }
 
