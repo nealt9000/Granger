@@ -164,6 +164,9 @@ object YearFacts {
      */
     /** Between a word and the name after it: up to three words, then "de", "del" or "de la/los/las". */
     private val OF_NAME_ES = Regex("\\s+(?:\\p{L}+\\s+){0,3}?(?:de|del)(?: la| los| las)?\\s+")
+    private val PRONOUN = Regex("\\b(he|she|his|her|him)\\b")
+    /** Between a word and the name it belongs to in English: "the fall of the Berlin Wall". */
+    private val OF_NAME_EN = Regex("\\s+of(?: the)?\\s+")
     private val LIVE_TO_SEE_ES = Regex("\\bllego\\b(?=.*\\ba ver\\b)|\\ba ver\\b")
     private val FORWARD_ES = setOf("cuando", "se", "mientras", "tras", "hasta", "desde")
 
@@ -243,6 +246,65 @@ object YearFacts {
             worked.forEach { appendLine("- $it") }
             if (languages.firstOrNull() != ResearchLanguage.ES) verdict(question, things)?.let { appendLine("So, for the question: $it") }
         }.trimEnd()
+    }
+
+    /**
+     * The question's verdict ([verdict]) as a reply of its own, for when the model declines with it in front of it (R2
+     * multi-step: given "No: in 1818 (Frankenstein), Jane Austen had already died", E2B said NOT IN LIBRARY). Cited
+     * like the block; English only, as the verdict is. Null when there's no verdict.
+     */
+    fun answer(
+        question: String,
+        keywords: List<String>,
+        passages: List<Passage>,
+        languages: List<ResearchLanguage> = ResearchLanguage.of(question),
+    ): String? {
+        if (languages.firstOrNull() == ResearchLanguage.ES) return null
+        val things = things(question, keywords, passages, languages)
+        if (worked(things).isEmpty()) return null
+        return verdict(question, things)
+    }
+
+    /**
+     * [ranked] with the passages that date the question's named things brought into its first [keep], when those
+     * places can't date them all and passages further down [pool] can (R2 multi-step: the King James Version's 1611,
+     * Columbus's 1492 and Mendeleev's 1869 were all found, but not among the four). A passage that dates nothing
+     * makes way, from the end; the rest keep their order and stay candidates.
+     */
+    fun complete(
+        question: String,
+        keywords: List<String>,
+        ranked: List<Passage>,
+        pool: List<Passage>,
+        keep: Int,
+        byMeaning: List<Passage> = emptyList(),
+        languages: List<ResearchLanguage> = ResearchLanguage.of(question),
+    ): List<Passage> {
+        val top = ranked.take(keep)
+        if (top.isEmpty()) return ranked
+        val have = things(question, keywords, top, languages)
+        val had = worked(have).size
+        // Only when the first places can't date it all; and further down, only the named things' own articles and the
+        // search by meaning's hits: any keyword hit naming them took Columbus, Ohio's 1831 for Columbus.
+        if (had > 0 && have.size >= 2) return ranked
+        val names = Entities.runs(question, languages).ifEmpty { keywords.filter { fold(question).contains(fold(it)) } }.map(::fold).distinct()
+        val own = (ranked.drop(keep) + pool).filter { p ->
+            p.kind == SourceKind.ARTICLE && names.any { Entities.match(p.sourceTitle, it, languages) > 0 }
+        } + byMeaning
+        val wide = top + own.distinctBy { Ranking.textKey(it) }.filter { p -> top.none { Ranking.textKey(it) == Ranking.textKey(p) } }
+        val found = things(question, keywords, wide, languages)
+        if (worked(found).size <= had) return ranked
+        val sources = found.flatMap { listOf(it.lifeAt, it.eventAt) }.filter { it > 0 }.map { it - 1 }.toSet()
+        val bring = sources.filter { it >= top.size }.sorted().map { wide[it] }
+        if (bring.isEmpty()) return ranked
+        val next = top.toMutableList()
+        for (p in bring) {
+            val out = next.indices.lastOrNull { i -> wide.indexOf(next[i]) !in sources } ?: break
+            next[out] = p
+        }
+        val now = things(question, keywords, next, languages)
+        if (worked(now).isEmpty() || now.size < have.size) return ranked
+        return next + (top + ranked.drop(keep)).filter { p -> p !in next }
     }
 
     private val OLDER = Regex("\\b(older|younger|oldest|youngest|born first|born earlier|born later)\\b", RegexOption.IGNORE_CASE)
@@ -334,12 +396,22 @@ object YearFacts {
                 event != null -> thing.copy(event = event.first, eventAt = event.second, quote = event.third)
                 // A work or an event with no sentence for its words: the first year of its lead, or the end of the
                 // lead's first range for an end ("the Berlin Wall fell": "from 1961 to 1989").
-                thing.born == null -> articles.firstNotNullOfOrNull { i ->
-                    val first = rules.sentence.split(texts[i]).firstOrNull { YEAR.containsMatchIn(it) } ?: return@firstNotNullOfOrNull null
-                    val range = if (mine.any { it in rules.ends }) rules.range.find(first) else null
-                    val at = range?.let(::endAt) ?: YEAR.find(first)!!.range.first
-                    if (rules.bc.matchesAt(first, at + 4)) null else dateIn(first, at, rules)?.let { Triple(it, i + 1, clause(first, at)) }
-                }?.let { thing.copy(event = it.first, eventAt = it.second, quote = it.third) } ?: thing
+                thing.born == null -> {
+                    val end = mine.any { it in rules.ends }
+                    // For an end, the first sentence of its articles with a range ("from 1961 to 1989"), before any
+                    // passage's first year ("After 1961, the deadly force…" was taken for "the fall of the Berlin Wall").
+                    val ranged = if (!end) null else articles.firstNotNullOfOrNull { i ->
+                        rules.sentence.split(texts[i]).firstOrNull { rules.range.containsMatchIn(it) }?.let { i to it }
+                    }
+                    val picked = ranged ?: articles.firstNotNullOfOrNull { i ->
+                        rules.sentence.split(texts[i]).firstOrNull { YEAR.containsMatchIn(it) }?.let { i to it }
+                    }
+                    picked?.let { (i, first) ->
+                        val range = if (end) rules.range.find(first) else null
+                        val at = range?.let(::endAt) ?: YEAR.find(first)!!.range.first
+                        if (rules.bc.matchesAt(first, at + 4)) null else dateIn(first, at, rules)?.let { Triple(it, i + 1, clause(first, at)) }
+                    }?.let { thing.copy(event = it.first, eventAt = it.second, quote = it.third) } ?: thing
+                }
                 else -> thing
             }
             // Two names for one article ("darwin", "charles darwin") are one thing.
@@ -520,10 +592,17 @@ object YearFacts {
                 // Another article's sentence counts only on one of the groups' words: "bible" alone took the
                 // Methuselah Foundation's 2003.
                 if (!own && found.none { f -> groups.any { f.value in it } }) continue
-                // Each of the question's words counts once, however many of its group the sentence has; the name's own
-                // article wins a tie, then the earlier sentence (a lead's first edition before a later translation).
-                val score = 2 * groups.count { g -> g.any { it in words } && found.any { it.value in g } } +
-                    2 * found.count { f -> f.value in words && groups.none { f.value in it } } + (if (own) 1 else 0)
+                // A person's event is one they're in: their name or "he"/"she" ("Another person to propose a periodic
+                // table was Lothar Meyer, who published a paper in 1864" is in Mendeleev's article, not his).
+                if (lifeYears.isNotEmpty() && !folded.contains(name.substringAfterLast(' ')) && !PRONOUN.containsMatchIn(folded)) continue
+                // Each of the question's words counts once, however many of its group the sentence has; more of the
+                // question's own words beat the name's own article ("Dmitri Mendeleev published a periodic table … in
+                // 1869" over his article's "the Nobel Prize in Chemistry for 1906 … periodic system"); the own article
+                // wins a tie, then the earlier sentence (a lead's first edition before a later translation).
+                val distinct = found.map { it.value }.filter { it in words }.distinct().size
+                val score = 20 * groups.count { g -> g.any { it in words } && found.any { it.value in g } } +
+                    20 * found.count { f -> f.value in words && groups.none { f.value in it } } + (if (own) 10 else 0) +
+                    15 * (distinct - 1).coerceAtLeast(0)
                 if (best != null && score <= best.first) continue
                 val range = if (found.any { it.value in rules.ends }) rules.range.find(s) else null
                 val at = if (range != null) {
@@ -531,7 +610,14 @@ object YearFacts {
                 } else {
                     // In another article, the first year after the name: "Madoc ... sailed to the Americas in 1170, over
                     // 300 years before Christopher Columbus's voyage in 1492" is 1492 for Columbus.
-                    val from = if (own) found.first().range.first else folded.indexOf(name)
+                    // After the name, the year after its event word when there is one: "the King James Bible ... was
+                    // commissioned in 1604 and published in 1611" is 1611 for "came out".
+                    val from = if (own) {
+                        found.first().range.first
+                    } else {
+                        val n = folded.indexOf(name)
+                        found.firstOrNull { f -> f.range.first > n && groups.any { f.value in it } && f.value in wanted }?.range?.first ?: n
+                    }
                     (YEAR.findAll(s).firstOrNull { it.range.first > from } ?: if (own) YEAR.find(s) else null)?.range?.first ?: continue
                 }
                 // A person's own birth or death year is their lifespan, not the event; a year BC isn't one we can count.
@@ -573,7 +659,10 @@ object YearFacts {
             val forward = afterAt != null && (
                 WORD.findAll(q.substring(beforeAt?.let { it.second + it.first.length }?.coerceAtMost(m.range.first) ?: 0, m.range.first))
                     .any { it.value in rules.forward } ||
-                    (rules.ofName && afterAt > m.range.last && OF_NAME_ES.matches(q.substring(m.range.last + 1, afterAt)))
+                    (rules.ofName && afterAt > m.range.last && OF_NAME_ES.matches(q.substring(m.range.last + 1, afterAt))) ||
+                    // English "the fall of the Berlin Wall" (R2 multi-step: "fall" went to the Declaration before it,
+                    // and the Wall took its lead's first year, 1961).
+                    (rules.english && afterAt > m.range.last && OF_NAME_EN.matches(q.substring(m.range.last + 1, afterAt)))
                 )
             val owner = (if ((rules.english && w.endsWith("ing") && after != null) || forward) after else before ?: after) ?: continue
             out.getOrPut(owner) { mutableSetOf() } += w

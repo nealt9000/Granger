@@ -1392,3 +1392,7 @@
 {"id": "medical-002", "kind": "answer", "replyHash": "75251ec46e52c7330bbb5e8637479caa3de5705b", "grade": "grounded", "reason": "Type 1 autoimmune beta-cell destruction [4]; type 2 from obesity and lack of exercise [1]; nothing beyond the passages."}
 {"id": "medical-003", "kind": "answer", "replyHash": "4e469228e82473520e6c63c6dbba2f35b966978a", "grade": "grounded", "reason": "Under 120/80 (AHA/ACC) and 120/70 (ESC) from [1]; 120/80 example from [3]."}
 {"id": "medical-012", "kind": "answer", "replyHash": "7f29256ebc72f36ae9ecbb2d33be3c513753eaaa", "grade": "grounded", "reason": "[2] long voyages on limited staples, lacking fruit, vegetables and vitamin C, caused scurvy."}
+{"id": "multi-step-002", "kind": "answer", "replyHash": "8353863aa55eed1f109795db4700cbf9f5e89c99", "grade": "grounded", "reason": "Austen died 18 July 1817 [4]; Frankenstein published 1818 [3]; the verdict follows."}
+{"id": "multi-step-009", "kind": "answer", "replyHash": "bf5572d8edcfd2735e11ee6a767b9c0a0d9f2399", "grade": "grounded", "reason": "Mayflower 1620 [1]; Columbus's voyage in 1492 [4]; 128 years is right."}
+{"id": "multi-step-012", "kind": "answer", "replyHash": "5ad47d7c00ecd394d5d1f21d2ce857716911b539", "grade": "grounded", "reason": "Wall stood 1961 to 1989 [2]; Declaration 1776 [4]; 213 years is right."}
+{"id": "multi-step-018", "kind": "answer", "replyHash": "a5773302794916a8ceb74e98ba0e0209afd5c247", "grade": "not-grounded", "reason": "Counts from the 1871 eight-column revision, not Mendeleev's 1869 periodic table the question means; 40 years, not 42."}

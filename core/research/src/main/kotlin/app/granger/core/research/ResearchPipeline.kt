@@ -285,13 +285,18 @@ class ResearchPipeline(
         val ranking = try {
             val merged = hits?.let { Ranking.hybrid(found, it, topical, config, weight, languages) }
             val lifted = Ranking.liftMedia(merged ?: rank(request.question, found, topical, weight, languages), found, asked)
-            if (reserveNamed && Entities.asked(request.question, languages)) {
+            val reserved = if (reserveNamed && Entities.asked(request.question, languages)) {
                 Entities.reserve(
                     lifted, all + hits.orEmpty(), Entities.named(request.question, keywords, languages), config.small,
                     languages = languages,
                 )
             } else {
                 lifted
+            }
+            if (yearFacts && request.quote == null && Entities.asked(request.question, languages)) {
+                YearFacts.complete(request.question, keywords, reserved, all + hits.orEmpty(), config.small, hits.orEmpty(), languages)
+            } else {
+                reserved
             }
         } catch (e: CancellationException) {
             throw e
@@ -350,7 +355,21 @@ class ResearchPipeline(
             }
             is CitationCheck.Valid ->
                 Outcome.Answered(reply, passages, check.cited, candidates, medical, keywords)
-            CitationCheck.ModelDeclined -> Outcome.Declined(medical, keywords, passages, reply)
+            CitationCheck.ModelDeclined -> {
+                // The dates settle it and the model declined anyway: the block's own verdict is the answer.
+                val verdict = if (yearFacts && quote == null && Entities.asked(request.question, languages)) {
+                    YearFacts.answer(request.question, keywords, passages, languages)
+                } else {
+                    null
+                }
+                val cited = verdict?.let { Citations.check(it, passages.size, languages) as? CitationCheck.Valid }
+                if (verdict != null && cited != null) {
+                    emit(ResearchEvent.Partial(verdict))
+                    Outcome.Answered(verdict, passages, cited.cited, candidates, medical, keywords)
+                } else {
+                    Outcome.Declined(medical, keywords, passages, reply)
+                }
+            }
             CitationCheck.Invalid -> Outcome.Unverified(reply, passages, candidates, medical, keywords)
         }
         emit(ResearchEvent.Done(outcome))

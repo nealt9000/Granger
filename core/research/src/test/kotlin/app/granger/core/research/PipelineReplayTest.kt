@@ -52,6 +52,7 @@ class PipelineReplayTest {
         var compared = 0
         var quoted = 0
         var answerable = 0
+        val blocks = StringBuilder()
         for (rec in records) {
             val id = rec.str("id")!!
             val item = items[id] ?: continue
@@ -83,7 +84,9 @@ class PipelineReplayTest {
             val prompt = answerPrompts.lastOrNull().orEmpty()
             // The prompt's rules change between runs, and recorded passages carry no author or date, so fidelity is
             // the passages chosen, in order.
-            val chosen = ((events.last() as ResearchEvent.Done).outcome as? Outcome.Declined)?.passages.orEmpty().map { Ranking.textKey(it) }
+            // The stand-in model always declines; a date verdict turns that into an answer on the same passages.
+            val done = (events.last() as ResearchEvent.Done).outcome
+            val chosen = ((done as? Outcome.Declined)?.passages ?: (done as? Outcome.Answered)?.passages).orEmpty().map { Ranking.textKey(it) }
             val recordedChosen = rec["chosen"]?.jsonArray?.map { Ranking.textKey(passage(it.jsonObject)) }.orEmpty()
             val isSame = chosen == recordedChosen
             compared++
@@ -93,9 +96,17 @@ class PipelineReplayTest {
             val hasQuote = quotes.any { fold(it) in fold(prompt) }
             if (isAnswerable && quotes.isNotEmpty()) { answerable++; if (hasQuote) quoted++ }
             out.append("$id\t$isAnswerable\t$hasQuote\t$isSame\t${chosen.size}\n")
+            if (id.startsWith("multi-step")) {
+                val titles = ((done as? Outcome.Declined)?.passages ?: (done as? Outcome.Answered)?.passages).orEmpty()
+                blocks.append("## $id ").append(titles.joinToString(" | ") { it.sourceTitle + " / " + it.heading + " :: " + it.text.take(60).replace('\n', ' ') }).append("\n")
+            }
+            prompt.indexOf("Dates in the passages:").takeIf { it >= 0 }?.let { at ->
+                blocks.append("== $id\n").append(prompt.substring(at).substringBefore("\n\nQuestion:")).append("\n")
+            }
         }
         File("build/replay").mkdirs()
         File("build/replay/$run.tsv").writeText(out.toString())
+        File("build/replay/$run-dates.txt").writeText(blocks.toString())
         println("REPLAY $run: passages as recorded $same/$compared; answer quote in the prompt $quoted/$answerable")
     }
 

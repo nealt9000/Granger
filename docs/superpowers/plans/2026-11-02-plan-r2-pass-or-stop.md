@@ -316,6 +316,18 @@ of Mac CPU per question (more on the phone). Ranking is left as it is.
   words median 12.8 s (p90 17.1 s), total median 16.8 s. Imported-book passages were chosen in 3 replies (the
   Classics notes; all grounded), so the own-book vectors cost nothing. Latency per stage isn't in the report; the
   total and first-words times stand in.
+- [x] **Multi-step, before scoring (2026-11-03, Neal's call).** Of `r2-t10-all`'s 10 multi-step misses, 7 lacked one
+  of the two facts in the prompt and 3 had them but reasoned wrongly. Four changes to YearFacts and the pipeline:
+  an English "the fall of the Berlin Wall" gives "fall" to the name after "of"; an end with no word for it takes its
+  article's range end (1989), not a passage's first year (1961); when the four passages can't date every named thing,
+  `YearFacts.complete` brings in one that can from the things' own articles or the search by meaning's hits (keyword
+  hits only naming them took Columbus, Ohio's 1831), and a person's event must be a sentence they're in (not Lothar
+  Meyer's 1864 in Mendeleev's article); and when the model declines with a date verdict in front of it, the verdict is
+  the answer. Mac replay: only 009's and 018's passages change; recall by quote unchanged (67/126). Phone,
+  `r2-ms-dates` (the 27 tuning items with date cues): **multi-step 10 → 13 of 20** (002, 009, 012), no losses, the one
+  unanswerable still declined. 018 now counts from the 1871 table (not 1869; graded not grounded). Left: 003 (the KJV
+  passage outranked by Shakespeare's), 010 (Noah's age is a count, not a date), 006 and 007 (second hop), 015 and 017
+  (physics arithmetic). With the rest of `r2-t10-all` unchanged, the tuning estimate is 103/126 (82%).
 - [ ] **Held-out scoring 1 of 2**: the whole set on the Pixel 6, graded by a separate session per `RUBRIC.md`. Totals and
   per-domain numbers only reach this session.
 - [ ] **Best guess** re-scored on E2B: confidently wrong ≤ 10% (eval spec; E2B was 20% on the Plan 9 held-out set, and

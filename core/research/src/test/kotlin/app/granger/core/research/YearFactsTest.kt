@@ -115,4 +115,66 @@ class YearFactsTest {
         assertThat(YearFacts.eventWords("How long did Darwin live after publishing On the Origin of Species?", listOf("darwin", "on the origin of species")))
             .containsExactly("on the origin of species", setOf("publishing"))
     }
+
+    // R2 multi-step: what the four passages miss, further down.
+    private fun article(title: String, text: String, heading: String = title) =
+        Passage(SourceKind.ARTICLE, "wiki", title, location = title.replace(' ', '_'), heading = heading, text = text)
+    private val mayflower = (1..4).map { n ->
+        article("Mayflower", "Mayflower was an English ship that transported the Pilgrims to the New World in 1620. Part $n.", if (n == 1) "Mayflower" else "Part $n")
+    }
+    private val q009 = "How many years after Columbus reached the Americas did the Mayflower arrive?"
+
+    @Test fun theOfNameGoesToTheNameAfter() {
+        val names = listOf("declaration of independence", "berlin wall")
+        assertThat(YearFacts.eventWords("How many years passed between the Declaration of Independence and the fall of the Berlin Wall?", names))
+            .containsExactly("berlin wall", setOf("fall"))
+    }
+
+    @Test fun anEndWithoutItsWordTakesTheRangeNotThePassagesFirstYear() {
+        val passages = listOf(
+            article("Berlin Wall", "After 1961, the deadly force associated with the Wall prevented almost all such emigration.", "Emigration"),
+            article("Berlin Wall", "The Berlin Wall was a concrete barrier separating Western and Eastern parts of Berlin from 1961 to 1989."),
+            article("United States Declaration of Independence", "The Declaration of Independence was adopted on July 4, 1776."),
+        )
+        assertThat(YearFacts.block("How many years passed between the Declaration of Independence and the fall of the Berlin Wall?", emptyList(), passages))
+            .contains("Berlin Wall (1989) came about 213 years after United States Declaration of Independence (4 July 1776)")
+    }
+
+    @Test fun aPassageFurtherDownDatesWhatTheFirstPlacesCant() {
+        val voyages = article("Voyages of Columbus", "Christopher Columbus made four voyages from Spain to the Caribbean, and reached the Americas in 1492.")
+        val ohio = article("Columbus, Ohio", "The National Road reached Columbus from Baltimore in 1831.")
+        assertThat(YearFacts.block(q009, emptyList(), mayflower)).isNull()
+        val done = YearFacts.complete(q009, emptyList(), mayflower, pool = listOf(ohio), keep = 4, byMeaning = listOf(voyages))
+        assertThat(done.take(4)).contains(voyages)
+        assertThat(done.take(4)).doesNotContain(ohio)
+        assertThat(done).containsExactlyElementsIn(mayflower + voyages)
+        assertThat(YearFacts.block(q009, emptyList(), done.take(4))).contains("came about 128 years after Columbus (1492)")
+        // A keyword hit that only names it isn't searched further down.
+        assertThat(YearFacts.complete(q009, emptyList(), mayflower, pool = listOf(ohio), keep = 4)).isEqualTo(mayflower)
+    }
+
+    @Test fun whatTheFirstPlacesDateIsLeftAlone() {
+        val passages = items.getValue("multi-step-008").third
+        val (q, k, _) = items.getValue("multi-step-008")
+        assertThat(YearFacts.complete(q, k, passages, pool = passages.reversed(), keep = 4)).isEqualTo(passages)
+    }
+
+    @Test fun aPersonsEventIsOneTheyAreIn() {
+        val passages = listOf(
+            article("Dmitri Mendeleev", "Dmitri Mendeleev (8 February 1834 – 2 February 1907) was a Russian chemist."),
+            article("Dmitri Mendeleev", "Another person to propose a periodic table was Lothar Meyer, who published a paper in 1864.", "Periodic table"),
+            article("Mendeleev's predicted elements", "Dmitri Mendeleev published a periodic table of the chemical elements in 1869."),
+            article("Marie Curie", "Marie Curie (7 November 1867 – 4 July 1934) was a chemist. She won the 1911 Nobel Prize in Chemistry."),
+        )
+        val block = YearFacts.block("How many years after Mendeleev's periodic table did Marie Curie win her chemistry Nobel?", emptyList(), passages)
+        assertThat(block).contains("1869 [3]")
+        assertThat(block).doesNotContain("1864")
+    }
+
+    @Test fun theVerdictAloneIsAnAnswer() {
+        val (q, k, p) = items.getValue("multi-step-002")
+        assertThat(YearFacts.answer(q, k, p)).isEqualTo("No: in 1818 (Frankenstein), Jane Austen had already died (18 July 1817) [3][4].")
+        val (q2, k2, p2) = items.getValue("multi-step-009")
+        assertThat(YearFacts.answer(q2, k2, p2)).isNull()
+    }
 }

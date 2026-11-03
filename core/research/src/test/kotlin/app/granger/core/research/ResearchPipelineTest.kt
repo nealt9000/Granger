@@ -174,6 +174,27 @@ class ResearchPipelineTest {
     }
 
     @Test
+    fun aDeclineWithADateVerdictIsTheVerdict() = runTest {
+        // R2 multi-step: given "No: … Jane Austen had already died", E2B said NOT IN LIBRARY.
+        fun article(title: String, text: String) = Passage(SourceKind.ARTICLE, "wiki", title, location = title, heading = title, text = text)
+        val austen = article("Jane Austen", "Jane Austen (16 December 1775 – 18 July 1817) was an English novelist.")
+        val frankenstein = article("Frankenstein", "Frankenstein; or, The Modern Prometheus is an 1818 Gothic novel written by Mary Shelley.")
+        val gen = FakeGenerator(
+            rewrite = { flowOf("keywords: Jane Austen, Frankenstein\n", "medical: no") },
+            answer = { flowOf(AnswerPrompt.DECLINE_TOKEN) },
+        )
+        val question = "Could Jane Austen have read Frankenstein?"
+        val on = ResearchPipeline(FakeFinder(listOf(austen, frankenstein)), FakeModels(gen, embedder = embedder), yearFacts = true)
+            .run(ResearchRequest(question)).toList()
+        val out = outcome(on) as Outcome.Answered
+        assertThat(out.text).startsWith("No: in 1818 (Frankenstein), Jane Austen had already died (18 July 1817)")
+        assertThat(out.cited).isNotEmpty()
+        val off = ResearchPipeline(FakeFinder(listOf(austen, frankenstein)), FakeModels(gen, embedder = embedder))
+            .run(ResearchRequest(question)).toList()
+        assertThat(outcome(off)).isInstanceOf(Outcome.Declined::class.java)
+    }
+
+    @Test
     fun rewriteTimeoutFallsBackToKeywords() = runTest {
         val gen = FakeGenerator(rewrite = { flow { awaitCancellation() } })
         val finder = FakeFinder(listOf(water))
