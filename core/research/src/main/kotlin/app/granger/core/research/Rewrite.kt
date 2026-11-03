@@ -20,14 +20,28 @@ object Rewrite {
     private val META_WORDS = Regex("^$META(\\s+(of|for)\\b)?\\s*|\\s*\\b$META$", RegexOption.IGNORE_CASE)
 
     /**
+     * Keywords that are only a word about the question when they stand alone: l4-tune-es-1 searched "ñapa, term",
+     * "madrugué, word" and "sobremesa, spanish", and the extra keyword brought in "Short-term memory" and "Microsoft Word".
+     * Inside a name they stay ("Microsoft Word", "Spanish flu").
+     */
+    private val ALONE = setOf(
+        "term", "terms", "word", "words", "phrase", "expression", "slang", "spanish", "english", "language",
+        "palabra", "palabras", "termino", "terminos", "término", "términos", "expresion", "expresión", "frase",
+        "significado", "significados", "jerga", "español", "espanol", "ingles", "inglés", "idioma",
+    )
+
+    /**
      * With [alternates] (Plan R0's debug variant), a keyword may carry up to [MAX_ALTERNATES] other words the source
      * might use for it, in brackets; [parse] turns `wine (strong drink)` into the group `wine|strong drink`.
      */
-    fun prompt(question: String, previousQuestion: String?, alternates: Boolean = false): String = buildString {
+    fun prompt(question: String, previousQuestion: String?, alternates: Boolean = false, languages: List<ResearchLanguage> = Keywords.ENGLISH): String = buildString {
+        val spanish = SpanishWords.leads(languages)
         append("Turn the question into search words for finding the text that answers it in a library.\n")
         append("Use the words that text itself would contain: names of people, places, works and things, and the source's own wording (older or formal words too).\n")
         append("Don't use words about the question, like definition, meaning, history, facts, problems, references, etymology.\n")
         append("For what a word means or where it comes from, give the word itself.\n")
+        // l4-tune-es-1: a Spanish question's search words came back partly English ("apapachó, feeling, affection").
+        if (spanish) append("The question is in Spanish: give the search words in Spanish, as a Spanish source would write them.\n")
         if (alternates) {
             append("After a keyword, add in brackets up to 2 other words the source itself might use for it instead (older words, synonyms, the thing named differently).\n")
         }
@@ -35,8 +49,13 @@ object Rewrite {
         append(if (alternates) "keywords: <3 to 6 words or short names, comma-separated, each with any other words in brackets>\n" else "keywords: <3 to 6 words or short names, comma-separated>\n")
         append("medical: <yes if the question is about health, illness, injury, the body, medicines or treatment; otherwise no>\n")
         append("Example:\n")
-        append("Question: how did old sailors work out how far east or west they were\n")
-        append(if (alternates) "keywords: longitude (meridian), marine chronometer (timekeeper), lunar distance, navigation (reckoning)\n" else "keywords: longitude, marine chronometer, lunar distance, navigation\n")
+        if (spanish && !alternates) {
+            append("Question: ¿cómo sabían los marinos antiguos qué tan al este o al oeste estaban?\n")
+            append("keywords: longitud, cronómetro marino, distancia lunar, navegación\n")
+        } else {
+            append("Question: how did old sailors work out how far east or west they were\n")
+            append(if (alternates) "keywords: longitude (meridian), marine chronometer (timekeeper), lunar distance, navigation (reckoning)\n" else "keywords: longitude, marine chronometer, lunar distance, navigation\n")
+        }
         append("medical: no\n")
         if (previousQuestion != null) append("Previous question: ").append(previousQuestion).append('\n')
         append("Question: ").append(question)
@@ -54,7 +73,7 @@ object Rewrite {
         if (original.isEmpty()) return null
         fun clean(k: String): String {
             var out = k.replace(SPACES, " ").trim()
-            while (true) out = META_WORDS.replace(out, "").trim().takeIf { it != out } ?: return out
+            while (true) out = META_WORDS.replace(out, "").trim().takeIf { it != out } ?: return out.takeUnless { it.lowercase() in ALONE }.orEmpty()
         }
         val cleaned = original
             .map { k ->

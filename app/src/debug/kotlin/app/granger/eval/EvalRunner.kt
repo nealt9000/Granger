@@ -58,6 +58,7 @@ class RecordingFinder(private val inner: PassageFinder, private val clock: () ->
         keywords = emptyList()
         languages = Keywords.ENGLISH
         passages = emptyList()
+        entry = null
         ms = null
         timings = null
     }
@@ -69,11 +70,17 @@ class RecordingFinder(private val inner: PassageFinder, private val clock: () ->
         this.languages = languages
         val start = clock()
         return inner.find(keywords, languages).also {
-            passages = it
+            passages = listOfNotNull(entry) + it
             ms = clock() - start
             timings = (inner as? LibraryPassageFinder)?.lastTimings
         }
     }
+
+    /** The dictionary entry (Plan L4 word questions); it joins [passages], as the pipeline adds it to what was found. */
+    override suspend fun entry(word: String, languages: List<ResearchLanguage>): Passage? =
+        inner.entry(word, languages).also { entry = it }
+
+    private var entry: Passage? = null
 
     /** The passages with their lexical score (as Ranking.preselect scores them), best first. */
     fun scored(): List<Pair<Passage, Double>> {

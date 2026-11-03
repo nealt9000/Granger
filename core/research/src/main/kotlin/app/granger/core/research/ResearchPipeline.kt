@@ -29,6 +29,12 @@ fun interface PassageFinder {
     suspend fun find(keywords: List<String>): List<Passage>
 
     suspend fun find(keywords: List<String>, languages: List<ResearchLanguage>): List<Passage> = find(keywords)
+
+    /**
+     * The dictionary entry for [word] ([WordQuestion]) as one passage, or null when no installed dictionary has it.
+     * An inflected form leads to its lemma ("madrugué" to "madrugar"). None by default.
+     */
+    suspend fun entry(word: String, languages: List<ResearchLanguage>): Passage? = null
 }
 
 /** Streams a model's reply to [prompt] in chunks. */
@@ -224,7 +230,7 @@ class ResearchPipeline(
             return
         }
 
-        val asked = MediaCues.asked(request.question, languages)
+        val mediaAsked = MediaCues.asked(request.question, languages)
         val rewrite = rewrite(model, request, languages)
         val medical = rewrite.medical == true || Medical.looksMedical(request.question) || PersonalMedical.strong(request.question)
         if (medical) emit(ResearchEvent.Medical)
@@ -236,7 +242,11 @@ class ResearchPipeline(
         }
         emit(ResearchEvent.Progress(Stage.SEARCHING))
         val hits: List<Passage>? = byMeaning
+        // A word's meaning or origin: its dictionary entry, which the full-text search ranks no better than any other hit.
+        val word = if (request.quote == null) WordQuestion.word(request.question, languages) else null
+        var entry: Passage? = null
         val all = try {
+            entry = word?.let { finder.entry(it, languages) }
             finder.find(Keywords.searchTerms(keywords), languages)
         } catch (e: CancellationException) {
             throw e
@@ -249,7 +259,7 @@ class ResearchPipeline(
         emit(ResearchEvent.Progress(Stage.RANKING))
         val ranked = try {
             val merged = hits?.let { Ranking.hybrid(found, it, keywords, config, weight, languages) }
-            val lifted = Ranking.liftMedia(merged ?: rank(request.question, found, keywords, weight, languages), found, asked)
+            val lifted = Ranking.liftMedia(merged ?: rank(request.question, found, keywords, weight, languages), found, mediaAsked)
             if (reserveNamed && Entities.asked(request.question, languages)) {
                 Entities.reserve(
                     lifted, all + hits.orEmpty(), Entities.named(request.question, keywords, languages), config.small,
@@ -268,7 +278,10 @@ class ResearchPipeline(
 
         val quote = request.quote
         // The media cap is applied before the cut, so a dropped media passage gives its place to the next one.
-        val capped = Ranking.capMedia(ranked, asked, config)
+        // The dictionary entry goes first, and counts even when nothing else passed the gates.
+        val capped = Ranking.capMedia(ranked, mediaAsked, config).let { c ->
+            entry?.let { e -> listOf(e) + c.filter { Ranking.textKey(it) != Ranking.textKey(e) } } ?: c
+        }
         if (quote == null && capped.isEmpty()) {
             emit(ResearchEvent.Done(Outcome.Declined(medical, keywords)))
             return
@@ -379,7 +392,7 @@ class ResearchPipeline(
             coroutineScope {
                 val ready = CompletableDeferred<Unit>()
                 val work = launch {
-                    val prompt = Rewrite.prompt(request.question, request.priorQuestion, rewriteAlternates)
+                    val prompt = Rewrite.prompt(request.question, request.priorQuestion, rewriteAlternates, languages)
                     val tokens = if (rewriteAlternates) REWRITE_TOKENS_ALTERNATES else REWRITE_TOKENS
                     val reply = generator.generate(prompt, tokens) { ready.complete(Unit) }
                         .fold("") { acc, chunk -> acc + chunk }
