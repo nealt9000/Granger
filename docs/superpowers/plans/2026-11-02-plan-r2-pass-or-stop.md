@@ -328,6 +328,15 @@ of Mac CPU per question (more on the phone). Ranking is left as it is.
   unanswerable still declined. 018 now counts from the 1871 table (not 1869; graded not grounded). Left: 003 (the KJV
   passage outranked by Shakespeare's), 010 (Noah's age is a count, not a date), 006 and 007 (second hop), 015 and 017
   (physics arithmetic). With the rest of `r2-t10-all` unchanged, the tuning estimate is 103/126 (82%).
+- [x] **Which 8 articles the keyword search reads (2026-11-03, diagnosis).** `LibraryPassageFinder` reads `docs` = 8
+  articles: every pack's top 8 hits per keyword, sorted by Kiwix's score and cut. The score is a percentage and the
+  top hits tie at 100 (154 of 159 tuning questions read eight 100s), so the packs' alphabetical order decides:
+  Appropedia and Based Cooking read first ("the bible on alcohol" read Limoncello and Solar drying in Uganda).
+  `tools/eval/experiments/article_cut.py` replays the recorded keywords through libzim against the phone's 32 packs
+  (1,270 of the 1,271 articles the phone read are among its hits). The answer's article is among the hits for 79 of
+  the 95 answerables with an article answer, but among the 8 read for 36. Title match first (an article whose title
+  holds a whole keyword), then most keywords, then rank: 46 at 8 (+16, -6), 50 at 12, 54 at 16, 60 at 24. Most
+  keywords first: 37 at 8; best rank first: 40. Reading 8 articles is 0.47 s median, alongside the books' 1.2 s.
 - [ ] **Held-out scoring 1 of 2**: the whole set on the Pixel 6, graded by a separate session per `RUBRIC.md`. Totals and
   per-domain numbers only reach this session.
 - [ ] **Best guess** re-scored on E2B: confidently wrong ≤ 10% (eval spec; E2B was 20% on the Plan 9 held-out set, and
