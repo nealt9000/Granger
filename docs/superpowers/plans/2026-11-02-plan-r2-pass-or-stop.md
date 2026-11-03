@@ -345,8 +345,17 @@ of Mac CPU per question (more on the phone). Ranking is left as it is.
   moved answers from never found (48 to 45) to found but not chosen (12 to 17); in the first 4 by quote 68 (69). Cost:
   keyword search 1.49 to 2.21 s median (reading 16 articles, 0.47 to 1.36 s), now longer than the books' 1.2 s; first
   words 12.2 s median (12.8). Run-to-run noise on answered items is about 4 either way.
-- [ ] **Held-out scoring 1 of 2**: the whole set on the Pixel 6, graded by a separate session per `RUBRIC.md`. Totals and
-  per-domain numbers only reach this session.
+- [x] **Held-out scoring 1 of 2** (2026-11-03): the whole set on the Pixel 6 with the `r2-t10-cut` build and flags plus
+  `--guesses small` (`r2-h2-1`, `r2-h2-1-own`), graded blind by a Fable agent per `RUBRIC.md`; only totals reached this
+  session. **Fails both bars:** answerable grounded 85/127 (67%; main 79/119, own-book 6/8), unanswerable declined
+  44/52 (85%). Recall@4 by quote 47/119 (39%; tuning 54%); found but not chosen / never found 12 / 51. Per domain
+  grounded: classics 19/33, food 6/10, making 7/10, maps 8/10, medicine 11/16, reference 7/10, science 6/10,
+  technology 7/10, thought 8/10; declined: medicine 8/11, reference 12/14, classics 3/4, making 2/3, technology 3/4,
+  the rest all. Best guess (E2B): confidently wrong 2/51 (4%), right or partly 41/51 (80%), passes. First words 12.6 s
+  median. Grader's note: most misses are replies that answer an adjacent question, misread a number or skip a
+  multi-step's second half, not invented claims. The own-book recall-by-location (0%) is a source-id mapping artefact
+  (sha256 ids vs `pg` stems); grades unaffected.
+  What it taught us and the questions for the restart: `docs/ask/r2-heldout-1-lessons.md`.
 - [ ] **Best guess** re-scored on E2B: confidently wrong ≤ 10% (eval spec; E2B was 20% on the Plan 9 held-out set, and
   E4B, which wrote guesses then, is gone).
 - [ ] Neal's feel test, redone on the release build (R5 Task 7's was "mostly poor" before the follow-up fix and was never
