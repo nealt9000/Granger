@@ -460,4 +460,24 @@ class LibraryPassageFinderTest {
         assertThat(cards(listOf("cien anos"), es)).isEmpty()
         assertThat(cards(listOf("cien años"), es)).containsExactly(book.id)
     }
+
+    @Test fun aHeadwordIsReadFromTheQuestionsWiktionaryInItsLanguageSection() = test {
+        val html = "<h1>betimes</h1><h2>English</h2><h3>Etymology</h3><p>From be- + time.</p>" +
+            "<h3>Pronunciation</h3><p>IPA: /bɪˈtaɪmz/</p><h3>Adverb</h3><p>betimes (archaic) Early; at an early hour.</p>" +
+            "<h3>Translations</h3><p>French: tôt</p><h2>Middle English</h2><h3>Adverb</h3><p>betimes Soon.</p>"
+        val wikt = pack("wikt").copy(name = "wiktionary_en_all", date = "2026-08-01")
+        val other = pack("top").copy(name = "wikipedia_en_top")
+        val finder = finder(
+            listOf(wikt, other),
+            mapOf("wikt" to FakeZimArchive("wikt", paths = setOf("betimes"), html = mapOf("betimes" to html)), "top" to FakeZimArchive("top")),
+        )
+        val found = finder.headword("Betimes", listOf(ResearchLanguage.EN))
+        assertThat(found.map { it.heading }).containsExactly("Etymology", "Adverb").inOrder()
+        assertThat(found.map { it.sourceId }.toSet()).containsExactly("wikt")
+        assertThat(found[1].text).contains("Early; at an early hour")
+        assertThat(found[0].sourceTitle).isEqualTo("betimes")
+        // No entry, or no Wiktionary in the question's language: nothing.
+        assertThat(finder.headword("zzyzx", listOf(ResearchLanguage.EN))).isEmpty()
+        assertThat(finder.headword("betimes", listOf(ResearchLanguage.ES))).isEmpty()
+    }
 }

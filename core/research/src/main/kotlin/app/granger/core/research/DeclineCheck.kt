@@ -27,6 +27,15 @@ object DeclineCheck {
         RegexOption.IGNORE_CASE,
     )
 
+    /**
+     * What the asker did on their phone: their searches and lookups are theirs, not the library's (R2 Task 6:
+     * "What did I search for yesterday" got past "my search history").
+     */
+    private val OWN_ACTIVITY = Regex(
+        "\\b(what|which \\w+) (did|have) i (search(ed)?|look(ed)? up|googl(e|ed))\\b|\\bmy (recent |last |past )?(searches|lookups)\\b",
+        RegexOption.IGNORE_CASE,
+    )
+
     /** Live or upcoming, not in any snapshot: "right now", "tonight", "this season", "last night's game". */
     private val LIVE = Regex(
         "\\b(right now|tonight|last night|this (season|weekend|week|morning|afternoon|evening|saturday|sunday)|" +
@@ -43,7 +52,7 @@ object DeclineCheck {
     fun unknowable(question: String, languages: List<ResearchLanguage> = ResearchLanguage.of(question)): Boolean {
         if (ResearchLanguage.EN !in languages) return false
         val q = question.replace('’', '\'')
-        return LOCAL.any { it.containsMatchIn(q) } || PERSONAL.containsMatchIn(q) || LIVE.containsMatchIn(q)
+        return LOCAL.any { it.containsMatchIn(q) } || PERSONAL.containsMatchIn(q) || OWN_ACTIVITY.containsMatchIn(q) || LIVE.containsMatchIn(q)
     }
 
     /**

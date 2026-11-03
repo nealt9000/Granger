@@ -29,6 +29,12 @@ fun interface PassageFinder {
     suspend fun find(keywords: List<String>): List<Passage>
 
     suspend fun find(keywords: List<String>, languages: List<ResearchLanguage>): List<Passage> = find(keywords)
+
+    /**
+     * [word]'s dictionary entry, read by headword (Plan R2 Task 6, [Headword]): its passages in the question's language,
+     * best first. Empty when no dictionary holds it.
+     */
+    suspend fun headword(word: String, languages: List<ResearchLanguage>): List<Passage> = emptyList()
 }
 
 /** Streams a model's reply to [prompt] in chunks. */
@@ -189,6 +195,11 @@ class ResearchPipeline(
     private val medicalQuotes: Boolean = false,
     /** Plan R2 Task 6's debug variant: keywords get [OlderWords]' alternates before the search. Off in the app until measured. */
     private val olderWords: Boolean = false,
+    /**
+     * Plan R2 Task 6's debug variant: a question that asks what a word means or where it comes from ([Headword]) gets the
+     * word's dictionary entry ([PassageFinder.headword]) first among its passages. Off in the app until measured.
+     */
+    private val headwords: Boolean = false,
 ) {
     /**
      * [stop] is polled after each chunk of the reply; when it turns true the reply so far is checked and finished.
@@ -198,6 +209,21 @@ class ResearchPipeline(
      * while the model loaded and rewrote (run ob-looking-1, 2026-11-02); the GPU and CPU share memory bandwidth.
      */
     fun run(request: ResearchRequest, stop: () -> Boolean = { false }): Flow<ResearchEvent> = flow { answer(request, stop) }
+
+    /** [ranked] with [question]'s word's dictionary entry first, when it asks about a word and a dictionary holds it. */
+    private suspend fun withHeadword(question: String, ranked: List<Passage>, languages: List<ResearchLanguage>): List<Passage> {
+        val word = Headword.word(question, languages) ?: return ranked
+        val entry = try {
+            finder.headword(word, languages)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            emptyList()
+        }
+        if (entry.isEmpty()) return ranked
+        val keys = entry.map(Ranking::textKey).toSet()
+        return entry + ranked.filterNot { Ranking.textKey(it) in keys }
+    }
 
     private suspend fun FlowCollector<ResearchEvent>.answer(request: ResearchRequest, stop: () -> Boolean) {
         var questionVector: FloatArray? = null
@@ -256,7 +282,7 @@ class ResearchPipeline(
         val topical = keywords.filterNot(YearFacts::cueOnly).ifEmpty { keywords }
         val found = Ranking.preselect(all, topical, config, weight, languages)
         emit(ResearchEvent.Progress(Stage.RANKING))
-        val ranked = try {
+        val ranking = try {
             val merged = hits?.let { Ranking.hybrid(found, it, topical, config, weight, languages) }
             val lifted = Ranking.liftMedia(merged ?: rank(request.question, found, topical, weight, languages), found, asked)
             if (reserveNamed && Entities.asked(request.question, languages)) {
@@ -276,6 +302,7 @@ class ResearchPipeline(
         }
 
         val quote = request.quote
+        val ranked = if (headwords && quote == null) withHeadword(request.question, ranking, languages) else ranking
         // The media cap is applied before the cut, so a dropped media passage gives its place to the next one.
         val capped = Ranking.capMedia(ranked, asked, config)
         if (quote == null && capped.isEmpty()) {

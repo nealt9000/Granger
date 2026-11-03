@@ -46,8 +46,14 @@ def cmd_validate(a):
 
 def cmd_run(a):
     items = dataset.load(a.dataset)
-    out = adb.run_eval(adb.real_runner, a.dataset, a.run_id, RUNS, ids=a.ids, groups=a.groups, guesses=a.guesses, fresh=a.fresh, rewrite=a.rewrite, fiction=a.fiction, dense=a.dense, entities=a.entities, facts=a.facts, older=a.older)
+    out = adb.run_eval(adb.real_runner, a.dataset, a.run_id, RUNS, ids=a.ids, groups=a.groups, guesses=a.guesses, fresh=a.fresh, rewrite=a.rewrite, fiction=a.fiction, dense=a.dense, entities=a.entities, facts=a.facts, older=a.older, headwords=a.headwords)
     print("results in %s (%d items in the dataset)" % (out, len(items)))
+    return 0
+
+
+def cmd_remove(a):
+    for name, outcome in adb.remove_packs(adb.real_runner, a.files, a.run_id, RUNS):
+        print("%s\t%s" % (name, outcome))
     return 0
 
 
@@ -105,10 +111,13 @@ def main(argv=None):
     r.add_argument("--entities", choices=["on"], help="each thing a date question names gets a passage (Plan R5 Task 4)")
     r.add_argument("--facts", choices=["on"], help="dates and the sums between them worked out in code (Plan R5 Task 4)")
     r.add_argument("--older", choices=["on"], help="keywords get older and modern words as alternates (Plan R2 Task 6)")
+    r.add_argument("--headwords", choices=["on"], help="a question about a word gets its dictionary entry first (Plan R2 Task 6)")
     r.add_argument("--fiction", help="a file of fiction book ids to weight 0.7 on non-literature questions (Plan R0, Task 6)")
     r.add_argument("--dense", choices=["on", "off"], help="dense retrieval for the run (Plan R1); the app's DENSE_RETRIEVAL when not given"); r.set_defaults(f=cmd_run)
     im = s.add_parser("import", help="import book files into the phone's library and index them (Plan R2)")
     im.add_argument("files", nargs="+"); im.add_argument("--run-id", required=True); im.set_defaults(f=cmd_import)
+    rm = s.add_parser("remove", help="remove packs from the phone's library by file name, as Sources' Remove does (Plan R2)")
+    rm.add_argument("files", nargs="+"); rm.add_argument("--run-id", required=True); rm.set_defaults(f=cmd_remove)
     w = s.add_parser("worksheet"); w.add_argument("run"); w.set_defaults(f=cmd_worksheet)
     rp = s.add_parser("report"); rp.add_argument("targets", nargs="+"); rp.add_argument("--dataset-only", action="store_true")
     rp.add_argument("--totals-only", action="store_true"); rp.add_argument("--compare"); rp.set_defaults(f=cmd_report)

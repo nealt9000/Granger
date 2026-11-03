@@ -4,7 +4,8 @@ import app.granger.core.text.Chunkers
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 
-data class HtmlPassage(val heading: String, val anchor: String?, val text: String)
+/** [section] is the last top heading (`h2`) above the passage: a dictionary entry's language ("English", "Español"). */
+data class HtmlPassage(val heading: String, val anchor: String?, val text: String, val section: String = "")
 
 /** Splits an article's HTML into quotable passages along its headings. The rules for what counts as text are [ArticleText]'s, shared with the voice. */
 object HtmlPassages {
@@ -22,12 +23,13 @@ object HtmlPassages {
         val out = mutableListOf<HtmlPassage>()
         var heading = ""
         var anchor: String? = null
+        var section = ""
         val buffer = mutableListOf<String>() // words of the passage being built
         val blocks = mutableListOf<String>()
         var skipLevel = 0 // level of the bibliography-style heading being skipped; 0 when not skipping
 
         fun flush() {
-            if (buffer.isNotEmpty()) out += HtmlPassage(heading, anchor, blocks.joinToString("\n"))
+            if (buffer.isNotEmpty()) out += HtmlPassage(heading, anchor, blocks.joinToString("\n"), section)
             buffer.clear()
             blocks.clear()
         }
@@ -41,6 +43,7 @@ object HtmlPassages {
                 if (skipLevel == 0 && title.lowercase() in SKIPPED_SECTIONS) skipLevel = level
                 heading = title
                 anchor = anchorOf(el)
+                if (level <= 2) section = title
                 continue
             }
             if (skipLevel != 0) continue
@@ -52,7 +55,7 @@ object HtmlPassages {
             if (words.size > maxWords) {
                 flush()
                 val pieces = words.chunked(targetWords)
-                for (piece in pieces.dropLast(1)) out += HtmlPassage(heading, anchor, piece.joinToString(" "))
+                for (piece in pieces.dropLast(1)) out += HtmlPassage(heading, anchor, piece.joinToString(" "), section)
                 buffer += pieces.last()
                 blocks += pieces.last().joinToString(" ")
             } else {

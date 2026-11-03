@@ -29,6 +29,9 @@ class DeclineCheckTest {
             "what's the price of bitcoin right now",
             "What was the final score of last night's NFL game?",
             "where did i park my car this morning",
+            "What did I search for yesterday?",
+            "which words have I looked up this week",
+            "show me my recent searches",
         ).forEach { assertWithMessage(it).that(DeclineCheck.unknowable(it)).isTrue() }
     }
 
@@ -47,6 +50,8 @@ class DeclineCheckTest {
             "what is my blood type made of",
             "what time does the sun rise at the equator",
             "what happened on the night of the Titanic",
+            "how do I search for a file in linux",
+            "what did people search for before the internet",
         ).forEach { assertWithMessage(it).that(DeclineCheck.unknowable(it)).isFalse() }
     }
 
@@ -80,6 +85,6 @@ class DeclineCheckTest {
     }
 
     private companion object {
-        const val CAUGHT = 31
+        const val CAUGHT = 32
     }
 }

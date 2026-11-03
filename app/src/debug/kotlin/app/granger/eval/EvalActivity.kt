@@ -80,6 +80,7 @@ class EvalActivity : ComponentActivity() {
         intent.getStringExtra("replay")?.let { replay(root, runId, it); return }
         intent.getStringExtra("embed")?.let { embed(root, runId, it); return }
         intent.getStringExtra("import")?.let { importBooks(root, runId, it); return }
+        intent.getStringExtra("remove")?.let { removePacks(root, runId, it); return }
         val c = (application as GrangerApp).container
         val ids = intent.getStringExtra("ids")
         val groups = intent.getStringExtra("groups")
@@ -95,6 +96,8 @@ class EvalActivity : ComponentActivity() {
         val facts = intent.getStringExtra("facts") == "on"
         // Plan R2, Task 6: keywords get the older words' alternates (OlderWords) before the search.
         val older = intent.getStringExtra("older") == "on"
+        // Plan R2, Task 6: a question about a word gets its dictionary entry first (Headword).
+        val headwords = intent.getStringExtra("headwords") == "on"
         // Fiction weighting is the app's (the catalog's literature books, 0.7) unless `fiction` is `off`, or names a file
         // under eval/ of fiction book ids, one per line (Plan R0, Task 6); `fictionWeight` sets the weight.
         val fictionWeight = intent.getStringExtra("fictionWeight")?.toDoubleOrNull() ?: FictionWeight.DEFAULT
@@ -120,10 +123,10 @@ class EvalActivity : ComponentActivity() {
             val dense = if (denseOn) RecordingDenseFinder(c.denseFinder, clock) else null
             c.embedderWanted.set(denseOn)
             try {
-                val pipeline = ResearchPipeline(finder, prompts, c.rankingConfig, rewriteAlternates = alternates, rewritePlain = plain, rewritePlainFollowUps = plainAll, reserveNamed = named, yearFacts = facts, sourceWeight = fiction, dense = dense, olderWords = older)
+                val pipeline = ResearchPipeline(finder, prompts, c.rankingConfig, rewriteAlternates = alternates, rewritePlain = plain, rewritePlainFollowUps = plainAll, reserveNamed = named, yearFacts = facts, sourceWeight = fiction, dense = dense, olderWords = older, headwords = headwords)
                 val runner = EvalRunner(pipeline, finder, sourceName, prompts, dense, clock)
                 runner.onItem = { item, n, total -> log("$n / $total ${item.id}") }
-                log("run $runId: ${items.size} items, guesses=$guesses${if (alternates) ", rewrite=alternates" else ""}${if (plainAll) ", rewrite=plain-all" else if (plain) ", rewrite=plain" else ""}${if (named) ", entities=on" else ""}${if (facts) ", facts=on" else ""}${if (older) ", older=on" else ""}" +
+                log("run $runId: ${items.size} items, guesses=$guesses${if (alternates) ", rewrite=alternates" else ""}${if (plainAll) ", rewrite=plain-all" else if (plain) ", rewrite=plain" else ""}${if (named) ", entities=on" else ""}${if (facts) ", facts=on" else ""}${if (older) ", older=on" else ""}${if (headwords) ", headwords=on" else ""}" +
                     "${if (fiction != null) ", fiction weighted" else ""}${if (denseOn) ", dense" else ""}")
                 runner.run(items, File(root, "$runId/results.jsonl"), guesses, runId)
             } finally {
@@ -138,6 +141,38 @@ class EvalActivity : ComponentActivity() {
             EvalSession.Start.ATTACHED -> log("run $runId is already running; showing its progress")
             EvalSession.Start.BUSY -> log("another eval is running; $runId was not started")
         }
+    }
+
+    /**
+     * Plan R2: removes packs from the test library by file name, as the Sources screen's Remove does: the library's
+     * entry, file, marks and documents, then any download record for that file. Writes `eval/<runId>/removed.tsv`
+     * (file, removed or not found or couldn't delete), then `done`.
+     */
+    private fun removePacks(root: File, runId: String, names: String) {
+        val c = (application as GrangerApp).container
+        val result = EvalSession.start(runId, root, ::log) {
+            val dir = File(root, runId).apply { mkdirs() }
+            c.library.refresh()
+            val packs = c.library.packs.first()
+            val records = c.downloads.records.first()
+            val lines = names.split(',').map { it.trim() }.filter { it.isNotEmpty() && '/' !in it && ".." !in it }.map { name ->
+                val pack = packs.firstOrNull { File(it.filePath).name == name }
+                val outcome = when {
+                    pack == null -> "not found"
+                    !c.library.remove(pack.id) -> "couldn't delete"
+                    else -> {
+                        records.filter { File(it.filePath).name == name }.forEach { c.downloads.remove(it.itemId) }
+                        "removed"
+                    }
+                }
+                log("$name: $outcome")
+                "$name\t$outcome"
+            }
+            File(dir, "removed.tsv").writeText(lines.joinToString("\n", postfix = "\n"))
+            File(dir, "done").writeText("done\n")
+            log("done $runId")
+        }
+        if (result != EvalSession.Start.STARTED) log("another eval is running; $runId was not started")
     }
 
     /**

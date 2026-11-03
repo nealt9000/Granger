@@ -92,7 +92,7 @@ def wait_done(runner, run_id, sleep=time.sleep, max_wait=MAX_WAIT_SECONDS, max_e
         waited += POLL_SECONDS
 
 
-def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, guesses="none", fresh=False, rewrite=None, fiction=None, dense=None, entities=None, facts=None, older=None, sleep=time.sleep,
+def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, guesses="none", fresh=False, rewrite=None, fiction=None, dense=None, entities=None, facts=None, older=None, headwords=None, sleep=time.sleep,
              max_wait=MAX_WAIT_SECONDS, max_errors=MAX_ERRORS):
     check_front(runner)
     runs_dir = Path(runs_dir)
@@ -115,7 +115,7 @@ def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, gues
     # -S stops the app first, so the eval screen starts fresh with these extras (a screen left over from an install or
     # an earlier run would otherwise take the intent and never begin).
     start = ["shell", "am", "start", "-S", "-n", PKG + "/.eval.EvalActivity", "--es", "runId", run_id]
-    for key, val in (("ids", ids), ("groups", groups), ("guesses", guesses), ("rewrite", rewrite), ("dense", dense), ("entities", entities), ("facts", facts), ("older", older)):
+    for key, val in (("ids", ids), ("groups", groups), ("guesses", guesses), ("rewrite", rewrite), ("dense", dense), ("entities", entities), ("facts", facts), ("older", older), ("headwords", headwords)):
         if val:
             start += ["--es", key, val]
     if fiction:
@@ -158,3 +158,24 @@ def import_books(runner, files, run_id, runs_dir, sleep=time.sleep):
     if rc:
         raise SystemExit("adb pull failed: " + o)
     return [tuple(line.split("\t")) for line in (out / "imported.tsv").read_text(encoding="utf-8").splitlines() if line]
+
+
+def remove_packs(runner, names, run_id, runs_dir, sleep=time.sleep):
+    """Plan R2: has the eval screen remove packs (by file name) as the Sources screen's Remove does.
+    Returns the rows of the phone's removed.tsv: (file name, outcome)."""
+    for n in names:
+        if "," in n or "/" in n:
+            raise SystemExit("a pack file name, without a comma or a folder: " + n)
+    check_front(runner)
+    runner(["shell", "rm", "-rf", "%s/%s" % (REMOTE, run_id)])
+    rc, o = runner(["shell", "am", "start", "-S", "-n", PKG + "/.eval.EvalActivity", "--es", "runId", run_id,
+                    "--es", "remove", ",".join(names)])
+    if rc:
+        raise SystemExit("could not start the eval activity: " + o)
+    wait_done(runner, run_id, sleep)
+    out = Path(runs_dir) / run_id
+    out.mkdir(parents=True, exist_ok=True)
+    rc, o = runner(["pull", "%s/%s/removed.tsv" % (REMOTE, run_id), str(out) + "/"])
+    if rc:
+        raise SystemExit("adb pull failed: " + o)
+    return [tuple(line.split("\t")) for line in (out / "removed.tsv").read_text(encoding="utf-8").splitlines() if line]

@@ -218,3 +218,19 @@ def test_import_refuses_a_comma_in_a_file_name(tmp_path):
     book.write_bytes(b"x")
     with pytest.raises(SystemExit, match="comma"):
         adb.import_books(Fake(), [book], "imp", tmp_path / "runs", sleep=lambda s: None)
+
+
+def test_remove_asks_the_eval_screen_and_reads_back_the_outcomes(tmp_path):
+    out = tmp_path / "runs" / "rm"
+    out.mkdir(parents=True)
+    (out / "removed.tsv").write_text("a.zim\tremoved\nb.zim\tnot found\n")
+    f = Fake()
+    rows = adb.remove_packs(f, ["a.zim", "b.zim"], "rm", tmp_path / "runs", sleep=lambda s: None)
+    start = [" ".join(c) for c in f.calls if "am start" in " ".join(c)][0]
+    assert "runId rm" in start and "remove a.zim,b.zim" in start
+    assert rows == [("a.zim", "removed"), ("b.zim", "not found")]
+
+
+def test_remove_refuses_a_path(tmp_path):
+    with pytest.raises(SystemExit, match="folder"):
+        adb.remove_packs(Fake(), ["../a.zim"], "rm", tmp_path / "runs", sleep=lambda s: None)
