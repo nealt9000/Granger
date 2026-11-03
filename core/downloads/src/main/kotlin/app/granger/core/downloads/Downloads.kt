@@ -132,6 +132,7 @@ class DownloadManager(
     private val prefs: QueuePrefs = MemoryQueuePrefs(),
     progress: Flow<QueueProgress> = flowOf(QueueProgress()),
     unmetered: Flow<Boolean> = flowOf(true),
+    meteredWifi: Flow<Boolean> = flowOf(false),
     private val freeBytes: (File) -> Long = { it.usableSpace },
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
@@ -144,8 +145,8 @@ class DownloadManager(
     override val paused: StateFlow<Boolean> = _paused.asStateFlow()
     private val batch = MutableStateFlow(prefs.batchStartedAt)
 
-    override val live: Flow<DownloadLive> = combine(progress, _paused, batch, unmetered) { p, paused, since, wifi ->
-        DownloadLive(p, paused, since, wifi)
+    override val live: Flow<DownloadLive> = combine(progress, _paused, batch, unmetered, meteredWifi) { p, paused, since, wifi, meteredWifi ->
+        DownloadLive(p, paused, since, wifi, meteredWifi)
     }
 
     /** Something is queued into an empty queue: a new round of downloads begins (Decision 6). */

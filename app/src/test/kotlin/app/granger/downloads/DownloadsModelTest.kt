@@ -87,6 +87,14 @@ class DownloadsModelTest {
         assertThat(downloadsText(context, ui.upNext.single(), now)).isEqualTo("312 B of 1.0 KB · Waiting for Wi-Fi")
     }
 
+    @Test fun onMeteredWifiTheRowAndThePageSaySo() {
+        val ui = ui(listOf(rec("a", DownloadState.QUEUED, done = 312)), DownloadLive(unmetered = false, meteredWifi = true, batchStartedAt = midnight))
+        assertThat(downloadsText(context, ui.upNext.single(), now)).isEqualTo("312 B of 1.0 KB · Waiting: this Wi-Fi is marked as metered")
+        assertThat(ui.meteredWifi).isTrue()
+        val off = ui(listOf(rec("a", DownloadState.QUEUED, done = 312)), DownloadLive(unmetered = false, batchStartedAt = midnight))
+        assertThat(off.meteredWifi).isFalse()
+    }
+
     @Test fun pausedTheHeaderSaysHowManyWait() {
         val ui = ui(
             listOf(rec("a", DownloadState.QUEUED, done = 200), rec("b", DownloadState.QUEUED)),

@@ -22,12 +22,16 @@ data class DownloadLive(
     val batchStartedAt: Long = 0,
     /** Whether the phone is on Wi-Fi (an unmetered network). */
     val unmetered: Boolean = true,
+    /** On Wi-Fi that Android marks as metered, as a phone's hotspot usually is (Plan E1 item 3). */
+    val meteredWifi: Boolean = false,
 )
 
 /** Why a waiting item isn't downloading: one reason each (Plan DL Decision 4). */
 sealed interface WaitReason {
     data object Paused : WaitReason
     data object WaitingForWifi : WaitReason
+    /** Wi-Fi only, and the phone is on Wi-Fi, but Android marks this Wi-Fi as metered (Plan E1 item 3). */
+    data object MeteredWifi : WaitReason
 
     /** [attempt] is the try that comes next, of [MAX_ATTEMPTS]. */
     data class Retrying(val at: Long, val attempt: Int) : WaitReason
@@ -91,7 +95,7 @@ object DownloadQueueSummary {
             } ?: 0
             val reason = when {
                 live.paused -> WaitReason.Paused
-                r.wifiOnly && !live.unmetered -> WaitReason.WaitingForWifi
+                r.wifiOnly && !live.unmetered -> if (live.meteredWifi) WaitReason.MeteredWifi else WaitReason.WaitingForWifi
                 (r.retryAt ?: 0) > now -> WaitReason.Retrying(r.retryAt!!, r.attempts + 1)
                 needs > 0 -> WaitReason.NeedsSpace(needs)
                 else -> WaitReason.InLine(++place)

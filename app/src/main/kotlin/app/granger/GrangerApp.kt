@@ -649,6 +649,7 @@ class AppContainer(context: Context) {
         // Deferred: the queue needs the runner, made below.
         progress = flow { emitAll(downloadQueue.progress) },
         unmetered = unmeteredFlow(context),
+        meteredWifi = app.granger.core.downloads.meteredWifiFlow(context),
     )
 
     val downloadRunner = DownloadRunner(

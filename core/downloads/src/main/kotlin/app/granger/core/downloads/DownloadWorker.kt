@@ -235,6 +235,29 @@ fun isUnmetered(context: Context): Boolean {
     return cm.getNetworkCapabilities(cm.activeNetwork)?.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED) == true
 }
 
+/**
+ * Whether the phone is on Wi-Fi that Android marks as metered (Plan E1 item 3): a phone's hotspot announces itself so,
+ * and the user can mark any network metered. A Wi-Fi-only download waits there; the Downloads screen says why.
+ */
+fun meteredWifiFlow(context: Context): Flow<Boolean> = callbackFlow {
+    val cm = context.getSystemService(ConnectivityManager::class.java)
+    val callback = object : ConnectivityManager.NetworkCallback() {
+        override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) { trySend(isMeteredWifi(caps)) }
+        override fun onLost(network: Network) { trySend(isMeteredWifi(context)) }
+    }
+    trySend(isMeteredWifi(context))
+    cm?.registerDefaultNetworkCallback(callback)
+    awaitClose { cm?.unregisterNetworkCallback(callback) }
+}.distinctUntilChanged()
+
+fun isMeteredWifi(context: Context): Boolean {
+    val cm = context.getSystemService(ConnectivityManager::class.java) ?: return false
+    return cm.getNetworkCapabilities(cm.activeNetwork)?.let(::isMeteredWifi) == true
+}
+
+private fun isMeteredWifi(caps: NetworkCapabilities): Boolean =
+    caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) && !caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+
 /** The link a download notification opens: the app's Downloads screen (Plan U3b Decision 1). */
 const val DOWNLOADS_LINK = "granger://downloads"
 
