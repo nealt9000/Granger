@@ -181,6 +181,11 @@ These need full phone runs, so they're batched into one run.
   knots questions, so Knots (with its full-text index) must be on the phone before held-out scoring.
 - [ ] The media cue words "movement", "piece", "suite" and "chapter": with media questions for them and the
   media-intrusion check (bar 0), which need the phone's library export (`dataset/media.json`). Not started.
+- [x] **Measured and on (2026-11-02).** `r2-t6-older`: the 8 tuning questions whose rewrite keywords hit the table, run
+  with `--older on` on the same build and library as `r2-t5`. +2 grounded, no losses: vocab-gap-002 (immigrants; the
+  Douay-Rheims Leviticus 19:33–34, was NOT IN LIBRARY) and vocab-gap-010 (intelligence gathering; "spies and spies
+  alone", was not-grounded; the grader calls it borderline, the words are a commentator's in that edition). The other 6
+  unchanged in grade. `olderWords = true` in `GrangerApp`; the eval keeps the flag explicit (`--older on`).
 
 ## Task 7: Classics plot and opening cards
 
@@ -198,7 +203,14 @@ These need full phone runs, so they're batched into one run.
   and indexes it, and `tools/vectors/book.py` embeds it on the CPU for the pushed-vectors directory. If it passes, it
   ships as one more catalog book with its own vectors.
 - [ ] Measure: import the notes, push their vectors, rerun the tuning split; compare with `r2-t5` per domain (classics
-  answerables, and no losses elsewhere).
+  answerables, and no losses elsewhere). Held until the test library is settled (below).
+
+**`r2-t5`, the full tuning split on Tasks 2–4 (2026-11-02):** declined 69/76 (91%), grounded 93/126 (74%), recall by
+quote 64/126. Not comparable with `r5-t7-all` (63/76, 91/126): the phone's library changed between them. Gone: IEP,
+WikEM, devdocs C/Git/JavaScript/Python, six Stack Exchange sites, foss.cooking, Wikipedia Geography and the Classics
+ZIM; new: Knots, Wikipedia Computer and Movies, Spanish packs. Attributable to the code: 9 unanswerables newly declined
+by the decline check (none of them answerable) and multi-step-004 by the verdict. Neal to decide the test library
+before held-out scoring.
 - [ ] Neal reads a sample of cards before they ship.
 
 ## Task 8: prompt rules for misreads

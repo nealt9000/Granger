@@ -838,7 +838,7 @@ class AppContainer(context: Context) {
     val research = ResearchPipeline(
         passageFinder, ModelsAdapter(modelManager), rankingConfig,
         sourceWeight = fictionWeight, dense = if (DENSE_RETRIEVAL) denseFinder else null,
-        reserveNamed = true, yearFacts = true, reactions = ::owlCentroids,
+        reserveNamed = true, yearFacts = true, olderWords = true, reactions = ::owlCentroids,
         // Ask Preview: a medical question shows the banner and quoted passages, no generated prose (Neal, 2026-11-02).
         medicalQuotes = true,
     )
