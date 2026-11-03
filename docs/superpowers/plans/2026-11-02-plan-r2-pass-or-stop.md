@@ -259,6 +259,14 @@ Rodwell's. Of 90 answerables whose quote is found, 64 reach the prompt; what's l
 which lexical and embedding scores don't separate. A reranker that reads question and passage together is the next test
 (offline first).
 
+**Cross-encoder rerankers (2026-11-03, Mac only; not adopted).** `tools/eval/experiments/rerank_ce.py` over `r2-t7-base`:
+every passage the search found (about 211 per question) scored against the question, best 4 to the "prompt"; the app gets
+an answer quote there for 65 of 126 by this count. MiniLM-L6 46, mxbai-rerank-xsmall 54, bge-reranker-base 53: each
+gains 7–9 right-source-wrong-passage items (follow-up-004, -005, literature-004, medical-002, multi-step-010…) and loses
+18–27, mostly two-fact and medical questions where the app's own rules choose the mix. Keeping the app's first 3 and
+letting the reranker fill the 4th: MiniLM 61, bge 65 (6 gained, 6 lost). No net gain, for a 22–278M model and 1.7–7.8 s
+of Mac CPU per question (more on the phone). Ranking is left as it is.
+
 ## Task 9: books you add (the own-book group)
 
 - [ ] Imported EPUBs are chunked with `:core:text` and embedded on the phone with EmbeddingGemma, in the background,

@@ -7,6 +7,8 @@ keyword passages and dense hits, one per text, cut to 1,200 characters as the pr
 sentence-transformers CrossEncoder name) scores (question, passage); the best --top go in the "prompt". Recall by quote
 (metrics.quote_in) against the app's own choice (results.jsonl's `chosen`), with the items gained and lost.
 
+--keep N keeps the app's first N chosen passages and lets the reranker fill the rest.
+
 --pool app reranks only the app's chosen passages plus its next-ranked candidates as recorded (`chosen` + `candidates`),
 which is what an in-app reranker over the existing pool could do. --pool all reranks everything found.
 """
@@ -23,6 +25,7 @@ import metrics  # noqa: E402
 ap = argparse.ArgumentParser()
 ap.add_argument("run"); ap.add_argument("models", nargs="+")
 ap.add_argument("--pool", default="all", choices=["all", "app"]); ap.add_argument("--top", type=int, default=4)
+ap.add_argument("--keep", type=int, default=0, help="keep the app's first KEEP chosen passages; the reranker fills the rest")
 a = ap.parse_args()
 RUN = HERE / "runs" / a.run
 items = json.loads((RUN / "dataset.json").read_text())
@@ -58,7 +61,7 @@ for it in items:
             seen.add(k); pool.append(p)
     q = it["question"] if not it.get("priorQuestion") else it["priorQuestion"] + " " + it["question"]
     app = any(metrics.quote_in(p, answers) for p in rec.get("chosen", []))
-    work.append((it["id"], q, answers, pool, app))
+    work.append((it["id"], q, answers, pool, app, rec.get("chosen", [])[: a.keep]))
 
 print("items %d, candidates per item %.0f, app %d" % (len(work), sum(len(w[3]) for w in work) / len(work), sum(w[4] for w in work)), flush=True)
 from sentence_transformers import CrossEncoder  # noqa: E402
@@ -68,15 +71,17 @@ for name in a.models:
     model = CrossEncoder(name, device="cpu", max_length=512)
     start = time.time()
     got, rows = 0, []
-    for iid, q, answers, pool, app in work:
+    for iid, q, answers, pool, app, kept in work:
         if not pool:
             rows.append((iid, False, app)); continue
         scores = model.predict([(q, doc(p)) for p in pool], batch_size=32, show_progress_bar=False)
-        top = [p for _, p in sorted(zip(scores, pool), key=lambda x: -float(x[0]))[: a.top]]
+        keys = {metrics.fold_words(text(p))[:200] for p in kept}
+        ranked = [p for _, p in sorted(zip(scores, pool), key=lambda x: -float(x[0])) if metrics.fold_words(text(p))[:200] not in keys]
+        top = kept + ranked[: a.top - len(kept)]
         hit = any(metrics.quote_in(p, answers) for p in top)
         got += hit; rows.append((iid, hit, app))
     pairs = sum(len(w[3]) for w in work)
     out[name] = {"inPrompt": got, "gained": [r[0] for r in rows if r[1] and not r[2]], "lost": [r[0] for r in rows if r[2] and not r[1]],
                  "msPerPair": round(1000 * (time.time() - start) / max(1, pairs), 2)}
     print(name, json.dumps(out[name]), flush=True)
-(RUN.parent / ("rerank-ce-%s-%s.json" % (a.run, a.pool))).write_text(json.dumps(out, indent=1))
+(RUN.parent / ("rerank-ce-%s-%s-keep%d.json" % (a.run, a.pool, a.keep))).write_text(json.dumps(out, indent=1))
