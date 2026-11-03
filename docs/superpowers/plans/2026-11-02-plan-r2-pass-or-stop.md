@@ -308,7 +308,14 @@ of Mac CPU per question (more on the phone). Ranking is left as it is.
 
 ## Task 10: scoring
 
-- [ ] A full tuning-split run with everything kept (grounded, declined, multi-step, medical, latency per stage).
+- [x] A full tuning-split run with everything kept (grounded, declined, multi-step, medical, latency per stage).
+  **Done 2026-11-03, `r2-t10-all`** (dense, entities, year facts, older words, headwords; own-book vectors on the
+  phone): **grounded 100/126 (79%), declined 71/76 (93%)**, the same as `r2-t6-head`. Two items swapped: science-006
+  gained, literature-007 lost (the right passage was chosen; the reply has Ahab die on the first day). Multi-step
+  10/20; medicine 24/25 grounded, 14/15 declined; classics 20/32; reference 44/55. Recall@4 by quote 69/126. First
+  words median 12.8 s (p90 17.1 s), total median 16.8 s. Imported-book passages were chosen in 3 replies (the
+  Classics notes; all grounded), so the own-book vectors cost nothing. Latency per stage isn't in the report; the
+  total and first-words times stand in.
 - [ ] **Held-out scoring 1 of 2**: the whole set on the Pixel 6, graded by a separate session per `RUBRIC.md`. Totals and
   per-domain numbers only reach this session.
 - [ ] **Best guess** re-scored on E2B: confidently wrong ≤ 10% (eval spec; E2B was 20% on the Plan 9 held-out set, and
