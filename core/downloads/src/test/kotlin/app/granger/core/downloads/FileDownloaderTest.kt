@@ -226,4 +226,50 @@ class FileDownloaderTest {
         val result = downloader.download(request(a), part)
         assertThat(result).isInstanceOf(DownloadResult.Failed::class.java)
     }
+
+    // --- Plan E1 item 4: a pack copied from a local file ---
+
+    private val local = "content://sd/f.zim"
+    private val opened = mutableListOf<Long>()
+    private fun localDownloader(file: ByteArray?) = FileDownloader(
+        server.client(), freeBytes = { freeBytes(it) }, reserveBytes = 1_000,
+        openLocal = { url, offset ->
+            check(url == local)
+            opened += offset
+            file ?: throw java.io.FileNotFoundException("card out")
+            java.io.ByteArrayInputStream(file, offset.toInt(), file.size - offset.toInt())
+        },
+    )
+
+    @Test fun copiesALocalFileFromWhereItsPartEnds() = runTest {
+        partWith(content.copyOf(40_000))
+        assertThat(localDownloader(content).download(request(local), part)).isEqualTo(DownloadResult.Done)
+        assertThat(opened).containsExactly(40_000L)
+        assertThat(part.readBytes()).isEqualTo(content)
+        assertThat(server.rangesRequested(local)).isEmpty()
+    }
+
+    @Test fun anUnlistedImportSkipsTheChecksum() = runTest {
+        val unchecked = DownloadRequest(listOf(local), content.size.toLong(), "${UNVERIFIED_PREFIX}some-uuid")
+        assertThat(localDownloader(content).download(unchecked, part)).isEqualTo(DownloadResult.Done)
+        // A listed one is still checked.
+        part.delete()
+        val wrong = DownloadRequest(listOf(local), content.size.toLong(), sha256(ByteArray(3)))
+        assertThat(localDownloader(content).download(wrong, part)).isEqualTo(DownloadResult.HashMismatch)
+    }
+
+    @Test fun aMissingFileIsWorthARetryAndAShortOneIsNot() = runTest {
+        val gone = localDownloader(null).download(request(local), part)
+        assertThat(gone).isInstanceOf(DownloadResult.Failed::class.java)
+        assertThat((gone as DownloadResult.Failed).permanent).isFalse()
+        part.delete()
+        val short = localDownloader(content.copyOf(10_000)).download(request(local), part) as DownloadResult.Failed
+        assertThat(short.permanent).isTrue()
+        assertThat(part.length()).isEqualTo(10_000)
+    }
+
+    @Test fun aLocalCopyChecksSpace() = runTest {
+        freeBytes = { 500 }
+        assertThat(localDownloader(content).download(request(local), part)).isInstanceOf(DownloadResult.NoSpace::class.java)
+    }
 }

@@ -7,6 +7,15 @@
     <!-- Get more opened from Listen's +: audio sources only. -->
     <string name="sources_get_audio">Get audiobooks &amp; music</string>
     <string name="sources_group_knowledge">Knowledge packs</string>
+    <!-- Get more → Knowledge packs: copy a .zim from the phone, an SD card or a USB stick (Plan E1). -->
+    <string name="packs_import">Add a pack from a file</string>
+    <string name="packs_import_sub">A .zim from this phone, an SD card or a USB stick; no internet needed</string>
+    <string name="packs_import_queued">Copying %1$s into your library. Downloads shows how far it is.</string>
+    <string name="packs_import_not_zim">%1$s isn\'t a knowledge pack (.zim file).</string>
+    <string name="packs_import_have">%1$s is already in your library.</string>
+    <string name="packs_import_no_space">Not enough space: %1$s more is needed.</string>
+    <string name="packs_import_no_storage">There\'s no storage to copy it to.</string>
+    <string name="packs_import_unreadable">Granger couldn\'t read that file.</string>
     <string name="sources_group_books">Books</string>
     <string name="sources_group_audio">Audiobooks &amp; music</string>
     <string name="sources_group_models">Models &amp; voices</string>

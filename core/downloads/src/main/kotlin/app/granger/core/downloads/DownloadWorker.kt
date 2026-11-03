@@ -65,7 +65,7 @@ class DownloadQueueWorker(context: Context, params: WorkerParameters) : Coroutin
                 }
                 queue.drain().also { shown.cancel() }
             }
-            if (rest is QueueRest.Later) WorkManagerScheduler.later(WorkManager.getInstance(applicationContext), rest.delayMillis, rest.unmeteredOnly)
+            if (rest is QueueRest.Later) WorkManagerScheduler.later(WorkManager.getInstance(applicationContext), rest.delayMillis, rest.unmeteredOnly, rest.offline)
             return Result.success()
         } finally {
             // Paused or idle, it's gone; this also removes one posted when setForeground was refused.
@@ -95,8 +95,8 @@ class WorkManagerScheduler(context: Context, private val queueOf: () -> Download
     private val work = WorkManager.getInstance(context)
     private val queue: DownloadQueue get() = queueOf()
 
-    override fun ensure(unmeteredOnly: Boolean) {
-        if (queue.wake()) work.enqueueUniqueWork(QUEUE_WORK, ExistingWorkPolicy.REPLACE, request(0, unmeteredOnly))
+    override fun ensure(unmeteredOnly: Boolean, offline: Boolean) {
+        if (queue.wake()) work.enqueueUniqueWork(QUEUE_WORK, ExistingWorkPolicy.REPLACE, request(0, unmeteredOnly, offline))
     }
 
     override suspend fun stopRun(itemId: String) = queue.stopRun(itemId)
@@ -117,12 +117,16 @@ class WorkManagerScheduler(context: Context, private val queueOf: () -> Download
         const val QUEUE_WORK = "download-queue"
 
         /** The queue's next run, after the one finishing now: [delayMillis] on, once the network allows. */
-        fun later(work: WorkManager, delayMillis: Long, unmeteredOnly: Boolean) {
-            work.enqueueUniqueWork(QUEUE_WORK, ExistingWorkPolicy.APPEND_OR_REPLACE, request(delayMillis, unmeteredOnly))
+        fun later(work: WorkManager, delayMillis: Long, unmeteredOnly: Boolean, offline: Boolean = false) {
+            work.enqueueUniqueWork(QUEUE_WORK, ExistingWorkPolicy.APPEND_OR_REPLACE, request(delayMillis, unmeteredOnly, offline))
         }
 
-        private fun request(delayMillis: Long, unmeteredOnly: Boolean): OneTimeWorkRequest {
-            val network = if (unmeteredOnly) NetworkType.UNMETERED else NetworkType.CONNECTED
+        private fun request(delayMillis: Long, unmeteredOnly: Boolean, offline: Boolean = false): OneTimeWorkRequest {
+            val network = when {
+                offline -> NetworkType.NOT_REQUIRED
+                unmeteredOnly -> NetworkType.UNMETERED
+                else -> NetworkType.CONNECTED
+            }
             return OneTimeWorkRequestBuilder<DownloadQueueWorker>()
                 .setConstraints(Constraints.Builder().setRequiredNetworkType(network).build())
                 .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
@@ -228,6 +232,12 @@ fun unmeteredFlow(context: Context): Flow<Boolean> = callbackFlow {
     cm?.registerDefaultNetworkCallback(callback)
     awaitClose { cm?.unregisterNetworkCallback(callback) }
 }.distinctUntilChanged()
+
+/** Whether any network is up now: a download needs one; a local copy doesn't (Plan E1 item 4). */
+fun isConnected(context: Context): Boolean {
+    val cm = context.getSystemService(ConnectivityManager::class.java) ?: return false
+    return cm.getNetworkCapabilities(cm.activeNetwork)?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+}
 
 /** Whether the network now is unmetered (Wi-Fi, Ethernet): what a Wi-Fi-only download may use. */
 fun isUnmetered(context: Context): Boolean {

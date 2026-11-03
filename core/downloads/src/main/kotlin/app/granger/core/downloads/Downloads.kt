@@ -110,8 +110,11 @@ interface Downloads {
 
 /** Runs the one download queue in the background; the WorkManager implementation is in DownloadWorker.kt. */
 interface DownloadScheduler {
-    /** There may be something new to run: makes sure the queue runs, on an unmetered network if [unmeteredOnly]. */
-    fun ensure(unmeteredOnly: Boolean)
+    /**
+     * There may be something new to run: makes sure the queue runs, on an unmetered network if [unmeteredOnly], or with
+     * no network at all if [offline] (a local copy waits; Plan E1 item 4).
+     */
+    fun ensure(unmeteredOnly: Boolean, offline: Boolean = false)
 
     /** Stops [itemId]'s download if it is the one running, and returns once it has; the queue moves on. */
     suspend fun stopRun(itemId: String)
@@ -161,7 +164,9 @@ class DownloadManager(
     private suspend fun wake() {
         if (prefs.paused) return
         val waiting = dao.waiting()
-        if (waiting.isNotEmpty()) withContext(io) { scheduler.ensure(unmeteredOnly = waiting.all { it.wifiOnly }) }
+        if (waiting.isNotEmpty()) withContext(io) {
+            scheduler.ensure(unmeteredOnly = waiting.all { it.needsWifi }, offline = waiting.any { it.isLocal })
+        }
     }
 
     /**

@@ -631,6 +631,13 @@ class AppContainer(context: Context) {
     val archiveSidecarDir: File = File(context.getExternalFilesDir(null) ?: context.filesDir, "books/archive-org")
 
     val volumes: VolumeSource = AndroidVolumes(context)
+
+    /** Add a pack from a file (Plan E1 item 4). */
+    val packImports: app.granger.packs.PackImports by lazy {
+        app.granger.packs.PackImports.forContext(
+            context.applicationContext, { catalog.state.value.catalog }, { library.packs.first() }, downloads, volumes, downloadPrefs,
+        )
+    }
     val downloadPrefs: DownloadPrefs = SharedDownloadPrefs(context)
 
     private val downloadDao = DownloadDatabase.create(context).downloadDao()
@@ -639,6 +646,7 @@ class AppContainer(context: Context) {
     val downloadQueue: DownloadQueue by lazy {
         DownloadQueue(
             downloadDao, downloadRunner, downloadPrefs, unmetered = { isUnmetered(context) }, elapsed = SystemClock::elapsedRealtime,
+            connected = { app.granger.core.downloads.isConnected(context) },
         )
     }
 
@@ -654,7 +662,7 @@ class AppContainer(context: Context) {
 
     val downloadRunner = DownloadRunner(
         dao = downloadDao,
-        downloader = FileDownloader(http),
+        downloader = FileDownloader(http, openLocal = { url, offset -> app.granger.core.downloads.LocalFiles.open(context, url, offset) }),
         onInstalled = { record ->
             if (record.kind == ItemKind.PACK) {
                 library.fileReplaced(record.filePath)

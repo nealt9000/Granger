@@ -95,7 +95,7 @@ object DownloadQueueSummary {
             } ?: 0
             val reason = when {
                 live.paused -> WaitReason.Paused
-                r.wifiOnly && !live.unmetered -> if (live.meteredWifi) WaitReason.MeteredWifi else WaitReason.WaitingForWifi
+                r.needsWifi && !live.unmetered -> if (live.meteredWifi) WaitReason.MeteredWifi else WaitReason.WaitingForWifi
                 (r.retryAt ?: 0) > now -> WaitReason.Retrying(r.retryAt!!, r.attempts + 1)
                 needs > 0 -> WaitReason.NeedsSpace(needs)
                 else -> WaitReason.InLine(++place)

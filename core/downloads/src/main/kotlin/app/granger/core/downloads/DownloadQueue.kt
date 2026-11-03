@@ -41,7 +41,7 @@ sealed interface QueueRest {
     data object Paused : QueueRest
 
     /** Everything left waits for a retry time or for Wi-Fi: look again after [delayMillis], on an unmetered network if [unmeteredOnly]. */
-    data class Later(val delayMillis: Long, val unmeteredOnly: Boolean) : QueueRest
+    data class Later(val delayMillis: Long, val unmeteredOnly: Boolean, val offline: Boolean = false) : QueueRest
 }
 
 /**
@@ -67,6 +67,8 @@ class DownloadQueue(
     private val progressEveryMillis: Long = 1_000,
     /** The clock [TransferRate] reads: monotonic in the app. */
     private val elapsed: () -> Long = now,
+    /** Whether any network is up; a copy from a local file runs without one (Plan E1 item 4). */
+    private val connected: () -> Boolean = { true },
 ) {
     private val rate = TransferRate()
     private val _progress = MutableStateFlow(QueueProgress())
@@ -151,7 +153,7 @@ class DownloadQueue(
     }
 
     private fun DownloadRecord.isRunnable(t: Long, metered: Boolean) =
-        (retryAt ?: 0) <= t && !(wifiOnly && metered)
+        (retryAt ?: 0) <= t && !(needsWifi && metered) && (isLocal || connected())
 
     /** True when a runnable small file waits behind [running], a big one: it is paused (part file kept) to let it by. */
     private suspend fun smallWaitsBehind(running: DownloadRecord): Boolean {
@@ -163,8 +165,11 @@ class DownloadQueue(
 
     private fun restOf(waiting: List<DownloadRecord>, t: Long, metered: Boolean): QueueRest {
         if (waiting.isEmpty()) return QueueRest.Idle
-        val onThisNetwork = waiting.filter { !(it.wifiOnly && metered) }
+        val onThisNetwork = waiting.filter { !(it.needsWifi && metered) }
         val soonest = (onThisNetwork.ifEmpty { waiting }).minOf { it.retryAt ?: t }
+        // A local copy still waiting (a retry after the card was out) needs no network to start.
+        val local = waiting.filter { it.isLocal }
+        if (local.isNotEmpty()) return QueueRest.Later((local.minOf { it.retryAt ?: t } - t).coerceAtLeast(0), unmeteredOnly = false, offline = true)
         return QueueRest.Later((soonest - t).coerceAtLeast(0), unmeteredOnly = onThisNetwork.isEmpty())
     }
 
@@ -207,7 +212,7 @@ class DownloadQueue(
                 val watch = launch {
                     while (job.isActive) {
                         delay(networkCheckMillis)
-                        if (!unmetered() && dao.get(record.itemId, record.hash)?.wifiOnly == true) job.cancel()
+                        if (!unmetered() && dao.get(record.itemId, record.hash)?.needsWifi == true) job.cancel()
                         else if (smallWaitsBehind(record)) job.cancel()
                     }
                 }

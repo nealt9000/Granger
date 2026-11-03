@@ -1377,6 +1377,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onBack = { nav.popBackStack() },
                     only = only,
                     onImport = if (only == GetMoreFor.BOOKS && Features.IMPORT) nav::importIntoLibrary else null,
+                    onImportPack = { uri -> container.packImports.add(uri).text() },
                 )
             }
             composable<ReadinessRoute> {

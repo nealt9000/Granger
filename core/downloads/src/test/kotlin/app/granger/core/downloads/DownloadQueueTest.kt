@@ -91,10 +91,12 @@ class DownloadQueueTest {
         dao, scheduler, prefs, freeBytes = { Long.MAX_VALUE / 2 }, io = Dispatchers.Unconfined, now = { clock },
     )
 
+    private var connected = true
+
     private fun queueOf(recordRunner: RecordRunner, networkCheckMillis: Long = Long.MAX_VALUE) =
         DownloadQueue(
             dao, recordRunner, prefs, unmetered = { unmetered }, now = { clock }, networkCheckMillis = networkCheckMillis,
-            progressEveryMillis = Long.MAX_VALUE,
+            progressEveryMillis = Long.MAX_VALUE, connected = { connected },
         )
 
     init {
@@ -241,6 +243,29 @@ class DownloadQueueTest {
         runner.reports["big"] = listOf(done, done)
         queue.drain()
         assertThat(dao.get("big", SHA_1)!!.attempts).isEqualTo(2)
+    }
+
+    @Test fun withNoNetworkALocalCopyRunsAndDownloadsWait() = runTest {
+        // Plan E1 item 4: off-grid, a pack copied from an SD card needs no network.
+        manager.enqueue(spec("web"), root, wifiOnly = false)
+        manager.enqueue(spec("card").copy(urls = listOf("content://sd/card.zim")), root, wifiOnly = false)
+        connected = false
+        val rest = queue.drain()
+        assertThat(runner.ran).containsExactly("card")
+        assertThat(rest).isEqualTo(QueueRest.Later(0, unmeteredOnly = false))
+        connected = true
+        queue.drain()
+        assertThat(runner.ran).containsExactly("card", "web").inOrder()
+    }
+
+    @Test fun aLocalCopyWaitingAsksForNoNetworkWhateverWifiOnlySays() = runTest {
+        manager.enqueue(spec("card").copy(urls = listOf("content://sd/card.zim")), root, wifiOnly = true)
+        assertThat(scheduler.offline.last()).isTrue()
+        assertThat(scheduler.ensured.last()).isFalse()
+        // On mobile data with Wi-Fi only on, it still runs.
+        unmetered = false
+        queue.drain()
+        assertThat(runner.ran).containsExactly("card")
     }
 
     @Test fun theBackoffDoublesFrom30sUpTo5Hours() {
