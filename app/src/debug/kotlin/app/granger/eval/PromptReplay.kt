@@ -7,6 +7,7 @@ import app.granger.core.ai.MemorySampler
 import app.granger.core.ai.ThinkingOff
 import app.granger.core.research.CitationCheck
 import app.granger.core.research.Citations
+import app.granger.core.research.ResearchLanguage
 import java.io.File
 import kotlinx.coroutines.flow.fold
 import org.json.JSONArray
@@ -55,6 +56,13 @@ class PromptReplay(
         }
     }
 
+    /** The question an answer prompt ends with, under its English or Spanish label; the whole prompt if neither. */
+    private fun questionOf(prompt: String): String {
+        val label = listOf("\nQuestion: ", "\nPregunta: ").maxBy { prompt.lastIndexOf(it) }
+        val at = prompt.lastIndexOf(label)
+        return if (at < 0) prompt else prompt.substring(at + label.length).substringBefore('\n')
+    }
+
     private suspend fun reply(model: LlmEngine, prompt: String, passages: Int): JSONObject {
         val start = clock()
         var first: Long? = null
@@ -66,7 +74,8 @@ class PromptReplay(
         }
         val total = clock() - start
         val answer = withoutThinking(text)
-        val check = Citations.check(answer, passages)
+        // The question's languages, as the pipeline checks it: a Spanish decline in prose counts (Plan L4 prompt test).
+        val check = Citations.check(answer, passages, ResearchLanguage.of(questionOf(prompt)))
         return JSONObject()
             .put("reply", answer)
             .put("raw", if (answer != text) text else JSONObject.NULL)
