@@ -99,7 +99,7 @@ His results fill these lines of the release checklist: *a second phone that isn'
 - [ ] 6. Baseline Profile: waits for Neal (generating one installs a benchmark build on the Pixel 6).
 - [x] 7. Battery audit: nothing to change. The only background work is the download queue, which the user starts; book indexing runs in the app's scope while it is open, and Make all searchable asks first. No `setRequiresBatteryNotLow`: a download the user asked for in town shouldn't stop at 15 %.
 - [ ] 8. Memory: from his reports.
-- [ ] 9. Swahili packs: curated rows and `swa` in `kiwix.languages`; merged into the signed catalog without moving other packs' snapshots (their vectors are tied to the exact files).
+- [x] 9. Swahili packs: `swa` in `kiwix.languages` and curated rows naming the language (Wikipedia with and without pictures, Wiktionary, PhET), plus five freeCodeCamp packs; no tiers. The rebuild moved no other pack (0 snapshot changes, every other entry identical), all 2,410 links answer, re-signed. Kiwix's Ubongo (Tanzanian children's educational videos in Swahili) has no family-table row: a licence check, and video packs are after launch.
 - [x] Tester addendum: `docs/friend-testing/economy-phone-note.md`.
 
 ## Decisions (Neal, 2026-11-03)

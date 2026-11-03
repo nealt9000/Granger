@@ -2,7 +2,8 @@
   "kiwix": {
     "languages": [
       "eng",
-      "spa"
+      "spa",
+      "swa"
     ],
     "families": "tools/catalog-gen/kiwix_families.json",
     "contents": "tools/catalog-gen/pack_contents.json"
@@ -231,6 +232,70 @@
           "title": "Wikivoyage travel guide in Spanish"
         }
       }
+    },
+    {
+      "name": "wikipedia_sw_all",
+      "flavour": "maxi",
+      "category": "Reference",
+      "license": "CC BY-SA 4.0",
+      "title": "Wikipedia",
+      "description": "Swahili Wikipedia: every article, with pictures",
+      "i18n": {
+        "en": {
+          "title": "Wikipedia in Swahili"
+        },
+        "es": {
+          "title": "Wikipedia en suajili"
+        }
+      }
+    },
+    {
+      "name": "wikipedia_sw_all",
+      "flavour": "nopic",
+      "category": "Reference",
+      "license": "CC BY-SA 4.0",
+      "title": "Wikipedia",
+      "description": "Swahili Wikipedia: every article, without pictures",
+      "i18n": {
+        "en": {
+          "title": "Wikipedia in Swahili (no pictures)"
+        },
+        "es": {
+          "title": "Wikipedia en suajili (sin imágenes)"
+        }
+      }
+    },
+    {
+      "name": "wiktionary_sw_all",
+      "flavour": "nopic",
+      "category": "Reference",
+      "license": "CC BY-SA 4.0",
+      "title": "Wiktionary",
+      "description": "The Swahili dictionary from Wiktionary",
+      "i18n": {
+        "en": {
+          "title": "Wiktionary in Swahili"
+        },
+        "es": {
+          "title": "Wikcionario en suajili"
+        }
+      }
+    },
+    {
+      "name": "phet_sw_all",
+      "category": "Science & Math",
+      "license": "CC BY 4.0 (sims published before 2026-03-29); CC BY-NC 4.0 (later sims)",
+      "title": "PhET Interactive Simulations",
+      "description": "Interactive science and maths simulations from the University of Colorado, in Swahili",
+      "i18n": {
+        "en": {
+          "title": "PhET science simulations in Swahili"
+        },
+        "es": {
+          "title": "Simulaciones de ciencias PhET en suajili"
+        }
+      },
+      "nonCommercial": true
     }
   ],
   "books": [

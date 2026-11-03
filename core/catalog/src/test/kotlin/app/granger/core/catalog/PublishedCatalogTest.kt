@@ -93,7 +93,7 @@ class PublishedCatalogTest {
         val catalog = (CatalogParser.parse(bytes, repoFile("catalog/catalog.json.sig").readBytes(), key) as ParseResult.Ok).catalog
 
         // English (and multilingual) packs; the Spanish ones are checked below (Plan L3).
-        val english = catalog.packs.filterNot { it.language == "es" }
+        val english = catalog.packs.filterNot { it.language == "es" || it.language == "sw" }
         val books = english.filter { it.isBookPack }
         assertThat(books).hasSize(50)
         assertThat(books.count { it.family == "gutenberg" }).isEqualTo(41)
@@ -106,6 +106,9 @@ class PublishedCatalogTest {
         assertThat(catalog.packs.filter { it.flavour.isNotEmpty() }.all { it.id == "${it.zimName}_${it.flavour}" }).isTrue()
         assertThat(english.groupingBy { it.flavour }.eachCount())
             .containsExactly("", 771, "maxi", 92, "nopic", 50, "mini", 10)
+        // Swahili, packs only (Plan E1 item 9): Wikipedia with and without pictures, Wiktionary, PhET, freeCodeCamp.
+        assertThat(catalog.packs.filter { it.language == "sw" }.groupingBy { it.flavour }.eachCount())
+            .containsExactly("", 6, "maxi", 1, "nopic", 2)
         // Spanish: Project Gutenberg's Spanish pack is a book pack too (the walkthrough, 2026-11-02).
         assertThat(catalog.packs.filter { it.language == "es" && it.isBookPack }.map { it.zimName }).contains("gutenberg_es_all")
     }
