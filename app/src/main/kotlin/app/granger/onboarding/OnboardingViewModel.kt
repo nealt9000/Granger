@@ -139,7 +139,8 @@ class OnboardingViewModel(
     private val useCaseIds = MutableStateFlow<Set<String>>(emptySet())
     private val askChosen = MutableStateFlow(true)
     private val voiceChosen = MutableStateFlow(true)
-    private val saveSpace = MutableStateFlow(false)
+    /** Null until the user flips it: then the default decides (Plan E1 item 5). */
+    private val saveSpace = MutableStateFlow<Boolean?>(null)
     private val secondChosen = MutableStateFlow(true)
     private val wifiOnly = MutableStateFlow(prefs.wifiOnly)
     private val volumePath = MutableStateFlow(prefs.volumePath)
@@ -155,7 +156,7 @@ class OnboardingViewModel(
         val catalog: Catalog?, val refreshing: Boolean, val failed: Boolean, val installed: Set<String>, val volumes: List<Volume>,
         val languages: List<String>,
     )
-    private class Choices(val step: Step, val startId: String?, val unticked: Set<String>, val regionQuery: String, val regionId: String?, val useCaseIds: Set<String>, val askChosen: Boolean, val voiceChosen: Boolean, val saveSpace: Boolean, val secondChosen: Boolean)
+    private class Choices(val step: Step, val startId: String?, val unticked: Set<String>, val regionQuery: String, val regionId: String?, val useCaseIds: Set<String>, val askChosen: Boolean, val voiceChosen: Boolean, val saveSpace: Boolean?, val secondChosen: Boolean)
     private class Setup(val wifiOnly: Boolean, val volumePath: String?, val notice: UiText?, val starting: Boolean)
 
     private val facts = combine(catalog.state, downloads.records, library.packs, volumeList, knowledge) { c, records, packs, vols, langs ->
@@ -166,7 +167,7 @@ class OnboardingViewModel(
     }
     private val choices = combine(step, startId, unticked, regionQuery, regionId, useCaseIds, askChosen, voiceChosen, saveSpace, secondChosen) { values ->
         @Suppress("UNCHECKED_CAST")
-        Choices(values[0] as Step, values[1] as String?, values[2] as Set<String>, values[3] as String, values[4] as String?, values[5] as Set<String>, values[6] as Boolean, values[7] as Boolean, values[8] as Boolean, values[9] as Boolean)
+        Choices(values[0] as Step, values[1] as String?, values[2] as Set<String>, values[3] as String, values[4] as String?, values[5] as Set<String>, values[6] as Boolean, values[7] as Boolean, values[8] as Boolean?, values[9] as Boolean)
     }
     private val setup = combine(wifiOnly, volumePath, notice, starting, ::Setup)
 
@@ -201,9 +202,19 @@ class OnboardingViewModel(
     private fun build(f: Facts, c: Choices, s: Setup): OnboardingUi {
         val catalog = f.catalog
         val appLang = appLanguage()
+        // The card when it has more room, unless a place was chosen (Plan E1 item 5).
+        val volume = f.volumes.firstOrNull { it.root.path == s.volumePath } ?: OnboardingModel.defaultVolume(f.volumes)
+        // Save space on by default when the start with pictures would leave little room and the one without fits.
+        val saveSpace = c.saveSpace ?: catalog?.let { cat ->
+            fun sized(save: Boolean) = OnboardingModel.startChoices(cat, f.installed, save, f.languages.first(), appLang)
+                .let { list -> list.firstOrNull { it.id == c.startId } ?: list.firstOrNull() }?.bytes(c.unticked) ?: 0L
+            val pics = sized(false)
+            val nopic = sized(true)
+            OnboardingModel.saveSpaceByDefault(pics, nopic, volume?.freeBytes)
+        } ?: false
         // The main library language's starts; a second language adds its encyclopedia as its own line (Plan L3).
-        val starts = catalog?.let { OnboardingModel.startChoices(it, f.installed, c.saveSpace, f.languages.first(), appLang) }.orEmpty()
-        val secondLine = f.languages.getOrNull(1)?.let { lang -> catalog?.let { OnboardingModel.secondLine(it, lang, f.installed, c.saveSpace) } }
+        val starts = catalog?.let { OnboardingModel.startChoices(it, f.installed, saveSpace, f.languages.first(), appLang) }.orEmpty()
+        val secondLine = f.languages.getOrNull(1)?.let { lang -> catalog?.let { OnboardingModel.secondLine(it, lang, f.installed, saveSpace) } }
         val startId = if (c.startId == OnboardingModel.DEFAULT_START) starts.firstOrNull()?.id else c.startId
         val start = starts.firstOrNull { it.id == startId }
         val regions = catalog?.let { OnboardingModel.regions(it, f.installed) } ?: Regions(emptyList(), emptyList())
@@ -216,7 +227,6 @@ class OnboardingViewModel(
         secondLine?.takeIf { c.secondChosen }?.items?.mapTo(chosen) { it.id }
         val additions = catalog?.let { OnboardingModel.additions(it, f.installed, chosen, f.languages, appLang) }.orEmpty()
         val picked = additions.filter { it.useCase.id in c.useCaseIds }
-        val volume = f.volumes.firstOrNull { it.root.path == s.volumePath } ?: f.volumes.firstOrNull()
         val askLine = catalog?.let { OnboardingModel.askLine(it, tier, dense, f.installed) }
         // Under 6 GB the Granger voices may stop mid-read (ONNX Runtime keeps ~420 MB): the phone's voice instead (Plan E1 item 2).
         val voiceLine = catalog?.takeIf { offerVoice && tier >= DeviceTier.ASK }?.let { OnboardingModel.voiceLine(it, f.installed) }
@@ -255,7 +265,7 @@ class OnboardingViewModel(
             useCaseIds = c.useCaseIds,
             askLine = askLine,
             askChosen = c.askChosen,
-            saveSpace = c.saveSpace,
+            saveSpace = saveSpace,
             voiceLine = voiceLine,
             voiceChosen = c.voiceChosen,
             review = review,
@@ -307,7 +317,7 @@ class OnboardingViewModel(
 
     fun toggleVoice() = voiceChosen.update { !it }
 
-    fun toggleSaveSpace() = saveSpace.update { !it }
+    fun toggleSaveSpace() = saveSpace.update { !(it ?: ui.value.saveSpace) }
 
     fun toggleSecond() = secondChosen.update { !it }
 
@@ -346,13 +356,15 @@ class OnboardingViewModel(
         viewModelScope.launch {
             val review = ui.value.review
             // The setting flows, not the built UI: a tap on the switch right before Start must count.
-            val volume = volumeList.value.firstOrNull { it.root.path == volumePath.value } ?: volumeList.value.firstOrNull()
+            val volume = volumeList.value.firstOrNull { it.root.path == volumePath.value } ?: OnboardingModel.defaultVolume(volumeList.value)
             if (review.isEmpty || volume == null) {
                 skip()
                 return@launch
             }
             val group = "onboarding:${now()}"
             starting.value = true
+            // Later downloads go where the start went (the card, if it was the default).
+            if (prefs.volumePath == null) prefs.volumePath = volume.root.path
             // Quick wins first (Plan DL Decision 5): the queue takes the group in this order.
             val domains = catalog.state.value.catalog?.readiness?.domains.orEmpty().map { it.id }
             val order = OnboardingModel.downloadOrder(review.items, domains, ui.value.region?.takeUnless { it.installed }?.pack?.id)
