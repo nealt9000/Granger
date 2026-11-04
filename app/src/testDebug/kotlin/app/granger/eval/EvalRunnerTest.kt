@@ -85,6 +85,24 @@ class EvalRunnerTest {
     }
 
     @Test
+    fun stopAtRewriteKeepsTheRewriteAndTheMedicalFlagAndSearchesNothing() = runTest {
+        val out = File(tmp.root, "rw/results.jsonl")
+        val finder = RecordingFinder(Finder(listOf(water)))
+        val prompts = PromptRecorder(Models(small))
+        EvalRunner(ResearchPipeline(finder, prompts), finder, { it.sourceId }, prompts, clock = { ticks += 10; ticks }, rewriteOnly = true)
+            .run(listOf(item("a"), item("m", question = "¿cuál es la dosis de ibuprofeno para la fiebre?")), out, GuessModels.NONE)
+        val recs = records(out)
+        assertThat(recs.map { it.getString("outcome") }).containsExactly("rewrite", "rewrite")
+        assertThat(recs.map { it.getBoolean("medical") }).containsExactly(false, true).inOrder()
+        assertThat(recs[0].getJSONArray("found").length()).isEqualTo(0)
+        val stages = recs[0].getJSONArray("prompts").let { p -> (0 until p.length()).map { p.getJSONObject(it).getString("stage") } }
+        assertThat(stages).containsExactly("rewrite")
+        assertThat(recs[0].getJSONObject("ms").has("rewrite")).isTrue()
+        // Two rewrites and no answers.
+        assertThat(small.prompts).hasSize(2)
+    }
+
+    @Test
     fun writesTheWholeSearchCorpusWithTextBesideTheRecords() = runTest {
         val out = File(tmp.root, "c/results.jsonl")
         runner().run(listOf(item("a"), item("b")), out, GuessModels.NONE)

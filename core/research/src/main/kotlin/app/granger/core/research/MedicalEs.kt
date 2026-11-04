@@ -124,6 +124,9 @@ object PersonalMedicalEs {
         "\\b(sera|es) (\\w+ ){0,4}(cancer|grave|normal|peligroso|serio|infectad[oa]|rot[oa]|maligno)\\b",
         "\\bque (probabilidades|posibilidades|riesgo) tengo\\b",
         "\\b(salio|salieron|dio|dieron) (muy )?(alt|baj)",
+        // A result as a number ("mi TSH salió en 6.2") and what it means for the asker ("¿qué significa para mí?").
+        "\\bmis? (\\w+ ){0,2}(salio|salieron|dio|dieron|sale|salen|esta|estan) (en |de |a )?\\d",
+        "\\bque (significan?|quieren? decir) (\\w+ )?para mi\\b",
         "\\btengo (?!que\\b|una pregunta|curiosidad|una duda)\\w+",
         "\\bme (sale|salio|salen|salieron|arde|arden|pica|pican|late|duele|duelen|dio|da|dan|siento|tome|trague|cai|corte|queme|torci|hice|quede)\\b",
         "\\b(estoy|estaba) (embarazada|amamantando|lactando|tomando|enferm|resfriad|maread|deprimid)",

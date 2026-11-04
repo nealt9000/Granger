@@ -103,6 +103,8 @@ class EvalActivity : ComponentActivity() {
         // Plan R1: `dense` on or off; the app's DENSE_RETRIEVAL when not given.
         val denseOn = intent.getStringExtra("dense")?.let { it == "on" } ?: DENSE_RETRIEVAL
         val guesses = GuessModels.parse(intent.getStringExtra("guesses"))
+        // Plan L4: `stop` = `rewrite` ends each question after the rewrite (the medical labels, Spanish baseline).
+        val rewriteOnly = intent.getStringExtra("stop") == "rewrite"
         val result = EvalSession.start(runId, root, ::log) {
             // Model roles come from the catalog. MainActivity loads the cached one at launch; a cold start straight
             // into this screen must too, or no model is listed and every question fails with "won't load".
@@ -117,10 +119,10 @@ class EvalActivity : ComponentActivity() {
             c.embedderWanted.set(denseOn)
             try {
                 val pipeline = ResearchPipeline(finder, prompts, c.rankingConfig, rewriteAlternates = alternates, rewritePlain = plain, rewritePlainFollowUps = plainAll, reserveNamed = named, yearFacts = facts, sourceWeight = fiction, dense = dense)
-                val runner = EvalRunner(pipeline, finder, sourceName, prompts, dense, clock)
+                val runner = EvalRunner(pipeline, finder, sourceName, prompts, dense, rewriteOnly, clock)
                 runner.onItem = { item, n, total -> log("$n / $total ${item.id}") }
                 log("run $runId: ${items.size} items, guesses=$guesses${if (alternates) ", rewrite=alternates" else ""}${if (plainAll) ", rewrite=plain-all" else if (plain) ", rewrite=plain" else ""}${if (named) ", entities=on" else ""}${if (facts) ", facts=on" else ""}" +
-                    "${if (fiction != null) ", fiction weighted" else ""}${if (denseOn) ", dense" else ""}")
+                    "${if (fiction != null) ", fiction weighted" else ""}${if (denseOn) ", dense" else ""}${if (rewriteOnly) ", stop=rewrite" else ""}")
                 runner.run(items, File(root, "$runId/results.jsonl"), guesses, runId)
             } finally {
                 c.embedderWanted.set(DENSE_RETRIEVAL)
