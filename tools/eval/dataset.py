@@ -20,7 +20,7 @@ import zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-SPLITS = ("tune", "heldout", "heldout2", "media")
+SPLITS = ("tune", "heldout", "heldout2", "dev", "media")
 BOOK_PREFIX = "book:granger:"
 ALBUM_PREFIX = "album:"
 AUDIOBOOK_PREFIX = "audiobook:"
