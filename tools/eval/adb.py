@@ -117,7 +117,7 @@ def run_eval(runner, dataset_path, run_id, runs_dir, ids=None, groups=None, gues
     start = ["shell", "am", "start", "-S", "-n", PKG + "/.eval.EvalActivity", "--es", "runId", run_id]
     for key, val in (("ids", ids), ("groups", groups), ("guesses", guesses), ("rewrite", rewrite), ("dense", dense), ("entities", entities), ("facts", facts), ("older", older), ("headwords", headwords), ("passages", passages)):
         if val:
-            start += ["--es", key, val]
+            start += ["--es", key, str(val)]
     if fiction:
         start += ["--es", "fiction", "fiction.txt"]
     rc, o = runner(start)

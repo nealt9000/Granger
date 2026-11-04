@@ -419,6 +419,10 @@ Classics notes, found for 13 of 31 held-out classics questions and chosen for 2.
   by `Passage.language`). **More passages in the prompt**: recall by quote at 4 / 6 / 8 is 69 / 76 / 79 on dev and
   65 / 70 / 74 on tuning (location 84 / 98 / 104 and 61 / 68 / 70): the one lever by replay that clears noise on both
   sets, with a prompt-length, latency and misread cost to measure on a run (`eval.py run --passages 6`).
+  **The gate stays:** on dev, 0.74 recovers no answerable (the 8 gate-declined answerables don't have the passage
+  in their top 4 ungated either) and turns 11 of 25 gate declines into model turns; 0.78 with the lexical gate at
+  1.3 declines 5 more on dev at no cost there but −3 recall on tuning (noise). Per-article cap 2: +3 location, +1
+  quote on dev, 0 on tuning (noise; revisit with 6 passages).
 
 
 - [ ] **Pass**: the spec's pass path; nothing to flip (F1 part 2 already flipped it). Record the numbers in the
