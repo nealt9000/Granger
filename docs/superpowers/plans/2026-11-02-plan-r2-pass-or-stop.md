@@ -404,7 +404,12 @@ Classics notes, found for 13 of 31 held-out classics questions and chosen for 2.
   16 / 46 (17 / 45); same outcome on 197 of 202, the same 4 passages for 125, 80% passage overlap; the keyword
   rewrite differs on about half the questions (CPU and GPU numerics). Notes: `~/.cache/granger/emu-stage/`.
 - [x] **Dev set baseline on the emulator, `dev-base-1` + `-own` (2026-11-04, the held-out run's flags, 25 min).**
-  Mechanical numbers (replies ungraded until Neal has reviewed the set): declined 51/61 (84%); recall@4 by quote
+  **Graded 2026-11-04 (Neal reading the set alongside): grounded 83/148 (56%), own-book 6/10; declined 51/61 (84%);
+  best guess confidently wrong 13%, right or partly 75%.** Per domain grounded: classics 19/44, food 6/12, making 5/12,
+  maps 9/12, medicine 15/20, reference 9/12, science 6/12, technology 8/12, thought 6/12. The 69 misses by kind:
+  **in the prompt and not grounded 25, in the prompt and declined 7** (the model, 46%); gate-declined 8, never found
+  11, found but not chosen 18 (retrieval, 54%). Classics: 10 of its 25 misses had the answer in the prompt.
+  Mechanical numbers from the run: declined 51/61 (84%); recall@4 by quote
   68/148 (46%), by location 57%; first words 5.6 s median. Misses by kind over the 148 answerables, with "found"
   meaning either search's full hit list by location or quote: in the prompt 90, **found but not chosen 43**, never
   found 15; 8 declined by the gate before the model, 6 of those with the passage found. Classics: 20 of 44 found but
