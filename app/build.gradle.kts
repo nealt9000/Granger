@@ -35,7 +35,7 @@ android {
         )
         // Settings → Send feedback writes here (Plan F1 part 2; Neal, 2026-10-31).
         buildConfigField("long", "FAKE_RAM_BYTES", "0L")
-        buildConfigField("String", "FEEDBACK_EMAIL", "\"nealt900@gmail.com\"")
+        buildConfigField("String", "FEEDBACK_EMAIL", "\"feedback@opengranger.org\"")
         buildConfigField(
             "String", "CATALOG_PUBLIC_KEY",
             "\"${rootProject.file("catalog/public-key.txt").readText().trim()}\"",

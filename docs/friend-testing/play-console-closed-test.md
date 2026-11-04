@@ -23,7 +23,7 @@ Play Console → Testing → Closed testing → Create track (name it "Round 1")
 
 - Testers tab: add the Google Group by its address. Keep an email list beside it, "Round 1 by email", for the people who wrote in before the group existed.
 - Countries: all, or at least the countries the testers are in.
-- Feedback channel: `nealt900@gmail.com` (the address the app's Send feedback writes to).
+- Feedback channel: `feedback@opengranger.org` (the address the app's Send feedback writes to; ImprovMX forwards it to Granger's Gmail, `tools/feedback/README.md`).
 - Releases: upload the next release bundle with its mapping file (build from main once the pre-friends fixes and the Ask items are checked on the phone, release checklist A). Release notes in English and Spanish (`round-1-tester-note.md` and `round-1-tester-note-es.md`, under 500 characters each).
 - Review and roll out. The first closed release goes through Google's review, which can take days; the opt-in link appears only once the release is published.
 
