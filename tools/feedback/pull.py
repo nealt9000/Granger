@@ -154,7 +154,8 @@ def pull(cfg, everything=False, dry=False):
     status, data = box.select(cfg["folder"], readonly=True)
     if status != "OK":
         sys.exit(f"cannot open {cfg['folder']}: {data}")
-    validity = box.response("UIDVALIDITY")[1][0].decode() if box.response("UIDVALIDITY")[1] else ""
+    got = box.response("UIDVALIDITY")[1]  # imaplib hands an untagged response out once, so read it once
+    validity = got[0].decode() if got and got[0] else ""
     last = state.get(key, {})
     start = 1 if everything or last.get("validity") != validity else int(last.get("uid", 0)) + 1
     status, data = box.uid("search", None, f"UID {start}:*")
