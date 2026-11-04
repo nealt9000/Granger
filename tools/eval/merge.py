@@ -67,8 +67,9 @@ def _keyword(question, corpus, cfg, w):
     return found, kept, weighted
 
 
-def _dense(hits, floor, w):
-    return [p for p in hits if p["cosine"] * _fw(p, w) >= floor]
+def _dense(hits, floor, w, dense_fw=True):
+    """Dense hits above the floor; [dense_fw] off leaves the fiction weight to the keyword side (R2, 2026-11-04)."""
+    return [p for p in hits if p["cosine"] * (_fw(p, w) if dense_fw else 1.0) >= floor]
 
 
 def _finish(question, ranked, found, cfg):
@@ -93,17 +94,18 @@ def _unique(ps):
     return out
 
 
-def _hybrid_scored(question, corpus, cfg, hits, alpha, floor):
+def _hybrid_scored(question, corpus, cfg, hits, alpha, floor, dense_fw=True):
     """hybrid's (passage, score) pairs, best first and unique by text, and the preselected keyword passages."""
     w = _weight(question, corpus, hits)
     found, kept, lex = _keyword(question, corpus, cfg, w)
     cos = {text_key(p): p["cosine"] for p in hits}
+    dfw = (lambda p: _fw(p, w)) if dense_fw else (lambda p: 1.0)
     scored = []
     for p in kept:
         c = cos.get(text_key(p))
-        scored.append((p, (alpha * lex(p) + (1 - alpha) * c * _fw(p, w)) if c is not None else alpha * lex(p) + (1 - alpha) * floor))
-    for p in _dense(hits, floor, w):
-        scored.append((p, alpha * replay.scorer(corpus["keywords"], language.of(question))(p) * _fw(p, w) + (1 - alpha) * p["cosine"] * _fw(p, w)))
+        scored.append((p, (alpha * lex(p) + (1 - alpha) * c * dfw(p)) if c is not None else alpha * lex(p) + (1 - alpha) * floor))
+    for p in _dense(hits, floor, w, dense_fw):
+        scored.append((p, alpha * replay.scorer(corpus["keywords"], language.of(question))(p) * _fw(p, w) + (1 - alpha) * p["cosine"] * dfw(p)))
     seen, out = set(), []
     for p, sc in sorted(scored, key=lambda x: -x[1]):
         k = text_key(p)
@@ -113,10 +115,17 @@ def _hybrid_scored(question, corpus, cfg, hits, alpha, floor):
     return out, found
 
 
-def hybrid(alpha, floor):
+def hybrid(alpha, floor, dense_fw=True):
     def rank(question, corpus, cfg, hits):
-        scored, found = _hybrid_scored(question, corpus, cfg, hits, alpha, floor)
+        scored, found = _hybrid_scored(question, corpus, cfg, hits, alpha, floor, dense_fw)
         return _finish(question, [p for p, _ in scored], found, cfg)
+    return rank
+
+
+def per_doc(inner, n):
+    """[inner] with at most [n] passages of one article or chapter among the chosen (the app's perDocument, 3)."""
+    def rank(question, corpus, cfg, hits):
+        return inner(question, corpus, replace(cfg, per_document=n), hits)
     return rank
 
 
@@ -194,12 +203,12 @@ def slots(n, floor):
     return rank
 
 
-def gated(inner, gate, lexical):
+def gated(inner, gate, lexical, dense_fw=True):
     """[inner]'s passages only when the best dense hit reaches [gate] or the best keyword passage scores [lexical] or more."""
     def rank(question, corpus, cfg, hits):
         w = _weight(question, corpus, hits)
         found, kept, lex = _keyword(question, corpus, cfg, w)
-        best_cos = max((p["cosine"] * _fw(p, w) for p in hits), default=0.0)
+        best_cos = max((p["cosine"] * (_fw(p, w) if dense_fw else 1.0) for p in hits), default=0.0)
         best_lex = max((lex(p) for p in kept), default=0.0)
         if best_cos < gate and best_lex < lexical:
             return []
@@ -233,6 +242,11 @@ def configs():
         for lx in (1.0, 1.1, 1.3, 9.0):
             out["gated g%.2f l%.1f hybrid a0.1 f0.74" % (g, lx)] = gated(hybrid(0.1, 0.74), g, lx)
             out["gated g%.2f l%.1f rrf f0.74" % (g, lx)] = gated(rrf(0.74), g, lx)
+    # R2 (2026-11-04): the fiction weight off the dense side, and a tighter per-article cap.
+    out["gated g0.78 l1.0 hybrid a0.1 f0.74 lexfw"] = gated(hybrid(0.1, 0.74, dense_fw=False), 0.78, 1.0, dense_fw=False)
+    for n in (1, 2):
+        out["gated g0.78 l1.0 hybrid a0.1 f0.74 pd%d" % n] = per_doc(gated(hybrid(0.1, 0.74), 0.78, 1.0), n)
+        out["gated g0.78 l1.0 hybrid a0.1 f0.74 lexfw pd%d" % n] = per_doc(gated(hybrid(0.1, 0.74, dense_fw=False), 0.78, 1.0, dense_fw=False), n)
     return out
 
 

@@ -390,6 +390,17 @@ no literary cue word grounded 1 of 9 held-out, 6 of 8 tuning); the per-article c
 article can fill 3 of the 4 slots over the work's own text); excerpt choice within a found chapter or article; the
 Classics notes, found for 13 of 31 held-out classics questions and chosen for 2.
 
+- [x] **Replay on `r2-t10-cut` (2026-11-04, `merge.py` variants).** The fiction weight off the dense side (`lexfw`):
+  no change at all (61/126 by location, 65 by quote, 47/76 empty, 2 intrusions), so the tuning split never trips it
+  and only the dev set can show it. Per-article cap 2: no change. Cap 1: +3 by location, −10 by quote (the chunk
+  with the answer sentence is dropped for another of the same article), not adopted. The gate grid is in Task 10's
+  sweep: 0.74 passes 15 more unanswerables to the model for +1 recall.
+- [x] **The eval on the Mac (Neal, 2026-11-04).** An arm64 emulator (API 36, 8 GB, AVD on the X10 Pro SSD) with a
+  copy of the phone's library and E2B's CPU bundle (the GPU bundle holds no CPU model; a debug build on the emulator
+  picks `MODEL_BACKEND = CPU`). The embedder's cosines are within 0.01 of the GPU's; first words 4–6 s, a turn 5–8 s,
+  so a dev-set run is about an hour and the phone stays free. Dev and tuning scoring run there; scoring 2 of 2 stays on
+  the phone. Parity against `r2-t10-cut`: `emu-t10-cut-1` (below, when done). Notes: `~/.cache/granger/emu-stage/`.
+
 
 - [ ] **Pass**: the spec's pass path; nothing to flip (F1 part 2 already flipped it). Record the numbers in the
   roadmap and the store listing's Preview wording stays or goes, Neal's call.
