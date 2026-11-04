@@ -349,7 +349,7 @@ def test_colophon_names_the_book_and_its_source(tmp_path):
     text = " ".join(" ".join(page.itertext()).split())
     for expected in ("Granger Classics", "The Modern Book", "A. Writer", "Translated by T. Ranslator",
                      "This translation first published 1920", "From Project Gutenberg ebook #1342",
-                     "Public domain in the USA.", "The world’s knowledge. Yours to keep."):
+                     "Public domain in the USA.", "Your door to knowledge. Always open."):
         assert expected in text, expected
     svg = page.find(".//{http://www.w3.org/2000/svg}svg")
     assert svg is not None and len(svg.findall("{http://www.w3.org/2000/svg}path")) == 3
@@ -458,7 +458,7 @@ def test_spanish_colophon_speaks_spanish_and_keeps_its_capitals(tmp_path):
     for expected in ("Clásicos Granger", "Traducción de T. Raductor",
                      "Esta traducción se publicó por primera vez en 1920",
                      "Del libro electrónico n.º 1 de Project Gutenberg", "Dominio público en los Estados Unidos.",
-                     "El conocimiento del mundo. Tuyo para siempre.", "— Colofón</title>"):
+                     "Tu puerta al conocimiento. Siempre abierta.", "— Colofón</title>"):
         assert expected in text, expected
     assert "Granger Classics" not in text and "Translated" not in text
     assert "Colofón" in z.read("OEBPS/nav.xhtml").decode()

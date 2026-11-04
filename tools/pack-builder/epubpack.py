@@ -28,7 +28,7 @@ LABELS = {
            "translated_by": "Translated by", "translation_published": "This translation first published {year}",
            "edition_published": "This edition first published {year}",
            "from_gutenberg": "From Project Gutenberg ebook #{id}", "from_ebible": "From eBible.org ({id})",
-           "tagline": "The world’s knowledge. Yours to keep."},
+           "tagline": "Your door to knowledge. Always open."},
     "es": {"contents": "Índice", "landmarks": "Puntos de referencia", "cover": "Portada", "start": "Comienzo del texto",
            "colophon": "Colofón", "translated": "trad.", "rights": "Dominio público en los Estados Unidos.",
            "translated_by": "Traducción de",
@@ -36,7 +36,7 @@ LABELS = {
            "edition_published": "Esta edición se publicó por primera vez en {year}",
            "from_gutenberg": "Del libro electrónico n.º {id} de Project Gutenberg",
            "from_ebible": "De eBible.org ({id})",
-           "tagline": "El conocimiento del mundo. Tuyo para siempre."},
+           "tagline": "Tu puerta al conocimiento. Siempre abierta."},
 }
 ZIP_TIME = (1980, 1, 1, 0, 0, 0)
 NS = 'xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"'

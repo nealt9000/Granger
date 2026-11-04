@@ -1,14 +1,16 @@
 # Granger brand and vision
 
-**Status:** Direction set by Neal, 2026-10-23, and revised the same day from his notes (your own media in the vision, the renaissance-generalist voice with a punk streak), then again: the Grange leads the name with Fahrenheit 451 beneath it, and the field-recorder image sets a new field-kit palette. Ownership leads, preparedness is the proof; field-kit visuals replace the dark flame; four revenue paths. **2026-10-26:** a first mark (the cassette on books) shipped in H3 Task 5. **2026-10-27:** Neal replaced it with the owl in the G (§8, The mark), which ships with Plan T1. The same day he chose the tagline (§3) and moved the wordmark from the stencil to Spectral capitals (§8, Type); the final palette is still open.
+**Status:** Direction set by Neal, 2026-10-23, and revised the same day from his notes (your own media in the vision, the renaissance-generalist voice with a punk streak), then again: the Grange leads the name with Fahrenheit 451 beneath it, and the field-recorder image sets a new field-kit palette. Ownership leads, preparedness is the proof; field-kit visuals replace the dark flame; four revenue paths. **2026-10-26:** a first mark (the cassette on books) shipped in H3 Task 5. **2026-10-27:** Neal replaced it with the owl in the G (§8, The mark), which ships with Plan T1. The same day he chose the tagline (§3; replaced 2026-11-03 by *Your door to knowledge. Always open.*) and moved the wordmark from the stencil to Spectral capitals (§8, Type); the final palette is still open. **2026-11-03:** Neal set the mission first and the keeper in the woods as Granger's character (`2026-11-03-brand-mission-design.md`): §1, §2, §3 and §7 are revised from it, with a new tagline and motto.
 **Reference art:** `docs/superpowers/brand/` (dated folders; the current reference is `2026-10-23-field-recorder-concept/`).
 **Unblocks:** H3 Task 5 (the Welcome brand), Plan 10 (billing, now on the fair deal below), Plan 11 (the store listing), and the UI pass that follows the roadmap's features.
 
 ## 1. Vision
 
-**The world's knowledge. Yours to keep.**
+**Your door to knowledge. Always open.**
 
-Granger puts the world's reference knowledge, literature and a local librarian on a device you own, right beside your own music, audiobooks and e-books. The librarian knows both: it answers from the encyclopedia and from your shelf, cites either, and plays the recording it cites. Nothing is rented, nothing needs an account, and nothing can be switched off by whoever made it. Because it is yours, it works anywhere: on a plane, in a tent, in a classroom with no signal, after a storm takes the network down.
+*Granger keeps the world's knowledge, and a librarian you can ask, on a phone you own. It waits, with no signal, for whoever needs it: in the air, off the grid, or wherever the network doesn't reach or isn't allowed to.* (The mission statement, 2026-11-03.)
+
+A library no one can switch off. The world's reference knowledge, literature and a local librarian sit on a device you own, beside your own music, audiobooks and e-books. The librarian knows both: it answers from the encyclopedia and from your shelf, cites either, and plays the recording it cites. Nothing is rented, nothing needs an account, and nothing you read or ask leaves the phone. It works on a plane, in a tent, in a classroom with no signal, after a storm takes the network down, and where sites are blocked or the internet is cut.
 
 ## 2. The name
 
@@ -18,22 +20,30 @@ The Granger movement gave the name its spine. In the 1860s–70s, American farme
 
 The mark carries the first story. Farmers left owl holes in their barn gables so barn owls would nest inside and keep the rats off the grain: the owl guards the store. It also sees in the dark, which is the point of Granger when the network goes down. Lead with the owl hole when the mark needs explaining. Granger plus an owl invites a jump to Hermione Granger and Hogwarts owls; it is not a legal problem, but the granary story should always come first, and Granger never uses wizarding imagery.
 
+**The keeper in the woods (2026-11-03).** Granger's character is the old sage who lives outside the civilisations that come and go, like the hermit in his cottage waiting for a young pupil to stumble in. It waits; it sits outside the city and doesn't need the network, the store or the state; it teaches by showing the page; it's patient and dry. It lives in the voice and the librarian's behaviour, never as imagery: no wizards, robes, spells or Merlin by name (the Hogwarts rule above), and the owl stays a mark, not the keeper's face. In public copy the long view is seasons, storms and networks that come and go, never collapse. Full notes: `2026-11-03-brand-mission-design.md` §2.
+
 There is a quieter layer too. In *Fahrenheit 451*, Granger leads the book people, exiles who each carry a book in memory so no one can take it, and who walk back to rebuild when the burning stops. Tell that story in our own words: the novel is in copyright, so never quote it at length, use its covers, or suggest the estate endorses Granger.
 
-## 3. Positioning: ownership first, preparedness as the proof
+## 3. Positioning: mission first, ownership as the means, anywhere as the proof
+
+Revised 2026-11-03 (was: ownership first, preparedness as the proof). "Preparedness" is retired as a brand word.
 
 | | Leads with | Says |
 |---|---|---|
-| **Headline** | Ownership | It's yours: downloaded, offline, no account, no subscription, nobody can take it back. |
-| **Proof** | Preparedness | So it works when nothing else does: no signal, no network, no service. |
+| **Why** | The mission | Knowledge is for all who seek it, wherever the network isn't. |
+| **How** | Ownership | It's yours: downloaded, offline, no account, no subscription, nothing leaves the phone, nobody can take it back. |
+| **Proof** | Three scenes | In the air, off the grid, where the network isn't allowed (`2026-11-03-brand-mission-design.md` §4–5 for who each is and which channel leads with which). |
 | **Delight** | Your collection, back in your hands | Your music, audiobooks and e-books in one player with every feature and none of the tethers: no lapsed subscription empties your library, no algorithm decides what you hear next. |
 | **Depth** | A librarian with context | It knows the encyclopedia and your shelf, connects them, and cites both. |
 
 Streaming services traded the best possible experience for the best possible shareholder returns. Granger offers all the features with none of the strings attached to you or your wallet; the product never gets worse to make someone else money.
 
 **Retired:** "Civilization, backed up." It frames Granger as an archive for after the end and puts fear first.
-**Tagline (chosen 2026-10-27):** *The world's knowledge. Yours to keep.* It says what Granger is in one breath: the scale ("the world's knowledge"), ownership first ("yours") and the granary and the book-keepers ("to keep"). It sits under the lockup, on Welcome (as two lines) and in About.
-**Mission line:** *Knowledge is a human right.* It says why Granger exists, not what it is, so it opens About, the manifesto, the non-profit and grants side and Basecamp, never the logo. (It sits close to Wikimedia's and the Internet Archive's slogans, so it stays a belief, not a slogan.)
+**Tagline (chosen 2026-11-03, replacing 2026-10-27's):** *Your door to knowledge. Always open.* The door is the keeper's cottage (`2026-11-03-brand-mission-design.md` §2); "your" keeps ownership; "always open" is the promise: no closing hours, no signal needed, open source. Spanish: *Tu puerta al conocimiento. Siempre abierta.* Board: `brand/2026-11-03-tagline-door/`.
+It sits under the lockup, on Welcome (as two lines), in About and in the Classics colophon.
+**Retired 2026-11-03:** *The world's knowledge. Yours to keep.* (chosen 2026-10-27 for the scale, ownership first and "to keep"). Accurate, but it grandstands; the keeper doesn't announce, he leaves the door open.
+**Motto (chosen 2026-11-03):** *Knowledge is for all who seek it.* Spanish: *El conocimiento es para todos los que lo buscan.* It says why Granger exists, in the keeper's terms: the door is open to whoever comes looking. It opens About, the site, the grants side and Basecamp, never the logo.
+**Retired 2026-11-03:** *Knowledge is a human right.* True, but it grandstands.
 **Description, where there's room:** name the content, not a rival: *"Encyclopedias, maps, manuals, books and your own music, with a reader and a librarian you can ask: all on your phone, all working with no signal."*
 **Never name Google** (or any search engine or streaming service) in the brand. In comparisons and press, "the internet's reference shelf, without the internet" makes the point without tying Granger to a competitor.
 **Passed over:** *Knowledge you keep.* (no scale); *Knowledge sovereignty* ("sovereign" carries the sovereign-citizen and crypto crowds, and "data sovereignty" is enterprise jargon and an Indigenous movement's own term; the idea stays in body copy: "your library answers to you"); *Everything you'd ask the internet. No internet.* (overclaims).
@@ -83,13 +93,14 @@ Charge for convenience, hardware, service and support, never for access to knowl
 
 **Who it's for:** a modern renaissance generalist. They think critically, solve problems, and value independent access to knowledge because it lets them build, fix, grow, invent, create, teach and learn. Cut off from everything, they're Robinson Crusoe with a library: resourceful, not frightened.
 
-**The attitude:** self-reliant with a punk streak. Granger refuses to outsource what you know or to rent back what should be yours, and says so plainly. The defiance aims at the tether, never at the person: someone on Spotify today is a future user, not a fool.
+**The attitude (revised 2026-11-03):** the keeper in the woods (§2): self-reliant, patient and dry. The punk streak stays but goes quiet: Granger refuses to outsource what you know or to rent back what should be yours, and doesn't need the network's permission, without making a speech about it. The defiance aims at the filter and the tether, never at a person, a people or a country: someone on Spotify today is a future user, not a fool, and someone on a censored network is a reader, not a victim.
 
 **The tone:** a capable friend who has read everything. Direct, dry, a little irreverent, generous with what they know.
 
-- **Say:** yours, keep, carry, build, fix, make, learn, works anywhere, no strings, cites its source.
-- **Avoid:** collapse, apocalypse, survive the end, backed up civilization; unlock, premium, upgrade to continue; manufactured urgency; sneering at people.
-- **Sounds like:** "No account. No subscription. No kidding." · "Works with no signal. First aid and water treatment are in Medicine and Survival." · "Your library. Not a licence to it."
+- **Say:** yours, keep, carry, build, fix, make, learn, works anywhere, no strings, cites its source; and (2026-11-03) open, wait, ask, whoever, look it up, nothing leaves the phone.
+- **Avoid:** collapse, apocalypse, survive the end, backed up civilization; unlock, premium, upgrade to continue; manufactured urgency; sneering at people. Added 2026-11-03: grandstanding (human right, revolution, democratise knowledge); overclaims (censorship-proof, uncensorable, unblockable); development language (digital divide, the underserved, empower); battle language (fight, liberate, weapon); wizard words (magic, spell, wizard).
+- **Safety rule (2026-11-03): the mission is said outside, the app is quiet.** Inside the app it's a library: no censorship, resist, freedom, banned or regime anywhere in it. The store listing says "outages and disruptions" and names no countries. Details and the country-naming practice: `2026-11-03-brand-mission-design.md` §6–7.
+- **Sounds like:** "Networks come and go. The library stays." · "Ask it anything in your library. Nobody else hears the question." · "No account. No subscription. No kidding." · "Works with no signal. First aid and water treatment are in Medicine and Survival." · "Your library. Not a licence to it."
 - Every claim is literal. "Offline" means offline; "yours" means it outlives the store.
 
 ## 8. Visual direction: field kit

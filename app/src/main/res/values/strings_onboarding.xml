@@ -24,7 +24,7 @@
     <string name="onboarding_next">Next</string>
 
     <!-- Welcome. The line break is part of the design. -->
-    <string name="onboarding_tagline">The world’s knowledge.\nYours to keep.</string>
+    <string name="onboarding_tagline">Your door to knowledge.\nAlways open.</string>
     <string name="onboarding_intro">Encyclopedias, maps, manuals, books and your own music, with a reader and a librarian you can ask: all on your phone, all working with no signal.</string>
     <!-- Welcome's offer of a second library language (Plan L3), when the phone lists two the catalog has. %1$s is the
          language named in the app's language: "Spanish" here, "inglés" in Spanish. -->

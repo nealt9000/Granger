@@ -70,8 +70,8 @@
     <string name="settings_internal_storage">Internal storage</string>
 
     <!-- About. -->
-    <string name="settings_about_tagline">The world’s knowledge. Yours to keep.</string>
-    <string name="settings_about_motto">Knowledge is a human right.</string>
+    <string name="settings_about_tagline">Your door to knowledge. Always open.</string>
+    <string name="settings_about_motto">Knowledge is for all who seek it.</string>
     <string name="settings_about_version">Version %1$s</string>
     <string name="settings_about_license">GPLv3 · source on GitHub</string>
 

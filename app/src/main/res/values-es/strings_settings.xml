@@ -48,8 +48,8 @@
     <string name="settings_storage_uninstall">Si desinstalas Granger, se elimina todo lo que descargó.</string>
     <string name="settings_internal_storage">Almacenamiento interno</string>
 
-    <string name="settings_about_tagline">El conocimiento del mundo. Tuyo para siempre.</string>
-    <string name="settings_about_motto">El conocimiento es un derecho humano.</string>
+    <string name="settings_about_tagline">Tu puerta al conocimiento. Siempre abierta.</string>
+    <string name="settings_about_motto">El conocimiento es para todos los que lo buscan.</string>
     <string name="settings_about_version">Versión %1$s</string>
     <string name="settings_about_license">GPLv3 · código fuente en GitHub</string>
 
