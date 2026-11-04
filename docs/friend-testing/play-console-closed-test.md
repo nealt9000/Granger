@@ -33,7 +33,7 @@ After the release is published: Testing → Closed testing → Round 1 → Teste
 
 ## 4. The forms, before the first closed release can be reviewed
 
-Each lives under Policy → App content; the answers in full are in `play-policy-check.md`.
+Each lives under Policy → App content; the answers in full are in `play-policy-check.md`. **All eleven App content declarations were saved on 2026-11-04** (privacy policy, Sign in details, Ads, Advertising ID, Government apps, Target audience 18+, Data safety "no data collected", Foreground services, Content ratings; Financial features and Health were already actioned). Content rating came back ESRB Everyone 10+, PEGI Parental guidance, IARC 12+. The dashboard's two remaining setup steps are the app category + contact details and the store listing; until those are done, Publishing overview's "Send app for review" stays locked and the closed track's countries/testers steps show as locked too.
 
 | Form | Answer |
 |---|---|
@@ -48,7 +48,7 @@ Each lives under Policy → App content; the answers in full are in `play-policy
 | Government apps | No |
 | Financial features | None |
 | Health | Medical reference and education only (WikiMed, first-aid packs, Ask's medical answers with their banner); not a medical device, no health data |
-| Foreground services | `mediaPlayback` (music, audiobooks, read-aloud with the screen off) and `dataSync` (user-started downloads of packs, books, models and voices, often several GB). Each needs a short unlisted video of a user starting it: start a book's Listen and lock the screen; get a pack and leave the app. Record them on the Pixel 7 |
+| Foreground services | `mediaPlayback` (music, audiobooks, read-aloud with the screen off) and `dataSync` (user-started downloads of packs, books, models and voices, often several GB). **Declared 2026-11-04** with two unlisted videos recorded on the Pixel 6 (build 1118; the shade's personal notifications blacked out in post): media playback https://youtube.com/shorts/C1YValy48ps (Listen on a book, Home, the playback notification); data sync https://youtube.com/shorts/fG4zEDn4cQ0 (Get a pack, Home, the download notification). Files: `~/Desktop/granger-play/granger-fgs-*.mp4` |
 | AI-generated content | Yes, Ask generates text. In-app reporting: Report this answer on every reply and best guess |
 
 Store listing (can be minimal for a closed test, but the fields are required): app name Granger, short description "Wikipedia, books and a librarian you can ask, on your phone, with no signal.", the full description's first paragraph from the brand spec §9, a 512 px icon, a feature graphic, at least two phone screenshots. Spanish listing alongside (release checklist B).
