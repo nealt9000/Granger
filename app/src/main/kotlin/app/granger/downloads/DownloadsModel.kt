@@ -96,6 +96,9 @@ data class DownloadsUi(
     val stopped: List<DownloadRow> = emptyList(),
     val doneToday: List<DownloadRow> = emptyList(),
 ) {
+    /** Something waits only because this Wi-Fi is marked metered: the screen explains and links to Wi-Fi settings (Plan E1). */
+    val meteredWifi: Boolean get() = upNext.any { it.reason == WaitReason.MeteredWifi }
+
     val isEmpty: Boolean get() = header == null && now == null && upNext.isEmpty() && stopped.isEmpty() && doneToday.isEmpty()
 
     /** Stopped rows Retry all queues again: not the ones that can only be removed. */
@@ -238,6 +241,7 @@ object DownloadsModel {
 fun reasonText(res: Resources, reason: WaitReason, now: Long): UiText = when (reason) {
     WaitReason.Paused -> UiText.Res(R.string.downloads_reason_paused)
     WaitReason.WaitingForWifi -> UiText.Res(R.string.downloads_reason_wifi)
+    WaitReason.MeteredWifi -> UiText.Res(R.string.downloads_reason_metered_wifi)
     is WaitReason.Retrying -> UiText.Res(R.string.downloads_reason_retrying, QueueText.inTime(res, reason.at - now), reason.attempt, MAX_ATTEMPTS)
     is WaitReason.NeedsSpace -> UiText.Res(R.string.downloads_reason_space, formatBytes(reason.bytes))
     is WaitReason.InLine -> UiText.Raw(QueueText.place(res, reason.place))

@@ -47,6 +47,8 @@ data class VoiceSettingsUi(
     val notice: UiText? = null,
     /** Research reads a new answer aloud as it is written (Plan V2). */
     val speakAnswers: Boolean = false,
+    /** Under 6 GB the Granger voices may stop partway (Plan E1 item 2): listed with a warning, not hidden. */
+    val mayStop: Boolean = false,
 )
 
 /**
@@ -63,6 +65,7 @@ class VoiceSettingsViewModel(
     private val downloadPrefs: DownloadPrefs,
     private val appScope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
+    private val lowMemory: Boolean = false,
 ) : ViewModel() {
     private val notice = MutableStateFlow<UiText?>(null)
 
@@ -81,7 +84,7 @@ class VoiceSettingsViewModel(
                 error = active?.takeIf { it.state == DownloadState.FAILED }?.error,
             )
         }
-        VoiceSettingsUi(voices, chosen, speed, mark, rows, n, speakAnswers = speak)
+        VoiceSettingsUi(voices, chosen, speed, mark, rows, n, speakAnswers = speak, mayStop = lowMemory)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), VoiceSettingsUi())
 
     init {

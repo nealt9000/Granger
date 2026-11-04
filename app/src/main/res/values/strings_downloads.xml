@@ -45,6 +45,10 @@
     <!-- Why a download waits. -->
     <string name="downloads_reason_paused">Paused</string>
     <string name="downloads_reason_wifi">Waiting for Wi-Fi</string>
+    <string name="downloads_reason_metered_wifi">Waiting: this Wi-Fi is marked as metered</string>
+    <!-- Under the header when Wi-Fi-only downloads wait on a metered Wi-Fi, such as a phone's hotspot (Plan E1). -->
+    <string name="downloads_metered_wifi_note">The phone marks this Wi-Fi as metered, as it does a phone\'s hotspot, so Wi-Fi-only downloads wait. If its data is yours to use, open the network in Wi-Fi settings and set it to unmetered, or turn off Download on Wi-Fi only in Settings.</string>
+    <string name="downloads_wifi_settings">Wi-Fi settings</string>
     <!-- %1$s is when, such as in 2 min; %2$d the attempt; %3$d the most attempts. -->
     <string name="downloads_reason_retrying">Trying again %1$s (attempt %2$d of %3$d)</string>
     <!-- %1$s is a size, such as 1.2 GB. -->

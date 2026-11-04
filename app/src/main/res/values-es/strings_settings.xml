@@ -102,6 +102,7 @@
     <string name="settings_voice_system">Voz del sistema · %1$s</string>
     <string name="settings_voice_system_more">Voces del sistema (%1$d)</string>
     <string name="settings_voice_catalog">Voces de Granger</string>
+    <string name="settings_voice_may_stop">Estas voces necesitan más memoria de la que tiene este teléfono, así que pueden detenerse a mitad de una lectura larga. La voz propia del teléfono funciona en cualquier teléfono.</string>
     <string name="settings_voice_catalog_empty">El catálogo aún no tiene voces.</string>
     <string name="settings_voice_download_size">Descarga de %1$s · %2$s</string>
     <string name="settings_voice_download_failed">Falló la descarga: %1$s</string>

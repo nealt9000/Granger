@@ -65,7 +65,7 @@ class DownloadQueueWorker(context: Context, params: WorkerParameters) : Coroutin
                 }
                 queue.drain().also { shown.cancel() }
             }
-            if (rest is QueueRest.Later) WorkManagerScheduler.later(WorkManager.getInstance(applicationContext), rest.delayMillis, rest.unmeteredOnly)
+            if (rest is QueueRest.Later) WorkManagerScheduler.later(WorkManager.getInstance(applicationContext), rest.delayMillis, rest.unmeteredOnly, rest.offline)
             return Result.success()
         } finally {
             // Paused or idle, it's gone; this also removes one posted when setForeground was refused.
@@ -95,8 +95,8 @@ class WorkManagerScheduler(context: Context, private val queueOf: () -> Download
     private val work = WorkManager.getInstance(context)
     private val queue: DownloadQueue get() = queueOf()
 
-    override fun ensure(unmeteredOnly: Boolean) {
-        if (queue.wake()) work.enqueueUniqueWork(QUEUE_WORK, ExistingWorkPolicy.REPLACE, request(0, unmeteredOnly))
+    override fun ensure(unmeteredOnly: Boolean, offline: Boolean) {
+        if (queue.wake()) work.enqueueUniqueWork(QUEUE_WORK, ExistingWorkPolicy.REPLACE, request(0, unmeteredOnly, offline))
     }
 
     override suspend fun stopRun(itemId: String) = queue.stopRun(itemId)
@@ -117,12 +117,16 @@ class WorkManagerScheduler(context: Context, private val queueOf: () -> Download
         const val QUEUE_WORK = "download-queue"
 
         /** The queue's next run, after the one finishing now: [delayMillis] on, once the network allows. */
-        fun later(work: WorkManager, delayMillis: Long, unmeteredOnly: Boolean) {
-            work.enqueueUniqueWork(QUEUE_WORK, ExistingWorkPolicy.APPEND_OR_REPLACE, request(delayMillis, unmeteredOnly))
+        fun later(work: WorkManager, delayMillis: Long, unmeteredOnly: Boolean, offline: Boolean = false) {
+            work.enqueueUniqueWork(QUEUE_WORK, ExistingWorkPolicy.APPEND_OR_REPLACE, request(delayMillis, unmeteredOnly, offline))
         }
 
-        private fun request(delayMillis: Long, unmeteredOnly: Boolean): OneTimeWorkRequest {
-            val network = if (unmeteredOnly) NetworkType.UNMETERED else NetworkType.CONNECTED
+        private fun request(delayMillis: Long, unmeteredOnly: Boolean, offline: Boolean = false): OneTimeWorkRequest {
+            val network = when {
+                offline -> NetworkType.NOT_REQUIRED
+                unmeteredOnly -> NetworkType.UNMETERED
+                else -> NetworkType.CONNECTED
+            }
             return OneTimeWorkRequestBuilder<DownloadQueueWorker>()
                 .setConstraints(Constraints.Builder().setRequiredNetworkType(network).build())
                 .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
@@ -229,11 +233,40 @@ fun unmeteredFlow(context: Context): Flow<Boolean> = callbackFlow {
     awaitClose { cm?.unregisterNetworkCallback(callback) }
 }.distinctUntilChanged()
 
+/** Whether any network is up now: a download needs one; a local copy doesn't (Plan E1 item 4). */
+fun isConnected(context: Context): Boolean {
+    val cm = context.getSystemService(ConnectivityManager::class.java) ?: return false
+    return cm.getNetworkCapabilities(cm.activeNetwork)?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+}
+
 /** Whether the network now is unmetered (Wi-Fi, Ethernet): what a Wi-Fi-only download may use. */
 fun isUnmetered(context: Context): Boolean {
     val cm = context.getSystemService(ConnectivityManager::class.java) ?: return false
     return cm.getNetworkCapabilities(cm.activeNetwork)?.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED) == true
 }
+
+/**
+ * Whether the phone is on Wi-Fi that Android marks as metered (Plan E1 item 3): a phone's hotspot announces itself so,
+ * and the user can mark any network metered. A Wi-Fi-only download waits there; the Downloads screen says why.
+ */
+fun meteredWifiFlow(context: Context): Flow<Boolean> = callbackFlow {
+    val cm = context.getSystemService(ConnectivityManager::class.java)
+    val callback = object : ConnectivityManager.NetworkCallback() {
+        override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) { trySend(isMeteredWifi(caps)) }
+        override fun onLost(network: Network) { trySend(isMeteredWifi(context)) }
+    }
+    trySend(isMeteredWifi(context))
+    cm?.registerDefaultNetworkCallback(callback)
+    awaitClose { cm?.unregisterNetworkCallback(callback) }
+}.distinctUntilChanged()
+
+fun isMeteredWifi(context: Context): Boolean {
+    val cm = context.getSystemService(ConnectivityManager::class.java) ?: return false
+    return cm.getNetworkCapabilities(cm.activeNetwork)?.let(::isMeteredWifi) == true
+}
+
+private fun isMeteredWifi(caps: NetworkCapabilities): Boolean =
+    caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) && !caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
 
 /** The link a download notification opens: the app's Downloads screen (Plan U3b Decision 1). */
 const val DOWNLOADS_LINK = "granger://downloads"

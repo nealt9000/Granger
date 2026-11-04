@@ -1,6 +1,7 @@
-Kiwix packs in eng, spa: 1378; listed 959, curated 26
+Kiwix packs in eng, spa, swa: 1388; listed 964, curated 30
   en: 1309; listed 906, curated 17
   es: 430; listed 58, curated 9
+  sw: 11; listed 6, curated 4
 
 Listed, by category and family:
   Games & Hobbies / alexandria.dk: 1
@@ -101,7 +102,7 @@ Listed, by category and family:
   Programming / devdocs: 243
   Programming / devhints.io: 1
   Programming / docs.python.org: 1
-  Programming / freecodecamp: 10
+  Programming / freecodecamp: 15
   Programming / gentoo: 1
   Programming / getbootstrap.com: 1
   Programming / gobyexample.com: 1
@@ -226,7 +227,7 @@ Listed, by readiness domain:
   medicine: 14
   reference: 87
   science: 70
-  technology: 363
+  technology: 368
   thought: 19
 
 Held back (flavour): 1
@@ -260,10 +261,11 @@ Held back (video): 385
 
 No license found: 0
 
-No family-table row: 5
+No family-table row: 6
   bulbapedia.bulbagarden.net: 1
   inciclopedia: 1
   partituras-gratis.es: 1
+  ubongo: 1
   wiki.nura.eco: 1
   wikidex: 1
 

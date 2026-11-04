@@ -80,6 +80,16 @@ class DownloadQueueSummaryTest {
         ).inOrder()
     }
 
+    @Test fun onMeteredWifiAWifiOnlyFileSaysWhyAndAMobileOneRuns() {
+        // Plan E1 item 3: a phone's hotspot is Wi-Fi but metered.
+        val records = listOf(
+            rec("wifi", DownloadState.QUEUED, order = 1, wifiOnly = true),
+            rec("mobile", DownloadState.QUEUED, order = 2, wifiOnly = false),
+        )
+        val s = DownloadQueueSummary.of(records, DownloadLive(unmetered = false, meteredWifi = true), now, mapOf("/phone" to Long.MAX_VALUE / 2))
+        assertThat(reasons(s)).containsExactly("wifi" to WaitReason.MeteredWifi, "mobile" to WaitReason.InLine(1)).inOrder()
+    }
+
     @Test fun theRoundStartsAtTheBatchAndAStoppedFileStaysInItUntilNothingWaits() {
         val records = listOf(
             rec("before", DownloadState.INSTALLED, updated = 40_000),

@@ -12,6 +12,7 @@ import okhttp3.Request
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
 import java.io.RandomAccessFile
 import java.security.MessageDigest
 
@@ -43,6 +44,8 @@ class FileDownloader(
     private val freeBytes: (File) -> Long = { it.usableSpace },
     private val reserveBytes: Long = DEFAULT_RESERVE_BYTES,
     private val io: CoroutineDispatcher = Dispatchers.IO,
+    /** Opens a [LOCAL_SCHEME] address at a byte offset (Plan E1 item 4); null where nothing local can be read. */
+    private val openLocal: ((url: String, offset: Long) -> InputStream)? = null,
 ) {
     suspend fun download(request: DownloadRequest, part: File, onProgress: (Long) -> Unit = {}): DownloadResult =
         withContext(io) {
@@ -64,7 +67,8 @@ class FileDownloader(
             var gone = request.urls.isNotEmpty()
             for (url in request.urls) {
                 if (offset >= request.sizeBytes) break
-                val attempt = fetch(url, request, part, dir, digest, offset, onProgress)
+                val attempt = if (url.startsWith(LOCAL_SCHEME)) copy(url, request, part, dir, digest, offset, onProgress)
+                    else fetch(url, request, part, dir, digest, offset, onProgress)
                 ensureActive()
                 offset = attempt.offset
                 // A failed write can leave bytes the digest never saw; cut the file back to what it covers.
@@ -81,7 +85,7 @@ class FileDownloader(
                 if (!attempt.gone) gone = false
             }
             if (offset < request.sizeBytes) return@withContext DownloadResult.Failed(lastError, permanent, gone && permanent)
-            if (digest.digest().toHex() != request.hash.lowercase()) {
+            if (!request.hash.startsWith(UNVERIFIED_PREFIX) && digest.digest().toHex() != request.hash.lowercase()) {
                 part.delete()
                 return@withContext DownloadResult.HashMismatch
             }
@@ -137,43 +141,70 @@ class FileDownloader(
                     digest.reset()
                     offset = 0
                 }
-                FileOutputStream(part, !restart).use { out ->
-                    try {
-                        val input = body.byteStream()
-                        val buffer = ByteArray(BUFFER_SIZE)
-                        var reported = offset
-                        while (true) {
-                            currentCoroutineContext().ensureActive()
-                            val n = input.read(buffer)
-                            if (n < 0) break
-                            if (offset + n > request.sizeBytes) return Attempt(offset, "$host sent too many bytes", permanent = true)
-                            if (freeBytes(dir) - n < reserveBytes) return Attempt(offset, noSpace = true)
-                            try {
-                                out.write(buffer, 0, n)
-                            } catch (e: IOException) {
-                                // A volume that filled up anyway (another app wrote to it) is out of space, not a network error.
-                                if (freeBytes(dir) < reserveBytes + BUFFER_SIZE) return Attempt(offset, noSpace = true)
-                                throw e
-                            }
-                            digest.update(buffer, 0, n)
-                            offset += n
-                            if (offset - reported >= PROGRESS_STEP || offset == request.sizeBytes) {
-                                onProgress(offset)
-                                reported = offset
-                            }
-                        }
-                    } finally {
-                        out.flush()
-                        out.fd.sync()
-                    }
-                }
-                return if (offset < request.sizeBytes) Attempt(offset, "$host closed the connection early") else Attempt(offset)
+                return pump(body.byteStream(), !restart, host, request, part, dir, digest, offset, onProgress) { offset = it }
+                    .let { if (it.error == null && !it.noSpace && it.offset < request.sizeBytes) Attempt(it.offset, "$host closed the connection early") else it }
             }
         } catch (e: IOException) {
             return Attempt(offset, e.message ?: "Network error")
         } finally {
             cancelHook.dispose()
         }
+    }
+
+    /** Copies a local file (Plan E1 item 4) from [start] on. A file that can't be opened now (card out) is worth a retry. */
+    private suspend fun copy(
+        url: String, request: DownloadRequest, part: File, dir: File, digest: MessageDigest, start: Long, onProgress: (Long) -> Unit,
+    ): Attempt {
+        val open = openLocal ?: return Attempt(start, "Can't read files on this phone", permanent = true)
+        var offset = start
+        return try {
+            open(url, start).use { input ->
+                pump(input, append = true, "The file", request, part, dir, digest, offset, onProgress) { offset = it }
+            }.let { if (it.error == null && !it.noSpace && it.offset < request.sizeBytes) Attempt(it.offset, "The file ended early", permanent = true) else it }
+        } catch (e: SecurityException) {
+            Attempt(offset, "Granger may no longer read this file; pick it again", permanent = true)
+        } catch (e: IOException) {
+            Attempt(offset, e.message ?: "Can't read the file")
+        }
+    }
+
+    /** Streams [input] onto [part] with the space check and the digest; [moved] keeps the caller's offset current. */
+    private suspend fun pump(
+        input: InputStream, append: Boolean, source: String, request: DownloadRequest, part: File, dir: File,
+        digest: MessageDigest, start: Long, onProgress: (Long) -> Unit, moved: (Long) -> Unit,
+    ): Attempt {
+        var offset = start
+        FileOutputStream(part, append).use { out ->
+            try {
+                val buffer = ByteArray(BUFFER_SIZE)
+                var reported = offset
+                while (true) {
+                    currentCoroutineContext().ensureActive()
+                    val n = input.read(buffer)
+                    if (n < 0) break
+                    if (offset + n > request.sizeBytes) return Attempt(offset, "$source sent too many bytes", permanent = true)
+                    if (freeBytes(dir) - n < reserveBytes) return Attempt(offset, noSpace = true)
+                    try {
+                        out.write(buffer, 0, n)
+                    } catch (e: IOException) {
+                        // A volume that filled up anyway (another app wrote to it) is out of space, not a network error.
+                        if (freeBytes(dir) < reserveBytes + BUFFER_SIZE) return Attempt(offset, noSpace = true)
+                        throw e
+                    }
+                    digest.update(buffer, 0, n)
+                    offset += n
+                    moved(offset)
+                    if (offset - reported >= PROGRESS_STEP || offset == request.sizeBytes) {
+                        onProgress(offset)
+                        reported = offset
+                    }
+                }
+            } finally {
+                out.flush()
+                out.fd.sync()
+            }
+        }
+        return Attempt(offset)
     }
 
     /** 4xx means this URL won't work however often we ask, except a timeout (408) or a rate limit (429). */

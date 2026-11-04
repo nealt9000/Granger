@@ -110,8 +110,11 @@ interface Downloads {
 
 /** Runs the one download queue in the background; the WorkManager implementation is in DownloadWorker.kt. */
 interface DownloadScheduler {
-    /** There may be something new to run: makes sure the queue runs, on an unmetered network if [unmeteredOnly]. */
-    fun ensure(unmeteredOnly: Boolean)
+    /**
+     * There may be something new to run: makes sure the queue runs, on an unmetered network if [unmeteredOnly], or with
+     * no network at all if [offline] (a local copy waits; Plan E1 item 4).
+     */
+    fun ensure(unmeteredOnly: Boolean, offline: Boolean = false)
 
     /** Stops [itemId]'s download if it is the one running, and returns once it has; the queue moves on. */
     suspend fun stopRun(itemId: String)
@@ -132,6 +135,7 @@ class DownloadManager(
     private val prefs: QueuePrefs = MemoryQueuePrefs(),
     progress: Flow<QueueProgress> = flowOf(QueueProgress()),
     unmetered: Flow<Boolean> = flowOf(true),
+    meteredWifi: Flow<Boolean> = flowOf(false),
     private val freeBytes: (File) -> Long = { it.usableSpace },
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
@@ -144,8 +148,8 @@ class DownloadManager(
     override val paused: StateFlow<Boolean> = _paused.asStateFlow()
     private val batch = MutableStateFlow(prefs.batchStartedAt)
 
-    override val live: Flow<DownloadLive> = combine(progress, _paused, batch, unmetered) { p, paused, since, wifi ->
-        DownloadLive(p, paused, since, wifi)
+    override val live: Flow<DownloadLive> = combine(progress, _paused, batch, unmetered, meteredWifi) { p, paused, since, wifi, meteredWifi ->
+        DownloadLive(p, paused, since, wifi, meteredWifi)
     }
 
     /** Something is queued into an empty queue: a new round of downloads begins (Decision 6). */
@@ -160,7 +164,9 @@ class DownloadManager(
     private suspend fun wake() {
         if (prefs.paused) return
         val waiting = dao.waiting()
-        if (waiting.isNotEmpty()) withContext(io) { scheduler.ensure(unmeteredOnly = waiting.all { it.wifiOnly }) }
+        if (waiting.isNotEmpty()) withContext(io) {
+            scheduler.ensure(unmeteredOnly = waiting.all { it.needsWifi }, offline = waiting.any { it.isLocal })
+        }
     }
 
     /**
@@ -415,7 +421,9 @@ class DownloadManager(
  */
 val DownloadRecord.isFromCatalog: Boolean
     get() = when (kind) {
-        ItemKind.PACK, ItemKind.MODEL, ItemKind.VOICE -> true
+        // A pack added from a file that the catalog doesn't list (Plan E1 item 4) never was a catalog item.
+        ItemKind.PACK -> !hash.startsWith(UNVERIFIED_PREFIX)
+        ItemKind.MODEL, ItemKind.VOICE -> true
         ItemKind.BOOK -> filePath.contains("${File.separator}books${File.separator}granger${File.separator}")
         ItemKind.AUDIO, ItemKind.VECTORS -> false
     }

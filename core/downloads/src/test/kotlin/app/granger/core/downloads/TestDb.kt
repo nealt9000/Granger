@@ -51,7 +51,9 @@ class FakeScheduler(private val queueOf: () -> DownloadQueue? = { null }) : Down
     var queueStops = 0
     var legacyForgotten = 0
     var running: String? = null
-    override fun ensure(unmeteredOnly: Boolean) { ensured += unmeteredOnly }
+    /** Each ensure call's offline flag (Plan E1 item 4). */
+    val offline = mutableListOf<Boolean>()
+    override fun ensure(unmeteredOnly: Boolean, offline: Boolean) { ensured += unmeteredOnly; this.offline += offline }
     override suspend fun stopRun(itemId: String) { stopped += itemId; queueOf()?.stopRun(itemId) }
     override suspend fun stopQueue() { queueStops++; queueOf()?.stopRun(null) }
     override fun isRunning(itemId: String) = running == itemId || queueOf()?.isRunning(itemId) == true

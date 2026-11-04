@@ -31,6 +31,9 @@
 
     <string name="downloads_reason_paused">En pausa</string>
     <string name="downloads_reason_wifi">Esperando Wi-Fi</string>
+    <string name="downloads_reason_metered_wifi">En espera: esta Wi-Fi está marcada como de uso medido</string>
+    <string name="downloads_metered_wifi_note">El teléfono marca esta Wi-Fi como de uso medido, como hace con el punto de acceso de un teléfono, así que las descargas solo por Wi-Fi esperan. Si puedes usar sus datos, abre la red en los ajustes de Wi-Fi y márcala como de uso no medido, o desactiva Descargar solo con Wi-Fi en Ajustes.</string>
+    <string name="downloads_wifi_settings">Ajustes de Wi-Fi</string>
     <!-- %1$s is "en 2 min": "Reintentando en 2 min (intento 2 de 5)". -->
     <string name="downloads_reason_retrying">Reintentando %1$s (intento %2$d de %3$d)</string>
     <string name="downloads_reason_space">Necesita %1$s más de espacio</string>

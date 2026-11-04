@@ -1225,9 +1225,10 @@ def test_real_family_table_files_spanish_packs():
     assert "flavours" not in _real_row("wiktionary_en_all")
 
 
-def test_real_curated_kiwix_languages_are_english_and_spanish():
+def test_real_curated_kiwix_languages_are_english_spanish_and_swahili():
+    # Swahili packs only, no tiers (Plan E1 item 9, Neal 2026-11-03).
     curated = json.loads((cg.REPO_ROOT / "tools/catalog-gen/curated.json").read_text())
-    assert curated["kiwix"]["languages"] == ["eng", "spa"]
+    assert curated["kiwix"]["languages"] == ["eng", "spa", "swa"]
 
 
 ES_FEED = (feed_entry("wikipedia_es_medicine", "maxi", language="spa"),

@@ -23,9 +23,16 @@ data class Catalog(
 
     fun item(id: String): CatalogItem? = items.firstOrNull { it.id == id }
 
-    /** Release builds list only models that passed the eval (spec §3 "Catalog"). */
-    fun forBuild(includeUnevaluatedModels: Boolean): Catalog =
-        if (includeUnevaluatedModels) this else copy(models = models.filter { it.evalPassed })
+    /**
+     * Release builds list only models that passed the eval (spec §3 "Catalog"). Without [includeVectors] (a phone too
+     * small for Ask, Plan E1) packs and books carry no search vectors, so their sizes, the review and the downloads
+     * leave out files only Ask reads.
+     */
+    fun forBuild(includeUnevaluatedModels: Boolean, includeVectors: Boolean = true): Catalog {
+        val evaluated = if (includeUnevaluatedModels) this else copy(models = models.filter { it.evalPassed })
+        return if (includeVectors) evaluated
+        else evaluated.copy(packs = packs.map { it.copy(vectors = null) }, books = books.map { it.copy(vectors = null) })
+    }
 
     /**
      * The knowledge languages the readiness model has tiers for (Plan L3): English first when its lists name anything,

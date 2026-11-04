@@ -569,10 +569,13 @@ class AppContainer(context: Context) {
     val search: LibrarySearch = ZimLibrarySearch(library, bookIndex, bookshelf = bookshelf, slices = packSlices)
     val resolver = ZimResolver(library::archive, library::cachedArchive)
 
-    val totalRamBytes: Long = ActivityManager.MemoryInfo()
+    val totalRamBytes: Long = BuildConfig.FAKE_RAM_BYTES.takeIf { it > 0 } ?: ActivityManager.MemoryInfo()
         .also { context.getSystemService(ActivityManager::class.java).getMemoryInfo(it) }
         .totalMem
     val deviceTier: DeviceTier = DeviceTiers.forTotalRam(totalRamBytes)
+    /** Where the phone is, for the suggested map: network, then SIM, then locale (Plan E1 item 1). */
+    private val appContext: Context = context.applicationContext
+    val phoneCountry: String get() = app.granger.device.PhoneCountry.of(appContext)
 
     private val archiveUserAgent = "Granger/${BuildConfig.VERSION_NAME} (+https://github.com/nealt9000/Granger)"
 
@@ -591,6 +594,8 @@ class AppContainer(context: Context) {
         publicKey = Base64.getDecoder().decode(BuildConfig.CATALOG_PUBLIC_KEY),
         cacheDir = File(context.filesDir, "catalog"),
         includeUnevaluatedModels = BuildConfig.DEBUG,
+        // Search vectors only serve Ask: a library phone neither counts nor downloads them (Plan E1 phone check).
+        includeVectors = deviceTier >= DeviceTier.ASK,
     )
 
     val archiveClient = ArchiveOrgClient(http, archiveUserAgent)
@@ -628,6 +633,13 @@ class AppContainer(context: Context) {
     val archiveSidecarDir: File = File(context.getExternalFilesDir(null) ?: context.filesDir, "books/archive-org")
 
     val volumes: VolumeSource = AndroidVolumes(context)
+
+    /** Add a pack from a file (Plan E1 item 4). */
+    val packImports: app.granger.packs.PackImports by lazy {
+        app.granger.packs.PackImports.forContext(
+            context.applicationContext, { catalog.state.value.catalog }, { library.packs.first() }, downloads, volumes, downloadPrefs,
+        )
+    }
     val downloadPrefs: DownloadPrefs = SharedDownloadPrefs(context)
 
     private val downloadDao = DownloadDatabase.create(context).downloadDao()
@@ -636,6 +648,7 @@ class AppContainer(context: Context) {
     val downloadQueue: DownloadQueue by lazy {
         DownloadQueue(
             downloadDao, downloadRunner, downloadPrefs, unmetered = { isUnmetered(context) }, elapsed = SystemClock::elapsedRealtime,
+            connected = { app.granger.core.downloads.isConnected(context) },
         )
     }
 
@@ -646,11 +659,12 @@ class AppContainer(context: Context) {
         // Deferred: the queue needs the runner, made below.
         progress = flow { emitAll(downloadQueue.progress) },
         unmetered = unmeteredFlow(context),
+        meteredWifi = app.granger.core.downloads.meteredWifiFlow(context),
     )
 
     val downloadRunner = DownloadRunner(
         dao = downloadDao,
-        downloader = FileDownloader(http),
+        downloader = FileDownloader(http, openLocal = { url, offset -> app.granger.core.downloads.LocalFiles.open(context, url, offset) }),
         onInstalled = { record ->
             if (record.kind == ItemKind.PACK) {
                 library.fileReplaced(record.filePath)

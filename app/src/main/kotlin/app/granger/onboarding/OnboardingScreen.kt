@@ -187,7 +187,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.welcome(ui: Onboardin
             Text(stringResource(R.string.onboarding_tagline), style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
             Spacer(Modifier.height(12.dp))
             Text(
-                stringResource(R.string.onboarding_intro),
+                ui.intro.resolve(),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
             )
