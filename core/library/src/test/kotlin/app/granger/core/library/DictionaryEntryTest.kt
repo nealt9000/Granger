@@ -58,6 +58,38 @@ class DictionaryEntryTest {
         assertThat(found.text).contains("caricias o palmaditas de cariño")
     }
 
+    /** The English Wiktionary's shape (wiktionary_en_all_nopic, 2026-08): headings in div.mw-heading, quotations nested in senses. */
+    @Test fun anEnglishEntryKeepsItsSensesWithoutTheirQuotations() {
+        val quotations = "<ul><li>1611, King James Version: " + "and rose up betimes in the morning ".repeat(60) + "</li></ul>"
+        val betimes = """
+            <div class="mw-parser-output"><div class="mw-heading mw-heading2"><h2 id="English">English</h2></div>
+            <div class="mw-heading mw-heading3"><h3 id="Etymology">Etymology</h3></div><p>From Middle English betymes.</p>
+            <div class="mw-heading mw-heading3"><h3 id="Adverb">Adverb</h3></div><p>betimes (not comparable)</p>
+            <ol><li>(dated) In good season or time; early, especially in the morning.$quotations</li><li>(archaic) In a short time, soon.</li></ol>
+            <div class="mw-heading mw-heading2"><h2 id="Middle_English">Middle English</h2></div>
+            <div class="mw-heading mw-heading3"><h3 id="Adverb_2">Adverb</h3></div><ol><li>at an early hour</li></ol></div>
+        """.trimIndent()
+        val found = DictionaryEntry.find(FakeZimArchive("wk", paths = setOf("betimes"), html = mapOf("betimes" to betimes)), "betimes")!!
+        assertThat(found.text).contains("Etymology: From Middle English betymes.")
+        assertThat(found.text).contains("early, especially in the morning")
+        assertThat(found.text).contains("In a short time, soon.")
+        assertThat(found.text).doesNotContain("King James")
+        assertThat(found.text).doesNotContain("at an early hour")
+    }
+
+    @Test fun aPartTooLongIsCutAtAWordAndASplitSectionKeepsOneHeading() {
+        val passages = listOf(
+            app.granger.core.research.HtmlPassage("Etymology", null, "From Latin salārium. " + "word ".repeat(150)),
+            app.granger.core.research.HtmlPassage("Noun", null, "A fixed amount of money paid to a worker. " + "pay ".repeat(400)),
+            app.granger.core.research.HtmlPassage("Noun", null, "the rest"),
+        )
+        val text = DictionaryEntry.text(passages)
+        assertThat(text.length).isAtMost(1_100)
+        assertThat(text).contains("Noun: A fixed amount of money paid to a worker.")
+        assertThat(text).endsWith(" …")
+        assertThat(text.split("Noun:").size).isEqualTo(2)
+    }
+
     @Test fun aDifferentWordIsNotTaken() {
         assertThat(DictionaryEntry.find(archive(listOf(ZimHit("madrugar", "madrugar"))), "mar")).isNull()
         assertThat(DictionaryEntry.sameStem("guagüero", "guagua")).isTrue() // same stem; used only with no entry for the word

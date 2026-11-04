@@ -4,16 +4,24 @@ import app.granger.core.research.HtmlPassage
 import app.granger.core.research.HtmlPassages
 import app.granger.core.research.ResearchLanguage
 import app.granger.core.zim.ZimArchive
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 
 /**
  * A word's entry in a Wiktionary ZIM, as one passage's text: the first language section's etymology and senses,
  * without the translations, pronunciation, references and word lists. An inflected form's entry ("madrugué": "Primera
  * persona del singular … de madrugar") leads to its lemma's, with the form's line kept first.
+ *
+ * Both Wiktionaries head each language with an h2 ("English", "Italian"; "Español", "Gallego"), so the entry is the
+ * page up to its second h2. English senses carry their quotations and examples as lists nested in the sense; they are
+ * dropped, or "betimes" is all quotation and its meaning never fits (l4-words-en-2).
  */
 internal object DictionaryEntry {
     const val PACK_PREFIX = "wiktionary_"
     private const val MAX_CHARS = 1_100
     private const val SEARCHED = 5
+    /** Less room than this left, and the next part isn't started. */
+    private const val MIN_PART = 80
 
     /** Sections that are lists or apparatus, not what the word means or where it comes from. */
     private val SKIP = setOf(
@@ -50,8 +58,25 @@ internal object DictionaryEntry {
         val resolved = archive.resolvePath(path) ?: return null
         val item = archive.read(resolved) ?: return null
         if (!item.mimeType.startsWith("text/html") && !item.mimeType.startsWith("application/xhtml")) return null
-        val passages = HtmlPassages.split(item.bytes.toString(Charsets.UTF_8))
+        val passages = HtmlPassages.split(firstLanguage(item.bytes.toString(Charsets.UTF_8)))
         return passages.takeIf { it.isNotEmpty() }?.let { resolved to it }
+    }
+
+    /** [html] up to its second h2 (the next language), without the quotations and examples nested in senses. */
+    internal fun firstLanguage(html: String): String {
+        val doc = Jsoup.parse(html)
+        doc.select("li > ul, li > dl").remove()
+        val next = doc.select("h2").getOrNull(1) ?: return doc.outerHtml()
+        // The h2 sits in a heading wrapper (div.mw-heading) or straight in the content: it and everything after it
+        // goes, at its own level and at each enclosing one.
+        val start: Element = next.parent()?.takeIf { it.hasClass("mw-heading") } ?: next
+        var level: Element? = start
+        while (level != null && level !== doc.body()) {
+            generateSequence(level.nextElementSibling()) { it.nextElementSibling() }.toList().forEach { it.remove() }
+            level = level.parent()
+        }
+        start.remove()
+        return doc.outerHtml()
     }
 
     /** The lemma an inflected form's entry names, or null when the entry is a lemma's own. */
@@ -71,22 +96,24 @@ internal object DictionaryEntry {
     }
 
     /**
-     * The first language section's useful parts, "Heading: text", to [MAX_CHARS]. A section heading met again (a
-     * second "Etimología") starts the next language's section, which ends it.
+     * The useful parts of an entry already cut to its first language ([firstLanguage]), "Heading: text", to
+     * [MAX_CHARS]. A section split over several passages keeps one heading; the part that doesn't fit is cut at a word,
+     * so a long etymology still leaves the senses some room.
      */
     internal fun text(passages: List<HtmlPassage>): String {
         val out = StringBuilder()
-        val seen = mutableSetOf<String>()
+        var last: String? = null
         for (p in passages) {
-            val heading = ResearchLanguage.fold(p.heading.trim())
-            if (heading.isNotEmpty() && !seen.add(heading)) break
-            if (heading in SKIP || p.text.isBlank()) continue
-            val part = if (p.heading.isBlank()) p.text.trim() else "${p.heading.trim()}: ${p.text.trim()}"
-            if (out.isNotEmpty() && out.length + part.length + 1 > MAX_CHARS) break
+            val heading = p.heading.trim()
+            if (ResearchLanguage.fold(heading) in SKIP || p.text.isBlank()) continue
+            val part = if (heading.isEmpty() || heading == last) p.text.trim() else "$heading: ${p.text.trim()}"
+            last = heading
+            val room = MAX_CHARS - out.length - (if (out.isEmpty()) 0 else 1)
+            if (room < MIN_PART) break
             if (out.isNotEmpty()) out.append('\n')
-            out.append(part)
+            out.append(if (part.length <= room) part else part.take(room - 2).substringBeforeLast(' ') + " …")
         }
-        return out.toString().take(MAX_CHARS)
+        return out.toString()
     }
 
     private fun summary(path: String, title: String, passages: List<HtmlPassage>, prefix: String?): Found? {
