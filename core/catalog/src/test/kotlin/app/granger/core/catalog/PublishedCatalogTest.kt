@@ -172,4 +172,18 @@ class PublishedCatalogTest {
         assertThat(catalog.forBuild(includeUnevaluatedModels = false).models.map { it.id })
             .containsExactly("gemma-4-e2b-gpu", "embeddinggemma-2-text-270m")
     }
+
+    /** Plan E1: a phone too small for Ask sees no search vectors, so a pack's size is its file alone. */
+    @Test fun aLibraryPhoneSeesNoSearchVectors() {
+        val bytes = repoFile("catalog/catalog.json").readBytes()
+        val key = Base64.getDecoder().decode(repoFile("catalog/public-key.txt").readText().trim())
+        val catalog = (CatalogParser.parse(bytes, repoFile("catalog/catalog.json.sig").readBytes(), key) as ParseResult.Ok).catalog
+        assertThat(catalog.packs.count { it.vectors != null } + catalog.books.count { it.vectors != null }).isGreaterThan(0)
+
+        val small = catalog.forBuild(includeUnevaluatedModels = false, includeVectors = false)
+        assertThat(small.packs.count { it.vectors != null } + small.books.count { it.vectors != null }).isEqualTo(0)
+        assertThat(small.packs.map { it.downloadBytes }).isEqualTo(small.packs.map { it.sizeBytes })
+        assertThat(small.models.map { it.id }).containsExactly("gemma-4-e2b-gpu", "embeddinggemma-2-text-270m")
+        assertThat(small.packs.map { it.id }).isEqualTo(catalog.packs.map { it.id })
+    }
 }

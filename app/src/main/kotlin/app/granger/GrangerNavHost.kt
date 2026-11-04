@@ -915,7 +915,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             }
             composable<BrowseRoute> {
                 BrowseScreen(
-                    viewModel { BrowseViewModel(container.shelves, container.library, container.catalog, container.downloads.records, countryCode = container.phoneCountry, knowledge = container.knowledgeLanguages.languages) },
+                    viewModel { BrowseViewModel(container.shelves, container.library, container.catalog, container.downloads.records, countryCode = container.phoneCountry, knowledge = container.knowledgeLanguages.languages, askOffered = container.deviceTier >= DeviceTier.ASK) },
                     packsFolder = container.packDirs().firstOrNull()?.path.orEmpty(),
                     downloadsBadge = downloadsBadge,
                     actions = BrowseActions(
@@ -925,6 +925,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         onDownloads = { nav.navigate(DownloadsRoute) { launchSingleTop = true } },
                         onReadiness = { nav.navigate(ReadinessRoute) },
                     ),
+                    importPack = { uri -> container.packImports.add(uri).text() },
                 )
             }
             composable<CollectionRoute> { backStackEntry ->

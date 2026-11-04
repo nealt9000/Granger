@@ -34,6 +34,7 @@ android {
             "\"${findProperty("catalogUrl") ?: "https://raw.githubusercontent.com/nealt9000/Granger/main/catalog/catalog.json"}\"",
         )
         // Settings → Send feedback writes here (Plan F1 part 2; Neal, 2026-10-31).
+        buildConfigField("long", "FAKE_RAM_BYTES", "0L")
         buildConfigField("String", "FEEDBACK_EMAIL", "\"nealt900@gmail.com\"")
         buildConfigField(
             "String", "CATALOG_PUBLIC_KEY",
@@ -75,6 +76,10 @@ android {
             // en-XA (accented, longer) and ar-XB (right to left): a phone set to either shows any text that isn't a
             // resource as plain English (Plan L1 Task 9). PseudoLocaleTest checks the main screens with en-XA.
             isPseudoLocalesEnabled = true
+            // -PfakeRamGb=4 makes a debug build size itself as a phone with that much memory (Plan E1 phone check).
+            findProperty("fakeRamGb")?.let {
+                buildConfigField("long", "FAKE_RAM_BYTES", "${(it.toString().toDouble() * (1L shl 30)).toLong()}L")
+            }
             if (project.hasProperty("fresh")) {
                 applicationIdSuffix = ".fresh"
                 manifestPlaceholders["appLabel"] = "Granger Fresh"

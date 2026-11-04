@@ -108,6 +108,11 @@ class OnboardingViewModelTest {
         assertThat(enqueued).isEmpty()
     }
 
+    @Test fun welcomePromisesTheLibrarianOnlyWhereAskRuns() = runTest(main.dispatcher) {
+        assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.intro.en()).doesNotContain("librarian")
+        assertThat(viewModel(DeviceTier.ASK).ui.value.intro.en()).contains("a librarian you can ask")
+    }
+
     @Test fun thisPhoneWordsTheTierAndAskAsReadinessDoes() = runTest(main.dispatcher) {
         assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.phone.tierLine.en()).isEqualTo("A library phone, with 8.0 GB of memory.")
         assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.phone.researchLine?.en()).contains("needs a phone with 6 GB")

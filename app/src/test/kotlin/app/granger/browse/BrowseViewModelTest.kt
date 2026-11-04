@@ -163,6 +163,13 @@ class BrowseViewModelTest {
         assertThat(ui.sections[1].packs.single().ask).isNull()
     }
 
+    @Test fun onAPhoneWithoutAskNoPackSaysHowAskSearchesIt() = runTest(main.dispatcher) {
+        shelves.shelfList.value = listOf(shelf("Literature", folder, row("Other", "literature", pack("u-side", "Sideloaded"))))
+        val ui = BrowseViewModel(shelves, library, FakeCatalogSource(catalogOf()), downloads.records, askOffered = false)
+            .ui.filterNotNull().first { it.sections.isNotEmpty() }
+        assertThat(ui.sections.flatMap { it.packs }.map { it.ask }.filterNotNull()).isEmpty()
+    }
+
     @Test fun anEmptyBrowseSuggestsAnEncyclopediaAndTheRegionsMap() = runTest(main.dispatcher) {
         val wiki = packEntry("wikipedia_en_top").copy(family = "wikipedia", domain = "reference")
         val france = packEntry("maps_france", size = 300_000_000).copy(title = "France", family = "maps", domain = "maps")

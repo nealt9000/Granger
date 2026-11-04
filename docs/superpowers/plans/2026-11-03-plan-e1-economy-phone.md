@@ -99,6 +99,16 @@ His results fill these lines of the release checklist: *a second phone that isn'
 - [x] 6. Baseline Profile, generated on the Pixel 6 on 2026-11-04: 37,504 rules, 6,615 of them Granger's, in `app/src/main/baseline-prof.txt`; the release APK carries it as `assets/dexopt/baseline.prof` and `profileinstaller` installs it. `benchmark` build type (`app.granger.benchmark`, "Granger Benchmark": release code without R8, debug-signed, its own data), the `:baselineprofile` test module (cold start, Skip, each rail tool, Get more → Kiwix scrolled) and `tools/dev/baseline-profile.sh`, which uninstalls both test apps after; the phone's `app.granger` isn't touched. Rerun the script after big UI changes. Not yet measured: a Macrobenchmark of cold start with and without it.
 - [x] 7. Battery audit: nothing to change. The only background work is the download queue, which the user starts; book indexing runs in the app's scope while it is open, and Make all searchable asks first. No `setRequiresBatteryNotLow`: a download the user asked for in town shouldn't stop at 15 %.
 - [ ] 8. Memory: from his reports.
+
+### Phone check (2026-11-04, Pixel 6 as a 4 GB phone)
+
+A debug build with `-Pfresh -PfakeRamGb=4 -PcatalogUrl=…` (installed as `app.granger.fresh`, this branch's catalog served over `adb reverse`) sizes itself as a library phone. Checked: the tier line and no Ask in the rail; Save space on by itself for Efficient (17 GB with pictures, 9.2 GB without, 19 GB free); the suggested map (the US, from the network) shown but not preselected at 17 GB, as designed; two `.zim` copies from Downloads (unlisted, checked by size), both opening, and the same file again answered "already in your library"; the Granger voices' "may stop partway" line; the Models screen's "Needs a phone with more memory". Not checked on the phone: the metered Wi-Fi note (it needs the phone's Wi-Fi set to metered; unit tests cover it) and an SD card (the Pixel has none).
+
+Fixed from it:
+- **Search vectors on a library phone.** They were counted in every size and queued after each pack (787 MB in Efficient alone) though only Ask reads them. `CatalogRepository(includeVectors = tier >= ASK)` drops them from the catalog the app sees, so Review loses its "indexes for Ask" line and Efficient is 9.2 GB, not 10.
+- **Add a pack from a file was only reachable from Downloads → Get more.** Now in Browse's ⋮ menu and under Get packs while Browse is empty.
+- **"Ask: keywords only" on every pack** in Kiwix and Browse: hidden on a phone without Ask.
+- **Welcome promised "a librarian you can ask"**: a library phone reads "with a reader and search".
 - [x] 9. Swahili packs: `swa` in `kiwix.languages` and curated rows naming the language (Wikipedia with and without pictures, Wiktionary, PhET), plus five freeCodeCamp packs; no tiers. The rebuild moved no other pack (0 snapshot changes, every other entry identical), all 2,410 links answer, re-signed. Kiwix's Ubongo (Tanzanian children's educational videos in Swahili) has no family-table row: a licence check, and video packs are after launch.
 - [x] Tester addendum: `docs/friend-testing/economy-phone-note.md`.
 

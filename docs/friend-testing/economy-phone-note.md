@@ -19,7 +19,7 @@ This goes with the round 1 tester note (`round-1-tester-note.md`). It's for test
 
 - **Downloads wait for Wi-Fi.** If you're on a phone's hotspot or a pocket router, Android may call that Wi-Fi "metered" and Granger will wait. Downloads says so and has a **Wi-Fi settings** button. There, open the network and set it to unmetered, or turn off "Download on Wi-Fi only" in Granger's Settings.
 - A download that drops picks up where it stopped, even after many drops.
-- **From a computer or another phone:** download the `.zim` file once (from download.kiwix.org on a computer in town, or copy it from a friend), put it on the SD card or a USB stick, then **Get more → Add a pack from a file** and pick it. Granger copies it into your library with no internet. Downloads shows the copy's progress. A pack Granger knows is checked against its catalog, so a damaged copy is caught.
+- **From a computer or another phone:** download the `.zim` file once (from download.kiwix.org on a computer in town, or copy it from a friend), put it on the SD card or a USB stick, then **Browse → ⋮ → Add a pack from a file** and pick it (it's also under **Get packs** while Browse is empty). Granger copies it into your library with no internet. Downloads shows the copy's progress. A pack Granger knows is checked against its catalog, so a damaged copy is caught.
 
 ## What to try over a week
 

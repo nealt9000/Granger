@@ -593,7 +593,8 @@ class SourceViewModel(
                 }
                 is VoiceEntry -> UiText.Raw(item.attribution)
             }
-            val ask = (item as? PackEntry)?.let { askReach(it, installedVectorParents) }
+            // A phone without Ask says nothing about how Ask would search (Plan E1 phone check).
+            val ask = (item as? PackEntry)?.takeIf { tier >= DeviceTier.ASK }?.let { askReach(it, installedVectorParents) }
             // On Project Gutenberg's own screen, each pack is its subject alone.
             val title = if (gutenberg) item.title.removeSuffix(GUTENBERG_SUFFIX) else KiwixList.title(item)
             val adds = (item as? PackEntry)?.let(::addsOf)

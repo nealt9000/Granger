@@ -51,6 +51,8 @@ data class PhoneUi(
 
 data class OnboardingUi(
     val step: Step = Step.WELCOME,
+    /** Welcome's line: a phone too small for Ask isn't promised a librarian (Plan E1 phone check). */
+    val intro: UiText = UiText.Res(R.string.onboarding_intro),
     /** No catalog yet: Pick a start shows the fetch (fresh install) or why it failed. */
     val noCatalog: Boolean = true,
     val refreshing: Boolean = false,
@@ -172,7 +174,7 @@ class OnboardingViewModel(
     private val setup = combine(wifiOnly, volumePath, notice, starting, ::Setup)
 
     val ui: StateFlow<OnboardingUi> = combine(facts, choices, setup) { f, c, s -> build(f, c, s) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), OnboardingUi())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), OnboardingUi(intro = intro()))
 
     init {
         viewModelScope.launch {
@@ -237,6 +239,7 @@ class OnboardingViewModel(
         )
         val phoneLanguages = KnowledgeLanguages.phoneLanguages(phoneLocales(), catalog?.languages.orEmpty())
         return OnboardingUi(
+            intro = intro(),
             languages = f.languages,
             alsoLanguage = KnowledgeLanguages.secondOffer(f.languages, phoneLanguages),
             secondLine = secondLine,
@@ -277,6 +280,9 @@ class OnboardingViewModel(
     }
 
     /** Memory as Readiness words it ([formatBytes]), so the two never disagree. */
+    private fun intro(): UiText =
+        UiText.Res(if (tier >= DeviceTier.ASK) R.string.onboarding_intro else R.string.onboarding_intro_library)
+
     private fun tierLine(): UiText = when (tier) {
         DeviceTier.LIBRARY_ONLY -> UiText.Res(R.string.onboarding_tier_library, formatBytes(totalRamBytes))
         DeviceTier.ASK -> UiText.Res(R.string.onboarding_tier_ask, formatBytes(totalRamBytes))

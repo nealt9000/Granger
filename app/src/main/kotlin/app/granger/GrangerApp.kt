@@ -569,7 +569,7 @@ class AppContainer(context: Context) {
     val search: LibrarySearch = ZimLibrarySearch(library, bookIndex, bookshelf = bookshelf, slices = packSlices)
     val resolver = ZimResolver(library::archive, library::cachedArchive)
 
-    val totalRamBytes: Long = ActivityManager.MemoryInfo()
+    val totalRamBytes: Long = BuildConfig.FAKE_RAM_BYTES.takeIf { it > 0 } ?: ActivityManager.MemoryInfo()
         .also { context.getSystemService(ActivityManager::class.java).getMemoryInfo(it) }
         .totalMem
     val deviceTier: DeviceTier = DeviceTiers.forTotalRam(totalRamBytes)
@@ -594,6 +594,8 @@ class AppContainer(context: Context) {
         publicKey = Base64.getDecoder().decode(BuildConfig.CATALOG_PUBLIC_KEY),
         cacheDir = File(context.filesDir, "catalog"),
         includeUnevaluatedModels = BuildConfig.DEBUG,
+        // Search vectors only serve Ask: a library phone neither counts nor downloads them (Plan E1 phone check).
+        includeVectors = deviceTier >= DeviceTier.ASK,
     )
 
     val archiveClient = ArchiveOrgClient(http, archiveUserAgent)
