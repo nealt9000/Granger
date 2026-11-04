@@ -1,0 +1,212 @@
+[
+ {
+  "id": "d-own-book-001",
+  "group": "own-book",
+  "domain": "own-book",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what did dorothy's house land on when it came down in oz",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:import:pg55",
+    "location": "4219894926018364867_55-h-3.htm.html",
+    "quote": "we are so grateful to you for having killed the wicked witch of the east"
+   }
+  ],
+  "reference": "On the Wicked Witch of the East, killing her (chapter 2).",
+  "goodGuess": null,
+  "notes": "quote checked by hand against the spine item"
+ },
+ {
+  "id": "d-own-book-002",
+  "group": "own-book",
+  "domain": "own-book",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what does the scarecrow want to ask the wizard for",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:import:pg55",
+    "location": "4219894926018364867_55-h-4.htm.html",
+    "quote": "if i go to the emerald city with you, that oz would give me some brains"
+   }
+  ],
+  "reference": "Brains, since he is stuffed with straw and has none (chapter 3).",
+  "goodGuess": null,
+  "notes": "quote checked by hand against the spine item"
+ },
+ {
+  "id": "d-own-book-003",
+  "group": "own-book",
+  "domain": "own-book",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why does everyone in the emerald city have to wear glasses",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:import:pg55",
+    "location": "4219894926018364867_55-h-11.htm.html",
+    "quote": "the brightness and glory of the emerald city would blind you"
+   }
+  ],
+  "reference": "The Guardian of the Gates says the brightness and glory of the city would blind them; the spectacles are locked on by Oz's order (chapter 10).",
+  "goodGuess": null,
+  "notes": "quote checked by hand against the spine item"
+ },
+ {
+  "id": "d-own-book-004",
+  "group": "own-book",
+  "domain": "own-book",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how does dorothy finally get back to kansas",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:import:pg55",
+    "location": "4219894926018364867_55-h-24.htm.html",
+    "quote": "knock the heels together three times and command the shoes"
+   }
+  ],
+  "reference": "Glinda tells her the silver shoes can carry her anywhere: she knocks the heels together three times and commands them to take her home (chapter 23).",
+  "goodGuess": null,
+  "notes": "quote checked by hand against the spine item"
+ },
+ {
+  "id": "d-own-book-005",
+  "group": "own-book",
+  "domain": "own-book",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "where was frederick douglass born",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:import:pg23",
+    "location": "4859935759385833727_23-h-4.htm.html",
+    "quote": "i was born in tuckahoe, near hillsborough, and about twelve miles from easton"
+   }
+  ],
+  "reference": "In Tuckahoe, near Hillsborough, about twelve miles from Easton, in Talbot County, Maryland (chapter 1).",
+  "goodGuess": null,
+  "notes": "quote checked by hand against the spine item"
+ },
+ {
+  "id": "d-own-book-006",
+  "group": "own-book",
+  "domain": "own-book",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who first taught douglass to read",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:import:pg23",
+    "location": "4859935759385833727_23-h-9.htm.html",
+    "quote": "she very kindly commenced to teach me the a, b, c"
+   }
+  ],
+  "reference": "His mistress Mrs. Auld in Baltimore, who taught him the alphabet and short words until her husband forbade it (chapter 6).",
+  "goodGuess": null,
+  "notes": "quote checked by hand against the spine item"
+ },
+ {
+  "id": "d-own-book-007",
+  "group": "own-book",
+  "domain": "own-book",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how long did douglass's fight with covey go on",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:import:pg23",
+    "location": "4859935759385833727_23-h-13.htm.html",
+    "quote": "we were at it for nearly two hours"
+   }
+  ],
+  "reference": "Nearly two hours, after which Covey let him go; Douglass calls it the turning-point in his life as a slave (chapter 10).",
+  "goodGuess": null,
+  "notes": "quote checked by hand against the spine item"
+ },
+ {
+  "id": "d-own-book-008",
+  "group": "own-book",
+  "domain": "own-book",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what shape are the women in flatland",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:import:pg201",
+    "location": "5055563876188660333_201-h-0.htm.html",
+    "quote": "our women are straight lines"
+   }
+  ],
+  "reference": "Straight lines (Part I, section 3).",
+  "goodGuess": null,
+  "notes": "quote checked by hand against the spine item"
+ },
+ {
+  "id": "d-own-book-009",
+  "group": "own-book",
+  "domain": "own-book",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how do people in flatland tell each other apart by sight",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:import:pg201",
+    "location": "5055563876188660333_201-h-0.htm.html",
+    "quote": "is the result of fog; which prevails during the greater part of the year"
+   }
+  ],
+  "reference": "By sight recognition, which works because of fog: distant parts of a figure look dimmer, so the angles can be judged (Part I, section 6).",
+  "goodGuess": null,
+  "notes": "quote checked by hand against the spine item"
+ },
+ {
+  "id": "d-own-book-010",
+  "group": "own-book",
+  "domain": "own-book",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what happens to the narrator at the end of flatland",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:import:pg201",
+    "location": "5055563876188660333_201-h-2.htm.html",
+    "quote": "i must be sentenced to perpetual imprisonment"
+   }
+  ],
+  "reference": "He is sentenced to perpetual imprisonment for preaching the third dimension (Part II, section 22).",
+  "goodGuess": null,
+  "notes": "quote checked by hand against the spine item"
+ }
+]

@@ -1,0 +1,4315 @@
+[
+ {
+  "id": "d-bible-001",
+  "group": "bible",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who in the bible got swallowed by a giant fish",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-king-james-bible",
+    "location": "c042.xhtml",
+    "quote": "the lord had prepared a great fish to swallow up jonah"
+   },
+   {
+    "source": "book:granger:gc-world-english-bible",
+    "location": "c048.xhtml",
+    "quote": "the lord prepared a huge fish to swallow up jonah"
+   },
+   {
+    "source": "book:granger:gc-berean-standard-bible",
+    "location": "c050.xhtml",
+    "quote": "the lord had appointed a great fish to swallow jonah"
+   }
+  ],
+  "reference": "Jonah: the Lord prepared a great fish that swallowed him, and he was in its belly three days and three nights (Jonah 1:17).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-bible-002",
+  "group": "bible",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how many times did jesus say we have to forgive someone",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-king-james-bible",
+    "location": "c050.xhtml",
+    "quote": "i say not unto thee, until seven times: but, until seventy times seven"
+   },
+   {
+    "source": "book:granger:gc-world-english-bible",
+    "location": "c074.xhtml",
+    "quote": "until seven times, but, until seventy times seven"
+   },
+   {
+    "source": "book:granger:gc-berean-standard-bible",
+    "location": "c059.xhtml",
+    "quote": "not just seven times, but seventy-seven times"
+   }
+  ],
+  "reference": "Seventy times seven (Matthew 18:22; the Berean has seventy-seven times), when Peter asked whether seven times was enough: in effect, without limit.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-bible-003",
+  "group": "bible",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what happened to the people building the tower of babel",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-douay-rheims-bible",
+    "location": "c002.xhtml",
+    "quote": "scattered them from that place into all lands, and they ceased to build the city"
+   },
+   {
+    "source": "book:granger:gc-king-james-bible",
+    "location": "c002.xhtml",
+    "quote": "and they left off to build the city"
+   }
+  ],
+  "reference": "The Lord confounded their language so they could not understand one another and scattered them over the earth, and they stopped building the city (Genesis 11).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-bible-004",
+  "group": "bible",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how was ruth related to naomi",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-holy-scriptures-jps-1917",
+    "location": "c013.xhtml",
+    "quote": "ruth the moabitess, the wife of mahlon"
+   },
+   {
+    "source": "book:granger:gc-king-james-bible",
+    "location": "c013.xhtml",
+    "quote": "ruth the moabitess, the wife of mahlon"
+   }
+  ],
+  "reference": "Ruth was Naomi's daughter-in-law, the Moabite widow of Naomi's son Mahlon (Ruth 1; 4:10).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-bible-005",
+  "group": "bible",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who chopped off holofernes head",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-apocrypha-deuterocanonical-books",
+    "location": "c005.xhtml",
+    "quote": "she smote twice upon his neck with all her might"
+   },
+   {
+    "source": "book:granger:gc-world-english-bible",
+    "location": "c057.xhtml",
+    "quote": "she struck twice upon his neck with all her might and cut off his head"
+   }
+  ],
+  "reference": "Judith, who struck his neck twice with his own sword while he lay drunk in his tent and carried the head away in her bag (Judith 13).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-bible-006",
+  "group": "bible",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how many wives is a man allowed to have in the koran",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-koran-rodwell",
+    "location": "c099.xhtml",
+    "quote": "marry but two, or three, or four"
+   },
+   {
+    "source": "book:granger:gc-koran-sale",
+    "location": "c019.xhtml",
+    "quote": "two, or three, or four, and not more"
+   }
+  ],
+  "reference": "Up to four (two, three or four), and only one if he fears he cannot treat them equitably (Sura 4, Women).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-bible-007",
+  "group": "bible",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "according to the dhammapada what actually makes hate stop",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-dhammapada",
+    "location": "c002.xhtml",
+    "quote": "hatred does not cease by hatred at any time"
+   }
+  ],
+  "reference": "Love, not more hatred: hatred never ceases by hatred, it ceases by love (Dhammapada, chapter 1, the Twin Verses).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-bible-008",
+  "group": "bible",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "where does the saying about a long trip starting with one step come from",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-tao-te-ching",
+    "location": "c003.xhtml",
+    "quote": "the journey of a thousand li commenced with a single step"
+   }
+  ],
+  "reference": "The Tao Te Ching, chapter 64: the journey of a thousand li begins with a single step.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-bible-009",
+  "group": "bible",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what single word did confucius say you could live your whole life by",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-analects",
+    "location": "c016.xhtml",
+    "quote": "what you do not want done to yourself, do not do to others"
+   }
+  ],
+  "reference": "Reciprocity: what you do not want done to yourself, do not do to others (Analects, book XV).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-bible-010",
+  "group": "bible",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who is arjuna's charioteer in the gita",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-bhagavad-gita-the-song-celestial",
+    "location": "c003.xhtml",
+    "quote": "spake this thing to krishna the divine, his charioteer"
+   },
+   {
+    "source": "book:granger:gc-bhagavad-gita-the-song-celestial",
+    "location": "c002.xhtml",
+    "quote": "krishna, the supreme deity, wearing the disguise of a charioteer"
+   }
+  ],
+  "reference": "Krishna, the supreme deity, who drives Arjuna's chariot in the disguise of a charioteer.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-literature-001",
+  "group": "literature",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who stole silas marner's gold",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-silas-marner",
+    "location": "c006.xhtml",
+    "quote": "dunstan felt round the hole, to be certain that it held no more"
+   }
+  ],
+  "reference": "Dunstan Cass, the squire's son, who found the two bags of guineas under the floor while Silas was out (chapter 4).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-literature-002",
+  "group": "literature",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what sort of jewel is the moonstone supposed to be",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-moonstone",
+    "location": "c002.xhtml",
+    "quote": "a yellow diamond—a famous gem in the native annals of india"
+   }
+  ],
+  "reference": "A large yellow diamond from India, said to have been set in the forehead of the Hindu moon god (the Prologue).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-literature-003",
+  "group": "literature",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what was the ship called that david balfour got kidnapped onto",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-kidnapped",
+    "location": "c008.xhtml",
+    "quote": "the captain of a trading brig, the covenant , of dysart"
+   }
+  ],
+  "reference": "The Covenant, a trading brig of Dysart captained by Hoseason (chapter 5).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-literature-004",
+  "group": "literature",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the dog called in three men in a boat",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-three-men-in-a-boat",
+    "location": "c003.xhtml",
+    "quote": "there were four of us—george, and william samuel harris, and myself, and montmorency"
+   },
+   {
+    "source": "book:granger:gc-three-men-in-a-boat",
+    "location": "c004.xhtml",
+    "quote": "in the shape of a small fox-terrier"
+   }
+  ],
+  "reference": "Montmorency, a small fox-terrier, the fourth member of the party.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-literature-005",
+  "group": "literature",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what is chichikov actually trying to buy from the landowners in dead souls",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-dead-souls",
+    "location": "c007.xhtml",
+    "quote": "purchase the dead peasants who, at the last census, were returned by you as alive"
+   }
+  ],
+  "reference": "Dead serfs: peasants who have died since the last census but are still listed as alive, which he buys cheaply on paper (part I, chapter 2).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-literature-006",
+  "group": "literature",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why was matthew cuthbert confused when he picked up anne at the station",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-anne-of-green-gables",
+    "location": "c003.xhtml",
+    "quote": "mrs. alexander spencer was to bring him over from nova scotia for me"
+   },
+   {
+    "source": "book:granger:gc-anne-of-green-gables",
+    "location": "c002.xhtml",
+    "quote": "marilla and matthew cuthbert of all people adopting a boy"
+   }
+  ],
+  "reference": "He and Marilla had sent for a boy from the orphan asylum to help on the farm, but Mrs Spencer brought a girl, Anne, instead (chapters 1-2).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-literature-007",
+  "group": "literature",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what happens on the sled ride near the end of ethan frome",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-ethan-frome",
+    "location": "c010.xhtml",
+    "quote": "he slanted his body to keep it headed for the elm"
+   }
+  ],
+  "reference": "Mattie asks Ethan to run the sled straight into the big elm so they never have to part, and he steers it into the tree on purpose (chapter 9).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-literature-008",
+  "group": "literature",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why does rudolf rassendyll have to pose as the king in the prisoner of zenda",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-prisoner-of-zenda",
+    "location": "c005.xhtml",
+    "quote": "do you think the king was drugged"
+   }
+  ],
+  "reference": "The king was drugged the night before his coronation (by his brother Black Michael) so that he could not be crowned, and Rassendyll, his double, takes his place (chapter 4).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-vocab-gap-001",
+  "group": "vocab-gap",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what does the bible say about atheists",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-king-james-bible",
+    "location": "c025.xhtml",
+    "quote": "the fool hath said in his heart, there is no god"
+   },
+   {
+    "source": "book:granger:gc-world-english-bible",
+    "location": "c026.xhtml",
+    "quote": "the fool has said in his heart"
+   }
+  ],
+  "reference": "Psalm 14:1 (and 53:1): the fool hath said in his heart, there is no God.",
+  "goodGuess": null,
+  "notes": "vocab gap: atheist -> the fool who says in his heart there is no god; the word atheist never appears."
+ },
+ {
+  "id": "d-vocab-gap-002",
+  "group": "vocab-gap",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what does hamlet say to ophelia about women wearing makeup",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-hamlet",
+    "location": "c004.xhtml",
+    "quote": "god hath given you one face, and you make yourselves another"
+   }
+  ],
+  "reference": "He has heard of their paintings well enough: God gave them one face and they make themselves another (Act 3, Scene 1).",
+  "goodGuess": null,
+  "notes": "vocab gap: makeup -> paintings / make yourselves another face."
+ },
+ {
+  "id": "d-vocab-gap-003",
+  "group": "vocab-gap",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "where does jekyll and hyde talk about everyone having a split personality",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-strange-case-of-dr-jekyll-and-mr-hyde",
+    "location": "c012.xhtml",
+    "quote": "that man is not truly one, but truly two"
+   }
+  ],
+  "reference": "In Henry Jekyll's full statement of the case, the last chapter: man is not truly one, but truly two.",
+  "goodGuess": null,
+  "notes": "vocab gap: split personality -> truly two, polity of multifarious denizens."
+ },
+ {
+  "id": "d-vocab-gap-004",
+  "group": "vocab-gap",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what does ishmael do when he gets depressed",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-moby-dick",
+    "location": "c003.xhtml",
+    "quote": "whenever it is a damp, drizzly november in my soul"
+   }
+  ],
+  "reference": "He goes to sea: whenever he feels grim about the mouth or a damp, drizzly November in his soul, he takes to the ship (Moby-Dick, chapter 1).",
+  "goodGuess": null,
+  "notes": "vocab gap: depressed -> the spleen, hypos, a damp drizzly november in my soul."
+ },
+ {
+  "id": "d-vocab-gap-005",
+  "group": "vocab-gap",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "does thomas more's utopia allow assisted suicide for the terminally ill",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-utopia",
+    "location": "c009.xhtml",
+    "quote": "starve themselves of their own accord, or take opium, and by that means die without pain"
+   }
+  ],
+  "reference": "Yes: when someone has an incurable and torturing illness the priests and magistrates urge them to end their life; those persuaded starve themselves or take opium and die without pain, but nobody is forced.",
+  "goodGuess": null,
+  "notes": "vocab gap: assisted suicide / euthanasia -> voluntary death, starve themselves, take opium."
+ },
+ {
+  "id": "d-vocab-gap-006",
+  "group": "vocab-gap",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "which part of ovid's metamorphoses argues for vegetarianism",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-metamorphoses-books-viii-xv",
+    "location": "c012.xhtml",
+    "quote": "her agreable food, and affords dainties without slaughter and bloodshed"
+   }
+  ],
+  "reference": "Book XV, the speech of Pythagoras: the earth gives food without slaughter and bloodshed, so people should not feed on flesh.",
+  "goodGuess": null,
+  "notes": "vocab gap: vegetarian -> abstain from flesh, dainties without slaughter and bloodshed. The spelling agreable is the text's."
+ },
+ {
+  "id": "d-vocab-gap-007",
+  "group": "vocab-gap",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what epidemic is going on at the start of the decameron",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-decameron",
+    "location": "c003.xhtml",
+    "quote": "fair over every other of italy, there came the death-dealing pestilence"
+   }
+  ],
+  "reference": "The plague of 1348, the deadly pestilence that came to Florence; the ten young people leave the city to escape it (the First Day introduction).",
+  "goodGuess": null,
+  "notes": "vocab gap: epidemic / plague -> pestilence."
+ },
+ {
+  "id": "d-vocab-gap-008",
+  "group": "vocab-gap",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "where does adam smith say the free market basically regulates itself",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-wealth-of-nations",
+    "location": "c032.xhtml",
+    "quote": "led by an invisible hand to promote an end which was no part of his intention"
+   }
+  ],
+  "reference": "Book IV, chapter II of The Wealth of Nations: each person pursuing his own gain is led by an invisible hand to promote an end that was no part of his intention.",
+  "goodGuess": null,
+  "notes": "vocab gap: free market regulating itself -> invisible hand."
+ },
+ {
+  "id": "d-who-wrote-001",
+  "group": "who-wrote",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the novel where a scientist builds a creature out of dead body parts and it turns on him",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Frankenstein",
+    "quote": "a young scientist who creates a sapient creature from different body parts"
+   },
+   {
+    "source": "book:granger:gc-frankenstein",
+    "location": "c001.xhtml",
+    "quote": "frankenstein; or, the modern prometheus by mary wollstonecraft (godwin) shelley"
+   }
+  ],
+  "reference": "Frankenstein; or, The Modern Prometheus (1818) by Mary Shelley.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-who-wrote-002",
+  "group": "who-wrote",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who wrote the civil war book about a young soldier who runs away during his first battle",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "The_Red_Badge_of_Courage",
+    "quote": "henry fleming, who flees from the field of battle"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "Stephen_Crane",
+    "quote": "he won international acclaim for his civil war novel the red badge of courage"
+   },
+   {
+    "source": "book:granger:gc-red-badge-of-courage",
+    "location": "c001.xhtml",
+    "quote": "the red badge of courage by stephen crane"
+   }
+  ],
+  "reference": "Stephen Crane, The Red Badge of Courage (1895).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-who-wrote-003",
+  "group": "who-wrote",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who wrote the story with the headless horseman",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-legend-of-sleepy-hollow",
+    "location": "c001.xhtml",
+    "quote": "the legend of sleepy hollow by washington irving"
+   }
+  ],
+  "reference": "Washington Irving, The Legend of Sleepy Hollow.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-who-wrote-004",
+  "group": "who-wrote",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who wrote the play that ends with the wife walking out on her husband and the door slamming",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-doll-s-house",
+    "location": "c005.xhtml",
+    "quote": "the sound of a door shutting is heard from below"
+   },
+   {
+    "source": "book:granger:gc-doll-s-house",
+    "location": "c001.xhtml",
+    "quote": "henrik ibsen haldeman-julius company girard, kansas"
+   }
+  ],
+  "reference": "Henrik Ibsen, A Doll's House: Nora leaves Torvald at the end of Act III.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-who-wrote-005",
+  "group": "who-wrote",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who wrote cyrano de bergerac",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-cyrano-de-bergerac",
+    "location": "c001.xhtml",
+    "quote": "a play in five acts by edmond rostand"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "Cyrano_de_Bergerac_(play)",
+    "quote": "is a french play written in 1897 by edmond rostand"
+   }
+  ],
+  "reference": "Edmond Rostand (1897), a play in five acts.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-who-wrote-006",
+  "group": "who-wrote",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "whos the poet behind the song of hiawatha",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-song-of-hiawatha",
+    "location": "c001.xhtml",
+    "quote": "the song of hiawatha henry w. longfellow"
+   }
+  ],
+  "reference": "Henry Wadsworth Longfellow.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-who-wrote-007",
+  "group": "who-wrote",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who wrote the rubaiyat and who put it into english",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-rubaiyat-of-omar-khayyam",
+    "location": "c001.xhtml",
+    "quote": "rendered into english verse by edward fitzgerald"
+   }
+  ],
+  "reference": "Omar Khayyam wrote it; Edward FitzGerald rendered it into English verse.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-who-wrote-008",
+  "group": "who-wrote",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who wrote the stories about a boy brought up by wolves in the indian jungle",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-jungle-book",
+    "location": "c001.xhtml",
+    "quote": "the jungle book by rudyard kipling"
+   },
+   {
+    "source": "book:granger:gc-jungle-book",
+    "location": "c003.xhtml",
+    "quote": "we will see what the pack will say to this fostering of man-cubs"
+   }
+  ],
+  "reference": "Rudyard Kipling, The Jungle Book (the Mowgli stories).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-follow-up-001",
+  "group": "follow-up",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who did he end up marrying",
+  "priorQuestion": "who is heathcliff in wuthering heights",
+  "answers": [
+   {
+    "source": "book:granger:gc-wuthering-heights",
+    "location": "c013.xhtml",
+    "quote": "lately married to mr. heathcliff, and he has brought me here"
+   }
+  ],
+  "reference": "Isabella Linton, Edgar Linton's sister, who eloped with him (chapter 13).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-follow-up-002",
+  "group": "follow-up",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "and who was its captain",
+  "priorQuestion": "whats the ship called in treasure island",
+  "answers": [
+   {
+    "source": "book:granger:gc-treasure-island",
+    "location": "c011.xhtml",
+    "quote": "captain smollett, sir, axing to speak with you"
+   }
+  ],
+  "reference": "Captain Smollett (chapter 9).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-follow-up-003",
+  "group": "follow-up",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who did he kill",
+  "priorQuestion": "who is raskolnikov",
+  "answers": [
+   {
+    "source": "book:granger:gc-crime-and-punishment",
+    "location": "c013.xhtml",
+    "quote": "someone had murdered alyona ivanovna and her sister, lizaveta ivanovna, with an axe"
+   }
+  ],
+  "reference": "The old pawnbroker Alyona Ivanovna and her sister Lizaveta, with an axe.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-follow-up-004",
+  "group": "follow-up",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how does moreau die",
+  "priorQuestion": "what is the island of doctor moreau about",
+  "answers": [
+   {
+    "source": "book:granger:gc-island-of-doctor-moreau",
+    "location": "c021.xhtml",
+    "quote": "his head had been battered in by the fetters of the puma"
+   }
+  ],
+  "reference": "He is killed by the escaped puma: he is found dead in a canebrake with his head battered in by the puma's fetters (chapter 18).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-follow-up-005",
+  "group": "follow-up",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what happened to her in the end",
+  "priorQuestion": "who is bertha mason in jane eyre",
+  "answers": [
+   {
+    "source": "book:granger:gc-jane-eyre",
+    "location": "c039.xhtml",
+    "quote": "she yelled and gave a spring, and the next minute she lay smashed on the pavement"
+   }
+  ],
+  "reference": "She set fire to Thornfield and leapt from the roof, dying on the pavement below (chapter 36).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-multi-step-001",
+  "group": "multi-step",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "how old was dickens when a christmas carol came out",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Charles_Dickens",
+    "quote": "charles john huffam dickens was born on 7 february 1812"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "A_Christmas_Carol",
+    "quote": "illustrator john leech published 19 december 1843"
+   }
+  ],
+  "reference": "31: he was born on 7 February 1812 and A Christmas Carol was published on 19 December 1843.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-multi-step-002",
+  "group": "multi-step",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "who was the father of the man who killed hector",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-iliad",
+    "location": "c024.xhtml",
+    "quote": "hector fell headlong, and achilles vaunted over him"
+   },
+   {
+    "source": "book:granger:gc-iliad",
+    "location": "c003.xhtml",
+    "quote": "the anger of achilles son of peleus"
+   }
+  ],
+  "reference": "Peleus: Hector was killed by Achilles (Iliad XXII), and Achilles is the son of Peleus (Iliad I).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-multi-step-003",
+  "group": "multi-step",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "which of the march sisters dies in little women and what illness did she first catch",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-little-women",
+    "location": "c019.xhtml",
+    "quote": "beth did have the fever, and was much sicker than anyone"
+   },
+   {
+    "source": "book:granger:gc-little-women",
+    "location": "c018.xhtml",
+    "quote": "every one had scarlet fever, and if rightly treated, nobody died"
+   },
+   {
+    "source": "book:granger:gc-little-women",
+    "location": "c042.xhtml",
+    "quote": "she quietly drew her last, with no farewell but one loving look, one little sigh"
+   }
+  ],
+  "reference": "Beth: she caught scarlet fever from the Hummels' baby (chapters 17-18) and, never fully recovering, died later (chapter 40).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-multi-step-004",
+  "group": "multi-step",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "whats the name of the parrot belonging to the one-legged cook on the hispaniola",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-treasure-island",
+    "location": "c009.xhtml",
+    "quote": "long john silver, he is called, and has lost a leg"
+   },
+   {
+    "source": "book:granger:gc-treasure-island",
+    "location": "c029.xhtml",
+    "quote": "green parrot, captain flint! it was she whom i had heard"
+   }
+  ],
+  "reference": "Captain Flint: the one-legged cook is Long John Silver, and his green parrot is called Captain Flint.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-multi-step-005",
+  "group": "multi-step",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "how many years after moby dick came out was dracula published",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Moby-Dick",
+    "quote": "publication date october 18, 1851 (united kingdom)"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "Dracula",
+    "quote": "dracula is an 1897 gothic horror novel by irish author bram stoker"
+   }
+  ],
+  "reference": "46 years: Moby-Dick came out in 1851 and Dracula in 1897.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-unanswerable-001",
+  "group": "unanswerable",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "how many carats was it",
+  "priorQuestion": "what is the moonstone in the wilkie collins novel",
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say: the novel never gives the diamond's weight in carats.",
+  "notes": "follow-up, no-record fact on a covered topic: the Moonstone EPUB has no occurrence of carat, and wikipedia_en_top has no article on the novel."
+ },
+ {
+  "id": "d-unanswerable-002",
+  "group": "unanswerable",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what chapter of middlemarch did i stop at last night",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "personal fact."
+ },
+ {
+  "id": "d-unanswerable-003",
+  "group": "unanswerable",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "which novel is going to win the 2027 booker prize",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that hasn't happened yet.",
+  "notes": "future: the 2027 prize is awarded in late 2027, long after the newest snapshot (foss.cooking, 2026-11-02) and after 2026-11-04."
+ },
+ {
+  "id": "d-unanswerable-004",
+  "group": "unanswerable",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "does the library downtown have a copy of ulysses i can borrow",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: a local library's catalogue isn't in any downloaded pack.",
+  "notes": "local fact."
+ },
+ {
+  "id": "d-unanswerable-005",
+  "group": "unanswerable",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "how tall was charles dickens",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "The library doesn't record his height.",
+  "notes": "no-record fact on a covered topic: wikipedia_en_top Charles_Dickens was grepped for height and tall (only inside other words); no height is given anywhere."
+ },
+ {
+  "id": "d-medical-001",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "does shingles come up on both sides of the body or just one side",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Shingles",
+    "quote": "the rash occurs in a single, wide mark either on the left or right side"
+   }
+  ],
+  "reference": "Typically one side: the shingles rash occurs as a single wide mark on either the left or the right side of the body or face.",
+  "goodGuess": null,
+  "notes": "symptom pattern"
+ },
+ {
+  "id": "d-medical-002",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "sailors on long voyages used to get bleeding gums and sore limbs, what were they missing?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Scurvy",
+    "quote": "is a deficiency disease (state of malnutrition) resulting from a lack of vitamin c"
+   }
+  ],
+  "reference": "Vitamin C: that illness is scurvy, a deficiency disease caused by a lack of vitamin C (ascorbic acid).",
+  "goodGuess": null,
+  "notes": "cause; the question describes scurvy without naming it"
+ },
+ {
+  "id": "d-medical-003",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "What is metformin prescribed for?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Metformin",
+    "quote": "is the main first-line medication for the treatment of type 2 diabetes"
+   }
+  ],
+  "reference": "Metformin is the main first-line medication for type 2 diabetes (it lowers blood glucose), particularly in people who are overweight.",
+  "goodGuess": null,
+  "notes": "what a drug is for"
+ },
+ {
+  "id": "d-medical-004",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "should you tip your head back when your nose is bleeding",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Nosebleed",
+    "quote": "when attempting to stop a nosebleed at home, the head should not be tilted back"
+   }
+  ],
+  "reference": "No. The head should not be tilted back; tilt it forward and pinch the soft front part of the nose firmly for at least five minutes.",
+  "goodGuess": null,
+  "notes": "first aid the article describes"
+ },
+ {
+  "id": "d-medical-005",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "whats the actual germ behind lockjaw",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Tetanus",
+    "quote": "a bacterial infection caused by clostridium tetani and characterized by muscle spasms"
+   }
+  ],
+  "reference": "Lockjaw is tetanus, a bacterial infection caused by Clostridium tetani, which produces muscle spasms that usually start in the jaw.",
+  "goodGuess": null,
+  "notes": "cause; asks by the common name"
+ },
+ {
+  "id": "d-medical-006",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "which muscle is actually twitching when you get the hiccups?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Hiccup",
+    "quote": "an involuntary contraction ( myoclonic jerk) of the diaphragm"
+   }
+  ],
+  "reference": "The diaphragm: a hiccup is an involuntary contraction of the diaphragm, followed by the glottis closing, which makes the sound.",
+  "goodGuess": null,
+  "notes": "anatomy/physiology"
+ },
+ {
+  "id": "d-medical-007",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "what builds up inside the joint to cause a gout attack",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Gout",
+    "quote": "needle-shaped crystals of the monosodium salt of uric acid"
+   }
+  ],
+  "reference": "Needle-shaped crystals of uric acid (monosodium urate) deposited in the joint, from persistently high uric acid in the blood.",
+  "goodGuess": null,
+  "notes": "cause"
+ },
+ {
+  "id": "d-medical-008",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "which childhood illness has a fever lasting days and then the skin on the hands and feet peels off?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Kawasaki_disease",
+    "quote": "the skin from the hands and feet may peel, after which recovery typically occurs"
+   }
+  ],
+  "reference": "Kawasaki disease: a fever of more than five days in young children, after which the skin of the hands and feet may peel.",
+  "goodGuess": null,
+  "notes": "uncommon condition, described rather than named"
+ },
+ {
+  "id": "d-medical-009",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "what is the drug they give someone for a heroin overdose",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Naloxone",
+    "quote": "naloxone is commonly used to restore breathing after an opioid overdose"
+   }
+  ],
+  "reference": "Naloxone (Narcan), an opioid antagonist used to restore breathing after an opioid overdose.",
+  "goodGuess": null,
+  "notes": "what a drug is; heroin is an opioid, the article says opioid"
+ },
+ {
+  "id": "d-medical-010",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "symptoms of breathing fumes from a faulty gas heater",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Carbon_monoxide_poisoning",
+    "quote": "commonly include headache , dizziness , weakness, vomiting, chest pain , and confusion"
+   }
+  ],
+  "reference": "Carbon monoxide poisoning: flu-like symptoms such as headache, dizziness, weakness, vomiting, chest pain and confusion; large exposures can cause loss of consciousness.",
+  "goodGuess": null,
+  "notes": "symptoms; the question does not name carbon monoxide"
+ },
+ {
+  "id": "d-medical-011",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "whats a normal body temp in celsius",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Human_body_temperature",
+    "quote": "the typical temperature range found in humans , generally given as 36.5–37.5 °c"
+   }
+  ],
+  "reference": "About 36.5 to 37.5 C (97.7 to 99.5 F).",
+  "goodGuess": null,
+  "notes": "normal range"
+ },
+ {
+  "id": "d-medical-012",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "my resting pulse is 72, is that in the normal range?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Heart_rate",
+    "quote": "the normal resting adult human heart rate is 60–100 bpm"
+   }
+  ],
+  "reference": "Yes: the normal resting adult heart rate is 60 to 100 beats per minute, so 72 is within it.",
+  "goodGuess": null,
+  "notes": "a my question that asks a general fact (the normal range); answerable"
+ },
+ {
+  "id": "d-medical-013",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "why do so many more guys than women have trouble telling red from green",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Color_blindness",
+    "quote": "more prevalent in males because the opsin genes responsible are located on the x chromosome"
+   }
+  ],
+  "reference": "Red-green color blindness is more common in males because the opsin genes responsible are on the X chromosome (it is X-linked); it affects about 1 in 12 males and 1 in 200 females.",
+  "goodGuess": null,
+  "notes": "cause/genetics"
+ },
+ {
+  "id": "d-medical-014",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "is there a name for when someone keeps wanting to eat dirt or chalk",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Pica_(disorder)",
+    "quote": "compulsive craving or consumption of objects that are not normally intended to be consumed"
+   }
+  ],
+  "reference": "Pica: the compulsive craving for or eating of things that are not food, classed as an eating disorder.",
+  "goodGuess": null,
+  "notes": "uncommon condition, described rather than named"
+ },
+ {
+  "id": "d-medical-015",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "doctor wouldnt give me antibiotics for my cold, would they even have helped",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Common_cold",
+    "quote": "antibiotics have no effect against viral infections, including the common cold"
+   }
+  ],
+  "reference": "No. Colds are caused by viruses and antibiotics have no effect on them; they can cause side effects and drive antibiotic resistance.",
+  "goodGuess": null,
+  "notes": "a my question that asks a general fact; answerable"
+ },
+ {
+  "id": "d-medical-016",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "Which vitamin does your body make from being out in the sun?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Vitamin_D",
+    "quote": "there is synthesis of cholecalciferol in the deeper layers of the skin"
+   }
+  ],
+  "reference": "Vitamin D: with enough UVB sunlight on the skin, cholecalciferol (vitamin D3) is made in the deeper layers of the epidermis.",
+  "goodGuess": null,
+  "notes": "nutrition"
+ },
+ {
+  "id": "d-medical-017",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "someone next to me is choking on food, what do I do first",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Choking",
+    "quote": "encouraging the victim to cough, followed by hard back slaps"
+   }
+  ],
+  "reference": "Encourage them to cough, then give hard back slaps; if that fails, abdominal thrusts (the Heimlich maneuver), alternating the two if needed.",
+  "goodGuess": null,
+  "notes": "first aid the article describes"
+ },
+ {
+  "id": "d-medical-018",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "burnt my hand on the stove, cold tap water or ice?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Burn",
+    "quote": "it should be performed with cool water 10–25 °c (50–77 °f) and not ice water"
+   }
+  ],
+  "reference": "Cool tap water (about 10 to 25 C), not ice water, which can cause further injury; early cooling helps pain and reduces damage, but prolonged cooling risks hypothermia.",
+  "goodGuess": null,
+  "notes": "first aid the article describes"
+ },
+ {
+  "id": "d-multi-step-006",
+  "group": "multi-step",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": true,
+  "question": "which takes longer to show up after you catch it, chickenpox or measles?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Chickenpox",
+    "quote": "the incubation period is 10–21 days, after which the characteristic rash appears"
+   },
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Measles",
+    "quote": "begin after an incubation period of about 10 days after exposure to the measles virus"
+   }
+  ],
+  "reference": "Chickenpox can take longer: its incubation period is 10 to 21 days, while measles symptoms begin after about 10 days.",
+  "goodGuess": null,
+  "notes": "comparison of two incubation periods from two articles"
+ },
+ {
+  "id": "d-multi-step-007",
+  "group": "multi-step",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": true,
+  "question": "how many years after insulin was first isolated was penicillin discovered",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Insulin",
+    "quote": "were the first to isolate insulin from dog pancreas in 1921"
+   },
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Penicillin",
+    "quote": "penicillin was discovered in 1928 by the scottish physician alexander fleming"
+   }
+  ],
+  "reference": "Seven years: insulin was isolated in 1921 (Banting and Best) and penicillin discovered in 1928 (Fleming).",
+  "goodGuess": null,
+  "notes": "arithmetic on two dates from two articles"
+ },
+ {
+  "id": "d-medical-019",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "how many mg of ibuprofen can I take at once, Im about 200 pounds",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say for you; ask your doctor or pharmacist.",
+  "notes": "personal dosing; depends on the asker's situation"
+ },
+ {
+  "id": "d-medical-020",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "theres a dark spot on my shoulder that got bigger this month, is it melanoma?",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say for you; have a doctor look at it.",
+  "notes": "diagnosing the asker's own mole"
+ },
+ {
+  "id": "d-medical-021",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "can I just stop my blood pressure pills now that my readings are fine",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say for you; ask the doctor who prescribed them.",
+  "notes": "whether to stop the asker's own medication"
+ },
+ {
+  "id": "d-medical-022",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "my blood test came back with TSH 6.2, what does that mean for me",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say for you; ask the doctor who ordered the test.",
+  "notes": "interpreting the asker's own test result"
+ },
+ {
+  "id": "d-medical-023",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "Ive had a headache for three days straight, is it a brain tumour?",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say for you; see a doctor.",
+  "notes": "diagnosing the asker's own symptom"
+ },
+ {
+  "id": "d-medical-024",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "does the urgent care on Elm Street take Medicaid",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's a local fact not in any library; call the clinic.",
+  "notes": "local fact"
+ },
+ {
+  "id": "d-medical-025",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "which pharmacy near me is open right now",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's local and current, not in any library.",
+  "notes": "local, present-time fact"
+ },
+ {
+  "id": "d-medical-026",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "when will there be a cure for type 1 diabetes",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's in the future.",
+  "notes": "medical future"
+ },
+ {
+  "id": "d-medical-027",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "which new alzheimers drug did the FDA approve in December 2026?",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's after anything in the library.",
+  "notes": "after-snapshot: WikiMed is dated 2026-10-10 and the newest pack in the library 2026-11-02; December 2026 is after both and after the writing date 2026-11-04"
+ },
+ {
+  "id": "d-medical-028",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "what vaccines did I get as a kid",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal; check your records or ask your doctor.",
+  "notes": "personal fact"
+ },
+ {
+  "id": "d-medical-029",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "am I allergic to penicillin?",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal; ask your doctor or check your medical records.",
+  "notes": "personal fact; the library covers penicillin but not the asker"
+ },
+ {
+  "id": "d-medical-030",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "my 2 year old has a fever of 39, should I take her to the ER tonight",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say for your child; call a doctor or nurse line now.",
+  "notes": "advice about the asker's own child; depends on the situation"
+ },
+ {
+  "id": "d-medical-031",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": false,
+  "medical": true,
+  "multiStep": false,
+  "question": "what blood type was Alexander Fleming",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Not recorded: the library covers Fleming and penicillin but not his blood type.",
+  "notes": "no-record fact on a covered topic (penicillin, Fleming); tests whether the model invents one"
+ },
+ {
+  "id": "d-cooking-001",
+  "group": "cooking",
+  "domain": "food",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "making beef jerky at home, how hot and for how long do i dry it",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "based.cooking_en_all",
+    "location": "based.cooking/beef-jerky/",
+    "quote": "dry in a food dehydrator at 145 °f (63 °c) for 6-8 hours"
+   },
+   {
+    "source": "foss.cooking_en_all",
+    "location": "foss.cooking/recipe/elias-howell/beef-jerky",
+    "quote": "dry in a food dehydrator at 145 °f (63 °c) for 6-8 hours"
+   }
+  ],
+  "reference": "In a dehydrator at 145 °F (63 °C) for 6 to 8 hours; an oven at about 150 °F also works, turning the meat after 3 to 4 hours and dropping to 130 °F. It is done when it bends but does not break.",
+  "goodGuess": null,
+  "notes": "The same recipe text is in both cooking packs; either copy counts."
+ },
+ {
+  "id": "d-cooking-002",
+  "group": "cooking",
+  "domain": "food",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how long does raw fish need to sit in lime juice for ceviche before its safe to eat",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "based.cooking_en_all",
+    "location": "based.cooking/ceviche/",
+    "quote": "you can get away with eating it after only an hour"
+   },
+   {
+    "source": "foss.cooking_en_all",
+    "location": "foss.cooking/recipe/jacob-smith/ceviche",
+    "quote": "you can get away with eating it after only an hour"
+   }
+  ],
+  "reference": "At least an hour in the fridge, though the recipe says it is better left overnight.",
+  "goodGuess": null,
+  "notes": "Same text in both cooking packs."
+ },
+ {
+  "id": "d-cooking-003",
+  "group": "cooking",
+  "domain": "food",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why does my white sauce always come out lumpy",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "based.cooking_en_all",
+    "location": "based.cooking/classic-bechamel-sauce/",
+    "quote": "if you skip the previous step you will end up with lumps of roux"
+   },
+   {
+    "source": "foss.cooking_en_all",
+    "location": "foss.cooking/recipe/yiusa/classic-bechamel-sauce",
+    "quote": "if you skip the previous step you will end up with lumps of roux"
+   }
+  ],
+  "reference": "Because the milk went in all at once: add about a glass of milk to the roux at a time, stirring until it combines, before adding the rest, and never stop stirring.",
+  "goodGuess": null,
+  "notes": "Vocabulary gap: white sauce vs bechamel. Same text in both cooking packs."
+ },
+ {
+  "id": "d-cooking-004",
+  "group": "cooking",
+  "domain": "food",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "can i make cheese with the long life milk from the supermarket",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "based.cooking_en_all",
+    "location": "based.cooking/cheese/",
+    "quote": "because the necessary bacteria have been killed"
+   },
+   {
+    "source": "foss.cooking_en_all",
+    "location": "foss.cooking/recipe/superduperdeou/cheese",
+    "quote": "because the necessary bacteria have been killed"
+   }
+  ],
+  "reference": "No: UHT milk will not work because the bacteria needed have been killed; use the freshest milk you can.",
+  "goodGuess": null,
+  "notes": "Vocabulary gap: long life milk vs UHT. Same text in both cooking packs."
+ },
+ {
+  "id": "d-cooking-005",
+  "group": "cooking",
+  "domain": "food",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how much salt do i add to cabbage for sauerkraut",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "foss.cooking_en_all",
+    "location": "foss.cooking/recipe/andrej-kirchmaier/sauerkraut",
+    "quote": "2-4% sea salt by cabbage weight"
+   },
+   {
+    "source": "based.cooking_en_all",
+    "location": "based.cooking/sauerkraut/",
+    "quote": "2-4% sea salt by cabbage weight"
+   },
+   {
+    "source": "appropedia_en_all",
+    "location": "Sauerkraut",
+    "quote": "sprinkle 3 tablespoons (45ml) of salt over the cabbage"
+   }
+  ],
+  "reference": "About 2 to 4 percent salt by weight of the cabbage (the crock method gives 3 tablespoons of salt per 5 pounds of shredded cabbage).",
+  "goodGuess": null,
+  "notes": "The recipe sites give a percentage; appropedia's crock method gives 3 tablespoons per 5 pounds, which is in the same range. Either place answers it."
+ },
+ {
+  "id": "d-cooking-006",
+  "group": "cooking",
+  "domain": "food",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how many days does the first fermentation of kombucha take",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "foss.cooking_en_all",
+    "location": "foss.cooking/recipe/elias-pahls/kombucha",
+    "quote": "let the jar sit in a warm dark spot for 10-14 days"
+   },
+   {
+    "source": "based.cooking_en_all",
+    "location": "based.cooking/kombucha/",
+    "quote": "let the jar sit in a warm dark spot for 10-14 days"
+   }
+  ],
+  "reference": "About 10 to 14 days in a warm dark spot; it is ready when it has started to carbonate and most of the sugar is gone.",
+  "goodGuess": null,
+  "notes": "Same text in both cooking packs."
+ },
+ {
+  "id": "d-cooking-007",
+  "group": "cooking",
+  "domain": "food",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "my homemade mayo keeps splitting with the stick blender, what am i doing wrong",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "foss.cooking_en_all",
+    "location": "foss.cooking/recipe/brox/mayonnaise-or-aioli",
+    "quote": "add oil as the very last ingredient"
+   },
+   {
+    "source": "based.cooking_en_all",
+    "location": "based.cooking/mayonnaise-or-aioli/",
+    "quote": "add oil as the very last ingredient"
+   }
+  ],
+  "reference": "Put the oil in last so it sits on top of the other ingredients, start the blender at the very bottom on full power and work upward slowly; adding the oil earlier can make it separate.",
+  "goodGuess": null,
+  "notes": "Same text in both cooking packs."
+ },
+ {
+  "id": "d-cooking-008",
+  "group": "cooking",
+  "domain": "food",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how long will homemade garam masala keep and how should i store it",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "foss.cooking_en_all",
+    "location": "foss.cooking/recipe/chetan-basuray/garam-masala",
+    "quote": "you can store this mixture for about 2/3 months in a cool dry place"
+   },
+   {
+    "source": "based.cooking_en_all",
+    "location": "based.cooking/garam-masala/",
+    "quote": "you can store this mixture for about 2/3 months in a cool dry place"
+   }
+  ],
+  "reference": "About two to three months, in airtight glass jars in a cool dry place.",
+  "goodGuess": null,
+  "notes": "Same text in both cooking packs."
+ },
+ {
+  "id": "d-cooking-009",
+  "group": "cooking",
+  "domain": "food",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "which fruits will set into jelly on their own without adding pectin from a packet",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "appropedia_en_all",
+    "location": "Jelly_Making",
+    "quote": "enough pectin to jell when cooked are blackberry, plum, gooseberry, apple, raspberry and grape"
+   }
+  ],
+  "reference": "Blackberry, plum, gooseberry, apple, raspberry and grape have enough natural pectin to jell when cooked (wild grapes better than tame ones).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-cooking-010",
+  "group": "cooking",
+  "domain": "food",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how long can i keep fruit ive dried myself, and where should it go",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "appropedia_en_all",
+    "location": "Preserving_Food_by_Drying",
+    "quote": "use within 4 to 12 months of drying, depending on the food type"
+   }
+  ],
+  "reference": "Use it within 4 to 12 months depending on the food, kept in airtight containers or lidded glass jars in a cool, dark, dry place.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-multi-step-008",
+  "group": "multi-step",
+  "domain": "food",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "which needs the hotter oven, chocolate chip cookies or a plain yeast loaf, and by how many degrees",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "based.cooking_en_all",
+    "location": "based.cooking/chocolate-chip-cookies/",
+    "quote": "directions preheat oven to 375°f"
+   },
+   {
+    "source": "foss.cooking_en_all",
+    "location": "foss.cooking/recipe/mfed3/chocolate-chip-cookies",
+    "quote": "directions preheat oven to 375°f"
+   },
+   {
+    "source": "based.cooking_en_all",
+    "location": "based.cooking/bread/",
+    "quote": "preheat oven to 425 degrees f (218 c)"
+   },
+   {
+    "source": "foss.cooking_en_all",
+    "location": "foss.cooking/recipe/alex-selimov/bread",
+    "quote": "preheat oven to 425 degrees f (218 c)"
+   }
+  ],
+  "reference": "The bread: the basic loaf bakes at 425 °F (218 °C) and the cookies at 375 °F, so the bread oven is 50 °F hotter.",
+  "goodGuess": null,
+  "notes": "Two recipes compared: cookies 375 °F, basic bread 425 °F. Each recipe is in both cooking packs; one answer per fact from either pack is enough."
+ },
+ {
+  "id": "d-multi-step-009",
+  "group": "multi-step",
+  "domain": "food",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "how much longer does it take to get a sourdough starter ready than to let no-knead dough rise",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "appropedia_en_all",
+    "location": "Making_bread",
+    "quote": "leave to stand for another 4 days, the starter is then ready"
+   },
+   {
+    "source": "foss.cooking_en_all",
+    "location": "foss.cooking/recipe/enthdegree/no-knead-bread",
+    "quote": "leave the dough at room temperature for 12 hours"
+   },
+   {
+    "source": "based.cooking_en_all",
+    "location": "based.cooking/no-knead-bread/",
+    "quote": "leave the dough at room temperature for 12 hours"
+   }
+  ],
+  "reference": "The starter takes about 6 days (2 days, then 4 more after feeding) while no-knead dough rests 12 hours, so the starter takes roughly five and a half days longer.",
+  "goodGuess": null,
+  "notes": "Two facts: the starter's 2 + 4 days (appropedia Making bread; the 2-day step is two sentences before the quote) and the no-knead rest of 12 hours (either cooking pack)."
+ },
+ {
+  "id": "d-unanswerable-006",
+  "group": "unanswerable",
+  "domain": "food",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what did my grandma put in her chili that made it taste so good",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's a personal family recipe and isn't in any library.",
+  "notes": "Personal. The library has chili con carne recipes but not hers."
+ },
+ {
+  "id": "d-unanswerable-007",
+  "group": "unanswerable",
+  "domain": "food",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "is the bakery on main street open on sundays",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: a local shop's hours aren't in any library.",
+  "notes": "Local."
+ },
+ {
+  "id": "d-unanswerable-008",
+  "group": "unanswerable",
+  "domain": "food",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats a dozen eggs going to cost in december 2026",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's in the future.",
+  "notes": "Future. December 2026 is after the newest snapshot (foss.cooking, 2026-11-02) and after the writing date (2026-11-04)."
+ },
+ {
+  "id": "d-unanswerable-009",
+  "group": "unanswerable",
+  "domain": "food",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "which recipe on foss.cooking has the best rating",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't say: the recipe collections in the library carry no ratings or scores.",
+  "notes": "No-record fact on a covered topic: the recipe packs have no rating, star or view data (searched both cooking packs for rating, stars, views, calories; the only hits are star anise and unrelated text)."
+ },
+ {
+  "id": "d-repair-001",
+  "group": "repair",
+  "domain": "making",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "i cant find the puncture in my bike inner tube, any trick",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "ifixit_en_all",
+    "location": "Guide/Patching+a+Bicycle+Tire+Inner+Tube/3794",
+    "quote": "place the tire under water and look for bubbles to find the leak"
+   }
+  ],
+  "reference": "Over-inflate the tube, hold it under water and watch for bubbles; mark the hole, then deflate it fully before patching.",
+  "goodGuess": null,
+  "notes": "iFixit."
+ },
+ {
+  "id": "d-repair-002",
+  "group": "repair",
+  "domain": "making",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how much thread should i cut to sew a button back on a shirt",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "ifixit_en_all",
+    "location": "Guide/Sew+a+Button/19501",
+    "quote": "about an arms-length should be more than enough"
+   }
+  ],
+  "reference": "About an arm's length of thread is more than enough; it is doubled through the needle and the ends knotted together.",
+  "goodGuess": null,
+  "notes": "iFixit."
+ },
+ {
+  "id": "d-repair-003",
+  "group": "repair",
+  "domain": "making",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "the slider on my jeans zipper came off one side of the teeth, can i get it back on without replacing the zipper",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "ifixit_en_all",
+    "location": "Guide/Jean+Zipper+Repair/146503",
+    "quote": "use the hammer to help close the zipper side onto the track"
+   }
+  ],
+  "reference": "Yes: pry the slider open a little with a small flathead screwdriver, fit the track back in, then tap the slider's sides closed with a hammer and test it up and down.",
+  "goodGuess": null,
+  "notes": "iFixit."
+ },
+ {
+  "id": "d-repair-004",
+  "group": "repair",
+  "domain": "making",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "when im chopping wood all day how often should i touch up the axe edge",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "appropedia_en_all",
+    "location": "Wood_Harvesting_with_Hand_Tools/Axes",
+    "quote": "hone the axe several times daily with a whetstone"
+   }
+  ],
+  "reference": "Several times a day, with a whetstone kept moist with water or spit; a fuller overhaul on a grindstone or file is only needed about weekly.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-repair-005",
+  "group": "repair",
+  "domain": "making",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "is it bad to put too much grease on the moving parts of a wheelchair",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "appropedia_en_all",
+    "location": "Wheelchair_Maintenance",
+    "quote": "the excess grease binds dirt and other particles that will prevent proper function"
+   }
+  ],
+  "reference": "Yes: excess grease binds dirt and grit that stop the parts working properly, so do not over-lubricate; dry lubricants are the most user-friendly.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-repair-006",
+  "group": "repair",
+  "domain": "making",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "the fabric tore off my umbrella frame, is there a 3d printed clip that fixes that and how many would i print",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "appropedia_en_all",
+    "location": "SCRAP_Humboldt_Forever_Dry_umbrella_repair_kit",
+    "quote": "a total of 24 parts need to be printed out for entire umbrella repair"
+   }
+  ],
+  "reference": "Yes, a printed fastener that clips the fabric back to the frame; a whole umbrella needs 24 printed parts, fewer for a smaller repair.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-knots-001",
+  "group": "knots",
+  "domain": "making",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats a good knot for tying a thin rope to a much thicker one",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_knots",
+    "location": "Sheet_bend",
+    "quote": "it is practical for joining lines of different diameter or rigidity"
+   }
+  ],
+  "reference": "The sheet bend (weaver's knot); the thicker rope forms the eye. Add a second turn (double sheet bend) for more security.",
+  "goodGuess": null,
+  "notes": "Asked by use, not by name."
+ },
+ {
+  "id": "d-knots-002",
+  "group": "knots",
+  "domain": "making",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "i need a fixed loop partway along a rope but i cant get to either end, what knot",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_knots",
+    "location": "Butterfly_loop",
+    "quote": "a knot used to form a fixed loop in the middle of a rope"
+   }
+  ],
+  "reference": "The butterfly loop (alpine butterfly or lineman's loop), tied in the bight without access to the ends.",
+  "goodGuess": null,
+  "notes": "Asked by description."
+ },
+ {
+  "id": "d-knots-003",
+  "group": "knots",
+  "domain": "making",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how do campers tie tent guy lines so they can be tightened later without retying",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_knots",
+    "location": "Taut-line_hitch",
+    "quote": "it is typically used for securing tent lines in outdoor activities involving camping"
+   }
+  ],
+  "reference": "With a taut-line hitch, an adjustable loop that slides along the standing part to take up slack.",
+  "goodGuess": null,
+  "notes": "Asked by use."
+ },
+ {
+  "id": "d-knots-004",
+  "group": "knots",
+  "domain": "making",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "is a square knot ok for joining two ropes together",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_knots",
+    "location": "Reef_knot",
+    "quote": "the reef knot is not recommended for tying two ropes together"
+   }
+  ],
+  "reference": "No: the reef (square) knot is a binding knot and is not recommended as a bend; it can spill, especially with ropes of unequal size, and misuse has caused deaths.",
+  "goodGuess": null,
+  "notes": "Vocabulary gap: square knot vs reef knot."
+ },
+ {
+  "id": "d-multi-step-010",
+  "group": "multi-step",
+  "domain": "making",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "what hitch is the adjustable tent-line knot built from, and what do sailors use that hitch for",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_knots",
+    "location": "Taut-line_hitch",
+    "quote": "it is made by tying a rolling hitch around the standing part"
+   },
+   {
+    "source": "wikipedia_en_knots",
+    "location": "Rolling_hitch",
+    "quote": "rigging a stopper to relax the tension on a sheet"
+   }
+  ],
+  "reference": "A rolling hitch; sailors use it to rig a stopper that takes the tension off a sheet so a jammed winch or block can be cleared.",
+  "goodGuess": null,
+  "notes": "Chain: taut-line hitch -> rolling hitch -> its sailing use."
+ },
+ {
+  "id": "d-multi-step-011",
+  "group": "multi-step",
+  "domain": "making",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "how much longer does fixing a jeans zipper take than sewing a button back on",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "ifixit_en_all",
+    "location": "Guide/Jean+Zipper+Repair/146503",
+    "quote": "steps 7 time required 30 minutes"
+   },
+   {
+    "source": "ifixit_en_all",
+    "location": "Guide/Sew+a+Button/19501",
+    "quote": "steps 17 time required 10 - 15 minutes"
+   }
+  ],
+  "reference": "About 15 to 20 minutes longer: the zipper repair is listed at 30 minutes and sewing a button at 10 to 15.",
+  "goodGuess": null,
+  "notes": "Two iFixit guides compared by their time required."
+ },
+ {
+  "id": "d-unanswerable-010",
+  "group": "unanswerable",
+  "domain": "making",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the serial number on my dishwasher",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's on your own appliance, not in any library.",
+  "notes": "Personal."
+ },
+ {
+  "id": "d-unanswerable-011",
+  "group": "unanswerable",
+  "domain": "making",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "is there a hardware store near me thats open right now",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: nearby shops and their hours aren't in any library.",
+  "notes": "Local."
+ },
+ {
+  "id": "d-unanswerable-012",
+  "group": "unanswerable",
+  "domain": "making",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what repairability score will ifixit give the 2027 iphone",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that phone hasn't been released or scored yet.",
+  "notes": "Future. A 2027 phone is after every snapshot (iFixit's is 2025-12-21; the newest is foss.cooking's 2026-11-02) and after the writing date (2026-11-04)."
+ },
+ {
+  "id": "d-unanswerable-013",
+  "group": "unanswerable",
+  "domain": "making",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "who invented the bowline knot",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "No one knows: the bowline is ancient and no inventor is recorded.",
+  "notes": "No-record fact on a covered topic: the Bowline article gives its origin as ancient and names no inventor."
+ },
+ {
+  "id": "d-travel-001",
+  "group": "travel",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "is it rude to leave a tip at a restaurant in japan",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Tipping",
+    "quote": "tipping is seen as an insult, and attempts to do so could offend your server"
+   }
+  ],
+  "reference": "Yes. In Japan (and South Korea) tipping is seen as an insult and may offend the server, so don't tip.",
+  "goodGuess": null,
+  "notes": "Travel-topic article (Tipping), not a destination page."
+ },
+ {
+  "id": "d-travel-002",
+  "group": "travel",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "Does drinking coca tea in the Andes actually help you get used to the altitude?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Altitude_sickness",
+    "quote": "coca tea does not help with acclimatization, but can alleviate symptoms of mild ams"
+   }
+  ],
+  "reference": "No. Coca tea does not help you acclimatize; it can only ease the symptoms of mild altitude sickness.",
+  "goodGuess": null,
+  "notes": "Travel-topic article (Altitude sickness)."
+ },
+ {
+  "id": "d-travel-003",
+  "group": "travel",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what kind of plug adapter do i need for singapore",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Electrical_systems",
+    "quote": "three rectangular pins united kingdom, ireland, malta, cyprus, malaysia, singapore, hong kong"
+   }
+  ],
+  "reference": "Singapore uses the British-style type G plug with three rectangular pins (220-240 V).",
+  "goodGuess": null,
+  "notes": "Travel-topic article (Electrical systems); the answer is in the plug-type table."
+ },
+ {
+  "id": "d-travel-004",
+  "group": "travel",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "can you drink the tap water in iceland?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Iceland",
+    "quote": "tap water is safe to drink in iceland"
+   },
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Iceland",
+    "quote": "the water quality in iceland is excellent and tap water is always drinkable"
+   }
+  ],
+  "reference": "Yes, tap water in Iceland is safe to drink (the hot tap water smells of sulphur from geothermal heating but is also safe).",
+  "goodGuess": null,
+  "notes": "Country article; the fact appears in both Drink and Stay healthy."
+ },
+ {
+  "id": "d-travel-005",
+  "group": "travel",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "am i allowed to bring a pack of gum with me into singapore",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Singapore",
+    "quote": "importing non-medical chewing gum is illegal, but customs officers would usually not bother"
+   }
+  ],
+  "reference": "Officially no: importing non-medical chewing gum into Singapore is illegal, though customs usually won't bother about a few sticks for personal use.",
+  "goodGuess": null,
+  "notes": "Entry rule as the guide states it, including its hedge."
+ },
+ {
+  "id": "d-travel-006",
+  "group": "travel",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "When is the wet season in Thailand?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Thailand",
+    "quote": "rainy : from may-oct, although it only really gets underway in sep"
+   }
+  ],
+  "reference": "Roughly May to October, though it only really gets going in September when the monsoons hit most of the country.",
+  "goodGuess": null,
+  "notes": "Country article, climate section."
+ },
+ {
+  "id": "d-travel-007",
+  "group": "travel",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "cheapest way from marrakech airport into the old medina?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Marrakech",
+    "quote": "the l19 airport shuttle bus is 30 dirham one way, 50 dirham return"
+   }
+  ],
+  "reference": "Take the L19 airport shuttle bus: 30 dirham one way or 50 return, straight to the medina area.",
+  "goodGuess": null,
+  "notes": "City article, Get in / ground transport."
+ },
+ {
+  "id": "d-travel-008",
+  "group": "travel",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "do I still need a visa for Kenya and what does it cost",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Kenya",
+    "quote": "will need to apply for an eta to enter kenya. the eta costs us$34.09"
+   }
+  ],
+  "reference": "No visa: Kenya now requires an electronic travel authorization (eTA) from visitors outside the East African Community, and it costs US$34.09.",
+  "goodGuess": null,
+  "notes": "Country article, Get in; the question says visa but the guide's word is eTA."
+ },
+ {
+  "id": "d-travel-009",
+  "group": "travel",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "is there a month when you cant hike the inca trail",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Inca_Trail",
+    "quote": "the trail is closed in february to clean up the garbage left behind"
+   }
+  ],
+  "reference": "Yes, February: the Inca Trail is closed that month for clean-up of the rubbish left behind.",
+  "goodGuess": null,
+  "notes": "Trail/park article."
+ },
+ {
+  "id": "d-travel-010",
+  "group": "travel",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "What's the coffee you're supposed to try in Hanoi?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Hanoi",
+    "quote": "coffee topped with a foam of egg yolks whipped with sugar and condensed milk"
+   }
+  ],
+  "reference": "Egg coffee (cà phê trứng): coffee topped with a foam of egg yolks whipped with sugar and condensed milk.",
+  "goodGuess": null,
+  "notes": "Regional speciality question; city article, Drink."
+ },
+ {
+  "id": "d-multi-step-012",
+  "group": "multi-step",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "which city is higher up, la paz or cuzco?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "La_Paz",
+    "quote": "la paz is 3,627 metres (11,900 ft) above sea level"
+   },
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Cuzco",
+    "quote": "at 3,400 m above sea level, altitude sickness"
+   }
+  ],
+  "reference": "La Paz: it sits at about 3,627 m (11,900 ft), higher than Cuzco at about 3,400 m.",
+  "goodGuess": null,
+  "notes": "Two altitudes from two city articles, compared."
+ },
+ {
+  "id": "d-multi-step-013",
+  "group": "multi-step",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "If I rent a car in New Zealand, will I be driving on the same side of the road as in Japan?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "New_Zealand",
+    "quote": "traffic drives on the left in new zealand"
+   },
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Japan",
+    "quote": "see the main article for details. driving is on the left"
+   }
+  ],
+  "reference": "Yes: both New Zealand and Japan drive on the left.",
+  "goodGuess": null,
+  "notes": "Driving side from each country article, compared."
+ },
+ {
+  "id": "d-unanswerable-014",
+  "group": "unanswerable",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the wifi password at my hotel in lisbon",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal to your booking and isn't in any library; ask the front desk.",
+  "notes": "Personal fact."
+ },
+ {
+  "id": "d-unanswerable-015",
+  "group": "unanswerable",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "What seat am I in on my flight to Denver tomorrow?",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: your seat assignment is in your booking, not in any library.",
+  "notes": "Personal fact."
+ },
+ {
+  "id": "d-unanswerable-016",
+  "group": "unanswerable",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "how long is the line at the uffizi right now",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: a live queue length isn't in any offline library.",
+  "notes": "Local real-time fact."
+ },
+ {
+  "id": "d-unanswerable-017",
+  "group": "unanswerable",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "is it raining in kyoto today?",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: today's weather isn't in an offline library, only typical climate.",
+  "notes": "Real-time fact."
+ },
+ {
+  "id": "d-unanswerable-018",
+  "group": "unanswerable",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "how many people are going to be in times square this new years eve",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: this New Year's Eve (31 December 2026) is after anything in the library.",
+  "notes": "After-snapshot/future: this New Year's Eve from the writing date 2026-11-04 is 2026-12-31, after the newest snapshot (foss.cooking, 2026-11-02; Wikivoyage 2026-09-13)."
+ },
+ {
+  "id": "d-unanswerable-019",
+  "group": "unanswerable",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what was the yen to dollar exchange rate on december 10 2026",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: a rate on 10 December 2026 is after the library's snapshots; check a live source when travelling.",
+  "notes": "After-snapshot: 2026-12-10 is after the newest snapshot (2026-11-02) and after the writing date 2026-11-04."
+ },
+ {
+  "id": "d-unanswerable-020",
+  "group": "unanswerable",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "who was the first woman to get a gondolier licence in venice",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Not in the library. The Venice guide says the city got its first licensed female gondolier in 2010 but doesn't give her name.",
+  "notes": "No-record fact: the Venice article mentions the 2010 first female gondolier without a name (checked: 'female gondolier' appears once, no name)."
+ },
+ {
+  "id": "d-unanswerable-021",
+  "group": "unanswerable",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "how many hot dogs does that famous stand by the harbour in reykjavik sell in a day",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Not in the library. The Reykjavík guide describes Bæjarins Beztu Pylsur (open 24/7, hot dog 820 kr) but gives no sales figure.",
+  "notes": "No-record fact: the Reykjavík article covers the stand (name, address, hours, price) but no daily sales number (checked 'hot dog' and 'bæjarins' occurrences)."
+ },
+ {
+  "id": "d-history-001",
+  "group": "history",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how did anyone finally work out how to read egyptian hieroglyphs",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Rosetta_Stone",
+    "quote": "jean-françois champollion announced the transliteration of the egyptian scripts in paris in 1822"
+   }
+  ],
+  "reference": "Through the Rosetta Stone, which carries the same decree in hieroglyphic, demotic and Greek; Jean-François Champollion announced the decipherment of the Egyptian scripts in 1822.",
+  "goodGuess": null,
+  "notes": "Asks the how, not the artifact; the Rosetta Stone article answers it."
+ },
+ {
+  "id": "d-history-002",
+  "group": "history",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "which king was made to put his seal on the magna carta, and when",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Magna_Carta",
+    "quote": "sealed by king john of england at runnymede, near windsor , on 15 june 1215"
+   }
+  ],
+  "reference": "King John of England, at Runnymede near Windsor, on 15 June 1215.",
+  "goodGuess": null,
+  "notes": "From wikipedia_en_top; the charter is named but the king is asked for."
+ },
+ {
+  "id": "d-history-003",
+  "group": "history",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "when and where did william of normandy beat king harold",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_history",
+    "location": "Battle_of_Hastings",
+    "quote": "fought on 14 october 1066 between the norman-french army of william, duke of normandy"
+   }
+  ],
+  "reference": "At the Battle of Hastings on 14 October 1066, about 7 miles (11 km) northwest of Hastings, near present-day Battle in East Sussex.",
+  "goodGuess": null,
+  "notes": "The battle is not named in the question."
+ },
+ {
+  "id": "d-history-004",
+  "group": "history",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what were the chinese trying to keep out when they built the great wall",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Great_Wall_of_China",
+    "quote": "as protection against various nomadic groups from the eurasian steppe"
+   }
+  ],
+  "reference": "Nomadic groups from the Eurasian steppe; the walls were fortifications along the northern borders of Chinese states.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-science-001",
+  "group": "science",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what makes the tide go in and out",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Tide",
+    "quote": "resulting from the differential gravitational forces exerted primarily by the moon and the sun"
+   }
+  ],
+  "reference": "The differential gravitational pull of the Moon and, to a lesser degree, the Sun on the oceans, combined with the inertial effects of the Earth-Moon orbital motion and the Earth's rotation; the Tide article notes local geography shapes the actual tides.",
+  "goodGuess": null,
+  "notes": "Everyday why question; the article is Tide."
+ },
+ {
+  "id": "d-science-002",
+  "group": "science",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what actually makes the northern lights glow",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Aurora",
+    "quote": "caused by charged particles from the sun colliding with atoms in the atmosphere"
+   }
+  ],
+  "reference": "Charged particles from the sun collide with atoms in the upper atmosphere, exciting oxygen and nitrogen, which then emit light of different colours (green, red, purple).",
+  "goodGuess": null,
+  "notes": "Asked as northern lights; the article is Aurora."
+ },
+ {
+  "id": "d-science-003",
+  "group": "science",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "is winter cold because the earth is further away from the sun",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Season",
+    "quote": "the axial tilt of the earth accounts for most of the seasonal variation"
+   }
+  ],
+  "reference": "No. The seasons come from the tilt of Earth's axis, which changes the sun's height and the length of the day, not from Earth's distance to the sun.",
+  "goodGuess": null,
+  "notes": "A common misconception the Season article corrects explicitly."
+ },
+ {
+  "id": "d-literature-009",
+  "group": "literature",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what town did the man who wrote tom sawyer grow up in",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Mark_Twain",
+    "quote": "twain was raised in hannibal, missouri, which later provided the setting"
+   }
+  ],
+  "reference": "Hannibal, Missouri, where Mark Twain (Samuel Clemens) was raised; it later became the setting for Tom Sawyer and Huckleberry Finn.",
+  "goodGuess": null,
+  "notes": "Describes the author by his book rather than naming him."
+ },
+ {
+  "id": "d-literature-010",
+  "group": "literature",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "which of jane austen's books only came out after she died",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Jane_Austen",
+    "quote": "northanger abbey and persuasion , both published posthumously in 1817"
+   }
+  ],
+  "reference": "Northanger Abbey and Persuasion, both published posthumously in 1817.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-geography-general-001",
+  "group": "geography-general",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the deepest spot in any ocean and how far down is it",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Challenger_Deep",
+    "quote": "the challenger deep is the deepest known point of the seabed of earth"
+   }
+  ],
+  "reference": "The Challenger Deep, at the southern end of the Mariana Trench in the western Pacific Ocean, about 10,935 m (35,876 ft) below sea level.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-multi-step-014",
+  "group": "multi-step",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "how old was darwin when his book about the origin of species came out",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Charles_Darwin",
+    "quote": "charles robert darwin was born on 12 february 1809"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "On_the_Origin_of_Species",
+    "quote": "it was published on 24 november 1859"
+   }
+  ],
+  "reference": "50 years old: Darwin was born on 12 February 1809 and On the Origin of Species was published on 24 November 1859.",
+  "goodGuess": null,
+  "notes": "Birth date from the Darwin article, publication date from the book's article; arithmetic."
+ },
+ {
+  "id": "d-multi-step-015",
+  "group": "multi-step",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "how many years passed between the first moon landing and the berlin wall coming down",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Apollo_11",
+    "quote": "apollo lunar module landing date july 20, 1969, 20:17:40 utc"
+   },
+   {
+    "source": "wikipedia_en_history",
+    "location": "Fall_of_the_Berlin_Wall",
+    "quote": "the berlin wall fell on 9 november 1989 during the peaceful revolution"
+   }
+  ],
+  "reference": "About 20 years: Apollo 11 landed on the Moon on 20 July 1969 and the Berlin Wall fell on 9 November 1989.",
+  "goodGuess": null,
+  "notes": "Two facts from two packs (top and history); arithmetic on the dates."
+ },
+ {
+  "id": "d-unanswerable-022",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the pin for my debit card",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "Personal."
+ },
+ {
+  "id": "d-unanswerable-023",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "when is my sister's wedding",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "Personal."
+ },
+ {
+  "id": "d-unanswerable-024",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what time is my dentist appointment on thursday",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "Personal schedule."
+ },
+ {
+  "id": "d-unanswerable-025",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "where did i park at the airport",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "Personal."
+ },
+ {
+  "id": "d-unanswerable-026",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what time does the pharmacy round the corner from me close tonight",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's a local fact no library holds.",
+  "notes": "Local: an unnamed shop on the user's street."
+ },
+ {
+  "id": "d-unanswerable-027",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what's the code for the parking garage under my office",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's a local fact no library holds.",
+  "notes": "Local/private."
+ },
+ {
+  "id": "d-unanswerable-028",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "which day is recycling picked up on my street",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's a local fact no library holds.",
+  "notes": "Local: depends on the user's town and street."
+ },
+ {
+  "id": "d-unanswerable-029",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "who won best picture at the 2027 oscars",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: the 2027 Academy Awards have not happened yet.",
+  "notes": "Future: the 99th Academy Awards are in March 2027, after today (2026-11-04) and after every snapshot (newest: foss.cooking 2026-11-02; wikipedia_en_top 2026-09-14, wikipedia_en_history 2026-10-12)."
+ },
+ {
+  "id": "d-unanswerable-030",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "who won super bowl lxi",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: Super Bowl LXI is in February 2027 and has not been played.",
+  "notes": "Future: Super Bowl LXI is February 2027, after today and after every pack snapshot."
+ },
+ {
+  "id": "d-unanswerable-031",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what was the score in last nights game",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: last night is after every pack's snapshot, and the game is not named.",
+  "notes": "After-snapshot and relative to today (2026-11-04): newer than foss.cooking 2026-11-02, the newest snapshot; also no team is named."
+ },
+ {
+  "id": "d-unanswerable-032",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats bitcoin trading at right now",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: a live price is not in any offline library.",
+  "notes": "Current/live value; after every snapshot by definition."
+ },
+ {
+  "id": "d-unanswerable-033",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "who did time magazine pick as person of the year for 2026",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: the 2026 Person of the Year is announced in December 2026, after the library's snapshots.",
+  "notes": "After-snapshot: Time names its Person of the Year in December; December 2026 is after today (2026-11-04) and after the newest snapshot (foss.cooking 2026-11-02)."
+ },
+ {
+  "id": "d-unanswerable-034",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what was jane austen's favourite food",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Not recorded: the library has an article on Jane Austen, but it says nothing about her favourite food.",
+  "notes": "No-record fact on a covered topic. Checked wikipedia_en_top Jane_Austen for favourite/favorite/food: only her favourite contemporary novel and a bibliography title (Jane Austen and Food), no favourite food."
+ },
+ {
+  "id": "d-unanswerable-035",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what was charles darwin's shoe size",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Not recorded: the Darwin article gives no shoe size.",
+  "notes": "No-record fact on a covered topic. Checked wikipedia_en_top Charles_Darwin for shoe: absent; full-text search for darwin shoe size finds nothing relevant."
+ },
+ {
+  "id": "d-unanswerable-036",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what was mark twain's first word as a baby",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Not recorded: the Mark Twain article says nothing about his first word.",
+  "notes": "No-record fact on a covered topic. Checked wikipedia_en_top Mark_Twain for first word: absent; full-text search finds nothing relevant."
+ },
+ {
+  "id": "d-unanswerable-037",
+  "group": "unanswerable",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what was the weather like on the day the rosetta stone was dug up",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Not recorded: the article says only that it was found in July 1799; the weather that day is not recorded.",
+  "notes": "No-record fact on a covered topic. Checked wikipedia_en_top Rosetta_Stone for weather and rain: absent."
+ },
+ {
+  "id": "d-physics-001",
+  "group": "physics",
+  "domain": "science",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why is the sky blue in the daytime",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_physics",
+    "location": "Diffuse_sky_radiation",
+    "quote": "blue light is more strongly scattered than the longer-wavelength lights"
+   },
+   {
+    "source": "wikipedia_en_physics",
+    "location": "Rayleigh_scattering",
+    "quote": "since blue light wavelengths scatter more, the diffuse sky seen in daytime is blue"
+   }
+  ],
+  "reference": "Air scatters short wavelengths more than long ones (Rayleigh scattering), so blue light from the sun is scattered across the sky and that is what we see when we look away from the sun.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-physics-002",
+  "group": "physics",
+  "domain": "science",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "does a jet make a sonic boom just once when it breaks the sound barrier, or the whole time its going that fast",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_physics",
+    "location": "Sonic_boom",
+    "quote": "does not occur only at the moment an object crosses the sound barrier"
+   }
+  ],
+  "reference": "The whole time: the boom is a continuous effect while the object is supersonic, heard by whoever the cone-shaped shock region behind it passes over, not a single bang at the moment it crosses the sound barrier.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-physics-003",
+  "group": "physics",
+  "domain": "science",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how can a huge steel ship float when a steel bolt sinks",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_physics",
+    "location": "Buoyancy",
+    "quote": "it encloses a volume of air (which is much less dense than water)"
+   }
+  ],
+  "reference": "Because the hull encloses a large volume of air, so the ship as a whole has an average density lower than water even though steel itself is denser than water.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-physics-004",
+  "group": "physics",
+  "domain": "science",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why does a straw in a glass of water look bent at the surface",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_physics",
+    "location": "Refraction",
+    "quote": "placed at a slant, partially in the water, the object appears to bend"
+   }
+  ],
+  "reference": "Refraction: light rays bend as they pass from water into air, and the eye traces them back as straight lines, so the submerged part appears displaced and the straw seems to bend at the surface.",
+  "goodGuess": null,
+  "notes": "the article's example is a pencil, not a straw"
+ },
+ {
+  "id": "d-chemistry-001",
+  "group": "chemistry",
+  "domain": "science",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why do they spread salt on the roads before it snows",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_chemistry",
+    "location": "Freezing-point_depression",
+    "quote": "road salting takes advantage of this effect to lower the freezing point of the ice"
+   }
+  ],
+  "reference": "Dissolved salt lowers the freezing point of water (freezing-point depression), so ice on the road melts, or does not form, at temperatures below 0 °C; ordinary salt works down to about -21 °C.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-chemistry-002",
+  "group": "chemistry",
+  "domain": "science",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what actually happens to iron when it rusts",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_chemistry",
+    "location": "Rust",
+    "quote": "formed by the reaction of iron and oxygen in the catalytic presence of water"
+   }
+  ],
+  "reference": "Iron reacts with oxygen in the presence of water or moisture, forming hydrated iron(III) oxides, a flaky reddish-brown layer that does not protect the metal underneath.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-chemistry-003",
+  "group": "chemistry",
+  "domain": "science",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why do helium balloons float up but the ones i blow up myself dont",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_chemistry",
+    "location": "Helium",
+    "quote": "because it is lighter than air, airships and balloons are inflated with helium for lift"
+   }
+  ],
+  "reference": "Helium is much less dense than air, so a helium-filled balloon is lighter than the air it displaces and rises; a balloon full of exhaled breath is not.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-chemistry-004",
+  "group": "chemistry",
+  "domain": "science",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why do onions make me cry when i chop them",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_chemistry",
+    "location": "Sulfenic_acid",
+    "quote": "the lachrymal glands are irritated by the end product of the reactions, syn-propanethial-s-oxide, causing tears"
+   }
+  ],
+  "reference": "Cutting the onion damages its cells and starts a chain of reactions (via sulfenic acids and an enzyme) that ends in syn-propanethial-S-oxide, a volatile compound that irritates the tear glands.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-mathematics-001",
+  "group": "mathematics",
+  "domain": "science",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why cant you divide by zero",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_mathematics",
+    "location": "Division_by_zero",
+    "quote": "numerical structures called fields leaves division by zero undefined"
+   }
+  ],
+  "reference": "Because a quotient a/0 would have to be a number that gives a when multiplied by 0, and anything times 0 is 0; so ordinary arithmetic leaves division by zero undefined (allowing it leads to absurd results).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-mathematics-002",
+  "group": "mathematics",
+  "domain": "science",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "on that game show with three doors and goats, after the host opens one should i switch doors or stay",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_mathematics",
+    "location": "Monty_Hall_problem",
+    "quote": "the switching strategy has a 2/3 probability of winning the car"
+   }
+  ],
+  "reference": "Switch: under the standard assumptions switching wins the car 2/3 of the time, staying only 1/3.",
+  "goodGuess": null,
+  "notes": "the Monty Hall problem, described without naming it"
+ },
+ {
+  "id": "d-multi-step-016",
+  "group": "multi-step",
+  "domain": "science",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "which melts at a higher temperature, copper or aluminium, and by roughly how much",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_chemistry",
+    "location": "Copper",
+    "quote": "phase at stp solid melting point 1357.77 k"
+   },
+   {
+    "source": "wikipedia_en_chemistry",
+    "location": "Aluminium",
+    "quote": "phase at stp solid melting point 933.47 k"
+   }
+  ],
+  "reference": "Copper: it melts at about 1085 °C (1357.77 K) against aluminium's about 660 °C (933.47 K), roughly 424 °C higher.",
+  "goodGuess": null,
+  "notes": "two melting points from two element articles, compared"
+ },
+ {
+  "id": "d-multi-step-017",
+  "group": "multi-step",
+  "domain": "science",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "roughly how many times faster does light travel than sound does in air",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_physics",
+    "location": "Speed_of_light",
+    "quote": "the value 299,792,458 metres per second is approximately 1 billion kilometres per hour"
+   },
+   {
+    "source": "wikipedia_en_physics",
+    "location": "Speed_of_sound",
+    "quote": "the speed of sound in air is about 343 m/s"
+   }
+  ],
+  "reference": "About 870,000 times: light travels 299,792,458 m/s and sound in air about 343 m/s at 20 °C.",
+  "goodGuess": null,
+  "notes": "two speeds from two articles, divided"
+ },
+ {
+  "id": "d-unanswerable-038",
+  "group": "unanswerable",
+  "domain": "science",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what time does the planetarium downtown close on saturdays",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's a local opening time and isn't in any library.",
+  "notes": "local fact; no offline pack holds a particular planetarium's hours"
+ },
+ {
+  "id": "d-unanswerable-039",
+  "group": "unanswerable",
+  "domain": "science",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "who is going to win the 2027 nobel prize in physics",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's in the future.",
+  "notes": "future: the 2027 physics prize is announced in October 2027; the newest snapshot of any pack is 2026-11-02 and the physics pack is 2026-10-14"
+ },
+ {
+  "id": "d-unanswerable-040",
+  "group": "unanswerable",
+  "domain": "science",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what colour were isaac newton's eyes",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Not recorded: the library has a long article on Newton but says nothing about his eye colour.",
+  "notes": "no-record fact on a covered topic: wikipedia_en_physics Isaac_Newton was grepped for eyes (only figurative uses, in newton's eyes) and eye colour (absent)"
+ },
+ {
+  "id": "d-unanswerable-041",
+  "group": "unanswerable",
+  "domain": "science",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what did i get on my chemistry midterm",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "personal fact"
+ },
+ {
+  "id": "d-programming-001",
+  "group": "programming",
+  "domain": "technology",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "i committed too early, how do i undo the last commit but keep all my changes",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_git",
+    "location": "git-reset",
+    "quote": "leave your working tree files and the index unchanged"
+   }
+  ],
+  "reference": "git reset --soft HEAD^ (or HEAD~1): it moves the branch back one commit and leaves your working tree and index as they were; the default --mixed also keeps the files but unstages them.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-programming-002",
+  "group": "programming",
+  "domain": "technology",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "my server replied with a 418, what is that supposed to mean",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_http",
+    "location": "reference/status/418",
+    "quote": "indicates that the server refuses to brew coffee because it is, permanently, a teapot"
+   }
+  ],
+  "reference": "418 I'm a teapot: a joke status from the April Fools Hyper Text Coffee Pot Control Protocol (RFC 2324), reserved so it cannot get real semantics; some sites return it for requests they do not want to handle, such as automated queries.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-programming-003",
+  "group": "programming",
+  "domain": "technology",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "my bash script keeps going after a command fails, how do i make it stop at the first error",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_bash",
+    "location": "the-set-builtin",
+    "quote": "-e exit immediately if a pipeline"
+   }
+  ],
+  "reference": "Use set -e (set -o errexit): the shell exits as soon as a pipeline or command returns a non-zero status, with exceptions such as commands in if tests or && / || lists.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-programming-004",
+  "group": "programming",
+  "domain": "technology",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the difference between == and === in javascript",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_javascript",
+    "location": "operators/strict_equality",
+    "quote": "the == operator attempts to convert them to the same type before comparing"
+   },
+   {
+    "source": "devdocs_en_javascript",
+    "location": "operators/equality",
+    "quote": "it attempts to convert and compare operands that are of different types"
+   }
+  ],
+  "reference": "=== (strict equality) treats operands of different types as unequal, while == converts them to a common type first, so \"1\" == 1 is true but \"1\" === 1 is false.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-programming-005",
+  "group": "programming",
+  "domain": "technology",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "in sqlite how do i find out how many rows my last update actually changed",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_sqlite",
+    "location": "lang_corefunc",
+    "quote": "function returns the number of database rows that were changed or inserted or deleted"
+   },
+   {
+    "source": "devdocs_en_sqlite",
+    "location": "c3ref/changes",
+    "quote": "the number of rows modified, inserted or deleted by the most recently completed"
+   }
+  ],
+  "reference": "Call the SQL function changes() (or sqlite3_changes() from C): it returns the number of rows changed, inserted or deleted by the most recently completed INSERT, UPDATE or DELETE on that connection.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-programming-006",
+  "group": "programming",
+  "domain": "technology",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what does marking a variable volatile actually do in C",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_c",
+    "location": "language/volatile",
+    "quote": "a volatile access cannot be optimized out or reordered relative to another visible side effect"
+   }
+  ],
+  "reference": "Every read or write through a volatile-qualified lvalue counts as an observable side effect, so the compiler cannot optimise it away or reorder it past other visible side effects separated by a sequence point.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-programming-007",
+  "group": "programming",
+  "domain": "technology",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "in python how do i make a slow function remember results it already worked out",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_python",
+    "location": "library/functools",
+    "quote": "wrap a function with a memoizing callable that saves up to the maxsize"
+   }
+  ],
+  "reference": "Decorate it with functools.lru_cache (or functools.cache for an unbounded cache): the decorator memoizes results so repeated calls with the same arguments return the saved value.",
+  "goodGuess": null,
+  "notes": "vocabulary: remember results -> memoize / cache"
+ },
+ {
+  "id": "d-programming-008",
+  "group": "programming",
+  "domain": "technology",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "something is already using port 9000 on my linux box, how do i find out which process",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "unix.stackexchange.com_en_all",
+    "location": "questions/106561/finding-the-pid-of-the-process-using-a-specific-port",
+    "quote": "on modern systems, ss is the appropriate tool to use to get this information"
+   }
+  ],
+  "reference": "Run it as root: sudo ss -lptn 'sport = :9000' (or sudo netstat -nlp | grep :9000, or sudo lsof -n -i :9000); without sudo Linux hides other users' process ids.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-programming-009",
+  "group": "programming",
+  "domain": "technology",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the difference between a mock and a stub in unit testing",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "softwareengineering.stackexchange.com_en_all",
+    "location": "questions/203362/need-help-understanding-mocks-and-stubs",
+    "quote": "stubs provide canned answers to calls made during the test"
+   },
+   {
+    "source": "softwareengineering.stackexchange.com_en_all",
+    "location": "questions/67656/unit-testing-should-we-care-about-distinguishing-between-mocks-and-stubs",
+    "quote": "stubs are dumb, pre-recorded set of answers for a specific test"
+   }
+  ],
+  "reference": "A stub just returns canned answers so the code under test can run (state testing); a mock also records the calls made to it so the test can verify the interactions (behaviour testing).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-programming-010",
+  "group": "programming",
+  "domain": "technology",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the difference between a disassembler and a decompiler",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "reverseengineering.stackexchange.com_en_all",
+    "location": "questions/4635/what-s-the-difference-between-a-disassembler-debugger-and-decompiler",
+    "quote": "transforms machine code into a human readable mnemonic representation called assembly language"
+   },
+   {
+    "source": "reverseengineering.stackexchange.com_en_all",
+    "location": "questions/4635/what-s-the-difference-between-a-disassembler-debugger-and-decompiler",
+    "quote": "decompiler takes a binary program file as input and output the same program"
+   }
+  ],
+  "reference": "A disassembler turns machine code into assembly language, one instruction per machine instruction; a decompiler tries to reverse compilation and produce the program in a higher-level structured language, which is shorter and easier to read but not always possible.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-multi-step-018",
+  "group": "multi-step",
+  "domain": "technology",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "if a client sends a request method the resource doesnt support, what status code should it get back, and is that counted as a client error or a server error",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_http",
+    "location": "reference/status/405",
+    "quote": "indicates that the server knows the request method, but the target resource"
+   },
+   {
+    "source": "devdocs_en_http",
+    "location": "reference/status",
+    "quote": "client error responses ( 400 – 499 )"
+   }
+  ],
+  "reference": "405 Method Not Allowed (sent with an Allow header listing the supported methods); it is in the 400-499 range, so a client error, not a server error.",
+  "goodGuess": null,
+  "notes": "the code from one page, its class from the status overview"
+ },
+ {
+  "id": "d-multi-step-019",
+  "group": "multi-step",
+  "domain": "technology",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "does a javascript number have more bits than a C int is guaranteed to have",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_javascript",
+    "location": "global_objects/number",
+    "quote": "the javascript number type is a double-precision 64-bit binary format ieee 754 value"
+   },
+   {
+    "source": "devdocs_en_c",
+    "location": "language/arithmetic_types",
+    "quote": "guaranteed to be at least 16 bits"
+   }
+  ],
+  "reference": "Yes: a JavaScript number is a 64-bit IEEE 754 double, while C only guarantees int at least 16 bits (most systems use 32).",
+  "goodGuess": null,
+  "notes": "two sizes from two packs, compared"
+ },
+ {
+  "id": "d-unanswerable-042",
+  "group": "unanswerable",
+  "domain": "technology",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats the passphrase for my ssh key",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's personal and isn't in any library.",
+  "notes": "personal fact"
+ },
+ {
+  "id": "d-unanswerable-043",
+  "group": "unanswerable",
+  "domain": "technology",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "is there an electronics shop near me open right now that sells usb-c cables",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's a local, current fact and isn't in any library.",
+  "notes": "local and present-tense; no offline pack knows the user's location or shop hours"
+ },
+ {
+  "id": "d-unanswerable-044",
+  "group": "unanswerable",
+  "domain": "technology",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what changed in the git release that comes out in december 2026",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that release is after anything in the library.",
+  "notes": "after-snapshot: December 2026 is after the newest snapshot of any pack (foss.cooking 2026-11-02; devdocs_en_git is 2026-10-02) and after the writing date 2026-11-04"
+ },
+ {
+  "id": "d-unanswerable-045",
+  "group": "unanswerable",
+  "domain": "technology",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what is the name of guido van rossum's cat",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Not recorded: the library covers Python and its creator but says nothing about a pet.",
+  "notes": "no-record fact on a covered topic: devdocs_en_python mentions van Rossum only in the FAQ on circular imports; full-text searches for rossum cat in devdocs_en_python and the stackexchange packs turn up nothing about a pet"
+ },
+ {
+  "id": "d-history-005",
+  "group": "history",
+  "domain": "thought",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what actually kicked off the big uprising in england in 1381",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_history",
+    "location": "Peasants'_Revolt",
+    "quote": "his attempts to collect unpaid poll taxes in brentwood ended in a violent confrontation"
+   }
+  ],
+  "reference": "A royal official, John Bampton, tried to collect unpaid poll tax in Brentwood, Essex, on 30 May 1381; it turned into a violent confrontation that spread across the south-east.",
+  "goodGuess": null,
+  "notes": "Trigger of the Peasants' Revolt; the article's background section also lists the deeper causes (Black Death, war taxes)."
+ },
+ {
+  "id": "d-history-006",
+  "group": "history",
+  "domain": "thought",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "How did the plague get from Asia into Europe in the 1340s?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_history",
+    "location": "Black_Death",
+    "quote": "carried by fleas living on the black rats that travelled on genoese ships"
+   }
+  ],
+  "reference": "It was reportedly introduced during the siege of the Genoese port of Caffa in Crimea by Jani Beg's Golden Horde in 1347, then carried by fleas on black rats aboard Genoese ships through the Mediterranean (Constantinople, Sicily, Italy).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-history-007",
+  "group": "history",
+  "domain": "thought",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who gave the signal for the slaves to rise up in haiti in 1791",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_history",
+    "location": "Haitian_Revolution",
+    "quote": "the signal to begin the revolt had been given by dutty boukman"
+   }
+  ],
+  "reference": "Dutty Boukman, a Vodou high priest and leader of the maroons (with Cecile Fatiman), at a religious ceremony at Bois Caiman on the night of 14 August 1791.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-history-008",
+  "group": "history",
+  "domain": "thought",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how many crates of tea got thrown into the harbor at the boston protest in 1773?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_history",
+    "location": "Boston_Tea_Party",
+    "quote": "they dumped all 340 or 342 chests of tea into the water"
+   }
+  ],
+  "reference": "340 or 342 chests of tea (accounts differ; 342 is the figure most textbooks give).",
+  "goodGuess": null,
+  "notes": "The article has a section on the conflicting chest counts."
+ },
+ {
+  "id": "d-history-009",
+  "group": "history",
+  "domain": "thought",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "When did Japan start drafting ordinary people into the army instead of relying on the samurai?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_history",
+    "location": "Meiji_era",
+    "quote": "when in january the conscription law of 1873 was passed"
+   }
+  ],
+  "reference": "With the Conscription Law of 1873, passed in January 1873, which the article calls the beginning of the end for the samurai class.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-philosophy-001",
+  "group": "philosophy",
+  "domain": "thought",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats zenos point with achilles and the tortoise, why cant he ever catch up",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "internet-encyclopedia-philosophy_en_all",
+    "location": "iep.utm.edu/zenos-paradoxes/",
+    "quote": "he must run at least to the place where the tortoise presently is"
+   }
+  ],
+  "reference": "The tortoise has a head start, so Achilles must first reach the spot where the tortoise is; by then it has crawled on to a new spot, which he must reach next, and so on without end, so by Zeno's reasoning he never catches it.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-philosophy-002",
+  "group": "philosophy",
+  "domain": "thought",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "What lesson did the Cynic who lived in a tub take from watching a mouse?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "internet-encyclopedia-philosophy_en_all",
+    "location": "iep.utm.edu/diogenes-of-sinope/",
+    "quote": "the lesson the mouse teaches is that he is capable of adapting himself to any circumstance"
+   }
+  ],
+  "reference": "Diogenes of Sinope learned from the mouse that he could adapt himself to any circumstance and had no need of conventional shelter or other comforts; this is the origin of his askesis (training).",
+  "goodGuess": null,
+  "notes": "Diogenes is not named in the question; the tub identifies him."
+ },
+ {
+  "id": "d-philosophy-003",
+  "group": "philosophy",
+  "domain": "thought",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "which ancient chinese thinker said you should care about strangers as much as your own people",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "internet-encyclopedia-philosophy_en_all",
+    "location": "iep.utm.edu/mozi/",
+    "quote": "does not make distinctions between self and other, associates and strangers"
+   }
+  ],
+  "reference": "Mozi (Mo-tzu), whose doctrine of impartial concern (jian'ai), often called universal love, says concern for people's welfare should make no distinction between self and other, associates and strangers.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-philosophy-004",
+  "group": "philosophy",
+  "domain": "thought",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "whats pascals argument for believing in god even if you think he probably doesnt exist",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "internet-encyclopedia-philosophy_en_all",
+    "location": "iep.utm.edu/pasc-wag/",
+    "quote": "the potential benefits of believing are so vast as to make betting on theism rational"
+   }
+  ],
+  "reference": "A pragmatic bet (Pascal's wager): even if God's existence is unlikely, the potential benefits of believing are so vast that betting on God is the rational choice; play it safe rather than risk being sorry.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-philosophy-005",
+  "group": "philosophy",
+  "domain": "thought",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "What is Searle trying to show with the thought experiment about a man locked in a room shuffling Chinese symbols?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "internet-encyclopedia-philosophy_en_all",
+    "location": "iep.utm.edu/chinese-room-argument/",
+    "quote": "one of the best known and widely credited counters to claims of artificial intelligence"
+   }
+  ],
+  "reference": "That computers do not really think or understand: it is a counter to strong AI, the claim that a suitably programmed computer literally understands. The man produces correct Chinese output by following rules without understanding a word, so running the program is not enough (syntax does not suffice for semantics).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-multi-step-020",
+  "group": "multi-step",
+  "domain": "thought",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "who lived to an older age, hume or kant?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "internet-encyclopedia-philosophy_en_all",
+    "location": "iep.utm.edu/hume/",
+    "quote": "in 1776, at age sixty-five, hume died from an internal disorder"
+   },
+   {
+    "source": "internet-encyclopedia-philosophy_en_all",
+    "location": "iep.utm.edu/kantview/",
+    "quote": "when he died in 1804, age 79"
+   }
+  ],
+  "reference": "Kant: he died in 1804 aged 79, while Hume died in 1776 aged 65, so Kant lived about 14 years longer.",
+  "goodGuess": null,
+  "notes": "Two facts from two IEP articles, compared."
+ },
+ {
+  "id": "d-multi-step-021",
+  "group": "multi-step",
+  "domain": "thought",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "How old was Socrates when Athens finally lost the war to Sparta?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "internet-encyclopedia-philosophy_en_all",
+    "location": "iep.utm.edu/socrates/",
+    "quote": "socrates was born in athens in the year 469 b.c.e."
+   },
+   {
+    "source": "wikipedia_en_history",
+    "location": "Classical_Athens",
+    "quote": "the war ended with the complete defeat of athens in 404"
+   }
+  ],
+  "reference": "About 65: Socrates was born in 469 BCE and the Peloponnesian War ended with the complete defeat of Athens in 404 BCE.",
+  "goodGuess": null,
+  "notes": "One fact from the IEP (birth year), one from the history pack (year of the defeat), combined by arithmetic."
+ },
+ {
+  "id": "d-unanswerable-046",
+  "group": "unanswerable",
+  "domain": "thought",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what page did my book club say to read up to in the republic for thursday",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: that's your book club's plan and isn't in any library.",
+  "notes": "Personal: the Republic is in Classics, but the book club's assignment is not in any library."
+ },
+ {
+  "id": "d-unanswerable-047",
+  "group": "unanswerable",
+  "domain": "thought",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "Who won the 2027 Pulitzer Prize for History?",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "Can't know: the 2027 Pulitzers have not been awarded yet.",
+  "notes": "Future/after-snapshot: the 2027 Pulitzer Prizes are announced in spring 2027, after today (2026-11-04) and after the newest snapshot of any pack (foss.cooking 2026-11-02; wikipedia_en_history 2026-10-12; wikipedia_en_top 2026-09-14)."
+ },
+ {
+  "id": "d-unanswerable-048",
+  "group": "unanswerable",
+  "domain": "thought",
+  "split": "dev",
+  "answerable": false,
+  "medical": false,
+  "multiStep": false,
+  "question": "what was the name of the horse wat tyler was riding when he was killed at smithfield",
+  "priorQuestion": null,
+  "answers": [],
+  "reference": null,
+  "goodGuess": "The library says Tyler rode about 30 yards before falling from his horse at Smithfield, but it never names the horse; say the name is not recorded.",
+  "notes": "No-record fact on a covered topic. Checked wikipedia_en_history: Peasants'_Revolt has no mention of a horse at all; Wat_Tyler mentions only that he fell from his horse after being stabbed, with no name."
+ }
+]

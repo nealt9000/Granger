@@ -29,7 +29,7 @@ def test_answerable_needs_an_answer_location():
 
 def test_unknown_split_is_rejected():
     with pytest.raises(ValueError, match="split"):
-        dataset.check([item(split="dev")])
+        dataset.check([item(split="scratch")])
 
 
 def test_validate_finds_location_and_quote_in_zim(tmp_path):

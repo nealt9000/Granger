@@ -363,6 +363,34 @@ of Mac CPU per question (more on the phone). Ranking is left as it is.
 
 ## Task 11: pass or stop
 
+**Neal's decisions (2026-11-04), after scoring 1 of 2 failed.** The fail path's "one more round on the tuning
+split" is not taken as written: the tuning split is a training set now (`docs/ask/r2-heldout-1-lessons.md`).
+Instead:
+
+1. **A development set, written blind** (`docs/ask/dev-set-brief.md`): `dataset/dev.json` (209: 148 answerable,
+   61 unanswerable, 33 medical, 21 multi-step, 6 follow-ups; 42 Classics books) and `dev-own.json` (10), split `dev`,
+   written 2026-11-04 by a separate Fable session that read only the brief, the authoring guide and the library.
+   Scored freely; never tuned on item by item. Every change is judged by kind on this set, and only changes that
+   hold on it go to scoring 2 of 2. Neal reviews the set before its first scoring.
+2. **The held-out misses by kind** (`docs/ask/r2-heldout-1-by-kind.md`, blind, leak-checked): retrieval 25 of 42
+   (never found 11, found but not chosen 14), of which 9 of the 14 were in the dense top 3; a further 6 "adjacent"
+   misses had the right chapter or article but the wrong excerpt. Classics novels 3 of 13 grounded against 16 of 20
+   for the rest of classics. Multi-step 5 of 19. Wrong declines 15, 6 of them before the answer stage (the ranking
+   gate) with the passage found by a search in 4; on tuning the gate never declined an answerable. Model-side kinds
+   (misread 1, partial 1, invented 2) are inside noise.
+3. **E2B stays the answer model** (Neal: within its scope; the misses are what reaches it, not what it does with it).
+   The LoRA stays blocked (LiteRT-LM #3173, no maintainer reply).
+4. **Phone time is shared** with the efficient-tier and Spanish workstreams; the dev set's baseline run (about 4 h)
+   is scheduled with Neal.
+
+**Levers to test on the dev set, by kind** (Mac replay on `r2-t10-cut` first, no loss there; then the dev set):
+the ranking gate (`denseGate` 0.78: on tuning, 0.74 passes 15 more unanswerables to the model for +1 recall, so a
+trade to be judged with both halves of the dev set); the fiction weight on dense hits (fiction-source questions with
+no literary cue word grounded 1 of 9 held-out, 6 of 8 tuning); the per-article cap (3 chunks of one encyclopedia
+article can fill 3 of the 4 slots over the work's own text); excerpt choice within a found chapter or article; the
+Classics notes, found for 13 of 31 held-out classics questions and chosen for 2.
+
+
 - [ ] **Pass**: the spec's pass path; nothing to flip (F1 part 2 already flipped it). Record the numbers in the
   roadmap and the store listing's Preview wording stays or goes, Neal's call.
 - [ ] **Fail**: one more round on the tuning split, then scoring 2 of 2. If it fails again, Neal decides between Ask as

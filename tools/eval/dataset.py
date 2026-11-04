@@ -22,6 +22,8 @@ from pathlib import Path
 
 SPLITS = ("tune", "heldout", "heldout2", "dev", "media")
 BOOK_PREFIX = "book:granger:"
+# Imported books (`book:import:<stem>`): the file is `<BOOKS>/<stem>.epub`, as for Classics (the own-book sets).
+IMPORT_PREFIX = "book:import:"
 ALBUM_PREFIX = "album:"
 AUDIOBOOK_PREFIX = "audiobook:"
 MEDIA_CONTROL = "media-control"
@@ -137,10 +139,11 @@ def validate_answers(items, packs=None, books=None, media=None):
                     if media is None:
                         continue
                     p = _media_problem(media, a)
-                elif src.startswith(BOOK_PREFIX):
+                elif src.startswith(BOOK_PREFIX) or src.startswith(IMPORT_PREFIX):
                     if books is None:
                         continue
-                    f = Path(books) / (src[len(BOOK_PREFIX):] + ".epub")
+                    stem = src[len(BOOK_PREFIX):] if src.startswith(BOOK_PREFIX) else src[len(IMPORT_PREFIX):]
+                    f = Path(books) / (stem + ".epub")
                     p = "book file missing: %s" % f if not f.exists() else _epub_problem(f, a)
                 else:
                     if packs is None:
