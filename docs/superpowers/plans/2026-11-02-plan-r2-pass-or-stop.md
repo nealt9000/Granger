@@ -403,6 +403,22 @@ Classics notes, found for 13 of 31 held-out classics questions and chosen for 2.
   72/76 declined (95%)** against the phone's 101 and 71; recall@4 by quote 67 (68), found-not-chosen / never found
   16 / 46 (17 / 45); same outcome on 197 of 202, the same 4 passages for 125, 80% passage overlap; the keyword
   rewrite differs on about half the questions (CPU and GPU numerics). Notes: `~/.cache/granger/emu-stage/`.
+- [x] **Dev set baseline on the emulator, `dev-base-1` + `-own` (2026-11-04, the held-out run's flags, 25 min).**
+  Mechanical numbers (replies ungraded until Neal has reviewed the set): declined 51/61 (84%); recall@4 by quote
+  68/148 (46%), by location 57%; first words 5.6 s median. Misses by kind over the 148 answerables, with "found"
+  meaning either search's full hit list by location or quote: in the prompt 90, **found but not chosen 43**, never
+  found 15; 8 declined by the gate before the model, 6 of those with the passage found. Classics: 20 of 44 found but
+  not chosen; fiction-source questions with no literary cue word 13 of 20 missed against 4 of 9 with one. Of the
+  43, Wikipedia articles about the work fill most slots; in 27 misses (dev; 19 tuning, 30 held-out) the right book
+  or article was chosen but another chunk of it, all 79 such chunks from the dense list across 67 chapters, and the
+  answer's chunk scores lower lexically than the chosen ones in 15 of 16 (other chapters use the question's words,
+  the answer's doesn't). Spanish-pack passages sat among the 4 for 11 dev, 17 tuning and 10 held-out questions.
+- [x] **Replay on `dev-base-1` and `r2-t10-cut` (2026-11-04).** Assumed cosine for keyword-only passages (0.66 to
+  0.72): +1 by location on dev, nothing else. Fiction weight off the dense side: nothing. Dropping passages in a
+  language the question isn't in: +2 location on dev, +1/+1 on tuning, no losses: **adopted** (`ResearchPipeline`,
+  by `Passage.language`). **More passages in the prompt**: recall by quote at 4 / 6 / 8 is 69 / 76 / 79 on dev and
+  65 / 70 / 74 on tuning (location 84 / 98 / 104 and 61 / 68 / 70): the one lever by replay that clears noise on both
+  sets, with a prompt-length, latency and misread cost to measure on a run (`eval.py run --passages 6`).
 
 
 - [ ] **Pass**: the spec's pass path; nothing to flip (F1 part 2 already flipped it). Record the numbers in the
