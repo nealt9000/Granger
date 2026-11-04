@@ -17,6 +17,8 @@ Run each one for **music**, an **audiobook** and **read-aloud** (a Classics book
 
 ## 2. An SD card (a tester's phone with a microSD slot; Pixels have none)
 
+Assigned 2026-11-04 to the E1 field tester (Sony Xperia 10 II, 4 GB, microSD); `economy-phone-note.md` asks him for it.
+
 - [ ] Settings → Storage lists the card; pick it as the download location.
 - [ ] Get a small pack (Knots or a Wikivoyage region) and a Classics book; both open.
 - [ ] Restart the phone: both still open.
@@ -24,6 +26,8 @@ Run each one for **music**, an **audiobook** and **read-aloud** (a Classics book
 - [ ] Music on the card: Listen finds it after a scan.
 
 ## 3. Read-aloud on a 4 GB phone (a tester's phone)
+
+Assigned 2026-11-04 to the E1 field tester (Sony Xperia 10 II, 4 GB, microSD); `economy-phone-note.md` asks him for it.
 
 The voice uses about 420 MB while speaking. Ask is hidden under 6 GB, but read-aloud isn't.
 
