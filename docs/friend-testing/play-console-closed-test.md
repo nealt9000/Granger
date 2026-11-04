@@ -12,10 +12,10 @@ So the self-serve path is a **Google Group that anyone can join**, added to the 
 
 At groups.google.com, with the Play developer account:
 
-- Name: Granger testers. Address: `granger-testers@googlegroups.com` (or whatever is free).
+- **Made 2026-11-04:** https://groups.google.com/g/granger-android-testers (`granger-android-testers@googlegroups.com`), added to the closed track as its tester list; the feedback channel is feedback@opengranger.org.
 - Who can join: **Anyone on the web can join** (no approval, so the website works at any hour). Who can post: owners only (it's a list, not a forum; turn off email delivery for members, "No email").
 - **Who can view members: group owners only**, and who can see the group's conversations: owners only. The brand spec's rule (`docs/superpowers/specs/2026-11-03-brand-mission-design.md` §6): testers stay unnamed, and no tester should see who else is testing.
-- Paste the group's URL into `TEST_GROUP_URL` in `granger-site/build.py`.
+- The group's URL is in `TEST_GROUP_URL` in `granger-site/build.py` (done); `TEST_OPTIN_URL` waits on step 3.
 
 ## 2. The closed track
 
