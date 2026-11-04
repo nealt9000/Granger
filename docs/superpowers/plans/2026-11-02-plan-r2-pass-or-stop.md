@@ -423,6 +423,11 @@ Classics notes, found for 13 of 31 held-out classics questions and chosen for 2.
   in their top 4 ungated either) and turns 11 of 25 gate declines into model turns; 0.78 with the lexical gate at
   1.3 declines 5 more on dev at no cost there but −3 recall on tuning (noise). Per-article cap 2: +3 location, +1
   quote on dev, 0 on tuning (noise; revisit with 6 passages).
+- [x] **Six passages in the prompt, tuning on the emulator, `emu-t10-p6` (2026-11-04): not adopted.** Against
+  `emu-t10-cut-1` (4 passages): recall by quote over the chosen 67 → 70, **grounded 102 → 100 (79%)**, not-grounded
+  15 → 24, **declined 72 → 69** (four unanswerables the model declined with 4 passages it answers with 6), prompt
+  5,540 → 7,580 characters median, first words 5.9 → 7.2 s. What retrieval gains, the model loses in misreads of a
+  longer prompt. The model's reading, not the passage count, bounds this lever; stays at 4.
 
 
 - [ ] **Pass**: the spec's pass path; nothing to flip (F1 part 2 already flipped it). Record the numbers in the
