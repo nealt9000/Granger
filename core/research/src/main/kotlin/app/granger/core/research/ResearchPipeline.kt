@@ -268,9 +268,13 @@ class ResearchPipeline(
             return
         }
         emit(ResearchEvent.Progress(Stage.SEARCHING))
-        val hits: List<Passage>? = byMeaning
+        // A passage in a language the question isn't in never answers it, and it takes a slot from one that could:
+        // Spanish articles sat among the 4 for 17 of 202 tuning questions and 10 of 171 held-out (R2, 2026-11-04).
+        // A passage of unknown language (cards, media, kept chats) stays.
+        val inLanguage = { p: Passage -> p.language == null || p.language in languages }
+        val hits: List<Passage>? = byMeaning?.filter(inLanguage)
         val all = try {
-            finder.find(Keywords.searchTerms(keywords), languages)
+            finder.find(Keywords.searchTerms(keywords), languages).filter(inLanguage)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {

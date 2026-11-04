@@ -46,7 +46,7 @@ def cmd_validate(a):
 
 def cmd_run(a):
     items = dataset.load(a.dataset)
-    out = adb.run_eval(adb.real_runner, a.dataset, a.run_id, RUNS, ids=a.ids, groups=a.groups, guesses=a.guesses, fresh=a.fresh, rewrite=a.rewrite, fiction=a.fiction, dense=a.dense, entities=a.entities, facts=a.facts, older=a.older, headwords=a.headwords)
+    out = adb.run_eval(adb.real_runner, a.dataset, a.run_id, RUNS, ids=a.ids, groups=a.groups, guesses=a.guesses, fresh=a.fresh, rewrite=a.rewrite, fiction=a.fiction, dense=a.dense, entities=a.entities, facts=a.facts, older=a.older, headwords=a.headwords, passages=a.passages)
     print("results in %s (%d items in the dataset)" % (out, len(items)))
     return 0
 
@@ -119,6 +119,7 @@ def main(argv=None):
     r.add_argument("--older", choices=["on"], help="keywords get older and modern words as alternates (Plan R2 Task 6)")
     r.add_argument("--headwords", choices=["on"], help="a question about a word gets its dictionary entry first (Plan R2 Task 6)")
     r.add_argument("--fiction", help="a file of fiction book ids to weight 0.7 on non-literature questions (Plan R0, Task 6)")
+    r.add_argument("--passages", type=int, help="passages in the answer prompt (the app's 4; Plan R2 2026-11-04)")
     r.add_argument("--dense", choices=["on", "off"], help="dense retrieval for the run (Plan R1); the app's DENSE_RETRIEVAL when not given"); r.set_defaults(f=cmd_run)
     im = s.add_parser("import", help="import book files into the phone's library and index them (Plan R2)")
     im.add_argument("files", nargs="+"); im.add_argument("--run-id", required=True); im.set_defaults(f=cmd_import)

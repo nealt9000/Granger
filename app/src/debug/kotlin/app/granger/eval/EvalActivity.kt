@@ -99,6 +99,9 @@ class EvalActivity : ComponentActivity() {
         val older = intent.getStringExtra("older") == "on"
         // Plan R2, Task 6: a question about a word gets its dictionary entry first (Headword).
         val headwords = intent.getStringExtra("headwords") == "on"
+        // How many passages the answer prompt gets (the app's 4; R2 2026-11-04: recall@6 is 5 points higher by replay).
+        val passages = intent.getStringExtra("passages")?.toIntOrNull()
+        val ranking = passages?.let { c.rankingConfig.copy(small = it, large = maxOf(c.rankingConfig.large, it)) } ?: c.rankingConfig
         // Fiction weighting is the app's (the catalog's literature books, 0.7) unless `fiction` is `off`, or names a file
         // under eval/ of fiction book ids, one per line (Plan R0, Task 6); `fictionWeight` sets the weight.
         val fictionWeight = intent.getStringExtra("fictionWeight")?.toDoubleOrNull() ?: FictionWeight.DEFAULT
@@ -124,10 +127,10 @@ class EvalActivity : ComponentActivity() {
             val dense = if (denseOn) RecordingDenseFinder(c.denseFinder, clock) else null
             c.embedderWanted.set(denseOn)
             try {
-                val pipeline = ResearchPipeline(finder, prompts, c.rankingConfig, rewriteAlternates = alternates, rewritePlain = plain, rewritePlainFollowUps = plainAll, reserveNamed = named, yearFacts = facts, sourceWeight = fiction, dense = dense, olderWords = older, headwords = headwords)
+                val pipeline = ResearchPipeline(finder, prompts, ranking, rewriteAlternates = alternates, rewritePlain = plain, rewritePlainFollowUps = plainAll, reserveNamed = named, yearFacts = facts, sourceWeight = fiction, dense = dense, olderWords = older, headwords = headwords)
                 val runner = EvalRunner(pipeline, finder, sourceName, prompts, dense, clock)
                 runner.onItem = { item, n, total -> log("$n / $total ${item.id}") }
-                log("run $runId: ${items.size} items, guesses=$guesses${if (alternates) ", rewrite=alternates" else ""}${if (plainAll) ", rewrite=plain-all" else if (plain) ", rewrite=plain" else ""}${if (named) ", entities=on" else ""}${if (facts) ", facts=on" else ""}${if (older) ", older=on" else ""}${if (headwords) ", headwords=on" else ""}" +
+                log("run $runId: ${items.size} items, guesses=$guesses${if (alternates) ", rewrite=alternates" else ""}${if (plainAll) ", rewrite=plain-all" else if (plain) ", rewrite=plain" else ""}${if (named) ", entities=on" else ""}${if (facts) ", facts=on" else ""}${if (older) ", older=on" else ""}${if (headwords) ", headwords=on" else ""}${passages?.let { ", passages=$it" } ?: ""}" +
                     "${if (fiction != null) ", fiction weighted" else ""}${if (denseOn) ", dense" else ""}")
                 runner.run(items, File(root, "$runId/results.jsonl"), guesses, runId)
             } finally {

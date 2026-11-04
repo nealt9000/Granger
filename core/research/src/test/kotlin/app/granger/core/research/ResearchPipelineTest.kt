@@ -607,6 +607,16 @@ class ResearchPipelineTest {
     }
 
     @Test
+    fun passagesInAnotherLanguageThanTheQuestionsNeverReachThePrompt() = runTest {
+        val spanish = passage("S", "El agua hierve a 100 grados.", "Agua").copy(language = ResearchLanguage.ES)
+        val spanishByMeaning = passage("T", "Hervir el agua.", "Hervir", n = 1).copy(cosine = 0.9, language = ResearchLanguage.ES)
+        val events = ResearchPipeline(FakeFinder(listOf(spanish, water)), FakeModels(FakeGenerator(), embedder = embedder), dense = FakeDense(listOf(spanishByMeaning)))
+            .run(ResearchRequest("At what temperature does water boil?")).toList()
+        val out = outcome(events) as Outcome.Answered
+        assertThat(out.passages).containsExactly(water)
+    }
+
+    @Test
     fun denseHitsReachThePromptAlongsideKeywordPassages() = runTest {
         val boiling = passage("B", "Boiling is a liquid turning to vapour.", "Boiling").copy(cosine = 0.85)
         val embedded = mutableListOf<String>()

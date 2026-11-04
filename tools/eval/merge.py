@@ -94,16 +94,20 @@ def _unique(ps):
     return out
 
 
-def _hybrid_scored(question, corpus, cfg, hits, alpha, floor, dense_fw=True):
-    """hybrid's (passage, score) pairs, best first and unique by text, and the preselected keyword passages."""
+def _hybrid_scored(question, corpus, cfg, hits, alpha, floor, dense_fw=True, kfloor=None):
+    """hybrid's (passage, score) pairs, best first and unique by text, and the preselected keyword passages.
+
+    A keyword passage with no dense twin is scored as if its cosine were [kfloor] (the app: the dense floor itself).
+    """
     w = _weight(question, corpus, hits)
     found, kept, lex = _keyword(question, corpus, cfg, w)
     cos = {text_key(p): p["cosine"] for p in hits}
     dfw = (lambda p: _fw(p, w)) if dense_fw else (lambda p: 1.0)
+    assumed = floor if kfloor is None else kfloor
     scored = []
     for p in kept:
         c = cos.get(text_key(p))
-        scored.append((p, (alpha * lex(p) + (1 - alpha) * c * dfw(p)) if c is not None else alpha * lex(p) + (1 - alpha) * floor))
+        scored.append((p, (alpha * lex(p) + (1 - alpha) * c * dfw(p)) if c is not None else alpha * lex(p) + (1 - alpha) * assumed))
     for p in _dense(hits, floor, w, dense_fw):
         scored.append((p, alpha * replay.scorer(corpus["keywords"], language.of(question))(p) * _fw(p, w) + (1 - alpha) * p["cosine"] * dfw(p)))
     seen, out = set(), []
@@ -115,9 +119,9 @@ def _hybrid_scored(question, corpus, cfg, hits, alpha, floor, dense_fw=True):
     return out, found
 
 
-def hybrid(alpha, floor, dense_fw=True):
+def hybrid(alpha, floor, dense_fw=True, kfloor=None):
     def rank(question, corpus, cfg, hits):
-        scored, found = _hybrid_scored(question, corpus, cfg, hits, alpha, floor, dense_fw)
+        scored, found = _hybrid_scored(question, corpus, cfg, hits, alpha, floor, dense_fw, kfloor)
         return _finish(question, [p for p, _ in scored], found, cfg)
     return rank
 
@@ -244,6 +248,9 @@ def configs():
             out["gated g%.2f l%.1f rrf f0.74" % (g, lx)] = gated(rrf(0.74), g, lx)
     # R2 (2026-11-04): the fiction weight off the dense side, and a tighter per-article cap.
     out["gated g0.78 l1.0 hybrid a0.1 f0.74 lexfw"] = gated(hybrid(0.1, 0.74, dense_fw=False), 0.78, 1.0, dense_fw=False)
+    for k in (0.66, 0.70, 0.72):
+        out["gated g0.78 l1.0 hybrid a0.1 f0.74 k%.2f" % k] = gated(hybrid(0.1, 0.74, kfloor=k), 0.78, 1.0)
+        out["gated g0.78 l1.0 hybrid a0.1 f0.74 lexfw k%.2f" % k] = gated(hybrid(0.1, 0.74, dense_fw=False, kfloor=k), 0.78, 1.0, dense_fw=False)
     for n in (1, 2):
         out["gated g0.78 l1.0 hybrid a0.1 f0.74 pd%d" % n] = per_doc(gated(hybrid(0.1, 0.74), 0.78, 1.0), n)
         out["gated g0.78 l1.0 hybrid a0.1 f0.74 lexfw pd%d" % n] = per_doc(gated(hybrid(0.1, 0.74, dense_fw=False), 0.78, 1.0, dense_fw=False), n)
