@@ -318,8 +318,20 @@ internal suspend fun fileBookRecord(bookshelf: Bookshelf, sidecarDir: File, reco
  */
 const val DENSE_RETRIEVAL = true
 
-/** Where the embedding model runs: the GPU, about twice as fast as the CPU on the Pixel 6. */
-val EMBEDDER_BACKEND = LlmBackend.GPU
+/**
+ * Whether this process runs on the Android emulator ("ranchu" is its virtual board, "goldfish" the older one). False
+ * in JVM tests, where [android.os.Build] is a stub.
+ */
+val ON_EMULATOR: Boolean = runCatching { android.os.Build.HARDWARE }.getOrNull()?.let { it == "goldfish" || it.startsWith("ranchu") } ?: false
+
+/**
+ * Where the models run: the GPU (the embedder is about twice as fast there as on the CPU on the Pixel 6). A debug build
+ * on the emulator uses the CPU, since the emulator has no OpenCL: the eval runs on the Mac that way (Plan R2, 2026-11-04).
+ */
+val MODEL_BACKEND: LlmBackend = if (BuildConfig.DEBUG && ON_EMULATOR) LlmBackend.CPU else LlmBackend.GPU
+
+/** Where the embedding model runs: with the answer model, [MODEL_BACKEND]. */
+val EMBEDDER_BACKEND: LlmBackend = MODEL_BACKEND
 
 /** Hand-wired dependencies; one instance per process. */
 class AppContainer(context: Context) {
@@ -735,7 +747,7 @@ class AppContainer(context: Context) {
         deviceTier, installedModels,
         { path, backend -> LiteRtLlmEngine(path, backend, modelCacheDir) },
         { path -> LiteRtTextEmbedder(path, modelCacheDir, EMBEDDER_BACKEND) },
-        appScope, useEmbedder = embedderWanted::get,
+        appScope, useEmbedder = embedderWanted::get, backend = MODEL_BACKEND,
         // The self-check (release checklist A): kept in files/, so a crash mid-check is found at the next launch.
         checks = ModelCheckStore(java.io.File(context.filesDir, "model-check.txt")),
     )
