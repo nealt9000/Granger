@@ -7,6 +7,13 @@ data/train.jsonl (pairs.py), merged into the weights and saved as an HF checkpoi
 Follows toy_adapter.py (2026-11-02): PEFT on MPS, bf16, q/k/v/o of the language model only, use_cache=True in the
 training forward (Gemma 4 shares K/V across layers 15-34 only when a cache exists). Loss on the reply tokens only.
 A tenth of the pairs are held back for a loss number; they are tuning items, not dev or held-out.
+
+Memory (2026-11-04 probe, memprobe.py): the model is 10.2 GB in bf16, a plain forward of a 2,088-token pair peaks at
+20 GB and a forward with gradients ran past 31 GB and swamped a 69 GB Mac (60 GB footprint, 43 GB swapped). Fixes:
+logits only for the reply positions (the 262k-word vocabulary makes full-prompt logits 2 GB in fp32), which brings a
+step to 30 GB peak and 5.4 s; --checkpoint adds gradient checkpointing (13.6 GB, 7.7 s) but has to run without the K/V
+cache, so the shared-K/V layers take a path inference never takes (toy_adapter.py's note), so it is off by default.
+Run with PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.7 PYTORCH_MPS_LOW_WATERMARK_RATIO=0.6 so an overrun fails, not swaps.
 """
 import argparse
 import glob
@@ -37,6 +44,7 @@ def main():
     ap.add_argument("--accum", type=int, default=4)
     ap.add_argument("--max-tokens", type=int, default=2600)
     ap.add_argument("--dry-run", action="store_true", help="tokenize only and report lengths")
+    ap.add_argument("--checkpoint", action="store_true", help="gradient checkpointing (less memory, no K/V cache in training)")
     a = ap.parse_args()
 
     import torch
@@ -69,11 +77,20 @@ def main():
 
     dev = "mps"
     model = AutoModelForCausalLM.from_pretrained(SNAP, dtype=torch.bfloat16).to(dev)
-    model.config.use_cache = True
+    model.config.use_cache = not a.checkpoint
     cfg = LoraConfig(r=a.rank, lora_alpha=a.rank, lora_dropout=0.0,
                      target_modules=r"model\.language_model\.layers\.\d+\.self_attn\.(q|k|v|o)_proj")
+    if a.checkpoint:
+        model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+        model.enable_input_require_grads()
     model = get_peft_model(model, cfg)
     model.print_trainable_parameters()
+
+    def step_loss(x, y):
+        """Cross-entropy over the reply tokens only: logits for the last reply-length positions, nothing for the prompt."""
+        n = int((y != -100).sum().item()) + 1
+        logits = model(input_ids=x, use_cache=not a.checkpoint, logits_to_keep=n).logits[0, :-1].float()
+        return torch.nn.functional.cross_entropy(logits, y[0, -n + 1:])
     params = [p for p in model.parameters() if p.requires_grad]
     opt = torch.optim.AdamW(params, lr=a.lr, weight_decay=0.0)
     steps = a.epochs * len(enc_train) // a.accum
@@ -84,7 +101,7 @@ def main():
         tot, n = 0.0, 0
         with torch.no_grad():
             for _, (x, y) in enc_val:
-                tot += model(input_ids=x.to(dev), labels=y.to(dev), use_cache=True).loss.item()
+                tot += step_loss(x.to(dev), y.to(dev)).item()
                 n += 1
         model.train()
         return tot / max(n, 1)
@@ -98,7 +115,7 @@ def main():
         run = 0.0
         for i, idx in enumerate(order):
             x, y = enc_train[idx][1]
-            loss = model(input_ids=x.to(dev), labels=y.to(dev), use_cache=True).loss
+            loss = step_loss(x.to(dev), y.to(dev))
             (loss / a.accum).backward()
             run += loss.item()
             seen += 1
