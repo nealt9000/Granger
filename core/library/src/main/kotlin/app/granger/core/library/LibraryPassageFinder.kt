@@ -93,6 +93,34 @@ class LibraryPassageFinder(
         }
     }
 
+    /** The first installed Wiktionary with [word] ([DictionaryEntry]); one in the question's main language is tried first. */
+    override suspend fun entry(word: String, languages: List<ResearchLanguage>): Passage? = withContext(io) {
+        val collections = shelves.collectionNames()
+        val dictionaries = library.packs.first()
+            .filter { it.status == PackStatus.OK && it.name.startsWith(DictionaryEntry.PACK_PREFIX) }
+            .sortedBy { if (ResearchLanguage.ofCode(it.language) == languages.firstOrNull()) 0 else 1 }
+        for (pack in dictionaries) {
+            val found = try {
+                library.archive(pack.id)?.let { DictionaryEntry.find(it, word) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                null
+            } ?: continue
+            return@withContext Passage(
+                kind = SourceKind.ARTICLE,
+                sourceId = pack.id,
+                sourceTitle = found.title,
+                packTitle = pack.title,
+                location = found.path,
+                text = found.text,
+                meta = SourceMeta(date = pack.date, collection = collections[pack.id].orEmpty()),
+                language = ResearchLanguage.ofCode(pack.language),
+            )
+        }
+        null
+    }
+
     private suspend fun timed(block: suspend () -> List<Passage>): Pair<List<Passage>, Long> {
         val start = clock()
         return block().let { it to clock() - start }

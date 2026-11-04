@@ -55,6 +55,42 @@ class ResearchPipelineTest {
         }
     }
 
+    /** Finds [results] and has [entry] as every word's dictionary entry; [asked] lists the words looked up. */
+    private class DictionaryFinder(val results: List<Passage>, val entry: Passage) : PassageFinder {
+        val asked = mutableListOf<String>()
+        override suspend fun find(keywords: List<String>): List<Passage> = results
+        override suspend fun entry(word: String, languages: List<ResearchLanguage>): Passage = entry.also { asked += word }
+    }
+
+    private val sobremesa = Passage(
+        SourceKind.ARTICLE, "wiktionary_es", "sobremesa",
+        text = "Sustantivo femenino: Tiempo que se está a la mesa después de haber comido.",
+    )
+
+    @Test
+    fun aWordQuestionAnswersFromTheWordsDictionaryEntryFirst() = runTest {
+        val gen = FakeGenerator(rewrite = { flowOf("keywords: sobremesa\n", "medical: no") }, answer = { flowOf("Es el tiempo después de comer [1].") })
+        val finder = DictionaryFinder(listOf(water), sobremesa)
+        val out = outcome(ResearchPipeline(finder, FakeModels(gen)).run(ResearchRequest("¿qué es la sobremesa?")).toList())
+        assertThat(finder.asked).containsExactly("sobremesa")
+        assertThat((out as Outcome.Answered).passages.first()).isEqualTo(sobremesa)
+        assertThat(gen.answerPrompts.single()).contains("[1] sobremesa")
+    }
+
+    @Test
+    fun aWordsEntryIsUsedWhenNothingElseIsFound() = runTest {
+        val gen = FakeGenerator(rewrite = { flowOf("keywords: sobremesa\n", "medical: no") }, answer = { flowOf("Es el tiempo después de comer [1].") })
+        val out = outcome(ResearchPipeline(DictionaryFinder(emptyList(), sobremesa), FakeModels(gen)).run(ResearchRequest("¿qué es la sobremesa?")).toList())
+        assertThat((out as Outcome.Answered).passages).containsExactly(sobremesa)
+    }
+
+    @Test
+    fun otherQuestionsLookNothingUp() = runTest {
+        val finder = DictionaryFinder(listOf(water), sobremesa)
+        ResearchPipeline(finder, FakeModels(FakeGenerator())).run(ResearchRequest("At what temperature does water boil?")).toList()
+        assertThat(finder.asked).isEmpty()
+    }
+
     /** Anything about water points one way, everything else the other. */
     private val embedder = PassageEmbedder { texts, _ ->
         texts.map { if (it.contains("water", ignoreCase = true)) floatArrayOf(1f, 0f) else floatArrayOf(0f, 1f) }

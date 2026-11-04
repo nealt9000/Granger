@@ -4,7 +4,7 @@ import json
 import sys
 from pathlib import Path
 
-OUTCOMES = ("answered", "declined", "unverified", "failed")
+OUTCOMES = ("answered", "declined", "unverified", "failed", "rewrite")  # rewrite: a stop=rewrite run (Plan L4)
 
 
 def load_results(path):

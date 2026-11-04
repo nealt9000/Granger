@@ -72,7 +72,25 @@ class RewriteTest {
 
     @Test fun metaWordsAreDropped() {
         assertThat(Rewrite.parse("keywords: betimes definition, betimes meaning, word origin")!!.keywords)
-            .containsExactly("betimes", "word").inOrder()
+            .containsExactly("betimes").inOrder()
+    }
+
+    @Test fun aLoneWordAboutTheQuestionIsDropped() {
+        // l4-tune-es-1's word questions: "term", "word" and "spanish" brought in Short-term memory and Microsoft Word.
+        assertThat(Rewrite.parse("keywords: ñapa, term")!!.keywords).containsExactly("ñapa")
+        assertThat(Rewrite.parse("keywords: madrugué, word")!!.keywords).containsExactly("madrugué")
+        assertThat(Rewrite.parse("keywords: sobremesa, Spanish, palabra")!!.keywords).containsExactly("sobremesa")
+        assertThat(Rewrite.parse("keywords: Microsoft Word, Spanish flu")!!.keywords).containsExactly("Microsoft Word", "Spanish flu").inOrder()
+    }
+
+    @Test fun aSpanishQuestionAsksForSpanishSearchWordsWithASpanishExample() {
+        val p = Rewrite.prompt("¿qué es la sobremesa?", null, languages = ResearchLanguage.of("¿qué es la sobremesa?"))
+        assertThat(p).contains("The question is in Spanish: give the search words in Spanish")
+        assertThat(p).contains("keywords: longitud, cronómetro marino, distancia lunar, navegación")
+        assertThat(p).doesNotContain("old sailors")
+        assertThat(p).contains("medical: <yes if")
+        // English questions keep today's prompt.
+        assertThat(Rewrite.prompt("who was Darwin", null, languages = ResearchLanguage.of("who was Darwin"))).isEqualTo(Rewrite.prompt("who was Darwin", null))
     }
 
     @Test fun aMetaWordInsideANameStays() {
