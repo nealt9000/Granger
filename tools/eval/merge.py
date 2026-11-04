@@ -207,6 +207,26 @@ def slots(n, floor):
     return rank
 
 
+def book_reserve(k, gate, alpha=0.1, floor=0.74, dense_gate=0.78, lexical=1.0):
+    """The shipped gated hybrid, then the best book chunk among the confident dense hits (cosine >= [gate]) gets one of
+    the 4, displacing the last (the app's Ranking.reserveBook; R2 2026-11-04: Wikipedia about the work beats the work)."""
+    def rank(question, corpus, cfg, hits):
+        w = _weight(question, corpus, hits)
+        found, kept, lex = _keyword(question, corpus, cfg, w)
+        best_cos = max((p["cosine"] * _fw(p, w) for p in hits), default=0.0)
+        best_lex = max((lex(p) for p in kept), default=0.0)
+        if best_cos < dense_gate and best_lex < lexical:
+            return []
+        scored, found = _hybrid_scored(question, corpus, cfg, hits, alpha, floor)
+        ranked = [p for p, _ in scored]
+        picks = [p for p in ranked if p.get("kind") == "BOOK" and (p.get("cosine") or 0.0) >= gate][:k]
+        if picks and not all(p in ranked[:cfg.small] for p in picks):
+            head = [p for p in ranked if p not in picks][:max(cfg.small - len(picks), 0)]
+            ranked = head + picks + [p for p in ranked if p not in head and p not in picks]
+        return _finish(question, ranked, found, cfg)
+    return rank
+
+
 def gated(inner, gate, lexical, dense_fw=True):
     """[inner]'s passages only when the best dense hit reaches [gate] or the best keyword passage scores [lexical] or more."""
     def rank(question, corpus, cfg, hits):
@@ -251,6 +271,9 @@ def configs():
     for k in (0.66, 0.70, 0.72):
         out["gated g0.78 l1.0 hybrid a0.1 f0.74 k%.2f" % k] = gated(hybrid(0.1, 0.74, kfloor=k), 0.78, 1.0)
         out["gated g0.78 l1.0 hybrid a0.1 f0.74 lexfw k%.2f" % k] = gated(hybrid(0.1, 0.74, dense_fw=False, kfloor=k), 0.78, 1.0, dense_fw=False)
+    # R2 (2026-11-04): one place for a confident book chunk (the app's --books on / Ranking.reserveBook).
+    for c in (0.78, 0.80):
+        out["gated g0.78 l1.0 hybrid a0.1 f0.74 book1 c%.2f" % c] = book_reserve(1, c)
     for n in (1, 2):
         out["gated g0.78 l1.0 hybrid a0.1 f0.74 pd%d" % n] = per_doc(gated(hybrid(0.1, 0.74), 0.78, 1.0), n)
         out["gated g0.78 l1.0 hybrid a0.1 f0.74 lexfw pd%d" % n] = per_doc(gated(hybrid(0.1, 0.74, dense_fw=False), 0.78, 1.0, dense_fw=False), n)

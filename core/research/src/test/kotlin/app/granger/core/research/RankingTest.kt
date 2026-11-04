@@ -226,4 +226,29 @@ class RankingTest {
         assertThat(Ranking.hybrid(emptyList(), listOf(novel, moon), listOf("moon"), RankingConfig(), fiction).map { it.sourceTitle })
             .containsExactly("Moon")
     }
+
+    @Test
+    fun reserveBookGivesAConfidentBookChunkTheLastPlace() {
+        fun article(n: Int) =
+            Passage(SourceKind.ARTICLE, "wiki", "Jonah", location = "Jonah", heading = "H$n", text = "article $n", cosine = 0.80)
+        val articles = (1..5).map { article(it) }
+        val book = Passage(SourceKind.BOOK, "book:kjv", "Bible", location = "Jonah 1", text = "a great fish", cosine = 0.79)
+        val out = Ranking.reserveBook(articles + book, keep = 4, gate = 0.78)
+        assertThat(out.take(4)).containsExactly(articles[0], articles[1], articles[2], book).inOrder()
+        assertThat(out.drop(4)).containsExactly(articles[3], articles[4]).inOrder()
+    }
+
+    @Test
+    fun reserveBookLeavesDoubtfulAndAlreadyPlacedBooksAlone() {
+        val articles = (1..5).map {
+            Passage(SourceKind.ARTICLE, "wiki", "Jonah", location = "Jonah", heading = "H$it", text = "article $it", cosine = 0.80)
+        }
+        val doubtful = Passage(SourceKind.BOOK, "book:kjv", "Bible", location = "Jonah 1", text = "a great fish", cosine = 0.75)
+        assertThat(Ranking.reserveBook(articles + doubtful, keep = 4, gate = 0.78)).isEqualTo(articles + doubtful)
+        val placed = listOf(doubtful.copy(cosine = 0.80)) + articles
+        assertThat(Ranking.reserveBook(placed, keep = 4, gate = 0.78)).isEqualTo(placed)
+        val keywordOnly = articles + doubtful.copy(cosine = null)
+        assertThat(Ranking.reserveBook(keywordOnly, keep = 4, gate = 0.78)).isEqualTo(keywordOnly)
+        assertThat(Ranking.reserveBook(emptyList(), keep = 4, gate = 0.78)).isEmpty()
+    }
 }

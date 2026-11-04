@@ -200,6 +200,11 @@ class ResearchPipeline(
      * word's dictionary entry ([PassageFinder.headword]) first among its passages. On in the app from 2026-11-03 (r2-t6-head).
      */
     private val headwords: Boolean = false,
+    /**
+     * R2 (2026-11-04): a confident book chunk among the dense hits gets one of the answer's places ([Ranking.reserveBook]),
+     * since the encyclopedia article about a work outranks the work. Off in the app until the dev set measures it.
+     */
+    private val reserveBook: Boolean = false,
 ) {
     /**
      * [stop] is polled after each chunk of the reply; when it turns true the reply so far is checked and finished.
@@ -289,13 +294,14 @@ class ResearchPipeline(
         val ranking = try {
             val merged = hits?.let { Ranking.hybrid(found, it, topical, config, weight, languages) }
             val lifted = Ranking.liftMedia(merged ?: rank(request.question, found, topical, weight, languages), found, asked)
+            val withBook = if (reserveBook) Ranking.reserveBook(lifted, config.small, config.denseGate) else lifted
             val reserved = if (reserveNamed && Entities.asked(request.question, languages)) {
                 Entities.reserve(
-                    lifted, all + hits.orEmpty(), Entities.named(request.question, keywords, languages), config.small,
+                    withBook, all + hits.orEmpty(), Entities.named(request.question, keywords, languages), config.small,
                     languages = languages,
                 )
             } else {
-                lifted
+                withBook
             }
             if (yearFacts && request.quote == null && Entities.asked(request.question, languages)) {
                 YearFacts.complete(request.question, keywords, reserved, all + hits.orEmpty(), config.small, hits.orEmpty(), languages)

@@ -93,6 +93,23 @@ object Ranking {
         return listOf(best) + ranked.filter { it != best }
     }
 
+    /**
+     * [ranked] with the best book chunk among its confident dense hits (cosine at or above [gate], the dense gate) given
+     * the last of its first [keep] places when it isn't among them: the passage it displaces moves down and nothing is
+     * dropped. At most [slots] chunks. The encyclopedia article about a work outranks the work itself, and no weight
+     * fixes that (R2 dev replay 2026-11-04: +3 classics answers in the 4 on dev and +2 on tuning with no losses; without
+     * the cosine condition +5 but twice the fiction intrusions). Nothing ranked stays nothing: a book doesn't overturn
+     * a decline.
+     */
+    fun reserveBook(ranked: List<Passage>, keep: Int, gate: Double, slots: Int = 1): List<Passage> {
+        if (ranked.isEmpty()) return ranked
+        val picks = ranked.filter { it.kind == SourceKind.BOOK && (it.cosine ?: 0.0) >= gate }.take(slots)
+        val top = ranked.take(keep)
+        if (picks.isEmpty() || picks.all { it in top }) return ranked
+        val head = ranked.filter { it !in picks }.take((keep - picks.size).coerceAtLeast(0))
+        return head + picks + ranked.filter { it !in head && it !in picks }
+    }
+
     /** [vectors] lines up with [candidates]. At most [limit] are kept. */
     fun byEmbedding(
         candidates: List<Passage>,
