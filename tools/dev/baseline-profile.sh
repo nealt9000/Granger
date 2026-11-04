@@ -21,8 +21,9 @@ trap cleanup EXIT
 
 ./gradlew :baselineprofile:connectedBenchmarkAndroidTest
 
-out=$(find baselineprofile/build/outputs/connected_android_test_additional_output -name '*-baseline-prof.txt' -print0 | xargs -0 ls -t | head -1)
+out=$(find baselineprofile/build/outputs/connected_android_test_additional_output \( -name '*-baseline-prof.txt' -o -name '*-startup-prof.txt' \) -print0 | xargs -0 ls -t | head -1)
 [[ -n "$out" ]] || { echo "No profile was written" >&2; exit 1; }
+# With includeInStartupProfile the rule names its one file *-startup-prof.txt; it holds the full profile.
 # The rule collects for the benchmark app; the classes are the app's own, whatever the package suffix.
 cp "$out" app/src/main/baseline-prof.txt
 echo "Wrote app/src/main/baseline-prof.txt ($(wc -l < app/src/main/baseline-prof.txt) rules) from $out"
