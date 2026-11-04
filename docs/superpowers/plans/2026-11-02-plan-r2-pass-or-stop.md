@@ -399,7 +399,10 @@ Classics notes, found for 13 of 31 held-out classics questions and chosen for 2.
   copy of the phone's library and E2B's CPU bundle (the GPU bundle holds no CPU model; a debug build on the emulator
   picks `MODEL_BACKEND = CPU`). The embedder's cosines are within 0.01 of the GPU's; first words 4–6 s, a turn 5–8 s,
   so a dev-set run is about an hour and the phone stays free. Dev and tuning scoring run there; scoring 2 of 2 stays on
-  the phone. Parity against `r2-t10-cut`: `emu-t10-cut-1` (below, when done). Notes: `~/.cache/granger/emu-stage/`.
+  the phone. Parity against `r2-t10-cut`: `emu-t10-cut-1` (the whole tuning split in 20 min): **102/126 grounded (81%),
+  72/76 declined (95%)** against the phone's 101 and 71; recall@4 by quote 67 (68), found-not-chosen / never found
+  16 / 46 (17 / 45); same outcome on 197 of 202, the same 4 passages for 125, 80% passage overlap; the keyword
+  rewrite differs on about half the questions (CPU and GPU numerics). Notes: `~/.cache/granger/emu-stage/`.
 
 
 - [ ] **Pass**: the spec's pass path; nothing to flip (F1 part 2 already flipped it). Record the numbers in the
