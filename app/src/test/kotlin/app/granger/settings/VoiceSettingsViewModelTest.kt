@@ -117,4 +117,16 @@ class VoiceSettingsViewModelTest {
         assertThat(downloads.enqueued).isEmpty()
         assertThat(vm.ui.value.notice).isEqualTo(app.granger.UiText.Res(app.granger.R.string.settings_voice_no_storage))
     }
+
+    @Test fun underSixGigabytesTheVoicesCarryAWarning() = runTest(main.dispatcher) {
+        val installed = InstalledVoices({ emptyList() }, { emptyList() }, noFactory, noFactory, main.dispatcher)
+        fun mayStop(low: Boolean): Boolean {
+            val vm = VoiceSettingsViewModel(prefs, installed, catalog, downloads, FakeVolumes(emptyList()), downloadPrefs, this, main.dispatcher, lowMemory = low)
+            backgroundScope.launch { vm.ui.collect {} }
+            testScheduler.advanceUntilIdle()
+            return vm.ui.value.mayStop
+        }
+        assertThat(mayStop(low = true)).isTrue()
+        assertThat(mayStop(low = false)).isFalse()
+    }
 }

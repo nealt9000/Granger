@@ -135,6 +135,8 @@ class BrowseViewModel(
     countryCode: String = java.util.Locale.getDefault().country,
     /** The library's languages, main first (Plan L3): the suggestion is the main one's encyclopedia. */
     knowledge: Flow<List<String>> = flowOf(listOf(app.granger.core.catalog.ENGLISH)),
+    /** False on a phone without Ask: the packs carry no Ask line (Plan E1 phone check). */
+    askOffered: Boolean = true,
 ) : ViewModel() {
     /** Null until the shelves first load. */
     val ui: StateFlow<BrowseUi?> = combine(
@@ -145,7 +147,7 @@ class BrowseViewModel(
             list,
             domains = catalog?.readiness?.domains.orEmpty(),
             domainOf = { installedEntry(it, catalog, recs)?.domain },
-        ) { installedAskReach(it, catalog, recs) }
+        ) { if (askOffered) installedAskReach(it, catalog, recs) else null }
         BrowseUi(sections, if (sections.isEmpty()) browseSuggestions(state?.catalog, countryCode, langs.firstOrNull() ?: app.granger.core.catalog.ENGLISH) else emptyList())
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 

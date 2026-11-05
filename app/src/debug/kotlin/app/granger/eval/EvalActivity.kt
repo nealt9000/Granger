@@ -97,8 +97,6 @@ class EvalActivity : ComponentActivity() {
         val facts = intent.getStringExtra("facts") == "on"
         // Plan R2, Task 6: keywords get the older words' alternates (OlderWords) before the search.
         val older = intent.getStringExtra("older") == "on"
-        // Plan R2, Task 6: a question about a word gets its dictionary entry first (Headword).
-        val headwords = intent.getStringExtra("headwords") == "on"
         // R2 (2026-11-04): a confident book chunk among the dense hits gets one of the answer's places (Ranking.reserveBook).
         val books = intent.getStringExtra("books") == "on"
         // How many passages the answer prompt gets (the app's 4; R2 2026-11-04: recall@6 is 5 points higher by replay).
@@ -116,6 +114,8 @@ class EvalActivity : ComponentActivity() {
         // Plan R1: `dense` on or off; the app's DENSE_RETRIEVAL when not given.
         val denseOn = intent.getStringExtra("dense")?.let { it == "on" } ?: DENSE_RETRIEVAL
         val guesses = GuessModels.parse(intent.getStringExtra("guesses"))
+        // Plan L4: `stop` = `rewrite` ends each question after the rewrite (the medical labels, Spanish baseline).
+        val rewriteOnly = intent.getStringExtra("stop") == "rewrite"
         val result = EvalSession.start(runId, root, ::log) {
             // Model roles come from the catalog. MainActivity loads the cached one at launch; a cold start straight
             // into this screen must too, or no model is listed and every question fails with "won't load".
@@ -129,11 +129,11 @@ class EvalActivity : ComponentActivity() {
             val dense = if (denseOn) RecordingDenseFinder(c.denseFinder, clock) else null
             c.embedderWanted.set(denseOn)
             try {
-                val pipeline = ResearchPipeline(finder, prompts, ranking, rewriteAlternates = alternates, rewritePlain = plain, rewritePlainFollowUps = plainAll, reserveNamed = named, yearFacts = facts, sourceWeight = fiction, dense = dense, olderWords = older, headwords = headwords, reserveBook = books)
-                val runner = EvalRunner(pipeline, finder, sourceName, prompts, dense, clock)
+                val pipeline = ResearchPipeline(finder, prompts, ranking, rewriteAlternates = alternates, rewritePlain = plain, rewritePlainFollowUps = plainAll, reserveNamed = named, yearFacts = facts, sourceWeight = fiction, dense = dense, olderWords = older, reserveBook = books)
+                val runner = EvalRunner(pipeline, finder, sourceName, prompts, dense, rewriteOnly, clock)
                 runner.onItem = { item, n, total -> log("$n / $total ${item.id}") }
-                log("run $runId: ${items.size} items, guesses=$guesses${if (alternates) ", rewrite=alternates" else ""}${if (plainAll) ", rewrite=plain-all" else if (plain) ", rewrite=plain" else ""}${if (named) ", entities=on" else ""}${if (facts) ", facts=on" else ""}${if (older) ", older=on" else ""}${if (headwords) ", headwords=on" else ""}${if (books) ", books=on" else ""}${passages?.let { ", passages=$it" } ?: ""}" +
-                    "${if (fiction != null) ", fiction weighted" else ""}${if (denseOn) ", dense" else ""}")
+                log("run $runId: ${items.size} items, guesses=$guesses${if (alternates) ", rewrite=alternates" else ""}${if (plainAll) ", rewrite=plain-all" else if (plain) ", rewrite=plain" else ""}${if (named) ", entities=on" else ""}${if (facts) ", facts=on" else ""}${if (older) ", older=on" else ""}${if (books) ", books=on" else ""}${passages?.let { ", passages=$it" } ?: ""}" +
+                    "${if (fiction != null) ", fiction weighted" else ""}${if (denseOn) ", dense" else ""}${if (rewriteOnly) ", stop=rewrite" else ""}")
                 runner.run(items, File(root, "$runId/results.jsonl"), guesses, runId)
             } finally {
                 c.embedderWanted.set(DENSE_RETRIEVAL)

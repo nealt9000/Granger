@@ -1,6 +1,6 @@
 # Granger privacy policy
 
-Draft, 2 November 2026, for Neal to review and host at a public URL for Play Console.
+Published 4 November 2026 at https://opengranger.org/privacy (Spanish: https://opengranger.org/privacidad), from `granger-site/_privacy.html` and `_privacidad.html`. Edit there and here together; the contact address is `CONTACT` in the site's `build.py`. The mailbox: `tools/feedback/README.md`.
 
 **Granger collects nothing about you.** There is no account, no analytics, no advertising and no tracking.
 
@@ -33,4 +33,4 @@ If this policy changes, the new version will be posted here with its date. Grang
 
 ## Contact
 
-Neal Thompson, [contact email to publish]. Granger is open source (GPL-3.0): github.com/nealt9000/Granger.
+Neal Thompson, feedback@opengranger.org (the address Send feedback writes to, forwarded to Granger's Gmail; `CONTACT` in the site's `build.py`). Granger is open source (GPL-3.0): github.com/nealt9000/Granger.

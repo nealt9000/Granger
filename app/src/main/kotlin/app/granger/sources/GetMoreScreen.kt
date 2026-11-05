@@ -1,6 +1,13 @@
 package app.granger.sources
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -69,8 +76,20 @@ fun getMoreSections(only: GetMoreFor?): List<Pair<GetMoreGroup, List<GetMoreLink
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GetMoreScreen(onOpen: (GetMoreLink) -> Unit, onBack: () -> Unit, only: GetMoreFor? = null, onImport: (() -> Unit)? = null) {
+fun GetMoreScreen(
+    onOpen: (GetMoreLink) -> Unit, onBack: () -> Unit, only: GetMoreFor? = null, onImport: (() -> Unit)? = null,
+    /** Add a pack from a file (Plan E1 item 4): the picked file, and what came of it for a snackbar. */
+    onImportPack: (suspend (android.net.Uri) -> app.granger.UiText)? = null,
+) {
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    // A ZIM has no registered type, so any file can be picked; the header check says if it isn't one.
+    val packPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null && onImportPack != null) scope.launch { snackbar.showSnackbar(onImportPack(uri).resolve(context)) }
+    }
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(only?.title ?: R.string.sources_get_more)) },
@@ -97,6 +116,16 @@ fun GetMoreScreen(onOpen: (GetMoreLink) -> Unit, onBack: () -> Unit, only: GetMo
                         modifier = Modifier.clickable { onOpen(link) },
                     )
                     HorizontalDivider()
+                }
+                if (group == GetMoreGroup.KNOWLEDGE && onImportPack != null) {
+                    item(key = "import-pack") {
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.packs_import)) },
+                            supportingContent = { Text(stringResource(R.string.packs_import_sub)) },
+                            modifier = Modifier.clickable { packPicker.launch(arrayOf("*/*")) },
+                        )
+                        HorizontalDivider()
+                    }
                 }
                 if (group == GetMoreGroup.BOOKS && onImport != null) {
                     item(key = "import") {

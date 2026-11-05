@@ -41,7 +41,7 @@ sealed interface QueueRest {
     data object Paused : QueueRest
 
     /** Everything left waits for a retry time or for Wi-Fi: look again after [delayMillis], on an unmetered network if [unmeteredOnly]. */
-    data class Later(val delayMillis: Long, val unmeteredOnly: Boolean) : QueueRest
+    data class Later(val delayMillis: Long, val unmeteredOnly: Boolean, val offline: Boolean = false) : QueueRest
 }
 
 /**
@@ -67,6 +67,8 @@ class DownloadQueue(
     private val progressEveryMillis: Long = 1_000,
     /** The clock [TransferRate] reads: monotonic in the app. */
     private val elapsed: () -> Long = now,
+    /** Whether any network is up; a copy from a local file runs without one (Plan E1 item 4). */
+    private val connected: () -> Boolean = { true },
 ) {
     private val rate = TransferRate()
     private val _progress = MutableStateFlow(QueueProgress())
@@ -151,7 +153,7 @@ class DownloadQueue(
     }
 
     private fun DownloadRecord.isRunnable(t: Long, metered: Boolean) =
-        (retryAt ?: 0) <= t && !(wifiOnly && metered)
+        (retryAt ?: 0) <= t && !(needsWifi && metered) && (isLocal || connected())
 
     /** True when a runnable small file waits behind [running], a big one: it is paused (part file kept) to let it by. */
     private suspend fun smallWaitsBehind(running: DownloadRecord): Boolean {
@@ -163,8 +165,11 @@ class DownloadQueue(
 
     private fun restOf(waiting: List<DownloadRecord>, t: Long, metered: Boolean): QueueRest {
         if (waiting.isEmpty()) return QueueRest.Idle
-        val onThisNetwork = waiting.filter { !(it.wifiOnly && metered) }
+        val onThisNetwork = waiting.filter { !(it.needsWifi && metered) }
         val soonest = (onThisNetwork.ifEmpty { waiting }).minOf { it.retryAt ?: t }
+        // A local copy still waiting (a retry after the card was out) needs no network to start.
+        val local = waiting.filter { it.isLocal }
+        if (local.isNotEmpty()) return QueueRest.Later((local.minOf { it.retryAt ?: t } - t).coerceAtLeast(0), unmeteredOnly = false, offline = true)
         return QueueRest.Later((soonest - t).coerceAtLeast(0), unmeteredOnly = onThisNetwork.isEmpty())
     }
 
@@ -183,11 +188,13 @@ class DownloadQueue(
         _progress.value = QueueProgress(record.itemId, record.hash, record.bytesDone, rate.bytesPerSecond(elapsed()))
         // The first report is what the part file already held: only bytes after it are counted as speed.
         var last = -1L
+        var first = -1L
         val outcome = try {
             coroutineScope {
                 val job = async {
                     runner.run(record.itemId, record.hash) { done, total ->
                         if (last >= 0 && done > last) rate.add(done - last, elapsed())
+                        if (first < 0) first = done
                         last = done
                         bytesNow = done
                         onProgress(running, done, total)
@@ -205,7 +212,7 @@ class DownloadQueue(
                 val watch = launch {
                     while (job.isActive) {
                         delay(networkCheckMillis)
-                        if (!unmetered() && dao.get(record.itemId, record.hash)?.wifiOnly == true) job.cancel()
+                        if (!unmetered() && dao.get(record.itemId, record.hash)?.needsWifi == true) job.cancel()
                         else if (smallWaitsBehind(record)) job.cancel()
                     }
                 }
@@ -225,7 +232,10 @@ class DownloadQueue(
             _current.value = null
         }
         if (outcome == RunOutcome.RETRY) {
-            val attempts = record.attempts + 1
+            // A run that got somewhere before the line dropped starts the count again (Plan E1 item 3): on a flaky rural
+            // link a 7 GB file can drop far more than MAX_ATTEMPTS times and still finish from its part file.
+            val progressed = first >= 0 && last - first >= PROGRESS_RESETS_BYTES
+            val attempts = if (progressed) 1 else record.attempts + 1
             if (attempts >= MAX_ATTEMPTS) {
                 runner.giveUp(record.itemId, record.hash)
             } else {
@@ -238,6 +248,9 @@ class DownloadQueue(
     companion object {
         /** A file at most this big goes ahead of bigger ones ([jumpsAhead]). */
         const val SMALL_BYTES = 50L * 1000 * 1000
+
+        /** A failed run that downloaded at least this much counts as the first failed try, not one more (Plan E1). */
+        const val PROGRESS_RESETS_BYTES = 1L * 1000 * 1000
 
         /**
          * Whether this record goes ahead of bigger ones: a small file. An Ask index may too, since it is queued only

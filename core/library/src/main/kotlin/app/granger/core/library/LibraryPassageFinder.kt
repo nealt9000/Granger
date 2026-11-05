@@ -1,7 +1,6 @@
 package app.granger.core.library
 
 import app.granger.core.books.PdfText
-import app.granger.core.research.Headword
 import app.granger.core.research.HtmlPassages
 import app.granger.core.research.Keywords
 import app.granger.core.research.LexicalScore
@@ -94,55 +93,32 @@ class LibraryPassageFinder(
         }
     }
 
-    /**
-     * Plan R2 Task 6: [word]'s entry in the Wiktionary of each of the question's [languages], read by path, so it doesn't
-     * have to win a place among the full-text search's few articles. Only the entry's section for that language
-     * ("English", "Español"), without its pronunciation, translations and word lists: the etymology and the senses,
-     * at most [HEADWORD_PASSAGES].
-     */
-    override suspend fun headword(word: String, languages: List<ResearchLanguage>): List<Passage> = withContext(io) {
-        val packs = try {
-            library.packs.first().filter { it.status == PackStatus.OK && it.name.startsWith("wiktionary_") }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (_: Exception) {
-            return@withContext emptyList()
-        }
+    /** The first installed Wiktionary with [word] ([DictionaryEntry]); one in the question's main language is tried first. */
+    override suspend fun entry(word: String, languages: List<ResearchLanguage>): Passage? = withContext(io) {
         val collections = shelves.collectionNames()
-        for (language in languages) {
-            val pack = packs.filter { it.name.startsWith("wiktionary_${language.tag}_") }.maxByOrNull { it.date } ?: continue
-            val section = DICTIONARY_SECTION[language] ?: continue
-            try {
-                val archive = library.archive(pack.id) ?: continue
-                val path = Headword.paths(word).firstNotNullOfOrNull { archive.resolvePath(it) } ?: continue
-                val item = archive.read(path) ?: continue
-                if (!item.mimeType.startsWith("text/html") && !item.mimeType.startsWith("application/xhtml")) continue
-                val title = path.substringAfterLast('/')
-                val passages = HtmlPassages.split(item.bytes.toString(Charsets.UTF_8))
-                    .filter { it.section.equals(section, ignoreCase = true) && it.heading.lowercase().trim() !in DICTIONARY_SKIPPED }
-                    .take(HEADWORD_PASSAGES)
-                    .map {
-                        Passage(
-                            kind = SourceKind.ARTICLE,
-                            sourceId = pack.id,
-                            sourceTitle = title,
-                            packTitle = pack.title,
-                            location = path,
-                            anchor = it.anchor,
-                            heading = it.heading,
-                            text = it.text,
-                            meta = SourceMeta(date = pack.date, collection = collections[pack.id].orEmpty()),
-                            language = ResearchLanguage.ofCode(pack.language),
-                        )
-                    }
-                if (passages.isNotEmpty()) return@withContext passages
+        val dictionaries = library.packs.first()
+            .filter { it.status == PackStatus.OK && it.name.startsWith(DictionaryEntry.PACK_PREFIX) }
+            .sortedBy { if (ResearchLanguage.ofCode(it.language) == languages.firstOrNull()) 0 else 1 }
+        for (pack in dictionaries) {
+            val found = try {
+                library.archive(pack.id)?.let { DictionaryEntry.find(it, word) }
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {
-                continue
-            }
+                null
+            } ?: continue
+            return@withContext Passage(
+                kind = SourceKind.ARTICLE,
+                sourceId = pack.id,
+                sourceTitle = found.title,
+                packTitle = pack.title,
+                location = found.path,
+                text = found.text,
+                meta = SourceMeta(date = pack.date, collection = collections[pack.id].orEmpty()),
+                language = ResearchLanguage.ofCode(pack.language),
+            )
         }
-        emptyList()
+        null
     }
 
     private suspend fun timed(block: suspend () -> List<Passage>): Pair<List<Passage>, Long> {
@@ -422,20 +398,6 @@ class LibraryPassageFinder(
 
     private companion object {
         const val NAMED_BOOKS = 3
-
-        /** A dictionary entry's passages kept for a headword question: its etymology and first senses, usually. */
-        const val HEADWORD_PASSAGES = 2
-
-        /** Each Wiktionary's heading for the entry's section in its own language. */
-        val DICTIONARY_SECTION = mapOf(ResearchLanguage.EN to "English", ResearchLanguage.ES to "Español")
-
-        /** An entry's parts that say nothing of what the word means or where it comes from. */
-        val DICTIONARY_SKIPPED = setOf(
-            "pronunciation", "pronunciación", "pronunciación y escritura", "hyphenation", "rhymes", "anagrams", "anagramas",
-            "translations", "traducciones", "references", "referencias y notas", "further reading", "see also",
-            "véase también", "derived terms", "related terms", "descendants", "alternative forms", "información adicional",
-            "english", "español",
-        )
 
         /** The Granger Classics ZIM's `Name`. */
         const val CLASSICS_ZIM = "granger_classics_en"

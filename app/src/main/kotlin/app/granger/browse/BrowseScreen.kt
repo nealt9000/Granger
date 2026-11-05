@@ -1,5 +1,8 @@
 package app.granger.browse
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -28,6 +31,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -35,17 +40,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.R
+import app.granger.UiText
+import kotlinx.coroutines.launch
 import app.granger.formatBytes
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
@@ -61,6 +70,8 @@ class BrowseActions(
     val onDownloads: () -> Unit = {},
     val onReadiness: () -> Unit = {},
     val onRemove: (Pack) -> Unit = {},
+    /** Opens the file picker for a .zim to copy in (Plan E1 item 4); null hides the choice. */
+    val onImportPack: (() -> Unit)? = null,
 )
 
 /** How many packs a section shows before its Show all. */
@@ -72,13 +83,34 @@ object BrowseTags {
 }
 
 @Composable
-fun BrowseScreen(viewModel: BrowseViewModel, packsFolder: String, downloadsBadge: Int, actions: BrowseActions) {
+fun BrowseScreen(
+    viewModel: BrowseViewModel,
+    packsFolder: String,
+    downloadsBadge: Int,
+    actions: BrowseActions,
+    /** Copies a picked .zim into the library and says what happened (Plan E1 item 4). */
+    importPack: (suspend (Uri) -> UiText)? = null,
+) {
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
         onPauseOrDispose {}
     }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
-    BrowseContent(ui, packsFolder, downloadsBadge, BrowseActions(actions.onOpenPack, actions.onGetPacks, actions.onDownloads, actions.onReadiness, viewModel::remove))
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    // A ZIM has no registered type, so any file can be picked; the header check says if it isn't one.
+    val packPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null && importPack != null) scope.launch { snackbar.showSnackbar(importPack(uri).resolve(context)) }
+    }
+    BrowseContent(
+        ui, packsFolder, downloadsBadge,
+        BrowseActions(
+            actions.onOpenPack, actions.onGetPacks, actions.onDownloads, actions.onReadiness, viewModel::remove,
+            onImportPack = importPack?.let { { packPicker.launch(arrayOf("*/*")) } },
+        ),
+        snackbar,
+    )
 }
 
 /**
@@ -88,7 +120,7 @@ fun BrowseScreen(viewModel: BrowseViewModel, packsFolder: String, downloadsBadge
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BrowseContent(ui: BrowseUi?, packsFolder: String, downloadsBadge: Int, actions: BrowseActions) {
+fun BrowseContent(ui: BrowseUi?, packsFolder: String, downloadsBadge: Int, actions: BrowseActions, snackbar: SnackbarHostState = remember { SnackbarHostState() }) {
     var menuOpen by remember { mutableStateOf(false) }
     // Section ids the user has collapsed; all start expanded, as in the Library.
     var collapsed by rememberSaveable { mutableStateOf(emptyList<String>()) }
@@ -96,6 +128,7 @@ fun BrowseContent(ui: BrowseUi?, packsFolder: String, downloadsBadge: Int, actio
     var showingAll by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var removing by remember { mutableStateOf<Pack?>(null) }
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.browse_title), maxLines = 1, overflow = TextOverflow.Ellipsis) },
@@ -113,6 +146,9 @@ fun BrowseContent(ui: BrowseUi?, packsFolder: String, downloadsBadge: Int, actio
                                 onClick = { menuOpen = false; actions.onDownloads() },
                             )
                             DropdownMenuItem(text = { Text(stringResource(R.string.browse_readiness)) }, onClick = { menuOpen = false; actions.onReadiness() })
+                            actions.onImportPack?.let { importPack ->
+                                DropdownMenuItem(text = { Text(stringResource(R.string.packs_import)) }, onClick = { menuOpen = false; importPack() })
+                            }
                         }
                     }
                 },
@@ -143,6 +179,9 @@ fun BrowseContent(ui: BrowseUi?, packsFolder: String, downloadsBadge: Int, actio
                 item(key = "get-packs") {
                     Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                         Button(onClick = { actions.onGetPacks(null) }) { Text(stringResource(R.string.browse_get_packs)) }
+                        actions.onImportPack?.let { importPack ->
+                            TextButton(onClick = importPack) { Text(stringResource(R.string.packs_import)) }
+                        }
                         Text(
                             stringResource(R.string.browse_copy_zims, packsFolder),
                             style = MaterialTheme.typography.bodySmall,

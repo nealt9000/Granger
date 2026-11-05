@@ -8,11 +8,11 @@ Each section gives what Play asks, Granger's answer for the Console, and any cha
 
 | # | Change | Why | State |
 |---|---|---|---|
-| 1 | **Report this answer** in Ask, without leaving the app | AI-Generated Content policy | To do: needs F1's Send feedback (on `f1-friend-build`), so it goes there or after that merges |
+| 1 | **Report this answer** in Ask, without leaving the app | AI-Generated Content policy | **Done** (`ask-release` b83d74d7) |
 | 2 | archive.org's 1930 filter fixed in the Play build | Intellectual Property policy | **Done** (`cl-cleanup`, `Features.ARCHIVE_WAIVER`) |
-| 3 | A privacy policy at a public URL | Required for every app | Draft: `docs/friend-testing/privacy-policy.md`; host it (GitHub Pages or the repo's raw page) |
-| 4 | Medical answers in release: banner plus quoted passages, without generated prose | Health misinformation risk under Health Content and Services; on the release checklist | To do (Ask work) |
-| 5 | Clásicos works first published after 1930 kept out of what the Play build offers | US copyright; Granger hosts them | To do: check publication years (see §3) |
+| 3 | A privacy policy at a public URL | Required for every app | **Done 2026-11-04:** https://opengranger.org/privacy (Spanish `/privacidad`), built from `docs/friend-testing/privacy-policy.md` |
+| 4 | Medical answers in release: banner plus quoted passages, without generated prose | Health misinformation risk under Health Content and Services; on the release checklist | **Done** (`ask-release` a433efdb) |
+| 5 | Clásicos works first published after 1930 kept out of what the Play build offers | US copyright; Granger hosts them | **Checked 2026-11-04, nothing to remove** (see §3) |
 | 6 | Foreground-service videos: one for media playback, one for downloads | FGS declaration | To record on the phone |
 
 Nothing else blocks. The account rule below sets the timeline.
@@ -21,7 +21,7 @@ Nothing else blocks. The account rule below sets the timeline.
 
 **Rule** ([Play Console Help](https://support.google.com/googleplay/android-developer/answer/14151465)): personal accounts created after 13 November 2023 need a **closed test with at least 12 testers opted in continuously for the 14 days** before they can apply for production. Internal testing doesn't count. Passing the 14 days doesn't grant access by itself: Google reviews the application, in about 7 days by vendor reports. Organisation accounts are exempt.
 
-**Action:** create a closed testing track now, add the testers by email list or Google Group, and move round 1 there. Aim for 15–20, because invites aren't opt-ins and some testers drop out. Keep them opted in until production access is granted.
+**Action:** create a closed testing track now, add the testers by email list or Google Group, and move round 1 there. Aim for 15–20, because invites aren't opt-ins and some testers drop out. Keep them opted in until production access is granted. **2026-11-04:** the website invites testers (https://opengranger.org/test) through a Google Group anyone can join, which is the track's tester list; the steps are in `play-console-closed-test.md`.
 
 ## 2. AI-Generated Content
 
@@ -41,7 +41,7 @@ Restricted Content: Gemma 4 E2B is safety-tuned, and Ask answers from cited pass
 - **archive.org:** the Play build shows only public-domain texts (published 1930 or earlier) and recordings with a usable date. The waiver ("Show everything") is gone from release builds, so there's no way past the filter. Spoken word stays empty in the Play build without the waiver; LibriVox covers it. **Done.**
 - **Kiwix packs:** Granger lists them and downloads them from Kiwix's own mirrors, with each family's licence shown. Granger hosts none of them.
 - **Granger Classics:** public domain in the US (published 1930 or earlier), built and hosted by Granger with a rights guard.
-- **Clásicos Granger: a risk to check.** Its rule is authors dead by 1945, which makes the works public domain in Spain and Argentina. The US test is different: a work first published in 1931 or later can still be under US copyright even if its author died long ago (copyright restored under the URAA). Play is a US store, and Granger hosts these files itself. **Check each Clásicos work's first publication year; keep anything published after 1930 out of the catalog the Play build reads** (or out of the release altogether) until it's cleared.
+- **Clásicos Granger: checked 2026-11-04, clear.** Its rule is authors dead by 1945, which makes the works public domain in Spain and Argentina. The US test is different: a work first published in 1931 or later can still be under US copyright even if its author died long ago (copyright restored under the URAA). Play is a US store, and Granger hosts these files itself. The check: all 185 works in `tools/pack-builder/classics/manifest_es.json` (and the released `clasicos_granger_es_books.json`) carry a `published` year of 1928 or earlier (latest: *Romancero gitano*, 1928). That field is the reproduced edition's year, which a first publication can't be later than, so every work was first published by 1930, and the L3 validator already fails any `published` after 1930. Works first published in 1930 or earlier are in the US public domain as of 1 January 2026. Nothing to remove.
 - **Imports:** the user's own DRM-free files. DRM is detected and refused.
 - **Store listing:** don't describe Granger as a way to get any book free. Say public-domain classics and open reference.
 

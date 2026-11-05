@@ -48,6 +48,9 @@ class DownloadQueueTest {
         val holds = mutableMapOf<String, CompletableDeferred<Unit>>()
         val started = mutableMapOf<String, CompletableDeferred<Unit>>()
 
+        /** Bytes each run of an item reports before its outcome, as a real download's progress does. */
+        val reports = mutableMapOf<String, List<Long>>()
+
         /** Runs as an item installs, like the app's library refresh (and VectorDownloads after it). */
         var onInstalled: suspend (String) -> Unit = {}
 
@@ -59,6 +62,7 @@ class DownloadQueueTest {
                 if (dao.setActiveState(itemId, hash, DownloadState.RUNNING, null, 0, 0, clock) == 0) return RunOutcome.GONE
                 started.getOrPut(itemId) { CompletableDeferred() }.complete(Unit)
                 holds[itemId]?.await()
+                reports[itemId]?.forEach { onProgress(it, 100_000_000) }
                 return when (val outcome = outcomes[itemId]?.removeFirstOrNull() ?: RunOutcome.INSTALLED) {
                     RunOutcome.INSTALLED -> outcome.also { dao.markInstalled(itemId, hash, clock); onInstalled(itemId) }
                     RunOutcome.RETRY -> outcome.also { dao.setActiveState(itemId, hash, DownloadState.QUEUED, "a.test answered 503", 0, 0, clock) }
@@ -87,10 +91,12 @@ class DownloadQueueTest {
         dao, scheduler, prefs, freeBytes = { Long.MAX_VALUE / 2 }, io = Dispatchers.Unconfined, now = { clock },
     )
 
+    private var connected = true
+
     private fun queueOf(recordRunner: RecordRunner, networkCheckMillis: Long = Long.MAX_VALUE) =
         DownloadQueue(
             dao, recordRunner, prefs, unmetered = { unmetered }, now = { clock }, networkCheckMillis = networkCheckMillis,
-            progressEveryMillis = Long.MAX_VALUE,
+            progressEveryMillis = Long.MAX_VALUE, connected = { connected },
         )
 
     init {
@@ -216,6 +222,50 @@ class DownloadQueueTest {
         assertThat(record.state).isEqualTo(DownloadState.FAILED)
         assertThat(record.error).isEqualTo("Gave up after repeated failures: a.test answered 503")
         assertThat(queue.drain()).isEqualTo(QueueRest.Idle)
+    }
+
+    @Test fun aRunThatGotSomewhereStartsTheCountAgain() = runTest {
+        // Plan E1 item 3: a flaky line drops a big file again and again, but each run adds to the part file.
+        group("onboarding:1", "big")
+        runner.outcomes["big"] = ArrayDeque(List(MAX_ATTEMPTS + 5) { RunOutcome.RETRY })
+        var done = 0L
+        repeat(MAX_ATTEMPTS + 5) {
+            runner.reports["big"] = listOf(done, done + 5_000_000)
+            done += 5_000_000
+            queue.drain()
+            clock += 6 * 60 * 60 * 1000L
+        }
+        val record = dao.get("big", SHA_1)!!
+        assertThat(record.state).isEqualTo(DownloadState.QUEUED)
+        assertThat(record.attempts).isEqualTo(1)
+        // A run that only re-reads its part file is no progress: the count goes on.
+        runner.outcomes["big"] = ArrayDeque(listOf(RunOutcome.RETRY))
+        runner.reports["big"] = listOf(done, done)
+        queue.drain()
+        assertThat(dao.get("big", SHA_1)!!.attempts).isEqualTo(2)
+    }
+
+    @Test fun withNoNetworkALocalCopyRunsAndDownloadsWait() = runTest {
+        // Plan E1 item 4: off-grid, a pack copied from an SD card needs no network.
+        manager.enqueue(spec("web"), root, wifiOnly = false)
+        manager.enqueue(spec("card").copy(urls = listOf("content://sd/card.zim")), root, wifiOnly = false)
+        connected = false
+        val rest = queue.drain()
+        assertThat(runner.ran).containsExactly("card")
+        assertThat(rest).isEqualTo(QueueRest.Later(0, unmeteredOnly = false))
+        connected = true
+        queue.drain()
+        assertThat(runner.ran).containsExactly("card", "web").inOrder()
+    }
+
+    @Test fun aLocalCopyWaitingAsksForNoNetworkWhateverWifiOnlySays() = runTest {
+        manager.enqueue(spec("card").copy(urls = listOf("content://sd/card.zim")), root, wifiOnly = true)
+        assertThat(scheduler.offline.last()).isTrue()
+        assertThat(scheduler.ensured.last()).isFalse()
+        // On mobile data with Wi-Fi only on, it still runs.
+        unmetered = false
+        queue.drain()
+        assertThat(runner.ran).containsExactly("card")
     }
 
     @Test fun theBackoffDoublesFrom30sUpTo5Hours() {

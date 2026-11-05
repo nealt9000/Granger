@@ -36,7 +36,7 @@ class LiteRtTextEmbedder(
 
     override fun embedDocuments(docs: List<Pair<String, String>>): List<FloatArray> {
         val e = checkNotNull(engine) { "load() first" }
-        val inputs = docs.map { (title, text) -> listOf(InputData.Text("title: ${title.trim().ifEmpty { "none" }} | text: $text")) }
+        val inputs = docs.map { (title, text) -> listOf(InputData.Text("title: ${title.trim().ifEmpty { "none" }} | text: $text")) } // l10n-ignore: EmbeddingGemma's document prompt, read by the model
         return e.computeEmbeddingBatch(inputs).map { it.embedding }
     }
 

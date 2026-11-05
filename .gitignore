@@ -24,3 +24,5 @@ tools/catalog-gen/.pytest_cache/
 # Plan A0: Neal's recordings stay off GitHub
 tools/asr/audio/
 tools/asr/out/
+# Plan F1/release: testers' feedback mail stays off GitHub
+tools/feedback/inbox/

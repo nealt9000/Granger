@@ -60,6 +60,23 @@ data class DownloadRecord(
 /** Tries per download before it is FAILED with its last error (Plan DL Decision 4). */
 const val MAX_ATTEMPTS = 10
 
+/**
+ * A pack copied in from a file (the phone, an SD card, a USB stick; Plan E1 item 4) has a `content://` address: the
+ * queue copies it like a download, with progress, resume and the space check, and needs no network for it.
+ */
+const val LOCAL_SCHEME = "content://"
+
+val DownloadRecord.isLocal: Boolean get() = urls.isNotEmpty() && urls.all { it.startsWith(LOCAL_SCHEME) }
+
+/** Whether this record waits for Wi-Fi: Wi-Fi only, and not a local copy, which uses no network whatever the setting. */
+val DownloadRecord.needsWifi: Boolean get() = wifiOnly && !isLocal
+
+/**
+ * The hash of an imported file that matches no catalog entry starts with this: there is no checksum to check it
+ * against, so [FileDownloader] skips the check (the library still opens the file before it lists it).
+ */
+const val UNVERIFIED_PREFIX = "unverified-"
+
 val DownloadRecord.file: File get() = File(filePath)
 val DownloadRecord.partFile: File get() = File("$filePath.part")
 val DownloadRecord.isActive: Boolean get() = state != DownloadState.INSTALLED

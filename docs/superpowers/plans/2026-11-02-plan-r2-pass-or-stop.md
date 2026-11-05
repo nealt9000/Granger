@@ -188,6 +188,9 @@ These need full phone runs, so they're batched into one run.
   both, no losses; words-001 (wherefore: "why, for what reason") and words-002 (betimes) now grounded from the entry.
   The first run found nothing: the eval's `RecordingFinder` didn't pass `headword` through (fixed, 7201f545); the app
   calls `LibraryPassageFinder` directly. `headwords = true` in `GrangerApp`; the eval keeps `--headwords on` explicit.
+  **Superseded at the merge to main (2026-11-05):** Plan L4 had built the same lookup on main (`WordQuestion`,
+  `DictionaryEntry`, `PassageFinder.entry`), always on, one passage, with lemma and stem lookup, measured on the Spanish
+  and English word questions. The merge keeps L4's and drops `Headword`, `headword` and the `--headwords` flag.
 - [x] **"What did I search for"** declines before search (`DeclineCheck`, the asker's own searches and lookups):
   unknowable catches 32/76 tuning unanswerables, 0 answerables. With the trimmed library, `r2-t6-lib` declines
   **71/76 (93%)**.

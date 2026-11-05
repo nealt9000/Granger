@@ -31,10 +31,10 @@ fun interface PassageFinder {
     suspend fun find(keywords: List<String>, languages: List<ResearchLanguage>): List<Passage> = find(keywords)
 
     /**
-     * [word]'s dictionary entry, read by headword (Plan R2 Task 6, [Headword]): its passages in the question's language,
-     * best first. Empty when no dictionary holds it.
+     * The dictionary entry for [word] ([WordQuestion]) as one passage, or null when no installed dictionary has it.
+     * An inflected form leads to its lemma ("madrugué" to "madrugar"). None by default.
      */
-    suspend fun headword(word: String, languages: List<ResearchLanguage>): List<Passage> = emptyList()
+    suspend fun entry(word: String, languages: List<ResearchLanguage>): Passage? = null
 }
 
 /** Streams a model's reply to [prompt] in chunks. */
@@ -196,11 +196,6 @@ class ResearchPipeline(
     /** Plan R2 Task 6's debug variant: keywords get [OlderWords]' alternates before the search. Off in the app until measured. */
     private val olderWords: Boolean = false,
     /**
-     * Plan R2 Task 6's debug variant: a question that asks what a word means or where it comes from ([Headword]) gets the
-     * word's dictionary entry ([PassageFinder.headword]) first among its passages. On in the app from 2026-11-03 (r2-t6-head).
-     */
-    private val headwords: Boolean = false,
-    /**
      * R2 (2026-11-04): a confident book chunk among the dense hits gets one of the answer's places ([Ranking.reserveBook]),
      * since the encyclopedia article about a work outranks the work. Off in the app until the dev set measures it.
      */
@@ -214,21 +209,6 @@ class ResearchPipeline(
      * while the model loaded and rewrote (run ob-looking-1, 2026-11-02); the GPU and CPU share memory bandwidth.
      */
     fun run(request: ResearchRequest, stop: () -> Boolean = { false }): Flow<ResearchEvent> = flow { answer(request, stop) }
-
-    /** [ranked] with [question]'s word's dictionary entry first, when it asks about a word and a dictionary holds it. */
-    private suspend fun withHeadword(question: String, ranked: List<Passage>, languages: List<ResearchLanguage>): List<Passage> {
-        val word = Headword.word(question, languages) ?: return ranked
-        val entry = try {
-            finder.headword(word, languages)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (_: Exception) {
-            emptyList()
-        }
-        if (entry.isEmpty()) return ranked
-        val keys = entry.map(Ranking::textKey).toSet()
-        return entry + ranked.filterNot { Ranking.textKey(it) in keys }
-    }
 
     private suspend fun FlowCollector<ResearchEvent>.answer(request: ResearchRequest, stop: () -> Boolean) {
         var questionVector: FloatArray? = null
@@ -262,7 +242,7 @@ class ResearchPipeline(
             return
         }
 
-        val asked = MediaCues.asked(request.question, languages)
+        val mediaAsked = MediaCues.asked(request.question, languages)
         val rewrite = rewrite(model, request, languages)
         val medical = rewrite.medical == true || Medical.looksMedical(request.question) || PersonalMedical.strong(request.question)
         if (medical) emit(ResearchEvent.Medical)
@@ -278,7 +258,11 @@ class ResearchPipeline(
         // A passage of unknown language (cards, media, kept chats) stays.
         val inLanguage = { p: Passage -> p.language == null || p.language in languages }
         val hits: List<Passage>? = byMeaning?.filter(inLanguage)
+        // A word's meaning or origin: its dictionary entry, which the full-text search ranks no better than any other hit.
+        val word = if (request.quote == null) WordQuestion.word(request.question, languages) else null
+        var entry: Passage? = null
         val all = try {
+            entry = word?.let { finder.entry(it, languages) }
             finder.find(Keywords.searchTerms(keywords), languages).filter(inLanguage)
         } catch (e: CancellationException) {
             throw e
@@ -291,9 +275,9 @@ class ResearchPipeline(
         val topical = keywords.filterNot(YearFacts::cueOnly).ifEmpty { keywords }
         val found = Ranking.preselect(all, topical, config, weight, languages)
         emit(ResearchEvent.Progress(Stage.RANKING))
-        val ranking = try {
+        val ranked = try {
             val merged = hits?.let { Ranking.hybrid(found, it, topical, config, weight, languages) }
-            val lifted = Ranking.liftMedia(merged ?: rank(request.question, found, topical, weight, languages), found, asked)
+            val lifted = Ranking.liftMedia(merged ?: rank(request.question, found, topical, weight, languages), found, mediaAsked)
             val withBook = if (reserveBook) Ranking.reserveBook(lifted, config.small, config.denseGate) else lifted
             val reserved = if (reserveNamed && Entities.asked(request.question, languages)) {
                 Entities.reserve(
@@ -317,9 +301,11 @@ class ResearchPipeline(
         }
 
         val quote = request.quote
-        val ranked = if (headwords && quote == null) withHeadword(request.question, ranking, languages) else ranking
         // The media cap is applied before the cut, so a dropped media passage gives its place to the next one.
-        val capped = Ranking.capMedia(ranked, asked, config)
+        // The dictionary entry goes first, and counts even when nothing else passed the gates.
+        val capped = Ranking.capMedia(ranked, mediaAsked, config).let { c ->
+            entry?.let { e -> listOf(e) + c.filter { Ranking.textKey(it) != Ranking.textKey(e) } } ?: c
+        }
         if (quote == null && capped.isEmpty()) {
             emit(ResearchEvent.Done(Outcome.Declined(medical, keywords)))
             return
@@ -448,7 +434,7 @@ class ResearchPipeline(
             coroutineScope {
                 val ready = CompletableDeferred<Unit>()
                 val work = launch {
-                    val prompt = Rewrite.prompt(request.question, request.priorQuestion, rewriteAlternates)
+                    val prompt = Rewrite.prompt(request.question, request.priorQuestion, rewriteAlternates, languages)
                     val tokens = if (rewriteAlternates) REWRITE_TOKENS_ALTERNATES else REWRITE_TOKENS
                     val reply = generator.generate(prompt, tokens) { ready.complete(Unit) }
                         .fold("") { acc, chunk -> acc + chunk }

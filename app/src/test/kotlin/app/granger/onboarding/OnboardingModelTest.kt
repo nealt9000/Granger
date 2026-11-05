@@ -319,6 +319,29 @@ class OnboardingModelTest {
         assertThat(one.items.map { it.id }).contains("wikipedia_en_top_maxi")
         assertThat(one.notes).isEmpty()
     }
+
+    // --- Plan E1 item 5: a 64 GB phone with a card ---
+
+    @Test fun theCardIsTheDefaultWhenItHasMoreRoom() {
+        val phone = app.granger.volume("/internal", "Internal storage", free = 30_000_000_000, total = 64_000_000_000)
+        val card = app.granger.volume("/sd", "SD card", free = 120_000_000_000, total = 128_000_000_000).copy(removable = true)
+        assertThat(OnboardingModel.defaultVolume(listOf(phone, card))).isEqualTo(card)
+        val smallCard = card.copy(freeBytes = 5_000_000_000)
+        assertThat(OnboardingModel.defaultVolume(listOf(phone, smallCard))).isEqualTo(phone)
+        assertThat(OnboardingModel.defaultVolume(emptyList())).isNull()
+    }
+
+    @Test fun saveSpaceStartsOnOnlyWhenPicturesWouldCrowdThePhoneAndTheRestFits() {
+        val gb = 1_000_000_000L
+        // Starter 9.0 / 3.8 GB on a phone with 15 GB free: pictures would leave 6 GB.
+        assertThat(OnboardingModel.saveSpaceByDefault(9 * gb, 4 * gb, 15 * gb)).isTrue()
+        // With 40 GB free, pictures stay.
+        assertThat(OnboardingModel.saveSpaceByDefault(9 * gb, 4 * gb, 40 * gb)).isFalse()
+        // Nothing fits either way: no change (the review says what's short).
+        assertThat(OnboardingModel.saveSpaceByDefault(9 * gb, 4 * gb, 3 * gb)).isFalse()
+        assertThat(OnboardingModel.saveSpaceByDefault(9 * gb, 9 * gb, 12 * gb)).isFalse()
+        assertThat(OnboardingModel.saveSpaceByDefault(9 * gb, 4 * gb, null)).isFalse()
+    }
 }
 
 /** Resources need Robolectric now that the flow's text is [UiText]; the assertions stay in English. */

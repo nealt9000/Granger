@@ -360,6 +360,12 @@ class SourceViewModelTest {
         assertThat(viewModel(CatalogScope.MODELS).ui.value.sections.flatMap { it.rows }.single().ask).isNull()
     }
 
+    @Test fun onAPhoneWithoutAskPackRowsSayNothingAboutAsk() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = catalogOf(packs = listOf(packEntry("top"), packEntry("bare").copy(hasFulltextIndex = false))))
+        val rows = viewModel(tier = DeviceTier.LIBRARY_ONLY).ui.value.sections.flatMap { it.rows }
+        assertThat(rows.map { it.ask }).containsExactly(null, null)
+    }
+
     @Test fun updatesTabShowsOnlyUpdates() = runTest(main.dispatcher) {
         library.packList.value = listOf(pack("u-med"))
         downloads.list.value = listOf(

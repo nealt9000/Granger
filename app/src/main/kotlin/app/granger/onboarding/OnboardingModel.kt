@@ -207,6 +207,27 @@ object OnboardingModel {
      * Country codes whose map pack the catalog titles differently from the phone's English name for the country (checked
      * against the catalog's 193 maps titles, 2026-10-28), or that share a pack with a neighbour.
      */
+    /**
+     * Where the start goes when nothing was chosen (Plan E1 item 5): a removable card with more free space than the
+     * phone's own storage (a 64 GB phone with a big card), else the first volume, the phone's own storage.
+     */
+    fun defaultVolume(volumes: List<app.granger.core.downloads.Volume>): app.granger.core.downloads.Volume? {
+        val first = volumes.firstOrNull() ?: return null
+        return volumes.filter { it.removable && it.freeBytes > first.freeBytes }.maxByOrNull { it.freeBytes } ?: first
+    }
+
+    /** Room a start should leave on the phone for its owner's own photos, apps and updates (Plan E1 item 5). */
+    const val ROOM_TO_LEAVE_BYTES = 10_000_000_000L
+
+    /**
+     * Whether Save space starts on (Plan E1 item 5): the start with pictures would leave less than [ROOM_TO_LEAVE_BYTES]
+     * free, and the one without pictures fits. Pictures stay where there's room: they matter for medicine and repair.
+     */
+    fun saveSpaceByDefault(withPictures: Long, withoutPictures: Long, freeBytes: Long?): Boolean {
+        if (freeBytes == null || withPictures <= 0 || withoutPictures >= withPictures) return false
+        return freeBytes - withPictures < ROOM_TO_LEAVE_BYTES && withoutPictures <= freeBytes
+    }
+
     /** A suggested map larger than this is offered, not preselected: the US map alone is 17 GB. */
     const val PRESELECT_MAX_BYTES = 2_000_000_000L
 

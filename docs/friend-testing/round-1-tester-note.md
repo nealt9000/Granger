@@ -6,9 +6,9 @@ This is an early test build. Some things are rough, and that's what your eyes ar
 
 ## Getting it
 
-1. Send Neal the email address of the Google account on your phone. He adds it to the test list.
-2. Open the link he sends you, tap **Accept invite**, then **Download it on Google Play**. Play calls it "app.granger (unreviewed)". That's expected for a test build.
-3. Updates come through Play like any other app.
+1. Go to https://opengranger.org/test and follow the steps: join the testers group with the Google account on your phone, open the test page on Google Play and tap **Become a tester**, then install Granger from Play. Until the test opens, the page asks for your account's email instead and Neal sends you the link.
+2. Play may mark the app as early access or unreviewed. That's expected for a test build.
+3. Updates come through Play like any other app. Google counts testers who stay opted in for 14 days in a row, so don't leave the test or uninstall it during the test.
 
 It needs Android 10 or newer. Ask, the librarian, needs a phone with 6 GB of memory or more. On smaller phones it's hidden and everything else works.
 
@@ -19,7 +19,7 @@ The app is small. The library isn't, so check sizes and stay on Wi-Fi.
 | What | Size |
 | --- | --- |
 | The app | about 50 MB |
-| The suggested start | about 18 GB |
+| The suggested start (Starter) | about 9 GB, 11.5 with Ask |
 | A full Wikipedia | about 100 GB |
 | Ask's model | 2 GB |
 | The reading voice | 67 MB |
@@ -68,8 +68,8 @@ Screenshots help. So do "I didn't understand this" and "I gave up here".
 Round 1 test build. Thank you for trying Granger.
 - Ask, the librarian, as a preview on phones with 6 GB or more. It answers from your library and shows sources; it can be wrong.
 - Settings → Send feedback: an email to Neal with your phone and build, plus any crash reports. You see everything before it's sent.
-- Downloads wait for Wi-Fi by default. The suggested start is about 18 GB.
+- Downloads wait for Wi-Fi by default. The suggested start is about 9 GB.
 The tester note has what to try and the known issues.
 ```
 
-Shared as a doc: https://claude.ai/artifact/HnaLjrjCTxqH9caqSHo5fS (private until Neal shares it).
+Shared as a doc: https://claude.ai/artifact/HnaLjrjCTxqH9caqSHo5fS (private until Neal shares it). The public version is https://opengranger.org/test; Spanish: `round-1-tester-note-es.md` and https://opengranger.org/prueba.

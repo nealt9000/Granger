@@ -43,6 +43,8 @@ class CatalogRepository(
     private val includeUnevaluatedModels: Boolean,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
+    /** False on a phone too small for Ask: the catalog shown has no search vectors ([Catalog.forBuild]). */
+    private val includeVectors: Boolean = true,
 ) : CatalogSource {
     private val _state = MutableStateFlow(CatalogState())
     override val state: StateFlow<CatalogState> = _state.asStateFlow()
@@ -107,7 +109,7 @@ class CatalogRepository(
 
     private fun show(catalog: Catalog, fetchedAt: Long) {
         current = catalog
-        _state.update { it.copy(catalog = catalog.forBuild(includeUnevaluatedModels), fetchedAt = fetchedAt) }
+        _state.update { it.copy(catalog = catalog.forBuild(includeUnevaluatedModels, includeVectors), fetchedAt = fetchedAt) }
     }
 
     private fun get(target: String): ByteArray? = try {

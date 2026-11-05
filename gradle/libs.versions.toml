@@ -22,6 +22,9 @@ work = "2.12.0"
 bouncycastle = "1.86"
 webkit = "1.14.0"
 jsoup = "1.21.2"
+profileinstaller = "1.4.1"
+benchmarkMacro = "1.5.0"
+uiautomator = "2.4.0"
 commonmark = "0.30.0"
 # CBR comics (RAR 4); pure Java.
 junrar = "7.5.5"
@@ -37,6 +40,9 @@ ndk = "30.0.16248370"
 sherpaOnnx = "1.13.8"   # vendored AAR in core/speech/libs (no Maven artifact); see core/speech/NOTICE.md
 
 [libraries]
+androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileinstaller" }
+androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "benchmarkMacro" }
+androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-compose-ui = { module = "androidx.compose.ui:ui" }
@@ -89,6 +95,7 @@ androidx-glance-appwidget-testing = { module = "androidx.glance:glance-appwidget
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+android-test = { id = "com.android.test", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

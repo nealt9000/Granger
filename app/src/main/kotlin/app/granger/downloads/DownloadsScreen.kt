@@ -147,6 +147,7 @@ fun DownloadsContent(
                 }
             }
             ui.header?.let { h -> item(key = "header") { Header(h, actions) } }
+            if (ui.meteredWifi) item(key = "metered-wifi") { MeteredWifiNote() }
             ui.now?.let { row ->
                 item(key = "heading-now") { Heading(stringResource(R.string.downloads_now)) }
                 item(key = row.key) { DownloadItem(row, now, actions, speed = ui.header?.bytesPerSecond) }
@@ -182,6 +183,18 @@ fun DownloadsContent(
 }
 
 /** The round's bar and figures, the speed with Pause all or Resume, and how much is still to come against free space. */
+/** Why Wi-Fi-only downloads wait on this Wi-Fi, and the way out: the phone's Wi-Fi settings (Plan E1 item 3). */
+@Composable
+private fun MeteredWifiNote() {
+    val context = LocalContext.current
+    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Text(stringResource(R.string.downloads_metered_wifi_note), style = MaterialTheme.typography.bodyMedium)
+        TextButton(onClick = {
+            runCatching { context.startActivity(android.content.Intent(android.provider.Settings.ACTION_WIFI_SETTINGS)) }
+        }) { Text(stringResource(R.string.downloads_wifi_settings)) }
+    }
+}
+
 @Composable
 private fun Header(h: DownloadsHeader, actions: DownloadsActions) {
     Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp)) {

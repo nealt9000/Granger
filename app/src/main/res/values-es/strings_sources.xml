@@ -4,6 +4,14 @@
     <string name="sources_get_books">Conseguir libros</string>
     <string name="sources_get_audio">Conseguir audiolibros y música</string>
     <string name="sources_group_knowledge">Paquetes de conocimiento</string>
+    <string name="packs_import">Añadir un paquete desde un archivo</string>
+    <string name="packs_import_sub">Un .zim de este teléfono, una tarjeta SD o una memoria USB; no hace falta internet</string>
+    <string name="packs_import_queued">Copiando %1$s en tu biblioteca. Descargas muestra cuánto falta.</string>
+    <string name="packs_import_not_zim">%1$s no es un paquete de conocimiento (archivo .zim).</string>
+    <string name="packs_import_have">%1$s ya está en tu biblioteca.</string>
+    <string name="packs_import_no_space">No hay espacio suficiente: faltan %1$s.</string>
+    <string name="packs_import_no_storage">No hay almacenamiento donde copiarlo.</string>
+    <string name="packs_import_unreadable">Granger no pudo leer ese archivo.</string>
     <string name="sources_group_books">Libros</string>
     <string name="sources_group_audio">Audiolibros y música</string>
     <string name="sources_group_models">Modelos y voces</string>

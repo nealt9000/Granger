@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-11-02T21:26:36Z",
+  "generatedAt": "2026-11-03T12:06:31Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -959,6 +959,137 @@
       "i18n": {
         "en": {
           "title": "Wikivoyage travel guide in Spanish"
+        }
+      }
+    },
+    {
+      "id": "wikipedia_sw_all_maxi",
+      "title": "Wikipedia",
+      "description": "Swahili Wikipedia: every article, with pictures",
+      "category": "Reference",
+      "language": "sw",
+      "sizeBytes": 747747672,
+      "sha256": "72241eecfae117653a20e5b8005e1f895c3b8378ffad1be1f644449d474601f4",
+      "urls": [
+        "https://download.kiwix.org/zim/wikipedia/wikipedia_sw_all_maxi_2026-10.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_sw_all_maxi_2026-10.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_sw_all_maxi_2026-10.zim"
+      ],
+      "snapshotDate": "2026-10-06",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "0369c385-b1bf-808e-6413-af17176520bb",
+      "zimName": "wikipedia_sw_all",
+      "featured": true,
+      "family": "wikipedia",
+      "domain": "reference",
+      "content": "",
+      "flavour": "maxi",
+      "i18n": {
+        "en": {
+          "title": "Wikipedia in Swahili"
+        },
+        "es": {
+          "title": "Wikipedia en suajili"
+        }
+      }
+    },
+    {
+      "id": "wikipedia_sw_all_nopic",
+      "title": "Wikipedia",
+      "description": "Swahili Wikipedia: every article, without pictures",
+      "category": "Reference",
+      "language": "sw",
+      "sizeBytes": 260230357,
+      "sha256": "b98da3fe9f73f17b75807cfed2a4d6432088fbebcb2fa3d266f066bf17f4c4bf",
+      "urls": [
+        "https://download.kiwix.org/zim/wikipedia/wikipedia_sw_all_nopic_2026-10.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_sw_all_nopic_2026-10.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_sw_all_nopic_2026-10.zim"
+      ],
+      "snapshotDate": "2026-10-06",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "05373428-97a7-0f62-14c6-0039fcb716a1",
+      "zimName": "wikipedia_sw_all",
+      "featured": true,
+      "family": "wikipedia",
+      "domain": "reference",
+      "content": "",
+      "flavour": "nopic",
+      "i18n": {
+        "en": {
+          "title": "Wikipedia in Swahili"
+        },
+        "es": {
+          "title": "Wikipedia en suajili"
+        }
+      }
+    },
+    {
+      "id": "wiktionary_sw_all_nopic",
+      "title": "Wiktionary",
+      "description": "The Swahili dictionary from Wiktionary",
+      "category": "Reference",
+      "language": "sw",
+      "sizeBytes": 56428566,
+      "sha256": "eccb612073eb60e35ef316474fdb6674ae60d8f25d67d90551211c119bfc7a95",
+      "urls": [
+        "https://download.kiwix.org/zim/wiktionary/wiktionary_sw_all_nopic_2026-10.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wiktionary/wiktionary_sw_all_nopic_2026-10.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wiktionary/wiktionary_sw_all_nopic_2026-10.zim"
+      ],
+      "snapshotDate": "2026-10-15",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "f0afbd98-c732-3865-b623-a41afab4f474",
+      "zimName": "wiktionary_sw_all",
+      "featured": true,
+      "family": "wiktionary",
+      "domain": "reference",
+      "content": "",
+      "flavour": "nopic",
+      "i18n": {
+        "en": {
+          "title": "Wiktionary in Swahili"
+        },
+        "es": {
+          "title": "Wikcionario en suajili"
+        }
+      }
+    },
+    {
+      "id": "phet_sw_all",
+      "title": "PhET Interactive Simulations",
+      "description": "Interactive science and maths simulations from the University of Colorado, in Swahili",
+      "category": "Science & Math",
+      "language": "sw",
+      "sizeBytes": 106593151,
+      "sha256": "5438c983c47c98321cf00442582995c1c69c34ee556b3b80af0051a708f35498",
+      "urls": [
+        "https://download.kiwix.org/zim/phet/phet_sw_all_2026-08.zim"
+      ],
+      "snapshotDate": "2026-08-25",
+      "license": "CC BY 4.0 (sims published before 2026-03-29); CC BY-NC 4.0 (later sims)",
+      "hasFulltextIndex": false,
+      "topics": [],
+      "zimUuid": "3d0296a5-9f7d-3441-c873-069a81f9037e",
+      "zimName": "phet_sw_all",
+      "featured": true,
+      "family": "phet",
+      "domain": "science",
+      "content": "",
+      "flavour": "",
+      "nonCommercial": true,
+      "i18n": {
+        "en": {
+          "title": "PhET science simulations in Swahili"
+        },
+        "es": {
+          "title": "Simulaciones de ciencias PhET en suajili"
         }
       }
     },
@@ -10599,6 +10730,29 @@
       "flavour": ""
     },
     {
+      "id": "freecodecamp_sw_all",
+      "title": "FreeCodeCamp",
+      "description": "Kozi zote za FreeCodeCamp",
+      "category": "Programming",
+      "language": "sw",
+      "sizeBytes": 11731646,
+      "sha256": "324e08b4135a40b8dac6ae685823f4b644352b60cabebf991359b8a050bca37b",
+      "urls": [
+        "https://download.kiwix.org/zim/freecodecamp/freecodecamp_sw_all_2026-10.zim"
+      ],
+      "snapshotDate": "2026-10-13",
+      "license": "Not stated by the source",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "79676104-5bcf-e3b4-9bea-8e45ae1a6a4e",
+      "zimName": "freecodecamp_sw_all",
+      "featured": false,
+      "family": "freecodecamp",
+      "domain": "technology",
+      "content": "",
+      "flavour": ""
+    },
+    {
       "id": "freecodecamp_es_coding-interview-prep",
       "title": "FreeCodeCamp Entrevista",
       "description": "Ejercicios de codificación",
@@ -10684,6 +10838,52 @@
       "topics": [],
       "zimUuid": "d0b84111-b8c7-434c-07d0-2992f9045627",
       "zimName": "freecodecamp_es_javascript-algorithms-and-data-structures",
+      "featured": false,
+      "family": "freecodecamp",
+      "domain": "technology",
+      "content": "",
+      "flavour": ""
+    },
+    {
+      "id": "freecodecamp_sw_javascript-algorithms-and-data-structures",
+      "title": "FreeCodeCamp JavaScript",
+      "description": "Kozi za JavaScript",
+      "category": "Programming",
+      "language": "sw",
+      "sizeBytes": 10700610,
+      "sha256": "ccf5e17b809fe8e1027d87a1fdeed12c4bf1ca2ff077611f18bb9063b6dc3976",
+      "urls": [
+        "https://download.kiwix.org/zim/freecodecamp/freecodecamp_sw_javascript-algorithms-and-data-structures_2026-10.zim"
+      ],
+      "snapshotDate": "2026-10-13",
+      "license": "Not stated by the source",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "cf25c950-aed0-361b-ae70-3132882d28dc",
+      "zimName": "freecodecamp_sw_javascript-algorithms-and-data-structures",
+      "featured": false,
+      "family": "freecodecamp",
+      "domain": "technology",
+      "content": "",
+      "flavour": ""
+    },
+    {
+      "id": "freecodecamp_sw_coding-interview-prep",
+      "title": "FreeCodeCamp Maandalizi",
+      "description": "Mazoezi ya uandishi wa programu",
+      "category": "Programming",
+      "language": "sw",
+      "sizeBytes": 10452731,
+      "sha256": "6df08c80f49a00cca923ea82eb98d64f97f48608b83f58eaef4834dffb7d9a16",
+      "urls": [
+        "https://download.kiwix.org/zim/freecodecamp/freecodecamp_sw_coding-interview-prep_2026-10.zim"
+      ],
+      "snapshotDate": "2026-10-13",
+      "license": "Not stated by the source",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "d1adb384-996f-d549-7ff2-913d735c04fe",
+      "zimName": "freecodecamp_sw_coding-interview-prep",
       "featured": false,
       "family": "freecodecamp",
       "domain": "technology",
@@ -11708,6 +11908,29 @@
       "flavour": ""
     },
     {
+      "id": "freecodecamp_sw_rosetta-code",
+      "title": "Kanuni ya Rosetta",
+      "description": "Ongeza ujuzi wako wa ubunifu wa kutatua matatizo",
+      "category": "Programming",
+      "language": "sw",
+      "sizeBytes": 10767467,
+      "sha256": "9f208744bde65b2679c34df657ba60616d58acac839dcc9946e992098502a8eb",
+      "urls": [
+        "https://download.kiwix.org/zim/freecodecamp/freecodecamp_sw_rosetta-code_2026-10.zim"
+      ],
+      "snapshotDate": "2026-10-13",
+      "license": "Not stated by the source",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "273527c2-8a38-2a82-b97e-2e929c4bae60",
+      "zimName": "freecodecamp_sw_rosetta-code",
+      "featured": false,
+      "family": "freecodecamp",
+      "domain": "technology",
+      "content": "",
+      "flavour": ""
+    },
+    {
       "id": "techbase.kde.org_en_all_maxi",
       "title": "KDE TechBase",
       "description": "Information developers need to use KDE Frameworks",
@@ -12393,6 +12616,29 @@
       "zimName": "devdocs_en_mongoose",
       "featured": false,
       "family": "devdocs",
+      "domain": "technology",
+      "content": "",
+      "flavour": ""
+    },
+    {
+      "id": "freecodecamp_sw_project-euler",
+      "title": "Mradi wa Euler",
+      "description": "Changamoto za uandishi wa programu",
+      "category": "Programming",
+      "language": "sw",
+      "sizeBytes": 11034228,
+      "sha256": "457ff32cc84d61a41f4acc8e244b168cffc640e1ea20b88bceb95d9d5e24a6fc",
+      "urls": [
+        "https://download.kiwix.org/zim/freecodecamp/freecodecamp_sw_project-euler_2026-10.zim"
+      ],
+      "snapshotDate": "2026-10-13",
+      "license": "Not stated by the source",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "93903fed-d300-850c-1c19-e46ad072d1ef",
+      "zimName": "freecodecamp_sw_project-euler",
+      "featured": false,
+      "family": "freecodecamp",
       "domain": "technology",
       "content": "",
       "flavour": ""
