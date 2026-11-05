@@ -434,14 +434,26 @@ Classics notes, found for 13 of 31 held-out classics questions and chosen for 2.
   5,540 → 7,580 characters median, first words 5.9 → 7.2 s. What retrieval gains, the model loses in misreads of a
   longer prompt. The model's reading, not the passage count, bounds this lever; stays at 4.
 
+- [x] **The model half, the night of 4–5 November** (`docs/ask/r2-findings-2026-11-04.md` §8–§12). The export gap
+  is Google's closed GPU executor and weight format, not a recipe: our export of stock E2B decodes at 9.7 tok/s on the
+  Pixel 6 against the bundle's 14.5. Training pairs come from the tuning runs only (`tools/lora/pairs.py`; dev and
+  held-out out). Two rank-16 attention adapters were trained on the Mac (`tools/lora/train_lora.py`), merged, exported
+  and run on the dev set against a control export of stock E2B on identical prompts: 44/148 and **70/148 grounded
+  against the control's 71** (Google's bundle 83). The adapter moves the decline rate only. No post-training
+  quantization in litert-torch 0.10.0 gives a phone-usable E2B: block-32 int4 keeps the model and won't load on the
+  Pixel 6 GPU; channel-wise int4 loads and wrecks it; int8 loads at 7.2 tok/s, damaged. No LoRA option has landed in
+  LiteRT-LM 0.19.0 or litert-torch; #3173 is idle. Both model routes are closed.
 
 - [ ] **Pass**: the spec's pass path; nothing to flip (F1 part 2 already flipped it). Record the numbers in the
   roadmap and the store listing's Preview wording stays or goes, Neal's call.
-- [ ] **Fail**: one more round on the tuning split, then scoring 2 of 2. If it fails again, Neal decides between Ask as
-  a Preview with the numbers on record (amend spec §8 and §11, which still say Ask leaves debug only on a pass) and
-  turning Ask off in release until the LoRA or a newer model.
+- [x] **Fail** (2026-11-05): the round was run on the dev set, not the tuning split (a training set now), and no
+  lever cleared ±4 there (findings §3, §7, §12). Scoring 2 of 2 waits for a change that holds on dev; on the current
+  pipeline it would confirm scoring 1 at the cost of the last blind set. **Open for Neal:** Ask as a Preview with the
+  numbers on record (amend spec §8 and §11, which still say Ask leaves debug only on a pass), or off in release until
+  a run-time adapter, a usable converter or a newer model.
 - [ ] Either way, write the decision into the spec, and say plainly in the roadmap that the Preview shipped before the
-  bar was measured.
+  bar was measured. 2026-11-05: the roadmap says it (the R2 row and checklist B); the spec §8 carries the status and
+  the open decision; the decision line itself waits for Neal.
 
 ## Task 12: housekeeping from the audit
 
@@ -449,13 +461,14 @@ Classics notes, found for 13 of 31 held-out classics questions and chosen for 2.
   what it handed on; R4 Task 8's per-phone-model item; R5's open items.
 - [ ] The E4B catalog entry: remove it, or keep it with a reason (R4 said removed, R5 said kept "until Neal says
   otherwise").
-- [ ] Watch for a Google-built E2B QAT file (R0: same quality, 0.5 GB less memory).
+- [ ] Watch for a Google-built E2B QAT file (R0: same quality, 0.5 GB less memory). 2026-11-05: the shipped GPU bundle
+  is already quantization-aware-trained in a closed format; our converter can't make one (findings §10, §12).
 - [ ] The latency target (9 s; 12 s median now): R5 Task 6's plain-keywords retry was the one route under 9 s found;
   revisit after Tasks 2–8, not before.
 - [ ] Stale roadmap lines: "Gate `Features.RESEARCH` … before any release build" and "deleteChat … no error guard".
 
 ## Not in this plan
 
-- The behaviour LoRA (waits on LiteRT-LM #3173), second-hop retrieval for two-fact questions (the most effort and
+- The behaviour LoRA (waits on LiteRT-LM #3173; tried outside this plan's tasks on 4–5 November, findings §9–§12), second-hop retrieval for two-fact questions (the most effort and
   latency per question; after this round's numbers), "What do I have on X?" (a fast follow after launch), Spanish Ask
   (Plan L4's bar).

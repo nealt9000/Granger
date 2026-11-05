@@ -230,6 +230,13 @@ Every passage gets one **address**, stored with the Research turn and reused by 
     re-signed;
   - fail twice: Research stays debug-only, and the plan ends with numbers and options, as Plan 9 did. Vectors and deep links
     ship either way, because Search and the readers can use them.
+- **Status (2026-11-05).** Scoring 1 of 2 on the fresh held-out set (`r2-h2-1`, Pixel 6, 2026-11-03): 67% grounded, 85%
+  declined; fail. The Preview had shipped on 2026-10-31 (F1 part 2) on the tuning split's grounded number, before the bar
+  was measured, so the stop path's "stays debug-only" no longer describes the app. A blind development set
+  (`dataset/dev.json`) says 56% / 84%; retrieval's remaining levers are bounded under the gap; the behaviour LoRA (merged)
+  and a self-exported E2B were tried and closed (`docs/ask/r2-findings-2026-11-04.md` §12). Scoring 2 of 2 waits for a
+  change that holds on the development set. **Open for Neal:** Ask stays a Preview with these numbers on record, or goes
+  off in release until a run-time adapter, a usable converter or a newer model. The decision goes here and in §11.
 - The report shows grounded per domain, recall@4 dense against keyword, and latency.
 
 ## 9. Constraints
@@ -260,7 +267,8 @@ Every passage gets one **address**, stored with the Research turn and reused by 
   checks each kind.
 - Median send to first words is 17.4 s or less on the tuning split.
 - The fresh held-out set is written, scored, and reported per domain. Research either passes the bar and leaves debug, or
-  stops with numbers and options.
+  stops with numbers and options. **2026-11-05:** scored once, failed, with the numbers and options in §8's status line;
+  the Preview is already out, so the stop path's shape is Neal's decision.
 
 ## 12. Decisions (Neal, 2026-10-21)
 
