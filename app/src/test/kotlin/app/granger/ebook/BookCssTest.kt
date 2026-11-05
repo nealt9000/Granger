@@ -44,7 +44,9 @@ class BookCssTest {
     @Test fun theBooksOwnImageSizesAreLeftAlone() {
         // Equation glyphs at `height: 1.2em` and `height: 100%` covers keep their sizes; ReadiumCSS already caps width.
         assertThat(BookCss.STYLE).doesNotContain("height")
-        assertThat(BookCss.STYLE).doesNotContain("width")
+        // The one width is the cap, which a book's `max-width: none` got past: an image narrower than the page is untouched.
+        assertThat(BookCss.STYLE).contains("img { max-width: 100% !important; }")
+        assertThat(BookCss.STYLE.replace("max-width", "")).doesNotContain("width")
     }
 
     @Test fun injectingTwiceAddsTheStyleOnce() {

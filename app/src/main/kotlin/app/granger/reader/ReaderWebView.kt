@@ -107,14 +107,16 @@ class ReaderWebView(
     /** 0 at the top, 1 at the bottom; 0 when the page does not scroll. */
     fun scrollFraction(): Float {
         val range = computeVerticalScrollRange() - height
-        return if (range <= 0) 0f else (scrollY.toFloat() / range).coerceIn(0f, 1f)
+        return if (range <= 0) bridge.boxFraction ?: 0f else (scrollY.toFloat() / range).coerceIn(0f, 1f)
+    }
+
+    /** A new page is showing: what the last one said of its own box is no longer true. */
+    fun forgetBoxScroll() {
+        bridge.boxFraction = null
     }
 
     fun scrollToFraction(fraction: Float) {
-        evaluateJavascript(
-            "window.scrollTo(0, (document.documentElement.scrollHeight - window.innerHeight) * $fraction)",
-            null,
-        )
+        evaluateJavascript(scrollToFractionScript(fraction), null)
     }
 
     override fun startActionMode(callback: ActionMode.Callback, type: Int): ActionMode? =

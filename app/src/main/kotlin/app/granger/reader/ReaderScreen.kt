@@ -84,7 +84,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.Features
+import app.granger.theme.FieldColors
 import app.granger.theme.GrangerTheme
+import app.granger.theme.NightColors
 import app.granger.R
 import app.granger.core.zim.ZimHit
 import app.granger.ebook.WikiTextSheet
@@ -245,7 +247,10 @@ fun ReaderScreen(
     val padRight = with(density) { (overlay.getRight(density, direction) - pageInsets.getRight(density, direction)).coerceAtLeast(0).toDp().value.roundToInt() }
     LaunchedEffect(webView, padTop, padBottom, padLeft, padRight) { webView?.setChromePadding(padTop, padBottom, padLeft, padRight) }
 
-    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    // Behind the page is the page's colour, as the WebView's own (ReaderWebView), or a landscape cutout's band shows the
+    // app's theme when the reader's differs. An error's words are in the app's colours, so it keeps the app's background.
+    val behindPage = if (state.error != null) MaterialTheme.colorScheme.background else (if (pageNight) NightColors else FieldColors).background
+    Box(Modifier.fillMaxSize().background(behindPage)) {
         // The page has the whole screen whether the chrome shows or not (Plan U3c Decision 5): the bars here, and the
         // shell's rail and mini-player, slide over it and away, and the page is padded inside for them.
         Box(
@@ -279,6 +284,7 @@ fun ReaderScreen(
                                 }
                                 // Before the place is restored, so it is restored on the padded page.
                                 (view as ReaderWebView).applyChromePadding()
+                                view.forgetBoxScroll()
                                 val title = view.title?.takeUnless { it == url }
                                 scope.launch {
                                     viewModel.onPageShown(url, title)?.let { (view as ReaderWebView).scrollToFraction(it) }

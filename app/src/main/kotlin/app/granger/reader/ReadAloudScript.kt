@@ -188,6 +188,7 @@ object ReadAloudScript {
             if (inner) {
               if (el.clientHeight < window.innerHeight * 0.5) return;
               y = el.scrollTop;
+              if (el.scrollHeight > el.clientHeight && window.${ReaderPageScript.BRIDGE_NAME}) ${ReaderPageScript.BRIDGE_NAME}.onBoxScroll(y / (el.scrollHeight - el.clientHeight));
               dy = y - (el.__grangerLastY || 0);
               el.__grangerLastY = y;
             } else {

@@ -21,6 +21,22 @@ class ReadingPrefsTest {
     private val shared = ApplicationProvider.getApplicationContext<Context>()
         .getSharedPreferences("reading-test", Context.MODE_PRIVATE)
 
+    @Test fun whatIsBehindAPageIsThePagesColourNotTheApps() {
+        // The reader's theme decides, whichever the app is in.
+        for (appNight in listOf(true, false)) {
+            assertThat(ReadingPrefs(theme = ReadingTheme.NIGHT, appNight = appNight).bookPageColor).isEqualTo(NightColors.background.toArgb())
+            assertThat(ReadingPrefs(theme = ReadingTheme.DAY, appNight = appNight).bookPageColor).isEqualTo(Theme.LIGHT.backgroundColor)
+            assertThat(ReadingPrefs(theme = ReadingTheme.SEPIA, appNight = appNight).bookPageColor).isEqualTo(Theme.SEPIA.backgroundColor)
+        }
+        assertThat(ReadingPrefs(theme = ReadingTheme.APP, appNight = true).bookPageColor).isEqualTo(NightColors.background.toArgb())
+        assertThat(ReadingPrefs(theme = ReadingTheme.APP, appNight = false).bookPageColor).isEqualTo(FieldColors.background.toArgb())
+        // And it is the colour the page itself is given, where the page is given one.
+        val night = ReadingPrefs(theme = ReadingTheme.NIGHT).toEpub()
+        assertThat(night.backgroundColor?.int).isEqualTo(ReadingPrefs(theme = ReadingTheme.NIGHT).bookPageColor)
+        assertThat(ReadingPrefs(theme = ReadingTheme.NIGHT).pdfPageColor).isEqualTo(android.graphics.Color.BLACK)
+        assertThat(ReadingPrefs(theme = ReadingTheme.SEPIA).pdfPageColor).isEqualTo(android.graphics.Color.WHITE)
+    }
+
     @Test fun toPdfiumMapsPagesFitAndNight() {
         val paged = ReadingPrefs().toPdfium()
         assertThat(paged.scroll).isFalse()

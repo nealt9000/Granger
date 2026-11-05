@@ -102,6 +102,20 @@ data class ReadingPrefs(
     /** A wiki page is darkened: Night chosen, or Match app while the app is in [appNight]. Sepia reads as Day there. */
     fun wikiNight(appNight: Boolean): Boolean = theme == ReadingTheme.NIGHT || (theme == ReadingTheme.APP && appNight)
 
+    /**
+     * The colour of a book's page, as an ARGB int: what the reader paints behind the navigator, so the rail's place and
+     * the cutout's band beside the page read as the page, not as the app's theme when the two differ.
+     */
+    val bookPageColor: Int get() = when {
+        pageNight -> NightColors.background.toArgb()
+        theme == ReadingTheme.APP -> FieldColors.background.toArgb()
+        theme == ReadingTheme.SEPIA -> Theme.SEPIA.backgroundColor
+        else -> Theme.LIGHT.backgroundColor
+    }
+
+    /** [bookPageColor] for a PDF: PDFium has no theme and fills around its pages in black, or white by day. */
+    val pdfPageColor: Int get() = if (pdfNight) android.graphics.Color.BLACK else android.graphics.Color.WHITE
+
     /** PDF pages are drawn inverted: Night is the one theme a PDF honours. */
     val pdfNight: Boolean get() = pageNight
 

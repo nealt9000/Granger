@@ -40,6 +40,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -66,6 +67,7 @@ import app.granger.reader.SystemBarsHidden
 import app.granger.reader.isNewChromeRequest
 import app.granger.shell.SafeDrawingIgnoringBars
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.readium.adapter.pdfium.navigator.PdfiumNavigatorFragment
 import org.readium.r2.navigator.DecorableNavigator
@@ -76,7 +78,9 @@ import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.navigator.pdf.PdfNavigatorFragment
 import org.readium.r2.navigator.input.InputListener
 import org.readium.r2.navigator.input.TapEvent
+import org.readium.r2.navigator.preferences.ReadingProgression
 import org.readium.r2.navigator.util.DirectionalNavigationAdapter
+import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.util.AbsoluteUrl
 
 /** Taps this far in from either side turn the page; taps between show or hide the chrome. */
@@ -311,7 +315,14 @@ fun EbookReaderScreen(
         }),
     ).copy(menu = menu)
 
-    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    // Behind the page is the page's colour, or the rail's place and the cutout's band show the app's theme when the
+    // reader's differs. An error's words are in the app's colours, so it keeps the app's background.
+    val behindPage = when {
+        state.error != null -> MaterialTheme.colorScheme.background
+        state.isPdf -> Color(state.prefs.pdfPageColor)
+        else -> Color(state.prefs.bookPageColor)
+    }
+    Box(Modifier.fillMaxSize().background(behindPage)) {
         // The navigator has the whole screen whether the chrome shows or not (Plan U3c Decision 5), so Readium never
         // lays the book out again for it: the bars here, and the shell's rail and mini-player, slide over it and away.
         // Readium's own cutout padding is off (readerConfiguration): the page is padded here, for the cutout and the rail.
@@ -341,13 +352,14 @@ fun EbookReaderScreen(
                     look = if (factory is BookNavigator.Pdf) state.prefs.pdfLook else "",
                     isCleared = { viewModel.isCleared },
                     onReady = { fragment ->
+                        val turns = DirectionalNavigationAdapter(
+                            fragment as OverflowableNavigator,
+                            minimumHorizontalEdgeSize = 0.0,
+                            horizontalEdgeThresholdPercent = EDGE_FRACTION,
+                            animatedTransition = true,
+                        )
                         val taps = listOf(
-                            DirectionalNavigationAdapter(
-                                fragment as OverflowableNavigator,
-                                minimumHorizontalEdgeSize = 0.0,
-                                horizontalEdgeThresholdPercent = EDGE_FRACTION,
-                                animatedTransition = true,
-                            ),
+                            if (fragment is EpubNavigatorFragment) OverflowEscapingTurns(fragment, state.publication?.readingOrder.orEmpty(), turns, scope) else turns,
                             MiddleTapListener(fragment, viewModel::toggleChrome),
                         )
                         // A PDF's links are found after the tap is handed over: its turns and chrome wait for that.
@@ -477,6 +489,32 @@ private fun Modifier.pageTouches(onTouch: (down: Boolean) -> Unit): Modifier = p
             val event = awaitPointerEvent(PointerEventPass.Initial)
         } while (event.changes.any { it.pressed })
         onTouch(false)
+    }
+}
+
+/**
+ * Edge taps, with a way out of a chapter that overflows its last page. A wide table or `<pre>` leaves the page a little
+ * wider than a whole number of screens: Readium's next-page tap then "moves" to an offset that snaps back and reports a
+ * move, so it never goes on to the next chapter (a swipe does). A right tap on such a page goes to the next chapter
+ * itself; every other tap is [turns]'s.
+ */
+private class OverflowEscapingTurns(
+    private val navigator: EpubNavigatorFragment,
+    private val readingOrder: List<Link>,
+    private val turns: InputListener,
+    private val scope: CoroutineScope,
+) : InputListener {
+    override fun onTap(event: TapEvent): Boolean {
+        val width = navigator.publicationView.width
+        val onward = width > 0 && event.point.x / width > 1 - EDGE_FRACTION &&
+            navigator.overflow.value.readingProgression == ReadingProgression.LTR
+        if (!onward) return turns.onTap(event)
+        scope.launch {
+            val trapped = OverflowedPage.isTrapped(runCatching { navigator.evaluateJavascript(OverflowedPage.JS) }.getOrNull())
+            val next = if (trapped) OverflowedPage.nextChapter(readingOrder, navigator.currentLocator.value.href) else null
+            if (next == null || !navigator.go(next, animated = false)) turns.onTap(event)
+        }
+        return true
     }
 }
 

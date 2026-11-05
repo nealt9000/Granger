@@ -87,6 +87,29 @@ fun chromePaddingScript(topDp: Int, bottomDp: Int, leftDp: Int = 0, rightDp: Int
 """.trimIndent()
 
 /**
+ * Puts the page [fraction] of the way down: the window, or on a page that scrolls in its own full-screen box (Kiwix main
+ * pages' `#container`; the same test as [chromePaddingScript]'s, the padding being in place by now) that box.
+ */
+fun scrollToFractionScript(fraction: Float): String = """
+    (function () {
+      var whole = document.documentElement.scrollHeight - window.innerHeight;
+      if (whole > 1) { window.scrollTo(0, whole * $fraction); return; }
+      if (!document.body) return;
+      function box(el) {
+        if (!el) return false;
+        var cs = getComputedStyle(el);
+        if (cs.position !== 'absolute' && cs.position !== 'fixed') return false;
+        return /(auto|scroll)/.test(cs.overflowY + ' ' + cs.overflow) && el.scrollHeight > el.clientHeight;
+      }
+      var kids = document.body.children;
+      for (var i = 0; i < kids.length; i++) {
+        var el = box(kids[i]) ? kids[i] : box(kids[i].firstElementChild) ? kids[i].firstElementChild : null;
+        if (el) { el.scrollTop = (el.scrollHeight - el.clientHeight) * $fraction; return; }
+      }
+    })();
+""".trimIndent()
+
+/**
  * The page's only way into the app, added to the WebView as [ReaderPageScript.BRIDGE_NAME]. JavaScript calls arrive
  * on a WebView background thread, so [onToggleChrome] and [onUserScroll] are posted to the main thread.
  */
@@ -112,6 +135,17 @@ class GrangerBridge(
     fun linkTextFor(url: String): String {
         val (href, text) = tappedLink ?: return ""
         return if (sameAddress(href, url)) text else ""
+    }
+
+    /**
+     * How far down its own box a page that scrolls in one has gone (Kiwix main pages' `#container`), 0 to 1; null until
+     * it reports on this page. The window doesn't move on such a page, so the view can't tell.
+     */
+    @Volatile var boxFraction: Float? = null
+
+    @JavascriptInterface
+    fun onBoxScroll(fraction: Double) {
+        boxFraction = fraction.toFloat().coerceIn(0f, 1f)
     }
 
     @JavascriptInterface
