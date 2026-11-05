@@ -28,7 +28,7 @@ else
   echo "warning: $main/local.properties is missing; see tools/dev/MAC-SETUP.md" >&2
 fi
 
-git -C "$dir" submodule update --init --quiet
+git -C "$dir" submodule update --init --recursive --quiet
 
 if [[ -z "${JAVA_HOME:-}" || -z "${ANDROID_HOME:-}" ]]; then
   echo "note: JAVA_HOME or ANDROID_HOME isn't set in this shell; see tools/dev/MAC-SETUP.md (Shell setup)" >&2
