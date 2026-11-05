@@ -697,6 +697,87 @@ Still open:
 - Search time grows with the library: median search went from 8.9 s to 10.9 s after the Hermeneutics Stack Exchange pack was
   added, and send to first words is now 17.4 s against the 9 s target.
 - One unexplained replay mismatch (words-002 ranked unweighted on the phone); no outcome changed.
+## Carried forward from R1 (dense retrieval, 2026-10-21 to 10-24)
+
+No separate results write-up was made (Task 12's `2026-10-r1-dense-results.md`); the plan's Tasks 7–11 hold the tables, and
+R5 and R2 scored on from them. Written here on 2026-11-05 from the plan.
+
+What R1 built and handed on:
+- One chunker for phone and Mac (`:core:text`); the vector set across the nine domains built on the Mac (`tools/vectors`,
+  `set.json`, `BUILD.md`; release `vectors-2026-10-23`: 372 files, 1,480.5 MB, vectors on 380 catalog entries); int8 search
+  on the phone (`:core:vectors`); `DensePassageFinder`, hybrid ranking, fiction weighting on by default, the parallel keyword
+  search, vectors in the catalog. `DENSE_RETRIEVAL = true` since 2026-10-24.
+- **Numbers** (tuning split, `r1-dense-1`, 2026-10-22): 86/126 grounded (68%), 67/76 declined (88%), recall@4 52%, send to
+  first words 16.5 / 22.2 s. The dense scan with 420 MB of vectors was 2.2 s median (the 1 s gate failed); with the whole
+  1.5 GB set `ms.dense` was 13.8–14.9 s, though it finished before the keyword search on every question that used it.
+- **The embedder's input is capped at 2,048 tokens** (reverseengineering's 24k-token chunks crashed the build; 45 earlier
+  chunks embedded past the cap were left). The unix pack was embedded on a RunPod 4090, within cosine 0.9945 of the Mac.
+  Knots was left out of the vector set (built from 2026-07-20 against the catalog's 2026-10-18).
+- **Neal's calls (2026-10-23):** a hedge on weak dense matches (best hit under 0.80) was built and reverted, since the
+  replay showed no better experience and it cost a schema bump; no year/season mismatch trick; the dense gate can't tell an
+  on-topic passage from one that answers (top cosines 0.75–0.83 overlap), which is the answer model's judgment.
+- **The ranking sweep** (Task 11): only `cover` gained with no loss, one possible answer at best; no phone run, the ranking
+  stayed. `cover` stays in `merge.py`.
+- Handed to R2 and done there: books a user adds are embedded on the phone in `build.py`'s format (R2 Task 9,
+  `BookVectors`); the held-out set covers every domain in `set.json` (R2 Task 1).
+
+Still open:
+- The dense scan's cost beside the model: on the Pixel 6 the scan took about 8 s instead of 0.9 s while the model loaded and
+  rewrote (the GPU and CPU share memory bandwidth; run `ob-looking-1`, 2026-11-02), so the pipeline runs it before the model.
+- The gitignored `tools/vectors/sources/` and the embedding caches stay on the Mac; `BUILD.md` is where their location goes.
+
+## Carried forward from R4 (the answer model, 2026-10-23 to 10-26)
+
+Results: the speed screen in the plan's Task 3 (and `docs/superpowers/spikes/2026-10-model-spike-results.md` for R0's).
+
+- **Only E2B is fast enough on the Pixel 6.** First words 2.9 / 3.3 s on the speed set, prefill 451 tok/s, decode 14 tok/s,
+  1.6 GB. The deciding number is prefill: the answer prompt is about 1,250 tokens, and the next-best model reads it at 107
+  tok/s, so every other candidate is past 12 s before its first word. E4B: 14.9 s. MiniCPM5-2B: 15.3 s. Ministral-3-3B:
+  47 s. LFM2.5-2.6B and SmolLM3-3B never produced a usable reply. Qwen3.5-2B, Qwen3.5-4B and Phi-4-mini were killed for
+  memory while loading.
+- **Speculative decoding (MTP) does nothing useful on this GPU:** replies byte-identical, E4B no faster, E2B slower (10.2
+  against 14.0 tok/s). `enableSpeculativeDecoding` stays at its default.
+- **No small rewrite model:** LFM2.5-350M and Qwen3-0.6B copy the prompt's worked example instead of rewriting; Qwen3.5-0.8B
+  was killed for memory. E2B's rewrite (1.0 s to first words, about 2.3 s in all) stays; R5 Task 6 then tried no model at all.
+- **Gotchas:** LiteRT-LM writes a compiled weight cache per model into the app's cache dir (1–2.4 GB each, never removed),
+  so trying seven candidates filled the phone; the eval runner stops when the app dies or its process is replaced.
+- Tasks 4–7 (quality, routing, finalists, feel test) were dropped with no candidate; Task 8 (Think deeper removed) went to R5.
+
+Still open:
+- A different answer model for newer phones (R4 decision 1: later). R2's verdict (2026-11-05) names the same door: a newer
+  small model that reads better out of the box, or a run-time adapter, or a usable converter.
+- A different embedder would invalidate every vector file (about two days of Mac GPU); not on the table.
+- The E4B catalog entry: kept by R5 "until Neal says otherwise"; **removed 2026-11-05** (Neal), catalog re-signed. The LARGE
+  role stays in the parser and the Sources row ("Not used") for an installed copy.
+
+## Carried forward from R5 (Research built around E2B, 2026-10-26 to 10-27)
+
+Results: the plan's Task 7 run (`r5-t7-all`) and feel test; merged with R4 and pushed (c2a52eb, 2026-10-27).
+
+- **Where it ended** (tuning split): grounded 91/126 (72%), multi-step 11/20 (from 4), declined 63/76 (83%), medical flag
+  recall 95%, recall@4 48%, first words 11.9 / 13.9 s without Think deeper's reloads. The bars (80% / 90% / 9 s) were not met;
+  R2 took the bar to a fresh held-out set.
+- **Kept:** keyword search 8.8 → 1.8 s (Task 1), entity passages and `YearFacts` (Task 4), E2B's rewrite, dense on, the
+  auto best guess after a decline (Neal's idea from the feel test), `FollowUp.refersBack` (a question that stands alone is
+  searched by meaning alone; the chat-prior bug declined 10 of Neal's 21 questions).
+- **Dropped, with numbers:** the check pass (Task 5: +1 unanswerable declined of 12 for 2.9 s on every question; E2B can't
+  tell an on-topic passage from one that answers any better when asked separately); plain keywords without the model (Task 6:
+  saves 4.5 s to first words, the one route under 9 s, but recall −2.4 points: names split into words, E2B's added terms
+  lost, filler kept); the medical flag on the embedder's vectors (apoplexy scores −0.012, too thin a margin); passage trim
+  (its embed cost about 4 s a question to save 0.9 s); the ranking gate (Task 3).
+- **Think deeper removed** (Task 8): one LLM, `InstalledModels` is `(llm, embedder)`, tiers LIBRARY_ONLY and ASK, the
+  storage columns stay written false, the eval report still reads old deeper records.
+- **Declines fell 4 with Task 1's search changes** (unanswerables 001, 035, 057, 058, 059 answered); R2's `DeclineCheck`
+  took 8 more back by rule.
+
+Still open:
+- The latency target (9 s; 12 s median): plain keywords were the one route under 9 s found, and a second try needs names
+  kept whole (capital runs, adjacent words that make a title), filler words dropped, and a medical flag with a real margin.
+- Neal's feel test on the release build path with no debug flags (R5 Task 7, R2 Task 10): never run as written; the closed
+  test's feedback takes its place.
+- Quantities with units, chains, and general question parsing; fine-tuning E2B (tried outside R2's tasks 2026-11-04/05 and
+  closed: `docs/ask/r2-findings-2026-11-04.md` §12).
+
 ## Carried forward from V0
 
 Measured on the Pixel 6 (2026-10-21, `docs/superpowers/spikes/2026-10-voice-spike-results.md`): Piper through sherpa-onnx at 2 threads has a real-time factor of 0.11–0.14 (0.14–0.15 with E2B resident on the GPU, 2.3 GB peak), first audio 250–400 ms for ordinary sentences and up to 1.6 s for 190-character ones, +420 MB of process memory while speaking; the system engine (Google TTS, 29 offline English voices) is at 0.06 and ≤ 573 ms; Kokoro is 1.5–2.2× slower than real time and slower with more threads. 1638 JVM tests pass.

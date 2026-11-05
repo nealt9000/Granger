@@ -460,10 +460,12 @@ Classics notes, found for 13 of 31 held-out classics questions and chosen for 2.
 
 ## Task 12: housekeeping from the audit
 
-- [ ] "Carried forward from R1, R4 and R5" sections in the roadmap (none exist): R1's results write-up (Task 12) and
-  what it handed on; R4 Task 8's per-phone-model item; R5's open items.
-- [ ] The E4B catalog entry: remove it, or keep it with a reason (R4 said removed, R5 said kept "until Neal says
-  otherwise").
+- [x] "Carried forward from R1, R4 and R5" sections in the roadmap (none exist): R1's results write-up (Task 12) and
+  what it handed on; R4 Task 8's per-phone-model item; R5's open items. Written 2026-11-05 from the plans (R1's results
+  doc was never made; the section says so).
+- [x] The E4B catalog entry: remove it, or keep it with a reason (R4 said removed, R5 said kept "until Neal says
+  otherwise"). **Removed 2026-11-05 (Neal):** out of `curated.json` and the catalog, re-signed; the LARGE role and the
+  Sources "Not used" row stay for an installed copy.
 - [ ] Watch for a Google-built E2B QAT file (R0: same quality, 0.5 GB less memory). 2026-11-05: the shipped GPU bundle
   is already quantization-aware-trained in a closed format; our converter can't make one (findings §10, §12).
 - [ ] The latency target (9 s; 12 s median now): R5 Task 6's plain-keywords retry was the one route under 9 s found;

@@ -447,7 +447,7 @@ Neal asked 21 questions in one chat: "mostly poor", with many easy ones declined
 
 ## Task 8: Think deeper removed (from R4 Task 8)
 
-- [x] Remove the button, the second pass and E4B as a model role. The catalog keeps E4B's entry until Neal says otherwise.
+- [x] Remove the button, the second pass and E4B as a model role. The catalog keeps E4B's entry until Neal says otherwise. **Removed from the catalog 2026-11-05 (Neal, Plan R2 Task 12).**
 
 ### Done (2026-10-27)
 

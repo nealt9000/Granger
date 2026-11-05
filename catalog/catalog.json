@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-11-03T12:06:31Z",
+  "generatedAt": "2026-11-05T12:25:48Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -24363,18 +24363,6 @@
       "url": "https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/b3ca0d2f076785a8f4b2219ddbd2bdb99954eae1/gemma-4-E2B-it-gpu.litertlm",
       "license": "Apache-2.0",
       "evalPassed": true
-    },
-    {
-      "id": "gemma-4-e4b-gpu",
-      "title": "Gemma 4 E4B (Think deeper)",
-      "role": "large",
-      "fileName": "gemma-4-E4B-it-gpu.litertlm",
-      "sizeBytes": 2969059328,
-      "minRamGb": 8,
-      "sha256": "4912bb5a9c30993c51a7711f763212077458529312175df0573a78323a2bb7ff",
-      "url": "https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/2eee7ac325f20eb8c9ac1d0e972f7c84663062da/gemma-4-E4B-it-gpu.litertlm",
-      "license": "Apache-2.0",
-      "evalPassed": false
     },
     {
       "id": "embeddinggemma-2-text-270m",
