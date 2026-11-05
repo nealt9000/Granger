@@ -5,7 +5,9 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.session.LibraryResult
+import androidx.media3.session.MediaBrowser
 import androidx.media3.session.MediaController
+import androidx.media3.session.MediaLibraryService.LibraryParams
 import androidx.media3.session.MediaLibraryService.MediaLibrarySession
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionError
@@ -16,6 +18,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertThrows
@@ -270,5 +273,33 @@ class PlaybackCallbackTest {
         rig.idle()
         assertThat(future.isDone).isTrue()
         assertThrows(ExecutionException::class.java) { future.get() }
+    }
+
+    @Test fun aFolderABrowserOpenedIsAnnouncedWhenTheLibraryChanges() {
+        val engine = rig.engine()
+        val changes = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+        val root = MediaItem.Builder().setMediaId("root")
+            .setMediaMetadata(MediaMetadata.Builder().setIsBrowsable(true).setIsPlayable(false).build()).build()
+        val tree = object : MediaBrowseTree by FakeTree(engine, emptyList()) {
+            override suspend fun item(id: String) = if (id == "root") root else null
+        }
+        val session = librarySession(engine, LibraryCallback(engine, scope, tree, changes))
+        val told = mutableListOf<Pair<String, Int>>()
+        val future = MediaBrowser.Builder(rig.context, session.token).setListener(object : MediaBrowser.Listener {
+            override fun onChildrenChanged(browser: MediaBrowser, parentId: String, itemCount: Int, params: LibraryParams?) {
+                told += parentId to itemCount
+            }
+        }).buildAsync()
+        rig.idle()
+        val browser = future.get().also { controllers += it }
+
+        browser.subscribe("root", null)
+        browser.getChildren("root", 0, 10, null)
+        rig.idle()
+        told.clear()      // Media3 announces a folder once when it's subscribed to
+
+        changes.tryEmit(Unit)
+        rig.idle()
+        assertThat(told).containsExactly("root" to 1)
     }
 }

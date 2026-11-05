@@ -26,17 +26,38 @@ import javax.crypto.spec.SecretKeySpec
  */
 class Artwork(private val roots: () -> List<File>, private val key: () -> ByteArray) {
 
-    /** content://app.granger.artwork/<token> for a cover under a root, else null. */
-    fun uri(coverPath: String): Uri? {
+    /** content://app.granger.artwork/<token> for an existing cover under a root, else null. */
+    fun uri(coverPath: String): Uri? = mint(coverPath, ::relativeTo)
+
+    /**
+     * [uri] from the path alone, with no look at the disk, for the player's items: a queue builds one per song on the
+     * main thread. [file] still checks everything when the image is asked for, so a cover that isn't there just shows no
+     * art, and one written later shows up. Null only when the path isn't under a root.
+     */
+    fun uriFromPath(coverPath: String): Uri? = mint(coverPath) { root, file -> lexicallyUnder(root, file) }
+
+    /** Reads the key and the roots ahead of the first [uriFromPath], which may be on the main thread. */
+    fun warm() {
+        key()
+        roots()
+    }
+
+    private fun mint(coverPath: String, under: (File, File) -> String?): Uri? {
         val file = File(coverPath)
         if (!isImage(file.name)) return null
         roots().forEachIndexed { index, root ->
-            val relative = relativeTo(root, file) ?: return@forEachIndexed
+            val relative = under(root, file) ?: return@forEachIndexed
             val payload = ENCODER.encodeToString("$index/$relative".toByteArray(Charsets.UTF_8))
             val token = "$payload.${ENCODER.encodeToString(mac(payload) ?: return null)}"
             return Uri.Builder().scheme("content").authority(AUTHORITY).appendPath(token).build()
         }
         return null
+    }
+
+    private fun lexicallyUnder(root: File, file: File): String? {
+        val relative = file.relativeToOrNull(root)?.path ?: return null
+        val inside = relative.isNotEmpty() && !relative.startsWith("..") && !File(relative).isAbsolute
+        return if (inside) relative.replace(File.separatorChar, '/') else null
     }
 
     /** The file a token names, if it's an image under a root (canonical path checked), else null. */

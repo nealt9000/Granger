@@ -44,9 +44,6 @@ interface MediaLibrary {
      */
     suspend fun sync(origin: MediaOrigin, result: ScanResult, keep: (uri: String) -> Boolean = { false })
 
-    /** Sets every [origin] row MISSING (permission lost). */
-    suspend fun markAllMissing(origin: MediaOrigin)
-
     /**
      * Deletes these catalog rows (tracks, audiobooks, and the audiobooks' chapters), and the notes of albums left with
      * no track row. Audiobook states, bookmarks, playlist
@@ -120,13 +117,6 @@ class RoomMediaLibrary(private val db: LibraryDatabase, private val now: () -> L
             val noted = result.albumNotes.associateBy { it.albumKey }
             for (keys in (scannedAlbums - noted.keys).chunked(MAX_IDS)) dao.deleteAlbumNotes(keys)
             dao.upsertAlbumNotes(noted.values.toList())
-        }
-    }
-
-    override suspend fun markAllMissing(origin: MediaOrigin) {
-        db.withTransaction {
-            dao.setTrackStatusForOrigin(origin, PackStatus.MISSING)
-            dao.setAudiobookStatusForOrigin(origin, PackStatus.MISSING)
         }
     }
 

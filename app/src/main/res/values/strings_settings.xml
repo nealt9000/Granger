@@ -78,7 +78,7 @@
     <!-- Music & audiobooks settings. -->
     <string name="settings_media_permission">Find music and audiobooks on this phone</string>
     <string name="settings_media_permission_granted">Granger reads them where they are and never changes them.</string>
-    <string name="settings_media_permission_denied">Not allowed. Granger works without it; folders you add below still need it.</string>
+    <string name="settings_media_permission_denied">Not allowed. Granger works without it, and folders you add below still work.</string>
     <string name="settings_media_permission_permanently_denied">Not allowed. Android won\'t ask again: allow Music and audio in Granger\'s app settings.</string>
     <string name="settings_media_allowed">Allowed</string>
     <string name="settings_media_allow_access">Allow access</string>

@@ -112,7 +112,6 @@ class MediaLibraryTest {
         library.sync(MediaOrigin.LIBRIVOX, ScanResult(listOf(track("x", MediaOrigin.LIBRIVOX)) + files, listOf(scanned)))
         library.sync(MediaOrigin.PHONE, ScanResult(listOf(track("a")), emptyList()))
         library.sync(MediaOrigin.PHONE, ScanResult(emptyList(), emptyList()))
-        library.markAllMissing(MediaOrigin.PHONE)
 
         assertThat(statusOf("track:librivox:x")).isEqualTo(PackStatus.OK)
         assertThat(statusOf("track:librivox:o1")).isEqualTo(PackStatus.OK)
@@ -121,13 +120,13 @@ class MediaLibraryTest {
         assertThat(statusOf("track:phone:a")).isEqualTo(PackStatus.MISSING)
     }
 
-    @Test fun markAllMissingKeepsEverything() = runTest {
+    @Test fun emptySyncKeepsEverythingAsMissing() = runTest {
         val (scanned, files) = book("hobbit", listOf("h1", "h2"))
         library.sync(MediaOrigin.PHONE, ScanResult(listOf(track("a")) + files, listOf(scanned)))
         playback.upsertAudiobookState(AudiobookState(scanned.book.id, "track:phone:h2", 1_000L, 1f, false, 0, false, 5L))
         playback.insertBookmark(AudioBookmark(0, scanned.book.id, "track:phone:h1", 500L, "Start", "", 6L))
 
-        library.markAllMissing(MediaOrigin.PHONE)
+        library.sync(MediaOrigin.PHONE, ScanResult(emptyList(), emptyList()))
 
         assertThat(allTracks().map { it.status }).containsExactly(PackStatus.MISSING, PackStatus.MISSING, PackStatus.MISSING)
         assertThat(library.audiobooks.first().map { it.status }).containsExactly(PackStatus.MISSING)

@@ -151,4 +151,16 @@ class ArtworkTest {
     private companion object {
         val KEY = ByteArray(32) { it.toByte() }
     }
+
+    @Test fun uriFromPathSkipsTheDiskAndTheCheckComesWhenServed() {
+        val later = File(covers, "later.jpg")
+        val uri = artwork.uriFromPath(later.path)!!
+        assertThat(artwork.file(token(uri))).isNull()          // not there yet: no art, no error
+        later.writeBytes(byteArrayOf(1))
+        assertThat(artwork.file(token(uri))).isEqualTo(later)  // the same link shows it once it's written
+
+        assertThat(artwork.uriFromPath(File(music, "../packs/x.jpg").path)).isNull()
+        assertThat(artwork.uriFromPath(File(tmp.root, "elsewhere/x.jpg").path)).isNull()
+        assertThat(artwork.uriFromPath(File(covers, "x.txt").path)).isNull()
+    }
 }

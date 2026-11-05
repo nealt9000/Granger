@@ -259,6 +259,7 @@ open class GrangerApp : Application(), DownloadsHost {
         }
         // Granger's own downloads: no permission needed. Quiet, on the app scope: a failure never crashes the start.
         container.appScope.launch { container.mediaDownloader.rescanQuietly() }
+        container.appScope.launch(Dispatchers.IO) { container.artwork.warm() }
     }
 
     override val downloadQueue: DownloadQueue get() = container.downloadQueue
@@ -531,7 +532,7 @@ class AppContainer(context: Context) {
         MediaControllerPlayerHub(
             context, media, playback, CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
             // A cover outside the provider's roots keeps its file:// URI, which the in-process notification can still read.
-            artwork = { path -> artwork.uri(path) ?: Uri.fromFile(File(path)) },
+            artwork = { path -> artwork.uriFromPath(path) ?: Uri.fromFile(File(path)) },
             // Made on first use (the tree plays through this hub): Android Auto's first browse.
             browse = { autoBrowse },
             voices = if (Features.READ_ALOUD) installedVoices else null,

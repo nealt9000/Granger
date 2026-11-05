@@ -18,6 +18,8 @@ import kotlinx.coroutines.withContext
 class MediaStoreSource(private val context: Context) : AudioSource {
     override fun owns(uri: String): Boolean = uri.startsWith("content://${MediaStore.AUTHORITY}/")
 
+    override val needsAudioPermission: Boolean get() = true
+
     override suspend fun list(): List<FoundFile> = withContext(Dispatchers.IO) {
         val collection = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val projection = listOfNotNull(

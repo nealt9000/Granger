@@ -33,7 +33,9 @@ import kotlinx.coroutines.withContext
  *   the phone's files. Covers are copied into [coversDir], Granger's own storage.
  * - A file's id is its [Fingerprint], so a moved or renamed file keeps its id, position and playlist entries.
  * - An unchanged file (same uri, size and date as in the scan cache) isn't opened: its row in [media] is reused.
- * - Without [hasPermission], every phone item goes MISSING (kept, with its state) and no source is asked.
+ * - Without [hasPermission], the items of a source that needs it go MISSING (kept, with its state) and that source
+ *   isn't asked; picked folders hold their own grants and scan as usual. Their scan-cache rows stay, so allowing the
+ *   permission again doesn't read every file over.
  * - A source (or one picked folder) that throws means "unknown", not "empty": the items it owns are left exactly as
  *   they are while the other sources sync. If nothing could be listed, nothing changes.
  * - A file that can't be opened or read is skipped; one TagLib can't parse still becomes a track named from its file.
@@ -88,12 +90,10 @@ class PhoneScanner(
     )
 
     private suspend fun runScan(): Int {
-        if (!hasPermission()) {
-            media.markAllMissing(MediaOrigin.PHONE)
-            return 0
-        }
+        val allowed = hasPermission()
+        val (scanned, refused) = sources.partition { allowed || !it.needsAudioPermission }
         // Each piece is listed on its own; a failed one (null) is unknown, and the rows it owns are left as they are.
-        val listings: List<Pair<AudioSource, List<FoundFile>?>> = sources.flatMap { source ->
+        val listings: List<Pair<AudioSource, List<FoundFile>?>> = refused.map { it to emptyList<FoundFile>() } + scanned.flatMap { source ->
             val parts = attempt { source.parts() } ?: return@flatMap listOf(source to null)
             parts.map { part -> part to attempt { part.list() } }
         }
@@ -101,9 +101,9 @@ class PhoneScanner(
         val failed = listings.filter { it.second == null }.map { it.first }
         val found = listings.flatMap { it.second.orEmpty() }
         return withContext(Dispatchers.IO) {
-            val read = readAndSync(found) { uri -> failed.any { it.owns(uri) } }
-            // Only after a complete listing: a source that failed may own rows whose covers would look unreferenced.
-            if (failed.isEmpty()) sweepCovers()
+            val read = readAndSync(found, refused, unknown = { uri -> failed.any { it.owns(uri) } })
+            // Only after a complete listing: a source that failed or wasn't asked may own rows whose covers would look unreferenced.
+            if (failed.isEmpty() && refused.isEmpty()) sweepCovers()
             read
         }
     }
@@ -131,7 +131,7 @@ class PhoneScanner(
         null
     }
 
-    private suspend fun readAndSync(found: List<FoundFile>, unknown: (String) -> Boolean): Int {
+    private suspend fun readAndSync(found: List<FoundFile>, refused: List<AudioSource>, unknown: (String) -> Boolean): Int {
         val storedChapters = mutableMapOf<String, List<AudiobookChapter>>()
         val folderCovers = mutableMapOf<String, String?>()
         val skipTags = tagGuard.skipped()
@@ -160,7 +160,7 @@ class PhoneScanner(
         for (e in read) playback.upsertScanCache(ScanCacheEntry(e.file.uri, e.file.sizeBytes, e.file.modifiedMs, e.fingerprint))
         // Files no longer listed drop out of the cache, except those of a piece that couldn't be listed this time.
         val seen = found.mapTo(HashSet()) { it.uri }
-        playback.scanCacheUris().filter { it !in seen && !unknown(it) }
+        playback.scanCacheUris().filter { uri -> uri !in seen && !unknown(uri) && refused.none { it.owns(uri) } }
             .chunked(CACHE_DELETE_BATCH)
             .forEach { playback.deleteScanCache(it) }
         return read.size

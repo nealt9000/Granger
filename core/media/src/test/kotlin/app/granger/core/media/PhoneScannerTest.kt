@@ -71,6 +71,7 @@ class PhoneScannerTest {
     /** Owns the uris under [prefix]. */
     private class FakeSource(var files: List<FoundFile>, private val prefix: String = "content://media/") : AudioSource {
         override fun owns(uri: String) = uri.startsWith(prefix)
+        override val needsAudioPermission get() = prefix == "content://media/"
         var calls = 0
         var error: Exception? = null
         var gate: CompletableDeferred<Unit>? = null
@@ -322,6 +323,37 @@ class PhoneScannerTest {
             disk[DocumentsContract.buildDocumentUriUsingTree(tree, id).toString()] = tmp.newFile().apply { writeBytes(bytes) }
             DocumentTree.Document(id, file, if (file.endsWith(".jpg")) "image/jpeg" else "audio/mpeg", bytes.size.toLong(), 5_000L)
         }
+    }
+
+    @Test fun permissionLostLeavesPickedFoldersScanning() = runTest {
+        val fakeTree = FakeTree()
+        val tapes = fakeTree.tree("primary:Tapes", "Tapes", listOf("side-a.mp3"))
+        val folders = mutableListOf(MediaFolder(tapes.toString(), audiobooks = false, addedAt = 1L))
+        val folderSource = FolderSource(ApplicationProvider.getApplicationContext(), { folders }, fakeTree)
+        val store = FakeSource(listOf(found("content://media/1", "Mars.mp3")))
+        val scanner = scanner(store, folderSource)
+        scanner.scan()
+
+        permission = false
+        store.calls = 0
+        opened.clear()
+        fakeTree.addFiles(tapes, "primary:Tapes", listOf("side-b.mp3"))
+        scanner.scan()
+
+        // The media store isn't asked and its song goes missing; the folder stays and even finds its new file.
+        assertThat(store.calls).isEqualTo(0)
+        assertThat(phoneTracks().associate { it.title to it.status }).containsExactly(
+            "Mars", PackStatus.MISSING, "side-a", PackStatus.OK, "side-b", PackStatus.OK,
+        )
+
+        // Allowed again: the song is back from the scan cache, without reading it over.
+        permission = true
+        opened.clear()
+        store.calls = 0
+        scanner.scan()
+        assertThat(store.calls).isEqualTo(1)
+        assertThat(phoneTracks().map { it.status }.distinct()).containsExactly(PackStatus.OK)
+        assertThat(opened).isEmpty()
     }
 
     @Test fun folderGrantLostMarksOnlyThatFoldersItemsMissing() = runTest {

@@ -15,7 +15,8 @@ import kotlinx.coroutines.launch
 /**
  * Runs phone scans: once on app start, 2 s after the system's media list stops changing, and at once when the audio
  * permission was granted or revoked since the last look ([recheckPermission], on every resume and after the prompt).
- * Without the permission the scanner marks phone items missing and asks nothing, so this never prompts or crashes.
+ * Without the permission the scanner marks the media store's items missing and leaves picked folders scanning, so this
+ * never prompts or crashes.
  */
 class PhoneMediaScans(private val context: Context, private val scope: CoroutineScope, private val scanner: PhoneScanner) {
     private suspend fun scanQuietly() {

@@ -55,7 +55,7 @@
 
     <string name="settings_media_permission">Buscar música y audiolibros en este teléfono</string>
     <string name="settings_media_permission_granted">Granger los lee donde están y nunca los modifica.</string>
-    <string name="settings_media_permission_denied">Sin permiso. Granger funciona sin él, pero las carpetas que agregues abajo sí lo necesitan.</string>
+    <string name="settings_media_permission_denied">Sin permiso. Granger funciona sin él, y las carpetas que agregues abajo siguen funcionando.</string>
     <string name="settings_media_permission_permanently_denied">Sin permiso. Android no volverá a preguntar: permite Música y audio en los ajustes de la app de Granger.</string>
     <string name="settings_media_allowed">Permitido</string>
     <string name="settings_media_allow_access">Permitir acceso</string>

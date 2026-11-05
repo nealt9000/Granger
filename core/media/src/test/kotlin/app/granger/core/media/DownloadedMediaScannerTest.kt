@@ -296,7 +296,12 @@ class DownloadedMediaScannerTest {
         scanner().scan()
         assertThat(tracksOf(MediaOrigin.PHONE).single().status).isEqualTo(PackStatus.OK)
 
-        val phoneScanner = PhoneScanner(emptyList(), { null }, media, playback, tmp.newFolder("covers"), hasPermission = { false })
+        val mediaStore = object : AudioSource {
+            override suspend fun list(): List<FoundFile> = error("Not asked without the permission")
+            override fun owns(uri: String) = uri.startsWith("content://media/")
+            override val needsAudioPermission get() = true
+        }
+        val phoneScanner = PhoneScanner(listOf(mediaStore), { null }, media, playback, tmp.newFolder("covers"), hasPermission = { false })
         phoneScanner.scan()
         scanner().scan()
         assertThat(tracksOf(MediaOrigin.PHONE).single().status).isEqualTo(PackStatus.MISSING)

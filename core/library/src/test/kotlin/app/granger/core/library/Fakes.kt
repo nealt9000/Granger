@@ -133,7 +133,6 @@ class MemoryMedia : MediaLibrary {
         bookList.value = bookList.value.filter { it.origin != origin } + result.audiobooks.map { it.book }
         noteList.value = noteList.value + result.albumNotes
     }
-    override suspend fun markAllMissing(origin: MediaOrigin) = error("not in tests")
     override suspend fun forget(trackIds: Collection<String>, audiobookIds: Collection<String>) = error("not in tests")
 }
 

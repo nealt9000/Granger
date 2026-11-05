@@ -42,10 +42,16 @@ import java.io.File
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -136,7 +142,7 @@ class PlaybackService : MediaLibraryService() {
         engine = e
         val power = getSystemService(android.os.PowerManager::class.java)
         e.setScreenState { if (power?.isInteractive == true) "on" else "off" }
-        session = MediaLibrarySession.Builder(this, SessionPlayer(player, e), LibraryCallback(e, callbackScope, deps.browse))
+        session = MediaLibrarySession.Builder(this, SessionPlayer(player, e), LibraryCallback(e, callbackScope, deps.browse, libraryChanges(deps.media)))
             .apply { sessionActivity()?.let(::setSessionActivity) }
             .build()
         headset = HeadsetAutoplay(this, e::onHeadsetConnected).also { it.start() }
@@ -193,7 +199,34 @@ internal class LibraryCallback(
     private val engine: PlayerEngine,
     private val scope: CoroutineScope,
     private val browse: MediaBrowseTree? = null,
+    /** The library changed; each folder a browser has opened is announced, so Android Auto's lists stay current. */
+    private val changes: Flow<Unit> = emptyFlow(),
 ) : MediaLibrarySession.Callback {
+    /** Folders a browser has opened. The session's calls, and the watch below, are on the main thread. */
+    private val browsed = mutableSetOf<String>()
+    private var watching = false
+
+    /** Watches [changes] from the first browse on, so a phone that's never in a car never does the work. */
+    private fun watchChanges(session: MediaLibrarySession) {
+        if (watching) return
+        watching = true
+        scope.launch {
+            try {
+                changes.collect {
+                    for (parentId in browsed.toList()) {
+                        val count = browse?.children(parentId, 0, 0)?.size
+                        if (count == null) browsed -= parentId else session.notifyChildrenChanged(parentId, count, null)
+                    }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // Auto's lists then refresh when it browses again, as they did before this watch.
+                Log.w("PlaybackService", "Library watch for browsers ended", e)
+            }
+        }
+    }
+
     private val emptyRoot = MediaItem.Builder()
         .setMediaId("root")
         .setMediaMetadata(MediaMetadata.Builder().setIsBrowsable(true).setIsPlayable(false).build())
@@ -212,6 +245,8 @@ internal class LibraryCallback(
             if (parentId == emptyRoot.mediaId) LibraryResult.ofItemList(ImmutableList.of(), params)
             else LibraryResult.ofError(SessionError.ERROR_BAD_VALUE),
         )
+        browsed += parentId
+        watchChanges(session)
         return future {
             tree.children(parentId, page, pageSize)?.let { LibraryResult.ofItemList(it, params) }
                 ?: LibraryResult.ofError(SessionError.ERROR_BAD_VALUE)
@@ -488,6 +523,13 @@ internal class SessionPlayer(player: ExoPlayer, private val engine: PlayerEngine
         )
     }
 }
+
+/** Once per burst of changes to the library (a scan writes many), never for what's already there at the start. */
+@OptIn(FlowPreview::class)
+internal fun libraryChanges(media: MediaLibrary): Flow<Unit> =
+    combine(media.tracks, media.audiobooks) { _, _ -> }.drop(1).debounce(LIBRARY_CHANGE_SETTLE_MS)
+
+private const val LIBRARY_CHANGE_SETTLE_MS = 2_000L
 
 /** [base], or [base] in the application's locales when they differ (the app's own language below API 33). */
 internal fun followAppLocales(base: Context): Context {

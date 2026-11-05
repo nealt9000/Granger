@@ -25,6 +25,9 @@ interface AudioSource {
     /** Whether a file at [uri] would come from this source; when a listing fails, the rows it owns are left alone. */
     fun owns(uri: String): Boolean
 
+    /** Whether listing this source takes the audio permission. A picked folder doesn't: its grant is its own. */
+    val needsAudioPermission: Boolean get() = false
+
     /** Pieces that are listed, and can fail, on their own (one per picked folder). By default the source is one piece. */
     suspend fun parts(): List<AudioSource> = listOf(this)
 }

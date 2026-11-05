@@ -56,12 +56,6 @@ interface MediaDao {
     @Query("UPDATE audiobooks SET status = :status WHERE id = :id")
     suspend fun setAudiobookStatus(id: String, status: PackStatus)
 
-    @Query("UPDATE tracks SET status = :status WHERE origin = :origin")
-    suspend fun setTrackStatusForOrigin(origin: MediaOrigin, status: PackStatus)
-
-    @Query("UPDATE audiobooks SET status = :status WHERE origin = :origin")
-    suspend fun setAudiobookStatusForOrigin(origin: MediaOrigin, status: PackStatus)
-
     @Query("DELETE FROM audiobook_chapters WHERE audiobookId = :audiobookId")
     suspend fun deleteChapters(audiobookId: String)
 
