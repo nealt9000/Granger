@@ -468,7 +468,7 @@ Classics notes, found for 13 of 31 held-out classics questions and chosen for 2.
   is already quantization-aware-trained in a closed format; our converter can't make one (findings §10, §12).
 - [ ] The latency target (9 s; 12 s median now): R5 Task 6's plain-keywords retry was the one route under 9 s found;
   revisit after Tasks 2–8, not before.
-- [ ] Stale roadmap lines: "Gate `Features.RESEARCH` … before any release build" and "deleteChat … no error guard".
+- [x] Stale roadmap lines: "Gate `Features.RESEARCH` … before any release build" and "deleteChat … no error guard". Struck through with what overtook them (2026-11-05).
 
 ## Not in this plan
 
