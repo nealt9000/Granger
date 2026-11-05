@@ -15,6 +15,12 @@ Run each one for **music**, an **audiobook** and **read-aloud** (a Classics book
 - [ ] Sleep timer, speed, chapters and the queue sheets each open and do what they say.
 - [ ] ReplayGain and the equaliser (Settings → Listening): an audible change, no crash.
 
+Also on the Pixel 6, with Granger open on the screen (a backgrounded app is frozen and sees no change):
+
+- [ ] Delete and restore a phone file: add a song to `Music/`; it appears. Delete it; it goes Missing, with its playlist entry kept. Put it back; it returns with the same id. (2026-11-05: tried by adb on a locked phone, which only showed the freeze. No result yet.)
+- [ ] Revoke Music and audio with a picked folder added: the folder's items stay playable, and the phone's own music goes Missing. Allow it again: the music returns at once.
+- [ ] A Wikipedia article with Australia, Rosetta and area, read by Owl, Nanny and Professor: does an "r" appear after the final "a"? Only `ljspeech` was heard doing it.
+
 ## 2. An SD card (a tester's phone with a microSD slot; Pixels have none)
 
 Assigned 2026-11-04 to the E1 field tester (Sony Xperia 10 II, 4 GB, microSD); `economy-phone-note.md` asks him for it.
@@ -34,5 +40,7 @@ The voice uses about 420 MB while speaking. Ask is hidden under 6 GB, but read-a
 - [ ] Get the default Granger voice; open a Classics chapter; Listen; lock the screen for 10 minutes.
 - [ ] Then the same with a Wikipedia article open in another tab and music paused in Listen.
 - [ ] Note whether reading stops, stutters or the app restarts, and the phone model.
+
+- [ ] Gapless on this phone's decoder: an album that runs track to track, no gap or click. (The 529-sample fix is keyed to the Pixel's `c2.android.mp3.decoder`.)
 
 **If it fails:** on phones under 6 GB, default to the phone's own voice and offer the Granger voices with a note that they may stop on this phone. (Decision for Neal; nothing changes unless it fails.)

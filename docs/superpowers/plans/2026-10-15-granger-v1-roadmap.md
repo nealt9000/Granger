@@ -405,12 +405,12 @@ Fixed after the walkthrough: the players' icons and text were near-black on the 
 Still open:
 
 Data and scanner:
-- Losing the audio permission marks items from picked folders MISSING too (the plan's rule), although SAF grants don't need it; and picked folders aren't scanned at all while the permission is denied (the scanner's gate; Settings says so).
-- A third-party SAF provider that returns a null cursor on a passing error leaves that folder's items MISSING until the next good scan (nothing is deleted).
+- ~~Losing the audio permission marks items from picked folders MISSING too (the plan's rule), although SAF grants don't need it; and picked folders aren't scanned at all while the permission is denied (the scanner's gate; Settings says so).~~ Fixed 2026-11-05, `listen-cleanup`: only the media store's items go MISSING; picked folders keep scanning on their own grants, and the scan cache stays, so allowing it again reads nothing over.
+- ~~A third-party SAF provider that returns a null cursor on a passing error leaves that folder's items MISSING until the next good scan (nothing is deleted).~~ Accepted 2026-11-05: children already throw and count as unknown; a null cursor on the top folder is how a provider says the folder is gone (SD card out, folder deleted), and the two can't be told apart. Nothing is deleted and the next good scan restores it.
 - A file moved within a single scan shows up once, under its new uri. Fine; noted only.
 - A playlist row's position is its entry ordinal, which is right only while every entry has a track row (true today: the scanner never deletes rows).
 - The artist list takes an artist sort tag only from single-artist tracks.
-- Orphaned cover files are never cleaned up (old `<fingerprint>.jpg` files and shared covers nothing uses).
+- ~~Orphaned cover files are never cleaned up (old `<fingerprint>.jpg` files and shared covers nothing uses).~~ Fixed earlier: `CoverSweep`, after a complete scan.
 - ~~The TagLib skip list never resets, so a file whose tag read was cut short by any process death is skipped for tags forever.~~ Fixed 2026-11-02: two strikes (one death only makes a file suspect, a clean read clears it; old one-strike skips get one more read), `cl-cleanup`.
 - Parity gaps, later: original dates are read and stored but not shown or sorted by; no way to exclude folders from the scan.
 
@@ -419,9 +419,9 @@ Player and engine:
 - `MediaControllerPlayerHub` and `PlaybackService` have no automated test; they're covered only through `PlayerEngine`.
 - The focus content type (speech or music) isn't requested again when the mode switches while focus is held.
 - ~~Pressing play in the mini-player on a book that just ended, without leaving it, hits the end again at once; reloading it from the book page restarts it.~~ Fixed 2026-11-02: play on an ended book starts it over, `cl-cleanup`.
-- A finished book restored after process death loads at the start, but the database says finished until the next save.
+- ~~A finished book restored after process death loads at the start, but the database says finished until the next save.~~ Works as intended, 2026-11-05: the mark stays until the user plays (`finishedMarkOnTheLoadedBookSurvivesItsNextSave`).
 - The chapter-lookup rule exists twice, in the app (`chapterAt`) and in the engine (`ChapterMap`, internal); keep them in step.
-- Worst-case position loss after process death is about 6 s (a 1 s tick on a 5 s interval).
+- ~~Worst-case position loss after process death is about 6 s (a 1 s tick on a 5 s interval).~~ Accepted 2026-11-05: writing more often costs battery for seconds that auto-rewind mostly covers anyway.
 - ~~After play is refused mid-call, the end of the call doesn't resume.~~ Fixed in `c41b868` (`playDuringACallPlaysWhenTheCallEnds`).
 
 UI:
@@ -495,7 +495,7 @@ Library and player:
 - M1's `unknown|<folder>` album-key collision corner case is left as is.
 
 Show in other apps:
-- Files by Google lists Granger under "Other storage" but opens the app instead of browsing it; in debug builds it opens the Spike launcher. Browsing works in Android's own file browser and any file picker.
+- ~~Files by Google lists Granger under "Other storage" but opens the app instead of browsing it; in debug builds it opens the Spike launcher. Browsing works in Android's own file browser and any file picker.~~ Accepted 2026-11-05: Google's app decides this for other apps' providers; browsing works in Android's own file browser and any file picker.
 - Tapping a file there sends it to Drive's quick viewer, which adds `?cpn=…` to the link and so loses its read grant ("problem with file"). Open with another app works. Drive's behaviour, not Granger's.
 - The provider root has no search. The canonical-path check isn't pinned by its own test (the shelf-prefix check catches symlinks).
 
@@ -556,10 +556,10 @@ Player, session and Auto:
 - `SessionPlayer.isEngines` compares media ids only, so a re-send of the same queue with another start index is swallowed.
 - ~~Tapping the current song's queue row restarts it from 0.~~ Fixed 2026-11-02: carries on instead, `cl-cleanup`.
 - The queue-row tap has no Compose UI test.
-- Artwork tokens depend on the order of the roots, and the key changes on reinstall or clear data, so URIs cached by Auto or the launcher can stop resolving.
-- A cover written after the queue loads stays `file://` until the items are rebuilt.
-- `Artwork.uri` touches the disk on the main thread.
-- Auto doesn't get `notifyChildrenChanged` when the library changes; it refreshes when it browses again.
+- ~~Artwork tokens depend on the order of the roots, and the key changes on reinstall or clear data, so URIs cached by Auto or the launcher can stop resolving.~~ Accepted 2026-11-05: a root only moves with a second removable volume, and a new key only comes with a reinstall or cleared data; Auto gets fresh links on its next browse.
+- ~~A cover written after the queue loads stays `file://` until the items are rebuilt.~~ Fixed 2026-11-05, `listen-cleanup`: player items mint their link from the path, so a later cover shows up.
+- ~~`Artwork.uri` touches the disk on the main thread.~~ Fixed 2026-11-05, `listen-cleanup`: `uriFromPath` for player items, checked when served; the key and roots warm on start.
+- ~~Auto doesn't get `notifyChildrenChanged` when the library changes; it refreshes when it browses again.~~ Fixed 2026-11-05, `listen-cleanup`: folders a browser opened are announced once the library settles. Not yet tried on a head unit.
 - Recents whose source is gone are left out. An empty playlist recent is still listed.
 - If the engine takes over 5 s to load, Auto reports a failure while playback still starts.
 - Only an album, an audiobook and search were played on the head unit. A playlist, next and previous, the queue, and switching players were checked on the phone but not on the head unit.
@@ -806,7 +806,7 @@ What V2 carries:
 - **The full-view sheet, the rail entry for a live voice session, `ReadAloud.start` for project 4, spoken Research answers** (the `TextReadSource` is there; `AnswerText.segments` strips the markers).
 - **The second catalog voice** after a licence check (from-scratch or permissively trained; `libritts_r` sounded best, reads books best at 0.8×, and cannot ship as is).
 - **Text normalisation before Piper, years first:** espeak-ng reads "1799" as "one thousand seven hundred ninety nine" and "1962" as "nineteen hundred sixty-two"; a year pass ("seventeen ninety-nine", "nineteen sixty-two", "two thousand five") is the broad win for articles. `Pronunciations` (respellings) stays but its built-in table is empty: "Rosetta" and "Rozetta" phonemize identically (`espeak-ng -v en-us --ipa`), and every respelling Neal listened to kept the same hard final "ah", which is the ljspeech model, not the phonemes. The espeak-ng extra-dictionary route remains for names.
-- **The bottom bar's headphones button is stop, not pause:** Neal used it as pause and got a restart from the page. Worth a pause/stop pair or a label once the full-view sheet lands.
+- ~~**The bottom bar's headphones button is stop, not pause:** Neal used it as pause and got a restart from the page. Worth a pause/stop pair or a label once the full-view sheet lands.~~ Overtaken: the Listen button shows only while idle; once this text is being read it leaves the bar for the mini player's controls.
 - **Signing:** the ljspeech zip is on release `voices-v1` (2026-10-22, via `gh release create`); the catalog rebuild and re-sign (`tools/catalog-gen/catalog_gen.py build` then `sign`, committed on main where the app fetches it) is the last step for the Get button.
 - **Small debts:** the section title of a book comes from the locator's title (the test publication has none); a restored book's `Publication` stays open for the process; the `recent` cache in `ReadAloudEngine` re-synthesizes after a speed change; `advanceUntilIdle` skips background-scope work in kotlinx-coroutines 1.11 (tests advance time explicitly); Readium parses on real threads, so its view-model tests poll; ICU is a stub off Robolectric, so `Sentences` falls back to a punctuation split.
 - **Rail and widget:** a `voice:` recent play resumes through `PlayResumer`; the widget's resume ignores the voice (its saved state has no tab).
@@ -824,7 +824,7 @@ What V2 settled:
 What V3 and later carry:
 - **"Australiar", "Rosettar":** words ending in "a" come out with an "r" from `ljspeech`; the phonemes are right (V1), so it is the model. V3's listening check must include a sentence with Australia, Rosetta and area.
 - **Music under the voice, the UX:** the mini-player is clunky when both play (Neal); on the Music tab the music under the voice has play/pause and next only (previous, seeking, shuffle, repeat and the queue sheet are inert in that state); the music is not saved on a tick while under the voice (only at the hand-over and the switch), so a crash loses its position since then; a restore after process death brings the voice back alone (Decision 4).
-- **Spoken answers:** the medical banner is spoken first only when the pipeline's Medical event came before the first Partial; the last sentence of a streaming answer is held until the text is complete (the spoken form is trimmed, so the trailing-space signal comes from the raw text).
+- **Spoken answers:** ~~the medical banner is spoken first only when the pipeline's Medical event came before the first Partial~~ (overtaken: the pipeline flags Medical before the reply streams, `medicalIsFlaggedBeforeTheReplyStreams`); the last sentence of a streaming answer is held until the text is complete (the spoken form is trimmed, so the trailing-space signal comes from the raw text).
 - **Multi-speaker voices:** done in V3 (below).
 - **A newer-engine spike** (KittenTTS v0.8, Pocket TTS) stays parked; Supertonic is out (OpenRAIL-M).
 - **R3 (deep links, `r3-deep-links`)** touches `ResearchViewModel`, `ResearchScreen` and `GrangerNavHost` beside V2's hunks and adds the same `player: PlayerHub? = null` parameter; it rebases onto this merge.
