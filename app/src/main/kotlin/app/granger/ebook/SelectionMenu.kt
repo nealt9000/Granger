@@ -6,6 +6,7 @@ import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
 import app.granger.Features
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /** What the text-selection menu offers, in this order. */
 enum class SelectionAction(@StringRes val label: Int) {
@@ -42,6 +43,9 @@ object SelectionBridge {
     /** Whether the selection menus offer Read from here (Plan V1); the app sets it from the feature flag. */
     @Volatile var readAloudAvailable: Boolean = false
 
+    /** The selection menu showing now, or null: Back and leaving the reader close it (it would stay over the next screen). */
+    val openMenu = MutableStateFlow<ActionMode?>(null)
+
     fun dispatch(request: SelectionRequest) {
         sink?.invoke(request)
     }
@@ -59,6 +63,7 @@ class SelectionMenu : ActionMode.Callback {
         actions.forEachIndexed { i, action ->
             menu.add(Menu.NONE, MENU_ID_BASE + i, i, action.label).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
         }
+        SelectionBridge.openMenu.value = mode
         return true
     }
 
@@ -79,7 +84,9 @@ class SelectionMenu : ActionMode.Callback {
         return true
     }
 
-    override fun onDestroyActionMode(mode: ActionMode) = Unit
+    override fun onDestroyActionMode(mode: ActionMode) {
+        SelectionBridge.openMenu.compareAndSet(mode, null)
+    }
 
     private companion object {
         const val MENU_ID_BASE = 0x6773

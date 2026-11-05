@@ -94,6 +94,21 @@ class SelectionMenuTest {
         assertThat(shown().visibleTitles()).containsExactly("Copy", "Highlight", "Note", "Search", "Ask").inOrder()
     }
 
+    @Test fun theOpenMenuIsKnownUntilItCloses() {
+        val callback = SelectionMenu()
+        val mode = FakeActionMode()
+        val menu = PopupMenu(context, View(context)).menu
+        callback.onCreateActionMode(mode, menu)
+        assertThat(SelectionBridge.openMenu.value).isSameInstanceAs(mode)
+        // An older menu closing late leaves a newer one known.
+        val newer = FakeActionMode()
+        callback.onCreateActionMode(newer, menu)
+        callback.onDestroyActionMode(mode)
+        assertThat(SelectionBridge.openMenu.value).isSameInstanceAs(newer)
+        callback.onDestroyActionMode(newer)
+        assertThat(SelectionBridge.openMenu.value).isNull()
+    }
+
     @Test fun noInquireLabelLeft() {
         val labels = SelectionAction.entries.map { context.getString(it.label) } +
             app.granger.reader.SelectionAction.entries.map { context.getString(it.label) }

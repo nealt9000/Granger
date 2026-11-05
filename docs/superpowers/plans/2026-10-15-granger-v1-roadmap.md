@@ -166,7 +166,7 @@ Plan 1's measurements feed directly into Plans 6–8 (backend choice, model file
 - ~~No longer planned (2026-10-19): Neal dropped the storage cap, so there's no limit but the phone's storage. `capBytes` stays `Long.MAX_VALUE` until the unused cap plumbing is removed (left for later in `2026-10-19-plan-m2-media-sources.md`).~~ Fixed 2026-11-02: the cap plumbing is gone, `cl-cleanup`.
 - SD cards were tested only in JVM tests (the Pixel 6 has no slot). Try a phone with one before the beta.
 - Android 15 limits `dataSync` foreground services to 6 hours a day; a very slow multi-GB download pauses at the limit and resumes when WorkManager next runs it.
-- The Ray Charles sample pack's main page (`index`) renders blank: the ZIM's own `_res_/script.js` throws `$ is not defined` because the page never loads jQuery, so its masonry article list never lays out. Articles open and render fine. Reader item for a later plan (Kiwix injects jQuery for such main pages).
+- ~~The Ray Charles sample pack's main page (`index`) renders blank: the ZIM's own `_res_/script.js` throws `$ is not defined` because the page never loads jQuery, so its masonry article list never lays out. Articles open and render fine. Reader item for a later plan (Kiwix injects jQuery for such main pages).~~ Fixed long ago (`0ff01116`, 2026-10-16): `MainPageFixes` adds a bundled jQuery before `_res_/script.js`.
 - `connectedDebugAndroidTest` uninstalls the app and wipes downloaded packs and models on the phone; re-download after running device tests.
 - Device testing a network drop: `adb shell cmd connectivity airplane-mode enable` alone did not stop an in-flight download on the Pixel 6 (it kept growing); add `adb shell svc wifi disable`. With both off the row shows "Waiting for Wi-Fi" and the `.part` file holds its size; on reconnect it resumes from the same size. A force-stop plus relaunch also resumes by itself.
 - Kiwix retires snapshots; the catalog pins exact URLs and hashes, so regenerate and re-sign it at least monthly (or schedule it). Downloads of a retired snapshot now fail with a reason and a Retry button.
@@ -231,8 +231,8 @@ Fixed after the walkthrough (merged `f8082c9`): a crash on the first launch afte
 Still open:
 - Define with no Wiktionary pack hands the word to another app (`PROCESS_TEXT`); not exercised on the device. Define through a Wiktionary pack is untested on a device too.
 - Classics pushed by hand into `books/granger/` show "Get", not installed: installed status comes from download records only.
-- A page turn within ~0.3 s before Back is lost (the outgoing reader's reports are ignored once it leaves the screen).
-- System Back from a book opened through the rail goes to the Library, not the previous book (rail destinations replace each other).
+- ~~A page turn within ~0.3 s before Back is lost (the outgoing reader's reports are ignored once it leaves the screen).~~ Accepted 2026-11-05: a leaving navigator re-lays out and reports a place up to a page back, so its reports must be ignored; the cost is one page in a rare case.
+- ~~System Back from a book opened through the rail goes to the Library, not the previous book (rail destinations replace each other).~~ Fixed in U3c Decision 7: `openTab` stacks an item opened from the rail on the reader, so Back returns to the page.
 - ~~Contents panel tab labels are cut off in landscape.~~ Fixed 2026-11-02: side panels grow by the end inset, `cl-cleanup`.
 - ~~Imported text books are titled by file name, not by their first heading.~~ Fixed 2026-11-02: the title the text names (Markdown heading, Gutenberg Title:, a standalone first line), `cl-cleanup`.
 - Book search results are unranked (`LIMIT 400`); ~~TXT files with single-newline paragraphs become one paragraph per chapter~~ (fixed 2026-11-02, `cl-cleanup`); the shared cover cache (4 MB) re-decodes while scrolling a long grid.
@@ -271,8 +271,8 @@ Fixed after the walkthrough:
 - In scan EPUBs a page-wide image inside an indented paragraph ran off the page, and Readium's edge tap couldn't leave that page. Every book page gets one rule, `p:has(img) { text-indent: 0 !important }`; books' own image sizes are left alone.
 
 Still open:
-- Readium's edge tap can still be trapped by other content that overflows by less than a page (a wide table, `<pre>`); swiping works.
-- Image width relies on ReadiumCSS's non-important `max-width: 100%`; a book that sets `max-width: none` on images can overflow.
+- ~~Readium's edge tap can still be trapped by other content that overflows by less than a page (a wide table, `<pre>`); swiping works.~~ Fixed 2026-11-05, `reader-cleanup`: a right tap on the last screen of a page that overflows goes to the next chapter (`OverflowedPage`).
+- ~~Image width relies on ReadiumCSS's non-important `max-width: 100%`; a book that sets `max-width: none` on images can overflow.~~ Fixed 2026-11-05, `reader-cleanup`: `BookCss` makes the cap `!important`.
 - OCR text is plain: page headers and hyphenation from the scan stay inline. PDF-only items wait for the PDF pass (done in P2: Get PDF). No thumbnails in results.
 - Archive.org items have no versions, so there is no Updates tab; a file archive.org re-derives later is not offered as an update.
 - Plan 11: the Play policy check for this source.
@@ -896,7 +896,7 @@ Neal's findings from the walkthrough, outside R3's scope:
 - **Think deeper (the larger model) has never added value for Neal**, as R0 found; whether it stays is open.
 - ~~**Research UX:** + doesn't start a fresh, clean chat; Back leaves Research across the app instead of going to the chat list (today the list is reached only by deleting the current chat).~~ Fixed: + opens a fresh chat (a3fac579); Back returns to the earlier chat only when this one came from the Chats sheet (U3a Decision 9). (2026-11-02)
 - **V2 follow-up:** with read-aloud on, a speaker icon for the Research chat does nothing when tapped (R3 doesn't touch those lines; the spoken-answer button or the rail's live entry, not yet narrowed down).
-- **E-book reader:** copying and pasting a selection is sometimes jittery and buggy.
+- **E-book reader:** copying and pasting a selection is sometimes jittery and buggy. Reproduced 2026-11-05 (Neal: dragging upwards): when the start handle enters a paragraph that began on the previous page, the selection flips on each move between the finger and a place far back on that page (logged over the debug bridge: start 11401, 9946, 11401, 9946…), so the highlight flashes and Copy can take text that isn't on screen. The page doesn't move. Putting the last good selection back from a `selectionchange` listener stops the flipping but loses the handles and menu (a selection set from script has none), and it held short of the split paragraph, so that isn't the fix. Cause still being narrowed. Also fixed, `reader-cleanup`: Back with a selection left the book and left the menu floating over the Library; Back now clears the selection first, and leaving closes the menu.
 
 ## Carried forward from H2
 
@@ -983,7 +983,7 @@ Fixed during the walkthrough:
 - Neal removed the Military Medicine pack: its PDF stayed in Home's Continue as "Removed book". A pack's documents now take their tabs, History rows, places and bookmarks with them, and a launch sweep clears any left from before.
 
 Still open:
-- A PDF link tapped before its pack's archive is open loads in the WebView and shows nothing. Not reproduced on the phone (the article's own load opens the archive first); a `DownloadListener` fallback would close it.
+- ~~A PDF link tapped before its pack's archive is open loads in the WebView and shows nothing. Not reproduced on the phone (the article's own load opens the archive first); a `DownloadListener` fallback would close it.~~ Accepted 2026-11-05: the link is on a page the same archive just served, so the archive is open; never reproduced.
 - Research answered "41,000 acres of saltwater wetlands" from a sentence about acres to be restricted (p. 204; the total is 40,000 on p. 12): an answer-quality case for R4, not a PDF bug.
 - Not in this pass (spec §2, §7): read-aloud of PDFs, selection and highlights on PDF pages, in-book search in an open PDF, indexing pack PDFs, OCR, dense vectors for PDF chunks (R2 should take `PdfText` chunks).
 - Night and Fit on a PDF rebuild the navigator (PDFium reads both only at layout); Sepia reads as Day on PDFs.
@@ -1009,7 +1009,7 @@ Fixed during the walkthroughs:
 
 Still open:
 - The "Food for Preppers" PDFs are old web-page printouts: no outline, no links, the contents page is text. A contents list worked out from the text (and for old scans) is its own session. More broadly, making the Kiwix catalog friendlier to find things in is a big value add for the app (Neal, 2026-10-29).
-- On a Kiwix main page that scrolls in its own box, the saved place and read-aloud's follow-scroll still act on the window.
+- ~~On a Kiwix main page that scrolls in its own box, the saved place and read-aloud's follow-scroll still act on the window.~~ Fixed 2026-11-05, `reader-cleanup`: the place is saved and restored in the box. The follow-scroll already worked there (`scrollIntoView`); a citation's `scrollBy` doesn't, but main pages aren't cited.
 - ~~`PlayerEngineTest.chapterChangeUpdatesTheTitleWithoutRepreparing` failed once in a full run and passed alone: a timing flake to settle.~~ Fixed 2026-11-02: it waits for the title, not a position (2 in 10 failed under load before, 12 in 12 passed after), `cl-cleanup`.
 - Browse lists packs flat within a section; a pack family with many sizes could group further.
 

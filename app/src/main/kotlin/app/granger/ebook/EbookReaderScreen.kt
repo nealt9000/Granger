@@ -248,6 +248,14 @@ fun EbookReaderScreen(
     }
     // Back closes an open panel first, then leaves the reader.
     BackHandler(enabled = state.panel != null) { viewModel.open(null) }
+    // A selection comes before both: Back clears it, and leaving any other way closes its menu, which isn't part of this
+    // screen and would stay floating over the next one.
+    val selectionMenu by SelectionBridge.openMenu.collectAsStateWithLifecycle()
+    BackHandler(enabled = selectionMenu != null) {
+        epub?.clearSelection()
+        selectionMenu?.finish()
+    }
+    DisposableEffect(Unit) { onDispose { SelectionBridge.openMenu.value?.finish() } }
     LaunchedEffect(navigator, state.prefs) {
         when (val shown = navigator) {
             is EpubNavigatorFragment -> shown.submitPreferences(state.prefs.toEpub(state.fixedLayout))
