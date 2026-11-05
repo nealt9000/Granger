@@ -184,6 +184,7 @@ fun EbookReaderScreen(
         viewModel.selectionActions.collect { request ->
             var message: String? = null
             try {
+                runCatching { fragment.evaluateJavascript(OnPageSelection.JS) }
                 val selection = fragment.currentSelection()
                 val text = selection?.locator?.text?.highlight.orEmpty().trim()
                 if (selection != null && text.isNotEmpty()) {
