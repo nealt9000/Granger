@@ -243,7 +243,7 @@ Wikipedia Geography (maxi) re-downloaded from Kiwix (2026-10 builds, sha256 chec
 added since stay. Baseline on it, `r2-t7-base`: declined 68/76 (89%), grounded 97/126 (77%). The book notes stay
 imported for held-out scoring (Neal, 2026-11-03), and the own-book group's EPUBs (`pg55`, `pg23`, `pg201`) are imported
 too (keyword search only until Task 9).
-- [ ] Neal reads a sample of cards before they ship.
+- [x] Neal reads a sample of cards before they ship. Read 2026-11-05: "they read well"; the cards can ship with the next Classics catalog rebuild.
 
 ## Task 8: prompt rules for misreads
 
