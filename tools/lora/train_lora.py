@@ -43,6 +43,7 @@ def main():
     ap.add_argument("--rank", type=int, default=16)
     ap.add_argument("--accum", type=int, default=4)
     ap.add_argument("--max-tokens", type=int, default=2600)
+    ap.add_argument("--save-every", type=int, default=0, help="also save the adapter every N optimizer steps")
     ap.add_argument("--dry-run", action="store_true", help="tokenize only and report lengths")
     ap.add_argument("--checkpoint", action="store_true", help="gradient checkpointing (less memory, no K/V cache in training)")
     a = ap.parse_args()
@@ -115,8 +116,16 @@ def main():
         run = 0.0
         for i, idx in enumerate(order):
             x, y = enc_train[idx][1]
-            loss = step_loss(x.to(dev), y.to(dev))
-            (loss / a.accum).backward()
+            try:
+                loss = step_loss(x.to(dev), y.to(dev))
+                (loss / a.accum).backward()
+            except RuntimeError as e:  # MPS out of memory on a long pair: drop it, keep the run (2026-11-04: the allocator creeps)
+                if "out of memory" not in str(e):
+                    raise
+                print(f"OOM on {enc_train[idx][0]['id']} ({x.shape[1]} tokens); skipped", flush=True)
+                opt.zero_grad()
+                torch.mps.empty_cache()
+                continue
             run += loss.item()
             seen += 1
             if seen % a.accum == 0:
@@ -124,13 +133,17 @@ def main():
                 opt.step()
                 sched.step()
                 opt.zero_grad()
+                torch.mps.empty_cache()  # the caching allocator otherwise grows 30 -> 36 GB over ~30 steps and dies at the cap
                 step += 1
+                if a.save_every and step % a.save_every == 0:
+                    model.save_pretrained(str(Path(a.out) / "adapter"))
                 if step % 10 == 0:
                     el = time.time() - t0
                     print(f"epoch {epoch} step {step}/{steps} loss {run / a.accum / 10:.4f} lr {sched.get_last_lr()[0]:.2e} "
                           f"{el:.0f}s, ~{el / step * (steps - step) / 60:.0f} min left", flush=True)
                     run = 0.0
         print(f"epoch {epoch} done: val loss {val_loss():.4f} after {time.time() - t0:.0f}s", flush=True)
+        model.save_pretrained(str(Path(a.out) / "adapter"))
 
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
