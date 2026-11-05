@@ -241,16 +241,24 @@ def build():
         sum(w["kind"] == "misread" for w in worksheet), sum(w["kind"] == "wrong-decline" for w in worksheet), len(books)))
 
 
-def train():
+def train(swapped_cap=SWAPPED_CAP, decline_cap=None, authored_times=1):
+    """decline_cap limits the recorded declines too; authored_times repeats the hand-written pairs. Run lora-r16-1
+    (2026-11-04: 154 decline targets of 499, 31%) declined 98 of 148 dev answerables against the stock export's 58: the
+    grounded targets were the model's own replies, so the declines were the only new signal and it learned to decline."""
     swapped = read_jsonl(DATA / "swapped.jsonl")
     random.Random(SEED).shuffle(swapped)
-    rows = read_jsonl(DATA / "recorded.jsonl") + swapped[:SWAPPED_CAP]
+    recorded = read_jsonl(DATA / "recorded.jsonl")
+    declines = [r for r in recorded if r["kind"] == "recorded-decline"]
+    random.Random(SEED).shuffle(declines)
+    if decline_cap is not None:
+        declines = declines[:decline_cap]
+    rows = [r for r in recorded if r["kind"] != "recorded-decline"] + declines + swapped[:swapped_cap]
     authored = {a["id"] + "|" + a["kind"]: a for a in read_jsonl(DATA / "authored.jsonl")} if (DATA / "authored.jsonl").exists() else {}
     n = 0
     for w in read_jsonl(DATA / "worksheet.jsonl"):
         a = authored.get(w["id"] + "|" + w["kind"])
         if a:
-            rows.append({"id": w["id"], "kind": "authored-" + w["kind"], "prompt": w["prompt"], "target": a["answer"]})
+            rows += [{"id": w["id"], "kind": "authored-" + w["kind"], "prompt": w["prompt"], "target": a["answer"]}] * authored_times
             n += 1
     random.Random(SEED).shuffle(rows)
     write_jsonl(DATA / "train.jsonl", rows)
@@ -258,4 +266,9 @@ def train():
 
 
 if __name__ == "__main__":
-    {"build": build, "train": train}[sys.argv[1]]()
+    if sys.argv[1] == "train":
+        kw = dict(arg.split("=") for arg in sys.argv[2:])
+        train(swapped_cap=int(kw.get("swapped", SWAPPED_CAP)), decline_cap=int(kw["declines"]) if "declines" in kw else None,
+              authored_times=int(kw.get("authored", 1)))
+    else:
+        build()
