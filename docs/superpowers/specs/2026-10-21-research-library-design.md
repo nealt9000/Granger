@@ -235,8 +235,11 @@ Every passage gets one **address**, stored with the Research turn and reused by 
   was measured, so the stop path's "stays debug-only" no longer describes the app. A blind development set
   (`dataset/dev.json`) says 56% / 84%; retrieval's remaining levers are bounded under the gap; the behaviour LoRA (merged)
   and a self-exported E2B were tried and closed (`docs/ask/r2-findings-2026-11-04.md` §12). Scoring 2 of 2 waits for a
-  change that holds on the development set. **Open for Neal:** Ask stays a Preview with these numbers on record, or goes
-  off in release until a run-time adapter, a usable converter or a newer model. The decision goes here and in §11.
+  change that holds on the development set. **Decision (Neal, 2026-11-05): Ask stays a Preview** in the closed test and
+  release, with these numbers on record, the Preview tag and "it can be wrong" wording, Report this answer and the medical
+  quotes unchanged. The bar stays; it is measured again when a change holds on the development set, or when a run-time
+  adapter, a usable converter or a newer model reopens the model side. Off in release (`Features.RESEARCH`) is the fallback
+  if the closed test's feedback says the Preview does harm.
 - The report shows grounded per domain, recall@4 dense against keyword, and latency.
 
 ## 9. Constraints
@@ -268,7 +271,7 @@ Every passage gets one **address**, stored with the Research turn and reused by 
 - Median send to first words is 17.4 s or less on the tuning split.
 - The fresh held-out set is written, scored, and reported per domain. Research either passes the bar and leaves debug, or
   stops with numbers and options. **2026-11-05:** scored once, failed, with the numbers and options in §8's status line;
-  the Preview is already out, so the stop path's shape is Neal's decision.
+  the Preview is already out, so the stop path's shape was Neal's decision: **Ask stays a Preview** (2026-11-05, §8).
 
 ## 12. Decisions (Neal, 2026-10-21)
 

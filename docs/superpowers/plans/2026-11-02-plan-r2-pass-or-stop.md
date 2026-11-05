@@ -448,12 +448,12 @@ Classics notes, found for 13 of 31 held-out classics questions and chosen for 2.
   roadmap and the store listing's Preview wording stays or goes, Neal's call.
 - [x] **Fail** (2026-11-05): the round was run on the dev set, not the tuning split (a training set now), and no
   lever cleared ±4 there (findings §3, §7, §12). Scoring 2 of 2 waits for a change that holds on dev; on the current
-  pipeline it would confirm scoring 1 at the cost of the last blind set. **Open for Neal:** Ask as a Preview with the
-  numbers on record (amend spec §8 and §11, which still say Ask leaves debug only on a pass), or off in release until
-  a run-time adapter, a usable converter or a newer model.
-- [ ] Either way, write the decision into the spec, and say plainly in the roadmap that the Preview shipped before the
+  pipeline it would confirm scoring 1 at the cost of the last blind set. **Neal (2026-11-05): Ask stays a Preview**
+  with the numbers on record; spec §8 and §11 amended. Off in release stays the fallback if the closed test's feedback
+  says the Preview does harm.
+- [x] Either way, write the decision into the spec, and say plainly in the roadmap that the Preview shipped before the
   bar was measured. 2026-11-05: the roadmap says it (the R2 row and checklist B); the spec §8 carries the status and
-  the open decision; the decision line itself waits for Neal.
+  the decision (Ask stays a Preview). The kept code of Tasks 2–9 merged to main the same day.
 
 ## Task 12: housekeeping from the audit
 
