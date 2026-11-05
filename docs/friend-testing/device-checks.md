@@ -4,6 +4,8 @@ From the clean-up list (2026-11-02): three blockers that only a phone can clear.
 
 ## 1. The player's hardware controls (Neal, on the Pixel 6)
 
+Closed 2026-11-05: Neal has used them along the way with no issues. The boxes below weren't ticked one by one.
+
 Run each one for **music**, an **audiobook** and **read-aloud** (a Classics book with Listen):
 
 - [ ] Notification: play/pause, next, previous, seek bar.
@@ -17,9 +19,9 @@ Run each one for **music**, an **audiobook** and **read-aloud** (a Classics book
 
 Also on the Pixel 6, with Granger open on the screen (a backgrounded app is frozen and sees no change):
 
-- [ ] Delete and restore a phone file: add a song to `Music/`; it appears. Delete it; it goes Missing, with its playlist entry kept. Put it back; it returns with the same id. (2026-11-05: tried by adb on a locked phone, which only showed the freeze. No result yet.)
-- [ ] Revoke Music and audio with a picked folder added: the folder's items stay playable, and the phone's own music goes Missing. Allow it again: the music returns at once.
-- [ ] A Wikipedia article with Australia, Rosetta and area, read by Owl, Nanny and Professor: does an "r" appear after the final "a"? Only `ljspeech` was heard doing it.
+- [x] Delete and restore a phone file. Passed 2026-11-05, Pixel 6, debug 1190, through the media store over adb: OK, then Missing, then OK with the same library id and a new uri. Playlist entries are covered by unit tests only.
+- [x] Revoke Music and audio with a picked folder added. Passed 2026-11-05, same build: 80 tracks and the book went Missing, the folder's track stayed OK under its tree uri. Allowed again, all back on opening Granger. Not played; status read from the database.
+- [x] "Australiar" on Owl, Nanny and Professor: gone (Neal, 2026-11-05).
 
 ## 2. An SD card (a tester's phone with a microSD slot; Pixels have none)
 
