@@ -118,7 +118,12 @@ class HomeViewModel(
     /** The library's languages, main first, and the app's (Plan L3): the strip measures and titles domains by them. */
     knowledge: Flow<List<String>> = kotlinx.coroutines.flow.flowOf(listOf(app.granger.core.catalog.ENGLISH)),
     appLanguage: Flow<String> = kotlinx.coroutines.flow.flowOf(app.granger.core.catalog.ENGLISH),
+    /** Makes Home's Wander in the view model's scope (Plan H5a); none in tests that don't need it. */
+    wanderOf: ((kotlinx.coroutines.CoroutineScope) -> WanderModel)? = null,
 ) : ViewModel() {
+    /** Wander (Plan H5a): its own state, started when Home first shows it. */
+    val wander: WanderModel? = wanderOf?.invoke(viewModelScope)
+
     private val day = MutableStateFlow(today())
 
     private val languages = combine(knowledge, appLanguage) { k, a -> k to a }

@@ -131,6 +131,7 @@ import app.granger.home.CardTarget
 import app.granger.home.FeedDrawer
 import app.granger.home.HomeScreen
 import app.granger.home.HomeViewModel
+import app.granger.home.WanderModel
 import app.granger.onboarding.OnboardingScreen
 import app.granger.onboarding.OnboardingViewModel
 import app.granger.shell.RailEntry
@@ -1296,6 +1297,12 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 )
             }
             composable<HomeRoute> {
+                val homeThumbs = remember {
+                    ArticleThumbnails(File(appContext.cacheDir, "home-thumbs")).also { thumbs ->
+                        // Once per Home: the cache trimmed to its cap, in the background.
+                        container.appScope.launch(Dispatchers.IO) { thumbs.prune() }
+                    }
+                }
                 HomeScreen(
                     viewModel = viewModel {
                         HomeViewModel(
@@ -1306,15 +1313,20 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 chunksOf = container.bookIndex::chunks,
                                 bookSearch = { container.bookIndex.search(it) },
                                 librarySearch = container.search,
-                                thumbnail = ArticleThumbnails(File(appContext.cacheDir, "home-thumbs")).let { thumbs ->
-                                    // Once per Home: the cache trimmed to its cap, in the background.
-                                    container.appScope.launch(Dispatchers.IO) { thumbs.prune() }
-                                    thumbs::thumbnail
-                                },
+                                thumbnail = homeThumbs::thumbnail,
                                 languages = { container.knowledgeNow.value },
                             ),
                             container.shelves, container.media, container.homePrefs, tidyDismissals = container.tidyDismissals,
                             knowledge = container.knowledgeLanguages.languages, appLanguage = container.appLanguages.code,
+                            wanderOf = { scope ->
+                                WanderModel(
+                                    scope = scope,
+                                    encyclopedias = { WanderModel.encyclopediasOf(container.library.packs.first(), container.knowledgeNow.value) },
+                                    archiveOf = { container.library.archive(it.id) },
+                                    thumbnail = homeThumbs::thumbnail,
+                                    titles = { container.search.titles(it).hits },
+                                )
+                            },
                         )
                     },
                     onReadiness = { nav.navigate(ReadinessRoute) { launchSingleTop = true } },
