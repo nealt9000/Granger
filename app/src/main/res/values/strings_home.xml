@@ -64,4 +64,16 @@
     <string name="home_crash_notice">Granger closed unexpectedly. Send a report?</string>
     <string name="home_crash_not_now">Not now</string>
     <string name="home_crash_send">Send</string>
+    <!-- Wander (Plan H5a): walk an encyclopedia by the links in each article's opening. -->
+    <string name="home_wander">Wander</string>
+    <string name="home_wander_search">Start from an article</string>
+    <string name="home_wander_elsewhere">Somewhere else</string>
+    <string name="home_wander_no_match">No articles match</string>
+    <string name="home_wander_finding">Finding somewhere to start…</string>
+    <string name="home_wander_open">Open</string>
+    <string name="home_wander_path">Your path:</string>
+    <!-- %1$s is an article's title. -->
+    <string name="home_wander_go_to">Go to %1$s</string>
+    <!-- %1$s is an article's title, linked from this one but in no pack on this phone. -->
+    <string name="home_wander_not_here">%1$s, not on this phone</string>
 </resources>
