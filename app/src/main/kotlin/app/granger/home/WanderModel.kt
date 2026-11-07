@@ -67,14 +67,19 @@ class WanderModel(
     fun start() = move(clearTrail = true) {
         val packs = encyclopedias()
         if (packs.isEmpty()) return@move null
+        // A whole encyclopedia's random article is a better first impression than a subject pack's stub village.
+        // packs come in the library's language order: the main language's whole encyclopedia, if there is one.
+        val main = packs.first().language
+        val from = packs.filter { GENERAL.containsMatchIn(it.name) && it.language == main }
+            .ifEmpty { packs.filter { GENERAL.containsMatchIn(it.name) } }.ifEmpty { packs }
         var best: Loaded? = null
         repeat(START_TRIES) {
-            val pack = packs[random.nextInt(packs.size)]
+            val pack = from[random.nextInt(from.size)]
             val archive = archiveOf(pack) ?: return@repeat
             val path = archive.randomPath()?.takeUnless { IndexPages.isIndex(it) } ?: return@repeat
             val loaded = load(pack, archive, path, packs) ?: return@repeat
             if (best == null || loaded.reachable > best!!.reachable) best = loaded
-            if (loaded.reachable >= MIN_REACHABLE) return@move loaded
+            if (loaded.reachable >= START_REACHABLE) return@move loaded
         }
         best
     }
@@ -156,7 +161,7 @@ class WanderModel(
                     val pack = packs[node.packId] ?: return@withContext null
                     val archive = archiveOf(pack) ?: return@withContext null
                     val html = archive.read(node.path)?.let { String(it.bytes, Charsets.UTF_8) } ?: return@withContext null
-                    node.copy(title = titleOf(html, pack, node.path), imagePath = runCatching { thumbnail(archive, node.path, html) }.getOrNull())
+                    node.copy(title = titleOf(html, pack, node.path), imagePath = picture(pack, archive, node.path, html, packs.values))
                 } ?: continue
                 state.update { s -> if (s.centre?.path != loaded.centre.path) s else s.copy(orbit = s.orbit.map { if (it.path == node.path && it.packId == node.packId) filled else it }) }
             }
@@ -172,7 +177,7 @@ class WanderModel(
         if (!item.mimeType.startsWith("text/html")) return null
         val html = String(item.bytes, Charsets.UTF_8)
         val lead = LeadLinks.parse(html, resolved)
-        val centre = WanderNode(pack.id, resolved, cleanTitle(lead.title, pack, resolved), runCatching { thumbnail(archive, resolved, html) }.getOrNull())
+        val centre = WanderNode(pack.id, resolved, cleanTitle(lead.title, pack, resolved), picture(pack, archive, resolved, html, packs))
         val others = listOf(pack) + packs.filter { it.id != pack.id }
         val reachable = ArrayList<WanderNode>()
         val missing = ArrayList<WanderNode>()
@@ -193,6 +198,23 @@ class WanderModel(
         }
         val orbit = if (reachable.size >= MIN_REACHABLE) reachable else reachable + missing.take(MIN_REACHABLE)
         return Loaded(centre, lead.summary, orbit, reachable.size)
+    }
+
+    /**
+     * The article's picture: from its own pack, else from the same article in another pack that has one (a
+     * no-pictures Medicine pack's "Antipsychotic" takes Top's picture).
+     */
+    private fun picture(pack: Pack, archive: ZimArchive, path: String, html: String, packs: Collection<Pack>): String? {
+        runCatching { thumbnail(archive, path, html) }.getOrNull()?.let { return it }
+        val name = path.substringAfterLast('/')
+        for (other in packs) {
+            if (other.id == pack.id) continue
+            val a = archiveOf(other) ?: continue
+            val p = a.resolvePath(path) ?: a.resolvePath(name) ?: a.resolvePath("A/$name") ?: continue
+            val page = a.read(p)?.let { String(it.bytes, Charsets.UTF_8) } ?: continue
+            runCatching { thumbnail(a, p, page) }.getOrNull()?.let { return it }
+        }
+        return null
     }
 
     /** The page's `<title>` without its site, read without parsing the page; else the path's name. */
@@ -221,6 +243,9 @@ class WanderModel(
         private val GENERAL = Regex("^wikipedia_[a-z]{2,3}_(all|top|top1m|100)(_|$)")
         const val ORBIT = 8
         const val MIN_REACHABLE = 3
+
+        /** A random start wants a fuller orbit than [MIN_REACHABLE]: a stub's three links make a thin first walk. */
+        const val START_REACHABLE = 5
         const val TRAIL = 12
         const val MAX_HITS = 6
         private const val START_TRIES = 8

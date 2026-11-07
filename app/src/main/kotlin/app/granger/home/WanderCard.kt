@@ -17,9 +17,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -82,9 +82,10 @@ class WanderActions(
     val onPick: (SearchHit) -> Unit = {},
 )
 
-private val CentreSize = 104.dp
+private val CentreSize = 92.dp
 private val LabelWidth = 96.dp
 private val MaxSide = 380.dp
+private val LabelRoom = 44.dp
 
 /** Orbit discs shrink by rank, the closest link largest (Plan H5a Task 3). */
 private fun orbitSize(rank: Int): Dp = (62 - rank * 3).coerceAtLeast(44).dp
@@ -145,6 +146,9 @@ fun WanderSection(ui: WanderUi, actions: WanderActions, onOpen: (WanderNode) -> 
 /** The search field with Somewhere else beside it; up to six title hits under it (Plan H5a Task 4). */
 @Composable
 private fun StartSearch(ui: WanderUi, actions: WanderActions) {
+    val focus = androidx.compose.ui.platform.LocalFocusManager.current
+    // Picking a start puts the keyboard away, so the constellation it starts is in view.
+    val pick: (SearchHit) -> Unit = { focus.clearFocus(); actions.onPick(it) }
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
@@ -157,10 +161,10 @@ private fun StartSearch(ui: WanderUi, actions: WanderActions) {
                     { IconButton(onClick = { actions.onQuery("") }) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.library_clear)) } }
                 },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = { ui.hits.firstOrNull()?.let(actions.onPick) }),
+                keyboardActions = KeyboardActions(onSearch = { ui.hits.firstOrNull()?.let(pick) }),
                 modifier = Modifier.weight(1f).testTag("wander-search"),
             )
-            IconButton(onClick = actions.onElsewhere, modifier = Modifier.testTag("wander-elsewhere")) {
+            IconButton(onClick = { focus.clearFocus(); actions.onElsewhere() }, modifier = Modifier.testTag("wander-elsewhere")) {
                 Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.home_wander_elsewhere))
             }
         }
@@ -178,7 +182,7 @@ private fun StartSearch(ui: WanderUi, actions: WanderActions) {
                     hit.title,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.fillMaxWidth().clickable { actions.onPick(hit) }.padding(horizontal = 16.dp, vertical = 10.dp).testTag("wander-hit-$i"),
+                    modifier = Modifier.fillMaxWidth().clickable { pick(hit) }.padding(horizontal = 16.dp, vertical = 10.dp).testTag("wander-hit-$i"),
                 )
             }
         }
@@ -193,18 +197,22 @@ private fun StartSearch(ui: WanderUi, actions: WanderActions) {
 @Composable
 private fun Constellation(ui: WanderUi, actions: WanderActions, modifier: Modifier = Modifier) {
     val ring = MaterialTheme.colorScheme.outlineVariant
-    BoxWithConstraints(modifier.widthIn(max = MaxSide).fillMaxWidth().aspectRatio(1f).testTag("wander-orbit")) {
-        val side = maxWidth
-        Canvas(Modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier.widthIn(max = MaxSide).fillMaxWidth()) {
+      val side = maxWidth
+      // Room under the square for the bottom labels, so they never run into the summary.
+      Box(Modifier.width(side).height(side + LabelRoom).testTag("wander-orbit")) {
+        Canvas(Modifier.width(side).height(side)) {
             drawCircle(ring, radius = size.minDimension * 0.38f, center = center, style = Stroke(width = 1.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 8f))))
         }
-        val centre = ui.centre ?: return@BoxWithConstraints
+        val centre = ui.centre ?: return@Box
         val nodes = listOf(centre) + ui.orbit
         nodes.forEachIndexed { i, node ->
             val isCentre = i == 0
             val rank = i - 1
             val target = if (isCentre) Offset(0.5f, 0.5f) else {
-                val angle = -Math.PI / 2 + rank * 2 * Math.PI / ui.orbit.size
+                // Half a step round, so no link sits right above the centre or on its title below.
+                val step = 2 * Math.PI / ui.orbit.size
+                val angle = -Math.PI / 2 + step / 2 + rank * step
                 val r = 0.38f + if (rank % 2 == 1) 0.03f else -0.02f
                 Offset(0.5f + r * cos(angle).toFloat(), 0.5f + r * sin(angle).toFloat())
             }
@@ -220,6 +228,7 @@ private fun Constellation(ui: WanderUi, actions: WanderActions, modifier: Modifi
                 )
             }
         }
+      }
     }
 }
 

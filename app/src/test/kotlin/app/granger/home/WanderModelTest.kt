@@ -64,6 +64,20 @@ class WanderModelTest {
         assertThat(ui.orbit[2].title).isEqualTo("Byzantine Empire")
     }
 
+    @Test fun aPictureComesFromAnotherPackWhenTheArticlesOwnHasNone() = runTest {
+        val bare = FakeZimArchive(uuid = "med", contents = mapOf("Psychosis" to page("Psychosis", "Delusion", "Paranoia", "Hallucination")))
+        val pictured = FakeZimArchive(uuid = "top", contents = mapOf("Psychosis" to page("Psychosis")))
+        val m = WanderModel(
+            scope = this, encyclopedias = { listOf(pack("med"), pack("top")) },
+            archiveOf = { mapOf("med" to bare, "top" to pictured)[it.id] },
+            thumbnail = { a, path, _ -> if (a.uuid == "top" && path == "Psychosis") "/thumbs/psychosis.jpg" else null },
+            titles = { emptyList() }, io = StandardTestDispatcher(testScheduler),
+        )
+        m.startFrom("med", "Psychosis"); advanceUntilIdle()
+        assertThat(m.ui.value.centre?.packId).isEqualTo("med")
+        assertThat(m.ui.value.centre?.imagePath).isEqualTo("/thumbs/psychosis.jpg")
+    }
+
     @Test fun goingPushesTheTrailAndBackTrimsIt() = runTest {
         val m = model()
         m.startFrom("top", "Hagia_Sophia"); advanceUntilIdle()
@@ -131,6 +145,25 @@ class WanderModelTest {
         m.start(); advanceUntilIdle()
         assertThat(m.ui.value.centre?.path).isEqualTo("Turkey")
         assertThat(m.ui.value.orbit.count { it.onPhone }).isAtLeast(WanderModel.MIN_REACHABLE)
+    }
+
+    @Test fun aRandomStartComesFromAWholeEncyclopediaNotASubject() = runTest {
+        top.random = "Turkey"
+        history.random = "Byzantine_Empire"
+        val m = model(packList = listOf(pack("history").copy(name = "wikipedia_en_history"), pack("top").copy(name = "wikipedia_en_top")))
+        repeat(3) { m.start(); advanceUntilIdle(); assertThat(m.ui.value.centre?.packId).isEqualTo("top") }
+    }
+
+    @Test fun aRandomStartIsInTheLibrarysMainLanguage() = runTest {
+        top.random = "Turkey"
+        val es = FakeZimArchive(uuid = "es", random = "Baldosa", contents = mapOf("Baldosa" to page("Baldosa", "Piedra", "Vidrio", "Metal")))
+        val m = WanderModel(
+            scope = this,
+            encyclopedias = { listOf(pack("top").copy(name = "wikipedia_en_top", language = "eng"), pack("es").copy(name = "wikipedia_es_top", language = "spa")) },
+            archiveOf = { mapOf("top" to top, "es" to es)[it.id] }, thumbnail = { _, _, _ -> null }, titles = { emptyList() },
+            io = StandardTestDispatcher(testScheduler), random = Random(3),
+        )
+        repeat(3) { m.start(); advanceUntilIdle(); assertThat(m.ui.value.centre?.packId).isEqualTo("top") }
     }
 
     @Test fun noEncyclopediaMeansWanderIsUnavailable() = runTest {
