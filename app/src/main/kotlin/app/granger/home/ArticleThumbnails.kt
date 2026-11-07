@@ -5,7 +5,6 @@ import android.graphics.BitmapFactory
 import app.granger.core.zim.ZimArchive
 import app.granger.shell.RailCovers
 import java.io.File
-import java.net.URI
 import java.security.MessageDigest
 import org.jsoup.Jsoup
 
@@ -86,18 +85,11 @@ class ArticleThumbnails(private val dir: File) {
                 val w = img.attr("width").toIntOrNull()
                 val h = img.attr("height").toIntOrNull()
                 if ((w != null && w < MIN_SIDE) || (h != null && h < MIN_SIDE)) continue
-                out += resolve(src, articlePath)
+                out += ZimPaths.resolve(src, articlePath)
                 out += "I/" + src.substringAfterLast('/')
                 if (out.size >= 6) break
             }
             return out.toList()
-        }
-
-        private fun resolve(src: String, articlePath: String): String {
-            val base = runCatching { URI("/" + articlePath.replace(" ", "%20")) }.getOrNull()
-            val resolved = runCatching { base?.resolve(src.replace(" ", "%20")) }.getOrNull()
-            val path = resolved?.path?.removePrefix("/") ?: src.removePrefix("./")
-            return path.replace("%20", " ")
         }
     }
 }
