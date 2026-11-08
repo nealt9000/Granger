@@ -1,5 +1,6 @@
 package app.granger.home
 
+import androidx.lifecycle.viewModelScope
 import app.granger.core.library.Lane
 import app.granger.core.library.TimeHistogram
 import app.granger.core.library.TimeIndexes
@@ -54,6 +55,8 @@ class TimelineModel(
     private val random: Random = Random.Default,
     private val now: Int = Year.now().value,
     private val debounceMillis: Long = 60L,
+    /** The article to open on (packId, path), as the full screen does from Home's lens; else a random century's best known. */
+    private val startAt: Pair<String, String>? = null,
 ) {
     private val state = MutableStateFlow(TimelineUi(window = TimeScale.history(now), bounds = TimeScale.all(now), now = now))
     val ui: StateFlow<TimelineUi> = state.asStateFlow()
@@ -82,9 +85,13 @@ class TimelineModel(
                     window = TimeScale.history(latest), bounds = TimeScale.all(latest),
                 )
             }
-            // Open on recorded history with the lens on the best-known mark of a random century since 500 BC.
-            val century = random.nextInt(-5, 20) * 100
-            val first = withContext(io) { idx.marks(century, century + 99, emptySet(), 1, now) }.firstOrNull()
+            // Open on recorded history with the lens on the given article, or on the best-known mark of a random century.
+            val first = withContext(io) {
+                startAt?.let { (pack, path) -> idx.find(pack, path) } ?: run {
+                    val century = random.nextInt(-5, 20) * 100
+                    idx.marks(century, century + 99, emptySet(), 1, now).firstOrNull()
+                }
+            }
             refresh(state.value.window, immediate = true)
             first?.let { select(it) }
         }
@@ -200,4 +207,15 @@ class TimelineModel(
         private const val YEAR_MAX = 2000
         val ORDER = compareBy<TimeMark> { it.y0 }.thenByDescending { it.rank }.thenBy { it.qid }
     }
+}
+
+/** The controls wired to [model], for Home's glance and the full screen alike. */
+fun timelineActions(model: TimelineModel) = TimelineActions(
+    onShown = model::ensureStarted, onToggle = model::toggle, onAll = model::all,
+    onWindow = model::show, onLens = model::lensAt, onStep = model::step, onSelect = model::select,
+)
+
+/** Holds the full-screen Timeline's own model (its lanes and zoom don't change Home's glance). */
+class TimelineViewModel(make: (kotlinx.coroutines.CoroutineScope) -> TimelineModel) : androidx.lifecycle.ViewModel() {
+    val model: TimelineModel = make(viewModelScope)
 }

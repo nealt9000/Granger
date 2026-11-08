@@ -97,6 +97,7 @@ fun HomeScreen(
     /** The downloads card opens Downloads, where the whole queue is (Plan DL Decision 7). */
     onOpenDownloads: () -> Unit = {},
     crashNotice: CrashNotice? = null,
+    onOpenTimeline: (app.granger.core.library.TimeMark?) -> Unit = {},
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -120,15 +121,11 @@ fun HomeScreen(
     }
     val timelineModel = viewModel.timeline
     val timeline = timelineModel?.ui?.collectAsStateWithLifecycle()?.value
-    val timelineActions = remember(timelineModel) {
-        if (timelineModel == null) TimelineActions() else TimelineActions(
-            onShown = timelineModel::ensureStarted, onToggle = timelineModel::toggle, onAll = timelineModel::all,
-            onWindow = timelineModel::show, onLens = timelineModel::lensAt, onStep = timelineModel::step, onSelect = timelineModel::select,
-        )
-    }
+    val timelineActions = remember(timelineModel) { timelineModel?.let(::timelineActions) ?: TimelineActions() }
     HomeContent(
         ui, onReadiness, onOpenTab, onPlay, onOpenCard, actions, onOpenDownloads, cardActions, crashNotice,
         wander = wander, wanderActions = wanderActions, timeline = timeline, timelineActions = timelineActions,
+        onOpenTimeline = onOpenTimeline,
     )
 }
 
@@ -154,6 +151,8 @@ fun HomeContent(
     /** The timeline (Plan H5b); null hides it. */
     timeline: TimelineUi? = null,
     timelineActions: TimelineActions = TimelineActions(),
+    /** Opens the full-screen Timeline on the mark Home's lens is on (Neal, 2026-11-08). */
+    onOpenTimeline: (app.granger.core.library.TimeMark?) -> Unit = {},
 ) {
     var adding by rememberSaveable { mutableStateOf(false) }
     Scaffold(
@@ -181,9 +180,11 @@ fun HomeContent(
             if (timeline != null && timeline.available) {
                 item(key = "timeline") {
                     HomeSection("timeline-section") {
-                        TimelineSection(timeline, timelineActions) { mark ->
-                            onOpenCard(Card(mark.title, "", CardTarget.Article(mark.packId, mark.path)))
-                        }
+                        TimelineSection(
+                            timeline, timelineActions,
+                            onOpen = { mark -> onOpenCard(Card(mark.title, "", CardTarget.Article(mark.packId, mark.path))) },
+                            onExpand = onOpenTimeline,
+                        )
                     }
                 }
             }

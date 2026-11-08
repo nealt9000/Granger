@@ -59,6 +59,8 @@
     <string name="home_wander_not_here">%1$s, no está en este teléfono</string>
     <!-- Plan H5b: la línea del tiempo de Inicio. -->
     <string name="home_timeline">Línea del tiempo</string>
+    <string name="home_timeline_expand">Abrir</string>
+    <string name="home_timeline_back">Volver a Inicio</string>
     <string name="home_timeline_all">Todo</string>
     <string name="home_timeline_loading">Ordenando las fechas…</string>
     <string name="home_timeline_nearby">Cerca</string>

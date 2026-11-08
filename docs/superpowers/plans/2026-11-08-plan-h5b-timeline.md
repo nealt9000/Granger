@@ -184,6 +184,28 @@ Findings go into this plan. Then hand to Neal before merging.
   - **Not yet checked:** pinch and the two-finger pan (adb can't send multi-touch; Neal's hands); ruler pan; TalkBack; rotation; animations off; Field theme; fps.
   - **Feel notes for Neal:** after a lane change, the lens settles on the nearest mark in time, which can be obscure (Hustler); rank could weigh more.
 
+## Neal's first try (2026-11-08) and the split
+- **Feedback:**
+  - the river should be about twice the height;
+  - "Show as list" wasn't useful;
+  - with All on there was blank space, but tapping into it found articles ("missing dots");
+  - mark the latest year at the right edge;
+  - AD 1000 onward, where most articles are, got about 1 cm.
+- **Fixes:**
+  - **Dots:** the river is cut into 48 slices of equal width, each showing its best known (6 per slice), plus the 40 best-known long spans overlapping the view. The shading now comes from a histogram of every article's year, held in memory, on a log scale.
+  - **Scale:** position is the log of years before 2100, so AD 1000 onward is about two thirds of the width on 3000 BC to now, and the Big Bang stays on the same axis. This replaces the piecewise scale of spec §5.1.
+  - **Latest year:** the right edge is the latest year the phone has (capped at today), labelled in the accent when the view reaches it.
+  - **Future dates:** the build drops marks dated after the dump's year. There were 12: the 2032 Olympics and the supercontinents, plus errors such as Wadi Feynan at AD 9500 and X-Men at 6767.
+  - "Show as list" is removed.
+- **The split (Neal chose "Glance on Home"):**
+  - **Home:** the river across all lanes, a one-finger scrub, and a compact lens card (picture, year, title, ‹ ›, Open), with "Open ›" to the full screen.
+  - **Full screen (`TimelineRoute`, its own model, opened on Home's lens mark):** chips with stacked lanes; a one-finger drag pans; press-and-hold then drag scrubs with the loupe (inside the river); pinch zooms; Nearby.
+  - **Still to build there:** search, and Show in time from articles.
+- **Bugs found on the phone:**
+  - a pan moved by 0 px, because the change was consumed before its movement was read;
+  - the push skipped rebuilt files of the same size, so it now compares MD5s;
+  - the rail didn't highlight Home on the Timeline route.
+
 ## Not in H5b
 - **Read aloud (the owl):** moves to H5c with the games, so one voice button serves the timeline's lens, Wander and the games.
 - **Spanish time indexes:** they need the dump re-filtered by eswiki sitelinks; the UI strings are in now.

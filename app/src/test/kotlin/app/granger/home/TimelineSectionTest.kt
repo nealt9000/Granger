@@ -9,6 +9,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
@@ -40,7 +41,7 @@ class TimelineSectionTest {
 
     private class Harness(start: TimelineUi) { var ui by mutableStateOf(start) }
 
-    private fun show(h: Harness, opened: MutableList<String> = mutableListOf(), toggled: MutableList<Lane> = mutableListOf()) {
+    private fun show(h: Harness, opened: MutableList<String> = mutableListOf(), toggled: MutableList<Lane> = mutableListOf(), expanded: MutableList<TimeMark?> = mutableListOf()) {
         val actions = TimelineActions(
             onStep = { by -> val i = order.indexOf(h.ui.selected) + by; order.getOrNull(i)?.let { h.ui = h.ui.copy(selected = it) } },
             onSelect = { m -> h.ui = h.ui.copy(selected = m) },
@@ -50,7 +51,7 @@ class TimelineSectionTest {
             HomeContent(
                 HomeUi(strip = ReadinessReport.EMPTY), onReadiness = {}, onOpenTab = {}, onPlay = {},
                 onOpenCard = { opened += (it.target as CardTarget.Article).path },
-                timeline = h.ui, timelineActions = actions,
+                timeline = h.ui, timelineActions = actions, onOpenTimeline = { expanded += it },
                 wander = WanderUi(centre = WanderNode("top", "Istanbul", "Istanbul")), wanderActions = WanderActions(),
             )
         }
@@ -76,14 +77,27 @@ class TimelineSectionTest {
         assertThat(opened).containsExactly("Plato")
     }
 
-    @Test fun nearbyAndChipsReachTheModel() {
+    @Test fun homeIsAGlanceAndOpenTakesTheLensMarkToTheFullScreen() {
+        val expanded = mutableListOf<TimeMark?>()
+        show(Harness(ui()), expanded = expanded)
+        compose.onNodeWithTag("timeline-chip-all").assertDoesNotExist()
+        compose.onNodeWithTag("timeline-nearby-3").assertDoesNotExist()
+        compose.onNodeWithTag("timeline-expand").performClick()
+        assertThat(expanded).containsExactly(un)
+    }
+
+    @Test fun theFullScreenHasChipsAndNearby() {
         val toggled = mutableListOf<Lane>()
         val h = Harness(ui())
-        show(h, toggled = toggled)
+        val actions = TimelineActions(onSelect = { m -> h.ui = h.ui.copy(selected = m) }, onToggle = { toggled += it })
+        var back = false
+        compose.setContent { TimelineScreen(h.ui, actions, onOpen = {}, onBack = { back = true }) }
         compose.onNodeWithTag("timeline-nearby-3").performClick()
         assertThat(h.ui.selected).isEqualTo(plan)
         compose.onNodeWithTag("timeline-chip-people").performClick()
         assertThat(toggled).containsExactly(Lane.PEOPLE)
+        compose.onNodeWithContentDescription("Back to Home").performClick()
+        assertThat(back).isTrue()
     }
 
     @Test fun theTimelineLeadsHomeAboveWanderAndAVerticalSwipeOnTheRiverScrollsHome() {

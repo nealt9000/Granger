@@ -1,5 +1,6 @@
 package app.granger.core.library
 
+import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 import java.io.Closeable
 import java.io.File
@@ -68,6 +69,12 @@ class TimeIndex private constructor(private val db: SQLiteDatabase, val packId: 
     fun top(from: Int, to: Int, lanes: Set<Lane>, k: Int): List<TimeMark> {
         val lane = laneFilter(lanes) ?: return emptyList()
         return query("y0 >= $from AND y0 <= $to$lane ORDER BY rank DESC LIMIT $k")
+    }
+
+    /** The mark for the article at [path], if this pack has it dated. */
+    fun find(path: String): TimeMark? {
+        val quoted = DatabaseUtils.sqlEscapeString(path)
+        return query("path = $quoted LIMIT 1").firstOrNull()
     }
 
     /** The latest start year here, or null for an empty file. */
@@ -194,6 +201,10 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
         out += marks(edges.first(), edges.last(), lanes, spans, now)
         return merge(out)
     }
+
+    /** The mark for an article: from its own pack when that pack is indexed, else from any pack that has the same path. */
+    fun find(packId: String, path: String): TimeMark? =
+        indexes.firstOrNull { it.packId == packId }?.find(path) ?: indexes.firstNotNullOfOrNull { it.find(path) }
 
     /** The latest year any pack has a mark starting in. */
     fun latestYear(): Int? = indexes.mapNotNull { it.latestYear() }.maxOrNull()

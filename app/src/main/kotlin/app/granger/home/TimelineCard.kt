@@ -16,6 +16,12 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -90,34 +96,76 @@ class TimelineActions(
 
 private val RowHeight = 72.dp
 private val SingleRowHeight = 152.dp
+private val FullRowHeight = 120.dp
+private val FullSingleRowHeight = 280.dp
 private const val TRACKS = 8
 private val RulerHeight = 22.dp
 private val TickGap = 64.dp
 private const val LOUPE_MARKS = 4
 
 /**
- * The Home timeline (Plan H5b, Task 4): every dated article on the phone along one river of time. Chips choose lanes;
- * one finger scrubs the lens, the ruler pans, two fingers pinch; the lens card steps mark by mark and opens articles.
+ * The Home timeline, a glance (Neal, 2026-11-08): every dated article on the phone along one river, scrubbed with one
+ * finger, with the lens card's picture, ‹ › and Open. Lanes, pinch, Nearby and search live in the full-screen
+ * [TimelineScreen], which [onExpand] opens on the mark the lens is on.
  */
 @Composable
-fun TimelineSection(ui: TimelineUi, actions: TimelineActions, onOpen: (TimeMark) -> Unit) {
+fun TimelineSection(ui: TimelineUi, actions: TimelineActions, onOpen: (TimeMark) -> Unit, onExpand: (TimeMark?) -> Unit = {}) {
     LaunchedEffect(Unit) { actions.onShown() }
-    Heading(stringResource(R.string.home_timeline))
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(end = 8.dp)) {
+        Heading(stringResource(R.string.home_timeline), Modifier.weight(1f))
+        TextButton(onClick = { onExpand(ui.selected) }, modifier = Modifier.padding(top = 12.dp).testTag("timeline-expand")) {
+            Text(stringResource(R.string.home_timeline_expand), style = MaterialTheme.typography.labelLarge)
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, Modifier.size(18.dp))
+        }
+    }
     Column(Modifier.fillMaxWidth().testTag("timeline"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Chips(ui, actions)
         val words = yearWords()
         if (ui.loading && ui.marks.isEmpty()) {
-            Text(
-                stringResource(R.string.home_timeline_loading),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp),
-            )
+            Loading()
             return@Column
         }
-        River(ui, actions, words)
-        ui.selected?.let { LensCard(it, ui, actions, words, onOpen) }
+        River(ui, actions, words, full = false)
+        ui.selected?.let { LensCard(it, ui, actions, words, onOpen, nearby = false) }
     }
+}
+
+/** The full-screen Timeline (spec §5): lanes stacked by chip, pinch and pan to deep time, the loupe and Nearby. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TimelineScreen(ui: TimelineUi, actions: TimelineActions, onOpen: (TimeMark) -> Unit, onBack: () -> Unit) {
+    LaunchedEffect(Unit) { actions.onShown() }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.home_timeline)) },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.home_timeline_back)) } },
+            )
+        },
+    ) { padding ->
+        Column(
+            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).testTag("timeline-screen"),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Chips(ui, actions)
+            val words = yearWords()
+            if (ui.loading && ui.marks.isEmpty()) {
+                Loading()
+                return@Column
+            }
+            River(ui, actions, words, full = true)
+            ui.selected?.let { LensCard(it, ui, actions, words, onOpen, nearby = true) }
+        }
+    }
+}
+
+@Composable
+private fun Loading() {
+    Text(
+        stringResource(R.string.home_timeline_loading),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(horizontal = 16.dp),
+    )
 }
 
 @Composable
@@ -139,9 +187,12 @@ private fun Chips(ui: TimelineUi, actions: TimelineActions) {
     }
 }
 
-/** The river: rows of marks (one per lane switched on, up to three, else one), the lens line, and the ruler. */
+/**
+ * The river: rows of marks (one per lane switched on, up to three, else one), the lens line, and the ruler. On Home
+ * ([full] false) one finger scrubs and that's all; full screen adds the ruler pan and two-finger pinch and pan.
+ */
 @Composable
-private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords) {
+private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords, full: Boolean) {
     val rows = if (ui.on.size in 1..3) Lane.entries.filter { it in ui.on } else listOf(null)
     val density = LocalDensity.current
     val measurer = rememberTextMeasurer()
@@ -151,57 +202,76 @@ private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords) {
     val labelStyle = TextStyle(fontSize = 10.sp, color = colours.onSurfaceVariant)
     var scrubX by remember { mutableStateOf<Float?>(null) }
     val current by rememberUpdatedState(ui)
-    val rowHeight = if (rows.size == 1) SingleRowHeight else RowHeight
+    val rowHeight = when {
+        full && rows.size == 1 -> FullSingleRowHeight
+        full -> FullRowHeight
+        rows.size == 1 -> SingleRowHeight
+        else -> RowHeight
+    }
     val height = rowHeight * rows.size + RulerHeight
+    // Dots spread over more tracks as a row gets taller, about one per 18 dp.
+    val tracks = (rowHeight.value / 18).toInt().coerceIn(3, 16)
     BoxWithConstraints(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         val widthPx = with(density) { maxWidth.toPx() }
-        val rulerPx = with(density) { RulerHeight.toPx() }
         val (from, to) = ui.window.years()
         Canvas(
             Modifier.fillMaxWidth().height(height).testTag("timeline-river")
                 .semantics { contentDescription = words.range(from, to) }
-                .pointerInput(widthPx) {
+                .pointerInput(widthPx, full) {
                     val slop = viewConfiguration.touchSlop
+                    val hold = viewConfiguration.longPressTimeoutMillis
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
-                        val onRuler = down.position.y > size.height - rulerPx
+                        val pressedAt = System.currentTimeMillis()
+                        // Home: a drag scrubs the lens. Full screen: a drag pans, a press-and-hold then drag scrubs, two
+                        // fingers pinch. A tap selects the nearest mark either way; a vertical drag is the page's scroll.
+                        var mode = Mode.UNDECIDED
                         var total = Offset.Zero
-                        var dragging = false
-                        var transformed = false
                         while (true) {
-                            val ev = awaitPointerEvent()
+                            val ev = if (full && mode == Mode.UNDECIDED) {
+                                val left = hold - (System.currentTimeMillis() - pressedAt)
+                                if (left <= 0) null else withTimeoutOrNull(left) { awaitPointerEvent() }
+                            } else awaitPointerEvent()
+                            if (ev == null) {   // held still: scrub with the loupe
+                                mode = Mode.SCRUB
+                                scrubX = down.position.x
+                                continue
+                            }
                             val pressed = ev.changes.filter { it.pressed }
                             if (pressed.isEmpty()) {
-                                val x = scrubX
-                                when {
-                                    transformed -> Unit
-                                    dragging && !onRuler && x != null -> actions.onLens(current.window.year(x, widthPx))
-                                    !dragging -> actions.onLens(current.window.year(down.position.x, widthPx))
+                                when (mode) {
+                                    Mode.SCRUB -> scrubX?.let { actions.onLens(current.window.year(it, widthPx)) }
+                                    Mode.UNDECIDED -> actions.onLens(current.window.year(down.position.x, widthPx))
+                                    else -> Unit
                                 }
                                 scrubX = null
                                 break
                             }
-                            if (pressed.size >= 2) {
-                                // Two fingers: pinch to zoom around their centre, and pan with them.
+                            if (pressed.size >= 2 && full) {
                                 val zoom = ev.calculateZoom()
                                 val pan = ev.calculatePan()
                                 val c = ev.calculateCentroid()
                                 actions.onWindow(current.window.zoom(zoom, c.x, widthPx, current.bounds).pan(pan.x, widthPx, current.bounds))
                                 ev.changes.forEach { it.consume() }
-                                transformed = true
+                                mode = Mode.PINCH
                                 scrubX = null
                                 continue
                             }
                             val ch = pressed.first()
-                            total += ch.positionChange()
-                            if (!dragging && !transformed) {
-                                if (abs(total.x) > slop && abs(total.x) > abs(total.y)) dragging = true
-                                else if (abs(total.y) > slop) break   // a vertical drag is Home's scroll, not ours
+                            total += ch.position - ch.previousPosition
+                            if (mode == Mode.UNDECIDED) {
+                                if (abs(total.x) > slop && abs(total.x) > abs(total.y)) mode = if (full) Mode.PAN else Mode.SCRUB
+                                else if (abs(total.y) > slop) break
                             }
-                            if (dragging) {
-                                ch.consume()
-                                if (onRuler) actions.onWindow(current.window.pan(ch.positionChange().x, widthPx, current.bounds))
-                                else scrubX = ch.position.x.coerceIn(0f, widthPx)
+                            when (mode) {
+                                Mode.SCRUB -> { ch.consume(); scrubX = ch.position.x.coerceIn(0f, widthPx) }
+                                Mode.PAN -> {
+                                    // Read the move before consuming it: a consumed change reports no movement.
+                                    val dx = ch.positionChange().x
+                                    ch.consume()
+                                    actions.onWindow(current.window.pan(dx, widthPx, current.bounds))
+                                }
+                                else -> Unit
                             }
                         }
                     }
@@ -233,7 +303,7 @@ private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords) {
                 val row = rows.indexOfFirst { it == null || it in m.lanes }.takeIf { it >= 0 } ?: continue
                 val lane = rows[row] ?: Lane.entries.firstOrNull { it in m.lanes }
                 val c = lane?.let { laneColours[it] } ?: other
-                val y = rowH * row + trackY(m.qid, rowH)
+                val y = rowH * row + trackY(m.qid, rowH, tracks)
                 val x0 = ui.window.x(m.y0.toDouble(), w)
                 when (m.kind) {
                     TimeKind.POINT -> drawCircle(c, 3.dp.toPx(), Offset(x0, y))
@@ -250,16 +320,20 @@ private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords) {
                 drawLine(colours.primary, Offset(lensX, 0f), Offset(lensX, bottom), strokeWidth = 2.dp.toPx())
                 ui.selected?.takeIf { scrubX == null }?.let { s ->
                     val row = rows.indexOfFirst { it == null || it in s.lanes }.coerceAtLeast(0)
-                    drawCircle(colours.primary, 6.dp.toPx(), Offset(lensX, rowH * row + trackY(s.qid, rowH)), style = Stroke(2.dp.toPx()))
+                    drawCircle(colours.primary, 6.dp.toPx(), Offset(lensX, rowH * row + trackY(s.qid, rowH, tracks)), style = Stroke(2.dp.toPx()))
                 }
             }
             // Row lines and the ruler.
             for (r in 1 until rows.size) drawLine(colours.outlineVariant, Offset(0f, rowH * r), Offset(w, rowH * r), strokeWidth = 1f)
             drawLine(colours.outline, Offset(0f, bottom), Offset(w, bottom), strokeWidth = 1.dp.toPx())
             // The latest year the phone has an article for, at the right edge, in the accent (Neal, 2026-11-08).
-            val latest = measurer.measure(words.year(ui.latest.toLong()), labelStyle.copy(color = colours.primary))
-            val latestLeft = w - latest.size.width
-            drawText(latest, topLeft = Offset(latestLeft, bottom + 5.dp.toPx()))
+            // Only when the view reaches it; panned into the past, the ruler's own ticks carry on to the edge.
+            var latestLeft = Float.POSITIVE_INFINITY
+            if (ui.window.end >= ui.bounds.end - 1e-6) {
+                val latest = measurer.measure(words.year(ui.latest.toLong()), labelStyle.copy(color = colours.primary))
+                latestLeft = w - latest.size.width
+                drawText(latest, topLeft = Offset(latestLeft, bottom + 5.dp.toPx()))
+            }
             // Ticks left to right; a label that would touch the one before it, or the latest year, is skipped (the tick stays).
             var lastRight = Float.NEGATIVE_INFINITY
             for (t in TimeScale.ticks(ui.window, w, TickGap.toPx())) {
@@ -273,13 +347,13 @@ private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords) {
             }
         }
         // matchParentSize: the loupe floats over the section without taking layout space, so nothing below jumps.
-        scrubX?.let { x -> Box(Modifier.matchParentSize()) { Loupe(ui, x, widthPx, words) } }
+        scrubX?.let { x -> Box(Modifier.matchParentSize()) { Loupe(ui, x, widthPx, words, inside = full) } }
     }
 }
 
-/** While scrubbing: the marks nearest the finger, spread out and named above the river (spec §3.1, the loupe). */
+/** While scrubbing: the marks nearest the finger, named above the river on Home, inside its top on the taller full screen (spec §3.1, the loupe). */
 @Composable
-private fun Loupe(ui: TimelineUi, x: Float, widthPx: Float, words: YearWords) {
+private fun Loupe(ui: TimelineUi, x: Float, widthPx: Float, words: YearWords, inside: Boolean) {
     val near = ui.marks.sortedBy { abs(ui.window.x(it.y0.toDouble(), widthPx) - x) }.take(LOUPE_MARKS).sortedWith(TimelineModel.ORDER)
     if (near.isEmpty()) return
     val density = LocalDensity.current
@@ -289,7 +363,7 @@ private fun Loupe(ui: TimelineUi, x: Float, widthPx: Float, words: YearWords) {
         tonalElevation = 6.dp,
         shadowElevation = 6.dp,
         shape = RoundedCornerShape(10.dp),
-        modifier = Modifier.zIndex(2f).offset { IntOffset(left.roundToInt(), -with(density) { (24 * near.size + 16).dp.roundToPx() }) }
+        modifier = Modifier.zIndex(2f).offset { IntOffset(left.roundToInt(), if (inside) with(density) { 8.dp.roundToPx() } else -with(density) { (24 * near.size + 16).dp.roundToPx() }) }
             .widthIn(max = 220.dp).testTag("timeline-loupe"),
     ) {
         Column(Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) {
@@ -307,7 +381,7 @@ private fun Loupe(ui: TimelineUi, x: Float, widthPx: Float, words: YearWords) {
 
 /** The selected mark: picture, dates, title, step buttons, Open, and the marks nearby. */
 @Composable
-private fun LensCard(mark: TimeMark, ui: TimelineUi, actions: TimelineActions, words: YearWords, onOpen: (TimeMark) -> Unit) {
+private fun LensCard(mark: TimeMark, ui: TimelineUi, actions: TimelineActions, words: YearWords, onOpen: (TimeMark) -> Unit, nearby: Boolean) {
     val picture = rememberRailCover(ui.picture, 64.dp)
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("timeline-card"), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -336,7 +410,7 @@ private fun LensCard(mark: TimeMark, ui: TimelineUi, actions: TimelineActions, w
             Box(Modifier.weight(1f))
             FilledTonalButton(onClick = { onOpen(mark) }, modifier = Modifier.testTag("timeline-open")) { Text(stringResource(R.string.home_wander_open)) }
         }
-        if (ui.nearby.isNotEmpty()) {
+        if (nearby && ui.nearby.isNotEmpty()) {
             Text(stringResource(R.string.home_timeline_nearby), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             for (n in ui.nearby) {
                 Text(
@@ -353,7 +427,9 @@ private fun LensCard(mark: TimeMark, ui: TimelineUi, actions: TimelineActions, w
 
 
 /** A mark's height within its row: one of [TRACKS] tracks by its id, so neighbours spread instead of stacking. */
-private fun trackY(qid: Long, rowH: Float): Float = rowH * (0.12f + 0.76f * ((qid % TRACKS).toInt() + 0.5f) / TRACKS)
+private fun trackY(qid: Long, rowH: Float, tracks: Int = TRACKS): Float = rowH * (0.08f + 0.84f * ((qid % tracks).toInt() + 0.5f) / tracks)
+
+private enum class Mode { UNDECIDED, SCRUB, PAN, PINCH }
 
 private fun laneName(lane: Lane): Int = when (lane) {
     Lane.PHILOSOPHY_RELIGION -> R.string.home_lane_philosophy_religion

@@ -79,6 +79,16 @@ class TimelineModelTest {
         assertThat(ui.selected).isNotNull()
     }
 
+    @Test fun itCanOpenOnAGivenArticle() = runTest {
+        val f = gtimeFile(tmp.root, "top", rows)
+        val m = TimelineModel(
+            scope = this, indexes = { TimeIndexes(listOf(TimeIndex.open(f, "top")!!)) }, picture = { _, _ -> null },
+            io = StandardTestDispatcher(testScheduler), now = 2026, startAt = "top" to "Battle_of_Hastings",
+        )
+        m.ensureStarted(); advanceUntilIdle()
+        assertThat(m.ui.value.selected?.path).isEqualTo("Battle_of_Hastings")
+    }
+
     @Test fun withoutAnyIndexTheTimelineIsUnavailable() = runTest {
         val m = model(file = null)
         m.ensureStarted(); advanceUntilIdle()

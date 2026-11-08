@@ -94,6 +94,14 @@ class TimeIndexTest {
         assertThat(idx.latestYear()).isEqualTo(1961)
     }
 
+    @Test fun findLooksUpAnArticleByPathInItsOwnPackFirst() {
+        val history = listOf(listOf(83224L, "Battle_of_Hastings", 0, 1066, null, bit(Lane.WARS), 80))
+        val all = TimeIndexes(listOf(TimeIndex.open(gtime("top", top), "top")!!, TimeIndex.open(gtime("history", history), "history")!!))
+        assertThat(all.find("history", "Battle_of_Hastings")?.packId).isEqualTo("history")
+        assertThat(all.find("medicine", "Ada_Lovelace")?.packId).isEqualTo("top")
+        assertThat(all.find("top", "O'Brien's_\"Nowhere\"")).isNull()
+    }
+
     @Test fun theHistogramCountsByYearAndLane() {
         val h = TimeIndexes(listOf(TimeIndex.open(gtime("top", top), "top")!!)).histogram()
         assertThat(h.count(-1000, 2026, emptySet())).isEqualTo(5)

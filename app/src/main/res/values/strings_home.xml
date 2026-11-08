@@ -78,6 +78,8 @@
     <string name="home_wander_not_here">%1$s, not on this phone</string>
     <!-- Plan H5b: the Home timeline. -->
     <string name="home_timeline">Timeline</string>
+    <string name="home_timeline_expand">Open</string>
+    <string name="home_timeline_back">Back to Home</string>
     <string name="home_timeline_all">All</string>
     <string name="home_timeline_loading">Laying out the dates…</string>
     <string name="home_timeline_nearby">Nearby</string>
