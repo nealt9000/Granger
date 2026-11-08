@@ -392,6 +392,27 @@ def test_kiwix_keeps_licensed_english_families():
     assert "No family-table row: 1\n  xkcd.com: 1" in text
 
 
+def test_kiwix_copy_replaces_a_title_on_every_flavour_without_featuring_it():
+    xml = feed(feed_entry("wikipedia_en_computer", "maxi", title="Equipo"), feed_entry("wikipedia_en_computer", "nopic", title="Equipo"),
+               feed_entry("wikipedia_en_physics", "maxi", title="Physics"))
+    copy = {"wikipedia_en_computer": {"title": "Informática por Wikipedia", "description": "Sobre informática"}}
+    packs, _ = cg.kiwix_entries({"languages": ["eng"], "copy": copy}, FAMILIES, cg.kiwix_feed(feed_fetch(xml)), set(),
+                                feed_fetch(xml), workers=2, sleep=lambda s: None)
+    by_id = {p["id"]: p for p in packs}
+    for flavour in ("maxi", "nopic"):
+        assert by_id[f"wikipedia_en_computer_{flavour}"]["title"] == "Informática por Wikipedia"
+        assert by_id[f"wikipedia_en_computer_{flavour}"]["description"] == "Sobre informática"
+        assert by_id[f"wikipedia_en_computer_{flavour}"]["featured"] is False
+    assert by_id["wikipedia_en_physics_maxi"]["title"] == "Physics"
+
+
+def test_kiwix_copy_takes_only_a_title_and_description():
+    with pytest.raises(SystemExit):
+        cg.kiwix_copy("x", {"category": "Medical"})
+    with pytest.raises(SystemExit):
+        cg.kiwix_copy("x", {"title": " "})
+
+
 def test_kiwix_takes_the_newest_snapshot_and_sorts():
     xml = feed(feed_entry("wikipedia_en_b", updated="2026-09-01", title="Beta"),
                feed_entry("wikipedia_en_b", updated="2026-10-01", title="Beta"),

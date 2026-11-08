@@ -271,6 +271,8 @@ class SourceViewModel(
     private val family: String? = null,
     /** The library's languages, main first (Plan L3): the lists show their packs, until All languages. */
     knowledge: kotlinx.coroutines.flow.Flow<List<String>> = kotlinx.coroutines.flow.flowOf(listOf(app.granger.core.catalog.ENGLISH)),
+    /** How the app names Granger voices ("Voz de Granger (Owl)"); null keeps the catalog's English title. */
+    private val voiceTitles: app.granger.core.speech.VoiceTitles? = null,
 ) : ViewModel() {
     private data class Choices(val volumes: List<Volume>, val selectedPath: String?, val wifiOnly: Boolean, val notice: UiText?, val domainCleared: Boolean)
 
@@ -576,7 +578,7 @@ class SourceViewModel(
             val details = when (item) {
                 // Plain words (Plan KB Decision 9): "English · Updated March 2026 · CC BY-SA".
                 is PackEntry -> KiwixList.details(item)
-                is BookEntry -> KiwixList.dotted(listOf(UiText.Raw(item.author), UiText.Raw(item.license)))
+                is BookEntry -> KiwixList.dotted(listOf(UiText.Raw(item.author), KiwixList.bookLicence(item.license)))
                 is ModelEntry -> UiText.Raw(item.license)
                 is VoiceEntry -> KiwixList.dotted(listOf(UiText.Res(R.string.sources_voice), UiText.Raw(item.language), UiText.Raw(item.license)))
             }
@@ -596,7 +598,11 @@ class SourceViewModel(
             // A phone without Ask says nothing about how Ask would search (Plan E1 phone check).
             val ask = (item as? PackEntry)?.takeIf { tier >= DeviceTier.ASK }?.let { askReach(it, installedVectorParents) }
             // On Project Gutenberg's own screen, each pack is its subject alone.
-            val title = if (gutenberg) item.title.removeSuffix(GUTENBERG_SUFFIX) else KiwixList.title(item)
+            val title = when {
+                gutenberg -> item.title.removeSuffix(GUTENBERG_SUFFIX)
+                item is VoiceEntry && voiceTitles != null -> app.granger.core.speech.SherpaSpeech.title(item.id, voiceTitles)
+                else -> KiwixList.title(item)
+            }
             val adds = (item as? PackEntry)?.let(::addsOf)
             return ItemRow(
                 item.id, title, details, description, item.downloadBytes, status(item), packId, ask,
@@ -742,7 +748,7 @@ class SourceViewModel(
         fun section(title: String, entries: List<CatalogItem>, folding: Boolean = folds, noun: SectionNoun = SectionNoun.PACKS): Section {
             val open = !folding || title in s.expanded || entries.size <= FOLDED_ROWS
             val rows = (if (open) entries else entries.take(FOLDED_ROWS)).map(::row)
-            return Section(title, rows, entries.size, foldable = folding && entries.size > FOLDED_ROWS, noun = noun)
+            return Section(title, rows, entries.size, foldable = folding && entries.size > FOLDED_ROWS, noun = noun, heading = KiwixList.category(title))
         }
         val sections = if (current == null) emptyList() else buildList {
             val models = current.models.filter(::shown)
@@ -798,7 +804,7 @@ class SourceViewModel(
                         val total = familyRows.size + loose.size
                         val open = !folds || category in s.expanded || total <= FOLDED_ROWS
                         val rows = familyRows + (if (open) loose else loose.take((FOLDED_ROWS - familyRows.size).coerceAtLeast(0))).map(::groupRow)
-                        add(Section(category, rows, total, foldable = folds && total > FOLDED_ROWS))
+                        add(Section(category, rows, total, foldable = folds && total > FOLDED_ROWS, heading = KiwixList.category(category)))
                     }
                 return@buildList
             }

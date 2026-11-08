@@ -340,6 +340,38 @@ object KiwixList {
         if (snapshotDate.isBlank()) null else UiText.Res(R.string.sources_updated, snapshotDate)
     }
 
+    /**
+     * A catalog category (or a Granger Classics section) as the app language says it: the catalog stores English
+     * names, which key sorting and the chips. Spanish books' own sections are Spanish already, and any other name
+     * shows as it is.
+     */
+    fun category(name: String): UiText = CATEGORIES[name]?.let { UiText.Res(it) } ?: UiText.Raw(name)
+
+    private val CATEGORIES = mapOf(
+        "Medical" to R.string.sources_category_medical,
+        "Reference" to R.string.sources_category_reference,
+        "Religion & Philosophy" to R.string.sources_category_religion,
+        "Literature & Drama" to R.string.sources_category_literature,
+        "Science & Math" to R.string.sources_category_science,
+        "How-to" to R.string.sources_category_howto,
+        "Regional" to R.string.sources_category_regional,
+        "Q&A" to R.string.sources_category_qa,
+        "Maps" to R.string.sources_category_maps,
+        "Programming" to R.string.sources_category_programming,
+        "Games & Hobbies" to R.string.sources_category_games,
+        "Other" to R.string.sources_category_other,
+        "Novels & stories" to R.string.sources_category_novels,
+        "Epic & poetry" to R.string.sources_category_poetry,
+        "Drama" to R.string.sources_category_drama,
+        "Philosophy" to R.string.sources_category_philosophy,
+        "Scripture & religion" to R.string.sources_category_scripture,
+        "Opera libretti" to R.string.sources_category_opera,
+    )
+
+    /** A book's licence for its row: Granger Classics' "Public domain (US)" in the app language, anything else as is. */
+    fun bookLicence(full: String): UiText =
+        if (full.trim().equals("Public domain (US)", ignoreCase = true)) UiText.Res(R.string.sources_licence_public_domain_us) else UiText.Raw(full)
+
     private val CC = Regex("^(CC BY(?:-(?:SA|NC|ND))*)(?:\\s+[\\d.]+)?$", RegexOption.IGNORE_CASE)
 
     /**

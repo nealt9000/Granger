@@ -6,7 +6,16 @@
       "swa"
     ],
     "families": "tools/catalog-gen/kiwix_families.json",
-    "contents": "tools/catalog-gen/pack_contents.json"
+    "contents": "tools/catalog-gen/pack_contents.json",
+    "copy": {
+      "wikipedia_es_computer": {
+        "title": "Informática por Wikipedia",
+        "description": "Una selección de artículos de Wikipedia sobre informática"
+      },
+      "wikipedia_es_movies": {
+        "title": "Cine por Wikipedia"
+      }
+    }
   },
   "sets": "tools/catalog-gen/pack_sets.json",
   "packs": [
@@ -131,6 +140,7 @@
       "category": "Medical",
       "license": "CC BY-SA 4.0",
       "title": "WikiMed en español (sin imágenes)",
+      "description": "La enciclopedia médica de Wikipedia",
       "i18n": {
         "en": {
           "title": "WikiMed in Spanish (no pictures)"
@@ -143,6 +153,7 @@
       "category": "Medical",
       "license": "CC BY-SA 4.0",
       "title": "WikiMed en español",
+      "description": "La enciclopedia médica de Wikipedia",
       "i18n": {
         "en": {
           "title": "WikiMed in Spanish"
@@ -179,6 +190,7 @@
       "category": "Reference",
       "license": "CC BY-SA 4.0",
       "title": "Wikipedia en español: todo (sin imágenes)",
+      "description": "Versión sin conexión de Wikipedia en español",
       "i18n": {
         "en": {
           "title": "Wikipedia in Spanish: everything (no pictures)"
@@ -191,6 +203,7 @@
       "category": "Reference",
       "license": "CC BY-SA 4.0",
       "title": "Wikipedia en español: todo",
+      "description": "Versión sin conexión de Wikipedia en español",
       "i18n": {
         "en": {
           "title": "Wikipedia in Spanish: everything"
@@ -215,6 +228,7 @@
       "category": "Regional",
       "license": "CC BY-SA 4.0",
       "title": "Wikiviajes, guía de viajes (sin imágenes)",
+      "description": "Versión sin conexión de Wikiviajes, la guía de viajes, en español",
       "i18n": {
         "en": {
           "title": "Wikivoyage travel guide in Spanish (no pictures)"
@@ -227,6 +241,7 @@
       "category": "Regional",
       "license": "CC BY-SA 4.0",
       "title": "Wikiviajes, guía de viajes",
+      "description": "Versión sin conexión de Wikiviajes, la guía de viajes, en español",
       "i18n": {
         "en": {
           "title": "Wikivoyage travel guide in Spanish"

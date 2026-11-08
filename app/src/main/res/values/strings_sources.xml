@@ -71,6 +71,25 @@
     <string name="sources_section_everything">Everything</string>
     <string name="sources_section_libraries">Libraries</string>
     <string name="sources_section_models">AI models</string>
+    <!-- The catalog's categories (the Kiwix list's chips and headings) and Granger Classics' sections, by name. -->
+    <string name="sources_category_medical">Medical</string>
+    <string name="sources_category_reference">Reference</string>
+    <string name="sources_category_religion">Religion &amp; Philosophy</string>
+    <string name="sources_category_literature">Literature &amp; Drama</string>
+    <string name="sources_category_science">Science &amp; Math</string>
+    <string name="sources_category_howto">How-to</string>
+    <string name="sources_category_regional">Regional</string>
+    <string name="sources_category_qa">Q&amp;A</string>
+    <string name="sources_category_maps">Maps</string>
+    <string name="sources_category_programming">Programming</string>
+    <string name="sources_category_games">Games &amp; Hobbies</string>
+    <string name="sources_category_other">Other</string>
+    <string name="sources_category_novels">Novels &amp; stories</string>
+    <string name="sources_category_poetry">Epic &amp; poetry</string>
+    <string name="sources_category_drama">Drama</string>
+    <string name="sources_category_philosophy">Philosophy</string>
+    <string name="sources_category_scripture">Scripture &amp; religion</string>
+    <string name="sources_category_opera">Opera libretti</string>
     <!-- Unfolds a long section: "Show all 40 packs". -->
     <plurals name="sources_show_all_packs">
         <item quantity="one">Show all %d pack</item>
@@ -216,6 +235,8 @@
     </plurals>
     <string name="sources_licence_not_stated">Licence not stated</string>
     <string name="sources_licence_public_domain">Public domain</string>
+    <!-- Granger Classics' licence: public domain in the United States. -->
+    <string name="sources_licence_public_domain_us">Public domain (US)</string>
     <!-- Several open licences, per project. -->
     <string name="sources_licence_open">Open licences</string>
     <string name="sources_licence_cc">CC licences</string>

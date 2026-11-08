@@ -39,6 +39,22 @@ class SpanishFormatsTest {
         assertThat(java.text.NumberFormat.getIntegerInstance(es).format(27_700)).isEqualTo("27.700")
     }
 
+    @Test fun catalogCategoriesAndTheClassicsLicenceReadInSpanish() {
+        // The catalog keeps English names; the chips and headings say them in the app language (L1 walkthrough).
+        assertThat(KiwixList.category("Medical").resolve(context)).isEqualTo("Medicina")
+        assertThat(KiwixList.category("Literature & Drama").resolve(context)).isEqualTo("Literatura y teatro")
+        assertThat(KiwixList.category("Scripture & religion").resolve(context)).isEqualTo("Escritura y religión")
+        // Clásicos Granger's own sections are Spanish already and stay as they are.
+        assertThat(KiwixList.category("Poesía").resolve(context)).isEqualTo("Poesía")
+        assertThat(KiwixList.bookLicence("Public domain (US)").resolve(context)).isEqualTo("Dominio público (EE. UU.)")
+        assertThat(KiwixList.bookLicence("CC BY 4.0").resolve(context)).isEqualTo("CC BY 4.0")
+    }
+
+    @Test fun aGrangerVoiceIsNamedInSpanish() {
+        val titles = app.granger.core.speech.VoiceTitles.of(context)
+        assertThat(app.granger.core.speech.SherpaSpeech.title("vits-piper-en_GB-granger_owl-medium", titles)).isEqualTo("Voz de Granger (Owl)")
+    }
+
     @Test fun datesReadInSpanish() {
         // Readiness's "is from" date.
         assertThat(LocalDate.of(2025, 1, 10).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(es))).isEqualTo("10 ene 2025")
