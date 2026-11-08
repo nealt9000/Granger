@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-11-08T16:57:01Z",
+  "generatedAt": "2026-11-08T18:43:03Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -667,7 +667,7 @@
     {
       "id": "wikipedia_es_medicine_nopic",
       "title": "WikiMed en español",
-      "description": "La Enciclopedia medical de Wikipedia",
+      "description": "La enciclopedia médica de Wikipedia",
       "category": "Medical",
       "language": "es",
       "sizeBytes": 171178026,
@@ -706,12 +706,20 @@
       "adds": {
         "wikipedia_es_top": 0.864
       },
-      "articles": 19727
+      "articles": 19727,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_medicine_nopic_2026-10.gtime",
+        "sha256": "f529d1a302df317703d58d8c6ac288558865de218fefca5d1e2ac68c640556fd",
+        "sizeBytes": 151552,
+        "count": 1014,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_es_medicine_maxi",
       "title": "WikiMed en español",
-      "description": "La Enciclopedia medical de Wikipedia",
+      "description": "La enciclopedia médica de Wikipedia",
       "category": "Medical",
       "language": "es",
       "sizeBytes": 468834575,
@@ -750,7 +758,15 @@
       "adds": {
         "wikipedia_es_top": 0.864
       },
-      "articles": 19727
+      "articles": 19727,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_medicine_nopic_2026-10.gtime",
+        "sha256": "f529d1a302df317703d58d8c6ac288558865de218fefca5d1e2ac68c640556fd",
+        "sizeBytes": 151552,
+        "count": 1014,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_es_top_nopic",
@@ -798,6 +814,14 @@
           "setTitle": "Wikipedia in Spanish",
           "setDescription": "The free encyclopedia in Spanish, from the best 50,000 articles to all of it."
         }
+      },
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_top_nopic_2026-10.gtime",
+        "sha256": "a00727c5f4312544346ae92faefafc7dc34c980efe0de0854fa0ac64a7a6cf1b",
+        "sizeBytes": 2236416,
+        "count": 24838,
+        "format": 1,
+        "lanesVersion": 1
       }
     },
     {
@@ -846,12 +870,20 @@
           "setTitle": "Wikipedia in Spanish",
           "setDescription": "The free encyclopedia in Spanish, from the best 50,000 articles to all of it."
         }
+      },
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_top_nopic_2026-10.gtime",
+        "sha256": "a00727c5f4312544346ae92faefafc7dc34c980efe0de0854fa0ac64a7a6cf1b",
+        "sizeBytes": 2236416,
+        "count": 24838,
+        "format": 1,
+        "lanesVersion": 1
       }
     },
     {
       "id": "wikipedia_es_all_nopic",
       "title": "Wikipedia en español: Todo",
-      "description": "versión fuera de línea de Wikipedia en español",
+      "description": "Versión sin conexión de Wikipedia en español",
       "category": "Reference",
       "language": "es",
       "sizeBytes": 13298215428,
@@ -890,7 +922,7 @@
     {
       "id": "wikipedia_es_all_maxi",
       "title": "Wikipedia en español: Todo",
-      "description": "versión fuera de línea de Wikipedia en español",
+      "description": "Versión sin conexión de Wikipedia en español",
       "category": "Reference",
       "language": "es",
       "sizeBytes": 36516617102,
@@ -959,7 +991,7 @@
     {
       "id": "wikivoyage_es_all_nopic",
       "title": "Wikiviajes, guía de viajes",
-      "description": "An Offline Version of Wikivoyage in Spanish Language",
+      "description": "Versión sin conexión de Wikiviajes, la guía de viajes, en español",
       "category": "Regional",
       "language": "es",
       "sizeBytes": 43135959,
@@ -998,7 +1030,7 @@
     {
       "id": "wikivoyage_es_all_maxi",
       "title": "Wikiviajes, guía de viajes",
-      "description": "An Offline Version of Wikivoyage in Spanish Language",
+      "description": "Versión sin conexión de Wikiviajes, la guía de viajes, en español",
       "category": "Regional",
       "language": "es",
       "sizeBytes": 139376586,
@@ -19901,7 +19933,7 @@
     },
     {
       "id": "wikipedia_es_movies_maxi",
-      "title": "Actores de Wikipedia",
+      "title": "Cine por Wikipedia",
       "description": "Una selección de artículos de Wikipedia sobre películas",
       "category": "Reference",
       "language": "es",
@@ -19931,7 +19963,7 @@
     },
     {
       "id": "wikipedia_es_movies_nopic",
-      "title": "Actores de Wikipedia",
+      "title": "Cine por Wikipedia",
       "description": "Una selección de artículos de Wikipedia sobre películas",
       "category": "Reference",
       "language": "es",
@@ -21171,8 +21203,8 @@
     },
     {
       "id": "wikipedia_es_computer_maxi",
-      "title": "Equipo por Wikipedia",
-      "description": "Una selección de artículos de Wikipedia en el ordenador",
+      "title": "Informática por Wikipedia",
+      "description": "Una selección de artículos de Wikipedia sobre informática",
       "category": "Reference",
       "language": "es",
       "sizeBytes": 226144328,
@@ -21206,12 +21238,20 @@
       "adds": {
         "wikipedia_es_top": 0.901
       },
-      "articles": 14091
+      "articles": 14091,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_computer_nopic_2026-10.gtime",
+        "sha256": "f6de4d21e0a65ae1adae80393809569ec0a65f8601df8194b3c3447a1206a6a2",
+        "sizeBytes": 446464,
+        "count": 5658,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_es_computer_nopic",
-      "title": "Equipo por Wikipedia",
-      "description": "Una selección de artículos de Wikipedia en el ordenador",
+      "title": "Informática por Wikipedia",
+      "description": "Una selección de artículos de Wikipedia sobre informática",
       "category": "Reference",
       "language": "es",
       "sizeBytes": 102728687,
@@ -21245,7 +21285,15 @@
       "adds": {
         "wikipedia_es_top": 0.901
       },
-      "articles": 14091
+      "articles": 14091,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_computer_nopic_2026-10.gtime",
+        "sha256": "f6de4d21e0a65ae1adae80393809569ec0a65f8601df8194b3c3447a1206a6a2",
+        "sizeBytes": 446464,
+        "count": 5658,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "finiki_en_all_maxi",
@@ -21422,7 +21470,15 @@
       "adds": {
         "wikipedia_es_top": 0.869
       },
-      "articles": 7752
+      "articles": 7752,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_geography_nopic_2026-10.gtime",
+        "sha256": "1dec78dadc1e6e25359190b31c55019f827790aab22cc34dd0d2e150504b63bd",
+        "sizeBytes": 221184,
+        "count": 1912,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_es_geography_nopic",
@@ -21452,7 +21508,15 @@
       "adds": {
         "wikipedia_es_top": 0.869
       },
-      "articles": 7752
+      "articles": 7752,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_geography_nopic_2026-10.gtime",
+        "sha256": "1dec78dadc1e6e25359190b31c55019f827790aab22cc34dd0d2e150504b63bd",
+        "sizeBytes": 221184,
+        "count": 1912,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_geography_nopic",
@@ -21595,7 +21659,15 @@
       "adds": {
         "wikipedia_es_top": 0.899
       },
-      "articles": 17634
+      "articles": 17634,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_history_nopic_2026-10.gtime",
+        "sha256": "5bdd1777e83f8a732ab66abe42d954bc45d6168b788b5464a8322805e13a9eb2",
+        "sizeBytes": 946176,
+        "count": 9891,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_es_history_nopic",
@@ -21634,7 +21706,15 @@
       "adds": {
         "wikipedia_es_top": 0.899
       },
-      "articles": 17634
+      "articles": 17634,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_history_nopic_2026-10.gtime",
+        "sha256": "5bdd1777e83f8a732ab66abe42d954bc45d6168b788b5464a8322805e13a9eb2",
+        "sizeBytes": 946176,
+        "count": 9891,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_history_maxi",
@@ -21835,7 +21915,15 @@
       "adds": {
         "wikipedia_es_top": 0.844
       },
-      "articles": 7848
+      "articles": 7848,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_physics_nopic_2026-10.gtime",
+        "sha256": "80d9642234dcb201d18c748049fbd6ef62b686dca1c4b127201a2e88b988a80a",
+        "sizeBytes": 258048,
+        "count": 2554,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_es_physics_mini",
@@ -21865,7 +21953,15 @@
       "adds": {
         "wikipedia_es_top": 0.844
       },
-      "articles": 7848
+      "articles": 7848,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_physics_nopic_2026-10.gtime",
+        "sha256": "80d9642234dcb201d18c748049fbd6ef62b686dca1c4b127201a2e88b988a80a",
+        "sizeBytes": 258048,
+        "count": 2554,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_es_physics_nopic",
@@ -21904,7 +22000,15 @@
       "adds": {
         "wikipedia_es_top": 0.844
       },
-      "articles": 7848
+      "articles": 7848,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_physics_nopic_2026-10.gtime",
+        "sha256": "80d9642234dcb201d18c748049fbd6ef62b686dca1c4b127201a2e88b988a80a",
+        "sizeBytes": 258048,
+        "count": 2554,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "lgbtqia.wiki_en_all_maxi",
@@ -21966,6 +22070,14 @@
           "setTitle": "Wikipedia in Spanish",
           "setDescription": "The free encyclopedia in Spanish, from the best 50,000 articles to all of it."
         }
+      },
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_top_nopic_2026-10.gtime",
+        "sha256": "a00727c5f4312544346ae92faefafc7dc34c980efe0de0854fa0ac64a7a6cf1b",
+        "sizeBytes": 2236416,
+        "count": 24838,
+        "format": 1,
+        "lanesVersion": 1
       }
     },
     {
@@ -22005,7 +22117,15 @@
       "adds": {
         "wikipedia_es_top": 0.885
       },
-      "articles": 7783
+      "articles": 7783,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_mathematics_nopic_2026-10.gtime",
+        "sha256": "d491f119754a1613b53cdc28f5f5b8d0e06681f051c8357ba3947e3a26247225",
+        "sizeBytes": 167936,
+        "count": 1570,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_es_mathematics_mini",
@@ -22035,7 +22155,15 @@
       "adds": {
         "wikipedia_es_top": 0.885
       },
-      "articles": 7783
+      "articles": 7783,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_mathematics_nopic_2026-10.gtime",
+        "sha256": "d491f119754a1613b53cdc28f5f5b8d0e06681f051c8357ba3947e3a26247225",
+        "sizeBytes": 167936,
+        "count": 1570,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_es_mathematics_nopic",
@@ -22074,7 +22202,15 @@
       "adds": {
         "wikipedia_es_top": 0.885
       },
-      "articles": 7783
+      "articles": 7783,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_mathematics_nopic_2026-10.gtime",
+        "sha256": "d491f119754a1613b53cdc28f5f5b8d0e06681f051c8357ba3947e3a26247225",
+        "sizeBytes": 167936,
+        "count": 1570,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_mathematics_mini",
@@ -22489,7 +22625,15 @@
       "adds": {
         "wikipedia_es_top": 0.805
       },
-      "articles": 3700
+      "articles": 3700,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_chemistry_nopic_2026-10.gtime",
+        "sha256": "50a723f038ca9b65de5949b8d17fbf7a7362704daf678958d55ddd21b5330fc1",
+        "sizeBytes": 36864,
+        "count": 136,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_es_chemistry_mini",
@@ -22519,7 +22663,15 @@
       "adds": {
         "wikipedia_es_top": 0.805
       },
-      "articles": 3700
+      "articles": 3700,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_chemistry_nopic_2026-10.gtime",
+        "sha256": "50a723f038ca9b65de5949b8d17fbf7a7362704daf678958d55ddd21b5330fc1",
+        "sizeBytes": 36864,
+        "count": 136,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_es_chemistry_nopic",
@@ -22558,7 +22710,15 @@
       "adds": {
         "wikipedia_es_top": 0.805
       },
-      "articles": 3700
+      "articles": 3700,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_chemistry_nopic_2026-10.gtime",
+        "sha256": "50a723f038ca9b65de5949b8d17fbf7a7362704daf678958d55ddd21b5330fc1",
+        "sizeBytes": 36864,
+        "count": 136,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "rationalwiki_en_all_maxi",
@@ -23128,7 +23288,7 @@
     {
       "id": "wikipedia_es_all_mini",
       "title": "Wikipedia en español: Todo",
-      "description": "versión fuera de línea de Wikipedia en español",
+      "description": "Versión sin conexión de Wikipedia en español",
       "category": "Reference",
       "language": "es",
       "sizeBytes": 4114469175,
