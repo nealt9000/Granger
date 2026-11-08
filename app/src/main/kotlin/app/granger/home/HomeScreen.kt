@@ -110,7 +110,18 @@ fun HomeScreen(
             viewModel::removeSmaller, viewModel::keepBoth,
         )
     }
-    HomeContent(ui, onReadiness, onOpenTab, onPlay, onOpenCard, actions, onOpenDownloads, cardActions, crashNotice)
+    val wanderModel = viewModel.wander
+    val wander = wanderModel?.ui?.collectAsStateWithLifecycle()?.value
+    val wanderActions = remember(wanderModel) {
+        if (wanderModel == null) WanderActions() else WanderActions(
+            onShown = wanderModel::ensureStarted, onGo = wanderModel::go, onBack = wanderModel::back,
+            onElsewhere = { wanderModel.start() }, onQuery = wanderModel::search, onPick = wanderModel::pick,
+        )
+    }
+    HomeContent(
+        ui, onReadiness, onOpenTab, onPlay, onOpenCard, actions, onOpenDownloads, cardActions, crashNotice,
+        wander = wander, wanderActions = wanderActions,
+    )
 }
 
 /** After a crash, Home asks once (Plan F1 part 2 Decision 3): Send report opens Send feedback; Not now lets it be. */
@@ -129,6 +140,9 @@ fun HomeContent(
     onOpenDownloads: () -> Unit = {},
     downloadsActions: DownloadsCardActions = DownloadsCardActions(),
     crashNotice: CrashNotice? = null,
+    /** Wander (Plan H5a); null hides it. */
+    wander: WanderUi? = null,
+    wanderActions: WanderActions = WanderActions(),
 ) {
     var adding by rememberSaveable { mutableStateOf(false) }
     Scaffold(
@@ -158,6 +172,13 @@ fun HomeContent(
                         },
                         onCancel = { adding = false },
                     )
+                }
+            }
+            if (wander != null && wander.available) {
+                item(key = "wander") {
+                    WanderSection(wander, wanderActions) { node ->
+                        onOpenCard(Card(node.title, "", CardTarget.Article(node.packId, node.path)))
+                    }
                 }
             }
             if (ui.continueCards.isNotEmpty()) {

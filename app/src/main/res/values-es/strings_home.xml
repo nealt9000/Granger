@@ -47,4 +47,14 @@
     <string name="home_crash_notice">Granger se cerró inesperadamente. ¿Enviar un informe?</string>
     <string name="home_crash_not_now">Ahora no</string>
     <string name="home_crash_send">Enviar</string>
+    <!-- Wander (Plan H5a): walk an encyclopedia by the links in each article's opening. -->
+    <string name="home_wander">Paseo</string>
+    <string name="home_wander_search">Empezar desde un artículo</string>
+    <string name="home_wander_elsewhere">A otro lugar</string>
+    <string name="home_wander_no_match">Ningún artículo coincide</string>
+    <string name="home_wander_finding">Buscando por dónde empezar…</string>
+    <string name="home_wander_open">Abrir</string>
+    <string name="home_wander_path">Tu camino:</string>
+    <string name="home_wander_go_to">Ir a %1$s</string>
+    <string name="home_wander_not_here">%1$s, no está en este teléfono</string>
 </resources>
