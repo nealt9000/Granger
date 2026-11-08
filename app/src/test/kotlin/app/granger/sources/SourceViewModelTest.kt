@@ -15,6 +15,7 @@ import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.CatalogError
 import app.granger.core.catalog.CatalogState
 import app.granger.core.catalog.Domain
+import app.granger.core.catalog.downloadBytes
 import app.granger.core.catalog.Preset
 import app.granger.core.catalog.Readiness
 import app.granger.core.downloads.DownloadState
@@ -1164,7 +1165,7 @@ class SourceViewModelTest {
         val published = publishedCatalog()
         catalog.mutable.value = CatalogState(catalog = published)
         val vm = kiwixViewModel()
-        fun size(id: String) = published.packs.single { it.id == id }.let { it.sizeBytes + (it.vectors?.sizeBytes ?: 0L) }
+        fun size(id: String) = published.packs.single { it.id == id }.downloadBytes   // the file, its vectors and its time index
         assertThat(vm.wikipedia().slices.map { it.sizeBytes }).containsExactly(
             size("wikipedia_en_100"), size("wikipedia_en_top_maxi"), size("wikipedia_en_top1m_maxi"), size("wikipedia_en_all_maxi"),
         ).inOrder()

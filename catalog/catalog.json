@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-11-05T12:25:48Z",
+  "generatedAt": "2026-11-08T16:57:01Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -41,7 +41,15 @@
         "wikipedia_en_top": 0.955,
         "wikipedia_en_top1m": 0.656
       },
-      "articles": 72901
+      "articles": 72901,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_medicine_nopic_2026-10-10.gtime",
+        "sha256": "5751536e1101c1a104d91497157ea3a357284dac7caeb88a2f14e5536036aa9b",
+        "sizeBytes": 618496,
+        "count": 5197,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_medicine_maxi",
@@ -82,7 +90,15 @@
         "wikipedia_en_top": 0.955,
         "wikipedia_en_top1m": 0.656
       },
-      "articles": 72901
+      "articles": 72901,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_medicine_nopic_2026-10-10.gtime",
+        "sha256": "5751536e1101c1a104d91497157ea3a357284dac7caeb88a2f14e5536036aa9b",
+        "sizeBytes": 618496,
+        "count": 5197,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_top_nopic",
@@ -122,7 +138,15 @@
       "setLabel": "Best 50,000 articles",
       "articles": 50002,
       "setTitle": "Wikipedia",
-      "setDescription": "The free encyclopedia, from 100 essential articles to all of it."
+      "setDescription": "The free encyclopedia, from 100 essential articles to all of it.",
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_top_maxi_2026-09-14.gtime",
+        "sha256": "4ac1de9be47754551d739fcdb3e456fa2513a09392d69c1e5029929e4abbb378",
+        "sizeBytes": 2330624,
+        "count": 26592,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_top_maxi",
@@ -162,7 +186,15 @@
       "setLabel": "Best 50,000 articles",
       "articles": 50002,
       "setTitle": "Wikipedia",
-      "setDescription": "The free encyclopedia, from 100 essential articles to all of it."
+      "setDescription": "The free encyclopedia, from 100 essential articles to all of it.",
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_top_maxi_2026-09-14.gtime",
+        "sha256": "4ac1de9be47754551d739fcdb3e456fa2513a09392d69c1e5029929e4abbb378",
+        "sizeBytes": 2330624,
+        "count": 26592,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_100",
@@ -393,7 +425,15 @@
         "wikipedia_en_top": 0.991,
         "wikipedia_en_top1m": 0.925
       },
-      "articles": 91985
+      "articles": 91985,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_geography_maxi_2026-10.gtime",
+        "sha256": "8d436a2c27166671c4ef75c92451337e33778bcb57c84fbc899a5d61003f2f2a",
+        "sizeBytes": 602112,
+        "count": 5711,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_physics_maxi",
@@ -434,7 +474,15 @@
         "wikipedia_en_top": 0.954,
         "wikipedia_en_top1m": 0.627
       },
-      "articles": 21783
+      "articles": 21783,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_physics_maxi_2026-10-14.gtime",
+        "sha256": "64811849fb8b2710b7477b686f8f96ba952e94ef7d42b00c40b100e74e44f184",
+        "sizeBytes": 733184,
+        "count": 7963,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_chemistry_maxi",
@@ -475,7 +523,15 @@
         "wikipedia_en_top": 0.937,
         "wikipedia_en_top1m": 0.559
       },
-      "articles": 9314
+      "articles": 9314,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_chemistry_maxi_2026-10-15.gtime",
+        "sha256": "b9a3d694577ae8f3d4841886ea569a7212b63455c38fe39dc7dc009e6f113110",
+        "sizeBytes": 90112,
+        "count": 549,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_mathematics_maxi",
@@ -516,7 +572,15 @@
         "wikipedia_en_top": 0.96,
         "wikipedia_en_top1m": 0.669
       },
-      "articles": 23326
+      "articles": 23326,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_mathematics_maxi_2026-09-15.gtime",
+        "sha256": "6a8a9eef19e6e48036619efd4fbf447cac077f94befcb7b1151a469089ef10ba",
+        "sizeBytes": 483328,
+        "count": 5091,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_knots_maxi",
@@ -557,7 +621,15 @@
         "wikipedia_en_top": 0.988,
         "wikipedia_en_top1m": 0.693
       },
-      "articles": 599
+      "articles": 599,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_knots_maxi_2026-10-18.gtime",
+        "sha256": "b22d59f66269371105377197d88a28e2bb59328015417ad0f16e69a6de214b4d",
+        "sizeBytes": 24576,
+        "count": 11,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "ifixit_en_all",
@@ -20191,7 +20263,15 @@
       "setLabel": "Best 50,000 articles",
       "articles": 50002,
       "setTitle": "Wikipedia",
-      "setDescription": "The free encyclopedia, from 100 essential articles to all of it."
+      "setDescription": "The free encyclopedia, from 100 essential articles to all of it.",
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_top_maxi_2026-09-14.gtime",
+        "sha256": "4ac1de9be47754551d739fcdb3e456fa2513a09392d69c1e5029929e4abbb378",
+        "sizeBytes": 2330624,
+        "count": 26592,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_es_molcell_maxi",
@@ -20506,7 +20586,15 @@
         "wikipedia_en_top": 0.937,
         "wikipedia_en_top1m": 0.559
       },
-      "articles": 9314
+      "articles": 9314,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_chemistry_maxi_2026-10-15.gtime",
+        "sha256": "b9a3d694577ae8f3d4841886ea569a7212b63455c38fe39dc7dc009e6f113110",
+        "sizeBytes": 90112,
+        "count": 549,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_chemistry_nopic",
@@ -20547,7 +20635,15 @@
         "wikipedia_en_top": 0.937,
         "wikipedia_en_top1m": 0.559
       },
-      "articles": 9314
+      "articles": 9314,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_chemistry_maxi_2026-10-15.gtime",
+        "sha256": "b9a3d694577ae8f3d4841886ea569a7212b63455c38fe39dc7dc009e6f113110",
+        "sizeBytes": 90112,
+        "count": 549,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "theworldfactbook_en_all",
@@ -21388,7 +21484,15 @@
         "wikipedia_en_top": 0.991,
         "wikipedia_en_top1m": 0.925
       },
-      "articles": 91985
+      "articles": 91985,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_geography_maxi_2026-10.gtime",
+        "sha256": "8d436a2c27166671c4ef75c92451337e33778bcb57c84fbc899a5d61003f2f2a",
+        "sizeBytes": 602112,
+        "count": 5711,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_golf_maxi",
@@ -21571,7 +21675,15 @@
         "wikipedia_en_top": 0.968,
         "wikipedia_en_top1m": 0.677
       },
-      "articles": 48733
+      "articles": 48733,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_history_maxi_2026-10-12.gtime",
+        "sha256": "7a40d1582b8a9e71568b43dfb10d3dc81e81a0b30fe1a11c2e2c9ca051517313",
+        "sizeBytes": 2142208,
+        "count": 23055,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_history_nopic",
@@ -21612,7 +21724,15 @@
         "wikipedia_en_top": 0.968,
         "wikipedia_en_top1m": 0.677
       },
-      "articles": 48733
+      "articles": 48733,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_history_maxi_2026-10-12.gtime",
+        "sha256": "7a40d1582b8a9e71568b43dfb10d3dc81e81a0b30fe1a11c2e2c9ca051517313",
+        "sizeBytes": 2142208,
+        "count": 23055,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_ice-hockey_maxi",
@@ -22027,7 +22147,15 @@
         "wikipedia_en_top": 0.96,
         "wikipedia_en_top1m": 0.669
       },
-      "articles": 23326
+      "articles": 23326,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_mathematics_maxi_2026-09-15.gtime",
+        "sha256": "6a8a9eef19e6e48036619efd4fbf447cac077f94befcb7b1151a469089ef10ba",
+        "sizeBytes": 483328,
+        "count": 5091,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "milneopentextbooks.org_en_all",
@@ -22242,7 +22370,15 @@
         "wikipedia_en_top": 0.954,
         "wikipedia_en_top1m": 0.627
       },
-      "articles": 21783
+      "articles": 21783,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_physics_maxi_2026-10-14.gtime",
+        "sha256": "64811849fb8b2710b7477b686f8f96ba952e94ef7d42b00c40b100e74e44f184",
+        "sizeBytes": 733184,
+        "count": 7963,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_physics_nopic",
@@ -22283,7 +22419,15 @@
         "wikipedia_en_top": 0.954,
         "wikipedia_en_top1m": 0.627
       },
-      "articles": 21783
+      "articles": 21783,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_physics_maxi_2026-10-14.gtime",
+        "sha256": "64811849fb8b2710b7477b686f8f96ba952e94ef7d42b00c40b100e74e44f184",
+        "sizeBytes": 733184,
+        "count": 7963,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "psiram_en_all_maxi",
@@ -22878,7 +23022,15 @@
         "wikipedia_en_top": 0.955,
         "wikipedia_en_top1m": 0.656
       },
-      "articles": 72901
+      "articles": 72901,
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_medicine_nopic_2026-10-10.gtime",
+        "sha256": "5751536e1101c1a104d91497157ea3a357284dac7caeb88a2f14e5536036aa9b",
+        "sizeBytes": 618496,
+        "count": 5197,
+        "format": 1,
+        "lanesVersion": 1
+      }
     },
     {
       "id": "wikipedia_en_all_maxi",

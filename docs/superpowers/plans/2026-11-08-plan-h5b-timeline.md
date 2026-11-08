@@ -233,6 +233,8 @@ Findings go into this plan. Then hand to Neal before merging.
 
   Testers need an app build with this code to download the files; the current Play build ignores them.
 
+- **Published (Neal's OK, 2026-11-08):** release `timeindex-2026-11-08` (8 files, 7.0 MB, hashes checked against `tools/timeindex/releases`). The catalog lists the time index on 19 packs; nothing else in it changed. All 2,417 links answer, and the catalog is re-signed and verified. `PublishedCatalogTest` checks it reaches every phone, and two size tests now count it in a pack's download.
+
 ## Not in H5b
 - **Read aloud (the owl):** moves to H5c with the games, so one voice button serves the timeline's lens, Wander and the games.
 - **Spanish time indexes:** they need the dump re-filtered by eswiki sitelinks; the UI strings are in now.

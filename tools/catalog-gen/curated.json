@@ -969,5 +969,9 @@
   "vectors": {
     "releases": "tools/vectors/releases",
     "releaseUrl": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-23/"
+  },
+  "timeIndex": {
+    "releases": "tools/timeindex/releases",
+    "releaseUrl": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/"
   }
 }
