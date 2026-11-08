@@ -112,9 +112,10 @@ def test_build_writes_rows_skips_stubs_and_drops_time_pages(tmp_path):
         "Hastings_battle": {"q": "Q83224", "sl": 80, "P31": ["Q178561"], "P585": [t("+1066-10-14T00:00:00Z")]},
         "Undated": {"q": "Q1", "sl": 1, "P31": ["Q11173"]},
     }
+    items["Undated"] = {"q": "Q1", "sl": 1, "P31": ["Q12345"], "P585": [t("+2032-07-23T00:00:00Z")]}   # the future: dropped
     out = tmp_path / "out.gtime"
     counts = build.build(build.articles(Archive(zim)), items, lanes(), out, {"zim": zim.name})
-    assert counts == {"articles": 5, "matched": 5, "rows": 3, "dropped": 1}
+    assert counts == {"articles": 5, "matched": 5, "rows": 3, "dropped": 1, "future": 1}
     db = sqlite3.connect(out)
     rows = db.execute("SELECT qid, title, kind, y0, md0, y1, prec, lanes, rank, lat FROM marks ORDER BY y0").fetchall()
     assert rows == [

@@ -86,6 +86,23 @@ class TimeIndexTest {
         assertThat(idx.laneCounts()[Lane.WARS]).isEqualTo(0)
     }
 
+    @Test fun spreadTakesTheBestKnownFromEachSliceSoQuietCenturiesAreNotBlank() {
+        val idx = TimeIndexes(listOf(TimeIndex.open(gtime("top", top), "top")!!))
+        // One mark per slice: antiquity, the middle ages and the modern era each keep their best known.
+        val marks = idx.spread(listOf(-500, 0, 1500, 2026), emptySet(), perSlice = 1, spans = 0, now = 2026)
+        assertThat(marks.map { it.path }).containsExactly("Aristotle", "Battle_of_Hastings", "Ada_Lovelace")
+        assertThat(idx.latestYear()).isEqualTo(1961)
+    }
+
+    @Test fun theHistogramCountsByYearAndLane() {
+        val h = TimeIndexes(listOf(TimeIndex.open(gtime("top", top), "top")!!)).histogram()
+        assertThat(h.count(-1000, 2026, emptySet())).isEqualTo(5)
+        assertThat(h.count(1000, 1900, emptySet())).isEqualTo(2)
+        assertThat(h.count(-1000, 2026, setOf(Lane.PEOPLE))).isEqualTo(3)
+        assertThat(h.count(-1000, 2026, setOf(Lane.LANGUAGES))).isEqualTo(0)
+        assertThat(h.laneCounts()[Lane.PEOPLE]).isEqualTo(3)
+    }
+
     @Test fun thePushedDirectoryListsFilesThatExistByZimName() {
         val dir = tmp.newFolder("timeindex")
         File(dir, "top.gtime").writeText("x")

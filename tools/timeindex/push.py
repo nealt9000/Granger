@@ -4,10 +4,12 @@
   push.py GTIME_DIR [--dry-run]
 
 Every .gtime in GTIME_DIR goes to the app's files/timeindex/ with an index.tsv (`<file>\\t<ZIM Name>`, read by the app's
-directory lookup), the pack's ZIM Name being its id without the flavour. Files already on the phone at the same size are
-skipped; the index goes last, so the app never lists a file that isn't all there. ANDROID_SERIAL picks the device.
+directory lookup), the pack's ZIM Name being its id without the flavour. Files already on the phone with the same MD5 are
+skipped (not the same size: a rebuilt SQLite file often keeps its size); the index goes last, so the app never lists a
+file that isn't all there. ANDROID_SERIAL picks the device.
 """
 import argparse
+import hashlib
 import subprocess
 import sys
 import tempfile
@@ -28,13 +30,21 @@ def adb(*args, capture=False):
     return r.stdout if capture else None
 
 
-def remote_sizes():
-    sizes = {}
-    for line in adb("shell", "ls -l %s 2>/dev/null || true" % REMOTE, capture=True).splitlines():
+def remote_md5s():
+    sums = {}
+    for line in adb("shell", "cd %s 2>/dev/null && md5sum *.gtime 2>/dev/null || true" % REMOTE, capture=True).splitlines():
         parts = line.split()
-        if len(parts) >= 8 and parts[-1].endswith(".gtime"):
-            sizes[parts[-1]] = int(parts[4])
-    return sizes
+        if len(parts) == 2:
+            sums[parts[1]] = parts[0]
+    return sums
+
+
+def md5(path):
+    h = hashlib.md5()
+    with open(path, "rb") as f:
+        for block in iter(lambda: f.read(1 << 20), b""):
+            h.update(block)
+    return h.hexdigest()
 
 
 def main(argv=None):
@@ -48,9 +58,9 @@ def main(argv=None):
         sys.stdout.write(index)
         return 0
     adb("shell", "mkdir -p %s" % REMOTE)
-    have = remote_sizes()
+    have = remote_md5s()
     for f in files:
-        if have.get(f.name) != f.stat().st_size:
+        if have.get(f.name) != md5(f):
             adb("push", str(f), "%s/%s" % (REMOTE, f.name), capture=True)
             print("  pushed", f.name, flush=True)
     with tempfile.NamedTemporaryFile("w", suffix=".tsv", delete=False) as t:

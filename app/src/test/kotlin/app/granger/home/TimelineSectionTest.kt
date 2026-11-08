@@ -86,15 +86,6 @@ class TimelineSectionTest {
         assertThat(toggled).containsExactly(Lane.PEOPLE)
     }
 
-    @Test fun showAsListListsTheMarksInTimeOrder() {
-        val h = Harness(ui())
-        show(h)
-        compose.onNodeWithTag("timeline-list-toggle").performClick()
-        compose.onNodeWithTag("timeline-list").assertExists()
-        compose.onNode(hasText("1948 · Marshall Plan") and hasAnyAncestor(hasTestTag("timeline-list"))).performClick()
-        assertThat(h.ui.selected).isEqualTo(plan)
-    }
-
     @Test fun theTimelineLeadsHomeAboveWanderAndAVerticalSwipeOnTheRiverScrollsHome() {
         show(Harness(ui()))
         val timelineTop = compose.onNodeWithTag("timeline-section").fetchSemanticsNode().boundsInRoot.top

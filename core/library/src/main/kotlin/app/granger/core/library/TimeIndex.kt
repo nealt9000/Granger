@@ -64,6 +64,27 @@ class TimeIndex private constructor(private val db: SQLiteDatabase, val packId: 
         return before.reversed() + after
     }
 
+    /** The best-known [k] marks starting within [from]..[to] (one slice of the river), highest ranked first. */
+    fun top(from: Int, to: Int, lanes: Set<Lane>, k: Int): List<TimeMark> {
+        val lane = laneFilter(lanes) ?: return emptyList()
+        return query("y0 >= $from AND y0 <= $to$lane ORDER BY rank DESC LIMIT $k")
+    }
+
+    /** The latest start year here, or null for an empty file. */
+    fun latestYear(): Int? = db.rawQuery("SELECT MAX(y0) FROM marks", null).use { c -> if (c.moveToFirst() && !c.isNull(0)) c.getInt(0) else null }
+
+    /** (start year, lanes as a [Lane.ordinal] bitmask, count) for every year and lane mix: the river's density. */
+    fun histogram(): List<Triple<Int, Int, Int>> =
+        db.rawQuery("SELECT y0, lanes, COUNT(*) FROM marks GROUP BY y0, lanes", null).use { c ->
+            buildList {
+                while (c.moveToNext()) {
+                    val fileMask = c.getLong(1)
+                    val mask = bits.entries.fold(0) { m, (lane, bit) -> if (fileMask shr bit and 1L == 1L) m or (1 shl lane.ordinal) else m }
+                    add(Triple(c.getInt(0), mask, c.getInt(2)))
+                }
+            }
+        }
+
     /** How many marks each lane holds here; lanes the file doesn't know count 0. */
     fun laneCounts(): Map<Lane, Int> = Lane.entries.associateWith { lane ->
         val bit = bits[lane] ?: return@associateWith 0
@@ -156,6 +177,30 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
             after.sortedWith(compareBy<TimeMark> { it.y0 }.thenBy { -it.rank }).take(n)
     }
 
+    /**
+     * The river's dots for one view: the best-known [perSlice] marks from each slice between consecutive [edges] (start
+     * years, ascending), so a quiet century isn't left blank beside a crowded one, plus the [spans] best-known marks
+     * overlapping the whole view (long spans and lifetimes that started before it).
+     */
+    fun spread(edges: List<Int>, lanes: Set<Lane>, perSlice: Int, spans: Int, now: Int): List<TimeMark> {
+        if (edges.size < 2) return emptyList()
+        val out = ArrayList<List<TimeMark>>()
+        for (i in 0 until edges.size - 1) {
+            val a = edges[i]
+            val b = if (i == edges.size - 2) edges[i + 1] else edges[i + 1] - 1
+            if (b < a) continue
+            out += merge(indexes.map { it.top(a, b, lanes, perSlice) }).sortedByDescending { it.rank }.take(perSlice)
+        }
+        out += marks(edges.first(), edges.last(), lanes, spans, now)
+        return merge(out)
+    }
+
+    /** The latest year any pack has a mark starting in. */
+    fun latestYear(): Int? = indexes.mapNotNull { it.latestYear() }.maxOrNull()
+
+    /** Every pack's year histogram together (overlaps counted per pack: a density guide, not an exact count). */
+    fun histogram(): TimeHistogram = TimeHistogram.of(indexes.flatMap { it.histogram() })
+
     /** Marks per lane across packs, before de-duplication: a guide for which chips to show, not an exact count. */
     fun laneCounts(): Map<Lane, Int> =
         Lane.entries.associateWith { lane -> indexes.sumOf { it.laneCounts()[lane] ?: 0 } }
@@ -163,5 +208,47 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
     private fun merge(lists: List<List<TimeMark>>): List<TimeMark> {
         val seen = HashSet<Long>()
         return lists.flatten().filter { seen.add(it.qid) }
+    }
+}
+
+/** How many marks start in each year, by lane mix, held in memory so the river can shade density at any zoom. */
+class TimeHistogram private constructor(private val years: IntArray, private val masks: IntArray, private val counts: IntArray) {
+    /** Marks starting in [from]..[to] in any of [lanes] (all when empty). */
+    fun count(from: Int, to: Int, lanes: Set<Lane>): Int {
+        if (to < from || years.isEmpty()) return 0
+        val want = lanes.fold(0) { m, l -> m or (1 shl l.ordinal) }
+        var i = lowerBound(from)
+        var n = 0
+        while (i < years.size && years[i] <= to) {
+            if (want == 0 || masks[i] and want != 0) n += counts[i]
+            i++
+        }
+        return n
+    }
+
+    /** Marks per lane across every year. */
+    fun laneCounts(): Map<Lane, Int> = Lane.entries.associateWith { lane ->
+        var n = 0
+        for (i in years.indices) if (masks[i] and (1 shl lane.ordinal) != 0) n += counts[i]
+        n
+    }
+
+    private fun lowerBound(y: Int): Int {
+        var lo = 0
+        var hi = years.size
+        while (lo < hi) {
+            val mid = (lo + hi) ushr 1
+            if (years[mid] < y) lo = mid + 1 else hi = mid
+        }
+        return lo
+    }
+
+    companion object {
+        val EMPTY = TimeHistogram(IntArray(0), IntArray(0), IntArray(0))
+
+        fun of(rows: List<Triple<Int, Int, Int>>): TimeHistogram {
+            val sorted = rows.sortedBy { it.first }
+            return TimeHistogram(IntArray(sorted.size) { sorted[it].first }, IntArray(sorted.size) { sorted[it].second }, IntArray(sorted.size) { sorted[it].third })
+        }
     }
 }

@@ -80,8 +80,6 @@
     <string name="home_timeline">Timeline</string>
     <string name="home_timeline_all">All</string>
     <string name="home_timeline_loading">Laying out the dates…</string>
-    <string name="home_timeline_as_list">Show as list</string>
-    <string name="home_timeline_as_river">Show as timeline</string>
     <string name="home_timeline_nearby">Nearby</string>
     <string name="home_timeline_earlier">Earlier</string>
     <string name="home_timeline_later">Later</string>
@@ -94,7 +92,7 @@
     <!-- %1$s is the year someone living was born. -->
     <string name="home_timeline_living">%1$s –</string>
     <!-- TalkBack, the river: %1$s and %2$s are the years at either edge. -->
-    <string name="home_timeline_range">Timeline from %1$s to %2$s. Use the step buttons below, or Show as list.</string>
+    <string name="home_timeline_range">Timeline from %1$s to %2$s. Use the step buttons below to move through it.</string>
     <string name="home_lane_philosophy_religion">Philosophy &amp; religion</string>
     <string name="home_lane_civilisations">Civilisations &amp; empires</string>
     <string name="home_lane_languages">Languages</string>

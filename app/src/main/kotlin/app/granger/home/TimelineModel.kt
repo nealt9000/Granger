@@ -1,6 +1,7 @@
 package app.granger.home
 
 import app.granger.core.library.Lane
+import app.granger.core.library.TimeHistogram
 import app.granger.core.library.TimeIndexes
 import app.granger.core.library.TimeMark
 import java.time.Year
@@ -27,10 +28,14 @@ data class TimelineUi(
     val lanes: List<Lane> = emptyList(),
     /** Lanes switched on; empty means All. */
     val on: Set<Lane> = emptySet(),
-    val window: TimeScale.Window = TimeScale.all(Year.now().value),
+    val window: TimeScale.Window = TimeScale.history(Year.now().value),
     val bounds: TimeScale.Window = TimeScale.all(Year.now().value),
-    /** The marks to draw: the highest ranked in the window, plus everything near the lens. */
+    /** The marks to draw: the best known from each slice of the window, plus everything near the lens. */
     val marks: List<TimeMark> = emptyList(),
+    /** Every mark's start year by lane, for shading where articles are even where no dot is drawn. */
+    val density: TimeHistogram = TimeHistogram.EMPTY,
+    /** The latest year the phone has an article for: the river's right edge, labelled. */
+    val latest: Int = Year.now().value,
     val selected: TimeMark? = null,
     /** Marks nearest the selected one in time, closest first (spec §3.1, "Nearby, not just nearest"). */
     val nearby: List<TimeMark> = emptyList(),
@@ -69,8 +74,14 @@ class TimelineModel(
                 state.update { it.copy(available = false, loading = false) }
                 return@launch
             }
-            val counts = withContext(io) { idx.laneCounts() }
-            state.update { it.copy(lanes = Lane.entries.filter { l -> (counts[l] ?: 0) > 0 }) }
+            val (density, latest) = withContext(io) { idx.histogram() to (idx.latestYear() ?: now).coerceAtMost(now) }   // never past today
+            val counts = density.laneCounts()
+            state.update {
+                it.copy(
+                    lanes = Lane.entries.filter { l -> (counts[l] ?: 0) > 0 }, density = density, latest = latest,
+                    window = TimeScale.history(latest), bounds = TimeScale.all(latest),
+                )
+            }
             // Open on recorded history with the lens on the best-known mark of a random century since 500 BC.
             val century = random.nextInt(-5, 20) * 100
             val first = withContext(io) { idx.marks(century, century + 99, emptySet(), 1, now) }.firstOrNull()
@@ -164,12 +175,11 @@ class TimelineModel(
         query?.cancel()
         query = scope.launch {
             if (!immediate) delay(debounceMillis)
-            val (from, to) = window.years()
-            val s = state.value
+                val s = state.value
             val marks = withContext(io) {
-                val top = idx.marks(from, to, s.on, LIMIT, now)
+                val spread = idx.spread(window.slices(SLICES), s.on, PER_SLICE, SPANS, now)
                 val lens = s.selected?.let { idx.around(it.y0, s.on, 6) }.orEmpty()
-                (top + lens).distinctBy { it.qid }
+                (spread + lens).distinctBy { it.qid }
             }
             state.update { it.copy(marks = marks, loading = false) }
         }
@@ -181,8 +191,11 @@ class TimelineModel(
     }
 
     companion object {
-        /** At most this many marks in a window (Decision 8). */
-        const val LIMIT = 300
+        /** The river is cut into this many slices of equal width, each showing its best known (Neal, 2026-11-08: "missing dots"). */
+        const val SLICES = 48
+        const val PER_SLICE = 6
+        /** Long spans and lifetimes overlapping the view, which no slice may start. */
+        const val SPANS = 40
         const val NEARBY = 5
         private const val YEAR_MAX = 2000
         val ORDER = compareBy<TimeMark> { it.y0 }.thenByDescending { it.rank }.thenBy { it.qid }

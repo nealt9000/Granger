@@ -151,7 +151,7 @@ CREATE TABLE marks(qid INTEGER NOT NULL, path TEXT NOT NULL, title TEXT NOT NULL
 """
 
 
-def build(pairs, items: dict, lanes: Lanes, out: Path, meta: dict) -> dict:
+def build(pairs, items: dict, lanes: Lanes, out: Path, meta: dict, last_year: int = 2026) -> dict:
     """Write the .gtime file from (path, title) pairs; returns counts."""
     if out.exists():
         out.unlink()
@@ -173,6 +173,9 @@ def build(pairs, items: dict, lanes: Lanes, out: Path, meta: dict) -> dict:
             counts["dropped"] += 1
             continue
         kind, (y0, md0), end, prec = d
+        if y0 > last_year:   # the timeline ends at the present: predictions (2032 Olympics) and errors (X-Men in 6767) go
+            counts["future"] = counts.get("future", 0) + 1
+            continue
         y1, md1 = end if end else (None, None)
         lat, lon = rec.get("P625", (None, None))
         rows.append((int(rec["q"][1:]), path, title, kind, y0, md0, y1, md1, prec, mask, rec.get("sl", 0), lat, lon))
@@ -229,7 +232,8 @@ def main(argv=None):
         out = Path(a.out) / (zim.stem + ".gtime")
         out.parent.mkdir(parents=True, exist_ok=True)
         source = sha256(zim)
-        counts = build(articles(Archive(zim)), items, lanes, out, {"sourceSha256": source, "dumpDate": a.dump_date, "zim": zim.name})
+        counts = build(articles(Archive(zim)), items, lanes, out, {"sourceSha256": source, "dumpDate": a.dump_date, "zim": zim.name},
+                       last_year=int(a.dump_date[:4]))
         print(zim.name, counts, f"{out.stat().st_size:,} bytes", file=sys.stderr, flush=True)
         if a.releases:
             pack_id = zim.stem.rsplit("_", 1)[0]

@@ -88,8 +88,9 @@ class TimelineActions(
     val onSelect: (TimeMark) -> Unit = {},
 )
 
-private val RowHeight = 44.dp
-private val SingleRowHeight = 76.dp
+private val RowHeight = 72.dp
+private val SingleRowHeight = 152.dp
+private const val TRACKS = 8
 private val RulerHeight = 22.dp
 private val TickGap = 64.dp
 private const val LOUPE_MARKS = 4
@@ -101,13 +102,7 @@ private const val LOUPE_MARKS = 4
 @Composable
 fun TimelineSection(ui: TimelineUi, actions: TimelineActions, onOpen: (TimeMark) -> Unit) {
     LaunchedEffect(Unit) { actions.onShown() }
-    var asList by rememberSaveable { mutableStateOf(false) }
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(end = 8.dp)) {
-        Heading(stringResource(R.string.home_timeline), Modifier.weight(1f))
-        TextButton(onClick = { asList = !asList }, modifier = Modifier.padding(top = 12.dp).testTag("timeline-list-toggle")) {
-            Text(stringResource(if (asList) R.string.home_timeline_as_river else R.string.home_timeline_as_list), style = MaterialTheme.typography.labelMedium)
-        }
-    }
+    Heading(stringResource(R.string.home_timeline))
     Column(Modifier.fillMaxWidth().testTag("timeline"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Chips(ui, actions)
         val words = yearWords()
@@ -120,7 +115,7 @@ fun TimelineSection(ui: TimelineUi, actions: TimelineActions, onOpen: (TimeMark)
             )
             return@Column
         }
-        if (asList) MarkList(ui, actions, words) else River(ui, actions, words)
+        River(ui, actions, words)
         ui.selected?.let { LensCard(it, ui, actions, words, onOpen) }
     }
 }
@@ -215,23 +210,30 @@ private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords) {
             val w = size.width
             val rowH = rowHeight.toPx()
             val bottom = rowH * rows.size
-            // Density shading: how many marks fall under each stretch of the axis.
-            val bins = IntArray(48)
-            for (m in ui.marks) {
-                val b = (ui.window.x(m.y0.toDouble(), w) / w * bins.size).toInt()
-                if (b in bins.indices) bins[b]++
-            }
-            val peak = (bins.maxOrNull() ?: 0).coerceAtLeast(1)
-            bins.forEachIndexed { i, n ->
-                if (n > 0) drawRect(colours.primary.copy(alpha = 0.04f + 0.10f * n / peak), Offset(w * i / bins.size, 0f), Size(w / bins.size, bottom))
+            // Density shading from every article's year, not just the dots drawn: where the river has articles even
+            // when no dot fits (Neal, 2026-11-08). Shaded per row, on a log scale so a quiet century still shows.
+            val bins = 64
+            for ((r, rowLane) in rows.withIndex()) {
+                val laneSet = rowLane?.let { setOf(it) } ?: ui.on
+                val counts = IntArray(bins) { i ->
+                    val a = kotlin.math.ceil(ui.window.year(w * i / bins, w)).toInt()
+                    val b = kotlin.math.ceil(ui.window.year(w * (i + 1) / bins, w)).toInt() - 1
+                    ui.density.count(a, b, laneSet)
+                }
+                val peak = kotlin.math.ln(1.0 + (counts.maxOrNull() ?: 0)).coerceAtLeast(1.0)
+                counts.forEachIndexed { i, n ->
+                    if (n > 0) {
+                        val alpha = (0.05 + 0.22 * kotlin.math.ln(1.0 + n) / peak).toFloat()
+                        drawRect(colours.primary.copy(alpha = alpha), Offset(w * i / bins, rowH * r), Size(w / bins + 0.5f, rowH))
+                    }
+                }
             }
             // Marks: lifetimes as thin bars, spans as bars, events as dots; the better known drawn last, on top.
             for (m in ui.marks.sortedBy { it.rank }) {
                 val row = rows.indexOfFirst { it == null || it in m.lanes }.takeIf { it >= 0 } ?: continue
                 val lane = rows[row] ?: Lane.entries.firstOrNull { it in m.lanes }
                 val c = lane?.let { laneColours[it] } ?: other
-                val track = (m.qid % 5).toInt()
-                val y = rowH * row + rowH * (0.2f + 0.15f * track)
+                val y = rowH * row + trackY(m.qid, rowH)
                 val x0 = ui.window.x(m.y0.toDouble(), w)
                 when (m.kind) {
                     TimeKind.POINT -> drawCircle(c, 3.dp.toPx(), Offset(x0, y))
@@ -248,20 +250,24 @@ private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords) {
                 drawLine(colours.primary, Offset(lensX, 0f), Offset(lensX, bottom), strokeWidth = 2.dp.toPx())
                 ui.selected?.takeIf { scrubX == null }?.let { s ->
                     val row = rows.indexOfFirst { it == null || it in s.lanes }.coerceAtLeast(0)
-                    drawCircle(colours.primary, 6.dp.toPx(), Offset(lensX, rowH * row + rowH * (0.2f + 0.15f * (s.qid % 5).toInt())), style = Stroke(2.dp.toPx()))
+                    drawCircle(colours.primary, 6.dp.toPx(), Offset(lensX, rowH * row + trackY(s.qid, rowH)), style = Stroke(2.dp.toPx()))
                 }
             }
             // Row lines and the ruler.
             for (r in 1 until rows.size) drawLine(colours.outlineVariant, Offset(0f, rowH * r), Offset(w, rowH * r), strokeWidth = 1f)
             drawLine(colours.outline, Offset(0f, bottom), Offset(w, bottom), strokeWidth = 1.dp.toPx())
-            // Ticks left to right; a label that would touch the one before it is skipped (the tick stays).
+            // The latest year the phone has an article for, at the right edge, in the accent (Neal, 2026-11-08).
+            val latest = measurer.measure(words.year(ui.latest.toLong()), labelStyle.copy(color = colours.primary))
+            val latestLeft = w - latest.size.width
+            drawText(latest, topLeft = Offset(latestLeft, bottom + 5.dp.toPx()))
+            // Ticks left to right; a label that would touch the one before it, or the latest year, is skipped (the tick stays).
             var lastRight = Float.NEGATIVE_INFINITY
             for (t in TimeScale.ticks(ui.window, w, TickGap.toPx())) {
                 val x = ui.window.x(t.toDouble(), w)
                 drawLine(colours.outline, Offset(x, bottom), Offset(x, bottom + 4.dp.toPx()), strokeWidth = 1.dp.toPx())
                 val layout = measurer.measure(words.tick(t), labelStyle)
                 val lx = (x - layout.size.width / 2f).coerceIn(0f, w - layout.size.width)
-                if (lx < lastRight + 8.dp.toPx()) continue
+                if (lx < lastRight + 8.dp.toPx() || lx + layout.size.width > latestLeft - 8.dp.toPx()) continue
                 drawText(layout, topLeft = Offset(lx, bottom + 5.dp.toPx()))
                 lastRight = lx + layout.size.width
             }
@@ -345,25 +351,9 @@ private fun LensCard(mark: TimeMark, ui: TimelineUi, actions: TimelineActions, w
     }
 }
 
-/** The window's marks in time order, for TalkBack and for anyone who'd rather read than scrub. */
-@Composable
-private fun MarkList(ui: TimelineUi, actions: TimelineActions, words: YearWords) {
-    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("timeline-list")) {
-        for (m in ui.marks.sortedWith(TimelineModel.ORDER).take(LIST_MAX)) {
-            val selected = m.qid == ui.selected?.qid
-            Text(
-                "${words.of(m)} · ${m.title}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth().clickable { actions.onSelect(m) }.padding(vertical = 8.dp),
-            )
-        }
-    }
-}
 
-private const val LIST_MAX = 60
+/** A mark's height within its row: one of [TRACKS] tracks by its id, so neighbours spread instead of stacking. */
+private fun trackY(qid: Long, rowH: Float): Float = rowH * (0.12f + 0.76f * ((qid % TRACKS).toInt() + 0.5f) / TRACKS)
 
 private fun laneName(lane: Lane): Int = when (lane) {
     Lane.PHILOSOPHY_RELIGION -> R.string.home_lane_philosophy_religion

@@ -121,7 +121,7 @@ class TimelineModelTest {
     @Test fun steppingOutsideTheWindowMovesTheWindowToFollow() = runTest {
         val m = model()
         m.ensureStarted(); advanceUntilIdle()
-        m.show(TimeScale.Window(1940.0, 1950.0)); advanceUntilIdle()
+        m.show(TimeScale.Window(TimeScale.toAxis(1940.0), TimeScale.toAxis(1950.0))); advanceUntilIdle()
         m.lensAt(1945.0); advanceUntilIdle()
         repeat(4) { m.step(1); advanceUntilIdle() }
         assertThat(m.ui.value.selected?.path).isEqualTo("Marshall_Plan")

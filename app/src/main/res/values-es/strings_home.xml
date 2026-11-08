@@ -61,8 +61,6 @@
     <string name="home_timeline">Línea del tiempo</string>
     <string name="home_timeline_all">Todo</string>
     <string name="home_timeline_loading">Ordenando las fechas…</string>
-    <string name="home_timeline_as_list">Ver como lista</string>
-    <string name="home_timeline_as_river">Ver como línea</string>
     <string name="home_timeline_nearby">Cerca</string>
     <string name="home_timeline_earlier">Anterior</string>
     <string name="home_timeline_later">Siguiente</string>
@@ -71,7 +69,7 @@
     <string name="home_timeline_million_ago">hace %1$s millones de años</string>
     <string name="home_timeline_billion_ago">hace %1$s mil millones de años</string>
     <string name="home_timeline_living">%1$s –</string>
-    <string name="home_timeline_range">Línea del tiempo de %1$s a %2$s. Usa los botones de abajo para avanzar, o Ver como lista.</string>
+    <string name="home_timeline_range">Línea del tiempo de %1$s a %2$s. Usa los botones de abajo para recorrerla.</string>
     <string name="home_lane_philosophy_religion">Filosofía y religión</string>
     <string name="home_lane_civilisations">Civilizaciones e imperios</string>
     <string name="home_lane_languages">Idiomas</string>
