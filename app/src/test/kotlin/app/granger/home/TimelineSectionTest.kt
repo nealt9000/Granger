@@ -116,7 +116,7 @@ class TimelineSectionTest {
         assertThat(back).isTrue()
     }
 
-    @Test fun theTimelineLeadsHomeAboveWanderAndAVerticalSwipeOnTheRiverScrollsHome() {
+    @Test fun theTimelineSitsAboveWanderAndAVerticalSwipeOnTheRiverScrollsHome() {
         show(Harness(ui()))
         val timelineTop = compose.onNodeWithTag("timeline-section").fetchSemanticsNode().boundsInRoot.top
         val wanderTop = compose.onNodeWithTag("wander-section").fetchSemanticsNode().boundsInRoot.top

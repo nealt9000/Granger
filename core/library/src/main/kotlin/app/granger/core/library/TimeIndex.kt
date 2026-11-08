@@ -214,6 +214,10 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
         return merge(out)
     }
 
+    /** The [k] best-known marks starting in [from]..[to], across packs (the games' draw, Plan H5c). */
+    fun top(from: Int, to: Int, lanes: Set<Lane>, k: Int): List<TimeMark> =
+        merge(indexes.map { it.top(from, to, lanes, k) }).sortedByDescending { it.rank }.take(k)
+
     /** The mark for an article: from its own pack when that pack is indexed, else from any pack that has the same path. */
     fun find(packId: String, path: String): TimeMark? =
         indexes.firstOrNull { it.packId == packId }?.find(path) ?: indexes.firstNotNullOfOrNull { it.find(path) }
