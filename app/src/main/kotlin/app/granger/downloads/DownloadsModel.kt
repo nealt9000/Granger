@@ -10,7 +10,8 @@ import app.granger.core.downloads.ItemKind
 import app.granger.core.downloads.MAX_ATTEMPTS
 import app.granger.core.downloads.QueueSummary
 import app.granger.core.downloads.QueueText
-import app.granger.core.downloads.VectorDownloads
+import app.granger.core.downloads.Companions
+import app.granger.core.downloads.isCompanion
 import app.granger.core.downloads.WaitReason
 import app.granger.core.downloads.isActive
 import app.granger.core.downloads.isFromCatalog
@@ -50,6 +51,8 @@ data class DownloadRow(
     val itemIds: List<String> = emptyList(),
     val withIndex: Boolean = false,
     val indexOnly: Boolean = false,
+    /** An [indexOnly] row that is a pack's time index (Plan H5b), not its Ask index: named for what it gives. */
+    val timelineDates: Boolean = false,
     /** Why a waiting row waits (Plan DL Decision 4). */
     val reason: WaitReason? = null,
     val error: String? = null,
@@ -128,24 +131,24 @@ object DownloadsModel {
     ): DownloadsUi {
         val packByPath = packs.associateBy { it.filePath }
         val bookByPath = books.associateBy { it.filePath }
-        val byItem = records.filter { it.kind != ItemKind.VECTORS }.associateBy { it.itemId }
+        val byItem = records.filter { !it.kind.isCompanion }.associateBy { it.itemId }
         fun titleOf(r: DownloadRecord): String {
-            if (r.kind == ItemKind.VECTORS) return VectorDownloads.parentOf(r.itemId)?.let(byItem::get)?.let(::titleOf) ?: r.title
+            if (r.kind.isCompanion) return Companions.parentOf(r.itemId)?.let(byItem::get)?.let(::titleOf) ?: r.title
             return packByPath[r.filePath]?.title ?: bookByPath[r.filePath]?.title ?: fileName(r)
         }
         fun notInCatalog(r: DownloadRecord) = catalogIds != null && r.isActive && r.isFromCatalog && r.itemId !in catalogIds
 
         // A vectors record folds into its parent's row when that row is in the same section.
         fun rows(list: List<DownloadRecord>, state: RowState, reasons: Map<DownloadRecord, WaitReason> = emptyMap()): List<DownloadRow> {
-            val shown = list.filter { it.kind != ItemKind.VECTORS }.mapTo(HashSet()) { it.itemId }
-            val folded = list.filter { r -> r.kind == ItemKind.VECTORS && VectorDownloads.parentOf(r.itemId) in shown }
-                .groupBy { VectorDownloads.parentOf(it.itemId)!! }
+            val shown = list.filter { !it.kind.isCompanion }.mapTo(HashSet()) { it.itemId }
+            val folded = list.filter { r -> r.kind.isCompanion && Companions.parentOf(r.itemId) in shown }
+                .groupBy { Companions.parentOf(it.itemId)!! }
             val foldedAway = folded.values.flatten().toHashSet()
             return list.filter { it !in foldedAway }.map { r ->
-                val vecs = if (r.kind == ItemKind.VECTORS) emptyList() else folded[r.itemId].orEmpty()
+                val vecs = if (r.kind.isCompanion) emptyList() else folded[r.itemId].orEmpty()
                 val all = listOf(r) + vecs
                 DownloadRow(
-                    key = (if (r.kind == ItemKind.VECTORS) "index:" else "item:") + r.itemId,
+                    key = (if (r.kind.isCompanion) "index:" else "item:") + r.itemId,
                     title = UiText.Raw(titleOf(r)),
                     state = state,
                     bytesDone = all.sumOf { if (it.state == DownloadState.INSTALLED) it.sizeBytes else it.bytesDone },
@@ -153,8 +156,10 @@ object DownloadsModel {
                     groupId = r.groupId,
                     groupLabel = r.groupId?.let { groupLabel(it, r) },
                     itemIds = all.map { it.itemId },
-                    withIndex = vecs.isNotEmpty(),
-                    indexOnly = r.kind == ItemKind.VECTORS,
+                    // "+ index for Ask" only when Ask's index rides along; the time index folds in quietly.
+                    withIndex = vecs.any { it.kind == ItemKind.VECTORS },
+                    indexOnly = r.kind.isCompanion,
+                    timelineDates = r.kind == ItemKind.TIME_INDEX,
                     reason = reasons[r],
                     error = all.firstOrNull { it.state == DownloadState.FAILED }?.error,
                     open = if (state == RowState.DONE) openOf(r, packByPath, bookByPath) else null,
@@ -177,8 +182,8 @@ object DownloadsModel {
         val done = records.filter { it.state == DownloadState.INSTALLED && it.updatedAt >= since }
         val groupOf = done.filter { it.groupId != null }.associate { it.itemId to it.groupId!! }
         val (groupVectors, singles) = done.filter { it.groupId == null }
-            .partition { it.kind == ItemKind.VECTORS && VectorDownloads.parentOf(it.itemId) in groupOf }
-        val vectorsOfGroup = groupVectors.groupBy { groupOf.getValue(VectorDownloads.parentOf(it.itemId)!!) }
+            .partition { it.kind.isCompanion && Companions.parentOf(it.itemId) in groupOf }
+        val vectorsOfGroup = groupVectors.groupBy { groupOf.getValue(Companions.parentOf(it.itemId)!!) }
         val doneToday = rows(singles, RowState.DONE) +
             done.filter { it.groupId != null }.groupBy { it.groupId!! }.map { (group, files) ->
                 val all = files + vectorsOfGroup[group].orEmpty()
@@ -221,7 +226,7 @@ object DownloadsModel {
      * thing coming, not 376).
      */
     fun badge(records: List<DownloadRecord>): Int =
-        records.filter { it.isActive && it.kind != ItemKind.VECTORS }.distinctBy { it.groupId ?: it.itemId }.size
+        records.filter { it.isActive && !it.kind.isCompanion }.distinctBy { it.groupId ?: it.itemId }.size
 
     /** "Setting up" for a group from onboarding (its ids are `onboarding:<epoch>`), else the group's title. */
     fun groupLabel(groupId: String, r: DownloadRecord): UiText =
@@ -259,7 +264,7 @@ private fun sizeText(row: DownloadRow): UiText =
  */
 fun downloadsText(context: Context, row: DownloadRow, now: Long = System.currentTimeMillis(), speed: Long? = null): String {
     val parts = mutableListOf<UiText>()
-    if (row.indexOnly) parts += UiText.Res(R.string.downloads_index_for_ask)
+    if (row.indexOnly) parts += UiText.Res(if (row.timelineDates) R.string.downloads_timeline_dates else R.string.downloads_index_for_ask)
     val notInCatalog = UiText.Res(R.string.downloads_not_in_catalog)
     when (row.state) {
         RowState.RUNNING -> {

@@ -219,6 +219,30 @@ class DownloadsModelTest {
         assertThat(med.bytes).isEqualTo(1_100)
     }
 
+    @Test fun aTimeIndexFoldsQuietlyIntoItsPackOrShowsAsTimelineDates() {
+        fun timeOf(parent: String) = rec(app.granger.core.downloads.TimeIndexDownloads.itemIdOf(parent), DownloadState.QUEUED, kind = ItemKind.TIME_INDEX, size = 7)
+        val ui = ui(
+            listOf(
+                rec("wiki", DownloadState.INSTALLED, updated = midnight - 5).copy(filePath = "/packs/wiki.zim"),
+                timeOf("wiki"),
+                rec("med", DownloadState.QUEUED),
+                timeOf("med"),
+                vectorsOf("med", DownloadState.QUEUED),
+            ),
+            packs = listOf(pack("wiki", "Wikipedia")),
+        )
+        assertThat(ui.upNext.map { it.title.text() }).containsExactly("Wikipedia", "Title med").inOrder()
+        assertThat(downloadsText(context, ui.upNext[0], now)).isEqualTo("Dates for the timeline · 7 B · Next")
+        val med = ui.upNext[1]
+        assertThat(med.itemIds).containsExactly("med", "med.timeindex", "med.vectors")
+        assertThat(med.bytes).isEqualTo(1_107)
+        assertThat(med.withIndex).isTrue()
+        // A pack with only its time index says nothing extra.
+        val quiet = ui(listOf(rec("hist", DownloadState.QUEUED), timeOf("hist"))).upNext.single()
+        assertThat(quiet.withIndex).isFalse()
+        assertThat(quiet.itemIds).containsExactly("hist", "hist.timeindex")
+    }
+
     @Test fun finishedPacksAndBooksOpenUnderTheirLibraryTitle() {
         val ui = ui(
             listOf(

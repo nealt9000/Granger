@@ -131,7 +131,15 @@ import app.granger.home.CardTarget
 import app.granger.home.FeedDrawer
 import app.granger.home.HomeScreen
 import app.granger.home.HomeViewModel
+import app.granger.home.TimelineModel
+import app.granger.home.TimelineScreen
+import app.granger.home.TimelineViewModel
+import app.granger.home.timelineActions
 import app.granger.home.WanderModel
+import app.granger.core.library.TimeIndex
+import app.granger.core.library.TimeIndexCache
+import app.granger.core.library.TimeIndexDirectory
+import app.granger.core.library.TimeIndexes
 import app.granger.onboarding.OnboardingScreen
 import app.granger.onboarding.OnboardingViewModel
 import app.granger.shell.RailEntry
@@ -172,6 +180,8 @@ internal fun LibraryRoute.noticeText(): UiText? = notice?.let { UiText.Res(it.te
 
 /** Home (Plan H2): the readiness strip, Continue and the feeds. A rail tool, pushed over the Library. */
 @Serializable object HomeRoute
+/** The full-screen Timeline, opened from Home's glance on the article its lens was on (Plan H5b). */
+@Serializable data class TimelineRoute(val packId: String? = null, val path: String? = null)
 
 /** Onboarding (Plan H3): five screens over Home on a first run, or from Settings. */
 @Serializable object OnboardingRoute
@@ -380,7 +390,7 @@ internal fun inLibraryRoute(kind: ArchiveKind, identifier: String): Any =
 internal fun railToolOf(
     destination: NavDestination, sourceScope: CatalogScope? = null, archiveKind: ArchiveKind? = null, getMoreFor: GetMoreFor? = null,
 ): RailTool? = when {
-    destination.hasRoute<HomeRoute>() || destination.hasRoute<OnboardingRoute>() -> RailTool.HOME
+    destination.hasRoute<HomeRoute>() || destination.hasRoute<OnboardingRoute>() || destination.hasRoute<TimelineRoute>() -> RailTool.HOME
     destination.hasRoute<SourceRoute>() -> when (sourceScope) {
         CatalogScope.MODELS -> RailTool.SETTINGS
         CatalogScope.KIWIX -> RailTool.BROWSE
@@ -639,6 +649,32 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
 
     // What Define does in the e-book reader; the selection menu reads it live through SelectionBridge.
     val appContext = LocalContext.current.applicationContext
+
+    /** The timeline's model, for Home's glance and the full screen (Plan H5b); [startAt] is an article to open on. */
+    val timeIndexCache = remember { TimeIndexCache() }
+
+    /** The phone's time indexes in Wander's pack order, opened once and reopened when the packs or files change. */
+    suspend fun timeIndexes(): TimeIndexes {
+        // Downloaded with each pack from the catalog (Plan H5b Task 3); files pushed for development fill any gap.
+        val installed = container.installedTimeIndexes()
+        val listed = TimeIndexDirectory.listed(File(appContext.getExternalFilesDir(null), "timeindex"))
+        val packs = WanderModel.encyclopediasOf(container.library.packs.first(), container.knowledgeNow.value)
+        val files = packs.mapNotNull { pack -> (installed[pack.id] ?: listed[pack.name])?.let { pack to it } }
+        return timeIndexCache.get(files.map { (p, f) -> "${p.id}|${f.path}|${f.lastModified()}" }) {
+            TimeIndexes(files.mapNotNull { (pack, file) -> TimeIndex.open(file, pack.id) })
+        }
+    }
+
+    fun timelineModel(scope: kotlinx.coroutines.CoroutineScope, thumbs: ArticleThumbnails, startAt: Pair<String, String>? = null) = TimelineModel(
+        scope = scope,
+        indexes = { timeIndexes() },
+        picture = { packId, path ->
+            container.library.archive(packId)?.let { archive ->
+                archive.read(path)?.let { thumbs.thumbnail(archive, path, String(it.bytes, Charsets.UTF_8)) }
+            }
+        },
+        startAt = startAt,
+    )
 
     // Send feedback and the crash log (Plan F1 part 2): one sheet, opened from Settings → About or Home's crash line.
     val activityContext = LocalContext.current
@@ -1024,6 +1060,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onSearchText = { text -> nav.navigate(SearchRoute(text)) },
                     onResearch = { text, packId, path, title -> nav.navigate(ResearchRoute.about(text, packId, title, path)) },
                     onOpenDocument = { packId, path, linkText -> scope.launch { openPackDocument(packId, path, linkText) } },
+                    isDated = { packId, path -> kotlinx.coroutines.withContext(Dispatchers.IO) { timeIndexes().find(packId, path) != null } },
+                    onShowInTime = { packId, path -> nav.navigate(TimelineRoute(packId, path)) },
                     onBack = { nav.popBackStack() },
                 )
             }
@@ -1327,6 +1365,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                     titles = { container.search.titles(it).hits },
                                 )
                             },
+                            timelineOf = { scope -> timelineModel(scope, homeThumbs) },
                         )
                     },
                     onReadiness = { nav.navigate(ReadinessRoute) { launchSingleTop = true } },
@@ -1334,6 +1373,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     crashNotice = if (crashNotice != null) CrashNotice(onSend = { feedbackOpen = true }, onDismiss = { crashLog?.acknowledge() }) else null,
                     onOpenTab = ::showTab,
                     onPlay = ::resumePlay,
+                    onOpenTimeline = { mark -> nav.navigate(TimelineRoute(mark?.packId, mark?.path)) { launchSingleTop = true } },
                     onOpenCard = { card ->
                         when (val target = card.target) {
                             is CardTarget.Article -> scope.launch {
@@ -1350,6 +1390,22 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             is CardTarget.Search -> nav.navigate(SearchRoute(target.query))
                         }
                     },
+                )
+            }
+            composable<TimelineRoute> { entry ->
+                val route = entry.toRoute<TimelineRoute>()
+                val thumbs = remember { ArticleThumbnails(File(appContext.cacheDir, "home-thumbs")) }
+                val model = viewModel { TimelineViewModel { scope -> timelineModel(scope, thumbs, route.packId?.let { p -> route.path?.let { p to it } }) } }.model
+                val ui by model.ui.collectAsStateWithLifecycle()
+                TimelineScreen(
+                    ui, remember(model) { timelineActions(model) },
+                    onOpen = { mark ->
+                        scope.launch {
+                            val tabId = container.sessions.openTab(mark.packId, mark.path, mark.title)
+                            container.sessions.tab(tabId)?.let { nav.showTab(it) }
+                        }
+                    },
+                    onBack = { nav.popBackStack() },
                 )
             }
             composable<OnboardingRoute> {

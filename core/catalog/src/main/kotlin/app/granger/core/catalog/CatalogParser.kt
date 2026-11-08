@@ -41,13 +41,14 @@ object CatalogParser {
         if (generatedAt == null || runCatching { Instant.parse(generatedAt) }.isFailure) {
             return ParseResult.Invalid(CatalogError.MALFORMED)
         }
-        val packs = entries<PackEntry>(root, "packs", retryWithout = VECTORS)
+        val packs = entries<PackEntry>(root, "packs", retryWithout = listOf(VECTORS, TIME_INDEX))
             .filter { valid(it) && DATE.matches(it.snapshotDate) }
             .distinctBy { it.id }
             .map { if (it.vectors == null || valid(it.vectors)) it else it.copy(vectors = null) }
+            .map { if (it.timeIndex == null || valid(it.timeIndex)) it else it.copy(timeIndex = null) }
             .map(::family)
             .map { it.copy(language = Languages.normalise(it.language), i18n = i18n(it.i18n)) }
-        val books = entries<BookEntry>(root, "books", retryWithout = VECTORS)
+        val books = entries<BookEntry>(root, "books", retryWithout = listOf(VECTORS))
             .filter { valid(it) && DATE.matches(it.releaseDate) }
             .distinctBy { it.id }
             .map { if (it.vectors == null || valid(it.vectors)) it else it.copy(vectors = null) }
@@ -157,15 +158,25 @@ object CatalogParser {
         return out
     }
 
-    /** An entry that doesn't decode is dropped; with [retryWithout], it is first tried again without that field. */
-    private inline fun <reified T> entries(root: JsonObject, key: String, retryWithout: String? = null): List<T> =
+    /**
+     * An entry that doesn't decode is dropped; with [retryWithout], it is first tried again without each of those
+     * optional fields in turn (so a bad time index doesn't cost a pack its vectors), then without all of them.
+     */
+    private inline fun <reified T> entries(root: JsonObject, key: String, retryWithout: List<String> = emptyList()): List<T> =
         (root[key] as? JsonArray).orEmpty().mapNotNull { element ->
-            runCatching { json.decodeFromJsonElement<T>(element) }.getOrNull()
-                ?: (element as? JsonObject)?.takeIf { retryWithout != null && retryWithout in it }
-                    ?.let { obj -> runCatching { json.decodeFromJsonElement<T>(JsonObject(obj - retryWithout!!)) }.getOrNull() }
+            runCatching { json.decodeFromJsonElement<T>(element) }.getOrNull() ?: (element as? JsonObject)?.let { obj ->
+                val present = retryWithout.filter { it in obj }
+                (present.map { listOf(it) } + listOf(present)).filter { it.isNotEmpty() }.firstNotNullOfOrNull { drop ->
+                    runCatching { json.decodeFromJsonElement<T>(JsonObject(obj - drop.toSet())) }.getOrNull()
+                }
+            }
         }
 
     private const val VECTORS = "vectors"
+    private const val TIME_INDEX = "timeIndex"
+
+    /** The `.gtime` layout this app reads (core/library `TimeIndex.FORMAT`); a newer one is left for a newer app. */
+    const val TIME_INDEX_FORMAT = 1
 
     /**
      * [pack]'s Wikipedia-family fields made consistent (Plan WF): a set without a rank of 1 or more is no set, a
@@ -188,6 +199,10 @@ object CatalogParser {
             v.sizeBytes > 0 &&
             v.dims > 0 &&
             v.chunkerVersion > 0
+
+    /** A time index the app can fetch, check and read: an https file with a checksum, in the format this app reads. */
+    private fun valid(t: TimeIndexEntry): Boolean =
+        t.url.startsWith("https://") && SHA256.matches(t.sha256) && t.sizeBytes > 0 && t.format == TIME_INDEX_FORMAT
 
     private fun valid(item: CatalogItem): Boolean =
         SAFE_NAME.matches(item.id) &&

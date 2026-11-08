@@ -13,7 +13,8 @@ import app.granger.core.catalog.PackEntry
 import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.ItemKind
-import app.granger.core.downloads.VectorDownloads
+import app.granger.core.downloads.Companions
+import app.granger.core.downloads.isCompanion
 import app.granger.core.library.Book
 import app.granger.core.library.BookOrigin
 import app.granger.core.library.Pack
@@ -305,9 +306,9 @@ object ReadinessModel {
         val groups = HashSet<String>()
         val byItem = installed.associateBy { it.itemId }
         for (record in installed) {
-            if (record.kind == ItemKind.VECTORS) {
+            if (record.kind.isCompanion) {
                 // Search vectors (Plan R1) are part of their item: its source, its count.
-                val parent = VectorDownloads.parentOf(record.itemId)?.let(byItem::get)
+                val parent = Companions.parentOf(record.itemId)?.let(byItem::get)
                 add(parent?.let(::sourceOf) ?: Source.GRANGER, record.sizeBytes, 0)
                 continue
             }

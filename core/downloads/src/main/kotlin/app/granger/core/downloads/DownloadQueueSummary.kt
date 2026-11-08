@@ -109,7 +109,7 @@ object DownloadQueueSummary {
             it.state == DownloadState.QUEUED || it.state == DownloadState.RUNNING ||
                 (it.updatedAt >= since && (it.state == DownloadState.INSTALLED || it.state == DownloadState.FAILED))
         }
-        val files = round.filter { it.kind != ItemKind.VECTORS }
+        val files = round.filter { !it.kind.isCompanion }
         val bytesToGo = active.sumOf { (it.sizeBytes - done(it)).coerceAtLeast(0) }
         val rate = p.bytesPerSecond?.takeIf { it > 0 && !live.paused }
         return QueueSummary(

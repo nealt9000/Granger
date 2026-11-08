@@ -57,4 +57,37 @@
     <string name="home_wander_path">Tu camino:</string>
     <string name="home_wander_go_to">Ir a %1$s</string>
     <string name="home_wander_not_here">%1$s, no está en este teléfono</string>
+    <!-- Plan H5b: la línea del tiempo de Inicio. -->
+    <string name="home_timeline">Línea del tiempo</string>
+    <string name="home_timeline_expand">Línea completa</string>
+    <string name="home_timeline_back">Volver a Inicio</string>
+    <string name="home_timeline_search">Buscar en la línea del tiempo</string>
+    <string name="home_timeline_search_hint">Roma, jazz, Newton…</string>
+    <string name="home_timeline_no_matches">Ningún artículo fechado coincide</string>
+    <plurals name="home_timeline_matches">
+        <item quantity="one">%1$d resultado</item>
+        <item quantity="many">%1$d resultados</item>
+        <item quantity="other">%1$d resultados</item>
+    </plurals>
+    <string name="reader_show_in_time">Ver en el tiempo</string>
+    <string name="home_timeline_all">Todo</string>
+    <string name="home_timeline_loading">Ordenando las fechas…</string>
+    <string name="home_timeline_nearby">Cerca</string>
+    <string name="home_timeline_earlier">Anterior</string>
+    <string name="home_timeline_later">Siguiente</string>
+    <string name="home_timeline_bc">%1$s a. C.</string>
+    <string name="home_timeline_circa">c. %1$s</string>
+    <string name="home_timeline_million_ago">hace %1$s millones de años</string>
+    <string name="home_timeline_billion_ago">hace %1$s mil millones de años</string>
+    <string name="home_timeline_living">%1$s –</string>
+    <string name="home_timeline_range">Línea del tiempo de %1$s a %2$s. Usa los botones de abajo para recorrerla.</string>
+    <string name="home_lane_philosophy_religion">Filosofía y religión</string>
+    <string name="home_lane_civilisations">Civilizaciones e imperios</string>
+    <string name="home_lane_languages">Idiomas</string>
+    <string name="home_lane_film_music">Cine y música</string>
+    <string name="home_lane_art_literature">Arte y literatura</string>
+    <string name="home_lane_science">Ciencia e inventos</string>
+    <string name="home_lane_wars">Guerras</string>
+    <string name="home_lane_events_politics">Hechos y política</string>
+    <string name="home_lane_people">Personas</string>
 </resources>

@@ -1,0 +1,40 @@
+{
+ "version": 1,
+ "note": "Timeline lanes (spec §5.2, §9.4). Bit = position in `lanes`. Every root is a Wikidata class or occupation with its English label; build.py fails if a label no longer matches. An article is in a lane when one of its P31/P279/P136 classes, or one of its first two P106 occupations, is a root or descends from one (P279, depth 10), unless it also descends from one of the lane's `except` roots.",
+ "lanes": [
+  {"id": "philosophy_religion", "roots": {
+   "Q9174": "religion", "Q178885": "deity", "Q179461": "religious text", "Q1530022": "religious organization",
+   "Q1387659": "school of thought", "Q24398318": "religious building", "Q4964182": "philosopher", "Q1234713": "theologian",
+   "Q2259532": "cleric", "Q43115": "saint", "Q22811234": "branch of philosophy", "Q33104279": "philosophical concept",
+   "Q2915955": "philosophical movement", "Q13414953": "religious denomination", "Q1826286": "religious movement"}},
+  {"id": "civilisations", "roots": {
+   "Q48349": "empire", "Q3024240": "historical country", "Q8432": "civilization", "Q465299": "archaeological culture",
+   "Q41710": "ethnic group", "Q164950": "dynasty", "Q1620908": "historical region", "Q28171280": "ancient civilization",
+   "Q839954": "archaeological site", "Q11514315": "historical period"}},
+  {"id": "languages", "roots": {
+   "Q34770": "language", "Q25295": "language family", "Q8192": "writing system", "Q20162172": "human language"},
+   "except": {"Q9143": "programming language"}},
+  {"id": "film_music", "roots": {
+   "Q11424": "film", "Q2188189": "musical work", "Q482994": "album", "Q7366": "song", "Q215380": "musical group",
+   "Q5398426": "television series", "Q639669": "musician", "Q33999": "actor", "Q2526255": "film director",
+   "Q36834": "composer", "Q177220": "singer", "Q1344": "opera", "Q105543609": "musical work/composition"}},
+  {"id": "art_literature", "roots": {
+   "Q3305213": "painting", "Q860861": "sculpture", "Q7725634": "literary work", "Q571": "book", "Q8261": "novel",
+   "Q5185279": "poem", "Q25379": "play", "Q36180": "writer", "Q49757": "poet", "Q1028181": "painter",
+   "Q2198855": "cultural movement"}},
+  {"id": "science", "roots": {
+   "Q901": "scientist", "Q11862829": "academic discipline", "Q336": "science", "Q7187": "gene",
+   "Q11173": "chemical compound", "Q12136": "disease"}},
+  {"id": "wars", "roots": {
+   "Q178561": "battle", "Q198": "war", "Q180684": "conflict", "Q831663": "military campaign", "Q645883": "military operation"}},
+  {"id": "events_politics", "roots": {
+   "Q131569": "treaty", "Q7278": "political party", "Q3624078": "sovereign state", "Q327333": "government agency",
+   "Q3241045": "disease outbreak", "Q7748": "law", "Q10931": "revolution", "Q40231": "public election",
+   "Q273120": "protest", "Q209715": "coronation", "Q13418847": "historical event", "Q2334719": "legal case"}},
+  {"id": "people", "roots": {"Q5": "human"}}
+ ],
+ "drop": {
+  "Q577": "year", "Q39911": "decade", "Q578": "century", "Q36507": "millennium", "Q3186692": "calendar year",
+  "Q18340514": "events in a specific year or time period", "Q13406463": "Wikimedia list article",
+  "Q80096233": "Wikimedia information list", "Q4167410": "Wikimedia disambiguation page"}
+}

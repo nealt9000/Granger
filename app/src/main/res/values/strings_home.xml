@@ -76,4 +76,40 @@
     <string name="home_wander_go_to">Go to %1$s</string>
     <!-- %1$s is an article's title, linked from this one but in no pack on this phone. -->
     <string name="home_wander_not_here">%1$s, not on this phone</string>
+    <!-- Plan H5b: the Home timeline. -->
+    <string name="home_timeline">Timeline</string>
+    <string name="home_timeline_expand">Full timeline</string>
+    <string name="home_timeline_back">Back to Home</string>
+    <string name="home_timeline_search">Search the timeline</string>
+    <string name="home_timeline_search_hint">Roman, jazz, Newton…</string>
+    <string name="home_timeline_no_matches">No dated articles match</string>
+    <plurals name="home_timeline_matches">
+        <item quantity="one">%1$d match</item>
+        <item quantity="other">%1$d matches</item>
+    </plurals>
+    <string name="reader_show_in_time">Show in time</string>
+    <string name="home_timeline_all">All</string>
+    <string name="home_timeline_loading">Laying out the dates…</string>
+    <string name="home_timeline_nearby">Nearby</string>
+    <string name="home_timeline_earlier">Earlier</string>
+    <string name="home_timeline_later">Later</string>
+    <!-- %1$s is a year, e.g. "500" or "10,000". -->
+    <string name="home_timeline_bc">%1$s BC</string>
+    <!-- %1$s is a date or a range of dates known only roughly. -->
+    <string name="home_timeline_circa">c. %1$s</string>
+    <string name="home_timeline_million_ago">%1$s million years ago</string>
+    <string name="home_timeline_billion_ago">%1$s billion years ago</string>
+    <!-- %1$s is the year someone living was born. -->
+    <string name="home_timeline_living">%1$s –</string>
+    <!-- TalkBack, the river: %1$s and %2$s are the years at either edge. -->
+    <string name="home_timeline_range">Timeline from %1$s to %2$s. Use the step buttons below to move through it.</string>
+    <string name="home_lane_philosophy_religion">Philosophy &amp; religion</string>
+    <string name="home_lane_civilisations">Civilisations &amp; empires</string>
+    <string name="home_lane_languages">Languages</string>
+    <string name="home_lane_film_music">Film &amp; music</string>
+    <string name="home_lane_art_literature">Art &amp; literature</string>
+    <string name="home_lane_science">Science &amp; invention</string>
+    <string name="home_lane_wars">Wars</string>
+    <string name="home_lane_events_politics">Events &amp; politics</string>
+    <string name="home_lane_people">People</string>
 </resources>
