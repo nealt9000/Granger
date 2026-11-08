@@ -80,6 +80,11 @@ def run(lines, titles: set, items, classes=None, site="enwiki", limit=None, log=
             break
         if limit and n > limit:
             break
+        if n % 500000 == 0:
+            items.flush()
+            if classes is not None:
+                classes.flush()
+            print(f"{n:,} lines {hit:,} articles {cls:,} classes {time.time() - t0:.0f}s", file=log, flush=True)
         path = sitelink_title(line, key)
         match = path if path in titles else None
         is_class = classes is not None and '"P279":[{"mainsnak"' in line
@@ -93,11 +98,6 @@ def run(lines, titles: set, items, classes=None, site="enwiki", limit=None, log=
         if match:
             hit += 1
             items.write(json.dumps(record(e, match, site), ensure_ascii=False) + "\n")
-        if n % 500000 == 0:
-            items.flush()
-            if classes is not None:
-                classes.flush()
-            print(f"{n:,} lines {hit:,} articles {cls:,} classes {time.time() - t0:.0f}s", file=log, flush=True)
     print(f"DONE {n:,} lines {hit:,} articles {cls:,} classes {time.time() - t0:.0f}s", file=log, flush=True)
     return hit
 
