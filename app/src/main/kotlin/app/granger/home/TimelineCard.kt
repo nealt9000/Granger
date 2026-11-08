@@ -62,10 +62,13 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -104,6 +107,10 @@ private val FullRowHeight = 120.dp
 private val FullSingleRowHeight = 280.dp
 private const val TRACKS = 8
 private val RulerHeight = 22.dp
+
+/** The most of the screen's height the river takes, on Home and full screen (landscape; a portrait phone is well under both). */
+private const val HOME_RIVER_SHARE = 0.3f
+private const val FULL_RIVER_SHARE = 0.55f
 private val TickGap = 64.dp
 private const val LOUPE_MARKS = 4
 
@@ -269,6 +276,10 @@ private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords, fu
         full -> FullRowHeight
         rows.size == 1 -> SingleRowHeight
         else -> RowHeight
+    }.let { natural ->
+        // On a phone turned sideways the river gives up height, so the ruler (and on Home the lens card) still shows.
+        val share = if (full) FULL_RIVER_SHARE else HOME_RIVER_SHARE
+        minOf(natural, (LocalConfiguration.current.screenHeightDp.dp * share - RulerHeight) / rows.size)
     }
     val height = rowHeight * rows.size + RulerHeight
     // Dots spread over more tracks as a row gets taller, about one per 18 dp.
@@ -460,7 +471,7 @@ private fun Loupe(ui: TimelineUi, x: Float, widthPx: Float, words: YearWords, in
 @Composable
 private fun LensCard(mark: TimeMark, ui: TimelineUi, actions: TimelineActions, words: YearWords, onOpen: (TimeMark) -> Unit, nearby: Boolean) {
     val picture = rememberRailCover(ui.picture, 56.dp)
-    val openLabel = stringResource(R.string.home_timeline_open_mark, mark.title)
+    val openLabel = stringResource(R.string.home_wander_open)
     Column(Modifier.fillMaxWidth().padding(horizontal = 4.dp).testTag("timeline-card"), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { actions.onStep(-1) }, modifier = Modifier.testTag("timeline-prev")) {
@@ -470,12 +481,16 @@ private fun LensCard(mark: TimeMark, ui: TimelineUi, actions: TimelineActions, w
                 onClick = { onOpen(mark) },
                 shape = RoundedCornerShape(12.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                modifier = Modifier.weight(1f).semantics(mergeDescendants = true) { contentDescription = openLabel }.testTag("timeline-open"),
+                // TalkBack reads the card's year and title, then "double-tap to Open" (a description repeated the title).
+                modifier = Modifier.weight(1f).semantics { onClick(label = openLabel) { onOpen(mark); true } }.testTag("timeline-open"),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(8.dp)) {
                     Box(Modifier.size(56.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHighest), contentAlignment = Alignment.Center) {
                         if (picture != null) Image(picture, null, contentScale = ContentScale.Crop, modifier = Modifier.size(56.dp))
-                        else Text(initials(mark.title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        else Text(
+                            initials(mark.title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.clearAndSetSemantics {},   // a stand-in for a picture, not read aloud
+                        )
                     }
                     Column(Modifier.weight(1f)) {
                         Text(words.of(mark), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.testTag("timeline-year"))

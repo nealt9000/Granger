@@ -94,7 +94,6 @@
     <string name="home_timeline_earlier">Earlier</string>
     <string name="home_timeline_later">Later</string>
     <!-- TalkBack, the lens card: %1$s is the article's title. -->
-    <string name="home_timeline_open_mark">Open %1$s</string>
     <string name="home_readiness_see_all">See all</string>
     <!-- The readiness strip, beside its dots: %1$d areas of %2$d have something on the phone. -->
     <string name="home_strip_areas">%1$d of %2$d areas covered</string>

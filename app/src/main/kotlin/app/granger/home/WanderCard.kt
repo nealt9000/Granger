@@ -52,8 +52,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
@@ -88,6 +90,9 @@ private val MaxSide = 380.dp
 
 /** An orbit at least this wide has room for all eight links; a narrower one shows [NARROW_ORBIT]. */
 private val WideSide = 360.dp
+
+/** The status bar and Home's title: what the orbit (with its labels) leaves of the screen's height. */
+private val ScreenChrome = 110.dp
 private const val NARROW_ORBIT = 6
 
 /** Under the lowest disc: its half, the gap and two lines of label. */
@@ -234,7 +239,8 @@ private fun StartSearch(ui: WanderUi, actions: WanderActions) {
 private fun Constellation(ui: WanderUi, actions: WanderActions, modifier: Modifier = Modifier) {
     val ring = MaterialTheme.colorScheme.outlineVariant
     BoxWithConstraints(modifier.widthIn(max = MaxSide).fillMaxWidth()) {
-      val side = maxWidth
+      // Turned sideways, the orbit is sized to the screen's height so it all shows at once (2026-11-08).
+      val side = minOf(maxWidth, LocalConfiguration.current.screenHeightDp.dp - ScreenChrome)
       // Only as tall as the lowest disc and its label need: the square's bottom was empty space (Neal, 2026-11-08).
       // On a phone-width orbit, eight links' labels run into their neighbours' discs (2026-11-08); the six closest fit.
       val orbit = if (side < WideSide) ui.orbit.take(NARROW_ORBIT) else ui.orbit
@@ -315,6 +321,8 @@ private fun OrbitNode(node: WanderNode, isCentre: Boolean, target: Offset, side:
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 color = if (node.onPhone) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                // The node's own description says it ("Go to …"); TalkBack would read the title twice.
+                modifier = Modifier.clearAndSetSemantics {},
             )
         }
     }
@@ -336,7 +344,8 @@ private fun Disc(node: WanderNode, size: Dp, isCentre: Boolean) {
         if (picture != null) {
             Image(picture, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         } else {
-            Text(initials(node.title), fontFamily = Spectral, fontSize = (size.value * 0.32f).sp, color = colors.onSurfaceVariant)
+            // A stand-in for a picture: decoration, not something TalkBack reads.
+            Text(initials(node.title), fontFamily = Spectral, fontSize = (size.value * 0.32f).sp, color = colors.onSurfaceVariant, modifier = Modifier.clearAndSetSemantics {})
         }
     }
 }

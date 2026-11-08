@@ -3,6 +3,9 @@ package app.granger.home
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
@@ -62,6 +65,18 @@ class TimelineSectionTest {
         loading = false, lanes = listOf(Lane.PHILOSOPHY_RELIGION, Lane.EVENTS_POLITICS, Lane.PEOPLE),
         marks = order, selected = un, nearby = listOf(yalta, plan), now = 2026,
     )
+
+    @Test fun talkBackReadsTheLensCardOnceWithOpenAsItsAction() {
+        val opened = mutableListOf<String>()
+        show(Harness(ui()), opened)
+        val card = compose.onNodeWithTag("timeline-open").fetchSemanticsNode()
+        assertThat(card.config.getOrNull(SemanticsProperties.ContentDescription)).isNull()
+        assertThat(card.config[SemanticsProperties.Text].map { it.text }).containsExactly("1945", "United Nations").inOrder()
+        val open = card.config[SemanticsActions.OnClick]
+        assertThat(open.label).isEqualTo("Open")
+        open.action!!.invoke()
+        assertThat(opened).containsExactly("United_Nations")
+    }
 
     @Test fun theStepButtonsMoveTheLensCardAndOpenOpensIt() {
         val opened = mutableListOf<String>()
