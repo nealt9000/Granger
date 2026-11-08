@@ -122,6 +122,8 @@ class HomeViewModel(
     wanderOf: ((kotlinx.coroutines.CoroutineScope) -> WanderModel)? = null,
     /** Makes Home's timeline in the view model's scope (Plan H5b); none in tests that don't need it. */
     timelineOf: ((kotlinx.coroutines.CoroutineScope) -> TimelineModel)? = null,
+    /** Makes Home's game round in the view model's scope (Plan H5c); none in tests that don't need it. */
+    gamesOf: ((kotlinx.coroutines.CoroutineScope) -> GameModel)? = null,
     /** An article tab's picture (its lead image, cached), or null; blocking, run on [io]. */
     private val tabPicture: (packId: String, path: String) -> String? = { _, _ -> null },
 ) : ViewModel() {
@@ -130,6 +132,9 @@ class HomeViewModel(
 
     /** The timeline (Plan H5b): its own state, started when Home first shows it. */
     val timeline: TimelineModel? = timelineOf?.invoke(viewModelScope)
+
+    /** Play (Plan H5c): one round at a time, the two games in turn, started when Home first shows it. */
+    val games: GameModel? = gamesOf?.invoke(viewModelScope)
 
     private val day = MutableStateFlow(today())
 

@@ -116,4 +116,50 @@
     <string name="home_lane_wars">Wars</string>
     <string name="home_lane_events_politics">Events &amp; politics</string>
     <string name="home_lane_people">People</string>
+    <!-- Games (Plan H5c) -->
+    <string name="home_play">Play</string>
+    <string name="home_play_more">More rounds</string>
+    <string name="games_title">Games</string>
+    <string name="game_order">Which came first?</string>
+    <string name="game_guess">Guess the year</string>
+    <string name="game_order_prompt_two">Tap the one that came first.</string>
+    <string name="game_order_prompt_three">Tap them in order, earliest first.</string>
+    <string name="game_born">born</string>
+    <string name="game_began">began</string>
+    <string name="game_order_right">Right!</string>
+    <string name="game_order_wrong">Not quite. Here\'s the order.</string>
+    <plurals name="game_years_apart">
+        <item quantity="one">%1$d year apart</item>
+        <item quantity="other">%1$d years apart</item>
+    </plurals>
+    <string name="game_guess_prompt_point">When did this happen?</string>
+    <string name="game_guess_prompt_life">When was this person born?</string>
+    <string name="game_guess_prompt_span">When did this begin?</string>
+    <string name="game_guess_submit">Guess</string>
+    <string name="game_guess_year">Your guess, %1$s</string>
+    <string name="game_guess_slider">Your guess</string>
+    <string name="game_spot_on">Spot on!</string>
+    <string name="game_very_close">Very close</string>
+    <string name="game_close">Close</string>
+    <string name="game_off">Further off</string>
+    <plurals name="game_years_off">
+        <item quantity="one">%1$d year off</item>
+        <item quantity="other">%1$d years off</item>
+    </plurals>
+    <string name="game_it_was">It was %1$s</string>
+    <string name="game_earlier_one">One year earlier</string>
+    <string name="game_earlier_ten">Ten years earlier</string>
+    <string name="game_later_one">One year later</string>
+    <string name="game_later_ten">Ten years later</string>
+    <string name="game_next">Next round</string>
+    <string name="game_choose_as">Choose as number %1$d</string>
+    <string name="game_chosen">Chosen as number %1$d</string>
+    <string name="game_right_place">In the right place</string>
+    <string name="game_wrong_place">Out of place</string>
+    <plurals name="games_played">
+        <item quantity="one">%1$d round played on this phone</item>
+        <item quantity="other">%1$d rounds played on this phone</item>
+    </plurals>
+    <string name="game_none">Not enough dated articles here for a round yet.</string>
+    <string name="game_loading">Dealing a round…</string>
 </resources>

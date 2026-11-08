@@ -131,6 +131,12 @@ import app.granger.home.CardTarget
 import app.granger.home.FeedDrawer
 import app.granger.home.HomeScreen
 import app.granger.home.HomeViewModel
+import app.granger.home.GameKind
+import app.granger.home.GameModel
+import app.granger.home.GameStore
+import app.granger.home.GamesScreen
+import app.granger.home.GamesViewModel
+import app.granger.home.gameActions
 import app.granger.home.TimelineModel
 import app.granger.home.TimelineScreen
 import app.granger.home.TimelineViewModel
@@ -182,6 +188,8 @@ internal fun LibraryRoute.noticeText(): UiText? = notice?.let { UiText.Res(it.te
 @Serializable object HomeRoute
 /** The full-screen Timeline, opened from Home's glance on the article its lens was on (Plan H5b). */
 @Serializable data class TimelineRoute(val packId: String? = null, val path: String? = null)
+/** The Games screen (Plan H5c): both games on the time index, opened from Home's Play. */
+@Serializable data object GamesRoute
 
 /** Onboarding (Plan H3): five screens over Home on a first run, or from Settings. */
 @Serializable object OnboardingRoute
@@ -390,7 +398,7 @@ internal fun inLibraryRoute(kind: ArchiveKind, identifier: String): Any =
 internal fun railToolOf(
     destination: NavDestination, sourceScope: CatalogScope? = null, archiveKind: ArchiveKind? = null, getMoreFor: GetMoreFor? = null,
 ): RailTool? = when {
-    destination.hasRoute<HomeRoute>() || destination.hasRoute<OnboardingRoute>() || destination.hasRoute<TimelineRoute>() -> RailTool.HOME
+    destination.hasRoute<HomeRoute>() || destination.hasRoute<OnboardingRoute>() || destination.hasRoute<TimelineRoute>() || destination.hasRoute<GamesRoute>() -> RailTool.HOME
     destination.hasRoute<SourceRoute>() -> when (sourceScope) {
         CatalogScope.MODELS -> RailTool.SETTINGS
         CatalogScope.KIWIX -> RailTool.BROWSE
@@ -674,6 +682,21 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             }
         },
         startAt = startAt,
+    )
+
+    // Play and the Games screen (Plan H5c) share one count of rounds played and Which came first?'s level.
+    val gameStore = remember { GameStore.Prefs(appContext.getSharedPreferences("games", android.content.Context.MODE_PRIVATE)) }
+    fun gameModel(scope: kotlinx.coroutines.CoroutineScope, thumbs: ArticleThumbnails, alternates: Boolean, start: GameKind = GameKind.ORDER) = GameModel(
+        scope = scope,
+        indexes = { timeIndexes() },
+        picture = { packId, path ->
+            container.library.archive(packId)?.let { archive ->
+                archive.read(path)?.let { thumbs.thumbnail(archive, path, String(it.bytes, Charsets.UTF_8)) }
+            }
+        },
+        store = gameStore,
+        alternates = alternates,
+        start = start,
     )
 
     // Send feedback and the crash log (Plan F1 part 2): one sheet, opened from Settings → About or Home's crash line.
@@ -1374,6 +1397,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 )
                             },
                             timelineOf = { scope -> timelineModel(scope, homeThumbs) },
+                            gamesOf = { scope -> gameModel(scope, homeThumbs, alternates = true) },
                             tabPicture = { packId, path ->
                                 container.library.archive(packId)?.let { archive ->
                                     archive.read(path)?.let { homeThumbs.thumbnail(archive, path, String(it.bytes, Charsets.UTF_8)) }
@@ -1387,6 +1411,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onOpenTab = ::showTab,
                     onPlay = ::resumePlay,
                     onOpenTimeline = { mark -> nav.navigate(TimelineRoute(mark?.packId, mark?.path)) { launchSingleTop = true } },
+                    onOpenGames = { nav.navigate(GamesRoute) { launchSingleTop = true } },
                     onOpenCard = { card ->
                         when (val target = card.target) {
                             is CardTarget.Article -> scope.launch {
@@ -1412,6 +1437,21 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 val ui by model.ui.collectAsStateWithLifecycle()
                 TimelineScreen(
                     ui, remember(model) { timelineActions(model) },
+                    onOpen = { mark ->
+                        scope.launch {
+                            val tabId = container.sessions.openTab(mark.packId, mark.path, mark.title)
+                            container.sessions.tab(tabId)?.let { nav.showTab(it) }
+                        }
+                    },
+                    onBack = { nav.popBackStack() },
+                )
+            }
+            composable<GamesRoute> {
+                val thumbs = remember { ArticleThumbnails(File(appContext.cacheDir, "home-thumbs")) }
+                val model = viewModel { GamesViewModel { scope -> gameModel(scope, thumbs, alternates = false) } }.model
+                val ui by model.ui.collectAsStateWithLifecycle()
+                GamesScreen(
+                    ui, remember(model) { gameActions(model) },
                     onOpen = { mark ->
                         scope.launch {
                             val tabId = container.sessions.openTab(mark.packId, mark.path, mark.title)

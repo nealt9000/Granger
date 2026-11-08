@@ -92,4 +92,53 @@
     <string name="home_lane_wars">Guerras</string>
     <string name="home_lane_events_politics">Hechos y política</string>
     <string name="home_lane_people">Personas</string>
+    <!-- Juegos (Plan H5c) -->
+    <string name="home_play">Jugar</string>
+    <string name="home_play_more">Más rondas</string>
+    <string name="games_title">Juegos</string>
+    <string name="game_order">¿Qué fue primero?</string>
+    <string name="game_guess">Adivina el año</string>
+    <string name="game_order_prompt_two">Toca el que fue primero.</string>
+    <string name="game_order_prompt_three">Tócalos en orden, del más antiguo al más reciente.</string>
+    <string name="game_born">nacimiento</string>
+    <string name="game_began">inicio</string>
+    <string name="game_order_right">¡Correcto!</string>
+    <string name="game_order_wrong">Casi. Este es el orden.</string>
+    <plurals name="game_years_apart">
+        <item quantity="one">%1$d año de diferencia</item>
+        <item quantity="many">%1$d años de diferencia</item>
+        <item quantity="other">%1$d años de diferencia</item>
+    </plurals>
+    <string name="game_guess_prompt_point">¿Cuándo ocurrió?</string>
+    <string name="game_guess_prompt_life">¿Cuándo nació esta persona?</string>
+    <string name="game_guess_prompt_span">¿Cuándo empezó?</string>
+    <string name="game_guess_submit">Adivinar</string>
+    <string name="game_guess_year">Tu respuesta, %1$s</string>
+    <string name="game_guess_slider">Tu respuesta</string>
+    <string name="game_spot_on">¡Exacto!</string>
+    <string name="game_very_close">Muy cerca</string>
+    <string name="game_close">Cerca</string>
+    <string name="game_off">Más lejos</string>
+    <plurals name="game_years_off">
+        <item quantity="one">%1$d año de diferencia</item>
+        <item quantity="many">%1$d años de diferencia</item>
+        <item quantity="other">%1$d años de diferencia</item>
+    </plurals>
+    <string name="game_it_was">Fue en %1$s</string>
+    <string name="game_earlier_one">Un año antes</string>
+    <string name="game_earlier_ten">Diez años antes</string>
+    <string name="game_later_one">Un año después</string>
+    <string name="game_later_ten">Diez años después</string>
+    <string name="game_next">Otra ronda</string>
+    <string name="game_choose_as">Elegir como número %1$d</string>
+    <string name="game_chosen">Elegido como número %1$d</string>
+    <string name="game_right_place">En su lugar</string>
+    <string name="game_wrong_place">Fuera de lugar</string>
+    <plurals name="games_played">
+        <item quantity="one">%1$d ronda jugada en este teléfono</item>
+        <item quantity="many">%1$d rondas jugadas en este teléfono</item>
+        <item quantity="other">%1$d rondas jugadas en este teléfono</item>
+    </plurals>
+    <string name="game_none">Todavía no hay suficientes artículos con fecha para una ronda.</string>
+    <string name="game_loading">Preparando una ronda…</string>
 </resources>

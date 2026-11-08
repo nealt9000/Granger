@@ -100,6 +100,7 @@ fun HomeScreen(
     onOpenDownloads: () -> Unit = {},
     crashNotice: CrashNotice? = null,
     onOpenTimeline: (app.granger.core.library.TimeMark?) -> Unit = {},
+    onOpenGames: () -> Unit = {},
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -124,10 +125,13 @@ fun HomeScreen(
     val timelineModel = viewModel.timeline
     val timeline = timelineModel?.ui?.collectAsStateWithLifecycle()?.value
     val timelineActions = remember(timelineModel) { timelineModel?.let(::timelineActions) ?: TimelineActions() }
+    val gameModel = viewModel.games
+    val game = gameModel?.ui?.collectAsStateWithLifecycle()?.value
+    val gameActions = remember(gameModel) { gameModel?.let(::gameActions) ?: GameActions() }
     HomeContent(
         ui, onReadiness, onOpenTab, onPlay, onOpenCard, actions, onOpenDownloads, cardActions, crashNotice,
         wander = wander, wanderActions = wanderActions, timeline = timeline, timelineActions = timelineActions,
-        onOpenTimeline = onOpenTimeline,
+        onOpenTimeline = onOpenTimeline, game = game, gameActions = gameActions, onOpenGames = onOpenGames,
     )
 }
 
@@ -155,6 +159,10 @@ fun HomeContent(
     timelineActions: TimelineActions = TimelineActions(),
     /** Opens the full-screen Timeline on the mark Home's lens is on (Neal, 2026-11-08). */
     onOpenTimeline: (app.granger.core.library.TimeMark?) -> Unit = {},
+    /** Play (Plan H5c); null hides it. */
+    game: GameUi? = null,
+    gameActions: GameActions = GameActions(),
+    onOpenGames: () -> Unit = {},
 ) {
     var adding by rememberSaveable { mutableStateOf(false) }
     Scaffold(
@@ -178,27 +186,9 @@ fun HomeContent(
                     )
                 }
             }
-            // The new pieces lead (spec §9.2), each on its own surface so sections read apart (spec §3).
-            if (timeline != null && timeline.available) {
-                item(key = "timeline") {
-                    HomeSection("timeline-section") {
-                        TimelineSection(
-                            timeline, timelineActions,
-                            onOpen = { mark -> onOpenCard(Card(mark.title, "", CardTarget.Article(mark.packId, mark.path))) },
-                            onExpand = onOpenTimeline,
-                        )
-                    }
-                }
-            }
-            if (wander != null && wander.available) {
-                item(key = "wander") {
-                    HomeSection("wander-section") {
-                        WanderSection(wander, wanderActions) { node ->
-                            onOpenCard(Card(node.title, "", CardTarget.Article(node.packId, node.path)))
-                        }
-                    }
-                }
-            }
+            // Home's order (Neal, 2026-11-08, replacing spec §9.2): what needs acting on, then Continue, the likeliest reason
+            // to open the app; then the Timeline, a round of Play between it and Wander so the two drag canvases never meet;
+            // the feeds; and Readiness last, a set-up check that's also on the rail.
             crashNotice?.let { notice -> item(key = "crash") { HomeSection("crash-section", bottom = 0.dp) { CrashNoticeRow(notice) } } }
             ui.downloads?.let { card ->
                 item(key = "downloads") { HomeSection("downloads-section", bottom = 0.dp) { DownloadsCardView(card, onOpenDownloads, downloadsActions) } }
@@ -224,15 +214,31 @@ fun HomeContent(
                     }
                 }
             }
-            item(key = "strip") {
-                HomeSection("readiness-section", bottom = 0.dp) {
-                    SectionHeading(
-                        stringResource(R.string.readiness_title),
-                        action = stringResource(R.string.home_readiness_see_all),
-                        onAction = onReadiness,
-                        actionTag = "readiness-see-all",
-                    )
-                    ReadinessStrip(ui.strip, onReadiness)
+            if (timeline != null && timeline.available) {
+                item(key = "timeline") {
+                    HomeSection("timeline-section") {
+                        TimelineSection(
+                            timeline, timelineActions,
+                            onOpen = { mark -> onOpenCard(Card(mark.title, "", CardTarget.Article(mark.packId, mark.path))) },
+                            onExpand = onOpenTimeline,
+                        )
+                    }
+                }
+            }
+            if (game != null && game.available) {
+                item(key = "play") {
+                    HomeSection("play-section") {
+                        PlaySection(game, gameActions, onOpen = { mark -> onOpenCard(Card(mark.title, "", CardTarget.Article(mark.packId, mark.path))) }, onMore = onOpenGames)
+                    }
+                }
+            }
+            if (wander != null && wander.available) {
+                item(key = "wander") {
+                    HomeSection("wander-section") {
+                        WanderSection(wander, wanderActions) { node ->
+                            onOpenCard(Card(node.title, "", CardTarget.Article(node.packId, node.path)))
+                        }
+                    }
                 }
             }
             for ((i, row) in ui.feeds.withIndex()) {
@@ -259,6 +265,17 @@ fun HomeContent(
                             }
                         }
                     }
+                }
+            }
+            item(key = "strip") {
+                HomeSection("readiness-section", bottom = 0.dp) {
+                    SectionHeading(
+                        stringResource(R.string.readiness_title),
+                        action = stringResource(R.string.home_readiness_see_all),
+                        onAction = onReadiness,
+                        actionTag = "readiness-see-all",
+                    )
+                    ReadinessStrip(ui.strip, onReadiness)
                 }
             }
             item(key = "end") { Box(Modifier.height(16.dp)) }
