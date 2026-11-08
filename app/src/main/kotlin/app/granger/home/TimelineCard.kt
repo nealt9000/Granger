@@ -62,10 +62,13 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -104,6 +107,10 @@ private val FullRowHeight = 120.dp
 private val FullSingleRowHeight = 280.dp
 private const val TRACKS = 8
 private val RulerHeight = 22.dp
+
+/** The most of the screen's height the river takes, on Home and full screen (landscape; a portrait phone is well under both). */
+private const val HOME_RIVER_SHARE = 0.3f
+private const val FULL_RIVER_SHARE = 0.55f
 private val TickGap = 64.dp
 private const val LOUPE_MARKS = 4
 
@@ -115,13 +122,12 @@ private const val LOUPE_MARKS = 4
 @Composable
 fun TimelineSection(ui: TimelineUi, actions: TimelineActions, onOpen: (TimeMark) -> Unit, onExpand: (TimeMark?) -> Unit = {}) {
     LaunchedEffect(Unit) { actions.onShown() }
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(end = 8.dp)) {
-        Heading(stringResource(R.string.home_timeline), Modifier.weight(1f))
-        TextButton(onClick = { onExpand(ui.selected) }, modifier = Modifier.padding(top = 12.dp).testTag("timeline-expand")) {
-            Text(stringResource(R.string.home_timeline_expand), style = MaterialTheme.typography.labelLarge)
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, Modifier.size(18.dp))
-        }
-    }
+    SectionHeading(
+        stringResource(R.string.home_timeline),
+        action = stringResource(R.string.home_timeline_expand),
+        onAction = { onExpand(ui.selected) },
+        actionTag = "timeline-expand",
+    )
     Column(Modifier.fillMaxWidth().testTag("timeline"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         val words = yearWords()
         if (ui.loading && ui.marks.isEmpty()) {
@@ -129,7 +135,28 @@ fun TimelineSection(ui: TimelineUi, actions: TimelineActions, onOpen: (TimeMark)
             return@Column
         }
         River(ui, actions, words, full = false)
+        LaneKey(ui.lanes)
         ui.selected?.let { LensCard(it, ui, actions, words, onOpen, nearby = false) }
+    }
+}
+
+/**
+ * What the river's colours mean, on Home where there are no chips (Neal, 2026-11-08): one line of dots and names,
+ * scrolled sideways when it doesn't fit.
+ */
+@Composable
+private fun LaneKey(lanes: List<Lane>) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp).testTag("timeline-key"),
+    ) {
+        for (lane in lanes) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Box(Modifier.size(8.dp).clip(RoundedCornerShape(4.dp)).background(laneColour(lane)))
+                Text(stringResource(laneName(lane)), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
     }
 }
 
@@ -249,6 +276,10 @@ private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords, fu
         full -> FullRowHeight
         rows.size == 1 -> SingleRowHeight
         else -> RowHeight
+    }.let { natural ->
+        // On a phone turned sideways the river gives up height, so the ruler (and on Home the lens card) still shows.
+        val share = if (full) FULL_RIVER_SHARE else HOME_RIVER_SHARE
+        minOf(natural, (LocalConfiguration.current.screenHeightDp.dp * share - RulerHeight) / rows.size)
     }
     val height = rowHeight * rows.size + RulerHeight
     // Dots spread over more tracks as a row gets taller, about one per 18 dp.
@@ -325,9 +356,12 @@ private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords, fu
             val w = size.width
             val rowH = rowHeight.toPx()
             val bottom = rowH * rows.size
-            // Density shading from every article's year, not just the dots drawn: where the river has articles even
-            // when no dot fits (Neal, 2026-11-08). Shaded per row, on a log scale so a quiet century still shows.
+            // Density from every article's year, not just the dots drawn: where the river has articles even when no dot
+            // fits (Neal, 2026-11-08). A low histogram along each row's foot, in a quiet neutral, on a log scale so a
+            // quiet century still shows; it was a full-height accent tint that read as muddy stripes behind the dots.
             val bins = 64
+            // Low enough to stay under the bottom track's dots.
+            val barMax = (rowH * 0.12f).coerceAtMost(14.dp.toPx())
             for ((r, rowLane) in rows.withIndex()) {
                 val laneSet = rowLane?.let { setOf(it) } ?: ui.on
                 val counts = IntArray(bins) { i ->
@@ -336,10 +370,12 @@ private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords, fu
                     ui.density.count(a, b, laneSet)
                 }
                 val peak = kotlin.math.ln(1.0 + (counts.maxOrNull() ?: 0)).coerceAtLeast(1.0)
+                val foot = rowH * (r + 1)
+                val gap = 1.dp.toPx()
                 counts.forEachIndexed { i, n ->
                     if (n > 0) {
-                        val alpha = (0.05 + 0.22 * kotlin.math.ln(1.0 + n) / peak).toFloat()
-                        drawRect(colours.primary.copy(alpha = alpha), Offset(w * i / bins, rowH * r), Size(w / bins + 0.5f, rowH))
+                        val h = (barMax * (0.15 + 0.85 * kotlin.math.ln(1.0 + n) / peak)).toFloat()
+                        drawRect(colours.onSurfaceVariant.copy(alpha = 0.16f), Offset(w * i / bins, foot - h), Size(w / bins - gap, h))
                     }
                 }
             }
@@ -428,46 +464,64 @@ private fun Loupe(ui: TimelineUi, x: Float, widthPx: Float, words: YearWords, in
     }
 }
 
-/** The selected mark: picture, dates, title, step buttons, Open, and the marks nearby. */
+/**
+ * The selected mark in one row (Neal, 2026-11-08: the step buttons sat on a row of their own): ‹, the mark's picture,
+ * dates and title as one card a tap opens, and ›. Then, full screen, the marks nearby.
+ */
 @Composable
 private fun LensCard(mark: TimeMark, ui: TimelineUi, actions: TimelineActions, words: YearWords, onOpen: (TimeMark) -> Unit, nearby: Boolean) {
-    val picture = rememberRailCover(ui.picture, 64.dp)
-    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("timeline-card"), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Box(Modifier.size(64.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh), contentAlignment = Alignment.Center) {
-                if (picture != null) Image(picture, null, contentScale = ContentScale.Crop, modifier = Modifier.size(64.dp))
-                else Text(initials(mark.title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            Column(Modifier.weight(1f)) {
-                Text(words.of(mark), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.testTag("timeline-year"))
-                Text(
-                    mark.title,
-                    style = MaterialTheme.typography.titleMedium.copy(fontFamily = Spectral),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.testTag("timeline-title"),
-                )
-            }
-        }
+    val picture = rememberRailCover(ui.picture, 56.dp)
+    val openLabel = stringResource(R.string.home_wander_open)
+    Column(Modifier.fillMaxWidth().padding(horizontal = 4.dp).testTag("timeline-card"), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { actions.onStep(-1) }, modifier = Modifier.testTag("timeline-prev")) {
                 Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, stringResource(R.string.home_timeline_earlier))
             }
+            Surface(
+                onClick = { onOpen(mark) },
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                // TalkBack reads the card's year and title, then "double-tap to Open" (a description repeated the title).
+                modifier = Modifier.weight(1f).semantics { onClick(label = openLabel) { onOpen(mark); true } }.testTag("timeline-open"),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(8.dp)) {
+                    Box(Modifier.size(56.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHighest), contentAlignment = Alignment.Center) {
+                        if (picture != null) Image(picture, null, contentScale = ContentScale.Crop, modifier = Modifier.size(56.dp))
+                        else Text(
+                            initials(mark.title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.clearAndSetSemantics {},   // a stand-in for a picture, not read aloud
+                        )
+                    }
+                    Column(Modifier.weight(1f)) {
+                        Text(words.of(mark), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.testTag("timeline-year"))
+                        Text(
+                            mark.title,
+                            style = MaterialTheme.typography.titleMedium.copy(fontFamily = Spectral),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.testTag("timeline-title"),
+                        )
+                    }
+                }
+            }
             IconButton(onClick = { actions.onStep(1) }, modifier = Modifier.testTag("timeline-next")) {
                 Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, stringResource(R.string.home_timeline_later))
             }
-            Box(Modifier.weight(1f))
-            FilledTonalButton(onClick = { onOpen(mark) }, modifier = Modifier.testTag("timeline-open")) { Text(stringResource(R.string.home_wander_open)) }
         }
         if (nearby && ui.nearby.isNotEmpty()) {
-            Text(stringResource(R.string.home_timeline_nearby), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                stringResource(R.string.home_timeline_nearby),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 12.dp, top = 8.dp),
+            )
             for (n in ui.nearby) {
                 Text(
                     "${words.of(n)} · ${n.title}",
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.fillMaxWidth().clickable { actions.onSelect(n) }.padding(vertical = 6.dp).testTag("timeline-nearby-${n.qid}"),
+                    modifier = Modifier.fillMaxWidth().clickable { actions.onSelect(n) }.padding(horizontal = 12.dp, vertical = 8.dp).testTag("timeline-nearby-${n.qid}"),
                 )
             }
         }

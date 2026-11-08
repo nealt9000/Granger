@@ -45,7 +45,6 @@ import app.granger.core.speech.ReadSource
 import app.granger.core.speech.ReadSourceKey
 import app.granger.core.speech.SherpaSpeech
 import app.granger.core.speech.SystemSpeech
-import app.granger.core.speech.TextReadSource
 import app.granger.core.speech.VoiceId
 import app.granger.ebook.BookReadSource
 import app.granger.player.PlayerFocus
@@ -136,7 +135,6 @@ import app.granger.widget.WidgetModel
 import app.granger.widget.WidgetModelStore
 import app.granger.widget.WidgetUpdater
 import androidx.glance.appwidget.updateAll
-import app.granger.research.AnswerText
 import app.granger.research.ModelsAdapter
 import app.granger.research.installedModelsOf
 import java.util.concurrent.atomic.AtomicBoolean
@@ -498,12 +496,8 @@ class AppContainer(context: Context) {
                 } ?: return@let null
                 BookReadSource(opened, k.bookId, book.title)
             }
-            // A Research answer read aloud (Plan V2): `text:answer:<turnId>`, re-read from the kept chat.
-            is ReadSourceKey.Text -> k.key.removePrefix("answer:").takeIf { it != k.key }?.toLongOrNull()?.let { id ->
-                researchChats.turn(id)?.let { t ->
-                    TextReadSource(key, t.question, AnswerText.spoken(t.answer.ifBlank { t.guess }, t.medical))
-                }
-            }
+            // A spoken Ask reply ends with its chat: one saved by an older build is gone, so the restore forgets it.
+            is ReadSourceKey.Text -> null
             null -> null
         }
     }

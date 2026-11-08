@@ -52,8 +52,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
@@ -85,7 +87,30 @@ class WanderActions(
 private val CentreSize = 92.dp
 private val LabelWidth = 96.dp
 private val MaxSide = 380.dp
-private val LabelRoom = 44.dp
+
+/** An orbit at least this wide has room for all eight links; a narrower one shows [NARROW_ORBIT]. */
+private val WideSide = 360.dp
+
+/** The status bar and Home's title: what the orbit (with its labels) leaves of the screen's height. */
+private val ScreenChrome = 110.dp
+private const val NARROW_ORBIT = 6
+
+/** Under the lowest disc: its half, the gap and two lines of label. */
+private val LabelRoom = 70.dp
+
+/** The orbit's radius, as a share of the square's side. */
+private const val RADIUS = 0.39f
+
+/**
+ * The lowest disc's centre, as a share of the side, for [n] links placed half a step round: the middle plus the radius
+ * (with its outward nudge) times the largest sine any link reaches.
+ */
+internal fun orbitBottom(n: Int): Float {
+    if (n == 0) return 0.5f
+    val step = 2 * Math.PI / n
+    val lowest = (0 until n).maxOf { sin(-Math.PI / 2 + step / 2 + it * step) }.toFloat()
+    return 0.5f + (RADIUS + 0.03f) * lowest
+}
 
 /** Orbit discs shrink by rank, the closest link largest (Plan H5a Task 3). */
 private fun orbitSize(rank: Int): Dp = (62 - rank * 3).coerceAtLeast(44).dp
@@ -111,11 +136,27 @@ fun WanderSection(ui: WanderUi, actions: WanderActions, onOpen: (WanderNode) -> 
             return@Column
         }
         Constellation(ui, actions, Modifier.align(Alignment.CenterHorizontally))
-        if (ui.summary.isNotBlank()) {
-            Text(ui.summary, style = MaterialTheme.typography.bodyLarge.copy(fontFamily = Spectral), modifier = Modifier.testTag("wander-summary"))
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        // The centre's title sits here, beside Open, not under its disc where the orbit's labels ran into it (Neal,
+        // 2026-11-08); the summary is a taste of the article, three lines at most.
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(
+                centre.title,
+                style = MaterialTheme.typography.titleMedium.copy(fontFamily = Spectral),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f).testTag("wander-title"),
+            )
             FilledTonalButton(onClick = { onOpen(centre) }, modifier = Modifier.testTag("wander-open")) { Text(stringResource(R.string.home_wander_open)) }
+        }
+        if (ui.summary.isNotBlank()) {
+            Text(
+                ui.summary,
+                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = Spectral),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.testTag("wander-summary"),
+            )
         }
         if (ui.trail.isNotEmpty()) {
             FlowRow(verticalArrangement = Arrangement.Center, modifier = Modifier.testTag("wander-trail")) {
@@ -198,22 +239,25 @@ private fun StartSearch(ui: WanderUi, actions: WanderActions) {
 private fun Constellation(ui: WanderUi, actions: WanderActions, modifier: Modifier = Modifier) {
     val ring = MaterialTheme.colorScheme.outlineVariant
     BoxWithConstraints(modifier.widthIn(max = MaxSide).fillMaxWidth()) {
-      val side = maxWidth
-      // Room under the square for the bottom labels, so they never run into the summary.
-      Box(Modifier.width(side).height(side + LabelRoom).testTag("wander-orbit")) {
+      // Turned sideways, the orbit is sized to the screen's height so it all shows at once (2026-11-08).
+      val side = minOf(maxWidth, LocalConfiguration.current.screenHeightDp.dp - ScreenChrome)
+      // Only as tall as the lowest disc and its label need: the square's bottom was empty space (Neal, 2026-11-08).
+      // On a phone-width orbit, eight links' labels run into their neighbours' discs (2026-11-08); the six closest fit.
+      val orbit = if (side < WideSide) ui.orbit.take(NARROW_ORBIT) else ui.orbit
+      Box(Modifier.width(side).height(side * orbitBottom(orbit.size) + LabelRoom).testTag("wander-orbit")) {
         Canvas(Modifier.width(side).height(side)) {
-            drawCircle(ring, radius = size.minDimension * 0.38f, center = center, style = Stroke(width = 1.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 8f))))
+            drawCircle(ring, radius = size.minDimension * RADIUS, center = center, style = Stroke(width = 1.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 8f))))
         }
         val centre = ui.centre ?: return@Box
-        val nodes = listOf(centre) + ui.orbit
+        val nodes = listOf(centre) + orbit
         nodes.forEachIndexed { i, node ->
             val isCentre = i == 0
             val rank = i - 1
             val target = if (isCentre) Offset(0.5f, 0.5f) else {
                 // Half a step round, so no link sits right above the centre or on its title below.
-                val step = 2 * Math.PI / ui.orbit.size
+                val step = 2 * Math.PI / orbit.size
                 val angle = -Math.PI / 2 + step / 2 + rank * step
-                val r = 0.38f + if (rank % 2 == 1) 0.03f else -0.02f
+                val r = RADIUS + if (rank % 2 == 1) 0.03f else -0.02f
                 Offset(0.5f + r * cos(angle).toFloat(), 0.5f + r * sin(angle).toFloat())
             }
             key(node.packId + "/" + node.path) {
@@ -247,14 +291,18 @@ private fun OrbitNode(node: WanderNode, isCentre: Boolean, target: Offset, side:
         }
     }
     val disc by animateDpAsState(size, spring(stiffness = Spring.StiffnessLow), label = "disc")
-    val width = maxOf(disc, if (isCentre) 160.dp else LabelWidth)
+    val width = if (isCentre) disc else maxOf(disc, LabelWidth)
     val label = if (!node.onPhone) stringResource(R.string.home_wander_not_here, node.title)
         else if (isCentre) node.title else stringResource(R.string.home_wander_go_to, node.title)
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
-            .offset { IntOffset(((side * x.value) - width / 2).roundToPx(), ((side * y.value) - disc / 2).roundToPx()) }
+            .offset {
+                // A label near the edge stays inside the orbit rather than off the card ("Government of India", 2026-11-08).
+                val left = (side * x.value - width / 2).roundToPx().coerceIn(0, (side - width).roundToPx().coerceAtLeast(0))
+                IntOffset(left, ((side * y.value) - disc / 2).roundToPx())
+            }
             .width(width)
             .alpha(shown.value * if (node.onPhone) 1f else 0.6f)
             .then(if (isCentre) Modifier else Modifier.clickable(enabled = node.onPhone, onClick = onClick))
@@ -262,16 +310,21 @@ private fun OrbitNode(node: WanderNode, isCentre: Boolean, target: Offset, side:
             .testTag(if (isCentre) "wander-centre" else "wander-node-${node.path}"),
     ) {
         Disc(node, disc, isCentre)
-        Text(
-            node.title,
-            style = if (isCentre) MaterialTheme.typography.titleMedium.copy(fontFamily = Spectral) else MaterialTheme.typography.labelMedium,
-            fontSize = if (isCentre) 16.sp else 11.5.sp,
-            lineHeight = if (isCentre) 19.sp else 13.sp,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            color = if (node.onPhone) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        // The centre's title is under the orbit, beside Open (WanderSection).
+        if (!isCentre) {
+            Text(
+                node.title,
+                style = MaterialTheme.typography.labelMedium,
+                fontSize = 11.5.sp,
+                lineHeight = 13.sp,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                color = if (node.onPhone) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                // The node's own description says it ("Go to …"); TalkBack would read the title twice.
+                modifier = Modifier.clearAndSetSemantics {},
+            )
+        }
     }
 }
 
@@ -291,7 +344,8 @@ private fun Disc(node: WanderNode, size: Dp, isCentre: Boolean) {
         if (picture != null) {
             Image(picture, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         } else {
-            Text(initials(node.title), fontFamily = Spectral, fontSize = (size.value * 0.32f).sp, color = colors.onSurfaceVariant)
+            // A stand-in for a picture: decoration, not something TalkBack reads.
+            Text(initials(node.title), fontFamily = Spectral, fontSize = (size.value * 0.32f).sp, color = colors.onSurfaceVariant, modifier = Modifier.clearAndSetSemantics {})
         }
     }
 }

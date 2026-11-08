@@ -186,7 +186,10 @@ class TimelineModel(
         }
         pictureJob?.cancel()
         pictureJob = scope.launch {
-            val near = withContext(io) { neighbourhood(idx, mark, state.value.on) }
+            // The years either side, plus the nearest marks each way however far: a quiet year like 5 BC still gets a
+            // full Nearby (it showed two, 2026-11-08).
+            val near = withContext(io) { neighbourhood(idx, mark, state.value.on) + idx.around(mark.y0, state.value.on, NEARBY) }
+                .distinctBy { it.qid }
                 .filter { it.qid != mark.qid }
                 .sortedWith(compareBy<TimeMark> { abs(it.y0 - mark.y0) }.thenByDescending { it.rank })
                 .take(NEARBY)

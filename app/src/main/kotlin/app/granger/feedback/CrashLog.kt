@@ -107,10 +107,19 @@ class CrashLog(
         refreshNotice()
     }
 
+    /**
+     * Home asks only about a crash in the build that's running: one from an older build was likely fixed by the update,
+     * and asking about it builds later (an ANR from 1194 still showing on 1218, 2026-11-08) only nags. The report
+     * stays in Settings' Send feedback.
+     */
     fun refreshNotice() {
         val acknowledged = runCatching { acknowledgedFile.readText().trim().toLong() }.getOrDefault(0L)
-        _notice.value = list().firstOrNull()?.takeIf { it.timestamp > acknowledged }
+        _notice.value = list().firstOrNull()?.takeIf { it.timestamp > acknowledged && fromThisBuild(it.file) }
     }
+
+    /** The report's header line (its second) names this build's version code: "Granger 0.1.1218 (1218) · …". */
+    private fun fromThisBuild(file: File): Boolean =
+        runCatching { file.useLines { it.drop(1).firstOrNull() } }.getOrNull()?.contains("(${facts.versionCode})") == true
 
     fun list(): List<CrashReport> =
         (dir.listFiles { f -> f.name.startsWith(PREFIX) && f.name.endsWith(".txt") } ?: emptyArray())

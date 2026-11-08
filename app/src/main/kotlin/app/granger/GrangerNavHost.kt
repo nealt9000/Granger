@@ -800,8 +800,16 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         )
     }
 
+    // A spoken Ask reply belongs to its chat (Ask has its own speaker button): no mini-player, no rail row, and it
+    // stops once Ask is left.
+    val askReplySpoken = (playerUi.now as? NowPlaying.Voice)?.let { ResearchViewModel.answerTurnId(it.sourceKey) } != null
+    val onAsk = destination?.hasRoute<ResearchRoute>() == true
+    LaunchedEffect(askReplySpoken, onAsk) {
+        if (askReplySpoken && !onAsk && destination != null) player?.stopVoice()
+    }
+
     val miniPlacement = miniPlayerPlacement(
-        loaded = playerUi.now != NowPlaying.Idle,
+        loaded = playerUi.now != NowPlaying.Idle && !askReplySpoken,
         // Listen's home has the Now playing card instead.
         onPlayer = destination?.hasRoute<ListenPlayerRoute>() == true || destination?.hasRoute<ListenRoute>() == true,
         reading = readerTabId != null,
@@ -1366,6 +1374,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 )
                             },
                             timelineOf = { scope -> timelineModel(scope, homeThumbs) },
+                            tabPicture = { packId, path ->
+                                container.library.archive(packId)?.let { archive ->
+                                    archive.read(path)?.let { homeThumbs.thumbnail(archive, path, String(it.bytes, Charsets.UTF_8)) }
+                                }
+                            },
                         )
                     },
                     onReadiness = { nav.navigate(ReadinessRoute) { launchSingleTop = true } },

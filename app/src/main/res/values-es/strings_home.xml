@@ -75,6 +75,8 @@
     <string name="home_timeline_nearby">Cerca</string>
     <string name="home_timeline_earlier">Anterior</string>
     <string name="home_timeline_later">Siguiente</string>
+    <string name="home_readiness_see_all">Ver todo</string>
+    <string name="home_strip_areas">%1$d de %2$d áreas cubiertas</string>
     <string name="home_timeline_bc">%1$s a. C.</string>
     <string name="home_timeline_circa">c. %1$s</string>
     <string name="home_timeline_million_ago">hace %1$s millones de años</string>

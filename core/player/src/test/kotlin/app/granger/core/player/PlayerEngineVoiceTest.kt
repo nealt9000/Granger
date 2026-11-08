@@ -244,6 +244,22 @@ class PlayerEngineVoiceTest {
         assertThat(runBlocking { rig.playback.recentPlay("voice:text:article") }?.title).isEqualTo("Rosetta Stone")
     }
 
+    @Test fun aSourceNotRememberedLeavesNoPlaceNoPlayAndNoRestore() {
+        val e = engine()
+        e.readAloud(source(), null, null)
+        rig.idle(); e.untilReady(); speak(2)
+        val reply = TextReadSource("text:answer:7", "Why tides?", text, remembered = false).also { sources[it.key] = it }
+        e.readAloud(reply, null, null)
+        rig.idle(); e.untilReady(); speak(2)
+        assertThat(e.ui.value.now).isInstanceOf(NowPlaying.Voice::class.java)   // it still reads
+        e.playTracks(rig.songs(), 0, shuffle = false, source = PlaySource("songs", "Songs"))
+        rig.idle(); e.untilReady()
+        assertThat(runBlocking { rig.playback.voiceState("text:answer:7") }).isNull()
+        assertThat(runBlocking { rig.playback.recentPlay("voice:text:answer:7") }).isNull()
+        // The article stays the voice a restart comes back to.
+        assertThat(rig.prefs.getString(PlayerSettingsKeys.LAST_VOICE, null)).isEqualTo("text:article")
+    }
+
     @Test fun restoreLoadsTheVoicePausedAtItsSentenceWithoutOpeningTheEngine() {
         val first = engine()
         first.readAloud(source(), null, null)

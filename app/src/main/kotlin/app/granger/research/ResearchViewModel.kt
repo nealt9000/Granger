@@ -728,7 +728,7 @@ class ResearchViewModel(
         val id = turnId ?: return null
         return streaming ?: run {
             if (!speaking()) return null
-            StreamingTextReadSource(answerKey(id), question).also {
+            StreamingTextReadSource(answerKey(id), question, remembered = false).also {
                 streaming = it
                 streamedTurn = id
                 hub.readAloud(it)
@@ -781,7 +781,7 @@ class ResearchViewModel(
         val turn = state.value.turns.firstOrNull { it.turn.id == turnId }?.turn ?: return
         val text = turn.answer.ifBlank { turn.guess }
         if (text.isBlank()) return
-        hub.readAloud(TextReadSource(answerKey(turnId), turn.question, AnswerText.spoken(text, turn.medical)))
+        hub.readAloud(TextReadSource(answerKey(turnId), turn.question, AnswerText.spoken(text, turn.medical), remembered = false))
     }
 
     /** The speaker button while its answer is read: pauses the voice, or resumes it at its sentence. */

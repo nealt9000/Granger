@@ -65,19 +65,25 @@ class FeedDrawer(
             )
         }
         scope.packs.isNotEmpty() -> {
-            val cards = LinkedHashMap<String, Card>()
-            repeat(CARDS * 2) {
-                if (cards.size >= CARDS) return@repeat
+            // Articles with a picture and a real opening paragraph first; the rest only fill a row that's short
+            // ("2933 Amber" and "List of Final Fantasy XI characters" with blank tiles, Neal 2026-11-08).
+            val good = LinkedHashMap<String, Card>()
+            val plain = LinkedHashMap<String, Card>()
+            repeat(RANDOM_TRIES) {
+                if (good.size >= CARDS) return@repeat
                 val pack = scope.packs[random.nextInt(scope.packs.size)]
                 val archive = archiveOf(pack) ?: return@repeat
                 val path = archive.randomPath() ?: return@repeat
                 // A user or tag list isn't a page to suggest (Plan U3b Decision 10).
                 if (IndexPages.isIndex(path)) return@repeat
                 val key = "${pack.id}/$path"
-                if (key in cards) return@repeat
-                cards[key] = articleCard(archive, pack, path)
+                if (key in good || key in plain) return@repeat
+                val html = archive.read(path)?.let { String(it.bytes, Charsets.UTF_8) } ?: return@repeat
+                val card = articleCard(archive, pack, path, html)
+                if (isList(card.title)) return@repeat
+                if (card.imagePath != null && hasLead(html)) good[key] = card else plain[key] = card
             }
-            cards.values.toList()
+            (good.values + plain.values).take(CARDS)
         }
         scope.albums.isNotEmpty() -> scope.albums.shuffled(random).take(CARDS).map {
             Card(it.title, it.albumArtist, CardTarget.Album(it.key), imagePath = it.coverPath)
@@ -92,8 +98,12 @@ class FeedDrawer(
     }
 
     /** An article card with its title read from the page and, when the page has one, its lead image. */
-    private fun articleCard(archive: ZimArchive, pack: Pack, path: String): Card {
-        val html = archive.read(path)?.let { String(it.bytes, Charsets.UTF_8) }
+    private fun articleCard(
+        archive: ZimArchive,
+        pack: Pack,
+        path: String,
+        html: String? = archive.read(path)?.let { String(it.bytes, Charsets.UTF_8) },
+    ): Card {
         return Card(
             title = html?.let { pageTitle(it, pack.title) } ?: pathTitle(path),
             subtitle = pack.title,
@@ -210,6 +220,21 @@ class FeedDrawer(
 
     companion object {
         const val CARDS = 5
+
+        /** Random articles read for a row of [CARDS]: enough that five with pictures are usually found. */
+        const val RANDOM_TRIES = CARDS * 6
+
+        /** An opening paragraph of at least this many characters: a real article, not a stub. */
+        private const val LEAD_CHARS = 160
+
+        /** "List of …", "Lists of …", "Index of …": a list, not an article to suggest. */
+        private val LIST_TITLE = Regex("^(lists? of|index of|outline of|glossary of) ", RegexOption.IGNORE_CASE)
+
+        internal fun isList(title: String) = LIST_TITLE.containsMatchIn(title)
+
+        /** The page's first paragraph with enough words in it. */
+        internal fun hasLead(html: String): Boolean =
+            Jsoup.parse(html).select("p").firstOrNull { it.text().isNotBlank() }?.text()?.length?.let { it >= LEAD_CHARS } == true
         private const val SEARCH_LIMIT = 30
 
         /** A whole encyclopedia's ZIM name, not a subject's: `wikipedia_es_all`, `wikipedia_en_top`. */

@@ -243,17 +243,33 @@ class RailViewModelTest {
     @Test fun aVoiceSourceWithoutATabKeepsItsReadingRow() = runTest(main.dispatcher) {
         library.packList.value = listOf(pack("a"))
         sessions.tabs.value = listOf(tab(5, "a", "Owls", openedAt = 20))
+        plays.value = listOf(RecentPlay("voice:pack:b/Tides", "Tides", 50))
+        val vm = vm()
+        val collecting = backgroundScope.launch { vm.ui.collect {} }
+        voice.value = app.granger.core.player.NowPlaying.Voice("pack:b/Tides", "Tides", null, "", 0, 1f, app.granger.core.speech.VoiceId.Granger("v"))
+        testScheduler.advanceUntilIdle()
+        // The Reading row heads the list; its own "Play again" waits until the voice is done.
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("reading:pack:b/Tides", "tab:5").inOrder()
+        assertThat(vm.ui.value.tabs.single().readingAloud).isFalse()
+        voice.value = null
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("play:voice:pack:b/Tides", "tab:5").inOrder()
+        collecting.cancel()
+    }
+
+    @Test fun aSpokenAskReplyHasNoReadingRowAndNoPlayAgain() = runTest(main.dispatcher) {
+        library.packList.value = listOf(pack("a"))
+        sessions.tabs.value = listOf(tab(5, "a", "Owls", openedAt = 20))
+        // A play an older build kept for a reply.
         plays.value = listOf(RecentPlay("voice:text:answer:1", "Why tides?", 50))
         val vm = vm()
         val collecting = backgroundScope.launch { vm.ui.collect {} }
         voice.value = app.granger.core.player.NowPlaying.Voice("text:answer:1", "Why tides?", null, "", 0, 1f, app.granger.core.speech.VoiceId.Granger("v"))
         testScheduler.advanceUntilIdle()
-        // The Reading row heads the list; its own "Play again" waits until the voice is done.
-        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("reading:text:answer:1", "tab:5").inOrder()
-        assertThat(vm.ui.value.tabs.single().readingAloud).isFalse()
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("tab:5")
         voice.value = null
         testScheduler.advanceUntilIdle()
-        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("play:voice:text:answer:1", "tab:5").inOrder()
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("tab:5")
         collecting.cancel()
     }
 
@@ -437,19 +453,19 @@ class RailViewModelTest {
     @Test fun removingAnotherTabOrTheReadingRowStopsOnlyForItsOwnVoice() = runTest(main.dispatcher) {
         library.packList.value = listOf(pack("a"))
         sessions.tabs.value = listOf(tab(6, "a", "Bats", openedAt = 10))
-        plays.value = listOf(RecentPlay("voice:text:answer:1", "Why tides?", 40))
-        reading("text:answer:1", "Why tides?")
+        plays.value = listOf(RecentPlay("voice:pack:b/Tides", "Tides", 40))
+        reading("pack:b/Tides", "Tides")
         val vm = voiceVm()
         val collecting = backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()
-        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("reading:text:answer:1", "tab:6").inOrder()
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("reading:pack:b/Tides", "tab:6").inOrder()
         vm.remove(vm.ui.value.entries.last())                   // a tab the voice isn't reading: it reads on
         testScheduler.advanceUntilIdle()
         assertThat(stops).isEmpty()
-        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("reading:text:answer:1")
+        assertThat(vm.ui.value.entries.map { it.key }).containsExactly("reading:pack:b/Tides")
         vm.remove(vm.ui.value.entries.single())                 // the Reading row: the voice stops, its play stays off
         testScheduler.advanceUntilIdle()
-        assertThat(stops).containsExactly("text:answer:1")
+        assertThat(stops).containsExactly("pack:b/Tides")
         assertThat(vm.ui.value.entries).isEmpty()
         collecting.cancel()
     }

@@ -1,5 +1,7 @@
 package app.granger.home
 
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -52,6 +54,8 @@ class WanderSectionTest {
         val h = Harness(WanderUi(centre = sophia, summary = "Hagia Sophia is a mosque in Istanbul.", orbit = links.getValue("Hagia_Sophia")))
         show(h)
         compose.onNodeWithTag("home-list").performScrollToNode(hasTestTag("wander-orbit"))
+        // TalkBack reads "Go to Istanbul" alone, not the label under the disc again.
+        assertThat(compose.onNodeWithContentDescription("Go to Istanbul").fetchSemanticsNode().config.getOrNull(SemanticsProperties.Text)).isNull()
         compose.onNodeWithContentDescription("Go to Istanbul").performClick()
         compose.waitForIdle()
         assertThat(h.ui.centre?.path).isEqualTo("Istanbul")

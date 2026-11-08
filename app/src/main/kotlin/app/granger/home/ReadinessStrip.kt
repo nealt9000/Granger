@@ -13,7 +13,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.Alignment
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -57,14 +61,15 @@ fun ReadinessStrip(report: ReadinessReport, onClick: () -> Unit, modifier: Modif
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .semantics { contentDescription = readiness }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(start = 16.dp, end = 12.dp, top = 4.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         stripStatus(report)?.let { status ->
             Text(status.resolve(), style = MaterialTheme.typography.labelMedium.status, color = GrangerTheme.extras.status)
         }
         if (report.domains.isNotEmpty()) {
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            // The dots say what they count (Neal, 2026-11-08: nine unlabelled dots).
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                 for (domain in report.domains) {
                     Box(
                         Modifier
@@ -74,8 +79,21 @@ fun ReadinessStrip(report: ReadinessReport, onClick: () -> Unit, modifier: Modif
                             .background(MaterialTheme.colorScheme.primary.copy(alpha = dotAlpha(domain.coverage))),
                     )
                 }
+                Text(
+                    stringResource(R.string.home_strip_areas, coveredAreas(report), report.domains.size),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 6.dp).testTag("strip-areas"),
+                )
             }
         }
-        Text(stripText(report).resolve(), style = MaterialTheme.typography.bodyMedium)
+        // The suggestion leads somewhere: a chevron says so.
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(stripText(report).resolve(), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.primary)
+        }
     }
 }
+
+/** The areas with anything on the phone for them (Basic or Comprehensive). */
+fun coveredAreas(report: ReadinessReport): Int = report.domains.count { it.coverage != Coverage.NONE }

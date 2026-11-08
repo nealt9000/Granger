@@ -570,7 +570,8 @@ class PlayerEngine(
             return@submit
         }
         if (fromMain && q != null) startMusicUnder(q, byId, position, play = playing)
-        playback.upsertRecentPlay(RecentPlay("voice:${source.key}", source.title, now()))
+        // A source the player doesn't keep (a spoken Ask reply) leaves no Play again row.
+        if (source.remembered) playback.upsertRecentPlay(RecentPlay("voice:${source.key}", source.title, now()))
     }
 
     override fun stopVoice() = submit {
@@ -1076,7 +1077,10 @@ class PlayerEngine(
         if (!keepMusicUnder) { musicQueue = null; tracks = emptyMap() }
         book = null; map = null
         mode = Mode.VOICE
-        prefs.edit().putString(PlayerSettingsKeys.LAST_MODE, MODE_VOICE).putString(PlayerSettingsKeys.LAST_VOICE, source.key).apply()
+        // Nor is it what a restart restores: the last kept player stays the one to come back to.
+        if (source.remembered) {
+            prefs.edit().putString(PlayerSettingsKeys.LAST_MODE, MODE_VOICE).putString(PlayerSettingsKeys.LAST_VOICE, source.key).apply()
+        }
 
         player.setAudioAttributes(attributes(speech = true), false)
         player.shuffleModeEnabled = false
@@ -1467,7 +1471,7 @@ class PlayerEngine(
         val position = player.currentPosition.coerceAtLeast(0L)
         return when (mode) {
             Mode.VOICE -> {
-                val src = voiceSource ?: return null
+                val src = voiceSource?.takeIf { it.remembered } ?: return null
                 val id = voiceId ?: return null
                 val address = (if (voiceOpen) readAloud.progress.value?.address else null) ?: voiceFrom ?: return null
                 Snapshot.Voice(VoiceState(src.key, address.encode(), voiceSpeed, src.title, voiceSection, id.encode(), now()))
