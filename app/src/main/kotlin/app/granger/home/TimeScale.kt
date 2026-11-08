@@ -25,6 +25,9 @@ object TimeScale {
     /** The whole axis: the Big Bang to [now] plus a little room. */
     fun all(now: Int): Window = Window(toAxis(BIG_BANG.toDouble()), now + 5.0)
 
+    /** Where the timeline opens: recorded history, 3000 BC to now; the deep past is a pinch away. */
+    fun history(now: Int): Window = Window(JOIN.toDouble(), now + 5.0)
+
     /** The visible stretch of the axis, in axis units. */
     data class Window(val start: Double, val end: Double) {
         val span: Double get() = end - start
@@ -70,11 +73,17 @@ object TimeScale {
         val out = mutableListOf<Long>()
         val (y0, y1) = toYear(window.start) to toYear(window.end)
         if (y1 > JOIN) {
+            // Round as people write years: AD 1000, 1500 BC (astronomical -1499), never "2,001 BC".
             val from = maxOf(y0, JOIN.toDouble())
             val pxPerYear = width / window.span
             val step = STEPS.firstOrNull { it * pxPerYear >= minGap } ?: STEPS.last()
-            var y = (kotlin.math.ceil(from / step) * step).toLong()
-            while (y <= y1) { out += y; y += step }
+            var ad = maxOf(step, (kotlin.math.ceil(from / step) * step).toLong())
+            while (ad <= y1) { out += ad; ad += step }
+            var bc = step
+            while (1 - bc >= from) {
+                if (1 - bc <= y1) out += 1 - bc
+                bc += step
+            }
         }
         if (y0 < JOIN) {
             for (k in 4..10) {

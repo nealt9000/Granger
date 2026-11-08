@@ -117,8 +117,12 @@ class TimelineSectionTest {
         assertThat(w.year(-499)).isEqualTo("500 BC")
         assertThat(w.year(-9_999)).isEqualTo("10,000 BC")
         assertThat(w.year(-65_999_999)).isEqualTo("66 million years ago")
+        assertThat(w.year(-999_999)).isEqualTo("1 million years ago")
         assertThat(w.year(-13_799_999_999)).isEqualTo("13.8 billion years ago")
         assertThat(w.of(mark(9, "Living", 1961, kind = TimeKind.LIFE))).isEqualTo("1961 –")
         assertThat(w.of(mark(9, "Rough", 1500).copy(prec = 7))).isEqualTo("c. 1500")
+        assertThat(w.of(mark(9, "Fourth century", 301).copy(prec = 7))).isEqualTo("c. 300")
+        assertThat(w.of(mark(9, "Bronze age", -1549).copy(prec = 7))).isEqualTo("c. 1500 BC")
+        assertThat(w.of(mark(9, "Late Middle Ages", 1301, 1492, TimeKind.SPAN).copy(prec = 7))).isEqualTo("c. 1300 – 1400")
     }
 }

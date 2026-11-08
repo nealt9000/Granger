@@ -163,6 +163,27 @@ Shared-phone rules: check `lastUpdateTime` and DB versions first, and never inst
 
 Findings go into this plan. Then hand to Neal before merging.
 
+## Findings (2026-11-08)
+- **Task 1 run** (eight English packs, dump 2026-11-06): 72,032 articles once across packs; 7.0 MB in all (Top 2.3 MB, History 2.1 MB, the rest under 1 MB).
+  - Rows: Top 26,599, History 23,056, Physics 7,963, Geography 5,714, Medicine 5,197, Mathematics 5,092, Chemistry 549, Knots 11.
+  - **Drop-root fix:** "Wikimedia article page" reached legislation through a bad Wikidata link ("item that needs to be split") and dropped the Treason Act 1351, Salic law and the Code of Justinian. Removed; lists stay dropped by "Wikimedia list article". History's drops (7,784) are now year, decade and century pages and "Deaths in May 2008" lists.
+  - **Known lane noise, for v2:** scientific journals count as Art & literature (Chemistry 205); some medieval scholars count as Science.
+- **Reader and placement:**
+  - The reader lives in `core/library` (Android SQLite; a plain JVM module can't open it), not a new module.
+  - Integers go into the SQL text, because Android binds arguments as text and `COALESCE(...)` has no affinity to turn them back into numbers.
+  - The readiness strip is already short, so "compact" means moving it below Continue with a "Readiness" heading.
+  - The crash notice and the downloads card now sit below the timeline and Wander, per Decision 6. **Check with Neal:** the crash notice is asked once and could be missed down there.
+- **Pixel 6, build 1212 and up, after a dev push of the eight indexes:**
+  - **Fixed on the phone:**
+    - it opened on the whole axis, which squeezed recorded history into a quarter; it now opens on 3000 BC to now;
+    - ruler labels collided, and a tick read "2,001 BC"; ticks are now round as written, and a label that would touch its neighbour is skipped;
+    - century-precision years read "c. 301"; rough dates now round to their unit (c. 300);
+    - the loupe pushed the lens card down; it now floats;
+    - the river is taller when it's one row.
+  - **Seen working:** the first draw from all eight packs (Mexico 1810, United States 1784, San Marino 301 with pictures); a scrub with the loupe (Andorra 1278 … Amsterdam 1300), settling on Manchester; the Philosophy & religion lane; ‹ › stepping (Hustler 1784 → Wat Phra Kaew 1785); Nearby across a crowded year.
+  - **Not yet checked:** pinch and the two-finger pan (adb can't send multi-touch; Neal's hands); ruler pan; TalkBack; rotation; animations off; Field theme; fps.
+  - **Feel notes for Neal:** after a lane change, the lens settles on the nearest mark in time, which can be obscure (Hustler); rank could weigh more.
+
 ## Not in H5b
 - **Read aloud (the owl):** moves to H5c with the games, so one voice button serves the timeline's lens, Wander and the games.
 - **Spanish time indexes:** they need the dump re-filtered by eswiki sitelinks; the UI strings are in now.

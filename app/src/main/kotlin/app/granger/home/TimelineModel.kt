@@ -50,7 +50,7 @@ class TimelineModel(
     private val now: Int = Year.now().value,
     private val debounceMillis: Long = 60L,
 ) {
-    private val state = MutableStateFlow(TimelineUi(window = TimeScale.all(now), bounds = TimeScale.all(now), now = now))
+    private val state = MutableStateFlow(TimelineUi(window = TimeScale.history(now), bounds = TimeScale.all(now), now = now))
     val ui: StateFlow<TimelineUi> = state.asStateFlow()
 
     private var index: TimeIndexes? = null
@@ -71,7 +71,7 @@ class TimelineModel(
             }
             val counts = withContext(io) { idx.laneCounts() }
             state.update { it.copy(lanes = Lane.entries.filter { l -> (counts[l] ?: 0) > 0 }) }
-            // Open on all of history with the lens on the best-known mark of a random century since 500 BC.
+            // Open on recorded history with the lens on the best-known mark of a random century since 500 BC.
             val century = random.nextInt(-5, 20) * 100
             val first = withContext(io) { idx.marks(century, century + 99, emptySet(), 1, now) }.firstOrNull()
             refresh(state.value.window, immediate = true)

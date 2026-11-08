@@ -89,6 +89,7 @@ class TimelineActions(
 )
 
 private val RowHeight = 44.dp
+private val SingleRowHeight = 76.dp
 private val RulerHeight = 22.dp
 private val TickGap = 64.dp
 private const val LOUPE_MARKS = 4
@@ -155,7 +156,8 @@ private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords) {
     val labelStyle = TextStyle(fontSize = 10.sp, color = colours.onSurfaceVariant)
     var scrubX by remember { mutableStateOf<Float?>(null) }
     val current by rememberUpdatedState(ui)
-    val height = RowHeight * rows.size + RulerHeight
+    val rowHeight = if (rows.size == 1) SingleRowHeight else RowHeight
+    val height = rowHeight * rows.size + RulerHeight
     BoxWithConstraints(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         val widthPx = with(density) { maxWidth.toPx() }
         val rulerPx = with(density) { RulerHeight.toPx() }
@@ -211,7 +213,7 @@ private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords) {
                 },
         ) {
             val w = size.width
-            val rowH = RowHeight.toPx()
+            val rowH = rowHeight.toPx()
             val bottom = rowH * rows.size
             // Density shading: how many marks fall under each stretch of the axis.
             val bins = IntArray(48)
@@ -252,15 +254,20 @@ private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords) {
             // Row lines and the ruler.
             for (r in 1 until rows.size) drawLine(colours.outlineVariant, Offset(0f, rowH * r), Offset(w, rowH * r), strokeWidth = 1f)
             drawLine(colours.outline, Offset(0f, bottom), Offset(w, bottom), strokeWidth = 1.dp.toPx())
+            // Ticks left to right; a label that would touch the one before it is skipped (the tick stays).
+            var lastRight = Float.NEGATIVE_INFINITY
             for (t in TimeScale.ticks(ui.window, w, TickGap.toPx())) {
                 val x = ui.window.x(t.toDouble(), w)
                 drawLine(colours.outline, Offset(x, bottom), Offset(x, bottom + 4.dp.toPx()), strokeWidth = 1.dp.toPx())
                 val layout = measurer.measure(words.tick(t), labelStyle)
                 val lx = (x - layout.size.width / 2f).coerceIn(0f, w - layout.size.width)
+                if (lx < lastRight + 8.dp.toPx()) continue
                 drawText(layout, topLeft = Offset(lx, bottom + 5.dp.toPx()))
+                lastRight = lx + layout.size.width
             }
         }
-        scrubX?.let { x -> Loupe(ui, x, widthPx, words) }
+        // matchParentSize: the loupe floats over the section without taking layout space, so nothing below jumps.
+        scrubX?.let { x -> Box(Modifier.matchParentSize()) { Loupe(ui, x, widthPx, words) } }
     }
 }
 
@@ -402,7 +409,8 @@ internal class YearWords(
     /** One year: 1066, 500 BC, 10,000 BC, 65 million years ago. Years are astronomical (500 BC = -499). */
     fun year(y: Long): String = when {
         y > 0 -> y.toString()
-        y > -1_000_000 -> bc.format(num(1 - y))
+        y > -9_999 -> bc.format((1 - y).toString())     // 1500 BC, written like 1500
+        y > -999_999 -> bc.format(num(1 - y))             // 10,000 BC
         y > -1_000_000_000 -> millionAgo.format(trim((1 - y) / 1e6))
         else -> billionAgo.format(trim((1 - y) / 1e9))
     }
@@ -411,14 +419,26 @@ internal class YearWords(
 
     /** A mark's dates: a point's year, a span or lifetime's two ends, "c." for anything coarser than a year. */
     fun of(m: TimeMark): String {
-        val a = year(m.y0.toLong())
+        val a = year(rounded(m.y0, m.prec))
         val text = when {
             m.kind == TimeKind.POINT -> a
-            m.y1 != null -> "$a – ${year(m.y1!!.toLong())}"
+            m.y1 != null -> "$a – ${year(rounded(m.y1!!, m.prec))}"
             m.kind == TimeKind.LIFE -> living.format(a)
             else -> a
         }
         return if (m.prec < 9) circa.format(text) else text
+    }
+
+    /**
+     * A year rounded to what its precision supports, as people write it: Wikidata stores "the 4th century" as 301, which
+     * reads as c. 300; 1450s as c. 1450; 1500 BC (astronomical -1499) stays 1500 BC.
+     */
+    private fun rounded(y: Int, prec: Int): Long {
+        val unit = when (prec) { 8 -> 10; 7 -> 100; 6 -> 1000; else -> return y.toLong() }
+        val written = if (y > 0) y.toLong() else 1L - y
+        val r = written / unit * unit
+        val w = if (r == 0L) written else r
+        return if (y > 0) w else 1 - w
     }
 
     fun range(from: Int, to: Int): String = rangeText.format(year(from.toLong()), year(to.toLong()))

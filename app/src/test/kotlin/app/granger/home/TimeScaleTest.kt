@@ -39,6 +39,10 @@ class TimeScaleTest {
         val wide = TimeScale.ticks(all, 1000f, 60f)
         assertThat(wide).contains(-9_999L)        // 10,000 BC
         assertThat(wide).contains(1000L)
+        // BC ticks are round as written: 2000 BC is astronomical -1999.
+        val bc = TimeScale.ticks(TimeScale.Window(-3000.0, 0.0), 1000f, 60f)
+        assertThat(bc).contains(-1999L)
+        assertThat(bc).doesNotContain(-2000L)
         assertThat(wide.zipWithNext().all { (a, b) -> all.x(b.toDouble(), 1000f) - all.x(a.toDouble(), 1000f) >= 60f }).isTrue()
     }
 }
