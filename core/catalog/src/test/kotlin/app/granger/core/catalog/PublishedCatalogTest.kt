@@ -194,6 +194,8 @@ class PublishedCatalogTest {
         val catalog = (CatalogParser.parse(bytes, repoFile("catalog/catalog.json.sig").readBytes(), key) as ParseResult.Ok).catalog
         val dated = catalog.packs.filter { it.timeIndex != null }
         assertThat(dated.map { it.id }).contains("wikipedia_en_top_maxi")
+        // Spanish too (2026-11-08), on every flavour of its snapshot.
+        assertThat(dated.map { it.id }).containsAtLeast("wikipedia_es_top_nopic", "wikipedia_es_top_maxi", "wikipedia_es_top_mini")
         assertThat(dated.size).isAtLeast(8)
         for (p in dated) {
             val t = p.timeIndex!!

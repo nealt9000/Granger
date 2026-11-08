@@ -190,7 +190,7 @@ fun SourceScreen(
                             FilterChip(
                                 selected = ui.category == category,
                                 onClick = { viewModel.setCategory(if (ui.category == category) null else category) },
-                                label = { Text(category) },
+                                label = { Text(KiwixList.category(category).resolve()) },
                             )
                         }
                     }

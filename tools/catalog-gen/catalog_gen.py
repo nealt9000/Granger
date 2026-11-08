@@ -274,6 +274,18 @@ def family_of(entry, families):
     return None
 
 
+def kiwix_copy(name, copy):
+    """
+    The "kiwix" setting's `copy` for one ZIM name: Kiwix's own title or description replaced where it reads wrong
+    ("Equipo por Wikipedia" for the computing pack), on every flavour, without making the pack a curated row (which
+    would mark it featured). Only `title` and `description`, as non-blank strings.
+    """
+    if not isinstance(copy, dict) or not copy or set(copy) - {"title", "description"} or \
+            any(not isinstance(v, str) or not v.strip() for v in copy.values()):
+        raise SystemExit(f"kiwix copy {name}: only a non-blank title and description, got {copy!r}")
+    return dict(copy)
+
+
 def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=8, tries=3, sleep=time.sleep,
                   contents=None):
     """
@@ -323,6 +335,10 @@ def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=
 
     with concurrent.futures.ThreadPoolExecutor(workers) as pool:
         results = list(pool.map(pin_with_retries, kept))
+    copy = config.get("copy", {})
+    for p, _ in results:
+        if p and p["zimName"] in copy:
+            p.update(kiwix_copy(p["zimName"], copy[p["zimName"]]))
     packs = sorted((p for p, _ in results if p), key=lambda p: (p["category"], p["title"].lower(), p["id"]))
     failed = [f for _, f in results if f]
 

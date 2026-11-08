@@ -87,6 +87,7 @@ class SourceViewModelTest {
     @Test fun categoriesInTheirOrder() = runTest(main.dispatcher) {
         val ui = viewModel().ui.value
         assertThat(ui.sections.map { it.title }).containsExactly("Medical", "Reference", "Regional").inOrder()
+        assertThat(ui.sections.map { it.heading.en() }).containsExactly("Medical", "Reference", "Regional").inOrder()
         assertThat(ui.loading).isFalse()
         assertThat(ui.sections[0].rows.single().details.en()).isEqualTo("English · Updated October 2026 · CC BY-SA")
     }

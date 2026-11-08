@@ -53,6 +53,25 @@
     <string name="sources_section_everything">Todo</string>
     <string name="sources_section_libraries">Bibliotecas</string>
     <string name="sources_section_models">Modelos de IA</string>
+    <!-- The catalog's categories (the Kiwix list's chips and headings) and Granger Classics' sections, by name. -->
+    <string name="sources_category_medical">Medicina</string>
+    <string name="sources_category_reference">Referencia</string>
+    <string name="sources_category_religion">Religión y filosofía</string>
+    <string name="sources_category_literature">Literatura y teatro</string>
+    <string name="sources_category_science">Ciencia y matemáticas</string>
+    <string name="sources_category_howto">Cómo hacerlo</string>
+    <string name="sources_category_regional">Regional</string>
+    <string name="sources_category_qa">Preguntas y respuestas</string>
+    <string name="sources_category_maps">Mapas</string>
+    <string name="sources_category_programming">Programación</string>
+    <string name="sources_category_games">Juegos y pasatiempos</string>
+    <string name="sources_category_other">Otros</string>
+    <string name="sources_category_novels">Novelas y cuentos</string>
+    <string name="sources_category_poetry">Épica y poesía</string>
+    <string name="sources_category_drama">Teatro</string>
+    <string name="sources_category_philosophy">Filosofía</string>
+    <string name="sources_category_scripture">Escritura y religión</string>
+    <string name="sources_category_opera">Libretos de ópera</string>
     <plurals name="sources_show_all_packs">
         <item quantity="one">Mostrar %d paquete</item>
         <item quantity="many">Mostrar los %d paquetes</item>
@@ -171,6 +190,7 @@
     </plurals>
     <string name="sources_licence_not_stated">Licencia no indicada</string>
     <string name="sources_licence_public_domain">Dominio público</string>
+    <string name="sources_licence_public_domain_us">Dominio público (EE. UU.)</string>
     <string name="sources_licence_open">Licencias abiertas</string>
     <string name="sources_licence_cc">Licencias CC</string>
     <string name="sources_licence_see">Ver licencia</string>

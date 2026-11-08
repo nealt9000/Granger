@@ -1236,6 +1236,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             source, container.catalog, container.downloads, container.library, container.bookshelf, container.volumes,
                             container.downloadPrefs, container.deviceTier, container.appScope, domain = route.domain,
                             family = route.family, knowledge = container.knowledgeLanguages.languages,
+                            voiceTitles = app.granger.core.speech.VoiceTitles.of(appContext),
                         )
                     },
                     title = stringResource(source.title),
