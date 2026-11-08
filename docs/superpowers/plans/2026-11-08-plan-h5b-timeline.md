@@ -212,6 +212,27 @@ Findings go into this plan. Then hand to Neal before merging.
 - **Search on the full screen:** titles containing every word, best known first, up to 300. Matches draw bright on top while the rest dims, a count shows, ‹ › steps through matches in time order, and the Search key puts the keyboard away. Checked: "Roman" gives 172 matches.
 - **Show in time:** the reader's ⋯ offers it only when the article is on the timeline, and it opens the full Timeline on it (checked: Romania → 1330). The indexes are opened once and shared (`TimeIndexCache`) by Home, the Timeline and the reader.
 
+## Task 3 built (2026-11-08)
+- **catalog-gen:** `attach_timeindex` + the `timeindex` subcommand; sizes count in the tier sums, and the URLs are link-checked.
+  - The index goes on every flavour of its ZIM snapshot, `_mini` included, since it's keyed by path.
+  - It isn't in `curated.json` yet: adding it before the release exists would break `check-links` for anyone building the catalog.
+  - Dry run on a copy of `catalog/catalog.json`: all 8 descriptors match, giving 19 pack entries and 7.0 MB to upload.
+- **App:**
+  - `TimeIndexEntry` on `PackEntry`. A bad or newer-format entry is dropped while the pack and its vectors are kept, and older apps ignore the field (`ignoreUnknownKeys`).
+  - `ItemKind.TIME_INDEX` with `TimeIndexDownloads`, a copy of `VectorDownloads` with no device-tier gate.
+  - `isCompanion` / `Companions.parentOf` fold it under its pack in Downloads and Readiness and delete it with the pack. A lone one reads "Dates for the timeline", and "+ index for Ask" shows only for vectors.
+  - The timeline reads installed indexes first, then the dev push.
+  - The Ask-only checks (Browse, Sources, onboarding's "indexes for Ask") stay vectors-only.
+- **Tests:** catalog-gen 100, catalog 71, downloads 151, library 443, app 1708, all passing.
+- **Phone:** the install succeeded with no crash in the log, but the phone was locked, so Home wasn't looked at after this commit.
+- **Publishing (waits for Neal's OK):**
+  1. A GitHub release `timeindex-<date>` with the 8 `.gtime` files from `/Volumes/X10 Pro/granger-g1/gtime/`.
+  2. Add `"timeIndex": {"releases": "tools/timeindex/releases", "releaseUrl": ".../timeindex-<date>/"}` to `curated.json`.
+  3. `catalog_gen.py timeindex …` on `catalog/catalog.json`, then `check-links`, then `sign`.
+  4. Commit and push the catalog.
+
+  Testers need an app build with this code to download the files; the current Play build ignores them.
+
 ## Not in H5b
 - **Read aloud (the owl):** moves to H5c with the games, so one voice button serves the timeline's lens, Wander and the games.
 - **Spanish time indexes:** they need the dump re-filtered by eswiki sitelinks; the UI strings are in now.
