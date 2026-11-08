@@ -131,7 +131,7 @@ fun TimelineSection(ui: TimelineUi, actions: TimelineActions, onOpen: (TimeMark)
     Column(Modifier.fillMaxWidth().testTag("timeline"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         val words = yearWords()
         if (ui.loading && ui.marks.isEmpty()) {
-            Loading()
+            Loading(reserve = true)
             return@Column
         }
         River(ui, actions, words, full = false)
@@ -227,15 +227,25 @@ private fun SearchField(ui: TimelineUi, actions: TimelineActions) {
     }
 }
 
+/**
+ * While the dates load, Home keeps the room the river, key and lens card will take, so Play and Wander below don't jump
+ * down when they arrive (Pixel 6, 2026-11-08: a tap meant for Play landed on the river).
+ */
 @Composable
-private fun Loading() {
-    Text(
-        stringResource(R.string.home_timeline_loading),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(horizontal = 16.dp),
-    )
+private fun Loading(reserve: Boolean = false) {
+    val river = minOf(SingleRowHeight, LocalConfiguration.current.screenHeightDp.dp * HOME_RIVER_SHARE - RulerHeight) + RulerHeight
+    Box(if (reserve) Modifier.fillMaxWidth().height(river + LoadingExtra) else Modifier) {
+        Text(
+            stringResource(R.string.home_timeline_loading),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 16.dp),
+        )
+    }
 }
+
+/** The lane key and the lens card under Home's river, with their spacing. */
+private val LoadingExtra = 108.dp
 
 @Composable
 private fun Chips(ui: TimelineUi, actions: TimelineActions) {
