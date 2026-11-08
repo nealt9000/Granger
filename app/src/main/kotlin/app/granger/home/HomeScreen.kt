@@ -118,9 +118,17 @@ fun HomeScreen(
             onElsewhere = { wanderModel.start() }, onQuery = wanderModel::search, onPick = wanderModel::pick,
         )
     }
+    val timelineModel = viewModel.timeline
+    val timeline = timelineModel?.ui?.collectAsStateWithLifecycle()?.value
+    val timelineActions = remember(timelineModel) {
+        if (timelineModel == null) TimelineActions() else TimelineActions(
+            onShown = timelineModel::ensureStarted, onToggle = timelineModel::toggle, onAll = timelineModel::all,
+            onWindow = timelineModel::show, onLens = timelineModel::lensAt, onStep = timelineModel::step, onSelect = timelineModel::select,
+        )
+    }
     HomeContent(
         ui, onReadiness, onOpenTab, onPlay, onOpenCard, actions, onOpenDownloads, cardActions, crashNotice,
-        wander = wander, wanderActions = wanderActions,
+        wander = wander, wanderActions = wanderActions, timeline = timeline, timelineActions = timelineActions,
     )
 }
 
@@ -143,6 +151,9 @@ fun HomeContent(
     /** Wander (Plan H5a); null hides it. */
     wander: WanderUi? = null,
     wanderActions: WanderActions = WanderActions(),
+    /** The timeline (Plan H5b); null hides it. */
+    timeline: TimelineUi? = null,
+    timelineActions: TimelineActions = TimelineActions(),
 ) {
     var adding by rememberSaveable { mutableStateOf(false) }
     Scaffold(
@@ -154,14 +165,6 @@ fun HomeContent(
         },
     ) { padding ->
         LazyColumn(Modifier.padding(padding).fillMaxSize().testTag("home-list")) {
-            item(key = "strip") { ReadinessStrip(ui.strip, onReadiness) }
-            crashNotice?.let { notice -> item(key = "crash") { CrashNoticeRow(notice) } }
-            ui.downloads?.let { card -> item(key = "downloads") { DownloadsCardView(card, onOpenDownloads, downloadsActions) } }
-            for (offer in ui.tidy) {
-                item(key = "tidy-${offer.key}") {
-                    app.granger.sources.TidyOfferCard(offer, { downloadsActions.onTidyRemove(offer) }, { downloadsActions.onTidyKeep(offer) })
-                }
-            }
             if (adding) {
                 item(key = "add-feed") {
                     AddFeedPanel(
@@ -174,11 +177,30 @@ fun HomeContent(
                     )
                 }
             }
+            // The new pieces lead (spec §9.2), each on its own surface so sections read apart (spec §3).
+            if (timeline != null && timeline.available) {
+                item(key = "timeline") {
+                    HomeSection("timeline-section") {
+                        TimelineSection(timeline, timelineActions) { mark ->
+                            onOpenCard(Card(mark.title, "", CardTarget.Article(mark.packId, mark.path)))
+                        }
+                    }
+                }
+            }
             if (wander != null && wander.available) {
                 item(key = "wander") {
-                    WanderSection(wander, wanderActions) { node ->
-                        onOpenCard(Card(node.title, "", CardTarget.Article(node.packId, node.path)))
+                    HomeSection("wander-section") {
+                        WanderSection(wander, wanderActions) { node ->
+                            onOpenCard(Card(node.title, "", CardTarget.Article(node.packId, node.path)))
+                        }
                     }
+                }
+            }
+            crashNotice?.let { notice -> item(key = "crash") { CrashNoticeRow(notice) } }
+            ui.downloads?.let { card -> item(key = "downloads") { DownloadsCardView(card, onOpenDownloads, downloadsActions) } }
+            for (offer in ui.tidy) {
+                item(key = "tidy-${offer.key}") {
+                    app.granger.sources.TidyOfferCard(offer, { downloadsActions.onTidyRemove(offer) }, { downloadsActions.onTidyKeep(offer) })
                 }
             }
             if (ui.continueCards.isNotEmpty()) {
@@ -191,6 +213,12 @@ fun HomeContent(
                             else -> {}
                         }
                     }
+                }
+            }
+            item(key = "strip") {
+                androidx.compose.foundation.layout.Column {
+                    Heading(stringResource(R.string.readiness_title))
+                    ReadinessStrip(ui.strip, onReadiness)
                 }
             }
             for ((i, row) in ui.feeds.withIndex()) {
@@ -231,6 +259,18 @@ private fun <T> CardRow(items: List<T>, key: (T) -> Any, tag: String, card: @Com
         modifier = Modifier.testTag(tag),
     ) {
         items(items, key = key) { card(it) }
+    }
+}
+
+/** One of Home's new pieces on its own surface, so a section never runs into the next (spec §3, Neal 2026-11-07). */
+@Composable
+internal fun HomeSection(tag: String, content: @Composable () -> Unit) {
+    androidx.compose.material3.Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp).testTag(tag),
+    ) {
+        androidx.compose.foundation.layout.Column(Modifier.padding(bottom = 12.dp)) { content() }
     }
 }
 

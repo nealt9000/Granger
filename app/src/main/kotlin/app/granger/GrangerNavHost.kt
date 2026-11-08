@@ -131,7 +131,11 @@ import app.granger.home.CardTarget
 import app.granger.home.FeedDrawer
 import app.granger.home.HomeScreen
 import app.granger.home.HomeViewModel
+import app.granger.home.TimelineModel
 import app.granger.home.WanderModel
+import app.granger.core.library.TimeIndex
+import app.granger.core.library.TimeIndexDirectory
+import app.granger.core.library.TimeIndexes
 import app.granger.onboarding.OnboardingScreen
 import app.granger.onboarding.OnboardingViewModel
 import app.granger.shell.RailEntry
@@ -1325,6 +1329,22 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                     archiveOf = { container.library.archive(it.id) },
                                     thumbnail = homeThumbs::thumbnail,
                                     titles = { container.search.titles(it).hits },
+                                )
+                            },
+                            timelineOf = { scope ->
+                                TimelineModel(
+                                    scope = scope,
+                                    indexes = {
+                                        // Pushed for development until the catalog lists them (Plan H5b Task 3).
+                                        val listed = TimeIndexDirectory.listed(File(appContext.getExternalFilesDir(null), "timeindex"))
+                                        val packs = WanderModel.encyclopediasOf(container.library.packs.first(), container.knowledgeNow.value)
+                                        TimeIndexes(packs.mapNotNull { pack -> listed[pack.name]?.let { TimeIndex.open(it, pack.id) } })
+                                    },
+                                    picture = { packId, path ->
+                                        container.library.archive(packId)?.let { archive ->
+                                            archive.read(path)?.let { homeThumbs.thumbnail(archive, path, String(it.bytes, Charsets.UTF_8)) }
+                                        }
+                                    },
                                 )
                             },
                         )

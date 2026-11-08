@@ -120,9 +120,14 @@ class HomeViewModel(
     appLanguage: Flow<String> = kotlinx.coroutines.flow.flowOf(app.granger.core.catalog.ENGLISH),
     /** Makes Home's Wander in the view model's scope (Plan H5a); none in tests that don't need it. */
     wanderOf: ((kotlinx.coroutines.CoroutineScope) -> WanderModel)? = null,
+    /** Makes Home's timeline in the view model's scope (Plan H5b); none in tests that don't need it. */
+    timelineOf: ((kotlinx.coroutines.CoroutineScope) -> TimelineModel)? = null,
 ) : ViewModel() {
     /** Wander (Plan H5a): its own state, started when Home first shows it. */
     val wander: WanderModel? = wanderOf?.invoke(viewModelScope)
+
+    /** The timeline (Plan H5b): its own state, started when Home first shows it. */
+    val timeline: TimelineModel? = timelineOf?.invoke(viewModelScope)
 
     private val day = MutableStateFlow(today())
 
