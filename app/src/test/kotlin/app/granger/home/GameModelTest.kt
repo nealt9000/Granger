@@ -139,6 +139,20 @@ class GameModelTest {
         assertThat((m.ui.value.round as Round.Guess).guess).isEqualTo(mark.y0 - 9)
     }
 
+    @Test fun roundsPreferWellKnownArticlesAndFallBackWhenThereAreTooFew() = runTest {
+        val known = rows.mapIndexed { i, r -> if (i % 2 == 0) r.toMutableList().also { it[6] = 200 } else r.toMutableList().also { it[6] = 5 } }
+        val m = model(file = gtimeFile(tmp.newFolder(), "top", known))
+        m.ensureStarted(); advanceUntilIdle()
+        repeat(6) {
+            val marks = when (val r = m.ui.value.round) { is Round.Order -> r.marks; is Round.Guess -> listOf(r.mark); null -> emptyList() }
+            assertThat(marks.map { it.rank }.toSet()).containsExactly(200)
+            m.next(); advanceUntilIdle()
+        }
+        val obscure = model(file = gtimeFile(tmp.newFolder(), "top", rows.map { r -> r.toMutableList().also { it[6] = 5 } }))
+        obscure.ensureStarted(); advanceUntilIdle()
+        assertThat(obscure.ui.value.round).isNotNull()
+    }
+
     @Test fun picturesArriveForTheCardsShown() = runTest {
         val m = model(start = GameKind.GUESS)
         m.ensureStarted(); advanceUntilIdle()

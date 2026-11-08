@@ -184,8 +184,9 @@ class GameModel(
         val latest = state.value.latest
         val round = withContext(io) {
             when (kind) {
-                GameKind.ORDER -> orderRound(idx, latest)
-                GameKind.GUESS -> guessRound(idx, latest)
+                // Well-known articles first (Neal, 2026-11-08); a phone with too few of them still gets a round.
+                GameKind.ORDER -> orderRound(idx, latest, KNOWN) ?: orderRound(idx, latest, 0)
+                GameKind.GUESS -> guessRound(idx, latest, KNOWN) ?: guessRound(idx, latest, 0)
             }
         }
         val marks = when (round) {
@@ -202,14 +203,14 @@ class GameModel(
     }
 
     /** Two cards, or three from level 2; their years at least a third of the level's gap apart and at most twice it. */
-    private fun orderRound(idx: TimeIndexes, latest: Int): Round.Order? {
+    private fun orderRound(idx: TimeIndexes, latest: Int, minRank: Int): Round.Order? {
         val level = store.level.coerceIn(0, GAPS.lastIndex)
         val gap = GAPS[level]
         val n = if (level >= 2) 3 else 2
         val min = maxOf(1, gap / 3)
         repeat(TRIES) {
             val anchor = anchorYear(latest)
-            val pool = idx.top(anchor - gap * 2, anchor + gap * 2, emptySet(), POOL).filter { playable(it, latest) && it.qid !in recent }.shuffled(random)
+            val pool = idx.top(anchor - gap * 2, anchor + gap * 2, emptySet(), POOL).filter { it.rank >= minRank && playable(it, latest) && it.qid !in recent }.shuffled(random)
             for (first in pool) {
                 val chosen = mutableListOf(first)
                 for (c in pool) {
@@ -223,10 +224,10 @@ class GameModel(
     }
 
     /** The best-known playable mark near a random point in recorded history; the marker starts in the middle. */
-    private fun guessRound(idx: TimeIndexes, latest: Int): Round.Guess? {
+    private fun guessRound(idx: TimeIndexes, latest: Int, minRank: Int): Round.Guess? {
         repeat(TRIES) {
             val anchor = anchorYear(latest)
-            val mark = idx.top(anchor - 60, anchor + 60, emptySet(), POOL).firstOrNull { playable(it, latest) && it.qid !in recent }
+            val mark = idx.top(anchor - 60, anchor + 60, emptySet(), POOL).firstOrNull { it.rank >= minRank && playable(it, latest) && it.qid !in recent }
             if (mark != null) {
                 val w = TimeScale.history(latest)
                 return Round.Guess(mark, TimeScale.toYear((w.start + w.end) / 2).toInt())
@@ -251,6 +252,11 @@ class GameModel(
         val GAPS = listOf(500, 200, 80, 30, 10)
         private const val TRIES = 12
         private const val POOL = 60
+        /**
+         * The rank a round prefers: Battle of Hastings is 81, Heraclitus 147, Abarsal 10. About 8,000 of the phone's
+         * marks clear it (Top 7,801, History 704; measured 2026-11-08).
+         */
+        const val KNOWN = 60
         private const val RECENT = 40
         private val GIVEAWAY = Regex("\\d{3,4}|century|millennium|siglo|milenio", RegexOption.IGNORE_CASE)
         private val LISTS = listOf("List of", "Lists of", "Lista de", "Anexo:", "Timeline of", "Cronología")
