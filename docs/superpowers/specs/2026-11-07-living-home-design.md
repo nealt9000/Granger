@@ -176,3 +176,37 @@ The Kiwix world map is 72.4 GB. That's fine for a base station but not a phone. 
 - **The day articles aren't in the packs phones have.** Neither Top 1M nor History has `November_7` (checked by path and by title), and the Pixel 6 and the emulator hold the same English Wikipedia packs. So the H2 On this day feed, and The Day as specified, have nothing to draw from on most phones. **Superseded by §0** (The Day reads the time index instead). The earlier proposal, kept for the record. **Proposal, G0:** a small "Days" pack built once from the full Wikipedia: 366 day lists with each line's year, kind and main link. That's an estimated 1–2 MB compressed, CC BY-SA. It ships in the catalog and goes on with any Wikipedia, so H5 doesn't have to wait for G1. Measure the size, and check which slices (if any) already include day articles.
 - **Only about 15% of a day's lines link to an article in Top 1M** (71 of 460 on November 7, 30–71 a day across November 4–10), because most lines are births of minor figures. The Day shows every line and marks the linked ones brighter and tappable. With G1 we could rank lines by how notable they are instead.
 - **Prototype:** artifact `Xe2YXjeszujR5ZvXgw6xUc` (The Day, Wander and Which came first?, on real November 4–10 lists with articles and pictures from Top 1M 2026-09). Built by scripts in the session scratchpad.
+
+## 11. G1 feasibility: measured (2026-11-08)
+
+**Run.** Wikidata `latest-all.json.gz` dated 2026-11-06 (146 GB, CC0), streamed on the X10 drive through a filter that kept items with an English Wikipedia article in the eight English packs: 338,368 items, plus 4.5 M class items for the lanes. Measured per pack with scripts in the session scratchpad (`g1measure.py`, `g1sum.py`). The files are on `/Volumes/X10 Pro/granger-g1/`.
+
+**Real articles match almost completely.** Each pack also carries many ~200-byte redirect stubs (Top: 174,135 stubs beside 50,004 articles). With those left out, 99.8–99.9% of real articles match a Wikidata item, so the ZIM path works as the join key.
+
+| Pack | Articles | Dated | Year or finer | Day | Coordinates | BCE |
+|---|---:|---:|---:|---:|---:|---:|
+| Top (`wikipedia_en_top_maxi`) | 50,004 | 54% | 52% | 36% | 14% | 1,023 |
+| History | 48,733 | 68% | 56% | 12% | 10% | 523 |
+| Physics | 21,782 | 37% | 36% | 26% | 2% | 34 |
+| Mathematics | 23,253 | 22% | 21% | 15% | 0% | 50 |
+| Medicine | 72,904 | 7% | 7% | 2% | 3% | 39 |
+| Geography | 91,987 | 6% | 6% | 3% | 83% | 34 |
+| Chemistry | 9,313 | 6% | 6% | 0% | 1% | 2 |
+| Knots | 437 | 3% | 2% | 0% | 0% | 0 |
+
+About 85,000 dated and 91,000 placed articles across the eight packs, so the index is small: an estimated 3–5 MB for dates plus about 3 MB for an R-tree of places, roughly 1–2 MB for Top alone. **The timeline is fed by Top and History; the Atlas by Geography.** Subject packs like Medicine and Chemistry add little to the timeline.
+
+**Dated articles per lane** (an article can sit in several):
+
+| Pack | Philosophy & religion | Civilisations | Languages | Film & music | Wars | Science | Art & literature | People | No lane |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Top | 1,282 | 700 | 223 | 6,882 | 811 | 2,562 | 3,944 | 10,281 | 10,448 |
+| History | 3,751 | 1,502 | 36 | 1,252 | 1,453 | 5,067 | 3,650 | 15,499 | 10,991 |
+
+**What the lanes need before production:**
+- **People by their main occupation only.** Wikidata lists every occupation, so Einstein lands in philosophy and art & literature, and Carl Sagan in film & music. Use the first one or two occupations, or the ones the article's lead names.
+- **An Events & politics lane.** Treaties, revolutions, political parties, sovereign states, government agencies and outbreaks are most of the dated articles in no lane.
+- **Drop time pages from the timeline.** "1066 in England" (events in a year: 5,776), years, decades and centuries are the axis, not points on it.
+- **Languages means human languages and scripts.** It currently catches programming languages (MATLAB, Ada).
+- **Smaller kinds left unplaced:** video games, organisations and universities, awards, villages and towns (founding dates). Leave them in "All" only.
+- **Lane roots were checked by label.** The first try used "entity" and "written work" and caught nearly everything, so every root goes through a label check and a traced sample before it ships.
