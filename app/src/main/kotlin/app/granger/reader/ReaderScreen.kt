@@ -122,6 +122,10 @@ fun ReaderScreen(
     onResearch: (text: String, packId: String, path: String, title: String) -> Unit = { _, _, _, _ -> },
     /** A tapped PDF in the pack (Plan P2): opened in the e-book reader over this page; [linkText] may name it. */
     onOpenDocument: (packId: String, path: String, linkText: String) -> Unit = { _, _, _ -> },
+    /** Whether an article is on the timeline (Plan H5b), so ⋯ offers Show in time only for dated articles. */
+    isDated: suspend (packId: String, path: String) -> Boolean = { _, _ -> false },
+    /** Opens the full-screen Timeline on this article. */
+    onShowInTime: (packId: String, path: String) -> Unit = { _, _ -> },
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -202,6 +206,11 @@ fun ReaderScreen(
     val zoom = prefs.wikiTextZoom
     LaunchedEffect(zoom, webView) { webView?.settings?.textZoom = zoom }
 
+    val datedPage = state.page?.path
+    val dated by androidx.compose.runtime.produceState(false, datedPage, viewModel.packId) {
+        val pack = viewModel.packId
+        value = datedPage != null && pack != null && runCatching { isDated(pack, datedPage) }.getOrDefault(false)
+    }
     val bars = wikiBarActions(
         packTitle = state.packTitle,
         hasPack = state.error == null,
@@ -217,6 +226,7 @@ fun ReaderScreen(
             }
         },
         onFind = viewModel::startFind,
+        onShowInTime = if (!dated) null else ({ viewModel.packId?.let { pack -> state.page?.let { onShowInTime(pack, it.path) } } }),
         onSearchPack = viewModel::startPackSearch,
         onContents = { viewModel.open(ReaderViewModel.Panel.CONTENTS) },
         onTextSettings = { viewModel.open(ReaderViewModel.Panel.TEXT) },
@@ -437,6 +447,8 @@ internal fun wikiBarActions(
     onHome: () -> Unit = {},
     onRandom: () -> Unit = {},
     onFind: () -> Unit = {},
+    /** Opens the Timeline on this article; null when it has no date there (Plan H5b). */
+    onShowInTime: (() -> Unit)? = null,
     onSearchPack: () -> Unit = {},
     onContents: () -> Unit = {},
     onTextSettings: () -> Unit = {},
@@ -453,6 +465,7 @@ internal fun wikiBarActions(
         menu = if (!hasPack) emptyList() else listOfNotNull(
             ReaderMenuItem(R.string.reader_random_article, onRandom),
             ReaderMenuItem(R.string.reader_find_in_page, onFind).takeIf { hasPage },
+            onShowInTime?.let { ReaderMenuItem(R.string.reader_show_in_time, it) }?.takeIf { hasPage },
         ),
         onContents = onContents.takeIf { hasPage },
         onSearch = onSearchPack.takeIf { hasPack },

@@ -12,6 +12,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeUp
 import app.granger.core.library.Lane
@@ -114,6 +115,18 @@ class TimelineSectionTest {
     @Test fun theTimelineIsHiddenWithoutAnIndex() {
         show(Harness(TimelineUi(available = false)))
         compose.onNodeWithTag("timeline").assertDoesNotExist()
+    }
+
+    @Test fun theFullScreenSearchSendsTheQueryAndShowsTheCount() {
+        val h = Harness(ui())
+        val actions = TimelineActions(onSearch = { q -> h.ui = h.ui.copy(query = q, matches = if (q.isBlank()) emptyList() else listOf(un, yalta)) })
+        compose.setContent { TimelineScreen(h.ui, actions, onOpen = {}, onBack = {}) }
+        compose.onNodeWithTag("timeline-search-toggle").performClick()
+        compose.onNodeWithTag("timeline-search").performTextInput("1945")
+        assertThat(h.ui.query).isEqualTo("1945")
+        compose.onNodeWithTag("timeline-match-count").assertTextEquals("2 matches")
+        compose.onNodeWithTag("timeline-search-toggle").performClick()
+        assertThat(h.ui.query).isEmpty()
     }
 
     @Test fun aTapPicksTheMarkInTheRowTouchedNotJustTheYear() {

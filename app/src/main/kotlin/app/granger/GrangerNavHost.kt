@@ -137,6 +137,7 @@ import app.granger.home.TimelineViewModel
 import app.granger.home.timelineActions
 import app.granger.home.WanderModel
 import app.granger.core.library.TimeIndex
+import app.granger.core.library.TimeIndexCache
 import app.granger.core.library.TimeIndexDirectory
 import app.granger.core.library.TimeIndexes
 import app.granger.onboarding.OnboardingScreen
@@ -650,14 +651,22 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     val appContext = LocalContext.current.applicationContext
 
     /** The timeline's model, for Home's glance and the full screen (Plan H5b); [startAt] is an article to open on. */
+    val timeIndexCache = remember { TimeIndexCache() }
+
+    /** The phone's time indexes in Wander's pack order, opened once and reopened when the packs or files change. */
+    suspend fun timeIndexes(): TimeIndexes {
+        // Pushed for development until the catalog lists them (Plan H5b Task 3).
+        val listed = TimeIndexDirectory.listed(File(appContext.getExternalFilesDir(null), "timeindex"))
+        val packs = WanderModel.encyclopediasOf(container.library.packs.first(), container.knowledgeNow.value)
+        val files = packs.mapNotNull { pack -> listed[pack.name]?.let { pack to it } }
+        return timeIndexCache.get(files.map { (p, f) -> "${p.id}|${f.path}|${f.lastModified()}" }) {
+            TimeIndexes(files.mapNotNull { (pack, file) -> TimeIndex.open(file, pack.id) })
+        }
+    }
+
     fun timelineModel(scope: kotlinx.coroutines.CoroutineScope, thumbs: ArticleThumbnails, startAt: Pair<String, String>? = null) = TimelineModel(
         scope = scope,
-        indexes = {
-            // Pushed for development until the catalog lists them (Plan H5b Task 3).
-            val listed = TimeIndexDirectory.listed(File(appContext.getExternalFilesDir(null), "timeindex"))
-            val packs = WanderModel.encyclopediasOf(container.library.packs.first(), container.knowledgeNow.value)
-            TimeIndexes(packs.mapNotNull { pack -> listed[pack.name]?.let { TimeIndex.open(it, pack.id) } })
-        },
+        indexes = { timeIndexes() },
         picture = { packId, path ->
             container.library.archive(packId)?.let { archive ->
                 archive.read(path)?.let { thumbs.thumbnail(archive, path, String(it.bytes, Charsets.UTF_8)) }
@@ -1050,6 +1059,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onSearchText = { text -> nav.navigate(SearchRoute(text)) },
                     onResearch = { text, packId, path, title -> nav.navigate(ResearchRoute.about(text, packId, title, path)) },
                     onOpenDocument = { packId, path, linkText -> scope.launch { openPackDocument(packId, path, linkText) } },
+                    isDated = { packId, path -> kotlinx.coroutines.withContext(Dispatchers.IO) { timeIndexes().find(packId, path) != null } },
+                    onShowInTime = { packId, path -> nav.navigate(TimelineRoute(packId, path)) },
                     onBack = { nav.popBackStack() },
                 )
             }

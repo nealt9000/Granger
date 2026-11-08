@@ -206,6 +206,12 @@ Findings go into this plan. Then hand to Neal before merging.
   - the push skipped rebuilt files of the same size, so it now compares MD5s;
   - the rail didn't highlight Home on the Timeline route.
 
+## Neal's second try (2026-11-08)
+- **Two "Open" buttons on Home** were confusing. The heading's now reads "Full timeline ›"; the card's Open opens the article.
+- **Taps landed in the right year but the wrong row.** A tap now hit-tests the drawn dots and bars (48 dp target, the same rows and tracks as the drawing) and falls back to the year only on empty space. Checked on the phone: a tap on a lone teal dot opened Esperanto (1887).
+- **Search on the full screen:** titles containing every word, best known first, up to 300. Matches draw bright on top while the rest dims, a count shows, ‹ › steps through matches in time order, and the Search key puts the keyboard away. Checked: "Roman" gives 172 matches.
+- **Show in time:** the reader's ⋯ offers it only when the article is on the timeline, and it opens the full Timeline on it (checked: Romania → 1330). The indexes are opened once and shared (`TimeIndexCache`) by Home, the Timeline and the reader.
+
 ## Not in H5b
 - **Read aloud (the owl):** moves to H5c with the games, so one voice button serves the timeline's lens, Wander and the games.
 - **Spanish time indexes:** they need the dump re-filtered by eswiki sitelinks; the UI strings are in now.

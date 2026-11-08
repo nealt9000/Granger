@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
@@ -50,6 +52,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -92,6 +95,7 @@ class TimelineActions(
     val onLens: (Double) -> Unit = {},
     val onStep: (Int) -> Unit = {},
     val onSelect: (TimeMark) -> Unit = {},
+    val onSearch: (String) -> Unit = {},
 )
 
 private val RowHeight = 72.dp
@@ -134,11 +138,18 @@ fun TimelineSection(ui: TimelineUi, actions: TimelineActions, onOpen: (TimeMark)
 @Composable
 fun TimelineScreen(ui: TimelineUi, actions: TimelineActions, onOpen: (TimeMark) -> Unit, onBack: () -> Unit) {
     LaunchedEffect(Unit) { actions.onShown() }
+    var searching by rememberSaveable { mutableStateOf(ui.query.isNotBlank()) }
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.home_timeline)) },
                 navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.home_timeline_back)) } },
+                actions = {
+                    IconButton(
+                        onClick = { if (searching) actions.onSearch(""); searching = !searching },
+                        modifier = Modifier.testTag("timeline-search-toggle"),
+                    ) { Icon(if (searching) Icons.Filled.Close else Icons.Filled.Search, stringResource(R.string.home_timeline_search)) }
+                },
             )
         },
     ) { padding ->
@@ -146,6 +157,7 @@ fun TimelineScreen(ui: TimelineUi, actions: TimelineActions, onOpen: (TimeMark) 
             Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).testTag("timeline-screen"),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
+            if (searching) SearchField(ui, actions)
             Chips(ui, actions)
             val words = yearWords()
             if (ui.loading && ui.marks.isEmpty()) {
@@ -154,6 +166,36 @@ fun TimelineScreen(ui: TimelineUi, actions: TimelineActions, onOpen: (TimeMark) 
             }
             River(ui, actions, words, full = true)
             ui.selected?.let { LensCard(it, ui, actions, words, onOpen, nearby = true) }
+        }
+    }
+}
+
+/** "Roman", "jazz": titles with every word light up on the river; the count says how many. */
+@Composable
+private fun SearchField(ui: TimelineUi, actions: TimelineActions) {
+    val focus = remember { androidx.compose.ui.focus.FocusRequester() }
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+    LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
+    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        androidx.compose.material3.OutlinedTextField(
+            value = ui.query,
+            onValueChange = actions.onSearch,
+            singleLine = true,
+            placeholder = { Text(stringResource(R.string.home_timeline_search_hint)) },
+            leadingIcon = { Icon(Icons.Filled.Search, null) },
+            // Search puts the keyboard away so the river and the lens card show.
+            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = androidx.compose.ui.text.input.ImeAction.Search),
+            keyboardActions = androidx.compose.foundation.text.KeyboardActions(onSearch = { focusManager.clearFocus() }),
+            modifier = Modifier.fillMaxWidth().focusRequester(focus).testTag("timeline-search"),
+        )
+        if (ui.query.isNotBlank()) {
+            Text(
+                if (ui.matches.isEmpty()) stringResource(R.string.home_timeline_no_matches)
+                else androidx.compose.ui.res.pluralStringResource(R.plurals.home_timeline_matches, ui.matches.size, ui.matches.size),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.testTag("timeline-match-count"),
+            )
         }
     }
 }
@@ -302,18 +344,22 @@ private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords, fu
                 }
             }
             // Marks: lifetimes as thin bars, spans as bars, events as dots; the better known drawn last, on top.
-            for (m in ui.marks.sortedBy { it.rank }) {
+            // While searching, matches draw bright and on top; everything else dims (spec §5.2, search).
+            val searching = ui.query.isNotBlank()
+            val matchIds = ui.matches.mapTo(HashSet()) { it.qid }
+            for (m in ui.visible().sortedBy { if (searching && it.qid in matchIds) Int.MAX_VALUE else it.rank }) {
                 val row = rowOf(m, rows) ?: continue
                 val lane = rows[row] ?: Lane.entries.firstOrNull { it in m.lanes }
-                val c = lane?.let { laneColours[it] } ?: other
+                val dim = searching && m.qid !in matchIds
+                val c = (lane?.let { laneColours[it] } ?: other).let { if (dim) it.copy(alpha = 0.18f) else it }
                 val y = rowH * row + trackY(m.qid, rowH, tracks)
                 val x0 = ui.window.x(m.y0.toDouble(), w)
                 when (m.kind) {
-                    TimeKind.POINT -> drawCircle(c, 3.dp.toPx(), Offset(x0, y))
+                    TimeKind.POINT -> drawCircle(c, (if (searching && !dim) 4.5f else 3f).dp.toPx(), Offset(x0, y))
                     else -> {
                         val x1 = ui.window.x(m.end(ui.now).toDouble(), w).coerceAtLeast(x0 + 2.dp.toPx())
                         val h = if (m.kind == TimeKind.SPAN) 5.dp.toPx() else 2.dp.toPx()
-                        drawRoundRect(c.copy(alpha = 0.85f), Offset(x0, y - h / 2), Size(x1 - x0, h), CornerRadius(h / 2))
+                        drawRoundRect(if (dim) c else c.copy(alpha = 0.85f), Offset(x0, y - h / 2), Size(x1 - x0, h), CornerRadius(h / 2))
                     }
                 }
             }
@@ -434,6 +480,9 @@ internal fun trackY(qid: Long, rowH: Float, tracks: Int = TRACKS): Float = rowH 
 
 private enum class Mode { UNDECIDED, SCRUB, PAN, PINCH }
 
+/** What the river draws: the window's marks plus any search matches. */
+internal fun TimelineUi.visible(): List<TimeMark> = if (matches.isEmpty()) marks else (marks + matches).distinctBy { it.qid }
+
 /** The row a mark is drawn in: the first switched-on lane it belongs to, or the single row; null if it's in none shown. */
 private fun rowOf(m: TimeMark, rows: List<Lane?>): Int? = rows.indexOfFirst { it == null || it in m.lanes }.takeIf { it >= 0 }
 
@@ -444,7 +493,7 @@ private fun rowOf(m: TimeMark, rows: List<Lane?>): Int? = rows.indexOfFirst { it
 internal fun hit(ui: TimelineUi, rows: List<Lane?>, rowH: Float, tracks: Int, width: Float, at: Offset, reach: Float): TimeMark? {
     var best: TimeMark? = null
     var bestD = reach
-    for (m in ui.marks) {
+    for (m in ui.visible()) {
         val row = rowOf(m, rows) ?: continue
         val y = rowH * row + trackY(m.qid, rowH, tracks)
         val x0 = ui.window.x(m.y0.toDouble(), width)

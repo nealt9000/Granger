@@ -37,6 +37,9 @@ data class TimelineUi(
     val density: TimeHistogram = TimeHistogram.EMPTY,
     /** The latest year the phone has an article for: the river's right edge, labelled. */
     val latest: Int = Year.now().value,
+    /** The full screen's search: titles containing every word light up on the river; others dim (spec §5.2). */
+    val query: String = "",
+    val matches: List<TimeMark> = emptyList(),
     val selected: TimeMark? = null,
     /** Marks nearest the selected one in time, closest first (spec §3.1, "Nearby, not just nearest"). */
     val nearby: List<TimeMark> = emptyList(),
@@ -65,6 +68,7 @@ class TimelineModel(
     private var started = false
     private var query: Job? = null
     private var pictureJob: Job? = null
+    private var searchJob: Job? = null
 
     /** Loads on the first composition of the section, not at app start. */
     fun ensureStarted() {
@@ -94,6 +98,23 @@ class TimelineModel(
             }
             refresh(state.value.window, immediate = true)
             first?.let { select(it) }
+        }
+    }
+
+    /**
+     * Searches titles for [text] in the lanes switched on: matches light up, the lens goes to the best known, and ‹ ›
+     * steps through the matches in time order until the search is cleared.
+     */
+    fun search(text: String) {
+        state.update { it.copy(query = text, matches = if (text.isBlank()) emptyList() else it.matches) }
+        searchJob?.cancel()
+        val idx = index ?: return
+        if (text.isBlank()) return
+        searchJob = scope.launch {
+            delay(SEARCH_DEBOUNCE)
+            val found = withContext(io) { idx.search(text, state.value.on, SEARCH_MAX) }
+            state.update { if (it.query == text) it.copy(matches = found) else it }
+            found.firstOrNull()?.let { select(it, follow = true) }
         }
     }
 
@@ -128,6 +149,14 @@ class TimelineModel(
     fun step(by: Int) {
         val idx = index ?: return
         val cur = state.value.selected ?: return
+        val matches = state.value.matches
+        if (matches.isNotEmpty()) {
+            val list = matches.sortedWith(ORDER)
+            val at = list.indexOfFirst { it.qid == cur.qid }
+            val next = if (at >= 0) list.getOrNull(at + by) else if (by > 0) list.firstOrNull { ORDER.compare(it, cur) > 0 } else list.lastOrNull { ORDER.compare(it, cur) < 0 }
+            next?.let { select(it, follow = true) }
+            return
+        }
         scope.launch {
             val list = withContext(io) { neighbourhood(idx, cur, state.value.on) }
             val at = list.indexOfFirst { it.qid == cur.qid }
@@ -169,6 +198,7 @@ class TimelineModel(
     }
 
     private fun reselect() {
+        if (state.value.query.isNotBlank()) search(state.value.query)
         val sel = state.value.selected
         refresh(state.value.window, immediate = true)
         if (sel != null) {
@@ -205,6 +235,8 @@ class TimelineModel(
         const val SPANS = 40
         const val NEARBY = 5
         private const val YEAR_MAX = 2000
+        const val SEARCH_MAX = 300
+        private const val SEARCH_DEBOUNCE = 250L
         val ORDER = compareBy<TimeMark> { it.y0 }.thenByDescending { it.rank }.thenBy { it.qid }
     }
 }
@@ -212,7 +244,7 @@ class TimelineModel(
 /** The controls wired to [model], for Home's glance and the full screen alike. */
 fun timelineActions(model: TimelineModel) = TimelineActions(
     onShown = model::ensureStarted, onToggle = model::toggle, onAll = model::all,
-    onWindow = model::show, onLens = model::lensAt, onStep = model::step, onSelect = model::select,
+    onWindow = model::show, onLens = model::lensAt, onStep = model::step, onSelect = model::select, onSearch = model::search,
 )
 
 /** Holds the full-screen Timeline's own model (its lanes and zoom don't change Home's glance). */

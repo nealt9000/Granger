@@ -102,6 +102,15 @@ class TimeIndexTest {
         assertThat(all.find("top", "O'Brien's_\"Nowhere\"")).isNull()
     }
 
+    @Test fun searchMatchesEveryWordInTitlesBestKnownFirst() {
+        val idx = TimeIndexes(listOf(TimeIndex.open(gtime("top", top), "top")!!))
+        assertThat(idx.search("empire", emptySet(), 10).map { it.path }).containsExactly("Roman_Empire")
+        assertThat(idx.search("battle hastings", emptySet(), 10).map { it.path }).containsExactly("Battle_of_Hastings")
+        assertThat(idx.search("a", emptySet(), 2).map { it.path }).containsExactly("Aristotle", "Roman_Empire").inOrder()
+        assertThat(idx.search("100%_x", emptySet(), 10)).isEmpty()
+        assertThat(idx.search("lovelace", setOf(Lane.WARS), 10)).isEmpty()
+    }
+
     @Test fun theHistogramCountsByYearAndLane() {
         val h = TimeIndexes(listOf(TimeIndex.open(gtime("top", top), "top")!!)).histogram()
         assertThat(h.count(-1000, 2026, emptySet())).isEqualTo(5)

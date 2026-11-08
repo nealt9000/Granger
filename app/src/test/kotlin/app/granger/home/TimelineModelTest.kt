@@ -89,6 +89,24 @@ class TimelineModelTest {
         assertThat(m.ui.value.selected?.path).isEqualTo("Battle_of_Hastings")
     }
 
+    @Test fun searchLightsUpMatchesAndStepsThroughThemInTimeOrder() = runTest {
+        val m = model()
+        m.ensureStarted(); advanceUntilIdle()
+        m.search("conference plan"); advanceUntilIdle()
+        assertThat(m.ui.value.matches).isEmpty()
+        m.search("1945"); advanceUntilIdle()
+        m.search("Yalta"); advanceUntilIdle()
+        assertThat(m.ui.value.matches.map { it.path }).containsExactly("Yalta_Conference")
+        assertThat(m.ui.value.selected?.path).isEqualTo("Yalta_Conference")
+        m.search("a"); advanceUntilIdle()
+        val inOrder = m.ui.value.matches.sortedWith(TimelineModel.ORDER).map { it.path }
+        m.select(m.ui.value.matches.first { it.path == inOrder.first() }); advanceUntilIdle()
+        m.step(1); advanceUntilIdle()
+        assertThat(m.ui.value.selected?.path).isEqualTo(inOrder[1])
+        m.search(""); advanceUntilIdle()
+        assertThat(m.ui.value.matches).isEmpty()
+    }
+
     @Test fun withoutAnyIndexTheTimelineIsUnavailable() = runTest {
         val m = model(file = null)
         m.ensureStarted(); advanceUntilIdle()

@@ -77,6 +77,18 @@ class TimeIndex private constructor(private val db: SQLiteDatabase, val packId: 
         return query("path = $quoted LIMIT 1").firstOrNull()
     }
 
+    /** Marks whose title contains [text] (any case), best known first: the Timeline's search. */
+    fun search(text: String, lanes: Set<Lane>, limit: Int): List<TimeMark> {
+        val lane = laneFilter(lanes) ?: return emptyList()
+        val words = text.trim().split(Regex("\\s+")).filter { it.isNotEmpty() }.take(4)
+        if (words.isEmpty()) return emptyList()
+        val like = words.joinToString(" AND ") { w ->
+            val pattern = "%" + w.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
+            "title LIKE ${DatabaseUtils.sqlEscapeString(pattern)} ESCAPE '\\'"
+        }
+        return query("$like$lane ORDER BY rank DESC LIMIT $limit")
+    }
+
     /** The latest start year here, or null for an empty file. */
     fun latestYear(): Int? = db.rawQuery("SELECT MAX(y0) FROM marks", null).use { c -> if (c.moveToFirst() && !c.isNull(0)) c.getInt(0) else null }
 
@@ -206,6 +218,10 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
     fun find(packId: String, path: String): TimeMark? =
         indexes.firstOrNull { it.packId == packId }?.find(path) ?: indexes.firstNotNullOfOrNull { it.find(path) }
 
+    /** Titles containing every word of [text], across packs, best known first. */
+    fun search(text: String, lanes: Set<Lane>, limit: Int): List<TimeMark> =
+        merge(indexes.map { it.search(text, lanes, limit) }).sortedByDescending { it.rank }.take(limit)
+
     /** The latest year any pack has a mark starting in. */
     fun latestYear(): Int? = indexes.mapNotNull { it.latestYear() }.maxOrNull()
 
@@ -261,5 +277,20 @@ class TimeHistogram private constructor(private val years: IntArray, private val
             val sorted = rows.sortedBy { it.first }
             return TimeHistogram(IntArray(sorted.size) { sorted[it].first }, IntArray(sorted.size) { sorted[it].second }, IntArray(sorted.size) { sorted[it].third })
         }
+    }
+}
+
+/**
+ * The phone's time indexes, opened once and shared by Home, the Timeline and the reader's Show in time; reopened only
+ * when the packs or their index files change ([key]).
+ */
+class TimeIndexCache {
+    private var key: List<String>? = null
+    private var value: TimeIndexes? = null
+
+    @Synchronized
+    fun get(key: List<String>, open: () -> TimeIndexes): TimeIndexes {
+        value?.takeIf { this.key == key }?.let { return it }
+        return open().also { this.key = key; value = it }
     }
 }

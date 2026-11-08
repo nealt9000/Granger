@@ -61,6 +61,15 @@
     <string name="home_timeline">Línea del tiempo</string>
     <string name="home_timeline_expand">Línea completa</string>
     <string name="home_timeline_back">Volver a Inicio</string>
+    <string name="home_timeline_search">Buscar en la línea del tiempo</string>
+    <string name="home_timeline_search_hint">Roma, jazz, Newton…</string>
+    <string name="home_timeline_no_matches">Ningún artículo fechado coincide</string>
+    <plurals name="home_timeline_matches">
+        <item quantity="one">%1$d resultado</item>
+        <item quantity="many">%1$d resultados</item>
+        <item quantity="other">%1$d resultados</item>
+    </plurals>
+    <string name="reader_show_in_time">Ver en el tiempo</string>
     <string name="home_timeline_all">Todo</string>
     <string name="home_timeline_loading">Ordenando las fechas…</string>
     <string name="home_timeline_nearby">Cerca</string>
