@@ -37,6 +37,12 @@ Neal's expectation (2026-11-07): lean towards *novel, engaging, interactive* way
 
 The existing feeds (Random, On this day, Search) and their settings stay below, unchanged, so testers' setups don't break. The readiness strip and Continue stay too, compacted. Above them sit up to three new pieces. Each one is built on something Granger already reads.
 
+**Clean separation between sections (Neal, 2026-11-07, after trying Wander on the Pixel 6).** As Home gains sections, each must read as its own thing at a glance:
+- every section has its own heading row and its own surface or clear spacing band, so one section never runs into the next;
+- gestures stay inside their section: a scrub, a drag or a tap in one section never moves or scrolls another;
+- each section lives in its own model and composable (as `WanderModel` / `WanderSection` do), and Home only places them;
+- the order and the separation are checked together on the phone each time a section is added.
+
 ### 3.1 The Day, a timeline you can scrub (the hero)
 
 Today's day article (On this day, `DayPage`) drawn as a **river of years** across the width of the screen instead of three lists:

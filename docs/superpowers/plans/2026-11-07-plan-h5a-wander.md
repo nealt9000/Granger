@@ -85,5 +85,9 @@
   Screenshot before each tap (memory: reader clean-up).
 - **Hand-off:** findings go into this plan, and the branch goes to Neal before merging.
 
+## Findings
+- **Emulator (build 1205):** the fixes in commit 9849c00c: pictures borrowed across packs, starts from a whole encyclopedia in the main language with 5+ links, room for bottom labels, a half-step orbit, and the keyboard put away on pick.
+- **Pixel 6 (build 1206, Neal, 2026-11-07):** "working and has a good feel overall." New rule for every later section: clean separation between Home sections (spec §3). TalkBack order, night theme, rotation and animations-off weren't checked separately; they go with the H5b phone check.
+
 ## Not in H5a
 Read aloud (the owl), which comes with H5b so all three pieces share one button and voice path. The Home timeline (H5b, after G1) and the games (H5c).
