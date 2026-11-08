@@ -349,7 +349,8 @@ private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords, fu
             // fits (Neal, 2026-11-08). A low histogram along each row's foot, in a quiet neutral, on a log scale so a
             // quiet century still shows; it was a full-height accent tint that read as muddy stripes behind the dots.
             val bins = 64
-            val barMax = (rowH * 0.28f).coerceAtMost(28.dp.toPx())
+            // Low enough to stay under the bottom track's dots.
+            val barMax = (rowH * 0.12f).coerceAtMost(14.dp.toPx())
             for ((r, rowLane) in rows.withIndex()) {
                 val laneSet = rowLane?.let { setOf(it) } ?: ui.on
                 val counts = IntArray(bins) { i ->

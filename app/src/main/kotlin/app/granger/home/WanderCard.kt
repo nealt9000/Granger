@@ -86,14 +86,26 @@ private val CentreSize = 92.dp
 private val LabelWidth = 96.dp
 private val MaxSide = 380.dp
 
+/** An orbit at least this wide has room for all eight links; a narrower one shows [NARROW_ORBIT]. */
+private val WideSide = 360.dp
+private const val NARROW_ORBIT = 6
+
 /** Under the lowest disc: its half, the gap and two lines of label. */
 private val LabelRoom = 70.dp
 
 /** The orbit's radius, as a share of the square's side. */
 private const val RADIUS = 0.39f
 
-/** The lowest disc's centre, as a share of the side: the middle, the radius and its outward nudge, and sin 67.5°. */
-private const val ORBIT_BOTTOM = 0.5f + (RADIUS + 0.03f) * 0.93f
+/**
+ * The lowest disc's centre, as a share of the side, for [n] links placed half a step round: the middle plus the radius
+ * (with its outward nudge) times the largest sine any link reaches.
+ */
+internal fun orbitBottom(n: Int): Float {
+    if (n == 0) return 0.5f
+    val step = 2 * Math.PI / n
+    val lowest = (0 until n).maxOf { sin(-Math.PI / 2 + step / 2 + it * step) }.toFloat()
+    return 0.5f + (RADIUS + 0.03f) * lowest
+}
 
 /** Orbit discs shrink by rank, the closest link largest (Plan H5a Task 3). */
 private fun orbitSize(rank: Int): Dp = (62 - rank * 3).coerceAtLeast(44).dp
@@ -224,18 +236,20 @@ private fun Constellation(ui: WanderUi, actions: WanderActions, modifier: Modifi
     BoxWithConstraints(modifier.widthIn(max = MaxSide).fillMaxWidth()) {
       val side = maxWidth
       // Only as tall as the lowest disc and its label need: the square's bottom was empty space (Neal, 2026-11-08).
-      Box(Modifier.width(side).height(side * ORBIT_BOTTOM + LabelRoom).testTag("wander-orbit")) {
+      // On a phone-width orbit, eight links' labels run into their neighbours' discs (2026-11-08); the six closest fit.
+      val orbit = if (side < WideSide) ui.orbit.take(NARROW_ORBIT) else ui.orbit
+      Box(Modifier.width(side).height(side * orbitBottom(orbit.size) + LabelRoom).testTag("wander-orbit")) {
         Canvas(Modifier.width(side).height(side)) {
             drawCircle(ring, radius = size.minDimension * RADIUS, center = center, style = Stroke(width = 1.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 8f))))
         }
         val centre = ui.centre ?: return@Box
-        val nodes = listOf(centre) + ui.orbit
+        val nodes = listOf(centre) + orbit
         nodes.forEachIndexed { i, node ->
             val isCentre = i == 0
             val rank = i - 1
             val target = if (isCentre) Offset(0.5f, 0.5f) else {
                 // Half a step round, so no link sits right above the centre or on its title below.
-                val step = 2 * Math.PI / ui.orbit.size
+                val step = 2 * Math.PI / orbit.size
                 val angle = -Math.PI / 2 + step / 2 + rank * step
                 val r = RADIUS + if (rank % 2 == 1) 0.03f else -0.02f
                 Offset(0.5f + r * cos(angle).toFloat(), 0.5f + r * sin(angle).toFloat())
