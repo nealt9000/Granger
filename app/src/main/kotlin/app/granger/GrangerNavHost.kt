@@ -655,10 +655,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
 
     /** The phone's time indexes in Wander's pack order, opened once and reopened when the packs or files change. */
     suspend fun timeIndexes(): TimeIndexes {
-        // Pushed for development until the catalog lists them (Plan H5b Task 3).
+        // Downloaded with each pack from the catalog (Plan H5b Task 3); files pushed for development fill any gap.
+        val installed = container.installedTimeIndexes()
         val listed = TimeIndexDirectory.listed(File(appContext.getExternalFilesDir(null), "timeindex"))
         val packs = WanderModel.encyclopediasOf(container.library.packs.first(), container.knowledgeNow.value)
-        val files = packs.mapNotNull { pack -> listed[pack.name]?.let { pack to it } }
+        val files = packs.mapNotNull { pack -> (installed[pack.id] ?: listed[pack.name])?.let { pack to it } }
         return timeIndexCache.get(files.map { (p, f) -> "${p.id}|${f.path}|${f.lastModified()}" }) {
             TimeIndexes(files.mapNotNull { (pack, file) -> TimeIndex.open(file, pack.id) })
         }

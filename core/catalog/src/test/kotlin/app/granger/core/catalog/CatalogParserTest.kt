@@ -392,6 +392,32 @@ class CatalogParserTest {
         assertThat(wrongType.packs.single().vectors).isNull()
     }
 
+    // --- Plan H5b: time indexes ---
+
+    private fun timeIndex(url: String = "https://github.com/x/releases/download/timeindex-1/med.gtime", sha: String = SHA_A, size: String = "700", format: String = "1") =
+        """{"url": "$url", "sha256": "$sha", "sizeBytes": $size, "count": 42, "format": $format, "lanesVersion": 1}"""
+
+    private fun timeCatalog(t: String?, v: String? = null) = """
+        {"formatVersion": 1, "generatedAt": "2026-11-08T00:00:00Z",
+         "packs": [${pack("med", "wikipedia", "medicine").withVectors(v).let { if (t == null) it else it.dropLast(1) + ", \"timeIndex\": $t}" }}]}
+    """.trimIndent().toByteArray()
+
+    @Test fun aPackCarriesItsTimeIndexAndItsSizeCountsIt() {
+        val med = ok(parse(timeCatalog(timeIndex(), vectors()))).packs.single()
+        assertThat(med.timeIndex!!.count).isEqualTo(42)
+        assertThat(med.downloadBytes).isEqualTo(1000 + 4096 + 700)
+        assertThat(ok(parse(timeCatalog(null))).packs.single().timeIndex).isNull()
+    }
+
+    @Test fun aBadOrNewerTimeIndexIsDroppedAndKeepsThePackAndItsVectors() {
+        assertThat(ok(parse(timeCatalog(timeIndex(url = "http://x/med.gtime")))).packs.single().timeIndex).isNull()
+        assertThat(ok(parse(timeCatalog(timeIndex(format = "2")))).packs.single().timeIndex).isNull()
+        // A time index of the wrong type: only it is dropped, the vectors stay.
+        val med = ok(parse(timeCatalog(timeIndex(size = "\"big\""), vectors()))).packs.single()
+        assertThat(med.timeIndex).isNull()
+        assertThat(med.vectors).isNotNull()
+    }
+
     // --- Plan L3: languages ---
 
     private fun esPack(id: String, domain: String) = pack(id, "wikipedia", domain).replace("\"language\": \"eng\"", "\"language\": \"spa\"")

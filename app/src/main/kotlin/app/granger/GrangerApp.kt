@@ -31,6 +31,7 @@ import app.granger.core.downloads.Downloads
 import app.granger.core.downloads.DownloadsHost
 import app.granger.core.downloads.FileDownloader
 import app.granger.core.downloads.ItemKind
+import app.granger.core.downloads.TimeIndexDownloads
 import app.granger.core.downloads.VectorDownloads
 import app.granger.core.downloads.VoiceUnpacker
 import app.granger.core.downloads.VolumeSource
@@ -774,6 +775,7 @@ class AppContainer(context: Context) {
 
     /** Search vectors follow their pack or book (Plan R1 Task 10): queued when it installs, removed with it. */
     private val vectorDownloads = VectorDownloads(downloads) { downloadPrefs.wifiOnly }
+    private val timeIndexDownloads = TimeIndexDownloads(downloads) { downloadPrefs.wifiOnly }
 
     /** Starts the download queue, recovering a file left running by a run that died; see [Downloads.recover]. */
     fun resumeDownloads() {
@@ -800,6 +802,14 @@ class AppContainer(context: Context) {
                         throw e
                     } catch (e: Exception) {
                         Log.w("Granger", "Couldn't update the search vectors downloads", e)
+                    }
+                    // The time index follows each pack the same way, on every phone (Plan H5b Task 3).
+                    try {
+                        timeIndexDownloads.reconcile(c, r)
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Log.w("Granger", "Couldn't update the time index downloads", e)
                     }
                 }
         }
@@ -839,6 +849,19 @@ class AppContainer(context: Context) {
         bookVectors.sources,
         DirectoryVectorSources(File(context.getExternalFilesDir(null), "vectors")),
     )
+
+    /** Each installed pack's time index (Plan H5b), by library pack id: the newest installed version of each. */
+    suspend fun installedTimeIndexes(): Map<String, File> {
+        val records = downloads.records.first().filter { it.state == DownloadState.INSTALLED }
+        val byItem = records.groupBy { it.itemId }
+        val packsByPath = library.packs.first().associateBy { it.filePath }
+        return records.filter { it.kind == ItemKind.TIME_INDEX }.groupBy { it.itemId }.mapNotNull { (itemId, versions) ->
+            val parentId = TimeIndexDownloads.parentOf(itemId) ?: return@mapNotNull null
+            val parent = byItem[parentId]?.maxByOrNull { it.createdAt } ?: return@mapNotNull null
+            val pack = packsByPath[parent.filePath] ?: return@mapNotNull null
+            pack.id to versions.maxBy { it.createdAt }.file
+        }.toMap()
+    }
 
     private suspend fun installedVectors(): List<ListedVectors> {
         val records = downloads.records.first().filter { it.state == DownloadState.INSTALLED }

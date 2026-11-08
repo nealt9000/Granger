@@ -11,7 +11,8 @@ import app.granger.core.downloads.Downloads
 import app.granger.core.downloads.Integrity
 import app.granger.core.downloads.IntegrityChecker
 import app.granger.core.downloads.ItemKind
-import app.granger.core.downloads.VectorDownloads
+import app.granger.core.downloads.Companions
+import app.granger.core.downloads.isCompanion
 import app.granger.core.downloads.Volume
 import app.granger.core.downloads.VolumeSource
 import app.granger.core.library.Book
@@ -182,13 +183,13 @@ class ReadinessViewModel(
     /** [record]'s installed search vectors, when it is a pack or a book. */
     private fun vectorsOf(record: DownloadRecord, installed: List<DownloadRecord>): List<DownloadRecord> =
         if (record.kind != ItemKind.PACK && record.kind != ItemKind.BOOK) emptyList()
-        else installed.filter { it.kind == ItemKind.VECTORS && VectorDownloads.parentOf(it.itemId) == record.itemId }
+        else installed.filter { it.kind.isCompanion && Companions.parentOf(it.itemId) == record.itemId }
 
     private fun build(records: List<DownloadRecord>, packs: List<Pack>, src: Sources, chk: Checks): ReadinessUi {
         val (vols, prog, res) = chk
         val all = records.filter { it.state == DownloadState.INSTALLED }
         // Search vectors (Plan R1) are part of their item's row, not rows of their own.
-        val (grouped, installed) = all.filter { it.kind != ItemKind.VECTORS }.partition { it.kind == ItemKind.AUDIO && it.groupId != null }
+        val (grouped, installed) = all.filter { !it.kind.isCompanion }.partition { it.kind == ItemKind.AUDIO && it.groupId != null }
         val media = grouped.groupBy { it.groupId!! }.map { (group, files) -> groupRow(group, files, prog, res) }
         val packByPath = packs.associateBy { it.filePath }
         val voiceKeys = installed.filter { it.kind == ItemKind.VOICE }.mapTo(HashSet()) { keyOf(it) }

@@ -10,9 +10,19 @@ enum class HashAlgorithm(val jcaName: String) { SHA256("SHA-256"), SHA1("SHA-1")
 /**
  * [AUDIO]: one file of a LibriVox or archive.org audio item, downloaded as part of a group. [VOICE]: a read-aloud voice's
  * zip, unpacked after verification. [VECTORS]: a pack's or book's search vectors (Plan R1), which follow it; see
- * [VectorDownloads]. Stored by name, so a new kind needs no migration.
+ * [VectorDownloads]. [TIME_INDEX]: a pack's time index (Plan H5b), which follows it the same way; see [TimeIndexDownloads].
+ * Stored by name, so a new kind needs no migration.
  */
-enum class ItemKind { PACK, MODEL, BOOK, AUDIO, VOICE, VECTORS }
+enum class ItemKind { PACK, MODEL, BOOK, AUDIO, VOICE, VECTORS, TIME_INDEX }
+
+/** A file that follows a pack or book (its vectors, its time index): shown, sized and removed with it, never on its own. */
+val ItemKind.isCompanion: Boolean get() = this == ItemKind.VECTORS || this == ItemKind.TIME_INDEX
+
+/** The item ids of companion downloads ([ItemKind.isCompanion]): `<parent>.vectors`, `<parent>.timeindex`. */
+object Companions {
+    /** The pack or book a companion download belongs to; null for any other item. */
+    fun parentOf(itemId: String): String? = VectorDownloads.parentOf(itemId) ?: TimeIndexDownloads.parentOf(itemId)
+}
 
 enum class DownloadState { QUEUED, RUNNING, FAILED, INSTALLED }
 

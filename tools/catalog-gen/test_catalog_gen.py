@@ -1453,3 +1453,53 @@ def test_spanish_everything_pack_is_named_in_spanish():
     # Plan L3 Task 10: the same name as the app's GutenbergNames.
     assert cg.gutenberg_title("gutenberg_es_all", "Los libros en español del primer productor") == \
         "Todos los libros en español · Project Gutenberg"
+
+
+def _tdescriptor(id, source, url=None):
+    return {"id": id, "kind": "pack", "fileName": f"{id}_x.gtime", "sizeBytes": 70, "sha256": "8" * 64, "count": 5,
+            "format": 1, "lanesVersion": 1, "sourceSha256": source, "url": url}
+
+
+def test_time_indexes_go_on_the_exact_source_and_every_flavour_mini_included():
+    catalog = _vcatalog()
+    catalog["packs"][0]["timeIndex"] = {"url": "https://old"}
+    used, lines = cg.attach_timeindex(catalog, [_tdescriptor("wikipedia_en_top_maxi", "b" * 64),
+                                                _tdescriptor("wikipedia_en_knots_maxi", "0" * 64, url="https://h/k.gtime"),
+                                                _tdescriptor("wikipedia_en_x", "a" * 64)],
+                                      release_url=None)
+    by_id = {p["id"]: p.get("timeIndex") for p in catalog["packs"]}
+    # Only the descriptor with a URL of its own and a known source attaches; the rest are reported.
+    assert by_id["wikipedia_en_top_maxi"] is None and by_id["wikipedia_en_top_nopic"] is None
+    assert lines == ["  wikipedia_en_top_maxi: no https URL, left out",
+                     "  wikipedia_en_knots_maxi: built from wikipedia_en_knots_maxi_x.gtime, but the catalog has 2026-10-18; rebuild it",
+                     "  wikipedia_en_x: no https URL, left out"]
+    used, lines = cg.attach_timeindex(catalog, [_tdescriptor("wikipedia_en_top_maxi", "b" * 64)],
+                                      release_url="https://github.com/x/releases/download/timeindex-1/")
+    by_id = {p["id"]: p.get("timeIndex") for p in catalog["packs"]}
+    index = {"url": "https://github.com/x/releases/download/timeindex-1/wikipedia_en_top_maxi_x.gtime", "sha256": "8" * 64,
+             "sizeBytes": 70, "count": 5, "format": 1, "lanesVersion": 1}
+    assert by_id["wikipedia_en_top_maxi"] == index
+    assert by_id["wikipedia_en_top_nopic"] == index and by_id["wikipedia_en_top_mini"] == index
+    assert by_id["wikipedia_en_knots_maxi"] is None
+    assert lines == [] and [d["id"] for d in used] == ["wikipedia_en_top_maxi"]
+
+
+def test_time_index_sizes_and_urls_count():
+    catalog = {"packs": [{"id": "med", "zimName": "med", "sizeBytes": 1000, "timeIndex": {"sizeBytes": 7, "url": "https://t/m.gtime"}}],
+               "books": [], "readiness": {"domains": [{"id": "medicine", "essential": ["med"], "comprehensive": ["med"]}]}}
+    assert cg.tier_sizes(catalog)["medicine"] == (1007, 1007)
+    assert "https://t/m.gtime" in cg.catalog_urls(catalog)
+
+
+def test_the_timeindex_command_rewrites_the_catalog_with_a_fresh_date(tmp_path, capsys):
+    catalog = _vcatalog() | {"generatedAt": "2026-10-22T00:00:00Z"}
+    path = tmp_path / "catalog.json"
+    path.write_text(json.dumps(catalog))
+    releases = tmp_path / "releases"
+    releases.mkdir()
+    (releases / "wikipedia_en_top_maxi.json").write_text(json.dumps(_tdescriptor("wikipedia_en_top_maxi", "b" * 64)))
+    cg.main(["timeindex", "--releases", str(releases), "--release-url", "https://github.com/x/releases/download/t/", str(path)])
+    out = json.loads(path.read_text())
+    assert out["generatedAt"] > "2026-10-22T00:00:00Z"
+    assert out["packs"][1]["timeIndex"]["url"].endswith("/t/wikipedia_en_top_maxi_x.gtime")
+    assert "time indexes on 3 packs from 1 files" in capsys.readouterr().out

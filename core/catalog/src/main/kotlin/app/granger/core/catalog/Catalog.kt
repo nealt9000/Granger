@@ -146,6 +146,8 @@ data class PackEntry(
     val flavour: String = "",
     /** The pack's search vectors (Plan R1), downloaded with it; null when it has none, and in older catalogs. */
     val vectors: VectorsEntry? = null,
+    /** The pack's time index (Plan H5b), downloaded with it on every phone; null when it has none, and in older catalogs. */
+    val timeIndex: TimeIndexEntry? = null,
     /**
      * The set this pack is a slice of (Plan WF Decision 2): "wikipedia_en", "wikivoyage_en"; blank for any other pack,
      * and in older catalogs. A slice of higher [setRank] holds the smaller ones' articles.
@@ -221,6 +223,21 @@ data class VectorsEntry(
     val chunkerVersion: Int = 0,
 )
 
+/**
+ * A pack's time index (Plan H5b): one `.gtime` SQLite file of dated articles, valid for every flavour of that ZIM
+ * snapshot (it's keyed by article path). [format] is the file layout the app must read; [lanesVersion] the lanes it was
+ * built with. Every field has a default so a malformed object decodes; the parser drops one that doesn't validate.
+ */
+@Serializable
+data class TimeIndexEntry(
+    val url: String = "",
+    val sha256: String = "",
+    val sizeBytes: Long = 0,
+    val count: Int = 0,
+    val format: Int = 0,
+    val lanesVersion: Int = 0,
+)
+
 /** The item's search vectors, for the kinds that can have them. */
 val CatalogItem.vectors: VectorsEntry?
     get() = when (this) {
@@ -229,8 +246,12 @@ val CatalogItem.vectors: VectorsEntry?
         else -> null
     }
 
-/** What getting the item downloads: its file and its vectors (spec §4, "their size is shown in the item's size"). */
-val CatalogItem.downloadBytes: Long get() = sizeBytes + (vectors?.sizeBytes ?: 0L)
+/** The pack's time index (Plan H5b); null for every other kind. */
+val CatalogItem.timeIndex: TimeIndexEntry?
+    get() = (this as? PackEntry)?.timeIndex
+
+/** What getting the item downloads: its file, its vectors and its time index (spec §4, "their size is shown in the item's size"). */
+val CatalogItem.downloadBytes: Long get() = sizeBytes + (vectors?.sizeBytes ?: 0L) + (timeIndex?.sizeBytes ?: 0L)
 
 @Serializable
 enum class ModelRole {

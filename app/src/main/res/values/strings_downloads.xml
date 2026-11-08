@@ -28,6 +28,7 @@
     <!-- Bytes done of bytes: 312 MB of 980 MB. -->
     <string name="downloads_bytes_of">%1$s of %2$s</string>
     <!-- The search vectors that let Ask search a pack by meaning. -->
+    <string name="downloads_timeline_dates">Dates for the timeline</string>
     <string name="downloads_index_for_ask">Index for Ask</string>
     <!-- After a row's line when the pack's Ask index downloads with it. %1$s is the line. -->
     <string name="downloads_with_index">%1$s + index for Ask</string>
