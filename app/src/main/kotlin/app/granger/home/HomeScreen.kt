@@ -21,11 +21,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PlayArrow
@@ -197,57 +199,69 @@ fun HomeContent(
                     }
                 }
             }
-            crashNotice?.let { notice -> item(key = "crash") { CrashNoticeRow(notice) } }
-            ui.downloads?.let { card -> item(key = "downloads") { DownloadsCardView(card, onOpenDownloads, downloadsActions) } }
+            crashNotice?.let { notice -> item(key = "crash") { HomeSection("crash-section", bottom = 0.dp) { CrashNoticeRow(notice) } } }
+            ui.downloads?.let { card ->
+                item(key = "downloads") { HomeSection("downloads-section", bottom = 0.dp) { DownloadsCardView(card, onOpenDownloads, downloadsActions) } }
+            }
             for (offer in ui.tidy) {
                 item(key = "tidy-${offer.key}") {
                     app.granger.sources.TidyOfferCard(offer, { downloadsActions.onTidyRemove(offer) }, { downloadsActions.onTidyKeep(offer) })
                 }
             }
+            // Every section on its own surface with the same heading, old and new alike (Neal, 2026-11-08: Timeline and
+            // Wander sat on surfaces while Continue, Readiness and the feeds ran flat on the page).
             if (ui.continueCards.isNotEmpty()) {
-                item(key = "continue") { Heading(stringResource(R.string.home_continue)) }
-                item(key = "continue-row") {
-                    CardRow(ui.continueCards, key = { it.key }, tag = "continue-row") { entry ->
-                        when (entry) {
-                            is RailEntry.Tab -> TabCard(entry) { onOpenTab(entry.tab.tabId) }
-                            is RailEntry.Play -> PlayCard(entry) { onPlay(entry) }
-                            else -> {}
+                item(key = "continue") {
+                    HomeSection("continue-section") {
+                        Heading(stringResource(R.string.home_continue))
+                        CardRow(ui.continueCards, key = { it.key }, tag = "continue-row") { entry ->
+                            when (entry) {
+                                is RailEntry.Tab -> TabCard(entry) { onOpenTab(entry.tab.tabId) }
+                                is RailEntry.Play -> PlayCard(entry) { onPlay(entry) }
+                                else -> {}
+                            }
                         }
                     }
                 }
             }
             item(key = "strip") {
-                androidx.compose.foundation.layout.Column {
-                    Heading(stringResource(R.string.readiness_title))
+                HomeSection("readiness-section", bottom = 0.dp) {
+                    SectionHeading(
+                        stringResource(R.string.readiness_title),
+                        action = stringResource(R.string.home_readiness_see_all),
+                        onAction = onReadiness,
+                        actionTag = "readiness-see-all",
+                    )
                     ReadinessStrip(ui.strip, onReadiness)
                 }
             }
             for ((i, row) in ui.feeds.withIndex()) {
                 item(key = "feed-${row.feed.id}") {
-                    FeedHeading(
-                        title = if (row.drawn != null) row.title.resolve() else stringResource(R.string.home_feed_pending, stringResource(row.feed.kind.label), row.scopeName.resolve()),
-                        first = i == 0,
-                        last = i == ui.feeds.lastIndex,
-                        onRemove = { actions.onRemove(row.feed.id) },
-                        onMove = { up -> actions.onMove(row.feed.id, up) },
-                    )
-                }
-                item(key = "feed-row-${row.feed.id}") {
-                    val drawn = row.drawn
-                    if (drawn == null) {
-                        Text(
-                            stringResource(R.string.home_drawing),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    HomeSection("feed-section-${row.feed.id}") {
+                        FeedHeading(
+                            title = if (row.drawn != null) row.title.resolve() else stringResource(R.string.home_feed_pending, stringResource(row.feed.kind.label), row.scopeName.resolve()),
+                            first = i == 0,
+                            last = i == ui.feeds.lastIndex,
+                            onRemove = { actions.onRemove(row.feed.id) },
+                            onMove = { up -> actions.onMove(row.feed.id, up) },
                         )
-                    } else {
-                        CardRow(drawn.cards, key = { "${it.title}|${it.target}" }, tag = "feed-row-${row.feed.id}") { card ->
-                            FeedCard(card) { onOpenCard(card) }
+                        val drawn = row.drawn
+                        if (drawn == null) {
+                            Text(
+                                stringResource(R.string.home_drawing),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            )
+                        } else {
+                            CardRow(drawn.cards, key = { "${it.title}|${it.target}" }, tag = "feed-row-${row.feed.id}") { card ->
+                                FeedCard(card) { onOpenCard(card) }
+                            }
                         }
                     }
                 }
             }
+            item(key = "end") { Box(Modifier.height(16.dp)) }
         }
     }
 }
@@ -265,24 +279,37 @@ private fun <T> CardRow(items: List<T>, key: (T) -> Any, tag: String, card: @Com
 
 /** One of Home's new pieces on its own surface, so a section never runs into the next (spec §3, Neal 2026-11-07). */
 @Composable
-internal fun HomeSection(tag: String, content: @Composable () -> Unit) {
+internal fun HomeSection(tag: String, bottom: androidx.compose.ui.unit.Dp = 16.dp, content: @Composable () -> Unit) {
     androidx.compose.material3.Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp).testTag(tag),
     ) {
-        androidx.compose.foundation.layout.Column(Modifier.padding(bottom = 12.dp)) { content() }
+        androidx.compose.foundation.layout.Column(Modifier.padding(bottom = bottom)) { content() }
     }
 }
 
+/** A section's title, the same on every section of Home. */
 @Composable
 internal fun Heading(text: String, modifier: Modifier = Modifier) {
     Text(
         text,
         style = MaterialTheme.typography.titleSmall,
         color = MaterialTheme.colorScheme.primary,
-        modifier = modifier.padding(start = 16.dp, top = 20.dp, bottom = 8.dp),
+        modifier = modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp),
     )
+}
+
+/** A heading with a "More ›" on the right (Full timeline, See all), lined up with the heading. */
+@Composable
+internal fun SectionHeading(text: String, action: String, onAction: () -> Unit, actionTag: String) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(end = 4.dp)) {
+        Heading(text, Modifier.weight(1f).padding(bottom = 0.dp))
+        TextButton(onClick = onAction, modifier = Modifier.padding(top = 8.dp).testTag(actionTag)) {
+            Text(action, style = MaterialTheme.typography.labelLarge)
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, Modifier.padding(start = 2.dp).size(18.dp))
+        }
+    }
 }
 
 /** A feed's title; a long press offers Move up, Move down and Remove. */
@@ -310,10 +337,11 @@ private fun TabCard(entry: RailEntry.Tab, onClick: () -> Unit) {
     Card(title = tab.title, subtitle = tab.subtitle.resolve(), enabled = tab.available, onClick = onClick) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val cover = rememberRailCover(tab.coverPath, maxWidth)
-            if (cover != null) {
-                Image(cover, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-            } else {
-                MediaTile(tab.title, tab.mediaKind())
+            when {
+                cover != null -> Image(cover, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                // An article without a picture: its icon, not its title a second time over the title (Neal, 2026-11-08).
+                tab.path.isNotEmpty() -> IconTile(painterResource(R.drawable.ic_library))
+                else -> MediaTile(tab.title, tab.mediaKind())
             }
         }
     }
@@ -468,7 +496,7 @@ fun homeDownloadsText(res: Resources, card: DownloadsCard.Active): UiText {
 @Composable
 private fun CrashNoticeRow(notice: CrashNotice) {
     Row(
-        Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 4.dp).testTag("crash-notice"),
+        Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp).testTag("crash-notice"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(stringResource(R.string.home_crash_notice), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)

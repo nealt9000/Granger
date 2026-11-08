@@ -122,6 +122,8 @@ class HomeViewModel(
     wanderOf: ((kotlinx.coroutines.CoroutineScope) -> WanderModel)? = null,
     /** Makes Home's timeline in the view model's scope (Plan H5b); none in tests that don't need it. */
     timelineOf: ((kotlinx.coroutines.CoroutineScope) -> TimelineModel)? = null,
+    /** An article tab's picture (its lead image, cached), or null; blocking, run on [io]. */
+    private val tabPicture: (packId: String, path: String) -> String? = { _, _ -> null },
 ) : ViewModel() {
     /** Wander (Plan H5a): its own state, started when Home first shows it. */
     val wander: WanderModel? = wanderOf?.invoke(viewModelScope)
@@ -179,7 +181,23 @@ class HomeViewModel(
         packs.filter { it.status == PackStatus.OK }.mapNotNull { pack -> library.archive(pack.id)?.mainPath?.let { pack.id to it } }.toMap()
     }.flowOn(io)
 
-    private val continuing = combine(rail, mainPaths) { railUi, mains -> continueCards(railUi, mains) }
+    /** Article pictures looked up once each ("packId/path" → file or none): the rail emits often. */
+    private val tabPictures = java.util.concurrent.ConcurrentHashMap<String, java.util.Optional<String>>()
+
+    /**
+     * Continue, with each article tab's lead image as its cover, so a card shows a picture rather than its title twice
+     * (Neal, 2026-11-08). Books keep their own covers.
+     */
+    private val continuing = combine(rail, mainPaths) { railUi, mains ->
+        continueCards(railUi, mains).map { entry ->
+            if (entry !is RailEntry.Tab || entry.tab.coverPath != null || entry.tab.path.isEmpty()) return@map entry
+            val key = "${entry.tab.packId}/${entry.tab.path}"
+            val picture = tabPictures.getOrPut(key) {
+                java.util.Optional.ofNullable(runCatching { tabPicture(entry.tab.packId, entry.tab.path) }.getOrNull())
+            }
+            if (picture.isPresent) entry.copy(tab = entry.tab.copy(coverPath = picture.get())) else entry
+        }
+    }.flowOn(io)
 
     private val tidyOffers = combine(catalog.state, downloads.records, library.packs, tidyDismissals.keys) { c, records, packs, keys ->
         app.granger.sources.SetTidy.offers(c.catalog, records, packs, keys)

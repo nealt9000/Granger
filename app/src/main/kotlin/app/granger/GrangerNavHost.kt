@@ -1366,6 +1366,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 )
                             },
                             timelineOf = { scope -> timelineModel(scope, homeThumbs) },
+                            tabPicture = { packId, path ->
+                                container.library.archive(packId)?.let { archive ->
+                                    archive.read(path)?.let { homeThumbs.thumbnail(archive, path, String(it.bytes, Charsets.UTF_8)) }
+                                }
+                            },
                         )
                     },
                     onReadiness = { nav.navigate(ReadinessRoute) { launchSingleTop = true } },

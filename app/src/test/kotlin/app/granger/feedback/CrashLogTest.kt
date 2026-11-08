@@ -143,6 +143,15 @@ class CrashLogTest {
         assertThat(log.notice.value).isNull()
     }
 
+    /** 2026-11-08: an ANR from 1194 was still asked about on 1218. A newer build keeps the report but doesn't ask. */
+    @Test fun aCrashFromAnOlderBuildIsKeptButNotAskedAbout() {
+        log.recordExits(listOf(PastExit(5_000L, CrashKind.ANR, null, null)))
+        val newer = CrashLog(tmp.root.resolve("crashes"), facts.copy(versionName = "0.1.851", versionCode = 851)) { clock }
+        newer.recordExits(emptyList())
+        assertThat(newer.notice.value).isNull()
+        assertThat(newer.list()).hasSize(1)
+    }
+
     @Test fun aJavaCrashFromTheLastRunIsNoticedOnTheNextStart() {
         log.record(Thread("main"), RuntimeException("boom"))
         // The next start reads past exits (none native here), which refreshes the notice from the files.

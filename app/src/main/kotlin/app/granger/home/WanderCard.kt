@@ -85,7 +85,15 @@ class WanderActions(
 private val CentreSize = 92.dp
 private val LabelWidth = 96.dp
 private val MaxSide = 380.dp
-private val LabelRoom = 44.dp
+
+/** Under the lowest disc: its half, the gap and two lines of label. */
+private val LabelRoom = 70.dp
+
+/** The orbit's radius, as a share of the square's side. */
+private const val RADIUS = 0.39f
+
+/** The lowest disc's centre, as a share of the side: the middle, the radius and its outward nudge, and sin 67.5°. */
+private const val ORBIT_BOTTOM = 0.5f + (RADIUS + 0.03f) * 0.93f
 
 /** Orbit discs shrink by rank, the closest link largest (Plan H5a Task 3). */
 private fun orbitSize(rank: Int): Dp = (62 - rank * 3).coerceAtLeast(44).dp
@@ -111,11 +119,27 @@ fun WanderSection(ui: WanderUi, actions: WanderActions, onOpen: (WanderNode) -> 
             return@Column
         }
         Constellation(ui, actions, Modifier.align(Alignment.CenterHorizontally))
-        if (ui.summary.isNotBlank()) {
-            Text(ui.summary, style = MaterialTheme.typography.bodyLarge.copy(fontFamily = Spectral), modifier = Modifier.testTag("wander-summary"))
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        // The centre's title sits here, beside Open, not under its disc where the orbit's labels ran into it (Neal,
+        // 2026-11-08); the summary is a taste of the article, three lines at most.
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(
+                centre.title,
+                style = MaterialTheme.typography.titleMedium.copy(fontFamily = Spectral),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f).testTag("wander-title"),
+            )
             FilledTonalButton(onClick = { onOpen(centre) }, modifier = Modifier.testTag("wander-open")) { Text(stringResource(R.string.home_wander_open)) }
+        }
+        if (ui.summary.isNotBlank()) {
+            Text(
+                ui.summary,
+                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = Spectral),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.testTag("wander-summary"),
+            )
         }
         if (ui.trail.isNotEmpty()) {
             FlowRow(verticalArrangement = Arrangement.Center, modifier = Modifier.testTag("wander-trail")) {
@@ -199,10 +223,10 @@ private fun Constellation(ui: WanderUi, actions: WanderActions, modifier: Modifi
     val ring = MaterialTheme.colorScheme.outlineVariant
     BoxWithConstraints(modifier.widthIn(max = MaxSide).fillMaxWidth()) {
       val side = maxWidth
-      // Room under the square for the bottom labels, so they never run into the summary.
-      Box(Modifier.width(side).height(side + LabelRoom).testTag("wander-orbit")) {
+      // Only as tall as the lowest disc and its label need: the square's bottom was empty space (Neal, 2026-11-08).
+      Box(Modifier.width(side).height(side * ORBIT_BOTTOM + LabelRoom).testTag("wander-orbit")) {
         Canvas(Modifier.width(side).height(side)) {
-            drawCircle(ring, radius = size.minDimension * 0.38f, center = center, style = Stroke(width = 1.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 8f))))
+            drawCircle(ring, radius = size.minDimension * RADIUS, center = center, style = Stroke(width = 1.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 8f))))
         }
         val centre = ui.centre ?: return@Box
         val nodes = listOf(centre) + ui.orbit
@@ -213,7 +237,7 @@ private fun Constellation(ui: WanderUi, actions: WanderActions, modifier: Modifi
                 // Half a step round, so no link sits right above the centre or on its title below.
                 val step = 2 * Math.PI / ui.orbit.size
                 val angle = -Math.PI / 2 + step / 2 + rank * step
-                val r = 0.38f + if (rank % 2 == 1) 0.03f else -0.02f
+                val r = RADIUS + if (rank % 2 == 1) 0.03f else -0.02f
                 Offset(0.5f + r * cos(angle).toFloat(), 0.5f + r * sin(angle).toFloat())
             }
             key(node.packId + "/" + node.path) {
@@ -247,14 +271,18 @@ private fun OrbitNode(node: WanderNode, isCentre: Boolean, target: Offset, side:
         }
     }
     val disc by animateDpAsState(size, spring(stiffness = Spring.StiffnessLow), label = "disc")
-    val width = maxOf(disc, if (isCentre) 160.dp else LabelWidth)
+    val width = if (isCentre) disc else maxOf(disc, LabelWidth)
     val label = if (!node.onPhone) stringResource(R.string.home_wander_not_here, node.title)
         else if (isCentre) node.title else stringResource(R.string.home_wander_go_to, node.title)
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
-            .offset { IntOffset(((side * x.value) - width / 2).roundToPx(), ((side * y.value) - disc / 2).roundToPx()) }
+            .offset {
+                // A label near the edge stays inside the orbit rather than off the card ("Government of India", 2026-11-08).
+                val left = (side * x.value - width / 2).roundToPx().coerceIn(0, (side - width).roundToPx().coerceAtLeast(0))
+                IntOffset(left, ((side * y.value) - disc / 2).roundToPx())
+            }
             .width(width)
             .alpha(shown.value * if (node.onPhone) 1f else 0.6f)
             .then(if (isCentre) Modifier else Modifier.clickable(enabled = node.onPhone, onClick = onClick))
@@ -262,16 +290,19 @@ private fun OrbitNode(node: WanderNode, isCentre: Boolean, target: Offset, side:
             .testTag(if (isCentre) "wander-centre" else "wander-node-${node.path}"),
     ) {
         Disc(node, disc, isCentre)
-        Text(
-            node.title,
-            style = if (isCentre) MaterialTheme.typography.titleMedium.copy(fontFamily = Spectral) else MaterialTheme.typography.labelMedium,
-            fontSize = if (isCentre) 16.sp else 11.5.sp,
-            lineHeight = if (isCentre) 19.sp else 13.sp,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            color = if (node.onPhone) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        // The centre's title is under the orbit, beside Open (WanderSection).
+        if (!isCentre) {
+            Text(
+                node.title,
+                style = MaterialTheme.typography.labelMedium,
+                fontSize = 11.5.sp,
+                lineHeight = 13.sp,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                color = if (node.onPhone) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

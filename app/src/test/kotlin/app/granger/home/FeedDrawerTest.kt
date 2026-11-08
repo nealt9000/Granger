@@ -228,4 +228,14 @@ class FeedDrawerTest {
         val any = drawer(listOf("es")).draw(feed(FeedKind.ON_THIS_DAY), Resolved(UiText.Raw("Wikipedia"), packs = listOf(wikipedia)), day)!!
         assertThat(any.cards.first().subtitle).isEqualTo("Events")
     }
+
+    /** Neal, 2026-11-08: Random showed "List of Final Fantasy XI characters" and stubs on blank tiles. */
+    @Test fun randomSkipsListsAndWantsARealLead() {
+        assertThat(FeedDrawer.isList("List of Final Fantasy XI characters")).isTrue()
+        assertThat(FeedDrawer.isList("Lists of rivers")).isTrue()
+        assertThat(FeedDrawer.isList("Listeria")).isFalse()
+        val long = "Jazz is a music genre that originated in the African-American communities of New Orleans, Louisiana, in the late 19th and early 20th centuries, with its roots in blues and ragtime."
+        assertThat(FeedDrawer.hasLead("<html><body><p> </p><p>$long</p></body></html>")).isTrue()
+        assertThat(FeedDrawer.hasLead("<html><body><p>2933 Amber is an asteroid.</p></body></html>")).isFalse()
+    }
 }
