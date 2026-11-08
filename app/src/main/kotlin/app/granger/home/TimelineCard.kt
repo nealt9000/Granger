@@ -241,7 +241,10 @@ private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords, fu
                             if (pressed.isEmpty()) {
                                 when (mode) {
                                     Mode.SCRUB -> scrubX?.let { actions.onLens(current.window.year(it, widthPx)) }
-                                    Mode.UNDECIDED -> actions.onLens(current.window.year(down.position.x, widthPx))
+                                    // A tap picks the dot or bar under the finger, in its row (Neal, 2026-11-08: taps
+                                    // landed in the right year but the wrong row); empty space falls back to the year.
+                                    Mode.UNDECIDED -> hit(current, rows, rowHeight.toPx(), tracks, widthPx, down.position, 24.dp.toPx())
+                                        ?.let(actions.onSelect) ?: actions.onLens(current.window.year(down.position.x, widthPx))
                                     else -> Unit
                                 }
                                 scrubX = null
@@ -300,7 +303,7 @@ private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords, fu
             }
             // Marks: lifetimes as thin bars, spans as bars, events as dots; the better known drawn last, on top.
             for (m in ui.marks.sortedBy { it.rank }) {
-                val row = rows.indexOfFirst { it == null || it in m.lanes }.takeIf { it >= 0 } ?: continue
+                val row = rowOf(m, rows) ?: continue
                 val lane = rows[row] ?: Lane.entries.firstOrNull { it in m.lanes }
                 val c = lane?.let { laneColours[it] } ?: other
                 val y = rowH * row + trackY(m.qid, rowH, tracks)
@@ -427,9 +430,38 @@ private fun LensCard(mark: TimeMark, ui: TimelineUi, actions: TimelineActions, w
 
 
 /** A mark's height within its row: one of [TRACKS] tracks by its id, so neighbours spread instead of stacking. */
-private fun trackY(qid: Long, rowH: Float, tracks: Int = TRACKS): Float = rowH * (0.08f + 0.84f * ((qid % tracks).toInt() + 0.5f) / tracks)
+internal fun trackY(qid: Long, rowH: Float, tracks: Int = TRACKS): Float = rowH * (0.08f + 0.84f * ((qid % tracks).toInt() + 0.5f) / tracks)
 
 private enum class Mode { UNDECIDED, SCRUB, PAN, PINCH }
+
+/** The row a mark is drawn in: the first switched-on lane it belongs to, or the single row; null if it's in none shown. */
+private fun rowOf(m: TimeMark, rows: List<Lane?>): Int? = rows.indexOfFirst { it == null || it in m.lanes }.takeIf { it >= 0 }
+
+/**
+ * The mark drawn nearest [at], within [reach] pixels: dots by distance to their centre, bars by distance to the bar.
+ * Uses the same rows and tracks as the drawing, so what you tap is what you get.
+ */
+internal fun hit(ui: TimelineUi, rows: List<Lane?>, rowH: Float, tracks: Int, width: Float, at: Offset, reach: Float): TimeMark? {
+    var best: TimeMark? = null
+    var bestD = reach
+    for (m in ui.marks) {
+        val row = rowOf(m, rows) ?: continue
+        val y = rowH * row + trackY(m.qid, rowH, tracks)
+        val x0 = ui.window.x(m.y0.toDouble(), width)
+        val x1 = if (m.kind == TimeKind.POINT) x0 else maxOf(x0, ui.window.x(m.end(ui.now).toDouble(), width))
+        val dx = when {
+            at.x < x0 -> x0 - at.x
+            at.x > x1 -> at.x - x1
+            else -> 0f
+        }
+        val d = kotlin.math.hypot(dx, at.y - y)
+        if (d < bestD || (d == bestD && best != null && m.rank > best.rank)) {
+            best = m
+            bestD = d
+        }
+    }
+    return best
+}
 
 private fun laneName(lane: Lane): Int = when (lane) {
     Lane.PHILOSOPHY_RELIGION -> R.string.home_lane_philosophy_religion

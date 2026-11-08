@@ -116,6 +116,20 @@ class TimelineSectionTest {
         compose.onNodeWithTag("timeline").assertDoesNotExist()
     }
 
+    @Test fun aTapPicksTheMarkInTheRowTouchedNotJustTheYear() {
+        // Two 1945 marks on different tracks; the lower one is less known but it's the one under the finger.
+        val upper = mark(8, "United Nations", 1945).copy(rank = 150)    // qid 8 -> track 0 of 8
+        val lower = mark(13, "Brief Encounter", 1945).copy(rank = 30)   // qid 13 -> track 5 of 8
+        val ui = TimelineUi(marks = listOf(upper, lower), window = TimeScale.history(2025), now = 2025)
+        val rowH = 300f
+        val x = ui.window.x(1945.0, 1000f)
+        val at = androidx.compose.ui.geometry.Offset(x + 3f, trackY(13, rowH, 8) + 4f)
+        assertThat(hit(ui, listOf(null), rowH, 8, 1000f, at, 24f)).isEqualTo(lower)
+        assertThat(hit(ui, listOf(null), rowH, 8, 1000f, at.copy(y = trackY(8, rowH, 8)), 24f)).isEqualTo(upper)
+        // Empty space: nothing within reach.
+        assertThat(hit(ui, listOf(null), rowH, 8, 1000f, at.copy(x = 5f), 24f)).isNull()
+    }
+
     @Test fun yearsReadAsPeopleWriteThem() {
         val w = YearWords("%s BC", "c. %s", "%s million years ago", "%s billion years ago", "%s to %s", "%s –")
         assertThat(w.year(1066)).isEqualTo("1066")
