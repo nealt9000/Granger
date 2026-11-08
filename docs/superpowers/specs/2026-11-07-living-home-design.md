@@ -57,7 +57,7 @@ Today's day article (On this day, `DayPage`) drawn as a **river of years** acros
 - **Density by zoom** (§5.1): zoomed all the way out you see eras and the best-known spans; zooming in brings out events, then people. A million articles never draw at once.
 - **Opening it out:** an expand control opens the same view full screen (§5) with search and Show in time. It's one view at two sizes.
 
-Every mark is an article you have, so every mark opens, which the day-article version couldn't manage: only about 15% of its lines linked to Top 1M.
+Every mark is an article you have, so every mark opens, which the day-article version couldn't manage: only about 15% of its lines linked to Top.
 
 *Reaching one article* (Neal: "more accessible"). In the prototype, marks crowd and the thumb hides what it's choosing. Fixes for the plan:
 - **A loupe:** while dragging, a magnified strip of the few years around the lens floats above your finger, with the marks spread out and labelled, so you choose from the loupe, not from the crowded river.
@@ -108,13 +108,13 @@ No new rails of cards. If a piece is a horizontal scroll of rectangles, it belon
 
 ## 4. G1: the time and place index (build pipeline)
 
-The article HTML in the packs carries too little: across 600 random articles each in Top 1M and History, 4% and 5% had in-page coordinates, 5% and 8% had an infobox year, and 4% and 17% had a Wikidata ID (all measured 2026-11-07). So the index is built offline, like the `.gvec` files, and listed in the catalog beside each Wikipedia pack.
+The article HTML in the packs carries too little: across 600 random articles each in Top and History, 4% and 5% had in-page coordinates, 5% and 8% had an infobox year, and 4% and 17% had a Wikidata ID (all measured 2026-11-07). So the index is built offline, like the `.gvec` files, and listed in the catalog beside each Wikipedia pack.
 
 - **Sources:** Wikipedia's coordinates table (`geo_tags`: primary coordinates per page, about a fifth of English Wikipedia's articles), plus a one-time slice of Wikidata (CC0) matched by each item's Wikipedia sitelink. The Wikidata fields used:
   - **Dates:** point in time (P585), start and end (P580, P582), inception and dissolution (P571, P576), birth and death (P569, P570).
   - **Place:** coordinates (P625), the fallback when `geo_tags` has none.
   - **Subject:** instance of (P31), occupation (P106), genre (P136) and field (P101), used for subject filtering (§5.2).
-- **Output, per pack:** an SQLite file holding article path, kind (event, person, place, work, polity, idea), year or span, precision (day, year, decade or century), latitude and longitude, and subject tags. It has a year index and an R-tree on coordinates. An estimated 20–30 MB for Top 1M; to be measured.
+- **Output, per pack:** an SQLite file holding article path, kind (event, person, place, work, polity, idea), year or span, precision (day, year, decade or century), latitude and longitude, and subject tags. It has a year index and an R-tree on coordinates. Measured in §11: a few MB per pack.
 - **Languages:** English first, then Spanish (`eswiki` sitelinks), since Spanish is in.
 - **Checks before any UI depends on it:** coverage by pack (the share of articles with a time, a place, or both); a hand check of 100 random rows; and the date errors to expect (Julian/Gregorian, BC, "circa").
 
@@ -160,7 +160,7 @@ The Kiwix world map is 72.4 GB. That's fine for a base station but not a phone. 
 - Testers' existing feeds and settings survive the H5 update.
 
 ## 8. Order (revised §0)
-1. **G1 feasibility:** get the Wikidata slice and the coordinates table, build the index for Top 1M and History, and measure coverage: how many articles have a date, how many have day precision, and how many marks a typical day gets across both packs.
+1. **G1 feasibility:** get the Wikidata slice and the coordinates table, build the index for Top and History, and measure coverage: how many articles have a date, how many have day precision, and how many marks a typical day gets across both packs.
 2. **H5:** Wander with search first (it needs no index, so it can start while G1 builds), then the Home timeline on the index (category chips plus the fixes for reaching one article), then Which came first? and Guess the year.
 3. **G1 production:** every English Wikipedia pack in the catalog, then Spanish; built and signed with the catalog.
 4. **The Timeline:** axis, marks, lanes, search, Show in time.
@@ -170,12 +170,13 @@ The Kiwix world map is 72.4 GB. That's fine for a base station but not a phone. 
 1. **All three H5 pieces go in the first build** (Neal, 2026-11-07).
 2. **The Day sits at the very top** of Home, with Continue and Readiness, compacted, under the new pieces (Neal, 2026-11-07).
 3. **The Atlas base is a zoom 7 world map, an optional download in the catalog, not bundled** (Neal, 2026-11-07). Without it, the Atlas falls back to plain outlines (Natural Earth, a few MB) or asks you to download it. **Measured 2026-11-07** (Protomaps build `20261107.pmtiles`, `pmtiles extract --dry-run`): zoom 5 is 15 MB, zoom 6 45 MB, **zoom 7 190 MB**, zoom 8 560 MB. These replace the estimates below. *Earlier note:* Neal wanted the sizes at zoom 7 and 8 before choosing. Measuring them needs `pmtiles extract … --maxzoom=N --dry-run` against the current Protomaps build (`20261107.pmtiles`, 139 GB at zoom 15). Extrapolating from zoom 5 (about 17 MB) and zoom 6 (about 45–60 MB), with each zoom level roughly doubling to tripling the size, gives about 120–180 MB at zoom 7 and about 300–500 MB at zoom 8. These are estimates until measured.
-4. *Open:* the starting lane list in §5.2.
+4. **Lanes for the first build** (Neal, 2026-11-08, after §11): Philosophy & religion · Civilisations, cultures & empires · Languages · Film & music · Art & literature · Science & invention · Wars · **Events & politics** (added) · People. "All" shows every dated article, including those in no lane. The finer split in §5.2 (Film apart from Music, People by occupation) can follow once the Timeline has its own screen.
+5. **The Wikidata dump stays** on the X10 drive (Neal, 2026-11-08): the full set will feed the Granger home server project.
 
 ## 10. Found while prototyping (2026-11-07)
-- **The day articles aren't in the packs phones have.** Neither Top 1M nor History has `November_7` (checked by path and by title), and the Pixel 6 and the emulator hold the same English Wikipedia packs. So the H2 On this day feed, and The Day as specified, have nothing to draw from on most phones. **Superseded by §0** (The Day reads the time index instead). The earlier proposal, kept for the record. **Proposal, G0:** a small "Days" pack built once from the full Wikipedia: 366 day lists with each line's year, kind and main link. That's an estimated 1–2 MB compressed, CC BY-SA. It ships in the catalog and goes on with any Wikipedia, so H5 doesn't have to wait for G1. Measure the size, and check which slices (if any) already include day articles.
-- **Only about 15% of a day's lines link to an article in Top 1M** (71 of 460 on November 7, 30–71 a day across November 4–10), because most lines are births of minor figures. The Day shows every line and marks the linked ones brighter and tappable. With G1 we could rank lines by how notable they are instead.
-- **Prototype:** artifact `Xe2YXjeszujR5ZvXgw6xUc` (The Day, Wander and Which came first?, on real November 4–10 lists with articles and pictures from Top 1M 2026-09). Built by scripts in the session scratchpad.
+- **The day articles aren't in the packs phones have.** Neither Top (best 50,000) nor History has `November_7` (checked by path and by title), and the Pixel 6 and the emulator hold the same English Wikipedia packs. So the H2 On this day feed, and The Day as specified, have nothing to draw from on most phones. **Superseded by §0** (The Day reads the time index instead). The earlier proposal, kept for the record. **Proposal, G0:** a small "Days" pack built once from the full Wikipedia: 366 day lists with each line's year, kind and main link. That's an estimated 1–2 MB compressed, CC BY-SA. It ships in the catalog and goes on with any Wikipedia, so H5 doesn't have to wait for G1. Measure the size, and check which slices (if any) already include day articles.
+- **Only about 15% of a day's lines link to an article in Top (best 50,000)** (71 of 460 on November 7, 30–71 a day across November 4–10), because most lines are births of minor figures. The Day shows every line and marks the linked ones brighter and tappable. With G1 we could rank lines by how notable they are instead.
+- **Prototype:** artifact `Xe2YXjeszujR5ZvXgw6xUc` (The Day, Wander and Which came first?, on real November 4–10 lists with articles and pictures from Top (best 50,000) 2026-09). Built by scripts in the session scratchpad.
 
 ## 11. G1 feasibility: measured (2026-11-08)
 
