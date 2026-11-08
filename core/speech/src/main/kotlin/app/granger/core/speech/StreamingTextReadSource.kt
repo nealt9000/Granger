@@ -10,7 +10,12 @@ import kotlinx.coroutines.flow.first
  * text is still open, and returns empty only once the source is complete and spent, so the player's queue waits
  * for the model instead of ending the read. [preface] is spoken first (the medical banner).
  */
-class StreamingTextReadSource(override val key: String, override val title: String, private val preface: String? = null) : ReadSource {
+class StreamingTextReadSource(
+    override val key: String,
+    override val title: String,
+    private val preface: String? = null,
+    override val remembered: Boolean = true,
+) : ReadSource {
     @Volatile private var text = ""
     @Volatile private var complete = false
     @Volatile private var ready: List<Utterance> = emptyList()

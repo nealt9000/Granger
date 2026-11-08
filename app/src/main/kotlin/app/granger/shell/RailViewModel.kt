@@ -25,6 +25,7 @@ import app.granger.core.library.ChatSummary
 import app.granger.core.speech.ReadSourceKey
 import app.granger.media.PlayResumer
 import app.granger.music.MusicSources
+import app.granger.research.ResearchViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -216,7 +217,9 @@ class RailViewModel(
             opened.tabs.map { tabEntry(it, shelf, current) } +
                 opened.searches.map { RailEntry.Search(it.query, it.searchedAt) } +
                 opened.chats.map { RailEntry.Chat(it.id, it.title, it.updatedAt) } +
-                opened.plays.map { RailEntry.Play(it.key, MusicSources.title(it.key, it.title), it.playedAt) }
+                // Ask replies read by an older build left plays; the reply lives in its chat, not here.
+                opened.plays.filterNot { ResearchViewModel.answerTurnId(it.key.removePrefix(VOICE_PLAY)) != null }
+                    .map { RailEntry.Play(it.key, MusicSources.title(it.key, it.title), it.playedAt) }
             ).associateBy { it.key }
         val gone = mutableListOf<String>()
         val pinned = pinList.mapNotNull { pin ->
@@ -247,7 +250,8 @@ class RailViewModel(
      */
     val ui: StateFlow<RailUi> = combine(list, live, stopping) { listed, v, stopped ->
         val list = listed.ui
-        if (v == null || v.sourceKey in stopped) return@combine list
+        // A spoken Ask reply has its chat on the rail already.
+        if (v == null || v.sourceKey in stopped || ResearchViewModel.answerTurnId(v.sourceKey) != null) return@combine list
         val played = "$VOICE_PLAY${v.sourceKey}"
         var marked = false
         val entries = list.entries.mapNotNull { entry ->

@@ -9,6 +9,12 @@ interface ReadSource {
     val key: String
     val title: String
 
+    /**
+     * Whether the player keeps this source once it's read: its place, Play again, the restore after a restart. False
+     * for a spoken Ask reply, which belongs to its chat and ends there.
+     */
+    val remembered: Boolean get() = true
+
     /** The section the address falls in (a chapter, a heading), for the notification; null when there is none. */
     suspend fun sectionTitle(at: ReadAddress): String? = null
 
@@ -60,7 +66,12 @@ sealed interface ReadSourceKey {
 }
 
 /** Plain text as a source: Research answers (V2) and the spike's passages read through the player. */
-class TextReadSource(override val key: String, override val title: String, text: String) : ReadSource {
+class TextReadSource(
+    override val key: String,
+    override val title: String,
+    text: String,
+    override val remembered: Boolean = true,
+) : ReadSource {
     private val all: List<Utterance> = Utterances.fromBlocks(
         text.split(Regex("\\n\\s*\\n")).mapIndexed { i, para -> Block(i.toString(), BlockKind.PARAGRAPH, para) }.filter { it.text.isNotBlank() },
     ) { blockId, n -> ReadAddress.Text(key, blockId.toInt(), n) }
