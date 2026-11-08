@@ -237,6 +237,10 @@ Findings go into this plan. Then hand to Neal before merging.
 
 ## Not in H5b
 - **Read aloud (the owl):** moves to H5c with the games, so one voice button serves the timeline's lens, Wander and the games.
-- **Spanish time indexes:** they need the dump re-filtered by eswiki sitelinks; the UI strings are in now.
+- ~~**Spanish time indexes:** they need the dump re-filtered by eswiki sitelinks; the UI strings are in now.~~ Built 2026-11-08 (`es-timeindex`):
+  - `tools/timeindex/wdfilter.py --site eswiki --no-classes` over the same 2026-11-06 dump took 20 minutes: 116,165 of 116,200 Spanish articles matched (8 nopic ZIMs, the catalog's snapshots; Geography downloaded for it). Classes are reused from the English run.
+  - Rows: Top 24,838, History 9,891, Computer 5,658, Physics 2,554, Geography 1,912, Mathematics 1,570, Medicine 1,014, Chemistry 136; 44,970 marks merged by QID, 4.5 MB. 300 random Top paths all open in the ZIM.
+  - No app change: a bilingual phone dedupes by QID with the library's main language first (`WanderModel.encyclopediasOf`), and the games already skip "siglo", "Anexo:" and "Lista de" titles.
+  - Dry run: 39 packs get an index (20 Spanish), nothing else in the catalog changes. Publishing (Neal's OK): upload the 8 Spanish `.gtime` files from `/Volumes/X10 Pro/granger-g1/gtime-es/` to the existing release `timeindex-2026-11-08`, then `catalog_gen.py timeindex`, `check-links`, `sign`.
 - **The full-screen Timeline** with search and Show in time (spec §5).
 - **The Atlas.**
