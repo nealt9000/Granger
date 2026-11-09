@@ -1,14 +1,14 @@
 {
  "id": "gc-es-bailen",
  "kind": "book",
- "fileName": "gc-es-bailen_2026-10-30.gvec",
- "sizeBytes": 141546,
- "sha256": "0282819cba2f97ff3473e494b752dfb8afe471f0c05b52bb1d2684a10818da50",
- "count": 481,
+ "fileName": "gc-es-bailen_2026-11-09.gvec",
+ "sizeBytes": 141844,
+ "sha256": "2499e072af76fa977f34710cd0eec66d00b5c4d250bd795ec35f0b2dadae52f3",
+ "count": 482,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "47df2478fbd2e0297a63f27374213430b3f7967e33db354a8e625986f534c9c4",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-bailen_2026-10-30.gvec"
+ "sourceSha256": "1d0ec9dd3ae277add8ccd261565555aa1f2875e81cd69223de1f41989a5118a9",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-bailen_2026-11-09.gvec"
 }

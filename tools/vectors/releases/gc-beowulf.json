@@ -1,14 +1,14 @@
 {
  "id": "gc-beowulf",
  "kind": "book",
- "fileName": "gc-beowulf_2026-10-30.gvec",
+ "fileName": "gc-beowulf_2026-11-09.gvec",
  "sizeBytes": 34828,
- "sha256": "af92292de67c3c74c733693e92b5c6a1163b0ce282089c9e9dc21971ce60fe82",
+ "sha256": "203b3ef8c9bbb9323d32135730f5d79a67fd2d14861c97a6895b80dba01e0091",
  "count": 118,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "0c684907175b9e55b519039c65d9da5573eea30535ef6ae0c95808f962c3fa8f",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-beowulf_2026-10-30.gvec"
+ "sourceSha256": "ff983262182ea6231f5e59102669e460a516ecded800e1c9c5223cb8907081fd",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-beowulf_2026-11-09.gvec"
 }

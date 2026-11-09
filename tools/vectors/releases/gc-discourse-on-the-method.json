@@ -1,14 +1,14 @@
 {
  "id": "gc-discourse-on-the-method",
  "kind": "book",
- "fileName": "gc-discourse-on-the-method_2026-10-30.gvec",
+ "fileName": "gc-discourse-on-the-method_2026-11-09.gvec",
  "sizeBytes": 26890,
- "sha256": "81255c47e2dc8de603228bd98ae2f02807169ddd4029424417d25f0dc02a8f27",
+ "sha256": "d8a63d11b1458e2aef08de2b41a9be8e9c5df19e56cad24034f7f06ec4465bf1",
  "count": 91,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "6cdda8a1e4287f171464468206e30b571d552eb595049689c9f58f27aba07913",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-discourse-on-the-method_2026-10-30.gvec"
+ "sourceSha256": "eac069ae0ce9a974fa9fad2005687d88f5f339ffc35830beb32aa246b8c33126",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-discourse-on-the-method_2026-11-09.gvec"
 }

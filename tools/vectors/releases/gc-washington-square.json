@@ -1,14 +1,14 @@
 {
  "id": "gc-washington-square",
  "kind": "book",
- "fileName": "gc-washington-square_2026-10-30.gvec",
+ "fileName": "gc-washington-square_2026-11-09.gvec",
  "sizeBytes": 143020,
- "sha256": "4a18b42f4303badbb3133f0d57cfaf60c4e334ee687ba20201027e5d697cb64b",
+ "sha256": "2d3cccef8bbd437656111fbf02cfbb9b34f7db8886dcb6b241a672cae95b24c2",
  "count": 486,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "3d3cff68ff5e840abc538eef8fe0d96d548cbf457e541e1da945dbeee7fd4d2d",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-washington-square_2026-10-30.gvec"
+ "sourceSha256": "40a2de6aa9031f7153e954f9d8bf2640b4e9a3fd11ba19c1f948aa465a8fcdfb",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-washington-square_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-social-contract",
  "kind": "book",
- "fileName": "gc-social-contract_2026-10-30.gvec",
+ "fileName": "gc-social-contract_2026-11-09.gvec",
  "sizeBytes": 233278,
- "sha256": "a76c663b6c305ebff99497c1f08546907ea7c974cc442cbdb6cbf76cc3900f4b",
+ "sha256": "a36da5cfffc631b366a0477d83c28644c4a94fa76b96fc1c8fa898d495c4bad2",
  "count": 793,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "7b2f8583e47a865ada0fd99bdc4b1789321cd4b03ff8c7e43315744716d433c3",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-social-contract_2026-10-30.gvec"
+ "sourceSha256": "411a10ceb964d84d39d97a81b032f4f2585590d80311d7e44a947dca2e384a24",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-social-contract_2026-11-09.gvec"
 }

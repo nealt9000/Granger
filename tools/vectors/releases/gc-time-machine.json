@@ -1,14 +1,14 @@
 {
  "id": "gc-time-machine",
  "kind": "book",
- "fileName": "gc-time-machine_2026-10-30.gvec",
+ "fileName": "gc-time-machine_2026-11-09.gvec",
  "sizeBytes": 63640,
- "sha256": "cfa4812a3459e224b646be6de7413da22035d7666045c88dee2271c0feef4745",
+ "sha256": "9efb235c8b17694e2f10ab6cd915106606642c435ac2c545ffbb0501a332b1bd",
  "count": 216,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "db15a4fc425a0f9dfe76db33a41c0924e63722364dfa0985a085173685c3f881",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-time-machine_2026-10-30.gvec"
+ "sourceSha256": "1ceed11064d373603fd9fa53202ea200a057345c1ae0ee55a6d3edeb98d02972",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-time-machine_2026-11-09.gvec"
 }

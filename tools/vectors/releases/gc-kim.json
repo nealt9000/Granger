@@ -1,14 +1,14 @@
 {
  "id": "gc-kim",
  "kind": "book",
- "fileName": "gc-kim_2026-10-30.gvec",
+ "fileName": "gc-kim_2026-11-09.gvec",
  "sizeBytes": 266794,
- "sha256": "60f6fc5c75545caa2532bb5d659225d24ad98015ffdb9a819c684a3b8d4bd91f",
+ "sha256": "39819363896e8af0a07dcf90ac01a8094631b86f288a5b6d603b5411f1557cbe",
  "count": 907,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "b2494763305a60ee51e47e986b37f6e7764339bdbaade457f05d9f48d54844e7",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-kim_2026-10-30.gvec"
+ "sourceSha256": "5a45b0bb15e6787847b3f590375ea302c45d6ed8a69941c9b6e1b17e7d38be9f",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-kim_2026-11-09.gvec"
 }

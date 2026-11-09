@@ -1,14 +1,14 @@
 {
  "id": "gc-essay-on-man",
  "kind": "book",
- "fileName": "gc-essay-on-man_2026-10-30.gvec",
+ "fileName": "gc-essay-on-man_2026-11-09.gvec",
  "sizeBytes": 48352,
- "sha256": "a6c935ae607c169e983dc6f4f341b823a2be457d8c7c1b9de4d3f40a2696aee4",
+ "sha256": "bcde9da10673d3131ce0695fbf034b4a6ba714273faab39c34bd947afca2123f",
  "count": 164,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "993350887f1f00090f1bcdf495943dbaea9fe7b10221d05196a77a47b9b10bf9",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-essay-on-man_2026-10-30.gvec"
+ "sourceSha256": "e472ab6c64e12d3778bdfac8c990ca57688085349eaea0636872d8689d38b8f4",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-essay-on-man_2026-11-09.gvec"
 }

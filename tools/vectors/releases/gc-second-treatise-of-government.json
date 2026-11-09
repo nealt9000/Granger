@@ -1,14 +1,14 @@
 {
  "id": "gc-second-treatise-of-government",
  "kind": "book",
- "fileName": "gc-second-treatise-of-government_2026-10-30.gvec",
+ "fileName": "gc-second-treatise-of-government_2026-11-09.gvec",
  "sizeBytes": 81868,
- "sha256": "0ce93966e340307875e2491ef4109d03842715050947d2e29d2b3eca9fde820b",
+ "sha256": "c27b62a6e6766c620f1e5f8fd241214bb8b82412433bfb5a0d08e4841e05d95b",
  "count": 278,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "74d43cb9b092edf6fc32343bc8eac970498c9e3b5188426527054500c1a962a4",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-second-treatise-of-government_2026-10-30.gvec"
+ "sourceSha256": "0a2c7a82a1f186b124ce24dcf9420575041104ae481af395cf49ed4fd4b7946f",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-second-treatise-of-government_2026-11-09.gvec"
 }

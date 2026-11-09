@@ -1,14 +1,14 @@
 {
  "id": "gc-through-the-looking-glass",
  "kind": "book",
- "fileName": "gc-through-the-looking-glass_2026-10-30.gvec",
+ "fileName": "gc-through-the-looking-glass_2026-11-09.gvec",
  "sizeBytes": 87160,
- "sha256": "21d67a012209a3e9269068e31654542a4ba9bd8ace4bf06c155305b8be758e2d",
+ "sha256": "aa03ff0f1bfa9923c46df3a7416ed6678f5f9e870b985e36a601f89472184a11",
  "count": 296,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ddf7cd9e41139988168530e6fa092ff977b6653a51a9e53f5f23c2a55bce486e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-through-the-looking-glass_2026-10-30.gvec"
+ "sourceSha256": "e8f91d66fcfe31ed7cf868a337fb94b0ddbb94b1e4034a379f1d7148c9a879a4",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-through-the-looking-glass_2026-11-09.gvec"
 }

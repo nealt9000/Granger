@@ -1,14 +1,14 @@
 {
  "id": "gc-es-los-pazos-de-ulloa",
  "kind": "book",
- "fileName": "gc-es-los-pazos-de-ulloa_2026-10-30.gvec",
- "sizeBytes": 174180,
- "sha256": "5b50fe8fae90739c54bde8a186ddf3136254fc7bb0025329623e90c8eb2c69e2",
- "count": 592,
+ "fileName": "gc-es-los-pazos-de-ulloa_2026-11-09.gvec",
+ "sizeBytes": 174478,
+ "sha256": "ceff540fe89f48018cc0a02bb0b70bd9e2f4ea98330ff14cb964cf88582ea580",
+ "count": 593,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "f7edf66be96e0cc035329e980ad093fb81eef2293fc14aeb12514db233c29933",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-los-pazos-de-ulloa_2026-10-30.gvec"
+ "sourceSha256": "082fc89da2216dd04bfcfeda74aab175308a3f15f0477c5f179071875837f1bb",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-los-pazos-de-ulloa_2026-11-09.gvec"
 }

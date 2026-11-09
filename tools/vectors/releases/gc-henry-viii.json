@@ -1,14 +1,14 @@
 {
  "id": "gc-henry-viii",
  "kind": "book",
- "fileName": "gc-henry-viii_2026-10-30.gvec",
+ "fileName": "gc-henry-viii_2026-11-09.gvec",
  "sizeBytes": 70402,
- "sha256": "ba7d6bfc96a11df947cc04e3cd24695beae04c1f6c93cd5d4bcb6bd458a477bd",
+ "sha256": "25d8087085d49a65e3b74fb4af25765285cd95178fe3242017ea8d274c1fb248",
  "count": 239,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "e830e99d75a08d104628ada653b2cc15f9a1e8e140e539a45c9d2357ab3e2e51",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-henry-viii_2026-10-30.gvec"
+ "sourceSha256": "f1431289f1e52532ca9782e3d0ca2a4462f5580a70e1595f00c86fda8d2eca29",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-henry-viii_2026-11-09.gvec"
 }

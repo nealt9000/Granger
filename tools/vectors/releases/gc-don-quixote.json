@@ -1,14 +1,14 @@
 {
  "id": "gc-don-quixote",
  "kind": "book",
- "fileName": "gc-don-quixote_2026-10-30.gvec",
+ "fileName": "gc-don-quixote_2026-11-09.gvec",
  "sizeBytes": 726610,
- "sha256": "2db5befc869033c03c656e774785d26109f19707151c75cd0602705cef1a5919",
+ "sha256": "4978174071e1c6b1c90ec03319f66ba2f1daeac42a42be6cc5ed30000703313b",
  "count": 2471,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "84008ed4d7ec59469aa0c84be9fe6cfb44620f370f820d055a1f9ddf0a7924ed",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-don-quixote_2026-10-30.gvec"
+ "sourceSha256": "af8a15f25e1580931699b349fac72453ec00de2ebb6b361ce7a6f9206760b435",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-don-quixote_2026-11-09.gvec"
 }

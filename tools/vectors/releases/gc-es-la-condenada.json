@@ -1,14 +1,14 @@
 {
  "id": "gc-es-la-condenada",
  "kind": "book",
- "fileName": "gc-es-la-condenada_2026-10-30.gvec",
- "sizeBytes": 97152,
- "sha256": "edf8e002b517ac704b8eae4fb053543a5dfe999634d63a8d52abc99c504fa69d",
- "count": 330,
+ "fileName": "gc-es-la-condenada_2026-11-09.gvec",
+ "sizeBytes": 97450,
+ "sha256": "d96a36818a3d27f6c7cfc390a090f730d7e0cb1872f32f2e4caecd20ce1d131e",
+ "count": 331,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "cc28b640e4c788ea8646a234d1ab80ba0a36dac3b427da57cb1838fc3af6dbfb",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-la-condenada_2026-10-30.gvec"
+ "sourceSha256": "6c631e4117d09dded8f1eada15cf71b8270a34044c0859652bbe0c093cbd1b82",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-la-condenada_2026-11-09.gvec"
 }

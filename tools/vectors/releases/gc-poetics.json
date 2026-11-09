@@ -1,14 +1,14 @@
 {
  "id": "gc-poetics",
  "kind": "book",
- "fileName": "gc-poetics_2026-10-30.gvec",
+ "fileName": "gc-poetics_2026-11-09.gvec",
  "sizeBytes": 29536,
- "sha256": "72becd0284807ecd0557907b25717aa9c5b9cb1e559e5d6b5f378d5bd0324978",
+ "sha256": "c8b7050f9a7efd8ed2cb021a9b0adec5e58d8863af7b9cdf20d4dbd7e491fba0",
  "count": 100,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "0593e5540f926a5d43c0c791004f1932d7a876010067a1bd7c4d4e16fc83e8b3",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-poetics_2026-10-30.gvec"
+ "sourceSha256": "e9ebdc966ecdac71666f0498bee71db3bd7fab673a7153ce9366629010e89beb",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-poetics_2026-11-09.gvec"
 }

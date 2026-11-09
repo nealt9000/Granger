@@ -1,14 +1,14 @@
 {
  "id": "gc-thirty-nine-steps",
  "kind": "book",
- "fileName": "gc-thirty-nine-steps_2026-10-30.gvec",
+ "fileName": "gc-thirty-nine-steps_2026-11-09.gvec",
  "sizeBytes": 105976,
- "sha256": "a6d3ace4c8d8dae8e8bd72b549132632447fc1bd80452c5be44475222a1f3eb9",
+ "sha256": "0b2241ad53f365e4e18073bdbb4a675527f50127466fd221bb95b3b58f5b4b7b",
  "count": 360,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "3d44a4aee4ae2383b2fc26495c1a9915bd3b7af32ad73c6ed594918fed62db26",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-thirty-nine-steps_2026-10-30.gvec"
+ "sourceSha256": "7a3000d26d62feed703a4e5b4d7f0fec61e805114eeae28ff2898c73b1667b18",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-thirty-nine-steps_2026-11-09.gvec"
 }

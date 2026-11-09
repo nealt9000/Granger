@@ -1,14 +1,14 @@
 {
  "id": "gc-yellow-wallpaper",
  "kind": "book",
- "fileName": "gc-yellow-wallpaper_2026-10-30.gvec",
+ "fileName": "gc-yellow-wallpaper_2026-11-09.gvec",
  "sizeBytes": 19834,
- "sha256": "102a4c0c86a1c09aec5596e8e5b5b563672a6bb9c4ebdb201926c6479195c9ae",
+ "sha256": "801f71800c390c10c89d77681cfce543980717c728825c112c08413ccd333cee",
  "count": 67,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "415b3172c1857acca096d1463e8989b9a23fcf783233e8a6eec11f15f377c320",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-yellow-wallpaper_2026-10-30.gvec"
+ "sourceSha256": "d165d0e5d30720be61996f2927594e78e93f9719f9d7f2d1fdf57330a0f43062",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-yellow-wallpaper_2026-11-09.gvec"
 }

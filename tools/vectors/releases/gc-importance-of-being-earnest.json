@@ -1,14 +1,14 @@
 {
  "id": "gc-importance-of-being-earnest",
  "kind": "book",
- "fileName": "gc-importance-of-being-earnest_2026-10-30.gvec",
+ "fileName": "gc-importance-of-being-earnest_2026-11-09.gvec",
  "sizeBytes": 66286,
- "sha256": "d5c6b8c30182f8e102af7b10f7eb225ebe6d92563aa938cdf49c7a86f26d3a61",
+ "sha256": "89dd80b9e0f1f277830b3c4074578547d49bf6e4775667c16a94598a003f83f6",
  "count": 225,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "fd1a4831427e282f30226160b02a4c43558fbfbcc36626fee18e75574b495e46",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-importance-of-being-earnest_2026-10-30.gvec"
+ "sourceSha256": "0194fedeecbc8c4de55024e86858b8428787c4139b8254632c10f727e133c3f0",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-importance-of-being-earnest_2026-11-09.gvec"
 }

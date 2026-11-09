@@ -1,14 +1,14 @@
 {
  "id": "gc-es-tres-novelas-ejemplares-y-un-prologo",
  "kind": "book",
- "fileName": "gc-es-tres-novelas-ejemplares-y-un-prologo_2026-10-30.gvec",
- "sizeBytes": 82158,
- "sha256": "de9c628f90d3a80875c94ce6bb93a750760fca85554b60263d92d3d23b56ff13",
- "count": 279,
+ "fileName": "gc-es-tres-novelas-ejemplares-y-un-prologo_2026-11-09.gvec",
+ "sizeBytes": 82456,
+ "sha256": "e99339b67acfd8d706c8f0939efe8483a3abde391cae6e283e5846b3f39407a4",
+ "count": 280,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "423d13d872faf25e1e7fe7613a59c23236f63d662494011d7bc6fa0c1cd47178",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-tres-novelas-ejemplares-y-un-prologo_2026-10-30.gvec"
+ "sourceSha256": "030ecc26f097976d9a620d4808600461e9e2dff7052a6459b16ea92415162446",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-tres-novelas-ejemplares-y-un-prologo_2026-11-09.gvec"
 }

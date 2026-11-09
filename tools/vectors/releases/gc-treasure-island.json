@@ -1,14 +1,14 @@
 {
  "id": "gc-treasure-island",
  "kind": "book",
- "fileName": "gc-treasure-island_2026-10-30.gvec",
+ "fileName": "gc-treasure-island_2026-11-09.gvec",
  "sizeBytes": 178006,
- "sha256": "8455216d9d44e9691060922579df59feb1c02ec72ea7ebb7eabf85f2ba9b8a6c",
+ "sha256": "acb09d8df624e33f8d165940b075ace91b72aa27810a4943a66785d8f299bf90",
  "count": 605,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "fc8de019f857f7e7f4c8c474ce3dac037f9562590990edf0d043467abaf171e0",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-treasure-island_2026-10-30.gvec"
+ "sourceSha256": "87f1ff95f0241a29c1110e96dd2524dc168caa836ee45fec2c81a6620a40cd58",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-treasure-island_2026-11-09.gvec"
 }

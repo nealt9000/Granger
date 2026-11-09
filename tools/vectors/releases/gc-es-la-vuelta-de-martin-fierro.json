@@ -1,14 +1,14 @@
 {
  "id": "gc-es-la-vuelta-de-martin-fierro",
  "kind": "book",
- "fileName": "gc-es-la-vuelta-de-martin-fierro_2026-10-30.gvec",
- "sizeBytes": 86862,
- "sha256": "89926939a80e94142b32938c45140fdd4fcaf7a6ac4ba3976cbd0274ed3deb8f",
- "count": 295,
+ "fileName": "gc-es-la-vuelta-de-martin-fierro_2026-11-09.gvec",
+ "sizeBytes": 87160,
+ "sha256": "5b6ca7d8d715bd3a55287483d825c51cbbe174f6d09bf525a4f58b8c3836205a",
+ "count": 296,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "323b274e6b47a534733bde1930a2208c8a21e001f27c8db317dcf529049acfb7",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-la-vuelta-de-martin-fierro_2026-10-30.gvec"
+ "sourceSha256": "40c580228db9e76bce05f6822d3e03bdc628c26f61c21e8b642eb44c28325215",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-la-vuelta-de-martin-fierro_2026-11-09.gvec"
 }

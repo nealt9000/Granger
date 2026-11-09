@@ -1,14 +1,14 @@
 {
  "id": "gc-es-cuentos-de-navidad-y-reyes-cuentos-de-la-patria-cuentos-antiguos",
  "kind": "book",
- "fileName": "gc-es-cuentos-de-navidad-y-reyes-cuentos-de-la-patria-cuentos-antiguos_2026-10-30.gvec",
- "sizeBytes": 111558,
- "sha256": "82c4b809a4783151e67adfced72c98bdaf6a3e2e5ff80bba366c915c61884154",
- "count": 379,
+ "fileName": "gc-es-cuentos-de-navidad-y-reyes-cuentos-de-la-patria-cuentos-antiguos_2026-11-09.gvec",
+ "sizeBytes": 111856,
+ "sha256": "1be2f1c14f3d55033bfc4878adbcefa6c7daaffee34adc1d8f3cd1ebe1b0e8b5",
+ "count": 380,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "0674bd1a5f06a1b33fe7c3cdf3eaabf02c7caeac985e73ae9e04ddbd13e5aeca",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-cuentos-de-navidad-y-reyes-cuentos-de-la-patria-cuentos-antiguos_2026-10-30.gvec"
+ "sourceSha256": "1e48e65bec6753bc4a1c5dd2b2af5d77f8a0d866ce2beba344c889e2dac460fc",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-cuentos-de-navidad-y-reyes-cuentos-de-la-patria-cuentos-antiguos_2026-11-09.gvec"
 }

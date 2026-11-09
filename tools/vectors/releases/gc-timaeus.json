@@ -1,14 +1,14 @@
 {
  "id": "gc-timaeus",
  "kind": "book",
- "fileName": "gc-timaeus_2026-10-30.gvec",
+ "fileName": "gc-timaeus_2026-11-09.gvec",
  "sizeBytes": 90394,
- "sha256": "1f535b01a312e4b1315fa38c9d201449859c59c65d8e8a477cd2235e7f6a30f1",
+ "sha256": "cf290620b11ba393cb6d18986590e38b130d1b5dd9ba0228c468fe3ddecc7a43",
  "count": 307,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "926a16162bea05f7e5385372ba879079a7286fab953f640353f05de61aa39ffa",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-timaeus_2026-10-30.gvec"
+ "sourceSha256": "349d37c10d6afcf515792358bdd5366b375f9064032047cef1635050e9daa288",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-timaeus_2026-11-09.gvec"
 }

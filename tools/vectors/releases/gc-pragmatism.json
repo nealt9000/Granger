@@ -1,14 +1,14 @@
 {
  "id": "gc-pragmatism",
  "kind": "book",
- "fileName": "gc-pragmatism_2026-10-30.gvec",
+ "fileName": "gc-pragmatism_2026-11-09.gvec",
  "sizeBytes": 100684,
- "sha256": "8e7433ebf39a904bdb4168217ac39165400029397a8a495209c3ced27e1bfe2a",
+ "sha256": "fc7c50ed50ffa7ec21b35f81cf62f944493c7fbf6a96b3baef98f214a1050926",
  "count": 342,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "3181d92c6a7eeb8a0077d24fe9182a53065212913f7f2abdb8d02c6a20688ca4",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-pragmatism_2026-10-30.gvec"
+ "sourceSha256": "a4daadf764c4e57e5d76d6843ef128925c089f500d97ec81d61439774a7f934c",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-pragmatism_2026-11-09.gvec"
 }

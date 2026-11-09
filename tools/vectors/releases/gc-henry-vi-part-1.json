@@ -1,14 +1,14 @@
 {
  "id": "gc-henry-vi-part-1",
  "kind": "book",
- "fileName": "gc-henry-vi-part-1_2026-10-30.gvec",
+ "fileName": "gc-henry-vi-part-1_2026-11-09.gvec",
  "sizeBytes": 70108,
- "sha256": "b131501b9b05421ea70a787720490ed3826f8041e4973d33d2c135cc16775af2",
+ "sha256": "c815a06195b4bb69917315284dfdca0eb7f3d124bca3dfe6ff838ee5b686263d",
  "count": 238,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c509607b25d0750e6bfa7a25c0541665609618285cc507c0a74d7e7f9ec8be09",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-henry-vi-part-1_2026-10-30.gvec"
+ "sourceSha256": "26b8d1989a73af84889a3a92705bfdaa31a4e5ba50ae5766e5933645e43c9906",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-henry-vi-part-1_2026-11-09.gvec"
 }

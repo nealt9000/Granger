@@ -1,14 +1,14 @@
 {
  "id": "gc-clouds",
  "kind": "book",
- "fileName": "gc-clouds_2026-10-30.gvec",
- "sizeBytes": 13660,
- "sha256": "82a2ea37ed775cfacb999f72803f37002bd482392d9dad512a910a1d539adbb2",
- "count": 46,
+ "fileName": "gc-clouds_2026-11-09.gvec",
+ "sizeBytes": 43648,
+ "sha256": "66478223011f8e6b6811271331125cc06d2e3028756671acbf840cdb50e6f179",
+ "count": 148,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "afb9d48baa8993b937bcbe30a303af71a4962b052d1fdc370fc83c0de56b0948",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-clouds_2026-10-30.gvec"
+ "sourceSha256": "72cdb86b85cc9f164d6225a01d16af047577d7fc0a0808d8afe613746fa9f81e",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-clouds_2026-11-09.gvec"
 }

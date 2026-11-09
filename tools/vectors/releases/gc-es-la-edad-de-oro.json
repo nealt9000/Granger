@@ -1,14 +1,14 @@
 {
  "id": "gc-es-la-edad-de-oro",
  "kind": "book",
- "fileName": "gc-es-la-edad-de-oro_2026-10-30.gvec",
- "sizeBytes": 97740,
- "sha256": "ab9d251f08cd9a944f47b88dc6837379cc4367eaa24ac361b91396eb08155ee4",
- "count": 332,
+ "fileName": "gc-es-la-edad-de-oro_2026-11-09.gvec",
+ "sizeBytes": 98038,
+ "sha256": "c82034beefa459abae23fe1abeb782fc990c780dbdd1024f8bf96ce33165926d",
+ "count": 333,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "6d5247140414b68c1e77e7bb006783364e16de0809594c38d212571e0fa65b2b",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-la-edad-de-oro_2026-10-30.gvec"
+ "sourceSha256": "0e32f79fb306b9483fa488b91d472ff3c4ac468e1987230ffad18b423eaafb37",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-la-edad-de-oro_2026-11-09.gvec"
 }

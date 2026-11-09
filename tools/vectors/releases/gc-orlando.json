@@ -1,0 +1,14 @@
+{
+ "id": "gc-orlando",
+ "kind": "book",
+ "fileName": "gc-orlando_2026-11-09.gvec",
+ "sizeBytes": 109504,
+ "sha256": "94d2e6f21424038872d2b39dc53faf026e4e6b080e94f2100de18c8eb9cdae0b",
+ "count": 372,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "b713455bf85f74da149f7d4810ee5e2cf65a6dfa9adafe7f6ebe0461c55a2036",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-orlando_2026-11-09.gvec"
+}

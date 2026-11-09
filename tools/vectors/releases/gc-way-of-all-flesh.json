@@ -1,14 +1,14 @@
 {
  "id": "gc-way-of-all-flesh",
  "kind": "book",
- "fileName": "gc-way-of-all-flesh_2026-10-30.gvec",
+ "fileName": "gc-way-of-all-flesh_2026-11-09.gvec",
  "sizeBytes": 315010,
- "sha256": "06647fd9451837e769e022a90b72b7aa93589eec796d9871d42440a10116e751",
+ "sha256": "4765b510e4c857417d3a3654298a6d59af45c765255c3e83850e34a5a4a41505",
  "count": 1071,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "e4d7bd577f8d591784ad1059c002455c4b457b6b9da50ea61920239bee737753",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-way-of-all-flesh_2026-10-30.gvec"
+ "sourceSha256": "e738f60191c7cc3ee46083b5870d981ce9c63451d34c34e1f83c707ca3ed45b8",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-way-of-all-flesh_2026-11-09.gvec"
 }

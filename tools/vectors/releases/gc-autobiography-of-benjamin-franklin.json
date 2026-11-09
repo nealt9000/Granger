@@ -1,0 +1,14 @@
+{
+ "id": "gc-autobiography-of-benjamin-franklin",
+ "kind": "book",
+ "fileName": "gc-autobiography-of-benjamin-franklin_2026-11-09.gvec",
+ "sizeBytes": 133024,
+ "sha256": "534910045669738070418b32fa829d8826a7286503e4a795d8b3caa47dc911aa",
+ "count": 452,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "71d499fd1f3550aa7bc5938ef7bcefd236242857f7da60ae1950616aa056699c",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-autobiography-of-benjamin-franklin_2026-11-09.gvec"
+}

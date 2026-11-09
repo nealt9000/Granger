@@ -1,14 +1,14 @@
 {
  "id": "gc-es-hamlet",
  "kind": "book",
- "fileName": "gc-es-hamlet_2026-10-30.gvec",
- "sizeBytes": 95976,
- "sha256": "2e03e3afbe6ded2ae63dcbe0f2925bce506b6c31a410794ed9081727dec53015",
- "count": 326,
+ "fileName": "gc-es-hamlet_2026-11-09.gvec",
+ "sizeBytes": 96274,
+ "sha256": "acc1a4e130e98b7d253705bbea20377544321a8f078b39986c44ee02eeaaa44b",
+ "count": 327,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "6a54919ccf598c47a7e363ef780365d9268355c15085582c61dcd7059f73355d",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-hamlet_2026-10-30.gvec"
+ "sourceSha256": "a955b7f1c67319e0d39bbf1bc841b615e39c882951a5d98e27a468df6b45aaac",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-hamlet_2026-11-09.gvec"
 }

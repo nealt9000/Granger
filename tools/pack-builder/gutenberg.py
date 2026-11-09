@@ -5,7 +5,9 @@ and so does every remaining block that names Project Gutenberg: their trademark 
 redistribute a public-domain text freely once every reference to Project Gutenberg is removed. Images,
 scripts and external links go too, since packs are text-only and the reader never touches the network.
 So do the shells those cuts leave: empty boilerplate headers and footers, blocks with nothing in them (an
-emptied figure, a `<p>&nbsp;</p>` spacer), and a transcriber's note that only speaks of the cover art.
+emptied figure, a `<p>&nbsp;</p>` spacer), and a transcriber's note that only speaks of the cover art. A
+producer's credit that Gutenberg's header gives ("Credits: Produced by ...") and the text repeats at its start goes
+too, as does a one-line note that the transcriber made the cover.
 """
 import re
 from dataclasses import dataclass
@@ -61,6 +63,7 @@ def clean(html: bytes, cut_after: str | None = None) -> Cleaned:
     for comment in soup.find_all(string=lambda s: isinstance(s, Comment)):
         comment.extract()
     root = soup.body or soup
+    credits = _credits(root)
     start, end = root.find(id="pg-start-separator"), root.find(id="pg-end-separator")
     if start is None or end is None:
         start = _text_marker(soup, root, START)
@@ -80,6 +83,7 @@ def clean(html: bytes, cut_after: str | None = None) -> Cleaned:
         if SCHEME.match(link["href"].strip()):
             unwrap_link(link)
     removed, removed_chars = _drop_branding(root)
+    removed += _drop_credit_lines(root, credits)
     _drop_leftovers(root)
 
     body = soup.new_tag("div")
@@ -186,8 +190,12 @@ def _drop_leftovers(root: Tag) -> None:
             shell.decompose()
     _drop_cover_notes(root)
     _drop_faded_page_notices(root)
+    _drop_illustration_lists(root)
+    _drop_edition_tables(root)
+    _drop_spacers(root)
     for block in reversed(root.find_all(["div", "p"])):  # innermost first, so emptied wrappers go too
-        if block.parent is None or block.parent.name in NO_PHRASING_CHILDREN or block.get_text().strip():
+        if (block.parent is None or block.parent.name in NO_PHRASING_CHILDREN or block.get_text().strip()
+                or "gx-gap" in (block.get("class") or [])):
             continue
         children = [c for c in block.contents if not (isinstance(c, NavigableString) and not c.strip())]
         if all(isinstance(c, Tag) and c.name == "span" and set(c.attrs) == {"id"} and not c.contents
@@ -197,6 +205,118 @@ def _drop_leftovers(root: Tag) -> None:
             for span in children:
                 block.insert_before(span.extract())
             block.decompose()
+
+
+GAP_STYLE = "height: 1em"
+_SPACER_CHILDREN = {"br", "a", "span"}
+
+
+def _spacer(block: Tag) -> bool:
+    """A block with no words that only makes room: `<p><br/></p>`, `<div style="height: 4em"><br/>…</div>`, a
+    `<p><a id="…"/></p>` holding a link target."""
+    if block.get_text().strip() or "gx-gap" in (block.get("class") or []):
+        return False
+    return all(t.name in _SPACER_CHILDREN and not t.get("href") for t in block.find_all(True))
+
+
+def _drop_spacers(root: Tag) -> None:
+    """Spacer blocks go (formatting audit F6: 18,209 `<br>`-only blocks in 119 books, 6,572 anchor-only, 2,289
+    height spacers), their ids kept as spans. Where two or more stood together (a stanza or scene break, as in
+    Poems: Three Series, whose one-line divs are parted by one such block and its stanzas by two) one small gap
+    stays, unless a heading or rule follows, which brings its own space."""
+    holder = BeautifulSoup("", "lxml")
+    for block in reversed(root.find_all(["p", "div"])):  # innermost first, so emptied wrappers go too
+        if block.parent is None or block.parent.name in NO_PHRASING_CHILDREN or not _spacer(block):
+            continue
+        ids = [t["id"] for t in [block, *block.find_all(True)] if t.get("id")]
+        ids += [t["name"] for t in block.find_all("a", attrs={"name": True}) if t.get("name") not in ids]
+        marker = holder.new_tag("span", attrs={"data-spacer": "1"})
+        block.insert_before(marker)
+        for ident in dict.fromkeys(ids):
+            marker.insert_before(holder.new_tag("span", attrs={"id": ident}))
+        block.decompose()
+    for marker in root.find_all("span", attrs={"data-spacer": True}):
+        if marker.parent is None:
+            continue
+        run, node = [marker], marker.next_sibling
+        while node is not None:
+            if isinstance(node, NavigableString) and not node.strip() or (
+                    isinstance(node, Tag) and node.name == "span" and set(node.attrs) == {"id"} and not node.contents):
+                node = node.next_sibling
+                continue
+            if isinstance(node, Tag) and node.name == "span" and node.get("data-spacer"):
+                run.append(node)
+                node = node.next_sibling
+                continue
+            break
+        following = node if isinstance(node, Tag) else None
+        keep_gap = (len(run) >= 2 and following is not None and not HEADINGS.match(following.name)
+                    and following.name != "hr" and _leads_somewhere(run[0]))
+        if keep_gap:
+            run[0].replace_with(holder.new_tag("div", attrs={"class": "gx-gap", "style": GAP_STYLE}))
+            run = run[1:]
+        for m in run:
+            m.decompose()
+
+
+def _leads_somewhere(marker: Tag) -> bool:
+    """True when words come before the marker in its parent (a gap at a wrapper's start parts nothing)."""
+    node = marker.previous_sibling
+    while node is not None:
+        if (node.get_text() if isinstance(node, Tag) else str(node)).strip():
+            return True
+        node = node.previous_sibling
+    return False
+
+
+def _drop_edition_tables(root: Tag) -> None:
+    """Gutenberg's table of its other editions of the work before the text (the Iliad, #2199: "22382 (With 800
+    linked footnotes…)", "16452 (In blank verse…)"): every row an ebook number and at most a note in brackets."""
+    seen = 0
+    for node in root.find_all(["table", "h1", "h2", "h3", "p"]):
+        if node.name != "table":
+            seen += len(node.get_text().strip())
+            if seen > FRONT_MATTER_CHARS:
+                return
+            continue
+        rows = [[" ".join(c.get_text().split()) for c in tr.find_all(["td", "th"])] for tr in node.find_all("tr")]
+        if len(rows) >= 2 and all(r and re.fullmatch(r"\d{2,6}", r[0]) and all(not c or c.startswith("(") for c in r[1:])
+                                  for r in rows):
+            node.decompose()
+
+
+ILLUSTRATIONS = re.compile(r"^\W*(list of )?(illustrations|plates)\W*$", re.I)
+ILLUSTRATION_LIST_CHARS = 20_000
+PAGE_MARKS = {"pagenum", "pageno", "page-num", "pagenumber", "tei-pb"}
+
+
+def _drop_illustration_lists(root: Tag) -> None:
+    """A "List of Illustrations" heading and the list under it, up to the next heading, since packs keep no
+    pictures (audit F10: 17 books). Only when what follows is a short list of entries."""
+    for heading in root.find_all(["h1", "h2", "h3", "h4", "h5", "h6"]):
+        words = "".join(t for t in heading.find_all(string=True)
+                        if not any(PAGE_MARKS & set(p.get("class") or []) for p in t.parents))
+        if heading.parent is None or not ILLUSTRATIONS.match(" ".join(words.split())):
+            continue
+        level = int(heading.name[1])
+
+        def ends(node) -> bool:  # a heading at the list's level or above; its own "In Colour" sub-heads go too
+            heads = [node] if HEADINGS.match(node.name) else node.find_all(HEADINGS)
+            return any(int(h.name[1]) <= level for h in heads) or (bool(heads) and not HEADINGS.match(node.name))
+
+        run, node = [], heading.next_sibling
+        while node is not None and not (isinstance(node, Tag) and ends(node)):
+            run.append(node)
+            node = node.next_sibling
+        text = "".join(n.get_text() if isinstance(n, Tag) else str(n) for n in run)
+        entries = [n for n in run if isinstance(n, Tag) and n.get_text().strip() and not HEADINGS.match(n.name)]
+        if len(text) > ILLUSTRATION_LIST_CHARS or not entries or any(
+                len(" ".join(e.get_text().split())) > 300 and e.name not in ("table", "ul", "ol", "dl", "div")
+                for e in entries):
+            continue
+        for n in run:
+            n.extract()
+        heading.decompose()
 
 
 def _drop_faded_page_notices(root: Tag) -> None:
@@ -218,6 +338,35 @@ def _drop_faded_page_notices(root: Tag) -> None:
             block = parent
         if block is not None and not block.decomposed and FADED_PAGE.search(" ".join(block.get_text(" ").split())):
             block.decompose()
+
+
+CREDITS_LABEL = re.compile(r"^\s*Credits\s*:?\s*$", re.I)
+CREDIT_BLOCKS = 4
+COVER_NOTE = re.compile(r"^The cover (image|art) (was|has been) (created|made|produced)[^.]{0,80}\.?$", re.I)
+
+
+def _credits(root: Tag) -> str:
+    """The producer's credit in Gutenberg's header ("Credits: Produced by ..."), read before the header goes."""
+    label = root.find(lambda t: t.name in ("strong", "b") and CREDITS_LABEL.match(t.get_text()))
+    if label is None or label.parent is None:
+        return ""
+    return " ".join(label.parent.get_text(" ").split()).split(":", 1)[-1].strip()
+
+
+def _drop_credit_lines(root: Tag, credits: str) -> int:
+    """The credit repeated in the first blocks of the text (in one line or split over two), and a cover note."""
+    def words(text: str) -> str:  # without the volunteers' e-mail addresses some texts add
+        return " ".join(re.findall(r"\w+", re.sub(r"<[^<>\s]+@[^<>\s]+>|\S+@\S+", " ", text.lower())))
+
+    removed, plain = 0, words(credits)
+    blocks = [b for b in root.find_all(["p", "div"]) if not b.find(["p", "div"]) and b.get_text(strip=True)]
+    for block in blocks[:CREDIT_BLOCKS]:
+        text = " ".join(block.get_text(" ").split())
+        said = words(text)
+        if COVER_NOTE.match(text) or (len(plain) >= 15 and len(said) >= 10 and f" {said} " in f" {plain} "):
+            block.decompose()
+            removed += 1
+    return removed
 
 
 def _drop_cover_notes(root: Tag) -> None:

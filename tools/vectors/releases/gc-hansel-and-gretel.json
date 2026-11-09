@@ -1,14 +1,14 @@
 {
  "id": "gc-hansel-and-gretel",
  "kind": "book",
- "fileName": "gc-hansel-and-gretel_2026-10-30.gvec",
- "sizeBytes": 57466,
- "sha256": "bce5fba4c1c86343b2ed5970e8714faf9d7015ba3a4362febe6c8df33bb56d3f",
- "count": 195,
+ "fileName": "gc-hansel-and-gretel_2026-11-09.gvec",
+ "sizeBytes": 57760,
+ "sha256": "5b79f9a8d78ac0f5dfd7611a6d27ddf4e4f734e72f598552dfda87144b7016ac",
+ "count": 196,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "2181b33063e6a29d500107b5fa94b75e2b14d914b93c18ebc3d6a66da65bf998",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-hansel-and-gretel_2026-10-30.gvec"
+ "sourceSha256": "6207ed39574f2b6eaa5b83ff5c5b0e8fd8250ff7438bf4271b6c88fdbe450a46",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-hansel-and-gretel_2026-11-09.gvec"
 }

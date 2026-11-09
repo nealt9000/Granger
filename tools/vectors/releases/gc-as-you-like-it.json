@@ -1,14 +1,14 @@
 {
  "id": "gc-as-you-like-it",
  "kind": "book",
- "fileName": "gc-as-you-like-it_2026-10-30.gvec",
+ "fileName": "gc-as-you-like-it_2026-11-09.gvec",
  "sizeBytes": 63640,
- "sha256": "26ed3c923b5feb9d0cb18f8eb7bfa0399e7cf9b2c4e0364f6395109ef1dba33f",
+ "sha256": "f3b8c685678abfb554acb4314433cce7e47261b74abc93f1c0c596dc6b053b9a",
  "count": 216,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c9f8ddc8b6e0a225aca72c3c0f5ec1d581b19d5a2e694a38ec5a6aa248a617e0",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-as-you-like-it_2026-10-30.gvec"
+ "sourceSha256": "bcebe603b62f5db0688066843abc62c0576fc524485d69c9cc7e4d2791278337",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-as-you-like-it_2026-11-09.gvec"
 }

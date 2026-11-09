@@ -1,14 +1,14 @@
 {
  "id": "gc-romeo-and-juliet",
  "kind": "book",
- "fileName": "gc-romeo-and-juliet_2026-10-30.gvec",
+ "fileName": "gc-romeo-and-juliet_2026-11-09.gvec",
  "sizeBytes": 72754,
- "sha256": "560cf5aa4c54e22e754a84e9e4027e26a4d99e3250f386590dd1b2700f6b2300",
+ "sha256": "95ec431b1b5c2ba52c9f3322cc362904cd002446041f6814f0b5f4adb2967a76",
  "count": 247,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "28f79d62c16ceccb6adc99852cfc3e06d069989e68677bf621f88c2dccf226b3",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-romeo-and-juliet_2026-10-30.gvec"
+ "sourceSha256": "5df19c9b68756c4dc38514442ecc9341766d80a30bc322f114d56fc1c2a6613b",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-romeo-and-juliet_2026-11-09.gvec"
 }

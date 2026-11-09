@@ -1,14 +1,14 @@
 {
  "id": "gc-faust-gounod",
  "kind": "book",
- "fileName": "gc-faust-gounod_2026-10-30.gvec",
+ "fileName": "gc-faust-gounod_2026-11-09.gvec",
  "sizeBytes": 61582,
- "sha256": "2807fa4927582262162891769504abc735dac1efec352215d3c44e9d0caa63d3",
+ "sha256": "ec41763bacda7c2361ba46b4eac461be6d5d95a6650d91164e76c71df4823974",
  "count": 209,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a4b412931442ba25618ac6c5534be73922cc74ab4e3504a194dcbe8d56300436",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-faust-gounod_2026-10-30.gvec"
+ "sourceSha256": "02e6d4b07bc052e40612272f1dc9f3c17b930f9caa0fd94eaf20c6865c6d6b4d",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-faust-gounod_2026-11-09.gvec"
 }

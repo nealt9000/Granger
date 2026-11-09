@@ -23,14 +23,14 @@ class PublishedCatalogTest {
         assertThat(catalog.packs.size).isEqualTo((raw["packs"] as kotlinx.serialization.json.JsonArray).size)
         assertThat(catalog.models.size).isEqualTo((raw["models"] as kotlinx.serialization.json.JsonArray).size)
         assertThat(catalog.books.size).isEqualTo((raw["books"] as kotlinx.serialization.json.JsonArray).size)
-        // Granger Classics (GC, 2026-10-30) and Clásicos Granger (Plan L3).
-        assertThat(catalog.books.count { it.language == "en" }).isEqualTo(372)
+        // Granger Classics (GC2, 2026-11-09) and Clásicos Granger (Plan L3).
+        assertThat(catalog.books.count { it.language == "en" }).isEqualTo(437)
         assertThat(catalog.books.count { it.language == "es" }).isEqualTo(185)
-        assertThat(catalog.books).hasSize(557)
+        assertThat(catalog.books).hasSize(622)
         assertThat(catalog.packs.map { it.id }).doesNotContain("granger_classics_en")
-        // Starter: the 4 non-Classics items plus the 372 books (GC, 2026-10-30).
-        assertThat(catalog.presets.single { it.id == "starter" }.items).hasSize(376)
-        assertThat(catalog.presets.single { it.id == "granger-classics" }.items).hasSize(372)
+        // Starter: the 4 non-Classics items plus the 437 books (GC2, 2026-11-09).
+        assertThat(catalog.presets.single { it.id == "starter" }.items).hasSize(441)
+        assertThat(catalog.presets.single { it.id == "granger-classics" }.items).hasSize(437)
         assertThat(catalog.presets.single { it.id == "clasicos-granger" }.items).hasSize(185)
     }
 

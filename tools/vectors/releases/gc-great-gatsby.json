@@ -1,14 +1,14 @@
 {
  "id": "gc-great-gatsby",
  "kind": "book",
- "fileName": "gc-great-gatsby_2026-10-30.gvec",
+ "fileName": "gc-great-gatsby_2026-11-09.gvec",
  "sizeBytes": 140668,
- "sha256": "f6c9efdba0f187481b27df34c3b01304757206567dbeec68906fbb964fd78941",
+ "sha256": "d909982c949b82f231f7d59f24c42d1d30b2991b12326d3179398def84d949e9",
  "count": 478,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c678e0975960a11e8d1f39ccb9fb8ed90454b7b043a6374a5b26e286cd20546b",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-great-gatsby_2026-10-30.gvec"
+ "sourceSha256": "af915a570ef254776163213e7351949cd7f10882b8ef0078d158fdc550c82872",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-great-gatsby_2026-11-09.gvec"
 }

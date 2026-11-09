@@ -1,14 +1,14 @@
 {
  "id": "gc-last-of-the-mohicans",
  "kind": "book",
- "fileName": "gc-last-of-the-mohicans_2026-10-30.gvec",
+ "fileName": "gc-last-of-the-mohicans_2026-11-09.gvec",
  "sizeBytes": 330592,
- "sha256": "5b1d391bef2d5b737e0c4012c02e90312eeebb0fdd5de7cc8ba94ca6a3eb3fb3",
+ "sha256": "927c24068b22ccbd9577c3fce2199922c7407931bc05c435037562dc438a1c4f",
  "count": 1124,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "f998f47ded37a2a7e231e05352937cb227a89bc5ae3808c804c6d413f410fd40",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-last-of-the-mohicans_2026-10-30.gvec"
+ "sourceSha256": "307267e6b1775568340c8bedd98885c602885590919d311d9604cd1c5a5cdc8b",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-last-of-the-mohicans_2026-11-09.gvec"
 }

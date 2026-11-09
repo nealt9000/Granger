@@ -1,0 +1,14 @@
+{
+ "id": "gc-r-u-r",
+ "kind": "book",
+ "fileName": "gc-r-u-r_2026-11-09.gvec",
+ "sizeBytes": 73048,
+ "sha256": "f2f57868d9ddece8180c5675cbc14b59a056892b8830ee8cec65348a360f54d8",
+ "count": 248,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "5dbea9d460c66678149ec028aafc3cf06f1d62c274bd5b8e5656b071ea120047",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-r-u-r_2026-11-09.gvec"
+}

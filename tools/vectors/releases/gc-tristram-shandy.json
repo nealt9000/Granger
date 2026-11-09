@@ -1,14 +1,14 @@
 {
  "id": "gc-tristram-shandy",
  "kind": "book",
- "fileName": "gc-tristram-shandy_2026-10-30.gvec",
+ "fileName": "gc-tristram-shandy_2026-11-09.gvec",
  "sizeBytes": 440842,
- "sha256": "2e3ccf4b1e0641fbdb4478d5d8f7b8bb6a2562be1fac4c018aef3ee4eebbe53a",
+ "sha256": "55968d71d866f8fb69a20eb4fbdd7fe9b1c7ef26e05ff8c42c8937f07f160594",
  "count": 1499,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ccb150f79675ac169ef76093217732d1b60cbcddc4e1de150d954975f12a803a",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-tristram-shandy_2026-10-30.gvec"
+ "sourceSha256": "02f11683635683450a2653db82e57f7610d531c14e77b099cb0c6aae5363a90f",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-tristram-shandy_2026-11-09.gvec"
 }

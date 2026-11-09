@@ -1,14 +1,14 @@
 {
  "id": "gc-laws",
  "kind": "book",
- "fileName": "gc-laws_2026-10-30.gvec",
+ "fileName": "gc-laws_2026-11-09.gvec",
  "sizeBytes": 342058,
- "sha256": "6d4ab285739dc64adc6f0118937eb11b057e6f85c556cfaaeb6558b5a0bf1178",
+ "sha256": "af1fdcf90996c87584a1ce9d51389b9ef87c8ff80183b45f670b9ba975deb3ac",
  "count": 1163,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "0ca211f1931941a9286c62b20afb51e793dd328d5fbdf04b72997f69d52d3caf",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-laws_2026-10-30.gvec"
+ "sourceSha256": "aac00d76c6bc7bf0d2a245f03f02b69dfd35f7ca4ce3f02df8ab571b7389fbe6",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-laws_2026-11-09.gvec"
 }

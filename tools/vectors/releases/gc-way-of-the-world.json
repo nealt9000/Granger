@@ -1,14 +1,14 @@
 {
  "id": "gc-way-of-the-world",
  "kind": "book",
- "fileName": "gc-way-of-the-world_2026-10-30.gvec",
+ "fileName": "gc-way-of-the-world_2026-11-09.gvec",
  "sizeBytes": 84514,
- "sha256": "81499cd22d0b93def5dcbacc046f8ee000ad5fe3a464a19a4b51431b5319dca2",
+ "sha256": "583a7433cdfcd219b8ffa8735c06759906efc3ccdb2d4e0b9def16ff800513c7",
  "count": 287,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "1731b9ed80bea84eb6aebcb06ecbadd0983e3bbd8c0dbef6a29fccd4313b0316",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-way-of-the-world_2026-10-30.gvec"
+ "sourceSha256": "93aec6fca2ed5c9b54deef39921f1b5d53e86a7de1b4d171862b4a73749f4cbe",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-way-of-the-world_2026-11-09.gvec"
 }

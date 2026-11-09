@@ -1,14 +1,14 @@
 {
  "id": "gc-song-of-hiawatha",
  "kind": "book",
- "fileName": "gc-song-of-hiawatha_2026-10-30.gvec",
+ "fileName": "gc-song-of-hiawatha_2026-11-09.gvec",
  "sizeBytes": 135376,
- "sha256": "167102ebe0e0dd84391354203c3606cb7d2a2e389df016b6fc9553b59e36236d",
+ "sha256": "b3d5fc015711fe9505e401319dba72273c82172fdf39c98535bc7ac48d5b7f0d",
  "count": 460,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "14482b53dede62945a6cb76c7b4106e51d53613fe3c3a3b94f154e455f8b9861",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-song-of-hiawatha_2026-10-30.gvec"
+ "sourceSha256": "ea9380aabc6b2d4e8ab6f8ad88ff182797612a5db0b47bacf672c07128a3b7a9",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-song-of-hiawatha_2026-11-09.gvec"
 }

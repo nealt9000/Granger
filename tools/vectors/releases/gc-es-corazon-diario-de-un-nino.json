@@ -1,14 +1,14 @@
 {
  "id": "gc-es-corazon-diario-de-un-nino",
  "kind": "book",
- "fileName": "gc-es-corazon-diario-de-un-nino_2026-10-30.gvec",
- "sizeBytes": 114204,
- "sha256": "72aad074ee0b4faecc12793079f4b5092910a5a90a163725df263d2a73572fa5",
- "count": 388,
+ "fileName": "gc-es-corazon-diario-de-un-nino_2026-11-09.gvec",
+ "sizeBytes": 114502,
+ "sha256": "2f7343d8c25d83c76d5dbcdf4c8bb6538f75d112a6d2488e7a42ac85fb42371c",
+ "count": 389,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "113c1b1bdefd61e0d3f5e1c78ade9afb3bd9658d7798a832f4737f4c35fb55fc",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-corazon-diario-de-un-nino_2026-10-30.gvec"
+ "sourceSha256": "ef79f32bef3509ab0f681287bef6d8ecaa9747d8659422b1af18ba39f73e26ef",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-corazon-diario-de-un-nino_2026-11-09.gvec"
 }

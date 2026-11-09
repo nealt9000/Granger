@@ -1,14 +1,14 @@
 {
  "id": "gc-es-las-fuerzas-extranas",
  "kind": "book",
- "fileName": "gc-es-las-fuerzas-extranas_2026-10-30.gvec",
- "sizeBytes": 127140,
- "sha256": "321c4e7d2f4a48c7a01a70aa9f1b141b98bf16672ab6e7719d1e8604fa78cdbe",
- "count": 432,
+ "fileName": "gc-es-las-fuerzas-extranas_2026-11-09.gvec",
+ "sizeBytes": 127438,
+ "sha256": "451879aa38431b6f0a3b108bad233cae4eb5161165c95f54da4d5c49e92af1e2",
+ "count": 433,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "23df63ce7be324598967c479289c6dc9a28c1cb684092bec7eb8a59dd4d8ced5",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-las-fuerzas-extranas_2026-10-30.gvec"
+ "sourceSha256": "e7be74225678ea2e0da0cead3ba8cb26fa8dbf2178404e46bf0a194c601d01dd",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-las-fuerzas-extranas_2026-11-09.gvec"
 }

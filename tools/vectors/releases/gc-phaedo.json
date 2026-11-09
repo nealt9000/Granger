@@ -1,14 +1,14 @@
 {
  "id": "gc-phaedo",
  "kind": "book",
- "fileName": "gc-phaedo_2026-10-30.gvec",
+ "fileName": "gc-phaedo_2026-11-09.gvec",
  "sizeBytes": 75400,
- "sha256": "e98b4c08e86125df0e6cdca3032e3a4d10dc70c983e2c67c5e92d0dae5a3d99c",
+ "sha256": "7fcebc3a6e2c546a9dd7e3dc032cb3b0f489743fee03758128a12160809f4419",
  "count": 256,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ff2ccaf51f9793a200037ea22edf4549bb27e89147da9e0f623e087e81a55510",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-phaedo_2026-10-30.gvec"
+ "sourceSha256": "604761f524eb88f3f236176c86a9e8de360c322684cac0fa76197f048155e3bf",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-phaedo_2026-11-09.gvec"
 }

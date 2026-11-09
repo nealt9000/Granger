@@ -1,14 +1,14 @@
 {
  "id": "gc-es-cuentos-clasicos-del-norte",
  "kind": "book",
- "fileName": "gc-es-cuentos-clasicos-del-norte_2026-10-30.gvec",
- "sizeBytes": 114498,
- "sha256": "1d0aef4ac7d44d4022693e0a99421f0eb3b10abf4bd0903a606ff75b798aa967",
- "count": 389,
+ "fileName": "gc-es-cuentos-clasicos-del-norte_2026-11-09.gvec",
+ "sizeBytes": 114796,
+ "sha256": "1aac84dbb471ff94da225455c866435ac7323237944ae395a363bad5bc52d205",
+ "count": 390,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "eec657111d1cdecc8c3bcb265a57dd2b104ef0bf770320e66408ff02a05f52a4",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-cuentos-clasicos-del-norte_2026-10-30.gvec"
+ "sourceSha256": "b5a498ddaf5faad2e3eb46775c4334e9e8638e56d02f3414d3cdbd8de5dc2818",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-cuentos-clasicos-del-norte_2026-11-09.gvec"
 }

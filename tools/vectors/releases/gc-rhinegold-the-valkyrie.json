@@ -1,14 +1,14 @@
 {
  "id": "gc-rhinegold-the-valkyrie",
  "kind": "book",
- "fileName": "gc-rhinegold-the-valkyrie_2026-10-30.gvec",
- "sizeBytes": 59818,
- "sha256": "c09d291b996888429621ebd1e08bbfe2bba6e4f6d31161c000f15341e97c969f",
- "count": 203,
+ "fileName": "gc-rhinegold-the-valkyrie_2026-11-09.gvec",
+ "sizeBytes": 58348,
+ "sha256": "0ce46eee7e6d95f61ed865ac9af67b416c640ecd0a7b497742a030c87e4db077",
+ "count": 198,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "2f7672c21bf0ba94c27ac3a092376339fdf2fc5886f2d2fca2a9b34188da6cc7",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-rhinegold-the-valkyrie_2026-10-30.gvec"
+ "sourceSha256": "a8fe0fec5afe80e95023b43fbe6a400532c18cce1635f67e65b7dda01ca122c1",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-rhinegold-the-valkyrie_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-essays-bacon",
  "kind": "book",
- "fileName": "gc-essays-bacon_2026-10-30.gvec",
+ "fileName": "gc-essays-bacon_2026-11-09.gvec",
  "sizeBytes": 73636,
- "sha256": "1bae6309247b9a58dd53d471693acd98f2522e4ca8523e94865d7666d3bd57d9",
+ "sha256": "daa6c48900be1547e506eb1b9a193e706416076d3103706582fc7582759ecd76",
  "count": 250,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "e9ce640398f01e112e05bb85ea3b54b0b9b21b918cac90def73cdb64516867cf",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-essays-bacon_2026-10-30.gvec"
+ "sourceSha256": "d630d4ee64baf0e0229c8b63c421e318d16ad01ae1704c535b6bea0e5c06d616",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-essays-bacon_2026-11-09.gvec"
 }

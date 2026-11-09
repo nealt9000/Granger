@@ -16,6 +16,9 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 from lxml import etree
 
 import covers
+import drama
+import textfix
+import editions
 import verse
 from chapters import PAGE_NUMBER, clean_title, drop_full_stop, shouting, title_case
 from zimpack import Work
@@ -28,7 +31,11 @@ LABELS = {
            "translated_by": "Translated by", "translation_published": "This translation first published {year}",
            "edition_published": "This edition first published {year}",
            "from_gutenberg": "From Project Gutenberg ebook #{id}", "from_ebible": "From eBible.org ({id})",
-           "tagline": "Your door to knowledge. Always open."},
+           "from_standardebooks": "From Standard Ebooks ({url}), whose edition is dedicated to the public domain "
+                                  "under CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/)",
+           "from_wikisource": "From Wikisource ({url})",
+           "from_wikisource_pages": "from {count} Wikisource pages (US government works)",
+           "tagline": "Your door to knowledge. Always open.", "title_page": "Title page"},
     "es": {"contents": "Índice", "landmarks": "Puntos de referencia", "cover": "Portada", "start": "Comienzo del texto",
            "colophon": "Colofón", "translated": "trad.", "rights": "Dominio público en los Estados Unidos.",
            "translated_by": "Traducción de",
@@ -36,12 +43,20 @@ LABELS = {
            "edition_published": "Esta edición se publicó por primera vez en {year}",
            "from_gutenberg": "Del libro electrónico n.º {id} de Project Gutenberg",
            "from_ebible": "De eBible.org ({id})",
-           "tagline": "Tu puerta al conocimiento. Siempre abierta."},
+           "from_standardebooks": "De Standard Ebooks ({url}), cuya edición está dedicada al dominio público "
+                                  "con CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/)",
+           "from_wikisource": "De Wikisource ({url})",
+           "from_wikisource_pages": "de {count} páginas de Wikisource (obras del gobierno de los EE. UU.)",
+           "tagline": "Tu puerta al conocimiento. Siempre abierta.", "title_page": "Portadilla"},
 }
 ZIP_TIME = (1980, 1, 1, 0, 0, 0)
 NS = 'xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"'
 
 # No colours or font families: the reader's own theme and typeface apply.
+# The cover fills one page (99vh, so rounding never spills it into a second column) and sits centred both ways. Its
+# height leaves at least 88 px above and below, so with the reader's chrome up (status bar, mini-player and top bar, 144 dp,
+# less the page's own 64 dp offset) nothing is covered; `!important` outranks Readium's `img { max-height: 95vh }`.
+# In landscape it keeps at least 60% of the page. verse_check/cover_check.py renders it.
 BOOK_CSS = """
 body { line-height: 1.5; margin: 0; padding: 0 .5em; }
 h1, h2, h3, h4, h5, h6 { line-height: 1.25; margin: 1.5em 0 .6em; page-break-after: avoid; }
@@ -51,8 +66,9 @@ pre { white-space: pre-wrap; }
 table { border-collapse: collapse; }
 td, th { padding: .2em .5em; vertical-align: top; }
 img { max-width: 100%; }
-.cover { text-align: center; margin: 0; padding: 0; }
-.cover img { max-height: 100vh; }
+.cover { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+  height: 99vh; margin: 0; padding: 0; overflow: hidden; }
+.cover img { display: block; max-width: 100%; max-height: max(calc(99vh - 176px), 60vh) !important; }
 .colophon { text-align: center; margin: 3em 0 0; }
 .colophon svg { width: 5em; height: 5em; }
 .colophon .collection { font-variant: small-caps; letter-spacing: .14em; margin: .4em 0 2.5em; }
@@ -61,7 +77,14 @@ img { max-width: 100%; }
 .colophon .facts { margin-top: 2.5em; font-size: .9em; }
 .colophon .facts p { margin: 0 0 .3em; }
 .colophon .tagline { margin-top: 2.5em; font-style: italic; }
+.editor-note { text-align: center; font-style: italic; margin: 2em 1em; }
+.colophon .editor-note { margin: 1em 0 0; }
+:root:root:root .footnote, :root:root:root .foot { font-size: .85rem !important; opacity: .8; margin-left: 1.5em; }
+:root:root:root h1.gx-long, :root:root:root h2.gx-long, :root:root:root h3.gx-long {
+  font-size: 1rem !important; font-weight: normal; }
 """.strip()
+LONG_HEADING = 80  # a chapter summary set as a heading (Tom Jones) reads as text, not as a title shouting
+LONG_TITLE = 70  # a contents title longer than this is cut at a natural break
 
 LINE_NUMBER = {"linenum", "linenumber", "lineno", "line-number", "linenr"}
 
@@ -100,8 +123,9 @@ class BookMeta:
     language: str
     source_url: str
     date: str
-    source_line: str = ""  # the colophon's credit, e.g. "From Project Gutenberg ebook #1342"
+    source_line: str = ""  # the colophon's credit, e.g. "From Project Gutenberg ebook #1342"; a line per source
     collection: str = COLLECTION
+    editor_note: str = ""  # Granger's own edition (a name map): said at the front and here
 
 
 def labels(language: str) -> dict[str, str]:
@@ -159,6 +183,10 @@ def _book_css(work: Work) -> str:
     parts = [BOOK_CSS, scrub_css(work.styles, work.line_numbers), verse.CSS]
     if work.verse:
         parts.append(verse.WRAPPER_CSS)
+    if work.drama or any('class="gd-' in c.html for c in work.chapters):  # Standard Ebooks plays come marked
+        parts.append(drama.CSS)
+    if any('class="gx-' in c.html for c in work.chapters):
+        parts.append(textfix.CSS)
     return "\n".join(p for p in parts if p) + "\n"
 
 
@@ -270,16 +298,21 @@ def _wrap_stray_definitions(soup: BeautifulSoup) -> None:
 
 
 def _prepare(html: str, line_numbers: str = "margin", reads_as_verse: bool = False,
-             language: str = "en") -> BeautifulSoup:
+             language: str = "en", is_drama: bool = False) -> BeautifulSoup:
     soup = BeautifulSoup(html, "lxml")
     _drop_page_numbers(soup)
     if line_numbers == "drop":
         _drop_page_numbers(soup, LINE_NUMBER)
     if reads_as_verse:
         verse.flatten_word_export(soup)
-        verse.mark(soup)
+        verse.mark(soup, gloss=not is_drama)
+    else:
+        verse.mark_pre(soup)
     if language == "en":  # title case follows English rules
         _quiet_headings(soup)
+    for heading in soup.find_all(["h1", "h2", "h3"]):
+        if len(" ".join(heading.get_text().split())) > LONG_HEADING:
+            heading["class"] = (heading.get("class") or []) + ["gx-long"]
     _fix_attributes(soup)
     _wrap_stray_definitions(soup)
     return soup
@@ -332,8 +365,29 @@ def _titles(work: Work, language: str = "en") -> list[str]:
     missing = sorted(set(work.title_overrides) - {str(i + 1) for i in range(len(work.chapters))}, key=int)
     if missing:
         raise ValueError(f"titleOverrides name pages {missing}, but the book has {len(work.chapters)}")
-    return [work.title_overrides.get(str(i + 1)) or clean_title(c.title, work.title, work.author, i, language)
-            for i, c in enumerate(work.chapters)]
+    titles = [clean_title(c.title, work.title, work.author, i, language) for i, c in enumerate(work.chapters)]
+    if titles and _words(work.chapters[0].html) < 3000:  # a short first page named for nothing: "Title page",
+        first = work.chapters[0].title  # not "Part 1" (251 books)
+        if first in ("", "Part 1") or clean_title(first, work.title, work.author, 0, language, fallback="") == "":
+            titles[0] = labels(language)["title_page"]
+    return [work.title_overrides.get(str(i + 1)) or shorten(t) for i, t in enumerate(titles)]
+
+
+def _words(html: str) -> int:
+    return len(" ".join(BeautifulSoup(html, "lxml").get_text().split()))
+
+
+def shorten(title: str, limit: int = LONG_TITLE) -> str:
+    """A contents title over `limit` characters cut at its first sentence, clause or dash break that fits, else
+    at a word with an ellipsis ("Containing the Birth of the Foundling, in which…")."""
+    if len(title) <= limit:
+        return title
+    for m in re.finditer(r"[.:;!?](?=\s)|\s[—–]\s", title):
+        if 12 <= m.start() <= limit:
+            cut = title[:m.start()].rstrip()
+            return cut
+    cut = title[:limit - 1].rsplit(" ", 1)[0].rstrip(",;:—– ")
+    return cut + "…"
 
 
 _FRONT_MATTER = {"title page", "contents", "table of contents", "front matter", "dedication"}
@@ -424,9 +478,11 @@ def _colophon(work: Work, meta: BookMeta) -> str:
         lines.append(f'<p class="author">{escape(meta.author, quote=False)}</p>')
     if meta.translator:
         lines.append(f"<p>{words['translated_by']} {escape(meta.translator, quote=False)}</p>")
+    if meta.editor_note:
+        lines.append(f'<p class="editor-note">{escape(meta.editor_note, quote=False)}</p>')
     facts = [words["translation_published" if meta.translator else "edition_published"].format(year=meta.published)]
     if meta.source_line:
-        facts.append(meta.source_line)
+        facts.extend(line for line in meta.source_line.splitlines() if line.strip())
     facts.append(words["rights"])
     body = (f'<section class="colophon" epub:type="colophon">{_owl_svg()}'
             f'<p class="collection">{escape(meta.collection, quote=False)}</p>{"".join(lines)}'
@@ -453,7 +509,10 @@ def write_epub(out: Path, work: Work, meta: BookMeta, cover_jpeg: bytes) -> None
                                     f'<div class="cover"><img src="cover.jpg" alt="{escape(title)}"/></div>')),
         ("OEBPS/colophon.xhtml", _colophon(work, meta)),
     ]
-    soups = [_prepare(chapter.html, work.line_numbers, work.verse, meta.language) for chapter in work.chapters]
+    soups = [_prepare(chapter.html, work.line_numbers, work.verse, meta.language, work.drama)
+             for chapter in work.chapters]
+    if meta.editor_note and soups:
+        editions.front_note(soups[0].body or soups[0], meta.editor_note)
     _unwrap_dangling_links(soups)
     for i, soup in enumerate(soups):
         body = to_xhtml(_body(soup))

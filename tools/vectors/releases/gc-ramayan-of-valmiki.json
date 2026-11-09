@@ -1,14 +1,14 @@
 {
  "id": "gc-ramayan-of-valmiki",
  "kind": "book",
- "fileName": "gc-ramayan-of-valmiki_2026-10-30.gvec",
- "sizeBytes": 1552456,
- "sha256": "47ddbc08570db2e58aaaf4362e85d628a3fe7b4a9ee2b59053e2b3ed5afd9a4f",
- "count": 5280,
+ "fileName": "gc-ramayan-of-valmiki_2026-11-09.gvec",
+ "sizeBytes": 1549222,
+ "sha256": "e44000a207dc0bd3369ab7dd31448d9e76a42dd4562da9aff3126de1f25478b6",
+ "count": 5269,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "931891814169c7e7f801a73349c9bc15616509408c4fe7c04a50599f22382e80",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-ramayan-of-valmiki_2026-10-30.gvec"
+ "sourceSha256": "c6cf795ab499e84f3271f747204eae68b7cf14e52ccf1324b36b5d204b7073f4",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-ramayan-of-valmiki_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-theaetetus",
  "kind": "book",
- "fileName": "gc-theaetetus_2026-10-30.gvec",
+ "fileName": "gc-theaetetus_2026-11-09.gvec",
  "sizeBytes": 128026,
- "sha256": "0d88f28682de2af0c5b8359f57cd5f34a9f63f037bb627b78387cd2adddba5fe",
+ "sha256": "be771b47556e6ce2970caf35989128b9cbaf1c6d8b41a493082ee70d1d70d13c",
  "count": 435,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "d3d9f9ae1350df9f2644b11f9fb419590ffc2c1764643fc68b23d9dedf1cff5d",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-theaetetus_2026-10-30.gvec"
+ "sourceSha256": "35621d08ad4e14e69b73af65dd5bbe78ebd3f2c2ebdac5567fbe162ecc40f258",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-theaetetus_2026-11-09.gvec"
 }

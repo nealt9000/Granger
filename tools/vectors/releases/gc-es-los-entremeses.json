@@ -1,14 +1,14 @@
 {
  "id": "gc-es-los-entremeses",
  "kind": "book",
- "fileName": "gc-es-los-entremeses_2026-10-30.gvec",
- "sizeBytes": 129198,
- "sha256": "2fb7cd589328b70137ff3fdbf1d4bb45a0b2a79ddf44871e341723f0019ef4eb",
- "count": 439,
+ "fileName": "gc-es-los-entremeses_2026-11-09.gvec",
+ "sizeBytes": 129496,
+ "sha256": "b0b14b60755572266534a7653a014ca70107a9af450d91224902a08edd01f452",
+ "count": 440,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "f2c4a3f55c5475e0bf1509cbf3b88d9caf96a64ca98daa8ad6f450bba68b48f6",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-los-entremeses_2026-10-30.gvec"
+ "sourceSha256": "923823af9f6983a0b7ef39abb3de621302cfff61f292fd3ab53371bb42a0070b",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-los-entremeses_2026-11-09.gvec"
 }

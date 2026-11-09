@@ -1,14 +1,14 @@
 {
  "id": "gc-utopia",
  "kind": "book",
- "fileName": "gc-utopia_2026-10-30.gvec",
+ "fileName": "gc-utopia_2026-11-09.gvec",
  "sizeBytes": 46294,
- "sha256": "32827409f88b46c6c6e92f0480290d971f4169c4662da04c6f3cfd1d4cc41f5f",
+ "sha256": "e40ffdfcf10ebe89304e14e1aa4780bc3dbe18b656c5ade44db00f3ec81607f1",
  "count": 157,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "514ad7f5ea744d16cfd86bb56adac10189ec90b8478ace4b68e00dbb07f4595d",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-utopia_2026-10-30.gvec"
+ "sourceSha256": "f4bca76ed947442025816cdde189aaa8d38b23baab2fa38fad5aecb919ef99e1",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-utopia_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-woman-in-white",
  "kind": "book",
- "fileName": "gc-woman-in-white_2026-10-30.gvec",
+ "fileName": "gc-woman-in-white_2026-11-09.gvec",
  "sizeBytes": 544624,
- "sha256": "6150409d5d362213a7386b9c091916847db0bdc1715d845b6443399683264fa3",
+ "sha256": "6bdbbff146853228ac195be95598988b7302e71e28a09310f5dfc44d9e23e7e1",
  "count": 1852,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "99f69138da88bf198384a2c665e32caf2cb5eb0f33603d692417373f8c0abb57",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-woman-in-white_2026-10-30.gvec"
+ "sourceSha256": "1fc9e7bb24aa9564019d24e21cd4475c9dd834bb41744f02fc974a4f29957097",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-woman-in-white_2026-11-09.gvec"
 }

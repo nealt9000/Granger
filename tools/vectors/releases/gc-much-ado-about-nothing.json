@@ -1,14 +1,14 @@
 {
  "id": "gc-much-ado-about-nothing",
  "kind": "book",
- "fileName": "gc-much-ado-about-nothing_2026-10-30.gvec",
+ "fileName": "gc-much-ado-about-nothing_2026-11-09.gvec",
  "sizeBytes": 68638,
- "sha256": "0444030593b7cf208f2a5f06b04b4d4b65a77789e273fd8b42443455c6103aa0",
+ "sha256": "c04e43a0928455bac195e620b93e6e9ba4093a40e35cdd127055642ee2541f92",
  "count": 233,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "86cf1a65ab2fbd6348a18ddbdc8e16cb31545524116417e2d7526aa0e413ddea",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-much-ado-about-nothing_2026-10-30.gvec"
+ "sourceSha256": "53a730b8e21fbf4c9de4c577761e44dd932b99af53fbcbcc07cb9fb487ea8595",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-much-ado-about-nothing_2026-11-09.gvec"
 }

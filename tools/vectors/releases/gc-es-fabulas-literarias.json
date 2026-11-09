@@ -1,14 +1,14 @@
 {
  "id": "gc-es-fabulas-literarias",
  "kind": "book",
- "fileName": "gc-es-fabulas-literarias_2026-10-30.gvec",
- "sizeBytes": 67164,
- "sha256": "0b37f8288e7aa54476cb73aa8e1981d682420fe7a7ad9d17be7fa211a4072a95",
- "count": 228,
+ "fileName": "gc-es-fabulas-literarias_2026-11-09.gvec",
+ "sizeBytes": 67462,
+ "sha256": "c41e7e7e68296ab87550c21a69ec54a3a9689b9e3e0d928ac9126276a731bc92",
+ "count": 229,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "13153f4740313a09d5cedbeaece3db26b6754b136217cea20bf9eded11a0f616",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-fabulas-literarias_2026-10-30.gvec"
+ "sourceSha256": "796276d4be7210ae6e5d8a1b718b5151d2260dc120adbbec3cf8d72e3e113de1",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-fabulas-literarias_2026-11-09.gvec"
 }

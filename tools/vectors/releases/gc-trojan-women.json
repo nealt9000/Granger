@@ -1,14 +1,14 @@
 {
  "id": "gc-trojan-women",
  "kind": "book",
- "fileName": "gc-trojan-women_2026-10-30.gvec",
+ "fileName": "gc-trojan-women_2026-11-09.gvec",
  "sizeBytes": 45118,
- "sha256": "539cb19f373a4a767e82511210a76433bafa92e8bd7ff6ea07760f0b2740e78f",
+ "sha256": "94396da6c5a2131d32ec46880ef1fa79e1267fd0c887e7a188a02677a65481a8",
  "count": 153,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "7cad785a7181a9c7ee6f2b02e6de36d2bc1ebfd2d7aa839d382a482725d9a988",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-trojan-women_2026-10-30.gvec"
+ "sourceSha256": "486b23f1faed458624b3eb2af34d2812cccb3ade34b82927c2019c5e0cdd4e1e",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-trojan-women_2026-11-09.gvec"
 }

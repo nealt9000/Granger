@@ -1,14 +1,14 @@
 {
  "id": "gc-songs-of-innocence-and-of-experience",
  "kind": "book",
- "fileName": "gc-songs-of-innocence-and-of-experience_2026-10-30.gvec",
+ "fileName": "gc-songs-of-innocence-and-of-experience_2026-11-09.gvec",
  "sizeBytes": 23362,
- "sha256": "1855ae31846af852fb626cdd536b949ec54d48b3dcfc2f2d375d9d701357aedd",
+ "sha256": "6f12e208176c1acb77fd372755ff7044d3b21e46d5e752080b4b92205d77c961",
  "count": 79,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "1dd348f08ffb952d7a99d14bce2854646b54eb7ebe658348b2b9f50c4a24010f",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-songs-of-innocence-and-of-experience_2026-10-30.gvec"
+ "sourceSha256": "ae4bed511847954e43efb4109532902795125c50b7c974ae41d7f439a2fc9101",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-songs-of-innocence-and-of-experience_2026-11-09.gvec"
 }

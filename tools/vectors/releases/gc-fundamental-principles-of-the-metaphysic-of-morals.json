@@ -1,14 +1,14 @@
 {
  "id": "gc-fundamental-principles-of-the-metaphysic-of-morals",
  "kind": "book",
- "fileName": "gc-fundamental-principles-of-the-metaphysic-of-morals_2026-10-30.gvec",
+ "fileName": "gc-fundamental-principles-of-the-metaphysic-of-morals_2026-11-09.gvec",
  "sizeBytes": 47176,
- "sha256": "753f4ee2a8a05b43f21226adfc5bb1a8b20e55e3fd2f2b37429c2d9d01311378",
+ "sha256": "de49936dce1034f73c65d0756a9d71d518bf17521d3211ca64b877c45ff3b77f",
  "count": 160,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "62a3771bc462bc7e0d23a8c42c5a5742b19c3171b8eb343efef8ff8e6c35f028",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-fundamental-principles-of-the-metaphysic-of-morals_2026-10-30.gvec"
+ "sourceSha256": "00b4e38b11fefbe9e2bc7dc724245cf9c1402aac92f2ea7c0e641e541292302e",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-fundamental-principles-of-the-metaphysic-of-morals_2026-11-09.gvec"
 }

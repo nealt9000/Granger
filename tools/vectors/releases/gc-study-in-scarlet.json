@@ -1,14 +1,14 @@
 {
  "id": "gc-study-in-scarlet",
  "kind": "book",
- "fileName": "gc-study-in-scarlet_2026-10-30.gvec",
+ "fileName": "gc-study-in-scarlet_2026-11-09.gvec",
  "sizeBytes": 102742,
- "sha256": "1ab3282d84ca55f502a7ababa13eb7badec09fd7cca477c4740d62b7ebaaa06b",
+ "sha256": "d4e57d000e4704b412fbcbc26cf3002d4ab25b805f9c28f8a4ee842308fc5f98",
  "count": 349,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "de1630e4748bde1bb097638cd8bd0db88b81791e9c3b1e95d5689674dd221920",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-study-in-scarlet_2026-10-30.gvec"
+ "sourceSha256": "b2de7efbc045ead7d1a1d8d4770c7dbd9737c228aaeb5927f1feff13749129bb",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-study-in-scarlet_2026-11-09.gvec"
 }

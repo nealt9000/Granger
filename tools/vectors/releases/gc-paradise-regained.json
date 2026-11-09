@@ -1,14 +1,14 @@
 {
  "id": "gc-paradise-regained",
  "kind": "book",
- "fileName": "gc-paradise-regained_2026-10-30.gvec",
+ "fileName": "gc-paradise-regained_2026-11-09.gvec",
  "sizeBytes": 14248,
- "sha256": "d05610660603252b7f640f56fc4bb3a47c6000e2bf31b6b6d17c30712cb243d0",
+ "sha256": "fb9589844c3c9ac0eee87a93325a0b33c4a395ee9e911d5f7fabe64dc1bb90da",
  "count": 48,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ba2f0eaabe891ef71164ceea4a02f1a8998c1552b2fb5406ef707eb514eb38bf",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-paradise-regained_2026-10-30.gvec"
+ "sourceSha256": "26bfb34231ab2e76e8f753c20a430c84ae371803a2be2231f320658cced8b18b",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-paradise-regained_2026-11-09.gvec"
 }

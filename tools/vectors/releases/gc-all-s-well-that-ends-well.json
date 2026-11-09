@@ -1,14 +1,14 @@
 {
  "id": "gc-all-s-well-that-ends-well",
  "kind": "book",
- "fileName": "gc-all-s-well-that-ends-well_2026-10-30.gvec",
+ "fileName": "gc-all-s-well-that-ends-well_2026-11-09.gvec",
  "sizeBytes": 73636,
- "sha256": "79856b1bb93d6cb1fbe8bd7bf193d107876a04e4653ac79bfed420d56e1fedfb",
+ "sha256": "f24afd21c9047804cf2e2b03e20d68aa3411e11dbd25643c5949661343502a91",
  "count": 250,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "f2c5dc296f8cdf6a8d8afba8e52a3678b3f420ca4717980e2300bbf258603893",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-all-s-well-that-ends-well_2026-10-30.gvec"
+ "sourceSha256": "6de9651ffbaceaba3c07171bf1f21e4c82a38e45ec308ea214bf78ae9e1c29d7",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-all-s-well-that-ends-well_2026-11-09.gvec"
 }

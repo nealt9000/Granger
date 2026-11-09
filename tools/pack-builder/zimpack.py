@@ -72,6 +72,7 @@ class Work:
     styles: str = ""
     line_numbers: str = "margin"  # "margin" or "drop", for EPUBs
     verse: bool = False  # lines of verse become hanging blocks, for EPUBs
+    drama: bool = False  # a play: no verse gloss rule, and the play rules (drama.CSS), for EPUBs
     title_overrides: dict[str, str] = field(default_factory=dict)  # contents titles by page number, for EPUBs
     language: str = "en"
 

@@ -1,14 +1,14 @@
 {
  "id": "gc-merchant-of-venice",
  "kind": "book",
- "fileName": "gc-merchant-of-venice_2026-10-30.gvec",
- "sizeBytes": 60700,
- "sha256": "547d77f750215aba27f2347fc2a181039088016caa9244030dcd9607e9db844e",
- "count": 206,
+ "fileName": "gc-merchant-of-venice_2026-11-09.gvec",
+ "sizeBytes": 60112,
+ "sha256": "e60cd9254862f6b44538ecad4bcbc98f81537ae16ab9a4111f8c96f812ac5f63",
+ "count": 204,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "8ac740f38939c4f7e8aed49504045cc967a7f26ed693d8d24e7da8f5b234d4f6",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-merchant-of-venice_2026-10-30.gvec"
+ "sourceSha256": "96bdc5df93e51292e416853a4e9a70420f13d1769c78166e027ddf871478fc72",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-merchant-of-venice_2026-11-09.gvec"
 }

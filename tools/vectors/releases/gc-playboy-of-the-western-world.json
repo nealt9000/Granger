@@ -1,14 +1,14 @@
 {
  "id": "gc-playboy-of-the-western-world",
  "kind": "book",
- "fileName": "gc-playboy-of-the-western-world_2026-10-30.gvec",
+ "fileName": "gc-playboy-of-the-western-world_2026-11-09.gvec",
  "sizeBytes": 62464,
- "sha256": "6c6f2c6f0741ccbab7942a1be66707b75eb34f36606766a10629653b9affde25",
+ "sha256": "28db2d10461b3bbd7bfb0ae4b57b233ce92aeeb66f7c92c9adcae80728fdf1d6",
  "count": 212,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "e5ee466dd2b318320eaef5fdca96a900e98ce008789e1cc2bf5aca7c06375c75",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-playboy-of-the-western-world_2026-10-30.gvec"
+ "sourceSha256": "71aeea3f71f374fc642066ccb6726301417a3953c88521a2c3c7baa366b85cb6",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-playboy-of-the-western-world_2026-11-09.gvec"
 }

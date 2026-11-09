@@ -1,14 +1,14 @@
 {
  "id": "gc-rime-of-the-ancient-mariner",
  "kind": "book",
- "fileName": "gc-rime-of-the-ancient-mariner_2026-10-30.gvec",
+ "fileName": "gc-rime-of-the-ancient-mariner_2026-11-09.gvec",
  "sizeBytes": 4840,
- "sha256": "deac80539f8595b548b1f6564444bb93688b4af7fc28c0a06de65f2ebeb90a62",
+ "sha256": "e6f87df3652823e6554839e959dbb054e3ca29a49e886cabe3e05284353a12b7",
  "count": 16,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "355894488c031deb036a585e152cf4ce9832c7b4b99f6cd63a83bbd31bedaaab",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-rime-of-the-ancient-mariner_2026-10-30.gvec"
+ "sourceSha256": "7ae82ebda88eae3532d400f17479157be019e6ef2029e9ec5762201835b06291",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-rime-of-the-ancient-mariner_2026-11-09.gvec"
 }

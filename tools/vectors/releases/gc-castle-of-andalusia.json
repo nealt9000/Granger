@@ -1,14 +1,14 @@
 {
  "id": "gc-castle-of-andalusia",
  "kind": "book",
- "fileName": "gc-castle-of-andalusia_2026-10-30.gvec",
+ "fileName": "gc-castle-of-andalusia_2026-11-09.gvec",
  "sizeBytes": 54232,
- "sha256": "88f21d1f6d24c3552614f49abdd771f4f6c6fbea415f5782a93dd44ebd42309b",
+ "sha256": "9f158e167ae3f4a6ee657e81b4e39a766a473232cb243a1c9c4d68f0dc9336ca",
  "count": 184,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c8100107651ce6c49ce3f251d5daec6aa63086ef624a6fc4e5f7bdef6f2329e4",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-castle-of-andalusia_2026-10-30.gvec"
+ "sourceSha256": "946a83ee72be7cdc7b1ff826f0195691a379218a674a30071665b793880f11d7",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-castle-of-andalusia_2026-11-09.gvec"
 }

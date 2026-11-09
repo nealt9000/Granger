@@ -1,14 +1,14 @@
 {
  "id": "gc-leviathan",
  "kind": "book",
- "fileName": "gc-leviathan_2026-10-30.gvec",
- "sizeBytes": 355876,
- "sha256": "e76ffd581e790160a9cfbaecfca053a195ff8d8f0c5a4afb6fb5954c9a978b9f",
- "count": 1210,
+ "fileName": "gc-leviathan_2026-11-09.gvec",
+ "sizeBytes": 356758,
+ "sha256": "b5638896e2d2788ed5356ea281693f997c016f43cf4a02d6210bc888774d1adb",
+ "count": 1213,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "b82733e59a9439a4c0765ff0767fe052af4662e2df930af11b3996095ea942c3",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-leviathan_2026-10-30.gvec"
+ "sourceSha256": "c4ed9353ac069afa632dc1724df18296948b42ef4a1a191779e4c749a61e02dd",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-leviathan_2026-11-09.gvec"
 }

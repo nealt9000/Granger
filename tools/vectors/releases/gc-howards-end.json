@@ -1,14 +1,14 @@
 {
  "id": "gc-howards-end",
  "kind": "book",
- "fileName": "gc-howards-end_2026-10-30.gvec",
+ "fileName": "gc-howards-end_2026-11-09.gvec",
  "sizeBytes": 269440,
- "sha256": "dec2352c6e003a497aded239a70936cbddeb99d7d4aed186a6fe5d9245ec1804",
+ "sha256": "3328dfa2b51b723a7db22c5548f47c9e88215b9bd3d958a60a4b799463596f19",
  "count": 916,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "8e92deb8521ba536085ebc59d8223b8524ecaa5a325e4501f6710f9e7f7349da",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-howards-end_2026-10-30.gvec"
+ "sourceSha256": "ae65ac063cee5e5b311bd039690c1e1c39ebd62b33acab25302030048d26915e",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-howards-end_2026-11-09.gvec"
 }

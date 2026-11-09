@@ -1,14 +1,14 @@
 {
  "id": "gc-works-of-edgar-allan-poe-volume-2",
  "kind": "book",
- "fileName": "gc-works-of-edgar-allan-poe-volume-2_2026-10-30.gvec",
+ "fileName": "gc-works-of-edgar-allan-poe-volume-2_2026-11-09.gvec",
  "sizeBytes": 180064,
- "sha256": "0aedf92095c72daa80996763f58dbdb2ee9ba730bc195431920d275a0db96685",
+ "sha256": "74113a98b348bb39aade8bb16b537ed20eaadf36f75e39d024ba853f3e3d8e50",
  "count": 612,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "2ce10cb2fb476e220c58487c0d4713062462e3f6dd486206f7fda967bcf9280a",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-works-of-edgar-allan-poe-volume-2_2026-10-30.gvec"
+ "sourceSha256": "dbae38a2e519c6ca39a2c925fd73598d0fcf0c3edd26987ea4407c7aee311552",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-works-of-edgar-allan-poe-volume-2_2026-11-09.gvec"
 }

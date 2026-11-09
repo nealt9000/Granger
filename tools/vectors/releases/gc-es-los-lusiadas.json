@@ -1,14 +1,14 @@
 {
  "id": "gc-es-los-lusiadas",
  "kind": "book",
- "fileName": "gc-es-los-lusiadas_2026-10-30.gvec",
- "sizeBytes": 233274,
- "sha256": "814eeb7e35d891e9ff5a374c12360ed05fc54e35419ae71ce77051ae411a14a2",
- "count": 793,
+ "fileName": "gc-es-los-lusiadas_2026-11-09.gvec",
+ "sizeBytes": 233572,
+ "sha256": "bf5ddb769ce39ad75d7c4a25e1bef98c1bb0a53ef5d91dc43aed11a81a98cd53",
+ "count": 794,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ea59c30f3ace5501d6df63af9b921141f4fc75426e4cde10412f57145639eac4",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-los-lusiadas_2026-10-30.gvec"
+ "sourceSha256": "3b857173dd8a2467086f80c9f33ac8307bcd644dd3cee50ca5eafae926b7264d",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-los-lusiadas_2026-11-09.gvec"
 }

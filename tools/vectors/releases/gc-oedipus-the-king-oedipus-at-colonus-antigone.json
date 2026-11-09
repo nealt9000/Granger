@@ -1,14 +1,14 @@
 {
  "id": "gc-oedipus-the-king-oedipus-at-colonus-antigone",
  "kind": "book",
- "fileName": "gc-oedipus-the-king-oedipus-at-colonus-antigone_2026-10-30.gvec",
- "sizeBytes": 83926,
- "sha256": "4d770611b8acc00baf219c9fc3df817c7f03e9e94c7a0d42dd69d35507efcbea",
- "count": 285,
+ "fileName": "gc-oedipus-the-king-oedipus-at-colonus-antigone_2026-11-09.gvec",
+ "sizeBytes": 83338,
+ "sha256": "ac02da43492554a679b64732a78178f750bd39fbd1585afa249ee81bdb2024fb",
+ "count": 283,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a0ab678ce3bad10bf39a445d8ebb7988a5d8b80ec4448550336242ef9e0eb814",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-oedipus-the-king-oedipus-at-colonus-antigone_2026-10-30.gvec"
+ "sourceSha256": "5d6cbde5f194704d448bbab628e1f72fab7062319aec83c315efc3ba860e16e2",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-oedipus-the-king-oedipus-at-colonus-antigone_2026-11-09.gvec"
 }

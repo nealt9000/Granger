@@ -1,14 +1,14 @@
 {
  "id": "gc-bacchae",
  "kind": "book",
- "fileName": "gc-bacchae_2026-10-30.gvec",
- "sizeBytes": 24538,
- "sha256": "e3572a2bfae0b5808e9b475e5f472aaffba2a34de5837d82a3f5fb2319819b0c",
- "count": 83,
+ "fileName": "gc-bacchae_2026-11-09.gvec",
+ "sizeBytes": 58054,
+ "sha256": "7e25d1acb940c80582168afcce4e957a587e835c17527937848ff0437c6a4611",
+ "count": 197,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "dc3b028dab2322fc72bbc9300314f3e5662687d7dc08d887858402f836b428db",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-bacchae_2026-10-30.gvec"
+ "sourceSha256": "082ac7db2d43d726048d5825e0f83ced54b1222dd023bf2f9e64f7cc450c2eb6",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-bacchae_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-es-el-si-de-las-ninas",
  "kind": "book",
- "fileName": "gc-es-el-si-de-las-ninas_2026-10-30.gvec",
- "sizeBytes": 58050,
- "sha256": "84db4a7f105f5adc895facc3c02323bd7a2e84e54761038cad244feed2e640fe",
- "count": 197,
+ "fileName": "gc-es-el-si-de-las-ninas_2026-11-09.gvec",
+ "sizeBytes": 58348,
+ "sha256": "824abf1174c42bdfde4ae56b726b9c6041b99030464069e51abb1c9c509cb326",
+ "count": 198,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "b4e86bb0c64f3b374524109843ffa80c508d4de5a549c7007ca8f898a97ae8e9",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-el-si-de-las-ninas_2026-10-30.gvec"
+ "sourceSha256": "61646048138fc6261175eb9e57261181d5ac7292e4efa11f267d9ce994ec0f7f",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-el-si-de-las-ninas_2026-11-09.gvec"
 }

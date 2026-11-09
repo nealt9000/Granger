@@ -1,14 +1,14 @@
 {
  "id": "gc-es-el-caso-extrano-del-doctor-jekyll",
  "kind": "book",
- "fileName": "gc-es-el-caso-extrano-del-doctor-jekyll_2026-10-30.gvec",
- "sizeBytes": 61284,
- "sha256": "d75b5411d502017b1097907a7b8654b9f5cf8bcea2a99ebdaccab860df856be6",
- "count": 208,
+ "fileName": "gc-es-el-caso-extrano-del-doctor-jekyll_2026-11-09.gvec",
+ "sizeBytes": 61582,
+ "sha256": "410d08724216c6c571a46f0a655433e986307b2051a67b961c367bfddda24495",
+ "count": 209,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "76affed140984ca65a9b7954e5d1fa52b71cef034656aafdafe8f17b2314b166",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-el-caso-extrano-del-doctor-jekyll_2026-10-30.gvec"
+ "sourceSha256": "0b21a4447b9737ed6758ae95a1d6888fa4ccc94051ffd68006847839f2405777",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-el-caso-extrano-del-doctor-jekyll_2026-11-09.gvec"
 }

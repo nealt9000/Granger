@@ -1,14 +1,14 @@
 {
  "id": "gc-es-del-sentimiento-tragico-de-la-vida",
  "kind": "book",
- "fileName": "gc-es-del-sentimiento-tragico-de-la-vida_2026-10-30.gvec",
- "sizeBytes": 206226,
- "sha256": "7ce98d7735ec29207f2e2908ebdd940b5b2fa997f5f29ff2e23163cd51ab4db4",
- "count": 701,
+ "fileName": "gc-es-del-sentimiento-tragico-de-la-vida_2026-11-09.gvec",
+ "sizeBytes": 206524,
+ "sha256": "99062e5fc92aa4f5ec418fa9915294dd1d338baba62637b06cdbdcc1c50aaa56",
+ "count": 702,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "2b8f2771a91272ddf5818e282a7174f0dadad1fb1722bc77a5fab493f0b06ab9",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-del-sentimiento-tragico-de-la-vida_2026-10-30.gvec"
+ "sourceSha256": "043bc32cee45201fda2bde30e4d9120eebd37bb14ed8001673ba5412bcc806eb",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-del-sentimiento-tragico-de-la-vida_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-es-cuentos-chilenos-de-nunca-acabar",
  "kind": "book",
- "fileName": "gc-es-cuentos-chilenos-de-nunca-acabar_2026-10-30.gvec",
- "sizeBytes": 33060,
- "sha256": "179f0a826d5fd67f005093639ad4072356b11b67565a2df455a17b79ff28a41f",
- "count": 112,
+ "fileName": "gc-es-cuentos-chilenos-de-nunca-acabar_2026-11-09.gvec",
+ "sizeBytes": 33358,
+ "sha256": "59dc62676fc3b6e3a588a2195252a6f7d891f0be8d1abb54831061565e9f0143",
+ "count": 113,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "3c0dc9d7db889dd8b7267e2c0ae7823c80260fa20bfc462c515bb986ac4e6dc2",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-cuentos-chilenos-de-nunca-acabar_2026-10-30.gvec"
+ "sourceSha256": "c73d3dd8cecdf98e72405d3fd3e0afa0627ad0854b446aaba7e52be8c7210fd4",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-cuentos-chilenos-de-nunca-acabar_2026-11-09.gvec"
 }

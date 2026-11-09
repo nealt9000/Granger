@@ -1,14 +1,14 @@
 {
  "id": "gc-lady-windermere-s-fan",
  "kind": "book",
- "fileName": "gc-lady-windermere-s-fan_2026-10-30.gvec",
- "sizeBytes": 58642,
- "sha256": "76963e2254e4c179dfbc3c326859ceef04712e34d16c5a2f228a28fd3f0f71fe",
- "count": 199,
+ "fileName": "gc-lady-windermere-s-fan_2026-11-09.gvec",
+ "sizeBytes": 59524,
+ "sha256": "27b0ce6b9f4431d5d360c736f41c3b63f4b5a8f1cb7e16302112ece7215b1573",
+ "count": 202,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "1d206601696d2138951b0cc74a23c453e1973132825b40ba16b239b396f08c4c",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-lady-windermere-s-fan_2026-10-30.gvec"
+ "sourceSha256": "2fbad42eca2e236ea72887e736942e5c73b4f0acae6fc3d28737bfca276d72c0",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-lady-windermere-s-fan_2026-11-09.gvec"
 }

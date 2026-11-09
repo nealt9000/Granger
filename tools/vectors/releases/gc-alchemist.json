@@ -1,14 +1,14 @@
 {
  "id": "gc-alchemist",
  "kind": "book",
- "fileName": "gc-alchemist_2026-10-30.gvec",
- "sizeBytes": 84220,
- "sha256": "2a88232aaa1313a752246214eada80557884d74899304d667a7a458596c26212",
- "count": 286,
+ "fileName": "gc-alchemist_2026-11-09.gvec",
+ "sizeBytes": 145078,
+ "sha256": "a534868be36ab1fb95c727ecd84101ccc97a4abf8e346b8dac2b6fad3155ff90",
+ "count": 493,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "5596e26cc1a9588444391fe6231198a9974886ece03fd72c51c375d4cb485e1e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-alchemist_2026-10-30.gvec"
+ "sourceSha256": "afa2ca62036106090df7af387fc48e7c1ef1bde045d2a6b778fb8fb1f2f8e70d",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-alchemist_2026-11-09.gvec"
 }

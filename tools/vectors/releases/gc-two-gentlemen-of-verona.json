@@ -1,14 +1,14 @@
 {
  "id": "gc-two-gentlemen-of-verona",
  "kind": "book",
- "fileName": "gc-two-gentlemen-of-verona_2026-10-30.gvec",
+ "fileName": "gc-two-gentlemen-of-verona_2026-11-09.gvec",
  "sizeBytes": 53938,
- "sha256": "7a472b94f83fd22728b8af341084afe545a4aac9bbdb225ba0863b4a9460c204",
+ "sha256": "828871efb121f70d01a76dc94f456bb83416f18a609a37bc80b8dc85ad33c442",
  "count": 183,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "09d64e9d7e7fcce267fc8eea794a2ef73b3f5487a16bc2d6a7b421eded10b39c",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-two-gentlemen-of-verona_2026-10-30.gvec"
+ "sourceSha256": "dc2a69cdad4bf988d83ba63e44ed516f93dbed21d6783b8e9e4a0d997982167c",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-two-gentlemen-of-verona_2026-11-09.gvec"
 }

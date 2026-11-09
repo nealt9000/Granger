@@ -1,14 +1,14 @@
 {
  "id": "gc-works-of-edgar-allan-poe-volume-1",
  "kind": "book",
- "fileName": "gc-works-of-edgar-allan-poe-volume-1_2026-10-30.gvec",
+ "fileName": "gc-works-of-edgar-allan-poe-volume-1_2026-11-09.gvec",
  "sizeBytes": 155662,
- "sha256": "9d34646fd4b30bd8c4080b34336243fd5f44bb8436f31748da813fbfe606f0b3",
+ "sha256": "62e08170fadd7bd497d9b6ba9d1a84e5d6d4bb83ecdb0556de8e5110b7eed451",
  "count": 529,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "bba8aed9eb10e649b5291b87971c89578da3b1e410cb82a643532a0b4b36d0a4",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-works-of-edgar-allan-poe-volume-1_2026-10-30.gvec"
+ "sourceSha256": "caea29c2df245b6c9fa3687a330ab334028d277946b694d92d82454096d9105a",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-works-of-edgar-allan-poe-volume-1_2026-11-09.gvec"
 }

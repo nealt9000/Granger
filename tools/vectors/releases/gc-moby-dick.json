@@ -1,14 +1,14 @@
 {
  "id": "gc-moby-dick",
  "kind": "book",
- "fileName": "gc-moby-dick_2026-10-30.gvec",
+ "fileName": "gc-moby-dick_2026-11-09.gvec",
  "sizeBytes": 442606,
- "sha256": "390d336deacbbdb0e193c1ce52fa8613fb26dc6024b098cdc3a8d36fefdb165d",
+ "sha256": "1585c180880d378fbd345c8733d4bfa19ad3d39028f599f42cb527ba65449f84",
  "count": 1505,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "d56cbd902d56c21cbff4cd772adde4c3d862e9c596fafd8a0c872644b06c53d6",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-moby-dick_2026-10-30.gvec"
+ "sourceSha256": "629a10db875f37b29b50a126bc023c9b48da93b10181afceaf0006f1a7b0d409",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-moby-dick_2026-11-09.gvec"
 }

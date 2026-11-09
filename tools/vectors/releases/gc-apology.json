@@ -1,14 +1,14 @@
 {
  "id": "gc-apology",
  "kind": "book",
- "fileName": "gc-apology_2026-10-30.gvec",
+ "fileName": "gc-apology_2026-11-09.gvec",
  "sizeBytes": 22480,
- "sha256": "c9d7b6399dfee0b4633718e3959bd50656a0eeebdd86b41ed904ce63fd8133f4",
+ "sha256": "be40db01755be2d7fce317462d24fc66c33a4d1496008f358c61dfd7c9a537b2",
  "count": 76,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "bee146bac1465af6ee68489224e9e4fc375e451397d997a62d68b77086907707",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-apology_2026-10-30.gvec"
+ "sourceSha256": "2365af16e072248631a541e0c8d41d86c29d5380efc5d214a41ac0a02f901a79",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-apology_2026-11-09.gvec"
 }

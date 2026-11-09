@@ -1,14 +1,14 @@
 {
  "id": "gc-es-vida-de-don-quijote-y-sancho",
  "kind": "book",
- "fileName": "gc-es-vida-de-don-quijote-y-sancho_2026-10-30.gvec",
- "sizeBytes": 207108,
- "sha256": "aad3981c62f862f6f20cb974c5cfa0031de9953da622325c59a0afa4507058fc",
- "count": 704,
+ "fileName": "gc-es-vida-de-don-quijote-y-sancho_2026-11-09.gvec",
+ "sizeBytes": 207406,
+ "sha256": "a62708f04468423b54731f0869882e8e7d3f4392842f91267ff697246f180366",
+ "count": 705,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "1e06a20da6a96783bf5a0d0fdf0b38bebb4c8d26a4ab3dbc30a409d72e0d8ddb",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-vida-de-don-quijote-y-sancho_2026-10-30.gvec"
+ "sourceSha256": "230a43295e49e5ffa9a78ca27d391b8ab150118d35f1a050ebd5a8c39bbb5cad",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-vida-de-don-quijote-y-sancho_2026-11-09.gvec"
 }

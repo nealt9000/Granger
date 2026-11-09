@@ -1,14 +1,14 @@
 {
  "id": "gc-major-barbara",
  "kind": "book",
- "fileName": "gc-major-barbara_2026-10-30.gvec",
+ "fileName": "gc-major-barbara_2026-11-09.gvec",
  "sizeBytes": 94804,
- "sha256": "3190d06ff012b7f42c1d4b5c0914ffb4190bd21706a224443a750c396ccd4431",
+ "sha256": "7bd4b5242069462062379a494543041ae97b1c2a5ba44d5935a9687aedf634e9",
  "count": 322,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ba7b1a34d2cbdbd8e5a4e272ed356f538cdcdaac1974b4ef5beac379a265b946",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-major-barbara_2026-10-30.gvec"
+ "sourceSha256": "af72b36e1c7e2b6778d9896afa4c67d7f3a598dc2d453fb2d8d8d1efaf4cc3ba",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-major-barbara_2026-11-09.gvec"
 }

@@ -1,0 +1,14 @@
+{
+ "id": "gc-adventures-of-pinocchio",
+ "kind": "book",
+ "fileName": "gc-adventures-of-pinocchio_2026-11-09.gvec",
+ "sizeBytes": 127144,
+ "sha256": "e9324171403eda1f9f7fbf50e295258b7135e6d9fbb9dda8b82705594491e9c5",
+ "count": 432,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "8409a797e85308622ef6c7373cfe22532ab479f410cc0957c5f4eea70d368b57",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-adventures-of-pinocchio_2026-11-09.gvec"
+}

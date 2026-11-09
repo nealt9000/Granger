@@ -1,14 +1,14 @@
 {
  "id": "gc-candide",
  "kind": "book",
- "fileName": "gc-candide_2026-10-30.gvec",
+ "fileName": "gc-candide_2026-11-09.gvec",
  "sizeBytes": 95980,
- "sha256": "838193b27e58fd09c585d300a6b3a9a194f28d8da3694b4feca3c1e9d0c2faa9",
+ "sha256": "8b6b9fc1991231d238ec239f6786f17e7e5068364b5006bd214e0f771013fdec",
  "count": 326,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "93cc031a183d49a3ee0394e678e7b7c1d741c232a64069e916fa980fe008970f",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-candide_2026-10-30.gvec"
+ "sourceSha256": "e8be88dfa5b65058dee20f0c4746b69a21c4341a9832e25d45f0578b2341cf76",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-candide_2026-11-09.gvec"
 }

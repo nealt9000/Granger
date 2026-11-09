@@ -1,0 +1,14 @@
+{
+ "id": "gc-murder-on-the-links",
+ "kind": "book",
+ "fileName": "gc-murder-on-the-links_2026-11-09.gvec",
+ "sizeBytes": 191824,
+ "sha256": "c19a7043c50d0e62b1962eb28518cbfab8e297da4ab5e77e2b6781b58ef662c6",
+ "count": 652,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "b0f968798930cc5e53541a4dcaa108de5f0445d8242ec4ddac40491d6f51634f",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-murder-on-the-links_2026-11-09.gvec"
+}

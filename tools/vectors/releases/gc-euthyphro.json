@@ -1,14 +1,14 @@
 {
  "id": "gc-euthyphro",
  "kind": "book",
- "fileName": "gc-euthyphro_2026-10-30.gvec",
+ "fileName": "gc-euthyphro_2026-11-09.gvec",
  "sizeBytes": 22186,
- "sha256": "a395e0222074e88699193dd4962e22a1b5c4ebd696dc5efdc58a5811fe6a5718",
+ "sha256": "ba3f2361c0e22892ea13ba8bc16b690c8405f9f2a3a3f6a337319591a66c57b7",
  "count": 75,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "4ce61467d7f0d5d6c21a4eac2cbbd3624e5b9d5facef756461b47d021979c657",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-euthyphro_2026-10-30.gvec"
+ "sourceSha256": "c24c47c7908acc526a04dbeed7aa80962d9a75ad099d4130cf43c183bfa68689",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-euthyphro_2026-11-09.gvec"
 }

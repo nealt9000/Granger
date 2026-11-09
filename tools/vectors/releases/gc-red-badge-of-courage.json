@@ -1,14 +1,14 @@
 {
  "id": "gc-red-badge-of-courage",
  "kind": "book",
- "fileName": "gc-red-badge-of-courage_2026-10-30.gvec",
+ "fileName": "gc-red-badge-of-courage_2026-11-09.gvec",
  "sizeBytes": 133024,
- "sha256": "9ac47c334fe70293b8ee56be740787cd8907e76548aaa18c4de8f87572fab92d",
+ "sha256": "1908af20846267ceb3ffa0a535174c16599552da7917136465903be8bb356802",
  "count": 452,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ebb6fdeb73dc14b70cfccffc7f40e491bf99985e90b98277deac239a2a18cfe2",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-red-badge-of-courage_2026-10-30.gvec"
+ "sourceSha256": "1cb7f8cf1d0a558195ea9b0df25ca053ae4bbb039440476b9a18d34f2be01f11",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-red-badge-of-courage_2026-11-09.gvec"
 }

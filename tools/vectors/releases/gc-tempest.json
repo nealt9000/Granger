@@ -1,14 +1,14 @@
 {
  "id": "gc-tempest",
  "kind": "book",
- "fileName": "gc-tempest_2026-10-30.gvec",
+ "fileName": "gc-tempest_2026-11-09.gvec",
  "sizeBytes": 53938,
- "sha256": "3654eb2f3019c1a0fa93687436b9bfd63b035f5efd4347b638bbc1af5e49b3fe",
+ "sha256": "496ca0f4c741c2a0e582638954947c437b9a84fcc769b1daeded82debe067cd3",
  "count": 183,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "f6d8f0a15214c3922f766b2208e5dec8ec4477f2ed08d40ca5f074923bed2e4b",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-tempest_2026-10-30.gvec"
+ "sourceSha256": "9d1d71b91254876867c1b37e3474332f7071ab623afb07c62344ac57c3d66d83",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-tempest_2026-11-09.gvec"
 }

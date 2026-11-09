@@ -1,0 +1,14 @@
+{
+ "id": "gc-hidden-staircase",
+ "kind": "book",
+ "fileName": "gc-hidden-staircase_2026-11-09.gvec",
+ "sizeBytes": 131554,
+ "sha256": "839480090295eb40850b9ea9648a655ff5e80d4530e3601f69c7549c4eeed7c8",
+ "count": 447,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "f1cc9883109c760627f1e48076da0f253dcd675c0a680e2db2c432ac28820108",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-hidden-staircase_2026-11-09.gvec"
+}

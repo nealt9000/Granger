@@ -1,0 +1,14 @@
+{
+ "id": "gc-castle",
+ "kind": "book",
+ "fileName": "gc-castle_2026-11-09.gvec",
+ "sizeBytes": 117442,
+ "sha256": "1f974b4a17190c91e15edc1b0fd327a1ba72ceb756b8f40fb2409c2fdc9e0663",
+ "count": 399,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "d22528bf567a2647f9a97882b1924fc9be119a65100c99f204ec0c82ce0eb94a",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-castle_2026-11-09.gvec"
+}

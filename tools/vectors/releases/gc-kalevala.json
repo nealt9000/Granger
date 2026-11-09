@@ -1,14 +1,14 @@
 {
  "id": "gc-kalevala",
  "kind": "book",
- "fileName": "gc-kalevala_2026-10-30.gvec",
+ "fileName": "gc-kalevala_2026-11-09.gvec",
  "sizeBytes": 317068,
- "sha256": "b093776f671e6e46957607833a175e5fe177c91202ee22330dd314b8b920f843",
+ "sha256": "fab156ee399e390b711264d215ff4a5ceed3d679b639894fc00ba4d746e8bea6",
  "count": 1078,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "0a1dbf22d824737b46cb1c92a17ac46c3be9de510d36b2949c21e320ef323802",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-kalevala_2026-10-30.gvec"
+ "sourceSha256": "a52d2e9c9beae4425976944f974b2c5c5420ab15ce811ce998804815608d954d",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-kalevala_2026-11-09.gvec"
 }

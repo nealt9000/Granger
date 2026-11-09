@@ -1,14 +1,14 @@
 {
  "id": "gc-she-stoops-to-conquer",
  "kind": "book",
- "fileName": "gc-she-stoops-to-conquer_2026-10-30.gvec",
+ "fileName": "gc-she-stoops-to-conquer_2026-11-09.gvec",
  "sizeBytes": 73342,
- "sha256": "5cd2b59af2b93504bff943a7a5005bb0ae78ebe335a8d3552619ec9cd9ccdea4",
+ "sha256": "cb2a4b15335ed321c1dff9206587c6697501f82907942754abeccb19586e9e98",
  "count": 249,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "2a807038134fc31ba7042721329ef51bdad49735a129348678031e1fb4f46745",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-she-stoops-to-conquer_2026-10-30.gvec"
+ "sourceSha256": "0807dd803f5ac338230e5a3b6513a16f7a1738ec3c4864b9ca0f48d80d17509e",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-she-stoops-to-conquer_2026-11-09.gvec"
 }

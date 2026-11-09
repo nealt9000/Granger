@@ -1,14 +1,14 @@
 {
  "id": "gc-es-gil-blas-de-santillana-tomo-1-de-3",
  "kind": "book",
- "fileName": "gc-es-gil-blas-de-santillana-tomo-1-de-3_2026-10-30.gvec",
- "sizeBytes": 102444,
- "sha256": "d58e896c67e6de5cde64b669d5698a6b5f1c2db93e111f4da988a89a4ebbb8d8",
- "count": 348,
+ "fileName": "gc-es-gil-blas-de-santillana-tomo-1-de-3_2026-11-09.gvec",
+ "sizeBytes": 102742,
+ "sha256": "b3a41a4993ebbc0dec271b8cc62b044a63ef50d9d79de6f3309836eb5a1b99e6",
+ "count": 349,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "621ef7f4ac495513fb8e6c9c2413332a0b6a2120f7fce84f1cddcf69686f6f4a",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-gil-blas-de-santillana-tomo-1-de-3_2026-10-30.gvec"
+ "sourceSha256": "2c771e6afeba753a865a797f063393c592c1c954b43c12ed5253c923646fb6c0",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-gil-blas-de-santillana-tomo-1-de-3_2026-11-09.gvec"
 }

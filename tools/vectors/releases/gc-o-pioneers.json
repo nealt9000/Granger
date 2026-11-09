@@ -1,14 +1,14 @@
 {
  "id": "gc-o-pioneers",
  "kind": "book",
- "fileName": "gc-o-pioneers_2026-10-30.gvec",
+ "fileName": "gc-o-pioneers_2026-11-09.gvec",
  "sizeBytes": 125674,
- "sha256": "d5f2123baa819ece7b1029d5edaf03f3c0cc51491853e85dabafd6f9731709bd",
+ "sha256": "e51f4f52a967b00574935ef079a548c023808c3e282cd1f14900dfd0c32bd13f",
  "count": 427,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "9ecb1cd530d0a024c7c78500adbe50438b31442b355d0497061cb5b944a5cdd8",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-o-pioneers_2026-10-30.gvec"
+ "sourceSha256": "39de29c923ded6c8603f1f0a4d023c3ad48e20b25cf0ad2577431b9e31121a8e",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-o-pioneers_2026-11-09.gvec"
 }

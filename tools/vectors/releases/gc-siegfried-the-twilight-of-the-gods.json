@@ -1,14 +1,14 @@
 {
  "id": "gc-siegfried-the-twilight-of-the-gods",
  "kind": "book",
- "fileName": "gc-siegfried-the-twilight-of-the-gods_2026-10-30.gvec",
- "sizeBytes": 99802,
- "sha256": "fdaac5602b2590d39844f531b5083a9480131719db87732486c08a085477fdf7",
- "count": 339,
+ "fileName": "gc-siegfried-the-twilight-of-the-gods_2026-11-09.gvec",
+ "sizeBytes": 97450,
+ "sha256": "0aca7236370fb514918e8abc1e7b52f56b6293ac77d57587a8711c23d78a3dc1",
+ "count": 331,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "482b1a77b0bfbe250e8cb3feb4a4f60e0310451838f8c6497c6ce32db71ae5d1",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-siegfried-the-twilight-of-the-gods_2026-10-30.gvec"
+ "sourceSha256": "378221e9bbd27ae9625fb8cb812daaa1e6fa4d2b39cb988b940518173042d1dd",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-siegfried-the-twilight-of-the-gods_2026-11-09.gvec"
 }

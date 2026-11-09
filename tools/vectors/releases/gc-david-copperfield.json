@@ -1,14 +1,14 @@
 {
  "id": "gc-david-copperfield",
  "kind": "book",
- "fileName": "gc-david-copperfield_2026-10-30.gvec",
+ "fileName": "gc-david-copperfield_2026-11-09.gvec",
  "sizeBytes": 874198,
- "sha256": "ad9828f5f0d134b1e1ab39ba5c3df4cebef514387a9a129b8565b654cde5dfdc",
+ "sha256": "fc05529fb7d6584b3ffe137d4a8cbbe5a75c6774b997e3efee896e8d28b65f83",
  "count": 2973,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "539a70df916222c36268ed6ef1c07f9f56b589720f99d320d161afc85c24813e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-david-copperfield_2026-10-30.gvec"
+ "sourceSha256": "db57d294ad800869eba583040f4026ea051efb2341301c8b88f14923b71a034d",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-david-copperfield_2026-11-09.gvec"
 }

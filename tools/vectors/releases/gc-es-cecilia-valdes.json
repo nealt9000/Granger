@@ -1,14 +1,14 @@
 {
  "id": "gc-es-cecilia-valdes",
  "kind": "book",
- "fileName": "gc-es-cecilia-valdes_2026-10-30.gvec",
- "sizeBytes": 446718,
- "sha256": "7d19bccdba0bee6401967b2bd5d7aee90cd6c7a75ec65dba0514aeadcf73395d",
- "count": 1519,
+ "fileName": "gc-es-cecilia-valdes_2026-11-09.gvec",
+ "sizeBytes": 447016,
+ "sha256": "0cb4d062282ef904d0af17402efa3f153e6341ca47660fd1b31bc7a278933319",
+ "count": 1520,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "830f1b20fa3a39eac3cf8c40d46bba46fe5bf29bc90994585d6adc145c483dd2",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-cecilia-valdes_2026-10-30.gvec"
+ "sourceSha256": "236fac77c3582726c44e9ce1aa59c03dd93eec5010d62e51333601a76f11eede",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-cecilia-valdes_2026-11-09.gvec"
 }

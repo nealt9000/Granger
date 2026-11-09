@@ -1,14 +1,14 @@
 {
  "id": "gc-middlemarch",
  "kind": "book",
- "fileName": "gc-middlemarch_2026-10-30.gvec",
+ "fileName": "gc-middlemarch_2026-11-09.gvec",
  "sizeBytes": 694270,
- "sha256": "7699735902f8aaa75ded112fb32b63c2158a026f8ec015e4ddf3c123cbb71dc7",
+ "sha256": "d332b17396aa62457d3e5759ed843b6bcaaa6032ed227bb36b92aa5f0f96b069",
  "count": 2361,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "7bef1d309c605c4eeed2fa9de8cacfa96aa0823726ca788fbc45cbeb4c53979a",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-middlemarch_2026-10-30.gvec"
+ "sourceSha256": "e49576202852449cdba1d6bc560d9c72ddf6a1c4763b3e722f7f3cfa34b72fc9",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-middlemarch_2026-11-09.gvec"
 }

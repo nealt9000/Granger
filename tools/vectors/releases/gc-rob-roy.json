@@ -1,14 +1,14 @@
 {
  "id": "gc-rob-roy",
  "kind": "book",
- "fileName": "gc-rob-roy_2026-10-30.gvec",
- "sizeBytes": 396448,
- "sha256": "17fc409e770e6812731ced154c7400c94680384a32a4ec76e6ac085044ea6952",
- "count": 1348,
+ "fileName": "gc-rob-roy_2026-11-09.gvec",
+ "sizeBytes": 396154,
+ "sha256": "213e50837d11a3bcc4aa0f0304686399de448ad506464e294440b0bb27a33c8c",
+ "count": 1347,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "435dafa2bf71db4df83a2b0d57069e6fe0d2840ec2c79c7b07e8501b947b1c6d",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-rob-roy_2026-10-30.gvec"
+ "sourceSha256": "00ad0a7539f0df236e15d99c0422ecaee2c62fb953a228e512d94a918e16b34e",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-rob-roy_2026-11-09.gvec"
 }

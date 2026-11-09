@@ -1,14 +1,14 @@
 {
  "id": "gc-beggar-s-opera",
  "kind": "book",
- "fileName": "gc-beggar-s-opera_2026-10-30.gvec",
+ "fileName": "gc-beggar-s-opera_2026-11-09.gvec",
  "sizeBytes": 51292,
- "sha256": "618ff2757df9d470c8d39850a8e6589c01ceae8b9e40882c8a8b7d6ebc11c038",
+ "sha256": "d2a8fc8ea39342e22c091ffa695a1eb96a9287fcf322f3986d97e582821ce149",
  "count": 174,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "b89d338a1c707f8e663aa330e99b2c979d17b2257b5dc7996818a47cfde859ee",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-beggar-s-opera_2026-10-30.gvec"
+ "sourceSha256": "c219c1b7552c87aaa45136d7199d23750e141ae28eb84b7ac2421f42a806f3dc",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-beggar-s-opera_2026-11-09.gvec"
 }

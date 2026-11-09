@@ -1,14 +1,14 @@
 {
  "id": "gc-coriolanus",
  "kind": "book",
- "fileName": "gc-coriolanus_2026-10-30.gvec",
+ "fileName": "gc-coriolanus_2026-11-09.gvec",
  "sizeBytes": 87748,
- "sha256": "fe9eb648cec905e4a29aa1cd5d3315f49b0f29329963d3735df32f4f0fd9397a",
+ "sha256": "9f5ea9e6140997f5e6df9aa3618c861f86d121844655d299e2156b2fb83b7da0",
  "count": 298,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "99e5c330065bd3dc1660b5b47a9fbca374db048e01c0aeb8c307363576260e7b",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-coriolanus_2026-10-30.gvec"
+ "sourceSha256": "9c11d3ed7eb89a94e83c977d577816236f7a7fdb59faf21a31b585243cc95375",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-coriolanus_2026-11-09.gvec"
 }

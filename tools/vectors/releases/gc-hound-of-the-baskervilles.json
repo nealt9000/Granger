@@ -1,14 +1,14 @@
 {
  "id": "gc-hound-of-the-baskervilles",
  "kind": "book",
- "fileName": "gc-hound-of-the-baskervilles_2026-10-30.gvec",
+ "fileName": "gc-hound-of-the-baskervilles_2026-11-09.gvec",
  "sizeBytes": 139198,
- "sha256": "2157b87c0fd8534cff0a44965e1edc9d268f5ba994403ae9088687eadbea1a8d",
+ "sha256": "c9aeedab578bc87a4e57b3cc4f2bf681112c4d139f0faaf2a11868f1a5a81161",
  "count": 473,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "0278931526a815b5df4cdaf83d5be7d4f700f729c785b90234be68a35e3a47a4",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-hound-of-the-baskervilles_2026-10-30.gvec"
+ "sourceSha256": "1cd766519b115dbfe065e3f57d988329c58df52b724aadee98f814b9bb52fc95",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-hound-of-the-baskervilles_2026-11-09.gvec"
 }

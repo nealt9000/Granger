@@ -1,14 +1,14 @@
 {
  "id": "gc-moonstone",
  "kind": "book",
- "fileName": "gc-moonstone_2026-10-30.gvec",
+ "fileName": "gc-moonstone_2026-11-09.gvec",
  "sizeBytes": 448780,
- "sha256": "45b33e9ad7d6136af660e844ba34f7b734d3598c22f990efa0994aaba65e5815",
+ "sha256": "b6be233dfe2cc3487db2de86c3f50e077d5e00b063e54a08679e0886e1341d9f",
  "count": 1526,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "6553678789df182c7ea30c38f3801656b222b6298b86f7683ee152a5c68d0a9f",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-moonstone_2026-10-30.gvec"
+ "sourceSha256": "e38350b8bc8c019eff4b2db6180275c7863c22400d03bba3c5ba3b8569a1f1ec",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-moonstone_2026-11-09.gvec"
 }

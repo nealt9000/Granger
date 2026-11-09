@@ -1,14 +1,14 @@
 {
  "id": "gc-poems-1817",
  "kind": "book",
- "fileName": "gc-poems-1817_2026-10-30.gvec",
+ "fileName": "gc-poems-1817_2026-11-09.gvec",
  "sizeBytes": 25714,
- "sha256": "3f345efe3fc52f6f36842729dcaed0e2a19c8b92e1d7c311f1855e4354232e7a",
+ "sha256": "33020ab4ff1c08ab39c0e71014833ecf58d98ee253c8f847d9362f937c7c7bae",
  "count": 87,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c9701437b0fe64b7311f8cb4b19666e7ce94f321d98387f6a33da205a6ec2034",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-poems-1817_2026-10-30.gvec"
+ "sourceSha256": "591ca93ecdde8205d9889c21a884a2595c9b22c42e3ccd50fa183a9d4397a005",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-poems-1817_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-uncle-tom-s-cabin",
  "kind": "book",
- "fileName": "gc-uncle-tom-s-cabin_2026-10-30.gvec",
- "sizeBytes": 466420,
- "sha256": "b7894ad3c9a69d26aaa578a1ca1fc825c3abde7d16d950b515370d169d175c04",
- "count": 1586,
+ "fileName": "gc-uncle-tom-s-cabin_2026-11-09.gvec",
+ "sizeBytes": 466126,
+ "sha256": "acbdf17ef08e17fc9008b0c4b82090d09e6c7a672e0bd9586f7aaaa37cb0fc2d",
+ "count": 1585,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "52c894d822bbdaf70397806d0b8330a120cc22ea019d0b20448bb63d01691f78",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-uncle-tom-s-cabin_2026-10-30.gvec"
+ "sourceSha256": "4f412b9463e13021d36a32bc320b21feb3cae52e28918966918fcf23711dfba6",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-uncle-tom-s-cabin_2026-11-09.gvec"
 }

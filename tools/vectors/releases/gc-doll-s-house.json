@@ -1,14 +1,14 @@
 {
  "id": "gc-doll-s-house",
  "kind": "book",
- "fileName": "gc-doll-s-house_2026-10-30.gvec",
+ "fileName": "gc-doll-s-house_2026-11-09.gvec",
  "sizeBytes": 80692,
- "sha256": "44d1b85e73cb78dbe06157c8abfd784dd90f3d348c8486c145b6cce3a365f6ba",
+ "sha256": "346f0acaf0e744f65a92c220f19b2b515211b9489dbba65f9ec721f683f7f046",
  "count": 274,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "51ef59325ebcdb26ded34bac3fac4dbcb9f8be211440487bf28fb66113ba3c04",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-doll-s-house_2026-10-30.gvec"
+ "sourceSha256": "a71e505f8574ed605ea8f183f006f4394c5423f5daba0a5063386ae643fd5c65",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-doll-s-house_2026-11-09.gvec"
 }

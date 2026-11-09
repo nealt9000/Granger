@@ -1,14 +1,14 @@
 {
  "id": "gc-protagoras",
  "kind": "book",
- "fileName": "gc-protagoras_2026-10-30.gvec",
+ "fileName": "gc-protagoras_2026-11-09.gvec",
  "sizeBytes": 51586,
- "sha256": "1b55cf60d6d0904426a06adaa4a7c3880f7192e93001ac81eee434a1c0d4b1e4",
+ "sha256": "c6c819695198385133aaf534f2c2edee8886b985f7380316f79e391bc0ecb153",
  "count": 175,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "b00f858cf36a5f790a78dc11bb981fac10e0cfece6549087ad81eeee65901fa0",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-protagoras_2026-10-30.gvec"
+ "sourceSha256": "eb95bf5df6fe9c8401c2b5b005402a632ed3199ef00bb8de633acb2133acf41c",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-protagoras_2026-11-09.gvec"
 }

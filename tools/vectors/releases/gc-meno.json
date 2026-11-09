@@ -1,14 +1,14 @@
 {
  "id": "gc-meno",
  "kind": "book",
- "fileName": "gc-meno_2026-10-30.gvec",
+ "fileName": "gc-meno_2026-11-09.gvec",
  "sizeBytes": 48940,
- "sha256": "cef05cbeebbe79d3556d1d40de9b9f6c7643b5407f7d47fcd919e745bb84efa5",
+ "sha256": "92f6ea58d3bb53d2a38e803c832cb900c36464bdc4b7171a8416bb867afe2d1e",
  "count": 166,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "e17f62ea9d12ecce6275f19921908b8ee1d79c6cbd6a13deec57b5f202bf9361",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-meno_2026-10-30.gvec"
+ "sourceSha256": "f7836deb9acb68922dd269128b4732d64eeaba91d7f540b82fa6b5e651b51814",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-meno_2026-11-09.gvec"
 }

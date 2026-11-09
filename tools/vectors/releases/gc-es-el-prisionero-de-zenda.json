@@ -1,14 +1,14 @@
 {
  "id": "gc-es-el-prisionero-de-zenda",
  "kind": "book",
- "fileName": "gc-es-el-prisionero-de-zenda_2026-10-30.gvec",
- "sizeBytes": 138312,
- "sha256": "ab9f5cb78fc2ea5347ff11119464106910cb0f1bbafc8cec5beedd1cf191c948",
- "count": 470,
+ "fileName": "gc-es-el-prisionero-de-zenda_2026-11-09.gvec",
+ "sizeBytes": 138610,
+ "sha256": "7a988a9ebce6da54a2d642efeab387198c1775e48e2d54964d467852d0ff7f22",
+ "count": 471,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "72237ccff174afda0e9fdefcab262baef755cd270bbcc36d3f614a8b9667d23e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-el-prisionero-de-zenda_2026-10-30.gvec"
+ "sourceSha256": "344a6e1bc0e56f1ab909eb33fd4878e14abf541894e75f6b9468ca6e7989cea5",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-el-prisionero-de-zenda_2026-11-09.gvec"
 }

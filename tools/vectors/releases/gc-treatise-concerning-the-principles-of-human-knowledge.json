@@ -1,14 +1,14 @@
 {
  "id": "gc-treatise-concerning-the-principles-of-human-knowledge",
  "kind": "book",
- "fileName": "gc-treatise-concerning-the-principles-of-human-knowledge_2026-10-30.gvec",
+ "fileName": "gc-treatise-concerning-the-principles-of-human-knowledge_2026-11-09.gvec",
  "sizeBytes": 57466,
- "sha256": "172ad6607fa796082c0c3b041673d3ec7bb3b5db21e9831ea9a85f4fff70cf39",
+ "sha256": "521633424d8edc578fddd794faf64918650d84aa99005df91fd675751782ac76",
  "count": 195,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c7aab2377e10ee846af524b84363d26b75c985c417367497030193590a63b9b0",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-treatise-concerning-the-principles-of-human-knowledge_2026-10-30.gvec"
+ "sourceSha256": "a0593146bb30de9c38f4473e6132cb25242ba4fb617f017919b20b256d52dc2d",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-treatise-concerning-the-principles-of-human-knowledge_2026-11-09.gvec"
 }

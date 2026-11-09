@@ -1,14 +1,14 @@
 {
  "id": "gc-sign-of-the-four",
  "kind": "book",
- "fileName": "gc-sign-of-the-four_2026-10-30.gvec",
+ "fileName": "gc-sign-of-the-four_2026-11-09.gvec",
  "sizeBytes": 97156,
- "sha256": "55cf3cc0fe12f088b9894274a0547bd0da1be8f3769dca44e4da7a2517139cf7",
+ "sha256": "e4e6b98753737c3ba73ed48f98b92672f399951cd982bc2204c67775cf16762f",
  "count": 330,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "bab2e9e57ac621469bbe201497e70f115b0c9fca829eda90511b07beb23ad4c8",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-sign-of-the-four_2026-10-30.gvec"
+ "sourceSha256": "d59d0df3173b36cde15221ae0840f2fc60566c10f4103465e0db2437f5eeb47d",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-sign-of-the-four_2026-11-09.gvec"
 }

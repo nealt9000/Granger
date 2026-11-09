@@ -1,14 +1,14 @@
 {
  "id": "gc-es-el-senorio-de-los-incas-cronica-del-peru-segunda-parte",
  "kind": "book",
- "fileName": "gc-es-el-senorio-de-los-incas-cronica-del-peru-segunda-parte_2026-10-30.gvec",
- "sizeBytes": 120378,
- "sha256": "fa7d26f6b33841eb2d94b8a17d752500ae4b1dc1bf5eccce43d86f101067800d",
- "count": 409,
+ "fileName": "gc-es-el-senorio-de-los-incas-cronica-del-peru-segunda-parte_2026-11-09.gvec",
+ "sizeBytes": 120676,
+ "sha256": "a3b715897238ae1c8ee80fa8d49d5be3d9b3c4a9350f4a53feb6977af85d01ec",
+ "count": 410,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "1f73b9352c3ff1e540ae591efddef8cb1b0f744e99914964128b5a4d381466b1",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-el-senorio-de-los-incas-cronica-del-peru-segunda-parte_2026-10-30.gvec"
+ "sourceSha256": "6e9dc47a9dead3ce15f11f9c0449ad72d233af13b361ba3ca7f5c5bee1a8954c",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-el-senorio-de-los-incas-cronica-del-peru-segunda-parte_2026-11-09.gvec"
 }

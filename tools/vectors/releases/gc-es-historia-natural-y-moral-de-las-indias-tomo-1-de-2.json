@@ -1,14 +1,14 @@
 {
  "id": "gc-es-historia-natural-y-moral-de-las-indias-tomo-1-de-2",
  "kind": "book",
- "fileName": "gc-es-historia-natural-y-moral-de-las-indias-tomo-1-de-2_2026-10-30.gvec",
- "sizeBytes": 137724,
- "sha256": "b5bb68d933ebf319e76667a03faea88724d78ffbfd623c1c15ce130b4fbf3b8e",
- "count": 468,
+ "fileName": "gc-es-historia-natural-y-moral-de-las-indias-tomo-1-de-2_2026-11-09.gvec",
+ "sizeBytes": 138022,
+ "sha256": "8a64e8adac219a32304e376c7615b5821530ea63788e3ada600330cdf005e385",
+ "count": 469,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "2263aba2779f6bfaa1f24988c210c10343ab908c967ea494bf3836956f8e3b65",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-historia-natural-y-moral-de-las-indias-tomo-1-de-2_2026-10-30.gvec"
+ "sourceSha256": "3e9521488361a817d995d342b100558997ad41978ec983e86563c94159938396",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-historia-natural-y-moral-de-las-indias-tomo-1-de-2_2026-11-09.gvec"
 }

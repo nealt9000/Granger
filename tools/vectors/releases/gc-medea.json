@@ -1,14 +1,14 @@
 {
  "id": "gc-medea",
  "kind": "book",
- "fileName": "gc-medea_2026-10-30.gvec",
+ "fileName": "gc-medea_2026-11-09.gvec",
  "sizeBytes": 42472,
- "sha256": "76562c0c3db169a737793969d7abadb491f393abf70bf097151d6ea605ce487e",
+ "sha256": "24e0556263bef2c87f5a615fd854f74799bce05fc3358adc576bfab9dd0059b2",
  "count": 144,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "b9512b1b5b1ee90f11fabd316079ead272006bafbd44fb1c30f0437b61eea888",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-medea_2026-10-30.gvec"
+ "sourceSha256": "47a0fb3611a006976405d5ec704d7863ad245199d693201708bc068a03d79d8a",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-medea_2026-11-09.gvec"
 }

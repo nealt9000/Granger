@@ -1,0 +1,14 @@
+{
+ "id": "gc-ninety-five-theses",
+ "kind": "book",
+ "fileName": "gc-ninety-five-theses_2026-11-09.gvec",
+ "sizeBytes": 17776,
+ "sha256": "287958a357f3240e4393a024e19fc8f8e31441b5b69595c4a6cd02f86ef21298",
+ "count": 60,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "3b5b4f81458730b1ad07e55654d8bc7b59af21af4ccc9cd651a2f07918b2bb4a",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-ninety-five-theses_2026-11-09.gvec"
+}

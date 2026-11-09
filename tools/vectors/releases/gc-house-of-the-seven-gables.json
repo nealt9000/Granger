@@ -1,14 +1,14 @@
 {
  "id": "gc-house-of-the-seven-gables",
  "kind": "book",
- "fileName": "gc-house-of-the-seven-gables_2026-10-30.gvec",
+ "fileName": "gc-house-of-the-seven-gables_2026-11-09.gvec",
  "sizeBytes": 179476,
- "sha256": "524e0471d30bb8c79e531cd667daef5d3c5de62445d87a11974405098b9ce6b7",
+ "sha256": "a2af1037587bbfd7b0555d1a1c00df161b867b1d7db09173de2ca2e297f191a6",
  "count": 610,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "505cd0e60207c92e6dadb295927db24f959b56b5a9efe65319c8604e3c1990e1",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-house-of-the-seven-gables_2026-10-30.gvec"
+ "sourceSha256": "a989f9c37768067f6ff4a2437df539bbc4d53e5444c2698ca13522d1c41f6662",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-house-of-the-seven-gables_2026-11-09.gvec"
 }

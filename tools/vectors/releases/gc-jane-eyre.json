@@ -1,14 +1,14 @@
 {
  "id": "gc-jane-eyre",
  "kind": "book",
- "fileName": "gc-jane-eyre_2026-10-30.gvec",
+ "fileName": "gc-jane-eyre_2026-11-09.gvec",
  "sizeBytes": 439960,
- "sha256": "abdbd47c3cc29fe62c76560c7fd8e33535b6e9ca2c5053a54a82f7d018ea9e7f",
+ "sha256": "8071269ea8edb4de843257d67a9cbf17415b3728ce181410c5e038851c08c050",
  "count": 1496,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "912fc2a5216fa282c9344cf78620eb39c586c3258143adef84598b6e8534448c",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-jane-eyre_2026-10-30.gvec"
+ "sourceSha256": "cce0e5acb2c50847c1a4736126f50b7b5f4154665de94d333a10a7f03bc7fa23",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-jane-eyre_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-idiot",
  "kind": "book",
- "fileName": "gc-idiot_2026-10-30.gvec",
+ "fileName": "gc-idiot_2026-11-09.gvec",
  "sizeBytes": 586960,
- "sha256": "da554c22cfa895f2af3d7c50fab47e8488efa317f0639b8b8fc20310a24e1125",
+ "sha256": "be9ba9ca21bc1cb3dc829ff3876d94048ba416e60248faaa4dc83e146228b625",
  "count": 1996,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "3bbdfd1110cf56a3de6b36ee67ae639bda09345ccb26d4350df242e8fca337f8",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-idiot_2026-10-30.gvec"
+ "sourceSha256": "8ff11643253968aba6c292ed0211e8625b1ea4c81f20ef1ff18779fe24fbbe46",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-idiot_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-divine-comedy-purgatory",
  "kind": "book",
- "fileName": "gc-divine-comedy-purgatory_2026-10-30.gvec",
+ "fileName": "gc-divine-comedy-purgatory_2026-11-09.gvec",
  "sizeBytes": 127144,
- "sha256": "8ec010c5fda4bc096cc7cac48285b1dd4c34db74618f7a8d9d50c9447ab4e8bd",
+ "sha256": "27c7749b32a8a03b319071bd9d2c94b6da06e16f0014970090e8e6e3d3e76785",
  "count": 432,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "860fbc9578aee9de7e52413a55abe81fdb0fd13a8e47dcd223b20f0b9901f97d",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-divine-comedy-purgatory_2026-10-30.gvec"
+ "sourceSha256": "e59efe87d95817ae215291335252e84393a2659a5edec77cc05052b91b4a0064",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-divine-comedy-purgatory_2026-11-09.gvec"
 }

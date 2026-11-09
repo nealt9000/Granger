@@ -1,14 +1,14 @@
 {
  "id": "gc-fontainbleau",
  "kind": "book",
- "fileName": "gc-fontainbleau_2026-10-30.gvec",
+ "fileName": "gc-fontainbleau_2026-11-09.gvec",
  "sizeBytes": 57466,
- "sha256": "f4ab22ed22c789033ef3d5c7e187a5629afc8bd256a2a4291479b5ed4a945e65",
+ "sha256": "ff73d2c692dfff132303b3f0a3ea33c9c98ba422a42c9f615d16103e4184e947",
  "count": 195,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "0f60e51ed67e428719b66666efb5bfe2f09ac757e101e9f9d8072012cf74ed9b",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-fontainbleau_2026-10-30.gvec"
+ "sourceSha256": "0314c0100152fa4860d32ed2ea9a19c0aa05093c01b3f160e8e82c038978ea56",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-fontainbleau_2026-11-09.gvec"
 }

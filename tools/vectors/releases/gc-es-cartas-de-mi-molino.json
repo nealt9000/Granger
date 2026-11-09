@@ -1,14 +1,14 @@
 {
  "id": "gc-es-cartas-de-mi-molino",
  "kind": "book",
- "fileName": "gc-es-cartas-de-mi-molino_2026-10-30.gvec",
- "sizeBytes": 80982,
- "sha256": "89ccbd8ab139f9314815549542f2d050fae47f7cc4c455dbf20a4ad38cbcdc1d",
- "count": 275,
+ "fileName": "gc-es-cartas-de-mi-molino_2026-11-09.gvec",
+ "sizeBytes": 81280,
+ "sha256": "ad06532054830cf424cf10b26c456d0d8b599ddb15872519019db02bdd151f02",
+ "count": 276,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "5d4fadfa7f8845fe0e36eaa6d61922ebbebe0f4870647120d2a9cfa17c90826a",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-cartas-de-mi-molino_2026-10-30.gvec"
+ "sourceSha256": "9027d174af83f74c83545dffeeb7425cbd61dda4314a325eca1c81acbf74ef8a",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-cartas-de-mi-molino_2026-11-09.gvec"
 }

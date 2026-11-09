@@ -1,14 +1,14 @@
 {
  "id": "gc-la-boheme",
  "kind": "book",
- "fileName": "gc-la-boheme_2026-10-30.gvec",
+ "fileName": "gc-la-boheme_2026-11-09.gvec",
  "sizeBytes": 45706,
- "sha256": "6f6ea70d92034d801519b0eb2b9c865d1f48040b87bd7eacd9541dad6df96ad3",
+ "sha256": "9b2c23d3d18c3176668376c458d202ac275ac50876ae2c8ad0532282e08efc87",
  "count": 155,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c70a4c4cf69187232654615b7f5bf620139d5415d146cb1d6defdbd9c9d7d232",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-la-boheme_2026-10-30.gvec"
+ "sourceSha256": "1016f309cddc261b9854274965422222148dcbc86cad65f5f3d57cdcebbcfafe",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-la-boheme_2026-11-09.gvec"
 }

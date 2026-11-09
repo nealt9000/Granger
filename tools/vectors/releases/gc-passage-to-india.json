@@ -1,0 +1,14 @@
+{
+ "id": "gc-passage-to-india",
+ "kind": "book",
+ "fileName": "gc-passage-to-india_2026-11-09.gvec",
+ "sizeBytes": 227104,
+ "sha256": "fc1a975d926b36a1c0b757b2da7aff2b5333923630e150b6b88f0a38487dad5f",
+ "count": 772,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "67f0af3ae5a2ac934bbf0efd321910eaa5cc569159cb414480497718383fc323",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-passage-to-india_2026-11-09.gvec"
+}

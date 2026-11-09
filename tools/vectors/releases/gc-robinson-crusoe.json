@@ -1,14 +1,14 @@
 {
  "id": "gc-robinson-crusoe",
  "kind": "book",
- "fileName": "gc-robinson-crusoe_2026-10-30.gvec",
+ "fileName": "gc-robinson-crusoe_2026-11-09.gvec",
  "sizeBytes": 180358,
- "sha256": "5559ae5e17fa0bbe3102706510b9254717ea3a8c3ca89f669cced001184465b5",
+ "sha256": "d3b58d652b044014b81a8ffe233e11aed0b8ae12babed85e44158265a07a44b4",
  "count": 613,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "164ba7b6961439148d7f6aef779f4b934d02a1872e62398b743982bf1860c9b1",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-robinson-crusoe_2026-10-30.gvec"
+ "sourceSha256": "82fe27e0b1634631a260fa085be21f4d5ca26d6caf516d589cefa5b304e757f7",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-robinson-crusoe_2026-11-09.gvec"
 }

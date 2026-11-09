@@ -1,14 +1,14 @@
 {
  "id": "gc-confessions",
  "kind": "book",
- "fileName": "gc-confessions_2026-10-30.gvec",
+ "fileName": "gc-confessions_2026-11-09.gvec",
  "sizeBytes": 28654,
- "sha256": "18d921b0f9064caefc5ba3973548ddfed02577ead6cf6cdaaf480f7d428487eb",
+ "sha256": "57be891ce57ef064b221c56f04c8bb46f27fddf0ddee87cebf6acd31fab86e5a",
  "count": 97,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c55ebb076a530da10dbe880b313357f5741bf34138101fc487e69d969eaca804",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-confessions_2026-10-30.gvec"
+ "sourceSha256": "5e9f38cb19a9e8afd85f7d1bc962a459d7af76eb35b604431536712e87a6e859",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-confessions_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-emma",
  "kind": "book",
- "fileName": "gc-emma_2026-10-30.gvec",
+ "fileName": "gc-emma_2026-11-09.gvec",
  "sizeBytes": 348526,
- "sha256": "9842de97c0448de3b3e28ae2d89135c7f7b1a2de364fef8d6313b83ad0e2d41f",
+ "sha256": "d0b1ec2381e04375fb1ebcf6cf5aec7d38588048147173e06ba6ac6b5133de9d",
  "count": 1185,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "3f336c23915e95fe22c4ee5d97df65a046f7eeb51d43cb4b96872a863a683425",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-emma_2026-10-30.gvec"
+ "sourceSha256": "24137676219cc93f580999b3e5344db38501088f3f5e7dee98834b8ebad5d2f4",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-emma_2026-11-09.gvec"
 }

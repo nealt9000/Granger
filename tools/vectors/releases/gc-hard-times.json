@@ -1,14 +1,14 @@
 {
  "id": "gc-hard-times",
  "kind": "book",
- "fileName": "gc-hard-times_2026-10-30.gvec",
- "sizeBytes": 262678,
- "sha256": "3f08f5dbedd9fe4918be215bc8b2f2c5d3ef084879447269fd0e27ea51f76709",
- "count": 893,
+ "fileName": "gc-hard-times_2026-11-09.gvec",
+ "sizeBytes": 262384,
+ "sha256": "8a9b99fb1b82f41661bc7a0b02a57a97baf231f8796c811e45d27eab24ce37e1",
+ "count": 892,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "92a6fd5bc757f7f05235c4d08e65d645be9bc530f1ad97138ee020cab6cf315f",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-hard-times_2026-10-30.gvec"
+ "sourceSha256": "e8ed777a4eb5adbcfc83c9505883a61f36766c3cf1bff0a6010be60925bcb9dd",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-hard-times_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-comedy-of-errors",
  "kind": "book",
- "fileName": "gc-comedy-of-errors_2026-10-30.gvec",
+ "fileName": "gc-comedy-of-errors_2026-11-09.gvec",
  "sizeBytes": 47470,
- "sha256": "f1cded019ca9548c21562c97993c97b81e605cecd811aa30019cb5c084e192df",
+ "sha256": "5245b476151ab6dcb45fb8bf363a50d01b21525f152de3151eb0b17da8f16014",
  "count": 161,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "53e717e2784dd83072b749a14b2c9f9eb80d3ea6fb5c099b958df8f103613dd7",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-comedy-of-errors_2026-10-30.gvec"
+ "sourceSha256": "e4bd0ac9fd5ccddc953094df944278ffcdcc5654b7974911082d95be8945091f",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-comedy-of-errors_2026-11-09.gvec"
 }

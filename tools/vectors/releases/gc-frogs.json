@@ -1,14 +1,14 @@
 {
  "id": "gc-frogs",
  "kind": "book",
- "fileName": "gc-frogs_2026-10-30.gvec",
- "sizeBytes": 12484,
- "sha256": "d74467c41bcc2782ed505ba04c6547fac0f21c2224c3aa95d5f8f3b6c863711a",
- "count": 42,
+ "fileName": "gc-frogs_2026-11-09.gvec",
+ "sizeBytes": 42178,
+ "sha256": "ce65576768f372eaaa6dffecbe5c02d10f5e443e5ff8d88c381ec39640b3df82",
+ "count": 143,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "4d4830647145ab7d84438cc6c641df7491fe0f36af6fbd481d6d044935ecd708",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-frogs_2026-10-30.gvec"
+ "sourceSha256": "b27b31d9db4198b1cc3da4ae6a515e5528a18419f5fd601321cf81d0afdb32fa",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-frogs_2026-11-09.gvec"
 }

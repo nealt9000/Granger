@@ -1,14 +1,14 @@
 {
  "id": "gc-alice-s-adventures-in-wonderland",
  "kind": "book",
- "fileName": "gc-alice-s-adventures-in-wonderland_2026-10-30.gvec",
+ "fileName": "gc-alice-s-adventures-in-wonderland_2026-11-09.gvec",
  "sizeBytes": 76576,
- "sha256": "2b1292a399dbfa742548c5f5bc0783ebf0a0d7d2f5d3163ba061fc5207153031",
+ "sha256": "0922b594033ee844375f92a0e9c1726e084781f5784c24fe5441a45071916fa9",
  "count": 260,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "bf47257e3d2b02e04bbf280de5c453e7ca15aaf9f3ff85a27b92b58f6d9142b2",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-alice-s-adventures-in-wonderland_2026-10-30.gvec"
+ "sourceSha256": "9fc87d21c20949542ffe34fe73f9e9e9b9c5e8fa80e76479b671675e16d57b02",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-alice-s-adventures-in-wonderland_2026-11-09.gvec"
 }

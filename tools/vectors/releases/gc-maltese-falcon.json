@@ -1,14 +1,14 @@
 {
  "id": "gc-maltese-falcon",
  "kind": "book",
- "fileName": "gc-maltese-falcon_2026-10-30.gvec",
+ "fileName": "gc-maltese-falcon_2026-11-09.gvec",
  "sizeBytes": 195352,
- "sha256": "d12bf2d5321410ccba9d4bbeb3c7459a5c528fa5cfab7ff20aa6ce7172d37c16",
+ "sha256": "d5dbc6025d4d428c0ab59bfc67eed77d78757618ce8a9c7903029d23f6e550ae",
  "count": 664,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "d5a999fe81e8e03a9dabaef58c5ea6ccae67614e5bc91ac088f40c56beec98bc",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-maltese-falcon_2026-10-30.gvec"
+ "sourceSha256": "277a0159fd6b444712f3712f5180d84ecffc28338500aeda57c450cd9edb24e6",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-maltese-falcon_2026-11-09.gvec"
 }

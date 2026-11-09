@@ -1,14 +1,14 @@
 {
  "id": "gc-don-juan",
  "kind": "book",
- "fileName": "gc-don-juan_2026-10-30.gvec",
+ "fileName": "gc-don-juan_2026-11-09.gvec",
  "sizeBytes": 105682,
- "sha256": "2013e61d4de626b8d87ff41eb0540accacf56908adeb565858043bdb989b8e47",
+ "sha256": "1fbc65f08adbe6591d98d59b80c06117a72d076b710c8fd881ce746236443bdf",
  "count": 359,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "883ff428b4ff95176d12e37c17c4e101fab98997354d5731802b704fe56c7968",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-don-juan_2026-10-30.gvec"
+ "sourceSha256": "e20e2e50b3f03eb76c7a74fbb3e55afbcb2bb844126fc0121bd887b4edf27524",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-don-juan_2026-11-09.gvec"
 }

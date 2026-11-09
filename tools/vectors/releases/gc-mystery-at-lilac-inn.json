@@ -1,0 +1,14 @@
+{
+ "id": "gc-mystery-at-lilac-inn",
+ "kind": "book",
+ "fileName": "gc-mystery-at-lilac-inn_2026-11-09.gvec",
+ "sizeBytes": 128908,
+ "sha256": "9e888cf2550b173ca394adf014d748913dbd72c87f09f3d41ed52a0917b1185a",
+ "count": 438,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "f93fac5eca4d15cf0752fba999bf27861bb4b6ceca79766abf45bc926b5a2644",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-mystery-at-lilac-inn_2026-11-09.gvec"
+}

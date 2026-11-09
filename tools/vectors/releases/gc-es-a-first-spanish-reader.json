@@ -1,14 +1,14 @@
 {
  "id": "gc-es-a-first-spanish-reader",
  "kind": "book",
- "fileName": "gc-es-a-first-spanish-reader_2026-10-30.gvec",
- "sizeBytes": 142134,
- "sha256": "72162dd5d0a6307b08ea5b4d3ee7115490b0d4f74e9a7970620035a4e552727c",
- "count": 483,
+ "fileName": "gc-es-a-first-spanish-reader_2026-11-09.gvec",
+ "sizeBytes": 142432,
+ "sha256": "2b4e44084aaa240ad37b368dad825c7d68699841912d0f17134b754878e3533b",
+ "count": 484,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c6f5141d3bd815b84474aabc84951fbce26b9ced40772052e8994127b093f00e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-a-first-spanish-reader_2026-10-30.gvec"
+ "sourceSha256": "7fa7c9b57c9cae33f7042fb8371817442457c6e8ffc3e12856f128bb333e3a37",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-a-first-spanish-reader_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-christmas-carol",
  "kind": "book",
- "fileName": "gc-christmas-carol_2026-10-30.gvec",
- "sizeBytes": 75106,
- "sha256": "ca402d7ef3375b78858c843701c2382b239da844893a5ee30072d9253f17c753",
- "count": 255,
+ "fileName": "gc-christmas-carol_2026-11-09.gvec",
+ "sizeBytes": 74812,
+ "sha256": "3be8c7351efdec7e1a4fdbb07359fe9e6f38417fbd6697272cbd328d10fde906",
+ "count": 254,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "e9c8b430d8a25247dd9b673a81aca98e9e155542a98f635c95b851f2cf638fd4",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-christmas-carol_2026-10-30.gvec"
+ "sourceSha256": "c638a2c0c92ff78fe762e51842cf2a73951458553c25896daee25bdfb9e30232",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-christmas-carol_2026-11-09.gvec"
 }

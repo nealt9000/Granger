@@ -1,14 +1,14 @@
 {
  "id": "gc-es-naufragios",
  "kind": "book",
- "fileName": "gc-es-naufragios_2026-10-30.gvec",
- "sizeBytes": 72750,
- "sha256": "469dc8438b4126b42d5c7e52c3a341fe22abf6d137b16c21fa8d49a5a1460984",
- "count": 247,
+ "fileName": "gc-es-naufragios_2026-11-09.gvec",
+ "sizeBytes": 73048,
+ "sha256": "62d7c3a045c2b1c1aa46002b48f98f7c20e6e950ddfaef5894bb112bda85f14e",
+ "count": 248,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a45134840617961c474b3ef22135b5fea93873b181524ce0a30c5047b7ccddd2",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-naufragios_2026-10-30.gvec"
+ "sourceSha256": "6fffc93af7a4398842eb2928479a6614a6d89141f38efa7dad7a925ac445b047",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-naufragios_2026-11-09.gvec"
 }

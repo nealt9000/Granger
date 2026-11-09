@@ -1,14 +1,14 @@
 {
  "id": "gc-hunchback-of-notre-dame",
  "kind": "book",
- "fileName": "gc-hunchback-of-notre-dame_2026-10-30.gvec",
+ "fileName": "gc-hunchback-of-notre-dame_2026-11-09.gvec",
  "sizeBytes": 438784,
- "sha256": "727aa99d677c4087dab8c5564f1ce8f2726bc646df57d6ddabbb2d3160be03ef",
+ "sha256": "ea970cc59405dbc9097c66f455d64d9865470beb2e24e3a1953e318ebba5b1e9",
  "count": 1492,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "70c2390a66c73f0734dae168ff623f310e3e2efbf2b9a3ace89471436e2f877f",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-hunchback-of-notre-dame_2026-10-30.gvec"
+ "sourceSha256": "274bc68536810e91078acd40dd764885fd2810770c6802533cb9621c49231caf",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-hunchback-of-notre-dame_2026-11-09.gvec"
 }

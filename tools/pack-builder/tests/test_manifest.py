@@ -104,7 +104,7 @@ def test_bad_reading_settings_are_errors(tmp_path):
 
 
 def test_unknown_source_is_an_error(tmp_path):
-    assert any("source" in e for e in validate(manifest(tmp_path, source="wikisource"), rdf_ok))
+    assert any("source must be" in e for e in validate(manifest(tmp_path, source="fadedpage"), rdf_ok))
 
 
 def test_non_gutenberg_work_needs_a_public_domain_licence_with_its_url(tmp_path):
@@ -153,7 +153,7 @@ def test_ebible_rows_need_a_quoted_licence_with_its_url_and_a_public_domain_page
     errors = validate(ebible_manifest(tmp_path), rdf_ok, lambda i: b"All rights reserved")
     assert any("Public Domain" in e for e in errors)
     assert any("ebible id" in e for e in validate(ebible_manifest(tmp_path, ebible="../x"), rdf_ok))
-    assert any("source" in e for e in validate(manifest(tmp_path, source="wikisource"), rdf_ok))
+    assert any("source must be" in e for e in validate(manifest(tmp_path, source="fadedpage"), rdf_ok))
 
 
 def test_cut_after_is_read_and_must_be_text(tmp_path):
@@ -264,3 +264,104 @@ def test_a_death_year_needs_a_source(tmp_path):
 
 def test_death_check_is_off_for_the_english_manifest(tmp_path):
     assert validate(manifest(tmp_path), rdf_ok) == []
+
+
+def no_rdf(_):
+    raise AssertionError("only Gutenberg works have an RDF record")
+
+
+SE_RIGHTS = ("The source text and artwork in this ebook are believed to be in the United States public domain [...] "
+             "dedicate their contributions to the worldwide public domain via the terms in the CC0 1.0 Universal "
+             "Public Domain Dedication")
+
+
+def se_work(tmp_path, **work):
+    row = dict(source="standardebooks", gutenberg=None, se="franz-kafka/the-castle/willa-muir_edwin-muir",
+               slug="castle", title="The Castle", author="Franz Kafka", translator="Willa and Edwin Muir",
+               published=1930)
+    row.update(work)
+    return manifest(tmp_path, **row)
+
+
+def test_standard_ebooks_rows_load_and_pass_with_cc0_rights_and_old_dates(tmp_path):
+    from manifest import SeRecord
+    m = se_work(tmp_path)
+    assert (m.works[0].source, m.works[0].se, m.works[0].where) == (
+        "standardebooks", "franz-kafka/the-castle/willa-muir_edwin-muir",
+        "castle (se franz-kafka/the-castle/willa-muir_edwin-muir)")
+    asked = []
+    record = SeRecord(placeholder=False, title="The Castle", rights=SE_RIGHTS, years=[1926, 1930])
+    assert validate(m, no_rdf, se_for=lambda i: asked.append(i) or record) == []
+    assert asked == ["franz-kafka/the-castle/willa-muir_edwin-muir"]
+
+
+def test_standard_ebooks_rows_refuse_placeholders_late_dates_bad_rights_titles_and_ids(tmp_path):
+    from manifest import SeRecord
+    good = SeRecord(placeholder=False, title="The Castle", rights=SE_RIGHTS, years=[1930])
+
+    def errors(record=good, **work):
+        return validate(se_work(tmp_path, **work), no_rdf, se_for=lambda i: record)
+
+    assert any("placeholder" in e for e in errors(SeRecord(placeholder=True)))
+    assert any("1937" in e for e in errors(SeRecord(False, "The Castle", SE_RIGHTS, [1926, 1937])))
+    assert any("after the 1930" in e for e in errors(published=1931))
+    assert any("CC0" in e for e in errors(SeRecord(False, "The Castle", "All rights reserved", [1930])))
+    assert any("doesn't match" in e for e in errors(SeRecord(False, "The Trial", SE_RIGHTS, [1930])))
+    assert any("se must be" in e for e in errors(se="../etc/passwd"))
+    assert any("se must be" in e for e in errors(se="kafka"))
+
+
+class Licence:
+    def __init__(self, government=False):
+        self.government = government
+
+
+def test_wikisource_rows_need_a_us_licence_and_the_year_line_unless_government(tmp_path):
+    def ws(**work):
+        row = dict(source="wikisource", gutenberg=None, wikisource="A Room of One's Own (Hogarth 1929)",
+                   slug="room-of-one-s-own", title="A Room of One's Own", author="Virginia Woolf", published=1929)
+        row.update(work)
+        return manifest(tmp_path, **row)
+
+    m = ws(wsSkip=["Index"])
+    assert m.works[0].ws_skip == ["Index"] and m.works[0].where.startswith("room-of-one-s-own (wikisource")
+    assert validate(m, no_rdf, ws_licence_for=lambda t: Licence()) == []
+    assert any("no US public-domain licence" in e for e in validate(m, no_rdf, ws_licence_for=lambda t: None))
+    late = ws(published=1971)
+    assert any("after the 1930" in e for e in validate(late, no_rdf, ws_licence_for=lambda t: Licence()))
+    assert validate(late, no_rdf, ws_licence_for=lambda t: Licence(government=True)) == []
+    assert any("page title" in e for e in validate(ws(wikisource=""), no_rdf))
+
+
+def compiled_work(tmp_path, parts):
+    return manifest(tmp_path, source="compiled", gutenberg=None, slug="founding-documents",
+                    title="Founding Documents", author="", translator=None, published=1787, splitAt="h2", parts=parts)
+
+
+def test_compiled_rows_check_each_part_by_its_source(tmp_path):
+    parts = [{"title": "The Declaration", "gutenberg": 1, "select": "div.etext"},
+             {"title": "The Articles", "wikisource": "Articles of Confederation and Perpetual Union"},
+             {"title": "Amendments", "pages": [
+                 {"title": "Amendment XI", "wikisource": "11th Amendment to the United States Constitution"},
+                 {"title": "Amendment XXVII", "html": "<p>No law...</p>",
+                  "licence": "a US government work: https://www.archives.gov/founding-docs/amendments-11-27"}]}]
+    m = compiled_work(tmp_path, parts)
+    w = m.works[0]
+    assert [p.source for p in w.parts] == ["gutenberg", "wikisource", "pages"]
+    assert w.parts[0].select == "div.etext" and [p.source for p in w.parts[2].pages] == ["wikisource", "text"]
+    looked = []
+    assert validate(m, lambda i: looked.append(i) or rdf_ok(i), ws_licence_for=lambda t: looked.append(t) or Licence()) == []
+    assert looked == [1, "Articles of Confederation and Perpetual Union",
+                      "11th Amendment to the United States Constitution"]
+
+
+def test_compiled_rows_refuse_a_copyrighted_part_an_unlicensed_text_and_no_parts(tmp_path):
+    def errors(parts, rights=PD):
+        return validate(compiled_work(tmp_path, parts), lambda i: Rdf("x", ["en"], rights),
+                        ws_licence_for=lambda t: None)
+
+    assert any("rights are" in e and "part 1" in e for e in errors([{"title": "A", "gutenberg": 7}], "Copyrighted."))
+    assert any("licence" in e for e in errors([{"title": "A", "wikisource": "Some Page"}]))
+    assert any("US government" in e for e in errors([{"title": "A", "html": "<p>x</p>", "licence": "mine"}]))
+    assert any("needs parts" in e for e in errors([]))
+    assert any("needs a title" in e for e in errors([{"gutenberg": 7}]))

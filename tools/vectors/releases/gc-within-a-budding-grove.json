@@ -1,14 +1,14 @@
 {
  "id": "gc-within-a-budding-grove",
  "kind": "book",
- "fileName": "gc-within-a-budding-grove_2026-10-30.gvec",
+ "fileName": "gc-within-a-budding-grove_2026-11-09.gvec",
  "sizeBytes": 268558,
- "sha256": "8f97e4c3980983129c0e8b48d267d2982facae46659c917633f0c00c0678d842",
+ "sha256": "0e9fbf9be8707c5c4645c4db9ff35d1f9eaca0eff7afce8932bfaec0a6c65980",
  "count": 913,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "3e9d7dfe817a92275e66cdfda1c24dd1e10e6685b7f3611002d8b12d2b7f570a",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-within-a-budding-grove_2026-10-30.gvec"
+ "sourceSha256": "b923eba0f379df0e01921eb3a3e61808686f544f212edf840ae156f4bc31d0a2",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-within-a-budding-grove_2026-11-09.gvec"
 }

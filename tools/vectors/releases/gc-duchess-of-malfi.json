@@ -1,14 +1,14 @@
 {
  "id": "gc-duchess-of-malfi",
  "kind": "book",
- "fileName": "gc-duchess-of-malfi_2026-10-30.gvec",
- "sizeBytes": 28360,
- "sha256": "9b63a2f1e03070e0aac7fc6f8f21f429ac31f230496b222bbc796a744e37d3c3",
- "count": 96,
+ "fileName": "gc-duchess-of-malfi_2026-11-09.gvec",
+ "sizeBytes": 80986,
+ "sha256": "e63838c3a0b49624a993fa4ac3b20c09ebf2ea03fe8b76e65e04b85b7b391008",
+ "count": 275,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "9379709de13c1ac4100ee23bdd2ec82448f9a058fc9f1853ac2a8ca99a396ede",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-duchess-of-malfi_2026-10-30.gvec"
+ "sourceSha256": "d8c400df5799a1220571c64111462d10fe425514b1f53ddab884dccceb50b47f",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-duchess-of-malfi_2026-11-09.gvec"
 }

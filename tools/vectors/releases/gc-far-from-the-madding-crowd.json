@@ -1,14 +1,14 @@
 {
  "id": "gc-far-from-the-madding-crowd",
  "kind": "book",
- "fileName": "gc-far-from-the-madding-crowd_2026-10-30.gvec",
- "sizeBytes": 366460,
- "sha256": "edb43c6d23c1ace4c39a17a310931bedaade5ef77d7947ce6a3f1024f05376a8",
- "count": 1246,
+ "fileName": "gc-far-from-the-madding-crowd_2026-11-09.gvec",
+ "sizeBytes": 365872,
+ "sha256": "9790d59456d1f8721cbee5806741358add02c3df20b415e85c3e00b56826e530",
+ "count": 1244,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "5f5cc19bde69185b8533a0fa7eb6b9816d6697b0f04fd8cdd3cbdfa9ac333e0e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-far-from-the-madding-crowd_2026-10-30.gvec"
+ "sourceSha256": "5c47c5e46eebae199a4150d2de4ac8350c29c07e3b21a547fd7b828e413e0267",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-far-from-the-madding-crowd_2026-11-09.gvec"
 }

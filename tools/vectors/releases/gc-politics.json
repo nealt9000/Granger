@@ -1,14 +1,14 @@
 {
  "id": "gc-politics",
  "kind": "book",
- "fileName": "gc-politics_2026-10-30.gvec",
- "sizeBytes": 120676,
- "sha256": "e54990e3f83a93d951ae4f21d97912c244b6bc6e36ecbfeb885c163647f37ed1",
- "count": 410,
+ "fileName": "gc-politics_2026-11-09.gvec",
+ "sizeBytes": 130084,
+ "sha256": "17ef8e44a05360771639e2f07b758aa9efa1abffd03e964269370b31b260ddff",
+ "count": 442,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "658ce606a6eccd5aeaaa0e1507a09352cbcf47cb727f8544f7dac6465d97f81b",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-politics_2026-10-30.gvec"
+ "sourceSha256": "c039cd598d4962e5baa8f5726ac4a51650e93e15b87e8bd627531dabbffd2eed",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-politics_2026-11-09.gvec"
 }

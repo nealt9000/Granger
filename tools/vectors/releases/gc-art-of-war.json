@@ -1,14 +1,14 @@
 {
  "id": "gc-art-of-war",
  "kind": "book",
- "fileName": "gc-art-of-war_2026-10-30.gvec",
+ "fileName": "gc-art-of-war_2026-11-09.gvec",
  "sizeBytes": 127144,
- "sha256": "800c6431aa8cc751fca52b4159c46893022092e58807776edb49121754caae73",
+ "sha256": "072b5467fe3e89c0856a8ba34be02a80e089ab49346af3dba9db143b56bb047c",
  "count": 432,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "b6bde5b2a66142fc480c80b80b46c7980053548b31f47be35062412de907db28",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-art-of-war_2026-10-30.gvec"
+ "sourceSha256": "49d4793bf9e865552b87c394eec915c512d39395cbb14288bb82331049493d1d",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-art-of-war_2026-11-09.gvec"
 }

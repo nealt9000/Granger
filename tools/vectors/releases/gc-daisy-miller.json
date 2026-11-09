@@ -1,14 +1,14 @@
 {
  "id": "gc-daisy-miller",
  "kind": "book",
- "fileName": "gc-daisy-miller_2026-10-30.gvec",
+ "fileName": "gc-daisy-miller_2026-11-09.gvec",
  "sizeBytes": 48646,
- "sha256": "b8eb8fd59ecf03f0f9dc1d5c589997982a01a7a05c088567328104f8336ce06e",
+ "sha256": "a7f8f302ed8b8805c1baffc473be8c209d205212c53be4c938e2dcb6590cb7b4",
  "count": 165,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a23e111678d5dd1c2f900b69846434ac1519752818498acd6c18297f19c5379a",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-daisy-miller_2026-10-30.gvec"
+ "sourceSha256": "09fde762fcdf182fcf90ac9b48c4ea2f5bdb357458081d444a079670c9127871",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-daisy-miller_2026-11-09.gvec"
 }

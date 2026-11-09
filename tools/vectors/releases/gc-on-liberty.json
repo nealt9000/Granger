@@ -1,14 +1,14 @@
 {
  "id": "gc-on-liberty",
  "kind": "book",
- "fileName": "gc-on-liberty_2026-10-30.gvec",
+ "fileName": "gc-on-liberty_2026-11-09.gvec",
  "sizeBytes": 61288,
- "sha256": "f74fb859bf05bbfa920039ad83f701c241f4273f111103e0811d0f6b80cb028c",
+ "sha256": "bd8395083d36443e75842b062ad0f3e626648a63b654bd64f4a4243bc7de6564",
  "count": 208,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "758262570eb6d3ce8896327991e3502bd7f410f419dd67d5ee90834789f8ac28",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-on-liberty_2026-10-30.gvec"
+ "sourceSha256": "520e742f917ada9f27cfb35c178eb9a33eabcf193501b3d71122c6c775aac04f",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-on-liberty_2026-11-09.gvec"
 }

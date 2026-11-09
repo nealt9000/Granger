@@ -1,0 +1,14 @@
+{
+ "id": "gc-just-so-stories",
+ "kind": "book",
+ "fileName": "gc-just-so-stories_2026-11-09.gvec",
+ "sizeBytes": 77458,
+ "sha256": "c957a481beddef6ef6dd2b7bd0a52f99156d8d7f3bdb934e3d678d5747e705d8",
+ "count": 263,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "4e507ff3fa993a4ae54831e57ae2de5f68e43f0439a930ce2f34e2d8d07c6fc9",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-just-so-stories_2026-11-09.gvec"
+}

@@ -1,14 +1,14 @@
 {
  "id": "gc-cavalleria-rusticana",
  "kind": "book",
- "fileName": "gc-cavalleria-rusticana_2026-10-30.gvec",
+ "fileName": "gc-cavalleria-rusticana_2026-11-09.gvec",
  "sizeBytes": 34534,
- "sha256": "ed44c44731bc9a4078628b9161275d0708829df15e3b5a56e9bee29dbd853fd8",
+ "sha256": "e631790610dafccbba32d1191619076af0a8fb7aef5cfa086c0e1064747c91bb",
  "count": 117,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "1249363043b7eaad5c9cdd780bb53a5a75a1682bb1e97f6d58a5d963cbf7f1f7",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-cavalleria-rusticana_2026-10-30.gvec"
+ "sourceSha256": "fb2359b97f57caf04adfe14a0cd1684af2d66982bc129c11c4135482010182c5",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-cavalleria-rusticana_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-es-doctor-sutilis",
  "kind": "book",
- "fileName": "gc-es-doctor-sutilis_2026-10-30.gvec",
- "sizeBytes": 154776,
- "sha256": "ae32d53f3867d25aa09a41ffff94ee3e893bbd6ee55e075bee133220e22b70d4",
- "count": 526,
+ "fileName": "gc-es-doctor-sutilis_2026-11-09.gvec",
+ "sizeBytes": 155074,
+ "sha256": "b4e50bbee941ba98d0485539c49bc52fcc526318051da38fa2a12358fc5c5b73",
+ "count": 527,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "badc8a6dc3803c3cd44b9d9b6c1cd6e3f16c9fcb7c53f58cf931ef23f8f159f3",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-doctor-sutilis_2026-10-30.gvec"
+ "sourceSha256": "541db42ddd909b67141cca7e5337f98bc5877a6c1910580a4aba15807d456cd6",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-doctor-sutilis_2026-11-09.gvec"
 }

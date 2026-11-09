@@ -1,14 +1,14 @@
 {
  "id": "gc-walden-and-on-the-duty-of-civil-disobedience",
  "kind": "book",
- "fileName": "gc-walden-and-on-the-duty-of-civil-disobedience_2026-10-30.gvec",
+ "fileName": "gc-walden-and-on-the-duty-of-civil-disobedience_2026-11-09.gvec",
  "sizeBytes": 150370,
- "sha256": "83f4618adeae3f60b8e58d4e19248c95548fc17aca633783f2b68a662b4860f6",
+ "sha256": "50cf88771d31cb74c56d7688ae3c4e87cbffe7acaa9ff9df2bc4fc1139010ce4",
  "count": 511,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "b9840dd845acc968d246cb798a33c1285579dcd41c2e99e3e4aab7092930eb1a",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-walden-and-on-the-duty-of-civil-disobedience_2026-10-30.gvec"
+ "sourceSha256": "bace13219cfeda766e2f95a37fae2d2bfc5b7c244070b1f9f7b2088f9403b7fe",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-walden-and-on-the-duty-of-civil-disobedience_2026-11-09.gvec"
 }
