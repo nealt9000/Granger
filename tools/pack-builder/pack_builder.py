@@ -27,6 +27,7 @@ from libzim.reader import Archive
 
 import chapters
 import covers
+import drama
 import epubpack
 import gutenberg
 import manifest as manifests
@@ -62,6 +63,7 @@ def build(m: Manifest, source: GutenbergSource, out: Path, date: str, ebible: EB
             raise type(error)(f"{spec.slug} (#{spec.gutenberg}): {error}") from error
         for notice in gutenberg.later_edition_notices(cleaned.body):
             print(f"WARNING {spec.slug} (#{spec.gutenberg}): later edition? {notice[:160]}")
+        restructure(spec, cleaned.body, m.code)
         pages = chapters.split(cleaned.body, spec.split_at,
                                zimpack.chapter_budget(spec.title, cleaned.styles, m.code), pack=spec.pack_sections)
         print(f"{spec.gutenberg:>6} {spec.slug:<40} {len(pages):>4} chapters  {cleaned.branding_removed} branding blocks")
@@ -80,19 +82,33 @@ class BuildError(Exception):
     """A work failed to build; the message starts with its slug and source id."""
 
 
+def restructure(spec: WorkSpec, body, language: str = "en") -> None:
+    """Structure the source only shows by typography, put back before the chapter split so headings it promotes
+    drive the split and the contents: a play's speeches, directions, acts and scenes (drama.py)."""
+    if spec.is_drama and language == "en":
+        report = drama.structure(body, drama.Hints.parse(spec.drama))
+        if report.skipped:
+            print(f"{'':>6} {spec.slug:<40} drama pass skipped: {report.skipped}")
+        else:
+            print(f"{'':>6} {spec.slug:<40} {report.speeches} speeches, {report.directions} directions, "
+                  f"{report.headings} act/scene headings, {len(report.cast)} speakers")
+
+
 def _work(spec, source, ebible, language: str = "en") -> zimpack.Work:
     if spec.source == "ebible":
         return _ebible_work(spec, ebible, language)
     cleaned = gutenberg.clean(source.html(spec.gutenberg), spec.cut_after)
     for notice in gutenberg.later_edition_notices(cleaned.body):
         print(f"WARNING {spec.slug} (#{spec.gutenberg}): later edition? {notice[:160]}")
+    restructure(spec, cleaned.body, language)
     pages = chapters.split(cleaned.body, spec.split_at, zimpack.chapter_budget(spec.title, cleaned.styles, language),
                            page_href=epubpack.chapter_href, pack=spec.pack_sections)
     print(f"{spec.gutenberg:>6} {spec.slug:<40} {len(pages):>4} chapters  {cleaned.branding_removed} branding blocks")
     return zimpack.Work(slug=spec.slug, title=spec.title, author=spec.author, translator=spec.translator,
                         published=spec.published, section=spec.section, chapters=pages, styles=cleaned.styles,
                         line_numbers=spec.line_numbers, verse=spec.reads_as_verse,
-                        title_overrides=spec.title_overrides, language=language)
+                        title_overrides=spec.title_overrides, language=language,
+                        drama=spec.is_drama and language == "en")
 
 
 def _source_url(spec: WorkSpec) -> str:

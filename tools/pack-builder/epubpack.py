@@ -16,6 +16,7 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 from lxml import etree
 
 import covers
+import drama
 import verse
 from chapters import PAGE_NUMBER, clean_title, drop_full_stop, shouting, title_case
 from zimpack import Work
@@ -159,6 +160,8 @@ def _book_css(work: Work) -> str:
     parts = [BOOK_CSS, scrub_css(work.styles, work.line_numbers), verse.CSS]
     if work.verse:
         parts.append(verse.WRAPPER_CSS)
+    if work.drama:
+        parts.append(drama.CSS)
     return "\n".join(p for p in parts if p) + "\n"
 
 
@@ -270,14 +273,16 @@ def _wrap_stray_definitions(soup: BeautifulSoup) -> None:
 
 
 def _prepare(html: str, line_numbers: str = "margin", reads_as_verse: bool = False,
-             language: str = "en") -> BeautifulSoup:
+             language: str = "en", is_drama: bool = False) -> BeautifulSoup:
     soup = BeautifulSoup(html, "lxml")
     _drop_page_numbers(soup)
     if line_numbers == "drop":
         _drop_page_numbers(soup, LINE_NUMBER)
     if reads_as_verse:
         verse.flatten_word_export(soup)
-        verse.mark(soup)
+        verse.mark(soup, gloss=not is_drama)
+    else:
+        verse.mark_pre(soup)
     if language == "en":  # title case follows English rules
         _quiet_headings(soup)
     _fix_attributes(soup)
@@ -453,7 +458,8 @@ def write_epub(out: Path, work: Work, meta: BookMeta, cover_jpeg: bytes) -> None
                                     f'<div class="cover"><img src="cover.jpg" alt="{escape(title)}"/></div>')),
         ("OEBPS/colophon.xhtml", _colophon(work, meta)),
     ]
-    soups = [_prepare(chapter.html, work.line_numbers, work.verse, meta.language) for chapter in work.chapters]
+    soups = [_prepare(chapter.html, work.line_numbers, work.verse, meta.language, work.drama)
+             for chapter in work.chapters]
     _unwrap_dangling_links(soups)
     for i, soup in enumerate(soups):
         body = to_xhtml(_body(soup))
