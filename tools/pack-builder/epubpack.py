@@ -42,6 +42,10 @@ ZIP_TIME = (1980, 1, 1, 0, 0, 0)
 NS = 'xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"'
 
 # No colours or font families: the reader's own theme and typeface apply.
+# The cover fills one page (99vh, so rounding never spills it into a second column) and sits centred both ways. Its
+# height leaves at least 88 px above and below, so with the reader's chrome up (status bar, mini-player and top bar, 144 dp,
+# less the page's own 64 dp offset) nothing is covered; `!important` outranks Readium's `img { max-height: 95vh }`.
+# In landscape it keeps at least 60% of the page. verse_check/cover_check.py renders it.
 BOOK_CSS = """
 body { line-height: 1.5; margin: 0; padding: 0 .5em; }
 h1, h2, h3, h4, h5, h6 { line-height: 1.25; margin: 1.5em 0 .6em; page-break-after: avoid; }
@@ -51,8 +55,9 @@ pre { white-space: pre-wrap; }
 table { border-collapse: collapse; }
 td, th { padding: .2em .5em; vertical-align: top; }
 img { max-width: 100%; }
-.cover { text-align: center; margin: 0; padding: 0; }
-.cover img { max-height: 100vh; }
+.cover { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+  height: 99vh; margin: 0; padding: 0; overflow: hidden; }
+.cover img { display: block; max-width: 100%; max-height: max(calc(99vh - 176px), 60vh) !important; }
 .colophon { text-align: center; margin: 3em 0 0; }
 .colophon svg { width: 5em; height: 5em; }
 .colophon .collection { font-variant: small-caps; letter-spacing: .14em; margin: .4em 0 2.5em; }

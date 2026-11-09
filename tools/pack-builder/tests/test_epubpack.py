@@ -128,6 +128,23 @@ def test_book_css_holds_scrubbed_work_styles(tmp_path):
     assert "red" not in css and "pagenum" not in css
 
 
+def test_cover_page_is_one_centred_page_clear_of_the_readers_chrome(tmp_path):
+    z = build(tmp_path, work())
+    page = etree.fromstring(z.read("OEBPS/cover.xhtml"))
+    cover = page.find(f".//{XHTML}div")
+    assert cover.get("class") == "cover" and [c.tag for c in cover] == [XHTML + "img"]
+    css = z.read("OEBPS/book.css").decode()
+    rules = dict(re.findall(r"(\.cover(?: img)?) \{([^}]*)\}", css))
+    box, img = rules[".cover"], rules[".cover img"]
+    # one page, centred both ways, never taller than a column (a second, blank page)
+    for declaration in ("display: flex", "flex-direction: column", "justify-content: center", "align-items: center",
+                        "height: 99vh", "overflow: hidden"):
+        assert declaration in box, declaration
+    # 88 px above and below at most: the top bar, mini-player and status bar reach 80 px into the page; the
+    # rule must outrank Readium's `img { max-height: 95vh !important }`
+    assert "max-height: max(calc(99vh - 176px), 60vh) !important" in img and "max-width: 100%" in img
+
+
 def test_cross_chapter_links_point_at_xhtml_files(tmp_path):
     w = work(html='<h2>A</h2><p><a href="#z">to Z</a></p><h2>B</h2><p>b</p><h2 id="z">C</h2><p>c</p>')
     z = build(tmp_path, w)
