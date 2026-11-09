@@ -27,6 +27,7 @@ from libzim.reader import Archive
 
 import chapters
 import covers
+import editions
 import epubpack
 import gutenberg
 import manifest as manifests
@@ -48,6 +49,20 @@ def _ebible_work(spec: WorkSpec, ebible: EBibleSource, language: str = "en") -> 
                         verse=spec.reads_as_verse, title_overrides=spec.title_overrides, language=language)
 
 
+def _edit(spec: WorkSpec, body) -> None:
+    """Granger's own edition of the text, when the row asks for one: the name map. (The editor's note goes in at
+    write time, on the first page and in the colophon, so it can't change how the book splits into pages.)"""
+    if spec.rename:
+        names = editions.load_names(spec.rename["names"])
+        start, stop = spec.rename.get("from"), spec.rename.get("to")
+        counts = editions.rename(body, names, start, stop)
+        left = editions.remaining(body, names, start, stop)
+        if left:
+            raise ValueError(f"names left after renaming: {dict(left)}")
+        print(f"{spec.slug}: {sum(counts.values())} names given as {spec.rename['names']} "
+              f"({', '.join(f'{k} {n}' for k, n in counts.most_common())})")
+
+
 def build(m: Manifest, source: GutenbergSource, out: Path, date: str, ebible: EBibleSource | None = None) -> Path:
     works = []
     for spec in m.works:
@@ -60,6 +75,7 @@ def build(m: Manifest, source: GutenbergSource, out: Path, date: str, ebible: EB
             cleaned = gutenberg.clean(source.html(spec.gutenberg), spec.cut_after)
         except gutenberg.CleaningError as error:
             raise type(error)(f"{spec.slug} (#{spec.gutenberg}): {error}") from error
+        _edit(spec, cleaned.body)
         for notice in gutenberg.later_edition_notices(cleaned.body):
             print(f"WARNING {spec.slug} (#{spec.gutenberg}): later edition? {notice[:160]}")
         pages = chapters.split(cleaned.body, spec.split_at,
@@ -84,6 +100,7 @@ def _work(spec, source, ebible, language: str = "en") -> zimpack.Work:
     if spec.source == "ebible":
         return _ebible_work(spec, ebible, language)
     cleaned = gutenberg.clean(source.html(spec.gutenberg), spec.cut_after)
+    _edit(spec, cleaned.body)
     for notice in gutenberg.later_edition_notices(cleaned.body):
         print(f"WARNING {spec.slug} (#{spec.gutenberg}): later edition? {notice[:160]}")
     pages = chapters.split(cleaned.body, spec.split_at, zimpack.chapter_budget(spec.title, cleaned.styles, language),
@@ -123,7 +140,7 @@ def build_epubs(m: Manifest, source: GutenbergSource, out: Path, date: str,
                 id=epubpack.book_id(spec.slug, m.book_id_prefix), title=epubpack.display_title(work, m.code),
                 author=spec.author, translator=spec.translator, published=spec.published,
                 section_title=sections[spec.section], language=m.code, source_url=_source_url(spec), date=date,
-                source_line=_source_line(spec, m.code), collection=m.title)
+                source_line=_source_line(spec, m.code), collection=m.title, editor_note=spec.editor_note)
             path = Path(out) / f"{meta.id}_{date}.epub"
             cover = covers.cover_jpeg(spec.title, spec.author, spec.translator, spec.section, sections[spec.section],
                                       wordmark=m.title.upper(),

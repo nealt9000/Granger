@@ -18,6 +18,10 @@ Reading settings: `verse` turns verse layout on or off (the default follows the 
 line numbers in the margin or drops them, and `titleOverrides` replaces contents titles by page number.
 `packSections` packs a too-big page's sections into even pages rather than one page each (a Bible's chapters).
 `cutAfter` gives a Gutenberg work's last words, so whatever follows them (a publisher's catalogue) is cut.
+
+Granger's own editions (editions.py): `rename` applies a name map from classics/names/ between two headings
+(`{"names": "homer-greek", "from": "Book I", "to": "Footnotes"}`), and `editorNote` says so at the front and in the
+colophon.
 """
 import json
 import re
@@ -27,6 +31,8 @@ from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
+
+import editions
 
 PD_LINE = 1930
 PD_RIGHTS = "Public domain in the USA."
@@ -75,6 +81,8 @@ class WorkSpec:
     learner: bool = False
     people: list[Person] | None = None
     note: str = ""
+    rename: dict | None = None
+    editor_note: str = ""
 
     @property
     def reads_as_verse(self) -> bool:
@@ -133,7 +141,8 @@ def load(path: Path) -> Manifest:
                       line_numbers=w.get("lineNumbers", "margin"), title_overrides=w.get("titleOverrides", {}),
                       source=w.get("source", "gutenberg"), ebible=w.get("ebible"), licence=w.get("licence"),
                       cut_after=w.get("cutAfter"), pack_sections=w.get("packSections", False),
-                      learner=w.get("learner", False), people=_people(w.get("people")), note=w.get("note", ""))
+                      learner=w.get("learner", False), people=_people(w.get("people")), note=w.get("note", ""),
+                      rename=w.get("rename"), editor_note=w.get("editorNote", ""))
              for w in data["works"]]
     domains = {s["id"]: s["domain"] for s in data["sections"] if s.get("domain")}
     return Manifest(name=data["name"], title=data["title"], description=data["description"],
@@ -208,11 +217,29 @@ def _reading_errors(w: WorkSpec) -> list[str]:
         errors.append(f"packSections must be true or false, not {w.pack_sections!r}")
     if w.cut_after is not None and not (isinstance(w.cut_after, str) and w.cut_after.strip()):
         errors.append(f"cutAfter must be the work's last words, not {w.cut_after!r}")
+    if w.rename is not None:
+        errors += _rename_errors(w.rename)
+    if not isinstance(w.editor_note, str):
+        errors.append(f"editorNote must be a sentence, not {w.editor_note!r}")
+    elif w.rename is not None and not w.editor_note.strip():
+        errors.append("a renamed text needs an editorNote saying so")
     overrides = w.title_overrides
     if not isinstance(overrides, dict) or not all(
             isinstance(k, str) and k.isdigit() and int(k) >= 1 and isinstance(v, str) and v.strip()
             for k, v in overrides.items()):
         errors.append(f"titleOverrides must map page numbers (\"1\", \"2\", ...) to titles, not {overrides!r}")
+    return errors
+
+
+def _rename_errors(rename) -> list[str]:
+    if not isinstance(rename, dict) or set(rename) - {"names", "from", "to"} or "names" not in rename:
+        return [f'rename must be {{"names": MAP, "from": HEADING, "to": HEADING}}, not {rename!r}']
+    errors = [f"rename {k} must be a heading's text, not {rename[k]!r}" for k in ("from", "to")
+              if k in rename and not (isinstance(rename[k], str) and rename[k].strip())]
+    try:
+        editions.load_names(rename["names"])
+    except (ValueError, TypeError) as error:
+        errors.append(str(error))
     return errors
 
 

@@ -16,6 +16,7 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 from lxml import etree
 
 import covers
+import editions
 import verse
 from chapters import PAGE_NUMBER, clean_title, drop_full_stop, shouting, title_case
 from zimpack import Work
@@ -66,6 +67,8 @@ img { max-width: 100%; }
 .colophon .facts { margin-top: 2.5em; font-size: .9em; }
 .colophon .facts p { margin: 0 0 .3em; }
 .colophon .tagline { margin-top: 2.5em; font-style: italic; }
+.editor-note { text-align: center; font-style: italic; margin: 2em 1em; }
+.colophon .editor-note { margin: 1em 0 0; }
 """.strip()
 
 LINE_NUMBER = {"linenum", "linenumber", "lineno", "line-number", "linenr"}
@@ -107,6 +110,7 @@ class BookMeta:
     date: str
     source_line: str = ""  # the colophon's credit, e.g. "From Project Gutenberg ebook #1342"
     collection: str = COLLECTION
+    editor_note: str = ""  # Granger's own edition (a name map): said at the front and here
 
 
 def labels(language: str) -> dict[str, str]:
@@ -429,6 +433,8 @@ def _colophon(work: Work, meta: BookMeta) -> str:
         lines.append(f'<p class="author">{escape(meta.author, quote=False)}</p>')
     if meta.translator:
         lines.append(f"<p>{words['translated_by']} {escape(meta.translator, quote=False)}</p>")
+    if meta.editor_note:
+        lines.append(f'<p class="editor-note">{escape(meta.editor_note, quote=False)}</p>')
     facts = [words["translation_published" if meta.translator else "edition_published"].format(year=meta.published)]
     if meta.source_line:
         facts.append(meta.source_line)
@@ -459,6 +465,8 @@ def write_epub(out: Path, work: Work, meta: BookMeta, cover_jpeg: bytes) -> None
         ("OEBPS/colophon.xhtml", _colophon(work, meta)),
     ]
     soups = [_prepare(chapter.html, work.line_numbers, work.verse, meta.language) for chapter in work.chapters]
+    if meta.editor_note and soups:
+        editions.front_note(soups[0].body or soups[0], meta.editor_note)
     _unwrap_dangling_links(soups)
     for i, soup in enumerate(soups):
         body = to_xhtml(_body(soup))

@@ -171,7 +171,7 @@ def test_spanish_titles_do_not_end_a_line_on_an_article():
     assert title("Heart of Darkness", "en") == ["Heart of", "Darkness"]
 
 
-def test_the_longest_spanish_covers_fit():  # all 165 take half a minute; the dozen longest stand in
+def test_the_longest_spanish_covers_fit():  # all 185 take half a minute; the dozen longest stand in
     sections = {s["id"]: s["title"] for s in MANIFEST_ES["sections"]}
     longest = sorted(MANIFEST_ES["works"], key=lambda w: -len(w["title"] + w.get("author", "") +
                                                              (w.get("translator") or "")))[:12]
