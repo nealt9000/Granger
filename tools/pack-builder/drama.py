@@ -44,6 +44,7 @@ CSS = """
 :root .gd-speech { margin: .9em 0 0; text-indent: 0; }
 :root .gd-speech + .gd-speech, :root .gd-sd + .gd-speech { margin-top: .6em; }
 :root .gd-who { font-weight: 700; font-style: normal; font-variant-caps: small-caps; letter-spacing: .03em; }
+:root .gd-above > .gd-who:first-child { display: block; margin-bottom: .1em; }
 :root .gd-head { display: block; text-indent: 0; padding-left: 0; margin: 0 0 .1em; }
 :root .gd-run > .gd-who { margin-right: .3em; }
 :root .gd-sd { font-style: italic; margin: .6em 0 .6em 1.5em; text-indent: 0; }

@@ -223,3 +223,73 @@ def test_describe_epubs_for_english_adds_no_domain_or_learner(tmp_path):
     build_epubs(m, FakeSource(), tmp_path, "2026-10-17")
     for book in describe_epubs(tmp_path, "https://example.org/r", m)["books"]:
         assert "domain" not in book and "learner" not in book
+
+
+class FakeSE:
+    def epub(self, se_id):
+        import se_fixture
+        assert se_id == "a-writer/the-test-play/b-writer"
+        return se_fixture.epub()
+
+
+class FakeWS:
+    def __init__(self):
+        from test_wikisource import GOV, PAGES, page
+        self.pages = dict(PAGES)
+        self.pages["11th Amendment"] = page("11th Amendment", "<p>The Judicial power shall not extend.</p>",
+                                            ("Template:PD-USGov",), GOV)
+
+    def parse(self, title):
+        return self.pages[title]
+
+
+def test_standard_ebooks_wikisource_and_compiled_rows_build_with_their_sources_in_the_colophon(tmp_path):
+    import zipfile
+    from pack_builder import build_epubs
+    works = [
+        {"source": "standardebooks", "se": "a-writer/the-test-play/b-writer", "slug": "test-play",
+         "title": "The Test Play", "author": "A. Writer", "translator": "B. Writer", "published": 1929,
+         "section": "drama"},
+        {"source": "wikisource", "wikisource": "Test Work", "wsSkip": ["Index"], "slug": "test-work",
+         "title": "The Test Work", "author": "A. Writer", "translator": None, "published": 1908, "section": "drama"},
+        {"source": "compiled", "slug": "test-documents", "title": "Test Documents", "author": "", "translator": None,
+         "published": 1787, "section": "drama", "splitAt": "h2", "parts": [
+             {"title": "The Modern Book", "gutenberg": 1342},
+             {"title": "Amendments", "pages": [
+                 {"title": "Amendment XI", "wikisource": "11th Amendment"},
+                 {"title": "Amendment XXVII", "html": "<p>No law, varying the compensation.</p>",
+                  "licence": "a US government work: https://www.archives.gov/founding-docs/amendments-11-27"}]}]}]
+    data = {"name": "granger_test", "title": "Granger Test", "language": "eng", "description": "Test pack",
+            "sections": [{"id": "drama", "title": "Drama"}], "works": works}
+    (tmp_path / "manifest.json").write_text(json.dumps(data))
+    m = load(tmp_path / "manifest.json")
+    out = tmp_path / "out"
+    out.mkdir()
+    play, work, documents = build_epubs(m, FakeSource(), out, "2026-11-09", se=FakeSE(), ws=FakeWS())
+    z = zipfile.ZipFile(play)
+    pages = "".join(z.read(n).decode() for n in z.namelist() if n[6:7] == "c" and n[7:8].isdigit())
+    assert 'class="gd-speech gd-prose gd-run"' in pages and "Standard Ebooks" not in pages and "epub:type=\"z3998" not in pages
+    colophon = z.read("OEBPS/colophon.xhtml").decode()
+    assert "From Standard Ebooks (https://standardebooks.org/ebooks/a-writer/the-test-play/b-writer)" in colophon
+    assert "CC0 1.0" in colophon
+    assert "https://standardebooks.org/ebooks/a-writer/the-test-play/b-writer" in z.read("OEBPS/content.opf").decode()
+    z = zipfile.ZipFile(work)
+    assert "Chapter I: Book I</h2>" in z.read("OEBPS/c001.xhtml").decode()
+    assert "From Wikisource (https://en.wikisource.org/wiki/Test_Work)" in z.read("OEBPS/colophon.xhtml").decode()
+    z = zipfile.ZipFile(documents)
+    nav = z.read("OEBPS/nav.xhtml").decode()
+    assert ">The Modern Book<" in nav and ">Amendments<" in nav
+    pages = "".join(z.read(n).decode() for n in z.namelist() if n[6:7] == "c" and n[7:8].isdigit())
+    assert "Amendment XI</h3>" in pages and "The Judicial power shall not extend." in pages
+    assert "No law, varying the compensation." in pages
+    colophon = z.read("OEBPS/colophon.xhtml").decode()
+    assert "The Modern Book: From Project Gutenberg ebook #1342" in colophon
+    assert "Amendments: from 1 Wikisource pages" in colophon and "archives.gov" in colophon
+
+
+def test_only_builds_the_named_works(tmp_path):
+    from pack_builder import build_epubs
+    out = tmp_path / "out"
+    out.mkdir()
+    [path] = build_epubs(two_works(tmp_path), FakeSource(), out, "2026-11-09", only={"koran-rodwell"})
+    assert path.name == "gc-koran-rodwell_2026-11-09.epub"

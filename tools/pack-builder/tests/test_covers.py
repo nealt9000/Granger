@@ -114,8 +114,67 @@ def test_a_clasicos_cover_carries_its_own_wordmark_and_credit(monkeypatch):
                         lambda draw, cx, y, text, *a: drawn.append(text) or real(draw, cx, y, text, *a))
     credits = []
     real_fit = covers._fit
-    monkeypatch.setattr(covers, "_fit", lambda draw, text, *a: credits.append(text) or real_fit(draw, text, *a))
+    monkeypatch.setattr(covers, "_fit",
+                        lambda draw, text, *a, **k: credits.append(text) or real_fit(draw, text, *a, **k))
     covers.cover_jpeg("Nuevo Testamento", "", "Casiodoro de Reina", "escritura", "Escritura",
                       wordmark="CLÁSICOS GRANGER", translated_by="traducción de")
     assert "CLÁSICOS GRANGER" in drawn and covers.WORDMARK not in drawn
     assert "traducción de Casiodoro de Reina" in credits
+
+
+MANIFEST_ES = json.loads((Path(__file__).parent.parent / "classics" / "manifest_es.json").read_text(encoding="utf-8"))
+
+
+@pytest.mark.parametrize("section, english", [("escritura", "scripture"), ("ensayo", "philosophy"),
+                                              ("historia", "philosophy"), ("poesia", "poetry"), ("teatro", "drama"),
+                                              ("novelas", "novels"), ("cuentos", "novels"), ("universales", "novels")])
+def test_clasicos_sections_wear_the_nearest_english_ground(section, english):
+    assert covers.ground_for(section) == covers.GROUNDS[english]
+    image = open_cover(covers.cover_jpeg("Fábulas", "Tomás de Iriarte", None, section, "Sección"))
+    assert near(image.getpixel((10, 10)), rgb(covers.GROUNDS[english]))
+
+
+def test_every_clasicos_section_has_a_ground_and_the_learner_ones_share_a_new_one():
+    assert {s["id"] for s in MANIFEST_ES["sections"]} == set(covers.SPANISH_GROUNDS)
+    learner = {covers.ground_for("lecturas"), covers.ground_for("infantil")}
+    assert learner == {covers.LEARNER_GROUND} and covers.LEARNER_GROUND in covers.LEARNER_CANDIDATES.values()
+    assert not set(covers.LEARNER_CANDIDATES.values()) & set(covers.GROUNDS.values())
+
+
+def _contrast(a: str, b: str) -> float:
+    def lum(h):
+        return sum(w * (c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4)
+                   for w, c in zip((0.2126, 0.7152, 0.0722), (v / 255 for v in rgb(h))))
+    hi, lo = sorted((lum(a), lum(b)), reverse=True)
+    return (hi + 0.05) / (lo + 0.05)
+
+
+@pytest.mark.parametrize("ground", sorted(covers.LEARNER_CANDIDATES.values()))
+def test_learner_candidates_are_as_dark_as_the_other_grounds(ground):
+    assert _contrast(covers.PAPER, ground) >= 7.6 and _contrast(covers.PHOSPHOR, ground) >= 5.0
+
+
+def test_a_ground_can_be_given_for_a_board():
+    image = open_cover(covers.cover_jpeg("Fábulas", "Tomás de Iriarte", None, "infantil", "Infantil", ground="#1E3D4A"))
+    assert near(image.getpixel((10, 10)), rgb("#1E3D4A"))
+
+
+def test_spanish_titles_do_not_end_a_line_on_an_article():
+    draw = ImageDraw.Draw(Image.new("RGB", (600, 900)))
+    def title(text, language="es"):
+        return covers._layout(draw, text, "Tucídides", None, 468, 528, 650, "traducción de", language)[0][1]
+    assert title("Historia de la guerra del Peloponeso (tomo 1 de 2)") == [
+        "Historia", "de la guerra", "del Peloponeso", "(tomo 1 de 2)"]
+    assert title("El filibusterismo") == ["El filibusterismo"]  # "El" never stands alone
+    assert title("Libro de buen amor") == ["Libro de", "buen amor"]  # a line may end on "de"
+    # English covers keep their approved wraps
+    assert title("Heart of Darkness", "en") == ["Heart of", "Darkness"]
+
+
+def test_the_longest_spanish_covers_fit():  # all 185 take half a minute; the dozen longest stand in
+    sections = {s["id"]: s["title"] for s in MANIFEST_ES["sections"]}
+    longest = sorted(MANIFEST_ES["works"], key=lambda w: -len(w["title"] + w.get("author", "") +
+                                                             (w.get("translator") or "")))[:12]
+    for w in longest:
+        covers.cover_jpeg(w["title"], w.get("author", ""), w.get("translator"), w["section"], sections[w["section"]],
+                          wordmark="CLÁSICOS GRANGER", translated_by="traducción de", language="es")

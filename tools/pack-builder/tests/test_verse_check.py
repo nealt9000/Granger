@@ -25,3 +25,17 @@ def test_a_book_fails_over_the_flush_limit_or_with_lost_alignment(capsys):
     assert not compare.report("x", {"a": dict(ok, wrapped_hang=60)}, 2.0, 100, set())
     assert compare.report("x", {"a": dict(ok, wrapped_hang=60)}, 2.0, 100, {"a"})
     assert not compare.report("x", {"a": dict(ok, align_lost=1)}, 2.0, 100, set())
+
+
+def test_harness_paginates_when_asked():
+    import harness
+    assert "readium-scroll-on" in harness.root_style(1.0)
+    assert "readium-scroll-on" not in harness.root_style(1.0, scroll=False)
+
+
+def test_cover_check_measures_clearance_from_the_screen_bands():
+    import cover_check
+    phone = cover_check.Phone(390, 844)
+    assert (phone.page_top, phone.page_height, phone.top_band, phone.bottom_band) == (64, 740, 144, 744)
+    top, foot = cover_check.clearance(phone, {"top": 100, "height": 500})
+    assert (top, foot) == (20, 80)

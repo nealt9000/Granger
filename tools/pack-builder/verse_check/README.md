@@ -58,6 +58,9 @@ $PY verse_check/compare.py render-390-1.0.json render-360-1.0.json render-390-1.
   a failure. A full run over ~140 books takes a few minutes per setting.
 - `shot.py BOOK.epub PAGE OUT.png --find "some words"` takes a 390 × 844 screenshot of one page, scrolled
   to the words, for looking at by eye.
+- `cover_check.py BOOK.epub OUT_DIR [--size 390x844 ...]` renders the cover page paginated (as the app shows a
+  book) in a phone frame, with the reader's chrome drawn over it (top: status bar, mini-player and top bar, 144 dp;
+  bottom: about 100 dp), and prints how far the cover clears each band and whether it spilled onto a second page.
 
 ## What counts as a verse line
 

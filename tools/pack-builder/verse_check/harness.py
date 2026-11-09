@@ -78,16 +78,18 @@ def check_ready() -> None:
         raise SystemExit(f"no Chrome at {CHROME}; set $CHROME")
 
 
-def root_style(scale: float) -> str:
-    return ("--USER__view: readium-scroll-on; --USER__advancedSettings: readium-advanced-on; "
+def root_style(scale: float, scroll: bool = True) -> str:
+    """The root style; with scroll False, Readium's paginated columns, as the app always shows a book."""
+    view = "--USER__view: readium-scroll-on; " if scroll else ""
+    return (f"{view}--USER__advancedSettings: readium-advanced-on; "
             f"--USER__fontOverride: readium-font-on; --USER__fontFamily: {FAMILY}, serif; --USER__textAlign: start; "
             f"--USER__lineHeight: 1.5; --USER__pageMargins: 1; --USER__fontSize: {int(round(scale * 100))}%;")
 
 
-def document(book_css: str, body: str, scale: float, script: str = "") -> str:
+def document(book_css: str, body: str, scale: float, script: str = "", scroll: bool = True) -> str:
     before = (READIUM / "ReadiumCSS-before.css").read_text()
     after = (READIUM / "ReadiumCSS-after.css").read_text()
-    return (f'<!DOCTYPE html><html lang="en" style="{root_style(scale)}"><head><meta charset="utf-8"/>'
+    return (f'<!DOCTYPE html><html lang="en" style="{root_style(scale, scroll)}"><head><meta charset="utf-8"/>'
             '<meta name="viewport" content="width=device-width, initial-scale=1"/>'
             f'<link rel="stylesheet" href="notoserif.css"/><style>{before}</style><style>{book_css}</style>'
             f"<style>{after}</style></head><body>{body}{script}</body></html>")

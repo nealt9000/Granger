@@ -232,3 +232,17 @@ def test_cut_after_drops_everything_after_the_works_last_words():
 def test_cut_after_text_that_isnt_there_fails_the_build():
     with pytest.raises(gutenberg.CleaningError, match="cutAfter"):
         gutenberg.clean(fixture("pg-modern.html"), cut_after="words the book doesn't have")
+
+
+def test_a_credit_the_header_gives_and_the_text_repeats_goes_with_a_cover_note():
+    html = ("<html><body><section class='pg-boilerplate'><p><strong>Credits</strong>: Produced by A. Volunteer, from "
+            "scans obtained at the Internet Archive</p></section>"
+            "<div id='pg-start-separator'>*** START OF THE PROJECT GUTENBERG EBOOK X ***</div>"
+            "<p>Produced by A. Volunteer, from scans obtained at the</p><p>Internet Archive</p>"
+            "<div class='covernote'>The cover image was created by the transcriber and is placed in the public "
+            "domain.</div><h1>THE BOOK</h1><p>Produced by hand, the archive grew.</p><p>Text of the work.</p>"
+            "<div id='pg-end-separator'>*** END OF THE PROJECT GUTENBERG EBOOK X ***</div></body></html>").encode()
+    cleaned = gutenberg.clean(html)
+    text = " ".join(cleaned.body.get_text(" ").split())
+    assert text == "THE BOOK Produced by hand, the archive grew. Text of the work."
+    assert cleaned.branding_removed >= 3

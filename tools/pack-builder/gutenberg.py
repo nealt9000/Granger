@@ -5,7 +5,9 @@ and so does every remaining block that names Project Gutenberg: their trademark 
 redistribute a public-domain text freely once every reference to Project Gutenberg is removed. Images,
 scripts and external links go too, since packs are text-only and the reader never touches the network.
 So do the shells those cuts leave: empty boilerplate headers and footers, blocks with nothing in them (an
-emptied figure, a `<p>&nbsp;</p>` spacer), and a transcriber's note that only speaks of the cover art.
+emptied figure, a `<p>&nbsp;</p>` spacer), and a transcriber's note that only speaks of the cover art. A
+producer's credit that Gutenberg's header gives ("Credits: Produced by ...") and the text repeats at its start goes
+too, as does a one-line note that the transcriber made the cover.
 """
 import re
 from dataclasses import dataclass
@@ -61,6 +63,7 @@ def clean(html: bytes, cut_after: str | None = None) -> Cleaned:
     for comment in soup.find_all(string=lambda s: isinstance(s, Comment)):
         comment.extract()
     root = soup.body or soup
+    credits = _credits(root)
     start, end = root.find(id="pg-start-separator"), root.find(id="pg-end-separator")
     if start is None or end is None:
         start = _text_marker(soup, root, START)
@@ -80,6 +83,7 @@ def clean(html: bytes, cut_after: str | None = None) -> Cleaned:
         if SCHEME.match(link["href"].strip()):
             unwrap_link(link)
     removed, removed_chars = _drop_branding(root)
+    removed += _drop_credit_lines(root, credits)
     _drop_leftovers(root)
 
     body = soup.new_tag("div")
@@ -317,6 +321,35 @@ def _drop_faded_page_notices(root: Tag) -> None:
             block = parent
         if block is not None and not block.decomposed and FADED_PAGE.search(" ".join(block.get_text(" ").split())):
             block.decompose()
+
+
+CREDITS_LABEL = re.compile(r"^\s*Credits\s*:?\s*$", re.I)
+CREDIT_BLOCKS = 4
+COVER_NOTE = re.compile(r"^The cover (image|art) (was|has been) (created|made|produced)[^.]{0,80}\.?$", re.I)
+
+
+def _credits(root: Tag) -> str:
+    """The producer's credit in Gutenberg's header ("Credits: Produced by ..."), read before the header goes."""
+    label = root.find(lambda t: t.name in ("strong", "b") and CREDITS_LABEL.match(t.get_text()))
+    if label is None or label.parent is None:
+        return ""
+    return " ".join(label.parent.get_text(" ").split()).split(":", 1)[-1].strip()
+
+
+def _drop_credit_lines(root: Tag, credits: str) -> int:
+    """The credit repeated in the first blocks of the text (in one line or split over two), and a cover note."""
+    def words(text: str) -> str:  # without the volunteers' e-mail addresses some texts add
+        return " ".join(re.findall(r"\w+", re.sub(r"<[^<>\s]+@[^<>\s]+>|\S+@\S+", " ", text.lower())))
+
+    removed, plain = 0, words(credits)
+    blocks = [b for b in root.find_all(["p", "div"]) if not b.find(["p", "div"]) and b.get_text(strip=True)]
+    for block in blocks[:CREDIT_BLOCKS]:
+        text = " ".join(block.get_text(" ").split())
+        said = words(text)
+        if COVER_NOTE.match(text) or (len(plain) >= 15 and len(said) >= 10 and f" {said} " in f" {plain} "):
+            block.decompose()
+            removed += 1
+    return removed
 
 
 def _drop_cover_notes(root: Tag) -> None:
