@@ -4951,3 +4951,115 @@
 {"id": "d-philosophy-004", "kind": "answer", "replyHash": "594c5307fa8c299677e7472168c7608b34be1198", "grade": "grounded", "reason": "Wager payoff reasoning and immortality extension match the passage"}
 {"id": "d-philosophy-005", "kind": "answer", "replyHash": "c373058075da5e26f0531422f6bc1fb9ea7aa866", "grade": "grounded", "reason": "Against strong AI, formal rule-following without knowing meaning; supported"}
 {"id": "d-multi-step-021", "kind": "answer", "replyHash": "90cec8e97d264baae88b68fb5e756afe8efd2ab0", "grade": "not-grounded", "reason": "Does not give Socrates' age; only the 404 BCE date"}
+{"id": "d-bible-002", "kind": "answer", "replyHash": "a167cec8c256547b55305de7f39578b9b6842031", "grade": "grounded", "reason": "Seventy times seven, straight from the passage"}
+{"id": "d-bible-003", "kind": "answer", "replyHash": "9e44e5e0aba0306098c9e7547513c6769ba48d89", "grade": "grounded", "reason": "Language confounded, scattered, stopped building; all in the passage"}
+{"id": "d-bible-004", "kind": "answer", "replyHash": "f909c91b5c3e4e80232ac672392fefcb69f8e508", "grade": "not-grounded", "reason": "Passage says Ruth was Mahlon's wife but never says Naomi was Mahlon's mother"}
+{"id": "d-bible-005", "kind": "answer", "replyHash": "0e8f60e01063361d2c71069712b506af383cc0a3", "grade": "not-grounded", "reason": "Never names Judith; 'a woman' does not answer who"}
+{"id": "d-bible-006", "kind": "answer", "replyHash": "70f677d6c46305bd48b9548be3544880985512d8", "grade": "grounded", "reason": "Two, three or four, one if not equitable; matches passage"}
+{"id": "d-bible-007", "kind": "answer", "replyHash": "5f74cd211f0fa412337aef444e047108896e19c9", "grade": "grounded", "reason": "Hatred ceases by love; verbatim from passage"}
+{"id": "d-bible-008", "kind": "answer", "replyHash": "d266ad399d08ec608557d0347a709dbaea4fce81", "grade": "grounded", "reason": "Tao Te Ching, supported by the cited passage"}
+{"id": "d-bible-009", "kind": "answer", "replyHash": "f2d14f9b8f5deae91e34510f07c2c227830345bb", "grade": "grounded", "reason": "Reciprocity with the quoted gloss; Analects passage supports it"}
+{"id": "d-literature-002", "kind": "answer", "replyHash": "5de7246f3935295a8755e80aafd9497f8301107f", "grade": "grounded", "reason": "Yellow diamond set in the moon god's forehead; all in passage"}
+{"id": "d-literature-003", "kind": "answer", "replyHash": "870b24c1cb7fb2870146e10231169c9889389b8b", "grade": "grounded", "reason": "The Covenant, supported by the Kidnapped passage"}
+{"id": "d-literature-005", "kind": "answer", "replyHash": "f7f6ca466b67ddb131bd225ec9dd1b2bd62f6924", "grade": "grounded", "reason": "Dead peasants returned as alive; matches passage"}
+{"id": "d-literature-007", "kind": "answer", "replyHash": "3deaf6947cd1158fbd527bc1cd2d8b970c31fbd2", "grade": "grounded", "reason": "Describes what the passage shows on the ride; every claim is in it"}
+{"id": "d-literature-008", "kind": "answer", "replyHash": "6a95dfb29f8b7e35bd231eb603ce561ca93d1d10", "grade": "not-grounded", "reason": "Restates the question; never gives the reason (the King was drugged)"}
+{"id": "d-vocab-gap-001", "kind": "answer", "replyHash": "90da60a2d9d13bda3fe50e4fbfb166dc3581b543", "grade": "not-grounded", "reason": "Attributes Bacon's commentary ('says it by rote') to the Bible"}
+{"id": "d-vocab-gap-003", "kind": "answer", "replyHash": "ebd77f3b124d172cf80288eb948315a18d7aaa21", "grade": "not-grounded", "reason": "Asked where; reply gives the idea but no location in the book"}
+{"id": "d-vocab-gap-006", "kind": "answer", "replyHash": "d3014051d6ce248024b1f206b37e688690911566", "grade": "not-grounded", "reason": "Asked which part; answers 'Passage [1]' with no book or speaker"}
+{"id": "d-vocab-gap-007", "kind": "answer", "replyHash": "f104667b630b3fe108a978d43709b6c983987107", "grade": "grounded", "reason": "Death-dealing pestilence from the East; matches passage"}
+{"id": "d-vocab-gap-008", "kind": "answer", "replyHash": "ecc24d153b1d30eeba10a905fbe7efd528432448", "grade": "not-grounded", "reason": "Asked where; quotes the invisible hand but gives no work or chapter"}
+{"id": "d-who-wrote-001", "kind": "answer", "replyHash": "a806893c3a35e3d3cad04fb1659057a2184e093a", "grade": "grounded", "reason": "Frankenstein; all claims in passage"}
+{"id": "d-who-wrote-002", "kind": "answer", "replyHash": "871ce7b44870bb1a491a46a0609bb75403cd7ab0", "grade": "not-grounded", "reason": "Never names the author; 'an author referenced in the entry' is no answer"}
+{"id": "d-who-wrote-003", "kind": "answer", "replyHash": "9573b58eef7c17eb75d6f0322427ccc695a1d0db", "grade": "grounded", "reason": "Washington Irving, Legend of Sleepy Hollow; in passage"}
+{"id": "d-who-wrote-006", "kind": "answer", "replyHash": "92b11b88a54c2fe8308e798b7712f32eb544e181", "grade": "not-grounded", "reason": "Publication year 1855 is not in the passage"}
+{"id": "d-who-wrote-007", "kind": "answer", "replyHash": "d21ee477eecb9b1ffde9de76d1304549df7e3f9d", "grade": "grounded", "reason": "Omar Khayyam, rendered by Fitzgerald; verbatim from passage"}
+{"id": "d-who-wrote-008", "kind": "answer", "replyHash": "6bc7e05ca06ede5dcbeb66bee396f5baf530a12d", "grade": "grounded", "reason": "Kipling as author of The Jungle Book is in the passage; rest restates the question"}
+{"id": "d-follow-up-001", "kind": "answer", "replyHash": "6b8b5e11e5d32d7a14732e9d4798674253c4804e", "grade": "not-grounded", "reason": "Says 'the narrator'; passage names no one and the speaker is Isabella, not the narrator"}
+{"id": "d-follow-up-005", "kind": "answer", "replyHash": "7191c2aa5f07b8b64df9944c14975da66131cd39", "grade": "grounded", "reason": "Bertha smashed on the pavement; in passage"}
+{"id": "d-multi-step-003", "kind": "answer", "replyHash": "d08b043abe7092b9dae333fcd31c1c67dc9561ab", "grade": "not-grounded", "reason": "Cites [1] for her death, which [1] does not say; 'a fever' omits scarlet fever from [2]"}
+{"id": "d-multi-step-005", "kind": "answer", "replyHash": "db7d240374ea9d7e6e2fb882fd14e0d5b7e13143", "grade": "grounded", "reason": "1851 and 1897 from passages; 46 years correct"}
+{"id": "d-medical-002", "kind": "answer", "replyHash": "e86f80776f90dd8d243208e854337106f1f922ac", "grade": "grounded", "reason": "Vitamin C / scurvy; nothing beyond passage"}
+{"id": "d-medical-003", "kind": "answer", "replyHash": "73fc67c90e5dfe9ac6e534860638f403afd0399d", "grade": "grounded", "reason": "Type 2 diabetes and PCOS use, both in passage"}
+{"id": "d-medical-007", "kind": "answer", "replyHash": "dc1d8b6b638180768d761634c21fa24518a0eea7", "grade": "grounded", "reason": "Monosodium urate crystals; nothing beyond passage"}
+{"id": "d-medical-008", "kind": "answer", "replyHash": "a61848df3d8a66581509f67be213dd126c3cf953", "grade": "grounded", "reason": "Kawasaki disease, peeling and other symptoms all in passage"}
+{"id": "d-medical-009", "kind": "answer", "replyHash": "656d25460eeb22d1f94b1233b30234627cbd3bad", "grade": "grounded", "reason": "Naloxone and onset times; all in passage"}
+{"id": "d-medical-010", "kind": "answer", "replyHash": "9ecbc393a8b9cbf521827ef05eff6c88e2f8885d", "grade": "grounded", "reason": "CO symptom list matches passage exactly"}
+{"id": "d-medical-012", "kind": "answer", "replyHash": "ee497685f7a5f810f2428fe50fcb03d4488104e6", "grade": "grounded", "reason": "60-100 bpm range from passage; 72 is within it"}
+{"id": "d-medical-013", "kind": "answer", "replyHash": "bfd00ac2284306256f15ebf02c59941151925cab", "grade": "grounded", "reason": "X-chromosome opsin genes and 1 in 12 / 1 in 200; all in passage"}
+{"id": "d-medical-014", "kind": "answer", "replyHash": "d29b58eae294d5c98ca329a4ed372cefec9cf1a2", "grade": "grounded", "reason": "Pica definition and classification from passage"}
+{"id": "d-medical-015", "kind": "answer", "replyHash": "ca3d75b59ebcbf76265caf103b5f366347343310", "grade": "grounded", "reason": "No effect on viral infections, overall harm; nothing beyond passage"}
+{"id": "d-medical-016", "kind": "answer", "replyHash": "571dabb76a5f9b505720447ac8749aa5ed520d50", "grade": "grounded", "reason": "Vitamin D3 from UVB; in passage"}
+{"id": "d-medical-017", "kind": "answer", "replyHash": "e3a39031a5dd30fd40ba284367432f4784207043", "grade": "grounded", "reason": "Cough, back slaps, thrusts; sequence from passage"}
+{"id": "d-medical-018", "kind": "answer", "replyHash": "e8706742e648e80ee98bbbe061db5a49a40593ae", "grade": "grounded", "reason": "Cool water 10-25 C, not ice; in passage"}
+{"id": "d-multi-step-007", "kind": "answer", "replyHash": "7e871f70525a8c512b0fe90d6f1140d8157eac12", "grade": "grounded", "reason": "1921 and 1928 from passages; seven years correct"}
+{"id": "d-cooking-001", "kind": "answer", "replyHash": "82c09fd320d033cdbbbcfc10a6a7d1ed492c0c1b", "grade": "grounded", "reason": "145 F for 6-8 hours, or 150 F oven; in passage"}
+{"id": "d-cooking-002", "kind": "answer", "replyHash": "a01138f821dd514d671cfedbf75e1f3860c3e4e8", "grade": "grounded", "reason": "An hour, better overnight; in passage"}
+{"id": "d-cooking-003", "kind": "answer", "replyHash": "b09576263c0ea920e1cc9f2464dbf8ba80edfe92", "grade": "not-grounded", "reason": "'Skip the previous step' names no step, so the cause is never given"}
+{"id": "d-cooking-004", "kind": "answer", "replyHash": "04da8e73ae318509272613895a7a767cc83380a7", "grade": "grounded", "reason": "UHT bacteria killed; other milks; all in passage"}
+{"id": "d-cooking-006", "kind": "answer", "replyHash": "1b3615229b47359b193afd7762429d4d7009ba32", "grade": "grounded", "reason": "10-14 days from passage"}
+{"id": "d-cooking-009", "kind": "answer", "replyHash": "46fc8c46ce9be07dbecfdb57be4373816105dfcf", "grade": "grounded", "reason": "Fruit list and wild grapes note match passage"}
+{"id": "d-cooking-010", "kind": "answer", "replyHash": "6a9f029154f416c5335cf05ea2a5cd4483066af9", "grade": "grounded", "reason": "4-12 months, cool dark dry; in passage"}
+{"id": "d-multi-step-008", "kind": "answer", "replyHash": "3c0f989611c17ca5c3774a090a57ec67ec6dc63c", "grade": "grounded", "reason": "425 vs 375 F from passages; 50 degrees correct"}
+{"id": "d-multi-step-009", "kind": "answer", "replyHash": "0a09cfeb8076ff4c7b7a1a4b6509940ee719cff4", "grade": "not-grounded", "reason": "Never gives the difference asked for, and drops the first 2 days of the starter (6 days total)"}
+{"id": "d-repair-002", "kind": "answer", "replyHash": "d1a3fc214f6b321c0478b56056441a18e0dccb6d", "grade": "grounded", "reason": "About an arm's length; in passage"}
+{"id": "d-repair-003", "kind": "answer", "replyHash": "5528847cf286b0ab37b274c4bca9d655749373c9", "grade": "grounded", "reason": "Reattach to tracks, hammer closed, check secure; all in passage"}
+{"id": "d-repair-004", "kind": "answer", "replyHash": "a1ce68d129af700cccbbe36a792c392196d69523", "grade": "grounded", "reason": "Several times daily with a moist whetstone; in passage"}
+{"id": "d-repair-006", "kind": "answer", "replyHash": "6e5372d298cdbcbc91c518848e79005d0cb84c74", "grade": "grounded", "reason": "Clip mechanism and 24 parts; all in passage"}
+{"id": "d-knots-001", "kind": "answer", "replyHash": "b34273604df441ce6346e37d506f48503e1467d2", "grade": "grounded", "reason": "Sheet bend for different diameters; in passage"}
+{"id": "d-knots-002", "kind": "answer", "replyHash": "2aa02c2ecd2c2e9614ae9251c7668659c59af478", "grade": "grounded", "reason": "Butterfly loop, tied in the bight; all from [1]"}
+{"id": "d-knots-003", "kind": "answer", "replyHash": "0e4caf4a2e0262c124681e672d4259d7371a7080", "grade": "grounded", "reason": "Taut-line hitch slides to adjust; all from [1]"}
+{"id": "d-multi-step-010", "kind": "answer", "replyHash": "78b5911d3d48f91d7b44579828b0e0927952013d", "grade": "not-grounded", "reason": "Never says the taut-line hitch is built from a rolling hitch; first half of question unanswered"}
+{"id": "d-multi-step-011", "kind": "answer", "replyHash": "40c831e359df7ddee3d9dd2b17237f897b2803ea", "grade": "grounded", "reason": "30 vs 10-15 min, 15-20 longer; arithmetic right, both cited"}
+{"id": "d-travel-002", "kind": "answer", "replyHash": "f44857ded0ea55417b7c01185b5a88aa26110e82", "grade": "grounded", "reason": "No acclimatization help, eases mild AMS; matches [1] exactly"}
+{"id": "d-travel-003", "kind": "answer", "replyHash": "72489fd5c62bef42a34f91c336077cbc847ba670", "grade": "grounded", "reason": "Type G British; country list from [1]"}
+{"id": "d-travel-004", "kind": "answer", "replyHash": "d56282e81d84bcb98d5575a9bf0b7c16a8141024", "grade": "grounded", "reason": "Safe to drink, cleanest water; from [1]"}
+{"id": "d-travel-005", "kind": "answer", "replyHash": "bd49a64aff04533bf157ceac89662afcce5b6c36", "grade": "grounded", "reason": "Illegal but a few sticks tolerated; from [1]"}
+{"id": "d-travel-006", "kind": "answer", "replyHash": "70d3eb3b60049047b60cca694d5b039d289915ea", "grade": "grounded", "reason": "May-Oct, really starts Sep; from [1]"}
+{"id": "d-travel-007", "kind": "answer", "replyHash": "1c5e8905c7e68d9596866db0afa29db4283387f7", "grade": "not-grounded", "reason": "Asserts L19 is the cheapest way; passage only calls it a great way, no price comparison"}
+{"id": "d-travel-009", "kind": "answer", "replyHash": "c490de2702d33477e62f36306f17b13ae63ef05f", "grade": "not-grounded", "reason": "Claims you cannot hike Jan-Apr due to weather; passage says roads are often closed, only February closes the trail"}
+{"id": "d-travel-010", "kind": "answer", "replyHash": "42810b11404cc17a805afb8665550cd105936394", "grade": "grounded", "reason": "Egg coffee description and Kopi Luwak aside both from [1]"}
+{"id": "d-multi-step-012", "kind": "answer", "replyHash": "59a40e83a2cd88a6fef5c36773336ab0d02b39ca", "grade": "grounded", "reason": "La Paz 3,627 m vs Cuzco 3,400 m; both cited"}
+{"id": "d-history-001", "kind": "answer", "replyHash": "ca7e48f882ea3045fd31eb56cb5f65894bab2a54", "grade": "grounded", "reason": "Champollion 1822 and the decoding advances all from [1]"}
+{"id": "d-history-002", "kind": "answer", "replyHash": "3cd356839ba7400905f030fc7012cb6c8b619862", "grade": "grounded", "reason": "King John, 15 June 1215; from [1]"}
+{"id": "d-history-003", "kind": "answer", "replyHash": "5f31fcaa151c870842dc142c0f114acfba45980b", "grade": "grounded", "reason": "Hastings, 14 Oct 1066, near Battle; from [1]"}
+{"id": "d-history-004", "kind": "answer", "replyHash": "964a9b674e9a27131a6f31c0da21b8d2ff0b247f", "grade": "grounded", "reason": "Nomadic groups from the Eurasian Steppe; from [1]"}
+{"id": "d-science-001", "kind": "answer", "replyHash": "4615fe64dd31b381caa3457df5c1182d5febb0eb", "grade": "grounded", "reason": "Moon/Sun gravity plus inertial effects; clumsy phrasing but all from [1]"}
+{"id": "d-science-002", "kind": "answer", "replyHash": "911cd59582618a8e12fa66f86586fdb352c0ee0b", "grade": "grounded", "reason": "Solar particles excite oxygen and nitrogen; from [1]"}
+{"id": "d-literature-009", "kind": "answer", "replyHash": "b06f5f211957666ae0a431ebba4e519ec1bf8f0d", "grade": "grounded", "reason": "Hannibal, Missouri; from [1]"}
+{"id": "d-literature-010", "kind": "answer", "replyHash": "28fd1951c0de25d95ab38eb941c3a595cfc3509c", "grade": "not-grounded", "reason": "Says she began Sanditon after her death; passage says she began it and left it unfinished at death"}
+{"id": "d-geography-general-001", "kind": "answer", "replyHash": "5aabdaef88b4783322cabd7e355af170bb91c8f8", "grade": "grounded", "reason": "Challenger Deep, 10,903-11,009 m; from [1]"}
+{"id": "d-multi-step-015", "kind": "answer", "replyHash": "5ad7a3461f14b7c73ffc49eb166aacf56649c00a", "grade": "not-grounded", "reason": "Says about 19 years; July 1969 to Nov 1989 is just over 20, arithmetic wrong"}
+{"id": "d-physics-001", "kind": "answer", "replyHash": "bf4bb66174ad66ac4bb612372b7b92d26182de84", "grade": "grounded", "reason": "Shorter wavelengths scattered more; from [1]"}
+{"id": "d-physics-002", "kind": "answer", "replyHash": "e9946916437a221074e113112540e9ecf1024150", "grade": "grounded", "reason": "Continuous effect, cone-shaped region; from [1]"}
+{"id": "d-physics-003", "kind": "answer", "replyHash": "418b21031e138d6dd2c80c0a07b3ab76e1fe83d8", "grade": "not-grounded", "reason": "Calls the ship floating 'negative buoyancy'; passage's term refers to the preceding (sinking) case"}
+{"id": "d-physics-004", "kind": "answer", "replyHash": "8d2f74b88d6fe8515928f80fb1a2dcfcda1b9534", "grade": "grounded", "reason": "Refraction, indices 1.33 vs 1; from [1]"}
+{"id": "d-chemistry-001", "kind": "answer", "replyHash": "d9a3509d30ba0b3b8f87682520516e992f905cd3", "grade": "grounded", "reason": "Freezing-point depression lets ice melt at lower temps; from [1]"}
+{"id": "d-chemistry-002", "kind": "answer", "replyHash": "6f5d7ea303de5ece7d8d765986dc2bf460effdc2", "grade": "grounded", "reason": "Iron + oxygen + moisture, hydrous iron(III) oxides; from [1]"}
+{"id": "d-chemistry-003", "kind": "answer", "replyHash": "c424e15dd6678ea92819e5d09ea831d9d946c20c", "grade": "grounded", "reason": "Helium lighter than air from [1]; openly says passage lacks the breath-balloon half, adds nothing"}
+{"id": "d-chemistry-004", "kind": "answer", "replyHash": "d5c2d0a9548ca604e167e3c43617957cadf23133", "grade": "grounded", "reason": "Sulfenic acid chain to syn-propanethial-S-oxide; from [1]"}
+{"id": "d-mathematics-001", "kind": "answer", "replyHash": "bbaedafcdc32049c2a47275c6c8a030a07dad513", "grade": "grounded", "reason": "Undefined in fields, any number times 0 is 0; from [1]"}
+{"id": "d-mathematics-002", "kind": "answer", "replyHash": "4ebeabc6090e103fe5a43537f5bff2a4da86aba9", "grade": "grounded", "reason": "Switch, 2/3 vs 1/3; from [1] (treats Savant as a title, harmless)"}
+{"id": "d-multi-step-016", "kind": "answer", "replyHash": "a8ef8be33e740d14478d01a03dd658423ca3c156", "grade": "not-grounded", "reason": "Opens by saying aluminium melts higher, then contradicts itself; aluminium data cited to [1] not [2]"}
+{"id": "d-multi-step-017", "kind": "answer", "replyHash": "fd103bdc7538413b4a63a76cc12dcb0f4d7e6526", "grade": "not-grounded", "reason": "Mixes mph with km/h and gets 560x; passages give ~870,000x"}
+{"id": "d-programming-001", "kind": "answer", "replyHash": "e889d1b1609efccb6d7933fb0abda35e01fa25ee", "grade": "grounded", "reason": "git reset --soft keeps tree and index; example from [1]"}
+{"id": "d-programming-002", "kind": "answer", "replyHash": "cc4abdfb4cc97e32e9f0cd2836a51fbc1e1cc1c9", "grade": "grounded", "reason": "418 I'm a teapot, 503 aside; from [1]"}
+{"id": "d-programming-003", "kind": "answer", "replyHash": "8dd57da685de655702b8bbd0235659eecd6e1663", "grade": "not-grounded", "reason": "Describes the background-job option, never mentions -e; does not answer the question"}
+{"id": "d-programming-004", "kind": "answer", "replyHash": "42c413e6ad83037a962c5ef0196b9ce39d866a11", "grade": "grounded", "reason": "== converts types, === does not; from [1]"}
+{"id": "d-programming-005", "kind": "answer", "replyHash": "3b303881b5c7fe9042c4e2fb77a0e654e7bf164b", "grade": "grounded", "reason": "sqlite3_changes()/changes64(); from [1]"}
+{"id": "d-programming-006", "kind": "answer", "replyHash": "5afe14fc97fd77ff13a8f69a77a1e229b836c256", "grade": "grounded", "reason": "Observable side effect, no optimising out or reordering; from [1]"}
+{"id": "d-programming-007", "kind": "answer", "replyHash": "d82f10886d2bf064034dc3f999767adcbf00312d", "grade": "grounded", "reason": "functools.lru_cache memoizes; from [1]"}
+{"id": "d-programming-008", "kind": "answer", "replyHash": "c028815d9fecb3e2a98a11f7024f86c033332a34", "grade": "grounded", "reason": "sudo ss -lptn with the port swapped in; from [1]"}
+{"id": "d-programming-009", "kind": "answer", "replyHash": "e44885504face53cdda9fd84c4d005b6b04bd3a4", "grade": "grounded", "reason": "Stubs canned answers, mocks expectations; from [1]"}
+{"id": "d-programming-010", "kind": "answer", "replyHash": "8ac9b2bdaa5d2bd583aa83cf0a998fa10a0285fc", "grade": "grounded", "reason": "Disassembler to assembly, decompiler to higher-level language; from [1]"}
+{"id": "d-multi-step-019", "kind": "answer", "replyHash": "8d5e36be029390652e778dbd1c7f5b82f3c39a60", "grade": "not-grounded", "reason": "Never answers yes/no and compares against unsigned long int, not int"}
+{"id": "d-history-005", "kind": "answer", "replyHash": "81d4c0dc3e56437d1dae93b27b931355d140bdd7", "grade": "grounded", "reason": "John Bampton, Brentwood, 30 May 1381; from [1]"}
+{"id": "d-history-006", "kind": "answer", "replyHash": "7ae7fca42de0e15aab11c0eaaa302adaec034e3f", "grade": "grounded", "reason": "Caffa 1347, rat fleas on Genoese ships; from [1]"}
+{"id": "d-history-007", "kind": "answer", "replyHash": "ca49d004125007caac978fe29ec052517ac0c59d", "grade": "grounded", "reason": "Boukman and Fatiman at Bois Caiman, 14 Aug; from [1]"}
+{"id": "d-history-008", "kind": "answer", "replyHash": "cab24b79ce43ddbde1255a26de7980bc4f00ef94", "grade": "grounded", "reason": "340 or 342 chests; from [1]"}
+{"id": "d-history-009", "kind": "answer", "replyHash": "b0acf02239360c1872226358ef368af4de89373d", "grade": "grounded", "reason": "Conscription Law of 1873; from [1]"}
+{"id": "d-philosophy-001", "kind": "answer", "replyHash": "75b301979627a19758a5c715817724546cd7ca3e", "grade": "grounded", "reason": "Tortoise always moves on before Achilles arrives; from [1]"}
+{"id": "d-philosophy-002", "kind": "answer", "replyHash": "d53a8f78d6f7bb615a7d145f9bd0a064bca86019", "grade": "grounded", "reason": "Adapt to any circumstance, origin of askesis; from [1]"}
+{"id": "d-philosophy-003", "kind": "answer", "replyHash": "d56f60918f116c1f16d1029f3d070a1e49bd7f13", "grade": "grounded", "reason": "Mozi, impartial concern (jian'ai); from [1]"}
+{"id": "d-philosophy-005", "kind": "answer", "replyHash": "f446e159b555dd88d49bcafb3bec0ba5384cd473", "grade": "grounded", "reason": "Counter to AI claims, brains cause minds, syntax not semantics; from [1]"}
+{"id": "d-multi-step-020", "kind": "answer", "replyHash": "41262f333fd2d5d172ca94ef5e07e84c9edd9f95", "grade": "grounded", "reason": "Kant 79 vs Hume 65; both cited"}
