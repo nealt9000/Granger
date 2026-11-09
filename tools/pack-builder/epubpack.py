@@ -29,6 +29,10 @@ LABELS = {
            "translated_by": "Translated by", "translation_published": "This translation first published {year}",
            "edition_published": "This edition first published {year}",
            "from_gutenberg": "From Project Gutenberg ebook #{id}", "from_ebible": "From eBible.org ({id})",
+           "from_standardebooks": "From Standard Ebooks ({url}), whose edition is dedicated to the public domain "
+                                  "under CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/)",
+           "from_wikisource": "From Wikisource ({url})",
+           "from_wikisource_pages": "from {count} Wikisource pages (US government works)",
            "tagline": "Your door to knowledge. Always open."},
     "es": {"contents": "Índice", "landmarks": "Puntos de referencia", "cover": "Portada", "start": "Comienzo del texto",
            "colophon": "Colofón", "translated": "trad.", "rights": "Dominio público en los Estados Unidos.",
@@ -37,6 +41,10 @@ LABELS = {
            "edition_published": "Esta edición se publicó por primera vez en {year}",
            "from_gutenberg": "Del libro electrónico n.º {id} de Project Gutenberg",
            "from_ebible": "De eBible.org ({id})",
+           "from_standardebooks": "De Standard Ebooks ({url}), cuya edición está dedicada al dominio público "
+                                  "con CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/)",
+           "from_wikisource": "De Wikisource ({url})",
+           "from_wikisource_pages": "de {count} páginas de Wikisource (obras del gobierno de los EE. UU.)",
            "tagline": "Tu puerta al conocimiento. Siempre abierta."},
 }
 ZIP_TIME = (1980, 1, 1, 0, 0, 0)
@@ -108,7 +116,7 @@ class BookMeta:
     language: str
     source_url: str
     date: str
-    source_line: str = ""  # the colophon's credit, e.g. "From Project Gutenberg ebook #1342"
+    source_line: str = ""  # the colophon's credit, e.g. "From Project Gutenberg ebook #1342"; a line per source
     collection: str = COLLECTION
     editor_note: str = ""  # Granger's own edition (a name map): said at the front and here
 
@@ -437,7 +445,7 @@ def _colophon(work: Work, meta: BookMeta) -> str:
         lines.append(f'<p class="editor-note">{escape(meta.editor_note, quote=False)}</p>')
     facts = [words["translation_published" if meta.translator else "edition_published"].format(year=meta.published)]
     if meta.source_line:
-        facts.append(meta.source_line)
+        facts.extend(line for line in meta.source_line.splitlines() if line.strip())
     facts.append(words["rights"])
     body = (f'<section class="colophon" epub:type="colophon">{_owl_svg()}'
             f'<p class="collection">{escape(meta.collection, quote=False)}</p>{"".join(lines)}'

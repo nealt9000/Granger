@@ -14,6 +14,19 @@ An eBible work (`"source": "ebible"`, `"ebible": "<id>"`) is a modern translatio
 the public domain, so it skips the year line; its `licence` must quote that dedication with its URL, and the
 eBible details page must still say "Public Domain".
 
+A Standard Ebooks work (`"source": "standardebooks"`, `"se": "<author>/<title>[/<translator>]"`) must be a
+released book (not one of SE's placeholder pages), carry SE's CC0 dedication in its `dc:rights`, and meet the
+year line like a Gutenberg work: SE produces only what is public domain in the US, but the year is ours to check.
+A Wikisource work (`"source": "wikisource"`, `"wikisource": "<page title>"`, `wsSkip` naming subpages to leave
+out) must carry a US public-domain licence template on its page, and meet the year line unless that template
+says it's a US government work.
+
+A compiled work (`"source": "compiled"`) is one book made of `parts`, each with its own `title` and a source of
+its own: a Gutenberg id (`"gutenberg"`, with an optional `select`, a CSS selector for the part of the page to
+keep), a Wikisource page (`"wikisource"`), the text itself (`"html"`, for a line no source has on its own, with a
+`licence` that names a US government source and its URL), or `pages`, a list of such parts shown under the
+part's title. Each part passes its own source's rights check; the work's `published` is the year it belongs to.
+
 Reading settings: `verse` turns verse layout on or off (the default follows the section), `lineNumbers` puts
 line numbers in the margin or drops them, and `titleOverrides` replaces contents titles by page number.
 `packSections` packs a too-big page's sections into even pages rather than one page each (a Bible's chapters).
@@ -60,6 +73,20 @@ class Person:
 
 
 @dataclass
+class PartSpec:
+    """One part of a compiled work: its title and where its text comes from."""
+    title: str
+    source: str
+    gutenberg: int | None = None
+    wikisource: str | None = None
+    ws_skip: list[str] = field(default_factory=list)
+    select: str | None = None
+    html: str | None = None
+    licence: str | None = None
+    pages: list["PartSpec"] = field(default_factory=list)
+
+
+@dataclass
 class WorkSpec:
     gutenberg: int | None
     slug: str
@@ -83,6 +110,10 @@ class WorkSpec:
     note: str = ""
     rename: dict | None = None
     editor_note: str = ""
+    se: str | None = None
+    wikisource: str | None = None
+    ws_skip: list[str] = field(default_factory=list)
+    parts: list[PartSpec] | None = None
 
     @property
     def reads_as_verse(self) -> bool:
@@ -92,6 +123,12 @@ class WorkSpec:
     def where(self) -> str:
         if self.source == "ebible":
             return f"{self.slug} (ebible {self.ebible})"
+        if self.source == "standardebooks":
+            return f"{self.slug} (se {self.se})"
+        if self.source == "wikisource":
+            return f"{self.slug} (wikisource {self.wikisource!r})"
+        if self.source == "compiled":
+            return f"{self.slug} (compiled)"
         return f"{self.slug} (#{self.gutenberg})"
 
 
@@ -132,6 +169,16 @@ def _people(entries: list[dict] | None) -> list[Person] | None:
             for p in entries]
 
 
+def _part(p: dict) -> PartSpec:
+    source = p.get("source") or ("gutenberg" if p.get("gutenberg") is not None else
+                                 "wikisource" if p.get("wikisource") else "text" if p.get("html") else
+                                 "pages" if p.get("pages") else "")
+    return PartSpec(title=p.get("title", ""), source=source,
+                    gutenberg=int(p["gutenberg"]) if p.get("gutenberg") is not None else None,
+                    wikisource=p.get("wikisource"), ws_skip=p.get("wsSkip", []), select=p.get("select"),
+                    html=p.get("html"), licence=p.get("licence"), pages=[_part(q) for q in p.get("pages", [])])
+
+
 def load(path: Path) -> Manifest:
     data = json.loads(Path(path).read_text(encoding="utf-8"))
     works = [WorkSpec(gutenberg=int(w["gutenberg"]) if w.get("gutenberg") is not None else None, slug=w["slug"],
@@ -142,7 +189,9 @@ def load(path: Path) -> Manifest:
                       source=w.get("source", "gutenberg"), ebible=w.get("ebible"), licence=w.get("licence"),
                       cut_after=w.get("cutAfter"), pack_sections=w.get("packSections", False),
                       learner=w.get("learner", False), people=_people(w.get("people")), note=w.get("note", ""),
-                      rename=w.get("rename"), editor_note=w.get("editorNote", ""))
+                      rename=w.get("rename"), editor_note=w.get("editorNote", ""),
+                      se=w.get("se"), wikisource=w.get("wikisource"), ws_skip=w.get("wsSkip", []),
+                      parts=[_part(p) for p in w["parts"]] if w.get("parts") is not None else None)
              for w in data["works"]]
     domains = {s["id"]: s["domain"] for s in data["sections"] if s.get("domain")}
     return Manifest(name=data["name"], title=data["title"], description=data["description"],
@@ -165,13 +214,31 @@ def _words(text: str) -> set[str]:
     return set(re.sub(r"[^a-z0-9]+", " ", plain).split()) - STOP_WORDS
 
 
+@dataclass
+class SeRecord:
+    """What a Standard Ebooks page and its EPUB say about a book: whether it's only a placeholder, its title and
+    its `dc:rights`."""
+    placeholder: bool
+    title: str = ""
+    rights: str = ""
+    years: list[int] = field(default_factory=list)  # the colophon's years for the text and its translation
+
+
+SE_ID = re.compile(r"^[a-z0-9]+([-_][a-z0-9]+)*(/[a-z0-9]+([-_][a-z0-9]+)*){1,3}$")
+
+
 def validate(m: Manifest, rdf_for: Callable[[int], Rdf],
-             ebible_page_for: Callable[[str], bytes] | None = None) -> list[str]:
+             ebible_page_for: Callable[[str], bytes] | None = None,
+             se_for: Callable[[str], SeRecord] | None = None,
+             ws_licence_for: Callable[[str], object] | None = None) -> list[str]:
+    """`ws_licence_for` gives a Wikisource page's US public-domain licence (with a `government` flag), or None."""
     errors = []
     sections = {section_id for section_id, _ in m.sections}
     slugs = Counter(w.slug for w in m.works)
     ids = Counter(w.gutenberg for w in m.works if w.source == "gutenberg")
     ebibles = Counter(w.ebible for w in m.works if w.source == "ebible")
+    others = {"standardebooks": Counter(w.se for w in m.works if w.source == "standardebooks"),
+              "wikisource": Counter(w.wikisource for w in m.works if w.source == "wikisource")}
     for w in m.works:
         where = w.where
         if not SLUG.match(w.slug):
@@ -187,8 +254,19 @@ def validate(m: Manifest, rdf_for: Callable[[int], Rdf],
         if w.source == "ebible":
             errors += _validate_ebible(w, ebibles, ebible_page_for)
             continue
+        if w.source == "standardebooks":
+            errors += [f"{where}: {e}" for e in _se_errors(w, others[w.source], se_for)]
+            continue
+        if w.source == "wikisource":
+            errors += [f"{where}: {e}" for e in _ws_errors(w.wikisource, w.published, others[w.source],
+                                                           ws_licence_for)]
+            continue
+        if w.source == "compiled":
+            errors += [f"{where}: {e}" for e in _compiled_errors(w, m, rdf_for, ws_licence_for)]
+            continue
         if w.source != "gutenberg" or w.gutenberg is None:
-            errors.append(f"{where}: source must be gutenberg (with an id) or ebible, not {w.source!r}")
+            errors.append(f"{where}: source must be gutenberg (with an id), ebible, standardebooks, wikisource or "
+                          f"compiled, not {w.source!r}")
             continue
         if ids[w.gutenberg] > 1:
             errors.append(f"{where}: Gutenberg id used more than once")
@@ -204,6 +282,83 @@ def validate(m: Manifest, rdf_for: Callable[[int], Rdf],
             errors += _death_errors(where, w)
         if w.title_check and not _words(w.title) <= _words(rdf.title):
             errors.append(f"{where}: title {w.title!r} doesn't match Gutenberg's {rdf.title!r}")
+    return errors
+
+
+def _se_errors(w: WorkSpec, ids: Counter, se_for: Callable[[str], SeRecord] | None) -> list[str]:
+    if not w.se or not SE_ID.match(w.se):
+        return ["se must be \"author/title\" or \"author/title/translator\" in lowercase words and hyphens"]
+    errors = []
+    if ids[w.se] > 1:
+        errors.append("Standard Ebooks id used more than once")
+        ids[w.se] = 1
+    if w.published > PD_LINE:
+        errors.append(f"published {w.published}, after the {PD_LINE} public-domain line")
+    if se_for is not None:
+        record = se_for(w.se)
+        if record.placeholder:
+            errors.append("Standard Ebooks has only a placeholder page for it, with no ebook")
+        else:
+            rights = " ".join(record.rights.split())
+            if "United States public domain" not in rights or "CC0" not in rights:
+                errors.append(f"the EPUB's rights don't state US public domain and CC0: {rights[:120]!r}")
+            if record.years and max(record.years) > PD_LINE:
+                errors.append(f"Standard Ebooks dates the text or translation {max(record.years)}, after the "
+                              f"{PD_LINE} public-domain line")
+            if w.title_check and not _words(w.title) <= _words(record.title):
+                errors.append(f"title {w.title!r} doesn't match Standard Ebooks' {record.title!r}")
+    return errors
+
+
+def _ws_errors(title: str | None, published: int, titles: Counter | None,
+               licence_for: Callable[[str], object] | None) -> list[str]:
+    if not title or not title.strip() or any(c in title for c in "#<>[]{}|"):
+        return ["wikisource must be a page title"]
+    errors = []
+    if titles is not None and titles[title] > 1:
+        errors.append("Wikisource page used more than once")
+        titles[title] = 1
+    if licence_for is None:
+        return errors
+    found = licence_for(title)
+    if found is None:
+        errors.append(f"Wikisource page {title!r} has no US public-domain licence template")
+    elif not found.government and published > PD_LINE:
+        errors.append(f"published {published}, after the {PD_LINE} public-domain line")
+    return errors
+
+
+def _compiled_errors(w: WorkSpec, m: Manifest, rdf_for: Callable[[int], Rdf],
+                     licence_for: Callable[[str], object] | None) -> list[str]:
+    if not w.parts:
+        return ["a compiled work needs parts"]
+    errors = []
+
+    def check(part: PartSpec, where: str, nested: bool) -> None:
+        if not part.title.strip():
+            errors.append(f"{where}: every part needs a title")
+        if part.source == "gutenberg":
+            rdf = rdf_for(part.gutenberg)
+            if " ".join(rdf.rights.split()) != PD_RIGHTS:
+                errors.append(f"{where} (#{part.gutenberg}): rights are {rdf.rights!r}")
+            if m.code not in rdf.languages:
+                errors.append(f"{where} (#{part.gutenberg}): language is {rdf.languages}, not {m.code!r}")
+        elif part.source == "wikisource":
+            errors.extend(f"{where}: {e}" for e in _ws_errors(part.wikisource, w.published, None, licence_for))
+        elif part.source == "text":
+            licence = part.licence or ""
+            if "government" not in licence.lower() or "https://" not in licence:
+                errors.append(f"{where}: a part given as text needs a licence naming its US government source "
+                              "and URL")
+        elif part.source == "pages" and not nested:
+            for i, page in enumerate(part.pages):
+                check(page, f"{where} page {i + 1}", True)
+        else:
+            errors.append(f"{where}: a part's source must be gutenberg, wikisource, html or pages, not "
+                          f"{part.source!r}")
+
+    for i, part in enumerate(w.parts):
+        check(part, f"part {i + 1} ({part.title})", False)
     return errors
 
 
