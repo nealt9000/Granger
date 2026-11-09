@@ -1,14 +1,14 @@
 {
  "id": "gc-idylls-of-the-king",
  "kind": "book",
- "fileName": "gc-idylls-of-the-king_2026-10-30.gvec",
+ "fileName": "gc-idylls-of-the-king_2026-11-09.gvec",
  "sizeBytes": 69226,
- "sha256": "893686c90d69f3475df9126d61fe449f3a4a834f5824828ddf789e142acf8de4",
+ "sha256": "bc415097678265ac0f4ed2705a753a2536efe8bca944925468158b8e3a4df23d",
  "count": 235,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "58430abf06e17ff9101cfc782358b5b3dfae3ccbf34c1da084211cbb3736a70d",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-idylls-of-the-king_2026-10-30.gvec"
+ "sourceSha256": "a116fb8523046412f5ca3c306498806dc180ce58851a273dcd42bddbbafb3b6a",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-idylls-of-the-king_2026-11-09.gvec"
 }

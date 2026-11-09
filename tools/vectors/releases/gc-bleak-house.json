@@ -1,14 +1,14 @@
 {
  "id": "gc-bleak-house",
  "kind": "book",
- "fileName": "gc-bleak-house_2026-10-30.gvec",
+ "fileName": "gc-bleak-house_2026-11-09.gvec",
  "sizeBytes": 875668,
- "sha256": "c59b6092700b1343d502d8d3769fc316e0062557ddfe1a148312bb5e4e199078",
+ "sha256": "c2f2a8a75e96d640cb1af35674303b2de27c2728ae49056dc850cacd2e4c1207",
  "count": 2978,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "01371c749aaf3aed5246ea837a4c7358de91756e0c48b6436ff6728994fb653f",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-bleak-house_2026-10-30.gvec"
+ "sourceSha256": "7b5c6cf41f68767b677a1b52edbd8cbfa77e8ef5105ac8a20821fac87f526a75",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-bleak-house_2026-11-09.gvec"
 }

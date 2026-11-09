@@ -1,14 +1,14 @@
 {
  "id": "gc-picture-of-dorian-gray",
  "kind": "book",
- "fileName": "gc-picture-of-dorian-gray_2026-10-30.gvec",
+ "fileName": "gc-picture-of-dorian-gray_2026-11-09.gvec",
  "sizeBytes": 174772,
- "sha256": "0c0d8321dc298aa26c7bb3b5fdaf54fe20007d0bec3a9ad1febed6578b332781",
+ "sha256": "5624acdb528a662a31f6b29bbf0046b369e87d14ae19336e7fad4df48fcd475e",
  "count": 594,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "21c6542eb5db7edb19cfa43271e8637d452a6096cf2fa48f589047c9fc204c37",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-picture-of-dorian-gray_2026-10-30.gvec"
+ "sourceSha256": "68202aa294d520c05914b8e9ccbc0532b19f8377055e833706d72e243c4d04d0",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-picture-of-dorian-gray_2026-11-09.gvec"
 }

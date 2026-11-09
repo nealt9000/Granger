@@ -1,14 +1,14 @@
 {
  "id": "gc-es-fausto-primera-parte",
  "kind": "book",
- "fileName": "gc-es-fausto-primera-parte_2026-10-30.gvec",
- "sizeBytes": 163596,
- "sha256": "b6fd0bafddf80624a4355192e61451aecff1d4df81c14094a3ab1f3230fdeaaf",
- "count": 556,
+ "fileName": "gc-es-fausto-primera-parte_2026-11-09.gvec",
+ "sizeBytes": 163894,
+ "sha256": "78e732303d842e84670b4b04d01aa8e168e96bda60c848ad1a4fa275c63ee7a9",
+ "count": 557,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "7d6c2d212ea9ea7d52a7a0c9bc4de27d7222d4a56a638e31f082c67e91584fec",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-fausto-primera-parte_2026-10-30.gvec"
+ "sourceSha256": "55542a7dd807a60ce1ce88ef4a7d54bb1f4d8dd4523d95af8952e541b2c671e9",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-fausto-primera-parte_2026-11-09.gvec"
 }

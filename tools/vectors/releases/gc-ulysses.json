@@ -1,14 +1,14 @@
 {
  "id": "gc-ulysses",
  "kind": "book",
- "fileName": "gc-ulysses_2026-10-30.gvec",
+ "fileName": "gc-ulysses_2026-11-09.gvec",
  "sizeBytes": 607246,
- "sha256": "d99bbfbb11e1d56a57e1ec458ce80db0dd3d32f6685f34c4031cf9ea35e7e5d2",
+ "sha256": "9668e597c11a1ebeb82fdcdd4a3215db8d1ef75e6d3baff2abd6d0c0dee84755",
  "count": 2065,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "7802b525141d7009ed7ae2786d9a833c879d27f315e4730fb634e4b4f25e74a8",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-ulysses_2026-10-30.gvec"
+ "sourceSha256": "79f4cfd5d7208bdef75c49e911ea063a488c43785ba6a703da8bdf71a8874b9e",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-ulysses_2026-11-09.gvec"
 }

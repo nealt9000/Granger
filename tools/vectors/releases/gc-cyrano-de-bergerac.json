@@ -1,14 +1,14 @@
 {
  "id": "gc-cyrano-de-bergerac",
  "kind": "book",
- "fileName": "gc-cyrano-de-bergerac_2026-10-30.gvec",
+ "fileName": "gc-cyrano-de-bergerac_2026-11-09.gvec",
  "sizeBytes": 120676,
- "sha256": "613f3324b043244209517edbb69774aa1d402335fa7073c1335746fafa218474",
+ "sha256": "634228e2cdacbf645a6ed9ee77a51104d1e239b1627c709af47862e5d752828f",
  "count": 410,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "990c7cef2e8e5c4d2209887cc8d0dd316c779885ec62fc05c74329839d555d58",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-cyrano-de-bergerac_2026-10-30.gvec"
+ "sourceSha256": "494454ef9797e069c5ba547b142dc59e730d5b2d47b8cbbccb87e635abe391e8",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-cyrano-de-bergerac_2026-11-09.gvec"
 }

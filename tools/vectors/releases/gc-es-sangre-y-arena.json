@@ -1,14 +1,14 @@
 {
  "id": "gc-es-sangre-y-arena",
  "kind": "book",
- "fileName": "gc-es-sangre-y-arena_2026-10-30.gvec",
- "sizeBytes": 298248,
- "sha256": "6047eadb83320d2546e491f925d3ccc14d225a5bbb8633dd1fdec8bc21856b4d",
- "count": 1014,
+ "fileName": "gc-es-sangre-y-arena_2026-11-09.gvec",
+ "sizeBytes": 298546,
+ "sha256": "8ec0acfc9f849874e7e3f2c50945500e88a38dba8d02f06bf44f42cac0fae07a",
+ "count": 1015,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "959eaaa812cca63a9603b72c644b9ffc18a80596ced65a52bbdde1d58273eb85",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-sangre-y-arena_2026-10-30.gvec"
+ "sourceSha256": "12e55571d9c9565e09607253b82adc99216cf547a221beb5d91731e8f4b5c08a",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-sangre-y-arena_2026-11-09.gvec"
 }

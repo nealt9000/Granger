@@ -1,14 +1,14 @@
 {
  "id": "gc-upanishads",
  "kind": "book",
- "fileName": "gc-upanishads_2026-10-30.gvec",
+ "fileName": "gc-upanishads_2026-11-09.gvec",
  "sizeBytes": 46294,
- "sha256": "94d5e598ac61b87a0349e246df18a71ddaa5cb34779d38c983a7cfe98e28cac8",
+ "sha256": "20a301d807b5d7b7a5da39d10780106cb3743dc81a5d0aaaf9e25904837423a4",
  "count": 157,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "745c4b16d0537ab810ba7ccaa51a974676b7846c80134ab9316b281d023eb56c",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-upanishads_2026-10-30.gvec"
+ "sourceSha256": "8742667c54698b9c8762134c6a5bb793cf77b117edb0cc28c4dcb0780e3c805e",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-upanishads_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-world-english-bible",
  "kind": "book",
- "fileName": "gc-world-english-bible_2026-10-30.gvec",
+ "fileName": "gc-world-english-bible_2026-11-09.gvec",
  "sizeBytes": 1795888,
- "sha256": "6d85ca35525b1553fe6ec0c219ff3b5e108ec402c6d8be6ae3805bdf90a91359",
+ "sha256": "df6e2ee54bdc76243fafe126e07f2652732300f1aff41dd44d7beff7b972f4a9",
  "count": 6108,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "7c23a3b6b2a7a56d784bd8331650d7c2a846600c9e1c8d2c6354e545e21de5b5",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-world-english-bible_2026-10-30.gvec"
+ "sourceSha256": "15dae6ee24db4c4775fe09a8c74ab4e94efd300df0138b8146efc626e258b6c8",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-world-english-bible_2026-11-09.gvec"
 }

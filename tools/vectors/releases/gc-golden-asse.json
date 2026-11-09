@@ -1,14 +1,14 @@
 {
  "id": "gc-golden-asse",
  "kind": "book",
- "fileName": "gc-golden-asse_2026-10-30.gvec",
+ "fileName": "gc-golden-asse_2026-11-09.gvec",
  "sizeBytes": 88336,
- "sha256": "a666717624ae85d324f3189460093aecef6ad931af99ba156f229ea75f7ea872",
+ "sha256": "d69293a3eef47a4754985e07bb83c6ebaa5dc0cb9ef18cbe72e480bba8ec57e3",
  "count": 300,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "3e07d51f5f1f13f30859b2d36632ccd176baeedd19fa9493de9e99be74331c3e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-golden-asse_2026-10-30.gvec"
+ "sourceSha256": "bb2b6d3774c9899844221637ae0568d11180549b22b611f3a0c4ac37b4f221dc",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-golden-asse_2026-11-09.gvec"
 }

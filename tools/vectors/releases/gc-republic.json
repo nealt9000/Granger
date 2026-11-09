@@ -1,14 +1,14 @@
 {
  "id": "gc-republic",
  "kind": "book",
- "fileName": "gc-republic_2026-10-30.gvec",
+ "fileName": "gc-republic_2026-11-09.gvec",
  "sizeBytes": 309718,
- "sha256": "b551647c5d3f74f73a833b6b02a176d0c98a3d98ac759d64b61d6a2dc8dd0cbb",
+ "sha256": "b769003f4c9031470bc4180c3e1bfcf5ecf06d3f52b30cad19c655e765281c72",
  "count": 1053,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "148f1685d0fb96c5860bb0828213a9a26a45d4f1652430d9dfde1db87587e2b5",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-republic_2026-10-30.gvec"
+ "sourceSha256": "f9ec4e996c110562efc75382b26b4c634533ed1b6f5757af36bdd2620d00ce3d",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-republic_2026-11-09.gvec"
 }

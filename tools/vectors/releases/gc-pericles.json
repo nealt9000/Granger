@@ -1,14 +1,14 @@
 {
  "id": "gc-pericles",
  "kind": "book",
- "fileName": "gc-pericles_2026-10-30.gvec",
- "sizeBytes": 58348,
- "sha256": "04a0664ec5d63f409232b740bb91da1bc76ffd32ceb3866d7f9fba6091db993b",
- "count": 198,
+ "fileName": "gc-pericles_2026-11-09.gvec",
+ "sizeBytes": 58054,
+ "sha256": "00c9c6a9440052231c9d7488e54a81cf80c633b2b47b47ca28f4b973e2305e19",
+ "count": 197,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "0850daed68f11f20de97b0e5e4fbe183f426182a1b1275263ae125c8cfefe077",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-pericles_2026-10-30.gvec"
+ "sourceSha256": "32ea7dbdfa1ba8254b09572ecc6e57d2ae3bca04de4355633142bf67c0bedcfd",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-pericles_2026-11-09.gvec"
 }

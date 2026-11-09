@@ -1,0 +1,14 @@
+{
+ "id": "gc-lady-with-the-dog-and-other-stories",
+ "kind": "book",
+ "fileName": "gc-lady-with-the-dog-and-other-stories_2026-11-09.gvec",
+ "sizeBytes": 170656,
+ "sha256": "bc1797ba543fc281560d16495c4a566368500484444b4ba26f6eaab04373ccee",
+ "count": 580,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "6f0cb8d0bcff4c4151f63f576b9820390970109ec6002d8a5b5bfa3684b6a9cf",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-lady-with-the-dog-and-other-stories_2026-11-09.gvec"
+}

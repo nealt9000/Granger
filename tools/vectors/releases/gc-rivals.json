@@ -1,14 +1,14 @@
 {
  "id": "gc-rivals",
  "kind": "book",
- "fileName": "gc-rivals_2026-10-30.gvec",
+ "fileName": "gc-rivals_2026-11-09.gvec",
  "sizeBytes": 88336,
- "sha256": "03d9e49010cb263e74d8f745ccfc3f0a20db40d97b16405520c3fa001f30ab8e",
+ "sha256": "9fec5d58446da348c24788589a391df57d2e36d62d6f94b46549e78169a28b9a",
  "count": 300,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "09bab6f9b6dfffea176c369dfad4390e68253d170d42c25e8a32da46a43c280c",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-rivals_2026-10-30.gvec"
+ "sourceSha256": "0dd91cd03fc3aec5dff8f6944550f2f1df1cd2fd5553a6c0d263fef1b2c4bd2f",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-rivals_2026-11-09.gvec"
 }

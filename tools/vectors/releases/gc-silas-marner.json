@@ -1,14 +1,14 @@
 {
  "id": "gc-silas-marner",
  "kind": "book",
- "fileName": "gc-silas-marner_2026-10-30.gvec",
+ "fileName": "gc-silas-marner_2026-11-09.gvec",
  "sizeBytes": 135964,
- "sha256": "f276bbaa5aa55b793d1cdb44e85faa22163a0fc139001387d6e28ca7c4b0cd86",
+ "sha256": "7b13cc7c86bf741737cce00c6f11c8b86d7e3953a6048208acb8eafbcf89cb39",
  "count": 462,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "78be4a3cd493445cb70328ac7397b9f6caead68b9219178a93767f8e07455c0d",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-silas-marner_2026-10-30.gvec"
+ "sourceSha256": "96696c5814e3bbde827ad4b619467020d53cb81f7df2734fede93eb795e5f2ea",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-silas-marner_2026-11-09.gvec"
 }

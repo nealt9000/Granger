@@ -1,14 +1,14 @@
 {
  "id": "gc-aesop-s-fables",
  "kind": "book",
- "fileName": "gc-aesop-s-fables_2026-10-30.gvec",
- "sizeBytes": 116560,
- "sha256": "e9a7d6edc77dffabe60b6bfc4c437b7a0065cc406ed212e6814ea0fafc5e4d8a",
- "count": 396,
+ "fileName": "gc-aesop-s-fables_2026-11-09.gvec",
+ "sizeBytes": 115384,
+ "sha256": "5d522c4e80eb1f1fbda1887053325fffb57891c4dc6f4fb2bab45297aeab5e67",
+ "count": 392,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "3e9d272cf96de844a3f14b43f89e0f6db56c57c3afaf01dba1c54db13ae64bcf",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-aesop-s-fables_2026-10-30.gvec"
+ "sourceSha256": "b4870c202067adef311a59bd8650959b46b15798c4fe6c145ab301673cb4ee41",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-aesop-s-fables_2026-11-09.gvec"
 }

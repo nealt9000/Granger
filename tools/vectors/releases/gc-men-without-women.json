@@ -1,0 +1,14 @@
+{
+ "id": "gc-men-without-women",
+ "kind": "book",
+ "fileName": "gc-men-without-women_2026-11-09.gvec",
+ "sizeBytes": 120088,
+ "sha256": "53883e251a5bdf3ee1e492189bfbbf1d189cb768fb5475336c80f5a2c720084e",
+ "count": 408,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "31a62028a9cd9710bd6352432a7a3d431b250e9b8d5bb524026a0dc2e9f4672f",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-men-without-women_2026-11-09.gvec"
+}

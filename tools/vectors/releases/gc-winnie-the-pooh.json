@@ -1,0 +1,14 @@
+{
+ "id": "gc-winnie-the-pooh",
+ "kind": "book",
+ "fileName": "gc-winnie-the-pooh_2026-11-09.gvec",
+ "sizeBytes": 72754,
+ "sha256": "99b891f738547722bfe6e33e17e1844746cdf7d7b4205162f0c1b0077884b4aa",
+ "count": 247,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "58579a03129fa69948933e4e2344c75211f3c5dc451c653f1d1dc24ac310f2b6",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-winnie-the-pooh_2026-11-09.gvec"
+}

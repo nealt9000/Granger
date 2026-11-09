@@ -1,0 +1,14 @@
+{
+ "id": "gc-souls-of-black-folk",
+ "kind": "book",
+ "fileName": "gc-souls-of-black-folk_2026-11-09.gvec",
+ "sizeBytes": 114208,
+ "sha256": "55be4f09c00470bbbecd4b0d36508fe06b5dcb02d02b8ed436d65d408881657c",
+ "count": 388,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "20f20fa65c10ec4d230b4b894244ce5536e0eb7e7b20be63359ff5905335c342",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-souls-of-black-folk_2026-11-09.gvec"
+}

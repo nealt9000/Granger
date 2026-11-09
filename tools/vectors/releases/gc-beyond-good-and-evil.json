@@ -1,14 +1,14 @@
 {
  "id": "gc-beyond-good-and-evil",
  "kind": "book",
- "fileName": "gc-beyond-good-and-evil_2026-10-30.gvec",
+ "fileName": "gc-beyond-good-and-evil_2026-11-09.gvec",
  "sizeBytes": 82456,
- "sha256": "b094826c3cc586cd3147daacc6b07b772c984e21ab23ff6d8d2e7b173100b44e",
+ "sha256": "d2e2511c12db92956bd1189ee9db1a934103e75368d77356ec9c9f5d62c70064",
  "count": 280,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a2b82d98ca2fb2ef24b4dd0fbbc51212b71498407195641fbbf5f2e83804a740",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-beyond-good-and-evil_2026-10-30.gvec"
+ "sourceSha256": "c3f4cb6b15fe3f777e93659fb5834a8243ce26af526e3a2e9c335eaa8e4e9d09",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-beyond-good-and-evil_2026-11-09.gvec"
 }

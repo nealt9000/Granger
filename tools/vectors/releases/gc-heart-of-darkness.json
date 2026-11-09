@@ -1,14 +1,14 @@
 {
  "id": "gc-heart-of-darkness",
  "kind": "book",
- "fileName": "gc-heart-of-darkness_2026-10-30.gvec",
+ "fileName": "gc-heart-of-darkness_2026-11-09.gvec",
  "sizeBytes": 51586,
- "sha256": "c562da97172f2ffc9cbc04ef9b9f679c29bf2dce9a6f2401a3ab7c0be1c637ff",
+ "sha256": "675bcaa4b85b25d6fd6e7c5f116ad61cc991fbe7ec302d3af4ef7d5adb849f37",
  "count": 175,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "f6ce18ad856a7a45cb34c005a2709e03e22a3ab05552cca05e6c3b4080ab6168",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-heart-of-darkness_2026-10-30.gvec"
+ "sourceSha256": "2252c28bba57ab606a9cf01272ad7e4c6e3534b5627b2d1273a84c809e5ca613",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-heart-of-darkness_2026-11-09.gvec"
 }

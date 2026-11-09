@@ -1,14 +1,14 @@
 {
  "id": "gc-sorrows-of-young-werther",
  "kind": "book",
- "fileName": "gc-sorrows-of-young-werther_2026-10-30.gvec",
+ "fileName": "gc-sorrows-of-young-werther_2026-11-09.gvec",
  "sizeBytes": 75106,
- "sha256": "954dff5b2e9e34d550077fdddaa36212c42c918d55c7b64d88cd74b70c7e0fd4",
+ "sha256": "3442b69719a178d792f46212a77d895efd4f1531940f951ee7932a7b43b31a6e",
  "count": 255,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "d0f1572695d5cbf2bad2e4d8a00686290f4ffd6a12c42699dc5f62550fb9b05e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-sorrows-of-young-werther_2026-10-30.gvec"
+ "sourceSha256": "1141e62d11ec6156294eac4a54854e78d2ee8a6448eec3864f16d43f67a4f186",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-sorrows-of-young-werther_2026-11-09.gvec"
 }

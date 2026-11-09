@@ -1,14 +1,14 @@
 {
  "id": "gc-portrait-of-a-lady-volume-2",
  "kind": "book",
- "fileName": "gc-portrait-of-a-lady-volume-2_2026-10-30.gvec",
+ "fileName": "gc-portrait-of-a-lady-volume-2_2026-11-09.gvec",
  "sizeBytes": 218872,
- "sha256": "c1fc58ee32a9c0b35d8a343cd510a03e10b991a66718905daf44dbd7f39e34f9",
+ "sha256": "a8f325e61e949ef67c056eb756140fed157d3a0f0a3a2e5e2d103e419c5ac0cb",
  "count": 744,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "32109b5f9d4ae4c44952e36a3722bf4f761a161ee1e1ced94be6ce3d5f7284bf",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-portrait-of-a-lady-volume-2_2026-10-30.gvec"
+ "sourceSha256": "59a35347b4f897e4bcf9e2e820d3eb237078c0dead144581506c66d5b26b2aa0",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-portrait-of-a-lady-volume-2_2026-11-09.gvec"
 }

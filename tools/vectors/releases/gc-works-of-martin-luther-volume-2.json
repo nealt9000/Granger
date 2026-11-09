@@ -1,0 +1,14 @@
+{
+ "id": "gc-works-of-martin-luther-volume-2",
+ "kind": "book",
+ "fileName": "gc-works-of-martin-luther-volume-2_2026-11-09.gvec",
+ "sizeBytes": 157720,
+ "sha256": "51b7e1a0619ffec6f92cf05bf51f508d8dc7df3c73774b16bc04d344dac2f104",
+ "count": 536,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "6528cc1f11fc6a6677ec7bb5e4041735f8f48b1fa701c22b4ce93deab30ab476",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-works-of-martin-luther-volume-2_2026-11-09.gvec"
+}

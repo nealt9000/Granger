@@ -1,14 +1,14 @@
 {
  "id": "gc-king-lear",
  "kind": "book",
- "fileName": "gc-king-lear_2026-10-30.gvec",
+ "fileName": "gc-king-lear_2026-11-09.gvec",
  "sizeBytes": 82750,
- "sha256": "b5537eb52e9e21c1a43847fb39183f139461bd4694c945df9626b9661caeab34",
+ "sha256": "63467669e092976464204b43eabd346da589f29dbd0d21395547709338fab79b",
  "count": 281,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "6a7eeeb69b7c404dff7ccfbc39d8af089116ca8dda8746c553ca22d3b4cadc1e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-king-lear_2026-10-30.gvec"
+ "sourceSha256": "bb82ac6cfd8e3d6a2072a8f13310d73cc0839051d5458e4b2cc72d9cc26bb8fd",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-king-lear_2026-11-09.gvec"
 }

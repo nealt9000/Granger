@@ -1,14 +1,14 @@
 {
  "id": "gc-meditations",
  "kind": "book",
- "fileName": "gc-meditations_2026-10-30.gvec",
+ "fileName": "gc-meditations_2026-11-09.gvec",
  "sizeBytes": 147724,
- "sha256": "bdc8b567b1cbc663ed4963832d2ee5ba39d8f5cc4b09a63a178c31992440353e",
+ "sha256": "908456af3535582fba7a5ab317f928d07cdd38cbeed2cae57ede13b597470c23",
  "count": 502,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "b193f88cbe4ce12c557ef6c2f53c98aa35198494e0af381fc3aa052c1dd6c3bb",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-meditations_2026-10-30.gvec"
+ "sourceSha256": "8d05578d861ec2b5bfa38515972308f5f033f48ce3fe094503de1d8112d3e0eb",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-meditations_2026-11-09.gvec"
 }

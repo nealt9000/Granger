@@ -1,14 +1,14 @@
 {
  "id": "gc-decameron",
  "kind": "book",
- "fileName": "gc-decameron_2026-10-30.gvec",
+ "fileName": "gc-decameron_2026-11-09.gvec",
  "sizeBytes": 402034,
- "sha256": "f3e981d04a23e720857aba915293eb0caae92a7b6093a543ea52123fb1f33483",
+ "sha256": "6ae4cc84b21ad2287f0772295b7eb1ef9d7038f70c9de9a54d7b0844b52e5ea0",
  "count": 1367,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "7d44fa3192f228ab111c79345440358bd7757ee2ae9a857a8dc907718b30173c",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-decameron_2026-10-30.gvec"
+ "sourceSha256": "1efcd314a90d4e928b2543f1f238b3dc90ae728cf4e70cc69a20fabad899329d",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-decameron_2026-11-09.gvec"
 }

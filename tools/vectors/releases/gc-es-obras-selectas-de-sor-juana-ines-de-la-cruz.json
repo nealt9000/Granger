@@ -1,14 +1,14 @@
 {
  "id": "gc-es-obras-selectas-de-sor-juana-ines-de-la-cruz",
  "kind": "book",
- "fileName": "gc-es-obras-selectas-de-sor-juana-ines-de-la-cruz_2026-10-30.gvec",
- "sizeBytes": 190056,
- "sha256": "bf777ebda4e21d78348169481aeafc94c653be78e48385e72177f54c15c6f7d8",
- "count": 646,
+ "fileName": "gc-es-obras-selectas-de-sor-juana-ines-de-la-cruz_2026-11-09.gvec",
+ "sizeBytes": 190354,
+ "sha256": "8e7fd916fa4fc461fcb513c9b623a40971ff28589ba3b2f5bad6149c8018cf1a",
+ "count": 647,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ff339782970216622733baf48f1c964d33f31d2c59cf6f42fdefeb4df8bcd138",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-obras-selectas-de-sor-juana-ines-de-la-cruz_2026-10-30.gvec"
+ "sourceSha256": "e1e13b0e17e9a46bb91b0f638a1a8e110b7f22bffa7ff703524d36d0fe1f8c9c",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-obras-selectas-de-sor-juana-ines-de-la-cruz_2026-11-09.gvec"
 }

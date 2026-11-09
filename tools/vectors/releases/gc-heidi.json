@@ -1,0 +1,14 @@
+{
+ "id": "gc-heidi",
+ "kind": "book",
+ "fileName": "gc-heidi_2026-11-09.gvec",
+ "sizeBytes": 196234,
+ "sha256": "20093724a1591d91a611e0c6bc37b8667af9fc8b47c94e2a3f5dd09693ea4877",
+ "count": 667,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "65ced59f5ad9dd0b2c80dca8ff5b8a9e4fb99e8602eef5f06285da9c8b91f1b2",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-heidi_2026-11-09.gvec"
+}

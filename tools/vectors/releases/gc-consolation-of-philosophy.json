@@ -1,14 +1,14 @@
 {
  "id": "gc-consolation-of-philosophy",
  "kind": "book",
- "fileName": "gc-consolation-of-philosophy_2026-10-30.gvec",
+ "fileName": "gc-consolation-of-philosophy_2026-11-09.gvec",
  "sizeBytes": 80104,
- "sha256": "e2b321f74a80a74e98fa52e296a0fa92557cd12765361b20f05ca900d1803ecc",
+ "sha256": "4ed88a3693b7c650e0b08b2cb06eb33b375de3a78a8658a8c15692c3dc14c52d",
  "count": 272,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ca03decb7424c09fb9769133386b5e18f803ecbee121b2840010cd23f91320ff",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-consolation-of-philosophy_2026-10-30.gvec"
+ "sourceSha256": "46d7ded431edc49913ea2b938c33adc05b4344ce82148df2e0941bef4f65e36d",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-consolation-of-philosophy_2026-11-09.gvec"
 }

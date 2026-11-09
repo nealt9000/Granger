@@ -1,14 +1,14 @@
 {
  "id": "gc-invisible-man",
  "kind": "book",
- "fileName": "gc-invisible-man_2026-10-30.gvec",
+ "fileName": "gc-invisible-man_2026-11-09.gvec",
  "sizeBytes": 125086,
- "sha256": "89933e795398ad254a291ed71a818a8aa1f067d5fa8e5b90a79c09db222db611",
+ "sha256": "9ec2c840aca43e307864fff45e1ee840fb3f8d1baadcfc67d9b0d92d54f323f9",
  "count": 425,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "bb8ec618277bc8195226060330de7360b566e9f9e68d11a91dad82d6eaff2510",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-invisible-man_2026-10-30.gvec"
+ "sourceSha256": "385b68eb59a6ab8412e01a7aa3dd26f4e263c0c7278e5bbcfd5484751ce2950c",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-invisible-man_2026-11-09.gvec"
 }

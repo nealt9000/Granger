@@ -1,14 +1,14 @@
 {
  "id": "gc-dead-souls",
  "kind": "book",
- "fileName": "gc-dead-souls_2026-10-30.gvec",
+ "fileName": "gc-dead-souls_2026-11-09.gvec",
  "sizeBytes": 265618,
- "sha256": "5fa85bcbf03157af1f357cbb9cb1c376d38f0652374efc1328263013b173ed15",
+ "sha256": "72adf2920b59ec476650e921ee793f00f05a5df0df39dc66c6ef47919141bc54",
  "count": 903,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "43345c704fd42cafde2bb8c9f817b775b1fb3f0dab895efed8feeee200a65289",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-dead-souls_2026-10-30.gvec"
+ "sourceSha256": "392bee65c6e17bbeb1307ce6fa61e5ff240d4057ff751069308a423d5901d881",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-dead-souls_2026-11-09.gvec"
 }

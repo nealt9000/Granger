@@ -1,14 +1,14 @@
 {
  "id": "gc-on-the-nature-of-things",
  "kind": "book",
- "fileName": "gc-on-the-nature-of-things_2026-10-30.gvec",
+ "fileName": "gc-on-the-nature-of-things_2026-11-09.gvec",
  "sizeBytes": 70402,
- "sha256": "266781e07784b2a5bd78571a77f2f73e739306ff39e6f3c37f6726e954275b75",
+ "sha256": "d379e2c310ce031c844340211f756a5b2ed1288f7670d71206573a360e21aeeb",
  "count": 239,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a807ccafa3a7d389d6df6d7e6797b3914c0f5acccf39b4040a4b2ebb9672b6cc",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-on-the-nature-of-things_2026-10-30.gvec"
+ "sourceSha256": "250dde6cd44fc43a419cc30b1bdad5ecf181682852381b5d86a727aaf55cc744",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-on-the-nature-of-things_2026-11-09.gvec"
 }

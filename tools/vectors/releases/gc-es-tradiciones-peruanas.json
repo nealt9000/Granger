@@ -1,14 +1,14 @@
 {
  "id": "gc-es-tradiciones-peruanas",
  "kind": "book",
- "fileName": "gc-es-tradiciones-peruanas_2026-10-30.gvec",
- "sizeBytes": 137724,
- "sha256": "747cc0a983f84a76dd00e2a948f17e0074aba6f7f7b3594117183bde8d81527f",
- "count": 468,
+ "fileName": "gc-es-tradiciones-peruanas_2026-11-09.gvec",
+ "sizeBytes": 138022,
+ "sha256": "e51b50f3771ee4ea278aafeefcba31d3077f053b9801563425d5e8c3f1fa3fbd",
+ "count": 469,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "b5d4aba52ef2b79cc78fb0982a70dfec4c3ed7c92cc6d3938df3a618214ffdcc",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-tradiciones-peruanas_2026-10-30.gvec"
+ "sourceSha256": "b1b066000010c24e0467a360848f0c7ab21fea19a1dd8db844021cca0bfa035e",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-tradiciones-peruanas_2026-11-09.gvec"
 }

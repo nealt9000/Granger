@@ -1,14 +1,14 @@
 {
  "id": "gc-es-la-madre-naturaleza",
  "kind": "book",
- "fileName": "gc-es-la-madre-naturaleza_2026-10-30.gvec",
- "sizeBytes": 189174,
- "sha256": "82174188b286a25b16a064067f6256287b7431d555786f199e021dda4e6d87da",
- "count": 643,
+ "fileName": "gc-es-la-madre-naturaleza_2026-11-09.gvec",
+ "sizeBytes": 189472,
+ "sha256": "49365580c2dee9cec454b795b18fda9ef8ad1d9bac4151d763568519dd1d86f8",
+ "count": 644,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "f5c66db0172ea2896a790fc15ea1066d48c579a5aade9f51c7a1fee8ea6f3d11",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-la-madre-naturaleza_2026-10-30.gvec"
+ "sourceSha256": "3281c35b79c63737f6cb26ff54611390ff7c42e14f19e23c29f0dbea9037f9db",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-la-madre-naturaleza_2026-11-09.gvec"
 }

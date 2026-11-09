@@ -1,14 +1,14 @@
 {
  "id": "gc-tristan-and-isolda",
  "kind": "book",
- "fileName": "gc-tristan-and-isolda_2026-10-30.gvec",
+ "fileName": "gc-tristan-and-isolda_2026-11-09.gvec",
  "sizeBytes": 29830,
- "sha256": "ee6b6bd4e866fac4bc42f190dc716a627084d20b5f4439ecb9e9ffea1b65a7b9",
+ "sha256": "792ac3f394d148a10acb039ecd51c5f9123e44782a3aa1c00b30c389c3288b97",
  "count": 101,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "001022e2627c8c3f4e7faf4bf0bb56c1a3c7ece3d34fe66cbdbf09269134eee6",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-tristan-and-isolda_2026-10-30.gvec"
+ "sourceSha256": "14ffed364f34721f9c8a5c17c9832458be6f986c04e5b4e3c8afcacb11b51899",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-tristan-and-isolda_2026-11-09.gvec"
 }

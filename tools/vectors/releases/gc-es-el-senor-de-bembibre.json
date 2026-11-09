@@ -1,14 +1,14 @@
 {
  "id": "gc-es-el-senor-de-bembibre",
  "kind": "book",
- "fileName": "gc-es-el-senor-de-bembibre_2026-10-30.gvec",
- "sizeBytes": 235626,
- "sha256": "307fe13b78924365d842e679580c93fe665112f4b163626674ddc56a0921608d",
- "count": 801,
+ "fileName": "gc-es-el-senor-de-bembibre_2026-11-09.gvec",
+ "sizeBytes": 235924,
+ "sha256": "f2f38ef8d7f3efaa7ae40e6043654085ebc72dfe8305f2d944ac736b06987c70",
+ "count": 802,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "597db3da4c38c17e7d0df0a24b93a4703e211c285be3755d0b37e382b18aacce",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-el-senor-de-bembibre_2026-10-30.gvec"
+ "sourceSha256": "71b8e4c0f5a632d329ab8e5ec38c5bbf2047de164ca4e1fa68ad0dad3d61e3e8",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-el-senor-de-bembibre_2026-11-09.gvec"
 }

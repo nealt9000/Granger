@@ -1,0 +1,14 @@
+{
+ "id": "gc-venus-and-adonis",
+ "kind": "book",
+ "fileName": "gc-venus-and-adonis_2026-11-09.gvec",
+ "sizeBytes": 30124,
+ "sha256": "86e307bd98894e1a40a66dc4982ff2c23c484d37b1c2426431892e4ac1b1401a",
+ "count": 102,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "072c9e7f6ae5279600a614e2d7a7fd1e121e3387420ae4678400fa1aa4967fac",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-venus-and-adonis_2026-11-09.gvec"
+}

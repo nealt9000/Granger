@@ -1,5 +1,5 @@
 {
-  "releaseDate": "2026-10-30",
+  "releaseDate": "2026-11-09",
   "collection": "clasicos-granger",
   "books": [
     {
@@ -10,10 +10,10 @@
       "published": 1916,
       "section": "Lecturas para aprender",
       "language": "es",
-      "sizeBytes": 144331,
-      "sha256": "c6f5141d3bd815b84474aabc84951fbce26b9ced40772052e8994127b093f00e",
+      "sizeBytes": 162995,
+      "sha256": "7fa7c9b57c9cae33f7042fb8371817442457c6e8ffc3e12856f128bb333e3a37",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-a-first-spanish-reader_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-a-first-spanish-reader_2026-11-09.epub"
       ],
       "domain": "literature",
       "learner": true
@@ -26,10 +26,10 @@
       "published": 1918,
       "section": "Lecturas para aprender",
       "language": "es",
-      "sizeBytes": 57744,
-      "sha256": "6f6ce26d23a7226d71aab53470c0dd6986df0549c45e9987ee5bf4135431718a",
+      "sizeBytes": 77568,
+      "sha256": "d661548b832b11e68ef688d890842d02727afe716ecbc3e4d74ec36678d45a82",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-libro-segundo-de-lectura_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-libro-segundo-de-lectura_2026-11-09.epub"
       ],
       "domain": "literature",
       "learner": true
@@ -42,10 +42,10 @@
       "published": 1920,
       "section": "Lecturas para aprender",
       "language": "es",
-      "sizeBytes": 149068,
-      "sha256": "3dd2ab004cc6769bb11f012a1d3287182f87078d75ee5fc3ac15772fa7769b80",
+      "sizeBytes": 168635,
+      "sha256": "0cdd9a1faeee0d0f8ca825b4a09fb5ed452e846bdb9dfd109b2dbb72207a72fa",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-paginas-sudamericanas_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-paginas-sudamericanas_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -57,10 +57,10 @@
       "published": 1907,
       "section": "Lecturas para aprender",
       "language": "es",
-      "sizeBytes": 333525,
-      "sha256": "e34400e759834f84d607773e0c14582a617735fcf12f23ac603e82d3d952e0ce",
+      "sizeBytes": 355489,
+      "sha256": "082e8527cf3b787e615be0130e76ab737a7110ba33364333f88723e94368b305",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-legends-tales-and-poems_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-legends-tales-and-poems_2026-11-09.epub"
       ],
       "domain": "literature",
       "learner": true
@@ -73,10 +73,10 @@
       "published": 1918,
       "section": "Lecturas para aprender",
       "language": "es",
-      "sizeBytes": 90609,
-      "sha256": "5d27c1158af19931daddfee7cebf4cc09eb38377006a3c015a596b58ca7d49ca",
+      "sizeBytes": 110521,
+      "sha256": "607f1fd866e735833e80f5503fdc221f020001414aed93cca72eb4f9a8ed95fd",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-mas-vale-mana-que-fuerza_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-mas-vale-mana-que-fuerza_2026-11-09.epub"
       ],
       "domain": "literature",
       "learner": true
@@ -89,10 +89,10 @@
       "published": 1781,
       "section": "Fábulas y lecturas infantiles",
       "language": "es",
-      "sizeBytes": 184295,
-      "sha256": "16773cb27507f6099b88174130085340d2683a94c9d2fb58953defc7270c89d9",
+      "sizeBytes": 203197,
+      "sha256": "0bc29c6fdd2962c6764d40ff68c58c8df210c3c9fa77efcd264a2e7b7ceb8940",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-fabulas_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-fabulas_2026-11-09.epub"
       ],
       "domain": "literature",
       "learner": true
@@ -105,10 +105,10 @@
       "published": 1782,
       "section": "Fábulas y lecturas infantiles",
       "language": "es",
-      "sizeBytes": 117589,
-      "sha256": "13153f4740313a09d5cedbeaece3db26b6754b136217cea20bf9eded11a0f616",
+      "sizeBytes": 137529,
+      "sha256": "796276d4be7210ae6e5d8a1b718b5151d2260dc120adbbec3cf8d72e3e113de1",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-fabulas-literarias_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-fabulas-literarias_2026-11-09.epub"
       ],
       "domain": "literature",
       "learner": true
@@ -121,10 +121,10 @@
       "published": 1889,
       "section": "Fábulas y lecturas infantiles",
       "language": "es",
-      "sizeBytes": 184853,
-      "sha256": "6d5247140414b68c1e77e7bb006783364e16de0809594c38d212571e0fa65b2b",
+      "sizeBytes": 204425,
+      "sha256": "0e32f79fb306b9483fa488b91d472ff3c4ac468e1987230ffad18b423eaafb37",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-edad-de-oro_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-edad-de-oro_2026-11-09.epub"
       ],
       "domain": "literature",
       "learner": true
@@ -137,10 +137,10 @@
       "published": 1911,
       "section": "Fábulas y lecturas infantiles",
       "language": "es",
-      "sizeBytes": 33120,
-      "sha256": "d8457ff0e3ff4fe9550515b89d2c77db397705e4fe18a44968e634714b60c67e",
+      "sizeBytes": 52962,
+      "sha256": "31bd471f9a0b062335020cd89862b26c187864787e6ab4bd53555e3bb45aa8d5",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-raton-perez_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-raton-perez_2026-11-09.epub"
       ],
       "domain": "literature",
       "learner": true
@@ -153,10 +153,10 @@
       "published": 1925,
       "section": "Fábulas y lecturas infantiles",
       "language": "es",
-      "sizeBytes": 252126,
-      "sha256": "113c1b1bdefd61e0d3f5e1c78ade9afb3bd9658d7798a832f4737f4c35fb55fc",
+      "sizeBytes": 272234,
+      "sha256": "ef79f32bef3509ab0f681287bef6d8ecaa9747d8659422b1af18ba39f73e26ef",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-corazon-diario-de-un-nino_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-corazon-diario-de-un-nino_2026-11-09.epub"
       ],
       "domain": "literature",
       "learner": true
@@ -169,10 +169,10 @@
       "published": 1886,
       "section": "Fábulas y lecturas infantiles",
       "language": "es",
-      "sizeBytes": 247899,
-      "sha256": "0937f0905ec88aad8462f0e9f598db5333a285c2e0bae4ee68659d4446e2e800",
+      "sizeBytes": 270266,
+      "sha256": "9bbcf92b1af92fc3451464776ddd06d2f132f4f5d7bd87867f50aa9d8c3accec",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-isla-del-tesoro_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-isla-del-tesoro_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -184,10 +184,10 @@
       "published": 1910,
       "section": "Fábulas y lecturas infantiles",
       "language": "es",
-      "sizeBytes": 67046,
-      "sha256": "3c0dc9d7db889dd8b7267e2c0ae7823c80260fa20bfc462c515bb986ac4e6dc2",
+      "sizeBytes": 87140,
+      "sha256": "c73d3dd8cecdf98e72405d3fd3e0afa0627ad0854b446aaba7e52be8c7210fd4",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-cuentos-chilenos-de-nunca-acabar_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-chilenos-de-nunca-acabar_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -199,10 +199,10 @@
       "published": 1923,
       "section": "Fábulas y lecturas infantiles",
       "language": "es",
-      "sizeBytes": 301692,
-      "sha256": "80c5d4aec37f068ca5d9e257eb1479de93cd59a482e46ae25cd147f656a6becd",
+      "sizeBytes": 319927,
+      "sha256": "1c233852fa56c4894bb9d57813b8547a18d00e020b07f71cf834e888786cb6e7",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-cuentos-populares-en-chile_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-populares-en-chile_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -214,10 +214,10 @@
       "published": 1898,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 237282,
-      "sha256": "656651d8d2942b7abef6dde49c78f8a0651f8029aa424f1651152d5d9c433e3f",
+      "sizeBytes": 257127,
+      "sha256": "e5e63f288f89d5a85d39d20405ac0f15348f0ebd09e15560843def1140d7d6c6",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-cuentos-de-amor_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-de-amor_2026-11-09.epub"
       ],
       "domain": "literature",
       "learner": true
@@ -230,10 +230,10 @@
       "published": 1917,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 179521,
-      "sha256": "07515525c5d06b0eaa057b09b98a791c0e869b310f810f3ed6731867cf06a8fc",
+      "sizeBytes": 200656,
+      "sha256": "c97637c9097ded95a29e7386228e182f74cfa10bf0f48441e783efcb8edae462",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-cuentos-de-amor-de-locura-y-de-muerte_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-de-amor-de-locura-y-de-muerte_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -245,10 +245,10 @@
       "published": 1613,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 451555,
-      "sha256": "ee00d8c2195a12819124106407bffee2ae7a7fd4a5363bfb296bc5440bd10d35",
+      "sizeBytes": 472068,
+      "sha256": "99a83a5896f77df1c32bcb3578c07a748930222e215dfcab20e71672c6af1869",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-novelas-ejemplares_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-novelas-ejemplares_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -260,10 +260,10 @@
       "published": 1874,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 226267,
-      "sha256": "d40fb44d3d039e3414cfd12fe302a37033e2ae4b38482b348ec33448a99662fc",
+      "sizeBytes": 247903,
+      "sha256": "b3fa7297dfa85272fda733d8701214afebfdcaf208c2936103a2bb71ac8bcaec",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-sombrero-de-tres-picos_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-sombrero-de-tres-picos_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -275,10 +275,10 @@
       "published": 1853,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 67896,
-      "sha256": "08a8f539815a57f65cd7c4f5e81dbfbb95cd5c24e8158d422a643d624e34af13",
+      "sizeBytes": 87947,
+      "sha256": "c8dc6ae6f44f044e8b80b2a0f1bcfab2b79bf43ff8c66b6ef1cea2a37b8f2ce9",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-clavo_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-clavo_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -290,10 +290,10 @@
       "published": 1872,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 176028,
-      "sha256": "b5d4aba52ef2b79cc78fb0982a70dfec4c3ed7c92cc6d3938df3a618214ffdcc",
+      "sizeBytes": 197005,
+      "sha256": "b1b066000010c24e0467a360848f0c7ab21fea19a1dd8db844021cca0bfa035e",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-tradiciones-peruanas_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-tradiciones-peruanas_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -305,10 +305,10 @@
       "published": 1902,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 216447,
-      "sha256": "0674bd1a5f06a1b33fe7c3cdf3eaabf02c7caeac985e73ae9e04ddbd13e5aeca",
+      "sizeBytes": 230757,
+      "sha256": "1e48e65bec6753bc4a1c5dd2b2af5d77f8a0d866ce2beba344c889e2dac460fc",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-cuentos-de-navidad-y-reyes-cuentos-de-la-patria-cuentos-antiguos_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-de-navidad-y-reyes-cuentos-de-la-patria-cuentos-antiguos_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -320,10 +320,10 @@
       "published": 1901,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 214515,
-      "sha256": "11d3bf20fc58b28fcc0d412e9963499f5aacb2455e1a97d766f7ddc93b78a38e",
+      "sizeBytes": 234936,
+      "sha256": "3a6ef44b8ceb4132090d492a8e62952e806883513fc92208205c23202f1cdb42",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-en-tranvia_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-en-tranvia_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -335,10 +335,10 @@
       "published": 1913,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 161040,
-      "sha256": "7f18e5388fbf8c3146117dbf738878e80481d568b8ebc201b1a25dcbadb8f2d6",
+      "sizeBytes": 182339,
+      "sha256": "41398218c5e289ad3e4a5c99157e6728fa36a2a7a1b7ff2116996fe6a795e28e",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-espejo-de-la-muerte_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-espejo-de-la-muerte_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -350,10 +350,10 @@
       "published": 1920,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 102354,
-      "sha256": "423d13d872faf25e1e7fe7613a59c23236f63d662494011d7bc6fa0c1cd47178",
+      "sizeBytes": 123334,
+      "sha256": "030ecc26f097976d9a620d4808600461e9e2dff7052a6459b16ea92415162446",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-tres-novelas-ejemplares-y-un-prologo_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-tres-novelas-ejemplares-y-un-prologo_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -365,10 +365,10 @@
       "published": 1882,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 124180,
-      "sha256": "ddb6bf94c9e09a2facb9145752f1407fc0c8b7c0a4733728a3c581cfb5dfacd8",
+      "sizeBytes": 144410,
+      "sha256": "ab944d0a004acc4735847d9a19980384fb2e1a00c7aa7cbee2545e22c961eef5",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-cuentos-y-dialogos_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-y-dialogos_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -380,10 +380,10 @@
       "published": 1893,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 171082,
-      "sha256": "772a0a08996c87f3192e0e9d5b7e2ba626753b78b2cc687106a923a5f0702950",
+      "sizeBytes": 193804,
+      "sha256": "374a71f756e3a258622db7adf4acd6cdaa6332ad2c8666c63e232bd86ab4f50d",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-senor-y-lo-demas-son-cuentos_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-senor-y-lo-demas-son-cuentos_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -395,10 +395,10 @@
       "published": 1916,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 237090,
-      "sha256": "badc8a6dc3803c3cd44b9d9b6c1cd6e3f16c9fcb7c53f58cf931ef23f8f159f3",
+      "sizeBytes": 257435,
+      "sha256": "541db42ddd909b67141cca7e5337f98bc5877a6c1910580a4aba15807d456cd6",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-doctor-sutilis_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-doctor-sutilis_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -410,10 +410,10 @@
       "published": 1906,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 211432,
-      "sha256": "e3aec8c10ed75f3696b21661c4e53ce5d148f5b2d90b127b18cf32e0f505c810",
+      "sizeBytes": 232036,
+      "sha256": "78a4b8f54df259035d7bf9c0ede538a98b4aa403f2433df77978b7dc38259960",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-cuentos-de-fray-mocho_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-de-fray-mocho_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -425,10 +425,10 @@
       "published": 1906,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 158481,
-      "sha256": "23df63ce7be324598967c479289c6dc9a28c1cb684092bec7eb8a59dd4d8ced5",
+      "sizeBytes": 180015,
+      "sha256": "e7be74225678ea2e0da0cead3ba8cb26fa8dbf2178404e46bf0a194c601d01dd",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-las-fuerzas-extranas_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-las-fuerzas-extranas_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -440,10 +440,10 @@
       "published": 1900,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 127370,
-      "sha256": "cc28b640e4c788ea8646a234d1ab80ba0a36dac3b427da57cb1838fc3af6dbfb",
+      "sizeBytes": 148152,
+      "sha256": "6c631e4117d09dded8f1eada15cf71b8270a34044c0859652bbe0c093cbd1b82",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-condenada_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-condenada_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -455,10 +455,10 @@
       "published": 1896,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 144101,
-      "sha256": "c9e28cb8902750b70a3bd91a61f482b853b99c8100e225a9aeda9ff97f5dec29",
+      "sizeBytes": 164442,
+      "sha256": "38cc6b035a4f3dcfd7ff7743f615cd9642c4d52c35d2b115aedd489bff64250e",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-cuentos-valencianos_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-valencianos_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -470,10 +470,10 @@
       "published": 1871,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 43867,
-      "sha256": "2a3175f9dd70218565e4838a51f21eaf91e18b68b8030b56f15612992d0732ae",
+      "sizeBytes": 65620,
+      "sha256": "71a686ba98c5b050156199656c4627b7e683396e02572e9ade8015128b145447",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-novela-en-el-tranvia_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-novela-en-el-tranvia_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -485,10 +485,10 @@
       "published": 1919,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 148831,
-      "sha256": "c0df3eba55d9e2837090601cb76e3f2e7612b7e40fe92a3fe96be0ef0a5661a4",
+      "sizeBytes": 168135,
+      "sha256": "a838677876499fabfb3a0ae8e1bb0240bd8f57b6e3b0a7e3fbc1d8db1ba73699",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-novelas-y-cuentos_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-novelas-y-cuentos_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -500,10 +500,10 @@
       "published": 1907,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 165215,
-      "sha256": "5d22a9717c4de106b83b6978e1c78709464b2a690d67b5f3ea58b39ff0470f5c",
+      "sizeBytes": 185126,
+      "sha256": "404e29515666888a63a5e6d233eb7a27914e44fac10e7c92266792e26c0a08b7",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-thespis_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-thespis_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -515,10 +515,10 @@
       "published": 1901,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 98668,
-      "sha256": "3a45d9c168a7543a716e467cba393bd570a7a89bf8385c0d5eb64d34a7f1b9bc",
+      "sizeBytes": 118212,
+      "sha256": "df2f54d96ab51c85365372c0190be62f4dd1200c22773f8f7704f195ed2d6f26",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-cuentos-ingenuos_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-ingenuos_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -530,10 +530,10 @@
       "published": 1885,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 277898,
-      "sha256": "c454377987d9c5e844a963b246ce9c41f9c79bfc564f729c6da31d72f3d280a0",
+      "sizeBytes": 297414,
+      "sha256": "803aa228ac6a240e85b8e490cfd0435a88a1932cd3fca4bfdc922aca12df77e8",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-antano-i-ogano_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-antano-i-ogano_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -545,10 +545,10 @@
       "published": 1900,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 101498,
-      "sha256": "567d00ae5160a53b89ff7892bd23f2a9e6c654ac7041932f69b31f66bda15d04",
+      "sizeBytes": 121344,
+      "sha256": "94f23b08420e5d15f61c385446ee2734d648f93e8b4f7ca577294368285f9da5",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-cuentos-de-poeta_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-de-poeta_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -560,10 +560,10 @@
       "published": 1641,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 277532,
-      "sha256": "50897f8a95afbcd0f1749b665a70d827d4ec8919a85a314c742a6f2683cc2e77",
+      "sizeBytes": 297277,
+      "sha256": "3606ba95246be6f9ecfc534113aef6626b81b20ea15c99c5229f8e4e8dccdb36",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-diablo-cojuelo_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-diablo-cojuelo_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -575,10 +575,10 @@
       "published": 1887,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 345341,
-      "sha256": "9d53586dba827b721ffcdd3b4422dfe88eba75b93c1d3042e449ec076bf7647a",
+      "sizeBytes": 365311,
+      "sha256": "b4f9e4f8c1a7027dca74778bc8e93f5b0d046bfb66f9a59e538d799809c83c95",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-anacronopete-viaje-a-china-metempsicosis_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-anacronopete-viaje-a-china-metempsicosis_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -590,10 +590,10 @@
       "published": 1637,
       "section": "Cuentos y novelas cortas",
       "language": "es",
-      "sizeBytes": 578390,
-      "sha256": "49821ac306e7633b2fb456aaadb833aca40fd3f46b929aec42ac1ab72667b7b2",
+      "sizeBytes": 601129,
+      "sha256": "3310e62cfb5b2657047f2c8b8e0bb47b69c6c9e119493f090fb92d1c0eda7c45",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-novelas-ejemplares-y-amorosas_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-novelas-ejemplares-y-amorosas_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -605,10 +605,10 @@
       "published": 1912,
       "section": "Poesía",
       "language": "es",
-      "sizeBytes": 288690,
-      "sha256": "9c41c62477566bb26a883afce43f20ded45f5bc6813fe2721f9a6171f82cb122",
+      "sizeBytes": 306313,
+      "sha256": "bd8f1c6cda66149f5c505e05e8d5aada4032babfacbed5a9d9f73228fae5d784",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-obras-escogidas_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-obras-escogidas_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -620,10 +620,10 @@
       "published": 1888,
       "section": "Poesía",
       "language": "es",
-      "sizeBytes": 131373,
-      "sha256": "371fa5cdbbea31b3ef886b55501ed55dcc7a64ec517ec060a89dea88854afac4",
+      "sizeBytes": 148228,
+      "sha256": "a30d7c6f19e05e8671dcd913f8c2103492a6bf5619b1c82fe1ffed8528cbf31a",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-azul_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-azul_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -635,10 +635,10 @@
       "published": 1896,
       "section": "Poesía",
       "language": "es",
-      "sizeBytes": 72901,
-      "sha256": "4f620e6151fecdf2dd2a1f65a5f7be8563e1b7cb7182109d04c7032689dfcbc1",
+      "sizeBytes": 90877,
+      "sha256": "c061d1cf609b44b6ffa2771cba92b1a839069b703a4c43377b5479262e64849a",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-prosas-profanas_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-prosas-profanas_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -650,10 +650,10 @@
       "published": 1905,
       "section": "Poesía",
       "language": "es",
-      "sizeBytes": 69099,
-      "sha256": "a9cc8eb4ef74b0b4b9ad93a5c9276e5d09d692a45a99ef7ff79431d1826612d2",
+      "sizeBytes": 87030,
+      "sha256": "fceccca7782f9a8923e217bc835f151988832b378bcfeaf471d98f33ccd3dc70",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-cantos-de-vida-y-esperanza_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cantos-de-vida-y-esperanza_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -665,10 +665,10 @@
       "published": 1917,
       "section": "Poesía",
       "language": "es",
-      "sizeBytes": 118711,
-      "sha256": "8022b659c359f386dc24743d9d1f74b356374f8ffb0cecd75a2cb4382696c25b",
+      "sizeBytes": 136411,
+      "sha256": "4ed9b4a4ec2a04973e3fedfa37f0d40a2902003a53302768ac5e47b9333fe1ed",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-poesias-completas_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-poesias-completas_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -680,10 +680,10 @@
       "published": 1917,
       "section": "Poesía",
       "language": "es",
-      "sizeBytes": 74538,
-      "sha256": "cde161c55abcb366b1cab4fbf80edd5868d0044f01a842653e41f1502bde5728",
+      "sizeBytes": 92650,
+      "sha256": "7c4d9d9fdb0b9472efe18e3c1d0c383b02ee265441d3799254d760d4a830bac0",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-paginas-escogidas_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-paginas-escogidas_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -695,10 +695,10 @@
       "published": 1928,
       "section": "Poesía",
       "language": "es",
-      "sizeBytes": 54606,
-      "sha256": "e77c2ecf2a9ef47ec28a997c3750a814d7bfb500b6fc41eb2e99299e5b5cf02f",
+      "sizeBytes": 70893,
+      "sha256": "a2f85445c30e5717c7f61da7c7514c366b197187eca0a84ad1763af7ac0a6e20",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-romancero-gitano_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-romancero-gitano_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -710,10 +710,10 @@
       "published": 1921,
       "section": "Poesía",
       "language": "es",
-      "sizeBytes": 110921,
-      "sha256": "bc2c39caeba130aeeea421a079002b34d5c05c46ae7a0ddf32e29f5bc9f2ccf5",
+      "sizeBytes": 127487,
+      "sha256": "674d8206dcf8df504bfe35932d1495063d6ef6ef82d037bafc1238c834dcc831",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-libro-de-poemas_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-libro-de-poemas_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -725,10 +725,10 @@
       "published": 1872,
       "section": "Poesía",
       "language": "es",
-      "sizeBytes": 55122,
-      "sha256": "44a2fb012b36bd8dee38e835c086d9ea4656c82106b72741f001cfa49a0b63b4",
+      "sizeBytes": 72949,
+      "sha256": "c08961ae0c35c4493a37194d9201e7778a259a3c76bd87f800d40b91374ebfb1",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-gaucho-martin-fierro_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-gaucho-martin-fierro_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -740,10 +740,10 @@
       "published": 1879,
       "section": "Poesía",
       "language": "es",
-      "sizeBytes": 113782,
-      "sha256": "323b274e6b47a534733bde1930a2208c8a21e001f27c8db317dcf529049acfb7",
+      "sizeBytes": 132076,
+      "sha256": "40c580228db9e76bce05f6822d3e03bdc628c26f61c21e8b642eb44c28325215",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-vuelta-de-martin-fierro_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-vuelta-de-martin-fierro_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -755,10 +755,10 @@
       "published": 1896,
       "section": "Poesía",
       "language": "es",
-      "sizeBytes": 22786,
-      "sha256": "e4cf930b9f3e5e093cb2102d83872b3fe2de69ff9cbbe8c6fac5e04592b332dc",
+      "sizeBytes": 40724,
+      "sha256": "b863398168584ee97f6de23084f420eaede671b12660f2a047e4710b77b1cea1",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-mi-ultimo-adios_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-mi-ultimo-adios_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -770,10 +770,10 @@
       "published": 1476,
       "section": "Poesía",
       "language": "es",
-      "sizeBytes": 71017,
-      "sha256": "57c4ee32f8acaf3874eaaaf6e5470a593aa5bd7f9caf2422e711105072c823c4",
+      "sizeBytes": 88974,
+      "sha256": "d8e01c150581ead1100795e4a80b37437eefaae22b9365845612f54c2a85ae00",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-coplas-por-la-muerte-de-su-padre_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-coplas-por-la-muerte-de-su-padre_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -785,10 +785,10 @@
       "published": 1873,
       "section": "Poesía",
       "language": "es",
-      "sizeBytes": 275451,
-      "sha256": "ff339782970216622733baf48f1c964d33f31d2c59cf6f42fdefeb4df8bcd138",
+      "sizeBytes": 293201,
+      "sha256": "e1e13b0e17e9a46bb91b0f638a1a8e110b7f22bffa7ff703524d36d0fe1f8c9c",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-obras-selectas-de-sor-juana-ines-de-la-cruz_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-obras-selectas-de-sor-juana-ines-de-la-cruz_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -800,10 +800,10 @@
       "published": 1330,
       "section": "Poesía",
       "language": "es",
-      "sizeBytes": 632054,
-      "sha256": "cbdcde110bc003b6f9c2fddad7fd89e5451aa9a522640e208e879afc73a82911",
+      "sizeBytes": 643879,
+      "sha256": "5bd3f468c6cc70db83071bd1a052023ee005b644df53c348ca308c405142bcec",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-libro-de-buen-amor_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-libro-de-buen-amor_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -815,10 +815,10 @@
       "published": 1884,
       "section": "Poesía",
       "language": "es",
-      "sizeBytes": 192235,
-      "sha256": "02c377e16528c4f38374efb2a24e69f58d8e77aa497baf3224dd3d08c8800956",
+      "sizeBytes": 208887,
+      "sha256": "5b4a4933a7456395bc8d2eceb9916215c53b1f4f84aa6d5b89d0c0dbf6a52617",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-romancero-selecto-del-cid_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-romancero-selecto-del-cid_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -830,10 +830,10 @@
       "published": 1908,
       "section": "Poesía",
       "language": "es",
-      "sizeBytes": 250264,
-      "sha256": "b558af3b62351e3728c38ca8a92f13c065ad54d12b2480cbf0f1a90986ee34fe",
+      "sizeBytes": 268293,
+      "sha256": "f690da5703908fb98c0bd62fcec2480415028e2419f649ad0b138cd6605da7d8",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-las-cien-mejores-poesias-liricas-de-la-lengua-castellana_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-las-cien-mejores-poesias-liricas-de-la-lengua-castellana_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -845,10 +845,10 @@
       "published": 1884,
       "section": "Poesía",
       "language": "es",
-      "sizeBytes": 134010,
-      "sha256": "9a0bab229c931a1f3ad5c573bda2d90eaa51715bdd049b3a9dbd7ecc1f406129",
+      "sizeBytes": 152087,
+      "sha256": "f4ef1b1562ab29cfed54176c479111ecab4a2fa9a77e4e026ebe6f55b9b190fe",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-en-las-orillas-del-sar_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-en-las-orillas-del-sar_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -860,10 +860,10 @@
       "published": 1881,
       "section": "Teatro",
       "language": "es",
-      "sizeBytes": 270880,
-      "sha256": "166447651fe54f25b48245093639773d8b8e91d0888906edd4fbdf2b1313da23",
+      "sizeBytes": 289379,
+      "sha256": "646a62a3440f063fbb2a70792f80cf0230c4cb51f78219e1f84df6d2bcaf94aa",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-teatro-selecto-tomo-1-de-4_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-teatro-selecto-tomo-1-de-4_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -875,10 +875,10 @@
       "published": 1881,
       "section": "Teatro",
       "language": "es",
-      "sizeBytes": 284448,
-      "sha256": "514da73c3eb3f15ad1dcbcdd4d01ba410e73ccffe611c1eca018afa146016f1d",
+      "sizeBytes": 303022,
+      "sha256": "8035ebf75dc8bb9c10260c6ff83ea480728c6999f25cb017205bfce28c20da8f",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-teatro-selecto-tomo-2-de-4_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-teatro-selecto-tomo-2-de-4_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -890,10 +890,10 @@
       "published": 1881,
       "section": "Teatro",
       "language": "es",
-      "sizeBytes": 226055,
-      "sha256": "1d8dfff9e82737e00ce6bbc1cfc65589b7a12660bee08bdac0600a4b4ce71860",
+      "sizeBytes": 244432,
+      "sha256": "e994c550e7d2a5f2338267b5d70a53283facf70044ace5a5ccb32884a3385efb",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-teatro-selecto-tomo-3-de-4_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-teatro-selecto-tomo-3-de-4_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -905,10 +905,10 @@
       "published": 1881,
       "section": "Teatro",
       "language": "es",
-      "sizeBytes": 281899,
-      "sha256": "a287a3b39ff73e410f6ea8dfd5650bb7bc44f3294814888842b1e71486eaa231",
+      "sizeBytes": 300095,
+      "sha256": "9844b7e708518203d5de9c1cb947965f40c75d7a3fcc5daff7c9afe6e941bfd4",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-teatro-selecto-tomo-4-de-4_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-teatro-selecto-tomo-4-de-4_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -920,10 +920,10 @@
       "published": 1806,
       "section": "Teatro",
       "language": "es",
-      "sizeBytes": 75466,
-      "sha256": "b4e86bb0c64f3b374524109843ffa80c508d4de5a549c7007ca8f898a97ae8e9",
+      "sizeBytes": 92652,
+      "sha256": "61646048138fc6261175eb9e57261181d5ac7292e4efa11f267d9ce994ec0f7f",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-si-de-las-ninas_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-si-de-las-ninas_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -935,10 +935,10 @@
       "published": 1835,
       "section": "Teatro",
       "language": "es",
-      "sizeBytes": 99167,
-      "sha256": "810679ab9abedb93adc4e2636215e4a11ea8997d13fbd957d06db339cadd05cc",
+      "sizeBytes": 117899,
+      "sha256": "4bbe390e7cae79f51d8a9be48ff7e7fba44b15b7cf8c77f59bad8a61389c72ab",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-don-alvaro-o-la-fuerza-del-sino_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-don-alvaro-o-la-fuerza-del-sino_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -950,10 +950,10 @@
       "published": 1615,
       "section": "Teatro",
       "language": "es",
-      "sizeBytes": 134731,
-      "sha256": "f2c4a3f55c5475e0bf1509cbf3b88d9caf96a64ca98daa8ad6f450bba68b48f6",
+      "sizeBytes": 151810,
+      "sha256": "923823af9f6983a0b7ef39abb3de621302cfff61f292fd3ab53371bb42a0070b",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-los-entremeses_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-los-entremeses_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -965,10 +965,10 @@
       "published": 1614,
       "section": "Teatro",
       "language": "es",
-      "sizeBytes": 203772,
-      "sha256": "c1230ac580015e2ae4f6bc43e1ba03e467f3340235dbfafad52ce3acbb77a8fa",
+      "sizeBytes": 221472,
+      "sha256": "b791311091884859dde0f2654bc8027aaf1641be5e96017718a59b69a576d19b",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-viaje-al-parnaso-la-numancia-el-trato-de-argel_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-viaje-al-parnaso-la-numancia-el-trato-de-argel_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -980,10 +980,10 @@
       "published": 1918,
       "section": "Teatro",
       "language": "es",
-      "sizeBytes": 93766,
-      "sha256": "f602cf47e9aa4eba4a62076dd3f98f8834dbe3bf1ba74705a9cfef4bad38791b",
+      "sizeBytes": 111678,
+      "sha256": "edb015af8870b751073b092c9172a7fb32b5fa7f0a737c1f166d4e1dcee539f6",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-venganza-de-don-mendo_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-venganza-de-don-mendo_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -995,10 +995,10 @@
       "published": 1924,
       "section": "Teatro",
       "language": "es",
-      "sizeBytes": 92736,
-      "sha256": "9b76fbc95fced5c029f0fb3efc2bcfc6caf1d40e0d2f3da749518ac9bc10b7ce",
+      "sizeBytes": 110532,
+      "sha256": "a0725cb3a345717812e9e58549827b65efd27d7031be2aaeefd5dbbfba2a6a0b",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-luces-de-bohemia_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-luces-de-bohemia_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1010,10 +1010,10 @@
       "published": 1920,
       "section": "Teatro",
       "language": "es",
-      "sizeBytes": 78393,
-      "sha256": "b72c066bb757d8cbe872695e3649112a3f73359c939260783e9f6e6f60934ec9",
+      "sizeBytes": 95670,
+      "sha256": "56af7fd90033e696b11f67a0724aa438e9b6b124cf72e550e7a26b9b9c85a092",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-divinas-palabras_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-divinas-palabras_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1025,10 +1025,10 @@
       "published": 1908,
       "section": "Teatro",
       "language": "es",
-      "sizeBytes": 100848,
-      "sha256": "9388fb792315a3133c0e3e99875c20561faf1eea0795e8db54ec68692ad37889",
+      "sizeBytes": 118099,
+      "sha256": "790157e9776570ffed02927700e7044a343db2615678128fb0c96dd4c1691874",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-romance-de-lobos_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-romance-de-lobos_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1040,10 +1040,10 @@
       "published": 1916,
       "section": "Teatro",
       "language": "es",
-      "sizeBytes": 89233,
-      "sha256": "25d1952c93e41df3bdf1e0d57b538c474b782d0ed447816f00dc1c57cc279d73",
+      "sizeBytes": 107686,
+      "sha256": "8d32a07cc0fa9d7f8f89fe0bd7b06ef406ccaa3003583a4654f9100a069a4247",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-senorita-de-trevelez_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-senorita-de-trevelez_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1055,10 +1055,10 @@
       "published": 1877,
       "section": "Teatro",
       "language": "es",
-      "sizeBytes": 82985,
-      "sha256": "9cc97d71cdb4de5d331236843dc412808339e8d07f649b6a073ca5f9113b30ef",
+      "sizeBytes": 101243,
+      "sha256": "c9cf34cf68851901eb393fdf4009b56b542b7d8d95f1d374110492e6b0f69363",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-o-locura-o-santidad_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-o-locura-o-santidad_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1070,10 +1070,10 @@
       "published": 1605,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 1015002,
-      "sha256": "7ad1a8afec310c6af42fd90baf14e62cc24f00016f3d2cb86c30339364dcc3f9",
+      "sizeBytes": 1026381,
+      "sha256": "5c7cc14ed414f1825301093efcd5b2bd5e310d198743ea9f202c9b1dfb7d256d",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-don-quijote_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-don-quijote_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1085,10 +1085,10 @@
       "published": 1554,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 71903,
-      "sha256": "510618662cefc95a05d53d91c4611e722ef9b90648a47526e6566cd40cd7d7e9",
+      "sizeBytes": 91398,
+      "sha256": "66c029ea6038ddc5a35a3964de1051c9dbb57a05e8b068d2f1201f759c5f9e68",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-lazarillo-de-tormes_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-lazarillo-de-tormes_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1100,10 +1100,10 @@
       "published": 1626,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 131277,
-      "sha256": "d9a74441ac21ebb7a81d8514c22dd424294bf4a23c0b0cc8582e4dd431f547bb",
+      "sizeBytes": 150812,
+      "sha256": "fc676afc06237a8e9f999da469ea4b50ebaa1d4895626755a42622459a73ba5f",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-historia-de-la-vida-del-buscon_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-la-vida-del-buscon_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1115,10 +1115,10 @@
       "published": 1887,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 1203191,
-      "sha256": "4c7c45ec292589562366890a1e5ab9d32cffd3e4a8f3addc487959f65ad3e056",
+      "sizeBytes": 1218370,
+      "sha256": "3de3b4b485fb05fc33682b8cc81f7e5d113146aeabf639af722d53705768addd",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-fortunata-y-jacinta_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-fortunata-y-jacinta_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1130,10 +1130,10 @@
       "published": 1878,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 168612,
-      "sha256": "ef4c19db7e76ee1358aa8ad16e0007480b63eb12c1a4ae6c35f707a95c9e76e8",
+      "sizeBytes": 186752,
+      "sha256": "41425691c4f948877dbed63076d3873e032d31f3bc44916ac4cd63339c7d4487",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-marianela_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-marianela_2026-11-09.epub"
       ],
       "domain": "literature",
       "learner": true
@@ -1146,10 +1146,10 @@
       "published": 1897,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 274328,
-      "sha256": "2fff17aea5e5f8650441f9a7d64e3976ce93f50408fe6ffa4abcb279930adfab",
+      "sizeBytes": 293088,
+      "sha256": "81841d1eab938c465df7b3f3341b611ab2cc18e787dacbabeb1abe8aebdc2a8f",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-misericordia_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-misericordia_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1161,10 +1161,10 @@
       "published": 1888,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 315248,
-      "sha256": "ef1f494c42d288ce692a4842a95d7eabb920eced79e4f7c25f9f79a32ace3b1e",
+      "sizeBytes": 332894,
+      "sha256": "990cd6057820f5d81cc94bba09967729c7c9a3787437fc1abbeda94c2ce77f2d",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-miau_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-miau_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1176,10 +1176,10 @@
       "published": 1882,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 311853,
-      "sha256": "7237c77fde757f6c66ad32a36392fcb28bdd288ac97587e85d7b8369c4c23fa8",
+      "sizeBytes": 330559,
+      "sha256": "66576101aac853d028411f89e2cf5868271c317c28abcb3978bf5a88eee17d40",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-amigo-manso_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-amigo-manso_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1191,10 +1191,10 @@
       "published": 1881,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 421993,
-      "sha256": "5aa7aa25211689ab4e48e608971fb9ecaff58744db5b4762487c6774983053cb",
+      "sizeBytes": 441217,
+      "sha256": "a5ba53257e86ed44d866c7a8c16deb2c5983e6747c2aac6b48a09f3c1a1aa042",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-desheredada_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-desheredada_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1206,10 +1206,10 @@
       "published": 1892,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 185547,
-      "sha256": "f7f4233185fa9be3b149d148d71f401fae63fa86f6270ea103b146e2dfa8aac7",
+      "sizeBytes": 203770,
+      "sha256": "980a5d5925e94d07d0bc939bd6c73d39c2d4107b3bfee1b67af69727b9bb2619",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-tristana_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-tristana_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1221,10 +1221,10 @@
       "published": 1873,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 167781,
-      "sha256": "794b6c9f84d1c6e7a8972510857c613bc9c271c018000545c0ef553963e7f853",
+      "sizeBytes": 185843,
+      "sha256": "8e2130c58a7aa7555f096e3d449e4c2dd0617a2bb03dc6c8254a9bfb62c9e3ed",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-trafalgar_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-trafalgar_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1236,10 +1236,10 @@
       "published": 1873,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 216600,
-      "sha256": "47df2478fbd2e0297a63f27374213430b3f7967e33db354a8e625986f534c9c4",
+      "sizeBytes": 233100,
+      "sha256": "1d0ec9dd3ae277add8ccd261565555aa1f2875e81cd69223de1f41989a5118a9",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-bailen_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-bailen_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1251,10 +1251,10 @@
       "published": 1884,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 833132,
-      "sha256": "cdcd0847c113121cd4ae99afe5f99122fa4e575a2467169b0de08f8cf97a6045",
+      "sizeBytes": 849975,
+      "sha256": "a7c024910485c9e494fd5714f357892d6541c8c754faada5e5eb67a70676edc1",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-regenta_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-regenta_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1266,10 +1266,10 @@
       "published": 1890,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 257510,
-      "sha256": "ef737394e94197f22ff5f77b98ec7b1a5ccd9cccea041b8f29e1e92e49d10aed",
+      "sizeBytes": 275341,
+      "sha256": "df7dc91ef5d3809ef1b2787f8201cd03a89e1b146b7601c1d7396dfbc45d6d0b",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-su-unico-hijo_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-su-unico-hijo_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1281,10 +1281,10 @@
       "published": 1886,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 275260,
-      "sha256": "f7edf66be96e0cc035329e980ad093fb81eef2293fc14aeb12514db233c29933",
+      "sizeBytes": 292879,
+      "sha256": "082fc89da2216dd04bfcfeda74aab175308a3f15f0477c5f179071875837f1bb",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-los-pazos-de-ulloa_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-los-pazos-de-ulloa_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1296,10 +1296,10 @@
       "published": 1887,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 297552,
-      "sha256": "f5c66db0172ea2896a790fc15ea1066d48c579a5aade9f51c7a1fee8ea6f3d11",
+      "sizeBytes": 316684,
+      "sha256": "3281c35b79c63737f6cb26ff54611390ff7c42e14f19e23c29f0dbea9037f9db",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-madre-naturaleza_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-madre-naturaleza_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1311,10 +1311,10 @@
       "published": 1889,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 292419,
-      "sha256": "461ec6fef8837d3085b1ab9b4eb1a6ea5ea60aed082546515a72fa1797aca7b5",
+      "sizeBytes": 311187,
+      "sha256": "5cb20fdcd7ebef25e5aa509fd19e068e02f150a3b364d201ae8e302d8fc21528",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-insolacion-y-morrina_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-insolacion-y-morrina_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1326,10 +1326,10 @@
       "published": 1883,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 230388,
-      "sha256": "ff98cf995038f3524ea75b8699a2b973bbb25e64cd9b3c3524c03623c3e8a6b3",
+      "sizeBytes": 247506,
+      "sha256": "f9b0928deb5400494e5b255fbb24bee325ffbcb823359cb9d0b77f4e11a81315",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-tribuna_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-tribuna_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1341,10 +1341,10 @@
       "published": 1874,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 155885,
-      "sha256": "bf988c8bf17fc6e8ac5c21e11dddfe194f5103fe987ca4b653dfc67ccfe0a38a",
+      "sizeBytes": 174804,
+      "sha256": "928b8698e0a3b96547a2094470369beedc30e352a84a01a49286aeafaebbb3f2",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-pepita-jimenez_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-pepita-jimenez_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1356,10 +1356,10 @@
       "published": 1889,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 335754,
-      "sha256": "28802bb3652cc06562d7991a6c5ad47bef085707a692ec681f70345249a49617",
+      "sizeBytes": 354863,
+      "sha256": "45eb5e7de0563cde13de541ab160858b1921959d8ca9fd622b3fc244968c8a72",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-hermana-san-sulpicio_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-hermana-san-sulpicio_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1371,10 +1371,10 @@
       "published": 1916,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 379203,
-      "sha256": "93e6edaac90018c5b2df4f78cd9b21c32423d6942b8318d2a36c3671dd516f07",
+      "sizeBytes": 397860,
+      "sha256": "6a075d56e531db9613802c10136a0784a3f4399a57a662006b1353f8ab8d7501",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-los-cuatro-jinetes-del-apocalipsis_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-los-cuatro-jinetes-del-apocalipsis_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1386,10 +1386,10 @@
       "published": 1898,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 179178,
-      "sha256": "d32b172dd45269a40b3db75fd4f2e15d115f9af01a88a91f99fa613e02b0bcc8",
+      "sizeBytes": 197511,
+      "sha256": "a282dde84407bfe3d325d33472d2b3b0d99a2b1b6200f56a4a63ed6f52e116a3",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-barraca_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-barraca_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1401,10 +1401,10 @@
       "published": 1902,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 216013,
-      "sha256": "25b0485b9cf20f14fed9df3a4a0115d09059da2b7250becbfc275f90db66cc03",
+      "sizeBytes": 234839,
+      "sha256": "92f216db7871deb388b1c7d5887c69a5f48c2860f0c0775e2b0b20570b05c9b4",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-canas-y-barro_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-canas-y-barro_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1416,10 +1416,10 @@
       "published": 1908,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 302962,
-      "sha256": "959eaaa812cca63a9603b72c644b9ffc18a80596ced65a52bbdde1d58273eb85",
+      "sizeBytes": 321198,
+      "sha256": "12e55571d9c9565e09607253b82adc99216cf547a221beb5d91731e8f4b5c08a",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-sangre-y-arena_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-sangre-y-arena_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1431,10 +1431,10 @@
       "published": 1914,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 539456,
-      "sha256": "191ddb685dea595be59baa9c046860378ff6bfd2df47296e99d641bf7efcc6f6",
+      "sizeBytes": 556999,
+      "sha256": "bd9ac38048433079af13f62641b149a8ada21126b05af372282825b5f95aa00c",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-los-argonautas_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-los-argonautas_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1446,10 +1446,10 @@
       "published": 1918,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 396885,
-      "sha256": "7bc2478b60e59988e7feb0c256cb55013d6fedb6c8d231a4f8c1e0c2e7f3e34e",
+      "sizeBytes": 414431,
+      "sha256": "43cfd7919bbebef242eea0e1426fc4c0d55625657af496899a677327716788a5",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-mare-nostrum_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-mare-nostrum_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1461,10 +1461,10 @@
       "published": 1914,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 188358,
-      "sha256": "1d5d40ddea4c49d2fd8a48ba632d400a26e9d7ce997aef122cf010e64635655a",
+      "sizeBytes": 206432,
+      "sha256": "b4865b3d006ca5ae5c2cee1bf012ade6356d4444e98c3b59a755a0c5505c0c0e",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-niebla_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-niebla_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1476,10 +1476,10 @@
       "published": 1917,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 121122,
-      "sha256": "4fcdc27f3046fc9b2f008e909b9e8a99999ef594870e2a9e84c2dfe1b33f33d7",
+      "sizeBytes": 139617,
+      "sha256": "dad3da203030f59154da503e0f5c3e05d423695896f0f0bebbd9700f23f9110c",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-abel-sanchez_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-abel-sanchez_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1491,10 +1491,10 @@
       "published": 1921,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 115580,
-      "sha256": "fb8a9084c6bb5aa2204ca47282846e6e3ee2ac9e5334078efda3452d545b5877",
+      "sizeBytes": 133751,
+      "sha256": "fecbb33cefbf0114c2a3762188aa55ccfb65eba326fb846c6ea7659c86326118",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-tia-tula_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-tia-tula_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1506,10 +1506,10 @@
       "published": 1902,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 164758,
-      "sha256": "79ae708190e020550d6479f4a99ff2bc5087939403e31304ce5b78f63fbc7461",
+      "sizeBytes": 182809,
+      "sha256": "29c6baa39afc4252ddb52403e6ba945fd59894b50d4db3de178115121e868594",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-amor-y-pedagogia_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-amor-y-pedagogia_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1521,10 +1521,10 @@
       "published": 1904,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 71397,
-      "sha256": "63eef9741c3d3e5356b532f19f4f03639f7062afd0d8fda65e54029721a5aeac",
+      "sizeBytes": 90348,
+      "sha256": "8e63b0cec41278799af6eed5b64587509d89bf62f9e6cc60dd60e5a2101a23d4",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-sonata-de-primavera_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-sonata-de-primavera_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1536,10 +1536,10 @@
       "published": 1903,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 81836,
-      "sha256": "ae97b82978d6a3461806bce0852adefa7f49f78596345f115e3695bc7519812e",
+      "sizeBytes": 101200,
+      "sha256": "2ea6945f5716b4b12267ef763bb5a06d06ddf51db9b88475b7c69389484ec9d1",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-sonata-de-estio_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-sonata-de-estio_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1551,10 +1551,10 @@
       "published": 1905,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 144997,
-      "sha256": "2d0f45601206cc8ea0a8d67fcc0f7e35908d10a01b146d4758702fbe3cfc0cce",
+      "sizeBytes": 164995,
+      "sha256": "d61a0c8106b6cb77cebe3f45dcb7bb91ee758bf0c857d362e67d9a441606e40c",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-sonata-de-otono-sonata-de-invierno_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-sonata-de-otono-sonata-de-invierno_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1566,10 +1566,10 @@
       "published": 1926,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 168317,
-      "sha256": "ffad9620053caeee958d15cf3605080248a77c043b17c15ccccfac3b036ec2f4",
+      "sizeBytes": 187480,
+      "sha256": "b5b1e931ceedc32f1462eacc9195aa8dbc608e30b4085dc86f5e9344984f32dd",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-tirano-banderas_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-tirano-banderas_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1581,10 +1581,10 @@
       "published": 1849,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 282573,
-      "sha256": "d57a4cb4fe6fb7e6b0bac70d62988c76738029c00b173b0f25a43f6c3d7fdb37",
+      "sizeBytes": 300547,
+      "sha256": "fba9035b0fe59bb0a22530ff5daa980af6a83b7930a0a76d01fb7d5528356df8",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-gaviota_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-gaviota_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1596,10 +1596,10 @@
       "published": 1889,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 356768,
-      "sha256": "ffc205463023c3c85622169412a9bf98ebf6cacb4c87bfd0764963bf6c31fd34",
+      "sizeBytes": 374488,
+      "sha256": "8146132b06c6160ceb82b5c441c48c9e2ebcd16ee1d0ad00c7316e144deddd5d",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-puchera_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-puchera_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1611,10 +1611,10 @@
       "published": 1885,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 346141,
-      "sha256": "009570ff49818be88c0dfba31592618aec3bfd56c1130336ff3468054b653c35",
+      "sizeBytes": 363702,
+      "sha256": "9f359219719362d82dfe748135ce075ed263a724ae581b19cb1c2bb0f83ca2b2",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-sotileza_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-sotileza_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1626,10 +1626,10 @@
       "published": 1844,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 344581,
-      "sha256": "597db3da4c38c17e7d0df0a24b93a4703e211c285be3755d0b37e382b18aacce",
+      "sizeBytes": 362826,
+      "sha256": "71b8e4c0f5a632d329ab8e5ec38c5bbf2047de164ca4e1fa68ad0dad3d61e3e8",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-senor-de-bembibre_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-senor-de-bembibre_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1641,10 +1641,10 @@
       "published": 1882,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 550236,
-      "sha256": "830f1b20fa3a39eac3cf8c40d46bba46fe5bf29bc90994585d6adc145c483dd2",
+      "sizeBytes": 569029,
+      "sha256": "236fac77c3582726c44e9ce1aa59c03dd93eec5010d62e51333601a76f11eede",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-cecilia-valdes_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cecilia-valdes_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1656,10 +1656,10 @@
       "published": 1887,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 485061,
-      "sha256": "c2f8d52eb36c1eb75a27557870dc48154817f4618fbea159be5266b83f5c41b8",
+      "sizeBytes": 507112,
+      "sha256": "41ff4276070cdb16ff6fb4e514509c6a746d945bab8eecf73eca21273174b058",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-noli-me-tangere_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-noli-me-tangere_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1671,10 +1671,10 @@
       "published": 1891,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 348629,
-      "sha256": "67aa3e5b13961515ab24742270029147370d53c5ab04536283267ec5d8f01102",
+      "sizeBytes": 369238,
+      "sha256": "2f23a14efdb67b246c804751291f29f23bd2afe8b59d8f4f72ebc280b45a1227",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-filibusterismo_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-filibusterismo_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1686,10 +1686,10 @@
       "published": 1884,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 169250,
-      "sha256": "cc50de54fd4be8955a362b2a6db62858dcc224a1efef84ab777ea56fe94df27c",
+      "sizeBytes": 187927,
+      "sha256": "273f4ebaaba1a5fd2c39f9cdd4ada723e14e0f90f0e4f9b866305f3354c7a10e",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-gran-aldea_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-gran-aldea_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1701,10 +1701,10 @@
       "published": 1891,
       "section": "Novelas",
       "language": "es",
-      "sizeBytes": 431234,
-      "sha256": "d1adef9efb20112c6aff09c5735fa442b30dc04625badbdbff9ce0fa34522bfd",
+      "sizeBytes": 448753,
+      "sha256": "1cff8b902215368222bcdc34d43a340dbbbeb474ed96c5bc9c360d394fdb784a",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-pequeneces_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-pequeneces_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1716,10 +1716,10 @@
       "published": 1910,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 483740,
-      "sha256": "9e074f31a6070e0cfb49806037530aa3decb691c23658591ae5e17f170ff829b",
+      "sizeBytes": 508906,
+      "sha256": "4801c271d30307e6daceea40b8b485aea532924e4ab268a86bea0d5c789d9a6f",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-odisea_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-odisea_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1731,10 +1731,10 @@
       "published": 1908,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 513297,
-      "sha256": "4e4cf44a3dcde3f5ba2261bc4bbc71ebfd2edcfa015b28d7b922efb43b2682de",
+      "sizeBytes": 538407,
+      "sha256": "b217e4477ad99159776a8404d70162c746f31a378a8d56ce9e7c36c63e0ddacb",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-iliada_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-iliada_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1746,10 +1746,10 @@
       "published": 1921,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 430309,
-      "sha256": "b832b325df2bebf856bdf2fb9f47426fb769ad063b14b26373a984bef03ab6e6",
+      "sizeBytes": 452825,
+      "sha256": "88a9f301a22ef22930c76c9587f0aef5b6b6bc84c299fbaeec358c9a4bd06b5a",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-divina-comedia_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-divina-comedia_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1761,10 +1761,10 @@
       "published": 1873,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 440385,
-      "sha256": "dd67c0fe6c20713d1a2e1c6a66d77e234053db053d1dd9ff6efd5ca69e734df7",
+      "sizeBytes": 465039,
+      "sha256": "b30278d64b5a528c2e8dc4f88f2f2176b2b74208b7f6bc8695f9a81a2f241384",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-paraiso-perdido_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-paraiso-perdido_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1776,10 +1776,10 @@
       "published": 1580,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 189225,
-      "sha256": "ea59c30f3ace5501d6df63af9b921141f4fc75426e4cde10412f57145639eac4",
+      "sizeBytes": 214231,
+      "sha256": "3b857173dd8a2467086f80c9f33ac8307bcd644dd3cee50ca5eafae926b7264d",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-los-lusiadas_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-los-lusiadas_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1791,10 +1791,10 @@
       "published": 1872,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 476533,
-      "sha256": "63d5142ad27e598700ece697c013f6731af634a64acf2123904ac0bf7ee7f9c6",
+      "sizeBytes": 502890,
+      "sha256": "ca0108c003c77deb6e0da73f18d35fe86e8c78a8d1f8cba47816fef8456e1bb7",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-orlando-furioso-tomo-1-de-2_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-orlando-furioso-tomo-1-de-2_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1806,10 +1806,10 @@
       "published": 1872,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 470070,
-      "sha256": "ea9a90bd8bea6925365ea049b2d87ffc38eeedfbcca0b9f8ff00fbabe6b7d4ab",
+      "sizeBytes": 496510,
+      "sha256": "5847d7a2faf60d28fe2dc8430c5cf9fb7820876aae0879c672098885295c5084",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-orlando-furioso-tomo-2-de-2_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-orlando-furioso-tomo-2-de-2_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1821,10 +1821,10 @@
       "published": 1882,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 196484,
-      "sha256": "7d6c2d212ea9ea7d52a7a0c9bc4de27d7222d4a56a638e31f082c67e91584fec",
+      "sizeBytes": 219889,
+      "sha256": "55542a7dd807a60ce1ce88ef4a7d54bb1f4d8dd4523d95af8952e541b2c671e9",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-fausto-primera-parte_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-fausto-primera-parte_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1836,10 +1836,10 @@
       "published": 1805,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 127636,
-      "sha256": "b429b2f8a3ef2de7cb010a6866a4910d556318d0903059f87aa638931a459d15",
+      "sizeBytes": 153136,
+      "sha256": "a1d394fb46a88fe62558c07ce337c050054a9f3e27df7f3fe3e60887fc95b889",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-metamorfoseos-tomo-1-de-4_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-metamorfoseos-tomo-1-de-4_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1851,10 +1851,10 @@
       "published": 1809,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 145619,
-      "sha256": "b44f2edf2ad6a16ba0ae72b6aa2b401ab5ad6fad72fd9bad1235540e9d8b4d34",
+      "sizeBytes": 171192,
+      "sha256": "9094aea5d6bc118bb197c326d1e780898e684602398b81a609cd63d667c7c1e0",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-metamorfoseos-tomo-2-de-4_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-metamorfoseos-tomo-2-de-4_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1866,10 +1866,10 @@
       "published": 1819,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 155143,
-      "sha256": "967270ec565eb7e94f28feac20ef346f30d29269277bb1a7ce1439e82d37590e",
+      "sizeBytes": 180734,
+      "sha256": "3b73c7ea52b22e7c387265dd77c291bbf0cf6ebe1d692489247c1d98fa607ae3",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-metamorfoseos-tomo-3-de-4_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-metamorfoseos-tomo-3-de-4_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1881,10 +1881,10 @@
       "published": 1819,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 157113,
-      "sha256": "09cb79b2f06334d5a774718f8a17e43ff6352c23ab1107dac20684414fdc9af2",
+      "sizeBytes": 182429,
+      "sha256": "482b97b50363b1e4ed72a021e85c55e8c9837a1c4258cba07351b34b2520e63d",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-metamorfoseos-tomo-4-de-4_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-metamorfoseos-tomo-4-de-4_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1896,10 +1896,10 @@
       "published": 1821,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 87864,
-      "sha256": "75110d7b79ef035c93b6c0faceeba726c6cda8df9cdf170d8267323d9c9d67b4",
+      "sizeBytes": 109865,
+      "sha256": "ef20d23d9281b93601a3935b3328deee7350784b8685d9611eb4572adaabb6c0",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-arte-de-amar_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-arte-de-amar_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1911,10 +1911,10 @@
       "published": 1513,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 261848,
-      "sha256": "ee11e5b7a7bd70a4f5e3381b340b6cac25698ce99b129e6ea1ef3f9ea12a587a",
+      "sizeBytes": 287502,
+      "sha256": "3c48c3dc51aac8dd4cfe693a070d5689b6c7a226500a959006f4441a1bd7396e",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-asno-de-oro_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-asno-de-oro_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1926,10 +1926,10 @@
       "published": 1798,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 120041,
-      "sha256": "6a54919ccf598c47a7e363ef780365d9268355c15085582c61dcd7059f73355d",
+      "sizeBytes": 145422,
+      "sha256": "a955b7f1c67319e0d39bbf1bc841b615e39c882951a5d98e27a468df6b45aaac",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-hamlet_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-hamlet_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1941,10 +1941,10 @@
       "published": 1881,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 252731,
-      "sha256": "b98ee626e09c0c9b27a9f52f2affd8a639b85f9b18280b5267a1d8b34f63046e",
+      "sizeBytes": 278562,
+      "sha256": "5d6af9820e6877b19b2a5fae435a3660d2cbaa97591414c60fc2572fe49ddb17",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-dramas-de-shakespeare-tomo-1_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-dramas-de-shakespeare-tomo-1_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1956,10 +1956,10 @@
       "published": 1909,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 325104,
-      "sha256": "8e792026f04631ed8073bfac7960f058a6f0f8edbe0020d515f5574e35869742",
+      "sizeBytes": 350172,
+      "sha256": "ed715282de6bef4dea2d44f675c4bf4ee132e4bf5158d903dd14b6c4024e0307",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-obras-dramaticas-de-euripides-tomo-1-de-3_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-obras-dramaticas-de-euripides-tomo-1-de-3_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1971,10 +1971,10 @@
       "published": 1909,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 294437,
-      "sha256": "b9b1ab911149a3574b0a0c7ff6189455b166ce2520d900ffcc5ca3d60b905b82",
+      "sizeBytes": 319542,
+      "sha256": "ff86511424e1027546d455faf685511b681f3ccc8efd8ddc1b917085e233c5b4",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-obras-dramaticas-de-euripides-tomo-2-de-3_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-obras-dramaticas-de-euripides-tomo-2-de-3_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -1986,10 +1986,10 @@
       "published": 1910,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 267621,
-      "sha256": "ffcdc3115a6e7af64ed24cce5085b02786fd0c79598ff84574ddeb96b9262774",
+      "sizeBytes": 292815,
+      "sha256": "0f59fb1caf6609fe1c8b8abbac1db4de1532ef1db4a6abfd040560f5c3f9939f",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-obras-dramaticas-de-euripides-tomo-3-de-3_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-obras-dramaticas-de-euripides-tomo-3-de-3_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -2001,10 +2001,10 @@
       "published": 1880,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 226102,
-      "sha256": "3ef27a6ae739c6c6bce6e8e897ac36f48dd178279d780bbd2592270e237e7cb5",
+      "sizeBytes": 253053,
+      "sha256": "bf0e9ae324c8b09a78bdd4acf119fa5906166bd8f89c4c08c1eebdc86ffcdff1",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-comedias-de-aristofanes-tomo-1-de-3_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-comedias-de-aristofanes-tomo-1-de-3_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -2016,10 +2016,10 @@
       "published": 1881,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 236482,
-      "sha256": "76e9e14f985f53801e3972f5bb267006a8ce983699dc05e432fdc619e192da43",
+      "sizeBytes": 263334,
+      "sha256": "b5fcb0873f52496953ef52bda3aa4fd1a6e017def07062fe93dba1123f5d54e7",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-comedias-de-aristofanes-tomo-2-de-3_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-comedias-de-aristofanes-tomo-2-de-3_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -2031,10 +2031,10 @@
       "published": 1881,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 205852,
-      "sha256": "c1b04e3e74b5ca1e934f286a125c5c2940c7d2c96a266b6d2e909d30779d43fb",
+      "sizeBytes": 232725,
+      "sha256": "d206ce1c45207b9d51c7ff211a79cf7d163f937587d0ccde8b32accb4895846e",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-comedias-de-aristofanes-tomo-3-de-3_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-comedias-de-aristofanes-tomo-3-de-3_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -2046,10 +2046,10 @@
       "published": 1894,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 272127,
-      "sha256": "18633247d0662addd5f516021ab17d0609b8f14c2be84719e01e716eadc86ddb",
+      "sizeBytes": 297118,
+      "sha256": "2be332b51018d041e3a37120f3aa83de9b0c7a50a7887e77d5b9bda0e6179482",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-letra-escarlata_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-letra-escarlata_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -2061,10 +2061,10 @@
       "published": 1919,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 221561,
-      "sha256": "766c2fda3225742443114fae610da41bf6e940b6f552dc610dbfe997bdd6ae4c",
+      "sizeBytes": 242951,
+      "sha256": "184730df5b3940623aed6cfd55fd1b0f1cd22441e4d14867a3ff99eb9c3cfa4a",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-silas-marner_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-silas-marner_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -2076,10 +2076,10 @@
       "published": 1909,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 173202,
-      "sha256": "72237ccff174afda0e9fdefcab262baef755cd270bbcc36d3f614a8b9667d23e",
+      "sizeBytes": 194951,
+      "sha256": "344a6e1bc0e56f1ab909eb33fd4878e14abf541894e75f6b9468ca6e7989cea5",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-prisionero-de-zenda_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-prisionero-de-zenda_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -2091,10 +2091,10 @@
       "published": 1912,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 304570,
-      "sha256": "ff3763ddf6871aef45e989c6c7d11f9fe2da0e48b12b9053222d7eca805827cb",
+      "sizeBytes": 327077,
+      "sha256": "6b4e4fa1875540922bf52656edc0f1c281d71907dd0467b5ad03c5fef55f9164",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-dama-de-las-camelias-una-familia-corsa_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-dama-de-las-camelias-una-familia-corsa_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -2106,10 +2106,10 @@
       "published": 1787,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 266383,
-      "sha256": "621ef7f4ac495513fb8e6c9c2413332a0b6a2120f7fce84f1cddcf69686f6f4a",
+      "sizeBytes": 291793,
+      "sha256": "2c771e6afeba753a865a797f063393c592c1c954b43c12ed5253c923646fb6c0",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-gil-blas-de-santillana-tomo-1-de-3_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-gil-blas-de-santillana-tomo-1-de-3_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -2121,10 +2121,10 @@
       "published": 1787,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 297268,
-      "sha256": "2ded7a8e695e121da464d4732d391e474649269082dee354a17e9e4f0f3857e6",
+      "sizeBytes": 322378,
+      "sha256": "e47213bb32933b202ed37ad1920cf8d3591b8f6b22e7c7ec08a411c652691f08",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-gil-blas-de-santillana-tomo-2-de-3_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-gil-blas-de-santillana-tomo-2-de-3_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -2136,10 +2136,10 @@
       "published": 1787,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 304410,
-      "sha256": "41e34a1087a9479b54a69f08e8b0515662544351ae11b52429c0d3abf93e5b5d",
+      "sizeBytes": 329532,
+      "sha256": "67e23ebc8938dbf5036cde5712772f0f5da9563f8a81df6a4a0f8f1398db61d6",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-gil-blas-de-santillana-tomo-3-de-3_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-gil-blas-de-santillana-tomo-3-de-3_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -2151,10 +2151,10 @@
       "published": 1920,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 183875,
-      "sha256": "eec657111d1cdecc8c3bcb265a57dd2b104ef0bf770320e66408ff02a05f52a4",
+      "sizeBytes": 210581,
+      "sha256": "b5a498ddaf5faad2e3eb46775c4334e9e8638e56d02f3414d3cdbd8de5dc2818",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-cuentos-clasicos-del-norte_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-clasicos-del-norte_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -2166,10 +2166,10 @@
       "published": 1833,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 107727,
-      "sha256": "10fb3996501bfd798900c73af03830e07dfe8e8c17e081b8361435a6aeacc616",
+      "sizeBytes": 131978,
+      "sha256": "14a513008d8dbe6db9bfa6aca62f543b5bf86856f2120132b5df803e1868f526",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-cuentos-de-la-alhambra_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-de-la-alhambra_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -2181,10 +2181,10 @@
       "published": 1908,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 276506,
-      "sha256": "af0378f9e03c5a5ada7c744aca4c752176c9275c5a342c1341f100ad35d6963d",
+      "sizeBytes": 300425,
+      "sha256": "2f0eb0eb420d1d7c17c78af25ccd4639a7f493bd16d04b229ea47d8806b654b2",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-cuentos-escogidos_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-escogidos_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -2196,10 +2196,10 @@
       "published": 1911,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 137548,
-      "sha256": "5d4fadfa7f8845fe0e36eaa6d61922ebbebe0f4870647120d2a9cfa17c90826a",
+      "sizeBytes": 162398,
+      "sha256": "9027d174af83f74c83545dffeeb7425cbd61dda4314a325eca1c81acbf74ef8a",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-cartas-de-mi-molino_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cartas-de-mi-molino_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -2211,10 +2211,10 @@
       "published": 1891,
       "section": "Clásicos universales en español",
       "language": "es",
-      "sizeBytes": 109544,
-      "sha256": "76affed140984ca65a9b7954e5d1fa52b71cef034656aafdafe8f17b2314b166",
+      "sizeBytes": 136388,
+      "sha256": "0b21a4447b9737ed6758ae95a1d6888fa4ccc94051ffd68006847839f2405777",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-caso-extrano-del-doctor-jekyll_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-caso-extrano-del-doctor-jekyll_2026-11-09.epub"
       ],
       "domain": "literature"
     },
@@ -2226,10 +2226,10 @@
       "published": 1922,
       "section": "Ensayo y pensamiento",
       "language": "es",
-      "sizeBytes": 256201,
-      "sha256": "a24b735b7ff6bbd4b86c5152e971cc69ff24edbf7a359e8de250a14aed048144",
+      "sizeBytes": 276574,
+      "sha256": "a904dab3600a19d0e6ae0ff8ff61e2163c4b75e59da8e2e6d3a3cf9eb644cb7c",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-andanzas-y-visiones-espanolas_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-andanzas-y-visiones-espanolas_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2241,10 +2241,10 @@
       "published": 1913,
       "section": "Ensayo y pensamiento",
       "language": "es",
-      "sizeBytes": 278182,
-      "sha256": "2b8f2771a91272ddf5818e282a7174f0dadad1fb1722bc77a5fab493f0b06ab9",
+      "sizeBytes": 298400,
+      "sha256": "043bc32cee45201fda2bde30e4d9120eebd37bb14ed8001673ba5412bcc806eb",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-del-sentimiento-tragico-de-la-vida_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-del-sentimiento-tragico-de-la-vida_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2256,10 +2256,10 @@
       "published": 1905,
       "section": "Ensayo y pensamiento",
       "language": "es",
-      "sizeBytes": 332718,
-      "sha256": "1e06a20da6a96783bf5a0d0fdf0b38bebb4c8d26a4ab3dbc30a409d72e0d8ddb",
+      "sizeBytes": 352396,
+      "sha256": "230a43295e49e5ffa9a78ca27d391b8ab150118d35f1a050ebd5a8c39bbb5cad",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-vida-de-don-quijote-y-sancho_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-vida-de-don-quijote-y-sancho_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2271,10 +2271,10 @@
       "published": 1900,
       "section": "Ensayo y pensamiento",
       "language": "es",
-      "sizeBytes": 80152,
-      "sha256": "42579414e5d63e51d25e41f933c95ededfe836564d198e93b683c49803c59167",
+      "sizeBytes": 98860,
+      "sha256": "f0f7ff8468c6699f20bf8ae39c778c10501257eb3c01ca6ee489263903a55a9f",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-ariel_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-ariel_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2286,10 +2286,10 @@
       "published": 1913,
       "section": "Ensayo y pensamiento",
       "language": "es",
-      "sizeBytes": 236319,
-      "sha256": "748130a93009ab31078d666b797a22058f9f4a2a962c5d89ac5183510f7a3460",
+      "sizeBytes": 256459,
+      "sha256": "e48e97651a6cf800b41f6b084c48dde28605427542d252b339ee9fab00191001",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-hombre-mediocre_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-hombre-mediocre_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2301,10 +2301,10 @@
       "published": 1651,
       "section": "Ensayo y pensamiento",
       "language": "es",
-      "sizeBytes": 302077,
-      "sha256": "657bb66009190625427fab6b6880c9f83c22a9d323c992bf0582778dada3dcf7",
+      "sizeBytes": 322498,
+      "sha256": "2da245f0b4f60043d221dc72169c859a3a651386f8d91bdd1691c22646313d6c",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-criticon-tomo-1-de-2_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-criticon-tomo-1-de-2_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2316,10 +2316,10 @@
       "published": 1657,
       "section": "Ensayo y pensamiento",
       "language": "es",
-      "sizeBytes": 325480,
-      "sha256": "908048a6c0af69afb5b93a5a1ca510fdb991f382444e2ad234827eea11b6cb2c",
+      "sizeBytes": 346037,
+      "sha256": "4d8383c4e3fcee425c96a8044769a31d61ec60ae538754ef84150f8676a18fb8",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-criticon-tomo-2-de-2_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-criticon-tomo-2-de-2_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2331,10 +2331,10 @@
       "published": 1907,
       "section": "Ensayo y pensamiento",
       "language": "es",
-      "sizeBytes": 285497,
-      "sha256": "40d186db392a9c3b7bbc202610ce6647a557533a7c45575e69af307e250ea004",
+      "sizeBytes": 306139,
+      "sha256": "62eaf17322d6647b617615d434657b5222313e470eae36907e837eb0712e10d1",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-figaro-articulos-selectos_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-figaro-articulos-selectos_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2346,10 +2346,10 @@
       "published": 1845,
       "section": "Ensayo y pensamiento",
       "language": "es",
-      "sizeBytes": 295441,
-      "sha256": "e6be1372d38383a4de2a2613a228b67f5c93ba96c6713975e8e5bc8a47e96841",
+      "sizeBytes": 314711,
+      "sha256": "8b35bad9df260b9c849bc34170ca908371bbcbc3d2a81eb4b675cb99066ff357",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-criterio_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-criterio_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2361,10 +2361,10 @@
       "published": 1897,
       "section": "Ensayo y pensamiento",
       "language": "es",
-      "sizeBytes": 209818,
-      "sha256": "9e2db89017334008bae2742de8175aea4c15a0c04b41193492a854f521bd50f1",
+      "sizeBytes": 230091,
+      "sha256": "893ebd76ba16cd6c1d1cb5e433f7670253613cdb3f92e240f2f164176d9f51b1",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-reglas-y-consejos-sobre-investigacion-cientifica_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-reglas-y-consejos-sobre-investigacion-cientifica_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2376,10 +2376,10 @@
       "published": 1901,
       "section": "Ensayo y pensamiento",
       "language": "es",
-      "sizeBytes": 304688,
-      "sha256": "79a4a7e0fc25965871d68300cdca04a53fe4d242d84eaef0afe1b05083ab6f4e",
+      "sizeBytes": 324893,
+      "sha256": "29558338b872a8ca4c364634a20747533ddb0019c1352d6f671dad9088795042",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-recuerdos-de-mi-vida-tomo-1-de-2_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-recuerdos-de-mi-vida-tomo-1-de-2_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2391,10 +2391,10 @@
       "published": 1917,
       "section": "Ensayo y pensamiento",
       "language": "es",
-      "sizeBytes": 477921,
-      "sha256": "ed30a13cf3fed8d30e8fb454e603c407b74c5511f84ae805bab37be37cd8b8a0",
+      "sizeBytes": 498303,
+      "sha256": "0fefad02fcf13de2c8a615c4a8f4a08655354e99d96cc185ef3bf32fd886e65f",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-recuerdos-de-mi-vida-tomo-2-de-2_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-recuerdos-de-mi-vida-tomo-2-de-2_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2406,10 +2406,10 @@
       "published": 1583,
       "section": "Ensayo y pensamiento",
       "language": "es",
-      "sizeBytes": 145743,
-      "sha256": "a7240275bc343da8b43c605456683bcfe1e51ed0c4401311c4d7b04164a20552",
+      "sizeBytes": 165468,
+      "sha256": "8c1f3face8d024a0e3f7de6255ecc52dc1a23e76b27f7d13990c9abe7f4bf84a",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-perfecta-casada_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-perfecta-casada_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2421,10 +2421,10 @@
       "published": 1784,
       "section": "Ensayo y pensamiento",
       "language": "es",
-      "sizeBytes": 208760,
-      "sha256": "5fd0a964b7ddbbde782c8ca6d62324512bbd0851762f1f3a6e12bc566dbe5d1a",
+      "sizeBytes": 233816,
+      "sha256": "d7a3053ef4b8e521f6ed667d1a55d3f96ee2f462c6f49ce5a660d4ce4669b4e8",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-tratado-de-la-pintura_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-tratado-de-la-pintura_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2436,10 +2436,10 @@
       "published": 1892,
       "section": "Ensayo y pensamiento",
       "language": "es",
-      "sizeBytes": 211848,
-      "sha256": "99264de032db7aa48000b75ad218500ea07981d1ac3fa99815ac81146e6c6324",
+      "sizeBytes": 237126,
+      "sha256": "3a83fd33805935faf7533f9f0db944481fda99e602ea8d3d840106da230e1206",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-naturaleza-de-las-cosas_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-naturaleza-de-las-cosas_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2451,10 +2451,10 @@
       "published": 1632,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 428900,
-      "sha256": "b8abe02666669701b3476af057ece94d5948e7e6a8ca9a882c5550223d83306a",
+      "sizeBytes": 447081,
+      "sha256": "791dd164b17648008b9324d59989c66150b91827395d835a941187c705aab2a9",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-1-de-3_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-1-de-3_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2466,10 +2466,10 @@
       "published": 1632,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 390860,
-      "sha256": "b42ba8ba38809fed20ae0b3a86e0b263bbea0e4fdd280f4e8daadfaf74a58221",
+      "sizeBytes": 409090,
+      "sha256": "3b81b993faf124033f05286e1d4c593d474b79a40c099a31fed4e269f9bce148",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-2-de-3_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-2-de-3_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2481,10 +2481,10 @@
       "published": 1632,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 297779,
-      "sha256": "51304f468600e65a52e2f58765a7ec86f98527ee64d61180cf99e4918a2cbdea",
+      "sizeBytes": 315936,
+      "sha256": "b4c135260eb2324ba5fcd3177af41f29638f79b9006e2eb2b928c73852463cfa",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-3-de-3_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-3-de-3_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2496,10 +2496,10 @@
       "published": 1542,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 174498,
-      "sha256": "a45134840617961c474b3ef22135b5fea93873b181524ce0a30c5047b7ccddd2",
+      "sizeBytes": 194050,
+      "sha256": "6fffc93af7a4398842eb2928479a6614a6d89141f38efa7dad7a925ac445b047",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-naufragios_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-naufragios_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2511,10 +2511,10 @@
       "published": 1875,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 517562,
-      "sha256": "3207e68bd7322297279757865eb6a3371a6c49e960e21ccf5ac2e37ba4c38b5a",
+      "sizeBytes": 538022,
+      "sha256": "ed9e7d48442d50ea860c50e2e34ca3f1555e90753daa62922fb12774fc0ba8d8",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-historia-de-las-indias-tomo-1-de-5_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-las-indias-tomo-1-de-5_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2526,10 +2526,10 @@
       "published": 1875,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 518611,
-      "sha256": "c9446665d84be25c8fe1ef9829abb42fc4104a72d7c155dbb02856ecfa0cd7a5",
+      "sizeBytes": 539530,
+      "sha256": "2f33fd6058c11865b561d56bf4f42976a7f3654fe8d59b5c658662d97a7c8bba",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-historia-de-las-indias-tomo-2-de-5_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-las-indias-tomo-2-de-5_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2541,10 +2541,10 @@
       "published": 1875,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 488209,
-      "sha256": "af668c769c773748a6a83fc600bc29d3efc7a9808e5d29629ca12a3faba995f9",
+      "sizeBytes": 509109,
+      "sha256": "29592ebcad5a972df05022559af2c96798d04ba204f74feba6e43ad51d0e0165",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-historia-de-las-indias-tomo-3-de-5_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-las-indias-tomo-3-de-5_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2556,10 +2556,10 @@
       "published": 1876,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 496329,
-      "sha256": "b1c1cc99578809be1306c59786bfcf1dfb3a4ce46fc9cf8cdb792d6b27f90fb0",
+      "sizeBytes": 516329,
+      "sha256": "46dc3586fcea2d6b866f04d417ab8f83e3c16228b850d6b54e22fc62deba950e",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-historia-de-las-indias-tomo-4-de-5_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-las-indias-tomo-4-de-5_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2571,10 +2571,10 @@
       "published": 1876,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 519311,
-      "sha256": "68668c4ff6db2c5cbf5e5d0673f94c797d18d427c3d131c4eea67297bea77490",
+      "sizeBytes": 540191,
+      "sha256": "8c4a3c689580ed230d85942398bf334ad80f8079091de0a0b5d97aeae8edc55d",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-historia-de-las-indias-tomo-5-de-5_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-las-indias-tomo-5-de-5_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2586,10 +2586,10 @@
       "published": 1590,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 370224,
-      "sha256": "2263aba2779f6bfaa1f24988c210c10343ab908c967ea494bf3836956f8e3b65",
+      "sizeBytes": 391636,
+      "sha256": "3e9521488361a817d995d342b100558997ad41978ec983e86563c94159938396",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-historia-natural-y-moral-de-las-indias-tomo-1-de-2_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-natural-y-moral-de-las-indias-tomo-1-de-2_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2601,10 +2601,10 @@
       "published": 1590,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 305075,
-      "sha256": "94688508b8fb4b83a948624c26993486d44227fee2f24c2d95fa876f3ec1fe4c",
+      "sizeBytes": 327530,
+      "sha256": "b41dced8a81a907c43f08fb7128d3439ffbe7121702e94b33a741ee5632eb003",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-historia-natural-y-moral-de-las-indias-tomo-2-de-2_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-natural-y-moral-de-las-indias-tomo-2-de-2_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2616,10 +2616,10 @@
       "published": 1880,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 277392,
-      "sha256": "1f73b9352c3ff1e540ae591efddef8cb1b0f744e99914964128b5a4d381466b1",
+      "sizeBytes": 296589,
+      "sha256": "6e9dc47a9dead3ce15f11f9c0449ad72d233af13b361ba3ca7f5c5bee1a8954c",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-el-senorio-de-los-incas-cronica-del-peru-segunda-parte_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-senorio-de-los-incas-cronica-del-peru-segunda-parte_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2631,10 +2631,10 @@
       "published": 1880,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 110566,
-      "sha256": "051c45ed2b773b87668d8a5b83b0a3043b95168baab4f3c585aa1721f8e63101",
+      "sizeBytes": 130702,
+      "sha256": "1f221e2233712ba1624e51afa6cbc1febf56c795a521defb8f8efdb7eb82cbe2",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-suma-y-narracion-de-los-incas_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-suma-y-narracion-de-los-incas_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2646,10 +2646,10 @@
       "published": 1878,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 441812,
-      "sha256": "e3bfa4c92cc89bad3a69f684a883bc52a8ff1a0e5f3e964ae7856757cfaa3c5f",
+      "sizeBytes": 465618,
+      "sha256": "3645e6aa8939a9e7452be891f2be42df698d1a369c7614218c86216755e1fdd9",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-los-nueve-libros-de-la-historia-tomo-1-de-2_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-los-nueve-libros-de-la-historia-tomo-1-de-2_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2661,10 +2661,10 @@
       "published": 1884,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 409397,
-      "sha256": "386a0f6beca752029cf2aed31f123dbcf2ce2c1852726a1edab7dca90a494b2f",
+      "sizeBytes": 433212,
+      "sha256": "18b886841241b87c49fdbf1ea835e6b731200e298f637197b205284cd0b18664",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-los-nueve-libros-de-la-historia-tomo-2-de-2_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-los-nueve-libros-de-la-historia-tomo-2-de-2_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2676,10 +2676,10 @@
       "published": 1564,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 397365,
-      "sha256": "06310803fb17fe01e5b2b587ae9521f81e79c6b46f19123d4c0ebb7b5f83c4e9",
+      "sizeBytes": 421948,
+      "sha256": "34bb9ed0b9a8440088ad3b1ad12f9b7600f0646950ec2bf8077aaff5209f04d7",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-historia-de-la-guerra-del-peloponeso-tomo-1-de-2_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-la-guerra-del-peloponeso-tomo-1-de-2_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2691,10 +2691,10 @@
       "published": 1564,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 343691,
-      "sha256": "137cbff0429cedd552faf20663c1f711bb89d0d01c1676904218aa3744ac7596",
+      "sizeBytes": 368281,
+      "sha256": "276cc4413ce5f3720f56a190339511f7be103589d3388910c9053d755a12660d",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-historia-de-la-guerra-del-peloponeso-tomo-2-de-2_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-la-guerra-del-peloponeso-tomo-2-de-2_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2706,10 +2706,10 @@
       "published": 1888,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 256302,
-      "sha256": "11123b5671a66105ead91951d09e40eca027a89a53d3b9ad96943c48161566e9",
+      "sizeBytes": 279892,
+      "sha256": "4532760721a8ca1fa3f6da3f6c37ec3d202c4481288b038376683807768e38c3",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-las-helenicas_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-las-helenicas_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2721,10 +2721,10 @@
       "published": 1921,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 250692,
-      "sha256": "742266a94f0ee1a76a8659b964b9085c6bfcf919a94134cd5f2ecab7e1f18186",
+      "sizeBytes": 273698,
+      "sha256": "d9687f5d111f92454c46832e34d74b96b2e39e18e26686269984d36dc06b01a8",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-biblia-en-espana-tomo-1-de-3_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-biblia-en-espana-tomo-1-de-3_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2736,10 +2736,10 @@
       "published": 1921,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 213720,
-      "sha256": "7c95a3c2d8ad030e337f3c5835568aea3d59107f5c0345606a9d443ce2b86f05",
+      "sizeBytes": 236701,
+      "sha256": "508e7b2ad12c0d66689c92db2e362c5c5695d1f62349a1d617cedcddeb25c1b3",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-biblia-en-espana-tomo-2-de-3_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-biblia-en-espana-tomo-2-de-3_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2751,10 +2751,10 @@
       "published": 1921,
       "section": "Historia y crónicas",
       "language": "es",
-      "sizeBytes": 246038,
-      "sha256": "58db811580a28d0a9b6264f0dc3d1189e4a766b64b7e7bc0a859bf36af58d904",
+      "sizeBytes": 269200,
+      "sha256": "c899036f02c82293e54ec842714b00ecc7bcaa9419143cd83bf27e90d1414673",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-la-biblia-en-espana-tomo-3-de-3_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-biblia-en-espana-tomo-3-de-3_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2766,10 +2766,10 @@
       "published": 1909,
       "section": "Escritura y religión",
       "language": "es",
-      "sizeBytes": 109402,
-      "sha256": "847d9aa898a0f127725f8df8bcd628b1ff7d776142b7b5c8c0ede51ce9750885",
+      "sizeBytes": 117007,
+      "sha256": "165e3ee9282511503633730e91d9cd0e98edc3883af4a1af2e1855d07c20fea9",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-epistola-de-san-pablo-a-los-romanos_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-epistola-de-san-pablo-a-los-romanos_2026-11-09.epub"
       ],
       "domain": "thought"
     },
@@ -2781,10 +2781,10 @@
       "published": 1869,
       "section": "Escritura y religión",
       "language": "es",
-      "sizeBytes": 379643,
-      "sha256": "22bb30e189bb6027713af1d6f163febea93375602958ec2b5d86e1bbc0841a0f",
+      "sizeBytes": 402052,
+      "sha256": "6f0ce71288bc4aef43094af9447af1dfaaf8bd86b6c14c4655268e3be7fac19d",
       "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-10-30/gc-es-vida-de-jesus_2026-10-30.epub"
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-vida-de-jesus_2026-11-09.epub"
       ],
       "domain": "thought"
     }

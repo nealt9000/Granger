@@ -1,14 +1,14 @@
 {
  "id": "gc-es-sonata-de-primavera",
  "kind": "book",
- "fileName": "gc-es-sonata-de-primavera_2026-10-30.gvec",
- "sizeBytes": 51582,
- "sha256": "2125cf44d80f3fa1b1883d8e8566f8f64e29b7ed7a25c1fe4512a54d2df79473",
- "count": 175,
+ "fileName": "gc-es-sonata-de-primavera_2026-11-09.gvec",
+ "sizeBytes": 51880,
+ "sha256": "e140c0c4f45966f137d78cb23a37930088286c1573823ef6e7fcb66e7c0d3789",
+ "count": 176,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "63eef9741c3d3e5356b532f19f4f03639f7062afd0d8fda65e54029721a5aeac",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-sonata-de-primavera_2026-10-30.gvec"
+ "sourceSha256": "8e63b0cec41278799af6eed5b64587509d89bf62f9e6cc60dd60e5a2101a23d4",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-sonata-de-primavera_2026-11-09.gvec"
 }

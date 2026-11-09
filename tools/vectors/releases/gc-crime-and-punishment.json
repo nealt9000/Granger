@@ -1,14 +1,14 @@
 {
  "id": "gc-crime-and-punishment",
  "kind": "book",
- "fileName": "gc-crime-and-punishment_2026-10-30.gvec",
- "sizeBytes": 429082,
- "sha256": "f88c45866195b045c5615f7064607a744094ab8204c74f1f3457f86802908c18",
- "count": 1459,
+ "fileName": "gc-crime-and-punishment_2026-11-09.gvec",
+ "sizeBytes": 771592,
+ "sha256": "c3a86e18cbe60b703af9e044ca856728031f4aa827b7988e9cac7da9b80c9e6e",
+ "count": 2624,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "752d910474369390c7a6b40c0e7ce3ad6bda0995d1a6c731f89b9cb997660c49",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-crime-and-punishment_2026-10-30.gvec"
+ "sourceSha256": "3b39faab1b5cafdfeec138df29ae3b29c9b1a7fd81675a2c10ab77439f72132a",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-crime-and-punishment_2026-11-09.gvec"
 }

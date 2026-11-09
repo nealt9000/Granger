@@ -1,14 +1,14 @@
 {
  "id": "gc-king-richard-ii",
  "kind": "book",
- "fileName": "gc-king-richard-ii_2026-10-30.gvec",
+ "fileName": "gc-king-richard-ii_2026-11-09.gvec",
  "sizeBytes": 60994,
- "sha256": "196c6ab4c085b233a661ed05d90d156fd3b06b76b8e515579979a9fae38ebcf1",
+ "sha256": "6cc93bf3625bc1cb7062fa92419815e3f4c455fb60ee9c472a5f502cad05a917",
  "count": 207,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c1897263f99fbe3dd17dcfd6c1a724ef0232f8d27bffa30c9044c46d0770b125",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-king-richard-ii_2026-10-30.gvec"
+ "sourceSha256": "c268ad50d30c8ae0db14730f1bc8cb7eb03711cfa34dd519dd9e6485708a1932",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-king-richard-ii_2026-11-09.gvec"
 }

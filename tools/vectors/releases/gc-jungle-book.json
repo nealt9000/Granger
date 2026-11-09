@@ -1,14 +1,14 @@
 {
  "id": "gc-jungle-book",
  "kind": "book",
- "fileName": "gc-jungle-book_2026-10-30.gvec",
+ "fileName": "gc-jungle-book_2026-11-09.gvec",
  "sizeBytes": 120676,
- "sha256": "4ce7240a7bf418ee4bde7ec9e35d6cd8efd2eb674403f13a5086af12442175b9",
+ "sha256": "319decb938d6ee88bad8e2a13fece39dbeadc45a6388e05e29564675de2f574b",
  "count": 410,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "68eb3ac3ee2076df0e3d5e38e538b7a004d99af4d447351d07acdc927b7cbfce",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-jungle-book_2026-10-30.gvec"
+ "sourceSha256": "e3fce0953426c0990990aeec16de2c6698dd7e3abaab0c97fd400d2eb3f524af",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-jungle-book_2026-11-09.gvec"
 }

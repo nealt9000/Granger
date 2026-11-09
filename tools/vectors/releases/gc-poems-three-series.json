@@ -1,14 +1,14 @@
 {
  "id": "gc-poems-three-series",
  "kind": "book",
- "fileName": "gc-poems-three-series_2026-10-30.gvec",
- "sizeBytes": 119794,
- "sha256": "e8bf58b62e8408c55539b163271790b8cbc68b96a624c35517d39f49fe962a08",
- "count": 407,
+ "fileName": "gc-poems-three-series_2026-11-09.gvec",
+ "sizeBytes": 119500,
+ "sha256": "70a5c626dba48e7243352016d56be4646405160e8c650cb4cf0c77392b120813",
+ "count": 406,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c82e006a45ed3a0b1ebd51de2e03599dcb54fe4456573a7fccdb72e822d1dfae",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-poems-three-series_2026-10-30.gvec"
+ "sourceSha256": "57512d3618529e5bc2f2203a34211f1793988e90f92345748248fa2196544b46",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-poems-three-series_2026-11-09.gvec"
 }

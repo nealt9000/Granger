@@ -1,14 +1,14 @@
 {
  "id": "gc-wuthering-heights",
  "kind": "book",
- "fileName": "gc-wuthering-heights_2026-10-30.gvec",
+ "fileName": "gc-wuthering-heights_2026-11-09.gvec",
  "sizeBytes": 258856,
- "sha256": "b7925345c9631faf56cb2ef3310c598105e8637e871c9120c144c49fa1380c52",
+ "sha256": "2292c7e19aad0d4df298d2ccf481aefd2892646bc3aea55b64712b1a20e3485e",
  "count": 880,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ad5657f30142e4e30bc08102c2523e215d04e4395ef45d36236ae095c37d8b3d",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-wuthering-heights_2026-10-30.gvec"
+ "sourceSha256": "9c3a2a3aaea4c842c24a25fe7ca55104687b6e1ce76fdcf88f98d15ddb7de92e",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-wuthering-heights_2026-11-09.gvec"
 }

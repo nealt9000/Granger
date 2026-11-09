@@ -1,14 +1,14 @@
 {
  "id": "gc-faust-part-one",
  "kind": "book",
- "fileName": "gc-faust-part-one_2026-10-30.gvec",
- "sizeBytes": 93040,
- "sha256": "bcf40348661fe7ca457cc0e740174e6fab8cef423f43d124c78036d5d3b7dad2",
- "count": 316,
+ "fileName": "gc-faust-part-one_2026-11-09.gvec",
+ "sizeBytes": 141550,
+ "sha256": "193e253184170431bd194c80a54279bbb0bbaf6e12565b5ee56e39f07b567ac6",
+ "count": 481,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "cefd4a8d2f2ea90f583a51993003a55246266a8a95a8137d8824b1f302a8295d",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-faust-part-one_2026-10-30.gvec"
+ "sourceSha256": "2c51477bc17000d522c55d02ec63fcfd36a009c9aeabe2e4b2ae19338b04d9a0",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-faust-part-one_2026-11-09.gvec"
 }

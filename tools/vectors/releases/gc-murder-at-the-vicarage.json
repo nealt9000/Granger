@@ -1,14 +1,14 @@
 {
  "id": "gc-murder-at-the-vicarage",
  "kind": "book",
- "fileName": "gc-murder-at-the-vicarage_2026-10-30.gvec",
+ "fileName": "gc-murder-at-the-vicarage_2026-11-09.gvec",
  "sizeBytes": 221224,
- "sha256": "4ec77566e187b9115ce6e2ce8df4c1641cd7f3f18dcd0555d4d0213903900f6d",
+ "sha256": "f35bac139f7d0b44b7722bed03e83d12419c544d220df36af304859af6c52a84",
  "count": 752,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a06245e67213a2be3e826a83a83f34ce62e8e3f3b8bef517a7f70bcaa0dfe47f",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-murder-at-the-vicarage_2026-10-30.gvec"
+ "sourceSha256": "6478460aa42ac24ab8b968169d30af98188f804ee471b4f7ec008fd8b6cceab7",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-murder-at-the-vicarage_2026-11-09.gvec"
 }

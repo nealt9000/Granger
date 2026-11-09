@@ -1,14 +1,14 @@
 {
  "id": "gc-es-la-tia-tula",
  "kind": "book",
- "fileName": "gc-es-la-tia-tula_2026-10-30.gvec",
- "sizeBytes": 88332,
- "sha256": "261837d5ed6c45872d536cb20d9f5b639daa006e1970c13dd487ef162436ff64",
- "count": 300,
+ "fileName": "gc-es-la-tia-tula_2026-11-09.gvec",
+ "sizeBytes": 88630,
+ "sha256": "534ff372c8d7d3e4f1876344909cd33a4d929ca2eee1135b09e12c2a67959ee0",
+ "count": 301,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "fb8a9084c6bb5aa2204ca47282846e6e3ee2ac9e5334078efda3452d545b5877",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-la-tia-tula_2026-10-30.gvec"
+ "sourceSha256": "fecbb33cefbf0114c2a3762188aa55ccfb65eba326fb846c6ea7659c86326118",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-la-tia-tula_2026-11-09.gvec"
 }

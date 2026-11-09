@@ -1,14 +1,14 @@
 {
  "id": "gc-es-cuentos-de-amor",
  "kind": "book",
- "fileName": "gc-es-cuentos-de-amor_2026-10-30.gvec",
- "sizeBytes": 138312,
- "sha256": "6f1817acb683a0e0d96801897cecdcc461cfecdb59b2a3165bca83bc60cac4c0",
- "count": 470,
+ "fileName": "gc-es-cuentos-de-amor_2026-11-09.gvec",
+ "sizeBytes": 138610,
+ "sha256": "c51b3db8427ab73c10a898388081087ce1519c3a51192088fe73c8065c88393d",
+ "count": 471,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "656651d8d2942b7abef6dde49c78f8a0651f8029aa424f1651152d5d9c433e3f",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-cuentos-de-amor_2026-10-30.gvec"
+ "sourceSha256": "e5e63f288f89d5a85d39d20405ac0f15348f0ebd09e15560843def1140d7d6c6",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-cuentos-de-amor_2026-11-09.gvec"
 }

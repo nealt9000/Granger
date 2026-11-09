@@ -1,14 +1,14 @@
 {
  "id": "gc-merry-wives-of-windsor",
  "kind": "book",
- "fileName": "gc-merry-wives-of-windsor_2026-10-30.gvec",
- "sizeBytes": 72754,
- "sha256": "d7420ef4eb3aad7d9ac5f5842f4913bac62d01020ad6baaac8226a767aa0b239",
- "count": 247,
+ "fileName": "gc-merry-wives-of-windsor_2026-11-09.gvec",
+ "sizeBytes": 72460,
+ "sha256": "aa777f416af6d35aa2c601c16388b73609d01c2f20dc2443910c40bbc1891f67",
+ "count": 246,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "f67d6449379c5aa084c2f8ca982e241df8ef782e1bf27e799bf276067ee5bef7",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-merry-wives-of-windsor_2026-10-30.gvec"
+ "sourceSha256": "fec133344da19c805acc0054cd48e650c83babfd6c2cec787020b5f0c8dbd9b5",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-merry-wives-of-windsor_2026-11-09.gvec"
 }

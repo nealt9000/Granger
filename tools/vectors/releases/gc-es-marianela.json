@@ -1,14 +1,14 @@
 {
  "id": "gc-es-marianela",
  "kind": "book",
- "fileName": "gc-es-marianela_2026-10-30.gvec",
- "sizeBytes": 129198,
- "sha256": "5855603a137fd56fd385f67b10a21bf09574613df99fa638ebcdd80afc2eaeb1",
- "count": 439,
+ "fileName": "gc-es-marianela_2026-11-09.gvec",
+ "sizeBytes": 129496,
+ "sha256": "844263aac8308f539ec7d83809e2494bd7e595e183531dbb288ff8e3787b6cd0",
+ "count": 440,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ef4c19db7e76ee1358aa8ad16e0007480b63eb12c1a4ae6c35f707a95c9e76e8",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-marianela_2026-10-30.gvec"
+ "sourceSha256": "41425691c4f948877dbed63076d3873e032d31f3bc44916ac4cd63339c7d4487",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-marianela_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-es-en-las-orillas-del-sar",
  "kind": "book",
- "fileName": "gc-es-en-las-orillas-del-sar_2026-10-30.gvec",
- "sizeBytes": 93036,
- "sha256": "85d2f3ec9ca5741600550ec5be2429267e9ee0c1d34f8478d76cf74e06ffaef9",
- "count": 316,
+ "fileName": "gc-es-en-las-orillas-del-sar_2026-11-09.gvec",
+ "sizeBytes": 93334,
+ "sha256": "79bebfe276e135fc78920d304a1072c0d5b9fa7fa39b3ee2c89f8a8c7a421399",
+ "count": 317,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "9a0bab229c931a1f3ad5c573bda2d90eaa51715bdd049b3a9dbd7ecc1f406129",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-en-las-orillas-del-sar_2026-10-30.gvec"
+ "sourceSha256": "f4ef1b1562ab29cfed54176c479111ecab4a2fa9a77e4e026ebe6f55b9b190fe",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-en-las-orillas-del-sar_2026-11-09.gvec"
 }

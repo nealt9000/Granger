@@ -1,14 +1,14 @@
 {
  "id": "gc-father-goriot",
  "kind": "book",
- "fileName": "gc-father-goriot_2026-10-30.gvec",
- "sizeBytes": 210934,
- "sha256": "dae77f24069e2c30a61d6d37d9c1b26af61422d208521ce41392916267522ab6",
- "count": 717,
+ "fileName": "gc-father-goriot_2026-11-09.gvec",
+ "sizeBytes": 211228,
+ "sha256": "e2e6b2595592997f6b0c0a03a72eca0fe0ccbe597376c80d6ff47558cf576da3",
+ "count": 718,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "6623bbaddf1e299d06e016f4be5b862048778214c1e0d6f41bb8c2bc3a021d99",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-father-goriot_2026-10-30.gvec"
+ "sourceSha256": "6e975edcec398c08454a44a0949f4f4e50dcae820a588316718c14156001d7de",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-father-goriot_2026-11-09.gvec"
 }

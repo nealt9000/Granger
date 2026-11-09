@@ -1,14 +1,14 @@
 {
  "id": "gc-phaedrus",
  "kind": "book",
- "fileName": "gc-phaedrus_2026-10-30.gvec",
+ "fileName": "gc-phaedrus_2026-11-09.gvec",
  "sizeBytes": 64816,
- "sha256": "aa7956b0edf07eaec89072ca79fc51be54e60f8668864430b97708cc02a64272",
+ "sha256": "b9f908998733e3b2a11a085388ce724c2eabca4633b3b3c4eb5ba8a5cbef7bd6",
  "count": 220,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "2956de6fc838e5afa2165ef53616ec4b66c188fdd2bf7d86da02f99e3d1dc434",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-phaedrus_2026-10-30.gvec"
+ "sourceSha256": "56c38ea1ee935c6f47c72be9869860b365fb00fff1dd606852eff7d013b34e09",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-phaedrus_2026-11-09.gvec"
 }

@@ -1,0 +1,14 @@
+{
+ "id": "gc-death-comes-for-the-archbishop",
+ "kind": "book",
+ "fileName": "gc-death-comes-for-the-archbishop_2026-11-09.gvec",
+ "sizeBytes": 152722,
+ "sha256": "ce7057791ac71e618c91558ce306ce0b99294518e64491d4b89ef444e89ea290",
+ "count": 519,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "870b49da2f31a742c4213a213038cc54057a227d5db099c44e1d987dfd9a519a",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-death-comes-for-the-archbishop_2026-11-09.gvec"
+}

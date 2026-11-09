@@ -1,0 +1,14 @@
+{
+ "id": "gc-steppenwolf",
+ "kind": "book",
+ "fileName": "gc-steppenwolf_2026-11-09.gvec",
+ "sizeBytes": 131848,
+ "sha256": "335d285e04b6109ffd7cdd3e4792c4c02fd46cd480c5282b20f52abccd8e13bf",
+ "count": 448,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "0fcb7b100f2a43260c5a9e0d617cc638749d52e7d0ac53effde1c33aa634b840",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-steppenwolf_2026-11-09.gvec"
+}

@@ -1,14 +1,14 @@
 {
  "id": "gc-ivanhoe",
  "kind": "book",
- "fileName": "gc-ivanhoe_2026-10-30.gvec",
+ "fileName": "gc-ivanhoe_2026-11-09.gvec",
  "sizeBytes": 442900,
- "sha256": "389f22c7f00606b635fb2b90ca1fd9907fbc65ab37cc3fc718e842c6a0572714",
+ "sha256": "a37306184a3fd532be886555d12de8151ff3f3f98e52699fc6273d0fd96bbfd9",
  "count": 1506,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "b5e1523b83a4b33bb3be0ddf00377d8cbe22d6f8a70d5ecb2f70f6acbe7bcc27",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-ivanhoe_2026-10-30.gvec"
+ "sourceSha256": "8d020936bddde3bc556466dbfa6f3bcbecd6ce53f4f77137fad182f6cdc04993",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-ivanhoe_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-le-morte-d-arthur-volume-1",
  "kind": "book",
- "fileName": "gc-le-morte-d-arthur-volume-1_2026-10-30.gvec",
+ "fileName": "gc-le-morte-d-arthur-volume-1_2026-11-09.gvec",
  "sizeBytes": 215638,
- "sha256": "bde8c8f113a22c6b80c9d0f172da5a43135740b6cecc87ac453adcbf106544cd",
+ "sha256": "df9d03ae0511a4a38e6b8d2003848e9acb2cdf1a4f950f215b3e09e4752a6737",
  "count": 733,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "9bea1b81c2facca2d380883c248ce2b0653c82777aebe09d01c18768a26829d4",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-le-morte-d-arthur-volume-1_2026-10-30.gvec"
+ "sourceSha256": "e959c1b243410198abec165948f096441b7101e76d1fac666ee66d0f648f74f2",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-le-morte-d-arthur-volume-1_2026-11-09.gvec"
 }

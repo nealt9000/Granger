@@ -1,14 +1,14 @@
 {
  "id": "gc-ideal-husband",
  "kind": "book",
- "fileName": "gc-ideal-husband_2026-10-30.gvec",
+ "fileName": "gc-ideal-husband_2026-11-09.gvec",
  "sizeBytes": 93040,
- "sha256": "d2287a9931ca74fbbedf7a65dd30f69b83194a23208d0c45f32fc90bbb01688c",
+ "sha256": "72f69e1c9db38c7b1650ff5fc963104ddb5f388104f54535a34ff64b01e02425",
  "count": 316,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "90b9bb0960fa4f558fee9ac3e56d46bd316c179fec8e2f74860cff546ea28fad",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-ideal-husband_2026-10-30.gvec"
+ "sourceSha256": "7e614f9ec1190810c392bf7ef461732b00b179c2366b41441da4a66fadb782e1",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-ideal-husband_2026-11-09.gvec"
 }

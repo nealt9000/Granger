@@ -1,0 +1,14 @@
+{
+ "id": "gc-large-catechism",
+ "kind": "book",
+ "fileName": "gc-large-catechism_2026-11-09.gvec",
+ "sizeBytes": 95098,
+ "sha256": "5c598f058569e138961593c57ce2903e109fc908bfa8e1e5e9bb1f9be28b5687",
+ "count": 323,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "41d728d31b56405c7899babbcb8bc01f66394d92fd8cd8dc48630469206a6367",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-large-catechism_2026-11-09.gvec"
+}

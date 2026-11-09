@@ -1,14 +1,14 @@
 {
  "id": "gc-persuasion",
  "kind": "book",
- "fileName": "gc-persuasion_2026-10-30.gvec",
+ "fileName": "gc-persuasion_2026-11-09.gvec",
  "sizeBytes": 175066,
- "sha256": "1a285f185102c3854779157243058165fd4cf2a502a727020b318c0027fb64d6",
+ "sha256": "ac4207453c27424e435cfffe0e956a16698c4c47005305120d691a63a72c3f83",
  "count": 595,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "cdc06b6e6edbe13015b10783a5e0c1cf7ba361adf4f3ec996aeca013df8ee90b",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-persuasion_2026-10-30.gvec"
+ "sourceSha256": "32776343ee5c7675aabd3d48673725bca8a83017b2b51efe83ea4e8d8e98a5a7",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-persuasion_2026-11-09.gvec"
 }

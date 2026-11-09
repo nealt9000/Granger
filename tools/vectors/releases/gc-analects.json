@@ -1,14 +1,14 @@
 {
  "id": "gc-analects",
  "kind": "book",
- "fileName": "gc-analects_2026-10-30.gvec",
- "sizeBytes": 62758,
- "sha256": "da0be52e45983050236e661f6b8bc659dfc762b1545e76ec84281743a774abf5",
- "count": 213,
+ "fileName": "gc-analects_2026-11-09.gvec",
+ "sizeBytes": 90982,
+ "sha256": "4e4a1fc765330f2bc215ebc74bd83b4446054aef4437e47e4a7f33ede9735acf",
+ "count": 309,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a16fa95232e2850ad8ba02cedb89934212d996a90d14658e172d953a762242c0",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-analects_2026-10-30.gvec"
+ "sourceSha256": "0b31926c15dfa06ab2d0e489cb8668e7dce7187f09d5eda4ba32d71761df906e",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-analects_2026-11-09.gvec"
 }

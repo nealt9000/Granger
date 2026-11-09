@@ -1,14 +1,14 @@
 {
  "id": "gc-house-of-atreus-agamemnon-the-libation-bearers-the-furies",
  "kind": "book",
- "fileName": "gc-house-of-atreus-agamemnon-the-libation-bearers-the-furies_2026-10-30.gvec",
+ "fileName": "gc-house-of-atreus-agamemnon-the-libation-bearers-the-furies_2026-11-09.gvec",
  "sizeBytes": 80398,
- "sha256": "d3f2b2d287ad7932c8485c8412e9869d4b5956a6cfd79c9fa91b7bfd98b28abb",
+ "sha256": "60e30b45e866e540c07d926ca1323274cac137947604e02c7c515d1902617a8e",
  "count": 273,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "3e68c3dce4dc277c5d64e1a21aa86829966c9dffe2e1018c1c3a9bd15d8d226b",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-house-of-atreus-agamemnon-the-libation-bearers-the-furies_2026-10-30.gvec"
+ "sourceSha256": "d9e31608945359f1dfe8ecc00eedafdfabea755642828e4c79635ef480a06485",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-house-of-atreus-agamemnon-the-libation-bearers-the-furies_2026-11-09.gvec"
 }

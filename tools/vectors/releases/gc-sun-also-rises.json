@@ -1,0 +1,14 @@
+{
+ "id": "gc-sun-also-rises",
+ "kind": "book",
+ "fileName": "gc-sun-also-rises_2026-11-09.gvec",
+ "sizeBytes": 183592,
+ "sha256": "d8cefd3efe586eb1b4af43dff8c7a663bd301f39cafc735bc06047c7dfae9ac6",
+ "count": 624,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "bdac3fbe50bc75cda4ef2f389fb56e5198e7c2cbf853e93806daa8577bc578de",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-sun-also-rises_2026-11-09.gvec"
+}

@@ -1,14 +1,14 @@
 {
  "id": "gc-king-richard-iii",
  "kind": "book",
- "fileName": "gc-king-richard-iii_2026-10-30.gvec",
- "sizeBytes": 90100,
- "sha256": "47b74199a4fbb06416beefa2fa4f0d28ea5ebdd17c60d2961a225c67f65b67e9",
- "count": 306,
+ "fileName": "gc-king-richard-iii_2026-11-09.gvec",
+ "sizeBytes": 89512,
+ "sha256": "438041fdf586f4acceed6113b128bbdc4dd57234391249e24933ab5186f6b43f",
+ "count": 304,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "b972619ca84fd025c65559f2b3dd3b5b7c4c6704bd4c95ce9d0befe4c0f4b3d8",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-king-richard-iii_2026-10-30.gvec"
+ "sourceSha256": "fe76d2de57d5e6c03e0cbf58821cd98bae15c5a500e8f92afdd56cce50067c5a",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-king-richard-iii_2026-11-09.gvec"
 }

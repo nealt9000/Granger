@@ -1,0 +1,14 @@
+{
+ "id": "gc-history-of-the-peloponnesian-war",
+ "kind": "book",
+ "fileName": "gc-history-of-the-peloponnesian-war_2026-11-09.gvec",
+ "sizeBytes": 285316,
+ "sha256": "a086c8ac48e8c8f15a30c36311629b2db2342cfec68538aa82edbe859592204d",
+ "count": 970,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "bbe111dc6f7f98566f0ed26afed5763535431133d095e9f5c841a80822d4b7e7",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-history-of-the-peloponnesian-war_2026-11-09.gvec"
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gc-democracy-in-america-volume-2",
+ "kind": "book",
+ "fileName": "gc-democracy-in-america-volume-2_2026-11-09.gvec",
+ "sizeBytes": 227104,
+ "sha256": "b92e91ed35acda2500b1c363e6e62ede2d01d00fa0e7ea3da2e6c190d16c3bba",
+ "count": 772,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "584eb039f50e0ccb6709ba3d07cbfa738787dbe6215638df5b72f978599662af",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-democracy-in-america-volume-2_2026-11-09.gvec"
+}

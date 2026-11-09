@@ -1,14 +1,14 @@
 {
  "id": "gc-es-el-tratado-de-la-pintura",
  "kind": "book",
- "fileName": "gc-es-el-tratado-de-la-pintura_2026-10-30.gvec",
- "sizeBytes": 141546,
- "sha256": "0be58cab324059290871bffbe97b67eaa2f2f6e7ede84a207582ed5181be4cf3",
- "count": 481,
+ "fileName": "gc-es-el-tratado-de-la-pintura_2026-11-09.gvec",
+ "sizeBytes": 141844,
+ "sha256": "80dd8bede878f9820309ab0bbf82550acfc305f4d2bcc91cf01a82031d967e32",
+ "count": 482,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "5fd0a964b7ddbbde782c8ca6d62324512bbd0851762f1f3a6e12bc566dbe5d1a",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-el-tratado-de-la-pintura_2026-10-30.gvec"
+ "sourceSha256": "d7a3053ef4b8e521f6ed667d1a55d3f96ee2f462c6f49ce5a660d4ce4669b4e8",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-el-tratado-de-la-pintura_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-anna-karenina",
  "kind": "book",
- "fileName": "gc-anna-karenina_2026-10-30.gvec",
+ "fileName": "gc-anna-karenina_2026-11-09.gvec",
  "sizeBytes": 861850,
- "sha256": "69567e2504c40a861f4250f5bee1b4c29262ff1f7d4578f489f4224a875a80f4",
+ "sha256": "b8dae8ccfd289edc017cb4abbe0e85ff512a0f6c74b63196efb99e70f6081685",
  "count": 2931,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "3b0c6cfdad00c6e6c24a2881c72968a09f3a12d940689b4bdb86344bfca46908",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-anna-karenina_2026-10-30.gvec"
+ "sourceSha256": "fd6ee08e0477833b11ae92a0479e9f4ed578702b5d0b8a0708eb8649efc167b4",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-anna-karenina_2026-11-09.gvec"
 }

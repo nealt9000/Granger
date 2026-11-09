@@ -1,14 +1,14 @@
 {
  "id": "gc-moll-flanders",
  "kind": "book",
- "fileName": "gc-moll-flanders_2026-10-30.gvec",
- "sizeBytes": 269146,
- "sha256": "cc0b0338a8de646b8025cc02b15f4935754cff6566d35698fbae2d214475c7fc",
- "count": 915,
+ "fileName": "gc-moll-flanders_2026-11-09.gvec",
+ "sizeBytes": 269440,
+ "sha256": "1a749be948d25aea920a7164e750681268bd837ae67bf96cb1bbcfd407b5f558",
+ "count": 916,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "e6226aeec51d0a7e5cd9c08465e7113e126eb892daa312cc089e4d811af14e81",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-moll-flanders_2026-10-30.gvec"
+ "sourceSha256": "2fb379f8a8701b8c81d031d70e690949cbd9f91a6adbed99114d94ae9347ff15",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-moll-flanders_2026-11-09.gvec"
 }

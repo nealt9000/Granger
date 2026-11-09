@@ -1,14 +1,14 @@
 {
  "id": "gc-poems-and-songs",
  "kind": "book",
- "fileName": "gc-poems-and-songs_2026-10-30.gvec",
+ "fileName": "gc-poems-and-songs_2026-11-09.gvec",
  "sizeBytes": 217402,
- "sha256": "c110d5e500410c1eec7e7731960b1e650391a99a676748aa8df93a448e957ddc",
+ "sha256": "e828627c0d0efa42f98fc64738b7436aa127547eefa1e6da849076452f7a1f9c",
  "count": 739,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "0b703fcd7432c6bd5be5ec67c173ad7b615aa9291829e627bc7f667c0bf86d68",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-poems-and-songs_2026-10-30.gvec"
+ "sourceSha256": "d69d1e8884fb13107d42593e67bbc8664e02e525e31926a6a85dc51739c07fb3",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-poems-and-songs_2026-11-09.gvec"
 }

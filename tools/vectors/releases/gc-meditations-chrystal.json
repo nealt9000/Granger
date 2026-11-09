@@ -1,0 +1,14 @@
+{
+ "id": "gc-meditations-chrystal",
+ "kind": "book",
+ "fileName": "gc-meditations-chrystal_2026-11-09.gvec",
+ "sizeBytes": 89512,
+ "sha256": "0d9019e0cd28f113e8cbda8465acbfc50cebb2de459f1569909cd4ec6d4abc39",
+ "count": 304,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "2849f59ded78c3bd02c3d102dca37c11fe9ec6d8eb7cb89ddba10dafcba074f8",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-meditations-chrystal_2026-11-09.gvec"
+}

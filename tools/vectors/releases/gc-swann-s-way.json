@@ -1,14 +1,14 @@
 {
  "id": "gc-swann-s-way",
  "kind": "book",
- "fileName": "gc-swann-s-way_2026-10-30.gvec",
+ "fileName": "gc-swann-s-way_2026-11-09.gvec",
  "sizeBytes": 257680,
- "sha256": "382f8c9db394ed8eddac242248932df7cace7708ed81d814c01621d8a0413857",
+ "sha256": "8706bbd741910d9a42de60a340628e3ff2948ac682859e8790ee8bc4bb5af476",
  "count": 876,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a972dadd80dfd49a884e4e2f0c16b189ab97f560f34890c68c69edc26178aca3",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-swann-s-way_2026-10-30.gvec"
+ "sourceSha256": "61eb969d6e23cbda03ca2807c25268b805e84894391f73f1a79fe2916bf410a9",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-swann-s-way_2026-11-09.gvec"
 }

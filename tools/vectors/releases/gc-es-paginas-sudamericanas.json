@@ -1,14 +1,14 @@
 {
  "id": "gc-es-paginas-sudamericanas",
  "kind": "book",
- "fileName": "gc-es-paginas-sudamericanas_2026-10-30.gvec",
- "sizeBytes": 106266,
- "sha256": "760691bd6c16cbd56bb458fef688f6ecf33d8b6c77e4474e4d9f65e1ca67add8",
- "count": 361,
+ "fileName": "gc-es-paginas-sudamericanas_2026-11-09.gvec",
+ "sizeBytes": 106564,
+ "sha256": "6b97c63a1ff409f33b623f9ca1a18916b54fb2fd2958857fbe2db1dfa8c20989",
+ "count": 362,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "3dd2ab004cc6769bb11f012a1d3287182f87078d75ee5fc3ac15772fa7769b80",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-paginas-sudamericanas_2026-10-30.gvec"
+ "sourceSha256": "0cdd9a1faeee0d0f8ca825b4a09fb5ed452e846bdb9dfd109b2dbb72207a72fa",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-paginas-sudamericanas_2026-11-09.gvec"
 }

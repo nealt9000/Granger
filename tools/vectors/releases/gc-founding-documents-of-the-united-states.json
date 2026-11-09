@@ -1,0 +1,14 @@
+{
+ "id": "gc-founding-documents-of-the-united-states",
+ "kind": "book",
+ "fileName": "gc-founding-documents-of-the-united-states_2026-11-09.gvec",
+ "sizeBytes": 46592,
+ "sha256": "e5cd0f8b6ba6ac063453e1a060b873bdd5f3b0c98fc261f759789464e7f14cd5",
+ "count": 158,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "b397463bb97465ccf0a4e6025b568ab14883534ea0f400ca5e250a9583cfb28f",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-founding-documents-of-the-united-states_2026-11-09.gvec"
+}

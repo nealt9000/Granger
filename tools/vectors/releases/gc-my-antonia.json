@@ -1,14 +1,14 @@
 {
  "id": "gc-my-antonia",
  "kind": "book",
- "fileName": "gc-my-antonia_2026-10-30.gvec",
+ "fileName": "gc-my-antonia_2026-11-09.gvec",
  "sizeBytes": 184474,
- "sha256": "b8c08b8157a5f53682cccab299d53823dbb574676a2b943b33de446854650808",
+ "sha256": "51eff4bb95154f4cd787eabfe4aed396f9983c987e4980e28549832d806181d6",
  "count": 627,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "b0e546fe6c7acca529167a8dbca3d77087f71274e07100a897daf90def1a8bfc",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-my-antonia_2026-10-30.gvec"
+ "sourceSha256": "36439f1e9b126e3a2d6cd9b6bc9f2681eaf9619e431337b5cb3951504dffcb25",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-my-antonia_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-twenty-thousand-leagues-under-the-sea",
  "kind": "book",
- "fileName": "gc-twenty-thousand-leagues-under-the-sea_2026-10-30.gvec",
- "sizeBytes": 259444,
- "sha256": "5c00db3f3b869f501824ced69c2c6b487a5192f342c81592130bb488166b96f9",
- "count": 882,
+ "fileName": "gc-twenty-thousand-leagues-under-the-sea_2026-11-09.gvec",
+ "sizeBytes": 259150,
+ "sha256": "962660ab036c9ab6aa2860778ceeed1f96b66eea3739f40bdc40ab2000d2e535",
+ "count": 881,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "e69f9ec10552138f8e73110a3c6f9214c90dd336c557efae1966b5eeb9281cee",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-twenty-thousand-leagues-under-the-sea_2026-10-30.gvec"
+ "sourceSha256": "964742fbf5076105382d2a43d47700afd3afdbedede87aa478ff37f33232f4d8",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-twenty-thousand-leagues-under-the-sea_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-kidnapped",
  "kind": "book",
- "fileName": "gc-kidnapped_2026-10-30.gvec",
+ "fileName": "gc-kidnapped_2026-11-09.gvec",
  "sizeBytes": 195646,
- "sha256": "532b61f2fc39b16633765aee25aa885028d665ec6c908777dc7413e677d52071",
+ "sha256": "61fe71e75408fac4575908b22cb19d3a5e4624fade2dbee64e4e64c9dc1f6dae",
  "count": 665,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "15fdb7422e574f48e53f90956613e9f3145f0f982a0023e32f60e48cb17be1b4",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-kidnapped_2026-10-30.gvec"
+ "sourceSha256": "da0ec96884a85e0a5df2c19fd9f02451e81973dfd54f4e6e22f4aeca8aa0499a",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-kidnapped_2026-11-09.gvec"
 }

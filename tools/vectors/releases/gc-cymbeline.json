@@ -1,14 +1,14 @@
 {
  "id": "gc-cymbeline",
  "kind": "book",
- "fileName": "gc-cymbeline_2026-10-30.gvec",
- "sizeBytes": 79516,
- "sha256": "25fa959eae96a67a728f4c09a9f78937ea9345351a53d9c1ba4113735ec992d5",
- "count": 270,
+ "fileName": "gc-cymbeline_2026-11-09.gvec",
+ "sizeBytes": 78928,
+ "sha256": "98dabdeecb1e731cbb5e72b445d9577bc810302e88b7340f47cd49e6d54db157",
+ "count": 268,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "7b7dec3cab4da4b3249be465bc7018e5f9d10fa4a4a3b2dcd1838f463e30499c",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-cymbeline_2026-10-30.gvec"
+ "sourceSha256": "a9508c51ad422e348fa0db932d50e5a4287cc7033e19f0c02774289983863c48",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-cymbeline_2026-11-09.gvec"
 }

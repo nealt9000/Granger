@@ -1,14 +1,14 @@
 {
  "id": "gc-main-street",
  "kind": "book",
- "fileName": "gc-main-street_2026-10-30.gvec",
+ "fileName": "gc-main-street_2026-11-09.gvec",
  "sizeBytes": 435256,
- "sha256": "dc3c6a605bef4a0c3469865794d19c37bd4c5f136f09ca1480a2f6d6107da8e1",
+ "sha256": "c98c9b798b9a5a6c8a72e6490ebf6a7353c3bd458a517186b02c7ccb48cba82d",
  "count": 1480,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c33522795b3a19285f3f40286e35a134fe4c877d690aebb8095ad37d3217081e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-main-street_2026-10-30.gvec"
+ "sourceSha256": "abfd140865ceb61ea55dee46f3fd1765f80a61d8e6e47fad02f6e0517b3886e7",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-main-street_2026-11-09.gvec"
 }

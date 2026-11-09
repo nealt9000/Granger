@@ -1,14 +1,14 @@
 {
  "id": "gc-tale-of-genji-volume-2",
  "kind": "book",
- "fileName": "gc-tale-of-genji-volume-2_2026-10-30.gvec",
+ "fileName": "gc-tale-of-genji-volume-2_2026-11-09.gvec",
  "sizeBytes": 137728,
- "sha256": "a58f8f8edb85b9934c8234af8442a547047d0848a37d623ecf3ad075630d7846",
+ "sha256": "953087173a31c2b4e39411233db132363688d41f36641341d5447656f2b6fdaa",
  "count": 468,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "62250fa14c97a3ef1d6cae97f04e59ffc586794bf451f55fb506d3d76b3cef7b",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-tale-of-genji-volume-2_2026-10-30.gvec"
+ "sourceSha256": "50d1852d2401f24c8a3d2c6db3732c5b6b01b0023ea0ddb8a930a0d74af2f5ec",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-tale-of-genji-volume-2_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-frankenstein",
  "kind": "book",
- "fileName": "gc-frankenstein_2026-10-30.gvec",
+ "fileName": "gc-frankenstein_2026-11-09.gvec",
  "sizeBytes": 155368,
- "sha256": "f27a68197f8bf38e4120ec583b1379bac3f208da2789ca754cfa6d6d1c809aea",
+ "sha256": "57266518abbf9adc3e2394c9172dac1e8404e714fe1a1dfde7268275567a21e8",
  "count": 528,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a5aec734a60e1356bddf1fcf990251fead12639bf1c1d7c88f2e29715c1268ca",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-frankenstein_2026-10-30.gvec"
+ "sourceSha256": "49ee3e80b17f514456f4ab29329d408c1a4e85a946b1f2e513d9af022b1f7abb",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-frankenstein_2026-11-09.gvec"
 }

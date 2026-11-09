@@ -1,14 +1,14 @@
 {
  "id": "gc-julius-caesar",
  "kind": "book",
- "fileName": "gc-julius-caesar_2026-10-30.gvec",
+ "fileName": "gc-julius-caesar_2026-11-09.gvec",
  "sizeBytes": 60994,
- "sha256": "f03dff414fbb8050c010f1e69706c7b1811728ae576b5cd34a4116d4b5539eeb",
+ "sha256": "886d5496f9dd8bbac2f58817065d1e58bdfee2cbe307d5e7d88e71ee22db4429",
  "count": 207,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "f13af40858e30af901c82baf38960e214da91c051bee4450331fdcfd9cb35aac",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-julius-caesar_2026-10-30.gvec"
+ "sourceSha256": "ba675d4647ac8131b93013db64b89b17d47cc516d05e44737bebb3813b7c2fd1",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-julius-caesar_2026-11-09.gvec"
 }

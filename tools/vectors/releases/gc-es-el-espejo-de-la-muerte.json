@@ -1,14 +1,14 @@
 {
  "id": "gc-es-el-espejo-de-la-muerte",
  "kind": "book",
- "fileName": "gc-es-el-espejo-de-la-muerte_2026-10-30.gvec",
- "sizeBytes": 125964,
- "sha256": "6c88ed8218a153ceb279c841a370ffb831540b1442680e78925fea793930721a",
- "count": 428,
+ "fileName": "gc-es-el-espejo-de-la-muerte_2026-11-09.gvec",
+ "sizeBytes": 126262,
+ "sha256": "d69b62f8bb87174fa38d7b387eb4b69ddf4fefecfdcc59e3b506f99c062e9199",
+ "count": 429,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "7f18e5388fbf8c3146117dbf738878e80481d568b8ebc201b1a25dcbadb8f2d6",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-el-espejo-de-la-muerte_2026-10-30.gvec"
+ "sourceSha256": "41398218c5e289ad3e4a5c99157e6728fa36a2a7a1b7ff2116996fe6a795e28e",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-el-espejo-de-la-muerte_2026-11-09.gvec"
 }

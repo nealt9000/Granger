@@ -1,14 +1,14 @@
 {
  "id": "gc-troilus-and-cressida",
  "kind": "book",
- "fileName": "gc-troilus-and-cressida_2026-10-30.gvec",
- "sizeBytes": 81280,
- "sha256": "48a7e273448a557267bebf8614c59936e89ea1645682d0f7ff3aa1ca3b5667db",
- "count": 276,
+ "fileName": "gc-troilus-and-cressida_2026-11-09.gvec",
+ "sizeBytes": 80986,
+ "sha256": "d48aa7e46a49da285cc28c59cc1590b5ae55a05174a35f23b4cbb7a63f30f6ff",
+ "count": 275,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "cc39cf349deaf09f1b0aadac617ab203e4d65dd9e142227e4848203e48c9541c",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-troilus-and-cressida_2026-10-30.gvec"
+ "sourceSha256": "59bc4efdd344ee5db3beda3cfb8eacc87bc7a7b44bb478cb4414b2cc72ed8103",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-troilus-and-cressida_2026-11-09.gvec"
 }

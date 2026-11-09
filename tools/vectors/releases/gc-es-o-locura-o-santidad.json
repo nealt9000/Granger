@@ -1,14 +1,14 @@
 {
  "id": "gc-es-o-locura-o-santidad",
  "kind": "book",
- "fileName": "gc-es-o-locura-o-santidad_2026-10-30.gvec",
- "sizeBytes": 69810,
- "sha256": "2ff01278c3806ef85ca763f30c92ebeea4ef516337b15d5a74ce67715eb9b19d",
- "count": 237,
+ "fileName": "gc-es-o-locura-o-santidad_2026-11-09.gvec",
+ "sizeBytes": 70108,
+ "sha256": "f4c95ed12cf72f341d3da42b49fc166a30e5d8a6fc770b10441f6af898a6ae18",
+ "count": 238,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "9cc97d71cdb4de5d331236843dc412808339e8d07f649b6a073ca5f9113b30ef",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-o-locura-o-santidad_2026-10-30.gvec"
+ "sourceSha256": "c9cf34cf68851901eb393fdf4009b56b542b7d8d95f1d374110492e6b0f69363",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-o-locura-o-santidad_2026-11-09.gvec"
 }

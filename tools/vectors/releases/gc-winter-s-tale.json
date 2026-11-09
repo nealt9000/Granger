@@ -1,14 +1,14 @@
 {
  "id": "gc-winter-s-tale",
  "kind": "book",
- "fileName": "gc-winter-s-tale_2026-10-30.gvec",
- "sizeBytes": 73342,
- "sha256": "57b39165e3af4754d3dfc057a0ca9255a81227338fda34ae7d243ada038e6c6b",
- "count": 249,
+ "fileName": "gc-winter-s-tale_2026-11-09.gvec",
+ "sizeBytes": 73048,
+ "sha256": "9e71306862193f5f9f8b0be45e7cca8a45359b38c4ae2506bc7f5b8a4341b1f5",
+ "count": 248,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "d883834920281afb0e57cbb566ec0f1e9123f07f9949d9b3696986d3a90a85f3",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-winter-s-tale_2026-10-30.gvec"
+ "sourceSha256": "cb57d29a139416b79c7ef3d07b9a843933be1aa9f17aba6463829242ac196164",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-winter-s-tale_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-jacob-s-room",
  "kind": "book",
- "fileName": "gc-jacob-s-room_2026-10-30.gvec",
+ "fileName": "gc-jacob-s-room_2026-11-09.gvec",
  "sizeBytes": 134200,
- "sha256": "425b0391e6ba227c4734b015e526305d3041fbbbd32710ce68416f637c9f7e85",
+ "sha256": "1a1ce767da5429859c3f9b80cf194ab59a825ea3ab9690a648728ed8bc752bad",
  "count": 456,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "34be64c48334f9f52bbb04fd50fbc6293c370a8d5d2835a51af560e519748fdc",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-jacob-s-room_2026-10-30.gvec"
+ "sourceSha256": "702f3d032c4b9ee0483129998f30d39e42e8a4edd09b117a8991270ec9292c40",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-jacob-s-room_2026-11-09.gvec"
 }

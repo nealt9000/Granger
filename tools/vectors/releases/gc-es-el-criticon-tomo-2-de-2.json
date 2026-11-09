@@ -1,14 +1,14 @@
 {
  "id": "gc-es-el-criticon-tomo-2-de-2",
  "kind": "book",
- "fileName": "gc-es-el-criticon-tomo-2-de-2_2026-10-30.gvec",
- "sizeBytes": 290016,
- "sha256": "4ec86fd3c95c6df4fde0067f2d01e0d1aeaf75b394a75a42f092f253efea87b9",
- "count": 986,
+ "fileName": "gc-es-el-criticon-tomo-2-de-2_2026-11-09.gvec",
+ "sizeBytes": 290314,
+ "sha256": "a9931f0582ff3a9940c85a2e3f1297e8330786a648da3b5fc886e8163dd3d277",
+ "count": 987,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "908048a6c0af69afb5b93a5a1ca510fdb991f382444e2ad234827eea11b6cb2c",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-el-criticon-tomo-2-de-2_2026-10-30.gvec"
+ "sourceSha256": "4d8383c4e3fcee425c96a8044769a31d61ec60ae538754ef84150f8676a18fb8",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-el-criticon-tomo-2-de-2_2026-11-09.gvec"
 }

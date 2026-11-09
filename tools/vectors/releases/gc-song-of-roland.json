@@ -1,14 +1,14 @@
 {
  "id": "gc-song-of-roland",
  "kind": "book",
- "fileName": "gc-song-of-roland_2026-10-30.gvec",
+ "fileName": "gc-song-of-roland_2026-11-09.gvec",
  "sizeBytes": 86278,
- "sha256": "8b538b01cbdbcd4deb58fd95126b8fd2fe334a7897bea91f5eff8656688f212d",
+ "sha256": "74576dd46d5fee071b15f2cafe4a3b8449db168310c86bd72b6bf3c203ba83e1",
  "count": 293,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "0416aefbab9e3e60d8acd9b7e31659f87b1d93d886fbd1c970eea1e712d85f55",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-song-of-roland_2026-10-30.gvec"
+ "sourceSha256": "20554c887bdf4fa4d1c2f2da1a8bfdfa6d872dec0028e7b5b4be5686edd23111",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-song-of-roland_2026-11-09.gvec"
 }

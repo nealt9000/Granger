@@ -1,14 +1,14 @@
 {
  "id": "gc-duenna",
  "kind": "book",
- "fileName": "gc-duenna_2026-10-30.gvec",
+ "fileName": "gc-duenna_2026-11-09.gvec",
  "sizeBytes": 54820,
- "sha256": "91c89e89edafb7bdbbac2d3315d2d8b41048e6048c28dfaec012aa29e617a39f",
+ "sha256": "f74354e31969af268551abd1c3ceab96420e665dc064a5bfd11eec453aca32a8",
  "count": 186,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "4260cc8477a3160781490f90063e6963f67bd7333a83ab2d7f5f56ca87ae727e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-duenna_2026-10-30.gvec"
+ "sourceSha256": "c98c844179c65aa1e25da3af8b85584eeb4ed775edef05880c74f69182629cd1",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-duenna_2026-11-09.gvec"
 }

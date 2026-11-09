@@ -1,14 +1,14 @@
 {
  "id": "gc-age-of-innocence",
  "kind": "book",
- "fileName": "gc-age-of-innocence_2026-10-30.gvec",
+ "fileName": "gc-age-of-innocence_2026-11-09.gvec",
  "sizeBytes": 262384,
- "sha256": "591a08196e89763494411344cabc9a40d4222f08185d95fce3b51a0d2994c744",
+ "sha256": "9ad6ad8cd57f22594fa29beab2f9ab1b38162d3da6b8aa6548bc839eca5d916f",
  "count": 892,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "cb1532afc2c7cf3b34c013bb6dc1c460c5ad6a1e272f43988ed1625315fe1496",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-age-of-innocence_2026-10-30.gvec"
+ "sourceSha256": "ac501e4cee4243a210cbb3c0d30bf47d87a5e077a6c342cdbb320298d80b7c10",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-age-of-innocence_2026-11-09.gvec"
 }

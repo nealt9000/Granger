@@ -1,14 +1,14 @@
 {
  "id": "gc-tartuffe",
  "kind": "book",
- "fileName": "gc-tartuffe_2026-10-30.gvec",
+ "fileName": "gc-tartuffe_2026-11-09.gvec",
  "sizeBytes": 48646,
- "sha256": "556f1b99ee872be2bf6eb1f7f2ffceca5242609f2bc39ce82207047a50a1f774",
+ "sha256": "d2be8ebc55f5180d1df8bd8ffc2e50810eac26a417e766d1a8a9ec534bcc26e3",
  "count": 165,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "3dfde720101f2eb9c12b28a111efc9dcaff08e353c801263166ee7199ff695c2",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-tartuffe_2026-10-30.gvec"
+ "sourceSha256": "934747426df1b805859c381b62d504490ed39bcee0049468946a84ee6913813c",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-tartuffe_2026-11-09.gvec"
 }

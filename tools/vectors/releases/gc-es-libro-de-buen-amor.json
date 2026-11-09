@@ -1,14 +1,14 @@
 {
  "id": "gc-es-libro-de-buen-amor",
  "kind": "book",
- "fileName": "gc-es-libro-de-buen-amor_2026-10-30.gvec",
- "sizeBytes": 495522,
- "sha256": "75012f1ef77cbedf6125719a2243bc9a8ed4cbca787ea7e4521ecc21d904dd76",
- "count": 1685,
+ "fileName": "gc-es-libro-de-buen-amor_2026-11-09.gvec",
+ "sizeBytes": 495820,
+ "sha256": "8e987d6b6945b459a46e9f9f1403d00d7017bb67785c9c255746a79de2ff16ce",
+ "count": 1686,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "cbdcde110bc003b6f9c2fddad7fd89e5451aa9a522640e208e879afc73a82911",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-libro-de-buen-amor_2026-10-30.gvec"
+ "sourceSha256": "5bd3f468c6cc70db83071bd1a052023ee005b644df53c348ca308c405142bcec",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-libro-de-buen-amor_2026-11-09.gvec"
 }

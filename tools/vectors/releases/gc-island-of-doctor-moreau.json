@@ -1,14 +1,14 @@
 {
  "id": "gc-island-of-doctor-moreau",
  "kind": "book",
- "fileName": "gc-island-of-doctor-moreau_2026-10-30.gvec",
+ "fileName": "gc-island-of-doctor-moreau_2026-11-09.gvec",
  "sizeBytes": 103330,
- "sha256": "b21a852b06b03cbe7302b7022f23af2e47335e062294f3f9b3cdd593dc793462",
+ "sha256": "4bf88cb8e8cac86f4d8fafbfe0b973b113e21ee2c193f57b12f85dad3bbb96c9",
  "count": 351,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "eede33ba873a5f408c6eaf62050af61780847aad7ab41f623c08fecefdbccb07",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-island-of-doctor-moreau_2026-10-30.gvec"
+ "sourceSha256": "56de5fa887353f39e9e2e5e88690d381774814e136ffebd446c0d5e8a78e1ffd",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-island-of-doctor-moreau_2026-11-09.gvec"
 }

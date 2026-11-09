@@ -1,14 +1,14 @@
 {
  "id": "gc-sonnets",
  "kind": "book",
- "fileName": "gc-sonnets_2026-10-30.gvec",
+ "fileName": "gc-sonnets_2026-11-09.gvec",
  "sizeBytes": 46000,
- "sha256": "a5105e24adcbaa52ce551ce31fb0436e6c0f44f4798f948d3e38b7647bd4ffa6",
+ "sha256": "4e02c7a0ad059d77a23f2121560b316aeddcbd890ab3459a042f571e48cffc4c",
  "count": 156,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "d2731621f92bd9f76611ba38f20f00b93696f882ada8e06f2831b513de70b45b",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-sonnets_2026-10-30.gvec"
+ "sourceSha256": "c6ac6d10324afb41db703c1014239ab81416c46f90707137f8d4fc5aeff79e8f",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-sonnets_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-strange-case-of-dr-jekyll-and-mr-hyde",
  "kind": "book",
- "fileName": "gc-strange-case-of-dr-jekyll-and-mr-hyde_2026-10-30.gvec",
+ "fileName": "gc-strange-case-of-dr-jekyll-and-mr-hyde_2026-11-09.gvec",
  "sizeBytes": 50410,
- "sha256": "cf88f04cd4bfa9256fae2dc8a8b8e0ff887b51807df2c73dfd3a696d07021285",
+ "sha256": "9c854b5f94ce8822d2f23b76799d1083026f4ced71df5c742ffacface20ab654",
  "count": 171,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "f0b0056ee389cd469f89e23ef0f2fdd15e8ec5d6f99db96d91794e7aabfa3033",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-strange-case-of-dr-jekyll-and-mr-hyde_2026-10-30.gvec"
+ "sourceSha256": "49dafcb57279d748fae732f621f5702eee05358522d73397995a23919744b17d",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-strange-case-of-dr-jekyll-and-mr-hyde_2026-11-09.gvec"
 }

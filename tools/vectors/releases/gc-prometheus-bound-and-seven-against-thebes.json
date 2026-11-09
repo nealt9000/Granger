@@ -1,0 +1,14 @@
+{
+ "id": "gc-prometheus-bound-and-seven-against-thebes",
+ "kind": "book",
+ "fileName": "gc-prometheus-bound-and-seven-against-thebes_2026-11-09.gvec",
+ "sizeBytes": 65404,
+ "sha256": "13770f58ebe3984c050c6d96e244631bc808521f8015bc0796ada8863878572f",
+ "count": 222,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "c22051c3e1edffbb926b2907a35c99b1464d47b44d5959454312cd722aaf082f",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-prometheus-bound-and-seven-against-thebes_2026-11-09.gvec"
+}

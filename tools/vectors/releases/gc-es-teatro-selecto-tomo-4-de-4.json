@@ -1,14 +1,14 @@
 {
  "id": "gc-es-teatro-selecto-tomo-4-de-4",
  "kind": "book",
- "fileName": "gc-es-teatro-selecto-tomo-4-de-4_2026-10-30.gvec",
- "sizeBytes": 342936,
- "sha256": "bb40e3ae824a7259cfccdacfa90e99a183492d36b67640ad70c96e69a10a05ac",
- "count": 1166,
+ "fileName": "gc-es-teatro-selecto-tomo-4-de-4_2026-11-09.gvec",
+ "sizeBytes": 343234,
+ "sha256": "86932e74d3ef7ec85f23285a86c7bf4dcf4f5c634bce282973419b29e5b63eaf",
+ "count": 1167,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "a287a3b39ff73e410f6ea8dfd5650bb7bc44f3294814888842b1e71486eaa231",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-teatro-selecto-tomo-4-de-4_2026-10-30.gvec"
+ "sourceSha256": "9844b7e708518203d5de9c1cb947965f40c75d7a3fcc5daff7c9afe6e941bfd4",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-teatro-selecto-tomo-4-de-4_2026-11-09.gvec"
 }

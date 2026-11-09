@@ -1,0 +1,14 @@
+{
+ "id": "gc-murder-of-roger-ackroyd",
+ "kind": "book",
+ "fileName": "gc-murder-of-roger-ackroyd_2026-11-09.gvec",
+ "sizeBytes": 218284,
+ "sha256": "b7dfd20042a6258b1df9f5c2f4baa008194f4f3802197e64d69c09c496dcf4e7",
+ "count": 742,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "0494ad623678c5fc97cddbfcf78bd1d8192d3a69de6dfc135100a6d21ced3615",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-murder-of-roger-ackroyd_2026-11-09.gvec"
+}

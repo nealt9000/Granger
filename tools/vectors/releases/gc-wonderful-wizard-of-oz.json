@@ -1,0 +1,14 @@
+{
+ "id": "gc-wonderful-wizard-of-oz",
+ "kind": "book",
+ "fileName": "gc-wonderful-wizard-of-oz_2026-11-09.gvec",
+ "sizeBytes": 113326,
+ "sha256": "26c63afd041a33ce34675521cd12025238f813fc92fb2e4d7cac25bfe1f33c47",
+ "count": 385,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "4fc2a91c687dac87c707bb9649bab95f851a5e16dffd7dd69a9a812693c88118",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-wonderful-wizard-of-oz_2026-11-09.gvec"
+}

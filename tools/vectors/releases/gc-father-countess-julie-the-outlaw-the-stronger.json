@@ -1,14 +1,14 @@
 {
  "id": "gc-father-countess-julie-the-outlaw-the-stronger",
  "kind": "book",
- "fileName": "gc-father-countess-julie-the-outlaw-the-stronger_2026-10-30.gvec",
- "sizeBytes": 117148,
- "sha256": "3a38528bbe0c10ae775442b3a9f6d63f96a7c601f7e9df8b01bf47752ced3949",
- "count": 398,
+ "fileName": "gc-father-countess-julie-the-outlaw-the-stronger_2026-11-09.gvec",
+ "sizeBytes": 116854,
+ "sha256": "f31bdea9135b96296f4f5aba1e505b4156e60797b849dde3a8bfe0d9dde5e691",
+ "count": 397,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "33626b581d6acd45f3a7b9520ae4c5f84476d019367ba061c92c0b82171337c1",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-father-countess-julie-the-outlaw-the-stronger_2026-10-30.gvec"
+ "sourceSha256": "37b4eb493569e57ccac24fef00c755c241f5019dd4aa8b08cd3bea5e594b8537",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-father-countess-julie-the-outlaw-the-stronger_2026-11-09.gvec"
 }

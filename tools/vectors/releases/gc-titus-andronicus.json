@@ -1,14 +1,14 @@
 {
  "id": "gc-titus-andronicus",
  "kind": "book",
- "fileName": "gc-titus-andronicus_2026-10-30.gvec",
+ "fileName": "gc-titus-andronicus_2026-11-09.gvec",
  "sizeBytes": 60112,
- "sha256": "4befbbf33dba3fdc8817dcbd8dd2ed9dbaa4e32e0a163d94813bd04c6f6fedbb",
+ "sha256": "057aea9b0f7a1a2544f3f3099bb5c678c8aeb2903fd6972067682a287ba9634d",
  "count": 204,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "4ccb1748987865c925fc52ff09d1890007955788dfc48025c7186f4aac9b6f03",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-titus-andronicus_2026-10-30.gvec"
+ "sourceSha256": "617f0b83c4976db4997b5aa944ad7195ff81ba461b165804aa0fe8b8bfcdfaed",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-titus-andronicus_2026-11-09.gvec"
 }

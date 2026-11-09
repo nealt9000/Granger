@@ -1,14 +1,14 @@
 {
  "id": "gc-pride-and-prejudice",
  "kind": "book",
- "fileName": "gc-pride-and-prejudice_2026-10-30.gvec",
- "sizeBytes": 297664,
- "sha256": "3dce29ee332a63979b374b7b71cff1434e3ae95e341742847c903516ec0bd4a9",
- "count": 1012,
+ "fileName": "gc-pride-and-prejudice_2026-11-09.gvec",
+ "sizeBytes": 295312,
+ "sha256": "7f3c8953d12931a2ebd6009d5ef001b39f78bcd304b327eb6db4f1e3249d96ed",
+ "count": 1004,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "6abe70de6d2c8cca4221d9e4711500cc0a0a9849ea93510d46bede253bc0dd62",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-pride-and-prejudice_2026-10-30.gvec"
+ "sourceSha256": "397ae50744b8ba95278c7c272f2b7eb694038e0fbe65e5d0372851d20ecff718",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-pride-and-prejudice_2026-11-09.gvec"
 }

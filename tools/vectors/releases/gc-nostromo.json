@@ -1,14 +1,14 @@
 {
  "id": "gc-nostromo",
  "kind": "book",
- "fileName": "gc-nostromo_2026-10-30.gvec",
+ "fileName": "gc-nostromo_2026-11-09.gvec",
  "sizeBytes": 336766,
- "sha256": "fc2c43c3a2dddf729bc8a8841e675509ea2aaab9293e290821cc829e1556fed2",
+ "sha256": "d539015434ee659401fb40a6d5e9dd985ee2a8a9f7a34a06092da2be8145159e",
  "count": 1145,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "56ccb398763349aa308700a3e21c61faa69014aacdb630f71af3910cdd970688",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-nostromo_2026-10-30.gvec"
+ "sourceSha256": "2aeffece30ca7e0ceb1063a53d988d449eb338fb1f3cd8abafa9559481944edc",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-nostromo_2026-11-09.gvec"
 }

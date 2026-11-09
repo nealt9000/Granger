@@ -1,14 +1,14 @@
 {
  "id": "gc-es-viaje-al-parnaso-la-numancia-el-trato-de-argel",
  "kind": "book",
- "fileName": "gc-es-viaje-al-parnaso-la-numancia-el-trato-de-argel_2026-10-30.gvec",
- "sizeBytes": 64518,
- "sha256": "32b5dce01ad953265c384d4f5abcafd16195151a6111e026d1e045c02e494081",
- "count": 219,
+ "fileName": "gc-es-viaje-al-parnaso-la-numancia-el-trato-de-argel_2026-11-09.gvec",
+ "sizeBytes": 64816,
+ "sha256": "50d39cdee2f7fb9a11ab81d2d3db1d2b28ac1851b555eb2de0ef90900e86f6ae",
+ "count": 220,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c1230ac580015e2ae4f6bc43e1ba03e467f3340235dbfafad52ce3acbb77a8fa",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-viaje-al-parnaso-la-numancia-el-trato-de-argel_2026-10-30.gvec"
+ "sourceSha256": "b791311091884859dde0f2654bc8027aaf1641be5e96017718a59b69a576d19b",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-viaje-al-parnaso-la-numancia-el-trato-de-argel_2026-11-09.gvec"
 }

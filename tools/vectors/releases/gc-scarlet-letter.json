@@ -1,14 +1,14 @@
 {
  "id": "gc-scarlet-letter",
  "kind": "book",
- "fileName": "gc-scarlet-letter_2026-10-30.gvec",
+ "fileName": "gc-scarlet-letter_2026-11-09.gvec",
  "sizeBytes": 141844,
- "sha256": "677cb67f1a136ad9af2dc25b07017ca0d5a2e7c281d8076165a78533e976f38f",
+ "sha256": "1dd0e5f186b073201f0c8e0fb38de3a8527342eb2ed8f94ff3e03100fbcc78cb",
  "count": 482,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "91c4bb29b76e32cb87e1a02636c331415c4f9b1fe6fac645e2765b69aaae7a37",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-scarlet-letter_2026-10-30.gvec"
+ "sourceSha256": "6412790974b7fe25cf740f9c3a5042bf17a0ff6939ce7ea7b91e6d862607d472",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-scarlet-letter_2026-11-09.gvec"
 }

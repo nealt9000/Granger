@@ -1,14 +1,14 @@
 {
  "id": "gc-es-sotileza",
  "kind": "book",
- "fileName": "gc-es-sotileza_2026-10-30.gvec",
- "sizeBytes": 259734,
- "sha256": "b20ce4c20a727bfdaada55739e751cb20af37ec3c9b89ee2e695a1df7d050218",
- "count": 883,
+ "fileName": "gc-es-sotileza_2026-11-09.gvec",
+ "sizeBytes": 260032,
+ "sha256": "14ffc6701e2d82a1fe86e8b5589efadb58434ff1ef03cd7cf84727af719772a9",
+ "count": 884,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "009570ff49818be88c0dfba31592618aec3bfd56c1130336ff3468054b653c35",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-sotileza_2026-10-30.gvec"
+ "sourceSha256": "9f359219719362d82dfe748135ce075ed263a724ae581b19cb1c2bb0f83ca2b2",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-sotileza_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-sea-gull",
  "kind": "book",
- "fileName": "gc-sea-gull_2026-10-30.gvec",
+ "fileName": "gc-sea-gull_2026-11-09.gvec",
  "sizeBytes": 51880,
- "sha256": "15c9c7692aa65e59f28d8685a2245617bc6620f3b1747cc602b6a3b999596602",
+ "sha256": "378daa3930e47f1aa335fdf7700765e0d43053138dbebe745e5f9f719d349287",
  "count": 176,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "965cad10235e732c2d52c05ee8462f07244bbc1d69218eef0b29502c522e63b9",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-sea-gull_2026-10-30.gvec"
+ "sourceSha256": "4079e3f305a813031f9443fa94ae0fa0221009027b3771911072466c4ef540c5",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-sea-gull_2026-11-09.gvec"
 }

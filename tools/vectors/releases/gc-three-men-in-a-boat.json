@@ -1,14 +1,14 @@
 {
  "id": "gc-three-men-in-a-boat",
  "kind": "book",
- "fileName": "gc-three-men-in-a-boat_2026-10-30.gvec",
+ "fileName": "gc-three-men-in-a-boat_2026-11-09.gvec",
  "sizeBytes": 181240,
- "sha256": "8e1209cc006b11a0b6867e83f81688c30d21ca4989e2c1b6fda5b0ab43266d9f",
+ "sha256": "6f9c02b5d2a33ffc97da823214837e07dddd0e89bc168e2ba8c41db5b87172ea",
  "count": 616,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "84ca3af2e76f917cd415c18b8bbc6754ed5b2326fb2a45c2c83c9d61e6c8984b",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-three-men-in-a-boat_2026-10-30.gvec"
+ "sourceSha256": "9ac1af5ad0b19dffbe63b5380badbe83b921f6dd12c355155c7c105874eba140",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-three-men-in-a-boat_2026-11-09.gvec"
 }

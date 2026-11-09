@@ -1,14 +1,14 @@
 {
  "id": "gc-enemy-of-the-people",
  "kind": "book",
- "fileName": "gc-enemy-of-the-people_2026-10-30.gvec",
+ "fileName": "gc-enemy-of-the-people_2026-11-09.gvec",
  "sizeBytes": 102448,
- "sha256": "b2ece26393def65d2788549be170787c5c58beed983c3e5dbb5a83bc48c43132",
+ "sha256": "48a6bb9e3ce02aa250a87af313cabc919973cc26ee4d86e712e9c9377c9230c4",
  "count": 348,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "aced54690db8d8e58e649ee3ed0129a80c590af931d5d5edcf28f8a68863fbd7",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-enemy-of-the-people_2026-10-30.gvec"
+ "sourceSha256": "ad2d4576ee817bc4b988f81187bdc0cfccc95bbb5b4d85430c98815f25203d17",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-enemy-of-the-people_2026-11-09.gvec"
 }

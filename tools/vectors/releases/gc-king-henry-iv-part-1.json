@@ -1,14 +1,14 @@
 {
  "id": "gc-king-henry-iv-part-1",
  "kind": "book",
- "fileName": "gc-king-henry-iv-part-1_2026-10-30.gvec",
- "sizeBytes": 69226,
- "sha256": "bd8f19bff3a305fa6091dc97d078a0591b01792d54b9d688a8ed7300f58ea3aa",
- "count": 235,
+ "fileName": "gc-king-henry-iv-part-1_2026-11-09.gvec",
+ "sizeBytes": 68932,
+ "sha256": "85e2d163de8568b742f9f466fb59d4fd2dd5af7f4294cc2eefed974802a47f7c",
+ "count": 234,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "5746bea28953bf01d5aebe445d6c7e943cff9bab4be799548bf83560284dee5c",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-king-henry-iv-part-1_2026-10-30.gvec"
+ "sourceSha256": "40fbe9259bb86392325350a178d1a6e95741300a40e75aa711bfd16249019ea0",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-king-henry-iv-part-1_2026-11-09.gvec"
 }

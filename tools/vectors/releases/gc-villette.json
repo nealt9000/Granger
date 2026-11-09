@@ -1,14 +1,14 @@
 {
  "id": "gc-villette",
  "kind": "book",
- "fileName": "gc-villette_2026-10-30.gvec",
+ "fileName": "gc-villette_2026-11-09.gvec",
  "sizeBytes": 442018,
- "sha256": "8b3f59f0001c471efa15acc3adbf85c4be1f8661625e2f34565ceebb95c9e1cb",
+ "sha256": "25480efed802765f46c4dc8004f8049129ada957783cef41c32245d1bda0c85d",
  "count": 1503,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "7810a4ae353d29f574e89c18904e980bee0d4b6224ad56e3c4a0ce66d1b0f54c",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-villette_2026-10-30.gvec"
+ "sourceSha256": "e2a31cb3f8fa0ffbb45cdf6deaae9731e23d3d1d981584075b8c5b68f72b97d2",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-villette_2026-11-09.gvec"
 }

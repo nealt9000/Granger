@@ -1,0 +1,14 @@
+{
+ "id": "gc-up-from-slavery",
+ "kind": "book",
+ "fileName": "gc-up-from-slavery_2026-11-09.gvec",
+ "sizeBytes": 145960,
+ "sha256": "d62dd8c37de6a2a49b0071477d04089b01fad17ae61e1dc83231fe04d70fe1b8",
+ "count": 496,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "3542ce4a874db015c37f06a7160a198876059440557503d9d715324f63972db7",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-up-from-slavery_2026-11-09.gvec"
+}

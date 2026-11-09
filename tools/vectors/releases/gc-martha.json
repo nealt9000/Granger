@@ -1,14 +1,14 @@
 {
  "id": "gc-martha",
  "kind": "book",
- "fileName": "gc-martha_2026-10-30.gvec",
+ "fileName": "gc-martha_2026-11-09.gvec",
  "sizeBytes": 39826,
- "sha256": "bce3ae10d635e63acc4fee2d0122b1e093843ca7a5b5c36467bfee3e776a8357",
+ "sha256": "d6434c9e0c169b526ee480e3be009c331021dc374c80428c75564fa9d065a674",
  "count": 135,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "9033f10a92b4c537e232483f363c2da9f4043ae763a8275a0c452722b76d47af",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-martha_2026-10-30.gvec"
+ "sourceSha256": "e752658b7d9566cd3eb67a987d22ea82b9304ae1c909baec61aae6e66bdc5070",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-martha_2026-11-09.gvec"
 }

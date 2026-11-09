@@ -1,14 +1,14 @@
 {
  "id": "gc-hedda-gabler",
  "kind": "book",
- "fileName": "gc-hedda-gabler_2026-10-30.gvec",
- "sizeBytes": 99802,
- "sha256": "50d4f864535aae9a8e6075bdd52a667f78763a0b0ef81dabfad3888466d874ad",
- "count": 339,
+ "fileName": "gc-hedda-gabler_2026-11-09.gvec",
+ "sizeBytes": 99214,
+ "sha256": "e12066439510a9911705367c7efd3ff1b3a59841090d2094ce37ef79cebb4e0c",
+ "count": 337,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ed0303b8d3e9080f4af1f33301185ae1f395ec36a0d0d91ff87623e0aa3be50c",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-hedda-gabler_2026-10-30.gvec"
+ "sourceSha256": "7efc206d049b452c5ed94f224bac884807ed1b6a508b3e9dedab8f4772058fc2",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-hedda-gabler_2026-11-09.gvec"
 }

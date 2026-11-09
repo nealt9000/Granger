@@ -1,14 +1,14 @@
 {
  "id": "gc-antony-and-cleopatra",
  "kind": "book",
- "fileName": "gc-antony-and-cleopatra_2026-10-30.gvec",
- "sizeBytes": 87454,
- "sha256": "ded4f0bac86deeeb2245e46ac05da9a8df72eb3f10639c58fb383eedbe3654b0",
- "count": 297,
+ "fileName": "gc-antony-and-cleopatra_2026-11-09.gvec",
+ "sizeBytes": 87160,
+ "sha256": "0940874272ad69450fb9dd2c7cf0ef119e000001c59d77805499d1482fb62484",
+ "count": 296,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "d2835da92f3cdf268981cb441ae71c3dad74fbe00d889db383b3ac57b967648e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-antony-and-cleopatra_2026-10-30.gvec"
+ "sourceSha256": "18774a873d6b8cf79aeb2c0800e7bd941729ab3a22c436c24cb0edb75af1a8de",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-antony-and-cleopatra_2026-11-09.gvec"
 }

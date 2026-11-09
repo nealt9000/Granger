@@ -1,14 +1,14 @@
 {
  "id": "gc-es-la-tribuna",
  "kind": "book",
- "fileName": "gc-es-la-tribuna_2026-10-30.gvec",
- "sizeBytes": 134196,
- "sha256": "ddda67190562f2add9d321f8714655d0680c139ec2bf5c16fef876d4ed105eca",
+ "fileName": "gc-es-la-tribuna_2026-11-09.gvec",
+ "sizeBytes": 134200,
+ "sha256": "d32274308a4de925fb5c17abe4e2ea2aa98f59fc92a4466e35cacbcb44435190",
  "count": 456,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ff98cf995038f3524ea75b8699a2b973bbb25e64cd9b3c3524c03623c3e8a6b3",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-la-tribuna_2026-10-30.gvec"
+ "sourceSha256": "f9b0928deb5400494e5b255fbb24bee325ffbcb823359cb9d0b77f4e11a81315",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-la-tribuna_2026-11-09.gvec"
 }

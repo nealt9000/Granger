@@ -1,14 +1,14 @@
 {
  "id": "gc-es-fabulas",
  "kind": "book",
- "fileName": "gc-es-fabulas_2026-10-30.gvec",
- "sizeBytes": 103914,
- "sha256": "21aa1175ef578a036a770e7924886fd6c4ebb7d4deb444159f1819a8bbf11de0",
- "count": 353,
+ "fileName": "gc-es-fabulas_2026-11-09.gvec",
+ "sizeBytes": 104212,
+ "sha256": "cf881c9b604d6ab69fde11a76979fe5db9a6dfac7c49ae4db62f094144a7741b",
+ "count": 354,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "16773cb27507f6099b88174130085340d2683a94c9d2fb58953defc7270c89d9",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-fabulas_2026-10-30.gvec"
+ "sourceSha256": "0bc29c6fdd2962c6764d40ff68c58c8df210c3c9fa77efcd264a2e7b7ceb8940",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-fabulas_2026-11-09.gvec"
 }

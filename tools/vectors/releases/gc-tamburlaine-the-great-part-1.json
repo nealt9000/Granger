@@ -1,14 +1,14 @@
 {
  "id": "gc-tamburlaine-the-great-part-1",
  "kind": "book",
- "fileName": "gc-tamburlaine-the-great-part-1_2026-10-30.gvec",
- "sizeBytes": 39238,
- "sha256": "1fc123b2e4ae2bcb652c755b7925e13be2feed60cc7b898668040165abe56604",
- "count": 133,
+ "fileName": "gc-tamburlaine-the-great-part-1_2026-11-09.gvec",
+ "sizeBytes": 70696,
+ "sha256": "6a1aba4c6c148edea4621d3d4b048d3dc8a4c7fb19f401e9c138e796433cd73b",
+ "count": 240,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "633b07367c1559b4cdbb49bbc50bde0c9f7c43d6214a4435d70bf998ad07c6a2",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-tamburlaine-the-great-part-1_2026-10-30.gvec"
+ "sourceSha256": "21a989306c998f605d343ccf637d9bf1fbf6654c6e5a674c1387cb859e67ee19",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-tamburlaine-the-great-part-1_2026-11-09.gvec"
 }

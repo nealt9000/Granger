@@ -1,14 +1,14 @@
 {
  "id": "gc-mrs-dalloway",
  "kind": "book",
- "fileName": "gc-mrs-dalloway_2026-10-30.gvec",
+ "fileName": "gc-mrs-dalloway_2026-11-09.gvec",
  "sizeBytes": 123322,
- "sha256": "04ca4d7848daa3be4631ab471319f3afca0bfd3982b8dd43484e977bbad9687f",
+ "sha256": "2574d054af6096fab18ac52ed4f244cf17ee1b1bf6c4b55f3d1dbc616d6126e9",
  "count": 419,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "f5b7c67ee0b2ce75541dcda339b5eb480b52c645ed092354af69feb0f0702e52",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-mrs-dalloway_2026-10-30.gvec"
+ "sourceSha256": "7e979f557fdce3b0d236233e369d657caf5811c184bed0c0d2e7e9a1e51123f4",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-mrs-dalloway_2026-11-09.gvec"
 }

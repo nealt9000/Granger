@@ -1,0 +1,14 @@
+{
+ "id": "gc-magic-mountain",
+ "kind": "book",
+ "fileName": "gc-magic-mountain_2026-11-09.gvec",
+ "sizeBytes": 547858,
+ "sha256": "d2eeb3ec681f57d77491e04f1f3ef9397679aea8b2fcf05064b4ba27c99e472c",
+ "count": 1863,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "df3d67878a9acfb243a0ec7482b84912058947e59ef8c2b2a26661954133a818",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-magic-mountain_2026-11-09.gvec"
+}

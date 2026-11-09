@@ -1,14 +1,14 @@
 {
  "id": "gc-odes",
  "kind": "book",
- "fileName": "gc-odes_2026-10-30.gvec",
+ "fileName": "gc-odes_2026-11-09.gvec",
  "sizeBytes": 48940,
- "sha256": "37450245868ebd1fcaf536e9b7c7bffdb2c2a7bf887b3aeadb6d86597b80bc38",
+ "sha256": "ad549dc6bef13fa7aa295ddfc46bd84bce263c7d35b32e5e2c49f462cb8eef68",
  "count": 166,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "782cca4311697846352246b8d085f306a40557996cdb8c54d7d7c8603388ebef",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-odes_2026-10-30.gvec"
+ "sourceSha256": "f97577b14f37df7aa8a14f25c8a0bb07d6d1f139e561fd2dd57139205bf9fe23",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-odes_2026-11-09.gvec"
 }

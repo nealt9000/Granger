@@ -1,14 +1,14 @@
 {
  "id": "gc-gorgias",
  "kind": "book",
- "fileName": "gc-gorgias_2026-10-30.gvec",
+ "fileName": "gc-gorgias_2026-11-09.gvec",
  "sizeBytes": 109504,
- "sha256": "2580f1e3d20acc3eebf2f5a0a2cafbc268dcc488c5cd1075a91f5e48efa9be1e",
+ "sha256": "42ec0794c50a548c84c3c4e61d59c9dcd1ca0f27081a341573a0478e7d375085",
  "count": 372,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c2c05fb9b99fc9d8020b9928570a6936aa3bf7fbed80fd5a714d09d768f0af60",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-gorgias_2026-10-30.gvec"
+ "sourceSha256": "1761afb44cb0f50c3dbeed0c1878009ffd3d98d5d0234c4973d99bebb9171773",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-gorgias_2026-11-09.gvec"
 }

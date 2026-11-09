@@ -1,14 +1,14 @@
 {
  "id": "gc-es-reglas-y-consejos-sobre-investigacion-cientifica",
  "kind": "book",
- "fileName": "gc-es-reglas-y-consejos-sobre-investigacion-cientifica_2026-10-30.gvec",
- "sizeBytes": 133608,
- "sha256": "dff781c763fee16cfdddd509d07a520a41e61697c222e2c0664044366271cd55",
- "count": 454,
+ "fileName": "gc-es-reglas-y-consejos-sobre-investigacion-cientifica_2026-11-09.gvec",
+ "sizeBytes": 133906,
+ "sha256": "4910fc60907caefd7e92b24e98008cb28de06d7ab79c0b984dc21c502aa4c9bb",
+ "count": 455,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "9e2db89017334008bae2742de8175aea4c15a0c04b41193492a854f521bd50f1",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-reglas-y-consejos-sobre-investigacion-cientifica_2026-10-30.gvec"
+ "sourceSha256": "893ebd76ba16cd6c1d1cb5e433f7670253613cdb3f92e240f2f164176d9f51b1",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-reglas-y-consejos-sobre-investigacion-cientifica_2026-11-09.gvec"
 }

@@ -1,0 +1,14 @@
+{
+ "id": "gc-room-of-one-s-own",
+ "kind": "book",
+ "fileName": "gc-room-of-one-s-own_2026-11-09.gvec",
+ "sizeBytes": 45706,
+ "sha256": "e7e385f62daa2ad0448098944040cec501ce7fb408368f80da675ba3f9d32412",
+ "count": 155,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "dd6254275b2db7794fea0378f352b7ee1e1a98067481a02821cbbe54cfb16087",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-room-of-one-s-own_2026-11-09.gvec"
+}

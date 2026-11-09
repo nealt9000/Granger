@@ -1,14 +1,14 @@
 {
  "id": "gc-utilitarianism",
  "kind": "book",
- "fileName": "gc-utilitarianism_2026-10-30.gvec",
+ "fileName": "gc-utilitarianism_2026-11-09.gvec",
  "sizeBytes": 34240,
- "sha256": "70c82cbdf76127f3eeb9abffd65c9d9a53376b77334ac89a709da463fa4dad3e",
+ "sha256": "0dc75b7fa818a289a5a9d6b3cb14388d5fcd2c3c256b60084de89c5f67af7659",
  "count": 116,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "73796ca1d211f3e740eef668f4793e5520d5804b8d721fe0155defeea016ec13",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-utilitarianism_2026-10-30.gvec"
+ "sourceSha256": "6b25e0c3808eb4533a4fe4a952aa13d9eaa59a652f3a7600bd33ed4dafde665b",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-utilitarianism_2026-11-09.gvec"
 }

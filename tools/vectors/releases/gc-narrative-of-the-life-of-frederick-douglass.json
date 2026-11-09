@@ -1,0 +1,14 @@
+{
+ "id": "gc-narrative-of-the-life-of-frederick-douglass",
+ "kind": "book",
+ "fileName": "gc-narrative-of-the-life-of-frederick-douglass_2026-11-09.gvec",
+ "sizeBytes": 55408,
+ "sha256": "9b956216b442755c5fe537988bc6713b6db29e9c292dabdc5d86d4489a7df669",
+ "count": 188,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "6e530a480a60c30fb28c957f6132a1c36c505e7078ec4da7fe8ff7a798165998",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-narrative-of-the-life-of-frederick-douglass_2026-11-09.gvec"
+}

@@ -1,14 +1,14 @@
 {
  "id": "gc-es-sonata-de-estio",
  "kind": "book",
- "fileName": "gc-es-sonata-de-estio_2026-10-30.gvec",
- "sizeBytes": 53052,
- "sha256": "91bff5c027793c90d4ce3c3131e41159e7671e5137161480c01bb8a095a954c6",
- "count": 180,
+ "fileName": "gc-es-sonata-de-estio_2026-11-09.gvec",
+ "sizeBytes": 53350,
+ "sha256": "49330768a5af891cdfcdc766c48be7f7c32674dcf29b8c876fc1408d14a51b29",
+ "count": 181,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "ae97b82978d6a3461806bce0852adefa7f49f78596345f115e3695bc7519812e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-sonata-de-estio_2026-10-30.gvec"
+ "sourceSha256": "2ea6945f5716b4b12267ef763bb5a06d06ddf51db9b88475b7c69389484ec9d1",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-sonata-de-estio_2026-11-09.gvec"
 }

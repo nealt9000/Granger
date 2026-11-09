@@ -1,14 +1,14 @@
 {
  "id": "gc-es-la-biblia-en-espana-tomo-2-de-3",
  "kind": "book",
- "fileName": "gc-es-la-biblia-en-espana-tomo-2-de-3_2026-10-30.gvec",
- "sizeBytes": 129198,
- "sha256": "4dc2930e494b6dc2d336036cfbe2e5b86b7673b1ce075bed80ca0582c5267041",
- "count": 439,
+ "fileName": "gc-es-la-biblia-en-espana-tomo-2-de-3_2026-11-09.gvec",
+ "sizeBytes": 129496,
+ "sha256": "6a0902a5d22c9eafd368e5f18254a3932a6e1517a5b4f982924dba226a7c07a6",
+ "count": 440,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "7c95a3c2d8ad030e337f3c5835568aea3d59107f5c0345606a9d443ce2b86f05",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-la-biblia-en-espana-tomo-2-de-3_2026-10-30.gvec"
+ "sourceSha256": "508e7b2ad12c0d66689c92db2e362c5c5695d1f62349a1d617cedcddeb25c1b3",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-la-biblia-en-espana-tomo-2-de-3_2026-11-09.gvec"
 }

@@ -1,14 +1,14 @@
 {
  "id": "gc-es-los-nueve-libros-de-la-historia-tomo-2-de-2",
  "kind": "book",
- "fileName": "gc-es-los-nueve-libros-de-la-historia-tomo-2-de-2_2026-10-30.gvec",
- "sizeBytes": 270024,
- "sha256": "d38402786ab0a59472fbea3da5850c134ff5da84d5fd7ac9294e1634abb2c963",
- "count": 918,
+ "fileName": "gc-es-los-nueve-libros-de-la-historia-tomo-2-de-2_2026-11-09.gvec",
+ "sizeBytes": 270322,
+ "sha256": "825b390e497b99cea314fdd119e4f280b9b4f32a13cd2c5105a9147d6995d031",
+ "count": 919,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "386a0f6beca752029cf2aed31f123dbcf2ce2c1852726a1edab7dca90a494b2f",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-los-nueve-libros-de-la-historia-tomo-2-de-2_2026-10-30.gvec"
+ "sourceSha256": "18b886841241b87c49fdbf1ea835e6b731200e298f637197b205284cd0b18664",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-los-nueve-libros-de-la-historia-tomo-2-de-2_2026-11-09.gvec"
 }

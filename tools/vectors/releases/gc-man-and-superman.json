@@ -1,14 +1,14 @@
 {
  "id": "gc-man-and-superman",
  "kind": "book",
- "fileName": "gc-man-and-superman_2026-10-30.gvec",
+ "fileName": "gc-man-and-superman_2026-11-09.gvec",
  "sizeBytes": 162424,
- "sha256": "41e612b884e899137044a6a1c7f64a09c6329ec98f8d1e383d29db80ca09f361",
+ "sha256": "571453ca56a7b9479557f925f67aa1057dd5c076298ccf15507e5d23e425582c",
  "count": 552,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "f2e655f63666971ab41d5ae008cd299ec43375ca8cd9c7286d6516d63373cef4",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-man-and-superman_2026-10-30.gvec"
+ "sourceSha256": "9e0c79c8ac7f6afb682dad93c141d7f4dc2321b13b71d3a5451fe6262fe1044a",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-man-and-superman_2026-11-09.gvec"
 }

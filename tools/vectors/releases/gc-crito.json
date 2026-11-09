@@ -1,14 +1,14 @@
 {
  "id": "gc-crito",
  "kind": "book",
- "fileName": "gc-crito_2026-10-30.gvec",
+ "fileName": "gc-crito_2026-11-09.gvec",
  "sizeBytes": 12484,
- "sha256": "8cea51261b92c917d05428d49a11880d1a5e654ace3f06cac0e00f3d1d4d1458",
+ "sha256": "190ece7216d6d9be8fd3b90dc72a27b53af3b4590e195d78e0401432f0d70b7a",
  "count": 42,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "c304014027dc3034015cbe83939181508c704cbed11337a007b1d31550944435",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-crito_2026-10-30.gvec"
+ "sourceSha256": "5e51485dd3d7a5921337ba872e1a24a7bcbdfd9c63460a7bdc6298a20a3286ef",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-crito_2026-11-09.gvec"
 }

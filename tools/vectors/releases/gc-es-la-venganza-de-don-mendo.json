@@ -1,14 +1,14 @@
 {
  "id": "gc-es-la-venganza-de-don-mendo",
  "kind": "book",
- "fileName": "gc-es-la-venganza-de-don-mendo_2026-10-30.gvec",
- "sizeBytes": 80982,
- "sha256": "371a1e2ee3696ad44848d26d5c69256ccb4a1d3b18dc9e1878c0515b029e0beb",
- "count": 275,
+ "fileName": "gc-es-la-venganza-de-don-mendo_2026-11-09.gvec",
+ "sizeBytes": 81280,
+ "sha256": "56278019dfbc72167b617db2b4221a670dfe7009ca6c0e9afc68864c7a5f3d71",
+ "count": 276,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "f602cf47e9aa4eba4a62076dd3f98f8834dbe3bf1ba74705a9cfef4bad38791b",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/gc-es-la-venganza-de-don-mendo_2026-10-30.gvec"
+ "sourceSha256": "edb015af8870b751073b092c9172a7fb32b5fa7f0a737c1f166d4e1dcee539f6",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-la-venganza-de-don-mendo_2026-11-09.gvec"
 }

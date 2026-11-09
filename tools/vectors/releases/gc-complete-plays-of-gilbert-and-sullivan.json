@@ -1,14 +1,14 @@
 {
  "id": "gc-complete-plays-of-gilbert-and-sullivan",
  "kind": "book",
- "fileName": "gc-complete-plays-of-gilbert-and-sullivan_2026-10-30.gvec",
- "sizeBytes": 151840,
- "sha256": "77d4956c35a13b0a1efdd95d2935530d1b6a1e278a2f23dd49849eac37ab7b8d",
- "count": 516,
+ "fileName": "gc-complete-plays-of-gilbert-and-sullivan_2026-11-09.gvec",
+ "sizeBytes": 494644,
+ "sha256": "359dcb2344478da6a5ebb38fa998696855d0f1e275133ba5c65e3296dc80c7fe",
+ "count": 1682,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "09eca25090689092d2ea9cc140fa2a20bcf983a8a2ee969fb751e0b2c430d345",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-complete-plays-of-gilbert-and-sullivan_2026-10-30.gvec"
+ "sourceSha256": "c5d533af1e199343ac232e0a714a35ff704d9150582feec8ae0b526c5204fb89",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-complete-plays-of-gilbert-and-sullivan_2026-11-09.gvec"
 }

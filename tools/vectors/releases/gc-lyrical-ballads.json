@@ -1,14 +1,14 @@
 {
  "id": "gc-lyrical-ballads",
  "kind": "book",
- "fileName": "gc-lyrical-ballads_2026-10-30.gvec",
+ "fileName": "gc-lyrical-ballads_2026-11-09.gvec",
  "sizeBytes": 25714,
- "sha256": "11382937408ff5700d04ae127b89aa3ae6d22cc03ad0f7cdac1e11874d88641b",
+ "sha256": "4267a98a4ef06d187fd1babd0233f03a6a40e33e613ab591f6e9018cbb2ba6ff",
  "count": 87,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
- "sourceSha256": "667f2d42dd3687aa887ca71ba23f744471708aba1e01f45425fdd3ca87391433",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-10-30/gc-lyrical-ballads_2026-10-30.gvec"
+ "sourceSha256": "56c2bac525d3fba4e86e3fa2f669f703f612adc09f569fd7f881a67a5961b977",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-lyrical-ballads_2026-11-09.gvec"
 }

@@ -1,0 +1,14 @@
+{
+ "id": "gc-mysterious-affair-at-styles",
+ "kind": "book",
+ "fileName": "gc-mysterious-affair-at-styles_2026-11-09.gvec",
+ "sizeBytes": 175360,
+ "sha256": "c582532d497dec76487d5c1e8550d4bc019ce9e7ec7c6020b46c8a30ea3503a0",
+ "count": 596,
+ "dims": 256,
+ "dtype": "int8",
+ "chunkerVersion": 1,
+ "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+ "sourceSha256": "aa20e6db7c7efc3068d16cf845ca6b48df7b380704acbc689d0a089e8938b853",
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-mysterious-affair-at-styles_2026-11-09.gvec"
+}
