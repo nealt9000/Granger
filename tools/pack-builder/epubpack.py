@@ -30,7 +30,7 @@ LABELS = {
            "translated_by": "Translated by", "translation_published": "This translation first published {year}",
            "edition_published": "This edition first published {year}",
            "from_gutenberg": "From Project Gutenberg ebook #{id}", "from_ebible": "From eBible.org ({id})",
-           "tagline": "Your door to knowledge. Always open."},
+           "tagline": "Your door to knowledge. Always open.", "title_page": "Title page"},
     "es": {"contents": "Índice", "landmarks": "Puntos de referencia", "cover": "Portada", "start": "Comienzo del texto",
            "colophon": "Colofón", "translated": "trad.", "rights": "Dominio público en los Estados Unidos.",
            "translated_by": "Traducción de",
@@ -38,7 +38,7 @@ LABELS = {
            "edition_published": "Esta edición se publicó por primera vez en {year}",
            "from_gutenberg": "Del libro electrónico n.º {id} de Project Gutenberg",
            "from_ebible": "De eBible.org ({id})",
-           "tagline": "Tu puerta al conocimiento. Siempre abierta."},
+           "tagline": "Tu puerta al conocimiento. Siempre abierta.", "title_page": "Portadilla"},
 }
 ZIP_TIME = (1980, 1, 1, 0, 0, 0)
 NS = 'xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"'
@@ -63,7 +63,12 @@ img { max-width: 100%; }
 .colophon .facts { margin-top: 2.5em; font-size: .9em; }
 .colophon .facts p { margin: 0 0 .3em; }
 .colophon .tagline { margin-top: 2.5em; font-style: italic; }
+:root:root:root .footnote, :root:root:root .foot { font-size: .85rem !important; opacity: .8; margin-left: 1.5em; }
+:root:root:root h1.gx-long, :root:root:root h2.gx-long, :root:root:root h3.gx-long {
+  font-size: 1rem !important; font-weight: normal; }
 """.strip()
+LONG_HEADING = 80  # a chapter summary set as a heading (Tom Jones) reads as text, not as a title shouting
+LONG_TITLE = 70  # a contents title longer than this is cut at a natural break
 
 LINE_NUMBER = {"linenum", "linenumber", "lineno", "line-number", "linenr"}
 
@@ -288,6 +293,9 @@ def _prepare(html: str, line_numbers: str = "margin", reads_as_verse: bool = Fal
         verse.mark_pre(soup)
     if language == "en":  # title case follows English rules
         _quiet_headings(soup)
+    for heading in soup.find_all(["h1", "h2", "h3"]):
+        if len(" ".join(heading.get_text().split())) > LONG_HEADING:
+            heading["class"] = (heading.get("class") or []) + ["gx-long"]
     _fix_attributes(soup)
     _wrap_stray_definitions(soup)
     return soup
@@ -340,8 +348,29 @@ def _titles(work: Work, language: str = "en") -> list[str]:
     missing = sorted(set(work.title_overrides) - {str(i + 1) for i in range(len(work.chapters))}, key=int)
     if missing:
         raise ValueError(f"titleOverrides name pages {missing}, but the book has {len(work.chapters)}")
-    return [work.title_overrides.get(str(i + 1)) or clean_title(c.title, work.title, work.author, i, language)
-            for i, c in enumerate(work.chapters)]
+    titles = [clean_title(c.title, work.title, work.author, i, language) for i, c in enumerate(work.chapters)]
+    if titles and _words(work.chapters[0].html) < 3000:  # a short first page named for nothing: "Title page",
+        first = work.chapters[0].title  # not "Part 1" (251 books)
+        if first in ("", "Part 1") or clean_title(first, work.title, work.author, 0, language, fallback="") == "":
+            titles[0] = labels(language)["title_page"]
+    return [work.title_overrides.get(str(i + 1)) or shorten(t) for i, t in enumerate(titles)]
+
+
+def _words(html: str) -> int:
+    return len(" ".join(BeautifulSoup(html, "lxml").get_text().split()))
+
+
+def shorten(title: str, limit: int = LONG_TITLE) -> str:
+    """A contents title over `limit` characters cut at its first sentence, clause or dash break that fits, else
+    at a word with an ellipsis ("Containing the Birth of the Foundling, in which…")."""
+    if len(title) <= limit:
+        return title
+    for m in re.finditer(r"[.:;!?](?=\s)|\s[—–]\s", title):
+        if 12 <= m.start() <= limit:
+            cut = title[:m.start()].rstrip()
+            return cut
+    cut = title[:limit - 1].rsplit(" ", 1)[0].rstrip(",;:—– ")
+    return cut + "…"
 
 
 _FRONT_MATTER = {"title page", "contents", "table of contents", "front matter", "dedication"}

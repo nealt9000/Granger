@@ -128,10 +128,10 @@ def flatten_word_export(soup: BeautifulSoup) -> None:
 
 
 def is_gloss(text: str) -> bool:
-    """A margin gloss is a word or two (`*sweet`, `crowd`), starred or short and with no sentence in it; a
+    """A margin gloss is a word or two (`*sweet`, `crowd`), starred, or short with no sentence in it; a
     longer run after wide spacing is the line's own words set apart (a half-line, a stage direction)."""
     text = text.strip()
-    if text.startswith("*"):
+    if "*" in text:  # Canterbury's glosses carry the star of the word they gloss: "*sweet", "with the best*"
         return True
     return len(text) <= 25 and not re.search(r"[.!?;:]\s+\S|[A-Z]{3,}", text)
 

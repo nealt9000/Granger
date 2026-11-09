@@ -148,8 +148,32 @@ def test_childless_textless_blocks_go_but_their_ids_stay():
     body = str(gutenberg.clean(html).body)
     assert "figcenter" not in body and "&nbsp;" not in body and "\xa0" not in body
     assert '<span id="stanza2"></span>' in body and '<span id="fig1"></span>' in body
-    assert "<p>Line one<br/>line two</p>" in body and "<td></td>" in body and "<p><br/></p>" in body
-    assert body.count("<p") == 3 and "<div" not in body.replace("<div>", "", 1)
+    assert "<p>Line one<br/>line two</p>" in body and "<td></td>" in body and "<p><br/></p>" not in body
+    assert body.count("<p") == 2 and body.count('class="gx-gap"') == 1  # two spacers in a row: one gap
+
+
+def test_spacers_go_and_a_run_of_them_leaves_one_gap_unless_a_heading_follows():
+    html = (b"<html><body><div id='pg-start-separator'></div>"
+            b"<div class='w'>Success is counted sweetest</div><div class='w'><br></div>"
+            b"<div class='w'>By those who ne'er succeed.</div><div class='w'><br></div><div class='w'><br></div>"
+            b"<div class='w'>To comprehend a nectar</div>"
+            b"<p>The end.</p><p><a id='link2H_4_0003'></a></p><div style='height: 4em'><br><br><br><br></div>"
+            b"<h2>Chapter II</h2><p>Words.</p>"
+            b"<div id='pg-end-separator'></div></body></html>")
+    body = str(gutenberg.clean(html).body)
+    assert body.count('class="gx-gap"') == 1  # the stanza break, not the line break or before the heading
+    assert body.index("ne'er succeed") < body.index("gx-gap") < body.index("To comprehend")
+    assert '<span id="link2H_4_0003"></span><h2>' in body.replace("\n", "")
+    assert "<br/>" not in body
+
+
+def test_a_list_of_illustrations_goes_with_its_heading():
+    html = (b"<html><body><div id='pg-start-separator'></div><h2>CONTENTS</h2><p>Chapter I</p>"
+            b"<h2>LIST OF ILLUSTRATIONS</h2><p class='toc'><a href='#i1'>She looked at him</a> 12</p>"
+            b"<p class='toc'><a href='#i2'>The ball</a> 40</p><h2>Chapter I</h2><p>It is a truth.</p>"
+            b"<div id='pg-end-separator'></div></body></html>")
+    body = str(gutenberg.clean(html).body)
+    assert "ILLUSTRATIONS" not in body and "The ball" not in body and "It is a truth." in body
 
 
 def test_cover_art_transcribers_note_is_dropped():

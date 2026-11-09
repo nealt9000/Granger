@@ -968,6 +968,9 @@ def structure(body: Tag, hints: Hints | None = None, min_speeches: int = MIN_SPE
     if not hints.on:
         report.skipped = "off"
         return report
+    if body.find(class_="gd-speech") is not None:  # Standard Ebooks: the source's own semantics, already mapped
+        report.skipped = "speeches already marked by the source"
+        return report
     pats = _patterns(hints)
     levels = _heading_levels(body)
 

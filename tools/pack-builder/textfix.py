@@ -295,3 +295,64 @@ def note_markers(body: Tag, kind: str) -> int:
         out.append(NavigableString(text[at:]))
         string.replace_with(*[n for n in out if not (isinstance(n, NavigableString) and not str(n))])
     return count
+
+
+# --- markers every book gets checked for --------------------------------------------------------------------------
+
+_SECTION_MARK = re.compile(r"(^|\n)([ \t]*)\{\d{1,4}\}[ \t]*")
+_BRACKET_MARK = re.compile(r"(?<=[^\s\[(])\[(\d{1,3})\](?=[\s,;:.!?'’\"”)—-]|$)")
+MIN_MARKS = 50
+
+
+def section_marks(body: Tag) -> int:
+    """Drops the editor's section numbers "{203}" that open lines and paragraphs (Pilgrim's Progress: 405), in a
+    book with at least `MIN_MARKS`; a few could be something else, so fewer are left."""
+    strings = [s for s in body.find_all(string=_SECTION_MARK) if _opens_a_line(s) and not any(
+        {"pagenum", "pageno", "page-num", "pagenumber"} & set(p.get("class") or []) for p in s.parents)]
+    if len(strings) < MIN_MARKS:
+        return 0
+    count = 0
+    for string in strings:
+        text, opens = str(string), _at_block_start(string)
+        # after a newline always; at the string's start only when that starts a line
+        new = _SECTION_MARK.sub(lambda m: m.group(1) + m.group(2) if m.group(1) or opens else m.group(0), text)
+        count += text != new
+        string.replace_with(NavigableString(new))
+    return count
+
+
+def _at_block_start(string: NavigableString) -> bool:
+    node = string.previous_sibling
+    while node is not None:
+        if isinstance(node, Tag) and node.name == "br":
+            return True
+        if (node.get_text() if isinstance(node, Tag) else str(node)).strip():
+            return False
+        node = node.previous_sibling
+    return True
+
+
+def _opens_a_line(string: NavigableString) -> bool:
+    return bool(re.search(r"\n[ \t]*\{\d", str(string))) or (
+        _at_block_start(string) and bool(re.match(r"\s*\{\d", str(string))))
+
+
+def note_brackets(body: Tag) -> int:
+    """A bare note mark glued to a word ("the planet[1] that leadeth", the Norton Dantes: 2,755) becomes
+    `sup.gx-ref`, in a book with at least `MIN_MARKS`; linked marks are the source's own and stay."""
+    strings = [s for s in body.find_all(string=_BRACKET_MARK) if s.find_parent(["a", "sup"]) is None]
+    if sum(len(_BRACKET_MARK.findall(str(s))) for s in strings) < MIN_MARKS:
+        return 0
+    count = 0
+    for string in strings:
+        text, at, out = str(string), 0, []
+        for m in _BRACKET_MARK.finditer(text):
+            out.append(NavigableString(text[at:m.start()]))
+            sup = _HOLDER.new_tag("sup", attrs={"class": "gx-ref"})
+            sup.string = m.group(1)
+            out.append(sup)
+            at = m.end()
+            count += 1
+        out.append(NavigableString(text[at:]))
+        string.replace_with(*[n for n in out if not (isinstance(n, NavigableString) and not str(n))])
+    return count

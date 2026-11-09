@@ -97,6 +97,9 @@ def restructure(spec: WorkSpec, body, language: str = "en") -> None:
         print(f"{'':>6} {spec.slug:<40} {promoted['chapters']} chapter labels, {promoted['verses']} verse numbers")
     if spec.verse_refs == "split":
         print(f"{'':>6} {spec.slug:<40} {textfix.verse_refs(body)} verse references set apart")
+    marks = textfix.section_marks(body), textfix.note_brackets(body)
+    if any(marks):
+        print(f"{'':>6} {spec.slug:<40} {marks[0]} section numbers dropped, {marks[1]} note marks raised")
     if spec.note_markers:
         print(f"{'':>6} {spec.slug:<40} {textfix.note_markers(body, spec.note_markers)} note marks set apart")
     if spec.is_drama and language == "en":

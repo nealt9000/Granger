@@ -26,7 +26,7 @@ from gutenberg import unwrap_link
 MAX_TITLE = 120
 FRONT_MATTER_CHARS = 200
 HEADINGS = {"h1", "h2", "h3", "h4", "h5", "h6"}
-PAGE_NUMBER = {"pagenum", "pageno", "page-num", "pagenumber"}
+PAGE_NUMBER = {"pagenum", "pageno", "page-num", "pagenumber", "tei-pb"}  # tei-pb: "[pg 079]" (Varieties)
 SCHEME = re.compile(r"^[a-z][a-z0-9+.-]*:", re.I)
 
 
@@ -56,9 +56,11 @@ TITLE_WORDS = {
 }
 
 
-def clean_title(title: str, work_title: str, author: str, index: int, language: str = "en") -> str:
+def clean_title(title: str, work_title: str, author: str, index: int, language: str = "en",
+                fallback: str | None = None) -> str:
     """A chapter title for a reader's contents list: no byline, no "Contents", no repeat of the work's title,
-    and, in English, no shouting ("BOOK I." reads "Book I"; title case follows English rules)."""
+    and, in English, no shouting ("BOOK I." reads "Book I"; title case follows English rules). With nothing
+    left, `fallback`, else "Part N"."""
     words = TITLE_WORDS.get(language, TITLE_WORDS["en"])
     segments = (_translate_made_up(s.strip(), words) for s in re.sub(r"<\d+>", "", title).split(" — "))
     kept = [s for s in segments
@@ -66,7 +68,7 @@ def clean_title(title: str, work_title: str, author: str, index: int, language: 
             and s.lower() != work_title.strip().lower()]
     if language == "en":
         kept = [_quieter(s) for s in kept]
-    return " — ".join(kept) or f"{words['part']} {index + 1}"
+    return " — ".join(kept) or fallback or f"{words['part']} {index + 1}"
 
 
 def _quieter(segment: str) -> str:
@@ -276,7 +278,32 @@ def _groups(nodes: list[PageElement], level: int) -> tuple[list[PageElement], li
             front.append(node)
     for before, after in zip(groups, groups[1:]):
         after.nodes[:0] = _take_trailing_section_heading(before.nodes, level)
+    for before, after in zip([_Part("", front)] + groups, groups):
+        after.nodes[:0] = _take_trailing_preamble(before.nodes)
     return front, groups
+
+
+def _textless(node: PageElement) -> bool:
+    """Whitespace, an anchor, a spacer or a rule: no words and no picture."""
+    if isinstance(node, NavigableString):
+        return not node.strip()
+    return (isinstance(node, Tag) and not node.get_text().strip()
+            and node.find(["img", "svg", "table", "ul", "ol", "dl"]) is None and node.name not in ("img", "svg"))
+
+
+def _take_trailing_preamble(nodes: list[PageElement]) -> list[PageElement]:
+    """Removes and returns the anchors and spacers that end a part only to open the next one: Gutenberg sets a
+    chapter's link target (`<p><a id="link2H…"/></p>`) and its spacing just before its heading, so left behind
+    they put a Contents tap at the foot of the previous page (formatting audit F5: 2,713 targets in 82 books)."""
+    tail = 0  # a rule closes the part it ends, so it stays (and so does what comes before it)
+    while (tail < len(nodes) and _textless(nodes[len(nodes) - 1 - tail])
+           and getattr(nodes[len(nodes) - 1 - tail], "name", None) != "hr"):
+        tail += 1
+    if tail == len(nodes) or not any(isinstance(n, Tag) for n in nodes[len(nodes) - tail:]):
+        return []  # an empty part keeps its own (the preamble of a heading-only part is merged later)
+    moved = nodes[len(nodes) - tail:]
+    del nodes[len(nodes) - tail:]
+    return moved
 
 
 def _take_trailing_section_heading(nodes: list[PageElement], level: int) -> list[PageElement]:
