@@ -18,9 +18,9 @@ GROUNDS = {"scripture": "#5B3322", "philosophy": "#354059", "poetry": "#2E4A45",
 DEFAULT_GROUND = GROUNDS["novels"]
 # Grounds offered for Clásicos Granger's learner sections (graded readers, fables and children's books), each as dark
 # as the six above (paper at least 7.6:1, phosphor at least 5:1). Neal picks one from the GC2 board
-# (docs/superpowers/spikes/2026-11-09-classics-round-2/covers/); until then LEARNER_GROUND is a placeholder.
+# (docs/superpowers/spikes/2026-11-09-classics-round-2/covers/); Neal picked brass (2026-11-09).
 LEARNER_CANDIDATES = {"brass": "#53401B", "moss": "#3B4725", "pine": "#1E3D4A"}
-LEARNER_GROUND = LEARNER_CANDIDATES["brass"]  # PLACEHOLDER: not yet picked by Neal
+LEARNER_GROUND = LEARNER_CANDIDATES["brass"]  # Neal picked brass, 2026-11-09
 # Clásicos Granger's sections, each on the nearest English ground; the learner sections on their own.
 SPANISH_GROUNDS = {"escritura": GROUNDS["scripture"], "ensayo": GROUNDS["philosophy"],
                    "historia": GROUNDS["philosophy"], "poesia": GROUNDS["poetry"], "teatro": GROUNDS["drama"],

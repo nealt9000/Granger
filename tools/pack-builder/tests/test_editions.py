@@ -59,7 +59,8 @@ def test_the_homer_map_is_roman_to_greek_and_leaves_butlers_greek_spellings():
     names = editions.load_names("homer-greek")
     assert names["Ulysses"] == "Odysseus" and names["Jove"] == "Zeus" and names["Minerva"] == "Athena"
     assert names["Saturn"] == "Cronus" and names["Aurora"] == "Dawn" and names["Latona"] == "Leto"
-    for kept in ("Achilles", "Ajax", "Patroclus", "Alexandrus", "Ilius", "Hades", "Apollo"):
+    assert names["Alexandrus"] == "Alexandros" and names["Ilius"] == "Ilion"  # Neal, 2026-11-09
+    for kept in ("Achilles", "Ajax", "Patroclus", "Hades", "Apollo"):
         assert kept not in names
     assert not set(names) & set(names.values())
     with pytest.raises(ValueError):
