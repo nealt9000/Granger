@@ -1,5 +1,6 @@
 """Draws a Granger Classics cover (brand direction D): the section in tracked capitals, the title, a lantern rule,
-the author and translator, and the owl over "GRANGER CLASSICS", on one ground colour per section.
+the author and translator, and the owl over "GRANGER CLASSICS" (or "CLÁSICOS GRANGER"), on one ground colour per
+section.
 
 The owl is rasterised here from `assets/granger-mark-owl.svg`, so the builder needs nothing outside its own tree.
 """
@@ -15,21 +16,36 @@ OWL_SVG = ASSETS / "granger-mark-owl.svg"
 GROUNDS = {"scripture": "#5B3322", "philosophy": "#354059", "poetry": "#2E4A45", "drama": "#6B2A2A",
            "libretti": "#4A3A5A", "novels": "#24292A"}
 DEFAULT_GROUND = GROUNDS["novels"]
+# Grounds offered for Clásicos Granger's learner sections (graded readers, fables and children's books), each as dark
+# as the six above (paper at least 7.6:1, phosphor at least 5:1). Neal picks one from the GC2 board
+# (docs/superpowers/spikes/2026-11-09-classics-round-2/covers/); until then LEARNER_GROUND is a placeholder.
+LEARNER_CANDIDATES = {"brass": "#53401B", "moss": "#3B4725", "pine": "#1E3D4A"}
+LEARNER_GROUND = LEARNER_CANDIDATES["brass"]  # PLACEHOLDER: not yet picked by Neal
+# Clásicos Granger's sections, each on the nearest English ground; the learner sections on their own.
+SPANISH_GROUNDS = {"escritura": GROUNDS["scripture"], "ensayo": GROUNDS["philosophy"],
+                   "historia": GROUNDS["philosophy"], "poesia": GROUNDS["poetry"], "teatro": GROUNDS["drama"],
+                   "novelas": GROUNDS["novels"], "cuentos": GROUNDS["novels"], "universales": GROUNDS["novels"],
+                   "lecturas": LEARNER_GROUND, "infantil": LEARNER_GROUND}
 PAPER, SUB, LANTERN, PHOSPHOR = "#EFE4D0", "#CFC4B0", "#F0A35E", "#91C4BA"
 WORDMARK = "GRANGER CLASSICS"
 TRACK = 0.14
 MAX_TITLE_LINES, MAX_NAME_LINES = 4, 2
 TITLE_TOP, TITLE_TOP_MIN = 250, 170
 OWL_SIZE = 96
-LONE_WORDS = {"the", "a", "an", "of", "and", "or", "on", "in", "to", "at", "by", "for", "with"}
-DANGLING_WORDS = LONE_WORDS - {"and", "or"}  # a line may end "Pride and", not "The Wealth of"
+# Short words that mustn't stand alone on a line, in English and in Spanish (Clásicos Granger).
+LONE_WORDS = {"the", "a", "an", "of", "and", "or", "on", "in", "to", "at", "by", "for", "with",
+              "el", "la", "los", "las", "lo", "un", "una", "de", "del", "al", "en", "con", "por", "para",
+              "y", "o", "e", "u"}
+# A line may end "Pride and", "Crimen y" or "Libro de", not "The Wealth of" or "Don Álvaro o la". (Spanish
+# prepositions may end a line: "de" is too common to keep off a line's end without worse breaks.)
+DANGLING_WORDS = LONE_WORDS - {"and", "or", "y", "o", "e", "u", "de", "a", "en", "con", "por", "para"}
 
 
 def cover_jpeg(title: str, author: str, translator: str | None, section_id: str, section_title: str,
                size: tuple[int, int] = (600, 900), wordmark: str = WORDMARK,
-               translated_by: str = "translated by") -> bytes:
+               translated_by: str = "translated by", ground: str | None = None, language: str = "en") -> bytes:
     width, height = size
-    ground = GROUNDS.get(section_id, DEFAULT_GROUND)
+    ground = ground or ground_for(section_id)
     image = Image.new("RGB", size, ground)
     draw = ImageDraw.Draw(image)
 
@@ -39,7 +55,7 @@ def cover_jpeg(title: str, author: str, translator: str | None, section_id: str,
     _tracked(draw, width / 2, height - 70, wordmark, _font("semibold", 20), PHOSPHOR)
 
     blocks = _layout(draw, title, author, translator, int(width * 0.78), int(width * 0.88), owl_top - 40,
-                     translated_by)
+                     translated_by, language)
     for i, (y, lines, font, step) in enumerate(blocks):
         for line in lines:
             if line is None:  # the rule under the title
@@ -53,8 +69,13 @@ def cover_jpeg(title: str, author: str, translator: str | None, section_id: str,
     return out.getvalue()
 
 
+def ground_for(section_id: str) -> str:
+    """The section's ground colour: an English or a Spanish section id, else the novels' ground."""
+    return GROUNDS.get(section_id) or SPANISH_GROUNDS.get(section_id) or DEFAULT_GROUND
+
+
 def _layout(draw, title: str, author: str, translator: str | None, box: int, name_box: int, bottom: int,
-            translated_by: str = "translated by"):
+            translated_by: str = "translated by", language: str = "en"):
     """The title, rule and names as (top, lines, font, line step) blocks that end above `bottom`.
 
     The names keep their size where they can. A long block first rises (up to TITLE_TOP_MIN), then the title
@@ -71,7 +92,7 @@ def _layout(draw, title: str, author: str, translator: str | None, box: int, nam
         if not all(named):
             continue
         for px in range(64, 29, -2):
-            fitted = _fit(draw, title, "regular", box, MAX_TITLE_LINES, px, 1.22)
+            fitted = _fit(draw, title, "regular", box, MAX_TITLE_LINES, px, 1.22, search=language == "es")
             if not fitted:
                 continue
             for top in range(TITLE_TOP, TITLE_TOP_MIN - 1, -10):
@@ -92,13 +113,15 @@ def _font(style: str, px: int) -> ImageFont.FreeTypeFont:
     return ImageFont.truetype(str(ASSETS / "fonts" / f"spectral_{style}.ttf"), px)
 
 
-def _fit(draw, text: str, style: str, box: int, max_lines: int, px: int, spacing: float):
+def _fit(draw, text: str, style: str, box: int, max_lines: int, px: int, spacing: float, search: bool = False):
     """(lines, font, line step) for the text at `px`, or None if it needs more than max_lines lines, a word is wider
     than the box, or a short word like "The" would sit alone on a line.
 
     Of the wraps with the fewest lines, the one that doesn't end a line on an article or preposition ("The Wealth /
     of Nations", not "The Wealth of / Nations") is chosen; then the most even, so the last line isn't left with
-    one word when it needn't be.
+    one word when it needn't be. With `search` (Spanish titles, where "de la" and "del" are everywhere), when every
+    such wrap still ends a line on an article, every break with as many lines is tried ("Historia / de la guerra /
+    del Peloponeso"). English covers keep the narrower wraps only, as Neal approved them.
     """
     font = _font(style, px)
     lines = _wrap(draw, text, font, box)
@@ -116,9 +139,31 @@ def _fit(draw, text: str, style: str, box: int, max_lines: int, px: int, spacing
         return None
     dangling = lambda c: sum(line.split()[-1].lower() in DANGLING_WORDS for line in c[:-1])
     least = min(map(dangling, candidates))
+    if least and search:  # every narrower wrap still ends a line on "la" or "del": try every break, as many lines
+        others = [c for c in _breaks(draw, text.split(), font, box, len(lines))
+                  if not any(line.lower() in LONE_WORDS for line in c) and dangling(c) < least]
+        if others:
+            fewest = min(map(dangling, others))
+            # the most even of those: the narrowest widest line
+            return (min((c for c in others if dangling(c) == fewest),
+                        key=lambda c: max(draw.textlength(line, font=font) for line in c)), font, int(px * spacing))
     candidates = [c for c in candidates if dangling(c) == least]
     lines = candidates[-1]
     return lines, font, int(px * spacing)
+
+
+def _breaks(draw, words: list[str], font, box: int, count: int) -> list[list[str]]:
+    """Every way to set the words on `count` lines that each fit the box."""
+    if count == 1:
+        line = " ".join(words)
+        return [[line]] if words and draw.textlength(line, font=font) <= box else []
+    out = []
+    for i in range(1, len(words) - count + 2):
+        first = " ".join(words[:i])
+        if draw.textlength(first, font=font) > box:
+            break
+        out += [[first, *rest] for rest in _breaks(draw, words[i:], font, box, count - 1)]
+    return out
 
 
 def _wrap(draw, text: str, font, box: int) -> list[str]:

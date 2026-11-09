@@ -127,7 +127,7 @@ def build_epubs(m: Manifest, source: GutenbergSource, out: Path, date: str,
             path = Path(out) / f"{meta.id}_{date}.epub"
             cover = covers.cover_jpeg(spec.title, spec.author, spec.translator, spec.section, sections[spec.section],
                                       wordmark=m.title.upper(),
-                                      translated_by=epubpack.labels(m.code)["translated_by"].lower())
+                                      translated_by=epubpack.labels(m.code)["translated_by"].lower(), language=m.code)
             epubpack.write_epub(path, work, meta, cover)
         except Exception as error:
             raise BuildError(f"{spec.where}: {error}") from error
