@@ -17,6 +17,7 @@ from lxml import etree
 
 import covers
 import drama
+import textfix
 import verse
 from chapters import PAGE_NUMBER, clean_title, drop_full_stop, shouting, title_case
 from zimpack import Work
@@ -162,6 +163,8 @@ def _book_css(work: Work) -> str:
         parts.append(verse.WRAPPER_CSS)
     if work.drama:
         parts.append(drama.CSS)
+    if any('class="gx-' in c.html for c in work.chapters):
+        parts.append(textfix.CSS)
     return "\n".join(p for p in parts if p) + "\n"
 
 

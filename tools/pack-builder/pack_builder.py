@@ -31,6 +31,7 @@ import drama
 import epubpack
 import gutenberg
 import manifest as manifests
+import textfix
 import usfm
 import verse
 import zimpack
@@ -84,7 +85,20 @@ class BuildError(Exception):
 
 def restructure(spec: WorkSpec, body, language: str = "en") -> None:
     """Structure the source only shows by typography, put back before the chapter split so headings it promotes
-    drive the split and the contents: a play's speeches, directions, acts and scenes (drama.py)."""
+    drive the split and the contents: a text file's paragraphs, chapters and verse numbers (textfix.py), and a
+    play's speeches, directions, acts and scenes (drama.py)."""
+    if spec.textfix:
+        fixed = textfix.restore(body)
+        if fixed["split"] or fixed["joined"]:
+            print(f"{'':>6} {spec.slug:<40} {fixed['split']} hidden paragraph starts restored, "
+                  f"{fixed['joined']} page-split paragraphs joined")
+    if spec.labels == "chapter-verse":
+        promoted = textfix.promote(body)
+        print(f"{'':>6} {spec.slug:<40} {promoted['chapters']} chapter labels, {promoted['verses']} verse numbers")
+    if spec.verse_refs == "split":
+        print(f"{'':>6} {spec.slug:<40} {textfix.verse_refs(body)} verse references set apart")
+    if spec.note_markers:
+        print(f"{'':>6} {spec.slug:<40} {textfix.note_markers(body, spec.note_markers)} note marks set apart")
     if spec.is_drama and language == "en":
         report = drama.structure(body, drama.Hints.parse(spec.drama))
         if report.skipped:
