@@ -439,6 +439,7 @@ def _mark_block(f: _Found, cast: set[str]) -> bool:
     head = _head(f.name, f.sd, stop, keep)
     after = _next_block(f.block)
     if (after is not None and after.name in ("p", "div") and after.find(_INNER_BLOCKS) is None
+            and not _VERSE_LINE_CLASSES & set(after.get("class") or [])  # one element a line: the name stays apart
             and not _is_label_block(after, cast) and not _is_direction_block(after)):
         after.insert(0, head)
         _add_class(after, "gd-speech", "gd-above")
@@ -446,11 +447,14 @@ def _mark_block(f: _Found, cast: set[str]) -> bool:
         return True
     f.block.clear()
     f.block.append(head)
-    if f.block.name not in ("p", "div"):
+    if f.block.name in ("h1", "h2", "h3", "h4", "h5", "h6"):
         f.block.name = "p"  # a speaker set as a heading (Trojan Women's h5) is no heading
         f.block.attrs = {k: v for k, v in f.block.attrs.items() if k in ("id", "class")}
     f.block["class"] = ["gd-speech", "gd-above", "gd-label"]
     return True
+
+
+_VERSE_LINE_CLASSES = {"line", "verse", "l", "tei-l", "i0", "i1", "i2", "vl"}
 
 
 def _is_label_block(block: Tag, cast: set[str]) -> bool:
@@ -1073,8 +1077,11 @@ def structure(body: Tag, hints: Hints | None = None, min_speeches: int = MIN_SPE
             continue
         if id(block) in region and block.name in ("p", "div"):
             _wrap_inline_directions(block)
+        in_song = block.find_parent(class_=["poem", "stanza", "poetry", "verse"]) is not None or any(
+            re.match(r"^i\d+$", c) for c in classes)  # a sung line set in italics is no direction
         if id(block) in region and block.name in ("p", "div") and text and (
-                _bracketed(text) or (_DIRECTION_WORD.match(text) and len(text) < 300) or _mostly_italic(block)):
+                _bracketed(text) or (_DIRECTION_WORD.match(text) and len(text) < 300)
+                or _mostly_italic(block) and not in_song):
             _add_class(block, "gd-sd")
             if _mostly_italic(block):
                 _add_class(block, "gd-own")

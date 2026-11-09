@@ -191,6 +191,7 @@ def _drop_leftovers(root: Tag) -> None:
     _drop_cover_notes(root)
     _drop_faded_page_notices(root)
     _drop_illustration_lists(root)
+    _drop_edition_tables(root)
     _drop_spacers(root)
     for block in reversed(root.find_all(["div", "p"])):  # innermost first, so emptied wrappers go too
         if (block.parent is None or block.parent.name in NO_PHRASING_CHILDREN or block.get_text().strip()
@@ -266,6 +267,22 @@ def _leads_somewhere(marker: Tag) -> bool:
             return True
         node = node.previous_sibling
     return False
+
+
+def _drop_edition_tables(root: Tag) -> None:
+    """Gutenberg's table of its other editions of the work before the text (the Iliad, #2199: "22382 (With 800
+    linked footnotes…)", "16452 (In blank verse…)"): every row an ebook number and at most a note in brackets."""
+    seen = 0
+    for node in root.find_all(["table", "h1", "h2", "h3", "p"]):
+        if node.name != "table":
+            seen += len(node.get_text().strip())
+            if seen > FRONT_MATTER_CHARS:
+                return
+            continue
+        rows = [[" ".join(c.get_text().split()) for c in tr.find_all(["td", "th"])] for tr in node.find_all("tr")]
+        if len(rows) >= 2 and all(r and re.fullmatch(r"\d{2,6}", r[0]) and all(not c or c.startswith("(") for c in r[1:])
+                                  for r in rows):
+            node.decompose()
 
 
 ILLUSTRATIONS = re.compile(r"^\W*(list of )?(illustrations|plates)\W*$", re.I)

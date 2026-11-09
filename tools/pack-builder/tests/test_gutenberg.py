@@ -246,3 +246,12 @@ def test_a_credit_the_header_gives_and_the_text_repeats_goes_with_a_cover_note()
     text = " ".join(cleaned.body.get_text(" ").split())
     assert text == "THE BOOK Produced by hand, the archive grew. Text of the work."
     assert cleaned.branding_removed >= 3
+
+
+def test_a_table_of_other_gutenberg_editions_goes():
+    html = (b"<html><body><div id='pg-start-separator'></div><table><tr><td><b>22382</b></td>"
+            b"<td>(With 800 linked footnotes, No illustrations)</td></tr><tr><td><b>3059</b></td><td></td></tr></table>"
+            b"<h1>THE ILIAD OF HOMER</h1><table><tr><td>1</td><td>Achilles</td></tr><tr><td>2</td><td>Hector</td></tr>"
+            b"</table><div id='pg-end-separator'></div></body></html>")
+    body = str(gutenberg.clean(html).body)
+    assert "22382" not in body and "Achilles" in body

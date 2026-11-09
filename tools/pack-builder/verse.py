@@ -35,7 +35,7 @@ p.gv, div.gv, td.gv { margin-left: 0; margin-right: 0; }
 # Only in a work read as verse: one-line-per-element verse hangs too, and a poem's wrapper keeps no side
 # margins, so its lines get the width a phone has (Faerie Queene: 62% of lines wrapped at 390 px, 38% without).
 WRAPPER_CSS = """
-div.stanza > p, div.stanza > div, div.poem > p, div.poetry > p, div.verse > p, div.tei-l, div.line {
+div.stanza > p, div.stanza > div, div.poem > p, div.poetry > p, div.verse > p, div.tei-l, div.line, p.line {
   padding-left: 1.5em; text-indent: -1.5em; }
 div.poem, div.stanza, div.poetry, div.verse { margin-left: 0; margin-right: 0; }
 """.strip()
