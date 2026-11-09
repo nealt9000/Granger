@@ -32,6 +32,12 @@ line numbers in the margin or drops them, and `titleOverrides` replaces contents
 `packSections` packs a too-big page's sections into even pages rather than one page each (a Bible's chapters).
 `cutAfter` gives a Gutenberg work's last words, so whatever follows them (a publisher's catalogue) is cut.
 
+Structure repairs (formatting audit 2026-11-09): `drama` turns the play pass (drama.py) off with `false`, on
+outside the drama and libretti sections with `true`, or tunes it (`{"labels": "titlecase", "prose": true,
+"labelsWithoutStop": true}`); `labels: "chapter-verse"` promotes a text file's "CHAP. III." and "2." labels
+(textfix.py); `textfix: false` turns its paragraph repair off; `verseRefs: "split"` starts each "36:16"
+verse on a line of its own; `noteMarkers` ("letters" or "digits") sets apart note marks glued to words.
+
 Granger's own editions (editions.py): `rename` applies a name map from classics/names/ between two headings
 (`{"names": "homer-greek", "from": "Book I", "to": "Footnotes"}`), and `editorNote` says so at the front and in the
 colophon.
@@ -50,6 +56,10 @@ import editions
 PD_LINE = 1930
 PD_RIGHTS = "Public domain in the USA."
 VERSE_SECTIONS = {"poetry", "drama", "libretti", "scripture"}
+DRAMA_SECTIONS = {"drama", "libretti"}  # English only: Spanish teatro labels (JORNADA, ESCENA) are another round
+LABELS = ("chapter-verse",)
+VERSE_REFS = ("split",)
+NOTE_MARKERS = ("letters", "digits")
 LINE_NUMBERS = ("margin", "drop")
 PD_DEATH_LINE = 1945  # life + 80 leaves authors who died in 1945 or earlier free in 2026
 EARLY_LINE = 1800  # before this, an unknown death year passes with a note
@@ -114,6 +124,18 @@ class WorkSpec:
     wikisource: str | None = None
     ws_skip: list[str] = field(default_factory=list)
     parts: list[PartSpec] | None = None
+    drama: bool | dict | None = None
+    labels: str | None = None
+    textfix: bool = True
+    verse_refs: str | None = None
+    note_markers: str | None = None
+
+    @property
+    def is_drama(self) -> bool:
+        """The play pass runs: in the drama and libretti sections unless turned off, elsewhere when turned on."""
+        if self.drama is False:
+            return False
+        return self.drama is not None or self.section in DRAMA_SECTIONS
 
     @property
     def reads_as_verse(self) -> bool:
@@ -189,6 +211,8 @@ def load(path: Path) -> Manifest:
                       source=w.get("source", "gutenberg"), ebible=w.get("ebible"), licence=w.get("licence"),
                       cut_after=w.get("cutAfter"), pack_sections=w.get("packSections", False),
                       learner=w.get("learner", False), people=_people(w.get("people")), note=w.get("note", ""),
+                      drama=w.get("drama"), labels=w.get("labels"), textfix=w.get("textfix", True),
+                      verse_refs=w.get("verseRefs"), note_markers=w.get("noteMarkers"),
                       rename=w.get("rename"), editor_note=w.get("editorNote", ""),
                       se=w.get("se"), wikisource=w.get("wikisource"), ws_skip=w.get("wsSkip", []),
                       parts=[_part(p) for p in w["parts"]] if w.get("parts") is not None else None)
@@ -372,6 +396,16 @@ def _reading_errors(w: WorkSpec) -> list[str]:
         errors.append(f"packSections must be true or false, not {w.pack_sections!r}")
     if w.cut_after is not None and not (isinstance(w.cut_after, str) and w.cut_after.strip()):
         errors.append(f"cutAfter must be the work's last words, not {w.cut_after!r}")
+    if not (w.drama is None or isinstance(w.drama, bool) or (
+            isinstance(w.drama, dict) and set(w.drama) <= {"labels", "prose", "labelsWithoutStop"}
+            and w.drama.get("labels", "titlecase") == "titlecase")):
+        errors.append(f"drama must be true, false or hints (labels, prose, labelsWithoutStop), not {w.drama!r}")
+    for name, value, allowed in (("labels", w.labels, LABELS), ("verseRefs", w.verse_refs, VERSE_REFS),
+                                 ("noteMarkers", w.note_markers, NOTE_MARKERS)):
+        if value is not None and value not in allowed:
+            errors.append(f"{name} must be one of {allowed} or left out, not {value!r}")
+    if not isinstance(w.textfix, bool):
+        errors.append(f"textfix must be true or false, not {w.textfix!r}")
     if w.rename is not None:
         errors += _rename_errors(w.rename)
     if not isinstance(w.editor_note, str):

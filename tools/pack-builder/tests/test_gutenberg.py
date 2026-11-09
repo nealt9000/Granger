@@ -148,8 +148,32 @@ def test_childless_textless_blocks_go_but_their_ids_stay():
     body = str(gutenberg.clean(html).body)
     assert "figcenter" not in body and "&nbsp;" not in body and "\xa0" not in body
     assert '<span id="stanza2"></span>' in body and '<span id="fig1"></span>' in body
-    assert "<p>Line one<br/>line two</p>" in body and "<td></td>" in body and "<p><br/></p>" in body
-    assert body.count("<p") == 3 and "<div" not in body.replace("<div>", "", 1)
+    assert "<p>Line one<br/>line two</p>" in body and "<td></td>" in body and "<p><br/></p>" not in body
+    assert body.count("<p") == 2 and body.count('class="gx-gap"') == 1  # two spacers in a row: one gap
+
+
+def test_spacers_go_and_a_run_of_them_leaves_one_gap_unless_a_heading_follows():
+    html = (b"<html><body><div id='pg-start-separator'></div>"
+            b"<div class='w'>Success is counted sweetest</div><div class='w'><br></div>"
+            b"<div class='w'>By those who ne'er succeed.</div><div class='w'><br></div><div class='w'><br></div>"
+            b"<div class='w'>To comprehend a nectar</div>"
+            b"<p>The end.</p><p><a id='link2H_4_0003'></a></p><div style='height: 4em'><br><br><br><br></div>"
+            b"<h2>Chapter II</h2><p>Words.</p>"
+            b"<div id='pg-end-separator'></div></body></html>")
+    body = str(gutenberg.clean(html).body)
+    assert body.count('class="gx-gap"') == 1  # the stanza break, not the line break or before the heading
+    assert body.index("ne'er succeed") < body.index("gx-gap") < body.index("To comprehend")
+    assert '<span id="link2H_4_0003"></span><h2>' in body.replace("\n", "")
+    assert "<br/>" not in body
+
+
+def test_a_list_of_illustrations_goes_with_its_heading():
+    html = (b"<html><body><div id='pg-start-separator'></div><h2>CONTENTS</h2><p>Chapter I</p>"
+            b"<h2>LIST OF ILLUSTRATIONS</h2><p class='toc'><a href='#i1'>She looked at him</a> 12</p>"
+            b"<p class='toc'><a href='#i2'>The ball</a> 40</p><h2>Chapter I</h2><p>It is a truth.</p>"
+            b"<div id='pg-end-separator'></div></body></html>")
+    body = str(gutenberg.clean(html).body)
+    assert "ILLUSTRATIONS" not in body and "The ball" not in body and "It is a truth." in body
 
 
 def test_cover_art_transcribers_note_is_dropped():
@@ -222,3 +246,12 @@ def test_a_credit_the_header_gives_and_the_text_repeats_goes_with_a_cover_note()
     text = " ".join(cleaned.body.get_text(" ").split())
     assert text == "THE BOOK Produced by hand, the archive grew. Text of the work."
     assert cleaned.branding_removed >= 3
+
+
+def test_a_table_of_other_gutenberg_editions_goes():
+    html = (b"<html><body><div id='pg-start-separator'></div><table><tr><td><b>22382</b></td>"
+            b"<td>(With 800 linked footnotes, No illustrations)</td></tr><tr><td><b>3059</b></td><td></td></tr></table>"
+            b"<h1>THE ILIAD OF HOMER</h1><table><tr><td>1</td><td>Achilles</td></tr><tr><td>2</td><td>Hector</td></tr>"
+            b"</table><div id='pg-end-separator'></div></body></html>")
+    body = str(gutenberg.clean(html).body)
+    assert "22382" not in body and "Achilles" in body

@@ -30,11 +30,13 @@ from libzim.reader import Archive
 import chapters
 import compiled
 import covers
+import drama
 import editions
 import epubpack
 import gutenberg
 import manifest as manifests
 import standardebooks
+import textfix
 import usfm
 import verse
 import wikisource
@@ -119,6 +121,7 @@ def build(m: Manifest, source: GutenbergSource, out: Path, date: str, ebible: EB
         _edit(spec, cleaned.body)
         for notice in gutenberg.later_edition_notices(cleaned.body):
             print(f"WARNING {spec.slug} (#{spec.gutenberg}): later edition? {notice[:160]}")
+        restructure(spec, cleaned.body, m.code)
         pages = chapters.split(cleaned.body, spec.split_at,
                                zimpack.chapter_budget(spec.title, cleaned.styles, m.code), pack=spec.pack_sections)
         print(f"{_label(spec):>6} {spec.slug:<40} {len(pages):>4} chapters  {cleaned.branding_removed} branding blocks")
@@ -137,6 +140,34 @@ class BuildError(Exception):
     """A work failed to build; the message starts with its slug and source id."""
 
 
+def restructure(spec: WorkSpec, body, language: str = "en") -> None:
+    """Structure the source only shows by typography, put back before the chapter split so headings it promotes
+    drive the split and the contents: a text file's paragraphs, chapters and verse numbers (textfix.py), and a
+    play's speeches, directions, acts and scenes (drama.py)."""
+    if spec.textfix:
+        fixed = textfix.restore(body)
+        if fixed["split"] or fixed["joined"]:
+            print(f"{'':>6} {spec.slug:<40} {fixed['split']} hidden paragraph starts restored, "
+                  f"{fixed['joined']} page-split paragraphs joined")
+    if spec.labels == "chapter-verse":
+        promoted = textfix.promote(body)
+        print(f"{'':>6} {spec.slug:<40} {promoted['chapters']} chapter labels, {promoted['verses']} verse numbers")
+    if spec.verse_refs == "split":
+        print(f"{'':>6} {spec.slug:<40} {textfix.verse_refs(body)} verse references set apart")
+    marks = textfix.section_marks(body), textfix.note_brackets(body)
+    if any(marks):
+        print(f"{'':>6} {spec.slug:<40} {marks[0]} section numbers dropped, {marks[1]} note marks raised")
+    if spec.note_markers:
+        print(f"{'':>6} {spec.slug:<40} {textfix.note_markers(body, spec.note_markers)} note marks set apart")
+    if spec.is_drama and language == "en":
+        report = drama.structure(body, drama.Hints.parse(spec.drama))
+        if report.skipped:
+            print(f"{'':>6} {spec.slug:<40} drama pass skipped: {report.skipped}")
+        else:
+            print(f"{'':>6} {spec.slug:<40} {report.speeches} speeches, {report.directions} directions, "
+                  f"{report.headings} act/scene headings, {len(report.cast)} speakers")
+
+
 def _label(spec: WorkSpec) -> str:
     return {"standardebooks": "se", "wikisource": "ws", "compiled": "parts"}.get(spec.source, str(spec.gutenberg))
 
@@ -148,13 +179,15 @@ def _work(spec, source, ebible, language: str = "en", se=None, ws=None) -> zimpa
     _edit(spec, cleaned.body)
     for notice in gutenberg.later_edition_notices(cleaned.body):
         print(f"WARNING {spec.where}: later edition? {notice[:160]}")
+    restructure(spec, cleaned.body, language)
     pages = chapters.split(cleaned.body, spec.split_at, zimpack.chapter_budget(spec.title, cleaned.styles, language),
                            page_href=epubpack.chapter_href, pack=spec.pack_sections)
     print(f"{_label(spec):>6} {spec.slug:<40} {len(pages):>4} chapters  {cleaned.branding_removed} branding blocks")
     return zimpack.Work(slug=spec.slug, title=spec.title, author=spec.author, translator=spec.translator,
                         published=spec.published, section=spec.section, chapters=pages, styles=cleaned.styles,
                         line_numbers=spec.line_numbers, verse=spec.reads_as_verse,
-                        title_overrides=spec.title_overrides, language=language)
+                        title_overrides=spec.title_overrides, language=language,
+                        drama=spec.is_drama and language == "en")
 
 
 def _source_url(spec: WorkSpec) -> str:

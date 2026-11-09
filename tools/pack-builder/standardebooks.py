@@ -4,7 +4,7 @@ Standard Ebooks (SE) marks up its books with semantics (`epub:type`). Those are 
 markup the rest of the builder knows, then dropped, so the book carries no vocabulary epubcheck would need declared:
 
 - Drama, which SE sets as a table of rows (`td` `z3998:persona`, then the speech), becomes speeches:
-  `p.gd-speech.gd-prose` with a run-in `span.gd-who` for prose, `div.gd-speech` when the speech holds blocks
+  `p.gd-speech.gd-prose.gd-run` with a run-in `span.gd-who` for prose, `div.gd-speech.gd-above` when it holds blocks
   (verse, several paragraphs); a row with no speaker becomes `div.gd-sd`, a stage direction. A direction inside a
   speech (`z3998:stage-direction`) becomes `span.gd-sdi`, in the parentheses SE's own stylesheet shows.
 - Verse (`z3998:poem`, `z3998:verse`, `z3998:song`, `z3998:hymn`, `z3998:lyrics`), SE's `p` of `span` lines,
@@ -34,15 +34,6 @@ VERSE = {"z3998:poem", "z3998:verse", "z3998:song", "z3998:hymn", "z3998:lyrics"
 PERSONA = "z3998:persona"
 DIRECTION = "z3998:stage-direction"
 MAX_FILE_BYTES = 20_000_000
-# The speech markup's look, as the drama pass (formatting audit F1) styles it, so a play read here looks the same.
-DRAMA_CSS = """
-.gd-speech { margin: .9em 0 0; text-indent: 0; }
-.gd-who { font-weight: 700; font-variant-caps: all-small-caps; letter-spacing: .06em; }
-.gd-prose > .gd-who { margin-right: .35em; }
-div.gd-speech > .gd-who { display: block; margin-bottom: .1em; }
-.gd-sd { font-style: italic; margin: .6em 0 .6em 1.5em; text-indent: 0; }
-.gd-sdi { font-style: italic; }
-""".strip()
 _INDENT = re.compile(r"^i(\d)$")
 _SCHEME = re.compile(r"^[a-z][a-z0-9+.-]*:", re.I)
 _BLOCKS = {"p", "div", "blockquote", "table", "ul", "ol", "dl", "section", "header", "footer", "hr"}
@@ -130,7 +121,7 @@ def read(epub: bytes) -> SeBook:
             string.replace_with(NavigableString(str(string).replace("﻿", "⁠")))
     return SeBook(title=meta["title"], authors=meta["authors"], translators=meta["translators"],
                   rights=meta["rights"], identifier=meta["identifier"], skipped=skipped, years=years,
-                  cleaned=Cleaned(body=body, styles=css + ("\n" + DRAMA_CSS if body.find(class_="gd-who") else ""),
+                  cleaned=Cleaned(body=body, styles=css,  # the gd-* look is drama.CSS, which epubpack adds
                                   branding_removed=len(skipped)))
 
 
@@ -279,9 +270,9 @@ def _drama_table(soup: BeautifulSoup, table: Tag) -> None:
         blocky = any(isinstance(c, Tag) and c.name in _BLOCKS for c in contents)
         name = " ".join(who.get_text(" ").split())
         if blocky:
-            speech = soup.new_tag("div", attrs={"class": "gd-speech"})
+            speech = soup.new_tag("div", attrs={"class": "gd-speech gd-above"})
         else:
-            speech = soup.new_tag("p", attrs={"class": "gd-speech gd-prose"})
+            speech = soup.new_tag("p", attrs={"class": "gd-speech gd-prose gd-run"})
         label = soup.new_tag("span", attrs={"class": "gd-who"})
         label.string = name
         speech.append(label)

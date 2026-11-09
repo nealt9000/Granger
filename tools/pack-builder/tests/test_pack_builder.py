@@ -268,7 +268,7 @@ def test_standard_ebooks_wikisource_and_compiled_rows_build_with_their_sources_i
     play, work, documents = build_epubs(m, FakeSource(), out, "2026-11-09", se=FakeSE(), ws=FakeWS())
     z = zipfile.ZipFile(play)
     pages = "".join(z.read(n).decode() for n in z.namelist() if n[6:7] == "c" and n[7:8].isdigit())
-    assert 'class="gd-speech gd-prose"' in pages and "Standard Ebooks" not in pages and "epub:type=\"z3998" not in pages
+    assert 'class="gd-speech gd-prose gd-run"' in pages and "Standard Ebooks" not in pages and "epub:type=\"z3998" not in pages
     colophon = z.read("OEBPS/colophon.xhtml").decode()
     assert "From Standard Ebooks (https://standardebooks.org/ebooks/a-writer/the-test-play/b-writer)" in colophon
     assert "CC0 1.0" in colophon
