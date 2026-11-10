@@ -80,6 +80,6 @@ the key's custody first.
 ## Next steps
 
 1. Use `build --previous` for every refresh (done in this branch).
-2. Write `upkeep.py check`, covering the Kiwix findings and dead links only, and its report.
+2. ~~Write `upkeep.py check`~~ done 2026-11-09: `tools/upkeep/upkeep.py check` (findings.json, report.md, candidate.json; playbooks in `tools/upkeep/README.md`). First real run: 13 min, 1 needs Neal (based.cooking vectors), 5 waiting on mirrors.
 3. Add the playbooks for vectors and time indexes (GPU-gated), then feedback triage.
 4. Do a dry run with a local model, then with OpenCode's free tier, on a real week's findings.

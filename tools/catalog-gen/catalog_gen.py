@@ -438,6 +438,10 @@ def book_entries(curated, head=http_head, root=None):
     return descriptor["collection"], entries
 
 
+# Readiness tier budgets for English, (Efficient, Comprehensive) bytes as tier_sizes counts them ("All"). With pictures by
+# default (Neal, 2026-10-28) and the 14.8 GB English Wiktionary accepted (Neal, 2026-11-09).
+TIER_BUDGETS = {"en": (18e9, 107e9)}
+
 PIN_KEYS = ("sha256", "sizeBytes", "urls", "snapshotDate", "zimUuid", "hasFulltextIndex")
 
 
@@ -451,7 +455,8 @@ def hold_back(packs, previous, derived, status=None, sleep=time.sleep):
         would silently drop them. [derived] maps "vectors" / "timeIndex" to the sourceSha256s descriptors exist for.
     Flavours of one ZIM name move together, since vectors and time indexes are shared across them. A pack is held only
     when its previous file still answers; if that is gone too it moves anyway, and the line says so.
-    Returns the report lines, one per ZIM name held or forced; packs is changed in place.
+    Returns one record per ZIM name held or forced: {"zim", "ids", "from", "to", "reasons" (of "mirror", "vectors",
+    "timeIndex"), "held" (False when the previous file was gone too), "text" (the report line)}; packs change in place.
     """
     status = status or http_status
     before = {p["id"]: p for p in previous.get("packs", [])}
@@ -463,33 +468,39 @@ def hold_back(packs, previous, derived, status=None, sleep=time.sleep):
         moved = [p for p in group if p["id"] in before and p.get("sha256") != before[p["id"]].get("sha256")]
         if not moved:
             continue
-        why = []
+        why, reasons = [], []
         for key, label in (("vectors", "search vectors"), ("timeIndex", "time index")):
             if any(before[p["id"]].get(key) for p in group if p["id"] in before) and \
                     not any(p.get("sha256") in derived.get(key, ()) for p in group):
                 why.append(f"would drop its {label} (rebuild for the new file)")
+                reasons.append(key)
         dead = dead_links([u for p in moved for u in p.get("urls", [])], status, sleep=sleep)
         if dead:
             why.append(f"{len(dead)} link(s) not answering yet ({dead[0][0].split('/')[2]}: {dead[0][1]})")
+            reasons.append("mirror")
         if not why:
             continue
         old, new = before[moved[0]["id"]].get("snapshotDate"), moved[0].get("snapshotDate")
+        record = {"zim": name, "ids": [p["id"] for p in moved], "from": old, "to": new, "reasons": reasons}
         if dead_links([u for p in moved for u in before[p["id"]].get("urls", [])], status, sleep=sleep):
-            lines.append(f"  {name}: moved to {new} anyway, {old} no longer answers; " + "; ".join(why))
+            lines.append({**record, "held": False,
+                          "text": f"  {name}: moved to {new} anyway, {old} no longer answers; " + "; ".join(why)})
             continue
         for p in moved:
             p.update({k: before[p["id"]][k] for k in PIN_KEYS if k in before[p["id"]]})
             for k in PIN_KEYS:
                 if k not in before[p["id"]]:
                     p.pop(k, None)
-        lines.append(f"  {name}: held at {old}, not {new}: " + "; ".join(why))
+        lines.append({**record, "held": True, "text": f"  {name}: held at {old}, not {new}: " + "; ".join(why)})
     return lines
 
 
-def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=None, previous=None, status=None):
+def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=None, previous=None, status=None,
+          holds=None):
     """
     The catalog. With a "kiwix" setting, the Kiwix report's lines are appended to [report]. With a [previous] catalog,
-    packs whose newer snapshot isn't safe to take yet keep their previous pin ([hold_back]).
+    packs whose newer snapshot isn't safe to take yet keep their previous pin ([hold_back]); their records are appended
+    to [holds].
     """
     now = now or datetime.datetime.now(datetime.timezone.utc)
     kiwix = curated.get("kiwix")
@@ -524,8 +535,10 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
             derived["timeIndex"] = {d["sourceSha256"] for d in
                                     vector_descriptors(base / curated["timeIndex"]["releases"], TIMEINDEX_KEYS)}
         held = hold_back(packs, previous, derived, status)
+        if holds is not None:
+            holds += held
         if report is not None:
-            report += ["", "Newer snapshots held back:"] + (held or ["  none"])
+            report += ["", "Newer snapshots held back:"] + ([h["text"] for h in held] or ["  none"])
     models = curated["models"]
     voices = curated.get("voices", [])       # Plan V1: one zip per voice, hand-written like models
     books, collections, collection_rows = [], {}, {}
