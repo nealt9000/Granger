@@ -1,0 +1,692 @@
+[
+ {
+  "id": "d-bible-001",
+  "group": "bible",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who in the bible got swallowed by a giant fish",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-king-james-bible",
+    "location": "c042.xhtml",
+    "quote": "the lord had prepared a great fish to swallow up jonah"
+   },
+   {
+    "source": "book:granger:gc-world-english-bible",
+    "location": "c048.xhtml",
+    "quote": "the lord prepared a huge fish to swallow up jonah"
+   },
+   {
+    "source": "book:granger:gc-berean-standard-bible",
+    "location": "c050.xhtml",
+    "quote": "the lord had appointed a great fish to swallow jonah"
+   }
+  ],
+  "reference": "Jonah: the Lord prepared a great fish that swallowed him, and he was in its belly three days and three nights (Jonah 1:17).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-bible-006",
+  "group": "bible",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how many wives is a man allowed to have in the koran",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-koran-rodwell",
+    "location": "c099.xhtml",
+    "quote": "marry but two, or three, or four"
+   },
+   {
+    "source": "book:granger:gc-koran-sale",
+    "location": "c019.xhtml",
+    "quote": "two, or three, or four, and not more"
+   }
+  ],
+  "reference": "Up to four (two, three or four), and only one if he fears he cannot treat them equitably (Sura 4, Women).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-literature-001",
+  "group": "literature",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who stole silas marner's gold",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-silas-marner",
+    "location": "c006.xhtml",
+    "quote": "dunstan felt round the hole, to be certain that it held no more"
+   }
+  ],
+  "reference": "Dunstan Cass, the squire's son, who found the two bags of guineas under the floor while Silas was out (chapter 4).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-literature-006",
+  "group": "literature",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why was matthew cuthbert confused when he picked up anne at the station",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-anne-of-green-gables",
+    "location": "c003.xhtml",
+    "quote": "mrs. alexander spencer was to bring him over from nova scotia for me"
+   },
+   {
+    "source": "book:granger:gc-anne-of-green-gables",
+    "location": "c002.xhtml",
+    "quote": "marilla and matthew cuthbert of all people adopting a boy"
+   }
+  ],
+  "reference": "He and Marilla had sent for a boy from the orphan asylum to help on the farm, but Mrs Spencer brought a girl, Anne, instead (chapters 1-2).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-vocab-gap-003",
+  "group": "vocab-gap",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "where does jekyll and hyde talk about everyone having a split personality",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-strange-case-of-dr-jekyll-and-mr-hyde",
+    "location": "c012.xhtml",
+    "quote": "that man is not truly one, but truly two"
+   }
+  ],
+  "reference": "In Henry Jekyll's full statement of the case, the last chapter: man is not truly one, but truly two.",
+  "goodGuess": null,
+  "notes": "vocab gap: split personality -> truly two, polity of multifarious denizens."
+ },
+ {
+  "id": "d-vocab-gap-008",
+  "group": "vocab-gap",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "where does adam smith say the free market basically regulates itself",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-wealth-of-nations",
+    "location": "c032.xhtml",
+    "quote": "led by an invisible hand to promote an end which was no part of his intention"
+   }
+  ],
+  "reference": "Book IV, chapter II of The Wealth of Nations: each person pursuing his own gain is led by an invisible hand to promote an end that was no part of his intention.",
+  "goodGuess": null,
+  "notes": "vocab gap: free market regulating itself -> invisible hand."
+ },
+ {
+  "id": "d-who-wrote-005",
+  "group": "who-wrote",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "who wrote cyrano de bergerac",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-cyrano-de-bergerac",
+    "location": "c001.xhtml",
+    "quote": "a play in five acts by edmond rostand"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "Cyrano_de_Bergerac_(play)",
+    "quote": "is a french play written in 1897 by edmond rostand"
+   }
+  ],
+  "reference": "Edmond Rostand (1897), a play in five acts.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-follow-up-002",
+  "group": "follow-up",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "and who was its captain",
+  "priorQuestion": "whats the ship called in treasure island",
+  "answers": [
+   {
+    "source": "book:granger:gc-treasure-island",
+    "location": "c011.xhtml",
+    "quote": "captain smollett, sir, axing to speak with you"
+   }
+  ],
+  "reference": "Captain Smollett (chapter 9).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-multi-step-002",
+  "group": "multi-step",
+  "domain": "classics",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "who was the father of the man who killed hector",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "book:granger:gc-iliad",
+    "location": "c024.xhtml",
+    "quote": "hector fell headlong, and achilles vaunted over him"
+   },
+   {
+    "source": "book:granger:gc-iliad",
+    "location": "c003.xhtml",
+    "quote": "the anger of achilles son of peleus"
+   }
+  ],
+  "reference": "Peleus: Hector was killed by Achilles (Iliad XXII), and Achilles is the son of Peleus (Iliad I).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-medical-002",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "sailors on long voyages used to get bleeding gums and sore limbs, what were they missing?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Scurvy",
+    "quote": "is a deficiency disease (state of malnutrition) resulting from a lack of vitamin c"
+   }
+  ],
+  "reference": "Vitamin C: that illness is scurvy, a deficiency disease caused by a lack of vitamin C (ascorbic acid).",
+  "goodGuess": null,
+  "notes": "cause; the question describes scurvy without naming it"
+ },
+ {
+  "id": "d-medical-007",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "what builds up inside the joint to cause a gout attack",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Gout",
+    "quote": "needle-shaped crystals of the monosodium salt of uric acid"
+   }
+  ],
+  "reference": "Needle-shaped crystals of uric acid (monosodium urate) deposited in the joint, from persistently high uric acid in the blood.",
+  "goodGuess": null,
+  "notes": "cause"
+ },
+ {
+  "id": "d-medical-012",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "my resting pulse is 72, is that in the normal range?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Heart_rate",
+    "quote": "the normal resting adult human heart rate is 60–100 bpm"
+   }
+  ],
+  "reference": "Yes: the normal resting adult heart rate is 60 to 100 beats per minute, so 72 is within it.",
+  "goodGuess": null,
+  "notes": "a my question that asks a general fact (the normal range); answerable"
+ },
+ {
+  "id": "d-medical-017",
+  "group": "medical",
+  "domain": "medicine",
+  "split": "dev",
+  "answerable": true,
+  "medical": true,
+  "multiStep": false,
+  "question": "someone next to me is choking on food, what do I do first",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_medicine",
+    "location": "Choking",
+    "quote": "encouraging the victim to cough, followed by hard back slaps"
+   }
+  ],
+  "reference": "Encourage them to cough, then give hard back slaps; if that fails, abdominal thrusts (the Heimlich maneuver), alternating the two if needed.",
+  "goodGuess": null,
+  "notes": "first aid the article describes"
+ },
+ {
+  "id": "d-cooking-002",
+  "group": "cooking",
+  "domain": "food",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how long does raw fish need to sit in lime juice for ceviche before its safe to eat",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "based.cooking_en_all",
+    "location": "based.cooking/ceviche/",
+    "quote": "you can get away with eating it after only an hour"
+   },
+   {
+    "source": "foss.cooking_en_all",
+    "location": "foss.cooking/recipe/jacob-smith/ceviche",
+    "quote": "you can get away with eating it after only an hour"
+   }
+  ],
+  "reference": "At least an hour in the fridge, though the recipe says it is better left overnight.",
+  "goodGuess": null,
+  "notes": "Same text in both cooking packs."
+ },
+ {
+  "id": "d-cooking-007",
+  "group": "cooking",
+  "domain": "food",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "my homemade mayo keeps splitting with the stick blender, what am i doing wrong",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "foss.cooking_en_all",
+    "location": "foss.cooking/recipe/brox/mayonnaise-or-aioli",
+    "quote": "add oil as the very last ingredient"
+   },
+   {
+    "source": "based.cooking_en_all",
+    "location": "based.cooking/mayonnaise-or-aioli/",
+    "quote": "add oil as the very last ingredient"
+   }
+  ],
+  "reference": "Put the oil in last so it sits on top of the other ingredients, start the blender at the very bottom on full power and work upward slowly; adding the oil earlier can make it separate.",
+  "goodGuess": null,
+  "notes": "Same text in both cooking packs."
+ },
+ {
+  "id": "d-multi-step-009",
+  "group": "multi-step",
+  "domain": "food",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "how much longer does it take to get a sourdough starter ready than to let no-knead dough rise",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "appropedia_en_all",
+    "location": "Making_bread",
+    "quote": "leave to stand for another 4 days, the starter is then ready"
+   },
+   {
+    "source": "foss.cooking_en_all",
+    "location": "foss.cooking/recipe/enthdegree/no-knead-bread",
+    "quote": "leave the dough at room temperature for 12 hours"
+   },
+   {
+    "source": "based.cooking_en_all",
+    "location": "based.cooking/no-knead-bread/",
+    "quote": "leave the dough at room temperature for 12 hours"
+   }
+  ],
+  "reference": "The starter takes about 6 days (2 days, then 4 more after feeding) while no-knead dough rests 12 hours, so the starter takes roughly five and a half days longer.",
+  "goodGuess": null,
+  "notes": "Two facts: the starter's 2 + 4 days (appropedia Making bread; the 2-day step is two sentences before the quote) and the no-knead rest of 12 hours (either cooking pack)."
+ },
+ {
+  "id": "d-repair-005",
+  "group": "repair",
+  "domain": "making",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "is it bad to put too much grease on the moving parts of a wheelchair",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "appropedia_en_all",
+    "location": "Wheelchair_Maintenance",
+    "quote": "the excess grease binds dirt and other particles that will prevent proper function"
+   }
+  ],
+  "reference": "Yes: excess grease binds dirt and grit that stop the parts working properly, so do not over-lubricate; dry lubricants are the most user-friendly.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-knots-004",
+  "group": "knots",
+  "domain": "making",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "is a square knot ok for joining two ropes together",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_knots",
+    "location": "Reef_knot",
+    "quote": "the reef knot is not recommended for tying two ropes together"
+   }
+  ],
+  "reference": "No: the reef (square) knot is a binding knot and is not recommended as a bend; it can spill, especially with ropes of unequal size, and misuse has caused deaths.",
+  "goodGuess": null,
+  "notes": "Vocabulary gap: square knot vs reef knot."
+ },
+ {
+  "id": "d-travel-003",
+  "group": "travel",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what kind of plug adapter do i need for singapore",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Electrical_systems",
+    "quote": "three rectangular pins united kingdom, ireland, malta, cyprus, malaysia, singapore, hong kong"
+   }
+  ],
+  "reference": "Singapore uses the British-style type G plug with three rectangular pins (220-240 V).",
+  "goodGuess": null,
+  "notes": "Travel-topic article (Electrical systems); the answer is in the plug-type table."
+ },
+ {
+  "id": "d-travel-008",
+  "group": "travel",
+  "domain": "maps",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "do I still need a visa for Kenya and what does it cost",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikivoyage_en_all",
+    "location": "Kenya",
+    "quote": "will need to apply for an eta to enter kenya. the eta costs us$34.09"
+   }
+  ],
+  "reference": "No visa: Kenya now requires an electronic travel authorization (eTA) from visitors outside the East African Community, and it costs US$34.09.",
+  "goodGuess": null,
+  "notes": "Country article, Get in; the question says visa but the guide's word is eTA."
+ },
+ {
+  "id": "d-history-001",
+  "group": "history",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "how did anyone finally work out how to read egyptian hieroglyphs",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Rosetta_Stone",
+    "quote": "jean-françois champollion announced the transliteration of the egyptian scripts in paris in 1822"
+   }
+  ],
+  "reference": "Through the Rosetta Stone, which carries the same decree in hieroglyphic, demotic and Greek; Jean-François Champollion announced the decipherment of the Egyptian scripts in 1822.",
+  "goodGuess": null,
+  "notes": "Asks the how, not the artifact; the Rosetta Stone article answers it."
+ },
+ {
+  "id": "d-science-002",
+  "group": "science",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "what actually makes the northern lights glow",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Aurora",
+    "quote": "caused by charged particles from the sun colliding with atoms in the atmosphere"
+   }
+  ],
+  "reference": "Charged particles from the sun collide with atoms in the upper atmosphere, exciting oxygen and nitrogen, which then emit light of different colours (green, red, purple).",
+  "goodGuess": null,
+  "notes": "Asked as northern lights; the article is Aurora."
+ },
+ {
+  "id": "d-multi-step-014",
+  "group": "multi-step",
+  "domain": "reference",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "how old was darwin when his book about the origin of species came out",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_top",
+    "location": "Charles_Darwin",
+    "quote": "charles robert darwin was born on 12 february 1809"
+   },
+   {
+    "source": "wikipedia_en_top",
+    "location": "On_the_Origin_of_Species",
+    "quote": "it was published on 24 november 1859"
+   }
+  ],
+  "reference": "50 years old: Darwin was born on 12 February 1809 and On the Origin of Species was published on 24 November 1859.",
+  "goodGuess": null,
+  "notes": "Birth date from the Darwin article, publication date from the book's article; arithmetic."
+ },
+ {
+  "id": "d-physics-004",
+  "group": "physics",
+  "domain": "science",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why does a straw in a glass of water look bent at the surface",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_physics",
+    "location": "Refraction",
+    "quote": "placed at a slant, partially in the water, the object appears to bend"
+   }
+  ],
+  "reference": "Refraction: light rays bend as they pass from water into air, and the eye traces them back as straight lines, so the submerged part appears displaced and the straw seems to bend at the surface.",
+  "goodGuess": null,
+  "notes": "the article's example is a pencil, not a straw"
+ },
+ {
+  "id": "d-mathematics-001",
+  "group": "mathematics",
+  "domain": "science",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "why cant you divide by zero",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_mathematics",
+    "location": "Division_by_zero",
+    "quote": "numerical structures called fields leaves division by zero undefined"
+   }
+  ],
+  "reference": "Because a quotient a/0 would have to be a number that gives a when multiplied by 0, and anything times 0 is 0; so ordinary arithmetic leaves division by zero undefined (allowing it leads to absurd results).",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-programming-002",
+  "group": "programming",
+  "domain": "technology",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "my server replied with a 418, what is that supposed to mean",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_http",
+    "location": "reference/status/418",
+    "quote": "indicates that the server refuses to brew coffee because it is, permanently, a teapot"
+   }
+  ],
+  "reference": "418 I'm a teapot: a joke status from the April Fools Hyper Text Coffee Pot Control Protocol (RFC 2324), reserved so it cannot get real semantics; some sites return it for requests they do not want to handle, such as automated queries.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-programming-007",
+  "group": "programming",
+  "domain": "technology",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "in python how do i make a slow function remember results it already worked out",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_python",
+    "location": "library/functools",
+    "quote": "wrap a function with a memoizing callable that saves up to the maxsize"
+   }
+  ],
+  "reference": "Decorate it with functools.lru_cache (or functools.cache for an unbounded cache): the decorator memoizes results so repeated calls with the same arguments return the saved value.",
+  "goodGuess": null,
+  "notes": "vocabulary: remember results -> memoize / cache"
+ },
+ {
+  "id": "d-multi-step-019",
+  "group": "multi-step",
+  "domain": "technology",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": true,
+  "question": "does a javascript number have more bits than a C int is guaranteed to have",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "devdocs_en_javascript",
+    "location": "global_objects/number",
+    "quote": "the javascript number type is a double-precision 64-bit binary format ieee 754 value"
+   },
+   {
+    "source": "devdocs_en_c",
+    "location": "language/arithmetic_types",
+    "quote": "guaranteed to be at least 16 bits"
+   }
+  ],
+  "reference": "Yes: a JavaScript number is a 64-bit IEEE 754 double, while C only guarantees int at least 16 bits (most systems use 32).",
+  "goodGuess": null,
+  "notes": "two sizes from two packs, compared"
+ },
+ {
+  "id": "d-history-009",
+  "group": "history",
+  "domain": "thought",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "When did Japan start drafting ordinary people into the army instead of relying on the samurai?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "wikipedia_en_history",
+    "location": "Meiji_era",
+    "quote": "when in january the conscription law of 1873 was passed"
+   }
+  ],
+  "reference": "With the Conscription Law of 1873, passed in January 1873, which the article calls the beginning of the end for the samurai class.",
+  "goodGuess": null,
+  "notes": ""
+ },
+ {
+  "id": "d-philosophy-005",
+  "group": "philosophy",
+  "domain": "thought",
+  "split": "dev",
+  "answerable": true,
+  "medical": false,
+  "multiStep": false,
+  "question": "What is Searle trying to show with the thought experiment about a man locked in a room shuffling Chinese symbols?",
+  "priorQuestion": null,
+  "answers": [
+   {
+    "source": "internet-encyclopedia-philosophy_en_all",
+    "location": "iep.utm.edu/chinese-room-argument/",
+    "quote": "one of the best known and widely credited counters to claims of artificial intelligence"
+   }
+  ],
+  "reference": "That computers do not really think or understand: it is a counter to strong AI, the claim that a suitably programmed computer literally understands. The man produces correct Chinese output by following rules without understanding a word, so running the program is not enough (syntax does not suffice for semantics).",
+  "goodGuess": null,
+  "notes": ""
+ }
+]

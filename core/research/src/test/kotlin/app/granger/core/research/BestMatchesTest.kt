@@ -1,6 +1,7 @@
 package app.granger.core.research
 
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -46,5 +47,22 @@ class BestMatchesTest {
     @Test fun theHighlightIsTheSentenceWithMostQueryWords() {
         val range = BestMatches.sentence(burnFirstAid, listOf("cool", "burn", "water"), Keywords.ENGLISH)!!
         assertThat(burnFirstAid.text.substring(range)).startsWith("Cool the burn with running water")
+    }
+
+    @Test fun meaningHitsComeFirstWhileTheKeywordSearchRuns() = runTest {
+        val dense = passage("wikem", "Thermal_burns", "Thermal burns", "Treat thermal burns by cooling them with water.", cosine = 0.86)
+        val slowWords = PassageFinder { kotlinx.coroutines.delay(1_000); listOf(burnFirstAid) }
+        val steps = BestMatches(slowWords, dense = DenseFinder { listOf(dense) }, embed = { FloatArray(4) })
+            .stream("how do I treat a burn").toList()
+        assertThat(steps).hasSize(2)
+        assertThat(steps[0].final).isFalse()
+        assertThat(steps[0].matches.map { it.passage.location }).containsExactly("Thermal_burns")
+        assertThat(steps[1].final).isTrue()
+        assertThat(steps[1].matches.map { it.passage.location }).contains("Burn")
+    }
+
+    @Test fun withoutMeaningThereIsOneStep() = runTest {
+        val steps = BestMatches(PassageFinder { listOf(burnFirstAid) }).stream("treat a burn").toList()
+        assertThat(steps.map { it.final }).containsExactly(true)
     }
 }

@@ -22,7 +22,9 @@ class SearchEval(
     private val packs: Map<String, Pair<String, String>>,
     private val clock: () -> Long,
     /** Best matches (Plan SQ Phase 4); null leaves them out of the records. */
-    private val best: (suspend (String) -> app.granger.core.research.BestMatches.Result)? = null,
+    private val best: ((String) -> kotlinx.coroutines.flow.Flow<app.granger.core.research.BestMatches.Result>)? = null,
+    /** The dense search's last timings (scan, rebuild, rows), recorded beside Best matches. */
+    private val denseTimings: () -> app.granger.core.library.DenseTimings? = { null },
 ) {
     var onItem: (String, Int, Int) -> Unit = { _, _, _ -> }
 
@@ -51,7 +53,13 @@ class SearchEval(
         val fullText = search.fullText(query)
         val fullTextMs = clock() - start
         start = clock()
-        val matches = best?.invoke(query)
+        var firstMs: Long? = null
+        var first: app.granger.core.research.BestMatches.Result? = null
+        var matches: app.granger.core.research.BestMatches.Result? = null
+        best?.invoke(query)?.collect { r ->
+            if (first == null) { first = r; firstMs = clock() - start }
+            matches = r
+        }
         val bestMs = clock() - start
         return JSONObject()
             .put("id", id)
@@ -68,6 +76,16 @@ class SearchEval(
                     .put("title", p.sourceTitle).put("kind", p.kind.name).put("sentence", m.sentence?.let { p.text.substring(it) } ?: "")
             }))
             .put("bestByMeaning", matches?.byMeaning ?: false)
+            .put("bestFirst", JSONArray(first?.takeIf { !it.final }?.matches.orEmpty().map { m ->
+                val p = m.passage
+                val source = if (p.kind == app.granger.core.research.SourceKind.ARTICLE) packs[p.sourceId]?.first ?: p.sourceId else p.sourceId
+                JSONObject().put("source", source).put("path", p.location).put("title", p.sourceTitle)
+            }))
+            .put("bestFirstMs", firstMs ?: JSONObject.NULL)
+            .put("bestStages", JSONObject().put("embedMs", matches?.embedMs ?: 0).put("denseMs", matches?.denseMs ?: 0).put("keywordMs", matches?.keywordMs ?: 0))
+            .put("dense", denseTimings()?.let { t ->
+                JSONObject().put("scanMs", t.scanMs).put("rebuildMs", t.rebuildMs).put("sourcesMs", t.sourcesMs).put("rows", t.rows).put("files", t.files)
+            } ?: JSONObject.NULL)
             .put("ms", JSONObject().put("titles", titlesMs).put("near", nearMs).put("books", booksMs).put("fullText", fullTextMs).put("best", bestMs))
     }
 

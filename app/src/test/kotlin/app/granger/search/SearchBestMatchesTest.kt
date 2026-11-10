@@ -47,7 +47,7 @@ class SearchBestMatchesTest {
         val opened = mutableListOf<BestMatches.Match>()
         val vm = SearchViewModel(
             NoTitles, FakeReadingSessions(), "treat a burn",
-            best = BestMatchSearch { BestMatches.Result((1..5).map(::match), listOf("treat", "burn"), byMeaning = true) },
+            best = BestMatchSearch { kotlinx.coroutines.flow.flowOf(BestMatches.Result((1..5).map(::match), listOf("treat", "burn"), byMeaning = true, final = true)) },
         )
         compose.setContent {
             SearchScreen(

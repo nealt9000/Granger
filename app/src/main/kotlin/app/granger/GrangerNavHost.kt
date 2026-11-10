@@ -1164,7 +1164,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             media = if (Features.PLAYER) MediaSearch { container.mediaIndex.searchForGroups(it) } else MediaSearch { MediaResults() },
                             voice = container.voiceInput,
                             spokenNames = container.spokenTitles.names,
-                            best = BestMatchSearch { container.bestMatches.find(it) },
+                            best = BestMatchSearch { container.bestMatches.stream(it) },
                         )
                     },
                     onOpenMatch = { match ->

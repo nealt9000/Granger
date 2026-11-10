@@ -85,8 +85,9 @@ def pct(n, d):
 
 def latency(rows):
     out = {}
-    for group in ("titles", "near", "books", "fullText", "best"):
-        ms = sorted(r["ms"][group] for r in rows if group in r.get("ms", {}))
+    for group in ("titles", "near", "books", "fullText", "best", "bestFirst"):
+        ms = sorted(r["ms"][group] if group in r.get("ms", {}) else r.get(group + "Ms") for r in rows
+                    if group in r.get("ms", {}) or isinstance(r.get(group + "Ms"), (int, float)))
         if ms:
             out[group] = (statistics.median(ms), ms[min(len(ms) - 1, int(round(0.95 * (len(ms) - 1))))])
     return out
@@ -120,7 +121,7 @@ def score_known(items, run):
 
 
 def score_questions(items, run):
-    keys = ("titles5", "books5", "ft5", "ft10", "page5", "best5", "best10")
+    keys = ("titles5", "books5", "ft5", "ft10", "page5", "best5", "best10", "first5")
     by = defaultdict(lambda: dict.fromkeys(keys + ("n",), 0))
     for it in items:
         if not it.get("answerable", True) or not it.get("answers"):
@@ -141,13 +142,17 @@ def score_questions(items, run):
         bm = next((n for n, h in enumerate(r.get("best", []), 1)
                    if matches({"source": h.get("source"), "location": h.get("path")}, it["answers"])), None)
         got["best5"], got["best10"] = bool(bm and bm <= 5), bool(bm and bm <= 10)
+        # The first step (dense hits alone), where there was one; else the final ranking stood from the start.
+        first = r.get("bestFirst") or r.get("best", [])
+        fm = next((n for n, h in enumerate(first, 1) if matches({"source": h.get("source"), "location": h.get("path")}, it["answers"])), None)
+        got["first5"] = bool(fm and fm <= 5)
         for key in ("all", it.get("domain", "?")):
             s = by[key]
             s["n"] += 1
             for k in keys:
                 s[k] += got[k]
-    lines = ["| Slice | n | Titles @5 | Books @5 | Articles @5 | Articles @10 | Page @5 | Best @5 | Best @10 |",
-             "|---|---|---|---|---|---|---|---|---|"]
+    lines = ["| Slice | n | Titles @5 | Books @5 | Articles @5 | Articles @10 | Page @5 | Best @5 | Best @10 | First step @5 |",
+             "|---|---|---|---|---|---|---|---|---|---|"]
     for key in sorted(by, key=lambda k: (k != "all", k)):
         s = by[key]
         lines.append("| %s | %d | %s |" % (key, s["n"], " | ".join(pct(s[k], s["n"]) for k in keys)))
@@ -169,6 +174,11 @@ def cmd_score(args):
                                                              top, "" if rank is None else " (rank %d)" % rank))
     else:
         print("\n".join(score_questions(items, run)))
+    dense = [r["dense"] for r in run.values() if r.get("dense")]
+    if dense:
+        scan = sorted(d["scanMs"] for d in dense)
+        print("\nDense scan, ms (p50 / p95): %d / %d over %d rows in %d files" % (
+            statistics.median(scan), scan[min(len(scan) - 1, int(round(0.95 * (len(scan) - 1))))], dense[0]["rows"], dense[0]["files"]))
     print("\nLatency, ms (p50 / p95):")
     for group, (p50, p95) in latency(list(run.values())).items():
         print("  %-9s %6.0f / %6.0f" % (group, p50, p95))

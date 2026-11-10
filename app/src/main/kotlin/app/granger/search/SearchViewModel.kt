@@ -38,8 +38,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
-/** Best matches for a query ([app.granger.core.research.BestMatches] in the app). */
-fun interface BestMatchSearch { suspend fun find(query: String): app.granger.core.research.BestMatches.Result }
+/** Best matches for a query, in up to two steps ([app.granger.core.research.BestMatches.stream] in the app). */
+fun interface BestMatchSearch { fun stream(query: String): Flow<app.granger.core.research.BestMatches.Result> }
 
 /** The music and audiobooks matching a query ([app.granger.core.library.MediaIndex.search] in the app). */
 fun interface MediaSearch { suspend fun search(query: String): MediaResults }
@@ -180,14 +180,16 @@ class SearchViewModel(
                     bestJob = viewModelScope.launch {
                         if (!submitted) kotlinx.coroutines.delay(BEST_PAUSE_MS)
                         _state.update { it.copy(bestLoading = true) }
-                        val found = try {
-                            source.find(q).matches
+                        try {
+                            // The meaning hits first, then the merged ranking (Plan SQ: ~1.7 s and ~3.5 s on the Pixel 6).
+                            source.stream(q).collect { found ->
+                                if (query.value.text == q) _state.update { it.copy(best = found.matches, bestLoading = !found.final) }
+                            }
                         } catch (e: CancellationException) {
                             throw e
                         } catch (e: Exception) {
-                            emptyList()
+                            if (query.value.text == q) _state.update { it.copy(bestLoading = false) }
                         }
-                        if (query.value.text == q) _state.update { it.copy(best = found, bestLoading = false) }
                     }
                 }
                 // Each group's results land with its cap, so its Show all label is right from the first frame.
