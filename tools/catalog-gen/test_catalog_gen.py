@@ -763,10 +763,9 @@ def test_real_curated_tiers_fit_the_target():
         pytest.skip("the published catalog predates the calibration (Plan H4)")
     sizes = cg.tier_sizes(published)
     efficient, comprehensive = sizes["All"]
-    # With pictures by default (Neal, 2026-10-28: no-pictures packs are the space-saving fallback): 17.7 / 101.5 GB.
-    assert efficient < 18e9
-    # Neal, 2026-11-09: accept the bigger tier when English Wiktionary nopic moves to its 14.8 GB file (about 105 GB).
-    assert comprehensive < 107e9
+    # With pictures by default (Neal, 2026-10-28): 17.7 / 101.5 GB; the bigger Wiktionary accepted (Neal, 2026-11-09).
+    assert efficient < cg.TIER_BUDGETS["en"][0]
+    assert comprehensive < cg.TIER_BUDGETS["en"][1]
 
 
 def test_real_curated_readiness_names_nine_domains_in_order():
@@ -1543,7 +1542,8 @@ def test_hold_back_keeps_a_pack_whose_new_file_isnt_on_every_mirror_yet():
     lines = cg.hold_back(packs, previous, {}, _status(dead=["2026-11"]), sleep=lambda s: None)
     assert packs[0]["sha256"] == "old" and packs[0]["snapshotDate"] == "2026-08" and packs[0]["urls"][0].endswith("2026-08.zim")
     assert packs[0]["title"] == "Kiwix's new title"  # only the pin is kept; copy still refreshes
-    assert len(lines) == 1 and "held at 2026-08, not 2026-11" in lines[0] and "not answering" in lines[0]
+    assert len(lines) == 1 and "held at 2026-08, not 2026-11" in lines[0]["text"] and "not answering" in lines[0]["text"]
+    assert lines[0]["reasons"] == ["mirror"] and lines[0]["held"] and lines[0]["ids"] == ["wikt_nopic"]
 
 
 def test_hold_back_keeps_every_flavour_until_the_vectors_are_rebuilt():
@@ -1552,7 +1552,7 @@ def test_hold_back_keeps_every_flavour_until_the_vectors_are_rebuilt():
     packs = [_pin("top_nopic", "top", "2026-11", "n2"), _pin("top_maxi", "top", "2026-11", "m2")]
     lines = cg.hold_back(packs, previous, {"vectors": {"n1"}}, _status(), sleep=lambda s: None)
     assert [p["sha256"] for p in packs] == ["n1", "m1"]
-    assert "would drop its search vectors" in lines[0]
+    assert "would drop its search vectors" in lines[0]["text"] and lines[0]["reasons"] == ["vectors"]
     # once a descriptor is built from the new nopic file, both flavours move
     packs = [_pin("top_nopic", "top", "2026-11", "n2"), _pin("top_maxi", "top", "2026-11", "m2")]
     assert cg.hold_back(packs, previous, {"vectors": {"n2"}}, _status(), sleep=lambda s: None) == []
@@ -1564,11 +1564,11 @@ def test_hold_back_checks_the_time_index_too_and_lets_safe_moves_through():
     packs = [_pin("wp_maxi", "wp", "2026-11", "b"), _pin("cook", "cook", "2026-11", "d"), _pin("brand_new", "bn", "2026-11", "e")]
     lines = cg.hold_back(packs, previous, {"timeIndex": {"a"}}, _status(), sleep=lambda s: None)
     assert [p["sha256"] for p in packs] == ["a", "d", "e"]
-    assert len(lines) == 1 and "time index" in lines[0]
+    assert len(lines) == 1 and "time index" in lines[0]["text"] and lines[0]["reasons"] == ["timeIndex"]
 
 
 def test_hold_back_moves_anyway_when_the_previous_file_is_gone_too():
     previous = {"packs": [_pin("xkcd", "xkcd", "2026-08", "old")]}
     packs = [_pin("xkcd", "xkcd", "2026-11", "new")]
     lines = cg.hold_back(packs, previous, {}, _status(dead=["xkcd"]), sleep=lambda s: None)
-    assert packs[0]["sha256"] == "new" and "moved to 2026-11 anyway" in lines[0]
+    assert packs[0]["sha256"] == "new" and "moved to 2026-11 anyway" in lines[0]["text"] and not lines[0]["held"]
