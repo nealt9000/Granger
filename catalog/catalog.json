@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-11-10T00:04:27Z",
+  "generatedAt": "2026-11-10T09:57:26Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -10908,16 +10908,16 @@
       "description": "JavaScript courses",
       "category": "Programming",
       "language": "en",
-      "sizeBytes": 7013514,
-      "sha256": "0e8eb2505f663d7b5fac487e70711812abe231d45e2a29a4dcc20954a4dc2d1d",
+      "sizeBytes": 10737822,
+      "sha256": "007e92dfcde555a2055b700eb4ad2a604a93991150b8778ff888af0fb0620883",
       "urls": [
-        "https://download.kiwix.org/zim/freecodecamp/freecodecamp_en_javascript-algorithms-and-data-structures_2026-08.zim"
+        "https://download.kiwix.org/zim/freecodecamp/freecodecamp_en_javascript-algorithms-and-data-structures_2026-11.zim"
       ],
-      "snapshotDate": "2026-08-11",
+      "snapshotDate": "2026-11-09",
       "license": "Not stated by the source",
-      "hasFulltextIndex": false,
+      "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "6e6994b3-1791-9635-2345-1302bf884a13",
+      "zimUuid": "fd36d4d7-eb90-87ae-dc9b-ce8f4eba2196",
       "zimName": "freecodecamp_en_javascript-algorithms-and-data-structures",
       "featured": false,
       "family": "freecodecamp",
@@ -13650,16 +13650,16 @@
       "description": "Programming challenges",
       "category": "Programming",
       "language": "en",
-      "sizeBytes": 7281613,
-      "sha256": "9dc09d88b5053776abe8da89fb53b41750819371fde43393150c5b4f4590fb0d",
+      "sizeBytes": 11106109,
+      "sha256": "c2d4d1d694133a75414a1350157b3c0bc7fe3bf5d75001401e456a567a97d433",
       "urls": [
-        "https://download.kiwix.org/zim/freecodecamp/freecodecamp_en_project-euler_2026-08.zim"
+        "https://download.kiwix.org/zim/freecodecamp/freecodecamp_en_project-euler_2026-11.zim"
       ],
-      "snapshotDate": "2026-08-11",
+      "snapshotDate": "2026-11-09",
       "license": "Not stated by the source",
-      "hasFulltextIndex": false,
+      "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "dae93d46-ed72-8de0-4462-bea163240ec5",
+      "zimUuid": "f7894ca6-2254-1aa9-67f7-2b0a14c45479",
       "zimName": "freecodecamp_en_project-euler",
       "featured": false,
       "family": "freecodecamp",
