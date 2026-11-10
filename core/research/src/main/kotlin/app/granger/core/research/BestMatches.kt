@@ -41,6 +41,19 @@ class BestMatches(
         val final: Boolean = false,
     )
 
+    /**
+     * Loads the embedder ahead of the first query (Plan SQ, the Pixel 6: the first query's embedding took 2.6 s against
+     * ~0.12 s after). Does nothing without one; never throws.
+     */
+    suspend fun warm() {
+        try {
+            embed?.invoke("warm")
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+        }
+    }
+
     /** The final ranking ([stream]'s last result). */
     suspend fun find(query: String, limit: Int = LIMIT): Result = stream(query, limit).last()
 

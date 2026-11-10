@@ -39,6 +39,9 @@ data class TitleResults(val hits: List<SearchHit>, val more: Boolean = false, va
 /** Searches every OK pack. Plan 5 replaces the implementation with `:core:search` sources. */
 interface LibrarySearch {
     suspend fun titles(query: String): TitleResults
+
+    /** Opens what the first [titles] would (each pack and its title index) before anything is typed; nothing by default. */
+    suspend fun warm() {}
     suspend fun fullText(query: String): List<SearchHit>
 
     /**
@@ -96,6 +99,12 @@ class ZimLibrarySearch(
             more = merged.size > titleLimit || packs.any { it.returned >= titlesPerPack },
             ranked = minOf(first.size, titleLimit),
         )
+    }
+
+    // Plan SQ, the Pixel 6: the first title search after launch took 1.4 s against ~0.1 s after, opening every pack and its
+    // suggester. A one-letter query asks each pack for one title (dictionaries skip it: [TitleMatch.skipsSuggest]).
+    override suspend fun warm() {
+        across("e", suggesting = true) { it.suggest("e", 1) }
     }
 
     override suspend fun nearTitles(query: String, shown: List<SearchHit>): List<SearchHit> {

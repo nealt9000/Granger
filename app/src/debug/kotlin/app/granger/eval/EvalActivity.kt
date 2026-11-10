@@ -167,6 +167,8 @@ class EvalActivity : ComponentActivity() {
             c.library.refresh()
             val packs = c.library.packs.first().associate { it.id to (it.name to File(it.filePath).name) }
             c.embedderWanted.set(true)
+            c.bestMatches.warm() // as Search does when it opens
+            c.search.warm()
             val eval = SearchEval(c.search, packs, { android.os.SystemClock.elapsedRealtime() }, best = { q -> c.bestMatches.stream(q) }, denseTimings = { c.denseFinder.lastTimings })
             eval.onItem = { id, n, total -> log("$n / $total $id") }
             log("search run $runId: ${set.name}, ${packs.size} packs")

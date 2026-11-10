@@ -39,7 +39,12 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
 /** Best matches for a query, in up to two steps ([app.granger.core.research.BestMatches.stream] in the app). */
-fun interface BestMatchSearch { fun stream(query: String): Flow<app.granger.core.research.BestMatches.Result> }
+fun interface BestMatchSearch {
+    fun stream(query: String): Flow<app.granger.core.research.BestMatches.Result>
+
+    /** Readies the search (the embedder) before the first query; nothing by default. */
+    suspend fun warm() {}
+}
 
 /** The music and audiobooks matching a query ([app.granger.core.library.MediaIndex.search] in the app). */
 fun interface MediaSearch { suspend fun search(query: String): MediaResults }
@@ -142,6 +147,9 @@ class SearchViewModel(
         private set
 
     init {
+        // The embedder loads while the query is typed, not after it (Plan SQ: 2.6 s on the Pixel 6's first query).
+        best?.let { source -> viewModelScope.launch(matching) { source.warm() } }
+        viewModelScope.launch(matching) { search.warm() }
         viewModelScope.launch {
             sessions.recentSearches().collect { recent -> _state.update { it.copy(recent = recent) } }
         }

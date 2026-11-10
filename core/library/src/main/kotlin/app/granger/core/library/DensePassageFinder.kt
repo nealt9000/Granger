@@ -22,6 +22,11 @@ import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import org.jsoup.parser.Parser
 
@@ -85,22 +90,32 @@ class DensePassageFinder(
         val hits = VectorSearch.top(query, searched, k, pool, probes = probes)
         val scanned = clock()
         val collections = shelves.collectionNames()
-        val rebuilt = HashMap<VectorHit, Passage>()
-        hits.groupBy { byFile.getValue(it.file) }.forEach { (source, sourceHits) ->
-            try {
-                when (source.kind) {
-                    SourceKind.ARTICLE -> {
-                        val pack = packs.getValue(source.target)
-                        val archive = library.archive(pack.id) ?: return@forEach
-                        articles(pack, archive, sourceHits, collections[pack.id].orEmpty(), rebuilt)
+        val rebuilt = java.util.concurrent.ConcurrentHashMap<VectorHit, Passage>()
+        // A few sources' articles at a time (Plan SQ, the Pixel 6: re-reading and re-chunking up to 24 hits' articles one
+        // after another took 1.1–2.9 s, twice the scan): each article is a read and a parse, on its own archive's reader.
+        val gate = Semaphore(PARALLEL_REBUILDS)
+        coroutineScope {
+            hits.groupBy { byFile.getValue(it.file) }.flatMap { (source, sourceHits) ->
+                sourceHits.groupBy { it.file.key(it.row).key }.values.map { same -> source to same }
+            }.map { (source, same) ->
+                async {
+                    gate.withPermit {
+                        try {
+                            when (source.kind) {
+                                SourceKind.ARTICLE -> {
+                                    val pack = packs.getValue(source.target)
+                                    library.archive(pack.id)?.let { articles(pack, it, same, collections[pack.id].orEmpty(), rebuilt) }
+                                }
+                                else -> chapters(books.getValue(source.target), same, collections, rebuilt)
+                            }
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (_: Exception) {
+                            // One damaged source drops only its own passages.
+                        }
                     }
-                    else -> chapters(books.getValue(source.target), sourceHits, collections, rebuilt)
                 }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (_: Exception) {
-                // One damaged source drops only its own passages.
-            }
+            }.awaitAll()
         }
         lastTimings = DenseTimings(listed - start, scanned - listed, clock() - scanned, searched.sumOf { it.header.count.toLong() }, searched.size)
         SliceDedupe.apply(
@@ -178,6 +193,8 @@ class DensePassageFinder(
 
     companion object {
         const val PROBES = 1024
+        /** Articles or chapters rebuilt at once. */
+        const val PARALLEL_REBUILDS = 4
         private val TITLE = Regex("<title[^>]*>(.*?)</title>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
     }
 }
