@@ -16,7 +16,9 @@ class TitleMatchTest {
         assertThat(TitleMatch.skipsSuggest("wiktionary_en_all", "paradise r")).isTrue()
         assertThat(TitleMatch.skipsSuggest("wiktionary_en_all", "r ")).isTrue()
         assertThat(TitleMatch.skipsSuggest("wiktionary_en_all", "paradise re")).isTrue()
-        assertThat(TitleMatch.skipsSuggest("wiktionary_en_all", "paradise reg")).isFalse()
+        assertThat(TitleMatch.skipsSuggest("wiktionary_en_all", "sea walls of con")).isTrue()
+        assertThat(TitleMatch.skipsSuggest("wiktionary_en_all", "sea walls of cons")).isFalse()
+        assertThat(TitleMatch.skipsSuggest("wiktionary_en_all", "cat")).isFalse()
         assertThat(TitleMatch.skipsSuggest("wiktionary_en_all", "paradise")).isFalse()
         assertThat(TitleMatch.skipsSuggest("wikipedia_en_top", "paradise r")).isFalse()
     }
