@@ -49,6 +49,7 @@ fun interface MediaSearch { suspend fun search(query: String): MediaResults }
  * [fetch] is how many are asked for, so a group that fills it may have more than Search knows of.
  */
 enum class SearchGroup(val preview: Int, val fetch: Int) {
+    BEST(3, app.granger.core.research.BestMatches.LIMIT),
     TITLES(8, ZimLibrarySearch.TITLE_LIMIT),
     ARTISTS(3, MEDIA_FETCH),
     ALBUMS(5, MEDIA_FETCH),

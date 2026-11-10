@@ -173,6 +173,7 @@ import app.granger.core.ai.ResearchReadiness
 import app.granger.core.research.Passage
 import app.granger.core.research.SourceKind
 import app.granger.research.CitationTarget
+import app.granger.search.BestMatchSearch
 import app.granger.research.citationTab
 import app.granger.research.ResearchScreen
 import app.granger.research.spokenOutcome
@@ -847,6 +848,29 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         SelectionBridge.researchAvailable = showResearch
         SelectionBridge.readAloudAvailable = Features.READ_ALOUD && Features.PLAYER
     }
+    /** Opens where a cited passage (Ask) or a Best match (Search, Plan SQ) leads, pushed over the screen it came from. */
+    fun openCitation(target: CitationTarget) {
+        scope.launch {
+            val tabId = when (target) {
+                is CitationTarget.Article -> target.tabId
+                is CitationTarget.Book -> target.tabId
+                is CitationTarget.Album -> return@launch nav.navigate(AlbumRoute(target.albumKey, target.trackId))
+                is CitationTarget.Audiobook -> return@launch nav.navigate(AudiobookRoute(target.audiobookId, target.chapter))
+                CitationTarget.Gone -> return@launch
+            }
+            val tab = citationTab(container.sessions, tabId) ?: return@launch
+            when (target) {
+                is CitationTarget.Article -> {
+                    nav.showTab(tab, fragment = target.fragment, quote = target.quote)
+                    if (target.moved) Toast.makeText(appContext, R.string.app_page_moved, Toast.LENGTH_LONG).show()
+                }
+                is CitationTarget.Book -> nav.showTab(tab, target.at)
+                is CitationTarget.Album, is CitationTarget.Audiobook, CitationTarget.Gone -> Unit
+            }
+        }
+    }
+    val matchOpener = remember { app.granger.research.CitationOpener(container.sessions, container.library, container.bookshelf, container.mediaIndex) }
+
     /** Opens [route], replacing a Research chat on top (whose view model would otherwise stay); else pushes it. */
     fun openResearch(route: ResearchRoute, fromChats: Boolean = false) {
         val researchOnTop = nav.currentBackStackEntry?.destination?.hasRoute<ResearchRoute>() == true
@@ -1140,7 +1164,15 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             media = if (Features.PLAYER) MediaSearch { container.mediaIndex.searchForGroups(it) } else MediaSearch { MediaResults() },
                             voice = container.voiceInput,
                             spokenNames = container.spokenTitles.names,
+                            best = BestMatchSearch { container.bestMatches.find(it) },
                         )
+                    },
+                    onOpenMatch = { match ->
+                        scope.launch {
+                            val p = match.passage
+                            val sentence = match.sentence?.let { p.text.substring(it).trim() }
+                            openCitation(matchOpener.open(app.granger.core.library.PassageAddress.of(p, sentence), title = p.sourceTitle))
+                        }
                     },
                     onOpenTab = ::showTab,
                     onOpenBook = { tabId, at ->
@@ -1173,27 +1205,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     voicePrefs = container.voiceInput.prefs,
                     focusInput = route.quote != null,
-                    onOpenCitation = { target ->
-                        // Pushed over the chat (Research isn't a reader), so Back returns to it.
-                        scope.launch {
-                            val tabId = when (target) {
-                                is CitationTarget.Article -> target.tabId
-                                is CitationTarget.Book -> target.tabId
-                                is CitationTarget.Album -> return@launch nav.navigate(AlbumRoute(target.albumKey, target.trackId))
-                                is CitationTarget.Audiobook -> return@launch nav.navigate(AudiobookRoute(target.audiobookId, target.chapter))
-                                CitationTarget.Gone -> return@launch
-                            }
-                            val tab = citationTab(container.sessions, tabId) ?: return@launch
-                            when (target) {
-                                is CitationTarget.Article -> {
-                                    nav.showTab(tab, fragment = target.fragment, quote = target.quote)
-                                    if (target.moved) Toast.makeText(appContext, R.string.app_page_moved, Toast.LENGTH_LONG).show()
-                                }
-                                is CitationTarget.Book -> nav.showTab(tab, target.at)
-                                is CitationTarget.Album, is CitationTarget.Audiobook, CitationTarget.Gone -> Unit
-                            }
-                        }
-                    },
+                    // Pushed over the chat (Research isn't a reader), so Back returns to it.
+                    onOpenCitation = ::openCitation,
                     onSearch = { keywords -> nav.navigate(SearchRoute(keywords)) },
                     onGetModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },
                     librarian = container.librarian.ui.collectAsStateWithLifecycle(null).value,

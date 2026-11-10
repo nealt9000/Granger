@@ -4,6 +4,11 @@
     <string name="search_nothing_found">Nothing in your library matches.</string>
     <!-- Section headings in the search results. -->
     <string name="search_recent">Recent</string>
+    <!-- Plan SQ: the articles and chapters that best answer the query, each with its matching sentence. -->
+    <string name="search_best">Best matches</string>
+    <string name="search_best_looking">Looking through your library…</string>
+    <string name="search_best_more">Show more matches</string>
+    <string name="search_best_fewer">Show fewer matches</string>
     <string name="search_titles">Titles</string>
     <string name="search_articles">Articles</string>
     <string name="search_books">Books</string>

@@ -38,6 +38,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
@@ -77,6 +78,8 @@ fun SearchScreen(
     onOpenAlbum: (albumKey: String) -> Unit,
     onOpenArtist: (name: String) -> Unit,
     onOpenAudiobook: (audiobookId: String) -> Unit,
+    /** Opens a Best match at its passage (Plan SQ), as Ask's source cards open. */
+    onOpenMatch: (app.granger.core.research.BestMatches.Match) -> Unit = {},
     /** Plays the song within its album (`SongPlayer`). */
     onPlaySong: (Track) -> Unit,
     onBack: () -> Unit,
@@ -189,6 +192,42 @@ fun SearchScreen(
                         )
                     }
                 }
+                // Plan SQ: Best matches lead, each its article or chapter with the sentence that matched.
+                if (state.best.isNotEmpty() || state.bestLoading) item(key = "best-header") { SectionHeader(stringResource(R.string.search_best)) }
+                if (state.bestLoading && state.best.isEmpty()) {
+                    item(key = "best-looking") {
+                        Text(
+                            stringResource(R.string.search_best_looking), Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                val bestShown = state.shown(SearchGroup.BEST, state.best)
+                itemsIndexed(bestShown, key = { _, m -> "bm:${m.passage.sourceId}/${m.passage.location}" }) { _, match ->
+                    val p = match.passage
+                    ListItem(
+                        modifier = Modifier.clickable { scope.launch { viewModel.recordSearch() }; onOpenMatch(match) }.testTag(SearchTags.BEST_ROW),
+                        headlineContent = { Text(p.sourceTitle, maxLines = 2, overflow = TextOverflow.Ellipsis) },
+                        supportingContent = {
+                            Column {
+                                val sentence = match.sentence?.let { p.text.substring(it).trim() } ?: p.text.take(220)
+                                Text("“$sentence”", maxLines = 3, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
+                                Text(p.packTitle.ifBlank { p.meta.collection }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        },
+                    )
+                }
+                if (state.best.size > SearchGroup.BEST.preview) {
+                    item(key = moreKey(SearchGroup.BEST)) {
+                        val open = SearchGroup.BEST in state.expanded
+                        ListItem(
+                            modifier = Modifier.clickable { viewModel.toggle(SearchGroup.BEST) },
+                            headlineContent = {
+                                Text(stringResource(if (open) R.string.search_best_fewer else R.string.search_best_more), color = MaterialTheme.colorScheme.primary)
+                            },
+                        )
+                    }
+                }
                 if (state.titles.isNotEmpty()) item { SectionHeader(stringResource(R.string.search_titles)) }
                 results(state, SearchGroup.TITLES, state.titles, { _, hit -> "t:${hit.packId}/${hit.path}" }, ::toggle) { hit ->
                     ListItem(
@@ -271,6 +310,11 @@ fun SearchScreen(
     }
 }
 
+/** Test tags on Search's rows. */
+object SearchTags {
+    const val BEST_ROW = "search-best-row"
+}
+
 private fun moreKey(group: SearchGroup) = "more:${group.name}"
 
 /**
@@ -322,7 +366,7 @@ internal object SearchRows {
                 SearchGroup.ALBUMS -> R.plurals.search_show_first_albums
                 SearchGroup.SONGS -> R.plurals.search_show_first_songs
                 SearchGroup.AUDIOBOOKS -> R.plurals.search_show_first_audiobooks
-                SearchGroup.FULL_TEXT -> R.plurals.search_show_first_articles
+                SearchGroup.FULL_TEXT, SearchGroup.BEST -> R.plurals.search_show_first_articles
                 SearchGroup.BOOKS -> R.plurals.search_show_first_books
             }
         } else {
@@ -332,7 +376,7 @@ internal object SearchRows {
                 SearchGroup.ALBUMS -> R.plurals.search_show_all_albums
                 SearchGroup.SONGS -> R.plurals.search_show_all_songs
                 SearchGroup.AUDIOBOOKS -> R.plurals.search_show_all_audiobooks
-                SearchGroup.FULL_TEXT -> R.plurals.search_show_all_articles
+                SearchGroup.FULL_TEXT, SearchGroup.BEST -> R.plurals.search_show_all_articles
                 SearchGroup.BOOKS -> R.plurals.search_show_all_books
             }
         }
@@ -346,7 +390,7 @@ internal object SearchRows {
             SearchGroup.ALBUMS -> R.string.search_show_fewer_albums
             SearchGroup.SONGS -> R.string.search_show_fewer_songs
             SearchGroup.AUDIOBOOKS -> R.string.search_show_fewer_audiobooks
-            SearchGroup.FULL_TEXT -> R.string.search_show_fewer_articles
+            SearchGroup.FULL_TEXT, SearchGroup.BEST -> R.string.search_show_fewer_articles
             SearchGroup.BOOKS -> R.string.search_show_fewer_books
         },
     )

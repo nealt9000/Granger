@@ -3,6 +3,10 @@
     <string name="search_placeholder">Buscar en tu biblioteca</string>
     <string name="search_nothing_found">Nada de tu biblioteca coincide.</string>
     <string name="search_recent">Recientes</string>
+    <string name="search_best">Mejores resultados</string>
+    <string name="search_best_looking">Buscando en tu biblioteca…</string>
+    <string name="search_best_more">Ver más resultados</string>
+    <string name="search_best_fewer">Ver menos resultados</string>
     <string name="search_titles">Títulos</string>
     <string name="search_articles">Artículos</string>
     <string name="search_books">Libros</string>
