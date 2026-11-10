@@ -1,5 +1,6 @@
 package app.granger.core.library
 
+import app.granger.core.research.Keywords
 import app.granger.core.zim.ZimArchive
 import app.granger.core.zim.ZimHit
 import kotlinx.coroutines.CoroutineDispatcher
@@ -54,25 +55,58 @@ class ZimLibrarySearch(
     // Then a title that is the query comes first, and one that starts with it next (Plan U3b Decision 10). Books on the
     // shelf go ahead of pack titles of the same rank, and a book found by its author after any title containing the
     // query (Plan U2 Decision 1).
+    // Plan SQ Task 4.3: a title matches on folded words, on what was typed or the article it leads to ("heart attack"
+    // finds Myocardial infarction, shown under its own name); within a rank, dictionaries and translated copies come
+    // after the rest ([TitleMatch.prior]); and when nothing matches exactly, titles a slip or two away are added after
+    // the ranked ones ([fuzzy]).
     override suspend fun titles(query: String): TitleResults {
         if (query.isBlank()) return TitleResults(emptyList())
         val books = bookTitles(query)
         val packs = across(query) { it.suggest(query, titlesPerPack) }
-        val turns = packs.maxOfOrNull { it.hits.size } ?: 0
-        val all = (0 until turns).flatMap { turn -> packs.mapNotNull { it.hits.getOrNull(turn)?.second } }
-        val q = SearchText.fold(query.trim())
-        val ranked = all.map { hit ->
-            val title = SearchText.fold(hit.title)
-            val rank = when {
-                title == q -> BookTitleSearch.Rank.EXACT
-                title.startsWith(q) -> BookTitleSearch.Rank.STARTS_WITH
-                else -> null
-            }
-            rank to hit
-        }
-        // Stable: books before packs within a rank, and pack titles that are neither last, in their turn order.
-        val merged = (books + ranked).sortedBy { (rank, _) -> rank?.ordinal ?: BookTitleSearch.Rank.entries.size }.map { it.second }
+        val q = TitleMatch.key(query)
+        val ranked = ranked(packs, q)
+        val exact = books.any { it.first == BookTitleSearch.Rank.EXACT } || ranked.any { it.first == BookTitleSearch.Rank.EXACT }
+        val near = if (exact) emptyList() else fuzzy(query, q, ranked.map { it.third.packId to it.third.path }.toSet())
+        val unranked = BookTitleSearch.Rank.entries.size
+        // Stable: books before packs within a rank, then by prior, and pack titles that are neither last, in turn order.
+        val first = (books.map { Triple(it.first, 0, it.second) } + ranked.filter { it.first != null })
+            .sortedWith(compareBy<Triple<BookTitleSearch.Rank?, Int, SearchHit>> { it.first?.ordinal ?: unranked }.thenBy { it.second })
+        val rest = ranked.filter { it.first == null }.sortedBy { it.second }
+        val merged = (first.map { it.third } + near + rest.map { it.third }).distinctBy { it.packId to it.path }
         return TitleResults(merged.take(titleLimit), more = merged.size > titleLimit || packs.any { it.returned >= titlesPerPack })
+    }
+
+    /** Each pack's hits taken in turns, each with its rank against [q] and its pack's prior. */
+    private fun ranked(packs: List<PackHits>, q: String): List<Triple<BookTitleSearch.Rank?, Int, SearchHit>> {
+        val turns = packs.maxOfOrNull { it.hits.size } ?: 0
+        return (0 until turns).flatMap { turn ->
+            packs.mapNotNull { pack ->
+                pack.hits.getOrNull(turn)?.let { (zim, hit) ->
+                    // The better of what was typed (a redirect's own title) and the article's.
+                    val rank = listOfNotNull(TitleMatch.rank(zim.title, q), TitleMatch.rank(hit.title, q)).minOrNull()
+                    Triple(rank, TitleMatch.prior(pack.name, hit.path, hit.title), hit)
+                }
+            }
+        }
+    }
+
+    /**
+     * Titles one or two slips from [query] ([TitleMatch.budget]), nearest first: each pack is asked for the
+     * [TitleMatch.probes], and a title is kept when its folded words are within the budget of the query's (or its
+     * start is, for a longer title). Ones already listed ([seen]) are left out.
+     */
+    private suspend fun fuzzy(query: String, q: String, seen: Set<Pair<String, String>>): List<SearchHit> {
+        val budget = TitleMatch.budget(q)
+        if (budget == 0) return emptyList()
+        val found = TitleMatch.probes(query).flatMap { probe -> across(probe) { it.suggest(probe, FUZZY_PER_PACK) }.flatMap { it.hits } }
+        return found.mapNotNull { (zim, hit) ->
+            if ((hit.packId to hit.path) in seen) return@mapNotNull null
+            val d = listOf(zim.title, hit.title).minOf { title ->
+                val t = TitleMatch.key(title)
+                minOf(TitleMatch.distance(t, q, budget), TitleMatch.distance(t.take(q.length), q, budget) + 1)
+            }
+            if (d <= budget) d to hit else null
+        }.sortedBy { it.first }.map { it.second }.distinctBy { it.packId to it.path }
     }
 
     /** The shelf's books matching [query] by title or author, as title hits that open the book. */
@@ -83,14 +117,29 @@ class ZimLibrarySearch(
         }
     }
 
-    override suspend fun fullText(query: String): List<SearchHit> =
-        across(query) { if (it.hasFulltextIndex) it.search(query, fullTextLimit) else emptyList() }
+    override suspend fun fullText(query: String): List<SearchHit> = relaxed(query, { it.packId to it.path }) { q ->
+        across(q) { if (it.hasFulltextIndex) it.search(q, fullTextLimit) else emptyList() }
             .flatMap { it.hits }
             .sortedByDescending { it.first.score }
             .take(fullTextLimit)
             .map { it.second }
+    }
 
-    override suspend fun books(query: String): List<BookHit> = bookIndex?.search(query) ?: emptyList()
+    override suspend fun books(query: String): List<BookHit> =
+        bookIndex?.let { index -> relaxed(query, { it.bookId to it.href }) { index.search(it) } } ?: emptyList()
+
+    /**
+     * Plan SQ Task 4.1: [run] on the query as typed and, when that finds fewer than [ENOUGH], again on its keywords, the
+     * second run's hits after the first's. Article text and book text match every word, so a question's small words sank
+     * it ("who chopped off holofernes head" found nothing; "holofernes head" finds the passage). One variant per keyword:
+     * every variant would have to match too.
+     */
+    private suspend fun <T> relaxed(query: String, key: (T) -> Any, run: suspend (String) -> List<T>): List<T> {
+        val typed = run(query)
+        if (typed.size >= ENOUGH) return typed
+        val keywords = keywordQuery(query) ?: return typed
+        return (typed + run(keywords)).distinctBy(key)
+    }
 
     override suspend fun titleOnly(): List<String> = library.packs.first()
         .filter { it.status == PackStatus.OK && !it.hasFulltextIndex && !it.name.startsWith("maps_") }
@@ -98,8 +147,8 @@ class ZimLibrarySearch(
         .distinct()
         .sortedBy { it.lowercase() }
 
-    /** One pack's hits; [returned] counts them as the pack gave them, before redirects are merged. */
-    private class PackHits(val hits: List<Pair<ZimHit, SearchHit>>, val returned: Int)
+    /** One pack's hits; [returned] counts them as the pack gave them, before redirects are merged. [name] is the pack's. */
+    private class PackHits(val hits: List<Pair<ZimHit, SearchHit>>, val returned: Int, val name: String = "")
 
     /**
      * Runs [run] on each OK pack, in library order; a pack that fails is skipped so the others still answer. Index pages
@@ -114,16 +163,31 @@ class ZimLibrarySearch(
                 val hits = try { run(archive) } catch (e: Exception) { emptyList() }
                 // Title suggestions are often redirects; point them at the article itself so the
                 // reader keys bookmarks and positions by the real path, and list each article once.
-                val found = hits.map { hit -> hit.copy(path = archive.resolvePath(hit.path) ?: hit.path) }
-                    .distinctBy { it.path }
-                    .filterNot { IndexPages.isIndex(it.path) }
-                    .map { hit -> hit to SearchHit(pack.id, pack.title, hit.path, PageTitles.clean(hit.title, pack.title), hit.snippet) }
-                PackHits(SliceDedupe.apply(found, packs, slices, library::archive, { it.second.packId }, { it.second.path }), returned = hits.size)
+                // A redirect is shown under the article's own title (Plan SQ: three slices listed "Turingia", not Thuringia);
+                // the ZimHit keeps the title that matched.
+                val found = hits.map { hit -> hit to (archive.resolvePath(hit.path) ?: hit.path) }
+                    .distinctBy { it.second }
+                    .filterNot { IndexPages.isIndex(it.second) }
+                    .map { (hit, path) ->
+                        val title = if (path == hit.path) hit.title else archive.entry(path)?.title?.ifBlank { null } ?: hit.title
+                        hit.copy(path = path) to SearchHit(pack.id, pack.title, path, PageTitles.clean(title, pack.title), hit.snippet)
+                    }
+                PackHits(SliceDedupe.apply(found, packs, slices, library::archive, { it.second.packId }, { it.second.path }), returned = hits.size, name = pack.name)
             }
         }
     }
 
     companion object {
+        /** Fewer article or book hits than this, and Search tries the query's keywords too ([relaxed]). */
+        const val ENOUGH = 3
+
+        /** The query's keywords as one query, or null when they are the query's own words (nothing to relax). */
+        fun keywordQuery(query: String): String? {
+            val words = Keywords.extract(query).mapNotNull { Keywords.variants(it).firstOrNull() }
+            val joined = words.joinToString(" ")
+            return joined.takeIf { it.isNotBlank() && SearchText.words(it) != SearchText.words(query) }
+        }
+
         /** The most titles returned over every pack. */
         const val TITLE_LIMIT = 50
         /**
@@ -132,5 +196,7 @@ class ZimLibrarySearch(
          */
         const val TITLES_PER_PACK = 20
         const val FULL_TEXT_LIMIT = 30
+        /** Titles asked of each pack for each typo probe ([TitleMatch.probes]). */
+        const val FUZZY_PER_PACK = 10
     }
 }

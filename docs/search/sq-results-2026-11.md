@@ -56,3 +56,24 @@ For comparison, Ask's ranker (keywords + dense) put the answer *passage* in its 
 The known-item targets are a uniform sample, so many are obscure (a fair test of the mechanism, not of popularity).
 Dictionaries are left out of the set. Same-title items across sets (Maputo in Wikipedia and Wikivoyage) are counted
 strictly by the target's set; Phase 4's grouping of one title across packs changes how those should be scored.
+
+## Phase 4 steps
+
+### 4.1 Keywords when the typed query finds too little (runs `sq-kw-dev`, `sq-kw-ki`)
+
+Questions page @5: 13% → **17%** (articles @5 22, @10 29, books @5 3). Known items unchanged (63% / 76%). All keywords must
+still match, so most questions stay short of their article.
+
+### Offline: Ask's retrieval as Best matches (`tools/eval/ask_articles.py`, recorded `dev-base-1`)
+
+Ask's own finder and ranker on the same 148 questions, deep pool, one row per article:
+
+| Ranker | Article @5 | Article @10 |
+|---|---|---|
+| Keyword only (Ask's per-word search + lexical rank) | 37 (25%) | 42 (28%) |
+| Hybrid, keyword + dense (α 0.1, floor 0.74) | **102 (68%)** | **109 (73%)** |
+| The app's gated hybrid | 102 (68%) | 108 (72%) |
+
+The question bars (50% / 65%) are reachable with what exists, **if dense retrieval runs**; keyword-only Best matches
+would stop near 25%. Phase 2 (dense under 1 s on the Pixel 6) is the critical path. Caveat: recorded hits from the
+full vector set on the emulator; the dev set has been used heavily, so held-out decides.
