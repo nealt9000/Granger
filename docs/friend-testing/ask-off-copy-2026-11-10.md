@@ -1,4 +1,12 @@
-# Ask off: copy outside the app (Plan SQ Task 0.3) — draft for Neal, 2026-11-10
+# Ask off: copy outside the app (Plan SQ Task 0.3) — 2026-11-10
+
+**Status (2026-11-10):** website updated in another session. Play store listing (short + full description, en-US and
+es-419) changed and **sent for review** (4 changes): first paragraph now "with one search over all of it", the Ask bullet
+became "One search over everything you keep: titles, article text, books, music and audiobooks", Privacy says "read or
+search". App content: Sign in details and Health apps carry no Ask wording (nothing to change); the content rating's
+"generates AI content" answer is left as is (re-taking the questionnaire re-rates the app; over-declaring is harmless),
+to revisit when Ask returns. Tester notes (en, es) and the shared tester doc updated; the next build's release notes are
+in the tester notes. The note to the testers group is Neal's to send.
 
 Nothing here is published until Neal approves. Two rounds: **now** (Ask leaves; Search is as today) and **when SQ ships**
 (Search's Best matches is the new headline). "Now" claims nothing Search can't do today.
