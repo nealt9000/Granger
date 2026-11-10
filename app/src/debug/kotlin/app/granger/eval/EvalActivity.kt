@@ -166,7 +166,8 @@ class EvalActivity : ComponentActivity() {
             c.catalog.load()
             c.library.refresh()
             val packs = c.library.packs.first().associate { it.id to (it.name to File(it.filePath).name) }
-            val eval = SearchEval(c.search, packs) { android.os.SystemClock.elapsedRealtime() }
+            c.embedderWanted.set(true)
+            val eval = SearchEval(c.search, packs, { android.os.SystemClock.elapsedRealtime() }, best = { q -> c.bestMatches.find(q) })
             eval.onItem = { id, n, total -> log("$n / $total $id") }
             log("search run $runId: ${set.name}, ${packs.size} packs")
             eval.run(set, File(dir, "search.jsonl"))

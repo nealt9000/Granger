@@ -21,6 +21,8 @@ class SearchEval(
     /** Pack id → (name, file name). */
     private val packs: Map<String, Pair<String, String>>,
     private val clock: () -> Long,
+    /** Best matches (Plan SQ Phase 4); null leaves them out of the records. */
+    private val best: (suspend (String) -> app.granger.core.research.BestMatches.Result)? = null,
 ) {
     var onItem: (String, Int, Int) -> Unit = { _, _, _ -> }
 
@@ -35,14 +37,22 @@ class SearchEval(
 
     private suspend fun record(id: String, query: String): JSONObject {
         var start = clock()
-        val titles = search.titles(query)
+        val typed = search.titles(query)
         val titlesMs = clock() - start
+        // As Search shows them once the near titles (typos) arrive.
+        start = clock()
+        val near = search.nearTitles(query, typed.hits)
+        val nearMs = clock() - start
+        val titles = typed.copy(hits = typed.withNear(near))
         start = clock()
         val books = search.books(query)
         val booksMs = clock() - start
         start = clock()
         val fullText = search.fullText(query)
         val fullTextMs = clock() - start
+        start = clock()
+        val matches = best?.invoke(query)
+        val bestMs = clock() - start
         return JSONObject()
             .put("id", id)
             .put("query", query)
@@ -50,7 +60,15 @@ class SearchEval(
             .put("titlesMore", titles.more)
             .put("books", JSONArray(books.map(::bookHit)))
             .put("fullText", JSONArray(fullText.map(::hit)))
-            .put("ms", JSONObject().put("titles", titlesMs).put("books", booksMs).put("fullText", fullTextMs))
+            .put("near", near.size)
+            .put("best", JSONArray(matches?.matches.orEmpty().map { m ->
+                val p = m.passage
+                val source = if (p.kind == app.granger.core.research.SourceKind.ARTICLE) packs[p.sourceId]?.first ?: p.sourceId else p.sourceId
+                JSONObject().put("source", source).put("file", packs[p.sourceId]?.second ?: "").put("path", p.location)
+                    .put("title", p.sourceTitle).put("kind", p.kind.name).put("sentence", m.sentence?.let { p.text.substring(it) } ?: "")
+            }))
+            .put("bestByMeaning", matches?.byMeaning ?: false)
+            .put("ms", JSONObject().put("titles", titlesMs).put("near", nearMs).put("books", booksMs).put("fullText", fullTextMs).put("best", bestMs))
     }
 
     private fun hit(h: SearchHit): JSONObject {

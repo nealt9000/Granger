@@ -85,7 +85,7 @@ def pct(n, d):
 
 def latency(rows):
     out = {}
-    for group in ("titles", "books", "fullText"):
+    for group in ("titles", "near", "books", "fullText", "best"):
         ms = sorted(r["ms"][group] for r in rows if group in r.get("ms", {}))
         if ms:
             out[group] = (statistics.median(ms), ms[min(len(ms) - 1, int(round(0.95 * (len(ms) - 1))))])
@@ -120,7 +120,7 @@ def score_known(items, run):
 
 
 def score_questions(items, run):
-    keys = ("titles5", "books5", "ft5", "ft10", "page5")
+    keys = ("titles5", "books5", "ft5", "ft10", "page5", "best5", "best10")
     by = defaultdict(lambda: dict.fromkeys(keys + ("n",), 0))
     for it in items:
         if not it.get("answerable", True) or not it.get("answers"):
@@ -136,12 +136,18 @@ def score_questions(items, run):
             "ft10": bool(f and f <= 10),
         }
         got["page5"] = got["titles5"] or got["books5"] or got["ft5"]
+        # As ask_articles.py scores Ask's retrieval (metrics.matches: a book's chapter must match too), so the two compare.
+        from metrics import matches
+        bm = next((n for n, h in enumerate(r.get("best", []), 1)
+                   if matches({"source": h.get("source"), "location": h.get("path")}, it["answers"])), None)
+        got["best5"], got["best10"] = bool(bm and bm <= 5), bool(bm and bm <= 10)
         for key in ("all", it.get("domain", "?")):
             s = by[key]
             s["n"] += 1
             for k in keys:
                 s[k] += got[k]
-    lines = ["| Slice | n | Titles @5 | Books @5 | Articles @5 | Articles @10 | Page @5 |", "|---|---|---|---|---|---|---|"]
+    lines = ["| Slice | n | Titles @5 | Books @5 | Articles @5 | Articles @10 | Page @5 | Best @5 | Best @10 |",
+             "|---|---|---|---|---|---|---|---|---|"]
     for key in sorted(by, key=lambda k: (k != "all", k)):
         s = by[key]
         lines.append("| %s | %d | %s |" % (key, s["n"], " | ".join(pct(s[k], s["n"]) for k in keys)))

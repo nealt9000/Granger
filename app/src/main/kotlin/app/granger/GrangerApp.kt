@@ -902,6 +902,18 @@ class AppContainer(context: Context) {
     /** Research's thresholds, set from the Pixel 6 measurements (Plan 8 Task 9) and Plan R1's merging sweep. */
     val rankingConfig = RankingConfig()
 
+    /**
+     * Search's Best matches (Plan SQ Phase 4): Ask's keyword and dense retrieval, ranked as Ask ranks, with no model. The
+     * dense side runs where the embedder and vectors are installed; elsewhere the keyword side alone.
+     */
+    val bestMatches by lazy {
+        app.granger.core.research.BestMatches(
+            passageFinder, denseFinder,
+            embed = { q -> app.granger.research.ModelsAdapter(modelManager).embedder()?.embed(listOf(q), isQuery = true)?.single() },
+            config = rankingConfig, sourceWeight = fictionWeight,
+        )
+    }
+
     /** The owl's reaction topics (assets/owl/topics.txt), read once; null when unreadable. */
     private val owlTopics by lazy {
         runCatching { context.assets.open("owl/topics.txt").bufferedReader().use { TopicCentroids.parse(it.readText()) } }

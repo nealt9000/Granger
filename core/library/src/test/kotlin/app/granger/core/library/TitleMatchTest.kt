@@ -39,4 +39,12 @@ class TitleMatchTest {
         assertThat(TitleMatch.prior("wiktionary_es_all", "Maputo", "Maputo")).isEqualTo(1)
         assertThat(TitleMatch.prior("wikem_en_all", "X/es", "X/es")).isEqualTo(2)
     }
+
+    @Test fun aPackIsInALanguageByItsZimCodes() {
+        assertThat(TitleMatch.inLanguage("spa", "es")).isTrue()
+        assertThat(TitleMatch.inLanguage("eng", "es")).isFalse()
+        assertThat(TitleMatch.inLanguage("eng,spa", "es")).isTrue()
+        assertThat(TitleMatch.inLanguage("", "es")).isTrue()
+        assertThat(TitleMatch.inLanguage("mul", "en")).isTrue()
+    }
 }

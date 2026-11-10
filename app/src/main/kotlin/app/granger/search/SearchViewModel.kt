@@ -38,6 +38,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
+/** Best matches for a query ([app.granger.core.research.BestMatches] in the app). */
+fun interface BestMatchSearch { suspend fun find(query: String): app.granger.core.research.BestMatches.Result }
+
 /** The music and audiobooks matching a query ([app.granger.core.library.MediaIndex.search] in the app). */
 fun interface MediaSearch { suspend fun search(query: String): MediaResults }
 
@@ -81,6 +84,8 @@ class SearchViewModel(
     private val spokenNames: Flow<List<String>> = emptyFlow(),
     /** Where the title matcher runs (a few milliseconds over a large library); tests pass their own. */
     private val matching: CoroutineDispatcher = Dispatchers.Default,
+    /** Best matches (Plan SQ); null leaves Search without them. */
+    private val best: BestMatchSearch? = null,
 ) : ViewModel() {
     data class State(
         val query: String = "",
@@ -105,6 +110,10 @@ class SearchViewModel(
          * (Plan A1: the recognizer misspells names, *the domapada*). Typing clears it.
          */
         val didYouMean: String? = null,
+        /** Best matches (Plan SQ): the articles and chapters that best answer the query, each with its passage. */
+        val best: List<app.granger.core.research.BestMatches.Match> = emptyList(),
+        /** Best matches are being looked for. */
+        val bestLoading: Boolean = false,
     ) {
         /** The rows of [group] on screen: its preview, or all of [all] once expanded. */
         fun <T> shown(group: SearchGroup, all: List<T>): List<T> = if (group in expanded) all else all.take(group.preview)
@@ -114,6 +123,12 @@ class SearchViewModel(
     private data class Request(val text: String, val generation: Int = 0)
 
     private val query = MutableStateFlow(Request(initialQuery.trim()))
+
+    /** The running search for titles a slip away ([LibrarySearch.nearTitles]); a new query cancels it. */
+    private var nearJob: kotlinx.coroutines.Job? = null
+
+    /** The running Best matches search; a new query cancels it. */
+    private var bestJob: kotlinx.coroutines.Job? = null
     private val _state = MutableStateFlow(State(query = initialQuery))
     val state: StateFlow<State> = _state.asStateFlow()
 
@@ -141,6 +156,8 @@ class SearchViewModel(
                 wait
             }.distinctUntilChanged().collectLatest { request ->
                 val q = request.text
+                nearJob?.cancel()
+                bestJob?.cancel()
                 // A refresh keeps the groups opened with Show all.
                 val again = q == lastText
                 lastText = q
@@ -148,16 +165,46 @@ class SearchViewModel(
                     _state.update {
                         it.copy(
                             titles = emptyList(), media = MediaResults(), fullText = emptyList(), books = emptyList(), searching = false,
+                            best = emptyList(), bestLoading = false,
                             expanded = emptySet(), capped = emptySet(),
                         )
                     }
                     return@collectLatest
                 }
                 _state.update { it.copy(searching = true, expanded = if (again) it.expanded else emptySet(), capped = emptySet()) }
+                // Best matches search by meaning too: they wait for a longer pause than the keystroke debounce, unless the
+                // query was submitted (a refresh), and the next query cancels them.
+                best?.let { source ->
+                    val submitted = request.generation > 0
+                    bestJob = viewModelScope.launch {
+                        if (!submitted) kotlinx.coroutines.delay(BEST_PAUSE_MS)
+                        _state.update { it.copy(bestLoading = true) }
+                        val found = try {
+                            source.find(q).matches
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            emptyList()
+                        }
+                        if (query.value.text == q) _state.update { it.copy(best = found, bestLoading = false) }
+                    }
+                }
                 // Each group's results land with its cap, so its Show all label is right from the first frame.
                 val titles = search.titles(q)
                 _state.update {
                     it.copy(titles = titles.hits, capped = it.capped.cap(SearchGroup.TITLES, titles.hits.size, titles.more))
+                }
+                // Titles a slip away (Plan SQ: typos) take longer: they arrive beside the other groups, placed after the
+                // ranked titles. The next query cancels them.
+                nearJob = viewModelScope.launch {
+                    val found = try {
+                        search.nearTitles(q, titles.hits)
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        emptyList()
+                    }
+                    if (found.isNotEmpty() && query.value.text == q) _state.update { it.copy(titles = titles.withNear(found)) }
                 }
                 // The media index is in memory and quick; a failure there must not cost the article and book results.
                 val found = try {
@@ -287,6 +334,8 @@ class SearchViewModel(
 
     companion object {
         const val DEBOUNCE_MS = 250L
+        /** How much longer than [DEBOUNCE_MS] typing must pause before Best matches are looked for (Plan SQ Decision 5). */
+        const val BEST_PAUSE_MS = 350L
         /** How long "Did you mean" waits for the library's names on the very first spoken search. */
         const val NAMES_WAIT_MS = 2_000L
     }

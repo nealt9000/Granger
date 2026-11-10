@@ -75,6 +75,17 @@ object TitleMatch {
         return (cut + dropped).filter { it.isNotBlank() }.distinct()
     }
 
+    private val THREE = mapOf("en" to "eng", "es" to "spa")
+
+    /**
+     * Whether a pack whose ZIM Language is [packLanguage] ("eng", "spa", "eng,spa", or blank) is in the language [tag]
+     * ("en", "es"). A blank or multilingual ("mul") pack counts for every language.
+     */
+    fun inLanguage(packLanguage: String, tag: String): Boolean {
+        val codes = packLanguage.lowercase().split(',', ';', ' ').map { it.trim() }.filter { it.isNotEmpty() }
+        return codes.isEmpty() || "mul" in codes || tag in codes || THREE[tag] in codes
+    }
+
     /** A pack name's family, the packs sharing article paths: its first two parts ("wikipedia_en_history" → "wikipedia_en"). */
     fun family(packName: String): String = packName.split('_').take(2).joinToString("_")
 

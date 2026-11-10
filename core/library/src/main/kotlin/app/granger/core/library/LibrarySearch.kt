@@ -1,6 +1,7 @@
 package app.granger.core.library
 
 import app.granger.core.research.Keywords
+import app.granger.core.research.ResearchLanguage
 import app.granger.core.zim.ZimArchive
 import app.granger.core.zim.ZimHit
 import kotlinx.coroutines.CoroutineDispatcher
@@ -21,13 +22,26 @@ data class SearchHit(
     val author: String = "",
 )
 
-/** Title hits, and [more] when the search stopped short, so more titles may match than are listed. */
-data class TitleResults(val hits: List<SearchHit>, val more: Boolean = false)
+/**
+ * Title hits, and [more] when the search stopped short, so more titles may match than are listed. The first [ranked] hits
+ * match the query exactly or begin with it; [LibrarySearch.nearTitles] go after those, before the rest.
+ */
+data class TitleResults(val hits: List<SearchHit>, val more: Boolean = false, val ranked: Int = 0) {
+    /** [near] titles placed after the ranked ones, one row per article. */
+    fun withNear(near: List<SearchHit>): List<SearchHit> =
+        if (near.isEmpty()) hits else (hits.take(ranked) + near + hits.drop(ranked)).distinctBy { it.packId to it.path }
+}
 
 /** Searches every OK pack. Plan 5 replaces the implementation with `:core:search` sources. */
 interface LibrarySearch {
     suspend fun titles(query: String): TitleResults
     suspend fun fullText(query: String): List<SearchHit>
+
+    /**
+     * Titles a slip or two from [query] (Plan SQ: typos), for when none of [shown] matches it exactly. Slower than
+     * [titles], so Search asks for them beside the other groups rather than on each keystroke's first answer.
+     */
+    suspend fun nearTitles(query: String, shown: List<SearchHit>): List<SearchHit> = emptyList()
 
     /** Full-text hits inside books; empty where books aren't searchable. */
     suspend fun books(query: String): List<BookHit> = emptyList()
@@ -57,28 +71,41 @@ class ZimLibrarySearch(
     // query (Plan U2 Decision 1).
     // Plan SQ Task 4.3: a title matches on folded words, on what was typed or the article it leads to ("heart attack"
     // finds Myocardial infarction, shown under its own name); within a rank, dictionaries and translated copies come
-    // after the rest ([TitleMatch.prior]); and when nothing matches exactly, titles a slip or two away are added after
-    // the ranked ones ([fuzzy]).
+    // after the rest, and packs in another language than a plainly English or Spanish query's ([TitleMatch.prior]).
+    // Titles a slip away are [nearTitles], asked for separately: they cost too much for every keystroke.
     override suspend fun titles(query: String): TitleResults {
         if (query.isBlank()) return TitleResults(emptyList())
         val books = bookTitles(query)
         val packs = across(query) { it.suggest(query, titlesPerPack) }
         val q = TitleMatch.key(query)
-        val ranked = ranked(packs, q)
-        val exact = books.any { it.first == BookTitleSearch.Rank.EXACT } || ranked.any { it.first == BookTitleSearch.Rank.EXACT }
-        val near = if (exact) emptyList() else fuzzy(query, q, ranked.map { it.third.packId to it.third.path }.toSet())
+        val ranked = ranked(packs, q, queryLanguage(query))
         val unranked = BookTitleSearch.Rank.entries.size
         // Stable: books before packs within a rank, then by prior, and pack titles that are neither last, in turn order.
+        val family = families()
         val first = (books.map { Triple(it.first, 0, it.second) } + ranked.filter { it.first != null })
             .sortedWith(compareBy<Triple<BookTitleSearch.Rank?, Int, SearchHit>> { it.first?.ordinal ?: unranked }.thenBy { it.second })
-        val rest = ranked.filter { it.first == null }.sortedBy { it.second }
-        val family = families()
-        val merged = (first.map { it.third } + near + rest.map { it.third }).distinctBy { family(it) to it.path }
-        return TitleResults(merged.take(titleLimit), more = merged.size > titleLimit || packs.any { it.returned >= titlesPerPack })
+            .map { it.third }.distinctBy { family(it) to it.path }
+        val rest = ranked.filter { it.first == null }.sortedBy { it.second }.map { it.third }
+        val merged = (first + rest).distinctBy { family(it) to it.path }
+        return TitleResults(
+            merged.take(titleLimit),
+            more = merged.size > titleLimit || packs.any { it.returned >= titlesPerPack },
+            ranked = minOf(first.size, titleLimit),
+        )
     }
 
-    /** Each pack's hits taken in turns, each with its rank against [q] and its pack's prior. */
-    private fun ranked(packs: List<PackHits>, q: String): List<Triple<BookTitleSearch.Rank?, Int, SearchHit>> {
+    override suspend fun nearTitles(query: String, shown: List<SearchHit>): List<SearchHit> {
+        val q = TitleMatch.key(query)
+        if (q.isEmpty() || shown.any { TitleMatch.rank(it.title, q) == BookTitleSearch.Rank.EXACT }) return emptyList()
+        val family = families()
+        return fuzzy(query, q, shown.map { it.packId to it.path }.toSet()).distinctBy { family(it) to it.path }
+    }
+
+    /** The query's language when it is plainly one ([ResearchLanguage.of] gives it alone), else null. */
+    private fun queryLanguage(query: String): ResearchLanguage? = ResearchLanguage.of(query).singleOrNull()
+
+    /** Each pack's hits taken in turns, each with its rank against [q] and its place among the same rank (lower first). */
+    private fun ranked(packs: List<PackHits>, q: String, language: ResearchLanguage?): List<Triple<BookTitleSearch.Rank?, Int, SearchHit>> {
         val turns = packs.maxOfOrNull { it.hits.size } ?: 0
         return (0 until turns).flatMap { turn ->
             packs.mapNotNull { pack ->
@@ -88,7 +115,8 @@ class ZimLibrarySearch(
                     val own = TitleMatch.rank(hit.title, q)
                     val rank = listOfNotNull(TitleMatch.rank(zim.title, q), own).minOrNull()
                     val viaRedirect = if (rank != null && own != rank) 1 else 0
-                    Triple(rank, 2 * TitleMatch.prior(pack.name, hit.path, hit.title) + viaRedirect, hit)
+                    val otherLanguage = if (language != null && !TitleMatch.inLanguage(pack.language, language.tag)) 1 else 0
+                    Triple(rank, 4 * TitleMatch.prior(pack.name, hit.path, hit.title) + 2 * otherLanguage + viaRedirect, hit)
                 }
             }
         }
@@ -166,7 +194,7 @@ class ZimLibrarySearch(
         .sortedBy { it.lowercase() }
 
     /** One pack's hits; [returned] counts them as the pack gave them, before redirects are merged. [name] is the pack's. */
-    private class PackHits(val hits: List<Pair<ZimHit, SearchHit>>, val returned: Int, val name: String = "")
+    private class PackHits(val hits: List<Pair<ZimHit, SearchHit>>, val returned: Int, val name: String = "", val language: String = "")
 
     /**
      * Runs [run] on each OK pack, in library order; a pack that fails is skipped so the others still answer. Index pages
@@ -190,7 +218,7 @@ class ZimLibrarySearch(
                         val title = if (path == hit.path) hit.title else archive.entry(path)?.title?.ifBlank { null } ?: hit.title
                         hit.copy(path = path) to SearchHit(pack.id, pack.title, path, PageTitles.clean(title, pack.title), hit.snippet)
                     }
-                PackHits(SliceDedupe.apply(found, packs, slices, library::archive, { it.second.packId }, { it.second.path }), returned = hits.size, name = pack.name)
+                PackHits(SliceDedupe.apply(found, packs, slices, library::archive, { it.second.packId }, { it.second.path }), returned = hits.size, name = pack.name, language = pack.language)
             }
         }
     }
