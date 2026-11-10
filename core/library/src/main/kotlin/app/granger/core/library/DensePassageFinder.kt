@@ -51,6 +51,8 @@ class DensePassageFinder(
     private val pool: ExecutorService,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val k: Int = 24,
+    /** Lists read from version 2 vector files (Plan SQ Task 2.2: 1,024 of ~250 rows kept 96% of brute force offline). */
+    private val probes: Int = PROBES,
     private val clock: () -> Long = { System.nanoTime() / 1_000_000 },
     /** The sets the packs are slices of, so a smaller slice's articles don't double a bigger one's (Plan WF Decision 6). */
     private val slices: PackSlices? = null,
@@ -79,7 +81,8 @@ class DensePassageFinder(
         val dims = usable.groupBy { it.file.header.dims }.maxBy { it.value.size }.key
         val searched = usable.map { it.file }.filter { it.header.dims == dims }
         val listed = clock()
-        val hits = VectorSearch.top(query, searched, k, pool)
+        // Version 2 files are read by their nearest lists (Plan SQ Task 2.2); version 1 files whole, as before.
+        val hits = VectorSearch.top(query, searched, k, pool, probes = probes)
         val scanned = clock()
         val collections = shelves.collectionNames()
         val rebuilt = HashMap<VectorHit, Passage>()
@@ -173,7 +176,8 @@ class DensePassageFinder(
         }
     }
 
-    private companion object {
-        val TITLE = Regex("<title[^>]*>(.*?)</title>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
+    companion object {
+        const val PROBES = 1024
+        private val TITLE = Regex("<title[^>]*>(.*?)</title>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
     }
 }
