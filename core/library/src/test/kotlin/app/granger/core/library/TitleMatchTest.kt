@@ -12,6 +12,15 @@ class TitleMatchTest {
         assertThat(TitleMatch.rank("Syndromes", q)).isNull()
     }
 
+    @Test fun dictionariesSkipSuggestionsWhileTheLastWordIsShort() {
+        assertThat(TitleMatch.skipsSuggest("wiktionary_en_all", "paradise r")).isTrue()
+        assertThat(TitleMatch.skipsSuggest("wiktionary_en_all", "r ")).isTrue()
+        assertThat(TitleMatch.skipsSuggest("wiktionary_en_all", "paradise re")).isTrue()
+        assertThat(TitleMatch.skipsSuggest("wiktionary_en_all", "paradise reg")).isFalse()
+        assertThat(TitleMatch.skipsSuggest("wiktionary_en_all", "paradise")).isFalse()
+        assertThat(TitleMatch.skipsSuggest("wikipedia_en_top", "paradise r")).isFalse()
+    }
+
     @Test fun distanceCountsASwapAsOne() {
         assertThat(TitleMatch.distance("kerri hiugchi", "kerri higuchi")).isEqualTo(1)
         assertThat(TitleMatch.distance("steatorreha", "steatorrhea")).isEqualTo(1)

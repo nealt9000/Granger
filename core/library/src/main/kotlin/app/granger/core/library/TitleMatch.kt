@@ -108,6 +108,14 @@ object TitleMatch {
      * Where a pack's hits sit among others of the same rank: lower first. Dictionaries go after encyclopedias and
      * guides ("Maputo" the city before "Maputo" the word), and translated copies after everything.
      */
+    /**
+     * Whether a pack is left out of title suggestions for [query]: a dictionary while the last word is one or two letters
+     * (Plan SQ, the phone: libkiwix expands a short last word over English Wiktionary's millions of titles, 1–3 s a call
+     * on the emulator, mostly for no hits, on keystrokes of "paradise r", "eduardo de" or "sea walls of c").
+     */
+    fun skipsSuggest(packName: String, query: String): Boolean =
+        packName.startsWith("wiktionary") && query.trim().substringAfterLast(' ').length <= 2
+
     fun prior(packName: String, path: String, title: String): Int = when {
         isTranslation(path, title) -> 2
         packName.startsWith("wiktionary") -> 1

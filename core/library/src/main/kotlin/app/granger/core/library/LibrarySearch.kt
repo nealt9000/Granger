@@ -5,6 +5,10 @@ import app.granger.core.research.ResearchLanguage
 import app.granger.core.zim.ZimArchive
 import app.granger.core.zim.ZimHit
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -76,7 +80,7 @@ class ZimLibrarySearch(
     override suspend fun titles(query: String): TitleResults {
         if (query.isBlank()) return TitleResults(emptyList())
         val books = bookTitles(query)
-        val packs = across(query) { it.suggest(query, titlesPerPack) }
+        val packs = across(query, suggesting = true) { it.suggest(query, titlesPerPack) }
         val q = TitleMatch.key(query)
         val ranked = ranked(packs, q, queryLanguage(query))
         val unranked = BookTitleSearch.Rank.entries.size
@@ -133,7 +137,7 @@ class ZimLibrarySearch(
     private suspend fun fuzzy(query: String, q: String, seen: Set<Pair<String, String>>): List<SearchHit> {
         val budget = TitleMatch.budget(q)
         if (budget == 0) return emptyList()
-        val found = TitleMatch.probes(query).flatMap { probe -> across(probe) { it.suggest(probe, FUZZY_PER_PACK) }.flatMap { it.hits } }
+        val found = TitleMatch.probes(query).flatMap { probe -> across(probe, suggesting = true) { it.suggest(probe, FUZZY_PER_PACK) }.flatMap { it.hits } }
         return found.mapNotNull { (zim, hit) ->
             if ((hit.packId to hit.path) in seen) return@mapNotNull null
             val d = listOf(zim.title, hit.title).minOf { title ->
@@ -203,27 +207,34 @@ class ZimLibrarySearch(
      * Runs [run] on each OK pack, in library order; a pack that fails is skipped so the others still answer. Index pages
      * (user and tag lists, [IndexPages]) are left out, and titles lose their site ([PageTitles]) before they're ranked.
      */
-    private suspend fun across(query: String, run: (ZimArchive) -> List<ZimHit>): List<PackHits> {
+    private suspend fun across(query: String, suggesting: Boolean = false, run: (ZimArchive) -> List<ZimHit>): List<PackHits> {
         if (query.isBlank()) return emptyList()
         val packs = library.packs.first().filter { it.status == PackStatus.OK }
+        val asked = packs.filterNot { suggesting && TitleMatch.skipsSuggest(it.name, query) }
+        // A few packs at a time, in their order (each archive reads under its own lock): one after another, 31 packs' title
+        // suggestions added up to 1–2 s on the emulator.
+        val gate = Semaphore(PARALLEL_PACKS)
         return withContext(io) {
-            packs.mapNotNull { pack ->
-                val archive = library.archive(pack.id) ?: return@mapNotNull null
-                val hits = try { run(archive) } catch (e: Exception) { emptyList() }
-                // Title suggestions are often redirects; point them at the article itself so the
-                // reader keys bookmarks and positions by the real path, and list each article once.
-                // A redirect is shown under the article's own title (Plan SQ: three slices listed "Turingia", not Thuringia);
-                // the ZimHit keeps the title that matched.
-                val found = hits.map { hit -> hit to (archive.resolvePath(hit.path) ?: hit.path) }
-                    .distinctBy { it.second }
-                    .filterNot { IndexPages.isIndex(it.second) }
-                    .map { (hit, path) ->
-                        val title = if (path == hit.path) hit.title else archive.entry(path)?.title?.ifBlank { null } ?: hit.title
-                        hit.copy(path = path) to SearchHit(pack.id, pack.title, path, PageTitles.clean(title, pack.title), hit.snippet)
-                    }
-                PackHits(SliceDedupe.apply(found, packs, slices, library::archive, { it.second.packId }, { it.second.path }), returned = hits.size, name = pack.name, language = pack.language)
-            }
+            asked.map { pack -> async { gate.withPermit { packHits(pack, packs, run) } } }.awaitAll().filterNotNull()
         }
+    }
+
+    /** One pack's hits for [across]; [packs] are all the readable packs, for [SliceDedupe]. Null when it can't be opened. */
+    private suspend fun packHits(pack: Pack, packs: List<Pack>, run: (ZimArchive) -> List<ZimHit>): PackHits? {
+        val archive = library.archive(pack.id) ?: return null
+        val hits = try { run(archive) } catch (e: Exception) { emptyList() }
+        // Title suggestions are often redirects; point them at the article itself so the
+        // reader keys bookmarks and positions by the real path, and list each article once.
+        // A redirect is shown under the article's own title (Plan SQ: three slices listed "Turingia", not Thuringia);
+        // the ZimHit keeps the title that matched.
+        val found = hits.map { hit -> hit to (archive.resolvePath(hit.path) ?: hit.path) }
+            .distinctBy { it.second }
+            .filterNot { IndexPages.isIndex(it.second) }
+            .map { (hit, path) ->
+                val title = if (path == hit.path) hit.title else archive.entry(path)?.title?.ifBlank { null } ?: hit.title
+                hit.copy(path = path) to SearchHit(pack.id, pack.title, path, PageTitles.clean(title, pack.title), hit.snippet)
+            }
+        return PackHits(SliceDedupe.apply(found, packs, slices, library::archive, { it.second.packId }, { it.second.path }), returned = hits.size, name = pack.name, language = pack.language)
     }
 
     companion object {
@@ -249,5 +260,7 @@ class ZimLibrarySearch(
         const val NEAR_MAX_WORDS = 4
         /** Titles asked of each pack for each typo probe ([TitleMatch.probes]). */
         const val FUZZY_PER_PACK = 10
+        /** Packs searched at once. */
+        const val PARALLEL_PACKS = 4
     }
 }
