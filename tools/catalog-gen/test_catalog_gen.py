@@ -765,7 +765,8 @@ def test_real_curated_tiers_fit_the_target():
     efficient, comprehensive = sizes["All"]
     # With pictures by default (Neal, 2026-10-28: no-pictures packs are the space-saving fallback): 17.7 / 101.5 GB.
     assert efficient < 18e9
-    assert comprehensive < 103e9
+    # Neal, 2026-11-09: accept the bigger tier when English Wiktionary nopic moves to its 14.8 GB file (about 105 GB).
+    assert comprehensive < 107e9
 
 
 def test_real_curated_readiness_names_nine_domains_in_order():
@@ -1524,3 +1525,50 @@ def test_the_timeindex_command_rewrites_the_catalog_with_a_fresh_date(tmp_path, 
     assert out["generatedAt"] > "2026-10-22T00:00:00Z"
     assert out["packs"][1]["timeIndex"]["url"].endswith("/t/wikipedia_en_top_maxi_x.gtime")
     assert "time indexes on 3 packs from 1 files" in capsys.readouterr().out
+
+
+# Upkeep (2026-11-09): a newer snapshot is taken only when it is safe.
+def _pin(pid, zim, snap, sha, **extra):
+    return {"id": pid, "zimName": zim, "snapshotDate": snap, "sha256": sha, "sizeBytes": 1, "zimUuid": sha,
+            "hasFulltextIndex": True, "urls": [f"https://download.example/{zim}_{snap}.zim"], **extra}
+
+
+def _status(dead=()):
+    return lambda url: 404 if any(d in url for d in dead) else 200
+
+
+def test_hold_back_keeps_a_pack_whose_new_file_isnt_on_every_mirror_yet():
+    previous = {"packs": [_pin("wikt_nopic", "wikt", "2026-08", "old")]}
+    packs = [_pin("wikt_nopic", "wikt", "2026-11", "new", title="Kiwix's new title")]
+    lines = cg.hold_back(packs, previous, {}, _status(dead=["2026-11"]), sleep=lambda s: None)
+    assert packs[0]["sha256"] == "old" and packs[0]["snapshotDate"] == "2026-08" and packs[0]["urls"][0].endswith("2026-08.zim")
+    assert packs[0]["title"] == "Kiwix's new title"  # only the pin is kept; copy still refreshes
+    assert len(lines) == 1 and "held at 2026-08, not 2026-11" in lines[0] and "not answering" in lines[0]
+
+
+def test_hold_back_keeps_every_flavour_until_the_vectors_are_rebuilt():
+    vec = {"url": "https://x/v.gvec"}
+    previous = {"packs": [_pin("top_nopic", "top", "2026-10", "n1", vectors=vec), _pin("top_maxi", "top", "2026-10", "m1", vectors=vec)]}
+    packs = [_pin("top_nopic", "top", "2026-11", "n2"), _pin("top_maxi", "top", "2026-11", "m2")]
+    lines = cg.hold_back(packs, previous, {"vectors": {"n1"}}, _status(), sleep=lambda s: None)
+    assert [p["sha256"] for p in packs] == ["n1", "m1"]
+    assert "would drop its search vectors" in lines[0]
+    # once a descriptor is built from the new nopic file, both flavours move
+    packs = [_pin("top_nopic", "top", "2026-11", "n2"), _pin("top_maxi", "top", "2026-11", "m2")]
+    assert cg.hold_back(packs, previous, {"vectors": {"n2"}}, _status(), sleep=lambda s: None) == []
+    assert [p["sha256"] for p in packs] == ["n2", "m2"]
+
+
+def test_hold_back_checks_the_time_index_too_and_lets_safe_moves_through():
+    previous = {"packs": [_pin("wp_maxi", "wp", "2026-10", "a", timeIndex={"url": "u"}), _pin("cook", "cook", "2026-08", "c")]}
+    packs = [_pin("wp_maxi", "wp", "2026-11", "b"), _pin("cook", "cook", "2026-11", "d"), _pin("brand_new", "bn", "2026-11", "e")]
+    lines = cg.hold_back(packs, previous, {"timeIndex": {"a"}}, _status(), sleep=lambda s: None)
+    assert [p["sha256"] for p in packs] == ["a", "d", "e"]
+    assert len(lines) == 1 and "time index" in lines[0]
+
+
+def test_hold_back_moves_anyway_when_the_previous_file_is_gone_too():
+    previous = {"packs": [_pin("xkcd", "xkcd", "2026-08", "old")]}
+    packs = [_pin("xkcd", "xkcd", "2026-11", "new")]
+    lines = cg.hold_back(packs, previous, {}, _status(dead=["xkcd"]), sleep=lambda s: None)
+    assert packs[0]["sha256"] == "new" and "moved to 2026-11 anyway" in lines[0]

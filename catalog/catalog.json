@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-11-09T22:23:26Z",
+  "generatedAt": "2026-11-10T00:04:27Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -35,13 +35,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "subjectOf": "wikipedia_en",
-      "adds": {
-        "wikipedia_en_100": 1.0,
-        "wikipedia_en_top": 0.955,
-        "wikipedia_en_top1m": 0.656
-      },
-      "articles": 72901,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_medicine_nopic_2026-10-10.gtime",
         "sha256": "5751536e1101c1a104d91497157ea3a357284dac7caeb88a2f14e5536036aa9b",
@@ -49,7 +42,14 @@
         "count": 5197,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_en",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.955,
+        "wikipedia_en_top1m": 0.656
+      },
+      "articles": 72901
     },
     {
       "id": "wikipedia_en_medicine_maxi",
@@ -84,13 +84,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "subjectOf": "wikipedia_en",
-      "adds": {
-        "wikipedia_en_100": 1.0,
-        "wikipedia_en_top": 0.955,
-        "wikipedia_en_top1m": 0.656
-      },
-      "articles": 72901,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_medicine_nopic_2026-10-10.gtime",
         "sha256": "5751536e1101c1a104d91497157ea3a357284dac7caeb88a2f14e5536036aa9b",
@@ -98,7 +91,14 @@
         "count": 5197,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_en",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.955,
+        "wikipedia_en_top1m": 0.656
+      },
+      "articles": 72901
     },
     {
       "id": "wikipedia_en_top_nopic",
@@ -133,12 +133,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "set": "wikipedia_en",
-      "setRank": 2,
-      "setLabel": "Best 50,000 articles",
-      "articles": 50002,
-      "setTitle": "Wikipedia",
-      "setDescription": "The free encyclopedia, from 100 essential articles to all of it.",
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_top_maxi_2026-09-14.gtime",
         "sha256": "4ac1de9be47754551d739fcdb3e456fa2513a09392d69c1e5029929e4abbb378",
@@ -146,7 +140,13 @@
         "count": 26592,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "set": "wikipedia_en",
+      "setRank": 2,
+      "setLabel": "Best 50,000 articles",
+      "articles": 50002,
+      "setTitle": "Wikipedia",
+      "setDescription": "The free encyclopedia, from 100 essential articles to all of it."
     },
     {
       "id": "wikipedia_en_top_maxi",
@@ -181,12 +181,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "set": "wikipedia_en",
-      "setRank": 2,
-      "setLabel": "Best 50,000 articles",
-      "articles": 50002,
-      "setTitle": "Wikipedia",
-      "setDescription": "The free encyclopedia, from 100 essential articles to all of it.",
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_top_maxi_2026-09-14.gtime",
         "sha256": "4ac1de9be47754551d739fcdb3e456fa2513a09392d69c1e5029929e4abbb378",
@@ -194,7 +188,13 @@
         "count": 26592,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "set": "wikipedia_en",
+      "setRank": 2,
+      "setLabel": "Best 50,000 articles",
+      "articles": 50002,
+      "setTitle": "Wikipedia",
+      "setDescription": "The free encyclopedia, from 100 essential articles to all of it."
     },
     {
       "id": "wikipedia_en_100",
@@ -419,13 +419,6 @@
       "domain": "maps",
       "content": "",
       "flavour": "maxi",
-      "subjectOf": "wikipedia_en",
-      "adds": {
-        "wikipedia_en_100": 1.0,
-        "wikipedia_en_top": 0.991,
-        "wikipedia_en_top1m": 0.925
-      },
-      "articles": 91985,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_geography_maxi_2026-10.gtime",
         "sha256": "8d436a2c27166671c4ef75c92451337e33778bcb57c84fbc899a5d61003f2f2a",
@@ -433,7 +426,14 @@
         "count": 5711,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_en",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.991,
+        "wikipedia_en_top1m": 0.925
+      },
+      "articles": 91985
     },
     {
       "id": "wikipedia_en_physics_maxi",
@@ -468,13 +468,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "subjectOf": "wikipedia_en",
-      "adds": {
-        "wikipedia_en_100": 1.0,
-        "wikipedia_en_top": 0.954,
-        "wikipedia_en_top1m": 0.627
-      },
-      "articles": 21783,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_physics_maxi_2026-10-14.gtime",
         "sha256": "64811849fb8b2710b7477b686f8f96ba952e94ef7d42b00c40b100e74e44f184",
@@ -482,7 +475,14 @@
         "count": 7963,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_en",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.954,
+        "wikipedia_en_top1m": 0.627
+      },
+      "articles": 21783
     },
     {
       "id": "wikipedia_en_chemistry_maxi",
@@ -517,13 +517,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "subjectOf": "wikipedia_en",
-      "adds": {
-        "wikipedia_en_100": 1.0,
-        "wikipedia_en_top": 0.937,
-        "wikipedia_en_top1m": 0.559
-      },
-      "articles": 9314,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_chemistry_maxi_2026-10-15.gtime",
         "sha256": "b9a3d694577ae8f3d4841886ea569a7212b63455c38fe39dc7dc009e6f113110",
@@ -531,7 +524,14 @@
         "count": 549,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_en",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.937,
+        "wikipedia_en_top1m": 0.559
+      },
+      "articles": 9314
     },
     {
       "id": "wikipedia_en_mathematics_maxi",
@@ -566,13 +566,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "subjectOf": "wikipedia_en",
-      "adds": {
-        "wikipedia_en_100": 1.0,
-        "wikipedia_en_top": 0.96,
-        "wikipedia_en_top1m": 0.669
-      },
-      "articles": 23326,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_mathematics_maxi_2026-09-15.gtime",
         "sha256": "6a8a9eef19e6e48036619efd4fbf447cac077f94befcb7b1151a469089ef10ba",
@@ -580,7 +573,14 @@
         "count": 5091,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_en",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.96,
+        "wikipedia_en_top1m": 0.669
+      },
+      "articles": 23326
     },
     {
       "id": "wikipedia_en_knots_maxi",
@@ -615,13 +615,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "subjectOf": "wikipedia_en",
-      "adds": {
-        "wikipedia_en_100": 0.998,
-        "wikipedia_en_top": 0.988,
-        "wikipedia_en_top1m": 0.693
-      },
-      "articles": 599,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_knots_maxi_2026-10-18.gtime",
         "sha256": "b22d59f66269371105377197d88a28e2bb59328015417ad0f16e69a6de214b4d",
@@ -629,7 +622,14 @@
         "count": 11,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_en",
+      "adds": {
+        "wikipedia_en_100": 0.998,
+        "wikipedia_en_top": 0.988,
+        "wikipedia_en_top1m": 0.693
+      },
+      "articles": 599
     },
     {
       "id": "ifixit_en_all",
@@ -697,6 +697,14 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_medicine_nopic_2026-10.gtime",
+        "sha256": "f529d1a302df317703d58d8c6ac288558865de218fefca5d1e2ac68c640556fd",
+        "sizeBytes": 151552,
+        "count": 1014,
+        "format": 1,
+        "lanesVersion": 1
+      },
       "i18n": {
         "en": {
           "title": "WikiMed in Spanish"
@@ -706,15 +714,7 @@
       "adds": {
         "wikipedia_es_top": 0.864
       },
-      "articles": 19727,
-      "timeIndex": {
-        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_medicine_nopic_2026-10.gtime",
-        "sha256": "f529d1a302df317703d58d8c6ac288558865de218fefca5d1e2ac68c640556fd",
-        "sizeBytes": 151552,
-        "count": 1014,
-        "format": 1,
-        "lanesVersion": 1
-      }
+      "articles": 19727
     },
     {
       "id": "wikipedia_es_medicine_maxi",
@@ -749,6 +749,14 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_medicine_nopic_2026-10.gtime",
+        "sha256": "f529d1a302df317703d58d8c6ac288558865de218fefca5d1e2ac68c640556fd",
+        "sizeBytes": 151552,
+        "count": 1014,
+        "format": 1,
+        "lanesVersion": 1
+      },
       "i18n": {
         "en": {
           "title": "WikiMed in Spanish"
@@ -758,15 +766,7 @@
       "adds": {
         "wikipedia_es_top": 0.864
       },
-      "articles": 19727,
-      "timeIndex": {
-        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_medicine_nopic_2026-10.gtime",
-        "sha256": "f529d1a302df317703d58d8c6ac288558865de218fefca5d1e2ac68c640556fd",
-        "sizeBytes": 151552,
-        "count": 1014,
-        "format": 1,
-        "lanesVersion": 1
-      }
+      "articles": 19727
     },
     {
       "id": "wikipedia_es_top_nopic",
@@ -801,6 +801,14 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_top_nopic_2026-10.gtime",
+        "sha256": "a00727c5f4312544346ae92faefafc7dc34c980efe0de0854fa0ac64a7a6cf1b",
+        "sizeBytes": 2236416,
+        "count": 24838,
+        "format": 1,
+        "lanesVersion": 1
+      },
       "set": "wikipedia_es",
       "setRank": 1,
       "setLabel": "Los 50.000 mejores artículos",
@@ -814,14 +822,6 @@
           "setTitle": "Wikipedia in Spanish",
           "setDescription": "The free encyclopedia in Spanish, from the best 50,000 articles to all of it."
         }
-      },
-      "timeIndex": {
-        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_top_nopic_2026-10.gtime",
-        "sha256": "a00727c5f4312544346ae92faefafc7dc34c980efe0de0854fa0ac64a7a6cf1b",
-        "sizeBytes": 2236416,
-        "count": 24838,
-        "format": 1,
-        "lanesVersion": 1
       }
     },
     {
@@ -857,6 +857,14 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_top_nopic_2026-10.gtime",
+        "sha256": "a00727c5f4312544346ae92faefafc7dc34c980efe0de0854fa0ac64a7a6cf1b",
+        "sizeBytes": 2236416,
+        "count": 24838,
+        "format": 1,
+        "lanesVersion": 1
+      },
       "set": "wikipedia_es",
       "setRank": 1,
       "setLabel": "Los 50.000 mejores artículos",
@@ -870,14 +878,6 @@
           "setTitle": "Wikipedia in Spanish",
           "setDescription": "The free encyclopedia in Spanish, from the best 50,000 articles to all of it."
         }
-      },
-      "timeIndex": {
-        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_top_nopic_2026-10.gtime",
-        "sha256": "a00727c5f4312544346ae92faefafc7dc34c980efe0de0854fa0ac64a7a6cf1b",
-        "sizeBytes": 2236416,
-        "count": 24838,
-        "format": 1,
-        "lanesVersion": 1
       }
     },
     {
@@ -2297,16 +2297,16 @@
       "description": "GrimGrains is a collection of recipes by Rek Bell and Devine Lu Linvega",
       "category": "How-to",
       "language": "en",
-      "sizeBytes": 26029459,
-      "sha256": "cd6f169b06193f661f95dda24d563a06992f9d2a21d2eb92614add7dc4bcbcce",
+      "sizeBytes": 26583114,
+      "sha256": "79bd60c48680aa1c0aef0a107569dc8e8523ad2063a9a9f3ebbb6ceed6fac29e",
       "urls": [
-        "https://download.kiwix.org/zim/zimit/grimgrains_en_all_2026-08.zim"
+        "https://download.kiwix.org/zim/zimit/grimgrains_en_all_2026-11.zim"
       ],
-      "snapshotDate": "2026-08-11",
+      "snapshotDate": "2026-11-09",
       "license": "CC BY-NC-SA 4.0",
       "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "819de301-f178-dde3-317b-16335d8d06a4",
+      "zimUuid": "f7600a9b-a0a3-77a5-5552-74a3cf520fd5",
       "zimName": "grimgrains_en_all",
       "featured": false,
       "family": "grimgrains",
@@ -10885,16 +10885,16 @@
       "description": "Coding exercises",
       "category": "Programming",
       "language": "en",
-      "sizeBytes": 6709771,
-      "sha256": "ba2f0594003ba370cd56c6c00e53cd2038e10e95a7eab7fd97e200176426be43",
+      "sizeBytes": 10569416,
+      "sha256": "19ebe6375aff4f2d38478b87becca9225cba8e890603ceeccf22b7fdd398eb90",
       "urls": [
-        "https://download.kiwix.org/zim/freecodecamp/freecodecamp_en_coding-interview-prep_2026-08.zim"
+        "https://download.kiwix.org/zim/freecodecamp/freecodecamp_en_coding-interview-prep_2026-11.zim"
       ],
-      "snapshotDate": "2026-08-11",
+      "snapshotDate": "2026-11-09",
       "license": "Not stated by the source",
-      "hasFulltextIndex": false,
+      "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "7d3a5ec8-8a27-49ab-fbae-69edb0769b42",
+      "zimUuid": "246dd180-109b-a4f5-c9b6-5ed3553d848e",
       "zimName": "freecodecamp_en_coding-interview-prep",
       "featured": false,
       "family": "freecodecamp",
@@ -14280,16 +14280,16 @@
       "description": "Level up your creative problem solving skills",
       "category": "Programming",
       "language": "en",
-      "sizeBytes": 6863790,
-      "sha256": "4e18ab32a553485531740f0ca594d58d107eb0f3c30b4fd8a04a5335c6250044",
+      "sizeBytes": 10595697,
+      "sha256": "f1d840e1f865df9f3b8bbcbf7ee11e7630b49ebab9dfcb1862628767b3579c03",
       "urls": [
-        "https://download.kiwix.org/zim/freecodecamp/freecodecamp_en_rosetta-code_2026-08.zim"
+        "https://download.kiwix.org/zim/freecodecamp/freecodecamp_en_rosetta-code_2026-11.zim"
       ],
-      "snapshotDate": "2026-08-11",
+      "snapshotDate": "2026-11-09",
       "license": "Not stated by the source",
-      "hasFulltextIndex": false,
+      "hasFulltextIndex": true,
       "topics": [],
-      "zimUuid": "4e220bba-6da8-7fd2-4a11-d452dd081db8",
+      "zimUuid": "4b9fc7ba-4095-39c0-f624-2cbe8bc4aa48",
       "zimName": "freecodecamp_en_rosetta-code",
       "featured": false,
       "family": "freecodecamp",
@@ -19932,66 +19932,6 @@
       "flavour": ""
     },
     {
-      "id": "wikipedia_es_movies_maxi",
-      "title": "Cine por Wikipedia",
-      "description": "Una selección de artículos de Wikipedia sobre películas",
-      "category": "Reference",
-      "language": "es",
-      "sizeBytes": 951938002,
-      "sha256": "116d8f91ce4dcc363a056d2cf1a7d8836b15bb4921568f4cdd31a17fa4696939",
-      "urls": [
-        "https://download.kiwix.org/zim/wikipedia/wikipedia_es_movies_maxi_2026-10.zim",
-        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_es_movies_maxi_2026-10.zim",
-        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_es_movies_maxi_2026-10.zim"
-      ],
-      "snapshotDate": "2026-10-13",
-      "license": "CC BY-SA 4.0",
-      "hasFulltextIndex": true,
-      "topics": [],
-      "zimUuid": "1aabf521-0133-cc8d-34bf-83cb83bac75a",
-      "zimName": "wikipedia_es_movies",
-      "featured": false,
-      "family": "wikipedia",
-      "domain": "literature",
-      "content": "",
-      "flavour": "maxi",
-      "subjectOf": "wikipedia_es",
-      "adds": {
-        "wikipedia_es_top": 0.948
-      },
-      "articles": 72361
-    },
-    {
-      "id": "wikipedia_es_movies_nopic",
-      "title": "Cine por Wikipedia",
-      "description": "Una selección de artículos de Wikipedia sobre películas",
-      "category": "Reference",
-      "language": "es",
-      "sizeBytes": 545529336,
-      "sha256": "e8528bc23f17387adb35a31fd649107d349386470473df6f8ace6fbaed0dc07e",
-      "urls": [
-        "https://download.kiwix.org/zim/wikipedia/wikipedia_es_movies_nopic_2026-10.zim",
-        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_es_movies_nopic_2026-10.zim",
-        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_es_movies_nopic_2026-10.zim"
-      ],
-      "snapshotDate": "2026-10-13",
-      "license": "CC BY-SA 4.0",
-      "hasFulltextIndex": true,
-      "topics": [],
-      "zimUuid": "1d95169c-6a88-a8a8-9d80-724aae97baa5",
-      "zimName": "wikipedia_es_movies",
-      "featured": false,
-      "family": "wikipedia",
-      "domain": "literature",
-      "content": "",
-      "flavour": "nopic",
-      "subjectOf": "wikipedia_es",
-      "adds": {
-        "wikipedia_es_top": 0.948
-      },
-      "articles": 72361
-    },
-    {
       "id": "womenshistory.si.edu_en_all",
       "title": "American Women’s History",
       "description": "Bringing American Women’s History into Focus",
@@ -20290,12 +20230,6 @@
       "domain": "reference",
       "content": "",
       "flavour": "mini",
-      "set": "wikipedia_en",
-      "setRank": 2,
-      "setLabel": "Best 50,000 articles",
-      "articles": 50002,
-      "setTitle": "Wikipedia",
-      "setDescription": "The free encyclopedia, from 100 essential articles to all of it.",
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_top_maxi_2026-09-14.gtime",
         "sha256": "4ac1de9be47754551d739fcdb3e456fa2513a09392d69c1e5029929e4abbb378",
@@ -20303,7 +20237,13 @@
         "count": 26592,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "set": "wikipedia_en",
+      "setRank": 2,
+      "setLabel": "Best 50,000 articles",
+      "articles": 50002,
+      "setTitle": "Wikipedia",
+      "setDescription": "The free encyclopedia, from 100 essential articles to all of it."
     },
     {
       "id": "wikipedia_es_molcell_maxi",
@@ -20612,13 +20552,6 @@
       "domain": "science",
       "content": "",
       "flavour": "mini",
-      "subjectOf": "wikipedia_en",
-      "adds": {
-        "wikipedia_en_100": 1.0,
-        "wikipedia_en_top": 0.937,
-        "wikipedia_en_top1m": 0.559
-      },
-      "articles": 9314,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_chemistry_maxi_2026-10-15.gtime",
         "sha256": "b9a3d694577ae8f3d4841886ea569a7212b63455c38fe39dc7dc009e6f113110",
@@ -20626,7 +20559,14 @@
         "count": 549,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_en",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.937,
+        "wikipedia_en_top1m": 0.559
+      },
+      "articles": 9314
     },
     {
       "id": "wikipedia_en_chemistry_nopic",
@@ -20661,13 +20601,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "subjectOf": "wikipedia_en",
-      "adds": {
-        "wikipedia_en_100": 1.0,
-        "wikipedia_en_top": 0.937,
-        "wikipedia_en_top1m": 0.559
-      },
-      "articles": 9314,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_chemistry_maxi_2026-10-15.gtime",
         "sha256": "b9a3d694577ae8f3d4841886ea569a7212b63455c38fe39dc7dc009e6f113110",
@@ -20675,7 +20608,14 @@
         "count": 549,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_en",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.937,
+        "wikipedia_en_top1m": 0.559
+      },
+      "articles": 9314
     },
     {
       "id": "theworldfactbook_en_all",
@@ -20699,6 +20639,66 @@
       "domain": "maps",
       "content": "",
       "flavour": ""
+    },
+    {
+      "id": "wikipedia_es_movies_maxi",
+      "title": "Cine por Wikipedia",
+      "description": "Una selección de artículos de Wikipedia sobre películas",
+      "category": "Reference",
+      "language": "es",
+      "sizeBytes": 951938002,
+      "sha256": "116d8f91ce4dcc363a056d2cf1a7d8836b15bb4921568f4cdd31a17fa4696939",
+      "urls": [
+        "https://download.kiwix.org/zim/wikipedia/wikipedia_es_movies_maxi_2026-10.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_es_movies_maxi_2026-10.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_es_movies_maxi_2026-10.zim"
+      ],
+      "snapshotDate": "2026-10-13",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "1aabf521-0133-cc8d-34bf-83cb83bac75a",
+      "zimName": "wikipedia_es_movies",
+      "featured": false,
+      "family": "wikipedia",
+      "domain": "literature",
+      "content": "",
+      "flavour": "maxi",
+      "subjectOf": "wikipedia_es",
+      "adds": {
+        "wikipedia_es_top": 0.948
+      },
+      "articles": 72361
+    },
+    {
+      "id": "wikipedia_es_movies_nopic",
+      "title": "Cine por Wikipedia",
+      "description": "Una selección de artículos de Wikipedia sobre películas",
+      "category": "Reference",
+      "language": "es",
+      "sizeBytes": 545529336,
+      "sha256": "e8528bc23f17387adb35a31fd649107d349386470473df6f8ace6fbaed0dc07e",
+      "urls": [
+        "https://download.kiwix.org/zim/wikipedia/wikipedia_es_movies_nopic_2026-10.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_es_movies_nopic_2026-10.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_es_movies_nopic_2026-10.zim"
+      ],
+      "snapshotDate": "2026-10-13",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "1d95169c-6a88-a8a8-9d80-724aae97baa5",
+      "zimName": "wikipedia_es_movies",
+      "featured": false,
+      "family": "wikipedia",
+      "domain": "literature",
+      "content": "",
+      "flavour": "nopic",
+      "subjectOf": "wikipedia_es",
+      "adds": {
+        "wikipedia_es_top": 0.948
+      },
+      "articles": 72361
     },
     {
       "id": "citizendium.org_en_all_maxi",
@@ -21202,100 +21202,6 @@
       "articles": 8601
     },
     {
-      "id": "wikipedia_es_computer_maxi",
-      "title": "Informática por Wikipedia",
-      "description": "Una selección de artículos de Wikipedia sobre informática",
-      "category": "Reference",
-      "language": "es",
-      "sizeBytes": 226144328,
-      "sha256": "627c7fc6c2bd716248f8904bd6b19c9ee8afb512fc683c312f5ce2985a1fa771",
-      "urls": [
-        "https://download.kiwix.org/zim/wikipedia/wikipedia_es_computer_maxi_2026-10.zim",
-        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_es_computer_maxi_2026-10.zim",
-        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_es_computer_maxi_2026-10.zim"
-      ],
-      "snapshotDate": "2026-10-15",
-      "license": "CC BY-SA 4.0",
-      "hasFulltextIndex": true,
-      "topics": [],
-      "zimUuid": "6e2d66e7-b751-8b31-881d-06aac8a7e1e2",
-      "zimName": "wikipedia_es_computer",
-      "featured": false,
-      "family": "wikipedia",
-      "domain": "technology",
-      "content": "",
-      "flavour": "maxi",
-      "vectors": {
-        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/wikipedia_es_computer_nopic_2026-10-15.gvec",
-        "sha256": "fc24b466939a76ce9f2b45338a87d6a3ea41c9caea28ab3fafc4e0d8270c4db0",
-        "sizeBytes": 24624954,
-        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
-        "dims": 256,
-        "dtype": "int8",
-        "chunkerVersion": 1
-      },
-      "subjectOf": "wikipedia_es",
-      "adds": {
-        "wikipedia_es_top": 0.901
-      },
-      "articles": 14091,
-      "timeIndex": {
-        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_computer_nopic_2026-10.gtime",
-        "sha256": "f6de4d21e0a65ae1adae80393809569ec0a65f8601df8194b3c3447a1206a6a2",
-        "sizeBytes": 446464,
-        "count": 5658,
-        "format": 1,
-        "lanesVersion": 1
-      }
-    },
-    {
-      "id": "wikipedia_es_computer_nopic",
-      "title": "Informática por Wikipedia",
-      "description": "Una selección de artículos de Wikipedia sobre informática",
-      "category": "Reference",
-      "language": "es",
-      "sizeBytes": 102728687,
-      "sha256": "8a351aec8e4ee16a2d8dc98159194cf12b9c3b5c03ba69f2f1af8daa342308ea",
-      "urls": [
-        "https://download.kiwix.org/zim/wikipedia/wikipedia_es_computer_nopic_2026-10.zim",
-        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_es_computer_nopic_2026-10.zim",
-        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_es_computer_nopic_2026-10.zim"
-      ],
-      "snapshotDate": "2026-10-15",
-      "license": "CC BY-SA 4.0",
-      "hasFulltextIndex": true,
-      "topics": [],
-      "zimUuid": "c9fceb2a-e3af-df97-b09b-95487ee84625",
-      "zimName": "wikipedia_es_computer",
-      "featured": false,
-      "family": "wikipedia",
-      "domain": "technology",
-      "content": "",
-      "flavour": "nopic",
-      "vectors": {
-        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/wikipedia_es_computer_nopic_2026-10-15.gvec",
-        "sha256": "fc24b466939a76ce9f2b45338a87d6a3ea41c9caea28ab3fafc4e0d8270c4db0",
-        "sizeBytes": 24624954,
-        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
-        "dims": 256,
-        "dtype": "int8",
-        "chunkerVersion": 1
-      },
-      "subjectOf": "wikipedia_es",
-      "adds": {
-        "wikipedia_es_top": 0.901
-      },
-      "articles": 14091,
-      "timeIndex": {
-        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_computer_nopic_2026-10.gtime",
-        "sha256": "f6de4d21e0a65ae1adae80393809569ec0a65f8601df8194b3c3447a1206a6a2",
-        "sizeBytes": 446464,
-        "count": 5658,
-        "format": 1,
-        "lanesVersion": 1
-      }
-    },
-    {
       "id": "finiki_en_all_maxi",
       "title": "Finiki",
       "description": "The Canadian financial wiki",
@@ -21466,11 +21372,6 @@
       "domain": "maps",
       "content": "",
       "flavour": "maxi",
-      "subjectOf": "wikipedia_es",
-      "adds": {
-        "wikipedia_es_top": 0.869
-      },
-      "articles": 7752,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_geography_nopic_2026-10.gtime",
         "sha256": "1dec78dadc1e6e25359190b31c55019f827790aab22cc34dd0d2e150504b63bd",
@@ -21478,7 +21379,12 @@
         "count": 1912,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_es",
+      "adds": {
+        "wikipedia_es_top": 0.869
+      },
+      "articles": 7752
     },
     {
       "id": "wikipedia_es_geography_nopic",
@@ -21504,11 +21410,6 @@
       "domain": "maps",
       "content": "",
       "flavour": "nopic",
-      "subjectOf": "wikipedia_es",
-      "adds": {
-        "wikipedia_es_top": 0.869
-      },
-      "articles": 7752,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_geography_nopic_2026-10.gtime",
         "sha256": "1dec78dadc1e6e25359190b31c55019f827790aab22cc34dd0d2e150504b63bd",
@@ -21516,7 +21417,12 @@
         "count": 1912,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_es",
+      "adds": {
+        "wikipedia_es_top": 0.869
+      },
+      "articles": 7752
     },
     {
       "id": "wikipedia_en_geography_nopic",
@@ -21542,13 +21448,6 @@
       "domain": "maps",
       "content": "",
       "flavour": "nopic",
-      "subjectOf": "wikipedia_en",
-      "adds": {
-        "wikipedia_en_100": 1.0,
-        "wikipedia_en_top": 0.991,
-        "wikipedia_en_top1m": 0.925
-      },
-      "articles": 91985,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_geography_maxi_2026-10.gtime",
         "sha256": "8d436a2c27166671c4ef75c92451337e33778bcb57c84fbc899a5d61003f2f2a",
@@ -21556,7 +21455,14 @@
         "count": 5711,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_en",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.991,
+        "wikipedia_en_top1m": 0.925
+      },
+      "articles": 91985
     },
     {
       "id": "wikipedia_en_golf_maxi",
@@ -21655,11 +21561,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "subjectOf": "wikipedia_es",
-      "adds": {
-        "wikipedia_es_top": 0.899
-      },
-      "articles": 17634,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_history_nopic_2026-10.gtime",
         "sha256": "5bdd1777e83f8a732ab66abe42d954bc45d6168b788b5464a8322805e13a9eb2",
@@ -21667,7 +21568,12 @@
         "count": 9891,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_es",
+      "adds": {
+        "wikipedia_es_top": 0.899
+      },
+      "articles": 17634
     },
     {
       "id": "wikipedia_es_history_nopic",
@@ -21702,11 +21608,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "subjectOf": "wikipedia_es",
-      "adds": {
-        "wikipedia_es_top": 0.899
-      },
-      "articles": 17634,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_history_nopic_2026-10.gtime",
         "sha256": "5bdd1777e83f8a732ab66abe42d954bc45d6168b788b5464a8322805e13a9eb2",
@@ -21714,7 +21615,12 @@
         "count": 9891,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_es",
+      "adds": {
+        "wikipedia_es_top": 0.899
+      },
+      "articles": 17634
     },
     {
       "id": "wikipedia_en_history_maxi",
@@ -21749,13 +21655,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "subjectOf": "wikipedia_en",
-      "adds": {
-        "wikipedia_en_100": 1.0,
-        "wikipedia_en_top": 0.968,
-        "wikipedia_en_top1m": 0.677
-      },
-      "articles": 48733,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_history_maxi_2026-10-12.gtime",
         "sha256": "7a40d1582b8a9e71568b43dfb10d3dc81e81a0b30fe1a11c2e2c9ca051517313",
@@ -21763,7 +21662,14 @@
         "count": 23055,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_en",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.968,
+        "wikipedia_en_top1m": 0.677
+      },
+      "articles": 48733
     },
     {
       "id": "wikipedia_en_history_nopic",
@@ -21798,13 +21704,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "subjectOf": "wikipedia_en",
-      "adds": {
-        "wikipedia_en_100": 1.0,
-        "wikipedia_en_top": 0.968,
-        "wikipedia_en_top1m": 0.677
-      },
-      "articles": 48733,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_history_maxi_2026-10-12.gtime",
         "sha256": "7a40d1582b8a9e71568b43dfb10d3dc81e81a0b30fe1a11c2e2c9ca051517313",
@@ -21812,7 +21711,14 @@
         "count": 23055,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_en",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.968,
+        "wikipedia_en_top1m": 0.677
+      },
+      "articles": 48733
     },
     {
       "id": "wikipedia_en_ice-hockey_maxi",
@@ -21879,6 +21785,100 @@
       "articles": 41982
     },
     {
+      "id": "wikipedia_es_computer_maxi",
+      "title": "Informática por Wikipedia",
+      "description": "Una selección de artículos de Wikipedia sobre informática",
+      "category": "Reference",
+      "language": "es",
+      "sizeBytes": 226144328,
+      "sha256": "627c7fc6c2bd716248f8904bd6b19c9ee8afb512fc683c312f5ce2985a1fa771",
+      "urls": [
+        "https://download.kiwix.org/zim/wikipedia/wikipedia_es_computer_maxi_2026-10.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_es_computer_maxi_2026-10.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_es_computer_maxi_2026-10.zim"
+      ],
+      "snapshotDate": "2026-10-15",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "6e2d66e7-b751-8b31-881d-06aac8a7e1e2",
+      "zimName": "wikipedia_es_computer",
+      "featured": false,
+      "family": "wikipedia",
+      "domain": "technology",
+      "content": "",
+      "flavour": "maxi",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/wikipedia_es_computer_nopic_2026-10-15.gvec",
+        "sha256": "fc24b466939a76ce9f2b45338a87d6a3ea41c9caea28ab3fafc4e0d8270c4db0",
+        "sizeBytes": 24624954,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      },
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_computer_nopic_2026-10.gtime",
+        "sha256": "f6de4d21e0a65ae1adae80393809569ec0a65f8601df8194b3c3447a1206a6a2",
+        "sizeBytes": 446464,
+        "count": 5658,
+        "format": 1,
+        "lanesVersion": 1
+      },
+      "subjectOf": "wikipedia_es",
+      "adds": {
+        "wikipedia_es_top": 0.901
+      },
+      "articles": 14091
+    },
+    {
+      "id": "wikipedia_es_computer_nopic",
+      "title": "Informática por Wikipedia",
+      "description": "Una selección de artículos de Wikipedia sobre informática",
+      "category": "Reference",
+      "language": "es",
+      "sizeBytes": 102728687,
+      "sha256": "8a351aec8e4ee16a2d8dc98159194cf12b9c3b5c03ba69f2f1af8daa342308ea",
+      "urls": [
+        "https://download.kiwix.org/zim/wikipedia/wikipedia_es_computer_nopic_2026-10.zim",
+        "https://ftpmirror.your.org/pub/kiwix/zim/wikipedia/wikipedia_es_computer_nopic_2026-10.zim",
+        "https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_es_computer_nopic_2026-10.zim"
+      ],
+      "snapshotDate": "2026-10-15",
+      "license": "CC BY-SA 4.0",
+      "hasFulltextIndex": true,
+      "topics": [],
+      "zimUuid": "c9fceb2a-e3af-df97-b09b-95487ee84625",
+      "zimName": "wikipedia_es_computer",
+      "featured": false,
+      "family": "wikipedia",
+      "domain": "technology",
+      "content": "",
+      "flavour": "nopic",
+      "vectors": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/wikipedia_es_computer_nopic_2026-10-15.gvec",
+        "sha256": "fc24b466939a76ce9f2b45338a87d6a3ea41c9caea28ab3fafc4e0d8270c4db0",
+        "sizeBytes": 24624954,
+        "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+        "dims": 256,
+        "dtype": "int8",
+        "chunkerVersion": 1
+      },
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_computer_nopic_2026-10.gtime",
+        "sha256": "f6de4d21e0a65ae1adae80393809569ec0a65f8601df8194b3c3447a1206a6a2",
+        "sizeBytes": 446464,
+        "count": 5658,
+        "format": 1,
+        "lanesVersion": 1
+      },
+      "subjectOf": "wikipedia_es",
+      "adds": {
+        "wikipedia_es_top": 0.901
+      },
+      "articles": 14091
+    },
+    {
       "id": "wikipedia_es_physics_maxi",
       "title": "La física de Wikipedia",
       "description": "Una selección de artículos de Wikipedia sobre física",
@@ -21911,11 +21911,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "subjectOf": "wikipedia_es",
-      "adds": {
-        "wikipedia_es_top": 0.844
-      },
-      "articles": 7848,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_physics_nopic_2026-10.gtime",
         "sha256": "80d9642234dcb201d18c748049fbd6ef62b686dca1c4b127201a2e88b988a80a",
@@ -21923,7 +21918,12 @@
         "count": 2554,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_es",
+      "adds": {
+        "wikipedia_es_top": 0.844
+      },
+      "articles": 7848
     },
     {
       "id": "wikipedia_es_physics_mini",
@@ -21949,11 +21949,6 @@
       "domain": "science",
       "content": "",
       "flavour": "mini",
-      "subjectOf": "wikipedia_es",
-      "adds": {
-        "wikipedia_es_top": 0.844
-      },
-      "articles": 7848,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_physics_nopic_2026-10.gtime",
         "sha256": "80d9642234dcb201d18c748049fbd6ef62b686dca1c4b127201a2e88b988a80a",
@@ -21961,7 +21956,12 @@
         "count": 2554,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_es",
+      "adds": {
+        "wikipedia_es_top": 0.844
+      },
+      "articles": 7848
     },
     {
       "id": "wikipedia_es_physics_nopic",
@@ -21996,11 +21996,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "subjectOf": "wikipedia_es",
-      "adds": {
-        "wikipedia_es_top": 0.844
-      },
-      "articles": 7848,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_physics_nopic_2026-10.gtime",
         "sha256": "80d9642234dcb201d18c748049fbd6ef62b686dca1c4b127201a2e88b988a80a",
@@ -22008,7 +22003,12 @@
         "count": 2554,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_es",
+      "adds": {
+        "wikipedia_es_top": 0.844
+      },
+      "articles": 7848
     },
     {
       "id": "lgbtqia.wiki_en_all_maxi",
@@ -22057,6 +22057,14 @@
       "domain": "reference",
       "content": "",
       "flavour": "mini",
+      "timeIndex": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_top_nopic_2026-10.gtime",
+        "sha256": "a00727c5f4312544346ae92faefafc7dc34c980efe0de0854fa0ac64a7a6cf1b",
+        "sizeBytes": 2236416,
+        "count": 24838,
+        "format": 1,
+        "lanesVersion": 1
+      },
       "set": "wikipedia_es",
       "setRank": 1,
       "setLabel": "Los 50.000 mejores artículos",
@@ -22070,14 +22078,6 @@
           "setTitle": "Wikipedia in Spanish",
           "setDescription": "The free encyclopedia in Spanish, from the best 50,000 articles to all of it."
         }
-      },
-      "timeIndex": {
-        "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_top_nopic_2026-10.gtime",
-        "sha256": "a00727c5f4312544346ae92faefafc7dc34c980efe0de0854fa0ac64a7a6cf1b",
-        "sizeBytes": 2236416,
-        "count": 24838,
-        "format": 1,
-        "lanesVersion": 1
       }
     },
     {
@@ -22113,11 +22113,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "subjectOf": "wikipedia_es",
-      "adds": {
-        "wikipedia_es_top": 0.885
-      },
-      "articles": 7783,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_mathematics_nopic_2026-10.gtime",
         "sha256": "d491f119754a1613b53cdc28f5f5b8d0e06681f051c8357ba3947e3a26247225",
@@ -22125,7 +22120,12 @@
         "count": 1570,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_es",
+      "adds": {
+        "wikipedia_es_top": 0.885
+      },
+      "articles": 7783
     },
     {
       "id": "wikipedia_es_mathematics_mini",
@@ -22151,11 +22151,6 @@
       "domain": "science",
       "content": "",
       "flavour": "mini",
-      "subjectOf": "wikipedia_es",
-      "adds": {
-        "wikipedia_es_top": 0.885
-      },
-      "articles": 7783,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_mathematics_nopic_2026-10.gtime",
         "sha256": "d491f119754a1613b53cdc28f5f5b8d0e06681f051c8357ba3947e3a26247225",
@@ -22163,7 +22158,12 @@
         "count": 1570,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_es",
+      "adds": {
+        "wikipedia_es_top": 0.885
+      },
+      "articles": 7783
     },
     {
       "id": "wikipedia_es_mathematics_nopic",
@@ -22198,11 +22198,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "subjectOf": "wikipedia_es",
-      "adds": {
-        "wikipedia_es_top": 0.885
-      },
-      "articles": 7783,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_mathematics_nopic_2026-10.gtime",
         "sha256": "d491f119754a1613b53cdc28f5f5b8d0e06681f051c8357ba3947e3a26247225",
@@ -22210,7 +22205,12 @@
         "count": 1570,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_es",
+      "adds": {
+        "wikipedia_es_top": 0.885
+      },
+      "articles": 7783
     },
     {
       "id": "wikipedia_en_mathematics_mini",
@@ -22277,13 +22277,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "subjectOf": "wikipedia_en",
-      "adds": {
-        "wikipedia_en_100": 1.0,
-        "wikipedia_en_top": 0.96,
-        "wikipedia_en_top1m": 0.669
-      },
-      "articles": 23326,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_mathematics_maxi_2026-09-15.gtime",
         "sha256": "6a8a9eef19e6e48036619efd4fbf447cac077f94befcb7b1151a469089ef10ba",
@@ -22291,7 +22284,14 @@
         "count": 5091,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_en",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.96,
+        "wikipedia_en_top1m": 0.669
+      },
+      "articles": 23326
     },
     {
       "id": "milneopentextbooks.org_en_all",
@@ -22500,13 +22500,6 @@
       "domain": "science",
       "content": "",
       "flavour": "mini",
-      "subjectOf": "wikipedia_en",
-      "adds": {
-        "wikipedia_en_100": 1.0,
-        "wikipedia_en_top": 0.954,
-        "wikipedia_en_top1m": 0.627
-      },
-      "articles": 21783,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_physics_maxi_2026-10-14.gtime",
         "sha256": "64811849fb8b2710b7477b686f8f96ba952e94ef7d42b00c40b100e74e44f184",
@@ -22514,7 +22507,14 @@
         "count": 7963,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_en",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.954,
+        "wikipedia_en_top1m": 0.627
+      },
+      "articles": 21783
     },
     {
       "id": "wikipedia_en_physics_nopic",
@@ -22549,13 +22549,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "subjectOf": "wikipedia_en",
-      "adds": {
-        "wikipedia_en_100": 1.0,
-        "wikipedia_en_top": 0.954,
-        "wikipedia_en_top1m": 0.627
-      },
-      "articles": 21783,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_physics_maxi_2026-10-14.gtime",
         "sha256": "64811849fb8b2710b7477b686f8f96ba952e94ef7d42b00c40b100e74e44f184",
@@ -22563,7 +22556,14 @@
         "count": 7963,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_en",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.954,
+        "wikipedia_en_top1m": 0.627
+      },
+      "articles": 21783
     },
     {
       "id": "psiram_en_all_maxi",
@@ -22621,11 +22621,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "subjectOf": "wikipedia_es",
-      "adds": {
-        "wikipedia_es_top": 0.805
-      },
-      "articles": 3700,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_chemistry_nopic_2026-10.gtime",
         "sha256": "50a723f038ca9b65de5949b8d17fbf7a7362704daf678958d55ddd21b5330fc1",
@@ -22633,7 +22628,12 @@
         "count": 136,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_es",
+      "adds": {
+        "wikipedia_es_top": 0.805
+      },
+      "articles": 3700
     },
     {
       "id": "wikipedia_es_chemistry_mini",
@@ -22659,11 +22659,6 @@
       "domain": "science",
       "content": "",
       "flavour": "mini",
-      "subjectOf": "wikipedia_es",
-      "adds": {
-        "wikipedia_es_top": 0.805
-      },
-      "articles": 3700,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_chemistry_nopic_2026-10.gtime",
         "sha256": "50a723f038ca9b65de5949b8d17fbf7a7362704daf678958d55ddd21b5330fc1",
@@ -22671,7 +22666,12 @@
         "count": 136,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_es",
+      "adds": {
+        "wikipedia_es_top": 0.805
+      },
+      "articles": 3700
     },
     {
       "id": "wikipedia_es_chemistry_nopic",
@@ -22706,11 +22706,6 @@
         "dtype": "int8",
         "chunkerVersion": 1
       },
-      "subjectOf": "wikipedia_es",
-      "adds": {
-        "wikipedia_es_top": 0.805
-      },
-      "articles": 3700,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_es_chemistry_nopic_2026-10.gtime",
         "sha256": "50a723f038ca9b65de5949b8d17fbf7a7362704daf678958d55ddd21b5330fc1",
@@ -22718,7 +22713,12 @@
         "count": 136,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_es",
+      "adds": {
+        "wikipedia_es_top": 0.805
+      },
+      "articles": 3700
     },
     {
       "id": "rationalwiki_en_all_maxi",
@@ -23176,13 +23176,6 @@
       "domain": "medicine",
       "content": "",
       "flavour": "mini",
-      "subjectOf": "wikipedia_en",
-      "adds": {
-        "wikipedia_en_100": 1.0,
-        "wikipedia_en_top": 0.955,
-        "wikipedia_en_top1m": 0.656
-      },
-      "articles": 72901,
       "timeIndex": {
         "url": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/wikipedia_en_medicine_nopic_2026-10-10.gtime",
         "sha256": "5751536e1101c1a104d91497157ea3a357284dac7caeb88a2f14e5536036aa9b",
@@ -23190,7 +23183,14 @@
         "count": 5197,
         "format": 1,
         "lanesVersion": 1
-      }
+      },
+      "subjectOf": "wikipedia_en",
+      "adds": {
+        "wikipedia_en_100": 1.0,
+        "wikipedia_en_top": 0.955,
+        "wikipedia_en_top1m": 0.656
+      },
+      "articles": 72901
     },
     {
       "id": "wikipedia_en_all_maxi",

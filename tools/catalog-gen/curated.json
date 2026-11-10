@@ -14,6 +14,9 @@
       },
       "wikipedia_es_movies": {
         "title": "Cine por Wikipedia"
+      },
+      "wikipedia_es_all": {
+        "description": "Versión sin conexión de Wikipedia en español"
       }
     }
   },
