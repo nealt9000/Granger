@@ -7,6 +7,7 @@ import app.granger.core.library.TimeKind
 import app.granger.core.library.TimeMark
 import com.google.common.truth.Truth.assertThat
 import java.io.File
+import kotlin.math.abs
 import kotlin.random.Random
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -36,12 +37,15 @@ class GameModelTest {
             listOf(501L, "List_of_popes", 0, 1300, null, laneBits(Lane.PEOPLE), 999),
         )
 
-    private fun TestScope.model(file: File? = gtimeFile(tmp.root, "top", rows), store: GameStore = GameStore.Memory(), alternates: Boolean = true, start: GameKind = GameKind.ORDER): GameModel =
+    /** People every 25 years from 1000 to 1900, each living 50: neighbours overlap, the next but one don't. */
+    private val people = (0 until 37).map { i -> listOf(1000L + i, "Person_" + name(i), 2, 1000 + i * 25, 1050 + i * 25, laneBits(Lane.PEOPLE), 100) }
+
+    private fun TestScope.model(file: File? = gtimeFile(tmp.root, "top", rows), store: GameStore = GameStore.Memory(), mixed: Boolean = true, start: GameKind? = GameKind.ORDER): GameModel =
         GameModel(
             scope = this,
             indexes = { TimeIndexes(listOfNotNull(file?.let { TimeIndex.open(it, "top") })) },
             picture = { _, path -> if (path == name(0)) "/thumbs/a.jpg" else null },
-            store = store, alternates = alternates, start = start,
+            store = store, mixed = mixed, start = start,
             io = StandardTestDispatcher(testScheduler), random = Random(7), now = 2026,
         )
 
@@ -76,13 +80,12 @@ class GameModelTest {
 
     @Test fun aWrongAnswerWidensTheGapAgainButNeverBelowTheFirstLevel() = runTest {
         val store = GameStore.Memory(level = 1)
-        val m = model(store = store)
-        m.ensureStarted(); advanceUntilIdle()
+        val m = model(store = store, mixed = false)
+        m.startRun(GameKind.ORDER); advanceUntilIdle()
         val r = m.ui.value.round as Round.Order
         m.pick(r.answer.last().qid)
         assertThat((m.ui.value.round as Round.Order).right).isFalse()
         assertThat(store.level).isEqualTo(0)
-        m.next(); advanceUntilIdle()   // a Guess round on Home
         m.next(); advanceUntilIdle()
         val again = m.ui.value.round as Round.Order
         m.pick(again.answer.last().qid)
@@ -105,20 +108,151 @@ class GameModelTest {
         assertThat(done.right).isTrue()
     }
 
-    @Test fun homeAlternatesGamesAndTheGamesScreenKeepsToOne() = runTest {
-        val home = model()
+    @Test fun homeDealsAnotherGameEachRoundAndTheGamesScreenWaitsForAChoice() = runTest {
+        val home = model(file = gtimeFile(tmp.newFolder(), "top", rows + people), start = null)
         home.ensureStarted(); advanceUntilIdle()
-        home.next(); advanceUntilIdle()
-        assertThat(home.ui.value.round).isInstanceOf(Round.Guess::class.java)
-        home.next(); advanceUntilIdle()
-        assertThat(home.ui.value.round).isInstanceOf(Round.Order::class.java)
+        val kinds = mutableListOf(home.ui.value.round!!.kind)
+        repeat(15) { home.next(); advanceUntilIdle(); kinds += home.ui.value.round!!.kind }
+        assertThat(kinds.zipWithNext().none { (a, b) -> a == b }).isTrue()
+        assertThat(kinds.toSet().size).isAtLeast(5)
 
-        val screen = model(file = gtimeFile(tmp.newFolder(), "top", rows), alternates = false, start = GameKind.GUESS)
+        val screen = model(mixed = false, start = null)
         screen.ensureStarted(); advanceUntilIdle()
+        assertThat(screen.ui.value.round).isNull()
+        assertThat(screen.ui.value.loading).isFalse()
+        screen.startRun(GameKind.GUESS); advanceUntilIdle()
+        assertThat(screen.ui.value.round).isInstanceOf(Round.Guess::class.java)
         screen.next(); advanceUntilIdle()
         assertThat(screen.ui.value.round).isInstanceOf(Round.Guess::class.java)
-        screen.choose(GameKind.ORDER); advanceUntilIdle()
-        assertThat(screen.ui.value.round).isInstanceOf(Round.Order::class.java)
+    }
+
+    @Test fun aGameWithTooFewArticlesGivesWayToAnotherOnHome() = runTest {
+        val m = model(start = GameKind.OVERLAP)   // no lifetimes in these rows
+        m.ensureStarted(); advanceUntilIdle()
+        assertThat(m.ui.value.round).isNotNull()
+        assertThat(m.ui.value.round!!.kind).isNotEqualTo(GameKind.OVERLAP)
+        val run = model(file = gtimeFile(tmp.newFolder(), "top", rows), mixed = false)
+        run.startRun(GameKind.OVERLAP); advanceUntilIdle()
+        assertThat(run.ui.value.round).isNull()   // a run keeps to its game: "not enough" rather than another game
+    }
+
+    @Test fun beforeOrAfterPlacesOneMarkAgainstANearbyOne() = runTest {
+        val m = model(start = GameKind.BEFORE_AFTER)
+        m.ensureStarted(); advanceUntilIdle()
+        val r = m.ui.value.round as Round.BeforeAfter
+        assertThat(r.gap).isAtLeast(2)
+        assertThat(r.revealed).isFalse()
+        m.say(r.before)
+        val done = m.ui.value.round as Round.BeforeAfter
+        assertThat(done.revealed).isTrue()
+        assertThat(done.right).isTrue()
+        assertThat(m.ui.value.played).isEqualTo(1)
+        m.say(!r.before)   // answered: no change
+        assertThat((m.ui.value.round as Round.BeforeAfter).right).isTrue()
+    }
+
+    @Test fun aliveAtTheSameTimeAsksAboutTwoLifetimesSometimesYesSometimesNo() = runTest {
+        val m = model(file = gtimeFile(tmp.newFolder(), "top", rows + people), mixed = false)
+        m.startRun(GameKind.OVERLAP); advanceUntilIdle()
+        val answers = mutableSetOf<Boolean>()
+        repeat(GameModel.RUN) {
+            val r = m.ui.value.round as Round.Overlap
+            assertThat(listOf(r.a.kind, r.b.kind)).containsExactly(TimeKind.LIFE, TimeKind.LIFE)
+            answers += r.overlaps
+            m.say(r.overlaps)
+            assertThat((m.ui.value.round as Round.Overlap).right).isTrue()
+            m.next(); advanceUntilIdle()
+        }
+        assertThat(answers).containsExactly(true, false)
+        assertThat(m.ui.value.run!!.right).isEqualTo(GameModel.RUN)
+    }
+
+    @Test fun oddOneOutHasThreeCloseTogetherAndOneFarOff() = runTest {
+        val m = model(start = GameKind.ODD_ONE_OUT)
+        m.ensureStarted(); advanceUntilIdle()
+        val r = m.ui.value.round as Round.OddOneOut
+        assertThat(r.marks).hasSize(4)
+        val odd = r.marks.single { it.qid == r.odd }
+        val rest = r.marks - odd
+        val spread = rest.maxOf { it.y0 } - rest.minOf { it.y0 }
+        assertThat(rest.minOf { abs(it.y0 - odd.y0) }).isGreaterThan(spread)
+        m.pick(rest.first().qid)
+        val done = m.ui.value.round as Round.OddOneOut
+        assertThat(done.right).isFalse()
+        m.pick(odd.qid)   // answered: no change
+        assertThat((m.ui.value.round as Round.OddOneOut).picked).isEqualTo(rest.first().qid)
+    }
+
+    @Test fun whichCenturyOffersFourInARowWithTheAnswerAndNoneAfterThisOne() = runTest {
+        val m = model(start = GameKind.CENTURY)
+        m.ensureStarted(); advanceUntilIdle()
+        val r = m.ui.value.round as Round.Century
+        assertThat(r.choices).hasSize(4)
+        assertThat(r.choices).contains(r.answer)
+        assertThat(r.choices.zipWithNext().all { (a, b) -> b == a + 1 }).isTrue()
+        assertThat(r.choices.max()).isAtMost(centuryOf(2026))
+        m.pickCentury(r.answer)
+        assertThat((m.ui.value.round as Round.Century).right).isTrue()
+    }
+
+    @Test fun centuriesCountFromOneEitherSideOfYearOne() {
+        assertThat(centuryOf(1)).isEqualTo(0)
+        assertThat(centuryOf(100)).isEqualTo(0)
+        assertThat(centuryOf(101)).isEqualTo(1)
+        assertThat(centuryOf(2026)).isEqualTo(20)
+        assertThat(centuryOf(0)).isEqualTo(-1)      // 1 BC
+        assertThat(centuryOf(-99)).isEqualTo(-1)    // 100 BC
+        assertThat(centuryOf(-100)).isEqualTo(-2)   // 101 BC
+        val en = CenturyNames("%1${'$'}s century", "%1${'$'}s century BC", roman = false, ordinals = listOf("%1${'$'}dst", "%1${'$'}dnd", "%1${'$'}drd", "%1${'$'}dth"))
+        assertThat(listOf(1, 2, 3, 4, 11, 12, 13, 21, 22).map(en::number)).containsExactly("1st", "2nd", "3rd", "4th", "11th", "12th", "13th", "21st", "22nd").inOrder()
+        assertThat(en.of(18)).isEqualTo("19th century")
+        assertThat(en.of(-5)).isEqualTo("5th century BC")
+        val es = CenturyNames("Siglo %1${'$'}s", "Siglo %1${'$'}s a. C.", roman = true, ordinals = List(4) { "" })
+        assertThat(es.of(18)).isEqualTo("Siglo XIX")
+        assertThat(es.of(-4)).isEqualTo("Siglo IV a. C.")
+    }
+
+    @Test fun aRunIsTenRoundsThenTheScoreAndTheBestIsKept() = runTest {
+        val store = GameStore.Memory()
+        val m = model(store = store, mixed = false)
+        m.startRun(GameKind.BEFORE_AFTER); advanceUntilIdle()
+        repeat(GameModel.RUN) { i ->
+            assertThat(m.ui.value.run!!.number).isEqualTo(i + 1)
+            val r = m.ui.value.round as Round.BeforeAfter
+            m.say(if (i < 7) r.before else !r.before)
+            m.next(); advanceUntilIdle()
+        }
+        val run = m.ui.value.run!!
+        assertThat(run.finished).isTrue()
+        assertThat(run.right).isEqualTo(7)
+        assertThat(run.newBest).isTrue()
+        assertThat(store.best(GameKind.BEFORE_AFTER)).isEqualTo(7)
+        assertThat(m.ui.value.best).containsExactly(GameKind.BEFORE_AFTER, 7)
+        m.startRun(GameKind.BEFORE_AFTER); advanceUntilIdle()
+        assertThat(m.ui.value.run).isEqualTo(GameRun(GameKind.BEFORE_AFTER, best = 7))
+        m.endRun()
+        assertThat(m.ui.value.run).isNull()
+        assertThat(m.ui.value.round).isNull()
+    }
+
+    @Test fun continueCarriesHomesUnansweredRoundIntoARunAndHomeDealsAnother() = runTest {
+        val home = model()
+        home.ensureStarted(); advanceUntilIdle()
+        val round = home.ui.value.round as Round.Order
+        val screen = model(file = gtimeFile(tmp.newFolder(), "top", rows), mixed = false)
+        screen.startRun(GameKind.ORDER, round, mapOf(1L to "/thumbs/x.jpg")); advanceUntilIdle()
+        assertThat(screen.ui.value.round).isSameInstanceAs(round)
+        assertThat(screen.ui.value.pictures).containsExactly(1L, "/thumbs/x.jpg")
+        assertThat(screen.ui.value.run!!.number).isEqualTo(1)
+        home.replace(); advanceUntilIdle()
+        assertThat(home.ui.value.round!!.kind).isNotEqualTo(GameKind.ORDER)
+
+        // An answered round isn't carried: the run starts with a fresh one of the same game.
+        screen.pick(round.answer.first().qid)
+        val answered = screen.ui.value.round!!
+        screen.startRun(GameKind.ORDER, answered); advanceUntilIdle()
+        assertThat(screen.ui.value.round).isNotSameInstanceAs(answered)
+        assertThat(screen.ui.value.round!!.revealed).isFalse()
     }
 
     @Test fun guessMovesNudgesStaysInHistoryAndRevealsHowFarOff() = runTest {
@@ -144,7 +278,7 @@ class GameModelTest {
         val m = model(file = gtimeFile(tmp.newFolder(), "top", known))
         m.ensureStarted(); advanceUntilIdle()
         repeat(6) {
-            val marks = when (val r = m.ui.value.round) { is Round.Order -> r.marks; is Round.Guess -> listOf(r.mark); null -> emptyList() }
+            val marks = m.ui.value.round!!.marks
             assertThat(marks.map { it.rank }.toSet()).containsExactly(200)
             m.next(); advanceUntilIdle()
         }

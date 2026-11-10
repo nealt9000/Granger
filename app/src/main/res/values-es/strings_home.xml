@@ -94,7 +94,7 @@
     <string name="home_lane_people">Personas</string>
     <!-- Juegos (Plan H5c) -->
     <string name="home_play">Jugar</string>
-    <string name="home_play_more">Más rondas</string>
+    <string name="home_play_more">Más juegos</string>
     <string name="games_title">Juegos</string>
     <string name="game_order">¿Qué fue primero?</string>
     <string name="game_guess">Adivina el año</string>
@@ -141,4 +141,73 @@
     </plurals>
     <string name="game_none">Todavía no hay suficientes artículos con fecha para una ronda.</string>
     <string name="game_loading">Preparando una ronda…</string>
+    <!-- Más juegos (Plan HY) -->
+    <string name="game_wrong">Casi</string>
+    <string name="game_order_about">Ordena dos o tres, del más antiguo al más reciente.</string>
+    <string name="game_guess_about">Desliza hasta el año en que ocurrió.</string>
+    <string name="game_before_after">¿Antes o después?</string>
+    <string name="game_before_after_about">Sitúa uno respecto al año de otro.</string>
+    <string name="game_before_after_prompt">¿Fue antes o después de %1$s (%2$s)?</string>
+    <string name="game_before">Antes</string>
+    <string name="game_after">Después</string>
+    <plurals name="game_years_before">
+        <item quantity="one">%1$d año antes</item>
+        <item quantity="many">%1$d años antes</item>
+        <item quantity="other">%1$d años antes</item>
+    </plurals>
+    <plurals name="game_years_after">
+        <item quantity="one">%1$d año después</item>
+        <item quantity="many">%1$d años después</item>
+        <item quantity="other">%1$d años después</item>
+    </plurals>
+    <string name="game_overlap">¿Vivieron a la vez?</string>
+    <string name="game_overlap_about">¿Pudieron conocerse estas dos personas?</string>
+    <string name="game_overlap_prompt">¿Vivieron estas dos personas al mismo tiempo?</string>
+    <string name="game_yes">Sí</string>
+    <string name="game_no">No</string>
+    <plurals name="game_overlap_shared">
+        <item quantity="one">Coincidieron %1$d año</item>
+        <item quantity="many">Coincidieron %1$d años</item>
+        <item quantity="other">Coincidieron %1$d años</item>
+    </plurals>
+    <string name="game_odd">El intruso</string>
+    <string name="game_odd_about">Tres son de la misma época. Encuentra el que no.</string>
+    <string name="game_odd_prompt">Tres de estos son de la misma época. ¿Cuál no?</string>
+    <string name="game_odd_choose">Elegir como el intruso</string>
+    <string name="game_odd_was">El intruso: %1$s, %2$s</string>
+    <string name="game_odd_state">El intruso</string>
+    <string name="game_century_name">¿Qué siglo?</string>
+    <string name="game_century_about">Elige el siglo entre cuatro.</string>
+    <string name="game_century_prompt_point">¿En qué siglo ocurrió?</string>
+    <string name="game_century_prompt_life">¿En qué siglo nació esta persona?</string>
+    <string name="game_century_prompt_span">¿En qué siglo empezó?</string>
+    <string name="game_century">Siglo %1$s</string>
+    <string name="game_century_bc">Siglo %1$s a. C.</string>
+    <string name="game_century_numerals">roman</string>
+    <string name="game_ordinal_st">%1$d.º</string>
+    <string name="game_ordinal_nd">%1$d.º</string>
+    <string name="game_ordinal_rd">%1$d.º</string>
+    <string name="game_ordinal_th">%1$d.º</string>
+    <string name="games_continue">Continuar</string>
+    <string name="games_continue_carry">Termina la ronda de Inicio y sigue hasta %1$d.</string>
+    <string name="games_continue_fresh">Juega una serie de %1$d rondas.</string>
+    <string name="games_continue_button">Continuar</string>
+    <string name="games_all">Todos los juegos</string>
+    <string name="games_best">Mejor: %1$d de %2$d</string>
+    <string name="games_round_of">Ronda %1$d de %2$d</string>
+    <plurals name="games_right">
+        <item quantity="one">%1$d acierto</item>
+        <item quantity="many">%1$d aciertos</item>
+        <item quantity="other">%1$d aciertos</item>
+    </plurals>
+    <string name="games_see_score">Ver resultado</string>
+    <string name="games_score">%1$d de %2$d</string>
+    <string name="games_new_best">¡Nuevo récord!</string>
+    <string name="games_again">Jugar otra vez</string>
+    <!-- Organizar Inicio (Plan HY) -->
+    <string name="home_arrange">Organizar Inicio</string>
+    <string name="home_arrange_reset">Restablecer</string>
+    <string name="home_arrange_hint">Arrastra una sección por su asa para moverla. Desactívala para ocultarla de Inicio.</string>
+    <string name="home_arrange_shown">Visible en Inicio</string>
+    <string name="home_arrange_hidden">Oculta</string>
 </resources>

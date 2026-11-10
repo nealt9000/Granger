@@ -231,10 +231,17 @@ class HomeViewModelTest {
         testScheduler.advanceUntilIdle()
         assertThat(homeFeeds.list.value.map { it.scope }).containsExactly("pack:wikipedia_en_all", "library").inOrder()
         assertThat(vm.ui.value.feeds.map { it.title.text() }).containsExactly("cats · Wikipedia", "Random from the library").inOrder()
-        vm.moveFeed(homeFeeds.list.value.last().id, up = true)
+        // Moving is Home's order now (Plan HY), kept in prefs; the feeds' own order stays as it was.
+        val (search, library) = homeFeeds.list.value.map { it.id }
+        vm.moveFeed(library, up = true)
         testScheduler.advanceUntilIdle()
-        assertThat(homeFeeds.list.value.map { it.scope }).containsExactly("library", "pack:wikipedia_en_all").inOrder()
-        vm.removeFeed(homeFeeds.list.value.first().id)
+        assertThat(vm.ui.value.layout.visible(listOf(search, library)).filterIsInstance<HomePart.Feed>().map { it.id }).containsExactly(library, search).inOrder()
+        assertThat(prefs.layout).isEqualTo(vm.ui.value.layout)
+        vm.moveFeed(library, up = true)   // above the feeds: past Wander
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.layout.visible(listOf(search, library)).map { it.token }.indexOf("feed:$library"))
+            .isLessThan(vm.ui.value.layout.visible(listOf(search, library)).map { it.token }.indexOf("wander"))
+        vm.removeFeed(library)
         testScheduler.advanceUntilIdle()
         assertThat(vm.ui.value.feeds.map { it.feed.scope }).containsExactly("pack:wikipedia_en_all")
     }

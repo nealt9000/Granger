@@ -63,6 +63,8 @@ data class HomeUi(
     val downloads: DownloadsCard? = null,
     /** A bigger slice is in: the offers to remove the smaller (Plan WF Decision 5). */
     val tidy: List<app.granger.sources.TidyOffer> = emptyList(),
+    /** Home's order and what's hidden (Plan HY). */
+    val layout: HomeLayout = HomeLayout(),
 )
 
 /** Home's one card for downloads: the round while anything waits or runs, else what stopped. */
@@ -92,6 +94,9 @@ interface HomePrefs {
 
     /** The stopped files whose card was closed (`itemId@hash`); a new failure brings the card back (Plan DL Decision 7). */
     var dismissedFailures: Set<String>
+
+    /** Home's order and hidden sections, as the user arranged them (Plan HY). */
+    var layout: HomeLayout
 }
 
 /**
@@ -208,10 +213,12 @@ class HomeViewModel(
         app.granger.sources.SetTidy.offers(c.catalog, records, packs, keys)
     }.flowOn(io)
 
-    val ui: StateFlow<HomeUi> = combine(strip, continuing, feedRows, snapshot, combine(downloadsCard, tidyOffers, ::Pair)) { report, cards, rows, snap, (card, tidy) ->
+    private val layout = MutableStateFlow(prefs.layout)
+
+    val ui: StateFlow<HomeUi> = combine(strip, continuing, feedRows, snapshot, combine(downloadsCard, tidyOffers, layout, ::Triple)) { report, cards, rows, snap, (card, tidy, order) ->
         HomeUi(
             strip = report, continueCards = cards, feeds = rows.filter { it.drawn?.cards?.isEmpty() != true },
-            scopeChoices = scopeChoices(snap), downloads = card, tidy = tidy,
+            scopeChoices = scopeChoices(snap), downloads = card, tidy = tidy, layout = order,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUi())
 
@@ -276,8 +283,15 @@ class HomeViewModel(
         viewModelScope.launch { homeFeeds.remove(id) }
     }
 
+    /** Moves a feed one place up or down among everything Home shows (Plan HY: feeds and sections share one order). */
     fun moveFeed(id: Long, up: Boolean) {
-        viewModelScope.launch { homeFeeds.move(id, up) }
+        arrange(layout.value.move("feed:$id", up, ui.value.feeds.map { it.feed.id }))
+    }
+
+    /** Saves Home's order and hidden sections from Arrange. */
+    fun arrange(arranged: HomeLayout) {
+        prefs.layout = arranged
+        layout.value = arranged
     }
 
     /** The first-run feeds (Decision 4), once; a Quotes feed sits dormant until a Wikiquote pack is installed. */
@@ -381,8 +395,17 @@ class SharedHomePrefs(private val prefs: android.content.SharedPreferences) : Ho
         get() = prefs.getStringSet(KEY_DISMISSED, null).orEmpty().toSet()
         set(value) = prefs.edit().putStringSet(KEY_DISMISSED, value).apply()
 
+    override var layout: HomeLayout
+        get() = HomeLayout.decode(prefs.getString(KEY_ORDER, null), prefs.getStringSet(KEY_HIDDEN, null))
+        set(value) {
+            val (order, hidden) = HomeLayout.encode(value)
+            prefs.edit().putString(KEY_ORDER, order).putStringSet(KEY_HIDDEN, hidden).apply()
+        }
+
     private companion object {
         const val KEY_SEEDED = "seeded"
         const val KEY_DISMISSED = "dismissedFailures"
+        const val KEY_ORDER = "layoutOrder"
+        const val KEY_HIDDEN = "layoutHidden"
     }
 }

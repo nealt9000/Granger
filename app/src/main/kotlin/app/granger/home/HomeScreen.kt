@@ -25,11 +25,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DropdownMenu
@@ -44,6 +46,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -132,6 +135,7 @@ fun HomeScreen(
         ui, onReadiness, onOpenTab, onPlay, onOpenCard, actions, onOpenDownloads, cardActions, crashNotice,
         wander = wander, wanderActions = wanderActions, timeline = timeline, timelineActions = timelineActions,
         onOpenTimeline = onOpenTimeline, game = game, gameActions = gameActions, onOpenGames = onOpenGames,
+        arrangeActions = remember(viewModel) { ArrangeActions(viewModel::arrange) },
     )
 }
 
@@ -163,17 +167,53 @@ fun HomeContent(
     game: GameUi? = null,
     gameActions: GameActions = GameActions(),
     onOpenGames: () -> Unit = {},
+    arrangeActions: ArrangeActions = ArrangeActions(),
 ) {
     var adding by rememberSaveable { mutableStateOf(false) }
+    var arranging by rememberSaveable { mutableStateOf(false) }
+    val feedIds = ui.feeds.map { it.feed.id }
+    val parts = ui.layout.visible(feedIds)
+    val openMark: (app.granger.core.library.TimeMark) -> Unit = { mark -> onOpenCard(Card(mark.title, "", CardTarget.Article(mark.packId, mark.path))) }
+    if (arranging) {
+        ArrangeHome(
+            parts = ui.layout.parts(feedIds),
+            hidden = ui.layout.hidden,
+            label = { part -> partLabel(part, ui.feeds) },
+            onDone = { arranged ->
+                arrangeActions.onArrange(arranged)
+                arranging = false
+            },
+            defaults = HomeLayout().parts(feedIds),
+            onCancel = { arranging = false },
+        )
+        return
+    }
+    val listState = rememberLazyListState()
+    // Sections arrive at different times (Continue after the timeline, a downloads card later still). Until the user
+    // scrolls, Home stays at its top, so a section landing above doesn't push the first one off screen (Neal, 2026-11-10:
+    // Home opened on the timeline with Continue just above it).
+    var touched by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(listState) {
+        listState.interactionSource.interactions.collect { if (it is androidx.compose.foundation.interaction.DragInteraction.Start) touched = true }
+    }
+    val keys = listOfNotNull(crashNotice?.let { "crash" }, ui.downloads?.let { "downloads" }) + ui.tidy.map { it.key } + parts.map { it.token }
+    LaunchedEffect(keys) {
+        if (!touched && (listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 0)) listState.scrollToItem(0)
+    }
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.home_title)) },
-                actions = { IconButton(onClick = { adding = true }) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.home_add_feed)) } },
+                actions = {
+                    IconButton(onClick = { arranging = true }, modifier = Modifier.testTag("home-arrange")) {
+                        Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.home_arrange))
+                    }
+                    IconButton(onClick = { adding = true }) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.home_add_feed)) }
+                },
             )
         },
     ) { padding ->
-        LazyColumn(Modifier.padding(padding).fillMaxSize().testTag("home-list")) {
+        LazyColumn(Modifier.padding(padding).fillMaxSize().testTag("home-list"), state = listState) {
             if (adding) {
                 item(key = "add-feed") {
                     AddFeedPanel(
@@ -186,9 +226,8 @@ fun HomeContent(
                     )
                 }
             }
-            // Home's order (Neal, 2026-11-08, replacing spec §9.2): what needs acting on, then Continue, the likeliest reason
-            // to open the app; then the Timeline, a round of Play between it and Wander so the two drag canvases never meet;
-            // the feeds; and Readiness last, a set-up check that's also on the rail.
+            // What needs acting on stays at the top; everything else comes in the order the user arranged (Plan HY),
+            // by default Continue, Timeline, Play, Wander, the feeds and Readiness (Neal, 2026-11-08).
             crashNotice?.let { notice -> item(key = "crash") { HomeSection("crash-section", bottom = 0.dp) { CrashNoticeRow(notice) } } }
             ui.downloads?.let { card ->
                 item(key = "downloads") { HomeSection("downloads-section", bottom = 0.dp) { DownloadsCardView(card, onOpenDownloads, downloadsActions) } }
@@ -198,89 +237,91 @@ fun HomeContent(
                     app.granger.sources.TidyOfferCard(offer, { downloadsActions.onTidyRemove(offer) }, { downloadsActions.onTidyKeep(offer) })
                 }
             }
-            // Every section on its own surface with the same heading, old and new alike (Neal, 2026-11-08: Timeline and
-            // Wander sat on surfaces while Continue, Readiness and the feeds ran flat on the page).
-            if (ui.continueCards.isNotEmpty()) {
-                item(key = "continue") {
-                    HomeSection("continue-section") {
-                        Heading(stringResource(R.string.home_continue))
-                        CardRow(ui.continueCards, key = { it.key }, tag = "continue-row") { entry ->
-                            when (entry) {
-                                is RailEntry.Tab -> TabCard(entry) { onOpenTab(entry.tab.tabId) }
-                                is RailEntry.Play -> PlayCard(entry) { onPlay(entry) }
-                                else -> {}
+            val feedsById = ui.feeds.associateBy { it.feed.id }
+            for ((i, part) in parts.withIndex()) {
+                when (part) {
+                    HomePart.Continue -> if (ui.continueCards.isNotEmpty()) item(key = "continue") {
+                        HomeSection("continue-section") {
+                            Heading(stringResource(R.string.home_continue))
+                            CardRow(ui.continueCards, key = { it.key }, tag = "continue-row") { entry ->
+                                when (entry) {
+                                    is RailEntry.Tab -> TabCard(entry) { onOpenTab(entry.tab.tabId) }
+                                    is RailEntry.Play -> PlayCard(entry) { onPlay(entry) }
+                                    else -> {}
+                                }
                             }
                         }
                     }
-                }
-            }
-            if (timeline != null && timeline.available) {
-                item(key = "timeline") {
-                    HomeSection("timeline-section") {
-                        TimelineSection(
-                            timeline, timelineActions,
-                            onOpen = { mark -> onOpenCard(Card(mark.title, "", CardTarget.Article(mark.packId, mark.path))) },
-                            onExpand = onOpenTimeline,
-                        )
+                    HomePart.Timeline -> if (timeline != null && timeline.available) item(key = "timeline") {
+                        HomeSection("timeline-section") { TimelineSection(timeline, timelineActions, onOpen = openMark, onExpand = onOpenTimeline) }
                     }
-                }
-            }
-            if (game != null && game.available) {
-                item(key = "play") {
-                    HomeSection("play-section") {
-                        PlaySection(game, gameActions, onOpen = { mark -> onOpenCard(Card(mark.title, "", CardTarget.Article(mark.packId, mark.path))) }, onMore = onOpenGames)
+                    HomePart.Play -> if (game != null && game.available) item(key = "play") {
+                        HomeSection("play-section") { PlaySection(game, gameActions, onOpen = openMark, onMore = onOpenGames) }
                     }
-                }
-            }
-            if (wander != null && wander.available) {
-                item(key = "wander") {
-                    HomeSection("wander-section") {
-                        WanderSection(wander, wanderActions) { node ->
-                            onOpenCard(Card(node.title, "", CardTarget.Article(node.packId, node.path)))
+                    HomePart.Wander -> if (wander != null && wander.available) item(key = "wander") {
+                        HomeSection("wander-section") {
+                            WanderSection(wander, wanderActions) { node -> onOpenCard(Card(node.title, "", CardTarget.Article(node.packId, node.path))) }
                         }
                     }
-                }
-            }
-            for ((i, row) in ui.feeds.withIndex()) {
-                item(key = "feed-${row.feed.id}") {
-                    HomeSection("feed-section-${row.feed.id}") {
-                        FeedHeading(
-                            title = if (row.drawn != null) row.title.resolve() else stringResource(R.string.home_feed_pending, stringResource(row.feed.kind.label), row.scopeName.resolve()),
-                            first = i == 0,
-                            last = i == ui.feeds.lastIndex,
-                            onRemove = { actions.onRemove(row.feed.id) },
-                            onMove = { up -> actions.onMove(row.feed.id, up) },
-                        )
-                        val drawn = row.drawn
-                        if (drawn == null) {
-                            Text(
-                                stringResource(R.string.home_drawing),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    HomePart.Readiness -> item(key = "strip") {
+                        HomeSection("readiness-section", bottom = 0.dp) {
+                            SectionHeading(
+                                stringResource(R.string.readiness_title),
+                                action = stringResource(R.string.home_readiness_see_all),
+                                onAction = onReadiness,
+                                actionTag = "readiness-see-all",
                             )
-                        } else {
-                            CardRow(drawn.cards, key = { "${it.title}|${it.target}" }, tag = "feed-row-${row.feed.id}") { card ->
-                                FeedCard(card) { onOpenCard(card) }
+                            ReadinessStrip(ui.strip, onReadiness)
+                        }
+                    }
+                    is HomePart.Feed -> feedsById[part.id]?.let { row ->
+                        item(key = "feed-${row.feed.id}") {
+                            HomeSection("feed-section-${row.feed.id}") {
+                                FeedHeading(
+                                    title = if (row.drawn != null) row.title.resolve() else stringResource(R.string.home_feed_pending, stringResource(row.feed.kind.label), row.scopeName.resolve()),
+                                    first = i == 0,
+                                    last = i == parts.lastIndex,
+                                    onRemove = { actions.onRemove(row.feed.id) },
+                                    onMove = { up -> actions.onMove(row.feed.id, up) },
+                                    onArrange = { arranging = true },
+                                )
+                                val drawn = row.drawn
+                                if (drawn == null) {
+                                    Text(
+                                        stringResource(R.string.home_drawing),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                    )
+                                } else {
+                                    CardRow(drawn.cards, key = { "${it.title}|${it.target}" }, tag = "feed-row-${row.feed.id}") { card ->
+                                        FeedCard(card) { onOpenCard(card) }
+                                    }
+                                }
                             }
                         }
                     }
-                }
-            }
-            item(key = "strip") {
-                HomeSection("readiness-section", bottom = 0.dp) {
-                    SectionHeading(
-                        stringResource(R.string.readiness_title),
-                        action = stringResource(R.string.home_readiness_see_all),
-                        onAction = onReadiness,
-                        actionTag = "readiness-see-all",
-                    )
-                    ReadinessStrip(ui.strip, onReadiness)
                 }
             }
             item(key = "end") { Box(Modifier.height(16.dp)) }
         }
     }
+}
+
+/** What Arrange does: save the order and hidden sections (Plan HY). */
+class ArrangeActions(val onArrange: (HomeLayout) -> Unit = {})
+
+/** A section's name in Arrange: its heading on Home, a feed's title. */
+@Composable
+private fun partLabel(part: HomePart, feeds: List<FeedUi>): String = when (part) {
+    HomePart.Continue -> stringResource(R.string.home_continue)
+    HomePart.Timeline -> stringResource(R.string.home_timeline)
+    HomePart.Play -> stringResource(R.string.home_play)
+    HomePart.Wander -> stringResource(R.string.home_wander)
+    HomePart.Readiness -> stringResource(R.string.readiness_title)
+    is HomePart.Feed -> feeds.firstOrNull { it.feed.id == part.id }?.let { row ->
+        if (row.drawn != null) row.title.resolve() else stringResource(R.string.home_feed_pending, stringResource(row.feed.kind.label), row.scopeName.resolve())
+    }.orEmpty()
 }
 
 @Composable
@@ -332,13 +373,14 @@ internal fun SectionHeading(text: String, action: String, onAction: () -> Unit, 
 /** A feed's title; a long press offers Move up, Move down and Remove. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun FeedHeading(title: String, first: Boolean, last: Boolean, onRemove: () -> Unit, onMove: (up: Boolean) -> Unit) {
+private fun FeedHeading(title: String, first: Boolean, last: Boolean, onRemove: () -> Unit, onMove: (up: Boolean) -> Unit, onArrange: () -> Unit) {
     var menu by remember { mutableStateOf(false) }
     Box {
         Heading(title, Modifier.combinedClickable(onClick = {}, onLongClick = { menu = true }))
         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
             if (!first) DropdownMenuItem(text = { Text(stringResource(R.string.home_move_up)) }, onClick = { menu = false; onMove(true) })
             if (!last) DropdownMenuItem(text = { Text(stringResource(R.string.home_move_down)) }, onClick = { menu = false; onMove(false) })
+            DropdownMenuItem(text = { Text(stringResource(R.string.home_arrange)) }, onClick = { menu = false; onArrange() })
             DropdownMenuItem(text = { Text(stringResource(R.string.common_remove)) }, onClick = { menu = false; onRemove() })
         }
     }
