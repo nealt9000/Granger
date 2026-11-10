@@ -112,3 +112,37 @@ So ~95% recall reads a tenth of the rows: ~1.4 s on the Pixel 6 if time scales w
 all-zero vectors were written with a NaN scale. A NaN compares as the largest score, so on the phone such a row could
 hold one of a range's top-k slots. `VectorSearch` now skips non-finite scores; the builder should not write them
 (`tools/vectors/build.py`, at the next vectors release).
+
+### 4.3b Typo titles out of the keystroke path (run `sq-t3-ki`)
+
+Same accuracy as t2 (Titles @1 78%, @3 91%; typos @3 68% en / 64% es). Titles p95 **293 ms** (was 1,540): the typed titles
+answer at once and the near titles (p95 1.2 s) are placed after the ranked ones when they arrive. The language prior
+changed nothing measurable: most Spanish names carry no language signal. Near titles are skipped for queries over four
+words (no typo query in the set has more; on questions they cost 5 s at p95 for nothing).
+
+### 4.2 Best matches in the app (run `sq-best-dev`, the dev questions)
+
+| Slice | n | Today's page @5 | **Best @5** | **Best @10** |
+|---|---|---|---|---|
+| all | 148 | 22 (15%) | **94 (64%)** | **109 (74%)** |
+| classics | 44 | 6 | 22 (50%) | 27 (61%) |
+| food | 12 | 1 | 10 | 10 |
+| making | 12 | 0 | 9 | 10 |
+| maps | 12 | 4 | 11 | 12 |
+| medicine | 20 | 0 | 11 (55%) | 14 (70%) |
+| reference | 12 | 6 | 9 | 11 |
+| science | 12 | 0 | 6 | 7 |
+| technology | 12 | 2 | 8 | 8 |
+| thought | 12 | 3 | 8 | 10 |
+
+**Both question bars cleared on dev** (50% / 65%), live through `BestMatches` with dense on, scored as `ask_articles.py`
+scores (a book answer needs its chapter). Emulator latency: Best matches 1.1 s p50 / 1.6 s p95 (the emulator holds the
+vectors in memory; the Pixel 6 reads them from flash, which is what the clustered index is for). Held-out is scored once,
+at the end.
+
+### 2.2 Clustered vector files built (`tools/vectors/ivf.py`)
+
+The eval library's 401 files convert in 20 s, same size (1.5 GB): 20,466 lists of ~250 rows, files under 500 rows left
+version 1. The phone reads both; DensePassageFinder probes 1,024 lists. Recall on the phone and the speed-up wait for a
+Pixel measurement and a vectors release (version 2 files; app builds before this one read only version 1, and only Ask
+used vectors there).
