@@ -81,5 +81,6 @@ the key's custody first.
 
 1. Use `build --previous` for every refresh (done in this branch).
 2. ~~Write `upkeep.py check`~~ done 2026-11-09: `tools/upkeep/upkeep.py check` (findings.json, report.md, candidate.json; playbooks in `tools/upkeep/README.md`). First real run: 13 min, 1 needs Neal (based.cooking vectors), 5 waiting on mirrors.
-3. Add the playbooks for vectors and time indexes (GPU-gated), then feedback triage.
-4. Do a dry run with a local model, then with OpenCode's free tier, on a real week's findings.
+3. ~~Run it weekly~~ done 2026-11-10: launchd agent `org.opengranger.upkeep`, Mondays 07:00 (`tools/upkeep/schedule.sh`); `weekly.sh` checks origin/main from a temp export and posts a notification with the counts.
+4. Add the playbooks for vectors and time indexes (GPU-gated), then feedback triage.
+5. Do a dry run with a local model, then with OpenCode's free tier, on a real week's findings.
