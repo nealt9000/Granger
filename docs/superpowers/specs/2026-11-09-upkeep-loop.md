@@ -14,7 +14,7 @@ The first refresh (2026-11-09) found three ways that "take Kiwix's latest" break
    (sha256). When a pack moves to a new snapshot, they disappear from the catalog, and the only trace is a line in the
    build output (based.cooking lost its vectors). A Wikipedia snapshot bump would drop dozens of them at once.
 3. **Budget drift.** English Wiktionary nopic went from 9.2 to 14.8 GB, which takes the Comprehensive tier to 105 GB,
-   over its 103 GB target. A test caught this; a human has to decide what to do.
+   over its 103 GB target. A test caught this; a human has to decide what to do. (Neal, 2026-11-09: accept the bigger tier; the target is now 107 GB.)
 
 Smaller lessons:
 - Kiwix's own copy drifts (the Spanish mini Wikipedia's description); `kiwix.copy` pins it.
@@ -50,7 +50,7 @@ ready, and everything else waits for a later run or for a rebuild.
 | Time indexes after a Wikipedia move | when held | `tools/timeindex/build.py` | upload (Neal) |
 | Pack contents / Wikipedia sets (`zim_probe.py probe`, `titles`) | with refreshes | yes | review diff |
 | HTML shape of parsed packs (Wiktionary, devdocs) | with refreshes | `zim_probe.py entry` + parser fixture | fix code if changed |
-| Tier budgets (Efficient < 18 GB, Comprehensive < 103 GB) | with refreshes | the test exists | budget call (Neal) |
+| Tier budgets (Efficient < 18 GB, Comprehensive < 107 GB) | with refreshes | the test exists | budget call (Neal) |
 | Classics (Gutenberg/SE/Wikisource corrections) | quarterly at most | pack-builder rebuild | release upload (Neal) |
 | Models, voices | rare, by decision | no | Neal |
 | App dependencies, Android SDK / Play target-API deadlines | monthly check | report only | Neal |

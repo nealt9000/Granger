@@ -765,7 +765,8 @@ def test_real_curated_tiers_fit_the_target():
     efficient, comprehensive = sizes["All"]
     # With pictures by default (Neal, 2026-10-28: no-pictures packs are the space-saving fallback): 17.7 / 101.5 GB.
     assert efficient < 18e9
-    assert comprehensive < 103e9
+    # Neal, 2026-11-09: accept the bigger tier when English Wiktionary nopic moves to its 14.8 GB file (about 105 GB).
+    assert comprehensive < 107e9
 
 
 def test_real_curated_readiness_names_nine_domains_in_order():
