@@ -7,7 +7,17 @@ The upkeep loop keeps Granger's catalog current with as little of Neal's time as
 ~/.venvs/granger-catalog/bin/python tools/upkeep/upkeep.py check          # ~15 min: a catalog build + every link
 ```
 
-It writes `~/granger-upkeep/<date>/`:
+It runs weekly by itself (Mondays 07:00) as the launchd agent `org.opengranger.upkeep`:
+
+```sh
+tools/upkeep/schedule.sh install     # or uninstall | status | run-now
+```
+
+The agent runs `weekly.sh` from the main checkout. That fetches origin, exports origin/main to a temp dir and checks
+it, so it checks the published catalog, never a working tree. It adds `run.log` beside the report and posts a macOS
+notification with the counts. A Mac asleep at 07:00 runs it on wake.
+
+Each run writes `~/granger-upkeep/<date>/`:
 - `report.md`: what to read.
 - `findings.json`: the same findings, for an agent.
 - `candidate.json`: the candidate catalog. It is unsigned and keeps the published pins of packs that aren't ready to move.
