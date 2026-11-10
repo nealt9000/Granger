@@ -2,9 +2,16 @@
 
 Your door to knowledge. Always open.
 
-An offline library for Android, with a librarian that answers from your books and shows you the page. Granger keeps Wikipedia, reference works, books and audiobooks on your phone and waits, with no signal, for whenever you need it: on a plane, off the grid, or wherever the network doesn't reach or isn't allowed to. Nothing you read or ask leaves the device.
+An offline library for Android. Granger keeps Wikipedia, 557 typeset classics, first aid, maps and repair guides on your phone, and waits, with no signal, for whenever you need it: on a plane, off the grid, or wherever the network doesn't reach or isn't allowed to.
 
-Licensed under GPL-3.0 (see `LICENSE`).
+- **One search across everything:** every pack, every page of every book, and your own ebooks, from one box.
+- **Books set as books:** the Classics, in English and Spanish, typeset with covers; your EPUBs and PDFs beside them.
+- **Read aloud:** offline voices made for Granger read any page, with the screen locked.
+- **Your own collection:** ebooks, music and audiobooks in the same app.
+
+The packs are [Kiwix](https://kiwix.org)'s open ZIM files, so anything Granger downloads can also be read by Kiwix's apps. No account, and nothing you read or search leaves the device.
+
+Site: [opengranger.org](https://opengranger.org) · Licensed under GPL-3.0 (see `LICENSE`).
 
 ## Build
 
