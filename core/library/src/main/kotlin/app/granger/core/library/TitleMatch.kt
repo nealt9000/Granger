@@ -61,15 +61,22 @@ object TitleMatch {
      * The title searches that can reach a query with one slip in it: for each word of four letters or more, the query
      * with that word cut to its first half and put last (a title index takes the last word as a prefix and the others
      * whole), so "Atomic orbtal" asks for "atomic orb" and "Steatorreha" for "steat". A slip in the first half of a
-     * word is left to the other words; a one-word query with one there isn't found.
+     * word is left to the other words (each long word is also left out, below); a one-word query with one there isn't found.
      */
     fun probes(query: String): List<String> {
         val words = SearchText.words(query)
-        return words.indices.filter { words[it].length >= 4 }.map { i ->
-            val cut = words[i].take(maxOf(2, words[i].length / 2))
-            (words.filterIndexed { k, _ -> k != i } + cut).joinToString(" ")
-        }.distinct()
+        val long = words.indices.filter { words[it].length >= 4 }
+        val cut = long.map { i ->
+            val head = words[i].take(maxOf(2, words[i].length / 2))
+            (words.filterIndexed { k, _ -> k != i } + head).joinToString(" ")
+        }
+        // With two words or more, also each long word left out, for a slip early in it ("Kerri Hiugchi" asks for "kerri").
+        val dropped = if (words.size < 2) emptyList() else long.map { i -> words.filterIndexed { k, _ -> k != i }.joinToString(" ") }
+        return (cut + dropped).filter { it.isNotBlank() }.distinct()
     }
+
+    /** A pack name's family, the packs sharing article paths: its first two parts ("wikipedia_en_history" → "wikipedia_en"). */
+    fun family(packName: String): String = packName.split('_').take(2).joinToString("_")
 
     private val TRANSLATION = Regex("/([a-z]{2,3}(?:-[a-z]{2,4})?)$")
     private val LANGUAGES = setOf(

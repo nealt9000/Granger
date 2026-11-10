@@ -77,3 +77,38 @@ Ask's own finder and ranker on the same 148 questions, deep pool, one row per ar
 The question bars (50% / 65%) are reachable with what exists, **if dense retrieval runs**; keyword-only Best matches
 would stop near 25%. Phase 2 (dense under 1 s on the Pixel 6) is the critical path. Caveat: recorded hits from the
 full vector set on the emulator; the dev set has been used heavily, so held-out decides.
+
+### 4.3 Titles: folded matching, redirects, priors, typos, one row per article (runs `sq-t1-ki`, `sq-t2-ki`)
+
+| | Baseline | t1 (match, priors, typos) | t2 (+ family dedupe, own-title tie-break, drop-word probe) | Bar |
+|---|---|---|---|---|
+| Titles @1 | 63% | 72% | **78%** (en 85%, es 61%) | 85% |
+| Titles @3 | 76% | 87% | **91%** | 95% |
+| Typos @3 en / es | 0 / 0 | 52% / 45% | **68% / 64%** | 70% |
+| Prefixes @3 en / es | 58% / 33% | 67% / 33% | 67% / 50% | 75% |
+| Titles p95 (emulator) | 0.43 s | 0.64 s | **1.54 s** | 0.3 s (Pixel 6) |
+
+Left: Spanish ties with English packs (a language prior is next); the typo probes cost Titles' p95, so they move out of
+the keystroke path (typed titles first, near titles a moment later, Phase 5); prefixes need popularity we don't have.
+
+## Phase 2 spike: clustered index, offline (`tools/vectors/ivf_spike.py`)
+
+The eval library's 401 vector files (5,191,645 rows × 256 dims, int8), 202 tune-set queries as the phone embedded them
+(`vectors-work/r1-queries.phone.json`). Files of 4,000 rows or more clustered into lists of ~1,000 rows (4,930 lists over
+28 files); the 373 smaller files (4.8% of rows) are always read. Against the phone's brute force:
+
+| Lists probed | Rows read | Recall@24 | Recall@4 | Best row kept |
+|---|---|---|---|---|
+| 32 | 5.4% | 79.8% | 83.8% | 82% |
+| 64 | 6.1% | 86.4% | 89.5% | 88% |
+| 128 | 7.3% | 90.7% | 92.5% | 92% |
+| 256 | 9.7% | 94.5% | 95.5% | 95% |
+| 512 | 14.6% | 97.3% | 97.5% | 98% |
+
+So ~95% recall reads a tenth of the rows: ~1.4 s on the Pixel 6 if time scales with rows read from today's ~14 s
+(Phase 2's bar is 1 s; tuning list size and the small-file floor comes next, then a phone measurement).
+
+**Found on the way:** `wikipedia_en_mathematics_maxi` vectors (released, sha 95ff40ac62d4) hold 31 empty chunks whose
+all-zero vectors were written with a NaN scale. A NaN compares as the largest score, so on the phone such a row could
+hold one of a range's top-k slots. `VectorSearch` now skips non-finite scores; the builder should not write them
+(`tools/vectors/build.py`, at the next vectors release).

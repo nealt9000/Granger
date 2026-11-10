@@ -26,9 +26,10 @@ class TitleMatchTest {
     }
 
     @Test fun probesCutEachLongWordToItsFirstHalf() {
-        assertThat(TitleMatch.probes("Atomic orbtal")).containsExactly("orbtal ato", "atomic orb")
+        assertThat(TitleMatch.probes("Atomic orbtal")).containsExactly("orbtal ato", "atomic orb", "orbtal", "atomic")
         assertThat(TitleMatch.probes("Steatorreha")).containsExactly("steat")
-        assertThat(TitleMatch.probes("PCB assmbly")).containsExactly("pcb ass")
+        assertThat(TitleMatch.probes("PCB assmbly")).containsExactly("pcb ass", "pcb")
+        assertThat(TitleMatch.family("wikipedia_en_history")).isEqualTo("wikipedia_en")
     }
 
     @Test fun translatedCopiesAndDictionariesComeLater() {

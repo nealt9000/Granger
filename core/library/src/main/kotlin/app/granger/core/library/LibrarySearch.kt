@@ -72,7 +72,8 @@ class ZimLibrarySearch(
         val first = (books.map { Triple(it.first, 0, it.second) } + ranked.filter { it.first != null })
             .sortedWith(compareBy<Triple<BookTitleSearch.Rank?, Int, SearchHit>> { it.first?.ordinal ?: unranked }.thenBy { it.second })
         val rest = ranked.filter { it.first == null }.sortedBy { it.second }
-        val merged = (first.map { it.third } + near + rest.map { it.third }).distinctBy { it.packId to it.path }
+        val family = families()
+        val merged = (first.map { it.third } + near + rest.map { it.third }).distinctBy { family(it) to it.path }
         return TitleResults(merged.take(titleLimit), more = merged.size > titleLimit || packs.any { it.returned >= titlesPerPack })
     }
 
@@ -82,9 +83,12 @@ class ZimLibrarySearch(
         return (0 until turns).flatMap { turn ->
             packs.mapNotNull { pack ->
                 pack.hits.getOrNull(turn)?.let { (zim, hit) ->
-                    // The better of what was typed (a redirect's own title) and the article's.
-                    val rank = listOfNotNull(TitleMatch.rank(zim.title, q), TitleMatch.rank(hit.title, q)).minOrNull()
-                    Triple(rank, TitleMatch.prior(pack.name, hit.path, hit.title), hit)
+                    // The better of what was typed (a redirect's own title) and the article's; at the same rank an article
+                    // matched under its own title goes first ("Turingia" before English Wikipedia's redirect to Thuringia).
+                    val own = TitleMatch.rank(hit.title, q)
+                    val rank = listOfNotNull(TitleMatch.rank(zim.title, q), own).minOrNull()
+                    val viaRedirect = if (rank != null && own != rank) 1 else 0
+                    Triple(rank, 2 * TitleMatch.prior(pack.name, hit.path, hit.title) + viaRedirect, hit)
                 }
             }
         }
@@ -117,12 +121,26 @@ class ZimLibrarySearch(
         }
     }
 
-    override suspend fun fullText(query: String): List<SearchHit> = relaxed(query, { it.packId to it.path }) { q ->
-        across(q) { if (it.hasFulltextIndex) it.search(q, fullTextLimit) else emptyList() }
-            .flatMap { it.hits }
-            .sortedByDescending { it.first.score }
-            .take(fullTextLimit)
-            .map { it.second }
+    override suspend fun fullText(query: String): List<SearchHit> {
+        val family = families()
+        return relaxed(query, { family(it) to it.path }) { q ->
+            across(q) { if (it.hasFulltextIndex) it.search(q, fullTextLimit) else emptyList() }
+                .flatMap { it.hits }
+                .sortedByDescending { it.first.score }
+                .map { it.second }
+                .distinctBy { family(it) to it.path }
+                .take(fullTextLimit)
+        }
+    }
+
+    /**
+     * A hit's pack family: the packs that share article paths, so one article in two of them is listed once (Plan SQ: the
+     * subject packs aren't slices of Wikipedia top, and "Thuringia" showed three times). From the pack's name, its first two
+     * parts ("wikipedia_en"); a book (no path) is its own.
+     */
+    private suspend fun families(): (SearchHit) -> String {
+        val names = library.packs.first().associate { it.id to it.name }
+        return { hit -> names[hit.packId]?.takeIf { it.isNotBlank() && hit.path.isNotEmpty() }?.let(TitleMatch::family) ?: hit.packId }
     }
 
     override suspend fun books(query: String): List<BookHit> =

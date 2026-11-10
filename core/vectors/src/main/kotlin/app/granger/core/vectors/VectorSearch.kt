@@ -53,6 +53,9 @@ object VectorSearch {
                 val base = r * dims
                 for (i in 0 until dims) dot += block[base + i] * q[i]
                 val score = dot * file.scale(row + r) * qScale
+                // An empty chunk's all-zero vector was written with a NaN scale (wikipedia_en_mathematics, 31 rows): a NaN
+                // compares as the largest score and would hold a slot. Plan SQ found it; such rows are skipped.
+                if (score.isNaN() || score.isInfinite()) continue
                 if (best.size < k || score > best.peek().score) offer(best, VectorHit(file, row + r, score), k)
             }
             row += n

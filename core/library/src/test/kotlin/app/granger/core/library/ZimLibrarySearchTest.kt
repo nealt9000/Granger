@@ -257,8 +257,10 @@ class ZimLibrarySearchTest {
         assertThat(titles.map { it.packId to it.path }).containsExactly(
             "u-top1m" to "Lion", "u-top" to "Lost_in_Translation", "u-top1m" to "Liger",
         )
-        // Without the catalog's sets, both packs answer as before.
+        // Without the catalog's sets, one article in two packs of a family is still listed once (Plan SQ: subject packs
+        // aren't slices of Wikipedia top, and their duplicates crowded Titles).
         val plain = ZimLibrarySearch(library, io = dispatcher, titlesPerPack = 5, fullTextLimit = 10)
-        assertThat(plain.fullText("li").count { it.path == "Lion" }).isEqualTo(2)
+        assertThat(plain.fullText("li").count { it.path == "Lion" }).isEqualTo(1)
+        assertThat(plain.titles("l").hits.count { it.path == "Lion" }).isEqualTo(1)
     }
 }
