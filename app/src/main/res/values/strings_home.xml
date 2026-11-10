@@ -118,7 +118,7 @@
     <string name="home_lane_people">People</string>
     <!-- Games (Plan H5c) -->
     <string name="home_play">Play</string>
-    <string name="home_play_more">More rounds</string>
+    <string name="home_play_more">More games</string>
     <string name="games_title">Games</string>
     <string name="game_order">Which came first?</string>
     <string name="game_guess">Guess the year</string>
@@ -162,4 +162,69 @@
     </plurals>
     <string name="game_none">Not enough dated articles here for a round yet.</string>
     <string name="game_loading">Dealing a round…</string>
+    <!-- More games (Plan HY, Neal 2026-11-10) -->
+    <string name="game_wrong">Not quite</string>
+    <string name="game_order_about">Put two or three in order, earliest first.</string>
+    <string name="game_guess_about">Slide to the year it happened.</string>
+    <string name="game_before_after">Before or after?</string>
+    <string name="game_before_after_about">Place one against another\'s year.</string>
+    <string name="game_before_after_prompt">Did this come before or after %1$s (%2$s)?</string>
+    <string name="game_before">Before</string>
+    <string name="game_after">After</string>
+    <plurals name="game_years_before">
+        <item quantity="one">%1$d year before</item>
+        <item quantity="other">%1$d years before</item>
+    </plurals>
+    <plurals name="game_years_after">
+        <item quantity="one">%1$d year after</item>
+        <item quantity="other">%1$d years after</item>
+    </plurals>
+    <string name="game_overlap">Alive at the same time?</string>
+    <string name="game_overlap_about">Could these two people have met?</string>
+    <string name="game_overlap_prompt">Were these two alive at the same time?</string>
+    <string name="game_yes">Yes</string>
+    <string name="game_no">No</string>
+    <plurals name="game_overlap_shared">
+        <item quantity="one">They shared %1$d year</item>
+        <item quantity="other">They shared %1$d years</item>
+    </plurals>
+    <string name="game_odd">Odd one out</string>
+    <string name="game_odd_about">Three are from about the same time. Find the one that isn\'t.</string>
+    <string name="game_odd_prompt">Three of these are from about the same time. Which one isn\'t?</string>
+    <string name="game_odd_choose">Choose as the odd one out</string>
+    <string name="game_odd_was">The odd one out: %1$s, %2$s</string>
+    <string name="game_odd_state">The odd one out</string>
+    <string name="game_century_name">Which century?</string>
+    <string name="game_century_about">Pick the century from four.</string>
+    <string name="game_century_prompt_point">Which century did this happen in?</string>
+    <string name="game_century_prompt_life">Which century was this person born in?</string>
+    <string name="game_century_prompt_span">Which century did this begin in?</string>
+    <string name="game_century">%1$s century</string>
+    <string name="game_century_bc">%1$s century BC</string>
+    <string name="game_century_numerals">ordinal</string>
+    <string name="game_ordinal_st">%1$dst</string>
+    <string name="game_ordinal_nd">%1$dnd</string>
+    <string name="game_ordinal_rd">%1$drd</string>
+    <string name="game_ordinal_th">%1$dth</string>
+    <string name="games_continue">Continue</string>
+    <string name="games_continue_carry">Finish Home\'s round, then play on to %1$d.</string>
+    <string name="games_continue_fresh">Play a run of %1$d rounds.</string>
+    <string name="games_continue_button">Continue</string>
+    <string name="games_all">All games</string>
+    <string name="games_best">Best: %1$d of %2$d</string>
+    <string name="games_round_of">Round %1$d of %2$d</string>
+    <plurals name="games_right">
+        <item quantity="one">%1$d right</item>
+        <item quantity="other">%1$d right</item>
+    </plurals>
+    <string name="games_see_score">See your score</string>
+    <string name="games_score">%1$d of %2$d</string>
+    <string name="games_new_best">A new best!</string>
+    <string name="games_again">Play again</string>
+    <!-- Arrange Home (Plan HY) -->
+    <string name="home_arrange">Arrange Home</string>
+    <string name="home_arrange_reset">Reset</string>
+    <string name="home_arrange_hint">Drag a section by its handle to move it. Switch one off to hide it from Home.</string>
+    <string name="home_arrange_shown">Shown on Home</string>
+    <string name="home_arrange_hidden">Hidden</string>
 </resources>

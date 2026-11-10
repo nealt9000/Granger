@@ -686,7 +686,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
 
     // Play and the Games screen (Plan H5c) share one count of rounds played and Which came first?'s level.
     val gameStore = remember { GameStore.Prefs(appContext.getSharedPreferences("games", android.content.Context.MODE_PRIVATE)) }
-    fun gameModel(scope: kotlinx.coroutines.CoroutineScope, thumbs: ArticleThumbnails, alternates: Boolean, start: GameKind = GameKind.ORDER) = GameModel(
+    // Home's round, for the Games screen's Continue to pick up (Plan HY); set when Home's view model makes it.
+    val homeGames = remember { arrayOfNulls<GameModel>(1) }
+    fun gameModel(scope: kotlinx.coroutines.CoroutineScope, thumbs: ArticleThumbnails, mixed: Boolean, start: GameKind? = null) = GameModel(
         scope = scope,
         indexes = { timeIndexes() },
         picture = { packId, path ->
@@ -695,7 +697,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             }
         },
         store = gameStore,
-        alternates = alternates,
+        mixed = mixed,
         start = start,
     )
 
@@ -1398,7 +1400,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 )
                             },
                             timelineOf = { scope -> timelineModel(scope, homeThumbs) },
-                            gamesOf = { scope -> gameModel(scope, homeThumbs, alternates = true) },
+                            gamesOf = { scope -> gameModel(scope, homeThumbs, mixed = true).also { homeGames[0] = it } },
                             tabPicture = { packId, path ->
                                 container.library.archive(packId)?.let { archive ->
                                     archive.read(path)?.let { homeThumbs.thumbnail(archive, path, String(it.bytes, Charsets.UTF_8)) }
@@ -1449,10 +1451,21 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             }
             composable<GamesRoute> {
                 val thumbs = remember { ArticleThumbnails(File(appContext.cacheDir, "home-thumbs")) }
-                val model = viewModel { GamesViewModel { scope -> gameModel(scope, thumbs, alternates = false) } }.model
+                val model = viewModel { GamesViewModel { scope -> gameModel(scope, thumbs, mixed = false) } }.model
                 val ui by model.ui.collectAsStateWithLifecycle()
+                val home = homeGames[0]
+                val carry = home?.ui?.collectAsStateWithLifecycle()?.value
                 GamesScreen(
                     ui, remember(model) { gameActions(model) },
+                    carry = carry,
+                    onContinue = {
+                        val r = carry?.round
+                        if (r != null) {
+                            model.startRun(r.kind, r, carry.pictures)
+                            // Home deals a fresh round of another game for when they're back.
+                            home.replace()
+                        }
+                    },
                     onOpen = { mark ->
                         scope.launch {
                             val tabId = container.sessions.openTab(mark.packId, mark.path, mark.title)

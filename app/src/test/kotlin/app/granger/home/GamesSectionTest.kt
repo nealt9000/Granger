@@ -52,7 +52,16 @@ class GamesSectionTest {
         onNudge = { calls += "nudge:$it" },
         onSubmit = { calls += "submit" },
         onNext = { calls += "next" },
-        onChoose = { calls += "choose:$it" },
+        onStart = { calls += "start:$it" },
+        onEndRun = { calls += "end" },
+        onSay = { yes ->
+            calls += "say:$yes"
+            h.ui = h.ui.copy(round = when (val r = h.ui.round) { is Round.BeforeAfter -> r.copy(said = yes); is Round.Overlap -> r.copy(said = yes); else -> r })
+        },
+        onCentury = { c ->
+            calls += "century:$c"
+            h.ui = h.ui.copy(round = (h.ui.round as Round.Century).copy(picked = c))
+        },
     )
 
     private fun home(h: Harness) {
@@ -126,14 +135,85 @@ class GamesSectionTest {
         compose.onNodeWithTag("play-section").assertDoesNotExist()
     }
 
-    @Test fun theGamesScreenSwitchesGameAndCountsRounds() {
-        val h = Harness(GameUi(loading = false, kind = GameKind.ORDER, round = Round.Order(listOf(magna, hastings)), played = 12, now = 2026))
+    private val newtonLife = TimeMark(3, "top", "Isaac_Newton", "Isaac Newton", TimeKind.LIFE, 1643, 0, 1727, 0, 9, setOf(Lane.PEOPLE), 10)
+    private val bach = TimeMark(4, "top", "J._S._Bach", "J. S. Bach", TimeKind.LIFE, 1685, 0, 1750, 0, 9, setOf(Lane.PEOPLE), 10)
+
+    @Test fun theMoreLinkSaysMoreGames() {
+        home(Harness(GameUi(loading = false, round = Round.Order(listOf(magna, hastings)), now = 2026)))
+        compose.onNodeWithText("More games").assertExists()
+    }
+
+    @Test fun beforeOrAfterShowsTheAnchorsYearAndRevealsTheGap() {
+        val h = Harness(GameUi(loading = false, round = Round.BeforeAfter(magna, hastings), now = 2026))
+        home(h)
+        compose.onNodeWithText("Before or after?").assertExists()
+        compose.onNodeWithText("Did this come before or after Battle of Hastings (1066)?").assertExists()
+        compose.onNodeWithTag("game-after").performClick()
+        assertThat(calls).containsExactly("say:false")
+        compose.onNodeWithText("Right!").assertExists()
+        compose.onNodeWithText("149 years after").assertExists()
+        compose.onNodeWithTag("game-answer-2").performClick()
+        assertThat(opened).containsExactly("Magna_Carta")
+    }
+
+    @Test fun aliveAtTheSameTimeDrawsBothLifetimes() {
+        val h = Harness(GameUi(loading = false, round = Round.Overlap(newtonLife, bach, now = 2026), now = 2026))
+        home(h)
+        compose.onNodeWithText("Were these two alive at the same time?").assertExists()
+        compose.onNodeWithTag("game-yes").performClick()
+        compose.onNodeWithText("They shared 42 years").assertExists()
+        compose.onNodeWithTag("game-life-strip").assertExists()
+    }
+
+    @Test fun oddOneOutMarksTheOddCardAfterATap() {
+        val wright = mark(5, "Wright Flyer", 1903)
+        val h = Harness(GameUi(loading = false, round = Round.OddOneOut(listOf(hastings, magna, newton, wright), odd = 5), now = 2026))
+        val actions = GameActions(onPick = { qid -> h.ui = h.ui.copy(round = (h.ui.round as Round.OddOneOut).copy(picked = qid)) })
+        compose.setContent { HomeContent(HomeUi(), onReadiness = {}, onOpenTab = {}, onPlay = {}, game = h.ui, gameActions = actions) }
+        compose.onNodeWithTag("game-card-2").performClick()
+        compose.onNodeWithText("Not quite").assertExists()
+        assertThat(compose.onNodeWithTag("game-answer-5").fetchSemanticsNode().config[SemanticsProperties.StateDescription]).isEqualTo("The odd one out")
+    }
+
+    @Test fun whichCenturyNamesTheChoicesAndTheAnswer() {
+        val h = Harness(GameUi(loading = false, round = Round.Century(magna, listOf(10, 11, 12, 13)), now = 2026))
+        home(h)
+        compose.onNodeWithText("13th century").assertExists()
+        compose.onNodeWithTag("game-century-12").performClick()
+        assertThat(calls).containsExactly("century:12")
+        compose.onNodeWithText("It was 1215 · 13th century").assertExists()
+    }
+
+    @Test fun theGamesScreenPutsContinueFirstThenEveryGame() {
+        val h = Harness(GameUi(loading = false, played = 12, best = mapOf(GameKind.GUESS to 8), now = 2026))
+        val carry = GameUi(loading = false, round = Round.Order(listOf(magna, hastings)), now = 2026)
         var back = false
-        compose.setContent { GamesScreen(h.ui, actions(h), onOpen = {}, onBack = { back = true }) }
+        var continued = false
+        compose.setContent { GamesScreen(h.ui, actions(h), onOpen = {}, onBack = { back = true }, carry = carry, onContinue = { continued = true }) }
+        assertThat(top("games-continue")).isLessThan(top("games-start-order"))
+        compose.onNodeWithText("Finish Home's round, then play on to 10.").assertExists()
+        compose.onNodeWithText("Best: 8 of 10").assertExists()
         compose.onNodeWithText("12 rounds played on this phone").assertExists()
-        compose.onNodeWithTag("games-tab-guess").performClick()
-        assertThat(calls).containsExactly("choose:GUESS")
+        GameKind.entries.forEach { compose.onNodeWithTag("games-start-${it.name.lowercase()}").assertExists() }
+        compose.onNodeWithTag("games-continue").performClick()
+        assertThat(continued).isTrue()
+        compose.onNodeWithTag("games-start-century").performClick()
+        assertThat(calls).containsExactly("start:CENTURY")
         compose.onNodeWithContentDescription("Back to Home").performClick()
         assertThat(back).isTrue()
+    }
+
+    @Test fun aRunShowsItsProgressAndEndsWithTheScore() {
+        val h = Harness(GameUi(loading = false, round = Round.Order(listOf(magna, hastings), picked = listOf(2, 1), revealed = true), run = GameRun(GameKind.ORDER, number = 10, right = 6), now = 2026))
+        compose.setContent { GamesScreen(h.ui, actions(h), onOpen = {}, onBack = {}) }
+        compose.onNodeWithText("Round 10 of 10 · 6 right").assertExists()
+        compose.onNodeWithText("See your score").performClick()
+        assertThat(calls).containsExactly("next")
+        h.ui = h.ui.copy(run = h.ui.run!!.copy(finished = true, right = 7, best = 7, newBest = true))
+        compose.onNodeWithText("7 of 10").assertExists()
+        compose.onNodeWithText("A new best!").assertExists()
+        compose.onNodeWithTag("games-again").performClick()
+        compose.onNodeWithTag("games-all").performClick()
+        assertThat(calls).containsExactly("next", "start:ORDER", "end").inOrder()
     }
 }

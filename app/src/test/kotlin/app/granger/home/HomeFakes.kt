@@ -45,4 +45,8 @@ class FakeHomeFeeds : HomeFeeds {
     override suspend fun clearDraw(feedId: Long) { draws.remove(feedId) }
 }
 
-class FakeHomePrefs(override var seeded: Boolean = false, override var dismissedFailures: Set<String> = emptySet()) : HomePrefs
+class FakeHomePrefs(
+    override var seeded: Boolean = false,
+    override var dismissedFailures: Set<String> = emptySet(),
+    override var layout: HomeLayout = HomeLayout(),
+) : HomePrefs
