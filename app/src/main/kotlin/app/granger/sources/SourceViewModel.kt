@@ -265,6 +265,8 @@ class SourceViewModel(
     private val tier: DeviceTier,
     private val appScope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
+    /** Ask runs here (the app's `askOn`): off, rows say nothing of how Ask would search, and Ask's model isn't offered. */
+    private val askOn: Boolean = tier >= DeviceTier.ASK,
     /** Opened from Readiness: the Kiwix list filtered to this domain until the chip is closed. */
     private val domain: String? = null,
     /** Opened from a folded family's row: that family's packs A–Z, with their own search (Plan KB Decision 10). */
@@ -533,6 +535,7 @@ class SourceViewModel(
         fun status(item: CatalogItem): ItemStatus =
             statuses.getOrPut(item.id) { statusOf(item, recordsById[item.id].orEmpty(), packs, tier) }
         val installedStates = setOf(ItemStatus.Installed, ItemStatus.UpdateAvailable)
+        val notHeld = setOf(ItemStatus.NotInstalled, ItemStatus.NeedsMoreMemory)
         /**
          * Whether [item] is in one of the library's languages (Plan L3): a multilingual pack counts for each of its
          * languages, `mul` and an item with no language for every one. An installed pack (or one downloading) in another
@@ -589,14 +592,15 @@ class SourceViewModel(
                 // Research embeds its questions with it once dense retrieval is on (Plan R1); until then nothing uses it.
                 // The large model's catalog entry stays, but Research no longer uses it (Plan R5 Task 8).
                 is ModelEntry -> when (item.role) {
-                    ModelRole.SMALL -> UiText.Raw("")
+                    // Kept on a phone that had it, while Ask rests: it can be removed to free the space (Plan SQ Task 0.2).
+                    ModelRole.SMALL -> if (askOn) UiText.Raw("") else UiText.Res(R.string.sources_model_ask_resting)
                     ModelRole.LARGE -> UiText.Res(R.string.sources_model_not_used)
-                    ModelRole.EMBEDDER -> UiText.Res(if (DENSE_RETRIEVAL) R.string.sources_model_used_by_ask else R.string.sources_model_not_used_yet)
+                    ModelRole.EMBEDDER -> UiText.Res(if (DENSE_RETRIEVAL && askOn) R.string.sources_model_used_by_ask else R.string.sources_model_not_used_yet)
                 }
                 is VoiceEntry -> UiText.Raw(item.attribution)
             }
             // A phone without Ask says nothing about how Ask would search (Plan E1 phone check).
-            val ask = (item as? PackEntry)?.takeIf { tier >= DeviceTier.ASK }?.let { askReach(it, installedVectorParents) }
+            val ask = (item as? PackEntry)?.takeIf { askOn }?.let { askReach(it, installedVectorParents) }
             // On Project Gutenberg's own screen, each pack is its subject alone.
             val title = when {
                 gutenberg -> item.title.removeSuffix(GUTENBERG_SUFFIX)
@@ -751,7 +755,9 @@ class SourceViewModel(
             return Section(title, rows, entries.size, foldable = folding && entries.size > FOLDED_ROWS, noun = noun, heading = KiwixList.category(title))
         }
         val sections = if (current == null) emptyList() else buildList {
+            // While Ask is off its model is listed only where it's installed, so it can be removed (Plan SQ Task 0.2).
             val models = current.models.filter(::shown)
+                .filterNot { !askOn && it.role == ModelRole.SMALL && status(it) in notHeld }
             if (models.isNotEmpty()) add(Section(AI_MODELS, models.map(::row), heading = UiText.Res(R.string.sources_section_models)))
             if (kiwix) {
                 // One row per pack, whatever its flavours (Plan KB Decision 8): chips, search and Recommended work on them.

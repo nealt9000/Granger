@@ -48,7 +48,7 @@
 
     <!-- The History screen. -->
     <string name="shell_clear_history_title">Clear history?</string>
-    <string name="shell_clear_history_body">This forgets what you\'ve opened, searched and played, and empties the rail. Pinned items and the page you came from stay. Ask\'s chats stay in Ask.</string>
+    <string name="shell_clear_history_body">This forgets what you\'ve opened, searched and played, and empties the rail. Pinned items and the page you came from stay.</string>
     <!-- The Clear history dialog's confirm button. -->
     <string name="shell_clear">Clear</string>
     <string name="shell_clear_history">Clear history</string>

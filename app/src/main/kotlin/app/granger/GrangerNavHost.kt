@@ -537,6 +537,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             plays = if (Features.PLAYER) container.playback.observeRecentPlays(RailViewModel.SCAN) else flowOf(emptyList()),
             recentPlay = container.playback::recentPlay,
             resumer = if (Features.PLAYER) container.playResumer else null,
+            showChats = container.askOn,
             voice = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub.ui.map { it.now as? NowPlaying.Voice } else flowOf(null),
             stopVoice = { if (Features.PLAYER) container.playerHub.stopVoice() },
         )
@@ -838,10 +839,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         reading = readerTabId != null,
     )
 
-    // Research runs only on phones of the ASK tier or better; below that, the rail and the selection menus leave it out.
-    // So does a phone whose model failed its self-check; Readiness says why and can try again.
+    // Research runs only where Ask is on (the feature, and a phone of the ASK tier or better); elsewhere the rail and the
+    // selection menus leave it out. So does a phone whose model failed its self-check; Readiness says why and can try again.
     val askReadiness by container.modelManager.readiness.collectAsStateWithLifecycle()
-    val showResearch = container.deviceTier >= DeviceTier.ASK && askReadiness != ResearchReadiness.FAILED_CHECK
+    val showResearch = container.askOn && askReadiness != ResearchReadiness.FAILED_CHECK
     SideEffect {
         SelectionBridge.researchAvailable = showResearch
         SelectionBridge.readAloudAvailable = Features.READ_ALOUD && Features.PLAYER
@@ -983,7 +984,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             }
             composable<BrowseRoute> {
                 BrowseScreen(
-                    viewModel { BrowseViewModel(container.shelves, container.library, container.catalog, container.downloads.records, countryCode = container.phoneCountry, knowledge = container.knowledgeLanguages.languages, askOffered = container.deviceTier >= DeviceTier.ASK) },
+                    viewModel { BrowseViewModel(container.shelves, container.library, container.catalog, container.downloads.records, countryCode = container.phoneCountry, knowledge = container.knowledgeLanguages.languages, askOffered = container.askOn) },
                     packsFolder = container.packDirs().firstOrNull()?.path.orEmpty(),
                     downloadsBadge = downloadsBadge,
                     actions = BrowseActions(
@@ -1234,7 +1235,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     viewModel = viewModel {
                         SourceViewModel(
                             source, container.catalog, container.downloads, container.library, container.bookshelf, container.volumes,
-                            container.downloadPrefs, container.deviceTier, container.appScope, domain = route.domain,
+                            container.downloadPrefs, container.deviceTier, container.appScope, askOn = container.askOn, domain = route.domain,
                             family = route.family, knowledge = container.knowledgeLanguages.languages,
                             voiceTitles = app.granger.core.speech.VoiceTitles.of(appContext),
                         )
@@ -1467,7 +1468,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     viewModel = viewModel {
                         OnboardingViewModel(
                             container.catalog, container.library, container.downloads, container.volumes, container.downloadPrefs,
-                            container.deviceTier, container.totalRamBytes, container.onboardingPrefs,
+                            container.deviceTier, container.totalRamBytes, container.onboardingPrefs, askOn = container.askOn,
                             knowledge = container.knowledgeLanguages.languages,
                             setKnowledge = container.knowledgeLanguages::set,
                             phoneLocales = container.appLanguages::phoneLocales,
@@ -1508,13 +1509,13 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     viewModel = viewModel {
                         ReadinessViewModel(
                             container.downloads, container.library, container.bookshelf, container.catalog, container.volumes,
-                            container.deviceTier, container.totalRamBytes, container.appScope,
+                            container.deviceTier, container.totalRamBytes, container.appScope, askOn = container.askOn,
                             knowledge = container.knowledgeLanguages.languages, appLanguage = container.appLanguages.code,
                         )
                     },
                     onBack = { nav.popBackStack() },
                     onOpenKiwix = { domain -> nav.navigate(SourceRoute(CatalogScope.KIWIX, domain)) },
-                    askCheck = container.modelManager.checkFailure.collectAsStateWithLifecycle().value,
+                    askCheck = container.modelManager.checkFailure.collectAsStateWithLifecycle().value.takeIf { container.askOn },
                     onRetryAsk = { container.appScope.launch { container.modelManager.retryCheck() } },
                 )
             }

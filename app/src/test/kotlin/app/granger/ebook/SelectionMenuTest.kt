@@ -91,7 +91,9 @@ class SelectionMenuTest {
         SelectionBridge.researchAvailable = false
         assertThat(shown().visibleTitles()).doesNotContain("Ask")
         SelectionBridge.researchAvailable = true
-        assertThat(shown().visibleTitles()).containsExactly("Copy", "Highlight", "Note", "Search", "Ask").inOrder()
+        // While Ask rests (Plan SQ, Features.RESEARCH off) no phone offers it.
+        val ask = if (app.granger.Features.RESEARCH) listOf("Ask") else emptyList()
+        assertThat(shown().visibleTitles()).containsExactlyElementsIn(listOf("Copy", "Highlight", "Note", "Search") + ask).inOrder()
     }
 
     @Test fun theOpenMenuIsKnownUntilItCloses() {

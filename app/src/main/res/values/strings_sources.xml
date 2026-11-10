@@ -37,7 +37,7 @@
     <string name="sources_link_archive_music">Archive.org music</string>
     <string name="sources_link_archive_music_sub">Recordings from the Internet Archive</string>
     <string name="sources_link_models">Models and voices</string>
-    <string name="sources_link_models_sub">What Ask and Read aloud run on</string>
+    <string name="sources_link_models_sub">What Read aloud runs on</string>
     <!-- Imports the user's own books from files on the phone. -->
     <string name="sources_import_own">Import your own</string>
     <string name="sources_import_own_sub">EPUB, PDF, TXT or Markdown books from this phone</string>
@@ -223,6 +223,7 @@
     <!-- What a model is for. -->
     <string name="sources_model_not_used">Not used</string>
     <string name="sources_model_used_by_ask">Used by Ask</string>
+    <string name="sources_model_ask_resting">Ask is resting for now. You can remove this model to free its space.</string>
     <string name="sources_model_not_used_yet">Not used yet</string>
     <string name="sources_voice">Read-aloud voice</string>
 

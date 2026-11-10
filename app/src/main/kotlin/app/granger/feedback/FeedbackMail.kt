@@ -8,7 +8,6 @@ import android.net.Uri
 import androidx.core.content.FileProvider
 import app.granger.AppContainer
 import app.granger.BuildConfig
-import app.granger.core.ai.DeviceTier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -82,7 +81,11 @@ object FeedbackMail {
             ?: volumes.firstOrNull()
         FeedbackFacts(
             build = BuildFacts.ofThisPhone(),
-            tier = if (container.deviceTier >= DeviceTier.ASK) "Library and Ask" else "Library only",
+            tier = when {
+                container.askOn -> "Library and Ask"
+                !app.granger.Features.RESEARCH -> "Library (Ask off)"
+                else -> "Library only"
+            },
             freeBytes = chosen?.freeBytes,
             packs = container.library.packs.first().size,
             books = FeedbackReport.bookCount(container.bookshelf.books.first()),

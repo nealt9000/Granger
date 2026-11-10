@@ -11,6 +11,8 @@
     <string name="readiness_memory">%1$s of memory</string>
     <string name="readiness_tier_library_only">Library only: Ask needs a phone with 6 GB of memory</string>
     <string name="readiness_tier_ask">Library and Ask</string>
+    <!-- While Ask rests on every phone (Plan SQ): no word about memory. -->
+    <string name="readiness_tier_library">Library</string>
     <string name="readiness_refresh_catalog">Refresh the catalog to see your coverage.</string>
     <!-- The Home strip's sentence when nothing needs doing. -->
     <string name="readiness_ready">Ready.</string>

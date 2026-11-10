@@ -117,6 +117,8 @@ class OnboardingViewModel(
     private val tier: DeviceTier,
     private val totalRamBytes: Long,
     private val onboardingPrefs: OnboardingPrefs,
+    /** Ask runs here (the app's `askOn`): off, onboarding words the phone as a library and offers no Ask line. */
+    private val askOn: Boolean = tier >= DeviceTier.ASK,
     private val dense: Boolean = app.granger.DENSE_RETRIEVAL,
     private val countryCode: String = java.util.Locale.getDefault().country,
     private val offerVoice: Boolean = app.granger.Features.READ_ALOUD && app.granger.Features.PLAYER,
@@ -229,7 +231,7 @@ class OnboardingViewModel(
         secondLine?.takeIf { c.secondChosen }?.items?.mapTo(chosen) { it.id }
         val additions = catalog?.let { OnboardingModel.additions(it, f.installed, chosen, f.languages, appLang) }.orEmpty()
         val picked = additions.filter { it.useCase.id in c.useCaseIds }
-        val askLine = catalog?.let { OnboardingModel.askLine(it, tier, dense, f.installed) }
+        val askLine = catalog?.takeIf { askOn }?.let { OnboardingModel.askLine(it, tier, dense, f.installed) }
         // Under 6 GB the Granger voices may stop mid-read (ONNX Runtime keeps ~420 MB): the phone's voice instead (Plan E1 item 2).
         val voiceLine = catalog?.takeIf { offerVoice && tier >= DeviceTier.ASK }?.let { OnboardingModel.voiceLine(it, f.installed) }
         val review = OnboardingModel.review(
@@ -281,17 +283,17 @@ class OnboardingViewModel(
 
     /** Memory as Readiness words it ([formatBytes]), so the two never disagree. */
     private fun intro(): UiText =
-        UiText.Res(if (tier >= DeviceTier.ASK) R.string.onboarding_intro else R.string.onboarding_intro_library)
+        UiText.Res(if (askOn) R.string.onboarding_intro else R.string.onboarding_intro_library)
 
-    private fun tierLine(): UiText = when (tier) {
-        DeviceTier.LIBRARY_ONLY -> UiText.Res(R.string.onboarding_tier_library, formatBytes(totalRamBytes))
-        DeviceTier.ASK -> UiText.Res(R.string.onboarding_tier_ask, formatBytes(totalRamBytes))
-    }
+    private fun tierLine(): UiText =
+        if (askOn) UiText.Res(R.string.onboarding_tier_ask, formatBytes(totalRamBytes))
+        else UiText.Res(R.string.onboarding_tier_library, formatBytes(totalRamBytes))
 
-    /** [offered]: Pick a start offers Ask's models. */
-    private fun researchLine(offered: Boolean): UiText = when (tier) {
-        DeviceTier.LIBRARY_ONLY -> UiText.Res(R.string.onboarding_research_needs_memory)
-        DeviceTier.ASK -> UiText.Res(if (offered) R.string.onboarding_research_offered else R.string.onboarding_research_runs)
+    /** [offered]: Pick a start offers Ask's models. None while Ask is off: it isn't the phone's memory that stops it. */
+    private fun researchLine(offered: Boolean): UiText? = when {
+        !askOn && !app.granger.Features.RESEARCH -> null
+        tier == DeviceTier.LIBRARY_ONLY -> UiText.Res(R.string.onboarding_research_needs_memory)
+        else -> UiText.Res(if (offered) R.string.onboarding_research_offered else R.string.onboarding_research_runs)
     }
 
     fun refreshVolumes() {

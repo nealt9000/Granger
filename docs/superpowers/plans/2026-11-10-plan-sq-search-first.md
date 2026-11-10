@@ -51,13 +51,17 @@ Defaults I took (Neal can override):
 Branch `sq-search-first`, worktree `.claude/worktrees/sq`. Each phase merges on its own.
 
 ### Phase 0: Ask off (ships first, small)
-- **Task 0.1, the flag.** One `askEnabled` (false in release and by default in debug, with a debug-only toggle). It
+- **Task 0.1, the flag.** `Features.RESEARCH = false` in every build, and `askOn` on the app container where the
+  tier check meant "Ask runs here" (no debug toggle: flip the constant to work on Ask). It
   hides Ask's rail tool (`GrangerShell.kt:124` gate), the reader's selection-menu Ask, the Home and Search "Ask"
   entry points, and Ask lines in onboarding (`OnboardingModel.ASK`) and readiness. Saved chats stay in the DB, unseen.
-- **Task 0.2, models.** E2B leaves the catalog's default sets, the tiers and Get more. On a phone that already has
-  E2B, Storage shows a one-time "Ask is paused: free 2.5 GB?" with Remove / Keep. Nothing is deleted without a tap. The
-  embedder stays (Search uses it). Re-sign the catalog.
-- **Task 0.3, words outside the app.** Site (opengranger.org: hero, Why, librarian lines, /test, /prueba), the Play
+- **Task 0.2, models.** E2B is no longer offered (`canRun(SMALL)` needs `Features.RESEARCH`, so presets and starts
+  skip it). Get more lists it only where it is installed, with "Ask is resting for now. You can remove this model to
+  free its space." and its usual Remove. Nothing is deleted without a tap, and there's no pop-up. The embedder stays
+  listed (Search will use it). No catalog change is needed.
+  *As built:* vectors stop downloading too (`meaningSearch`, = `askOn` until Phase 4/6), and so does on-phone embedding
+  of added books. Vectors already installed stay, removed only with their pack.
+- **Task 0.3, words outside the app.** Draft: `docs/friend-testing/ask-off-copy-2026-11-10.md`. Site (opengranger.org: hero, Why, librarian lines, /test, /prueba), the Play
   listing (en + es-419), tester notes, privacy page if it names Ask. A short "Ask is resting" note for testers.
   Neal approves the copy before anything is published.
 - Done: release build with no Ask anywhere; tests green; the Pixel 6 walk shows none.

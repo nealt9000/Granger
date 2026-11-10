@@ -165,9 +165,11 @@ class RailTest {
         compose.onAllNodesWithContentDescription("Ask").assertCountEquals(0)
     }
 
-    @Test fun askShowsOnAnAskTierPhone() {
+    @Test fun askShowsOnAnAskTierPhoneOnlyWhileAskIsOn() {
         shell(showResearch = true)
-        compose.onNodeWithContentDescription("Ask").assertExists()
+        // Plan SQ: Ask rests in every build, whatever the phone.
+        if (app.granger.Features.RESEARCH) compose.onNodeWithContentDescription("Ask").assertExists()
+        else compose.onNodeWithContentDescription("Ask").assertDoesNotExist()
     }
 
     @Test fun homeIsTheFirstTool() {
@@ -287,8 +289,12 @@ class RailTest {
     private fun tilesShown() = listOf("Owls", "Gone, not available", "Recent search: cats", "Ask chat: About owls")
         .count { compose.onAllNodesWithContentDescription(it).fetchSemanticsNodes().isNotEmpty() }
 
+    /** The tile slot Ask's tool frees while Ask rests (Plan SQ). */
+    private val askFreed = if (app.granger.Features.RESEARCH) 0 else 1
+
     private fun assertToolsAndSettingsShow() {
-        for (tool in listOf("Home", "Search", "Ask", "Browse", "Library", "Listen", "Settings")) {
+        val tools = listOf("Home", "Search", "Ask", "Browse", "Library", "Listen", "Settings")
+        for (tool in tools.filter { it != "Ask" || app.granger.Features.RESEARCH }) {
             compose.onNodeWithContentDescription(tool).assertExists()
         }
     }
@@ -307,8 +313,9 @@ class RailTest {
         rail = RailUi(listOf(owls, gone, cats, chat))
         shell(showResearch = true)
         assertToolsAndSettingsShow()
-        assertThat(tilesShown()).isEqualTo(3)
-        compose.onAllNodesWithContentDescription("Ask chat: About owls").assertCountEquals(0)
+        // Without Ask's tool (Plan SQ) the slot it took holds the fourth item.
+        assertThat(tilesShown()).isEqualTo(3 + askFreed)
+        if (app.granger.Features.RESEARCH) compose.onAllNodesWithContentDescription("Ask chat: About owls").assertCountEquals(0)
         compose.onNodeWithContentDescription("History").assertExists()
     }
 
@@ -317,7 +324,7 @@ class RailTest {
         rail = RailUi(listOf(owls, gone, cats, chat))
         shell(showResearch = true)
         assertToolsAndSettingsShow()
-        assertThat(tilesShown()).isEqualTo(0)
+        assertThat(tilesShown()).isEqualTo(0 + askFreed)
         compose.onNodeWithContentDescription("History").assertExists()
     }
 

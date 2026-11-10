@@ -583,6 +583,13 @@ class AppContainer(context: Context) {
         .also { context.getSystemService(ActivityManager::class.java).getMemoryInfo(it) }
         .totalMem
     val deviceTier: DeviceTier = DeviceTiers.forTotalRam(totalRamBytes)
+    /** Ask runs on this phone: the feature is on ([Features.RESEARCH]) and the phone has the memory for it. */
+    val askOn: Boolean = Features.RESEARCH && deviceTier >= DeviceTier.ASK
+    /**
+     * Search vectors are fetched and books you add are embedded. Only Ask reads them today; Plan SQ Phase 4 brings them
+     * to Search, and Phase 6 decides which phones get them.
+     */
+    val meaningSearch: Boolean = askOn
     /** Where the phone is, for the suggested map: network, then SIM, then locale (Plan E1 item 1). */
     private val appContext: Context = context.applicationContext
     val phoneCountry: String get() = app.granger.device.PhoneCountry.of(appContext)
@@ -604,8 +611,9 @@ class AppContainer(context: Context) {
         publicKey = Base64.getDecoder().decode(BuildConfig.CATALOG_PUBLIC_KEY),
         cacheDir = File(context.filesDir, "catalog"),
         includeUnevaluatedModels = BuildConfig.DEBUG,
-        // Search vectors only serve Ask: a library phone neither counts nor downloads them (Plan E1 phone check).
-        includeVectors = deviceTier >= DeviceTier.ASK,
+        // Search vectors only serve Ask: a phone without it neither counts nor downloads them (Plan E1 phone check). Vectors
+        // already installed stay (VectorDownloads removes them only with their pack).
+        includeVectors = meaningSearch,
     )
 
     val archiveClient = ArchiveOrgClient(http, archiveUserAgent)
@@ -831,7 +839,7 @@ class AppContainer(context: Context) {
     /** A new or found book: its words are indexed first, so the keyword search has it at once; its vectors follow. */
     suspend fun prepareBooks() {
         bookIndex.indexPending()
-        bookVectors.embedPending()
+        if (meaningSearch) bookVectors.embedPending()
     }
 
     /**
