@@ -273,7 +273,18 @@ Unsafe ids: 0
 
 Failed to pin: 0
 
+Newer snapshots held back:
+  based.cooking_en_all: held at 2026-08-11, not 2026-11-09: would drop its search vectors (rebuild for the new file)
+  cd3wdproject.org_en_all: held at 2025-11-12, not 2026-11-07: 1 link(s) not answering yet (download.kiwix.org: HTTP 404)
+  htdp.org_en_all: held at 2026-08-09, not 2026-11-07: 1 link(s) not answering yet (download.kiwix.org: HTTP 404)
+  openzim_en_all: held at 2026-08-07, not 2026-11-05: 2 link(s) not answering yet (download.kiwix.org: HTTP 404)
+  wiktionary_en_all: held at 2026-08-13, not 2026-11-02: 1 link(s) not answering yet (download.kiwix.org: HTTP 404)
+  xkcd.com_en_all: held at 2026-08-07, not 2026-11-05: 1 link(s) not answering yet (download.kiwix.org: HTTP 404)
+
 Search vectors left out:
+  none
+
+Time indexes left out:
   none
 
 Readiness tiers in en, essential / comprehensive (one pack per ZIM, held ZIMs and the region's map left out):
@@ -284,8 +295,8 @@ Readiness tiers in en, essential / comprehensive (one pack per ZIM, held ZIMs an
   technology: 0.9 GB / 11.3 GB
   maps: 1.2 GB / 4.2 GB
   reference: 7.2 GB / 34.6 GB
-  literature: 0.2 GB / 9.9 GB
-  thought: 0.0 GB / 3.9 GB
+  literature: 0.2 GB / 10.0 GB
+  thought: 0.1 GB / 3.9 GB
   All: 17.8 GB / 99.4 GB
 
 Readiness tiers in es, essential / comprehensive (one pack per ZIM, held ZIMs and the region's map left out):

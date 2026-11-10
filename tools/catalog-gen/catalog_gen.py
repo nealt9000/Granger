@@ -5,7 +5,7 @@ Packs come from Kiwix's OPDS catalog plus the hand-picked list in curated.json; 
 one snapshot by its sha256 from Kiwix's metalink file. Models are listed in curated.json as-is.
 
   catalog_gen.py keygen --out ~/.config/granger/catalog-signing.key   # once; prints the public key
-  catalog_gen.py build  --curated tools/catalog-gen/curated.json --out catalog/catalog.json
+  catalog_gen.py build  --curated tools/catalog-gen/curated.json --out catalog/catalog.json [--previous catalog/catalog.json]
   catalog_gen.py check-links catalog/catalog.json                       # HEADs every download URL (Plan DL)
   catalog_gen.py sign   --key ~/.config/granger/catalog-signing.key catalog/catalog.json
   catalog_gen.py verify --public-key catalog/public-key.txt catalog/catalog.json
@@ -438,8 +438,59 @@ def book_entries(curated, head=http_head, root=None):
     return descriptor["collection"], entries
 
 
-def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=None):
-    """The catalog. With a "kiwix" setting, the Kiwix report's lines are appended to [report]."""
+PIN_KEYS = ("sha256", "sizeBytes", "urls", "snapshotDate", "zimUuid", "hasFulltextIndex")
+
+
+def hold_back(packs, previous, derived, status=None, sleep=time.sleep):
+    """
+    Upkeep (2026-11-09): a pack moves to a newer snapshot only when that is safe; otherwise it keeps the [previous]
+    catalog's pin (PIN_KEYS) and a report line says why. Unsafe means either
+      - a link of the new file doesn't answer yet (Kiwix's redirector sends some downloads to mirrors that haven't
+        synced a file published days ago), or
+      - the pack carried search vectors or a time index and no descriptor is built from the new file yet, so the move
+        would silently drop them. [derived] maps "vectors" / "timeIndex" to the sourceSha256s descriptors exist for.
+    Flavours of one ZIM name move together, since vectors and time indexes are shared across them. A pack is held only
+    when its previous file still answers; if that is gone too it moves anyway, and the line says so.
+    Returns the report lines, one per ZIM name held or forced; packs is changed in place.
+    """
+    status = status or http_status
+    before = {p["id"]: p for p in previous.get("packs", [])}
+    groups = {}
+    for p in packs:
+        groups.setdefault(p.get("zimName") or p["id"], []).append(p)
+    lines = []
+    for name, group in sorted(groups.items()):
+        moved = [p for p in group if p["id"] in before and p.get("sha256") != before[p["id"]].get("sha256")]
+        if not moved:
+            continue
+        why = []
+        for key, label in (("vectors", "search vectors"), ("timeIndex", "time index")):
+            if any(before[p["id"]].get(key) for p in group if p["id"] in before) and \
+                    not any(p.get("sha256") in derived.get(key, ()) for p in group):
+                why.append(f"would drop its {label} (rebuild for the new file)")
+        dead = dead_links([u for p in moved for u in p.get("urls", [])], status, sleep=sleep)
+        if dead:
+            why.append(f"{len(dead)} link(s) not answering yet ({dead[0][0].split('/')[2]}: {dead[0][1]})")
+        if not why:
+            continue
+        old, new = before[moved[0]["id"]].get("snapshotDate"), moved[0].get("snapshotDate")
+        if dead_links([u for p in moved for u in before[p["id"]].get("urls", [])], status, sleep=sleep):
+            lines.append(f"  {name}: moved to {new} anyway, {old} no longer answers; " + "; ".join(why))
+            continue
+        for p in moved:
+            p.update({k: before[p["id"]][k] for k in PIN_KEYS if k in before[p["id"]]})
+            for k in PIN_KEYS:
+                if k not in before[p["id"]]:
+                    p.pop(k, None)
+        lines.append(f"  {name}: held at {old}, not {new}: " + "; ".join(why))
+    return lines
+
+
+def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=None, previous=None, status=None):
+    """
+    The catalog. With a "kiwix" setting, the Kiwix report's lines are appended to [report]. With a [previous] catalog,
+    packs whose newer snapshot isn't safe to take yet keep their previous pin ([hold_back]).
+    """
     now = now or datetime.datetime.now(datetime.timezone.utc)
     kiwix = curated.get("kiwix")
     if kiwix is None:
@@ -464,6 +515,17 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
         packs += bulk
         if report is not None:
             report += lines
+    if previous is not None:
+        base = pathlib.Path(root or REPO_ROOT)
+        derived = {}
+        if "vectors" in curated:
+            derived["vectors"] = {d["sourceSha256"] for d in vector_descriptors(base / curated["vectors"]["releases"])}
+        if "timeIndex" in curated:
+            derived["timeIndex"] = {d["sourceSha256"] for d in
+                                    vector_descriptors(base / curated["timeIndex"]["releases"], TIMEINDEX_KEYS)}
+        held = hold_back(packs, previous, derived, status)
+        if report is not None:
+            report += ["", "Newer snapshots held back:"] + (held or ["  none"])
     models = curated["models"]
     voices = curated.get("voices", [])       # Plan V1: one zip per voice, hand-written like models
     books, collections, collection_rows = [], {}, {}
@@ -1092,6 +1154,7 @@ def main(argv):
     sub = parser.add_subparsers(dest="command", required=True)
     p = sub.add_parser("keygen"); p.add_argument("--out", required=True)
     p = sub.add_parser("build"); p.add_argument("--curated", required=True); p.add_argument("--out", required=True)
+    p.add_argument("--previous", help="the catalog now published: newer snapshots that aren't safe yet keep its pins")
     p = sub.add_parser("check-links"); p.add_argument("file")
     p = sub.add_parser("sign"); p.add_argument("file")
     group = p.add_mutually_exclusive_group(required=True)
@@ -1110,7 +1173,8 @@ def main(argv):
         print(keygen(args.out))
     elif args.command == "build":
         report, tables = [], []
-        catalog = build(json.loads(pathlib.Path(args.curated).read_text()), report=report)
+        previous = json.loads(pathlib.Path(args.previous).read_text(encoding="utf-8")) if args.previous else None
+        catalog = build(json.loads(pathlib.Path(args.curated).read_text()), report=report, previous=previous)
         if catalog.get("readiness"):
             for language in tier_languages(catalog):  # one table per language (Plan L3)
                 tables += ["", f"Readiness tiers in {language}, essential / comprehensive "
