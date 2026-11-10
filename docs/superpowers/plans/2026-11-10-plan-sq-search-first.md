@@ -77,8 +77,13 @@ Branch `sq-search-first`, worktree `.claude/worktrees/sq`. Each phase merges on 
   `metrics.matches`, plus graders on a sample); latency p50/p95 for titles and for Best matches.
 - **Task 1.3, run the baseline** on today's Search (questions scored on the Articles group, standing in for Best matches)
   and on Ask's ranker as a Best-matches stand-in. **Checkpoint with Neal: set the numeric bars from the baseline.**
-  Proposed starting bars: known-item @1 ≥ 85%, @3 ≥ 95%; questions top 5 ≥ 55%, top 10 ≥ 70%; titles < 300 ms per
-  keystroke; Best matches < 2.5 s after Enter on the Pixel 6.
+  *Done 2026-11-10* (baseline in `docs/search/sq-results-2026-11.md`). **Bars (Neal):** known items: right item first
+  ≥ 85% (today 63%), top 3 ≥ 95% (76%), typos top 3 ≥ 70% (0%), prefixes top 3 ≥ 75% (58% en / 33% es), Spanish within
+  5 points of English. Questions: the answer's article or book in Best matches' top 5 ≥ 50% of the dev set (today's
+  page @5: 13%), top 10 ≥ 65%, confirmed once on held-out. Speed on the Pixel 6, p95: titles < 0.3 s per keystroke, Best
+  matches < 2.5 s after Enter.
+  *Phase 2 note:* the vectors are already 256 dims (~1.5 GB for the full set), so the 10–14 s is mostly reading from
+  flash; Task 2.1's shorter-vector pass is unlikely to help and the clustered index (2.2) is the main route.
 
 ### Phase 2: Fast meaning search (spike, go/no-go)
 - **Task 2.1, try the cheap route first: shorter vectors.** Score every row on its first 128–256 dims (EmbeddingGemma is
