@@ -163,6 +163,7 @@ def check(out_dir, published_path, curated_path, build=cg.build, status=None, sl
         findings.append(finding("build-failed", [], str(e)))
     if candidate is not None:
         (out_dir / "candidate.json").write_text(json.dumps(candidate, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        lines += cg.tier_tables(candidate)  # as `catalog_gen.py build` ends kiwix-report.txt
         (out_dir / "candidate-report.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
         findings += compare(published, candidate, holds)
         findings += budget_findings(candidate)

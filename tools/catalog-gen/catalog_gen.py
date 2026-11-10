@@ -1003,6 +1003,17 @@ def one_per_zim(items, zim_of, contains):
     return out
 
 
+def tier_tables(catalog):
+    """The readiness-tier tables that end kiwix-report.txt: one per language (Plan L3)."""
+    tables = []
+    if catalog.get("readiness"):
+        for language in tier_languages(catalog):
+            tables += ["", f"Readiness tiers in {language}, essential / comprehensive "
+                           "(one pack per ZIM, held ZIMs and the region's map left out):"]
+            tables += [f"  {d}: {e / 1e9:.1f} GB / {c / 1e9:.1f} GB" for d, (e, c) in tier_sizes(catalog, language).items()]
+    return tables
+
+
 def tier_sizes(catalog, language="en"):
     """
     Per readiness domain and for "All", (essential, comprehensive) bytes as the presets count them: one pack per ZIM,
@@ -1185,14 +1196,10 @@ def main(argv):
     if args.command == "keygen":
         print(keygen(args.out))
     elif args.command == "build":
-        report, tables = [], []
+        report = []
         previous = json.loads(pathlib.Path(args.previous).read_text(encoding="utf-8")) if args.previous else None
         catalog = build(json.loads(pathlib.Path(args.curated).read_text()), report=report, previous=previous)
-        if catalog.get("readiness"):
-            for language in tier_languages(catalog):  # one table per language (Plan L3)
-                tables += ["", f"Readiness tiers in {language}, essential / comprehensive "
-                               "(one pack per ZIM, held ZIMs and the region's map left out):"]
-                tables += [f"  {d}: {e / 1e9:.1f} GB / {c / 1e9:.1f} GB" for d, (e, c) in tier_sizes(catalog, language).items()]
+        tables = tier_tables(catalog)
         report += tables
         out = pathlib.Path(args.out)
         out.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

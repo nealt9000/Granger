@@ -57,7 +57,8 @@ def test_link_findings_split_published_from_candidate():
     assert kinds(found) == [("candidate-dead-link", ("b",)), ("dead-link", ("a",))]
 
 
-def test_check_writes_findings_report_and_candidate(tmp_path):
+def test_check_writes_findings_report_and_candidate(tmp_path, monkeypatch):
+    monkeypatch.setattr(upkeep.cg, "tier_tables", lambda c: ["", "Readiness tiers in en: ..."])
     published = cat(pack("cook", "c1"))
     (tmp_path / "pub.json").write_text(json.dumps(published))
     (tmp_path / "cur.json").write_text("{}")
@@ -72,6 +73,7 @@ def test_check_writes_findings_report_and_candidate(tmp_path):
     data = json.loads((tmp_path / "out/findings.json").read_text())
     assert data["findings"][0]["action"] == "apply-candidate" and data["links"] == 1
     assert json.loads((tmp_path / "out/candidate.json").read_text())["packs"][0]["sha256"] == "c2"
+    assert (tmp_path / "out/candidate-report.txt").read_text() == "built\n\nReadiness tiers in en: ...\n"
     md = (tmp_path / "out/report.md").read_text()
     assert "Ready to apply: 1" in md and "**snapshot-ready**: cook: 2026-08 → 2026-11" in md
 
