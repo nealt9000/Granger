@@ -167,3 +167,38 @@ What got it there, from the first streaming run (`px-v2c-*`: first step p95 4.0 
 - **Best matches** (6e7d8175): the dense hits' articles are rebuilt four at a time (1.1–2.9 s one after another), and
   Search loads the embedder and each pack's title index when it opens (the first query's embedding took 2.6 s, its titles
   1.4 s). Emulator dev questions unchanged (Best @5 94/148); first step @5 there is 99/148, above the final ranking's 94.
+
+### 4.4 Names and Best matches, round 2 (runs `sq-t7-ki`, `sq-best-dev5`, emulator)
+
+**Known items (201):**
+
+| | Before (`sq-t4-ki`) | Now (`sq-t7-ki`) | Bar |
+|---|---|---|---|
+| Right item first | 78% | **90%** | 85% ✓ |
+| Top 3 | 91% | **93%** | 95% ✗ |
+| Typos in top 3 (en / es) | 68% / 64% | 72% / 82% | 70% ✓ |
+| Prefixes in top 3 (en / es) | 67% / 50% | 67% / 83% | 75% (en ✗) |
+| Spanish right first (vs English) | 61% (85%) | 86% (92%) | within 5 points (✗ by 1) |
+
+- **One row per title** (d14aad78, Neal's pick): the same folded title from several packs or the shelf is one row, the
+  others named under it ("Also in Wikivoyage (ES)"), each a link and a TalkBack action. ~20 of the 45 first-place
+  misses were such ties ("Turingia" in Spanish Wikipedia and Wikivoyage; "Jacob's Room" on the shelf and in Classics).
+  The scorer finds a target anywhere in its row.
+- **Typo probes** (5d03e6ef): one-letter words are left out ("Wyne's World" asked for "s world"), and each long word's
+  initial is tried. Near titles count words of two letters or more.
+- **Not done:** one-word typos ("Misoula", "Tzone", "Kanai") are most of the 14 left at 3. libkiwix's SpellingsDB
+  (`getSpellingCorrections`) would reach them, but building it on the emulator ran the app out of native memory (Scudo
+  map failure) on the big packs; dropped. Several of the rest are arguable targets ("flatus" → Flatulence, Wikipedia's
+  own redirect, ahead of "Flatus bag").
+
+**Best matches** (6edfdd7b): Ask's gate is off (gated, "how can a huge steel ship float" lost its dense hits to an
+empty keyword list), keyword-only passages score with cosine 0.66 (`merge.py` on the recorded dev retrieval: @5 68% →
+70%, @10 72% → 77%), the dense ranking stands when nothing clears the floor, and one article in two packs of a family is
+one row. The scorer now counts the answer's article in any pack of its family (as known items do); on that count the
+first step's lead over the final ranking (68% vs 64%) was the same article in another Wikipedia pack.
+
+| Dev questions (148) | `sq-best-dev` (rescored) | `sq-best-dev5` | Bar |
+|---|---|---|---|
+| Best @5 | 101 (68%) | **102 (69%)** | 50% ✓ |
+| Best @10 | 113 (76%) | **115 (78%)** | 65% ✓ |
+| First step @5 | 101 (68%) | 101 (68%) | |
