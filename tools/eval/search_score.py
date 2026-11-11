@@ -169,12 +169,62 @@ def score_questions(items, run):
     return lines
 
 
+def score_quotes(items, run):
+    """Quote sets (tools/eval/quotes.py): is the quote's book (and chapter) among Books and Best matches."""
+    keys = ("books1", "books3", "chapter3", "best5", "bestch5", "page")
+    slices = {}
+    controls = [0, 0]
+    misses = []
+    for it in items:
+        r = run.get(it["id"])
+        if r is None:
+            continue
+        if it["book"] is None:
+            controls[0] += 1
+            controls[1] += not r.get("books")
+            continue
+        books = r.get("books", [])
+        best = [h for h in r.get("best", []) if h.get("kind") == "BOOK"]
+        best_all = r.get("best", [])
+        rank = next((n for n, h in enumerate(books, 1) if h.get("source") == it["book"]), None)
+        ch = next((n for n, h in enumerate(books, 1) if h.get("source") == it["book"] and h.get("href") == it["href"]), None)
+        brank = next((n for n, h in enumerate(best_all, 1) if h.get("source") == it["book"]), None)
+        bch = next((n for n, h in enumerate(best_all, 1) if h.get("source") == it["book"] and h.get("path") == it["href"]), None)
+        got = {
+            "books1": rank == 1, "books3": bool(rank and rank <= 3), "chapter3": bool(ch and ch <= 3),
+            "best5": bool(brank and brank <= 5), "bestch5": bool(bch and bch <= 5),
+        }
+        got["page"] = got["chapter3"] or got["bestch5"]
+        if not got["page"]:
+            misses.append((it, [h.get("title") for h in books[:2]], [h.get("title") for h in best_all[:2]]))
+        for name in ("all", it["kind"], it["language"]):
+            row = slices.setdefault(name, [0] + [0] * len(keys))
+            row[0] += 1
+            for i, k in enumerate(keys):
+                row[i + 1] += got[k]
+    lines = ["| Slice | n | Books @1 | Books @3 | Chapter in Books @3 | Best @5 (book) | Best @5 (chapter) | Chapter on page |",
+             "|---|---|---|---|---|---|---|---|"]
+    for name, row in slices.items():
+        lines.append("| %s | %d | %s |" % (name, row[0], " | ".join(pct(v, row[0]) for v in row[1:])))
+    if controls[0]:
+        lines.append("\nControls (not in the collection): %d of %d with no Books hits" % (controls[1], controls[0]))
+    return lines, misses
+
+
 def cmd_score(args):
     items = load_items(args.set)
     run = load_run(args.run)
     is_known = "query" in items[0] and "pack" in items[0]
+    is_quote = "book" in items[0] and "href" in items[0]
     print("Run %s: %d of %d items answered\n" % (Path(args.run).name, len(run), len(items)))
-    if is_known:
+    if is_quote:
+        lines, misses = score_quotes(items, run)
+        print("\n".join(lines))
+        if args.misses:
+            print("\nChapter not on the page:")
+            for it, books, best in misses:
+                print("  %-9s %-8s %-44s want %-26s books %s best %s" % (it["id"], it["kind"], it["query"][:44], it["book"][13:39], books, best))
+    elif is_known:
         lines, misses = score_known(items, run)
         print("\n".join(lines))
         if args.misses:

@@ -126,9 +126,11 @@ class BookIndex(
         if (bookIds.isEmpty()) return emptyMap()
         val counts = HashMap<String, Int>()
         try {
+            // CROSS JOIN keeps book_text first, so the match runs once. With a plain JOIN SQLite may walk the books'
+            // chunks and re-run the whole match for each one: minutes for a quote of common words ("does not in").
             db.openHelper.readableDatabase.query(
                 SimpleSQLiteQuery(
-                    "SELECT c.bookId, COUNT(*) FROM book_text t JOIN book_chunks c ON c.id = t.docid " +
+                    "SELECT c.bookId, COUNT(*) FROM book_text t CROSS JOIN book_chunks c ON c.id = t.docid " +
                         "WHERE book_text MATCH ? AND c.bookId IN (${bookIds.joinToString(",") { "?" }}) GROUP BY c.bookId",
                     arrayOf<Any>(match, *bookIds.toTypedArray()),
                 ),
