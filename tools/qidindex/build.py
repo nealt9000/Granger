@@ -80,9 +80,27 @@ def build(paths, items, out: Path, source: Path, source_sha256: str) -> dict:
     return counts
 
 
-def read_items(path):
+def path_of(line: str):
+    """The "t" field of a wdfilter line without parsing it all: wdfilter writes q, then t, first (json.dumps order)."""
+    i = line.find('"t": "')
+    if i < 0:
+        return None
+    j = i + 6
+    while True:
+        k = line.find('"', j)
+        if k < 0:
+            return None
+        if line[k - 1] != "\\" or line[k - 2] == "\\":
+            return json.loads(line[i + 5:k + 1])
+        j = k + 1
+
+
+def read_items(path, wanted=None):
+    """wdfilter records; with [wanted], only the lines whose path is in it are parsed (~7M English lines otherwise)."""
     with open(path, encoding="utf8") as f:
         for line in f:
+            if wanted is not None and path_of(line) not in wanted:
+                continue
             yield json.loads(line)
 
 
@@ -98,7 +116,7 @@ def main(argv=None):
         out = Path(a.out) / f"{zim.stem}.{KIND}"
         out.parent.mkdir(parents=True, exist_ok=True)
         paths = [path for path, _ in articles(Archive(zim))]
-        counts = build(paths, read_items(a.items), out, zim, meta.sha256(zim))
+        counts = build(paths, read_items(a.items, set(paths)), out, zim, meta.sha256(zim))
         share = counts["matched"] / max(1, counts["articles"])
         print(f"{zim.name}: {counts['matched']:,}/{counts['articles']:,} articles ({share:.1%}), {counts['links']:,} links, "
               f"{counts['coords']:,} coords, {out.stat().st_size / 1e6:.1f} MB", file=sys.stderr, flush=True)

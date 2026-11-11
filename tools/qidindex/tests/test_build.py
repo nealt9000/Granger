@@ -78,3 +78,13 @@ def test_check_passes_a_good_index_and_fails_low_coverage(tmp_path, capsys):
     assert "3/4 articles have an item (75.00%)" in capsys.readouterr().out
     assert check.main([str(out), "--min-share", "0.9"]) == 1
     assert "floor 90%" in capsys.readouterr().out
+
+
+def test_path_of_reads_the_path_without_parsing_and_handles_escapes(tmp_path):
+    import json
+    lines = [json.dumps(r, ensure_ascii=False) for r in
+             [{"q": "Q1", "t": 'Guerra_de_los_"Cien_Años"', "sl": 3}, {"q": "Q2", "t": "C:\\\\", "sl": 1}, {"q": "Q3", "t": "Plain"}]]
+    assert [build.path_of(l) for l in lines] == ['Guerra_de_los_"Cien_Años"', "C:\\\\", "Plain"]
+    f = tmp_path / "items.jsonl"
+    f.write_text("\n".join(lines) + "\n", encoding="utf8")
+    assert [r["q"] for r in build.read_items(f, {"Plain", 'Guerra_de_los_"Cien_Años"'})] == ["Q1", "Q3"]
