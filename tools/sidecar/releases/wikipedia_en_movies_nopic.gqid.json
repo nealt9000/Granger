@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_en_movies_nopic",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_en_movies_nopic_2026-10.gqid",
+ "sizeBytes": 30302208,
+ "sha256": "3430ca7bbe63ecd89c69c1503b5266ea7fdbe0a79ba650d5124dd7cfc151308d",
+ "schemaVersion": 1,
+ "sourceSha256": "86bd1899ef8f552ed1ea325106047bb956d1c92476dd8dd8fb4d80a729eb8722",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

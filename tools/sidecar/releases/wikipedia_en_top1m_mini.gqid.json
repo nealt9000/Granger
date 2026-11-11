@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_en_top1m_mini",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_en_top1m_mini_2026-04.gqid",
+ "sizeBytes": 94560256,
+ "sha256": "05e67647d39af139e75a9f447f7d6d29ec83a151d5686857e36de50459afc0e5",
+ "schemaVersion": 1,
+ "sourceSha256": "56b963ffb5f5246da10cf87d1bdbaaad457b39e3b766d52844ccd1aab3a49a34",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_en_geography_nopic",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_en_geography_nopic_2026-10.gqid",
+ "sizeBytes": 7307264,
+ "sha256": "00c431471db205fd5271ae3c3cc016bd3494716c44275793a143821b882393a1",
+ "schemaVersion": 1,
+ "sourceSha256": "eb8e7c2d91fef97c3c6578c52b98894129afeaed58f1f2ec72543db2d61ad1e3",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}
