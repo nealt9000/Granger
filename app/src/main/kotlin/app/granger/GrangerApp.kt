@@ -836,15 +836,21 @@ class AppContainer(context: Context) {
     )
 
     /** Each installed pack's time index (Plan H5b), by library pack id: the newest installed version of each. */
-    suspend fun installedTimeIndexes(): Map<String, File> {
+    suspend fun installedTimeIndexes(): Map<String, File> = installedSidecars(SidecarKind.TIME_INDEX).mapValues { it.value.file }
+
+    /**
+     * Each installed pack's sidecar of [kind] (Linked Library spec §5.1), by library pack id: the newest installed version,
+     * with the sha256 of the pack file it belongs to, which a reader checks against the sidecar's own meta (spec §5.2).
+     */
+    suspend fun installedSidecars(kind: SidecarKind): Map<String, InstalledSidecar> {
         val records = downloads.records.first().filter { it.state == DownloadState.INSTALLED }
         val byItem = records.groupBy { it.itemId }
         val packsByPath = library.packs.first().associateBy { it.filePath }
-        return records.filter { it.kind == ItemKind.TIME_INDEX }.groupBy { it.itemId }.mapNotNull { (itemId, versions) ->
-            val parentId = SidecarKind.TIME_INDEX.parentOf(itemId) ?: return@mapNotNull null
+        return records.filter { it.kind == kind.itemKind && kind.parentOf(it.itemId) != null }.groupBy { it.itemId }.mapNotNull { (itemId, versions) ->
+            val parentId = kind.parentOf(itemId) ?: return@mapNotNull null
             val parent = byItem[parentId]?.maxByOrNull { it.createdAt } ?: return@mapNotNull null
             val pack = packsByPath[parent.filePath] ?: return@mapNotNull null
-            pack.id to versions.maxBy { it.createdAt }.file
+            pack.id to InstalledSidecar(versions.maxBy { it.createdAt }.file, parent.hash)
         }.toMap()
     }
 
@@ -906,3 +912,6 @@ class AppContainer(context: Context) {
         medicalQuotes = true,
     )
 }
+
+/** A sidecar file on the phone and the sha256 of the pack file it must have been built from. */
+data class InstalledSidecar(val file: File, val packSha256: String)
