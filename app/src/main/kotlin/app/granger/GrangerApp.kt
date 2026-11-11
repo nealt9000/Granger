@@ -20,6 +20,7 @@ import app.granger.core.ai.ModelManager
 import app.granger.core.catalog.CatalogRepository
 import app.granger.core.catalog.CatalogSource
 import app.granger.core.catalog.ModelRole
+import app.granger.sources.canRun
 import app.granger.core.downloads.AndroidVolumes
 import app.granger.core.downloads.DownloadDatabase
 import app.granger.core.downloads.DownloadManager
@@ -586,10 +587,12 @@ class AppContainer(context: Context) {
     /** Ask runs on this phone: the feature is on ([Features.RESEARCH]) and the phone has the memory for it. */
     val askOn: Boolean = Features.RESEARCH && deviceTier >= DeviceTier.ASK
     /**
-     * Search vectors are fetched and books you add are embedded. Only Ask reads them today; Plan SQ Phase 4 brings them
-     * to Search, and Phase 6 decides which phones get them.
+     * Search by meaning (Plan SQ Phase 6): search vectors are fetched, the embedder follows them, books you add are
+     * embedded, and Best matches embed the query. On whether Ask is or not: phones with the memory Ask's tier asks for
+     * (6 GB marketed), measured at speed on the Pixel 6. A 4 GB phone keeps keyword-only Best matches until one is
+     * measured; a slow phone above the line drops to them by itself ([EmbedSpeed]).
      */
-    val meaningSearch: Boolean = askOn
+    val meaningSearch: Boolean = DENSE_RETRIEVAL && deviceTier.canRun(ModelRole.EMBEDDER)
     /** Where the phone is, for the suggested map: network, then SIM, then locale (Plan E1 item 1). */
     private val appContext: Context = context.applicationContext
     val phoneCountry: String get() = app.granger.device.PhoneCountry.of(appContext)
@@ -611,8 +614,8 @@ class AppContainer(context: Context) {
         publicKey = Base64.getDecoder().decode(BuildConfig.CATALOG_PUBLIC_KEY),
         cacheDir = File(context.filesDir, "catalog"),
         includeUnevaluatedModels = BuildConfig.DEBUG,
-        // Search vectors only serve Ask: a phone without it neither counts nor downloads them (Plan E1 phone check). Vectors
-        // already installed stay (VectorDownloads removes them only with their pack).
+        // Search vectors serve search by meaning: a phone without it neither counts nor downloads them (Plan E1 phone
+        // check). Vectors already installed stay (VectorDownloads removes them only with their pack).
         includeVectors = meaningSearch,
     )
 
@@ -779,6 +782,13 @@ class AppContainer(context: Context) {
     private val vectorDownloads = VectorDownloads(downloads) { downloadPrefs.wifiOnly }
     private val timeIndexDownloads = TimeIndexDownloads(downloads) { downloadPrefs.wifiOnly }
 
+    /** The embedder follows the first search vectors, once (Plan SQ Phase 6); the marker keeps a removal in Models. */
+    private val embedderFollowedMarker = File(context.filesDir, "embedder-followed")
+    private val embedderDownloads = app.granger.core.downloads.EmbedderDownloads(
+        downloads, wifiOnly = { downloadPrefs.wifiOnly },
+        followed = { embedderFollowedMarker.exists() }, markFollowed = { embedderFollowedMarker.createNewFile() },
+    )
+
     /** Starts the download queue, recovering a file left running by a run that died; see [Downloads.recover]. */
     fun resumeDownloads() {
         appScope.launch {
@@ -804,6 +814,15 @@ class AppContainer(context: Context) {
                         throw e
                     } catch (e: Exception) {
                         Log.w("Granger", "Couldn't update the search vectors downloads", e)
+                    }
+                    if (meaningSearch) {
+                        try {
+                            embedderDownloads.reconcile(c, r)
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            Log.w("Granger", "Couldn't queue the embedder", e)
+                        }
                     }
                     // The time index follows each pack the same way, on every phone (Plan H5b Task 3).
                     try {
@@ -906,10 +925,29 @@ class AppContainer(context: Context) {
      * Search's Best matches (Plan SQ Phase 4): Ask's keyword and dense retrieval, ranked as Ask ranks, with no model. The
      * dense side runs where the embedder and vectors are installed; elsewhere the keyword side alone.
      */
+    /** How long search by meaning takes here; a slow phone's Best matches go keyword-only (Plan SQ Phase 6). */
+    val embedSpeed = app.granger.search.EmbedSpeed()
+
+    /** Best matches for Search, each query's meaning step timed into [embedSpeed]. */
+    fun bestStream(query: String): kotlinx.coroutines.flow.Flow<app.granger.core.research.BestMatches.Result> = kotlinx.coroutines.flow.flow {
+        var timed = false
+        bestMatches.stream(query).collect { result ->
+            if (!timed && result.byMeaning && result.embedMs + result.denseMs > 0) {
+                embedSpeed.record(result.embedMs + result.denseMs)
+                timed = true
+            }
+            emit(result)
+        }
+    }
+
     val bestMatches by lazy {
         app.granger.core.research.BestMatches(
             passageFinder, denseFinder,
-            embed = { q -> app.granger.research.ModelsAdapter(modelManager).embedder()?.embed(listOf(q), isQuery = true)?.single() },
+            // Plan SQ Phase 6: no embedder on a phone without search by meaning, and none while it is too slow here.
+            embed = { q ->
+                if (!meaningSearch || !embedSpeed.useMeaning()) null
+                else app.granger.research.ModelsAdapter(modelManager).embedder()?.embed(listOf(q), isQuery = true)?.single()
+            },
             config = rankingConfig, sourceWeight = fictionWeight,
             articleKey = {
                 // A pack's family ("wikipedia_en"), so one article in two Wikipedia packs is one row; a book is its own.

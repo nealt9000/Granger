@@ -105,7 +105,7 @@
     <string name="onboarding_quick_voice">Quick ones first: the voice lands in a few minutes.</string>
     <string name="onboarding_quick_classics">Quick ones first: the Classics land in a few minutes.</string>
     <!-- %1$s is a size. -->
-    <string name="onboarding_indexes">Includes %1$s of indexes for Ask, fetched after their packs.</string>
+    <string name="onboarding_indexes">Includes %1$s for search by meaning, fetched after their packs.</string>
     <string name="onboarding_wifi_only">Download on Wi-Fi only</string>
     <!-- Which storage the downloads go to. -->
     <string name="onboarding_store_on">Store on</string>

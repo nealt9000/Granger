@@ -267,6 +267,8 @@ class SourceViewModel(
     private val io: CoroutineDispatcher = Dispatchers.IO,
     /** Ask runs here (the app's `askOn`): off, rows say nothing of how Ask would search, and Ask's model isn't offered. */
     private val askOn: Boolean = tier >= DeviceTier.ASK,
+    /** Search by meaning runs here (the app's `meaningSearch`, Plan SQ Phase 6): the embedder's line says Search uses it. */
+    private val meaningSearch: Boolean = DENSE_RETRIEVAL && tier.canRun(ModelRole.EMBEDDER),
     /** Opened from Readiness: the Kiwix list filtered to this domain until the chip is closed. */
     private val domain: String? = null,
     /** Opened from a folded family's row: that family's packs A–Z, with their own search (Plan KB Decision 10). */
@@ -595,7 +597,7 @@ class SourceViewModel(
                     // Kept on a phone that had it, while Ask rests: it can be removed to free the space (Plan SQ Task 0.2).
                     ModelRole.SMALL -> if (askOn) UiText.Raw("") else UiText.Res(R.string.sources_model_ask_resting)
                     ModelRole.LARGE -> UiText.Res(R.string.sources_model_not_used)
-                    ModelRole.EMBEDDER -> UiText.Res(if (DENSE_RETRIEVAL && askOn) R.string.sources_model_used_by_ask else R.string.sources_model_not_used_yet)
+                    ModelRole.EMBEDDER -> UiText.Res(if (meaningSearch) R.string.sources_model_used_by_search else R.string.sources_model_not_used_yet)
                 }
                 is VoiceEntry -> UiText.Raw(item.attribution)
             }

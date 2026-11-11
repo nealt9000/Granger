@@ -296,3 +296,25 @@ Built on top of Task 5.1's Best matches block (`SearchScreen`, `SearchViewModel`
   nothing, the library name `SpokenTitleMatcher` likes best is offered in the same row the mic's uses; it is never
   applied by itself, and a spoken query keeps its own suggestion. The word-level fix from the title vocabulary is not
   built: typo titles (§4.3b) already cover most of it.
+
+## Phase 6: search by meaning, off Ask's switch
+
+**The bug it fixes.** `meaningSearch` was `askOn`, and Phase 0 turned Ask off (`Features.RESEARCH = false`), so a release
+build fetched no vectors, no embedder and embedded no books on any phone: Best matches were keyword-only everywhere. The
+Pixel runs had dense hits only because that phone kept the vectors and embedder from before.
+
+- **Which phones.** `meaningSearch = DENSE_RETRIEVAL && deviceTier.canRun(EMBEDDER)`: phones of Ask's memory tier
+  (`ASK_MIN_BYTES`, marketed 6 GB), whether Ask is on or not. The catalog lists vectors (and onboarding counts them) on
+  those phones only, as before. **4 GB phones (E1, the Xperia 10 II) stay keyword-only**: none has been measured, and E1
+  is with its tester. Measuring one is the open item before widening the line.
+- **The embedder follows the vectors.** Nothing fetched EmbeddingGemma once Ask's line left onboarding.
+  `EmbedderDownloads` queues it (165 MB) on the volume of the phone's first vectors download, once: a marker file keeps a
+  removal in Models. Onboarding's Review counts it in the total and in "Includes … for search by meaning".
+- **A speed guard** (`EmbedSpeed`). On the Pixel 6 the query's embedding is ~0.12 s (p50 113 ms, p95 117–130 ms over
+  `px-v2e-*`, `px-dev-q`); the dense search after it is most of the 1.2 s first step. Search times embedding + dense
+  search per query; when the median of the last five (the first after a start left out, as it loads the model) is over
+  4 s, twice the Pixel's p95, Best matches go keyword-only, and try meaning again every 20 searches.
+- **Words.** "Index for Ask" → "Search index"; Review's "indexes for Ask" → "for search by meaning"; the embedder in
+  Models: "Used by Search to find passages by meaning". Spanish too.
+- **Sizes.** On 6 GB phones the starts count the vectors again, as they did before Phase 0 (Efficient carried 787 MB of
+  them, Plan E1), plus the embedder's 165 MB. The presets themselves (Neal's ~20 GB middle tier) are unchanged.

@@ -178,7 +178,7 @@
     <string name="sources_ask_keywords">Preguntar: solo palabras clave</string>
     <string name="sources_ask_none">Preguntar no puede buscar aquí</string>
     <string name="sources_model_not_used">Sin usar</string>
-    <string name="sources_model_used_by_ask">Lo usa Preguntar</string>
+    <string name="sources_model_used_by_search">Lo usa Buscar para encontrar pasajes por significado</string>
     <string name="sources_model_ask_resting">Preguntar está en pausa por ahora. Puedes quitar este modelo para liberar su espacio.</string>
     <string name="sources_model_not_used_yet">Aún sin usar</string>
     <string name="sources_voice">Voz para leer en voz alta</string>

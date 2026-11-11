@@ -238,7 +238,11 @@ class OnboardingViewModel(
             start, c.unticked, region, picked, volume?.freeBytes ?: 0L, askLine?.takeIf { c.askChosen }, voiceLine?.takeIf { c.voiceChosen },
             containment = catalog?.let { app.granger.core.catalog.Containment(it) },
             second = secondLine?.takeIf { c.secondChosen },
-        )
+        ).let { r ->
+            // Search by meaning (Plan SQ Phase 6): the catalog lists indexes only where it runs, and the embedder follows them.
+            val embedder = catalog?.models?.firstOrNull { it.role == app.granger.core.catalog.ModelRole.EMBEDDER }
+            if (embedder == null || embedder.id in f.installed || r.items.any { it.id == embedder.id }) r else r.copy(embedderBytes = embedder.sizeBytes)
+        }
         val phoneLanguages = KnowledgeLanguages.phoneLanguages(phoneLocales(), catalog?.languages.orEmpty())
         return OnboardingUi(
             intro = intro(),

@@ -1166,7 +1166,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             voice = container.voiceInput,
                             spokenNames = container.spokenTitles.names,
                             best = object : BestMatchSearch {
-                                override fun stream(query: String) = container.bestMatches.stream(query)
+                                override fun stream(query: String) = container.bestStream(query)
                                 override suspend fun warm() = container.bestMatches.warm()
                             },
                             define = WordEntry { word ->
@@ -1256,7 +1256,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     viewModel = viewModel {
                         SourceViewModel(
                             source, container.catalog, container.downloads, container.library, container.bookshelf, container.volumes,
-                            container.downloadPrefs, container.deviceTier, container.appScope, askOn = container.askOn, domain = route.domain,
+                            container.downloadPrefs, container.deviceTier, container.appScope, askOn = container.askOn, meaningSearch = container.meaningSearch, domain = route.domain,
                             family = route.family, knowledge = container.knowledgeLanguages.languages,
                             voiceTitles = app.granger.core.speech.VoiceTitles.of(appContext),
                         )

@@ -123,7 +123,7 @@ class SourceViewModelTest {
         backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()
         val rows = vm.ui.value.sections.flatMap { it.rows }.associateBy { it.id }
-        assertThat(rows.getValue("gemma-embed").description.en()).isEqualTo(if (DENSE_RETRIEVAL) "Used by Ask" else "Not used yet")
+        assertThat(rows.getValue("gemma-embed").description.en()).isEqualTo(if (DENSE_RETRIEVAL) "Used by Search to find passages by meaning" else "Not used yet")
         assertThat(rows.getValue("e2b").description.en()).isEmpty()
     }
 
@@ -677,7 +677,8 @@ class SourceViewModelTest {
             return vm.ui.value.sections.flatMap { it.rows }.associateBy { it.id }
         }
         assertThat(rows().keys).containsExactly("gemma-embed")
-        assertThat(rows().getValue("gemma-embed").description.en()).isEqualTo("Not used yet")
+        // Search by meaning uses the embedder whether Ask runs or not (Plan SQ Phase 6).
+        assertThat(rows().getValue("gemma-embed").description.en()).isEqualTo("Used by Search to find passages by meaning")
         downloads.list.value = listOf(record("e2b", DownloadState.INSTALLED, sha256 = e2b.sha256, kind = app.granger.core.downloads.ItemKind.MODEL))
         val held = rows()
         assertThat(held.getValue("e2b").status).isEqualTo(ItemStatus.Installed)
