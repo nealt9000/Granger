@@ -22,6 +22,8 @@ Encarta's content was licensed from Funk & Wagnalls. What made it Encarta was ev
 2. **The order in §6 stands** (LL0 to LL6).
 3. **Reference links default to Light.**
 4. **Nothing retires.** Music, audiobooks, archive.org/LibriVox, games, maps and readiness all **fold into** the Linked Library (§4), so none of them feels bolted on, unnecessary or out of place.
+5. **Music works out of the box** (2026-11-11, later the same day). Granger offers a curated, prebuilt music pack (or a few) of freely licensed recordings tied to the library, so music links are useful before anyone goes looking for music (§3.7).
+6. **Audiobooks become the fallback, not a feature** (same day). The Owl voice reading the book is how Granger listens to books. LibriVox recordings exist for older phones that have the storage but can't run the reader voice well. They're offered where the reader voice won't run well, and stay for anyone who already has audiobooks, but they aren't promoted elsewhere.
 
 ## 2. What we already have
 
@@ -61,11 +63,22 @@ Encarta's content was licensed from Funk & Wagnalls. What made it Encarta was ev
 - **Characters and places, spoiler-safe:** who someone is and where they've appeared, only up to your current position. Built on the Mac from LL1's entity pass.
 - **Trace a theme** through a book: a heat strip over its chapters from the book's own vectors on the phone.
 - **Books like this** across the Classics, from per-book vectors.
-- **Listen and read as one:** the LibriVox recording of a Classic opens the book at the same chapter, and back.
+- **Listen and read as one** is the Owl voice reading the book, which already exists. On phones that fall back to LibriVox (§1.6), the recording opens the book at the same chapter, and back.
 
 ### 3.5 Study (LL5)
 - **A review deck** from highlights, clips and dictionary lookups: cloze cards with simple spaced repetition.
 - **Quiz me** on a notebook, a book or a trail, reusing the games engine with that set as the pool.
+
+### 3.7 Granger Music, a curated pack (with LL2)
+- **Why:** music links only help if there's music. Most people won't go and find recordings first.
+- **What:** one or a few packs built by the pack builder, each recording keyed to the QIDs of its work, composer or performer. Every recording is free to share (public domain or CC0/CC BY), with attribution in the pack:
+  - **Classical and early music:** recordings released into the public domain or CC0 (Musopen, the Open Goldberg Variations, Wikimedia Commons).
+  - **Early recordings:** US sound recordings now in the public domain under the Music Modernization Act (released before 1926 as of 2026), from archive.org's 78rpm and cylinder collections and the Library of Congress.
+  - **Folk and world:** field recordings and anthems from Commons and archive.org, where the licence allows.
+- **Shape:** tiers like the Classics. A small starter (~300 MB, Opus at ~64–96 kbps): the works the most-linked composers and topics point to. Then larger add-ons by era or kind. English and Spanish share one pack, since music needs no translation, only titles and notes.
+- **Curation, not volume:** selection starts from what the library links to most (composer and work articles by rank, the works named in the Classics), so every track has somewhere to link from.
+- **Delivery:** a ZIM like the Classics, readable by Kiwix as a media pack, plus its own `.gqid`-style index as a sidecar. The music player plays it like local music.
+- **Play builds:** the same public-domain rules as the books. The early-recordings tier follows the US rule only, and the policy check states that.
 
 ### 3.6 Explore (LL6)
 - **Trails:** curated paths through articles, book chapters, timeline stops, map pins and recordings. Seeded from Wikipedia's "Outline of…" pages and hand-picked. Preparedness trails count too (first aid, water, knots).
@@ -78,8 +91,8 @@ Every existing feature becomes one more kind of thing the library can link to an
 
 | Feature | How it folds in |
 |---|---|
-| **Music** | Artist and work tags (MusicBrainz → QID) link both ways. A composer's article shows *In your music*. Related includes recordings. A Trail can stop at a piece. |
-| **Audiobooks / LibriVox** | A recording links to its book (P1899 / P2034) and to the author's article. Listen and read as one (LL4). |
+| **Music** | **Granger Music** (§3.7) makes it work out of the box. Artist and work tags (MusicBrainz → QID) and the pack's own QIDs link both ways. A composer's article shows *In your music*. Related includes recordings. A Trail can stop at a piece. |
+| **Audiobooks / LibriVox** | The fallback for phones where the reader voice won't run well (§1.6), and kept for audiobooks people already have. Where offered, a recording links to its book (P1899 / P2034) and the author's article. Elsewhere the Owl voice reads the book. The tech-debt session can slim this code path. |
 | **archive.org** | The fallback for an unresolved link to a work: "Find it on archive.org" (behind the existing 1930 filter in Play builds). A work's article offers its recording or scan. |
 | **Games** | Study mode (LL5): the same games over a notebook, a book or a trail. Answers open articles, as now. |
 | **Maps** | The Atlas (LL6): places from articles, books and notebooks. Show on the map from At a glance. |
@@ -113,7 +126,7 @@ The tech-debt session comes next, and these rules exist so the Linked Library do
 | **LL5** | Study | Review deck, Quiz me |
 | **LL6** | Explore | Trails, the Atlas (living Home §6), topic map |
 
-Music links (MusicBrainz) ride in LL2 with Related. LibriVox joins in LL4.
+Music links (MusicBrainz) and the first Granger Music pack (§3.7) ride in LL2 with Related, a plan of their own if they grow. The LibriVox join (only for fallback phones) comes in LL4.
 
 ## 7. Open questions
 
