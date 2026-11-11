@@ -474,6 +474,12 @@ def hold_back(packs, previous, derived, status=None, sleep=time.sleep):
                     not any(p.get("sha256") in derived.get(key, ()) for p in group):
                 why.append(f"would drop its {label} (rebuild for the new file)")
                 reasons.append(key)
+        # Each sidecar kind the pack carried needs a descriptor built from the new file too (Linked Library spec §5.2).
+        carried = sorted({s["kind"] for p in group if p["id"] in before for s in before[p["id"]].get("sidecars", [])})
+        for kind in carried:
+            if not any((kind, p.get("sha256")) in derived.get("sidecars", ()) for p in group):
+                why.append(f"would drop its {kind} sidecar (rebuild for the new file)")
+                reasons.append(kind)
         dead = dead_links([u for p in moved for u in p.get("urls", [])], status, sleep=sleep)
         if dead:
             why.append(f"{len(dead)} link(s) not answering yet ({dead[0][0].split('/')[2]}: {dead[0][1]})")
@@ -534,6 +540,9 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
         if "timeIndex" in curated:
             derived["timeIndex"] = {d["sourceSha256"] for d in
                                     vector_descriptors(base / curated["timeIndex"]["releases"], TIMEINDEX_KEYS)}
+        if "sidecars" in curated:
+            derived["sidecars"] = {(d["sidecar"], d["sourceSha256"]) for d in
+                                   vector_descriptors(base / curated["sidecars"]["releases"], SIDECAR_KEYS)}
         held = hold_back(packs, previous, derived, status)
         if holds is not None:
             holds += held
@@ -583,6 +592,13 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
                                          t.get("releaseUrl"))
         if report is not None:
             report += ["", "Time indexes left out:"] + (time_lines or ["  none"])
+    if "sidecars" in curated:
+        sc = curated["sidecars"]
+        _, sidecar_lines = attach_sidecars({"packs": packs, "books": books},
+                                           vector_descriptors(pathlib.Path(root or REPO_ROOT) / sc["releases"], SIDECAR_KEYS),
+                                           sc.get("releaseUrl"))
+        if report is not None:
+            report += ["", "Sidecars left out:"] + (sidecar_lines or ["  none"])
     if "sets" in curated:
         missing = apply_sets(packs, load_sets(pathlib.Path(root or REPO_ROOT) / curated["sets"]), curated["packs"])
         if missing:
@@ -615,6 +631,8 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
 VECTOR_KEYS = ("id", "kind", "fileName", "sizeBytes", "sha256", "dims", "dtype", "chunkerVersion", "embedderSha256",
                "sourceSha256")
 TIMEINDEX_KEYS = ("id", "kind", "fileName", "sizeBytes", "sha256", "count", "format", "lanesVersion", "sourceSha256")
+# Linked Library spec §5.1: one descriptor shape for every later sidecar kind ("gqid", "glink"); `tools/sidecar/meta.py` writes it.
+SIDECAR_KEYS = ("id", "kind", "sidecar", "fileName", "sizeBytes", "sha256", "schemaVersion", "sourceSha256")
 
 
 FLAVOUR_WORDS = re.compile(r"\s*\(((no|with) pictures|(sin|con) imágenes)\)\s*$", re.IGNORECASE)  # Spanish: Plan L3
@@ -788,6 +806,39 @@ def attach_timeindex(catalog, descriptors, release_url=None):
                  "format": d["format"], "lanesVersion": d["lanesVersion"]}
         for entry in targets:
             entry["timeIndex"] = dict(index)
+        used.append(d)
+    return used, lines
+
+
+def attach_sidecars(catalog, descriptors, release_url=None):
+    """
+    Puts each sidecar (Linked Library spec §5.1: the QID index, the Classics' links…) on the entries built from its exact
+    source file (sha256): a pack's on every flavour of that snapshot, as [attach_timeindex] does (sidecars are keyed by
+    article path, which every flavour shares), a book's on that book. One per kind per entry, as `sidecars: [...]`.
+    Replaces earlier ones and returns (the uploads, report lines), as [attach_vectors] does.
+    """
+    packs, books = catalog["packs"], catalog.get("books", [])
+    for entry in packs + books:
+        entry.pop("sidecars", None)
+    used, lines = [], []
+    for d in descriptors:
+        url = d.get("url") or (release_url.rstrip("/") + "/" + d["fileName"] if release_url else None)
+        if not url or not url.startswith("https://"):
+            lines.append(f"  {d['id']} {d['sidecar']}: no https URL, left out")
+            continue
+        if d["kind"] == "book":
+            targets = [b for b in books if b["id"] == d["id"] and b["sha256"] == d["sourceSha256"]]
+        else:
+            source = next((p for p in packs if p["sha256"] == d["sourceSha256"]), None)
+            targets = [] if source is None else [
+                p for p in packs if p["zimName"] == source["zimName"] and p["snapshotDate"] == source["snapshotDate"]]
+        if not targets:
+            lines.append(f"  {d['id']} {d['sidecar']}: built from {d['fileName']}, which the catalog no longer lists; rebuild it")
+            continue
+        sidecar = {"kind": d["sidecar"], "url": url, "sha256": d["sha256"], "sizeBytes": d["sizeBytes"],
+                   "schemaVersion": d["schemaVersion"]}
+        for entry in targets:
+            entry["sidecars"] = [s for s in entry.get("sidecars", []) if s["kind"] != d["sidecar"]] + [dict(sidecar)]
         used.append(d)
     return used, lines
 
@@ -1034,9 +1085,10 @@ def tier_sizes(catalog, language="en"):
                 out.append(t)
         return out
 
-    # An item's size counts its search vectors (Plan R1) and time index (Plan H5b), as the app shows it.
+    # An item's size counts its search vectors (Plan R1), time index (Plan H5b) and sidecars (LL0), as the app shows it.
     def size(e):
-        return e["sizeBytes"] + (e.get("vectors") or {}).get("sizeBytes", 0) + (e.get("timeIndex") or {}).get("sizeBytes", 0)
+        return e["sizeBytes"] + (e.get("vectors") or {}).get("sizeBytes", 0) + (e.get("timeIndex") or {}).get("sizeBytes", 0) + \
+            sum(s["sizeBytes"] for s in e.get("sidecars", []))
 
     sizes_of = {**{b["id"]: size(b) for b in books}, **{i: size(p) for i, p in packs.items()}}
     zim_of = {i: p.get("zimName") for i, p in packs.items()}
@@ -1075,6 +1127,7 @@ def catalog_urls(catalog):
                 urls.append(entry["vectors"]["url"])
             if entry.get("timeIndex", {}).get("url"):
                 urls.append(entry["timeIndex"]["url"])
+            urls += [s["url"] for s in entry.get("sidecars", []) if s.get("url")]
     return list(dict.fromkeys(urls))
 
 
@@ -1188,6 +1241,8 @@ def main(argv):
     p.add_argument("file")
     p = sub.add_parser("timeindex"); p.add_argument("--releases", required=True); p.add_argument("--release-url")
     p.add_argument("file")
+    p = sub.add_parser("sidecars"); p.add_argument("--releases", required=True); p.add_argument("--release-url")
+    p.add_argument("file")
     p = sub.add_parser("sets"); p.add_argument("file")
     p.add_argument("--sets", default=str(REPO_ROOT / "tools/catalog-gen/pack_sets.json"))
     p.add_argument("--curated", default=str(REPO_ROOT / "tools/catalog-gen/curated.json"))
@@ -1242,6 +1297,17 @@ def main(argv):
         path.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         entries = sum(1 for e in catalog["packs"] if "timeIndex" in e)
         print(f"{path}: time indexes on {entries} packs from {len(used)} files, "
+              f"{sum(d['sizeBytes'] for d in used) / 1e6:.1f} MB to upload")
+        for line in lines:
+            print(line)
+    elif args.command == "sidecars":
+        path = pathlib.Path(args.file)
+        catalog = json.loads(path.read_text(encoding="utf-8"))
+        used, lines = attach_sidecars(catalog, vector_descriptors(args.releases, SIDECAR_KEYS), args.release_url)
+        catalog["generatedAt"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        path.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        entries = sum(1 for e in catalog["packs"] + catalog.get("books", []) if e.get("sidecars"))
+        print(f"{path}: sidecars on {entries} entries from {len(used)} files, "
               f"{sum(d['sizeBytes'] for d in used) / 1e6:.1f} MB to upload")
         for line in lines:
             print(line)

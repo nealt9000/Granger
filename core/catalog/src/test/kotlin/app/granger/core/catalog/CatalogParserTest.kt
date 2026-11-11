@@ -418,6 +418,45 @@ class CatalogParserTest {
         assertThat(med.vectors).isNotNull()
     }
 
+    // --- Plan LL0: sidecars ---
+
+    private fun sidecar(kind: String = "gqid", url: String = "https://github.com/x/releases/download/sidecars-1/med.gqid",
+                        sha: String = SHA_A, size: String = "300", schema: String = "1") =
+        """{"kind": "$kind", "url": "$url", "sha256": "$sha", "sizeBytes": $size, "schemaVersion": $schema}"""
+
+    private fun sidecarCatalog(vararg s: String, bookSidecars: String? = null) = """
+        {"formatVersion": 1, "generatedAt": "2026-11-11T00:00:00Z",
+         "packs": [${pack("med", "wikipedia", "medicine").dropLast(1)}, "sidecars": [${s.joinToString()}]}],
+         "books": [${book("gc-hamlet", "literature").let { if (bookSidecars == null) it else it.dropLast(1) + ", \"sidecars\": [$bookSidecars]}" }}]}
+    """.trimIndent().toByteArray()
+
+    @Test fun aPackAndABookCarryTheirSidecarsAndTheSizeCountsThem() {
+        val c = ok(parse(sidecarCatalog(sidecar(), sidecar("glink", size = "200"), bookSidecars = sidecar("glink", size = "50"))))
+        val med = c.packs.single()
+        assertThat(med.sidecars.map { it.kind }).containsExactly("gqid", "glink").inOrder()
+        assertThat(med.downloadBytes).isEqualTo(1000 + 300 + 200)
+        assertThat(c.books.single().sidecars.single().kind).isEqualTo("glink")
+        assertThat(ok(parse(timeCatalog(null))).packs.single().sidecars).isEmpty()
+    }
+
+    @Test fun unknownNewerOrBadSidecarsAreDroppedAndKeepThePack() {
+        val med = ok(parse(sidecarCatalog(
+            sidecar("gzzz"), sidecar(schema = "2"), sidecar("glink", url = "http://x/med.glink"),
+            sidecar("glink", sha = "nope"), sidecar("glink", size = "0"),
+        ))).packs.single()
+        assertThat(med.sidecars).isEmpty()
+        // One per kind: the first wins.
+        assertThat(ok(parse(sidecarCatalog(sidecar(size = "1"), sidecar(size = "2")))).packs.single().sidecars.single().sizeBytes).isEqualTo(1)
+    }
+
+    @Test fun sidecarsOfTheWrongTypeAreDroppedAndKeepThePack() {
+        val c = ok(parse("""
+            {"formatVersion": 1, "generatedAt": "2026-11-11T00:00:00Z",
+             "packs": [${pack("med", "wikipedia", "medicine").dropLast(1)}, "sidecars": "lots"}]}
+        """.trimIndent().toByteArray()))
+        assertThat(c.packs.single().sidecars).isEmpty()
+    }
+
     // --- Plan L3: languages ---
 
     private fun esPack(id: String, domain: String) = pack(id, "wikipedia", domain).replace("\"language\": \"eng\"", "\"language\": \"spa\"")

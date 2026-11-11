@@ -19,7 +19,7 @@ import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
-class VectorDownloadsTest {
+class SidecarsVectorsTest {
     @get:Rule val tmp = TemporaryFolder()
 
     private val db = inMemoryDownloads()
@@ -27,7 +27,7 @@ class VectorDownloadsTest {
     private val scheduler = FakeScheduler()
     private val dispatcher = StandardTestDispatcher()
     private val manager = DownloadManager(dao, scheduler, io = dispatcher, now = { 7L })
-    private val vectors = VectorDownloads(manager, wifiOnly = { true })
+    private val vectors = Sidecars(manager, wifiOnly = { true })
     private val sd by lazy { tmp.newFolder("sd") }
 
     @After fun close() = db.close()
@@ -155,7 +155,7 @@ class VectorDownloadsTest {
     }
 
     @Test fun parentOfOnlyNamesVectorsItems() {
-        assertThat(VectorDownloads.parentOf("med.vectors")).isEqualTo("med")
-        assertThat(VectorDownloads.parentOf("med")).isNull()
+        assertThat(SidecarKind.VECTORS.parentOf("med.vectors")).isEqualTo("med")
+        assertThat(SidecarKind.VECTORS.parentOf("med")).isNull()
     }
 }

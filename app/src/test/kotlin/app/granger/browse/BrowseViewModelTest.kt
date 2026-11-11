@@ -14,7 +14,7 @@ import app.granger.core.catalog.Preset
 import app.granger.core.catalog.Readiness
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.ItemKind
-import app.granger.core.downloads.VectorDownloads
+import app.granger.core.downloads.SidecarKind
 import app.granger.core.library.CollectionRow
 import app.granger.core.library.MediaType
 import app.granger.core.library.Shelf
@@ -154,7 +154,7 @@ class BrowseViewModelTest {
         )
         // Wikipedia has its search vectors installed; DevDocs is in the catalog with a keyword index only.
         val catalog = catalogOf(packs = listOf(packEntry("wiki").copy(zimUuid = "u-wiki"), packEntry("dev").copy(zimUuid = "u-dev")))
-        downloads.list.value = listOf(record(VectorDownloads.itemIdOf("wiki"), DownloadState.INSTALLED, kind = ItemKind.VECTORS))
+        downloads.list.value = listOf(record(SidecarKind.VECTORS.itemIdOf("wiki"), DownloadState.INSTALLED, kind = ItemKind.VECTORS))
         val ui = BrowseViewModel(shelves, library, FakeCatalogSource(catalog), downloads.records).ui.filterNotNull().first { it.sections.size == 2 }
         val ask = ui.sections[0].packs.associate { it.pack.title to it.ask }
         assertThat(ask).containsExactly(

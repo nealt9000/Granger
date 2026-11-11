@@ -51,7 +51,7 @@ class DownloadQueueTest {
         /** Bytes each run of an item reports before its outcome, as a real download's progress does. */
         val reports = mutableMapOf<String, List<Long>>()
 
-        /** Runs as an item installs, like the app's library refresh (and VectorDownloads after it). */
+        /** Runs as an item installs, like the app's library refresh (and Sidecars after it). */
         var onInstalled: suspend (String) -> Unit = {}
 
         override suspend fun run(itemId: String, hash: String, onProgress: (Long, Long) -> Unit): RunOutcome {
@@ -140,7 +140,7 @@ class DownloadQueueTest {
 
     @Test fun somethingYouStartGoesNextAndVectorsFollowTheirParent() = runTest {
         group("onboarding:1", "med", "knots", "atlas")
-        runner.onInstalled = { id -> if (id == "med") manager.enqueue(spec(VectorDownloads.itemIdOf("med"), kind = ItemKind.VECTORS), root, true) }
+        runner.onInstalled = { id -> if (id == "med") manager.enqueue(spec(SidecarKind.VECTORS.itemIdOf("med"), kind = ItemKind.VECTORS), root, true) }
         runner.holds["knots"] = CompletableDeferred()
         val drain = drainInBackground()
         runner.started.getOrPut("knots") { CompletableDeferred() }.await()

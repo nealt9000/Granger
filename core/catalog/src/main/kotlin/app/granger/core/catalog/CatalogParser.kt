@@ -41,17 +41,19 @@ object CatalogParser {
         if (generatedAt == null || runCatching { Instant.parse(generatedAt) }.isFailure) {
             return ParseResult.Invalid(CatalogError.MALFORMED)
         }
-        val packs = entries<PackEntry>(root, "packs", retryWithout = listOf(VECTORS, TIME_INDEX))
+        val packs = entries<PackEntry>(root, "packs", retryWithout = listOf(VECTORS, TIME_INDEX, SIDECARS))
             .filter { valid(it) && DATE.matches(it.snapshotDate) }
             .distinctBy { it.id }
             .map { if (it.vectors == null || valid(it.vectors)) it else it.copy(vectors = null) }
             .map { if (it.timeIndex == null || valid(it.timeIndex)) it else it.copy(timeIndex = null) }
+            .map { it.copy(sidecars = sidecars(it.sidecars)) }
             .map(::family)
             .map { it.copy(language = Languages.normalise(it.language), i18n = i18n(it.i18n)) }
-        val books = entries<BookEntry>(root, "books", retryWithout = listOf(VECTORS))
+        val books = entries<BookEntry>(root, "books", retryWithout = listOf(VECTORS, SIDECARS))
             .filter { valid(it) && DATE.matches(it.releaseDate) }
             .distinctBy { it.id }
             .map { if (it.vectors == null || valid(it.vectors)) it else it.copy(vectors = null) }
+            .map { it.copy(sidecars = sidecars(it.sidecars)) }
             .map { it.copy(language = Languages.normalise(it.language)) }
         val models = entries<ModelEntry>(root, "models")
             .filter { valid(it) && SAFE_NAME.matches(it.fileName) }
@@ -174,6 +176,7 @@ object CatalogParser {
 
     private const val VECTORS = "vectors"
     private const val TIME_INDEX = "timeIndex"
+    private const val SIDECARS = "sidecars"
 
     /** The `.gtime` layout this app reads (core/library `TimeIndex.FORMAT`); a newer one is left for a newer app. */
     const val TIME_INDEX_FORMAT = 1
@@ -199,6 +202,17 @@ object CatalogParser {
             v.sizeBytes > 0 &&
             v.dims > 0 &&
             v.chunkerVersion > 0
+
+    /**
+     * The sidecars this app can fetch, check and read: a kind it knows ([SidecarEntry.KNOWN]) at a schema no newer than it
+     * reads, an https file with a checksum; one per kind (the first).
+     */
+    private fun sidecars(list: List<SidecarEntry>): List<SidecarEntry> = list
+        .filter { s ->
+            val newest = SidecarEntry.KNOWN[s.kind] ?: return@filter false
+            s.schemaVersion in 1..newest && s.url.startsWith("https://") && SHA256.matches(s.sha256) && s.sizeBytes > 0
+        }
+        .distinctBy { it.kind }
 
     /** A time index the app can fetch, check and read: an https file with a checksum, in the format this app reads. */
     private fun valid(t: TimeIndexEntry): Boolean =

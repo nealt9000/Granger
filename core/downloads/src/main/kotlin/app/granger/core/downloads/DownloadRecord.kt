@@ -9,19 +9,19 @@ enum class HashAlgorithm(val jcaName: String) { SHA256("SHA-256"), SHA1("SHA-1")
 
 /**
  * [AUDIO]: one file of a LibriVox or archive.org audio item, downloaded as part of a group. [VOICE]: a read-aloud voice's
- * zip, unpacked after verification. [VECTORS]: a pack's or book's search vectors (Plan R1), which follow it; see
- * [VectorDownloads]. [TIME_INDEX]: a pack's time index (Plan H5b), which follows it the same way; see [TimeIndexDownloads].
- * Stored by name, so a new kind needs no migration.
+ * zip, unpacked after verification. [VECTORS]: a pack's or book's search vectors (Plan R1), [TIME_INDEX]: a pack's time
+ * index (Plan H5b), and [SIDECAR]: any later file built offline for a pack or book (Linked Library spec §5.1), each of
+ * which follows its item; see [Sidecars]. Stored by name, so a new kind needs no migration.
  */
-enum class ItemKind { PACK, MODEL, BOOK, AUDIO, VOICE, VECTORS, TIME_INDEX }
+enum class ItemKind { PACK, MODEL, BOOK, AUDIO, VOICE, VECTORS, TIME_INDEX, SIDECAR }
 
-/** A file that follows a pack or book (its vectors, its time index): shown, sized and removed with it, never on its own. */
-val ItemKind.isCompanion: Boolean get() = this == ItemKind.VECTORS || this == ItemKind.TIME_INDEX
+/** A file that follows a pack or book (a [SidecarKind]): shown, sized and removed with it, never on its own. */
+val ItemKind.isCompanion: Boolean get() = this == ItemKind.VECTORS || this == ItemKind.TIME_INDEX || this == ItemKind.SIDECAR
 
-/** The item ids of companion downloads ([ItemKind.isCompanion]): `<parent>.vectors`, `<parent>.timeindex`. */
+/** The item ids of companion downloads ([ItemKind.isCompanion]): `<parent>.vectors`, `<parent>.timeindex`, `<parent>.gqid`… */
 object Companions {
     /** The pack or book a companion download belongs to; null for any other item. */
-    fun parentOf(itemId: String): String? = VectorDownloads.parentOf(itemId) ?: TimeIndexDownloads.parentOf(itemId)
+    fun parentOf(itemId: String): String? = SidecarKind.parentOf(itemId)
 }
 
 enum class DownloadState { QUEUED, RUNNING, FAILED, INSTALLED }

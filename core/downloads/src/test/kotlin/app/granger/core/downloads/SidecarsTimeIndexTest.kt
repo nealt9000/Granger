@@ -2,6 +2,7 @@ package app.granger.core.downloads
 
 import app.granger.core.catalog.Catalog
 import app.granger.core.catalog.PackEntry
+import app.granger.core.catalog.SidecarEntry
 import app.granger.core.catalog.TimeIndexEntry
 import app.granger.core.catalog.VectorsEntry
 import com.google.common.truth.Truth.assertThat
@@ -20,7 +21,7 @@ import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
-class TimeIndexDownloadsTest {
+class SidecarsTimeIndexTest {
     @get:Rule val tmp = TemporaryFolder()
 
     private val db = inMemoryDownloads()
@@ -28,7 +29,7 @@ class TimeIndexDownloadsTest {
     private val scheduler = FakeScheduler()
     private val dispatcher = StandardTestDispatcher()
     private val manager = DownloadManager(dao, scheduler, io = dispatcher, now = { 7L })
-    private val indexes = TimeIndexDownloads(manager, wifiOnly = { true })
+    private val indexes = Sidecars(manager, wifiOnly = { true })
     private val sd by lazy { tmp.newFolder("sd") }
 
     @After fun close() = db.close()
@@ -79,10 +80,25 @@ class TimeIndexDownloadsTest {
         val both = med.copy(vectors = VectorsEntry("https://github.test/vectors-1/med.gvec", "3".repeat(64), 4_096, SHA_2, 256, "int8", 1))
         install(both)
         reconcile(catalog(both))
-        VectorDownloads(manager) { true }.reconcile(catalog(both), manager.records.first())
         val companions = manager.records.first().filter { it.kind.isCompanion }
         assertThat(companions.map { it.itemId }).containsExactly("med.timeindex", "med.vectors")
         assertThat(companions.map { Companions.parentOf(it.itemId) }.toSet()).containsExactly("med")
+    }
+
+    @Test fun laterSidecarKindsFollowThePackInTheirOwnFolder() = test {
+        val gqid = SidecarEntry("gqid", "https://github.test/sidecars-1/med.gqid", "6".repeat(64), 300, 1)
+        val glink = SidecarEntry("glink", "https://github.test/sidecars-1/med.glink", "7".repeat(64), 200, 1)
+        val all = med.copy(sidecars = listOf(gqid, glink))
+        install(all)
+        reconcile(catalog(all))
+        val records = manager.records.first().filter { it.kind == ItemKind.SIDECAR }.associateBy { it.itemId }
+        assertThat(records.keys).containsExactly("med.gqid", "med.glink")
+        assertThat(records.getValue("med.gqid").filePath).isEqualTo(File(sd, "sidecars/med_666666666666.gqid").path)
+        assertThat(records.values.all { it.kind.isCompanion && Companions.parentOf(it.itemId) == "med" }).isTrue()
+        assertThat(SidecarKind.ofItem("med.glink")).isEqualTo(SidecarKind.LINKS)
+        manager.remove("med")
+        reconcile(catalog(all))
+        assertThat(manager.records.first().filter { it.kind == ItemKind.SIDECAR }).isEmpty()
     }
 
     @Test fun removingThePackRemovesItsTimeIndexAndItsFile() = test {
@@ -110,8 +126,8 @@ class TimeIndexDownloadsTest {
     }
 
     @Test fun parentOfOnlyNamesTimeIndexItems() {
-        assertThat(TimeIndexDownloads.parentOf("med.timeindex")).isEqualTo("med")
-        assertThat(TimeIndexDownloads.parentOf("med.vectors")).isNull()
+        assertThat(SidecarKind.TIME_INDEX.parentOf("med.timeindex")).isEqualTo("med")
+        assertThat(SidecarKind.TIME_INDEX.parentOf("med.vectors")).isNull()
         assertThat(Companions.parentOf("med.vectors")).isEqualTo("med")
         assertThat(Companions.parentOf("med")).isNull()
     }

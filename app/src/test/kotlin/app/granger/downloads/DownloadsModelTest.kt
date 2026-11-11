@@ -11,7 +11,7 @@ import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.GoneFile
 import app.granger.core.downloads.ItemKind
 import app.granger.core.downloads.QueueProgress
-import app.granger.core.downloads.VectorDownloads
+import app.granger.core.downloads.SidecarKind
 import app.granger.core.downloads.WaitReason
 import app.granger.core.downloads.isFromCatalog
 import app.granger.pack
@@ -37,7 +37,7 @@ class DownloadsModelTest {
         .copy(createdAt = updated, updatedAt = updated, groupId = group)
 
     private fun vectorsOf(parent: String, state: DownloadState, updated: Long = now) =
-        rec(VectorDownloads.itemIdOf(parent), state, updated, kind = ItemKind.VECTORS, size = 100)
+        rec(SidecarKind.VECTORS.itemIdOf(parent), state, updated, kind = ItemKind.VECTORS, size = 100)
 
     private fun ui(
         records: List<DownloadRecord>, live: DownloadLive = DownloadLive(batchStartedAt = midnight), catalogIds: Set<String>? = null,
@@ -220,7 +220,7 @@ class DownloadsModelTest {
     }
 
     @Test fun aTimeIndexFoldsQuietlyIntoItsPackOrShowsAsTimelineDates() {
-        fun timeOf(parent: String) = rec(app.granger.core.downloads.TimeIndexDownloads.itemIdOf(parent), DownloadState.QUEUED, kind = ItemKind.TIME_INDEX, size = 7)
+        fun timeOf(parent: String) = rec(app.granger.core.downloads.SidecarKind.TIME_INDEX.itemIdOf(parent), DownloadState.QUEUED, kind = ItemKind.TIME_INDEX, size = 7)
         val ui = ui(
             listOf(
                 rec("wiki", DownloadState.INSTALLED, updated = midnight - 5).copy(filePath = "/packs/wiki.zim"),

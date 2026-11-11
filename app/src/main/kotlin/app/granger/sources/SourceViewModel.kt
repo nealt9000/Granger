@@ -25,7 +25,7 @@ import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.Downloads
 import app.granger.core.downloads.EnqueueResult
 import app.granger.core.downloads.ItemKind
-import app.granger.core.downloads.VectorDownloads
+import app.granger.core.downloads.SidecarKind
 import app.granger.core.downloads.Volume
 import app.granger.core.downloads.VolumeSource
 import app.granger.core.downloads.isActive
@@ -529,7 +529,7 @@ class SourceViewModel(
         val statuses = HashMap<String, ItemStatus>()
         val installedVectorParents = records
             .filter { it.kind == ItemKind.VECTORS && it.state == DownloadState.INSTALLED }
-            .mapNotNullTo(HashSet()) { VectorDownloads.parentOf(it.itemId) }
+            .mapNotNullTo(HashSet()) { SidecarKind.VECTORS.parentOf(it.itemId) }
         fun status(item: CatalogItem): ItemStatus =
             statuses.getOrPut(item.id) { statusOf(item, recordsById[item.id].orEmpty(), packs, tier) }
         val installedStates = setOf(ItemStatus.Installed, ItemStatus.UpdateAvailable)

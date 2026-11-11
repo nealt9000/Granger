@@ -425,7 +425,7 @@ val DownloadRecord.isFromCatalog: Boolean
         ItemKind.PACK -> !hash.startsWith(UNVERIFIED_PREFIX)
         ItemKind.MODEL, ItemKind.VOICE -> true
         ItemKind.BOOK -> filePath.contains("${File.separator}books${File.separator}granger${File.separator}")
-        ItemKind.AUDIO, ItemKind.VECTORS, ItemKind.TIME_INDEX -> false
+        ItemKind.AUDIO, ItemKind.VECTORS, ItemKind.TIME_INDEX, ItemKind.SIDECAR -> false
     }
 
 /**

@@ -109,3 +109,14 @@ LL0 Tasks 1–2 first: they're the debt payback and touch shared code, so agree 
 
 ## Not in LL0 + LL1
 The article context panel, Related, the other-language link and web highlights (LL2); the Notebook (LL3); the companion and LibriVox (LL4); music links (LL2); the user's own EPUBs (later); the Atlas (LL6).
+
+## Tasks 1–2 built (2026-11-11)
+- **The catalog:** `SidecarEntry` (`kind`, `url`, `sha256`, `sizeBytes`, `schemaVersion`) as `sidecars: [...]` on packs and books. `SidecarEntry.KNOWN` (`gqid` 1, `glink` 1) is what this app reads; the parser drops other kinds, newer schemas, bad files and a second of a kind, keeping the entry. `downloadBytes` counts them.
+- **`catalog_gen.py`:** `attach_sidecars` and a `sidecars` command, using one descriptor shape (`SIDECAR_KEYS`; `kind` stays pack/book as in the other descriptors, and `sidecar` names the kind). They attach to every flavour of a snapshot (as the time index does), books by exact file. Tier sizes and `check-links` count them. **`hold_back` waits for each sidecar kind a pack carried** to be rebuilt from the new file. `curated.json` gets its `sidecars` setting with the first published file (LL0 Task 3), so today's catalog builds don't change.
+- **`tools/sidecar/meta.py`:** writes and checks the meta table and writes the release descriptor; every builder uses it.
+- **One delivery path:** `Sidecars` + `SidecarKind` replace `VectorDownloads` and `TimeIndexDownloads`. **Changed from Decision 1 / Task 2:**
+  - **No DB migration.** `gvec` and `gtime` keep their record kinds (`VECTORS`, `TIME_INDEX`), item ids (`.vectors`, `.timeindex`) and folders, so nothing on testers' phones moves. Later kinds are `ItemKind.SIDECAR` under `sidecars/` (kinds are stored by name).
+  - **The catalog's `vectors` and `timeIndex` fields stay as they are** until Plan SQ has merged, because SQ changes the vector gate and the `.gvec` format. Moving them into `sidecars` is a tech-debt-session item. `followVectors` keeps its name for the same reason.
+  - **One push tool waits for Task 5**, when there's a `.gqid` to push.
+- **Tests:** catalog parsing (3 new), the reconcile tests moved onto `Sidecars` plus later kinds (1 new), catalog_gen (4 new), meta (3). The full JVM suite: 3,338 tests, 0 failures. Python: catalog_gen 110, timeindex 15, sidecar 3.
+- **For the tech-debt session:** "sidecar" also names archive.org's metadata files (`ArchiveDownloads.sidecar*`, `archiveSidecarDir`). They're in different packages, but one of the two names should change.

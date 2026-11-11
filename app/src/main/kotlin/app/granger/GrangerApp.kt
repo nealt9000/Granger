@@ -31,8 +31,8 @@ import app.granger.core.downloads.Downloads
 import app.granger.core.downloads.DownloadsHost
 import app.granger.core.downloads.FileDownloader
 import app.granger.core.downloads.ItemKind
-import app.granger.core.downloads.TimeIndexDownloads
-import app.granger.core.downloads.VectorDownloads
+import app.granger.core.downloads.SidecarKind
+import app.granger.core.downloads.Sidecars
 import app.granger.core.downloads.VoiceUnpacker
 import app.granger.core.downloads.VolumeSource
 import app.granger.core.downloads.file
@@ -696,14 +696,14 @@ class AppContainer(context: Context) {
                 VoiceUnpacker.unpack(record.file).onFailure { Log.w("Granger", "Couldn't unpack the voice ${record.itemId}", it) }
                 installedVoices.refresh()
             }
-            // Its vectors go right behind it, before the queue moves on (Plan DL Decision 2).
+            // Its sidecars go right behind it, before the queue moves on (Plan DL Decision 2).
             if (record.kind == ItemKind.PACK || record.kind == ItemKind.BOOK) {
                 try {
-                    vectorDownloads.reconcile(catalog.state.value.catalog, downloadDao.getAll())
+                    sidecars.reconcile(catalog.state.value.catalog, downloadDao.getAll())
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
-                    Log.w("Granger", "Couldn't queue the search vectors of ${record.itemId}", e)
+                    Log.w("Granger", "Couldn't queue the sidecars of ${record.itemId}", e)
                 }
             }
         },
@@ -767,9 +767,8 @@ class AppContainer(context: Context) {
 
     val passageFinder = LibraryPassageFinder(library, bookIndex, bookshelf, shelves, media = mediaIndex, slices = packSlices)
 
-    /** Search vectors follow their pack or book (Plan R1 Task 10): queued when it installs, removed with it. */
-    private val vectorDownloads = VectorDownloads(downloads) { downloadPrefs.wifiOnly }
-    private val timeIndexDownloads = TimeIndexDownloads(downloads) { downloadPrefs.wifiOnly }
+    /** Sidecars (search vectors, the time index, the QID index…) follow their pack or book: queued when it installs, removed with it. */
+    private val sidecars = Sidecars(downloads) { downloadPrefs.wifiOnly }
 
     /** Starts the download queue, recovering a file left running by a run that died; see [Downloads.recover]. */
     fun resumeDownloads() {
@@ -791,19 +790,11 @@ class AppContainer(context: Context) {
             combine(catalog.state.map { it.catalog }.distinctUntilChanged(), downloads.records) { c, r -> c to r }
                 .collectLatest { (c, r) ->
                     try {
-                        vectorDownloads.reconcile(c, r)
+                        sidecars.reconcile(c, r)
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
-                        Log.w("Granger", "Couldn't update the search vectors downloads", e)
-                    }
-                    // The time index follows each pack the same way, on every phone (Plan H5b Task 3).
-                    try {
-                        timeIndexDownloads.reconcile(c, r)
-                    } catch (e: CancellationException) {
-                        throw e
-                    } catch (e: Exception) {
-                        Log.w("Granger", "Couldn't update the time index downloads", e)
+                        Log.w("Granger", "Couldn't update the sidecar downloads", e)
                     }
                 }
         }
@@ -850,7 +841,7 @@ class AppContainer(context: Context) {
         val byItem = records.groupBy { it.itemId }
         val packsByPath = library.packs.first().associateBy { it.filePath }
         return records.filter { it.kind == ItemKind.TIME_INDEX }.groupBy { it.itemId }.mapNotNull { (itemId, versions) ->
-            val parentId = TimeIndexDownloads.parentOf(itemId) ?: return@mapNotNull null
+            val parentId = SidecarKind.TIME_INDEX.parentOf(itemId) ?: return@mapNotNull null
             val parent = byItem[parentId]?.maxByOrNull { it.createdAt } ?: return@mapNotNull null
             val pack = packsByPath[parent.filePath] ?: return@mapNotNull null
             pack.id to versions.maxBy { it.createdAt }.file
@@ -862,7 +853,7 @@ class AppContainer(context: Context) {
         val byItem = records.groupBy { it.itemId }
         val packsByPath = library.packs.first().associateBy { it.filePath }
         return records.filter { it.kind == ItemKind.VECTORS }.groupBy { it.itemId }.mapNotNull { (itemId, versions) ->
-            val parentId = VectorDownloads.parentOf(itemId) ?: return@mapNotNull null
+            val parentId = SidecarKind.VECTORS.parentOf(itemId) ?: return@mapNotNull null
             val parent = byItem[parentId]?.maxByOrNull { it.createdAt } ?: return@mapNotNull null
             val file = versions.maxBy { it.createdAt }.file
             when (parent.kind) {

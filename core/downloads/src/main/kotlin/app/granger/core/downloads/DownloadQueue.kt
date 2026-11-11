@@ -253,8 +253,8 @@ class DownloadQueue(
         const val PROGRESS_RESETS_BYTES = 1L * 1000 * 1000
 
         /**
-         * Whether this record goes ahead of bigger ones: a small file. An Ask index or a time index may too, since each
-         * is queued only once its pack is installed ([VectorDownloads], [TimeIndexDownloads]).
+         * Whether this record goes ahead of bigger ones: a small file. A pack's sidecars may too, since each is queued
+         * only once its pack is installed ([Sidecars]).
          */
         val DownloadRecord.jumpsAhead: Boolean get() = sizeBytes in 1..SMALL_BYTES
 

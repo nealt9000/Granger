@@ -148,6 +148,8 @@ data class PackEntry(
     val vectors: VectorsEntry? = null,
     /** The pack's time index (Plan H5b), downloaded with it on every phone; null when it has none, and in older catalogs. */
     val timeIndex: TimeIndexEntry? = null,
+    /** The pack's other sidecars (Linked Library spec §5.1), downloaded with it; empty in older catalogs. */
+    val sidecars: List<SidecarEntry> = emptyList(),
     /**
      * The set this pack is a slice of (Plan WF Decision 2): "wikipedia_en", "wikivoyage_en"; blank for any other pack,
      * and in older catalogs. A slice of higher [setRank] holds the smaller ones' articles.
@@ -205,6 +207,8 @@ data class BookEntry(
     val domain: String = "",
     /** The book's search vectors (Plan R1), downloaded with it; null when it has none, and in older catalogs. */
     val vectors: VectorsEntry? = null,
+    /** The book's other sidecars (Linked Library spec §5.1), downloaded with it; empty in older catalogs. */
+    val sidecars: List<SidecarEntry> = emptyList(),
 ) : CatalogItem
 
 /**
@@ -238,6 +242,35 @@ data class TimeIndexEntry(
     val lanesVersion: Int = 0,
 )
 
+/**
+ * One file built offline for a pack or book and downloaded with it (Linked Library spec §5.1): a read-only SQLite file
+ * whose `meta` table names its [kind], [schemaVersion] and the exact source file it was built from. [KNOWN] holds the
+ * kinds this app reads and the newest schema of each; the parser drops the rest, leaving them for a newer app. Search
+ * vectors and the time index stay in their own fields until the catalog moves them here (after Plan SQ). Every field has
+ * a default so a malformed object decodes; the parser drops one that doesn't validate.
+ */
+@Serializable
+data class SidecarEntry(
+    val kind: String = "",
+    val url: String = "",
+    val sha256: String = "",
+    val sizeBytes: Long = 0,
+    val schemaVersion: Int = 0,
+) {
+    companion object {
+        /** Kind -> the newest schema this app reads: the QID index (Plan LL0) and the Classics' reference links (Plan LL1). */
+        val KNOWN: Map<String, Int> = mapOf("gqid" to 1, "glink" to 1)
+    }
+}
+
+/** The item's sidecars (Linked Library spec §5.1), for the kinds that can have them. */
+val CatalogItem.sidecars: List<SidecarEntry>
+    get() = when (this) {
+        is PackEntry -> sidecars
+        is BookEntry -> sidecars
+        else -> emptyList()
+    }
+
 /** The item's search vectors, for the kinds that can have them. */
 val CatalogItem.vectors: VectorsEntry?
     get() = when (this) {
@@ -250,8 +283,9 @@ val CatalogItem.vectors: VectorsEntry?
 val CatalogItem.timeIndex: TimeIndexEntry?
     get() = (this as? PackEntry)?.timeIndex
 
-/** What getting the item downloads: its file, its vectors and its time index (spec §4, "their size is shown in the item's size"). */
-val CatalogItem.downloadBytes: Long get() = sizeBytes + (vectors?.sizeBytes ?: 0L) + (timeIndex?.sizeBytes ?: 0L)
+/** What getting the item downloads: its file, its vectors, its time index and its sidecars (spec §4, "their size is shown in the item's size"). */
+val CatalogItem.downloadBytes: Long
+    get() = sizeBytes + (vectors?.sizeBytes ?: 0L) + (timeIndex?.sizeBytes ?: 0L) + sidecars.sumOf { it.sizeBytes }
 
 @Serializable
 enum class ModelRole {

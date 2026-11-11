@@ -1526,6 +1526,59 @@ def test_the_timeindex_command_rewrites_the_catalog_with_a_fresh_date(tmp_path, 
     assert "time indexes on 3 packs from 1 files" in capsys.readouterr().out
 
 
+# Plan LL0: sidecars, one descriptor shape for every later kind.
+def _sdescriptor(id, source, sidecar="gqid", url=None, kind="pack", sha="9"):
+    return {"id": id, "kind": kind, "sidecar": sidecar, "fileName": f"{id}_x.{sidecar}", "sizeBytes": 30,
+            "sha256": sha * 64, "schemaVersion": 1, "sourceSha256": source, "url": url}
+
+
+def test_sidecars_go_on_every_flavour_one_per_kind_and_books_by_exact_file():
+    catalog = _vcatalog()
+    catalog["packs"][0]["sidecars"] = [{"kind": "gqid", "url": "https://old"}]
+    book = {"id": "gc-pride", "sha256": "c" * 64, "sizeBytes": 10}
+    catalog["books"] = [book]
+    used, lines = cg.attach_sidecars(catalog, [
+        _sdescriptor("wikipedia_en_top_maxi", "b" * 64),
+        _sdescriptor("wikipedia_en_top_maxi", "b" * 64, sidecar="glink", sha="7"),
+        _sdescriptor("wikipedia_en_top_maxi", "b" * 64, sha="6"),       # a second gqid replaces the first
+        _sdescriptor("gc-pride", "c" * 64, sidecar="glink", kind="book"),
+        _sdescriptor("gc-pride", "d" * 64, sidecar="glink", kind="book"),  # another release: reported
+        _sdescriptor("wikipedia_en_gone", "0" * 64, url="https://h/g.gqid"),
+    ], release_url="https://github.com/x/releases/download/sidecars-1/")
+    by_id = {p["id"]: p.get("sidecars") for p in catalog["packs"]}
+    top = by_id["wikipedia_en_top_maxi"]
+    assert [(s["kind"], s["sha256"][0]) for s in top] == [("glink", "7"), ("gqid", "6")]
+    assert top[1] == {"kind": "gqid", "url": "https://github.com/x/releases/download/sidecars-1/wikipedia_en_top_maxi_x.gqid",
+                      "sha256": "6" * 64, "sizeBytes": 30, "schemaVersion": 1}
+    assert by_id["wikipedia_en_top_nopic"] == top and by_id["wikipedia_en_top_mini"] == top
+    assert by_id["wikipedia_en_knots_maxi"] is None
+    assert [s["kind"] for s in book["sidecars"]] == ["glink"]
+    assert len(lines) == 2 and all("no longer lists" in l for l in lines)
+    assert len(used) == 4
+
+
+def test_sidecar_sizes_and_urls_count():
+    catalog = {"packs": [{"id": "med", "zimName": "med", "sizeBytes": 1000,
+                          "sidecars": [{"kind": "gqid", "sizeBytes": 30, "url": "https://s/m.gqid"}]}],
+               "books": [], "readiness": {"domains": [{"id": "medicine", "essential": ["med"], "comprehensive": ["med"]}]}}
+    assert cg.tier_sizes(catalog)["medicine"] == (1030, 1030)
+    assert "https://s/m.gqid" in cg.catalog_urls(catalog)
+
+
+def test_the_sidecars_command_rewrites_the_catalog_with_a_fresh_date(tmp_path, capsys):
+    catalog = _vcatalog() | {"generatedAt": "2026-10-22T00:00:00Z"}
+    path = tmp_path / "catalog.json"
+    path.write_text(json.dumps(catalog))
+    releases = tmp_path / "releases"
+    releases.mkdir()
+    (releases / "top.gqid.json").write_text(json.dumps(_sdescriptor("wikipedia_en_top_maxi", "b" * 64)))
+    cg.main(["sidecars", "--releases", str(releases), "--release-url", "https://github.com/x/releases/download/s/", str(path)])
+    out = json.loads(path.read_text())
+    assert out["generatedAt"] > "2026-10-22T00:00:00Z"
+    assert out["packs"][1]["sidecars"][0]["url"].endswith("/s/wikipedia_en_top_maxi_x.gqid")
+    assert "sidecars on 3 entries from 1 files" in capsys.readouterr().out
+
+
 # Upkeep (2026-11-09): a newer snapshot is taken only when it is safe.
 def _pin(pid, zim, snap, sha, **extra):
     return {"id": pid, "zimName": zim, "snapshotDate": snap, "sha256": sha, "sizeBytes": 1, "zimUuid": sha,
@@ -1565,6 +1618,15 @@ def test_hold_back_checks_the_time_index_too_and_lets_safe_moves_through():
     lines = cg.hold_back(packs, previous, {"timeIndex": {"a"}}, _status(), sleep=lambda s: None)
     assert [p["sha256"] for p in packs] == ["a", "d", "e"]
     assert len(lines) == 1 and "time index" in lines[0]["text"] and lines[0]["reasons"] == ["timeIndex"]
+
+
+def test_hold_back_waits_for_each_sidecar_kind_to_be_rebuilt():
+    previous = {"packs": [_pin("wp_maxi", "wp", "2026-10", "a", sidecars=[{"kind": "gqid"}, {"kind": "glink"}])]}
+    packs = [_pin("wp_maxi", "wp", "2026-11", "b")]
+    lines = cg.hold_back(packs, previous, {"sidecars": {("gqid", "b")}}, _status(), sleep=lambda s: None)
+    assert packs[0]["sha256"] == "a" and lines[0]["reasons"] == ["glink"] and "glink sidecar" in lines[0]["text"]
+    packs = [_pin("wp_maxi", "wp", "2026-11", "b")]
+    assert cg.hold_back(packs, previous, {"sidecars": {("gqid", "b"), ("glink", "b")}}, _status(), sleep=lambda s: None) == []
 
 
 def test_hold_back_moves_anyway_when_the_previous_file_is_gone_too():

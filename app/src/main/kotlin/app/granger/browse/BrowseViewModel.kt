@@ -11,7 +11,7 @@ import app.granger.core.catalog.PackEntry
 import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.ItemKind
-import app.granger.core.downloads.VectorDownloads
+import app.granger.core.downloads.SidecarKind
 import app.granger.core.library.Filing
 import app.granger.core.library.isBookPack
 import app.granger.core.library.Library
@@ -107,7 +107,7 @@ fun installedEntry(pack: Pack, catalog: Catalog?, records: List<DownloadRecord>)
 fun installedAskReach(pack: Pack, catalog: Catalog?, records: List<DownloadRecord>): AskReach {
     val installed = records.filter { it.state == DownloadState.INSTALLED }
     val entry = installedEntry(pack, catalog, records)
-    val vectorParents = installed.filter { it.kind == ItemKind.VECTORS }.mapNotNullTo(HashSet()) { VectorDownloads.parentOf(it.itemId) }
+    val vectorParents = installed.filter { it.kind == ItemKind.VECTORS }.mapNotNullTo(HashSet()) { SidecarKind.VECTORS.parentOf(it.itemId) }
     return entry?.let { askReach(it, vectorParents) }
         ?: if (pack.hasFulltextIndex) AskReach.KEYWORDS else AskReach.NONE
 }
