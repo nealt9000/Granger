@@ -31,6 +31,12 @@ class BestMatches(
      * Asked once per search.
      */
     private val articleKey: suspend () -> (Passage) -> Any = { { p: Passage -> p.sourceId to p.location } },
+    /**
+     * Plan SQ Step 4: the passages holding the query as a quote (the app's: book chunks with its words as a phrase), put
+     * first in both steps. Ranked on keywords and meaning, a remembered line lost to articles sharing one word ("Alas,
+     * poor Yorick" gave "Working poor"): 20% of quotes had their book in the first five, against 95% in Books.
+     */
+    private val quoted: (suspend (String) -> List<Passage>)? = null,
 ) {
     /** One row: an article or chapter, its best passage, and the [sentence] of it (character range) to highlight. */
     data class Match(val passage: Passage, val sentence: IntRange?)
@@ -71,11 +77,14 @@ class BestMatches(
     fun stream(query: String, limit: Int = LIMIT): Flow<Result> = channelFlow {
         val languages = ResearchLanguage.of(query)
         val keywords = Keywords.extract(query, languages = languages)
+        val inLanguage = { p: Passage -> p.language == null || p.language in languages }
+        val quote = async { quotes(query).filter(inLanguage) }
+        // The quote's sentence: every word of the query counts, small ones too ("To be, or not to be").
+        val quoteMatch = { p: Passage -> Match(p, sentence(p, listOf(query), languages, stopwords = false)) }
         if (keywords.isEmpty()) {
-            send(Result(emptyList(), keywords, false, final = true))
+            send(Result(quote.await().take(limit).map(quoteMatch), keywords, false, final = true))
             return@channelFlow
         }
-        val inLanguage = { p: Passage -> p.language == null || p.language in languages }
         val article = articleKey()
         val keywordDone = CompletableDeferred<Unit>()
         val meaning = async {
@@ -83,7 +92,9 @@ class BestMatches(
                 // Shown while the keyword search runs; skipped when the keywords already finished.
                 if (!keywordDone.isCompleted) {
                     val ranked = byCosine(hits, sourceWeight?.of(query, keywords, hits) ?: Ranking.NO_WEIGHT, limit, article)
-                    send(Result(ranked.map { Match(it, sentence(it, keywords, languages)) }, keywords, byMeaning = true, embedMs = lastEmbedMs, denseMs = lastDenseMs))
+                    val pinned = quote.await()
+                    val rows = withQuotes(query, pinned.map(quoteMatch), ranked.map { Match(it, sentence(it, keywords, languages)) })
+                    send(Result(rows.distinctBy { article(it.passage) }.take(limit), keywords, byMeaning = true, embedMs = lastEmbedMs, denseMs = lastDenseMs))
                 }
             }
         }
@@ -102,10 +113,10 @@ class BestMatches(
         // With dense hits all below the floor and no keyword passage, the first step's ranking stands.
         val ranked = merged.ifEmpty { Ranking.byLexical(found, topical, wide, limit = POOL, weight = weight, languages = languages) }
             .ifEmpty { hits?.let { byCosine(it, weight, POOL, article) }.orEmpty() }
-        val perArticle = ranked.distinctBy(article).take(limit)
+        val rows = withQuotes(query, quote.await().map(quoteMatch), ranked.map { Match(it, sentence(it, topical, languages)) })
         send(
             Result(
-                perArticle.map { Match(it, sentence(it, topical, languages)) }, keywords, byMeaning = hits != null,
+                rows.distinctBy { article(it.passage) }.take(limit), keywords, byMeaning = hits != null,
                 embedMs = lastEmbedMs, denseMs = lastDenseMs, keywordMs = keywordMs, final = true,
             ),
         )
@@ -114,6 +125,25 @@ class BestMatches(
     /** Dense hits by weighted cosine, one per article or chapter: the first step's ranking. */
     private fun byCosine(hits: List<Passage>, weight: (Passage) -> Double, limit: Int, article: (Passage) -> Any): List<Passage> =
         hits.filter { it.cosine != null }.sortedByDescending { it.cosine!! * weight(it) }.distinctBy(article).take(limit)
+
+    /**
+     * [quotes] first, or, for a query under [QUOTE_FIRST_WORDS] words, after the first [SHORT_QUOTE_AT] [ranked] rows: a
+     * three-word phrase in a book is as often a topic as a quote ("speed of light", "life of napoleon"), and its article
+     * should lead.
+     */
+    private fun withQuotes(query: String, quotes: List<Match>, ranked: List<Match>): List<Match> =
+        if (Keywords.words(query).size >= QUOTE_FIRST_WORDS) quotes + ranked
+        else ranked.take(SHORT_QUOTE_AT) + quotes + ranked.drop(SHORT_QUOTE_AT)
+
+    /** [quoted]'s passages for [query]; empty without it or when it fails. */
+    private suspend fun quotes(query: String): List<Passage> =
+        try {
+            quoted?.invoke(query).orEmpty()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            emptyList()
+        }
 
     @Volatile private var lastEmbedMs = 0L
     @Volatile private var lastDenseMs = 0L
@@ -142,14 +172,17 @@ class BestMatches(
         const val POOL = 40
         /** [RankingConfig.keywordCosine] for Best matches. */
         const val KEYWORD_COSINE = 0.66
+        /** The fewest words for a quote to lead Best matches; a shorter one comes in at [SHORT_QUOTE_AT]. */
+        const val QUOTE_FIRST_WORDS = 4
+        const val SHORT_QUOTE_AT = 2
 
         /**
-         * The sentence of [passage] sharing the most of [keywords]' words (folded, stopwords left out), the earlier on a
-         * tie; null when none shares any.
+         * The sentence of [passage] sharing the most of [keywords]' words (folded, stopwords left out unless [stopwords] is
+         * false), the earlier on a tie; null when none shares any.
          */
-        fun sentence(passage: Passage, keywords: List<String>, languages: List<ResearchLanguage>): IntRange? {
+        fun sentence(passage: Passage, keywords: List<String>, languages: List<ResearchLanguage>, stopwords: Boolean = true): IntRange? {
             val wanted = keywords.flatMap(Keywords::variants).flatMap(Keywords::words)
-                .map { ResearchLanguage.fold(it) }.filterNot { Keywords.isStopword(it, languages) }.toSet()
+                .map { ResearchLanguage.fold(it) }.filterNot { stopwords && Keywords.isStopword(it, languages) }.toSet()
             if (wanted.isEmpty()) return null
             val ranges = CitedQuote.sentences(passage.text, languages.first())
             return ranges.map { r -> r to Keywords.words(passage.text.substring(r)).count { ResearchLanguage.fold(it) in wanted } }

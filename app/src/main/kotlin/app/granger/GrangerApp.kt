@@ -918,6 +918,7 @@ class AppContainer(context: Context) {
                     (if (p.kind == app.granger.core.research.SourceKind.ARTICLE) families[p.sourceId] ?: p.sourceId else p.sourceId) to p.location
                 })
             },
+            quoted = passageFinder::quoted,
         )
     }
 

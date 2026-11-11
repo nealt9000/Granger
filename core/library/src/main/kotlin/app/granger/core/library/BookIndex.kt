@@ -121,6 +121,43 @@ class BookIndex(
         }
     }
 
+    /**
+     * Plan SQ Step 4: the chunks that hold [query] as a quote, best first, one per book, at most [limit]: its words as a
+     * phrase, else (a word misremembered or left out) each word within [NEAR] words of the next. Empty for fewer than
+     * [QUOTE_WORDS] words, or when the words are so common that more than [QUOTE_CHUNKS] chunks hold them: then the query
+     * isn't pointing at one place ("thought he had been").
+     */
+    suspend fun quoted(query: String, limit: Int = 2): List<BookPassage> {
+        val words = Keywords.words(query)
+        if (words.size < QUOTE_WORDS) return emptyList()
+        val phrase = "\"${words.joinToString(" ")}\""
+        val near = words.joinToString(" NEAR/$NEAR ") { "\"$it\"" }
+        return withContext(io) {
+            val found = listOf(phrase, near).asSequence()
+                .map { scores(listOf(it), bookId = null) }
+                .firstOrNull { it.isNotEmpty() }
+                ?.takeIf { it.size <= QUOTE_CHUNKS }
+                ?: return@withContext emptyList()
+            val ranked = found.entries.sortedWith(compareByDescending<Map.Entry<Long, Double>> { it.value }.thenBy { it.key })
+            // The oldest book first: famous lines are quoted by later books ("Alas, poor Yorick" is in Tristram Shandy,
+            // Hard Times and The Brothers Karamazov too, each once, so BM25 can't tell them from Hamlet).
+            val books = topChunks(ranked.map { it.key }, QUOTE_CHUNKS, perBook = 1).mapNotNull { c -> dao.get(c.bookId)?.let { c to it } }
+            books.sortedBy { (_, book) -> year(book.date) ?: Int.MAX_VALUE }.take(limit).mapNotNull { (chunk, book) ->
+                val text = try {
+                    chunkTexts(book, listOf(chunk))[chunk.id]
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    null
+                }
+                text?.let { BookPassage(book, chunk.href, chunk.progression, it) }
+            }
+        }
+    }
+
+    /** The year a book's date starts with (negative for BCE dates written "-0429"); null when it has none. */
+    private fun year(date: String?): Int? = date?.let { YEAR.find(it)?.value?.toIntOrNull() }
+
     /** How many chunks of each of [bookIds] match [match]; empty for a bad query. */
     private fun matchCounts(match: String, bookIds: List<String>): Map<String, Int> {
         if (bookIds.isEmpty()) return emptyMap()
@@ -336,7 +373,12 @@ class BookIndex(
     companion object {
         /** The most hits [search] returns by default. */
         const val LIMIT = 30
+        /** The fewest words [quoted] takes for a quote, the most each may stray from the next, and the most chunks. */
+        const val QUOTE_WORDS = 3
+        const val NEAR = 2
+        const val QUOTE_CHUNKS = 20
         private val WHITESPACE = Regex("\\s+")
+        private val YEAR = Regex("^-?\\d{1,4}")
     }
 }
 

@@ -71,6 +71,39 @@ class BestMatchesTest {
         assertThat(result.matches.map { it.passage.location }).containsExactly("Burn")
     }
 
+    @Test fun aQuotesPassageComesFirstInBothSteps() = runTest {
+        val hamlet = Passage(SourceKind.BOOK, "book:hamlet", "Hamlet", location = "OEBPS/c002.xhtml",
+            text = "The grave is dug. Alas, poor Yorick! I knew him, Horatio.", language = ResearchLanguage.EN)
+        val working = passage("wp", "Working_poor", "Working poor", "The working poor are poor despite a job.", cosine = 0.81)
+        val steps = BestMatches(
+            PassageFinder { kotlinx.coroutines.delay(1_000); listOf(working) },
+            dense = DenseFinder { listOf(working) }, embed = { FloatArray(4) },
+            quoted = { q -> if (q == "Alas, poor Yorick, I knew him") listOf(hamlet) else emptyList() },
+        ).stream("Alas, poor Yorick, I knew him").toList()
+        assertThat(steps.map { m -> m.matches.map { it.passage.sourceTitle } }).containsExactly(
+            listOf("Hamlet", "Working poor"), listOf("Hamlet", "Working poor"),
+        ).inOrder()
+        assertThat(hamlet.text.substring(steps.last().matches.first().sentence!!)).startsWith("Alas, poor Yorick")
+    }
+
+    @Test fun aQuoteOfSmallWordsStillFindsItsPassage() = runTest {
+        val play = Passage(SourceKind.BOOK, "book:hamlet", "Hamlet", location = "OEBPS/c003.xhtml",
+            text = "To be, or not to be, that is the question.", language = ResearchLanguage.EN)
+        val result = BestMatches(PassageFinder { emptyList() }, quoted = { listOf(play) }).find("to be or not to be")
+        assertThat(result.matches.map { it.passage.sourceTitle }).containsExactly("Hamlet")
+    }
+
+    @Test fun aThreeWordQuoteComesInAfterTheFirstTwoRows() = runTest {
+        val book = Passage(SourceKind.BOOK, "book:physics", "Opticks", location = "OEBPS/c004.xhtml",
+            text = "The speed of light is finite.", language = ResearchLanguage.EN)
+        val articles = listOf("Speed_of_light", "Light", "Photon").mapIndexed { i, a ->
+            passage("wp", a, a.replace('_', ' '), "$a: light travels at a finite speed.", cosine = 0.9 - i * 0.01)
+        }
+        val result = BestMatches(PassageFinder { emptyList() }, dense = DenseFinder { articles }, embed = { FloatArray(4) },
+            quoted = { listOf(book) }).find("speed of light")
+        assertThat(result.matches.map { it.passage.sourceTitle }).containsExactly("Speed of light", "Light", "Opticks", "Photon").inOrder()
+    }
+
     @Test fun theHighlightIsTheSentenceWithMostQueryWords() {
         val range = BestMatches.sentence(burnFirstAid, listOf("cool", "burn", "water"), Keywords.ENGLISH)!!
         assertThat(burnFirstAid.text.substring(range)).startsWith("Cool the burn with running water")

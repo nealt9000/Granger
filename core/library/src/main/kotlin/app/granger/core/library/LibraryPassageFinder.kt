@@ -275,25 +275,39 @@ class LibraryPassageFinder(
                 emptyList()
             }
             val found = bookIndex.passages(words, limit = bookLimit) + named
-            found.distinctBy { Triple(it.book.id, it.href, it.text) }.map {
-                Passage(
-                    kind = SourceKind.BOOK,
-                    sourceId = it.book.id,
-                    sourceTitle = it.book.title,
-                    location = it.href,
-                    progression = it.progression,
-                    // A PDF's page is its source card's heading, so the citation says where it is.
-                    heading = if (it.book.format == BookFormat.PDF) PdfText.pageOf(it.href)?.let { n -> "p. $n" }.orEmpty() else "",
-                    text = it.text,
-                    meta = SourceMeta(it.book.author, it.book.date, it.book.subjects, collections[it.book.id].orEmpty()),
-                    language = ResearchLanguage.ofCode(it.book.language),
-                )
-            }
+            found.distinctBy { Triple(it.book.id, it.href, it.text) }.map { bookPassage(it, collections) }
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {
             emptyList()
         }
+
+    /**
+     * Plan SQ Step 4: the book chunks holding [query] as a quote ([BookIndex.quoted]), for Best matches to put first;
+     * empty when it isn't one, or on any failure.
+     */
+    suspend fun quoted(query: String): List<Passage> =
+        try {
+            val found = bookIndex.quoted(query)
+            if (found.isEmpty()) emptyList() else shelves.collectionNames().let { c -> found.map { bookPassage(it, c) } }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            emptyList()
+        }
+
+    private fun bookPassage(it: BookPassage, collections: Map<String, String>) = Passage(
+        kind = SourceKind.BOOK,
+        sourceId = it.book.id,
+        sourceTitle = it.book.title,
+        location = it.href,
+        progression = it.progression,
+        // A PDF's page is its source card's heading, so the citation says where it is.
+        heading = if (it.book.format == BookFormat.PDF) PdfText.pageOf(it.href)?.let { n -> "p. $n" }.orEmpty() else "",
+        text = it.text,
+        meta = SourceMeta(it.book.author, it.book.date, it.book.subjects, collections[it.book.id].orEmpty()),
+        language = ResearchLanguage.ofCode(it.book.language),
+    )
 
     /**
      * For up to [NAMED_BOOKS] books the keywords name, a search inside the book for the keywords that don't. For a
