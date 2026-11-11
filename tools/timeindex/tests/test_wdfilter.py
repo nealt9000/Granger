@@ -60,3 +60,24 @@ def test_classes_only_when_asked():
     assert none is None
     _, cls = run([cls_line], [], "eswiki", classes=True)
     assert json.loads(cls.getvalue()) == {"q": "Q5", "l": "q5", "p279": ["Q215627"]}
+
+
+def test_link_properties_ride_along():
+    q = entity("Q1001", {"enwiki": "Pride_and_Prejudice"},
+               {"P50": [claim({"id": "Q36322"})], "P2034": [claim("1342")], "P1899": [claim("123")],
+                "P434": [claim("abc-123")], "P86": [claim({"id": "Q255"})]})
+    out, _ = run([q], ["Pride_and_Prejudice"], "enwiki")
+    r = out[0]
+    assert r["P50"] == ["Q36322"] and r["P86"] == ["Q255"]
+    assert r["P2034"] == ["1342"] and r["P1899"] == ["123"] and r["P434"] == ["abc-123"]
+
+
+def test_all_items_and_several_sites_in_one_pass():
+    belgium = entity("Q31", {"enwiki": "Belgium", "eswiki": "Bélgica"})
+    only_en = entity("Q99", {"enwiki": "Elsewhere"})
+    no_wiki = entity("Q7", {"frwiki": "Ailleurs"})
+    en, es = io.StringIO(), io.StringIO()
+    wdfilter.run_sites(iter(["[\n", belgium, only_en, no_wiki, "]\n"]),
+                       {"enwiki": (None, en), "eswiki": (None, es)}, log=io.StringIO())
+    assert [json.loads(l)["t"] for l in en.getvalue().splitlines()] == ["Belgium", "Elsewhere"]
+    assert [json.loads(l)["t"] for l in es.getvalue().splitlines()] == ["Bélgica"]
