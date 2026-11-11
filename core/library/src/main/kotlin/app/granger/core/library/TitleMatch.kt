@@ -76,6 +76,16 @@ object TitleMatch {
         return (cut + initial + dropped).filter { it.isNotBlank() }.distinct()
     }
 
+    /**
+     * [hits] with each title once: a hit whose folded title ([key]) an earlier one has goes into that one's
+     * [SearchHit.also], in order. The rows keep the order of their first hits.
+     */
+    fun oneRowPerTitle(hits: List<SearchHit>): List<SearchHit> {
+        val rows = LinkedHashMap<String, MutableList<SearchHit>>()
+        hits.forEach { hit -> rows.getOrPut(key(hit.title).ifEmpty { hit.packId + "/" + hit.path }) { mutableListOf() }.add(hit) }
+        return rows.values.map { same -> same.first().copy(also = same.first().also + same.drop(1)) }
+    }
+
     private val THREE = mapOf("en" to "eng", "es" to "spa")
 
     /**

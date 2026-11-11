@@ -24,6 +24,8 @@ data class SearchHit(
     val title: String,
     val snippet: String? = null,
     val author: String = "",
+    /** The same title from other packs or the shelf, listed under this one's row (Plan SQ: one row per title). */
+    val also: List<SearchHit> = emptyList(),
 )
 
 /**
@@ -94,10 +96,14 @@ class ZimLibrarySearch(
             .map { it.third }.distinctBy { family(it) to it.path }
         val rest = ranked.filter { it.first == null }.sortedBy { it.second }.map { it.third }
         val merged = (first + rest).distinctBy { family(it) to it.path }
+        // One row per title: "Turingia" in Wikipedia and Wikivoyage, or a book on the shelf and in Classics, is one row
+        // led by the better ranked, the others under it.
+        val rows = TitleMatch.oneRowPerTitle(merged)
+        val firstKeys = first.mapTo(HashSet()) { it.packId to it.path }
         return TitleResults(
-            merged.take(titleLimit),
-            more = merged.size > titleLimit || packs.any { it.returned >= titlesPerPack },
-            ranked = minOf(first.size, titleLimit),
+            rows.take(titleLimit),
+            more = rows.size > titleLimit || packs.any { it.returned >= titlesPerPack },
+            ranked = minOf(rows.count { (it.packId to it.path) in firstKeys }, titleLimit),
         )
     }
 

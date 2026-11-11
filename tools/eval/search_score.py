@@ -53,12 +53,14 @@ def load_run(run_dir):
 
 
 def known_rank(item, hits):
-    """1-based rank of the target in [hits], or None: same file and path, or the same title in the same set."""
-    for n, h in enumerate(hits, 1):
-        if h.get("file") == item["pack"] and h.get("path") == item["path"]:
-            return n
-        if fold(h.get("title")) == fold(item["title"]) and family(h.get("file")) == family(item["pack"]):
-            return n
+    """1-based rank of the row holding the target in [hits], or None: same file and path, or the same title in the same set."""
+    for n, row in enumerate(hits, 1):
+        # A row holds one title from every pack that has it (its "also"): the target in any of them is found at the row.
+        for h in [row] + row.get("also", []):
+            if h.get("file") == item["pack"] and h.get("path") == item["path"]:
+                return n
+            if fold(h.get("title")) == fold(item["title"]) and family(h.get("file")) == family(item["pack"]):
+                return n
     return None
 
 

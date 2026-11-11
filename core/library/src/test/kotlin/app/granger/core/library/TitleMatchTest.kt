@@ -23,6 +23,17 @@ class TitleMatchTest {
         assertThat(TitleMatch.skipsSuggest("wikipedia_en_top", "paradise r")).isFalse()
     }
 
+    @Test fun oneRowPerTitleKeepsTheFirstAndListsTheRestUnderIt() {
+        val wiki = SearchHit("wp", "Wikipedia", "Turingia", "Turingia")
+        val voyage = SearchHit("wv", "Wikivoyage", "Turingia", "Turingia")
+        val other = SearchHit("wp", "Wikipedia", "Turin", "Turín")
+        val accent = SearchHit("wt", "Wiktionary", "turin", "turin")
+        val rows = TitleMatch.oneRowPerTitle(listOf(wiki, other, voyage, accent))
+        assertThat(rows.map { it.packId to it.path }).containsExactly("wp" to "Turingia", "wp" to "Turin").inOrder()
+        assertThat(rows[0].also).containsExactly(voyage)
+        assertThat(rows[1].also).containsExactly(accent)
+    }
+
     @Test fun distanceCountsASwapAsOne() {
         assertThat(TitleMatch.distance("kerri hiugchi", "kerri higuchi")).isEqualTo(1)
         assertThat(TitleMatch.distance("steatorreha", "steatorrhea")).isEqualTo(1)

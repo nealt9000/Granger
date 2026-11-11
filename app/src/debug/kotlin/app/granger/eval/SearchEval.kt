@@ -92,7 +92,10 @@ class SearchEval(
     private fun hit(h: SearchHit): JSONObject {
         val (name, file) = packs[h.packId] ?: (h.packId to "")
         // A book in Titles has its id as packId and no path.
-        return JSONObject().put("source", if (h.path.isEmpty()) h.packId else name).put("file", file).put("path", h.path).put("title", h.title)
+        val row = JSONObject().put("source", if (h.path.isEmpty()) h.packId else name).put("file", file).put("path", h.path).put("title", h.title)
+        // The same title from other packs, shown in the row's "Also in".
+        if (h.also.isNotEmpty()) row.put("also", JSONArray(h.also.map(::hit)))
+        return row
     }
 
     private fun bookHit(h: BookHit): JSONObject =

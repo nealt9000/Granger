@@ -134,10 +134,13 @@ class ZimLibrarySearchTest {
         ))
         install("ideas.zim", FakeZimArchive("u-ideas", "Ideas", suggestions = listOf(ZimHit("Apocalyptic", "Après l'Apocalypse"), ZimHit("Apo", "ÀPOCALYPSE"))))
         library.refresh()
-        val hits = ZimLibrarySearch(library, io = dispatcher).titles("apocalypse").hits.map { it.title }
-        // Case and accents don't count; within a rank, the turns across packs keep their order.
-        assertThat(hits.take(3)).containsExactly("ÀPOCALYPSE", "Apocalypse", "Apocalypse Now").inOrder()
-        assertThat(hits.drop(3)).containsAtLeast("215 Cassiopeia solar apocalypse computer", "Après l'Apocalypse", "Aspirin")
+        val rows = ZimLibrarySearch(library, io = dispatcher).titles("apocalypse").hits
+        val hits = rows.map { it.title }
+        // Case and accents don't count; within a rank, the turns across packs keep their order. One row per title: the
+        // second pack's "Apocalypse" is under the first's.
+        assertThat(hits.take(2)).containsExactly("ÀPOCALYPSE", "Apocalypse Now").inOrder()
+        assertThat(rows.first().also.map { it.packId to it.title }).containsExactly("u-wiki" to "Apocalypse")
+        assertThat(hits.drop(2)).containsAtLeast("215 Cassiopeia solar apocalypse computer", "Après l'Apocalypse", "Aspirin")
     }
 
     @Test fun booksOnTheShelfAreTitlesAheadOfPackTitlesOfTheSameRank() = test {
@@ -151,9 +154,11 @@ class ZimLibrarySearchTest {
         val withBooks = ZimLibrarySearch(library, io = dispatcher, bookshelf = StubBookshelf(listOf(doc, peterPan)))
 
         val hits = withBooks.titles("peter pan").hits
-        assertThat(hits.map { it.packId to it.title }.take(3)).containsExactly(
-            peterPan.id to "Peter Pan", "u-wiki" to "Peter Pan", "u-wiki" to "Peter Pan (2003 film)",
+        assertThat(hits.map { it.packId to it.title }.take(2)).containsExactly(
+            peterPan.id to "Peter Pan", "u-wiki" to "Peter Pan (2003 film)",
         ).inOrder()
+        // The pack's "Peter Pan" is under the book's row.
+        assertThat(hits.first().also.map { it.packId }).contains("u-wiki")
         // A book opens as a book: its id and no path, with its author and collection for the row.
         val row = hits.first()
         assertThat(listOf(row.path, row.author, row.packTitle)).containsExactly("", "J. M. Barrie", "Granger Classics").inOrder()

@@ -40,6 +40,14 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.text.withLink
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.input.ImeAction
@@ -230,11 +238,24 @@ fun SearchScreen(
                 }
                 if (state.titles.isNotEmpty()) item { SectionHeader(stringResource(R.string.search_titles)) }
                 results(state, SearchGroup.TITLES, state.titles, { _, hit -> "t:${hit.packId}/${hit.path}" }, ::toggle) { hit ->
+                    val openIn = stringResource(R.string.search_open_in)
                     ListItem(
-                        modifier = Modifier.clickable { open(hit) },
+                        modifier = Modifier.clickable { open(hit) }.semantics {
+                            // The "Also in" links, for TalkBack: the row reads as one, its other copies as actions.
+                            if (hit.also.isNotEmpty()) {
+                                customActions = hit.also.map { other ->
+                                    CustomAccessibilityAction(openIn.format(other.packTitle.ifBlank { other.author }.ifBlank { other.title })) { open(other); true }
+                                }
+                            }
+                        },
                         headlineContent = { Text(hit.title) },
                         // A book reads "J. M. Barrie · Granger Classics".
-                        supportingContent = { Text(listOf(hit.author, hit.packTitle).filter { it.isNotBlank() }.joinToString(" · ")) },
+                        supportingContent = {
+                            Column {
+                                Text(listOf(hit.author, hit.packTitle).filter { it.isNotBlank() }.joinToString(" · "))
+                                if (hit.also.isNotEmpty()) AlsoIn(hit.also, ::open)
+                            }
+                        },
                     )
                 }
                 if (state.fullText.isNotEmpty()) item { SectionHeader(stringResource(R.string.search_articles)) }
@@ -313,6 +334,7 @@ fun SearchScreen(
 /** Test tags on Search's rows. */
 object SearchTags {
     const val BEST_ROW = "search-best-row"
+    const val ALSO_IN = "search-also-in"
 }
 
 private fun moreKey(group: SearchGroup) = "more:${group.name}"
@@ -461,4 +483,29 @@ private fun SectionHeader(text: String) {
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 4.dp),
     )
+}
+
+/**
+ * Under a title row, the same title in other packs or on the shelf (Plan SQ: one row per title), each pack's name a link
+ * that opens its copy: "Also in Wikivoyage, Granger Classics".
+ */
+@Composable
+private fun AlsoIn(also: List<SearchHit>, open: (SearchHit) -> Unit) {
+    val linkColor = MaterialTheme.colorScheme.primary
+    val template = stringResource(R.string.search_also_in, "\u0000")
+    val text = remember(also, template, linkColor) {
+        val (before, after) = template.split("\u0000").let { it.first() to it.getOrElse(1) { "" } }
+        buildAnnotatedString {
+            append(before)
+            also.forEachIndexed { i, hit ->
+                if (i > 0) append(", ")
+                val name = hit.packTitle.ifBlank { hit.author }.ifBlank { hit.title }
+                withLink(LinkAnnotation.Clickable("also:${hit.packId}/${hit.path}", TextLinkStyles(SpanStyle(color = linkColor))) { open(hit) }) {
+                    append(name)
+                }
+            }
+            append(after)
+        }
+    }
+    Text(text, modifier = Modifier.testTag(SearchTags.ALSO_IN), style = MaterialTheme.typography.bodySmall)
 }

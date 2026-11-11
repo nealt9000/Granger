@@ -5,6 +5,8 @@
     <string name="search_recent">Recientes</string>
     <string name="search_best">Mejores resultados</string>
     <string name="search_best_looking">Buscando en tu biblioteca…</string>
+    <string name="search_also_in">También en %1$s</string>
+    <string name="search_open_in">Abrir en %1$s</string>
     <string name="search_best_more">Ver más resultados</string>
     <string name="search_best_fewer">Ver menos resultados</string>
     <string name="search_titles">Títulos</string>

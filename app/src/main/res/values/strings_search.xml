@@ -7,6 +7,10 @@
     <!-- Plan SQ: the articles and chapters that best answer the query, each with its matching sentence. -->
     <string name="search_best">Best matches</string>
     <string name="search_best_looking">Looking through your library…</string>
+    <!-- Under a title row: the same title in other packs or on the shelf, each a link ("Also in Wikivoyage, Classics"). -->
+    <string name="search_also_in">Also in %1$s</string>
+    <!-- TalkBack action on a title row: open the same title in another pack. -->
+    <string name="search_open_in">Open in %1$s</string>
     <string name="search_best_more">Show more matches</string>
     <string name="search_best_fewer">Show fewer matches</string>
     <string name="search_titles">Titles</string>
