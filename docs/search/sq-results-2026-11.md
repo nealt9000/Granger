@@ -146,3 +146,24 @@ The eval library's 401 files convert in 20 s, same size (1.5 GB): 20,466 lists o
 version 1. The phone reads both; DensePassageFinder probes 1,024 lists. Recall on the phone and the speed-up wait for a
 Pixel measurement and a vectors release (version 2 files; app builds before this one read only version 1, and only Ask
 used vectors there).
+
+### 2.3 The Pixel 6: speed bars met (runs `px-v2e-dev`, `px-v2e-ki`, build 98620bd6, version 2 vectors)
+
+| | p50 | p95 | Bar (p95) |
+|---|---|---|---|
+| Best matches, first step (questions) | 1.19 s | **2.12 s** | < 2.5 s ✓ |
+| Best matches, first step (known items) | 1.31 s | **1.67 s** | < 2.5 s ✓ |
+| Best matches, final (questions) | 2.94 s | 3.98 s | |
+| Titles per keystroke (questions) | 0.11 s | **0.18 s** | < 0.3 s ✓ |
+| Titles per keystroke (known items) | 0.09 s | **0.27 s** | < 0.3 s ✓ |
+
+Quality on the phone sets unchanged: Best @5 18/30, first step @5 17/30; known items (English) @1 24/29, @3 26/29.
+The phone has no Spanish Wikipedia or Wikivoyage, so its 12 Spanish known items aren't measurable there.
+
+What got it there, from the first streaming run (`px-v2c-*`: first step p95 4.0 s, titles p95 2.1 s):
+- **Titles** (f364b4c7, 98620bd6): libkiwix expands a short last word over English Wiktionary's titles, 0.5–3 s a call
+  for no hits ("paradise r", "sea walls of con"); dictionaries now skip suggestions while the last word is one or two
+  letters, or three after other words. Packs are asked four at a time. Known items unchanged (201: @1 78%, @3 91%).
+- **Best matches** (6e7d8175): the dense hits' articles are rebuilt four at a time (1.1–2.9 s one after another), and
+  Search loads the embedder and each pack's title index when it opens (the first query's embedding took 2.6 s, its titles
+  1.4 s). Emulator dev questions unchanged (Best @5 94/148); first step @5 there is 99/148, above the final ranking's 94.
