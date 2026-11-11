@@ -4,6 +4,8 @@ import sqlite3
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import meta  # noqa: E402
 
@@ -43,6 +45,7 @@ def test_check_finds_a_wrong_source_a_wrong_name_and_no_meta(tmp_path):
 def test_descriptor_has_the_catalog_keys(tmp_path):
     path, source = make(tmp_path)
     d = meta.descriptor(path, "wikipedia_en_top_maxi")
+    pytest.importorskip("cryptography")   # catalog_gen signs; run this one in ~/.venvs/granger-catalog
     sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "catalog-gen"))
     import catalog_gen  # noqa: E402
     assert all(k in d for k in catalog_gen.SIDECAR_KEYS)

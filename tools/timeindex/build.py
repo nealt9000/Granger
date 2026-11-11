@@ -15,6 +15,9 @@ import sys
 from collections import deque
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "sidecar"))
+from zim_articles import articles, is_stub  # noqa: E402,F401  (shared with the other sidecar builders)
+
 FORMAT = 1
 POINT, SPAN, LIFE = 0, 1, 2
 HUMAN = "Q5"
@@ -119,28 +122,6 @@ class Lanes:
         for b in bits - ex:
             mask |= 1 << b
         return mask
-
-
-def is_stub(item) -> bool:
-    """mwoffliner's redirect stubs: a ~200-byte HTML page with a meta refresh, not a real article."""
-    if item.size >= 600:
-        return False
-    return b'http-equiv="refresh"' in bytes(item.content).lower().replace(b"'", b'"')
-
-
-def articles(archive):
-    """(path, title) for every real article in a ZIM."""
-    for i in range(archive.all_entry_count):
-        e = archive._get_entry_by_id(i)
-        if e.is_redirect or e.path.startswith(("-/", "_", "I/", "M/", "X/")):
-            continue
-        try:
-            it = e.get_item()
-            if it.mimetype != "text/html" or is_stub(it):
-                continue
-        except Exception:
-            continue
-        yield e.path, e.title
 
 
 SCHEMA = """
