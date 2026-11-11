@@ -60,19 +60,20 @@ object TitleMatch {
     /**
      * The title searches that can reach a query with one slip in it: for each word of four letters or more, the query
      * with that word cut to its first half and put last (a title index takes the last word as a prefix and the others
-     * whole), so "Atomic orbtal" asks for "atomic orb" and "Steatorreha" for "steat". A slip in the first half of a
-     * word is left to the other words (each long word is also left out, below); a one-word query with one there isn't found.
+     * whole), so "Atomic orbtal" asks for "atomic orb" and "Steatorreha" for "steat". With two words or more, also each
+     * long word cut to its first letter ("Elctromeric effect" asks for "effect e", "Juego de nipes" for "juego de n") and
+     * each long word left out ("Kerri Hiugchi" asks for "kerri"). A one-word query with a slip in its first half isn't found.
      */
     fun probes(query: String): List<String> {
-        val words = SearchText.words(query)
+        // A one-letter word (the s of "Wayne's") is no word of the title index's: asked whole, it finds nothing.
+        val words = SearchText.words(query).filter { it.length > 1 }
         val long = words.indices.filter { words[it].length >= 4 }
-        val cut = long.map { i ->
-            val head = words[i].take(maxOf(2, words[i].length / 2))
-            (words.filterIndexed { k, _ -> k != i } + head).joinToString(" ")
-        }
-        // With two words or more, also each long word left out, for a slip early in it ("Kerri Hiugchi" asks for "kerri").
-        val dropped = if (words.size < 2) emptyList() else long.map { i -> words.filterIndexed { k, _ -> k != i }.joinToString(" ") }
-        return (cut + dropped).filter { it.isNotBlank() }.distinct()
+        fun others(i: Int) = words.filterIndexed { k, _ -> k != i }
+        val cut = long.map { i -> (others(i) + words[i].take(maxOf(2, words[i].length / 2))).joinToString(" ") }
+        val many = words.size >= 2
+        val initial = if (!many) emptyList() else long.map { i -> (others(i) + words[i].take(1)).joinToString(" ") }
+        val dropped = if (!many) emptyList() else long.map { i -> others(i).joinToString(" ") }
+        return (cut + initial + dropped).filter { it.isNotBlank() }.distinct()
     }
 
     private val THREE = mapOf("en" to "eng", "es" to "spa")

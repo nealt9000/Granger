@@ -112,7 +112,7 @@ class ZimLibrarySearch(
         if (q.isEmpty() || shown.any { TitleMatch.rank(it.title, q) == BookTitleSearch.Rank.EXACT }) return emptyList()
         // A name is a few words; a longer query is a question, which Best matches answer (the probes took 5 s at p95 on
         // the dev questions, for nothing).
-        if (q.split(' ').size > NEAR_MAX_WORDS) return emptyList()
+        if (q.split(' ').count { it.length > 1 } > NEAR_MAX_WORDS) return emptyList()
         val family = families()
         return fuzzy(query, q, shown.map { it.packId to it.path }.toSet()).distinctBy { family(it) to it.path }
     }
@@ -265,7 +265,7 @@ class ZimLibrarySearch(
          */
         const val TITLES_PER_PACK = 20
         const val FULL_TEXT_LIMIT = 30
-        /** Longer queries get no titles a slip away ([nearTitles]). */
+        /** Longer queries get no titles a slip away ([nearTitles]); a one-letter word (the s of "Laymen's") isn't counted. */
         const val NEAR_MAX_WORDS = 4
         /** Titles asked of each pack for each typo probe ([TitleMatch.probes]). */
         const val FUZZY_PER_PACK = 10
