@@ -41,8 +41,9 @@ Each run writes `~/granger-upkeep/<date>/`:
 | `snapshot-held-mirror` | waiting | none (a later run takes it once every mirror has the file) |
 | `snapshot-held-vectors` | needs Neal | rebuild-vectors |
 | `snapshot-held-timeindex` | needs Neal | rebuild-timeindex |
+| `snapshot-held-sidecar` | needs Neal | rebuild-sidecar |
 | `snapshot-forced` | needs Neal | rebuild-vectors / rebuild-timeindex (the old file is gone, so the pack moved anyway) |
-| `derived-dropped` | needs Neal | rebuild-vectors / rebuild-timeindex |
+| `derived-dropped` | needs Neal | rebuild-vectors / rebuild-timeindex / rebuild-sidecar |
 | `pack-removed` | needs Neal | replace-or-drop |
 | `dead-link` | needs Neal | replace-or-drop |
 | `candidate-dead-link` | needs Neal | replace-or-drop |
@@ -84,6 +85,16 @@ Needs Neal's yes, because it uses the Mac GPU. With his yes: download the new ZI
 Run `tools/timeindex/build.py` for the new ZIM (its docstring has the arguments; it uses `~/.venvs/granger-pack`). The
 check is a descriptor in `tools/timeindex/releases/` whose `sourceSha256` equals the candidate's `sha256`. Neal
 uploads it.
+
+### rebuild-sidecar
+
+A pack's new snapshot waits for a sidecar (the finding names the kind: `gqid`, `glink`…), or a pack lost one. Every
+kind is listed in `tools/sidecar/kinds.json` with its inputs, its build command and its check command; nothing GPU-bound
+so far (`"gpu": false`). Download the new ZIM into `~/Developer/Granger/vectors-work/sources` (its URL is in
+`candidate.json`), run the kind's `build` with `{zim}` set to it and `{out}` to a scratch folder, then its `check`. The
+playbook is done when the check exits 0 and `tools/sidecar/releases/` has a descriptor whose `sourceSha256` equals the
+candidate's `sha256`. A failing check is reported as it is (rule 4). Neal uploads the file; the next `check` moves the
+pack.
 
 ### replace-or-drop
 

@@ -42,6 +42,28 @@ def test_compare_flags_dropped_vectors_forced_moves_and_repo_changes():
     assert "presets" in next(f for f in found if f["kind"] == "repo-change")["summary"]
 
 
+def test_compare_names_held_and_dropped_sidecars_by_kind():
+    published = cat(pack("wp", "a", zim="wp", sidecars=[{"kind": "gqid", "url": "q"}]),
+                    pack("cl", "c", sidecars=[{"kind": "glink", "url": "l"}]))
+    candidate = cat(pack("wp", "a", zim="wp", sidecars=[{"kind": "gqid", "url": "q"}]), pack("cl", "c"))
+    holds = [{"zim": "wp", "ids": ["wp"], "from": "2026-10", "to": "2026-11", "reasons": ["gqid"], "held": True, "text": ""}]
+    found = upkeep.compare(published, candidate, holds)
+    assert kinds(found) == [("derived-dropped", ("cl",)), ("snapshot-held-sidecar", ("wp",))]
+    held = next(f for f in found if f["kind"] == "snapshot-held-sidecar")
+    assert "gqid sidecar" in held["summary"] and held["action"] == "rebuild-sidecar"
+
+
+def test_every_sidecar_kind_has_a_build_and_a_check():
+    import json
+    from pathlib import Path
+    kinds_ = json.loads((Path(__file__).resolve().parents[1] / "sidecar" / "kinds.json").read_text())
+    for kind, k in kinds_.items():
+        if kind.startswith("_"):
+            continue
+        assert {"build", "check", "inputs", "gpu"} <= k.keys(), kind
+        assert "{zim}" in k["build"] and "{out}" in k["build"], kind
+
+
 def test_budget_findings_use_catalog_gens_budgets(monkeypatch):
     monkeypatch.setattr(upkeep.cg, "TIER_BUDGETS", {"en": (18e9, 107e9)})
     monkeypatch.setattr(upkeep.cg, "tier_sizes", lambda c, lang: {"All": (17e9, 108e9)})

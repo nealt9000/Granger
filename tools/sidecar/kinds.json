@@ -1,0 +1,11 @@
+{
+  "_comment": "Linked Library spec §5: every sidecar kind, how to build one for a new source file and how to check it. The upkeep loop's rebuild-sidecar playbook reads this; adding a kind is one entry. Commands run from the repo root; {zim} is the new source file, {out} the output folder. gvec and gtime keep their own playbooks (rebuild-vectors, rebuild-timeindex) until the catalog moves them into sidecars (after Plan SQ).",
+  "gqid": {
+    "plan": "LL0",
+    "for": "Wikipedia packs (en, es)",
+    "inputs": "wdfilter.py's items-<site>.jsonl for the pack's language, on /Volumes/X10 Pro/granger-ll/ (rebuilt from a newer Wikidata dump at most quarterly)",
+    "build": "~/.venvs/granger-pack/bin/python -I tools/qidindex/build.py '/Volumes/X10 Pro/granger-ll/items-{site}.jsonl' {out} {zim} --releases tools/sidecar/releases",
+    "check": "~/.venvs/granger-pack/bin/python -I tools/qidindex/check.py {out}/{stem}.gqid --source {zim}",
+    "gpu": false
+  }
+}

@@ -17,6 +17,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "sidecar"))
 from zim_articles import articles, is_stub  # noqa: E402,F401  (shared with the other sidecar builders)
+import meta as sidecar_meta  # noqa: E402  (tools/sidecar/meta.py: the contract every sidecar's meta keeps)
+
+BUILDER_VERSION = 1
 
 FORMAT = 1
 POINT, SPAN, LIFE = 0, 1, 2
@@ -215,6 +218,11 @@ def main(argv=None):
         source = sha256(zim)
         counts = build(articles(Archive(zim)), items, lanes, out, {"sourceSha256": source, "dumpDate": a.dump_date, "zim": zim.name},
                        last_year=int(a.dump_date[:4]))
+        # The shared sidecar keys beside the time index's own (Linked Library spec §5.1); the phone reads only "format".
+        db = sqlite3.connect(out)
+        sidecar_meta.write_meta(db, "gtime", FORMAT, zim, "tools/timeindex/build.py", BUILDER_VERSION, source_sha256=source)
+        db.commit()
+        db.close()
         print(zim.name, counts, f"{out.stat().st_size:,} bytes", file=sys.stderr, flush=True)
         if a.releases:
             pack_id = zim.stem.rsplit("_", 1)[0]

@@ -37,8 +37,9 @@ KINDS = {
     "snapshot-held-mirror": ("waiting", "none: a later run takes it once every mirror has the file"),
     "snapshot-held-vectors": ("needs-neal", "rebuild-vectors (Mac GPU: ask Neal)"),
     "snapshot-held-timeindex": ("needs-neal", "rebuild-timeindex"),
+    "snapshot-held-sidecar": ("needs-neal", "rebuild-sidecar"),
     "snapshot-forced": ("needs-neal", "rebuild-vectors / rebuild-timeindex: the old file is gone, so the pack moved anyway"),
-    "derived-dropped": ("needs-neal", "rebuild-vectors / rebuild-timeindex"),
+    "derived-dropped": ("needs-neal", "rebuild-vectors / rebuild-timeindex / rebuild-sidecar"),
     "pack-removed": ("needs-neal", "replace-or-drop"),
     "dead-link": ("needs-neal", "replace-or-drop"),
     "candidate-dead-link": ("needs-neal", "replace-or-drop"),
@@ -67,6 +68,9 @@ def compare(published, candidate, holds):
                              ("mirror", "snapshot-held-mirror")):
             if reason in h["reasons"]:
                 out.append(finding(kind, h["ids"], f"{h['zim']}: {h['to']} waits, {h['from']} kept"))
+        # Any other reason is a sidecar kind (gqid, glink…) the new file has no build of yet (Linked Library spec §5.2).
+        for kind in [r for r in h["reasons"] if r not in ("vectors", "timeIndex", "mirror")]:
+            out.append(finding("snapshot-held-sidecar", h["ids"], f"{h['zim']}: {h['to']} waits for its {kind} sidecar, {h['from']} kept"))
     moved = {}
     for pid in new.keys() & old.keys():
         a, b = old[pid], new[pid]
@@ -78,6 +82,9 @@ def compare(published, candidate, holds):
         for key, label in (("vectors", "search vectors"), ("timeIndex", "time index")):
             if a.get(key) and not b.get(key):
                 out.append(finding("derived-dropped", [pid], f"{pid} loses its {label}"))
+        lost = {s["kind"] for s in a.get("sidecars", [])} - {s["kind"] for s in b.get("sidecars", [])}
+        for kind in sorted(lost):
+            out.append(finding("derived-dropped", [pid], f"{pid} loses its {kind} sidecar"))
     forced = {pid for h in holds if not h["held"] for pid in h["ids"]}
     for zim, ids in sorted(moved.items()):
         if set(ids) & forced:
@@ -122,7 +129,7 @@ def link_findings(published, candidate, status=None, sleep=None):
     for kind in ("packs", "models", "books", "voices"):
         for e in published.get(kind, []) + candidate.get(kind, []):
             for u in e.get("urls", []) + [e.get("url"), (e.get("vectors") or {}).get("url"),
-                                          (e.get("timeIndex") or {}).get("url")]:
+                                          (e.get("timeIndex") or {}).get("url")] + [s.get("url") for s in e.get("sidecars", [])]:
                 if u:
                     owners.setdefault(u, e["id"])
     out = [finding("dead-link", [owners.get(u, "?")], f"{u}: {why}") for u, why in cg.dead_links(old_urls, **kw)]
