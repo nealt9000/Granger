@@ -1,6 +1,17 @@
 package app.granger.search
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -91,6 +102,8 @@ fun SearchScreen(
     /** Plays the song within its album (`SongPlayer`). */
     onPlaySong: (Track) -> Unit,
     onBack: () -> Unit,
+    /** The empty state's Get more (Plan SQ Task 5.2); null hides it. */
+    onGetMore: (() -> Unit)? = null,
     /** Voice input's settings (Plan A1), for the mic's permission prompt; null hides the mic. */
     voicePrefs: VoiceInputPrefs? = null,
 ) {
@@ -165,13 +178,15 @@ fun SearchScreen(
             )
         },
     ) { padding ->
-        val nothingFound = state.query.isNotBlank() && !state.searching &&
-            state.titles.isEmpty() && state.media.isEmpty && state.fullText.isEmpty() && state.books.isEmpty()
+        val nothingFound = state.nothingFound
         Box(Modifier.padding(padding).fillMaxSize()) {
             if (state.searching) LinearProgressIndicator(Modifier.fillMaxWidth())
             if (nothingFound) {
                 Column(Modifier.align(Alignment.Center).padding(24.dp)) {
                     Text(stringResource(R.string.search_nothing_found))
+                    onGetMore?.let { getMore ->
+                        TextButton(onClick = getMore, modifier = Modifier.padding(top = 4.dp), contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 0.dp)) { Text(stringResource(R.string.search_get_more)) }
+                    }
                     SearchRows.titleOnly(state.titleOnly)?.let {
                         Text(it.resolve(), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
@@ -200,9 +215,24 @@ fun SearchScreen(
                         )
                     }
                 }
+                // Plan SQ Task 5.3: chips narrow the results to one kind, once the query found more than one.
+                val kinds = state.kinds
+                if (state.query.isNotBlank() && (kinds.size > 1 || state.filter != SearchFilter.ALL)) {
+                    item(key = "filters") { FilterChips(state.filter, kinds, viewModel::setFilter) }
+                }
+                // Plan SQ Decision 8: a medical query's results carry Ask's banner; Search only ever quotes.
+                if (state.medical && !nothingFound) item(key = "medical") { MedicalBanner() }
+                // Plan SQ Task 5.4: a single word's dictionary entry.
+                state.define?.takeIf { state.showing(SearchFilter.ARTICLES) }?.let { entry ->
+                    item(key = "define") {
+                        DefineCard(entry) { scope.launch { viewModel.recordSearch() }; onOpenMatch(app.granger.core.research.BestMatches.Match(entry, null)) }
+                    }
+                }
                 // Plan SQ: Best matches lead, each its article or chapter with the sentence that matched.
-                if (state.best.isNotEmpty() || state.bestLoading) item(key = "best-header") { SectionHeader(stringResource(R.string.search_best)) }
-                if (state.bestLoading && state.best.isEmpty()) {
+                val bestAll = state.bestFiltered
+                val bestOn = state.filter != SearchFilter.MEDIA
+                if (bestOn && (bestAll.isNotEmpty() || state.bestLoading)) item(key = "best-header") { SectionHeader(stringResource(R.string.search_best)) }
+                if (bestOn && state.bestLoading && bestAll.isEmpty()) {
                     item(key = "best-looking") {
                         Text(
                             stringResource(R.string.search_best_looking), Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -210,22 +240,24 @@ fun SearchScreen(
                         )
                     }
                 }
-                val bestShown = state.shown(SearchGroup.BEST, state.best)
+                val bestShown = state.shown(SearchGroup.BEST, bestAll)
                 itemsIndexed(bestShown, key = { _, m -> "bm:${m.passage.sourceId}/${m.passage.location}" }) { _, match ->
                     val p = match.passage
                     ListItem(
                         modifier = Modifier.clickable { scope.launch { viewModel.recordSearch() }; onOpenMatch(match) }.testTag(SearchTags.BEST_ROW),
+                        leadingContent = { KindIcon(p.kind) },
                         headlineContent = { Text(p.sourceTitle, maxLines = 2, overflow = TextOverflow.Ellipsis) },
                         supportingContent = {
                             Column {
                                 val sentence = match.sentence?.let { p.text.substring(it).trim() } ?: p.text.take(220)
-                                Text("“$sentence”", maxLines = 3, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
+                                val shown = remember(sentence, state.bestWords) { SearchRows.highlight("“$sentence”", state.bestWords) }
+                                Text(shown, maxLines = 3, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
                                 Text(p.packTitle.ifBlank { p.meta.collection }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         },
                     )
                 }
-                if (state.best.size > SearchGroup.BEST.preview) {
+                if (bestAll.size > SearchGroup.BEST.preview) {
                     item(key = moreKey(SearchGroup.BEST)) {
                         val open = SearchGroup.BEST in state.expanded
                         ListItem(
@@ -236,8 +268,9 @@ fun SearchScreen(
                         )
                     }
                 }
-                if (state.titles.isNotEmpty()) item { SectionHeader(stringResource(R.string.search_titles)) }
-                results(state, SearchGroup.TITLES, state.titles, { _, hit -> "t:${hit.packId}/${hit.path}" }, ::toggle) { hit ->
+                val titles = state.titlesFiltered
+                if (titles.isNotEmpty()) item { SectionHeader(stringResource(R.string.search_titles)) }
+                results(state, SearchGroup.TITLES, titles, { _, hit -> "t:${hit.packId}/${hit.path}" }, ::toggle) { hit ->
                     val openIn = stringResource(R.string.search_open_in)
                     ListItem(
                         modifier = Modifier.clickable { open(hit) }.semantics {
@@ -258,8 +291,9 @@ fun SearchScreen(
                         },
                     )
                 }
-                if (state.fullText.isNotEmpty()) item { SectionHeader(stringResource(R.string.search_articles)) }
-                results(state, SearchGroup.FULL_TEXT, state.fullText, { _, hit -> "f:${hit.packId}/${hit.path}" }, ::toggle) { hit ->
+                val fullText = if (state.showing(SearchFilter.ARTICLES)) state.fullText else emptyList()
+                if (fullText.isNotEmpty()) item { SectionHeader(stringResource(R.string.search_articles)) }
+                results(state, SearchGroup.FULL_TEXT, fullText, { _, hit -> "f:${hit.packId}/${hit.path}" }, ::toggle) { hit ->
                     ListItem(
                         modifier = Modifier.clickable { open(hit) },
                         headlineContent = { Text(hit.title) },
@@ -273,8 +307,9 @@ fun SearchScreen(
                         },
                     )
                 }
-                if (state.books.isNotEmpty()) item { SectionHeader(stringResource(R.string.search_books)) }
-                results(state, SearchGroup.BOOKS, state.books, { _, hit -> "b:${hit.bookId}" }, ::toggle) { hit ->
+                val books = if (state.showing(SearchFilter.BOOKS)) state.books else emptyList()
+                if (books.isNotEmpty()) item { SectionHeader(stringResource(R.string.search_books)) }
+                results(state, SearchGroup.BOOKS, books, { _, hit -> "b:${hit.bookId}" }, ::toggle) { hit ->
                     ListItem(
                         modifier = Modifier.clickable { open(hit) },
                         headlineContent = { Text(hit.bookTitle) },
@@ -289,7 +324,7 @@ fun SearchScreen(
                         },
                     )
                 }
-                val music = state.media
+                val music = if (state.showing(SearchFilter.MEDIA)) state.media else app.granger.core.library.MediaResults()
                 if (music.artists.isNotEmpty() || music.albums.isNotEmpty() || music.songs.isNotEmpty()) {
                     item { SectionHeader(stringResource(R.string.search_music)) }
                 }
@@ -335,6 +370,9 @@ fun SearchScreen(
 object SearchTags {
     const val BEST_ROW = "search-best-row"
     const val ALSO_IN = "search-also-in"
+    const val FILTER = "search-filter"
+    const val MEDICAL = "search-medical"
+    const val DEFINE = "search-define"
 }
 
 private fun moreKey(group: SearchGroup) = "more:${group.name}"
@@ -452,6 +490,38 @@ internal object SearchRows {
         return SearchText.words(query).any { it in text }
     }
 
+    /**
+     * [sentence] with the words that match [keywords] in bold (Plan SQ Task 5.1): a word matches when, case and accents
+     * aside, it is a keyword's word or begins with one of three letters or more ("burns" for "burn").
+     */
+    fun highlight(sentence: String, keywords: List<String>): AnnotatedString {
+        val wanted = keywords.flatMap { SearchText.words(it) }.toSet()
+        if (wanted.isEmpty()) return AnnotatedString(sentence)
+        // Folded a character at a time, so offsets in the folded text are offsets in the sentence.
+        val folded = String(CharArray(sentence.length) { i -> SearchText.fold(sentence[i].toString()).firstOrNull() ?: sentence[i] })
+        return buildAnnotatedString {
+            append(sentence)
+            WORD.findAll(folded).forEach { m ->
+                val w = m.value
+                if (wanted.any { it == w || (it.length >= 3 && w.startsWith(it)) }) {
+                    addStyle(SpanStyle(fontWeight = FontWeight.SemiBold), m.range.first, m.range.last + 1)
+                }
+            }
+        }
+    }
+
+    /**
+     * The Define card's text from a dictionary entry ("Heading: text" lines, DictionaryEntry): the senses, the etymology
+     * left out when there is anything else, on one line.
+     */
+    fun defineText(entry: String): String {
+        val lines = entry.lines().map { it.trim() }.filter { it.isNotEmpty() }
+        val senses = lines.filterNot { ETYMOLOGY.containsMatchIn(SearchText.fold(it.substringBefore(':'))) }
+        return senses.ifEmpty { lines }.joinToString(" ")
+    }
+
+    private val ETYMOLOGY = Regex("^(etymolog|etimolog)")
+    private val WORD = Regex("[\\p{L}\\p{N}]+")
     private val BOLD = Regex("<b>\\s*[^<\\s]", RegexOption.IGNORE_CASE)
     private val TAG = Regex("<[^>]*>")
     private val ENTITIES = mapOf("&amp;" to "&", "&lt;" to "<", "&gt;" to ">", "&quot;" to "\"", "&#39;" to "'", "&nbsp;" to " ")
@@ -481,7 +551,8 @@ private fun SectionHeader(text: String) {
         text,
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 4.dp),
+        // A heading for TalkBack, so its reader can jump group to group.
+        modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 4.dp).semantics { heading() },
     )
 }
 
@@ -508,4 +579,83 @@ private fun AlsoIn(also: List<SearchHit>, open: (SearchHit) -> Unit) {
         }
     }
     Text(text, modifier = Modifier.testTag(SearchTags.ALSO_IN), style = MaterialTheme.typography.bodySmall)
+}
+
+/** The chips over the results (Plan SQ Task 5.3): All, then each kind the query found, and the one picked. */
+@Composable
+private fun FilterChips(selected: SearchFilter, kinds: Set<SearchFilter>, onSelect: (SearchFilter) -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        SearchFilter.entries.filter { it == SearchFilter.ALL || it in kinds || it == selected }.forEach { filter ->
+            FilterChip(
+                selected = filter == selected,
+                onClick = { onSelect(filter) },
+                label = {
+                    Text(
+                        stringResource(
+                            when (filter) {
+                                SearchFilter.ALL -> R.string.search_filter_all
+                                SearchFilter.ARTICLES -> R.string.search_filter_articles
+                                SearchFilter.BOOKS -> R.string.search_filter_books
+                                SearchFilter.MEDIA -> R.string.search_filter_media
+                            },
+                        ),
+                    )
+                },
+                modifier = Modifier.testTag(SearchTags.FILTER),
+            )
+        }
+    }
+}
+
+/** Ask's medical banner, over a medical query's results. */
+@Composable
+private fun MedicalBanner() {
+    Text(
+        stringResource(R.string.research_medical),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onTertiaryContainer,
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.tertiaryContainer, RoundedCornerShape(8.dp))
+            .padding(12.dp)
+            .testTag(SearchTags.MEDICAL),
+    )
+}
+
+/** A Best match's kind: an article or a book, read out by TalkBack with the row. */
+@Composable
+private fun KindIcon(kind: app.granger.core.research.SourceKind) {
+    val book = kind == app.granger.core.research.SourceKind.BOOK
+    Icon(
+        painterResource(if (book) R.drawable.ic_menu_book else R.drawable.ic_article),
+        contentDescription = stringResource(if (book) R.string.search_kind_book else R.string.search_kind_article),
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+/** A single word's dictionary entry (Plan SQ Task 5.4): the headword and the start of its senses; tapping opens it. */
+@Composable
+private fun DefineCard(entry: app.granger.core.research.Passage, onOpen: () -> Unit) {
+    Column(
+        Modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(12.dp))
+            .clickable(onClick = onOpen)
+            .padding(12.dp)
+            .testTag(SearchTags.DEFINE),
+    ) {
+        Text(stringResource(R.string.search_define), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+        Text(entry.sourceTitle, style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
+        Text(SearchRows.defineText(entry.text), maxLines = 4, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
+        Text(
+            stringResource(R.string.search_define_source, entry.packTitle.ifBlank { "Wiktionary" }),
+            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp),
+        )
+    }
 }

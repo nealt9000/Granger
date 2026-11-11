@@ -105,6 +105,7 @@ import app.granger.search.SearchScreen
 import app.granger.search.MediaSearch
 import app.granger.search.searchForGroups
 import app.granger.search.SearchViewModel
+import app.granger.search.WordEntry
 import android.content.Context
 import app.granger.media.PlayResumer
 import app.granger.settings.ComponentOtherAppsSharing
@@ -1168,6 +1169,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 override fun stream(query: String) = container.bestMatches.stream(query)
                                 override suspend fun warm() = container.bestMatches.warm()
                             },
+                            define = WordEntry { word ->
+                                container.passageFinder.entry(word, app.granger.core.research.ResearchLanguage.of(word))
+                            },
                         )
                     },
                     onOpenMatch = { match ->
@@ -1186,6 +1190,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onOpenAudiobook = { nav.navigate(AudiobookRoute(it)) },
                     onPlaySong = { track -> scope.launch { songs.play(track) } },
                     onBack = { nav.popBackStack() },
+                    onGetMore = { nav.navigate(GetMoreRoute()) { launchSingleTop = true } },
                     voicePrefs = container.voiceInput.prefs,
                 )
             }

@@ -273,3 +273,26 @@ Buoyancy; Meiji era; Copper and Aluminium), about 3% of 148; Helium's answer is 
 **Decision:** not now. Lifting the cap and adding infobox text stay open for a vectors release that rebuilds the set for
 another reason. What the cap costs is mostly the highlighted sentence: the row is right, but it shows an early passage
 rather than the answer.
+
+## Phase 5: the results page
+
+Built on top of Task 5.1's Best matches block (`SearchScreen`, `SearchViewModel`); ThemeShots `search-best`,
+`search-best-landscape`, `search-define`, `search-empty`, in English and Spanish (`-PthemeShots`).
+
+- **Rows (5.1).** Each Best match has a kind icon (article or book, read out by TalkBack), and its sentence shows the
+  searched words in bold, case and accents aside ("burns", "BURN" for *burn*; words of one or two letters whole only).
+- **States (5.2).** "Nothing found" now waits for Best matches too: with vectors on, meaning search nearly always lists
+  something, so the empty state is rare. The empty state is one plain line ("Nothing in your library for that. Try fewer
+  words.", Decision 11) and a Get more button. The `titleOnly` note stays.
+- **Filters (5.3).** Chips All · Articles · Books · Media, shown once a query finds more than one kind. A filter
+  narrows every group (Best matches by passage kind, Titles by shelf vs pack) and stays from query to query. Not done:
+  "In: <pack>": nothing opens Search from a pack today, so it waits for a pack-level Search entry.
+- **Define (5.4).** A single word (letters, hyphen or apostrophe; 2+ letters) is looked up with `PassageFinder.entry`
+  (the installed Wiktionary in the word's language first) beside the other searches; an entry shows as a small card above
+  Best matches (the senses, the etymology left out), and opens the entry. It is hidden under Books and Media.
+- **Medical (Decision 8).** A query that reads as medical (`Medical.looksMedical` or `PersonalMedical.strong`, English
+  and Spanish lexicons) shows Ask's banner over the results. Search only quotes, so nothing else changes.
+- **Typed "Did you mean" (4.5).** When a typed query's keyword groups (titles, article text, books, media) find
+  nothing, the library name `SpokenTitleMatcher` likes best is offered in the same row the mic's uses; it is never
+  applied by itself, and a spoken query keeps its own suggestion. The word-level fix from the title vocabulary is not
+  built: typo titles (§4.3b) already cover most of it.
