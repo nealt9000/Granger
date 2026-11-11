@@ -202,3 +202,74 @@ first step's lead over the final ranking (68% vs 64%) was the same article in an
 | Best @5 | 101 (68%) | **102 (69%)** | 50% ✓ |
 | Best @10 | 113 (76%) | **115 (78%)** | 65% ✓ |
 | First step @5 | 101 (68%) | 101 (68%) | |
+
+## Step 4: quotes and indexing gaps
+
+### 4.5 Quotes from books (runs `sq-q1`–`sq-q4`, emulator; set `sets/quotes.json`)
+
+Neal tries lines from the Classics books and found Search hit or miss on them. `tools/eval/quotes.py` builds 127 quotes
+from the books as the app has them, each with its book and chapter: famous lines (25 found in the collection, plus 2
+controls that aren't in it: "Of all the gin joints", "Elementary, my dear Watson"), exact lines (8–12 words), fragments
+(4–5 words from inside a sentence), loose lines (one inner word left out) and plain lines (lower case, no punctuation);
+20 are Spanish. `search_score.py score` scores a quote set by book and chapter in Books and in Best matches.
+
+**Books was right but slow.** The book was in Books' first three for 95% of quotes, but Books took 11.6 s at the median
+and 413 s at p95 (27 min at worst, "this foreseeing does not in"). The FTS query itself took 0.2 s; the time was
+`matchCounts`, whose plain JOIN let SQLite walk the books' chunks and re-run the whole match for each (55 s on the Mac
+for one quote). Any search whose phrase found fewer than three places hit it. A CROSS JOIN keeps the match first
+(873f46cb): Books 278 ms median, 1.08 s p95.
+
+**Best matches missed them.** Ranked by keywords and meaning, a quote lost to articles sharing one word ("Alas, poor
+Yorick" gave "Working poor"; a Hardy line gave "She Loves You"). The quote step (e2e07276): `BookIndex.quoted` finds the
+chunks holding the query as a phrase, else with each word within two of the next (a word misremembered), one per book,
+the oldest book first ("Alas, poor Yorick" is in Tristram Shandy, Hard Times and The Brothers Karamazov too, once each),
+and none when over 20 chunks match (the words are too common to point anywhere). Best matches lists them first, or
+third for a three-word query: a three-word phrase in a book is as often a topic ("speed of light", "life of napoleon"
+each match two or four chunks) as a quote.
+
+| Quotes (125 with a book) | Books @3 | Best @5, before (`sq-q2`) | Best @5, now (`sq-q4`) |
+|---|---|---|---|
+| All | 95% | 20% | **98%** |
+| Famous | 96% | 16% | **100%** |
+| Exact | 100% | 20% | **100%** |
+| Fragment | 96% | 8% | **96%** |
+| Loose (a word left out) | 92% | 24% | **100%** |
+| Plain (lower case, no punctuation) | 92% | 32% | **92%** |
+| Spanish | 100% | 30% | **100%** |
+
+The dev questions are unchanged (`sq-best-dev6`: Best @5 102/148, @10 115/148); Best matches is ~70 ms slower at the
+median. Left: "thought he had been" (too common to point at one book: arguably right), two plain lines that find
+nothing or the wrong book, and one control that still lists books in Books (Best matches shows no book for it).
+
+**The Pixel 6** (build e2e07276, version 1 vectors, runs `px-q1`, `px-dev-q`, `px-ki-q`): quotes Best @5 (book) 121/125
+(97%), Books @3 94%, Spanish 20/20; dev questions Best @5 19/30, @10 22/30; English known items @1 26/29 (was 24/29;
+the Pixel has no Spanish packs, so the Spanish 12 can't score). Speed isn't comparable with §2.3, which ran version 2
+vectors: Best's first step settled at 2–3 s, but took 5–18 s for the first ~50 quotes, the first ~12 minutes after the
+install, while the phone caught up on its own work (most likely the book vectors' rebuild). Worth checking with version
+2 vectors on the phone before release; an update shouldn't make Search slow for its first minutes.
+
+### 3.1 Indexing gaps: measured, not worth a rebuild now
+
+Ask's step-back (§9) counted 23 dev answers in no vector chunk. Re-checked against the packs (`dev-base-1`'s
+`qindex-ranks.json`, each answer's article re-chunked with the app's chunker): 25 answers on 17 questions.
+
+| Why the answer has no chunk | Answers |
+|---|---|
+| Not a gap: the quote is in the chunk, but the dataset's quote has stray spaces ("headache , dizziness") | 7 |
+| Past the 12-chunk cap (Common cold 14th chunk, Burn 17th, Buoyancy 21st, Helium 39th, Haitian Revolution 18th, Boston Tea Party 15th, Meiji era 18th) | 7 |
+| In a table or infobox (Wikivoyage's plug table, an Altitude sickness box, Copper's and Aluminium's melting points) | 4 |
+| A Classics book (Kidnapped), and the rest of one multi-part answer | 7 |
+
+**Cost of lifting the cap** (`counts.json` against `counts-trimmed.json`): the 12-chunk Wikipedia packs grow by 365 MB,
++17% of the set (Top 1M 162 → 396 MB, History 87 → 146 MB, Medicine 104 → 141 MB), and ~11 h more embedding on the Mac.
+Infobox text would mean a chunker change (tables are left out by `ArticleText.NOISE`, which the reader and the voice share),
+so a full rebuild.
+
+**Gain:** Best matches ranks articles, and the keyword side already searches past the cap, so 6 of the 11 real gaps
+already have their article in the first five (`sq-best-dev6`: Haitian Revolution 1st, Boston Tea Party 1st, Burn 2nd,
+Electrical systems 3rd, Altitude sickness 4th). At most four or five dev questions could rise (Common cold, now 8th;
+Buoyancy; Meiji era; Copper and Aluminium), about 3% of 148; Helium's answer is past any cap short of 40.
+
+**Decision:** not now. Lifting the cap and adding infobox text stay open for a vectors release that rebuilds the set for
+another reason. What the cap costs is mostly the highlighted sentence: the row is right, but it shows an early passage
+rather than the answer.
