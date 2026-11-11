@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_en_sociology_nopic",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_en_sociology_nopic_2026-10.gqid",
+ "sizeBytes": 872448,
+ "sha256": "42be50fe3568b60c6c68303835c3ef792965db2865a03af99c3c86ad633c9f67",
+ "schemaVersion": 1,
+ "sourceSha256": "2391c27d07a9b13d3b430cada133279b725ce5401f4b1cbde45c3bc17e89a558",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

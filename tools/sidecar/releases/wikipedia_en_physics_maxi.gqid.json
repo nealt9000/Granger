@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_en_physics_maxi",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_en_physics_maxi_2026-10-14.gqid",
+ "sizeBytes": 1708032,
+ "sha256": "920528f4aeb85e9d053a84475986a21dd90da56e4a16402848d0ec94c21f753a",
+ "schemaVersion": 1,
+ "sourceSha256": "2751c32efda00e18093e7ff4934269fcf916b6f0c7e5f2304efa83699d25442f",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

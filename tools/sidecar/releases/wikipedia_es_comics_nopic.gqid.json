@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_es_comics_nopic",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_es_comics_nopic_2026-10.gqid",
+ "sizeBytes": 909312,
+ "sha256": "baa902e7132d3e5798fe49216de5be19d63282f8ffb4bdf812844612dd707587",
+ "schemaVersion": 1,
+ "sourceSha256": "bfe16e16834f49d5b4d6ac61f37ea2961e9cc221a90185b2e7428e248cff9964",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

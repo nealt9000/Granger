@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_en_nollywood_maxi",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_en_nollywood_maxi_2026-10.gqid",
+ "sizeBytes": 192512,
+ "sha256": "5f1eb485a9bf214a9f4fdafcfce4a4400b6f6df6f7c41bd2dc37b50918cc7407",
+ "schemaVersion": 1,
+ "sourceSha256": "faa53e0c8ef641206867ce21f0e107d4e2aa9012e3b2263f05fe9bddf4f72aa3",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

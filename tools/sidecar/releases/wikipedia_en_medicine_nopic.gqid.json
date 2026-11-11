@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_en_medicine_nopic",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_en_medicine_nopic_2026-10-10.gqid",
+ "sizeBytes": 5148672,
+ "sha256": "1a3d3d1019ccd955ada76ca588c8788ae2074aaceab3d6557a31bf169b0f87c6",
+ "schemaVersion": 1,
+ "sourceSha256": "718fadad40b3491be3fa8f95181a948e4d726f97a79a14e0ef1b90c6b2b03625",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

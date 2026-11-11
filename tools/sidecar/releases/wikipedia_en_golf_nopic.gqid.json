@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_en_golf_nopic",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_en_golf_nopic_2026-10.gqid",
+ "sizeBytes": 860160,
+ "sha256": "d233355e7efcc96f5dfb1c7130dcd68c8685b32b50f333231b6d492248accce5",
+ "schemaVersion": 1,
+ "sourceSha256": "4d589c84d57203c1356e0620d7e9efccf0f134426fe0d6773fd123e9056bfd76",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_es_mathematics_nopic",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_es_mathematics_nopic_2026-10-14.gqid",
+ "sizeBytes": 872448,
+ "sha256": "ee225f76d432f8f382bfb65d50c4b6e37c85618c86a7120104b72b117c1bb689",
+ "schemaVersion": 1,
+ "sourceSha256": "2f47a05625b9f45ffa01591b449e2cb20760bb4838b7040f1dd1d5eb16831eb9",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

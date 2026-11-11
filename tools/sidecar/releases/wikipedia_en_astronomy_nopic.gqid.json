@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_en_astronomy_nopic",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_en_astronomy_nopic_2026-08.gqid",
+ "sizeBytes": 1957888,
+ "sha256": "165ba12e38918400f261253ef01b345a901ded455956c8e8adf75dc328027329",
+ "schemaVersion": 1,
+ "sourceSha256": "05eeb2dacfa1e79d66f43b01fb9531eaf22cf2d5b829ff856e75504863e6526c",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

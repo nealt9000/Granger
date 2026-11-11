@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_en_ray-charles_mini",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_en_ray-charles_mini_2026-10.gqid",
+ "sizeBytes": 2768896,
+ "sha256": "e528370d9721f81bc8bcdf6ba31ca1616752412cafb19868ca2624a1d7bc2e0f",
+ "schemaVersion": 1,
+ "sourceSha256": "ad37a9355a356b12cc4f2e339fcd15940dd93099de0c2851b6a25cc5b9c33c31",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

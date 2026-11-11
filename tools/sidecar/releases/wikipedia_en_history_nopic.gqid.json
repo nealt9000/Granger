@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_en_history_nopic",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_en_history_nopic_2026-10-12.gqid",
+ "sizeBytes": 3923968,
+ "sha256": "c8167c27fa256769c87b3155294f2eeb16e9a2fd60c3eb20b33b3e1d1521b260",
+ "schemaVersion": 1,
+ "sourceSha256": "4711b6d4c2d61886db10b7092a3bd88da5d963cc945eb7e7d1fa1e514c8595b8",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

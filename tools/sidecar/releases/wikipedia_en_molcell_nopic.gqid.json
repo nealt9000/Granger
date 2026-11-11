@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_en_molcell_nopic",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_en_molcell_nopic_2026-10.gqid",
+ "sizeBytes": 1753088,
+ "sha256": "b411b0eca2dbfc6a6fcae53b76c44a1b72afc7414101e21dbdc3936d72fc207c",
+ "schemaVersion": 1,
+ "sourceSha256": "8fb46450e31310a65e9ada144a3a6ea80ddf722cd9603051f9a7a3b656387f5d",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

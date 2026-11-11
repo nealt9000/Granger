@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_es_climate-change_mini",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_es_climate-change_mini_2026-10.gqid",
+ "sizeBytes": 192512,
+ "sha256": "88282bda595d8ea2f24a28198bfeef2c7fa1b712df9b932a1dc1b69195e3cf81",
+ "schemaVersion": 1,
+ "sourceSha256": "928e89fdfe3e92e6cf63d4c640c27f318ba7515bdd87a76ddaa6fe96bd30eadc",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

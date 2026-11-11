@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_en_knots_maxi",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_en_knots_maxi_2026-10-18.gqid",
+ "sizeBytes": 65536,
+ "sha256": "901ece054d796422e0a960f11b37b8407050704a5c9c1d0f8967ade342f08c04",
+ "schemaVersion": 1,
+ "sourceSha256": "29a3ffa52a725d0ef9dd5359d27b864ec8454c61430c0bfb15fd1929f4b73390",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_en_mathematics_mini",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_en_mathematics_mini_2026-06.gqid",
+ "sizeBytes": 1888256,
+ "sha256": "78202498c2b89233c924dc174d68e9f496fed6f53fd4e60e65f902320e873691",
+ "schemaVersion": 1,
+ "sourceSha256": "d77564b03e42f94541b0d11f6c85d32a4b265980bb3a9d371ed4ac290426d48d",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

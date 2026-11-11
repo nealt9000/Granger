@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_en_ice-hockey_nopic",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_en_ice-hockey_nopic_2026-10.gqid",
+ "sizeBytes": 2760704,
+ "sha256": "457ed0f236a4a8c1f80c3bbc9dbc81b2c4bceecf84780bec4bc10e5b443abdb6",
+ "schemaVersion": 1,
+ "sourceSha256": "564620664169b5cbb72bf522caeabf8b8fe9d176864edb80aacb5e69162208ea",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

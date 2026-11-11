@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_es_basketball_nopic",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_es_basketball_nopic_2026-09.gqid",
+ "sizeBytes": 1089536,
+ "sha256": "2e6d27c048f28007eeb8e520e835375bd3d54f8e01983409c26e78645d80489d",
+ "schemaVersion": 1,
+ "sourceSha256": "600872688b73f29874189b0f4cf5fe98b9f8dab56be26aba4d82714e916c7d43",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

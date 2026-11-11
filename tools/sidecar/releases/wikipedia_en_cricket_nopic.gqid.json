@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_en_cricket_nopic",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_en_cricket_nopic_2026-10.gqid",
+ "sizeBytes": 3088384,
+ "sha256": "9a0e41b37542766147ba7cbdd1c06c7098718c7a35e689c6206a016044dd81fc",
+ "schemaVersion": 1,
+ "sourceSha256": "a7fed0dd8d489eb5b92525f5c9dbec4a61076372e84c8995fe70ac89e83f8c00",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

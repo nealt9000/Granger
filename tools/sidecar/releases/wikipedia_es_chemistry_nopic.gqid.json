@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_es_chemistry_nopic",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_es_chemistry_nopic_2026-10-15.gqid",
+ "sizeBytes": 319488,
+ "sha256": "3f2c0cd8ea2670f92fcc1df64a8bc8e484436e7b4e6625a71a8615362e454642",
+ "schemaVersion": 1,
+ "sourceSha256": "7d937dc1b5493e3e0307e8d11478506a000b8b4488e9add46e9655be8494147b",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}
