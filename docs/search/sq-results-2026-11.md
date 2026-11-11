@@ -318,3 +318,99 @@ Pixel runs had dense hits only because that phone kept the vectors and embedder 
   Models: "Used by Search to find passages by meaning". Spanish too.
 - **Sizes.** On 6 GB phones the starts count the vectors again, as they did before Phase 0 (Efficient carried 787 MB of
   them, Plan E1), plus the embedder's 165 MB. The presets themselves (Neal's ~20 GB middle tier) are unchanged.
+
+## Phase 7 verdict (runs `sq-v-held`, `sq-v-held-es`, `sq-v-ki`, `sq-v-q`; build 0da419b6, emulator, 2026-11-11)
+
+The held-out sets were scored once, on this build, with nothing tuned on them. They have no "before" run: the baseline
+build never ran them. Their "today's page" column (titles, books, full text) stands in for it.
+
+### Against Neal's bars
+
+| Bar | Result | |
+|---|---|---|
+| Known items @1 ≥ 85 | **90%** (en 92, es 86) | ✓ |
+| Known items @3 ≥ 95 | **93%** (en 92, es 95) | ✗ by 2 points (4 items) |
+| Typos @3 ≥ 70 | en **72%**, es **82%** | ✓ |
+| Prefixes @3 ≥ 75 | en **67%** (8/12), es **83%** (5/6) | ✗ en |
+| Questions, article top 5 ≥ 50%, held-out | en **53%** (33/62), es **80%** (28/35); together 63% | ✓ |
+| Questions, article top 10 ≥ 65%, held-out | en **60%** (37/62), es **80%**; together 67% | ✗ en by 5 points (3 questions) |
+| Pixel 6 p95: titles < 0.3 s, Best < 2.5 s | 0.18–0.27 s, 1.67–2.12 s (§2.3, build 98620bd6) | ✓, but before the quote step and Phases 5–6: recheck at the walkthrough |
+
+### Known items (201), before and after
+
+| Slice | n | @1 before | @1 now | @3 before | @3 now |
+|---|---|---|---|---|---|
+| all | 201 | 63% | **90%** | 76% | **93%** |
+| en | 142 | 69% | **92%** | 78% | **92%** |
+| es | 59 | 49% | **86%** | 71% | **95%** |
+| en exact / lower / alias | 105 | 89% | **100%** | 99% | **100%** |
+| en typo | 25 | 0% | 68% | 0% | 72% |
+| en prefix | 12 | 42% | 67% | 58% | 67% |
+| es exact / lower / alias | 42 | 64% | **100%** | 95% | **100%** |
+| es typo | 11 | 0% | 64% | 0% | 82% |
+| es prefix | 6 | 33% | 33% | 33% | 83% |
+
+Same as `sq-t7-ki` (§4.4): nothing changed titles since. The misses are one-word typos ("Misoula", "Tzone") and prefixes
+that need a sense of what's popular.
+
+### Questions, held-out (scored once)
+
+| Slice | n | Today's page @5 | **Best @5** | **Best @10** |
+|---|---|---|---|---|
+| **English, all** | 62 | 6 (10%) | **33 (53%)** | **37 (60%)** |
+| medical | 12 | 2 | 11 | 12 |
+| multi-step | 10 | 2 | 8 | 8 |
+| bible (scriptures) | 9 | 0 | 2 | 4 |
+| who-wrote | 6 | 1 | 2 | 2 |
+| vocab-gap | 5 | 0 | 1 | 1 |
+| follow-up | 4 | 0 | 0 | 0 |
+| science, maths, knots, words, other (12 groups of 1–2) | 16 | 1 | 9 | 10 |
+| **Spanish, all** | 35 | 15 (43%) | **28 (80%)** | **28 (80%)** |
+| medical / multi-step / history / science | 18 | 7 | 18 | 18 |
+| words | 3 | 1 | 0 | 0 |
+| follow-up | 2 | 0 | 0 | 0 |
+| other (geography, travel, who-wrote, vocab-gap, literature) | 12 | 7 | 10 | 10 |
+
+Dev, for comparison (`sq-base-dev` page @5 → `sq-best-dev6` Best @5 / @10): all 13% → 69% / 78%; classics 9% → 50% / 64%;
+medicine 5% → 80% / 85%; maps 17% → 92% / 100%; food 8% → 83%; making 0% → 75%; reference 50% → 75%; science 8% → 58%;
+technology 17% → 67%; thought 17% → 83%. Held-out English is 16 points under dev at 5 and 18 at 10.
+
+Latency on the emulator (held-out en): Best first step p50 / p95 0.76 / 1.10 s, final 1.11 / 1.47 s; titles 32 / 55 ms.
+
+### Where held-out English falls short
+
+Of 29 English misses at 5:
+
+- **A Classics chapter is the answer (17).** In most of these Best matches shows a Wikipedia article on the right
+  subject instead: "charging interest on a loan" → *Usury*; "who wrote revelation" → *Book of
+  Revelation*; "what does John Stuart Mill say about censorship" → *John Stuart Mill*, *Freedom of speech*; "who wrote
+  the poem where a sailor shoots an albatross" → *The Rime of the Ancient Mariner* (the article, not the poem). Counted
+  as the plan counts (a book answer needs its chapter), these miss. If any chapter of the right book counted, held-out
+  English would be 61% / 69% (dev 73% / 82%).
+- **Follow-ups (4 en, 2 es).** "how did he die?" needs the previous question; Search has none. They can't pass by
+  design. Without them: en 57% / 64%.
+- **Word-for questions (2 en, 3 es).** "the word for throwing someone out a window" (defenestration), "que es la ñapa": the
+  answer is a Wiktionary entry, and dictionaries have no vectors. The Define card only fires on a single word.
+- **The rest (6).** Close: "is sydney the capital of australia" (*Canberra* 6th), "will antibiotics help my cold"
+  (*Common cold* 6th). Near but wrong: gallium (*Tin*, *Field's metal*), angular momentum (*Figure skating spins*),
+  Euclid's theorem, sheet bend.
+
+The quote set holds (Best @5 98%, Books @3 95%, Spanish 20/20), unchanged from `sq-q4`.
+
+### What I propose (Neal decides)
+
+1. **Questions @10, held-out English (60% vs 65%).** Three choices:
+   - **a. Accept for this release.** The bar is cleared at 5 in both languages and at 10 in Spanish and for both
+     together. The English shortfall is mostly book-versus-article scoring and follow-ups Search can't answer. Record
+     the 60%.
+   - **b. A "from the book" step.** When a question names a book or author that's in Classics ("who wrote proverbs",
+     "what does Mill say about…"), put that book's best passage among the first five. Tuned on dev only. Held-out is
+     now spent, so its effect could only be shown on dev; a fresh held-out set would be needed to confirm it.
+   - **c. Both:** release as a, and do b with a new held-out set afterwards.
+   I'd pick **c**.
+2. **Known items @3 (93% vs 95%) and English prefixes (67% vs 75%).** Unchanged since §4.4. What's left needs a
+   popularity signal (Top 1M's order, or page views) for prefixes and a word-level spelling fix for one-word typos
+   (libkiwix's SpellingsDB ran out of memory; a small vocabulary of our own would be the way). Propose: accept for this
+   release, and fold both into the next Search round.
+3. **Pixel speed** was last measured before the quote step and Phases 5–6. The walkthrough rechecks it (and the first
+   minutes after install, §4.5) before the merge.

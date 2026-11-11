@@ -156,7 +156,7 @@ def score_questions(items, run):
         first = r.get("bestFirst") or r.get("best", [])
         fm = next((n for n, h in enumerate(first, 1) if found(h)), None)
         got["first5"] = bool(fm and fm <= 5)
-        for key in ("all", it.get("domain", "?")):
+        for key in ("all", it.get("domain") or it.get("group", "?")):
             s = by[key]
             s["n"] += 1
             for k in keys:
