@@ -911,6 +911,13 @@ class AppContainer(context: Context) {
             passageFinder, denseFinder,
             embed = { q -> app.granger.research.ModelsAdapter(modelManager).embedder()?.embed(listOf(q), isQuery = true)?.single() },
             config = rankingConfig, sourceWeight = fictionWeight,
+            articleKey = {
+                // A pack's family ("wikipedia_en"), so one article in two Wikipedia packs is one row; a book is its own.
+                val families = library.packs.first().filter { it.name.isNotBlank() }.associate { it.id to app.granger.core.library.TitleMatch.family(it.name) }
+                ({ p: app.granger.core.research.Passage ->
+                    (if (p.kind == app.granger.core.research.SourceKind.ARTICLE) families[p.sourceId] ?: p.sourceId else p.sourceId) to p.location
+                })
+            },
         )
     }
 

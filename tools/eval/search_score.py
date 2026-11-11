@@ -141,12 +141,20 @@ def score_questions(items, run):
         got["page5"] = got["titles5"] or got["books5"] or got["ft5"]
         # As ask_articles.py scores Ask's retrieval (metrics.matches: a book's chapter must match too), so the two compare.
         from metrics import matches
-        bm = next((n for n, h in enumerate(r.get("best", []), 1)
-                   if matches({"source": h.get("source"), "location": h.get("path")}, it["answers"])), None)
+
+        def found(h):
+            # The answer's article in any pack of its family counts (Best matches list one copy of an article that two
+            # Wikipedia packs share, as Titles does; known_rank counts the same way).
+            if matches({"source": h.get("source"), "location": h.get("path")}, it["answers"]):
+                return True
+            return any(h.get("path") and h.get("path") == a.get("location") and family(a.get("source", "")) == family(h.get("source", ""))
+                       for a in it["answers"])
+
+        bm = next((n for n, h in enumerate(r.get("best", []), 1) if found(h)), None)
         got["best5"], got["best10"] = bool(bm and bm <= 5), bool(bm and bm <= 10)
         # The first step (dense hits alone), where there was one; else the final ranking stood from the start.
         first = r.get("bestFirst") or r.get("best", [])
-        fm = next((n for n, h in enumerate(first, 1) if matches({"source": h.get("source"), "location": h.get("path")}, it["answers"])), None)
+        fm = next((n for n, h in enumerate(first, 1) if found(h)), None)
         got["first5"] = bool(fm and fm <= 5)
         for key in ("all", it.get("domain", "?")):
             s = by[key]

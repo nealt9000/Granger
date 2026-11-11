@@ -73,13 +73,13 @@ class SearchEval(
                 val p = m.passage
                 val source = if (p.kind == app.granger.core.research.SourceKind.ARTICLE) packs[p.sourceId]?.first ?: p.sourceId else p.sourceId
                 JSONObject().put("source", source).put("file", packs[p.sourceId]?.second ?: "").put("path", p.location)
-                    .put("title", p.sourceTitle).put("kind", p.kind.name).put("sentence", m.sentence?.let { p.text.substring(it) } ?: "")
+                    .put("title", p.sourceTitle).put("cosine", p.cosine ?: JSONObject.NULL).put("kind", p.kind.name).put("sentence", m.sentence?.let { p.text.substring(it) } ?: "")
             }))
             .put("bestByMeaning", matches?.byMeaning ?: false)
             .put("bestFirst", JSONArray(first?.takeIf { !it.final }?.matches.orEmpty().map { m ->
                 val p = m.passage
                 val source = if (p.kind == app.granger.core.research.SourceKind.ARTICLE) packs[p.sourceId]?.first ?: p.sourceId else p.sourceId
-                JSONObject().put("source", source).put("path", p.location).put("title", p.sourceTitle)
+                JSONObject().put("source", source).put("path", p.location).put("title", p.sourceTitle).put("cosine", p.cosine ?: JSONObject.NULL)
             }))
             .put("bestFirstMs", firstMs ?: JSONObject.NULL)
             .put("bestStages", JSONObject().put("embedMs", matches?.embedMs ?: 0).put("denseMs", matches?.denseMs ?: 0).put("keywordMs", matches?.keywordMs ?: 0))

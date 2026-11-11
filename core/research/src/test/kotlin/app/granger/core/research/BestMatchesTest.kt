@@ -34,6 +34,33 @@ class BestMatchesTest {
         assertThat(result.matches.first().passage.location).isEqualTo("Thermal_burns")
     }
 
+    @Test fun unsureMeaningHitsStillListWhenNoKeywordPassageMatches() = runTest {
+        // Below Ask's gate (0.78) and with no keyword passage: Ask would decline; Search lists its guesses.
+        val dense = passage("wikipedia", "Buoyancy", "Buoyancy", "An object floats when it displaces its own weight of water.", cosine = 0.76)
+        val result = BestMatches(PassageFinder { emptyList() }, dense = DenseFinder { listOf(dense) }, embed = { FloatArray(4) })
+            .find("how can a huge steel ship float")
+        assertThat(result.matches.map { it.passage.location }).containsExactly("Buoyancy")
+    }
+
+    @Test fun meaningHitsBelowTheFloorStillListAlone() = runTest {
+        val dense = passage("wikipedia", "Buoyancy", "Buoyancy", "An object floats when it displaces its own weight of water.", cosine = 0.60)
+        val result = BestMatches(PassageFinder { emptyList() }, dense = DenseFinder { listOf(dense) }, embed = { FloatArray(4) })
+            .find("how can a huge steel ship float")
+        assertThat(result.matches.map { it.passage.location }).containsExactly("Buoyancy")
+    }
+
+    @Test fun oneArticleInTwoPacksOfAFamilyIsOneRow() = runTest {
+        val top = passage("wp-top", "Capillary_action", "Capillary action", "Capillary action draws water up a narrow tube.", cosine = 0.80)
+        val physics = top.copy(sourceId = "wp-physics")
+        val other = passage("wp-top", "Refraction", "Refraction", "Light bends as it passes from water into air.", cosine = 0.79)
+        val search = BestMatches(
+            PassageFinder { emptyList() }, dense = DenseFinder { listOf(top, physics, other) }, embed = { FloatArray(4) },
+            articleKey = { { p: Passage -> (if (p.sourceId.startsWith("wp-")) "wikipedia_en" else p.sourceId) to p.location } },
+        )
+        assertThat(search.find("why does a straw look bent in water").matches.map { it.passage.location })
+            .containsExactly("Capillary_action", "Refraction").inOrder()
+    }
+
     @Test fun aFailingEmbedderLeavesTheKeywordSide() = runTest {
         val result = BestMatches(
             PassageFinder { listOf(burnFirstAid) },

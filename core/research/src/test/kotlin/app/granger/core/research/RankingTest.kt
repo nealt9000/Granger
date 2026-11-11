@@ -209,6 +209,17 @@ class RankingTest {
     }
 
     @Test
+    fun aLowerKeywordCosineLetsAConfidentDenseHitLead() {
+        // A ship's buoyancy, found by meaning alone, against a passage with the words but not the answer.
+        val words = article("Steel ships and steel bolts are both made of steel.", "Steel")
+        val meaning = article("An object floats when it displaces its own weight of water.", "Buoyancy", 0.80)
+        val keys = listOf("steel", "ship", "bolt")
+        assertThat(Ranking.hybrid(listOf(words), listOf(meaning), keys, RankingConfig()).first().sourceTitle).isEqualTo("Steel")
+        assertThat(Ranking.hybrid(listOf(words), listOf(meaning), keys, RankingConfig(keywordCosine = 0.66)).first().sourceTitle)
+            .isEqualTo("Buoyancy")
+    }
+
+    @Test
     fun hybridGatePassesAStrongDenseHitOrACompleteKeywordMatch() {
         val paris = article("Paris is the capital of France.", "Paris")
         assertThat(Ranking.hybrid(emptyList(), listOf(paris.copy(cosine = 0.85)), listOf("capital", "france"), RankingConfig())).hasSize(1)

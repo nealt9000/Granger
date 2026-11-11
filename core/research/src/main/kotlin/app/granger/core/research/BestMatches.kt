@@ -15,8 +15,8 @@ import kotlin.coroutines.cancellation.CancellationException
  * recorded retrieval ranked this way put the answer's article in the top 5 for 68% of the dev questions
  * (`tools/eval/ask_articles.py`); keywords alone, 25%.
  *
- * Where Ask's gate would decline (no dense hit or keyword passage confident enough), Search still shows the keyword
- * ranking: a search lists its best guesses; it doesn't refuse.
+ * Ask's gate (decline when no dense hit or keyword passage is confident enough) is off: a search lists its best guesses;
+ * it doesn't refuse.
  */
 class BestMatches(
     private val finder: PassageFinder,
@@ -25,6 +25,12 @@ class BestMatches(
     private val embed: (suspend (String) -> FloatArray?)? = null,
     private val config: RankingConfig = RankingConfig(),
     private val sourceWeight: SourceWeight? = null,
+    /**
+     * Which article a passage is, for one row per article: the app's maps a pack to its family ("wikipedia_en"), so one
+     * article in Wikipedia and Wikipedia Physics is one row (Plan SQ: "Capillary action" took two of the first five).
+     * Asked once per search.
+     */
+    private val articleKey: suspend () -> (Passage) -> Any = { { p: Passage -> p.sourceId to p.location } },
 ) {
     /** One row: an article or chapter, its best passage, and the [sentence] of it (character range) to highlight. */
     data class Match(val passage: Passage, val sentence: IntRange?)
@@ -70,14 +76,13 @@ class BestMatches(
             return@channelFlow
         }
         val inLanguage = { p: Passage -> p.language == null || p.language in languages }
+        val article = articleKey()
         val keywordDone = CompletableDeferred<Unit>()
         val meaning = async {
             byMeaning(query)?.filter(inLanguage)?.also { hits ->
                 // Shown while the keyword search runs; skipped when the keywords already finished.
                 if (!keywordDone.isCompleted) {
-                    val weight = sourceWeight?.of(query, keywords, hits) ?: Ranking.NO_WEIGHT
-                    val ranked = hits.filter { it.cosine != null }.sortedByDescending { it.cosine!! * weight(it) }
-                        .distinctBy { it.sourceId to it.location }.take(limit)
+                    val ranked = byCosine(hits, sourceWeight?.of(query, keywords, hits) ?: Ranking.NO_WEIGHT, limit, article)
                     send(Result(ranked.map { Match(it, sentence(it, keywords, languages)) }, keywords, byMeaning = true, embedMs = lastEmbedMs, denseMs = lastDenseMs))
                 }
             }
@@ -89,11 +94,15 @@ class BestMatches(
         val hits = meaning.await()
         val weight = sourceWeight?.of(query, keywords, words + hits.orEmpty()) ?: Ranking.NO_WEIGHT
         val topical = keywords.filterNot(YearFacts::cueOnly).ifEmpty { keywords }
-        val wide = config.copy(preselect = POOL, small = POOL, large = POOL)
+        // No gate: Ask's declines an unsure question, but a search lists its best guesses (Plan SQ: gated, "how can a huge
+        // steel ship float" lost its dense hits to an empty keyword list).
+        val wide = config.copy(preselect = POOL, small = POOL, large = POOL, keywordCosine = KEYWORD_COSINE, denseGate = 0.0, lexicalGate = 0.0)
         val found = Ranking.preselect(words, topical, wide, weight, languages)
         val merged = hits?.let { Ranking.hybrid(found, it, topical, wide, weight, languages) }.orEmpty()
+        // With dense hits all below the floor and no keyword passage, the first step's ranking stands.
         val ranked = merged.ifEmpty { Ranking.byLexical(found, topical, wide, limit = POOL, weight = weight, languages = languages) }
-        val perArticle = ranked.distinctBy { it.sourceId to it.location }.take(limit)
+            .ifEmpty { hits?.let { byCosine(it, weight, POOL, article) }.orEmpty() }
+        val perArticle = ranked.distinctBy(article).take(limit)
         send(
             Result(
                 perArticle.map { Match(it, sentence(it, topical, languages)) }, keywords, byMeaning = hits != null,
@@ -101,6 +110,10 @@ class BestMatches(
             ),
         )
     }
+
+    /** Dense hits by weighted cosine, one per article or chapter: the first step's ranking. */
+    private fun byCosine(hits: List<Passage>, weight: (Passage) -> Double, limit: Int, article: (Passage) -> Any): List<Passage> =
+        hits.filter { it.cosine != null }.sortedByDescending { it.cosine!! * weight(it) }.distinctBy(article).take(limit)
 
     @Volatile private var lastEmbedMs = 0L
     @Volatile private var lastDenseMs = 0L
@@ -127,6 +140,8 @@ class BestMatches(
         const val LIMIT = 10
         /** How many passages are ranked before one row per article is kept (merge.py's deep pool). */
         const val POOL = 40
+        /** [RankingConfig.keywordCosine] for Best matches. */
+        const val KEYWORD_COSINE = 0.66
 
         /**
          * The sentence of [passage] sharing the most of [keywords]' words (folded, stopwords left out), the earlier on a
