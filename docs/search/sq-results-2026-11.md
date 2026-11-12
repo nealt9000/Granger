@@ -414,3 +414,7 @@ The quote set holds (Best @5 98%, Books @3 95%, Spanish 20/20), unchanged from `
    release, and fold both into the next Search round.
 3. **Pixel speed** was last measured before the quote step and Phases 5–6. The walkthrough rechecks it (and the first
    minutes after install, §4.5) before the merge.
+
+**Neal's calls (2026-11-11):** 1 → **c**: release with held-out English at 60% top 10, then a "from the book" step tuned on dev
+and confirmed on a new held-out set. 2 → accepted: known items @3 and English prefixes wait for the next Search round
+(popularity signal, own spelling vocabulary).
