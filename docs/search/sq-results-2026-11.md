@@ -418,3 +418,23 @@ The quote set holds (Best @5 98%, Books @3 95%, Spanish 20/20), unchanged from `
 **Neal's calls (2026-11-11):** 1 → **c**: release with held-out English at 60% top 10, then a "from the book" step tuned on dev
 and confirmed on a new held-out set. 2 → accepted: known items @3 and English prefixes wait for the next Search round
 (popularity signal, own spelling vocabulary).
+
+### The Pixel 6 on the release build (runs `px-v3-*`, `px-v3c-*`; build 0da419b6, version 2 vectors, 2026-11-11)
+
+| p95 | §2.3 (98620bd6) | Warm (`px-v3`, thermal 2, on the charger, after 19 min of quotes) | **Cool (`px-v3c`, thermal 0→1, unplugged)** | Bar |
+|---|---|---|---|---|
+| Best first step, questions | 2.12 s | 3.28 s | **2.39 s** | 2.5 s ✓ |
+| Best first step, known items | 1.67 s | 2.91 s | **2.20 s** | 2.5 s ✓ |
+| Titles, questions | 0.18 s | 0.20 s | **0.20 s** | 0.3 s ✓ |
+| Titles, known items | 0.27 s | 0.38 s | **0.30 s** | 0.3 s ✓ (at the line) |
+| Vector scan p50 (same files) | 407 ms | 749 ms | 540 ms | |
+
+- **The bars hold on a cool phone, with less room than in §2.3.** The vector-scan code is unchanged since then, and the raw scan
+  moves with the phone's heat (407 / 540 / 749 ms). The cool run had warmed to thermal status 1 by its second set. A warm
+  phone, after long use or on the charger, goes over the 2.5 s bar.
+- **The slowdown after install is gone.** Quotes ran from the moment of install: Best's first step stayed at 1.7–1.9 s
+  (medians of 10) from the first minute to the 19th. With version 1 vectors it was 5–18 s for ~12 minutes (§4.5).
+- **Quality unchanged:** quotes Best @5 (book) 97%, Spanish 20/20; dev-30 Best @5 19/30, @10 22/30; English known items
+  right first 26/29.
+- **For a later round:** a warm phone's first step could stay under 2.5 s if the dense pass probed fewer lists when the
+  last query was slow (fewer than the 1,024 probed now), at some cost in recall.
