@@ -55,3 +55,17 @@ Nothing here is published until Neal approves. Two rounds: **now** (Ask leaves; 
 
 - `README.md` first lines and `funding.json`: "with a librarian that answers from your books" → "with one search over
   everything". Brand spec §9 keeps the librarian copy as the version for Ask's return.
+
+## When SQ ships: release notes for build 1306 (draft, Neal approves)
+
+English (≤500):
+> Ask is resting; Search now finds passages. Type a question or a half-remembered line and Best matches shows the
+> paragraphs that answer it, with the sentence highlighted; tap one to open the page at that spot. Search also forgives
+> typos, finds lines from the Classics books, defines single words from your dictionary, and filters by Articles,
+> Books or Media. On phones with 6 GB or more, it searches by meaning too (a 165 MB download).
+
+Español (es-419, ≤500):
+> Preguntar está en pausa; Buscar ahora encuentra pasajes. Escribe una pregunta o una frase a medio recordar y Mejores
+> resultados muestra los párrafos que la responden, con la oración resaltada; tócalo para abrir la página ahí mismo.
+> Buscar también perdona errores, encuentra frases de los libros Clásicos, define palabras sueltas con tu diccionario y
+> filtra por Artículos, Libros o Multimedia. En teléfonos de 6 GB o más, también busca por significado (descarga de 165 MB).
