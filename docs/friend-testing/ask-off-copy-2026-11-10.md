@@ -56,7 +56,7 @@ Nothing here is published until Neal approves. Two rounds: **now** (Ask leaves; 
 - `README.md` first lines and `funding.json`: "with a librarian that answers from your books" → "with one search over
   everything". Brand spec §9 keeps the librarian copy as the version for Ask's return.
 
-## When SQ ships: release notes for build 1306 (draft, Neal approves)
+## When SQ ships: release notes for build 1309 (draft, Neal approves)
 
 English (≤500):
 > Ask is resting; Search now finds passages. Type a question or a half-remembered line and Best matches shows the
