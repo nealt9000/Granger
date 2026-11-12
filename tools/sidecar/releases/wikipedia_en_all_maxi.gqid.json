@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_en_all_maxi",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_en_all_maxi_2026-08.gqid",
+ "sizeBytes": 580964352,
+ "sha256": "c37404fe1e425adb62550ade292626b9d2b24edba21023f23d3755fdc8f7c6c0",
+ "schemaVersion": 1,
+ "sourceSha256": "34162d18b9f96f494eac48a73a309c72e0bc95d85f76be405d0f5de795854aa6",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}

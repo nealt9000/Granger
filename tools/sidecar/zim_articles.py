@@ -1,5 +1,16 @@
-"""The real articles of a ZIM, shared by every sidecar builder (Linked Library spec §5): redirects, metadata and
-mwoffliner's redirect stubs left out."""
+"""The real articles of a ZIM, shared by every sidecar builder (Linked Library spec §5): redirects, metadata,
+mwoffliner's redirect stubs and Wikipedia's non-article namespaces (maxi carries 2.2M Category: and Portal: pages)
+left out."""
+
+# Namespaces that hold no article; Spanish "Anexo:" (lists) is content and stays. A real title keeps a space after its
+# colon ("Portal:_Still_Alive"), a namespace page doesn't.
+NAMESPACES = ("Category", "Portal", "Template", "File", "Wikipedia", "Help", "Draft", "Module", "Special", "Talk",
+              "Categoría", "Plantilla", "Archivo", "Ayuda", "Especial", "Discusión")
+
+
+def is_namespace_page(path: str) -> bool:
+    ns, colon, rest = path.partition(":")
+    return bool(colon) and ns in NAMESPACES and not rest.startswith("_")
 
 
 def is_stub(item) -> bool:
@@ -14,6 +25,8 @@ def articles(archive):
     for i in range(archive.all_entry_count):
         e = archive._get_entry_by_id(i)
         if e.is_redirect or e.path.startswith(("-/", "_", "I/", "M/", "X/")):
+            continue
+        if is_namespace_page(e.path):
             continue
         try:
             it = e.get_item()
