@@ -2,13 +2,13 @@
  "id": "gc-es-niebla",
  "kind": "book",
  "fileName": "gc-es-niebla_2026-11-09.gvec",
- "sizeBytes": 159190,
- "sha256": "e1042e9f9ae45f567e9ae82195d094f616acb419ee0eb8c1b56c203e9ffef296",
+ "sizeBytes": 159726,
+ "sha256": "0cd7fa8b19a55fc19245251ea062ab04bedaae33de51f2dff31ed43843e55b18",
  "count": 541,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "b4865b3d006ca5ae5c2cee1bf012ade6356d4444e98c3b59a755a0c5505c0c0e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-niebla_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-niebla_2026-11-09.gvec"
 }

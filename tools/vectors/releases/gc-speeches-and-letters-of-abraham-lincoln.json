@@ -2,13 +2,13 @@
  "id": "gc-speeches-and-letters-of-abraham-lincoln",
  "kind": "book",
  "fileName": "gc-speeches-and-letters-of-abraham-lincoln_2026-11-09.gvec",
- "sizeBytes": 162424,
- "sha256": "5d8d3d242584c269fd9d5009189d478e47eac8e0d8f3f26a8f640e871ba6dfe7",
+ "sizeBytes": 162960,
+ "sha256": "b26c0927d82b1f81aab2714ad2a632503e5d11e23c7df7016e6f5ab779283176",
  "count": 552,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "46c530ea43b3eac675fe475d8af62fc3a99ec17e8340f11ba414752952093948",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-speeches-and-letters-of-abraham-lincoln_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-speeches-and-letters-of-abraham-lincoln_2026-11-09.gvec"
 }

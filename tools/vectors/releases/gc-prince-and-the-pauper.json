@@ -2,13 +2,13 @@
  "id": "gc-prince-and-the-pauper",
  "kind": "book",
  "fileName": "gc-prince-and-the-pauper_2026-11-09.gvec",
- "sizeBytes": 165658,
- "sha256": "56baf95fec4fdbee095a6e4a1e2d9adca5563b7e5ffbc66374032338ec200018",
+ "sizeBytes": 166194,
+ "sha256": "4e93715f536209867d10f84d25c53e4bad222caa6a9915be75b6d73f0c1279c0",
  "count": 563,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "15f0032ee1f9f6d92b0a15b10357a8eac4611b191a707544517a9607f29c3b6f",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-prince-and-the-pauper_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-prince-and-the-pauper_2026-11-09.gvec"
 }

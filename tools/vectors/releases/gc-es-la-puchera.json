@@ -2,13 +2,13 @@
  "id": "gc-es-la-puchera",
  "kind": "book",
  "fileName": "gc-es-la-puchera_2026-11-09.gvec",
- "sizeBytes": 254446,
- "sha256": "80003f4b5c3e5c4004846af250dc00ccee49959bc97398f4ec68dbdb794d6b00",
+ "sizeBytes": 255246,
+ "sha256": "61cd7e11c81ebd196e1ed5df889372e9b01bc7b5dedec148327073041e915c43",
  "count": 865,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "8146132b06c6160ceb82b5c441c48c9e2ebcd16ee1d0ad00c7316e144deddd5d",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-la-puchera_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-la-puchera_2026-11-09.gvec"
 }

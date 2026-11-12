@@ -2,13 +2,13 @@
  "id": "gc-es-romancero-selecto-del-cid",
  "kind": "book",
  "fileName": "gc-es-romancero-selecto-del-cid_2026-11-09.gvec",
- "sizeBytes": 149194,
- "sha256": "04a0895d15470a8c0bfb1a589cb3ef2c01ed9facbdcd6eade217645c847ab0ac",
+ "sizeBytes": 149730,
+ "sha256": "25671a9258ea438540a08bfa35812b552156f8cb93046b254b2076c12fdf975b",
  "count": 507,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "5b4a4933a7456395bc8d2eceb9916215c53b1f4f84aa6d5b89d0c0dbf6a52617",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-romancero-selecto-del-cid_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-romancero-selecto-del-cid_2026-11-09.gvec"
 }

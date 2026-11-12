@@ -2,13 +2,13 @@
  "id": "gc-es-recuerdos-de-mi-vida-tomo-1-de-2",
  "kind": "book",
  "fileName": "gc-es-recuerdos-de-mi-vida-tomo-1-de-2_2026-11-09.gvec",
- "sizeBytes": 208876,
- "sha256": "496fee9234233ebfb5bed15bab87d6e765f38b9e62156bc9e586bd2fc358b50b",
+ "sizeBytes": 209412,
+ "sha256": "58bfe4663150a33b91271bb82611bcdca82906760ef7277a6b8c0f80090d6fd6",
  "count": 710,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "29558338b872a8ca4c364634a20747533ddb0019c1352d6f671dad9088795042",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-recuerdos-de-mi-vida-tomo-1-de-2_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-recuerdos-de-mi-vida-tomo-1-de-2_2026-11-09.gvec"
 }

@@ -2,13 +2,13 @@
  "id": "gc-vindication-of-the-rights-of-woman",
  "kind": "book",
  "fileName": "gc-vindication-of-the-rights-of-woman_2026-11-09.gvec",
- "sizeBytes": 177418,
- "sha256": "a616a2129b449adb77ea2bc357bb66156c04353885071bf756f66246c933781b",
+ "sizeBytes": 177954,
+ "sha256": "097b056f8bae91a195a0985a443b4996ae97e871798b5bac8d13f376ead82f50",
  "count": 603,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "86e407de99d0269144b243aab46933f4296481dd5127fb74073035d4cbcdf72e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-vindication-of-the-rights-of-woman_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-vindication-of-the-rights-of-woman_2026-11-09.gvec"
 }

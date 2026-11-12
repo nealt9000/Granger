@@ -2,13 +2,13 @@
  "id": "gc-rights-of-man",
  "kind": "book",
  "fileName": "gc-rights-of-man_2026-11-09.gvec",
- "sizeBytes": 204466,
- "sha256": "4f5c19e6dbf2f7cb4d4bf8fb4eb96ab37434595051311ec042806319ed53266c",
+ "sizeBytes": 205002,
+ "sha256": "8150623ac0121ebf20fe9743b273cf912ac2a68dfa6552360bc243c4f4cb1f1b",
  "count": 695,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "ca4547d00c8e21f8a5017fc7809d00272f1627518207f003919b9a3474058045",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-rights-of-man_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-rights-of-man_2026-11-09.gvec"
 }

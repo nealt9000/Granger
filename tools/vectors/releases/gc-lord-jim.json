@@ -2,13 +2,13 @@
  "id": "gc-lord-jim",
  "kind": "book",
  "fileName": "gc-lord-jim_2026-11-09.gvec",
- "sizeBytes": 175066,
- "sha256": "69ece71ce61d8d4bdf6b6d1bf5364113d4eb66477714fa740e5e193b1382547e",
+ "sizeBytes": 175602,
+ "sha256": "26efead8603154d8f262ed023ba0ec6ad75a52f17b0caca12fda93211f965e87",
  "count": 595,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "2ac5a0ba6c39ca352af1bde80a85ce61806104b2470076f34ed0b0b958a9d1f6",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-lord-jim_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-lord-jim_2026-11-09.gvec"
 }

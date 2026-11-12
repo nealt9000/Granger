@@ -2,13 +2,13 @@
  "id": "gc-es-teatro-selecto-tomo-3-de-4",
  "kind": "book",
  "fileName": "gc-es-teatro-selecto-tomo-3-de-4_2026-11-09.gvec",
- "sizeBytes": 262678,
- "sha256": "ed2e0f8c3d2a0a31b9a0a1bbdd84d2cae540d95bf63d50ed17f749af33eda101",
+ "sizeBytes": 263478,
+ "sha256": "a5d98c98b07a114e5acaf559ab926b68c5b3e3f131bb105ade67a6d38ba0aca0",
  "count": 893,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "e994c550e7d2a5f2338267b5d70a53283facf70044ace5a5ccb32884a3385efb",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-teatro-selecto-tomo-3-de-4_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-teatro-selecto-tomo-3-de-4_2026-11-09.gvec"
 }

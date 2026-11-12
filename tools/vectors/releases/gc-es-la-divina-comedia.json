@@ -2,13 +2,13 @@
  "id": "gc-es-la-divina-comedia",
  "kind": "book",
  "fileName": "gc-es-la-divina-comedia_2026-11-09.gvec",
- "sizeBytes": 241216,
- "sha256": "4b4286b458d4ee705ae8870bf0c47e2287997d504acb1ca2b0569d99556c48e1",
+ "sizeBytes": 242016,
+ "sha256": "f2c82894fa84f9ccdf45ea05ec2177b62c684a331b3418adc727e87e33c0ff5c",
  "count": 820,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "88a9f301a22ef22930c76c9587f0aef5b6b6bc84c299fbaeec358c9a4bd06b5a",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-la-divina-comedia_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-la-divina-comedia_2026-11-09.gvec"
 }

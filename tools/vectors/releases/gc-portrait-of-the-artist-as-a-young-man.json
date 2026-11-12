@@ -2,13 +2,13 @@
  "id": "gc-portrait-of-the-artist-as-a-young-man",
  "kind": "book",
  "fileName": "gc-portrait-of-the-artist-as-a-young-man_2026-11-09.gvec",
- "sizeBytes": 194470,
- "sha256": "e4419d012781e75f51c70bc850f8d82a00ee5369e207c857d7b239c14906fdd8",
+ "sizeBytes": 195006,
+ "sha256": "d9cb5e2e9da0f8fa7d5930ced48c218e4ed6142540de7bf752e607aa897e67ae",
  "count": 661,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "39c608ce7859335511a7f6dc909ed697dd52d905925c0f0f91b00b38630d7612",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-portrait-of-the-artist-as-a-young-man_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-portrait-of-the-artist-as-a-young-man_2026-11-09.gvec"
 }

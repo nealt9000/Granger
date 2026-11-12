@@ -2,13 +2,13 @@
  "id": "gc-tess-of-the-d-urbervilles",
  "kind": "book",
  "fileName": "gc-tess-of-the-d-urbervilles_2026-11-09.gvec",
- "sizeBytes": 383512,
- "sha256": "97dcb9b4fc9e1d6dd32c7cb4fa0df008852efeacad6264fba754e2f8bb582bea",
+ "sizeBytes": 384840,
+ "sha256": "90a03693e04a5baaba74908ec19febee17bb6a8b0e9d83ef484433737f2ba1ec",
  "count": 1304,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "7ec489306130c238bd5516bd6d9a83048f46e0969ac6d0940b5328bd2daa8c32",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-tess-of-the-d-urbervilles_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-tess-of-the-d-urbervilles_2026-11-09.gvec"
 }

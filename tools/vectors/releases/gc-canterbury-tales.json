@@ -2,13 +2,13 @@
  "id": "gc-canterbury-tales",
  "kind": "book",
  "fileName": "gc-canterbury-tales_2026-11-09.gvec",
- "sizeBytes": 489058,
- "sha256": "ca93c1fbd73f8063f9890a0487b4e15a6692611ac6c1a8c8a0e99d9ebe99c4bf",
+ "sizeBytes": 490650,
+ "sha256": "e2b1b4ba77c00af2dad0c0758b453ecfe704f9e6f745fe9399592cedfe3ed85d",
  "count": 1663,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "0493cf60076d98abe565b9de5ac1663c87aed8edea9ab7c71001b113a268f3c8",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-canterbury-tales_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-canterbury-tales_2026-11-09.gvec"
 }

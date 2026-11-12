@@ -2,13 +2,13 @@
  "id": "gc-hunger",
  "kind": "book",
  "fileName": "gc-hunger_2026-11-09.gvec",
- "sizeBytes": 150076,
- "sha256": "fb334e1ac08e5fb912e670b6dffd8f35945825264a218663a88e55f79ed5e93f",
+ "sizeBytes": 150612,
+ "sha256": "368ace0df849962e0100052620903dff99fe21a1ae5be9ae79e2e1b982117b5d",
  "count": 510,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "1ce750a431138912e112099fee8cd63d81e37d868ec62c40b5555793280f0e84",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-hunger_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-hunger_2026-11-09.gvec"
 }

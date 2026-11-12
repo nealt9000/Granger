@@ -2,13 +2,13 @@
  "id": "gc-barchester-towers",
  "kind": "book",
  "fileName": "gc-barchester-towers_2026-11-09.gvec",
- "sizeBytes": 447604,
- "sha256": "ca2e97684ab6f36f724bb9e4a9eaf2695bd76e9607868062dabeea1f40443b7c",
+ "sizeBytes": 449196,
+ "sha256": "5344cdcd98d306220028ec48c3e320f9c756995a2f4e5853af73ed96d897c53b",
  "count": 1522,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "b99b9f51ac90f599e422e0bef576d565aac21f79ac7f60ee4520b6feea177bfc",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-barchester-towers_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-barchester-towers_2026-11-09.gvec"
 }

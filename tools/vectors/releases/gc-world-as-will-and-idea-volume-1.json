@@ -2,13 +2,13 @@
  "id": "gc-world-as-will-and-idea-volume-1",
  "kind": "book",
  "fileName": "gc-world-as-will-and-idea-volume-1_2026-11-09.gvec",
- "sizeBytes": 216814,
- "sha256": "b63c85c9fc71d0597bc9e09140705252f83e6c87cc9bab392570ae9735f6f28c",
+ "sizeBytes": 217350,
+ "sha256": "1c32ab7b8e3441f3d8666215d199f9da28673050ab30707d6c74227b2b74b63a",
  "count": 737,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "fe35d430101789c3e2295108f5504e08ceb1cafba9b8f85e67fea4922e41910e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-world-as-will-and-idea-volume-1_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-world-as-will-and-idea-volume-1_2026-11-09.gvec"
 }

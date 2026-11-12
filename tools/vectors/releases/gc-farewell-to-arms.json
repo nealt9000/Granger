@@ -2,13 +2,13 @@
  "id": "gc-farewell-to-arms",
  "kind": "book",
  "fileName": "gc-farewell-to-arms_2026-11-09.gvec",
- "sizeBytes": 224164,
- "sha256": "8b081f9ff2fd6d527f3a1835cb88dffb490cba07a0bf93097019fd1175e6c8b5",
+ "sizeBytes": 224964,
+ "sha256": "0eca14c6eb747e63ef4be04f3472691eca1fd1c9a72095d8d857f8e3757ef829",
  "count": 762,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "4929bb416a8639d191f7c5115ee29f141fab64a45b7ca2a40606afa9f84a7929",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-farewell-to-arms_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-farewell-to-arms_2026-11-09.gvec"
 }

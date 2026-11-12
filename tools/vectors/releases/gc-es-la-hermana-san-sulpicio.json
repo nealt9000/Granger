@@ -2,13 +2,13 @@
  "id": "gc-es-la-hermana-san-sulpicio",
  "kind": "book",
  "fileName": "gc-es-la-hermana-san-sulpicio_2026-11-09.gvec",
- "sizeBytes": 265912,
- "sha256": "f04bc6d40324b129fa38837d92f815cc7c7817a6e107ce9e332d1875b76c2e44",
+ "sizeBytes": 266712,
+ "sha256": "78c5d28a482d82263512c7da5864cacbd3af6104b6d59cf76a0b7713d32bd497",
  "count": 904,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "45eb5e7de0563cde13de541ab160858b1921959d8ca9fd622b3fc244968c8a72",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-la-hermana-san-sulpicio_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-la-hermana-san-sulpicio_2026-11-09.gvec"
 }

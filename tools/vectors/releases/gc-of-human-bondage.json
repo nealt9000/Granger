@@ -2,13 +2,13 @@
  "id": "gc-of-human-bondage",
  "kind": "book",
  "fileName": "gc-of-human-bondage_2026-11-09.gvec",
- "sizeBytes": 545800,
- "sha256": "8e700cd5ef3b2faa22b31ba0de07494589805621cff66e9ec201643243990af2",
+ "sizeBytes": 547656,
+ "sha256": "0e89f360143256def4144c66e7756ea0bb0cc4c4087fed3277331e0ce08de2cf",
  "count": 1856,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "c062ecfb97ce47e351b3f9c5a2cd91e025d4eb426ec82e30354844494c121a76",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-of-human-bondage_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-of-human-bondage_2026-11-09.gvec"
 }

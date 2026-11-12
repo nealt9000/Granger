@@ -2,13 +2,13 @@
  "id": "gc-federalist-papers",
  "kind": "book",
  "fileName": "gc-federalist-papers_2026-11-09.gvec",
- "sizeBytes": 322066,
- "sha256": "ab423ec0e9c6faca6df678125727b2e5d676fdd5034fff6985f8fffc136fe376",
+ "sizeBytes": 323130,
+ "sha256": "9bc84015204b113f397765ec642c42401b0fbc0661b5437db61bbcd4e83881f8",
  "count": 1095,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "efa86850cb6941a20a5c71df98871f077ed9f0f8f1b2ec802e6fbdd357c6fc7d",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-federalist-papers_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-federalist-papers_2026-11-09.gvec"
 }

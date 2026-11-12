@@ -2,13 +2,13 @@
  "id": "gc-thus-spake-zarathustra",
  "kind": "book",
  "fileName": "gc-thus-spake-zarathustra_2026-11-09.gvec",
- "sizeBytes": 358522,
- "sha256": "1e574a8cfc83cba55317aae1ebebee76d40c17426744afd9fd6ffd4e309026e5",
+ "sizeBytes": 359586,
+ "sha256": "0e23232d4f7688c34b8e7ce555c0470fc7fb4992e21c47ae53fae136198ea7de",
  "count": 1219,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "4b350983312c125aa8bd555048fedb4562af210c21c0a620902517fc3070134e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-thus-spake-zarathustra_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-thus-spake-zarathustra_2026-11-09.gvec"
 }

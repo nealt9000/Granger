@@ -2,13 +2,13 @@
  "id": "gc-metamorphoses-books-viii-xv",
  "kind": "book",
  "fileName": "gc-metamorphoses-books-viii-xv_2026-11-09.gvec",
- "sizeBytes": 243568,
- "sha256": "47d0fdb7e101a33ee3785e869e44cea698b145b7b414c7399b214dc0f044267c",
+ "sizeBytes": 244368,
+ "sha256": "e1298b5805be67c39fc533098ac6819c211238effdc1da535711234c0d951306",
  "count": 828,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "5d9358fe540da0063059f32dc4531ec49b99bfa07333357233767fa6c6fd7c1b",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-metamorphoses-books-viii-xv_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-metamorphoses-books-viii-xv_2026-11-09.gvec"
 }

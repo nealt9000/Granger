@@ -2,13 +2,13 @@
  "id": "gc-vanity-fair",
  "kind": "book",
  "fileName": "gc-vanity-fair_2026-11-09.gvec",
- "sizeBytes": 613420,
- "sha256": "7e4c174507b08b2445a83555c0a64ec225edfd3b4269fc4e4fe4136a09d2ba60",
+ "sizeBytes": 615540,
+ "sha256": "80f41554bcad000928d61791b0b5e2e30030ad01dcb946e2d6548a2570196998",
  "count": 2086,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "b83051ecfc12d1c0b477bc5087b4ae1fdf1b37a8619b00d7ff971ea03cb64e65",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-vanity-fair_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-vanity-fair_2026-11-09.gvec"
 }

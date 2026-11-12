@@ -2,13 +2,13 @@
  "id": "gc-plays-by-anton-chekhov-second-series",
  "kind": "book",
  "fileName": "gc-plays-by-anton-chekhov-second-series_2026-11-09.gvec",
- "sizeBytes": 194764,
- "sha256": "b75a30537082421ac651aa7ec2de4e090d9e8224756d5e09a7f62c9b733f7ec7",
+ "sizeBytes": 195300,
+ "sha256": "9b78d289460941d01ac3cc5e2a153c0d2c4ebac5dfc604f2da617cd245c32c69",
  "count": 662,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "5b7194eaec7bb03d48e571871b9ef0042d0ba63cf461288b04c632e6ee4ae421",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-plays-by-anton-chekhov-second-series_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-plays-by-anton-chekhov-second-series_2026-11-09.gvec"
 }

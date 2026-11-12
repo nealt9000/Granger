@@ -2,13 +2,13 @@
  "id": "gc-es-cuentos-de-amor-de-locura-y-de-muerte",
  "kind": "book",
  "fileName": "gc-es-cuentos-de-amor-de-locura-y-de-muerte_2026-11-09.gvec",
- "sizeBytes": 151546,
- "sha256": "ab000458928da17d303ddab1688fd4b44f5cb3ab25d0f30064d0c20cbfe4a3ff",
+ "sizeBytes": 152082,
+ "sha256": "6f76e6ad1935536d3ed98c63e3cd6b18dad055ef8fc9e017f50e3fac0d33f25f",
  "count": 515,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "c97637c9097ded95a29e7386228e182f74cfa10bf0f48441e783efcb8edae462",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-cuentos-de-amor-de-locura-y-de-muerte_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-cuentos-de-amor-de-locura-y-de-muerte_2026-11-09.gvec"
 }

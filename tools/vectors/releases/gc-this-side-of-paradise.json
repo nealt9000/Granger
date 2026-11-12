@@ -2,13 +2,13 @@
  "id": "gc-this-side-of-paradise",
  "kind": "book",
  "fileName": "gc-this-side-of-paradise_2026-11-09.gvec",
- "sizeBytes": 225634,
- "sha256": "59689e59f08c2e3117c60a20ed1a447532884534ceeb98bf03b2e24759337e03",
+ "sizeBytes": 226434,
+ "sha256": "69535765372019cfdc10271ea16153a903b7620c3fba874d00a19b71bf9d19fb",
  "count": 767,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "de7496d19cfe8b0bb73e251de327250e660be2b22d6e6c324bd3e5771227d545",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-this-side-of-paradise_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-this-side-of-paradise_2026-11-09.gvec"
 }

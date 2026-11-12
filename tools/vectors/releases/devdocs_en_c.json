@@ -2,13 +2,13 @@
  "id": "devdocs_en_c",
  "kind": "pack",
  "fileName": "devdocs_en_c_2026-10-05.gvec",
- "sizeBytes": 577301,
- "sha256": "950909093b67c78932e2188eeec7340fa32833cf891d6ef91bab4063f4d73848",
+ "sizeBytes": 579157,
+ "sha256": "d228c919dbfeda70cdb2e1b4789914daa7245d085bbd6af5e6bd2cc34f496636",
  "count": 1952,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "5b5c00cd83c0cbfc7e89220721afbbc15ce82210d62229ac3639a169a3352431",
- "url": null
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/devdocs_en_c_2026-10-05.gvec"
 }

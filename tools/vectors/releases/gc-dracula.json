@@ -2,13 +2,13 @@
  "id": "gc-dracula",
  "kind": "book",
  "fileName": "gc-dracula_2026-11-09.gvec",
- "sizeBytes": 283846,
- "sha256": "a206d8c39c0fe322a41f50968153504533acd80875ef9d644eae92fa611452ea",
+ "sizeBytes": 284646,
+ "sha256": "fb8e69759f98095443ab8d91e1c63eea53b318049584b5e28aa60c05a2523036",
  "count": 965,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "44445f0a266352b7e7386dcd577610412545db99580e2daa0bb5b85aac7116ad",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-dracula_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-dracula_2026-11-09.gvec"
 }

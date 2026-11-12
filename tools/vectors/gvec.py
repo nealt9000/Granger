@@ -7,7 +7,8 @@ import numpy as np
 
 
 def truncate(vecs, dims):
-    v = np.asarray(vecs, dtype=np.float32)[:, :dims]
+    # An empty chunk can embed as NaN; written as is, its NaN scale outranks every real score on the phone.
+    v = np.nan_to_num(np.asarray(vecs, dtype=np.float32)[:, :dims], nan=0.0, posinf=0.0, neginf=0.0)
     return v / np.maximum(np.linalg.norm(v, axis=1, keepdims=True), 1e-12)
 
 

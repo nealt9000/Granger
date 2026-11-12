@@ -2,13 +2,13 @@
  "id": "gc-white-fang",
  "kind": "book",
  "fileName": "gc-white-fang_2026-11-09.gvec",
- "sizeBytes": 182416,
- "sha256": "c970109f05366947e32f96d3db3e6a370320a9c612a5372d08a1533280b83095",
+ "sizeBytes": 182952,
+ "sha256": "0c6e5ad6494d55898709b8369a95e60490aef45361113a335042a725f202554b",
  "count": 620,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "e45edd710986f8050e3d663174375ceeedcabcef5c976b683f2f9c9c736f9874",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-white-fang_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-white-fang_2026-11-09.gvec"
 }

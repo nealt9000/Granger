@@ -2,13 +2,13 @@
  "id": "gc-es-el-filibusterismo",
  "kind": "book",
  "fileName": "gc-es-el-filibusterismo_2026-11-09.gvec",
- "sizeBytes": 267382,
- "sha256": "aec17e340ec9f59a53fb9ba59edb9e2635afd2eac3ff3b23e61c2913db4d88e3",
+ "sizeBytes": 268182,
+ "sha256": "12db085468e1c008a207ae401abddae7236ef2e3df2bb4b9c0384a8ac768bd6c",
  "count": 909,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "2f23a14efdb67b246c804751291f29f23bd2afe8b59d8f4f72ebc280b45a1227",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-el-filibusterismo_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-el-filibusterismo_2026-11-09.gvec"
 }

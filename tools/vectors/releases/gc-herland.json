@@ -2,13 +2,13 @@
  "id": "gc-herland",
  "kind": "book",
  "fileName": "gc-herland_2026-11-09.gvec",
- "sizeBytes": 159190,
- "sha256": "26f40c510f4448f39b8679a0386f32d246f77a29603379bfa9aa23632fb2c0cf",
+ "sizeBytes": 159726,
+ "sha256": "9e6701413e8f835d55629f8646bce6b2b99aa29193010c2fe5bf3bcd3df58c6b",
  "count": 541,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "252cabab33a40068dc3c2d6359ed851406e410c9d2687bebb0bfbf2bada46fdc",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-herland_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-herland_2026-11-09.gvec"
 }

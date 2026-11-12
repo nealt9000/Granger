@@ -2,13 +2,13 @@
  "id": "gc-city-of-god-volume-2",
  "kind": "book",
  "fileName": "gc-city-of-god-volume-2_2026-11-09.gvec",
- "sizeBytes": 330298,
- "sha256": "11811c28bdf7d2ad7a203bc4701af33be83a0b00ea792448f2f1cd2680d7f64e",
+ "sizeBytes": 331362,
+ "sha256": "79116e5852564796bd2b9f65975e758d81b8e44abac860e690f172342bcf72e4",
  "count": 1123,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "5b127b4f83d00ca453dc48de762c6d6d24307bd125d3067a74c1e1bab802e0c0",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-city-of-god-volume-2_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-city-of-god-volume-2_2026-11-09.gvec"
 }

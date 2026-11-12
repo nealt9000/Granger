@@ -2,13 +2,13 @@
  "id": "gc-madame-bovary",
  "kind": "book",
  "fileName": "gc-madame-bovary_2026-11-09.gvec",
- "sizeBytes": 300604,
- "sha256": "c7c922ba81cacdbaca767882a5b28800604f03a1dbe53cf6eba8c53632548b76",
+ "sizeBytes": 301668,
+ "sha256": "6de36a686730fe28be57596702ef45d53fd663e18a211f9651c7aabe4c253772",
  "count": 1022,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "27c8612b26bce68ba16638052f9742bade377e0282cc5934c8034fd5819d09f7",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-madame-bovary_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-madame-bovary_2026-11-09.gvec"
 }

@@ -2,13 +2,13 @@
  "id": "gc-es-novelas-ejemplares-y-amorosas",
  "kind": "book",
  "fileName": "gc-es-novelas-ejemplares-y-amorosas_2026-11-09.gvec",
- "sizeBytes": 586666,
- "sha256": "691d8f65fdb30a02668a4b19ea5e8875df7a4221dd67607c3b8855d7121eea4d",
+ "sizeBytes": 588522,
+ "sha256": "2b4c6e408911e3a991f1c5834b6ea34b186dacce8d2a5534a0558ee7a0a2c652",
  "count": 1995,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "3310e62cfb5b2657047f2c8b8e0bb47b69c6c9e119493f090fb92d1c0eda7c45",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-novelas-ejemplares-y-amorosas_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-novelas-ejemplares-y-amorosas_2026-11-09.gvec"
 }

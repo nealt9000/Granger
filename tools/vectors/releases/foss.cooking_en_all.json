@@ -2,13 +2,13 @@
  "id": "foss.cooking_en_all",
  "kind": "pack",
  "fileName": "foss.cooking_en_all_2026-11-02.gvec",
- "sizeBytes": 610165,
- "sha256": "00df9a30634160d3da1f6ef65a77ddd0edf9109bef4e8e50c0296a71d0cf6132",
+ "sizeBytes": 612021,
+ "sha256": "a0d2b9de479ba4e77619fd52c8ea85740bd6ce11dc6a9d8fab6d86b26744104c",
  "count": 1896,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "7d871e90701a8b0e9c7379257edc4a1f6c565f06e353209b1d35b116da2c75c4",
- "url": null
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/foss.cooking_en_all_2026-11-02.gvec"
 }

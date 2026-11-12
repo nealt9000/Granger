@@ -2,13 +2,13 @@
  "id": "gc-little-dorrit",
  "kind": "book",
  "fileName": "gc-little-dorrit_2026-11-09.gvec",
- "sizeBytes": 820690,
- "sha256": "cd32dc908828b14e8af127dd8adc3321941fa47cdf7a9d23e3844391964864ba",
+ "sizeBytes": 823602,
+ "sha256": "9d90ffea59165b8bbc37dae0492ecdcfa2f5aef929130ab5190416a02bda5320",
  "count": 2791,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "172dda918138f560f720a69dd276ff38f081728f5d491aaab75ee62d56120ff4",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-little-dorrit_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-little-dorrit_2026-11-09.gvec"
 }

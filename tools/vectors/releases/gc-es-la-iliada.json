@@ -2,13 +2,13 @@
  "id": "gc-es-la-iliada",
  "kind": "book",
  "fileName": "gc-es-la-iliada_2026-11-09.gvec",
- "sizeBytes": 389686,
- "sha256": "19a8bc88f29dfabd5e64d4fc4272e7096c587d4ff285db79685489bdd665f2fd",
+ "sizeBytes": 391014,
+ "sha256": "b3a2c9d74ab67992b5c6189f7dc99173fe5af2cfdb53ff5a41a5226bfbf3b0c7",
  "count": 1325,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "b217e4477ad99159776a8404d70162c746f31a378a8d56ce9e7c36c63e0ddacb",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-la-iliada_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-la-iliada_2026-11-09.gvec"
 }

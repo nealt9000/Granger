@@ -2,13 +2,13 @@
  "id": "gc-mansfield-park",
  "kind": "book",
  "fileName": "gc-mansfield-park_2026-11-09.gvec",
- "sizeBytes": 308542,
- "sha256": "35fe635a5b2a7ca767951850e8169e8fc9af0630487a3e37af35cd9fdb2636e2",
+ "sizeBytes": 309606,
+ "sha256": "642a20491dae36712df7a0d7101a0647f5a5cc3d5f6dc6544f18c7a8fefc54b6",
  "count": 1049,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "bbd850f221ac92af41447136c5b26dfa6aaf2d37652404e7c5cb1ecfac872766",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-mansfield-park_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-mansfield-park_2026-11-09.gvec"
 }

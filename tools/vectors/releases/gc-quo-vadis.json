@@ -2,13 +2,13 @@
  "id": "gc-quo-vadis",
  "kind": "book",
  "fileName": "gc-quo-vadis_2026-11-09.gvec",
- "sizeBytes": 447898,
- "sha256": "4d29ae8babdd21d647fe9294012deb364cc1dfe75ed92c996f83a6370dfae8b6",
+ "sizeBytes": 449490,
+ "sha256": "b05bf976103c64542bd74703fc851e9f62cb4b00059c3dcd8b4f9eb97ad88c81",
  "count": 1523,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "f65987a1c37fdbef07d259cfd3effc8ae41778c5bfdca30dac331d5a9532654e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-quo-vadis_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-quo-vadis_2026-11-09.gvec"
 }

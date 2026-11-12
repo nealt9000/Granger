@@ -2,13 +2,13 @@
  "id": "gc-berean-standard-bible",
  "kind": "book",
  "fileName": "gc-berean-standard-bible_2026-11-09.gvec",
- "sizeBytes": 1906138,
- "sha256": "b68d068d35d245a2e8d0bfb56e8bf0958c6aa1f9363c09518ac05b745d8f5715",
+ "sizeBytes": 1912746,
+ "sha256": "7013590ebfba1ce23e4a171a18b4fc8d2a9c7d33b5bceb6d7e2552d7f88824f9",
  "count": 6483,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "810425c71e8dee59bc08636b2314b577ba9e007f88ed1e0fd417923edd4f699e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-berean-standard-bible_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-berean-standard-bible_2026-11-09.gvec"
 }

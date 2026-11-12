@@ -2,13 +2,13 @@
  "id": "gc-tom-jones",
  "kind": "book",
  "fileName": "gc-tom-jones_2026-11-09.gvec",
- "sizeBytes": 717202,
- "sha256": "d923fb83fd42787b68baf355ee1cee45f37a672a33bec77b145925b845418628",
+ "sizeBytes": 719586,
+ "sha256": "cff8b8a0e78194447a87f275dbe901d9a5117ae84ce852f0e0b7be93f469e650",
  "count": 2439,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "f9757007b10d166950065ef6478166135ed00fdf05cb81ed435984fac00e2d27",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-tom-jones_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-tom-jones_2026-11-09.gvec"
 }

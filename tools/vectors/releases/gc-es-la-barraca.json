@@ -2,13 +2,13 @@
  "id": "gc-es-la-barraca",
  "kind": "book",
  "fileName": "gc-es-la-barraca_2026-11-09.gvec",
- "sizeBytes": 164188,
- "sha256": "ead457b579005d1722eec826bd6262cd2756ded7fbeea42623f0f04fa937e2e8",
+ "sizeBytes": 164724,
+ "sha256": "6d27cd7a55df8cb5f8963a68eeb2601a4aa4bef1dee35551d363ee0de4217e99",
  "count": 558,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "a282dde84407bfe3d325d33472d2b3b0d99a2b1b6200f56a4a63ed6f52e116a3",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-la-barraca_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-la-barraca_2026-11-09.gvec"
 }

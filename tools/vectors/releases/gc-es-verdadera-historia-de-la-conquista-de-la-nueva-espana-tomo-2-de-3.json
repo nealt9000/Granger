@@ -2,13 +2,13 @@
  "id": "gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-2-de-3",
  "kind": "book",
  "fileName": "gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-2-de-3_2026-11-09.gvec",
- "sizeBytes": 242686,
- "sha256": "83cc1d0c4738edfe45f72de7f94e2558d4bf2dc21959da501739fd352e20731f",
+ "sizeBytes": 243486,
+ "sha256": "6733a2d7dccd2732a6e51fc94e2e679e3a84728f21c051477c1b5eb97d1f9c70",
  "count": 825,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "3b81b993faf124033f05286e1d4c593d474b79a40c099a31fed4e269f9bce148",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-2-de-3_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-2-de-3_2026-11-09.gvec"
 }

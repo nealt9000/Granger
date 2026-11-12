@@ -2,13 +2,13 @@
  "id": "ifixit_es_all",
  "kind": "pack",
  "fileName": "ifixit_es_all_2026-03-06.gvec",
- "sizeBytes": 111374070,
- "sha256": "03af7a9b31f20f7d7f13b9c74afb0dd7a83397fb3aca0530ca7700045152dabe",
+ "sizeBytes": 111732326,
+ "sha256": "72aab62485b365a2068a7899d7337ac45a3ea07deeb00905006c6ada7c86d1c2",
  "count": 339340,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "f749b80a04e360e8311d1b39cd85bda8e23bcc40fd3ce9b880b0a5f607fd4e86",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/ifixit_es_all_2026-03-06.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/ifixit_es_all_2026-03-06.gvec"
 }

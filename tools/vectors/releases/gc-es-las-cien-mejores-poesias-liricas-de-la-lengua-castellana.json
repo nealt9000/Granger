@@ -2,13 +2,13 @@
  "id": "gc-es-las-cien-mejores-poesias-liricas-de-la-lengua-castellana",
  "kind": "book",
  "fileName": "gc-es-las-cien-mejores-poesias-liricas-de-la-lengua-castellana_2026-11-09.gvec",
- "sizeBytes": 238276,
- "sha256": "f969b0976ae80f0650e510bbb7d69159f6de3b60de9e93ca8e0c31af9face0bb",
+ "sizeBytes": 239076,
+ "sha256": "50b7b071d40855a62b027ff7de146b1c45f0df705dc11a4f7dc6a5ae239d9bc3",
  "count": 810,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "f690da5703908fb98c0bd62fcec2480415028e2419f649ad0b138cd6605da7d8",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-las-cien-mejores-poesias-liricas-de-la-lengua-castellana_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-las-cien-mejores-poesias-liricas-de-la-lengua-castellana_2026-11-09.gvec"
 }

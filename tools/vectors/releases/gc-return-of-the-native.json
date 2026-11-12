@@ -2,13 +2,13 @@
  "id": "gc-return-of-the-native",
  "kind": "book",
  "fileName": "gc-return-of-the-native_2026-11-09.gvec",
- "sizeBytes": 372340,
- "sha256": "aaa27aad50a107309cb40f82064caa82bf30c7779e87b6fe85dc46a41e0f3423",
+ "sizeBytes": 373668,
+ "sha256": "6e85036ee49e957454d4cdbf609d0740ba600e589505af9bf5f80be0d7b05e86",
  "count": 1266,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "c3d73c9a365f9f5b4a73382bebe79e9c0b363d8489f2e9842ec50e72dff2e80f",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-return-of-the-native_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-return-of-the-native_2026-11-09.gvec"
 }

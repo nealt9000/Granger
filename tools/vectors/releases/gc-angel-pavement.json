@@ -2,13 +2,13 @@
  "id": "gc-angel-pavement",
  "kind": "book",
  "fileName": "gc-angel-pavement_2026-11-09.gvec",
- "sizeBytes": 367342,
- "sha256": "a39d5c3493c1fe481d37158b067f33df8323d4aee628679e5864b244a4c57c6b",
+ "sizeBytes": 368406,
+ "sha256": "0e141351800dd6c4f2f7edd4c5ef1cb98ea40bb0cc8cbaf7b2e79fb9d532a9b0",
  "count": 1249,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "adc65825e49755494cf7b40e58ae64efea2aaa4f9587eb33f3a9b94ade6d8e76",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-angel-pavement_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-angel-pavement_2026-11-09.gvec"
 }

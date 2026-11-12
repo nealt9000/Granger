@@ -2,13 +2,13 @@
  "id": "gc-es-las-helenicas",
  "kind": "book",
  "fileName": "gc-es-las-helenicas_2026-11-09.gvec",
- "sizeBytes": 170362,
- "sha256": "e75fda88b7b6f717988422de6767f39cc96c1e994ccd078da3b8060d096ba394",
+ "sizeBytes": 170898,
+ "sha256": "6339520fa23467157ec5edb28154f806d991ffabaace371c502bfba976954e2a",
  "count": 579,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "4532760721a8ca1fa3f6da3f6c37ec3d202c4481288b038376683807768e38c3",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-las-helenicas_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-las-helenicas_2026-11-09.gvec"
 }

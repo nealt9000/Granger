@@ -2,13 +2,13 @@
  "id": "gc-es-legends-tales-and-poems",
  "kind": "book",
  "fileName": "gc-es-legends-tales-and-poems_2026-11-09.gvec",
- "sizeBytes": 329416,
- "sha256": "aebc1fd8dcf1080588050bc3c70438deb4b3e930da8b194ee0aa05dd7ca73c06",
+ "sizeBytes": 330480,
+ "sha256": "5531808a4894f3ab66f3989c82839052be597158ab307366ba3dadbb71de65c4",
  "count": 1120,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "082e8527cf3b787e615be0130e76ab737a7110ba33364333f88723e94368b305",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-legends-tales-and-poems_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-legends-tales-and-poems_2026-11-09.gvec"
 }

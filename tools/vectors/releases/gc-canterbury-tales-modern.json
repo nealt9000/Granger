@@ -2,13 +2,13 @@
  "id": "gc-canterbury-tales-modern",
  "kind": "book",
  "fileName": "gc-canterbury-tales-modern_2026-11-09.gvec",
- "sizeBytes": 469360,
- "sha256": "af1d82ffde4cb5cf8ea70d800612193b19ceb56b406852a1343e4c9cd6fb128b",
+ "sizeBytes": 470952,
+ "sha256": "3d255b135bb8b94db17492e305f6210c80b2a3eeba3ad4670b0ea849d841224f",
  "count": 1596,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "a3976bdea969fd82409bcb0ccca1f7bff67eccf76c3aa7b86828b63efa5d179f",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-canterbury-tales-modern_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-canterbury-tales-modern_2026-11-09.gvec"
 }

@@ -2,13 +2,13 @@
  "id": "gc-soldiers-pay",
  "kind": "book",
  "fileName": "gc-soldiers-pay_2026-11-09.gvec",
- "sizeBytes": 263266,
- "sha256": "c9477091d3b0c46ccce979ba26788366ee9f7a6f5a48cde8cb3c8151d791e87b",
+ "sizeBytes": 264066,
+ "sha256": "8e9289bfc44f73b10e7f6f0b3a745588f6a59734961751251f549c8e84265cf5",
  "count": 895,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "77f981f46f52d88e08461900f063977cb4cd742ce02222b779e68a688a2fe4c2",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-soldiers-pay_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-soldiers-pay_2026-11-09.gvec"
 }

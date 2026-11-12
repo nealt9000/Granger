@@ -2,13 +2,13 @@
  "id": "gc-room-with-a-view",
  "kind": "book",
  "fileName": "gc-room-with-a-view_2026-11-09.gvec",
- "sizeBytes": 187708,
- "sha256": "b5144f516b39b8e42d53cd9da35378f017d5960e2230e0eb90130a0cf476c966",
+ "sizeBytes": 188244,
+ "sha256": "a3834ead9bf17009bbf306c6ac80afe23dd307c28e830a699282b691311a0be2",
  "count": 638,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "29d02c5642d103fbda38f13ba4e59f19e8a36cc291804a9e80ffcb96e20126e8",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-room-with-a-view_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-room-with-a-view_2026-11-09.gvec"
 }

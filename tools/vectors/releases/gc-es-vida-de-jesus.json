@@ -2,13 +2,13 @@
  "id": "gc-es-vida-de-jesus",
  "kind": "book",
  "fileName": "gc-es-vida-de-jesus_2026-11-09.gvec",
- "sizeBytes": 198292,
- "sha256": "dd1ccc6f079064d857c32224072df4de2001c718b580990243558443daee2935",
+ "sizeBytes": 198828,
+ "sha256": "20a4cb61a1882a56a5e926498130ae898be2335db0719c747ed1d1494e98a5cf",
  "count": 674,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "6f0ce71288bc4aef43094af9447af1dfaaf8bd86b6c14c4655268e3be7fac19d",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-vida-de-jesus_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-vida-de-jesus_2026-11-09.gvec"
 }

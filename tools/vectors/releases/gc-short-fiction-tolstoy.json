@@ -2,13 +2,13 @@
  "id": "gc-short-fiction-tolstoy",
  "kind": "book",
  "fileName": "gc-short-fiction-tolstoy_2026-11-09.gvec",
- "sizeBytes": 1553338,
- "sha256": "a621295a3f7e1177f2829a46842795cf4c2caf48caa41cf5e468bc3b0fa0377b",
+ "sizeBytes": 1558890,
+ "sha256": "7c4881e378aa4d165dd613e44ee76768ba4abdf8abb430a8b27706b807521781",
  "count": 5283,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "768122791cadf8088bf9b4b82ab6aea625b3b0c6ad58971d68378811b65ff72a",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-short-fiction-tolstoy_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-short-fiction-tolstoy_2026-11-09.gvec"
 }

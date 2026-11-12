@@ -2,13 +2,13 @@
  "id": "gc-fathers-and-sons",
  "kind": "book",
  "fileName": "gc-fathers-and-sons_2026-11-09.gvec",
- "sizeBytes": 204760,
- "sha256": "96250bc3f89a1057aa259e0c90225e63b9bf4ff164738330ed62f13fae41b209",
+ "sizeBytes": 205296,
+ "sha256": "64b2a8daceea11821fb0dcb08228cf2336f7eb0997e5c89ec4112b0126cd9b7a",
  "count": 696,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "23f411c84726c72edfd05877e88b72b82f7971d3265ccbdf1a2b000f07981660",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-fathers-and-sons_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-fathers-and-sons_2026-11-09.gvec"
 }

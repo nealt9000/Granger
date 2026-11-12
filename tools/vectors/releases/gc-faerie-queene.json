@@ -2,13 +2,13 @@
  "id": "gc-faerie-queene",
  "kind": "book",
  "fileName": "gc-faerie-queene_2026-11-09.gvec",
- "sizeBytes": 265618,
- "sha256": "4a8b97c105aca0b6d450f5dd802c66c281a0d31a844c42f747c27d7d30b9fa88",
+ "sizeBytes": 266418,
+ "sha256": "4d0777720d9f43214e02e8f2250a436c3eed5d3c7ebb9cc304a4ad6f1991a3b6",
  "count": 903,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "7969ae23455c9cabf08e8a31fb8760570c9d7f51cd816abba71b7be5369c0d67",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-faerie-queene_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-faerie-queene_2026-11-09.gvec"
 }

@@ -2,13 +2,13 @@
  "id": "gc-es-don-quijote",
  "kind": "book",
  "fileName": "gc-es-don-quijote_2026-11-09.gvec",
- "sizeBytes": 781294,
- "sha256": "d1066cc9932a9cb6449d1ee32e935e376f582eb6c634bdd2cd0be1c1be7caee2",
+ "sizeBytes": 783942,
+ "sha256": "dfeecdcfebad16b17da033084f09a8fbb971f1549951c59a2718a2be08433bc4",
  "count": 2657,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "5c7cc14ed414f1825301093efcd5b2bd5e310d198743ea9f202c9b1dfb7d256d",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-don-quijote_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-don-quijote_2026-11-09.gvec"
 }

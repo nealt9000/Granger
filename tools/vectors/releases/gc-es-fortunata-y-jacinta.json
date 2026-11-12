@@ -2,13 +2,13 @@
  "id": "gc-es-fortunata-y-jacinta",
  "kind": "book",
  "fileName": "gc-es-fortunata-y-jacinta_2026-11-09.gvec",
- "sizeBytes": 825982,
- "sha256": "bf4589e3bf2fdbb3d6804a0fdf7984495882a28410915efac6f13e393c1d552a",
+ "sizeBytes": 828894,
+ "sha256": "7df58e7ff1a57ed394527f97c9cc3320c4c8318107bc931c2837c368b88708f2",
  "count": 2809,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "3de3b4b485fb05fc33682b8cc81f7e5d113146aeabf639af722d53705768addd",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-fortunata-y-jacinta_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-fortunata-y-jacinta_2026-11-09.gvec"
 }

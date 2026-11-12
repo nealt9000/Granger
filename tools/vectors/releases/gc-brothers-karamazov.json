@@ -2,13 +2,13 @@
  "id": "gc-brothers-karamazov",
  "kind": "book",
  "fileName": "gc-brothers-karamazov_2026-11-09.gvec",
- "sizeBytes": 709852,
- "sha256": "b80ae1a9af025e476bbfcd8857d8ab28bbb8c3e87ec94ac88cca922f647f785d",
+ "sizeBytes": 712236,
+ "sha256": "1652c9edd0669c9d9f8da77bcf38f0327790837f5a02752c0b0df0671cab037b",
  "count": 2414,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "043b8496a0df981fba977df511aca39a5c74042a2d51659b27caa5ca57b0b21b",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-brothers-karamazov_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-brothers-karamazov_2026-11-09.gvec"
 }

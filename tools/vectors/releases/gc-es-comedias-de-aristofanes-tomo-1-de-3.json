@@ -2,13 +2,13 @@
  "id": "gc-es-comedias-de-aristofanes-tomo-1-de-3",
  "kind": "book",
  "fileName": "gc-es-comedias-de-aristofanes-tomo-1-de-3_2026-11-09.gvec",
- "sizeBytes": 190648,
- "sha256": "7441ae8158b85cd4bbcb2dc626f5d212d187aae8da364ed9192eba58dc31a717",
+ "sizeBytes": 191184,
+ "sha256": "ac2e534e157d47ff4c130a05613c9f060d6fd348c3d5985655010a7e1075b9d8",
  "count": 648,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "bf0e9ae324c8b09a78bdd4acf119fa5906166bd8f89c4c08c1eebdc86ffcdff1",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-comedias-de-aristofanes-tomo-1-de-3_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-comedias-de-aristofanes-tomo-1-de-3_2026-11-09.gvec"
 }

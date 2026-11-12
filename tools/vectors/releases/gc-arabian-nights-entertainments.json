@@ -2,13 +2,13 @@
  "id": "gc-arabian-nights-entertainments",
  "kind": "book",
  "fileName": "gc-arabian-nights-entertainments_2026-11-09.gvec",
- "sizeBytes": 270028,
- "sha256": "897c144d7a84096f79bb97f5cdfa322a70e69ae9d57fcc16ea4252e2d6fb0f02",
+ "sizeBytes": 270828,
+ "sha256": "d018f834022fc7e567f390c8849c9fb0405083e69a94b0df81c7c8f332b88c7b",
  "count": 918,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "68e4fbaa79b32ffaba25613e072de59a24917d263f36681bcbdfeb4e44822fe9",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-arabian-nights-entertainments_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-arabian-nights-entertainments_2026-11-09.gvec"
 }

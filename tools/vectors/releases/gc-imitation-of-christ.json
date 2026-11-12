@@ -2,13 +2,13 @@
  "id": "gc-imitation-of-christ",
  "kind": "book",
  "fileName": "gc-imitation-of-christ_2026-11-09.gvec",
- "sizeBytes": 164776,
- "sha256": "04ce10a59e54fc4da07c4691ff0b64f7f7d26aafc04ef3d4a401648108f7ad0f",
+ "sizeBytes": 165312,
+ "sha256": "ac4348d026f4d0cc5195ffc4807e4600f2501669199b2f4960cc8d06f0b7bcf7",
  "count": 560,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "5eb9a959e13c57aecd5a4d53bd4a55b1231a8a71e2ea864534e4da56de36583a",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-imitation-of-christ_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-imitation-of-christ_2026-11-09.gvec"
 }

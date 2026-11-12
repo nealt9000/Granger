@@ -2,13 +2,13 @@
  "id": "gc-leaves-of-grass",
  "kind": "book",
  "fileName": "gc-leaves-of-grass_2026-11-09.gvec",
- "sizeBytes": 200056,
- "sha256": "adc5eb96b4702158eb0437cc8dd12f9b584630e293396364b37bf318893b8976",
+ "sizeBytes": 200592,
+ "sha256": "3d3be20a69580f289831fb7d2e9abf2af612bc41bfa0b1da68b4d2f6caa28464",
  "count": 680,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "96a323481c2dafb96da9354bddb4c88a410aec12917756452b4f1b9cc2a02afe",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-leaves-of-grass_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-leaves-of-grass_2026-11-09.gvec"
 }

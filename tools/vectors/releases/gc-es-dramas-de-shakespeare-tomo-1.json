@@ -2,13 +2,13 @@
  "id": "gc-es-dramas-de-shakespeare-tomo-1",
  "kind": "book",
  "fileName": "gc-es-dramas-de-shakespeare-tomo-1_2026-11-09.gvec",
- "sizeBytes": 237688,
- "sha256": "39f798ce4e91cb0135da35458c7f92098b3c4b1c0269ffe74137457dcac4d793",
+ "sizeBytes": 238488,
+ "sha256": "242a73e224e62aac760cad6a56b3082669129e428c78350f4c430fd513e4300e",
  "count": 808,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "5d6af9820e6877b19b2a5fae435a3660d2cbaa97591414c60fc2572fe49ddb17",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-dramas-de-shakespeare-tomo-1_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-dramas-de-shakespeare-tomo-1_2026-11-09.gvec"
 }

@@ -2,13 +2,13 @@
  "id": "gc-metamorphoses",
  "kind": "book",
  "fileName": "gc-metamorphoses_2026-11-09.gvec",
- "sizeBytes": 228868,
- "sha256": "13c8776fd694ca3cb85e8e2ed69aab68ff28bc8c3591195a0b687460e90c1fad",
+ "sizeBytes": 229668,
+ "sha256": "f43e0d3d8e5c732a6c17e610fcc6448bca889754d39e018b1d53644da7699fde",
  "count": 778,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "1b8968e6a748d81bec887fe5fe541b4f389d402a9b5e3444f58e6aac97ce05dc",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-metamorphoses_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-metamorphoses_2026-11-09.gvec"
 }

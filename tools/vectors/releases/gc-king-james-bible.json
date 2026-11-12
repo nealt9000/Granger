@@ -2,13 +2,13 @@
  "id": "gc-king-james-bible",
  "kind": "book",
  "fileName": "gc-king-james-bible_2026-11-09.gvec",
- "sizeBytes": 2646430,
- "sha256": "521cd056f79ce756a4d09154f97a583fac31ff0d750b26f6aa9a0a59cd222307",
+ "sizeBytes": 2655942,
+ "sha256": "f5a3cc039ab506afcf359067faa46f97116b47140af510dae77d421e10f12150",
  "count": 9001,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "dc0b0da1d48a8e1bb276d5c5874962c8f378d824e55fea0bd0a7aa36b9ec4356",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-king-james-bible_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-king-james-bible_2026-11-09.gvec"
 }

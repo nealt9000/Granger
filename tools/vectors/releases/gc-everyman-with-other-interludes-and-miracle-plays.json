@@ -2,13 +2,13 @@
  "id": "gc-everyman-with-other-interludes-and-miracle-plays",
  "kind": "book",
  "fileName": "gc-everyman-with-other-interludes-and-miracle-plays_2026-11-09.gvec",
- "sizeBytes": 149194,
- "sha256": "6e05a211a32549ffb8406e4169efc0ef16af4c5ba1f7b45705b72ed4f1eb16e2",
+ "sizeBytes": 149730,
+ "sha256": "7b03572d972dbfa2269c46730a1976760cc9092b87e0166f75961b8325ae0828",
  "count": 507,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "a99adbecafec56586868751b7025eb5038c42fc7490adef7b5594ec2cdb44429",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-everyman-with-other-interludes-and-miracle-plays_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-everyman-with-other-interludes-and-miracle-plays_2026-11-09.gvec"
 }

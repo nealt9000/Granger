@@ -2,13 +2,13 @@
  "id": "gc-adventures-of-huckleberry-finn",
  "kind": "book",
  "fileName": "gc-adventures-of-huckleberry-finn_2026-11-09.gvec",
- "sizeBytes": 238864,
- "sha256": "9ada09367b928bef6c784553cbaa969e9982f848a464bb6e36fee6626558b16d",
+ "sizeBytes": 239664,
+ "sha256": "0dbc7579f66b156fb6bf4e1dbcf72e662e92387e1784e6ec7899673df373f157",
  "count": 812,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "f191f0603e431e613e5b91d825ee3140052fd231a8ef77870bfeb9ff34f867f5",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-adventures-of-huckleberry-finn_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-adventures-of-huckleberry-finn_2026-11-09.gvec"
 }

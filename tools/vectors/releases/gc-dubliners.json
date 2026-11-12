@@ -2,13 +2,13 @@
  "id": "gc-dubliners",
  "kind": "book",
  "fileName": "gc-dubliners_2026-11-09.gvec",
- "sizeBytes": 160660,
- "sha256": "28a6275a89241d836e3708b792a0abfc9ee7b347a40411a586e3f6372b766ea2",
+ "sizeBytes": 161196,
+ "sha256": "cdf84008f71f4cb47822ef210823bddd0dbff4a8023665ccaecb53d54a7479cb",
  "count": 546,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "4c6c808e4343d25c061c8dc06783e80097c6fb2f9d50a51c1812ae87ab57cc5a",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-dubliners_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-dubliners_2026-11-09.gvec"
 }

@@ -2,13 +2,13 @@
  "id": "gc-holy-scriptures-jps-1917",
  "kind": "book",
  "fileName": "gc-holy-scriptures-jps-1917_2026-11-09.gvec",
- "sizeBytes": 578728,
- "sha256": "1bb4a12e195eedbed9342e72e0109cfeee47ae9d742ce640fdc6f84141a78b7d",
+ "sizeBytes": 580584,
+ "sha256": "b43d50b8399ed05ee587df507f0e3d3928000cc7ddee8439d491f551ac557c3b",
  "count": 1968,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "aabbb26d43cef7cc8d910c72ce3c21fd5bedb5c7928b118486fd6b29f2346aa2",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-holy-scriptures-jps-1917_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-holy-scriptures-jps-1917_2026-11-09.gvec"
 }

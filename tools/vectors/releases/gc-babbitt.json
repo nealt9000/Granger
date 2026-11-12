@@ -2,13 +2,13 @@
  "id": "gc-babbitt",
  "kind": "book",
  "fileName": "gc-babbitt_2026-11-09.gvec",
- "sizeBytes": 311776,
- "sha256": "2ac1b1d1616154cf0678c8e862e1fd6c3b751a434a2d41d89037c995292efc30",
+ "sizeBytes": 312840,
+ "sha256": "15c8931146cfdcc1b235500eb405ae137108d42edf8b63ccd045363f272fa175",
  "count": 1060,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "75de853faf28c80527e4f238153280df5aca3f010be65dcbbd366b817c4bd3fa",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-babbitt_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-babbitt_2026-11-09.gvec"
 }

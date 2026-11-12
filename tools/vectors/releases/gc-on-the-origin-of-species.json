@@ -2,13 +2,13 @@
  "id": "gc-on-the-origin-of-species",
  "kind": "book",
  "fileName": "gc-on-the-origin-of-species_2026-11-09.gvec",
- "sizeBytes": 218284,
- "sha256": "63b4b3c7828a702eac130e814b21a10287d725f4cdbf859ba5f3b5b2a2b65d56",
+ "sizeBytes": 218820,
+ "sha256": "6995af4ffbc06b3c3c8f4a8d46500710519820f61c6ca8dc9da8ffe8333cd69a",
  "count": 742,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "accbddfb675129f84a79360669e19d8c279d42ed62c9369afe9970763a670957",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-on-the-origin-of-species_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-on-the-origin-of-species_2026-11-09.gvec"
 }

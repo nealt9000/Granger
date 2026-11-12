@@ -2,13 +2,13 @@
  "id": "gc-es-la-gaviota",
  "kind": "book",
  "fileName": "gc-es-la-gaviota_2026-11-09.gvec",
- "sizeBytes": 248860,
- "sha256": "384441a5cea1d720db9935b0348f7800bc2be8d8c5ef5a11780a22746d38761b",
+ "sizeBytes": 249660,
+ "sha256": "8e474bb7a8ff504a7d24779529b626cecd7c39932e9e48c1e0531e07f522285b",
  "count": 846,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "fba9035b0fe59bb0a22530ff5daa980af6a83b7930a0a76d01fb7d5528356df8",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-la-gaviota_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-la-gaviota_2026-11-09.gvec"
 }

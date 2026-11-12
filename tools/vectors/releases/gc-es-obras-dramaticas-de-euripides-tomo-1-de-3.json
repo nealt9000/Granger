@@ -2,13 +2,13 @@
  "id": "gc-es-obras-dramaticas-de-euripides-tomo-1-de-3",
  "kind": "book",
  "fileName": "gc-es-obras-dramaticas-de-euripides-tomo-1-de-3_2026-11-09.gvec",
- "sizeBytes": 252682,
- "sha256": "9c6e02b397dd5220715e82448adecf46102e598043443f997a66caaa533498ff",
+ "sizeBytes": 253482,
+ "sha256": "0f680a8a5a6f5fc27f3b63b0501da14279889459a00ce84f10625cc2dc5657bf",
  "count": 859,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "ed715282de6bef4dea2d44f675c4bf4ee132e4bf5158d903dd14b6c4024e0307",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-obras-dramaticas-de-euripides-tomo-1-de-3_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-obras-dramaticas-de-euripides-tomo-1-de-3_2026-11-09.gvec"
 }

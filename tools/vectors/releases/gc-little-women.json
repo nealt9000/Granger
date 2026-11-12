@@ -2,13 +2,13 @@
  "id": "gc-little-women",
  "kind": "book",
  "fileName": "gc-little-women_2026-11-09.gvec",
- "sizeBytes": 456718,
- "sha256": "13272dcfb57fcbb2a214bc9d276f95669dd8080adfed6431d2d525e37abcdf73",
+ "sizeBytes": 458310,
+ "sha256": "fc1bac09e31a518cde20f721f489742e0f3654c4c58190406440f059f33aa704",
  "count": 1553,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "dec3ebc6f9332063a4919cafa7a481f8b76c6cd9969f263729e75c3b24436d5e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-little-women_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-little-women_2026-11-09.gvec"
 }

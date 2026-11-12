@@ -2,13 +2,13 @@
  "id": "gc-apocrypha-deuterocanonical-books",
  "kind": "book",
  "fileName": "gc-apocrypha-deuterocanonical-books_2026-11-09.gvec",
- "sizeBytes": 483472,
- "sha256": "f847e4cb01c20c86dce37324f6c18aac50c48f7720c1bf8e86e81bf9a63af196",
+ "sizeBytes": 485064,
+ "sha256": "81ca396b38d0a5426887662f549b6e40c509bce9c574f6932c566dcc7cbd1f31",
  "count": 1644,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "5dce3a94ee7e94923a6e04e574a9c85cd7e83c8a785c17ad5929223558e33369",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-apocrypha-deuterocanonical-books_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-apocrypha-deuterocanonical-books_2026-11-09.gvec"
 }

@@ -2,13 +2,13 @@
  "id": "gc-es-el-amigo-manso",
  "kind": "book",
  "fileName": "gc-es-el-amigo-manso_2026-11-09.gvec",
- "sizeBytes": 203584,
- "sha256": "fde768d50d25c40d270f37c56d695984d5abeffdc7091b81311d50bd215b273a",
+ "sizeBytes": 204120,
+ "sha256": "fe9ee1ca4e234175b94972688463b1b5f63025ed2fb8db57473d153541b30a10",
  "count": 692,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "66576101aac853d028411f89e2cf5868271c317c28abcb3978bf5a88eee17d40",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-el-amigo-manso_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-el-amigo-manso_2026-11-09.gvec"
 }

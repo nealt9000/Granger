@@ -2,13 +2,13 @@
  "id": "gc-critique-of-pure-reason",
  "kind": "book",
  "fileName": "gc-critique-of-pure-reason_2026-11-09.gvec",
- "sizeBytes": 330592,
- "sha256": "183154576b09f6d246105242fe487b0c30c9a7f498ee52c072b7dec035f3ab9f",
+ "sizeBytes": 331656,
+ "sha256": "cf1f6b0c05a82c97e1112574dce49990c2524b775113a0650c157c3bd7ffb5f9",
  "count": 1124,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "fe81b747d076da99ed44df8ccbe0ad67e417f31ca1a9da3b62eab86371e0984d",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-critique-of-pure-reason_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-critique-of-pure-reason_2026-11-09.gvec"
 }

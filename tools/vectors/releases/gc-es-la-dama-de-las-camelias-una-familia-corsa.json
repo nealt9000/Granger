@@ -2,13 +2,13 @@
  "id": "gc-es-la-dama-de-las-camelias-una-familia-corsa",
  "kind": "book",
  "fileName": "gc-es-la-dama-de-las-camelias-una-familia-corsa_2026-11-09.gvec",
- "sizeBytes": 282376,
- "sha256": "de4025483d5a6a4c29f8f49ec4eb1ce716c78757af112f5fd8ccbfc7e6d42910",
+ "sizeBytes": 283176,
+ "sha256": "fb8f2278cd56ed8a1f9275c5fd88bf2d2415cfff0139e2428c0ac8dafadb14a7",
  "count": 960,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "6b4e4fa1875540922bf52656edc0f1c281d71907dd0467b5ad03c5fef55f9164",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-la-dama-de-las-camelias-una-familia-corsa_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-la-dama-de-las-camelias-una-familia-corsa_2026-11-09.gvec"
 }

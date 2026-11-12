@@ -2,13 +2,13 @@
  "id": "gc-wealth-of-nations",
  "kind": "book",
  "fileName": "gc-wealth-of-nations_2026-11-09.gvec",
- "sizeBytes": 573730,
- "sha256": "c4a1a2e34b5839cbcef17a4220014b4b9ffc719ed888f34daa5c59d01a97512f",
+ "sizeBytes": 575586,
+ "sha256": "4a83d62aed853b3136ca6424a582730e0b7086f7e47d881739ad6b7d33401a50",
  "count": 1951,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "2de79ab4c6f4d999251989fe05162c315e8583a90c5d5d2e974b2a96ca0588ee",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-wealth-of-nations_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-wealth-of-nations_2026-11-09.gvec"
 }

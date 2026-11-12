@@ -2,13 +2,13 @@
  "id": "gc-es-obras-selectas-de-sor-juana-ines-de-la-cruz",
  "kind": "book",
  "fileName": "gc-es-obras-selectas-de-sor-juana-ines-de-la-cruz_2026-11-09.gvec",
- "sizeBytes": 190354,
- "sha256": "8e7fd916fa4fc461fcb513c9b623a40971ff28589ba3b2f5bad6149c8018cf1a",
+ "sizeBytes": 190890,
+ "sha256": "e3c78b12f8bb148299918940a1f9ccfb3d219e575ba663584c2380b6cf1f48a1",
  "count": 647,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "e1e13b0e17e9a46bb91b0f638a1a8e110b7f22bffa7ff703524d36d0fe1f8c9c",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-obras-selectas-de-sor-juana-ines-de-la-cruz_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-obras-selectas-de-sor-juana-ines-de-la-cruz_2026-11-09.gvec"
 }

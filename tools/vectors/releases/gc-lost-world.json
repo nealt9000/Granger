@@ -2,13 +2,13 @@
  "id": "gc-lost-world",
  "kind": "book",
  "fileName": "gc-lost-world_2026-11-09.gvec",
- "sizeBytes": 156838,
- "sha256": "02ad6c9f1bbc4d5f6897c111abe16f7e58160e6c6096217700a3f568b04416df",
+ "sizeBytes": 157374,
+ "sha256": "9ef50d3886c6af420e15297bbdd4cce32e8fbdb9980147bd033101c85a083eff",
  "count": 533,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "a3029d3fbd20fe40c6c95b86287bc850d2929bb944f1eb7408bfcfcac59245f0",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-lost-world_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-lost-world_2026-11-09.gvec"
 }

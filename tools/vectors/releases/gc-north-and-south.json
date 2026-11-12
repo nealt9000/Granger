@@ -2,13 +2,13 @@
  "id": "gc-north-and-south",
  "kind": "book",
  "fileName": "gc-north-and-south_2026-11-09.gvec",
- "sizeBytes": 384982,
- "sha256": "9e339cb4f2ed0ebbc82475b1db8583e568e97fea597b2f8f2b72cfd12ac5f363",
+ "sizeBytes": 386310,
+ "sha256": "9dee25d1ec36e2f943f7e6bd827863e17b49d3a69aa4e5478173f96f48ac9063",
  "count": 1309,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "73657cd8a439c9e9941b66f9d892d51df9dfb47c5c3edfd655e6c3fefceeb13f",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-north-and-south_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-north-and-south_2026-11-09.gvec"
 }

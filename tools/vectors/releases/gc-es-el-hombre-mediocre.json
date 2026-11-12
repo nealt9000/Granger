@@ -2,13 +2,13 @@
  "id": "gc-es-el-hombre-mediocre",
  "kind": "book",
  "fileName": "gc-es-el-hombre-mediocre_2026-11-09.gvec",
- "sizeBytes": 161248,
- "sha256": "acb88e9aee20cd542c9093a93259223fc01d226ce77d6048c657dd430bd5617d",
+ "sizeBytes": 161784,
+ "sha256": "61503a9d10dba3278981da99470192e40e708a257c956c848045eecc2c0233cb",
  "count": 548,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "e48e97651a6cf800b41f6b084c48dde28605427542d252b339ee9fab00191001",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-el-hombre-mediocre_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-el-hombre-mediocre_2026-11-09.gvec"
 }

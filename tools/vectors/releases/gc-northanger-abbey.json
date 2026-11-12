@@ -2,13 +2,13 @@
  "id": "gc-northanger-abbey",
  "kind": "book",
  "fileName": "gc-northanger-abbey_2026-11-09.gvec",
- "sizeBytes": 150958,
- "sha256": "f3443a80fd618bce997f34b2a4e120884604e406c5a49ab1d98260d6c9eaaaf0",
+ "sizeBytes": 151494,
+ "sha256": "203019dff9f1dbad364d02ea085a3810f32c94b3bab907f1e900445a47bd9ac3",
  "count": 513,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "51fb50d829461517e5cd2b139baf1a4ae2c0a68b1104ad48796fa49225614de1",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-northanger-abbey_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-northanger-abbey_2026-11-09.gvec"
 }

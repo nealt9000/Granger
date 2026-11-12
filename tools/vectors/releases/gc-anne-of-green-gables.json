@@ -2,13 +2,13 @@
  "id": "gc-anne-of-green-gables",
  "kind": "book",
  "fileName": "gc-anne-of-green-gables_2026-11-09.gvec",
- "sizeBytes": 243862,
- "sha256": "b498e0d72b02e4d7abd0ccd8ffc64e534d92235c5939563a0f71c4bf267e8e8b",
+ "sizeBytes": 244662,
+ "sha256": "729f01857bdbd8d2803ff27db42f08e2bf6fe883a24f0cce11a3af6799890835",
  "count": 829,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "7edada606b16ecaf3754d368b88fbb92925c74f94ddb6f7a3fa27ecdcfde4737",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-anne-of-green-gables_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-anne-of-green-gables_2026-11-09.gvec"
 }

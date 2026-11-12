@@ -2,13 +2,13 @@
  "id": "gc-essays-cotton",
  "kind": "book",
  "fileName": "gc-essays-cotton_2026-11-09.gvec",
- "sizeBytes": 797170,
- "sha256": "0d5509b3b2d490804388d778fed39b4fbbfbeafd92734556cf83ce92c640ba20",
+ "sizeBytes": 799818,
+ "sha256": "c4d556231a643f6d33906d160c6a2eabd19a0e16c40596f10ba263ab5a66a9ad",
  "count": 2711,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "eb1164391189d6be71bb970a5632581b5ed0c0e4131aa00772c45da9f8cb6693",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-essays-cotton_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-essays-cotton_2026-11-09.gvec"
 }

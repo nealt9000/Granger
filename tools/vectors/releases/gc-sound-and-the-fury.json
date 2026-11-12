@@ -2,13 +2,13 @@
  "id": "gc-sound-and-the-fury",
  "kind": "book",
  "fileName": "gc-sound-and-the-fury_2026-11-09.gvec",
- "sizeBytes": 238864,
- "sha256": "53f5730d9db1bb824b7fe13a81e4cb718fcdd6fa5a534e3c91ef00c9745de97d",
+ "sizeBytes": 239664,
+ "sha256": "eb50ea0c635f946ee2833883f9bead87c48bfa7d66da314ce03903c6c7bf1407",
  "count": 812,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "bd24de3b9580f57ff9c86822aec6d78ed0bca699bf0bce1c94fef6d4cfce9642",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-sound-and-the-fury_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-sound-and-the-fury_2026-11-09.gvec"
 }

@@ -12,6 +12,13 @@ def test_truncate_renormalizes():
     assert np.allclose(v, [[0.6, 0.8]])
 
 
+def test_nan_rows_quantize_to_zero_with_a_finite_scale():
+    v = np.array([[np.nan] * 4, [3.0, 4.0, 0.0, 0.0]], dtype=np.float32)
+    q, scale = gvec.quantize(gvec.truncate(v, 4))
+    assert np.isfinite(scale).all()
+    assert not q[0].any()
+
+
 def test_int8_scores_track_float_scores():
     rng = np.random.default_rng(1)
     d = gvec.truncate(rng.normal(size=(500, 256)), 256)

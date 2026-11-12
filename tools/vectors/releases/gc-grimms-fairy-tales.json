@@ -2,13 +2,13 @@
  "id": "gc-grimms-fairy-tales",
  "kind": "book",
  "fileName": "gc-grimms-fairy-tales_2026-11-09.gvec",
- "sizeBytes": 174478,
- "sha256": "4640279e2d46def217a16e23786c78d87d5df61951e34384fd3e4014e910da80",
+ "sizeBytes": 175014,
+ "sha256": "f9be1e385ef686fad6762db525431d1df702963ac484da02ed8ee28caf9265ba",
  "count": 593,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "61572743ca0fb0a9913fe830b656e543bd87c642b0d6a40406babddc489297c0",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-grimms-fairy-tales_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-grimms-fairy-tales_2026-11-09.gvec"
 }

@@ -2,13 +2,13 @@
  "id": "gc-vile-bodies",
  "kind": "book",
  "fileName": "gc-vile-bodies_2026-11-09.gvec",
- "sizeBytes": 169186,
- "sha256": "84ce6ef132ec9383fb0f9ffee73ad9b1dfe1e7aa63e6a4a77716e81cee847be7",
+ "sizeBytes": 169722,
+ "sha256": "45d66b4c20179d24cd48a652399ca94e2088f2212d4cb9b59b43d8bc8b66d8a2",
  "count": 575,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "e277a6eb6acd782d09aa30aed395f657bc457e6950438af8e8f8223838fbbec9",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-vile-bodies_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-vile-bodies_2026-11-09.gvec"
 }

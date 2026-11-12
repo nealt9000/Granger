@@ -2,13 +2,13 @@
  "id": "gc-king-solomon-s-mines",
  "kind": "book",
  "fileName": "gc-king-solomon-s-mines_2026-11-09.gvec",
- "sizeBytes": 190060,
- "sha256": "a82272718e13030c0d031a685d5d37bc601d65fd4840b42ad497d258aabe72ef",
+ "sizeBytes": 190596,
+ "sha256": "615b6db0af1eac3cf3f0d018cb2c80dabcd0e5e74dcf07d433294bdbad531d9a",
  "count": 646,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "3e3a4fb26cdf95963220ec1b7dd044b6c6c4320e86027e3ae5cad894562cdb4f",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-king-solomon-s-mines_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-king-solomon-s-mines_2026-11-09.gvec"
 }

@@ -2,13 +2,13 @@
  "id": "gc-tale-of-genji-volume-4",
  "kind": "book",
  "fileName": "gc-tale-of-genji-volume-4_2026-11-09.gvec",
- "sizeBytes": 157132,
- "sha256": "b3ce500d0fb64b286b2f32a985200cb09d6ebce2ca82507a2a673688a51e7f49",
+ "sizeBytes": 157668,
+ "sha256": "8e63465fff783a7749375c824389af7db36fb069356a75413ba26ed1b8bbf7f8",
  "count": 534,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "af2d3f37c5274eb13623247fcb630cfa3be26759ad97e91a0046278b2bae2440",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-tale-of-genji-volume-4_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-tale-of-genji-volume-4_2026-11-09.gvec"
 }

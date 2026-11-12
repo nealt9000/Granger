@@ -2,13 +2,13 @@
  "id": "gc-es-la-odisea",
  "kind": "book",
  "fileName": "gc-es-la-odisea_2026-11-09.gvec",
- "sizeBytes": 326476,
- "sha256": "f6903486230a68bb433012bbb1e271054766c35a3dfa6f08bf7fe5c0108462d7",
+ "sizeBytes": 327540,
+ "sha256": "4757791ad84d4df023b00adba075e843e0c8c85bfe0a3e34bed4c5df142da1b9",
  "count": 1110,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "4801c271d30307e6daceea40b8b485aea532924e4ab268a86bea0d5c789d9a6f",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-la-odisea_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-la-odisea_2026-11-09.gvec"
 }

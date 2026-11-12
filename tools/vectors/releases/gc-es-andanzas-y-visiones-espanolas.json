@@ -2,13 +2,13 @@
  "id": "gc-es-andanzas-y-visiones-espanolas",
  "kind": "book",
  "fileName": "gc-es-andanzas-y-visiones-espanolas_2026-11-09.gvec",
- "sizeBytes": 170362,
- "sha256": "107eb658c68c63778803c6d0c235acd7f3a6eb12c62b118352d0401aaea82e19",
+ "sizeBytes": 170898,
+ "sha256": "6e3fdb00d000d507a53311e1f8fc0adedb5aee73af0e1f325130151d3562024b",
  "count": 579,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "a904dab3600a19d0e6ae0ff8ff61e2163c4b75e59da8e2e6d3a3cf9eb644cb7c",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-andanzas-y-visiones-espanolas_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-andanzas-y-visiones-espanolas_2026-11-09.gvec"
 }

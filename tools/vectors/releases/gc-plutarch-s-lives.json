@@ -2,13 +2,13 @@
  "id": "gc-plutarch-s-lives",
  "kind": "book",
  "fileName": "gc-plutarch-s-lives_2026-11-09.gvec",
- "sizeBytes": 905362,
- "sha256": "f273075e8e2a62bc66e3cef5ff7ebaf63a83be7148c6227e3212f4413ee44d52",
+ "sizeBytes": 908538,
+ "sha256": "de28e636b52a5099e915a7448c44971e2d8e4ef6e61be3412fb45899af48892d",
  "count": 3079,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "0443eeb9b35e7ea4312a7ca17b8b3cba18d8bb0f2664435563b767411d99a26e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-plutarch-s-lives_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-plutarch-s-lives_2026-11-09.gvec"
 }

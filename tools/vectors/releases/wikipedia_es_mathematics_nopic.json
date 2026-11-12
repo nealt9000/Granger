@@ -2,13 +2,13 @@
  "id": "wikipedia_es_mathematics_nopic",
  "kind": "pack",
  "fileName": "wikipedia_es_mathematics_nopic_2026-10-14.gvec",
- "sizeBytes": 17813759,
- "sha256": "29da0cd6e8cbd50308aad0d171326f282f1ce38c362c4b3a55ac743158b52e27",
+ "sizeBytes": 17876599,
+ "sha256": "704e3929623e380cf80f33518c73b1db1a7d495b67f666751648f9c179ac79f2",
  "count": 59623,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "2f47a05625b9f45ffa01591b449e2cb20760bb4838b7040f1dd1d5eb16831eb9",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/wikipedia_es_mathematics_nopic_2026-10-14.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/wikipedia_es_mathematics_nopic_2026-10-14.gvec"
 }

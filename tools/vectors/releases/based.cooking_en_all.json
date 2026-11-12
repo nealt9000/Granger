@@ -2,13 +2,13 @@
  "id": "based.cooking_en_all",
  "kind": "pack",
  "fileName": "based.cooking_en_all_2026-08-11.gvec",
- "sizeBytes": 476155,
- "sha256": "cfc095a083b02b15d01678fe786c9755144f2d09fbd72bf4c9a27aa9b1a1f85e",
+ "sizeBytes": 477747,
+ "sha256": "ea4fd6652c5ed86a404625785f8d8cb29050ab89d66813cb89430200f93a84d9",
  "count": 1545,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "52ca9fedc61da2fc846f71b1f74cf7fb8e96193fe9f671bb4632bcaf1181ce72",
- "url": null
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/based.cooking_en_all_2026-08-11.gvec"
 }

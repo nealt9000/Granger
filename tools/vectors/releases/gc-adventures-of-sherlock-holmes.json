@@ -2,13 +2,13 @@
  "id": "gc-adventures-of-sherlock-holmes",
  "kind": "book",
  "fileName": "gc-adventures-of-sherlock-holmes_2026-11-09.gvec",
- "sizeBytes": 243568,
- "sha256": "cfc06247cb030592104b382b4c3375e16e0efe26c3c40976112c56cafa52dbb2",
+ "sizeBytes": 244368,
+ "sha256": "07cb436d6cafd17436aaf4ff85e6cab76ec2eccf6b3cb740f717c84071fdfde8",
  "count": 828,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "1873b5e3e90fe7680edaa01e11ecf614cf9857a42ef607cb4328b4c469ef0b8c",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-adventures-of-sherlock-holmes_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-adventures-of-sherlock-holmes_2026-11-09.gvec"
 }

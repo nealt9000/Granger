@@ -2,13 +2,13 @@
  "id": "gc-oliver-twist",
  "kind": "book",
  "fileName": "gc-oliver-twist_2026-11-09.gvec",
- "sizeBytes": 434080,
- "sha256": "ed5eada85174e7b97c0964a2ba7f8c00621e58b6284ff2532ea75cb7a84005b1",
+ "sizeBytes": 435408,
+ "sha256": "a945e76b129080bb4d3a4119d49537533d985b3e26ec9e44ea02fdd299427563",
  "count": 1476,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "a7d8253cde5676a1e3139acaf201b8b0046e50206f157fdedc2e9a413f8ff37e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-oliver-twist_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-oliver-twist_2026-11-09.gvec"
 }

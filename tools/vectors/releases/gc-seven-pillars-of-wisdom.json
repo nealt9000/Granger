@@ -2,13 +2,13 @@
  "id": "gc-seven-pillars-of-wisdom",
  "kind": "book",
  "fileName": "gc-seven-pillars-of-wisdom_2026-11-09.gvec",
- "sizeBytes": 624298,
- "sha256": "d86a5619f3b2aec3fa9df72ddf0a7bbb37ceacd06ecab6d5849c8275edcd9ced",
+ "sizeBytes": 626418,
+ "sha256": "c96cf02aac541231946a1cef25d274371e27d22a4ca886058d17647aa3759ca9",
  "count": 2123,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "5e04f291695452b4682cd8f04e23a51dcec91d88cd72c390ce84dac9e2d02f75",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-seven-pillars-of-wisdom_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-seven-pillars-of-wisdom_2026-11-09.gvec"
 }

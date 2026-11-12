@@ -2,13 +2,13 @@
  "id": "gc-way-we-live-now",
  "kind": "book",
  "fileName": "gc-way-we-live-now_2026-11-09.gvec",
- "sizeBytes": 657520,
- "sha256": "0670e7c447df0c5fb3787bf8097292df54cc9ce93d8fa1dc68312e8b04af895f",
+ "sizeBytes": 659640,
+ "sha256": "4cc80fcbb22f21bb4a4c00ffbd0b60ef23fd6c5345ef0ba0ff8a47d6895ef547",
  "count": 2236,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "1189e2a1aadf1b4ee1091cce3ab8e1bd40e122c42f8bd3b0382828750d36e611",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-way-we-live-now_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-way-we-live-now_2026-11-09.gvec"
 }

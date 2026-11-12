@@ -2,13 +2,13 @@
  "id": "gc-douay-rheims-bible",
  "kind": "book",
  "fileName": "gc-douay-rheims-bible_2026-11-09.gvec",
- "sizeBytes": 3330568,
- "sha256": "0ad1ab5dc0c08fc22d4cf6cc742943ac75c8f298c46c0fcf605bbe346c53d1d8",
+ "sizeBytes": 3342456,
+ "sha256": "5a7ef6b97200681724394cfbae4a3acb08a9407d381f9eb19fdb4c1763bb60d1",
  "count": 11328,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "6b519dcc76734d5892523efca5effaf475dee610b8a8501ad20da9dcfdb9ea2c",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-douay-rheims-bible_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-douay-rheims-bible_2026-11-09.gvec"
 }

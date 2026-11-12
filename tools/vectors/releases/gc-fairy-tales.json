@@ -2,13 +2,13 @@
  "id": "gc-fairy-tales",
  "kind": "book",
  "fileName": "gc-fairy-tales_2026-11-09.gvec",
- "sizeBytes": 736312,
- "sha256": "a83122137921329a2632a0ea4010c90fa54cf9cfaceb532a8e49a0b78203b873",
+ "sizeBytes": 738960,
+ "sha256": "5140c1eff3c63c23982dd235b8247d20c1a6d5acaeba6a337da95b964f1196cd",
  "count": 2504,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "93555ff6d1254d0f543f05823e3aad044c64669b431214d0e396ea7d75bf331a",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-fairy-tales_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-fairy-tales_2026-11-09.gvec"
 }

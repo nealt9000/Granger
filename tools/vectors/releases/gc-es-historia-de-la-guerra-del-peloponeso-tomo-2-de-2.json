@@ -2,13 +2,13 @@
  "id": "gc-es-historia-de-la-guerra-del-peloponeso-tomo-2-de-2",
  "kind": "book",
  "fileName": "gc-es-historia-de-la-guerra-del-peloponeso-tomo-2-de-2_2026-11-09.gvec",
- "sizeBytes": 272380,
- "sha256": "d596c1c7c608d1df33c0e60758765737cf8d6d993cbd90467303b032bbc94f13",
+ "sizeBytes": 273180,
+ "sha256": "14c811fa7cc302ef5b82b658211818720bd0efca0fc6457ca176b3e6d5ab19f6",
  "count": 926,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "276cc4413ce5f3720f56a190339511f7be103589d3388910c9053d755a12660d",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-historia-de-la-guerra-del-peloponeso-tomo-2-de-2_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-historia-de-la-guerra-del-peloponeso-tomo-2-de-2_2026-11-09.gvec"
 }

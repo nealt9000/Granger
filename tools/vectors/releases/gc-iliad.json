@@ -2,13 +2,13 @@
  "id": "gc-iliad",
  "kind": "book",
  "fileName": "gc-iliad_2026-11-09.gvec",
- "sizeBytes": 268264,
- "sha256": "4160be304957c1fe925a4de253da83f2574fc768c604f6edb8f30a89f3667638",
+ "sizeBytes": 269064,
+ "sha256": "fafeb3b2f0bd18b8679c732c4f35048df4e5b6ed1beb6adee2a3c4dffc6c5cf8",
  "count": 912,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "536f74cec2ecb7fe7d377a250f95385cc0b1b15d2aa3d98c494c6684ef8bbea1",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-iliad_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-iliad_2026-11-09.gvec"
 }

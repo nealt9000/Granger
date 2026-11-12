@@ -2,13 +2,13 @@
  "id": "gc-les-miserables",
  "kind": "book",
  "fileName": "gc-les-miserables_2026-11-09.gvec",
- "sizeBytes": 1330192,
- "sha256": "e06908daefad6a4d93b57746ea9a5077e648ee2cb357077e9276e11fb74dbc96",
+ "sizeBytes": 1334952,
+ "sha256": "4cfcd13a8697b24ecb8aae6254c93c904e2ea4b02578e8f9bba499aadb5ee61f",
  "count": 4524,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "8eaaca52eea11cf820ee805f7407f0f8fc161e2929caae5b1f37ea2e6cab7356",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-les-miserables_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-les-miserables_2026-11-09.gvec"
 }

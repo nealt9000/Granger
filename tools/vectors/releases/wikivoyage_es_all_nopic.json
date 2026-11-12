@@ -2,13 +2,13 @@
  "id": "wikivoyage_es_all_nopic",
  "kind": "pack",
  "fileName": "wikivoyage_es_all_nopic_2026-09-17.gvec",
- "sizeBytes": 21734580,
- "sha256": "d44960f4a9ff7df272109fdf7a1926dbe95e40021fdabb4590d9dd6549b21323",
+ "sizeBytes": 21813524,
+ "sha256": "f546e0c0efbd3ba9fdecea277917a2408ee748cd4e80d474534c3cb05ff5ba8a",
  "count": 74903,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "6f39fcea4dcb213c8a42302e548349d0f835330b74c9e7253daa4821611a289c",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/wikivoyage_es_all_nopic_2026-09-17.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/wikivoyage_es_all_nopic_2026-09-17.gvec"
 }

@@ -2,13 +2,13 @@
  "id": "gc-three-musketeers",
  "kind": "book",
  "fileName": "gc-three-musketeers_2026-11-09.gvec",
- "sizeBytes": 693094,
- "sha256": "a8e09b06757e573f948386526ef255d286037bf38e9d657c1d9dd8e3f5cc06a1",
+ "sizeBytes": 695478,
+ "sha256": "ccffb625a39f9b00b028d1cb8aad18bab96e3f42fa28d90bfc5fb48b07f7dfe1",
  "count": 2357,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "fba370ee58e406c24d83afca7110718c4c40853512710d297566bcc05712e3f3",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-three-musketeers_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-three-musketeers_2026-11-09.gvec"
 }

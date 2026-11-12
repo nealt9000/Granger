@@ -2,13 +2,13 @@
  "id": "gc-koran-rodwell",
  "kind": "book",
  "fileName": "gc-koran-rodwell_2026-11-09.gvec",
- "sizeBytes": 623416,
- "sha256": "ecab9044b4d29a32188d967c8d3532679867fa39a870bb4cd01ef242064fd824",
+ "sizeBytes": 625536,
+ "sha256": "52c4ccad6b244649b1f4268913075ebc6562cc256f40df56732906be02deea32",
  "count": 2120,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "28324bc5893966c077bb0f556e15f2142f17a1b4aa54ea3d949e2902c82d353d",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-koran-rodwell_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-koran-rodwell_2026-11-09.gvec"
 }

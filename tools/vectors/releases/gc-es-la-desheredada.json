@@ -2,13 +2,13 @@
  "id": "gc-es-la-desheredada",
  "kind": "book",
  "fileName": "gc-es-la-desheredada_2026-11-09.gvec",
- "sizeBytes": 317362,
- "sha256": "c6984ed10c4f18c26d610963bb85e91e6ba8be21a310fc763a7b008e992f7033",
+ "sizeBytes": 318426,
+ "sha256": "a7c9394fce71daa667e351c5ecaef27b351eae1189549bb2f6b992b4518f6f37",
  "count": 1079,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "a5ba53257e86ed44d866c7a8c16deb2c5983e6747c2aac6b48a09f3c1a1aa042",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-la-desheredada_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-la-desheredada_2026-11-09.gvec"
 }

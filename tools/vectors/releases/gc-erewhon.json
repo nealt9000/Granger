@@ -2,13 +2,13 @@
  "id": "gc-erewhon",
  "kind": "book",
  "fileName": "gc-erewhon_2026-11-09.gvec",
- "sizeBytes": 160954,
- "sha256": "a32895ccfc050b6d9c4036c1f3ed07a2b91d56fe558a6d488f952e5884b8979a",
+ "sizeBytes": 161490,
+ "sha256": "621b23d6400bdc80b14d42ac030033fe7c81b3525e17e4a031a758bdee294a96",
  "count": 547,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "fddd4e62c050c5887ff3593272042904e4508294a62251561fce974acf3dded1",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-erewhon_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-erewhon_2026-11-09.gvec"
 }

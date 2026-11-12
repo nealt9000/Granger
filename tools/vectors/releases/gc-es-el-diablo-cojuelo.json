@@ -2,13 +2,13 @@
  "id": "gc-es-el-diablo-cojuelo",
  "kind": "book",
  "fileName": "gc-es-el-diablo-cojuelo_2026-11-09.gvec",
- "sizeBytes": 187414,
- "sha256": "254ee902626f2a11db9e664b6b30eaa48a0eff6894424b061d6d01537a39c32a",
+ "sizeBytes": 187950,
+ "sha256": "7d8f4dad6651ff5db751a5e7bd56c7707205f309a38ca55d4af6a5a13f9760a0",
  "count": 637,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "3606ba95246be6f9ecfc534113aef6626b81b20ea15c99c5229f8e4e8dccdb36",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-el-diablo-cojuelo_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-el-diablo-cojuelo_2026-11-09.gvec"
 }

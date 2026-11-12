@@ -2,13 +2,13 @@
  "id": "gc-sons-and-lovers",
  "kind": "book",
  "fileName": "gc-sons-and-lovers_2026-11-09.gvec",
- "sizeBytes": 457306,
- "sha256": "a018115b60e2987db8d7564a40b4a6a8236f4e1f4d8fdd640e728ee649061ee6",
+ "sizeBytes": 458898,
+ "sha256": "c2624d5e523997738b363983ef9f086e858f7ce496750637bfa43b9f84511ffa",
  "count": 1555,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "e3a23b4d4eeef733d2a814460cfaff78472fe992a9dd66c93d72946f0b50ea76",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-sons-and-lovers_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-sons-and-lovers_2026-11-09.gvec"
 }

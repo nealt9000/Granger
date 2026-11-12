@@ -2,13 +2,13 @@
  "id": "gc-connecticut-yankee-in-king-arthur-s-court",
  "kind": "book",
  "fileName": "gc-connecticut-yankee-in-king-arthur-s-court_2026-11-09.gvec",
- "sizeBytes": 239158,
- "sha256": "5612179e6e8babdb331eec2335f9cf14a90b2f5e382e247306b3821729fa1704",
+ "sizeBytes": 239958,
+ "sha256": "e82253bf1833ed890749495a98a4ef0221bca2daa13bdd4fc1ce4ec3c5a1fcee",
  "count": 813,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "18e5c4d2008bedb3add821d21b5b7364f4fdc36b75b5cf8826e183441dc7e546",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-connecticut-yankee-in-king-arthur-s-court_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-connecticut-yankee-in-king-arthur-s-court_2026-11-09.gvec"
 }

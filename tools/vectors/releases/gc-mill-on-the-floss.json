@@ -2,13 +2,13 @@
  "id": "gc-mill-on-the-floss",
  "kind": "book",
  "fileName": "gc-mill-on-the-floss_2026-11-09.gvec",
- "sizeBytes": 437314,
- "sha256": "1a6f7d4fa1538bce59516dc9122cd16d4e36a8b720eefacc16f1153578e26b7f",
+ "sizeBytes": 438642,
+ "sha256": "d93c785f86f8a3c2d1cbe4e6a99452cebfdcdbf66a50cf80c2f75fe7bbc3f2f4",
  "count": 1487,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "28fa1cc1f2c1a523d6df3912502f133f8dffe0d405f275df594e71fb6d1ce4b9",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-mill-on-the-floss_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-mill-on-the-floss_2026-11-09.gvec"
 }

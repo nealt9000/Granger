@@ -2,13 +2,13 @@
  "id": "gc-all-quiet-on-the-western-front",
  "kind": "book",
  "fileName": "gc-all-quiet-on-the-western-front_2026-11-09.gvec",
- "sizeBytes": 172420,
- "sha256": "140fe782d0a09ec0cb56d672f6422ffcf97f2542fb9f254ac292771146fd8a0a",
+ "sizeBytes": 172956,
+ "sha256": "b4da6c305b23159e4066837d3c4c31bedea844d91e3b42c209fb6ead54e4f754",
  "count": 586,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "856156e582e720a5d3b96899f89a3e0c45d8fc44425bd95c612c3abac4d604de",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-all-quiet-on-the-western-front_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-all-quiet-on-the-western-front_2026-11-09.gvec"
 }

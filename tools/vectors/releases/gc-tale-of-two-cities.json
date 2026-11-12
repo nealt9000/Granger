@@ -2,13 +2,13 @@
  "id": "gc-tale-of-two-cities",
  "kind": "book",
  "fileName": "gc-tale-of-two-cities_2026-11-09.gvec",
- "sizeBytes": 351760,
- "sha256": "01e8e3b492d34f015d80f6fab69fce0ddc5682b100b0984968420cc48c3ba041",
+ "sizeBytes": 352824,
+ "sha256": "5e1ea189bbc89ca1f0cefbdc6742b2cf1b423a9c7af373ba052e17c255eb9f33",
  "count": 1196,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "01ce5995fccdcccc7ba35ef337033e2a502f1831df5d841c5c2590f076a44a22",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-tale-of-two-cities_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-tale-of-two-cities_2026-11-09.gvec"
 }

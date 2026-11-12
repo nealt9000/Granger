@@ -2,13 +2,13 @@
  "id": "gc-history-of-herodotus-volume-2",
  "kind": "book",
  "fileName": "gc-history-of-herodotus-volume-2_2026-11-09.gvec",
- "sizeBytes": 266794,
- "sha256": "a9f3351021557237a56f8e3f7053eb29d6835cd896d0584fc1e8d1463e248600",
+ "sizeBytes": 267594,
+ "sha256": "8f382dbbea5407350320c8238486ed6b12c76d727bf593a004ef59b9e0c2194b",
  "count": 907,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "1b15d444e94bd4337deb2b116b523dd1eec67398edea5fc91fe85399bf658a79",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-history-of-herodotus-volume-2_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-history-of-herodotus-volume-2_2026-11-09.gvec"
 }

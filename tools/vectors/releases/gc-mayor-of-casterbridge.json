@@ -2,13 +2,13 @@
  "id": "gc-mayor-of-casterbridge",
  "kind": "book",
  "fileName": "gc-mayor-of-casterbridge_2026-11-09.gvec",
- "sizeBytes": 307072,
- "sha256": "ccb26affef3fab16fe3beea6f3cc1037dff85013968a1f2c97eb4ef468623cce",
+ "sizeBytes": 308136,
+ "sha256": "88f6954d17838aa91e53d08c1dbef86fab8e43c4f78362308cb5cca9ee09f5d2",
  "count": 1044,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "5a874b5ea3ca719b2951d7b4888afd8af62c40d92da900e1b8d8b78e9b4209bb",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-mayor-of-casterbridge_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-mayor-of-casterbridge_2026-11-09.gvec"
 }

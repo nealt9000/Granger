@@ -2,13 +2,13 @@
  "id": "gc-aeneid",
  "kind": "book",
  "fileName": "gc-aeneid_2026-11-09.gvec",
- "sizeBytes": 155368,
- "sha256": "860488eedb88982ee849b19a2777394c62b4a539623ac9aff279517cde24c7f9",
+ "sizeBytes": 155904,
+ "sha256": "10ab4ed1a250fb335b072e70d484beb47f2442cabb8f798c7af6a7f3eb5323d8",
  "count": 528,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "714035218306b543953709b3a3f073445e2f6ce3d56f6b4df7417d5a3c705fb8",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-aeneid_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-aeneid_2026-11-09.gvec"
 }

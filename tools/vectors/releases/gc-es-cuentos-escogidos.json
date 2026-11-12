@@ -2,13 +2,13 @@
  "id": "gc-es-cuentos-escogidos",
  "kind": "book",
  "fileName": "gc-es-cuentos-escogidos_2026-11-09.gvec",
- "sizeBytes": 263560,
- "sha256": "8c121a8e83a832059877a1efd853c3fe379d1a31da492b70fa1c60953b740e1f",
+ "sizeBytes": 264360,
+ "sha256": "f4ab62cd1aac243257cb5823a5655e08ccc25f481c012249116dcdb71cc37dce",
  "count": 896,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "2f0eb0eb420d1d7c17c78af25ccd4639a7f493bd16d04b229ea47d8806b654b2",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-cuentos-escogidos_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-cuentos-escogidos_2026-11-09.gvec"
 }

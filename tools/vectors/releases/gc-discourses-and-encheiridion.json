@@ -2,13 +2,13 @@
  "id": "gc-discourses-and-encheiridion",
  "kind": "book",
  "fileName": "gc-discourses-and-encheiridion_2026-11-09.gvec",
- "sizeBytes": 250624,
- "sha256": "bbc772459701cfe6c98ecde599a0221cd4c103ae372e8d6bfb48fedfcd7b9b20",
+ "sizeBytes": 251424,
+ "sha256": "4e9c101e705398fc892b66de016e9e2dab6041c4a8fb78ecb6fac52ad8bb360e",
  "count": 852,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "d4573b6382b07225bcff8fc8fec5e15e8f7592344bb5fa3f5c1156352fc31c65",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-discourses-and-encheiridion_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-discourses-and-encheiridion_2026-11-09.gvec"
 }

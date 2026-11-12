@@ -2,13 +2,13 @@
  "id": "gc-es-pequeneces",
  "kind": "book",
  "fileName": "gc-es-pequeneces_2026-11-09.gvec",
- "sizeBytes": 364402,
- "sha256": "defffaa52c45630bb19db310ddd04b9d886139427bd015f14854f531544c8928",
+ "sizeBytes": 365466,
+ "sha256": "f5a2f56beb399c13fd8dfaff7b2a33b0470dc1beb458af429a8fb5787a10754c",
  "count": 1239,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "1cff8b902215368222bcdc34d43a340dbbbeb474ed96c5bc9c360d394fdb784a",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-pequeneces_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-pequeneces_2026-11-09.gvec"
 }

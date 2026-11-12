@@ -2,13 +2,13 @@
  "id": "gc-sister-carrie",
  "kind": "book",
  "fileName": "gc-sister-carrie_2026-11-09.gvec",
- "sizeBytes": 435256,
- "sha256": "bdf545d3e52d9ff8a4ff297a132d7c24a45eab022c2cc58b0ba72325c6fa98c1",
+ "sizeBytes": 436584,
+ "sha256": "2af47857916cbed3a211898f9eee5c654225c3049d7f769850c63a759413459c",
  "count": 1480,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "a69fcdb2b98e3fe617e73f8fc9ca4b1e64430e6731206c742ccd0d402c4749fc",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-sister-carrie_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-sister-carrie_2026-11-09.gvec"
 }

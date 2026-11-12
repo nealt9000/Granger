@@ -2,13 +2,13 @@
  "id": "gc-es-el-asno-de-oro",
  "kind": "book",
  "fileName": "gc-es-el-asno-de-oro_2026-11-09.gvec",
- "sizeBytes": 230338,
- "sha256": "6544b93dc8f6cb03e1e46c1ecf72b092e75413c7fc22bf6ef7ef7b489ebc70d0",
+ "sizeBytes": 231138,
+ "sha256": "6bf9209934f16b99ebeb23f38449ca4add423ee6a01febd97b40b2b359ac188d",
  "count": 783,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "3c48c3dc51aac8dd4cfe693a070d5689b6c7a226500a959006f4441a1bd7396e",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-el-asno-de-oro_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-el-asno-de-oro_2026-11-09.gvec"
 }

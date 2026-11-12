@@ -2,13 +2,13 @@
  "id": "gc-es-la-isla-del-tesoro",
  "kind": "book",
  "fileName": "gc-es-la-isla-del-tesoro_2026-11-09.gvec",
- "sizeBytes": 218872,
- "sha256": "81f5e1166f16a7d52fe27b94349cef7c88d54281e7287725f7ecb16c247035db",
+ "sizeBytes": 219408,
+ "sha256": "b7b763a70f1939d94b25b64c1a71afccded42065adb9b234d4f3ca8099a3661e",
  "count": 744,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "9bbcf92b1af92fc3451464776ddd06d2f132f4f5d7bd87867f50aa9d8c3accec",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-la-isla-del-tesoro_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-la-isla-del-tesoro_2026-11-09.gvec"
 }

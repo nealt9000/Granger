@@ -2,13 +2,13 @@
  "id": "gc-es-el-paraiso-perdido",
  "kind": "book",
  "fileName": "gc-es-el-paraiso-perdido_2026-11-09.gvec",
- "sizeBytes": 259150,
- "sha256": "5fa1883735a718c24a2920dc45f109405cea37e0c4dd52407290582ff6d7de1f",
+ "sizeBytes": 259950,
+ "sha256": "699bf243b7105478055d0995791e62a3ef2cbbdf475cfc30e01a9995324e957c",
  "count": 881,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "b30278d64b5a528c2e8dc4f88f2f2176b2b74208b7f6bc8695f9a81a2f241384",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-el-paraiso-perdido_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-el-paraiso-perdido_2026-11-09.gvec"
 }

@@ -2,13 +2,13 @@
  "id": "gc-koran-sale",
  "kind": "book",
  "fileName": "gc-koran-sale_2026-11-09.gvec",
- "sizeBytes": 800404,
- "sha256": "67a293153118b0aebd61d6a4a3b4b47b9ab66dfdcef81237273c8280b4117ee9",
+ "sizeBytes": 803052,
+ "sha256": "33c4d7974ce083c80682281e566e5dadc60d5a547db4148d44f855675ca5f186",
  "count": 2722,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "7db93c852df0844a6d7cde692ebf10742f2a5383fd115d0e6f2fb30f6f1de48a",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-koran-sale_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-koran-sale_2026-11-09.gvec"
 }

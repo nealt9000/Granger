@@ -2,13 +2,13 @@
  "id": "gc-works-of-edgar-allan-poe-volume-4",
  "kind": "book",
  "fileName": "gc-works-of-edgar-allan-poe-volume-4_2026-11-09.gvec",
- "sizeBytes": 172126,
- "sha256": "aab37ed95fad6766c1918a79ea31d2343148d04c0e013fcb8869edd9797ca70b",
+ "sizeBytes": 172662,
+ "sha256": "7ebbdc771972129cb28ffe32f480663da9dbbe3b3ad5ef9a3ae92b245d580c80",
  "count": 585,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "5bc7f528cd11ea0cd8c8468891db54e2c8eab9ae63a3283c8bb5ede09009c26f",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-works-of-edgar-allan-poe-volume-4_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-works-of-edgar-allan-poe-volume-4_2026-11-09.gvec"
 }

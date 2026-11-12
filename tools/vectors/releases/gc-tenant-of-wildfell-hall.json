@@ -2,13 +2,13 @@
  "id": "gc-tenant-of-wildfell-hall",
  "kind": "book",
  "fileName": "gc-tenant-of-wildfell-hall_2026-11-09.gvec",
- "sizeBytes": 375280,
- "sha256": "13177b897bb8d4a213cd39858eb9655bbc2101f97447b529df84bf76f14476ed",
+ "sizeBytes": 376608,
+ "sha256": "303db7b20deb5d176044a1d09e734becba5c9e7fae15fab8b0d4d6c9f238db08",
  "count": 1276,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "f88bf15050d27a7628817da6ce1f3d44911ba922b0f01d571bcd5d361cb84c28",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-tenant-of-wildfell-hall_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-tenant-of-wildfell-hall_2026-11-09.gvec"
 }

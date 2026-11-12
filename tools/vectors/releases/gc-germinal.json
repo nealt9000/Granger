@@ -2,13 +2,13 @@
  "id": "gc-germinal",
  "kind": "book",
  "fileName": "gc-germinal_2026-11-09.gvec",
- "sizeBytes": 389686,
- "sha256": "4f3d0f97e227c8bd8c6663ce12d27835257b215f6d7a63458433b7bb54ecd766",
+ "sizeBytes": 391014,
+ "sha256": "92efec7fd8147ec82b0376dbbd776de4538b07aa8e5343b788b4c076a67d2990",
  "count": 1325,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "65f37d37e701386204237e99334e0d58dbd0a79793521cdc39cf3e37d0f97c26",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-germinal_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-germinal_2026-11-09.gvec"
 }

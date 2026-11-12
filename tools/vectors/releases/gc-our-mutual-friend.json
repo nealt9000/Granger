@@ -2,13 +2,13 @@
  "id": "gc-our-mutual-friend",
  "kind": "book",
  "fileName": "gc-our-mutual-friend_2026-11-09.gvec",
- "sizeBytes": 857440,
- "sha256": "e39a9f7169d860bdd9361fa878692eaae7a7f058ddbe2955baf8d9796992561f",
+ "sizeBytes": 860352,
+ "sha256": "13d8a50410654374a1e4cf62f8c9d2793cd8776e50c4d5da4aa3a90aeadc0d06",
  "count": 2916,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "8006298c870924ee2c806d0223e4be50a9e4cfa4324644a302bfe35bad56ee92",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-our-mutual-friend_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-our-mutual-friend_2026-11-09.gvec"
 }

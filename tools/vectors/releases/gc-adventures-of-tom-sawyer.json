@@ -2,13 +2,13 @@
  "id": "gc-adventures-of-tom-sawyer",
  "kind": "book",
  "fileName": "gc-adventures-of-tom-sawyer_2026-11-09.gvec",
- "sizeBytes": 173596,
- "sha256": "fa0b0180c19099ac3aa9ada6394dbaff72b8e2388add1959c81e42e5db8f0686",
+ "sizeBytes": 174132,
+ "sha256": "8d8a3333c151a640bab6931cd6487a8e5447036e7372ca4ebebbed75a07fd15f",
  "count": 590,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "8656109b5a3897ed14553c70e37a5bf476dbb8a6283b61b1f3de61dc99d92cdf",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-adventures-of-tom-sawyer_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-adventures-of-tom-sawyer_2026-11-09.gvec"
 }

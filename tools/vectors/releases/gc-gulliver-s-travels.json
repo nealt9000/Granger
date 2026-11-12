@@ -2,13 +2,13 @@
  "id": "gc-gulliver-s-travels",
  "kind": "book",
  "fileName": "gc-gulliver-s-travels_2026-11-09.gvec",
- "sizeBytes": 155368,
- "sha256": "f5e0c9b25d62f8728bdf564e76f5bc273ebf96d9f680c25201746f78baad6226",
+ "sizeBytes": 155904,
+ "sha256": "bdbd1ac3e152d07a9bf95e07a23199d254be4efb6bc7b63f4fd78d357d4b64df",
  "count": 528,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "90a635fae629f4b46e0d4f06dd5fdfa429cbf56cd7ce1635eb36bdd0f0ac7c67",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-gulliver-s-travels_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-gulliver-s-travels_2026-11-09.gvec"
 }

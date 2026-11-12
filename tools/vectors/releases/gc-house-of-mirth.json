@@ -2,13 +2,13 @@
  "id": "gc-house-of-mirth",
  "kind": "book",
  "fileName": "gc-house-of-mirth_2026-11-09.gvec",
- "sizeBytes": 275320,
- "sha256": "56715c97fbc1717b31a34e1851eabf77860124ef296ac20ab303c9d26d0427df",
+ "sizeBytes": 276120,
+ "sha256": "536ae23cd50e4904c3c9f10cfa25d3a37b2e2e172e1f0763366329b86bbf4b32",
  "count": 936,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "5585b7e7cc27752fe10fbca93161b77fd0776d0138e23cf378b112f3a1ab9bc7",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-house-of-mirth_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-house-of-mirth_2026-11-09.gvec"
 }

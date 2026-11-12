@@ -2,13 +2,13 @@
  "id": "gc-as-i-lay-dying",
  "kind": "book",
  "fileName": "gc-as-i-lay-dying_2026-11-09.gvec",
- "sizeBytes": 149782,
- "sha256": "144eab8dc5041e53285c74f55f0933a4aa929a1bd64446e3d7404713576709fd",
+ "sizeBytes": 150318,
+ "sha256": "91638411f90dd0ef6d652f3c7a62523105f7e679197279c8cae670c013e8d0a8",
  "count": 509,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "36ab69174f8eb3d6a3ee0ccca60733aa8f1a177c3b10bdcb5dc75453a72a659c",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-as-i-lay-dying_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-as-i-lay-dying_2026-11-09.gvec"
 }

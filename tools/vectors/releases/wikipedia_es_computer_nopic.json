@@ -2,13 +2,13 @@
  "id": "wikipedia_es_computer_nopic",
  "kind": "pack",
  "fileName": "wikipedia_es_computer_nopic_2026-10-15.gvec",
- "sizeBytes": 24624954,
- "sha256": "fc24b466939a76ce9f2b45338a87d6a3ea41c9caea28ab3fafc4e0d8270c4db0",
+ "sizeBytes": 24713402,
+ "sha256": "e1545b62a8f9bd4b46ea76cc5de18d4e36626920dd63dc873cadb41c90f9aa1a",
  "count": 83771,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "8a351aec8e4ee16a2d8dc98159194cf12b9c3b5c03ba69f2f1af8daa342308ea",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/wikipedia_es_computer_nopic_2026-10-15.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/wikipedia_es_computer_nopic_2026-10-15.gvec"
 }

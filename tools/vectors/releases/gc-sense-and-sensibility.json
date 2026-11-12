@@ -2,13 +2,13 @@
  "id": "gc-sense-and-sensibility",
  "kind": "book",
  "fileName": "gc-sense-and-sensibility_2026-11-09.gvec",
- "sizeBytes": 263854,
- "sha256": "1bb008b7af5a338ef4edcda4a7605fccce0bf96d94ef4d3c0ee9f56acff86e2a",
+ "sizeBytes": 264654,
+ "sha256": "b65834a7d05a0abf01b7cbca26f122eca706789dc630b75fb93f4719084c6112",
  "count": 897,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "f4ae2dc312b96c3216748bbc14458ca1397c8e65793134d2534f938476d71189",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-sense-and-sensibility_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-sense-and-sensibility_2026-11-09.gvec"
 }

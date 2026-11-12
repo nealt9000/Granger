@@ -2,13 +2,13 @@
  "id": "reverseengineering.stackexchange.com_en_all",
  "kind": "pack",
  "fileName": "reverseengineering.stackexchange.com_en_all_2026-10-20.gvec",
- "sizeBytes": 13825553,
- "sha256": "c773786e468a4aaee458d51a30b8ffca353c6919015b2ac8c44c32a9ed9ae94d",
+ "sizeBytes": 13868857,
+ "sha256": "c22c9e8a33c9db91c775e8ce1724a9513912fe6c31dbf9ac6049feaa759a932a",
  "count": 41094,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "0b0e9f06e800603217af632f865f1062ecae4a7f4ce4537459ca325623c58b41",
- "url": null
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/reverseengineering.stackexchange.com_en_all_2026-10-20.gvec"
 }

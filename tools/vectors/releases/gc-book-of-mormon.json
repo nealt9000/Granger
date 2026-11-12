@@ -2,13 +2,13 @@
  "id": "gc-book-of-mormon",
  "kind": "book",
  "fileName": "gc-book-of-mormon_2026-11-09.gvec",
- "sizeBytes": 811576,
- "sha256": "452c55f1bedbc204861ee995198d129b13a68cda17e9b75323c8a9013e0db9a7",
+ "sizeBytes": 814488,
+ "sha256": "99cd1245f70743c68ffd43fe25e1d931e4df67565e494771fa918f7c0843487f",
  "count": 2760,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "5703361467903f88cf440d7e522d65932eeeb165c1a7f1cdb5c430e1c7dec69c",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-book-of-mormon_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-book-of-mormon_2026-11-09.gvec"
 }

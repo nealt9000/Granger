@@ -2,13 +2,13 @@
  "id": "wikipedia_es_chemistry_nopic",
  "kind": "pack",
  "fileName": "wikipedia_es_chemistry_nopic_2026-10-15.gvec",
- "sizeBytes": 7692716,
- "sha256": "97ee8568f08e9ce60cefe95036c4fe0604d5b7d8f20ac3fd2d634e6b46e60019",
+ "sizeBytes": 7719916,
+ "sha256": "5b79f611359f94dcb72b5be646a0f6f1ba8d096d719ce07148e59a4566d3e980",
  "count": 25932,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "7d937dc1b5493e3e0307e8d11478506a000b8b4488e9add46e9655be8494147b",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-01/wikipedia_es_chemistry_nopic_2026-10-15.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/wikipedia_es_chemistry_nopic_2026-10-15.gvec"
 }

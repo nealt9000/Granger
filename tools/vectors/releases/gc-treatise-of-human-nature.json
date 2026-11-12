@@ -2,13 +2,13 @@
  "id": "gc-treatise-of-human-nature",
  "kind": "book",
  "fileName": "gc-treatise-of-human-nature_2026-11-09.gvec",
- "sizeBytes": 364108,
- "sha256": "e8d224c43d4efc16eeb2c36eccfb1fabb220481e83c2a9ff879f82aacdb72798",
+ "sizeBytes": 365172,
+ "sha256": "7a97e8b2ce847bafd5540662656d263740ac165574b699e1d7e00628133811cc",
  "count": 1238,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "c1cd150418bf5c9064a4415b2a337d0a4e2866c39f6b74ae125a7af877a64897",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-treatise-of-human-nature_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-treatise-of-human-nature_2026-11-09.gvec"
 }

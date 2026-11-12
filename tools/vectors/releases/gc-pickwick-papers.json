@@ -2,13 +2,13 @@
  "id": "gc-pickwick-papers",
  "kind": "book",
  "fileName": "gc-pickwick-papers_2026-11-09.gvec",
- "sizeBytes": 799228,
- "sha256": "7428b431226568647d29688dd224448fb253b44b22c75f31858dfa86bd50c365",
+ "sizeBytes": 801876,
+ "sha256": "5b3fd376e77fe217e1d59ac7ebc7b94d2caeb45c1c69a53121419e9a9efadc4c",
  "count": 2718,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "86c71f3b696becdc0bb9fc2512c513b3044df7e55847b27eb18e11abc59c72ae",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-pickwick-papers_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-pickwick-papers_2026-11-09.gvec"
 }

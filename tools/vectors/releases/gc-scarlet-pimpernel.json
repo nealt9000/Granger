@@ -2,13 +2,13 @@
  "id": "gc-scarlet-pimpernel",
  "kind": "book",
  "fileName": "gc-scarlet-pimpernel_2026-11-09.gvec",
- "sizeBytes": 240628,
- "sha256": "6d2c9d4552797e76ed03dc0b17424ccf6db5e3eab74ce5317cb795c60bbbcd41",
+ "sizeBytes": 241428,
+ "sha256": "fa99b88c4fcd5ee9ce299c4027b9c27843dfe7b57a5d29786056de7a0335bcdc",
  "count": 818,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "7108f0a5a7c9eb461099d19ab8f36d43df7479faec52ffe86156a022a49956bd",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-scarlet-pimpernel_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-scarlet-pimpernel_2026-11-09.gvec"
 }

@@ -2,13 +2,13 @@
  "id": "gc-great-expectations",
  "kind": "book",
  "fileName": "gc-great-expectations_2026-11-09.gvec",
- "sizeBytes": 450838,
- "sha256": "a2877cc3b728ca6d88568783325bbe67315ef98c3b24b56dc131c9437078091e",
+ "sizeBytes": 452430,
+ "sha256": "6805099b396698a661d6baad8fb610417aaa856f540412c8b7b432103eb23e90",
  "count": 1533,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "5f078a8bb5b1f3ae25637c013d081f15be10cf3386c6d159f3bace325b618613",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-2026-11-09/gc-great-expectations_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-great-expectations_2026-11-09.gvec"
 }

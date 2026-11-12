@@ -2,13 +2,13 @@
  "id": "gc-es-los-nueve-libros-de-la-historia-tomo-1-de-2",
  "kind": "book",
  "fileName": "gc-es-los-nueve-libros-de-la-historia-tomo-1-de-2_2026-11-09.gvec",
- "sizeBytes": 292666,
- "sha256": "e0eb9d98652932d722615e63cab0d578ea48b96860e8273b6f18963e10e4c71d",
+ "sizeBytes": 293466,
+ "sha256": "960b748dab326798df8e65ce079fd3b99fee5b5f55f13b043ecd32fedac100fc",
  "count": 995,
  "dims": 256,
  "dtype": "int8",
  "chunkerVersion": 1,
  "embedderSha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
  "sourceSha256": "3645e6aa8939a9e7452be891f2be42df698d1a369c7614218c86216755e1fdd9",
- "url": "https://github.com/nealt9000/Granger/releases/download/vectors-es-2026-11-09/gc-es-los-nueve-libros-de-la-historia-tomo-1-de-2_2026-11-09.gvec"
+ "url": "https://github.com/nealt9000/Granger/releases/download/vectors-v2-2026-11-12/gc-es-los-nueve-libros-de-la-historia-tomo-1-de-2_2026-11-09.gvec"
 }
