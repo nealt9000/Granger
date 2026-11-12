@@ -80,7 +80,7 @@
 - **A no-go** (precision under 90%) falls back to a curated list: only QIDs named in the manifest's people plus places with rank ≥ a high floor. That's narrower but safe.
 - Findings and numbers recorded here.
 - **Result (2026-11-12): GO.** Code in `tools/links/` (ner → link → rules); working files on the X10 (`granger-ll/ll1/`).
-  - **Neal's grades, 200 random Light links (seed 20261112):** P&P 40/40, W&P 79/80, DQ 80/80 → 199/200 (99.5%). The one W&P "wrong" is Moscow → Moscow (the city; likely a slip).
+  - **Neal's grades, 200 random Light links (seed 20261112):** P&P 40/40, W&P 79/80, DQ 80/80 → 199/200 (99.5%). The one W&P "wrong", Moscow → Moscow (the city), was a slip; Neal corrected it to right.
   - **Corrected for known errors:** Neal graded the Spanish loosely. Four of the DQ links are wrong by my own check: Lanzarote (Lancelot, not the island), Arcadia → Arcadia Regional Unit, Teodora → Theodora, Santa Lucía → Saint Lucia. That makes DQ 76/80 (95%), right on the bar. English clears it easily (P&P 100%, W&P 99–100%).
   - **What changed from the plan:**
     - Step 3 is dropped. EmbeddingGemma similarity didn't separate wrong links from right ones (wrong 0.46–0.71, right median ~0.59).
