@@ -79,6 +79,27 @@
 - **The bar:** **≥ 95% precision at Light** on 200 hand-graded links (Neal grades a sample in a simple HTML page), and density Neal likes when reading a chapter on the Pixel.
 - **A no-go** (precision under 90%) falls back to a curated list: only QIDs named in the manifest's people plus places with rank ≥ a high floor. That's narrower but safe.
 - Findings and numbers recorded here.
+- **Result (2026-11-12): GO.** Code in `tools/links/` (ner → link → rules); working files on the X10 (`granger-ll/ll1/`).
+  - **Neal's grades, 200 random Light links (seed 20261112):** P&P 40/40, W&P 79/80, DQ 80/80 → 199/200 (99.5%). The one W&P "wrong" is Moscow → Moscow (the city; likely a slip).
+  - **Corrected for known errors:** Neal graded the Spanish loosely. Four of the DQ links are wrong by my own check: Lanzarote (Lancelot, not the island), Arcadia → Arcadia Regional Unit, Teodora → Theodora, Santa Lucía → Saint Lucia. That makes DQ 76/80 (95%), right on the bar. English clears it easily (P&P 100%, W&P 99–100%).
+  - **What changed from the plan:**
+    - Step 3 is dropped. EmbeddingGemma similarity didn't separate wrong links from right ones (wrong 0.46–0.71, right median ~0.59).
+    - Choosing comes from rules drawn from the book instead (`link.py`):
+      - Social titles mark the cast.
+      - A word the book also prints in lowercase is a common word.
+      - A name the book mostly tags as a person isn't a place.
+      - People and works must agree by name: the label, the surname, or a longer form.
+      - Nobody born after year − 10 is linked, and no non-place founded after the book.
+      - Spanish accents must match exactly.
+      - Fictional items are never linked, nor the book itself.
+    - Light uses the English *all* index at sitelinks ≥ 40, not Top-only, which would miss Kutuzov, Bagration and Smolensk.
+  - **Density at Light:** P&P 0.9, W&P 2.0, DQ 1.3 links per 1,000 words (110 / 1,064 / 481 links; 19 / 167 / 169 items). How that feels is judged on the Pixel (Task 10).
+  - **Fixes before Task 7, all in Spanish:**
+    - Arthurian names: Lanzarote, Ginebra.
+    - Bare place-like names that are saints or people in context: Santa Lucía, Teodora.
+    - Arcadia: prefer the classical region over the modern regional unit.
+  - **English residue:** a surname redirect to a famous person, e.g. "Count Tolstóy" → Leo Tolstoy, and Glinka.
+  - The book's year must come from the Classic's Wikidata QID. The manifest's `published` is the translation year.
 
 ### LL1 · Task 7: `.glink` for the Classics (Python, tested)
 - `tools/links/build.py` runs the spike's pipeline over a Classics pack and writes `.glink` (Decision 4).
