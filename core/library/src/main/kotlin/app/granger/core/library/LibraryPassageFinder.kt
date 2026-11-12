@@ -3,6 +3,7 @@ package app.granger.core.library
 import app.granger.core.books.PdfText
 import app.granger.core.research.HtmlPassages
 import app.granger.core.research.Keywords
+import app.granger.core.text.Spellings
 import app.granger.core.research.LexicalScore
 import app.granger.core.research.Passage
 import app.granger.core.research.PassageFinder
@@ -199,7 +200,10 @@ class LibraryPassageFinder(
                         val packStart = clock()
                         val archive = library.archive(pack.id) ?: return@async emptyList()
                         // Research never shows a snippet, and libzim builds each one from the article.
-                        words.flatMapIndexed { k, word -> archive.searchWithoutSnippets(word, perPack).mapIndexed { rank, hit -> Triple(k, rank, hit) } }
+                        // Each spelling of a keyword ("grey horse", "gray horse") is searched; its hits count as that keyword's.
+                        words.flatMapIndexed { k, word ->
+                            Spellings.forms(word).flatMap { form -> archive.searchWithoutSnippets(form, perPack).mapIndexed { rank, hit -> Triple(k, rank, hit) } }
+                        }
                             .groupBy { it.third.path }.values
                             .filterNot { same -> twins(pack, same.first().third.path) }
                             .map { same ->

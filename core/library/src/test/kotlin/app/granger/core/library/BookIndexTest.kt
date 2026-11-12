@@ -326,6 +326,22 @@ class BookIndexTest {
         assertThat(index.search("NEAR hello*")).isEmpty()
     }
 
+    @Test fun eitherSpellingOfAWordFindsTheOther() = test {
+        val clouds = add("clouds", "<p>Pas. For the twelve minae, which you received when you were buying the dapple-gray horse.</p>",
+            title = "The Clouds")
+        index.indexPending()
+
+        val hit = index.search("the dapple-grey horse").single()
+        assertThat(hit.bookId).isEqualTo(clouds.id)
+        assertThat(hit.snippet).contains("<b>dapple-gray</b>")
+        assertThat(hit.quote!!.highlight).isEqualTo("the dapple-gray horse")
+        assertThat(index.search("dapple grey").map { it.bookId }).containsExactly(clouds.id)
+        assertThat(index.quoted("buying the dapple grey horse").map { it.book.id }).containsExactly(clouds.id)
+        assertThat(index.passages(listOf("grey horse")).map { it.book.id }).containsExactly(clouds.id)
+        // A word with no other spelling still has to be there.
+        assertThat(index.search("dapple grey mare")).isEmpty()
+    }
+
     @Test fun passagesMatchAnyKeyword() = test {
         add("moby", "<p>Call me Ishmael.</p>", "<p>The whale surfaced at dawn.</p>")
         index.indexPending()

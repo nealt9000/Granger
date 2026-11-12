@@ -438,3 +438,23 @@ and confirmed on a new held-out set. 2 → accepted: known items @3 and English 
   right first 26/29.
 - **For a later round:** a warm phone's first step could stay under 2.5 s if the dense pass probed fewer lists when the
   last query was slow (fewer than the 1,024 probed now), at some cost in recall.
+
+## After release: British and American spellings (runs `sv-base-sp`, `sv-1-*`, emulator, 2026-11-12)
+
+Neal's walkthrough: "the dapple-grey horse" missed The Clouds, whose translation prints "dapple-gray". Search matched
+spellings exactly, and the Classics mix British and American editions. `Spellings` (core:text) is a curated table of
+~600 British/American pairs (-our/-or, -ise/-ize, doubled l, -re/-er, ae/oe medical words, grey/gray, plough/plow…;
+a list, not suffix rules, so "promise" stays). Book search, the quote step, book passages, article full text, Best
+matches' keyword step and its lexical ranker run each spelling of a query on its own, the best score kept; Search
+rows bold either spelling. Queries without such a word run as before.
+
+New set `sets/spelling-quotes.json` (`tools/eval/spelling_quotes.py`): 75 lines from English Classics with one word
+swapped to its other spelling (as printed, lower-case, short).
+
+| | Before (`sv-base-sp`) | After (`sv-1-sp`) |
+|---|---|---|
+| Spelling lines: book in Books @3 | 3/75 (4%) | **75/75 (100%)** |
+| Spelling lines: book in Best @5 | 12/75 (16%) | **75/75 (100%)** |
+| Quotes (`sv-1-q`): Best @5 | 98% | 98% |
+| Dev questions (`sv-1-dev`): Best @5 / @10 | 102 / 115 | 102 / 115 |
+| Best p50 / p95 (dev) | 1.19 / 1.54 s | 1.15 / 1.53 s |
