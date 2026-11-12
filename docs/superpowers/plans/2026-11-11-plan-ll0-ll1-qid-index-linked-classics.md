@@ -98,6 +98,15 @@
     - Arthurian names: Lanzarote, Ginebra.
     - Bare place-like names that are saints or people in context: Santa Lucía, Teodora.
     - Arcadia: prefer the classical region over the modern regional unit.
+  - **Fixed the same day:** three new book rules in `link.py`.
+    - A name the book prints after a title ("reina Ginebra", "don Lanzarote") is a person there, not a place.
+    - "Santa/San X" with a saint candidate isn't a place.
+    - A one-word person (sitelinks under 120) whose name starts 30+ people's articles is a given name ("Teodora", "Jerome", "Titus").
+    - Effect at Light:
+      - DQ loses Lanzarote ×6, Ginebra→Geneva ×5, Teodora ×2, Santa Lucía, Maguncia→Mainz ×2. The rule also costs Adriano and Rodrigo, both right.
+      - W&P loses Jerome and Titus, plus Attila, which was right.
+      - P&P is unchanged.
+    - Re-scoring the graded DQ sample gives 76/77 (99%); Arcadia → the regional unit is still wrong.
   - **English residue:** a surname redirect to a famous person, e.g. "Count Tolstóy" → Leo Tolstoy, and Glinka.
   - The book's year must come from the Classic's Wikidata QID. The manifest's `published` is the translation year.
 

@@ -36,6 +36,12 @@ FITS = {"PERSON": {"human"}, "PER": {"human"},
         "ORG": {"org"}, "NORP": set(),  # nationalities and peoples: too noisy for Light
         "EVENT": {"event"}, "WORK_OF_ART": {"work"}, "MISC": {"work", "event"}}
 POSSESSIVE = re.compile(r"[’']s$")
+SAINT = {"saint", "st", "san", "santo", "santa", "são"}
+# Words in SOCIAL that sit before places too: "old Moscow", "Little Mytíshchi", "el padre Tajo" (the river).
+NOT_TITLES = {"old", "young", "little", "padre"}
+# A mononym person ("Teodora", "Jerome", "Titus") whose name dozens of other people's articles also start with is a
+# given name the book's own people carry, unless the one it links to is very well known.
+GIVEN_NAME_BEARERS, GIVEN_NAME_SL = 30, 120
 
 
 def proper(t):
@@ -91,16 +97,29 @@ class KB:
                                   raw=set((r[7] or "").split("\x1f"))) for r in rows]
         return self.cache[n]
 
+    def bearers(self, path):
+        """How many people's articles start with this one-word title as their first name ("Teodora_Comnena")."""
+        if "_" in re.sub(r"_\(.*\)$", "", path):
+            return 0
+        lo = re.sub(r"_\(.*\)$", "", path) + "_"
+        return self.db.execute("SELECT COUNT(*) FROM item WHERE path >= ? AND path < ? AND cls = 'human' "
+                               "AND path NOT LIKE ?", (lo, lo + "\uffff", lo + "(%")).fetchone()[0]
+
 
 class BookFacts:
     """What the book itself says about a name (plan Decision 8): the words it prints in lowercase (so "Tornó" or
     "Mass" at a sentence start is a common word), how often each name is tagged a person (the Rostóvs aren't the
-    city), and the year it was written (nobody born after it is in it)."""
+    city), the names it prints after a title ("reina Ginebra", "don Lanzarote": people, not Geneva or the island),
+    and the year it was written (nobody born after it is in it)."""
 
-    def __init__(self, texts, spans, year=None, title=""):
-        self.lower = set()
+    def __init__(self, texts, spans, year=None, title="", lang="en"):
+        self.lower, self.titled = set(), set()
+        titles = sorted((RANK.get(lang, set()) | SOCIAL.get(lang, set())) - SAINT - NOT_TITLES, key=len, reverse=True)
+        # Same line, a space or an abbreviation's dot between: "master.\nEurope" is two sentences.
+        after = re.compile(r"\b(?:%s)\.? ([A-ZÁÉÍÓÚÑÜ][\w’'-]+)" % "|".join(map(re.escape, titles)), re.I)
         for t in texts:
             self.lower.update(w for w in re.findall(r"\b\w+\b", t) if w.islower())
+            self.titled.update(norm(POSSESSIVE.sub("", m.group(1))) for m in after.finditer(t))
         tags = collections.defaultdict(collections.Counter)
         for s in spans:
             tags[norm(POSSESSIVE.sub("", s["text"]))][s["label"] in ("PERSON", "PER")] += 1
@@ -114,6 +133,7 @@ def resolve(kb, text, label, lang, book_title="", facts=None):
     book_title = book_title or facts.title
     tries = lookups(text, label, lang)
     bare = POSSESSIVE.sub("", text.strip()).rstrip(".,;:!?")
+    words = bare.split()
     if tries and tries != [("", "not-a-name")] and " " not in bare and bare.lower() in facts.lower:
         return None, [], None, "common-word"
     if not tries:
@@ -148,11 +168,17 @@ def resolve(kb, text, label, lang, book_title="", facts=None):
             if len(late) == len(good):
                 return None, [], how, "after-the-book"
             good = [c for c in good if c not in late]
-        if good[0]["cls"] == "place" and facts.person_share.get(n, 0) >= 0.5:
+        if good[0]["cls"] == "place" and (facts.person_share.get(n, 0) >= 0.5 or n in facts.titled):
             return None, [], how, "a-person-here"
+        if (good[0]["cls"] == "place" and words and words[0].lower().rstrip(".") in SAINT
+                and any(c["cls"] == "human" for c in cands)):
+            return None, [], how, "a-saint"      # "Santa Lucía" is the saint, not the island country
         # A title beats a redirect ("Moscow" the article over a redirect that happens to normalise the same).
         good.sort(key=lambda c: (c["kind"] != "title", -c["sl"]))
         best, alts = good[0], good[1:]
+        if (best["cls"] == "human" and len(words) == 1 and best["sl"] < GIVEN_NAME_SL
+                and kb.bearers(best["path"]) >= GIVEN_NAME_BEARERS):
+            return None, [], how, "a-given-name"
         return best, alts, how, None
     if not seen_any:
         return None, [], None, "no-article"
@@ -192,7 +218,7 @@ def main(argv=None):
     text = {href: "\n".join(t for _, t in bs) for href, bs in chapters(args.epub)}
     book_title = title_of(args.epub)
     spans = [json.loads(l) for l in open(args.ner, encoding="utf8")]
-    facts = BookFacts(text.values(), spans, args.year, book_title)
+    facts = BookFacts(text.values(), spans, args.year, book_title, args.lang)
     kb = KB(args.kb)
     rows, reasons = [], collections.Counter()
     for s in spans:

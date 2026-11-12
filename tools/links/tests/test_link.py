@@ -19,13 +19,19 @@ def kb(tmp_path):
              (192, "Mikhail_Kutuzov", 75, "Mikhail Kutuzov", "human", 1745),
              (7, "Maria_Höfl-Riesch", 37, "Maria Höfl-Riesch", "human", 1984),
              (9391, "Ludwig_Wittgenstein", 174, "Ludwig Wittgenstein", "human", 1889),
-             (8, "Mörön", 50, "Mörön", "place", None), (9, "Rostov-on-Don", 120, "Rostov-on-Don", "place", 1749)]
+             (8, "Mörön", 50, "Mörön", "place", None), (9, "Rostov-on-Don", 120, "Rostov-on-Don", "place", 1749),
+             (71, "Ginebra", 200, "Geneva", "place", None), (760, "Santa_Lucía", 236, "Saint Lucia", "place", 1979),
+             (183240, "Santa_Lucía_de_Siracusa", 72, "Saint Lucy", "human", 283),
+             (204843, "Teodora", 64, "Theodora", "human", 500)]
+    items += [(1000 + i, f"Teodora_X{i}", 5, f"Teodora X{i}", "human", None) for i in range(30)]
     db.executemany("INSERT INTO item VALUES (?,?,?,?,?,?)", items)
     db.executemany("INSERT INTO alias(norm, qid, kind, raw) SELECT column1, column2, column3, column1 FROM (VALUES (?,?,?))", [
         ("napoleon", 517, "title"), ("napoleon bonaparte", 517, "redirect"), ("moscow", 649, "title"),
         ("wickham", 1, "title"), ("elizabeth", 2, "redirect"), ("darcy", 3, "redirect"),
         ("kutuzov", 192, "redirect"), ("mikhail kutuzov", 192, "title"), ("maria", 7, "redirect"),
-        ("wittgenstein", 9391, "redirect"), ("rostov", 9, "redirect")])
+        ("wittgenstein", 9391, "redirect"), ("rostov", 9, "redirect"), ("ginebra", 71, "title"),
+        ("teodora", 204843, "title")])
+    db.executemany("INSERT INTO alias VALUES ('santa lucia', ?, ?, 'Santa Lucía')", [(760, "title"), (183240, "redirect")])
     db.execute("INSERT INTO alias VALUES ('moron', 8, 'title', 'Mörön')")
     db.commit(); db.close()
     return link.KB(p)
@@ -75,3 +81,15 @@ def test_light_takes_the_first_mention_per_chapter_and_caps_density():
     assert [x["qid"] for x in light] == [1, 4]          # 300 words -> 2 links: the best-known two, in order
     more = ll_select.select(rows, "more", min_sl=40)
     assert [x["qid"] for x in more] == [1, 2, 3, 4]     # 5 stays out: ambiguous
+
+
+def test_titled_names_saints_and_given_names_stay_unlinked(tmp_path):
+    k = kb(tmp_path)
+    dq = link.BookFacts(["los amores de don Lanzarote con la reina Ginebra."], [], year=1615, lang="es")
+    assert link.resolve(k, "Ginebra", "LOC", "es", facts=dq)[3] == "a-person-here"    # the queen, not Geneva
+    assert link.resolve(k, "Ginebra", "LOC", "es")[0]["qid"] == 71
+    wp = link.BookFacts(["They loved old Moscow. He was the master.\nMoscow burned."], [], lang="en")
+    assert link.resolve(k, "Moscow", "GPE", "en", facts=wp)[0]["qid"] == 649      # adjectives and sentence breaks
+    assert link.resolve(k, "Santa Lucía", "LOC", "es")[3] == "a-saint"
+    assert link.resolve(k, "Teodora", "PER", "es")[3] == "a-given-name"
+    assert link.resolve(k, "Napoleon", "PERSON", "en")[0]["qid"] == 517

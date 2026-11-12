@@ -48,6 +48,8 @@ def main(argv=None):
     a.add_argument("--min-sl", type=int, default=40); a.add_argument("--min-sim", type=float, default=0.3)
     a.add_argument("--per-words", type=int, default=150); a.add_argument("--out")
     args = a.parse_args(argv)
+    if args.out:
+        open(args.out, "w").close()   # one run's books, appended below
     for path in args.cands:
         rows = [json.loads(l) for l in open(path, encoding="utf8")]
         words = sum(max((r["word"] for r in rows if r["href"] == h), default=0) for h in {r["href"] for r in rows})
