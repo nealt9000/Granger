@@ -81,6 +81,7 @@ import app.granger.core.library.Audiobook
 import app.granger.core.library.BookHit
 import app.granger.core.library.SearchHit
 import app.granger.core.library.SearchText
+import app.granger.core.text.Spellings
 import app.granger.core.library.Track
 import app.granger.music.AlbumCover
 import app.granger.music.MusicCatalog
@@ -495,7 +496,8 @@ internal object SearchRows {
      * aside, it is a keyword's word or begins with one of three letters or more ("burns" for "burn").
      */
     fun highlight(sentence: String, keywords: List<String>): AnnotatedString {
-        val wanted = keywords.flatMap { SearchText.words(it) }.toSet()
+        // Either spelling of a word is bold ("gray" in the text for "grey" searched).
+        val wanted = keywords.flatMap { SearchText.words(it) }.flatMap { Spellings.variants(it) }.toSet()
         if (wanted.isEmpty()) return AnnotatedString(sentence)
         // Folded a character at a time, so offsets in the folded text are offsets in the sentence.
         val folded = String(CharArray(sentence.length) { i -> SearchText.fold(sentence[i].toString()).firstOrNull() ?: sentence[i] })

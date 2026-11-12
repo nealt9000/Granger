@@ -2,6 +2,7 @@ package app.granger.core.library
 
 import app.granger.core.research.Keywords
 import app.granger.core.research.ResearchLanguage
+import app.granger.core.text.Spellings
 import app.granger.core.zim.ZimArchive
 import app.granger.core.zim.ZimHit
 import kotlinx.coroutines.CoroutineDispatcher
@@ -174,7 +175,8 @@ class ZimLibrarySearch(
     override suspend fun fullText(query: String): List<SearchHit> {
         val family = families()
         return relaxed(query, { family(it) to it.path }) { q ->
-            across(q) { if (it.hasFulltextIndex) it.search(q, fullTextLimit) else emptyList() }
+            // Each spelling of the query ("dapple grey horse", "dapple gray horse") is searched; most queries have one.
+            Spellings.forms(q).flatMap { form -> across(form) { if (it.hasFulltextIndex) it.search(form, fullTextLimit) else emptyList() } }
                 .flatMap { it.hits }
                 .sortedByDescending { it.first.score }
                 .map { it.second }

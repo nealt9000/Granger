@@ -11,6 +11,7 @@ import app.granger.core.books.TextChunk
 import app.granger.core.books.TextQuote
 import app.granger.core.books.XhtmlText
 import app.granger.core.research.Keywords
+import app.granger.core.text.Spellings
 import java.io.File
 import java.io.IOException
 import java.util.zip.ZipFile
@@ -89,23 +90,27 @@ class BookIndex(
         val words = query.split(WHITESPACE).map { it.replace("\"", "").trimEnd('*') }
             .filter { word -> word.any { it.isLetterOrDigit() } }
         if (words.isEmpty()) return emptyList()
-        val phrase = "\"${words.joinToString(" ")}*\""
-        val apart = words.mapIndexed { i, w -> if (i == words.lastIndex) "\"$w*\"" else "\"$w\"" }.joinToString(" ")
+        // Each spelling of the query ("grey" and "gray") is matched on its own; a chunk keeps its best score of them.
+        val forms = Spellings.forms(words)
+        val phrases = forms.map { f -> "\"${f.joinToString(" ")}*\"" }
+        val aparts = forms.map { f -> f.mapIndexed { i, w -> if (i == f.lastIndex) "\"$w*\"" else "\"$w\"" }.joinToString(" ") }
         return withContext(io) {
-            val inPhrase = scores(listOf(phrase), bookId = null)
-            val all = if (words.size == 1) inPhrase else scores(listOf(apart), bookId = null)
+            val inPhrase = bestScores(phrases)
+            val all = if (words.size == 1) inPhrase else bestScores(aparts)
             val ranked = all.keys.sortedWith(
                 compareByDescending<Long> { it in inPhrase }
                     .thenByDescending { (inPhrase[it] ?: 0.0) + all.getValue(it) }
                     .thenBy { it },
             )
             val kept = topChunks(ranked, limit, perBook)
-            val counts = matchCounts(apart, kept.map { it.bookId }.distinct())
-            val snippetQuery = words.joinToString(" ")
+            val ids = kept.map { it.bookId }.distinct()
+            val counts = HashMap<String, Int>()
+            for (apart in aparts) matchCounts(apart, ids).forEach { (id, n) -> counts.merge(id, n, ::maxOf) }
             kept.groupBy { it.bookId }.flatMap { (bookId, hits) ->
                 val book = dao.get(bookId) ?: return@flatMap emptyList()
                 val texts = chunkTexts(book, hits)
                 hits.map { chunk ->
+                    val snippetQuery = texts[chunk.id]?.let { formIn(it, forms) } ?: words.joinToString(" ")
                     BookHit(
                         bookId = book.id,
                         bookTitle = book.title,
@@ -130,11 +135,12 @@ class BookIndex(
     suspend fun quoted(query: String, limit: Int = 2): List<BookPassage> {
         val words = Keywords.words(query)
         if (words.size < QUOTE_WORDS) return emptyList()
-        val phrase = "\"${words.joinToString(" ")}\""
-        val near = words.joinToString(" NEAR/$NEAR ") { "\"$it\"" }
+        val forms = Spellings.forms(words)
+        val phrases = forms.map { f -> "\"${f.joinToString(" ")}\"" }
+        val nears = forms.map { f -> f.joinToString(" NEAR/$NEAR ") { "\"$it\"" } }
         return withContext(io) {
-            val found = listOf(phrase, near).asSequence()
-                .map { scores(listOf(it), bookId = null) }
+            val found = listOf(phrases, nears).asSequence()
+                .map { bestScores(it) }
                 .firstOrNull { it.isNotEmpty() }
                 ?.takeIf { it.size <= QUOTE_CHUNKS }
                 ?: return@withContext emptyList()
@@ -193,7 +199,8 @@ class BookIndex(
 
     private suspend fun rankedPassages(keywords: List<String>, bookId: String?, limit: Int, perBook: Int): List<BookPassage> {
         // Each word quoted, so query syntax (OR, NEAR, -) inside a keyword is just words; spaces AND them.
-        val matches = keywords.map { k -> Keywords.words(k) }.filter { it.isNotEmpty() }.distinct()
+        // Each spelling of a keyword ("grey horse", "gray horse") is a keyword of its own.
+        val matches = keywords.map { k -> Keywords.words(k) }.filter { it.isNotEmpty() }.flatMap { Spellings.forms(it) }.distinct()
             .map { words -> words.joinToString(" ") { "\"$it\"" } }
         if (matches.isEmpty()) return emptyList()
         return withContext(io) {
@@ -241,6 +248,21 @@ class BookIndex(
             }
         }
         return scores
+    }
+
+    /** Each chunk matching any of [matches], scored by its best BM25 among them (the spellings of one query). */
+    private fun bestScores(matches: List<String>): Map<Long, Double> {
+        if (matches.size == 1) return scores(matches, bookId = null)
+        val best = HashMap<Long, Double>()
+        for (match in matches) scores(listOf(match), bookId = null).forEach { (id, s) -> best.merge(id, s, ::maxOf) }
+        return best
+    }
+
+    /** The spelling of the query that [text] holds, every word of it (case aside), for its snippet; else the first. */
+    private fun formIn(text: String, forms: List<List<String>>): String {
+        val lower = text.lowercase()
+        val form = forms.firstOrNull { f -> f.all { w -> Keywords.words(w).all { it.lowercase() in lower } } } ?: forms.first()
+        return form.joinToString(" ")
     }
 
     /** The chunks of [ranked] ids, in that order, until [limit] are kept, at most [perBook] from one book. */
