@@ -1,0 +1,13 @@
+{
+ "id": "wikipedia_en_all_mini",
+ "kind": "pack",
+ "sidecar": "gqid",
+ "fileName": "wikipedia_en_all_mini_2026-09.gqid",
+ "sizeBytes": 582950912,
+ "sha256": "5faf7ac6e554cb941ff7cef53d0b02583c3fac6c7c73bb0e8458eb86c13f0dd6",
+ "schemaVersion": 1,
+ "sourceSha256": "350d8956ee3d7abe2839c464c3a983f93d6934a16c7f04b10715b49439dfd349",
+ "builder": "tools/qidindex/build.py",
+ "builderVersion": 1,
+ "url": null
+}
