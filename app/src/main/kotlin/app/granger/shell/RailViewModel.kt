@@ -153,6 +153,8 @@ class RailViewModel(
     private val now: () -> Long = System::currentTimeMillis,
     /** Stops the voice (not music): removing what it reads takes it off with the item. */
     private val stopVoice: () -> Unit = {},
+    /** Ask's chats are listed; false while Ask is off ([app.granger.Features.RESEARCH]), when a pinned chat stays pinned, unshown. */
+    private val showChats: Boolean = true,
 ) : ViewModel() {
     private class Shelf(val packs: Map<String, Pack>, val books: Map<String, Book>, val positions: Map<String, BookPosition>)
 
@@ -202,7 +204,7 @@ class RailViewModel(
     private val opened = combine(
         sessions.railTabs(SCAN).emptyOnError("Rail tabs"),
         sessions.recentSearchRows(SCAN).emptyOnError("Rail searches"),
-        chats.recent(SCAN).emptyOnError("Rail chats"),
+        if (showChats) chats.recent(SCAN).emptyOnError("Rail chats") else flowOf(emptyList()),
         plays.emptyOnError("Rail plays"),
     ) { tabs, searches, chats, plays ->
         Opened(tabs, searches, chats, plays)
@@ -281,6 +283,7 @@ class RailViewModel(
         when {
             key.startsWith(RailEntry.TAB) -> key.removePrefix(RailEntry.TAB).toLongOrNull()
                 ?.let { sessions.tab(it) }?.takeIf { it.onRail }?.let { Found.Entry(tabEntry(it, shelf, current)) } ?: Found.Gone
+            key.startsWith(RailEntry.CHAT) && !showChats -> Found.Unknown
             key.startsWith(RailEntry.CHAT) -> key.removePrefix(RailEntry.CHAT).toLongOrNull()
                 ?.let { chats.chat(it) }?.let { Found.Entry(RailEntry.Chat(it.id, it.title, it.updatedAt)) } ?: Found.Gone
             key.startsWith(RailEntry.PLAY) -> recentPlay(key.removePrefix(RailEntry.PLAY))

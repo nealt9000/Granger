@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="search_placeholder">Search your library</string>
-    <string name="search_nothing_found">Nothing in your library matches.</string>
+    <string name="search_nothing_found">Nothing in your library for that. Try fewer words.</string>
     <!-- Section headings in the search results. -->
     <string name="search_recent">Recent</string>
+    <!-- Plan SQ: the articles and chapters that best answer the query, each with its matching sentence. -->
+    <string name="search_best">Best matches</string>
+    <string name="search_best_looking">Looking through your library…</string>
+    <!-- Under a title row: the same title in other packs or on the shelf, each a link ("Also in Wikivoyage, Classics"). -->
+    <string name="search_also_in">Also in %1$s</string>
+    <!-- TalkBack action on a title row: open the same title in another pack. -->
+    <string name="search_open_in">Open in %1$s</string>
+    <string name="search_best_more">Show more matches</string>
+    <string name="search_best_fewer">Show fewer matches</string>
     <string name="search_titles">Titles</string>
     <string name="search_articles">Articles</string>
     <string name="search_books">Books</string>
@@ -111,4 +120,17 @@
     </plurals>
     <!-- After a spoken search (Plan A1): the library name the words most likely meant. -->
     <string name="search_did_you_mean">Did you mean %1$s?</string>
+    <!-- Under the empty state: opens Get more. -->
+    <string name="search_get_more">Get more</string>
+    <!-- Plan SQ Task 5.3: the chips that narrow the results to one kind. -->
+    <string name="search_filter_all">All</string>
+    <string name="search_filter_articles">Articles</string>
+    <string name="search_filter_books">Books</string>
+    <string name="search_filter_media">Media</string>
+    <!-- TalkBack: the kind icon on a Best match. -->
+    <string name="search_kind_article">Article</string>
+    <string name="search_kind_book">Book</string>
+    <!-- Plan SQ Task 5.4: the small card with a single word's dictionary entry. %1$s is the dictionary (Wiktionary). -->
+    <string name="search_define">Define</string>
+    <string name="search_define_source">Dictionary entry from %1$s</string>
 </resources>

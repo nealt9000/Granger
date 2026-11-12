@@ -3,10 +3,12 @@ package app.granger
 /** Features whose code paths exist but stay hidden until they ship. */
 object Features {
     /**
-     * Research, the on-device librarian (Plan 8), shown as Ask with its Preview tag. On in release since the friend build
-     * (Plan F1 part 2); the device tier still keeps it to ASK phones, and release builds offer only evalPassed models.
+     * Research, the on-device librarian (Plan 8), shown as Ask with its Preview tag. Off in every build from Plan SQ (Neal,
+     * 2026-11-10: Ask rests until on-device models improve; check back in a few months). Off hides Ask's rail tool, its
+     * selection-menu item, its chats on the rail, its onboarding and readiness lines and its small model; the code, the
+     * saved chats and the eval tools stay. On again, the device tier still keeps it to ASK phones.
      */
-    const val RESEARCH = true
+    const val RESEARCH = false
 
     /** The music and audiobook players, the mini-player and the Player tool (Plan M1). */
     val PLAYER = true
@@ -30,4 +32,10 @@ object Features {
      * with "Ask answers in English for now". Debug builds keep it for the L4 baseline.
      */
     val SPANISH_ASK = BuildConfig.DEBUG
+
+    /**
+     * Linked Library LL1: reference links in the Classics. Off until LL1 ships; while off, phones don't download the
+     * QID index or links sidecars, since nothing reads them yet (Neal, 2026-11-12).
+     */
+    const val LINKED_CLASSICS = false
 }

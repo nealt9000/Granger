@@ -80,12 +80,17 @@ data class Review(
     val freeBytes: Long,
     /** What was left out because a bigger pack in the review holds it (Plan WF Decision 5). */
     val notes: List<UiText> = emptyList(),
+    /** The embedder that follows the first search indexes (Plan SQ Phase 6), when it isn't on the phone; 0 otherwise. */
+    val embedderBytes: Long = 0,
 ) {
     val lines: List<Line> get() = groups.flatMap { it.lines }
     val items: List<CatalogItem> get() = lines.flatMap { it.items }
-    val bytes: Long get() = items.sumOf { it.downloadBytes }
-    /** The part of [bytes] that is Ask's search indexes (`.gvec`), fetched after their packs. */
-    val indexBytes: Long get() = items.sumOf { it.vectors?.sizeBytes ?: 0L }
+    private val vectorBytes: Long get() = items.sumOf { it.vectors?.sizeBytes ?: 0L }
+    /** The embedder comes only with indexes to read. */
+    private val followingBytes: Long get() = if (vectorBytes > 0) embedderBytes else 0L
+    val bytes: Long get() = items.sumOf { it.downloadBytes } + followingBytes
+    /** The part of [bytes] that is search by meaning: the packs' indexes (`.gvec`) and the embedder, fetched after the packs. */
+    val indexBytes: Long get() = vectorBytes + followingBytes
     val fits: Boolean get() = bytes <= freeBytes
     val isEmpty: Boolean get() = items.isEmpty()
 }

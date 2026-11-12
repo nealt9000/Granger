@@ -3,6 +3,7 @@ package app.granger.core.library
 import app.granger.core.books.PdfText
 import app.granger.core.research.HtmlPassages
 import app.granger.core.research.Keywords
+import app.granger.core.text.Spellings
 import app.granger.core.research.LexicalScore
 import app.granger.core.research.Passage
 import app.granger.core.research.PassageFinder
@@ -199,7 +200,10 @@ class LibraryPassageFinder(
                         val packStart = clock()
                         val archive = library.archive(pack.id) ?: return@async emptyList()
                         // Research never shows a snippet, and libzim builds each one from the article.
-                        words.flatMapIndexed { k, word -> archive.searchWithoutSnippets(word, perPack).mapIndexed { rank, hit -> Triple(k, rank, hit) } }
+                        // Each spelling of a keyword ("grey horse", "gray horse") is searched; its hits count as that keyword's.
+                        words.flatMapIndexed { k, word ->
+                            Spellings.forms(word).flatMap { form -> archive.searchWithoutSnippets(form, perPack).mapIndexed { rank, hit -> Triple(k, rank, hit) } }
+                        }
                             .groupBy { it.third.path }.values
                             .filterNot { same -> twins(pack, same.first().third.path) }
                             .map { same ->
@@ -275,25 +279,39 @@ class LibraryPassageFinder(
                 emptyList()
             }
             val found = bookIndex.passages(words, limit = bookLimit) + named
-            found.distinctBy { Triple(it.book.id, it.href, it.text) }.map {
-                Passage(
-                    kind = SourceKind.BOOK,
-                    sourceId = it.book.id,
-                    sourceTitle = it.book.title,
-                    location = it.href,
-                    progression = it.progression,
-                    // A PDF's page is its source card's heading, so the citation says where it is.
-                    heading = if (it.book.format == BookFormat.PDF) PdfText.pageOf(it.href)?.let { n -> "p. $n" }.orEmpty() else "",
-                    text = it.text,
-                    meta = SourceMeta(it.book.author, it.book.date, it.book.subjects, collections[it.book.id].orEmpty()),
-                    language = ResearchLanguage.ofCode(it.book.language),
-                )
-            }
+            found.distinctBy { Triple(it.book.id, it.href, it.text) }.map { bookPassage(it, collections) }
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {
             emptyList()
         }
+
+    /**
+     * Plan SQ Step 4: the book chunks holding [query] as a quote ([BookIndex.quoted]), for Best matches to put first;
+     * empty when it isn't one, or on any failure.
+     */
+    suspend fun quoted(query: String): List<Passage> =
+        try {
+            val found = bookIndex.quoted(query)
+            if (found.isEmpty()) emptyList() else shelves.collectionNames().let { c -> found.map { bookPassage(it, c) } }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            emptyList()
+        }
+
+    private fun bookPassage(it: BookPassage, collections: Map<String, String>) = Passage(
+        kind = SourceKind.BOOK,
+        sourceId = it.book.id,
+        sourceTitle = it.book.title,
+        location = it.href,
+        progression = it.progression,
+        // A PDF's page is its source card's heading, so the citation says where it is.
+        heading = if (it.book.format == BookFormat.PDF) PdfText.pageOf(it.href)?.let { n -> "p. $n" }.orEmpty() else "",
+        text = it.text,
+        meta = SourceMeta(it.book.author, it.book.date, it.book.subjects, collections[it.book.id].orEmpty()),
+        language = ResearchLanguage.ofCode(it.book.language),
+    )
 
     /**
      * For up to [NAMED_BOOKS] books the keywords name, a search inside the book for the keywords that don't. For a

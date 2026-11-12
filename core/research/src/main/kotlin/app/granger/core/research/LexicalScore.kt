@@ -1,5 +1,7 @@
 package app.granger.core.research
 
+import app.granger.core.text.Spellings
+
 /**
  * How well a passage matches the rewrite keywords, independent of the search engine's own score. Each keyword counts
  * for the share of its words that are there, so "portia quote" half-matches a passage that names Portia. Stopwords
@@ -27,7 +29,8 @@ object LexicalScore {
         // Each keyword is a list of alternatives (one, unless the rewrite gave `wine|strong drink`), each a list of words.
         val groups = keywords
             .map { k ->
-                Keywords.variants(k).map { v ->
+                // Each spelling of an alternative ("grey horse", "gray horse") is an alternative too.
+                Keywords.variants(k).flatMap { Spellings.forms(it) }.distinct().map { v ->
                     val words = Keywords.words(v).map { it.lowercase() }.filterNot { Keywords.isStopword(it, languages) }
                     (if (fold) words.map(ResearchLanguage::foldVowels) else words).distinct()
                 }

@@ -1,0 +1,1021 @@
+{
+ "seed": 7,
+ "items": [
+  {
+   "query": "It is a truth universally acknowledged",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-pride-and-prejudice",
+   "href": "OEBPS/c004.xhtml",
+   "id": "q-en-000"
+  },
+  {
+   "query": "Call me Ishmael",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-moby-dick",
+   "href": "OEBPS/c003.xhtml",
+   "id": "q-en-001"
+  },
+  {
+   "query": "It was the best of times, it was the worst of times",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-tale-of-two-cities",
+   "href": "OEBPS/c002.xhtml",
+   "id": "q-en-002"
+  },
+  {
+   "query": "Happy families are all alike",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-anna-karenina",
+   "href": "OEBPS/c002.xhtml",
+   "id": "q-en-003"
+  },
+  {
+   "query": "To be, or not to be, that is the question",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-hamlet",
+   "href": "OEBPS/c004.xhtml",
+   "id": "q-en-004"
+  },
+  {
+   "query": "Something is rotten in the state of Denmark",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-hamlet",
+   "href": "OEBPS/c002.xhtml",
+   "id": "q-en-005"
+  },
+  {
+   "query": "Alas, poor Yorick",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-hamlet",
+   "href": "OEBPS/c006.xhtml",
+   "id": "q-en-006"
+  },
+  {
+   "query": "In a village of La Mancha",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-don-quixote",
+   "href": "OEBPS/c015.xhtml",
+   "id": "q-en-007"
+  },
+  {
+   "query": "all that glisters is not gold",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-merchant-of-venice",
+   "href": "OEBPS/c004.xhtml",
+   "id": "q-en-008"
+  },
+  {
+   "query": "Now is the winter of our discontent",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-king-richard-iii",
+   "href": "OEBPS/c003.xhtml",
+   "id": "q-en-009"
+  },
+  {
+   "query": "A horse! a horse! my kingdom for a horse",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-king-richard-iii",
+   "href": "OEBPS/c007.xhtml",
+   "id": "q-en-010"
+  },
+  {
+   "query": "All the world's a stage",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-as-you-like-it",
+   "href": "OEBPS/c003.xhtml",
+   "id": "q-en-011"
+  },
+  {
+   "query": "If music be the food of love, play on",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-twelfth-night",
+   "href": "OEBPS/c003.xhtml",
+   "id": "q-en-012"
+  },
+  {
+   "query": "Double, double toil and trouble",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-macbeth",
+   "href": "OEBPS/c006.xhtml",
+   "id": "q-en-013"
+  },
+  {
+   "query": "Out, damned spot",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-macbeth",
+   "href": "OEBPS/c007.xhtml",
+   "id": "q-en-014"
+  },
+  {
+   "query": "Friends, Romans, countrymen, lend me your ears",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-julius-caesar",
+   "href": "OEBPS/c005.xhtml",
+   "id": "q-en-015"
+  },
+  {
+   "query": "Wherefore art thou Romeo",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-romeo-and-juliet",
+   "href": "OEBPS/c003.xhtml",
+   "id": "q-en-016"
+  },
+  {
+   "query": "Reader, I married him",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-jane-eyre",
+   "href": "OEBPS/c041.xhtml",
+   "id": "q-en-017"
+  },
+  {
+   "query": "Whatever our souls are made of, his and mine are the same",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-wuthering-heights",
+   "href": "OEBPS/c009.xhtml",
+   "id": "q-en-018"
+  },
+  {
+   "query": "Of all the gin joints",
+   "kind": "famous",
+   "language": "en",
+   "book": null,
+   "href": null,
+   "id": "q-en-019"
+  },
+  {
+   "query": "Hope is the thing with feathers",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-poems-three-series",
+   "href": "OEBPS/c005.xhtml",
+   "id": "q-en-020"
+  },
+  {
+   "query": "Because I could not stop for Death",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-poems-three-series",
+   "href": "OEBPS/c004.xhtml",
+   "id": "q-en-021"
+  },
+  {
+   "query": "Water, water, every where",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-rime-of-the-ancient-mariner",
+   "href": "OEBPS/c003.xhtml",
+   "id": "q-en-022"
+  },
+  {
+   "query": "Curiouser and curiouser",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-alice-s-adventures-in-wonderland",
+   "href": "OEBPS/c003.xhtml",
+   "id": "q-en-023"
+  },
+  {
+   "query": "Elementary, my dear Watson",
+   "kind": "famous",
+   "language": "en",
+   "book": null,
+   "href": null,
+   "id": "q-en-024"
+  },
+  {
+   "query": "You have been in Afghanistan, I perceive",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-study-in-scarlet",
+   "href": "OEBPS/c003.xhtml",
+   "id": "q-en-025"
+  },
+  {
+   "query": "To a great mind, nothing is little",
+   "kind": "famous",
+   "language": "en",
+   "book": "book:granger:gc-study-in-scarlet",
+   "href": "OEBPS/c008.xhtml",
+   "id": "q-en-026"
+  },
+  {
+   "query": "their tokens shall the sinners be known, and",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-koran-rodwell",
+   "href": "OEBPS/c048.xhtml",
+   "id": "q-en-027"
+  },
+  {
+   "query": "say in Paris that every time a royalist escapes to England that",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-scarlet-pimpernel",
+   "href": "OEBPS/c005.xhtml",
+   "id": "q-en-028"
+  },
+  {
+   "query": "was the duty of every little piece to",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-red-badge-of-courage",
+   "href": "OEBPS/c008.xhtml",
+   "id": "q-en-029"
+  },
+  {
+   "query": "this must be the Good proposed by doing",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-nicomachean-ethics",
+   "href": "OEBPS/c003.xhtml",
+   "id": "q-en-030"
+  },
+  {
+   "query": "un gesto que ví hacer á la señora, comprendí que había adquirido",
+   "kind": "exact",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-031"
+  },
+  {
+   "query": "Handel,” said Herbert, stopping, “you feel convinced that you can take no",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-great-expectations",
+   "href": "OEBPS/c042.xhtml",
+   "id": "q-en-032"
+  },
+  {
+   "query": "is't That I neglect my reputation so As",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-spanish-tragedy",
+   "href": "OEBPS/c013.xhtml",
+   "id": "q-en-033"
+  },
+  {
+   "query": "the Doctor with a heavy, measured tread and his hands",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-awakening",
+   "href": "OEBPS/c039.xhtml",
+   "id": "q-en-034"
+  },
+  {
+   "query": "at Alessandria, and for two years, till his death, was",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-divine-comedy-purgatory-norton",
+   "href": "OEBPS/c008.xhtml",
+   "id": "q-en-035"
+  },
+  {
+   "query": "la mandó tocar el piano y ella no se atrevió á resistir.",
+   "kind": "exact",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-036"
+  },
+  {
+   "query": "trow we be all shent!221 Say, woman, who hath been here since",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-everyman-with-other-interludes-and-miracle-plays",
+   "href": "OEBPS/c008.xhtml",
+   "id": "q-en-037"
+  },
+  {
+   "query": "as Robinson Crusoe was of his island, as long",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-social-contract",
+   "href": "OEBPS/c010.xhtml",
+   "id": "q-en-038"
+  },
+  {
+   "query": "Here comes my vulture, Heaving his beak up in the air",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-volpone-or-the-fox",
+   "href": "OEBPS/c011.xhtml",
+   "id": "q-en-039"
+  },
+  {
+   "query": "now Did the sea toss upon our shore this",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-pericles",
+   "href": "OEBPS/c005.xhtml",
+   "id": "q-en-040"
+  },
+  {
+   "query": "no dormía, y en efecto, despierto estaba, y tan despierto",
+   "kind": "exact",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-041"
+  },
+  {
+   "query": "can avoid doing so, but, if compelled, then to know",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-prince",
+   "href": "OEBPS/c025.xhtml",
+   "id": "q-en-042"
+  },
+  {
+   "query": "repelled the idea even more emphatically, although still with the utmost",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-brothers-karamazov",
+   "href": "OEBPS/c016.xhtml",
+   "id": "q-en-043"
+  },
+  {
+   "query": "had, or thought that he had, a connivance, one might almost",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-les-miserables",
+   "href": "OEBPS/c080.xhtml",
+   "id": "q-en-044"
+  },
+  {
+   "query": "confidence that he has in other men’s industry may make him slothful.",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-utopia",
+   "href": "OEBPS/c003.xhtml",
+   "id": "q-en-045"
+  },
+  {
+   "query": "de mi viaje y me dirigí á la casa donde",
+   "kind": "exact",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-046"
+  },
+  {
+   "query": "give me the horse!” I cried, staggering to",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-prisoner-of-zenda",
+   "href": "OEBPS/c020.xhtml",
+   "id": "q-en-047"
+  },
+  {
+   "query": "And I will not spoil your life for",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-ideal-husband",
+   "href": "OEBPS/c008.xhtml",
+   "id": "q-en-048"
+  },
+  {
+   "query": "eyes and laughing and forgetting he had ever been cold",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-wind-in-the-willows",
+   "href": "OEBPS/c006.xhtml",
+   "id": "q-en-049"
+  },
+  {
+   "query": "is evident, that we ought not to make an exception to",
+   "kind": "exact",
+   "language": "en",
+   "book": "book:granger:gc-enquiry-concerning-human-understanding",
+   "href": "OEBPS/c012.xhtml",
+   "id": "q-en-050"
+  },
+  {
+   "query": "y contándose recíprocamente sus arrugas, sus lunares, y éste",
+   "kind": "exact",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-051"
+  },
+  {
+   "query": "the fearful lovers are",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-midsummer-night-s-dream",
+   "href": "OEBPS/c007.xhtml",
+   "id": "q-en-052"
+  },
+  {
+   "query": "inside is as open",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-walden-and-on-the-duty-of-civil-disobedience",
+   "href": "OEBPS/c014.xhtml",
+   "id": "q-en-053"
+  },
+  {
+   "query": "the distance is altered",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-essays-bacon",
+   "href": "OEBPS/c010.xhtml",
+   "id": "q-en-054"
+  },
+  {
+   "query": "till it rested on",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-portrait-of-a-lady-volume-2",
+   "href": "OEBPS/c028.xhtml",
+   "id": "q-en-055"
+  },
+  {
+   "query": "y nos agrada su aspecto",
+   "kind": "fragment",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-056"
+  },
+  {
+   "query": "a forked tongue— 2 AVOC",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-volpone-or-the-fox",
+   "href": "OEBPS/c011.xhtml",
+   "id": "q-en-057"
+  },
+  {
+   "query": "this foreseeing does not in",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-consolation-of-philosophy",
+   "href": "OEBPS/c014.xhtml",
+   "id": "q-en-058"
+  },
+  {
+   "query": "all drownd in deadly sleepe",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-faerie-queene",
+   "href": "OEBPS/c003.xhtml",
+   "id": "q-en-059"
+  },
+  {
+   "query": "bird in the cage.) But",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-blue-bird",
+   "href": "OEBPS/c007.xhtml",
+   "id": "q-en-060"
+  },
+  {
+   "query": "de vida ó muerte, cuando",
+   "kind": "fragment",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-061"
+  },
+  {
+   "query": "were taking me to a",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-daisy-miller",
+   "href": "OEBPS/c002.xhtml",
+   "id": "q-en-062"
+  },
+  {
+   "query": "wouldn’t come over some",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-portrait-of-a-lady-volume-1",
+   "href": "OEBPS/c011.xhtml",
+   "id": "q-en-063"
+  },
+  {
+   "query": "signed the passport for",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-les-miserables",
+   "href": "OEBPS/c140.xhtml",
+   "id": "q-en-064"
+  },
+  {
+   "query": "through with it somehow, and",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-angel-pavement",
+   "href": "OEBPS/c006.xhtml",
+   "id": "q-en-065"
+  },
+  {
+   "query": "me volvió á enseñar",
+   "kind": "fragment",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-066"
+  },
+  {
+   "query": "head down on his shoulder",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-great-expectations",
+   "href": "OEBPS/c036.xhtml",
+   "id": "q-en-067"
+  },
+  {
+   "query": "apology when he made",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-great-expectations",
+   "href": "OEBPS/c041.xhtml",
+   "id": "q-en-068"
+  },
+  {
+   "query": "what one keeps to oneself",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-grimms-fairy-tales",
+   "href": "OEBPS/c015.xhtml",
+   "id": "q-en-069"
+  },
+  {
+   "query": "aright, how stands it with",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-house-of-atreus-agamemnon-the-libation-bearers-the-furies",
+   "href": "OEBPS/c003.xhtml",
+   "id": "q-en-070"
+  },
+  {
+   "query": "el señor Conde se",
+   "kind": "fragment",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-071"
+  },
+  {
+   "query": "while longer, and he thought",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-grimms-fairy-tales",
+   "href": "OEBPS/c034.xhtml",
+   "id": "q-en-072"
+  },
+  {
+   "query": "thought he had been",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-twelfth-night",
+   "href": "OEBPS/c005.xhtml",
+   "id": "q-en-073"
+  },
+  {
+   "query": "ride full speed with their",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-essays-cotton",
+   "href": "OEBPS/c066.xhtml",
+   "id": "q-en-074"
+  },
+  {
+   "query": "Idea is re-established in the",
+   "kind": "fragment",
+   "language": "en",
+   "book": "book:granger:gc-world-as-will-and-idea-volume-1",
+   "href": "OEBPS/c009.xhtml",
+   "id": "q-en-075"
+  },
+  {
+   "query": "ojos se fijaron en",
+   "kind": "fragment",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-076"
+  },
+  {
+   "query": "is my child fearing me as if I were her father",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-two-gentlemen-of-verona",
+   "href": "OEBPS/c004.xhtml",
+   "id": "q-en-077"
+  },
+  {
+   "query": "on three points:— whether, in business for others, I may have",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-analects",
+   "href": "OEBPS/c002.xhtml",
+   "id": "q-en-078"
+  },
+  {
+   "query": "I sometimes think she you yet, and is",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-far-from-the-madding-crowd",
+   "href": "OEBPS/c055.xhtml",
+   "id": "q-en-079"
+  },
+  {
+   "query": "sons, As ancient legends tell the tale, Touching",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-frogs",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-en-080"
+  },
+  {
+   "query": "se elevan un poco, luego no quien los sufra.",
+   "kind": "loose",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-081"
+  },
+  {
+   "query": "I only wake some still, bright morning and feel that life",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-uncle-vanya",
+   "href": "OEBPS/c006.xhtml",
+   "id": "q-en-082"
+  },
+  {
+   "query": "point of limited the value of Mill's",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-on-liberty",
+   "href": "OEBPS/c004.xhtml",
+   "id": "q-en-083"
+  },
+  {
+   "query": "light above, which visible the Creator unto",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-divine-comedy-paradise",
+   "href": "OEBPS/c031.xhtml",
+   "id": "q-en-084"
+  },
+  {
+   "query": "the of man does not differ much from that of the",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-walden-and-on-the-duty-of-civil-disobedience",
+   "href": "OEBPS/c018.xhtml",
+   "id": "q-en-085"
+  },
+  {
+   "query": "Ya no le ningún respeto, ni era obstáculo a",
+   "kind": "loose",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-086"
+  },
+  {
+   "query": "in the ranks, was thoughtfully down the",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-red-badge-of-courage",
+   "href": "OEBPS/c016.xhtml",
+   "id": "q-en-087"
+  },
+  {
+   "query": "usual names, Fortune and Fate, as one quite",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-paradise-regained",
+   "href": "OEBPS/c005.xhtml",
+   "id": "q-en-088"
+  },
+  {
+   "query": "of Bizet, Cherubini, Gounod, Halévy, Handel, Mozart, Ponchielli",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-faust-gounod",
+   "href": "OEBPS/c016.xhtml",
+   "id": "q-en-089"
+  },
+  {
+   "query": "the gentle from heaven Upon the place",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-merchant-of-venice",
+   "href": "OEBPS/c006.xhtml",
+   "id": "q-en-090"
+  },
+  {
+   "query": "decir esto, Mudarra dio algunos pasos hacia la que",
+   "kind": "loose",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-091"
+  },
+  {
+   "query": "small had plenty of “material” in our school.",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-herland",
+   "href": "OEBPS/c004.xhtml",
+   "id": "q-en-092"
+  },
+  {
+   "query": "them into an instrument with seven which bears",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-metamorphoses",
+   "href": "OEBPS/c018.xhtml",
+   "id": "q-en-093"
+  },
+  {
+   "query": "left on any person in a where an old woman",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-riders-to-the-sea",
+   "href": "OEBPS/c003.xhtml",
+   "id": "q-en-094"
+  },
+  {
+   "query": "As we paced along the giddy footing of the",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-king-richard-iii",
+   "href": "OEBPS/c003.xhtml",
+   "id": "q-en-095"
+  },
+  {
+   "query": "y al fin, anocheciendo el coche se",
+   "kind": "loose",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-096"
+  },
+  {
+   "query": "and tumults which at times have happened",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-rights-of-man",
+   "href": "OEBPS/c012.xhtml",
+   "id": "q-en-097"
+  },
+  {
+   "query": "His varied aided by an excellent education, won for",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-consolation-of-philosophy",
+   "href": "OEBPS/c004.xhtml",
+   "id": "q-en-098"
+  },
+  {
+   "query": "suit him admirably, he has deteriorated since I knew",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-ideal-husband",
+   "href": "OEBPS/c006.xhtml",
+   "id": "q-en-099"
+  },
+  {
+   "query": "Chauvelin, with that unreasoning fury, which sometimes assails a strong was",
+   "kind": "loose",
+   "language": "en",
+   "book": "book:granger:gc-scarlet-pimpernel",
+   "href": "OEBPS/c031.xhtml",
+   "id": "q-en-100"
+  },
+  {
+   "query": "en aquel papelucho, folletín, duda, traducido de",
+   "kind": "loose",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-101"
+  },
+  {
+   "query": "will explain why you don't accept the world",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-brothers-karamazov",
+   "href": "OEBPS/c035.xhtml",
+   "id": "q-en-102"
+  },
+  {
+   "query": "but such a desirable state of things does not exist and never",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-civilization-and-its-discontents",
+   "href": "OEBPS/c007.xhtml",
+   "id": "q-en-103"
+  },
+  {
+   "query": "but he is such a little chap yes he is small",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-black-beauty",
+   "href": "OEBPS/c018.xhtml",
+   "id": "q-en-104"
+  },
+  {
+   "query": "airs from caucasus far soothing cradle of man the river euphrates flowing",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-leaves-of-grass",
+   "href": "OEBPS/c229.xhtml",
+   "id": "q-en-105"
+  },
+  {
+   "query": "darme otro apretón de manos y de causar segundo",
+   "kind": "plain",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-106"
+  },
+  {
+   "query": "dramas show the influence of the philosophical ideas of anaxagoras",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-bacchae",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-en-107"
+  },
+  {
+   "query": "was made to repeat it several times over till they could",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-rubaiyat-of-omar-khayyam",
+   "href": "OEBPS/c003.xhtml",
+   "id": "q-en-108"
+  },
+  {
+   "query": "i am the only person of the smallest importance in",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-ideal-husband",
+   "href": "OEBPS/c007.xhtml",
+   "id": "q-en-109"
+  },
+  {
+   "query": "through inactivity jonson hit upon the heroic remedy of a journey afoot",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-alchemist",
+   "href": "OEBPS/c002.xhtml",
+   "id": "q-en-110"
+  },
+  {
+   "query": "mudarra contrajo la pergaminosa piel y los rígidos tendones de su",
+   "kind": "plain",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-111"
+  },
+  {
+   "query": "arm on private carr's sleeve not that i wish it for you",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-ulysses",
+   "href": "OEBPS/c015.xhtml",
+   "id": "q-en-112"
+  },
+  {
+   "query": "all like that the youth glancing at his companion",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-red-badge-of-courage",
+   "href": "OEBPS/c011.xhtml",
+   "id": "q-en-113"
+  },
+  {
+   "query": "lest this should not have been thy fortune we will",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-tom-jones",
+   "href": "OEBPS/c036.xhtml",
+   "id": "q-en-114"
+  },
+  {
+   "query": "lover is the hardest not that i am an enemy to love",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-duenna",
+   "href": "OEBPS/c002.xhtml",
+   "id": "q-en-115"
+  },
+  {
+   "query": "al verme solo en la calle recordé el objeto de",
+   "kind": "plain",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-116"
+  },
+  {
+   "query": "examine and refute him if they think that he is",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-phaedo",
+   "href": "OEBPS/c002.xhtml",
+   "id": "q-en-117"
+  },
+  {
+   "query": "no robbery no record of strangers having been seen upon",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-adventures-of-sherlock-holmes",
+   "href": "OEBPS/c006.xhtml",
+   "id": "q-en-118"
+  },
+  {
+   "query": "up are their heads before them have we set a",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-koran-rodwell",
+   "href": "OEBPS/c060.xhtml",
+   "id": "q-en-119"
+  },
+  {
+   "query": "woman thus her artless story told one field a flock",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-lyrical-ballads",
+   "href": "OEBPS/c007.xhtml",
+   "id": "q-en-120"
+  },
+  {
+   "query": "duda traducido de alguna desatinada novela de ponson du terrail o de",
+   "kind": "plain",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-121"
+  },
+  {
+   "query": "wanted was obtainable neither through himself nor others",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-fathers-and-sons",
+   "href": "OEBPS/c008.xhtml",
+   "id": "q-en-122"
+  },
+  {
+   "query": "rising and falling with the restlessness of the water in a",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-howards-end",
+   "href": "OEBPS/c006.xhtml",
+   "id": "q-en-123"
+  },
+  {
+   "query": "much and to have nothing is to have rich eyes",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-as-you-like-it",
+   "href": "OEBPS/c005.xhtml",
+   "id": "q-en-124"
+  },
+  {
+   "query": "times and how wide the interval between myself and these of the",
+   "kind": "plain",
+   "language": "en",
+   "book": "book:granger:gc-time-machine",
+   "href": "OEBPS/c009.xhtml",
+   "id": "q-en-125"
+  },
+  {
+   "query": "serenar mi espíritu razonando los verdaderos términos de tan embrollada",
+   "kind": "plain",
+   "language": "es",
+   "book": "book:granger:gc-es-la-novela-en-el-tranvia",
+   "href": "OEBPS/c001.xhtml",
+   "id": "q-es-126"
+  }
+ ]
+}

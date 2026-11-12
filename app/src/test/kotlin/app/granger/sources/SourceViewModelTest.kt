@@ -123,7 +123,7 @@ class SourceViewModelTest {
         backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()
         val rows = vm.ui.value.sections.flatMap { it.rows }.associateBy { it.id }
-        assertThat(rows.getValue("gemma-embed").description.en()).isEqualTo(if (DENSE_RETRIEVAL) "Used by Ask" else "Not used yet")
+        assertThat(rows.getValue("gemma-embed").description.en()).isEqualTo(if (DENSE_RETRIEVAL) "Used by Search to find passages by meaning" else "Not used yet")
         assertThat(rows.getValue("e2b").description.en()).isEmpty()
     }
 
@@ -584,8 +584,13 @@ class SourceViewModelTest {
         val vm = viewModel()
         vm.getPreset("starter")
         testScheduler.advanceUntilIdle()
-        assertThat(downloads.enqueued.map { it.first }).containsExactly("e2b", "voyage").inOrder()
-        assertThat(vm.ui.value.notice.en()).isEqualTo("Queued 2 downloads.")
+        // While Ask rests (Plan SQ) a preset leaves Ask's model out.
+        if (app.granger.Features.RESEARCH) {
+            assertThat(downloads.enqueued.map { it.first }).containsExactly("e2b", "voyage").inOrder()
+            assertThat(vm.ui.value.notice.en()).isEqualTo("Queued 2 downloads.")
+        } else {
+            assertThat(downloads.enqueued.map { it.first }).containsExactly("voyage")
+        }
     }
 
     @Test fun presetWithNothingLeftSaysSo() = runTest(main.dispatcher) {
@@ -656,7 +661,28 @@ class SourceViewModelTest {
 
     @Test fun weakPhonesCannotGetModels() = runTest(main.dispatcher) {
         val models = viewModel(CatalogScope.MODELS, DeviceTier.LIBRARY_ONLY).ui.value
-        assertThat(models.sections.single().rows.single().status).isEqualTo(ItemStatus.NeedsMoreMemory)
+        // Where Ask can't run, its model isn't listed at all (Plan SQ): there is nothing to get.
+        assertThat(models.sections.flatMap { it.rows }).isEmpty()
+    }
+
+    /** Plan SQ Task 0.2: while Ask rests, its model shows only where installed, saying it can go, and is never offered. */
+    @Test fun whileAskRestsItsModelShowsOnlyWhereInstalled() = runTest(main.dispatcher) {
+        fun rows(): Map<String, ItemRow> {
+            val vm = SourceViewModel(
+                CatalogScope.MODELS, FakeCatalogSource(catalogOf(models = listOf(e2b, modelEntry("gemma-embed", ModelRole.EMBEDDER)))),
+                downloads, library, bookshelf, volumes, prefs, DeviceTier.ASK, appScope = this, io = main.dispatcher, askOn = false,
+            )
+            backgroundScope.launch { vm.ui.collect {} }
+            testScheduler.advanceUntilIdle()
+            return vm.ui.value.sections.flatMap { it.rows }.associateBy { it.id }
+        }
+        assertThat(rows().keys).containsExactly("gemma-embed")
+        // Search by meaning uses the embedder whether Ask runs or not (Plan SQ Phase 6).
+        assertThat(rows().getValue("gemma-embed").description.en()).isEqualTo("Used by Search to find passages by meaning")
+        downloads.list.value = listOf(record("e2b", DownloadState.INSTALLED, sha256 = e2b.sha256, kind = app.granger.core.downloads.ItemKind.MODEL))
+        val held = rows()
+        assertThat(held.getValue("e2b").status).isEqualTo(ItemStatus.Installed)
+        assertThat(held.getValue("e2b").description.en()).isEqualTo("Ask is resting for now. You can remove this model to free its space.")
     }
 
     // --- Plan H1: the Kiwix list filtered to a readiness domain ---

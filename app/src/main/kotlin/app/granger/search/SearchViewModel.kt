@@ -38,6 +38,20 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
+/** Best matches for a query, in up to two steps ([app.granger.core.research.BestMatches.stream] in the app). */
+fun interface BestMatchSearch {
+    fun stream(query: String): Flow<app.granger.core.research.BestMatches.Result>
+
+    /** Readies the search (the embedder) before the first query; nothing by default. */
+    suspend fun warm() {}
+}
+
+/** A single word's dictionary entry ([app.granger.core.research.PassageFinder.entry] in the app), or null. */
+fun interface WordEntry { suspend fun entry(word: String): app.granger.core.research.Passage? }
+
+/** What the results are narrowed to (Plan SQ Task 5.3): everything, or one kind. */
+enum class SearchFilter { ALL, ARTICLES, BOOKS, MEDIA }
+
 /** The music and audiobooks matching a query ([app.granger.core.library.MediaIndex.search] in the app). */
 fun interface MediaSearch { suspend fun search(query: String): MediaResults }
 
@@ -46,6 +60,7 @@ fun interface MediaSearch { suspend fun search(query: String): MediaResults }
  * [fetch] is how many are asked for, so a group that fills it may have more than Search knows of.
  */
 enum class SearchGroup(val preview: Int, val fetch: Int) {
+    BEST(3, app.granger.core.research.BestMatches.LIMIT),
     TITLES(8, ZimLibrarySearch.TITLE_LIMIT),
     ARTISTS(3, MEDIA_FETCH),
     ALBUMS(5, MEDIA_FETCH),
@@ -81,6 +96,10 @@ class SearchViewModel(
     private val spokenNames: Flow<List<String>> = emptyFlow(),
     /** Where the title matcher runs (a few milliseconds over a large library); tests pass their own. */
     private val matching: CoroutineDispatcher = Dispatchers.Default,
+    /** Best matches (Plan SQ); null leaves Search without them. */
+    private val best: BestMatchSearch? = null,
+    /** The Define card's lookup (Plan SQ Task 5.4); null leaves Search without it. */
+    private val define: WordEntry? = null,
 ) : ViewModel() {
     data class State(
         val query: String = "",
@@ -105,7 +124,60 @@ class SearchViewModel(
          * (Plan A1: the recognizer misspells names, *the domapada*). Typing clears it.
          */
         val didYouMean: String? = null,
+        /** Best matches (Plan SQ): the articles and chapters that best answer the query, each with its passage. */
+        val best: List<app.granger.core.research.BestMatches.Match> = emptyList(),
+        /** Best matches are being looked for. */
+        val bestLoading: Boolean = false,
+        /** The words Best matches searched for, bolded in their sentences. */
+        val bestWords: List<String> = emptyList(),
+        /** A single-word query's dictionary entry, shown as a small Define card (Plan SQ Task 5.4). */
+        val define: app.granger.core.research.Passage? = null,
+        /** The query reads as medical: the results carry the medical banner (Plan SQ Decision 8). */
+        val medical: Boolean = false,
+        /** What the results are narrowed to; kept from query to query. */
+        val filter: SearchFilter = SearchFilter.ALL,
+        /** [didYouMean] came from a typed search that found nothing, not a spoken one. */
+        val typedSuggestion: Boolean = false,
     ) {
+        /** The kinds of result the query found, for the filter chips: shown when it found more than one. */
+        val kinds: Set<SearchFilter>
+            get() = buildSet {
+                val titleBooks = titles.count { app.granger.core.library.BookIds.isBook(it.packId) }
+                if (titles.size > titleBooks || fullText.isNotEmpty() || best.any { it.passage.kind != app.granger.core.research.SourceKind.BOOK }) add(SearchFilter.ARTICLES)
+                if (titleBooks > 0 || books.isNotEmpty() || best.any { it.passage.kind == app.granger.core.research.SourceKind.BOOK }) add(SearchFilter.BOOKS)
+                if (!media.isEmpty) add(SearchFilter.MEDIA)
+            }
+
+        /** Whether the [filter] shows results of [kind]. */
+        fun showing(kind: SearchFilter): Boolean = filter == SearchFilter.ALL || filter == kind
+
+        /** Best matches under the [filter]. */
+        val bestFiltered: List<app.granger.core.research.BestMatches.Match>
+            get() = when (filter) {
+                SearchFilter.ALL -> best
+                SearchFilter.BOOKS -> best.filter { it.passage.kind == app.granger.core.research.SourceKind.BOOK }
+                SearchFilter.ARTICLES -> best.filter { it.passage.kind != app.granger.core.research.SourceKind.BOOK }
+                SearchFilter.MEDIA -> emptyList()
+            }
+
+        /** Titles under the [filter]: articles are pack titles, books the shelf's. */
+        val titlesFiltered: List<SearchHit>
+            get() = when (filter) {
+                SearchFilter.ALL -> titles
+                SearchFilter.BOOKS -> titles.filter { app.granger.core.library.BookIds.isBook(it.packId) }
+                SearchFilter.ARTICLES -> titles.filterNot { app.granger.core.library.BookIds.isBook(it.packId) }
+                SearchFilter.MEDIA -> emptyList()
+            }
+
+        /** The search has finished and found nothing at all: the empty state's one plain line shows. */
+        val nothingFound: Boolean
+            get() = query.isNotBlank() && !searching && !bestLoading && titles.isEmpty() && media.isEmpty &&
+                fullText.isEmpty() && books.isEmpty() && best.isEmpty() && define == null
+
+        /** The keyword groups found nothing (Best matches by meaning may still list something): a typo is likely. */
+        val keywordsFoundNothing: Boolean
+            get() = query.isNotBlank() && !searching && titles.isEmpty() && media.isEmpty && fullText.isEmpty() && books.isEmpty()
+
         /** The rows of [group] on screen: its preview, or all of [all] once expanded. */
         fun <T> shown(group: SearchGroup, all: List<T>): List<T> = if (group in expanded) all else all.take(group.preview)
     }
@@ -114,6 +186,15 @@ class SearchViewModel(
     private data class Request(val text: String, val generation: Int = 0)
 
     private val query = MutableStateFlow(Request(initialQuery.trim()))
+
+    /** The running search for titles a slip away ([LibrarySearch.nearTitles]); a new query cancels it. */
+    private var nearJob: kotlinx.coroutines.Job? = null
+
+    /** The running Best matches search; a new query cancels it. */
+    private var bestJob: kotlinx.coroutines.Job? = null
+
+    /** The running dictionary lookup for the Define card; a new query cancels it. */
+    private var defineJob: kotlinx.coroutines.Job? = null
     private val _state = MutableStateFlow(State(query = initialQuery))
     val state: StateFlow<State> = _state.asStateFlow()
 
@@ -125,7 +206,19 @@ class SearchViewModel(
     var searchText by mutableStateOf(initialQuery)
         private set
 
+    /**
+     * The library's names, read from the first spoken search (or typed search that found nothing) on, so they are ready
+     * by the time they're wanted. Declared before [init]: its search may ask for them straight away.
+     */
+    private val names: StateFlow<List<String>> by lazy { spokenNames.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList()) }
+
+    /** The last query that came from the mic: its suggestion is the spoken one, not a typed one. */
+    private var lastSpoken: String? = null
+
     init {
+        // The embedder loads while the query is typed, not after it (Plan SQ: 2.6 s on the Pixel 6's first query).
+        best?.let { source -> viewModelScope.launch(matching) { source.warm() } }
+        viewModelScope.launch(matching) { search.warm() }
         viewModelScope.launch {
             sessions.recentSearches().collect { recent -> _state.update { it.copy(recent = recent) } }
         }
@@ -141,6 +234,9 @@ class SearchViewModel(
                 wait
             }.distinctUntilChanged().collectLatest { request ->
                 val q = request.text
+                nearJob?.cancel()
+                bestJob?.cancel()
+                defineJob?.cancel()
                 // A refresh keeps the groups opened with Show all.
                 val again = q == lastText
                 lastText = q
@@ -148,16 +244,69 @@ class SearchViewModel(
                     _state.update {
                         it.copy(
                             titles = emptyList(), media = MediaResults(), fullText = emptyList(), books = emptyList(), searching = false,
+                            best = emptyList(), bestLoading = false, bestWords = emptyList(), define = null, medical = false,
                             expanded = emptySet(), capped = emptySet(),
                         )
                     }
                     return@collectLatest
                 }
-                _state.update { it.copy(searching = true, expanded = if (again) it.expanded else emptySet(), capped = emptySet()) }
+                _state.update {
+                    it.copy(
+                        searching = true, expanded = if (again) it.expanded else emptySet(), capped = emptySet(),
+                        medical = looksMedical(q),
+                        // A typed suggestion belongs to the query it was made for.
+                        didYouMean = if (it.typedSuggestion) null else it.didYouMean, typedSuggestion = false,
+                        define = if (again) it.define else null,
+                    )
+                }
+                // A single word may have a dictionary entry: a small Define card above the results (Plan SQ Task 5.4).
+                define?.takeIf { isOneWord(q) }?.let { lookup ->
+                    defineJob = viewModelScope.launch {
+                        val entry = try {
+                            withContext(matching) { lookup.entry(q) }
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            null
+                        }
+                        if (query.value.text == q) _state.update { it.copy(define = entry) }
+                    }
+                }
+                // Best matches search by meaning too: they wait for a longer pause than the keystroke debounce, unless the
+                // query was submitted (a refresh), and the next query cancels them.
+                best?.let { source ->
+                    val submitted = request.generation > 0
+                    bestJob = viewModelScope.launch {
+                        if (!submitted) kotlinx.coroutines.delay(BEST_PAUSE_MS)
+                        _state.update { it.copy(bestLoading = true) }
+                        try {
+                            // The meaning hits first, then the merged ranking (Plan SQ: ~1.7 s and ~3.5 s on the Pixel 6).
+                            source.stream(q).collect { found ->
+                                if (query.value.text == q) _state.update { it.copy(best = found.matches, bestLoading = !found.final, bestWords = found.keywords) }
+                            }
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            if (query.value.text == q) _state.update { it.copy(bestLoading = false) }
+                        }
+                    }
+                }
                 // Each group's results land with its cap, so its Show all label is right from the first frame.
                 val titles = search.titles(q)
                 _state.update {
                     it.copy(titles = titles.hits, capped = it.capped.cap(SearchGroup.TITLES, titles.hits.size, titles.more))
+                }
+                // Titles a slip away (Plan SQ: typos) take longer: they arrive beside the other groups, placed after the
+                // ranked titles. The next query cancels them.
+                nearJob = viewModelScope.launch {
+                    val found = try {
+                        search.nearTitles(q, titles.hits)
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        emptyList()
+                    }
+                    if (found.isNotEmpty() && query.value.text == q) _state.update { it.copy(titles = titles.withNear(found)) }
                 }
                 // The media index is in memory and quick; a failure there must not cost the article and book results.
                 val found = try {
@@ -191,8 +340,24 @@ class SearchViewModel(
                         capped = it.capped.cap(SearchGroup.FULL_TEXT, allText.size),
                     )
                 }
+                // Typed and found nothing by its words: the library name it most likely meant, offered, never applied
+                // (Plan SQ Task 4.5). A spoken search has its own suggestion.
+                if (_state.value.keywordsFoundNothing && _state.value.didYouMean == null) suggestTyped(q)
             }
         }
+    }
+
+    private suspend fun suggestTyped(q: String) {
+        if (q == lastSpoken) return
+        val library = withTimeoutOrNull(NAMES_WAIT_MS) { names.first { it.isNotEmpty() } } ?: names.value
+        val match = withContext(matching) { SpokenTitleMatcher.best(q, library) } ?: return
+        if (SpokenTitleMatcher.normalize(match.name) == SpokenTitleMatcher.normalize(q)) return
+        if (query.value.text == q) _state.update { it.copy(didYouMean = match.name, typedSuggestion = true) }
+    }
+
+    /** Narrows the results to [filter] (All shows everything again). */
+    fun setFilter(filter: SearchFilter) {
+        _state.update { it.copy(filter = filter) }
     }
 
     fun onQueryChange(text: String) {
@@ -213,8 +378,6 @@ class SearchViewModel(
     val micShown: StateFlow<Boolean> = voice?.status?.map { it.micShown }?.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
         ?: MutableStateFlow(false)
 
-    /** Read from the first spoken search on, so the names are ready by the time the speaker stops. */
-    private val names: StateFlow<List<String>> by lazy { spokenNames.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList()) }
 
     /** The mic: listens, fills the field as the words come, then searches at once and offers "Did you mean". */
     fun speak() {
@@ -222,6 +385,7 @@ class SearchViewModel(
         names.value // starts reading the library's names
         _state.update { it.copy(didYouMean = null) }
         dictation.start(onText = ::setQuery) { heard ->
+            lastSpoken = heard.trim()
             setQuery(heard)
             refresh()
             viewModelScope.launch { suggest(heard) }
@@ -286,7 +450,16 @@ class SearchViewModel(
         if (more || count >= group.fetch) this + group else this
 
     companion object {
+        /** One word of at least two letters: a query the Define card looks up. */
+        fun isOneWord(q: String): Boolean = q.length >= 2 && q.none { it.isWhitespace() } && q.any { it.isLetter() } && q.all { it.isLetter() || it == '-' || it == '\'' || it == '’' }
+
+        /** A medical query, by the same lexicons Ask used (Plan SQ Decision 8). */
+        fun looksMedical(q: String): Boolean =
+            app.granger.core.research.Medical.looksMedical(q) || app.granger.core.research.PersonalMedical.strong(q)
+
         const val DEBOUNCE_MS = 250L
+        /** How much longer than [DEBOUNCE_MS] typing must pause before Best matches are looked for (Plan SQ Decision 5). */
+        const val BEST_PAUSE_MS = 350L
         /** How long "Did you mean" waits for the library's names on the very first spoken search. */
         const val NAMES_WAIT_MS = 2_000L
     }

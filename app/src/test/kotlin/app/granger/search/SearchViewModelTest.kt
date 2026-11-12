@@ -260,9 +260,11 @@ class SearchViewModelTest {
 
         val titles = vm.state.value.titles
         assertThat(titles.map { it.packId to it.title }).containsExactly(
-            "book:granger:peter_pan" to "Peter Pan", "wiki" to "Peter Pan", "wiki" to "Peter Pan (2003 film)",
+            "book:granger:peter_pan" to "Peter Pan", "wiki" to "Peter Pan (2003 film)",
         ).inOrder()
         assertThat(titles.first().author).isEqualTo("J. M. Barrie")
+        // One row per title: the pack's "Peter Pan" is under the book's.
+        assertThat(titles.first().also.map { it.packId to it.title }).containsExactly("wiki" to "Peter Pan")
         // A book id, so the tab opens in the book reader.
         assertThat(BookIds.isBook(titles.first().packId)).isTrue()
         val id = vm.open(titles.first())

@@ -101,6 +101,14 @@ class SidecarsTimeIndexTest {
         assertThat(manager.records.first().filter { it.kind == ItemKind.SIDECAR }).isEmpty()
     }
 
+    @Test fun aKindNoFeatureReadsIsNotQueued() = test {
+        val gqid = SidecarEntry("gqid", "https://github.test/sidecars-1/med.gqid", "6".repeat(64), 300, 1)
+        val all = med.copy(sidecars = listOf(gqid))
+        install(all)
+        Sidecars(manager, wifiOnly = { true }, wanted = { it != SidecarKind.QID_INDEX }).reconcile(catalog(all), manager.records.first())
+        assertThat(manager.records.first().map { it.itemId }).containsExactly("med", "med.timeindex")
+    }
+
     @Test fun removingThePackRemovesItsTimeIndexAndItsFile() = test {
         install(med)
         reconcile(catalog(med))

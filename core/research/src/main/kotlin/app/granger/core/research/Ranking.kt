@@ -17,6 +17,12 @@ data class RankingConfig(
     // Dense retrieval (Plan R1 Task 7, the tuning split's sweep in `tools/eval/merge.py`): see [Ranking.hybrid].
     val denseAlpha: Double = 0.1,
     val cosineFloor: Double = 0.74,
+    /**
+     * The cosine a keyword passage with no dense twin is scored with; null, [cosineFloor] (Ask). Search's Best matches
+     * use 0.66 (Plan SQ, `tools/eval/merge.py` on the dev questions' recorded retrieval: article @5 68% → 70%, @10 72% →
+     * 77%, flat from 0.66 down): the floor let keyword passages push a confident dense hit out of the first ten.
+     */
+    val keywordCosine: Double? = null,
     val denseGate: Double = 0.78,
     val lexicalGate: Double = 1.0,
 )
@@ -132,7 +138,7 @@ object Ranking {
      * Nothing comes back unless the best dense hit reaches [RankingConfig.denseGate] or a keyword passage matches every
      * keyword ([RankingConfig.lexicalGate]): an unanswerable question rarely clears either, and an empty list declines it.
      * Otherwise each keyword passage above [RankingConfig.lexicalThreshold] scores `α·lexical + (1−α)·cosine`, the cosine
-     * of the dense hit with the same text or the floor when it has none, and each dense hit above
+     * of the dense hit with the same text or [RankingConfig.keywordCosine] (the floor) when it has none, and each dense hit above
      * [RankingConfig.cosineFloor] scores the same way. A passage both found is listed once. [weight] multiplies the
      * lexical score and the cosine alike, and at most [RankingConfig.perDocument] are kept per article or chapter.
      */
@@ -158,7 +164,7 @@ object Ranking {
         val cosineOf = dense.associate { textKey(it) to it.cosine!! }
         val scored = kept.map { (p, lex) ->
             val c = cosineOf[textKey(p)]
-            p to (if (c != null) a * lex + (1 - a) * c * weight(p) else a * lex + (1 - a) * config.cosineFloor)
+            p to (if (c != null) a * lex + (1 - a) * c * weight(p) else a * lex + (1 - a) * (config.keywordCosine ?: config.cosineFloor))
         } + weighted.filter { it.second >= config.cosineFloor }.map { (p, cos) ->
             p to a * lexical(p) * weight(p) + (1 - a) * cos
         }

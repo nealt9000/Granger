@@ -1,0 +1,605 @@
+{
+ "seed": 5,
+ "items": [
+  {
+   "query": "shadows of men that can labor no more, drive me away from",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-iliad",
+   "href": "OEBPS/c025.xhtml",
+   "id": "s-en-000"
+  },
+  {
+   "query": "Go to work, labour, young man, struggle ardently and courageously",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-count-of-monte-cristo",
+   "href": "OEBPS/c031.xhtml",
+   "id": "s-en-001"
+  },
+  {
+   "query": "stumbling-block unto thee, nor offense of heart unto my",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-holy-scriptures-jps-1917",
+   "href": "OEBPS/c015.xhtml",
+   "id": "s-en-002"
+  },
+  {
+   "query": "one that is wholly clear from all offense.",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-essays-cotton",
+   "href": "OEBPS/c125.xhtml",
+   "id": "s-en-003"
+  },
+  {
+   "query": "that our husbandmen may have oxen to plow with",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-republic",
+   "href": "OEBPS/c002.xhtml",
+   "id": "s-en-004"
+  },
+  {
+   "query": "foremost Achaeans, knew the Eastern ranks and swart Memnon's armor.",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-aeneid-mackail",
+   "href": "OEBPS/c005.xhtml",
+   "id": "s-en-005"
+  },
+  {
+   "query": "All this labor I was at the expense of, purely from my",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-robinson-crusoe",
+   "href": "OEBPS/c014.xhtml",
+   "id": "s-en-006"
+  },
+  {
+   "query": "earnest now—Lose or win, I daur gae nae farther wi' your honor",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-rob-roy",
+   "href": "OEBPS/c046.xhtml",
+   "id": "s-en-007"
+  },
+  {
+   "query": "of one’s own neighbours, you know.” The weavers and tanners of",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-middlemarch",
+   "href": "OEBPS/c053.xhtml",
+   "id": "s-en-008"
+  },
+  {
+   "query": "be wished that superficial moralists had said less respecting behavior, and outward",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-vindication-of-the-rights-of-woman",
+   "href": "OEBPS/c012.xhtml",
+   "id": "s-en-009"
+  },
+  {
+   "query": "in ignorance of the rumor above-mentioned, still, they had, by some means",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-billy-budd",
+   "href": "OEBPS/c043.xhtml",
+   "id": "s-en-010"
+  },
+  {
+   "query": "went, to the center of the room—leaped, with the agility",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-works-of-edgar-allan-poe-volume-5",
+   "href": "OEBPS/c005.xhtml",
+   "id": "s-en-011"
+  },
+  {
+   "query": "small part of the annual produce of the land and labor of",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-wealth-of-nations",
+   "href": "OEBPS/c031.xhtml",
+   "id": "s-en-012"
+  },
+  {
+   "query": "thousand!” Meanwhile the Gaul, reaching the center of the",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-quo-vadis",
+   "href": "OEBPS/c057.xhtml",
+   "id": "s-en-013"
+  },
+  {
+   "query": "might have had one for the asking, and the Honorable",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-vanity-fair",
+   "href": "OEBPS/c031.xhtml",
+   "id": "s-en-014"
+  },
+  {
+   "query": "Hem did the honors of a prime boiled leg",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-vanity-fair",
+   "href": "OEBPS/c054.xhtml",
+   "id": "s-en-015"
+  },
+  {
+   "query": "often they realized it had been a failure, not what",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-sons-and-lovers",
+   "href": "OEBPS/c014.xhtml",
+   "id": "s-en-016"
+  },
+  {
+   "query": "was hidden, and felt her ardor redouble for this",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-madame-bovary",
+   "href": "OEBPS/c037.xhtml",
+   "id": "s-en-017"
+  },
+  {
+   "query": "able to keep up the same system with hired labour,” said Sviazhsky.",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-anna-karenina",
+   "href": "OEBPS/c097.xhtml",
+   "id": "s-en-018"
+  },
+  {
+   "query": "The funds for maintaining productive labor being the same, the",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-wealth-of-nations",
+   "href": "OEBPS/c024.xhtml",
+   "id": "s-en-019"
+  },
+  {
+   "query": "As I have life and honor, there shall he sit till noon.",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-king-lear",
+   "href": "OEBPS/c003.xhtml",
+   "id": "s-en-020"
+  },
+  {
+   "query": "and, if his identity had not been recognized, at",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-twenty-thousand-leagues-under-the-sea",
+   "href": "OEBPS/c046.xhtml",
+   "id": "s-en-021"
+  },
+  {
+   "query": "of their own honor, irritating the party offended in their memory",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-essays-cotton",
+   "href": "OEBPS/c025.xhtml",
+   "id": "s-en-022"
+  },
+  {
+   "query": "I have recommended that your honour should be appointed a",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-war-and-peace",
+   "href": "OEBPS/c111.xhtml",
+   "id": "s-en-023"
+  },
+  {
+   "query": "color borrow the name, is lodged in the bosom",
+   "kind": "spelling",
+   "language": "en",
+   "book": "book:granger:gc-essays-cotton",
+   "href": "OEBPS/c088.xhtml",
+   "id": "s-en-024"
+  },
+  {
+   "query": "the ghosts vain shadows of men that can labor no more",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-iliad",
+   "href": "OEBPS/c025.xhtml",
+   "id": "s-en-025"
+  },
+  {
+   "query": "to work labour young man struggle ardently and courageously",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-count-of-monte-cristo",
+   "href": "OEBPS/c031.xhtml",
+   "id": "s-en-026"
+  },
+  {
+   "query": "no stumbling-block unto thee nor offense of heart unto my lord",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-holy-scriptures-jps-1917",
+   "href": "OEBPS/c015.xhtml",
+   "id": "s-en-027"
+  },
+  {
+   "query": "to find some one that is wholly clear from all offense",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-essays-cotton",
+   "href": "OEBPS/c125.xhtml",
+   "id": "s-en-028"
+  },
+  {
+   "query": "order that our husbandmen may have oxen to plow",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-republic",
+   "href": "OEBPS/c002.xhtml",
+   "id": "s-en-029"
+  },
+  {
+   "query": "the foremost achaeans knew the eastern ranks and swart memnon's armor",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-aeneid-mackail",
+   "href": "OEBPS/c005.xhtml",
+   "id": "s-en-030"
+  },
+  {
+   "query": "this labor i was at the expense of purely from my",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-robinson-crusoe",
+   "href": "OEBPS/c014.xhtml",
+   "id": "s-en-031"
+  },
+  {
+   "query": "win i daur gae nae farther wi' your honor",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-rob-roy",
+   "href": "OEBPS/c046.xhtml",
+   "id": "s-en-032"
+  },
+  {
+   "query": "of one's own neighbours you know the weavers",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-middlemarch",
+   "href": "OEBPS/c053.xhtml",
+   "id": "s-en-033"
+  },
+  {
+   "query": "moralists had said less respecting behavior and outward observances for",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-vindication-of-the-rights-of-woman",
+   "href": "OEBPS/c012.xhtml",
+   "id": "s-en-034"
+  },
+  {
+   "query": "of the rumor above-mentioned still they had by some means",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-billy-budd",
+   "href": "OEBPS/c043.xhtml",
+   "id": "s-en-035"
+  },
+  {
+   "query": "returned as he went to the center of",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-works-of-edgar-allan-poe-volume-5",
+   "href": "OEBPS/c005.xhtml",
+   "id": "s-en-036"
+  },
+  {
+   "query": "for purchasing gold and silver from their neighbors",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-wealth-of-nations",
+   "href": "OEBPS/c031.xhtml",
+   "id": "s-en-037"
+  },
+  {
+   "query": "two thousand meanwhile the gaul reaching the center of the arena",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-quo-vadis",
+   "href": "OEBPS/c057.xhtml",
+   "id": "s-en-038"
+  },
+  {
+   "query": "she might have had one for the asking and the honorable mrs",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-vanity-fair",
+   "href": "OEBPS/c031.xhtml",
+   "id": "s-en-039"
+  },
+  {
+   "query": "hem did the honors of a prime boiled leg of mutton",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-vanity-fair",
+   "href": "OEBPS/c054.xhtml",
+   "id": "s-en-040"
+  },
+  {
+   "query": "often they realized it had been a failure",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-sons-and-lovers",
+   "href": "OEBPS/c014.xhtml",
+   "id": "s-en-041"
+  },
+  {
+   "query": "which he was hidden and felt her ardor redouble for this",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-madame-bovary",
+   "href": "OEBPS/c037.xhtml",
+   "id": "s-en-042"
+  },
+  {
+   "query": "keep up the same system with hired labour said sviazhsky",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-anna-karenina",
+   "href": "OEBPS/c097.xhtml",
+   "id": "s-en-043"
+  },
+  {
+   "query": "the funds for maintaining productive labor being the",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-wealth-of-nations",
+   "href": "OEBPS/c024.xhtml",
+   "id": "s-en-044"
+  },
+  {
+   "query": "as i have life and honor there shall",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-king-lear",
+   "href": "OEBPS/c003.xhtml",
+   "id": "s-en-045"
+  },
+  {
+   "query": "identity had not been recognized at least the nations united against him",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-twenty-thousand-leagues-under-the-sea",
+   "href": "OEBPS/c046.xhtml",
+   "id": "s-en-046"
+  },
+  {
+   "query": "of their own honor irritating the party offended in",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-essays-cotton",
+   "href": "OEBPS/c025.xhtml",
+   "id": "s-en-047"
+  },
+  {
+   "query": "have recommended that your honour should be appointed a member",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-war-and-peace",
+   "href": "OEBPS/c111.xhtml",
+   "id": "s-en-048"
+  },
+  {
+   "query": "false color borrow the name is lodged in the bosom of the",
+   "kind": "spelling-plain",
+   "language": "en",
+   "book": "book:granger:gc-essays-cotton",
+   "href": "OEBPS/c088.xhtml",
+   "id": "s-en-049"
+  },
+  {
+   "query": "labour, young man, struggle ardently",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-count-of-monte-cristo",
+   "href": "OEBPS/c031.xhtml",
+   "id": "s-en-050"
+  },
+  {
+   "query": "unto thee, nor offense",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-holy-scriptures-jps-1917",
+   "href": "OEBPS/c015.xhtml",
+   "id": "s-en-051"
+  },
+  {
+   "query": "clear from all offense.",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-essays-cotton",
+   "href": "OEBPS/c125.xhtml",
+   "id": "s-en-052"
+  },
+  {
+   "query": "to plow with, and builders",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-republic",
+   "href": "OEBPS/c002.xhtml",
+   "id": "s-en-053"
+  },
+  {
+   "query": "ranks and swart Memnon's armor.",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-aeneid-mackail",
+   "href": "OEBPS/c005.xhtml",
+   "id": "s-en-054"
+  },
+  {
+   "query": "nae farther wi' your honor",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-rob-roy",
+   "href": "OEBPS/c046.xhtml",
+   "id": "s-en-055"
+  },
+  {
+   "query": "of one’s own neighbours",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-middlemarch",
+   "href": "OEBPS/c053.xhtml",
+   "id": "s-en-056"
+  },
+  {
+   "query": "respecting behavior, and outward",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-vindication-of-the-rights-of-woman",
+   "href": "OEBPS/c012.xhtml",
+   "id": "s-en-057"
+  },
+  {
+   "query": "in ignorance of the rumor",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-billy-budd",
+   "href": "OEBPS/c043.xhtml",
+   "id": "s-en-058"
+  },
+  {
+   "query": "center of the room—leaped",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-works-of-edgar-allan-poe-volume-5",
+   "href": "OEBPS/c005.xhtml",
+   "id": "s-en-059"
+  },
+  {
+   "query": "silver from their neighbors.",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-wealth-of-nations",
+   "href": "OEBPS/c031.xhtml",
+   "id": "s-en-060"
+  },
+  {
+   "query": "Gaul, reaching the center",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-quo-vadis",
+   "href": "OEBPS/c057.xhtml",
+   "id": "s-en-061"
+  },
+  {
+   "query": "asking, and the Honorable Mrs.",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-vanity-fair",
+   "href": "OEBPS/c031.xhtml",
+   "id": "s-en-062"
+  },
+  {
+   "query": "honors of a prime boiled",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-vanity-fair",
+   "href": "OEBPS/c054.xhtml",
+   "id": "s-en-063"
+  },
+  {
+   "query": "often they realized it had",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-sons-and-lovers",
+   "href": "OEBPS/c014.xhtml",
+   "id": "s-en-064"
+  },
+  {
+   "query": "her ardor redouble for",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-madame-bovary",
+   "href": "OEBPS/c037.xhtml",
+   "id": "s-en-065"
+  },
+  {
+   "query": "with hired labour,” said Sviazhsky.",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-anna-karenina",
+   "href": "OEBPS/c097.xhtml",
+   "id": "s-en-066"
+  },
+  {
+   "query": "maintaining productive labor being the",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-wealth-of-nations",
+   "href": "OEBPS/c024.xhtml",
+   "id": "s-en-067"
+  },
+  {
+   "query": "have life and honor",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-king-lear",
+   "href": "OEBPS/c003.xhtml",
+   "id": "s-en-068"
+  },
+  {
+   "query": "recognized, at least, the",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-twenty-thousand-leagues-under-the-sea",
+   "href": "OEBPS/c046.xhtml",
+   "id": "s-en-069"
+  },
+  {
+   "query": "own honor, irritating the party",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-essays-cotton",
+   "href": "OEBPS/c025.xhtml",
+   "id": "s-en-070"
+  },
+  {
+   "query": "honour should be appointed",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-war-and-peace",
+   "href": "OEBPS/c111.xhtml",
+   "id": "s-en-071"
+  },
+  {
+   "query": "a false color borrow",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-essays-cotton",
+   "href": "OEBPS/c088.xhtml",
+   "id": "s-en-072"
+  },
+  {
+   "query": "inclinations in my favor.",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-tom-jones",
+   "href": "OEBPS/c070.xhtml",
+   "id": "s-en-073"
+  },
+  {
+   "query": "he had recognized her.",
+   "kind": "spelling-short",
+   "language": "en",
+   "book": "book:granger:gc-don-quixote",
+   "href": "OEBPS/c050.xhtml",
+   "id": "s-en-074"
+  }
+ ]
+}

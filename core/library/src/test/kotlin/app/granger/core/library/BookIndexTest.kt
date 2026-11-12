@@ -134,8 +134,8 @@ class BookIndexTest {
 
     private fun test(block: suspend TestScope.() -> Unit) = runTest(dispatcher) { block() }
 
-    private suspend fun add(ref: String, vararg chapters: String, title: String = ref): Book =
-        shelf.addDownloaded(TestEpubs.build(grangerDir, "${ref}_2026-01-01.epub", title = title, chapters = chapters.toList()), BookOrigin.GRANGER, ref)!!
+    private suspend fun add(ref: String, vararg chapters: String, title: String = ref, date: String = "2020-01-02"): Book =
+        shelf.addDownloaded(TestEpubs.build(grangerDir, "${ref}_2026-01-01.epub", title = title, date = date, chapters = chapters.toList()), BookOrigin.GRANGER, ref)!!
 
     private fun chunkSequence(): Long =
         db.query("SELECT seq FROM sqlite_sequence WHERE name = 'book_chunks'", null).use { if (it.moveToFirst()) it.getLong(0) else 0L }
@@ -154,6 +154,33 @@ class BookIndexTest {
         assertThat(index.search("surf").map { it.href }).containsExactly("OEBPS/c002.xhtml")
         assertThat(index.search("call ishm").map { it.href }).containsExactly("OEBPS/c001.xhtml")
         assertThat(shelf.book(moby.id)!!.indexedAt).isEqualTo(5L)
+    }
+
+    @Test fun aQuoteIsFoundAsAPhraseOrWithAWordLeftOut() = test {
+        val hamlet = add("hamlet", "<p>The play opens on the battlements.</p>",
+            "<p>Alas, poor Yorick! I knew him, Horatio: a fellow of infinite jest.</p>", title = "Hamlet")
+        add("other", "<p>A poor fellow knew him well, and Yorick was a name he had heard.</p>", title = "Other")
+        index.indexPending()
+
+        val quote = index.quoted("alas poor yorick i knew him").single()
+        assertThat(quote.book.id).isEqualTo(hamlet.id)
+        assertThat(quote.href).isEqualTo("OEBPS/c002.xhtml")
+        assertThat(quote.text).contains("Alas, poor Yorick")
+        // Remembered with a word left out: the words still sit close together in Hamlet alone.
+        assertThat(index.quoted("I knew him Horatio a of infinite jest").map { it.book.id }).containsExactly(hamlet.id)
+        // Too short to be a quote; words that are only near each other in no book.
+        assertThat(index.quoted("poor yorick")).isEmpty()
+        assertThat(index.quoted("Yorick fellow name battlements")).isEmpty()
+    }
+
+    @Test fun aQuotedLineGoesToTheOldestBookThatHasIt() = test {
+        // Indexed first, and each quotes the line once, as Hamlet says it once.
+        add("shandy", "<p>Alas, poor Yorick! said my uncle Toby.</p>", title = "Tristram Shandy", date = "1759")
+        add("times", "<p>He sighed: alas, poor Yorick, and went out.</p>", title = "Hard Times", date = "1854")
+        val hamlet = add("hamlet", "<p>Let me see. Alas, poor Yorick. I knew him, Horatio.</p>", title = "Hamlet", date = "1603")
+        index.indexPending()
+
+        assertThat(index.quoted("Alas, poor Yorick", limit = 1).map { it.book.id }).containsExactly(hamlet.id)
     }
 
     @Test fun hitsAreGroupedByBookAndLimited() = test {
@@ -297,6 +324,22 @@ class BookIndexTest {
         assertThat(index.search("")).isEmpty()
         assertThat(index.search("- * : ( )")).isEmpty()
         assertThat(index.search("NEAR hello*")).isEmpty()
+    }
+
+    @Test fun eitherSpellingOfAWordFindsTheOther() = test {
+        val clouds = add("clouds", "<p>Pas. For the twelve minae, which you received when you were buying the dapple-gray horse.</p>",
+            title = "The Clouds")
+        index.indexPending()
+
+        val hit = index.search("the dapple-grey horse").single()
+        assertThat(hit.bookId).isEqualTo(clouds.id)
+        assertThat(hit.snippet).contains("<b>dapple-gray</b>")
+        assertThat(hit.quote!!.highlight).isEqualTo("the dapple-gray horse")
+        assertThat(index.search("dapple grey").map { it.bookId }).containsExactly(clouds.id)
+        assertThat(index.quoted("buying the dapple grey horse").map { it.book.id }).containsExactly(clouds.id)
+        assertThat(index.passages(listOf("grey horse")).map { it.book.id }).containsExactly(clouds.id)
+        // A word with no other spelling still has to be there.
+        assertThat(index.search("dapple grey mare")).isEmpty()
     }
 
     @Test fun passagesMatchAnyKeyword() = test {

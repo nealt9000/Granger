@@ -26,7 +26,7 @@
         <item quantity="many">%1$s documentos</item>
         <item quantity="other">%1$s documentos</item>
     </plurals>
-    <!-- "Searchable in full" is "buscable por completo" throughout: Buscar and Preguntar can read the whole book. -->
+    <!-- "Searchable in full" is "buscable por completo" throughout: Buscar can read the whole book. -->
     <plurals name="library_searchable_in_full">
         <item quantity="one">%1$s buscable por completo</item>
         <item quantity="many">%1$s buscables por completo</item>
@@ -66,9 +66,9 @@
     </plurals>
     <string name="library_make_searchable_title">¿Hacer todos buscables?</string>
     <plurals name="library_make_searchable_body">
-        <item quantity="one">Copia fuera del paquete %1$s libro aún sin abrir, para que Buscar y Preguntar puedan leerlo completo. Eso ocupa unos %2$s más (%3$s libres). Se hace en segundo plano; puedes salir de esta pantalla.</item>
-        <item quantity="many">Copia fuera del paquete los %1$s libros aún sin abrir, para que Buscar y Preguntar puedan leerlos completos. Eso ocupa unos %2$s más (%3$s libres). Se hace en segundo plano; puedes salir de esta pantalla.</item>
-        <item quantity="other">Copia fuera del paquete los %1$s libros aún sin abrir, para que Buscar y Preguntar puedan leerlos completos. Eso ocupa unos %2$s más (%3$s libres). Se hace en segundo plano; puedes salir de esta pantalla.</item>
+        <item quantity="one">Copia fuera del paquete %1$s libro aún sin abrir, para que Buscar pueda leerlo completo. Eso ocupa unos %2$s más (%3$s libres). Se hace en segundo plano; puedes salir de esta pantalla.</item>
+        <item quantity="many">Copia fuera del paquete los %1$s libros aún sin abrir, para que Buscar pueda leerlos completos. Eso ocupa unos %2$s más (%3$s libres). Se hace en segundo plano; puedes salir de esta pantalla.</item>
+        <item quantity="other">Copia fuera del paquete los %1$s libros aún sin abrir, para que Buscar pueda leerlos completos. Eso ocupa unos %2$s más (%3$s libres). Se hace en segundo plano; puedes salir de esta pantalla.</item>
     </plurals>
     <string name="library_make_searchable">Hacer buscables</string>
     <string name="library_pack_missing">No se encontró el archivo. Vuelve a insertar la tarjeta SD o descarga el paquete de nuevo.</string>

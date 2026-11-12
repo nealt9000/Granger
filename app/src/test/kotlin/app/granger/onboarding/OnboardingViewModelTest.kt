@@ -115,7 +115,12 @@ class OnboardingViewModelTest {
 
     @Test fun thisPhoneWordsTheTierAndAskAsReadinessDoes() = runTest(main.dispatcher) {
         assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.phone.tierLine.en()).isEqualTo("A library phone, with 8.0 GB of memory.")
-        assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.phone.researchLine?.en()).contains("needs a phone with 6 GB")
+        // While Ask rests (Plan SQ) no phone hears about it, so memory isn't blamed.
+        if (app.granger.Features.RESEARCH) {
+            assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.phone.researchLine?.en()).contains("needs a phone with 6 GB")
+        } else {
+            assertThat(viewModel(DeviceTier.LIBRARY_ONLY).ui.value.phone.researchLine).isNull()
+        }
         assertThat(viewModel(DeviceTier.ASK).ui.value.phone.tierLine.en()).isEqualTo("A library phone that can run Ask, with 8.0 GB of memory.")
         // No models in this catalog (a release build's): Ask runs here, but there's nothing to get on the next screen.
         assertThat(viewModel(DeviceTier.ASK).ui.value.phone.researchLine?.en()).isEqualTo("Ask, the librarian, runs on this phone.")

@@ -82,6 +82,7 @@ class EvalActivity : ComponentActivity() {
         intent.getStringExtra("import")?.let { importBooks(root, runId, it); return }
         intent.getStringExtra("remove")?.let { removePacks(root, runId, it); return }
         if (intent.getStringExtra("embedbooks") != null) { embedBooks(root, runId); return }
+        intent.getStringExtra("search")?.let { searchSet(root, runId, it); return }
         val c = (application as GrangerApp).container
         val ids = intent.getStringExtra("ids")
         val groups = intent.getStringExtra("groups")
@@ -147,6 +148,35 @@ class EvalActivity : ComponentActivity() {
             EvalSession.Start.ATTACHED -> log("run $runId is already running; showing its progress")
             EvalSession.Start.BUSY -> log("another eval is running; $runId was not started")
         }
+    }
+
+    /**
+     * Plan SQ Task 1.2: runs the set `eval/<name>` through Search ([SearchEval]) into `eval/<runId>/search.jsonl`, then
+     * `done`. Start with string extras `runId` and `search`.
+     */
+    private fun searchSet(root: File, runId: String, name: String) {
+        val c = (application as GrangerApp).container
+        val set = File(root, name).takeIf { '/' !in name && ".." !in name }
+        if (set == null || !set.exists()) {
+            log("no set at eval/$name")
+            return
+        }
+        val result = EvalSession.start(runId, root, ::log) {
+            val dir = File(root, runId).apply { mkdirs() }
+            c.catalog.load()
+            c.library.refresh()
+            val packs = c.library.packs.first().associate { it.id to (it.name to File(it.filePath).name) }
+            c.embedderWanted.set(true)
+            c.bestMatches.warm() // as Search does when it opens
+            c.search.warm()
+            val eval = SearchEval(c.search, packs, { android.os.SystemClock.elapsedRealtime() }, best = { q -> c.bestMatches.stream(q) }, denseTimings = { c.denseFinder.lastTimings })
+            eval.onItem = { id, n, total -> log("$n / $total $id") }
+            log("search run $runId: ${set.name}, ${packs.size} packs")
+            eval.run(set, File(dir, "search.jsonl"))
+            File(dir, "done").writeText("done\n")
+            log("done $runId")
+        }
+        if (result != EvalSession.Start.STARTED) log("another eval is running; $runId was not started")
     }
 
     /**

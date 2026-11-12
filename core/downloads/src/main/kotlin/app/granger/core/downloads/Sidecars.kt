@@ -67,9 +67,14 @@ data class SidecarFile(val url: String, val sha256: String, val sizeBytes: Long)
  * - once an item's current sidecar of a kind is installed, its older versions are deleted.
  *
  * An item at another snapshot than the catalog's gets none: a sidecar is valid only for the file it was built from.
- * Which phones get vectors is the catalog's business ([Catalog.forBuild]), not this class's.
+ * Which phones get vectors is the catalog's business ([Catalog.forBuild]), not this class's. A kind no switched-on
+ * feature reads isn't queued ([wanted]; Neal, 2026-11-12: no QID index downloads before a feature uses them).
  */
-class Sidecars(private val downloads: Downloads, private val wifiOnly: () -> Boolean) {
+class Sidecars(
+    private val downloads: Downloads,
+    private val wifiOnly: () -> Boolean,
+    private val wanted: (SidecarKind) -> Boolean = { true },
+) {
     private val mutex = Mutex()
 
     suspend fun reconcile(catalog: Catalog?, records: List<DownloadRecord>) = mutex.withLock {
@@ -87,7 +92,7 @@ class Sidecars(private val downloads: Downloads, private val wifiOnly: () -> Boo
                 if (versions.any { it.hash == file.sha256 && it.state == DownloadState.INSTALLED }) {
                     for (old in versions.filter { it.hash != file.sha256 && !it.isActive }) downloads.removeVersion(old.itemId, old.hash)
                 }
-                if (installed == null || versions.any { it.hash == file.sha256 || it.isActive }) continue
+                if (installed == null || !wanted(kind) || versions.any { it.hash == file.sha256 || it.isActive }) continue
                 val relative = downloadSpecOf(item).relativePath
                 val root = installed.filePath.removeSuffix(File.separator + relative).takeIf { it != installed.filePath } ?: continue
                 // Not enough space is a quiet no: the next change to the records tries again.

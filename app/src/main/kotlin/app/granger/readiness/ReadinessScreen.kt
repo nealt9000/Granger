@@ -119,7 +119,7 @@ fun ReadinessContent(
             item(key = "device") {
                 Heading(stringResource(R.string.readiness_this_phone))
                 ListItem(
-                    headlineContent = { Text(stringResource(tierText(ui.tier))) },
+                    headlineContent = { Text(stringResource(tierText(ui.tier, ui.askOn))) },
                     supportingContent = { Text(stringResource(R.string.readiness_memory, formatBytes(ui.totalRamBytes))) },
                 )
                 askCheck?.let { why ->
@@ -221,9 +221,11 @@ fun ReadinessContent(
     }
 }
 
-private fun tierText(tier: DeviceTier) = when (tier) {
-    DeviceTier.LIBRARY_ONLY -> R.string.readiness_tier_library_only
-    DeviceTier.ASK -> R.string.readiness_tier_ask
+private fun tierText(tier: DeviceTier, askOn: Boolean) = when {
+    // While Ask rests on every phone, memory isn't what keeps it off (Plan SQ).
+    !app.granger.Features.RESEARCH -> R.string.readiness_tier_library
+    tier == DeviceTier.LIBRARY_ONLY || !askOn -> R.string.readiness_tier_library_only
+    else -> R.string.readiness_tier_ask
 }
 
 /** A source's line: "Not stored by Granger", or its size and file count, and how many need attention. */

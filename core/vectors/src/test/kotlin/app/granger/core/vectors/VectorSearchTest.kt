@@ -40,6 +40,27 @@ class VectorSearchTest {
         assertThat(found).contains(ref.first())
     }
 
+    /** Plan SQ Task 2.2: a version 2 file is read by its nearest lists; brute force still reads it whole. */
+    @Test fun probesReadOnlyTheNearestListsOfAVersionTwoFile() {
+        val rng = Random(11)
+        // Two tight clusters, one around +x and one around -x.
+        fun around(sign: Float) = List(50) { unit(FloatArray(8) { i -> if (i == 0) sign * 5f else rng.nextFloat() - 0.5f }) }
+        val plus = around(1f)
+        val minus = around(-1f)
+        val file = VectorFile.open(TestGvec.writeLists(tmp.newFile(), listOf(plus, minus)))!!
+        assertThat(file.header.version).isEqualTo(2)
+        assertThat(file.listCount).isEqualTo(2)
+        assertThat(file.listStart(1)).isEqualTo(50)
+        val q = unit(FloatArray(8) { i -> if (i == 0) 1f else 0f })
+        val probed = VectorSearch.top(q, listOf(file), 10, pool, probes = 1)
+        assertThat(probed.map { it.row }.all { it < 50 }).isTrue()
+        // The same answer as reading everything, here where the clusters are apart.
+        assertThat(probed.map { it.row }).containsExactlyElementsIn(VectorSearch.top(q, listOf(file), 10, pool).map { it.row })
+        // A version 1 file alongside is read whole.
+        val v1 = VectorFile.open(TestGvec.write(tmp.newFile(), listOf(q)))!!
+        assertThat(VectorSearch.top(q, listOf(file, v1), 1, pool, probes = 1).single().file).isSameInstanceAs(v1)
+    }
+
     @Test fun queryIsTruncatedToTheFilesDims() {
         val f = VectorFile.open(TestGvec.write(tmp.newFile(), listOf(floatArrayOf(0f, 1f), floatArrayOf(1f, 0f))))!!
         val hits = VectorSearch.top(floatArrayOf(1f, 0f, 9f, 9f), listOf(f), 1, pool)

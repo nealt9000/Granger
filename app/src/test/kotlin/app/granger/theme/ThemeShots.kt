@@ -1086,6 +1086,91 @@ open class ThemeShots {
             ),
         )
     }
+
+    /** Plan SQ Phase 5: Search's results page. The view model searches on the main looper, so it is idled past Best matches' pause. */
+    private fun shootSearch(name: String, vm: app.granger.search.SearchViewModel) {
+        var night by mutableStateOf(true)
+        compose.setContent {
+            GrangerTheme(night = night) {
+                app.granger.search.SearchScreen(
+                    vm, onOpenTab = {}, onOpenBook = { _, _ -> }, onOpenAlbum = {}, onOpenArtist = {}, onOpenAudiobook = {},
+                    onPlaySong = {}, onBack = {}, onGetMore = {},
+                )
+            }
+        }
+        org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper()).idleFor(java.time.Duration.ofMillis(2_000))
+        for (n in listOf(true, false)) {
+            night = n
+            compose.waitForIdle()
+            val bmp = compose.onRoot().captureToImage().asAndroidBitmap()
+            File(out).mkdirs()
+            File(out, "$name-${if (n) "night" else "field"}.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        }
+    }
+
+    private class ShotSearch(
+        val titles: List<app.granger.core.library.SearchHit> = emptyList(),
+        val books: List<app.granger.core.library.BookHit> = emptyList(),
+    ) : app.granger.core.library.LibrarySearch {
+        override suspend fun titles(query: String) = app.granger.core.library.TitleResults(titles)
+        override suspend fun fullText(query: String) = emptyList<app.granger.core.library.SearchHit>()
+        override suspend fun books(query: String) = books
+    }
+
+    private fun bestMatch(kind: app.granger.core.research.SourceKind, title: String, pack: String, before: String, sentence: String) =
+        app.granger.core.research.BestMatches.Match(
+            app.granger.core.research.Passage(kind, pack, title, packTitle = pack, location = title, text = before + sentence),
+            before.length until before.length + sentence.length,
+        )
+
+    private fun bestOf(words: List<String>, vararg m: app.granger.core.research.BestMatches.Match) =
+        app.granger.search.BestMatchSearch { kotlinx.coroutines.flow.flowOf(app.granger.core.research.BestMatches.Result(m.toList(), words, byMeaning = true, final = true)) }
+
+    private val burnMatches = arrayOf(
+        bestMatch(app.granger.core.research.SourceKind.ARTICLE, "Burn", "WikiMed", "Burns are injuries. ", "Cool the burn with cool running water for twenty minutes, and do not use ice."),
+        bestMatch(app.granger.core.research.SourceKind.ARTICLE, "First aid for burns", "Wikivoyage", "", "Remove rings and tight clothing near the burn before it swells."),
+        bestMatch(app.granger.core.research.SourceKind.BOOK, "Chapter XII", "Little Women", "", "Jo burned her hand on the kettle, and Marmee bound it in a cool wet cloth."),
+        bestMatch(app.granger.core.research.SourceKind.ARTICLE, "Sunburn", "WikiMed", "", "A sunburn is a burn from ultraviolet light."),
+    )
+
+    @Test fun searchBest() = shootSearch(
+        "search-best",
+        app.granger.search.SearchViewModel(
+            ShotSearch(
+                titles = listOf(
+                    app.granger.core.library.SearchHit("wikimed", "WikiMed", "Burn", "Burn"),
+                    app.granger.core.library.SearchHit("book:granger:burns", "Granger Classics", "", "Poems of Robert Burns", author = "Robert Burns"),
+                ),
+            ),
+            app.granger.FakeReadingSessions(), "how to treat a burn", best = bestOf(listOf("treat", "burn"), *burnMatches),
+        ),
+    )
+
+    @Config(qualifiers = "+w640dp-h360dp")
+    @Test fun searchBestLandscape() = shootSearch(
+        "search-best-landscape",
+        app.granger.search.SearchViewModel(ShotSearch(), app.granger.FakeReadingSessions(), "how to treat a burn", best = bestOf(listOf("treat", "burn"), *burnMatches)),
+    )
+
+    @Test fun searchDefine() = shootSearch(
+        "search-define",
+        app.granger.search.SearchViewModel(
+            ShotSearch(titles = listOf(app.granger.core.library.SearchHit("wikipedia", "Wikipedia", "Serendipity", "Serendipity"))),
+            app.granger.FakeReadingSessions(), "serendipity",
+            best = bestOf(listOf("serendipity"), bestMatch(app.granger.core.research.SourceKind.ARTICLE, "Serendipity", "Wikipedia", "", "Serendipity is an unplanned fortunate discovery.")),
+            define = app.granger.search.WordEntry {
+                app.granger.core.research.Passage(
+                    app.granger.core.research.SourceKind.ARTICLE, "wikt", "serendipity", packTitle = "Wiktionary", location = "serendipity",
+                    text = "Etymology: Coined by Horace Walpole in 1754.\nNoun: serendipity (usually uncountable, plural serendipities) 1. A combination of events which have come together by chance to make a surprisingly good or wonderful outcome. 2. An unsought, unintended, and unexpected, but fortunate, discovery.",
+                )
+            },
+        ),
+    )
+
+    @Test fun searchEmpty() = shootSearch(
+        "search-empty",
+        app.granger.search.SearchViewModel(ShotSearch(), app.granger.FakeReadingSessions(), "gin joints in casablanca"),
+    )
 }
 
 /**
