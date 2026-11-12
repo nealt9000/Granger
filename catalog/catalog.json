@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-11-10T09:57:26Z",
+  "generatedAt": "2026-11-12T18:37:55Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -49,7 +49,16 @@
         "wikipedia_en_top": 0.955,
         "wikipedia_en_top1m": 0.656
       },
-      "articles": 72901
+      "articles": 72901,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_medicine_nopic_2026-10-10.gqid",
+          "sha256": "1a3d3d1019ccd955ada76ca588c8788ae2074aaceab3d6557a31bf169b0f87c6",
+          "sizeBytes": 5148672,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_medicine_maxi",
@@ -98,7 +107,16 @@
         "wikipedia_en_top": 0.955,
         "wikipedia_en_top1m": 0.656
       },
-      "articles": 72901
+      "articles": 72901,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_medicine_nopic_2026-10-10.gqid",
+          "sha256": "1a3d3d1019ccd955ada76ca588c8788ae2074aaceab3d6557a31bf169b0f87c6",
+          "sizeBytes": 5148672,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_top_nopic",
@@ -146,7 +164,16 @@
       "setLabel": "Best 50,000 articles",
       "articles": 50002,
       "setTitle": "Wikipedia",
-      "setDescription": "The free encyclopedia, from 100 essential articles to all of it."
+      "setDescription": "The free encyclopedia, from 100 essential articles to all of it.",
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_top_nopic_2026-09-14.gqid",
+          "sha256": "7884e60b4074e40d4dbec86b5aa56241946596d0dcb03bb260f3db8f00fede74",
+          "sizeBytes": 5574656,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_top_maxi",
@@ -194,7 +221,16 @@
       "setLabel": "Best 50,000 articles",
       "articles": 50002,
       "setTitle": "Wikipedia",
-      "setDescription": "The free encyclopedia, from 100 essential articles to all of it."
+      "setDescription": "The free encyclopedia, from 100 essential articles to all of it.",
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_top_nopic_2026-09-14.gqid",
+          "sha256": "7884e60b4074e40d4dbec86b5aa56241946596d0dcb03bb260f3db8f00fede74",
+          "sizeBytes": 5574656,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_100",
@@ -225,7 +261,16 @@
       "setLabel": "100 essential articles",
       "articles": 100,
       "setTitle": "Wikipedia",
-      "setDescription": "The free encyclopedia, from 100 essential articles to all of it."
+      "setDescription": "The free encyclopedia, from 100 essential articles to all of it.",
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_100_2026-08.gqid",
+          "sha256": "c88a0d865f044cf7f34d7b2d552a75d7fd3da5199e3962c15b87221f865db495",
+          "sizeBytes": 45056,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_ray-charles_maxi",
@@ -258,7 +303,16 @@
         "wikipedia_en_top1m": 0.704
       },
       "articles": 152,
-      "sample": true
+      "sample": true,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_ray-charles_mini_2026-10.gqid",
+          "sha256": "e528370d9721f81bc8bcdf6ba31ca1616752412cafb19868ca2624a1d7bc2e0f",
+          "sizeBytes": 2768896,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "gutenberg_en_lcc-b",
@@ -433,7 +487,16 @@
         "wikipedia_en_top": 0.991,
         "wikipedia_en_top1m": 0.925
       },
-      "articles": 91985
+      "articles": 91985,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_geography_nopic_2026-10.gqid",
+          "sha256": "00c431471db205fd5271ae3c3cc016bd3494716c44275793a143821b882393a1",
+          "sizeBytes": 7307264,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_physics_maxi",
@@ -482,7 +545,16 @@
         "wikipedia_en_top": 0.954,
         "wikipedia_en_top1m": 0.627
       },
-      "articles": 21783
+      "articles": 21783,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_physics_maxi_2026-10-14.gqid",
+          "sha256": "920528f4aeb85e9d053a84475986a21dd90da56e4a16402848d0ec94c21f753a",
+          "sizeBytes": 1708032,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_chemistry_maxi",
@@ -531,7 +603,16 @@
         "wikipedia_en_top": 0.937,
         "wikipedia_en_top1m": 0.559
       },
-      "articles": 9314
+      "articles": 9314,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_chemistry_maxi_2026-10-15.gqid",
+          "sha256": "1a0fa56c7af6b18831dd0294fe6d8451784af07278e7270f311803f4eba6bb9c",
+          "sizeBytes": 704512,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_mathematics_maxi",
@@ -580,7 +661,16 @@
         "wikipedia_en_top": 0.96,
         "wikipedia_en_top1m": 0.669
       },
-      "articles": 23326
+      "articles": 23326,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_mathematics_maxi_2026-09-15.gqid",
+          "sha256": "82ef2efce888a365f20ad70aa0a817805468bc52b39642c63a859b569a314883",
+          "sizeBytes": 1888256,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_knots_maxi",
@@ -629,7 +719,16 @@
         "wikipedia_en_top": 0.988,
         "wikipedia_en_top1m": 0.693
       },
-      "articles": 599
+      "articles": 599,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_knots_maxi_2026-10-18.gqid",
+          "sha256": "901ece054d796422e0a960f11b37b8407050704a5c9c1d0f8967ade342f08c04",
+          "sizeBytes": 65536,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "ifixit_en_all",
@@ -714,7 +813,16 @@
       "adds": {
         "wikipedia_es_top": 0.864
       },
-      "articles": 19727
+      "articles": 19727,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_medicine_nopic_2026-10-15.gqid",
+          "sha256": "3b0d45e039b60cde31286a118c48a02d2537dcc3435c80d4bf51fbe8b1cc52cf",
+          "sizeBytes": 1601536,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_medicine_maxi",
@@ -766,7 +874,16 @@
       "adds": {
         "wikipedia_es_top": 0.864
       },
-      "articles": 19727
+      "articles": 19727,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_medicine_nopic_2026-10-15.gqid",
+          "sha256": "3b0d45e039b60cde31286a118c48a02d2537dcc3435c80d4bf51fbe8b1cc52cf",
+          "sizeBytes": 1601536,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_top_nopic",
@@ -822,7 +939,16 @@
           "setTitle": "Wikipedia in Spanish",
           "setDescription": "The free encyclopedia in Spanish, from the best 50,000 articles to all of it."
         }
-      }
+      },
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_top_nopic_2026-10-10.gqid",
+          "sha256": "1eda60cef9f5aa9d79915f4e81c427343a3173ab6c7003a054e9081326feca3f",
+          "sizeBytes": 5636096,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_top_maxi",
@@ -878,7 +1004,16 @@
           "setTitle": "Wikipedia in Spanish",
           "setDescription": "The free encyclopedia in Spanish, from the best 50,000 articles to all of it."
         }
-      }
+      },
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_top_nopic_2026-10-10.gqid",
+          "sha256": "1eda60cef9f5aa9d79915f4e81c427343a3173ab6c7003a054e9081326feca3f",
+          "sizeBytes": 5636096,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_all_nopic",
@@ -917,7 +1052,16 @@
           "setTitle": "Wikipedia in Spanish",
           "setDescription": "The free encyclopedia in Spanish, from the best 50,000 articles to all of it."
         }
-      }
+      },
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_all_mini_2026-10.gqid",
+          "sha256": "2b795f59921c070dd304ad35090ee394f5aaf1e0612477f904a32794e20ea79a",
+          "sizeBytes": 198389760,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_all_maxi",
@@ -956,7 +1100,16 @@
           "setTitle": "Wikipedia in Spanish",
           "setDescription": "The free encyclopedia in Spanish, from the best 50,000 articles to all of it."
         }
-      }
+      },
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_all_mini_2026-10.gqid",
+          "sha256": "2b795f59921c070dd304ad35090ee394f5aaf1e0612477f904a32794e20ea79a",
+          "sizeBytes": 198389760,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wiktionary_es_all_nopic",
@@ -19984,7 +20137,16 @@
         "wikipedia_en_top": 0.978,
         "wikipedia_en_top1m": 0.74
       },
-      "articles": 28272
+      "articles": 28272,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_astronomy_nopic_2026-08.gqid",
+          "sha256": "165ba12e38918400f261253ef01b345a901ded455956c8e8adf75dc328027329",
+          "sizeBytes": 1957888,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_astronomy_nopic",
@@ -20016,7 +20178,16 @@
         "wikipedia_en_top": 0.978,
         "wikipedia_en_top1m": 0.74
       },
-      "articles": 28272
+      "articles": 28272,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_astronomy_nopic_2026-08.gqid",
+          "sha256": "165ba12e38918400f261253ef01b345a901ded455956c8e8adf75dc328027329",
+          "sizeBytes": 1957888,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_basketball_maxi",
@@ -20046,7 +20217,16 @@
       "adds": {
         "wikipedia_es_top": 0.984
       },
-      "articles": 12461
+      "articles": 12461,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_basketball_nopic_2026-09.gqid",
+          "sha256": "2e6d27c048f28007eeb8e520e835375bd3d54f8e01983409c26e78645d80489d",
+          "sizeBytes": 1089536,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_basketball_nopic",
@@ -20076,7 +20256,16 @@
       "adds": {
         "wikipedia_es_top": 0.984
       },
-      "articles": 12461
+      "articles": 12461,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_basketball_nopic_2026-09.gqid",
+          "sha256": "2e6d27c048f28007eeb8e520e835375bd3d54f8e01983409c26e78645d80489d",
+          "sizeBytes": 1089536,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_baseball_maxi",
@@ -20108,7 +20297,16 @@
         "wikipedia_en_top": 0.991,
         "wikipedia_en_top1m": 0.825
       },
-      "articles": 50622
+      "articles": 50622,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_baseball_nopic_2026-09.gqid",
+          "sha256": "3910ab8da8bca8d2d0a4331126dc3fcd59c1a7bc9be50ce9d1a2648c0970c3e7",
+          "sizeBytes": 3321856,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_baseball_nopic",
@@ -20140,7 +20338,16 @@
         "wikipedia_en_top": 0.991,
         "wikipedia_en_top1m": 0.825
       },
-      "articles": 50622
+      "articles": 50622,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_baseball_nopic_2026-09.gqid",
+          "sha256": "3910ab8da8bca8d2d0a4331126dc3fcd59c1a7bc9be50ce9d1a2648c0970c3e7",
+          "sizeBytes": 3321856,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_basketball_maxi",
@@ -20172,7 +20379,16 @@
         "wikipedia_en_top": 0.994,
         "wikipedia_en_top1m": 0.853
       },
-      "articles": 37018
+      "articles": 37018,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_basketball_nopic_2026-09.gqid",
+          "sha256": "eb6b36934861c58bcf8837ba9c128bb5a376fa8e2eb2b68f9156edbd9d00a909",
+          "sizeBytes": 2748416,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_basketball_nopic",
@@ -20204,7 +20420,16 @@
         "wikipedia_en_top": 0.994,
         "wikipedia_en_top1m": 0.853
       },
-      "articles": 37018
+      "articles": 37018,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_basketball_nopic_2026-09.gqid",
+          "sha256": "eb6b36934861c58bcf8837ba9c128bb5a376fa8e2eb2b68f9156edbd9d00a909",
+          "sizeBytes": 2748416,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_top_mini",
@@ -20243,7 +20468,16 @@
       "setLabel": "Best 50,000 articles",
       "articles": 50002,
       "setTitle": "Wikipedia",
-      "setDescription": "The free encyclopedia, from 100 essential articles to all of it."
+      "setDescription": "The free encyclopedia, from 100 essential articles to all of it.",
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_top_nopic_2026-09-14.gqid",
+          "sha256": "7884e60b4074e40d4dbec86b5aa56241946596d0dcb03bb260f3db8f00fede74",
+          "sizeBytes": 5574656,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_molcell_maxi",
@@ -20273,7 +20507,16 @@
       "adds": {
         "wikipedia_es_top": 0.856
       },
-      "articles": 5630
+      "articles": 5630,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_molcell_nopic_2026-10.gqid",
+          "sha256": "acf8062522bb38027dcf810bd5d17882bbd0feead01278436cbb702761a084b0",
+          "sizeBytes": 401408,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_molcell_nopic",
@@ -20303,7 +20546,16 @@
       "adds": {
         "wikipedia_es_top": 0.856
       },
-      "articles": 5630
+      "articles": 5630,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_molcell_nopic_2026-10.gqid",
+          "sha256": "acf8062522bb38027dcf810bd5d17882bbd0feead01278436cbb702761a084b0",
+          "sizeBytes": 401408,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "bitcoin_en_all_maxi",
@@ -20404,7 +20656,16 @@
         "wikipedia_en_top": 0.996,
         "wikipedia_en_top1m": 0.83
       },
-      "articles": 28391
+      "articles": 28391,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_indian-cinema_nopic_2026-10.gqid",
+          "sha256": "1ddcd13694c65436e5c423be1bdf737c62b078c26588ca4bf718e54f58eea6dc",
+          "sizeBytes": 2764800,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_indian-cinema_nopic",
@@ -20436,7 +20697,16 @@
         "wikipedia_en_top": 0.996,
         "wikipedia_en_top1m": 0.83
       },
-      "articles": 28391
+      "articles": 28391,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_indian-cinema_nopic_2026-10.gqid",
+          "sha256": "1ddcd13694c65436e5c423be1bdf737c62b078c26588ca4bf718e54f58eea6dc",
+          "sizeBytes": 2764800,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_climate-change_maxi",
@@ -20466,7 +20736,16 @@
       "adds": {
         "wikipedia_es_top": 0.853
       },
-      "articles": 1303
+      "articles": 1303,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_climate-change_mini_2026-10.gqid",
+          "sha256": "88282bda595d8ea2f24a28198bfeef2c7fa1b712df9b932a1dc1b69195e3cf81",
+          "sizeBytes": 192512,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_climate-change_mini",
@@ -20496,7 +20775,16 @@
       "adds": {
         "wikipedia_es_top": 0.853
       },
-      "articles": 1303
+      "articles": 1303,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_climate-change_mini_2026-10.gqid",
+          "sha256": "88282bda595d8ea2f24a28198bfeef2c7fa1b712df9b932a1dc1b69195e3cf81",
+          "sizeBytes": 192512,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_climate-change_nopic",
@@ -20526,7 +20814,16 @@
       "adds": {
         "wikipedia_es_top": 0.853
       },
-      "articles": 1303
+      "articles": 1303,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_climate-change_mini_2026-10.gqid",
+          "sha256": "88282bda595d8ea2f24a28198bfeef2c7fa1b712df9b932a1dc1b69195e3cf81",
+          "sizeBytes": 192512,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_chemistry_mini",
@@ -20566,7 +20863,16 @@
         "wikipedia_en_top": 0.937,
         "wikipedia_en_top1m": 0.559
       },
-      "articles": 9314
+      "articles": 9314,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_chemistry_maxi_2026-10-15.gqid",
+          "sha256": "1a0fa56c7af6b18831dd0294fe6d8451784af07278e7270f311803f4eba6bb9c",
+          "sizeBytes": 704512,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_chemistry_nopic",
@@ -20615,7 +20921,16 @@
         "wikipedia_en_top": 0.937,
         "wikipedia_en_top1m": 0.559
       },
-      "articles": 9314
+      "articles": 9314,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_chemistry_maxi_2026-10-15.gqid",
+          "sha256": "1a0fa56c7af6b18831dd0294fe6d8451784af07278e7270f311803f4eba6bb9c",
+          "sizeBytes": 704512,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "theworldfactbook_en_all",
@@ -20668,7 +20983,16 @@
       "adds": {
         "wikipedia_es_top": 0.948
       },
-      "articles": 72361
+      "articles": 72361,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_movies_nopic_2026-10.gqid",
+          "sha256": "11cdfc41f6c8309db6ba8e4aa44354d41718b82a6ca6a0df5c9385561087970c",
+          "sizeBytes": 9568256,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_movies_nopic",
@@ -20698,7 +21022,16 @@
       "adds": {
         "wikipedia_es_top": 0.948
       },
-      "articles": 72361
+      "articles": 72361,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_movies_nopic_2026-10.gqid",
+          "sha256": "11cdfc41f6c8309db6ba8e4aa44354d41718b82a6ca6a0df5c9385561087970c",
+          "sizeBytes": 9568256,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "citizendium.org_en_all_maxi",
@@ -20753,7 +21086,16 @@
         "wikipedia_en_top": 0.923,
         "wikipedia_en_top1m": 0.572
       },
-      "articles": 3701
+      "articles": 3701,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_climate-change_mini_2026-10.gqid",
+          "sha256": "640c5604c243aa5dd47626b1479bbf6ef95696bdbaf4f3635279d379ee8049e6",
+          "sizeBytes": 380928,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_climate-change_mini",
@@ -20785,7 +21127,16 @@
         "wikipedia_en_top": 0.923,
         "wikipedia_en_top1m": 0.572
       },
-      "articles": 3701
+      "articles": 3701,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_climate-change_mini_2026-10.gqid",
+          "sha256": "640c5604c243aa5dd47626b1479bbf6ef95696bdbaf4f3635279d379ee8049e6",
+          "sizeBytes": 380928,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_climate-change_nopic",
@@ -20817,7 +21168,16 @@
         "wikipedia_en_top": 0.923,
         "wikipedia_en_top1m": 0.572
       },
-      "articles": 3701
+      "articles": 3701,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_climate-change_mini_2026-10.gqid",
+          "sha256": "640c5604c243aa5dd47626b1479bbf6ef95696bdbaf4f3635279d379ee8049e6",
+          "sizeBytes": 380928,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_comics_maxi",
@@ -20849,7 +21209,16 @@
         "wikipedia_en_top": 0.983,
         "wikipedia_en_top1m": 0.693
       },
-      "articles": 21515
+      "articles": 21515,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_comics_nopic_2026-10.gqid",
+          "sha256": "c1f067f02959a0387518305aa5001f903a85efdab5d7ed240b4833282446464e",
+          "sizeBytes": 2027520,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_comics_nopic",
@@ -20881,7 +21250,16 @@
         "wikipedia_en_top": 0.983,
         "wikipedia_en_top1m": 0.693
       },
-      "articles": 21515
+      "articles": 21515,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_comics_nopic_2026-10.gqid",
+          "sha256": "c1f067f02959a0387518305aa5001f903a85efdab5d7ed240b4833282446464e",
+          "sizeBytes": 2027520,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_computer_maxi",
@@ -20913,7 +21291,16 @@
         "wikipedia_en_top": 0.957,
         "wikipedia_en_top1m": 0.62
       },
-      "articles": 43489
+      "articles": 43489,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_computer_nopic_2026-09.gqid",
+          "sha256": "172419e98784ecde1686ded0df630353b504f89099c23d5a5e8542cfc040b953",
+          "sizeBytes": 2818048,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_computer_nopic",
@@ -20945,7 +21332,16 @@
         "wikipedia_en_top": 0.957,
         "wikipedia_en_top1m": 0.62
       },
-      "articles": 43489
+      "articles": 43489,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_computer_nopic_2026-09.gqid",
+          "sha256": "172419e98784ecde1686ded0df630353b504f89099c23d5a5e8542cfc040b953",
+          "sizeBytes": 2818048,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "consumerrights.wiki_en_all_maxi",
@@ -21000,7 +21396,16 @@
         "wikipedia_en_top": 0.997,
         "wikipedia_en_top1m": 0.921
       },
-      "articles": 46252
+      "articles": 46252,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_cricket_nopic_2026-10.gqid",
+          "sha256": "9a0e41b37542766147ba7cbdd1c06c7098718c7a35e689c6206a016044dd81fc",
+          "sizeBytes": 3088384,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_cricket_nopic",
@@ -21032,7 +21437,16 @@
         "wikipedia_en_top": 0.997,
         "wikipedia_en_top1m": 0.921
       },
-      "articles": 46252
+      "articles": 46252,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_cricket_nopic_2026-10.gqid",
+          "sha256": "9a0e41b37542766147ba7cbdd1c06c7098718c7a35e689c6206a016044dd81fc",
+          "sizeBytes": 3088384,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "cyborganthropology.com_en_all_maxi",
@@ -21085,7 +21499,16 @@
       "adds": {
         "wikipedia_es_top": 0.929
       },
-      "articles": 7527
+      "articles": 7527,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_comics_nopic_2026-10.gqid",
+          "sha256": "baa902e7132d3e5798fe49216de5be19d63282f8ffb4bdf812844612dd707587",
+          "sizeBytes": 909312,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_comics_nopic",
@@ -21115,7 +21538,16 @@
       "adds": {
         "wikipedia_es_top": 0.929
       },
-      "articles": 7527
+      "articles": 7527,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_comics_nopic_2026-10.gqid",
+          "sha256": "baa902e7132d3e5798fe49216de5be19d63282f8ffb4bdf812844612dd707587",
+          "sizeBytes": 909312,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "edutechwiki_en_all_maxi",
@@ -21169,7 +21601,16 @@
       "adds": {
         "wikipedia_es_top": 0.946
       },
-      "articles": 8601
+      "articles": 8601,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_venezuela_nopic_2026-09.gqid",
+          "sha256": "e97ed2e79d0c3111e0250acd0f0f133d85407e484f842feb1fb854519c1eba74",
+          "sizeBytes": 811008,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_venezuela_nopic",
@@ -21199,7 +21640,16 @@
       "adds": {
         "wikipedia_es_top": 0.946
       },
-      "articles": 8601
+      "articles": 8601,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_venezuela_nopic_2026-09.gqid",
+          "sha256": "e97ed2e79d0c3111e0250acd0f0f133d85407e484f842feb1fb854519c1eba74",
+          "sizeBytes": 811008,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "finiki_en_all_maxi",
@@ -21254,7 +21704,16 @@
         "wikipedia_en_top": 0.995,
         "wikipedia_en_top1m": 0.85
       },
-      "articles": 308031
+      "articles": 308031,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_football_nopic_2026-10.gqid",
+          "sha256": "63faf64ff636d4dc57fedffb787b2d36c63c0837784a345204d5545faf7600ed",
+          "sizeBytes": 21397504,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_football_nopic",
@@ -21286,7 +21745,16 @@
         "wikipedia_en_top": 0.995,
         "wikipedia_en_top1m": 0.85
       },
-      "articles": 308031
+      "articles": 308031,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_football_nopic_2026-10.gqid",
+          "sha256": "63faf64ff636d4dc57fedffb787b2d36c63c0837784a345204d5545faf7600ed",
+          "sizeBytes": 21397504,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_football_maxi",
@@ -21316,7 +21784,16 @@
       "adds": {
         "wikipedia_es_top": 0.97
       },
-      "articles": 80553
+      "articles": 80553,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_football_nopic_2026-10.gqid",
+          "sha256": "b7c1ca3f37bcf577f509616f8b2bf11592d26abe036edebc23940647727c3153",
+          "sizeBytes": 6737920,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_football_nopic",
@@ -21346,7 +21823,16 @@
       "adds": {
         "wikipedia_es_top": 0.97
       },
-      "articles": 80553
+      "articles": 80553,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_football_nopic_2026-10.gqid",
+          "sha256": "b7c1ca3f37bcf577f509616f8b2bf11592d26abe036edebc23940647727c3153",
+          "sizeBytes": 6737920,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_geography_maxi",
@@ -21384,7 +21870,16 @@
       "adds": {
         "wikipedia_es_top": 0.869
       },
-      "articles": 7752
+      "articles": 7752,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_geography_nopic_2026-10-15.gqid",
+          "sha256": "3686e1d7d7da8a01a9003c6eda4d56c8c826725044c7791dd859b82da12c2127",
+          "sizeBytes": 753664,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_geography_nopic",
@@ -21422,7 +21917,16 @@
       "adds": {
         "wikipedia_es_top": 0.869
       },
-      "articles": 7752
+      "articles": 7752,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_geography_nopic_2026-10-15.gqid",
+          "sha256": "3686e1d7d7da8a01a9003c6eda4d56c8c826725044c7791dd859b82da12c2127",
+          "sizeBytes": 753664,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_geography_nopic",
@@ -21462,7 +21966,16 @@
         "wikipedia_en_top": 0.991,
         "wikipedia_en_top1m": 0.925
       },
-      "articles": 91985
+      "articles": 91985,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_geography_nopic_2026-10.gqid",
+          "sha256": "00c431471db205fd5271ae3c3cc016bd3494716c44275793a143821b882393a1",
+          "sizeBytes": 7307264,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_golf_maxi",
@@ -21494,7 +22007,16 @@
         "wikipedia_en_top": 0.996,
         "wikipedia_en_top1m": 0.898
       },
-      "articles": 12140
+      "articles": 12140,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_golf_nopic_2026-10.gqid",
+          "sha256": "d233355e7efcc96f5dfb1c7130dcd68c8685b32b50f333231b6d492248accce5",
+          "sizeBytes": 860160,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_golf_nopic",
@@ -21526,7 +22048,16 @@
         "wikipedia_en_top": 0.996,
         "wikipedia_en_top1m": 0.898
       },
-      "articles": 12140
+      "articles": 12140,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_golf_nopic_2026-10.gqid",
+          "sha256": "d233355e7efcc96f5dfb1c7130dcd68c8685b32b50f333231b6d492248accce5",
+          "sizeBytes": 860160,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_history_maxi",
@@ -21573,7 +22104,16 @@
       "adds": {
         "wikipedia_es_top": 0.899
       },
-      "articles": 17634
+      "articles": 17634,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_history_nopic_2026-10-14.gqid",
+          "sha256": "3a13681404f78417293f5437ffa43bcbe951044cfc55567d60e787ca973655a3",
+          "sizeBytes": 1679360,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_history_nopic",
@@ -21620,7 +22160,16 @@
       "adds": {
         "wikipedia_es_top": 0.899
       },
-      "articles": 17634
+      "articles": 17634,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_history_nopic_2026-10-14.gqid",
+          "sha256": "3a13681404f78417293f5437ffa43bcbe951044cfc55567d60e787ca973655a3",
+          "sizeBytes": 1679360,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_history_maxi",
@@ -21669,7 +22218,16 @@
         "wikipedia_en_top": 0.968,
         "wikipedia_en_top1m": 0.677
       },
-      "articles": 48733
+      "articles": 48733,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_history_nopic_2026-10-12.gqid",
+          "sha256": "c8167c27fa256769c87b3155294f2eeb16e9a2fd60c3eb20b33b3e1d1521b260",
+          "sizeBytes": 3923968,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_history_nopic",
@@ -21718,7 +22276,16 @@
         "wikipedia_en_top": 0.968,
         "wikipedia_en_top1m": 0.677
       },
-      "articles": 48733
+      "articles": 48733,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_history_nopic_2026-10-12.gqid",
+          "sha256": "c8167c27fa256769c87b3155294f2eeb16e9a2fd60c3eb20b33b3e1d1521b260",
+          "sizeBytes": 3923968,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_ice-hockey_maxi",
@@ -21750,7 +22317,16 @@
         "wikipedia_en_top": 0.997,
         "wikipedia_en_top1m": 0.867
       },
-      "articles": 41982
+      "articles": 41982,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_ice-hockey_nopic_2026-10.gqid",
+          "sha256": "457ed0f236a4a8c1f80c3bbc9dbc81b2c4bceecf84780bec4bc10e5b443abdb6",
+          "sizeBytes": 2760704,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_ice-hockey_nopic",
@@ -21782,7 +22358,16 @@
         "wikipedia_en_top": 0.997,
         "wikipedia_en_top1m": 0.867
       },
-      "articles": 41982
+      "articles": 41982,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_ice-hockey_nopic_2026-10.gqid",
+          "sha256": "457ed0f236a4a8c1f80c3bbc9dbc81b2c4bceecf84780bec4bc10e5b443abdb6",
+          "sizeBytes": 2760704,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_computer_maxi",
@@ -21829,7 +22414,16 @@
       "adds": {
         "wikipedia_es_top": 0.901
       },
-      "articles": 14091
+      "articles": 14091,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_computer_nopic_2026-10-15.gqid",
+          "sha256": "38fa8d6dc7c4953dd0f34cf57ad492918650875ad115f45ba0bfc9a0ef09dc43",
+          "sizeBytes": 1105920,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_computer_nopic",
@@ -21876,7 +22470,16 @@
       "adds": {
         "wikipedia_es_top": 0.901
       },
-      "articles": 14091
+      "articles": 14091,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_computer_nopic_2026-10-15.gqid",
+          "sha256": "38fa8d6dc7c4953dd0f34cf57ad492918650875ad115f45ba0bfc9a0ef09dc43",
+          "sizeBytes": 1105920,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_physics_maxi",
@@ -21923,7 +22526,16 @@
       "adds": {
         "wikipedia_es_top": 0.844
       },
-      "articles": 7848
+      "articles": 7848,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_physics_nopic_2026-10-15.gqid",
+          "sha256": "30f8a5f8e802a842693a71334538afcf4b91726e3857acce3d572b2330474dbb",
+          "sizeBytes": 798720,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_physics_mini",
@@ -21961,7 +22573,16 @@
       "adds": {
         "wikipedia_es_top": 0.844
       },
-      "articles": 7848
+      "articles": 7848,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_physics_nopic_2026-10-15.gqid",
+          "sha256": "30f8a5f8e802a842693a71334538afcf4b91726e3857acce3d572b2330474dbb",
+          "sizeBytes": 798720,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_physics_nopic",
@@ -22008,7 +22629,16 @@
       "adds": {
         "wikipedia_es_top": 0.844
       },
-      "articles": 7848
+      "articles": 7848,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_physics_nopic_2026-10-15.gqid",
+          "sha256": "30f8a5f8e802a842693a71334538afcf4b91726e3857acce3d572b2330474dbb",
+          "sizeBytes": 798720,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "lgbtqia.wiki_en_all_maxi",
@@ -22078,7 +22708,16 @@
           "setTitle": "Wikipedia in Spanish",
           "setDescription": "The free encyclopedia in Spanish, from the best 50,000 articles to all of it."
         }
-      }
+      },
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_top_nopic_2026-10-10.gqid",
+          "sha256": "1eda60cef9f5aa9d79915f4e81c427343a3173ab6c7003a054e9081326feca3f",
+          "sizeBytes": 5636096,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_mathematics_maxi",
@@ -22125,7 +22764,16 @@
       "adds": {
         "wikipedia_es_top": 0.885
       },
-      "articles": 7783
+      "articles": 7783,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_mathematics_nopic_2026-10-14.gqid",
+          "sha256": "ee225f76d432f8f382bfb65d50c4b6e37c85618c86a7120104b72b117c1bb689",
+          "sizeBytes": 872448,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_mathematics_mini",
@@ -22163,7 +22811,16 @@
       "adds": {
         "wikipedia_es_top": 0.885
       },
-      "articles": 7783
+      "articles": 7783,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_mathematics_nopic_2026-10-14.gqid",
+          "sha256": "ee225f76d432f8f382bfb65d50c4b6e37c85618c86a7120104b72b117c1bb689",
+          "sizeBytes": 872448,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_mathematics_nopic",
@@ -22210,7 +22867,16 @@
       "adds": {
         "wikipedia_es_top": 0.885
       },
-      "articles": 7783
+      "articles": 7783,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_mathematics_nopic_2026-10-14.gqid",
+          "sha256": "ee225f76d432f8f382bfb65d50c4b6e37c85618c86a7120104b72b117c1bb689",
+          "sizeBytes": 872448,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_mathematics_mini",
@@ -22242,7 +22908,16 @@
         "wikipedia_en_top": 0.96,
         "wikipedia_en_top1m": 0.669
       },
-      "articles": 23326
+      "articles": 23326,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_mathematics_mini_2026-06.gqid",
+          "sha256": "78202498c2b89233c924dc174d68e9f496fed6f53fd4e60e65f902320e873691",
+          "sizeBytes": 1888256,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_mathematics_nopic",
@@ -22291,7 +22966,16 @@
         "wikipedia_en_top": 0.96,
         "wikipedia_en_top1m": 0.669
       },
-      "articles": 23326
+      "articles": 23326,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_mathematics_maxi_2026-09-15.gqid",
+          "sha256": "82ef2efce888a365f20ad70aa0a817805468bc52b39642c63a859b569a314883",
+          "sizeBytes": 1888256,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "milneopentextbooks.org_en_all",
@@ -22346,7 +23030,16 @@
         "wikipedia_en_top": 0.976,
         "wikipedia_en_top1m": 0.808
       },
-      "articles": 28369
+      "articles": 28369,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_molcell_nopic_2026-10.gqid",
+          "sha256": "b411b0eca2dbfc6a6fcae53b76c44a1b72afc7414101e21dbdc3936d72fc207c",
+          "sizeBytes": 1753088,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_molcell_nopic",
@@ -22378,7 +23071,16 @@
         "wikipedia_en_top": 0.976,
         "wikipedia_en_top1m": 0.808
       },
-      "articles": 28369
+      "articles": 28369,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_molcell_nopic_2026-10.gqid",
+          "sha256": "b411b0eca2dbfc6a6fcae53b76c44a1b72afc7414101e21dbdc3936d72fc207c",
+          "sizeBytes": 1753088,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_movies_maxi",
@@ -22410,7 +23112,16 @@
         "wikipedia_en_top": 0.989,
         "wikipedia_en_top1m": 0.836
       },
-      "articles": 309311
+      "articles": 309311,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_movies_nopic_2026-10.gqid",
+          "sha256": "3430ca7bbe63ecd89c69c1503b5266ea7fdbe0a79ba650d5124dd7cfc151308d",
+          "sizeBytes": 30302208,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_movies_nopic",
@@ -22442,7 +23153,16 @@
         "wikipedia_en_top": 0.989,
         "wikipedia_en_top1m": 0.836
       },
-      "articles": 309311
+      "articles": 309311,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_movies_nopic_2026-10.gqid",
+          "sha256": "3430ca7bbe63ecd89c69c1503b5266ea7fdbe0a79ba650d5124dd7cfc151308d",
+          "sizeBytes": 30302208,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_nollywood_maxi",
@@ -22474,7 +23194,16 @@
         "wikipedia_en_top": 0.997,
         "wikipedia_en_top1m": 0.935
       },
-      "articles": 1916
+      "articles": 1916,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_nollywood_maxi_2026-10.gqid",
+          "sha256": "5f1eb485a9bf214a9f4fdafcfce4a4400b6f6df6f7c41bd2dc37b50918cc7407",
+          "sizeBytes": 192512,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_physics_mini",
@@ -22514,7 +23243,16 @@
         "wikipedia_en_top": 0.954,
         "wikipedia_en_top1m": 0.627
       },
-      "articles": 21783
+      "articles": 21783,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_physics_maxi_2026-10-14.gqid",
+          "sha256": "920528f4aeb85e9d053a84475986a21dd90da56e4a16402848d0ec94c21f753a",
+          "sizeBytes": 1708032,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_physics_nopic",
@@ -22563,7 +23301,16 @@
         "wikipedia_en_top": 0.954,
         "wikipedia_en_top1m": 0.627
       },
-      "articles": 21783
+      "articles": 21783,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_physics_maxi_2026-10-14.gqid",
+          "sha256": "920528f4aeb85e9d053a84475986a21dd90da56e4a16402848d0ec94c21f753a",
+          "sizeBytes": 1708032,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "psiram_en_all_maxi",
@@ -22633,7 +23380,16 @@
       "adds": {
         "wikipedia_es_top": 0.805
       },
-      "articles": 3700
+      "articles": 3700,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_chemistry_nopic_2026-10-15.gqid",
+          "sha256": "3f2c0cd8ea2670f92fcc1df64a8bc8e484436e7b4e6625a71a8615362e454642",
+          "sizeBytes": 319488,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_chemistry_mini",
@@ -22671,7 +23427,16 @@
       "adds": {
         "wikipedia_es_top": 0.805
       },
-      "articles": 3700
+      "articles": 3700,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_chemistry_nopic_2026-10-15.gqid",
+          "sha256": "3f2c0cd8ea2670f92fcc1df64a8bc8e484436e7b4e6625a71a8615362e454642",
+          "sizeBytes": 319488,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_es_chemistry_nopic",
@@ -22718,7 +23483,16 @@
       "adds": {
         "wikipedia_es_top": 0.805
       },
-      "articles": 3700
+      "articles": 3700,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_chemistry_nopic_2026-10-15.gqid",
+          "sha256": "3f2c0cd8ea2670f92fcc1df64a8bc8e484436e7b4e6625a71a8615362e454642",
+          "sizeBytes": 319488,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "rationalwiki_en_all_maxi",
@@ -22797,7 +23571,16 @@
         "wikipedia_en_top1m": 0.704
       },
       "articles": 152,
-      "sample": true
+      "sample": true,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_ray-charles_mini_2026-10.gqid",
+          "sha256": "e528370d9721f81bc8bcdf6ba31ca1616752412cafb19868ca2624a1d7bc2e0f",
+          "sizeBytes": 2768896,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_ray-charles_nopic",
@@ -22830,7 +23613,16 @@
         "wikipedia_en_top1m": 0.704
       },
       "articles": 152,
-      "sample": true
+      "sample": true,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_ray-charles_mini_2026-10.gqid",
+          "sha256": "e528370d9721f81bc8bcdf6ba31ca1616752412cafb19868ca2624a1d7bc2e0f",
+          "sizeBytes": 2768896,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_sociology_maxi",
@@ -22862,7 +23654,16 @@
         "wikipedia_en_top": 0.926,
         "wikipedia_en_top1m": 0.524
       },
-      "articles": 10654
+      "articles": 10654,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_sociology_nopic_2026-10.gqid",
+          "sha256": "42be50fe3568b60c6c68303835c3ef792965db2865a03af99c3c86ad633c9f67",
+          "sizeBytes": 872448,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_sociology_nopic",
@@ -22894,7 +23695,16 @@
         "wikipedia_en_top": 0.926,
         "wikipedia_en_top1m": 0.524
       },
-      "articles": 10654
+      "articles": 10654,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_sociology_nopic_2026-10.gqid",
+          "sha256": "42be50fe3568b60c6c68303835c3ef792965db2865a03af99c3c86ad633c9f67",
+          "sizeBytes": 872448,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_tennis_maxi",
@@ -22926,7 +23736,16 @@
         "wikipedia_en_top": 0.996,
         "wikipedia_en_top1m": 0.866
       },
-      "articles": 45704
+      "articles": 45704,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_tennis_nopic_2026-10.gqid",
+          "sha256": "2228ee886184adaa560d0d99442200efb0cb02d52c27e23bd9ce6f032156f734",
+          "sizeBytes": 4456448,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_tennis_nopic",
@@ -22958,7 +23777,16 @@
         "wikipedia_en_top": 0.996,
         "wikipedia_en_top1m": 0.866
       },
-      "articles": 45704
+      "articles": 45704,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_tennis_nopic_2026-10.gqid",
+          "sha256": "2228ee886184adaa560d0d99442200efb0cb02d52c27e23bd9ce6f032156f734",
+          "sizeBytes": 4456448,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "vikidia_en_all_maxi",
@@ -23190,7 +24018,16 @@
         "wikipedia_en_top": 0.955,
         "wikipedia_en_top1m": 0.656
       },
-      "articles": 72901
+      "articles": 72901,
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_medicine_nopic_2026-10-10.gqid",
+          "sha256": "1a3d3d1019ccd955ada76ca588c8788ae2074aaceab3d6557a31bf169b0f87c6",
+          "sizeBytes": 5148672,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_all_maxi",
@@ -23322,7 +24159,16 @@
           "setTitle": "Wikipedia in Spanish",
           "setDescription": "The free encyclopedia in Spanish, from the best 50,000 articles to all of it."
         }
-      }
+      },
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_es_all_mini_2026-10.gqid",
+          "sha256": "2b795f59921c070dd304ad35090ee394f5aaf1e0612477f904a32794e20ea79a",
+          "sizeBytes": 198389760,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en-simple_all_maxi",
@@ -23428,7 +24274,16 @@
       "setLabel": "Top 1 million articles",
       "articles": 999593,
       "setTitle": "Wikipedia",
-      "setDescription": "The free encyclopedia, from 100 essential articles to all of it."
+      "setDescription": "The free encyclopedia, from 100 essential articles to all of it.",
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_top1m_mini_2026-04.gqid",
+          "sha256": "05e67647d39af139e75a9f447f7d6d29ec83a151d5686857e36de50459afc0e5",
+          "sizeBytes": 94560256,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_top1m_mini",
@@ -23459,7 +24314,16 @@
       "setLabel": "Top 1 million articles",
       "articles": 999593,
       "setTitle": "Wikipedia",
-      "setDescription": "The free encyclopedia, from 100 essential articles to all of it."
+      "setDescription": "The free encyclopedia, from 100 essential articles to all of it.",
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_top1m_mini_2026-04.gqid",
+          "sha256": "05e67647d39af139e75a9f447f7d6d29ec83a151d5686857e36de50459afc0e5",
+          "sizeBytes": 94560256,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikipedia_en_top1m_nopic",
@@ -23490,7 +24354,16 @@
       "setLabel": "Top 1 million articles",
       "articles": 999593,
       "setTitle": "Wikipedia",
-      "setDescription": "The free encyclopedia, from 100 essential articles to all of it."
+      "setDescription": "The free encyclopedia, from 100 essential articles to all of it.",
+      "sidecars": [
+        {
+          "kind": "gqid",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/wikipedia_en_top1m_mini_2026-04.gqid",
+          "sha256": "05e67647d39af139e75a9f447f7d6d29ec83a151d5686857e36de50459afc0e5",
+          "sizeBytes": 94560256,
+          "schemaVersion": 1
+        }
+      ]
     },
     {
       "id": "wikiversity_es_all_maxi",

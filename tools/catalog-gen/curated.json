@@ -991,5 +991,9 @@
   "timeIndex": {
     "releases": "tools/timeindex/releases",
     "releaseUrl": "https://github.com/nealt9000/Granger/releases/download/timeindex-2026-11-08/"
+  },
+  "sidecars": {
+    "releases": "tools/sidecar/releases",
+    "releaseUrl": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/"
   }
 }

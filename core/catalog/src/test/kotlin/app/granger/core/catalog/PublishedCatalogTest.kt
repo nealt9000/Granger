@@ -173,7 +173,7 @@ class PublishedCatalogTest {
             .containsExactly("gemma-4-e2b-gpu", "embeddinggemma-2-text-270m")
     }
 
-    /** Plan E1: a phone too small for Ask sees no search vectors, so a pack's size is its file and its time index alone (H5b). */
+    /** Plan E1: a phone too small for Ask sees no search vectors, so a pack's size is its file, its time index (H5b) and its sidecars (LL0). */
     @Test fun aLibraryPhoneSeesNoSearchVectors() {
         val bytes = repoFile("catalog/catalog.json").readBytes()
         val key = Base64.getDecoder().decode(repoFile("catalog/public-key.txt").readText().trim())
@@ -182,7 +182,7 @@ class PublishedCatalogTest {
 
         val small = catalog.forBuild(includeUnevaluatedModels = false, includeVectors = false)
         assertThat(small.packs.count { it.vectors != null } + small.books.count { it.vectors != null }).isEqualTo(0)
-        assertThat(small.packs.map { it.downloadBytes }).isEqualTo(small.packs.map { it.sizeBytes + (it.timeIndex?.sizeBytes ?: 0L) })
+        assertThat(small.packs.map { it.downloadBytes }).isEqualTo(small.packs.map { it.sizeBytes + (it.timeIndex?.sizeBytes ?: 0L) + it.sidecars.sumOf { s -> s.sizeBytes } })
         assertThat(small.models.map { it.id }).containsExactly("gemma-4-e2b-gpu", "embeddinggemma-2-text-270m")
         assertThat(small.packs.map { it.id }).isEqualTo(catalog.packs.map { it.id })
     }
@@ -206,5 +206,25 @@ class PublishedCatalogTest {
         }
         val small = catalog.forBuild(includeUnevaluatedModels = false, includeVectors = false)
         assertThat(small.packs.filter { it.timeIndex != null }.map { it.id }).isEqualTo(dated.map { it.id })
+    }
+
+    /**
+     * Linked Library LL0: every Wikipedia pack but English all carries its QID index (release sidecars-2026-11-12, 44
+     * files); English all's three wait for LL1's slimming (tools/sidecar/releases/held).
+     */
+    @Test fun publishedCatalogCarriesTheQidIndexes() {
+        val bytes = repoFile("catalog/catalog.json").readBytes()
+        val key = Base64.getDecoder().decode(repoFile("catalog/public-key.txt").readText().trim())
+        val catalog = (CatalogParser.parse(bytes, repoFile("catalog/catalog.json.sig").readBytes(), key) as ParseResult.Ok).catalog
+        val indexed = catalog.packs.filter { p -> p.sidecars.any { it.kind == "gqid" } }
+        assertThat(indexed.map { it.id }).containsAtLeast("wikipedia_en_top_maxi", "wikipedia_es_top_maxi", "wikipedia_es_all_mini")
+        assertThat(indexed.map { it.id }.filter { it.startsWith("wikipedia_en_all_") }).isEmpty()
+        assertThat(indexed.size).isAtLeast(90)
+        for (s in indexed.flatMap { it.sidecars }) {
+            assertThat(s.url).startsWith("https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/")
+            assertThat(s.sha256).hasLength(64)
+            assertThat(s.schemaVersion).isEqualTo(1)
+        }
+        assertThat(catalog.books.count { it.sidecars.isNotEmpty() }).isEqualTo(0)
     }
 }
