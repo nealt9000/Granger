@@ -264,7 +264,7 @@ private fun sizeText(row: DownloadRow): UiText =
  */
 fun downloadsText(context: Context, row: DownloadRow, now: Long = System.currentTimeMillis(), speed: Long? = null): String {
     val parts = mutableListOf<UiText>()
-    if (row.indexOnly) parts += UiText.Res(if (row.timelineDates) R.string.downloads_timeline_dates else R.string.downloads_index_for_ask)
+    if (row.indexOnly) parts += UiText.Res(if (row.timelineDates) R.string.downloads_timeline_dates else R.string.downloads_search_index)
     val notInCatalog = UiText.Res(R.string.downloads_not_in_catalog)
     when (row.state) {
         RowState.RUNNING -> {

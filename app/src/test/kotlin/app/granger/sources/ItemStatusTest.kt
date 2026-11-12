@@ -72,7 +72,10 @@ class ItemStatusTest {
         val e4b = modelEntry("e4b", role = ModelRole.LARGE)
         assertThat(statusOf(e4b, emptyList(), emptyList(), DeviceTier.ASK)).isEqualTo(ItemStatus.NeedsMoreMemory)
         assertThat(statusOf(e2b, emptyList(), emptyList(), DeviceTier.LIBRARY_ONLY)).isEqualTo(ItemStatus.NeedsMoreMemory)
-        assertThat(statusOf(e2b, emptyList(), emptyList(), DeviceTier.ASK)).isEqualTo(ItemStatus.NotInstalled)
+        // While Ask rests (Plan SQ) its model is offered nowhere; the embedder still is.
+        val askModel = if (app.granger.Features.RESEARCH) ItemStatus.NotInstalled else ItemStatus.NeedsMoreMemory
+        assertThat(statusOf(e2b, emptyList(), emptyList(), DeviceTier.ASK)).isEqualTo(askModel)
+        assertThat(statusOf(modelEntry("embed", role = ModelRole.EMBEDDER), emptyList(), emptyList(), DeviceTier.ASK)).isEqualTo(ItemStatus.NotInstalled)
     }
 
     @Test fun installedPackIdFollowsTheZimOrTheFile() {

@@ -14,7 +14,8 @@ data class ChunkKey(val key: String, val ordinal: Int)
 /**
  * A pack's or book's precomputed vectors (`tools/vectors/gvec.py` writes them; the layout is documented there), mapped
  * read-only. Vectors are int8 with one float scale each; each row also carries its chunk text's hash
- * ([app.granger.core.text.Chunkers.hash]) and its [ChunkKey].
+ * ([app.granger.core.text.Chunkers.hash]) and its [ChunkKey]. A version 2 file (`tools/vectors/ivf.py`, Plan SQ) keeps its
+ * rows grouped into lists around [listCount] centroids, so a search can read only the nearest lists ([VectorSearch]).
  */
 class VectorFile private constructor(val file: File, private val channel: FileChannel, private val buf: ByteBuffer, val header: Header) :
     Closeable {
@@ -49,6 +50,25 @@ class VectorFile private constructor(val file: File, private val channel: FileCh
         return ChunkKey(bytes.toString(Charsets.UTF_8), ordinal)
     }
 
+    private val listsAt: Long = if (header.version >= 2) buf.getLong(LISTS_AT) else -1L
+
+    /** How many lists the rows are grouped in; 0 for a version 1 file, read whole. */
+    val listCount: Int = if (listsAt < 0) 0 else buf.getInt(listsAt.toInt())
+
+    private val centroidsAt = listsAt + 4
+    private val centroidScalesAt = centroidsAt + listCount.toLong() * header.dims
+    private val startsAt = centroidScalesAt + 4L * listCount
+
+    /** The first row of list [list]; `listStart(listCount)` is [Header.count]. */
+    fun listStart(list: Int): Int = buf.getInt((startsAt + 4L * list).toInt())
+
+    fun centroidScale(list: Int): Float = buf.getFloat((centroidScalesAt + 4L * list).toInt())
+
+    /** Copies every centroid (listCount × dims int8) into [dst]. */
+    internal fun copyCentroids(dst: ByteArray) {
+        buf.duplicate().apply { position(centroidsAt.toInt()) }.get(dst, 0, listCount * header.dims)
+    }
+
     /** Copies [rows] vectors starting at [from] into [dst] (rows × dims bytes). */
     internal fun copyRows(from: Int, rows: Int, dst: ByteArray) {
         buf.duplicate().apply { position(HEADER + from * header.dims) }.get(dst, 0, rows * header.dims)
@@ -58,10 +78,13 @@ class VectorFile private constructor(val file: File, private val channel: FileCh
 
     companion object {
         const val VERSION = 1
+        /** The newest version read: 2 adds the lists ([listCount]). */
+        const val MAX_VERSION = 2
         private const val HEADER = 128
+        private const val LISTS_AT = 88
         private val MAGIC = "GVEC".toByteArray()
 
-        /** Null for a file that isn't a version-1 vector file or is truncated. */
+        /** Null for a file that isn't a version 1 or 2 vector file, or is truncated. */
         fun open(file: File): VectorFile? {
             val channel = try {
                 RandomAccessFile(file, "r").channel
@@ -81,14 +104,28 @@ class VectorFile private constructor(val file: File, private val channel: FileCh
                 )
                 val keysAt = buf.getLong(80)
                 val blobLengthAt = keysAt + 4L * header.count
-                val fits = header.version == VERSION && header.dims > 0 && header.count >= 0 &&
-                    keysAt == HEADER + header.count.toLong() * (header.dims + 12) && blobLengthAt + 4 <= buf.capacity() &&
-                    blobLengthAt + 4 + (buf.getInt(blobLengthAt.toInt()).toLong() and 0xFFFFFFFFL) == buf.capacity().toLong()
+                val size = buf.capacity().toLong()
+                // Version 1 ends with the key blob; version 2 has the lists section after it (its offset at 88).
+                val blobEnd = if (header.version >= 2) buf.getLong(LISTS_AT) else size
+                val fits = header.version in VERSION..MAX_VERSION && header.dims > 0 && header.count >= 0 &&
+                    keysAt == HEADER + header.count.toLong() * (header.dims + 12) && blobLengthAt + 4 <= size &&
+                    blobLengthAt + 4 + (buf.getInt(blobLengthAt.toInt()).toLong() and 0xFFFFFFFFL) == blobEnd &&
+                    (header.version < 2 || listsFit(buf, blobEnd, header.dims, header.count, size))
                 if (fits) VectorFile(file, channel, buf, header) else null.also { channel.close() }
             } catch (_: IOException) {
                 channel.close()
                 null
             }
+        }
+
+        /** A version 2 file's lists section: n lists of centroids and scales, then n + 1 starts from 0 to count, ending the file. */
+        private fun listsFit(buf: ByteBuffer, at: Long, dims: Int, count: Int, size: Long): Boolean {
+            if (at + 4 > size) return false
+            val n = buf.getInt(at.toInt())
+            if (n <= 0) return false
+            val startsAt = at + 4 + n.toLong() * (dims + 4)
+            if (startsAt + 4L * (n + 1) != size) return false
+            return buf.getInt(startsAt.toInt()) == 0 && buf.getInt((startsAt + 4L * n).toInt()) == count
         }
 
         /**

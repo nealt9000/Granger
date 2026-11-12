@@ -58,6 +58,8 @@ data class CheckRow(
 data class ReadinessUi(
     val loading: Boolean = true,
     val tier: DeviceTier = DeviceTier.LIBRARY_ONLY,
+    /** Ask runs here; false also while Ask is off on every phone ([app.granger.Features.RESEARCH]). */
+    val askOn: Boolean = tier >= DeviceTier.ASK,
     val totalRamBytes: Long = 0,
     val volumes: List<VolumeRow> = emptyList(),
     val models: List<CheckRow> = emptyList(),
@@ -79,6 +81,8 @@ class ReadinessViewModel(
     private val tier: DeviceTier,
     private val totalRamBytes: Long,
     private val appScope: CoroutineScope,
+    /** Ask runs here (the app's `askOn`); off, This phone says Library without blaming its memory. */
+    private val askOn: Boolean = tier >= DeviceTier.ASK,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val quick: (DownloadRecord) -> Integrity = IntegrityChecker::quick,
     private val full: suspend (DownloadRecord, (Float) -> Unit) -> Integrity = { record, progress ->
@@ -104,7 +108,7 @@ class ReadinessViewModel(
         combine(downloads.records, library.packs, sources, checkState) { records, packs, src, chk ->
             // The quick check reads file sizes.
             withContext(io) { build(records, packs, src, chk) }
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ReadinessUi(tier = tier, totalRamBytes = totalRamBytes))
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ReadinessUi(tier = tier, askOn = askOn, totalRamBytes = totalRamBytes))
 
     init {
         // The cached catalog, never the network: the coverage rows read it (spec §8).
@@ -249,6 +253,7 @@ class ReadinessViewModel(
         return ReadinessUi(
             loading = false,
             tier = tier,
+            askOn = askOn,
             totalRamBytes = totalRamBytes,
             volumes = vols.map { VolumeRow(it.root.path, it.label, it.removable, it.freeBytes, it.totalBytes, it.grangerBytes, 0) },
             models = rows.filter { it.isModel },

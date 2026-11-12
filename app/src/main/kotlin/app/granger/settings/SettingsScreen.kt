@@ -147,7 +147,8 @@ fun SettingsScreen(
                 HorizontalDivider()
             }
             item(key = "ask") {
-                SettingsHeader(stringResource(R.string.settings_section_ask))
+                // While Ask rests the Models row (the voices, the embedder) stands without Ask's heading (Plan SQ).
+                if (app.granger.Features.RESEARCH) SettingsHeader(stringResource(R.string.settings_section_ask))
                 LinkRow(stringResource(R.string.settings_models), stringResource(R.string.settings_models_summary), onModels)
                 HorizontalDivider()
             }

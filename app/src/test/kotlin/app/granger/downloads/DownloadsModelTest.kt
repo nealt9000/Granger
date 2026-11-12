@@ -182,7 +182,7 @@ class DownloadsModelTest {
         )
         assertThat(ui.doneToday.map { it.title.text() }).containsExactly("Title noon", "Setting up", "Title morning").inOrder()
         val setup = ui.doneToday[1]
-        assertThat(downloadsText(context, setup, now)).isEqualTo("2 files · 2.1 KB + index for Ask")
+        assertThat(downloadsText(context, setup, now)).isEqualTo("2 files · 2.1 KB + search index")
     }
 
     @Test fun nothingLeftIsEmpty() {
@@ -212,7 +212,7 @@ class DownloadsModelTest {
         assertThat(ui.upNext.map { it.title.text() }).containsExactly("Wikipedia", "Title med").inOrder()
         val index = ui.upNext[0]
         assertThat(index.indexOnly).isTrue()
-        assertThat(downloadsText(context, index, now)).isEqualTo("Index for Ask · 100 B · Next")
+        assertThat(downloadsText(context, index, now)).isEqualTo("Search index · 100 B · Next")
         val med = ui.upNext[1]
         assertThat(med.withIndex).isTrue()
         assertThat(med.itemIds).containsExactly("med", "med.vectors").inOrder()

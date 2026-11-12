@@ -105,6 +105,7 @@ import app.granger.search.SearchScreen
 import app.granger.search.MediaSearch
 import app.granger.search.searchForGroups
 import app.granger.search.SearchViewModel
+import app.granger.search.WordEntry
 import android.content.Context
 import app.granger.media.PlayResumer
 import app.granger.settings.ComponentOtherAppsSharing
@@ -173,6 +174,7 @@ import app.granger.core.ai.ResearchReadiness
 import app.granger.core.research.Passage
 import app.granger.core.research.SourceKind
 import app.granger.research.CitationTarget
+import app.granger.search.BestMatchSearch
 import app.granger.research.citationTab
 import app.granger.research.ResearchScreen
 import app.granger.research.spokenOutcome
@@ -537,6 +539,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             plays = if (Features.PLAYER) container.playback.observeRecentPlays(RailViewModel.SCAN) else flowOf(emptyList()),
             recentPlay = container.playback::recentPlay,
             resumer = if (Features.PLAYER) container.playResumer else null,
+            showChats = container.askOn,
             voice = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub.ui.map { it.now as? NowPlaying.Voice } else flowOf(null),
             stopVoice = { if (Features.PLAYER) container.playerHub.stopVoice() },
         )
@@ -840,14 +843,37 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         reading = readerTabId != null,
     )
 
-    // Research runs only on phones of the ASK tier or better; below that, the rail and the selection menus leave it out.
-    // So does a phone whose model failed its self-check; Readiness says why and can try again.
+    // Research runs only where Ask is on (the feature, and a phone of the ASK tier or better); elsewhere the rail and the
+    // selection menus leave it out. So does a phone whose model failed its self-check; Readiness says why and can try again.
     val askReadiness by container.modelManager.readiness.collectAsStateWithLifecycle()
-    val showResearch = container.deviceTier >= DeviceTier.ASK && askReadiness != ResearchReadiness.FAILED_CHECK
+    val showResearch = container.askOn && askReadiness != ResearchReadiness.FAILED_CHECK
     SideEffect {
         SelectionBridge.researchAvailable = showResearch
         SelectionBridge.readAloudAvailable = Features.READ_ALOUD && Features.PLAYER
     }
+    /** Opens where a cited passage (Ask) or a Best match (Search, Plan SQ) leads, pushed over the screen it came from. */
+    fun openCitation(target: CitationTarget) {
+        scope.launch {
+            val tabId = when (target) {
+                is CitationTarget.Article -> target.tabId
+                is CitationTarget.Book -> target.tabId
+                is CitationTarget.Album -> return@launch nav.navigate(AlbumRoute(target.albumKey, target.trackId))
+                is CitationTarget.Audiobook -> return@launch nav.navigate(AudiobookRoute(target.audiobookId, target.chapter))
+                CitationTarget.Gone -> return@launch
+            }
+            val tab = citationTab(container.sessions, tabId) ?: return@launch
+            when (target) {
+                is CitationTarget.Article -> {
+                    nav.showTab(tab, fragment = target.fragment, quote = target.quote)
+                    if (target.moved) Toast.makeText(appContext, R.string.app_page_moved, Toast.LENGTH_LONG).show()
+                }
+                is CitationTarget.Book -> nav.showTab(tab, target.at)
+                is CitationTarget.Album, is CitationTarget.Audiobook, CitationTarget.Gone -> Unit
+            }
+        }
+    }
+    val matchOpener = remember { app.granger.research.CitationOpener(container.sessions, container.library, container.bookshelf, container.mediaIndex) }
+
     /** Opens [route], replacing a Research chat on top (whose view model would otherwise stay); else pushes it. */
     fun openResearch(route: ResearchRoute, fromChats: Boolean = false) {
         val researchOnTop = nav.currentBackStackEntry?.destination?.hasRoute<ResearchRoute>() == true
@@ -985,7 +1011,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             }
             composable<BrowseRoute> {
                 BrowseScreen(
-                    viewModel { BrowseViewModel(container.shelves, container.library, container.catalog, container.downloads.records, countryCode = container.phoneCountry, knowledge = container.knowledgeLanguages.languages, askOffered = container.deviceTier >= DeviceTier.ASK) },
+                    viewModel { BrowseViewModel(container.shelves, container.library, container.catalog, container.downloads.records, countryCode = container.phoneCountry, knowledge = container.knowledgeLanguages.languages, askOffered = container.askOn) },
                     packsFolder = container.packDirs().firstOrNull()?.path.orEmpty(),
                     downloadsBadge = downloadsBadge,
                     actions = BrowseActions(
@@ -1141,7 +1167,21 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             media = if (Features.PLAYER) MediaSearch { container.mediaIndex.searchForGroups(it) } else MediaSearch { MediaResults() },
                             voice = container.voiceInput,
                             spokenNames = container.spokenTitles.names,
+                            best = object : BestMatchSearch {
+                                override fun stream(query: String) = container.bestStream(query)
+                                override suspend fun warm() = container.bestMatches.warm()
+                            },
+                            define = WordEntry { word ->
+                                container.passageFinder.entry(word, app.granger.core.research.ResearchLanguage.of(word))
+                            },
                         )
+                    },
+                    onOpenMatch = { match ->
+                        scope.launch {
+                            val p = match.passage
+                            val sentence = match.sentence?.let { p.text.substring(it).trim() }
+                            openCitation(matchOpener.open(app.granger.core.library.PassageAddress.of(p, sentence), title = p.sourceTitle))
+                        }
                     },
                     onOpenTab = ::showTab,
                     onOpenBook = { tabId, at ->
@@ -1152,6 +1192,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onOpenAudiobook = { nav.navigate(AudiobookRoute(it)) },
                     onPlaySong = { track -> scope.launch { songs.play(track) } },
                     onBack = { nav.popBackStack() },
+                    onGetMore = { nav.navigate(GetMoreRoute()) { launchSingleTop = true } },
                     voicePrefs = container.voiceInput.prefs,
                 )
             }
@@ -1174,27 +1215,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     voicePrefs = container.voiceInput.prefs,
                     focusInput = route.quote != null,
-                    onOpenCitation = { target ->
-                        // Pushed over the chat (Research isn't a reader), so Back returns to it.
-                        scope.launch {
-                            val tabId = when (target) {
-                                is CitationTarget.Article -> target.tabId
-                                is CitationTarget.Book -> target.tabId
-                                is CitationTarget.Album -> return@launch nav.navigate(AlbumRoute(target.albumKey, target.trackId))
-                                is CitationTarget.Audiobook -> return@launch nav.navigate(AudiobookRoute(target.audiobookId, target.chapter))
-                                CitationTarget.Gone -> return@launch
-                            }
-                            val tab = citationTab(container.sessions, tabId) ?: return@launch
-                            when (target) {
-                                is CitationTarget.Article -> {
-                                    nav.showTab(tab, fragment = target.fragment, quote = target.quote)
-                                    if (target.moved) Toast.makeText(appContext, R.string.app_page_moved, Toast.LENGTH_LONG).show()
-                                }
-                                is CitationTarget.Book -> nav.showTab(tab, target.at)
-                                is CitationTarget.Album, is CitationTarget.Audiobook, CitationTarget.Gone -> Unit
-                            }
-                        }
-                    },
+                    // Pushed over the chat (Research isn't a reader), so Back returns to it.
+                    onOpenCitation = ::openCitation,
                     onSearch = { keywords -> nav.navigate(SearchRoute(keywords)) },
                     onGetModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },
                     librarian = container.librarian.ui.collectAsStateWithLifecycle(null).value,
@@ -1236,7 +1258,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     viewModel = viewModel {
                         SourceViewModel(
                             source, container.catalog, container.downloads, container.library, container.bookshelf, container.volumes,
-                            container.downloadPrefs, container.deviceTier, container.appScope, domain = route.domain,
+                            container.downloadPrefs, container.deviceTier, container.appScope, askOn = container.askOn, meaningSearch = container.meaningSearch, domain = route.domain,
                             family = route.family, knowledge = container.knowledgeLanguages.languages,
                             voiceTitles = app.granger.core.speech.VoiceTitles.of(appContext),
                         )
@@ -1480,7 +1502,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     viewModel = viewModel {
                         OnboardingViewModel(
                             container.catalog, container.library, container.downloads, container.volumes, container.downloadPrefs,
-                            container.deviceTier, container.totalRamBytes, container.onboardingPrefs,
+                            container.deviceTier, container.totalRamBytes, container.onboardingPrefs, askOn = container.askOn,
                             knowledge = container.knowledgeLanguages.languages,
                             setKnowledge = container.knowledgeLanguages::set,
                             phoneLocales = container.appLanguages::phoneLocales,
@@ -1521,13 +1543,13 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     viewModel = viewModel {
                         ReadinessViewModel(
                             container.downloads, container.library, container.bookshelf, container.catalog, container.volumes,
-                            container.deviceTier, container.totalRamBytes, container.appScope,
+                            container.deviceTier, container.totalRamBytes, container.appScope, askOn = container.askOn,
                             knowledge = container.knowledgeLanguages.languages, appLanguage = container.appLanguages.code,
                         )
                     },
                     onBack = { nav.popBackStack() },
                     onOpenKiwix = { domain -> nav.navigate(SourceRoute(CatalogScope.KIWIX, domain)) },
-                    askCheck = container.modelManager.checkFailure.collectAsStateWithLifecycle().value,
+                    askCheck = container.modelManager.checkFailure.collectAsStateWithLifecycle().value.takeIf { container.askOn },
                     onRetryAsk = { container.appScope.launch { container.modelManager.retryCheck() } },
                 )
             }

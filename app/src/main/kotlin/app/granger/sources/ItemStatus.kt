@@ -74,7 +74,9 @@ fun installedPackId(entry: PackEntry, records: List<DownloadRecord>, packs: List
             .firstNotNullOfOrNull { record -> packs.firstOrNull { it.filePath == record.filePath }?.id }
 
 fun DeviceTier.canRun(role: ModelRole): Boolean = when (role) {
-    ModelRole.SMALL, ModelRole.EMBEDDER -> this >= DeviceTier.ASK
+    // Ask's model isn't offered at all while Ask rests (Plan SQ): a preset or a start leaves it out like a phone too small.
+    ModelRole.SMALL -> app.granger.Features.RESEARCH && this >= DeviceTier.ASK
+    ModelRole.EMBEDDER -> this >= DeviceTier.ASK
     // Gemma 4 E4B: too slow and too big on the phones measured (Plan R5 Task 8), and nothing uses it.
     ModelRole.LARGE -> false
 }

@@ -163,7 +163,7 @@ fun VoiceSettingsScreen(viewModel: VoiceSettingsViewModel, onBack: () -> Unit) {
                     trailingContent = { Switch(checked = ui.markSentence, onCheckedChange = viewModel::setMarkSentence, modifier = Modifier.testTag(VoiceSettingsTags.MARK)) },
                 )
             }
-            item(key = "speak-answers") {
+            if (app.granger.Features.RESEARCH) item(key = "speak-answers") {
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.settings_voice_speak_answers)) },
                     supportingContent = { Text(stringResource(R.string.settings_voice_speak_answers_summary)) },

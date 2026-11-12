@@ -145,12 +145,22 @@ class OnboardingModelTest {
         assertThat(trimmed.groups.single().title.en()).isEqualTo("Your picks")
     }
 
-    @Test fun theReviewSaysHowMuchIsAsksIndexes() {
+    @Test fun theReviewSaysHowMuchIsSearchIndexes() {
         val vectors = app.granger.core.catalog.VectorsEntry(sizeBytes = 70)
         val withIndex = med.copy(vectors = vectors)
         val review = OnboardingModel.review(null, emptySet(), Region(withIndex, installed = false), emptyList(), 10_000)
         assertThat(review.bytes).isEqualTo(1_070)
         assertThat(review.indexBytes).isEqualTo(70)
+    }
+
+    @Test fun theEmbedderCountsOnlyWithIndexesToRead() {
+        val withIndex = med.copy(vectors = app.granger.core.catalog.VectorsEntry(sizeBytes = 70))
+        val review = OnboardingModel.review(null, emptySet(), Region(withIndex, installed = false), emptyList(), 10_000).copy(embedderBytes = 165)
+        assertThat(review.bytes).isEqualTo(1_235)
+        assertThat(review.indexBytes).isEqualTo(235)
+        val none = OnboardingModel.review(null, emptySet(), Region(med, installed = false), emptyList(), 10_000).copy(embedderBytes = 165)
+        assertThat(none.bytes).isEqualTo(1_000)
+        assertThat(none.indexBytes).isEqualTo(0)
     }
 
     @Test fun theSuggestedRegionIsThePhonesCountryByNameOrAlias() {

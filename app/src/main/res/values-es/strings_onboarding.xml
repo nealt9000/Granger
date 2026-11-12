@@ -73,7 +73,7 @@
     <string name="onboarding_quick_voice_classics">Primero lo rápido: la voz y los Clásicos llegan en unos minutos.</string>
     <string name="onboarding_quick_voice">Primero lo rápido: la voz llega en unos minutos.</string>
     <string name="onboarding_quick_classics">Primero lo rápido: los Clásicos llegan en unos minutos.</string>
-    <string name="onboarding_indexes">Incluye %1$s de índices para Preguntar, que se descargan después de sus paquetes.</string>
+    <string name="onboarding_indexes">Incluye %1$s para buscar por significado, que se descargan después de sus paquetes.</string>
     <string name="onboarding_wifi_only">Descargar solo con Wi-Fi</string>
     <string name="onboarding_store_on">Guardar en</string>
     <string name="onboarding_volume_free">%1$s · %2$s libres</string>

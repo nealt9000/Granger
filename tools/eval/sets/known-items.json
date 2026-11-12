@@ -1,0 +1,1814 @@
+{
+ "seed": 11,
+ "items": [
+  {
+   "query": "James Buchanon",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "James Buchanan",
+   "path": "James_Buchanan",
+   "id": "ki-en-001"
+  },
+  {
+   "query": "International organization",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "International organization",
+   "path": "International_organization",
+   "id": "ki-en-002"
+  },
+  {
+   "query": "Iranian cultural continent",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Greater Iran",
+   "path": "Greater_Iran",
+   "id": "ki-en-003"
+  },
+  {
+   "query": "Criticism of radical feminism",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Criticism of radical feminism",
+   "path": "Criticism_of_radical_feminism",
+   "id": "ki-en-004"
+  },
+  {
+   "query": "Copartner",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Partnership",
+   "path": "Partnership",
+   "id": "ki-en-005"
+  },
+  {
+   "query": "WellPoint",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Elevance Health",
+   "path": "Elevance_Health",
+   "id": "ki-en-006"
+  },
+  {
+   "query": "Guillain-barre syndrome",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Guillain–Barré syndrome",
+   "path": "Guillain–Barré_syndrome",
+   "id": "ki-en-007"
+  },
+  {
+   "query": "Buccos",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Pittsburgh Pirates",
+   "path": "Pittsburgh_Pirates",
+   "id": "ki-en-008"
+  },
+  {
+   "query": "Boston School of Technology",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Massachusetts Institute of Technology",
+   "path": "Massachusetts_Institute_of_Technology",
+   "id": "ki-en-009"
+  },
+  {
+   "query": "Amethopterin",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Methotrexate",
+   "path": "Methotrexate",
+   "id": "ki-en-010"
+  },
+  {
+   "query": "Sexually stimulate",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Sexual stimulation",
+   "path": "Sexual_stimulation",
+   "id": "ki-en-011"
+  },
+  {
+   "query": "Jose Murinio",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "José Mourinho",
+   "path": "José_Mourinho",
+   "id": "ki-en-012"
+  },
+  {
+   "query": "Matty Roh",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Matty Roh",
+   "path": "Matty_Roh",
+   "id": "ki-en-013"
+  },
+  {
+   "query": "PedoBaptism",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Infant baptism",
+   "path": "Infant_baptism",
+   "id": "ki-en-014"
+  },
+  {
+   "query": "東条 英機",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Hideki Tojo",
+   "path": "Hideki_Tojo",
+   "id": "ki-en-015"
+  },
+  {
+   "query": "National parks in Kuwait",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "National parks in Kuwait",
+   "path": "National_parks_in_Kuwait",
+   "id": "ki-en-016"
+  },
+  {
+   "query": "Potassium chloride",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Potassium chloride",
+   "path": "Potassium_chloride",
+   "id": "ki-en-017"
+  },
+  {
+   "query": "Distance quotes",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Quotation mark",
+   "path": "Quotation_mark",
+   "id": "ki-en-018"
+  },
+  {
+   "query": "VPN Service Providers",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Virtual private network",
+   "path": "Virtual_private_network",
+   "id": "ki-en-019"
+  },
+  {
+   "query": "CTV.ca",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "CTV Television Network",
+   "path": "CTV_Television_Network",
+   "id": "ki-en-020"
+  },
+  {
+   "query": "Lily and James Potter",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Lily and James Potter",
+   "path": "Lily_and_James_Potter",
+   "id": "ki-en-021"
+  },
+  {
+   "query": "Cave records",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Cave records",
+   "path": "Cave_records",
+   "id": "ki-en-022"
+  },
+  {
+   "query": "Southern Dravidian",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Southern Dravidian",
+   "path": "Southern_Dravidian",
+   "id": "ki-en-023"
+  },
+  {
+   "query": "Effects of domestic violence",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Effects of domestic violence",
+   "path": "Effects_of_domestic_violence",
+   "id": "ki-en-024"
+  },
+  {
+   "query": "Death squads in Egypt",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Death squads in Egypt",
+   "path": "Death_squads_in_Egypt",
+   "id": "ki-en-025"
+  },
+  {
+   "query": "Warm water ports",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Warm water ports",
+   "path": "Warm_water_ports",
+   "id": "ki-en-026"
+  },
+  {
+   "query": "Uždaroji akcinė bendrovė",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Uždaroji akcinė bendrovė",
+   "path": "Uždaroji_akcinė_bendrovė",
+   "id": "ki-en-027"
+  },
+  {
+   "query": "Infundibulorm",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Infundibulorm",
+   "path": "Infundibulorm",
+   "id": "ki-en-028"
+  },
+  {
+   "query": "Gynecomastia surgery",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Gynecomastia surgery",
+   "path": "Gynecomastia_surgery",
+   "id": "ki-en-029"
+  },
+  {
+   "query": "Velodrome",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Velodrome",
+   "path": "Velodrome",
+   "id": "ki-en-030"
+  },
+  {
+   "query": "arsenic",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Arsenic",
+   "path": "Arsenic",
+   "id": "ki-en-031"
+  },
+  {
+   "query": "voiced post-palatal approximant",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Voiced post-palatal approximant",
+   "path": "Voiced_post-palatal_approximant",
+   "id": "ki-en-032"
+  },
+  {
+   "query": "korean coins",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Korean coins",
+   "path": "Korean_coins",
+   "id": "ki-en-033"
+  },
+  {
+   "query": "museums in jinan",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Museums in Jinan",
+   "path": "Museums_in_Jinan",
+   "id": "ki-en-034"
+  },
+  {
+   "query": "singular cohomology theory",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Singular cohomology theory",
+   "path": "Singular_cohomology_theory",
+   "id": "ki-en-035"
+  },
+  {
+   "query": "unification church and zionism",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Unification Church and Zionism",
+   "path": "Unification_Church_and_Zionism",
+   "id": "ki-en-036"
+  },
+  {
+   "query": "ventura harbor",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Ventura Harbor",
+   "path": "Ventura_Harbor",
+   "id": "ki-en-037"
+  },
+  {
+   "query": "compounds of fermium",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Compounds of fermium",
+   "path": "Compounds_of_fermium",
+   "id": "ki-en-038"
+  },
+  {
+   "query": "history of neptunium",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "History of neptunium",
+   "path": "History_of_neptunium",
+   "id": "ki-en-039"
+  },
+  {
+   "query": "mind stone",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Mind stone",
+   "path": "Mind_stone",
+   "id": "ki-en-040"
+  },
+  {
+   "query": "Kerri Hiugchi",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Kerri Higuchi",
+   "path": "Kerri_Higuchi",
+   "id": "ki-en-041"
+  },
+  {
+   "query": "Lea-psmearing",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Leap-smearing",
+   "path": "Leap-smearing",
+   "id": "ki-en-042"
+  },
+  {
+   "query": "Tzone",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "T-zone",
+   "path": "T-zone",
+   "id": "ki-en-043"
+  },
+  {
+   "query": "Link state updaet",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Link state update",
+   "path": "Link_state_update",
+   "id": "ki-en-044"
+  },
+  {
+   "query": "Atomic orbtal",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Atomic orbital",
+   "path": "Atomic_orbital",
+   "id": "ki-en-045"
+  },
+  {
+   "query": "PCB assmbly",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "PCB assembly",
+   "path": "PCB_assembly",
+   "id": "ki-en-046"
+  },
+  {
+   "query": "Steatorreha",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Steatorrhea",
+   "path": "Steatorrhea",
+   "id": "ki-en-047"
+  },
+  {
+   "query": "Vieyarder",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Vineyarder",
+   "path": "Vineyarder",
+   "id": "ki-en-048"
+  },
+  {
+   "query": "Scalybreasted munia",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Scaly-breasted munia",
+   "path": "Scaly-breasted_munia",
+   "id": "ki-en-049"
+  },
+  {
+   "query": "Arcaed system",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Arcade system",
+   "path": "Arcade_system",
+   "id": "ki-en-050"
+  },
+  {
+   "query": "Prehistorc mines",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Prehistoric mines",
+   "path": "Prehistoric_mines",
+   "id": "ki-en-051"
+  },
+  {
+   "query": "Ukrainin Beauty Eggplant",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Ukrainian Beauty Eggplant",
+   "path": "Ukrainian_Beauty_Eggplant",
+   "id": "ki-en-052"
+  },
+  {
+   "query": "jean g",
+   "kind": "prefix",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Jean Grey",
+   "path": "Jean_Grey",
+   "id": "ki-en-053"
+  },
+  {
+   "query": "no man's s",
+   "kind": "prefix",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "No Man's Sky Next",
+   "path": "No_Man's_Sky_Next",
+   "id": "ki-en-054"
+  },
+  {
+   "query": "african-americans",
+   "kind": "prefix",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "African-Americans in Delaware",
+   "path": "African-Americans_in_Delaware",
+   "id": "ki-en-055"
+  },
+  {
+   "query": "sea walls of con",
+   "kind": "prefix",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Sea Walls of Constantinople",
+   "path": "Sea_Walls_of_Constantinople",
+   "id": "ki-en-056"
+  },
+  {
+   "query": "flatus",
+   "kind": "prefix",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Flatus bag",
+   "path": "Flatus_bag",
+   "id": "ki-en-057"
+  },
+  {
+   "query": "s type",
+   "kind": "prefix",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "S type fuse",
+   "path": "S_type_fuse",
+   "id": "ki-en-058"
+  },
+  {
+   "query": "d-day be",
+   "kind": "prefix",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "D-Day beaches",
+   "path": "D-Day_beaches",
+   "id": "ki-en-059"
+  },
+  {
+   "query": "digital fuel",
+   "kind": "prefix",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Digital fuel injection",
+   "path": "Digital_fuel_injection",
+   "id": "ki-en-060"
+  },
+  {
+   "query": "cuisine of pen",
+   "kind": "prefix",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Cuisine of Pennsylvania",
+   "path": "Cuisine_of_Pennsylvania",
+   "id": "ki-en-061"
+  },
+  {
+   "query": "led zep",
+   "kind": "prefix",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Led Zeppelin",
+   "path": "Led_Zeppelin",
+   "id": "ki-en-062"
+  },
+  {
+   "query": "Tactile anaesthetic",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_medicine_nopic_2026-10-10.zim",
+   "title": "Topical anesthetic",
+   "path": "Topical_anesthetic",
+   "id": "ki-en-063"
+  },
+  {
+   "query": "Yellow marrow",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_medicine_nopic_2026-10-10.zim",
+   "title": "Yellow marrow",
+   "path": "Yellow_marrow",
+   "id": "ki-en-064"
+  },
+  {
+   "query": "Clutton joints",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_medicine_nopic_2026-10-10.zim",
+   "title": "Clutton's joints",
+   "path": "Clutton's_joints",
+   "id": "ki-en-065"
+  },
+  {
+   "query": "Iopamidol",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_medicine_nopic_2026-10-10.zim",
+   "title": "Iopamidol",
+   "path": "Iopamidol",
+   "id": "ki-en-066"
+  },
+  {
+   "query": "Sorsby's Disease",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_medicine_nopic_2026-10-10.zim",
+   "title": "Sorsby's fundus dystrophy",
+   "path": "Sorsby's_fundus_dystrophy",
+   "id": "ki-en-067"
+  },
+  {
+   "query": "Cephazolin",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_medicine_nopic_2026-10-10.zim",
+   "title": "Cefazolin",
+   "path": "Cefazolin",
+   "id": "ki-en-068"
+  },
+  {
+   "query": "Petechia",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_medicine_nopic_2026-10-10.zim",
+   "title": "Petechia",
+   "path": "Petechia",
+   "id": "ki-en-069"
+  },
+  {
+   "query": "skyline projection",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_medicine_nopic_2026-10-10.zim",
+   "title": "Skyline projection",
+   "path": "Skyline_projection",
+   "id": "ki-en-070"
+  },
+  {
+   "query": "is path warm?",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_medicine_nopic_2026-10-10.zim",
+   "title": "IS PATH WARM?",
+   "path": "IS_PATH_WARM?",
+   "id": "ki-en-071"
+  },
+  {
+   "query": "alpha-ethyltryptamines",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_medicine_nopic_2026-10-10.zim",
+   "title": "Alpha-ethyltryptamines",
+   "path": "Alpha-ethyltryptamines",
+   "id": "ki-en-072"
+  },
+  {
+   "query": "Terasakielal pusilla",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_medicine_nopic_2026-10-10.zim",
+   "title": "Terasakiella pusilla",
+   "path": "Terasakiella_pusilla",
+   "id": "ki-en-073"
+  },
+  {
+   "query": "Dentl nurse",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_medicine_nopic_2026-10-10.zim",
+   "title": "Dental nurse",
+   "path": "Dental_nurse",
+   "id": "ki-en-074"
+  },
+  {
+   "query": "Argpat",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_history_maxi_2026-10-12.zim",
+   "title": "Argbed",
+   "path": "Argbed",
+   "id": "ki-en-075"
+  },
+  {
+   "query": "Classical canon",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_history_maxi_2026-10-12.zim",
+   "title": "Classical canon",
+   "path": "Classical_canon",
+   "id": "ki-en-076"
+  },
+  {
+   "query": "Canyon Springs Office Building",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_history_maxi_2026-10-12.zim",
+   "title": "Canyon Springs Office Building",
+   "path": "Canyon_Springs_Office_Building",
+   "id": "ki-en-077"
+  },
+  {
+   "query": "Victory on the ice",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_history_maxi_2026-10-12.zim",
+   "title": "Battle on the Ice",
+   "path": "Battle_on_the_Ice",
+   "id": "ki-en-078"
+  },
+  {
+   "query": "The Bridge-Mountain Gang",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_history_maxi_2026-10-12.zim",
+   "title": "Water Margin",
+   "path": "Water_Margin",
+   "id": "ki-en-079"
+  },
+  {
+   "query": "Throw down the gauntlet",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_history_maxi_2026-10-12.zim",
+   "title": "Throw down the gauntlet",
+   "path": "Throw_down_the_gauntlet",
+   "id": "ki-en-080"
+  },
+  {
+   "query": "wilaya of al-andalus",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_history_maxi_2026-10-12.zim",
+   "title": "Wilaya of al-Andalus",
+   "path": "Wilaya_of_al-Andalus",
+   "id": "ki-en-081"
+  },
+  {
+   "query": "portrait of tenochtitlan",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_history_maxi_2026-10-12.zim",
+   "title": "Portrait of Tenochtitlan",
+   "path": "Portrait_of_Tenochtitlan",
+   "id": "ki-en-082"
+  },
+  {
+   "query": "Lamyen's Foreign Missions Inquiry",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_history_maxi_2026-10-12.zim",
+   "title": "Laymen's Foreign Missions Inquiry",
+   "path": "Laymen's_Foreign_Missions_Inquiry",
+   "id": "ki-en-083"
+  },
+  {
+   "query": "Blue Book of Britian",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_history_maxi_2026-10-12.zim",
+   "title": "Blue Book of Britain",
+   "path": "Blue_Book_of_Britain",
+   "id": "ki-en-084"
+  },
+  {
+   "query": "Bizmirabad",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_geography_maxi_2026-10.zim",
+   "title": "Bozmirabad",
+   "path": "Bozmirabad",
+   "id": "ki-en-085"
+  },
+  {
+   "query": "Bolshoy Priklon",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_geography_maxi_2026-10.zim",
+   "title": "Bolshoy Priklon",
+   "path": "Bolshoy_Priklon",
+   "id": "ki-en-086"
+  },
+  {
+   "query": "Garhi Sajar Khan",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_geography_maxi_2026-10.zim",
+   "title": "Garhi Sanjar Khan",
+   "path": "Garhi_Sanjar_Khan",
+   "id": "ki-en-087"
+  },
+  {
+   "query": "Tanzanian geography",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_geography_maxi_2026-10.zim",
+   "title": "Geography of Tanzania",
+   "path": "Geography_of_Tanzania",
+   "id": "ki-en-088"
+  },
+  {
+   "query": "Nizhnekargino",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_geography_maxi_2026-10.zim",
+   "title": "Nizhnekargino",
+   "path": "Nizhnekargino",
+   "id": "ki-en-089"
+  },
+  {
+   "query": "Geography of Cambodia",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_geography_maxi_2026-10.zim",
+   "title": "Geography of Cambodia",
+   "path": "Geography_of_Cambodia",
+   "id": "ki-en-090"
+  },
+  {
+   "query": "taghenkuh district",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_geography_maxi_2026-10.zim",
+   "title": "Taghenkuh District",
+   "path": "Taghenkuh_District",
+   "id": "ki-en-091"
+  },
+  {
+   "query": "khadakolob",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_geography_maxi_2026-10.zim",
+   "title": "Khadakolob",
+   "path": "Khadakolob",
+   "id": "ki-en-092"
+  },
+  {
+   "query": "Kekaleh",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_geography_maxi_2026-10.zim",
+   "title": "Keykaleh",
+   "path": "Keykaleh",
+   "id": "ki-en-093"
+  },
+  {
+   "query": "Korvaj",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_geography_maxi_2026-10.zim",
+   "title": "Khorvaj",
+   "path": "Khorvaj",
+   "id": "ki-en-094"
+  },
+  {
+   "query": "Neodymium uses",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_chemistry_maxi_2026-10-15.zim",
+   "title": "Neodymium uses",
+   "path": "Neodymium_uses",
+   "id": "ki-en-095"
+  },
+  {
+   "query": "Ash",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_chemistry_maxi_2026-10-15.zim",
+   "title": "Ash",
+   "path": "Ash",
+   "id": "ki-en-096"
+  },
+  {
+   "query": "chemistry development kit",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_chemistry_maxi_2026-10-15.zim",
+   "title": "Chemistry Development Kit",
+   "path": "Chemistry_Development_Kit",
+   "id": "ki-en-097"
+  },
+  {
+   "query": "stannic",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_chemistry_maxi_2026-10-15.zim",
+   "title": "Stannic",
+   "path": "Stannic",
+   "id": "ki-en-098"
+  },
+  {
+   "query": "Elctromeric effect",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_chemistry_maxi_2026-10-15.zim",
+   "title": "Electromeric effect",
+   "path": "Electromeric_effect",
+   "id": "ki-en-099"
+  },
+  {
+   "query": "Von Braun amide degraadtion",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_chemistry_maxi_2026-10-15.zim",
+   "title": "Von Braun amide degradation",
+   "path": "Von_Braun_amide_degradation",
+   "id": "ki-en-100"
+  },
+  {
+   "query": "Massive transfusion",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikem_en_all_maxi_2026-07-24.zim",
+   "title": "Massive transfusion",
+   "path": "Massive_transfusion",
+   "id": "ki-en-101"
+  },
+  {
+   "query": "Desonide",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikem_en_all_maxi_2026-07-24.zim",
+   "title": "Desonide",
+   "path": "Desonide",
+   "id": "ki-en-102"
+  },
+  {
+   "query": "Abrazo Health Network",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikem_en_all_maxi_2026-07-24.zim",
+   "title": "Abrazo Health Network",
+   "path": "Abrazo_Health_Network",
+   "id": "ki-en-103"
+  },
+  {
+   "query": "toxicology fellowship",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikem_en_all_maxi_2026-07-24.zim",
+   "title": "Toxicology fellowship",
+   "path": "Toxicology_fellowship",
+   "id": "ki-en-104"
+  },
+  {
+   "query": "john peter smith hospital",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikem_en_all_maxi_2026-07-24.zim",
+   "title": "John Peter Smith Hospital",
+   "path": "John_Peter_Smith_Hospital",
+   "id": "ki-en-105"
+  },
+  {
+   "query": "third nerve palsy",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikem_en_all_maxi_2026-07-24.zim",
+   "title": "Third nerve palsy",
+   "path": "Third_nerve_palsy",
+   "id": "ki-en-106"
+  },
+  {
+   "query": "Superficial thrmbophlebitis",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikem_en_all_maxi_2026-07-24.zim",
+   "title": "Superficial thrombophlebitis",
+   "path": "Superficial_thrombophlebitis",
+   "id": "ki-en-107"
+  },
+  {
+   "query": "Alvarado score calculatro",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikem_en_all_maxi_2026-07-24.zim",
+   "title": "Alvarado score calculator",
+   "path": "Alvarado_score_calculator",
+   "id": "ki-en-108"
+  },
+  {
+   "query": "Camp",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikivoyage_en_all_maxi_2026-09-13.zim",
+   "title": "Camp",
+   "path": "Camp",
+   "id": "ki-en-109"
+  },
+  {
+   "query": "Salalah",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikivoyage_en_all_maxi_2026-09-13.zim",
+   "title": "Salalah",
+   "path": "Salalah",
+   "id": "ki-en-110"
+  },
+  {
+   "query": "Trzęsacz",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikivoyage_en_all_maxi_2026-09-13.zim",
+   "title": "Trzęsacz",
+   "path": "Trzęsacz",
+   "id": "ki-en-111"
+  },
+  {
+   "query": "TIQ",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikivoyage_en_all_maxi_2026-09-13.zim",
+   "title": "TIQ",
+   "path": "TIQ",
+   "id": "ki-en-112"
+  },
+  {
+   "query": "quillabamba",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikivoyage_en_all_maxi_2026-09-13.zim",
+   "title": "Quillabamba",
+   "path": "Quillabamba",
+   "id": "ki-en-113"
+  },
+  {
+   "query": "comfort",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikivoyage_en_all_maxi_2026-09-13.zim",
+   "title": "Comfort",
+   "path": "Comfort",
+   "id": "ki-en-114"
+  },
+  {
+   "query": "deruta",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikivoyage_en_all_maxi_2026-09-13.zim",
+   "title": "Deruta",
+   "path": "Deruta",
+   "id": "ki-en-115"
+  },
+  {
+   "query": "Misoula",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikivoyage_en_all_maxi_2026-09-13.zim",
+   "title": "Missoula",
+   "path": "Missoula",
+   "id": "ki-en-116"
+  },
+  {
+   "query": "Cuatro Cinegas",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikivoyage_en_all_maxi_2026-09-13.zim",
+   "title": "Cuatro Ciénegas",
+   "path": "Cuatro_Ciénegas",
+   "id": "ki-en-117"
+  },
+  {
+   "query": "ChiliTechnology ChiliCube Teardown",
+   "kind": "exact",
+   "language": "en",
+   "pack": "ifixit_en_all_2025-12-21.zim",
+   "title": "ChiliTechnology ChiliCube Teardown",
+   "path": "Teardown/ChiliTechnology+ChiliCube+Teardown/61640",
+   "id": "ki-en-118"
+  },
+  {
+   "query": "FedMedical Exam Lighting",
+   "kind": "exact",
+   "language": "en",
+   "pack": "ifixit_en_all_2025-12-21.zim",
+   "title": "FedMedical Exam Lighting",
+   "path": "Device/FedMedical_Exam_Lighting",
+   "id": "ki-en-119"
+  },
+  {
+   "query": "Plantronics Backbeat Fit",
+   "kind": "exact",
+   "language": "en",
+   "pack": "ifixit_en_all_2025-12-21.zim",
+   "title": "Plantronics Backbeat Fit",
+   "path": "Device/Plantronics_Backbeat_Fit",
+   "id": "ki-en-120"
+  },
+  {
+   "query": "maytag dishwasher",
+   "kind": "lower",
+   "language": "en",
+   "pack": "ifixit_en_all_2025-12-21.zim",
+   "title": "Maytag Dishwasher",
+   "path": "Device/Maytag_Dishwasher",
+   "id": "ki-en-121"
+  },
+  {
+   "query": "steelseries mouse",
+   "kind": "lower",
+   "language": "en",
+   "pack": "ifixit_en_all_2025-12-21.zim",
+   "title": "SteelSeries Mouse",
+   "path": "Device/SteelSeries_Mouse",
+   "id": "ki-en-122"
+  },
+  {
+   "query": "THERAPY Recycle and Exorcise",
+   "kind": "exact",
+   "language": "en",
+   "pack": "appropedia_en_all_maxi_2026-02-26.zim",
+   "title": "THERAPY Recycle and Exorcise",
+   "path": "THERAPY_Recycle_and_Exorcise",
+   "id": "ki-en-123"
+  },
+  {
+   "query": "TechnoCommons",
+   "kind": "exact",
+   "language": "en",
+   "pack": "appropedia_en_all_maxi_2026-02-26.zim",
+   "title": "TechnoCommons",
+   "path": "TechnoCommons",
+   "id": "ki-en-124"
+  },
+  {
+   "query": "PortaTherm",
+   "kind": "exact",
+   "language": "en",
+   "pack": "appropedia_en_all_maxi_2026-02-26.zim",
+   "title": "PortaTherm",
+   "path": "PortaTherm",
+   "id": "ki-en-125"
+  },
+  {
+   "query": "agriculture",
+   "kind": "lower",
+   "language": "en",
+   "pack": "appropedia_en_all_maxi_2026-02-26.zim",
+   "title": "Agriculture",
+   "path": "Agriculture",
+   "id": "ki-en-126"
+  },
+  {
+   "query": "open circuit institute",
+   "kind": "lower",
+   "language": "en",
+   "pack": "appropedia_en_all_maxi_2026-02-26.zim",
+   "title": "Open Circuit Institute",
+   "path": "Open_Circuit_Institute",
+   "id": "ki-en-127"
+  },
+  {
+   "query": "Copyright",
+   "kind": "exact",
+   "language": "en",
+   "pack": "internet-encyclopedia-philosophy_en_all_2026-05-28.zim",
+   "title": "Copyright",
+   "path": "iep.utm.edu/home/copyright/",
+   "id": "ki-en-128"
+  },
+  {
+   "query": "Russell",
+   "kind": "exact",
+   "language": "en",
+   "pack": "internet-encyclopedia-philosophy_en_all_2026-05-28.zim",
+   "title": "Russell",
+   "path": "iep.utm.edu/par-russ/",
+   "id": "ki-en-129"
+  },
+  {
+   "query": "Sartre",
+   "kind": "exact",
+   "language": "en",
+   "pack": "internet-encyclopedia-philosophy_en_all_2026-05-28.zim",
+   "title": "Sartre",
+   "path": "iep.utm.edu/sartre-p/",
+   "id": "ki-en-130"
+  },
+  {
+   "query": "internet encyclopedia of philosophy",
+   "kind": "lower",
+   "language": "en",
+   "pack": "internet-encyclopedia-philosophy_en_all_2026-05-28.zim",
+   "title": "Internet Encyclopedia of Philosophy",
+   "path": "iep.utm.edu/time-radial/",
+   "id": "ki-en-131"
+  },
+  {
+   "query": "zeno",
+   "kind": "lower",
+   "language": "en",
+   "pack": "internet-encyclopedia-philosophy_en_all_2026-05-28.zim",
+   "title": "Zeno",
+   "path": "iep.utm.edu/zenos-paradoxes/",
+   "id": "ki-en-132"
+  },
+  {
+   "query": "Aespo",
+   "kind": "typo",
+   "language": "en",
+   "pack": "internet-encyclopedia-philosophy_en_all_2026-05-28.zim",
+   "title": "Aesop",
+   "path": "iep.utm.edu/aesop/",
+   "id": "ki-en-133"
+  },
+  {
+   "query": "Wind in the Willows",
+   "kind": "exact",
+   "language": "en",
+   "pack": "granger_classics_en_2026-10-16.zim",
+   "title": "Wind in the Willows",
+   "path": "wind-in-the-willows",
+   "id": "ki-en-134"
+  },
+  {
+   "query": "Jacob's Room",
+   "kind": "exact",
+   "language": "en",
+   "pack": "granger_classics_en_2026-10-16.zim",
+   "title": "Jacob's Room",
+   "path": "jacob-s-room",
+   "id": "ki-en-135"
+  },
+  {
+   "query": "Moll Flanders",
+   "kind": "exact",
+   "language": "en",
+   "pack": "granger_classics_en_2026-10-16.zim",
+   "title": "Moll Flanders",
+   "path": "moll-flanders",
+   "id": "ki-en-136"
+  },
+  {
+   "query": "Jungle",
+   "kind": "exact",
+   "language": "en",
+   "pack": "granger_classics_en_2026-10-16.zim",
+   "title": "Jungle",
+   "path": "jungle",
+   "id": "ki-en-137"
+  },
+  {
+   "query": "great gatsby",
+   "kind": "lower",
+   "language": "en",
+   "pack": "granger_classics_en_2026-10-16.zim",
+   "title": "Great Gatsby",
+   "path": "great-gatsby",
+   "id": "ki-en-138"
+  },
+  {
+   "query": "timon of athens",
+   "kind": "lower",
+   "language": "en",
+   "pack": "granger_classics_en_2026-10-16.zim",
+   "title": "Timon of Athens",
+   "path": "timon-of-athens",
+   "id": "ki-en-139"
+  },
+  {
+   "query": "man who was thursday",
+   "kind": "lower",
+   "language": "en",
+   "pack": "granger_classics_en_2026-10-16.zim",
+   "title": "Man Who Was Thursday",
+   "path": "man-who-was-thursday",
+   "id": "ki-en-140"
+  },
+  {
+   "query": "paradise r",
+   "kind": "prefix",
+   "language": "en",
+   "pack": "granger_classics_en_2026-10-16.zim",
+   "title": "Paradise Regained",
+   "path": "paradise-regained",
+   "id": "ki-en-141"
+  },
+  {
+   "query": "titus andr",
+   "kind": "prefix",
+   "language": "en",
+   "pack": "granger_classics_en_2026-10-16.zim",
+   "title": "Titus Andronicus",
+   "path": "titus-andronicus",
+   "id": "ki-en-142"
+  },
+  {
+   "query": "SM Caén",
+   "kind": "alias",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Stade Malherbe Caen",
+   "path": "Stade_Malherbe_Caen",
+   "id": "ki-es-143"
+  },
+  {
+   "query": "Arachnida",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Arachnida",
+   "path": "Arachnida",
+   "id": "ki-es-144"
+  },
+  {
+   "query": "Acuminada",
+   "kind": "alias",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Hoja",
+   "path": "Hoja",
+   "id": "ki-es-145"
+  },
+  {
+   "query": "Mustafá I",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Mustafá I",
+   "path": "Mustafá_I",
+   "id": "ki-es-146"
+  },
+  {
+   "query": "Affiche",
+   "kind": "alias",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Cartel",
+   "path": "Cartel",
+   "id": "ki-es-147"
+  },
+  {
+   "query": "Desarrollo psicosexual",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Desarrollo psicosexual",
+   "path": "Desarrollo_psicosexual",
+   "id": "ki-es-148"
+  },
+  {
+   "query": "Hyundai Accent",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Hyundai Accent",
+   "path": "Hyundai_Accent",
+   "id": "ki-es-149"
+  },
+  {
+   "query": "Tremarctus ornatus",
+   "kind": "alias",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Tremarctos ornatus",
+   "path": "Tremarctos_ornatus",
+   "id": "ki-es-150"
+  },
+  {
+   "query": "Periodo posclasico maya",
+   "kind": "alias",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Período posclásico mesoamericano",
+   "path": "Período_posclásico_mesoamericano",
+   "id": "ki-es-151"
+  },
+  {
+   "query": "Insectos palo",
+   "kind": "alias",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Phasmatodea",
+   "path": "Phasmatodea",
+   "id": "ki-es-152"
+  },
+  {
+   "query": "Langskip",
+   "kind": "alias",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Drakkar",
+   "path": "Drakkar",
+   "id": "ki-es-153"
+  },
+  {
+   "query": "Combustión Humana Espontánea",
+   "kind": "alias",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Combustión espontánea humana",
+   "path": "Combustión_espontánea_humana",
+   "id": "ki-es-154"
+  },
+  {
+   "query": "Software malicioso",
+   "kind": "alias",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Malware",
+   "path": "Malware",
+   "id": "ki-es-155"
+  },
+  {
+   "query": "Sommelier",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Sommelier",
+   "path": "Sommelier",
+   "id": "ki-es-156"
+  },
+  {
+   "query": "Franco Nero",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Franco Nero",
+   "path": "Franco_Nero",
+   "id": "ki-es-157"
+  },
+  {
+   "query": "Presidente colombiano",
+   "kind": "alias",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Presidente de Colombia",
+   "path": "Presidente_de_Colombia",
+   "id": "ki-es-158"
+  },
+  {
+   "query": "Eulalio Gutiérrez Ortiz",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Eulalio Gutiérrez Ortiz",
+   "path": "Eulalio_Gutiérrez_Ortiz",
+   "id": "ki-es-159"
+  },
+  {
+   "query": "Carlos Soublette",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Carlos Soublette",
+   "path": "Carlos_Soublette",
+   "id": "ki-es-160"
+  },
+  {
+   "query": "Sinodo del terror",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Sinodo del terror",
+   "path": "Sinodo_del_terror",
+   "id": "ki-es-161"
+  },
+  {
+   "query": "Mecánica cuántica",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Mecánica cuántica",
+   "path": "Mecánica_cuántica",
+   "id": "ki-es-162"
+  },
+  {
+   "query": "Ingeniería de minas",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Ingeniería de minas",
+   "path": "Ingeniería_de_minas",
+   "id": "ki-es-163"
+  },
+  {
+   "query": "WWE Judgment Day",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "WWE Judgment Day",
+   "path": "WWE_Judgment_Day",
+   "id": "ki-es-164"
+  },
+  {
+   "query": "onda media",
+   "kind": "lower",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Onda media",
+   "path": "Onda_media",
+   "id": "ki-es-165"
+  },
+  {
+   "query": "chuck berry",
+   "kind": "lower",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Chuck Berry",
+   "path": "Chuck_Berry",
+   "id": "ki-es-166"
+  },
+  {
+   "query": "anglicanismo",
+   "kind": "lower",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Anglicanismo",
+   "path": "Anglicanismo",
+   "id": "ki-es-167"
+  },
+  {
+   "query": "capua",
+   "kind": "lower",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Capua",
+   "path": "Capua",
+   "id": "ki-es-168"
+  },
+  {
+   "query": "funcion de probabilidad",
+   "kind": "lower",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Función de probabilidad",
+   "path": "Función_de_probabilidad",
+   "id": "ki-es-169"
+  },
+  {
+   "query": "masa atomica",
+   "kind": "lower",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Masa atómica",
+   "path": "Masa_atómica",
+   "id": "ki-es-170"
+  },
+  {
+   "query": "ingenieria biomedica",
+   "kind": "lower",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Ingeniería biomédica",
+   "path": "Ingeniería_biomédica",
+   "id": "ki-es-171"
+  },
+  {
+   "query": "didelphidae",
+   "kind": "lower",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Didelphidae",
+   "path": "Didelphidae",
+   "id": "ki-es-172"
+  },
+  {
+   "query": "solucion hipertonica",
+   "kind": "lower",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Solucion hipertónica",
+   "path": "Solucion_hipertónica",
+   "id": "ki-es-173"
+  },
+  {
+   "query": "reino de sajonia",
+   "kind": "lower",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Reino de Sajonia",
+   "path": "Reino_de_Sajonia",
+   "id": "ki-es-174"
+  },
+  {
+   "query": "Juego de nipes",
+   "kind": "typo",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Juego de naipes",
+   "path": "Juego_de_naipes",
+   "id": "ki-es-175"
+  },
+  {
+   "query": "República Democrátiac de Georgia",
+   "kind": "typo",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "República Democrática de Georgia",
+   "path": "República_Democrática_de_Georgia",
+   "id": "ki-es-176"
+  },
+  {
+   "query": "Neville Longbottm",
+   "kind": "typo",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Neville Longbottom",
+   "path": "Neville_Longbottom",
+   "id": "ki-es-177"
+  },
+  {
+   "query": "Stéfanos Tsitspiás",
+   "kind": "typo",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Stéfanos Tsitsipás",
+   "path": "Stéfanos_Tsitsipás",
+   "id": "ki-es-178"
+  },
+  {
+   "query": "Traabjador doméstico",
+   "kind": "typo",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Trabajador doméstico",
+   "path": "Trabajador_doméstico",
+   "id": "ki-es-179"
+  },
+  {
+   "query": "Wyne's World",
+   "kind": "typo",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Wayne's World",
+   "path": "Wayne's_World",
+   "id": "ki-es-180"
+  },
+  {
+   "query": "San Vciente del Raspeig",
+   "kind": "typo",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "San Vicente del Raspeig",
+   "path": "San_Vicente_del_Raspeig",
+   "id": "ki-es-181"
+  },
+  {
+   "query": "Tradición apostólcia",
+   "kind": "typo",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Tradición apostólica",
+   "path": "Tradición_apostólica",
+   "id": "ki-es-182"
+  },
+  {
+   "query": "shurik",
+   "kind": "prefix",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Shuriken",
+   "path": "Shuriken",
+   "id": "ki-es-183"
+  },
+  {
+   "query": "joseph b",
+   "kind": "prefix",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Joseph Barbera",
+   "path": "Joseph_Barbera",
+   "id": "ki-es-184"
+  },
+  {
+   "query": "media arit",
+   "kind": "prefix",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Media aritmética",
+   "path": "Media_aritmética",
+   "id": "ki-es-185"
+  },
+  {
+   "query": "eduardo de w",
+   "kind": "prefix",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Eduardo de Woodstock",
+   "path": "Eduardo_de_Woodstock",
+   "id": "ki-es-186"
+  },
+  {
+   "query": "bania",
+   "kind": "prefix",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Bania Luka",
+   "path": "Bania_Luka",
+   "id": "ki-es-187"
+  },
+  {
+   "query": "terna pita",
+   "kind": "prefix",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Terna pitagórica",
+   "path": "Terna_pitagórica",
+   "id": "ki-es-188"
+  },
+  {
+   "query": "Maputo",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikivoyage_es_all_nopic_2026-09-17.zim",
+   "title": "Maputo",
+   "path": "Maputo",
+   "id": "ki-es-189"
+  },
+  {
+   "query": "Turingia",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikivoyage_es_all_nopic_2026-09-17.zim",
+   "title": "Turingia",
+   "path": "Turingia",
+   "id": "ki-es-190"
+  },
+  {
+   "query": "Victoria",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikivoyage_es_all_nopic_2026-09-17.zim",
+   "title": "Victoria",
+   "path": "Victoria",
+   "id": "ki-es-191"
+  },
+  {
+   "query": "Pueblos Mágicos",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikivoyage_es_all_nopic_2026-09-17.zim",
+   "title": "Pueblos Mágicos",
+   "path": "Pueblos_Mágicos",
+   "id": "ki-es-192"
+  },
+  {
+   "query": "Kōbe",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikivoyage_es_all_nopic_2026-09-17.zim",
+   "title": "Kōbe",
+   "path": "Kōbe",
+   "id": "ki-es-193"
+  },
+  {
+   "query": "Carolina del Norte",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikivoyage_es_all_nopic_2026-09-17.zim",
+   "title": "Carolina del Norte",
+   "path": "Carolina_del_Norte",
+   "id": "ki-es-194"
+  },
+  {
+   "query": "pozo almonte",
+   "kind": "lower",
+   "language": "es",
+   "pack": "wikivoyage_es_all_nopic_2026-09-17.zim",
+   "title": "Pozo Almonte",
+   "path": "Pozo_Almonte",
+   "id": "ki-es-195"
+  },
+  {
+   "query": "besanzon",
+   "kind": "lower",
+   "language": "es",
+   "pack": "wikivoyage_es_all_nopic_2026-09-17.zim",
+   "title": "Besanzón",
+   "path": "Besanzón",
+   "id": "ki-es-196"
+  },
+  {
+   "query": "hayedos de europa",
+   "kind": "lower",
+   "language": "es",
+   "pack": "wikivoyage_es_all_nopic_2026-09-17.zim",
+   "title": "Hayedos de Europa",
+   "path": "Hayedos_de_Europa",
+   "id": "ki-es-197"
+  },
+  {
+   "query": "novelda",
+   "kind": "lower",
+   "language": "es",
+   "pack": "wikivoyage_es_all_nopic_2026-09-17.zim",
+   "title": "Novelda",
+   "path": "Novelda",
+   "id": "ki-es-198"
+  },
+  {
+   "query": "Kanai",
+   "kind": "typo",
+   "language": "es",
+   "pack": "wikivoyage_es_all_nopic_2026-09-17.zim",
+   "title": "Kansai",
+   "path": "Kansai",
+   "id": "ki-es-199"
+  },
+  {
+   "query": "Provicnia de Buenos Aires",
+   "kind": "typo",
+   "language": "es",
+   "pack": "wikivoyage_es_all_nopic_2026-09-17.zim",
+   "title": "Provincia de Buenos Aires",
+   "path": "Provincia_de_Buenos_Aires",
+   "id": "ki-es-200"
+  },
+  {
+   "query": "Animales pelgrosos",
+   "kind": "typo",
+   "language": "es",
+   "pack": "wikivoyage_es_all_nopic_2026-09-17.zim",
+   "title": "Animales peligrosos",
+   "path": "Animales_peligrosos",
+   "id": "ki-es-201"
+  }
+ ]
+}

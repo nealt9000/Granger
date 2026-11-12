@@ -64,14 +64,17 @@ class SettingsScreenTest {
 
     private fun top(text: String) = compose.onNodeWithText(text).getBoundsInRoot().top
 
-    @Test fun fiveSectionsInOrderEachWithItsRows() {
+    @Test fun sectionsInOrderEachWithItsRows() {
         show()
-        val sections = listOf("Library & storage", "Reading & listening", "Ask", "Appearance", "About")
+        // While Ask rests (Plan SQ) the Models row stands without Ask's heading.
+        val ask = if (app.granger.Features.RESEARCH) listOf("Ask") else emptyList()
+        if (!app.granger.Features.RESEARCH) compose.onNodeWithText("Ask").assertDoesNotExist()
+        val sections = listOf("Library & storage", "Reading & listening") + ask + listOf("Appearance", "About")
         assertThat(sections.map(::top)).isInStrictOrder()
         // Each row under its heading.
         assertThat(listOf("Library & storage", "Download on Wi-Fi only", "Archive.org: show everything", "Set up suggestions again", "Reading & listening").map(::top))
             .isInStrictOrder()
-        assertThat(listOf("Reading & listening", "Voice", "Music & audiobooks", "Ask", "Models", "Appearance").map(::top)).isInStrictOrder()
+        assertThat((listOf("Reading & listening", "Voice", "Music & audiobooks") + ask + listOf("Models", "Appearance")).map(::top)).isInStrictOrder()
         // Readiness is reached from Home and the Library now.
         compose.onNodeWithText("Readiness").assertDoesNotExist()
         for (row in listOf("Set up suggestions again", "Voice", "Music & audiobooks", "Models")) compose.onNodeWithText(row).performClick()
@@ -102,7 +105,7 @@ class SettingsScreenTest {
     @Test fun withoutVoiceOrMusicThereIsNoReadingAndListening() {
         show(listening = false)
         compose.onNodeWithText("Reading & listening").assertDoesNotExist()
-        compose.onNodeWithText("Ask").assertExists()
+        compose.onNodeWithText("Models").assertExists()
     }
 
     @Test fun musicAndAudiobooksBelongsToSettings() {

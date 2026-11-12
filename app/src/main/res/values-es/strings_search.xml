@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="search_placeholder">Buscar en tu biblioteca</string>
-    <string name="search_nothing_found">Nada de tu biblioteca coincide.</string>
+    <string name="search_nothing_found">Nada en tu biblioteca para eso. Prueba con menos palabras.</string>
     <string name="search_recent">Recientes</string>
+    <string name="search_best">Mejores resultados</string>
+    <string name="search_best_looking">Buscando en tu biblioteca…</string>
+    <string name="search_also_in">También en %1$s</string>
+    <string name="search_open_in">Abrir en %1$s</string>
+    <string name="search_best_more">Ver más resultados</string>
+    <string name="search_best_fewer">Ver menos resultados</string>
     <string name="search_titles">Títulos</string>
     <string name="search_articles">Artículos</string>
     <string name="search_books">Libros</string>
@@ -119,4 +125,17 @@
         <item quantity="other">%1$s y %2$d más no tienen búsqueda de texto, así que solo se buscó en sus títulos.</item>
     </plurals>
     <string name="search_did_you_mean">¿Querías decir %1$s?</string>
+    <!-- Under the empty state: opens Get more. -->
+    <string name="search_get_more">Conseguir más</string>
+    <!-- Plan SQ Task 5.3: the chips that narrow the results to one kind. -->
+    <string name="search_filter_all">Todo</string>
+    <string name="search_filter_articles">Artículos</string>
+    <string name="search_filter_books">Libros</string>
+    <string name="search_filter_media">Multimedia</string>
+    <!-- TalkBack: the kind icon on a Best match. -->
+    <string name="search_kind_article">Artículo</string>
+    <string name="search_kind_book">Libro</string>
+    <!-- Plan SQ Task 5.4: the small card with a single word's dictionary entry. %1$s is the dictionary (Wiktionary). -->
+    <string name="search_define">Definición</string>
+    <string name="search_define_source">Entrada de diccionario de %1$s</string>
 </resources>

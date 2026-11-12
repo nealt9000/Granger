@@ -1,0 +1,374 @@
+{
+ "seed": 11,
+ "items": [
+  {
+   "query": "James Buchanon",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "James Buchanan",
+   "path": "James_Buchanan",
+   "id": "ki-en-001"
+  },
+  {
+   "query": "WellPoint",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Elevance Health",
+   "path": "Elevance_Health",
+   "id": "ki-en-006"
+  },
+  {
+   "query": "Sexually stimulate",
+   "kind": "alias",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Sexual stimulation",
+   "path": "Sexual_stimulation",
+   "id": "ki-en-011"
+  },
+  {
+   "query": "National parks in Kuwait",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "National parks in Kuwait",
+   "path": "National_parks_in_Kuwait",
+   "id": "ki-en-016"
+  },
+  {
+   "query": "Lily and James Potter",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Lily and James Potter",
+   "path": "Lily_and_James_Potter",
+   "id": "ki-en-021"
+  },
+  {
+   "query": "Warm water ports",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Warm water ports",
+   "path": "Warm_water_ports",
+   "id": "ki-en-026"
+  },
+  {
+   "query": "arsenic",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Arsenic",
+   "path": "Arsenic",
+   "id": "ki-en-031"
+  },
+  {
+   "query": "unification church and zionism",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Unification Church and Zionism",
+   "path": "Unification_Church_and_Zionism",
+   "id": "ki-en-036"
+  },
+  {
+   "query": "Kerri Hiugchi",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Kerri Higuchi",
+   "path": "Kerri_Higuchi",
+   "id": "ki-en-041"
+  },
+  {
+   "query": "PCB assmbly",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "PCB assembly",
+   "path": "PCB_assembly",
+   "id": "ki-en-046"
+  },
+  {
+   "query": "Prehistorc mines",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Prehistoric mines",
+   "path": "Prehistoric_mines",
+   "id": "ki-en-051"
+  },
+  {
+   "query": "sea walls of con",
+   "kind": "prefix",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Sea Walls of Constantinople",
+   "path": "Sea_Walls_of_Constantinople",
+   "id": "ki-en-056"
+  },
+  {
+   "query": "cuisine of pen",
+   "kind": "prefix",
+   "language": "en",
+   "pack": "wikipedia_en_top_maxi_2026-09-14.zim",
+   "title": "Cuisine of Pennsylvania",
+   "path": "Cuisine_of_Pennsylvania",
+   "id": "ki-en-061"
+  },
+  {
+   "query": "Iopamidol",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_medicine_nopic_2026-10-10.zim",
+   "title": "Iopamidol",
+   "path": "Iopamidol",
+   "id": "ki-en-066"
+  },
+  {
+   "query": "is path warm?",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_medicine_nopic_2026-10-10.zim",
+   "title": "IS PATH WARM?",
+   "path": "IS_PATH_WARM?",
+   "id": "ki-en-071"
+  },
+  {
+   "query": "Classical canon",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_history_maxi_2026-10-12.zim",
+   "title": "Classical canon",
+   "path": "Classical_canon",
+   "id": "ki-en-076"
+  },
+  {
+   "query": "wilaya of al-andalus",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_history_maxi_2026-10-12.zim",
+   "title": "Wilaya of al-Andalus",
+   "path": "Wilaya_of_al-Andalus",
+   "id": "ki-en-081"
+  },
+  {
+   "query": "Bolshoy Priklon",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_geography_maxi_2026-10.zim",
+   "title": "Bolshoy Priklon",
+   "path": "Bolshoy_Priklon",
+   "id": "ki-en-086"
+  },
+  {
+   "query": "taghenkuh district",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikipedia_en_geography_maxi_2026-10.zim",
+   "title": "Taghenkuh District",
+   "path": "Taghenkuh_District",
+   "id": "ki-en-091"
+  },
+  {
+   "query": "Ash",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikipedia_en_chemistry_maxi_2026-10-15.zim",
+   "title": "Ash",
+   "path": "Ash",
+   "id": "ki-en-096"
+  },
+  {
+   "query": "Massive transfusion",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikem_en_all_maxi_2026-07-24.zim",
+   "title": "Massive transfusion",
+   "path": "Massive_transfusion",
+   "id": "ki-en-101"
+  },
+  {
+   "query": "third nerve palsy",
+   "kind": "lower",
+   "language": "en",
+   "pack": "wikem_en_all_maxi_2026-07-24.zim",
+   "title": "Third nerve palsy",
+   "path": "Third_nerve_palsy",
+   "id": "ki-en-106"
+  },
+  {
+   "query": "Trzęsacz",
+   "kind": "exact",
+   "language": "en",
+   "pack": "wikivoyage_en_all_maxi_2026-09-13.zim",
+   "title": "Trzęsacz",
+   "path": "Trzęsacz",
+   "id": "ki-en-111"
+  },
+  {
+   "query": "Misoula",
+   "kind": "typo",
+   "language": "en",
+   "pack": "wikivoyage_en_all_maxi_2026-09-13.zim",
+   "title": "Missoula",
+   "path": "Missoula",
+   "id": "ki-en-116"
+  },
+  {
+   "query": "maytag dishwasher",
+   "kind": "lower",
+   "language": "en",
+   "pack": "ifixit_en_all_2025-12-21.zim",
+   "title": "Maytag Dishwasher",
+   "path": "Device/Maytag_Dishwasher",
+   "id": "ki-en-121"
+  },
+  {
+   "query": "agriculture",
+   "kind": "lower",
+   "language": "en",
+   "pack": "appropedia_en_all_maxi_2026-02-26.zim",
+   "title": "Agriculture",
+   "path": "Agriculture",
+   "id": "ki-en-126"
+  },
+  {
+   "query": "internet encyclopedia of philosophy",
+   "kind": "lower",
+   "language": "en",
+   "pack": "internet-encyclopedia-philosophy_en_all_2026-05-28.zim",
+   "title": "Internet Encyclopedia of Philosophy",
+   "path": "iep.utm.edu/time-radial/",
+   "id": "ki-en-131"
+  },
+  {
+   "query": "Moll Flanders",
+   "kind": "exact",
+   "language": "en",
+   "pack": "granger_classics_en_2026-10-16.zim",
+   "title": "Moll Flanders",
+   "path": "moll-flanders",
+   "id": "ki-en-136"
+  },
+  {
+   "query": "paradise r",
+   "kind": "prefix",
+   "language": "en",
+   "pack": "granger_classics_en_2026-10-16.zim",
+   "title": "Paradise Regained",
+   "path": "paradise-regained",
+   "id": "ki-en-141"
+  },
+  {
+   "query": "Mustafá I",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Mustafá I",
+   "path": "Mustafá_I",
+   "id": "ki-es-146"
+  },
+  {
+   "query": "Periodo posclasico maya",
+   "kind": "alias",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Período posclásico mesoamericano",
+   "path": "Período_posclásico_mesoamericano",
+   "id": "ki-es-151"
+  },
+  {
+   "query": "Sommelier",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Sommelier",
+   "path": "Sommelier",
+   "id": "ki-es-156"
+  },
+  {
+   "query": "Sinodo del terror",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Sinodo del terror",
+   "path": "Sinodo_del_terror",
+   "id": "ki-es-161"
+  },
+  {
+   "query": "chuck berry",
+   "kind": "lower",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Chuck Berry",
+   "path": "Chuck_Berry",
+   "id": "ki-es-166"
+  },
+  {
+   "query": "ingenieria biomedica",
+   "kind": "lower",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Ingeniería biomédica",
+   "path": "Ingeniería_biomédica",
+   "id": "ki-es-171"
+  },
+  {
+   "query": "República Democrátiac de Georgia",
+   "kind": "typo",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "República Democrática de Georgia",
+   "path": "República_Democrática_de_Georgia",
+   "id": "ki-es-176"
+  },
+  {
+   "query": "San Vciente del Raspeig",
+   "kind": "typo",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "San Vicente del Raspeig",
+   "path": "San_Vicente_del_Raspeig",
+   "id": "ki-es-181"
+  },
+  {
+   "query": "eduardo de w",
+   "kind": "prefix",
+   "language": "es",
+   "pack": "wikipedia_es_top_nopic_2026-10-10.zim",
+   "title": "Eduardo de Woodstock",
+   "path": "Eduardo_de_Woodstock",
+   "id": "ki-es-186"
+  },
+  {
+   "query": "Victoria",
+   "kind": "exact",
+   "language": "es",
+   "pack": "wikivoyage_es_all_nopic_2026-09-17.zim",
+   "title": "Victoria",
+   "path": "Victoria",
+   "id": "ki-es-191"
+  },
+  {
+   "query": "besanzon",
+   "kind": "lower",
+   "language": "es",
+   "pack": "wikivoyage_es_all_nopic_2026-09-17.zim",
+   "title": "Besanzón",
+   "path": "Besanzón",
+   "id": "ki-es-196"
+  },
+  {
+   "query": "Animales pelgrosos",
+   "kind": "typo",
+   "language": "es",
+   "pack": "wikivoyage_es_all_nopic_2026-09-17.zim",
+   "title": "Animales peligrosos",
+   "path": "Animales_peligrosos",
+   "id": "ki-es-201"
+  }
+ ]
+}

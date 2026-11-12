@@ -4,10 +4,10 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
 class FeaturesTest {
-    @Test fun researchIsOnInEveryBuild() {
-        // The friend build ships Ask as a Preview (Plan F1 part 2); the device tier gates it, not the build type.
-        assertThat(Features.RESEARCH).isTrue()
-        assertThat(app.granger.shell.RailTool.RESEARCH.shown).isTrue()
+    @Test fun researchIsOffInEveryBuild() {
+        // Ask rests from Plan SQ (Neal, 2026-11-10): no rail tool in any build.
+        assertThat(Features.RESEARCH).isFalse()
+        assertThat(app.granger.shell.RailTool.RESEARCH.shown).isFalse()
     }
 
     @Test fun playerIsOnWithItsRailTool() {

@@ -12,7 +12,9 @@ Es una versión de prueba temprana. Algunas cosas están sin pulir, y para eso e
 2. Play puede marcar la app como acceso anticipado o sin revisar. Es lo normal en una versión de prueba.
 3. Las actualizaciones llegan por Play como con cualquier otra app. Google cuenta a quienes siguen inscritos 14 días seguidos, así que no te des de baja ni la desinstales durante la prueba.
 
-Necesita Android 10 o más reciente. Preguntar, el bibliotecario, necesita un teléfono con 6 GB de memoria o más. En teléfonos más pequeños queda oculto y todo lo demás funciona.
+Necesita Android 10 o más reciente.
+
+**Preguntar, el bibliotecario, está en pausa por ahora.** Los modelos que caben en un teléfono hoy se equivocan en demasiadas respuestas, y una respuesta en la que no puedes confiar es peor que ninguna. Volverá cuando los modelos en el teléfono puedan responder bien. Mientras tanto mejoramos Buscar: cuéntanos qué buscaste y no encontraste.
 
 ## Antes de descargar mucho
 
@@ -23,36 +25,24 @@ La app es pequeña. La biblioteca no, así que mira los tamaños y quédate en W
 | La app | unos 50 MB |
 | El inicio sugerido (en español) | unos 10 GB |
 | Una Wikipedia completa | unos 100 GB |
-| El modelo de Preguntar | 2 GB |
 | La voz que lee | 67 MB |
 
 - **Las descargas esperan al Wi-Fi.** "Descargar solo con Wi-Fi" viene activado (Ajustes → Biblioteca y almacenamiento). Déjalo así a menos que quieras gastar datos móviles.
 - Granger pregunta antes de cualquier descarga de más de 100 MB, y muestra el tamaño antes.
 - Ajustes muestra cuánto ocupa Granger. Desinstalar Granger borra todo lo que descargó.
+- Si descargaste el modelo de Preguntar en una versión anterior, puedes quitarlo en Ajustes → Modelos para liberar unos 2.5 GB.
 
 ## Qué probar
 
 1. **El primer arranque.** Elige un inicio (o "Ninguno" y decide después), tu región y para qué la vas a usar. ¿Tenían sentido las opciones?
-2. **Descarga algo y léelo.** Un paquete de Wikipedia, una guía (Wikivoyage, iFixit, primeros auxilios) o un libro de Clásicos Granger. Luego busca algo que de verdad consultarías.
+2. **Descarga algo y léelo.** Un paquete de Wikipedia, una guía (Wikivoyage, iFixit, primeros auxilios) o un libro de Clásicos Granger.
 3. **Activa el modo avión** y úsala. De eso se trata.
 4. **Escuchar.** Abre un libro o un artículo y toca Escuchar; el búho lo lee en voz alta. Pruébalo con la pantalla bloqueada. Por ahora la voz de Granger lee en inglés; los textos en español los lee la voz del teléfono.
-5. **Preguntar** (en teléfonos de 6 GB). Descarga el modelo en Ajustes → Modelos y haz una pregunta que tu biblioteca debería responder. Toca una fuente para ver de dónde salió la respuesta.
+5. **Buscar** cosas que de verdad consultarías: un nombre, un lugar, un título a medio recordar, una pregunta. Cuando no encuentre lo que querías, mándanos las palabras que escribiste.
 6. **Inicio.** ¿Qué te muestra, y te sirve algo de eso?
-
-## Qué esperar de Preguntar
-
-Preguntar es una **vista previa**. Responde solo con lo que hay en tu biblioteca y muestra sus fuentes, pero usa un modelo pequeño que corre en el teléfono, así que:
-- Tarda: a menudo entre 10 y 20 segundos antes de las primeras palabras.
-- Por ahora responde solo en inglés. Una pregunta en español te manda a Buscar.
-- Puede equivocarse, o responder a una pregunta parecida en vez de a la tuya. Revisa las fuentes.
-- En temas médicos, tómalo como una señal hacia el artículo, no como un consejo.
-- Cuando no encuentra respuesta, lo dice. Es a propósito.
-
-Las respuestas erróneas o raras son de lo más útil que puedes enviar. Incluye la pregunta.
 
 ## Problemas conocidos
 
-- Preguntar es lento y a veces se desvía (ver arriba).
 - Si el teléfono cierra en segundo plano la página de un libro electrónico, el libro puede cerrarse. Los artículos se recuperan; los libros todavía no.
 - Algunos paquetes son grandes y tardan en descargarse. Pausar y reanudar es normal.
 - El icono, los nombres y los textos todavía cambian.
@@ -66,6 +56,14 @@ Si Granger se cierra de golpe, la próxima vez que la abras Inicio ofrece enviar
 Las capturas de pantalla ayudan. También "esto no lo entendí" y "aquí me rendí". Escribe en español o en inglés, como prefieras.
 
 ## Novedades (notas de la versión en Play, menos de 500 caracteres)
+
+La próxima versión (Preguntar en pausa):
+
+```
+Preguntar está en pausa mientras la IA en el teléfono mejora; volverá cuando pueda responder bien. Si descargaste su modelo, Ajustes → Modelos puede quitarlo para liberar unos 2.5 GB. Todo lo demás funciona igual, y lo siguiente es Buscar: cuéntanos qué buscaste y no encontraste.
+```
+
+Ronda 1, la primera versión:
 
 ```
 Versión de prueba, ronda 1. Gracias por probar Granger.

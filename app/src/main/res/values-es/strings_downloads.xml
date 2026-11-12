@@ -19,8 +19,8 @@
     <string name="downloads_speed">%1$s/s</string>
     <string name="downloads_bytes_of">%1$s de %2$s</string>
     <string name="downloads_timeline_dates">Fechas para la línea del tiempo</string>
-    <string name="downloads_index_for_ask">Índice para Preguntar</string>
-    <string name="downloads_with_index">%1$s + índice para Preguntar</string>
+    <string name="downloads_search_index">Índice de búsqueda</string>
+    <string name="downloads_with_index">%1$s + índice de búsqueda</string>
     <string name="downloads_queued">En cola</string>
     <string name="downloads_failed">Falló</string>
     <string name="downloads_not_in_catalog">Ya no está en el catálogo</string>

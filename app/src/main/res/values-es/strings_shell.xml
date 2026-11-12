@@ -37,7 +37,7 @@
     <string name="shell_kind_album">Álbum</string>
 
     <string name="shell_clear_history_title">¿Borrar el historial?</string>
-    <string name="shell_clear_history_body">Se olvidará lo que abriste, buscaste y reprodujiste, y se vaciará la barra. Los elementos fijados y la página de la que vienes se quedan. Los chats de Preguntar se quedan en Preguntar.</string>
+    <string name="shell_clear_history_body">Se olvidará lo que abriste, buscaste y reprodujiste, y se vaciará la barra. Los elementos fijados y la página de la que vienes se quedan.</string>
     <string name="shell_clear">Borrar</string>
     <string name="shell_clear_history">Borrar el historial</string>
     <string name="shell_saved">Guardados</string>
