@@ -83,6 +83,8 @@ def test_prompts_by_ids_and_stage(tmp_path, monkeypatch):
 def test_the_committed_sets_are_well_formed():
     for path in sorted(answerers.SETS.glob("*.json")):
         s = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(s, list) or "items" in s:
+            continue  # Search's sets (search_score.py: known items, quotes, phone subsets), not Ask prompt sets
         assert s["stage"] in ("answer", "rewrite") and s["base"] and s["ids"], path
         assert len(set(s["ids"])) == len(s["ids"]), path
     assert answerers.load_set("sample-40", "r1-dense-1")["stage"] == "answer"
