@@ -7,5 +7,13 @@
     "build": "~/.venvs/granger-pack/bin/python -I tools/qidindex/build.py '/Volumes/X10 Pro/granger-ll/items-{site}.jsonl' {out} {zim} --releases tools/sidecar/releases",
     "check": "~/.venvs/granger-pack/bin/python -I tools/qidindex/check.py {out}/{stem}.gqid --source {zim}",
     "gpu": false
+  },
+  "glink": {
+    "plan": "LL1",
+    "for": "Granger Classics books (en, es), one per book",
+    "inputs": "the new EPUB ({zim}) and the Classics release manifests (tools/pack-builder/releases/*_books.json) that list it; kb.py's kb-en/kb-es.sqlite on /Volumes/X10 Pro/granger-ll/ll1/ (rebuilt with the items files); tools/links/classics-qid.json (classics_qid.py) for each book's work and year",
+    "build": "~/.venvs/granger-links/bin/python tools/links/build.py {out} {zim} --ner-dir '/Volumes/X10 Pro/granger-ll/ll1/ner-cache' --releases tools/sidecar/releases",
+    "check": "~/.venvs/granger-links/bin/python tools/links/check.py {out} --epub-dir $(dirname {zim})",
+    "gpu": false
   }
 }

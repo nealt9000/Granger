@@ -185,6 +185,32 @@ def resolve(kb, text, label, lang, book_title="", facts=None):
     return None, [], None, "name-disagrees" if disagreed else "type-mismatch"
 
 
+def candidate_rows(kb, epub, spans, lang, year=None):
+    """(rows, reason counts): link.py's output rows (module docstring) for the book's spans, without the context check."""
+    text = {href: "\n".join(t for _, t in bs) for href, bs in chapters(epub)}
+    book_title = title_of(epub)
+    facts = BookFacts(text.values(), spans, year, book_title, lang)
+    rows, reasons = [], collections.Counter()
+    for s in spans:
+        ch = text[s["href"]]
+        best, alts, how, why = resolve(kb, s["text"], s["label"], lang, book_title, facts)
+        if s["heading"]:
+            best, why = None, "heading"
+        r = dict(s, word=len(ch[:s["start"]].split()), quote=ch[s["start"]:s["start"] + s["len"]],
+                 before=ch[max(0, s["start"] - 40):s["start"]])
+        if best is None:
+            reasons[why] += 1
+            rows.append(dict(r, qid=None, reason=why))
+            continue
+        b = ch.rfind("\n", 0, s["start"]) + 1
+        e = ch.find("\n", s["start"]); e = len(ch) if e < 0 else e
+        rows.append(dict(r, qid=best["qid"], path=best["path"], label_wd=best["label"], sl=best["sl"],
+                         cls=best["cls"], kind=best["kind"], how=how,
+                         alts=[[c["qid"], c["label"], c["sl"]] for c in alts[:3]], para=ch[b:e]))
+        reasons["candidate"] += 1
+    return rows, reasons
+
+
 def leads(zim_path, paths):
     """The first real paragraph of each article (the candidate's description for the context check)."""
     from libzim.reader import Archive
@@ -215,30 +241,8 @@ def main(argv=None):
     a.add_argument("--year", type=int, help="the year the book was written (nobody born after it is linked)")
     args = a.parse_args(argv)
 
-    text = {href: "\n".join(t for _, t in bs) for href, bs in chapters(args.epub)}
-    book_title = title_of(args.epub)
     spans = [json.loads(l) for l in open(args.ner, encoding="utf8")]
-    facts = BookFacts(text.values(), spans, args.year, book_title, args.lang)
-    kb = KB(args.kb)
-    rows, reasons = [], collections.Counter()
-    for s in spans:
-        ch = text[s["href"]]
-        best, alts, how, why = resolve(kb, s["text"], s["label"], args.lang, book_title, facts)
-        if s["heading"]:
-            best, why = None, "heading"
-        r = dict(s, word=len(ch[:s["start"]].split()), quote=ch[s["start"]:s["start"] + s["len"]],
-                 before=ch[max(0, s["start"] - 40):s["start"]])
-        if best is None:
-            reasons[why] += 1
-            rows.append(dict(r, qid=None, reason=why))
-            continue
-        b = ch.rfind("\n", 0, s["start"]) + 1
-        e = ch.find("\n", s["start"]); e = len(ch) if e < 0 else e
-        para = ch[b:e]
-        rows.append(dict(r, qid=best["qid"], path=best["path"], label_wd=best["label"], sl=best["sl"],
-                         cls=best["cls"], kind=best["kind"], how=how,
-                         alts=[[c["qid"], c["label"], c["sl"]] for c in alts[:3]], para=para))
-        reasons["candidate"] += 1
+    rows, reasons = candidate_rows(KB(args.kb), args.epub, spans, args.lang, args.year)
 
     # The context check (step 3): the paragraph against the candidate article's lead, both with EmbeddingGemma.
     linked = [r for r in rows if r["qid"]]

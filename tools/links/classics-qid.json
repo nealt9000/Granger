@@ -1,0 +1,3734 @@
+{
+ "gc-adventures-of-huckleberry-finn": {
+  "qid": 215410,
+  "label": "Adventures of Huckleberry Finn",
+  "year": 1884,
+  "how": "work"
+ },
+ "gc-adventures-of-pinocchio": {
+  "qid": 8065468,
+  "label": "The Adventures of Pinocchio",
+  "year": 1881,
+  "how": "work"
+ },
+ "gc-adventures-of-sherlock-holmes": {
+  "qid": 392147,
+  "label": "The Adventures of Sherlock Holmes",
+  "year": 1892,
+  "how": "work"
+ },
+ "gc-adventures-of-tom-sawyer": {
+  "qid": 326914,
+  "label": "The Adventures of Tom Sawyer",
+  "year": 1876,
+  "how": "work"
+ },
+ "gc-aeneid": {
+  "qid": 60220,
+  "label": "Aeneid",
+  "year": -50,
+  "how": "work"
+ },
+ "gc-aeneid-mackail": {
+  "qid": 60220,
+  "label": "Aeneid",
+  "year": -50,
+  "how": "work"
+ },
+ "gc-aesop-s-fables": {
+  "qid": 865902,
+  "label": "Aesop's Fables",
+  "year": 1912,
+  "how": "work-no-date"
+ },
+ "gc-age-of-innocence": {
+  "qid": 1045464,
+  "label": "The Age of Innocence",
+  "year": 1920,
+  "how": "work"
+ },
+ "gc-alchemist": {
+  "qid": 647411,
+  "label": "The Alchemist",
+  "year": 1612,
+  "how": "work-no-date"
+ },
+ "gc-alice-s-adventures-in-wonderland": {
+  "qid": 92640,
+  "label": "Alice's Adventures in Wonderland",
+  "year": 1862,
+  "how": "work"
+ },
+ "gc-all-quiet-on-the-western-front": {
+  "qid": 207332,
+  "label": "All Quiet on the Western Front",
+  "year": 1928,
+  "how": "work"
+ },
+ "gc-all-s-well-that-ends-well": {
+  "qid": 506865,
+  "label": "All's Well That Ends Well",
+  "year": 1605,
+  "how": "work"
+ },
+ "gc-analects": {
+  "qid": null,
+  "label": "",
+  "year": -479,
+  "how": "author-death"
+ },
+ "gc-angel-pavement": {
+  "qid": 4762241,
+  "label": "Angel Pavement",
+  "year": 1930,
+  "how": "work"
+ },
+ "gc-anna-karenina": {
+  "qid": 147787,
+  "label": "Anna Karenina",
+  "year": 1873,
+  "how": "work"
+ },
+ "gc-anne-of-green-gables": {
+  "qid": 565911,
+  "label": "Anne of Green Gables",
+  "year": 1908,
+  "how": "work"
+ },
+ "gc-antony-and-cleopatra": {
+  "qid": 606830,
+  "label": "Antony and Cleopatra",
+  "year": 1606,
+  "how": "work"
+ },
+ "gc-apocrypha-deuterocanonical-books": {
+  "qid": null,
+  "label": "",
+  "year": 1611,
+  "how": "published"
+ },
+ "gc-apology": {
+  "qid": 273668,
+  "label": "Apology",
+  "year": -395,
+  "how": "work"
+ },
+ "gc-arabian-nights-entertainments": {
+  "qid": null,
+  "label": "",
+  "year": 1898,
+  "how": "published"
+ },
+ "gc-arms-and-the-man": {
+  "qid": 2646905,
+  "label": "Arms and the Man",
+  "year": 1894,
+  "how": "work"
+ },
+ "gc-around-the-world-in-eighty-days": {
+  "qid": 1219561,
+  "label": "Around the World in Eighty Days",
+  "year": 1872,
+  "how": "work"
+ },
+ "gc-art-of-war": {
+  "qid": 8251,
+  "label": "The Art of War",
+  "year": 1910,
+  "how": "work-no-date"
+ },
+ "gc-as-i-lay-dying": {
+  "qid": 1544119,
+  "label": "As I Lay Dying",
+  "year": 1930,
+  "how": "work"
+ },
+ "gc-as-you-like-it": {
+  "qid": 237572,
+  "label": "As You Like It",
+  "year": 1599,
+  "how": "work"
+ },
+ "gc-ash-wednesday": {
+  "qid": 2346941,
+  "label": "Ash Wednesday",
+  "year": 1930,
+  "how": "work"
+ },
+ "gc-autobiography-of-benjamin-franklin": {
+  "qid": 7714957,
+  "label": "The Autobiography of Benjamin Franklin",
+  "year": 1791,
+  "how": "work"
+ },
+ "gc-awakening": {
+  "qid": 1567505,
+  "label": "The Awakening",
+  "year": 1899,
+  "how": "work"
+ },
+ "gc-babbitt": {
+  "qid": 1107000,
+  "label": "Babbitt",
+  "year": 1922,
+  "how": "work"
+ },
+ "gc-bacchae": {
+  "qid": 934597,
+  "label": "The Bacchae",
+  "year": 1902,
+  "how": "work-no-date"
+ },
+ "gc-barchester-towers": {
+  "qid": 4859885,
+  "label": "Barchester Towers",
+  "year": 1857,
+  "how": "work"
+ },
+ "gc-bartleby-the-scrivener": {
+  "qid": 780407,
+  "label": "Bartleby, the Scrivener",
+  "year": 1853,
+  "how": "work"
+ },
+ "gc-beggar-s-opera": {
+  "qid": 1472110,
+  "label": "The Beggar's Opera",
+  "year": 1727,
+  "how": "work"
+ },
+ "gc-beowulf": {
+  "qid": null,
+  "label": "",
+  "year": 1910,
+  "how": "published"
+ },
+ "gc-berean-standard-bible": {
+  "qid": null,
+  "label": "",
+  "year": 2016,
+  "how": "published"
+ },
+ "gc-beyond-good-and-evil": {
+  "qid": 579794,
+  "label": "Beyond Good and Evil",
+  "year": 1886,
+  "how": "work"
+ },
+ "gc-bhagavad-gita-the-song-celestial": {
+  "qid": null,
+  "label": "",
+  "year": 1885,
+  "how": "published"
+ },
+ "gc-billy-budd": {
+  "qid": 863037,
+  "label": "Billy Budd, Sailor",
+  "year": 1924,
+  "how": "work"
+ },
+ "gc-black-beauty": {
+  "qid": 880092,
+  "label": "Black Beauty",
+  "year": 1877,
+  "how": "work"
+ },
+ "gc-bleak-house": {
+  "qid": 883305,
+  "label": "Bleak House",
+  "year": 1852,
+  "how": "work"
+ },
+ "gc-blue-bird": {
+  "qid": 1367544,
+  "label": "The Blue Bird",
+  "year": 1908,
+  "how": "work"
+ },
+ "gc-book-of-mormon": {
+  "qid": 459842,
+  "label": "Book of Mormon",
+  "year": 1830,
+  "how": "work"
+ },
+ "gc-bridge-of-san-luis-rey": {
+  "qid": 941462,
+  "label": "The Bridge of San Luis Rey",
+  "year": 1927,
+  "how": "work"
+ },
+ "gc-brothers-karamazov": {
+  "qid": null,
+  "label": "",
+  "year": 1912,
+  "how": "published"
+ },
+ "gc-bungalow-mystery": {
+  "qid": null,
+  "label": "",
+  "year": 1930,
+  "how": "published"
+ },
+ "gc-cakes-and-ale": {
+  "qid": 2266873,
+  "label": "Cakes and Ale",
+  "year": 1930,
+  "how": "work"
+ },
+ "gc-call-of-the-wild": {
+  "qid": 476871,
+  "label": "The Call of the Wild",
+  "year": 1903,
+  "how": "work"
+ },
+ "gc-candide": {
+  "qid": 215894,
+  "label": "Candide",
+  "year": 1759,
+  "how": "work"
+ },
+ "gc-canterbury-tales": {
+  "qid": null,
+  "label": "",
+  "year": 1400,
+  "how": "published"
+ },
+ "gc-canterbury-tales-modern": {
+  "qid": null,
+  "label": "",
+  "year": 1400,
+  "how": "author-death"
+ },
+ "gc-castle": {
+  "qid": 682733,
+  "label": "The Castle",
+  "year": 1922,
+  "how": "work"
+ },
+ "gc-castle-of-andalusia": {
+  "qid": null,
+  "label": "",
+  "year": 1782,
+  "how": "published"
+ },
+ "gc-cavalleria-rusticana": {
+  "qid": null,
+  "label": "",
+  "year": 1919,
+  "how": "published"
+ },
+ "gc-christmas-carol": {
+  "qid": 62879,
+  "label": "A Christmas Carol",
+  "year": 1843,
+  "how": "work"
+ },
+ "gc-city-of-god-volume-1": {
+  "qid": null,
+  "label": "",
+  "year": 1871,
+  "how": "published"
+ },
+ "gc-city-of-god-volume-2": {
+  "qid": null,
+  "label": "",
+  "year": 1871,
+  "how": "published"
+ },
+ "gc-civilization-and-its-discontents": {
+  "qid": 1170621,
+  "label": "Civilization and Its Discontents",
+  "year": 1930,
+  "how": "work"
+ },
+ "gc-clouds": {
+  "qid": 868447,
+  "label": "The Clouds",
+  "year": 1853,
+  "how": "work-no-date"
+ },
+ "gc-comedy-of-errors": {
+  "qid": 506505,
+  "label": "The Comedy of Errors",
+  "year": 1594,
+  "how": "work"
+ },
+ "gc-common-sense": {
+  "qid": 843940,
+  "label": "Common Sense",
+  "year": 1776,
+  "how": "work"
+ },
+ "gc-communist-manifesto": {
+  "qid": 40591,
+  "label": "The Communist Manifesto",
+  "year": 1848,
+  "how": "work"
+ },
+ "gc-complete-plays-of-gilbert-and-sullivan": {
+  "qid": null,
+  "label": "",
+  "year": 1900,
+  "how": "published"
+ },
+ "gc-confessions": {
+  "qid": 372941,
+  "label": "Confessions",
+  "year": 1838,
+  "how": "work-no-date"
+ },
+ "gc-connecticut-yankee-in-king-arthur-s-court": {
+  "qid": 848612,
+  "label": "A Connecticut Yankee in King Arthur's Court",
+  "year": 1889,
+  "how": "work"
+ },
+ "gc-conquest-of-happiness": {
+  "qid": 3821889,
+  "label": "The Conquest of Happiness",
+  "year": 1930,
+  "how": "work"
+ },
+ "gc-consolation-of-philosophy": {
+  "qid": 861927,
+  "label": "The Consolation of Philosophy",
+  "year": 524,
+  "how": "work"
+ },
+ "gc-coriolanus": {
+  "qid": 463126,
+  "label": "Coriolanus",
+  "year": 1608,
+  "how": "work"
+ },
+ "gc-count-of-monte-cristo": {
+  "qid": 191838,
+  "label": "The Count of Monte Cristo",
+  "year": 1844,
+  "how": "work"
+ },
+ "gc-cranford": {
+  "qid": 265100,
+  "label": "Cranford",
+  "year": 1851,
+  "how": "work"
+ },
+ "gc-crime-and-punishment": {
+  "qid": null,
+  "label": "",
+  "year": 1914,
+  "how": "published"
+ },
+ "gc-critique-of-pure-reason": {
+  "qid": 220002,
+  "label": "Critique of Pure Reason",
+  "year": 1781,
+  "how": "work"
+ },
+ "gc-crito": {
+  "qid": 267634,
+  "label": "Crito",
+  "year": -400,
+  "how": "work"
+ },
+ "gc-cymbeline": {
+  "qid": 730212,
+  "label": "Cymbeline",
+  "year": 1610,
+  "how": "work"
+ },
+ "gc-cyrano-de-bergerac": {
+  "qid": 1048916,
+  "label": "Cyrano de Bergerac",
+  "year": 1897,
+  "how": "work"
+ },
+ "gc-daisy-miller": {
+  "qid": 574887,
+  "label": "Daisy Miller",
+  "year": 1879,
+  "how": "work"
+ },
+ "gc-david-copperfield": {
+  "qid": 189811,
+  "label": "David Copperfield",
+  "year": 1849,
+  "how": "work"
+ },
+ "gc-dead-souls": {
+  "qid": 647379,
+  "label": "Dead Souls",
+  "year": 1835,
+  "how": "work"
+ },
+ "gc-death-comes-for-the-archbishop": {
+  "qid": 543116,
+  "label": "Death Comes for the Archbishop",
+  "year": 1927,
+  "how": "work"
+ },
+ "gc-decameron": {
+  "qid": 16438,
+  "label": "The Decameron",
+  "year": 1351,
+  "how": "work"
+ },
+ "gc-democracy-in-america-volume-1": {
+  "qid": null,
+  "label": "",
+  "year": 1835,
+  "how": "published"
+ },
+ "gc-democracy-in-america-volume-2": {
+  "qid": null,
+  "label": "",
+  "year": 1840,
+  "how": "published"
+ },
+ "gc-dhammapada": {
+  "qid": null,
+  "label": "",
+  "year": 1881,
+  "how": "published"
+ },
+ "gc-discourse-on-the-method": {
+  "qid": 731224,
+  "label": "Discourse on the Method",
+  "year": 1637,
+  "how": "work"
+ },
+ "gc-discourses-and-encheiridion": {
+  "qid": null,
+  "label": "",
+  "year": 125,
+  "how": "author-death"
+ },
+ "gc-divine-comedy-hell": {
+  "qid": 40185,
+  "label": "The Divine Comedy",
+  "year": 1320,
+  "how": "work"
+ },
+ "gc-divine-comedy-hell-norton": {
+  "qid": 40185,
+  "label": "The Divine Comedy",
+  "year": 1320,
+  "how": "work"
+ },
+ "gc-divine-comedy-paradise": {
+  "qid": 40185,
+  "label": "The Divine Comedy",
+  "year": 1320,
+  "how": "work"
+ },
+ "gc-divine-comedy-paradise-norton": {
+  "qid": 40185,
+  "label": "The Divine Comedy",
+  "year": 1320,
+  "how": "work"
+ },
+ "gc-divine-comedy-purgatory": {
+  "qid": 40185,
+  "label": "The Divine Comedy",
+  "year": 1320,
+  "how": "work"
+ },
+ "gc-divine-comedy-purgatory-norton": {
+  "qid": 40185,
+  "label": "The Divine Comedy",
+  "year": 1320,
+  "how": "work"
+ },
+ "gc-doctor-faustus": {
+  "qid": 50919,
+  "label": "The Tragical History of Doctor Faustus",
+  "year": 1604,
+  "how": "work"
+ },
+ "gc-doll-s-house": {
+  "qid": 669694,
+  "label": "A Doll's House",
+  "year": 1879,
+  "how": "work"
+ },
+ "gc-don-juan": {
+  "qid": null,
+  "label": "",
+  "year": 1824,
+  "how": "published"
+ },
+ "gc-don-quixote": {
+  "qid": 480,
+  "label": "Don Quixote",
+  "year": 1605,
+  "how": "work"
+ },
+ "gc-douay-rheims-bible": {
+  "qid": null,
+  "label": "",
+  "year": 1752,
+  "how": "published"
+ },
+ "gc-dracula": {
+  "qid": 41542,
+  "label": "Dracula",
+  "year": 1890,
+  "how": "work"
+ },
+ "gc-dubliners": {
+  "qid": 459592,
+  "label": "Dubliners",
+  "year": 1904,
+  "how": "work"
+ },
+ "gc-duchess-of-malfi": {
+  "qid": 3408612,
+  "label": "The Duchess of Malfi",
+  "year": 1623,
+  "how": "work"
+ },
+ "gc-duenna": {
+  "qid": null,
+  "label": "",
+  "year": 1775,
+  "how": "published"
+ },
+ "gc-emma": {
+  "qid": 223880,
+  "label": "Emma",
+  "year": 1815,
+  "how": "work"
+ },
+ "gc-enemy-of-the-people": {
+  "qid": 1305319,
+  "label": "An Enemy of the People",
+  "year": 1882,
+  "how": "work"
+ },
+ "gc-enquiry-concerning-human-understanding": {
+  "qid": 1306656,
+  "label": "Philosophical Essays Concerning Human Understanding",
+  "year": 1748,
+  "how": "work"
+ },
+ "gc-erewhon": {
+  "qid": 1350048,
+  "label": "Erewhon",
+  "year": 1872,
+  "how": "work"
+ },
+ "gc-es-a-first-spanish-reader": {
+  "qid": null,
+  "label": "",
+  "year": 1916,
+  "how": "published"
+ },
+ "gc-es-abel-sanchez": {
+  "qid": 3822183,
+  "label": "Abel Sánchez",
+  "year": 1917,
+  "how": "work"
+ },
+ "gc-es-amor-y-pedagogia": {
+  "qid": 5673140,
+  "label": "",
+  "year": 1902,
+  "how": "work-no-date"
+ },
+ "gc-es-andanzas-y-visiones-espanolas": {
+  "qid": 5674964,
+  "label": "Andanzas y visiones españolas",
+  "year": 1922,
+  "how": "work-no-date"
+ },
+ "gc-es-antano-i-ogano": {
+  "qid": null,
+  "label": "",
+  "year": 1885,
+  "how": "published"
+ },
+ "gc-es-ariel": {
+  "qid": 5704003,
+  "label": "Ariel",
+  "year": 1900,
+  "how": "work"
+ },
+ "gc-es-azul": {
+  "qid": 5715218,
+  "label": "Azul",
+  "year": 1888,
+  "how": "work"
+ },
+ "gc-es-bailen": {
+  "qid": 5716743,
+  "label": "Bailén",
+  "year": 1873,
+  "how": "work"
+ },
+ "gc-es-canas-y-barro": {
+  "qid": 8343249,
+  "label": "",
+  "year": 1901,
+  "how": "work"
+ },
+ "gc-es-cantos-de-vida-y-esperanza": {
+  "qid": 19418810,
+  "label": "Cantos de vida y esperanza",
+  "year": 1905,
+  "how": "work-no-date"
+ },
+ "gc-es-cartas-de-mi-molino": {
+  "qid": null,
+  "label": "",
+  "year": 1897,
+  "how": "author-death"
+ },
+ "gc-es-cecilia-valdes": {
+  "qid": 1052412,
+  "label": "Cecilia Valdés",
+  "year": 1839,
+  "how": "work"
+ },
+ "gc-es-comedias-de-aristofanes-tomo-1-de-3": {
+  "qid": null,
+  "label": "",
+  "year": 1880,
+  "how": "published"
+ },
+ "gc-es-comedias-de-aristofanes-tomo-2-de-3": {
+  "qid": null,
+  "label": "",
+  "year": 1881,
+  "how": "published"
+ },
+ "gc-es-comedias-de-aristofanes-tomo-3-de-3": {
+  "qid": null,
+  "label": "",
+  "year": 1881,
+  "how": "published"
+ },
+ "gc-es-coplas-por-la-muerte-de-su-padre": {
+  "qid": 1218668,
+  "label": "Coplas por la muerte de su padre",
+  "year": 1476,
+  "how": "work-no-date"
+ },
+ "gc-es-corazon-diario-de-un-nino": {
+  "qid": 11336,
+  "label": "Heart",
+  "year": 1886,
+  "how": "work"
+ },
+ "gc-es-cuentos-chilenos-de-nunca-acabar": {
+  "qid": null,
+  "label": "",
+  "year": 1910,
+  "how": "published"
+ },
+ "gc-es-cuentos-clasicos-del-norte": {
+  "qid": null,
+  "label": "",
+  "year": 1849,
+  "how": "author-death"
+ },
+ "gc-es-cuentos-de-amor": {
+  "qid": null,
+  "label": "",
+  "year": 1898,
+  "how": "published"
+ },
+ "gc-es-cuentos-de-amor-de-locura-y-de-muerte": {
+  "qid": 2918088,
+  "label": "Tales of Love Madness and Death",
+  "year": 1917,
+  "how": "work"
+ },
+ "gc-es-cuentos-de-fray-mocho": {
+  "qid": null,
+  "label": "",
+  "year": 1906,
+  "how": "published"
+ },
+ "gc-es-cuentos-de-la-alhambra": {
+  "qid": 1210997,
+  "label": "Tales of the Alhambra",
+  "year": 1832,
+  "how": "work"
+ },
+ "gc-es-cuentos-de-navidad-y-reyes-cuentos-de-la-patria-cuentos-antiguos": {
+  "qid": null,
+  "label": "",
+  "year": 1902,
+  "how": "published"
+ },
+ "gc-es-cuentos-de-poeta": {
+  "qid": null,
+  "label": "",
+  "year": 1900,
+  "how": "published"
+ },
+ "gc-es-cuentos-escogidos": {
+  "qid": null,
+  "label": "",
+  "year": 1893,
+  "how": "author-death"
+ },
+ "gc-es-cuentos-ingenuos": {
+  "qid": null,
+  "label": "",
+  "year": 1901,
+  "how": "published"
+ },
+ "gc-es-cuentos-populares-en-chile": {
+  "qid": null,
+  "label": "",
+  "year": 1923,
+  "how": "published"
+ },
+ "gc-es-cuentos-valencianos": {
+  "qid": null,
+  "label": "",
+  "year": 1896,
+  "how": "published"
+ },
+ "gc-es-cuentos-y-dialogos": {
+  "qid": null,
+  "label": "",
+  "year": 1882,
+  "how": "published"
+ },
+ "gc-es-del-sentimiento-tragico-de-la-vida": {
+  "qid": 3227098,
+  "label": "Del sentimiento trágico de la vida",
+  "year": 1912,
+  "how": "work"
+ },
+ "gc-es-divinas-palabras": {
+  "qid": 8561242,
+  "label": "Divinas palabras",
+  "year": 1919,
+  "how": "work"
+ },
+ "gc-es-doctor-sutilis": {
+  "qid": null,
+  "label": "",
+  "year": 1916,
+  "how": "published"
+ },
+ "gc-es-don-alvaro-o-la-fuerza-del-sino": {
+  "qid": 1239596,
+  "label": "Don Álvaro o la fuerza del sino",
+  "year": 1835,
+  "how": "work-no-date"
+ },
+ "gc-es-don-quijote": {
+  "qid": 480,
+  "label": "Don Quixote",
+  "year": 1605,
+  "how": "work"
+ },
+ "gc-es-dramas-de-shakespeare-tomo-1": {
+  "qid": null,
+  "label": "",
+  "year": 1616,
+  "how": "author-death"
+ },
+ "gc-es-el-amigo-manso": {
+  "qid": 18416088,
+  "label": "",
+  "year": 1882,
+  "how": "work"
+ },
+ "gc-es-el-anacronopete-viaje-a-china-metempsicosis": {
+  "qid": null,
+  "label": "",
+  "year": 1887,
+  "how": "published"
+ },
+ "gc-es-el-arte-de-amar": {
+  "qid": null,
+  "label": "",
+  "year": 1821,
+  "how": "published"
+ },
+ "gc-es-el-asno-de-oro": {
+  "qid": null,
+  "label": "",
+  "year": 1513,
+  "how": "published"
+ },
+ "gc-es-el-caso-extrano-del-doctor-jekyll": {
+  "qid": null,
+  "label": "",
+  "year": 1891,
+  "how": "published"
+ },
+ "gc-es-el-clavo": {
+  "qid": 19932982,
+  "label": "El clavo",
+  "year": 1853,
+  "how": "work"
+ },
+ "gc-es-el-criterio": {
+  "qid": null,
+  "label": "",
+  "year": 1845,
+  "how": "published"
+ },
+ "gc-es-el-criticon-tomo-1-de-2": {
+  "qid": 3049817,
+  "label": "El Criticón",
+  "year": 1651,
+  "how": "work"
+ },
+ "gc-es-el-criticon-tomo-2-de-2": {
+  "qid": 3049817,
+  "label": "El Criticón",
+  "year": 1651,
+  "how": "work"
+ },
+ "gc-es-el-diablo-cojuelo": {
+  "qid": 19436348,
+  "label": "El diablo cojuelo",
+  "year": 1637,
+  "how": "work"
+ },
+ "gc-es-el-espejo-de-la-muerte": {
+  "qid": null,
+  "label": "",
+  "year": 1913,
+  "how": "published"
+ },
+ "gc-es-el-filibusterismo": {
+  "qid": 1249199,
+  "label": "El filibusterismo",
+  "year": 1891,
+  "how": "work"
+ },
+ "gc-es-el-gaucho-martin-fierro": {
+  "qid": 832330,
+  "label": "Martín Fierro",
+  "year": 1872,
+  "how": "work"
+ },
+ "gc-es-el-hombre-mediocre": {
+  "qid": 5825244,
+  "label": "",
+  "year": 1913,
+  "how": "work"
+ },
+ "gc-es-el-paraiso-perdido": {
+  "qid": 28754,
+  "label": "Paradise Lost",
+  "year": 1667,
+  "how": "work"
+ },
+ "gc-es-el-prisionero-de-zenda": {
+  "qid": 1193766,
+  "label": "The Prisoner of Zenda",
+  "year": 1894,
+  "how": "work"
+ },
+ "gc-es-el-senor-de-bembibre": {
+  "qid": 5823315,
+  "label": "El Señor de Bembibre",
+  "year": 1844,
+  "how": "work-no-date"
+ },
+ "gc-es-el-senor-y-lo-demas-son-cuentos": {
+  "qid": null,
+  "label": "",
+  "year": 1893,
+  "how": "published"
+ },
+ "gc-es-el-senorio-de-los-incas-cronica-del-peru-segunda-parte": {
+  "qid": 21002017,
+  "label": "El Señorío de los Incas",
+  "year": 1880,
+  "how": "work"
+ },
+ "gc-es-el-si-de-las-ninas": {
+  "qid": 6593776,
+  "label": "The Maidens' Consent",
+  "year": 1801,
+  "how": "work"
+ },
+ "gc-es-el-sombrero-de-tres-picos": {
+  "qid": 16564880,
+  "label": "The Three-Cornered Hat",
+  "year": 1874,
+  "how": "work"
+ },
+ "gc-es-el-tratado-de-la-pintura": {
+  "qid": 1258536,
+  "label": "A Treatise on Painting",
+  "year": 1520,
+  "how": "work"
+ },
+ "gc-es-en-las-orillas-del-sar": {
+  "qid": 19440746,
+  "label": "En las orillas del Sar",
+  "year": 1884,
+  "how": "work"
+ },
+ "gc-es-en-tranvia": {
+  "qid": null,
+  "label": "",
+  "year": 1901,
+  "how": "published"
+ },
+ "gc-es-epistola-de-san-pablo-a-los-romanos": {
+  "qid": null,
+  "label": "",
+  "year": 1909,
+  "how": "published"
+ },
+ "gc-es-fabulas": {
+  "qid": null,
+  "label": "",
+  "year": 1781,
+  "how": "published"
+ },
+ "gc-es-fabulas-literarias": {
+  "qid": null,
+  "label": "",
+  "year": 1782,
+  "how": "published"
+ },
+ "gc-es-fausto-primera-parte": {
+  "qid": 29478,
+  "label": "Faust",
+  "year": 1774,
+  "how": "work"
+ },
+ "gc-es-figaro-articulos-selectos": {
+  "qid": null,
+  "label": "",
+  "year": 1837,
+  "how": "author-death"
+ },
+ "gc-es-fortunata-y-jacinta": {
+  "qid": 3815979,
+  "label": "Fortunata and Jacinta",
+  "year": 1885,
+  "how": "work"
+ },
+ "gc-es-gil-blas-de-santillana-tomo-1-de-3": {
+  "qid": null,
+  "label": "",
+  "year": 1747,
+  "how": "author-death"
+ },
+ "gc-es-gil-blas-de-santillana-tomo-2-de-3": {
+  "qid": null,
+  "label": "",
+  "year": 1747,
+  "how": "author-death"
+ },
+ "gc-es-gil-blas-de-santillana-tomo-3-de-3": {
+  "qid": null,
+  "label": "",
+  "year": 1747,
+  "how": "author-death"
+ },
+ "gc-es-hamlet": {
+  "qid": 41567,
+  "label": "Hamlet",
+  "year": 1602,
+  "how": "work"
+ },
+ "gc-es-historia-de-la-guerra-del-peloponeso-tomo-1-de-2": {
+  "qid": null,
+  "label": "",
+  "year": 1564,
+  "how": "published"
+ },
+ "gc-es-historia-de-la-guerra-del-peloponeso-tomo-2-de-2": {
+  "qid": null,
+  "label": "",
+  "year": 1564,
+  "how": "published"
+ },
+ "gc-es-historia-de-la-vida-del-buscon": {
+  "qid": null,
+  "label": "",
+  "year": 1626,
+  "how": "published"
+ },
+ "gc-es-historia-de-las-indias-tomo-1-de-5": {
+  "qid": null,
+  "label": "",
+  "year": 1566,
+  "how": "author-death"
+ },
+ "gc-es-historia-de-las-indias-tomo-2-de-5": {
+  "qid": null,
+  "label": "",
+  "year": 1566,
+  "how": "author-death"
+ },
+ "gc-es-historia-de-las-indias-tomo-3-de-5": {
+  "qid": null,
+  "label": "",
+  "year": 1566,
+  "how": "author-death"
+ },
+ "gc-es-historia-de-las-indias-tomo-4-de-5": {
+  "qid": null,
+  "label": "",
+  "year": 1566,
+  "how": "author-death"
+ },
+ "gc-es-historia-de-las-indias-tomo-5-de-5": {
+  "qid": null,
+  "label": "",
+  "year": 1566,
+  "how": "author-death"
+ },
+ "gc-es-historia-natural-y-moral-de-las-indias-tomo-1-de-2": {
+  "qid": 24943500,
+  "label": "The natural and moral history of the Indies",
+  "year": 1589,
+  "how": "work"
+ },
+ "gc-es-historia-natural-y-moral-de-las-indias-tomo-2-de-2": {
+  "qid": 24943500,
+  "label": "The natural and moral history of the Indies",
+  "year": 1589,
+  "how": "work"
+ },
+ "gc-es-insolacion-y-morrina": {
+  "qid": null,
+  "label": "",
+  "year": 1889,
+  "how": "published"
+ },
+ "gc-es-la-barraca": {
+  "qid": 467719,
+  "label": "The Shack",
+  "year": 1898,
+  "how": "work"
+ },
+ "gc-es-la-biblia-en-espana-tomo-1-de-3": {
+  "qid": 7717461,
+  "label": "The Bible in Spain",
+  "year": 1921,
+  "how": "work-no-date"
+ },
+ "gc-es-la-biblia-en-espana-tomo-2-de-3": {
+  "qid": 7717461,
+  "label": "The Bible in Spain",
+  "year": 1921,
+  "how": "work-no-date"
+ },
+ "gc-es-la-biblia-en-espana-tomo-3-de-3": {
+  "qid": 7717461,
+  "label": "The Bible in Spain",
+  "year": 1921,
+  "how": "work-no-date"
+ },
+ "gc-es-la-condenada": {
+  "qid": null,
+  "label": "",
+  "year": 1900,
+  "how": "published"
+ },
+ "gc-es-la-dama-de-las-camelias-una-familia-corsa": {
+  "qid": null,
+  "label": "",
+  "year": 1912,
+  "how": "published"
+ },
+ "gc-es-la-desheredada": {
+  "qid": 18419409,
+  "label": "",
+  "year": 1881,
+  "how": "work"
+ },
+ "gc-es-la-divina-comedia": {
+  "qid": 40185,
+  "label": "The Divine Comedy",
+  "year": 1320,
+  "how": "work"
+ },
+ "gc-es-la-edad-de-oro": {
+  "qid": null,
+  "label": "",
+  "year": 1889,
+  "how": "published"
+ },
+ "gc-es-la-gaviota": {
+  "qid": null,
+  "label": "",
+  "year": 1849,
+  "how": "published"
+ },
+ "gc-es-la-gran-aldea": {
+  "qid": 16588239,
+  "label": "",
+  "year": 1884,
+  "how": "work"
+ },
+ "gc-es-la-hermana-san-sulpicio": {
+  "qid": null,
+  "label": "",
+  "year": 1889,
+  "how": "published"
+ },
+ "gc-es-la-iliada": {
+  "qid": null,
+  "label": "",
+  "year": 1908,
+  "how": "published"
+ },
+ "gc-es-la-isla-del-tesoro": {
+  "qid": 185118,
+  "label": "Treasure Island",
+  "year": 1883,
+  "how": "work"
+ },
+ "gc-es-la-letra-escarlata": {
+  "qid": 907568,
+  "label": "The Scarlet Letter",
+  "year": 1850,
+  "how": "work"
+ },
+ "gc-es-la-madre-naturaleza": {
+  "qid": 5575234,
+  "label": "",
+  "year": 1887,
+  "how": "work"
+ },
+ "gc-es-la-novela-en-el-tranvia": {
+  "qid": null,
+  "label": "",
+  "year": 1871,
+  "how": "published"
+ },
+ "gc-es-la-odisea": {
+  "qid": null,
+  "label": "",
+  "year": 1910,
+  "how": "published"
+ },
+ "gc-es-la-perfecta-casada": {
+  "qid": 42194140,
+  "label": "The Perfect Wife",
+  "year": 1583,
+  "how": "work-no-date"
+ },
+ "gc-es-la-puchera": {
+  "qid": null,
+  "label": "",
+  "year": 1889,
+  "how": "published"
+ },
+ "gc-es-la-regenta": {
+  "qid": 1784466,
+  "label": "La Regenta",
+  "year": 1884,
+  "how": "work"
+ },
+ "gc-es-la-senorita-de-trevelez": {
+  "qid": 5968130,
+  "label": "The Lady from Trévelez",
+  "year": 1916,
+  "how": "work-no-date"
+ },
+ "gc-es-la-tia-tula": {
+  "qid": 5968334,
+  "label": "",
+  "year": 1921,
+  "how": "work-no-date"
+ },
+ "gc-es-la-tribuna": {
+  "qid": 130613699,
+  "label": "",
+  "year": 1883,
+  "how": "work"
+ },
+ "gc-es-la-venganza-de-don-mendo": {
+  "qid": 5650164,
+  "label": "La venganza de Don Mendo",
+  "year": 1918,
+  "how": "work-no-date"
+ },
+ "gc-es-la-vuelta-de-martin-fierro": {
+  "qid": 5968530,
+  "label": "La vuelta de Martín Fierro",
+  "year": 1879,
+  "how": "work"
+ },
+ "gc-es-las-cien-mejores-poesias-liricas-de-la-lengua-castellana": {
+  "qid": null,
+  "label": "",
+  "year": 1908,
+  "how": "published"
+ },
+ "gc-es-las-fuerzas-extranas": {
+  "qid": 5694002,
+  "label": "Strange Forces",
+  "year": 1906,
+  "how": "work"
+ },
+ "gc-es-las-helenicas": {
+  "qid": null,
+  "label": "",
+  "year": 1888,
+  "how": "published"
+ },
+ "gc-es-lazarillo-de-tormes": {
+  "qid": null,
+  "label": "",
+  "year": 1554,
+  "how": "published"
+ },
+ "gc-es-legends-tales-and-poems": {
+  "qid": null,
+  "label": "",
+  "year": 1870,
+  "how": "author-death"
+ },
+ "gc-es-libro-de-buen-amor": {
+  "qid": null,
+  "label": "",
+  "year": 1330,
+  "how": "published"
+ },
+ "gc-es-libro-de-poemas": {
+  "qid": null,
+  "label": "",
+  "year": 1921,
+  "how": "published"
+ },
+ "gc-es-libro-segundo-de-lectura": {
+  "qid": null,
+  "label": "",
+  "year": 1918,
+  "how": "published"
+ },
+ "gc-es-los-argonautas": {
+  "qid": null,
+  "label": "",
+  "year": 1914,
+  "how": "published"
+ },
+ "gc-es-los-cuatro-jinetes-del-apocalipsis": {
+  "qid": 9024244,
+  "label": "The Four Horsemen of the Apocalypse",
+  "year": 1916,
+  "how": "work"
+ },
+ "gc-es-los-entremeses": {
+  "qid": null,
+  "label": "",
+  "year": 1615,
+  "how": "published"
+ },
+ "gc-es-los-lusiadas": {
+  "qid": 781898,
+  "label": "Os Lusíadas",
+  "year": 1550,
+  "how": "work"
+ },
+ "gc-es-los-nueve-libros-de-la-historia-tomo-1-de-2": {
+  "qid": null,
+  "label": "",
+  "year": 1878,
+  "how": "published"
+ },
+ "gc-es-los-nueve-libros-de-la-historia-tomo-2-de-2": {
+  "qid": null,
+  "label": "",
+  "year": 1884,
+  "how": "published"
+ },
+ "gc-es-los-pazos-de-ulloa": {
+  "qid": 9024322,
+  "label": "The House of Ulloa",
+  "year": 1886,
+  "how": "work"
+ },
+ "gc-es-luces-de-bohemia": {
+  "qid": 3312512,
+  "label": "Bohemian Lights",
+  "year": 1920,
+  "how": "work"
+ },
+ "gc-es-mare-nostrum": {
+  "qid": null,
+  "label": "",
+  "year": 1918,
+  "how": "published"
+ },
+ "gc-es-marianela": {
+  "qid": 6762098,
+  "label": "Marianela",
+  "year": 1878,
+  "how": "work"
+ },
+ "gc-es-mas-vale-mana-que-fuerza": {
+  "qid": null,
+  "label": "",
+  "year": 1898,
+  "how": "author-death"
+ },
+ "gc-es-metamorfoseos-tomo-1-de-4": {
+  "qid": null,
+  "label": "",
+  "year": 1805,
+  "how": "published"
+ },
+ "gc-es-metamorfoseos-tomo-2-de-4": {
+  "qid": null,
+  "label": "",
+  "year": 1809,
+  "how": "published"
+ },
+ "gc-es-metamorfoseos-tomo-3-de-4": {
+  "qid": null,
+  "label": "",
+  "year": 1819,
+  "how": "published"
+ },
+ "gc-es-metamorfoseos-tomo-4-de-4": {
+  "qid": null,
+  "label": "",
+  "year": 1819,
+  "how": "published"
+ },
+ "gc-es-mi-ultimo-adios": {
+  "qid": 740855,
+  "label": "Mi último adiós",
+  "year": 1896,
+  "how": "work"
+ },
+ "gc-es-miau": {
+  "qid": 6827778,
+  "label": "Miau",
+  "year": 1888,
+  "how": "work"
+ },
+ "gc-es-misericordia": {
+  "qid": 5836705,
+  "label": "Compassion",
+  "year": 1897,
+  "how": "work"
+ },
+ "gc-es-naturaleza-de-las-cosas": {
+  "qid": null,
+  "label": "",
+  "year": 1892,
+  "how": "published"
+ },
+ "gc-es-naufragios": {
+  "qid": 764661,
+  "label": "The Account and Commentaries of Governor Álvar Núñez Cabeza de Vaca",
+  "year": 1542,
+  "how": "work"
+ },
+ "gc-es-niebla": {
+  "qid": 2604439,
+  "label": "Mist",
+  "year": 1907,
+  "how": "work"
+ },
+ "gc-es-noli-me-tangere": {
+  "qid": 568299,
+  "label": "Noli Me Tángere",
+  "year": 1887,
+  "how": "work"
+ },
+ "gc-es-novelas-ejemplares": {
+  "qid": 555699,
+  "label": "Exemplary Novels",
+  "year": 1613,
+  "how": "work"
+ },
+ "gc-es-novelas-ejemplares-y-amorosas": {
+  "qid": null,
+  "label": "",
+  "year": 1637,
+  "how": "published"
+ },
+ "gc-es-novelas-y-cuentos": {
+  "qid": null,
+  "label": "",
+  "year": 1867,
+  "how": "author-death"
+ },
+ "gc-es-o-locura-o-santidad": {
+  "qid": null,
+  "label": "",
+  "year": 1877,
+  "how": "published"
+ },
+ "gc-es-obras-dramaticas-de-euripides-tomo-1-de-3": {
+  "qid": null,
+  "label": "",
+  "year": -406,
+  "how": "author-death"
+ },
+ "gc-es-obras-dramaticas-de-euripides-tomo-2-de-3": {
+  "qid": null,
+  "label": "",
+  "year": -406,
+  "how": "author-death"
+ },
+ "gc-es-obras-dramaticas-de-euripides-tomo-3-de-3": {
+  "qid": null,
+  "label": "",
+  "year": -406,
+  "how": "author-death"
+ },
+ "gc-es-obras-escogidas": {
+  "qid": null,
+  "label": "",
+  "year": 1870,
+  "how": "author-death"
+ },
+ "gc-es-obras-selectas-de-sor-juana-ines-de-la-cruz": {
+  "qid": null,
+  "label": "",
+  "year": 1695,
+  "how": "author-death"
+ },
+ "gc-es-orlando-furioso-tomo-1-de-2": {
+  "qid": 48922,
+  "label": "Orlando Furioso",
+  "year": 1516,
+  "how": "work"
+ },
+ "gc-es-orlando-furioso-tomo-2-de-2": {
+  "qid": 48922,
+  "label": "Orlando Furioso",
+  "year": 1516,
+  "how": "work"
+ },
+ "gc-es-paginas-escogidas": {
+  "qid": null,
+  "label": "",
+  "year": 1917,
+  "how": "published"
+ },
+ "gc-es-paginas-sudamericanas": {
+  "qid": null,
+  "label": "",
+  "year": 1920,
+  "how": "published"
+ },
+ "gc-es-pepita-jimenez": {
+  "qid": 5562244,
+  "label": "Pepita Jiménez",
+  "year": 1874,
+  "how": "work"
+ },
+ "gc-es-pequeneces": {
+  "qid": 112262940,
+  "label": "Pequeñeces",
+  "year": 1890,
+  "how": "work"
+ },
+ "gc-es-poesias-completas": {
+  "qid": 41241012,
+  "label": "",
+  "year": 1917,
+  "how": "work"
+ },
+ "gc-es-prosas-profanas": {
+  "qid": null,
+  "label": "",
+  "year": 1896,
+  "how": "published"
+ },
+ "gc-es-raton-perez": {
+  "qid": null,
+  "label": "",
+  "year": 1911,
+  "how": "published"
+ },
+ "gc-es-recuerdos-de-mi-vida-tomo-1-de-2": {
+  "qid": null,
+  "label": "",
+  "year": 1901,
+  "how": "published"
+ },
+ "gc-es-recuerdos-de-mi-vida-tomo-2-de-2": {
+  "qid": null,
+  "label": "",
+  "year": 1917,
+  "how": "published"
+ },
+ "gc-es-reglas-y-consejos-sobre-investigacion-cientifica": {
+  "qid": 18747766,
+  "label": "Advice for a Young Investigator",
+  "year": 1899,
+  "how": "work"
+ },
+ "gc-es-romance-de-lobos": {
+  "qid": 6111385,
+  "label": "",
+  "year": 1908,
+  "how": "work"
+ },
+ "gc-es-romancero-gitano": {
+  "qid": 584556,
+  "label": "Romancero gitano",
+  "year": 1928,
+  "how": "work"
+ },
+ "gc-es-romancero-selecto-del-cid": {
+  "qid": null,
+  "label": "",
+  "year": 1884,
+  "how": "published"
+ },
+ "gc-es-sangre-y-arena": {
+  "qid": 5646475,
+  "label": "Blood and Sand",
+  "year": 1908,
+  "how": "work-no-date"
+ },
+ "gc-es-silas-marner": {
+  "qid": 638327,
+  "label": "Silas Marner",
+  "year": 1861,
+  "how": "work"
+ },
+ "gc-es-sonata-de-estio": {
+  "qid": null,
+  "label": "",
+  "year": 1903,
+  "how": "published"
+ },
+ "gc-es-sonata-de-otono-sonata-de-invierno": {
+  "qid": null,
+  "label": "",
+  "year": 1905,
+  "how": "published"
+ },
+ "gc-es-sonata-de-primavera": {
+  "qid": 6132118,
+  "label": "",
+  "year": 1904,
+  "how": "work-no-date"
+ },
+ "gc-es-sotileza": {
+  "qid": 3491390,
+  "label": "Sotileza",
+  "year": 1885,
+  "how": "work"
+ },
+ "gc-es-su-unico-hijo": {
+  "qid": 16636356,
+  "label": "",
+  "year": 1890,
+  "how": "work-no-date"
+ },
+ "gc-es-suma-y-narracion-de-los-incas": {
+  "qid": null,
+  "label": "",
+  "year": 1576,
+  "how": "author-death"
+ },
+ "gc-es-teatro-selecto-tomo-1-de-4": {
+  "qid": null,
+  "label": "",
+  "year": 1681,
+  "how": "author-death"
+ },
+ "gc-es-teatro-selecto-tomo-2-de-4": {
+  "qid": null,
+  "label": "",
+  "year": 1681,
+  "how": "author-death"
+ },
+ "gc-es-teatro-selecto-tomo-3-de-4": {
+  "qid": null,
+  "label": "",
+  "year": 1681,
+  "how": "author-death"
+ },
+ "gc-es-teatro-selecto-tomo-4-de-4": {
+  "qid": null,
+  "label": "",
+  "year": 1681,
+  "how": "author-death"
+ },
+ "gc-es-thespis": {
+  "qid": null,
+  "label": "",
+  "year": 1907,
+  "how": "published"
+ },
+ "gc-es-tirano-banderas": {
+  "qid": 516499,
+  "label": "Tirano Banderas",
+  "year": 1926,
+  "how": "work"
+ },
+ "gc-es-tradiciones-peruanas": {
+  "qid": 7171210,
+  "label": "Peruvian Traditions",
+  "year": 1872,
+  "how": "work"
+ },
+ "gc-es-trafalgar": {
+  "qid": 3997228,
+  "label": "Trafalgar",
+  "year": 1873,
+  "how": "work"
+ },
+ "gc-es-tres-novelas-ejemplares-y-un-prologo": {
+  "qid": null,
+  "label": "",
+  "year": 1920,
+  "how": "published"
+ },
+ "gc-es-tristana": {
+  "qid": 3999038,
+  "label": "Tristana",
+  "year": 1892,
+  "how": "work"
+ },
+ "gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-1-de-3": {
+  "qid": null,
+  "label": "",
+  "year": 1632,
+  "how": "published"
+ },
+ "gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-2-de-3": {
+  "qid": null,
+  "label": "",
+  "year": 1632,
+  "how": "published"
+ },
+ "gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-3-de-3": {
+  "qid": null,
+  "label": "",
+  "year": 1632,
+  "how": "published"
+ },
+ "gc-es-viaje-al-parnaso-la-numancia-el-trato-de-argel": {
+  "qid": null,
+  "label": "",
+  "year": 1614,
+  "how": "published"
+ },
+ "gc-es-vida-de-don-quijote-y-sancho": {
+  "qid": null,
+  "label": "",
+  "year": 1905,
+  "how": "published"
+ },
+ "gc-es-vida-de-jesus": {
+  "qid": 7701139,
+  "label": "Life of Jesus",
+  "year": 1863,
+  "how": "work"
+ },
+ "gc-essay-on-man": {
+  "qid": 3121862,
+  "label": "An Essay on Man",
+  "year": 1733,
+  "how": "work"
+ },
+ "gc-essays-bacon": {
+  "qid": 3944819,
+  "label": "Essays",
+  "year": 1597,
+  "how": "work"
+ },
+ "gc-essays-cotton": {
+  "qid": 624852,
+  "label": "Essays",
+  "year": 1685,
+  "how": "work-no-date"
+ },
+ "gc-essays-first-series": {
+  "qid": 5399394,
+  "label": "Essays: First Series",
+  "year": 1841,
+  "how": "work"
+ },
+ "gc-ethan-frome": {
+  "qid": 5402934,
+  "label": "Ethan Frome",
+  "year": 1911,
+  "how": "work"
+ },
+ "gc-ethics": {
+  "qid": 862816,
+  "label": "Ethics",
+  "year": 1677,
+  "how": "work"
+ },
+ "gc-euthyphro": {
+  "qid": 648889,
+  "label": "Euthyphro",
+  "year": -400,
+  "how": "work"
+ },
+ "gc-everyman-with-other-interludes-and-miracle-plays": {
+  "qid": null,
+  "label": "",
+  "year": 1909,
+  "how": "published"
+ },
+ "gc-faerie-queene": {
+  "qid": 1813771,
+  "label": "The Faerie Queene",
+  "year": 1590,
+  "how": "work"
+ },
+ "gc-fairy-tales": {
+  "qid": 5430998,
+  "label": "Fairy Tales Told for Children. First Collection.",
+  "year": 1837,
+  "how": "work"
+ },
+ "gc-far-from-the-madding-crowd": {
+  "qid": 5642996,
+  "label": "Far from the Madding Crowd",
+  "year": 1874,
+  "how": "work"
+ },
+ "gc-farewell-to-arms": {
+  "qid": 235795,
+  "label": "A Farewell to Arms",
+  "year": 1929,
+  "how": "work"
+ },
+ "gc-father-countess-julie-the-outlaw-the-stronger": {
+  "qid": null,
+  "label": "",
+  "year": 1912,
+  "how": "published"
+ },
+ "gc-father-goriot": {
+  "qid": null,
+  "label": "",
+  "year": 1850,
+  "how": "author-death"
+ },
+ "gc-fathers-and-sons": {
+  "qid": 29424,
+  "label": "Fathers and Sons",
+  "year": 1860,
+  "how": "work"
+ },
+ "gc-faust-gounod": {
+  "qid": null,
+  "label": "",
+  "year": 1906,
+  "how": "published"
+ },
+ "gc-faust-part-one": {
+  "qid": 13221881,
+  "label": "Faust, Part One",
+  "year": 1808,
+  "how": "work"
+ },
+ "gc-federalist-papers": {
+  "qid": 858036,
+  "label": "Federalist Papers",
+  "year": 1788,
+  "how": "work"
+ },
+ "gc-fontainbleau": {
+  "qid": null,
+  "label": "",
+  "year": 1784,
+  "how": "published"
+ },
+ "gc-founding-documents-of-the-united-states": {
+  "qid": null,
+  "label": "",
+  "year": 1787,
+  "how": "published"
+ },
+ "gc-frankenstein": {
+  "qid": 150827,
+  "label": "Frankenstein; or, The Modern Prometheus",
+  "year": 1816,
+  "how": "work"
+ },
+ "gc-frogs": {
+  "qid": 815376,
+  "label": "The Frogs",
+  "year": 1902,
+  "how": "work-no-date"
+ },
+ "gc-fundamental-principles-of-the-metaphysic-of-morals": {
+  "qid": null,
+  "label": "",
+  "year": 1804,
+  "how": "author-death"
+ },
+ "gc-germinal": {
+  "qid": 137869,
+  "label": "Germinal",
+  "year": 1885,
+  "how": "work"
+ },
+ "gc-ghosts": {
+  "qid": 1434818,
+  "label": "Ghosts",
+  "year": 1881,
+  "how": "work"
+ },
+ "gc-golden-asse": {
+  "qid": null,
+  "label": "",
+  "year": 170,
+  "how": "author-death"
+ },
+ "gc-gorgias": {
+  "qid": 264241,
+  "label": "Gorgias",
+  "year": 1871,
+  "how": "work-no-date"
+ },
+ "gc-great-expectations": {
+  "qid": 219552,
+  "label": "Great Expectations",
+  "year": 1860,
+  "how": "work"
+ },
+ "gc-great-gatsby": {
+  "qid": 214371,
+  "label": "The Great Gatsby",
+  "year": 1925,
+  "how": "work"
+ },
+ "gc-grimms-fairy-tales": {
+  "qid": 163027,
+  "label": "Grimms' fairy tales",
+  "year": 1806,
+  "how": "work"
+ },
+ "gc-guermantes-way": {
+  "qid": null,
+  "label": "",
+  "year": 1922,
+  "how": "author-death"
+ },
+ "gc-gulliver-s-travels": {
+  "qid": 181488,
+  "label": "Gulliver's Travels",
+  "year": 1726,
+  "how": "work"
+ },
+ "gc-hamlet": {
+  "qid": 41567,
+  "label": "Hamlet",
+  "year": 1602,
+  "how": "work"
+ },
+ "gc-hansel-and-gretel": {
+  "qid": null,
+  "label": "",
+  "year": 1894,
+  "how": "published"
+ },
+ "gc-hard-times": {
+  "qid": 1340493,
+  "label": "Hard Times: For These Times",
+  "year": 1854,
+  "how": "work"
+ },
+ "gc-heart-of-darkness": {
+  "qid": 129778,
+  "label": "Heart of Darkness",
+  "year": 1899,
+  "how": "work"
+ },
+ "gc-hebraic-literature-translations-from-the-talmud-midrashim-an": {
+  "qid": null,
+  "label": "",
+  "year": 1901,
+  "how": "published"
+ },
+ "gc-hedda-gabler": {
+  "qid": 176465,
+  "label": "Hedda Gabler",
+  "year": 1890,
+  "how": "work"
+ },
+ "gc-heidi": {
+  "qid": 271697,
+  "label": "Heidi",
+  "year": 1880,
+  "how": "work"
+ },
+ "gc-henry-vi-part-1": {
+  "qid": 643236,
+  "label": "Henry VI, Part 1",
+  "year": 1592,
+  "how": "work"
+ },
+ "gc-henry-vi-part-2": {
+  "qid": 1236216,
+  "label": "Henry VI, Part 2",
+  "year": 1591,
+  "how": "work"
+ },
+ "gc-henry-vi-part-3": {
+  "qid": 1241754,
+  "label": "Henry VI, Part 3",
+  "year": 1591,
+  "how": "work"
+ },
+ "gc-henry-viii": {
+  "qid": 672059,
+  "label": "Henry VIII",
+  "year": 1613,
+  "how": "work"
+ },
+ "gc-herland": {
+  "qid": 5739278,
+  "label": "Herland",
+  "year": 1915,
+  "how": "work"
+ },
+ "gc-hidden-staircase": {
+  "qid": null,
+  "label": "",
+  "year": 1930,
+  "how": "published"
+ },
+ "gc-history-of-herodotus-volume-1": {
+  "qid": null,
+  "label": "",
+  "year": -425,
+  "how": "author-death"
+ },
+ "gc-history-of-herodotus-volume-2": {
+  "qid": null,
+  "label": "",
+  "year": -425,
+  "how": "author-death"
+ },
+ "gc-history-of-the-peloponnesian-war": {
+  "qid": 639493,
+  "label": "History of the Peloponnesian War",
+  "year": -500,
+  "how": "work"
+ },
+ "gc-holy-scriptures-jps-1917": {
+  "qid": null,
+  "label": "",
+  "year": 1917,
+  "how": "published"
+ },
+ "gc-hound-of-the-baskervilles": {
+  "qid": 45192,
+  "label": "The Hound of the Baskervilles",
+  "year": 1902,
+  "how": "work"
+ },
+ "gc-house-of-atreus-agamemnon-the-libation-bearers-the-furies": {
+  "qid": null,
+  "label": "",
+  "year": -456,
+  "how": "author-death"
+ },
+ "gc-house-of-mirth": {
+  "qid": 6474536,
+  "label": "The House of Mirth",
+  "year": 1905,
+  "how": "work"
+ },
+ "gc-house-of-the-seven-gables": {
+  "qid": 1141732,
+  "label": "The House of the Seven Gables",
+  "year": 1851,
+  "how": "work"
+ },
+ "gc-howards-end": {
+  "qid": 1146642,
+  "label": "Howards End",
+  "year": 1910,
+  "how": "work"
+ },
+ "gc-hunchback-of-notre-dame": {
+  "qid": 191380,
+  "label": "The Hunchback of Notre Dame",
+  "year": 1831,
+  "how": "work"
+ },
+ "gc-hunger": {
+  "qid": 1062365,
+  "label": "Hunger",
+  "year": 1890,
+  "how": "work"
+ },
+ "gc-ideal-husband": {
+  "qid": 1143075,
+  "label": "An Ideal Husband",
+  "year": 1895,
+  "how": "work"
+ },
+ "gc-idiot": {
+  "qid": null,
+  "label": "",
+  "year": 1915,
+  "how": "published"
+ },
+ "gc-idylls-of-the-king": {
+  "qid": 2227196,
+  "label": "Idylls of the King",
+  "year": 1859,
+  "how": "work"
+ },
+ "gc-iliad": {
+  "qid": null,
+  "label": "",
+  "year": 1898,
+  "how": "published"
+ },
+ "gc-imitation-of-christ": {
+  "qid": 670350,
+  "label": "The Imitation of Christ",
+  "year": 1418,
+  "how": "work"
+ },
+ "gc-importance-of-being-earnest": {
+  "qid": 830501,
+  "label": "The Importance of Being Earnest",
+  "year": 1895,
+  "how": "work-no-date"
+ },
+ "gc-invisible-man": {
+  "qid": 1539509,
+  "label": "The Invisible Man",
+  "year": 1897,
+  "how": "work"
+ },
+ "gc-island-of-doctor-moreau": {
+  "qid": 718268,
+  "label": "The Island of Dr Moreau",
+  "year": 1895,
+  "how": "work"
+ },
+ "gc-ivanhoe": {
+  "qid": 840974,
+  "label": "Ivanhoe",
+  "year": 1819,
+  "how": "work"
+ },
+ "gc-jacob-s-room": {
+  "qid": 1677745,
+  "label": "Jacob's Room",
+  "year": 1922,
+  "how": "work"
+ },
+ "gc-jane-eyre": {
+  "qid": 182961,
+  "label": "Jane Eyre",
+  "year": 1847,
+  "how": "work"
+ },
+ "gc-jude-the-obscure": {
+  "qid": 1248773,
+  "label": "Jude the Obscure",
+  "year": 1895,
+  "how": "work"
+ },
+ "gc-julius-caesar": {
+  "qid": 215750,
+  "label": "Julius Caesar",
+  "year": 1599,
+  "how": "work"
+ },
+ "gc-jungle": {
+  "qid": 260205,
+  "label": "The Jungle",
+  "year": 1905,
+  "how": "work"
+ },
+ "gc-jungle-book": {
+  "qid": 189509,
+  "label": "The Jungle Book",
+  "year": 1894,
+  "how": "work"
+ },
+ "gc-just-so-stories": {
+  "qid": 1247723,
+  "label": "Just So Stories",
+  "year": 1902,
+  "how": "work"
+ },
+ "gc-kalevala": {
+  "qid": 130924,
+  "label": "Kalevala",
+  "year": 1828,
+  "how": "work"
+ },
+ "gc-kidnapped": {
+  "qid": 2349094,
+  "label": "Kidnapped",
+  "year": 1886,
+  "how": "work"
+ },
+ "gc-kim": {
+  "qid": 589868,
+  "label": "Kim",
+  "year": 1901,
+  "how": "work"
+ },
+ "gc-king-henry-iv-part-1": {
+  "qid": null,
+  "label": "",
+  "year": 1598,
+  "how": "published"
+ },
+ "gc-king-henry-iv-part-2": {
+  "qid": null,
+  "label": "",
+  "year": 1600,
+  "how": "published"
+ },
+ "gc-king-henry-v": {
+  "qid": null,
+  "label": "",
+  "year": 1600,
+  "how": "published"
+ },
+ "gc-king-james-bible": {
+  "qid": null,
+  "label": "",
+  "year": 1611,
+  "how": "published"
+ },
+ "gc-king-john": {
+  "qid": 661222,
+  "label": "King John",
+  "year": 1590,
+  "how": "work"
+ },
+ "gc-king-lear": {
+  "qid": 181598,
+  "label": "King Lear",
+  "year": 1606,
+  "how": "work"
+ },
+ "gc-king-richard-ii": {
+  "qid": null,
+  "label": "",
+  "year": 1597,
+  "how": "published"
+ },
+ "gc-king-richard-iii": {
+  "qid": null,
+  "label": "",
+  "year": 1597,
+  "how": "published"
+ },
+ "gc-king-solomon-s-mines": {
+  "qid": 1137494,
+  "label": "King Solomon's Mines",
+  "year": 1885,
+  "how": "work"
+ },
+ "gc-koran-rodwell": {
+  "qid": 116204839,
+  "label": "The Koran",
+  "year": 1734,
+  "how": "work"
+ },
+ "gc-koran-sale": {
+  "qid": 116204839,
+  "label": "The Koran",
+  "year": 1734,
+  "how": "work"
+ },
+ "gc-la-boheme": {
+  "qid": null,
+  "label": "",
+  "year": 1896,
+  "how": "published"
+ },
+ "gc-lady-windermere-s-fan": {
+  "qid": 1469224,
+  "label": "Lady Windermere's Fan",
+  "year": 1892,
+  "how": "work"
+ },
+ "gc-lady-with-the-dog-and-other-stories": {
+  "qid": null,
+  "label": "",
+  "year": 1904,
+  "how": "author-death"
+ },
+ "gc-large-catechism": {
+  "qid": null,
+  "label": "",
+  "year": 1546,
+  "how": "author-death"
+ },
+ "gc-last-of-the-mohicans": {
+  "qid": 493574,
+  "label": "The Last of the Mohicans",
+  "year": 1824,
+  "how": "work"
+ },
+ "gc-laws": {
+  "qid": 752285,
+  "label": "Laws",
+  "year": 1871,
+  "how": "work-no-date"
+ },
+ "gc-le-morte-d-arthur-volume-1": {
+  "qid": null,
+  "label": "",
+  "year": 1471,
+  "how": "author-death"
+ },
+ "gc-le-morte-d-arthur-volume-2": {
+  "qid": null,
+  "label": "",
+  "year": 1471,
+  "how": "author-death"
+ },
+ "gc-leaves-of-grass": {
+  "qid": 132042,
+  "label": "Leaves of Grass",
+  "year": 1855,
+  "how": "work"
+ },
+ "gc-legend-of-sleepy-hollow": {
+  "qid": 72309,
+  "label": "The Legend of Sleepy Hollow",
+  "year": 1819,
+  "how": "work"
+ },
+ "gc-les-miserables": {
+  "qid": 180736,
+  "label": "Les Misérables",
+  "year": 1862,
+  "how": "work"
+ },
+ "gc-leviathan": {
+  "qid": 193034,
+  "label": "Leviathan",
+  "year": 1651,
+  "how": "work"
+ },
+ "gc-little-dorrit": {
+  "qid": 565638,
+  "label": "Little Dorrit",
+  "year": 1857,
+  "how": "work"
+ },
+ "gc-little-women": {
+  "qid": 523076,
+  "label": "Little Women",
+  "year": 1868,
+  "how": "work"
+ },
+ "gc-lord-jim": {
+  "qid": 727408,
+  "label": "Lord Jim",
+  "year": 1900,
+  "how": "work"
+ },
+ "gc-lost-world": {
+  "qid": 785255,
+  "label": "The Lost World",
+  "year": 1912,
+  "how": "work"
+ },
+ "gc-love-s-labour-s-lost": {
+  "qid": 128610,
+  "label": "Love's Labour's Lost",
+  "year": 1595,
+  "how": "work"
+ },
+ "gc-lyrical-ballads": {
+  "qid": 738958,
+  "label": "Lyrical Ballads",
+  "year": 1798,
+  "how": "work"
+ },
+ "gc-lysistrata": {
+  "qid": 753907,
+  "label": "Lysistrata",
+  "year": -412,
+  "how": "work"
+ },
+ "gc-macbeth": {
+  "qid": 130283,
+  "label": "Macbeth",
+  "year": 1606,
+  "how": "work"
+ },
+ "gc-madame-bovary": {
+  "qid": 193417,
+  "label": "Madame Bovary",
+  "year": 1856,
+  "how": "work"
+ },
+ "gc-magic-mountain": {
+  "qid": 212898,
+  "label": "The Magic Mountain",
+  "year": 1924,
+  "how": "work"
+ },
+ "gc-mahabharata-dutt": {
+  "qid": 8276,
+  "label": "Mahabharata",
+  "year": 1899,
+  "how": "work-no-date"
+ },
+ "gc-main-street": {
+  "qid": 6736091,
+  "label": "Main Street",
+  "year": 1920,
+  "how": "work"
+ },
+ "gc-major-barbara": {
+  "qid": 6738028,
+  "label": "Major Barbara",
+  "year": 1907,
+  "how": "work-no-date"
+ },
+ "gc-maltese-falcon": {
+  "qid": 870551,
+  "label": "The Maltese Falcon",
+  "year": 1929,
+  "how": "work"
+ },
+ "gc-man-and-superman": {
+  "qid": 725409,
+  "label": "Man and Superman",
+  "year": 1903,
+  "how": "work-no-date"
+ },
+ "gc-man-who-was-thursday": {
+  "qid": 959816,
+  "label": "The Man Who Was Thursday",
+  "year": 1908,
+  "how": "work"
+ },
+ "gc-mansfield-park": {
+  "qid": 469690,
+  "label": "Mansfield Park",
+  "year": 1814,
+  "how": "work"
+ },
+ "gc-mantle-and-other-stories": {
+  "qid": null,
+  "label": "",
+  "year": 1852,
+  "how": "author-death"
+ },
+ "gc-martha": {
+  "qid": null,
+  "label": "",
+  "year": 1883,
+  "how": "author-death"
+ },
+ "gc-mayor-of-casterbridge": {
+  "qid": 2343169,
+  "label": "The Mayor of Casterbridge",
+  "year": 1886,
+  "how": "work"
+ },
+ "gc-measure-for-measure": {
+  "qid": 665446,
+  "label": "Measure for Measure",
+  "year": 1604,
+  "how": "work"
+ },
+ "gc-medea": {
+  "qid": 286381,
+  "label": "Medea",
+  "year": 1910,
+  "how": "work-no-date"
+ },
+ "gc-meditations": {
+  "qid": 1152283,
+  "label": "Meditations",
+  "year": 200,
+  "how": "work"
+ },
+ "gc-meditations-chrystal": {
+  "qid": 1152283,
+  "label": "Meditations",
+  "year": 200,
+  "how": "work"
+ },
+ "gc-men-without-women": {
+  "qid": 4179831,
+  "label": "Men Without Women",
+  "year": 1927,
+  "how": "work"
+ },
+ "gc-meno": {
+  "qid": 746253,
+  "label": "Meno",
+  "year": 1871,
+  "how": "work-no-date"
+ },
+ "gc-merchant-of-venice": {
+  "qid": 206400,
+  "label": "The Merchant of Venice",
+  "year": 1596,
+  "how": "work"
+ },
+ "gc-merry-wives-of-windsor": {
+  "qid": 844836,
+  "label": "The Merry Wives of Windsor",
+  "year": 1597,
+  "how": "work"
+ },
+ "gc-metamorphoses": {
+  "qid": null,
+  "label": "",
+  "year": 17,
+  "how": "author-death"
+ },
+ "gc-metamorphoses-books-viii-xv": {
+  "qid": null,
+  "label": "",
+  "year": 17,
+  "how": "author-death"
+ },
+ "gc-middlemarch": {
+  "qid": 313129,
+  "label": "Middlemarch",
+  "year": 1871,
+  "how": "work"
+ },
+ "gc-midsummer-night-s-dream": {
+  "qid": 104871,
+  "label": "A Midsummer Night's Dream",
+  "year": 1595,
+  "how": "work"
+ },
+ "gc-mill-on-the-floss": {
+  "qid": 1215018,
+  "label": "The Mill on the Floss",
+  "year": 1860,
+  "how": "work"
+ },
+ "gc-moby-dick": {
+  "qid": 174596,
+  "label": "Moby-Dick",
+  "year": 1850,
+  "how": "work"
+ },
+ "gc-moll-flanders": {
+  "qid": 612523,
+  "label": "Moll Flanders",
+  "year": 1722,
+  "how": "work"
+ },
+ "gc-moonstone": {
+  "qid": 2362563,
+  "label": "The Moonstone",
+  "year": 1868,
+  "how": "work"
+ },
+ "gc-mrs-dalloway": {
+  "qid": 752584,
+  "label": "Mrs Dalloway",
+  "year": 1925,
+  "how": "work"
+ },
+ "gc-much-ado-about-nothing": {
+  "qid": 130851,
+  "label": "Much Ado About Nothing",
+  "year": 1599,
+  "how": "work"
+ },
+ "gc-murder-at-the-vicarage": {
+  "qid": 693559,
+  "label": "The Murder at the Vicarage",
+  "year": 1930,
+  "how": "work"
+ },
+ "gc-murder-of-roger-ackroyd": {
+  "qid": 224078,
+  "label": "The Murder of Roger Ackroyd",
+  "year": 1926,
+  "how": "work"
+ },
+ "gc-murder-on-the-links": {
+  "qid": 542293,
+  "label": "Murder on the Links",
+  "year": 1923,
+  "how": "work"
+ },
+ "gc-my-antonia": {
+  "qid": 2776448,
+  "label": "My Ántonia",
+  "year": 1918,
+  "how": "work"
+ },
+ "gc-mysterious-affair-at-styles": {
+  "qid": 472228,
+  "label": "The Mysterious Affair at Styles",
+  "year": 1916,
+  "how": "work"
+ },
+ "gc-mysterious-mr-quin": {
+  "qid": 1143438,
+  "label": "The Mysterious Mr Quin",
+  "year": 1930,
+  "how": "work"
+ },
+ "gc-mystery-at-lilac-inn": {
+  "qid": null,
+  "label": "",
+  "year": 1930,
+  "how": "published"
+ },
+ "gc-narrative-of-the-life-of-frederick-douglass": {
+  "qid": 2904743,
+  "label": "Narrative of the Life of Frederick Douglass, an American Slave",
+  "year": 1845,
+  "how": "work"
+ },
+ "gc-nicomachean-ethics": {
+  "qid": 474537,
+  "label": "Nicomachean Ethics",
+  "year": 1881,
+  "how": "work-no-date"
+ },
+ "gc-ninety-five-theses": {
+  "qid": 157506,
+  "label": "Ninety-five Theses",
+  "year": 1517,
+  "how": "work"
+ },
+ "gc-north-and-south": {
+  "qid": 1853142,
+  "label": "North and South",
+  "year": 1855,
+  "how": "work"
+ },
+ "gc-northanger-abbey": {
+  "qid": 477508,
+  "label": "Northanger Abbey",
+  "year": 1818,
+  "how": "work"
+ },
+ "gc-nostromo": {
+  "qid": 430248,
+  "label": "Nostromo",
+  "year": 1904,
+  "how": "work"
+ },
+ "gc-notes-from-the-underground": {
+  "qid": null,
+  "label": "",
+  "year": 1918,
+  "how": "published"
+ },
+ "gc-o-pioneers": {
+  "qid": 2008343,
+  "label": "O Pioneers!",
+  "year": 1913,
+  "how": "work"
+ },
+ "gc-odes": {
+  "qid": 943884,
+  "label": "Odes",
+  "year": -23,
+  "how": "work"
+ },
+ "gc-odyssey": {
+  "qid": null,
+  "label": "",
+  "year": 1900,
+  "how": "published"
+ },
+ "gc-oedipus-the-king-oedipus-at-colonus-antigone": {
+  "qid": null,
+  "label": "",
+  "year": -406,
+  "how": "author-death"
+ },
+ "gc-of-human-bondage": {
+  "qid": 1195793,
+  "label": "Of Human Bondage",
+  "year": 1915,
+  "how": "work"
+ },
+ "gc-oliver-twist": {
+  "qid": 164974,
+  "label": "Oliver Twist",
+  "year": 1839,
+  "how": "work"
+ },
+ "gc-on-liberty": {
+  "qid": 1055881,
+  "label": "On Liberty",
+  "year": 1859,
+  "how": "work"
+ },
+ "gc-on-the-nature-of-things": {
+  "qid": null,
+  "label": "",
+  "year": -55,
+  "how": "author-death"
+ },
+ "gc-on-the-origin-of-species": {
+  "qid": 20124,
+  "label": "On the Origin of Species",
+  "year": 1859,
+  "how": "work"
+ },
+ "gc-orlando": {
+  "qid": 1629456,
+  "label": "Orlando: A Biography",
+  "year": 1928,
+  "how": "work"
+ },
+ "gc-othello": {
+  "qid": 26833,
+  "label": "Othello",
+  "year": 1604,
+  "how": "work"
+ },
+ "gc-our-mutual-friend": {
+  "qid": 1557935,
+  "label": "Our Mutual Friend",
+  "year": 1864,
+  "how": "work"
+ },
+ "gc-paradise-lost": {
+  "qid": 28754,
+  "label": "Paradise Lost",
+  "year": 1667,
+  "how": "work"
+ },
+ "gc-paradise-regained": {
+  "qid": 2307419,
+  "label": "Paradise Regained",
+  "year": 1671,
+  "how": "work"
+ },
+ "gc-passage-to-india": {
+  "qid": 622303,
+  "label": "A Passage to India",
+  "year": 1924,
+  "how": "work"
+ },
+ "gc-pericles": {
+  "qid": 584729,
+  "label": "Pericles, Prince of Tyre",
+  "year": 1608,
+  "how": "work"
+ },
+ "gc-persuasion": {
+  "qid": 333179,
+  "label": "Persuasion",
+  "year": 1817,
+  "how": "work"
+ },
+ "gc-peter-pan": {
+  "qid": 3435337,
+  "label": "Peter Pan",
+  "year": 1911,
+  "how": "work"
+ },
+ "gc-phaedo": {
+  "qid": 244161,
+  "label": "Phaedo",
+  "year": -360,
+  "how": "work"
+ },
+ "gc-phaedra": {
+  "qid": null,
+  "label": "",
+  "year": 1699,
+  "how": "author-death"
+ },
+ "gc-phaedrus": {
+  "qid": 555862,
+  "label": "Phaedrus",
+  "year": -370,
+  "how": "work"
+ },
+ "gc-pickwick-papers": {
+  "qid": 460583,
+  "label": "The Pickwick Papers",
+  "year": 1836,
+  "how": "work"
+ },
+ "gc-picture-of-dorian-gray": {
+  "qid": 82464,
+  "label": "The Picture of Dorian Gray",
+  "year": 1890,
+  "how": "work"
+ },
+ "gc-pilgrim-s-progress": {
+  "qid": 268211,
+  "label": "The Pilgrim’s Progress",
+  "year": 1678,
+  "how": "work"
+ },
+ "gc-playboy-of-the-western-world": {
+  "qid": 451517,
+  "label": "The Playboy of the Western World",
+  "year": 1907,
+  "how": "work-no-date"
+ },
+ "gc-plays-by-anton-chekhov-second-series": {
+  "qid": null,
+  "label": "",
+  "year": 1904,
+  "how": "author-death"
+ },
+ "gc-plutarch-s-lives": {
+  "qid": null,
+  "label": "",
+  "year": 120,
+  "how": "author-death"
+ },
+ "gc-poems-1817": {
+  "qid": null,
+  "label": "",
+  "year": 1817,
+  "how": "published"
+ },
+ "gc-poems-and-songs": {
+  "qid": null,
+  "label": "",
+  "year": 1796,
+  "how": "published"
+ },
+ "gc-poems-three-series": {
+  "qid": null,
+  "label": "",
+  "year": 1886,
+  "how": "author-death"
+ },
+ "gc-poetic-edda": {
+  "qid": 205874,
+  "label": "Poetic Edda",
+  "year": 1260,
+  "how": "work"
+ },
+ "gc-poetics": {
+  "qid": 264714,
+  "label": "Poetics",
+  "year": 1895,
+  "how": "work-no-date"
+ },
+ "gc-poirot-investigates": {
+  "qid": 1418731,
+  "label": "Poirot Investigates",
+  "year": 1924,
+  "how": "work"
+ },
+ "gc-politics": {
+  "qid": 69539,
+  "label": "Politics",
+  "year": -400,
+  "how": "work"
+ },
+ "gc-portrait-of-a-lady-volume-1": {
+  "qid": null,
+  "label": "",
+  "year": 1717,
+  "how": "author-death"
+ },
+ "gc-portrait-of-a-lady-volume-2": {
+  "qid": null,
+  "label": "",
+  "year": 1717,
+  "how": "author-death"
+ },
+ "gc-portrait-of-the-artist-as-a-young-man": {
+  "qid": 465360,
+  "label": "A Portrait of the Artist as a Young Man",
+  "year": 1907,
+  "how": "work"
+ },
+ "gc-pragmatism": {
+  "qid": null,
+  "label": "",
+  "year": 1617,
+  "how": "author-death"
+ },
+ "gc-pride-and-prejudice": {
+  "qid": 170583,
+  "label": "Pride and Prejudice",
+  "year": 1800,
+  "how": "work"
+ },
+ "gc-prince": {
+  "qid": 131719,
+  "label": "The Prince",
+  "year": 1513,
+  "how": "work"
+ },
+ "gc-prince-and-the-pauper": {
+  "qid": 869725,
+  "label": "The Prince and the Pauper",
+  "year": 1881,
+  "how": "work"
+ },
+ "gc-prisoner-of-zenda": {
+  "qid": 1193766,
+  "label": "The Prisoner of Zenda",
+  "year": 1894,
+  "how": "work"
+ },
+ "gc-prometheus-bound-and-seven-against-thebes": {
+  "qid": null,
+  "label": "",
+  "year": -456,
+  "how": "author-death"
+ },
+ "gc-protagoras": {
+  "qid": 520328,
+  "label": "Protagoras",
+  "year": 1871,
+  "how": "work-no-date"
+ },
+ "gc-prufrock-and-other-observations": {
+  "qid": null,
+  "label": "",
+  "year": 1917,
+  "how": "published"
+ },
+ "gc-pygmalion": {
+  "qid": 637200,
+  "label": "Pygmalion",
+  "year": 1912,
+  "how": "work"
+ },
+ "gc-quo-vadis": {
+  "qid": 335315,
+  "label": "Quo Vadis",
+  "year": 1895,
+  "how": "work"
+ },
+ "gc-r-u-r": {
+  "qid": 1164094,
+  "label": "R.U.R.",
+  "year": 1920,
+  "how": "work"
+ },
+ "gc-ramayan-of-valmiki": {
+  "qid": null,
+  "label": "",
+  "year": 1874,
+  "how": "published"
+ },
+ "gc-rape-of-lucrece": {
+  "qid": 1398793,
+  "label": "The Rape of Lucrece",
+  "year": 1594,
+  "how": "work"
+ },
+ "gc-red-badge-of-courage": {
+  "qid": 1219239,
+  "label": "The Red Badge of Courage",
+  "year": 1894,
+  "how": "work"
+ },
+ "gc-republic": {
+  "qid": 123397,
+  "label": "The Republic",
+  "year": -379,
+  "how": "work"
+ },
+ "gc-return-of-the-native": {
+  "qid": 141568,
+  "label": "The Return of the Native",
+  "year": 1878,
+  "how": "work"
+ },
+ "gc-rhinegold-the-valkyrie": {
+  "qid": null,
+  "label": "",
+  "year": 1883,
+  "how": "author-death"
+ },
+ "gc-riders-to-the-sea": {
+  "qid": 3742640,
+  "label": "Riders to the Sea",
+  "year": 1904,
+  "how": "work-no-date"
+ },
+ "gc-rights-of-man": {
+  "qid": 979108,
+  "label": "Rights of Man",
+  "year": 1791,
+  "how": "work"
+ },
+ "gc-rime-of-the-ancient-mariner": {
+  "qid": 708177,
+  "label": "The Rime of the Ancient Mariner",
+  "year": 1797,
+  "how": "work"
+ },
+ "gc-rivals": {
+  "qid": 7760957,
+  "label": "The Rivals",
+  "year": 1775,
+  "how": "work-no-date"
+ },
+ "gc-rob-roy": {
+  "qid": 2156104,
+  "label": "Rob Roy",
+  "year": 1817,
+  "how": "work"
+ },
+ "gc-robinson-crusoe": {
+  "qid": 483034,
+  "label": "Robinson Crusoe",
+  "year": 1719,
+  "how": "work"
+ },
+ "gc-romeo-and-juliet": {
+  "qid": 83186,
+  "label": "Romeo and Juliet",
+  "year": 1590,
+  "how": "work"
+ },
+ "gc-room-of-one-s-own": {
+  "qid": 1204366,
+  "label": "A Room of One's Own",
+  "year": 1929,
+  "how": "work"
+ },
+ "gc-room-with-a-view": {
+  "qid": 120288,
+  "label": "A Room with a View",
+  "year": 1908,
+  "how": "work"
+ },
+ "gc-rubaiyat-of-omar-khayyam": {
+  "qid": 1059358,
+  "label": "Rubáiyát of Omar Khayyám",
+  "year": 1100,
+  "how": "work"
+ },
+ "gc-saint-joan": {
+  "qid": 1218620,
+  "label": "Saint Joan",
+  "year": 1923,
+  "how": "work"
+ },
+ "gc-salome": {
+  "qid": 1149498,
+  "label": "Salome",
+  "year": 1891,
+  "how": "work"
+ },
+ "gc-scarlet-letter": {
+  "qid": 907568,
+  "label": "The Scarlet Letter",
+  "year": 1850,
+  "how": "work"
+ },
+ "gc-scarlet-pimpernel": {
+  "qid": 1249536,
+  "label": "The Scarlet Pimpernel",
+  "year": 1905,
+  "how": "work"
+ },
+ "gc-school-for-scandal": {
+  "qid": 471118,
+  "label": "The School for Scandal",
+  "year": 1777,
+  "how": "work"
+ },
+ "gc-sea-gull": {
+  "qid": null,
+  "label": "",
+  "year": 1904,
+  "how": "author-death"
+ },
+ "gc-sea-wolf": {
+  "qid": 1196857,
+  "label": "The Sea-Wolf",
+  "year": 1904,
+  "how": "work"
+ },
+ "gc-second-treatise-of-government": {
+  "qid": null,
+  "label": "",
+  "year": 1689,
+  "how": "published"
+ },
+ "gc-secret-adversary": {
+  "qid": 617379,
+  "label": "The Secret Adversary",
+  "year": 1922,
+  "how": "work"
+ },
+ "gc-secret-agent": {
+  "qid": 1247666,
+  "label": "The Secret Agent",
+  "year": 1907,
+  "how": "work"
+ },
+ "gc-secret-garden": {
+  "qid": 472194,
+  "label": "The Secret Garden",
+  "year": 1910,
+  "how": "work"
+ },
+ "gc-secret-of-the-old-clock": {
+  "qid": null,
+  "label": "",
+  "year": 1930,
+  "how": "published"
+ },
+ "gc-sense-and-sensibility": {
+  "qid": 274744,
+  "label": "Sense and Sensibility",
+  "year": 1811,
+  "how": "work"
+ },
+ "gc-seven-pillars-of-wisdom": {
+  "qid": 24323,
+  "label": "Seven Pillars of Wisdom",
+  "year": 1922,
+  "how": "work"
+ },
+ "gc-she-stoops-to-conquer": {
+  "qid": 2324782,
+  "label": "She Stoops to Conquer",
+  "year": 1773,
+  "how": "work"
+ },
+ "gc-short-fiction-tolstoy": {
+  "qid": null,
+  "label": "",
+  "year": 1910,
+  "how": "author-death"
+ },
+ "gc-siegfried-the-twilight-of-the-gods": {
+  "qid": null,
+  "label": "",
+  "year": 1883,
+  "how": "author-death"
+ },
+ "gc-sign-of-the-four": {
+  "qid": 500688,
+  "label": "The Sign of Four",
+  "year": 1890,
+  "how": "work"
+ },
+ "gc-silas-marner": {
+  "qid": 638327,
+  "label": "Silas Marner",
+  "year": 1861,
+  "how": "work"
+ },
+ "gc-sir-gawain-and-the-green-knight": {
+  "qid": 756715,
+  "label": "Sir Gawain and the Green Knight",
+  "year": 1301,
+  "how": "work"
+ },
+ "gc-sister-carrie": {
+  "qid": 1286961,
+  "label": "Sister Carrie",
+  "year": 1900,
+  "how": "work"
+ },
+ "gc-social-contract": {
+  "qid": 190126,
+  "label": "The Social Contract",
+  "year": 1762,
+  "how": "work"
+ },
+ "gc-soldiers-pay": {
+  "qid": 1536034,
+  "label": "Soldiers' Pay",
+  "year": 1926,
+  "how": "work"
+ },
+ "gc-song-of-hiawatha": {
+  "qid": 279486,
+  "label": "The Song of Hiawatha",
+  "year": 1855,
+  "how": "work"
+ },
+ "gc-song-of-roland": {
+  "qid": 185427,
+  "label": "The Song of Roland",
+  "year": 1100,
+  "how": "work"
+ },
+ "gc-songs-of-innocence-and-of-experience": {
+  "qid": 630530,
+  "label": "Songs of Innocence and of Experience",
+  "year": 1794,
+  "how": "work"
+ },
+ "gc-sonnets": {
+  "qid": null,
+  "label": "",
+  "year": 1609,
+  "how": "published"
+ },
+ "gc-sons-and-lovers": {
+  "qid": 80771,
+  "label": "Sons and Lovers",
+  "year": 1913,
+  "how": "work"
+ },
+ "gc-sorrows-of-young-werther": {
+  "qid": 151883,
+  "label": "The Sorrows of Young Werther",
+  "year": 1774,
+  "how": "work"
+ },
+ "gc-souls-of-black-folk": {
+  "qid": 1253660,
+  "label": "The Souls of Black Folk",
+  "year": 1903,
+  "how": "work"
+ },
+ "gc-sound-and-the-fury": {
+  "qid": 135515,
+  "label": "The Sound and the Fury",
+  "year": 1929,
+  "how": "work"
+ },
+ "gc-spanish-tragedy": {
+  "qid": 1115255,
+  "label": "The Spanish Tragedy",
+  "year": 1592,
+  "how": "work-no-date"
+ },
+ "gc-speeches-and-letters-of-abraham-lincoln": {
+  "qid": null,
+  "label": "",
+  "year": 1786,
+  "how": "author-death"
+ },
+ "gc-steppenwolf": {
+  "qid": 217073,
+  "label": "Steppenwolf",
+  "year": 1920,
+  "how": "work"
+ },
+ "gc-strange-case-of-dr-jekyll-and-mr-hyde": {
+  "qid": 217352,
+  "label": "Strange Case of Dr Jekyll and Mr Hyde",
+  "year": 1885,
+  "how": "work"
+ },
+ "gc-strong-poison": {
+  "qid": 2544560,
+  "label": "Strong Poison",
+  "year": 1930,
+  "how": "work"
+ },
+ "gc-study-in-scarlet": {
+  "qid": 223131,
+  "label": "A Study in Scarlet",
+  "year": 1887,
+  "how": "work"
+ },
+ "gc-sun-also-rises": {
+  "qid": 501351,
+  "label": "The Sun Also Rises",
+  "year": 1926,
+  "how": "work"
+ },
+ "gc-swann-s-way": {
+  "qid": null,
+  "label": "",
+  "year": 1922,
+  "how": "published"
+ },
+ "gc-symposium": {
+  "qid": 486727,
+  "label": "Symposium",
+  "year": 1871,
+  "how": "work-no-date"
+ },
+ "gc-tale-of-genji": {
+  "qid": null,
+  "label": "",
+  "year": 1100,
+  "how": "author-death"
+ },
+ "gc-tale-of-genji-volume-2": {
+  "qid": null,
+  "label": "",
+  "year": 1100,
+  "how": "author-death"
+ },
+ "gc-tale-of-genji-volume-3": {
+  "qid": null,
+  "label": "",
+  "year": 1100,
+  "how": "author-death"
+ },
+ "gc-tale-of-genji-volume-4": {
+  "qid": null,
+  "label": "",
+  "year": 1100,
+  "how": "author-death"
+ },
+ "gc-tale-of-two-cities": {
+  "qid": 308918,
+  "label": "A Tale of Two Cities",
+  "year": 1859,
+  "how": "work"
+ },
+ "gc-tamburlaine-the-great-part-1": {
+  "qid": null,
+  "label": "",
+  "year": 1590,
+  "how": "published"
+ },
+ "gc-tamburlaine-the-great-part-2": {
+  "qid": null,
+  "label": "",
+  "year": 1590,
+  "how": "published"
+ },
+ "gc-taming-of-the-shrew": {
+  "qid": 332387,
+  "label": "The Taming of the Shrew",
+  "year": 1591,
+  "how": "work"
+ },
+ "gc-tao-te-ching": {
+  "qid": 134425,
+  "label": "Tao Te Ching",
+  "year": 1891,
+  "how": "work-no-date"
+ },
+ "gc-tartuffe": {
+  "qid": 205875,
+  "label": "Tartuffe",
+  "year": 1664,
+  "how": "work"
+ },
+ "gc-tempest": {
+  "qid": 86440,
+  "label": "The Tempest",
+  "year": 1611,
+  "how": "work"
+ },
+ "gc-tenant-of-wildfell-hall": {
+  "qid": 44701,
+  "label": "The Tenant of Wildfell Hall",
+  "year": 1848,
+  "how": "work"
+ },
+ "gc-tess-of-the-d-urbervilles": {
+  "qid": 649409,
+  "label": "Tess of the d'Urbervilles",
+  "year": 1891,
+  "how": "work"
+ },
+ "gc-theaetetus": {
+  "qid": 846241,
+  "label": "Theaetetus",
+  "year": 1871,
+  "how": "work-no-date"
+ },
+ "gc-thirty-nine-steps": {
+  "qid": 2609365,
+  "label": "The Thirty-nine Steps",
+  "year": 1915,
+  "how": "work"
+ },
+ "gc-this-side-of-paradise": {
+  "qid": 2581681,
+  "label": "This Side of Paradise",
+  "year": 1920,
+  "how": "work"
+ },
+ "gc-three-men-in-a-boat": {
+  "qid": 955910,
+  "label": "Three Men in a Boat",
+  "year": 1889,
+  "how": "work"
+ },
+ "gc-three-musketeers": {
+  "qid": 140527,
+  "label": "The Three Musketeers",
+  "year": 1844,
+  "how": "work"
+ },
+ "gc-three-plays-pirandello": {
+  "qid": null,
+  "label": "",
+  "year": 1922,
+  "how": "published"
+ },
+ "gc-through-the-looking-glass": {
+  "qid": 220331,
+  "label": "Through the Looking-Glass",
+  "year": 1871,
+  "how": "work"
+ },
+ "gc-thus-spake-zarathustra": {
+  "qid": null,
+  "label": "",
+  "year": 1900,
+  "how": "author-death"
+ },
+ "gc-timaeus": {
+  "qid": 371884,
+  "label": "Timaeus",
+  "year": -360,
+  "how": "work"
+ },
+ "gc-time-machine": {
+  "qid": 627333,
+  "label": "The Time Machine",
+  "year": 1895,
+  "how": "work"
+ },
+ "gc-timon-of-athens": {
+  "qid": 284641,
+  "label": "Timon of Athens",
+  "year": 1606,
+  "how": "work"
+ },
+ "gc-titus-andronicus": {
+  "qid": 272169,
+  "label": "Titus Andronicus",
+  "year": 1592,
+  "how": "work"
+ },
+ "gc-to-the-lighthouse": {
+  "qid": 478016,
+  "label": "To the Lighthouse",
+  "year": 1927,
+  "how": "work"
+ },
+ "gc-tom-jones": {
+  "qid": 248096,
+  "label": "The History of Tom Jones, a Foundling",
+  "year": 1749,
+  "how": "work"
+ },
+ "gc-treasure-island": {
+  "qid": 185118,
+  "label": "Treasure Island",
+  "year": 1883,
+  "how": "work"
+ },
+ "gc-treatise-concerning-the-principles-of-human-knowledge": {
+  "qid": 3267928,
+  "label": "A Treatise Concerning the Principles of Human Knowledge",
+  "year": 1710,
+  "how": "work"
+ },
+ "gc-treatise-of-human-nature": {
+  "qid": 2451675,
+  "label": "A Treatise of Human Nature",
+  "year": 1739,
+  "how": "work"
+ },
+ "gc-tristan-and-isolda": {
+  "qid": null,
+  "label": "",
+  "year": 1883,
+  "how": "author-death"
+ },
+ "gc-tristram-shandy": {
+  "qid": null,
+  "label": "",
+  "year": 1759,
+  "how": "published"
+ },
+ "gc-troilus-and-cressida": {
+  "qid": 183304,
+  "label": "Troilus and Cressida",
+  "year": 1600,
+  "how": "work"
+ },
+ "gc-trojan-women": {
+  "qid": 1216943,
+  "label": "The Trojan Women",
+  "year": 1905,
+  "how": "work-no-date"
+ },
+ "gc-turn-of-the-screw": {
+  "qid": 625923,
+  "label": "The Turn of the Screw",
+  "year": 1898,
+  "how": "work"
+ },
+ "gc-twelfth-night": {
+  "qid": 221211,
+  "label": "Twelfth Night",
+  "year": 1601,
+  "how": "work"
+ },
+ "gc-twenty-thousand-leagues-under-the-sea": {
+  "qid": 183565,
+  "label": "Twenty Thousand Leagues Under the Sea",
+  "year": 1869,
+  "how": "work"
+ },
+ "gc-two-gentlemen-of-verona": {
+  "qid": 232042,
+  "label": "The Two Gentlemen of Verona",
+  "year": 1591,
+  "how": "work"
+ },
+ "gc-ulysses": {
+  "qid": 6511,
+  "label": "Ulysses",
+  "year": 1914,
+  "how": "work"
+ },
+ "gc-uncle-tom-s-cabin": {
+  "qid": 2222,
+  "label": "Uncle Tom's Cabin",
+  "year": 1852,
+  "how": "work"
+ },
+ "gc-uncle-vanya": {
+  "qid": 753298,
+  "label": "Uncle Vanya",
+  "year": 1896,
+  "how": "work"
+ },
+ "gc-up-from-slavery": {
+  "qid": 1568126,
+  "label": "Up from Slavery",
+  "year": 1900,
+  "how": "work"
+ },
+ "gc-upanishads": {
+  "qid": null,
+  "label": "",
+  "year": 1919,
+  "how": "published"
+ },
+ "gc-utilitarianism": {
+  "qid": 1197767,
+  "label": "Utilitarianism",
+  "year": 1861,
+  "how": "work"
+ },
+ "gc-utopia": {
+  "qid": 404158,
+  "label": "Utopia",
+  "year": 1516,
+  "how": "work"
+ },
+ "gc-vanity-fair": {
+  "qid": 612836,
+  "label": "Vanity Fair",
+  "year": 1848,
+  "how": "work"
+ },
+ "gc-varieties-of-religious-experience": {
+  "qid": 2605035,
+  "label": "The Varieties of Religious Experience",
+  "year": 1902,
+  "how": "work"
+ },
+ "gc-venus-and-adonis": {
+  "qid": 1066765,
+  "label": "Venus and Adonis",
+  "year": 1592,
+  "how": "work"
+ },
+ "gc-vile-bodies": {
+  "qid": 7271018,
+  "label": "Vile Bodies",
+  "year": 1930,
+  "how": "work"
+ },
+ "gc-villette": {
+  "qid": 2449570,
+  "label": "Villette",
+  "year": 1853,
+  "how": "work"
+ },
+ "gc-vindication-of-the-rights-of-woman": {
+  "qid": 300646,
+  "label": "A Vindication of the Rights of Woman",
+  "year": 1792,
+  "how": "work"
+ },
+ "gc-volpone-or-the-fox": {
+  "qid": null,
+  "label": "",
+  "year": 1607,
+  "how": "published"
+ },
+ "gc-walden-and-on-the-duty-of-civil-disobedience": {
+  "qid": null,
+  "label": "",
+  "year": 1854,
+  "how": "published"
+ },
+ "gc-war-and-peace": {
+  "qid": 161531,
+  "label": "War and Peace",
+  "year": 1863,
+  "how": "work"
+ },
+ "gc-war-of-the-worlds": {
+  "qid": 213019,
+  "label": "The War of the Worlds",
+  "year": 1897,
+  "how": "work"
+ },
+ "gc-washington-square": {
+  "qid": 1548029,
+  "label": "Washington Square",
+  "year": 1880,
+  "how": "work"
+ },
+ "gc-waste-land": {
+  "qid": 581458,
+  "label": "The Waste Land",
+  "year": 1922,
+  "how": "work"
+ },
+ "gc-way-of-all-flesh": {
+  "qid": 255074,
+  "label": "The Way of All Flesh",
+  "year": 1903,
+  "how": "work"
+ },
+ "gc-way-of-the-world": {
+  "qid": 723947,
+  "label": "The Way of the World",
+  "year": 1700,
+  "how": "work-no-date"
+ },
+ "gc-way-we-live-now": {
+  "qid": 7773866,
+  "label": "The Way We Live Now",
+  "year": 1875,
+  "how": "work"
+ },
+ "gc-wealth-of-nations": {
+  "qid": 233562,
+  "label": "The Wealth of Nations",
+  "year": 1776,
+  "how": "work"
+ },
+ "gc-white-fang": {
+  "qid": 152267,
+  "label": "White Fang",
+  "year": 1906,
+  "how": "work"
+ },
+ "gc-wild-duck": {
+  "qid": 1217608,
+  "label": "The Wild Duck",
+  "year": 1884,
+  "how": "work"
+ },
+ "gc-wind-in-the-willows": {
+  "qid": 936276,
+  "label": "The Wind in the Willows",
+  "year": 1908,
+  "how": "work"
+ },
+ "gc-winnie-the-pooh": {
+  "qid": 3766392,
+  "label": "Winnie-the-Pooh",
+  "year": 1926,
+  "how": "work"
+ },
+ "gc-winter-s-tale": {
+  "qid": 743194,
+  "label": "The Winter's Tale",
+  "year": 1611,
+  "how": "work"
+ },
+ "gc-within-a-budding-grove": {
+  "qid": null,
+  "label": "",
+  "year": 1922,
+  "how": "author-death"
+ },
+ "gc-woman-in-white": {
+  "qid": 1212672,
+  "label": "The Woman in White",
+  "year": 1860,
+  "how": "work"
+ },
+ "gc-woman-of-andros": {
+  "qid": 19898261,
+  "label": "The Woman of Andros",
+  "year": 1930,
+  "how": "work"
+ },
+ "gc-wonderful-wizard-of-oz": {
+  "qid": 130295,
+  "label": "The Wonderful Wizard of Oz",
+  "year": 1900,
+  "how": "work"
+ },
+ "gc-works-of-edgar-allan-poe-volume-1": {
+  "qid": null,
+  "label": "",
+  "year": 1849,
+  "how": "author-death"
+ },
+ "gc-works-of-edgar-allan-poe-volume-2": {
+  "qid": null,
+  "label": "",
+  "year": 1849,
+  "how": "author-death"
+ },
+ "gc-works-of-edgar-allan-poe-volume-3": {
+  "qid": null,
+  "label": "",
+  "year": 1849,
+  "how": "author-death"
+ },
+ "gc-works-of-edgar-allan-poe-volume-4": {
+  "qid": null,
+  "label": "",
+  "year": 1849,
+  "how": "author-death"
+ },
+ "gc-works-of-edgar-allan-poe-volume-5": {
+  "qid": null,
+  "label": "",
+  "year": 1849,
+  "how": "author-death"
+ },
+ "gc-works-of-martin-luther-volume-2": {
+  "qid": null,
+  "label": "",
+  "year": 1546,
+  "how": "author-death"
+ },
+ "gc-world-as-will-and-idea-volume-1": {
+  "qid": null,
+  "label": "",
+  "year": 1860,
+  "how": "author-death"
+ },
+ "gc-world-english-bible": {
+  "qid": 8035681,
+  "label": "World English Bible",
+  "year": 2000,
+  "how": "work"
+ },
+ "gc-wuthering-heights": {
+  "qid": 202975,
+  "label": "Wuthering Heights",
+  "year": 1847,
+  "how": "work"
+ },
+ "gc-yellow-wallpaper": {
+  "qid": 462373,
+  "label": "The Yellow Wall Paper",
+  "year": 1892,
+  "how": "work"
+ }
+}

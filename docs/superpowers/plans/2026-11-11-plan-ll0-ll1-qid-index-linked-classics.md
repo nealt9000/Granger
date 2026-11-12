@@ -114,6 +114,17 @@
 - `tools/links/build.py` runs the spike's pipeline over a Classics pack and writes `.glink` (Decision 4).
 - `check.py` re-scores the fixed graded sample and fails under the bar, so the upkeep loop guards precision on every rebuild.
 - Registered as a sidecar kind (Task 4); built for `classics` and `clasicos-es`.
+- **As built (2026-11-12):**
+  - **One `.glink` per book, not per collection.** Each Classic is its own catalog item with its own `.gvec`, so its links ride on it the same way: catalog_gen attaches by the EPUB's sha256, and the file comes and goes with the book.
+  - **The file:** `meta` (contract), a one-row `book` table (`id`, `qid`, `year`), and `mentions` as in Decision 4, indexed on `qid` and `href`.
+  - **`classics_qid.py`** decides each book's work and year once, into `tools/links/classics-qid.json`, which is committed and reviewable.
+    - A match needs the title (exact, or a word prefix if the author agrees) and the author's surname in P50.
+    - A work dated after the book's own edition is an adaptation, so it's rejected.
+    - With no work, the year is the author's death year if that's earlier, else `published`.
+    - English: 334 of 437 books matched a work. Spanish: 86 of 185.
+  - **`build.py OUT EPUB…`** finds each book in the Classics manifests and caches NER per EPUB sha, so a rules-only rebuild takes seconds.
+  - **`check.py`** verifies the contract and rows, and re-scores `graded-2026-11-12.json` (Neal's 200, with four desk corrections). It fails under 95%, per book with 20+ still linked or overall.
+  - `glink` is in `tools/sidecar/kinds.json`.
 
 ### LL1 · Task 8: Links in the ebook reader (Kotlin + Compose, tested)
 - `BookLinks` reads `.glink` for the open book's chapter and places mentions as Readium decorations (a link style beside the highlight style in `BookAnnotations`); unplaceable mentions are dropped silently.

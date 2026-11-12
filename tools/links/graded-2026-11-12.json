@@ -1,0 +1,2010 @@
+{
+ "_comment": "Plan LL1 Task 6: 200 random Light links (seed 20261112) graded by Neal on 2026-11-12, with desk corrections where his Spanish grading was loose. check.py re-scores every rebuild against these.",
+ "links": [
+  {
+   "id": "pride-000",
+   "book": "gc-pride-and-prejudice",
+   "quote": "London",
+   "before": "he convenient distance of Hunsford from ",
+   "qid": 84,
+   "label": "London",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-001",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Kent",
+   "before": "ntion the circumstance when you were in ",
+   "qid": 23298,
+   "label": "Kent",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-002",
+   "book": "gc-pride-and-prejudice",
+   "quote": "London",
+   "before": "fortnight later in July, and must be in ",
+   "qid": 84,
+   "label": "London",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-003",
+   "book": "gc-pride-and-prejudice",
+   "quote": "London",
+   "before": "er husband was gone to enjoy himself in ",
+   "qid": 84,
+   "label": "London",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-004",
+   "book": "gc-pride-and-prejudice",
+   "quote": "London",
+   "before": "isters were well, I hope, when you left ",
+   "qid": 84,
+   "label": "London",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-005",
+   "book": "gc-pride-and-prejudice",
+   "quote": "London",
+   "before": "is friend had left him that morning for ",
+   "qid": 84,
+   "label": "London",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-006",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Derbyshire",
+   "before": "e had assured herself of his feeling in ",
+   "qid": 23098,
+   "label": "Derbyshire",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-007",
+   "book": "gc-pride-and-prejudice",
+   "quote": "London",
+   "before": "r him to call on Jane in such a part of ",
+   "qid": 84,
+   "label": "London",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-008",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Brighton",
+   "before": "nel Forster came yesterday, having left ",
+   "qid": 131491,
+   "label": "Brighton",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-009",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Derbyshire",
+   "before": "e is not a finer county in England than ",
+   "qid": 23098,
+   "label": "Derbyshire",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-010",
+   "book": "gc-pride-and-prejudice",
+   "quote": "London",
+   "before": " received his commission before he left ",
+   "qid": 84,
+   "label": "London",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-011",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Derbyshire",
+   "before": " to make of it. Had she not seen him in ",
+   "qid": 23098,
+   "label": "Derbyshire",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-012",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Hertfordshire",
+   "before": " way of life, nothing had been known in ",
+   "qid": 3410,
+   "label": "Hertfordshire",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-013",
+   "book": "gc-pride-and-prejudice",
+   "quote": "England",
+   "before": "aking of music. There are few people in ",
+   "qid": 21,
+   "label": "England",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-014",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Hertfordshire",
+   "before": "marrying—and, moreover, for coming into ",
+   "qid": 3410,
+   "label": "Hertfordshire",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-015",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Brighton",
+   "before": "“They are going to be encamped near ",
+   "qid": 131491,
+   "label": "Brighton",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-016",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Ramsgate",
+   "before": ",” thought Elizabeth, “when she goes to ",
+   "qid": 736439,
+   "label": "Ramsgate",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-017",
+   "book": "gc-pride-and-prejudice",
+   "quote": "London",
+   "before": "o did call on him in her return through ",
+   "qid": 84,
+   "label": "London",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-018",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Hertfordshire",
+   "before": "e to pay his respects to his friends in ",
+   "qid": 3410,
+   "label": "Hertfordshire",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-019",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Brighton",
+   "before": "“If one could but go to ",
+   "qid": 131491,
+   "label": "Brighton",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-020",
+   "book": "gc-pride-and-prejudice",
+   "quote": "London",
+   "before": "d gone to her on their first arrival in ",
+   "qid": 84,
+   "label": "London",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-021",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Derbyshire",
+   "before": " the perplexity about Elizabeth and her ",
+   "qid": 23098,
+   "label": "Derbyshire",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-022",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Memling",
+   "before": "tricted sense, and must think rather of ",
+   "qid": 106851,
+   "label": "Hans Memling",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-023",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Oxford",
+   "before": "s through which their route thither lay—",
+   "qid": 34217,
+   "label": "Oxford",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-024",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Hertfordshire",
+   "before": " and their intimate friends who live in ",
+   "qid": 3410,
+   "label": "Hertfordshire",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-025",
+   "book": "gc-pride-and-prejudice",
+   "quote": "London",
+   "before": " not feel quite certain that the air of ",
+   "qid": 84,
+   "label": "London",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-026",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Warwick",
+   "before": "eir route thither lay—Oxford, Blenheim, ",
+   "qid": 549761,
+   "label": "Warwick",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-027",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Derbyshire",
+   "before": " once. From what I can collect, he left ",
+   "qid": 23098,
+   "label": "Derbyshire",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-028",
+   "book": "gc-pride-and-prejudice",
+   "quote": "London",
+   "before": "“I cannot see that ",
+   "qid": 84,
+   "label": "London",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-029",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Kent",
+   "before": "self by her, and talked so agreeably of ",
+   "qid": 23298,
+   "label": "Kent",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-030",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Hertfordshire",
+   "before": " the third morning after his arrival in ",
+   "qid": 3410,
+   "label": "Hertfordshire",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-031",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Jane Austen’s",
+   "before": "nine element in “Mr. Spectator,” and in ",
+   "qid": 36322,
+   "label": "Jane Austen",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-032",
+   "book": "gc-pride-and-prejudice",
+   "quote": "England",
+   "before": "f model. There is not a finer county in ",
+   "qid": 21,
+   "label": "England",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-033",
+   "book": "gc-pride-and-prejudice",
+   "quote": "London",
+   "before": " have no objection, but my father hates ",
+   "qid": 84,
+   "label": "London",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-034",
+   "book": "gc-pride-and-prejudice",
+   "quote": "London",
+   "before": "rs? Mr. Bingley will not be detained in ",
+   "qid": 84,
+   "label": "London",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-035",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Kent",
+   "before": " five weeks which she had now passed in ",
+   "qid": 23298,
+   "label": "Kent",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-036",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Hertfordshire",
+   "before": "ever I saw him, when he first came into ",
+   "qid": 3410,
+   "label": "Hertfordshire",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-037",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Derbyshire",
+   "before": "of a young man who has lived so long in ",
+   "qid": 23098,
+   "label": "Derbyshire",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-038",
+   "book": "gc-pride-and-prejudice",
+   "quote": "England",
+   "before": " man of large fortune from the north of ",
+   "qid": 21,
+   "label": "England",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "pride-039",
+   "book": "gc-pride-and-prejudice",
+   "quote": "Kent",
+   "before": "e had liked him better when they met in ",
+   "qid": 23298,
+   "label": "Kent",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-000",
+   "book": "gc-war-and-peace",
+   "quote": "Egypt",
+   "before": "With regard to religion, as to which in ",
+   "qid": 79,
+   "label": "Egypt",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-001",
+   "book": "gc-war-and-peace",
+   "quote": "Mozháysk",
+   "before": " of the twenty-fifth Pierre was leaving ",
+   "qid": 159139,
+   "label": "Mozhaysk",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-002",
+   "book": "gc-war-and-peace",
+   "quote": "Russia",
+   "before": "ll his heart to establish a republic in ",
+   "qid": 159,
+   "label": "Russia",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-003",
+   "book": "gc-war-and-peace",
+   "quote": "Jena",
+   "before": "ncrease. The victories of the French at ",
+   "qid": 3150,
+   "label": "Jena",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-004",
+   "book": "gc-war-and-peace",
+   "quote": "Kutúzov",
+   "before": "On November 1 ",
+   "qid": 185801,
+   "label": "Mikhail Kutuzov",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-005",
+   "book": "gc-war-and-peace",
+   "quote": "Napoleon",
+   "before": "The very day that ",
+   "qid": 517,
+   "label": "Napoleon",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-006",
+   "book": "gc-war-and-peace",
+   "quote": "Kutúzov",
+   "before": "emembering Dólokhov’s conversation with ",
+   "qid": 185801,
+   "label": "Mikhail Kutuzov",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-007",
+   "book": "gc-war-and-peace",
+   "quote": "Moscow",
+   "before": "n the first of September he had come to ",
+   "qid": 649,
+   "label": "Moscow",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-008",
+   "book": "gc-war-and-peace",
+   "quote": "Moscow",
+   "before": "In burned and devastated ",
+   "qid": 649,
+   "label": "Moscow",
+   "grade": "wrong",
+   "by": "neal",
+   "note": "Moscow the city looks right; asked Neal whether this was a slip"
+  },
+  {
+   "id": "war-a-009",
+   "book": "gc-war-and-peace",
+   "quote": "Russia",
+   "before": "the defense of Bald Hills, where one of ",
+   "qid": 159,
+   "label": "Russia",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-010",
+   "book": "gc-war-and-peace",
+   "quote": "Poland",
+   "before": "aign began, the regiment was moved into ",
+   "qid": 36,
+   "label": "Poland",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-011",
+   "book": "gc-war-and-peace",
+   "quote": "Kutúzov",
+   "before": "It was ",
+   "qid": 185801,
+   "label": "Mikhail Kutuzov",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-012",
+   "book": "gc-war-and-peace",
+   "quote": "Moscow",
+   "before": "After his interview with Pierre in ",
+   "qid": 649,
+   "label": "Moscow",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-013",
+   "book": "gc-war-and-peace",
+   "quote": "Russia",
+   "before": "rvise the enrollment decreed throughout ",
+   "qid": 159,
+   "label": "Russia",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-014",
+   "book": "gc-war-and-peace",
+   "quote": "Malta",
+   "before": "ss of soul. She has refused to evacuate ",
+   "qid": 233,
+   "label": "Malta",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-015",
+   "book": "gc-war-and-peace",
+   "quote": "Vienna",
+   "before": "ce Hippolyte who had just returned from ",
+   "qid": 1741,
+   "label": "Vienna",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-016",
+   "book": "gc-war-and-peace",
+   "quote": "Moscow",
+   "before": "old to write down the resolution of the ",
+   "qid": 649,
+   "label": "Moscow",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-017",
+   "book": "gc-war-and-peace",
+   "quote": "Napoleon",
+   "before": "“And did you really see and speak to ",
+   "qid": 517,
+   "label": "Napoleon",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-018",
+   "book": "gc-war-and-peace",
+   "quote": "Kutúzov",
+   "before": "he only possible line of action—the one ",
+   "qid": 185801,
+   "label": "Mikhail Kutuzov",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-019",
+   "book": "gc-war-and-peace",
+   "quote": "Chateaubriand",
+   "before": "e de Staël, Photius, Schelling, Fichte, ",
+   "qid": 49767,
+   "label": "François-Auguste-René de Chateaubriand",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-020",
+   "book": "gc-war-and-peace",
+   "quote": "Poland",
+   "before": "Kutúzov, whom he had overtaken in ",
+   "qid": 36,
+   "label": "Poland",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-021",
+   "book": "gc-war-and-peace",
+   "quote": "Napoleon",
+   "before": "times, and so it is to our own day. All ",
+   "qid": 517,
+   "label": "Napoleon",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-022",
+   "book": "gc-war-and-peace",
+   "quote": "Tilsit",
+   "before": "te of Denísov’s affairs, Rostóv rode to ",
+   "qid": 5647,
+   "label": "Sovetsk",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-023",
+   "book": "gc-war-and-peace",
+   "quote": "Moskvá",
+   "before": "ght—along the course of the Kolochá and ",
+   "qid": 649,
+   "label": "Moscow",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-024",
+   "book": "gc-war-and-peace",
+   "quote": "Napoleon",
+   "before": ", a Caesar in the field! E’en fortunate ",
+   "qid": 517,
+   "label": "Napoleon",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-025",
+   "book": "gc-war-and-peace",
+   "quote": "Ulm",
+   "before": " the same fate—(the fate of the army at ",
+   "qid": 3012,
+   "label": "Ulm",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-026",
+   "book": "gc-war-and-peace",
+   "quote": "Napoleon",
+   "before": "om Dokhtúrov and from Alexéy Petróvich. ",
+   "qid": 517,
+   "label": "Napoleon",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-027",
+   "book": "gc-war-and-peace",
+   "quote": "Moscow",
+   "before": "At the end of January Pierre went to ",
+   "qid": 649,
+   "label": "Moscow",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-028",
+   "book": "gc-war-and-peace",
+   "quote": "Italy",
+   "before": "apel was a marble monument brought from ",
+   "qid": 38,
+   "label": "Italy",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-029",
+   "book": "gc-war-and-peace",
+   "quote": "Moscow",
+   "before": "habits and acquaintances he had made in ",
+   "qid": 649,
+   "label": "Moscow",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-030",
+   "book": "gc-war-and-peace",
+   "quote": "Moscow",
+   "before": "he preservation of my father’s house in ",
+   "qid": 649,
+   "label": "Moscow",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-031",
+   "book": "gc-war-and-peace",
+   "quote": "Moscow",
+   "before": "In 1811 there was living in ",
+   "qid": 649,
+   "label": "Moscow",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-032",
+   "book": "gc-war-and-peace",
+   "quote": "Napoleon",
+   "before": "ee the great man,” he said, alluding to ",
+   "qid": 517,
+   "label": "Napoleon",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-033",
+   "book": "gc-war-and-peace",
+   "quote": "Nóvgorod",
+   "before": "egan to move, and two battalions of the ",
+   "qid": 2235,
+   "label": "Veliky Novgorod",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-034",
+   "book": "gc-war-and-peace",
+   "quote": "Napoleon",
+   "before": "ed the Cross of the Legion of Honor and ",
+   "qid": 517,
+   "label": "Napoleon",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-035",
+   "book": "gc-war-and-peace",
+   "quote": "Russia",
+   "before": "w wiz indifference ze danger vreatening ",
+   "qid": 159,
+   "label": "Russia",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-036",
+   "book": "gc-war-and-peace",
+   "quote": "Smolénsk",
+   "before": "ce had a list of things to be bought in ",
+   "qid": 2337,
+   "label": "Smolensk",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-037",
+   "book": "gc-war-and-peace",
+   "quote": "Krémlin",
+   "before": "rms were being distributed today at the ",
+   "qid": 133274,
+   "label": "Kremlin",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-038",
+   "book": "gc-war-and-peace",
+   "quote": "Hamburg",
+   "before": "second Military Division, of Bremen, of ",
+   "qid": 1055,
+   "label": "Hamburg",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-039",
+   "book": "gc-war-and-peace",
+   "quote": "Kutúzov",
+   "before": "After the encounter at Vyázma, where ",
+   "qid": 185801,
+   "label": "Mikhail Kutuzov",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-040",
+   "book": "gc-war-and-peace",
+   "quote": "Naples",
+   "before": "ussars and behind them rode the King of ",
+   "qid": 2634,
+   "label": "Naples",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-041",
+   "book": "gc-war-and-peace",
+   "quote": "Smolénsk",
+   "before": "e rear guard. Ill with fever he went to ",
+   "qid": 2337,
+   "label": "Smolensk",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-042",
+   "book": "gc-war-and-peace",
+   "quote": "Naples",
+   "before": "ans and as many English were to land at ",
+   "qid": 2634,
+   "label": "Naples",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-043",
+   "book": "gc-war-and-peace",
+   "quote": "Paris",
+   "before": "In 1789 a ferment arises in ",
+   "qid": 90,
+   "label": "Paris",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-044",
+   "book": "gc-war-and-peace",
+   "quote": "Napoleon",
+   "before": "m personally. Armfeldt virulently hated ",
+   "qid": 517,
+   "label": "Napoleon",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-045",
+   "book": "gc-war-and-peace",
+   "quote": "Moscow",
+   "before": "eports about the war began to spread in ",
+   "qid": 649,
+   "label": "Moscow",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-046",
+   "book": "gc-war-and-peace",
+   "quote": "Maria Theresa",
+   "before": "neral in a greatcoat, with the order of ",
+   "qid": 131706,
+   "label": "Maria Theresa of Austria",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-047",
+   "book": "gc-war-and-peace",
+   "quote": "Glogau",
+   "before": "Borís to tell them about his journey to ",
+   "qid": 66013,
+   "label": "Głogów",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-048",
+   "book": "gc-war-and-peace",
+   "quote": "Poland",
+   "before": "ry advantage. What receptions we had in ",
+   "qid": 36,
+   "label": "Poland",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-049",
+   "book": "gc-war-and-peace",
+   "quote": "Tver",
+   "before": "Moscow, moved into the city through the ",
+   "qid": 2288,
+   "label": "Tver",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-050",
+   "book": "gc-war-and-peace",
+   "quote": "Bórovsk",
+   "before": " evening a house serf who had come from ",
+   "qid": 132718,
+   "label": "Borovsk",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-051",
+   "book": "gc-war-and-peace",
+   "quote": "Vílna",
+   "before": " the Berëzina, and from the Berëzina to ",
+   "qid": 216,
+   "label": "Vilnius",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-052",
+   "book": "gc-war-and-peace",
+   "quote": "Napoleon",
+   "before": "ussian position. The attack directed by ",
+   "qid": 517,
+   "label": "Napoleon",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-053",
+   "book": "gc-war-and-peace",
+   "quote": "Kalúga",
+   "before": ", moved into the city through the Tver, ",
+   "qid": 2837,
+   "label": "Kaluga",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-054",
+   "book": "gc-war-and-peace",
+   "quote": "Moscow",
+   "before": "e end of January Princess Mary left for ",
+   "qid": 649,
+   "label": "Moscow",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-055",
+   "book": "gc-war-and-peace",
+   "quote": "Danube",
+   "before": "s of Russian troops. At the bend of the ",
+   "qid": 1653,
+   "label": "Danube",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-056",
+   "book": "gc-war-and-peace",
+   "quote": "Pávlograd",
+   "before": "“I saw the ",
+   "qid": 237206,
+   "label": "Pavlohrad",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-057",
+   "book": "gc-war-and-peace",
+   "quote": "Paris",
+   "before": "n from Italy he finds the government in ",
+   "qid": 90,
+   "label": "Paris",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-058",
+   "book": "gc-war-and-peace",
+   "quote": "Suvórov",
+   "before": "d listened to stories of Potëmkin’s and ",
+   "qid": 154232,
+   "label": "Alexander Suvorov",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-059",
+   "book": "gc-war-and-peace",
+   "quote": "Moscow",
+   "before": "you can rush off alone in a carriage to ",
+   "qid": 649,
+   "label": "Moscow",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-060",
+   "book": "gc-war-and-peace",
+   "quote": "Tilsit",
+   "before": "rds he had used to Alexander himself at ",
+   "qid": 5647,
+   "label": "Sovetsk",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-061",
+   "book": "gc-war-and-peace",
+   "quote": "Christianity",
+   "before": "ir own view: love of one’s neighbor and ",
+   "qid": 5043,
+   "label": "Christianity",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-062",
+   "book": "gc-war-and-peace",
+   "quote": "Napoleon",
+   "before": "ll these Westphalians and Hessians whom ",
+   "qid": 517,
+   "label": "Napoleon",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-063",
+   "book": "gc-war-and-peace",
+   "quote": "Moscow",
+   "before": "ne they had taken while passing through ",
+   "qid": 649,
+   "label": "Moscow",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-064",
+   "book": "gc-war-and-peace",
+   "quote": "Smolénsk",
+   "before": "ding. Ever since the enemy’s entry into ",
+   "qid": 2337,
+   "label": "Smolensk",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-065",
+   "book": "gc-war-and-peace",
+   "quote": "Napoleon",
+   "before": "for him now was: “Have I really allowed ",
+   "qid": 517,
+   "label": "Napoleon",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-066",
+   "book": "gc-war-and-peace",
+   "quote": "Russia",
+   "before": "ne of the first examples of the kind in ",
+   "qid": 159,
+   "label": "Russia",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-067",
+   "book": "gc-war-and-peace",
+   "quote": "Vienna",
+   "before": "e other adjutants, and had taken him to ",
+   "qid": 1741,
+   "label": "Vienna",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-068",
+   "book": "gc-war-and-peace",
+   "quote": "Russia",
+   "before": "inment of certain ends—the greatness of ",
+   "qid": 159,
+   "label": "Russia",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-069",
+   "book": "gc-war-and-peace",
+   "quote": "Moscow",
+   "before": "mself. At that moment he did not desire ",
+   "qid": 649,
+   "label": "Moscow",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-070",
+   "book": "gc-war-and-peace",
+   "quote": "Austria",
+   "before": "touched on the question of the war with ",
+   "qid": 40,
+   "label": "Austria",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-071",
+   "book": "gc-war-and-peace",
+   "quote": "Poland",
+   "before": ", and the next he’s a wild beast.... In ",
+   "qid": 36,
+   "label": "Poland",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-072",
+   "book": "gc-war-and-peace",
+   "quote": "Moscow",
+   "before": "tions addressed to him. But on entering ",
+   "qid": 649,
+   "label": "Moscow",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-073",
+   "book": "gc-war-and-peace",
+   "quote": "Vorónezh",
+   "before": "embering her relations with Nicholas in ",
+   "qid": 3426,
+   "label": "Voronezh",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-074",
+   "book": "gc-war-and-peace",
+   "quote": "Vienna",
+   "before": "a diplomatic note that had been sent to ",
+   "qid": 1741,
+   "label": "Vienna",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-075",
+   "book": "gc-war-and-peace",
+   "quote": "Vílna",
+   "before": "peror of Russia had, meanwhile, been in ",
+   "qid": 216,
+   "label": "Vilnius",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-076",
+   "book": "gc-war-and-peace",
+   "quote": "Mozháysk",
+   "before": "ed at their whiteness, “the peasants at ",
+   "qid": 159139,
+   "label": "Mozhaysk",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-077",
+   "book": "gc-war-and-peace",
+   "quote": "Europe",
+   "before": "nsibility for all that was happening in ",
+   "qid": 46,
+   "label": "Europe",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-078",
+   "book": "gc-war-and-peace",
+   "quote": "Napoleon",
+   "before": "",
+   "qid": 517,
+   "label": "Napoleon",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "war-a-079",
+   "book": "gc-war-and-peace",
+   "quote": "Moscow",
+   "before": "me alive! We have a house of our own in ",
+   "qid": 649,
+   "label": "Moscow",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-000",
+   "book": "gc-es-don-quijote",
+   "quote": "Segovia",
+   "before": "e Cuenca que otras cuatro de límiste de ",
+   "qid": 15684,
+   "label": "Segovia",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-001",
+   "book": "gc-es-don-quijote",
+   "quote": "Aragón",
+   "before": "rinos llaman en Berbería a los moros de ",
+   "qid": 4040,
+   "label": "Aragon",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-002",
+   "book": "gc-es-don-quijote",
+   "quote": "Lanzarote",
+   "before": " Ginebra, si fuera hoy viva, a pesar de ",
+   "qid": 182432,
+   "label": "Lanzarote",
+   "grade": "wrong",
+   "by": "desk",
+   "note": "Lancelot, not the island (Neal graded the Spanish loosely)"
+  },
+  {
+   "id": "don-q-003",
+   "book": "gc-es-don-quijote",
+   "quote": "Toledo",
+   "before": "e dejo metido en la casa del Nuncio, en ",
+   "qid": 5836,
+   "label": "Toledo",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-004",
+   "book": "gc-es-don-quijote",
+   "quote": "Rodrigo",
+   "before": "sdichado que puedo decir con el rey don ",
+   "qid": 243573,
+   "label": "Roderic",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-005",
+   "book": "gc-es-don-quijote",
+   "quote": "Cartago",
+   "before": "o Lusitania; un César, Roma; un Anibal, ",
+   "qid": 6343,
+   "label": "Carthage",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-006",
+   "book": "gc-es-don-quijote",
+   "quote": "Tajo",
+   "before": " cristal aquellas cuatro ninfas que del ",
+   "qid": 14294,
+   "label": "Tagus",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-007",
+   "book": "gc-es-don-quijote",
+   "quote": "Túnez",
+   "before": "a cómo el señor don Juan había ganado a ",
+   "qid": 948,
+   "label": "Tunisia",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-008",
+   "book": "gc-es-don-quijote",
+   "quote": "Argel",
+   "before": "i hija y a mi mujer, que sé que está en ",
+   "qid": 3561,
+   "label": "Algiers",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-009",
+   "book": "gc-es-don-quijote",
+   "quote": "Julio César",
+   "before": "osos templos: las cenizas del cuerpo de ",
+   "qid": 1048,
+   "label": "Julius Caesar",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-010",
+   "book": "gc-es-don-quijote",
+   "quote": "Tetuán",
+   "before": "ue de ordinario vienen con mercancía de ",
+   "qid": 185157,
+   "label": "Tétouan",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-011",
+   "book": "gc-es-don-quijote",
+   "quote": "Venecia",
+   "before": " de felice recordación, había hecho con ",
+   "qid": 641,
+   "label": "Venice",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-012",
+   "book": "gc-es-don-quijote",
+   "quote": "Europa",
+   "before": "do Apenino; finalmente, cuantos toda la ",
+   "qid": 46,
+   "label": "Europe",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-013",
+   "book": "gc-es-don-quijote",
+   "quote": "Francia",
+   "before": "encantado, sino cuando no lo estaba, en ",
+   "qid": 142,
+   "label": "France",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-014",
+   "book": "gc-es-don-quijote",
+   "quote": "Sierra Morena",
+   "before": "— Pues no anduve yo en ",
+   "qid": 686362,
+   "label": "Sierra Morena",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-015",
+   "book": "gc-es-don-quijote",
+   "quote": "Guadiana",
+   "before": "rma; la cual, con vos, y conmigo, y con ",
+   "qid": 14305,
+   "label": "Guadiana",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-016",
+   "book": "gc-es-don-quijote",
+   "quote": "Castilla",
+   "before": "sino unas raciones de un pescado que en ",
+   "qid": 173063,
+   "label": "Castile",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-017",
+   "book": "gc-es-don-quijote",
+   "quote": "India",
+   "before": "cuantos magos crió Persia, bracmanes la ",
+   "qid": 668,
+   "label": "India",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-018",
+   "book": "gc-es-don-quijote",
+   "quote": "Sierra Morena",
+   "before": "s galeotes, dio libertad don Quijote en ",
+   "qid": 686362,
+   "label": "Sierra Morena",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-019",
+   "book": "gc-es-don-quijote",
+   "quote": "España",
+   "before": " Diego Matamoros: \"¡Santiago, y cierra, ",
+   "qid": 29,
+   "label": "Spain",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-020",
+   "book": "gc-es-don-quijote",
+   "quote": "Francia",
+   "before": "sus esposa de tierra firme y la llevó a ",
+   "qid": 142,
+   "label": "France",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-021",
+   "book": "gc-es-don-quijote",
+   "quote": "Asia",
+   "before": "ornada comenzó en Europa, la segunda en ",
+   "qid": 48,
+   "label": "Asia",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-022",
+   "book": "gc-es-don-quijote",
+   "quote": "Chipre",
+   "before": " ganado con su armada la famosa isla de ",
+   "qid": 229,
+   "label": "Cyprus",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-023",
+   "book": "gc-es-don-quijote",
+   "quote": "España",
+   "before": "ión, puesto que déstos hay muy pocos en ",
+   "qid": 29,
+   "label": "Spain",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-024",
+   "book": "gc-es-don-quijote",
+   "quote": "Oviedo",
+   "before": "dereada, soy natural de las Asturias de ",
+   "qid": 14317,
+   "label": "Oviedo",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-025",
+   "book": "gc-es-don-quijote",
+   "quote": "Inglaterra",
+   "before": " desde Granada hasta Loja, de Londres a ",
+   "qid": 21,
+   "label": "England",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-026",
+   "book": "gc-es-don-quijote",
+   "quote": "España",
+   "before": "que eres el mayor bellacuelo que hay en ",
+   "qid": 29,
+   "label": "Spain",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-027",
+   "book": "gc-es-don-quijote",
+   "quote": "Málaga",
+   "before": " envidiar el más regalado bodegonero de ",
+   "qid": 8851,
+   "label": "Málaga",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-028",
+   "book": "gc-es-don-quijote",
+   "quote": "Francia",
+   "before": "rnador. Tan buen pan hacen aquí como en ",
+   "qid": 142,
+   "label": "France",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-029",
+   "book": "gc-es-don-quijote",
+   "quote": "Nápoles",
+   "before": "abía en todo el universo mundo, que era ",
+   "qid": 2634,
+   "label": "Naples",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-030",
+   "book": "gc-es-don-quijote",
+   "quote": "Flandes",
+   "before": "za, y que puede pasar por los bancos de ",
+   "qid": 234,
+   "label": "Flanders",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-031",
+   "book": "gc-es-don-quijote",
+   "quote": "Segovia",
+   "before": "la del muerto que llevaban a enterrar a ",
+   "qid": 15684,
+   "label": "Segovia",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-032",
+   "book": "gc-es-don-quijote",
+   "quote": "Miguel de Cervantes Saavedra",
+   "before": "",
+   "qid": 5682,
+   "label": "Miguel de Cervantes",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-033",
+   "book": "gc-es-don-quijote",
+   "quote": "Montiel",
+   "before": "u primer viaje, que fue por el campo de ",
+   "qid": 1610078,
+   "label": "Montiel",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-034",
+   "book": "gc-es-don-quijote",
+   "quote": "Roncesvalles",
+   "before": "ntendió y le ahogó entre los brazos, en ",
+   "qid": 917891,
+   "label": "Orreaga-Roncesvalles",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-035",
+   "book": "gc-es-don-quijote",
+   "quote": "Almodóvar del Campo",
+   "before": " Tirteafuera, que está entre Caracuel y ",
+   "qid": 1631896,
+   "label": "Almodóvar del Campo",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-036",
+   "book": "gc-es-don-quijote",
+   "quote": "Florencia",
+   "before": "«En ",
+   "qid": 2044,
+   "label": "Florence",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-037",
+   "book": "gc-es-don-quijote",
+   "quote": "Ariosto",
+   "before": " precio de cantar algunas estancias del ",
+   "qid": 48900,
+   "label": "Ludovico Ariosto",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-038",
+   "book": "gc-es-don-quijote",
+   "quote": "Arcadia",
+   "before": " querían renovar e imitar a la pastoral ",
+   "qid": 170054,
+   "label": "Arcadia Regional Unit",
+   "grade": "wrong",
+   "by": "desk",
+   "note": "the classical region, not the modern regional unit (Neal graded the Spanish loosely)"
+  },
+  {
+   "id": "don-q-039",
+   "book": "gc-es-don-quijote",
+   "quote": "Gaeta",
+   "before": "nto ensancha, que llegó del Catay hasta ",
+   "qid": 128089,
+   "label": "Gaeta",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-040",
+   "book": "gc-es-don-quijote",
+   "quote": "Africa",
+   "before": " han pasado mayores, ni tan grandes, de ",
+   "qid": 15,
+   "label": "Africa",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-041",
+   "book": "gc-es-don-quijote",
+   "quote": "Osuna",
+   "before": " de juicio. Era graduado en cánones por ",
+   "qid": 586018,
+   "label": "Osuna",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-042",
+   "book": "gc-es-don-quijote",
+   "quote": "Puerto Lápice",
+   "before": "rimera aventura que le avino fue la del ",
+   "qid": 1630316,
+   "label": "Puerto Lápice",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-043",
+   "book": "gc-es-don-quijote",
+   "quote": "Sierra Morena",
+   "before": " cien escudos que halló en la maleta en ",
+   "qid": 686362,
+   "label": "Sierra Morena",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-044",
+   "book": "gc-es-don-quijote",
+   "quote": "Francia",
+   "before": "has veces se ponía a mirar el camino de ",
+   "qid": 142,
+   "label": "France",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-045",
+   "book": "gc-es-don-quijote",
+   "quote": "Segovia",
+   "before": "a venta, se hallasen cuatro perailes de ",
+   "qid": 15684,
+   "label": "Segovia",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-046",
+   "book": "gc-es-don-quijote",
+   "quote": "Ilíada",
+   "before": "jo bien o mal Homero en tal verso de la ",
+   "qid": 8275,
+   "label": "Iliad",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-047",
+   "book": "gc-es-don-quijote",
+   "quote": "Roldán",
+   "before": "nadie las mueva que estar no pueda con ",
+   "qid": 207535,
+   "label": "Roland",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-048",
+   "book": "gc-es-don-quijote",
+   "quote": "Salamanca",
+   "before": "lomé Carrasco, que viene de estudiar de ",
+   "qid": 15695,
+   "label": "Salamanca",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-049",
+   "book": "gc-es-don-quijote",
+   "quote": "Úbeda",
+   "before": " como Orbaneja, un pintor que estaba en ",
+   "qid": 329984,
+   "label": "Úbeda",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-050",
+   "book": "gc-es-don-quijote",
+   "quote": "Miguel de Cervantes",
+   "before": "Por cuanto por parte de vos, ",
+   "qid": 5682,
+   "label": "Miguel de Cervantes",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-051",
+   "book": "gc-es-don-quijote",
+   "quote": "Berbería",
+   "before": "tura fui yo por dos tíos míos llevada a ",
+   "qid": 501768,
+   "label": "Barbary Coast",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-052",
+   "book": "gc-es-don-quijote",
+   "quote": "Teodora",
+   "before": "ferma, y, abrazándose estrechamente con ",
+   "qid": 204843,
+   "label": "Theodora",
+   "grade": "wrong",
+   "by": "desk",
+   "note": "a character in a tale, not the empress (Neal graded the Spanish loosely)"
+  },
+  {
+   "id": "don-q-053",
+   "book": "gc-es-don-quijote",
+   "quote": "Tajo",
+   "before": " con el licor del siempre rico y dorado ",
+   "qid": 14294,
+   "label": "Tagus",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-054",
+   "book": "gc-es-don-quijote",
+   "quote": "Sicilia",
+   "before": "están en Barcelona con orden de pasar a ",
+   "qid": 1460,
+   "label": "Sicily",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-055",
+   "book": "gc-es-don-quijote",
+   "quote": "Francia",
+   "before": " no a la sepultura, sino a ser reina de ",
+   "qid": 142,
+   "label": "France",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-056",
+   "book": "gc-es-don-quijote",
+   "quote": "Virgilio",
+   "before": "A fee que no fue tan piadoso Eneas como ",
+   "qid": 1398,
+   "label": "Virgil",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-057",
+   "book": "gc-es-don-quijote",
+   "quote": "Miguel de Cervantes Saavedra",
+   "before": "",
+   "qid": 5682,
+   "label": "Miguel de Cervantes",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-058",
+   "book": "gc-es-don-quijote",
+   "quote": "Aristóteles",
+   "before": "y profanos, tan llenos de sentencias de ",
+   "qid": 868,
+   "label": "Aristotle",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-059",
+   "book": "gc-es-don-quijote",
+   "quote": "Italia",
+   "before": "imo; y es hombre galante, como dicen en ",
+   "qid": 38,
+   "label": "Italy",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-060",
+   "book": "gc-es-don-quijote",
+   "quote": "Indias Orientales",
+   "before": " que se embarcan en Cádiz para ir a las ",
+   "qid": 213137,
+   "label": "East Indies",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-061",
+   "book": "gc-es-don-quijote",
+   "quote": "Nápoles",
+   "before": "or emperador, y monarca por monarca, en ",
+   "qid": 2634,
+   "label": "Naples",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-062",
+   "book": "gc-es-don-quijote",
+   "quote": "Asturias",
+   "before": "ilada y asendereada, soy natural de las ",
+   "qid": 3934,
+   "label": "Asturias",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-063",
+   "book": "gc-es-don-quijote",
+   "quote": "Rodrigo",
+   "before": "cados, pasatiempos y riquezas sacaron a ",
+   "qid": 243573,
+   "label": "Roderic",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-064",
+   "book": "gc-es-don-quijote",
+   "quote": "Berbería",
+   "before": "unos cristianos ya libres que venían de ",
+   "qid": 501768,
+   "label": "Barbary Coast",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-065",
+   "book": "gc-es-don-quijote",
+   "quote": "España",
+   "before": "imero de caballerías que se imprimió en ",
+   "qid": 29,
+   "label": "Spain",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-066",
+   "book": "gc-es-don-quijote",
+   "quote": "Santa Lucía",
+   "before": " de lo añejo, me pondrá en la espina de ",
+   "qid": 760,
+   "label": "Saint Lucia",
+   "grade": "wrong",
+   "by": "desk",
+   "note": "the saint (an idiom), not the country (Neal graded the Spanish loosely)"
+  },
+  {
+   "id": "don-q-067",
+   "book": "gc-es-don-quijote",
+   "quote": "Sierra Morena",
+   "before": "de parte de Dulcinea le había llevado a ",
+   "qid": 686362,
+   "label": "Sierra Morena",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-068",
+   "book": "gc-es-don-quijote",
+   "quote": "Roncesvalles",
+   "before": ", cuando Bernardo del Carpio le mató en ",
+   "qid": 917891,
+   "label": "Orreaga-Roncesvalles",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-069",
+   "book": "gc-es-don-quijote",
+   "quote": "Salamanca",
+   "before": " a Marica por Rávena, o al bachiller en ",
+   "qid": 15695,
+   "label": "Salamanca",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-070",
+   "book": "gc-es-don-quijote",
+   "quote": "Giralda",
+   "before": "la famosa giganta de Sevilla llamada la ",
+   "qid": 834479,
+   "label": "Giralda",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-071",
+   "book": "gc-es-don-quijote",
+   "quote": "Florencia",
+   "before": " que si me dieran una sotana de raja de ",
+   "qid": 2044,
+   "label": "Florence",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-072",
+   "book": "gc-es-don-quijote",
+   "quote": "Sicilia",
+   "before": "a hecho proveer las costas de Nápoles y ",
+   "qid": 1460,
+   "label": "Sicily",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-073",
+   "book": "gc-es-don-quijote",
+   "quote": "Cicerón",
+   "before": "s, ni dijo nada San Basilio, ni alcanzó ",
+   "qid": 1541,
+   "label": "Cicero",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-074",
+   "book": "gc-es-don-quijote",
+   "quote": "Tajo",
+   "before": "tanta confusión no las arenas del padre ",
+   "qid": 14294,
+   "label": "Tagus",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-075",
+   "book": "gc-es-don-quijote",
+   "quote": "España",
+   "before": "é habían parado, ni si habían llegado a ",
+   "qid": 29,
+   "label": "Spain",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-076",
+   "book": "gc-es-don-quijote",
+   "quote": "Terencio",
+   "before": "o es morir, y acabóse la obra; y, según ",
+   "qid": 172048,
+   "label": "Terence",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-077",
+   "book": "gc-es-don-quijote",
+   "quote": "Madrid",
+   "before": " y por la mañana ya estaba de vuelta en ",
+   "qid": 2807,
+   "label": "Madrid",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-078",
+   "book": "gc-es-don-quijote",
+   "quote": "Castilla",
+   "before": "ndro, Grecia; un conde Fernán González, ",
+   "qid": 173063,
+   "label": "Castile",
+   "grade": "right",
+   "by": "neal"
+  },
+  {
+   "id": "don-q-079",
+   "book": "gc-es-don-quijote",
+   "quote": "España",
+   "before": " y cómo tienes atrevimiento de volver a ",
+   "qid": 29,
+   "label": "Spain",
+   "grade": "right",
+   "by": "neal"
+  }
+ ]
+}
