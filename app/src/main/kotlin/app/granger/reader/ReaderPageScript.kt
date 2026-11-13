@@ -50,7 +50,7 @@ object ReaderPageScript {
  *
  * Wikipedia's skin pins `html` and `body` to the viewport's height (`height:100%`) and lets the article overflow them,
  * so the root's bottom padding sits after the first screen and the article's end gets none (Plan LL1 Task 10: the
- * footer's band never opened). On a page that scrolls the root, a root or body pinned so is let grow with its content.
+ * footer's band never opened). On a page that scrolls the root, a root or body its content overflows is let grow.
  */
 fun chromePaddingScript(topDp: Int, bottomDp: Int, leftDp: Int = 0, rightDp: Int = 0): String = """
     (function () {
@@ -87,8 +87,9 @@ fun chromePaddingScript(topDp: Int, bottomDp: Int, leftDp: Int = 0, rightDp: Int
         }
         if (boxed) return;
         [document.documentElement, document.body].forEach(function (e) {
-          var h = parseFloat(getComputedStyle(e).height);
-          if (Math.abs(h - window.innerHeight) < 2 && e.scrollHeight > window.innerHeight + 1) {
+          var cs = getComputedStyle(e);
+          var box = parseFloat(cs.height) + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+          if (e.scrollHeight > box + 2) {
             e.style.setProperty('height', 'auto', 'important');
             e.style.setProperty('min-height', '100%', 'important');
           }
