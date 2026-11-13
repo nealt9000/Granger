@@ -42,4 +42,24 @@
     <string name="reader_pdf_copy_failed">No se pudo abrir este PDF: falló la copia desde el paquete.</string>
     <string name="reader_pdf_damaged">No se pudo abrir este PDF: está dañado o protegido.</string>
     <string name="reader_devdocs_contents">Índice</string>
+    <string name="reader_footer_title">En tu biblioteca</string>
+    <string name="reader_footer_this_work">Tienes este libro</string>
+    <plurals name="reader_footer_in_books">
+        <item quantity="one">Aparece en %d de tus libros</item>
+        <item quantity="many">Aparece en %d de tus libros</item>
+        <item quantity="other">Aparece en %d de tus libros</item>
+    </plurals>
+    <plurals name="reader_footer_by_author">
+        <item quantity="one">%d libro de este autor</item>
+        <item quantity="many">%d libros de este autor</item>
+        <item quantity="other">%d libros de este autor</item>
+    </plurals>
+    <string name="reader_footer_in_books_heading">En tus libros</string>
+    <string name="reader_footer_by_author_heading">De este autor en tu biblioteca</string>
+    <plurals name="reader_footer_mentions">
+        <item quantity="one">%d mención</item>
+        <item quantity="many">%d menciones</item>
+        <item quantity="other">%d menciones</item>
+    </plurals>
+    <string name="reader_footer_read">Leer</string>
 </resources>

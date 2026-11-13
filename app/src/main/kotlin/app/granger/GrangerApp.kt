@@ -888,28 +888,31 @@ class AppContainer(context: Context) {
     }
 
     /**
-     * A Classic's installed sidecar of [kind] (its `.glink`, Plan LL1), by the bookshelf's id for it, with the sha256 of
-     * the EPUB it must have been built from; null when it has none.
+     * Each installed Classic's sidecar of [kind] (its `.glink`, Plan LL1), by the bookshelf's id for it, with the sha256
+     * of the EPUB it must have been built from: the newest installed version of each.
      */
-    suspend fun installedBookSidecar(kind: SidecarKind, bookId: String): InstalledSidecar? {
+    suspend fun installedBookSidecars(kind: SidecarKind): Map<String, InstalledSidecar> {
         val records = downloads.records.first().filter { it.state == DownloadState.INSTALLED }
-        val catalogId = records.firstOrNull { it.kind == ItemKind.BOOK && BookIds.of(BookOrigin.GRANGER, it.itemId) == bookId }
-            ?.takeIf { it.hash.isNotEmpty() } ?: return null
-        val file = records.filter { it.kind == kind.itemKind && it.itemId == kind.itemIdOf(catalogId.itemId) }.maxByOrNull { it.createdAt }?.file
-        return file?.let { InstalledSidecar(it, catalogId.hash) }
+        val books = records.filter { it.kind == ItemKind.BOOK && it.hash.isNotEmpty() }.groupBy { it.itemId }
+        return records.filter { it.kind == kind.itemKind }.groupBy { it.itemId }.mapNotNull { (itemId, versions) ->
+            val parentId = kind.parentOf(itemId) ?: return@mapNotNull null
+            val book = books[parentId]?.maxByOrNull { it.createdAt } ?: return@mapNotNull null
+            BookIds.of(BookOrigin.GRANGER, parentId) to InstalledSidecar(versions.maxBy { it.createdAt }.file, book.hash)
+        }.toMap()
     }
 
     /** Reference links in the Classics (Plan LL1 Task 8): each book's `.glink`, resolved through the packs' QID indexes. */
     val referenceLinks: app.granger.ebook.ReferenceLinksSource by lazy {
         val thumbs = app.granger.home.ArticleThumbnails(File(context.cacheDir, "home-thumbs"))
         app.granger.ebook.ReferenceLinksSource(
-            linksFile = { installedBookSidecar(SidecarKind.LINKS, it) },
+            linksFiles = { installedBookSidecars(SidecarKind.LINKS) },
             qidFiles = {
                 val installed = installedSidecars(SidecarKind.QID_INDEX)
                 app.granger.home.WanderModel.encyclopediasOf(library.packs.first(), knowledgeNow.value)
                     .mapNotNull { pack -> installed[pack.id]?.let { pack.id to it } }
             },
             lead = { packId, path -> articleLead(packId, path, thumbs) },
+            bookOf = { id -> bookshelf.book(id)?.takeIf { it.status == app.granger.core.library.PackStatus.OK }?.let { app.granger.ebook.LibraryBook(it.id, it.title, it.coverPath) } },
         )
     }
 

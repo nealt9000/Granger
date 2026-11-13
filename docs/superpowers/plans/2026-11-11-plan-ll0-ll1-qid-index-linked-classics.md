@@ -151,7 +151,7 @@
   - **A tap** opens `LinkPeekSheet` (picture, title, opening lines, Open article). Open goes through `sessions.openTab` + `nav.showTab(keepCurrent = true)`, as Define does, so Back returns to the page.
   - **The setting:** Text settings → Reference links: Off / Light / More, stored in `ReadingPrefs`, Light by default. It appears only in a book that has links. Spanish wording: No / Pocos / Más.
   - `Features.LINKED_CLASSICS` is now on in debug builds, for Task 10. Release stays off.
-  - **Changed from the plan, for Neal at the checkpoint:**
+  - **Changed from the plan (Neal approved both, 2026-11-13: "both changes are fine"):**
     - **Decision 6:** a link whose article no installed pack has isn't drawn, rather than offering Preview / Get. Every drawn link opens, and the catalog has no per-pack QID coverage yet to choose a pack to offer.
     - **"In your library" for a work** on the card moves to Task 9, with author → works, which uses the same joins.
   - **Tests:**
@@ -167,6 +167,16 @@
   - Hidden when empty.
 - Queries go across installed `.glink` files by QID on IO and are cached per article.
 - **Tests:** the queries on fixtures, and empty-state hiding.
+- **As built (2026-11-13):**
+  - **Under the article.** The page is a WebView, so a native section can't follow its HTML. Instead, an article with a footer gets 96 dp more bottom padding, and once the page's end is in view a native card ("In your library", plus one summary line) fills that band. A tap opens the full sheet. A page too short to scroll shows the card at once.
+  - **The sheet:**
+    - *In your library*: this article's own work, when its book is on the phone, with Read.
+    - *In your books*: each installed Classic that mentions the subject, most mentions first, with its count and first three passages. Each passage opens the book at that quote through `PassageAddress.Book` + `openCitation`.
+    - *By this author in your library*: covers and titles, each opening the book at its saved place.
+  - **Author → works** joins on the work QID each `.glink` carries (decided on the Mac, Task 7): the author's P800 plus every work naming them in P50, matched against the installed books' works. The plan's Gutenberg-ID route isn't used, because P2034 is rare on work items (LL0 finding).
+  - **Queries:** `ReferenceLinksSource.footer` opens each installed `.glink` and asks for the article's QID (`countOf`, `passagesOf`). Each book's work QID is read once per set of installed links files. Footers are cached per article (the last 32), and the cache resets when the installed books or packs change. **Cost to watch in Task 10:** one SQLite open per installed Classic per new article.
+  - **The peek card** (Task 8's moved item) says "In your library: <title>", with Read the book, when the link is a work whose book is on the phone.
+  - **Tests:** the footer's three sections and the cache (`ReferenceLinksTest`, 7 in all now); `passagesOf` (`BookLinksTest`); the web reader asking once per article, keeping the footer on a jump within the page, and an empty footer showing nothing (`ReaderViewModelTest`, 2 new); the card's summary line.
 
 ### LL1 · Task 10: Phone check, Pixel 6 (then Pixel 7)
 - Read a chapter of each spike book with Light, then More. Open links and come back. Check an unresolved link with Top only installed. Check *In your books* on London, Napoleon and Jane Austen. Repeat in Spanish (Cervantes, La Mancha).

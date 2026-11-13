@@ -874,6 +874,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     }
     val matchOpener = remember { app.granger.research.CitationOpener(container.sessions, container.library, container.bookshelf, container.mediaIndex) }
 
+    /** Opens a book the Linked Library found (an article's footer, a link's card) at its saved place, over this screen. */
+    fun openLinkedBook(bookId: String) {
+        scope.launch { openCitation(matchOpener.open(app.granger.core.library.PassageAddress.Book(bookId, "", 0.0))) }
+    }
+
     /** Opens [route], replacing a Research chat on top (whose view model would otherwise stay); else pushes it. */
     fun openResearch(route: ResearchRoute, fromChats: Boolean = false) {
         val researchOnTop = nav.currentBackStackEntry?.destination?.hasRoute<ResearchRoute>() == true
@@ -1111,6 +1116,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             route.tabId, container.library, container.sessions, container.appScope, fragment = route.fragment,
                             player = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub else null,
                             quote = route.quote, savedPlace = container.voicePlace, prefsStore = container.readingPrefs,
+                            footerSource = if (Features.LINKED_CLASSICS) container.referenceLinks else null,
                         )
                     },
                     resolver = container.resolver,
@@ -1121,6 +1127,19 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onOpenDocument = { packId, path, linkText -> scope.launch { openPackDocument(packId, path, linkText) } },
                     isDated = { packId, path -> kotlinx.coroutines.withContext(Dispatchers.IO) { timeIndexes().find(packId, path) != null } },
                     onShowInTime = { packId, path -> nav.navigate(TimelineRoute(packId, path)) },
+                    onOpenBook = ::openLinkedBook,
+                    onOpenPassage = { bookId, m ->
+                        scope.launch {
+                            val quote = m.quote
+                            val before = app.granger.ebook.LinkDecorations.contextOf(m.before).orEmpty()
+                            openCitation(
+                                matchOpener.open(
+                                    app.granger.core.library.PassageAddress.Book(bookId, m.href, 0.0, quote),
+                                    app.granger.core.research.CitedQuote.Quote(before, quote, ""),
+                                ),
+                            )
+                        }
+                    },
                     onBack = { nav.popBackStack() },
                 )
             }
@@ -1149,6 +1168,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onLookUp = ::lookUpInWiktionary,
                     onBack = { nav.popBackStack() },
                     onOpenTab = ::showTab,
+                    onOpenBook = ::openLinkedBook,
                     // A reference link's article opens over the book, as Define's entry does; Back comes back to the page.
                     onOpenArticle = { packId, path, title ->
                         scope.launch {

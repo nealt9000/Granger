@@ -39,6 +39,17 @@ class BookLinks private constructor(private val db: SQLiteDatabase) : Closeable 
             }
         }
 
+    /** The first [limit] mentions of [qid], in book order (Task 9's *In your books* passages). */
+    fun passagesOf(qid: Long, limit: Int): List<BookMention> =
+        db.rawQuery(
+            "SELECT href, start, quote, before, qid, tier FROM mentions WHERE qid = ? ORDER BY href, start LIMIT ?",
+            arrayOf(qid.toString(), limit.toString()),
+        ).use { c ->
+            buildList {
+                while (c.moveToNext()) add(BookMention(c.getString(0), c.getInt(1), c.getString(2), c.getString(3), c.getLong(4), c.getInt(5)))
+            }
+        }
+
     /** How many of the book's mentions point at [qid] (Task 9's *In your books*). */
     fun countOf(qid: Long): Int =
         db.rawQuery("SELECT COUNT(*) FROM mentions WHERE qid = ?", arrayOf(qid.toString())).use { if (it.moveToFirst()) it.getInt(0) else 0 }

@@ -14,8 +14,14 @@ import org.readium.r2.shared.util.mediatype.MediaType
 /** Reference links in the Classics (Plan LL1 Decision 5): none, the Light set (the default), or More. */
 enum class LinkLevel(val maxTier: Int) { OFF(0), LIGHT(1), MORE(2) }
 
-/** What a tapped link opens (plan Decision 7): the article's title, first sentence and picture, and where it is. */
-data class LinkPeek(val qid: Long, val packId: String, val path: String, val title: String, val sentence: String, val thumbnail: String?)
+/**
+ * What a tapped link opens (plan Decision 7): the article's title, first sentence and picture, and where it is; [book]
+ * when the link is a work whose book is on the phone ("In your library").
+ */
+data class LinkPeek(
+    val qid: Long, val packId: String, val path: String, val title: String, val sentence: String, val thumbnail: String?,
+    val book: LibraryBook? = null,
+)
 
 /** Where the reader gets a Classic's links and what a tapped one opens; the app's is [app.granger.ReferenceLinksSource]. */
 interface BookLinkSource {

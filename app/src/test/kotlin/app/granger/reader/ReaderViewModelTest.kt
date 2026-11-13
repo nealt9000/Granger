@@ -40,6 +40,50 @@ class ReaderViewModelTest {
         assertThat(reader("C++").state.value.url).isEqualTo(url("C++"))
     }
 
+    // ---- the article's footer (Plan LL1 Task 9) ----
+
+    @Test fun eachArticleGetsItsOwnFooterAndAnEmptyOneShowsNothing() = runTest(main.dispatcher) {
+        val book = app.granger.ebook.LibraryBook("book:granger:gc-pp", "Pride and Prejudice", null)
+        val asked = mutableListOf<String>()
+        val source = app.granger.ebook.ArticleFooterSource { _, path ->
+            asked += path
+            if (path == "Photosynthesis") app.granger.ebook.ArticleFooter(listOf(book), emptyList(), emptyList()) else app.granger.ebook.ArticleFooter.NONE
+        }
+        sessions.tabs.value = listOf(ReadingTab(1, "p", "Photosynthesis", "Photosynthesis", 1L, onRail = true))
+        val vm = ReaderViewModel(1, library, sessions, this, main.dispatcher, footerSource = source)
+        testScheduler.advanceUntilIdle()
+        vm.onPageShown(url("Photosynthesis"), "Photosynthesis")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.footer?.thisWork).containsExactly(book)
+        vm.openFooter(true)
+        assertThat(vm.state.value.footerOpen).isTrue()
+        // A jump within the page keeps it, without asking again.
+        vm.onPageShown(url("Photosynthesis", "Overview"), "Photosynthesis")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.footer).isNotNull()
+        assertThat(asked).containsExactly("Photosynthesis")
+        // Another page: its own footer, here nothing, and the sheet closes.
+        vm.onPageShown(url("C++"), "C++")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.footer).isNull()
+        assertThat(vm.state.value.footerOpen).isFalse()
+        vm.openFooter(true)
+        assertThat(vm.state.value.footerOpen).isFalse()
+    }
+
+    @Test fun theFootersCardLineCountsWhatItHolds() {
+        val b = app.granger.ebook.LibraryBook("b", "B", null)
+        val m = app.granger.core.library.BookMention("c1", 0, "London", "Chapter 1\nShe went to ", 84L, 1)
+        val f = app.granger.ebook.ArticleFooter(listOf(b), listOf(app.granger.ebook.InYourBook(b, 3, listOf(m))), listOf(b, b))
+        assertThat(FooterSummary.parts(f)).containsExactly(
+            app.granger.UiText.Res(app.granger.R.string.reader_footer_this_work),
+            app.granger.UiText.Plural(app.granger.R.plurals.reader_footer_in_books, 1, 1),
+            app.granger.UiText.Plural(app.granger.R.plurals.reader_footer_by_author, 2, 2),
+        ).inOrder()
+        assertThat(FooterSummary.parts(app.granger.ebook.ArticleFooter.NONE)).isEmpty()
+        assertThat(FooterSummary.lead(m)).isEqualTo("…She went to ")
+    }
+
     // ---- read aloud (Plan V1) ----
 
     private val article = """

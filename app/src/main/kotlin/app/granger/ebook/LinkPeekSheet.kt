@@ -14,6 +14,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,7 +33,7 @@ import app.granger.shell.rememberRailCover
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LinkPeekSheet(peek: LinkPeek, onOpen: () -> Unit, onDismiss: () -> Unit) {
+fun LinkPeekSheet(peek: LinkPeek, onOpen: () -> Unit, onDismiss: () -> Unit, onReadBook: (bookId: String) -> Unit = {}) {
     ModalBottomSheet(onDismissRequest = onDismiss, modifier = Modifier.testTag(EbookTags.LINK_PEEK)) {
         Column(Modifier.navigationBarsPadding().padding(horizontal = 24.dp).padding(bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.Top) {
@@ -45,6 +46,16 @@ fun LinkPeekSheet(peek: LinkPeek, onOpen: () -> Unit, onDismiss: () -> Unit) {
                     if (peek.sentence.isNotBlank()) {
                         Text(peek.sentence, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 6, overflow = TextOverflow.Ellipsis)
                     }
+                }
+            }
+            peek.book?.let { book ->
+                // A work whose book is on the phone (plan Task 8, moved to Task 9): read it, not only about it.
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        stringResource(R.string.ebook_link_in_library, book.title), style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f), maxLines = 2, overflow = TextOverflow.Ellipsis,
+                    )
+                    TextButton(onClick = { onReadBook(book.bookId) }) { Text(stringResource(R.string.ebook_link_read)) }
                 }
             }
             Button(onClick = onOpen, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.ebook_link_open)) }

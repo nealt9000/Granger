@@ -123,6 +123,8 @@ fun EbookReaderScreen(
     onReopen: () -> Unit = {},
     /** Opens a reference link's article (Plan LL1) in the web reader; Back comes back to this place in the book. */
     onOpenArticle: (packId: String, path: String, title: String) -> Unit = { _, _, _ -> },
+    /** Opens another book on the phone (a linked work's, Plan LL1 Task 9) at its saved place. */
+    onOpenBook: (bookId: String) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var navigator by remember { mutableStateOf<VisualNavigator?>(null) }
@@ -450,6 +452,10 @@ fun EbookReaderScreen(
                     onOpenArticle(peek.packId, peek.path, peek.title)
                 },
                 onDismiss = viewModel::closePeek,
+                onReadBook = { id ->
+                    viewModel.closePeek()
+                    onOpenBook(id)
+                },
             )
         }
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))

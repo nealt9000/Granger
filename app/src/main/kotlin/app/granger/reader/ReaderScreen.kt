@@ -126,6 +126,10 @@ fun ReaderScreen(
     isDated: suspend (packId: String, path: String) -> Boolean = { _, _ -> false },
     /** Opens the full-screen Timeline on this article. */
     onShowInTime: (packId: String, path: String) -> Unit = { _, _ -> },
+    /** Opens a book from the article's footer (Plan LL1 Task 9), at its saved place. */
+    onOpenBook: (bookId: String) -> Unit = {},
+    /** Opens a book at a passage that mentions the article's subject. */
+    onOpenPassage: (bookId: String, mention: app.granger.core.library.BookMention) -> Unit = { _, _ -> },
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -255,7 +259,18 @@ fun ReaderScreen(
     val pageInsets = ReaderPageInsets
     val padLeft = with(density) { (overlay.getLeft(density, direction) - pageInsets.getLeft(density, direction)).coerceAtLeast(0).toDp().value.roundToInt() }
     val padRight = with(density) { (overlay.getRight(density, direction) - pageInsets.getRight(density, direction)).coerceAtLeast(0).toDp().value.roundToInt() }
-    LaunchedEffect(webView, padTop, padBottom, padLeft, padRight) { webView?.setChromePadding(padTop, padBottom, padLeft, padRight) }
+    // An article with a footer (Plan LL1 Task 9) ends above a band the footer's card takes once the page is read to its end.
+    val footerPad = if (state.footer != null) FOOTER_BAND_DP else 0
+    var atEnd by remember { mutableStateOf(false) }
+    fun checkEnd() {
+        atEnd = webView?.let { !it.canScrollVertically(1) } ?: false
+    }
+    LaunchedEffect(webView, padTop, padBottom, padLeft, padRight, footerPad) { webView?.setChromePadding(padTop, padBottom + footerPad, padLeft, padRight) }
+    LaunchedEffect(state.footer, state.page?.path, webView) {
+        // After the padding has gone in: a short page shows its end at once.
+        kotlinx.coroutines.delay(FOOTER_SETTLE_MS)
+        checkEnd()
+    }
 
     // Behind the page is the page's colour, as the WebView's own (ReaderWebView), or a landscape cutout's band shows the
     // app's theme when the reader's differs. An error's words are in the app's colours, so it keeps the app's background.
@@ -330,11 +345,14 @@ fun ReaderScreen(
                                     SelectionAction.READ_ALOUD -> BlockRef.parse(text)?.let(viewModel::readFrom)
                                 }
                             },
-                            onUserScroll = viewModel::onUserScroll,
+                            onUserScroll = { dy, byHand ->
+                                viewModel.onUserScroll(dy, byHand)
+                                checkEnd()
+                            },
                         ).also {
                             it.setFindListener { active, count, done -> matches = FindMatches(active, count, done) }
                             it.settings.textZoom = zoom
-                            it.setChromePadding(padTop, padBottom, padLeft, padRight)
+                            it.setChromePadding(padTop, padBottom + footerPad, padLeft, padRight)
                             webView = it
                             val saved = viewModel.webViewState
                             if (saved == null || it.restoreState(saved) == null) it.loadUrl(startUrl)
@@ -383,6 +401,13 @@ fun ReaderScreen(
                     modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = followLift + 16.dp).testTag(ReaderTags.FOLLOW),
                 )
             }
+            val footer = state.footer
+            if (footer != null && atEnd && reading == null) {
+                ArticleFooterCard(
+                    footer, onOpen = { viewModel.openFooter(true) },
+                    Modifier.align(Alignment.BottomCenter).padding(bottom = with(density) { bottomBarPx.toDp() }),
+                )
+            }
         }
         SlidingBar(state.chromeVisible, top = true, onHeight = { topBarPx = it }) {
             if (findQuery != null) {
@@ -425,6 +450,15 @@ fun ReaderScreen(
                 )
                 ReaderViewModel.Panel.TEXT -> WikiTextSheet(prefs, viewModel::updatePrefs, onDismiss = { viewModel.open(null) })
                 null -> Unit
+            }
+            val footer = state.footer
+            if (state.footerOpen && footer != null) {
+                ArticleFooterSheet(
+                    footer,
+                    onOpenBook = { id -> viewModel.openFooter(false); onOpenBook(id) },
+                    onOpenPassage = { id, m -> viewModel.openFooter(false); onOpenPassage(id, m) },
+                    onDismiss = { viewModel.openFooter(false) },
+                )
             }
         }
     }

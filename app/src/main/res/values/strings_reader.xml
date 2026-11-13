@@ -60,4 +60,22 @@
     <string name="reader_pdf_damaged">Couldn\'t open this PDF: it is damaged or protected.</string>
     <!-- The button DevDocs pages get on a narrow screen; it opens the page's own contents (a ☰ glyph goes before it). -->
     <string name="reader_devdocs_contents">Contents</string>
+    <!-- Plan LL1 Task 9: what the library holds about the article, under it. -->
+    <string name="reader_footer_title">In your library</string>
+    <string name="reader_footer_this_work">You have this book</string>
+    <plurals name="reader_footer_in_books">
+        <item quantity="one">Mentioned in %d of your books</item>
+        <item quantity="other">Mentioned in %d of your books</item>
+    </plurals>
+    <plurals name="reader_footer_by_author">
+        <item quantity="one">%d book by this author</item>
+        <item quantity="other">%d books by this author</item>
+    </plurals>
+    <string name="reader_footer_in_books_heading">In your books</string>
+    <string name="reader_footer_by_author_heading">By this author in your library</string>
+    <plurals name="reader_footer_mentions">
+        <item quantity="one">%d mention</item>
+        <item quantity="other">%d mentions</item>
+    </plurals>
+    <string name="reader_footer_read">Read</string>
 </resources>

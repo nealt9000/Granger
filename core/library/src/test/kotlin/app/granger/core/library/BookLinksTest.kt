@@ -46,6 +46,9 @@ class BookLinksTest {
             assertThat(links.mentions(2)).hasSize(3)
             assertThat(links.mentions(2)[1]).isEqualTo(BookMention("OEBPS/c001.xhtml", 90, "Derby", "the county of ", 23098L, 2))
             assertThat(links.countOf(84L)).isEqualTo(2)
+            assertThat(links.passagesOf(84L, 1).map { it.href }).containsExactly("OEBPS/c001.xhtml")
+            assertThat(links.passagesOf(84L, 3).map { it.before }).containsExactly("Ruskin House, ", "went up to ").inOrder()
+            assertThat(links.passagesOf(9L, 3)).isEmpty()
         }
     }
 

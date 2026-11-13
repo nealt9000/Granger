@@ -89,6 +89,8 @@
     <string name="ebook_links_light">Light</string>
     <string name="ebook_links_more">More</string>
     <string name="ebook_link_open">Open article</string>
+    <string name="ebook_link_in_library">In your library: %1$s</string>
+    <string name="ebook_link_read">Read the book</string>
     <string name="ebook_link_gone">That article isn’t on your phone any more</string>
     <!-- A PDF's settings: how pages follow each other. -->
     <string name="ebook_pdf_pages">Pages</string>

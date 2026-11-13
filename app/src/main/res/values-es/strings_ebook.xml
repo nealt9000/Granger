@@ -61,6 +61,8 @@
     <string name="ebook_links_light">Pocos</string>
     <string name="ebook_links_more">Más</string>
     <string name="ebook_link_open">Abrir artículo</string>
+    <string name="ebook_link_in_library">En tu biblioteca: %1$s</string>
+    <string name="ebook_link_read">Leer el libro</string>
     <string name="ebook_link_gone">Ese artículo ya no está en tu teléfono</string>
     <string name="ebook_pdf_pages">Páginas</string>
     <string name="ebook_pdf_page_by_page">Página por página</string>

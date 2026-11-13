@@ -140,34 +140,42 @@ class ReferenceLinksTest {
         return f
     }
 
-    private fun glink(source: String = "e".repeat(64)) = sqlite("gc-pp", "glink", source) { db ->
-        db.execSQL("CREATE TABLE book(id TEXT NOT NULL, qid INTEGER, year INTEGER)")
-        db.execSQL("INSERT INTO book VALUES ('gc-pp', 170583, 1813)")
-        db.execSQL("CREATE TABLE mentions(book TEXT, href TEXT, start INTEGER, len INTEGER, quote TEXT, before TEXT, qid INTEGER, tier INTEGER, conf REAL)")
-        for (m in listOf(london, derby, mention("c002.xhtml", 5, "Bath", 22889L))) {
-            db.execSQL("INSERT INTO mentions VALUES ('gc-pp', ?, ?, ?, ?, ?, ?, ?, 1.0)", arrayOf<Any>(m.href, m.start, m.quote.length, m.quote, m.before, m.qid, m.tier))
-        }
-    }
+    private val ppMentions = listOf(london, derby, mention("c002.xhtml", 5, "Bath", 22889L), mention("c003.xhtml", 8, "London", 84L, before = "back to "))
 
-    private fun gqid(source: String, vararg articles: Pair<String, Long>) = sqlite("wiki", "gqid", source) { db ->
+    private fun glink(id: String = "gc-pp", work: Long? = 170583L, mentions: List<BookMention> = ppMentions, source: String = "e".repeat(64)) =
+        sqlite(id, "glink", source) { db ->
+            db.execSQL("CREATE TABLE book(id TEXT NOT NULL, qid INTEGER, year INTEGER)")
+            db.execSQL("INSERT INTO book VALUES (?, ?, 1813)", arrayOf<Any?>(id, work))
+            db.execSQL("CREATE TABLE mentions(book TEXT, href TEXT, start INTEGER, len INTEGER, quote TEXT, before TEXT, qid INTEGER, tier INTEGER, conf REAL)")
+            for (m in mentions) {
+                db.execSQL("INSERT INTO mentions VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1.0)", arrayOf<Any>(id, m.href, m.start, m.quote.length, m.quote, m.before, m.qid, m.tier))
+            }
+        }
+
+    private fun gqid(source: String, vararg articles: Pair<String, Long>, links: List<Triple<Long, String, String>> = emptyList()) = sqlite("wiki", "gqid", source) { db ->
         db.execSQL("CREATE TABLE articles(path TEXT PRIMARY KEY, qid INTEGER NOT NULL, rank INTEGER NOT NULL, other TEXT)")
         db.execSQL("CREATE TABLE links(qid INTEGER, prop TEXT, value TEXT)")
         articles.forEach { (path, qid) -> db.execSQL("INSERT INTO articles VALUES (?, ?, 10, NULL)", arrayOf<Any>(path, qid)) }
+        links.forEach { (qid, prop, value) -> db.execSQL("INSERT INTO links VALUES (?, ?, ?)", arrayOf<Any>(qid, prop, value)) }
     }
+
+    private fun shelf(id: String) = LibraryBook(id, "Title of $id", null)
 
     @Test fun theSourceDrawsOnlyLinksAnInstalledPackCanOpenAndPeeksTheBestPackThatReads() = runBlocking {
         val top = gqid("t".repeat(64), "London" to 84L)
         val history = gqid("h".repeat(64), "Derby" to 23098L, "London_(city)" to 84L)
         var packs = listOf("top" to InstalledSidecar(top, "t".repeat(64)), "history" to InstalledSidecar(history, "h".repeat(64)))
         val read = mutableListOf<Pair<String, String>>()
+        val books = mapOf("b" to InstalledSidecar(glink(), "e".repeat(64)))
         val source = ReferenceLinksSource(
-            linksFile = { id -> if (id == "b") InstalledSidecar(glink(), "e".repeat(64)) else null },
+            linksFiles = { books },
             qidFiles = { packs },
             lead = { pack, path -> read += pack to path; if (pack == "top") null else ArticleLead(path, "A city.", null) },
+            bookOf = { shelf(it) },
         )
         // Bath has no article on the phone: not drawn. Derby is More only.
-        assertThat(source.mentions("b", LinkLevel.LIGHT).map { it.quote }).containsExactly("London")
-        assertThat(source.mentions("b", LinkLevel.MORE).map { it.quote }).containsExactly("London", "Derby").inOrder()
+        assertThat(source.mentions("b", LinkLevel.LIGHT).map { it.quote }).containsExactly("London", "London")
+        assertThat(source.mentions("b", LinkLevel.MORE).map { it.quote }).containsExactly("London", "Derby", "London").inOrder()
         assertThat(source.mentions("b", LinkLevel.OFF)).isEmpty()
         assertThat(source.mentions("other", LinkLevel.MORE)).isEmpty()
         // Top comes first, but its page doesn't read: the card is History's.
@@ -176,7 +184,7 @@ class ReferenceLinksTest {
         assertThat(source.peek(22889L)).isNull()
         // A pack removed: the indexes open again without it.
         packs = packs.drop(1)
-        assertThat(source.mentions("b", LinkLevel.MORE).map { it.quote }).containsExactly("London", "Derby").inOrder()
+        assertThat(source.mentions("b", LinkLevel.MORE).map { it.quote }).containsExactly("London", "Derby", "London").inOrder()
         packs = emptyList()
         assertThat(source.mentions("b", LinkLevel.MORE)).isEmpty()
     }
@@ -184,16 +192,62 @@ class ReferenceLinksTest {
     @Test fun linksBuiltFromAnotherEpubOrAQidIndexFromAnotherPackAreIgnored() = runBlocking {
         val top = gqid("t".repeat(64), "London" to 84L)
         val wrongBook = ReferenceLinksSource(
-            linksFile = { InstalledSidecar(glink(), "x".repeat(64)) },
+            linksFiles = { mapOf("b" to InstalledSidecar(glink(), "x".repeat(64))) },
             qidFiles = { listOf("top" to InstalledSidecar(top, "t".repeat(64))) },
             lead = { _, p -> ArticleLead(p, "", null) },
+            bookOf = { shelf(it) },
         )
         assertThat(wrongBook.mentions("b", LinkLevel.MORE)).isEmpty()
         val wrongPack = ReferenceLinksSource(
-            linksFile = { InstalledSidecar(glink(), "e".repeat(64)) },
+            linksFiles = { mapOf("b" to InstalledSidecar(glink(), "e".repeat(64))) },
             qidFiles = { listOf("top" to InstalledSidecar(top, "y".repeat(64))) },
             lead = { _, p -> ArticleLead(p, "", null) },
+            bookOf = { shelf(it) },
         )
         assertThat(wrongPack.mentions("b", LinkLevel.MORE)).isEmpty()
+    }
+
+    @Test fun anArticlesFooterHasItsBookThePassagesInYourBooksAndTheAuthorsBooks() = runBlocking {
+        val austen = 36322L
+        val pp = 170583L
+        val emma = 191047L
+        val top = gqid(
+            "t".repeat(64), "London" to 84L, "Jane_Austen" to austen, "Pride_and_Prejudice" to pp, "Moon" to 405L,
+            links = listOf(Triple(pp, "P50", "Q$austen"), Triple(austen, "P800", "Q$emma")),
+        )
+        val books = mapOf(
+            "book:granger:gc-pp" to InstalledSidecar(glink("gc-pp", pp), "e".repeat(64)),
+            "book:granger:gc-emma" to InstalledSidecar(glink("gc-emma", emma, listOf(mention("c001.xhtml", 1, "London", 84L))), "e".repeat(64)),
+            "book:granger:gc-x" to InstalledSidecar(glink("gc-x", null, emptyList()), "e".repeat(64)),
+        )
+        var gone = emptySet<String>()
+        val source = ReferenceLinksSource(
+            linksFiles = { books },
+            qidFiles = { listOf("top" to InstalledSidecar(top, "t".repeat(64))) },
+            lead = { _, p -> ArticleLead(p, "", null) },
+            bookOf = { id -> shelf(id).takeIf { id !in gone } },
+        )
+        // London: P&P mentions it twice (first passages first), Emma once.
+        val london = source.footer("top", "London")
+        assertThat(london.thisWork).isEmpty()
+        assertThat(london.byAuthor).isEmpty()
+        assertThat(london.inBooks.map { it.book.bookId to it.count }).containsExactly("book:granger:gc-pp" to 2, "book:granger:gc-emma" to 1).inOrder()
+        assertThat(london.inBooks.first().passages.map { it.before }).containsExactly("in ", "back to ").inOrder()
+        // Jane Austen: her books, one through P50 on the work, one through P800 on her.
+        val her = source.footer("top", "Jane_Austen")
+        assertThat(her.byAuthor.map { it.bookId }).containsExactly("book:granger:gc-emma", "book:granger:gc-pp")
+        assertThat(her.inBooks).isEmpty()
+        // The work itself: that book, and not again under its author.
+        val work = source.footer("top", "Pride_and_Prejudice")
+        assertThat(work.thisWork.map { it.bookId }).containsExactly("book:granger:gc-pp")
+        assertThat(work.byAuthor).isEmpty()
+        assertThat(source.peek(pp)?.book?.bookId).isEqualTo("book:granger:gc-pp")
+        assertThat(source.peek(84L)?.book).isNull()
+        // Nothing about the Moon, nor about a page without a QID.
+        assertThat(source.footer("top", "Moon").isEmpty).isTrue()
+        assertThat(source.footer("top", "Nowhere")).isEqualTo(ArticleFooter.NONE)
+        // Cached per article; a book gone from the shelves is left out of a fresh footer.
+        gone = setOf("book:granger:gc-emma")
+        assertThat(source.footer("top", "London").inBooks).hasSize(2)
     }
 }

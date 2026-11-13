@@ -40,6 +40,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CancellationException
+import android.util.Log
 
 /**
  * One reading tab: the article it shows and the pages reached by following links from it. Writes (positions,
@@ -62,6 +64,8 @@ class ReaderViewModel(
     private val savedPlace: suspend (sourceKey: String) -> ReadAddress? = { null },
     /** The text size and reader theme (Plan U3c), shared with the e-books; null keeps them in this reader only (tests). */
     private val prefsStore: ReadingPrefsStore? = null,
+    /** What goes under an article (Plan LL1 Task 9: its work, *In your books*, by this author); null leaves it out. */
+    private val footerSource: app.granger.ebook.ArticleFooterSource? = null,
 ) : ViewModel() {
     data class Page(val path: String, val title: String)
 
@@ -109,6 +113,10 @@ class ReaderViewModel(
         val panel: Panel? = null,
         /** The page's sections for Contents: null until read (or when there's no page). */
         val contents: List<ArticleSection>? = null,
+        /** What goes under the article shown (Plan LL1 Task 9); null while unread, or when there's nothing to show. */
+        val footer: app.granger.ebook.ArticleFooter? = null,
+        /** The footer's full sheet is open. */
+        val footerOpen: Boolean = false,
     )
 
     /**
@@ -298,7 +306,14 @@ class ReaderViewModel(
         page.value = shown
         if (citedPath != null && citedPath != zim.path) citedPath = null
         // A new page has its own sections; the same page shown again (a jump within it) keeps them.
-        _state.update { it.copy(url = url, page = shown, cite = it.cite.takeIf { citedPath != null }, contents = it.contents.takeIf { _ -> it.page == shown }) }
+        _state.update {
+            val same = it.page?.path == shown.path
+            it.copy(
+                url = url, page = shown, cite = it.cite.takeIf { citedPath != null }, contents = it.contents.takeIf { _ -> it.page == shown },
+                footer = it.footer.takeIf { same }, footerOpen = it.footerOpen && same,
+            )
+        }
+        footerSource?.let { source -> if (_state.value.footer == null) loadFooter(source, pack, zim.path) }
         writeStack { sessions.pushPath(tabId, zim.path, title) }
         return if (zim.fragment != null) null else library.position(pack, zim.path)
     }
@@ -316,6 +331,22 @@ class ReaderViewModel(
         if (_state.value.readingThisPage) player?.stopVoice()
         writeStack { sessions.pushPath(tabId, zim.path, titleFromPath(zim.path)) }
     }
+
+    private fun loadFooter(source: app.granger.ebook.ArticleFooterSource, pack: String, path: String) {
+        viewModelScope.launch {
+            val footer = try {
+                withContext(io) { source.footer(pack, path) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w("Granger", "Couldn't read what the library holds about the article", e)
+                return@launch
+            }
+            _state.update { if (it.page?.path == path && !footer.isEmpty) it.copy(footer = footer) else it }
+        }
+    }
+
+    fun openFooter(open: Boolean) = _state.update { it.copy(footerOpen = open && it.footer != null) }
 
     /** What Back does: see [back]. */
     sealed interface BackStep {
