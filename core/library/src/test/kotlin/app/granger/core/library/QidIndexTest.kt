@@ -18,7 +18,7 @@ class QidIndexTest {
     /** A .gqid with tools/qidindex/build.py's schema: (path, qid, rank, other) articles and (qid, prop, value) links. */
     private fun gqid(
         name: String, articles: List<List<Any?>>, links: List<List<Any>> = emptyList(), coords: List<List<Any>> = emptyList(),
-        kind: String = "gqid", schema: Int = 1, source: String = "a".repeat(64),
+        kind: String = "gqid", schema: Int = 1, source: String = "a".repeat(64), sourceZim: String? = null,
     ): File {
         val f = File(tmp.root, "$name.gqid")
         SQLiteDatabase.openOrCreateDatabase(f, null).use { db ->
@@ -27,6 +27,7 @@ class QidIndexTest {
             db.execSQL("CREATE TABLE links(qid INTEGER NOT NULL, prop TEXT NOT NULL, value TEXT NOT NULL)")
             db.execSQL("CREATE TABLE coords(qid INTEGER PRIMARY KEY, lat REAL NOT NULL, lon REAL NOT NULL)")
             db.execSQL("INSERT INTO meta VALUES ('kind', '$kind'), ('schemaVersion', '$schema'), ('sourceSha256', '$source')")
+            sourceZim?.let { db.execSQL("INSERT INTO meta VALUES ('sourceZim', ?)", arrayOf(it)) }
             articles.forEach { db.execSQL("INSERT INTO articles VALUES (?, ?, ?, ?)", it.toTypedArray()) }
             links.forEach { db.execSQL("INSERT INTO links VALUES (?, ?, ?)", it.toTypedArray()) }
             coords.forEach { db.execSQL("INSERT INTO coords VALUES (?, ?, ?)", it.toTypedArray()) }
@@ -61,6 +62,19 @@ class QidIndexTest {
         assertThat(QidIndex.open(File(tmp.root, "missing.gqid"), "e")).isNull()
         val notSqlite = File(tmp.root, "junk.gqid").apply { writeText("not a database") }
         assertThat(QidIndex.open(notSqlite, "f")).isNull()
+    }
+
+    @Test fun oneIndexServesEveryFlavourOfItsEdition() {
+        // Plan LL1 Task 10: the catalog gives the nopic build to maxi; the maxi pack's sha differs but the edition matches.
+        val nopic = "wikipedia_en_top_nopic_2026-09-14.zim"
+        val other = "b".repeat(64)
+        assertThat(QidIndex.open(gqid("m", top, sourceZim = nopic), "m", other, "wikipedia_en_top_maxi_2026-09-14.zim")).isNotNull()
+        assertThat(QidIndex.open(gqid("n", top, sourceZim = nopic), "n", other, "wikipedia_en_top_mini_2026-09-14.zim")).isNotNull()
+        assertThat(QidIndex.open(gqid("o", top, sourceZim = nopic), "o", other, "wikipedia_en_top_maxi_2026-10-14.zim")).isNull()
+        assertThat(QidIndex.open(gqid("p", top, sourceZim = nopic), "p", other, "wikipedia_es_top_maxi_2026-09-14.zim")).isNull()
+        assertThat(QidIndex.open(gqid("q", top, sourceZim = nopic), "q", other, "wikipedia_en_top1m_maxi_2026-09-14.zim")).isNull()
+        assertThat(QidIndex.open(gqid("r", top), "r", other, "wikipedia_en_top_maxi_2026-09-14.zim")).isNull()
+        assertThat(QidIndex.sameEdition("wikipedia_en_history_maxi_2026-10.zim", "wikipedia_en_history_nopic_2026-10.zim")).isTrue()
     }
 
     @Test fun severalPacksResolveInPreferenceOrder() {

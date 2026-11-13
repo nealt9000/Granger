@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
@@ -405,7 +406,9 @@ fun ReaderScreen(
             if (footer != null && atEnd && reading == null) {
                 ArticleFooterCard(
                     footer, onOpen = { viewModel.openFooter(true) },
-                    Modifier.align(Alignment.BottomCenter).padding(bottom = with(density) { bottomBarPx.toDp() }),
+                    // In the band the page leaves at its end: above the bars' place, and clear of the rail like the lines.
+                    Modifier.align(Alignment.BottomCenter)
+                        .absolutePadding(left = padLeft.dp, right = padRight.dp, bottom = with(density) { bottomBarPx.toDp() }),
                 )
             }
         }

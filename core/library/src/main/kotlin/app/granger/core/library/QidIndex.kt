@@ -49,20 +49,36 @@ class QidIndex private constructor(private val db: SQLiteDatabase, val packId: S
         /**
          * Opens [file] read-only for [packId]; null if it's missing, unreadable, not a QID index, a schema this app
          * doesn't read, or (with [sourceSha256]) built from another file than the installed pack (spec §5.2: the
-         * feature hides instead of breaking).
+         * feature hides instead of breaking). One index serves every flavour of an edition (Plan LL0: the catalog gives
+         * the nopic build to maxi and mini too), so with [sourceName], the installed pack's file name, an index built
+         * from the same edition in another flavour is accepted as well.
          */
-        fun open(file: File, packId: String, sourceSha256: String? = null): QidIndex? {
+        fun open(file: File, packId: String, sourceSha256: String? = null, sourceName: String? = null): QidIndex? {
             if (!file.isFile) return null
             val db = runCatching { SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READONLY) }.getOrNull() ?: return null
             val meta = SidecarMeta.read(db)
             val ok = meta != null && meta.kind == KIND && meta.schemaVersion in 1..SCHEMA_VERSION &&
-                (sourceSha256 == null || meta.sourceSha256 == sourceSha256)
+                (sourceSha256 == null || meta.sourceSha256 == sourceSha256 || sameEdition(meta.values["sourceZim"], sourceName))
             if (!ok) {
                 db.close()
                 return null
             }
             return QidIndex(db, packId)
         }
+
+        /** Whether two Kiwix file names are one edition: the same name and date, whatever the flavour. */
+        fun sameEdition(a: String?, b: String?): Boolean {
+            val x = a?.let(::edition) ?: return false
+            return x == b?.let(::edition)
+        }
+
+        /** `wikipedia_en_top_maxi_2026-09-14.zim` -> `wikipedia_en_top_2026-09-14`. */
+        private fun edition(name: String): String? {
+            val m = EDITION.matchEntire(name.substringAfterLast('/')) ?: return null
+            return m.groupValues[1] + "_" + m.groupValues[2]
+        }
+
+        private val EDITION = Regex("(.+?)(?:_(?:maxi|mini|nopic))?_(\\d{4}-\\d{2}(?:-\\d{2})?)\\.zim")
     }
 }
 

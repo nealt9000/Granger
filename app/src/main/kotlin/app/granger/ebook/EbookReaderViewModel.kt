@@ -1,5 +1,7 @@
 package app.granger.ebook
 
+import app.granger.BuildConfig
+
 import app.granger.R
 import app.granger.UiText
 import android.util.Log
@@ -708,7 +710,14 @@ class EbookReaderViewModel(
         _state.update { it.copy(hasLinks = true) }
         prefsStore.prefs.map { it.referenceLinks }.distinctUntilChanged().collect { level ->
             val placed = try {
-                withContext(io) { LinkDecorations.place(opened, links.mentions(bookId, level)) }
+                withContext(io) {
+                    val t0 = System.nanoTime()
+                    val ms = links.mentions(bookId, level)
+                    val t1 = System.nanoTime()
+                    LinkDecorations.place(opened, ms).also {
+                        if (BuildConfig.DEBUG) Log.d("GrangerLinks", "$bookId $level: ${ms.size} mentions in ${(t1 - t0) / 1_000_000} ms, placed ${it.size} in ${(System.nanoTime() - t1) / 1_000_000} ms")
+                    }
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

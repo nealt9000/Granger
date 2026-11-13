@@ -883,7 +883,7 @@ class AppContainer(context: Context) {
             val parentId = kind.parentOf(itemId) ?: return@mapNotNull null
             val parent = byItem[parentId]?.maxByOrNull { it.createdAt } ?: return@mapNotNull null
             val pack = packsByPath[parent.filePath] ?: return@mapNotNull null
-            pack.id to InstalledSidecar(versions.maxBy { it.createdAt }.file, parent.hash)
+            pack.id to InstalledSidecar(versions.maxBy { it.createdAt }.file, parent.hash, File(pack.filePath).name)
         }.toMap()
     }
 
@@ -1028,5 +1028,5 @@ class AppContainer(context: Context) {
     )
 }
 
-/** A sidecar file on the phone and the sha256 of the pack file it must have been built from. */
-data class InstalledSidecar(val file: File, val packSha256: String)
+/** A sidecar file on the phone and the sha256 of the pack file it must have been built from (and that file's name). */
+data class InstalledSidecar(val file: File, val packSha256: String, val packName: String? = null)

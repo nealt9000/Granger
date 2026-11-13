@@ -47,6 +47,10 @@ object ReaderPageScript {
  * same four, border-box: a body child, or its first child, that is absolute or fixed, starts at the viewport's top
  * left, is at least 90 % of its height and scrolls. Run at document start the body isn't there yet, so the script runs
  * again when the DOM is loaded; it is idempotent, and [ReaderWebView.applyChromePadding] runs it once more after load.
+ *
+ * Wikipedia's skin pins `html` and `body` to the viewport's height (`height:100%`) and lets the article overflow them,
+ * so the root's bottom padding sits after the first screen and the article's end gets none (Plan LL1 Task 10: the
+ * footer's band never opened). On a page that scrolls the root, a root or body pinned so is let grow with its content.
  */
 fun chromePaddingScript(topDp: Int, bottomDp: Int, leftDp: Int = 0, rightDp: Int = 0): String = """
     (function () {
@@ -71,15 +75,24 @@ fun chromePaddingScript(topDp: Int, bottomDp: Int, leftDp: Int = 0, rightDp: Int
         s.setProperty('scroll-padding-bottom', '${bottomDp}px');
         window.__grangerTop = $topDp;
         if (!document.body) return;
-        var kids = document.body.children;
+        var kids = document.body.children, boxed = false;
         for (var i = 0; i < kids.length; i++) {
           var el = scroller(kids[i]) ? kids[i] : scroller(kids[i].firstElementChild) ? kids[i].firstElementChild : null;
           if (!el) continue;
+          boxed = true;
           pad(el.style);
           el.style.setProperty('box-sizing', 'border-box', 'important');
           el.style.setProperty('scroll-padding-top', '${topDp}px');
           el.style.setProperty('scroll-padding-bottom', '${bottomDp}px');
         }
+        if (boxed) return;
+        [document.documentElement, document.body].forEach(function (e) {
+          var h = parseFloat(getComputedStyle(e).height);
+          if (Math.abs(h - window.innerHeight) < 2 && e.scrollHeight > window.innerHeight + 1) {
+            e.style.setProperty('height', 'auto', 'important');
+            e.style.setProperty('min-height', '100%', 'important');
+          }
+        });
       }
       apply();
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply, { once: true });

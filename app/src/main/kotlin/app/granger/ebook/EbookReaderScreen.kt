@@ -69,6 +69,10 @@ import app.granger.shell.SafeDrawingIgnoringBars
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.delay
 import org.readium.adapter.pdfium.navigator.PdfiumNavigatorFragment
 import org.readium.r2.navigator.DecorableNavigator
 import org.readium.r2.navigator.Decoration
@@ -226,8 +230,19 @@ fun EbookReaderScreen(
     LaunchedEffect(epub, state.decorations) {
         epub?.applyDecorations(state.decorations, HIGHLIGHT_GROUP)
     }
+    // Reference links (Plan LL1 Task 8). Readium loses decorations sent while a restored page is still loading, and a
+    // later apply of the same list is diffed to nothing (Task 10: P&P reopened on its chapter drew no links), so each
+    // time the reader settles in another resource the links are cleared and drawn again.
     LaunchedEffect(epub, state.linkDecorations) {
-        epub?.applyDecorations(state.linkDecorations, LINKS_GROUP)
+        val nav = epub ?: return@LaunchedEffect
+        val links = state.linkDecorations
+        nav.applyDecorations(links, LINKS_GROUP)
+        if (links.isEmpty()) return@LaunchedEffect
+        nav.currentLocator.map { it.href }.distinctUntilChanged().collectLatest {
+            delay(LINKS_REDRAW_MS)
+            nav.applyDecorations(emptyList(), LINKS_GROUP)
+            nav.applyDecorations(links, LINKS_GROUP)
+        }
     }
     LaunchedEffect(epub, state.searchHit) {
         val hit = state.searchHit?.let { Decoration("search-hit", it, Decoration.Style.Highlight(tint = SEARCH_HIT_TINT)) }
@@ -587,3 +602,6 @@ private fun openInBrowser(appContext: Context, url: String) {
         Log.w("Granger", "No app can open $url")
     }
 }
+
+/** How long after the reader enters a resource its reference links are drawn again (see the links effect). */
+private const val LINKS_REDRAW_MS = 300L

@@ -70,14 +70,18 @@ class ReferenceLinksSource(
         val files = qidFiles()
         opened?.takeIf { it.first == files }?.let { return it.second }
         opened?.second?.close()
-        val fresh = QidIndexes(files.mapNotNull { (packId, s) -> QidIndex.open(s.file, packId, s.packSha256) })
+        val fresh = QidIndexes(files.mapNotNull { (packId, s) -> QidIndex.open(s.file, packId, s.packSha256, s.packName) })
         opened = files to fresh
         fresh
     }
 
     /** [index] brought into step with the installed links files (a no-op when they haven't changed). */
     private suspend fun synced(): MentionIndex {
-        index.sync(linksFiles().mapValues { (_, s) -> LinksFile(s.file, s.packSha256) })
+        val t0 = System.nanoTime()
+        val copied = index.sync(linksFiles().mapValues { (_, s) -> LinksFile(s.file, s.packSha256) })
+        if (copied > 0 && app.granger.BuildConfig.DEBUG) {
+            android.util.Log.d("GrangerLinks", "mention index: copied $copied books in ${(System.nanoTime() - t0) / 1_000_000} ms")
+        }
         return index
     }
 
