@@ -77,5 +77,9 @@
         <item quantity="one">%d mention</item>
         <item quantity="other">%d mentions</item>
     </plurals>
+    <plurals name="reader_footer_more_books">
+        <item quantity="one">and %d more of your books</item>
+        <item quantity="other">and %d more of your books</item>
+    </plurals>
     <string name="reader_footer_read">Read</string>
 </resources>

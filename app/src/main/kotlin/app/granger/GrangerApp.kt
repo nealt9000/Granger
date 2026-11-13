@@ -913,6 +913,7 @@ class AppContainer(context: Context) {
             },
             lead = { packId, path -> articleLead(packId, path, thumbs) },
             bookOf = { id -> bookshelf.book(id)?.takeIf { it.status == app.granger.core.library.PackStatus.OK }?.let { app.granger.ebook.LibraryBook(it.id, it.title, it.coverPath) } },
+            index = app.granger.core.library.MentionIndex(File(context.filesDir, "linked-library/mentions.sqlite")),
         )
     }
 

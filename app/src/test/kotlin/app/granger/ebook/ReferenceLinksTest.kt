@@ -161,7 +161,9 @@ class ReferenceLinksTest {
 
     private fun shelf(id: String) = LibraryBook(id, "Title of $id", null)
 
-    @Test fun theSourceDrawsOnlyLinksAnInstalledPackCanOpenAndPeeksTheBestPackThatReads() = runBlocking {
+    private fun mentionIndex() = app.granger.core.library.MentionIndex(File(tmp.root, "mentions-${made++}.sqlite"))
+
+    @Test fun theSourceDrawsOnlyLinksAnInstalledPackCanOpenAndPeeksTheBestPackThatReads() = runBlocking<Unit> {
         val top = gqid("t".repeat(64), "London" to 84L)
         val history = gqid("h".repeat(64), "Derby" to 23098L, "London_(city)" to 84L)
         var packs = listOf("top" to InstalledSidecar(top, "t".repeat(64)), "history" to InstalledSidecar(history, "h".repeat(64)))
@@ -172,6 +174,7 @@ class ReferenceLinksTest {
             qidFiles = { packs },
             lead = { pack, path -> read += pack to path; if (pack == "top") null else ArticleLead(path, "A city.", null) },
             bookOf = { shelf(it) },
+            index = mentionIndex(),
         )
         // Bath has no article on the phone: not drawn. Derby is More only.
         assertThat(source.mentions("b", LinkLevel.LIGHT).map { it.quote }).containsExactly("London", "London")
@@ -189,13 +192,14 @@ class ReferenceLinksTest {
         assertThat(source.mentions("b", LinkLevel.MORE)).isEmpty()
     }
 
-    @Test fun linksBuiltFromAnotherEpubOrAQidIndexFromAnotherPackAreIgnored() = runBlocking {
+    @Test fun linksBuiltFromAnotherEpubOrAQidIndexFromAnotherPackAreIgnored() = runBlocking<Unit> {
         val top = gqid("t".repeat(64), "London" to 84L)
         val wrongBook = ReferenceLinksSource(
             linksFiles = { mapOf("b" to InstalledSidecar(glink(), "x".repeat(64))) },
             qidFiles = { listOf("top" to InstalledSidecar(top, "t".repeat(64))) },
             lead = { _, p -> ArticleLead(p, "", null) },
             bookOf = { shelf(it) },
+            index = mentionIndex(),
         )
         assertThat(wrongBook.mentions("b", LinkLevel.MORE)).isEmpty()
         val wrongPack = ReferenceLinksSource(
@@ -203,11 +207,12 @@ class ReferenceLinksTest {
             qidFiles = { listOf("top" to InstalledSidecar(top, "y".repeat(64))) },
             lead = { _, p -> ArticleLead(p, "", null) },
             bookOf = { shelf(it) },
+            index = mentionIndex(),
         )
         assertThat(wrongPack.mentions("b", LinkLevel.MORE)).isEmpty()
     }
 
-    @Test fun anArticlesFooterHasItsBookThePassagesInYourBooksAndTheAuthorsBooks() = runBlocking {
+    @Test fun anArticlesFooterHasItsBookThePassagesInYourBooksAndTheAuthorsBooks() = runBlocking<Unit> {
         val austen = 36322L
         val pp = 170583L
         val emma = 191047L
@@ -226,6 +231,7 @@ class ReferenceLinksTest {
             qidFiles = { listOf("top" to InstalledSidecar(top, "t".repeat(64))) },
             lead = { _, p -> ArticleLead(p, "", null) },
             bookOf = { id -> shelf(id).takeIf { id !in gone } },
+            index = mentionIndex(),
         )
         // London: P&P mentions it twice (first passages first), Emma once.
         val london = source.footer("top", "London")
@@ -233,6 +239,7 @@ class ReferenceLinksTest {
         assertThat(london.byAuthor).isEmpty()
         assertThat(london.inBooks.map { it.book.bookId to it.count }).containsExactly("book:granger:gc-pp" to 2, "book:granger:gc-emma" to 1).inOrder()
         assertThat(london.inBooks.first().passages.map { it.before }).containsExactly("in ", "back to ").inOrder()
+        assertThat(london.inBooksTotal).isEqualTo(2)
         // Jane Austen: her books, one through P50 on the work, one through P800 on her.
         val her = source.footer("top", "Jane_Austen")
         assertThat(her.byAuthor.map { it.bookId }).containsExactly("book:granger:gc-emma", "book:granger:gc-pp")
@@ -246,8 +253,27 @@ class ReferenceLinksTest {
         // Nothing about the Moon, nor about a page without a QID.
         assertThat(source.footer("top", "Moon").isEmpty).isTrue()
         assertThat(source.footer("top", "Nowhere")).isEqualTo(ArticleFooter.NONE)
-        // Cached per article; a book gone from the shelves is left out of a fresh footer.
+        // A book gone from the shelves is left out.
         gone = setOf("book:granger:gc-emma")
-        assertThat(source.footer("top", "London").inBooks).hasSize(2)
+        assertThat(source.footer("top", "London").inBooks.map { it.book.bookId }).containsExactly("book:granger:gc-pp")
+    }
+
+    @Test fun aSubjectInManyBooksListsTheMostMentioningAndCountsTheRest() = runBlocking<Unit> {
+        val top = gqid("t".repeat(64), "London" to 84L)
+        // Book n mentions London n times.
+        val books = (1..10).associate { n ->
+            "book:$n" to InstalledSidecar(glink("b$n", null, (1..n).map { mention("c1.xhtml", it, "London", 84L) }), "e".repeat(64))
+        }
+        val source = ReferenceLinksSource(
+            linksFiles = { books },
+            qidFiles = { listOf("top" to InstalledSidecar(top, "t".repeat(64))) },
+            lead = { _, p -> ArticleLead(p, "", null) },
+            bookOf = { shelf(it) },
+            index = mentionIndex(),
+        )
+        val footer = source.footer("top", "London")
+        assertThat(footer.inBooks.map { it.count }).containsExactly(10, 9, 8, 7, 6, 5, 4, 3).inOrder()
+        assertThat(footer.inBooksTotal).isEqualTo(10)
+        assertThat(footer.inBooks.first().passages).hasSize(ReferenceLinksSource.PASSAGES)
     }
 }

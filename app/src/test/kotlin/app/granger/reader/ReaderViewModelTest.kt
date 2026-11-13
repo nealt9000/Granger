@@ -74,10 +74,10 @@ class ReaderViewModelTest {
     @Test fun theFootersCardLineCountsWhatItHolds() {
         val b = app.granger.ebook.LibraryBook("b", "B", null)
         val m = app.granger.core.library.BookMention("c1", 0, "London", "Chapter 1\nShe went to ", 84L, 1)
-        val f = app.granger.ebook.ArticleFooter(listOf(b), listOf(app.granger.ebook.InYourBook(b, 3, listOf(m))), listOf(b, b))
+        val f = app.granger.ebook.ArticleFooter(listOf(b), listOf(app.granger.ebook.InYourBook(b, 3, listOf(m))), listOf(b, b), inBooksTotal = 290)
         assertThat(FooterSummary.parts(f)).containsExactly(
             app.granger.UiText.Res(app.granger.R.string.reader_footer_this_work),
-            app.granger.UiText.Plural(app.granger.R.plurals.reader_footer_in_books, 1, 1),
+            app.granger.UiText.Plural(app.granger.R.plurals.reader_footer_in_books, 290, 290),
             app.granger.UiText.Plural(app.granger.R.plurals.reader_footer_by_author, 2, 2),
         ).inOrder()
         assertThat(FooterSummary.parts(app.granger.ebook.ArticleFooter.NONE)).isEmpty()

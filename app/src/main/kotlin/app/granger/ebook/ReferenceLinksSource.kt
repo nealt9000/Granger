@@ -3,6 +3,8 @@ package app.granger.ebook
 import app.granger.InstalledSidecar
 import app.granger.core.library.BookLinks
 import app.granger.core.library.BookMention
+import app.granger.core.library.LinksFile
+import app.granger.core.library.MentionIndex
 import app.granger.core.library.QidIndex
 import app.granger.core.library.QidIndexes
 import kotlinx.coroutines.sync.Mutex
@@ -21,7 +23,14 @@ data class InYourBook(val book: LibraryBook, val count: Int, val passages: List<
  * What the web reader shows under an article (Plan LL1 Task 9): the article's work when it's on the phone, the
  * Classics that mention its subject, and the installed books by its subject when that's an author.
  */
-data class ArticleFooter(val thisWork: List<LibraryBook>, val inBooks: List<InYourBook>, val byAuthor: List<LibraryBook>) {
+data class ArticleFooter(
+    val thisWork: List<LibraryBook>,
+    /** The books mentioning it most, at most [ReferenceLinksSource.BOOKS_SHOWN]. */
+    val inBooks: List<InYourBook>,
+    val byAuthor: List<LibraryBook>,
+    /** How many installed books mention it in all (London is in 290 of the 622 Classics). */
+    val inBooksTotal: Int = inBooks.size,
+) {
     val isEmpty: Boolean get() = thisWork.isEmpty() && inBooks.isEmpty() && byAuthor.isEmpty()
 
     companion object {
@@ -38,7 +47,8 @@ fun interface ArticleFooterSource {
  * The Linked Library on the phone (Plan LL1 Tasks 8–9): the Classics' `.glink` files and the packs' QID indexes, read
  * together. A book's link is drawn only when an installed Wikipedia has its article, found through the QID indexes in
  * Wander's order, whole encyclopedias in the library's languages first (Decision 6), so every link drawn opens. The
- * other way round, an article's footer asks every installed Classic for its subject. Blocking reads; called on IO.
+ * other way round, an article's footer asks [index], every installed Classic's links in one file, kept in step with
+ * the installed books. Blocking reads; called on IO.
  */
 class ReferenceLinksSource(
     /** Each installed Classic's links file by bookshelf id, with the sha256 of the EPUB it must be built from. */
@@ -49,14 +59,11 @@ class ReferenceLinksSource(
     private val lead: (packId: String, path: String) -> ArticleLead?,
     /** A book on the shelves; null when it's gone. */
     private val bookOf: suspend (bookId: String) -> LibraryBook?,
+    /** Every installed Classic's mentions in one file, for the reverse view. */
+    private val index: MentionIndex,
 ) : BookLinkSource, ArticleFooterSource {
     private val lock = Mutex()
     private var opened: Pair<List<Pair<String, InstalledSidecar>>, QidIndexes>? = null
-    private var works: Pair<Map<String, InstalledSidecar>, Map<String, Long>>? = null
-    private val footers = object : LinkedHashMap<String, ArticleFooter>(16, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, ArticleFooter>) = size > FOOTER_CACHE
-    }
-    private var footersFor: Pair<Map<String, InstalledSidecar>, List<Pair<String, InstalledSidecar>>>? = null
 
     /** The QID indexes now installed, opened once and again whenever the set changes. */
     private suspend fun indexes(): QidIndexes = lock.withLock {
@@ -68,12 +75,10 @@ class ReferenceLinksSource(
         fresh
     }
 
-    /** Each installed Classic's work (its Wikidata QID), read once per set of installed links files. */
-    private suspend fun worksOf(files: Map<String, InstalledSidecar>): Map<String, Long> = lock.withLock {
-        works?.takeIf { it.first == files }?.let { return it.second }
-        val fresh = files.mapNotNull { (bookId, s) -> BookLinks.open(s.file, s.packSha256)?.use { l -> l.workQid?.let { bookId to it } } }.toMap()
-        works = files to fresh
-        fresh
+    /** [index] brought into step with the installed links files (a no-op when they haven't changed). */
+    private suspend fun synced(): MentionIndex {
+        index.sync(linksFiles().mapValues { (_, s) -> LinksFile(s.file, s.packSha256) })
+        return index
     }
 
     override suspend fun mentions(bookId: String, level: LinkLevel): List<BookMention> {
@@ -90,45 +95,40 @@ class ReferenceLinksSource(
     override suspend fun peek(qid: Long): LinkPeek? {
         for (article in indexes().articlesOf(qid)) {
             val l = lead(article.packId, article.path) ?: continue
-            val book = worksOf(linksFiles()).entries.firstOrNull { it.value == qid }?.let { bookOf(it.key) }
+            val book = synced().works().entries.firstOrNull { it.value == qid }?.let { bookOf(it.key) }
             return LinkPeek(qid, article.packId, article.path, l.title, l.sentence, l.thumbnail, book)
         }
         return null
     }
 
     override suspend fun footer(packId: String, path: String): ArticleFooter {
-        val files = linksFiles()
-        if (files.isEmpty()) return ArticleFooter.NONE
-        val packs = qidFiles()
-        lock.withLock {
-            if (footersFor != files to packs) { footers.clear(); footersFor = files to packs }
-            footers["$packId/$path"]?.let { return it }
-        }
-        val qids = indexes()
-        val qid = qids.qidOf(packId, path) ?: return ArticleFooter.NONE
-        val works = worksOf(files)
+        val qid = indexes().qidOf(packId, path) ?: return ArticleFooter.NONE
+        val books = synced()
+        val works = books.works()
         val thisWork = works.filterValues { it == qid }.keys
-        val inBooks = files.mapNotNull { (bookId, s) ->
-            BookLinks.open(s.file, s.packSha256)?.use { l ->
-                val n = l.countOf(qid)
-                if (n == 0) null else bookOf(bookId)?.let { InYourBook(it, n, l.passagesOf(qid, PASSAGES)) }
-            }
-        }.sortedWith(compareByDescending<InYourBook> { it.count }.thenBy { it.book.title })
+        val counts = books.counts(qid)
+        val inBooks = ArrayList<InYourBook>()
+        for ((bookId, n) in counts) {
+            if (inBooks.size == BOOKS_SHOWN) break
+            bookOf(bookId)?.let { inBooks += InYourBook(it, n, books.passages(bookId, qid, PASSAGES)) }
+        }
         // An author's works: P800 on the author, and every work naming them in P50.
+        val qids = indexes()
         val written = (qids.linksOf(qid, "P800") + qids.itemsWith("P50", "Q$qid").map { "Q$it" })
             .mapNotNullTo(HashSet()) { it.removePrefix("Q").toLongOrNull() }
         val byAuthor = works.filter { (bookId, work) -> work in written && bookId !in thisWork }.keys
-        val footer = ArticleFooter(
+        return ArticleFooter(
             thisWork.mapNotNull { bookOf(it) }.sortedBy { it.title },
             inBooks,
             byAuthor.mapNotNull { bookOf(it) }.sortedBy { it.title },
+            inBooksTotal = if (inBooks.size < BOOKS_SHOWN) inBooks.size else counts.size,
         )
-        lock.withLock { footers["$packId/$path"] = footer }
-        return footer
     }
 
-    private companion object {
+    companion object {
         const val PASSAGES = 3
-        const val FOOTER_CACHE = 32
+
+        /** Books listed under *In your books*; the rest are counted. */
+        const val BOOKS_SHOWN = 8
     }
 }

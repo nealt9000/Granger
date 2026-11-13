@@ -174,9 +174,14 @@
     - *In your books*: each installed Classic that mentions the subject, most mentions first, with its count and first three passages. Each passage opens the book at that quote through `PassageAddress.Book` + `openCitation`.
     - *By this author in your library*: covers and titles, each opening the book at its saved place.
   - **Author → works** joins on the work QID each `.glink` carries (decided on the Mac, Task 7): the author's P800 plus every work naming them in P50, matched against the installed books' works. The plan's Gutenberg-ID route isn't used, because P2034 is rare on work items (LL0 finding).
-  - **Queries:** `ReferenceLinksSource.footer` opens each installed `.glink` and asks for the article's QID (`countOf`, `passagesOf`). Each book's work QID is read once per set of installed links files. Footers are cached per article (the last 32), and the cache resets when the installed books or packs change. **Cost to watch in Task 10:** one SQLite open per installed Classic per new article.
+  - **Queries: one local index, not a file per book** (Neal, 2026-11-13: "I generally download the whole pack"; the first version opened every installed `.glink` for each new article).
+    - `MentionIndex` (core:library) keeps every installed Classic's mentions in one app-local SQLite file (`files/linked-library/mentions.sqlite`), indexed on QID.
+    - `sync` copies a new or changed book in with SQLite's ATTACH and drops a removed one. It does nothing while the installed set is unchanged, including across restarts.
+    - On the Mac, all 622 books: 105,105 mentions, a 30 MB index, built in 2.1 s. Five footer queries take 0.8 ms in all.
+  - **Capped at eight books.** London is in 290 of the 622 Classics, so the sheet lists the eight books that mention a subject most, then "and N more of your books". The card counts them all.
+  - **Pack splitting:** smaller, themed Classics packs may still be worth offering for choice, but speed no longer needs them.
   - **The peek card** (Task 8's moved item) says "In your library: <title>", with Read the book, when the link is a work whose book is on the phone.
-  - **Tests:** the footer's three sections and the cache (`ReferenceLinksTest`, 7 in all now); `passagesOf` (`BookLinksTest`); the web reader asking once per article, keeping the footer on a jump within the page, and an empty footer showing nothing (`ReaderViewModelTest`, 2 new); the card's summary line.
+  - **Tests:** `MentionIndexTest` (2: answers by QID; re-sync after a removal or an updated file; wrong files left out); the footer's three sections and the eight-book cap (`ReferenceLinksTest`, 8 in all now); `passagesOf` (`BookLinksTest`); the web reader asking once per article, keeping the footer on a jump within the page, and an empty footer showing nothing (`ReaderViewModelTest`, 2 new); the card's summary line.
 
 ### LL1 · Task 10: Phone check, Pixel 6 (then Pixel 7)
 - Read a chapter of each spike book with Light, then More. Open links and come back. Check an unresolved link with Top only installed. Check *In your books* on London, Napoleon and Jane Austen. Repeat in Spanish (Cervantes, La Mancha).

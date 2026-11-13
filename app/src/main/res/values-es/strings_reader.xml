@@ -61,5 +61,10 @@
         <item quantity="many">%d menciones</item>
         <item quantity="other">%d menciones</item>
     </plurals>
+    <plurals name="reader_footer_more_books">
+        <item quantity="one">y %d libro más tuyo</item>
+        <item quantity="many">y %d libros más tuyos</item>
+        <item quantity="other">y %d libros más tuyos</item>
+    </plurals>
     <string name="reader_footer_read">Leer</string>
 </resources>

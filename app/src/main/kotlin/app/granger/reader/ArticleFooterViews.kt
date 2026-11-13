@@ -59,7 +59,7 @@ internal object FooterSummary {
     /** The card's line: the work on the phone, how many books mention the subject, how many by this author. */
     fun parts(footer: ArticleFooter): List<UiText> = buildList {
         if (footer.thisWork.isNotEmpty()) add(UiText.Res(R.string.reader_footer_this_work))
-        if (footer.inBooks.isNotEmpty()) add(UiText.Plural(R.plurals.reader_footer_in_books, footer.inBooks.size, footer.inBooks.size))
+        if (footer.inBooks.isNotEmpty()) add(UiText.Plural(R.plurals.reader_footer_in_books, footer.inBooksTotal, footer.inBooksTotal))
         if (footer.byAuthor.isNotEmpty()) add(UiText.Plural(R.plurals.reader_footer_by_author, footer.byAuthor.size, footer.byAuthor.size))
     }
 
@@ -128,6 +128,10 @@ fun ArticleFooterSheet(
                         }
                     }
                 }
+            }
+            val more = footer.inBooksTotal - footer.inBooks.size
+            if (footer.inBooks.isNotEmpty() && more > 0) {
+                Text(pluralStringResource(R.plurals.reader_footer_more_books, more, more), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             if (footer.byAuthor.isNotEmpty()) {
                 Heading(R.string.reader_footer_by_author_heading)
