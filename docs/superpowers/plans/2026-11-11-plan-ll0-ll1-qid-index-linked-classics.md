@@ -187,6 +187,38 @@
 - Read a chapter of each spike book with Light, then More. Open links and come back. Check an unresolved link with Top only installed. Check *In your books* on London, Napoleon and Jane Austen. Repeat in Spanish (Cervantes, La Mancha).
 - Sizes, timings (placing a chapter's links < 50 ms) and Neal's findings recorded here.
 - **LL1 checkpoint with Neal:** density, look and the setting's wording, then the walkthrough and merge.
+- **As built (2026-11-13), first pass on the emulator** (granger-eval-1, Android 16). The Pixel 6 holds Play's 1309, and a debug build would need an uninstall, so Neal decides when.
+  - **Setup.** The branch catalog was signed by Neal and served over `adb reverse` (`-PcatalogUrl`). The emulator held the 10-30 Classics, so links followed only once *Get all* brought the 11-09 books, and each `.glink` arrived with its book. A further 185 Spanish books were fetched. 8 QID indexes arrived (24 MB). Geography's didn't, because its installed edition is older than the catalog's.
+  - **Found and fixed (890e5a2b, d6c7f6d2, 4796ff03):**
+    1. *English book, Spanish card.* One `.gqid` serves every flavour of an edition, since the catalog gives the nopic build to maxi and mini. But the app checked it against the installed maxi's sha, dropped English Top, and fell through to Spanish Top. Fix: an index built from the same edition in another flavour is accepted.
+    2. *Spanish book, English card.* Pack order followed the library's languages only. Fix: a card prefers packs in the book's language (from the index's source name), with Wander's order within each language. This adjusts Decision 6.
+    3. *No links on reopening at a chapter.* Readium drops decorations sent while a restored page loads, and diffs a re-send to nothing. Fix: the links are cleared and drawn again each time the reader settles in another resource (300 ms after).
+    4. *The footer card covered the article's end and ran under the rail.* Wikipedia pins `html` and `body` to the viewport height, so the root's bottom padding never reached the end of the page. That also means the bottom bar's padding never worked there before. Fix: a root or body whose content overflows it grows. The card is inset by the rail.
+  - **Seen working:**
+    - P&P Chapter III, Light: Derbyshire card → article → footer (P&P 14, Sons and Lovers 5, Ivanhoe 1). A passage opens Sons and Lovers on the flashed mention.
+    - Jane Austen: 7 books; 6 by the author (Emma, Mansfield Park…).
+    - London: 234 books, eight listed, then "and 226 more".
+    - Don Quijote prologue, Light: 9 links. Aristóteles → Spanish card → Spanish article → footer (123 books, 3 by the author).
+  - **Timings (emulator, arm64):**
+    - Drawing a whole book's links:
+      - P&P Light: 109 links, 102 ms to read and 78 ms to place.
+      - P&P More: 110 links, 51 + 23 ms.
+      - Don Quijote Light: 437 links, 100 + 89 ms.
+      - Sons and Lovers: 70 links, 48 + 2 ms.
+    - The first `MentionIndex` sync: 437 books in 2.85 s.
+  - **Sizes:**
+    - 622 `.glink` files: 34 MB.
+    - 8 `.gqid` files: 24 MB.
+    - `mentions.sqlite`: 11.8 MB for 437 books, 19.3 MB with the 185 Spanish added.
+  - **Left for Neal / later:**
+    - The footer misses packs that have no index of their own (an old-edition topic pack). A same-language path fallback would cover them.
+    - A page that grows after the card shows keeps the card until the next scroll.
+    - With a two-line summary the card nearly touches the band's top.
+    - Card sentences stop at "a." ("322 a.").
+    - Passage leads can start mid-word.
+    - The P&P contents list glues illustration captions to chapter titles (an existing EPUB issue).
+    - On the Classics set row, "437 of 437 to get" counts older versions as missing.
+    - Light is spare in P&P (Derbyshire is the only link on its page), while the Don Quijote prologue has 9. Density is a checkpoint question.
 
 ## Order and size
 LL0 Tasks 1–2 first: they're the debt payback and touch shared code, so agree with SQ before merging. Task 3 can run on the X10 alongside them. The LL1 spike (Task 6) can start as soon as Task 3's data exists, before the phone side lands. About six to eight sessions in total.

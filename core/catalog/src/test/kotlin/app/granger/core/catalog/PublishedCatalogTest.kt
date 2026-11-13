@@ -225,6 +225,13 @@ class PublishedCatalogTest {
             assertThat(s.sha256).hasLength(64)
             assertThat(s.schemaVersion).isEqualTo(1)
         }
-        assertThat(catalog.books.count { it.sidecars.isNotEmpty() }).isEqualTo(0)
+        // Plan LL1 Task 7: every Classic carries its reference links, from their own release.
+        val linked = catalog.books.filter { it.sidecars.isNotEmpty() }
+        assertThat(linked.size).isEqualTo(622)
+        for (s in linked.flatMap { it.sidecars }) {
+            assertThat(s.kind).isEqualTo("glink")
+            assertThat(s.url).startsWith("https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/")
+            assertThat(s.sha256).hasLength(64)
+        }
     }
 }
