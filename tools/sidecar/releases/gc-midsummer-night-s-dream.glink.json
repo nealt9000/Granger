@@ -1,0 +1,13 @@
+{
+ "id": "gc-midsummer-night-s-dream",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-midsummer-night-s-dream_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "75216b421a4cc4fe032f96cab9c5c8a162181123cacb245e81d17a567941a5e5",
+ "schemaVersion": 1,
+ "sourceSha256": "a63345f461e1b80d3a4cbad1954a153939a2ea2087f1b44c5f079d450edca13c",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-midsummer-night-s-dream_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-el-gaucho-martin-fierro",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-el-gaucho-martin-fierro_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "155109054a1378d7bf7772e9774793bc69810e0e1b6bc9590af67537bb7d2e36",
+ "schemaVersion": 1,
+ "sourceSha256": "c08961ae0c35c4493a37194d9201e7778a259a3c76bd87f800d40b91374ebfb1",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-gaucho-martin-fierro_2026-11-09.glink"
+}

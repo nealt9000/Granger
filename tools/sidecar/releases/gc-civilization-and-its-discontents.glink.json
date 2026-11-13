@@ -1,0 +1,13 @@
+{
+ "id": "gc-civilization-and-its-discontents",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-civilization-and-its-discontents_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "78a87bf8f891cb97de0a166d261509894f314a63f7d1eb87e881357620c1cb65",
+ "schemaVersion": 1,
+ "sourceSha256": "4ad2a3c26af15cad1fc751ce15fb8843e387c4b723e5c3b3a1b67a8d97f01373",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-civilization-and-its-discontents_2026-11-09.glink"
+}

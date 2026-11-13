@@ -1,0 +1,13 @@
+{
+ "id": "gc-pragmatism",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-pragmatism_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "0646a71a132aa38b189ffafb166a95c7594af3224a0f609e28e41f30e0eec12a",
+ "schemaVersion": 1,
+ "sourceSha256": "a4daadf764c4e57e5d76d6843ef128925c089f500d97ec81d61439774a7f934c",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-pragmatism_2026-11-09.glink"
+}

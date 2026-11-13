@@ -1,0 +1,13 @@
+{
+ "id": "gc-scarlet-letter",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-scarlet-letter_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "a9fb6e808a0c99f26300b0627733e75b987ad809903f84832a3ab73ac59561e6",
+ "schemaVersion": 1,
+ "sourceSha256": "6412790974b7fe25cf740f9c3a5042bf17a0ff6939ce7ea7b91e6d862607d472",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-scarlet-letter_2026-11-09.glink"
+}

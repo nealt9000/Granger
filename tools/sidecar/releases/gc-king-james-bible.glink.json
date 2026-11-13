@@ -1,0 +1,13 @@
+{
+ "id": "gc-king-james-bible",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-king-james-bible_2026-11-09.glink",
+ "sizeBytes": 200704,
+ "sha256": "a666151f7d31050469783b3a2cf6fd7f106452d5ff87da59327094894cf071d1",
+ "schemaVersion": 1,
+ "sourceSha256": "dc0b0da1d48a8e1bb276d5c5874962c8f378d824e55fea0bd0a7aa36b9ec4356",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-king-james-bible_2026-11-09.glink"
+}

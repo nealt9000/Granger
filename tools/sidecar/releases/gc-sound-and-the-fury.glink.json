@@ -1,0 +1,13 @@
+{
+ "id": "gc-sound-and-the-fury",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-sound-and-the-fury_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "b42601069e7da64fe692887e2b3b227b23a3490855e202adec90043b4d99846f",
+ "schemaVersion": 1,
+ "sourceSha256": "bd24de3b9580f57ff9c86822aec6d78ed0bca699bf0bce1c94fef6d4cfce9642",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-sound-and-the-fury_2026-11-09.glink"
+}

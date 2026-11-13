@@ -1,0 +1,13 @@
+{
+ "id": "gc-tess-of-the-d-urbervilles",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-tess-of-the-d-urbervilles_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "8a7f92deb7e5adc725266a5e32aff0b62872ed8549b255e089d31b089d6bf298",
+ "schemaVersion": 1,
+ "sourceSha256": "7ec489306130c238bd5516bd6d9a83048f46e0969ac6d0940b5328bd2daa8c32",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-tess-of-the-d-urbervilles_2026-11-09.glink"
+}

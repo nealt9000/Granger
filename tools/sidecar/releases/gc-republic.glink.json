@@ -1,0 +1,13 @@
+{
+ "id": "gc-republic",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-republic_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "40fbe06336069d85ecd28454bf65934d8d233571f7e7f67e3751c598360e2fab",
+ "schemaVersion": 1,
+ "sourceSha256": "f9ec4e996c110562efc75382b26b4c634533ed1b6f5757af36bdd2620d00ce3d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-republic_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-great-expectations",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-great-expectations_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "e3bc966453a1134c68cc2d37c419e1356ec884f1a8624e027ac4106af001766a",
+ "schemaVersion": 1,
+ "sourceSha256": "5f078a8bb5b1f3ae25637c013d081f15be10cf3386c6d159f3bace325b618613",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-great-expectations_2026-11-09.glink"
+}

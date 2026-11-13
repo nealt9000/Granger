@@ -1,0 +1,13 @@
+{
+ "id": "gc-pickwick-papers",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-pickwick-papers_2026-11-09.glink",
+ "sizeBytes": 49152,
+ "sha256": "f6e61742e989acc9268c436d08a1a1f147285a5a129891d3799536447989ba31",
+ "schemaVersion": 1,
+ "sourceSha256": "86c71f3b696becdc0bb9fc2512c513b3044df7e55847b27eb18e11abc59c72ae",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-pickwick-papers_2026-11-09.glink"
+}

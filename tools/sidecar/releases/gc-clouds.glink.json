@@ -1,0 +1,13 @@
+{
+ "id": "gc-clouds",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-clouds_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "020c7586b60bb5b2ea22df15446b42f1e0e0cce1cdf5fe1677f7a70d4f34762a",
+ "schemaVersion": 1,
+ "sourceSha256": "72cdb86b85cc9f164d6225a01d16af047577d7fc0a0808d8afe613746fa9f81e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-clouds_2026-11-09.glink"
+}

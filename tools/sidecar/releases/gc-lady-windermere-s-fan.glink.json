@@ -1,0 +1,13 @@
+{
+ "id": "gc-lady-windermere-s-fan",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-lady-windermere-s-fan_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "17557cf9db18a31ec8b8bdb74168167a21e064a34b82f9b40e392b0d665c7275",
+ "schemaVersion": 1,
+ "sourceSha256": "2fbad42eca2e236ea72887e736942e5c73b4f0acae6fc3d28737bfca276d72c0",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-lady-windermere-s-fan_2026-11-09.glink"
+}

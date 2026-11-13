@@ -1,0 +1,13 @@
+{
+ "id": "gc-two-gentlemen-of-verona",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-two-gentlemen-of-verona_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "0452d311bd685255ca374f99fcf19bc1a013c5e1c93339f7211cd570b99757cb",
+ "schemaVersion": 1,
+ "sourceSha256": "dc2a69cdad4bf988d83ba63e44ed516f93dbed21d6783b8e9e4a0d997982167c",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-two-gentlemen-of-verona_2026-11-09.glink"
+}

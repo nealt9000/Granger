@@ -1,0 +1,13 @@
+{
+ "id": "gc-works-of-edgar-allan-poe-volume-5",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-works-of-edgar-allan-poe-volume-5_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "915fec479c5dd297ce000948b14567cc4dbcf5846b66ee08ec5ee6629bc46118",
+ "schemaVersion": 1,
+ "sourceSha256": "f43f448f97823e5685bf5ab3c6e7eba5d94c16b982d6657b55267dfe5f638105",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-works-of-edgar-allan-poe-volume-5_2026-11-09.glink"
+}

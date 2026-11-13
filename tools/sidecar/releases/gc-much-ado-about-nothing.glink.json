@@ -1,0 +1,13 @@
+{
+ "id": "gc-much-ado-about-nothing",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-much-ado-about-nothing_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "906e27b00f68098a7540235252e9e32dfaba6aa3c4731410257bee5d79b40bcd",
+ "schemaVersion": 1,
+ "sourceSha256": "53a730b8e21fbf4c9de4c577761e44dd932b99af53fbcbcc07cb9fb487ea8595",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-much-ado-about-nothing_2026-11-09.glink"
+}

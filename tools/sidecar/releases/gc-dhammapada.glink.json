@@ -1,0 +1,13 @@
+{
+ "id": "gc-dhammapada",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-dhammapada_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "79f6868d2ec965e937c9d4cb6667ffff5f30dffe5487cfc6248cec1cede4bdac",
+ "schemaVersion": 1,
+ "sourceSha256": "7cc73ad702a14fec818fbfa051aa0f4c9803a7ba611cbba9ec4f0a0bea362918",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-dhammapada_2026-11-09.glink"
+}

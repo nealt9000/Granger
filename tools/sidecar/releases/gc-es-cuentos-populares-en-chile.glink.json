@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-cuentos-populares-en-chile",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-cuentos-populares-en-chile_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "e8d8c3f76b120eb4ae05706059ec12c7111737b92ac055ac385b377b4eda89c1",
+ "schemaVersion": 1,
+ "sourceSha256": "1c233852fa56c4894bb9d57813b8547a18d00e020b07f71cf834e888786cb6e7",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-cuentos-populares-en-chile_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-cuentos-de-amor",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-cuentos-de-amor_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "f8995173d24192e1d4a617c84de1422f08f22e321b2a6ed1328445cd17d50052",
+ "schemaVersion": 1,
+ "sourceSha256": "e5e63f288f89d5a85d39d20405ac0f15348f0ebd09e15560843def1140d7d6c6",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-cuentos-de-amor_2026-11-09.glink"
+}

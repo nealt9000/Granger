@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-don-alvaro-o-la-fuerza-del-sino",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-don-alvaro-o-la-fuerza-del-sino_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "3bc80498c491ae86565b0805ad7cca65975e24f75ebdc03dbf1bed4632b26dcb",
+ "schemaVersion": 1,
+ "sourceSha256": "4bbe390e7cae79f51d8a9be48ff7e7fba44b15b7cf8c77f59bad8a61389c72ab",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-don-alvaro-o-la-fuerza-del-sino_2026-11-09.glink"
+}

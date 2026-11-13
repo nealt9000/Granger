@@ -1,0 +1,13 @@
+{
+ "id": "gc-room-with-a-view",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-room-with-a-view_2026-11-09.glink",
+ "sizeBytes": 49152,
+ "sha256": "34b05de77b3eb1b0e25e32b39c84c4228b2f9f48e99748271aa3d131cf08df54",
+ "schemaVersion": 1,
+ "sourceSha256": "29d02c5642d103fbda38f13ba4e59f19e8a36cc291804a9e80ffcb96e20126e8",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-room-with-a-view_2026-11-09.glink"
+}

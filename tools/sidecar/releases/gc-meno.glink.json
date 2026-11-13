@@ -1,0 +1,13 @@
+{
+ "id": "gc-meno",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-meno_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "30f5567eef2d725aa60e6de56674de381eee45415495842f9fa753bffcb4b1c7",
+ "schemaVersion": 1,
+ "sourceSha256": "f7836deb9acb68922dd269128b4732d64eeaba91d7f540b82fa6b5e651b51814",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-meno_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-mystery-at-lilac-inn",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-mystery-at-lilac-inn_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "94b631c1140f626410426f61cd1772f7df14e61a180b7955e5c20717d1315532",
+ "schemaVersion": 1,
+ "sourceSha256": "f93fac5eca4d15cf0752fba999bf27861bb4b6ceca79766abf45bc926b5a2644",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-mystery-at-lilac-inn_2026-11-09.glink"
+}

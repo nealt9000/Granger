@@ -1,0 +1,13 @@
+{
+ "id": "gc-timon-of-athens",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-timon-of-athens_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "78395b30a7fee8f6a7e97bf088026a3d01832add96ece2b3a27af6660cbadd63",
+ "schemaVersion": 1,
+ "sourceSha256": "596ab3252d3ea49fe94b764cf563d4c8be7668404143b57af2d108115377efb9",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-timon-of-athens_2026-11-09.glink"
+}

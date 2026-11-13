@@ -1,0 +1,13 @@
+{
+ "id": "gc-book-of-mormon",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-book-of-mormon_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "33afb136ebb32fc057e4164238acb216573deca1452ab20df6bd53318c11c74e",
+ "schemaVersion": 1,
+ "sourceSha256": "5703361467903f88cf440d7e522d65932eeeb165c1a7f1cdb5c430e1c7dec69c",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-book-of-mormon_2026-11-09.glink"
+}

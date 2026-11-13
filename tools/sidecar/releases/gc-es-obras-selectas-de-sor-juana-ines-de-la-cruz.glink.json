@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-obras-selectas-de-sor-juana-ines-de-la-cruz",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-obras-selectas-de-sor-juana-ines-de-la-cruz_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "7c503eb64c2f9d3385ec2102a4fbae3cc0ecbed3c2ed0feed7892a7a821cdadf",
+ "schemaVersion": 1,
+ "sourceSha256": "e1e13b0e17e9a46bb91b0f638a1a8e110b7f22bffa7ff703524d36d0fe1f8c9c",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-obras-selectas-de-sor-juana-ines-de-la-cruz_2026-11-09.glink"
+}

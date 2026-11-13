@@ -1,0 +1,13 @@
+{
+ "id": "gc-way-we-live-now",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-way-we-live-now_2026-11-09.glink",
+ "sizeBytes": 102400,
+ "sha256": "55dbfb451ccbadbfd525ab16aafa25826455e9e94b5e860ccfa97bfb50f05cfe",
+ "schemaVersion": 1,
+ "sourceSha256": "1189e2a1aadf1b4ee1091cce3ab8e1bd40e122c42f8bd3b0382828750d36e611",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-way-we-live-now_2026-11-09.glink"
+}

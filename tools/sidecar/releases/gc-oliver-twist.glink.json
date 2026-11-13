@@ -1,0 +1,13 @@
+{
+ "id": "gc-oliver-twist",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-oliver-twist_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "98747a49ef628c36b9c92527e33b481c7f5772f98428f48d609bfb320284789a",
+ "schemaVersion": 1,
+ "sourceSha256": "a7d8253cde5676a1e3139acaf201b8b0046e50206f157fdedc2e9a413f8ff37e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-oliver-twist_2026-11-09.glink"
+}

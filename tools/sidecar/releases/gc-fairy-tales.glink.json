@@ -1,0 +1,13 @@
+{
+ "id": "gc-fairy-tales",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-fairy-tales_2026-11-09.glink",
+ "sizeBytes": 81920,
+ "sha256": "1b6ed179bee0ac6b91717de0e689af9398bed46a6fde75cc25aaf58ea85ef055",
+ "schemaVersion": 1,
+ "sourceSha256": "93555ff6d1254d0f543f05823e3aad044c64669b431214d0e396ea7d75bf331a",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-fairy-tales_2026-11-09.glink"
+}

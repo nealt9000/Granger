@@ -1,0 +1,13 @@
+{
+ "id": "gc-erewhon",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-erewhon_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "8d385e69e83687de43bc3cab90fdaabf782682ec4b51bfd87f399ba6e333aa95",
+ "schemaVersion": 1,
+ "sourceSha256": "fddd4e62c050c5887ff3593272042904e4508294a62251561fce974acf3dded1",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-erewhon_2026-11-09.glink"
+}

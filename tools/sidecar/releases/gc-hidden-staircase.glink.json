@@ -1,0 +1,13 @@
+{
+ "id": "gc-hidden-staircase",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-hidden-staircase_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "27590eb2d09dc0c38c2fb46ec9fca09c067167eaa1f0801365f52ce95f186bc3",
+ "schemaVersion": 1,
+ "sourceSha256": "f1cc9883109c760627f1e48076da0f253dcd675c0a680e2db2c432ac28820108",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-hidden-staircase_2026-11-09.glink"
+}

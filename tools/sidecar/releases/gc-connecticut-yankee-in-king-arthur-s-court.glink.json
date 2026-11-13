@@ -1,0 +1,13 @@
+{
+ "id": "gc-connecticut-yankee-in-king-arthur-s-court",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-connecticut-yankee-in-king-arthur-s-court_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "a9b64e5982e64259409f367e67bf8d526fd1740e34a29d6b752a192f396e5559",
+ "schemaVersion": 1,
+ "sourceSha256": "18e5c4d2008bedb3add821d21b5b7364f4fdc36b75b5cf8826e183441dc7e546",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-connecticut-yankee-in-king-arthur-s-court_2026-11-09.glink"
+}

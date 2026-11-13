@@ -1,0 +1,13 @@
+{
+ "id": "gc-ulysses",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-ulysses_2026-11-09.glink",
+ "sizeBytes": 147456,
+ "sha256": "a05d3addbd912cb0d322cb3089d223c8010192cce843a7be7f492791466d4525",
+ "schemaVersion": 1,
+ "sourceSha256": "79f4cfd5d7208bdef75c49e911ea063a488c43785ba6a703da8bdf71a8874b9e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-ulysses_2026-11-09.glink"
+}

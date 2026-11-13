@@ -1,0 +1,13 @@
+{
+ "id": "gc-divine-comedy-hell-norton",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-divine-comedy-hell-norton_2026-11-09.glink",
+ "sizeBytes": 69632,
+ "sha256": "85eee784c51303d90a12d0a0d4abf961c79e9e2e26e3da6f44f76971d8ea4f27",
+ "schemaVersion": 1,
+ "sourceSha256": "dbca06efd7b8ad7561714b72730297f558dadf3ef82629b6504a77c3001411ab",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-divine-comedy-hell-norton_2026-11-09.glink"
+}

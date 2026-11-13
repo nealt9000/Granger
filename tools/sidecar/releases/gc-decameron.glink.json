@@ -1,0 +1,13 @@
+{
+ "id": "gc-decameron",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-decameron_2026-11-09.glink",
+ "sizeBytes": 94208,
+ "sha256": "7ca77aecb9b8912c3c4fad9ea46b4a908ffc4cfb2b08ce74d0a13553c0ee562a",
+ "schemaVersion": 1,
+ "sourceSha256": "1efcd314a90d4e928b2543f1f238b3dc90ae728cf4e70cc69a20fabad899329d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-decameron_2026-11-09.glink"
+}

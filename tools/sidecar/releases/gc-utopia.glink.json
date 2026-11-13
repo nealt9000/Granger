@@ -1,0 +1,13 @@
+{
+ "id": "gc-utopia",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-utopia_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "0eafa6002c7a4731e42e59b636d88ab8a73d9124a0fc5102664639e13d48919b",
+ "schemaVersion": 1,
+ "sourceSha256": "f4bca76ed947442025816cdde189aaa8d38b23baab2fa38fad5aecb919ef99e1",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-utopia_2026-11-09.glink"
+}

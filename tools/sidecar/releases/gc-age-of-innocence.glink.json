@@ -1,0 +1,13 @@
+{
+ "id": "gc-age-of-innocence",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-age-of-innocence_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "d852502e55d1e23fbaa84f62f19bc0b7f517b03fe010fc2338bd47e42e1cf6ee",
+ "schemaVersion": 1,
+ "sourceSha256": "ac501e4cee4243a210cbb3c0d30bf47d87a5e077a6c342cdbb320298d80b7c10",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-age-of-innocence_2026-11-09.glink"
+}

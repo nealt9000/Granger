@@ -1,0 +1,13 @@
+{
+ "id": "gc-poems-three-series",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-poems-three-series_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "892bb2f21a51173532176b90d7c22b7a18d554e505d59b560729519a5d7f0a00",
+ "schemaVersion": 1,
+ "sourceSha256": "57512d3618529e5bc2f2203a34211f1793988e90f92345748248fa2196544b46",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-poems-three-series_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-beggar-s-opera",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-beggar-s-opera_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "9fd9d7dd812901276ab7724077901404c1d5194b3edb7f78c3b242ab5aa7861f",
+ "schemaVersion": 1,
+ "sourceSha256": "c219c1b7552c87aaa45136d7199d23750e141ae28eb84b7ac2421f42a806f3dc",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-beggar-s-opera_2026-11-09.glink"
+}

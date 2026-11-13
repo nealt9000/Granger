@@ -1,0 +1,13 @@
+{
+ "id": "gc-lysistrata",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-lysistrata_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "0da6e5a38552b417909547615ea023530c26ccfc4e8243fb970abbae19b549f4",
+ "schemaVersion": 1,
+ "sourceSha256": "b6544b6e296ddbc13e0f99b10de0cec0a766ed59275aa44d3ed677c0d547eae2",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-lysistrata_2026-11-09.glink"
+}

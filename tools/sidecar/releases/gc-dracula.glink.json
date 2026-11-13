@@ -1,0 +1,13 @@
+{
+ "id": "gc-dracula",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-dracula_2026-11-09.glink",
+ "sizeBytes": 57344,
+ "sha256": "7dc6913c50618f28682eb4fa1a97ff68891dfdefb0fd94d2520c2dc22ebe7a84",
+ "schemaVersion": 1,
+ "sourceSha256": "44445f0a266352b7e7386dcd577610412545db99580e2daa0bb5b85aac7116ad",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-dracula_2026-11-09.glink"
+}

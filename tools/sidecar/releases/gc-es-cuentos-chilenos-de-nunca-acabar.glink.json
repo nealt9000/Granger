@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-cuentos-chilenos-de-nunca-acabar",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-cuentos-chilenos-de-nunca-acabar_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "3f037e7fd436feb7473b289991711f2212ecce2f414c3d3def02b17f30689d76",
+ "schemaVersion": 1,
+ "sourceSha256": "c73d3dd8cecdf98e72405d3fd3e0afa0627ad0854b446aaba7e52be8c7210fd4",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-cuentos-chilenos-de-nunca-acabar_2026-11-09.glink"
+}

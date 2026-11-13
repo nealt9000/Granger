@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-letra-escarlata",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-letra-escarlata_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "bcc252c2c63b843f0ab11f172728235a55435804bc8bef353adb45796414bfb0",
+ "schemaVersion": 1,
+ "sourceSha256": "2be332b51018d041e3a37120f3aa83de9b0c7a50a7887e77d5b9bda0e6179482",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-letra-escarlata_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-up-from-slavery",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-up-from-slavery_2026-11-09.glink",
+ "sizeBytes": 57344,
+ "sha256": "84650a3d90bba934f107115efa7a9f84bc9bd725f6805ee8fea7c66fa394f58d",
+ "schemaVersion": 1,
+ "sourceSha256": "3542ce4a874db015c37f06a7160a198876059440557503d9d715324f63972db7",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-up-from-slavery_2026-11-09.glink"
+}

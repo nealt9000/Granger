@@ -1,0 +1,13 @@
+{
+ "id": "gc-works-of-edgar-allan-poe-volume-2",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-works-of-edgar-allan-poe-volume-2_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "5d12eafb1055b97248b8b4a9e1968b84710a01b6fdea76b4f91619c361a82bbc",
+ "schemaVersion": 1,
+ "sourceSha256": "dbae38a2e519c6ca39a2c925fd73598d0fcf0c3edd26987ea4407c7aee311552",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-works-of-edgar-allan-poe-volume-2_2026-11-09.glink"
+}

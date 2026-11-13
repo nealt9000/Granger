@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-trafalgar",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-trafalgar_2026-11-09.glink",
+ "sizeBytes": 49152,
+ "sha256": "6d078802116bdaa18260970ced900f14e81640ea788e0f36b857231c836fc760",
+ "schemaVersion": 1,
+ "sourceSha256": "8e2130c58a7aa7555f096e3d449e4c2dd0617a2bb03dc6c8254a9bfb62c9e3ed",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-trafalgar_2026-11-09.glink"
+}

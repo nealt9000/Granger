@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-cuentos-de-navidad-y-reyes-cuentos-de-la-patria-cuentos-antiguos",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-cuentos-de-navidad-y-reyes-cuentos-de-la-patria-cuentos-antiguos_2026-11-09.glink",
+ "sizeBytes": 49152,
+ "sha256": "125bf3cf91302355235f49344bf3cfc6605acad0bd6460052419b9ce70e7d631",
+ "schemaVersion": 1,
+ "sourceSha256": "1e48e65bec6753bc4a1c5dd2b2af5d77f8a0d866ce2beba344c889e2dac460fc",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-cuentos-de-navidad-y-reyes-cuentos-de-la-patria-cuentos-antiguos_2026-11-09.glink"
+}

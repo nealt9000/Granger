@@ -1,0 +1,13 @@
+{
+ "id": "gc-cavalleria-rusticana",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-cavalleria-rusticana_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "d0d2bfab5cd885c4e7378659d0e2da560ae99003ef1e2fd2c3bdc2d74381f12c",
+ "schemaVersion": 1,
+ "sourceSha256": "fb2359b97f57caf04adfe14a0cd1684af2d66982bc129c11c4135482010182c5",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-cavalleria-rusticana_2026-11-09.glink"
+}

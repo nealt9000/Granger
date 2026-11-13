@@ -1,0 +1,13 @@
+{
+ "id": "gc-imitation-of-christ",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-imitation-of-christ_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "0c783bcb28a22c204bee2e76ddd6fe096eb1bf36bf15db65bdb84f2e5938ebc9",
+ "schemaVersion": 1,
+ "sourceSha256": "5eb9a959e13c57aecd5a4d53bd4a55b1231a8a71e2ea864534e4da56de36583a",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-imitation-of-christ_2026-11-09.glink"
+}

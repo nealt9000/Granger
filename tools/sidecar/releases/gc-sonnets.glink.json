@@ -1,0 +1,13 @@
+{
+ "id": "gc-sonnets",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-sonnets_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "a31a4a9d5c53fe82a18bf0ff2d9220c562a04cbf994c0dcc31fa58de085c4e72",
+ "schemaVersion": 1,
+ "sourceSha256": "c6ac6d10324afb41db703c1014239ab81416c46f90707137f8d4fc5aeff79e8f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-sonnets_2026-11-09.glink"
+}

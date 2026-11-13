@@ -1,0 +1,13 @@
+{
+ "id": "gc-turn-of-the-screw",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-turn-of-the-screw_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "8cd764b3e2f404dc74e58721bfe535d3d2b85aa51baaebc2124c7ec708cd31b0",
+ "schemaVersion": 1,
+ "sourceSha256": "eb5952147609821fcec3a7c7626657aa6be901af0dce48f0f16692232ab6ff3d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-turn-of-the-screw_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-cuentos-valencianos",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-cuentos-valencianos_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "f3a998cfeab39a0f00b97172731828dd689e3235fe62f8aa4675318281352803",
+ "schemaVersion": 1,
+ "sourceSha256": "38cc6b035a4f3dcfd7ff7743f615cd9642c4d52c35d2b115aedd489bff64250e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-cuentos-valencianos_2026-11-09.glink"
+}

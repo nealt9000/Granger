@@ -1,0 +1,13 @@
+{
+ "id": "gc-discourse-on-the-method",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-discourse-on-the-method_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "15b5edb2d5937809bbb0977f32af29ae0a6c7fec03f2f215ab784959fbe798af",
+ "schemaVersion": 1,
+ "sourceSha256": "eac069ae0ce9a974fa9fad2005687d88f5f339ffc35830beb32aa246b8c33126",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-discourse-on-the-method_2026-11-09.glink"
+}

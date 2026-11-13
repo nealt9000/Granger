@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-el-espejo-de-la-muerte",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-el-espejo-de-la-muerte_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "1d3a81ca20e2b5f493434d18e65de91940a1133d4a8f56d61f3fd3b449749807",
+ "schemaVersion": 1,
+ "sourceSha256": "41398218c5e289ad3e4a5c99157e6728fa36a2a7a1b7ff2116996fe6a795e28e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-espejo-de-la-muerte_2026-11-09.glink"
+}

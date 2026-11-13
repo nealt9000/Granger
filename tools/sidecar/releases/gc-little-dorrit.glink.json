@@ -1,0 +1,13 @@
+{
+ "id": "gc-little-dorrit",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-little-dorrit_2026-11-09.glink",
+ "sizeBytes": 73728,
+ "sha256": "50d108faf15f5ff06a6bc4c141fe840492bca7fcd79230a0e88c00f22658813b",
+ "schemaVersion": 1,
+ "sourceSha256": "172dda918138f560f720a69dd276ff38f081728f5d491aaab75ee62d56120ff4",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-little-dorrit_2026-11-09.glink"
+}

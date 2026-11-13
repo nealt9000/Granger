@@ -1,0 +1,13 @@
+{
+ "id": "gc-hunchback-of-notre-dame",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-hunchback-of-notre-dame_2026-11-09.glink",
+ "sizeBytes": 102400,
+ "sha256": "1e9e0cf620080a4d58186a1e92a1650722bcaed4cab68552b0cf9ac8395fd9d9",
+ "schemaVersion": 1,
+ "sourceSha256": "274bc68536810e91078acd40dd764885fd2810770c6802533cb9621c49231caf",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-hunchback-of-notre-dame_2026-11-09.glink"
+}

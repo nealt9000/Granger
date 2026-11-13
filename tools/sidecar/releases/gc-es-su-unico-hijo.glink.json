@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-su-unico-hijo",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-su-unico-hijo_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "e762ba26677cfd143a4e26a21dabc32abdd75a5e039f2014b552715488b31cf8",
+ "schemaVersion": 1,
+ "sourceSha256": "df7dc91ef5d3809ef1b2787f8201cd03a89e1b146b7601c1d7396dfbc45d6d0b",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-su-unico-hijo_2026-11-09.glink"
+}

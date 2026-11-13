@@ -1,0 +1,13 @@
+{
+ "id": "gc-divine-comedy-paradise-norton",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-divine-comedy-paradise-norton_2026-11-09.glink",
+ "sizeBytes": 69632,
+ "sha256": "b5bc79be3555a7c3eea9c5e2f1fa3f5f9ab75f0fc17330c2a227a59147b6e606",
+ "schemaVersion": 1,
+ "sourceSha256": "0b14f9df9da6399a1c021f8730791156f35e56eb6d97ca170f0093f06d0cbd2b",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-divine-comedy-paradise-norton_2026-11-09.glink"
+}

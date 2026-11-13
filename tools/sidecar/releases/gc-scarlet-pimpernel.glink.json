@@ -1,0 +1,13 @@
+{
+ "id": "gc-scarlet-pimpernel",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-scarlet-pimpernel_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "58d7df1c9e2f26a264e1805bf077b7811da8e23d03a894aa6ddd940f5d8d317c",
+ "schemaVersion": 1,
+ "sourceSha256": "7108f0a5a7c9eb461099d19ab8f36d43df7479faec52ffe86156a022a49956bd",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-scarlet-pimpernel_2026-11-09.glink"
+}

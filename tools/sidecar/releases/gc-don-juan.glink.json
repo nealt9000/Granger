@@ -1,0 +1,13 @@
+{
+ "id": "gc-don-juan",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-don-juan_2026-11-09.glink",
+ "sizeBytes": 73728,
+ "sha256": "3315e5e8d0bf8a838ddedf16ddfa6fe7d8feb75a22914a31966f479728544120",
+ "schemaVersion": 1,
+ "sourceSha256": "e20e2e50b3f03eb76c7a74fbb3e55afbcb2bb844126fc0121bd887b4edf27524",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-don-juan_2026-11-09.glink"
+}

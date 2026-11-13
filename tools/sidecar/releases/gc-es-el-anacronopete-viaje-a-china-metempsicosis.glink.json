@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-el-anacronopete-viaje-a-china-metempsicosis",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-el-anacronopete-viaje-a-china-metempsicosis_2026-11-09.glink",
+ "sizeBytes": 114688,
+ "sha256": "75073ce38f1cef05234c27285bf91e9c59763555e9cc795dd2c8b487ad49b9f0",
+ "schemaVersion": 1,
+ "sourceSha256": "b4f9e4f8c1a7027dca74778bc8e93f5b0d046bfb66f9a59e538d799809c83c95",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-anacronopete-viaje-a-china-metempsicosis_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-king-henry-iv-part-2",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-king-henry-iv-part-2_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "41cfa23c84ef77192a9164fdbb86a1e544fe10c4808919318235a87d21eeb606",
+ "schemaVersion": 1,
+ "sourceSha256": "065b1a658fba3fa73417f5f4e7c075fa6e4aae1c29a476cd17a5813b4e3ef97d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-king-henry-iv-part-2_2026-11-09.glink"
+}

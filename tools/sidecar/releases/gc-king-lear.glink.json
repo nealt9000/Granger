@@ -1,0 +1,13 @@
+{
+ "id": "gc-king-lear",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-king-lear_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "b404c42538fbe00cd6b4c8752b80433e7f9f0b17129453b620895e988e78a569",
+ "schemaVersion": 1,
+ "sourceSha256": "bb82ac6cfd8e3d6a2072a8f13310d73cc0839051d5458e4b2cc72d9cc26bb8fd",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-king-lear_2026-11-09.glink"
+}

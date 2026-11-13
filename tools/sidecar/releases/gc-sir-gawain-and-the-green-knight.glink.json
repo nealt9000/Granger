@@ -1,0 +1,13 @@
+{
+ "id": "gc-sir-gawain-and-the-green-knight",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-sir-gawain-and-the-green-knight_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "6c51e105340e4c3673845f3ba034814b2e9b92af6d656c9b7aa7b52935384cf4",
+ "schemaVersion": 1,
+ "sourceSha256": "0592471daba59b57d21bb4e358403ba6b02ac40a5936f5cb593a874432c8f4c9",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-sir-gawain-and-the-green-knight_2026-11-09.glink"
+}

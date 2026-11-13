@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-el-filibusterismo",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-el-filibusterismo_2026-11-09.glink",
+ "sizeBytes": 57344,
+ "sha256": "d33e6ab27e92dba54cd7a749d14be26390925115552492359d6d36e6772f5b60",
+ "schemaVersion": 1,
+ "sourceSha256": "2f23a14efdb67b246c804751291f29f23bd2afe8b59d8f4f72ebc280b45a1227",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-filibusterismo_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-suma-y-narracion-de-los-incas",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-suma-y-narracion-de-los-incas_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "cf73c2b2a3933d2c88c3c0c7555d743b053be354395933a7631a590290285abf",
+ "schemaVersion": 1,
+ "sourceSha256": "1f221e2233712ba1624e51afa6cbc1febf56c795a521defb8f8efdb7eb82cbe2",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-suma-y-narracion-de-los-incas_2026-11-09.glink"
+}

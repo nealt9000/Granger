@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-cantos-de-vida-y-esperanza",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-cantos-de-vida-y-esperanza_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "e0d728ba5ecb74d1c64edb7d30d0917ce6e22fa26a0c275039dddb3fb786f6e3",
+ "schemaVersion": 1,
+ "sourceSha256": "fceccca7782f9a8923e217bc835f151988832b378bcfeaf471d98f33ccd3dc70",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-cantos-de-vida-y-esperanza_2026-11-09.glink"
+}

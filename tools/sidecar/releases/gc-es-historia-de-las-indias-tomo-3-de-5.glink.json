@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-historia-de-las-indias-tomo-3-de-5",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-historia-de-las-indias-tomo-3-de-5_2026-11-09.glink",
+ "sizeBytes": 102400,
+ "sha256": "dc94defe72ff1a942952f62990294832a54abfa1dd286aaf47f5c4b8f8a4394c",
+ "schemaVersion": 1,
+ "sourceSha256": "29592ebcad5a972df05022559af2c96798d04ba204f74feba6e43ad51d0e0165",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-historia-de-las-indias-tomo-3-de-5_2026-11-09.glink"
+}

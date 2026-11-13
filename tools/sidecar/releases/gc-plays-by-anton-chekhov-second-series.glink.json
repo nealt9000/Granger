@@ -1,0 +1,13 @@
+{
+ "id": "gc-plays-by-anton-chekhov-second-series",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-plays-by-anton-chekhov-second-series_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "985a140e4758b483f82e0e5dca3d5054d046362edbec14a62fa4ff286cb93a81",
+ "schemaVersion": 1,
+ "sourceSha256": "5b7194eaec7bb03d48e571871b9ef0042d0ba63cf461288b04c632e6ee4ae421",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-plays-by-anton-chekhov-second-series_2026-11-09.glink"
+}

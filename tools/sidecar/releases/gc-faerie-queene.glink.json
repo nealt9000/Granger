@@ -1,0 +1,13 @@
+{
+ "id": "gc-faerie-queene",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-faerie-queene_2026-11-09.glink",
+ "sizeBytes": 65536,
+ "sha256": "96c8cde67367925b04d3abddc26001423d16dccb7604f4f6852b6af8457df16e",
+ "schemaVersion": 1,
+ "sourceSha256": "7969ae23455c9cabf08e8a31fb8760570c9d7f51cd816abba71b7be5369c0d67",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-faerie-queene_2026-11-09.glink"
+}

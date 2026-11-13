@@ -1,0 +1,13 @@
+{
+ "id": "gc-call-of-the-wild",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-call-of-the-wild_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "327967874ffdb5eb5619a7ec27955adb7d6c6ecbe7674119a90d1f38cb2f91dd",
+ "schemaVersion": 1,
+ "sourceSha256": "e111b053a1099a3175cdcfaa711ed3ff354f47a540fa10d9120c617bb4ebd64c",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-call-of-the-wild_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-main-street",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-main-street_2026-11-09.glink",
+ "sizeBytes": 94208,
+ "sha256": "585c4aad33c5e6e6e31c4bc25f1884e724a17b93e5e8dd30e595ae7c268a9b1b",
+ "schemaVersion": 1,
+ "sourceSha256": "abfd140865ceb61ea55dee46f3fd1765f80a61d8e6e47fad02f6e0517b3886e7",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-main-street_2026-11-09.glink"
+}

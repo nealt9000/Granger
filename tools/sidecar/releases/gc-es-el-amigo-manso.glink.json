@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-el-amigo-manso",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-el-amigo-manso_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "7c6be828df7225c9ec995c8862e2417bf8419c1132bbe8688c8214d431a699be",
+ "schemaVersion": 1,
+ "sourceSha256": "66576101aac853d028411f89e2cf5868271c317c28abcb3978bf5a88eee17d40",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-amigo-manso_2026-11-09.glink"
+}

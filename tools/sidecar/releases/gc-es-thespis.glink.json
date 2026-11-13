@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-thespis",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-thespis_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "3c49399e31dfa5699de2939bb940768441bd9c9c441f3224c12b6a58c14c2ca5",
+ "schemaVersion": 1,
+ "sourceSha256": "404e29515666888a63a5e6d233eb7a27914e44fac10e7c92266792e26c0a08b7",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-thespis_2026-11-09.glink"
+}

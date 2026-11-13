@@ -1,0 +1,13 @@
+{
+ "id": "gc-aesop-s-fables",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-aesop-s-fables_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "f6379977d2fd40606c1a7d8eb0d0cb655a285661707efe061c58688438293ff4",
+ "schemaVersion": 1,
+ "sourceSha256": "b4870c202067adef311a59bd8650959b46b15798c4fe6c145ab301673cb4ee41",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-aesop-s-fables_2026-11-09.glink"
+}

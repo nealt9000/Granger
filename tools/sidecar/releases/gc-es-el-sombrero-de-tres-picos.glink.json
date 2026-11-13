@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-el-sombrero-de-tres-picos",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-el-sombrero-de-tres-picos_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "a574ad7b6403135cb2ae720e2b6150edad653de78e521ad0cabe652b6b52e3cc",
+ "schemaVersion": 1,
+ "sourceSha256": "b3fa7297dfa85272fda733d8701214afebfdcaf208c2936103a2bb71ac8bcaec",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-sombrero-de-tres-picos_2026-11-09.glink"
+}

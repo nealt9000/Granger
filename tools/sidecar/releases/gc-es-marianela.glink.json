@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-marianela",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-marianela_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "d58409d7d5ec88b3b95622c99d5a46ab544808a540451b47677967bfba06c93b",
+ "schemaVersion": 1,
+ "sourceSha256": "41425691c4f948877dbed63076d3873e032d31f3bc44916ac4cd63339c7d4487",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-marianela_2026-11-09.glink"
+}

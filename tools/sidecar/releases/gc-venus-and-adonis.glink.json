@@ -1,0 +1,13 @@
+{
+ "id": "gc-venus-and-adonis",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-venus-and-adonis_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "f3b93f1fe5b5aa3ce0cd6a5a11d367ae8a954c14fc1dd933a6a121d7db95503a",
+ "schemaVersion": 1,
+ "sourceSha256": "072c9e7f6ae5279600a614e2d7a7fd1e121e3387420ae4678400fa1aa4967fac",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-venus-and-adonis_2026-11-09.glink"
+}

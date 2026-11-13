@@ -1,0 +1,13 @@
+{
+ "id": "gc-alice-s-adventures-in-wonderland",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-alice-s-adventures-in-wonderland_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "fdc42a6256796cdfbcc1de2306bcf96a181e2c7c28d868ea1ba213a2c5ec6886",
+ "schemaVersion": 1,
+ "sourceSha256": "9fc87d21c20949542ffe34fe73f9e9e9b9c5e8fa80e76479b671675e16d57b02",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-alice-s-adventures-in-wonderland_2026-11-09.glink"
+}

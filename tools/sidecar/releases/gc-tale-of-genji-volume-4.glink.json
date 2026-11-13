@@ -1,0 +1,13 @@
+{
+ "id": "gc-tale-of-genji-volume-4",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-tale-of-genji-volume-4_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "dc999c2c986cb41c0082d08f6e59acc0f35b86cf8130bb67db322a6babc45cbb",
+ "schemaVersion": 1,
+ "sourceSha256": "af2d3f37c5274eb13623247fcb630cfa3be26759ad97e91a0046278b2bae2440",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-tale-of-genji-volume-4_2026-11-09.glink"
+}

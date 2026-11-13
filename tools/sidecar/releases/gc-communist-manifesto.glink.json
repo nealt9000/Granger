@@ -1,0 +1,13 @@
+{
+ "id": "gc-communist-manifesto",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-communist-manifesto_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "779a367a463f94930bffe75b06c327c8281c3c46609d4ca6009f74521eb7dcd1",
+ "schemaVersion": 1,
+ "sourceSha256": "8a3fe86627bd3aae1a91c9b9520a815e47d91ee366581286315069213b4cfcbf",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-communist-manifesto_2026-11-09.glink"
+}

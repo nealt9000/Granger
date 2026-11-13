@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-ariel",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-ariel_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "c8d55330834d87c4dac8915d06a612715808f3f533594f7352554ee92468c446",
+ "schemaVersion": 1,
+ "sourceSha256": "f0f7ff8468c6699f20bf8ae39c778c10501257eb3c01ca6ee489263903a55a9f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-ariel_2026-11-09.glink"
+}

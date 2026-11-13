@@ -1,0 +1,13 @@
+{
+ "id": "gc-middlemarch",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-middlemarch_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "87d1414ed7247db6f9b98728dddaeec0eae7c8f72eb604e5ed20b84862b5d6de",
+ "schemaVersion": 1,
+ "sourceSha256": "e49576202852449cdba1d6bc560d9c72ddf6a1c4763b3e722f7f3cfa34b72fc9",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-middlemarch_2026-11-09.glink"
+}

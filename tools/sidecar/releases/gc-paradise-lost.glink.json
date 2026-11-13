@@ -1,0 +1,13 @@
+{
+ "id": "gc-paradise-lost",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-paradise-lost_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "aecd786f9e3108dbdf2a580557ea9aff3721fdd3ee99d2495312d41865edaca2",
+ "schemaVersion": 1,
+ "sourceSha256": "e8aac3611fe1ab526f915175f49a050c411452e674f542d272133bef1aed2b9c",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-paradise-lost_2026-11-09.glink"
+}

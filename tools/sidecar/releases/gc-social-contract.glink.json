@@ -1,0 +1,13 @@
+{
+ "id": "gc-social-contract",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-social-contract_2026-11-09.glink",
+ "sizeBytes": 69632,
+ "sha256": "089867a0860250b20d570852c6baacc827534e381b56f03b67143f2db1782c3a",
+ "schemaVersion": 1,
+ "sourceSha256": "411a10ceb964d84d39d97a81b032f4f2585590d80311d7e44a947dca2e384a24",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-social-contract_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-tia-tula",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-tia-tula_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "be962b097d255a523f5777ead45f341fdef6e5acbaf7b97eb8d05dfe8d9dc359",
+ "schemaVersion": 1,
+ "sourceSha256": "fecbb33cefbf0114c2a3762188aa55ccfb65eba326fb846c6ea7659c86326118",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-tia-tula_2026-11-09.glink"
+}

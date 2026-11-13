@@ -1,0 +1,13 @@
+{
+ "id": "gc-antony-and-cleopatra",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-antony-and-cleopatra_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "1de9a7194603dffadf8cc3609641214647c8c8d9c7828893d265b79bc5ef848d",
+ "schemaVersion": 1,
+ "sourceSha256": "18774a873d6b8cf79aeb2c0800e7bd941729ab3a22c436c24cb0edb75af1a8de",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-antony-and-cleopatra_2026-11-09.glink"
+}

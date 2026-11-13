@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-niebla",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-niebla_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "972142ae12bf7ad701236a82dda6d0723b5edc1c531e1f204fd9be6c2d740012",
+ "schemaVersion": 1,
+ "sourceSha256": "b4865b3d006ca5ae5c2cee1bf012ade6356d4444e98c3b59a755a0c5505c0c0e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-niebla_2026-11-09.glink"
+}

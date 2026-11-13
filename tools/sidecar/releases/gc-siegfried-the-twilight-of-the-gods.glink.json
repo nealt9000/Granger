@@ -1,0 +1,13 @@
+{
+ "id": "gc-siegfried-the-twilight-of-the-gods",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-siegfried-the-twilight-of-the-gods_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "9d4e1a88120eb26bf5e6c503f97a9eec39f514acb16b013e2d9d7cfc7afc7d3c",
+ "schemaVersion": 1,
+ "sourceSha256": "378221e9bbd27ae9625fb8cb812daaa1e6fa4d2b39cb988b940518173042d1dd",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-siegfried-the-twilight-of-the-gods_2026-11-09.glink"
+}

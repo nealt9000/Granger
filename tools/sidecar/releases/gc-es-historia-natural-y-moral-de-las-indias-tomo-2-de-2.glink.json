@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-historia-natural-y-moral-de-las-indias-tomo-2-de-2",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-historia-natural-y-moral-de-las-indias-tomo-2-de-2_2026-11-09.glink",
+ "sizeBytes": 94208,
+ "sha256": "bda1d93491a2758707a516a0fd70bd33c3f92c2db8d4f8a6247b51583968a008",
+ "schemaVersion": 1,
+ "sourceSha256": "b41dced8a81a907c43f08fb7128d3439ffbe7121702e94b33a741ee5632eb003",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-historia-natural-y-moral-de-las-indias-tomo-2-de-2_2026-11-09.glink"
+}

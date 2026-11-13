@@ -1,0 +1,13 @@
+{
+ "id": "gc-ash-wednesday",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-ash-wednesday_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "5b2f185c3fb7e70c5c19d89969b0ac7e9491fe24736f2b784c9b8eb985dc0458",
+ "schemaVersion": 1,
+ "sourceSha256": "2eca16326633021ffe41dd603057ca85623b716425875e3aaea5aa5909a9a7b3",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-ash-wednesday_2026-11-09.glink"
+}

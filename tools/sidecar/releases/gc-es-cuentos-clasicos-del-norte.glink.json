@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-cuentos-clasicos-del-norte",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-cuentos-clasicos-del-norte_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "7c07c730a8142abc77e10956d968cd443ab42cda0f9fab044a06bfbdab29b008",
+ "schemaVersion": 1,
+ "sourceSha256": "b5a498ddaf5faad2e3eb46775c4334e9e8638e56d02f3414d3cdbd8de5dc2818",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-cuentos-clasicos-del-norte_2026-11-09.glink"
+}

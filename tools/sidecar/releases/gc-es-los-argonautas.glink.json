@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-los-argonautas",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-los-argonautas_2026-11-09.glink",
+ "sizeBytes": 102400,
+ "sha256": "95616a3d24f9a3ae41c977b0153981bf6df16032638742ef3e00788a93c7318c",
+ "schemaVersion": 1,
+ "sourceSha256": "bd9ac38048433079af13f62641b149a8ada21126b05af372282825b5f95aa00c",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-los-argonautas_2026-11-09.glink"
+}

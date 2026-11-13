@@ -1,0 +1,13 @@
+{
+ "id": "gc-confessions",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-confessions_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "641cd3594b4712b7d07a52a0ad84b3adda271ba00644e78be0cbe490fc3b6810",
+ "schemaVersion": 1,
+ "sourceSha256": "5e9f38cb19a9e8afd85f7d1bc962a459d7af76eb35b604431536712e87a6e859",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-confessions_2026-11-09.glink"
+}

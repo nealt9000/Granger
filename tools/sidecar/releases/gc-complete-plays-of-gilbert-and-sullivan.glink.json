@@ -1,0 +1,13 @@
+{
+ "id": "gc-complete-plays-of-gilbert-and-sullivan",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-complete-plays-of-gilbert-and-sullivan_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "9cab933d4bd9c24926634f788b4615a528706d2c1872da3eeb15c3b531cb7a9a",
+ "schemaVersion": 1,
+ "sourceSha256": "c5d533af1e199343ac232e0a714a35ff704d9150582feec8ae0b526c5204fb89",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-complete-plays-of-gilbert-and-sullivan_2026-11-09.glink"
+}

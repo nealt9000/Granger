@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-mare-nostrum",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-mare-nostrum_2026-11-09.glink",
+ "sizeBytes": 98304,
+ "sha256": "d778027476933bb567f17ac640ab37b14e4394c104bd6af63b243ebc1f5325bf",
+ "schemaVersion": 1,
+ "sourceSha256": "43cfd7919bbebef242eea0e1426fc4c0d55625657af496899a677327716788a5",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-mare-nostrum_2026-11-09.glink"
+}

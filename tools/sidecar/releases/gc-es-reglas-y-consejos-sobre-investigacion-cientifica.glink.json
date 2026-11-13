@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-reglas-y-consejos-sobre-investigacion-cientifica",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-reglas-y-consejos-sobre-investigacion-cientifica_2026-11-09.glink",
+ "sizeBytes": 73728,
+ "sha256": "5f828c05d1cb21eac0b21cf9f457e8c1d9d98fd3086458420d7fe426523198eb",
+ "schemaVersion": 1,
+ "sourceSha256": "893ebd76ba16cd6c1d1cb5e433f7670253613cdb3f92e240f2f164176d9f51b1",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-reglas-y-consejos-sobre-investigacion-cientifica_2026-11-09.glink"
+}

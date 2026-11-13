@@ -1,0 +1,13 @@
+{
+ "id": "gc-iliad",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-iliad_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "2f8ad034f740ebedc29c28208e8c1b8d94639a24404fc193d049619badb813ec",
+ "schemaVersion": 1,
+ "sourceSha256": "536f74cec2ecb7fe7d377a250f95385cc0b1b15d2aa3d98c494c6684ef8bbea1",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-iliad_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-tenant-of-wildfell-hall",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-tenant-of-wildfell-hall_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "67b690a78e71afa72799fcc3bf666f673f73dc153430e4fe3870bd9d494afe93",
+ "schemaVersion": 1,
+ "sourceSha256": "f88bf15050d27a7628817da6ce1f3d44911ba922b0f01d571bcd5d361cb84c28",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-tenant-of-wildfell-hall_2026-11-09.glink"
+}

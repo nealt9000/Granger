@@ -1,0 +1,13 @@
+{
+ "id": "gc-koran-rodwell",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-koran-rodwell_2026-11-09.glink",
+ "sizeBytes": 81920,
+ "sha256": "cd4297d7cab8a14fa1ed286b585ed603e892fc060b09d77c80ada7da6e54e6cd",
+ "schemaVersion": 1,
+ "sourceSha256": "28324bc5893966c077bb0f556e15f2142f17a1b4aa54ea3d949e2902c82d353d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-koran-rodwell_2026-11-09.glink"
+}

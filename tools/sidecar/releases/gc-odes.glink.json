@@ -1,0 +1,13 @@
+{
+ "id": "gc-odes",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-odes_2026-11-09.glink",
+ "sizeBytes": 57344,
+ "sha256": "347a83f01a068a9622b4451c19b9bdd5a28ce7fe94fa77ae7eb8d2d528d01ba4",
+ "schemaVersion": 1,
+ "sourceSha256": "f97577b14f37df7aa8a14f25c8a0bb07d6d1f139e561fd2dd57139205bf9fe23",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-odes_2026-11-09.glink"
+}

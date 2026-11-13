@@ -1,0 +1,13 @@
+{
+ "id": "gc-playboy-of-the-western-world",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-playboy-of-the-western-world_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "bada575de3338673a4097a6fb5a165fba5fc20d931014607b3c757ac3e95d653",
+ "schemaVersion": 1,
+ "sourceSha256": "71aeea3f71f374fc642066ccb6726301417a3953c88521a2c3c7baa366b85cb6",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-playboy-of-the-western-world_2026-11-09.glink"
+}

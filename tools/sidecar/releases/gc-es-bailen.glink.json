@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-bailen",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-bailen_2026-11-09.glink",
+ "sizeBytes": 77824,
+ "sha256": "7209e7df76bdd04cf077926e44817b43a7645b9e5f6b6503993bf51769863fdd",
+ "schemaVersion": 1,
+ "sourceSha256": "1d0ec9dd3ae277add8ccd261565555aa1f2875e81cd69223de1f41989a5118a9",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-bailen_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-beowulf",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-beowulf_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "e03d922a8d460530b2add7cfcd4d15819f696678400f0dd7746bceda93a7aac5",
+ "schemaVersion": 1,
+ "sourceSha256": "ff983262182ea6231f5e59102669e460a516ecded800e1c9c5223cb8907081fd",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-beowulf_2026-11-09.glink"
+}

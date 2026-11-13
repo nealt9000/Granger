@@ -1,0 +1,13 @@
+{
+ "id": "gc-sister-carrie",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-sister-carrie_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "dd320d11e2962681ba0a7f2776ca79662a35b297709c0d33754138a7937c0448",
+ "schemaVersion": 1,
+ "sourceSha256": "a69fcdb2b98e3fe617e73f8fc9ca4b1e64430e6731206c742ccd0d402c4749fc",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-sister-carrie_2026-11-09.glink"
+}

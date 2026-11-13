@@ -1,0 +1,13 @@
+{
+ "id": "gc-white-fang",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-white-fang_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "f2e44f3153735fb13bc1bc54b95e917601f2dc4584c0b70b80943285545df004",
+ "schemaVersion": 1,
+ "sourceSha256": "e45edd710986f8050e3d663174375ceeedcabcef5c976b683f2f9c9c736f9874",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-white-fang_2026-11-09.glink"
+}

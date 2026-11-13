@@ -1,0 +1,13 @@
+{
+ "id": "gc-sun-also-rises",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-sun-also-rises_2026-11-09.glink",
+ "sizeBytes": 49152,
+ "sha256": "2228190129048df355668a7a39114a04dbbbcaf0e16bd9a47343ff16d7b33eea",
+ "schemaVersion": 1,
+ "sourceSha256": "bdac3fbe50bc75cda4ef2f389fb56e5198e7c2cbf853e93806daa8577bc578de",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-sun-also-rises_2026-11-09.glink"
+}

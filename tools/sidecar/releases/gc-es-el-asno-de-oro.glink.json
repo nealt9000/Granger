@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-el-asno-de-oro",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-el-asno-de-oro_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "e69120f4e43cc8f6fbf0fbcaa7e7f83f4d09391d5d508af998baf96875ca4f6f",
+ "schemaVersion": 1,
+ "sourceSha256": "3c48c3dc51aac8dd4cfe693a070d5689b6c7a226500a959006f4441a1bd7396e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-asno-de-oro_2026-11-09.glink"
+}

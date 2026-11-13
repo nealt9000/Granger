@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-libro-de-poemas",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-libro-de-poemas_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "6073ffa380f39d8088e6ca27821f08cb30bef8b4cac60bd01d1b9896b02132db",
+ "schemaVersion": 1,
+ "sourceSha256": "674d8206dcf8df504bfe35932d1495063d6ef6ef82d037bafc1238c834dcc831",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-libro-de-poemas_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-common-sense",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-common-sense_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "fb21f7029f08bfe14469199df03ac9bc6502dfe7d223b032a7b3393994fdee6d",
+ "schemaVersion": 1,
+ "sourceSha256": "d44d3a3beae743f9c9f71835f2617a25ce078f374a216bd678d2a6474db22060",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-common-sense_2026-11-09.glink"
+}

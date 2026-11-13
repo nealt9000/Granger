@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-libro-de-buen-amor",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-libro-de-buen-amor_2026-11-09.glink",
+ "sizeBytes": 102400,
+ "sha256": "ade00bb8c0960ea6a4ab277229d27e08169a961a78f71cc8a8b582183085259d",
+ "schemaVersion": 1,
+ "sourceSha256": "5bd3f468c6cc70db83071bd1a052023ee005b644df53c348ca308c405142bcec",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-libro-de-buen-amor_2026-11-09.glink"
+}

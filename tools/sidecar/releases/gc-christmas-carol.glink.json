@@ -1,0 +1,13 @@
+{
+ "id": "gc-christmas-carol",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-christmas-carol_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "f4402be29d1c83cde76760efb3984482b219ace6e8ce834a7197d59e6a1c9c5f",
+ "schemaVersion": 1,
+ "sourceSha256": "c638a2c0c92ff78fe762e51842cf2a73951458553c25896daee25bdfb9e30232",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-christmas-carol_2026-11-09.glink"
+}

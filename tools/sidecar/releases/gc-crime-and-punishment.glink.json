@@ -1,0 +1,13 @@
+{
+ "id": "gc-crime-and-punishment",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-crime-and-punishment_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "5960553dfe8b7190845a25b1ca2d80892994246bf5b42872712d281237d51719",
+ "schemaVersion": 1,
+ "sourceSha256": "3b39faab1b5cafdfeec138df29ae3b29c9b1a7fd81675a2c10ab77439f72132a",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-crime-and-punishment_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-tirano-banderas",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-tirano-banderas_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "346beddf491dddd98543bd04f213cc4d34575972901767d3de5e32ce909da9c7",
+ "schemaVersion": 1,
+ "sourceSha256": "b5b1e931ceedc32f1462eacc9195aa8dbc608e30b4085dc86f5e9344984f32dd",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-tirano-banderas_2026-11-09.glink"
+}

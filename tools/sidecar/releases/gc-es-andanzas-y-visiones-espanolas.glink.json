@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-andanzas-y-visiones-espanolas",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-andanzas-y-visiones-espanolas_2026-11-09.glink",
+ "sizeBytes": 122880,
+ "sha256": "a6a74a2f806bde49b5c137c153831ff45c1b0432679afbfa3d0a845682dc8b2a",
+ "schemaVersion": 1,
+ "sourceSha256": "a904dab3600a19d0e6ae0ff8ff61e2163c4b75e59da8e2e6d3a3cf9eb644cb7c",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-andanzas-y-visiones-espanolas_2026-11-09.glink"
+}

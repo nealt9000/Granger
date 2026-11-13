@@ -1,0 +1,13 @@
+{
+ "id": "gc-don-quixote",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-don-quixote_2026-11-09.glink",
+ "sizeBytes": 114688,
+ "sha256": "772a1cd2b1c28b1f12d6f578aeb4ca297c5578df574544d995d065de1c04a138",
+ "schemaVersion": 1,
+ "sourceSha256": "af8a15f25e1580931699b349fac72453ec00de2ebb6b361ce7a6f9206760b435",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-don-quixote_2026-11-09.glink"
+}

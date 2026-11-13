@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-romancero-gitano",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-romancero-gitano_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "166054534823bcb24d2ced2d7c5224b21210c1bc1af556245be0fc0ccabb1305",
+ "schemaVersion": 1,
+ "sourceSha256": "a2f85445c30e5717c7f61da7c7514c366b197187eca0a84ad1763af7ac0a6e20",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-romancero-gitano_2026-11-09.glink"
+}

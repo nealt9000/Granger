@@ -1,0 +1,13 @@
+{
+ "id": "gc-arms-and-the-man",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-arms-and-the-man_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "bc9302dad97a59fbbbb40124defa9a72f13655f272d0877612484e6b0fdca1e5",
+ "schemaVersion": 1,
+ "sourceSha256": "33941ee19eeafa6157fe2faf3fe8a8963d0fac90fd70ecf486a8a1d10d9e77b0",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-arms-and-the-man_2026-11-09.glink"
+}

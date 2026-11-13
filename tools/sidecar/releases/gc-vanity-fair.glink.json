@@ -1,0 +1,13 @@
+{
+ "id": "gc-vanity-fair",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-vanity-fair_2026-11-09.glink",
+ "sizeBytes": 122880,
+ "sha256": "d333ccd8500f853514b26d242f32c7619c47b4b233b6c8052b3e1bc315893849",
+ "schemaVersion": 1,
+ "sourceSha256": "b83051ecfc12d1c0b477bc5087b4ae1fdf1b37a8619b00d7ff971ea03cb64e65",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-vanity-fair_2026-11-09.glink"
+}

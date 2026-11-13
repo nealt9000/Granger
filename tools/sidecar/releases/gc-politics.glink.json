@@ -1,0 +1,13 @@
+{
+ "id": "gc-politics",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-politics_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "ac8261747a40b0058fa217f44ae35d816e20f537b95b957bb86b0e14c54d37e8",
+ "schemaVersion": 1,
+ "sourceSha256": "c039cd598d4962e5baa8f5726ac4a51650e93e15b87e8bd627531dabbffd2eed",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-politics_2026-11-09.glink"
+}

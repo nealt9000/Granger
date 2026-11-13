@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-cuentos-y-dialogos",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-cuentos-y-dialogos_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "a4a4ae228ee3d17dc0c5070d46327473bf113e78c1f56dcc12a49d5fd52471fd",
+ "schemaVersion": 1,
+ "sourceSha256": "ab944d0a004acc4735847d9a19980384fb2e1a00c7aa7cbee2545e22c961eef5",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-cuentos-y-dialogos_2026-11-09.glink"
+}

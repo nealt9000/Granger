@@ -1,0 +1,13 @@
+{
+ "id": "gc-wild-duck",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-wild-duck_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "74d72d7f1d1c89a9568cacfac0881db3b11c66727a07ff6afe838ca1ef7a3d7f",
+ "schemaVersion": 1,
+ "sourceSha256": "5be8c0ee686f0be084b680c8713c46c2bc0fa7cbdf512ea53fb890149fa85bd2",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-wild-duck_2026-11-09.glink"
+}

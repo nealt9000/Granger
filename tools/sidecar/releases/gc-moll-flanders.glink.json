@@ -1,0 +1,13 @@
+{
+ "id": "gc-moll-flanders",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-moll-flanders_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "60de1d46d77dfa9ca68d0faa69d6bc1f64cc0c9426eeaaf03f6c29000aa82028",
+ "schemaVersion": 1,
+ "sourceSha256": "2fb379f8a8701b8c81d031d70e690949cbd9f91a6adbed99114d94ae9347ff15",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-moll-flanders_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-heart-of-darkness",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-heart-of-darkness_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "ce68fc694ad2bbd130cd300c9af1f43a547098a17ba4a324b0d35fad166d828c",
+ "schemaVersion": 1,
+ "sourceSha256": "2252c28bba57ab606a9cf01272ad7e4c6e3534b5627b2d1273a84c809e5ca613",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-heart-of-darkness_2026-11-09.glink"
+}

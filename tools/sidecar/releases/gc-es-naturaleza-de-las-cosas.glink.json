@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-naturaleza-de-las-cosas",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-naturaleza-de-las-cosas_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "f966b1246c1e1389d8dfe4938572d4f09945a09b8da625ea11315a1cf5aada97",
+ "schemaVersion": 1,
+ "sourceSha256": "3a83fd33805935faf7533f9f0db944481fda99e602ea8d3d840106da230e1206",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-naturaleza-de-las-cosas_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-seven-pillars-of-wisdom",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-seven-pillars-of-wisdom_2026-11-09.glink",
+ "sizeBytes": 176128,
+ "sha256": "f4ff12b9cb96053fb54e962847479f7ef45cd845b617d2575c8ceeb5fe6d1171",
+ "schemaVersion": 1,
+ "sourceSha256": "5e04f291695452b4682cd8f04e23a51dcec91d88cd72c390ce84dac9e2d02f75",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-seven-pillars-of-wisdom_2026-11-09.glink"
+}

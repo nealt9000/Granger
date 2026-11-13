@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-cuentos-ingenuos",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-cuentos-ingenuos_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "36defb74db867ea60a4a22ba74e9ffe0992b2f08561c359a66dc724cbd6ad586",
+ "schemaVersion": 1,
+ "sourceSha256": "df2f54d96ab51c85365372c0190be62f4dd1200c22773f8f7704f195ed2d6f26",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-cuentos-ingenuos_2026-11-09.glink"
+}

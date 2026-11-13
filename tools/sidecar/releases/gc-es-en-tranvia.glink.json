@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-en-tranvia",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-en-tranvia_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "5a57ca396cf0e45bee6307f1fa0a2b522cc382aa010dbea2d43da29250532b9f",
+ "schemaVersion": 1,
+ "sourceSha256": "3a6ef44b8ceb4132090d492a8e62952e806883513fc92208205c23202f1cdb42",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-en-tranvia_2026-11-09.glink"
+}

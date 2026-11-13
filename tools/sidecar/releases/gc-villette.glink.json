@@ -1,0 +1,13 @@
+{
+ "id": "gc-villette",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-villette_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "6c2655a21edada43d79bb6ee46677d5d54b727f02050c2e5f0ff2a2e43a33605",
+ "schemaVersion": 1,
+ "sourceSha256": "e2a31cb3f8fa0ffbb45cdf6deaae9731e23d3d1d981584075b8c5b68f72b97d2",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-villette_2026-11-09.glink"
+}

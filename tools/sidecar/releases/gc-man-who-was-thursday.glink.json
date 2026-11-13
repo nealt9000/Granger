@@ -1,0 +1,13 @@
+{
+ "id": "gc-man-who-was-thursday",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-man-who-was-thursday_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "11308a5c8e3d88e850869b28513ad6f10c0faad3c1e0f8f62bd6fe5665d1157e",
+ "schemaVersion": 1,
+ "sourceSha256": "bfe03ccb0ae8e1d8a4547f21343f2d510b62355d35863833e180892d160e438c",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-man-who-was-thursday_2026-11-09.glink"
+}

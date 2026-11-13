@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-iliada",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-iliada_2026-11-09.glink",
+ "sizeBytes": 118784,
+ "sha256": "74a152c8f58b14d40139978dfb35f09061a1a020faf2c9ae0e262bf7afa08d45",
+ "schemaVersion": 1,
+ "sourceSha256": "b217e4477ad99159776a8404d70162c746f31a378a8d56ce9e7c36c63e0ddacb",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-iliada_2026-11-09.glink"
+}

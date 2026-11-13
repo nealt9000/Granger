@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-cuentos-de-fray-mocho",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-cuentos-de-fray-mocho_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "7c0fa297152b872b51d5308637c9944cb039a0e7be7eefa074d3d51d7bc305e1",
+ "schemaVersion": 1,
+ "sourceSha256": "78a4b8f54df259035d7bf9c0ede538a98b4aa403f2433df77978b7dc38259960",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-cuentos-de-fray-mocho_2026-11-09.glink"
+}

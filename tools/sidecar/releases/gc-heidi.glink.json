@@ -1,0 +1,13 @@
+{
+ "id": "gc-heidi",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-heidi_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "7641a1c0f49080c643d24eabd60be60489d34fe42741bbda48b5bccd8cbafdbb",
+ "schemaVersion": 1,
+ "sourceSha256": "65ced59f5ad9dd0b2c80dca8ff5b8a9e4fb99e8602eef5f06285da9c8b91f1b2",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-heidi_2026-11-09.glink"
+}

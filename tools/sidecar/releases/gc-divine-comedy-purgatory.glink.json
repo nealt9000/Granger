@@ -1,0 +1,13 @@
+{
+ "id": "gc-divine-comedy-purgatory",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-divine-comedy-purgatory_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "abe4f4dca5c15021b7d86182c5af5abd69fc7c5a7a01e1601e06a4723d8b5872",
+ "schemaVersion": 1,
+ "sourceSha256": "e59efe87d95817ae215291335252e84393a2659a5edec77cc05052b91b4a0064",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-divine-comedy-purgatory_2026-11-09.glink"
+}

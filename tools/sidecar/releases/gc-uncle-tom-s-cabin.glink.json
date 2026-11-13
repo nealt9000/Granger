@@ -1,0 +1,13 @@
+{
+ "id": "gc-uncle-tom-s-cabin",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-uncle-tom-s-cabin_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "947295d65e6735f6b75c32900dd7b3207156670cf4c9b332241acc976410be81",
+ "schemaVersion": 1,
+ "sourceSha256": "4f412b9463e13021d36a32bc320b21feb3cae52e28918966918fcf23711dfba6",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-uncle-tom-s-cabin_2026-11-09.glink"
+}

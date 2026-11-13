@@ -1,0 +1,13 @@
+{
+ "id": "gc-mysterious-mr-quin",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-mysterious-mr-quin_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "e0cf26404e5935c14d465701331e6e16a23f6502f277d5970d87716eaebf52c4",
+ "schemaVersion": 1,
+ "sourceSha256": "f621ec0828cddb8e45a95e50ddd512db5b9f23d3572f6efed8ef5d31f5705acb",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-mysterious-mr-quin_2026-11-09.glink"
+}

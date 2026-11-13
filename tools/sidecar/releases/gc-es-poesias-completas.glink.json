@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-poesias-completas",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-poesias-completas_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "cfa29420f9a78154914b0d6698e923b9110d8b77c135778484744c7d3e92e0ce",
+ "schemaVersion": 1,
+ "sourceSha256": "4ed9b4a4ec2a04973e3fedfa37f0d40a2902003a53302768ac5e47b9333fe1ed",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-poesias-completas_2026-11-09.glink"
+}

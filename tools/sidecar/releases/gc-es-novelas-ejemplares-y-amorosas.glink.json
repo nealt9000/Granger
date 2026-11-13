@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-novelas-ejemplares-y-amorosas",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-novelas-ejemplares-y-amorosas_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "810b8cd61323e56bc73edf4210b9e8a71ddd134b240ff168b0627d0a81b708a0",
+ "schemaVersion": 1,
+ "sourceSha256": "3310e62cfb5b2657047f2c8b8e0bb47b69c6c9e119493f090fb92d1c0eda7c45",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-novelas-ejemplares-y-amorosas_2026-11-09.glink"
+}

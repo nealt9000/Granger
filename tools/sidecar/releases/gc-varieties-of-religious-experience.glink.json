@@ -1,0 +1,13 @@
+{
+ "id": "gc-varieties-of-religious-experience",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-varieties-of-religious-experience_2026-11-09.glink",
+ "sizeBytes": 77824,
+ "sha256": "e7be04149a79a998e90c60d430b59316c42d5f374beacc309609a244b409501d",
+ "schemaVersion": 1,
+ "sourceSha256": "09137070058e9e7f98da7079d53b5e23e00d4eb351e0fb899cc868b464dc8154",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-varieties-of-religious-experience_2026-11-09.glink"
+}

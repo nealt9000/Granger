@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-cuentos-de-poeta",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-cuentos-de-poeta_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "33d63e1d4197da37477d8bac1770b8b1adbd7fdbaac8bbe74335f86c9616c43a",
+ "schemaVersion": 1,
+ "sourceSha256": "94f23b08420e5d15f61c385446ee2734d648f93e8b4f7ca577294368285f9da5",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-cuentos-de-poeta_2026-11-09.glink"
+}

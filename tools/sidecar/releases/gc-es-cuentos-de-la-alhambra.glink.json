@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-cuentos-de-la-alhambra",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-cuentos-de-la-alhambra_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "ecd1b7f7aaa067415628a5f88d78396beae483aaec928e71fb43f37c28f30993",
+ "schemaVersion": 1,
+ "sourceSha256": "14a513008d8dbe6db9bfa6aca62f543b5bf86856f2120132b5df803e1868f526",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-cuentos-de-la-alhambra_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-nicomachean-ethics",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-nicomachean-ethics_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "f6e3aa4fc8bed5a592c72f5e6571caec1e9bfbd381fa403039b1c0989f8d1481",
+ "schemaVersion": 1,
+ "sourceSha256": "b5afdc26ee9a08e4ec1db15a36655e3760dbad204adc5ddde826ce7595fdfd01",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-nicomachean-ethics_2026-11-09.glink"
+}

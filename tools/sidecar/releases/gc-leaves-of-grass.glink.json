@@ -1,0 +1,13 @@
+{
+ "id": "gc-leaves-of-grass",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-leaves-of-grass_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "bbe86564752243dfd8d934e11ac2918c462e1ba2e94364d8ba7359ba8e3349e3",
+ "schemaVersion": 1,
+ "sourceSha256": "96a323481c2dafb96da9354bddb4c88a410aec12917756452b4f1b9cc2a02afe",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-leaves-of-grass_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-winnie-the-pooh",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-winnie-the-pooh_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "79a4fca9698c857d2100c25e9473276c47040a0011b7796235ea9ee0984757ed",
+ "schemaVersion": 1,
+ "sourceSha256": "58579a03129fa69948933e4e2344c75211f3c5dc451c653f1d1dc24ac310f2b6",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-winnie-the-pooh_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-pequeneces",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-pequeneces_2026-11-09.glink",
+ "sizeBytes": 94208,
+ "sha256": "9cda68219d19cd844f29356dc85d6c4d29e9c5bf0ec71503786f01bff396bb67",
+ "schemaVersion": 1,
+ "sourceSha256": "1cff8b902215368222bcdc34d43a340dbbbeb474ed96c5bc9c360d394fdb784a",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-pequeneces_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-essays-bacon",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-essays-bacon_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "becf49a31979bbc64eaea13e1081326b34ec89357826b02455422c5218d065f5",
+ "schemaVersion": 1,
+ "sourceSha256": "d630d4ee64baf0e0229c8b63c421e318d16ad01ae1704c535b6bea0e5c06d616",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-essays-bacon_2026-11-09.glink"
+}

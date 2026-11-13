@@ -1,0 +1,13 @@
+{
+ "id": "gc-tale-of-genji-volume-2",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-tale-of-genji-volume-2_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "1da8a4f59b30b175fb86e495356a9013ca039d4e59512fd1d70e24b6a3522a5f",
+ "schemaVersion": 1,
+ "sourceSha256": "50d1852d2401f24c8a3d2c6db3732c5b6b01b0023ea0ddb8a930a0d74af2f5ec",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-tale-of-genji-volume-2_2026-11-09.glink"
+}

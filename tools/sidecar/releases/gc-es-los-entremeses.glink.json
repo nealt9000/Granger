@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-los-entremeses",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-los-entremeses_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "315cd085a38fd404eb45e94df5453a63e3350d5c74a796d2c4578da64251f7d6",
+ "schemaVersion": 1,
+ "sourceSha256": "923823af9f6983a0b7ef39abb3de621302cfff61f292fd3ab53371bb42a0070b",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-los-entremeses_2026-11-09.glink"
+}

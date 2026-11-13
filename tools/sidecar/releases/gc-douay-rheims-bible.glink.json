@@ -1,0 +1,13 @@
+{
+ "id": "gc-douay-rheims-bible",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-douay-rheims-bible_2026-11-09.glink",
+ "sizeBytes": 241664,
+ "sha256": "d5b920fbb443cd90a72190dfeea0e8af7be97ee48be6f6ec58b3f96f7f51d5b7",
+ "schemaVersion": 1,
+ "sourceSha256": "6b519dcc76734d5892523efca5effaf475dee610b8a8501ad20da9dcfdb9ea2c",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-douay-rheims-bible_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-libro-segundo-de-lectura",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-libro-segundo-de-lectura_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "81313ca5666945ffeef0357715baae7302430fa7c02397441025450586ee1ecf",
+ "schemaVersion": 1,
+ "sourceSha256": "d661548b832b11e68ef688d890842d02727afe716ecbc3e4d74ec36678d45a82",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-libro-segundo-de-lectura_2026-11-09.glink"
+}

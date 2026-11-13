@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-vida-de-don-quijote-y-sancho",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-vida-de-don-quijote-y-sancho_2026-11-09.glink",
+ "sizeBytes": 65536,
+ "sha256": "1471e609e05e3a54eb284e0209cd309ccfa75c1fcdac5b7ff92f2d13b73faa23",
+ "schemaVersion": 1,
+ "sourceSha256": "230a43295e49e5ffa9a78ca27d391b8ab150118d35f1a050ebd5a8c39bbb5cad",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-vida-de-don-quijote-y-sancho_2026-11-09.glink"
+}

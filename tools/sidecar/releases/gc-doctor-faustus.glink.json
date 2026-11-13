@@ -1,0 +1,13 @@
+{
+ "id": "gc-doctor-faustus",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-doctor-faustus_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "d642fc8f93280d6565345a15c0a1196213508c6680e2f678f7eea0fa05cc713b",
+ "schemaVersion": 1,
+ "sourceSha256": "c6a1c30a3fa2e301cee4847af7747685b1e056f0d90dcbbcd98718311f1222ea",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-doctor-faustus_2026-11-09.glink"
+}

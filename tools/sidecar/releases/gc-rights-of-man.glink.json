@@ -1,0 +1,13 @@
+{
+ "id": "gc-rights-of-man",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-rights-of-man_2026-11-09.glink",
+ "sizeBytes": 57344,
+ "sha256": "4cbbb61ca23f5b63ff69161bee41eefd24793923ecc2a53c4ec0e2cfe330b138",
+ "schemaVersion": 1,
+ "sourceSha256": "ca4547d00c8e21f8a5017fc7809d00272f1627518207f003919b9a3474058045",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-rights-of-man_2026-11-09.glink"
+}

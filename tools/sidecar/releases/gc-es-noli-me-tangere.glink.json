@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-noli-me-tangere",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-noli-me-tangere_2026-11-09.glink",
+ "sizeBytes": 69632,
+ "sha256": "3c45246a96b6fc183503798083337aa3328e7dc2ec9e7eb473ce8eb0ab0a654a",
+ "schemaVersion": 1,
+ "sourceSha256": "41ff4276070cdb16ff6fb4e514509c6a746d945bab8eecf73eca21273174b058",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-noli-me-tangere_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-meditations",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-meditations_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "a1672ea4c821d35dee1c8b9a1619beb71f2377e94763619c3093116735bf6c85",
+ "schemaVersion": 1,
+ "sourceSha256": "8d05578d861ec2b5bfa38515972308f5f033f48ce3fe094503de1d8112d3e0eb",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-meditations_2026-11-09.glink"
+}

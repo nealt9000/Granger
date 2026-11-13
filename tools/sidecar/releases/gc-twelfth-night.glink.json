@@ -1,0 +1,13 @@
+{
+ "id": "gc-twelfth-night",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-twelfth-night_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "4083f3ee5d627ee3990f72ed6fd04fb9aa92440b5d6f396a891f86ac5031ae0d",
+ "schemaVersion": 1,
+ "sourceSha256": "672e4752705a26a3aa930758237d4b83e484d4db86b5dcee673a3dd21a894827",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-twelfth-night_2026-11-09.glink"
+}

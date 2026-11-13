@@ -1,0 +1,13 @@
+{
+ "id": "gc-anne-of-green-gables",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-anne-of-green-gables_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "0f118543c43f2f5b67a348dda4c7a33f123f38c2776af20f4e0c5152b7e982f9",
+ "schemaVersion": 1,
+ "sourceSha256": "7edada606b16ecaf3754d368b88fbb92925c74f94ddb6f7a3fa27ecdcfde4737",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-anne-of-green-gables_2026-11-09.glink"
+}

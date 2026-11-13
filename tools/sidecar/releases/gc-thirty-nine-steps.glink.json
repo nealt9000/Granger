@@ -1,0 +1,13 @@
+{
+ "id": "gc-thirty-nine-steps",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-thirty-nine-steps_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "8438efbce681500b32e6a78963a1f99decba350e874b4b407bb1a0d41b419449",
+ "schemaVersion": 1,
+ "sourceSha256": "7a3000d26d62feed703a4e5b4d7f0fec61e805114eeae28ff2898c73b1667b18",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-thirty-nine-steps_2026-11-09.glink"
+}

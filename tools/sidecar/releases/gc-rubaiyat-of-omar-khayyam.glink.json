@@ -1,0 +1,13 @@
+{
+ "id": "gc-rubaiyat-of-omar-khayyam",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-rubaiyat-of-omar-khayyam_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "317b562700d90da22b1da06101610e28df2eea82a4b7bb1c94bdb70d028e17f4",
+ "schemaVersion": 1,
+ "sourceSha256": "8f7b40277cb81e5c4416b9babfe83a575ce9818ef0a234750ad6dcd2bf5aeb3a",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-rubaiyat-of-omar-khayyam_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-fathers-and-sons",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-fathers-and-sons_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "8e9752da07673760063cf9efe206b6003b84ebcadb901ed08eec86f053d46f76",
+ "schemaVersion": 1,
+ "sourceSha256": "23f411c84726c72edfd05877e88b72b82f7971d3265ccbdf1a2b000f07981660",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-fathers-and-sons_2026-11-09.glink"
+}

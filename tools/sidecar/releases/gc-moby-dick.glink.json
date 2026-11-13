@@ -1,0 +1,13 @@
+{
+ "id": "gc-moby-dick",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-moby-dick_2026-11-09.glink",
+ "sizeBytes": 114688,
+ "sha256": "d372e89a94fb663d7d99d6850ca6dc0e3cad6df742935e5a2ee9a6c97f90c7c4",
+ "schemaVersion": 1,
+ "sourceSha256": "629a10db875f37b29b50a126bc023c9b48da93b10181afceaf0006f1a7b0d409",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-moby-dick_2026-11-09.glink"
+}

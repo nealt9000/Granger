@@ -1,0 +1,13 @@
+{
+ "id": "gc-hound-of-the-baskervilles",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-hound-of-the-baskervilles_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "8f6ae7c086c272728a4329d64bcfabb577de8b42fdfb982d841dc9b66297e761",
+ "schemaVersion": 1,
+ "sourceSha256": "1cd766519b115dbfe065e3f57d988329c58df52b724aadee98f814b9bb52fc95",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-hound-of-the-baskervilles_2026-11-09.glink"
+}

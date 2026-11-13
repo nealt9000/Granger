@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-azul",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-azul_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "ac843fc7f70e434787c746adc7f4d6f760de1cccfc4b075a0c565b75b36f98d1",
+ "schemaVersion": 1,
+ "sourceSha256": "a30d7c6f19e05e8671dcd913f8c2103492a6bf5619b1c82fe1ffed8528cbf31a",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-azul_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-germinal",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-germinal_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "c7f6f085b9a79b382486cd61abb53487da4205958d0a59883474c7b8bcdb09a4",
+ "schemaVersion": 1,
+ "sourceSha256": "65f37d37e701386204237e99334e0d58dbd0a79793521cdc39cf3e37d0f97c26",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-germinal_2026-11-09.glink"
+}

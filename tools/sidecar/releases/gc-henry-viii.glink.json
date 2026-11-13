@@ -1,0 +1,13 @@
+{
+ "id": "gc-henry-viii",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-henry-viii_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "61d3e7e848bdb3ae5a6ab5464b38b759c147d1266344bc22375130e423ebbd2f",
+ "schemaVersion": 1,
+ "sourceSha256": "f1431289f1e52532ca9782e3d0ca2a4462f5580a70e1595f00c86fda8d2eca29",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-henry-viii_2026-11-09.glink"
+}

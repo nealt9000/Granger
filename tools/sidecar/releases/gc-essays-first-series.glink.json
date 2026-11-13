@@ -1,0 +1,13 @@
+{
+ "id": "gc-essays-first-series",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-essays-first-series_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "a9f9d875b0e619e32c0e07d0f796e3dc0e6f599f1951380d486bec74d16fc29d",
+ "schemaVersion": 1,
+ "sourceSha256": "444f27515280eb3aa2ee4ed7d3ee196c0600fdbe905ced5221f75405eac30ead",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-essays-first-series_2026-11-09.glink"
+}

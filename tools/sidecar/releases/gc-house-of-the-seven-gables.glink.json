@@ -1,0 +1,13 @@
+{
+ "id": "gc-house-of-the-seven-gables",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-house-of-the-seven-gables_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "f3d6fafdfaba1e09eeda8fba7ab4e6cca6894d7c7ce20afadfe15838254a489f",
+ "schemaVersion": 1,
+ "sourceSha256": "a989f9c37768067f6ff4a2437df539bbc4d53e5444c2698ca13522d1c41f6662",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-house-of-the-seven-gables_2026-11-09.glink"
+}

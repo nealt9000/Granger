@@ -1,0 +1,13 @@
+{
+ "id": "gc-way-of-all-flesh",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-way-of-all-flesh_2026-11-09.glink",
+ "sizeBytes": 65536,
+ "sha256": "1f5abf9e65b618d07c394ff5dedb81e4531144d57cff6b7d9fcb8cbe54a77371",
+ "schemaVersion": 1,
+ "sourceSha256": "e738f60191c7cc3ee46083b5870d981ce9c63451d34c34e1f83c707ca3ed45b8",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-way-of-all-flesh_2026-11-09.glink"
+}

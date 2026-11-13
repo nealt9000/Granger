@@ -1,0 +1,13 @@
+{
+ "id": "gc-war-of-the-worlds",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-war-of-the-worlds_2026-11-09.glink",
+ "sizeBytes": 65536,
+ "sha256": "86be14d5d83067fa75ff2dfd4e4eab0ac6b1fb25aa297e4030c7c6a955d1e2f4",
+ "schemaVersion": 1,
+ "sourceSha256": "c7324085edf6917b24ea26189c8176ce59f0df8cd3066bca5cff8028b2db5996",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-war-of-the-worlds_2026-11-09.glink"
+}

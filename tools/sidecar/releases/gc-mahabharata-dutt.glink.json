@@ -1,0 +1,13 @@
+{
+ "id": "gc-mahabharata-dutt",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-mahabharata-dutt_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "a00254ae26b07c01cd33a60442bc9ad6f016a6c8d1f18a11797aabb2dc12e261",
+ "schemaVersion": 1,
+ "sourceSha256": "a6cd27af11b32cfdee0c94a6310b5474c0027ee3a01f75a999f077443ed83c7f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-mahabharata-dutt_2026-11-09.glink"
+}

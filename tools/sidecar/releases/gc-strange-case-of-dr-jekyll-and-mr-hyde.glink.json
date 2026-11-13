@@ -1,0 +1,13 @@
+{
+ "id": "gc-strange-case-of-dr-jekyll-and-mr-hyde",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-strange-case-of-dr-jekyll-and-mr-hyde_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "3d631f8fb181f45c1900733b87e800be18d31b26f329d5ebe7f29022f3718fb6",
+ "schemaVersion": 1,
+ "sourceSha256": "49dafcb57279d748fae732f621f5702eee05358522d73397995a23919744b17d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-strange-case-of-dr-jekyll-and-mr-hyde_2026-11-09.glink"
+}

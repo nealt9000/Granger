@@ -1,0 +1,13 @@
+{
+ "id": "gc-macbeth",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-macbeth_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "e86031e864a30f7983b27188059d52ce8cf2219a4ed9c634c6aeb2650afdca60",
+ "schemaVersion": 1,
+ "sourceSha256": "8d0a2bafe2a5659c7a43f1a0c3698461ce9c47a55f9a47a1d15b325f85a90a2e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-macbeth_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-howards-end",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-howards-end_2026-11-09.glink",
+ "sizeBytes": 69632,
+ "sha256": "c390269dcadad131135aa08c0d6317853d9b696447673c6801b8fb628b540d17",
+ "schemaVersion": 1,
+ "sourceSha256": "ae65ac063cee5e5b311bd039690c1e1c39ebd62b33acab25302030048d26915e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-howards-end_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-our-mutual-friend",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-our-mutual-friend_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "3118f46b94f275e11f96bf2a5da6ae6616e20ce6e3cba1c92456278d34261150",
+ "schemaVersion": 1,
+ "sourceSha256": "8006298c870924ee2c806d0223e4be50a9e4cfa4324644a302bfe35bad56ee92",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-our-mutual-friend_2026-11-09.glink"
+}

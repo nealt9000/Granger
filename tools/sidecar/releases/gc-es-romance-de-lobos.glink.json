@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-romance-de-lobos",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-romance-de-lobos_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "3f3b3cb801e78a5a49ef6c46965d28ba0cf7d3f9ba0f195375d78e75073f3dc4",
+ "schemaVersion": 1,
+ "sourceSha256": "790157e9776570ffed02927700e7044a343db2615678128fb0c96dd4c1691874",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-romance-de-lobos_2026-11-09.glink"
+}

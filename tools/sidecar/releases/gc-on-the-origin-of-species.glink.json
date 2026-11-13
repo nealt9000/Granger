@@ -1,0 +1,13 @@
+{
+ "id": "gc-on-the-origin-of-species",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-on-the-origin-of-species_2026-11-09.glink",
+ "sizeBytes": 69632,
+ "sha256": "7a0100217a644bc24c8c54f34cc601bdf1947c3f0a10c20d99f50745c6cb991d",
+ "schemaVersion": 1,
+ "sourceSha256": "accbddfb675129f84a79360669e19d8c279d42ed62c9369afe9970763a670957",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-on-the-origin-of-species_2026-11-09.glink"
+}

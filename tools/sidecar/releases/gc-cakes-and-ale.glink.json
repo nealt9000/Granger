@@ -1,0 +1,13 @@
+{
+ "id": "gc-cakes-and-ale",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-cakes-and-ale_2026-11-09.glink",
+ "sizeBytes": 49152,
+ "sha256": "742a2c5045e8d082e695497b49fc170f32e0fe309d4209b2cba993f957815cd3",
+ "schemaVersion": 1,
+ "sourceSha256": "f64430aaf008557ee74df67a33e63a4508028d5557c287eda7dec934868db654",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-cakes-and-ale_2026-11-09.glink"
+}

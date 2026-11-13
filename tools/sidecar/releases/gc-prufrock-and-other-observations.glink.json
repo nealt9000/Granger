@@ -1,0 +1,13 @@
+{
+ "id": "gc-prufrock-and-other-observations",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-prufrock-and-other-observations_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "1979cda3b9dd6e815b161d59947f01b01afaf4f990f74ffb00353b032d9f2480",
+ "schemaVersion": 1,
+ "sourceSha256": "ad53bdfdbdeedf6143b56833729473aefd2d158cc02393311822155f79a8ec21",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-prufrock-and-other-observations_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-condenada",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-condenada_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "6f2f96cb9e9728c98e8ec2a039ae64570e60e8aeaf0c4a3cb7f077fdf2714d43",
+ "schemaVersion": 1,
+ "sourceSha256": "6c631e4117d09dded8f1eada15cf71b8270a34044c0859652bbe0c093cbd1b82",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-condenada_2026-11-09.glink"
+}

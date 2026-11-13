@@ -1,0 +1,13 @@
+{
+ "id": "gc-divine-comedy-paradise",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-divine-comedy-paradise_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "05f6bf3b55c8caf0bb32023f3f983bfb2af427a2dcf355a91b3d7f460f8ad883",
+ "schemaVersion": 1,
+ "sourceSha256": "0ae16690462afe448779fb48eb15ee4ef00dda0f7feb5b03f053175ef9f80fc9",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-divine-comedy-paradise_2026-11-09.glink"
+}

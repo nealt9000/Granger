@@ -1,0 +1,13 @@
+{
+ "id": "gc-theaetetus",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-theaetetus_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "af1bfa569a58c35b2bf6d0128219c8dd9b4a22ae9462292827e6c6021523b87c",
+ "schemaVersion": 1,
+ "sourceSha256": "35621d08ad4e14e69b73af65dd5bbe78ebd3f2c2ebdac5567fbe162ecc40f258",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-theaetetus_2026-11-09.glink"
+}

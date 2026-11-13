@@ -1,0 +1,13 @@
+{
+ "id": "gc-on-the-nature-of-things",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-on-the-nature-of-things_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "22b63ad235bd5b8e0df6cfc7097e9124b2e451bc06355dad9d8862fe48d1ac9f",
+ "schemaVersion": 1,
+ "sourceSha256": "250dde6cd44fc43a419cc30b1bdad5ecf181682852381b5d86a727aaf55cc744",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-on-the-nature-of-things_2026-11-09.glink"
+}

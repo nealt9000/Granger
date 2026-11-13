@@ -1,0 +1,13 @@
+{
+ "id": "gc-orlando",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-orlando_2026-11-09.glink",
+ "sizeBytes": 49152,
+ "sha256": "a5f160ea202b541dad7f49700180401680eb54403f9fb7b348a80940b1a67a41",
+ "schemaVersion": 1,
+ "sourceSha256": "b713455bf85f74da149f7d4810ee5e2cf65a6dfa9adafe7f6ebe0461c55a2036",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-orlando_2026-11-09.glink"
+}

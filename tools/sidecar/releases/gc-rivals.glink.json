@@ -1,0 +1,13 @@
+{
+ "id": "gc-rivals",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-rivals_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "f8cafd79e6384880a601fb793f55cfbe541ebc4b1d517e6d26940a7b8e9b093d",
+ "schemaVersion": 1,
+ "sourceSha256": "0dd91cd03fc3aec5dff8f6944550f2f1df1cd2fd5553a6c0d263fef1b2c4bd2f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-rivals_2026-11-09.glink"
+}

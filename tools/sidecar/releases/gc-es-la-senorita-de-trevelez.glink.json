@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-senorita-de-trevelez",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-senorita-de-trevelez_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "459c494847ea3047c4d04d940794bce6f8a236dfcb30892be901b9cc23b7692d",
+ "schemaVersion": 1,
+ "sourceSha256": "8d32a07cc0fa9d7f8f89fe0bd7b06ef406ccaa3003583a4654f9100a069a4247",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-senorita-de-trevelez_2026-11-09.glink"
+}

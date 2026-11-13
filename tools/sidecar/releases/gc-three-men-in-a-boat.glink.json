@@ -1,0 +1,13 @@
+{
+ "id": "gc-three-men-in-a-boat",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-three-men-in-a-boat_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "4e4c2ac86e9731eff657d7800bd9a149bcbb76bda283d5b36bf6c88c9b6e8d72",
+ "schemaVersion": 1,
+ "sourceSha256": "9ac1af5ad0b19dffbe63b5380badbe83b921f6dd12c355155c7c105874eba140",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-three-men-in-a-boat_2026-11-09.glink"
+}

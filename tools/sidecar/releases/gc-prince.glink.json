@@ -1,0 +1,13 @@
+{
+ "id": "gc-prince",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-prince_2026-11-09.glink",
+ "sizeBytes": 69632,
+ "sha256": "c7f4c5dfdfca535c200201e637ce60e600dbcb06dff7a79e0e7362847453b6b9",
+ "schemaVersion": 1,
+ "sourceSha256": "631c3aa3efb7f62f9202b04103528e0e4a9e66ba59ded215552d6739fa653601",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-prince_2026-11-09.glink"
+}

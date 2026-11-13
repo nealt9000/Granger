@@ -1,0 +1,13 @@
+{
+ "id": "gc-wealth-of-nations",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-wealth-of-nations_2026-11-09.glink",
+ "sizeBytes": 163840,
+ "sha256": "9022353215d33c4e48eb3a1a321ee2c92af484ad8e72ae913c05bbad22002dd5",
+ "schemaVersion": 1,
+ "sourceSha256": "2de79ab4c6f4d999251989fe05162c315e8583a90c5d5d2e974b2a96ca0588ee",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-wealth-of-nations_2026-11-09.glink"
+}

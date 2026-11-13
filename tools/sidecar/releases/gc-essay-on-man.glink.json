@@ -1,0 +1,13 @@
+{
+ "id": "gc-essay-on-man",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-essay-on-man_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "5ed439e0a150dc4601615f0a08e86a67082ed7c64bb8711dab64085710fe11aa",
+ "schemaVersion": 1,
+ "sourceSha256": "e472ab6c64e12d3778bdfac8c990ca57688085349eaea0636872d8689d38b8f4",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-essay-on-man_2026-11-09.glink"
+}

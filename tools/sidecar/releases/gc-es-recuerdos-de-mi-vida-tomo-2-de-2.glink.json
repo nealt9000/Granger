@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-recuerdos-de-mi-vida-tomo-2-de-2",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-recuerdos-de-mi-vida-tomo-2-de-2_2026-11-09.glink",
+ "sizeBytes": 110592,
+ "sha256": "66ab5b1a4b71472ec6238b0c21de50a07df741a34fe0c3ddbaeb7e75c7b810d8",
+ "schemaVersion": 1,
+ "sourceSha256": "0fefad02fcf13de2c8a615c4a8f4a08655354e99d96cc185ef3bf32fd886e65f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-recuerdos-de-mi-vida-tomo-2-de-2_2026-11-09.glink"
+}

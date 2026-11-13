@@ -1,0 +1,13 @@
+{
+ "id": "gc-northanger-abbey",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-northanger-abbey_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "8ffcb793faa8fec73bd4b767d2d505b5249a5d8cb295e1a45dd1747792b5ce0a",
+ "schemaVersion": 1,
+ "sourceSha256": "51fb50d829461517e5cd2b139baf1a4ae2c0a68b1104ad48796fa49225614de1",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-northanger-abbey_2026-11-09.glink"
+}

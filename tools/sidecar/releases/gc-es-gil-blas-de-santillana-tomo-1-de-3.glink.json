@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-gil-blas-de-santillana-tomo-1-de-3",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-gil-blas-de-santillana-tomo-1-de-3_2026-11-09.glink",
+ "sizeBytes": 53248,
+ "sha256": "113fe7b7983811176126a6edbd7301500a9eb2e114a0da825692bfec67025000",
+ "schemaVersion": 1,
+ "sourceSha256": "2c771e6afeba753a865a797f063393c592c1c954b43c12ed5253c923646fb6c0",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-gil-blas-de-santillana-tomo-1-de-3_2026-11-09.glink"
+}

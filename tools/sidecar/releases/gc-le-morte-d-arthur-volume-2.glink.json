@@ -1,0 +1,13 @@
+{
+ "id": "gc-le-morte-d-arthur-volume-2",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-le-morte-d-arthur-volume-2_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "366f70db46cd55551e6ca5bb433413be2adacecb27bf16e5d6c720ce1420bda1",
+ "schemaVersion": 1,
+ "sourceSha256": "c0b9878ffae62e3269aa215ab4abf296281ec00c7939b517a47c9fce93129f54",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-le-morte-d-arthur-volume-2_2026-11-09.glink"
+}

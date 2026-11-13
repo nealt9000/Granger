@@ -1,0 +1,13 @@
+{
+ "id": "gc-poirot-investigates",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-poirot-investigates_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "3daefc25d3e0134207c8f69cd56b858a7c5c9008f8c376c5d875eb04cc51fd5a",
+ "schemaVersion": 1,
+ "sourceSha256": "3bc8b27757a76067b666331cb75a8708a50e498b9198cf144646d0df1e0b8eff",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-poirot-investigates_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-portrait-of-the-artist-as-a-young-man",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-portrait-of-the-artist-as-a-young-man_2026-11-09.glink",
+ "sizeBytes": 49152,
+ "sha256": "db45b9660dc9e5fdb0824eb31b348bfb3fae05ada2d71d950ebd8fd1534c5443",
+ "schemaVersion": 1,
+ "sourceSha256": "39c608ce7859335511a7f6dc909ed697dd52d905925c0f0f91b00b38630d7612",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-portrait-of-the-artist-as-a-young-man_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-abel-sanchez",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-abel-sanchez_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "100237d611d8da264248f6ff3bb4a008085ad7a8fc70154b2503f21acb6f7b09",
+ "schemaVersion": 1,
+ "sourceSha256": "dad3da203030f59154da503e0f5c3e05d423695896f0f0bebbd9700f23f9110c",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-abel-sanchez_2026-11-09.glink"
+}

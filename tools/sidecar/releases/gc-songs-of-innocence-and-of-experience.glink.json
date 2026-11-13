@@ -1,0 +1,13 @@
+{
+ "id": "gc-songs-of-innocence-and-of-experience",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-songs-of-innocence-and-of-experience_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "a21e9d3d07cb47e10a43472b2138208bc45b156f07520f5213e0ffd2f614fda2",
+ "schemaVersion": 1,
+ "sourceSha256": "ae4bed511847954e43efb4109532902795125c50b7c974ae41d7f439a2fc9101",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-songs-of-innocence-and-of-experience_2026-11-09.glink"
+}

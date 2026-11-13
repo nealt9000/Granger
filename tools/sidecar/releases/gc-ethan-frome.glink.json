@@ -1,0 +1,13 @@
+{
+ "id": "gc-ethan-frome",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-ethan-frome_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "d28cd7634f92d447366a17654e69b3ae22c14c10db176ff90ebc38a817aa288c",
+ "schemaVersion": 1,
+ "sourceSha256": "3171dbf375830c700d6112dd1866d6e7fc887a72f91215aa97b86d917eabb06c",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-ethan-frome_2026-11-09.glink"
+}

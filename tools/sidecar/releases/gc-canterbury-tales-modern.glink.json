@@ -1,0 +1,13 @@
+{
+ "id": "gc-canterbury-tales-modern",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-canterbury-tales-modern_2026-11-09.glink",
+ "sizeBytes": 102400,
+ "sha256": "650eb0455ddcaef383202eb0f8eb3dfadf7d17968b01d91077de3f39867b76e9",
+ "schemaVersion": 1,
+ "sourceSha256": "a3976bdea969fd82409bcb0ccca1f7bff67eccf76c3aa7b86828b63efa5d179f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-canterbury-tales-modern_2026-11-09.glink"
+}

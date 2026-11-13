@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-sonata-de-otono-sonata-de-invierno",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-sonata-de-otono-sonata-de-invierno_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "1a9f089ca9d774bb092bfd9a322e9711063e7f2ee71435dd87a76ef61804d696",
+ "schemaVersion": 1,
+ "sourceSha256": "d61a0c8106b6cb77cebe3f45dcb7bb91ee758bf0c857d362e67d9a441606e40c",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-sonata-de-otono-sonata-de-invierno_2026-11-09.glink"
+}

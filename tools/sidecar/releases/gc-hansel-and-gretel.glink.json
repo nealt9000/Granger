@@ -1,0 +1,13 @@
+{
+ "id": "gc-hansel-and-gretel",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-hansel-and-gretel_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "c1e514541db4fc619038cf88f8a11a2a4a4b1daf06b8a345988ffb5d28a63b27",
+ "schemaVersion": 1,
+ "sourceSha256": "6207ed39574f2b6eaa5b83ff5c5b0e8fd8250ff7438bf4271b6c88fdbe450a46",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-hansel-and-gretel_2026-11-09.glink"
+}

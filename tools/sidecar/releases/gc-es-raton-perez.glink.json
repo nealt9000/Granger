@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-raton-perez",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-raton-perez_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "1d003ead86afa79885c6eb3828a9d905470f97aac59e568a15a372450dc7e4ae",
+ "schemaVersion": 1,
+ "sourceSha256": "31bd471f9a0b062335020cd89862b26c187864787e6ab4bd53555e3bb45aa8d5",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-raton-perez_2026-11-09.glink"
+}

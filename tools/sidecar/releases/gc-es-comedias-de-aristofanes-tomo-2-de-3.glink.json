@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-comedias-de-aristofanes-tomo-2-de-3",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-comedias-de-aristofanes-tomo-2-de-3_2026-11-09.glink",
+ "sizeBytes": 73728,
+ "sha256": "60ae2deecd9dbdc2ed3aed244802ef86adc09ed7bc17c95e9e0db51131e8e4d3",
+ "schemaVersion": 1,
+ "sourceSha256": "b5fcb0873f52496953ef52bda3aa4fd1a6e017def07062fe93dba1123f5d54e7",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-comedias-de-aristofanes-tomo-2-de-3_2026-11-09.glink"
+}

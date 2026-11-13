@@ -1,0 +1,13 @@
+{
+ "id": "gc-adventures-of-tom-sawyer",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-adventures-of-tom-sawyer_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "b922a9466e496d73dbf54e2db6f8f1595d3ccd2a0c69ac775bd7311b8aeea091",
+ "schemaVersion": 1,
+ "sourceSha256": "8656109b5a3897ed14553c70e37a5bf476dbb8a6283b61b1f3de61dc99d92cdf",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-adventures-of-tom-sawyer_2026-11-09.glink"
+}

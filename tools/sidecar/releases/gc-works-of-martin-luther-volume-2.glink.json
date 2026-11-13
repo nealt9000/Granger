@@ -1,0 +1,13 @@
+{
+ "id": "gc-works-of-martin-luther-volume-2",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-works-of-martin-luther-volume-2_2026-11-09.glink",
+ "sizeBytes": 77824,
+ "sha256": "857fb7bb2f9de0f48e60838d12f90c74e1f749c7f0269e05e0b5d717265ae3d4",
+ "schemaVersion": 1,
+ "sourceSha256": "6528cc1f11fc6a6677ec7bb5e4041735f8f48b1fa701c22b4ce93deab30ab476",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-works-of-martin-luther-volume-2_2026-11-09.glink"
+}

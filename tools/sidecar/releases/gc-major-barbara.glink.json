@@ -1,0 +1,13 @@
+{
+ "id": "gc-major-barbara",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-major-barbara_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "4e974fba3486b580fcd25c5d357b85ff8e4a208b36a9679e89504c3e0b0c520b",
+ "schemaVersion": 1,
+ "sourceSha256": "af72b36e1c7e2b6778d9896afa4c67d7f3a598dc2d453fb2d8d8d1efaf4cc3ba",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-major-barbara_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-short-fiction-tolstoy",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-short-fiction-tolstoy_2026-11-09.glink",
+ "sizeBytes": 98304,
+ "sha256": "525a11be8925170e70e40c7841714a79f92ff6bf5abb670f143acf32fe629afd",
+ "schemaVersion": 1,
+ "sourceSha256": "768122791cadf8088bf9b4b82ab6aea625b3b0c6ad58971d68378811b65ff72a",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-short-fiction-tolstoy_2026-11-09.glink"
+}

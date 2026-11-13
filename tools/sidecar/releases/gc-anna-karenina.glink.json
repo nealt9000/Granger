@@ -1,0 +1,13 @@
+{
+ "id": "gc-anna-karenina",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-anna-karenina_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "99d755d8d0586af3a621deb14786be9ab468c4008057de5fd33923c3717b3ebb",
+ "schemaVersion": 1,
+ "sourceSha256": "fd6ee08e0477833b11ae92a0479e9f4ed578702b5d0b8a0708eb8649efc167b4",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-anna-karenina_2026-11-09.glink"
+}

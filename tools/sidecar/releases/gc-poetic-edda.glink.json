@@ -1,0 +1,13 @@
+{
+ "id": "gc-poetic-edda",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-poetic-edda_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "b75507ac95151c6f64fc6626b5d0ec556ab24eb88b71e1c736bdb69194327884",
+ "schemaVersion": 1,
+ "sourceSha256": "8ca07a7d6f96c830cfb37607021a48914ef47a214f5502e3b70b1651444c3f66",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-poetic-edda_2026-11-09.glink"
+}

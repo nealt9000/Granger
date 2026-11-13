@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-el-senor-de-bembibre",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-el-senor-de-bembibre_2026-11-09.glink",
+ "sizeBytes": 69632,
+ "sha256": "fded03a6d7e78a0591424a50f388ff64e0d6d744374a8c63e2a3355f2c545a5c",
+ "schemaVersion": 1,
+ "sourceSha256": "71b8e4c0f5a632d329ab8e5ec38c5bbf2047de164ca4e1fa68ad0dad3d61e3e8",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-senor-de-bembibre_2026-11-09.glink"
+}

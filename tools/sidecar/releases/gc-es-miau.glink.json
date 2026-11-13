@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-miau",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-miau_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "00591453ad835ffd60af706b377a7a34d72f200f9f9570e05258d5cafb5b82d5",
+ "schemaVersion": 1,
+ "sourceSha256": "990cd6057820f5d81cc94bba09967729c7c9a3787437fc1abbeda94c2ce77f2d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-miau_2026-11-09.glink"
+}

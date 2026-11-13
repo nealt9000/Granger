@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-orlando-furioso-tomo-1-de-2",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-orlando-furioso-tomo-1-de-2_2026-11-09.glink",
+ "sizeBytes": 135168,
+ "sha256": "a6ced9ecad02f48b68595ea725f96ac93e0adb61484a944023a9a0cbb9145309",
+ "schemaVersion": 1,
+ "sourceSha256": "ca0108c003c77deb6e0da73f18d35fe86e8c78a8d1f8cba47816fef8456e1bb7",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-orlando-furioso-tomo-1-de-2_2026-11-09.glink"
+}

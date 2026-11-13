@@ -1,0 +1,13 @@
+{
+ "id": "gc-faust-part-one",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-faust-part-one_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "ff9f1058d57a961fe2beb95113ffd84adeedae6e9d08ebde6f29b9d89184bccd",
+ "schemaVersion": 1,
+ "sourceSha256": "2c51477bc17000d522c55d02ec63fcfd36a009c9aeabe2e4b2ae19338b04d9a0",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-faust-part-one_2026-11-09.glink"
+}

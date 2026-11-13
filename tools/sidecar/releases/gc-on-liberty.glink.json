@@ -1,0 +1,13 @@
+{
+ "id": "gc-on-liberty",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-on-liberty_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "0bd3369f1163f1bd6cd42f81b46634f80cc2bb5f4ccea946069a680ce26fa48c",
+ "schemaVersion": 1,
+ "sourceSha256": "520e742f917ada9f27cfb35c178eb9a33eabcf193501b3d71122c6c775aac04f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-on-liberty_2026-11-09.glink"
+}

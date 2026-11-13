@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-novela-en-el-tranvia",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-novela-en-el-tranvia_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "fa204ead40f29c342f8bdb54869d46c4ef38ef182660a644f66114e19d818a3a",
+ "schemaVersion": 1,
+ "sourceSha256": "71a686ba98c5b050156199656c4627b7e683396e02572e9ade8015128b145447",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-novela-en-el-tranvia_2026-11-09.glink"
+}

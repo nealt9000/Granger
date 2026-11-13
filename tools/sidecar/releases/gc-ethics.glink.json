@@ -1,0 +1,13 @@
+{
+ "id": "gc-ethics",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-ethics_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "a686b1c4bdec136a65a891b5eab78d506e21f831d795fb9b8f21a7eaafaf327d",
+ "schemaVersion": 1,
+ "sourceSha256": "62979eabbe93094f0899ae6d8ef2d918240efebc09225f4a8be0d99a833f25b4",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-ethics_2026-11-09.glink"
+}

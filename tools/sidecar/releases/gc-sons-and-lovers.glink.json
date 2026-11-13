@@ -1,0 +1,13 @@
+{
+ "id": "gc-sons-and-lovers",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-sons-and-lovers_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "16d2fa95488b99103ee15aecbf8b8b35d7e3f5d735e3cab7c284321e2857935a",
+ "schemaVersion": 1,
+ "sourceSha256": "e3a23b4d4eeef733d2a814460cfaff78472fe992a9dd66c93d72946f0b50ea76",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-sons-and-lovers_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-coplas-por-la-muerte-de-su-padre",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-coplas-por-la-muerte-de-su-padre_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "6b005a4531f38745d34f241aadbe75c11f55549096f4861f319af6c1433ad776",
+ "schemaVersion": 1,
+ "sourceSha256": "d8e01c150581ead1100795e4a80b37437eefaae22b9365845612f54c2a85ae00",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-coplas-por-la-muerte-de-su-padre_2026-11-09.glink"
+}

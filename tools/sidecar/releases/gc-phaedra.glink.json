@@ -1,0 +1,13 @@
+{
+ "id": "gc-phaedra",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-phaedra_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "b940cf7e367026c8c8291dec14917a2882c743319a4067a205f5e6269cb98cff",
+ "schemaVersion": 1,
+ "sourceSha256": "8c815ef97a8cfdd272a95a29167b1d50317739accaeaa5e16a59aa9761a613be",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-phaedra_2026-11-09.glink"
+}

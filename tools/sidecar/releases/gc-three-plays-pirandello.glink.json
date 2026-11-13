@@ -1,0 +1,13 @@
+{
+ "id": "gc-three-plays-pirandello",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-three-plays-pirandello_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "6c6a8f4215f5ce740ac5e7910f5eef2ad316596d3c88e515687fdb48e13e8cd7",
+ "schemaVersion": 1,
+ "sourceSha256": "42f8d771a093184e8924ab3827fda89134daedbab9fdc890400df9df9391b682",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-three-plays-pirandello_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-school-for-scandal",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-school-for-scandal_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "3d53b8deb41c6e7bea3653e8ace916274701bd1f345d901e693232bccd490098",
+ "schemaVersion": 1,
+ "sourceSha256": "bb2a2f59ad62d8e3536789f3d49f80b9c33973982d08735e15bdcf5a7dee7073",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-school-for-scandal_2026-11-09.glink"
+}

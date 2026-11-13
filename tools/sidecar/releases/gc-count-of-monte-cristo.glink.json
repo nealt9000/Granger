@@ -1,0 +1,13 @@
+{
+ "id": "gc-count-of-monte-cristo",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-count-of-monte-cristo_2026-11-09.glink",
+ "sizeBytes": 176128,
+ "sha256": "24c6d3dcdcfa73373289f300dd884fc6e773e7175a7fdcbb5e2e4877d1131058",
+ "schemaVersion": 1,
+ "sourceSha256": "080a22ce8bbe322f90b52af7136e5254e58da049c512b4d5feb67d2645abfcab",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-count-of-monte-cristo_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-romeo-and-juliet",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-romeo-and-juliet_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "20f9190cfa207347a34e0fa1a2e24f04382557e677ee56ae9a4f799c1b461172",
+ "schemaVersion": 1,
+ "sourceSha256": "5df19c9b68756c4dc38514442ecc9341766d80a30bc322f114d56fc1c2a6613b",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-romeo-and-juliet_2026-11-09.glink"
+}

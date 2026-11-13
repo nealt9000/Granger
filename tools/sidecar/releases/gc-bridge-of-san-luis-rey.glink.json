@@ -1,0 +1,13 @@
+{
+ "id": "gc-bridge-of-san-luis-rey",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-bridge-of-san-luis-rey_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "41885beac46a65ae709e613f915ea0641b73b11bd40488b959cc4070a9721329",
+ "schemaVersion": 1,
+ "sourceSha256": "35deb14079498e333383837900cc7d134f75d5c5bc0fa07041904da42ceb3854",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-bridge-of-san-luis-rey_2026-11-09.glink"
+}

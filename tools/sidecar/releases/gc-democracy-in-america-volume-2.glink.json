@@ -1,0 +1,13 @@
+{
+ "id": "gc-democracy-in-america-volume-2",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-democracy-in-america-volume-2_2026-11-09.glink",
+ "sizeBytes": 69632,
+ "sha256": "2a7242ddbafdf1bb3bd4f1a5fab05e318b66203d7ffea3243aef9da402fda1f4",
+ "schemaVersion": 1,
+ "sourceSha256": "584eb039f50e0ccb6709ba3d07cbfa738787dbe6215638df5b72f978599662af",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-democracy-in-america-volume-2_2026-11-09.glink"
+}

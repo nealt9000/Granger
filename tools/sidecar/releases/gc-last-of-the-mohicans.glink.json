@@ -1,0 +1,13 @@
+{
+ "id": "gc-last-of-the-mohicans",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-last-of-the-mohicans_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "ceb8244cfcce997ae32c6b3ab85ee8d92ec7d6df16ca060b479af570f8624b95",
+ "schemaVersion": 1,
+ "sourceSha256": "307267e6b1775568340c8bedd98885c602885590919d311d9604cd1c5a5cdc8b",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-last-of-the-mohicans_2026-11-09.glink"
+}

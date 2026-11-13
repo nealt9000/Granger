@@ -1,0 +1,13 @@
+{
+ "id": "gc-saint-joan",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-saint-joan_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "d166f78d3b5e8a7df2aa57b7be65df44153b320ee6953febc3f4b7c3bb6f328b",
+ "schemaVersion": 1,
+ "sourceSha256": "940965448f702c8aba27d5cd2a9fcad8d357ea9006134b878aaeae79aa98ac7e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-saint-joan_2026-11-09.glink"
+}

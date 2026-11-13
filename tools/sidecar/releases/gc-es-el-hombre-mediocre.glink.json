@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-el-hombre-mediocre",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-el-hombre-mediocre_2026-11-09.glink",
+ "sizeBytes": 65536,
+ "sha256": "b2b783a0a64af23850c858b8573fff2fa86b59a7124fc700b28fc233762b9ff5",
+ "schemaVersion": 1,
+ "sourceSha256": "e48e97651a6cf800b41f6b084c48dde28605427542d252b339ee9fab00191001",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-hombre-mediocre_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-lyrical-ballads",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-lyrical-ballads_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "c475b91a561b198a97cd30dea888c5096974cd395acaa7f103cea42dd478c6a7",
+ "schemaVersion": 1,
+ "sourceSha256": "56c2bac525d3fba4e86e3fa2f669f703f612adc09f569fd7f881a67a5961b977",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-lyrical-ballads_2026-11-09.glink"
+}

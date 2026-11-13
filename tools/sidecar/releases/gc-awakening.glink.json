@@ -1,0 +1,13 @@
+{
+ "id": "gc-awakening",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-awakening_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "166c977a5b4dcc396d1e033cda589abe55124fe4c897db1240a8473336e3cefd",
+ "schemaVersion": 1,
+ "sourceSha256": "0d3952a0a1f803286ad40f290b30f208fed5965c7ff9737c934336917dcc5393",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-awakening_2026-11-09.glink"
+}

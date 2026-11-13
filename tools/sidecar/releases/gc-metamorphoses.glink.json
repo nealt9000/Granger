@@ -1,0 +1,13 @@
+{
+ "id": "gc-metamorphoses",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-metamorphoses_2026-11-09.glink",
+ "sizeBytes": 118784,
+ "sha256": "41fcace073fb167b48cab1f60f941cecdc26178a3fd26ec4f85f225b3efb6693",
+ "schemaVersion": 1,
+ "sourceSha256": "1b8968e6a748d81bec887fe5fe541b4f389d402a9b5e3444f58e6aac97ce05dc",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-metamorphoses_2026-11-09.glink"
+}

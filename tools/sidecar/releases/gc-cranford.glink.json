@@ -1,0 +1,13 @@
+{
+ "id": "gc-cranford",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-cranford_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "ad8e0d55ad62914466f0250fb780188a915ae42b503ab0e9061ce349ab0e5f93",
+ "schemaVersion": 1,
+ "sourceSha256": "185421ca127f3eaddb9823373e6de2f0f7245926013109ae2c942844fb8b0d37",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-cranford_2026-11-09.glink"
+}

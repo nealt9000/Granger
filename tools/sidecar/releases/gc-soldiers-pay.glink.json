@@ -1,0 +1,13 @@
+{
+ "id": "gc-soldiers-pay",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-soldiers-pay_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "1dc907292b97e33676410dd7d8a997ba9e7139ffae224dcf89b679e2eb5c2031",
+ "schemaVersion": 1,
+ "sourceSha256": "77f981f46f52d88e08461900f063977cb4cd742ce02222b779e68a688a2fe4c2",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-soldiers-pay_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-murder-at-the-vicarage",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-murder-at-the-vicarage_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "4d71e6255f1d5b0aa28f58533a6afe245a55f5e640651ba41653d344b02c81c0",
+ "schemaVersion": 1,
+ "sourceSha256": "6478460aa42ac24ab8b968169d30af98188f804ee471b4f7ec008fd8b6cceab7",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-murder-at-the-vicarage_2026-11-09.glink"
+}

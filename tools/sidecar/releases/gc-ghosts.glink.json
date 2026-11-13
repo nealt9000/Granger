@@ -1,0 +1,13 @@
+{
+ "id": "gc-ghosts",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-ghosts_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "4107f583f32fda56fd58d376c8ad82e48bdce6bd5f30bba330f193319ccc95c3",
+ "schemaVersion": 1,
+ "sourceSha256": "1dfd1771f00b510a8a577764f99e67ac069effd9330d1ffd74b4a61db7ca57a5",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-ghosts_2026-11-09.glink"
+}

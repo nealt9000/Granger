@@ -1,0 +1,13 @@
+{
+ "id": "gc-tamburlaine-the-great-part-2",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-tamburlaine-the-great-part-2_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "aa2d5aa393016ddfc5e49e077863cb816457681ddddef3ff9fa2eca6a7993197",
+ "schemaVersion": 1,
+ "sourceSha256": "996200fc7fd6baae16cdabbaa2764897af53225eed15a28af3edc24f148d2f38",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-tamburlaine-the-great-part-2_2026-11-09.glink"
+}

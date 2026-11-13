@@ -1,0 +1,13 @@
+{
+ "id": "gc-narrative-of-the-life-of-frederick-douglass",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-narrative-of-the-life-of-frederick-douglass_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "86b661fcb29d3e1d48adab37b99a8be821a2966f3b25b643dfcda33b495aff52",
+ "schemaVersion": 1,
+ "sourceSha256": "6e530a480a60c30fb28c957f6132a1c36c505e7078ec4da7fe8ff7a798165998",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-narrative-of-the-life-of-frederick-douglass_2026-11-09.glink"
+}

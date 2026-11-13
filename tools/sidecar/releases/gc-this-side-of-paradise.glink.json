@@ -1,0 +1,13 @@
+{
+ "id": "gc-this-side-of-paradise",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-this-side-of-paradise_2026-11-09.glink",
+ "sizeBytes": 65536,
+ "sha256": "665e0173a8db2958ccac92708154e5a94d5efa3c345ea8efb8441e7ba6fc466d",
+ "schemaVersion": 1,
+ "sourceSha256": "de7496d19cfe8b0bb73e251de327250e660be2b22d6e6c324bd3e5771227d545",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-this-side-of-paradise_2026-11-09.glink"
+}

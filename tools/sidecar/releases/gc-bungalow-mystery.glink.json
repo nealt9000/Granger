@@ -1,0 +1,13 @@
+{
+ "id": "gc-bungalow-mystery",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-bungalow-mystery_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "b7840dde5b5b409daccfa51e12b8d8ae1e4292e6656f316d6966f1b4aa4ac311",
+ "schemaVersion": 1,
+ "sourceSha256": "b755e6638a974c51c4c1645cce73abdd20fde34b67589bc9c092d406f6b2419b",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-bungalow-mystery_2026-11-09.glink"
+}

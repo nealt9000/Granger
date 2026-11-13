@@ -1,0 +1,13 @@
+{
+ "id": "gc-ramayan-of-valmiki",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-ramayan-of-valmiki_2026-11-09.glink",
+ "sizeBytes": 81920,
+ "sha256": "30e10db5ee37cee7c915b49d5f7a192eb05b468de9fb4292311e5af0932a201b",
+ "schemaVersion": 1,
+ "sourceSha256": "c6cf795ab499e84f3271f747204eae68b7cf14e52ccf1324b36b5d204b7073f4",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-ramayan-of-valmiki_2026-11-09.glink"
+}

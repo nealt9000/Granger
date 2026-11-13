@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-insolacion-y-morrina",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-insolacion-y-morrina_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "906e49d089610a7ac0038bd925e7b4c051140adcba89c7897ebe3a37bc7805ee",
+ "schemaVersion": 1,
+ "sourceSha256": "5cb20fdcd7ebef25e5aa509fd19e068e02f150a3b364d201ae8e302d8fc21528",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-insolacion-y-morrina_2026-11-09.glink"
+}

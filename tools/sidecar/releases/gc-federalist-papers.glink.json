@@ -1,0 +1,13 @@
+{
+ "id": "gc-federalist-papers",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-federalist-papers_2026-11-09.glink",
+ "sizeBytes": 81920,
+ "sha256": "0b4dd0b0011ed1c429381db2beb1c32232e7c74d2084f6ca434f513aabc0f1cc",
+ "schemaVersion": 1,
+ "sourceSha256": "efa86850cb6941a20a5c71df98871f077ed9f0f8f1b2ec802e6fbdd357c6fc7d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-federalist-papers_2026-11-09.glink"
+}

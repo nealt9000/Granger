@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-paginas-escogidas",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-paginas-escogidas_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "657d3248392a2918587d158ecd6e1d91273c35688369e91f7f26d4c13595904f",
+ "schemaVersion": 1,
+ "sourceSha256": "7c4d9d9fdb0b9472efe18e3c1d0c383b02ee265441d3799254d760d4a830bac0",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-paginas-escogidas_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-novelas-ejemplares",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-novelas-ejemplares_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "f844759ac7e701082d7fcf212a6d25a15dae98fda6f7eed7e7c31add0e6421c9",
+ "schemaVersion": 1,
+ "sourceSha256": "99a83a5896f77df1c32bcb3578c07a748930222e215dfcab20e71672c6af1869",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-novelas-ejemplares_2026-11-09.glink"
+}

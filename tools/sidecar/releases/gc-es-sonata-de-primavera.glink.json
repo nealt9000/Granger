@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-sonata-de-primavera",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-sonata-de-primavera_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "7e620ae6c96218bc49e18a5cc4e780ca62e8691c00fbe788a11576f99987111e",
+ "schemaVersion": 1,
+ "sourceSha256": "8e63b0cec41278799af6eed5b64587509d89bf62f9e6cc60dd60e5a2101a23d4",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-sonata-de-primavera_2026-11-09.glink"
+}

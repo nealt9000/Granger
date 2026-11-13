@@ -1,0 +1,13 @@
+{
+ "id": "gc-world-english-bible",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-world-english-bible_2026-11-09.glink",
+ "sizeBytes": 237568,
+ "sha256": "566f22a0f02711478273801f05a77d2ca24b45a2ab62679b987d6f2df0a49180",
+ "schemaVersion": 1,
+ "sourceSha256": "15dae6ee24db4c4775fe09a8c74ab4e94efd300df0138b8146efc626e258b6c8",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-world-english-bible_2026-11-09.glink"
+}

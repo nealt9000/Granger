@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-tradiciones-peruanas",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-tradiciones-peruanas_2026-11-09.glink",
+ "sizeBytes": 73728,
+ "sha256": "f07fcfea97e12f6f992056dbb2ebe3de3ae610017ac284528e58575d5e0e9d33",
+ "schemaVersion": 1,
+ "sourceSha256": "b1b066000010c24e0467a360848f0c7ab21fea19a1dd8db844021cca0bfa035e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-tradiciones-peruanas_2026-11-09.glink"
+}

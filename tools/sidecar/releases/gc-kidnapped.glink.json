@@ -1,0 +1,13 @@
+{
+ "id": "gc-kidnapped",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-kidnapped_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "0c261c6bd05c0fbb42bdf8a7f0f789c0ba55d7517b614f6d067fb3ae3e6ce767",
+ "schemaVersion": 1,
+ "sourceSha256": "da0ec96884a85e0a5df2c19fd9f02451e81973dfd54f4e6e22f4aeca8aa0499a",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-kidnapped_2026-11-09.glink"
+}

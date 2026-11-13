@@ -1,0 +1,13 @@
+{
+ "id": "gc-henry-vi-part-2",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-henry-vi-part-2_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "5013e72dc1e66b055519eb30ecc2e2e0b5c6d2e6b8b38639546c117319b69c92",
+ "schemaVersion": 1,
+ "sourceSha256": "3cb1e637aa0323e820d46b0a884e91c5b3fcf4f96f0a70f8fcca5a8f27b9ad85",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-henry-vi-part-2_2026-11-09.glink"
+}

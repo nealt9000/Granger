@@ -1,0 +1,13 @@
+{
+ "id": "gc-symposium",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-symposium_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "ca4464456495e04fb98188b421a065f4707f956205f6b7404feb7f4e809710d9",
+ "schemaVersion": 1,
+ "sourceSha256": "151bb4f16eec6c11a5667e1e88ecc6a82f34b74458eb19f50c7376a8062b8ada",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-symposium_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-oedipus-the-king-oedipus-at-colonus-antigone",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-oedipus-the-king-oedipus-at-colonus-antigone_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "22eb21fdd3e266a253f1857beb2f183ee8f0bc0772fee632fada3122bd3e7206",
+ "schemaVersion": 1,
+ "sourceSha256": "5d6cbde5f194704d448bbab628e1f72fab7062319aec83c315efc3ba860e16e2",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-oedipus-the-king-oedipus-at-colonus-antigone_2026-11-09.glink"
+}

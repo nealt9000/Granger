@@ -1,0 +1,13 @@
+{
+ "id": "gc-othello",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-othello_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "b4eff531ad605a065f1af7df2ccd895b5bf48eb10cd30f3f35ec35caed026510",
+ "schemaVersion": 1,
+ "sourceSha256": "d336cd9d279bb15c05c83f6c4370674a3065040536e2c2021e4aa70f9abf44f7",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-othello_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-king-john",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-king-john_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "5b13ebd6659bf398e14a8989842817836e1d751318d2f811578f59920a546b4e",
+ "schemaVersion": 1,
+ "sourceSha256": "019dfdda5ed712406801ee74bce3c4a59e8f44b2a2f11d09dab1871e1f729770",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-king-john_2026-11-09.glink"
+}

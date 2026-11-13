@@ -1,0 +1,13 @@
+{
+ "id": "gc-within-a-budding-grove",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-within-a-budding-grove_2026-11-09.glink",
+ "sizeBytes": 73728,
+ "sha256": "08e1753b6dab6ad91ab58c3abf2ef3c2dd195d8f032fdf3509dda9a10d28e9bc",
+ "schemaVersion": 1,
+ "sourceSha256": "b923eba0f379df0e01921eb3a3e61808686f544f212edf840ae156f4bc31d0a2",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-within-a-budding-grove_2026-11-09.glink"
+}

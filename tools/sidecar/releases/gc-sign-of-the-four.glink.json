@@ -1,0 +1,13 @@
+{
+ "id": "gc-sign-of-the-four",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-sign-of-the-four_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "3217b22a716434e62e7182c6c53949d0feecfcf53ea6275e6590805987abe2a1",
+ "schemaVersion": 1,
+ "sourceSha256": "d59d0df3173b36cde15221ae0840f2fc60566c10f4103465e0db2437f5eeb47d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-sign-of-the-four_2026-11-09.glink"
+}

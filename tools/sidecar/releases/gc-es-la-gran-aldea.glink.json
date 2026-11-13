@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-gran-aldea",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-gran-aldea_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "2bd6bfcb50ffef259509957dd75619dc73522e17f21d4c1c6f506dcc368e83e0",
+ "schemaVersion": 1,
+ "sourceSha256": "273f4ebaaba1a5fd2c39f9cdd4ada723e14e0f90f0e4f9b866305f3354c7a10e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-gran-aldea_2026-11-09.glink"
+}

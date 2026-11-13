@@ -1,0 +1,13 @@
+{
+ "id": "gc-doll-s-house",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-doll-s-house_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "f2a6b346f70ae403ec7b0b031e22e860626ad4e2abe4a0296090a44d9d4e454f",
+ "schemaVersion": 1,
+ "sourceSha256": "a71e505f8574ed605ea8f183f006f4394c5423f5daba0a5063386ae643fd5c65",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-doll-s-house_2026-11-09.glink"
+}

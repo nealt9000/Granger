@@ -1,0 +1,13 @@
+{
+ "id": "gc-dubliners",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-dubliners_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "686ac5270f72ff4f573b863e1e80910df7e01e9e211b4de6f43c0d0a8720022a",
+ "schemaVersion": 1,
+ "sourceSha256": "4c6c808e4343d25c061c8dc06783e80097c6fb2f9d50a51c1812ae87ab57cc5a",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-dubliners_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-legend-of-sleepy-hollow",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-legend-of-sleepy-hollow_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "871745d8087ed9668f83785b60e0a8707a8b3cfe487567157a573ce964c816bb",
+ "schemaVersion": 1,
+ "sourceSha256": "5331dea355678932114dd1ffd15ca2157e4eb2bb1c9e0beb7ba5d9baabdb8af6",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-legend-of-sleepy-hollow_2026-11-09.glink"
+}

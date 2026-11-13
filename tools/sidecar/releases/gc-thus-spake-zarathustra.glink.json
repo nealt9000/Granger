@@ -1,0 +1,13 @@
+{
+ "id": "gc-thus-spake-zarathustra",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-thus-spake-zarathustra_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "83fffc4fce1717036976064d750c44ced91674e33e2a823460844c393c6146e4",
+ "schemaVersion": 1,
+ "sourceSha256": "4b350983312c125aa8bd555048fedb4562af210c21c0a620902517fc3070134e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-thus-spake-zarathustra_2026-11-09.glink"
+}

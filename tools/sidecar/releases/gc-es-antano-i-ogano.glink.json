@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-antano-i-ogano",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-antano-i-ogano_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "310d77523fd29ab40de8e4746e1ebc2e40372787e8bda31696ea6f4466cf73ca",
+ "schemaVersion": 1,
+ "sourceSha256": "803aa228ac6a240e85b8e490cfd0435a88a1932cd3fca4bfdc922aca12df77e8",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-antano-i-ogano_2026-11-09.glink"
+}

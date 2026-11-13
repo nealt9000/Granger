@@ -1,0 +1,13 @@
+{
+ "id": "gc-great-gatsby",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-great-gatsby_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "73a90981ef070bc55e2bc451b3fd65cb4267415c8e1d89e55d9fe208c93a47c0",
+ "schemaVersion": 1,
+ "sourceSha256": "af915a570ef254776163213e7351949cd7f10882b8ef0078d158fdc550c82872",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-great-gatsby_2026-11-09.glink"
+}

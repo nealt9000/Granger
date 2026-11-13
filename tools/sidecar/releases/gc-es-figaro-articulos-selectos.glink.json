@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-figaro-articulos-selectos",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-figaro-articulos-selectos_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "3d5c86888a47f2e14f3491454959300e35cba464680cb540c8474a7ab0cebff8",
+ "schemaVersion": 1,
+ "sourceSha256": "62eaf17322d6647b617615d434657b5222313e470eae36907e837eb0712e10d1",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-figaro-articulos-selectos_2026-11-09.glink"
+}

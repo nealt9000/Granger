@@ -1,0 +1,13 @@
+{
+ "id": "gc-king-henry-v",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-king-henry-v_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "9ac3d607c6fce69de8a0380eb9d7c30bb7cf434b96802649f6a81cec6d148cb8",
+ "schemaVersion": 1,
+ "sourceSha256": "fecf90c1f9e59adc1f474137c51fd479bd4dcebb980edb077e99ac114d5b7135",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-king-henry-v_2026-11-09.glink"
+}

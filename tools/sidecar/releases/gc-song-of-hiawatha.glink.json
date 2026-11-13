@@ -1,0 +1,13 @@
+{
+ "id": "gc-song-of-hiawatha",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-song-of-hiawatha_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "cbd89e741d7a3bb64dfee4d6dcca5c9025815cab3b67aff6270ed1a474656ae6",
+ "schemaVersion": 1,
+ "sourceSha256": "ea9380aabc6b2d4e8ab6f8ad88ff182797612a5db0b47bacf672c07128a3b7a9",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-song-of-hiawatha_2026-11-09.glink"
+}

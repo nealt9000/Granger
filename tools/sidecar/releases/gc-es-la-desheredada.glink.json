@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-desheredada",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-desheredada_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "f1b2d7417c1e73595b038f21feb9fc640b19725e7848a756ffe1ae17c7f964a7",
+ "schemaVersion": 1,
+ "sourceSha256": "a5ba53257e86ed44d866c7a8c16deb2c5983e6747c2aac6b48a09f3c1a1aa042",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-desheredada_2026-11-09.glink"
+}

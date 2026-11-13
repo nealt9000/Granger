@@ -1,0 +1,13 @@
+{
+ "id": "gc-barchester-towers",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-barchester-towers_2026-11-09.glink",
+ "sizeBytes": 49152,
+ "sha256": "5892d1328ba9954b1f74332ed84c15c66289407fe5bd694a08d0347a89b1f752",
+ "schemaVersion": 1,
+ "sourceSha256": "b99b9f51ac90f599e422e0bef576d565aac21f79ac7f60ee4520b6feea177bfc",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-barchester-towers_2026-11-09.glink"
+}

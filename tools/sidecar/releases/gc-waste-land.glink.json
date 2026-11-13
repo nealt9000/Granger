@@ -1,0 +1,13 @@
+{
+ "id": "gc-waste-land",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-waste-land_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "0596e4fb4f7ed27653fc905a2b87cbea725ac9709fda9a52add4cad177620128",
+ "schemaVersion": 1,
+ "sourceSha256": "65d5d17e7578fc6e5ff896f942573ac1ac5c523dc885ebac303e1afdfba7199e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-waste-land_2026-11-09.glink"
+}

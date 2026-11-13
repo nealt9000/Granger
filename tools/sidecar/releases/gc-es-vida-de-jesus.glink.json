@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-vida-de-jesus",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-vida-de-jesus_2026-11-09.glink",
+ "sizeBytes": 81920,
+ "sha256": "700e28bbaeb79b1a3023ff543c19b9c9b5a8bf31044375c42a6c9e91dd4ea8a5",
+ "schemaVersion": 1,
+ "sourceSha256": "6f0ce71288bc4aef43094af9447af1dfaaf8bd86b6c14c4655268e3be7fac19d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-vida-de-jesus_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-critique-of-pure-reason",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-critique-of-pure-reason_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "26edd6174f7221a1bbbae2e4415f53a8593ce387a1b28cfb3fd0cc51ae5d2f9e",
+ "schemaVersion": 1,
+ "sourceSha256": "fe81b747d076da99ed44df8ccbe0ad67e417f31ca1a9da3b62eab86371e0984d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-critique-of-pure-reason_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-del-sentimiento-tragico-de-la-vida",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-del-sentimiento-tragico-de-la-vida_2026-11-09.glink",
+ "sizeBytes": 77824,
+ "sha256": "35b8678fc1736e5509d6aca7f8e2dc2d6ea29aacad31e83d745265a0511127de",
+ "schemaVersion": 1,
+ "sourceSha256": "043bc32cee45201fda2bde30e4d9120eebd37bb14ed8001673ba5412bcc806eb",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-del-sentimiento-tragico-de-la-vida_2026-11-09.glink"
+}

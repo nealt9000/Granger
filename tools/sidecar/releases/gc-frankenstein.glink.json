@@ -1,0 +1,13 @@
+{
+ "id": "gc-frankenstein",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-frankenstein_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "52a04313af3315e8e1712129e35d4b3e826b70a32bf6dd2ec3dec3e9d4bda57a",
+ "schemaVersion": 1,
+ "sourceSha256": "49ee3e80b17f514456f4ab29329d408c1a4e85a946b1f2e513d9af022b1f7abb",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-frankenstein_2026-11-09.glink"
+}

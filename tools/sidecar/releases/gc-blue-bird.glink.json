@@ -1,0 +1,13 @@
+{
+ "id": "gc-blue-bird",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-blue-bird_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "07cd446701e93c4b70f28fef8a35a5047d724d57259e34ef26fd3551f375118b",
+ "schemaVersion": 1,
+ "sourceSha256": "32c3149b71789b1d24d0a69ed19f48fc1b632a9b1ce07357ddb917621d960f78",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-blue-bird_2026-11-09.glink"
+}

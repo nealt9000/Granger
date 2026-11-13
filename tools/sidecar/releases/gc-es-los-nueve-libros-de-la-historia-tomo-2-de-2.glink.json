@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-los-nueve-libros-de-la-historia-tomo-2-de-2",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-los-nueve-libros-de-la-historia-tomo-2-de-2_2026-11-09.glink",
+ "sizeBytes": 180224,
+ "sha256": "f79c70dd456bee4823ff13351baf70daecf2c26d5ca016b63282208159b23b58",
+ "schemaVersion": 1,
+ "sourceSha256": "18b886841241b87c49fdbf1ea835e6b731200e298f637197b205284cd0b18664",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-los-nueve-libros-de-la-historia-tomo-2-de-2_2026-11-09.glink"
+}

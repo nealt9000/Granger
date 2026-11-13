@@ -1,0 +1,13 @@
+{
+ "id": "gc-rob-roy",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-rob-roy_2026-11-09.glink",
+ "sizeBytes": 69632,
+ "sha256": "dec06dc330f89ecedc563ef91e88bbb881a2195dd25c00b75cbb9801d6d487a0",
+ "schemaVersion": 1,
+ "sourceSha256": "00ad0a7539f0df236e15d99c0422ecaee2c62fb953a228e512d94a918e16b34e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-rob-roy_2026-11-09.glink"
+}

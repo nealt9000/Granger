@@ -1,0 +1,13 @@
+{
+ "id": "gc-holy-scriptures-jps-1917",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-holy-scriptures-jps-1917_2026-11-09.glink",
+ "sizeBytes": 155648,
+ "sha256": "5b8605afd7bfc96728221301f07a25ffed50f5649be4f1fda3d419a295a3767a",
+ "schemaVersion": 1,
+ "sourceSha256": "aabbb26d43cef7cc8d910c72ce3c21fd5bedb5c7928b118486fd6b29f2346aa2",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-holy-scriptures-jps-1917_2026-11-09.glink"
+}

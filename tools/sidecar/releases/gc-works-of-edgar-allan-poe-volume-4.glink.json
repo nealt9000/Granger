@@ -1,0 +1,13 @@
+{
+ "id": "gc-works-of-edgar-allan-poe-volume-4",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-works-of-edgar-allan-poe-volume-4_2026-11-09.glink",
+ "sizeBytes": 49152,
+ "sha256": "6b9aee1c035279f9ebb239e0562e1001400516d144b9bdd7f296f7ea4a6a0989",
+ "schemaVersion": 1,
+ "sourceSha256": "5bc7f528cd11ea0cd8c8468891db54e2c8eab9ae63a3283c8bb5ede09009c26f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-works-of-edgar-allan-poe-volume-4_2026-11-09.glink"
+}

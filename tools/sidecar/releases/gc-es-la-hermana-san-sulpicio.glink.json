@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-hermana-san-sulpicio",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-hermana-san-sulpicio_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "19a6c758242baec9804ee71e91da533de2c3594cb1f1f78700d0a5109b8a2f82",
+ "schemaVersion": 1,
+ "sourceSha256": "45eb5e7de0563cde13de541ab160858b1921959d8ca9fd622b3fc244968c8a72",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-hermana-san-sulpicio_2026-11-09.glink"
+}

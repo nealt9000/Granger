@@ -1,0 +1,13 @@
+{
+ "id": "gc-treatise-concerning-the-principles-of-human-knowledge",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-treatise-concerning-the-principles-of-human-knowledge_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "6cff72702b2ebd96da342833e89cbfc5cab2145ed081de1f7660092513706583",
+ "schemaVersion": 1,
+ "sourceSha256": "a0593146bb30de9c38f4473e6132cb25242ba4fb617f017919b20b256d52dc2d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-treatise-concerning-the-principles-of-human-knowledge_2026-11-09.glink"
+}

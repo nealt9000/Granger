@@ -1,0 +1,13 @@
+{
+ "id": "gc-picture-of-dorian-gray",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-picture-of-dorian-gray_2026-11-09.glink",
+ "sizeBytes": 49152,
+ "sha256": "1afe54f91c3acf559487074d466a3d7fdd05a1cc8afe4cc0d576b68614fb5629",
+ "schemaVersion": 1,
+ "sourceSha256": "68202aa294d520c05914b8e9ccbc0532b19f8377055e833706d72e243c4d04d0",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-picture-of-dorian-gray_2026-11-09.glink"
+}

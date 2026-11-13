@@ -1,0 +1,13 @@
+{
+ "id": "gc-pride-and-prejudice",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-pride-and-prejudice_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "d63ed2e0277c44a9099bc15de2916f1299077ca26f1408c7b9bf7d6b104b5e61",
+ "schemaVersion": 1,
+ "sourceSha256": "397ae50744b8ba95278c7c272f2b7eb694038e0fbe65e5d0372851d20ecff718",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-pride-and-prejudice_2026-11-09.glink"
+}

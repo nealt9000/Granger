@@ -1,0 +1,13 @@
+{
+ "id": "gc-swann-s-way",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-swann-s-way_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "d7f2bda48b22703fb728cde860bc9dfca922bca6b50c6c93b78e67b247b6edff",
+ "schemaVersion": 1,
+ "sourceSha256": "61eb969d6e23cbda03ca2807c25268b805e84894391f73f1a79fe2916bf410a9",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-swann-s-way_2026-11-09.glink"
+}

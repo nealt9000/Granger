@@ -1,0 +1,13 @@
+{
+ "id": "gc-fundamental-principles-of-the-metaphysic-of-morals",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-fundamental-principles-of-the-metaphysic-of-morals_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "495925d02080b6c8d194e6817509d1add2ac965d9279202fc41c9f1cb76f6e35",
+ "schemaVersion": 1,
+ "sourceSha256": "00b4e38b11fefbe9e2bc7dc724245cf9c1402aac92f2ea7c0e641e541292302e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-fundamental-principles-of-the-metaphysic-of-morals_2026-11-09.glink"
+}

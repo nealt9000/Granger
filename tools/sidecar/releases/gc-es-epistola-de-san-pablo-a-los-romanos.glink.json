@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-epistola-de-san-pablo-a-los-romanos",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-epistola-de-san-pablo-a-los-romanos_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "43db547aba770f6c1c25ddfc01a0992c27b926054a6f70615887c0326f732514",
+ "schemaVersion": 1,
+ "sourceSha256": "165e3ee9282511503633730e91d9cd0e98edc3883af4a1af2e1855d07c20fea9",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-epistola-de-san-pablo-a-los-romanos_2026-11-09.glink"
+}

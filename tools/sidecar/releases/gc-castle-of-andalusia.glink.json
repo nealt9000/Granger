@@ -1,0 +1,13 @@
+{
+ "id": "gc-castle-of-andalusia",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-castle-of-andalusia_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "62b37a522b7062999bf3f1b4bab6dce7614c15ab600b89b4c3297f502eba287f",
+ "schemaVersion": 1,
+ "sourceSha256": "946a83ee72be7cdc7b1ff826f0195691a379218a674a30071665b793880f11d7",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-castle-of-andalusia_2026-11-09.glink"
+}

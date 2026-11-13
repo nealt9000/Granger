@@ -1,0 +1,13 @@
+{
+ "id": "gc-emma",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-emma_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "5791a5e2a14147155c0662c3567050e5ad4e46f29bc58ce962953694948202de",
+ "schemaVersion": 1,
+ "sourceSha256": "24137676219cc93f580999b3e5344db38501088f3f5e7dee98834b8ebad5d2f4",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-emma_2026-11-09.glink"
+}

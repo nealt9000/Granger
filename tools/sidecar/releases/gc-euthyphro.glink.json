@@ -1,0 +1,13 @@
+{
+ "id": "gc-euthyphro",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-euthyphro_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "83e29e765c08fa43545e9645798dfe4e460d10456df1036f9d0028928e344960",
+ "schemaVersion": 1,
+ "sourceSha256": "c24c47c7908acc526a04dbeed7aa80962d9a75ad099d4130cf43c183bfa68689",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-euthyphro_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-room-of-one-s-own",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-room-of-one-s-own_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "25b91de81e26262b5a5c7a1722be7fac2207be9976a5963d94546e12f0c24721",
+ "schemaVersion": 1,
+ "sourceSha256": "dd6254275b2db7794fea0378f352b7ee1e1a98067481a02821cbbe54cfb16087",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-room-of-one-s-own_2026-11-09.glink"
+}

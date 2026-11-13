@@ -1,0 +1,13 @@
+{
+ "id": "gc-measure-for-measure",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-measure-for-measure_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "c2f49d8c9fd454e74eb4e4463f1df8f5f7730abb2921795ea82efb5bedba4632",
+ "schemaVersion": 1,
+ "sourceSha256": "3324ed2bd82fa2a51f3a68036c5e0f71472b3cb0ca509a7b11a493d89bd8421d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-measure-for-measure_2026-11-09.glink"
+}

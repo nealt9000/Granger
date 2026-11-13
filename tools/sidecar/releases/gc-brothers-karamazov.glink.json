@@ -1,0 +1,13 @@
+{
+ "id": "gc-brothers-karamazov",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-brothers-karamazov_2026-11-09.glink",
+ "sizeBytes": 65536,
+ "sha256": "50c2765aba4db51a601b789b0f9cdaae47317cc2755dbb23629023d4c4eb1ec0",
+ "schemaVersion": 1,
+ "sourceSha256": "043b8496a0df981fba977df511aca39a5c74042a2d51659b27caa5ca57b0b21b",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-brothers-karamazov_2026-11-09.glink"
+}

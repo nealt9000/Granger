@@ -1,0 +1,13 @@
+{
+ "id": "gc-twenty-thousand-leagues-under-the-sea",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-twenty-thousand-leagues-under-the-sea_2026-11-09.glink",
+ "sizeBytes": 86016,
+ "sha256": "f1a5860a9a0da726add3c15e705ad0bc8338bb35831e7265828e707f954694aa",
+ "schemaVersion": 1,
+ "sourceSha256": "964742fbf5076105382d2a43d47700afd3afdbedede87aa478ff37f33232f4d8",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-twenty-thousand-leagues-under-the-sea_2026-11-09.glink"
+}

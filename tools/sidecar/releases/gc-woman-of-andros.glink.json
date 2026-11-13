@@ -1,0 +1,13 @@
+{
+ "id": "gc-woman-of-andros",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-woman-of-andros_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "29daecdab046621415be64f5689049a716fa1e38108aa652180aff227cd5b489",
+ "schemaVersion": 1,
+ "sourceSha256": "a3f79bf4269e72b7aaf55e8b5daea7ce644972eea4e71db317d134706e918f36",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-woman-of-andros_2026-11-09.glink"
+}

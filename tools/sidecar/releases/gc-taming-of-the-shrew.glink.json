@@ -1,0 +1,13 @@
+{
+ "id": "gc-taming-of-the-shrew",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-taming-of-the-shrew_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "a4e8b14f45905f70b25e97fb5b9068bea169c9f282096409f4f76f79fc51c7b8",
+ "schemaVersion": 1,
+ "sourceSha256": "60b7148605703455ec1c3eae365619bec5682db168abdc799c45898dd450bb41",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-taming-of-the-shrew_2026-11-09.glink"
+}

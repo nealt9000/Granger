@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-historia-de-la-vida-del-buscon",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-historia-de-la-vida-del-buscon_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "cc47d5030d39de95c56494643c7fdb81d3604116486abcb16b637b4daedb9713",
+ "schemaVersion": 1,
+ "sourceSha256": "fc676afc06237a8e9f999da469ea4b50ebaa1d4895626755a42622459a73ba5f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-historia-de-la-vida-del-buscon_2026-11-09.glink"
+}

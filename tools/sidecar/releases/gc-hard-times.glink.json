@@ -1,0 +1,13 @@
+{
+ "id": "gc-hard-times",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-hard-times_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "552033e390815bb9760a975ffd06f4bbcf2dbcde904b148209f8e157dc7aafc3",
+ "schemaVersion": 1,
+ "sourceSha256": "e8ed777a4eb5adbcfc83c9505883a61f36766c3cf1bff0a6010be60925bcb9dd",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-hard-times_2026-11-09.glink"
+}

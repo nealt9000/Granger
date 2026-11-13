@@ -1,0 +1,13 @@
+{
+ "id": "gc-poems-and-songs",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-poems-and-songs_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "f9b8e9f2dfd1e3bf5f1bd077204cc687ab6e9f4b36dbf3b69bd768cade525d37",
+ "schemaVersion": 1,
+ "sourceSha256": "d69d1e8884fb13107d42593e67bbc8664e02e525e31926a6a85dc51739c07fb3",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-poems-and-songs_2026-11-09.glink"
+}

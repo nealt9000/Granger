@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-sotileza",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-sotileza_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "cc9d69d79d237ca2c4897c23cc6e60d59f7aa19af39e5dcc6e3b6dcc355faf06",
+ "schemaVersion": 1,
+ "sourceSha256": "9f359219719362d82dfe748135ce075ed263a724ae581b19cb1c2bb0f83ca2b2",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-sotileza_2026-11-09.glink"
+}

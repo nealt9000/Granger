@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-romancero-selecto-del-cid",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-romancero-selecto-del-cid_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "a016daa7b0158057104bb19eac9f1e0cb3c89baef23f70b250875472c66d46f3",
+ "schemaVersion": 1,
+ "sourceSha256": "5b4a4933a7456395bc8d2eceb9916215c53b1f4f84aa6d5b89d0c0dbf6a52617",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-romancero-selecto-del-cid_2026-11-09.glink"
+}

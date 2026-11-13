@@ -1,0 +1,13 @@
+{
+ "id": "gc-war-and-peace",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-war-and-peace_2026-11-09.glink",
+ "sizeBytes": 192512,
+ "sha256": "71d6d191f800c61894b6854802bcf56e184352c7c3578836056d944dbcb0593a",
+ "schemaVersion": 1,
+ "sourceSha256": "e680ea6606c327c2de3751c666f0094790a63c55abc5abb0f3d01b26bc778283",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-war-and-peace_2026-11-09.glink"
+}

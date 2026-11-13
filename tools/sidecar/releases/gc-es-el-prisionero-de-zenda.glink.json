@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-el-prisionero-de-zenda",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-el-prisionero-de-zenda_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "74198176982390d7e57a9d207ca36be6b208d8710e2748e14a8ea248fef28c89",
+ "schemaVersion": 1,
+ "sourceSha256": "344a6e1bc0e56f1ab909eb33fd4878e14abf541894e75f6b9468ca6e7989cea5",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-prisionero-de-zenda_2026-11-09.glink"
+}

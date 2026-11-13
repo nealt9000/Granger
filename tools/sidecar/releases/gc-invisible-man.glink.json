@@ -1,0 +1,13 @@
+{
+ "id": "gc-invisible-man",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-invisible-man_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "88dfdbc3f77841111a3a2bf509ede58c3713468fcc4bd58482dce4e2a4ba1a2d",
+ "schemaVersion": 1,
+ "sourceSha256": "385b68eb59a6ab8412e01a7aa3dd26f4e263c0c7278e5bbcfd5484751ce2950c",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-invisible-man_2026-11-09.glink"
+}

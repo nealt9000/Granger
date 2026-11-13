@@ -1,0 +1,13 @@
+{
+ "id": "gc-all-s-well-that-ends-well",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-all-s-well-that-ends-well_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "5d287d9a1943f9a660bb82b2cc2b4cf1479bc62b04058c45795d278bd4ebcb73",
+ "schemaVersion": 1,
+ "sourceSha256": "6de9651ffbaceaba3c07171bf1f21e4c82a38e45ec308ea214bf78ae9e1c29d7",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-all-s-well-that-ends-well_2026-11-09.glink"
+}

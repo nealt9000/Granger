@@ -1,0 +1,13 @@
+{
+ "id": "gc-passage-to-india",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-passage-to-india_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "9d5ca55c6cfdec2cf591b4b46ed54e15f155d1f19468e3adbc1ee5e0e2791c3b",
+ "schemaVersion": 1,
+ "sourceSha256": "67f0af3ae5a2ac934bbf0efd321910eaa5cc569159cb414480497718383fc323",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-passage-to-india_2026-11-09.glink"
+}

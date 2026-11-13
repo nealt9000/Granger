@@ -1,0 +1,13 @@
+{
+ "id": "gc-candide",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-candide_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "5623a4c7e3f46c810685a15348d0b3205e4b98b8348b9761cca9e3fb5dba583c",
+ "schemaVersion": 1,
+ "sourceSha256": "e8be88dfa5b65058dee20f0c4746b69a21c4341a9832e25d45f0578b2341cf76",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-candide_2026-11-09.glink"
+}

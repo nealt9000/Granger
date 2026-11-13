@@ -1,0 +1,13 @@
+{
+ "id": "gc-comedy-of-errors",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-comedy-of-errors_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "2abdd5979a4ab0d03a4e02b6414fab1207a073a13623fab93049884ded861889",
+ "schemaVersion": 1,
+ "sourceSha256": "e4bd0ac9fd5ccddc953094df944278ffcdcc5654b7974911082d95be8945091f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-comedy-of-errors_2026-11-09.glink"
+}

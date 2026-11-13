@@ -1,0 +1,13 @@
+{
+ "id": "gc-to-the-lighthouse",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-to-the-lighthouse_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "98a0affe253aacfdd3558553c5ea2e976d486b11b304630cf7fb594ac13326af",
+ "schemaVersion": 1,
+ "sourceSha256": "bd6d92a82804634b051bbcc4a34446f71c2112545520fc7b291b2c1adb8d7fe1",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-to-the-lighthouse_2026-11-09.glink"
+}

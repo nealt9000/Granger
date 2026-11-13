@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-teatro-selecto-tomo-3-de-4",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-teatro-selecto-tomo-3-de-4_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "555516d214d4a8e57c3e16acad8b78b08e49ad8fbbdc14d20c85b72794df5bb1",
+ "schemaVersion": 1,
+ "sourceSha256": "e994c550e7d2a5f2338267b5d70a53283facf70044ace5a5ccb32884a3385efb",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-teatro-selecto-tomo-3-de-4_2026-11-09.glink"
+}

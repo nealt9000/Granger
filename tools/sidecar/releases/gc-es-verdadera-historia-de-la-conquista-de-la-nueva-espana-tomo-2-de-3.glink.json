@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-2-de-3",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-2-de-3_2026-11-09.glink",
+ "sizeBytes": 102400,
+ "sha256": "58091fca5ee3aa1d4cca5a614b9e9070546430d5c2bee0503576fbebedeeeb9e",
+ "schemaVersion": 1,
+ "sourceSha256": "3b81b993faf124033f05286e1d4c593d474b79a40c099a31fed4e269f9bce148",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-2-de-3_2026-11-09.glink"
+}

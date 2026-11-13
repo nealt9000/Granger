@@ -1,0 +1,13 @@
+{
+ "id": "gc-little-women",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-little-women_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "7f9e0149e3ab32cd794690e17e21f030ab7a02ca5f8ddeade7d5ebbe13adc7eb",
+ "schemaVersion": 1,
+ "sourceSha256": "dec3ebc6f9332063a4919cafa7a481f8b76c6cd9969f263729e75c3b24436d5e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-little-women_2026-11-09.glink"
+}

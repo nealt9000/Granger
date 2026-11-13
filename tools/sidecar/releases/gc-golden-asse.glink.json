@@ -1,0 +1,13 @@
+{
+ "id": "gc-golden-asse",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-golden-asse_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "889c350f343e9255edd0f55b789c1c83bced0379acff280fdbc2f8317e14cc81",
+ "schemaVersion": 1,
+ "sourceSha256": "bb2b6d3774c9899844221637ae0568d11180549b22b611f3a0c4ac37b4f221dc",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-golden-asse_2026-11-09.glink"
+}

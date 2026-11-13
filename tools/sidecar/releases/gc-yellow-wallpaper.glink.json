@@ -1,0 +1,13 @@
+{
+ "id": "gc-yellow-wallpaper",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-yellow-wallpaper_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "384875ef7eb0e82100b9e1a2f043fe6b67e20a28cd73c8f367133eadd385787d",
+ "schemaVersion": 1,
+ "sourceSha256": "d165d0e5d30720be61996f2927594e78e93f9719f9d7f2d1fdf57330a0f43062",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-yellow-wallpaper_2026-11-09.glink"
+}

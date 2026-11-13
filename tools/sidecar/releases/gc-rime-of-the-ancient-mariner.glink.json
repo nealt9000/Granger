@@ -1,0 +1,13 @@
+{
+ "id": "gc-rime-of-the-ancient-mariner",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-rime-of-the-ancient-mariner_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "4472c990e9c8f8ae703db42e99dcc9dfbb21463ad75ae208164e9bd25724db69",
+ "schemaVersion": 1,
+ "sourceSha256": "7ae82ebda88eae3532d400f17479157be019e6ef2029e9ec5762201835b06291",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-rime-of-the-ancient-mariner_2026-11-09.glink"
+}

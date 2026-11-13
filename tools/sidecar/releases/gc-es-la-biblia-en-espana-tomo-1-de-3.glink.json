@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-biblia-en-espana-tomo-1-de-3",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-biblia-en-espana-tomo-1-de-3_2026-11-09.glink",
+ "sizeBytes": 81920,
+ "sha256": "d2bdc1e009bec9bd71d0c930bbe7c268244ab4de3603d5d1485147b3443f661b",
+ "schemaVersion": 1,
+ "sourceSha256": "d9687f5d111f92454c46832e34d74b96b2e39e18e26686269984d36dc06b01a8",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-biblia-en-espana-tomo-1-de-3_2026-11-09.glink"
+}

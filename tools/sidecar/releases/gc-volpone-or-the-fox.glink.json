@@ -1,0 +1,13 @@
+{
+ "id": "gc-volpone-or-the-fox",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-volpone-or-the-fox_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "12ed0767538bdfe8081e0a3c23f2e27df7fef5497ef4413d55e951dab3decc14",
+ "schemaVersion": 1,
+ "sourceSha256": "39ae0077242f01769da17bcb98706f737b53cc0eeb139289878c59d30ccc57ec",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-volpone-or-the-fox_2026-11-09.glink"
+}

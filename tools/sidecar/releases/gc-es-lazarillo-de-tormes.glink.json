@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-lazarillo-de-tormes",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-lazarillo-de-tormes_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "357bf4aad235cf6dd14ac9969f45a3a326263c1f4f7933ccc5a6079e4d9692ba",
+ "schemaVersion": 1,
+ "sourceSha256": "66c029ea6038ddc5a35a3964de1051c9dbb57a05e8b068d2f1201f759c5f9e68",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-lazarillo-de-tormes_2026-11-09.glink"
+}

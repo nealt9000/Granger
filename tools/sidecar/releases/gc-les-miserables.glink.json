@@ -1,0 +1,13 @@
+{
+ "id": "gc-les-miserables",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-les-miserables_2026-11-09.glink",
+ "sizeBytes": 258048,
+ "sha256": "3557edbf6505c82c1bf7d99dba027666be6fb2cc2bf3afe21cad8be531d2c86d",
+ "schemaVersion": 1,
+ "sourceSha256": "8eaaca52eea11cf820ee805f7407f0f8fc161e2929caae5b1f37ea2e6cab7356",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-les-miserables_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-notes-from-the-underground",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-notes-from-the-underground_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "8c9ae7914ea2ac6537059febe9bcc52777c777fc28e4eba89755c8085276c3dd",
+ "schemaVersion": 1,
+ "sourceSha256": "968a7649d565c1070e6c48592b65361a1ff4ad16c3160df77215125285fbc0cc",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-notes-from-the-underground_2026-11-09.glink"
+}

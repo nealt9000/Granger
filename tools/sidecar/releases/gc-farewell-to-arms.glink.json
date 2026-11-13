@@ -1,0 +1,13 @@
+{
+ "id": "gc-farewell-to-arms",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-farewell-to-arms_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "d90c4a97f485f15febfcc160bcc2ce49be0785c2d04961030dfd8a48164c57f8",
+ "schemaVersion": 1,
+ "sourceSha256": "4929bb416a8639d191f7c5115ee29f141fab64a45b7ca2a40606afa9f84a7929",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-farewell-to-arms_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-duchess-of-malfi",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-duchess-of-malfi_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "5788738922c168da64e2c9e2ca16524ceeb9f1cae07841f0116549ef43d8bcf6",
+ "schemaVersion": 1,
+ "sourceSha256": "d8c400df5799a1220571c64111462d10fe425514b1f53ddab884dccceb50b47f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-duchess-of-malfi_2026-11-09.glink"
+}

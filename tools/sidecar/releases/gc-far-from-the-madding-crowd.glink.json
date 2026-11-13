@@ -1,0 +1,13 @@
+{
+ "id": "gc-far-from-the-madding-crowd",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-far-from-the-madding-crowd_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "050ca4d8e9849c9a2ece0fd0e30cd58985f64c510e1c167609bb2816477a8642",
+ "schemaVersion": 1,
+ "sourceSha256": "5c47c5e46eebae199a4150d2de4ac8350c29c07e3b21a547fd7b828e413e0267",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-far-from-the-madding-crowd_2026-11-09.glink"
+}

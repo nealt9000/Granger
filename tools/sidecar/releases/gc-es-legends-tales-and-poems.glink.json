@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-legends-tales-and-poems",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-legends-tales-and-poems_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "e9bb7e10c1b62b22386acdec16bdee9f506a417103e0f962908f911c268c98aa",
+ "schemaVersion": 1,
+ "sourceSha256": "082e8527cf3b787e615be0130e76ab737a7110ba33364333f88723e94368b305",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-legends-tales-and-poems_2026-11-09.glink"
+}

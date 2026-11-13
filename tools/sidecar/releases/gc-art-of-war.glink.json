@@ -1,0 +1,13 @@
+{
+ "id": "gc-art-of-war",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-art-of-war_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "f5a78b927f1edb065ee2b021727837785f4f5f1033237d14df9ee7dd6d5ecf31",
+ "schemaVersion": 1,
+ "sourceSha256": "49d4793bf9e865552b87c394eec915c512d39395cbb14288bb82331049493d1d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-art-of-war_2026-11-09.glink"
+}

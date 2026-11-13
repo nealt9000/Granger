@@ -1,0 +1,13 @@
+{
+ "id": "gc-sorrows-of-young-werther",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-sorrows-of-young-werther_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "36d80293d342535e9d33d306dc606fe911eed89a370c59b336593b886698248d",
+ "schemaVersion": 1,
+ "sourceSha256": "1141e62d11ec6156294eac4a54854e78d2ee8a6448eec3864f16d43f67a4f186",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-sorrows-of-young-werther_2026-11-09.glink"
+}

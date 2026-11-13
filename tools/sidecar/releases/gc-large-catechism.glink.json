@@ -1,0 +1,13 @@
+{
+ "id": "gc-large-catechism",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-large-catechism_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "5fff59222470846e535205651d5b3c1ebc07760043c8c4d8a2144fc47cb98b84",
+ "schemaVersion": 1,
+ "sourceSha256": "41d728d31b56405c7899babbcb8bc01f66394d92fd8cd8dc48630469206a6367",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-large-catechism_2026-11-09.glink"
+}

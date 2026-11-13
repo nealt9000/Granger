@@ -1,0 +1,13 @@
+{
+ "id": "gc-apocrypha-deuterocanonical-books",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-apocrypha-deuterocanonical-books_2026-11-09.glink",
+ "sizeBytes": 65536,
+ "sha256": "2ba21fc7897e0b8055a0d13f71f4d4593038fe69af494bf699163ee83136adbd",
+ "schemaVersion": 1,
+ "sourceSha256": "5dce3a94ee7e94923a6e04e574a9c85cd7e83c8a785c17ad5929223558e33369",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-apocrypha-deuterocanonical-books_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-ivanhoe",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-ivanhoe_2026-11-09.glink",
+ "sizeBytes": 69632,
+ "sha256": "21fddc71cf9848dcaf9a5c85ffa847d365e70c8979c2a62ec6e0c5e895de21a7",
+ "schemaVersion": 1,
+ "sourceSha256": "8d020936bddde3bc556466dbfa6f3bcbecd6ce53f4f77137fad182f6cdc04993",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-ivanhoe_2026-11-09.glink"
+}

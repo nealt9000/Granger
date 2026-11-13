@@ -1,0 +1,13 @@
+{
+ "id": "gc-kim",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-kim_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "8fcb590207b498233395695cda75493605349c366cb803595d8baca5c5b8f1ee",
+ "schemaVersion": 1,
+ "sourceSha256": "5a45b0bb15e6787847b3f590375ea302c45d6ed8a69941c9b6e1b17e7d38be9f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-kim_2026-11-09.glink"
+}

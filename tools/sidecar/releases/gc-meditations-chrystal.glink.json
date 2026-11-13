@@ -1,0 +1,13 @@
+{
+ "id": "gc-meditations-chrystal",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-meditations-chrystal_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "a7cdb5cf3efce54d8b158d0b06e2a2c7edb7ba36bc37731ca52eb109c53f599f",
+ "schemaVersion": 1,
+ "sourceSha256": "2849f59ded78c3bd02c3d102dca37c11fe9ec6d8eb7cb89ddba10dafcba074f8",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-meditations-chrystal_2026-11-09.glink"
+}

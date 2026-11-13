@@ -1,0 +1,13 @@
+{
+ "id": "gc-mayor-of-casterbridge",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-mayor-of-casterbridge_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "e3d9e2dc25c0a9899b8c27c7a2d1453b06f7e31c9c69e62a799d755f1b4641a9",
+ "schemaVersion": 1,
+ "sourceSha256": "5a874b5ea3ca719b2951d7b4888afd8af62c40d92da900e1b8d8b78e9b4209bb",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-mayor-of-casterbridge_2026-11-09.glink"
+}

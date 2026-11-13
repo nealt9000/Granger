@@ -1,0 +1,13 @@
+{
+ "id": "gc-fontainbleau",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-fontainbleau_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "35a3d75791229ec6dd6ae99e21996a8b090701bc72ee4808ee27552cd7c8c998",
+ "schemaVersion": 1,
+ "sourceSha256": "0314c0100152fa4860d32ed2ea9a19c0aa05093c01b3f160e8e82c038978ea56",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-fontainbleau_2026-11-09.glink"
+}

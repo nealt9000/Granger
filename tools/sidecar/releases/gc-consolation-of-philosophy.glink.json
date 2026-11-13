@@ -1,0 +1,13 @@
+{
+ "id": "gc-consolation-of-philosophy",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-consolation-of-philosophy_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "c7da2bbbeb8d984a554571b90e6b3c7f207d3d5af873b160ba9889d43d0981ac",
+ "schemaVersion": 1,
+ "sourceSha256": "46d7ded431edc49913ea2b938c33adc05b4344ce82148df2e0941bef4f65e36d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-consolation-of-philosophy_2026-11-09.glink"
+}

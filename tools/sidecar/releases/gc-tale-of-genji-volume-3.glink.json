@@ -1,0 +1,13 @@
+{
+ "id": "gc-tale-of-genji-volume-3",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-tale-of-genji-volume-3_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "00e14767fdb1ce02de8ea13a9acbec78c72bc4d1eff43d23d9c1a8fdd2ea03de",
+ "schemaVersion": 1,
+ "sourceSha256": "c55a237881b1a9cb34f25f7e0ddccfc79fab7711d2da696108eb198262f63ceb",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-tale-of-genji-volume-3_2026-11-09.glink"
+}

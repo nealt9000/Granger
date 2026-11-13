@@ -1,0 +1,13 @@
+{
+ "id": "gc-mrs-dalloway",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-mrs-dalloway_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "6280f6a770e41fe39843f1ab1636b1916cd54f1ef2edc168088a487be5c3262d",
+ "schemaVersion": 1,
+ "sourceSha256": "7e979f557fdce3b0d236233e369d657caf5811c184bed0c0d2e7e9a1e51123f4",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-mrs-dalloway_2026-11-09.glink"
+}

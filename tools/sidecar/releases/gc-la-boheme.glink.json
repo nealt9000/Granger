@@ -1,0 +1,13 @@
+{
+ "id": "gc-la-boheme",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-la-boheme_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "5f810c89a3e94e4a0580a58b6a4a8631308c1c53e700af2d75b51c3f6ff4cbbb",
+ "schemaVersion": 1,
+ "sourceSha256": "1016f309cddc261b9854274965422222148dcbc86cad65f5f3d57cdcebbcfafe",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-la-boheme_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-king-solomon-s-mines",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-king-solomon-s-mines_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "0302202d46765e15fdfc86e3d6cf7e053f23ad777573c30e82cf700ef42468a7",
+ "schemaVersion": 1,
+ "sourceSha256": "3e3a4fb26cdf95963220ec1b7dd044b6c6c4320e86027e3ae5cad894562cdb4f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-king-solomon-s-mines_2026-11-09.glink"
+}

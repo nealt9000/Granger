@@ -1,0 +1,13 @@
+{
+ "id": "gc-of-human-bondage",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-of-human-bondage_2026-11-09.glink",
+ "sizeBytes": 118784,
+ "sha256": "5af22e3b1eea5b7badbee135605d986f11f50f05ca9e1c6fcea4d64ea61a19db",
+ "schemaVersion": 1,
+ "sourceSha256": "c062ecfb97ce47e351b3f9c5a2cd91e025d4eb426ec82e30354844494c121a76",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-of-human-bondage_2026-11-09.glink"
+}

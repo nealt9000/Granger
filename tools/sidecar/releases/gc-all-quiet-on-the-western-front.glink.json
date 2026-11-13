@@ -1,0 +1,13 @@
+{
+ "id": "gc-all-quiet-on-the-western-front",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-all-quiet-on-the-western-front_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "f6aff12fe61f13ccfbdaa7eee278a04a3c007ccbbd7adf7e43ba5ec7792797cf",
+ "schemaVersion": 1,
+ "sourceSha256": "856156e582e720a5d3b96899f89a3e0c45d8fc44425bd95c612c3abac4d604de",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-all-quiet-on-the-western-front_2026-11-09.glink"
+}

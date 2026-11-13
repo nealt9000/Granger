@@ -1,0 +1,13 @@
+{
+ "id": "gc-bartleby-the-scrivener",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-bartleby-the-scrivener_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "903e5bbae3edc89b094283a38a9d4fba4bf82c0dda5772e5e4ad6ce2e2517204",
+ "schemaVersion": 1,
+ "sourceSha256": "05a08be00736cd28513e182e0dc683c16121257943247395df3734833893994a",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-bartleby-the-scrivener_2026-11-09.glink"
+}

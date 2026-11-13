@@ -1,0 +1,13 @@
+{
+ "id": "gc-troilus-and-cressida",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-troilus-and-cressida_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "3ba9a7cb850e03181813846d47c21f514ba9dd99a5b054823fe89e186fee5068",
+ "schemaVersion": 1,
+ "sourceSha256": "59bc4efdd344ee5db3beda3cfb8eacc87bc7a7b44bb478cb4414b2cc72ed8103",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-troilus-and-cressida_2026-11-09.glink"
+}

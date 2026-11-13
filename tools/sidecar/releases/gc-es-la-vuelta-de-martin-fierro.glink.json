@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-vuelta-de-martin-fierro",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-vuelta-de-martin-fierro_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "1e78830c800b9171dd3bff339498926df0f1f47615901ab1265978ed4b4cdbf4",
+ "schemaVersion": 1,
+ "sourceSha256": "40c580228db9e76bce05f6822d3e03bdc628c26f61c21e8b642eb44c28325215",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-vuelta-de-martin-fierro_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-phaedo",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-phaedo_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "55f3671e1f3316f0dd508113f019dbae0946b2e463bcd7e5d13c785cb4244c2e",
+ "schemaVersion": 1,
+ "sourceSha256": "604761f524eb88f3f236176c86a9e8de360c322684cac0fa76197f048155e3bf",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-phaedo_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-king-richard-iii",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-king-richard-iii_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "7c38ed56fc0265d82efb19cfd3087cfcefdcfe5f6de90a4e63abd01df159cffb",
+ "schemaVersion": 1,
+ "sourceSha256": "fe76d2de57d5e6c03e0cbf58821cd98bae15c5a500e8f92afdd56cce50067c5a",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-king-richard-iii_2026-11-09.glink"
+}

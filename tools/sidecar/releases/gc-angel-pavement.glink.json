@@ -1,0 +1,13 @@
+{
+ "id": "gc-angel-pavement",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-angel-pavement_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "b301efeacc85781d638f1c48fba7b3795c1ea09e332e82cbbcd093c663951501",
+ "schemaVersion": 1,
+ "sourceSha256": "adc65825e49755494cf7b40e58ae64efea2aaa4f9587eb33f3a9b94ade6d8e76",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-angel-pavement_2026-11-09.glink"
+}

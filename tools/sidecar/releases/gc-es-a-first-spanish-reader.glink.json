@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-a-first-spanish-reader",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-a-first-spanish-reader_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "89b0bf030202a1bd8b4f058a85e6e61f5b5d50a8894c7982e585d1fe2e280a27",
+ "schemaVersion": 1,
+ "sourceSha256": "7fa7c9b57c9cae33f7042fb8371817442457c6e8ffc3e12856f128bb333e3a37",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-a-first-spanish-reader_2026-11-09.glink"
+}

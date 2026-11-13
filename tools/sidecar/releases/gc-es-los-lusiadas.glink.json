@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-los-lusiadas",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-los-lusiadas_2026-11-09.glink",
+ "sizeBytes": 77824,
+ "sha256": "6674123ea647bde38ce9abbe7edb6042ed10d22b15b19e9d049d3ae80fda485d",
+ "schemaVersion": 1,
+ "sourceSha256": "3b857173dd8a2467086f80c9f33ac8307bcd644dd3cee50ca5eafae926b7264d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-los-lusiadas_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-three-musketeers",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-three-musketeers_2026-11-09.glink",
+ "sizeBytes": 94208,
+ "sha256": "7c70f7356c9d67f1c7d42f8283406ed40e6a0a366fbafbc372a4d7d253493efc",
+ "schemaVersion": 1,
+ "sourceSha256": "fba370ee58e406c24d83afca7110718c4c40853512710d297566bcc05712e3f3",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-three-musketeers_2026-11-09.glink"
+}

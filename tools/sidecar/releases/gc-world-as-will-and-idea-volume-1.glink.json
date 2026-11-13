@@ -1,0 +1,13 @@
+{
+ "id": "gc-world-as-will-and-idea-volume-1",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-world-as-will-and-idea-volume-1_2026-11-09.glink",
+ "sizeBytes": 69632,
+ "sha256": "e172c2798e26a39f7e2792f67b8b4c4b4f9ff6dd3512c843765eaec036812e5a",
+ "schemaVersion": 1,
+ "sourceSha256": "fe35d430101789c3e2295108f5504e08ceb1cafba9b8f85e67fea4922e41910e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-world-as-will-and-idea-volume-1_2026-11-09.glink"
+}

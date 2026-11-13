@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-cuentos-escogidos",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-cuentos-escogidos_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "d8addb4d6f57e135479d223aa38ad1f3f4da96781e8ab015df8d276177cfec34",
+ "schemaVersion": 1,
+ "sourceSha256": "2f0eb0eb420d1d7c17c78af25ccd4639a7f493bd16d04b229ea47d8806b654b2",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-cuentos-escogidos_2026-11-09.glink"
+}

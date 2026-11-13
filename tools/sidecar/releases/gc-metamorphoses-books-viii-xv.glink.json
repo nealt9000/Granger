@@ -1,0 +1,13 @@
+{
+ "id": "gc-metamorphoses-books-viii-xv",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-metamorphoses-books-viii-xv_2026-11-09.glink",
+ "sizeBytes": 122880,
+ "sha256": "b6f2a89d8b0a86194b3f118bfd971bed225391fca9ffe1e5e41f301166fce4bf",
+ "schemaVersion": 1,
+ "sourceSha256": "5d9358fe540da0063059f32dc4531ec49b99bfa07333357233767fa6c6fd7c1b",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-metamorphoses-books-viii-xv_2026-11-09.glink"
+}

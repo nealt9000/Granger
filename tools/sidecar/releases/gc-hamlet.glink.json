@@ -1,0 +1,13 @@
+{
+ "id": "gc-hamlet",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-hamlet_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "eeee975830f733c5ff8e380b5ae2447f37162f3ce1f22d5b20514b43d019c867",
+ "schemaVersion": 1,
+ "sourceSha256": "ed66cc0794036a7c2d5a3ec3d6299a62e7b8409ad8b49ab96451a0b413d898f9",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-hamlet_2026-11-09.glink"
+}

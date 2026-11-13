@@ -1,0 +1,13 @@
+{
+ "id": "gc-magic-mountain",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-magic-mountain_2026-11-09.glink",
+ "sizeBytes": 69632,
+ "sha256": "47e3135dbe4d074c877c2555c88e9cb809a3ad4fb41717d9fb8abdddfc6782b9",
+ "schemaVersion": 1,
+ "sourceSha256": "df3d67878a9acfb243a0ec7482b84912058947e59ef8c2b2a26661954133a818",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-magic-mountain_2026-11-09.glink"
+}

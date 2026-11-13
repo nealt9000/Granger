@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-isla-del-tesoro",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-isla-del-tesoro_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "88b45464e5c2e0de089f875ee446ececf1bcdee0df2d244c696b5dc635ecda19",
+ "schemaVersion": 1,
+ "sourceSha256": "9bbcf92b1af92fc3451464776ddd06d2f132f4f5d7bd87867f50aa9d8c3accec",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-isla-del-tesoro_2026-11-09.glink"
+}

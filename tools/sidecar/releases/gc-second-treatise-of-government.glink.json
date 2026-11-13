@@ -1,0 +1,13 @@
+{
+ "id": "gc-second-treatise-of-government",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-second-treatise-of-government_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "c15cffc5e0d145e36973eec5f901b46dcf03f97152cbbb44915ab2b97e521053",
+ "schemaVersion": 1,
+ "sourceSha256": "0a2c7a82a1f186b124ce24dcf9420575041104ae481af395cf49ed4fd4b7946f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-second-treatise-of-government_2026-11-09.glink"
+}

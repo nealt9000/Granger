@@ -1,0 +1,13 @@
+{
+ "id": "gc-aeneid-mackail",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-aeneid-mackail_2026-11-09.glink",
+ "sizeBytes": 65536,
+ "sha256": "b43bff6106cdf9ca894f2e233718eb0c21cb0fa1bace2c8c1f14e894ae4826f6",
+ "schemaVersion": 1,
+ "sourceSha256": "64e06578d7a205207c81f439cf420b502fd8fec03f8d5c357fec0f819af4c0e3",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-aeneid-mackail_2026-11-09.glink"
+}

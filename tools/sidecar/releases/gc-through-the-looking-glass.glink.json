@@ -1,0 +1,13 @@
+{
+ "id": "gc-through-the-looking-glass",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-through-the-looking-glass_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "4a21c2134c1103ed05e4a00192199328d05f03f8bded5d54000c6de4f7ad3fec",
+ "schemaVersion": 1,
+ "sourceSha256": "e8f91d66fcfe31ed7cf868a337fb94b0ddbb94b1e4034a379f1d7148c9a879a4",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-through-the-looking-glass_2026-11-09.glink"
+}

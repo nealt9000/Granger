@@ -1,0 +1,13 @@
+{
+ "id": "gc-idylls-of-the-king",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-idylls-of-the-king_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "ad43a7efb5760923fa6795b0eb5a1ee1845a52dffe69f5a4731d672e2af4afed",
+ "schemaVersion": 1,
+ "sourceSha256": "a116fb8523046412f5ca3c306498806dc180ce58851a273dcd42bddbbafb3b6a",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-idylls-of-the-king_2026-11-09.glink"
+}

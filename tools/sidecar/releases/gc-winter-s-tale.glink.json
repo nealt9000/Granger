@@ -1,0 +1,13 @@
+{
+ "id": "gc-winter-s-tale",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-winter-s-tale_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "ef7f0d4e7795f34c4705b5bc5d5ceb78559b5e78c335f3965ab59425035f3ea0",
+ "schemaVersion": 1,
+ "sourceSha256": "cb57d29a139416b79c7ef3d07b9a843933be1aa9f17aba6463829242ac196164",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-winter-s-tale_2026-11-09.glink"
+}

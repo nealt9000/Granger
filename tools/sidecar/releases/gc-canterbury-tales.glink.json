@@ -1,0 +1,13 @@
+{
+ "id": "gc-canterbury-tales",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-canterbury-tales_2026-11-09.glink",
+ "sizeBytes": 126976,
+ "sha256": "65cef32ae87e641390f54236f02ccef695b8ced0ed83d7d2505f1187574bbd52",
+ "schemaVersion": 1,
+ "sourceSha256": "0493cf60076d98abe565b9de5ac1663c87aed8edea9ab7c71001b113a268f3c8",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-canterbury-tales_2026-11-09.glink"
+}

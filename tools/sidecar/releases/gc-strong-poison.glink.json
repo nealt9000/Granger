@@ -1,0 +1,13 @@
+{
+ "id": "gc-strong-poison",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-strong-poison_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "14444d333af77d689b168981665fd5d90c94e10ffe226cc04a1489ca802d0488",
+ "schemaVersion": 1,
+ "sourceSha256": "09213345a4a53222321c4494c557a275de046ecdc5e56685cdf456b66f8dd7ea",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-strong-poison_2026-11-09.glink"
+}

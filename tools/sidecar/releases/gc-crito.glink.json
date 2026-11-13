@@ -1,0 +1,13 @@
+{
+ "id": "gc-crito",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-crito_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "233ae1668c9134d4fca84fd716c355a6a7c8f6add1a691296349a8adf7d74967",
+ "schemaVersion": 1,
+ "sourceSha256": "5e51485dd3d7a5921337ba872e1a24a7bcbdfd9c63460a7bdc6298a20a3286ef",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-crito_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-las-cien-mejores-poesias-liricas-de-la-lengua-castellana",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-las-cien-mejores-poesias-liricas-de-la-lengua-castellana_2026-11-09.glink",
+ "sizeBytes": 69632,
+ "sha256": "f290535e839a2cfd77d601c04e67224e695eca0b75c61d7ecc2b3830a2e57b40",
+ "schemaVersion": 1,
+ "sourceSha256": "f690da5703908fb98c0bd62fcec2480415028e2419f649ad0b138cd6605da7d8",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-las-cien-mejores-poesias-liricas-de-la-lengua-castellana_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-hunger",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-hunger_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "1230b98f928b2ff1d7e66c44bee9026bbabfaa359a51ca099907a14f1d0952a9",
+ "schemaVersion": 1,
+ "sourceSha256": "1ce750a431138912e112099fee8cd63d81e37d868ec62c40b5555793280f0e84",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-hunger_2026-11-09.glink"
+}

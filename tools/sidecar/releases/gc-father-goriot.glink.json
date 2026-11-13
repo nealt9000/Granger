@@ -1,0 +1,13 @@
+{
+ "id": "gc-father-goriot",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-father-goriot_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "c948b3798ce1316a51b707d2fc33fb80b72950033d0d9de94114a69620357b4d",
+ "schemaVersion": 1,
+ "sourceSha256": "6e975edcec398c08454a44a0949f4f4e50dcae820a588316718c14156001d7de",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-father-goriot_2026-11-09.glink"
+}

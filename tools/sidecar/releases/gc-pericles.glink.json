@@ -1,0 +1,13 @@
+{
+ "id": "gc-pericles",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-pericles_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "2bc249f30d2a4d06b8ad75d472dc1af69a519acadef1293ab18c7241abdfafd7",
+ "schemaVersion": 1,
+ "sourceSha256": "32ea7dbdfa1ba8254b09572ecc6e57d2ae3bca04de4355633142bf67c0bedcfd",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-pericles_2026-11-09.glink"
+}

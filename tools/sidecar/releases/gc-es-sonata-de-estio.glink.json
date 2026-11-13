@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-sonata-de-estio",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-sonata-de-estio_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "a054b216e54b768b67ac79af3aecfda204c8ce1a002db6875a546989b431d830",
+ "schemaVersion": 1,
+ "sourceSha256": "2ea6945f5716b4b12267ef763bb5a06d06ddf51db9b88475b7c69389484ec9d1",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-sonata-de-estio_2026-11-09.glink"
+}

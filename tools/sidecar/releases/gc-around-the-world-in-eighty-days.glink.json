@@ -1,0 +1,13 @@
+{
+ "id": "gc-around-the-world-in-eighty-days",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-around-the-world-in-eighty-days_2026-11-09.glink",
+ "sizeBytes": 90112,
+ "sha256": "994b829877fe127131aecb6aa4e15008d19e022b1c385a736aa03a68a7ec401d",
+ "schemaVersion": 1,
+ "sourceSha256": "777f521d604b913888e00dd6e772471e5ef4b5081d9d83b3ffa4f2ee2bc9f36d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-around-the-world-in-eighty-days_2026-11-09.glink"
+}

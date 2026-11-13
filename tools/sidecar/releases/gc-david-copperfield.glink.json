@@ -1,0 +1,13 @@
+{
+ "id": "gc-david-copperfield",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-david-copperfield_2026-11-09.glink",
+ "sizeBytes": 69632,
+ "sha256": "021dab919051aaf7523438d31da34693aca6a43fb377fa6a2baec8a97c787a36",
+ "schemaVersion": 1,
+ "sourceSha256": "db57d294ad800869eba583040f4026ea051efb2341301c8b88f14923b71a034d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-david-copperfield_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-comedias-de-aristofanes-tomo-3-de-3",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-comedias-de-aristofanes-tomo-3-de-3_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "3f8b4d42c0fb5a2c424faa2e4376fb14f55b867f00af3e2d891ef418f88849bc",
+ "schemaVersion": 1,
+ "sourceSha256": "d206ce1c45207b9d51c7ff211a79cf7d163f937587d0ccde8b32accb4895846e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-comedias-de-aristofanes-tomo-3-de-3_2026-11-09.glink"
+}

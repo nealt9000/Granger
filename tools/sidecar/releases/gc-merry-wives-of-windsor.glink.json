@@ -1,0 +1,13 @@
+{
+ "id": "gc-merry-wives-of-windsor",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-merry-wives-of-windsor_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "212868296d38240f085bc234de25f4bf9fdcd75431bae01e5864bd9e94933398",
+ "schemaVersion": 1,
+ "sourceSha256": "fec133344da19c805acc0054cd48e650c83babfd6c2cec787020b5f0c8dbd9b5",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-merry-wives-of-windsor_2026-11-09.glink"
+}

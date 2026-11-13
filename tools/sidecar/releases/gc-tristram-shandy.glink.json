@@ -1,0 +1,13 @@
+{
+ "id": "gc-tristram-shandy",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-tristram-shandy_2026-11-09.glink",
+ "sizeBytes": 106496,
+ "sha256": "e02564042d0e0f9b13943c9d9aa04008a6fa7f451371621fda605eb1565cb1c0",
+ "schemaVersion": 1,
+ "sourceSha256": "02f11683635683450a2653db82e57f7610d531c14e77b099cb0c6aae5363a90f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-tristram-shandy_2026-11-09.glink"
+}

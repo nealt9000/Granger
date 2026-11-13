@@ -1,0 +1,13 @@
+{
+ "id": "gc-duenna",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-duenna_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "ad1ca5b7cd6ba451136b9b196fb35a29c9eff759ac688a35ec397385e7a5df5e",
+ "schemaVersion": 1,
+ "sourceSha256": "c98c844179c65aa1e25da3af8b85584eeb4ed775edef05880c74f69182629cd1",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-duenna_2026-11-09.glink"
+}

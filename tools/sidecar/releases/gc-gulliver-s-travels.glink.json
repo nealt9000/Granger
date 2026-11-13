@@ -1,0 +1,13 @@
+{
+ "id": "gc-gulliver-s-travels",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-gulliver-s-travels_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "9e33fc2836bd831d518029673478be5fce87f85555ba0e654e2237e3507ff693",
+ "schemaVersion": 1,
+ "sourceSha256": "90a635fae629f4b46e0d4f06dd5fdfa429cbf56cd7ce1635eb36bdd0f0ac7c67",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-gulliver-s-travels_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-rhinegold-the-valkyrie",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-rhinegold-the-valkyrie_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "c402623fc959f1bfcc1ae78d5431e89e326faa2859aa8009186a71d5d6a2a62f",
+ "schemaVersion": 1,
+ "sourceSha256": "a8fe0fec5afe80e95023b43fbe6a400532c18cce1635f67e65b7dda01ca122c1",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-rhinegold-the-valkyrie_2026-11-09.glink"
+}

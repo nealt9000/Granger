@@ -1,0 +1,13 @@
+{
+ "id": "gc-house-of-atreus-agamemnon-the-libation-bearers-the-furies",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-house-of-atreus-agamemnon-the-libation-bearers-the-furies_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "661361d90dc3ddc6d89f1f19f6a84c048a5e76c99f547ade629d60813fc3a424",
+ "schemaVersion": 1,
+ "sourceSha256": "d9e31608945359f1dfe8ecc00eedafdfabea755642828e4c79635ef480a06485",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-house-of-atreus-agamemnon-the-libation-bearers-the-furies_2026-11-09.glink"
+}

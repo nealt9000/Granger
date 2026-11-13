@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-odisea",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-odisea_2026-11-09.glink",
+ "sizeBytes": 94208,
+ "sha256": "8a089c86d4457b20585712f3d48f003559b8c4b515a1d67bc504df320b47294c",
+ "schemaVersion": 1,
+ "sourceSha256": "4801c271d30307e6daceea40b8b485aea532924e4ab268a86bea0d5c789d9a6f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-odisea_2026-11-09.glink"
+}

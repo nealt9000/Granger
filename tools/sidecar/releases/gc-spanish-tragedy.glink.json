@@ -1,0 +1,13 @@
+{
+ "id": "gc-spanish-tragedy",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-spanish-tragedy_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "7f0232212a610b51c74218f8f22a2d4a32c9271f9e68600b4e76f6906e0c602a",
+ "schemaVersion": 1,
+ "sourceSha256": "1af5eec2f50f4610728e97fe0cf20de5a5039abfaf697e76760efbb4df25c06f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-spanish-tragedy_2026-11-09.glink"
+}

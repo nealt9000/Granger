@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-dramas-de-shakespeare-tomo-1",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-dramas-de-shakespeare-tomo-1_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "a85770452b0ebf877154c528a5c2476eae7474a0c3c3e13be74d8f1136836b91",
+ "schemaVersion": 1,
+ "sourceSha256": "5d6af9820e6877b19b2a5fae435a3660d2cbaa97591414c60fc2572fe49ddb17",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-dramas-de-shakespeare-tomo-1_2026-11-09.glink"
+}

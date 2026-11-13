@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-historia-de-las-indias-tomo-2-de-5",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-historia-de-las-indias-tomo-2-de-5_2026-11-09.glink",
+ "sizeBytes": 135168,
+ "sha256": "7d040d552a6f8878513f8f1ea5d46ef6ae0eabe4007c63d797b536c65357e097",
+ "schemaVersion": 1,
+ "sourceSha256": "2f33fd6058c11865b561d56bf4f42976a7f3654fe8d59b5c658662d97a7c8bba",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-historia-de-las-indias-tomo-2-de-5_2026-11-09.glink"
+}

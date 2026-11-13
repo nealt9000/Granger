@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-edad-de-oro",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-edad-de-oro_2026-11-09.glink",
+ "sizeBytes": 69632,
+ "sha256": "643c341e5c154fb7bd3679df79116ebc85405089d5c95467902b065dfc5d8c36",
+ "schemaVersion": 1,
+ "sourceSha256": "0e32f79fb306b9483fa488b91d472ff3c4ac468e1987230ffad18b423eaafb37",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-edad-de-oro_2026-11-09.glink"
+}

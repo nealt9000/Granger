@@ -1,0 +1,13 @@
+{
+ "id": "gc-faust-gounod",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-faust-gounod_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "065fe9a270bfbbbc5c85ba1e5fffe300ac990bf6c29b59d26b781fa5766360ed",
+ "schemaVersion": 1,
+ "sourceSha256": "02e6d4b07bc052e40612272f1dc9f3c17b930f9caa0fd94eaf20c6865c6d6b4d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-faust-gounod_2026-11-09.glink"
+}

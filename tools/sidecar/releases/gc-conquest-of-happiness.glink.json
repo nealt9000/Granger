@@ -1,0 +1,13 @@
+{
+ "id": "gc-conquest-of-happiness",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-conquest-of-happiness_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "39d04f86be807c987fbeff1331a4039e8a9abe51687f76ed8d040377a9cfe190",
+ "schemaVersion": 1,
+ "sourceSha256": "4b96a8529a1d3e7387fcb399f5e1a7822fa18267e73e94029263e53667b95f67",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-conquest-of-happiness_2026-11-09.glink"
+}

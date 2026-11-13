@@ -1,0 +1,13 @@
+{
+ "id": "gc-history-of-herodotus-volume-2",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-history-of-herodotus-volume-2_2026-11-09.glink",
+ "sizeBytes": 118784,
+ "sha256": "8e22cdd631c97948ec933472bdcb8ae5e1a35173777949c57fc158fb0c090b11",
+ "schemaVersion": 1,
+ "sourceSha256": "1b15d444e94bd4337deb2b116b523dd1eec67398edea5fc91fe85399bf658a79",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-history-of-herodotus-volume-2_2026-11-09.glink"
+}

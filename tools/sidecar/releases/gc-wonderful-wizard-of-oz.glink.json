@@ -1,0 +1,13 @@
+{
+ "id": "gc-wonderful-wizard-of-oz",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-wonderful-wizard-of-oz_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "39766035e9364b774239964df0429b439860b47d19125427f8515390d3f46140",
+ "schemaVersion": 1,
+ "sourceSha256": "4fc2a91c687dac87c707bb9649bab95f851a5e16dffd7dd69a9a812693c88118",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-wonderful-wizard-of-oz_2026-11-09.glink"
+}

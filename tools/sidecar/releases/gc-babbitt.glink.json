@@ -1,0 +1,13 @@
+{
+ "id": "gc-babbitt",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-babbitt_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "33295f0036b33b90f5f2b7bba4d037d6ac5368e7959a4119e2a710b23ad8e305",
+ "schemaVersion": 1,
+ "sourceSha256": "75de853faf28c80527e4f238153280df5aca3f010be65dcbbd366b817c4bd3fa",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-babbitt_2026-11-09.glink"
+}

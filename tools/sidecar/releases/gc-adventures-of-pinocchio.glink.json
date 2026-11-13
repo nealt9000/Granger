@@ -1,0 +1,13 @@
+{
+ "id": "gc-adventures-of-pinocchio",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-adventures-of-pinocchio_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "23d9c8da16ac08870240de838a55945d7a87d493094d618c0a4b0c289243027d",
+ "schemaVersion": 1,
+ "sourceSha256": "8409a797e85308622ef6c7373cfe22532ab479f410cc0957c5f4eea70d368b57",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-adventures-of-pinocchio_2026-11-09.glink"
+}

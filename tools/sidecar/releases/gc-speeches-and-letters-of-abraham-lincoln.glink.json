@@ -1,0 +1,13 @@
+{
+ "id": "gc-speeches-and-letters-of-abraham-lincoln",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-speeches-and-letters-of-abraham-lincoln_2026-11-09.glink",
+ "sizeBytes": 69632,
+ "sha256": "418ec25982b38859a7fdb0ff041f8980e5d1d7f3085f10edadd4c58e2d946bd6",
+ "schemaVersion": 1,
+ "sourceSha256": "46c530ea43b3eac675fe475d8af62fc3a99ec17e8340f11ba414752952093948",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-speeches-and-letters-of-abraham-lincoln_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-ninety-five-theses",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-ninety-five-theses_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "3b5a76fb77540b19dc6a939b82d6e716e1147f564f3cacca8abeda0edc0e5b31",
+ "schemaVersion": 1,
+ "sourceSha256": "3b5b4f81458730b1ad07e55654d8bc7b59af21af4ccc9cd651a2f07918b2bb4a",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-ninety-five-theses_2026-11-09.glink"
+}

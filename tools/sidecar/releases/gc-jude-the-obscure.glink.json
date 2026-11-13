@@ -1,0 +1,13 @@
+{
+ "id": "gc-jude-the-obscure",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-jude-the-obscure_2026-11-09.glink",
+ "sizeBytes": 49152,
+ "sha256": "f166bdd17fdb50dc16c933b892ef91ce7acddaa8feb3106adebb1af3c21a3004",
+ "schemaVersion": 1,
+ "sourceSha256": "748dee62ce8bd7694c887a647f80de06792f522b6ab5070a29de14d2489aaaba",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-jude-the-obscure_2026-11-09.glink"
+}

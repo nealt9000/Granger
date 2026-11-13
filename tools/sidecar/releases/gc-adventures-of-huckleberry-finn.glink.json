@@ -1,0 +1,13 @@
+{
+ "id": "gc-adventures-of-huckleberry-finn",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-adventures-of-huckleberry-finn_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "569c2bc1a3ad39d43d3965c305368598451ff17100d152e5505a0ed10ecd733b",
+ "schemaVersion": 1,
+ "sourceSha256": "f191f0603e431e613e5b91d825ee3140052fd231a8ef77870bfeb9ff34f867f5",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-adventures-of-huckleberry-finn_2026-11-09.glink"
+}

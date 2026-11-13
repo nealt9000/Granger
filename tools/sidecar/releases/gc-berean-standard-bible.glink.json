@@ -1,0 +1,13 @@
+{
+ "id": "gc-berean-standard-bible",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-berean-standard-bible_2026-11-09.glink",
+ "sizeBytes": 192512,
+ "sha256": "8a05888faf695e36767be1f873d88cb2a16f17c0b95a6c5194bb6139b2fa2c25",
+ "schemaVersion": 1,
+ "sourceSha256": "810425c71e8dee59bc08636b2314b577ba9e007f88ed1e0fd417923edd4f699e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-berean-standard-bible_2026-11-09.glink"
+}

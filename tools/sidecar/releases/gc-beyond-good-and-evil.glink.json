@@ -1,0 +1,13 @@
+{
+ "id": "gc-beyond-good-and-evil",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-beyond-good-and-evil_2026-11-09.glink",
+ "sizeBytes": 49152,
+ "sha256": "5e104719d6b547d6809c517a3e4073b6e0763b5cb486ecd191e1d38b712b0771",
+ "schemaVersion": 1,
+ "sourceSha256": "c3f4cb6b15fe3f777e93659fb5834a8243ce26af526e3a2e9c335eaa8e4e9d09",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-beyond-good-and-evil_2026-11-09.glink"
+}

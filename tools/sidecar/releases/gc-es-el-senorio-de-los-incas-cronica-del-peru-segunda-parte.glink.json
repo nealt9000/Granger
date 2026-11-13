@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-el-senorio-de-los-incas-cronica-del-peru-segunda-parte",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-el-senorio-de-los-incas-cronica-del-peru-segunda-parte_2026-11-09.glink",
+ "sizeBytes": 77824,
+ "sha256": "52011eef819a38c79de76b2cc2701889713948c544ccd5b1e89563f4a74e2ec2",
+ "schemaVersion": 1,
+ "sourceSha256": "6e9dc47a9dead3ce15f11f9c0449ad72d233af13b361ba3ca7f5c5bee1a8954c",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-senorio-de-los-incas-cronica-del-peru-segunda-parte_2026-11-09.glink"
+}

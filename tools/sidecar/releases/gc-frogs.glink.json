@@ -1,0 +1,13 @@
+{
+ "id": "gc-frogs",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-frogs_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "99ca70bc609cc47233a90549b6072a078b6aaea89e4f58d694670821781293ee",
+ "schemaVersion": 1,
+ "sourceSha256": "b27b31d9db4198b1cc3da4ae6a515e5528a18419f5fd601321cf81d0afdb32fa",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-frogs_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-island-of-doctor-moreau",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-island-of-doctor-moreau_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "a18fcd1420db41fdb3041653bfa365e99532f7121c89e768d2e5483544cd8922",
+ "schemaVersion": 1,
+ "sourceSha256": "56de5fa887353f39e9e2e5e88690d381774814e136ffebd446c0d5e8a78e1ffd",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-island-of-doctor-moreau_2026-11-09.glink"
+}

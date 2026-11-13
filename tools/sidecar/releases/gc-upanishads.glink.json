@@ -1,0 +1,13 @@
+{
+ "id": "gc-upanishads",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-upanishads_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "0d48dcb72734f6c0cd15b1f9e78e8a1dabb4a8e0cc46b0b85f65e4fbdb2cf807",
+ "schemaVersion": 1,
+ "sourceSha256": "8742667c54698b9c8762134c6a5bb793cf77b117edb0cc28c4dcb0780e3c805e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-upanishads_2026-11-09.glink"
+}

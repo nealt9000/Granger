@@ -1,0 +1,13 @@
+{
+ "id": "gc-maltese-falcon",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-maltese-falcon_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "be0cd09bec2c1ef2c73247b8de331b03b89535fdcbd247f43d1c0462bb947ca2",
+ "schemaVersion": 1,
+ "sourceSha256": "277a0159fd6b444712f3712f5180d84ecffc28338500aeda57c450cd9edb24e6",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-maltese-falcon_2026-11-09.glink"
+}

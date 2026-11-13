@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-cartas-de-mi-molino",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-cartas-de-mi-molino_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "52116792beab1a55f03599797040fff5870c0a00ee0296b6bfcb49303e8a0e7c",
+ "schemaVersion": 1,
+ "sourceSha256": "9027d174af83f74c83545dffeeb7425cbd61dda4314a325eca1c81acbf74ef8a",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-cartas-de-mi-molino_2026-11-09.glink"
+}

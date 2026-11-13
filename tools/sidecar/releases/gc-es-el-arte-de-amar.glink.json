@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-el-arte-de-amar",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-el-arte-de-amar_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "cc0641e976ff63cf0892b2030d1af11f51bce2c613f0dea9a350945f2e262ba5",
+ "schemaVersion": 1,
+ "sourceSha256": "ef20d23d9281b93601a3935b3328deee7350784b8685d9611eb4572adaabb6c0",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-arte-de-amar_2026-11-09.glink"
+}

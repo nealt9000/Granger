@@ -1,0 +1,13 @@
+{
+ "id": "gc-utilitarianism",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-utilitarianism_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "6a4ffd4227a08f41fcdb8f2ad0c734baa2e8956a1e66581211cd3be9c08cf35d",
+ "schemaVersion": 1,
+ "sourceSha256": "6b25e0c3808eb4533a4fe4a952aa13d9eaa59a652f3a7600bd33ed4dafde665b",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-utilitarianism_2026-11-09.glink"
+}

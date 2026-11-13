@@ -1,0 +1,13 @@
+{
+ "id": "gc-treasure-island",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-treasure-island_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "4f5d3f45cc8a281e06cd2b6aedc8d063f36cdafaff03aed03f5086557eb85e13",
+ "schemaVersion": 1,
+ "sourceSha256": "87f1ff95f0241a29c1110e96dd2524dc168caa836ee45fec2c81a6620a40cd58",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-treasure-island_2026-11-09.glink"
+}

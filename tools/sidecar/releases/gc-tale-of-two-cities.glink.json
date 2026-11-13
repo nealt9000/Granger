@@ -1,0 +1,13 @@
+{
+ "id": "gc-tale-of-two-cities",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-tale-of-two-cities_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "a8c6492f5a710eed932c30399d81ffb986e304d707dd5c7dec57647b25a21db9",
+ "schemaVersion": 1,
+ "sourceSha256": "01ce5995fccdcccc7ba35ef337033e2a502f1831df5d841c5c2590f076a44a22",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-tale-of-two-cities_2026-11-09.glink"
+}

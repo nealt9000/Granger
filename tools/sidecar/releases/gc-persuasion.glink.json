@@ -1,0 +1,13 @@
+{
+ "id": "gc-persuasion",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-persuasion_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "e013ecd2ef2a31d01e7c764853f4cab905993bd139ca8aa524d4f1034542229e",
+ "schemaVersion": 1,
+ "sourceSha256": "32776343ee5c7675aabd3d48673725bca8a83017b2b51efe83ea4e8d8e98a5a7",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-persuasion_2026-11-09.glink"
+}

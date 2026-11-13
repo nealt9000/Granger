@@ -1,0 +1,13 @@
+{
+ "id": "gc-phaedrus",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-phaedrus_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "d68e4079ca224df187baaa3072c2078bf79e8b03a805e0109cc8a4baff72c89e",
+ "schemaVersion": 1,
+ "sourceSha256": "56c38ea1ee935c6f47c72be9869860b365fb00fff1dd606852eff7d013b34e09",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-phaedrus_2026-11-09.glink"
+}

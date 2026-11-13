@@ -1,0 +1,13 @@
+{
+ "id": "gc-tom-jones",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-tom-jones_2026-11-09.glink",
+ "sizeBytes": 69632,
+ "sha256": "e2294e95fae8b6151a36892ed15ec3d73a8f845f2ad49bc93e48df7e7c8f3a5f",
+ "schemaVersion": 1,
+ "sourceSha256": "f9757007b10d166950065ef6478166135ed00fdf05cb81ed435984fac00e2d27",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-tom-jones_2026-11-09.glink"
+}

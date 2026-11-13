@@ -1,0 +1,13 @@
+{
+ "id": "gc-ideal-husband",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-ideal-husband_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "1633774beb9ee6d8868b41ceaac95f49bc5768d59701bbde64134bc79954eabd",
+ "schemaVersion": 1,
+ "sourceSha256": "7e614f9ec1190810c392bf7ef461732b00b179c2366b41441da4a66fadb782e1",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-ideal-husband_2026-11-09.glink"
+}

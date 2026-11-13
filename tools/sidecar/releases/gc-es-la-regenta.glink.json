@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-regenta",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-regenta_2026-11-09.glink",
+ "sizeBytes": 81920,
+ "sha256": "4df39039770ec61cc3a7f2e5ad43eeef268efe0d082b4d21c7435b9a1d2436e3",
+ "schemaVersion": 1,
+ "sourceSha256": "a7c024910485c9e494fd5714f357892d6541c8c754faada5e5eb67a70676edc1",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-regenta_2026-11-09.glink"
+}

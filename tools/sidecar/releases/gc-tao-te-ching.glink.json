@@ -1,0 +1,13 @@
+{
+ "id": "gc-tao-te-ching",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-tao-te-ching_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "230aa3d212751cc5a5317a73c62c3694dc6ee832b91e6381c793445717a8da29",
+ "schemaVersion": 1,
+ "sourceSha256": "8a804010ad2083661b8b4096f924f1bcb4e024256338215d3dde62df077727a1",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-tao-te-ching_2026-11-09.glink"
+}

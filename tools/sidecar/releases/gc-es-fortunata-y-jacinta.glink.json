@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-fortunata-y-jacinta",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-fortunata-y-jacinta_2026-11-09.glink",
+ "sizeBytes": 131072,
+ "sha256": "2b3f4c69521c79dfb684bbea578e632589f04136e467a10ed35c3ea7a2afffca",
+ "schemaVersion": 1,
+ "sourceSha256": "3de3b4b485fb05fc33682b8cc81f7e5d113146aeabf639af722d53705768addd",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-fortunata-y-jacinta_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-portrait-of-a-lady-volume-1",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-portrait-of-a-lady-volume-1_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "9a7e0e08333f6e5b68e5dad7aad67b4d16f96eea992e5ea7b0284a543f89c98e",
+ "schemaVersion": 1,
+ "sourceSha256": "7be8467de589e37570247f68c0516dbb7bb87d97e8322d78ddbc61c740823a4f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-portrait-of-a-lady-volume-1_2026-11-09.glink"
+}

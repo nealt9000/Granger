@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-fabulas-literarias",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-fabulas-literarias_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "0e28e5043404530d2d073a2730a9e773dfbf56c4308692e17cb83236c2d27062",
+ "schemaVersion": 1,
+ "sourceSha256": "796276d4be7210ae6e5d8a1b718b5151d2260dc120adbbec3cf8d72e3e113de1",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-fabulas-literarias_2026-11-09.glink"
+}

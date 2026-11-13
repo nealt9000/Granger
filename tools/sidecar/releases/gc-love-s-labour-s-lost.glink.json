@@ -1,0 +1,13 @@
+{
+ "id": "gc-love-s-labour-s-lost",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-love-s-labour-s-lost_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "da4edf1b8a863894efe2f73b7feec12f823a705c24a785794a7e7170fb870433",
+ "schemaVersion": 1,
+ "sourceSha256": "592b4ea3c3cf619bfbad134dbf52776ab17594dd3a78f09018d31ae5b8a07c2e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-love-s-labour-s-lost_2026-11-09.glink"
+}

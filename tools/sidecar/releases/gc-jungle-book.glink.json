@@ -1,0 +1,13 @@
+{
+ "id": "gc-jungle-book",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-jungle-book_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "d7908b618bc67c4263dad43fee5a58aece0acf27022adee52731d51cdb50b859",
+ "schemaVersion": 1,
+ "sourceSha256": "e3fce0953426c0990990aeec16de2c6698dd7e3abaab0c97fd400d2eb3f524af",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-jungle-book_2026-11-09.glink"
+}

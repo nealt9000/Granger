@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-cuentos-de-amor-de-locura-y-de-muerte",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-cuentos-de-amor-de-locura-y-de-muerte_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "3ecbf6e940e1f0f7eb27e06df6f32252dbd28aaf79056d1716f2b975552453ed",
+ "schemaVersion": 1,
+ "sourceSha256": "c97637c9097ded95a29e7386228e182f74cfa10bf0f48441e783efcb8edae462",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-cuentos-de-amor-de-locura-y-de-muerte_2026-11-09.glink"
+}

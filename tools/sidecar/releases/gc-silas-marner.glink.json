@@ -1,0 +1,13 @@
+{
+ "id": "gc-silas-marner",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-silas-marner_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "cf0fde36d106aa380f95d49b83cb0a616f03ee32430679f33a48ee9704f98260",
+ "schemaVersion": 1,
+ "sourceSha256": "96696c5814e3bbde827ad4b619467020d53cb81f7df2734fede93eb795e5f2ea",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-silas-marner_2026-11-09.glink"
+}

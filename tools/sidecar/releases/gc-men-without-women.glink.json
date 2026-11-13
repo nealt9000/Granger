@@ -1,0 +1,13 @@
+{
+ "id": "gc-men-without-women",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-men-without-women_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "671044749505e47c70f610125a4ae2e50677aacb78cb9b0662e204e7be650b8a",
+ "schemaVersion": 1,
+ "sourceSha256": "31a62028a9cd9710bd6352432a7a3d431b250e9b8d5bb524026a0dc2e9f4672f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-men-without-women_2026-11-09.glink"
+}

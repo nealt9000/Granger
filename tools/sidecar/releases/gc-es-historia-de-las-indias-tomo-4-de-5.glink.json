@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-historia-de-las-indias-tomo-4-de-5",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-historia-de-las-indias-tomo-4-de-5_2026-11-09.glink",
+ "sizeBytes": 110592,
+ "sha256": "fbb422ba4c289682fa32fee1cec1da8a93567e7d805e1b365c34f3840d0a78d8",
+ "schemaVersion": 1,
+ "sourceSha256": "46dc3586fcea2d6b866f04d417ab8f83e3c16228b850d6b54e22fc62deba950e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-historia-de-las-indias-tomo-4-de-5_2026-11-09.glink"
+}

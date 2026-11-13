@@ -1,0 +1,13 @@
+{
+ "id": "gc-paradise-regained",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-paradise-regained_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "8647a905a3ec3babbf18d75bcb445d097ef1a0cb3e413e1e0d50a4ff43768341",
+ "schemaVersion": 1,
+ "sourceSha256": "26bfb34231ab2e76e8f753c20a430c84ae371803a2be2231f320658cced8b18b",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-paradise-regained_2026-11-09.glink"
+}

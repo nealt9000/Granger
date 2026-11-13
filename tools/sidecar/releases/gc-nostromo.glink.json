@@ -1,0 +1,13 @@
+{
+ "id": "gc-nostromo",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-nostromo_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "935cae985f48525461f0d9faa02ff11246cb7e7abcecc80b1363940d3be9d86a",
+ "schemaVersion": 1,
+ "sourceSha256": "2aeffece30ca7e0ceb1063a53d988d449eb338fb1f3cd8abafa9559481944edc",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-nostromo_2026-11-09.glink"
+}

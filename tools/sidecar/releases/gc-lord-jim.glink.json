@@ -1,0 +1,13 @@
+{
+ "id": "gc-lord-jim",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-lord-jim_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "ad9b0c179f73e9b1b690deaf6fd72f1a985af444e8eb07388aebb427645baff2",
+ "schemaVersion": 1,
+ "sourceSha256": "2ac5a0ba6c39ca352af1bde80a85ce61806104b2470076f34ed0b0b958a9d1f6",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-lord-jim_2026-11-09.glink"
+}

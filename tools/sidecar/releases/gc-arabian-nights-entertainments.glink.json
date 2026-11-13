@@ -1,0 +1,13 @@
+{
+ "id": "gc-arabian-nights-entertainments",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-arabian-nights-entertainments_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "15280df7e7a1a475964c581ae26a956e24fc5441240d8115b6c5a52ed2165770",
+ "schemaVersion": 1,
+ "sourceSha256": "68e4fbaa79b32ffaba25613e072de59a24917d263f36681bcbdfeb4e44822fe9",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-arabian-nights-entertainments_2026-11-09.glink"
+}

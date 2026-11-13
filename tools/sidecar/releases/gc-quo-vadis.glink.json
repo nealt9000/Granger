@@ -1,0 +1,13 @@
+{
+ "id": "gc-quo-vadis",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-quo-vadis_2026-11-09.glink",
+ "sizeBytes": 139264,
+ "sha256": "9af4206c6c999b95f440eaea5bc4e83e29ef3e099dd39829ca171e307efe2657",
+ "schemaVersion": 1,
+ "sourceSha256": "f65987a1c37fdbef07d259cfd3effc8ae41778c5bfdca30dac331d5a9532654e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-quo-vadis_2026-11-09.glink"
+}

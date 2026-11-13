@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-los-cuatro-jinetes-del-apocalipsis",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-los-cuatro-jinetes-del-apocalipsis_2026-11-09.glink",
+ "sizeBytes": 73728,
+ "sha256": "15f1d7be00e90b83e8edc59d75e00bd71585e14449dff0b680aa55311133ddac",
+ "schemaVersion": 1,
+ "sourceSha256": "6a075d56e531db9613802c10136a0784a3f4399a57a662006b1353f8ab8d7501",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-los-cuatro-jinetes-del-apocalipsis_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-robinson-crusoe",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-robinson-crusoe_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "227d3a93740db7209d1e0c8056d57638d0577fb2759c8f3cf718ade6039107e6",
+ "schemaVersion": 1,
+ "sourceSha256": "82fe27e0b1634631a260fa085be21f4d5ca26d6caf516d589cefa5b304e757f7",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-robinson-crusoe_2026-11-09.glink"
+}

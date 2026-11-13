@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-dama-de-las-camelias-una-familia-corsa",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-dama-de-las-camelias-una-familia-corsa_2026-11-09.glink",
+ "sizeBytes": 53248,
+ "sha256": "77eba4d932f80cccca2fd690c6051943efcf410ffbcef30248b71eff80fd33bf",
+ "schemaVersion": 1,
+ "sourceSha256": "6b4e4fa1875540922bf52656edc0f1c281d71907dd0467b5ad03c5fef55f9164",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-dama-de-las-camelias-una-familia-corsa_2026-11-09.glink"
+}

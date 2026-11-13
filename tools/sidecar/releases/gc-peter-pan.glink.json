@@ -1,0 +1,13 @@
+{
+ "id": "gc-peter-pan",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-peter-pan_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "618264de78c44f2713156b822e5c891051292b437d8b63e28860e5e94afbcff6",
+ "schemaVersion": 1,
+ "sourceSha256": "84f42f04a7f685e382222ffbb137324b1215abcc4dd08f1c24da8ca5e51dca16",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-peter-pan_2026-11-09.glink"
+}

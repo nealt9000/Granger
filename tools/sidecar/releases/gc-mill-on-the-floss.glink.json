@@ -1,0 +1,13 @@
+{
+ "id": "gc-mill-on-the-floss",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-mill-on-the-floss_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "3a56813bf2a3fdfbe9085c4c7a02b4ab1abb671ce435c29b94e9e93f65491d12",
+ "schemaVersion": 1,
+ "sourceSha256": "28fa1cc1f2c1a523d6df3912502f133f8dffe0d405f275df594e71fb6d1ce4b9",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-mill-on-the-floss_2026-11-09.glink"
+}

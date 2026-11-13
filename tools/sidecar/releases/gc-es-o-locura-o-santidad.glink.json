@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-o-locura-o-santidad",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-o-locura-o-santidad_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "c9626949d0a1a0c7904d5a9ddc7ed92477a6581ead63b7cfce95c13e7e32384b",
+ "schemaVersion": 1,
+ "sourceSha256": "c9cf34cf68851901eb393fdf4009b56b542b7d8d95f1d374110492e6b0f69363",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-o-locura-o-santidad_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-just-so-stories",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-just-so-stories_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "7d6c29e6a9e71fd59c6eb1a008318f9f16b921ef6ac82035787d893621044939",
+ "schemaVersion": 1,
+ "sourceSha256": "4e507ff3fa993a4ae54831e57ae2de5f68e43f0439a930ce2f34e2d8d07c6fc9",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-just-so-stories_2026-11-09.glink"
+}

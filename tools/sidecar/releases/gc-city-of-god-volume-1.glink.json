@@ -1,0 +1,13 @@
+{
+ "id": "gc-city-of-god-volume-1",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-city-of-god-volume-1_2026-11-09.glink",
+ "sizeBytes": 81920,
+ "sha256": "795808730a6abd361a51a382ae63046e7a2b469d403094863371d25253244362",
+ "schemaVersion": 1,
+ "sourceSha256": "2b4cfa6b8426bd56191da63689cd52b8775037218048df2b29ae3f8bfb4eea3d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-city-of-god-volume-1_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-divina-comedia",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-divina-comedia_2026-11-09.glink",
+ "sizeBytes": 106496,
+ "sha256": "42b943decb161260161a9664a87fd2e177eeb628b563e0bc5faf46cb8a8973e1",
+ "schemaVersion": 1,
+ "sourceSha256": "88a9f301a22ef22930c76c9587f0aef5b6b6bc84c299fbaeec358c9a4bd06b5a",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-divina-comedia_2026-11-09.glink"
+}

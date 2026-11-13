@@ -1,0 +1,13 @@
+{
+ "id": "gc-tristan-and-isolda",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-tristan-and-isolda_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "d0c2cb72668618043337d3052746ec067635a89949b24e1a6fc1b1f2d2e7e9a2",
+ "schemaVersion": 1,
+ "sourceSha256": "14ffed364f34721f9c8a5c17c9832458be6f986c04e5b4e3c8afcacb11b51899",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-tristan-and-isolda_2026-11-09.glink"
+}

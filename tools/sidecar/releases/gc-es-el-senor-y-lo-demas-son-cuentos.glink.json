@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-el-senor-y-lo-demas-son-cuentos",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-el-senor-y-lo-demas-son-cuentos_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "2d78d75491c480aa084e3094eeee17e6e478e8e5a2e3f9d47b5e62b4b2c4e568",
+ "schemaVersion": 1,
+ "sourceSha256": "374a71f756e3a258622db7adf4acd6cdaa6332ad2c8666c63e232bd86ab4f50d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-senor-y-lo-demas-son-cuentos_2026-11-09.glink"
+}

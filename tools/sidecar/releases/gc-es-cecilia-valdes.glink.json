@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-cecilia-valdes",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-cecilia-valdes_2026-11-09.glink",
+ "sizeBytes": 81920,
+ "sha256": "97aabce31ed399632de461ac2d02a104641a266c6ed41694c073482889684046",
+ "schemaVersion": 1,
+ "sourceSha256": "236fac77c3582726c44e9ce1aa59c03dd93eec5010d62e51333601a76f11eede",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-cecilia-valdes_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-discourses-and-encheiridion",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-discourses-and-encheiridion_2026-11-09.glink",
+ "sizeBytes": 110592,
+ "sha256": "7980233140abbf5e9d59fd92cc701a48e00c311eea98d901567e55c480391ae3",
+ "schemaVersion": 1,
+ "sourceSha256": "d4573b6382b07225bcff8fc8fec5e15e8f7592344bb5fa3f5c1156352fc31c65",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-discourses-and-encheiridion_2026-11-09.glink"
+}

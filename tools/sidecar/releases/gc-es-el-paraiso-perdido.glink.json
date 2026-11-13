@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-el-paraiso-perdido",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-el-paraiso-perdido_2026-11-09.glink",
+ "sizeBytes": 98304,
+ "sha256": "933a33d8295bd9afc3c65f7a168cf54a1d87bf8403d5da31671b040c1913e4b5",
+ "schemaVersion": 1,
+ "sourceSha256": "b30278d64b5a528c2e8dc4f88f2f2176b2b74208b7f6bc8695f9a81a2f241384",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-paraiso-perdido_2026-11-09.glink"
+}

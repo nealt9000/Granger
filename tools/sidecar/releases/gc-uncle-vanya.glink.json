@@ -1,0 +1,13 @@
+{
+ "id": "gc-uncle-vanya",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-uncle-vanya_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "5afc380fb95e7cc8af7f6e2e42a8739cbdd3ae41ca09c552af808cd81f772339",
+ "schemaVersion": 1,
+ "sourceSha256": "9a0b953b540387710da77e75104fe057a1c11ed708a1d1a78da1d2efaaaf29e7",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-uncle-vanya_2026-11-09.glink"
+}

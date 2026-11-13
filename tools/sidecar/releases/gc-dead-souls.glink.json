@@ -1,0 +1,13 @@
+{
+ "id": "gc-dead-souls",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-dead-souls_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "5b55d6cbae2b45e77d8e3d6fa89e3dc32815cfd77415ef09bee7e5307e3de48d",
+ "schemaVersion": 1,
+ "sourceSha256": "392bee65c6e17bbeb1307ce6fa61e5ff240d4057ff751069308a423d5901d881",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-dead-souls_2026-11-09.glink"
+}

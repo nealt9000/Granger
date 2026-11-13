@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-historia-de-la-guerra-del-peloponeso-tomo-2-de-2",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-historia-de-la-guerra-del-peloponeso-tomo-2-de-2_2026-11-09.glink",
+ "sizeBytes": 172032,
+ "sha256": "64c83dea2363116a71dbeead28614179cbe43a66312b4736f8dfbd4095504770",
+ "schemaVersion": 1,
+ "sourceSha256": "276cc4413ce5f3720f56a190339511f7be103589d3388910c9053d755a12660d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-historia-de-la-guerra-del-peloponeso-tomo-2-de-2_2026-11-09.glink"
+}

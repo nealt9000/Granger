@@ -1,0 +1,13 @@
+{
+ "id": "gc-kalevala",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-kalevala_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "323becaca6b4b8ce70f27b87b8008bf401fb495c9ca8c02b5fd1b67e5b5a0ceb",
+ "schemaVersion": 1,
+ "sourceSha256": "a52d2e9c9beae4425976944f974b2c5c5420ab15ce811ce998804815608d954d",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-kalevala_2026-11-09.glink"
+}

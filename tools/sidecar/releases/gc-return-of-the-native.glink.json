@@ -1,0 +1,13 @@
+{
+ "id": "gc-return-of-the-native",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-return-of-the-native_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "98e1afa2a022faae2f173d02398b637289fe1dfff4db7927e5d9dd3062a6f0d2",
+ "schemaVersion": 1,
+ "sourceSha256": "c3d73c9a365f9f5b4a73382bebe79e9c0b363d8489f2e9842ec50e72dff2e80f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-return-of-the-native_2026-11-09.glink"
+}

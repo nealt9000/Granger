@@ -1,0 +1,13 @@
+{
+ "id": "gc-essays-cotton",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-essays-cotton_2026-11-09.glink",
+ "sizeBytes": 286720,
+ "sha256": "6653461ee8e34d65657740fa42e747040a2841c20a536a019cfb22300e4d7a93",
+ "schemaVersion": 1,
+ "sourceSha256": "eb1164391189d6be71bb970a5632581b5ed0c0e4131aa00772c45da9f8cb6693",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-essays-cotton_2026-11-09.glink"
+}

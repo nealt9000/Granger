@@ -1,0 +1,13 @@
+{
+ "id": "gc-prometheus-bound-and-seven-against-thebes",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-prometheus-bound-and-seven-against-thebes_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "97db641629c563e5a7f65133b05a4d6b70c93ee2dab7f7b4dc885f98f29c77ac",
+ "schemaVersion": 1,
+ "sourceSha256": "c22051c3e1edffbb926b2907a35c99b1464d47b44d5959454312cd722aaf082f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-prometheus-bound-and-seven-against-thebes_2026-11-09.glink"
+}

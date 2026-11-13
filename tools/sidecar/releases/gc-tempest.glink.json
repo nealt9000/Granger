@@ -1,0 +1,13 @@
+{
+ "id": "gc-tempest",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-tempest_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "4d7b78d31f86bc407ee70f9c5473981d4ad2ea5b92684747eeffd53004a134a0",
+ "schemaVersion": 1,
+ "sourceSha256": "9d1d71b91254876867c1b37e3474332f7071ab623afb07c62344ac57c3d66d83",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-tempest_2026-11-09.glink"
+}

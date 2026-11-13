@@ -1,0 +1,13 @@
+{
+ "id": "gc-song-of-roland",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-song-of-roland_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "0edbaa6851889216ed5c5da55d3360f887e64c035858dd27c4fd41a3a5ed3ab8",
+ "schemaVersion": 1,
+ "sourceSha256": "20554c887bdf4fa4d1c2f2da1a8bfdfa6d872dec0028e7b5b4be5686edd23111",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-song-of-roland_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-el-clavo",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-el-clavo_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "9fb9ffddb14ae06f5d60efa3272191d7f2824a3293667cc15ee58eb04ed87cc2",
+ "schemaVersion": 1,
+ "sourceSha256": "c8dc6ae6f44f044e8b80b2a0f1bcfab2b79bf43ff8c66b6ef1cea2a37b8f2ce9",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-clavo_2026-11-09.glink"
+}

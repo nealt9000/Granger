@@ -1,0 +1,13 @@
+{
+ "id": "gc-steppenwolf",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-steppenwolf_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "de802f366f2eb1659dc174b1f4ce3e13cf223a82271071ee67bcd8a11337a711",
+ "schemaVersion": 1,
+ "sourceSha256": "0fcb7b100f2a43260c5a9e0d617cc638749d52e7d0ac53effde1c33aa634b840",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-steppenwolf_2026-11-09.glink"
+}

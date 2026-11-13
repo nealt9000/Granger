@@ -1,0 +1,13 @@
+{
+ "id": "gc-enemy-of-the-people",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-enemy-of-the-people_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "400393d164d5f8639df0174fd1fa6bbb894475707542e12bc89019acc13c8c8d",
+ "schemaVersion": 1,
+ "sourceSha256": "ad2d4576ee817bc4b988f81187bdc0cfccc95bbb5b4d85430c98815f25203d17",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-enemy-of-the-people_2026-11-09.glink"
+}

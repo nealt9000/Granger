@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-tristana",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-tristana_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "4e29e5087694e6edba32097fb663bec6aeb20418bc417cea144914ff048d0ccc",
+ "schemaVersion": 1,
+ "sourceSha256": "980a5d5925e94d07d0bc939bd6c73d39c2d4107b3bfee1b67af69727b9bb2619",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-tristana_2026-11-09.glink"
+}

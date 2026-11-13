@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-las-fuerzas-extranas",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-las-fuerzas-extranas_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "570255676230f0fa081887a914c79fb36f4feb1e05e256f85d9b9a548be44122",
+ "schemaVersion": 1,
+ "sourceSha256": "e7be74225678ea2e0da0cead3ba8cb26fa8dbf2178404e46bf0a194c601d01dd",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-las-fuerzas-extranas_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-titus-andronicus",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-titus-andronicus_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "5f80aff66fab2f6a6176835a4c8f549bd882360604c43239553a315408b10441",
+ "schemaVersion": 1,
+ "sourceSha256": "617f0b83c4976db4997b5aa944ad7195ff81ba461b165804aa0fe8b8bfcdfaed",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-titus-andronicus_2026-11-09.glink"
+}

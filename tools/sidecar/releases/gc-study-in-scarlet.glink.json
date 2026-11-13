@@ -1,0 +1,13 @@
+{
+ "id": "gc-study-in-scarlet",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-study-in-scarlet_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "284bf9f3c87d1e1d8f738fc631a63d6bae25ca671f3bce4bdbbd80a77bcf8155",
+ "schemaVersion": 1,
+ "sourceSha256": "b2de7efbc045ead7d1a1d8d4770c7dbd9737c228aaeb5927f1feff13749129bb",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-study-in-scarlet_2026-11-09.glink"
+}

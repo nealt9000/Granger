@@ -1,0 +1,13 @@
+{
+ "id": "gc-jacob-s-room",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-jacob-s-room_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "21b7fc99dcd7b8cb096fc8317fb784dc291b7d70a4b6db84110b63eba6209131",
+ "schemaVersion": 1,
+ "sourceSha256": "702f3d032c4b9ee0483129998f30d39e42e8a4edd09b117a8991270ec9292c40",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-jacob-s-room_2026-11-09.glink"
+}

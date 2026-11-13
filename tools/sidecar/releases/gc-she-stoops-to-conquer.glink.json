@@ -1,0 +1,13 @@
+{
+ "id": "gc-she-stoops-to-conquer",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-she-stoops-to-conquer_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "4d4d7fa516383ae3529f2d8c43b4f8dcd45ccdb7dd39b6de996a7d00e996c43e",
+ "schemaVersion": 1,
+ "sourceSha256": "0807dd803f5ac338230e5a3b6513a16f7a1738ec3c4864b9ca0f48d80d17509e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-she-stoops-to-conquer_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-trojan-women",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-trojan-women_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "af6740b0e2629092481839ee193397d912b247e04e4ad3089e87303af1a20b08",
+ "schemaVersion": 1,
+ "sourceSha256": "486b23f1faed458624b3eb2af34d2812cccb3ade34b82927c2019c5e0cdd4e1e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-trojan-women_2026-11-09.glink"
+}

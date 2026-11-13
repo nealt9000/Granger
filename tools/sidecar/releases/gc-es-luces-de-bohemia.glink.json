@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-luces-de-bohemia",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-luces-de-bohemia_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "809749ea810582f0b78c3fc916bb7f45cc59f354b66c3ba6c82f542b4af01137",
+ "schemaVersion": 1,
+ "sourceSha256": "a0725cb3a345717812e9e58549827b65efd27d7031be2aaeefd5dbbfba2a6a0b",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-luces-de-bohemia_2026-11-09.glink"
+}

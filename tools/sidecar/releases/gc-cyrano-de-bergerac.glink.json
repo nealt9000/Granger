@@ -1,0 +1,13 @@
+{
+ "id": "gc-cyrano-de-bergerac",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-cyrano-de-bergerac_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "3c266d472bfd53c682594cd41337bfc9609da4f37cfbfda34505ea588dc022e7",
+ "schemaVersion": 1,
+ "sourceSha256": "494454ef9797e069c5ba547b142dc59e730d5b2d47b8cbbccb87e635abe391e8",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-cyrano-de-bergerac_2026-11-09.glink"
+}

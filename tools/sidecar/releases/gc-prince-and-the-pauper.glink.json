@@ -1,0 +1,13 @@
+{
+ "id": "gc-prince-and-the-pauper",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-prince-and-the-pauper_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "9394821aaa34b78b8a2fd5b4625352533ed462cf8946538c03dbcd29946c983a",
+ "schemaVersion": 1,
+ "sourceSha256": "15f0032ee1f9f6d92b0a15b10357a8eac4611b191a707544517a9607f29c3b6f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-prince-and-the-pauper_2026-11-09.glink"
+}

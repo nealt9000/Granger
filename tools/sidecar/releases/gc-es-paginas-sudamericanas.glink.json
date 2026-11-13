@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-paginas-sudamericanas",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-paginas-sudamericanas_2026-11-09.glink",
+ "sizeBytes": 69632,
+ "sha256": "23bc1468e90535fc75d3975dc64e8a6b9e8d09f43c10ab9d2998c3377340067e",
+ "schemaVersion": 1,
+ "sourceSha256": "0cdd9a1faeee0d0f8ca825b4a09fb5ed452e846bdb9dfd109b2dbb72207a72fa",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-paginas-sudamericanas_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-walden-and-on-the-duty-of-civil-disobedience",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-walden-and-on-the-duty-of-civil-disobedience_2026-11-09.glink",
+ "sizeBytes": 65536,
+ "sha256": "d8122af1528022ec3762f4e6876b11ccc0270fc48c261e94f7a8a492c427d937",
+ "schemaVersion": 1,
+ "sourceSha256": "bace13219cfeda766e2f95a37fae2d2bfc5b7c244070b1f9f7b2088f9403b7fe",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-walden-and-on-the-duty-of-civil-disobedience_2026-11-09.glink"
+}

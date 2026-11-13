@@ -1,0 +1,13 @@
+{
+ "id": "gc-works-of-edgar-allan-poe-volume-3",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-works-of-edgar-allan-poe-volume-3_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "b08df24e3557ea8aabc573098829b1a4e825922bf9bedb75a5526cb48a6016a5",
+ "schemaVersion": 1,
+ "sourceSha256": "70ed0309ae99f437f0c8fdc3db750014a5211cf2b873f3ee54141e0439b5fa46",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-works-of-edgar-allan-poe-volume-3_2026-11-09.glink"
+}

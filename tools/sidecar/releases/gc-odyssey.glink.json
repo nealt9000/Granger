@@ -1,0 +1,13 @@
+{
+ "id": "gc-odyssey",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-odyssey_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "17f17802699b980075596e3459b5477155779af3f044426de9a1874641c89546",
+ "schemaVersion": 1,
+ "sourceSha256": "a18f937b993b863ba02d45a3a90026775e33b3d05c0e108f67c2838f24ce63d6",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-odyssey_2026-11-09.glink"
+}

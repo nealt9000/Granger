@@ -1,0 +1,13 @@
+{
+ "id": "gc-moonstone",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-moonstone_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "aedf15ae3bc28c945081a53bd1aaf8b8eab4486a42df5d717ba6113b63ae54e1",
+ "schemaVersion": 1,
+ "sourceSha256": "e38350b8bc8c019eff4b2db6180275c7863c22400d03bba3c5ba3b8569a1f1ec",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-moonstone_2026-11-09.glink"
+}

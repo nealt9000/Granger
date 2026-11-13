@@ -1,0 +1,13 @@
+{
+ "id": "gc-woman-in-white",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-woman-in-white_2026-11-09.glink",
+ "sizeBytes": 61440,
+ "sha256": "87020581fe5841ea2fd12d5a07d0a7f9c8e49cc3e07b7aedd760385f38122928",
+ "schemaVersion": 1,
+ "sourceSha256": "1fc9e7bb24aa9564019d24e21cd4475c9dd834bb41744f02fc974a4f29957097",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-woman-in-white_2026-11-09.glink"
+}

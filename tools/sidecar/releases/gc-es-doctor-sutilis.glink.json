@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-doctor-sutilis",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-doctor-sutilis_2026-11-09.glink",
+ "sizeBytes": 57344,
+ "sha256": "5c06629374fa84a1fdbf5ee43c269469729408f45074de63fa28fc61e2e52363",
+ "schemaVersion": 1,
+ "sourceSha256": "541db42ddd909b67141cca7e5337f98bc5877a6c1910580a4aba15807d456cd6",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-doctor-sutilis_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-obras-dramaticas-de-euripides-tomo-3-de-3",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-obras-dramaticas-de-euripides-tomo-3-de-3_2026-11-09.glink",
+ "sizeBytes": 73728,
+ "sha256": "6cd6a79cc405b6db833a4c24d4cc930d410c50a9deaa976f2f84767273f5795f",
+ "schemaVersion": 1,
+ "sourceSha256": "0f59fb1caf6609fe1c8b8abbac1db4de1532ef1db4a6abfd040560f5c3f9939f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-obras-dramaticas-de-euripides-tomo-3-de-3_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-gorgias",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-gorgias_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "eeeb551e7699b56a44a7e9b970a43b2ccf646ab144dde5c713b055b026cb9f1e",
+ "schemaVersion": 1,
+ "sourceSha256": "1761afb44cb0f50c3dbeed0c1878009ffd3d98d5d0234c4973d99bebb9171773",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-gorgias_2026-11-09.glink"
+}

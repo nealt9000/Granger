@@ -1,0 +1,13 @@
+{
+ "id": "gc-o-pioneers",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-o-pioneers_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "df049dc8c09695a61b76e99de6da3fef6ec2709dbf8f4a6fa186284f671a8804",
+ "schemaVersion": 1,
+ "sourceSha256": "39de29c923ded6c8603f1f0a4d023c3ad48e20b25cf0ad2577431b9e31121a8e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-o-pioneers_2026-11-09.glink"
+}

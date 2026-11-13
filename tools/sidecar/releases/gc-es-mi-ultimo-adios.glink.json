@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-mi-ultimo-adios",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-mi-ultimo-adios_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "3b09fa3e62b8ec54b1e2650207ca3e73c0f84c505db9c99da8a38266f5aea378",
+ "schemaVersion": 1,
+ "sourceSha256": "b863398168584ee97f6de23084f420eaede671b12660f2a047e4710b77b1cea1",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-mi-ultimo-adios_2026-11-09.glink"
+}

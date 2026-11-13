@@ -1,0 +1,13 @@
+{
+ "id": "gc-plutarch-s-lives",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-plutarch-s-lives_2026-11-09.glink",
+ "sizeBytes": 458752,
+ "sha256": "6b7019f2d910cc036178f36375d9e17329140d9de2b63f001fd0ef015defd2fa",
+ "schemaVersion": 1,
+ "sourceSha256": "0443eeb9b35e7ea4312a7ca17b8b3cba18d8bb0f2664435563b767411d99a26e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-plutarch-s-lives_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-koran-sale",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-koran-sale_2026-11-09.glink",
+ "sizeBytes": 118784,
+ "sha256": "102ff0e5e7770dfbd6622263cd89196b3c8638b765d199bcc7bb2f727a92f5b9",
+ "schemaVersion": 1,
+ "sourceSha256": "7db93c852df0844a6d7cde692ebf10742f2a5383fd115d0e6f2fb30f6f1de48a",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-koran-sale_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-analects",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-analects_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "242f12a1aaf955dc99fc89065004e723d001602e04b1a81738996235b839a24c",
+ "schemaVersion": 1,
+ "sourceSha256": "0b31926c15dfa06ab2d0e489cb8668e7dce7187f09d5eda4ba32d71761df906e",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-analects_2026-11-09.glink"
+}

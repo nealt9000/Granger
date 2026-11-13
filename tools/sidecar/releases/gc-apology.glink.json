@@ -1,0 +1,13 @@
+{
+ "id": "gc-apology",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-apology_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "f272ca953937a3f2c8e86f9226548a1e17424344f9f1d1b9a0d2465a80acc77b",
+ "schemaVersion": 1,
+ "sourceSha256": "2365af16e072248631a541e0c8d41d86c29d5380efc5d214a41ac0a02f901a79",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-apology_2026-11-09.glink"
+}

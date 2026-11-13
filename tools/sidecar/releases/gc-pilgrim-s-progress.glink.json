@@ -1,0 +1,13 @@
+{
+ "id": "gc-pilgrim-s-progress",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-pilgrim-s-progress_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "b3e1680d66a8c719135bca923efa329aa6ee8b1082fa30526ba430c67f03ee3f",
+ "schemaVersion": 1,
+ "sourceSha256": "eb89c37fc869773d96b2ee251860a3ef06a926cf3c3c83b634ba9ced156a068a",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-pilgrim-s-progress_2026-11-09.glink"
+}

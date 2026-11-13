@@ -1,0 +1,13 @@
+{
+ "id": "gc-washington-square",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-washington-square_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "8c0eaacf1207780a55413e019844dfb5259296bc4f1bcacf94f9130f69027651",
+ "schemaVersion": 1,
+ "sourceSha256": "40a2de6aa9031f7153e954f9d8bf2640b4e9a3fd11ba19c1f948aa465a8fcdfb",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-washington-square_2026-11-09.glink"
+}

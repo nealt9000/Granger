@@ -1,0 +1,13 @@
+{
+ "id": "gc-adventures-of-sherlock-holmes",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-adventures-of-sherlock-holmes_2026-11-09.glink",
+ "sizeBytes": 49152,
+ "sha256": "36bab41c31486ceaf668c7e55f2c623ce23386757571344674a327ea16ba20e1",
+ "schemaVersion": 1,
+ "sourceSha256": "1873b5e3e90fe7680edaa01e11ecf614cf9857a42ef607cb4328b4c469ef0b8c",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-adventures-of-sherlock-holmes_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-corazon-diario-de-un-nino",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-corazon-diario-de-un-nino_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "5c8dc13304a0eb401a3cc36c7ee16630dfa343fa42e6a529b01a2de4655fdae4",
+ "schemaVersion": 1,
+ "sourceSha256": "ef79f32bef3509ab0f681287bef6d8ecaa9747d8659422b1af18ba39f73e26ef",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-corazon-diario-de-un-nino_2026-11-09.glink"
+}

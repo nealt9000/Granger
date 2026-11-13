@@ -1,0 +1,13 @@
+{
+ "id": "gc-tartuffe",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-tartuffe_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "be3b7335f1b8721565649b4afc68bd5ef38132fac7cf0a574f1f13961ce80b63",
+ "schemaVersion": 1,
+ "sourceSha256": "934747426df1b805859c381b62d504490ed39bcee0049468946a84ee6913813c",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-tartuffe_2026-11-09.glink"
+}

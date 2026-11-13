@@ -1,0 +1,13 @@
+{
+ "id": "gc-hedda-gabler",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-hedda-gabler_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "a1ea9ff3f46667d0fc6ba2bcb7309239146732b4913061211ebea3bbb773e6bd",
+ "schemaVersion": 1,
+ "sourceSha256": "7efc206d049b452c5ed94f224bac884807ed1b6a508b3e9dedab8f4772058fc2",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-hedda-gabler_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-las-helenicas",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-las-helenicas_2026-11-09.glink",
+ "sizeBytes": 102400,
+ "sha256": "71ee9f9c1bae941a535dfc24b44a41be235a3019bde9e08e8815174dbcbdb09f",
+ "schemaVersion": 1,
+ "sourceSha256": "4532760721a8ca1fa3f6da3f6c37ec3d202c4481288b038376683807768e38c3",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-las-helenicas_2026-11-09.glink"
+}

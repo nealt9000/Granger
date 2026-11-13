@@ -1,0 +1,13 @@
+{
+ "id": "gc-prisoner-of-zenda",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-prisoner-of-zenda_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "c8970a897963beee89109e9467d4942a966bdace3289c4dec02c03db289a5474",
+ "schemaVersion": 1,
+ "sourceSha256": "ceb9df9a3355af5836cb9dc0adfd99a33db7bc456d8cf27015b15e58d271cc4b",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-prisoner-of-zenda_2026-11-09.glink"
+}

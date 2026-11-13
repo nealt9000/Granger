@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-obras-escogidas",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-obras-escogidas_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "d8baee81d96fa5a54209f07b45b736759582706b9fdf606e67777dac2199b166",
+ "schemaVersion": 1,
+ "sourceSha256": "bd8f1c6cda66149f5c505e05e8d5aada4032babfacbed5a9d9f73228fae5d784",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-obras-escogidas_2026-11-09.glink"
+}

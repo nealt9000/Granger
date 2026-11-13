@@ -1,0 +1,13 @@
+{
+ "id": "gc-herland",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-herland_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "eabcc32d9e0f63ab1c82532f7e055a01292dd2dfea850aac03f55194d95e8376",
+ "schemaVersion": 1,
+ "sourceSha256": "252cabab33a40068dc3c2d6359ed851406e410c9d2687bebb0bfbf2bada46fdc",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-herland_2026-11-09.glink"
+}

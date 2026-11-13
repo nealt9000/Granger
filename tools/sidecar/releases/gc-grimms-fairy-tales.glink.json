@@ -1,0 +1,13 @@
+{
+ "id": "gc-grimms-fairy-tales",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-grimms-fairy-tales_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "a86e6bb4115a3216fc17455694929381508a3d8f5c2105642326a0ca56aad91a",
+ "schemaVersion": 1,
+ "sourceSha256": "61572743ca0fb0a9913fe830b656e543bd87c642b0d6a40406babddc489297c0",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-grimms-fairy-tales_2026-11-09.glink"
+}

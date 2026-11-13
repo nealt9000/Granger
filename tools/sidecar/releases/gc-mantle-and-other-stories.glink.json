@@ -1,0 +1,13 @@
+{
+ "id": "gc-mantle-and-other-stories",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-mantle-and-other-stories_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "b94ae9c1266ae8943f1d225e04b8d38dfd47ed386caecddb696054cc33ff2d1c",
+ "schemaVersion": 1,
+ "sourceSha256": "4f75db24f68c517cc996e03a261df65dbeae9b3d8cfeb94212d7b0b7929da8d7",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-mantle-and-other-stories_2026-11-09.glink"
+}

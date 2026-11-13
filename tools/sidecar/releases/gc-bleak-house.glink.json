@@ -1,0 +1,13 @@
+{
+ "id": "gc-bleak-house",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-bleak-house_2026-11-09.glink",
+ "sizeBytes": 65536,
+ "sha256": "f2ce99945fd52c4ff05c4dcaba6ae0a504e1b8a1092b6d600f8026d8a0e7b247",
+ "schemaVersion": 1,
+ "sourceSha256": "7b5c6cf41f68767b677a1b52edbd8cbfa77e8ef5105ac8a20821fac87f526a75",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-bleak-house_2026-11-09.glink"
+}

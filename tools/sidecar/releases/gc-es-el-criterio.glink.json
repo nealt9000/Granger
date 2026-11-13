@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-el-criterio",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-el-criterio_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "98e5170d801b9ae2fa2eb59b1c6eee042a9adeec3e271856f78f3158eee4376a",
+ "schemaVersion": 1,
+ "sourceSha256": "8b35bad9df260b9c849bc34170ca908371bbcbc3d2a81eb4b675cb99066ff357",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-criterio_2026-11-09.glink"
+}

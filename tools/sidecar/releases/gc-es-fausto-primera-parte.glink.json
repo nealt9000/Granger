@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-fausto-primera-parte",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-fausto-primera-parte_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "977f7a2b5580cd1f78b74f16fff9680064c15a4088bbe1e97a64efcb3bb09991",
+ "schemaVersion": 1,
+ "sourceSha256": "55542a7dd807a60ce1ce88ef4a7d54bb1f4d8dd4523d95af8952e541b2c671e9",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-fausto-primera-parte_2026-11-09.glink"
+}

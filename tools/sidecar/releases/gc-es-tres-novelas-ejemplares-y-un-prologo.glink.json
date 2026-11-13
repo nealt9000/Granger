@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-tres-novelas-ejemplares-y-un-prologo",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-tres-novelas-ejemplares-y-un-prologo_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "8f77c46b2a6226589b227f1d3298b2e38eda7863bebf5aa54f675aa09c2a5bf6",
+ "schemaVersion": 1,
+ "sourceSha256": "030ecc26f097976d9a620d4808600461e9e2dff7052a6459b16ea92415162446",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-tres-novelas-ejemplares-y-un-prologo_2026-11-09.glink"
+}

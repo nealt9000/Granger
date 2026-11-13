@@ -1,0 +1,13 @@
+{
+ "id": "gc-everyman-with-other-interludes-and-miracle-plays",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-everyman-with-other-interludes-and-miracle-plays_2026-11-09.glink",
+ "sizeBytes": 45056,
+ "sha256": "f971b884f26a67f450babb087d16252284fb4346e0a0fdd66993db82c103640c",
+ "schemaVersion": 1,
+ "sourceSha256": "a99adbecafec56586868751b7025eb5038c42fc7490adef7b5594ec2cdb44429",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-everyman-with-other-interludes-and-miracle-plays_2026-11-09.glink"
+}

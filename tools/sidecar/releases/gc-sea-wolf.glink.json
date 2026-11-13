@@ -1,0 +1,13 @@
+{
+ "id": "gc-sea-wolf",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-sea-wolf_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "4b82e2508f078dc721698e7cd8a5e280c71c7825eddc3f424ad448a1778a9753",
+ "schemaVersion": 1,
+ "sourceSha256": "bf184c77f5ca17e90e1c2ce43415a7a50a8104ee983eb1269a6bce54c6a44ab3",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-sea-wolf_2026-11-09.glink"
+}

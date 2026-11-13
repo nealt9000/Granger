@@ -1,0 +1,13 @@
+{
+ "id": "gc-red-badge-of-courage",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-red-badge-of-courage_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "17db185f859686da3284a260b52dbeddb784047a9d5dd3e3cf08f2c039f9f28a",
+ "schemaVersion": 1,
+ "sourceSha256": "1cb7f8cf1d0a558195ea9b0df25ca053ae4bbb039440476b9a18d34f2be01f11",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-red-badge-of-courage_2026-11-09.glink"
+}

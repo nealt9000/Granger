@@ -1,0 +1,13 @@
+{
+ "id": "gc-coriolanus",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-coriolanus_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "8d3c11ff67c48b37936f10fcc6b87b36c6d5602e1d0e9f304f90e6f12c53d5b4",
+ "schemaVersion": 1,
+ "sourceSha256": "9c11d3ed7eb89a94e83c977d577816236f7a7fdb59faf21a31b585243cc95375",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-coriolanus_2026-11-09.glink"
+}

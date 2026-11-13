@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-barraca",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-barraca_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "0f27fc5d2acda5a2d26db8e2ebab8dee34f715c334b817a525cda7187671a674",
+ "schemaVersion": 1,
+ "sourceSha256": "a282dde84407bfe3d325d33472d2b3b0d99a2b1b6200f56a4a63ed6f52e116a3",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-barraca_2026-11-09.glink"
+}

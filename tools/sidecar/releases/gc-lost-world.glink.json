@@ -1,0 +1,13 @@
+{
+ "id": "gc-lost-world",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-lost-world_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "bbd90b6d194a8fdf78e60b976e8b15036eea2c1618cb2c439ea05e4ac546f8a0",
+ "schemaVersion": 1,
+ "sourceSha256": "a3029d3fbd20fe40c6c95b86287bc850d2929bb944f1eb7408bfcfcac59245f0",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-lost-world_2026-11-09.glink"
+}

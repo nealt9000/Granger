@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-madre-naturaleza",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-madre-naturaleza_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "552819f925f178aaa20461538dad9c17ee8e06f8d360fe3def78313f44285033",
+ "schemaVersion": 1,
+ "sourceSha256": "3281c35b79c63737f6cb26ff54611390ff7c42e14f19e23c29f0dbea9037f9db",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-madre-naturaleza_2026-11-09.glink"
+}

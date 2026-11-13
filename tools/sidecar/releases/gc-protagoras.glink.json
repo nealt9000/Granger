@@ -1,0 +1,13 @@
+{
+ "id": "gc-protagoras",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-protagoras_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "6dc0589600366ff3d198900ee1f83591d0799c907271dfc87b6adfa57c9f64ad",
+ "schemaVersion": 1,
+ "sourceSha256": "eb95bf5df6fe9c8401c2b5b005402a632ed3199ef00bb8de633acb2133acf41c",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-protagoras_2026-11-09.glink"
+}

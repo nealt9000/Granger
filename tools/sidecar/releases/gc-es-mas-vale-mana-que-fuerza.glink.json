@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-mas-vale-mana-que-fuerza",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-mas-vale-mana-que-fuerza_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "ec6f03591c052b46658a92f61f5065a81f3f9a6549bd7a3223e46aeb62c5d501",
+ "schemaVersion": 1,
+ "sourceSha256": "607f1fd866e735833e80f5503fdc221f020001414aed93cca72eb4f9a8ed95fd",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-mas-vale-mana-que-fuerza_2026-11-09.glink"
+}

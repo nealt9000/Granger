@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-amor-y-pedagogia",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-amor-y-pedagogia_2026-11-09.glink",
+ "sizeBytes": 40960,
+ "sha256": "2ce120e3a42c562883586f35c28bf666ef780a80c0ab38134ea65a454b65c697",
+ "schemaVersion": 1,
+ "sourceSha256": "29c6baa39afc4252ddb52403e6ba945fd59894b50d4db3de178115121e868594",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-amor-y-pedagogia_2026-11-09.glink"
+}

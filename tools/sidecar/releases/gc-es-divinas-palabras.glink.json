@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-divinas-palabras",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-divinas-palabras_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "bcf28e5f027e256a564726d40079a5cc14f97c31d77351c5247c1a7674bb6edb",
+ "schemaVersion": 1,
+ "sourceSha256": "56af7fd90033e696b11f67a0724aa438e9b6b124cf72e550e7a26b9b9c85a092",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-divinas-palabras_2026-11-09.glink"
+}

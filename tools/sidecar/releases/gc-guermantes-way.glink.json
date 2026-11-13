@@ -1,0 +1,13 @@
+{
+ "id": "gc-guermantes-way",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-guermantes-way_2026-11-09.glink",
+ "sizeBytes": 81920,
+ "sha256": "0e71bdf3631213f6cefa2110abf51f4d44ba610da39d71ad1d19ac452879cec6",
+ "schemaVersion": 1,
+ "sourceSha256": "b8a7396f8ff7fc628c6bc331a43c21de8d2d73b6386ce21e8c8b24a30c131b68",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-guermantes-way_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-misericordia",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-misericordia_2026-11-09.glink",
+ "sizeBytes": 49152,
+ "sha256": "4f8c0db8e8b7b3b7c66a527fad7fc97988ee096ec5906c7456b068adf783ab42",
+ "schemaVersion": 1,
+ "sourceSha256": "81841d1eab938c465df7b3f3341b611ab2cc18e787dacbabeb1abe8aebdc2a8f",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-misericordia_2026-11-09.glink"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-la-perfecta-casada",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-la-perfecta-casada_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "fd0358e0c76df5203b8858db767ca015b519a0c90f11a480279b07a30ac5fcd1",
+ "schemaVersion": 1,
+ "sourceSha256": "8c1f3face8d024a0e3f7de6255ecc52dc1a23e76b27f7d13990c9abe7f4bf84a",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-perfecta-casada_2026-11-09.glink"
+}

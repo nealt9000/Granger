@@ -1,0 +1,13 @@
+{
+ "id": "gc-treatise-of-human-nature",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-treatise-of-human-nature_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "f0a198500997bb5780196c1468cfe902f6f35a4ab614b89139d68d1351c6ae2c",
+ "schemaVersion": 1,
+ "sourceSha256": "c1cd150418bf5c9064a4415b2a337d0a4e2866c39f6b74ae125a7af877a64897",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-treatise-of-human-nature_2026-11-09.glink"
+}

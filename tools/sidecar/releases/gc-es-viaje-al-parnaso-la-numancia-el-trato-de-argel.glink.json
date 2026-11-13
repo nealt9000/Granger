@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-viaje-al-parnaso-la-numancia-el-trato-de-argel",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-viaje-al-parnaso-la-numancia-el-trato-de-argel_2026-11-09.glink",
+ "sizeBytes": 49152,
+ "sha256": "52050493d1d177686b0683cfe7708b8ace546a39274262e38adc392e8b445af8",
+ "schemaVersion": 1,
+ "sourceSha256": "b791311091884859dde0f2654bc8027aaf1641be5e96017718a59b69a576d19b",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-viaje-al-parnaso-la-numancia-el-trato-de-argel_2026-11-09.glink"
+}

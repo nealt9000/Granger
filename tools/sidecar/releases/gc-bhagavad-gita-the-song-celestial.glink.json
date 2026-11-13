@@ -1,0 +1,13 @@
+{
+ "id": "gc-bhagavad-gita-the-song-celestial",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-bhagavad-gita-the-song-celestial_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "8522431287f4068fa44fd5ec7af6544c0d358cac05b878aaf93e3003bffeb6e2",
+ "schemaVersion": 1,
+ "sourceSha256": "db2a284e862eff2fd093e78ed1b232be741095104ffbeaed93c7647c10114082",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-bhagavad-gita-the-song-celestial_2026-11-09.glink"
+}

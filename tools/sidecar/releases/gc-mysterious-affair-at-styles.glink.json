@@ -1,0 +1,13 @@
+{
+ "id": "gc-mysterious-affair-at-styles",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-mysterious-affair-at-styles_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "e7a3070e454d09ee2b96bdca82db5d39f8ee48cc3cefe763deee70a1a397fdc5",
+ "schemaVersion": 1,
+ "sourceSha256": "aa20e6db7c7efc3068d16cf845ca6b48df7b380704acbc689d0a089e8938b853",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-mysterious-affair-at-styles_2026-11-09.glink"
+}

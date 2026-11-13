@@ -1,0 +1,13 @@
+{
+ "id": "gc-es-prosas-profanas",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-es-prosas-profanas_2026-11-09.glink",
+ "sizeBytes": 28672,
+ "sha256": "1df3ac1db19297a5b284f140d7e84abf56d18c1ecf2ed5fa5c9dc3908dbb65ae",
+ "schemaVersion": 1,
+ "sourceSha256": "c061d1cf609b44b6ffa2771cba92b1a839069b703a4c43377b5479262e64849a",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-prosas-profanas_2026-11-09.glink"
+}

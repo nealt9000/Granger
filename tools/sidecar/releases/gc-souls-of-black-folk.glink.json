@@ -1,0 +1,13 @@
+{
+ "id": "gc-souls-of-black-folk",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-souls-of-black-folk_2026-11-09.glink",
+ "sizeBytes": 49152,
+ "sha256": "283f27881c8fbebc1197ab5e5ddc4203ff9db1e165eae3ee55623de4d450ec97",
+ "schemaVersion": 1,
+ "sourceSha256": "20f20fa65c10ec4d230b4b894244ce5536e0eb7e7b20be63359ff5905335c342",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-souls-of-black-folk_2026-11-09.glink"
+}

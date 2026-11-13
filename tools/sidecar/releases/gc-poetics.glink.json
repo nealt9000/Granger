@@ -1,0 +1,13 @@
+{
+ "id": "gc-poetics",
+ "kind": "book",
+ "sidecar": "glink",
+ "fileName": "gc-poetics_2026-11-09.glink",
+ "sizeBytes": 36864,
+ "sha256": "25c858aa74ce908320a689be7b6d76bd4cf8c204feb0e1ce05c1f90bf91f4882",
+ "schemaVersion": 1,
+ "sourceSha256": "e9ebdc966ecdac71666f0498bee71db3bd7fab673a7153ce9366629010e89beb",
+ "builder": "tools/links/build.py",
+ "builderVersion": 2,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-poetics_2026-11-09.glink"
+}
