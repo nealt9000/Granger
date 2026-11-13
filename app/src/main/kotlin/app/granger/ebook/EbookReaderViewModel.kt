@@ -224,6 +224,9 @@ class EbookReaderViewModel(
     /** The open PDF's file, for PdfBox; null for an EPUB. */
     private var pdfFile: File? = null
 
+    /** The open book's language (its first), for a link's card to prefer an article in it. */
+    @Volatile private var bookLanguage: String? = null
+
     /** The open PDF's links as PdfBox read them, the first time a tapped link needed them. */
     private var pdfLinkList: List<PdfLink>? = null
     /** The open publication; whoever takes it out closes it. */
@@ -311,6 +314,7 @@ class EbookReaderViewModel(
             }
             if (pdf && _state.value.toc.none { (pdfPageOf(it.href) ?: 0) >= 1 }) launch { pdfOutlineInstead(opened, file) }
             if (!pdf) launch { readAnchorStarts(opened) }
+            bookLanguage = opened.metadata.languages.firstOrNull()?.substringBefore('-')?.lowercase()
             if (!pdf && !fixed && links != null) launch { followLinks(links, book.id, opened) }
             launch { bookshelf.marks(book.id).collect(::onMarks) }
             // Counting pages can be slow for a big book; the label shows percent until it's done.
@@ -734,7 +738,7 @@ class EbookReaderViewModel(
         val source = links ?: return
         viewModelScope.launch {
             val peek = try {
-                withContext(io) { source.peek(qid) }
+                withContext(io) { source.peek(qid, bookLanguage) }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

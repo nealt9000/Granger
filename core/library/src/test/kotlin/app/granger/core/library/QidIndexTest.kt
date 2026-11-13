@@ -77,6 +77,19 @@ class QidIndexTest {
         assertThat(QidIndex.sameEdition("wikipedia_en_history_maxi_2026-10.zim", "wikipedia_en_history_nopic_2026-10.zim")).isTrue()
     }
 
+    @Test fun aBooksLanguageComesFirst() {
+        // Plan LL1 Task 10: English first in the library, but Don Quijote's Aristóteles opens the Spanish article.
+        val en = QidIndex.open(gqid("en", listOf(listOf("Aristotle", 868L, 300, "Aristóteles")), sourceZim = "wikipedia_en_top_maxi_2026-09-14.zim"), "en")!!
+        val es = QidIndex.open(gqid("es", listOf(listOf("Aristóteles", 868L, 300, "Aristotle")), sourceZim = "wikipedia_es_top_nopic_2026-10-10.zim"), "es")!!
+        val all = QidIndexes(listOf(en, es))
+        assertThat(en.language).isEqualTo("en")
+        assertThat(all.articlesOf(868L, "es").map { it.path }).containsExactly("Aristóteles", "Aristotle").inOrder()
+        assertThat(all.articlesOf(868L, "en").map { it.path }).containsExactly("Aristotle", "Aristóteles").inOrder()
+        assertThat(all.articlesOf(868L, null).map { it.path }).containsExactly("Aristotle", "Aristóteles").inOrder()
+        assertThat(all.articlesOf(868L, "fr").map { it.path }).containsExactly("Aristotle", "Aristóteles").inOrder()
+        all.close()
+    }
+
     @Test fun severalPacksResolveInPreferenceOrder() {
         val history = gqid("history", listOf(listOf("London", 84L, 300, null), listOf("Hastings", 83224L, 80, null)))
         val all = QidIndexes(listOf(QidIndex.open(gqid("top", top, links), "top")!!, QidIndex.open(history, "history")!!))

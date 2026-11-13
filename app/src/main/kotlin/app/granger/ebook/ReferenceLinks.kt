@@ -28,8 +28,11 @@ interface BookLinkSource {
     /** The open book's mentions up to [level]'s tier that an installed Wikipedia can open; empty when it has no links file. */
     suspend fun mentions(bookId: String, level: LinkLevel): List<BookMention>
 
-    /** The peek card for [qid]; null when no installed pack has the article any more. */
-    suspend fun peek(qid: Long): LinkPeek?
+    /**
+     * The peek card for [qid]; null when no installed pack has the article any more. With the book's [language], an
+     * article in that language comes first (Task 10: Don Quijote's Aristóteles opened the English article).
+     */
+    suspend fun peek(qid: Long, language: String? = null): LinkPeek?
 }
 
 /** The group of decorations drawn for the reference links, apart from the highlights, the search hit and the voice. */

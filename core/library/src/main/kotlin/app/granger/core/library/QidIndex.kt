@@ -12,7 +12,7 @@ data class QidArticle(val qid: Long, val packId: String, val path: String, val r
  * the other language, and the item's join properties (author P50, Gutenberg P2034, MusicBrainz P434…). The Linked
  * Library joins on QIDs only (spec §5.3), so a link from a book, a recording or another pack resolves here.
  */
-class QidIndex private constructor(private val db: SQLiteDatabase, val packId: String) : Closeable {
+class QidIndex private constructor(private val db: SQLiteDatabase, val packId: String, val language: String? = null) : Closeable {
     fun qidOf(path: String): Long? =
         db.rawQuery("SELECT qid FROM articles WHERE path = ?", arrayOf(path)).use { if (it.moveToFirst()) it.getLong(0) else null }
 
@@ -63,7 +63,7 @@ class QidIndex private constructor(private val db: SQLiteDatabase, val packId: S
                 db.close()
                 return null
             }
-            return QidIndex(db, packId)
+            return QidIndex(db, packId, meta.values["sourceZim"]?.let { LANGUAGE.find(it)?.groupValues?.get(1) })
         }
 
         /** Whether two Kiwix file names are one edition: the same name and date, whatever the flavour. */
@@ -77,6 +77,9 @@ class QidIndex private constructor(private val db: SQLiteDatabase, val packId: S
             val m = EDITION.matchEntire(name.substringAfterLast('/')) ?: return null
             return m.groupValues[1] + "_" + m.groupValues[2]
         }
+
+        /** `wikipedia_es_top_nopic_2026-10-10.zim` -> `es`. */
+        private val LANGUAGE = Regex("^[a-z]+_([a-z]{2,3})_")
 
         private val EDITION = Regex("(.+?)(?:_(?:maxi|mini|nopic))?_(\\d{4}-\\d{2}(?:-\\d{2})?)\\.zim")
     }
@@ -93,6 +96,13 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
 
     /** Where the item can be read, best pack first; empty when no installed pack has it. */
     fun articlesOf(qid: Long): List<QidArticle> = indexes.flatMap { it.articlesOf(qid) }
+
+    /** [articlesOf], the packs in [language] first (a book's own language), each side kept in preference order. */
+    fun articlesOf(qid: Long, language: String?): List<QidArticle> {
+        if (language == null) return articlesOf(qid)
+        val (mine, others) = indexes.partition { it.language == language }
+        return (mine + others).flatMap { it.articlesOf(qid) }
+    }
 
     fun otherTitle(packId: String, path: String): String? = indexes.firstOrNull { it.packId == packId }?.otherTitle(path)
 

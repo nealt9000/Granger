@@ -96,8 +96,9 @@ class ReferenceLinksSource(
         return all.filter { it.qid in known }
     }
 
-    override suspend fun peek(qid: Long): LinkPeek? {
-        for (article in indexes().articlesOf(qid)) {
+    override suspend fun peek(qid: Long, language: String?): LinkPeek? {
+        val qids = indexes()
+        for (article in qids.articlesOf(qid, language)) {
             val l = lead(article.packId, article.path) ?: continue
             val book = synced().works().entries.firstOrNull { it.value == qid }?.let { bookOf(it.key) }
             return LinkPeek(qid, article.packId, article.path, l.title, l.sentence, l.thumbnail, book)

@@ -52,7 +52,7 @@ class ReferenceLinksTest {
 
     private class FakeLinks(val all: List<BookMention>, val peeks: Map<Long, LinkPeek>) : BookLinkSource {
         override suspend fun mentions(bookId: String, level: LinkLevel) = all.filter { it.tier <= level.maxTier }
-        override suspend fun peek(qid: Long) = peeks[qid]
+        override suspend fun peek(qid: Long, language: String?) = peeks[qid]
     }
 
     private fun TestScope.reader(links: BookLinkSource?): EbookReaderViewModel {
