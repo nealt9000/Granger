@@ -32,7 +32,7 @@
    - Rank (sitelinks) at or above a threshold the spike sets.
    - Never: common nouns, the book's own characters (fictional names that collide with real ones: "Elizabeth Bennet" isn't Elizabeth I), quoted dialogue tags.
    - **More** lifts the density cap and the rank floor, and links every chapter's first mention.
-6. **How a link resolves:** QID → every installed pack's `.gqid`, in Wander's pack order. If none has it, a sheet offers Preview (library.kiwix.org) or Get for the smallest pack that has it, from the catalog's QID coverage (a count per pack in the release JSON, not a list).
+6. **How a link resolves:** QID → every installed pack's `.gqid`, packs in the book's language first, then Wander's pack order (Neal, 2026-11-13). If none has it, a sheet offers Preview (library.kiwix.org) or Get for the smallest pack that has it, from the catalog's QID coverage (a count per pack in the release JSON, not a list).
 7. **How links look:** a thin dotted underline in the theme's link tone, unchanged by read-aloud highlighting. A tap opens a peek card (title, the article's first sentence, thumbnail, Open). It never jumps straight out of the book.
 8. **The book's own characters are excluded** with a desk-built per-book cast list (names that recur but have no confident match, or match a fictional-character item). The same list seeds LL4's companion.
 
@@ -186,12 +186,12 @@
 ### LL1 · Task 10: Phone check, Pixel 6 (then Pixel 7)
 - Read a chapter of each spike book with Light, then More. Open links and come back. Check an unresolved link with Top only installed. Check *In your books* on London, Napoleon and Jane Austen. Repeat in Spanish (Cervantes, La Mancha).
 - Sizes, timings (placing a chapter's links < 50 ms) and Neal's findings recorded here.
-- **LL1 checkpoint with Neal:** density, look and the setting's wording, then the walkthrough and merge.
+- **LL1 checkpoint with Neal:** density, look and the setting's wording, then the walkthrough and merge. (2026-11-13: Neal agreed the language change to Decision 6 and chose to merge now and check on the Pixel afterwards. Density and wording stay open for that check; release builds keep `LINKED_CLASSICS` off.)
 - **As built (2026-11-13), first pass on the emulator** (granger-eval-1, Android 16). The Pixel 6 holds Play's 1309, and a debug build would need an uninstall, so Neal decides when.
   - **Setup.** The branch catalog was signed by Neal and served over `adb reverse` (`-PcatalogUrl`). The emulator held the 10-30 Classics, so links followed only once *Get all* brought the 11-09 books, and each `.glink` arrived with its book. A further 185 Spanish books were fetched. 8 QID indexes arrived (24 MB). Geography's didn't, because its installed edition is older than the catalog's.
   - **Found and fixed (890e5a2b, d6c7f6d2, 4796ff03):**
     1. *English book, Spanish card.* One `.gqid` serves every flavour of an edition, since the catalog gives the nopic build to maxi and mini. But the app checked it against the installed maxi's sha, dropped English Top, and fell through to Spanish Top. Fix: an index built from the same edition in another flavour is accepted.
-    2. *Spanish book, English card.* Pack order followed the library's languages only. Fix: a card prefers packs in the book's language (from the index's source name), with Wander's order within each language. This adjusts Decision 6.
+    2. *Spanish book, English card.* Pack order followed the library's languages only. Fix: a card prefers packs in the book's language (from the index's source name), with Wander's order within each language. This adjusts Decision 6 (Neal agreed, 2026-11-13).
     3. *No links on reopening at a chapter.* Readium drops decorations sent while a restored page loads, and diffs a re-send to nothing. Fix: the links are cleared and drawn again each time the reader settles in another resource (300 ms after).
     4. *The footer card covered the article's end and ran under the rail.* Wikipedia pins `html` and `body` to the viewport height, so the root's bottom padding never reached the end of the page. That also means the bottom bar's padding never worked there before. Fix: a root or body whose content overflows it grows. The card is inset by the rail.
   - **Seen working:**
