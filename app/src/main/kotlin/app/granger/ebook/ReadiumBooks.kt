@@ -62,6 +62,7 @@ fun readerConfiguration(): EpubNavigatorFragment.Configuration {
         readiumCssRsProperties = RsProperties(linkColor = accent, visitedColor = accent),
         selectionActionModeCallback = SelectionMenu(),
         shouldApplyInsetsPadding = false,
+        decorationTemplates = readerDecorationTemplates(),
     )
 }
 

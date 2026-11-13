@@ -39,6 +39,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -118,6 +120,12 @@ data class EbookUi(
     val makingEbook: Boolean = false,
     /** Something the reader says once (Read as ebook's outcome), then [noticeShown] clears. */
     val notice: UiText? = null,
+    /** The Classic has reference links (Plan LL1), so the text settings offer Off / Light / More. */
+    val hasLinks: Boolean = false,
+    /** The reference links drawn at the chosen level; the screen applies them to the navigator whenever they change. */
+    val linkDecorations: List<Decoration> = emptyList(),
+    /** The card of the link just tapped (Decision 7); null when none is open. */
+    val peek: LinkPeek? = null,
 )
 
 /** The voice's sentence in this book: its locator (the element's, with the sentence as text), its paragraph, and whether the page follows it. */
@@ -170,6 +178,8 @@ class EbookReaderViewModel(
     private val pdfLinks: (File) -> List<PdfLink> = PdfLinks::read,
     /** Whether a PDF is in colour, which Night leaves in its own colours (called on [io]; the app passes PdfColour). */
     private val pdfColour: (File) -> Boolean = { false },
+    /** A Classic's reference links and what a tapped one opens (Plan LL1); null leaves links out of this reader. */
+    private val links: BookLinkSource? = null,
 ) : ViewModel() {
     /** The open PDF is in colour ([pdfColour]): Night doesn't invert it. */
     @Volatile private var colour = false
@@ -299,6 +309,7 @@ class EbookReaderViewModel(
             }
             if (pdf && _state.value.toc.none { (pdfPageOf(it.href) ?: 0) >= 1 }) launch { pdfOutlineInstead(opened, file) }
             if (!pdf) launch { readAnchorStarts(opened) }
+            if (!pdf && !fixed && links != null) launch { followLinks(links, book.id, opened) }
             launch { bookshelf.marks(book.id).collect(::onMarks) }
             // Counting pages can be slow for a big book; the label shows percent until it's done.
             launch {
@@ -682,6 +693,50 @@ class EbookReaderViewModel(
     }
 
     fun updatePrefs(prefs: ReadingPrefs) = prefsStore.update(prefs)
+
+    /** Draws the book's reference links at the chosen level, again whenever the level changes. */
+    private suspend fun followLinks(links: BookLinkSource, bookId: String, opened: Publication) {
+        val has = try {
+            withContext(io) { links.mentions(bookId, LinkLevel.MORE).isNotEmpty() }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w("Granger", "Couldn't read the book's links", e)
+            false
+        }
+        if (!has) return
+        _state.update { it.copy(hasLinks = true) }
+        prefsStore.prefs.map { it.referenceLinks }.distinctUntilChanged().collect { level ->
+            val placed = try {
+                withContext(io) { LinkDecorations.place(opened, links.mentions(bookId, level)) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w("Granger", "Couldn't place the book's links", e)
+                emptyList()
+            }
+            _state.update { it.copy(linkDecorations = placed) }
+        }
+    }
+
+    /** A drawn reference link was tapped: its card opens, or a note says the article has gone from the phone. */
+    fun openLink(decorationId: String) {
+        val qid = LinkDecorations.qidOf(decorationId) ?: return
+        val source = links ?: return
+        viewModelScope.launch {
+            val peek = try {
+                withContext(io) { source.peek(qid) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w("Granger", "Couldn't open the link's article", e)
+                null
+            }
+            _state.update { if (peek != null) it.copy(peek = peek) else it.copy(notice = UiText.Res(R.string.ebook_link_gone)) }
+        }
+    }
+
+    fun closePeek() = _state.update { it.copy(peek = null) }
 
     /**
      * A finger went [down] on the page, or came up. Page changes while it's down, and up to [PAGE_TURN_GRACE_MS] after,

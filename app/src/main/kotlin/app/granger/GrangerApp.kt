@@ -887,6 +887,45 @@ class AppContainer(context: Context) {
         }.toMap()
     }
 
+    /**
+     * A Classic's installed sidecar of [kind] (its `.glink`, Plan LL1), by the bookshelf's id for it, with the sha256 of
+     * the EPUB it must have been built from; null when it has none.
+     */
+    suspend fun installedBookSidecar(kind: SidecarKind, bookId: String): InstalledSidecar? {
+        val records = downloads.records.first().filter { it.state == DownloadState.INSTALLED }
+        val catalogId = records.firstOrNull { it.kind == ItemKind.BOOK && BookIds.of(BookOrigin.GRANGER, it.itemId) == bookId }
+            ?.takeIf { it.hash.isNotEmpty() } ?: return null
+        val file = records.filter { it.kind == kind.itemKind && it.itemId == kind.itemIdOf(catalogId.itemId) }.maxByOrNull { it.createdAt }?.file
+        return file?.let { InstalledSidecar(it, catalogId.hash) }
+    }
+
+    /** Reference links in the Classics (Plan LL1 Task 8): each book's `.glink`, resolved through the packs' QID indexes. */
+    val referenceLinks: app.granger.ebook.ReferenceLinksSource by lazy {
+        val thumbs = app.granger.home.ArticleThumbnails(File(context.cacheDir, "home-thumbs"))
+        app.granger.ebook.ReferenceLinksSource(
+            linksFile = { installedBookSidecar(SidecarKind.LINKS, it) },
+            qidFiles = {
+                val installed = installedSidecars(SidecarKind.QID_INDEX)
+                app.granger.home.WanderModel.encyclopediasOf(library.packs.first(), knowledgeNow.value)
+                    .mapNotNull { pack -> installed[pack.id]?.let { pack.id to it } }
+            },
+            lead = { packId, path -> articleLead(packId, path, thumbs) },
+        )
+    }
+
+    /** An article's title, opening lines and picture, read out of its pack for a link's card. Blocking. */
+    private fun articleLead(packId: String, path: String, thumbs: app.granger.home.ArticleThumbnails): app.granger.ebook.ArticleLead? {
+        val archive = library.archive(packId) ?: return null
+        val resolved = archive.resolvePath(path) ?: return null
+        val item = archive.read(resolved)?.takeIf { it.mimeType.startsWith("text/html") } ?: return null
+        val html = String(item.bytes, Charsets.UTF_8)
+        val lead = app.granger.home.LeadLinks.parse(html, resolved)
+        val title = lead.title.ifBlank { resolved.substringAfterLast('/').replace('_', ' ') }
+        return app.granger.ebook.ArticleLead(
+            app.granger.core.library.PageTitles.clean(title), lead.summary, runCatching { thumbs.thumbnail(archive, resolved, html) }.getOrNull(),
+        )
+    }
+
     private suspend fun installedVectors(): List<ListedVectors> {
         val records = downloads.records.first().filter { it.state == DownloadState.INSTALLED }
         val byItem = records.groupBy { it.itemId }

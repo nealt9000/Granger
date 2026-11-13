@@ -1136,6 +1136,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             player = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub else null,
                             restore = container::restoreBook, savedPlace = container.voicePlace,
                             pdfColour = PdfColour::isColour,
+                            links = if (Features.LINKED_CLASSICS) container.referenceLinks else null,
                         )
                     },
                     onChromeVisibleChange = { visible -> shell.railVisible = visible },
@@ -1148,6 +1149,12 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onLookUp = ::lookUpInWiktionary,
                     onBack = { nav.popBackStack() },
                     onOpenTab = ::showTab,
+                    // A reference link's article opens over the book, as Define's entry does; Back comes back to the page.
+                    onOpenArticle = { packId, path, title ->
+                        scope.launch {
+                            container.sessions.tab(container.sessions.openTab(packId, path, title))?.let { nav.showTab(it, keepCurrent = true) }
+                        }
+                    },
                     // Made an ebook (Plan IA): this reader closes and the tab opens again, as the ebook. Only if it is
                     // still on screen: the reader may have been left while the conversion ran.
                     onReopen = {

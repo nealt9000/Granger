@@ -55,6 +55,12 @@ class ReadingPrefsTest {
         assertThat(day.copy(pdfScroll = true).pdfLook).isEqualTo(day.pdfLook)
     }
 
+    @Test fun referenceLinksAreLightByDefaultAndSurviveTheStore() {
+        assertThat(ReadingPrefs().referenceLinks).isEqualTo(LinkLevel.LIGHT)
+        ReadingPrefsStore(shared).update(ReadingPrefs(referenceLinks = LinkLevel.MORE))
+        assertThat(ReadingPrefsStore(shared).prefs.value.referenceLinks).isEqualTo(LinkLevel.MORE)
+    }
+
     @Test fun pdfPrefsSurviveTheStore() {
         val store = ReadingPrefsStore(shared)
         store.update(ReadingPrefs(pdfScroll = true, pdfFitWidth = true))

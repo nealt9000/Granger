@@ -34,8 +34,9 @@ object Features {
     val SPANISH_ASK = BuildConfig.DEBUG
 
     /**
-     * Linked Library LL1: reference links in the Classics. Off until LL1 ships; while off, phones don't download the
-     * QID index or links sidecars, since nothing reads them yet (Neal, 2026-11-12).
+     * Linked Library LL1: reference links in the Classics. Off in release until LL1 ships; while off, phones don't
+     * download the QID index or links sidecars (Neal, 2026-11-12). Debug builds read them from Task 8 on, for the
+     * Pixel check (Task 10).
      */
-    const val LINKED_CLASSICS = false
+    val LINKED_CLASSICS = BuildConfig.DEBUG
 }

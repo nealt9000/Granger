@@ -32,7 +32,7 @@ import kotlin.math.roundToInt
 /** Typeface, size, spacing, margins, alignment and theme. Every change goes to [onChange] at once and shows live. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TextSettingsSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onDismiss: () -> Unit) {
+fun TextSettingsSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onDismiss: () -> Unit, showLinks: Boolean = false) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.navigationBarsPadding().padding(horizontal = 24.dp).padding(bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Setting(R.string.ebook_typeface) {
@@ -77,6 +77,14 @@ fun TextSettingsSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onD
                     listOf(ReadingTheme.APP to R.string.ebook_theme_match_app, ReadingTheme.DAY to R.string.ebook_theme_day, ReadingTheme.SEPIA to R.string.ebook_theme_sepia, ReadingTheme.NIGHT to R.string.ebook_theme_night),
                     prefs.theme,
                 ) { onChange(prefs.copy(theme = it)) }
+            }
+            if (showLinks) {
+                Setting(R.string.ebook_reference_links) {
+                    Chips(
+                        listOf(LinkLevel.OFF to R.string.ebook_links_off, LinkLevel.LIGHT to R.string.ebook_links_light, LinkLevel.MORE to R.string.ebook_links_more),
+                        prefs.referenceLinks,
+                    ) { onChange(prefs.copy(referenceLinks = it)) }
+                }
             }
         }
     }

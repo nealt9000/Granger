@@ -92,6 +92,7 @@ private const val VOICE_LOG = "GrangerVoice"
 object EbookTags {
     const val FOLLOW = "ebook_follow"
     const val PAGE = "ebook_page"
+    const val LINK_PEEK = "ebook_link_peek"
 }
 
 /**
@@ -120,6 +121,8 @@ fun EbookReaderScreen(
     onOpenTab: (tabId: Long) -> Unit = {},
     /** Opens this book again: it has just become an ebook (Read as ebook). */
     onReopen: () -> Unit = {},
+    /** Opens a reference link's article (Plan LL1) in the web reader; Back comes back to this place in the book. */
+    onOpenArticle: (packId: String, path: String, title: String) -> Unit = { _, _, _ -> },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var navigator by remember { mutableStateOf<VisualNavigator?>(null) }
@@ -221,6 +224,9 @@ fun EbookReaderScreen(
     LaunchedEffect(epub, state.decorations) {
         epub?.applyDecorations(state.decorations, HIGHLIGHT_GROUP)
     }
+    LaunchedEffect(epub, state.linkDecorations) {
+        epub?.applyDecorations(state.linkDecorations, LINKS_GROUP)
+    }
     LaunchedEffect(epub, state.searchHit) {
         val hit = state.searchHit?.let { Decoration("search-hit", it, Decoration.Style.Highlight(tint = SEARCH_HIT_TINT)) }
         epub?.applyDecorations(listOfNotNull(hit), SEARCH_GROUP)
@@ -244,8 +250,18 @@ fun EbookReaderScreen(
                 return true
             }
         }
+        val links = object : DecorableNavigator.Listener {
+            override fun onDecorationActivated(event: DecorableNavigator.OnActivatedEvent): Boolean {
+                viewModel.openLink(event.decoration.id)
+                return true
+            }
+        }
         fragment?.addDecorationListener(HIGHLIGHT_GROUP, listener)
-        onDispose { fragment?.removeDecorationListener(listener) }
+        fragment?.addDecorationListener(LINKS_GROUP, links)
+        onDispose {
+            fragment?.removeDecorationListener(listener)
+            fragment?.removeDecorationListener(links)
+        }
     }
     // Back closes an open panel first, then leaves the reader.
     BackHandler(enabled = state.panel != null) { viewModel.open(null) }
@@ -409,7 +425,7 @@ fun EbookReaderScreen(
                 Panel.SETTINGS -> if (state.isPdf) {
                     PdfSettingsSheet(state.prefs, viewModel::updatePrefs, onDismiss = { viewModel.open(null) })
                 } else {
-                    TextSettingsSheet(state.prefs, viewModel::updatePrefs, onDismiss = { viewModel.open(null) })
+                    TextSettingsSheet(state.prefs, viewModel::updatePrefs, onDismiss = { viewModel.open(null) }, showLinks = state.hasLinks)
                 }
                 Panel.SEARCH -> BookSearchPanel(state.search, viewModel::search, viewModel::goToHit, onDismiss = { viewModel.open(null) })
                 null -> Unit
@@ -425,6 +441,16 @@ fun EbookReaderScreen(
                     onDismiss = { viewModel.editHighlight(null) },
                 )
             }
+        }
+        state.peek?.let { peek ->
+            LinkPeekSheet(
+                peek = peek,
+                onOpen = {
+                    viewModel.closePeek()
+                    onOpenArticle(peek.packId, peek.path, peek.title)
+                },
+                onDismiss = viewModel::closePeek,
+            )
         }
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
     }

@@ -138,6 +138,27 @@
 - A tap opens the peek card (Decision 7): Open goes to the article in the web reader, with Back returning to the same spot in the book. An unresolved QID gets Preview / Get (Decision 6). For a work, the card says "In your library" when the work itself is installed.
 - **Reading settings:** Reference links: Off / Light / More, **Light by default**, in English and Spanish.
 - **Tests:** placing (quote found, quote moved, quote gone), tier filtering, resolve order, the setting.
+- **As built (2026-11-13):**
+  - **`BookLinks`** (core:library) reads a `.glink`. It refuses another kind, a newer schema, or a file built from another EPUB than the installed one.
+  - **`ReferenceLinksSource`** (the app's `BookLinkSource`):
+    - It finds the book's installed `.glink` (`installedBookSidecar`) and opens the phone's QID indexes in Wander's pack order. The indexes are reopened when the installed set changes.
+    - It keeps only the mentions whose QID an installed pack has. The card reads the first pack whose article opens: `LeadLinks` gives the title and opening lines, and `ArticleThumbnails` the picture.
+  - **Drawing:**
+    - Mentions become Readium decorations in their own `links` group.
+    - Each is placed by its quote plus the last 32 characters of the same paragraph before it. This uses Readium's text-quote matching, as its own highlights do.
+    - The look is a custom `ReferenceLinkStyle` template: a 1.5 px dotted bottom border in the book's link tone, one box per line.
+    - The whole book's mentions load once per level. Readium sends each chapter its own.
+  - **A tap** opens `LinkPeekSheet` (picture, title, opening lines, Open article). Open goes through `sessions.openTab` + `nav.showTab(keepCurrent = true)`, as Define does, so Back returns to the page.
+  - **The setting:** Text settings → Reference links: Off / Light / More, stored in `ReadingPrefs`, Light by default. It appears only in a book that has links. Spanish wording: No / Pocos / Más.
+  - `Features.LINKED_CLASSICS` is now on in debug builds, for Task 10. Release stays off.
+  - **Changed from the plan, for Neal at the checkpoint:**
+    - **Decision 6:** a link whose article no installed pack has isn't drawn, rather than offering Preview / Get. Every drawn link opens, and the catalog has no per-pack QID coverage yet to choose a pack to offer.
+    - **"In your library" for a work** on the card moves to Task 9, with author → works, which uses the same joins.
+  - **Tests:**
+    - `BookLinksTest` (3).
+    - `ReferenceLinksTest` (6): tiers and Off; a chapter this edition lacks; a book with no links; tap → card or "gone"; the source's resolve order, dropping unresolved QIDs, reopening after a pack goes, and wrong-EPUB and wrong-pack files ignored.
+    - `ReadingPrefsTest`: the setting's default and storage.
+    - Placing against real page text (quote moved or gone) is Readium's JavaScript, so it's checked on the phone in Task 10.
 
 ### LL1 · Task 9: *In your books* and author → works (Kotlin + Compose, tested)
 - **The web reader's article footer** gets a native section under the article, not injected into the HTML:

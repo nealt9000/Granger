@@ -44,6 +44,8 @@ data class ReadingPrefs(
     val pdfFitWidth: Boolean = false,
     /** The wiki reader's text size (Plan U3c Decision 4): the WebView's `textZoom`, a percent, 80..160 in steps of 10. */
     val wikiTextZoom: Int = 100,
+    /** Reference links in the Classics (Plan LL1): Light by default (Neal, 2026-11-11). */
+    val referenceLinks: LinkLevel = LinkLevel.LIGHT,
 ) {
     /**
      * Readium's preferences. Publisher styles are always off so the reader's choices win over the book's CSS
@@ -168,6 +170,7 @@ class ReadingPrefsStore(private val shared: SharedPreferences) {
             .putBoolean(KEY_PDF_SCROLL, clamped.pdfScroll)
             .putBoolean(KEY_PDF_FIT_WIDTH, clamped.pdfFitWidth)
             .putInt(KEY_WIKI_TEXT_ZOOM, clamped.wikiTextZoom)
+            .putString(KEY_REFERENCE_LINKS, clamped.referenceLinks.name)
             .apply()
     }
 
@@ -184,6 +187,7 @@ class ReadingPrefsStore(private val shared: SharedPreferences) {
             pdfScroll = shared.getBoolean(KEY_PDF_SCROLL, d.pdfScroll),
             pdfFitWidth = shared.getBoolean(KEY_PDF_FIT_WIDTH, d.pdfFitWidth),
             wikiTextZoom = shared.getInt(KEY_WIKI_TEXT_ZOOM, d.wikiTextZoom),
+            referenceLinks = enumOr(shared.getString(KEY_REFERENCE_LINKS, null), d.referenceLinks),
         ).clamped()
     }
 
@@ -200,5 +204,6 @@ class ReadingPrefsStore(private val shared: SharedPreferences) {
         const val KEY_PDF_SCROLL = "pdf_scroll"
         const val KEY_PDF_FIT_WIDTH = "pdf_fit_width"
         const val KEY_WIKI_TEXT_ZOOM = "wiki_text_zoom"
+        const val KEY_REFERENCE_LINKS = "reference_links"
     }
 }

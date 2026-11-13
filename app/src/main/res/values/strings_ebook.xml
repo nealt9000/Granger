@@ -83,6 +83,13 @@
     <string name="ebook_theme_day">Day</string>
     <string name="ebook_theme_sepia">Sepia</string>
     <string name="ebook_theme_night">Night</string>
+    <!-- Plan LL1: reference links in the Classics, and the card a tapped one opens. -->
+    <string name="ebook_reference_links">Reference links</string>
+    <string name="ebook_links_off">Off</string>
+    <string name="ebook_links_light">Light</string>
+    <string name="ebook_links_more">More</string>
+    <string name="ebook_link_open">Open article</string>
+    <string name="ebook_link_gone">That article isn’t on your phone any more</string>
     <!-- A PDF's settings: how pages follow each other. -->
     <string name="ebook_pdf_pages">Pages</string>
     <string name="ebook_pdf_page_by_page">Page by page</string>
