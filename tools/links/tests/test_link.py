@@ -22,7 +22,7 @@ def kb(tmp_path):
              (8, "Mörön", 50, "Mörön", "place", None), (9, "Rostov-on-Don", 120, "Rostov-on-Don", "place", 1749),
              (71, "Ginebra", 200, "Geneva", "place", None), (760, "Santa_Lucía", 236, "Saint Lucia", "place", 1979),
              (183240, "Santa_Lucía_de_Siracusa", 72, "Saint Lucy", "human", 283),
-             (204843, "Teodora", 64, "Theodora", "human", 500)]
+             (204843, "Teodora", 64, "Theodora", "human", 500), (5, "Delphinidae", 90, "Delphinidae", "taxon", None)]
     items += [(1000 + i, f"Teodora_X{i}", 5, f"Teodora X{i}", "human", None) for i in range(30)]
     db.executemany("INSERT INTO item VALUES (?,?,?,?,?,?)", items)
     db.executemany("INSERT INTO alias(norm, qid, kind, raw) SELECT column1, column2, column3, column1 FROM (VALUES (?,?,?))", [
@@ -30,7 +30,7 @@ def kb(tmp_path):
         ("wickham", 1, "title"), ("elizabeth", 2, "redirect"), ("darcy", 3, "redirect"),
         ("kutuzov", 192, "redirect"), ("mikhail kutuzov", 192, "title"), ("maria", 7, "redirect"),
         ("wittgenstein", 9391, "redirect"), ("rostov", 9, "redirect"), ("ginebra", 71, "title"),
-        ("teodora", 204843, "title")])
+        ("teodora", 204843, "title"), ("delfin", 5, "redirect")])
     db.executemany("INSERT INTO alias VALUES ('santa lucia', ?, ?, 'Santa Lucía')", [(760, "title"), (183240, "redirect")])
     db.execute("INSERT INTO alias VALUES ('moron', 8, 'title', 'Mörön')")
     db.commit(); db.close()
@@ -57,6 +57,7 @@ def test_resolve_keeps_real_people_and_places_and_drops_the_cast(tmp_path):
     assert link.resolve(k, "Napoleon Bonaparte", "PERSON", "en")[0]["qid"] == 517          # a longer form of his name
     assert link.resolve(k, "Maria", "PERSON", "en")[3] == "name-disagrees"                 # a redirect to a skier
     assert link.resolve(k, "moscow", "GPE", "en")[3] == "not-a-name"
+    assert link.resolve(k, "LIII", "LOC", "es")[3] == "not-a-name"
     assert link.resolve(k, "Moscow", "GPE", "en", book_title="Moscow")[3] == "the-book-itself"
     assert link.resolve(k, "Moscow", "GPE", "en", book_title="Moscow Nights")[0]["qid"] == 649
 
@@ -92,4 +93,5 @@ def test_titled_names_saints_and_given_names_stay_unlinked(tmp_path):
     assert link.resolve(k, "Moscow", "GPE", "en", facts=wp)[0]["qid"] == 649      # adjectives and sentence breaks
     assert link.resolve(k, "Santa Lucía", "LOC", "es")[3] == "a-saint"
     assert link.resolve(k, "Teodora", "PER", "es")[3] == "a-given-name"
+    assert link.resolve(k, "Delfín", "LOC", "es")[0] is None                       # the Dauphin, not dolphins (taxa fit no label)
     assert link.resolve(k, "Napoleon", "PERSON", "en")[0]["qid"] == 517

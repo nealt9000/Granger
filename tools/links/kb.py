@@ -26,6 +26,7 @@ WORK = {"Q7725634", "Q571", "Q47461344", "Q8261", "Q25379", "Q5185279", "Q482994
         "Q2188189", "Q7366", "Q1004", "Q16970", "Q41298", "Q1344", "Q49084", "Q35760"}
 EVENT = {"Q178561", "Q198", "Q645883", "Q1190554", "Q13418847", "Q180684", "Q1261499", "Q188055", "Q831663",
          "Q124734", "Q467011", "Q2001676"}
+TAXON = {"Q16521", "Q310890"}   # living things: a printed name ("el Delfín", "Cempoal") is never a genus
 ORG = {"Q43229", "Q4830453", "Q783794", "Q891723", "Q7278", "Q2659904", "Q327333", "Q31855", "Q3918", "Q9174",
        "Q13414953", "Q1530022", "Q879146", "Q163740", "Q48204", "Q20746389"}
 
@@ -41,7 +42,7 @@ def norm(s: str) -> str:
 
 def cls_of(p31) -> str:
     p = set(p31 or ())
-    for name, ids in (("disambig", DISAMBIG), ("fictional", FICTIONAL), ("name", NAME), ("human", HUMAN),
+    for name, ids in (("disambig", DISAMBIG), ("taxon", TAXON), ("fictional", FICTIONAL), ("name", NAME), ("human", HUMAN),
                       ("event", EVENT), ("work", WORK), ("org", ORG)):
         if p & ids:
             return name

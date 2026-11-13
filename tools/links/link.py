@@ -44,9 +44,14 @@ NOT_TITLES = {"old", "young", "little", "padre"}
 GIVEN_NAME_BEARERS, GIVEN_NAME_SL = 30, 120
 
 
+ROMAN = re.compile(r"^[IVXLCDM]+\.?$", re.I)
+
+
 def proper(t):
-    """A name as printed: starts with a capital, has three letters or more, no dash run ("the ——shire")."""
-    return bool(t) and t[0].isupper() and sum(c.isalpha() for c in t) >= 3 and "——" not in t and "--" not in t
+    """A name as printed: starts with a capital, has three letters or more, no dash run ("the ——shire"), and isn't a
+    Roman numeral (a chapter number: "LIII" isn't the number 53)."""
+    return (bool(t) and t[0].isupper() and sum(c.isalpha() for c in t) >= 3 and "——" not in t and "--" not in t
+            and not ROMAN.match(t))
 
 
 def agrees(n, c):

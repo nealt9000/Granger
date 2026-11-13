@@ -125,6 +125,13 @@
   - **`build.py OUT EPUB…`** finds each book in the Classics manifests and caches NER per EPUB sha, so a rules-only rebuild takes seconds.
   - **`check.py`** verifies the contract and rows, and re-scores `graded-2026-11-12.json` (Neal's 200, with four desk corrections). It fails under 95%, per book with 20+ still linked or overall.
   - `glink` is in `tools/sidecar/kinds.json`.
+  - **Full build (2026-11-13):** all 622 Classics, 31 MB, 82,055 Light + 23,050 More-only links. `check.py` passes at 99.5% of 195 graded links.
+  - **Shelf scan fixes (builder v2):**
+    - Roman numerals aren't names. Spanish chapter heads gave "LIII" → 53.
+    - Taxa get their own class (P31 Q16521 / Q310890) and fit no NER label. "el Delfín" (the Dauphin) → Delphinidae, "Cempoal" → a marigold, "Aguacate", "Cuervo", "Reno" and about 40 more are gone.
+    - A wider fix (the name-agrees rule for the catch-all class) was tried and dropped. It also cut right links: Españoles → Spaniards, Leteo → Lethe, Jove → Jupiter.
+    - Net change from v1: −303 Light links, nearly all numerals and taxa. Right links lost: Cid → Rodrigo Díaz de Vivar ×3, Right Whale ×2.
+    - Left as borderline, each the only candidate and its article covering the history: Achaia / Arcadia → the modern regional units, Ammon → Amman.
 
 ### LL1 · Task 8: Links in the ebook reader (Kotlin + Compose, tested)
 - `BookLinks` reads `.glink` for the open book's chapter and places mentions as Readium decorations (a link style beside the highlight style in `BookAnnotations`); unplaceable mentions are dropped silently.

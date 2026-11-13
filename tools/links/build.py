@@ -30,7 +30,7 @@ import meta  # noqa: E402
 from link import KB, candidate_rows  # noqa: E402
 from rules import select  # noqa: E402
 
-KIND, SCHEMA, BUILDER, BUILDER_VERSION = "glink", 1, "tools/links/build.py", 1
+KIND, SCHEMA, BUILDER, BUILDER_VERSION = "glink", 1, "tools/links/build.py", 2
 LIGHT_MIN_SL = 40   # the spike's floor (plan Task 6)
 
 
