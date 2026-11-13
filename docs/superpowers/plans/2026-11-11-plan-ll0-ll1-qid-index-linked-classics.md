@@ -219,6 +219,21 @@
     - The P&P contents list glues illustration captions to chapter titles (an existing EPUB issue).
     - On the Classics set row, "437 of 437 to get" counts older versions as missing.
     - Light is spare in P&P (Derbyshire is the only link on its page), while the Don Quijote prologue has 9. Density is a checkpoint question.
+- **Pixel 6 pass (2026-11-13), after the merge.** Neal OK'd uninstalling Play's 1309 (unchanged since 11-12). Debug 1345 from `234ff015` against the live catalog. A fresh Starter (WikiMed, Top maxi, Classics, Owl) brought 437 `.glink` files and the WikiMed and Top `.gqid` files with their packs.
+  - **Seen working:**
+    - P&P Chapter III: Hertfordshire and London are drawn. London card (picture, two sentences) → article → footer card under the article's end ("Mentioned in 234 of your books") → sheet (The Way We Live Now 73, Of Human Bondage 59, Vanity Fair 50…). A passage opens Of Human Bondage on the flashed mention.
+    - Jane Austen: 7 books, and all 6 novels under *By this author*. Emma opens from that list with its links.
+    - Light → More redraws every open book.
+  - **Timings (Pixel 6), drawing a whole book's links (read + place):**
+    - P&P Light: 107 links, 147 + 72 ms.
+    - Of Human Bondage Light: 460 links, 122 + 150 ms; More: 484 links, 216 + 123 ms.
+    - Emma Light: 54 links, 94 + 41 ms; More: 55 links, 187 + 60 ms.
+    - The first `MentionIndex` sync: 437 books in 10.5 s (2.85 s on the emulator). It runs once, off the main thread, but a footer asked for during it waits.
+  - **New findings:**
+    - Chapter headings count as mentions, so passages read "FATHER BARHAM VISITS LONDON…" and "LONDON…". Skip headings in the builder or the sheet.
+    - With the reader bars hidden, an empty band remains under the footer card (the bottom bar's height).
+    - Not linked to LL: the books filter in search ranks *The Call of the Wild* above *Pride and Prejudice* for "Pride" and drops the Titles section. Home's "Random from Best of Wikipedia" shows WikiMed articles.
+  - **Not done on the Pixel:** Spanish (needs Clásicos and Spanish Top, about 3 GB more), Napoleon, an unresolved link.
 
 ## Order and size
 LL0 Tasks 1–2 first: they're the debt payback and touch shared code, so agree with SQ before merging. Task 3 can run on the X10 alongside them. The LL1 spike (Task 6) can start as soon as Task 3's data exists, before the phone side lands. About six to eight sessions in total.
