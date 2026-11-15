@@ -234,6 +234,11 @@
     - With the reader bars hidden, an empty band remains under the footer card (the bottom bar's height).
     - Not linked to LL: the books filter in search ranks *The Call of the Wild* above *Pride and Prejudice* for "Pride" and drops the Titles section. Home's "Random from Best of Wikipedia" shows WikiMed articles.
   - **Not done on the Pixel:** Spanish (needs Clásicos and Spanish Top, about 3 GB more), Napoleon, an unresolved link.
+  - **Neal (2026-11-14):** density is fine ("more about catching relevant keywords"); the setting's wording stays for now. He found *Israel* in Treasure Island linked to the country: it's Israel Hands.
+  - **Builder fixes (tools/links, glinks rebuilt into `glink-all-v3`, not yet published):**
+    - *A character's recurring full name claims the bare first name.* The tagger read the bare "Israel" as a place 8 times and a person 5, so the book's-own-people rule (person share >= 0.5) let it link; "Israel Hands" (7 times) wasn't counted. Full person names now count for their first word when they recur at least `FULL_NAME_MIN` = 3 times (counting every one made a single "Virginia Woolf" outvote Virginia: 54 good Light links lost). Effect: 8 Light and 12 More links dropped across 622 books, nearly all wrong (Israel, Numeriano, Meges, "La duquesa"); one real loss, the state of Wei in the Analects, at More.
+    - *All-capitals blocks are headings.* A block with no lowercase letter (a chapter title set as a paragraph, a running head, a publisher's list) gives no links, so "FATHER BARHAM VISITS LONDON" leaves the London sheet and the chapter's next mention takes its place. 320 all-caps names in mixed-case text stay (KEPLER, COPERNICUS in emphasis).
+    - Totals: Light 82,055 -> 81,866, More 23,050 -> 22,869; 31 MB as before. Publishing them needs Neal (release, catalog sidecars, check-links, sign).
 
 ## Order and size
 LL0 Tasks 1–2 first: they're the debt payback and touch shared code, so agree with SQ before merging. Task 3 can run on the X10 alongside them. The LL1 spike (Task 6) can start as soon as Task 3's data exists, before the phone side lands. About six to eight sessions in total.

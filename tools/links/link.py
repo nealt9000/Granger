@@ -42,6 +42,8 @@ NOT_TITLES = {"old", "young", "little", "padre"}
 # A mononym person ("Teodora", "Jerome", "Titus") whose name dozens of other people's articles also start with is a
 # given name the book's own people carry, unless the one it links to is very well known.
 GIVEN_NAME_BEARERS, GIVEN_NAME_SL = 30, 120
+# How often a character's full name must recur before it speaks for the bare first name (BookFacts).
+FULL_NAME_MIN = 3
 
 
 ROMAN = re.compile(r"^[IVXLCDM]+\.?$", re.I)
@@ -125,9 +127,19 @@ class BookFacts:
         for t in texts:
             self.lower.update(w for w in re.findall(r"\b\w+\b", t) if w.islower())
             self.titled.update(norm(POSSESSIVE.sub("", m.group(1))) for m in after.finditer(t))
-        tags = collections.defaultdict(collections.Counter)
+        tags, full = collections.defaultdict(collections.Counter), collections.Counter()
         for s in spans:
-            tags[norm(POSSESSIVE.sub("", s["text"]))][s["label"] in ("PERSON", "PER")] += 1
+            n = norm(POSSESSIVE.sub("", s["text"]))
+            person = s["label"] in ("PERSON", "PER")
+            tags[n][person] += 1
+            if person and " " in n:
+                full[n.split()[0]] += 1
+        # A character's full name speaks for the bare first name too: "Israel Hands" (7 times in Treasure Island)
+        # makes "Israel" him, not the country, even where the tagger reads the bare name as a place. Only a name
+        # the book repeats counts, so one "Virginia Woolf" doesn't outvote Virginia.
+        for n, k in full.items():
+            if k >= FULL_NAME_MIN:
+                tags[n][True] += k
         self.person_share = {n: c[True] / sum(c.values()) for n, c in tags.items()}
         self.year, self.title = year, title
 
@@ -199,7 +211,11 @@ def candidate_rows(kb, epub, spans, lang, year=None):
     for s in spans:
         ch = text[s["href"]]
         best, alts, how, why = resolve(kb, s["text"], s["label"], lang, book_title, facts)
-        if s["heading"]:
+        b = ch.rfind("\n", 0, s["start"]) + 1
+        e = ch.find("\n", s["start"]); e = len(ch) if e < 0 else e
+        # A block printed all in capitals is a heading the EPUB marks as a paragraph ("FATHER BARHAM VISITS
+        # LONDON"), a running head or a publisher's list at the back: not a passage to send anyone to.
+        if s["heading"] or not any(c.islower() for c in ch[b:e]):
             best, why = None, "heading"
         r = dict(s, word=len(ch[:s["start"]].split()), quote=ch[s["start"]:s["start"] + s["len"]],
                  before=ch[max(0, s["start"] - 40):s["start"]])
@@ -207,8 +223,6 @@ def candidate_rows(kb, epub, spans, lang, year=None):
             reasons[why] += 1
             rows.append(dict(r, qid=None, reason=why))
             continue
-        b = ch.rfind("\n", 0, s["start"]) + 1
-        e = ch.find("\n", s["start"]); e = len(ch) if e < 0 else e
         rows.append(dict(r, qid=best["qid"], path=best["path"], label_wd=best["label"], sl=best["sl"],
                          cls=best["cls"], kind=best["kind"], how=how,
                          alts=[[c["qid"], c["label"], c["sl"]] for c in alts[:3]], para=ch[b:e]))

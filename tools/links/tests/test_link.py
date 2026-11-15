@@ -95,3 +95,15 @@ def test_titled_names_saints_and_given_names_stay_unlinked(tmp_path):
     assert link.resolve(k, "Teodora", "PER", "es")[3] == "a-given-name"
     assert link.resolve(k, "Delfín", "LOC", "es")[0] is None                       # the Dauphin, not dolphins (taxa fit no label)
     assert link.resolve(k, "Napoleon", "PERSON", "en")[0]["qid"] == 517
+
+
+def test_a_characters_recurring_full_name_claims_the_bare_first_name(tmp_path):
+    k = kb(tmp_path)
+    # Treasure Island: the bare "Moscow" read as a place 8 times, as a person 5, and "Moscow Hands" 7 times.
+    spans = ([{"text": "Moscow", "label": "GPE"}] * 8 + [{"text": "Moscow", "label": "PERSON"}] * 5
+             + [{"text": "Moscow Hands", "label": "PERSON"}] * 7)
+    ti = link.BookFacts([], spans, lang="en")
+    assert link.resolve(k, "Moscow", "GPE", "en", facts=ti)[3] == "a-person-here"
+    # One passing full name doesn't outvote the place.
+    once = link.BookFacts([], [{"text": "Moscow", "label": "GPE"}, {"text": "Moscow Hands", "label": "PERSON"}], lang="en")
+    assert link.resolve(k, "Moscow", "GPE", "en", facts=once)[0]["qid"] == 649
