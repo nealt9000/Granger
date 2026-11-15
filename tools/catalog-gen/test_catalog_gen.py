@@ -1634,3 +1634,18 @@ def test_hold_back_moves_anyway_when_the_previous_file_is_gone_too():
     packs = [_pin("xkcd", "xkcd", "2026-11", "new")]
     lines = cg.hold_back(packs, previous, {}, _status(dead=["xkcd"]), sleep=lambda s: None)
     assert packs[0]["sha256"] == "new" and "moved to 2026-11 anyway" in lines[0]["text"] and not lines[0]["held"]
+
+
+def test_sign_reads_the_default_key_file_and_names_it_when_missing(tmp_path, link_server, capsys, monkeypatch):
+    base, _ = link_server
+    path = tmp_path / "catalog.json"
+    path.write_text(json.dumps({"packs": [{"id": "a", "urls": [f"{base}/ok"]}]}))
+    cg.main(["check-links", str(path)])
+    monkeypatch.setenv("HOME", str(tmp_path))
+    with pytest.raises(SystemExit, match="no signing key at .*catalog-signing.key"):
+        cg.main(["sign", str(path)])
+    key = tmp_path / ".config" / "granger" / "catalog-signing.key"
+    key.parent.mkdir(parents=True)
+    key.write_text(RFC_SEED.hex() + "\n")
+    cg.main(["sign", str(path)])
+    assert cg.verify_file(RFC_PUBLIC, path)

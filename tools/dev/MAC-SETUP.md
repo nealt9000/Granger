@@ -132,6 +132,26 @@ Each tool runs from its own virtualenv under `~/.venvs` (Homebrew Python 3.14, e
 Two gotchas: `catalog_gen.py sign` refuses a file that hasn't passed `check-links` since it changed (about 1,850
 links, a few minutes), and `/usr/bin/python3` has none of these packages.
 
+## Signing the catalog
+
+The app only accepts `catalog/catalog.json` when `catalog/catalog.json.sig` verifies against the public key it is
+built with (`catalog/public-key.txt`, read into `BuildConfig.CATALOG_PUBLIC_KEY`).
+
+- **The private key** lives at `~/.config/granger/catalog-signing.key` on Neal's Mac (a hex Ed25519 seed, mode 600).
+  It is never committed and never leaves the Mac. Keep a copy in the password manager; losing it means a new key
+  pair, a new `public-key.txt`, and an app update before any new catalog is accepted.
+- **To sign** (signing is Neal's step), after `check-links` has passed on the file as it now stands:
+
+  ```bash
+  ~/.venvs/granger-catalog/bin/python tools/catalog-gen/catalog_gen.py check-links catalog/catalog.json
+  ~/.venvs/granger-catalog/bin/python tools/catalog-gen/catalog_gen.py sign catalog/catalog.json
+  ```
+
+  `sign` reads the key from that path by default; `--key <file>` or `--key-hex <seed>` overrides it.
+- **To check** a signature: `catalog_gen.py verify --public-key catalog/public-key.txt catalog/catalog.json`.
+- **A new key pair** (only if the key is lost): `catalog_gen.py keygen --out ~/.config/granger/catalog-signing.key`
+  prints the public key for `catalog/public-key.txt`.
+
 ## A new worktree
 
 `tools/dev/new-worktree.sh <name> <branch> [base]` makes `.claude/worktrees/<name>` on a new branch, copies

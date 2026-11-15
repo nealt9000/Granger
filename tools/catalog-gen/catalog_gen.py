@@ -1226,6 +1226,10 @@ def keygen(out):
     return base64.b64encode(public_key(seed)).decode()
 
 
+# Where keygen puts the catalog signing key on the Mac (tools/dev/MAC-SETUP.md, "Signing the catalog").
+DEFAULT_SIGNING_KEY = "~/.config/granger/catalog-signing.key"
+
+
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -1234,8 +1238,10 @@ def main(argv):
     p.add_argument("--previous", help="the catalog now published: newer snapshots that aren't safe yet keep its pins")
     p = sub.add_parser("check-links"); p.add_argument("file")
     p = sub.add_parser("sign"); p.add_argument("file")
-    group = p.add_mutually_exclusive_group(required=True)
-    group.add_argument("--key"); group.add_argument("--key-hex")
+    group = p.add_mutually_exclusive_group()
+    group.add_argument("--key", default=DEFAULT_SIGNING_KEY,
+                       help=f"the private key file (default {DEFAULT_SIGNING_KEY}, made by keygen; see tools/dev/MAC-SETUP.md)")
+    group.add_argument("--key-hex")
     p = sub.add_parser("verify"); p.add_argument("--public-key", required=True); p.add_argument("file")
     p = sub.add_parser("vectors"); p.add_argument("--releases", required=True); p.add_argument("--release-url")
     p.add_argument("file")
@@ -1274,7 +1280,10 @@ def main(argv):
     elif args.command == "sign":
         if not links_checked(args.file):
             raise SystemExit(f"{args.file}: run check-links on this file first (it changed since, or never passed)")
-        hex_seed = args.key_hex or pathlib.Path(args.key).expanduser().read_text().strip()
+        key_file = pathlib.Path(args.key).expanduser()
+        if not args.key_hex and not key_file.exists():
+            raise SystemExit(f"no signing key at {key_file}: pass --key (see tools/dev/MAC-SETUP.md, Signing the catalog)")
+        hex_seed = args.key_hex or key_file.read_text().strip()
         sign_file(bytes.fromhex(hex_seed), args.file)
         print(f"wrote {args.file}.sig")
     elif args.command == "vectors":
