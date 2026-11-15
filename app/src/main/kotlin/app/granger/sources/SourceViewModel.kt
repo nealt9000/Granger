@@ -169,6 +169,8 @@ data class PresetRow(
     val totalBytes: Long = 0,
     val onPhone: Int = 0,
     val downloading: Int = 0,
+    /** On the phone in an older version than the catalog's: not "to get". */
+    val updates: Int = 0,
 )
 
 /** A preset's lines (Plan U3b Decision 13). */
@@ -187,14 +189,15 @@ object PresetText {
         return KiwixList.dotted(listOf(joined, UiText.Raw(formatBytes(row.totalBytes))))
     }
 
-    /** "All on this phone"; else "3 downloading", "9 of 12 to get", or both. */
+    /** "All on this phone"; else "3 downloading", "9 of 12 to get", "437 to update", or several. */
     fun status(row: PresetRow): UiText {
         if (row.onPhone >= row.itemCount) return UiText.Res(R.string.sources_preset_all_here)
-        val toGet = row.itemCount - row.onPhone - row.downloading
+        val toGet = row.itemCount - row.onPhone - row.downloading - row.updates
         return KiwixList.dotted(
             listOfNotNull(
                 if (row.downloading > 0) UiText.Res(R.string.sources_preset_downloading, row.downloading) else null,
                 if (toGet > 0) UiText.Res(R.string.sources_preset_to_get, toGet, row.itemCount) else null,
+                if (row.updates > 0) UiText.Res(R.string.sources_preset_to_update, row.updates) else null,
             ),
         )
     }
@@ -876,6 +879,7 @@ class SourceViewModel(
                 others = items.count { it !is PackEntry && it !is BookEntry }, totalBytes = items.sumOf { it.downloadBytes },
                 onPhone = statuses.count { it == ItemStatus.Installed },
                 downloading = statuses.count { it is ItemStatus.Queued || it is ItemStatus.Downloading },
+                updates = statuses.count { it == ItemStatus.UpdateAvailable },
             )
         }
         return SourceUi(

@@ -132,6 +132,8 @@
     <string name="sources_preset_downloading">%1$d downloading</string>
     <!-- %1$d of the preset's %2$d items are still to get. -->
     <string name="sources_preset_to_get">%1$d of %2$d to get</string>
+    <!-- %1$d of the preset's items are on the phone in an older version than the catalog's. -->
+    <string name="sources_preset_to_update">%1$d to update</string>
     <!-- Two parts of a line with a dot between, such as "No pictures · March 2026" or "220 GB · English". -->
     <string name="sources_dotted">%1$s · %2$s</string>
     <!-- %1$s is the full licence text. -->

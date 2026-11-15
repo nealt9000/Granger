@@ -524,6 +524,9 @@ class SourceViewModelTest {
         assertThat(PresetText.summary(efficient.copy(others = 2)).en()).startsWith("12 packs, 347 books and 2 models · ")
         assertThat(PresetText.status(efficient.copy(downloading = 359)).en()).isEqualTo("359 downloading")
         assertThat(PresetText.status(efficient.copy(onPhone = 359)).en()).isEqualTo("All on this phone")
+        // Older versions on the phone are updates, not books still to get.
+        assertThat(PresetText.status(efficient.copy(updates = 359)).en()).isEqualTo("359 to update")
+        assertThat(PresetText.status(efficient.copy(onPhone = 300, updates = 50)).en()).isEqualTo("9 of 359 to get · 50 to update")
     }
 
     @Test fun classicsPresetComesFirst() = runTest(main.dispatcher) {

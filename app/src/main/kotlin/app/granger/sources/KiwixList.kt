@@ -123,7 +123,7 @@ object KiwixList {
             val setId = g.default.setId.takeIf { g.flavours.all { it.isSlice } } ?: return@mapNotNull g
             if (!placed.add(setId)) return@mapNotNull null
             val flavours = bySet.getValue(setId).flatMap { it.flavours }.sortedWith(compareBy({ it.setRank }, ::flavourRank))
-            PackGroup("set:$setId", flavours, defaultOf(flavours, freeBytes), setId)
+            PackGroup("set:$setId", flavours, defaultOf(flavours, freeBytes, cap = SET_DEFAULT_MAX_BYTES), setId)
         }
     }
 
@@ -233,11 +233,22 @@ object KiwixList {
         return (n + step / 2) / step * step
     }
 
-    private fun defaultOf(flavours: List<PackEntry>, freeBytes: Long?): PackEntry {
+    /**
+     * The largest featured flavour that fits in [freeBytes] and [cap], else the smallest featured; without featured ones,
+     * the same over every flavour.
+     */
+    private fun defaultOf(flavours: List<PackEntry>, freeBytes: Long?, cap: Long = Long.MAX_VALUE): PackEntry {
         val pool = flavours.filter { it.featured }.ifEmpty { flavours }
-        val fits = pool.filter { freeBytes == null || it.sizeBytes <= freeBytes }
+        val fits = pool.filter { (freeBytes == null || it.sizeBytes <= freeBytes) && it.sizeBytes <= cap }
         return fits.maxByOrNull { it.sizeBytes } ?: pool.minBy { it.sizeBytes }
     }
+
+    /**
+     * The most a set's row offers without being asked: Spanish Wikipedia features its whole edition (36.5 GB), which
+     * a phone with room for it would otherwise preselect; Best 50,000 with pictures (4.1 GB) is the quiet choice.
+     * English's (7 GB) is under it too.
+     */
+    const val SET_DEFAULT_MAX_BYTES = 10_000_000_000L
 
     /** The flavour with pictures names the pack, less "(no pictures)" or "(with pictures)" if a title carries it. */
     fun groupTitle(group: PackGroup): String {

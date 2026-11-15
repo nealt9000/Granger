@@ -154,4 +154,18 @@ class SourceLanguagesTest {
         assertThat(row.description.en()).isEqualTo("The free encyclopedia in Spanish.")
         assertThat(row.slices.map { it.label }).containsExactly("Best 50,000 articles", "Everything").inOrder()
     }
+
+    @Test fun aSetDoesntPreselectAWholeEditionTensOfGigabytesBig() {
+        fun slice(id: String, zim: String, rank: Int, flavour: String, gb: Double) = kiwix(id, "es", zimName = zim).copy(
+            setId = "wikipedia_es", setRank = rank, flavour = flavour, featured = true, sizeBytes = (gb * 1e9).toLong(),
+        )
+        val packs = listOf(
+            slice("es_top_nopic", "wikipedia_es_top", 1, "nopic", 1.2), slice("es_top_maxi", "wikipedia_es_top", 1, "maxi", 4.1),
+            slice("es_all_nopic", "wikipedia_es_all", 2, "nopic", 13.3), slice("es_all_maxi", "wikipedia_es_all", 2, "maxi", 36.5),
+        )
+        // Room for everything: still Best 50,000 with pictures.
+        assertThat(KiwixList.group(packs, freeBytes = 100_000_000_000, sets = true).single().default.id).isEqualTo("es_top_maxi")
+        // Little room: the largest that fits, as before.
+        assertThat(KiwixList.group(packs, freeBytes = 2_000_000_000, sets = true).single().default.id).isEqualTo("es_top_nopic")
+    }
 }
