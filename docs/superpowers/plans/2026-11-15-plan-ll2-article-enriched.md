@@ -42,6 +42,28 @@
 - **Go:** under 1.5 s warm and at least 4 of 6 related on 8 of the 10. Otherwise fall back to `.grel` (Decision 2).
 - Written up in this plan's Task 1 notes. Neal sees the 10 lists before the UI is built.
 
+#### Task 1 notes (2026-11-15): GO on speed and quality, pending Neal's read of the lists
+- **Method:** prototyped on the Mac (`tools/vectors/related_spike.py`) with the Pixel's own files, then run on the Pixel 6 (debug `RelatedSpikeActivity`, which logs `Related:` lines). The Pixel had Top en and es, Medicine, the two cooking packs and 622 books. The two runs gave the same lists.
+- **Finding the rows:** keys aren't sorted (version 2 files group rows by list), but no map is needed. `VectorFile.rowsOf(key)` compares bytes in one pass over the keys: **27 ms** for Top en (567k rows). Decoding every key as a string took 550 ms, and a full key → rows map 2.1–3.8 s, so neither is used. `copyRow` reads a row back.
+- **The query and search:** the article's rows averaged (8–12 chunks, the lead), then two searches run at once: the page language's Wikipedia files (k 128, probes 1024) and its books (k 64, scanned whole, as books are version 1).
+- **What changed from the plan's first shape:**
+  - k 48 over everything left room for only 2–3 results: the page's own chunks, its copy in another pack (Photosynthesis is in Top and Medicine) and its other-language article took most of the hits. Hence a larger k.
+  - Articles and books are searched separately, because on Don Quixote the book took 234 of 256 hits.
+  - **Results stay in the page's language:** the other-language article is the Read-in link (Task 3), not Related.
+  - Same title in two packs is shown once.
+  - Books need a score of at least **0.79**: science pages otherwise got Metamorphoses and the Bible at about 0.75.
+  - Shown: up to 8 articles and 4 books, mixed by score.
+- **Speed on the Pixel:** warm **0.70–0.96 s** for all 10 (bar 1.5 s). The first search after the files open took 1.8 s. Opening 627 files cold took 3–5 s; the app already opens them for search, and Related should reuse that.
+- **Quality (my count of related in the top 6):** London 4, Napoleon 5, Photosynthesis 6, Jane Austen 5, Don Quixote 6, Zaragoza 5, Insulin 6, Byzantine Empire 6, Jazz 6, Volcano 6. All 10 meet the bar of 4. The weak spots:
+  - London, Ontario and Æthelred under London.
+  - Zamora and Zagreb under Zaragoza: near in the alphabet and in the vectors, not in meaning.
+  - Caviar under Don Quixote, at #8.
+  - Books that share a mood rather than a subject (Babbitt for Jazz, Main Street for Jane Austen).
+- **Still open for Task 4:**
+  - Drop redirects and other packs' copies by QID rather than by title.
+  - Land a book at its best passage, not at the colophon (Spanish Don Quijote's best hit is `colophon.xhtml`).
+  - Show titles, not paths.
+
 ### Task 2: At a glance (phone, tested)
 - **`ArticleGlance`**, built from `TimeIndexes`:
   - the page's mark;

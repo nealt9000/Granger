@@ -74,6 +74,24 @@ class VectorFile private constructor(val file: File, private val channel: FileCh
         buf.duplicate().apply { position(HEADER + from * header.dims) }.get(dst, 0, rows * header.dims)
     }
 
+    /** The rows whose key is [key] (an article path or chapter href), by one pass over the keys comparing bytes. */
+    fun rowsOf(key: String): IntArray {
+        val want = key.toByteArray(Charsets.UTF_8)
+        val out = ArrayList<Int>()
+        val base = blobAt.toInt()
+        for (r in 0 until header.count) {
+            val at = base + buf.getInt((keysAt + 4L * r).toInt())
+            if ((buf.getShort(at + 4).toInt() and 0xFFFF) != want.size) continue
+            var i = 0
+            while (i < want.size && buf.get(at + 6 + i) == want[i]) i++
+            if (i == want.size) out += r
+        }
+        return out.toIntArray()
+    }
+
+    /** Copies row [row]'s int8 vector into [dst] (dims bytes); times [scale] it approximates the stored vector. */
+    fun copyRow(row: Int, dst: ByteArray) = copyRows(row, 1, dst)
+
     override fun close() = channel.close()
 
     companion object {

@@ -22,6 +22,10 @@
             android:exported="true"
             android:label="Research benchmark" />
         <activity
+            android:name="app.granger.research.RelatedSpikeActivity"
+            android:exported="true"
+            android:label="Related spike" />
+        <activity
             android:name="app.granger.voice.VoiceSpikeActivity"
             android:exported="true"
             android:label="Voice spike" />
