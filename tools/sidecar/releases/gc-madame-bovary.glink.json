@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-madame-bovary_2026-11-09.glink",
  "sizeBytes": 57344,
- "sha256": "6b5fef7f82974a90d05389437b004fa3d518f456ffda60137d692620ed75e5ae",
+ "sha256": "511926588cfc614755036273db183255faabf20fc4db51e247ef5ab3fbe6f3bf",
  "schemaVersion": 1,
  "sourceSha256": "27c8612b26bce68ba16638052f9742bade377e0282cc5934c8034fd5819d09f7",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-madame-bovary_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-madame-bovary_2026-11-09.glink"
 }

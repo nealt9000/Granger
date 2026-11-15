@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-leaves-of-grass_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "bbe86564752243dfd8d934e11ac2918c462e1ba2e94364d8ba7359ba8e3349e3",
+ "sha256": "9b5c3feb2a98f8b680854a2dfcc92ea4a848085c470b4c69760af1f7d05237bf",
  "schemaVersion": 1,
  "sourceSha256": "96a323481c2dafb96da9354bddb4c88a410aec12917756452b4f1b9cc2a02afe",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-leaves-of-grass_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-leaves-of-grass_2026-11-09.glink"
 }

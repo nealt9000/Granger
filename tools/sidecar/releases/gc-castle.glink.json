@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-castle_2026-11-09.glink",
  "sizeBytes": 36864,
- "sha256": "ae01676273ec2dfa0fa86d11f1cba6d96d8be181c6095dc3bb62d4354627086e",
+ "sha256": "72ed75a8b3801c13c2dd0a5519c156fc96c1ace37c6be1604d11fd04a1c2d457",
  "schemaVersion": 1,
  "sourceSha256": "d22528bf567a2647f9a97882b1924fc9be119a65100c99f204ec0c82ce0eb94a",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-castle_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-castle_2026-11-09.glink"
 }

@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-figaro-articulos-selectos_2026-11-09.glink",
  "sizeBytes": 61440,
- "sha256": "3d5c86888a47f2e14f3491454959300e35cba464680cb540c8474a7ab0cebff8",
+ "sha256": "52a656752999d8954f67d2ff352b62a9ff34348c4ee9254abfa4c9305c816da4",
  "schemaVersion": 1,
  "sourceSha256": "62eaf17322d6647b617615d434657b5222313e470eae36907e837eb0712e10d1",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-figaro-articulos-selectos_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-figaro-articulos-selectos_2026-11-09.glink"
 }

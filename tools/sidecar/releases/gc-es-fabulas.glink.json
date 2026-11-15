@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-fabulas_2026-11-09.glink",
  "sizeBytes": 49152,
- "sha256": "536201f14d28ea4b18a84d7bb4e42671cfd1739e4d1e9a40bb687fe543c4cde6",
+ "sha256": "8b29b528c548acaa1be5b6470588646f29ba717f6343c94804a904ffdf881e51",
  "schemaVersion": 1,
  "sourceSha256": "0bc29c6fdd2962c6764d40ff68c58c8df210c3c9fa77efcd264a2e7b7ceb8940",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-fabulas_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-fabulas_2026-11-09.glink"
 }

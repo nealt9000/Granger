@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-time-machine_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "bb0f6122cbd62fce43b7f582a8bd091a0365d742c4a2330078a2fbf50bad8c33",
+ "sha256": "df122423e3eb156d32f7bf2fc25236d4b2a710cb805db524b1caef4c6f70947a",
  "schemaVersion": 1,
  "sourceSha256": "1ceed11064d373603fd9fa53202ea200a057345c1ae0ee55a6d3edeb98d02972",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-time-machine_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-time-machine_2026-11-09.glink"
 }

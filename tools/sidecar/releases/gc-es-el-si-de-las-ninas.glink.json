@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-el-si-de-las-ninas_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "27a2b9f6ba6854571ad18aa67967947046bf3c38c41baf638699a61a6b52d3ec",
+ "sha256": "5174a8c0115899274bcd9dfb2ee8e20f4253013b4012829cf1f6856503af9c1d",
  "schemaVersion": 1,
  "sourceSha256": "61646048138fc6261175eb9e57261181d5ac7292e4efa11f267d9ce994ec0f7f",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-si-de-las-ninas_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-el-si-de-las-ninas_2026-11-09.glink"
 }

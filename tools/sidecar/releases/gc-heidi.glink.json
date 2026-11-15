@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-heidi_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "7641a1c0f49080c643d24eabd60be60489d34fe42741bbda48b5bccd8cbafdbb",
+ "sha256": "d0d020fc84f55952bb61e1f1ff7037c7c24238a557b736027ea0979406c64032",
  "schemaVersion": 1,
  "sourceSha256": "65ced59f5ad9dd0b2c80dca8ff5b8a9e4fb99e8602eef5f06285da9c8b91f1b2",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-heidi_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-heidi_2026-11-09.glink"
 }

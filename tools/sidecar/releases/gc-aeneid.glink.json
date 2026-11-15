@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-aeneid_2026-11-09.glink",
  "sizeBytes": 45056,
- "sha256": "ae5fa64a15fc63581a61377ac52c41bfd71cdd762ba24f0c905c067638b56d5d",
+ "sha256": "927689df7db86723d84e1448dd221d0047c3dc3caedec9aec62b40863b223d1d",
  "schemaVersion": 1,
  "sourceSha256": "714035218306b543953709b3a3f073445e2f6ce3d56f6b4df7417d5a3c705fb8",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-aeneid_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-aeneid_2026-11-09.glink"
 }

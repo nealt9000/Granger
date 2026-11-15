@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-el-caso-extrano-del-doctor-jekyll_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "07de4ede6a8b53b80ac7bf0f37f2542f2a9a1c75ac9e68805a7fddf978e19632",
+ "sha256": "d7660db82e7e8718e9b39e3ad1f98ec50854d50dedd821f3507d843806ef165b",
  "schemaVersion": 1,
  "sourceSha256": "0b21a4447b9737ed6758ae95a1d6888fa4ccc94051ffd68006847839f2405777",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-caso-extrano-del-doctor-jekyll_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-el-caso-extrano-del-doctor-jekyll_2026-11-09.glink"
 }

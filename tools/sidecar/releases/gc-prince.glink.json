@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-prince_2026-11-09.glink",
  "sizeBytes": 69632,
- "sha256": "c7f4c5dfdfca535c200201e637ce60e600dbcb06dff7a79e0e7362847453b6b9",
+ "sha256": "f335b10833641e515dab287313914ee326c51aa0291e224270d62f0b2e549750",
  "schemaVersion": 1,
  "sourceSha256": "631c3aa3efb7f62f9202b04103528e0e4a9e66ba59ded215552d6739fa653601",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-prince_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-prince_2026-11-09.glink"
 }

@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-canas-y-barro_2026-11-09.glink",
  "sizeBytes": 40960,
- "sha256": "9346cd3c23726235078e140869328a060a3d3e962ecd773ded5d554bc376027d",
+ "sha256": "a36c84d7f2fdcd322f490a4f35065fba6c0689c91211319bc87953d26846af0e",
  "schemaVersion": 1,
  "sourceSha256": "92f216db7871deb388b1c7d5887c69a5f48c2860f0c0775e2b0b20570b05c9b4",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-canas-y-barro_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-canas-y-barro_2026-11-09.glink"
 }

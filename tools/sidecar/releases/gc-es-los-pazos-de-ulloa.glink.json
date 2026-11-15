@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-los-pazos-de-ulloa_2026-11-09.glink",
  "sizeBytes": 36864,
- "sha256": "65b0bdbdb0ff29918f6cfd0ffde2632e84c171172f979bc337b64e0788751718",
+ "sha256": "0f1e86d002c604e84c1e73cb46c8ee38bf0de146d8ace1a90f6f83aabf2b06da",
  "schemaVersion": 1,
  "sourceSha256": "082fc89da2216dd04bfcfeda74aab175308a3f15f0477c5f179071875837f1bb",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-los-pazos-de-ulloa_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-los-pazos-de-ulloa_2026-11-09.glink"
 }

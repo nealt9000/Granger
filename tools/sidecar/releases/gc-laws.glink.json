@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-laws_2026-11-09.glink",
  "sizeBytes": 61440,
- "sha256": "4396ba10ba43dc452135bc19f0c842d43301dd3a2dc01a0e4c4dd74b2dc3660e",
+ "sha256": "5ac100122d7ad8fd13bf18196f17f1eafde0110480812d4c59eaea103bb8e083",
  "schemaVersion": 1,
  "sourceSha256": "aac00d76c6bc7bf0d2a245f03f02b69dfd35f7ca4ce3f02df8ab571b7389fbe6",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-laws_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-laws_2026-11-09.glink"
 }

@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-sense-and-sensibility_2026-11-09.glink",
  "sizeBytes": 45056,
- "sha256": "d2823a17860c222071bee99d37cb31385bece1b732fe79e9ff91ba795e2d70e8",
+ "sha256": "a2c5e6b882714a568ebafdc4a0b51b9eabb3529d178c7e3d78891fb904880df3",
  "schemaVersion": 1,
  "sourceSha256": "f4ae2dc312b96c3216748bbc14458ca1397c8e65793134d2534f938476d71189",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-sense-and-sensibility_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-sense-and-sensibility_2026-11-09.glink"
 }

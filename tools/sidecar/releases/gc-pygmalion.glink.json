@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-pygmalion_2026-11-09.glink",
  "sizeBytes": 36864,
- "sha256": "e0e3a0190bbce2b72a20471ff994ac09fefcb9f68d9648114babfc5556f2eff7",
+ "sha256": "875073a604d48dd0e2b992f812d446d987ec2ffd710fc63a532c5d2ab326bde8",
  "schemaVersion": 1,
  "sourceSha256": "459d68496da4c53c8ffdd17b35deba5e1132781e9145c267ac5f3103811f806d",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-pygmalion_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-pygmalion_2026-11-09.glink"
 }

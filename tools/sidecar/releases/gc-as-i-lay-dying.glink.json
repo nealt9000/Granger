@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-as-i-lay-dying_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "932e94fbac02d084879635d28afdb3eb3a5826505e4c19ca2f6710f462d2ca7a",
+ "sha256": "4dd4ca382b61e52c2f4e57b682b157c3499ec97203a7972410d76565632b1151",
  "schemaVersion": 1,
  "sourceSha256": "36ab69174f8eb3d6a3ee0ccca60733aa8f1a177c3b10bdcb5dc75453a72a659c",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-as-i-lay-dying_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-as-i-lay-dying_2026-11-09.glink"
 }

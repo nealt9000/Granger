@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-divine-comedy-hell_2026-11-09.glink",
  "sizeBytes": 45056,
- "sha256": "03288ac26fe1b4464f0d4921f0bafa65240409a72116689ad85e348931903d39",
+ "sha256": "c500c625e7106dfe4502fcb0dfdef2c9582b8312ef451e3034746031094da953",
  "schemaVersion": 1,
  "sourceSha256": "eb11b63b957d93f8f93c9db028d110fcf07cc68a99ddcea129176168427b90e2",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-divine-comedy-hell_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-divine-comedy-hell_2026-11-09.glink"
 }

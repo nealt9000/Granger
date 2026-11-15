@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-cymbeline_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "131ddae74b3269e0392706826f2f7f8eb2e99426b3ab2a73edb49905eb1b1f6b",
+ "sha256": "d7b076d5b30252d3b6ef3abd703996520ce1202ac676a55db4f07f96d1a9d6e0",
  "schemaVersion": 1,
  "sourceSha256": "a9508c51ad422e348fa0db932d50e5a4287cc7033e19f0c02774289983863c48",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-cymbeline_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-cymbeline_2026-11-09.glink"
 }

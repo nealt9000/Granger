@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-la-regenta_2026-11-09.glink",
  "sizeBytes": 81920,
- "sha256": "4df39039770ec61cc3a7f2e5ad43eeef268efe0d082b4d21c7435b9a1d2436e3",
+ "sha256": "934d31c3929b0b71b9ca1cfe05e04f25c7af138dd36b3ca5a013852fbe754c7d",
  "schemaVersion": 1,
  "sourceSha256": "a7c024910485c9e494fd5714f357892d6541c8c754faada5e5eb67a70676edc1",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-regenta_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-la-regenta_2026-11-09.glink"
 }

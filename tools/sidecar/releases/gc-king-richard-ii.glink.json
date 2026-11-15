@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-king-richard-ii_2026-11-09.glink",
  "sizeBytes": 36864,
- "sha256": "ab4592da000978b92931be54b4cc6b355c91136e3f5712030c9e99566648cbb4",
+ "sha256": "2bedb2aa30de3b1c196bdb6de22f2d52d53c288b2f1fb01d235c9310f5830dff",
  "schemaVersion": 1,
  "sourceSha256": "c268ad50d30c8ae0db14730f1bc8cb7eb03711cfa34dd519dd9e6485708a1932",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-king-richard-ii_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-king-richard-ii_2026-11-09.glink"
 }

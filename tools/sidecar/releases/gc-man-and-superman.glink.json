@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-man-and-superman_2026-11-09.glink",
  "sizeBytes": 45056,
- "sha256": "95118ad426640a4848b2c812f65a226b0d549705e22b5d393cfd8edd160c3257",
+ "sha256": "6b4176c96cf08c50c9540d44ead2a74cb0c692541f9a52f9246c52f8fac9b644",
  "schemaVersion": 1,
  "sourceSha256": "9e0c79c8ac7f6afb682dad93c141d7f4dc2321b13b71d3a5451fe6262fe1044a",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-man-and-superman_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-man-and-superman_2026-11-09.glink"
 }

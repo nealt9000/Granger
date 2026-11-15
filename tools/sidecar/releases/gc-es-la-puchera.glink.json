@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-la-puchera_2026-11-09.glink",
  "sizeBytes": 36864,
- "sha256": "cd1b262937f008465ae6ed41501988e6cd1e1f4b8ad0745751f0bf35533b46a5",
+ "sha256": "a9bf3736f9a25a1ef58b3cc72d35955715ecc78369e032c5a1371890272d5792",
  "schemaVersion": 1,
  "sourceSha256": "8146132b06c6160ceb82b5c441c48c9e2ebcd16ee1d0ad00c7316e144deddd5d",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-puchera_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-la-puchera_2026-11-09.glink"
 }

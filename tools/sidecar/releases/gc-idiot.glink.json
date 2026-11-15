@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-idiot_2026-11-09.glink",
  "sizeBytes": 45056,
- "sha256": "eafd681f7630357fb6ed97cdc1905b860cc8b4cd8ae7a82b287cce7cd1e2700f",
+ "sha256": "96a14fe3f51e9204ea37df5bfbffed35803a6dacd6ae49002b9cfa6741a1b335",
  "schemaVersion": 1,
  "sourceSha256": "8ff11643253968aba6c292ed0211e8625b1ea4c81f20ef1ff18779fe24fbbe46",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-idiot_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-idiot_2026-11-09.glink"
 }

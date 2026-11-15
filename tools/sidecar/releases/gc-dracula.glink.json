@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-dracula_2026-11-09.glink",
  "sizeBytes": 57344,
- "sha256": "7dc6913c50618f28682eb4fa1a97ff68891dfdefb0fd94d2520c2dc22ebe7a84",
+ "sha256": "381742372d8d69f6d0066e426695f1a0dcc41bd296b0b51a53740add15f6e41c",
  "schemaVersion": 1,
  "sourceSha256": "44445f0a266352b7e7386dcd577610412545db99580e2daa0bb5b85aac7116ad",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-dracula_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-dracula_2026-11-09.glink"
 }

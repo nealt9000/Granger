@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-house-of-the-seven-gables_2026-11-09.glink",
  "sizeBytes": 36864,
- "sha256": "f3d6fafdfaba1e09eeda8fba7ab4e6cca6894d7c7ce20afadfe15838254a489f",
+ "sha256": "9eb6192403f5f7e7fd6b175a924654f6529255a582b778e31e51767629d22367",
  "schemaVersion": 1,
  "sourceSha256": "a989f9c37768067f6ff4a2437df539bbc4d53e5444c2698ca13522d1c41f6662",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-house-of-the-seven-gables_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-house-of-the-seven-gables_2026-11-09.glink"
 }

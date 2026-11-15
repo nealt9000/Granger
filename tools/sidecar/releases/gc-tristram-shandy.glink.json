@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-tristram-shandy_2026-11-09.glink",
  "sizeBytes": 106496,
- "sha256": "e02564042d0e0f9b13943c9d9aa04008a6fa7f451371621fda605eb1565cb1c0",
+ "sha256": "ef4117a19a60ca10bd02952e778574c87f34a2d1d851f07dfa8a92b8a3a03329",
  "schemaVersion": 1,
  "sourceSha256": "02f11683635683450a2653db82e57f7610d531c14e77b099cb0c6aae5363a90f",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-tristram-shandy_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-tristram-shandy_2026-11-09.glink"
 }

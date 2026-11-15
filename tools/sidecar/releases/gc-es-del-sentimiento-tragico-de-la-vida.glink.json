@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-del-sentimiento-tragico-de-la-vida_2026-11-09.glink",
  "sizeBytes": 77824,
- "sha256": "35b8678fc1736e5509d6aca7f8e2dc2d6ea29aacad31e83d745265a0511127de",
+ "sha256": "9c1b6a6ea1975f65e72e7fe0ba0a0269b9d65e00620324aca43148e4db77a355",
  "schemaVersion": 1,
  "sourceSha256": "043bc32cee45201fda2bde30e4d9120eebd37bb14ed8001673ba5412bcc806eb",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-del-sentimiento-tragico-de-la-vida_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-del-sentimiento-tragico-de-la-vida_2026-11-09.glink"
 }

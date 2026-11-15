@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-world-english-bible_2026-11-09.glink",
  "sizeBytes": 237568,
- "sha256": "566f22a0f02711478273801f05a77d2ca24b45a2ab62679b987d6f2df0a49180",
+ "sha256": "378c199b93e572c27848d8089bb3728f864b65d5ab7eb74a38bb0a89f07a40cf",
  "schemaVersion": 1,
  "sourceSha256": "15dae6ee24db4c4775fe09a8c74ab4e94efd300df0138b8146efc626e258b6c8",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-world-english-bible_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-world-english-bible_2026-11-09.glink"
 }

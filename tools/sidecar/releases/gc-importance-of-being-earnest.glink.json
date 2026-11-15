@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-importance-of-being-earnest_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "82bb3b527afe63bcc8508b54405f535049d92730ba7d4ee83a9059b27dd7c563",
+ "sha256": "485240ba7c27da0ad4b62c74b80c29d61ac26440696130d128d27e6b2d4e9318",
  "schemaVersion": 1,
  "sourceSha256": "0194fedeecbc8c4de55024e86858b8428787c4139b8254632c10f727e133c3f0",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-importance-of-being-earnest_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-importance-of-being-earnest_2026-11-09.glink"
 }

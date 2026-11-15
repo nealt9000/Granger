@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-salome_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "61937f7426b3f4b4507c8e62d38fe60e918f6885e116245f254a2ac8602af34c",
+ "sha256": "2d870ab9b063595ddd987030b7527b2e5e1467064ba28eb502e84f23e024f507",
  "schemaVersion": 1,
  "sourceSha256": "97267e407f92aa7cdeff97505b8be5d3ff067a82817b69e89ab1bcf1cdad3f3a",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-salome_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-salome_2026-11-09.glink"
 }

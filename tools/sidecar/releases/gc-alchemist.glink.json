@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-alchemist_2026-11-09.glink",
  "sizeBytes": 36864,
- "sha256": "94c6e8426434ced8f6881d55a46c0264d6faea4ce87c28865c894f0c605d2b33",
+ "sha256": "e926de4e4ec6728770318967c7b0331837676c3151edcd27374c11619b5cdb78",
  "schemaVersion": 1,
  "sourceSha256": "afa2ca62036106090df7af387fc48e7c1ef1bde045d2a6b778fb8fb1f2f8e70d",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-alchemist_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-alchemist_2026-11-09.glink"
 }

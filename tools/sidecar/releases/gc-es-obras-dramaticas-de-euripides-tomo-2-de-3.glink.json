@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-obras-dramaticas-de-euripides-tomo-2-de-3_2026-11-09.glink",
  "sizeBytes": 77824,
- "sha256": "ab3d676580244b2e4ef556d5cd7d86de35167d5cacae35a186d1057c6bcf30c8",
+ "sha256": "1d6318d94035198cce12af0c08728aac315d6c4b8bd313b41b1e74c3af5cfda0",
  "schemaVersion": 1,
  "sourceSha256": "ff86511424e1027546d455faf685511b681f3ccc8efd8ddc1b917085e233c5b4",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-obras-dramaticas-de-euripides-tomo-2-de-3_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-obras-dramaticas-de-euripides-tomo-2-de-3_2026-11-09.glink"
 }

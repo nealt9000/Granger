@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-la-senorita-de-trevelez_2026-11-09.glink",
  "sizeBytes": 36864,
- "sha256": "459c494847ea3047c4d04d940794bce6f8a236dfcb30892be901b9cc23b7692d",
+ "sha256": "c35d87541d7862c91c092098e34eafcc48ceaffe3fe0d397ed6abf2edc674fc5",
  "schemaVersion": 1,
  "sourceSha256": "8d32a07cc0fa9d7f8f89fe0bd7b06ef406ccaa3003583a4654f9100a069a4247",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-senorita-de-trevelez_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-la-senorita-de-trevelez_2026-11-09.glink"
 }

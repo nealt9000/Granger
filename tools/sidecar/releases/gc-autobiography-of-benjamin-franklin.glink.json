@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-autobiography-of-benjamin-franklin_2026-11-09.glink",
  "sizeBytes": 69632,
- "sha256": "66120267cff69cbb1c1e6422a070e9a2cdeadbe3860670d0cb577dd7f9ea9a3e",
+ "sha256": "bba0f3457fa2bbaab185e2dd700135e74307b220d8d7c7024277145d3e42da5e",
  "schemaVersion": 1,
  "sourceSha256": "71d499fd1f3550aa7bc5938ef7bcefd236242857f7da60ae1950616aa056699c",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-autobiography-of-benjamin-franklin_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-autobiography-of-benjamin-franklin_2026-11-09.glink"
 }

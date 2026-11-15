@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-lady-with-the-dog-and-other-stories_2026-11-09.glink",
  "sizeBytes": 36864,
- "sha256": "a0715e8e0622f14294631daea20bde886b74c35f9b096a7b6fe42a3fd79b6736",
+ "sha256": "5497b0733901f7c4661bcbdefda7130342745f7716152b7f8ac70575735b2dc6",
  "schemaVersion": 1,
  "sourceSha256": "6f0cb8d0bcff4c4151f63f576b9820390970109ec6002d8a5b5bfa3684b6a9cf",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-lady-with-the-dog-and-other-stories_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-lady-with-the-dog-and-other-stories_2026-11-09.glink"
 }

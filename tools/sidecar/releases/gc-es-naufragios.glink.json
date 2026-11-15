@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-naufragios_2026-11-09.glink",
  "sizeBytes": 40960,
- "sha256": "eb93f2e6c4eb941012674105fbde5d906723893f92df33bdac578b99e956be70",
+ "sha256": "84e6b8e6f851bf29ccb1bc86ab57739e46ce3cecb2941c3b39fa7e2e0e3d0cbd",
  "schemaVersion": 1,
  "sourceSha256": "6fffc93af7a4398842eb2928479a6614a6d89141f38efa7dad7a925ac445b047",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-naufragios_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-naufragios_2026-11-09.glink"
 }

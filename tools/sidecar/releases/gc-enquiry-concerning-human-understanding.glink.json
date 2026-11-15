@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-enquiry-concerning-human-understanding_2026-11-09.glink",
  "sizeBytes": 36864,
- "sha256": "b2c9231b261c26a1000a0add8bc3f2f49594e96f12371ce6a4a4017ae3fae28f",
+ "sha256": "cf5d6de4d8910cacf8a03f64088b33235ad92e45e05cb82eb94de5b9f5437542",
  "schemaVersion": 1,
  "sourceSha256": "e6781c402695c3ef0dae641182f8f620ffc629038f1cc97cf870a8c54884de06",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-enquiry-concerning-human-understanding_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-enquiry-concerning-human-understanding_2026-11-09.glink"
 }

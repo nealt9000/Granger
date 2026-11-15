@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-white-fang_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "f2e44f3153735fb13bc1bc54b95e917601f2dc4584c0b70b80943285545df004",
+ "sha256": "33fd631d67d60913baeac97f8196424e35709e7d0deb78e2c702b22cc2829c3b",
  "schemaVersion": 1,
  "sourceSha256": "e45edd710986f8050e3d663174375ceeedcabcef5c976b683f2f9c9c736f9874",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-white-fang_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-white-fang_2026-11-09.glink"
 }

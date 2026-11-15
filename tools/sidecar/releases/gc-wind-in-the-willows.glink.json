@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-wind-in-the-willows_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "712f3f82cf5167052b887fbb70707d1737d4c1fa5200078776c08b15fdd3179d",
+ "sha256": "0738cad161a7164e5fd3c583e54a8313f1781c9b9dcb5876651ed3e0b2903627",
  "schemaVersion": 1,
  "sourceSha256": "a94528a2b5f7d3a925de74eb266e10fb9a3174ccb9e0b6069efdfb977d748cdc",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-wind-in-the-willows_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-wind-in-the-willows_2026-11-09.glink"
 }

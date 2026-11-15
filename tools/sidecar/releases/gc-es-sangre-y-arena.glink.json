@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-sangre-y-arena_2026-11-09.glink",
  "sizeBytes": 45056,
- "sha256": "4d141b01927201c9389f0aefaf4333748d77c1ef007d37777aedb110776886d6",
+ "sha256": "7405d4f68120ceab72149b4fe61f16c8901ad5d3fac84d754fd8871be51c8c42",
  "schemaVersion": 1,
  "sourceSha256": "12e55571d9c9565e09607253b82adc99216cf547a221beb5d91731e8f4b5c08a",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-sangre-y-arena_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-sangre-y-arena_2026-11-09.glink"
 }

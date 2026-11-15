@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-recuerdos-de-mi-vida-tomo-1-de-2_2026-11-09.glink",
  "sizeBytes": 81920,
- "sha256": "d5220ec9c56b796a693ff024e074114b07c2314e311304bcb4485272b323f7fd",
+ "sha256": "a4a2c43a3e37d089a2aa067c488413fe978383791db14afc2a5688d17b785a23",
  "schemaVersion": 1,
  "sourceSha256": "29558338b872a8ca4c364634a20747533ddb0019c1352d6f671dad9088795042",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-recuerdos-de-mi-vida-tomo-1-de-2_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-recuerdos-de-mi-vida-tomo-1-de-2_2026-11-09.glink"
 }

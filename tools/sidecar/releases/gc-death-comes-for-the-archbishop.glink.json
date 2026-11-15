@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-death-comes-for-the-archbishop_2026-11-09.glink",
  "sizeBytes": 65536,
- "sha256": "7a911e10a0065bb024b9a8c088636216832e0760e3b2800819f8d76eb741f92e",
+ "sha256": "d8b8391e4c17f9a7ee2b08c3a0c59aa28f23c32dade710484071c62e83db6f27",
  "schemaVersion": 1,
  "sourceSha256": "870b49da2f31a742c4213a213038cc54057a227d5db099c44e1d987dfd9a519a",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-death-comes-for-the-archbishop_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-death-comes-for-the-archbishop_2026-11-09.glink"
 }

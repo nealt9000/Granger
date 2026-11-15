@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-murder-of-roger-ackroyd_2026-11-09.glink",
  "sizeBytes": 36864,
- "sha256": "3c6719fdf914b96e5ae793f50c5547df80878f05e3df28675a360afd523b5021",
+ "sha256": "1b523657275d33fb0a7d7e09bec06345b1019cd6bb490ffca01e35c01ecf6802",
  "schemaVersion": 1,
  "sourceSha256": "0494ad623678c5fc97cddbfcf78bd1d8192d3a69de6dfc135100a6d21ced3615",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-murder-of-roger-ackroyd_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-murder-of-roger-ackroyd_2026-11-09.glink"
 }

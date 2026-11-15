@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-metamorfoseos-tomo-4-de-4_2026-11-09.glink",
  "sizeBytes": 61440,
- "sha256": "05052758742fbd5b25f77cffa7e309e266d4d487dfffe17b74356a889f4e7525",
+ "sha256": "c977e764ff4b51d0ea833b16cf853b5c88ff4f2b399ad9118191bc394d73acfd",
  "schemaVersion": 1,
  "sourceSha256": "482b97b50363b1e4ed72a021e85c55e8c9837a1c4258cba07351b34b2520e63d",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-metamorfoseos-tomo-4-de-4_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-metamorfoseos-tomo-4-de-4_2026-11-09.glink"
 }

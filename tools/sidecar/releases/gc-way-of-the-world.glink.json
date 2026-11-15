@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-way-of-the-world_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "97400d00b01e2782be71e3ca0caff08c72e91fe30055366ec1d5732177afa7d0",
+ "sha256": "302bf5d9d77605bb5993c2b56de94a41a419cc9958950ce3e611f9cbbb313b76",
  "schemaVersion": 1,
  "sourceSha256": "93aec6fca2ed5c9b54deef39921f1b5d53e86a7de1b4d171862b4a73749f4cbe",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-way-of-the-world_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-way-of-the-world_2026-11-09.glink"
 }

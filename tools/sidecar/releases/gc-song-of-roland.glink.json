@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-song-of-roland_2026-11-09.glink",
  "sizeBytes": 45056,
- "sha256": "0edbaa6851889216ed5c5da55d3360f887e64c035858dd27c4fd41a3a5ed3ab8",
+ "sha256": "1a54ea71d846564ec20c1ae08744a51c88a1c177373b91079f6f0d32f4ae838a",
  "schemaVersion": 1,
  "sourceSha256": "20554c887bdf4fa4d1c2f2da1a8bfdfa6d872dec0028e7b5b4be5686edd23111",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-song-of-roland_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-song-of-roland_2026-11-09.glink"
 }

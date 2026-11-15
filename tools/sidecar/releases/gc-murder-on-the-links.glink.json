@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-murder-on-the-links_2026-11-09.glink",
  "sizeBytes": 40960,
- "sha256": "617b8958438f3bfe8e08a9669f29748f3a85f850466ccedbaf969a9206415649",
+ "sha256": "4cc3b53697d522f6abb8d44e728e249bb42b47236485c8259165979785b5ce75",
  "schemaVersion": 1,
  "sourceSha256": "b0f968798930cc5e53541a4dcaa108de5f0445d8242ec4ddac40491d6f51634f",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-murder-on-the-links_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-murder-on-the-links_2026-11-09.glink"
 }

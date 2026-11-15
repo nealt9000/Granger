@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-black-beauty_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "f1e243886a179afb500efd70a2bf481a83fa2032fa696d864278d36ce4197c2d",
+ "sha256": "0b51bffbccafe437d59452a17c1b6a0a6bcbf07902f2567a65288986e66f6155",
  "schemaVersion": 1,
  "sourceSha256": "a4e73eb9f74ed8a8e5be8d7c30b5d0a2c8f36b5c7c5b5a6aefde0a9efd4278c0",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-black-beauty_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-black-beauty_2026-11-09.glink"
 }

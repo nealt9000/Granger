@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-mansfield-park_2026-11-09.glink",
  "sizeBytes": 57344,
- "sha256": "c0ad9db781bb912f7907f1266fcc01d7518bec8797255f2b257c4a1f0dfdfa5c",
+ "sha256": "74cc842e91170b51f92d50ea7c8d4f0ead3e8609861c085e003067d1f11f6edc",
  "schemaVersion": 1,
  "sourceSha256": "bbd850f221ac92af41447136c5b26dfa6aaf2d37652404e7c5cb1ecfac872766",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-mansfield-park_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-mansfield-park_2026-11-09.glink"
 }

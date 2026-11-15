@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-la-tribuna_2026-11-09.glink",
  "sizeBytes": 40960,
- "sha256": "8fa9a8c1c0b0db729db027f3afcb15083e9d671bd9a940a7cd3c68080428df98",
+ "sha256": "07daa90e2585ab3db2219b73710fc0ff406994b1197ece3a023621c51fd1b793",
  "schemaVersion": 1,
  "sourceSha256": "f9b0928deb5400494e5b255fbb24bee325ffbcb823359cb9d0b77f4e11a81315",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-tribuna_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-la-tribuna_2026-11-09.glink"
 }

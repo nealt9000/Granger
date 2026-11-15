@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-divine-comedy-purgatory-norton_2026-11-09.glink",
  "sizeBytes": 69632,
- "sha256": "c1c6c92f897fac2fa33c0d81815711f1461c22308a76d4e2d31068ece1e30cf1",
+ "sha256": "b42f3879454120098d54ab71b37dd2538a02d07549cac42157ff53bed912767c",
  "schemaVersion": 1,
  "sourceSha256": "0948667468b4519602ecb2d4202e34538d733d84a44a7058d070f05704fc5e50",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-divine-comedy-purgatory-norton_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-divine-comedy-purgatory-norton_2026-11-09.glink"
 }

@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-el-diablo-cojuelo_2026-11-09.glink",
  "sizeBytes": 102400,
- "sha256": "c8ec20dea7384ce183adf883cb6621fdc8c56026049f6d10f7b8026e81b4eae3",
+ "sha256": "4f81fc8647c6cb5d86152cb8a6b56fef8a9f5f8e5bf63e90b257a4c4af3a1541",
  "schemaVersion": 1,
  "sourceSha256": "3606ba95246be6f9ecfc534113aef6626b81b20ea15c99c5229f8e4e8dccdb36",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-diablo-cojuelo_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-el-diablo-cojuelo_2026-11-09.glink"
 }

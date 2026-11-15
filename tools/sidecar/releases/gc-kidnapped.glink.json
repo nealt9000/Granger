@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-kidnapped_2026-11-09.glink",
  "sizeBytes": 40960,
- "sha256": "0c261c6bd05c0fbb42bdf8a7f0f789c0ba55d7517b614f6d067fb3ae3e6ce767",
+ "sha256": "906fe428ca80e2c4f7aeb99c71305bfcf161d013a0c6dbe37e25c2c379610f7b",
  "schemaVersion": 1,
  "sourceSha256": "da0ec96884a85e0a5df2c19fd9f02451e81973dfd54f4e6e22f4aeca8aa0499a",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-kidnapped_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-kidnapped_2026-11-09.glink"
 }

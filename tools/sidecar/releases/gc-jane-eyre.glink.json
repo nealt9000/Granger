@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-jane-eyre_2026-11-09.glink",
  "sizeBytes": 45056,
- "sha256": "83455a3d374fa4c0232ea6fe1e2090fae6cceb1809d4a307df8a2072e8dcafb1",
+ "sha256": "ef7b89241de5c0834c1897570b1ca2c3f01c7911ea00f2a1ce9510f405896f4e",
  "schemaVersion": 1,
  "sourceSha256": "cce0e5acb2c50847c1a4736126f50b7b5f4154665de94d333a10a7f03bc7fa23",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-jane-eyre_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-jane-eyre_2026-11-09.glink"
 }

@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-martha_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "b5faa951ee41d66515dc0a627ab1259eb4e0f6529d532a36479e69a937b7bdb0",
+ "sha256": "2f19e81e25118d6b9d2d5855168dac74e86ebbdb35a8d5abb66b5eb661f242f6",
  "schemaVersion": 1,
  "sourceSha256": "e752658b7d9566cd3eb67a987d22ea82b9304ae1c909baec61aae6e66bdc5070",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-martha_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-martha_2026-11-09.glink"
 }

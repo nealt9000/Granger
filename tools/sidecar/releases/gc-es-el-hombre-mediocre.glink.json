@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-el-hombre-mediocre_2026-11-09.glink",
  "sizeBytes": 65536,
- "sha256": "b2b783a0a64af23850c858b8573fff2fa86b59a7124fc700b28fc233762b9ff5",
+ "sha256": "9113ee089c6785b121fd8ad1fb847e0ae9e4577a5da9b82d26607056f6d2eb9f",
  "schemaVersion": 1,
  "sourceSha256": "e48e97651a6cf800b41f6b084c48dde28605427542d252b339ee9fab00191001",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-hombre-mediocre_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-el-hombre-mediocre_2026-11-09.glink"
 }

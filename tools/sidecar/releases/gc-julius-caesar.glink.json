@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-julius-caesar_2026-11-09.glink",
  "sizeBytes": 36864,
- "sha256": "95214f867ec017e31819fcf9798e5c68cceb82d1c8652657ff8520cb56dcd480",
+ "sha256": "cd8862fd61c836ce4b59bb1fa7a3cd20db81246283fede2f551cb3438b28d48c",
  "schemaVersion": 1,
  "sourceSha256": "ba675d4647ac8131b93013db64b89b17d47cc516d05e44737bebb3813b7c2fd1",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-julius-caesar_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-julius-caesar_2026-11-09.glink"
 }

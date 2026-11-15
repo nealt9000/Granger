@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-ninety-five-theses_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "3b5a76fb77540b19dc6a939b82d6e716e1147f564f3cacca8abeda0edc0e5b31",
+ "sha256": "b2acc85c9f022540c17d2d4f409775ad167fd507d0932d668248ad896053147f",
  "schemaVersion": 1,
  "sourceSha256": "3b5b4f81458730b1ad07e55654d8bc7b59af21af4ccc9cd651a2f07918b2bb4a",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-ninety-five-theses_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-ninety-five-theses_2026-11-09.glink"
 }

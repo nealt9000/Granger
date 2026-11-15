@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-leviathan_2026-11-09.glink",
  "sizeBytes": 77824,
- "sha256": "c9a15b5c1de4fef91b3d15d93440dd852d8fececc5187a5b23efbf04447b8632",
+ "sha256": "6c6d3e94b554558f1eb4008ef0590bcee9b4fc22d0fc3f7adc4c38cc5a3651b2",
  "schemaVersion": 1,
  "sourceSha256": "c4ed9353ac069afa632dc1724df18296948b42ef4a1a191779e4c749a61e02dd",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-leviathan_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-leviathan_2026-11-09.glink"
 }

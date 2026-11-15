@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-henry-viii_2026-11-09.glink",
  "sizeBytes": 36864,
- "sha256": "61d3e7e848bdb3ae5a6ab5464b38b759c147d1266344bc22375130e423ebbd2f",
+ "sha256": "310587d54c56ae96b5714fc8b18ba46130fa7e638b5ea7c37b03c1566ab1983a",
  "schemaVersion": 1,
  "sourceSha256": "f1431289f1e52532ca9782e3d0ca2a4462f5580a70e1595f00c86fda8d2eca29",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-henry-viii_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-henry-viii_2026-11-09.glink"
 }

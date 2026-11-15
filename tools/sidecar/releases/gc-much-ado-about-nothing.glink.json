@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-much-ado-about-nothing_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "906e27b00f68098a7540235252e9e32dfaba6aa3c4731410257bee5d79b40bcd",
+ "sha256": "c2c354cf99e8942a33c6df2c50bc67a99feaf8f8b4ec0b0aa01bccf2e99812e5",
  "schemaVersion": 1,
  "sourceSha256": "53a730b8e21fbf4c9de4c577761e44dd932b99af53fbcbcc07cb9fb487ea8595",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-much-ado-about-nothing_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-much-ado-about-nothing_2026-11-09.glink"
 }

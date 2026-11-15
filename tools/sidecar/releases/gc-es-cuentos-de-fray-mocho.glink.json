@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-cuentos-de-fray-mocho_2026-11-09.glink",
  "sizeBytes": 36864,
- "sha256": "7c0fa297152b872b51d5308637c9944cb039a0e7be7eefa074d3d51d7bc305e1",
+ "sha256": "e0c8bfa2e028d57b028a449ccc13467c3462b12f2e026dffc836def98cd1c35a",
  "schemaVersion": 1,
  "sourceSha256": "78a4b8f54df259035d7bf9c0ede538a98b4aa403f2433df77978b7dc38259960",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-cuentos-de-fray-mocho_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-cuentos-de-fray-mocho_2026-11-09.glink"
 }

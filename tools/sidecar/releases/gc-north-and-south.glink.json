@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-north-and-south_2026-11-09.glink",
  "sizeBytes": 45056,
- "sha256": "381cf1148f9198cd4a2b02728896001915967309ac0b40416f422b8835060e47",
+ "sha256": "b34e7d2c61c5eca142e43ca0dd4c002d09abaeb9f1b7f81dff4187d8dc3d9955",
  "schemaVersion": 1,
  "sourceSha256": "73657cd8a439c9e9941b66f9d892d51df9dfb47c5c3edfd655e6c3fefceeb13f",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-north-and-south_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-north-and-south_2026-11-09.glink"
 }

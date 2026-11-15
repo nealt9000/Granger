@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-history-of-the-peloponnesian-war_2026-11-09.glink",
  "sizeBytes": 163840,
- "sha256": "485a912b027df9a9fa0d310e8122b3ae920075c84cdb4475c721d1decb214377",
+ "sha256": "2f121c789642ff0e8cca03d44ba7da3dee07e0124b28cd2de615e4715a1c3a17",
  "schemaVersion": 1,
  "sourceSha256": "bbe111dc6f7f98566f0ed26afed5763535431133d095e9f5c841a80822d4b7e7",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-history-of-the-peloponnesian-war_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-history-of-the-peloponnesian-war_2026-11-09.glink"
 }

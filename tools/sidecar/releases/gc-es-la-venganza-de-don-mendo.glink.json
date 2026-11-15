@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-la-venganza-de-don-mendo_2026-11-09.glink",
  "sizeBytes": 36864,
- "sha256": "b8091c86dce586e99258ff65a70e23c6c5372409c7a721de9b318ed29e4c16aa",
+ "sha256": "d9dd36d0a7a80eb71957de08f0094c50b14315a5000d040154a9ee2ad9baf9a9",
  "schemaVersion": 1,
  "sourceSha256": "edb015af8870b751073b092c9172a7fb32b5fa7f0a737c1f166d4e1dcee539f6",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-venganza-de-don-mendo_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-la-venganza-de-don-mendo_2026-11-09.glink"
 }

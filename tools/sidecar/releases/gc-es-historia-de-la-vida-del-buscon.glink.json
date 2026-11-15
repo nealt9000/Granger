@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-historia-de-la-vida-del-buscon_2026-11-09.glink",
  "sizeBytes": 36864,
- "sha256": "cc47d5030d39de95c56494643c7fdb81d3604116486abcb16b637b4daedb9713",
+ "sha256": "f2daa3e9a5cf6f1c34467f58cd6a22908a1d9417a252993ce185278919f60632",
  "schemaVersion": 1,
  "sourceSha256": "fc676afc06237a8e9f999da469ea4b50ebaa1d4895626755a42622459a73ba5f",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-historia-de-la-vida-del-buscon_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-historia-de-la-vida-del-buscon_2026-11-09.glink"
 }

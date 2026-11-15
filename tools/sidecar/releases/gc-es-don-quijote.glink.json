@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-don-quijote_2026-11-09.glink",
  "sizeBytes": 114688,
- "sha256": "93298852db622274e96dde63cc9fcc4341b65b17917a0b5409dc3e44d93b82ff",
+ "sha256": "bed27a0ca4359e68e84414da03d730293a408dbb8e26c64a631dac55ef2a7676",
  "schemaVersion": 1,
  "sourceSha256": "5c7cc14ed414f1825301093efcd5b2bd5e310d198743ea9f202c9b1dfb7d256d",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-don-quijote_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-don-quijote_2026-11-09.glink"
 }

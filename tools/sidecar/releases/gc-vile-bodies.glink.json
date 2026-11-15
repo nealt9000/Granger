@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-vile-bodies_2026-11-09.glink",
  "sizeBytes": 45056,
- "sha256": "918844891d83d3380ee1e12453ff3eaecc94fd6063bb9503495d3c8b1b4784c1",
+ "sha256": "23baef1cd7355608d72e799ca147d0fc8886bb1dd376193f598923e8c0f339f3",
  "schemaVersion": 1,
  "sourceSha256": "e277a6eb6acd782d09aa30aed395f657bc457e6950438af8e8f8223838fbbec9",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-vile-bodies_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-vile-bodies_2026-11-09.glink"
 }

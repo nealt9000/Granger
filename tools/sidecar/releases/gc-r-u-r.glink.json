@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-r-u-r_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "c1892abde657420e3cfef79276472afe55e599fbd2ad8772e533cc36ea38b033",
+ "sha256": "c4a23063324500b49e148542c340fc96328a67101b7db66c7318d5d6a157ba57",
  "schemaVersion": 1,
  "sourceSha256": "5dbea9d460c66678149ec028aafc3cf06f1d62c274bd5b8e5656b071ea120047",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-r-u-r_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-r-u-r_2026-11-09.glink"
 }

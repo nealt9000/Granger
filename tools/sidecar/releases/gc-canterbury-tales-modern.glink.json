@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-canterbury-tales-modern_2026-11-09.glink",
  "sizeBytes": 102400,
- "sha256": "650eb0455ddcaef383202eb0f8eb3dfadf7d17968b01d91077de3f39867b76e9",
+ "sha256": "37a6b12443976a8043cfc95b09975f0011f76c027c51a81edafd0e36cd8e5a42",
  "schemaVersion": 1,
  "sourceSha256": "a3976bdea969fd82409bcb0ccca1f7bff67eccf76c3aa7b86828b63efa5d179f",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-canterbury-tales-modern_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-canterbury-tales-modern_2026-11-09.glink"
 }

@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-novelas-y-cuentos_2026-11-09.glink",
  "sizeBytes": 40960,
- "sha256": "e6cff068e6defeb89ac3081c3c51c5c45aadadf255da6688c4d4b6a952ceb708",
+ "sha256": "6b48428148b3028ff8e746a6dfb4acbd05b1b8775d4b3c10d32bb9a9a12885df",
  "schemaVersion": 1,
  "sourceSha256": "a838677876499fabfb3a0ae8e1bb0240bd8f57b6e3b0a7e3fbc1d8db1ba73699",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-novelas-y-cuentos_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-novelas-y-cuentos_2026-11-09.glink"
 }

@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-father-countess-julie-the-outlaw-the-stronger_2026-11-09.glink",
  "sizeBytes": 36864,
- "sha256": "e3c12859cb2de26da7e6df0d61e609fc633ad133c72daef03fc7f47d85efea92",
+ "sha256": "49b7324ee91c667a32743e2548cb5c8091faf96bff35e59e0ec2d43092708e08",
  "schemaVersion": 1,
  "sourceSha256": "37b4eb493569e57ccac24fef00c755c241f5019dd4aa8b08cd3bea5e594b8537",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-father-countess-julie-the-outlaw-the-stronger_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-father-countess-julie-the-outlaw-the-stronger_2026-11-09.glink"
 }

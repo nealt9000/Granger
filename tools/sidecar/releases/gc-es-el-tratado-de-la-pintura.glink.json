@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-el-tratado-de-la-pintura_2026-11-09.glink",
  "sizeBytes": 40960,
- "sha256": "e91036328a950746a94f50be692fd8ce4acd5fc2b99f0a7ee91988f40d3aa456",
+ "sha256": "b5292436d23b8bf8572e7bb46dc4a21c064fb0da4ddd96ea496b588b61270647",
  "schemaVersion": 1,
  "sourceSha256": "d7a3053ef4b8e521f6ed667d1a55d3f96ee2f462c6f49ce5a660d4ce4669b4e8",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-el-tratado-de-la-pintura_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-el-tratado-de-la-pintura_2026-11-09.glink"
 }

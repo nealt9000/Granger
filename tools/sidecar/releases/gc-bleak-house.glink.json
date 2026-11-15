@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-bleak-house_2026-11-09.glink",
  "sizeBytes": 65536,
- "sha256": "f2ce99945fd52c4ff05c4dcaba6ae0a504e1b8a1092b6d600f8026d8a0e7b247",
+ "sha256": "4a2d4f7eae72c9e77a47f32dd5cde1dc88ad592542d59fb0be94df98c0f8c533",
  "schemaVersion": 1,
  "sourceSha256": "7b5c6cf41f68767b677a1b52edbd8cbfa77e8ef5105ac8a20821fac87f526a75",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-bleak-house_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-bleak-house_2026-11-09.glink"
 }

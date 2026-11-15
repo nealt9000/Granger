@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-heart-of-darkness_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "ce68fc694ad2bbd130cd300c9af1f43a547098a17ba4a324b0d35fad166d828c",
+ "sha256": "bc4d63cf19065cf3a9b701903cf17ae33b12e66e498459ac56f9cbadbc228ec4",
  "schemaVersion": 1,
  "sourceSha256": "2252c28bba57ab606a9cf01272ad7e4c6e3534b5627b2d1273a84c809e5ca613",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-heart-of-darkness_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-heart-of-darkness_2026-11-09.glink"
 }

@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-poems-1817_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "2ebe11dfd93fd479f4ce54706a987328dc6239e70d75966dd1848901ab30eb5d",
+ "sha256": "94827c8a72ca96ce3ca356aa2b62c1597fbefb7b91dec6e7ede63b6a66fd80a1",
  "schemaVersion": 1,
  "sourceSha256": "591ca93ecdde8205d9889c21a884a2595c9b22c42e3ccd50fa183a9d4397a005",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-poems-1817_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-poems-1817_2026-11-09.glink"
 }

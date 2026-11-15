@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-my-antonia_2026-11-09.glink",
  "sizeBytes": 45056,
- "sha256": "0e16c89fdbc60800f58070314f46ac4670ce7087e9132376eaaf216442935358",
+ "sha256": "400d2ee36fc892db22c8c7944f0a7c54d2dea36212957b471f61be4a839a10ac",
  "schemaVersion": 1,
  "sourceSha256": "36439f1e9b126e3a2d6cd9b6bc9f2681eaf9619e431337b5cb3951504dffcb25",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-my-antonia_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-my-antonia_2026-11-09.glink"
 }

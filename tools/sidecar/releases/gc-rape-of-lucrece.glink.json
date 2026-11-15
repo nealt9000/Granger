@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-rape-of-lucrece_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "226e01154a896cf789a068cd7bf71c2c928262a52f82f2dca52e52a8df0156ea",
+ "sha256": "1e165c0130c5aeec7e393d0682b832adb2c39a9a7e0888552f23d47e2bad171c",
  "schemaVersion": 1,
  "sourceSha256": "e09e415ebe80893e7afa7d2ee882cd4d7a1d4feefef4109e82914ca056288a7f",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-rape-of-lucrece_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-rape-of-lucrece_2026-11-09.glink"
 }

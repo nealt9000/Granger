@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-tale-of-genji_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "53ac2448a62c7910339aa586e41de27cefce79291740cc51bcf671cfa49afa09",
+ "sha256": "04d8cb5e4e5237a6792b261cde68b1261e854b8aa2eb3165f67e3fc866af4ec2",
  "schemaVersion": 1,
  "sourceSha256": "8a4a7cd52febf949e9153a6a9eb3ae8df5af8cc58d891ddcbf13947ede40066a",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-tale-of-genji_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-tale-of-genji_2026-11-09.glink"
 }

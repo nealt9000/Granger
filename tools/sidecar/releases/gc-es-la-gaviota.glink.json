@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-es-la-gaviota_2026-11-09.glink",
  "sizeBytes": 61440,
- "sha256": "3caef034dc08dbefff14b9711c512ceae4d392141533e496255d1d56c688bef1",
+ "sha256": "f750c1e9209eb2aad613f431e6b1354e1f843880442a06aac6ccff21c8549a19",
  "schemaVersion": 1,
  "sourceSha256": "fba9035b0fe59bb0a22530ff5daa980af6a83b7930a0a76d01fb7d5528356df8",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-es-la-gaviota_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-es-la-gaviota_2026-11-09.glink"
 }

@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-last-of-the-mohicans_2026-11-09.glink",
  "sizeBytes": 45056,
- "sha256": "ceb8244cfcce997ae32c6b3ab85ee8d92ec7d6df16ca060b479af570f8624b95",
+ "sha256": "6bc764a1a3b49ce884e618be4d010d6ccffbcb6295318ce4159d96c52f2d24bd",
  "schemaVersion": 1,
  "sourceSha256": "307267e6b1775568340c8bedd98885c602885590919d311d9604cd1c5a5cdc8b",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-last-of-the-mohicans_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-last-of-the-mohicans_2026-11-09.glink"
 }

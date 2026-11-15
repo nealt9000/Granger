@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-founding-documents-of-the-united-states_2026-11-09.glink",
  "sizeBytes": 36864,
- "sha256": "209c0b3b599f39378b0149e85bf0e660d165f8245348fa5118b69f7189b9e938",
+ "sha256": "be13df45e3df3098c805efb5676411366360b5ec315ede37ffd73edfe7f1b77c",
  "schemaVersion": 1,
  "sourceSha256": "b397463bb97465ccf0a4e6025b568ab14883534ea0f400ca5e250a9583cfb28f",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-founding-documents-of-the-united-states_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-founding-documents-of-the-united-states_2026-11-09.glink"
 }

@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-medea_2026-11-09.glink",
  "sizeBytes": 28672,
- "sha256": "f897263c1aeaa1a290405d663cef89b9d1c0af84ed85661fe1530703734c170e",
+ "sha256": "3690c266964c86a6de34726571086125a0fae0e97c5f054fafed1a5266af7fb2",
  "schemaVersion": 1,
  "sourceSha256": "47a0fb3611a006976405d5ec704d7863ad245199d693201708bc068a03d79d8a",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-medea_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-medea_2026-11-09.glink"
 }

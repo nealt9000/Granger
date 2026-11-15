@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-moll-flanders_2026-11-09.glink",
  "sizeBytes": 40960,
- "sha256": "60de1d46d77dfa9ca68d0faa69d6bc1f64cc0c9426eeaaf03f6c29000aa82028",
+ "sha256": "17fa365b00833bbd3034bf7cff2e0ae3fcf3b027b3946bdf9d3eef0c14c28ce3",
  "schemaVersion": 1,
  "sourceSha256": "2fb379f8a8701b8c81d031d70e690949cbd9f91a6adbed99114d94ae9347ff15",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-moll-flanders_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-moll-flanders_2026-11-09.glink"
 }

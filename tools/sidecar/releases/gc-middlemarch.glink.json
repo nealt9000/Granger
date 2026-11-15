@@ -4,10 +4,10 @@
  "sidecar": "glink",
  "fileName": "gc-middlemarch_2026-11-09.glink",
  "sizeBytes": 61440,
- "sha256": "87d1414ed7247db6f9b98728dddaeec0eae7c8f72eb604e5ed20b84862b5d6de",
+ "sha256": "b6092a62490e0d6d5c57453c5555cbeb2d39d6507407abc3b6394c70fead1b90",
  "schemaVersion": 1,
  "sourceSha256": "e49576202852449cdba1d6bc560d9c72ddf6a1c4763b3e722f7f3cfa34b72fc9",
  "builder": "tools/links/build.py",
- "builderVersion": 2,
- "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/gc-middlemarch_2026-11-09.glink"
+ "builderVersion": 3,
+ "url": "https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/gc-middlemarch_2026-11-09.glink"
 }
