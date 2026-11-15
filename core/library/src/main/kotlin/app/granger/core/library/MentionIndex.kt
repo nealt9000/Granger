@@ -3,6 +3,8 @@ package app.granger.core.library
 import android.database.sqlite.SQLiteDatabase
 import java.io.Closeable
 import java.io.File
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 /** An installed Classic's links file and the sha256 of the EPUB it must have been built from. */
 data class LinksFile(val file: File, val sourceSha256: String)
@@ -14,10 +16,14 @@ data class LinksFile(val file: File, val sourceSha256: String)
  * dropping a removed one, so only the first sync after installing a collection does real work. Blocking; call on IO.
  */
 class MentionIndex(private val file: File) : Closeable {
+    // Internal for the test that holds it as a long sync would.
+    internal val lock = ReentrantLock()
     private var db: SQLiteDatabase? = null
     private var synced: Map<String, LinksFile>? = null
 
-    @Synchronized
+    /** [works] as the last finished sync left it, for [worksNow] while another sync runs. */
+    @Volatile private var lastWorks: Map<String, Long>? = null
+
     private fun db(): SQLiteDatabase = db ?: run {
         file.parentFile?.mkdirs()
         var d = SQLiteDatabase.openOrCreateDatabase(file, null)
@@ -41,8 +47,7 @@ class MentionIndex(private val file: File) : Closeable {
      * Makes the index hold exactly [files] (bookshelf id → links file): removed books and changed files out, new ones
      * in. A file that isn't a links file, or was built from another EPUB, is left out. Returns how many books it copied.
      */
-    @Synchronized
-    fun sync(files: Map<String, LinksFile>): Int {
+    fun sync(files: Map<String, LinksFile>): Int = lock.withLock {
         if (files == synced) return 0
         val d = db()
         val held = d.rawQuery("SELECT book_id, file, sha FROM books", null).use { c ->
@@ -68,7 +73,8 @@ class MentionIndex(private val file: File) : Closeable {
             if (copy(d, id, f, work.getOrNull())) copied++
         }
         synced = files
-        return copied
+        lastWorks = queryWorks(d)
+        copied
     }
 
     private fun copy(d: SQLiteDatabase, id: String, f: LinksFile, work: Long?): Boolean = try {
@@ -91,23 +97,36 @@ class MentionIndex(private val file: File) : Closeable {
     }
 
     /** Each indexed book's Wikidata work, by bookshelf id; books with none are left out. */
-    @Synchronized
-    fun works(): Map<String, Long> =
-        db().rawQuery("SELECT book_id, work FROM books WHERE work IS NOT NULL", null).use { c ->
+    fun works(): Map<String, Long> = lock.withLock { queryWorks(db()) }
+
+    /**
+     * [works] without waiting: while a sync is copying books (seconds, the first time after a collection arrives), the
+     * works as the last finished sync left them, or none before the first. For a link's card, which mustn't wait.
+     */
+    fun worksNow(): Map<String, Long> {
+        if (!lock.tryLock()) return lastWorks.orEmpty()
+        return try {
+            queryWorks(db())
+        } finally {
+            lock.unlock()
+        }
+    }
+
+    private fun queryWorks(d: SQLiteDatabase): Map<String, Long> =
+        d.rawQuery("SELECT book_id, work FROM books WHERE work IS NOT NULL", null).use { c ->
             buildMap { while (c.moveToNext()) put(c.getString(0), c.getLong(1)) }
         }
 
     /** The books that mention [qid] and how often, most first. */
-    @Synchronized
-    fun counts(qid: Long): List<Pair<String, Int>> =
+    fun counts(qid: Long): List<Pair<String, Int>> = lock.withLock {
         db().rawQuery(
             "SELECT book_id, COUNT(*) AS n FROM mentions WHERE qid = ? GROUP BY book_id ORDER BY n DESC, book_id",
             arrayOf(qid.toString()),
         ).use { c -> buildList { while (c.moveToNext()) add(c.getString(0) to c.getInt(1)) } }
+    }
 
     /** [bookId]'s first [limit] mentions of [qid], in book order. */
-    @Synchronized
-    fun passages(bookId: String, qid: Long, limit: Int): List<BookMention> =
+    fun passages(bookId: String, qid: Long, limit: Int): List<BookMention> = lock.withLock {
         db().rawQuery(
             "SELECT href, start, quote, before, qid, tier FROM mentions WHERE qid = ? AND book_id = ? ORDER BY href, start LIMIT ?",
             arrayOf(qid.toString(), bookId, limit.toString()),
@@ -116,12 +135,13 @@ class MentionIndex(private val file: File) : Closeable {
                 while (c.moveToNext()) add(BookMention(c.getString(0), c.getInt(1), c.getString(2), c.getString(3), c.getLong(4), c.getInt(5)))
             }
         }
+    }
 
-    @Synchronized
-    override fun close() {
+    override fun close() = lock.withLock {
         db?.close()
         db = null
         synced = null
+        lastWorks = null
     }
 
     private companion object {

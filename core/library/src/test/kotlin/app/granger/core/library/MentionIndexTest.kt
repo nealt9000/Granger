@@ -66,4 +66,30 @@ class MentionIndexTest {
         assertThat(index.sync(mapOf("a" to wrongKind, "b" to wrongEpub, "c" to missing))).isEqualTo(0)
         assertThat(index.counts(84L)).isEmpty()
     }
+
+    @Test fun worksNowDoesntWaitForASyncAndGivesTheLastFinishedOnes() {
+        val index = MentionIndex(File(tmp.root, "w.sqlite"))
+        assertThat(index.worksNow()).isEmpty()
+        index.sync(mapOf("pp" to glink(170583L, Triple(84L, "c1.xhtml", 1))))
+        assertThat(index.worksNow()).containsExactly("pp", 170583L)
+        // Another thread mid-sync holds the index: the answer is the last sync's, at once.
+        val held = java.util.concurrent.CountDownLatch(1)
+        val release = java.util.concurrent.CountDownLatch(1)
+        val syncing = Thread {
+            index.lock.lock()
+            try {
+                held.countDown()
+                release.await()
+            } finally {
+                index.lock.unlock()
+            }
+        }.apply { start() }
+        held.await()
+        assertThat(index.worksNow()).containsExactly("pp", 170583L)
+        release.countDown()
+        syncing.join()
+        index.close()
+        // A new process before its first sync: what the file already holds.
+        assertThat(MentionIndex(File(tmp.root, "w.sqlite")).worksNow()).containsExactly("pp", 170583L)
+    }
 }

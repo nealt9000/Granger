@@ -276,4 +276,24 @@ class ReferenceLinksTest {
         assertThat(footer.inBooksTotal).isEqualTo(10)
         assertThat(footer.inBooks.first().passages).hasSize(ReferenceLinksSource.PASSAGES)
     }
+
+    @Test fun openingABookBringsTheIndexInStepSoACardNeverWaitsForIt() = runBlocking<Unit> {
+        val pp = 170583L
+        val top = gqid("t".repeat(64), "London" to 84L, "Pride_and_Prejudice" to pp)
+        val books = mapOf("book:granger:gc-pp" to InstalledSidecar(glink("gc-pp", pp), "e".repeat(64)))
+        val background = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob())
+        val source = ReferenceLinksSource(
+            linksFiles = { books },
+            qidFiles = { listOf("top" to InstalledSidecar(top, "t".repeat(64))) },
+            lead = { _, p -> ArticleLead(p, "", null) },
+            bookOf = { shelf(it) },
+            index = mentionIndex(),
+            background = background,
+        )
+        // Before anything has synced, the card comes without its book rather than waiting.
+        assertThat(source.peek(pp)?.book).isNull()
+        source.mentions("book:granger:gc-pp", LinkLevel.LIGHT)
+        background.coroutineContext[kotlinx.coroutines.Job]!!.children.forEach { it.join() }
+        assertThat(source.peek(pp)?.book?.bookId).isEqualTo("book:granger:gc-pp")
+    }
 }

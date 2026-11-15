@@ -7,6 +7,9 @@ import app.granger.core.library.LinksFile
 import app.granger.core.library.MentionIndex
 import app.granger.core.library.QidIndex
 import app.granger.core.library.QidIndexes
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -61,6 +64,11 @@ class ReferenceLinksSource(
     private val bookOf: suspend (bookId: String) -> LibraryBook?,
     /** Every installed Classic's mentions in one file, for the reverse view. */
     private val index: MentionIndex,
+    /**
+     * Where opening a book brings [index] into step, so a link's card never waits on the copy (5 s for the 185 Clásicos
+     * on a Pixel 6); null leaves it to the first footer.
+     */
+    private val background: CoroutineScope? = null,
 ) : BookLinkSource, ArticleFooterSource {
     private val lock = Mutex()
     private var opened: Pair<List<Pair<String, InstalledSidecar>>, QidIndexes>? = null
@@ -87,6 +95,7 @@ class ReferenceLinksSource(
 
     override suspend fun mentions(bookId: String, level: LinkLevel): List<BookMention> {
         if (level == LinkLevel.OFF) return emptyList()
+        background?.launch(Dispatchers.IO) { synced() }
         val file = linksFiles()[bookId] ?: return emptyList()
         val all = BookLinks.open(file.file, file.packSha256)?.use { it.mentions(level.maxTier) } ?: return emptyList()
         if (all.isEmpty()) return all
@@ -100,7 +109,8 @@ class ReferenceLinksSource(
         val qids = indexes()
         for (article in qids.articlesOf(qid, language)) {
             val l = lead(article.packId, article.path) ?: continue
-            val book = synced().works().entries.firstOrNull { it.value == qid }?.let { bookOf(it.key) }
+            // The index as it stands: a card doesn't wait for a sync still copying books in.
+            val book = index.worksNow().entries.firstOrNull { it.value == qid }?.let { bookOf(it.key) }
             return LinkPeek(qid, article.packId, article.path, l.title, l.sentence, l.thumbnail, book)
         }
         return null

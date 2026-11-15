@@ -466,6 +466,13 @@ class EbookReaderViewModelTest {
         val hit = vm.state.value.searchHit!!
         assertThat(hit).isSameInstanceAs(vm.state.value.initial)
         assertThat(hit.text.highlight).isEqualTo("quality of mercy")
+        // The bars lie over the page's edges, where the quote may be: they start hidden.
+        assertThat(vm.state.value.chromeVisible).isFalse()
+    }
+
+    @Test fun aTargetWithoutAQuoteOpensWithTheBarsShown() = runTest(main.dispatcher) {
+        assertThat(reader(target = BookTarget("c003.xhtml", 0.5)).state.value.chromeVisible).isTrue()
+        assertThat(reader().state.value.chromeVisible).isTrue()
     }
 
     @Test fun usedTargetIsNotMarkedAgainAfterProcessDeath() = runTest(main.dispatcher) {

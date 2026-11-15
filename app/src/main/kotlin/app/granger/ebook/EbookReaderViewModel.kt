@@ -299,11 +299,13 @@ class EbookReaderViewModel(
             navigatorFactory = factory
             OpenBooks.current = book.id to factory
             appScope.launch { sessions.showInTab(tabId, book.id, "", book.title) }
-            // A search hit's text is marked where the reader lands, as an in-book search hit is.
+            // A search hit's text is marked where the reader lands, as an in-book search hit is. The bars start hidden
+            // there too: they lie over the page's top and bottom lines, and the quote can be on either.
             val hit = initial?.takeIf { !targetUsed && target?.quote != null && it.text.highlight != null }
             _state.update {
                 it.copy(
                     loading = false, publication = opened, initial = initial, searchHit = hit,
+                    chromeVisible = if (hit != null) false else it.chromeVisible,
                     toc = flatten(opened.tableOfContents, 0), isPdf = pdf, fixedLayout = fixed, hasText = text,
                 ).derived()
             }
