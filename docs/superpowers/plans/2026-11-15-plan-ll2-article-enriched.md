@@ -16,7 +16,7 @@
 1. **Where the new pieces sit.** Neither goes over the article's own text:
    - *At a glance* is a slim strip under the top bar, shown only for dated pages: "1769–1821 · 52 years", plus a lifespan bar. A tap opens its sheet with contemporaries, the same year, and Show in time, which moves from the overflow menu into the sheet.
    - *Related* and *Read in Spanish* join the footer: the footer card's line grows ("Mentioned in 44 of your books · 12 related · En español"), and the sheet gains a Related section.
-   - **Needs Neal's OK.** The alternative is a side panel like Encarta's. That fits a tablet, but on a phone it covers the page.
+   - **Neal chose this, 2026-11-15** (over all in the footer, and over an Encarta-style side panel, which covers the page on a phone).
 2. **Related is built on the phone from the vectors we already ship** (changed from the spec, which planned a new Mac-built per-article vector). The article's own chunk rows are averaged into one query, then run through `VectorSearch` over every installed `.gvec` (articles and books). Hits are grouped by article or book, and the page itself is dropped.
    - No new sidecar, release or catalog field, and the upkeep loop is untouched.
    - Task 1 spikes it on the Pixel: finding the article's rows (keys are per row, so a lookup per file may be needed), search time with probes, and whether the results read as related.
