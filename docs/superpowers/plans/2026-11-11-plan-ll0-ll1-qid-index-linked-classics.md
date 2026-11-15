@@ -244,7 +244,10 @@
     - *Card:* Zaragoza's opens in Spanish from Lo mejor de Wikipedia, with its picture. It was slow the first time (about 3 to 5 s), because `peek` waits on `synced()` and the first sync after adding the Clásicos copied 185 books in 5.4 s.
     - *Footer:* Zaragoza is "Mentioned in 44 of your books". Its sheet puts the English Don Quixote ("Saragossa", 15) next to the Spanish one ("Zaragoza", 15): one QID across both languages. Miguel de Cervantes is in 70 books, with 3 by this author (Don Quijote, Don Quixote, Novelas ejemplares). *Viaje al Parnaso; La Numancia; El trato de Argel* is in the mentions but not under the author, since a three-work volume has no single work QID.
     - *Passage tap:* opens Los argonautas, but the page came up offset with the highlighted line just below the bottom edge. A page turn there and back showed it, linked (Cervantes, then Shakespeare and Beethoven).
-    - **To fix:** `peek` shouldn't wait for the mention-index sync (look up the book's work only if the index is ready, or sync in the background on install). A passage open should land on the page holding the quote.
+    - **Fixed (`8145ec6d`, debug 1354 on the Pixel):**
+      - *Card:* `peek` reads `MentionIndex.worksNow()`, the works as they stand, or the last finished sync's while another sync copies. `MentionIndex` uses a lock now instead of `@Synchronized`, so it can tell. Opening a book also starts the sync in the background (`background = appScope`), so the index is ready before the first card. The Shakespeare card came up in about a second.
+      - *Passage:* the reader's bars lie over the page's top and bottom lines. A book opened at a quote now starts with them hidden, as a jump from in-book search already did. The same Los argonautas passage now lands with "Cervantes" in view.
+      - Tests: `worksNow` while a sync holds the lock, the card before and after a book open, and the bars on a quote target. 3,112 JVM tests pass.
 
 ## Order and size
 LL0 Tasks 1–2 first: they're the debt payback and touch shared code, so agree with SQ before merging. Task 3 can run on the X10 alongside them. The LL1 spike (Task 6) can start as soon as Task 3's data exists, before the phone side lands. About six to eight sessions in total.
