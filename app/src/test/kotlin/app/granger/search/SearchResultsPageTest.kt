@@ -38,6 +38,19 @@ class SearchResultsPageTest {
 
     private val wiktionary = Passage(SourceKind.ARTICLE, "wikt", "serendipity", packTitle = "Wiktionary", location = "serendipity", text = "Noun: a happy accident")
 
+    @Test fun aRowWithTheArticleAndTheBookKeepsTheFiltersPart() = runTest(main.dispatcher) {
+        val book = SearchHit("book:granger:gc-pp", "Classics", "", "Pride and Prejudice", author = "Jane Austen")
+        val article = SearchHit("wikipedia", "Wikipedia", "Pride_and_Prejudice", "Pride and Prejudice", also = listOf(book))
+        val search = Search(titles = listOf(SearchHit("wikipedia", "Wikipedia", "Pride", "Pride"), article))
+        val vm = SearchViewModel(search, FakeReadingSessions(), "pride", best = best(), matching = main.dispatcher)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.kinds).containsExactly(SearchFilter.ARTICLES, SearchFilter.BOOKS)
+        vm.setFilter(SearchFilter.BOOKS)
+        assertThat(vm.state.value.titlesFiltered).containsExactly(book)
+        vm.setFilter(SearchFilter.ARTICLES)
+        assertThat(vm.state.value.titlesFiltered.map { it.path to it.also }).containsExactly("Pride" to emptyList<SearchHit>(), "Pride_and_Prejudice" to emptyList<SearchHit>()).inOrder()
+    }
+
     @Test fun theKindsFoundDecideTheChipsAndAFilterNarrowsEveryGroup() = runTest(main.dispatcher) {
         val search = Search(
             titles = listOf(SearchHit("wikipedia", "Wikipedia", "Burn", "Burn"), SearchHit("book:granger:burns", "Classics", "", "Poems of Burns")),

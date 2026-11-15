@@ -142,8 +142,8 @@ class SearchViewModel(
         /** The kinds of result the query found, for the filter chips: shown when it found more than one. */
         val kinds: Set<SearchFilter>
             get() = buildSet {
-                val titleBooks = titles.count { app.granger.core.library.BookIds.isBook(it.packId) }
-                if (titles.size > titleBooks || fullText.isNotEmpty() || best.any { it.passage.kind != app.granger.core.research.SourceKind.BOOK }) add(SearchFilter.ARTICLES)
+                val titleBooks = titles.count { row -> rowPart(row, book = true) != null }
+                if (titles.any { row -> rowPart(row, book = false) != null } || fullText.isNotEmpty() || best.any { it.passage.kind != app.granger.core.research.SourceKind.BOOK }) add(SearchFilter.ARTICLES)
                 if (titleBooks > 0 || books.isNotEmpty() || best.any { it.passage.kind == app.granger.core.research.SourceKind.BOOK }) add(SearchFilter.BOOKS)
                 if (!media.isEmpty) add(SearchFilter.MEDIA)
             }
@@ -160,14 +160,24 @@ class SearchViewModel(
                 SearchFilter.MEDIA -> emptyList()
             }
 
-        /** Titles under the [filter]: articles are pack titles, books the shelf's. */
+        /**
+         * Titles under the [filter]: articles are pack titles, books the shelf's. A row holding both (Pride and Prejudice
+         * the article, with the book under it) keeps the part the filter wants, led by it.
+         */
         val titlesFiltered: List<SearchHit>
             get() = when (filter) {
                 SearchFilter.ALL -> titles
-                SearchFilter.BOOKS -> titles.filter { app.granger.core.library.BookIds.isBook(it.packId) }
-                SearchFilter.ARTICLES -> titles.filterNot { app.granger.core.library.BookIds.isBook(it.packId) }
+                SearchFilter.BOOKS -> titles.mapNotNull { rowPart(it, book = true) }
+                SearchFilter.ARTICLES -> titles.mapNotNull { rowPart(it, book = false) }
                 SearchFilter.MEDIA -> emptyList()
             }
+
+        /** [row]'s books (or its articles), the first leading the rest; null when it has none. */
+        private fun rowPart(row: SearchHit, book: Boolean): SearchHit? {
+            val keep = (listOf(row.copy(also = emptyList())) + row.also).filter { app.granger.core.library.BookIds.isBook(it.packId) == book }
+            if (keep.size == 1 + row.also.size) return row
+            return keep.firstOrNull()?.copy(also = keep.drop(1))
+        }
 
         /** The search has finished and found nothing at all: the empty state's one plain line shows. */
         val nothingFound: Boolean
