@@ -248,6 +248,14 @@
       - *Card:* `peek` reads `MentionIndex.worksNow()`, the works as they stand, or the last finished sync's while another sync copies. `MentionIndex` uses a lock now instead of `@Synchronized`, so it can tell. Opening a book also starts the sync in the background (`background = appScope`), so the index is ready before the first card. The Shakespeare card came up in about a second.
       - *Passage:* the reader's bars lie over the page's top and bottom lines. A book opened at a quote now starts with them hidden, as a jump from in-book search already did. The same Los argonautas passage now lands with "Cervantes" in view.
       - Tests: `worksNow` while a sync holds the lock, the card before and after a book open, and the bars on a quote target. 3,112 JVM tests pass.
+  - **Polish pass (2026-11-15, debug 1358 on the Pixel; 3,116 JVM tests pass):**
+    - *Footer card* (`a4c50f3f`): the band is the card's measured height plus 8 dp. The card is measured unplaced before the end is reached, so it's never drawn or tapped early. While the bars are away it docks at the screen's foot. While it shows, the end is rechecked every 500 ms, so a page that grows takes it away. On the Pixel, Cervantes's two-line card clears the article with the bars shown and sits at the foot with them hidden.
+    - *Card summaries* keep abbreviations: "322 a. C.", "St. Paul", "J. R. R." (`LeadLinks.sentences`).
+    - *Passage leads* start at a word. `contextOf` stays exact for Readium.
+    - *Footer for a Wikipedia pack without its own index:* found by title in an index of its language (`QidIndexes.qidOfTitle`). A pack with its own index never falls back.
+    - *Get more* (`62da052b`): older versions read "N to update", not "N of N to get". A set's quiet default stays under 10 GB, so Spanish Wikipedia offers Best 50,000 with pictures (4.1 GB), not Everything (36.5 GB).
+    - *Search:* under a filter, a title row holding both the article and the book keeps the filter's part, so Books shows Pride and Prejudice the book again. Best matches' order (The Call of the Wild first) is the meaning ranking and was left as is.
+    - *Not a bug:* Home's "Random from Best of Wikipedia" medical cards (Tacrolimus) are Top's own articles.
 
 ## Order and size
 LL0 Tasks 1–2 first: they're the debt payback and touch shared code, so agree with SQ before merging. Task 3 can run on the X10 alongside them. The LL1 spike (Task 6) can start as soon as Task 3's data exists, before the phone side lands. About six to eight sessions in total.
