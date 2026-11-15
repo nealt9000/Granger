@@ -230,7 +230,7 @@ class PublishedCatalogTest {
         assertThat(linked.size).isEqualTo(622)
         for (s in linked.flatMap { it.sidecars }) {
             assertThat(s.kind).isEqualTo("glink")
-            assertThat(s.url).startsWith("https://github.com/nealt9000/Granger/releases/download/links-2026-11-13/")
+            assertThat(s.url).startsWith("https://github.com/nealt9000/Granger/releases/download/links-2026-11-15/")
             assertThat(s.sha256).hasLength(64)
         }
     }
