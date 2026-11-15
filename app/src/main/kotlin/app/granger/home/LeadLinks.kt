@@ -88,6 +88,28 @@ object LeadLinks {
 
     private val FILE_EXTENSIONS = setOf("jpg", "jpeg", "png", "gif", "svg", "webp", "pdf", "ogg", "ogv", "webm", "mp3", "css", "js")
 
+    /**
+     * [text] in sentences: split after a full stop and before a capital, except after an abbreviation ("322 a. C.",
+     * "St. Paul", "J. R. R. Tolkien"), a word of one or two letters or one of [ABBREVIATIONS].
+     */
+    internal fun sentences(text: String): List<String> {
+        val out = ArrayList<String>()
+        var start = 0
+        for (m in SENTENCE_END.findAll(text)) {
+            val word = text.substring(start, m.range.first).trimEnd('.', '!', '?').takeLastWhile { it.isLetter() }
+            if (text[m.range.first - 1] == '.' && (word.length in 1..2 || word.lowercase() in ABBREVIATIONS)) continue
+            out += text.substring(start, m.range.first)
+            start = m.range.last + 1
+        }
+        out += text.substring(start)
+        return out
+    }
+
+    private val ABBREVIATIONS = setOf(
+        "mrs", "prof", "gen", "col", "capt", "rev", "hon", "gov", "sen", "etc", "approx", "fig", "vol", "sra", "srta",
+        "dra", "núm", "art", "pág", "ref", "lit",
+    )
+
     /** The lead's first two sentences, plain, at most [MAX_SUMMARY] characters, cut at a word. */
     internal fun summary(paragraphs: List<Element>): String {
         val text = paragraphs.joinToString(" ") { it.text() }
@@ -97,7 +119,7 @@ object LeadLinks {
             .replace("( ", "(")
             .trim()
         if (text.isEmpty()) return ""
-        val two = text.split(SENTENCE_END).take(2).joinToString(" ")
+        val two = sentences(text).take(2).joinToString(" ")
         if (two.length <= MAX_SUMMARY) return two
         val cut = two.take(MAX_SUMMARY - 1)
         return cut.substring(0, cut.lastIndexOf(' ').takeIf { it > MAX_SUMMARY / 2 } ?: cut.length).trimEnd(',', ';', ':', ' ') + "…"

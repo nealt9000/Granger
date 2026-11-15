@@ -261,10 +261,19 @@ fun ReaderScreen(
     val padLeft = with(density) { (overlay.getLeft(density, direction) - pageInsets.getLeft(density, direction)).coerceAtLeast(0).toDp().value.roundToInt() }
     val padRight = with(density) { (overlay.getRight(density, direction) - pageInsets.getRight(density, direction)).coerceAtLeast(0).toDp().value.roundToInt() }
     // An article with a footer (Plan LL1 Task 9) ends above a band the footer's card takes once the page is read to its end.
-    val footerPad = if (state.footer != null) FOOTER_BAND_DP else 0
+    // The band is the card's own height, measured while it waits unseen, so a two-line summary doesn't reach the article.
+    var footerCardPx by remember { mutableIntStateOf(0) }
+    val footerPad = if (state.footer == null) 0 else maxOf(FOOTER_BAND_DP, with(density) { footerCardPx.toDp().value.roundToInt() } + FOOTER_GAP_DP)
     var atEnd by remember { mutableStateOf(false) }
     fun checkEnd() {
         atEnd = webView?.let { !it.canScrollVertically(1) } ?: false
+    }
+    // A page still growing under the card (pictures arriving) takes it away again without waiting for a scroll.
+    LaunchedEffect(atEnd, webView) {
+        while (atEnd) {
+            kotlinx.coroutines.delay(FOOTER_RECHECK_MS)
+            checkEnd()
+        }
     }
     LaunchedEffect(webView, padTop, padBottom, padLeft, padRight, footerPad) { webView?.setChromePadding(padTop, padBottom + footerPad, padLeft, padRight) }
     LaunchedEffect(state.footer, state.page?.path, webView) {
@@ -403,12 +412,21 @@ fun ReaderScreen(
                 )
             }
             val footer = state.footer
-            if (footer != null && atEnd && reading == null) {
+            if (footer != null && reading == null) {
+                // Above the bottom bar while it shows; on the screen's foot while it's away, not over an empty strip.
+                val footerLift by animateDpAsState(
+                    with(density) { if (state.chromeVisible) bottomBarPx.toDp() else ReaderBottomBarInsets.getBottom(density).toDp() },
+                    tween(ChromeSlideMs),
+                    label = "footer",
+                )
                 ArticleFooterCard(
                     footer, onOpen = { viewModel.openFooter(true) },
-                    // In the band the page leaves at its end: above the bars' place, and clear of the rail like the lines.
+                    // In the band the page leaves at its end, clear of the rail like the lines. Measured before the end is
+                    // reached, though not placed, so its height is known for the band.
                     Modifier.align(Alignment.BottomCenter)
-                        .absolutePadding(left = padLeft.dp, right = padRight.dp, bottom = with(density) { bottomBarPx.toDp() }),
+                        .absolutePadding(left = padLeft.dp, right = padRight.dp, bottom = footerLift),
+                    shown = atEnd,
+                    onHeight = { footerCardPx = it },
                 )
             }
         }

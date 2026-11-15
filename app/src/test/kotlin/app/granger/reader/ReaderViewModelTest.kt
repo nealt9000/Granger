@@ -82,6 +82,11 @@ class ReaderViewModelTest {
         ).inOrder()
         assertThat(FooterSummary.parts(app.granger.ebook.ArticleFooter.NONE)).isEmpty()
         assertThat(FooterSummary.lead(m)).isEqualTo("…She went to ")
+        // A long paragraph's last words start at a word, not inside one.
+        val long = m.copy(before = "Don Quixote goes now as he goes from Madrid to ")
+        assertThat(app.granger.ebook.LinkDecorations.contextOf(long.before)).isEqualTo("s now as he goes from Madrid to ")
+        assertThat(FooterSummary.lead(long)).isEqualTo("…now as he goes from Madrid to ")
+        assertThat(FooterSummary.lead(m.copy(before = "x".repeat(40)))).isEmpty()
     }
 
     // ---- read aloud (Plan V1) ----

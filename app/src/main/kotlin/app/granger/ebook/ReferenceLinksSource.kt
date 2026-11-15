@@ -69,6 +69,8 @@ class ReferenceLinksSource(
      * on a Pixel 6); null leaves it to the first footer.
      */
     private val background: CoroutineScope? = null,
+    /** A Wikipedia pack's language (`en`), for one with no QID index of its own; null for other packs. */
+    private val wikipediaLanguage: suspend (packId: String) -> String? = { null },
 ) : BookLinkSource, ArticleFooterSource {
     private val lock = Mutex()
     private var opened: Pair<List<Pair<String, InstalledSidecar>>, QidIndexes>? = null
@@ -117,7 +119,11 @@ class ReferenceLinksSource(
     }
 
     override suspend fun footer(packId: String, path: String): ArticleFooter {
-        val qid = indexes().qidOf(packId, path) ?: return ArticleFooter.NONE
+        val all = indexes()
+        // A Wikipedia pack without its own index finds the page by title in another of its language.
+        val qid = all.qidOf(packId, path)
+            ?: (if (all.has(packId)) null else wikipediaLanguage(packId)?.let { all.qidOfTitle(path, it) })
+            ?: return ArticleFooter.NONE
         val books = synced()
         val works = books.works()
         val thisWork = works.filterValues { it == qid }.keys

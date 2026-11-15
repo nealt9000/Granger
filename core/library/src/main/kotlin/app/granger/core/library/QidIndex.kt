@@ -94,6 +94,16 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
 
     fun qidOf(packId: String, path: String): Long? = indexes.firstOrNull { it.packId == packId }?.qidOf(path)
 
+    /** Whether [packId] has an index of its own here. */
+    fun has(packId: String): Boolean = indexes.any { it.packId == packId }
+
+    /**
+     * The item of the page titled [path] in any index of [language]: for a Wikipedia pack with no index of its own (an
+     * older subject pack), whose pages share their titles with the language's other Wikipedias.
+     */
+    fun qidOfTitle(path: String, language: String): Long? =
+        indexes.asSequence().filter { it.language == language }.firstNotNullOfOrNull { it.qidOf(path) }
+
     /** Where the item can be read, best pack first; empty when no installed pack has it. */
     fun articlesOf(qid: Long): List<QidArticle> = indexes.flatMap { it.articlesOf(qid) }
 

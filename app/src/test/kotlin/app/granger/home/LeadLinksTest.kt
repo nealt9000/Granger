@@ -84,4 +84,13 @@ class LeadLinksTest {
         assertThat(lead.links).containsExactly("Idioma_griego", "Estambul").inOrder()
         assertThat(lead.summary).isEqualTo("Santa Sofía (en griego, Ἁγία Σοφία) es un antiguo templo de Estambul, construido en el siglo VI el 27 de diciembre de 537. ¿Es la mayor?")
     }
+
+    @Test fun anAbbreviationDoesntEndTheSummarysSentence() {
+        val es = """<html><head><title>Alejandro Magno</title></head><body>
+            <p><b>Alejandro Magno</b> (356 a. C.-323 a. C.) fue rey de Macedonia. Murió en Babilonia. Su imperio se dividió.</p></body></html>"""
+        assertThat(LeadLinks.parse(es, "Alejandro_Magno").summary).isEqualTo("Alejandro Magno (356 a. C.-323 a. C.) fue rey de Macedonia. Murió en Babilonia.")
+        assertThat(LeadLinks.sentences("He met St. Paul and J. R. R. Tolkien. Then Mrs. Dalloway left. The end."))
+            .containsExactly("He met St. Paul and J. R. R. Tolkien.", "Then Mrs. Dalloway left.", "The end.").inOrder()
+        assertThat(LeadLinks.sentences("It opened in 1990. It closed.")).containsExactly("It opened in 1990.", "It closed.").inOrder()
+    }
 }

@@ -152,7 +152,8 @@ class ReferenceLinksTest {
             }
         }
 
-    private fun gqid(source: String, vararg articles: Pair<String, Long>, links: List<Triple<Long, String, String>> = emptyList()) = sqlite("wiki", "gqid", source) { db ->
+    private fun gqid(source: String, vararg articles: Pair<String, Long>, links: List<Triple<Long, String, String>> = emptyList(), zim: String? = null) = sqlite("wiki", "gqid", source) { db ->
+        zim?.let { db.execSQL("INSERT INTO meta VALUES ('sourceZim', ?)", arrayOf(it)) }
         db.execSQL("CREATE TABLE articles(path TEXT PRIMARY KEY, qid INTEGER NOT NULL, rank INTEGER NOT NULL, other TEXT)")
         db.execSQL("CREATE TABLE links(qid INTEGER, prop TEXT, value TEXT)")
         articles.forEach { (path, qid) -> db.execSQL("INSERT INTO articles VALUES (?, ?, 10, NULL)", arrayOf<Any>(path, qid)) }
@@ -295,5 +296,26 @@ class ReferenceLinksTest {
         source.mentions("book:granger:gc-pp", LinkLevel.LIGHT)
         background.coroutineContext[kotlinx.coroutines.Job]!!.children.forEach { it.join() }
         assertThat(source.peek(pp)?.book?.bookId).isEqualTo("book:granger:gc-pp")
+    }
+
+    @Test fun aWikipediaPackWithoutItsOwnIndexFindsItsPageByTitleInItsLanguage() = runBlocking<Unit> {
+        val top = gqid("t".repeat(64), "London" to 84L, zim = "wikipedia_en_top_maxi_2026-09.zim")
+        val esTop = gqid("s".repeat(64), "Londres" to 84L, zim = "wikipedia_es_top_maxi_2026-10.zim")
+        val books = mapOf("book:granger:gc-pp" to InstalledSidecar(glink(), "e".repeat(64)))
+        val source = ReferenceLinksSource(
+            linksFiles = { books },
+            qidFiles = { listOf("top" to InstalledSidecar(top, "t".repeat(64)), "es" to InstalledSidecar(esTop, "s".repeat(64))) },
+            lead = { _, p -> ArticleLead(p, "", null) },
+            bookOf = { shelf(it) },
+            index = mentionIndex(),
+            wikipediaLanguage = { id -> mapOf("history-old" to "en", "es-history" to "es")[id] },
+        )
+        // An older English History pack has no index: London is found through English Top.
+        assertThat(source.footer("history-old", "London").inBooks.map { it.count }).containsExactly(2)
+        // Not in another language's index, nor for a pack that isn't Wikipedia.
+        assertThat(source.footer("es-history", "London")).isEqualTo(ArticleFooter.NONE)
+        assertThat(source.footer("wikivoyage", "London")).isEqualTo(ArticleFooter.NONE)
+        // A pack with its own index answers from it alone.
+        assertThat(source.footer("top", "Londres")).isEqualTo(ArticleFooter.NONE)
     }
 }

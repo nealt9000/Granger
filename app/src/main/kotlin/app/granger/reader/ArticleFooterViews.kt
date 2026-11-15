@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -52,8 +53,14 @@ object ArticleFooterTags {
 /** The room under an article the footer's card takes, in dp: the page is padded by it so the article ends above the card. */
 const val FOOTER_BAND_DP = 96
 
+/** Room between the article's end and the footer's card, in dp, past the card's own height. */
+const val FOOTER_GAP_DP = 8
+
 /** How long after a page or its footer arrives the reader looks whether the page's end is in view. */
 const val FOOTER_SETTLE_MS = 400L
+
+/** While the card shows, how often the reader looks again whether the page's end is still in view (it can grow). */
+const val FOOTER_RECHECK_MS = 500L
 
 internal object FooterSummary {
     /** The card's line: the work on the phone, how many books mention the subject, how many by this author. */
@@ -63,19 +70,44 @@ internal object FooterSummary {
         if (footer.byAuthor.isNotEmpty()) add(UiText.Plural(R.plurals.reader_footer_by_author, footer.byAuthor.size, footer.byAuthor.size))
     }
 
-    /** A passage's words before the mention, as the card shows them: the same paragraph's last few words. */
-    fun lead(m: BookMention): String = LinkDecorations.contextOf(m.before)?.trimStart()?.let { "…$it" }.orEmpty()
+    /**
+     * A passage's words before the mention, as the card shows them: the same paragraph's last few words, from a word's
+     * start ("…as he goes from Madrid to", not "…s now as he goes"). [LinkDecorations.contextOf] itself stays exact, as
+     * Readium matches on it.
+     */
+    fun lead(m: BookMention): String {
+        val context = LinkDecorations.contextOf(m.before) ?: return ""
+        val cut = m.before.substringAfterLast('\n').length > context.length && !context.first().isWhitespace()
+        val words = if (cut) context.substringAfter(' ', "") else context
+        return words.trimStart().takeIf { it.isNotEmpty() }?.let { "…$it" }.orEmpty()
+    }
 }
 
-/** The card in the band under the article, once the page is read to its end; a tap opens [ArticleFooterSheet]. */
+/**
+ * The card in the band under the article, [shown] once the page is read to its end; a tap opens [ArticleFooterSheet].
+ * Before then it's measured but not placed (so not drawn, touched or read by TalkBack), and [onHeight] still learns
+ * its height, padding included, so the band can be sized to it.
+ */
 @Composable
-fun ArticleFooterCard(footer: ArticleFooter, onOpen: () -> Unit, modifier: Modifier = Modifier) {
+fun ArticleFooterCard(
+    footer: ArticleFooter,
+    onOpen: () -> Unit,
+    modifier: Modifier = Modifier,
+    shown: Boolean = true,
+    onHeight: (Int) -> Unit = {},
+) {
     Surface(
         onClick = onOpen,
         shape = RoundedCornerShape(12.dp),
         tonalElevation = 3.dp,
         shadowElevation = 2.dp,
-        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).testTag(ArticleFooterTags.CARD),
+        modifier = modifier
+            .layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints)
+                onHeight(placeable.height)
+                layout(placeable.width, placeable.height) { if (shown) placeable.place(0, 0) }
+            }
+            .fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).testTag(ArticleFooterTags.CARD),
     ) {
         Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(stringResource(R.string.reader_footer_title), style = MaterialTheme.typography.titleMedium)

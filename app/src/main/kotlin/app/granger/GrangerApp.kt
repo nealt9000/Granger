@@ -915,6 +915,9 @@ class AppContainer(context: Context) {
             bookOf = { id -> bookshelf.book(id)?.takeIf { it.status == app.granger.core.library.PackStatus.OK }?.let { app.granger.ebook.LibraryBook(it.id, it.title, it.coverPath) } },
             index = app.granger.core.library.MentionIndex(File(context.filesDir, "linked-library/mentions.sqlite")),
             background = appScope,
+            wikipediaLanguage = { id ->
+                library.packs.first().firstOrNull { it.id == id }?.name?.let { WIKIPEDIA_LANGUAGE.find(it)?.groupValues?.get(1) }
+            },
         )
     }
 
@@ -1031,3 +1034,6 @@ class AppContainer(context: Context) {
 
 /** A sidecar file on the phone and the sha256 of the pack file it must have been built from (and that file's name). */
 data class InstalledSidecar(val file: File, val packSha256: String, val packName: String? = null)
+
+/** `wikipedia_en_history_maxi_2026-09.zim` -> `en`: a Wikipedia pack's language, as its QID index names it. */
+private val WIKIPEDIA_LANGUAGE = Regex("^wikipedia_([a-z]{2,3})_")
