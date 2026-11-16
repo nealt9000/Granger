@@ -37,6 +37,8 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], qualifiers = "w400dp-h800dp") // Tall enough for the whole expanded rail.
 class RailTest {
+    /** The Browse tool\'s label: Explore with Plan EX\'s flag (debug builds), Browse without. */
+    private val BROWSE = if (app.granger.Features.EXPLORE) "Explore" else "Browse"
     @get:Rule val compose = createComposeRule()
 
     private val calls = mutableListOf<String>()
@@ -143,20 +145,20 @@ class RailTest {
     /** Plan U3c Decision 1: Browse, a globe, between Ask and Library; Settings stays at the foot. */
     @Test fun browseSitsBetweenAskAndLibrary() {
         assertThat(RailTool.entries.map { it.text() })
-            .containsExactly("Home", "Search", "Ask", "Browse", "Library", "Listen", "Settings").inOrder()
+            .containsExactly("Home", "Search", "Ask", BROWSE, "Library", "Listen", "Settings").inOrder()
         assertThat(RailTool.BROWSE.shown).isTrue()
         assertThat(RailTool.BROWSE.drawable()).isEqualTo(app.granger.R.drawable.ic_browse)
         assertThat(RailTool.entries.mapNotNull { it.drawable() }.toSet()).hasSize(5)
         shell()
         val top = { d: String -> compose.onNodeWithContentDescription(d).fetchSemanticsNode().boundsInRoot.top }
         // Ask shows only on a phone that can run it; Browse still comes after Search and before the Library.
-        assertThat(listOf("Search", "Browse", "Library").map(top)).isInStrictOrder()
-        compose.onNodeWithContentDescription("Browse").performClick()
+        assertThat(listOf("Search", BROWSE, "Library").map(top)).isInStrictOrder()
+        compose.onNodeWithContentDescription(BROWSE).performClick()
         compose.waitForIdle()
         assertThat(calls).containsExactly("tool:BROWSE")
         expanded = true
         compose.waitForIdle()
-        compose.onNodeWithText("Browse").assertExists()
+        compose.onNodeWithText(BROWSE).assertExists()
     }
 
     /** Ask is on in every build since the friend build (Plan F1 part 2); the phone's tier alone decides whether it shows. */
@@ -293,7 +295,7 @@ class RailTest {
     private val askFreed = if (app.granger.Features.RESEARCH) 0 else 1
 
     private fun assertToolsAndSettingsShow() {
-        val tools = listOf("Home", "Search", "Ask", "Browse", "Library", "Listen", "Settings")
+        val tools = listOf("Home", "Search", "Ask", BROWSE, "Library", "Listen", "Settings")
         for (tool in tools.filter { it != "Ask" || app.granger.Features.RESEARCH }) {
             compose.onNodeWithContentDescription(tool).assertExists()
         }

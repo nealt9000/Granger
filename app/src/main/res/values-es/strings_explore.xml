@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shell_tool_explore">Explorar</string>
+    <string name="explore_title">Explorar</string>
+    <string name="explore_start">Empieza por un tema</string>
+    <string name="explore_time">A través del tiempo</string>
+    <string name="explore_open_timeline">Abrir la línea del tiempo</string>
+    <string name="explore_sources">Tus fuentes</string>
+    <string name="explore_get_more">Conseguir más</string>
+    <string name="explore_no_subjects">Consigue una Wikipedia para explorarla por tema. Los temas llegan con ella.</string>
+    <string name="explore_get_wikipedia">Conseguir una Wikipedia</string>
+    <string name="explore_subject_packs">Paquetes sobre este tema</string>
+    <string name="explore_show_more">Mostrar más</string>
+    <string name="explore_nothing_here">Todavía no hay nada sobre este tema</string>
+    <plurals name="explore_all_packs">
+        <item quantity="one">Tu único paquete</item>
+        <item quantity="many">Los %1$d paquetes</item>
+        <item quantity="other">Los %1$d paquetes</item>
+    </plurals>
+    <plurals name="explore_topics">
+        <item quantity="one">%1$s tema</item>
+        <item quantity="many">%1$s temas</item>
+        <item quantity="other">%1$s temas</item>
+    </plurals>
+    <plurals name="explore_packs">
+        <item quantity="one">%1$d paquete</item>
+        <item quantity="many">%1$d paquetes</item>
+        <item quantity="other">%1$d paquetes</item>
+    </plurals>
+    <string name="explore_summary">%1$s artículos · %2$s</string>
+    <string name="explore_subject_history">Historia</string>
+    <string name="explore_subject_society">Sociedad y política</string>
+    <string name="explore_subject_business">Economía y empresa</string>
+    <string name="explore_subject_places">Lugares</string>
+    <string name="explore_subject_science">Ciencia y matemáticas</string>
+    <string name="explore_subject_nature">Naturaleza y animales</string>
+    <string name="explore_subject_health">Salud y medicina</string>
+    <string name="explore_subject_technology">Tecnología</string>
+    <string name="explore_subject_art">Arte y arquitectura</string>
+    <string name="explore_subject_literature">Libros y escritura</string>
+    <string name="explore_subject_music">Música</string>
+    <string name="explore_subject_film">Cine y televisión</string>
+    <string name="explore_subject_sports">Deportes</string>
+    <string name="explore_subject_games">Juegos</string>
+    <string name="explore_subject_religion">Filosofía y religión</string>
+    <string name="explore_subject_languages">Idiomas</string>
+    <string name="explore_subject_food">Comida y agricultura</string>
+    <string name="explore_era_prehistory">Prehistoria</string>
+    <string name="explore_era_prehistory_span">antes del 3000 a. C.</string>
+    <string name="explore_era_ancient">Mundo antiguo</string>
+    <string name="explore_era_ancient_span">3000 a. C. – 500 d. C.</string>
+    <string name="explore_era_middle_ages">Edad Media</string>
+    <string name="explore_era_middle_ages_span">500 – 1500</string>
+    <string name="explore_era_early_modern">Del Renacimiento a 1800</string>
+    <string name="explore_era_early_modern_span">1500 – 1800</string>
+    <string name="explore_era_c19">El siglo XIX</string>
+    <string name="explore_era_c19_span">1800 – 1900</string>
+    <string name="explore_era_wars">De 1900 a 1945</string>
+    <string name="explore_era_wars_span">dos guerras mundiales</string>
+    <string name="explore_era_recent">Desde 1946</string>
+    <string name="explore_era_recent_span">1946 – hoy</string>
+</resources>

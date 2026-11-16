@@ -142,4 +142,12 @@ class TimeIndexTest {
         assertThat(both.marks(1700, 1900, emptySet(), 10, now = 2026).single().path).isEqualTo("French_Revolution")
         assertThat(both.marks(1700, 1900, emptySet(), 10, now = 2026, prefer = "es").single().path).isEqualTo("Revolución_francesa")
     }
+
+    @Test fun countStartingCountsAnItemOnceAcrossPacks() {
+        val history = listOf(listOf(83224L, "Battle_of_Hastings", 0, 1066, null, bit(Lane.WARS), 80), listOf(42L, "Domesday_Book", 0, 1086, null, 0L, 40))
+        val all = TimeIndexes(listOf(TimeIndex.open(gtime("top", top), "top")!!, TimeIndex.open(gtime("history", history), "history")!!))
+        assertThat(all.countStarting(500, 1499)).isEqualTo(2)          // Hastings in both packs, Domesday in one
+        assertThat(all.countStarting(-3000, 499)).isEqualTo(2)         // Aristotle, Rome
+        assertThat(all.countStarting(1500, 1799)).isEqualTo(0)
+    }
 }

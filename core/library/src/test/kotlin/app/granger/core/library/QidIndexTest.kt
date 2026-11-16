@@ -19,6 +19,7 @@ class QidIndexTest {
     private fun gqid(
         name: String, articles: List<List<Any?>>, links: List<List<Any>> = emptyList(), coords: List<List<Any>> = emptyList(),
         kind: String = "gqid", schema: Int = 1, source: String = "a".repeat(64), sourceZim: String? = null,
+        subjects: List<List<Any>>? = null,
     ): File {
         val f = File(tmp.root, "$name.gqid")
         SQLiteDatabase.openOrCreateDatabase(f, null).use { db ->
@@ -31,6 +32,11 @@ class QidIndexTest {
             articles.forEach { db.execSQL("INSERT INTO articles VALUES (?, ?, ?, ?)", it.toTypedArray()) }
             links.forEach { db.execSQL("INSERT INTO links VALUES (?, ?, ?)", it.toTypedArray()) }
             coords.forEach { db.execSQL("INSERT INTO coords VALUES (?, ?, ?)", it.toTypedArray()) }
+            if (subjects != null) {
+                db.execSQL("CREATE TABLE subjects(qid INTEGER NOT NULL, ord INTEGER NOT NULL, subject TEXT NOT NULL, PRIMARY KEY(qid, ord)) WITHOUT ROWID")
+                db.execSQL("CREATE INDEX subjects_subject ON subjects(subject, qid)")
+                subjects.forEach { db.execSQL("INSERT INTO subjects VALUES (?, ?, ?)", it.toTypedArray()) }
+            }
         }
         return f
     }
@@ -98,6 +104,30 @@ class QidIndexTest {
         assertThat(all.articlesOf(1L)).isEmpty()
         assertThat(all.qidOf("history", "Hastings")).isEqualTo(83224L)
         assertThat(all.linksOf(170583L, "P50")).containsExactly("Q36322")
+        all.close()
+    }
+
+    @Test fun subjectsAreCountedOncePerItemAcrossPacksAndListedMostLinkedFirst() {
+        // English and Spanish Top share Jane Austen (36322) and London (84); Pride and Prejudice is English only, Bélgica Spanish only.
+        val en = QidIndex.open(gqid("en", top, subjects = listOf(
+            listOf(36322L, 0, "literature"), listOf(36322L, 1, "history"), listOf(170583L, 0, "literature"), listOf(84L, 0, "places"),
+        )), "en")!!
+        val es = QidIndex.open(gqid("es", listOf(
+            listOf("Jane_Austen", 36322L, 150, "Jane Austen"), listOf("Londres", 84L, 300, "London"), listOf("Bélgica", 31L, 383, "Belgium"),
+        ), subjects = listOf(listOf(36322L, 0, "literature"), listOf(84L, 0, "places"), listOf(31L, 0, "places"))), "es")!!
+        val old = QidIndex.open(gqid("old", listOf(listOf("Paris", 90L, 400, null))), "old")!!   // built before subjects
+        assertThat(old.hasSubjects).isFalse()
+        assertThat(old.topIn("places", 5)).isEmpty()
+        val all = QidIndexes(listOf(en, es, old))
+        assertThat(all.hasSubjects).isTrue()
+        assertThat(all.subjectCounts(listOf("literature", "places", "history", "music")))
+            .containsExactly("literature", 2, "places", 2, "history", 1, "music", 0)
+        assertThat(all.itemCount()).isEqualTo(5)
+        assertThat(all.subjectsOf(36322L)).containsExactly("literature", "history").inOrder()
+        // Each item once, in the first pack that has it (the library's main language first), most-linked first.
+        assertThat(all.topIn("places", 5).map { it.packId to it.path }).containsExactly("es" to "Bélgica", "en" to "London").inOrder()
+        assertThat(all.topIn("places", 1, offset = 1).map { it.path }).containsExactly("London")
+        assertThat(all.topIn("literature", 5).map { it.path }).containsExactly("Jane_Austen", "Pride_and_Prejudice").inOrder()
         all.close()
     }
 }

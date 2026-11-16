@@ -209,7 +209,7 @@ class PublishedCatalogTest {
     }
 
     /**
-     * Linked Library LL0: every Wikipedia pack but English all carries its QID index (release sidecars-2026-11-12, 44
+     * Linked Library LL0: every Wikipedia pack but English all carries its QID index (release sidecars-2026-11-16 since Plan EX added subjects; first sidecars-2026-11-12, 44
      * files); English all's three wait for LL1's slimming (tools/sidecar/releases/held).
      */
     @Test fun publishedCatalogCarriesTheQidIndexes() {
@@ -221,7 +221,7 @@ class PublishedCatalogTest {
         assertThat(indexed.map { it.id }.filter { it.startsWith("wikipedia_en_all_") }).isEmpty()
         assertThat(indexed.size).isAtLeast(90)
         for (s in indexed.flatMap { it.sidecars }) {
-            assertThat(s.url).startsWith("https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-12/")
+            assertThat(s.url).startsWith("https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/")
             assertThat(s.sha256).hasLength(64)
             assertThat(s.schemaVersion).isEqualTo(1)
         }

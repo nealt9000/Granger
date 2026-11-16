@@ -81,6 +81,10 @@ import app.granger.listen.ListenActions
 import app.granger.browse.BrowseActions
 import app.granger.browse.BrowseScreen
 import app.granger.browse.BrowseViewModel
+import app.granger.explore.ExploreScreen
+import app.granger.explore.ExploreViewModel
+import app.granger.explore.SubjectScreen
+import app.granger.explore.SubjectViewModel
 import app.granger.listen.ListenScreen
 import app.granger.listen.ListenViewModel
 import app.granger.widget.playFromWidget
@@ -406,7 +410,8 @@ internal fun railToolOf(
         CatalogScope.KIWIX -> RailTool.BROWSE
         else -> RailTool.LIBRARY
     }
-    destination.hasRoute<BrowseRoute>() || destination.hasRoute<ReaderRoute>() -> RailTool.BROWSE
+    destination.hasRoute<BrowseRoute>() || destination.hasRoute<ReaderRoute>() ||
+        destination.hasRoute<ExploreRoute>() || destination.hasRoute<SubjectRoute>() -> RailTool.BROWSE
     destination.hasRoute<BookRoute>() -> RailTool.LIBRARY
     destination.hasRoute<GetMoreRoute>() && getMoreFor == GetMoreFor.LISTEN -> RailTool.LISTEN
     destination.hasRoute<ArchiveRoute>() -> if (archiveKind == null || archiveKind == ArchiveKind.TEXTS) RailTool.LIBRARY else RailTool.LISTEN
@@ -422,6 +427,12 @@ internal fun railToolOf(
 
 /** Browse's home (Plan U3c Decision 1): the packs and the maps, each a row opening its main page. The tool's landing. */
 @Serializable object BrowseRoute
+
+/** Explore (Plan EX, with [Features.EXPLORE]): the rail's Browse tool lands here; Your sources leads on to [BrowseRoute]. */
+@Serializable object ExploreRoute
+
+/** One subject opened from Explore (Plan EX): [subject] is its subjects.json id. */
+@Serializable data class SubjectRoute(val subject: String)
 
 /** Listen's home (Plan U2 Decision 4): the Now playing card and the Music and Audiobooks shelves. The tool's landing. */
 @Serializable object ListenRoute
@@ -676,6 +687,41 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         startAt = startAt,
     )
 
+    // Explore (Plan EX): the QID indexes' subjects, the time indexes' eras and the packs, as Browse lists them.
+    val exploreSources = remember {
+        val thumbs = ArticleThumbnails(File(appContext.cacheDir, "home-thumbs"))
+        app.granger.explore.ExploreSources(
+            qids = { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { container.referenceLinks.qidIndexes() } },
+            times = { timeIndexes() },
+            picture = { packId, path ->
+                container.library.archive(packId)?.let { archive ->
+                    archive.read(path)?.let { thumbs.thumbnail(archive, path, String(it.bytes, Charsets.UTF_8)) }
+                }
+            },
+            packs = kotlinx.coroutines.flow.combine(
+                container.library.packs, container.catalog.state, container.downloads.records,
+            ) { packs, state, records ->
+                packs.filterNot { it.isBookPack }.map { pack ->
+                    // A map joins no door (the Atlas is LL6); it stays under Your sources.
+                    val map = app.granger.core.library.Filing.defaultKey(pack) == "maps"
+                    pack to if (map) null else app.granger.browse.installedEntry(pack, state?.catalog, records)?.domain
+                }
+            },
+            isWikipedia = { it.name.startsWith("wikipedia_") },
+        )
+    }
+    val exploreActions = app.granger.explore.ExploreActions(
+        onOpenSubject = { nav.navigate(SubjectRoute(it.id)) },
+        onOpenArticle = { packId, path, title ->
+            scope.launch { container.sessions.tab(container.sessions.openTab(packId, path, title))?.let { nav.showTab(it, keepCurrent = true) } }
+        },
+        onOpenTimeline = { packId, path -> nav.navigate(TimelineRoute(packId, path)) },
+        onOpenSources = { nav.navigate(BrowseRoute) { launchSingleTop = true } },
+        onOpenPack = { packId -> openPack(packId, newTab = true) },
+        onGetMore = { nav.navigate(SourceRoute(CatalogScope.KIWIX)) },
+        onBack = { nav.popBackStack() },
+    )
+
     // Play and the Games screen (Plan H5c) share one count of rounds played and Which came first?'s level.
     val gameStore = remember { GameStore.Prefs(appContext.getSharedPreferences("games", android.content.Context.MODE_PRIVATE)) }
     // Home's round, for the Games screen's Continue to pick up (Plan HY); set when Home's view model makes it.
@@ -912,7 +958,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             when (tool) {
                 RailTool.HOME -> if (!nav.popBackStack<HomeRoute>(inclusive = false)) nav.navigate(HomeRoute) { launchSingleTop = true }
                 RailTool.SEARCH -> nav.navigate(SearchRoute()) { launchSingleTop = true }
-                RailTool.BROWSE -> if (!nav.popBackStack<BrowseRoute>(inclusive = false)) nav.navigate(BrowseRoute) { launchSingleTop = true }
+                RailTool.BROWSE -> if (Features.EXPLORE) {
+                    if (!nav.popBackStack<ExploreRoute>(inclusive = false)) nav.navigate(ExploreRoute) { launchSingleTop = true }
+                } else if (!nav.popBackStack<BrowseRoute>(inclusive = false)) nav.navigate(BrowseRoute) { launchSingleTop = true }
                 RailTool.LIBRARY -> if (!nav.popBackStack<LibraryRoute>(inclusive = false)) nav.navigate(LibraryRoute())
                 RailTool.SETTINGS -> nav.navigate(SettingsRoute) { launchSingleTop = true }
                 RailTool.RESEARCH -> openResearch(ResearchRoute()) // A new chat, even while a kept one is open.
@@ -1002,6 +1050,14 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     importAsked = importAsked,
                     onImportAsked = { backStackEntry.savedStateHandle[IMPORT_ASKED] = false },
                 )
+            }
+            composable<ExploreRoute> {
+                ExploreScreen(viewModel { ExploreViewModel(exploreSources) }, exploreActions)
+            }
+            composable<SubjectRoute> { backStackEntry ->
+                val id = backStackEntry.toRoute<SubjectRoute>().subject
+                val subject = app.granger.explore.Subject.of(id) ?: app.granger.explore.Subject.HISTORY
+                SubjectScreen(viewModel(key = "subject:$id") { SubjectViewModel(subject, exploreSources) }, exploreActions)
             }
             composable<BrowseRoute> {
                 BrowseScreen(

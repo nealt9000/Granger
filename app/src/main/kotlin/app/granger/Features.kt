@@ -45,4 +45,10 @@ object Features {
      * release until the tester build turns both on.
      */
     val TOPIC_PAGE = LINKED_CLASSICS
+
+    /**
+     * Plan EX: the rail's Browse becomes Explore (subjects, Through time, Your sources), the same tool and id. Rides with
+     * [LINKED_CLASSICS], since subjects come in the QID index those builds download. Off: Browse as before.
+     */
+    val EXPLORE = LINKED_CLASSICS
 }

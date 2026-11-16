@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Plan EX: Explore, the rail's way into the library by subject and by time (Browse's place). -->
+    <string name="shell_tool_explore">Explore</string>
+    <string name="explore_title">Explore</string>
+    <string name="explore_start">Start with a subject</string>
+    <string name="explore_time">Through time</string>
+    <string name="explore_open_timeline">Open the Timeline</string>
+    <string name="explore_sources">Your sources</string>
+    <string name="explore_get_more">Get more</string>
+    <string name="explore_no_subjects">Get a Wikipedia to explore it by subject. Subjects arrive with it.</string>
+    <string name="explore_get_wikipedia">Get a Wikipedia</string>
+    <string name="explore_subject_packs">Packs on this subject</string>
+    <string name="explore_show_more">Show more</string>
+    <string name="explore_nothing_here">Nothing on this subject yet</string>
+    <!-- The Your sources row: how many packs there are. %1$d is the count. -->
+    <plurals name="explore_all_packs">
+        <item quantity="one">Your one pack</item>
+        <item quantity="other">All %1$d packs</item>
+    </plurals>
+    <!-- How many articles a subject or an era holds. %1$s is the number, already formatted (2,776). -->
+    <plurals name="explore_topics">
+        <item quantity="one">%1$s topic</item>
+        <item quantity="other">%1$s topics</item>
+    </plurals>
+    <!-- A subject door's packs (non-Wikipedia sources on the subject). %1$d is the count. -->
+    <plurals name="explore_packs">
+        <item quantity="one">%1$d pack</item>
+        <item quantity="other">%1$d packs</item>
+    </plurals>
+    <!-- Under the title: what the phone holds. %1$s is the number of articles, formatted; %2$s the packs line (explore_packs). -->
+    <string name="explore_summary">%1$s articles · %2$s</string>
+    <!-- The subjects (tools/subjects/subjects.json, ids locked in v1). -->
+    <string name="explore_subject_history">History</string>
+    <string name="explore_subject_society">Society &amp; politics</string>
+    <string name="explore_subject_business">Business &amp; economy</string>
+    <string name="explore_subject_places">Places</string>
+    <string name="explore_subject_science">Science &amp; maths</string>
+    <string name="explore_subject_nature">Nature &amp; animals</string>
+    <string name="explore_subject_health">Health &amp; medicine</string>
+    <string name="explore_subject_technology">Technology</string>
+    <string name="explore_subject_art">Art &amp; architecture</string>
+    <string name="explore_subject_literature">Books &amp; writing</string>
+    <string name="explore_subject_music">Music</string>
+    <string name="explore_subject_film">Film &amp; TV</string>
+    <string name="explore_subject_sports">Sports</string>
+    <string name="explore_subject_games">Games</string>
+    <string name="explore_subject_religion">Philosophy &amp; religion</string>
+    <string name="explore_subject_languages">Languages</string>
+    <string name="explore_subject_food">Food &amp; farming</string>
+    <!-- The eras of Through time, and the years each covers. -->
+    <string name="explore_era_prehistory">Prehistory</string>
+    <string name="explore_era_prehistory_span">before 3000 BC</string>
+    <string name="explore_era_ancient">Ancient world</string>
+    <string name="explore_era_ancient_span">3000 BC – AD 500</string>
+    <string name="explore_era_middle_ages">Middle Ages</string>
+    <string name="explore_era_middle_ages_span">500 – 1500</string>
+    <string name="explore_era_early_modern">Renaissance to 1800</string>
+    <string name="explore_era_early_modern_span">1500 – 1800</string>
+    <string name="explore_era_c19">The 1800s</string>
+    <string name="explore_era_c19_span">1800 – 1900</string>
+    <string name="explore_era_wars">1900 to 1945</string>
+    <string name="explore_era_wars_span">two world wars</string>
+    <string name="explore_era_recent">Since 1946</string>
+    <string name="explore_era_recent_span">1946 – now</string>
+</resources>

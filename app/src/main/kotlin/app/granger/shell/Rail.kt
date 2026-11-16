@@ -74,8 +74,11 @@ enum class RailTool(@StringRes val label: Int, val shown: Boolean) {
     HOME(R.string.shell_tool_home, true),
     SEARCH(R.string.shell_tool_search, true),
     RESEARCH(R.string.shell_tool_ask, Features.RESEARCH),
-    /** The wiki and Kiwix packs and the maps, browsed as linked sites (Plan U3c Decision 1). */
-    BROWSE(R.string.shell_tool_browse, true),
+    /**
+     * The wiki and Kiwix packs and the maps, browsed as linked sites (Plan U3c Decision 1). With [Features.EXPLORE] it's
+     * Explore (Plan EX): subjects and time first, the packs one tap back. Same id, so pins and arrangements keep.
+     */
+    BROWSE(if (Features.EXPLORE) R.string.shell_tool_explore else R.string.shell_tool_browse, true),
     /** Books: what you read through (Plan U3c Decision 2). */
     LIBRARY(R.string.shell_tool_library, true),
     /** Your player and your audio collection (Plan U2 Decision 4). */

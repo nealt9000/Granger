@@ -71,6 +71,10 @@ class TimeIndex private constructor(private val db: SQLiteDatabase, val packId: 
         return query("y0 >= $from AND y0 <= $to$lane ORDER BY rank DESC LIMIT $k")
     }
 
+    /** The items whose mark starts in [from]..[to], in qid order, for [TimeIndexes.countStarting]. */
+    internal fun qidsStarting(from: Int, to: Int): android.database.Cursor =
+        db.rawQuery("SELECT DISTINCT qid FROM marks WHERE y0 >= $from AND y0 <= $to ORDER BY qid", null)
+
     /** The mark for the article at [path], if this pack has it dated. */
     fun find(path: String): TimeMark? {
         val quoted = DatabaseUtils.sqlEscapeString(path)
@@ -227,6 +231,9 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
     /** Titles containing every word of [text], across packs, best known first. */
     fun search(text: String, lanes: Set<Lane>, limit: Int): List<TimeMark> =
         merge(indexes.map { it.search(text, lanes, limit) }).sortedByDescending { it.rank }.take(limit)
+
+    /** How many items have a mark starting in [from]..[to], each once however many packs date it (Explore's eras). */
+    fun countStarting(from: Int, to: Int): Int = countDistinct(indexes.map { it.qidsStarting(from, to) })
 
     /** The latest year any pack has a mark starting in. */
     fun latestYear(): Int? = indexes.mapNotNull { it.latestYear() }.maxOrNull()
