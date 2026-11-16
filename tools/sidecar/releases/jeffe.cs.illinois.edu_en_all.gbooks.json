@@ -1,0 +1,13 @@
+{
+ "id": "jeffe.cs.illinois.edu_en_all",
+ "kind": "pack",
+ "sidecar": "gbooks",
+ "fileName": "jeffe.cs.illinois.edu_en_all_2026-09.gbooks",
+ "sizeBytes": 237568,
+ "sha256": "7c6921b799fc82f997685852443d08172e00acddc8df7d4a044e4316778312e2",
+ "schemaVersion": 1,
+ "sourceSha256": "f2c84cdb4723de39ab91d8f84806823a4b981020844f3ed4054ef66addf7a6bf",
+ "builder": "tools/bookpacks/build.py",
+ "builderVersion": 1,
+ "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-16/jeffe.cs.illinois.edu_en_all_2026-09.gbooks"
+}

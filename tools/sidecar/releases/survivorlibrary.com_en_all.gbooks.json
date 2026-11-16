@@ -1,0 +1,13 @@
+{
+ "id": "survivorlibrary.com_en_all",
+ "kind": "pack",
+ "sidecar": "gbooks",
+ "fileName": "survivorlibrary.com_en_all_2026-09.gbooks",
+ "sizeBytes": 4251648,
+ "sha256": "23e6c61ab812375419073e1c5cd257a51731a52f90111715dd17fa48a2ecf72a",
+ "schemaVersion": 1,
+ "sourceSha256": "cf0b00f1f5c0cc840046337ba2d1f9b866be1afb8d5a59c5bc3be31a0994cd25",
+ "builder": "tools/bookpacks/build.py",
+ "builderVersion": 1,
+ "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-16/survivorlibrary.com_en_all_2026-09.gbooks"
+}

@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-11-15T10:42:25Z",
+  "generatedAt": "2026-11-16T16:44:16Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -335,7 +335,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "wikisource_en_all_nopic",
@@ -383,7 +384,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "wikivoyage_en_all_nopic",
@@ -2185,7 +2187,8 @@
       "family": "zimgit-knots",
       "domain": "making",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "manuals"
     },
     {
       "id": "appropedia_en_all_maxi",
@@ -2364,7 +2367,8 @@
       "family": "zimgit-food-preparation",
       "domain": "food",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "manuals"
     },
     {
       "id": "foss.cooking_en_all",
@@ -2546,7 +2550,8 @@
       "family": "zimgit-post-disaster",
       "domain": "food",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "manuals"
     },
     {
       "id": "publicdomainrecipes.com_en_all",
@@ -2708,7 +2713,17 @@
       "family": "survivorlibrary.com",
       "domain": "food",
       "content": "",
-      "flavour": ""
+      "flavour": "",
+      "sidecars": [
+        {
+          "kind": "gbooks",
+          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-16/survivorlibrary.com_en_all_2026-09.gbooks",
+          "sha256": "23e6c61ab812375419073e1c5cd257a51731a52f90111715dd17fa48a2ecf72a",
+          "sizeBytes": 4251648,
+          "schemaVersion": 1
+        }
+      ],
+      "shelf": "manuals"
     },
     {
       "id": "privacydefence.org_en_opsecbible",
@@ -2777,7 +2792,8 @@
       "family": "usda-2015",
       "domain": "food",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "manuals"
     },
     {
       "id": "zimgit-water_en",
@@ -2800,7 +2816,8 @@
       "family": "zimgit-water",
       "domain": "food",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "manuals"
     },
     {
       "id": "wikiciv_en_all_maxi",
@@ -2869,7 +2886,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "allthetropes_en_all_maxi",
@@ -2915,7 +2933,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-c",
@@ -2938,7 +2957,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-z",
@@ -2961,7 +2981,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "booksdash_en_all",
@@ -3031,7 +3052,8 @@
       "family": "prunelle",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "children"
     },
     {
       "id": "chopin.lib.uchicago.edu_en_all",
@@ -3102,7 +3124,8 @@
       "family": "prunelle",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "children"
     },
     {
       "id": "gutenberg_en_lcc-pl",
@@ -3125,7 +3148,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-l",
@@ -3148,7 +3172,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-pe",
@@ -3171,7 +3196,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_mul_all",
@@ -3194,7 +3220,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_all",
@@ -3217,7 +3244,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-pz",
@@ -3240,7 +3268,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-n",
@@ -3263,7 +3292,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "folgerpedia.folger.edu_en_all",
@@ -3309,7 +3339,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-a",
@@ -3332,7 +3363,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-g",
@@ -3355,7 +3387,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-pd",
@@ -3378,7 +3411,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-pt",
@@ -3401,7 +3435,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-pa",
@@ -3424,7 +3459,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-e",
@@ -3447,7 +3483,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-f",
@@ -3470,7 +3507,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-pm",
@@ -3493,7 +3531,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-pk",
@@ -3516,7 +3555,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-p",
@@ -3539,7 +3579,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-k",
@@ -3562,7 +3603,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-pn",
@@ -3585,7 +3627,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-r",
@@ -3608,7 +3651,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-u",
@@ -3631,7 +3675,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-pb",
@@ -3654,7 +3699,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-m",
@@ -3677,7 +3723,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "mutopiaproject.org_en_all",
@@ -3723,7 +3770,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-pj",
@@ -3746,7 +3794,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-j",
@@ -3769,7 +3818,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "prunelle_en_interactive-books",
@@ -3792,7 +3842,8 @@
       "family": "prunelle",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "children"
     },
     {
       "id": "gutenberg_en_lcc-pc",
@@ -3815,7 +3866,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-q",
@@ -3838,7 +3890,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-pg",
@@ -3861,7 +3914,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "smbc-comics.com_en_all",
@@ -3885,7 +3939,17 @@
       "domain": "",
       "content": "",
       "flavour": "",
-      "nonCommercial": true
+      "nonCommercial": true,
+      "sidecars": [
+        {
+          "kind": "gbooks",
+          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-16/smbc-comics.com_en_all_2026-10.gbooks",
+          "sha256": "20c66020533ecfc56a89c0d6e633e180b26ef6899073fa956e29fef60401468c",
+          "sizeBytes": 36864,
+          "schemaVersion": 1
+        }
+      ],
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-h",
@@ -3908,7 +3972,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-t",
@@ -3931,7 +3996,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_es_all",
@@ -3954,7 +4020,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "tomlehrersongs.com_en_all",
@@ -4000,7 +4067,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "gutenberg_en_lcc-pf",
@@ -4023,7 +4091,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "wikiquote_en_all_maxi",
@@ -4221,7 +4290,8 @@
       "family": "gutenberg",
       "domain": "literature",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "literature"
     },
     {
       "id": "xkcd.com_en_all",
@@ -8823,7 +8893,8 @@
       "family": "zimgit-medicine",
       "domain": "medicine",
       "content": "books",
-      "flavour": ""
+      "flavour": "",
+      "shelf": "manuals"
     },
     {
       "id": "medlineplus.gov_en_all",
@@ -8892,7 +8963,17 @@
       "family": "irp.fas.org",
       "domain": "medicine",
       "content": "",
-      "flavour": ""
+      "flavour": "",
+      "sidecars": [
+        {
+          "kind": "gbooks",
+          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-16/irp.fas.org_en_military-medicine_2026-10.gbooks",
+          "sha256": "0c42c9cac2be27d4dff9897b69d2270e0ea5e5234d7546e2dc2fc473aecd528a",
+          "sizeBytes": 45056,
+          "schemaVersion": 1
+        }
+      ],
+      "shelf": "manuals"
     },
     {
       "id": "nhs.uk_en_medicines",
@@ -22998,7 +23079,17 @@
       "family": "milneopentextbooks.org",
       "domain": "reference",
       "content": "",
-      "flavour": ""
+      "flavour": "",
+      "sidecars": [
+        {
+          "kind": "gbooks",
+          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-16/milneopentextbooks.org_en_all_2026-08.gbooks",
+          "sha256": "65b64714b464bdb8ba2c467e82cebb6a6b94bc586ebe2928b8bf8b7f10bcec7c",
+          "sizeBytes": 45056,
+          "schemaVersion": 1
+        }
+      ],
+      "shelf": "learning"
     },
     {
       "id": "wikipedia_en_molcell_maxi",
@@ -24757,7 +24848,17 @@
       "family": "jeffe.cs.illinois.edu",
       "domain": "technology",
       "content": "",
-      "flavour": ""
+      "flavour": "",
+      "sidecars": [
+        {
+          "kind": "gbooks",
+          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-16/jeffe.cs.illinois.edu_en_all_2026-09.gbooks",
+          "sha256": "7c6921b799fc82f997685852443d08172e00acddc8df7d4a044e4316778312e2",
+          "sizeBytes": 237568,
+          "schemaVersion": 1
+        }
+      ],
+      "shelf": "learning"
     },
     {
       "id": "artofproblemsolving_en_all_maxi",

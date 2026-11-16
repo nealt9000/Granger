@@ -173,42 +173,60 @@ Python for tools).
 
 ## Phase 1: manifests and upkeep (tools)
 
-- [ ] **Task 1.1: format + check.**
-  - Write `tools/bookpacks/schema.md` (design §3).
-  - Write `check.py`: every path resolves in the source ZIM, keys are unique, titles aren't empty, and a drift report
-    against the previous manifest (keys lost, count delta, share of file-name titles).
-  - Add tests with a fixture ZIM.
-- [ ] **Task 1.2: `book_packs.json`.** Per pack: extractor, filters, group rules, `noun`, provider, licence and `overrides`.
-  Start with the round-one packs from D1.
-- [ ] **Task 1.3: sidecar kind `gbooks`.**
-  - Add it to `tools/sidecar/kinds.json` (build and check commands, `gpu: false`).
-  - Write release descriptors under `tools/sidecar/releases`.
-  - Make `catalog_gen.py attach_sidecars` attach them to the pack entries.
-  - Use `build --previous` hold-back to hold a pack whose `.gbooks` would drop (`snapshot-held-sidecar`).
-  - Tests.
-- [ ] **Task 1.4: catalog `content`.**
-  - Manifest-backed packs get `content: "books"` and a `shelf` (Literature / Children / Manuals / Learning).
-  - Gutenberg and nautilus packs get their shelf too.
-  - Add African Storybook to `curated.json` if D2 says ZIM, or don't list it if D2 says sets.
-  - `FORMAT_VERSION` stays 1.
-- [ ] **Task 1.5: upkeep findings.** `upkeep.py check` adds:
-  - `bookpack-drift`, from `check.py` on any rebuilt manifest;
-  - `bookpack-candidate`: `zim_probe probe` on new or changed packs with the audit's rules (3 or more docs; doc bytes
-    at least 50% of the pack, or a doc/HTML ratio of at least 0.5; not already in `book_packs.json`; not class E in
-    the audit's list).
-  - Add playbooks to `tools/upkeep/README.md`, and tests.
+- [x] **Task 1.1: format + check.** Done 3b29d60f.
+  - **The sidecar is SQLite, not JSON.** The sidecar contract (`tools/sidecar/meta.py`) is a read-only SQLite file
+    with a `meta` table, so `.gbooks` keeps it and the catalog, hold-back and upkeep take it as they take `.gqid`.
+    Tables: `meta`, `collection`, `groups`, `items` (`tools/bookpacks/schema.md`).
+  - `build.py` writes `.gbooks` (or `.json` for review), and reads a previous one to keep the keys of moved files.
+  - `check.py` exits 1 on a problem (meta contract, empty title or bad format, a path the ZIM lacks) and 2 on drift
+    (books lost, count >10%, file-name titles >5% and rising).
+  - Fixture ZIMs come from `tools/test-zim/make_bookpacks_zim.py` (a scraped site in every shape the audit met, and a
+    Kolibri pack); 29 tests.
+  - The tests found and fixed: single words counted as generic link text; language names; brackets inside PDF
+    strings; averaged sizes for files sharing a cluster; hyphens in dates and volume ranges.
+- [x] **Task 1.2: `book_packs.json`.** Done.
+  - The six round-one packs.
+  - `shelves`: prefixes for list-carrying packs: `gutenberg_` → literature, `zimgit-` and `usda-` → manuals,
+    `prunelle_` → children.
+  - `notBooks`: the audit's reviewed sites, scores and later passes, with reasons.
+- [x] **Task 1.3: sidecar kind `gbooks`.** Done d4ad0ae8.
+  - `kinds.json` has the build and check commands, and `gpu: false`.
+  - `build.py auto <zim>` names the pack from its file.
+  - `--catalog` gives the source sha256 and the published `.gbooks` as the previous manifest.
+  - `meta.py release --url` handles a sidecar in a release of its own (as `.glink` files are): `bookpacks-<date>`.
+  - `attach_sidecars` and the hold-back rule needed no change.
+- [x] **Task 1.4: catalog `shelf`.** Done d4ad0ae8. **Changed from the draft:** `content` stays as it is.
+  - Today's app (in testers' hands) lists `content: "books"` packs under Books but opens a non-Gutenberg,
+    non-nautilus pack as a website, so marking the new packs would misfile them.
+  - **The new app knows a manifest pack by its `gbooks` sidecar** (Task 2.1). Old apps drop sidecar kinds they don't
+    know (`SidecarEntry.KNOWN`).
+  - A new `shelf` key, which old apps ignore, comes from `book_packs.json` and is stamped by `catalog_gen.py shelves`.
+    It's set on 56 packs: 43 literature, 8 manuals, 3 children, 2 learning.
+  - African Storybook isn't listed (Decision 2: sets).
+- [x] **Task 1.5: upkeep findings.** Done 89ad6def.
+  - `bookpack-drift`: a pack held for its `gbooks` is rebuilt in memory and checked against the published manifest.
+  - `bookpack-candidate`: new packs and new snapshots are probed and judged by the audit's Counter rule.
+  - Hold records now carry `toUrl` and `toSha256`.
+  - Both playbooks are in the README; the gbooks rebuild needs no ZIM download.
+  - Smoke-tested live: SMBC is judged a book bundle, and a Military Medicine dry rebuild gives 24 items with no drift.
 - [ ] **Task 1.6: build, check, release prep.**
-  - Build the round-one `.gbooks` and run the checks.
-  - Write an upload script, resumable, batched about 10 per upload with sleeps.
-  - **Neal uploads.**
-  - Attach the manifests to the catalog, unsigned, then run `check-links`. **Neal signs.**
+  - [x] Built and checked all five catalog packs' `.gbooks` from their pinned files (exit 0), into
+    `~/Developer/Granger/vectors-work/bookpacks-2026-11-16/`, 4.6 MB in all (Survivor 4.25 MB).
+  - [x] Wrote the descriptors (`tools/sidecar/releases/*.gbooks.json`, release `bookpacks-2026-11-16`) and attached
+    them to the catalog with the shelves, unsigned. A semantic diff shows only the 5 `gbooks` sidecars, the 56
+    `shelf` keys and `generatedAt`.
+  - [x] Wrote the upload script: `tools/bookpacks/upload_release.sh`, resumable, 10 per batch.
+  - [ ] **Neal:** run
+    `tools/bookpacks/upload_release.sh bookpacks-2026-11-16 ~/Developer/Granger/vectors-work/bookpacks-2026-11-16`.
+  - [ ] `check-links`, then **Neal signs**; then `:core:catalog` tests (they read the signature).
 
 ## Phase 2: the phone reads manifests
 
 - [ ] **Task 2.1: `ManifestSource` over `PackBooks`.**
   - A new `BookOrigin.KIWIX` (`book:kiwix:<zimName>/<key>`), `isPackBook`.
   - Download the `.gbooks` with its pack, as `.gqid` files are.
-  - `Pack.bookSource` is KIWIX when the pack has a manifest.
+  - `Pack.bookSource` is KIWIX when the pack has a `gbooks` sidecar (catalog) or a downloaded `.gbooks` file: not
+    `content`, which stays blank for these packs (Task 1.4). Add `"gbooks" to 1` to `SidecarEntry.KNOWN`.
   - Rows carry group, order, level, language and parts. Restore picks the inspector by format.
   - Tests: fixture manifest, parts folded, snapshot change keeps ids, fallback when the manifest is missing.
 - [ ] **Task 2.2: fallback.**
