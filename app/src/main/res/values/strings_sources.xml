@@ -40,6 +40,8 @@
     <string name="sources_shelf_manuals">Manuals &amp; references</string>
     <string name="sources_shelf_learning">Learning</string>
     <string name="sources_shelf_other">More books</string>
+    <!-- Plan KB2 Task 3.2: a book set's reading level (African Storybook), as a section and a collection's heading. -->
+    <string name="sources_level">Level %1$d</string>
     <!-- Under the shelves: the ways to find a book that aren't a shelf. -->
     <string name="sources_books_find">Find a book</string>
     <string name="sources_search_all_books">Search all books</string>

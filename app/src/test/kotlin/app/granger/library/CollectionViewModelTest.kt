@@ -5,6 +5,8 @@ import app.granger.FakeBookshelf
 import app.granger.FakeCatalogSource
 import app.granger.bookEntry
 import app.granger.catalogOf
+import app.granger.asbSet
+import app.granger.core.library.BookIds
 import app.granger.FakeDownloads
 import app.granger.FakeLibrary
 import app.granger.book
@@ -561,6 +563,34 @@ class CollectionViewModelTest {
             manifestOf = { app.granger.core.library.ManifestCollection("Military Medicine", "books", "Federation of American Scientists", listOf("Handbooks", "Orders")) },
             languageName = { mapOf("en" to "English", "es" to "Spanish")[it] ?: it },
         )
+    }
+
+    /**
+     * Plan KB2 Task 3.2: an African Storybook collection is its levels, lowest first, each headed in the app's words, and
+     * its header says how many books and who made them, with no "From Kiwix".
+     */
+    @Test fun anAfricanStorybookCollectionIsItsLevelsAndNamesItsMaker() = runTest(main.dispatcher) {
+        val set = asbSet()
+        val books = set.books.map { e -> book(BookIds.of(BookOrigin.GRANGER, e.id), e.title).copy(sourceRef = e.id, indexedAt = 1L) }
+        val key = "african-storybook-en"
+        show(CollectionRow(ShelfCollection("c:$key", "African Storybook · English", "lit", false, defaultKey = key), emptyList(), books))
+        val vm = CollectionViewModel(
+            "c:$key", shelves, library, sessions, bookshelf, downloads, appScope = this,
+            catalog = FakeCatalogSource(catalogOf().copy(bookSets = listOf(set))), viewPrefs = LibraryViewPrefs(), compute = main.dispatcher,
+            levelName = { "Nivel $it" },
+        )
+        backgroundScope.launch { vm.books.collect {} }
+        backgroundScope.launch { vm.gutenbergHeader.collect {} }
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.books.value.rows!!.map { it.label() }).containsExactly(
+            "# Nivel 1", "A very tall man", "Cows at the market", "# Nivel 2", "Goat and the hyena",
+        ).inOrder()
+        assertThat(vm.books.value.languages).isEmpty()
+        val header = vm.gutenbergHeader.value!!
+        assertThat(header.kind).isEqualTo(HeaderKind.BOOK_SET)
+        assertThat(header.text.en()).isEqualTo("3 books · African Storybook Initiative")
+        // The Library's row says the same.
+        assertThat(rowCountText(vm.ui.value!!).en()).isEqualTo("3 books · African Storybook Initiative")
     }
 
     private fun SectionRow.label(): String = when (this) {

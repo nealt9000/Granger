@@ -139,7 +139,7 @@ fun CollectionScreen(
                         IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.common_more)) }
                         DropdownMenu(menuOpen, { menuOpen = false }) {
                             gutenberg?.let { g ->
-                                if (g.progress == null && g.searchable < g.books) DropdownMenuItem(
+                                if (g.kind != HeaderKind.BOOK_SET && g.progress == null && g.searchable < g.books) DropdownMenuItem(
                                     text = { Text(stringResource(R.string.library_make_searchable_menu)) },
                                     onClick = {
                                         menuOpen = false

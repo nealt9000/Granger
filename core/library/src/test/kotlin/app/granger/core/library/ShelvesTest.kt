@@ -321,6 +321,24 @@ class ShelvesTest {
         assertThat(Filing.grangerCollection("fr")).isEqualTo("granger-classics")
     }
 
+    @Test fun africanStorybookBooksFileIntoACollectionPerLanguageNotGrangerClassics() = runTest {
+        val (s, _) = shelves()
+        val en = "asb-en-${"a".repeat(32)}"
+        val sw = "asb-sw-${"b".repeat(32)}"
+        bookshelf.state.value = listOf(book("gc-pride"), book(en), book(sw))
+        val rows = s.shelves.first().single().collections.associateBy { it.collection.defaultKey }
+        assertThat(rows.keys).containsExactly("granger-classics", "african-storybook-en", "african-storybook-sw")
+        assertThat(rows.getValue("african-storybook-en").collection.name).isEqualTo("African Storybook · English")
+        assertThat(rows.getValue("african-storybook-sw").collection.name).isEqualTo("African Storybook · Kiswahili")
+        assertThat(rows.getValue("african-storybook-en").books.map { it.sourceRef }).containsExactly(en)
+        assertThat(rows.getValue("granger-classics").books.map { it.sourceRef }).containsExactly("gc-pride")
+        assertThat(Filing.isBookSetCollection("african-storybook-sw")).isTrue()
+        assertThat(Filing.isBookSetCollection("granger-classics")).isFalse()
+        assertThat(Filing.bookSetProvider("african-storybook-en")).isEqualTo("African Storybook Initiative")
+        // A Granger Classics id that merely starts with "asb" stays a Classic.
+        assertThat(Filing.defaultKey(book("asbury"))).isEqualTo("granger-classics")
+    }
+
     @Test fun spanishPacksNamesAndFrontPages() {
         assertThat(GutenbergNames.packTitle("gutenberg_es_all", "Los libros en español del primer productor")).isEqualTo("Todos los libros en español · Project Gutenberg")
         assertThat(PageTitles.clean("Portada", "Wikipedia en español")).isEqualTo("Wikipedia en español")

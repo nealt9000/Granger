@@ -20,9 +20,14 @@ for their own packs and are marked featured. `build` writes what it kept and lef
 Packs we build ourselves (tools/pack-builder) are listed with a "release" row in curated.json that names
 their release descriptor; the hosted file's size is checked against it. A "books" row names the descriptor
 of an e-book collection (`pack_builder.py describe-epubs`): every book becomes a catalog entry and the
-collection gets a preset. "@<collection>" in a preset's items expands to that collection's book ids. A books row may
-also give a `shelf` (stamped on each book) and `levelSets` (a preset per reading level, Plan KB2: African Storybook);
-a book's `description` and `level` come from its descriptor.
+collection gets a preset. "@<collection>" in a preset's items expands to that collection's book ids. A book's
+`description` and `level` come from its descriptor.
+
+Book sets (Plan KB2 Task 3.2, African Storybook): a "bookSets" row names a descriptor as a books row does, plus `title`,
+`language`, `shelf`, `license`, optional `provider` (else the descriptor's), `i18n` and `levelSets` ({"label": "Level
+{n}", "i18n": {"es": "Nivel {n}"}}). Each becomes one entry of the top-level `bookSets` array, holding its own presets
+and books. Released apps file every `books` entry into Granger Classics and skip keys they don't know, so a set must
+never go in `books` (a books row with `shelf` or `levelSets` fails the build).
 
 Search vectors (Plan R1): a "vectors" setting in curated.json names the folder of `tools/vectors/build.py`'s release
 descriptors and the release URL their files are uploaded under; each descriptor's vectors go on the entries built from
@@ -468,12 +473,9 @@ def book_entries(curated, head=http_head, root=None):
             "published": book["published"],
             "domain": book.get("domain") or BOOK_DOMAINS.get(book["section"], BOOK_DOMAIN_DEFAULT),
         }
-        # Plan KB2 (African Storybook): a reading level and the Books screen's shelf, when the set has them. Old apps
-        # ignore both keys.
+        # Plan KB2 (African Storybook): a reading level, when the set has them (its shelf is the set's).
         if book.get("level") is not None:
             entry["level"] = book["level"]
-        if curated.get("shelf"):
-            entry["shelf"] = curated["shelf"]
         entries.append(entry)
     return descriptor["collection"], entries
 
@@ -504,6 +506,40 @@ def level_presets(name, row, entries):
                 for code, copy in (row.get("i18n") or {}).items() if copy.get("title")}
         presets.append(with_i18n(preset, check_i18n(f"books {name} level {n}", i18n or None)))
     return presets
+
+
+SET_ROW_KEYS = ("bookRelease", "license", "title", "language", "shelf")
+
+
+def book_set(row, head=http_head, root=None):
+    """
+    Plan KB2 Task 3.2: one `bookSets` entry (African Storybook, one per language) from a curated `bookSets` row, which
+    names a release descriptor as a `books` row does. Released apps file every `books` entry into Granger Classics, and
+    one catalog serves every app version, so a set's books live inside the set, in a top-level array old apps skip
+    (their parser reads only the keys it knows). Its presets (all books, then one per level) live inside it too: an old
+    app's `presets` would keep such a preset with its unknown items filtered out, an empty set on Granger's screen.
+
+    {id, title, language, shelf, provider, license, description, i18n?, presets: [...], books: [BookEntry-shaped]}.
+    The id is the descriptor's `collection` (`african-storybook-en`); `provider` is the row's, else the descriptor's.
+    """
+    missing = [key for key in SET_ROW_KEYS if not row.get(key)]
+    if missing:
+        raise SystemExit(f"bookSets {row.get('bookRelease')}: missing {missing}")
+    descriptor = json.loads((pathlib.Path(root or REPO_ROOT) / row["bookRelease"]).read_text(encoding="utf-8"))
+    collection, entries = book_entries(row, head, root)
+    provider = row.get("provider") or descriptor.get("provider") or ""
+    if not provider:
+        raise SystemExit(f"bookSets {collection}: no provider in the row or its descriptor")
+    language = bcp47(row["language"])
+    i18n = check_i18n(f"bookSets {collection}", row.get("i18n"))
+    everything = with_i18n({"id": collection, "title": row["title"], "items": [e["id"] for e in entries],
+                            "language": language}, i18n)
+    return with_i18n({
+        "id": collection, "title": row["title"], "language": language, "shelf": row["shelf"], "provider": provider,
+        "license": row["license"], "description": row.get("description", ""),
+        "presets": [everything] + level_presets(collection, row, entries),
+        "books": entries,
+    }, i18n)
 
 
 # Readiness tier budgets for English, (Efficient, Comprehensive) bytes as tier_sizes counts them ("All"). With pictures by
@@ -625,6 +661,9 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
     voices = curated.get("voices", [])       # Plan V1: one zip per voice, hand-written like models
     books, collections, collection_rows, collection_entries = [], {}, {}, {}
     for row in curated.get("books", []):
+        if row.get("levelSets") or row.get("shelf"):
+            # Plan KB2 Task 3.2: released apps file every `books` entry into Granger Classics.
+            raise SystemExit(f"books {row['bookRelease']}: a set with a shelf or levels goes under bookSets, not books")
         collection, entries = book_entries(row, head)
         books += entries
         collections[collection] = [e["id"] for e in entries]
@@ -634,12 +673,22 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
         for key in ("id", "fileName"):
             if key in item and not SAFE_NAME.match(item[key]):
                 raise SystemExit(f"unsafe {key}: {item[key]!r}")
-    for book in books:
+    book_sets = [book_set(row, head) for row in curated.get("bookSets", [])]
+    set_books = [b for s in book_sets for b in s["books"]]
+    for book in books + set_books:
         if not SAFE_NAME.match(book["id"]):
             raise SystemExit(f"unsafe id: {book['id']!r}")
     ids = [item["id"] for item in packs + models + books + voices]
     if len(ids) != len(set(ids)):
         raise SystemExit(f"duplicate ids in {ids}")
+    # A set's books and presets are its own; their ids must clash with nothing else in the catalog.
+    set_ids = [b["id"] for b in set_books] + [p["id"] for s in book_sets for p in s["presets"]]
+    seen, clashes = set(), set()
+    for i in set_ids + ids:
+        (clashes if i in seen else seen).add(i)
+    clashes = sorted(clashes)
+    if clashes:
+        raise SystemExit(f"bookSets: duplicate ids {clashes[:10]}")
     # "@<collection>" in a preset stands for every book of that collection.
     presets = [with_i18n({**{k: v for k, v in p.items() if k != "i18n"},
                           "items": [i for item in p["items"] for i in
@@ -696,6 +745,8 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
         "presets": presets,
         "voices": voices,
     }
+    if book_sets:  # Plan KB2 Task 3.2: absent when there are none, so the catalog is unchanged
+        catalog["bookSets"] = book_sets
     if readiness is not None:
         catalog["readiness"] = readiness
     if onboarding is not None:
@@ -1203,6 +1254,9 @@ def catalog_urls(catalog):
             if entry.get("timeIndex", {}).get("url"):
                 urls.append(entry["timeIndex"]["url"])
             urls += [s["url"] for s in entry.get("sidecars", []) if s.get("url")]
+    for book_set_ in catalog.get("bookSets", []):  # Plan KB2: a set's books are downloads too
+        for entry in book_set_.get("books", []):
+            urls += entry.get("urls", [])
     return list(dict.fromkeys(urls))
 
 

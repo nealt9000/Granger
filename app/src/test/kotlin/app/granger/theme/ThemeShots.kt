@@ -974,6 +974,69 @@ open class ThemeShots {
         }
     }
 
+    /** Plan KB2 Task 3.2: an African Storybook set of 25 books over five levels, as the catalog's `bookSets` lists it. */
+    private fun asbShotSet(language: String = "en", name: String = "English"): app.granger.core.catalog.BookSet {
+        val base = app.granger.asbSet(language, name)
+        val titles = listOf(
+            "A very tall man", "Cows at the market", "Goat and the hyena", "Sing, little bird", "Grandma's garden",
+            "The lion who could not roar", "Tinga Tinga", "Counting stars", "My school bus", "Rain, rain",
+        )
+        val books = (0 until 25).map { i ->
+            val level = 1 + i % 5
+            base.books.first().copy(
+                id = "asb-$language-${"%032x".format(i)}", title = titles[i % titles.size] + if (i >= titles.size) " ${i / titles.size + 1}" else "",
+                level = level, category = "Level $level", sizeBytes = 900_000L + i * 120_000L,
+            )
+        }
+        return base.copy(
+            books = books,
+            presets = listOf(app.granger.core.catalog.Preset(base.id, base.title, books.map { it.id }, language)) +
+                (1..5).map { n -> app.granger.core.catalog.Preset("${base.id}-level-$n", "${base.title}: Level $n", books.filter { it.level == n }.map { it.id }, language) },
+        )
+    }
+
+    private fun asbViewModel(scope: app.granger.sources.CatalogScope, catalog: app.granger.core.catalog.Catalog, downloads: app.granger.FakeDownloads = app.granger.FakeDownloads()) =
+        app.granger.sources.SourceViewModel(
+            scope, app.granger.FakeCatalogSource(catalog), downloads,
+            app.granger.FakeLibrary(), app.granger.FakeBookshelf(),
+            app.granger.FakeVolumes(listOf(app.granger.volume("/internal", "Phone", free = 41_000_000_000))), app.granger.FakePrefs(),
+            app.granger.core.ai.DeviceTier.ASK, kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main),
+            io = kotlinx.coroutines.Dispatchers.Main, bookSet = "african-storybook-en",
+        )
+
+    /** Plan KB2 Task 3.2: Books by kind with African Storybook's English set on the Children's shelf. */
+    @Config(sdk = [35], qualifiers = "w360dp-h1700dp-xxhdpi")
+    @Test fun asbBooksByKind() {
+        val catalog = publishedCatalog().let { it.copy(bookSets = listOf(asbShotSet(), asbShotSet("sw", "Kiswahili"))) }
+        val vm = asbViewModel(app.granger.sources.CatalogScope.BOOKS, catalog)
+        shoot("asb-books-by-kind") {
+            GrangerShell(
+                rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = RailTool.LIBRARY,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+            ) {
+                app.granger.sources.BooksScreen(vm, onBack = {}, onOpenScope = {}, onOpenPack = {}, onOpenBook = { _, _ -> }, onArchive = {}, onImport = {})
+            }
+        }
+    }
+
+    /** Plan KB2 Task 3.2: an African Storybook set's screen: its sets (all, each level), then its books by level. */
+    @Config(sdk = [35], qualifiers = "w360dp-h1400dp-xxhdpi")
+    @Test fun asbSetScreen() {
+        val set = asbShotSet()
+        val downloads = app.granger.FakeDownloads()
+        downloads.list.value = set.books.take(2).map {
+            app.granger.record(it.id, app.granger.core.downloads.DownloadState.INSTALLED, kind = app.granger.core.downloads.ItemKind.BOOK,
+                filePath = "/internal/books/granger/${it.id}_2026-11-16.epub")
+        }
+        val vm = asbViewModel(app.granger.sources.CatalogScope.BOOK_SET, app.granger.catalogOf().copy(bookSets = listOf(set)), downloads)
+        shoot("asb-set") {
+            GrangerShell(
+                rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = RailTool.LIBRARY,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+            ) { app.granger.sources.SourceScreen(vm, title = "Books", onBack = {}) }
+        }
+    }
+
     @Test fun wfKiwixList() = wfScreen("wf-kiwix-list", null)
 
     @Test fun wfSubjects() = wfScreen("wf-subjects", "subjects:wikipedia_en:wikipedia_en_top")

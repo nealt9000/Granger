@@ -144,7 +144,7 @@ fun SourceScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(ui.familyTitle?.resolve() ?: title) },
+                title = { Text((ui.familyTitle ?: ui.screenTitle)?.resolve() ?: title) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) }
                 },
@@ -162,7 +162,7 @@ fun SourceScreen(
                 OutlinedTextField(
                     value = viewModel.searchText,
                     onValueChange = viewModel::setQuery,
-                    placeholder = { Text(stringResource(R.string.sources_search, ui.familyTitle?.resolve() ?: title)) },
+                    placeholder = { Text(stringResource(R.string.sources_search, (ui.familyTitle ?: ui.screenTitle)?.resolve() ?: title)) },
                     leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),

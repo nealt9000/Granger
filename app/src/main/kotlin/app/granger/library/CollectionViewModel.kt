@@ -74,6 +74,8 @@ class CollectionViewModel(
     private val manifestOf: (Pack) -> ManifestCollection? = ::manifestCollectionOf,
     /** A language code's name for the language chips ("eng" → "English"). */
     private val languageName: (String) -> String = app.granger.sources.KiwixList::languageName,
+    /** A book set's level as its section is headed, in the app's language ("Level 2", "Nivel 2"; Plan KB2 Task 3.2). */
+    private val levelName: (Int) -> String = { "Level $it" },
 ) : ViewModel() {
     /** Null until loaded, and again if the collection goes away (emptied or deleted). */
     val ui: StateFlow<CollectionRow?> =
@@ -96,10 +98,21 @@ class CollectionViewModel(
     val view: StateFlow<ShelfView> = viewPrefs.view(ShelfKind.BOOKS)
     private val category: StateFlow<String?> = savedState.getStateFlow(CATEGORY, null)
 
-    /** Each catalog book's category by id, in catalog order. */
-    private val categories = (catalog?.state ?: flowOf(null))
-        .map { state -> state?.catalog?.books.orEmpty().associate { it.id to it.category } }
+    /**
+     * What the catalog says of the books here: each Granger book's category by id, in catalog order, and each set book's
+     * reading level (Plan KB2 Task 3.2: African Storybook), which heads its section.
+     */
+    private val facts = (catalog?.state ?: flowOf(null))
+        .map { state ->
+            val catalog = state?.catalog
+            CatalogFacts(
+                catalog?.books.orEmpty().associate { it.id to it.category },
+                catalog?.setBooks.orEmpty().filter { it.level > 0 }.associate { it.id to it.level },
+            )
+        }
         .distinctUntilChanged()
+
+    private data class CatalogFacts(val categories: Map<String, String>, val levels: Map<String, Int>)
 
     private data class Choices(val query: String, val sort: BookSort, val category: String?)
 
@@ -129,10 +142,10 @@ class CollectionViewModel(
     val books: StateFlow<CollectionBooks> = combine(
         ui.map { it?.books.orEmpty() }.distinctUntilChanged(),
         combine(query, sort, category, ::Choices),
-        categories,
+        facts,
         positions,
         layout,
-    ) { list, c, categoryOf, read, l -> collectionBooks(list, c.query, c.sort, c.category, categoryOf, read, l, languageName) }
+    ) { list, c, f, read, l -> collectionBooks(withLevels(list, f.levels, levelName), c.query, c.sort, c.category, f.categories, read, l, languageName) }
         .flowOn(compute)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CollectionBooks())
 
@@ -190,6 +203,14 @@ class CollectionViewModel(
     val gutenbergHeader: StateFlow<GutenbergHeader?> = combine(
         ui, library.packs, gutenberg?.progress ?: flowOf(emptyMap()), manifest,
     ) { row, packs, runs, m ->
+        // A catalog book set's collection (Plan KB2 Task 3.2): "693 books · African Storybook Initiative".
+        row?.collection?.defaultKey?.takeIf(Filing::isBookSetCollection)?.let { key ->
+            return@combine GutenbergHeader(
+                null, row.books.size, row.books.count { it.searchableInFull }, kind = HeaderKind.BOOK_SET,
+                providerName = Filing.bookSetProvider(key), documents = false,
+                unopened = row.books.count { it.titleOnlyUntilOpened }, scans = row.books.count { it.scanTitleOnly },
+            )
+        }
         val key = row?.collection?.defaultKey?.takeIf(Filing::isBookPackCollection) ?: return@combine null
         val pack = packs.firstOrNull { it.isBookPack && Filing.defaultKey(it) == key }
         val packName = pack?.name ?: row.books.firstOrNull()?.let(PackBooks::packNameOf)
@@ -313,6 +334,17 @@ class CollectionViewModel(
 }
 
 /**
+ * [books] with each set book's reading level ([levels] by catalog id) as its section and order (Plan KB2 Task 3.2): an
+ * African Storybook collection shows "Level 1" … "Level 5", lowest first, as a manifest collection shows its sections.
+ * Done as they're shown, not stored, so a level reads in the app's language ([levelName]) and needs no new column.
+ */
+internal fun withLevels(books: List<Book>, levels: Map<String, Int>, levelName: (Int) -> String): List<Book> =
+    if (levels.isEmpty()) books else books.map { book ->
+        val level = if (book.origin == BookOrigin.GRANGER) levels[book.sourceRef] else null
+        if (level == null) book else book.copy(groupName = levelName(level), ord = level)
+    }
+
+/**
  * What a Kiwix book pack's manifest says of its collection (Plan KB2), read from the `.gbooks` file [Pack.bookManifest]
  * names; a pack listed by its files' names says only that. Blocking.
  */
@@ -333,8 +365,11 @@ fun countsDocuments(pack: Pack): Boolean = when (pack.bookSource) {
     else -> false
 }
 
-/** Whose a book pack's collection is: Project Gutenberg's books, or a Kiwix pack's books or documents (Plan KB Decision 7). */
-enum class HeaderKind { GUTENBERG, KIWIX_LIBRARY }
+/**
+ * Whose a book pack's collection is: Project Gutenberg's books, or a Kiwix pack's books or documents (Plan KB Decision 7);
+ * or a catalog book set's, which Granger publishes (Plan KB2 Task 3.2: African Storybook).
+ */
+enum class HeaderKind { GUTENBERG, KIWIX_LIBRARY, BOOK_SET }
 
 /**
  * A book pack's collection's [pack] (null once it's gone), its [books], how many are [searchable] in full, and a run's
@@ -367,6 +402,8 @@ data class GutenbergHeader(
     val provider: UiText get() = when (kind) {
         HeaderKind.GUTENBERG -> UiText.Res(R.string.library_from_kiwix_by, app.granger.core.library.GutenbergNames.PROVIDER)
         HeaderKind.KIWIX_LIBRARY -> providerName?.let { UiText.Res(R.string.library_from_kiwix_by, it) } ?: UiText.Res(R.string.library_from_kiwix)
+        // Granger publishes a set's books: the maker alone, no "From Kiwix".
+        HeaderKind.BOOK_SET -> UiText.Raw(providerName.orEmpty())
     }
 
     /** "1,284 books", "17 documents". */

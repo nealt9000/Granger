@@ -11,6 +11,9 @@ import app.granger.FakePrefs
 import app.granger.FakeVolumes
 import app.granger.MainDispatcherRule
 import app.granger.catalogOf
+import app.granger.asbSet
+import app.granger.core.library.BookIds
+import app.granger.core.library.BookOrigin
 import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.CatalogError
 import app.granger.core.catalog.CatalogState
@@ -1154,6 +1157,75 @@ class SourceViewModelTest {
         vm.setQuery("music")
         testScheduler.advanceUntilIdle()
         assertThat(vm.ui.value.sections.single().rows.map { it.id }).contains("gutenberg_en_lcc-m")
+    }
+
+    // --- Plan KB2 Task 3.2: African Storybook, sets in their own catalog array ---
+
+    private fun asbCatalog(vararg sets: app.granger.core.catalog.BookSet) = catalogOf(
+        books = listOf(bookEntry("gc-emma")),
+        presets = listOf(Preset("granger-classics", "Granger Classics: all books", listOf("gc-emma"))),
+    ).copy(bookSets = sets.toList())
+
+    @Test fun aBookSetIsOneRowOnItsShelfAndStaysOffGrangersScreen() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = asbCatalog(asbSet(), asbSet("sw", "Kiswahili")))
+        val ui = viewModel(CatalogScope.BOOKS).ui.value
+        val children = ui.sections.single { it.title == "children" }.rows
+        // Kiswahili waits for All languages, as any book in another language does.
+        assertThat(children.map { it.id }).containsExactly("set:african-storybook-en")
+        val row = children.single()
+        assertThat(row.title).isEqualTo("African Storybook · English")
+        assertThat(row.opensSet).isEqualTo("african-storybook-en")
+        assertThat(row.meta.en()).isEqualTo("3 books · 6.0 MB · African Storybook Initiative")
+        assertThat(ui.languageChip).isTrue()
+        // The set's presets aren't Granger's: Literature's sets are Granger Classics alone.
+        assertThat(ui.presets.map { it.id }).containsExactly("granger-classics")
+        // Granger's own screen lists only Granger's books.
+        val granger = viewModel(CatalogScope.GRANGER).ui.value
+        assertThat(granger.sections.flatMap { it.rows }.map { it.id }).containsExactly("gc-emma")
+        assertThat(granger.presets.map { it.id }).containsExactly("granger-classics")
+        assertThat(scopeOf(asbSet().books.first())).isEqualTo(CatalogScope.BOOK_SET)
+        // All languages brings Kiswahili's row; a search finds the sets' books.
+        val vm = viewModel(CatalogScope.BOOKS)
+        vm.setAllLanguages(true)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.single { it.title == "children" }.rows.map { it.title })
+            .containsExactly("African Storybook · English", "African Storybook · Kiswahili").inOrder()
+        vm.setQuery("hyena")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.single().rows.map { it.title }).containsExactly("Goat and the hyena", "Goat and the hyena")
+    }
+
+    @Test fun aBookSetsScreenOffersItsLevelsAndGetsThem() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = asbCatalog(asbSet()))
+        val set = asbSet()
+        val (a, b, c) = set.books
+        downloads.list.value = listOf(record(a.id, DownloadState.INSTALLED, kind = ItemKind.BOOK, filePath = "/internal/books/granger/${a.id}_2026-11-16.epub"))
+        val vm = SourceViewModel(
+            CatalogScope.BOOK_SET, catalog, downloads, library, bookshelf, volumes, prefs, DeviceTier.ASK, appScope = this,
+            io = main.dispatcher, bookSet = set.id,
+        )
+        backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        val ui = vm.ui.value
+        assertThat(ui.screenTitle.en()).isEqualTo("African Storybook · English")
+        assertThat(ui.presets.map { it.id }).containsExactly(set.id, "${set.id}-level-1", "${set.id}-level-2").inOrder()
+        assertThat(ui.presets.first().books).isEqualTo(3)
+        assertThat(ui.presets.first().onPhone).isEqualTo(1)
+        assertThat(ui.sections.map { it.heading.en() }).containsExactly("Level 1", "Level 2").inOrder()
+        assertThat(ui.sections.first().rows.map { it.id }).containsExactly(a.id, c.id).inOrder()
+        assertThat(ui.sections.first().noun).isEqualTo(SectionNoun.BOOKS)
+        // An installed set book opens as a Granger book, as the Classics do.
+        assertThat(ui.sections.first().rows.first().bookId).isEqualTo(BookIds.of(BookOrigin.GRANGER, a.id))
+        vm.getPreset("${set.id}-level-1")
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.enqueued.map { it.first }).containsExactly(c.id)
+        vm.get(b.id)
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.enqueued.map { it.first }).containsExactly(c.id, b.id).inOrder()
+        // Remove takes its shelf row, as a Classic's.
+        vm.remove(a.id)
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.calls).contains("remove:${a.id}")
     }
 
     /** Plan KB2 Task 4.1: installed rows show where they stand: a Gutenberg pack on the phone, a Granger book updated. */

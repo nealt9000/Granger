@@ -230,6 +230,55 @@ class CatalogParserTest {
         assertThat(catalog.items).hasSize(3)
     }
 
+    // --- Plan KB2 Task 3.2: book sets, in an array older apps skip ---
+
+    private val asb = testdata("catalog/asb-catalog.json").readBytes()
+
+    @Test fun aBookSetsBooksStayOutOfBooksWhichOlderAppsFileIntoGrangerClassics() {
+        val catalog = ok(parse(asb))
+        // What an older app reads: `books` alone, and it never sees the set.
+        assertThat(catalog.books.map { it.id }).containsExactly("gc-emma")
+        assertThat(catalog.books.none { it.inSet }).isTrue()
+        // A top-level preset can't name a set's books: an older app would keep it with nothing in it, so sets keep theirs.
+        assertThat(catalog.presets.first { it.id == "sneaky" }.items).isEmpty()
+        assertThat(catalog.presets.map { it.id }).doesNotContain("african-storybook-en-level-1")
+    }
+
+    @Test fun aBookSetParsesWithItsBooksPresetsAndLevels() {
+        val catalog = ok(parse(asb))
+        val set = catalog.bookSets.single()
+        assertThat(set.id).isEqualTo("african-storybook-en")
+        assertThat(set.title("es")).isEqualTo("African Storybook · inglés")
+        assertThat(set.shelf).isEqualTo(Shelves.CHILDREN)
+        assertThat(set.provider).isEqualTo("African Storybook Initiative")
+        assertThat(set.books.map { it.level }).containsExactly(1, 2, 1).inOrder()
+        assertThat(set.books.all { it.bookSet == set.id && it.inSet }).isTrue()
+        assertThat(set.levels).containsExactly(1, 2).inOrder()
+        assertThat(set.presets.map { it.id }).containsExactly(
+            "african-storybook-en", "african-storybook-en-level-1", "african-storybook-en-level-2").inOrder()
+        assertThat(set.presets[1].title("es")).isEqualTo("African Storybook · inglés: Nivel 1")
+        assertThat(set.presets[1].items).hasSize(2)
+        // Its books are catalog items: downloads, status and Remove find them by id.
+        val first = set.books.first()
+        assertThat(catalog.item(first.id)).isSameInstanceAs(first)
+        assertThat(catalog.setBooks).hasSize(3)
+        assertThat(catalog.items.map { it.id }).containsAtLeastElementsIn(set.books.map { it.id })
+    }
+
+    @Test fun aSetBookTakingAnotherItemsIdIsDroppedAndAnEmptySetGoes() {
+        val text = asb.decodeToString()
+            .replace("asb-en-${"a".repeat(32)}", "gc-emma")
+            .replace("\"bookSets\": [", "\"bookSets\": [{\"id\": \"empty\", \"title\": \"Empty\", \"books\": []},")
+        val catalog = ok(parse(text.toByteArray()))
+        assertThat(catalog.bookSets.map { it.id }).containsExactly("african-storybook-en")
+        assertThat(catalog.bookSets.single().books).hasSize(2)
+        assertThat(catalog.item("gc-emma")).isSameInstanceAs(catalog.books.single())
+    }
+
+    @Test fun aCatalogWithoutBookSetsHasNone() {
+        assertThat(ok(parse(catalogWithBooksJson())).bookSets).isEmpty()
+    }
+
     // --- Plan H1: domains and the readiness model ---
 
     private fun pack(id: String, family: String, domain: String) =

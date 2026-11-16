@@ -84,6 +84,8 @@ fun BooksScreen(
     onArchive: () -> Unit,
     /** Import your own; null leaves it out. */
     onImport: (() -> Unit)? = null,
+    /** A catalog book set's screen (Plan KB2 Task 3.2: African Storybook · English). */
+    onOpenSet: (setId: String) -> Unit = {},
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
@@ -120,6 +122,11 @@ fun BooksScreen(
         val scopeOpened = row.opensScope
         if (scopeOpened != null) {
             GroupedRow(row.title, row.meta?.resolve(), onClick = { onOpenScope(scopeOpened) })
+            return
+        }
+        val setOpened = row.opensSet
+        if (setOpened != null) {
+            GroupedRow(row.title, row.meta?.resolve(), onClick = { onOpenSet(setOpened) })
             return
         }
         val open = { row.packId?.let(onOpenPack) ?: row.bookId?.let { onOpenBook(it, row.title) } ?: Unit }

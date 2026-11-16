@@ -109,6 +109,8 @@ data class ItemRow(
     val opensScope: CatalogScope? = null,
     /** The row's one meta line on Get more → Books: "65 MB · From Kiwix · irp.fas.org"; null elsewhere. */
     val meta: UiText? = null,
+    /** A catalog book set's row on Get more → Books (Plan KB2 Task 3.2): the set whose screen it opens. */
+    val opensSet: String? = null,
 ) {
     /** Whether Open has something to open: an installed pack or book. */
     val opens: Boolean get() = packId != null || bookId != null
@@ -261,6 +263,8 @@ data class SourceUi(
      */
     val languageChip: Boolean = false,
     val allLanguages: Boolean = false,
+    /** The screen's own title, when it isn't its scope's: a book set's ("African Storybook · English", Plan KB2). */
+    val screenTitle: UiText? = null,
 )
 
 /** One row per volume, with what is still to download onto it. */
@@ -304,6 +308,8 @@ class SourceViewModel(
     knowledge: kotlinx.coroutines.flow.Flow<List<String>> = kotlinx.coroutines.flow.flowOf(listOf(app.granger.core.catalog.ENGLISH)),
     /** How the app names Granger voices ("Voz de Granger (Owl)"); null keeps the catalog's English title. */
     private val voiceTitles: app.granger.core.speech.VoiceTitles? = null,
+    /** The catalog book set a [CatalogScope.BOOK_SET] screen shows (Plan KB2 Task 3.2); null elsewhere. */
+    private val bookSet: String? = null,
 ) : ViewModel() {
     private data class Choices(val volumes: List<Volume>, val selectedPath: String?, val wifiOnly: Boolean, val notice: UiText?, val domainCleared: Boolean)
 
@@ -448,7 +454,9 @@ class SourceViewModel(
 
     fun getPreset(presetId: String) {
         val current = catalog.state.value.catalog ?: return
-        val preset = current.presets.firstOrNull { it.id == presetId } ?: return
+        // A set's screen gets its set's presets (Plan KB2 Task 3.2), which aren't the catalog's.
+        val preset = (if (scope == CatalogScope.BOOK_SET) current.bookSet(bookSet.orEmpty())?.presets.orEmpty() else current.presets)
+            .firstOrNull { it.id == presetId } ?: return
         appScope.launch {
             val records = downloads.records.first()
             val packs = library.packs.first()
@@ -575,6 +583,8 @@ class SourceViewModel(
         val gutenberg = scope == CatalogScope.GUTENBERG
         val booksScope = scope == CatalogScope.BOOKS
         val kiwixBooks = scope == CatalogScope.KIWIX_BOOKS
+        val setScope = scope == CatalogScope.BOOK_SET
+        val theSet = if (setScope) current?.bookSet(bookSet.orEmpty()) else null
         val volumeRows = volumeRows(s.volumes, records)
         // With the whole Kiwix catalog listed, each item's status is worked out once, from its own records only.
         val recordsById = records.groupBy { it.itemId }
@@ -759,6 +769,8 @@ class SourceViewModel(
         fun inList(item: CatalogItem): Boolean {
             // The 2 MB Ray Charles sample is a test pack (Plan WF Decision 4).
             if (item is PackEntry && item.sample) return false
+            // A book set's screen (Plan KB2 Task 3.2): its books, whatever the library's languages; it was chosen.
+            if (setScope) return item is BookEntry && item.bookSet == bookSet
             if (!shownInLanguage(item)) return false
             // The subjects list (Plan WF Decision 4): its set's subject packs.
             if (subjectsSet != null) return item is PackEntry && item.subjectOf == subjectsSet
@@ -868,7 +880,22 @@ class SourceViewModel(
                 return@buildList
             }
             if (booksScope) {
-                addBookShelves(current, needle.isNotEmpty(), ::shown, ::row, ::groupRow, ::status)
+                addBookShelves(current, needle.isNotEmpty(), ::shown, ::row, ::groupRow, ::status, lang, ::inLanguage)
+                return@buildList
+            }
+            if (setScope) {
+                // A set's books by reading level (Plan KB2 Task 3.2), each level folded as Granger's categories are.
+                theSet?.books.orEmpty().filter(::shown).groupBy { it.level }.toSortedMap().forEach { (level, entries) ->
+                    val title = "$LEVEL_PREFIX$level"
+                    val open = needle.isNotEmpty() || title in s.expanded || entries.size <= FOLDED_ROWS
+                    add(
+                        Section(
+                            title, (if (open) entries else entries.take(FOLDED_ROWS)).map(::row), entries.size,
+                            foldable = needle.isEmpty() && entries.size > FOLDED_ROWS, noun = SectionNoun.BOOKS,
+                            heading = if (level > 0) UiText.Res(R.string.sources_level, level) else UiText.Res(R.string.sources_shelf_other),
+                        ),
+                    )
+                }
                 return@buildList
             }
             val packs = current.packs.filter { shown(it) && (chosen == null || it.category == chosen) }
@@ -911,7 +938,8 @@ class SourceViewModel(
         }
         // Granger's screen is Get more's Granger Classics, under Books: only a set of books is offered there. Starter,
         // Efficient and Comprehensive bring Kiwix's wikis and the models, which aren't books (Plan GB walkthrough).
-        val presets = if (scope != CatalogScope.GRANGER && scope != CatalogScope.BOOKS) emptyList() else current?.presets.orEmpty().filter { preset ->
+        val presetList = if (setScope) theSet?.presets.orEmpty()
+        else if (scope != CatalogScope.GRANGER && scope != CatalogScope.BOOKS) emptyList() else current?.presets.orEmpty().filter { preset ->
             preset.items.isNotEmpty() && preset.items.all { current?.item(it) is BookEntry } &&
                 // A collection in another language (Clásicos Granger for an English library) waits for All languages (Plan L3).
                 (lang.all || app.granger.core.catalog.Languages.normalise(preset.language) in lang.languages)
@@ -921,12 +949,15 @@ class SourceViewModel(
                 { it.id !in GRANGER_PRESETS },
                 { lang.languages.indexOf(app.granger.core.catalog.Languages.normalise(it.language)).let { i -> if (i < 0) Int.MAX_VALUE else i } },
             ),
-        ).map { preset ->
+        )
+        val presets = presetList.map { preset ->
             val items = preset.items.mapNotNull { current?.item(it) }
             val statuses = items.map(::status)
             val todo = items.filterIndexed { i, _ -> wanted(statuses[i]) }
             PresetRow(
-                preset.id, preset.title(java.util.Locale.getDefault().language), items.size, todo.size, todo.sumOf { it.downloadBytes },
+                // On a set's own screen a level's set is just "Level 2" (its catalog title repeats the set's name).
+                preset.id, preset.title(java.util.Locale.getDefault().language).let { if (setScope) it.substringAfter(": ", it) else it },
+                items.size, todo.size, todo.sumOf { it.downloadBytes },
                 packs = items.count { it is PackEntry }, books = items.count { it is BookEntry },
                 others = items.count { it !is PackEntry && it !is BookEntry }, totalBytes = items.sumOf { it.downloadBytes },
                 onPhone = statuses.count { it == ItemStatus.Installed },
@@ -954,8 +985,10 @@ class SourceViewModel(
                 ?: subjectsSet?.let { set -> UiText.Res(R.string.sources_set_subjects, setGroup(set)?.title ?: "Wikipedia") },
             languageChip = current != null && (lang.all || (scope in PACK_SCOPES || scope == CatalogScope.GRANGER) &&
                 (current.packs.any { scopeOf(it) == scope && !it.sample && !inLanguage(it) } || current.books.any { scopeOf(it) == scope && !inLanguage(it) }) ||
-                booksScope && (current.packs.any { BookShelves.isBookItem(it) && !it.sample && !inLanguage(it) } || current.books.any { !inLanguage(it) })),
+                booksScope && (current.packs.any { BookShelves.isBookItem(it) && !it.sample && !inLanguage(it) } ||
+                    (current.books + current.setBooks).any { !inLanguage(it) })),
             allLanguages = lang.all,
+            screenTitle = theSet?.let { UiText.Raw(it.title(java.util.Locale.getDefault().language)) },
         )
     }
 
@@ -973,14 +1006,18 @@ class SourceViewModel(
         row: (CatalogItem) -> ItemRow,
         groupRow: (PackGroup) -> ItemRow,
         status: (CatalogItem) -> ItemStatus,
+        lang: LanguageChoice,
+        inLanguage: (CatalogItem) -> Boolean,
     ) {
         val installed = setOf(ItemStatus.Installed, ItemStatus.UpdateAvailable)
+        // A book set (Plan KB2 Task 3.2) shows in the library's languages, or once any of its books is here or coming.
+        val sets = current.bookSets.filter { set -> lang.all || set.books.any(inLanguage) }
         fun packRow(group: PackGroup) = groupRow(group).let { r ->
             r.copy(meta = BookShelves.packMeta(group.flavour(r.id) ?: group.default, r.sizeBytes))
         }
         val packs = current.packs.filter { BookShelves.isBookItem(it) && shown(it) }
         if (searching) {
-            val books = current.books.filter(shown).map { row(it).copy(meta = BookShelves.bookMeta(it)) }
+            val books = (current.books + current.setBooks).filter(shown).map { row(it).copy(meta = BookShelves.bookMeta(it)) }
             val packRows = KiwixList.group(packs).sortedBy { it.title.lowercase() }.map(::packRow)
             val rows = books + packRows
             if (rows.isNotEmpty()) add(Section(BOOK_RESULTS, rows, heading = UiText.Res(R.string.sources_group_books)))
@@ -1012,6 +1049,17 @@ class SourceViewModel(
                         ),
                     )
                 }
+                // A set's one row (Plan KB2 Task 3.2): "693 books · 1.2 GB · African Storybook Initiative", opening its screen.
+                addAll(
+                    sets.filter { BookShelves.shelfOf(it) == shelf }.map { set ->
+                        ItemRow(
+                            "set:${set.id}", set.title(java.util.Locale.getDefault().language), UiText.Raw(""), UiText.Raw(set.description), 0L,
+                            ItemStatus.NotInstalled, null,
+                            opensSet = set.id,
+                            meta = BookShelves.setMeta(set, set.books.count { status(it) in installed }),
+                        )
+                    },
+                )
                 addAll(KiwixList.group(others).sortedBy { it.title.lowercase() }.map(::packRow))
             }
             // Literature stays, even empty, for the Granger sets the screen puts in it.
@@ -1045,6 +1093,8 @@ class SourceViewModel(
         const val AI_MODELS = "AI models"
         /** Get more → Books' one section while searching (Plan KB2 Task 4.1). */
         const val BOOK_RESULTS = "Book results"
+        /** A book set's level sections' keys, "level-2" (Plan KB2 Task 3.2); each shows "Level 2". */
+        const val LEVEL_PREFIX = "level-"
         /** A subjects list's family token: "subjects:<set id>:<slice ZIM name>" (Plan WF Decision 4). */
         const val SUBJECTS_PREFIX = "subjects:"
         /**

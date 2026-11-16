@@ -59,7 +59,7 @@ class DownloadsViewModel(
     work: CoroutineDispatcher = Dispatchers.Default,
     private val tidyDismissals: app.granger.sources.TidyDismissals = app.granger.sources.TidyDismissals(),
 ) : ViewModel() {
-    private val catalogIds = catalog?.state?.map { s -> s.catalog?.let { c -> (c.packs + c.models + c.books + c.voices).mapTo(HashSet()) { it.id } } }
+    private val catalogIds = catalog?.state?.map { s -> s.catalog?.let { c -> c.items.mapTo(HashSet()) { it.id } } }
         ?: flowOf(null)
 
     /** The volumes, listed once (their roots and labels); free space is read again each time. */

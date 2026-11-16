@@ -2,6 +2,7 @@ package app.granger.core.catalog
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 /** The signed list of packs, models and books the app can download. */
 @Serializable
@@ -18,10 +19,26 @@ data class Catalog(
     val readiness: Readiness? = null,
     /** Onboarding's use cases and larger map areas (Plan H3); null in older catalogs. */
     val onboarding: Onboarding? = null,
+    /**
+     * Sets of books that aren't Granger Classics (Plan KB2 Task 3.2: African Storybook, one per language), each with its
+     * own books and presets. A top-level array older apps skip: they file every [books] entry into Granger Classics.
+     */
+    val bookSets: List<BookSet> = emptyList(),
 ) {
-    val items: List<CatalogItem> get() = models + packs + books + voices
+    /** Every set's books (Plan KB2): catalog items like [books], but not Granger's own collections. */
+    val setBooks: List<BookEntry> get() = bookSets.flatMap { it.books }
 
-    fun item(id: String): CatalogItem? = items.firstOrNull { it.id == id }
+    val items: List<CatalogItem> get() = models + packs + books + setBooks + voices
+
+    /** Items by id, the first of each id winning, built once: with the sets, lists hold thousands of entries. */
+    private val byId: Map<String, CatalogItem> by lazy {
+        HashMap<String, CatalogItem>().apply { items.forEach { putIfAbsent(it.id, it) } }
+    }
+
+    fun item(id: String): CatalogItem? = byId[id]
+
+    /** The set with [id]; null when the catalog has none. */
+    fun bookSet(id: String): BookSet? = bookSets.firstOrNull { it.id == id }
 
     /**
      * Release builds list only models that passed the eval (spec §3 "Catalog"). Without [includeVectors] (a phone too
@@ -226,7 +243,44 @@ data class BookEntry(
     val vectors: VectorsEntry? = null,
     /** The book's other sidecars (Linked Library spec §5.1), downloaded with it; empty in older catalogs. */
     val sidecars: List<SidecarEntry> = emptyList(),
-) : CatalogItem
+    /** A set book's reading level (Plan KB2: African Storybook's 1–5); 0 when it has none. */
+    val level: Int = 0,
+    /**
+     * The [BookSet] this book is in (Plan KB2 Task 3.2), set by the parser from where the book was listed, never read
+     * from the catalog; blank for a book of the top-level [Catalog.books] (Granger Classics, Clásicos Granger).
+     */
+    @Transient val bookSet: String = "",
+) : CatalogItem {
+    /** A set's book (African Storybook), not one of Granger's own collections. */
+    val inSet: Boolean get() = bookSet.isNotEmpty()
+}
+
+/**
+ * A set of books in one language from one provider (Plan KB2 Task 3.2): African Storybook · English. [id] is its
+ * books' `collection`; [presets] are its own (every book, then one per level), never in [Catalog.presets], which older
+ * apps read. [shelf] is one of [Shelves]. Every field but the id has a default so a sparse set decodes; the parser
+ * drops a set with no valid books.
+ */
+@Serializable
+data class BookSet(
+    val id: String,
+    val title: String = "",
+    val description: String = "",
+    val language: String = ENGLISH,
+    val shelf: String = "",
+    /** Who made the books ("African Storybook Initiative"): the Books screen and the collection say it. */
+    val provider: String = "",
+    val license: String = "",
+    val i18n: Map<String, Copy> = emptyMap(),
+    val presets: List<Preset> = emptyList(),
+    val books: List<BookEntry> = emptyList(),
+) {
+    /** The title in app language [appLang], else the catalog's own. */
+    fun title(appLang: String): String = localised(i18n, appLang, title)
+
+    /** Its books' reading levels, lowest first; empty when they have none. */
+    val levels: List<Int> get() = books.map { it.level }.filter { it > 0 }.distinct().sorted()
+}
 
 /**
  * A pack's or book's precomputed search vectors (Plan R1, spec §4): one `.gvec` file, valid only for that exact pack or

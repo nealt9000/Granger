@@ -447,7 +447,39 @@ Python for tools).
       - Each EPUB embeds about 830 KB of Noto fonts (Ethiopic and Arabic Kufi included), which en and sw never use.
         Dropping them would save roughly 0.2–0.3 GB, but it's a bigger change than epubcheck needs. Left for Neal.
       - `.gvec`/`.glink` for these books: see "Later".
-- [ ] **Task 3.2: catalog.**
+- [x] **Task 3.2: catalog.** (App and tooling side done; the catalog change itself waits on Neal: see "Left" below.)
+  - **Done 2026-11-16 (app + tooling; `catalog.json` untouched).**
+    - **Array:** top-level `bookSets`, one entry per language: `{id: "african-storybook-en", title, language, shelf:
+      "children", provider, license, description, i18n, presets: [all books, then <id>-level-<n> with level/setOf and
+      Spanish "Nivel n"], books: [BookEntry-shaped, id asb-<lang>-<node>, level, collection = set id]}`.
+    - **Old apps stay safe:** `CatalogParser` reads the root by key, so `bookSets` is skipped. The set presets live
+      inside the set: an old app keeps a top-level preset with its unknown items filtered out (an empty set on Granger's
+      screen), which `CatalogParserTest.aBookSetsBooksStayOutOfBooks…` pins.
+    - **catalog_gen:** `book_set()` from a curated **`bookSets`** row (same shape as the prep's rows below, under the new
+      key; `provider` from the row or the descriptor's top level). A `books` row with `shelf` or `levelSets` fails the
+      build. Set book and preset ids may clash with nothing. `catalog_urls` (check-links) includes set books; tier
+      sizes don't (no preset or readiness list names them). The key is absent when there are no sets. Tests: 9 for
+      sets (the 4 from Task 3.1 rewritten), 124 pass.
+    - **App:** `Catalog.bookSets`/`setBooks`; set books are catalog `items` (download, status, update by sha, Remove)
+      with a parser-stamped `@Transient bookSet`, but not `books`; `item()` is now a lazy id map (thousands of items).
+      `scopeOf` puts set books in new `CatalogScope.BOOK_SET`, so Granger's screen never lists them. They install as
+      Granger books (`books/granger/<id>_<date>.epub`, `book:granger:<id>`); `Filing.grangerKey` files `asb-<lang>-`
+      into `african-storybook-<lang>`, named "African Storybook · English" / "· Kiswahili". Collection: levels as
+      sections "Level 1"… (es "Nivel 1"), lowest first, applied when shown from the catalog's `level`
+      (`withLevels`; no column, so it reads in the app's language); header and Library row "N books · African Storybook
+      Initiative" (`HeaderKind.BOOK_SET`, no "From Kiwix"). Books screen: one row per set on its shelf ("25 books · 59 MB ·
+      African Storybook Initiative", "· N on this phone"), Kiswahili behind All languages, set books in Search all books;
+      the row opens `SourceRoute(BOOK_SET, set=…)`: the set's presets (all, Level 1–5 with Get all) and its books by level
+      (folded at 8). Home/Downloads' "not in catalog" check now uses `items`. Readiness left out.
+    - Tests: `CatalogParserTest` +4 (fixture `testdata/catalog/asb-catalog.json`, 3 books), `ShelvesTest` +1,
+      `SourceViewModelTest` +2, `CollectionViewModelTest` +1, `BookInstalledTest` +1. ThemeShots `asb-books-by-kind`,
+      `asb-set` (Field + Night) checked. `:core:catalog` 81, `:core:library` 502, `:core:downloads` 158, `:app` 1839 (126
+      skipped), 0 failures.
+    - **Left (the catalog change):** Neal decides on stripping the unused Noto fonts → (re)build with
+      `africanstorybook.py build` (rewrites the two release lists) → `upload_asb.sh en|sw <date>` → add the two rows below
+      to `curated.json` under **`bookSets`** (not `books`) → `catalog_gen.py build --previous` → diff (`bookSets` 2 sets,
+      1,120 books, 12 presets; `books`/`presets` unchanged) → `check-links` → `:core:catalog` tests → Neal signs. No code
+      change for a rebuild.
   - **Decided 2026-11-16 (after Task 3.1 found the blocker):** the African Storybook books do **not** go in the catalog's
     `books` array.
     - Today's app files every `books` entry into Granger Classics (`CatalogScope.kt:34`, `Filing.kt:139`), and one

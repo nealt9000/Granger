@@ -311,7 +311,8 @@ def test_collection_token_expands_to_book_ids_in_presets(tmp_path, monkeypatch):
     assert starter["items"] == ["gc-hamlet", "gc-macbeth"]
 
 
-ASB = {"releaseDate": "2026-11-16", "collection": "african-storybook-en", "books": [
+ASB = {"releaseDate": "2026-11-16", "collection": "african-storybook-en", "provider": "African Storybook Initiative",
+       "books": [
     {"id": f"asb-en-{c * 32}", "title": f"Story {c}", "author": "A. Writer", "translator": None, "published": 2014,
      "section": f"Level {lvl}", "language": "en", "sizeBytes": 100 + i, "sha256": "cd" * 32,
      "urls": [f"https://github.com/nealt9000/Granger/releases/download/asb-en-2026-11-16/asb-en-{c * 32}.epub"],
@@ -323,24 +324,45 @@ ASB_ROW = {"bookRelease": "asb.json", "license": "CC BY 4.0, African Storybook I
            "levelSets": {"label": "Level {n}", "i18n": {"es": "Nivel {n}"}}}
 
 
-def asb_build(tmp_path, monkeypatch, row=ASB_ROW, books=ASB):
+def asb_build(tmp_path, monkeypatch, row=ASB_ROW, books=ASB, key="bookSets"):
     (tmp_path / "asb.json").write_text(json.dumps(books))
     monkeypatch.setattr(cg, "REPO_ROOT", tmp_path)
     sizes = {b["urls"][0]: b["sizeBytes"] for b in books["books"]}
-    curated = {"packs": [], "models": [], "books": [row], "presets": []}
+    curated = {"packs": [], "models": [], key: [row], "presets": []}
     return cg.build(curated, fake_fetch(ROUTES), head=lambda url: sizes[url])
 
 
-def test_a_book_set_carries_descriptions_levels_and_its_shelf(tmp_path, monkeypatch):
+def test_a_book_set_is_its_own_array_and_leaves_books_and_presets_alone(tmp_path, monkeypatch):
+    """Plan KB2 Task 3.2: released apps file every `books` entry into Granger Classics, so a set lives elsewhere."""
     catalog = asb_build(tmp_path, monkeypatch)
-    first = catalog["books"][0]
-    assert first["description"] == "About story a." and first["level"] == 1 and first["shelf"] == "children"
+    assert catalog["books"] == [] and catalog["presets"] == []
+    [book_set] = catalog["bookSets"]
+    assert {k: v for k, v in book_set.items() if k not in ("presets", "books")} == {
+        "id": "african-storybook-en", "title": "African Storybook · English", "language": "en", "shelf": "children",
+        "provider": "African Storybook Initiative", "license": "CC BY 4.0, African Storybook Initiative",
+        "description": "", "i18n": {"es": {"title": "African Storybook · inglés"}}}
+    assert [b["id"] for b in book_set["books"]] == [f"asb-en-{x * 32}" for x in "abc"]
+    assert cg.catalog_urls(catalog) == [b["urls"][0] for b in ASB["books"]]
+
+
+def test_without_book_sets_the_catalog_has_no_book_sets_key(tmp_path, monkeypatch):
+    (tmp_path / "books.json").write_text(json.dumps(BOOKS))
+    monkeypatch.setattr(cg, "REPO_ROOT", tmp_path)
+    sizes = {b["urls"][0]: b["sizeBytes"] for b in BOOKS["books"]}
+    catalog = cg.build({"packs": [], "models": [], "books": [BOOK_ROW], "presets": []}, fake_fetch(ROUTES),
+                       head=lambda url: sizes[url])
+    assert "bookSets" not in catalog
+
+
+def test_a_book_set_carries_descriptions_and_levels(tmp_path, monkeypatch):
+    first = asb_build(tmp_path, monkeypatch)["bookSets"][0]["books"][0]
+    assert first["description"] == "About story a." and first["level"] == 1 and "shelf" not in first
     assert first["category"] == "Level 1" and first["collection"] == "african-storybook-en"
     assert first["license"] == "CC BY 4.0, African Storybook Initiative" and first["domain"] == "literature"
 
 
 def test_a_book_set_gets_an_all_levels_preset_and_one_per_level_with_spanish_copy(tmp_path, monkeypatch):
-    presets = {p["id"]: p for p in asb_build(tmp_path, monkeypatch)["presets"]}
+    presets = {p["id"]: p for p in asb_build(tmp_path, monkeypatch)["bookSets"][0]["presets"]}
     a, b, c = (f"asb-en-{x * 32}" for x in "abc")
     assert presets["african-storybook-en"] == {"id": "african-storybook-en", "title": "African Storybook · English",
                                                "items": [a, b, c], "language": "en",
@@ -359,12 +381,28 @@ def test_level_sets_need_a_level_on_every_book(tmp_path, monkeypatch):
         asb_build(tmp_path, monkeypatch, books=books)
 
 
-def test_a_books_row_without_level_sets_or_levels_stays_as_the_classics_are(tmp_path, monkeypatch):
-    row = {k: v for k, v in ASB_ROW.items() if k not in ("levelSets", "shelf")}
-    books = {**ASB, "books": [{k: v for k, v in b.items() if k not in ("level", "description")} for b in ASB["books"]]}
-    catalog = asb_build(tmp_path, monkeypatch, row=row, books=books)
-    assert [p["id"] for p in catalog["presets"]] == ["african-storybook-en"]
-    assert all("level" not in b and "shelf" not in b and b["description"] == "" for b in catalog["books"])
+def test_a_book_set_without_level_sets_has_only_its_all_books_preset(tmp_path, monkeypatch):
+    row = {k: v for k, v in ASB_ROW.items() if k != "levelSets"}
+    book_set = asb_build(tmp_path, monkeypatch, row=row)["bookSets"][0]
+    assert [p["id"] for p in book_set["presets"]] == ["african-storybook-en"]
+
+
+def test_a_set_in_books_fails_the_build(tmp_path, monkeypatch):
+    with pytest.raises(SystemExit, match="goes under bookSets"):
+        asb_build(tmp_path, monkeypatch, key="books")
+
+
+def test_a_book_set_needs_its_shelf_and_a_provider(tmp_path, monkeypatch):
+    with pytest.raises(SystemExit, match="missing \\['shelf'\\]"):
+        asb_build(tmp_path, monkeypatch, row={k: v for k, v in ASB_ROW.items() if k != "shelf"})
+    with pytest.raises(SystemExit, match="no provider"):
+        asb_build(tmp_path, monkeypatch, books={k: v for k, v in ASB.items() if k != "provider"})
+
+
+def test_a_set_book_id_may_not_clash_with_another_item(tmp_path, monkeypatch):
+    books = {**ASB, "books": [{**ASB["books"][0], "id": "african-storybook-en-level-1"}]}
+    with pytest.raises(SystemExit, match="duplicate ids"):
+        asb_build(tmp_path, monkeypatch, books=books)
 
 
 def feed_entry(name, flavour="", language="eng", category="", updated="2026-10-01", title=None):
@@ -1716,3 +1754,4 @@ def test_book_packs_get_a_shelf_and_other_packs_none():
     assert cg.shelf_of("zimgit-water_en", "books", shelves) == "manuals"
     assert cg.shelf_of("wikipedia_en_all", "", shelves) == ""
     assert cg.shelf_of("gutenberg_en_lcc-pr", "", shelves) == ""  # a prefix alone doesn't make a book pack
+

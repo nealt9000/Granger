@@ -136,7 +136,43 @@ object Filing {
      * Clásicos Granger's, every other one Granger Classics'. The library keeps no catalog collection per book, so the
      * id stands in for it.
      */
-    fun grangerKey(sourceRef: String): String = if (sourceRef.startsWith(CLASICOS_ID_PREFIX)) CLASICOS_GRANGER else GRANGER_CLASSICS
+    fun grangerKey(sourceRef: String): String = when {
+        sourceRef.startsWith(CLASICOS_ID_PREFIX) -> CLASICOS_GRANGER
+        else -> bookSetKey(sourceRef) ?: GRANGER_CLASSICS
+    }
+
+    /**
+     * A catalog book set Granger publishes that isn't one of its own collections (Plan KB2 Task 3.2): the id prefix of
+     * its books (`asb-<lang>-<node>`), its collections' key prefix (`african-storybook-<lang>`, the catalog's set id and
+     * books' `collection`), the project's name and who made the books.
+     */
+    private class BookSetRule(val idPrefix: String, val keyPrefix: String, val name: String, val provider: String)
+
+    private val BOOK_SETS = listOf(BookSetRule("asb-", "african-storybook-", "African Storybook", "African Storybook Initiative"))
+
+    /** The language names a set's collection is called by, in the language itself ("Kiswahili"); else the code. */
+    private val SET_LANGUAGES = mapOf("en" to "English", "sw" to "Kiswahili", "es" to "Español", "fr" to "Français", "pt" to "Português")
+
+    /**
+     * The collection a set book files in (Plan KB2 Task 3.2): `african-storybook-en` for `asb-en-…`, one per language,
+     * not Granger Classics; null for a book of no set.
+     */
+    fun bookSetKey(sourceRef: String): String? = BOOK_SETS.firstOrNull { sourceRef.startsWith(it.idPrefix) }?.let { rule ->
+        sourceRef.removePrefix(rule.idPrefix).substringBefore('-', "").takeIf { it.isNotEmpty() }?.let { rule.keyPrefix + it }
+    }
+
+    /** Whether the collection with [defaultKey] holds a catalog book set's books (African Storybook · English). */
+    fun isBookSetCollection(defaultKey: String?): Boolean = defaultKey != null && BOOK_SETS.any { defaultKey.startsWith(it.keyPrefix) }
+
+    /** A set collection's name: "African Storybook · English", "African Storybook · Kiswahili". */
+    fun bookSetName(defaultKey: String): String? = BOOK_SETS.firstOrNull { defaultKey.startsWith(it.keyPrefix) }?.let { rule ->
+        val lang = defaultKey.removePrefix(rule.keyPrefix)
+        "${rule.name} · ${SET_LANGUAGES[lang] ?: lang}"
+    }
+
+    /** Who made a set collection's books ("African Storybook Initiative"), which its header says; null for any other. */
+    fun bookSetProvider(defaultKey: String?): String? =
+        defaultKey?.let { key -> BOOK_SETS.firstOrNull { key.startsWith(it.keyPrefix) }?.provider }
 
     /** Books are filed by origin; these are their collections' keys and names. */
     private val BOOK_COLLECTIONS = mapOf(
@@ -171,6 +207,7 @@ object Filing {
         book.origin == BookOrigin.NAUTILUS || book.origin == BookOrigin.KIWIX ->
             PackBooks.packNameOf(book).let { name -> kiwixBooksName(packs.firstOrNull { it.name == name }, name) }
         key == CLASICOS_GRANGER -> CLASICOS_GRANGER_NAME
+        isBookSetCollection(key) -> bookSetName(key) ?: book.title
         else -> BOOK_COLLECTIONS.values.firstOrNull { it.first == key }?.second
             ?: book.title.substringBeforeLast(SET_TITLE).takeIf { key.startsWith("archive-org:") && SET_TITLE in book.title }
             ?: book.title

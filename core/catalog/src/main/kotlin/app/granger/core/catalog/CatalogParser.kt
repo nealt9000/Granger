@@ -49,12 +49,7 @@ object CatalogParser {
             .map { it.copy(sidecars = sidecars(it.sidecars)) }
             .map(::family)
             .map { it.copy(language = Languages.normalise(it.language), i18n = i18n(it.i18n)) }
-        val books = entries<BookEntry>(root, "books", retryWithout = listOf(VECTORS, SIDECARS))
-            .filter { valid(it) && DATE.matches(it.releaseDate) }
-            .distinctBy { it.id }
-            .map { if (it.vectors == null || valid(it.vectors)) it else it.copy(vectors = null) }
-            .map { it.copy(sidecars = sidecars(it.sidecars)) }
-            .map { it.copy(language = Languages.normalise(it.language)) }
+        val books = books(root["books"] as? JsonArray)
         val models = entries<ModelEntry>(root, "models")
             .filter { valid(it) && SAFE_NAME.matches(it.fileName) }
             .distinctBy { it.id }
@@ -70,7 +65,42 @@ object CatalogParser {
         }
         val readiness = (root["readiness"] as? JsonObject)?.let { readiness(it, packs, books) }
         val onboarding = (root["onboarding"] as? JsonObject)?.let { onboarding(it, packs, books) }
-        return ParseResult.Ok(Catalog(version, generatedAt, packs, models, books, presets, voices, readiness, onboarding))
+        val bookSets = bookSets(root["bookSets"] as? JsonArray, ids)
+        return ParseResult.Ok(Catalog(version, generatedAt, packs, models, books, presets, voices, readiness, onboarding, bookSets))
+    }
+
+    /** Books that validate, once each: the top level's and each set's. */
+    private fun books(array: JsonArray?): List<BookEntry> = entries<BookEntry>(array, retryWithout = listOf(VECTORS, SIDECARS))
+        .filter { valid(it) && DATE.matches(it.releaseDate) }
+        .distinctBy { it.id }
+        .map { if (it.vectors == null || valid(it.vectors)) it else it.copy(vectors = null) }
+        .map { it.copy(sidecars = sidecars(it.sidecars)) }
+        .map { it.copy(language = Languages.normalise(it.language), level = it.level.coerceAtLeast(0)) }
+
+    /**
+     * The book sets (Plan KB2 Task 3.2). A set needs a safe, new id and a title; its books are checked as the top level's
+     * are, and one whose id is already taken ([taken], or an earlier set's) is dropped; a set left with no books is
+     * dropped. Each book is stamped with its set ([BookEntry.bookSet]); the set's presets keep only its own books.
+     */
+    private fun bookSets(array: JsonArray?, taken: Set<String>): List<BookSet> {
+        val seen = HashSet(taken)
+        val out = ArrayList<BookSet>()
+        for (element in array.orEmpty()) {
+            val obj = element as? JsonObject ?: continue
+            val head = runCatching { json.decodeFromJsonElement<BookSet>(JsonObject(obj - setOf("books", "presets"))) }.getOrNull() ?: continue
+            if (!SAFE_NAME.matches(head.id) || head.title.isBlank() || head.id in seen) continue
+            val books = books(obj["books"] as? JsonArray).filter { seen.add(it.id) }.map { it.copy(bookSet = head.id) }
+            if (books.isEmpty()) continue
+            seen += head.id
+            val own = books.mapTo(HashSet()) { it.id }
+            val language = Languages.normalise(head.language).ifBlank { ENGLISH }
+            val presets = entries<Preset>(obj["presets"] as? JsonArray).map { preset ->
+                preset.copy(items = preset.items.filter { it in own }, language = Languages.normalise(preset.language).ifBlank { language },
+                    i18n = i18n(preset.i18n))
+            }.filter { it.items.isNotEmpty() }.distinctBy { it.id }
+            out += head.copy(language = language, i18n = i18n(head.i18n), presets = presets, books = books)
+        }
+        return out
     }
 
     /**
@@ -165,7 +195,10 @@ object CatalogParser {
      * optional fields in turn (so a bad time index doesn't cost a pack its vectors), then without all of them.
      */
     private inline fun <reified T> entries(root: JsonObject, key: String, retryWithout: List<String> = emptyList()): List<T> =
-        (root[key] as? JsonArray).orEmpty().mapNotNull { element ->
+        entries(root[key] as? JsonArray, retryWithout)
+
+    private inline fun <reified T> entries(array: JsonArray?, retryWithout: List<String> = emptyList()): List<T> =
+        array.orEmpty().mapNotNull { element ->
             runCatching { json.decodeFromJsonElement<T>(element) }.getOrNull() ?: (element as? JsonObject)?.let { obj ->
                 val present = retryWithout.filter { it in obj }
                 (present.map { listOf(it) } + listOf(present)).filter { it.isNotEmpty() }.firstNotNullOfOrNull { drop ->

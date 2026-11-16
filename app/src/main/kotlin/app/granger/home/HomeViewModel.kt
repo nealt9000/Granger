@@ -180,7 +180,7 @@ class HomeViewModel(
 
     private val dismissed = MutableStateFlow(prefs.dismissedFailures)
 
-    private val catalogIds = catalog.state.map { s -> s.catalog?.let { c -> (c.packs + c.models + c.books + c.voices).mapTo(HashSet()) { it.id } } }
+    private val catalogIds = catalog.state.map { s -> s.catalog?.let { c -> c.items.mapTo(HashSet()) { it.id } } }
 
     private val downloadsCard = combine(downloads.records, downloads.live, dismissed, catalogIds) { records, live, closed, ids ->
         downloadsCard(DownloadQueueSummary.of(records, live, clock()), closed, ids)

@@ -22,6 +22,11 @@ enum class CatalogScope(@StringRes val title: Int) {
      * returns it, each item stays in its own scope.
      */
     BOOKS(R.string.sources_get_books),
+    /**
+     * One catalog book set (Plan KB2 Task 3.2: African Storybook · English), its screen opened from Books' shelf row: the
+     * set's own presets (every book, each level) and its books by level. The screen is titled by the set.
+     */
+    BOOK_SET(R.string.sources_get_books),
 }
 
 /** The scopes a pack can be in: where Readiness's domain views and the other cross-scope lists look (Plan KB Decision 6). */
@@ -35,8 +40,8 @@ val PACK_SCOPES = setOf(CatalogScope.KIWIX, CatalogScope.KIWIX_BOOKS, CatalogSco
  */
 fun scopeOf(item: CatalogItem): CatalogScope = when (item) {
     is ModelEntry, is VoiceEntry -> CatalogScope.MODELS
-    // Books are Granger's own.
-    is BookEntry -> CatalogScope.GRANGER
+    // Books are Granger's own; a set's (African Storybook, Plan KB2 Task 3.2) are their set's.
+    is BookEntry -> if (item.inSet) CatalogScope.BOOK_SET else CatalogScope.GRANGER
     is PackEntry -> when {
         isGutenberg(item) -> CatalogScope.GUTENBERG
         item.isBookPack -> CatalogScope.KIWIX_BOOKS

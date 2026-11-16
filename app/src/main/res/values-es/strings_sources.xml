@@ -32,6 +32,8 @@
     <string name="sources_shelf_manuals">Manuales y obras de consulta</string>
     <string name="sources_shelf_learning">Aprendizaje</string>
     <string name="sources_shelf_other">Más libros</string>
+    <!-- Plan KB2 Task 3.2: a book set's reading level (African Storybook), as a section and a collection's heading. -->
+    <string name="sources_level">Nivel %1$d</string>
     <string name="sources_books_find">Buscar un libro</string>
     <string name="sources_search_all_books">Buscar en todos los libros</string>
     <string name="sources_search_all_books_sub">Títulos de todas las fuentes de libros de aquí</string>

@@ -315,7 +315,7 @@ fun NavController.dropClosedReaders(keptTabIds: Set<Long>) {
  * [domain] filters the Kiwix list to a readiness domain (Plan H1); [family] is one folded family's A–Z list (Plan KB
  * Decision 10); null for both is the whole catalog.
  */
-@Serializable data class SourceRoute(val scope: CatalogScope, val domain: String? = null, val family: String? = null)
+@Serializable data class SourceRoute(val scope: CatalogScope, val domain: String? = null, val family: String? = null, val set: String? = null)
 /** [kind] picks the view: texts (Books), spoken word (Audiobooks) or music. */
 @Serializable data class ArchiveRoute(val kind: ArchiveKind = ArchiveKind.TEXTS)
 /** The LibriVox source: Recently added, six genres and search (Plan M2). */
@@ -1048,6 +1048,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             container.bookshelf, container.downloads, container.appScope, container.archiveSidecarDir,
                             container.catalog, createSavedStateHandle(), container.libraryViews,
                             gutenberg = container.gutenbergShelf,
+                            levelName = { appContext.getString(R.string.sources_level, it) },
                         )
                     },
                     onOpened = ::showTab,
@@ -1297,7 +1298,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             source, container.catalog, container.downloads, container.library, container.bookshelf, container.volumes,
                             container.downloadPrefs, container.deviceTier, container.appScope, askOn = container.askOn, meaningSearch = container.meaningSearch, domain = route.domain,
                             family = route.family, knowledge = container.knowledgeLanguages.languages,
-                            voiceTitles = app.granger.core.speech.VoiceTitles.of(appContext),
+                            voiceTitles = app.granger.core.speech.VoiceTitles.of(appContext), bookSet = route.set,
                         )
                     },
                     title = stringResource(source.title),
@@ -1594,6 +1595,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         onOpenBook = { bookId, title -> scope.launch { showTab(container.sessions.openTab(bookId, "", title)) } },
                         onArchive = { nav.navigate(ArchiveRoute(ArchiveKind.TEXTS)) },
                         onImport = if (Features.IMPORT) nav::importIntoLibrary else null,
+                        onOpenSet = { id -> nav.navigate(SourceRoute(CatalogScope.BOOK_SET, set = id)) },
                     )
                     return@composable
                 }

@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import app.granger.R
 import app.granger.UiText
 import app.granger.core.catalog.BookEntry
+import app.granger.core.catalog.BookSet
 import app.granger.core.catalog.CatalogItem
 import app.granger.core.catalog.PackEntry
 import app.granger.core.catalog.Shelves
@@ -33,6 +34,22 @@ object BookShelves {
      */
     fun shelfOf(pack: PackEntry): String = pack.shelf.takeIf { it in Shelves.ORDER }
         ?: if (isGutenberg(pack)) Shelves.LITERATURE else OTHER
+
+    /** A book set's shelf (Plan KB2 Task 3.2): the catalog's, else [OTHER]. */
+    fun shelfOf(set: BookSet): String = set.shelf.takeIf { it in Shelves.ORDER } ?: OTHER
+
+    /**
+     * A book set's row: "693 books · 1.2 GB · African Storybook Initiative", and "· 3 on this phone" once some are. No
+     * "From Kiwix": Granger publishes these books.
+     */
+    fun setMeta(set: BookSet, onPhone: Int): UiText = KiwixList.dotted(
+        listOfNotNull(
+            UiText.Plural(R.plurals.common_books, set.books.size, set.books.size),
+            UiText.Raw(formatBytes(set.books.sumOf { it.sizeBytes })),
+            set.provider.takeIf { it.isNotBlank() }?.let(UiText::Raw),
+            if (onPhone > 0) UiText.Plural(R.plurals.sources_on_this_phone, onPhone, onPhone) else null,
+        ),
+    )
 
     @StringRes fun heading(shelf: String): Int = when (shelf) {
         Shelves.LITERATURE -> R.string.sources_shelf_literature

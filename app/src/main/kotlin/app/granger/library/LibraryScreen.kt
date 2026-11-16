@@ -294,6 +294,13 @@ internal fun rowCountText(row: CollectionRow, manifest: ManifestCollection? = nu
     // come from (Plan GB Decision 2, Plan KB Decision 7, Plan KB2 Task 4.2). Whether they're searchable in full is the
     // collection header's to say, and only where they aren't (Task 4.5).
     val key = row.collection.defaultKey
+    // A catalog book set's collection (Plan KB2 Task 3.2): "693 books · African Storybook Initiative".
+    if (Filing.isBookSetCollection(key)) {
+        val books = rows.sumOf { it.books.size }
+        if (books == 0) return counts
+        return GutenbergHeader(pack = null, books = books, searchable = 0, kind = HeaderKind.BOOK_SET,
+            providerName = Filing.bookSetProvider(key), documents = false).provenance
+    }
     if (!Filing.isBookPackCollection(key)) return counts
     // A work in parts counts once, as the header counts it.
     val books = rows.sumOf { r -> if (manifest != null) r.books.distinctBy { it.workKey ?: it.id }.size else r.books.size }
