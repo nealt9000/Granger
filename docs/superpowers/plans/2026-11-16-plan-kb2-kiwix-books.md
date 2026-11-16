@@ -292,10 +292,41 @@ Python for tools).
       and too-few-documents stay websites, Counter parsing; a pack that can't be opened keeps "files"; file-name
       titles), `CollectionViewModelTest.aCollectionListedByFileNamesSaysSo`. `:core:library` 495, `:app` 1800 (112
       skipped), 0 failures.
-- [ ] **Task 2.3: groups in the collection screen.**
+- [x] **Task 2.3: groups in the collection screen.**
   - Section headers from manifest groups (Level 1–5; Handbooks; The book / Course materials).
   - A language chip when a collection holds more than one language.
   - The ThemeShots get the new states.
+  - **Done 2026-11-16** (this commit).
+    - **When the collection's own order shows (decision):** a manifest collection (its rows carry `ord`) with the
+      Title sort (the default) and no Find text. Author, Recent or a Find query list the books flat as before, parts
+      as separate rows. So the Title chip means "the collection's order" here; within a section books follow the
+      manifest's `ord`, not A–Z. The sort is a shared preference, and a fourth chip for one kind of collection seemed
+      worse.
+    - `sectionRows` (app `library/CollectionSections.kt`, pure): books with an empty group first with no header, then
+      each group under a heading in the manifest's `groups` order (a group it doesn't name follows, by its first book).
+      A section of more than 50 rows (a work counts once) folds behind a button header "Course materials · 643";
+      Algorithms' 643 course files sit folded ahead of the book's chapters, as the manifest orders its groups.
+    - **Parts (decision):** a work is one row ("Hospital Corpsman", author, "3 parts", an arrow). A tap shows its files
+      indented beneath it (the whole file first, when the pack has one, then the parts by `part_no`); another tap hides
+      them. Expanding is the one pattern for both shapes (whole + parts, parts only) and never opens a part the reader
+      didn't choose. A "work" of one file is just that book. The grid does the same with a cover cell.
+    - Language chips ("All", then each language's name via `KiwixList.languageName`, so `eng` and `en` are one
+      "English") when a manifest collection holds more than one; they filter both layouts.
+    - Header: "<provider> · N <noun>" from the manifest (`ManifestCollection`, read off the main thread by
+      `CollectionViewModel.manifest`, `manifestCollectionOf`): `library_books_counted` or `library_documents`
+      (existing plurals, en + es), a work counted once; "Kiwix library" when the manifest names no provider.
+    - Open sections, open works and the chosen language live in `SavedStateHandle`.
+    - TalkBack: section names are headings; a folded header is a `Role.Button` heading with `stateDescription`
+      Expanded/Collapsed and an Expand/Collapse click label; a work row is a button with the same state. New strings
+      `library_expanded`, `library_collapsed`, plurals `library_parts` (en + es "Expandido", "Contraído", "N partes").
+    - ThemeShots: `kb2-sections` (list: ungrouped books, Handbooks with a parts row, language chips), `kb2-parts` (the
+      work open), `kb2-sections-grid`, `kb2-folded` (Algorithms: "Course materials · 643" folded above "The book").
+      Rendered and checked by eye in Night and Field.
+    - Tests: `CollectionSectionsTest` (4: order and unnamed groups, folding at 50, parts with no whole, a whole heading
+      its parts), `CollectionViewModelTest` +2 (sections, parts, folding, language filter, header provider/noun/count,
+      Find going flat; other collections unchanged).
+    - Suites: `:core:catalog` 77, `:core:downloads` 158, `:core:library` 495, `:core:zim` 31, `:app` 1814 (ThemeShots
+      skipped without `-PthemeShots`), 0 failures; `:app:assembleDebug` builds.
 - [x] **Task 2.4: pack documents keyed by name (design §4.5).**
   - `book:pack:<zimName>/<path>`.
   - Adopt old UUID rows with place, marks, tabs and history (the KB Decision 5 pattern).

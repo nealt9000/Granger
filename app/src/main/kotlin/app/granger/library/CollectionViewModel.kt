@@ -22,6 +22,9 @@ import app.granger.core.library.CollectionRow
 import app.granger.core.library.Filing
 import app.granger.core.library.PackBooks
 import app.granger.core.library.isBookPack
+import app.granger.core.library.BookManifest
+import app.granger.core.library.ManifestCollection
+import app.granger.core.library.bookSource
 import app.granger.core.library.Library
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
@@ -67,6 +70,10 @@ class CollectionViewModel(
     private val compute: CoroutineDispatcher = Dispatchers.Default,
     /** "Make all searchable…" for a Gutenberg collection (Plan GB); null offers it nowhere. */
     private val gutenberg: GutenbergShelf? = null,
+    /** What a Kiwix book pack's manifest says of its collection (Plan KB2); read off the main thread. */
+    private val manifestOf: (Pack) -> ManifestCollection? = ::manifestCollectionOf,
+    /** A language code's name for the language chips ("eng" → "English"). */
+    private val languageName: (String) -> String = app.granger.sources.KiwixList::languageName,
 ) : ViewModel() {
     /** Null until loaded, and again if the collection goes away (emptied or deleted). */
     val ui: StateFlow<CollectionRow?> =
@@ -96,15 +103,53 @@ class CollectionViewModel(
 
     private data class Choices(val query: String, val sort: BookSort, val category: String?)
 
-    /** The books to show, after Find, the category and the sort. */
+    /** A book pack collection's pack, when installed; null for any other collection. */
+    private val bookPack = combine(ui, library.packs) { row, packs ->
+        val key = row?.collection?.defaultKey?.takeIf(Filing::isBookPackCollection) ?: return@combine null
+        packs.firstOrNull { it.isBookPack && Filing.defaultKey(it) == key }
+    }.distinctUntilChanged()
+
+    /** What a Kiwix book pack's manifest says of its collection (Plan KB2): its provider, noun and sections. */
+    val manifest: StateFlow<ManifestCollection?> = bookPack
+        .map { pack -> pack?.takeIf { it.bookSource == BookOrigin.KIWIX } }
+        .distinctUntilChanged { a, b -> a?.id == b?.id && a?.bookManifest == b?.bookManifest && a?.title == b?.title }
+        .map { pack -> pack?.let(manifestOf) }
+        .flowOn(compute)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    private val openSections = savedState.getStateFlow(OPEN_SECTIONS, ArrayList<String>())
+    private val openWorks = savedState.getStateFlow(OPEN_WORKS, ArrayList<String>())
+    private val language = savedState.getStateFlow<String?>(LANGUAGE, null)
+
+    private val layout = combine(manifest, openSections, openWorks, language) { m, sections, works, lang ->
+        CollectionLayout(m?.groups.orEmpty(), sections.toSet(), works.toSet(), lang)
+    }
+
+    /** The books to show, after Find, the language, the category and the sort; a manifest collection in its own order. */
     val books: StateFlow<CollectionBooks> = combine(
         ui.map { it?.books.orEmpty() }.distinctUntilChanged(),
         combine(query, sort, category, ::Choices),
         categories,
         positions,
-    ) { list, c, categoryOf, read -> collectionBooks(list, c.query, c.sort, c.category, categoryOf, read) }
+        layout,
+    ) { list, c, categoryOf, read, l -> collectionBooks(list, c.query, c.sort, c.category, categoryOf, read, l, languageName) }
         .flowOn(compute)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CollectionBooks())
+
+    /** Opens or folds a long section of a manifest collection ("Course materials · 643"). */
+    fun toggleSection(name: String) {
+        savedState[OPEN_SECTIONS] = ArrayList(openSections.value.toggled(name))
+    }
+
+    /** Shows or hides a work's parts. */
+    fun toggleWork(workKey: String) {
+        savedState[OPEN_WORKS] = ArrayList(openWorks.value.toggled(workKey))
+    }
+
+    /** Null shows every language. */
+    fun setLanguage(name: String?) { savedState[LANGUAGE] = name }
+
+    private fun List<String>.toggled(item: String): List<String> = if (item in this) this - item else this + item
 
     fun setQuery(text: String) {
         findText = text
@@ -129,14 +174,21 @@ class CollectionViewModel(
      * in full; and the "Make all searchable…" run, if one is going. Null for any other collection.
      */
     val gutenbergHeader: StateFlow<GutenbergHeader?> = combine(
-        ui, library.packs, gutenberg?.progress ?: flowOf(emptyMap()),
-    ) { row, packs, runs ->
+        ui, library.packs, gutenberg?.progress ?: flowOf(emptyMap()), manifest,
+    ) { row, packs, runs, m ->
         val key = row?.collection?.defaultKey?.takeIf(Filing::isBookPackCollection) ?: return@combine null
         val pack = packs.firstOrNull { it.isBookPack && Filing.defaultKey(it) == key }
         val packName = pack?.name ?: row.books.firstOrNull()?.let(PackBooks::packNameOf)
-        val header = GutenbergHeader(pack, row.books.size, row.books.count { it.searchableInFull }, packName?.let(runs::get))
+        // A work in parts counts once (Plan KB2): its whole and parts share a work key.
+        val count = if (m != null) row.books.distinctBy { it.workKey ?: it.id }.size else row.books.size
+        val header = GutenbergHeader(pack, count, row.books.count { it.searchableInFull }, packName?.let(runs::get))
         if (Filing.isKiwixBooksCollection(key)) {
-            header.copy(kind = HeaderKind.KIWIX_LIBRARY, fromFileNames = pack?.bookManifest == Pack.BOOK_FILES)
+            header.copy(
+                kind = HeaderKind.KIWIX_LIBRARY,
+                fromFileNames = m?.fromFileNames ?: (pack?.bookManifest == Pack.BOOK_FILES),
+                providerName = m?.provider?.takeIf { it.isNotBlank() },
+                documents = m?.documents ?: true,
+            )
         } else {
             header
         }
@@ -236,7 +288,20 @@ class CollectionViewModel(
     private companion object {
         const val QUERY = "query"
         const val CATEGORY = "category"
+        const val OPEN_SECTIONS = "openSections"
+        const val OPEN_WORKS = "openWorks"
+        const val LANGUAGE = "language"
     }
+}
+
+/**
+ * What a Kiwix book pack's manifest says of its collection (Plan KB2), read from the `.gbooks` file [Pack.bookManifest]
+ * names; a pack listed by its files' names says only that. Blocking.
+ */
+fun manifestCollectionOf(pack: Pack): ManifestCollection? = when (val manifest = pack.bookManifest) {
+    null -> null
+    Pack.BOOK_FILES -> ManifestCollection(pack.title, ManifestCollection.NOUN_DOCUMENTS, "", emptyList(), fromFileNames = true)
+    else -> BookManifest.collection(java.io.File(manifest))
 }
 
 /** Whose a book pack's collection is: Project Gutenberg's books, or a Kiwix library's documents (Plan KB Decision 7). */
@@ -254,16 +319,20 @@ data class GutenbergHeader(
     val kind: HeaderKind = HeaderKind.GUTENBERG,
     /** A pack listed with no manifest (Plan KB2 Task 2.2): its titles are its files' names, and the header says so. */
     val fromFileNames: Boolean = false,
+    /** Who made a Kiwix collection, as its manifest names them ("Federation of American Scientists"); null says "Kiwix library". */
+    val providerName: String? = null,
+    /** Whether a Kiwix collection counts documents (nautilus packs, and a manifest whose noun says so) rather than books. */
+    val documents: Boolean = true,
 ) {
-    /** "Project Gutenberg", "Kiwix library". */
+    /** "Project Gutenberg", "Kiwix library", or the manifest's provider. */
     val provider: UiText get() = when (kind) {
         HeaderKind.GUTENBERG -> UiText.Raw(app.granger.core.library.GutenbergNames.PROVIDER)
-        HeaderKind.KIWIX_LIBRARY -> UiText.Res(R.string.library_kiwix_library)
+        HeaderKind.KIWIX_LIBRARY -> providerName?.let { UiText.Raw(it) } ?: UiText.Res(R.string.library_kiwix_library)
     }
 
     /** "1,284 books", "17 documents". */
     val count: UiText get() = UiText.Plural(
-        if (kind == HeaderKind.KIWIX_LIBRARY) R.plurals.library_documents else R.plurals.library_books_counted, books, number(books),
+        if (kind == HeaderKind.KIWIX_LIBRARY && documents) R.plurals.library_documents else R.plurals.library_books_counted, books, number(books),
     )
 
     /** "Project Gutenberg · 1,284 books", "Kiwix library · 17 documents". */

@@ -22,6 +22,14 @@
     <string name="library_kiwix_library">Kiwix library</string>
     <!-- Under a Kiwix collection listed with no book manifest: its titles are only its files' names (Plan KB2). -->
     <string name="library_titles_from_file_names">Titles from file names</string>
+    <!-- A folded section or a work's parts, as TalkBack says its state (Plan KB2). -->
+    <string name="library_expanded">Expanded</string>
+    <string name="library_collapsed">Collapsed</string>
+    <!-- A work in parts shown as one row in a collection: "3 parts" (Plan KB2). -->
+    <plurals name="library_parts">
+        <item quantity="one">%1$d part</item>
+        <item quantity="other">%1$d parts</item>
+    </plurals>
     <!-- %1$s is the count, formatted, such as 1,284. -->
     <plurals name="library_books_counted">
         <item quantity="one">%1$s book</item>

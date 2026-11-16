@@ -491,7 +491,86 @@ class CollectionViewModelTest {
         assertThat(header.text.en()).endsWith(" · Titles from file names")
         // A manifest pack's header doesn't.
         library.packList.value = listOf(box.copy(bookManifest = "/s/box.gbooks"))
+        assertThat(vm.gutenbergHeader.first { it?.pack?.bookManifest == "/s/box.gbooks" && it.fromFileNames == false }).isNotNull()
+    }
+
+    // --- Plan KB2 Task 2.3: groups, parts and languages ---
+
+    private val mm = pack("u-mm", "Military Medicine").copy(name = "mm_en_all", scraper = "zimit", bookManifest = "/s/mm.gbooks")
+    private val mmKey = "kiwixbooks-mm_en_all"
+
+    private fun mmBook(key: String, title: String, group: String, ord: Int, workKey: String? = null, partNo: Int? = null, language: String = "en") =
+        book("book:kiwix:mm_en_all/$key", title).copy(
+            origin = BookOrigin.KIWIX, sourceRef = "mm_en_all/$key.pdf", format = app.granger.core.library.BookFormat.PDF,
+            groupName = group, ord = ord, workKey = workKey, workTitle = workKey?.let { "Hospital Corpsman" }, partNo = partNo, language = language,
+        )
+
+    private val mmBooks = listOf(
+        mmBook("intro", "Introduction", "", 0),
+        mmBook("hc1", "Hospital Corpsman (Part 1)", "Handbooks", 1, workKey = "hc", partNo = 1),
+        mmBook("hc2", "Hospital Corpsman (Part 2)", "Handbooks", 2, workKey = "hc", partNo = 2),
+        mmBook("fa", "Primeros auxilios", "Handbooks", 3, language = "es"),
+    ) + (1..60).map { mmBook("o$it", "Order $it", "Orders", 10 + it) }
+
+    private fun TestScope.mmVm(): CollectionViewModel {
+        library.packList.value = listOf(mm)
+        show(CollectionRow(ShelfCollection("c:$mmKey", "Military Medicine", "lit", false, defaultKey = mmKey), emptyList(), mmBooks))
+        return CollectionViewModel(
+            "c:$mmKey", shelves, library, sessions, bookshelf, downloads, appScope = this, viewPrefs = LibraryViewPrefs(),
+            compute = main.dispatcher,
+            manifestOf = { app.granger.core.library.ManifestCollection("Military Medicine", "books", "Federation of American Scientists", listOf("Handbooks", "Orders")) },
+            languageName = { mapOf("en" to "English", "es" to "Spanish")[it] ?: it },
+        )
+    }
+
+    private fun SectionRow.label(): String = when (this) {
+        is SectionRow.Header -> "# $name"
+        is SectionRow.Item -> (if (part) "- " else "") + book.title
+        is SectionRow.Work -> "$title (${parts.size})"
+    }
+
+    @Test fun aManifestCollectionShowsItsSectionsPartsAndLanguages() = runTest(main.dispatcher) {
+        val vm = mmVm()
+        backgroundScope.launch { vm.books.collect {} }
+        backgroundScope.launch { vm.gutenbergHeader.collect {} }
         testScheduler.advanceUntilIdle()
-        assertThat(vm.gutenbergHeader.value!!.fromFileNames).isFalse()
+        val shown = vm.books.value
+        assertThat(shown.rows!!.map { it.label() }).containsExactly(
+            "Introduction", "# Handbooks", "Hospital Corpsman (2)", "Primeros auxilios", "# Orders",
+        ).inOrder()
+        assertThat((shown.rows!!.last() as SectionRow.Header).let { it.count to it.foldable }).isEqualTo(60 to true)
+        assertThat(shown.languages).containsExactly("English", "Spanish").inOrder()
+        // The header names the manifest's provider and counts a work once, in its noun.
+        val header = vm.gutenbergHeader.value!!
+        assertThat(header.text.en()).isEqualTo("Federation of American Scientists · 63 books · 0 searchable in full")
+
+        vm.toggleWork("hc")
+        vm.toggleSection("Orders")
+        testScheduler.advanceUntilIdle()
+        val open = vm.books.value.rows!!.map { it.label() }
+        assertThat(open.take(6)).containsExactly(
+            "Introduction", "# Handbooks", "Hospital Corpsman (2)", "- Hospital Corpsman (Part 1)", "- Hospital Corpsman (Part 2)", "Primeros auxilios",
+        ).inOrder()
+        assertThat(open).hasSize(7 + 60)
+
+        vm.setLanguage("Spanish")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.books.value.rows!!.map { it.label() }).containsExactly("# Handbooks", "Primeros auxilios").inOrder()
+        assertThat(vm.books.value.language).isEqualTo("Spanish")
+
+        // Find, or another sort, lists the books flat as before.
+        vm.setLanguage(null)
+        vm.setQuery("hospital")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.books.value.rows).isNull()
+        assertThat(vm.books.value.books.map { it.title }).containsExactly("Hospital Corpsman (Part 1)", "Hospital Corpsman (Part 2)")
+    }
+
+    @Test fun otherCollectionsHaveNoSectionsOrLanguageChips() = runTest(main.dispatcher) {
+        show(collection("c:mine", true, books = listOf(book("a", "Alpha"), book("b", "Beta").copy(language = "spa"))))
+        val shown = vm("c:mine").books.first { it.total == 2 }
+        assertThat(shown.rows).isNull()
+        assertThat(shown.languages).isEmpty()
+        assertThat(shown.books).hasSize(2)
     }
 }

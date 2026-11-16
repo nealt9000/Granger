@@ -36,6 +36,13 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.Role
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
@@ -253,6 +260,21 @@ fun CollectionScreen(
                             }
                         }
                     })
+                    // A collection in more than one language (Plan KB2): one chip shows that language alone.
+                    if (shown.languages.isNotEmpty()) add(HeadItem("languages", "chips") {
+                        LazyRow(contentPadding = PaddingValues(horizontal = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            item(key = "all") {
+                                FilterChip(selected = shown.language == null, onClick = { viewModel.setLanguage(null) }, label = { Text(stringResource(R.string.sources_all)) })
+                            }
+                            items(shown.languages, key = { it }) { language ->
+                                FilterChip(
+                                    selected = shown.language == language,
+                                    onClick = { viewModel.setLanguage(if (shown.language == language) null else language) },
+                                    label = { Text(language) },
+                                )
+                            }
+                        }
+                    })
                     if (shown.books.isEmpty()) add(HeadItem("none", "none") {
                         Text(
                             stringResource(R.string.library_no_books_match),
@@ -264,7 +286,46 @@ fun CollectionScreen(
                 }
             }
             val open = { book: Book -> scope.launch { viewModel.openBook(book)?.let(onOpened) }; Unit }
-            if (view == ShelfView.LIST) ShelfList(
+            val sectioned = shown.rows
+            // A manifest collection in its own order (Plan KB2 Task 2.3): sections, folded sections and works in parts.
+            if (sectioned != null && view == ShelfView.LIST) LazyColumn(Modifier.padding(padding).fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)) {
+                for (h in head) item(key = h.key, contentType = h.contentType) { h.content() }
+                items(sectioned, key = { it.key }, contentType = { it::class.simpleName }) { entry ->
+                    when (entry) {
+                        is SectionRow.Header -> SectionHeaderRow(entry, onToggle = { viewModel.toggleSection(entry.name) })
+                        is SectionRow.Work -> WorkRow(entry, onToggle = { viewModel.toggleWork(entry.workKey) })
+                        is SectionRow.Item -> Box(if (entry.part) Modifier.padding(start = 24.dp) else Modifier) {
+                            val book = entry.book
+                            var bookMenu by remember { mutableStateOf(false) }
+                            BookRow(book, positions[book.id]?.totalProgression, onClick = { open(book) }, onLongClick = { bookMenu = true })
+                            BookMenu(book, bookMenu, { bookMenu = false }, onMove = { dialog = CollectionDialog.MoveBook(book) }, onRemove = { dialog = CollectionDialog.RemoveBook(book) })
+                        }
+                    }
+                }
+            } else if (sectioned != null) androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
+                columns = androidx.compose.foundation.lazy.grid.GridCells.Adaptive(104.dp),
+                modifier = Modifier.padding(padding).fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                for (h in head) item(key = h.key, span = { GridItemSpan(maxLineSpan) }, contentType = h.contentType) { h.content() }
+                for (entry in sectioned) when (entry) {
+                    is SectionRow.Header -> item(key = entry.key, span = { GridItemSpan(maxLineSpan) }, contentType = "section") {
+                        SectionHeaderRow(entry, onToggle = { viewModel.toggleSection(entry.name) })
+                    }
+                    is SectionRow.Work -> item(key = entry.key, contentType = "work") {
+                        Box(Modifier.padding(horizontal = 8.dp)) { WorkCell(entry, onToggle = { viewModel.toggleWork(entry.workKey) }) }
+                    }
+                    is SectionRow.Item -> item(key = entry.key, contentType = "book") {
+                        val book = entry.book
+                        Box(Modifier.padding(horizontal = 8.dp)) {
+                            var bookMenu by remember { mutableStateOf(false) }
+                            BookCell(book, positions[book.id]?.totalProgression, onClick = { open(book) }, onLongClick = { bookMenu = true })
+                            BookMenu(book, bookMenu, { bookMenu = false }, onMove = { dialog = CollectionDialog.MoveBook(book) }, onRemove = { dialog = CollectionDialog.RemoveBook(book) })
+                        }
+                    }
+                }
+            } else if (view == ShelfView.LIST) ShelfList(
                 shown.sections,
                 Modifier.padding(padding).fillMaxSize(),
                 contentType = "book",
@@ -408,6 +469,91 @@ private fun GutenbergHead(header: GutenbergHeader) {
                 progress = { if (p.total == 0) 0f else p.done.toFloat() / p.total },
                 modifier = Modifier.fillMaxWidth().height(3.dp),
             )
+        }
+    }
+}
+
+/**
+ * A section's header in a manifest collection (Plan KB2 Task 2.3), read by TalkBack as a heading. A long section is
+ * folded behind it: then it's a button, "Course materials · 643", with its state (expanded or collapsed).
+ */
+@Composable
+private fun SectionHeaderRow(header: SectionRow.Header, onToggle: () -> Unit) {
+    val style = MaterialTheme.typography.titleMedium
+    val colour = MaterialTheme.colorScheme.primary
+    if (!header.foldable) {
+        Text(
+            header.name,
+            style = style,
+            color = colour,
+            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp).semantics { heading() },
+        )
+        return
+    }
+    val count = java.text.NumberFormat.getIntegerInstance().format(header.count)
+    val state = stringResource(if (header.expanded) R.string.library_expanded else R.string.library_collapsed)
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clickable(
+                onClickLabel = stringResource(if (header.expanded) R.string.library_collapse else R.string.library_expand),
+                role = Role.Button,
+                onClick = onToggle,
+            )
+            .padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 4.dp)
+            .semantics(mergeDescendants = true) { heading(); stateDescription = state },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(stringResource(R.string.library_dotted, header.name, count), style = style, color = colour, modifier = Modifier.weight(1f))
+        Icon(if (header.expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = colour)
+    }
+}
+
+/**
+ * A work in parts as one row (Plan KB2 Task 2.3): its title, author and "3 parts"; a tap shows its parts beneath it
+ * (the whole file first, when the pack has one), another hides them. A button with its state for TalkBack.
+ */
+@Composable
+private fun WorkRow(work: SectionRow.Work, onToggle: () -> Unit) {
+    val state = stringResource(if (work.expanded) R.string.library_expanded else R.string.library_collapsed)
+    ShelfRow(
+        title = work.title,
+        subtitle = work.author,
+        cover = { BookCover(work.first, Modifier.height(ShelfCoverSize)) },
+        onClick = onToggle,
+        modifier = Modifier.semantics { role = Role.Button; stateDescription = state },
+        detail = {
+            Text(
+                pluralStringResource(R.plurals.library_parts, work.parts.size, work.parts.size),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        },
+        trailing = { Icon(if (work.expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown, contentDescription = null) },
+    )
+}
+
+/** A work in parts in the grid: its first file's cover, its title and "3 parts"; a tap shows or hides the parts. */
+@Composable
+private fun WorkCell(work: SectionRow.Work, onToggle: () -> Unit) {
+    val state = stringResource(if (work.expanded) R.string.library_expanded else R.string.library_collapsed)
+    Column(
+        Modifier
+            .clickable(role = Role.Button, onClick = onToggle)
+            .semantics(mergeDescendants = true) { stateDescription = state },
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        BookCover(work.first, Modifier.fillMaxWidth())
+        Text(work.title, style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis, minLines = 2)
+        Text(work.author, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, minLines = 1, overflow = TextOverflow.Ellipsis)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                pluralStringResource(R.plurals.library_parts, work.parts.size, work.parts.size),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.weight(1f),
+            )
+            Icon(if (work.expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
         }
     }
 }

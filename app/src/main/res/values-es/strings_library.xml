@@ -17,6 +17,13 @@
     <string name="library_dotted">%1$s · %2$s</string>
     <string name="library_kiwix_library">Biblioteca de Kiwix</string>
     <string name="library_titles_from_file_names">Títulos tomados de los nombres de archivo</string>
+    <string name="library_expanded">Expandido</string>
+    <string name="library_collapsed">Contraído</string>
+    <plurals name="library_parts">
+        <item quantity="one">%1$d parte</item>
+        <item quantity="many">%1$d partes</item>
+        <item quantity="other">%1$d partes</item>
+    </plurals>
     <plurals name="library_books_counted">
         <item quantity="one">%1$s libro</item>
         <item quantity="many">%1$s libros</item>

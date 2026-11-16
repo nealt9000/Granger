@@ -696,6 +696,66 @@ open class ThemeShots {
         }
     }
 
+    /**
+     * Plan KB2 Task 2.3: a manifest collection (Military Medicine-like) at 360 dp in its own order: books with no section
+     * first, a "Handbooks" section with a work in parts ([openWork] shows its parts), a folded "Orders · 60" section,
+     * and language chips (the collection holds English and Spanish). With [algorithms], Algorithms instead: 643 course
+     * files folded under "Course materials · 643" ahead of the book's chapters.
+     */
+    private fun manifestShot(name: String, view: ShelfView, openWork: Boolean, algorithms: Boolean = false) {
+        val zim = if (algorithms) "jeffe.cs.illinois.edu_en_all" else "irp.fas.org_en_military-medicine"
+        fun kb(key: String, title: String, group: String, ord: Int, author: String = "Department of the Army", workKey: String? = null, partNo: Int? = null, language: String = "en") =
+            app.granger.book("book:kiwix:$zim/$key", title, author = author).copy(
+                origin = app.granger.core.library.BookOrigin.KIWIX, sourceRef = "$zim/$key.pdf",
+                format = app.granger.core.library.BookFormat.PDF, groupName = group, ord = ord, workKey = workKey,
+                workTitle = workKey?.let { "Hospital Corpsman" }, partNo = partNo, language = language,
+            )
+        // Algorithms: 643 course files folded ahead of the book's chapters (the manifest's group order).
+        val algorithmsBooks = (1..643).map { kb("c$it", "Fall 2024 · Homework $it", "Course materials", it, author = "") } +
+            listOf("Introduction", "Recursion", "Backtracking", "Dynamic Programming", "Greedy Algorithms", "Basic Graph Algorithms")
+                .mapIndexed { i, t -> kb("b$i", t, "The book", 1000 + i, author = "Jeff Erickson") }
+        val books = if (algorithms) algorithmsBooks else listOf(
+            kb("emwar", "Emergency War Surgery", "", 0, author = "Borden Institute"),
+            kb("fa", "First Aid for Soldiers", "", 1),
+            kb("hc1", "Hospital Corpsman (Part 1 of 3)", "Handbooks", 2, author = "US Navy", workKey = "hc", partNo = 1),
+            kb("hc2", "Hospital Corpsman (Part 2 of 3)", "Handbooks", 3, author = "US Navy", workKey = "hc", partNo = 2),
+            kb("hc3", "Hospital Corpsman (Part 3 of 3)", "Handbooks", 4, author = "US Navy", workKey = "hc", partNo = 3),
+            kb("sf", "Special Forces Medical Handbook", "Handbooks", 5),
+            kb("pa", "Primeros auxilios en combate", "Handbooks", 6, language = "es"),
+        ) + (1..60).map { kb("o$it", "Medical order $it", "Orders", 10 + it) }
+        val key = "kiwixbooks-$zim"
+        val title = if (algorithms) "Algorithms" else "Military Medicine"
+        val collection = if (algorithms) {
+            app.granger.core.library.ManifestCollection(title, "documents", "Jeff Erickson", listOf("Course materials", "The book"))
+        } else {
+            app.granger.core.library.ManifestCollection(title, "books", "Federation of American Scientists", listOf("Handbooks", "Orders"))
+        }
+        val shelves = app.granger.FakeShelves()
+        shelves.shelfList.value = listOf(
+            app.granger.core.library.Shelf(
+                MediaType("literature", "Literature", true, 0),
+                listOf(CollectionRow(ShelfCollection("c:$key", title, "literature", false, defaultKey = key), emptyList(), books)),
+            ),
+        )
+        val library = app.granger.FakeLibrary().apply {
+            packList.value = listOf(pack("u-mm", title).copy(name = zim, scraper = "zimit", bookManifest = "/s/mm.gbooks"))
+        }
+        val prefs = app.granger.library.shelf.LibraryViewPrefs().apply { setView(app.granger.library.shelf.ShelfKind.BOOKS, view) }
+        val vm = app.granger.library.CollectionViewModel(
+            "c:$key", shelves, library, app.granger.FakeReadingSessions(), app.granger.FakeBookshelf(), app.granger.FakeDownloads(),
+            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main), viewPrefs = prefs,
+            compute = kotlinx.coroutines.Dispatchers.Main,
+            manifestOf = { collection },
+        )
+        if (openWork) vm.toggleWork("hc")
+        shoot(name) {
+            GrangerShell(
+                rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = RailTool.LIBRARY,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+            ) { app.granger.library.CollectionScreen(vm, onOpened = {}, onOpenPack = {}, onGetBooks = {}, onOpenCollection = {}, onBack = {}) }
+        }
+    }
+
     /** A dialog alone, as its window draws it, in Night then Field. */
     private fun shootDialog(name: String, content: @Composable () -> Unit) {
         var night by mutableStateOf(true)
@@ -893,6 +953,14 @@ open class ThemeShots {
     @Test fun kiwixBooksList() = kiwixBooksShot("kiwixbooks-list", ShelfView.LIST)
 
     @Test fun kiwixBooksGrid() = kiwixBooksShot("kiwixbooks-grid", ShelfView.GRID)
+
+    @Test fun manifestSections() = manifestShot("kb2-sections", ShelfView.LIST, openWork = false)
+
+    @Test fun manifestParts() = manifestShot("kb2-parts", ShelfView.LIST, openWork = true)
+
+    @Test fun manifestGrid() = manifestShot("kb2-sections-grid", ShelfView.GRID, openWork = true)
+
+    @Test fun manifestFolded() = manifestShot("kb2-folded", ShelfView.LIST, openWork = false, algorithms = true)
 
     @Test fun gutenbergList() = gutenbergShot("gutenberg-list", ShelfView.LIST)
 
