@@ -312,7 +312,8 @@ class EbookReaderViewModel(
             savedState[TARGET_CONSUMED] = true
             launch {
                 val pages = bookshelf.originalPagesBytes(book.id)
-                _state.update { it.copy(originalPagesBytes = pages, canReadAsEbook = pdf && book.onShelf) }
+                _state.update { it.copy(originalPagesBytes = pages, canReadAsEbook = pdf && (book.onShelf || book.origin == app.granger.core.library.BookOrigin.PACK) && text && book.searchable &&
+                    withContext(io) { app.granger.core.books.PdfOrigin.of(file) } == app.granger.core.books.PdfOrigin.BORN_DIGITAL) }
             }
             if (pdf && _state.value.toc.none { (pdfPageOf(it.href) ?: 0) >= 1 }) launch { pdfOutlineInstead(opened, file) }
             if (!pdf) launch { readAnchorStarts(opened) }

@@ -489,6 +489,64 @@ class BookshelfTest {
         assertThat(pdfShelf.readAsEbook(id)).isNull()
     }
 
+    /**
+     * Plan KB2 Task 4.4: a pack document's PDF reads as an ebook too, and stays one: opened again from the same copy, from
+     * a new snapshot's copy (made again, the old files gone, its pages' place and marks kept), and gone with its pack.
+     */
+    @Test fun aPackDocumentReadAsAnEbookStaysOneAcrossAPackUpdate() = test {
+        val first = prosePdf(File(booksDir, "packs/zim1").apply { mkdirs() }, "doc.pdf")
+        val doc = pdfShelf.registerPackDocument("zim1", "docs/water.pdf", "Water treatment", first)!!
+        pdfShelf.savePosition(doc.id, "{\"href\":\"page/3\"}", 0.5, "Page 3")
+        pdfShelf.addMark(BookAnnotation(0, doc.id, MarkKind.BOOKMARK, "{}", "p. 3", "", "", 1, 1))
+        assertThat(pdfShelf.readAsEbook(doc.id)!!.passes).isTrue()
+        val ebook = pdfShelf.book(doc.id)!!
+        assertThat(ebook.format).isEqualTo(BookFormat.EPUB)
+        assertThat(ebook.origin).isEqualTo(BookOrigin.PACK)
+        assertThat(ebook.filePath).isEqualTo(first.absolutePath + ".epub")
+        val pages = BookIds.pagesOf(doc.id)
+        assertThat(pdfShelf.book(pages)!!.filePath).isEqualTo(first.absolutePath)
+        assertThat(pdfShelf.marks(pages).first().single().text).isEqualTo("p. 3")
+
+        // Opened again from the same copy: still the ebook.
+        val again = pdfShelf.registerPackDocument("zim1", "docs/water.pdf", "Water treatment", first)!!
+        assertThat(again.format).isEqualTo(BookFormat.EPUB)
+        assertThat(again.filePath).isEqualTo(ebook.filePath)
+
+        // A new snapshot's copy elsewhere: made an ebook again from it; the old copy and ebook go, the pages follow.
+        val second = prosePdf(File(booksDir, "packs/zim2").apply { mkdirs() }, "doc.pdf")
+        val moved = pdfShelf.registerPackDocument("zim1", "docs/water.pdf", "Water treatment", second)!!
+        assertThat(moved.format).isEqualTo(BookFormat.EPUB)
+        assertThat(moved.filePath).isEqualTo(second.absolutePath + ".epub")
+        assertThat(moved.title).isEqualTo("Water treatment")
+        assertThat(first.exists()).isFalse()
+        assertThat(File(ebook.filePath).exists()).isFalse()
+        assertThat(pdfShelf.book(pages)!!.filePath).isEqualTo(second.absolutePath)
+        assertThat(pdfShelf.position(pages)!!.chapterTitle).isEqualTo("Page 3")
+        assertThat(pdfShelf.marks(pages).first().single().text).isEqualTo("p. 3")
+
+        // Gone with its pack, the PDF and its pages' row too.
+        pdfShelf.removePackDocuments("zim1")
+        assertThat(pdfShelf.book(doc.id)).isNull()
+        assertThat(pdfShelf.book(pages)).isNull()
+        assertThat(File(moved.filePath).exists()).isFalse()
+        assertThat(second.exists()).isFalse()
+    }
+
+    @Test fun aPackDocumentWhoseEbookCantBeMadeAgainIsItsPdfWithItsMarks() = test {
+        val first = prosePdf(File(booksDir, "packs/zim1").apply { mkdirs() }, "doc.pdf")
+        val doc = pdfShelf.registerPackDocument("zim1", "docs/water.pdf", "Water treatment", first)!!
+        pdfShelf.addMark(BookAnnotation(0, doc.id, MarkKind.BOOKMARK, "{}", "p. 3", "", "", 1, 1))
+        assertThat(pdfShelf.readAsEbook(doc.id)!!.passes).isTrue()
+        // The new snapshot's copy is a scan: no ebook comes of it.
+        val scan = prosePdf(File(booksDir, "packs/zim2").apply { mkdirs() }, "doc.pdf", hidden = true)
+        val back = pdfShelf.registerPackDocument("zim1", "docs/water.pdf", "Water treatment", scan)!!
+        assertThat(back.format).isEqualTo(BookFormat.PDF)
+        assertThat(back.filePath).isEqualTo(scan.absolutePath)
+        assertThat(pdfShelf.book(BookIds.pagesOf(doc.id))).isNull()
+        assertThat(pdfShelf.marks(doc.id).first().single().text).isEqualTo("p. 3")
+        assertThat(first.exists()).isFalse()
+    }
+
     @Test fun archiveTextOverTheLimitIsRefused() = test {
         val small = RoomBookshelf(db, { listOf(booksDir) }, { importDir }, coversDir, dispatcher, { 1_000L }, maxTextBytes = 10)
         val txt = File(archiveDir, "big.txt").apply { writeText("x".repeat(100)) }

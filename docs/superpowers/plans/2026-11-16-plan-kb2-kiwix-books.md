@@ -689,13 +689,25 @@ now)").
       hidden = 0, `CollectionViewModelTest.aRemovedPackBookIsListedForShowRemovedWhichPutsItBack`,
       `ArchiveViewModelTest.openReadsTheTextItsPdfOrASetsCollection`, `SourceViewModelTest` book Open,
       `GutenbergCollectionScreenTest` Remove on a pack book. `:core:library` 497, `:app` 1818 (120 skipped), 0 failures.
-- [ ] **Task 4.4: the PDF rule (D3: Read as ebook stays a choice).**
+- [x] **Task 4.4: the PDF rule (D3: Read as ebook stays a choice).**
   - "Read as ebook" is offered for every text PDF from every source: pack books, imports and pack documents (today
     `onShelf` hides it for pack documents).
   - It's hidden for `pdfKind` scan or comic. Where there's no manifest, `PdfOrigin` decides on the phone.
   - It needs `canReadAsEbook` in `EbookReaderViewModel`, which is LL's file. Message granger-d0 before the change, or
     have them make it.
   - archive.org's convert-at-install stays (Plan IA), noted as the one exception.
+  - **Done 2026-11-16** (granger-d0 OK'd the one change in their file).
+    - `EbookReaderViewModel`: only `canReadAsEbook` changed, to `pdf && (book.onShelf || origin == PACK) && text &&
+      book.searchable && PdfOrigin.of(file) == BORN_DIGITAL` (on io, in the coroutine that already set it). `text` is the
+      reader's own has-text scan, `searchable` false is a scan found at indexing, and `PdfOrigin` (12 sampled pages, the
+      same test `PdfToEpub` applies) hides it for scans with an OCR layer, comics and picture books. No manifest
+      `pdfKind` reaches the reader, so `PdfOrigin` decides everywhere.
+    - `RoomBookshelf.readAsEbook` accepts PACK rows (`book:pack:<zimName>/<path>`). `registerPackDocument` keeps it an
+      ebook: the same copy reopens as the ebook; a new snapshot's copy is made an ebook again (old copy and ebook
+      deleted, the PAGES row re-pointed, same id, so its place and marks stay); if that fails, the PDF is the book again
+      with the pages' place and marks moved back. `removePackDocuments` also deletes the PDF and the PAGES row.
+    - Tests: `BookshelfTest` +2, `EbookReaderViewModelTest` +1 (real PDFs: app tests now use core/books' test fixtures).
+      `:core:library` 504, `:app` 1841 (126 skipped), 0 failures; `:app:assembleDebug` builds.
 - [x] **Task 4.5: search de-dup.**
   - Book-pack ZIM hits that map to a shelf row show as the book; the rest are dropped.
   - Show only the exceptions ("Titles only until opened", "A scan: titles only").

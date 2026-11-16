@@ -81,9 +81,12 @@ class EbookReaderViewModelTest {
         pdfOutline: (java.io.File) -> List<app.granger.core.books.OutlineEntry> = { emptyList() },
         pdfLinks: (java.io.File) -> List<app.granger.core.books.PdfLink> = { emptyList() },
         pdfColour: (java.io.File) -> Boolean = { false },
+        /** Writes the book's file instead of a stand-in: a real PDF, for the Read as ebook gate (Plan KB2 Task 4.4). */
+        write: ((java.io.File) -> Unit)? = null,
+        shaped: (app.granger.core.library.Book) -> app.granger.core.library.Book = { it },
     ): EbookReaderViewModel {
-        val file = tmp.root.resolve("b.epub").apply { if (fileExists) writeText("epub") }
-        bookshelf.bookList.value = listOf(book("b", title = "The Upanishads").copy(filePath = file.path))
+        val file = tmp.root.resolve("b.epub").apply { if (write != null) write(this) else if (fileExists) writeText("epub") }
+        bookshelf.bookList.value = listOf(shaped(book("b", title = "The Upanishads").copy(filePath = file.path)))
         sessions.tabs.value = listOf(ReadingTab(1, "b", "", "The Upanishads", 1L, onRail = true))
         return EbookReaderViewModel(1, target, bookshelf, sessions, opener, prefsStore, appScope, main.dispatcher, searcher, savedState, pdfOutline = pdfOutline, pdfLinks = pdfLinks, pdfColour = pdfColour)
             .also { testScheduler.advanceUntilIdle() }
@@ -320,9 +323,38 @@ class EbookReaderViewModelTest {
         assertThat(bookshelf.originalPages).isEmpty()
     }
 
+    /** A PDF set in real, visible type (born digital), or with its words hidden over the page (a scan's OCR layer). */
+    private fun prosePdf(target: java.io.File, hidden: Boolean = false) {
+        val mono = com.tom_roush.pdfbox.pdmodel.font.PDType1Font.COURIER
+        val pages = (1..4).map { p ->
+            app.granger.core.books.TextPdfFixtures.Page(
+                (0 until 40).map { i ->
+                    val text = "page $p line $i of a book set in plain words on a page of prose".padEnd(64, 'x').take(64)
+                    app.granger.core.books.TextPdfFixtures.Line(text, 72f + 14f * i, 72f, 10f, mono, hidden = hidden)
+                },
+            )
+        }
+        app.granger.core.books.TextPdfFixtures.build(target.parentFile, "made.pdf", pages, title = "Prose").renameTo(target)
+    }
+
+    /**
+     * Plan KB2 Task 4.4: Read as ebook is offered for every text PDF, a pack document's included, and not for a scan (its
+     * words an OCR layer, or none found at indexing).
+     */
+    @Test fun readAsEbookIsOfferedForEveryTextPdfAndNotForAScan() = runTest(main.dispatcher) {
+        opener.publication = app.granger.testPdfPublication()
+        val pack: (app.granger.core.library.Book) -> app.granger.core.library.Book =
+            { it.copy(origin = app.granger.core.library.BookOrigin.PACK, sourceRef = "mm_en_all/files/water.pdf", format = app.granger.core.library.BookFormat.PDF) }
+        assertThat(reader(write = { prosePdf(it) }, shaped = pack).state.value.canReadAsEbook).isTrue()
+        assertThat(reader(write = { prosePdf(it, hidden = true) }, shaped = pack).state.value.canReadAsEbook).isFalse()
+        assertThat(reader(write = { prosePdf(it) }, shaped = { it.copy(searchable = false) }).state.value.canReadAsEbook).isFalse()
+        // A page of a book made an ebook isn't offered.
+        assertThat(reader(write = { prosePdf(it) }, shaped = { it.copy(origin = app.granger.core.library.BookOrigin.PAGES) }).state.value.canReadAsEbook).isFalse()
+    }
+
     @Test fun aPdfReadAsAnEbookOpensAgainOrSaysWhyNot() = runTest(main.dispatcher) {
         opener.publication = app.granger.testPdfPublication()
-        val vm = reader()
+        val vm = reader(write = { prosePdf(it) })
         assertThat(vm.state.value.canReadAsEbook).isTrue()
         val passing = PdfToEpub.Report(PdfOrigin.BORN_DIGITAL, 10, 1000, 1000, 0, 10, 100, 0, 1, 0, 0, 2, null, 0, true, "passes")
         bookshelf.ebookReports["b"] = passing.copy(passes = false, why = "kept only 80% of the text")
