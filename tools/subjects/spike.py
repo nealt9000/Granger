@@ -32,16 +32,17 @@ def load_spec(labels):
             for q, want in s.get(table, {}).items():
                 if labels.get(q) != want:
                     bad.append(f"{s['id']}.{table} {q} wants {want!r}, has {labels.get(q)!r}")
-    for table in ("fictional", "drop"):
-        for q, want in spec[table].items():
+    for table in ("fictional", "drop", "stop"):
+        for q, want in spec.get(table, {}).items():
             if labels.get(q) != want:
                 bad.append(f"{table} {q} wants {want!r}, has {labels.get(q)!r}")
     return spec, bad
 
 
 class Walker:
-    def __init__(self, parents, roots, depth):
-        self.parents, self.roots, self.depth, self.memo = parents, roots, depth, {}
+    def __init__(self, parents, roots, depth, stop=()):
+        # A stop class is too general to pass through ("person" leads to organism, "social scientist" to scientist).
+        self.parents, self.roots, self.depth, self.stop, self.memo = parents, roots, depth, set(stop), {}
 
     def subjects(self, q):
         """{subject: steps} for the nearest root of each subject reachable from class q within depth."""
@@ -53,7 +54,7 @@ class Walker:
             c, d = todo.popleft()
             for s in self.roots.get(c, ()):
                 found.setdefault(s, d)
-            if d < self.depth:
+            if d < self.depth and c not in self.stop:
                 for p in self.parents.get(c, ()):
                     if p not in seen:
                         seen.add(p)
@@ -115,7 +116,16 @@ def lead_roles(sentence, role_of, role_re):
     return out
 
 
-def main(items_path, classes_path, gvec_path, out_dir, zim_path=None):
+def time_marks(gtime_path):
+    """{path: (kind, y0, y1)} from the pack's time index (kind 0 point, 1 span, 2 life)."""
+    import sqlite3
+    if not gtime_path:
+        return {}
+    con = sqlite3.connect(gtime_path)
+    return {p: (k, y0, y1) for p, k, y0, y1 in con.execute("SELECT path, kind, y0, y1 FROM marks")}
+
+
+def main(items_path, classes_path, gvec_path, out_dir, zim_path=None, gtime_path=None, this_year=2026):
     os.makedirs(out_dir, exist_ok=True)
     g = G(gvec_path)
     keys = set(g.keymap())
@@ -139,14 +149,17 @@ def main(items_path, classes_path, gvec_path, out_dir, zim_path=None):
             roots[q].add(s["id"])
         for q in s.get("occupations", {}):
             occ[q].add(s["id"])
-    cls_walk = Walker(parents, roots, spec["depth"])
+    stop = spec.get("stop", {})
+    cls_walk = Walker(parents, roots, spec["depth"], stop)
     # A root listed under two subjects (hurricane: Science and History) gives an article both.
-    dual = [frozenset(v) for v in roots.values() if len(v) > 1]
-    occ_walk = Walker(parents, occ, spec["depth"])
+    dual_walk = Walker(parents, {q: v for q, v in roots.items() if len(v) > 1}, spec["depth"], stop)
+    occ_walk = Walker(parents, occ, spec["depth"], stop)
     drop, fictional = set(spec["drop"]), set(spec["fictional"])
     neutral_walk = Walker(parents, {q: {"neutral"} for q in spec.get("neutral", {})}, 2)
 
-    rules, why = {}, {}
+    rules, why, duals, events = {}, {}, {}, {}
+    hist = spec.get("history", {})
+    event_walk = Walker(parents, {q: {"event"} for q in hist.get("event_class", {})}, hist.get("event_depth", 4), stop)
     dropped = []
     for t, r in items.items():
         p31 = r.get("P31", [])
@@ -159,7 +172,7 @@ def main(items_path, classes_path, gvec_path, out_dir, zim_path=None):
                 for s, d in occ_walk.subjects(q).items():
                     cand[s] = min(cand.get(s, 99), d)
         else:
-            classes = p31 + r.get("P279", []) + r.get("P136", [])
+            classes = [r["q"]] + p31 + r.get("P279", []) + r.get("P136", [])  # "Mountain" is itself the mountain root
             for q in classes:
                 if neutral_walk.subjects(q):
                     continue  # a glossary or an outline says nothing about its subject; meaning decides
@@ -170,6 +183,13 @@ def main(items_path, classes_path, gvec_path, out_dir, zim_path=None):
                 for s, d in occ_walk.subjects(q).items():
                     cand[s] = min(cand.get(s, 99), d)
         rules[t] = cand
+        if HUMAN not in p31:
+            d = set()
+            for q in p31 + r.get("P279", []) + r.get("P136", []):
+                d |= set(dual_walk.subjects(q))
+            if d:
+                duals[t] = d
+            events[t] = any(event_walk.subjects(q) for q in p31 + r.get("P279", []))
 
     vecs = article_vectors(g, rules.keys())
     # A biography is compared with biographies, a thing with things. Meaning is a vote of the K nearest articles the
@@ -213,6 +233,7 @@ def main(items_path, classes_path, gvec_path, out_dir, zim_path=None):
     role_re = re.compile(r"\b(" + "|".join(sorted(map(re.escape, role_of), key=len, reverse=True)) + r")s?\b")
     result = {}
     how = collections.Counter()
+    marks = time_marks(gtime_path)
     for t, cand in rules.items():
         sims = dict(votes.get(t, {}))
         lead_w = lead_roles(leads.get(t), role_of, role_re) if t in leads else {}
@@ -244,17 +265,33 @@ def main(items_path, classes_path, gvec_path, out_dir, zim_path=None):
         extra = [x for x in share if x != main_s and (
             (x in cand and share[x] >= EXTRA_RULE) or share[x] >= EXTRA_VOTE or
             (lead_w.get(x, 0) >= 1 / 3 and (x in cand or share[x] >= EXTRA_RULE)))]
+        # Places as a second subject: only for something with coordinates (P625), or a type of place the rules name.
+        if "P625" not in items[t] and not ("places" in cand and items[t].get("P279")):
+            extra = [x for x in extra if x != "places"]
         extra.sort(key=lambda x: share[x] + lead_w.get(x, 0) + (0.4 if x in cand else 0), reverse=True)
-        for pair in dual:
-            if main_s in pair:
-                for x in pair:
-                    if x != main_s and x in cand and x not in extra:
-                        extra.insert(0, x)
+        if main_s in duals.get(t, ()):
+            for x in duals[t]:
+                if x != main_s and x not in extra:
+                    extra.insert(0, x)
         subjects = ([main_s] if main_s else []) + extra[:spec.get("max_subjects", 3) - 1]
+        # History: a dated past event (not a founded thing, not a work), or a dead person in public life.
+        mark = marks.get(t)
+        if main_s and "history" not in subjects and len(subjects) < spec.get("max_subjects", 3) and mark:
+            kind, y0, y1 = mark
+            end = y1 if y1 is not None else y0
+            if is_person[t]:
+                past = kind == 2 and y1 is not None and main_s in hist["person_main"]
+            else:
+                past = (events.get(t) and "P571" not in items[t] and main_s not in hist["event_skip_main"]
+                        and end <= this_year - hist["recent_years"])
+            if past:
+                subjects.append("history")
+                how["history_added"] += 1
         best = max(sims, key=sims.get) if sims else None
         disagree = bool(sims) and mode != "meaning" and best != main_s and sims.get(main_s, 0) < 0.25 * sum(sims.values())
         result[t] = {"q": items[t]["q"], "label": items[t]["l"], "main": main_s, "subjects": subjects, "mode": mode,
-                     "rules": sorted(cand), "nearest": best, "flag": disagree}
+                     "rules": sorted(cand), "nearest": best, "flag": disagree,
+                     "share": {x: round(v, 2) for x, v in sorted(share.items(), key=lambda kv: -kv[1])[:4]}}
 
     counts = collections.Counter(r["main"] for r in result.values())
     nsub = collections.Counter(len(r["subjects"]) for r in result.values())
@@ -268,4 +305,4 @@ def main(items_path, classes_path, gvec_path, out_dir, zim_path=None):
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:6])
+    main(*sys.argv[1:7])

@@ -1,5 +1,6 @@
 {
- "version": 0,
+ "version": 1,
+ "ids_locked": "2026-11-16: the 17 subject ids are final (catalog `subjects: [ids]`, Explore, lanes v2). Names, roots and roles may change; an id is never renamed or reused.",
  "note": "Plan EX Task 0 (spike). Subject roots: an article's P31/P279/P136 classes walk P279 up at most `depth` steps to a root; a person's occupations (P106, all of them) walk to an occupation root. Labels are checked against Wikidata, so a wrong id fails loudly. Ties and gaps are settled by meaning (vectors), never by hand per article.",
  "depth": 3,
  "subjects": [
@@ -300,14 +301,12 @@
    "en": "Science & maths",
    "es": "Ciencia y matemáticas",
    "roots": {
-    "Q11862829": "academic discipline",
     "Q2465832": "branch of science",
     "Q11344": "chemical element",
     "Q113145171": "type of chemical entity",
     "Q11173": "chemical compound",
     "Q24034552": "mathematical concept",
     "Q65943": "theorem",
-    "Q17737": "theory",
     "Q17444909": "astronomical object type",
     "Q6999": "astronomical object",
     "Q2996394": "biological process",
@@ -327,7 +326,8 @@
     "Q483372": "paradox",
     "Q1127759": "cognitive bias",
     "Q2547976": "North Atlantic tropical cyclone",
-    "Q1293220": "physical phenomenon"
+    "Q1293220": "physical phenomenon",
+    "Q3239681": "scientific theory"
    },
    "occupations": {
     "Q901": "scientist",
@@ -752,7 +752,9 @@
     "Q30149195": "biblical concept",
     "Q205985": "goddess",
     "Q22811234": "branch of philosophy",
-    "Q375011": "religious holiday"
+    "Q375011": "religious holiday",
+    "Q131510": "mantra",
+    "Q40953": "prayer"
    },
    "occupations": {
     "Q4964182": "philosopher",
@@ -864,6 +866,32 @@
   "Q859161": "glossary",
   "Q1531349": "outline",
   "Q15138389": "Wikimedia article page"
+ },
+ "stop": {
+  "Q215627": "person",
+  "Q15319501": "social scientist",
+  "Q16727193": "humanities scholar",
+  "Q3400985": "academic"
+ },
+ "history": {
+  "note": "History is added (when there's room) to a dated past event (its classes reach 'occurrence' within event_depth steps; not a founded thing; not a work or a sports event), and to a dead person in public life.",
+  "recent_years": 5,
+  "event_skip_main": [
+   "film",
+   "music",
+   "literature",
+   "art",
+   "games",
+   "sports"
+  ],
+  "person_main": [
+   "society",
+   "business"
+  ],
+  "event_class": {
+   "Q1190554": "occurrence"
+  },
+  "event_depth": 4
  },
  "max_subjects": 3
 }
