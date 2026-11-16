@@ -382,6 +382,46 @@ Python for tools).
 
 ## Phase 4: one model for books (design §4)
 
+**Keep in step with Explore** (Neal, 2026-11-16: "keep this design in-step to the direction that Browse has taken on
+in the other session (an explore of topics launch point, with actual kiwix pack library browsing 1 additional tap in
+now)").
+- **Source:** granger-d0's plan `docs/superpowers/plans/2026-11-16-plan-ex-explore.md` on `ll-linked-library`
+  (075f3266, unmerged; no code yet, and its Task 0 subjects spike gates the UI). Mockups are the second row of canvas
+  HG4yrYyYPFssmRvsYscdvq (ExploreA, ExploreSubject, ExploreB, ExploreMap, ExploreSources). Re-read both before
+  starting Phase 4; they may have moved on.
+- **Explore's shape:**
+  - The rail's Browse becomes **Explore** (compass icon; RailTool keeps its id).
+  - The landing shows the title with a **+ (Get more)**, a summary line, "Start with a subject" (a 2-column grid of
+    subject doors), "Through time", and "Your sources" (one line, plus "All N packs").
+  - **Your sources** is the old Browse list grouped by domain: Encyclopedias, Health, Cooking & food, Skills, Books.
+    Each row is a title, a meta line (language · size) and a chevron. Its top bar has + (Get more) and an overflow
+    menu (Downloads, Readiness, Import). Its **Books** group is one row that goes to the Library.
+  - Book collections reach Explore through a Books door and "In your Classics" on a subject screen, by QID or
+    subject.
+- **What Phase 4 adopts:**
+  - **Words:**
+    - "pack" for a ZIM or a download;
+    - "Your sources" for the installed packs;
+    - "subject" for a door;
+    - "Get more" for the catalog.
+    - Explore avoids the word "collection". So Task 4.2's vocabulary changes: **no visible "collection".** A group of
+      books is named by its title, with "N books" or "N documents" and the provider ("Military Medicine · 24 books ·
+      from Kiwix"). "Collection" stays an internal word only.
+  - **Components:** Get more → Books (Task 4.1) uses Sources' style rather than its own:
+    - a small teal label (Roboto 500 13 px, #2E4A45) above a rounded #FAF7F1 block of rows with hairline dividers;
+    - each row a title plus a meta line and a chevron;
+    - Spectral 600 20 px section headers with a right-aligned text action;
+    - 36 px outlined chips, filled teal when selected.
+  - **Shelves and subjects:** the catalog `shelf` (literature / children / manuals / learning) stays the Books screen's
+    grouping by kind. Each book collection also gets **subject ids from Explore's list** (history, society, business,
+    places, science, nature, health, technology, art, literature, music, film, sports, religion, languages, food), so
+    Explore's subject screens can show them as "In your books". This is new **Task 4.8**.
+- **Hand-offs to granger-d0 (message, don't edit their files):**
+  - Your sources' Books row should count every book collection on the phone (Classics, Gutenberg, Kiwix libraries,
+    manifest packs, African Storybook), not only the Classics.
+  - Its pack rows already exclude book packs (`isBookPack`); KIWIX packs are included in that.
+  - Tell them the subject-id field's name once Task 4.8 settles it.
+
 - [ ] **Task 4.1: Books screen by kind (D4).**
   - Get more → Books: shelves Literature / Children / Manuals & references / Learning, from catalog `shelf`.
   - Search all books.
@@ -389,8 +429,9 @@ Python for tools).
   - Provider line on each row.
   - Keep KiwixList's 10 GB set cap and the preset "N to update" behaviour.
   - Spanish strings (L1 rules).
-- [ ] **Task 4.2: one vocabulary.** "Collection", plus the manifest `noun` in Get more, the header, the Make-searchable
-  dialog and the Remove dialogs. Fix `sources_remove_pack_body`, which wrongly says places are deleted.
+- [ ] **Task 4.2: one vocabulary.** No visible "collection" (Explore avoids it): a group of books is its title, plus
+  the manifest `noun` count and the provider, in Get more, the header, the Make-searchable dialog and the Remove
+  dialogs. Fix `sources_remove_pack_body`, which wrongly says places are deleted.
 - [ ] **Task 4.3: Open and Remove everywhere.**
   - Open on installed Classics and archive.org texts.
   - Downloads → Open on a book pack opens its collection.
@@ -408,6 +449,21 @@ Python for tools).
   - Show only the exceptions ("Titles only until opened", "A scan: titles only").
 - [ ] **Task 4.6: Files in this pack.** A Files row on web packs with documents, from the manifest or `ZimArchive.list`.
 - [ ] **Task 4.7: per-pack membership.** Gutenberg books held by two packs list in both collections.
+
+- [ ] **Task 4.8: subjects for book collections (Explore).**
+  - `book_packs.json` (and a `subjects` map for list-carrying packs by prefix) gives each collection one to three
+    subject ids from Explore's list. Proposed:
+    - Military Medicine → health;
+    - Survivor Library → technology, food, health;
+    - Algorithms → science, technology;
+    - Milne → technology, science;
+    - SMBC → literature;
+    - African Storybook → literature, languages;
+    - zimgit packs → health / food;
+    - Gutenberg subjects by LCC class.
+  - The catalog gets a `subjects` field on book packs and books. Agree the field name with granger-d0, whose LL2
+    Task 4 adds an item → subject-packs sidecar.
+  - The phone exposes it to Explore's subject screens through one function in core/library. Explore's UI is d0's.
 
 ## Phase 5: check and merge
 
