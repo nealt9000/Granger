@@ -461,6 +461,10 @@ now)").
     - African Storybook → literature, languages;
     - zimgit packs → health / food;
     - Gutenberg subjects by LCC class.
+  - **Blocked on granger-d0's subjects spike (EX Task 0).** The ids are draft (e.g. Food may become "Food &
+    farming"); the canonical list is `tools/subjects/subjects.json` on ll-linked-library. d0 will message when it
+    settles. Neither session adds the field before then. Agreed with d0 2026-11-16: `subjects: ["health", …]` on pack
+    and book entries.
   - The catalog gets a `subjects` field on book packs and books. Agree the field name with granger-d0, whose LL2
     Task 4 adds an item → subject-packs sidecar.
   - The phone exposes it to Explore's subject screens through one function in core/library. Explore's UI is d0's.
