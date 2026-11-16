@@ -55,3 +55,12 @@ The Timeline lanes can then take the same subjects (a lanes v2), so the shipped 
 
 ## Not in EX
 Places as a subject door beyond counts (the Atlas is LL6); Trails (LL6); the online layer (LL2b).
+
+## Progress (2026-11-16)
+- **Task 0, runs 1–9** (`c3b4afa2`, `e43e19c3`; work files on X10 `granger-ll/ex0`):
+  - **The method now:** class rules (depth ≤ 3; a root 2+ steps closer wins), occupation articles take the occupation's subject, and a neighbour vote among single-subject articles (people against people, things against things, each vote weighted against its subject's size). For people, the lead's role words also count and can name a subject Wikidata's occupations miss. Food became "Food & farming".
+  - **Coverage:** 49,157 of 49,955 Top articles get a subject; the other 798 are list pages, which are dropped.
+  - **Known misses:** all 60 come out right.
+  - **My strict grades:** 93% on run 8's sample (seed 20261116), then about 97% on the same sample after the fixes. Both samples (seeds 16 and 20261116) were used to tune, so they don't count towards the bar.
+  - **The held-out 200 for Neal** (seed 911, run 9): https://claude.ai/artifact/7x3W1iie6Rt9Tbf5xzK7Zp (db collection `grades`).
+- **Catalog field agreed with KB2 (granger-b9):** `subjects: [ids]` on pack and book entries. The ids are final once Task 0 passes.
