@@ -186,8 +186,10 @@ object TimeIndexDirectory {
 class TimeIndexes(private val indexes: List<TimeIndex>) {
     val isEmpty: Boolean get() = indexes.isEmpty()
 
-    fun marks(from: Int, to: Int, lanes: Set<Lane>, limit: Int, now: Int): List<TimeMark> =
-        merge(indexes.map { it.marks(from, to, lanes, limit, now) }).sortedByDescending { it.rank }.take(limit)
+    /** [prefer]: a pack whose copy of a mark wins over the others' (a Spanish topic page gets the Spanish titles). */
+    fun marks(from: Int, to: Int, lanes: Set<Lane>, limit: Int, now: Int, prefer: String? = null): List<TimeMark> =
+        merge(indexes.sortedBy { if (it.packId == prefer) 0 else 1 }.map { it.marks(from, to, lanes, limit, now) })
+            .sortedByDescending { it.rank }.take(limit)
 
     fun around(year: Int, lanes: Set<Lane>, n: Int): List<TimeMark> {
         val all = merge(indexes.map { it.around(year, lanes, n) })

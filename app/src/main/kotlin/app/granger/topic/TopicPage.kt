@@ -101,21 +101,32 @@ fun TopicPage(
                     Text(packTitle.orEmpty(), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
-            header?.picture?.let { path ->
-                item {
-                    val picture = rememberRailCover(path, 480.dp)
-                    if (picture != null) {
+            item {
+                // The packs' pictures are often small: a large one fills the width; a small one sits beside the title
+                // at a size it can bear, rather than blown up and blurred.
+                val picture = rememberRailCover(header?.picture, 480.dp)
+                val wide = picture != null && picture.width >= WIDE_PICTURE_PX
+                if (wide) {
+                    Image(
+                        picture!!, contentDescription = null, contentScale = ContentScale.Crop, alignment = Alignment.TopCenter,
+                        modifier = Modifier.fillMaxWidth().aspectRatio(PICTURE_RATIO).background(MaterialTheme.colorScheme.surfaceContainer),
+                    )
+                }
+                Row(Modifier.padding(horizontal = 16.dp).padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                    if (picture != null && !wide) {
                         Image(
                             picture, contentDescription = null, contentScale = ContentScale.Crop, alignment = Alignment.TopCenter,
-                            modifier = Modifier.fillMaxWidth().aspectRatio(PICTURE_RATIO).background(MaterialTheme.colorScheme.surfaceContainer),
+                            modifier = Modifier.width(SMALL_PICTURE).aspectRatio(0.75f).clip(RoundedCornerShape(12.dp)),
                         )
+                    }
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(header?.title ?: TopicSource.titleOf(topic.path), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
+                        topic.time?.mark?.let { Span(it, words.of(it)) }
                     }
                 }
             }
             item {
-                Column(Modifier.padding(horizontal = 16.dp).padding(top = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(header?.title ?: TopicSource.titleOf(topic.path), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
-                    topic.time?.mark?.let { Span(it, words.of(it)) }
+                Column(Modifier.padding(horizontal = 16.dp).padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     if (!header?.lead.isNullOrBlank()) Text(header!!.lead, style = MaterialTheme.typography.bodyLarge)
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(onClick = onReadFull, modifier = Modifier.heightIn(min = 48.dp).testTag(TopicPageTags.READ_FULL)) {
@@ -334,5 +345,8 @@ internal fun ageOf(y0: Int, md0: Int, y1: Int, md1: Int): Int {
 }
 
 private const val PICTURE_RATIO = 1.15f
+/** A picture at least this wide (px, as loaded) fills the width; a smaller one sits beside the title. */
+private const val WIDE_PICTURE_PX = 600
+private val SMALL_PICTURE = 112.dp
 private const val QUOTES = 3
 private const val RELATED_SHOWN = 6

@@ -127,7 +127,7 @@ class TopicSource(
         val mark = index.find(packId, path) ?: return null
         val year = now()
         val window = TopicTime.window(mark, year)
-        val around = index.marks(window.first, window.last, emptySet(), AROUND, year)
+        val around = index.marks(window.first, window.last, emptySet(), AROUND, year, prefer = mark.packId)
         val people = TopicTime.contemporaries(mark, around, year)
         val pictures = (listOf(mark) + people).mapNotNull { p -> lead(p.packId, p.path)?.thumbnail?.let { p.path to it } }.toMap()
         return TopicTimeView(mark, people, TopicTime.events(mark, around, year), pictures)

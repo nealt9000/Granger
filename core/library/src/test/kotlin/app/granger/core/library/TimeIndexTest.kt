@@ -134,4 +134,12 @@ class TimeIndexTest {
         val junk = File(tmp.root, "junk.gtime").apply { writeText("not sqlite") }
         assertThat(TimeIndex.open(junk, "x")).isNull()
     }
+
+    @Test fun aPreferredPacksCopyOfAMarkWins() {
+        val en = TimeIndex.open(gtime("en", listOf(listOf(6534L, "French_Revolution", 1, 1789, 1799, bit(Lane.EVENTS_POLITICS), 198))), "en")!!
+        val es = TimeIndex.open(gtime("es", listOf(listOf(6534L, "Revolución_francesa", 1, 1789, 1799, bit(Lane.EVENTS_POLITICS), 198))), "es")!!
+        val both = TimeIndexes(listOf(en, es))
+        assertThat(both.marks(1700, 1900, emptySet(), 10, now = 2026).single().path).isEqualTo("French_Revolution")
+        assertThat(both.marks(1700, 1900, emptySet(), 10, now = 2026, prefer = "es").single().path).isEqualTo("Revolución_francesa")
+    }
 }
