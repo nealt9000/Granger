@@ -9,7 +9,7 @@ People: the lead's first role words ("was a Roman general and statesman") add to
 
     python spike.py ITEMS.jsonl CLASSES.jsonl PACK.gvec OUT_DIR
 """
-import json, os, sys, collections, random
+import json, os, re, sys, collections, random
 from collections import deque
 import numpy as np
 
@@ -19,6 +19,8 @@ from related_spike import G  # noqa: E402
 
 HUMAN = "Q5"
 K = 15
+EXTRA_RULE = float(os.environ.get("EXTRA_RULE", "0.15"))
+EXTRA_VOTE = float(os.environ.get("EXTRA_VOTE", "0.35"))
 PRIOR = float(os.environ.get("PRIOR", "0.5"))
 
 
@@ -99,21 +101,17 @@ def person_leads(zim_path, paths):
     return out
 
 
-def lead_roles(sentence, role_of):
+def lead_roles(sentence, role_of, role_re):
     """{subject: weight} from the role words after the sentence's verb ("was a Roman general and statesman"): 1 for the first
-    subject named, 1/3 for the second, 1/9 for the third."""
-    import re
+    role mention adds 0.8^i to its subject (i = its order). Longest phrase first ("theoretical physicist" before "physicist")."""
     if not sentence:
         return {}
     m = re.search(r"\b(is|was|are|were)\b", sentence)
-    words = re.findall(r"[a-z]+", sentence[m.end():].lower() if m else sentence.lower())
+    text = (sentence[m.end():] if m else sentence).lower()
     out = {}
-    for w in words:
-        w1 = w[:-1] if w.endswith("s") and w[:-1] in role_of else w
-        if w1 in role_of and role_of[w1] not in out:
-            out[role_of[w1]] = 3.0 ** -len(out)
-            if len(out) == 3:
-                break
+    for i, hit in enumerate(role_re.finditer(text)):
+        s = role_of[hit.group(1)]
+        out[s] = out.get(s, 0) + 0.8 ** i  # every mention counts, earlier ones more ("polymath… painter, sculptor, architect")
     return out
 
 
@@ -142,8 +140,11 @@ def main(items_path, classes_path, gvec_path, out_dir, zim_path=None):
         for q in s.get("occupations", {}):
             occ[q].add(s["id"])
     cls_walk = Walker(parents, roots, spec["depth"])
+    # A root listed under two subjects (hurricane: Science and History) gives an article both.
+    dual = [frozenset(v) for v in roots.values() if len(v) > 1]
     occ_walk = Walker(parents, occ, spec["depth"])
     drop, fictional = set(spec["drop"]), set(spec["fictional"])
+    neutral_walk = Walker(parents, {q: {"neutral"} for q in spec.get("neutral", {})}, 2)
 
     rules, why = {}, {}
     dropped = []
@@ -160,6 +161,8 @@ def main(items_path, classes_path, gvec_path, out_dir, zim_path=None):
         else:
             classes = p31 + r.get("P279", []) + r.get("P136", [])
             for q in classes:
+                if neutral_walk.subjects(q):
+                    continue  # a glossary or an outline says nothing about its subject; meaning decides
                 for s, d in cls_walk.subjects(q).items():
                     cand[s] = min(cand.get(s, 99), d)
             # An article about an occupation or office ("songwriter", "President of Mexico") takes that occupation's subject.
@@ -200,11 +203,19 @@ def main(items_path, classes_path, gvec_path, out_dir, zim_path=None):
     for sj in spec["subjects"]:
         for w in sj.get("roles_en", []):
             role_of[w] = sj["id"]
+    # Every occupation the pack's people hold names its subject in a lead ("astrophysicist", "organic chemist"), when its
+    # walk reaches exactly one subject.
+    for q in {q for r in items.values() for q in r.get("P106", [])}:
+        subs = occ_walk.subjects(q)
+        lab = (labels.get(q) or "").lower()
+        if len(subs) == 1 and lab and lab not in role_of and len(lab) > 3:
+            role_of[lab] = next(iter(subs))
+    role_re = re.compile(r"\b(" + "|".join(sorted(map(re.escape, role_of), key=len, reverse=True)) + r")s?\b")
     result = {}
     how = collections.Counter()
     for t, cand in rules.items():
         sims = dict(votes.get(t, {}))
-        lead_w = lead_roles(leads.get(t), role_of) if t in leads else {}
+        lead_w = lead_roles(leads.get(t), role_of, role_re) if t in leads else {}
         near = sorted(cand.values())
         if len(cand) == 1 and not lead_w:
             main_s, mode = next(iter(cand)), "rule"
@@ -226,14 +237,29 @@ def main(items_path, classes_path, gvec_path, out_dir, zim_path=None):
         else:
             main_s, mode = None, "none"
         how[mode] += 1
+        # More subjects: a rule subject the neighbours back at least a little, any subject the neighbours back strongly,
+        # or a role the lead names that the rules or neighbours back too. At most max_subjects, best first.
+        tot = sum(sims.values()) or 1.0
+        share = {x: sims.get(x, 0) / tot for x in set(cand) | set(sims) | set(lead_w)}
+        extra = [x for x in share if x != main_s and (
+            (x in cand and share[x] >= EXTRA_RULE) or share[x] >= EXTRA_VOTE or
+            (lead_w.get(x, 0) >= 1 / 3 and (x in cand or share[x] >= EXTRA_RULE)))]
+        extra.sort(key=lambda x: share[x] + lead_w.get(x, 0) + (0.4 if x in cand else 0), reverse=True)
+        for pair in dual:
+            if main_s in pair:
+                for x in pair:
+                    if x != main_s and x in cand and x not in extra:
+                        extra.insert(0, x)
+        subjects = ([main_s] if main_s else []) + extra[:spec.get("max_subjects", 3) - 1]
         best = max(sims, key=sims.get) if sims else None
         disagree = bool(sims) and mode != "meaning" and best != main_s and sims.get(main_s, 0) < 0.25 * sum(sims.values())
-        result[t] = {"q": items[t]["q"], "label": items[t]["l"], "main": main_s, "mode": mode,
+        result[t] = {"q": items[t]["q"], "label": items[t]["l"], "main": main_s, "subjects": subjects, "mode": mode,
                      "rules": sorted(cand), "nearest": best, "flag": disagree}
 
     counts = collections.Counter(r["main"] for r in result.values())
+    nsub = collections.Counter(len(r["subjects"]) for r in result.values())
     report = {"articles": len(items), "dropped_lists": len(dropped), "assigned": sum(1 for r in result.values() if r["main"]),
-              "how": dict(how), "flagged": sum(r["flag"] for r in result.values()),
+              "how": dict(how), "subjects_per_article": dict(sorted(nsub.items())), "flagged": sum(r["flag"] for r in result.values()),
               "by_subject": {s: counts.get(s, 0) for s in ids}, "pool_people": len(pool[True][0]), "pool_things": len(pool[False][0]), "label_mismatches": bad}
     json.dump(result, open(os.path.join(out_dir, "subjects.json"), "w"), ensure_ascii=False)
     json.dump(report, open(os.path.join(out_dir, "report.json"), "w"), indent=1, ensure_ascii=False)

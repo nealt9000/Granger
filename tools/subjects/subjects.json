@@ -37,7 +37,19 @@
     "Q41397": "genocide",
     "Q3320743": "title of honor",
     "Q744913": "aviation accident",
-    "Q15169167": "execution method"
+    "Q15169167": "execution method",
+    "Q171558": "accident",
+    "Q3839081": "disaster",
+    "Q179057": "explosion",
+    "Q844482": "killing",
+    "Q149086": "homicide",
+    "Q2223653": "terrorist attack",
+    "Q8065": "natural disaster",
+    "Q1996993": "police brutality",
+    "Q2133344": "space mission",
+    "Q34439356": "hurricane",
+    "Q7944": "earthquake",
+    "Q220659": "archaeological artefact"
    },
    "occupations": {
     "Q116": "monarch",
@@ -90,7 +102,8 @@
     "emir",
     "chieftain",
     "chief"
-   ]
+   ],
+   "scope_en": "The past as events and eras: wars, battles, empires, dynasties, rulers, revolutions, disasters, historic incidents and missions, archaeology."
   },
   {
    "id": "society",
@@ -134,7 +147,10 @@
     "Q248577": "President of the Republic",
     "Q187588": "social class",
     "Q2616578": "travel document",
-    "Q4504549": "religious role"
+    "Q4504549": "religious role",
+    "Q3150005": "legal instrument",
+    "Q820655": "statute",
+    "Q680655": "constitutional document"
    },
    "occupations": {
     "Q82955": "politician",
@@ -186,7 +202,8 @@
     "educator",
     "terrorist",
     "assassin"
-   ]
+   ],
+   "scope_en": "How people live and govern together: politics, government, law, crime, social movements, organisations, institutions, education, media, holidays."
   },
   {
    "id": "business",
@@ -226,7 +243,8 @@
     "executive",
     "magnate",
     "philanthropist"
-   ]
+   ],
+   "scope_en": "Companies, brands, industries, money, trade and economics, and the people who run businesses."
   },
   {
    "id": "places",
@@ -265,9 +283,17 @@
     "Q8072": "volcano",
     "Q11303": "skyscraper",
     "Q12413618": "international border",
-    "Q99527323": "architecture of geographic location"
+    "Q99527323": "architecture of geographic location",
+    "Q27686": "hotel",
+    "Q133215": "casino",
+    "Q875157": "resort",
+    "Q622425": "nightclub",
+    "Q8719053": "music venue",
+    "Q194195": "amusement park",
+    "Q11315": "shopping center"
    },
-   "roles_en": []
+   "roles_en": [],
+   "scope_en": "Where things are: countries, cities, regions, landforms, rivers, buildings, landmarks, venues, roads and transport hubs."
   },
   {
    "id": "science",
@@ -275,7 +301,6 @@
    "es": "Ciencia y matemáticas",
    "roots": {
     "Q11862829": "academic discipline",
-    "Q1047113": "field of study",
     "Q2465832": "branch of science",
     "Q11344": "chemical element",
     "Q113145171": "type of chemical entity",
@@ -328,7 +353,8 @@
     "zoologist",
     "astronaut",
     "statistician"
-   ]
+   ],
+   "scope_en": "Natural sciences and maths: physics, chemistry, astronomy, earth science, biology as science, maths, scientific concepts and scientists."
   },
   {
    "id": "nature",
@@ -346,7 +372,8 @@
     "Q7239": "organism"
    },
    "occupations": {},
-   "roles_en": []
+   "roles_en": [],
+   "scope_en": "Living things and the natural world: animals, plants, fungi, breeds, ecosystems and environmental issues."
   },
   {
    "id": "health",
@@ -380,7 +407,8 @@
     "nurse",
     "doctor",
     "psychiatrist"
-   ]
+   ],
+   "scope_en": "Medicine and the body: diseases, symptoms, anatomy, drugs, treatments, public health, doctors."
   },
   {
    "id": "technology",
@@ -420,7 +448,8 @@
     "Q752783": "human spaceflight",
     "Q42032": "country code top-level domain",
     "Q15078788": "broadcasting",
-    "Q337540": "motor fuel"
+    "Q337540": "motor fuel",
+    "Q5916": "spaceflight"
    },
    "occupations": {
     "Q81096": "engineer",
@@ -435,7 +464,8 @@
     "programmer",
     "aviator",
     "computer"
-   ]
+   ],
+   "scope_en": "Made things and how they work: machines, vehicles, aircraft, ships, weapons, computers, software, the internet, spaceflight, engineering, inventors."
   },
   {
    "id": "art",
@@ -469,7 +499,8 @@
     "designer",
     "illustrator",
     "cartoonist"
-   ]
+   ],
+   "scope_en": "Visual arts and design: painting, sculpture, architecture as an art, photography, fashion, comics art, artists."
   },
   {
    "id": "literature",
@@ -477,7 +508,6 @@
    "es": "Libros y escritura",
    "roots": {
     "Q7725634": "literary work",
-    "Q47461344": "written work",
     "Q571": "book",
     "Q8261": "novel",
     "Q5185279": "poem",
@@ -507,7 +537,8 @@
     "essayist",
     "dramatist",
     "screenwriter"
-   ]
+   ],
+   "scope_en": "Writing and books: novels, poems, plays, religious and historical texts as writings, literary characters, writers, publishing."
   },
   {
    "id": "music",
@@ -525,7 +556,8 @@
     "Q18127": "record label",
     "Q1344": "opera",
     "Q104635718": "Wikimedia artist discography",
-    "Q58483083": "dramatico-musical work"
+    "Q58483083": "dramatico-musical work",
+    "Q1573906": "concert tour"
    },
    "occupations": {
     "Q639669": "musician",
@@ -556,7 +588,8 @@
     "bassist",
     "violinist",
     "band"
-   ]
+   ],
+   "scope_en": "Music: songs, albums, bands, musicians, composers, genres, instruments, tours."
   },
   {
    "id": "film",
@@ -601,12 +634,13 @@
     "producer",
     "presenter",
     "youtuber"
-   ]
+   ],
+   "scope_en": "Film, television and screen performance: films, series, episodes, screen characters, actors, directors, comedians."
   },
   {
    "id": "sports",
-   "en": "Sports & games",
-   "es": "Deportes y juegos",
+   "en": "Sports",
+   "es": "Deportes",
    "roots": {
     "Q31629": "type of sport",
     "Q349": "sport",
@@ -622,13 +656,6 @@
     "Q13393265": "basketball team",
     "Q17156793": "American football team",
     "Q15229207": "sports award",
-    "Q7889": "video game",
-    "Q659563": "video game genre",
-    "Q1569167": "video game character",
-    "Q112144412": "esports discipline",
-    "Q210167": "video game developer",
-    "Q1137109": "video game publisher",
-    "Q11410": "game",
     "Q3273417": "lists of sportspeople",
     "Q135408445": "men's national association football team",
     "Q47728": "hobby",
@@ -653,7 +680,6 @@
     "Q11303721": "golfer",
     "Q11513337": "athletics competitor",
     "Q11607585": "mixed martial arts fighter",
-    "Q10873124": "chess player",
     "Q628099": "association football coach",
     "Q5137571": "basketball coach"
    },
@@ -674,7 +700,34 @@
     "gymnast",
     "cricketer",
     "jockey"
-   ]
+   ],
+   "scope_en": "Sport: sports, teams, clubs, competitions, seasons, stadiums, athletes, coaches."
+  },
+  {
+   "id": "games",
+   "en": "Games",
+   "es": "Juegos",
+   "roots": {
+    "Q7889": "video game",
+    "Q659563": "video game genre",
+    "Q1569167": "video game character",
+    "Q112144412": "esports discipline",
+    "Q210167": "video game developer",
+    "Q1137109": "video game publisher",
+    "Q11410": "game",
+    "Q131436": "board game",
+    "Q142714": "card game",
+    "Q3244175": "tabletop game",
+    "Q300920": "esports"
+   },
+   "occupations": {
+    "Q10873124": "chess player"
+   },
+   "roles_en": [
+    "chess",
+    "gamer"
+   ],
+   "scope_en": "Games: video games, board and card games, chess, esports, game characters and game makers."
   },
   {
    "id": "religion",
@@ -698,7 +751,8 @@
     "Q4271324": "mythical character",
     "Q30149195": "biblical concept",
     "Q205985": "goddess",
-    "Q22811234": "branch of philosophy"
+    "Q22811234": "branch of philosophy",
+    "Q375011": "religious holiday"
    },
    "occupations": {
     "Q4964182": "philosopher",
@@ -727,7 +781,8 @@
     "apostle",
     "preacher",
     "missionary"
-   ]
+   ],
+   "scope_en": "Belief and thought: religions, deities, myths, religious texts as faith, philosophy, philosophers, clergy, holy days."
   },
   {
    "id": "languages",
@@ -744,14 +799,16 @@
     "Q29517555": "natural writing system",
     "Q335806": "abugida",
     "Q152559": "macrolanguage",
-    "Q19776628": "Latin-script letter"
+    "Q19776628": "Latin-script letter",
+    "Q82042": "part of speech"
    },
    "occupations": {
     "Q14467526": "linguist"
    },
    "roles_en": [
     "linguist"
-   ]
+   ],
+   "scope_en": "Languages and writing systems: languages, dialects, alphabets, grammar, linguists."
   },
   {
    "id": "food",
@@ -788,7 +845,8 @@
     "cook",
     "farmer",
     "agronomist"
-   ]
+   ],
+   "scope_en": "Food & farming: dishes, ingredients, drinks, cuisines, crops, livestock, agriculture, cooks."
   }
  ],
  "fictional": {
@@ -801,5 +859,11 @@
   "Q80096233": "Wikimedia information list",
   "Q21484471": "Wikimedia article covering multiple topics",
   "Q98645843": "Wikimedia music-related list"
- }
+ },
+ "neutral": {
+  "Q859161": "glossary",
+  "Q1531349": "outline",
+  "Q15138389": "Wikimedia article page"
+ },
+ "max_subjects": 3
 }
