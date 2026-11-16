@@ -36,10 +36,15 @@
         <item quantity="other">%1$s documentos</item>
     </plurals>
     <!-- "Searchable in full" is "buscable por completo" throughout: Buscar can read the whole book. -->
-    <plurals name="library_searchable_in_full">
-        <item quantity="one">%1$s buscable por completo</item>
-        <item quantity="many">%1$s buscables por completo</item>
-        <item quantity="other">%1$s buscables por completo</item>
+    <plurals name="library_titles_only_until_opened">
+        <item quantity="one">%1$s solo por el título hasta abrirlo</item>
+        <item quantity="many">%1$s solo por el título hasta abrirlos</item>
+        <item quantity="other">%1$s solo por el título hasta abrirlos</item>
+    </plurals>
+    <plurals name="library_scans_titles_only">
+        <item quantity="one">%1$s escaneo: solo el título</item>
+        <item quantity="many">%1$s escaneos: solo los títulos</item>
+        <item quantity="other">%1$s escaneos: solo los títulos</item>
     </plurals>
 
     <string name="library_make_searchable_menu">Hacer todos buscables…</string>
@@ -66,9 +71,8 @@
     <string name="library_collection_name">Nombre de la colección</string>
     <string name="library_delete_collection_title">¿Eliminar la colección?</string>
     <string name="library_delete_collection_body">Sus paquetes vuelven a sus colecciones habituales. No se quita nada del teléfono.</string>
-    <string name="library_searchable_full">Buscable por completo</string>
-    <string name="library_title_only_scan">Solo el título: es un escaneo</string>
-    <string name="library_titles_only">Solo títulos hasta que lo abras</string>
+    <string name="library_title_only_scan">Un escaneo: solo el título</string>
+    <string name="library_titles_only">Solo el título hasta abrirlo</string>
     <string name="library_making_searchable">Haciendo buscables: %1$s de %2$s copiados</string>
     <string name="library_not_enough_space">No hay espacio suficiente</string>
     <plurals name="library_searchable_no_room">
@@ -100,8 +104,7 @@
     <string name="library_file_not_found">Archivo no encontrado</string>
     <string name="library_damaged">Dañado</string>
     <string name="library_percent">%1$d%%</string>
-    <string name="library_full_text">Texto completo</string>
-    <string name="library_pdf_not_searchable">PDF · No buscable</string>
+    <string name="library_pdf_not_searchable">PDF · Un escaneo: solo el título</string>
 
     <string name="library_new_collection">Nueva colección</string>
     <string name="library_move">Mover</string>

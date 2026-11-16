@@ -30,6 +30,15 @@ data class SearchableCost(val books: Int, val bytes: Long, val freeBytes: Long) 
 val Book.searchableInFull: Boolean get() = origin.isPackBook && indexedAt != null && searchable
 
 /**
+ * A pack book Search finds by its title only until it's opened, copied out and indexed (Plan KB2 Task 4.5): one of the
+ * exceptions to "searchable in full", the default, which isn't marked.
+ */
+val Book.titleOnlyUntilOpened: Boolean get() = origin.isPackBook && indexedAt == null
+
+/** A book found at indexing to be a scan, with no text to search: Search finds it by its title only. */
+val Book.scanTitleOnly: Boolean get() = indexedAt != null && !searchable
+
+/**
  * "Make all searchable…" for a Gutenberg collection (Plan GB Decision 5): every book not yet copied out of its pack is
  * copied out ([GutenbergBooks.restore]) and indexed, a batch at a time, on [scope] so leaving the screen doesn't stop
  * it. One run per pack at a time; [progress] says how far each has got, and the run's entry goes when it ends.

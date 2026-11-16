@@ -341,10 +341,15 @@ class SearchViewModel(
                 // Counted before the titles are taken out: the search stopped at its limit either way.
                 val allText = search.fullText(q)
                 val titleOnly = search.titleOnly()
+                // A book pack's text hit is its book (Plan KB2 Task 4.5): it joins the books, after the book index's own
+                // hits and once, opening the book where the reader left it.
+                val (bookText, articleText) = allText.filterNot { hit -> (hit.packId to hit.path) in shown }
+                    .partition { hit -> app.granger.core.library.BookIds.isBook(hit.packId) }
                 _state.update {
                     it.copy(
-                        fullText = allText.filterNot { hit -> (hit.packId to hit.path) in shown }
+                        fullText = articleText
                             .map { hit -> hit.copy(snippet = hit.snippet?.takeIf { s -> SearchRows.snippetMatches(s, q) }) },
+                        books = (it.books + bookText.map { hit -> SearchRows.bookHitOf(hit, q) }).distinctBy { hit -> hit.bookId },
                         searching = false,
                         titleOnly = titleOnly,
                         capped = it.capped.cap(SearchGroup.FULL_TEXT, allText.size),

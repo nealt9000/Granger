@@ -80,19 +80,21 @@ class GutenbergCollectionScreenTest {
     @Test fun calledByItsSubjectWithTheProviderAndCountsUnderIt() {
         open()
         compose.onNodeWithText("Music and books on music").assertIsDisplayed()
-        compose.onNodeWithContentDescription("3 books · From Kiwix · Project Gutenberg · 1 searchable in full").assertIsDisplayed()
+        compose.onNodeWithContentDescription("3 books · From Kiwix · Project Gutenberg · 2 titles only until opened").assertIsDisplayed()
     }
 
-    @Test fun onlyTheIndexedBookCarriesTheFullTextMark() {
+    /** Plan KB2 Task 4.5: searchable in full is the default, so no book is marked for it. */
+    @Test fun noBookCarriesAFullTextMark() {
         open()
-        assertThat(compose.onAllNodesWithContentDescription("Searchable in full").fetchSemanticsNodes()).hasSize(1)
+        assertThat(compose.onAllNodesWithContentDescription("Searchable in full").fetchSemanticsNodes()).isEmpty()
+        compose.onNodeWithText("Full text").assertDoesNotExist()
     }
 
     /** Plan KB2 Task 4.3: a pack book can be removed on its own; the dialog says Show removed brings it back. */
     @Test fun aBooksMenuSaysWhetherItIsSearchableAndOffersRemove() {
         open()
         compose.onNodeWithText("The Art of Fugue").performTouchInput { longClick() }
-        compose.onNodeWithText("Titles only until you open it").assertIsDisplayed()
+        compose.onNodeWithText("Title only until opened").assertIsDisplayed()
         compose.onNodeWithText("Move to collection…").assertIsDisplayed()
         compose.onNodeWithText("Remove from phone").performClick()
         compose.onNodeWithText("The Art of Fugue will be deleted from this phone and taken off this list; Show removed brings it back. Your place, bookmarks and highlights are kept.")

@@ -509,9 +509,29 @@ now)").
   - It needs `canReadAsEbook` in `EbookReaderViewModel`, which is LL's file. Message granger-d0 before the change, or
     have them make it.
   - archive.org's convert-at-install stays (Plan IA), noted as the one exception.
-- [ ] **Task 4.5: search de-dup.**
+- [x] **Task 4.5: search de-dup.**
   - Book-pack ZIM hits that map to a shelf row show as the book; the rest are dropped.
   - Show only the exceptions ("Titles only until opened", "A scan: titles only").
+  - **Done 2026-11-16** (this commit, worktree kb2ux).
+    - `ZimLibrarySearch.across` maps every book pack's hit (titles, near titles and full text alike) to its shelf book
+      (`bookHits`): a Gutenberg page by the id in its path (`GutenbergList.idOfPage`: `Title.12.html`, `Title_cover.12`,
+      `.epub`), a nautilus or manifest file by `<pack name>/<path>` = `sourceRef`. The hit becomes a book hit (book id,
+      no path, its collection's name, author, the page's snippet), once per book; anything else from a book pack (index,
+      author lists, a hidden or missing book, or no shelf at all) is dropped. Title rows then fold with the shelf's own
+      book hit (same id and path), so Plan SQ's one row per title holds.
+    - Search screen: `SearchViewModel` moves full-text hits that are books into the Books group (`SearchRows.bookHitOf`,
+      href "" so the reader opens at the saved place; snippet kept only if it shows the query), after the book index's
+      hits, one per book. Articles keep only articles.
+    - Searchable in full is the default and unsaid. Header: "N titles only until opened" and/or "N scans: titles only"
+      (`library_titles_only_until_opened`, `library_scans_titles_only`; works counted once), only when non-zero. The
+      Library row drops its searchable count. Book rows lose the "Full text" mark (`FullTextMark` removed); a scan's
+      label reads "PDF · A scan: title only". The book menu shows only an exception: "Title only until opened" or "A scan:
+      title only". "Make all searchable…" stays. Removed: `library_searchable_in_full`, `library_searchable_full`,
+      `library_full_text`.
+    - Tests: `ZimLibrarySearchTest.aBookPacksHitsAreItsBooksOnceAndTheRestAreDropped`,
+      `SearchViewModelTest.aBookPacksTextHitJoinsTheBooksOnce`, header/row/menu/format wording updates. ThemeShots
+      (`kiwixbooks-list`, `gutenberg-list`, `kb2-*`) checked: "10 titles only until opened", "7 titles only until opened
+      · 1 scan: title only". `:core:library` 498, `:app` 1819 (120 skipped), 0 failures.
 - [ ] **Task 4.6: Files in this pack.** A Files row on web packs with documents, from the manifest or `ZimArchive.list`.
 - [ ] **Task 4.7: per-pack membership.** Gutenberg books held by two packs list in both collections.
 

@@ -589,7 +589,7 @@ open class ThemeShots {
         }
     }
 
-    /** Real titles from the Music pack, the first four searchable in full. */
+    /** Real titles from the Music pack; the first four opened (one of them a scan), the rest titles only until opened. */
     private val musicBooks = listOf(
         "Beethoven" to "Ludwig Nohl", "The Art of the Fugue" to "Johann Sebastian Bach", "Chopin and Other Musical Essays" to "Henry T. Finck",
         "Great Pianists on Piano Playing" to "James Francis Cooke", "The Music of the Wild" to "Gene Stratton-Porter",

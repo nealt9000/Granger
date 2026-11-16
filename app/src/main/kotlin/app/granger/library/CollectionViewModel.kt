@@ -193,9 +193,12 @@ class CollectionViewModel(
         val key = row?.collection?.defaultKey?.takeIf(Filing::isBookPackCollection) ?: return@combine null
         val pack = packs.firstOrNull { it.isBookPack && Filing.defaultKey(it) == key }
         val packName = pack?.name ?: row.books.firstOrNull()?.let(PackBooks::packNameOf)
-        // A work in parts counts once (Plan KB2): its whole and parts share a work key.
-        val count = if (m != null) row.books.distinctBy { it.workKey ?: it.id }.size else row.books.size
-        val header = GutenbergHeader(pack, count, row.books.count { it.searchableInFull }, packName?.let(runs::get))
+        // A work in parts counts once (Plan KB2): its whole and parts share a work key; so in the exceptions.
+        fun counted(books: List<Book>) = if (m != null) books.distinctBy { it.workKey ?: it.id }.size else books.size
+        val header = GutenbergHeader(
+            pack, counted(row.books), row.books.count { it.searchableInFull }, packName?.let(runs::get),
+            unopened = counted(row.books.filter { it.titleOnlyUntilOpened }), scans = counted(row.books.filter { it.scanTitleOnly }),
+        )
         if (Filing.isKiwixBooksCollection(key)) {
             header.copy(
                 kind = HeaderKind.KIWIX_LIBRARY,
@@ -349,6 +352,10 @@ data class GutenbergHeader(
     val providerName: String? = null,
     /** Whether a Kiwix collection counts documents (nautilus packs, and a manifest whose noun says so) rather than books. */
     val documents: Boolean = true,
+    /** Its books Search finds by title only until they're opened ([titleOnlyUntilOpened]). */
+    val unopened: Int = 0,
+    /** Its scans, found by title only ([scanTitleOnly]). */
+    val scans: Int = 0,
 ) {
     /** Whether its books are counted as documents ("17 documents"): a Kiwix collection whose noun says so. */
     val countsDocuments: Boolean get() = kind == HeaderKind.KIWIX_LIBRARY && documents
@@ -370,15 +377,21 @@ data class GutenbergHeader(
     /** "1,284 books · From Kiwix · Project Gutenberg", "17 documents · From Kiwix". */
     val provenance: UiText get() = UiText.Res(R.string.library_dotted, count, provider)
 
-    /** "37 searchable in full". */
-    val searchableText: UiText get() = UiText.Plural(R.plurals.library_searchable_in_full, searchable, number(searchable))
+    /**
+     * The exceptions to "searchable in full", the default, which isn't said (Plan KB2 Task 4.5): "12 titles only until
+     * opened", "3 scans: titles only", or both; null when every book is searchable in full.
+     */
+    val exceptionText: UiText? get() = listOfNotNull<UiText>(
+        UiText.Plural(R.plurals.library_titles_only_until_opened, unopened, number(unopened)).takeIf { unopened > 0 },
+        UiText.Plural(R.plurals.library_scans_titles_only, scans, number(scans)).takeIf { scans > 0 },
+    ).reduceOrNull { line, part -> UiText.Res(R.string.library_dotted, line, part) }
 
     /** "Titles from file names", for a collection listed with no manifest; null otherwise. */
     val fileNamesText: UiText? get() = if (fromFileNames) UiText.Res(R.string.library_titles_from_file_names) else null
 
-    /** "1,284 books · From Kiwix · Project Gutenberg · 37 searchable in full", and "Titles from file names" when it applies. */
-    val text: UiText get() = UiText.Res(R.string.library_dotted, provenance, searchableText)
-        .let { line -> fileNamesText?.let { UiText.Res(R.string.library_dotted, line, it) } ?: line }
+    /** "1,284 books · From Kiwix · Project Gutenberg · 1,247 titles only until opened", and "Titles from file names" when it applies. */
+    val text: UiText get() = listOfNotNull<UiText>(provenance, exceptionText, fileNamesText)
+        .reduce { line, part -> UiText.Res(R.string.library_dotted, line, part) }
 
     private fun number(n: Int) = java.text.NumberFormat.getIntegerInstance().format(n)
 }

@@ -389,9 +389,10 @@ class CollectionViewModelTest {
         assertThat(header.pack).isEqualTo(music)
         assertThat(header.books).isEqualTo(3)
         assertThat(header.searchable).isEqualTo(1)
-        assertThat(header.text.en()).isEqualTo("3 books · From Kiwix · Project Gutenberg · 1 searchable in full")
+        // Plan KB2 Task 4.5: only the exception is said.
+        assertThat(header.text.en()).isEqualTo("3 books · From Kiwix · Project Gutenberg · 2 titles only until opened")
         // The Library's row says the same (Plan GB walkthrough).
-        assertThat(rowCountText(gutenbergRow).en()).isEqualTo("3 books · From Kiwix · Project Gutenberg · 1 searchable in full")
+        assertThat(rowCountText(gutenbergRow).en()).isEqualTo("3 books · From Kiwix · Project Gutenberg")
     }
 
     @Test fun anyOtherCollectionHasNoGutenbergHeader() = runTest(main.dispatcher) {
@@ -464,8 +465,8 @@ class CollectionViewModelTest {
         assertThat(header.pack).isEqualTo(food)
         assertThat(header.books).isEqualTo(3)
         assertThat(header.searchable).isEqualTo(1)
-        assertThat(header.text.en()).isEqualTo("3 documents · From Kiwix · 1 searchable in full")
-        assertThat(rowCountText(foodRow).en()).isEqualTo("3 documents · From Kiwix · 1 searchable in full")
+        assertThat(header.text.en()).isEqualTo("3 documents · From Kiwix · 1 title only until opened · 1 scan: title only")
+        assertThat(rowCountText(foodRow).en()).isEqualTo("3 documents · From Kiwix")
         assertThat(rowCountText(foodRow.copy(books = foodRow.books.take(1).map { it.copy(indexedAt = null) })).en())
             .isEqualTo("1 document · From Kiwix")
     }
@@ -571,7 +572,7 @@ class CollectionViewModelTest {
         assertThat(shown.languages).containsExactly("English", "Spanish").inOrder()
         // The header names the manifest's provider and counts a work once, in its noun.
         val header = vm.gutenbergHeader.value!!
-        assertThat(header.text.en()).isEqualTo("63 books · From Kiwix · Federation of American Scientists · 0 searchable in full")
+        assertThat(header.text.en()).isEqualTo("63 books · From Kiwix · Federation of American Scientists · 63 titles only until opened")
 
         vm.toggleWork("hc")
         vm.toggleSection("Orders")

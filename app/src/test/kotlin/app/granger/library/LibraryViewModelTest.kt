@@ -120,7 +120,8 @@ class LibraryViewModelTest {
         assertThat(rowCountText(kinds.single().collections[1]).resolve(ApplicationProvider.getApplicationContext())).isEqualTo("3 books · From Kiwix · Project Gutenberg")
     }
 
-    @Test fun aGutenbergRowSaysHowManyAreSearchableInFullOnceAnyAre() {
+    /** Plan KB2 Task 4.5: searchable in full is the default and the Library's row doesn't say how many are. */
+    @Test fun aGutenbergRowLeavesSearchableToTheHeader() {
         fun gutenberg(id: Int, indexed: Boolean) = book("g$id").copy(
             id = "book:gutenberg:$id", origin = app.granger.core.library.BookOrigin.GUTENBERG, indexedAt = if (indexed) 5L else null,
         )
@@ -129,7 +130,7 @@ class LibraryViewModelTest {
             emptyList(), books = books.toList(),
         )
         assertThat(rowCountText(row(gutenberg(1, true), gutenberg(2, false), gutenberg(3, false))).resolve(ApplicationProvider.getApplicationContext()))
-            .isEqualTo("3 books · From Kiwix · Project Gutenberg · 1 searchable in full")
+            .isEqualTo("3 books · From Kiwix · Project Gutenberg")
         assertThat(rowCountText(row(gutenberg(1, false))).resolve(ApplicationProvider.getApplicationContext())).isEqualTo("1 book · From Kiwix · Project Gutenberg")
     }
 

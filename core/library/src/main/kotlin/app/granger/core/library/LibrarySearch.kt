@@ -228,16 +228,38 @@ class ZimLibrarySearch(
         if (query.isBlank()) return emptyList()
         val packs = library.packs.first().filter { it.status == PackStatus.OK }
         val asked = packs.filterNot { suggesting && TitleMatch.skipsSuggest(it.name, query) }
+        val asBook = bookHits(asked)
         // A few packs at a time, in their order (each archive reads under its own lock): one after another, 31 packs' title
         // suggestions added up to 1–2 s on the emulator.
         val gate = Semaphore(PARALLEL_PACKS)
         return withContext(io) {
-            asked.map { pack -> async { gate.withPermit { packHits(pack, packs, run) } } }.awaitAll().filterNotNull()
+            asked.map { pack -> async { gate.withPermit { packHits(pack, packs, run, asBook) } } }.awaitAll().filterNotNull()
+        }
+    }
+
+    /**
+     * Each book pack's hit as the shelf book it is (Plan KB2 Task 4.5: a book shows once, as a book): a Gutenberg pack's
+     * pages by the book's id in their path, a nautilus or manifest pack's file by its entry; a hit that is no shelf book
+     * (an index page, an author's list, a removed book) is dropped. Null when [packs] hold no book pack.
+     */
+    private suspend fun bookHits(packs: List<Pack>): ((Pack, SearchHit) -> SearchHit?)? {
+        if (packs.none { it.isBookPack }) return null
+        val shelf = bookshelf?.books?.first().orEmpty().filter { it.origin.isPackBook && it.onShelf && it.status == PackStatus.OK }
+        val byId = shelf.associateBy { it.id }
+        val bySource = shelf.associateBy { it.sourceRef }
+        return { pack, hit ->
+            val book = when (pack.bookSource) {
+                BookOrigin.GUTENBERG -> GutenbergList.idOfPage(hit.path)?.let { byId[BookIds.of(BookOrigin.GUTENBERG, it)] }
+                else -> bySource["${pack.name}/${hit.path}"]
+            }
+            book?.let { SearchHit(it.id, Filing.defaultName(Filing.defaultKey(it), it, packs), "", it.title, hit.snippet, author = it.author) }
         }
     }
 
     /** One pack's hits for [across]; [packs] are all the readable packs, for [SliceDedupe]. Null when it can't be opened. */
-    private suspend fun packHits(pack: Pack, packs: List<Pack>, run: (ZimArchive) -> List<ZimHit>): PackHits? {
+    private suspend fun packHits(
+        pack: Pack, packs: List<Pack>, run: (ZimArchive) -> List<ZimHit>, asBook: ((Pack, SearchHit) -> SearchHit?)? = null,
+    ): PackHits? {
         val archive = library.archive(pack.id) ?: return null
         val hits = try { run(archive) } catch (e: Exception) { emptyList() }
         // Title suggestions are often redirects; point them at the article itself so the
@@ -251,6 +273,11 @@ class ZimLibrarySearch(
                 val title = if (path == hit.path) hit.title else archive.entry(path)?.title?.ifBlank { null } ?: hit.title
                 hit.copy(path = path) to SearchHit(pack.id, pack.title, path, PageTitles.clean(title, pack.title), hit.snippet)
             }
+        // A book pack's hits are its books, or nothing (Plan KB2 Task 4.5).
+        if (pack.isBookPack) {
+            val books = asBook?.let { map -> found.mapNotNull { (zim, hit) -> map(pack, hit)?.let { zim to it } }.distinctBy { it.second.packId } }.orEmpty()
+            return PackHits(books, returned = hits.size, name = pack.name, language = pack.language)
+        }
         return PackHits(SliceDedupe.apply(found, packs, slices, library::archive, { it.second.packId }, { it.second.path }), returned = hits.size, name = pack.name, language = pack.language)
     }
 

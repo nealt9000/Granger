@@ -291,14 +291,13 @@ internal fun rowCountText(row: CollectionRow, manifest: ManifestCollection? = nu
     val rows = row.withChildren
     val counts = countText(rows.sumOf { it.packs.size }, rows.sumOf { it.books.size }, rows.sumOf { it.albums.size }, rows.sumOf { it.audiobooks.size })
     // A book pack's collection is called by its subject or pack; the line under it says how many it holds and where they
-    // come from (Plan GB Decision 2, Plan KB Decision 7, Plan KB2 Task 4.2), and, as the collection's header does, how
-    // many of its books are searchable in full once any are.
+    // come from (Plan GB Decision 2, Plan KB Decision 7, Plan KB2 Task 4.2). Whether they're searchable in full is the
+    // collection header's to say, and only where they aren't (Task 4.5).
     val key = row.collection.defaultKey
     if (!Filing.isBookPackCollection(key)) return counts
-    val searchable = rows.sumOf { r -> r.books.count { it.searchableInFull } }
     // A work in parts counts once, as the header counts it.
     val books = rows.sumOf { r -> if (manifest != null) r.books.distinctBy { it.workKey ?: it.id }.size else r.books.size }
-    val header = GutenbergHeader(pack = null, books = books, searchable = searchable).let {
+    val header = GutenbergHeader(pack = null, books = books, searchable = 0).let {
         // "17 documents · From Kiwix", "24 books · From Kiwix · Federation of American Scientists".
         if (Filing.isKiwixBooksCollection(key)) {
             it.copy(kind = HeaderKind.KIWIX_LIBRARY, providerName = manifest?.provider?.takeIf(String::isNotBlank), documents = manifest?.documents ?: true)
@@ -306,7 +305,7 @@ internal fun rowCountText(row: CollectionRow, manifest: ManifestCollection? = nu
             it
         }
     }
-    return dotted(listOfNotNull(if (books > 0) header.provenance else header.provider, header.searchableText.takeIf { searchable > 0 }))
+    return if (books > 0) header.provenance else header.provider
 }
 
 private val EMPTY = UiText.Raw("")

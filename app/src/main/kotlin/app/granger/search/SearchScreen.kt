@@ -460,6 +460,15 @@ internal object SearchRows {
      * A book result's line under its title: the author, and "3 matches" when the book matched in more than one place;
      * null when it has neither.
      */
+    /**
+     * A book pack's text hit as a book's ([SearchViewModel], Plan KB2 Task 4.5): no place of its own (an empty href opens
+     * the book where the reader left it), and its snippet only when it shows the query.
+     */
+    fun bookHitOf(hit: app.granger.core.library.SearchHit, query: String): BookHit = BookHit(
+        bookId = hit.packId, bookTitle = hit.title, author = hit.author, href = "", progression = 0.0,
+        snippet = hit.snippet?.takeIf { snippetMatches(it, query) }.orEmpty(),
+    )
+
     fun bookLine(hit: BookHit): UiText? = when {
         hit.matches > 1 && hit.author.isNotBlank() -> UiText.Plural(R.plurals.search_book_matches_by, hit.matches, hit.matches, hit.author)
         hit.matches > 1 -> UiText.Plural(R.plurals.search_book_matches, hit.matches, hit.matches)

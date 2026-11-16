@@ -40,10 +40,15 @@
         <item quantity="one">%1$s document</item>
         <item quantity="other">%1$s documents</item>
     </plurals>
-    <!-- How many of a pack's books Search can read in full; %1$s is the count, formatted. -->
-    <plurals name="library_searchable_in_full">
-        <item quantity="one">%1$s searchable in full</item>
-        <item quantity="other">%1$s searchable in full</item>
+    <!-- The exceptions to "searchable in full", the default, which isn't shown (Plan KB2): a collection's books Search finds
+         by title only until they're opened, and its scans; %1$s is the count, formatted. -->
+    <plurals name="library_titles_only_until_opened">
+        <item quantity="one">%1$s title only until opened</item>
+        <item quantity="other">%1$s titles only until opened</item>
+    </plurals>
+    <plurals name="library_scans_titles_only">
+        <item quantity="one">%1$s scan: title only</item>
+        <item quantity="other">%1$s scans: titles only</item>
     </plurals>
 
     <!-- The source names an empty Music or Audiobooks screen links to. -->
@@ -84,10 +89,9 @@
     <string name="library_collection_name">Collection name</string>
     <string name="library_delete_collection_title">Delete collection?</string>
     <string name="library_delete_collection_body">Its packs go back to their usual collections. Nothing is removed from the phone.</string>
-    <!-- A pack's book: whether Search can read it in full yet. -->
-    <string name="library_searchable_full">Searchable in full</string>
-    <string name="library_title_only_scan">Title only: it\'s a scan</string>
-    <string name="library_titles_only">Titles only until you open it</string>
+    <!-- A pack's book that Search can't read in full (Plan KB2: only the exceptions are said). -->
+    <string name="library_title_only_scan">A scan: title only</string>
+    <string name="library_titles_only">Title only until opened</string>
     <!-- %1$s of %2$s books copied out, both formatted. -->
     <string name="library_making_searchable">Making searchable: %1$s of %2$s copied</string>
     <string name="library_not_enough_space">Not enough space</string>
@@ -119,10 +123,8 @@
     <string name="library_damaged">Damaged</string>
     <!-- How far through a book the reader is. -->
     <string name="library_percent">%1$d%%</string>
-    <!-- The small mark on a book Search can read in full. -->
-    <string name="library_full_text">Full text</string>
-    <!-- A PDF scan's text can't be searched. -->
-    <string name="library_pdf_not_searchable">PDF · Not searchable</string>
+    <!-- A PDF scan's text can't be searched: Search finds its title only. -->
+    <string name="library_pdf_not_searchable">PDF · A scan: title only</string>
 
     <!-- Moving packs and collections. -->
     <string name="library_new_collection">New collection</string>

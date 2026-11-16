@@ -32,8 +32,6 @@ import app.granger.R
 import app.granger.core.library.Book
 import app.granger.core.library.isBookPack
 import app.granger.core.library.isPackBook
-import androidx.compose.foundation.border
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -434,27 +432,19 @@ fun CollectionScreen(
 private class HeadItem(val key: String, val contentType: String, val content: @Composable () -> Unit)
 
 /**
- * A book's long-press menu. A pack's book (Gutenberg, nautilus, Kiwix) says whether its full text is searchable yet
- * (Plan GB Decision 6). Every book has Remove (Plan KB2 Task 4.3): a pack book's copy goes and its row is hidden.
+ * A book's long-press menu. A book Search can't yet read in full says so (Plan GB Decision 6; since Plan KB2 Task 4.5
+ * only the exceptions: a pack book not yet opened, a scan). Every book has Remove (Plan KB2 Task 4.3): a pack book's copy goes and its row is hidden.
  */
 @Composable
 private fun BookMenu(book: Book, open: Boolean, onClose: () -> Unit, onMove: () -> Unit, onRemove: () -> Unit) {
     DropdownMenu(open, onClose) {
-        if (book.origin.isPackBook) DropdownMenuItem(
-            text = {
-                Text(
-                    stringResource(
-                        when {
-                            book.searchableInFull -> R.string.library_searchable_full
-                            book.indexedAt != null && !book.searchable -> R.string.library_title_only_scan
-                            else -> R.string.library_titles_only
-                        },
-                    ),
-                )
-            },
-            onClick = {},
-            enabled = false,
-        )
+        // Searchable in full is the default and isn't said; only an exception is (Plan KB2 Task 4.5).
+        val exception = when {
+            book.scanTitleOnly -> R.string.library_title_only_scan
+            book.titleOnlyUntilOpened -> R.string.library_titles_only
+            else -> null
+        }
+        if (exception != null) DropdownMenuItem(text = { Text(stringResource(exception)) }, onClick = {}, enabled = false)
         DropdownMenuItem(text = { Text(stringResource(R.string.library_move_to_collection)) }, onClick = { onClose(); onMove() })
         DropdownMenuItem(text = { Text(stringResource(R.string.library_remove_from_phone)) }, onClick = { onClose(); onRemove() })
     }
@@ -473,7 +463,10 @@ private fun GutenbergHead(header: GutenbergHeader) {
             // wraps mid-phrase at 360 dp.
             Text(header.count.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(header.provider.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(header.searchableText.resolve(),style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            // Searchable in full is the default and isn't said; only the exceptions are (Plan KB2 Task 4.5).
+            header.exceptionText?.let {
+                Text(it.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
             header.fileNamesText?.let {
                 Text(it.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -674,7 +667,6 @@ internal fun BookRow(book: Book, progress: Double?, onClick: () -> Unit, onLongC
         PackStatus.CORRUPT -> stringResource(R.string.library_damaged)
     }
     val label = formatLabel(book)?.resolve()
-    val fullText = book.searchableInFull
     ShelfRow(
         title = book.title,
         subtitle = book.author,
@@ -682,9 +674,8 @@ internal fun BookRow(book: Book, progress: Double?, onClick: () -> Unit, onLongC
         onClick = { if (readable) onClick() },
         onLongClick = onLongClick,
         dimmed = !readable,
-        detail = if (label == null && problem == null && !fullText) null else {
+        detail = if (label == null && problem == null) null else {
             {
-                if (fullText) FullTextMark()
                 if (label != null) Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (problem != null) Text(problem, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
             }
@@ -725,7 +716,6 @@ internal fun BookCell(book: Book, progress: Double?, onClick: () -> Unit, onLong
         formatLabel(book)?.let {
             Text(it.resolve(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        if (book.searchableInFull) FullTextMark()
         when (book.status) {
             PackStatus.OK -> LinearProgressIndicator(
                 progress = { (progress ?: 0.0).toFloat().coerceIn(0f, 1f) },
@@ -735,24 +725,4 @@ internal fun BookCell(book: Book, progress: Double?, onClick: () -> Unit, onLong
             PackStatus.CORRUPT -> Text(stringResource(R.string.library_damaged), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
         }
     }
-}
-
-/**
- * The mark on a Gutenberg book whose full text is in Search and Ask (Plan GB Decision 6): a small outlined label,
- * read by TalkBack as "Searchable in full".
- */
-@Composable
-internal fun FullTextMark() {
-    val described = stringResource(R.string.library_searchable_full)
-    Text(
-        stringResource(R.string.library_full_text),
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.primary,
-        maxLines = 1,
-        modifier = Modifier
-            .padding(vertical = 2.dp)
-            .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp))
-            .padding(horizontal = 5.dp, vertical = 1.dp)
-            .clearAndSetSemantics { contentDescription = described },
-    )
 }
