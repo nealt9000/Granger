@@ -31,8 +31,9 @@ class FakeZimArchive(
     /** Entries of any type: path to (MIME type, content), beside [paths]' HTML ones. */
     private val files: Map<String, Pair<String, ByteArray>> = emptyMap(),
     scraper: String = "",
+    language: String = "eng",
 ) : ZimArchive {
-    override val metadata = ZimMetadata(title, description, "eng", "2026-10-15", name, scraper)
+    override val metadata = ZimMetadata(title, description, language, "2026-10-15", name, scraper)
     var closed = false
     var searches = 0
 

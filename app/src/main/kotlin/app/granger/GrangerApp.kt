@@ -577,7 +577,7 @@ class AppContainer(context: Context) {
     )
     /** Each installed pack's set and rank from the catalog, for Search and Ask's slice dedupe (Plan WF Decision 6). */
     val packSlices: app.granger.core.library.PackSlices = app.granger.sources.CatalogPackSlices { catalog.state.value.catalog }
-    val search: LibrarySearch = ZimLibrarySearch(library, bookIndex, bookshelf = bookshelf, slices = packSlices)
+    val search: LibrarySearch = ZimLibrarySearch(library, bookIndex, bookshelf = bookshelf, slices = packSlices, languages = { knowledgeNow.value.toSet() })
     val resolver = ZimResolver(library::archive, library::cachedArchive)
 
     val totalRamBytes: Long = BuildConfig.FAKE_RAM_BYTES.takeIf { it > 0 } ?: ActivityManager.MemoryInfo()
@@ -1056,12 +1056,21 @@ class AppContainer(context: Context) {
     /** Best matches for Search, each query's meaning step timed into [embedSpeed]. */
     fun bestStream(query: String): kotlinx.coroutines.flow.Flow<app.granger.core.research.BestMatches.Result> = kotlinx.coroutines.flow.flow {
         var timed = false
+        // Best matches keep to the library's languages too (Neal, 2026-11-16), as Titles and Articles do.
+        val allowed = knowledgeNow.value.toSet()
+        val packLanguages = library.packs.first().associate { it.id to it.language }
+        suspend fun allowedSource(p: app.granger.core.research.Passage): Boolean = when (p.kind) {
+            app.granger.core.research.SourceKind.ARTICLE -> packLanguages[p.sourceId]?.let { l -> allowed.any { app.granger.core.library.TitleMatch.inLanguage(l, it) } } ?: true
+            app.granger.core.research.SourceKind.BOOK -> (bookLanguages[p.sourceId] ?: bookshelf.book(p.sourceId)?.language?.let(::twoLetter)?.also { bookLanguages[p.sourceId] = it })
+                ?.let { it in allowed } ?: true
+            else -> true
+        }
         bestMatches.stream(query).collect { result ->
             if (!timed && result.byMeaning && result.embedMs + result.denseMs > 0) {
                 embedSpeed.record(result.embedMs + result.denseMs)
                 timed = true
             }
-            emit(result)
+            emit(result.copy(matches = result.matches.filter { allowedSource(it.passage) }))
         }
     }
 
