@@ -342,9 +342,7 @@ fun NavController.importIntoLibrary() {
 /** Where each Get more row goes: today's source screens. */
 internal fun routeOf(link: GetMoreLink): Any = when (link) {
     GetMoreLink.KIWIX -> SourceRoute(CatalogScope.KIWIX)
-    GetMoreLink.GRANGER_CLASSICS -> SourceRoute(CatalogScope.GRANGER)
-    GetMoreLink.GUTENBERG -> SourceRoute(CatalogScope.GUTENBERG)
-    GetMoreLink.KIWIX_BOOKS -> SourceRoute(CatalogScope.KIWIX_BOOKS)
+    GetMoreLink.BOOKS -> GetMoreRoute(GetMoreFor.BOOKS)
     GetMoreLink.ARCHIVE_ORG_BOOKS -> ArchiveRoute(ArchiveKind.TEXTS)
     GetMoreLink.LIBRIVOX -> LibriVoxRoute
     GetMoreLink.ARCHIVE_ORG_AUDIOBOOKS -> ArchiveRoute(ArchiveKind.SPOKEN_WORD)
@@ -1568,6 +1566,25 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             }
             composable<GetMoreRoute> { backStackEntry ->
                 val only = backStackEntry.toRoute<GetMoreRoute>().only
+                // The Library's + is Books by kind itself (Plan KB2 Task 4.1).
+                if (only == GetMoreFor.BOOKS) {
+                    app.granger.sources.BooksScreen(
+                        viewModel = viewModel {
+                            SourceViewModel(
+                                CatalogScope.BOOKS, container.catalog, container.downloads, container.library, container.bookshelf, container.volumes,
+                                container.downloadPrefs, container.deviceTier, container.appScope, askOn = container.askOn, meaningSearch = container.meaningSearch,
+                                knowledge = container.knowledgeLanguages.languages,
+                            )
+                        },
+                        onBack = { nav.popBackStack() },
+                        onOpenScope = { s -> nav.navigate(SourceRoute(s)) },
+                        onOpenPack = ::openPackOrCollection,
+                        onOpenBook = { bookId, title -> scope.launch { showTab(container.sessions.openTab(bookId, "", title)) } },
+                        onArchive = { nav.navigate(ArchiveRoute(ArchiveKind.TEXTS)) },
+                        onImport = if (Features.IMPORT) nav::importIntoLibrary else null,
+                    )
+                    return@composable
+                }
                 GetMoreScreen(
                     onOpen = nav::openGetMore,
                     onBack = { nav.popBackStack() },

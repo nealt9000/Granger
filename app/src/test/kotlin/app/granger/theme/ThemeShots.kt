@@ -227,13 +227,22 @@ open class ThemeShots {
         val classics = CollectionRow(ShelfCollection("c:gc", "Granger Classics", "literature", false, defaultKey = "gc"), emptyList(), books = List(12) { book("b$it") })
         val mine = CollectionRow(ShelfCollection("c:mine", "My books", "literature", false, defaultKey = "mine"), emptyList(), books = listOf(book("m")))
         val archive = CollectionRow(ShelfCollection("c:ao", "Archive.org", "literature", false, defaultKey = "ao"), emptyList(), books = List(3) { book("a$it") })
+        // A manifest pack's row (Plan KB2 Task 4.2): "24 books · From Kiwix · Federation of American Scientists".
+        val mmKey = "kiwixbooks-irp.fas.org_en_military-medicine"
+        val military = CollectionRow(
+            ShelfCollection("c:$mmKey", "Military Medicine", "literature", false, defaultKey = mmKey), emptyList(), books = List(24) { book("mm$it") },
+        )
+        val mmManifest = app.granger.core.library.ManifestCollection("Military Medicine", "books", "Federation of American Scientists", emptyList())
         GrangerShell(
             rail = RailUi(listOf(owls, blue)), expanded = false, railVisible = true, selected = RailTool.LIBRARY,
             onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {}, onChat = {}, onPlay = {},
             actions = RailEntryActions(onPin = {}, onUnpin = {}, onRemove = {}),
         ) {
             LibraryContent(
-                LibraryUi(libraryKinds(listOf(Shelf(MediaType("literature", "Literature", true, 0), listOf(archive, classics, wikipedia, mine)))), false),
+                LibraryUi(
+                    libraryKinds(listOf(Shelf(MediaType("literature", "Literature", true, 0), listOf(archive, classics, military, wikipedia, mine)))), false,
+                    manifests = mapOf(mmKey to mmManifest),
+                ),
                 SnackbarHostState(), {}, {}, {}, downloadsBadge = 2, onDownloads = {}, onGetMore = {}, onImport = {},
             )
         }
@@ -937,6 +946,31 @@ open class ThemeShots {
                 ),
                 onRemove = {}, onKeep = {},
             )
+        }
+    }
+
+    /** Plan KB2 Task 4.1: Get more → Books by kind over the published catalog, Military Medicine on the phone. */
+    @Config(sdk = [35], qualifiers = "w360dp-h1700dp-xxhdpi")
+    @Test fun booksByKind() {
+        val catalog = publishedCatalog()
+        val library = app.granger.FakeLibrary()
+        val military = catalog.packs.single { it.zimName == "irp.fas.org_en_military-medicine" }
+        val music = catalog.packs.single { it.zimName == "gutenberg_en_lcc-m" }
+        library.packList.value = listOf(military, music).map { app.granger.pack(it.zimUuid).copy(name = it.zimName) }
+        val vm = app.granger.sources.SourceViewModel(
+            app.granger.sources.CatalogScope.BOOKS, app.granger.FakeCatalogSource(catalog), app.granger.FakeDownloads(),
+            library, app.granger.FakeBookshelf(),
+            app.granger.FakeVolumes(listOf(app.granger.volume("/internal", "Phone", free = 41_000_000_000))), app.granger.FakePrefs(),
+            app.granger.core.ai.DeviceTier.ASK, kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main),
+            io = kotlinx.coroutines.Dispatchers.Main,
+        )
+        shoot("books-by-kind") {
+            GrangerShell(
+                rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = RailTool.LIBRARY,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+            ) {
+                app.granger.sources.BooksScreen(vm, onBack = {}, onOpenScope = {}, onOpenPack = {}, onOpenBook = { _, _ -> }, onArchive = {}, onImport = {})
+            }
         }
     }
 

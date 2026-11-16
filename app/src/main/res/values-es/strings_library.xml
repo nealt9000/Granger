@@ -46,6 +46,8 @@
         <item quantity="many">%1$s escaneos: solo los títulos</item>
         <item quantity="other">%1$s escaneos: solo los títulos</item>
     </plurals>
+    <string name="library_all_titles_only_until_opened">Solo por el título hasta abrirlos</string>
+    <string name="library_all_scans_titles_only">Escaneos: solo los títulos</string>
 
     <string name="library_make_searchable_menu">Hacer todos buscables…</string>
     <string name="library_open_pack_pages">Abrir las páginas del paquete</string>

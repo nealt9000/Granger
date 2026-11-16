@@ -110,6 +110,15 @@ sealed interface CatalogItem {
 /** [PackEntry.content] of a pack that is a bundle of books (Plan KB). */
 const val CONTENT_BOOKS = "books"
 
+/** [PackEntry.shelf]'s values (Plan KB2 Task 1.4), in the order Get more → Books shows them. */
+object Shelves {
+    const val LITERATURE = "literature"
+    const val CHILDREN = "children"
+    const val MANUALS = "manuals"
+    const val LEARNING = "learning"
+    val ORDER = listOf(LITERATURE, CHILDREN, MANUALS, LEARNING)
+}
+
 @Serializable
 data class PackEntry(
     override val id: String,
@@ -172,6 +181,11 @@ data class PackEntry(
     val setDescription: String = "",
     /** The curated title and the set's copy in other languages, by language code (Plan L3); empty in older catalogs. */
     val i18n: Map<String, Copy> = emptyMap(),
+    /**
+     * A book pack's shelf by kind (Plan KB2 Task 1.4), one of [Shelves]: Get more → Books groups by it. Blank for a
+     * website, and in older catalogs.
+     */
+    val shelf: String = "",
 ) : CatalogItem {
     /** The title in app language [appLang], else the catalog's own (Kiwix's, or the curated one). */
     fun title(appLang: String): String = localised(i18n, appLang, title)

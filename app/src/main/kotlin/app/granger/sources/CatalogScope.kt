@@ -17,6 +17,11 @@ enum class CatalogScope(@StringRes val title: Int) {
     GUTENBERG(R.string.sources_scope_gutenberg),
     /** Kiwix's other book packs, the nautilus libraries (Food for Preppers, Water, Prunelle), offered as books (Plan KB). */
     KIWIX_BOOKS(R.string.sources_scope_kiwix_books),
+    /**
+     * Get more → Books (Plan KB2 Task 4.1): every book source at once, by shelf. A view, not a home: [scopeOf] never
+     * returns it, each item stays in its own scope.
+     */
+    BOOKS(R.string.sources_get_books),
 }
 
 /** The scopes a pack can be in: where Readiness's domain views and the other cross-scope lists look (Plan KB Decision 6). */

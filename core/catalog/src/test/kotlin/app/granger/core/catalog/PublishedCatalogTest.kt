@@ -114,6 +114,11 @@ class PublishedCatalogTest {
             .containsExactly("", 6, "maxi", 1, "nopic", 2)
         // Spanish: Project Gutenberg's Spanish pack is a book pack too (the walkthrough, 2026-11-02).
         assertThat(catalog.packs.filter { it.language == "es" && it.isBookPack }.map { it.zimName }).contains("gutenberg_es_all")
+        // Plan KB2 Task 4.1: every book pack has a shelf by kind, and only book packs do.
+        assertThat(catalog.packs.filter { it.isBookPack }.map { it.shelf }.toSet()).containsExactlyElementsIn(Shelves.ORDER)
+        assertThat(catalog.packs.filter { it.shelf.isNotEmpty() }.all { it.isBookPack }).isTrue()
+        assertThat(catalog.packs.single { it.zimName == "irp.fas.org_en_military-medicine" }.shelf).isEqualTo(Shelves.MANUALS)
+        assertThat(catalog.packs.single { it.zimName == "jeffe.cs.illinois.edu_en_all" }.shelf).isEqualTo(Shelves.LEARNING)
     }
 
     /** Plan WF: Wikipedia and Wikivoyage as sets, the subjects with what they add, the sample marked. */

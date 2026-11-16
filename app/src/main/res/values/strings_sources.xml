@@ -21,13 +21,6 @@
     <string name="sources_group_models">Models &amp; voices</string>
     <string name="sources_link_kiwix" translatable="false">Kiwix</string>
     <string name="sources_link_kiwix_sub">Wikipedia, Stack Exchange, medicine, how-to and more, offline</string>
-    <string name="sources_link_classics">Granger Classics</string>
-    <string name="sources_link_classics_sub">Public-domain e-books, ready to read</string>
-    <string name="sources_link_gutenberg" translatable="false">Project Gutenberg</string>
-    <string name="sources_link_gutenberg_sub">Public-domain books by subject, in packs from Kiwix</string>
-    <!-- Kiwix's book packs (nautilus and manifest packs): Food for Preppers, Water, Military Medicine (Plan KB2: no "libraries"). -->
-    <string name="sources_link_kiwix_books">Books from Kiwix</string>
-    <string name="sources_link_kiwix_books_sub">Guides and handbooks: food, water, medicine, knots and more</string>
     <string name="sources_link_archive_books">Archive.org books</string>
     <string name="sources_link_archive_books_sub">Out-of-copyright books from the Internet Archive</string>
     <string name="sources_link_librivox" translatable="false">LibriVox</string>
@@ -38,6 +31,28 @@
     <string name="sources_link_archive_music_sub">Recordings from the Internet Archive</string>
     <string name="sources_link_models">Models and voices</string>
     <string name="sources_link_models_sub">What Read aloud runs on</string>
+    <!-- Get more → Books (Plan KB2 Task 4.1): every book source in one screen, by kind. -->
+    <string name="sources_link_books">Books by kind</string>
+    <string name="sources_link_books_sub">Literature, children\'s books, manuals and learning</string>
+    <!-- Its shelves, from the catalog's shelf field; More books holds a book pack with none. -->
+    <string name="sources_shelf_literature">Literature</string>
+    <string name="sources_shelf_children">Children\'s books</string>
+    <string name="sources_shelf_manuals">Manuals &amp; references</string>
+    <string name="sources_shelf_learning">Learning</string>
+    <string name="sources_shelf_other">More books</string>
+    <!-- Under the shelves: the ways to find a book that aren't a shelf. -->
+    <string name="sources_books_find">Find a book</string>
+    <string name="sources_search_all_books">Search all books</string>
+    <string name="sources_search_all_books_sub">Titles from every book source here</string>
+    <!-- Project Gutenberg's folded row: "41 subjects · From Kiwix · 2 on this phone". -->
+    <plurals name="sources_subjects">
+        <item quantity="one">%1$d subject</item>
+        <item quantity="other">%1$d subjects</item>
+    </plurals>
+    <plurals name="sources_on_this_phone">
+        <item quantity="one">%1$d on this phone</item>
+        <item quantity="other">%1$d on this phone</item>
+    </plurals>
     <!-- Imports the user's own books from files on the phone. -->
     <string name="sources_import_own">Import your own</string>
     <string name="sources_import_own_sub">EPUB, PDF, TXT or Markdown books from this phone</string>

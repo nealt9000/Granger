@@ -395,6 +395,16 @@ class CollectionViewModelTest {
         assertThat(rowCountText(gutenbergRow).en()).isEqualTo("3 books · From Kiwix · Project Gutenberg")
     }
 
+    /** Review polish: when every book is the exception, the line doesn't count them again. */
+    @Test fun anExceptionForEveryBookIsSaidWithoutItsCount() {
+        fun line(unopened: Int, scans: Int) = GutenbergHeader(null, 65, 0, unopened = unopened, scans = scans).exceptionText?.en()
+        assertThat(line(65, 0)).isEqualTo("Titles only until opened")
+        assertThat(line(12, 0)).isEqualTo("12 titles only until opened")
+        assertThat(line(0, 65)).isEqualTo("Scans: titles only")
+        assertThat(line(60, 5)).isEqualTo("60 titles only until opened · 5 scans: titles only")
+        assertThat(line(0, 0)).isNull()
+    }
+
     @Test fun anyOtherCollectionHasNoGutenbergHeader() = runTest(main.dispatcher) {
         show(collection("c:granger-classics", false, books = listOf(book("hamlet"))))
         val vm = vm("c:granger-classics")
@@ -572,7 +582,7 @@ class CollectionViewModelTest {
         assertThat(shown.languages).containsExactly("English", "Spanish").inOrder()
         // The header names the manifest's provider and counts a work once, in its noun.
         val header = vm.gutenbergHeader.value!!
-        assertThat(header.text.en()).isEqualTo("63 books · From Kiwix · Federation of American Scientists · 63 titles only until opened")
+        assertThat(header.text.en()).isEqualTo("63 books · From Kiwix · Federation of American Scientists · Titles only until opened")
 
         vm.toggleWork("hc")
         vm.toggleSection("Orders")

@@ -16,11 +16,6 @@
     <string name="sources_group_audio">Audiolibros y música</string>
     <string name="sources_group_models">Modelos y voces</string>
     <string name="sources_link_kiwix_sub">Wikipedia, Stack Exchange, medicina, guías prácticas y más, sin conexión</string>
-    <string name="sources_link_classics">Clásicos Granger</string>
-    <string name="sources_link_classics_sub">Libros electrónicos de dominio público, listos para leer</string>
-    <string name="sources_link_gutenberg_sub">Libros de dominio público por tema, en paquetes de Kiwix</string>
-    <string name="sources_link_kiwix_books">Libros de Kiwix</string>
-    <string name="sources_link_kiwix_books_sub">Guías y manuales: comida, agua, medicina, nudos y más</string>
     <string name="sources_link_archive_books">Libros de Archive.org</string>
     <string name="sources_link_archive_books_sub">Libros sin derechos de autor de Internet Archive</string>
     <string name="sources_link_librivox_sub">Audiolibros de dominio público, leídos por voluntarios</string>
@@ -30,6 +25,26 @@
     <string name="sources_link_archive_music_sub">Grabaciones de Internet Archive</string>
     <string name="sources_link_models">Modelos y voces</string>
     <string name="sources_link_models_sub">Lo que hace funcionar la lectura en voz alta</string>
+    <string name="sources_link_books">Libros por tipo</string>
+    <string name="sources_link_books_sub">Literatura, libros infantiles, manuales y aprendizaje</string>
+    <string name="sources_shelf_literature">Literatura</string>
+    <string name="sources_shelf_children">Libros infantiles</string>
+    <string name="sources_shelf_manuals">Manuales y obras de consulta</string>
+    <string name="sources_shelf_learning">Aprendizaje</string>
+    <string name="sources_shelf_other">Más libros</string>
+    <string name="sources_books_find">Buscar un libro</string>
+    <string name="sources_search_all_books">Buscar en todos los libros</string>
+    <string name="sources_search_all_books_sub">Títulos de todas las fuentes de libros de aquí</string>
+    <plurals name="sources_subjects">
+        <item quantity="one">%1$d tema</item>
+        <item quantity="many">%1$d temas</item>
+        <item quantity="other">%1$d temas</item>
+    </plurals>
+    <plurals name="sources_on_this_phone">
+        <item quantity="one">%1$d en este teléfono</item>
+        <item quantity="many">%1$d en este teléfono</item>
+        <item quantity="other">%1$d en este teléfono</item>
+    </plurals>
     <string name="sources_import_own">Importar los tuyos</string>
     <string name="sources_import_own_sub">Libros EPUB, PDF, TXT o Markdown de este teléfono</string>
 

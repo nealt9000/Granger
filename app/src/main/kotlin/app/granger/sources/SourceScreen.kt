@@ -329,31 +329,35 @@ fun SourceScreen(
     }
 
     confirmRemove?.let { (row, kind) ->
-        AlertDialog(
-            onDismissRequest = { confirmRemove = null },
-            title = {
-                val slice = row.slices.firstOrNull { it.chosen }
-                Text(
-                    if (slice != null) stringResource(R.string.sources_remove_slice_title, row.title, slice.label)
-                    else stringResource(R.string.sources_remove_title, row.title),
-                )
-            },
-            text = {
-                Text(stringResource(kind.body))
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.remove(row.id)
-                    confirmRemove = null
-                }) { Text(stringResource(R.string.common_remove)) }
-            },
-            dismissButton = { TextButton(onClick = { confirmRemove = null }) { Text(stringResource(R.string.common_keep)) } },
-        )
+        RemoveDialog(row, kind, onRemove = { viewModel.remove(row.id) }, onDismiss = { confirmRemove = null })
     }
 }
 
+/** Remove [row]? Its dialog says what goes with it ([kind], Plan KB2 Task 4.2); Keep closes it. */
+@Composable
+internal fun RemoveDialog(row: ItemRow, kind: RemoveKind, onRemove: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            val slice = row.slices.firstOrNull { it.chosen }
+            Text(
+                if (slice != null) stringResource(R.string.sources_remove_slice_title, row.title, slice.label)
+                else stringResource(R.string.sources_remove_title, row.title),
+            )
+        },
+        text = { Text(stringResource(kind.body)) },
+        confirmButton = {
+            TextButton(onClick = {
+                onRemove()
+                onDismiss()
+            }) { Text(stringResource(R.string.common_remove)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_keep)) } },
+    )
+}
+
 /** "38.2 GB free on Phone · Granger uses 4.1 GB" for the volume downloads will go to. */
-private fun storageSummary(ui: SourceUi): UiText? {
+internal fun storageSummary(ui: SourceUi): UiText? {
     val volume = ui.volumes.firstOrNull { it.path == ui.selectedVolume } ?: return null
     return UiText.Res(R.string.sources_storage_summary, formatBytes(volume.freeBytes), volume.label, formatBytes(volume.grangerBytes))
 }
@@ -676,7 +680,7 @@ private fun FlavourOption(flavour: FlavourChoice, onChoose: () -> Unit) {
  * asks first.
  */
 @Composable
-private fun RowActions(
+internal fun RowActions(
     row: ItemRow, onGet: () -> Unit, onCancel: () -> Unit, onRetry: () -> Unit, onRemove: () -> Unit, onOpen: () -> Unit,
     onSwitch: () -> Unit = onGet,
     preview: Boolean = true,

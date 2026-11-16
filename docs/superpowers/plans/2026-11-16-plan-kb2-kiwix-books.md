@@ -439,13 +439,41 @@ now)").
   - Its pack rows already exclude book packs (`isBookPack`); KIWIX packs are included in that.
   - Tell them the subject-id field's name once Task 4.8 settles it.
 
-- [ ] **Task 4.1: Books screen by kind (D4).**
+- [x] **Task 4.1: Books screen by kind (D4).**
   - Get more → Books: shelves Literature / Children / Manuals & references / Learning, from catalog `shelf`.
   - Search all books.
   - Archive.org stays a search entry.
   - Provider line on each row.
   - Keep KiwixList's 10 GB set cap and the preset "N to update" behaviour.
   - Spanish strings (L1 rules).
+  - **Done 2026-11-16** (this commit, worktree kb2ux).
+    - `PackEntry.shelf` (default "") and `Shelves` (literature, children, manuals, learning) in core/catalog.
+    - **One screen:** the Library's + (`GetMoreRoute(BOOKS)`) is `BooksScreen`, over `SourceViewModel(CatalogScope.BOOKS)`
+      (a view: `scopeOf` never returns it; `BookShelves.isBookItem` = Granger books, Gutenberg packs, book packs). Get
+      more's Books group is now "Books by kind" (→ the same screen) and "Archive.org books"; the empty Library links the
+      same two. The Granger Classics / Project Gutenberg / Books from Kiwix links and their strings are gone.
+    - **Shelves** (teal labels, rounded blocks): Literature = Granger sets (presets, "Granger Classics · 437 books ·
+      257 MB", "· N to update" once any is here; Clásicos with All languages, as before) opening Granger's screen, then
+      **Project Gutenberg folded** ("39 subjects · From Kiwix · 1 on this phone", opens today's Gutenberg list), then
+      SMBC; Children's books (Prunelle), Manuals & references (zimgit, USDA, Military Medicine, Survivor Library),
+      Learning (Algorithms, Milne). A shelf with nothing is left out; a book pack with no known shelf goes under "More
+      books" (seam: African Storybook arrives with `shelf: children`, no code change). Each Kiwix pack row:
+      "65 MB · From Kiwix · irp.fas.org" + Get / Open+overflow Remove / progress (`RowActions`, size check, remove
+      dialog shared with SourceScreen).
+    - **Provider (decision):** the catalog has no provider field, so `BookShelves.provider` uses Project Gutenberg, a
+      family that names a site (irp.fas.org) or a one-word maker (Prunelle); else "From Kiwix" alone.
+    - **Find a book** (Spectral header): Search all books (a search mode over catalog titles/authors/descriptions of
+      every book source, one "Books" block of results), Archive.org books, Import your own.
+    - **Shared look:** `app/.../theme/GroupedRows.kt`: `GroupLabel` (heading semantics), `SectionHeader`,
+      `GroupedRows`, `GroupedRow`, `Chevron`, `OutlineChip` (36 dp, teal when chosen). Teal is `extras.status` (Enamel in
+      Field, Phosphor at Night); block = surfaceContainerLowest (Field #FAF7F1) / surfaceContainerLow (Night). For
+      Explore's Sources to reuse.
+    - Polish: a collection header whose every book is the exception says "Titles only until opened" / "Scans: titles
+      only" without the count (`library_all_*`); the Library ThemeShot now has Military Medicine's row.
+    - Tests: `BooksScreenTest` (2), `SourceViewModelTest` books by kind over the published catalog, on-the-phone counts,
+      preset meta; `CollectionViewModelTest.anExceptionForEveryBookIsSaidWithoutItsCount`; `PublishedCatalogTest` shelves;
+      GetMore/Library tests updated. ThemeShot `books-by-kind` (Field + Night) checked. `:core:catalog` 77, `:app` 1826
+      (122 skipped), 0 failures.
 - [x] **Task 4.2: one vocabulary.** No visible "collection" (Explore avoids it): a group of books is its title, plus
   the manifest `noun` count and the provider, in Get more, the header, the Make-searchable dialog and the Remove
   dialogs. Fix `sources_remove_pack_body`, which wrongly says places are deleted.

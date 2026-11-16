@@ -36,10 +36,10 @@ class GetMoreScreenTest {
         assertThat(GET_MORE_SECTIONS.map { context.getString(it.first.heading) })
             .containsExactly("Knowledge packs", "Books", "Audiobooks & music", "Models & voices").inOrder()
         assertThat(GET_MORE_SECTIONS.flatMap { it.second }).containsExactlyElementsIn(GetMoreLink.entries)
-        // Project Gutenberg is books, after Granger Classics (Plan GB Decision 7); Books from Kiwix after it (Plan KB).
+        // Plan KB2 Task 4.1: one Books screen by kind (Granger Classics, Project Gutenberg, Kiwix's book packs), then archive.org.
         assertThat(GET_MORE_SECTIONS.single { it.first == GetMoreGroup.BOOKS }.second)
-            .containsExactly(GetMoreLink.GRANGER_CLASSICS, GetMoreLink.GUTENBERG, GetMoreLink.KIWIX_BOOKS, GetMoreLink.ARCHIVE_ORG_BOOKS).inOrder()
-        assertThat(GetMoreLink.KIWIX_BOOKS.label).isEqualTo("Books from Kiwix")
+            .containsExactly(GetMoreLink.BOOKS, GetMoreLink.ARCHIVE_ORG_BOOKS).inOrder()
+        assertThat(GetMoreLink.BOOKS.label).isEqualTo("Books by kind")
         // Archive.org once per kind, its kind in the name.
         assertThat(GetMoreLink.entries.map { it.label }.filter { it.startsWith("Archive.org") })
             .containsExactly("Archive.org books", "Archive.org audiobooks", "Archive.org music")
@@ -56,7 +56,7 @@ class GetMoreScreenTest {
     /** Plan KB walkthrough 2: the Library's + is books alone, with Import your own; Listen's, audio alone. */
     @Test fun theLibrarysGetMoreOffersOnlyBooksAndListensOnlyAudio() {
         assertThat(getMoreSections(GetMoreFor.BOOKS).flatMap { it.second })
-            .containsExactly(GetMoreLink.GRANGER_CLASSICS, GetMoreLink.GUTENBERG, GetMoreLink.KIWIX_BOOKS, GetMoreLink.ARCHIVE_ORG_BOOKS).inOrder()
+            .containsExactly(GetMoreLink.BOOKS, GetMoreLink.ARCHIVE_ORG_BOOKS).inOrder()
         assertThat(getMoreSections(GetMoreFor.LISTEN).flatMap { it.second })
             .containsExactly(GetMoreLink.LIBRIVOX, GetMoreLink.ARCHIVE_ORG_AUDIOBOOKS, GetMoreLink.ARCHIVE_ORG_MUSIC).inOrder()
         assertThat(getMoreSections(null)).isEqualTo(GET_MORE_SECTIONS)
@@ -80,7 +80,7 @@ class GetMoreScreenTest {
         compose.setContent { GetMoreScreen(onOpen = {}, onBack = {}, only = GetMoreFor.LISTEN) }
         compose.onNodeWithText("Get audiobooks & music").assertIsDisplayed()
         for (link in getMoreSections(GetMoreFor.LISTEN).flatMap { it.second }) compose.onNodeWithText(link.label).assertIsDisplayed()
-        for (link in listOf(GetMoreLink.KIWIX, GetMoreLink.KIWIX_BOOKS, GetMoreLink.GUTENBERG, GetMoreLink.MODELS)) {
+        for (link in listOf(GetMoreLink.KIWIX, GetMoreLink.BOOKS, GetMoreLink.MODELS)) {
             compose.onNodeWithText(link.label).assertDoesNotExist()
         }
         compose.onNodeWithText(importYourOwn).assertDoesNotExist()
@@ -88,9 +88,8 @@ class GetMoreScreenTest {
 
     @Test fun eachRowsRouteIsTodaysSourceScreen() {
         assertThat(routeOf(GetMoreLink.KIWIX)).isEqualTo(SourceRoute(CatalogScope.KIWIX))
-        assertThat(routeOf(GetMoreLink.GRANGER_CLASSICS)).isEqualTo(SourceRoute(CatalogScope.GRANGER))
-        assertThat(routeOf(GetMoreLink.GUTENBERG)).isEqualTo(SourceRoute(CatalogScope.GUTENBERG))
-        assertThat(routeOf(GetMoreLink.KIWIX_BOOKS)).isEqualTo(SourceRoute(CatalogScope.KIWIX_BOOKS))
+        // Books by kind is the Library's Get more itself (Plan KB2 Task 4.1).
+        assertThat(routeOf(GetMoreLink.BOOKS)).isEqualTo(GetMoreRoute(GetMoreFor.BOOKS))
         assertThat(routeOf(GetMoreLink.ARCHIVE_ORG_BOOKS)).isEqualTo(ArchiveRoute(ArchiveKind.TEXTS))
         assertThat(routeOf(GetMoreLink.LIBRIVOX)).isEqualTo(LibriVoxRoute)
         assertThat(routeOf(GetMoreLink.ARCHIVE_ORG_AUDIOBOOKS)).isEqualTo(ArchiveRoute(ArchiveKind.SPOKEN_WORD))

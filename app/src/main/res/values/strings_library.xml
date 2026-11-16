@@ -50,6 +50,9 @@
         <item quantity="one">%1$s scan: title only</item>
         <item quantity="other">%1$s scans: titles only</item>
     </plurals>
+    <!-- The same, when it's every book in the collection: the count is already on the line. -->
+    <string name="library_all_titles_only_until_opened">Titles only until opened</string>
+    <string name="library_all_scans_titles_only">Scans: titles only</string>
 
     <!-- The source names an empty Music or Audiobooks screen links to. -->
     <string name="library_link_granger" translatable="false">Granger</string>

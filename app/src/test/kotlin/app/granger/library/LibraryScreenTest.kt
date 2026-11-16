@@ -70,11 +70,11 @@ class LibraryScreenTest {
     @Test fun anEmptyLibraryOffersTheBookSources() {
         show(LibraryUi(emptyList(), emptyLibrary = true))
         compose.onNodeWithText("No books yet").assertIsDisplayed()
-        compose.onNodeWithText("Granger Classics").performClick()
+        compose.onNodeWithText("Books by kind").performClick()
         compose.onNodeWithText("Archive.org books").performClick()
         compose.onNodeWithText("Import your own EPUB, PDF, TXT or Markdown books").performClick()
         compose.onNodeWithText("Get packs and books →").assertDoesNotExist()
         compose.onNodeWithText(".zim", substring = true).assertDoesNotExist()
-        assertThat(calls).containsExactly("source:GRANGER_CLASSICS", "source:ARCHIVE_ORG_BOOKS", "import").inOrder()
+        assertThat(calls).containsExactly("source:BOOKS", "source:ARCHIVE_ORG_BOOKS", "import").inOrder()
     }
 }

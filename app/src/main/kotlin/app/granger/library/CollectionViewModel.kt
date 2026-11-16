@@ -379,11 +379,20 @@ data class GutenbergHeader(
 
     /**
      * The exceptions to "searchable in full", the default, which isn't said (Plan KB2 Task 4.5): "12 titles only until
-     * opened", "3 scans: titles only", or both; null when every book is searchable in full.
+     * opened", "3 scans: titles only", or both; null when every book is searchable in full. When it's every book, the
+     * count isn't said again: "65 books · … · Titles only until opened".
      */
     val exceptionText: UiText? get() = listOfNotNull<UiText>(
-        UiText.Plural(R.plurals.library_titles_only_until_opened, unopened, number(unopened)).takeIf { unopened > 0 },
-        UiText.Plural(R.plurals.library_scans_titles_only, scans, number(scans)).takeIf { scans > 0 },
+        when {
+            unopened <= 0 -> null
+            unopened >= books -> UiText.Res(R.string.library_all_titles_only_until_opened)
+            else -> UiText.Plural(R.plurals.library_titles_only_until_opened, unopened, number(unopened))
+        },
+        when {
+            scans <= 0 -> null
+            scans >= books -> UiText.Res(R.string.library_all_scans_titles_only)
+            else -> UiText.Plural(R.plurals.library_scans_titles_only, scans, number(scans))
+        },
     ).reduceOrNull { line, part -> UiText.Res(R.string.library_dotted, line, part) }
 
     /** "Titles from file names", for a collection listed with no manifest; null otherwise. */
