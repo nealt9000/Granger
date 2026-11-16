@@ -612,6 +612,13 @@ now)").
     Task 4 adds an item → subject-packs sidecar.
   - The phone exposes it to Explore's subject screens through one function in core/library. Explore's UI is d0's.
 
+- **From the Books screen review (2026-11-16), for the Task 3.2 catalog change and Phase 5:**
+  - Stamp a `provider` field from `book_packs.json` (as `shelf` is) so rows read "From Kiwix · Federation of American
+    Scientists", not "irp.fas.org"; add providers for the list-carrying packs (zimgit, USDA, Prunelle). Old apps ignore
+    the key.
+  - Phase 5: confirm the >10 GB size check (KB Decision 9) fires from the Books screen's Get on Survivor Library
+    (220 GB).
+
 ## Phase 5: check and merge
 
 - [ ] **Task 5.1: emulator pass.**
