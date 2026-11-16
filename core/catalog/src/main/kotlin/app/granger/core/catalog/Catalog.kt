@@ -209,6 +209,11 @@ data class PackEntry(
      * and in older catalogs.
      */
     val provider: String = "",
+    /**
+     * Explore's subject ids (Plan KB2 Task 4.8; ids v1 in tools/subjects/subjects.json), one to three, main first:
+     * `["health"]`. Empty for an untagged entry and in older catalogs. See [bookCollectionsBySubject].
+     */
+    val subjects: List<String> = emptyList(),
 ) : CatalogItem {
     /** The title in app language [appLang], else the catalog's own (Kiwix's, or the curated one). */
     fun title(appLang: String): String = localised(i18n, appLang, title)
@@ -252,6 +257,11 @@ data class BookEntry(
     /** A set book's reading level (Plan KB2: African Storybook's 1–5); 0 when it has none. */
     val level: Int = 0,
     /**
+     * Explore's subject ids (Plan KB2 Task 4.8; ids v1 in tools/subjects/subjects.json), one to three, main first:
+     * `["health"]`. Empty for an untagged entry and in older catalogs. See [bookCollectionsBySubject].
+     */
+    val subjects: List<String> = emptyList(),
+    /**
      * The [BookSet] this book is in (Plan KB2 Task 3.2), set by the parser from where the book was listed, never read
      * from the catalog; blank for a book of the top-level [Catalog.books] (Granger Classics, Clásicos Granger).
      */
@@ -280,6 +290,11 @@ data class BookSet(
     val i18n: Map<String, Copy> = emptyMap(),
     val presets: List<Preset> = emptyList(),
     val books: List<BookEntry> = emptyList(),
+    /**
+     * Explore's subject ids (Plan KB2 Task 4.8; ids v1 in tools/subjects/subjects.json), one to three, main first:
+     * `["health"]`. Empty for an untagged entry and in older catalogs. See [bookCollectionsBySubject].
+     */
+    val subjects: List<String> = emptyList(),
 ) {
     /** The title in app language [appLang], else the catalog's own. */
     fun title(appLang: String): String = localised(i18n, appLang, title)

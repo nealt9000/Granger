@@ -764,7 +764,19 @@ now)").
       `GutenbergBooksTest` memberOf for one and two packs, `MigrationTest` memberOf null. `:core:library` 499, `:app`
       1819 (120 skipped), 0 failures; `:app:assembleDebug` builds.
 
-- [ ] **Task 4.8: subjects for book collections (Explore).**
+- [x] **Task 4.8: subjects for book collections (Explore).**
+  - **Done 2026-11-16** (commit "KB2 Task 4.8: subjects on book packs, books and book sets"). Ids are subjects.json v1
+    (e227798e), hard-coded as `SUBJECT_IDS` in catalog_gen; a bad id, none, or more than 3 fails the build.
+  - Field: `subjects: ["health", …]` (1–3, main first) on book `packs`, `books`, `bookSets` and each set's books.
+    `book_packs.json`: `subjects` per manifest pack, `subjectsByPrefix` (zimgit, usda, prunelle, gutenberg_ fallback,
+    `african-storybook-` sets); Gutenberg LCC packs by class (`LCC_SUBJECTS`); Classics/Clásicos books by section
+    (`book_subjects`). Web packs are not tagged here (d0's). Build emits it; `catalog_gen.py shelves <file>` now also
+    stamps it in place (never removes another tool's).
+  - On today's catalog: 56 book packs and 622 books tagged (literature 495, religion 93, history 21, literature+music
+    13 for opera libretti); no bookSets in the catalog yet.
+  - App: `subjects` on `PackEntry`, `BookEntry`, `BookSet`; `fun Catalog.bookCollectionsBySubject(installedPackIds:
+    Set<String>, installedBookIds: Set<String>): Map<String, List<SubjectCollection>>` in
+    `core/catalog/.../Subjects.kt` (core/library doesn't see the catalog). Tests: `SubjectsTest` (3), pytest 190.
   - `book_packs.json` (and a `subjects` map for list-carrying packs by prefix) gives each collection one to three
     subject ids from Explore's list. Proposed:
     - Military Medicine → health;

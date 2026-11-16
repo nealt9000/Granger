@@ -1,5 +1,5 @@
 {
-  "about": "Plan KB2: the Kiwix packs shown as book collections through a .gbooks manifest, and how build.py reads each (extractor, filters, groups, title overrides). Gutenberg and nautilus packs carry their own lists and aren't here. `shelves` puts list-carrying book packs (content \"books\") on a Books shelf by name prefix (Plan KB2 Decision 4), and `providers` names who made them, by the same prefixes (a manifest pack's `provider` is its own). `notBooks` lists packs the audit or Neal judged not to be book collections, with why, so upkeep doesn't raise them as candidates.",
+  "about": "Plan KB2: the Kiwix packs shown as book collections through a .gbooks manifest, and how build.py reads each (extractor, filters, groups, title overrides). Gutenberg and nautilus packs carry their own lists and aren't here. `shelves` puts list-carrying book packs (content \"books\") on a Books shelf by name prefix (Plan KB2 Decision 4), and `providers` names who made them, by the same prefixes (a manifest pack's `provider` is its own). `notBooks` lists packs the audit or Neal judged not to be book collections, with why, so upkeep doesn't raise them as candidates. `subjects` (on a manifest pack) and `subjectsByPrefix` (list-carrying book packs, and bookSets by collection id) give Explore's subject ids (tools/subjects/subjects.json v1), 1–3, main first; Gutenberg LCC packs (gutenberg_en_lcc-<class>) get theirs from the class in catalog_gen.",
   "shelves": {
     "gutenberg_": "literature",
     "zimgit-": "manuals",
@@ -10,6 +10,39 @@
     "gutenberg_": "Project Gutenberg",
     "usda-": "USDA",
     "prunelle_": "Prunelle"
+  },
+  "subjectsByPrefix": {
+    "zimgit-water_en": [
+      "food",
+      "health"
+    ],
+    "zimgit-food-preparation_en": [
+      "food"
+    ],
+    "zimgit-medicine_en": [
+      "health"
+    ],
+    "zimgit-post-disaster_en": [
+      "technology",
+      "health"
+    ],
+    "zimgit-knots_en": [
+      "sports"
+    ],
+    "usda-2015_en": [
+      "food"
+    ],
+    "prunelle_": [
+      "literature",
+      "languages"
+    ],
+    "gutenberg_": [
+      "literature"
+    ],
+    "african-storybook-": [
+      "literature",
+      "languages"
+    ]
   },
   "notBooks": {
     "theworldfactbook_en_all": "web: its PDFs repeat the country pages",
@@ -35,14 +68,21 @@
       "noun": "books",
       "provider": "African Storybook Initiative",
       "licence": "CC BY",
-      "shelf": "children"
+      "shelf": "children",
+      "subjects": [
+        "literature",
+        "languages"
+      ]
     },
     "irp.fas.org_en_military-medicine": {
       "extractor": "zimit-index",
       "title": "Military Medicine",
       "noun": "books",
       "provider": "Federation of American Scientists",
-      "shelf": "manuals"
+      "shelf": "manuals",
+      "subjects": [
+        "health"
+      ]
     },
     "smbc-comics.com_en_all": {
       "extractor": "zimit-index",
@@ -52,7 +92,10 @@
       "shelf": "literature",
       "overrides": {
         "www.smbc-comics.com/covid/files/augie_german.pdf": "Augie and the Green Knight (German)"
-      }
+      },
+      "subjects": [
+        "literature"
+      ]
     },
     "jeffe.cs.illinois.edu_en_all": {
       "extractor": "zimit-index",
@@ -133,7 +176,11 @@
         "jeffe.cs.illinois.edu/teaching/algorithms/hwex/old-hwex.pdf": "Homework and exams · 2003 revision",
         "jeffe.cs.illinois.edu/teaching/algorithms/hwex/ancient-hwex.pdf": "Homework and exams · before 2003"
       },
-      "order": "path"
+      "order": "path",
+      "subjects": [
+        "science",
+        "technology"
+      ]
     },
     "milneopentextbooks.org_en_all": {
       "extractor": "zimit-index",
@@ -143,7 +190,11 @@
       "shelf": "learning",
       "minBytes": 200000,
       "site": "Milne Open Textbooks",
-      "exclude": "(?i)vpat|accessibility-conformance"
+      "exclude": "(?i)vpat|accessibility-conformance",
+      "subjects": [
+        "technology",
+        "science"
+      ]
     },
     "survivorlibrary.com_en_all": {
       "extractor": "zimit-index",
@@ -153,7 +204,12 @@
       "shelf": "manuals",
       "groupBy": "page",
       "groupPattern": "^Library-(?P<g>.+)$",
-      "yearSuffix": true
+      "yearSuffix": true,
+      "subjects": [
+        "technology",
+        "food",
+        "health"
+      ]
     }
   }
 }

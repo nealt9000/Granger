@@ -263,7 +263,7 @@ def test_book_release_adds_books_and_preset(tmp_path, monkeypatch):
                       "category": "Drama", "language": "en", "sizeBytes": 10, "sha256": "ab" * 32,
                       "urls": BOOKS["books"][0]["urls"], "releaseDate": "2026-10-17",
                       "license": "Public domain (US)", "collection": "granger-classics", "published": 1603,
-                      "domain": "literature"}
+                      "domain": "literature", "subjects": ["literature"]}
     assert [b["id"] for b in catalog["books"]] == ["gc-hamlet", "gc-macbeth"]
     assert {"id": "granger-classics", "title": "Granger Classics: all books",
             "items": ["gc-hamlet", "gc-macbeth"]} in catalog["presets"]
@@ -1787,3 +1787,58 @@ def test_shelves_command_stamps_providers_in_place(tmp_path):
     cg.main(["shelves", str(path)])
     [pack] = json.loads(path.read_text())["packs"]
     assert pack["shelf"] == "manuals" and pack["provider"] == "USDA"
+
+
+def test_book_packs_get_explore_subjects_and_other_packs_none():
+    """Plan KB2 Task 4.8: manifest packs by name, Gutenberg by LCC class, list-carrying book packs by prefix."""
+    subjects = cg.load_subjects()
+    of = lambda name, content="books": cg.subjects_of(name, content, subjects)
+    assert of("irp.fas.org_en_military-medicine", "") == ["health"]
+    assert of("survivorlibrary.com_en_all", "") == ["technology", "food", "health"]
+    assert of("gutenberg_en_lcc-b") == ["religion"]
+    assert of("gutenberg_en_lcc-h") == ["society"] and of("gutenberg_en_lcc-hb") == ["business"]
+    assert of("gutenberg_en_lcc-pe") == ["languages", "literature"]
+    assert of("gutenberg_en_lcc-pa") == ["literature", "languages"] and of("gutenberg_en_lcc-pr") == ["literature"]
+    assert of("gutenberg_en_lcc-s") == ["food", "nature"] and of("gutenberg_en_lcc-g") == ["places"]
+    assert of("gutenberg_en_all") == ["literature"] and of("gutenberg_es_all") == ["literature"]
+    assert of("zimgit-knots_en") == ["sports"] and of("zimgit-water_en") == ["food", "health"]
+    assert of("prunelle_en_interactive-books") == ["literature", "languages"]
+    assert of("wikipedia_en_all", "") == [] and of("gutenberg_en_lcc-pr", "") == []
+    assert cg.set_subjects("african-storybook-es", subjects) == ["literature", "languages"]
+
+
+def test_every_configured_subject_is_an_explore_id_and_a_bad_one_fails():
+    for _, value in cg.load_subjects()[1]:
+        assert set(value) <= set(cg.SUBJECT_IDS)
+    with pytest.raises(SystemExit, match="subjects"):
+        cg.check_subjects("x", ["cooking"])
+    with pytest.raises(SystemExit, match="subjects"):
+        cg.check_subjects("x", ["food", "health", "nature", "places"])
+    with pytest.raises(SystemExit, match="subjects"):
+        cg.check_subjects("x", [])
+
+
+def test_book_subjects_come_from_the_section():
+    assert cg.book_subjects("Novels & stories") == ["literature"]
+    assert cg.book_subjects("Scripture & religion") == ["religion"]
+    assert cg.book_subjects("Philosophy") == ["religion"]
+    assert cg.book_subjects("Historia y crónicas") == ["history"]
+    assert cg.book_subjects("Opera libretti") == ["literature", "music"]
+    assert cg.book_subjects("Escritura y religión") == ["religion"]
+    assert cg.book_subjects("Lecturas para aprender") == ["literature"]
+
+
+def test_shelves_command_stamps_subjects_on_packs_books_and_sets(tmp_path):
+    path = tmp_path / "catalog.json"
+    path.write_text(json.dumps({"generatedAt": "2026-01-01T00:00:00Z", "packs": [
+        {"id": "usda-2015_en", "zimName": "usda-2015_en", "content": "books"},
+        {"id": "wikipedia_en_all", "content": "", "subjects": ["history"]}],
+        "books": [{"id": "gc-x", "category": "Drama"}],
+        "bookSets": [{"id": "african-storybook-en", "books": [{"id": "asb-1"}]}]}))
+    cg.main(["shelves", str(path)])
+    catalog = json.loads(path.read_text())
+    assert catalog["packs"][0]["subjects"] == ["food"]
+    assert catalog["packs"][1]["subjects"] == ["history"]  # another tool's tags stay
+    assert catalog["books"][0]["subjects"] == ["literature"]
+    assert catalog["bookSets"][0]["subjects"] == ["literature", "languages"]
+    assert catalog["bookSets"][0]["books"][0]["subjects"] == ["literature", "languages"]
