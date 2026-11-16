@@ -29,4 +29,14 @@
     <string name="topic_found">From your search</string>
     <string name="topic_found_go">Read it in the article</string>
     <string name="topic_wander">Wander from here</string>
+    <!-- Explore connections (the map). -->
+    <string name="topic_explore">Explore connections</string>
+    <string name="topic_map_all">All</string>
+    <string name="topic_map_people">People</string>
+    <string name="topic_map_events">Events</string>
+    <string name="topic_map_places">Places</string>
+    <string name="topic_map_topics">Topics</string>
+    <string name="topic_map_books">Books</string>
+    <string name="topic_map_open">Open the topic page</string>
+    <string name="topic_map_hint">Tap a circle to centre the map on it. Hold to open it.</string>
 </resources>

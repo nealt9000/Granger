@@ -71,6 +71,7 @@ object TopicPageTags {
     const val RELATED = "topic_related"
     const val FOUND = "topic_found"
     const val WANDER = "topic_wander"
+    const val EXPLORE = "topic_explore"
 }
 
 /**
@@ -95,6 +96,8 @@ fun TopicPage(
     /** The passage a search found in this article: shown first, with the way to it. */
     found: String? = null,
     onWander: (() -> Unit)? = null,
+    /** Opens Explore connections (the map); null leaves the button out. */
+    onExplore: (() -> Unit)? = null,
 ) {
     val header = topic.header
     val words = yearWords()
@@ -140,6 +143,12 @@ fun TopicPage(
                         topic.other?.let { other ->
                             OutlinedButton(onClick = { onOther(other) }, modifier = Modifier.heightIn(min = 48.dp).testTag(TopicPageTags.OTHER)) {
                                 Text(stringResource(if (other.language == "es") R.string.topic_read_in_spanish else R.string.topic_read_in_english))
+                            }
+                        }
+                        val connections = (topic.related?.size ?: 0) + (topic.time?.people?.size ?: 0) + (topic.time?.events?.size ?: 0)
+                        if (onExplore != null && connections >= MIN_CONNECTIONS) {
+                            OutlinedButton(onClick = onExplore, modifier = Modifier.heightIn(min = 48.dp).testTag(TopicPageTags.EXPLORE)) {
+                                Text(stringResource(R.string.topic_explore))
                             }
                         }
                     }
@@ -365,6 +374,8 @@ internal fun ageOf(y0: Int, md0: Int, y1: Int, md1: Int): Int {
 }
 
 private const val PICTURE_RATIO = 1.15f
+/** The map needs a few circles to be worth opening. */
+private const val MIN_CONNECTIONS = 3
 /** A picture at least this wide (px, as loaded) fills the width; a smaller one sits beside the title. */
 private const val WIDE_PICTURE_PX = 600
 private val SMALL_PICTURE = 112.dp

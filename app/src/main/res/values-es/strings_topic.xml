@@ -24,4 +24,13 @@
     <string name="topic_found">De tu búsqueda</string>
     <string name="topic_found_go">Leerlo en el artículo</string>
     <string name="topic_wander">Pasear desde aquí</string>
+    <string name="topic_explore">Explorar conexiones</string>
+    <string name="topic_map_all">Todo</string>
+    <string name="topic_map_people">Personas</string>
+    <string name="topic_map_events">Hechos</string>
+    <string name="topic_map_places">Lugares</string>
+    <string name="topic_map_topics">Temas</string>
+    <string name="topic_map_books">Libros</string>
+    <string name="topic_map_open">Abrir la página del tema</string>
+    <string name="topic_map_hint">Toca un círculo para centrar el mapa en él. Mantén pulsado para abrirlo.</string>
 </resources>

@@ -126,6 +126,8 @@ class ReaderViewModel(
         val topicShown: Boolean = false,
         /** The passage a search found in this article, shown on its topic page; Read it opens the article there. */
         val found: String? = null,
+        /** Explore connections (the map) is open over the topic page. */
+        val mapShown: Boolean = false,
     )
 
     /**
@@ -445,6 +447,13 @@ class ReaderViewModel(
             source.topic(pack, path).collect { t -> _state.update { if (topicPath == path) it.copy(topic = t) else it } }
         }
     }
+
+    /** Opens or closes Explore connections over the topic page. */
+    fun showMap(open: Boolean) = _state.update { it.copy(mapShown = open && it.topic != null) }
+
+    /** Another article's topic, for the map's re-centring; nothing without the feature. */
+    fun topicOf(packId: String, path: String): kotlinx.coroutines.flow.Flow<app.granger.topic.Topic> =
+        topics?.topic(packId, path) ?: kotlinx.coroutines.flow.emptyFlow()
 
     /** Read the full article: the topic page steps aside; the article is already loaded behind it. */
     fun readFullArticle() = _state.update { it.copy(topicShown = false, chromeVisible = true) }

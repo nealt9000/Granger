@@ -472,7 +472,18 @@ fun ReaderScreen(
                     onShowInTime = if (topic.time == null) null else ({ onShowInTime(topic.packId, topic.path) }),
                     found = state.found,
                     onWander = onWander?.let { w -> { w(topic.packId, topic.path) } },
+                    onExplore = { viewModel.showMap(true) },
                 )
+                if (state.mapShown) {
+                    app.granger.topic.TopicMap(
+                        start = topic,
+                        topicOf = viewModel::topicOf,
+                        onOpenArticle = onOpenArticle,
+                        onOpenBookAt = onOpenBookAt,
+                        onOpenPassage = onOpenPassage,
+                        onClose = { viewModel.showMap(false) },
+                    )
+                }
             }
             val packSearch = state.packSearch
             if (state.chromeVisible && packSearch != null) {

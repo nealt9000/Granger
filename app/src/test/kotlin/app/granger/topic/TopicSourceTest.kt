@@ -223,3 +223,37 @@ class BlurbTest {
             .isEqualTo("Napoleon III was the first President of France.")
     }
 }
+
+class TopicMapNodesTest {
+    private fun life(qid: Long, path: String) =
+        app.granger.core.library.TimeMark(qid, "w", path, path, app.granger.core.library.TimeKind.LIFE, 1750, 0, 1820, null, 9, emptySet(), 10)
+    private fun event(qid: Long, path: String) =
+        app.granger.core.library.TimeMark(qid, "w", path, path, app.granger.core.library.TimeKind.SPAN, 1800, 0, 1815, null, 9, emptySet(), 10)
+    private val book = LibraryBook("book:granger:gc-wp", "War and Peace", null)
+
+    private val topic = Topic(
+        "w", "Napoleon",
+        time = TopicTimeView(life(517, "Napoleon"), listOf(life(1, "Goethe"), life(2, "Beethoven")), listOf(event(3, "Napoleonic_Wars"), event(4, "Congress_of_Vienna"))),
+        related = listOf(
+            TopicArticle("w", "Napoleon_III", "Napoleon III", "", null, NodeKind.PERSON),
+            TopicArticle("w", "Napoleonic_Wars", "Napoleonic Wars", "", null, NodeKind.EVENT),   // also an event: once
+            TopicArticle("w", "Tuileries_Palace", "Tuileries Palace", "", null, NodeKind.PLACE),
+            TopicArticle("w", "19th_century", "19th century", "", null, NodeKind.TOPIC),
+        ),
+        relatedBooks = listOf(TopicBook(book, "OEBPS/c170.xhtml")),
+    )
+
+    @Test fun theInnerRingMixesKindsAndNothingRepeats() {
+        val nodes = TopicMapNodes.of(topic)
+        assertThat(nodes.take(6).map { it.title }).containsExactly(
+            "Napoleon III", "Napoleonic Wars", "Tuileries Palace", "Goethe", "Congress of Vienna", "War and Peace",
+        ).inOrder()
+        assertThat(nodes.map { it.title }).containsNoDuplicates()
+        assertThat(nodes.map { it.title }).containsAtLeast("19th century", "Beethoven")
+    }
+
+    @Test fun aFilterKeepsOneKind() {
+        assertThat(TopicMapNodes.of(topic, NodeKind.PERSON).map { it.title }).containsExactly("Napoleon III", "Goethe", "Beethoven")
+        assertThat(TopicMapNodes.of(topic, NodeKind.BOOK).single().chapter).isEqualTo("OEBPS/c170.xhtml")
+    }
+}

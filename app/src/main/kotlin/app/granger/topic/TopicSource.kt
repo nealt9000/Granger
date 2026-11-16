@@ -32,8 +32,18 @@ data class TopicTimeView(
 /** The same subject in the other language, in an installed pack. */
 data class TopicOther(val language: String, val packId: String, val path: String, val title: String)
 
-/** One closest article, as its card shows it. */
-data class TopicArticle(val packId: String, val path: String, val title: String, val blurb: String, val picture: String?)
+/** What a node on the connections map is (Plan LL2 Task 5), for its colour and its filter. */
+enum class NodeKind { PERSON, EVENT, PLACE, TOPIC, BOOK }
+
+/** One closest article, as its card shows it; [kind] from the time index (a life, an event) or a place's coordinates. */
+data class TopicArticle(
+    val packId: String,
+    val path: String,
+    val title: String,
+    val blurb: String,
+    val picture: String?,
+    val kind: NodeKind = NodeKind.TOPIC,
+)
 
 /** One book near in meaning, opened at [chapter]. */
 data class TopicBook(val book: LibraryBook, val chapter: String)
@@ -166,13 +176,29 @@ class TopicSource(
         val all = qids()
         // The same subject under another title: a redirect's target, or the article in another pack.
         val r = find(name, path) { packName, key -> qid != null && ids[packName]?.let { all.qidOf(it, key) } == qid }
+        val times = attempt { times() }
         val articles = r.articles.take(SHOWN).mapNotNull { h ->
             val id = ids[h.target] ?: return@mapNotNull null
             val l = lead(id, h.key)
-            TopicArticle(id, h.key, l?.title ?: titleOf(h.key), blurb(l?.sentence.orEmpty()), l?.thumbnail)
+            TopicArticle(id, h.key, l?.title ?: titleOf(h.key), blurb(l?.sentence.orEmpty()), l?.thumbnail, kindOf(id, h.key, times, all))
         }
         val books = r.books.mapNotNull { h -> bookOf(h.target)?.let { TopicBook(it, h.key) } }
         return articles to books
+    }
+
+    /** A life is a person, a dated span or battle an event; an item with coordinates a place; anything else a topic. */
+    private fun kindOf(packId: String, path: String, times: TimeIndexes?, qids: QidIndexes): NodeKind {
+        val mark = runCatching { times?.find(packId, path) }.getOrNull()
+        // An older QID index has no coordinates table; that's "not a place", never a lost Related.
+        val placed = runCatching { qids.qidOf(packId, path)?.let { qids.coordinates(it) } != null }.getOrDefault(false)
+        return when {
+            mark?.kind == app.granger.core.library.TimeKind.LIFE -> NodeKind.PERSON
+            mark != null && (mark.kind == app.granger.core.library.TimeKind.SPAN ||
+                app.granger.core.library.Lane.WARS in mark.lanes || app.granger.core.library.Lane.EVENTS_POLITICS in mark.lanes) &&
+                !placed -> NodeKind.EVENT
+            placed -> NodeKind.PLACE
+            else -> NodeKind.TOPIC
+        }
     }
 
     /** [block]'s value, or null when it fails; a cancellation still cancels. A part that fails is left out, not the page. */
