@@ -88,3 +88,46 @@ def test_path_of_reads_the_path_without_parsing_and_handles_escapes(tmp_path):
     f = tmp_path / "items.jsonl"
     f.write_text("\n".join(lines) + "\n", encoding="utf8")
     assert [r["q"] for r in build.read_items(f, {"Plain", 'Guerra_de_los_"Cien_Años"'})] == ["Q1", "Q3"]
+
+
+def make_subjects(tmp_path, rows):
+    f = tmp_path / "subjects.sqlite"
+    db = sqlite3.connect(f)
+    db.execute("CREATE TABLE subjects(qid INTEGER, ord INTEGER, subject TEXT, PRIMARY KEY(qid, ord))")
+    db.execute("CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT)")
+    db.executemany("INSERT INTO subjects VALUES (?,?,?)", rows)
+    db.executemany("INSERT INTO meta VALUES (?,?)", [("subjectsVersion", "1"), ("builtAt", "2026-11-16T00:00:00Z")])
+    db.commit(); db.close()
+    return f
+
+
+def test_subjects_are_attached_for_the_index_items_only_and_schema_stays_1(tmp_path):
+    from libzim.reader import Archive
+    zim = make_zim(tmp_path)
+    out = tmp_path / "x.gqid"
+    subjects = make_subjects(tmp_path, [(36322, 0, "literature"), (36322, 1, "history"), (170583, 0, "literature"),
+                                        (999, 0, "science")])
+    counts = build.build([p for p, _ in articles(Archive(zim))], iter(ITEMS), out, zim, meta.sha256(zim), subjects)
+    assert counts["subjects"] == 2
+    db = sqlite3.connect(out)
+    assert db.execute("SELECT qid, ord, subject FROM subjects ORDER BY qid, ord").fetchall() == [
+        (36322, 0, "literature"), (36322, 1, "history"), (170583, 0, "literature")]
+    db.close()
+    m = meta.read_meta(out)
+    assert m["schemaVersion"] == "1" and m["builderVersion"] == "2" and m["subjectsVersion"] == "1"
+    assert m["withSubjects"] == "2" and m["packSubject"] == ""
+
+
+def test_a_subject_pack_gives_its_subject_to_items_the_rules_leave_without_one(tmp_path):
+    db = sqlite3.connect(tmp_path / "wikipedia_en_chemistry_maxi_2026-10.gqid")
+    db.executescript(build.SCHEMA)
+    db.executemany("INSERT INTO articles VALUES (?,?,?,?)", [("Niobium", 1046, 9, None), ("Law_of_mass_action", 5, 3, None)])
+    db.execute("CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+    db.execute("INSERT INTO meta VALUES ('sourceZim', 'wikipedia_en_chemistry_maxi_2026-10.zim')")
+    n = build.add_subjects(db, make_subjects(tmp_path, [(1046, 0, "science"), (1046, 1, "technology")]))
+    assert n == 2
+    assert db.execute("SELECT qid, ord, subject FROM subjects ORDER BY qid, ord").fetchall() == [
+        (5, 0, "science"), (1046, 0, "science"), (1046, 1, "technology")]
+    assert build.pack_subject("wikipedia_es_movies_nopic_2026-10.zim") == "film"
+    assert build.pack_subject("wikipedia_en_top_nopic_2026-09-14.zim") is None
+    assert build.pack_subject("wikipedia_en_all_maxi_2026-08.zim") is None

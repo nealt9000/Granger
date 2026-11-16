@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_en_knots_maxi_2026-10-18.gqid",
- "sizeBytes": 65536,
- "sha256": "901ece054d796422e0a960f11b37b8407050704a5c9c1d0f8967ade342f08c04",
+ "sizeBytes": 73728,
+ "sha256": "a7db390c7afd0b029ea1b64161c3a46d98a1b8abe0cf394469ef699b977a6246",
  "schemaVersion": 1,
  "sourceSha256": "29a3ffa52a725d0ef9dd5359d27b864ec8454c61430c0bfb15fd1929f4b73390",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 1,
+ "builderVersion": 2,
  "url": null
 }

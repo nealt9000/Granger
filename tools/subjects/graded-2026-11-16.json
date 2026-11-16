@@ -1,0 +1,2332 @@
+{
+ "note": "Plan EX Task 0 round 2: 198 random Top en articles (seed 4242), each subject run 11 gave marked right/wrong/unsure by Neal (2026-11-16), plus the subjects he said were missing. Six marks were changed to wrong on Fable's second read, with Neal's OK. Used to tune run 15, so it checks for regressions; it is no longer held-out.",
+ "items": [
+  {
+   "q": "Q3234651",
+   "path": "Avatar:_The_Last_Airbender_season_2",
+   "graded": [
+    "film"
+   ],
+   "marks": {
+    "film": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q133318",
+   "path": "Marat_Safin",
+   "graded": [
+    "sports"
+   ],
+   "marks": {
+    "sports": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q548861",
+   "path": "Dan_Henderson",
+   "graded": [
+    "sports"
+   ],
+   "marks": {
+    "sports": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q192050",
+   "path": "Assassination_of_Archduke_Franz_Ferdinand",
+   "graded": [
+    "history",
+    "science"
+   ],
+   "marks": {
+    "history": "right",
+    "science": "unsure"
+   },
+   "missing": [
+    "society"
+   ]
+  },
+  {
+   "q": "Q1028133",
+   "path": "Autonomous_Province_of_Korçë",
+   "graded": [
+    "history",
+    "places"
+   ],
+   "marks": {
+    "history": "right",
+    "places": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q239910",
+   "path": "Shirley_Jackson",
+   "graded": [
+    "literature"
+   ],
+   "marks": {
+    "literature": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q539010",
+   "path": "Art_Ross",
+   "graded": [
+    "sports",
+    "business"
+   ],
+   "marks": {
+    "business": "unsure",
+    "sports": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q51740",
+   "path": "Obi-Wan_Kenobi",
+   "graded": [
+    "film"
+   ],
+   "marks": {
+    "film": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q157875",
+   "path": "Carpenter_ant",
+   "graded": [
+    "nature"
+   ],
+   "marks": {
+    "nature": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q186385",
+   "path": "Caviar",
+   "graded": [
+    "food"
+   ],
+   "marks": {
+    "food": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1361817",
+   "path": "Value_investing",
+   "graded": [
+    "business"
+   ],
+   "marks": {
+    "business": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q108700",
+   "path": "Whigs_(British_political_party)",
+   "graded": [
+    "society",
+    "history"
+   ],
+   "marks": {
+    "history": "right",
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q229246",
+   "path": "Julia_Domna",
+   "graded": [
+    "history",
+    "science",
+    "society"
+   ],
+   "marks": {
+    "history": "right",
+    "science": "unsure",
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q7913",
+   "path": "Romanian_language",
+   "graded": [
+    "languages"
+   ],
+   "marks": {
+    "languages": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q110832",
+   "path": "Centre_Party_(Sweden)",
+   "graded": [
+    "society"
+   ],
+   "marks": {
+    "society": "right"
+   },
+   "missing": [
+    "history"
+   ]
+  },
+  {
+   "q": "Q77729",
+   "path": "Ursula_Franklin",
+   "graded": [
+    "science",
+    "society"
+   ],
+   "marks": {
+    "science": "right",
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q392655",
+   "path": "Flight_feather",
+   "graded": [
+    "nature"
+   ],
+   "marks": {
+    "nature": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q157963",
+   "path": "Savings_bank",
+   "graded": [
+    "business"
+   ],
+   "marks": {
+    "business": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q663",
+   "path": "Aluminium",
+   "graded": [
+    "science"
+   ],
+   "marks": {
+    "science": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1584286",
+   "path": "Silver_as_an_investment",
+   "graded": [
+    "business"
+   ],
+   "marks": {
+    "business": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q3751091",
+   "path": "José_Andrés",
+   "graded": [
+    "food",
+    "business",
+    "society"
+   ],
+   "marks": {
+    "business": "right",
+    "food": "right",
+    "society": "unsure"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q3757",
+   "path": "Java",
+   "graded": [
+    "places"
+   ],
+   "marks": {
+    "places": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q5864957",
+   "path": "History_of_Ipswich_Town_F.C.",
+   "graded": [
+    "history",
+    "sports"
+   ],
+   "marks": {
+    "history": "right",
+    "sports": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q25686",
+   "path": "Artemisia_absinthium",
+   "graded": [
+    "nature"
+   ],
+   "marks": {
+    "nature": "right"
+   },
+   "missing": [
+    "food"
+   ]
+  },
+  {
+   "q": "Q11439",
+   "path": "Home_page",
+   "graded": [
+    "technology"
+   ],
+   "marks": {
+    "technology": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q61740820",
+   "path": "Nomadland",
+   "graded": [
+    "film"
+   ],
+   "marks": {
+    "film": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q16799549",
+   "path": "Latin_Americans",
+   "graded": [
+    "society"
+   ],
+   "marks": {
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q719337",
+   "path": "FarmVille",
+   "graded": [
+    "games"
+   ],
+   "marks": {
+    "games": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q618153",
+   "path": "Liquid_oxygen",
+   "graded": [
+    "science"
+   ],
+   "marks": {
+    "science": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q328473",
+   "path": "New_York_City_Police_Department",
+   "graded": [
+    "society",
+    "places"
+   ],
+   "marks": {
+    "places": "wrong",
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q50364330",
+   "path": "Android_Pie",
+   "graded": [
+    "technology"
+   ],
+   "marks": {
+    "technology": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q10701282",
+   "path": "Atlantic_slave_trade",
+   "graded": [
+    "history",
+    "business"
+   ],
+   "marks": {
+    "business": "right",
+    "history": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q2164580",
+   "path": "United_Kingdom_parliamentary_expenses_scandal",
+   "graded": [
+    "society"
+   ],
+   "marks": {
+    "society": "right"
+   },
+   "missing": [
+    "history"
+   ]
+  },
+  {
+   "q": "Q211604",
+   "path": "Montparnasse",
+   "graded": [
+    "places"
+   ],
+   "marks": {
+    "places": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q274083",
+   "path": "Antacid",
+   "graded": [
+    "health",
+    "science"
+   ],
+   "marks": {
+    "health": "right",
+    "science": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q212960",
+   "path": "Super_Audio_CD",
+   "graded": [
+    "technology"
+   ],
+   "marks": {
+    "technology": "right"
+   },
+   "missing": [
+    "music"
+   ]
+  },
+  {
+   "q": "Q1495434",
+   "path": "Plant_virus",
+   "graded": [
+    "nature"
+   ],
+   "marks": {
+    "nature": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q212188",
+   "path": "S._R._Nathan",
+   "graded": [
+    "society"
+   ],
+   "marks": {
+    "society": "unsure"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q147027",
+   "path": "Thought_experiment",
+   "graded": [
+    "science"
+   ],
+   "marks": {
+    "science": "right"
+   },
+   "missing": [
+    "religion"
+   ]
+  },
+  {
+   "q": "Q7708739",
+   "path": "Recreational_drug_use",
+   "graded": [
+    "health"
+   ],
+   "marks": {
+    "health": "right"
+   },
+   "missing": [
+    "society"
+   ]
+  },
+  {
+   "q": "Q122892",
+   "path": "Bromley",
+   "graded": [
+    "places"
+   ],
+   "marks": {
+    "places": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q76548",
+   "path": "Meister_Eckhart",
+   "graded": [
+    "religion"
+   ],
+   "marks": {
+    "religion": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q33582",
+   "path": "Mug_shot",
+   "graded": [
+    "society"
+   ],
+   "marks": {
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q166196",
+   "path": "Poland_national_football_team",
+   "graded": [
+    "sports"
+   ],
+   "marks": {
+    "sports": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q12059",
+   "path": "Ant_spider",
+   "graded": [
+    "nature"
+   ],
+   "marks": {
+    "nature": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q315475",
+   "path": "Lin_Biao",
+   "graded": [
+    "society",
+    "history"
+   ],
+   "marks": {
+    "history": "right",
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1590915",
+   "path": "Devadasi",
+   "graded": [
+    "religion"
+   ],
+   "marks": {
+    "religion": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q28937399",
+   "path": "PUBG:_Battlegrounds",
+   "graded": [
+    "games",
+    "technology"
+   ],
+   "marks": {
+    "games": "right",
+    "technology": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q156013",
+   "path": "Eurostar",
+   "graded": [
+    "business"
+   ],
+   "marks": {
+    "business": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q4264",
+   "path": "Mercosur",
+   "graded": [
+    "society",
+    "places"
+   ],
+   "marks": {
+    "places": "wrong",
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q16257937",
+   "path": "Molecular_diagnostics",
+   "graded": [
+    "health"
+   ],
+   "marks": {
+    "health": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q11954",
+   "path": "Dries_Mertens",
+   "graded": [
+    "sports"
+   ],
+   "marks": {
+    "sports": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q9392232",
+   "path": "Annunciation_(Memling)",
+   "graded": [
+    "art"
+   ],
+   "marks": {
+    "art": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q44746",
+   "path": "Uncertainty_principle",
+   "graded": [
+    "science"
+   ],
+   "marks": {
+    "science": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q156291",
+   "path": "Allegheny_County,_Pennsylvania",
+   "graded": [
+    "places"
+   ],
+   "marks": {
+    "places": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q450746",
+   "path": "Pat_Garrett",
+   "graded": [
+    "society"
+   ],
+   "marks": {
+    "society": "right"
+   },
+   "missing": [
+    "history"
+   ]
+  },
+  {
+   "q": "Q127751",
+   "path": "Wars_of_the_Roses",
+   "graded": [
+    "history"
+   ],
+   "marks": {
+    "history": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q298016",
+   "path": "Fred_Thompson",
+   "graded": [
+    "society",
+    "film"
+   ],
+   "marks": {
+    "film": "right",
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q5708511",
+   "path": "President_of_Peru",
+   "graded": [
+    "society"
+   ],
+   "marks": {
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q326542",
+   "path": "John_Peel",
+   "graded": [
+    "society",
+    "film",
+    "music"
+   ],
+   "marks": {
+    "film": "unsure",
+    "music": "unsure",
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q216935",
+   "path": "Lidocaine",
+   "graded": [
+    "science",
+    "health"
+   ],
+   "marks": {
+    "health": "right",
+    "science": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q273005",
+   "path": "Economic_system",
+   "graded": [
+    "business"
+   ],
+   "marks": {
+    "business": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q9359",
+   "path": "Google_bombing",
+   "graded": [
+    "technology"
+   ],
+   "marks": {
+    "technology": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q720671",
+   "path": "Bob_Lazar",
+   "graded": [
+    "business",
+    "science"
+   ],
+   "marks": {
+    "business": "unsure",
+    "science": "wrong"
+   },
+   "missing": [
+    "history",
+    "society"
+   ]
+  },
+  {
+   "q": "Q478060",
+   "path": "Volcano_(South_Park)",
+   "graded": [
+    "film"
+   ],
+   "marks": {
+    "film": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1190071",
+   "path": "The_Nightfly",
+   "graded": [
+    "music"
+   ],
+   "marks": {
+    "music": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q53945",
+   "path": "Breaking_Dawn",
+   "graded": [
+    "literature"
+   ],
+   "marks": {
+    "literature": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q2291130",
+   "path": "Hemiparesis",
+   "graded": [
+    "health"
+   ],
+   "marks": {
+    "health": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q131687",
+   "path": "Heliosphere",
+   "graded": [
+    "science"
+   ],
+   "marks": {
+    "science": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1048268",
+   "path": "European_integration",
+   "graded": [
+    "science",
+    "society"
+   ],
+   "marks": {
+    "science": "unsure",
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q776909",
+   "path": "Larsen_Ice_Shelf",
+   "graded": [
+    "places"
+   ],
+   "marks": {
+    "places": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q396013",
+   "path": "Agranulocytosis",
+   "graded": [
+    "health",
+    "science"
+   ],
+   "marks": {
+    "health": "right",
+    "science": "unsure"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q2303056",
+   "path": "Shepherd's_pie",
+   "graded": [
+    "food"
+   ],
+   "marks": {
+    "food": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q311374",
+   "path": "Alexander_Ovechkin",
+   "graded": [
+    "sports"
+   ],
+   "marks": {
+    "sports": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1000158",
+   "path": "Panic_of_1857",
+   "graded": [
+    "history"
+   ],
+   "marks": {
+    "history": "right"
+   },
+   "missing": [
+    "business"
+   ]
+  },
+  {
+   "q": "Q4018",
+   "path": "Navarre",
+   "graded": [
+    "places"
+   ],
+   "marks": {
+    "places": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1351895",
+   "path": "USS_Gerald_R._Ford",
+   "graded": [
+    "technology"
+   ],
+   "marks": {
+    "technology": "unsure"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q5204243",
+   "path": "Daicon_III_and_IV_Opening_Animations",
+   "graded": [
+    "film"
+   ],
+   "marks": {
+    "film": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q182895",
+   "path": "Maxilla",
+   "graded": [
+    "health"
+   ],
+   "marks": {
+    "health": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q19855",
+   "path": "Minutes_to_Midnight_(Linkin_Park_album)",
+   "graded": [
+    "music"
+   ],
+   "marks": {
+    "music": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q970352",
+   "path": "Selected_Ambient_Works_85–92",
+   "graded": [
+    "music"
+   ],
+   "marks": {
+    "music": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1519107",
+   "path": "Afghan_conflict",
+   "graded": [
+    "history"
+   ],
+   "marks": {
+    "history": "right"
+   },
+   "missing": [
+    "society"
+   ]
+  },
+  {
+   "q": "Q839726",
+   "path": "Gambler's_fallacy",
+   "graded": [
+    "science"
+   ],
+   "marks": {
+    "science": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q139712",
+   "path": "John_Le_Mesurier",
+   "graded": [
+    "film"
+   ],
+   "marks": {
+    "film": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q585939",
+   "path": "Donkey_Kong_Country_Returns",
+   "graded": [
+    "games"
+   ],
+   "marks": {
+    "games": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q239344",
+   "path": "Salt_March",
+   "graded": [
+    "society"
+   ],
+   "marks": {
+    "society": "right"
+   },
+   "missing": [
+    "history"
+   ]
+  },
+  {
+   "q": "Q208465",
+   "path": "Buffer_solution",
+   "graded": [
+    "science"
+   ],
+   "marks": {
+    "science": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q7278",
+   "path": "Political_party",
+   "graded": [
+    "society"
+   ],
+   "marks": {
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q42876406",
+   "path": ".hack_(video_game_series)",
+   "graded": [
+    "games"
+   ],
+   "marks": {
+    "games": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q54196",
+   "path": "Cerebrospinal_fluid",
+   "graded": [
+    "health"
+   ],
+   "marks": {
+    "health": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q53550",
+   "path": "Althea_Gibson",
+   "graded": [
+    "sports"
+   ],
+   "marks": {
+    "sports": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q5604175",
+   "path": "Greenhouse_gas_emissions_by_the_United_States",
+   "graded": [
+    "science"
+   ],
+   "marks": {
+    "science": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q189280",
+   "path": "Democratic_socialism",
+   "graded": [
+    "society"
+   ],
+   "marks": {
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q11240",
+   "path": "1993_World_Trade_Center_bombing",
+   "graded": [
+    "history"
+   ],
+   "marks": {
+    "history": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1061285",
+   "path": "Tathāgata",
+   "graded": [
+    "religion"
+   ],
+   "marks": {
+    "religion": "right"
+   },
+   "missing": [
+    "history"
+   ]
+  },
+  {
+   "q": "Q615522",
+   "path": "L'incoronazione_di_Poppea",
+   "graded": [
+    "music",
+    "literature"
+   ],
+   "marks": {
+    "literature": "right",
+    "music": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1327700",
+   "path": "Reactive_arthritis",
+   "graded": [
+    "health"
+   ],
+   "marks": {
+    "health": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q190908",
+   "path": "Seven_(1995_film)",
+   "graded": [
+    "film"
+   ],
+   "marks": {
+    "film": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q155833",
+   "path": "Nerium",
+   "graded": [
+    "nature"
+   ],
+   "marks": {
+    "nature": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q186528",
+   "path": "USS_South_Dakota_(BB-57)",
+   "graded": [
+    "history"
+   ],
+   "marks": {
+    "history": "right"
+   },
+   "missing": [
+    "technology"
+   ]
+  },
+  {
+   "q": "Q379664",
+   "path": "Valentino_(fashion_designer)",
+   "graded": [
+    "art",
+    "film"
+   ],
+   "marks": {
+    "art": "right",
+    "film": "wrong"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q41429",
+   "path": "Gibraltar_pound",
+   "graded": [
+    "business"
+   ],
+   "marks": {
+    "business": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q68947",
+   "path": "Subspecies",
+   "graded": [
+    "nature"
+   ],
+   "marks": {
+    "nature": "right"
+   },
+   "missing": [
+    "science"
+   ]
+  },
+  {
+   "q": "Q1067764",
+   "path": "Alt_attribute",
+   "graded": [
+    "technology"
+   ],
+   "marks": {
+    "technology": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q189288",
+   "path": "Stratford-upon-Avon",
+   "graded": [
+    "places"
+   ],
+   "marks": {
+    "places": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q9361",
+   "path": "Bishkek",
+   "graded": [
+    "places"
+   ],
+   "marks": {
+    "places": "right"
+   },
+   "missing": [
+    "history"
+   ]
+  },
+  {
+   "q": "Q234869",
+   "path": "Salah",
+   "graded": [
+    "religion"
+   ],
+   "marks": {
+    "religion": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1425",
+   "path": "Trajan",
+   "graded": [
+    "history",
+    "society"
+   ],
+   "marks": {
+    "history": "right",
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q40816",
+   "path": "Benghazi",
+   "graded": [
+    "places",
+    "history"
+   ],
+   "marks": {
+    "history": "right",
+    "places": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q364990",
+   "path": "Pat_Robertson",
+   "graded": [
+    "society",
+    "business"
+   ],
+   "marks": {
+    "business": "right",
+    "society": "right"
+   },
+   "missing": [
+    "history"
+   ]
+  },
+  {
+   "q": "Q215343",
+   "path": "Southern_elephant_seal",
+   "graded": [
+    "nature"
+   ],
+   "marks": {
+    "nature": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q467557",
+   "path": "America's_Cup",
+   "graded": [
+    "sports"
+   ],
+   "marks": {
+    "sports": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q217110",
+   "path": "Orson_Scott_Card",
+   "graded": [
+    "literature"
+   ],
+   "marks": {
+    "literature": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q570600",
+   "path": "Listed_building",
+   "graded": [
+    "places"
+   ],
+   "marks": {
+    "places": "unsure"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q4605",
+   "path": "Sarah_Bernhardt",
+   "graded": [
+    "film",
+    "literature"
+   ],
+   "marks": {
+    "film": "right",
+    "literature": "unsure"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q482955",
+   "path": "Edwin_van_der_Sar",
+   "graded": [
+    "sports"
+   ],
+   "marks": {
+    "sports": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q834280",
+   "path": "Bupropion",
+   "graded": [
+    "science",
+    "health"
+   ],
+   "marks": {
+    "health": "right",
+    "science": "unsure"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q506623",
+   "path": "Chemical_polarity",
+   "graded": [
+    "science"
+   ],
+   "marks": {
+    "science": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q415588",
+   "path": "Carboplatin",
+   "graded": [
+    "science",
+    "health"
+   ],
+   "marks": {
+    "health": "right",
+    "science": "unsure"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q123665",
+   "path": "Gloria_Macapagal_Arroyo",
+   "graded": [
+    "society",
+    "science"
+   ],
+   "marks": {
+    "science": "wrong",
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q619694",
+   "path": "Pokémon_Black_2_and_White_2",
+   "graded": [
+    "games"
+   ],
+   "marks": {
+    "games": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q20056406",
+   "path": "The_Wrestlers_(Etty)",
+   "graded": [
+    "art"
+   ],
+   "marks": {
+    "art": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q509891",
+   "path": "Harry_R._Truman",
+   "graded": [
+    "business"
+   ],
+   "marks": {
+    "business": "right"
+   },
+   "missing": [
+    "history",
+    "society"
+   ]
+  },
+  {
+   "q": "Q44197",
+   "path": "Maximilien_Robespierre",
+   "graded": [
+    "society"
+   ],
+   "marks": {
+    "society": "right"
+   },
+   "missing": [
+    "history"
+   ]
+  },
+  {
+   "q": "Q4752686",
+   "path": "Pilgrim_at_Tinker_Creek",
+   "graded": [
+    "literature"
+   ],
+   "marks": {
+    "literature": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q53454",
+   "path": "John_III_Sobieski",
+   "graded": [
+    "history",
+    "society"
+   ],
+   "marks": {
+    "history": "right",
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q180704",
+   "path": "Iron_Man",
+   "graded": [
+    "film",
+    "literature"
+   ],
+   "marks": {
+    "film": "right",
+    "literature": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q134316",
+   "path": "Adposition",
+   "graded": [
+    "languages"
+   ],
+   "marks": {
+    "languages": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q128267",
+   "path": "Saint_Joseph",
+   "graded": [
+    "religion"
+   ],
+   "marks": {
+    "religion": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1891793",
+   "path": "Moroccans",
+   "graded": [
+    "society"
+   ],
+   "marks": {
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1083686",
+   "path": "Death_row",
+   "graded": [
+    "places"
+   ],
+   "marks": {
+    "places": "wrong"
+   },
+   "missing": [
+    "society"
+   ]
+  },
+  {
+   "q": "Q566",
+   "path": "Purgatory",
+   "graded": [
+    "religion"
+   ],
+   "marks": {
+    "religion": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1093334",
+   "path": "Omkareshwar_Temple",
+   "graded": [
+    "religion",
+    "places"
+   ],
+   "marks": {
+    "places": "right",
+    "religion": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q889669",
+   "path": "Soil_conservation",
+   "graded": [
+    "food"
+   ],
+   "marks": {
+    "food": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q49264",
+   "path": "Lisa_Nowak",
+   "graded": [
+    "technology",
+    "science"
+   ],
+   "marks": {
+    "science": "right",
+    "technology": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q63241885",
+   "path": "Joe_Biden_2020_presidential_campaign",
+   "graded": [
+    "society"
+   ],
+   "marks": {
+    "society": "right"
+   },
+   "missing": [
+    "history"
+   ]
+  },
+  {
+   "q": "Q749011",
+   "path": "Dawn_of_the_Dead_(2004_film)",
+   "graded": [
+    "film"
+   ],
+   "marks": {
+    "film": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q6497384",
+   "path": "Vulcan_(Star_Trek)",
+   "graded": [
+    "film"
+   ],
+   "marks": {
+    "film": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q52925",
+   "path": "Charles_XV",
+   "graded": [
+    "history",
+    "society"
+   ],
+   "marks": {
+    "history": "right",
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q37477",
+   "path": "Fog",
+   "graded": [
+    "science"
+   ],
+   "marks": {
+    "science": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q8441",
+   "path": "Man",
+   "graded": [
+    "nature"
+   ],
+   "marks": {
+    "nature": "unsure"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q189627",
+   "path": "Van_der_Waals_force",
+   "graded": [
+    "science"
+   ],
+   "marks": {
+    "science": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q185674",
+   "path": "Field_(physics)",
+   "graded": [
+    "science"
+   ],
+   "marks": {
+    "science": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q373069",
+   "path": "Evangelism",
+   "graded": [
+    "religion"
+   ],
+   "marks": {
+    "religion": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q22683173",
+   "path": "First_observation_of_gravitational_waves",
+   "graded": [
+    "science"
+   ],
+   "marks": {
+    "science": "right"
+   },
+   "missing": [
+    "history"
+   ]
+  },
+  {
+   "q": "Q536900",
+   "path": "Ken_Griffey_Jr.",
+   "graded": [
+    "sports"
+   ],
+   "marks": {
+    "sports": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q17080673",
+   "path": "Visa_policy_of_Brazil",
+   "graded": [
+    "society"
+   ],
+   "marks": {
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q131695",
+   "path": "Glyptodon",
+   "graded": [
+    "nature"
+   ],
+   "marks": {
+    "nature": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q178899",
+   "path": "Akvavit",
+   "graded": [
+    "food"
+   ],
+   "marks": {
+    "food": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q3655895",
+   "path": "Medieval_household",
+   "graded": [
+    "history"
+   ],
+   "marks": {
+    "history": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q193418",
+   "path": "Amphipoda",
+   "graded": [
+    "nature"
+   ],
+   "marks": {
+    "nature": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q18952",
+   "path": "Polychaete",
+   "graded": [
+    "nature"
+   ],
+   "marks": {
+    "nature": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q2474644",
+   "path": "Shakshouka",
+   "graded": [
+    "food"
+   ],
+   "marks": {
+    "food": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q7892243",
+   "path": "Triple_Crown_of_Thoroughbred_Racing_(United_States)",
+   "graded": [
+    "sports"
+   ],
+   "marks": {
+    "sports": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q4383991",
+   "path": "Bulwell",
+   "graded": [
+    "places"
+   ],
+   "marks": {
+    "places": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q546591",
+   "path": "Joe_Paterno",
+   "graded": [
+    "sports"
+   ],
+   "marks": {
+    "sports": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q183372",
+   "path": "Alfred_North_Whitehead",
+   "graded": [
+    "science",
+    "religion"
+   ],
+   "marks": {
+    "religion": "right",
+    "science": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q276183",
+   "path": "Theodicy",
+   "graded": [
+    "religion",
+    "science"
+   ],
+   "marks": {
+    "religion": "right",
+    "science": "unsure"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q318223",
+   "path": "Max_Martin",
+   "graded": [
+    "music"
+   ],
+   "marks": {
+    "music": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q55885925",
+   "path": "Hudson_Yards_(development)",
+   "graded": [
+    "places"
+   ],
+   "marks": {
+    "places": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q183445",
+   "path": "Justin_I",
+   "graded": [
+    "history",
+    "society"
+   ],
+   "marks": {
+    "history": "right",
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q745608",
+   "path": "Las_Vegas_Strip",
+   "graded": [
+    "places"
+   ],
+   "marks": {
+    "places": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q218637",
+   "path": "ATR_42",
+   "graded": [
+    "technology"
+   ],
+   "marks": {
+    "technology": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q962763",
+   "path": "DirectShow",
+   "graded": [
+    "technology"
+   ],
+   "marks": {
+    "technology": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q42326",
+   "path": "Rock_dove",
+   "graded": [
+    "nature"
+   ],
+   "marks": {
+    "nature": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q259605",
+   "path": "International_Securities_Identification_Number",
+   "graded": [
+    "technology"
+   ],
+   "marks": {
+    "technology": "wrong"
+   },
+   "missing": [
+    "business"
+   ]
+  },
+  {
+   "q": "Q1570174",
+   "path": "Space_weathering",
+   "graded": [
+    "science"
+   ],
+   "marks": {
+    "science": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1064728",
+   "path": "Cycling_at_the_2008_Summer_Olympics_–_Women's_individual_road_race",
+   "graded": [
+    "sports"
+   ],
+   "marks": {
+    "sports": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q2503621",
+   "path": "Texas_state_highway_system",
+   "graded": [
+    "places"
+   ],
+   "marks": {
+    "places": "unsure"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q161829",
+   "path": "Emperor_penguin",
+   "graded": [
+    "nature"
+   ],
+   "marks": {
+    "nature": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q194226",
+   "path": "Battle_of_the_Yarmuk",
+   "graded": [
+    "history"
+   ],
+   "marks": {
+    "history": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q600090",
+   "path": "Ellyse_Perry",
+   "graded": [
+    "sports"
+   ],
+   "marks": {
+    "sports": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q906066",
+   "path": "Christian_worship",
+   "graded": [
+    "religion"
+   ],
+   "marks": {
+    "religion": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q4022",
+   "path": "River",
+   "graded": [
+    "places"
+   ],
+   "marks": {
+    "places": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1750244",
+   "path": "FWA_Footballer_of_the_Year",
+   "graded": [
+    "sports"
+   ],
+   "marks": {
+    "sports": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q868337",
+   "path": "War_of_the_currents",
+   "graded": [
+    "science"
+   ],
+   "marks": {
+    "science": "wrong"
+   },
+   "missing": [
+    "history",
+    "society",
+    "business"
+   ]
+  },
+  {
+   "q": "Q219477",
+   "path": "Missionary",
+   "graded": [
+    "religion"
+   ],
+   "marks": {
+    "religion": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q621613",
+   "path": "Bounty_hunter",
+   "graded": [
+    "nature",
+    "society"
+   ],
+   "marks": {
+    "nature": "wrong",
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q165524",
+   "path": "Tobey_Maguire",
+   "graded": [
+    "film"
+   ],
+   "marks": {
+    "film": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1437",
+   "path": "Rajasthan",
+   "graded": [
+    "places"
+   ],
+   "marks": {
+    "places": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q512934",
+   "path": "Shinran",
+   "graded": [
+    "religion"
+   ],
+   "marks": {
+    "religion": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q4204752",
+   "path": "History_of_Norwich_City_F.C.",
+   "graded": [
+    "history",
+    "sports"
+   ],
+   "marks": {
+    "history": "right",
+    "sports": "unsure"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q3181500",
+   "path": "John_Fetterman",
+   "graded": [
+    "society"
+   ],
+   "marks": {
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q9413",
+   "path": "Namokar_Mantra",
+   "graded": [
+    "music",
+    "religion"
+   ],
+   "marks": {
+    "music": "wrong",
+    "religion": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q259997",
+   "path": "Hydroxylamine",
+   "graded": [
+    "science"
+   ],
+   "marks": {
+    "science": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q2154479",
+   "path": "Rinus_Michels",
+   "graded": [
+    "sports"
+   ],
+   "marks": {
+    "sports": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q313326",
+   "path": "Adverse_possession",
+   "graded": [
+    "society"
+   ],
+   "marks": {
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q817168",
+   "path": "Benford's_law",
+   "graded": [
+    "science"
+   ],
+   "marks": {
+    "science": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q30634329",
+   "path": "The_Marvelous_Mrs._Maisel",
+   "graded": [
+    "film"
+   ],
+   "marks": {
+    "film": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q918224",
+   "path": "Wide_receiver",
+   "graded": [
+    "sports"
+   ],
+   "marks": {
+    "sports": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1282269",
+   "path": "Apple_IIGS",
+   "graded": [
+    "technology"
+   ],
+   "marks": {
+    "technology": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q5282077",
+   "path": "Discrimination_against_people_with_HIV/AIDS",
+   "graded": [
+    "health"
+   ],
+   "marks": {
+    "health": "unsure"
+   },
+   "missing": [
+    "history",
+    "society"
+   ]
+  },
+  {
+   "q": "Q935662",
+   "path": "Forward_secrecy",
+   "graded": [
+    "technology"
+   ],
+   "marks": {
+    "technology": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q14317",
+   "path": "Oviedo",
+   "graded": [
+    "places"
+   ],
+   "marks": {
+    "places": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q151394",
+   "path": "António_de_Oliveira_Salazar",
+   "graded": [
+    "society",
+    "science",
+    "business"
+   ],
+   "marks": {
+    "business": "right",
+    "science": "unsure",
+    "society": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1861917",
+   "path": "Riz_Ahmed",
+   "graded": [
+    "film",
+    "music"
+   ],
+   "marks": {
+    "film": "right",
+    "music": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q634857",
+   "path": "Cy_Young_Award",
+   "graded": [
+    "sports"
+   ],
+   "marks": {
+    "sports": "right"
+   },
+   "missing": []
+  },
+  {
+   "q": "Q1415243",
+   "path": "Tom_Price_(American_politician)",
+   "graded": [
+    "society",
+    "health"
+   ],
+   "marks": {
+    "health": "right",
+    "society": "right"
+   },
+   "missing": []
+  }
+ ]
+}

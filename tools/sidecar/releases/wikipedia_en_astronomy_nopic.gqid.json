@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_en_astronomy_nopic_2026-08.gqid",
- "sizeBytes": 1957888,
- "sha256": "165ba12e38918400f261253ef01b345a901ded455956c8e8adf75dc328027329",
+ "sizeBytes": 2973696,
+ "sha256": "47dbc3ae090ed937200a6604a16ab4b66ffe3a323f6645f3bc6637e1a0f3e846",
  "schemaVersion": 1,
  "sourceSha256": "05eeb2dacfa1e79d66f43b01fb9531eaf22cf2d5b829ff856e75504863e6526c",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 1,
+ "builderVersion": 2,
  "url": null
 }

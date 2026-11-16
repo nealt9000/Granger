@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_en_mathematics_maxi_2026-09-15.gqid",
- "sizeBytes": 1888256,
- "sha256": "82ef2efce888a365f20ad70aa0a817805468bc52b39642c63a859b569a314883",
+ "sizeBytes": 2715648,
+ "sha256": "2e2bb96e4a37196b2aa48bbabbdf728a90cbfc6fdaafa181310117138d48e5fc",
  "schemaVersion": 1,
  "sourceSha256": "069b5c59f508d795f223e91e875190007e5d9ac23681cf07cfb72ee6d64d5793",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 1,
+ "builderVersion": 2,
  "url": null
 }

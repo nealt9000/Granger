@@ -3,10 +3,11 @@
   "gqid": {
     "plan": "LL0",
     "for": "Wikipedia packs (en, es)",
-    "inputs": "wdfilter.py's items-<site>.jsonl for the pack's language, on /Volumes/X10 Pro/granger-ll/ (rebuilt from a newer Wikidata dump at most quarterly)",
-    "build": "~/.venvs/granger-pack/bin/python -I tools/qidindex/build.py '/Volumes/X10 Pro/granger-ll/items-{site}.jsonl' {out} {zim} --releases tools/sidecar/releases",
-    "check": "~/.venvs/granger-pack/bin/python -I tools/qidindex/check.py {out}/{stem}.gqid --source {zim}",
-    "gpu": false
+    "inputs": "wdfilter.py's items-<site>.jsonl for the pack's language, on /Volumes/X10 Pro/granger-ll/ (rebuilt from a newer Wikidata dump at most quarterly); the subjects file /Volumes/X10 Pro/granger-ll/subjects-v1.sqlite (Plan EX: rebuild it with `subjects` below when the items, subjects.json or Top's vectors change)",
+    "build": "~/.venvs/granger-pack/bin/python -I tools/qidindex/build.py '/Volumes/X10 Pro/granger-ll/items-{site}.jsonl' {out} {zim} --releases tools/sidecar/releases --subjects '/Volumes/X10 Pro/granger-ll/subjects-v1.sqlite'",
+    "check": "~/.venvs/granger-pack/bin/python -I tools/qidindex/check.py {out}/{stem}.gqid --source {zim} && python3 tools/subjects/check.py {out}/{stem}.gqid --min-share 0.75",
+    "gpu": false,
+    "subjects": "~/.venvs/granger-links/bin/python tools/subjects/build.py '/Volumes/X10 Pro/granger-g1/classes.jsonl' '/Volumes/X10 Pro/granger-ll/subjects-v1.sqlite' --gqid-dir <folder of every published .gqid> --items en='/Volumes/X10 Pro/granger-ll/items-enwiki.jsonl' --items es='/Volumes/X10 Pro/granger-ll/items-eswiki.jsonl' --full en=<Top en .gvec>,<Top en .zim> --full es=<Top es .gvec>,<Top es .zim>; then check Top en with tools/subjects/check.py --graded tools/subjects/graded-2026-11-16.json (bar 95%, 98% of items)"
   },
   "glink": {
     "plan": "LL1",

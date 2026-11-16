@@ -1,303 +1,45 @@
-"""Plan EX Task 0: one main subject for every article of a Wikipedia pack, by rule, with ties and gaps settled by meaning.
+"""Plan EX Task 0: subjects for every article of one Wikipedia pack with vectors (the method lives in assign.py).
 
-Rules: an article's P31/P279/P136 classes walk P279 up to `depth` steps to a subject root (subjects.json). A person's
-subjects come from all their occupations (P106) walked the same way; a fictional character's from its classes only.
-When one subject's root is 2+ steps closer than the others, it wins.
-Meaning: each article's shipped .gvec rows are averaged into one vector; a vote of its K nearest single-subject articles
-(people against people, things against things), each vote weighted against its subject's size, settles ties and gaps.
-People: the lead's first role words ("was a Roman general and statesman") add to the vote. Nothing is fixed per article.
+    python spike.py ITEMS.jsonl CLASSES.jsonl PACK.gvec OUT_DIR [PACK.zim] [LANG]
 
-    python spike.py ITEMS.jsonl CLASSES.jsonl PACK.gvec OUT_DIR
+Writes OUT_DIR/subjects.json ({path: result}) and OUT_DIR/report.json. RULES_ONLY=1 gives what a pack without vectors
+gets (rules, dual roots and History only).
 """
-import json, os, re, sys, collections, random
-from collections import deque
-import numpy as np
+import collections
+import json
+import os
+import sys
+
+from assign import Rules, full, load_classes, load_spec, read_items
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "vectors"))
-from related_spike import G  # noqa: E402
-
-HUMAN = "Q5"
-K = 15
-EXTRA_RULE = float(os.environ.get("EXTRA_RULE", "0.15"))
-EXTRA_VOTE = float(os.environ.get("EXTRA_VOTE", "0.35"))
-PRIOR = float(os.environ.get("PRIOR", "0.5"))
 
 
-def load_spec(labels):
-    spec = json.load(open(os.path.join(HERE, "subjects.json")))
-    bad = []
-    for s in spec["subjects"]:
-        for table in ("roots", "occupations"):
-            for q, want in s.get(table, {}).items():
-                if labels.get(q) != want:
-                    bad.append(f"{s['id']}.{table} {q} wants {want!r}, has {labels.get(q)!r}")
-    for table in ("fictional", "drop", "stop"):
-        for q, want in spec.get(table, {}).items():
-            if labels.get(q) != want:
-                bad.append(f"{table} {q} wants {want!r}, has {labels.get(q)!r}")
-    return spec, bad
-
-
-class Walker:
-    def __init__(self, parents, roots, depth, stop=()):
-        # A stop class is too general to pass through ("person" leads to organism, "social scientist" to scientist).
-        self.parents, self.roots, self.depth, self.stop, self.memo = parents, roots, depth, set(stop), {}
-
-    def subjects(self, q):
-        """{subject: steps} for the nearest root of each subject reachable from class q within depth."""
-        if q in self.memo:
-            return self.memo[q]
-        found = {}
-        seen, todo = {q}, deque([(q, 0)])
-        while todo:
-            c, d = todo.popleft()
-            for s in self.roots.get(c, ()):
-                found.setdefault(s, d)
-            if d < self.depth and c not in self.stop:
-                for p in self.parents.get(c, ()):
-                    if p not in seen:
-                        seen.add(p)
-                        todo.append((p, d + 1))
-        self.memo[q] = found
-        return found
-
-
-def article_vectors(g, keys):
-    km = g.keymap()
-    out = {}
-    for k in keys:
-        rows = km.get(k)
-        if not rows:
-            continue
-        v = (g.q[rows].astype(np.float32) * g.scales[rows][:, None]).mean(0)
-        out[k] = v / max(np.linalg.norm(v), 1e-12)
-    return out
-
-
-def person_leads(zim_path, paths):
-    """The lead's first sentence for each path, from the pack itself."""
-    import html as H, re
-    from libzim.reader import Archive
-    a = Archive(zim_path)
-    out = {}
-    for p in paths:
-        try:
-            e = a.get_entry_by_path(p)
-            while e.is_redirect:
-                e = e.get_redirect_entry()
-            h = bytes(e.get_item().content).decode("utf-8", "replace")
-        except KeyError:
-            continue
-        for para in re.findall(r"<p[^>]*>(.*?)</p>", h, flags=re.S):
-            t = re.sub(r"<(style|sup|script)[^>]*>.*?</\1>", "", para, flags=re.S)
-            t = H.unescape(re.sub(r"<[^>]+>", "", t))
-            for _ in range(3):
-                t = re.sub(r"\s*\([^()]*\)", "", t)
-            t = re.sub(r"\s+", " ", t).strip()
-            if len(t) > 60:
-                m = re.match(r"(.+?[.!?])(\s|$)", t)
-                out[p] = (m.group(1) if m else t)[:400]
-                break
-    return out
-
-
-def lead_roles(sentence, role_of, role_re):
-    """{subject: weight} from the role words after the sentence's verb ("was a Roman general and statesman"): 1 for the first
-    role mention adds 0.8^i to its subject (i = its order). Longest phrase first ("theoretical physicist" before "physicist")."""
-    if not sentence:
-        return {}
-    m = re.search(r"\b(is|was|are|were)\b", sentence)
-    text = (sentence[m.end():] if m else sentence).lower()
-    out = {}
-    for i, hit in enumerate(role_re.finditer(text)):
-        s = role_of[hit.group(1)]
-        out[s] = out.get(s, 0) + 0.8 ** i  # every mention counts, earlier ones more ("polymath… painter, sculptor, architect")
-    return out
-
-
-def time_marks(gtime_path):
-    """{path: (kind, y0, y1)} from the pack's time index (kind 0 point, 1 span, 2 life)."""
-    import sqlite3
-    if not gtime_path:
-        return {}
-    con = sqlite3.connect(gtime_path)
-    return {p: (k, y0, y1) for p, k, y0, y1 in con.execute("SELECT path, kind, y0, y1 FROM marks")}
-
-
-def main(items_path, classes_path, gvec_path, out_dir, zim_path=None, gtime_path=None, this_year=2026):
+def main(items_path, classes_path, gvec_path, out_dir, zim_path=None, lang="en"):
+    sys.path.insert(0, os.path.join(HERE, "..", "vectors"))
+    from related_spike import G
     os.makedirs(out_dir, exist_ok=True)
-    g = G(gvec_path)
-    keys = set(g.keymap())
-    items = {}
-    for line in open(items_path):
-        r = json.loads(line)
-        if r["t"] in keys:
-            items[r["t"]] = r
-    parents, labels = {}, {}
-    for line in open(classes_path):
-        r = json.loads(line)
-        parents[r["q"]] = r.get("p279", [])
-        labels[r["q"]] = r.get("l")
+    items = read_items(items_path, set(G(gvec_path).keymap()))
+    parents, labels = load_classes(classes_path)
     spec, bad = load_spec(labels)
     if bad:
         print("LABEL MISMATCHES (fix subjects.json):\n  " + "\n  ".join(bad))
-    ids = [s["id"] for s in spec["subjects"]]
-    roots, occ = collections.defaultdict(set), collections.defaultdict(set)
-    for s in spec["subjects"]:
-        for q in s["roots"]:
-            roots[q].add(s["id"])
-        for q in s.get("occupations", {}):
-            occ[q].add(s["id"])
-    stop = spec.get("stop", {})
-    cls_walk = Walker(parents, roots, spec["depth"], stop)
-    # A root listed under two subjects (hurricane: Science and History) gives an article both.
-    dual_walk = Walker(parents, {q: v for q, v in roots.items() if len(v) > 1}, spec["depth"], stop)
-    occ_walk = Walker(parents, occ, spec["depth"], stop)
-    drop, fictional = set(spec["drop"]), set(spec["fictional"])
-    neutral_walk = Walker(parents, {q: {"neutral"} for q in spec.get("neutral", {})}, 2)
-
-    rules, why, duals, events = {}, {}, {}, {}
-    hist = spec.get("history", {})
-    event_walk = Walker(parents, {q: {"event"} for q in hist.get("event_class", {})}, hist.get("event_depth", 4), stop)
-    dropped = []
-    for t, r in items.items():
-        p31 = r.get("P31", [])
-        if any(q in drop for q in p31):
-            dropped.append(t)
-            continue
-        cand = {}
-        if HUMAN in p31:
-            for q in r.get("P106", []):
-                for s, d in occ_walk.subjects(q).items():
-                    cand[s] = min(cand.get(s, 99), d)
-        else:
-            classes = [r["q"]] + p31 + r.get("P279", []) + r.get("P136", [])  # "Mountain" is itself the mountain root
-            for q in classes:
-                if neutral_walk.subjects(q):
-                    continue  # a glossary or an outline says nothing about its subject; meaning decides
-                for s, d in cls_walk.subjects(q).items():
-                    cand[s] = min(cand.get(s, 99), d)
-            # An article about an occupation or office ("songwriter", "President of Mexico") takes that occupation's subject.
-            for q in [r["q"]] + r.get("P279", []):
-                for s, d in occ_walk.subjects(q).items():
-                    cand[s] = min(cand.get(s, 99), d)
-        rules[t] = cand
-        if HUMAN not in p31:
-            d = set()
-            for q in p31 + r.get("P279", []) + r.get("P136", []):
-                d |= set(dual_walk.subjects(q))
-            if d:
-                duals[t] = d
-            events[t] = any(event_walk.subjects(q) for q in p31 + r.get("P279", []))
-
-    vecs = article_vectors(g, rules.keys())
-    # A biography is compared with biographies, a thing with things. Meaning is a vote of the K nearest articles the
-    # rules tag with exactly one subject (a neighbour vote keeps mixed subjects, like companies plus economics, intact).
-    is_person = {t: HUMAN in items[t].get("P31", []) for t in rules}
-    pool = {}
-    for person in (True, False):
-        ts = [t for t, cand in rules.items() if len(cand) == 1 and t in vecs and is_person[t] == person]
-        lab = [next(iter(rules[t])) for t in ts]
-        n = collections.Counter(lab)
-        # A big subject mustn't win close calls by headcount: each vote is weighted by (mean size / its subject's size)^PRIOR.
-        w = {s: (len(ts) / len(n) / c) ** PRIOR for s, c in n.items()}
-        pool[person] = (ts, np.stack([vecs[t] for t in ts]), lab, w)
-    votes = {}
-    for person in (True, False):
-        ts_pool, M, lab, w = pool[person]
-        todo = [t for t in rules if t in vecs and is_person[t] == person]
-        for i in range(0, len(todo), 2048):
-            chunk = todo[i:i + 2048]
-            S = np.stack([vecs[t] for t in chunk]) @ M.T
-            for j, t in enumerate(chunk):
-                row = S[j]
-                top = np.argpartition(-row, K + 1)[:K + 1]
-                v = collections.Counter()
-                for k in top:
-                    if ts_pool[k] != t:
-                        v[lab[k]] += float(row[k]) * w[lab[k]]
-                votes[t] = v
-    leads = person_leads(zim_path, [t for t in rules if is_person[t]]) if zim_path else {}
-    role_of = {}
-    for sj in spec["subjects"]:
-        for w in sj.get("roles_en", []):
-            role_of[w] = sj["id"]
-    # Every occupation the pack's people hold names its subject in a lead ("astrophysicist", "organic chemist"), when its
-    # walk reaches exactly one subject.
-    for q in {q for r in items.values() for q in r.get("P106", [])}:
-        subs = occ_walk.subjects(q)
-        lab = (labels.get(q) or "").lower()
-        if len(subs) == 1 and lab and lab not in role_of and len(lab) > 3:
-            role_of[lab] = next(iter(subs))
-    role_re = re.compile(r"\b(" + "|".join(sorted(map(re.escape, role_of), key=len, reverse=True)) + r")s?\b")
-    result = {}
-    how = collections.Counter()
-    marks = time_marks(gtime_path)
-    for t, cand in rules.items():
-        sims = dict(votes.get(t, {}))
-        lead_w = lead_roles(leads.get(t), role_of, role_re) if t in leads else {}
-        near = sorted(cand.values())
-        if len(cand) == 1 and not lead_w:
-            main_s, mode = next(iter(cand)), "rule"
-        elif not is_person[t] and len(near) > 1 and near[1] - near[0] >= 2:
-            # One subject's root is much closer than the rest: the article is that kind of thing first.
-            main_s, mode = min(cand, key=cand.get), "rule"
-        elif lead_w:
-            # A person: the neighbours' vote share, plus the lead's role words (1, 1/3, 1/9 by order), plus 0.5 for a subject
-            # the occupations give. The lead can name a subject Wikidata's occupations miss ("Sheshi was a ruler…").
-            tot = sum(sims.values()) or 1.0
-            pool_s = set(cand) | set(lead_w)
-            main_s = max(pool_s, key=lambda x: sims.get(x, 0) / tot + lead_w.get(x, 0) + (0.5 if x in cand else 0))
-            mode = "rule+lead"
-        elif len(cand) > 1:
-            main_s = max(cand, key=lambda s: sims.get(s, -1)) if sims else min(cand, key=cand.get)
-            mode = "rule+meaning"
-        elif sims:
-            main_s, mode = max(sims, key=sims.get), "meaning"
-        else:
-            main_s, mode = None, "none"
-        how[mode] += 1
-        # More subjects: a rule subject the neighbours back at least a little, any subject the neighbours back strongly,
-        # or a role the lead names that the rules or neighbours back too. At most max_subjects, best first.
-        tot = sum(sims.values()) or 1.0
-        share = {x: sims.get(x, 0) / tot for x in set(cand) | set(sims) | set(lead_w)}
-        extra = [x for x in share if x != main_s and (
-            (x in cand and share[x] >= EXTRA_RULE) or share[x] >= EXTRA_VOTE or
-            (lead_w.get(x, 0) >= 1 / 3 and (x in cand or share[x] >= EXTRA_RULE)))]
-        # Places as a second subject: only for something with coordinates (P625), or a type of place the rules name.
-        if "P625" not in items[t] and not ("places" in cand and items[t].get("P279")):
-            extra = [x for x in extra if x != "places"]
-        extra.sort(key=lambda x: share[x] + lead_w.get(x, 0) + (0.4 if x in cand else 0), reverse=True)
-        if main_s in duals.get(t, ()):
-            for x in duals[t]:
-                if x != main_s and x not in extra:
-                    extra.insert(0, x)
-        subjects = ([main_s] if main_s else []) + extra[:spec.get("max_subjects", 3) - 1]
-        # History: a dated past event (not a founded thing, not a work), or a dead person in public life.
-        mark = marks.get(t)
-        if main_s and "history" not in subjects and len(subjects) < spec.get("max_subjects", 3) and mark:
-            kind, y0, y1 = mark
-            end = y1 if y1 is not None else y0
-            if is_person[t]:
-                past = kind == 2 and y1 is not None and main_s in hist["person_main"]
-            else:
-                past = (events.get(t) and "P571" not in items[t] and main_s not in hist["event_skip_main"]
-                        and end <= this_year - hist["recent_years"])
-            if past:
-                subjects.append("history")
-                how["history_added"] += 1
-        best = max(sims, key=sims.get) if sims else None
-        disagree = bool(sims) and mode != "meaning" and best != main_s and sims.get(main_s, 0) < 0.25 * sum(sims.values())
-        result[t] = {"q": items[t]["q"], "label": items[t]["l"], "main": main_s, "subjects": subjects, "mode": mode,
-                     "rules": sorted(cand), "nearest": best, "flag": disagree,
-                     "share": {x: round(v, 2) for x, v in sorted(share.items(), key=lambda kv: -kv[1])[:4]}}
-
-    counts = collections.Counter(r["main"] for r in result.values())
-    nsub = collections.Counter(len(r["subjects"]) for r in result.values())
-    report = {"articles": len(items), "dropped_lists": len(dropped), "assigned": sum(1 for r in result.values() if r["main"]),
-              "how": dict(how), "subjects_per_article": dict(sorted(nsub.items())), "flagged": sum(r["flag"] for r in result.values()),
-              "by_subject": {s: counts.get(s, 0) for s in ids}, "pool_people": len(pool[True][0]), "pool_things": len(pool[False][0]), "label_mismatches": bad}
+    rules = Rules(spec, parents, labels)
+    if os.environ.get("RULES_ONLY") == "1":
+        result = {}
+        for t, r in items.items():
+            m, subs, mode = rules.rules_only(r)
+            if mode != "dropped":
+                result[t] = {"q": r["q"], "label": r.get("l"), "main": m, "subjects": subs, "mode": mode}
+    else:
+        result = full(rules, items, gvec_path, zim_path or None, lang)
+    how = collections.Counter(r["mode"] for r in result.values())
+    report = {"articles": len(items), "dropped_lists": len(items) - len(result),
+              "assigned": sum(1 for r in result.values() if r["main"]), "how": dict(how),
+              "subjects_per_article": dict(sorted(collections.Counter(len(r["subjects"]) for r in result.values()).items())),
+              "with_history": sum("history" in r["subjects"] for r in result.values()),
+              "flagged": sum(r.get("flag", False) for r in result.values()),
+              "by_subject": dict(collections.Counter(r["main"] for r in result.values() if r["main"])), "label_mismatches": bad}
     json.dump(result, open(os.path.join(out_dir, "subjects.json"), "w"), ensure_ascii=False)
     json.dump(report, open(os.path.join(out_dir, "report.json"), "w"), indent=1, ensure_ascii=False)
     print(json.dumps(report, indent=1, ensure_ascii=False))

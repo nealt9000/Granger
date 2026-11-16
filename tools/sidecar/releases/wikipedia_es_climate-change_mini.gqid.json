@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_es_climate-change_mini_2026-10.gqid",
- "sizeBytes": 192512,
- "sha256": "88282bda595d8ea2f24a28198bfeef2c7fa1b712df9b932a1dc1b69195e3cf81",
+ "sizeBytes": 249856,
+ "sha256": "a5728623f5a0d959c0d4b1f3a0b203e77b29591772ff4ee710f53d1e74a19dfe",
  "schemaVersion": 1,
  "sourceSha256": "928e89fdfe3e92e6cf63d4c640c27f318ba7515bdd87a76ddaa6fe96bd30eadc",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 1,
+ "builderVersion": 2,
  "url": null
 }

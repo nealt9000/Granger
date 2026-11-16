@@ -104,6 +104,45 @@
     "chieftain",
     "chief"
    ],
+   "roles_es": [
+    "rey",
+    "reina",
+    "emperador",
+    "emperatriz",
+    "faraón",
+    "sultán",
+    "califa",
+    "zar",
+    "zarina",
+    "kan",
+    "sah",
+    "monarca",
+    "gobernante",
+    "príncipe",
+    "princesa",
+    "regente",
+    "conquistador",
+    "conquistadora",
+    "general",
+    "almirante",
+    "caudillo",
+    "comandante",
+    "explorador",
+    "exploradora",
+    "navegante",
+    "historiador",
+    "historiadora",
+    "arqueólogo",
+    "arqueóloga",
+    "dinastía",
+    "consorte",
+    "duque",
+    "duquesa",
+    "marajá",
+    "emir",
+    "cacique",
+    "jefe tribal"
+   ],
    "scope_en": "The past as events and eras: wars, battles, empires, dynasties, rulers, revolutions, disasters, historic incidents and missions, archaeology."
   },
   {
@@ -204,6 +243,52 @@
     "terrorist",
     "assassin"
    ],
+   "roles_es": [
+    "político",
+    "política",
+    "presidente",
+    "presidenta",
+    "primer ministro",
+    "primera ministra",
+    "ministro",
+    "ministra",
+    "estadista",
+    "senador",
+    "senadora",
+    "gobernador",
+    "gobernadora",
+    "alcalde",
+    "alcaldesa",
+    "canciller",
+    "abogado",
+    "abogada",
+    "juez",
+    "jueza",
+    "jurista",
+    "activista",
+    "periodista",
+    "diplomático",
+    "diplomática",
+    "revolucionario",
+    "revolucionaria",
+    "dictador",
+    "sociólogo",
+    "socióloga",
+    "psicólogo",
+    "psicóloga",
+    "antropólogo",
+    "antropóloga",
+    "criminal",
+    "asesino",
+    "asesina",
+    "gánster",
+    "espía",
+    "educador",
+    "educadora",
+    "pedagogo",
+    "pedagoga",
+    "terrorista"
+   ],
    "scope_en": "How people live and govern together: politics, government, law, crime, social movements, organisations, institutions, education, media, holidays."
   },
   {
@@ -244,6 +329,23 @@
     "executive",
     "magnate",
     "philanthropist"
+   ],
+   "roles_es": [
+    "empresario",
+    "empresaria",
+    "emprendedor",
+    "emprendedora",
+    "industrial",
+    "inversor",
+    "inversora",
+    "banquero",
+    "banquera",
+    "economista",
+    "ejecutivo",
+    "ejecutiva",
+    "magnate",
+    "filántropo",
+    "filántropa"
    ],
    "scope_en": "Companies, brands, industries, money, trade and economics, and the people who run businesses."
   },
@@ -294,6 +396,7 @@
     "Q11315": "shopping center"
    },
    "roles_en": [],
+   "roles_es": [],
    "scope_en": "Where things are: countries, cities, regions, landforms, rivers, buildings, landmarks, venues, roads and transport hubs."
   },
   {
@@ -354,6 +457,30 @@
     "astronaut",
     "statistician"
    ],
+   "roles_es": [
+    "físico",
+    "física",
+    "químico",
+    "química",
+    "matemático",
+    "matemática",
+    "científico",
+    "científica",
+    "astrónomo",
+    "astrónoma",
+    "biólogo",
+    "bióloga",
+    "naturalista",
+    "botánico",
+    "botánica",
+    "geólogo",
+    "geóloga",
+    "zoólogo",
+    "zoóloga",
+    "astronauta",
+    "estadístico",
+    "estadística"
+   ],
    "scope_en": "Natural sciences and maths: physics, chemistry, astronomy, earth science, biology as science, maths, scientific concepts and scientists."
   },
   {
@@ -373,6 +500,7 @@
    },
    "occupations": {},
    "roles_en": [],
+   "roles_es": [],
    "scope_en": "Living things and the natural world: animals, plants, fungi, breeds, ecosystems and environmental issues."
   },
   {
@@ -407,6 +535,17 @@
     "nurse",
     "doctor",
     "psychiatrist"
+   ],
+   "roles_es": [
+    "médico",
+    "médica",
+    "cirujano",
+    "cirujana",
+    "enfermero",
+    "enfermera",
+    "doctor",
+    "doctora",
+    "psiquiatra"
    ],
    "scope_en": "Medicine and the body: diseases, symptoms, anatomy, drugs, treatments, public health, doctors."
   },
@@ -465,6 +604,18 @@
     "aviator",
     "computer"
    ],
+   "roles_es": [
+    "inventor",
+    "inventora",
+    "ingeniero",
+    "ingeniera",
+    "programador",
+    "programadora",
+    "aviador",
+    "aviadora",
+    "informático",
+    "informática"
+   ],
    "scope_en": "Made things and how they work: machines, vehicles, aircraft, ships, weapons, computers, software, the internet, spaceflight, engineering, inventors."
   },
   {
@@ -499,6 +650,23 @@
     "designer",
     "illustrator",
     "cartoonist"
+   ],
+   "roles_es": [
+    "pintor",
+    "pintora",
+    "escultor",
+    "escultora",
+    "arquitecto",
+    "arquitecta",
+    "artista",
+    "fotógrafo",
+    "fotógrafa",
+    "diseñador",
+    "diseñadora",
+    "ilustrador",
+    "ilustradora",
+    "dibujante",
+    "historietista"
    ],
    "scope_en": "Visual arts and design: painting, sculpture, architecture as an art, photography, fashion, comics art, artists."
   },
@@ -537,6 +705,19 @@
     "essayist",
     "dramatist",
     "screenwriter"
+   ],
+   "roles_es": [
+    "escritor",
+    "escritora",
+    "poeta",
+    "poetisa",
+    "novelista",
+    "dramaturgo",
+    "dramaturga",
+    "autor",
+    "autora",
+    "ensayista",
+    "guionista"
    ],
    "scope_en": "Writing and books: novels, poems, plays, religious and historical texts as writings, literary characters, writers, publishing."
   },
@@ -589,6 +770,24 @@
     "violinist",
     "band"
    ],
+   "roles_es": [
+    "cantante",
+    "compositor",
+    "compositora",
+    "músico",
+    "música",
+    "rapero",
+    "rapera",
+    "cantautor",
+    "cantautora",
+    "guitarrista",
+    "pianista",
+    "director de orquesta",
+    "baterista",
+    "bajista",
+    "violinista",
+    "banda"
+   ],
    "scope_en": "Music: songs, albums, bands, musicians, composers, genres, instruments, tours."
   },
   {
@@ -633,6 +832,20 @@
     "comedian",
     "producer",
     "presenter",
+    "youtuber"
+   ],
+   "roles_es": [
+    "actor",
+    "actriz",
+    "director de cine",
+    "directora de cine",
+    "cineasta",
+    "comediante",
+    "humorista",
+    "productor",
+    "productora",
+    "presentador",
+    "presentadora",
     "youtuber"
    ],
    "scope_en": "Film, television and screen performance: films, series, episodes, screen characters, actors, directors, comedians."
@@ -701,6 +914,34 @@
     "cricketer",
     "jockey"
    ],
+   "roles_es": [
+    "futbolista",
+    "jugador",
+    "jugadora",
+    "atleta",
+    "deportista",
+    "boxeador",
+    "boxeadora",
+    "ciclista",
+    "piloto",
+    "corredor",
+    "corredora",
+    "luchador",
+    "luchadora",
+    "entrenador",
+    "entrenadora",
+    "nadador",
+    "nadadora",
+    "golfista",
+    "velocista",
+    "esquiador",
+    "esquiadora",
+    "gimnasta",
+    "jinete",
+    "tenista",
+    "baloncestista",
+    "beisbolista"
+   ],
    "scope_en": "Sport: sports, teams, clubs, competitions, seasons, stadiums, athletes, coaches."
   },
   {
@@ -725,6 +966,11 @@
    },
    "roles_en": [
     "chess",
+    "gamer"
+   ],
+   "roles_es": [
+    "ajedrecista",
+    "jugador de ajedrez",
     "gamer"
    ],
    "scope_en": "Games: video games, board and card games, chess, esports, game characters and game makers."
@@ -784,6 +1030,28 @@
     "preacher",
     "missionary"
    ],
+   "roles_es": [
+    "filósofo",
+    "filósofa",
+    "teólogo",
+    "teóloga",
+    "profeta",
+    "santo",
+    "santa",
+    "papa",
+    "monje",
+    "monja",
+    "sacerdote",
+    "sacerdotisa",
+    "rabino",
+    "imán",
+    "obispo",
+    "apóstol",
+    "predicador",
+    "predicadora",
+    "misionero",
+    "misionera"
+   ],
    "scope_en": "Belief and thought: religions, deities, myths, religious texts as faith, philosophy, philosophers, clergy, holy days."
   },
   {
@@ -809,6 +1077,11 @@
    },
    "roles_en": [
     "linguist"
+   ],
+   "roles_es": [
+    "lingüista",
+    "filólogo",
+    "filóloga"
    ],
    "scope_en": "Languages and writing systems: languages, dialects, alphabets, grammar, linguists."
   },
@@ -847,6 +1120,15 @@
     "cook",
     "farmer",
     "agronomist"
+   ],
+   "roles_es": [
+    "chef",
+    "cocinero",
+    "cocinera",
+    "agricultor",
+    "agricultora",
+    "agrónomo",
+    "agrónoma"
    ],
    "scope_en": "Food & farming: dishes, ingredients, drinks, cuisines, crops, livestock, agriculture, cooks."
   }
@@ -893,5 +1175,31 @@
   },
   "event_depth": 4
  },
- "max_subjects": 3
+ "max_subjects": 3,
+ "packs": {
+  "_note": "A Wikipedia subject pack's subject (the topic in wikipedia_<lang>_<topic>_…): its catalog `subjects`, and the subject an article in it gets when the rules give none. Whole encyclopedias (top, top1m, all, 100) and category-page packs have none.",
+  "astronomy": "science",
+  "baseball": "sports",
+  "basketball": "sports",
+  "chemistry": "science",
+  "climate-change": "science",
+  "comics": "literature",
+  "computer": "technology",
+  "cricket": "sports",
+  "football": "sports",
+  "geography": "places",
+  "golf": "sports",
+  "history": "history",
+  "ice-hockey": "sports",
+  "indian-cinema": "film",
+  "mathematics": "science",
+  "medicine": "health",
+  "molcell": "science",
+  "movies": "film",
+  "nollywood": "film",
+  "physics": "science",
+  "sociology": "society",
+  "tennis": "sports",
+  "venezuela": "places"
+ }
 }

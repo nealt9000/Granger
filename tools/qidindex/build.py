@@ -21,7 +21,7 @@ from zim_articles import articles  # noqa: E402
 KIND = "gqid"
 SCHEMA_VERSION = 1
 BUILDER = "tools/qidindex/build.py"
-BUILDER_VERSION = 1
+BUILDER_VERSION = 2  # 2: the subjects table (Plan EX Task 1)
 
 # The joins the phone reads (plan Decision 3): author, notable work, edition of, main subject, composer, performer
 # (item-valued, stored as "Q123"); Gutenberg, LibriVox, MusicBrainz artist and work, archive.org (strings).
@@ -33,6 +33,43 @@ CREATE TABLE links(qid INTEGER NOT NULL, prop TEXT NOT NULL, value TEXT NOT NULL
 CREATE TABLE coords(qid INTEGER PRIMARY KEY, lat REAL NOT NULL, lon REAL NOT NULL);
 """
 
+# Plan EX Task 1: each item's subjects (tools/subjects/subjects.json ids; ord 0 the main one), from tools/subjects/build.py.
+# A table of its own, so schemaVersion stays 1 and apps that don't read subjects open the file as before.
+SUBJECTS_SCHEMA = """
+CREATE TABLE subjects(qid INTEGER NOT NULL, ord INTEGER NOT NULL, subject TEXT NOT NULL, PRIMARY KEY(qid, ord)) WITHOUT ROWID;
+CREATE INDEX subjects_subject ON subjects(subject, qid);
+"""
+
+
+SUBJECTS_SPEC = Path(__file__).resolve().parents[1] / "subjects" / "subjects.json"
+
+
+def pack_subject(source_zim: str):
+    """The subject of a Wikipedia subject pack (subjects.json `packs`, by the topic in wikipedia_<lang>_<topic>_…)."""
+    parts = source_zim.split("_")
+    packs = json.loads(SUBJECTS_SPEC.read_text(encoding="utf8")).get("packs", {})
+    return packs.get(parts[2]) if len(parts) > 3 and parts[0] == "wikipedia" else None
+
+
+def add_subjects(db: sqlite3.Connection, subjects_path) -> int:
+    """Copies the subjects of the index's items from tools/subjects/build.py's file; in a subject pack, an item the rules
+    leave without one takes the pack's subject. Returns how many items have subjects."""
+    db.execute("DROP TABLE IF EXISTS subjects")
+    db.executescript(SUBJECTS_SCHEMA)
+    db.execute("ATTACH DATABASE ? AS s", (f"file:{subjects_path}?mode=ro",))
+    db.execute("INSERT INTO subjects SELECT qid, ord, subject FROM s.subjects WHERE qid IN (SELECT qid FROM articles)")
+    version = db.execute("SELECT value FROM s.meta WHERE key = 'subjectsVersion'").fetchone()[0]
+    built = db.execute("SELECT value FROM s.meta WHERE key = 'builtAt'").fetchone()[0]
+    db.commit()
+    db.execute("DETACH DATABASE s")
+    default = pack_subject(db.execute("SELECT value FROM meta WHERE key = 'sourceZim'").fetchone()[0])
+    if default:
+        db.execute("INSERT INTO subjects SELECT DISTINCT qid, 0, ? FROM articles WHERE qid NOT IN (SELECT qid FROM subjects)", (default,))
+    n = db.execute("SELECT COUNT(DISTINCT qid) FROM subjects").fetchone()[0]
+    db.executemany("INSERT OR REPLACE INTO meta VALUES (?, ?)",
+                   [("subjectsVersion", version), ("subjectsBuiltAt", built), ("withSubjects", str(n)), ("packSubject", default or "")])
+    return n
+
 
 def rows_of(rec: dict):
     """(article row without path, link rows, coord row or None) for one wdfilter record."""
@@ -43,7 +80,7 @@ def rows_of(rec: dict):
     return (qid, rec.get("sl", 0), other), links, ((qid, c[0], c[1]) if c else None)
 
 
-def build(paths, items, out: Path, source: Path, source_sha256: str) -> dict:
+def build(paths, items, out: Path, source: Path, source_sha256: str, subjects=None) -> dict:
     """Write the .gqid from the ZIM's real article [paths] and an iterable of wdfilter records; returns counts."""
     wanted = set(paths)
     if out.exists():
@@ -74,6 +111,9 @@ def build(paths, items, out: Path, source: Path, source_sha256: str) -> dict:
     m = meta.write_meta(db, KIND, SCHEMA_VERSION, source, BUILDER, BUILDER_VERSION, source_sha256=source_sha256)
     db.executemany("INSERT OR REPLACE INTO meta VALUES (?, ?)", [("articles", str(counts["articles"])), ("matched", str(counts["matched"]))])
     db.commit()
+    if subjects:
+        counts["subjects"] = add_subjects(db, subjects)
+        db.commit()
     db.execute("VACUUM")
     db.close()
     counts["meta"] = m
@@ -108,6 +148,7 @@ def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("items"); p.add_argument("out"); p.add_argument("zims", nargs="+")
     p.add_argument("--releases", help="write the release descriptors here")
+    p.add_argument("--subjects", help="tools/subjects/build.py's file: attach each item's subjects")
     a = p.parse_args(argv)
     from libzim.reader import Archive
 
@@ -116,7 +157,7 @@ def main(argv=None):
         out = Path(a.out) / f"{zim.stem}.{KIND}"
         out.parent.mkdir(parents=True, exist_ok=True)
         paths = [path for path, _ in articles(Archive(zim))]
-        counts = build(paths, read_items(a.items, set(paths)), out, zim, meta.sha256(zim))
+        counts = build(paths, read_items(a.items, set(paths)), out, zim, meta.sha256(zim), a.subjects)
         share = counts["matched"] / max(1, counts["articles"])
         print(f"{zim.name}: {counts['matched']:,}/{counts['articles']:,} articles ({share:.1%}), {counts['links']:,} links, "
               f"{counts['coords']:,} coords, {out.stat().st_size / 1e6:.1f} MB", file=sys.stderr, flush=True)
