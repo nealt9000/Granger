@@ -613,7 +613,12 @@ def extract_zimit_index(pack, cfg):
                                                                     else None),
                       "linked": len(cands.get(d["path"], []))})
     fold_parts(items, cfg)
-    items.sort(key=lambda i: (i["group"], i["title"].lower()))
+    # Configured groups keep their configured order ("The book" before "Course materials"); others go A–Z after the
+    # ungrouped items. Within a group, `"order": "path"` keeps the site's file order (00-intro, 01-recursion…).
+    rank = {title: n for n, (_, title, _) in enumerate(groups)}
+    by_path = cfg.get("order") == "path"
+    items.sort(key=lambda i: (i["group"] != "", rank.get(i["group"], len(rank)), i["group"],
+                              i["path"] if by_path else i["title"].lower()))
     return items
 
 

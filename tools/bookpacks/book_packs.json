@@ -127,7 +127,8 @@
       "overrides": {
         "jeffe.cs.illinois.edu/teaching/algorithms/hwex/old-hwex.pdf": "Homework and exams · 2003 revision",
         "jeffe.cs.illinois.edu/teaching/algorithms/hwex/ancient-hwex.pdf": "Homework and exams · before 2003"
-      }
+      },
+      "order": "path"
     },
     "milneopentextbooks.org_en_all": {
       "extractor": "zimit-index",

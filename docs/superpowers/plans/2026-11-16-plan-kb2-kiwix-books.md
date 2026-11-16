@@ -351,6 +351,15 @@ Python for tools).
     as a pack book's do). Both Task 0.1 tests un-ignored, 2 new. `:core:library` 471/0 fail, `:app` 1797/0 fail
     (112 skipped).
 
+- **Carried to Phase 3's catalog change** (found in the Task 2.3 screenshots, 2026-11-16):
+  - The builder ordered groups A–Z, which put Algorithms' "Course materials" above "The book" and sorted chapters by
+    title. Configured groups now keep their order, and `"order": "path"` keeps the site's file order (Algorithms
+    uses it); the fix is in the builder, with a test.
+  - **Rebuild `jeffe.cs.illinois.edu_en_all`'s `.gbooks` and upload it with the African Storybook release**, so Neal
+    uploads and signs once.
+  - Also: after a pack is removed and reinstalled, a book once read as an ebook comes back as a PDF, while its kept
+    place is an EPUB locator (Task 2.5 edge). Handle this when Phase 4 touches PDF rows.
+
 ## Phase 3: African Storybook (D2: per-language sets)
 
 - [ ] **Task 3.1: the set builder.**

@@ -215,3 +215,13 @@ def test_the_pack_name_and_catalog_lookups(tmp_path):
         ("abc", "https://r/s.gbooks")
     assert build.from_catalog(catalog, "storybooks_mul_all", "https://m/storybooks_mul_all_2026-05.zim") == \
         (None, "https://r/s.gbooks")
+
+
+def test_configured_groups_keep_their_order_and_path_order_keeps_the_sites():
+    cfg = dict(ZIMIT_CFG, groups=[{"key": "m", "title": "Manuals", "match": "/manuals/"},
+                                  {"key": "l", "title": "Library", "match": "/library/"}], order="path")
+    m = build.build("example.org_en_all", ZIMIT, cfg)
+    groups = [i["group"] for i in m["items"]]
+    assert groups.index("Manuals") < groups.index("Library") and groups[0] == ""
+    manuals = [i["key"].rsplit("/", 1)[-1] for i in m["items"] if i["group"] == "Manuals"]
+    assert manuals == sorted(manuals)
