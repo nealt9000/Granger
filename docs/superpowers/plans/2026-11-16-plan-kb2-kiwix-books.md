@@ -360,6 +360,23 @@ Python for tools).
   - Also: after a pack is removed and reinstalled, a book once read as an ebook comes back as a PDF, while its kept
     place is an EPUB locator (Task 2.5 edge). Handle this when Phase 4 touches PDF rows.
 
+- **Phase 2 emulator check, 2026-11-16: PASS.** Neal chose the emulator over the shared Pixel 6, whose library was
+  at database 15 with granger-d0's build 1374; ours migrates to 16, which would have blocked d0's installs.
+  - Setup: debug 1375 on `emulator-5580`, built with `-PcatalogUrl=http://localhost:8765/catalog.json`. The branch's
+    signed catalog was served by `python3 -m http.server --directory catalog` with `adb reverse tcp:8765 tcp:8765`.
+  - Database 15 → 16 migrated with the library intact.
+  - Get more → Kiwix libraries lists Military Medicine, SMBC and Algorithms. Get queued them behind 77 Classics
+    `.glink` downloads.
+  - Each pack's `.gbooks` installed with it.
+  - Library: "Military Medicine · Kiwix library · 24 documents" and "SMBC COVID-19 Book Pack · 9 documents". The row
+    wording is Task 4.2's.
+  - Collection: real titles, header "Federation of American Scientists · 20 books" (works counted once), and "US
+    Army Special Forces Medical Handbook · 3 parts" as one row.
+  - Emergency Childbirth copied out on first open and opened at p. 1 of 13, with its first-page cover on the rail.
+    "Read as ebook" is in the menu.
+  - Browse no longer lists either pack.
+  - The emulator is now at database 16 (d0 told).
+
 ## Phase 3: African Storybook (D2: per-language sets)
 
 - [ ] **Task 3.1: the set builder.**
