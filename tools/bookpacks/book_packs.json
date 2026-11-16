@@ -113,7 +113,8 @@
       "provider": "SUNY Geneseo Milne Library",
       "shelf": "learning",
       "minBytes": 200000,
-      "site": "Milne Open Textbooks"
+      "site": "Milne Open Textbooks",
+      "exclude": "(?i)vpat|accessibility-conformance"
     },
     "survivorlibrary.com_en_all": {
       "extractor": "zimit-index",

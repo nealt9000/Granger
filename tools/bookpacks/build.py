@@ -30,14 +30,19 @@ import sys
 import urllib.parse
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "catalog-gen"))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "sidecar"))
+import meta as sidecar_meta  # noqa: E402
 import zim_probe as zp  # noqa: E402
 
-VERSION = 1
+VERSION = 1          # builderVersion: bump when a builder fix changes what it writes
+SCHEMA_VERSION = 1   # the file layout (schema.md); the app's SidecarEntry.KNOWN["gbooks"]
+BUILDER = "tools/bookpacks/build.py"
 DOC_MIMES = {"application/pdf": "pdf", "application/epub+zip": "epub"}
 BUDGET = 1 << 30
 GENERIC = re.compile(
     r"^\W*(download|télécharger|descargar|pdf|epub|here|click here|full text( in one file)?|link|view|open|read|"
-    r"read online|file|document|\(?[a-z]+\)?|part \d+|vol(ume)?\.? ?\d+|\d+|(pdf|epub)?\s*\d+(\.\d+)?\s*[kmg]i?b)(\W*\(?(pdf|epub|english|german|"
+    r"read online|file|document|\([a-z]+\)|everything|all|complete|full|whole book|english|german|french|spanish|"
+    r"español|deutsch|français|portuguese|part \d+|vol(ume)?\.? ?\d+|\d+|(pdf|epub)?\s*\d+(\.\d+)?\s*[kmg]i?b)(\W*\(?(pdf|epub|english|german|"
     r"french|spanish|español|deutsch)\)?)*\W*$",
     re.I)
 BOILER = re.compile(r"click here|start it manually|download (will|should) (start|begin)|if your download|"
@@ -107,6 +112,19 @@ class Pack:
         for d in self.docs:
             c = d["cluster"]
             d["bytes"] = (self.cluster_ptrs[c + 1] - self.cluster_ptrs[c]) // per_cluster[c]
+            if per_cluster[c] > 1:  # small files share a cluster: a stored one's offset table gives each its size
+                d["bytes"] = self.blob_size(c, d["blob"]) or d["bytes"]
+
+    def blob_size(self, c, blob):
+        """A blob's exact size in a stored cluster; None when the cluster is compressed."""
+        a = self.cluster_ptrs[c]
+        info = self.r.read(a, 1)[0]
+        if info & 0x0F not in (0, 1):
+            return None
+        size = 8 if info & 0x10 else 4
+        fmt = "<2Q" if size == 8 else "<2I"
+        o0, o1 = struct.unpack(fmt, self.r.read(a + 1 + size * blob, 2 * size))
+        return o1 - o0
 
     def follow(self, e, hops=5):
         while e["redirect"] is not None and hops:
@@ -170,6 +188,26 @@ def _pdf_string(raw, hexed=False):
     return raw.decode("latin-1", "replace").strip()
 
 
+def _pdf_literal(blob, start):
+    """The bytes of the PDF literal string opening just before [start]: balanced brackets, backslash escapes."""
+    depth, i, out = 1, start, bytearray()
+    while i < len(blob):
+        ch = blob[i:i + 1]
+        if ch == b"\\" and i + 1 < len(blob):
+            out += blob[i:i + 2]
+            i += 2
+            continue
+        if ch == b"(":
+            depth += 1
+        elif ch == b")":
+            depth -= 1
+            if depth == 0:
+                return bytes(out)
+        out += ch
+        i += 1
+    return None
+
+
 def pdf_title(head, tail):
     """
     A PDF's own title: XMP's dc:title, or /Title in the document Info dictionary (one that also names a Producer,
@@ -186,9 +224,11 @@ def pdf_title(head, tail):
             body = d.group(1)
             if b"/Title" not in body or not re.search(INFO_KEYS, body):
                 continue
-            m = re.search(rb"/Title\s*\(((?:\\.|[^\\)])*)\)", body, re.S)
+            m = re.search(rb"/Title\s*\(", body)
             if m:
-                return _pdf_string(m.group(1)) or None
+                raw = _pdf_literal(body, m.end())
+                if raw is not None:
+                    return _pdf_string(raw) or None
             m = re.search(rb"/Title\s*<([0-9A-Fa-f\s]+)>", body)
             if m:
                 return _pdf_string(m.group(1), hexed=True) or None
@@ -200,7 +240,7 @@ def plausible_pdf_title(t):
         return None
     t = re.sub(r"^Microsoft (Word|PowerPoint) - ", "", t).strip()
     t = re.sub(r"\.(docx?|pptx?|pdf|indd|qxd)$", "", t, flags=re.I).strip()
-    if len(t) < 4 or re.fullmatch(r"(untitled|title|document\d*|slide \d+|\S+\.\w{2,4}|[\W\d_]+)", t, re.I):
+    if len(t) < 4 or re.fullmatch(r"(untitled|title|document\d*|slide \d+|\S+\.[a-z]\w{1,7}|[\W\d_]+)", t, re.I):
         return None
     if re.fullmatch(r"[A-Za-z0-9_-]+", t) and ("_" in t or not " " in t and len(t) > 25):
         return None  # a file name, not a title
@@ -367,8 +407,10 @@ def tidy(t, cfg):
     t = re.sub(r"\b\d+(\.\d+)?\s*[kmg]i?b\s*$", " ", t.strip(), flags=re.I)
     t = re.sub(r"[ _]pdf\s*$", "", t.strip(), flags=re.I)
     t = re.sub(r"\s+", " ", t).strip(" -–—:|·,()[]")
-    if "_" in t:
-        t = re.sub(r"\s*-\s*", " – ", t.replace("_", " ")) if " " not in t.replace("_", "") else t.replace("_", " ")
+    if "_" in t:  # a file-style name: underscores are spaces, and a hyphen between words separates title parts
+        t = t.replace("_", " ")
+        t = re.sub(r"(?<=\w)\s*-\s*(?=\w)", lambda m: m.group(0) if re.fullmatch(r"\d", t[m.start() - 1]) and
+                   re.fullmatch(r"\d", t[m.end()]) else " – ", t)
         t = re.sub(r"\s+", " ", t).strip()
     t = re.sub(r"(\d)(St|Nd|Rd|Th|Mm|Cm|Kg|Lb|Hp|Ed)\b", lambda m: m.group(1) + m.group(2).lower(), t)
     if cfg.get("yearSuffix"):
@@ -558,11 +600,13 @@ def extract_zimit_index(pack, cfg):
         title, source = best_title(cands.get(d["path"], []), overrides.get(key), meta, d["path"], rules, site, cfg)
         if source in ("page", "heading", "pdf"):
             title = qualified(title, cands.get(d["path"], []))
-        group = next((k for k, _, rx in groups if rx.search(d["path"])), "")
+        if title and title == title.lower() and title[0].isalpha():
+            title = title[0].upper() + title[1:]
+        group = next((title for _, title, rx in groups if rx.search(d["path"])), "")
         if not group and cfg.get("groupBy") == "page" and cands.get(d["path"]):
             t = cands[d["path"]][0]["pageTitle"]
-            m = re.search(cfg.get("groupPattern", r"^(?P<g>.+?)(\s+[-|–]\s+.*)?$"), t)
-            group = (m.group("g") if m else t).replace("_", " ").strip()
+            m = re.search(cfg.get("groupPattern", r"^(?P<g>.+?)(\s+[-|–—]\s+.*)?$"), t)
+            group = m.group("g").replace("_", " ").strip() if m else ""
         items.append({"key": key, "path": d["path"], "format": DOC_MIMES[d["mimeType"]], "title": title,
                       "titleSource": source, "pdfTitle": meta, "group": group, "bytes": d["bytes"],
                       "pdfKind": pdf_kind(head, tail) if head else ("unknown" if d["mimeType"].endswith("pdf")
@@ -650,19 +694,96 @@ def build(name, src, cfg, previous=None):
         pack.close()
 
 
+ITEM_COLUMNS = ("key", "path", "format", "title", "title_source", "author", "description", "licence", "language",
+                "group_name", "ord", "bytes", "pdf_kind", "part_of", "work_key", "work_title", "part_no", "qid")
+
+
+def write_gbooks(manifest, out, source_name, source_sha256, now=None):
+    """Writes [manifest] as a `.gbooks` SQLite sidecar (schema.md), meta contract included."""
+    import sqlite3
+    out = pathlib.Path(out)
+    out.unlink(missing_ok=True)
+    db = sqlite3.connect(out)
+    try:
+        sidecar_meta.write_meta(db, "gbooks", SCHEMA_VERSION, pathlib.Path(source_name), BUILDER, VERSION,
+                                source_sha256=source_sha256, now=now)
+        db.execute("CREATE TABLE collection(key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+        coll = dict(manifest["collection"], sourceDate=manifest.get("sourceDate", ""), zimName=manifest["zimName"])
+        db.executemany("INSERT INTO collection VALUES (?, ?)", [(k, str(v)) for k, v in coll.items() if v is not None])
+        db.execute("CREATE TABLE groups(name TEXT PRIMARY KEY, ord INTEGER NOT NULL)")
+        groups = list(dict.fromkeys(i.get("group", "") for i in manifest["items"] if i.get("group")))
+        db.executemany("INSERT INTO groups VALUES (?, ?)", [(g, n) for n, g in enumerate(groups)])
+        db.execute(f"""CREATE TABLE items(key TEXT PRIMARY KEY, path TEXT NOT NULL, format TEXT NOT NULL,
+            title TEXT NOT NULL, title_source TEXT NOT NULL, author TEXT, description TEXT, licence TEXT,
+            language TEXT, group_name TEXT NOT NULL DEFAULT '', ord INTEGER NOT NULL, bytes INTEGER NOT NULL,
+            pdf_kind TEXT, part_of TEXT, work_key TEXT, work_title TEXT, part_no INTEGER, qid TEXT)""")
+        rows = []
+        for n, i in enumerate(manifest["items"]):
+            work = i.get("work") or {}
+            rows.append((i["key"], i["path"], i["format"], i["title"], i["titleSource"], i.get("author") or None,
+                         i.get("description") or None, i.get("licence") or None, i.get("language") or None,
+                         i.get("group", ""), n, i["bytes"], i.get("pdfKind"), i.get("partOf"), work.get("key"),
+                         work.get("title"), i.get("order") if (work or i.get("partOf")) else None, i.get("qid")))
+        db.executemany(f"INSERT INTO items VALUES ({','.join('?' * len(ITEM_COLUMNS))})", rows)
+        db.commit()
+        db.execute("VACUUM")
+    finally:
+        db.close()
+
+
+def read_gbooks(path):
+    """A `.gbooks` file (or a manifest .json) back in the builder's dict shape: collection, items, meta."""
+    path = pathlib.Path(path)
+    if path.suffix == ".json":
+        return json.loads(path.read_text(encoding="utf-8"))
+    import sqlite3
+    db = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    try:
+        meta = dict(db.execute("SELECT key, value FROM meta"))
+        coll = dict(db.execute("SELECT key, value FROM collection"))
+        items = []
+        for row in db.execute(f"SELECT {', '.join(ITEM_COLUMNS)} FROM items ORDER BY ord"):
+            r = dict(zip(ITEM_COLUMNS, row))
+            item = {"key": r["key"], "path": r["path"], "format": r["format"], "title": r["title"],
+                    "titleSource": r["title_source"], "group": r["group_name"], "bytes": r["bytes"]}
+            for k, col in (("author", "author"), ("description", "description"), ("licence", "licence"),
+                           ("language", "language"), ("pdfKind", "pdf_kind"), ("partOf", "part_of"), ("qid", "qid")):
+                if r[col] is not None:
+                    item[k] = r[col]
+            if r["work_key"]:
+                item["work"] = {"key": r["work_key"], "title": r["work_title"]}
+            if r["part_no"] is not None:
+                item["order"] = r["part_no"]
+            items.append(item)
+        return {"meta": meta, "zimName": coll.pop("zimName", ""), "sourceDate": coll.pop("sourceDate", ""),
+                "collection": coll, "items": items}
+    finally:
+        db.close()
+
+
 def main(argv):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("name")
-    ap.add_argument("src")
-    ap.add_argument("--out", required=True)
+    ap.add_argument("src", help="the ZIM: a local file or its URL")
+    ap.add_argument("--out", required=True, help="a .gbooks file (or .json, to review a manifest)")
+    ap.add_argument("--source-sha256", help="the ZIM's sha256 (from the catalog), needed when SRC is a URL")
     ap.add_argument("--config", default=str(pathlib.Path(__file__).with_name("book_packs.json")))
-    ap.add_argument("--previous")
+    ap.add_argument("--previous", help="the pack's previous .gbooks (or .json): keys of moved files are kept")
     ap.add_argument("--sample", type=int, default=0, help="print N random items for grading")
     a = ap.parse_args(argv)
     cfg = json.loads(pathlib.Path(a.config).read_text(encoding="utf-8"))["packs"][a.name]
-    prev = json.loads(pathlib.Path(a.previous).read_text(encoding="utf-8")) if a.previous else None
+    prev = read_gbooks(a.previous) if a.previous else None
     m = build(a.name, a.src, cfg, prev)
-    pathlib.Path(a.out).write_text(json.dumps(m, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    out = pathlib.Path(a.out)
+    if out.suffix == ".json":
+        out.write_text(json.dumps(m, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    else:
+        remote = a.src.startswith(("http://", "https://"))
+        if remote and not a.source_sha256:
+            raise SystemExit("a URL source needs --source-sha256 (the catalog's sha256 for that file)")
+        sha = a.source_sha256 or sidecar_meta.sha256(a.src)
+        source_name = urllib.parse.urlsplit(a.src).path.rsplit("/", 1)[-1] if remote else pathlib.Path(a.src).name
+        write_gbooks(m, out, source_name, sha)
     print(json.dumps(m["stats"]))
     if a.sample:
         rnd = random.Random(16)
