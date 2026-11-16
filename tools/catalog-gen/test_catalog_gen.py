@@ -387,6 +387,25 @@ def test_a_book_set_without_level_sets_has_only_its_all_books_preset(tmp_path, m
     assert [p["id"] for p in book_set["presets"]] == ["african-storybook-en"]
 
 
+def test_book_sets_go_onto_a_built_catalog_in_place_and_leave_the_rest_alone(tmp_path, monkeypatch):
+    """Plan KB2: `booksets` adds the sets without a full `build --previous` (which would move Kiwix packs too)."""
+    built = asb_build(tmp_path, monkeypatch)
+    sizes = {b["urls"][0]: b["sizeBytes"] for b in ASB["books"]}
+    catalog = {"packs": [{"id": "p1"}], "models": [], "books": [{"id": "gc-hamlet"}], "presets": [{"id": "starter"}]}
+    sets = cg.apply_book_sets(catalog, {"bookSets": [ASB_ROW]}, head=lambda url: sizes[url])
+    assert catalog["bookSets"] == sets == built["bookSets"]
+    assert catalog["packs"] == [{"id": "p1"}] and catalog["books"] == [{"id": "gc-hamlet"}]
+    assert cg.apply_book_sets(catalog, {"bookSets": []}) == [] and "bookSets" not in catalog
+
+
+def test_book_sets_in_place_refuse_an_id_the_catalog_already_has(tmp_path, monkeypatch):
+    asb_build(tmp_path, monkeypatch)
+    sizes = {b["urls"][0]: b["sizeBytes"] for b in ASB["books"]}
+    catalog = {"packs": [], "books": [{"id": f"asb-en-{'a' * 32}"}], "presets": []}
+    with pytest.raises(SystemExit, match="duplicate ids"):
+        cg.apply_book_sets(catalog, {"bookSets": [ASB_ROW]}, head=lambda url: sizes[url])
+
+
 def test_a_set_in_books_fails_the_build(tmp_path, monkeypatch):
     with pytest.raises(SystemExit, match="goes under bookSets"):
         asb_build(tmp_path, monkeypatch, key="books")

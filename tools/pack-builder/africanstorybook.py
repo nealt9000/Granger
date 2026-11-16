@@ -28,7 +28,8 @@ licence and source). They are changed only as far as epubcheck and Granger need 
 - a `dc:rights` line carries the back cover's attribution into the metadata;
 - XML that doesn't parse is mended (control characters dropped, bare `&` escaped, `<br>` closed) and empty
   `dc:creator`s removed (some books have no illustrator);
-- a 0-byte cover image (46 of the 1,120 books) takes the first page's picture.
+- a 0-byte cover image (46 of the 1,120 books) takes the first page's picture;
+- the embedded fonts are dropped (about 330 KB a book, 20% of the sets): Granger's reader sets its own typeface.
 """
 import argparse
 import collections
@@ -114,6 +115,9 @@ BAD_XML_CHARS = re.compile(rb"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 BARE_AMP = re.compile(rb"&(?!#\d+;|#x[0-9A-Fa-f]+;|[A-Za-z][A-Za-z0-9]*;)")
 OPEN_BR = re.compile(rb"<br\s*>", re.I)
 EMPTY_CREATOR = re.compile(rb'<dc:creator id="([^"]+)">\s*</dc:creator>')
+FONT_FILE = re.compile(r"\.(otf|ttf|woff2?)$", re.I)
+FONT_ITEM = re.compile(rb'[ \t]*<item\b[^>]*\bhref="[^"]+\.(?:otf|ttf|woff2?)"[^>]*/>[ \t]*\r?\n?', re.I)
+FONT_FACE = re.compile(rb"[ \t]*@font-face\s*\{[^}]*\}[ \t]*\r?\n?", re.I)
 
 
 def _opf_path(z):
@@ -227,10 +231,23 @@ def fix_epub(data, licence_fallback=LICENSE):
         opf = opf.replace(b"</metadata>", f"<dc:rights>{escape(rights)}</dc:rights></metadata>".encode(), 1)
         contents[opf_name] = opf
         changes.append("rights")
+    # 5. The embedded fonts (NotoSans, Noto Sans Ethiopic, Noto Kufi Arabic: 370 MB over both sets). The books are
+    # reflowable and Granger's reader sets its own typeface (ReadingPrefs: publisherStyles = false), so none is ever
+    # shown; Ethiopic and Arabic aren't used by English or Kiswahili text anyway. The @font-face rules and manifest
+    # items go with the files, so nothing points at a missing resource; font-family names stay (unknown ones fall back).
+    fonts = {n for n in contents if FONT_FILE.search(n) or (n.endswith("/") and n.rstrip("/").endswith("fonts"))}
+    if fonts:
+        for name in fonts:
+            del contents[name]
+        opf, n = FONT_ITEM.subn(b"", contents[opf_name])
+        contents[opf_name] = opf
+        for name in [n for n in contents if n.endswith(".css")]:
+            contents[name] = FONT_FACE.sub(b"", contents[name])
+        changes.append("fonts")
 
     out = io.BytesIO()
     with zipfile.ZipFile(out, "w") as z:
-        infos = sorted(src.infolist(), key=lambda i: i.filename != "mimetype")
+        infos = sorted((i for i in src.infolist() if i.filename in contents), key=lambda i: i.filename != "mimetype")
         for info in infos:
             old = info.filename
             rel = old[len(base):] if old.startswith(base) else None

@@ -333,6 +333,44 @@
       }
     }
   ],
+  "bookSets": [
+    {
+      "bookRelease": "tools/pack-builder/releases/african_storybook_en_books.json",
+      "license": "CC BY 4.0, African Storybook Initiative",
+      "title": "African Storybook · English",
+      "language": "en",
+      "shelf": "children",
+      "i18n": {
+        "es": {
+          "title": "African Storybook · inglés"
+        }
+      },
+      "levelSets": {
+        "label": "Level {n}",
+        "i18n": {
+          "es": "Nivel {n}"
+        }
+      }
+    },
+    {
+      "bookRelease": "tools/pack-builder/releases/african_storybook_sw_books.json",
+      "license": "CC BY 4.0, African Storybook Initiative",
+      "title": "African Storybook · Kiswahili",
+      "language": "sw",
+      "shelf": "children",
+      "i18n": {
+        "es": {
+          "title": "African Storybook · suajili"
+        }
+      },
+      "levelSets": {
+        "label": "Level {n}",
+        "i18n": {
+          "es": "Nivel {n}"
+        }
+      }
+    }
+  ],
   "models": [
     {
       "id": "gemma-4-e2b-gpu",

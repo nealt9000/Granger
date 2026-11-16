@@ -699,6 +699,41 @@ def book_set(row, head=http_head, root=None):
     }, i18n)
 
 
+def book_sets_of(curated, other_ids, head=http_head, root=None):
+    """
+    The `bookSets` entries of [curated]'s `bookSets` rows. A set's books and presets are its own: their ids must be safe
+    file names and clash with nothing in [other_ids] (the catalog's packs, models, books and voices) or each other.
+    """
+    sets = [book_set(row, head, root) for row in curated.get("bookSets", [])]
+    set_books = [b for s in sets for b in s["books"]]
+    for book in set_books:
+        if not SAFE_NAME.match(book["id"]):
+            raise SystemExit(f"unsafe id: {book['id']!r}")
+    # (A set's id is its all-books preset's id, so the presets stand for it.)
+    set_ids = [b["id"] for b in set_books] + [p["id"] for s in sets for p in s["presets"]]
+    seen, clashes = set(), set()
+    for i in set_ids + list(other_ids):
+        (clashes if i in seen else seen).add(i)
+    if clashes:
+        raise SystemExit(f"bookSets: duplicate ids {sorted(clashes)[:10]}")
+    return sets
+
+
+def apply_book_sets(catalog, curated, head=http_head, root=None):
+    """
+    Plan KB2: puts [curated]'s book sets on an already-built [catalog] in place (replacing any it had), without a full
+    `build --previous`, which would also move every Kiwix pack to its newest safe snapshot. Returns the sets.
+    """
+    others = [i["id"] for key in ("packs", "models", "books", "voices") for i in catalog.get(key, [])]
+    others += [p["id"] for p in catalog.get("presets", [])]
+    sets = book_sets_of(curated, others, head, root)
+    if sets:
+        catalog["bookSets"] = sets
+    else:
+        catalog.pop("bookSets", None)
+    return sets
+
+
 # Readiness tier budgets for English, (Efficient, Comprehensive) bytes as tier_sizes counts them ("All"). With pictures by
 # default (Neal, 2026-10-28) and the 14.8 GB English Wiktionary accepted (Neal, 2026-11-09).
 TIER_BUDGETS = {"en": (18e9, 107e9)}
@@ -835,22 +870,13 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
         for key in ("id", "fileName"):
             if key in item and not SAFE_NAME.match(item[key]):
                 raise SystemExit(f"unsafe {key}: {item[key]!r}")
-    book_sets = [book_set(row, head) for row in curated.get("bookSets", [])]
-    set_books = [b for s in book_sets for b in s["books"]]
-    for book in books + set_books:
+    for book in books:
         if not SAFE_NAME.match(book["id"]):
             raise SystemExit(f"unsafe id: {book['id']!r}")
     ids = [item["id"] for item in packs + models + books + voices]
     if len(ids) != len(set(ids)):
         raise SystemExit(f"duplicate ids in {ids}")
-    # A set's books and presets are its own; their ids must clash with nothing else in the catalog.
-    set_ids = [b["id"] for b in set_books] + [p["id"] for s in book_sets for p in s["presets"]]
-    seen, clashes = set(), set()
-    for i in set_ids + ids:
-        (clashes if i in seen else seen).add(i)
-    clashes = sorted(clashes)
-    if clashes:
-        raise SystemExit(f"bookSets: duplicate ids {clashes[:10]}")
+    book_sets = book_sets_of(curated, ids, head)
     # "@<collection>" in a preset stands for every book of that collection.
     presets = [with_i18n({**{k: v for k, v in p.items() if k != "i18n"},
                           "items": [i for item in p["items"] for i in
@@ -1541,6 +1567,8 @@ def main(argv):
     p = sub.add_parser("sidecars"); p.add_argument("--releases", required=True); p.add_argument("--release-url")
     p.add_argument("file")
     p = sub.add_parser("shelves"); p.add_argument("file")
+    p = sub.add_parser("booksets"); p.add_argument("file")
+    p.add_argument("--curated", default=str(REPO_ROOT / "tools/catalog-gen/curated.json"))
     p = sub.add_parser("sets"); p.add_argument("file")
     p.add_argument("--sets", default=str(REPO_ROOT / "tools/catalog-gen/pack_sets.json"))
     p.add_argument("--curated", default=str(REPO_ROOT / "tools/catalog-gen/curated.json"))
@@ -1623,6 +1651,15 @@ def main(argv):
         makers = collections.Counter(p["provider"] for p in catalog["packs"] if p.get("provider"))
         print(f"{path}: {changed} packs changed; shelves {dict(sorted(counts.items()))}; "
               f"providers {dict(sorted(makers.items()))}; {tagged} subjects stamped")
+    elif args.command == "booksets":  # Plan KB2 Task 3.2: the curated book sets onto a built catalog, in place
+        path = pathlib.Path(args.file)
+        catalog = json.loads(path.read_text(encoding="utf-8"))
+        sets = apply_book_sets(catalog, json.loads(pathlib.Path(args.curated).read_text(encoding="utf-8")))
+        catalog["generatedAt"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        path.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        print(f"{path}: {len(sets)} book sets, {sum(len(s['books']) for s in sets)} books, "
+              f"{sum(len(s['presets']) for s in sets)} presets, "
+              f"{sum(b['sizeBytes'] for s in sets for b in s['books']) / 1e9:.2f} GB")
     elif args.command == "sets":
         path = pathlib.Path(args.file)
         catalog = json.loads(path.read_text(encoding="utf-8"))

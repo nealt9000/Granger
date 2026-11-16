@@ -125,6 +125,23 @@ def test_fix_drops_only_the_css_properties_epub_bans():
     assert "css:epub.css" in changes
 
 
+def test_fix_drops_the_fonts_their_rules_and_their_manifest_items():
+    css = ("@font-face {\n    font-family: 'NotoSans-Regular';\n    src: url(fonts/NotoSans.otf)  format('opentype');\n}\n"
+           "@font-face {\n  font-family: 'NotoKufiArabic';\n  src: url('fonts/NotoKufiArabic.otf') format('opentype');\n}\n"
+           "p { font-family: 'NotoSans-Regular', sans-serif; }\n")
+    opf = OPF.replace('<item href="epub.css"', '<item href="fonts/NotoSans.otf" id="NotoSans-Regular" '
+                      'media-type="application/vnd.ms-opentype"/>\n   <item href="fonts/NotoKufiArabic.otf" '
+                      'id="NotoKufiArabic" media-type="application/vnd.ms-opentype"/>\n   <item href="epub.css"')
+    fixed, changes = asb.fix_epub(epub(**{"content.opf": opf, "epub.css": css, "fonts/": b"",
+                                          "fonts/NotoSans.otf": b"OTTO" * 100, "fonts/NotoKufiArabic.otf": b"OTTO"}))
+    z, files = read(fixed)
+    assert not [n for n in z.namelist() if n.startswith("fonts")]
+    assert ".otf" not in files["content.opf"] and 'href="epub.css"' in files["content.opf"]
+    assert "@font-face" not in files["epub.css"] and "p { font-family: 'NotoSans-Regular', sans-serif; }" in files["epub.css"]
+    assert "fonts" in changes
+    assert "fonts" not in asb.fix_epub(fixed)[1]
+
+
 def test_fix_names_the_cover_and_back_cover_as_related_skips_them():
     fixed, _ = asb.fix_epub(epub())
     z, files = read(fixed)
