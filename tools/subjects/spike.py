@@ -162,6 +162,10 @@ def main(items_path, classes_path, gvec_path, out_dir, zim_path=None):
             for q in classes:
                 for s, d in cls_walk.subjects(q).items():
                     cand[s] = min(cand.get(s, 99), d)
+            # An article about an occupation or office ("songwriter", "President of Mexico") takes that occupation's subject.
+            for q in [r["q"]] + r.get("P279", []):
+                for s, d in occ_walk.subjects(q).items():
+                    cand[s] = min(cand.get(s, 99), d)
         rules[t] = cand
 
     vecs = article_vectors(g, rules.keys())
@@ -191,7 +195,7 @@ def main(items_path, classes_path, gvec_path, out_dir, zim_path=None):
                     if ts_pool[k] != t:
                         v[lab[k]] += float(row[k]) * w[lab[k]]
                 votes[t] = v
-    leads = person_leads(zim_path, [t for t, c in rules.items() if is_person[t] and len(c) != 1]) if zim_path else {}
+    leads = person_leads(zim_path, [t for t in rules if is_person[t]]) if zim_path else {}
     role_of = {}
     for sj in spec["subjects"]:
         for w in sj.get("roles_en", []):
@@ -202,15 +206,17 @@ def main(items_path, classes_path, gvec_path, out_dir, zim_path=None):
         sims = dict(votes.get(t, {}))
         lead_w = lead_roles(leads.get(t), role_of) if t in leads else {}
         near = sorted(cand.values())
-        if len(cand) == 1:
+        if len(cand) == 1 and not lead_w:
             main_s, mode = next(iter(cand)), "rule"
         elif not is_person[t] and len(near) > 1 and near[1] - near[0] >= 2:
             # One subject's root is much closer than the rest: the article is that kind of thing first.
             main_s, mode = min(cand, key=cand.get), "rule"
-        elif lead_w and any(x in cand for x in lead_w):
-            # A person: the neighbours' vote share plus the lead's role words (1, 1/3, 1/9 by order), among the rule's subjects.
+        elif lead_w:
+            # A person: the neighbours' vote share, plus the lead's role words (1, 1/3, 1/9 by order), plus 0.5 for a subject
+            # the occupations give. The lead can name a subject Wikidata's occupations miss ("Sheshi was a ruler…").
             tot = sum(sims.values()) or 1.0
-            main_s = max(cand, key=lambda x: sims.get(x, 0) / tot + lead_w.get(x, 0))
+            pool_s = set(cand) | set(lead_w)
+            main_s = max(pool_s, key=lambda x: sims.get(x, 0) / tot + lead_w.get(x, 0) + (0.5 if x in cand else 0))
             mode = "rule+lead"
         elif len(cand) > 1:
             main_s = max(cand, key=lambda s: sims.get(s, -1)) if sims else min(cand, key=cand.get)

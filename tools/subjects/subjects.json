@@ -33,7 +33,11 @@
     "Q13418847": "historical event",
     "Q19953632": "former administrative territorial entity",
     "Q182531": "battleship",
-    "Q355567": "noble title"
+    "Q355567": "noble title",
+    "Q41397": "genocide",
+    "Q3320743": "title of honor",
+    "Q744913": "aviation accident",
+    "Q15169167": "execution method"
    },
    "occupations": {
     "Q116": "monarch",
@@ -78,7 +82,14 @@
     "dynasty",
     "consort",
     "duke",
-    "duchess"
+    "duchess",
+    "maharaja",
+    "raja",
+    "rajah",
+    "maharani",
+    "emir",
+    "chieftain",
+    "chief"
    ]
   },
   {
@@ -116,7 +127,14 @@
     "Q1616075": "television station",
     "Q3918": "university",
     "Q189533": "academic degree",
-    "Q37002670": "unicameral legislature"
+    "Q37002670": "unicameral legislature",
+    "Q48352": "head of state",
+    "Q2570643": "senate",
+    "Q7210356": "political organization",
+    "Q248577": "President of the Republic",
+    "Q187588": "social class",
+    "Q2616578": "travel document",
+    "Q4504549": "religious role"
    },
    "occupations": {
     "Q82955": "politician",
@@ -165,7 +183,9 @@
     "murderer",
     "gangster",
     "spy",
-    "educator"
+    "educator",
+    "terrorist",
+    "assassin"
    ]
   },
   {
@@ -184,7 +204,9 @@
     "Q29028649": "economic concept",
     "Q22687": "bank",
     "Q8187769": "economic activity",
-    "Q113813711": "coin type"
+    "Q113813711": "coin type",
+    "Q11691": "stock exchange",
+    "Q1738991": "index number"
    },
    "occupations": {
     "Q43845": "businessperson",
@@ -240,7 +262,10 @@
     "Q8514": "desert",
     "Q165": "sea",
     "Q9430": "ocean",
-    "Q8072": "volcano"
+    "Q8072": "volcano",
+    "Q11303": "skyscraper",
+    "Q12413618": "international border",
+    "Q99527323": "architecture of geographic location"
    },
    "roles_en": []
   },
@@ -272,7 +297,12 @@
     "Q189118": "cell type",
     "Q12132": "calendar system",
     "Q107715": "physical quantity",
-    "Q1322005": "natural phenomenon"
+    "Q1322005": "natural phenomenon",
+    "Q214070": "physical law",
+    "Q483372": "paradox",
+    "Q1127759": "cognitive bias",
+    "Q2547976": "North Atlantic tropical cyclone",
+    "Q1293220": "physical phenomenon"
    },
    "occupations": {
     "Q901": "scientist",
@@ -310,7 +340,10 @@
     "Q55983715": "organisms known by a particular common name",
     "Q39367": "dog breed",
     "Q1160573": "horse breed",
-    "Q38829": "breed"
+    "Q38829": "breed",
+    "Q2144359": "environmental issue",
+    "Q20011319": "plant structure",
+    "Q7239": "organism"
    },
    "occupations": {},
    "roles_en": []
@@ -333,7 +366,9 @@
     "Q105967696": "vaccine type",
     "Q1931388": "cause of death",
     "Q929833": "rare disease",
-    "Q3241045": "disease outbreak"
+    "Q3241045": "disease outbreak",
+    "Q179661": "therapy",
+    "Q55215251": "medical test type"
    },
    "occupations": {
     "Q39631": "physician",
@@ -381,7 +416,11 @@
     "Q11016": "technology",
     "Q1068715": "telecommunications network",
     "Q811701": "model series",
-    "Q10929058": "product model"
+    "Q10929058": "product model",
+    "Q752783": "human spaceflight",
+    "Q42032": "country code top-level domain",
+    "Q15078788": "broadcasting",
+    "Q337540": "motor fuel"
    },
    "occupations": {
     "Q81096": "engineer",
@@ -592,7 +631,8 @@
     "Q11410": "game",
     "Q3273417": "lists of sportspeople",
     "Q135408445": "men's national association football team",
-    "Q47728": "hobby"
+    "Q47728": "hobby",
+    "Q13406554": "sports competition"
    },
    "occupations": {
     "Q2066131": "athlete",
@@ -703,7 +743,8 @@
     "Q4004706": "unicase alphabet",
     "Q29517555": "natural writing system",
     "Q335806": "abugida",
-    "Q152559": "macrolanguage"
+    "Q152559": "macrolanguage",
+    "Q19776628": "Latin-script letter"
    },
    "occupations": {
     "Q14467526": "linguist"
@@ -714,22 +755,39 @@
   },
   {
    "id": "food",
-   "en": "Food & drink",
-   "es": "Comida y bebida",
+   "en": "Food & farming",
+   "es": "Comida y agricultura",
    "roots": {
     "Q2095": "food",
     "Q746549": "dish",
     "Q40050": "drink",
     "Q25403900": "food ingredient",
-    "Q19861951": "type of food or dish"
+    "Q19861951": "type of food or dish",
+    "Q11451": "agriculture",
+    "Q235352": "crop",
+    "Q103459": "livestock",
+    "Q622852": "domesticated animal",
+    "Q11827455": "agricultural product",
+    "Q104214643": "agricultural practice",
+    "Q56395513": "farming system",
+    "Q4886": "cultivar",
+    "Q1364": "fruit",
+    "Q11004": "vegetable",
+    "Q1778821": "cuisine",
+    "Q154": "alcoholic beverage",
+    "Q3395383": "agricultural land",
+    "Q121288968": "farming method"
    },
    "occupations": {
     "Q3499072": "chef",
-    "Q156839": "cook"
+    "Q156839": "cook",
+    "Q131512": "farmer"
    },
    "roles_en": [
     "chef",
-    "cook"
+    "cook",
+    "farmer",
+    "agronomist"
    ]
   }
  ],
