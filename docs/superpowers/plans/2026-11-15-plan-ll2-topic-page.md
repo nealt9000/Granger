@@ -77,7 +77,7 @@ When a topic leads to a pack the phone lacks, read that article online from Kiwi
 - **What changed from the plan's first shape:**
   - k 48 over everything left room for only 2–3 results: the page's own chunks, its copy in another pack (Photosynthesis is in Top and Medicine) and its other-language article took most of the hits. Hence a larger k.
   - Articles and books are searched separately, because on Don Quixote the book took 234 of 256 hits.
-  - **Results stay in the page's language:** the other-language article is the Read-in link (Task 3), not Related.
+  - **Results stay in the page's language:** the other-language article is the Read-in button, not Related.
   - Same title in two packs is shown once.
   - Books need a score of at least **0.79**: science pages otherwise got Metamorphoses and the Bible at about 0.75.
   - Shown: up to 8 articles and 4 books, mixed by score.
@@ -87,7 +87,7 @@ When a topic leads to a pack the phone lacks, read that article online from Kiwi
   - Zamora and Zagreb under Zaragoza: near in the alphabet and in the vectors, not in meaning.
   - Caviar under Don Quixote, at #8.
   - Books that share a mood rather than a subject (Babbitt for Jazz, Main Street for Jane Austen).
-- **Still open for Task 4:**
+- **Still open (now in Task 2):**
   - Drop redirects and other packs' copies by QID rather than by title.
   - Land a book at its best passage, not at the colophon (Spanish Don Quijote's best hit is `colophon.xhtml`).
   - Show titles, not paths.
