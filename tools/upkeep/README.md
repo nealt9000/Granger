@@ -50,6 +50,8 @@ Each run writes `~/granger-upkeep/<date>/`:
 | `budget-over` | needs Neal | budget-call |
 | `repo-change` | review | review-repo-change |
 | `build-failed` | needs Neal | fix-build |
+| `bookpack-drift` | needs Neal | bookpack-drift |
+| `bookpack-candidate` | needs Neal | bookpack-candidate |
 
 ## Playbooks
 
@@ -95,6 +97,35 @@ so far (`"gpu": false`). Download the new ZIM into `~/Developer/Granger/vectors-
 playbook is done when the check exits 0 and `tools/sidecar/releases/` has a descriptor whose `sourceSha256` equals the
 candidate's `sha256`. A failing check is reported as it is (rule 4). Neal uploads the file; the next `check` moves the
 pack.
+
+**For `gbooks`** (Plan KB2, a book pack's manifest): don't download the ZIM. The builder reads it by range requests:
+1. Run the kind's `build` with `{zim}` set to the hold's new URL (`toUrl` in candidate-report.txt's hold line, or
+   `candidate.json`), adding `--source-sha256 <toSha256>`.
+2. Run its `check`. Exit 2 is drift: stop and report it as `bookpack-drift`.
+3. Write the descriptor:
+   `~/.venvs/granger-catalog/bin/python tools/sidecar/meta.py release {out}/{stem}.gbooks --id <pack id> --url
+   https://github.com/nealt9000/Granger/releases/download/bookpacks-<date>/{stem}.gbooks`.
+4. Neal makes the `bookpacks-<date>` release and uploads the file.
+
+### bookpack-drift
+
+A book pack's new snapshot was rebuilt in memory, and its manifest drifted from the published one: books lost (their
+readers' places would be orphaned), the count moved by more than 10%, more titles fell back to file names, or the
+builder failed (the site changed its pages). The pack stays held at its published snapshot, which is safe.
+1. Copy the finding into the summary.
+2. Run `tools/bookpacks/build.py <pack> <toUrl> --out /tmp/<pack>.json --catalog catalog/catalog.json --sample 30`,
+   and add its stats and sample.
+3. Stop. Neal decides whether to fix the pack's settings in `tools/bookpacks/book_packs.json`, accept the change, or
+   keep holding.
+
+### bookpack-candidate
+
+A new pack, or a new snapshot, looks like a bundle of books by its file counts (Plan KB2's audit rule) and isn't in
+`tools/bookpacks/book_packs.json`.
+1. Run `tools/bookpacks/build.py` with a trial row (`"extractor": "zimit-index"`, or `"kolibri"` for a Kolibri pack)
+   in a copy of the config, with `--out /tmp/<pack>.json --sample 30`. Add the stats and the sample to the summary.
+2. Stop. Neal says yes (add the row: shelf, noun, provider, overrides) or no (add the pack to `notBooks` with a
+   reason, so it isn't raised again).
 
 ### replace-or-drop
 

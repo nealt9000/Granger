@@ -24,6 +24,7 @@ import sys
 HERE = pathlib.Path(__file__).resolve().parent
 REPO_ROOT = HERE.parents[1]
 sys.path.insert(0, str(REPO_ROOT / "tools/catalog-gen"))
+sys.path.insert(0, str(REPO_ROOT / "tools/bookpacks"))
 import catalog_gen as cg  # noqa: E402
 
 GROUPS = ("needs-neal", "ready", "review", "waiting")
@@ -46,6 +47,8 @@ KINDS = {
     "budget-over": ("needs-neal", "budget-call"),
     "repo-change": ("review", "review-repo-change"),
     "build-failed": ("needs-neal", "fix-build"),
+    "bookpack-drift": ("needs-neal", "bookpack-drift"),
+    "bookpack-candidate": ("needs-neal", "bookpack-candidate"),
 }
 
 
@@ -106,6 +109,87 @@ def compare(published, candidate, holds):
     return out
 
 
+BOOK_MIMES = ("application/pdf", "application/epub+zip")
+
+
+def looks_like_books(counter):
+    """
+    Plan KB2's audit rule, from a ZIM's Counter metadata: at least 3 PDFs/EPUBs, and either as many documents as half
+    its HTML pages or no more than 10 pages (a container whose pages only wrap the files).
+    """
+    docs = sum(counter.get(m, 0) for m in BOOK_MIMES)
+    html = sum(n for m, n in counter.items() if m.startswith("text/html"))
+    return docs >= 3 and (docs >= 0.5 * html or html <= 10), docs, html
+
+
+def _probe_counter(url):
+    import zim_probe
+    record = zim_probe.probe(url)
+    if record.get("error"):
+        raise IOError(record["error"])
+    return zim_probe.parse_counter(record.get("metadata", {}).get("Counter"))
+
+
+def _dry_rebuild(name, url, cfg, previous_url):
+    """(drift lines, item count) for a rebuild of [name]'s manifest from [url], against its published one."""
+    import tempfile
+    import build as bookbuild
+    import check as bookcheck
+    previous = bookbuild.read_gbooks(bookbuild.fetch(previous_url, tempfile.mkdtemp(prefix="gbooks-"))) \
+        if previous_url else None
+    manifest = bookbuild.build(name, url, cfg, previous)
+    return bookcheck.problems_of(manifest) + bookcheck.drift_of(manifest, previous), len(manifest["items"])
+
+
+def bookpack_findings(published, candidate, holds, config=None, probe=_probe_counter, rebuild=_dry_rebuild):
+    """
+    Plan KB2 §5. A pack held for its gbooks sidecar is rebuilt in memory (range reads, nothing written or uploaded) and
+    compared with its published manifest: drift or a failing extractor is `bookpack-drift`, so Neal looks before the
+    agent uploads. A new pack, or a new snapshot, that looks like a book bundle and isn't in book_packs.json (as a pack
+    or as reviewed `notBooks`) is a `bookpack-candidate`.
+    """
+    if config is None:
+        file = REPO_ROOT / "tools/bookpacks/book_packs.json"
+        config = json.loads(file.read_text(encoding="utf-8")) if file.exists() else {}
+    packs, not_books = config.get("packs", {}), config.get("notBooks", {})
+    out = []
+    old = {p["id"]: p for p in published.get("packs", [])}
+    new = {p["id"]: p for p in candidate.get("packs", [])}
+    for h in holds:
+        if not h["held"] or "gbooks" not in h["reasons"] or h["zim"] not in packs:
+            continue
+        name = h["zim"]
+        url = h.get("toUrl")
+        previous_url = next((s["url"] for p in published.get("packs", []) if p.get("zimName") == name
+                             for s in p.get("sidecars", []) if s.get("kind") == "gbooks"), None)
+        if not url:
+            continue
+        try:
+            lines, n = rebuild(name, url, packs[name], previous_url)
+        except Exception as e:  # noqa: BLE001 - an extractor that breaks on a new snapshot is the finding
+            out.append(finding("bookpack-drift", h["ids"], f"{name}: the manifest builder failed on {h['to']}: {e}"))
+            continue
+        if lines:
+            out.append(finding("bookpack-drift", h["ids"], f"{name} {h['to']} ({n} items): " + "; ".join(lines)))
+    changed = [pid for pid in new if pid not in old or old[pid].get("sha256") != new[pid].get("sha256")]
+    seen = set()
+    for pid in sorted(changed):
+        p = new[pid]
+        name = p.get("zimName") or pid
+        if name in seen or name in packs or name in not_books or p.get("content") == "books":
+            continue
+        seen.add(name)
+        try:
+            counter = probe(p["urls"][0])
+        except Exception:  # noqa: BLE001 - an unreadable pack is the link check's business, not this one's
+            continue
+        books, docs, html = looks_like_books(counter)
+        if books:
+            out.append(finding("bookpack-candidate", [pid], f"{name}: {docs} PDF/EPUB files beside {html} HTML pages; "
+                                                            "a book collection?"))
+    return out
+
+
 def budget_findings(catalog):
     out = []
     for language, budget in cg.TIER_BUDGETS.items():
@@ -157,7 +241,8 @@ def report(findings, meta):
     return "\n".join(lines) + "\n"
 
 
-def check(out_dir, published_path, curated_path, build=cg.build, status=None, sleep=None, today=None):
+def check(out_dir, published_path, curated_path, build=cg.build, status=None, sleep=None, today=None,
+          bookpacks=bookpack_findings):
     out_dir = pathlib.Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     published = json.loads(pathlib.Path(published_path).read_text(encoding="utf-8"))
@@ -174,6 +259,7 @@ def check(out_dir, published_path, curated_path, build=cg.build, status=None, sl
         (out_dir / "candidate-report.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
         findings += compare(published, candidate, holds)
         findings += budget_findings(candidate)
+        findings += bookpacks(published, candidate, holds)
     findings += link_findings(published, candidate or published, status, sleep)
     order = {g: i for i, g in enumerate(GROUPS)}
     findings.sort(key=lambda f: (order[f["group"]], f["kind"], f["ids"]))

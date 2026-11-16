@@ -1,10 +1,27 @@
 {
-  "about": "Plan KB2: the Kiwix packs shown as book collections through a .gbooks manifest, and how build.py reads each (extractor, filters, groups, title overrides). Gutenberg and nautilus packs carry their own lists and aren't here. `shelves` puts list-carrying book packs (content \"books\") on a Books shelf by name prefix (Plan KB2 Decision 4).",
+  "about": "Plan KB2: the Kiwix packs shown as book collections through a .gbooks manifest, and how build.py reads each (extractor, filters, groups, title overrides). Gutenberg and nautilus packs carry their own lists and aren't here. `shelves` puts list-carrying book packs (content \"books\") on a Books shelf by name prefix (Plan KB2 Decision 4). `notBooks` lists packs the audit or Neal judged not to be book collections, with why, so upkeep doesn't raise them as candidates.",
   "shelves": {
     "gutenberg_": "literature",
     "zimgit-": "manuals",
     "usda-": "manuals",
     "prunelle_": "children"
+  },
+  "notBooks": {
+    "theworldfactbook_en_all": "web: its PDFs repeat the country pages",
+    "tomlehrersongs.com_en_all": "web: one lyric sheet beside each song page",
+    "music.dalitio.de_en_all": "scores (a Scores collection type later)",
+    "mutopiaproject.org_en_all": "scores",
+    "celticscores.com_en_all": "scores",
+    "partituras-gratis.es_es_all": "scores",
+    "cheatography.com_en_all": "web: PDF copies of its sheets",
+    "medlineplus.gov_en_all": "web: handouts repeat pages",
+    "ready.gov_en_all": "web, with files (Files in this pack)",
+    "ready.gov_es_all": "web, with files (Files in this pack)",
+    "wikibooks_en_all": "web: printable copies of its books",
+    "marxists.org_es_all": "not listed in Granger's catalog",
+    "booksdash_en_all": "picture books as page images: later (design §1 B)",
+    "armypubs_en_all": "book pack, second pass (Decision 1)",
+    "alexandria.dk_en_all": "Danish scenarios, not in Granger's languages"
   },
   "packs": {
     "africanstorybook.org_mul_all": {

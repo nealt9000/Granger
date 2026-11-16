@@ -517,7 +517,9 @@ def hold_back(packs, previous, derived, status=None, sleep=time.sleep):
         if not why:
             continue
         old, new = before[moved[0]["id"]].get("snapshotDate"), moved[0].get("snapshotDate")
-        record = {"zim": name, "ids": [p["id"] for p in moved], "from": old, "to": new, "reasons": reasons}
+        record = {"zim": name, "ids": [p["id"] for p in moved], "from": old, "to": new, "reasons": reasons,
+                  # Plan KB2: the new file, for a sidecar rebuild (and upkeep's dry manifest build) before it's pinned
+                  "toUrl": (moved[0].get("urls") or [None])[0], "toSha256": moved[0].get("sha256")}
         if dead_links([u for p in moved for u in before[p["id"]].get("urls", [])], status, sleep=sleep):
             lines.append({**record, "held": False,
                           "text": f"  {name}: moved to {new} anyway, {old} no longer answers; " + "; ".join(why)})

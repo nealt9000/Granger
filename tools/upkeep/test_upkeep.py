@@ -90,7 +90,7 @@ def test_check_writes_findings_report_and_candidate(tmp_path, monkeypatch):
         return cat(pack("cook", "c2", "2026-11"))
 
     found = upkeep.check(tmp_path / "out", tmp_path / "pub.json", tmp_path / "cur.json", build=build,
-                         status=lambda u: 200, sleep=lambda s: None)
+                         status=lambda u: 200, sleep=lambda s: None, bookpacks=lambda *a: [])
     assert kinds(found) == [("snapshot-ready", ("cook",))]
     data = json.loads((tmp_path / "out/findings.json").read_text())
     assert data["findings"][0]["action"] == "apply-candidate" and data["links"] == 1
@@ -108,7 +108,7 @@ def test_check_reports_a_failed_build_and_still_checks_links(tmp_path):
         raise SystemExit("preset starter lists unknown items ['gone']")
 
     found = upkeep.check(tmp_path / "out", tmp_path / "pub.json", tmp_path / "cur.json", build=build,
-                         status=lambda u: 404, sleep=lambda s: None)
+                         status=lambda u: 404, sleep=lambda s: None, bookpacks=lambda *a: [])
     assert kinds(found) == [("build-failed", ()), ("dead-link", ("cook",))]
     assert not (tmp_path / "out/candidate.json").exists()
     assert "unknown items" in (tmp_path / "out/report.md").read_text()
@@ -122,3 +122,49 @@ def test_every_kind_has_a_playbook_in_the_readme():
         name = action.split(" ")[0]
         if name != "none:":
             assert f"### {name}" in readme, name
+
+
+# ---------- Plan KB2: book packs ----------
+
+def test_the_audit_rule_tells_a_book_bundle_from_a_site():
+    assert upkeep.looks_like_books({"application/pdf": 24, "text/html": 2})[0]            # a container
+    assert upkeep.looks_like_books({"application/epub+zip": 5165, "text/html": 5724})[0]  # one page per book
+    assert not upkeep.looks_like_books({"application/pdf": 27202, "text/html": 66886})[0]  # PDFs of a site's pages
+    assert not upkeep.looks_like_books({"application/pdf": 2, "text/html": 1})[0]
+
+
+def test_a_new_book_bundle_is_a_candidate_unless_known():
+    published = cat(pack("site", "s1"))
+    candidate = cat(pack("site", "s1"), pack("manuals", "m1"), pack("sheets", "x1"), pack("known", "k1"),
+                    pack("gut", "g1", content="books"))
+    counters = {"manuals": {"application/pdf": 40, "text/html": 3}, "sheets": {"application/pdf": 9, "text/html": 4},
+                "known": {"application/pdf": 50, "text/html": 1}, "gut": {"application/epub+zip": 9}}
+    config = {"packs": {"known": {}}, "notBooks": {"sheets": "scores"}}
+    found = upkeep.bookpack_findings(published, candidate, [], config,
+                                     probe=lambda u: counters[u.split("/")[-1].split("_")[0]])
+    assert kinds(found) == [("bookpack-candidate", ("manuals",))]
+    assert "40 PDF/EPUB files beside 3 HTML pages" in found[0]["summary"]
+
+
+def test_a_held_manifest_that_drifts_or_breaks_is_reported_and_a_clean_one_isnt():
+    published = cat(pack("milmed", "a", "2026-10", sidecars=[{"kind": "gbooks", "url": "https://r/milmed.gbooks"}]))
+    candidate = cat(pack("milmed", "a", "2026-10"))
+    hold = {"held": True, "zim": "milmed", "ids": ["milmed"], "from": "2026-10", "to": "2026-12", "reasons": ["gbooks"],
+            "toUrl": "https://dl.example/milmed_2026-12.zim", "toSha256": "b"}
+    config = {"packs": {"milmed": {"extractor": "zimit-index"}}}
+    calls = []
+
+    def rebuild(name, url, cfg, previous_url):
+        calls.append((name, url, previous_url))
+        return (["2 books lost (keys gone): 'A', 'B'"], 22)
+
+    found = upkeep.bookpack_findings(published, candidate, [hold], config, probe=None, rebuild=rebuild)
+    assert calls == [("milmed", "https://dl.example/milmed_2026-12.zim", "https://r/milmed.gbooks")]
+    assert kinds(found) == [("bookpack-drift", ("milmed",))] and "2 books lost" in found[0]["summary"]
+    assert upkeep.bookpack_findings(published, candidate, [hold], config, rebuild=lambda *a: ([], 24)) == []
+
+    def broken(*a):
+        raise ValueError("no pages")
+
+    found = upkeep.bookpack_findings(published, candidate, [hold], config, rebuild=broken)
+    assert "builder failed on 2026-12: no pages" in found[0]["summary"]
