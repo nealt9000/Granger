@@ -5,8 +5,9 @@ package app.granger.topic
  * few words the link file keeps). Pure; the app reads the chapter's text out of the EPUB.
  */
 object QuoteSentence {
-    private const val MAX = 320
-    private const val SIDE = 150
+    /** Four lines on a phone: longer sentences are cut to a window with the mention in it. */
+    private const val MAX = 210
+    private const val SIDE = 90
     private val END = Regex("[.!?…»”\"]")
 
     /**

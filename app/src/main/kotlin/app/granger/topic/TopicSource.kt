@@ -169,7 +169,7 @@ class TopicSource(
         val articles = r.articles.take(SHOWN).mapNotNull { h ->
             val id = ids[h.target] ?: return@mapNotNull null
             val l = lead(id, h.key)
-            TopicArticle(id, h.key, l?.title ?: titleOf(h.key), l?.sentence.orEmpty(), l?.thumbnail)
+            TopicArticle(id, h.key, l?.title ?: titleOf(h.key), blurb(l?.sentence.orEmpty()), l?.thumbnail)
         }
         val books = r.books.mapNotNull { h -> bookOf(h.target)?.let { TopicBook(it, h.key) } }
         return articles to books
@@ -194,6 +194,13 @@ class TopicSource(
         const val SHOWN = 8
         /** Book quotes shown on the page, each read whole from its book. */
         const val QUOTES = 3
+
+        /** A card's first sentence without its bracketed asides: birth names, pronunciations, Greek. */
+        fun blurb(sentence: String): String {
+            var s = sentence
+            repeat(3) { s = s.replace(Regex("\\s*[(\\[][^()\\[\\]]*[)\\]]"), "") }
+            return s.replace(Regex("\\s+([,.;:])"), "$1").replace(Regex("\\s{2,}"), " ").trim()
+        }
 
         fun titleOf(path: String): String = app.granger.core.library.PageTitles.clean(path.substringAfterLast('/').replace('_', ' '))
     }

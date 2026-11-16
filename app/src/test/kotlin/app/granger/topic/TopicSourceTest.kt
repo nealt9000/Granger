@@ -194,6 +194,7 @@ class QuoteSentenceTest {
     @Test fun theMentionsWholeSentence() {
         assertThat(QuoteSentence.around(chapter, "conversation that was started about ", "Napoleon"))
             .isEqualTo("In the midst of a conversation that was started about Napoleon’s Spanish affairs, which they all agreed in approving, Prince Andrew began to express a contrary opinion.")
+        assertThat(QuoteSentence.around("Short. Napoleon won. Then more.", "", "Napoleon")).isEqualTo("Napoleon won.")
     }
 
     @Test fun theWordsBeforeChooseTheOccurrence() {
@@ -206,10 +207,19 @@ class QuoteSentenceTest {
         assertThat(s).startsWith("…")
         assertThat(s).endsWith("…")
         assertThat(s).contains("Napoleon")
-        assertThat(s.length).isAtMost(330)
+        assertThat(s.length).isAtMost(220)
     }
 
     @Test fun aQuoteNotInTheTextIsNull() {
         assertThat(QuoteSentence.around(chapter, "", "Wellington")).isNull()
+    }
+}
+
+class BlurbTest {
+    @Test fun bracketedAsidesGo() {
+        assertThat(TopicSource.blurb("The Panthéon (French: [pɑ̃.te.ɔ̃], from Ancient Greek πάνθειον (pántheion)) is a monument in Paris."))
+            .isEqualTo("The Panthéon is a monument in Paris.")
+        assertThat(TopicSource.blurb("Napoleon III (born Charles-Louis Napoléon Bonaparte; 20 April 1808 – 9 January 1873) was the first President of France."))
+            .isEqualTo("Napoleon III was the first President of France.")
     }
 }
