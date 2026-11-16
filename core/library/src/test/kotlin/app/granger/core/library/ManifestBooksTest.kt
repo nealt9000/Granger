@@ -277,6 +277,80 @@ class ManifestBooksTest {
         assertThat(BookIds.of(BookOrigin.KIWIX, "a/b")).isEqualTo("book:kiwix:a/b")
     }
 
+    // --- Task 2.2: a pure container with no manifest lists its files ---
+
+    private fun entry(path: String, mime: String = "application/pdf", size: Long = 2_000) =
+        app.granger.core.zim.ZimEntry(path, path.substringAfterLast('/'), mime, size)
+
+    @Test fun aPureContainerWithNoManifestListsItsFilesTitledByTheirNames() = test {
+        val paths = listOf("files/A_Treatise%20on_Hedges.pdf", "files/bee-keeping.epub", "files/Field_Radio.pdf?x=1")
+        val text = PdfFixtures.text(src, "text.pdf").readBytes()
+        val archive = FakeZimArchive(
+            "u-box", "Box of manuals", name = "manuals.example_en_all", counter = "text/html=3;application/pdf=2;application/epub+zip=1;image/png=9",
+            files = paths.associateWith { "application/pdf" to text },
+            listed = listOf(entry(paths[0]), entry(paths[1], "application/epub+zip"), entry("files/cover.png", "image/png"), entry(paths[2])),
+        )
+        archives["u-box"] = archive
+        db.packDao().upsert(
+            Pack("u-box", "/packs/u-box.zim", "Box of manuals", "", "eng", "2026-10-01", 1_000L, true, PackStatus.OK, 0L, name = "manuals.example_en_all", scraper = "zimit"),
+        )
+        manifests.attach(emptyMap())
+        val pack = db.packDao().get("u-box")!!
+        assertThat(pack.bookManifest).isEqualTo(Pack.BOOK_FILES)
+        assertThat(pack.bookSource).isEqualTo(BookOrigin.KIWIX)
+        assertThat(BookManifest.titleOf(pack)).isNull()
+        books.sync(listOf(pack))
+        val rows = rows()
+        assertThat(rows.map { it.title }).containsExactly("A Treatise on Hedges", "bee-keeping", "Field Radio").inOrder()
+        assertThat(rows.map { it.format }).containsExactly(BookFormat.PDF, BookFormat.EPUB, BookFormat.PDF).inOrder()
+        assertThat(rows.first().id).isEqualTo("book:kiwix:manuals.example_en_all/files/A_Treatise%20on_Hedges.pdf")
+        assertThat(rows.map { it.groupName }.toSet()).containsExactly(null)
+        assertThat(Filing.defaultName("kiwixbooks-manuals.example_en_all", pack)).isEqualTo("Box of manuals")
+        // A link to one of its files opens its row.
+        assertThat(PackBookLinks({ db.packDao().getAll() }, listOf(books)).bookFor("u-box", "files/Field_Radio.pdf?x=1")?.title).isEqualTo("Field Radio")
+        assertThat(books.restore(rows.last())).isTrue()
+        // A manifest built from another file doesn't take over; a verified one does.
+        manifests.attach(mapOf("u-box" to ManifestFile(manifest(example), "b".repeat(64))))
+        assertThat(db.packDao().get("u-box")!!.bookManifest).isEqualTo(Pack.BOOK_FILES)
+        manifests.attach(mapOf("u-box" to ManifestFile(manifest(example), ZIMIT_SHA)))
+        assertThat(db.packDao().get("u-box")!!.bookManifest).isEqualTo(File(tmp.root, "sidecars/$example").absolutePath)
+    }
+
+    @Test fun aWebsiteWithManyDocumentsStaysAWebsite() = test {
+        // The World Factbook: 839 PDFs beside 830 pages. The rule doesn't loosen.
+        install("u-wf", "theworldfactbook_en_all", counter = "text/html=830;application/pdf=839;image/jpeg=2000")
+        // Two documents aren't a library; nor is a pack whose Counter says nothing.
+        install("u-two", "two.example_en_all", counter = "text/html=1;application/pdf=2")
+        install("u-none", "none.example_en_all")
+        manifests.attach(emptyMap())
+        assertThat(db.packDao().getAll().map { it.bookManifest }.toSet()).containsExactly(null)
+        assertThat(BookFiles.isContainer("text/html=10;application/pdf=3")).isTrue()
+        assertThat(BookFiles.isContainer("text/html=11;application/pdf=300")).isFalse()
+        assertThat(BookFiles.isContainer("text/html; charset=utf-8=4;application/epub+zip=3")).isTrue()
+        assertThat(BookFiles.parseCounter("text/html=12;bad;image/png=x;application/pdf=3")).containsExactly("text/html", 12, "application/pdf", 3)
+    }
+
+    @Test fun aPackThatCantBeOpenedKeepsItsFilesListing() = test {
+        install("u-box", "box_en_all", counter = "text/html=1;application/pdf=5")
+        manifests.attach(emptyMap())
+        assertThat(db.packDao().get("u-box")!!.bookManifest).isEqualTo(Pack.BOOK_FILES)
+        // Read once per snapshot: the archive going away later doesn't flip it.
+        archives.remove("u-box")
+        manifests.attach(emptyMap())
+        assertThat(db.packDao().get("u-box")!!.bookManifest).isEqualTo(Pack.BOOK_FILES)
+        // A fresh reader that can't open it keeps what the row says.
+        BookManifests(db, { null }, dispatcher).attach(emptyMap())
+        assertThat(db.packDao().get("u-box")!!.bookManifest).isEqualTo(Pack.BOOK_FILES)
+    }
+
+    @Test fun fileNameTitles() {
+        assertThat(BookFiles.titleOf("a/b/Water_Purification%E2%80%94Part_1.pdf")).isEqualTo("Water Purification—Part 1")
+        assertThat(BookFiles.titleOf("a/C%2B%2B_Primer.epub")).isEqualTo("C++ Primer")
+        assertThat(BookFiles.titleOf("viewcontent.cgi?article=1028")).isEqualTo("viewcontent")
+        assertThat(BookFiles.titleOf("x/100%_sure.pdf")).isEqualTo("100% sure")
+        assertThat(BookFiles.titleOf("x/.pdf")).isEqualTo(".pdf")
+    }
+
     private companion object {
         /** sha256 of core/library/src/test/resources/gbooks/zimit-books.zim and kolibri-books.zim. */
         const val ZIMIT_SHA = "71ee36ed0e7093ba1a02d6c6ceaba82dced94239323c20fe86e6aeb633bb9858"

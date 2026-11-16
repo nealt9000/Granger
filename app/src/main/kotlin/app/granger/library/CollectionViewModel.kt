@@ -135,7 +135,11 @@ class CollectionViewModel(
         val pack = packs.firstOrNull { it.isBookPack && Filing.defaultKey(it) == key }
         val packName = pack?.name ?: row.books.firstOrNull()?.let(PackBooks::packNameOf)
         val header = GutenbergHeader(pack, row.books.size, row.books.count { it.searchableInFull }, packName?.let(runs::get))
-        if (Filing.isKiwixBooksCollection(key)) header.copy(kind = HeaderKind.KIWIX_LIBRARY) else header
+        if (Filing.isKiwixBooksCollection(key)) {
+            header.copy(kind = HeaderKind.KIWIX_LIBRARY, fromFileNames = pack?.bookManifest == Pack.BOOK_FILES)
+        } else {
+            header
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** What "Make all searchable…" would take here; null when it isn't offered. */
@@ -248,6 +252,8 @@ data class GutenbergHeader(
     val searchable: Int,
     val progress: SearchableProgress? = null,
     val kind: HeaderKind = HeaderKind.GUTENBERG,
+    /** A pack listed with no manifest (Plan KB2 Task 2.2): its titles are its files' names, and the header says so. */
+    val fromFileNames: Boolean = false,
 ) {
     /** "Project Gutenberg", "Kiwix library". */
     val provider: UiText get() = when (kind) {
@@ -266,8 +272,12 @@ data class GutenbergHeader(
     /** "37 searchable in full". */
     val searchableText: UiText get() = UiText.Plural(R.plurals.library_searchable_in_full, searchable, number(searchable))
 
-    /** "Project Gutenberg · 1,284 books · 37 searchable in full". */
+    /** "Titles from file names", for a collection listed with no manifest; null otherwise. */
+    val fileNamesText: UiText? get() = if (fromFileNames) UiText.Res(R.string.library_titles_from_file_names) else null
+
+    /** "Project Gutenberg · 1,284 books · 37 searchable in full", and "Titles from file names" when it applies. */
     val text: UiText get() = UiText.Res(R.string.library_dotted, provenance, searchableText)
+        .let { line -> fileNamesText?.let { UiText.Res(R.string.library_dotted, line, it) } ?: line }
 
     private fun number(n: Int) = java.text.NumberFormat.getIntegerInstance().format(n)
 }

@@ -20,6 +20,8 @@
     <string name="library_dotted">%1$s · %2$s</string>
     <!-- A Kiwix book pack's collection, whose books are documents (Plan KB). -->
     <string name="library_kiwix_library">Kiwix library</string>
+    <!-- Under a Kiwix collection listed with no book manifest: its titles are only its files' names (Plan KB2). -->
+    <string name="library_titles_from_file_names">Titles from file names</string>
     <!-- %1$s is the count, formatted, such as 1,284. -->
     <plurals name="library_books_counted">
         <item quantity="one">%1$s book</item>

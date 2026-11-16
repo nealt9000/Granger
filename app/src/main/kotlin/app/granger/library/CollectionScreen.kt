@@ -393,6 +393,9 @@ private fun GutenbergHead(header: GutenbergHeader) {
         Column(Modifier.clearAndSetSemantics { contentDescription = all }) {
             Text(header.provenance.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(header.searchableText.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            header.fileNamesText?.let {
+                Text(it.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
         header.progress?.let { p ->
             val number = java.text.NumberFormat.getIntegerInstance()

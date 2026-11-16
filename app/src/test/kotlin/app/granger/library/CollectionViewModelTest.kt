@@ -469,4 +469,29 @@ class CollectionViewModelTest {
         assertThat(rowCountText(foodRow.copy(books = foodRow.books.take(1).map { it.copy(indexedAt = null) })).en())
             .isEqualTo("Kiwix library · 1 document")
     }
+
+    // --- Plan KB2 Task 2.2: a pure container listed by its files' names ---
+
+    @Test fun aCollectionListedByFileNamesSaysSo() = runTest(main.dispatcher) {
+        val box = pack("u-box", "Box of manuals").copy(name = "box_en_all", scraper = "zimit", bookManifest = app.granger.core.library.Pack.BOOK_FILES)
+        val key = "kiwixbooks-box_en_all"
+        val row = CollectionRow(
+            ShelfCollection("c:$key", "Box of manuals", "lit", false, defaultKey = key), emptyList(),
+            listOf(book("book:kiwix:box_en_all/files/a.pdf", "a").copy(origin = BookOrigin.KIWIX, sourceRef = "box_en_all/files/a.pdf", ord = 0)),
+        )
+        library.packList.value = listOf(box)
+        show(row)
+        val vm = vm("c:$key")
+        backgroundScope.launch { vm.gutenbergHeader.collect {} }
+        testScheduler.advanceUntilIdle()
+        val header = vm.gutenbergHeader.value!!
+        assertThat(header.pack).isEqualTo(box)
+        assertThat(header.fromFileNames).isTrue()
+        assertThat(header.fileNamesText.en()).isEqualTo("Titles from file names")
+        assertThat(header.text.en()).endsWith(" · Titles from file names")
+        // A manifest pack's header doesn't.
+        library.packList.value = listOf(box.copy(bookManifest = "/s/box.gbooks"))
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.gutenbergHeader.value!!.fromFileNames).isFalse()
+    }
 }

@@ -272,10 +272,26 @@ Python for tools).
       `PublishedCatalogTest` and `SourceViewModelTest` counts 50→55 / 9→14 book packs.
     - Suites: `:core:catalog` 77, `:core:downloads` 158, `:core:library` 491, `:core:zim` 31, `:app` 1799 (112 skipped),
       0 failures.
-- [ ] **Task 2.2: fallback.**
+- [x] **Task 2.2: fallback.**
   - When a pack looks like a book bundle (`content: "books"` or the audit's rules on its Counter) but has no manifest,
     list it with `ZimArchive.list`, titled by file name.
   - The header says "Titles from file names".
+  - **Done 2026-11-16** (this commit; the code came with Task 2.1's, as `BookManifests.attach` decides both).
+    - The rule is the Counter's alone, on the phone: `ZimMetadata.counter` (libkiwix `Counter`), at least 3
+      PDF/EPUB entries and **at most 10** `text/html*` entries (`BookFiles.isContainer`). Not loosened: the World
+      Factbook (839 PDFs, 830 pages) stays a web pack (tested). `content: "books"` isn't used: every such pack today is
+      nautilus or Gutenberg, with lists of their own. Read once per snapshot (cached by pack id); a pack that can't be
+      opened keeps what its row says.
+    - Such a pack gets `bookManifest = "files"`: `ManifestSource` walks `ZimArchive.list({pdf, epub})` in path order,
+      key = the entry path, title = the file name without query or extension, `%xx` decoded (a `+` stays), underscores
+      as spaces (`BookFiles.titleOf`). No sections; `ord` is the walk order. A verified manifest takes over when it
+      arrives (keys change from paths to manifest keys).
+    - The collection header adds "Titles from file names" (`library_titles_from_file_names`, en + es "Títulos tomados
+      de los nombres de archivo"), as a third line under the provenance; the collection is named by the pack title.
+    - Tests: `ManifestBooksTest` +4 (a container listed by names, link tap, restore, a manifest taking over; Factbook
+      and too-few-documents stay websites, Counter parsing; a pack that can't be opened keeps "files"; file-name
+      titles), `CollectionViewModelTest.aCollectionListedByFileNamesSaysSo`. `:core:library` 495, `:app` 1800 (112
+      skipped), 0 failures.
 - [ ] **Task 2.3: groups in the collection screen.**
   - Section headers from manifest groups (Level 1–5; Handbooks; The book / Course materials).
   - A language chip when a collection holds more than one language.
