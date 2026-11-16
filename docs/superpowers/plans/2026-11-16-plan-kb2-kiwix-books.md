@@ -209,16 +209,17 @@ Python for tools).
   - Hold records now carry `toUrl` and `toSha256`.
   - Both playbooks are in the README; the gbooks rebuild needs no ZIM download.
   - Smoke-tested live: SMBC is judged a book bundle, and a Military Medicine dry rebuild gives 24 items with no drift.
-- [ ] **Task 1.6: build, check, release prep.**
+- [x] **Task 1.6: build, check, release prep.**
   - [x] Built and checked all five catalog packs' `.gbooks` from their pinned files (exit 0), into
     `~/Developer/Granger/vectors-work/bookpacks-2026-11-16/`, 4.6 MB in all (Survivor 4.25 MB).
   - [x] Wrote the descriptors (`tools/sidecar/releases/*.gbooks.json`, release `bookpacks-2026-11-16`) and attached
     them to the catalog with the shelves, unsigned. A semantic diff shows only the 5 `gbooks` sidecars, the 56
     `shelf` keys and `generatedAt`.
   - [x] Wrote the upload script: `tools/bookpacks/upload_release.sh`, resumable, 10 per batch.
-  - [ ] **Neal:** run
-    `tools/bookpacks/upload_release.sh bookpacks-2026-11-16 ~/Developer/Granger/vectors-work/bookpacks-2026-11-16`.
-  - [ ] `check-links`, then **Neal signs**; then `:core:catalog` tests (they read the signature).
+  - [x] Neal uploaded release `bookpacks-2026-11-16` (2026-11-16). All five downloads match their descriptors'
+    sha256.
+  - [x] `check-links`: all 3,226 links answer. Neal signed; `verify` passes, and `:core:catalog` gives 76 tests and
+    0 failures.
 
 ## Phase 2: the phone reads manifests
 
