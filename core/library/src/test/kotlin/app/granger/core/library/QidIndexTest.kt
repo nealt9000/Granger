@@ -128,6 +128,15 @@ class QidIndexTest {
         assertThat(all.topIn("places", 5).map { it.packId to it.path }).containsExactly("es" to "Bélgica", "en" to "London").inOrder()
         assertThat(all.topIn("places", 1, offset = 1).map { it.path }).containsExactly("London")
         assertThat(all.topIn("literature", 5).map { it.path }).containsExactly("Jane_Austen", "Pride_and_Prejudice").inOrder()
+        // History is Jane Austen's second subject: she's on History's page, after its own articles, but not its example.
+        assertThat(all.topIn("history", 5).map { it.path }).containsExactly("Jane_Austen")
+        assertThat(all.topIn("history", 5, mainOnly = true)).isEmpty()
+        // London (rank 300) has History only second; Jane Austen (150) has it first, so she leads History's page.
+        val mixed = QidIndexes(listOf(QidIndex.open(gqid("mixed", top, subjects = listOf(
+            listOf(84L, 0, "places"), listOf(84L, 1, "history"), listOf(36322L, 0, "history"),
+        )), "mixed")!!))
+        assertThat(mixed.topIn("history", 5).map { it.path to it.mainSubject }).containsExactly("Jane_Austen" to true, "London" to false).inOrder()
+        mixed.close()
         all.close()
     }
 }

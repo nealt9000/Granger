@@ -71,9 +71,12 @@ class TimeIndex private constructor(private val db: SQLiteDatabase, val packId: 
         return query("y0 >= $from AND y0 <= $to$lane ORDER BY rank DESC LIMIT $k")
     }
 
-    /** The items whose mark starts in [from]..[to], in qid order, for [TimeIndexes.countStarting]. */
-    internal fun qidsStarting(from: Int, to: Int): android.database.Cursor =
-        db.rawQuery("SELECT DISTINCT qid FROM marks WHERE y0 >= $from AND y0 <= $to ORDER BY qid", null)
+    /** The items whose mark falls in [from]..[to] by [ACTIVE], in qid order, for [TimeIndexes.countActive]. */
+    internal fun qidsActive(from: Int, to: Int): android.database.Cursor =
+        db.rawQuery("SELECT DISTINCT qid FROM marks WHERE $ACTIVE >= $from AND $ACTIVE <= $to ORDER BY qid", null)
+
+    /** The best-known [k] marks falling in [from]..[to] by [ACTIVE], highest ranked first. */
+    fun topActive(from: Int, to: Int, k: Int): List<TimeMark> = query("$ACTIVE >= $from AND $ACTIVE <= $to ORDER BY rank DESC LIMIT $k")
 
     /** The mark for the article at [path], if this pack has it dated. */
     fun find(path: String): TimeMark? {
@@ -147,6 +150,11 @@ class TimeIndex private constructor(private val db: SQLiteDatabase, val packId: 
         }
 
     companion object {
+        /**
+         * When a mark belongs to an era (Explore): a life at about forty, or its end if sooner (Hitler, born 1889, is a
+         * 1900–1945 figure, not an 1800s one); anything else at its start. SQL, over the marks table's columns.
+         */
+        const val ACTIVE = "(CASE kind WHEN 2 THEN MIN(y0 + 40, COALESCE(y1, y0 + 40)) ELSE y0 END)"
         const val FORMAT = 1
 
         /** Opens [file] read-only for [packId]; null if it's missing, unreadable or a format this app doesn't read. */
@@ -232,8 +240,15 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
     fun search(text: String, lanes: Set<Lane>, limit: Int): List<TimeMark> =
         merge(indexes.map { it.search(text, lanes, limit) }).sortedByDescending { it.rank }.take(limit)
 
-    /** How many items have a mark starting in [from]..[to], each once however many packs date it (Explore's eras). */
-    fun countStarting(from: Int, to: Int): Int = countDistinct(indexes.map { it.qidsStarting(from, to) })
+    /**
+     * How many items fall in [from]..[to] by [TimeIndex.ACTIVE] (a life at about forty, anything else at its start), each
+     * once however many packs date it: Explore's eras.
+     */
+    fun countActive(from: Int, to: Int): Int = countDistinct(indexes.map { it.qidsActive(from, to) })
+
+    /** The [k] best-known marks falling in [from]..[to] by [TimeIndex.ACTIVE], across packs. */
+    fun topActive(from: Int, to: Int, k: Int): List<TimeMark> =
+        merge(indexes.map { it.topActive(from, to, k) }).sortedByDescending { it.rank }.take(k)
 
     /** The latest year any pack has a mark starting in. */
     fun latestYear(): Int? = indexes.mapNotNull { it.latestYear() }.maxOrNull()

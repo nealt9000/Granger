@@ -708,6 +708,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 }
             },
             isWikipedia = { it.name.startsWith("wikipedia_") },
+            load = { container.catalog.load() },
         )
     }
     val exploreActions = app.granger.explore.ExploreActions(

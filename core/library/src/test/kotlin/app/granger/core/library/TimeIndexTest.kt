@@ -143,11 +143,14 @@ class TimeIndexTest {
         assertThat(both.marks(1700, 1900, emptySet(), 10, now = 2026, prefer = "es").single().path).isEqualTo("Revolución_francesa")
     }
 
-    @Test fun countStartingCountsAnItemOnceAcrossPacks() {
+    @Test fun countActiveCountsAnItemOnceAcrossPacksAndALifeAtForty() {
         val history = listOf(listOf(83224L, "Battle_of_Hastings", 0, 1066, null, bit(Lane.WARS), 80), listOf(42L, "Domesday_Book", 0, 1086, null, 0L, 40))
         val all = TimeIndexes(listOf(TimeIndex.open(gtime("top", top), "top")!!, TimeIndex.open(gtime("history", history), "history")!!))
-        assertThat(all.countStarting(500, 1499)).isEqualTo(2)          // Hastings in both packs, Domesday in one
-        assertThat(all.countStarting(-3000, 499)).isEqualTo(2)         // Aristotle, Rome
-        assertThat(all.countStarting(1500, 1799)).isEqualTo(0)
+        assertThat(all.countActive(500, 1499)).isEqualTo(2)          // Hastings in both packs, Domesday in one
+        assertThat(all.countActive(-3000, 499)).isEqualTo(2)         // Aristotle (at -343), Rome
+        assertThat(all.countActive(1500, 1799)).isEqualTo(0)
+        // Ada Lovelace (1815–1852) is placed at 1852, her death, before forty; a living person born 1961 at 2001.
+        assertThat(all.topActive(1850, 1899, 5).map { it.path }).containsExactly("Ada_Lovelace")
+        assertThat(all.topActive(1946, 2100, 5).map { it.path }).containsExactly("Living_Person")
     }
 }

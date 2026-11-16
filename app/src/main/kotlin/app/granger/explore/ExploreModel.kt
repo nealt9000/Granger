@@ -65,8 +65,8 @@ enum class Subject(val id: String, @StringRes val label: Int) {
 }
 
 /**
- * Through time's eras (the mockup's B timeline), by start year (astronomical: 1 BC is 0): each counts the dated items
- * starting in it. [to] is inclusive; the last runs to the far future.
+ * Through time's eras (the mockup's B timeline), by year (astronomical: 1 BC is 0): each counts the dated items that fall
+ * in it, a life at about forty ([app.granger.core.library.TimeIndex.ACTIVE]). [to] is inclusive; the last runs to the far future.
  */
 enum class Era(val from: Int, val to: Int, @StringRes val label: Int, @StringRes val span: Int) {
     PREHISTORY(Int.MIN_VALUE / 2, -3001, R.string.explore_era_prehistory, R.string.explore_era_prehistory_span),
@@ -122,6 +122,18 @@ fun subjectDoors(counts: Map<String, Int>, examples: (Subject) -> List<ExploreAr
         .map { (s, n) -> SubjectDoor(s, n, if (n > 0) examples(s) else emptyList(), bySubject[s].orEmpty().sortedBy { it.title.lowercase() }) }
 }
 
+/** Main subjects that don't make an era's example: the best-known items dated in an era are otherwise countries, cities and tamed animals. */
+private val NOT_ERA_EXAMPLES = setOf("places", "nature")
+
+/**
+ * An era's examples (pure, for tests): its best-known [marks] whose main subject (from the QID index) isn't a place or
+ * a creature, [ExploreViewModel.EXAMPLES] of them. With no subjects at all, the best-known marks as they come.
+ */
+fun eraExamples(marks: List<TimeMark>, subjectsOf: (Long) -> List<String>): List<ExploreArticle> {
+    val kept = marks.filter { subjectsOf(it.qid).firstOrNull() !in NOT_ERA_EXAMPLES }
+    return kept.take(ExploreViewModel.EXAMPLES).map { it.toExplore() }
+}
+
 /** What Explore reads; the app's comes from the container (QID and time indexes, thumbnails, the shelves). */
 class ExploreSources(
     val qids: suspend () -> QidIndexes,
@@ -132,6 +144,8 @@ class ExploreSources(
     val packs: Flow<List<Pair<Pack, String?>>>,
     /** Whether [pack] is a Wikipedia (its articles are in the doors already, through its QID index). */
     val isWikipedia: (Pack) -> Boolean,
+    /** Loads the catalog, as Browse does, so the QID indexes with subjects arrive (the sidecars follow the catalog). */
+    val load: suspend () -> Unit = {},
 )
 
 /** Explore's landing, built off the main thread whenever the packs change; null until the first build. */
@@ -139,14 +153,31 @@ class ExploreViewModel(private val sources: ExploreSources) : ViewModel() {
     private val state = MutableStateFlow<ExploreUi?>(null)
     val ui: StateFlow<ExploreUi?> = state.asStateFlow()
 
+    private var packs: List<Pair<Pack, String?>>? = null
+
     init {
+        viewModelScope.launch { runCatching { sources.load() } }
         viewModelScope.launch {
-            sources.packs.map { list -> list.sortedBy { it.first.id } }.distinctUntilChanged().collect { packs ->
-                state.value = withContext(Dispatchers.IO) { build(packs) }
-                // Pictures second: the doors and eras show at once, then fill in.
-                state.value = state.value?.let { withContext(Dispatchers.IO) { withPictures(it) } }
+            sources.packs.map { list -> list.sortedBy { it.first.id } }.distinctUntilChanged().collect { list ->
+                packs = list
+                rebuild(list)
             }
         }
+    }
+
+    /** Builds again on coming back (a QID or time index may have arrived since); the indexes reopen only when they changed. */
+    fun refresh() {
+        val now = packs ?: return
+        viewModelScope.launch { rebuild(now) }
+    }
+
+    private suspend fun rebuild(list: List<Pair<Pack, String?>>) {
+        val built = withContext(Dispatchers.IO) { build(list) }
+        // Unchanged since last time (pictures aside): keep what's on screen, pictures and all.
+        if (state.value?.let { shown -> withoutPictures(shown) == built } == true) return
+        state.value = built
+        // Pictures second: the doors and eras show at once, then fill in.
+        state.value = withContext(Dispatchers.IO) { withPictures(built) }
     }
 
     private suspend fun build(packs: List<Pair<Pack, String?>>): ExploreUi {
@@ -154,13 +185,15 @@ class ExploreViewModel(private val sources: ExploreSources) : ViewModel() {
         val counts = if (qids.hasSubjects) qids.subjectCounts(Subject.entries.map { it.id }) else emptyMap()
         val articles = if (qids.hasSubjects) qids.itemCount() else 0
         val others = packs.filterNot { sources.isWikipedia(it.first) }
-        val doors = subjectDoors(counts, { s -> qids.topIn(s.id, EXAMPLES).map { it.toExplore() } }, others)
+        val doors = subjectDoors(counts, { s -> qids.topIn(s.id, EXAMPLES, mainOnly = true).map { it.toExplore() } }, others)
         val times = sources.times()
         val eras = if (times.isEmpty) emptyList() else Era.entries.map { era ->
-            EraRow(era, times.countStarting(era.from, era.to), times.top(era.from, era.to, emptySet(), EXAMPLES).map { it.toExplore() })
+            EraRow(era, times.countActive(era.from, era.to), eraExamples(times.topActive(era.from, era.to, ERA_POOL), qids::subjectsOf))
         }.filter { it.count > 0 }
         return ExploreUi(articles, doors, eras, packs.map { it.first.title }.sortedBy { it.lowercase() })
     }
+
+    private fun withoutPictures(ui: ExploreUi) = ui.copy(doors = ui.doors.map { it.copy(picture = null) }, eras = ui.eras.map { it.copy(picture = null) })
 
     /** Each door and era gets the first picture among its examples. */
     private fun withPictures(ui: ExploreUi): ExploreUi {
@@ -174,6 +207,9 @@ class ExploreViewModel(private val sources: ExploreSources) : ViewModel() {
     companion object {
         /** Examples per door and per era (the mockup's three). */
         const val EXAMPLES = 3
+
+        /** How many of an era's best-known marks [eraExamples] picks from. */
+        const val ERA_POOL = 40
     }
 }
 

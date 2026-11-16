@@ -89,4 +89,11 @@ class ExploreScreenTest {
         assertThat(calls).containsExactly("pack:c", "article:top/Coffee").inOrder()
         assertThat(more).isEqualTo(1)
     }
+
+    @Test fun anErasExamplesLeaveOutPlacesAndCreatures() {
+        fun m(qid: Long, title: String) = app.granger.core.library.TimeMark(qid, "top", title.replace(' ', '_'), title, app.granger.core.library.TimeKind.POINT, 1000, 0, null, null, 9, emptySet(), 100)
+        val subjects = mapOf(142L to listOf("places", "history"), 144L to listOf("nature", "food"), 1L to listOf("history"), 2L to listOf("religion"))
+        val picked = eraExamples(listOf(m(142, "France"), m(1, "Battle of Hastings"), m(144, "Dog"), m(2, "Islam"), m(3, "Undated thing")), { subjects[it].orEmpty() })
+        assertThat(picked.map { it.title }).containsExactly("Battle of Hastings", "Islam", "Undated thing").inOrder()
+    }
 }

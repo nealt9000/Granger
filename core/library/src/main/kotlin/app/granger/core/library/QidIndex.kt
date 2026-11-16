@@ -5,7 +5,7 @@ import java.io.Closeable
 import java.io.File
 
 /** One article an item has in a pack: where to open it, and the item's rank (sitelink count). */
-data class QidArticle(val qid: Long, val packId: String, val path: String, val rank: Int)
+data class QidArticle(val qid: Long, val packId: String, val path: String, val rank: Int, val mainSubject: Boolean = true)
 
 /**
  * A Wikipedia pack's QID index (`.gqid`, Plan LL0 Task 5): every real article's Wikidata item, its rank, its title in
@@ -51,13 +51,16 @@ class QidIndex private constructor(private val db: SQLiteDatabase, val packId: S
             buildList { while (c.moveToNext()) add(c.getString(0)) }
         }
 
-    /** The articles with [subject] (main or not), most-linked first: the item's article here and its rank. */
-    fun topIn(subject: String, limit: Int, offset: Int = 0): List<QidArticle> = if (!hasSubjects) emptyList() else
+    /**
+     * The articles with [subject]: those whose main subject it is first, then the rest, each most-linked first (France
+     * has History too, but History's page opens on World War II). [mainOnly]: only the first kind (a door's examples).
+     */
+    fun topIn(subject: String, limit: Int, offset: Int = 0, mainOnly: Boolean = false): List<QidArticle> = if (!hasSubjects) emptyList() else
         db.rawQuery(
-            "SELECT a.qid, a.path, a.rank FROM subjects s JOIN articles a ON a.qid = s.qid WHERE s.subject = ? " +
-                "ORDER BY a.rank DESC, a.qid LIMIT ? OFFSET ?",
+            "SELECT a.qid, a.path, a.rank, s.ord FROM subjects s JOIN articles a ON a.qid = s.qid WHERE s.subject = ? " +
+                (if (mainOnly) "AND s.ord = 0 " else "") + "ORDER BY s.ord > 0, a.rank DESC, a.qid LIMIT ? OFFSET ?",
             arrayOf(subject, limit.toString(), offset.toString()),
-        ).use { c -> buildList { while (c.moveToNext()) add(QidArticle(c.getLong(0), packId, c.getString(1), c.getInt(2))) } }
+        ).use { c -> buildList { while (c.moveToNext()) add(QidArticle(c.getLong(0), packId, c.getString(1), c.getInt(2), c.getInt(3) == 0)) } }
 
     /** The items with [subject], in qid order, as a cursor for [countDistinct]; null without subjects. */
     internal fun qidsWith(subject: String): android.database.Cursor? = if (!hasSubjects) null else
@@ -167,14 +170,15 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
     fun itemCount(): Int = countDistinct(indexes.map { it.allQids() })
 
     /**
-     * The most-linked articles with [subject], each item once, in the first pack (in preference order: the library's
-     * main language first) that has it. [limit] past [offset].
+     * The articles with [subject], main subject first, then most-linked, each item once, in the first pack (in preference
+     * order: the library's main language first) that has it. [limit] past [offset].
      */
-    fun topIn(subject: String, limit: Int, offset: Int = 0): List<QidArticle> {
+    fun topIn(subject: String, limit: Int, offset: Int = 0, mainOnly: Boolean = false): List<QidArticle> {
         val want = offset + limit
         val best = LinkedHashMap<Long, QidArticle>()
-        for (index in indexes) for (a in index.topIn(subject, want)) best.putIfAbsent(a.qid, a)
-        return best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).drop(offset).take(limit)
+        for (index in indexes) for (a in index.topIn(subject, want, mainOnly = mainOnly)) best.putIfAbsent(a.qid, a)
+        return best.values.sortedWith(compareByDescending<QidArticle> { it.mainSubject }.thenByDescending { it.rank }.thenBy { it.qid })
+            .drop(offset).take(limit)
     }
 
     override fun close() = indexes.forEach { it.close() }

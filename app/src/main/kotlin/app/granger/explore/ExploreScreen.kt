@@ -81,6 +81,10 @@ private fun count(n: Int): String = NumberFormat.getIntegerInstance().format(n)
 
 @Composable
 fun ExploreScreen(viewModel: ExploreViewModel, actions: ExploreActions) {
+    androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
+        viewModel.refresh()
+        onPauseOrDispose {}
+    }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     ExploreContent(ui, actions)
 }
