@@ -37,7 +37,8 @@ object LeadLinks {
     private val SAID = Regex("\\s*\\((?:[^()]*?/[^()/]+/[^()]*?|[^()]*?(?:listen|pronunciation|pronunciación|escuchar)[^()]*?)\\)", RegexOption.IGNORE_CASE)
     private val SENTENCE_END = Regex("(?<=[.!?])\\s+(?=[\"“¿¡(]?[\\p{Lu}])")
 
-    fun parse(html: String, articlePath: String): Lead {
+    /** [sentences] and [maxChars] size the summary: a link's card takes two, the topic page's lead more (Plan LL2). */
+    fun parse(html: String, articlePath: String, sentences: Int = 2, maxChars: Int = MAX_SUMMARY): Lead {
         val doc = Jsoup.parse(html)
         val title = doc.title().ifBlank { doc.selectFirst("h1")?.text().orEmpty() }.trim()
         doc.select("sup, .reference, .mw-editsection, style, script, table, figure, .hatnote, .thumb, .infobox, .navbox, .metadata").remove()
@@ -59,7 +60,7 @@ object LeadLinks {
         }
         // Stable: equal scores keep the order they appear in.
         val links = scores.entries.sortedByDescending { it.value }.map { it.key }.take(MAX_LINKS)
-        return Lead(title, summary(paragraphs), links)
+        return Lead(title, summary(paragraphs, sentences, maxChars), links)
     }
 
     /** [href] as a ZIM article path, or null for a link Wander shouldn't orbit. */
@@ -110,8 +111,8 @@ object LeadLinks {
         "dra", "núm", "art", "pág", "ref", "lit",
     )
 
-    /** The lead's first two sentences, plain, at most [MAX_SUMMARY] characters, cut at a word. */
-    internal fun summary(paragraphs: List<Element>): String {
+    /** The lead's first [count] sentences, plain, at most [max] characters, cut at a word. */
+    internal fun summary(paragraphs: List<Element>, count: Int = 2, max: Int = MAX_SUMMARY): String {
         val text = paragraphs.joinToString(" ") { it.text() }
             .replace(SAID, "")
             .replace(Regex("\\s+"), " ")
@@ -119,9 +120,9 @@ object LeadLinks {
             .replace("( ", "(")
             .trim()
         if (text.isEmpty()) return ""
-        val two = sentences(text).take(2).joinToString(" ")
-        if (two.length <= MAX_SUMMARY) return two
-        val cut = two.take(MAX_SUMMARY - 1)
-        return cut.substring(0, cut.lastIndexOf(' ').takeIf { it > MAX_SUMMARY / 2 } ?: cut.length).trimEnd(',', ';', ':', ' ') + "…"
+        val two = sentences(text).take(count).joinToString(" ")
+        if (two.length <= max) return two
+        val cut = two.take(max - 1)
+        return cut.substring(0, cut.lastIndexOf(' ').takeIf { it > max / 2 } ?: cut.length).trimEnd(',', ';', ':', ' ') + "…"
     }
 }

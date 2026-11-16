@@ -75,7 +75,9 @@ class ReferenceLinksSource(
     private val lock = Mutex()
     private var opened: Pair<List<Pair<String, InstalledSidecar>>, QidIndexes>? = null
 
-    /** The QID indexes now installed, opened once and again whenever the set changes. */
+    /** The QID indexes now installed, opened once and again whenever the set changes (the topic page reads them too). */
+    suspend fun qidIndexes(): QidIndexes = indexes()
+
     private suspend fun indexes(): QidIndexes = lock.withLock {
         val files = qidFiles()
         opened?.takeIf { it.first == files }?.let { return it.second }

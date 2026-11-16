@@ -662,19 +662,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     val appContext = LocalContext.current.applicationContext
 
     /** The timeline's model, for Home's glance and the full screen (Plan H5b); [startAt] is an article to open on. */
-    val timeIndexCache = remember { TimeIndexCache() }
-
-    /** The phone's time indexes in Wander's pack order, opened once and reopened when the packs or files change. */
-    suspend fun timeIndexes(): TimeIndexes {
-        // Downloaded with each pack from the catalog (Plan H5b Task 3); files pushed for development fill any gap.
-        val installed = container.installedTimeIndexes()
-        val listed = TimeIndexDirectory.listed(File(appContext.getExternalFilesDir(null), "timeindex"))
-        val packs = WanderModel.encyclopediasOf(container.library.packs.first(), container.knowledgeNow.value)
-        val files = packs.mapNotNull { pack -> (installed[pack.id] ?: listed[pack.name])?.let { pack to it } }
-        return timeIndexCache.get(files.map { (p, f) -> "${p.id}|${f.path}|${f.lastModified()}" }) {
-            TimeIndexes(files.mapNotNull { (pack, file) -> TimeIndex.open(file, pack.id) })
-        }
-    }
+    /** The phone's time indexes, shared with the topic page (the container keeps them open). */
+    suspend fun timeIndexes(): TimeIndexes = container.timeIndexes()
 
     fun timelineModel(scope: kotlinx.coroutines.CoroutineScope, thumbs: ArticleThumbnails, startAt: Pair<String, String>? = null) = TimelineModel(
         scope = scope,
