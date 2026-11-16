@@ -31,4 +31,8 @@
     <string name="browse_pack_missing">File not found. Reinsert the SD card or download the pack again.</string>
     <string name="browse_pack_corrupt">This file is damaged and can\'t be opened.</string>
     <string name="browse_remove_from_phone">Remove from phone</string>
+    <!-- Files in this pack (Plan KB2 Task 4.6): a website pack's PDFs and EPUBs. The menu item, %1$d is how many. -->
+    <string name="browse_pack_files_count">Files in this pack (%1$d)</string>
+    <string name="browse_pack_files">Files in this pack</string>
+    <string name="browse_pack_files_none">No files could be listed from this pack.</string>
 </resources>

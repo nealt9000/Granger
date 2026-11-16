@@ -72,6 +72,8 @@ class BrowseActions(
     val onRemove: (Pack) -> Unit = {},
     /** Opens the file picker for a .zim to copy in (Plan E1 item 4); null hides the choice. */
     val onImportPack: (() -> Unit)? = null,
+    /** Files in this pack (Plan KB2 Task 4.6): a website pack's PDFs and EPUBs. */
+    val onFiles: (packId: String) -> Unit = {},
 )
 
 /** How many packs a section shows before its Show all. */
@@ -108,6 +110,7 @@ fun BrowseScreen(
         BrowseActions(
             actions.onOpenPack, actions.onGetPacks, actions.onDownloads, actions.onReadiness, viewModel::remove,
             onImportPack = importPack?.let { { packPicker.launch(arrayOf("*/*")) } },
+            onFiles = actions.onFiles,
         ),
         snackbar,
     )
@@ -211,7 +214,10 @@ fun BrowseContent(ui: BrowseUi?, packsFolder: String, downloadsBadge: Int, actio
                     val shown = if (all) section.packs else section.packs.take(SECTION_PREVIEW)
                     for (item in shown) {
                         item(key = "pack:${item.pack.id}") {
-                            PackItemRow(item, map = section.id == MAPS_SECTION, onOpen = { actions.onOpenPack(item.pack.id) }, onRemove = { removing = item.pack })
+                            PackItemRow(
+                                item, map = section.id == MAPS_SECTION, onOpen = { actions.onOpenPack(item.pack.id) }, onRemove = { removing = item.pack },
+                                onFiles = { actions.onFiles(item.pack.id) },
+                            )
                         }
                     }
                     if (section.packs.size > SECTION_PREVIEW) {
@@ -241,12 +247,13 @@ fun BrowseContent(ui: BrowseUi?, packsFolder: String, downloadsBadge: Int, actio
 }
 
 /**
- * One pack: its tile, title, size and Ask line (maps have none). A tap opens it; a long press offers Remove from phone.
- * One that's missing or damaged says so instead of opening.
+ * One pack: its tile, title, size and Ask line (maps have none). A tap opens it; a long press offers Files in this pack
+ * (when it holds PDFs or EPUBs, Plan KB2 Task 4.6) and Remove from phone. One that's missing or damaged says so instead
+ * of opening.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun PackItemRow(item: PackItem, map: Boolean, onOpen: () -> Unit, onRemove: () -> Unit) {
+private fun PackItemRow(item: PackItem, map: Boolean, onOpen: () -> Unit, onRemove: () -> Unit, onFiles: () -> Unit = {}) {
     val pack = item.pack
     var menu by remember { mutableStateOf(false) }
     val problem = when (pack.status) {
@@ -259,7 +266,7 @@ private fun PackItemRow(item: PackItem, map: Boolean, onOpen: () -> Unit, onRemo
             modifier = Modifier.combinedClickable(
                 onClickLabel = stringResource(R.string.common_open),
                 onClick = { if (pack.status == PackStatus.OK) onOpen() },
-                onLongClickLabel = stringResource(R.string.browse_remove_from_phone),
+                onLongClickLabel = stringResource(if (item.files > 0) R.string.common_more else R.string.browse_remove_from_phone),
                 onLongClick = { menu = true },
             ),
             leadingContent = { PackTile(pack, map) },
@@ -272,6 +279,9 @@ private fun PackItemRow(item: PackItem, map: Boolean, onOpen: () -> Unit, onRemo
             },
         )
         DropdownMenu(menu, { menu = false }) {
+            if (item.files > 0 && pack.status == PackStatus.OK) {
+                DropdownMenuItem(text = { Text(stringResource(R.string.browse_pack_files_count, item.files)) }, onClick = { menu = false; onFiles() })
+            }
             DropdownMenuItem(text = { Text(stringResource(R.string.browse_remove_from_phone)) }, onClick = { menu = false; onRemove() })
         }
     }

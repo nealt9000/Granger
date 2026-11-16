@@ -94,6 +94,23 @@ fun GroupedRows(rows: List<@Composable () -> Unit>, modifier: Modifier = Modifie
 }
 
 /**
+ * Row [index] of [count] in a block drawn item by item, for a lazy list too long for one [GroupedRows] (a pack's 800
+ * files): the first rounds the top corners, the last the bottom, and a hairline sits above every row but the first.
+ */
+@Composable
+fun GroupedItem(index: Int, count: Int, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    val r = 16.dp
+    val shape = RoundedCornerShape(
+        topStart = if (index == 0) r else 0.dp, topEnd = if (index == 0) r else 0.dp,
+        bottomStart = if (index == count - 1) r else 0.dp, bottomEnd = if (index == count - 1) r else 0.dp,
+    )
+    Column(modifier.fillMaxWidth().padding(horizontal = 12.dp).clip(shape).background(blockColor)) {
+        if (index > 0) HorizontalDivider(thickness = 1.dp, color = hairlineColor)
+        content()
+    }
+}
+
+/**
  * One row of a block: [title], one [meta] line, and [trailing] (a chevron by default: the row opens something). [below]
  * goes under the meta line (a download's progress). With [onClick] null the row isn't clickable (its trailing buttons are).
  */

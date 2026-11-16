@@ -404,7 +404,7 @@ internal fun railToolOf(
         CatalogScope.KIWIX -> RailTool.BROWSE
         else -> RailTool.LIBRARY
     }
-    destination.hasRoute<BrowseRoute>() || destination.hasRoute<ReaderRoute>() -> RailTool.BROWSE
+    destination.hasRoute<BrowseRoute>() || destination.hasRoute<ReaderRoute>() || destination.hasRoute<PackFilesRoute>() -> RailTool.BROWSE
     destination.hasRoute<BookRoute>() -> RailTool.LIBRARY
     destination.hasRoute<GetMoreRoute>() && getMoreFor == GetMoreFor.LISTEN -> RailTool.LISTEN
     destination.hasRoute<ArchiveRoute>() -> if (archiveKind == null || archiveKind == ArchiveKind.TEXTS) RailTool.LIBRARY else RailTool.LISTEN
@@ -420,6 +420,8 @@ internal fun railToolOf(
 
 /** Browse's home (Plan U3c Decision 1): the packs and the maps, each a row opening its main page. The tool's landing. */
 @Serializable object BrowseRoute
+/** Files in this pack (Plan KB2 Task 4.6): a website pack's PDFs and EPUBs. */
+@Serializable data class PackFilesRoute(val packId: String)
 
 /** Listen's home (Plan U2 Decision 4): the Now playing card and the Music and Audiobooks shelves. The tool's landing. */
 @Serializable object ListenRoute
@@ -1023,8 +1025,18 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         onGetPacks = { domain -> nav.navigate(SourceRoute(CatalogScope.KIWIX, domain)) },
                         onDownloads = { nav.navigate(DownloadsRoute) { launchSingleTop = true } },
                         onReadiness = { nav.navigate(ReadinessRoute) },
+                        onFiles = { packId -> nav.navigate(PackFilesRoute(packId)) },
                     ),
                     importPack = { uri -> container.packImports.add(uri).text() },
+                )
+            }
+            composable<PackFilesRoute> { backStackEntry ->
+                val packId = backStackEntry.toRoute<PackFilesRoute>().packId
+                app.granger.browse.PackFilesScreen(
+                    viewModel { app.granger.browse.PackFilesViewModel(packId, container.library) },
+                    onBack = { nav.popBackStack() },
+                    // Opened as a pack document (Plan P2's path), as a link to it in the pack would be.
+                    onOpen = { path, title -> scope.launch { openPackDocument(packId, path, title) } },
                 )
             }
             composable<CollectionRoute> { backStackEntry ->

@@ -79,8 +79,16 @@ class FakeZimArchive(
     var results: List<ZimHit> = emptyList(),
     /** HTML per path, for the pages that need a body (read-aloud); others read as empty. */
     val contents: Map<String, String> = emptyMap(),
+    /** Its Counter metadata, and the entries [list] walks (Plan KB2 Task 4.6); null can't be listed. */
+    counter: String = "",
+    private val listed: List<app.granger.core.zim.ZimEntry>? = null,
 ) : ZimArchive {
-    override val metadata = ZimMetadata(uuid, "", "eng", "2026-10-15", uuid)
+    override val metadata = ZimMetadata(uuid, "", "eng", "2026-10-15", uuid, counter = counter)
+    override fun list(mimes: Set<String>, each: (app.granger.core.zim.ZimEntry) -> Boolean): Boolean {
+        val entries = listed ?: return false
+        for (e in entries) if (e.mimeType in mimes && !each(e)) break
+        return true
+    }
     override val hasFulltextIndex = true
     override fun resolvePath(path: String) = (redirects[path] ?: path).takeIf { it in paths || it in contents }
     override fun read(path: String) = resolvePath(path)?.let { ZimItem(it, "text/html; charset=utf-8", contents[it]?.toByteArray() ?: ByteArray(0)) }

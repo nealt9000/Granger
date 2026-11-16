@@ -560,7 +560,23 @@ now)").
       `SearchViewModelTest.aBookPacksTextHitJoinsTheBooksOnce`, header/row/menu/format wording updates. ThemeShots
       (`kiwixbooks-list`, `gutenberg-list`, `kb2-*`) checked: "10 titles only until opened", "7 titles only until opened
       · 1 scan: title only". `:core:library` 498, `:app` 1819 (120 skipped), 0 failures.
-- [ ] **Task 4.6: Files in this pack.** A Files row on web packs with documents, from the manifest or `ZimArchive.list`.
+- [x] **Task 4.6: Files in this pack.** A Files row on web packs with documents, from the manifest or `ZimArchive.list`.
+  - **Done 2026-11-16** (this commit, worktree kb2ux).
+    - **Where (decision):** Browse's pack row long press (its only menu, beside Remove from phone): "Files in this pack
+      (N)", shown only for an OK, non-book pack whose ZIM `Counter` holds PDFs/EPUBs. Opens `PackFilesRoute(packId)` (rail:
+      Browse). Explore's Sources should keep the entry when it takes over the pack rows (hand-off).
+    - `core/library` `PackFiles`: `count(counter)` (the cheap check, `BookFiles.parseCounter`) and `list(archive)`
+      (`ZimArchive.list({pdf, epub})`, titles from `BookFiles.titleOf`, A–Z; null when it can't list). No manifest path:
+      web packs have none today.
+    - `BrowseViewModel` reads each website pack's Counter once (cached by pack id, off the main thread) into
+      `PackItem.files`.
+    - `PackFilesScreen`: the pack's title, a "Files in this pack" label, the files as grouped rows ("PDF · 2.0 MB"), drawn
+      item by item (`GroupedItem`, new in theme/GroupedRows.kt) so the Factbook's 839 stay lazy. A tap calls the nav
+      host's `openPackDocument(packId, path, title)` (no reader files touched).
+    - Strings: `browse_pack_files_count`, `browse_pack_files`, `browse_pack_files_none` (en + es).
+    - Tests: `PackFilesTest` (2), `BrowseViewModelTest.aWebPackCountsItsFilesFromItsCounter`,
+      `BrowseScreenTest.aLongPressOffersTheFilesInThePackWhenItHasSome`, `PackFilesScreenTest` (3). `:core:library` 501,
+      `:app` 1831 (122 skipped), 0 failures; `:app:assembleDebug` builds.
 - [x] **Task 4.7: per-pack membership.** Gutenberg books held by two packs list in both collections.
   - **Done 2026-11-16** (this commit, worktree kb2ux).
     - **Mechanism (decision):** a column, not a table: `books.memberOf TEXT` (`Book.memberOf`, the ZIM names of every
