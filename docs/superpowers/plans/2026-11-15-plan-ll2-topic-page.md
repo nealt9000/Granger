@@ -139,6 +139,24 @@ When a topic leads to an article the phone lacks, it reads that article online, 
 - Timings on the Pixel: header under 300 ms, the whole page under 1.5 s warm.
 - **LL2 checkpoint with Neal,** then merge, push, and the tester build (flags on, `LINKED_CLASSICS` on in release).
 
+## Progress (2026-11-16)
+- **Task 1:** done, GO (`61aad757`).
+- **Task 2:** done (`ff36eecf`, `2325f00c`): TopicTime, RelatedFinder, TopicSource.
+- **Task 3:** done (`85b9098d` and the Pixel pass), with these changes from Neal's review on the phone:
+  - **Every fresh article opens at its topic page,** a search's Best match too. The passage found is shown first ("From your search"), with Read it in the article.
+  - **The trigger:** the tab's `openedAt` within 10 s, so no entry point had to change.
+  - **Pictures:** small ones (under 600 px) sit beside the title, not blown up.
+  - **Leads and blurbs** lose their bracketed asides.
+  - **Book quotes** are whole sentences read from the chapter (QuoteSentence), cut to about four lines around the mention.
+  - **Languages:** *In your books*, and Search (titles, articles, books, Best matches), keep to the library's languages, the page's first.
+  - **A Spanish page's** people and events come from the Spanish pack.
+  - **Wander from here** starts Home's Wander at the article.
+- **Task 5:** done (`46fa71fd` and its Pixel pass). Explore connections:
+  - 6 circles inner, 4 on the outer diagonals, filters per kind;
+  - a tap re-centres, a long press opens, Back steps back.
+- **Left:** Task 4 (More on this subject: the catalog sidecar, which Neal signs), then Task 6 (the walkthrough).
+- **Next session:** the Browse rail mockups. Neal is leaning toward an Explore landing in place of Browse, with Kiwix packs secondary.
+
 ## Order and size
 Tasks 2 → 3 first; they give a usable page. Then Task 5, the map, and Task 4, which needs a catalog change and Neal's signature. About four sessions. The online layer (LL2b) follows Task 6.
 

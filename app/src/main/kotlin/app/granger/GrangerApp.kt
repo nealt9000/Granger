@@ -1004,7 +1004,8 @@ class AppContainer(context: Context) {
         val lead = app.granger.home.LeadLinks.parse(html, resolved, sentences = 3, maxChars = TOPIC_LEAD_CHARS)
         val title = lead.title.ifBlank { resolved.substringAfterLast('/').replace('_', ' ') }
         return app.granger.topic.TopicHeader(
-            app.granger.core.library.PageTitles.clean(title), lead.summary,
+            // The lead without its bracketed asides (birth names, dates and pronunciations the page shows already).
+            app.granger.core.library.PageTitles.clean(title), app.granger.topic.TopicSource.blurb(lead.summary),
             runCatching { thumbs.thumbnail(archive, resolved, html, TOPIC_PICTURE_PX) }.getOrNull(),
         )
     }

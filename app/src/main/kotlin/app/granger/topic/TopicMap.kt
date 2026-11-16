@@ -83,7 +83,8 @@ data class MapNode(
  * kind. Pure.
  */
 object TopicMapNodes {
-    const val MAX = 12
+    /** Six in the inner ring and four in the outer one's diagonal gaps: more crowd a phone. */
+    const val MAX = 10
     const val INNER = 6
 
     fun of(topic: Topic, filter: NodeKind? = null): List<MapNode> {
@@ -161,17 +162,18 @@ fun TopicMap(
                 val h = maxHeight
                 val cx = w / 2
                 val cy = h / 2
-                val shortSide = if (w < h) w else h
-                val inner = shortSide * 0.30f
-                val outer = shortSide * 0.46f
+                // Ovals, not circles: a phone's map is tall, and circles sized to its width crowd the labels together.
+                val innerX = w * 0.31f
+                val innerY = h * 0.22f
+                val outerX = w * 0.38f
+                val outerY = h * 0.43f
                 val placed = nodes.mapIndexed { i, n ->
                     val ring = if (i < TopicMapNodes.INNER) 0 else 1
-                    val count = if (ring == 0) minOf(nodes.size, TopicMapNodes.INNER) else nodes.size - TopicMapNodes.INNER
-                    val index = if (ring == 0) i else i - TopicMapNodes.INNER
-                    val angle = Math.toRadians(-90.0 + 360.0 * index / count + if (ring == 1) 180.0 / count else 0.0)
-                    val r = if (ring == 0) inner else outer
-                    val x = (cx + r * cos(angle).toFloat()).coerceIn(NODE_WIDTH / 2, w - NODE_WIDTH / 2)
-                    val y = (cy + r * sin(angle).toFloat()).coerceIn(NODE_SIZE / 2, h - NODE_SIZE)
+                    val count = minOf(nodes.size, TopicMapNodes.INNER)
+                    // The outer ring takes the diagonals, above and below the inner ring, where a phone has the room.
+                    val angle = Math.toRadians(if (ring == 0) -90.0 + 360.0 * i / count else OUTER_ANGLES[i - TopicMapNodes.INNER])
+                    val x = (cx + (if (ring == 0) innerX else outerX) * cos(angle).toFloat()).coerceIn(NODE_WIDTH / 2, w - NODE_WIDTH / 2)
+                    val y = (cy + (if (ring == 0) innerY else outerY) * sin(angle).toFloat()).coerceIn(NODE_SIZE / 2, h - NODE_SIZE)
                     Triple(n, x, y) to ring
                 }
                 val lineColour = MaterialTheme.colorScheme.outlineVariant
@@ -211,7 +213,11 @@ fun TopicMap(
                     topic.time?.mark?.let { Text(words.of(it), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary) }
                     topic.header?.lead?.takeIf { it.isNotBlank() }?.let { Text(it, style = MaterialTheme.typography.bodyMedium, maxLines = 3, overflow = TextOverflow.Ellipsis) }
                     Button(
-                        onClick = { onOpenArticle(topic.packId, topic.path, topic.header?.title ?: TopicSource.titleOf(topic.path)) },
+                        // The map's first centre is the topic page it was opened from: back to it, not a second copy.
+                        onClick = {
+                            if (centres.size == 1) onClose()
+                            else onOpenArticle(topic.packId, topic.path, topic.header?.title ?: TopicSource.titleOf(topic.path))
+                        },
                         modifier = Modifier.heightIn(min = 48.dp),
                     ) { Text(stringResource(R.string.topic_map_open)) }
                     Text(stringResource(R.string.topic_map_hint), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -264,6 +270,7 @@ private val FILTERS = listOf(
     NodeKind.TOPIC to R.string.topic_map_topics,
     NodeKind.BOOK to R.string.topic_map_books,
 )
+private val OUTER_ANGLES = listOf(-125.0, -55.0, 125.0, 55.0)
 private val NODE_SIZE = 56.dp
 private val SMALL_NODE = 44.dp
 private val CENTRE_SIZE = 88.dp
