@@ -95,13 +95,16 @@ class PublishedCatalogTest {
         // English (and multilingual) packs; the Spanish ones are checked below (Plan L3).
         val english = catalog.packs.filterNot { it.language == "es" || it.language == "sw" }
         val books = english.filter { it.isBookPack }
-        assertThat(books).hasSize(50)
+        assertThat(books).hasSize(55)
         assertThat(books.count { it.family == "gutenberg" }).isEqualTo(41)
         assertThat(catalog.packs.filter { it.family == "gutenberg" }.all { it.isBookPack }).isTrue()
         assertThat(books.filter { it.family != "gutenberg" }.map { it.zimName }).containsExactly(
             "zimgit-food-preparation_en", "zimgit-knots_en", "zimgit-medicine_en", "zimgit-post-disaster_en",
             "zimgit-water_en", "usda-2015_en", "prunelle_en_budding-authors", "prunelle_en_draw-your-african-story",
             "prunelle_en_interactive-books",
+            // Plan KB2: book manifests, content blank.
+            "irp.fas.org_en_military-medicine", "smbc-comics.com_en_all", "jeffe.cs.illinois.edu_en_all",
+            "milneopentextbooks.org_en_all", "survivorlibrary.com_en_all",
         )
         assertThat(catalog.packs.filter { it.flavour.isNotEmpty() }.all { it.id == "${it.zimName}_${it.flavour}" }).isTrue()
         assertThat(english.groupingBy { it.flavour }.eachCount())

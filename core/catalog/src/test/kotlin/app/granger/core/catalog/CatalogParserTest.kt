@@ -449,6 +449,15 @@ class CatalogParserTest {
         assertThat(ok(parse(sidecarCatalog(sidecar(size = "1"), sidecar(size = "2")))).packs.single().sidecars.single().sizeBytes).isEqualTo(1)
     }
 
+    /** Plan KB2: a pack with a book manifest is a book pack, though its content stays blank for older apps. */
+    @Test fun aPackWithABookManifestIsABookPack() {
+        val med = ok(parse(sidecarCatalog(sidecar("gbooks", url = "https://github.com/x/releases/download/bookpacks-1/med.gbooks")))).packs.single()
+        assertThat(med.sidecars.single().kind).isEqualTo("gbooks")
+        assertThat(med.content).isEmpty()
+        assertThat(med.isBookPack).isTrue()
+        assertThat(ok(parse(sidecarCatalog(sidecar()))).packs.single().isBookPack).isFalse()
+    }
+
     @Test fun sidecarsOfTheWrongTypeAreDroppedAndKeepThePack() {
         val c = ok(parse("""
             {"formatVersion": 1, "generatedAt": "2026-11-11T00:00:00Z",

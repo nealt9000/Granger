@@ -57,7 +57,9 @@ class RoomLibrary(
                     is ZimOpenResult.Opened -> result.archive.use { archive ->
                         // A pack moved to another folder or volume keeps its addedAt.
                         val sameZim = previous ?: known.firstOrNull { it.id == archive.uuid }
+                        // The file doesn't say whether it has a book manifest (Plan KB2): the same ZIM keeps its own.
                         Pack.from(archive, file, sameZim?.addedAt ?: now())
+                            .copy(bookManifest = sameZim?.takeIf { it.id == archive.uuid }?.bookManifest)
                     }
                     is ZimOpenResult.Failed ->
                         previous?.copy(status = PackStatus.CORRUPT, sizeBytes = file.length())

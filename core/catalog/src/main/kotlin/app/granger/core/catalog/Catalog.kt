@@ -176,8 +176,11 @@ data class PackEntry(
     /** The title in app language [appLang], else the catalog's own (Kiwix's, or the curated one). */
     fun title(appLang: String): String = localised(i18n, appLang, title)
 
-    /** A bundle of books (Gutenberg, nautilus): listed under Books and opened as a collection (Plan KB). */
-    val isBookPack: Boolean get() = content == CONTENT_BOOKS
+    /**
+     * A bundle of books (Gutenberg, nautilus): listed under Books and opened as a collection (Plan KB). A pack with a
+     * book manifest (Plan KB2) is one too, though its [content] stays blank so older apps keep it a website.
+     */
+    val isBookPack: Boolean get() = content == CONTENT_BOOKS || sidecars.any { it.kind == SidecarEntry.GBOOKS }
 
     /** A slice of a set (Plan WF). */
     val isSlice: Boolean get() = setId.isNotBlank() && setRank > 0
@@ -258,8 +261,14 @@ data class SidecarEntry(
     val schemaVersion: Int = 0,
 ) {
     companion object {
-        /** Kind -> the newest schema this app reads: the QID index (Plan LL0) and the Classics' reference links (Plan LL1). */
-        val KNOWN: Map<String, Int> = mapOf("gqid" to 1, "glink" to 1)
+        /**
+         * Kind -> the newest schema this app reads: the QID index (Plan LL0), the Classics' reference links (Plan LL1) and
+         * a Kiwix pack's book manifest (Plan KB2).
+         */
+        val KNOWN: Map<String, Int> = mapOf("gqid" to 1, "glink" to 1, GBOOKS to 1)
+
+        /** A Kiwix pack's book manifest (Plan KB2, `tools/bookpacks/schema.md`): it makes the pack a book collection. */
+        const val GBOOKS = "gbooks"
     }
 }
 

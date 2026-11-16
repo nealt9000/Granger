@@ -13,6 +13,11 @@ data class ZimMetadata(
     val name: String,
     /** The tool that made the ZIM, its `Scraper` metadata ("gutenberg2zim-3.0.1", "nautiluszim 1.1.1"); blank if unsaid. */
     val scraper: String = "",
+    /**
+     * Its `Counter` metadata, entries per MIME type ("text/html=12;application/pdf=40"); blank if unsaid. It tells a pure
+     * container of books from a website (Plan KB2 Task 2.2).
+     */
+    val counter: String = "",
 )
 
 /** One entry's content after following redirects; [path] is the final entry's path. */

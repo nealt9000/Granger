@@ -36,8 +36,17 @@ data class Pack(
      * row from before version 15), blank when the ZIM doesn't say. It tells a bundle of books ([bookSource]).
      */
     val scraper: String? = null,
+    /**
+     * What makes a Kiwix website a book collection (Plan KB2, version 16): the absolute path of its verified `.gbooks`
+     * manifest, [BOOK_FILES] when it's a pure container of PDFs and EPUBs with no manifest (its files are listed by
+     * name), or null. Kept in step with the installed manifests by [BookManifests]; a refresh keeps it for the same file.
+     */
+    val bookManifest: String? = null,
 ) {
     companion object {
+        /** [bookManifest] for a pack listed by its files' names, with no manifest (Plan KB2 Task 2.2). */
+        const val BOOK_FILES = "files"
+
         fun from(archive: ZimArchive, file: File, addedAt: Long) = Pack(
             id = archive.uuid,
             filePath = file.absolutePath,
@@ -163,6 +172,22 @@ data class Book(
     val format: BookFormat = BookFormat.EPUB,
     /** False for a PDF found at indexing to have no text layer (a scan); nothing of it is in the index. */
     val searchable: Boolean = true,
+    /**
+     * A Kiwix book's section in its collection, from its pack's manifest (Plan KB2, version 16): blank for the items
+     * before the first section, null for every other book.
+     */
+    val groupName: String? = null,
+    /** Its place in its collection's own order (the manifest's `ord`); null outside a manifest. */
+    val ord: Int? = null,
+    /**
+     * The work this file is a part of: the manifest's `work_key` for parts with no whole file, or the whole file's key
+     * (`part_of`) for a part of one. Rows sharing it show as one row with parts. Null for a book on its own.
+     */
+    val workKey: String? = null,
+    /** The work's title, for parts with no whole file; null otherwise. */
+    val workTitle: String? = null,
+    /** Which part this is, from 1; null when it isn't a numbered part. */
+    val partNo: Int? = null,
 )
 
 /** Where the reader left off in a book. [locatorJson] is opaque to the library. */

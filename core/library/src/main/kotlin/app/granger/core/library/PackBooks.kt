@@ -27,6 +27,14 @@ data class PackItem(
     val format: BookFormat,
     val sizeBytes: Long,
     val description: String? = null,
+    /** Its language, when the pack's list says; null takes the row's own, else the pack's. */
+    val language: String? = null,
+    /** Where it sits in a manifest collection (Plan KB2): see [Book.groupName] and the fields after it. */
+    val groupName: String? = null,
+    val ord: Int? = null,
+    val workKey: String? = null,
+    val workTitle: String? = null,
+    val partNo: Int? = null,
 )
 
 /**
@@ -74,7 +82,10 @@ open class PackBooks(
     private val mutex = Mutex()
     private val origin = source.origin
 
-    /** Each pack's books, by pack id (a UUID names one snapshot, whose contents never change); read once. */
+    /**
+     * Each pack's books, by pack id (a UUID names one snapshot, whose contents never change) and book manifest (which can
+     * arrive after the pack, Plan KB2); read once.
+     */
     private val listed = ConcurrentHashMap<String, List<PackItem>>()
 
     private fun mine(pack: Pack) = pack.bookSource == origin
@@ -113,9 +124,14 @@ open class PackBooks(
                     title = item.title,
                     author = item.author,
                     description = item.description ?: old?.description.orEmpty(),
-                    language = old?.language?.takeIf { it.isNotBlank() } ?: pack.language,
+                    language = item.language?.takeIf { it.isNotBlank() } ?: old?.language?.takeIf { it.isNotBlank() } ?: pack.language,
                     sizeBytes = if (old != null && File(old.filePath).isFile) old.sizeBytes else item.sizeBytes,
                     status = PackStatus.OK,
+                    groupName = item.groupName,
+                    ord = item.ord,
+                    workKey = item.workKey,
+                    workTitle = item.workTitle,
+                    partNo = item.partNo,
                 )
                 if (row != old) writes += row
             }
@@ -295,11 +311,13 @@ open class PackBooks(
     }
 
     /** The pack's books, from its list (read once per snapshot); null when the pack can't be read or has no list. */
-    private fun held(pack: Pack): List<PackItem>? = listed[pack.id] ?: run {
+    private fun held(pack: Pack): List<PackItem>? {
+        val key = "${pack.id}|${pack.bookManifest.orEmpty()}"
+        listed[key]?.let { return it }
         val archive = archiveOf(pack.id) ?: return null
         val items = source.list(pack, archive) ?: return null
-        listed[pack.id] = items
-        items
+        listed[key] = items
+        return items
     }
 
     private fun newRow(id: String, ref: String, format: BookFormat, dir: File) = Book(

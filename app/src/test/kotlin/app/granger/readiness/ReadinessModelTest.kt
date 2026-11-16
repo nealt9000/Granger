@@ -199,6 +199,19 @@ class ReadinessModelTest {
         assertThat(ReadinessModel.sourceOf(installed(water), cat)).isEqualTo(Source.KIWIX)
     }
 
+    /** Plan KB2 Decision 5: a manifest pack, offered under Books, still counts toward its domain. */
+    @Test fun aManifestPackStillCountsTowardItsDomain() {
+        val gbooks = app.granger.core.catalog.SidecarEntry("gbooks", "https://github.com/x/releases/download/bookpacks-1/s.gbooks", "8".repeat(64), 4_000, 1)
+        val survivor = packEntry("survivorlibrary.com_en_all", "survivorlibrary.com_en_all", "food", 50, family = "survivorlibrary.com")
+            .copy(sidecars = listOf(gbooks))
+        val food = Domain("food", "Food, water & survival", essential = listOf(survivor.id), comprehensive = listOf(survivor.id))
+        val cat = catalog.copy(packs = catalog.packs + survivor, readiness = Readiness(readiness.domains + food))
+        assertThat(app.granger.sources.scopeOf(survivor)).isEqualTo(app.granger.sources.CatalogScope.KIWIX_BOOKS)
+        val r = report(packs = listOf(installed(survivor)), cat = cat)
+        assertThat(domain(r, "food").coverage).isNotEqualTo(Coverage.NONE)
+        assertThat(domain(r, "food").installedBytes).isEqualTo(50)
+    }
+
     @Test fun aPackUnknownToTheCatalogIsStorageOnly() {
         val stranger = pack("u-stranger", "Stranger").copy(name = "stranger_en_all", sizeBytes = 777, filePath = "/internal/packs/stranger.zim")
         val r = report(packs = listOf(stranger))

@@ -287,6 +287,22 @@ class RoomLibraryTest {
         assertThat(packs().single().addedAt).isEqualTo(7L)
     }
 
+    /** Plan KB2: the file doesn't say it has a book manifest, so a refresh keeps the one attached to the same ZIM. */
+    @Test fun aRefreshKeepsThePacksBookManifest() = test {
+        opener.archives["mm.zim"] = { FakeZimArchive("u-m", "Military Medicine", name = "irp.fas.org_en_military-medicine") }
+        File(internal, "mm.zim").writeText("zim u-m")
+        library.refresh()
+        db.packDao().setBookManifest("u-m", "/s/mm.gbooks")
+        library.refresh()
+        assertThat(packs().single().bookManifest).isEqualTo("/s/mm.gbooks")
+        assertThat(packs().single().bookSource).isEqualTo(BookOrigin.KIWIX)
+        // Another ZIM at that path (a new snapshot) starts without it: the manifest was for the old file.
+        opener.archives["mm.zim"] = { FakeZimArchive("u-m2", "Military Medicine", name = "irp.fas.org_en_military-medicine") }
+        library.refresh()
+        assertThat(packs().single().id).isEqualTo("u-m2")
+        assertThat(packs().single().bookManifest).isNull()
+    }
+
     @Test fun updatedSnapshotKeepsBookmarksPositionsAndAddedAt() = test {
         val old = zim(internal, "top_2026-08.zim", "u-old", name = "wikipedia_en_top", paths = setOf("index", "C++"))
         library.refresh()

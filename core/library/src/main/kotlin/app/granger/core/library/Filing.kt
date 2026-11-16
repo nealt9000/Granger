@@ -37,7 +37,7 @@ object Filing {
         if (pack.name.isBlank()) return "other"
         when (pack.bookSource) {
             BookOrigin.GUTENBERG -> return gutenbergKey(pack.name)
-            BookOrigin.NAUTILUS -> return kiwixBooksKey(pack.name)
+            BookOrigin.NAUTILUS, BookOrigin.KIWIX -> return kiwixBooksKey(pack.name)
             else -> {}
         }
         return RULES.firstOrNull { it.matches(pack.name) }?.key ?: "pack:${pack.name}"
@@ -47,7 +47,8 @@ object Filing {
     fun defaultName(key: String, pack: Pack): String = when {
         key == "other" -> "Other"
         pack.isGutenberg && key == gutenbergKey(pack.name) -> gutenbergName(pack)
-        pack.bookSource == BookOrigin.NAUTILUS && key == kiwixBooksKey(pack.name) -> kiwixBooksName(pack, pack.name)
+        (pack.bookSource == BookOrigin.NAUTILUS || pack.bookSource == BookOrigin.KIWIX) && key == kiwixBooksKey(pack.name) ->
+            kiwixBooksName(pack, pack.name)
         key.startsWith("pack:") -> pack.title
         else -> RULES.firstOrNull { it.key == key }?.name ?: pack.title
     }
@@ -90,20 +91,25 @@ object Filing {
     private const val GUTENBERG_PREFIX = "gutenberg-"
 
     /**
-     * The collection of a nautilus pack's documents (Plan KB Decision 7), `kiwixbooks-<pack name>`: one per pack, at the
-     * top of Literature beside the Gutenberg collections, not in the Kiwix folder.
+     * The collection of a nautilus pack's documents (Plan KB Decision 7), or a manifest pack's books (Plan KB2),
+     * `kiwixbooks-<pack name>`: one per pack, at the top of Literature beside the Gutenberg collections, not in the Kiwix
+     * folder.
      */
     fun kiwixBooksKey(packName: String): String = "$KIWIX_BOOKS_PREFIX$packName"
 
-    /** Whether the collection with [defaultKey] holds a nautilus pack's documents. */
+    /** Whether the collection with [defaultKey] holds a nautilus or manifest pack's books. */
     fun isKiwixBooksCollection(defaultKey: String?): Boolean = defaultKey?.startsWith(KIWIX_BOOKS_PREFIX) == true
 
     /** Whether the collection with [defaultKey] holds a book pack's books (Gutenberg or nautilus). */
     fun isBookPackCollection(defaultKey: String?): Boolean =
         isGutenbergCollection(defaultKey) || isKiwixBooksCollection(defaultKey)
 
-    /** A nautilus collection's name: its pack's title ("Food for Preppers"), else the pack's ZIM name. */
-    fun kiwixBooksName(pack: Pack?, packName: String): String = pack?.title?.takeIf { it.isNotBlank() } ?: packName
+    /**
+     * A nautilus or manifest collection's name: its manifest's title (Plan KB2), else its pack's title ("Food for
+     * Preppers"), else the pack's ZIM name.
+     */
+    fun kiwixBooksName(pack: Pack?, packName: String): String =
+        pack?.let(BookManifest::titleOf) ?: pack?.title?.takeIf { it.isNotBlank() } ?: packName
 
     private const val KIWIX_BOOKS_PREFIX = "kiwixbooks-"
 
@@ -149,7 +155,7 @@ object Filing {
      */
     fun defaultKey(book: Book): String = when {
         book.origin == BookOrigin.GUTENBERG -> gutenbergKey(PackBooks.packNameOf(book))
-        book.origin == BookOrigin.NAUTILUS -> kiwixBooksKey(PackBooks.packNameOf(book))
+        book.origin == BookOrigin.NAUTILUS || book.origin == BookOrigin.KIWIX -> kiwixBooksKey(PackBooks.packNameOf(book))
         book.origin == BookOrigin.ARCHIVE_ORG && SET_PART in book.sourceRef ->
             BOOK_COLLECTIONS.getValue(BookOrigin.ARCHIVE_ORG).first + ":" + book.sourceRef.substringBefore(SET_PART)
         book.origin == BookOrigin.GRANGER -> grangerKey(book.sourceRef)
@@ -162,7 +168,8 @@ object Filing {
      */
     fun defaultName(key: String, book: Book, packs: List<Pack> = emptyList()): String = when {
         book.origin == BookOrigin.GUTENBERG -> gutenbergName(packs.firstOrNull { it.name == PackBooks.packNameOf(book) })
-        book.origin == BookOrigin.NAUTILUS -> PackBooks.packNameOf(book).let { name -> kiwixBooksName(packs.firstOrNull { it.name == name }, name) }
+        book.origin == BookOrigin.NAUTILUS || book.origin == BookOrigin.KIWIX ->
+            PackBooks.packNameOf(book).let { name -> kiwixBooksName(packs.firstOrNull { it.name == name }, name) }
         key == CLASICOS_GRANGER -> CLASICOS_GRANGER_NAME
         else -> BOOK_COLLECTIONS.values.firstOrNull { it.first == key }?.second
             ?: book.title.substringBeforeLast(SET_TITLE).takeIf { key.startsWith("archive-org:") && SET_TITLE in book.title }

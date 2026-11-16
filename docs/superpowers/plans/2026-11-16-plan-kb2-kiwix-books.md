@@ -223,13 +223,55 @@ Python for tools).
 
 ## Phase 2: the phone reads manifests
 
-- [ ] **Task 2.1: `ManifestSource` over `PackBooks`.**
+- [x] **Task 2.1: `ManifestSource` over `PackBooks`.**
   - A new `BookOrigin.KIWIX` (`book:kiwix:<zimName>/<key>`), `isPackBook`.
   - Download the `.gbooks` with its pack, as `.gqid` files are.
   - `Pack.bookSource` is KIWIX when the pack has a `gbooks` sidecar (catalog) or a downloaded `.gbooks` file: not
     `content`, which stays blank for these packs (Task 1.4). Add `"gbooks" to 1` to `SidecarEntry.KNOWN`.
   - Rows carry group, order, level, language and parts. Restore picks the inspector by format.
   - Tests: fixture manifest, parts folded, snapshot change keeps ids, fallback when the manifest is missing.
+  - **Done 2026-11-16** (this commit).
+    - Catalog: `gbooks` in `KNOWN` (`SidecarEntry.GBOOKS`); `PackEntry.isBookPack` is `content == "books"` or a
+      `gbooks` sidecar, so the five packs move from the Kiwix web list to Kiwix libraries (scope `KIWIX_BOOKS`) and
+      Readiness still counts them (`PACK_SCOPES`). Downloads: `SidecarKind.BOOK_MANIFEST` (`sidecars/<id>_<sha12>.gbooks`),
+      always wanted; `Sidecars.reconcile` fetches and removes it with its pack.
+    - **Migration 15 → 16** (`MIGRATION_15_16`, schema `16.json`): `packs.bookManifest TEXT` (the verified `.gbooks`
+      path, `"files"` = `Pack.BOOK_FILES`, or null) and, on `books`, `groupName TEXT`, `ord INTEGER`, `workKey TEXT`,
+      `workTitle TEXT`, `partNo INTEGER`. All nullable.
+    - `Pack.bookSource` → KIWIX when `bookManifest != null`, after the gutenberg/nautilus scraper rules.
+      `RoomLibrary.refresh` keeps `bookManifest` for the same ZIM UUID (the file doesn't carry it; without this every
+      refresh would null it and flap the collection).
+    - **Who sets the column:** `BookManifests.attach(installed)` (core/library), driven by a new
+      `AppContainer.followBookManifests()` that watches the gbooks download records and the packs (id, status, path)
+      and passes `installedSidecars(BOOK_MANIFEST)`. A pack gets the path only when the file's `meta` is kind `gbooks`,
+      schema 1 and `sourceSha256` equals the pack's download hash (spec §5.2; cached per file). Gutenberg/nautilus packs
+      are cleared; a MISSING/CORRUPT pack keeps its value, so its books stay while the card is out.
+    - `ManifestSource`/`ManifestBooks` (core/library `ManifestBooks.kt`): one row per item, ref `<pack name>/<key>`,
+      `sourceRef` `<pack name>/<path>` (the path keeps its query; `packNameOf`/`restore` split at the first `/`, which
+      pack names never contain). Items are trusted from the verified manifest without a per-entry lookup (Survivor has
+      11,802). Language: the item's, else the row's, else the pack's. Copies go to `books/kiwix/<sha1(ref)>.pdf|.epub`;
+      restore uses `PackBooks.restore` unchanged (inspector by format, PDF first-page cover). `PackBooks.held` now
+      caches per pack id **and** manifest, and `follow()` re-syncs when `bookManifest` changes.
+    - **Parts (decision):** one Book row per file. `workKey` = the manifest's `work_key`, or `part_of` (the whole's
+      key) for parts of a whole file, and the whole file gets its own key as `workKey`, so the collection screen folds
+      rows by `workKey` (whole = the row whose key equals it).
+    - Filing: `kiwixbooks-<pack name>` like nautilus, named by the manifest's `collection.title`
+      (`BookManifest.titleOf`, cached per file), else the pack title. Out of Browse and the Kiwix folder via
+      `isBookPack` (verified in a test: `Filing.folderKey` null).
+    - GrangerApp: `manifestBooks` in `PackBookLinks`, both restore chains, and `follow(manifestBooks, "Kiwix books")`.
+      Link taps resolve by exact path, then key, then key without query (`BookManifest.keyOf`).
+    - Task 2.2's fallback code (`BookFiles`, the `"files"` branch, `ZimMetadata.counter`) landed in this commit too,
+      since `attach` decides both; Task 2.2 adds its header and tests.
+    - Known gap: a new snapshot is not KIWIX until its own manifest downloads, so for that moment its rows go (places
+      and marks stay; the same keys bring them back). And a pure container that gets a manifest later changes keys
+      (path → manifest key).
+    - Tests: `ManifestBooksTest` (12: rows/titles/groups/order/parts, Kolibri EPUBs + languages + restore, wrong sha
+      ignored, manifest gone, new snapshot keeps ids and place, removal, missing pack, restore with `?tmstv=…`, link
+      taps, gutenberg left alone, bookSource rules), `MigrationTest` 15→16, `RoomLibraryTest` keep-on-refresh,
+      `SidecarsTimeIndexTest.aBookManifestFollowsItsPack`, `CatalogParserTest`, `CatalogScopeTest`, `ReadinessModelTest`;
+      `PublishedCatalogTest` and `SourceViewModelTest` counts 50→55 / 9→14 book packs.
+    - Suites: `:core:catalog` 77, `:core:downloads` 158, `:core:library` 491, `:core:zim` 31, `:app` 1799 (112 skipped),
+      0 failures.
 - [ ] **Task 2.2: fallback.**
   - When a pack looks like a book bundle (`content: "books"` or the audit's rules on its Counter) but has no manifest,
     list it with `ZimArchive.list`, titled by file name.

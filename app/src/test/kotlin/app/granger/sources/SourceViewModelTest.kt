@@ -1060,8 +1060,13 @@ class SourceViewModelTest {
         val published = publishedCatalog()
         catalog.mutable.value = CatalogState(catalog = published)
         val nautilus = published.packs.filter { it.isBookPack && !isGutenberg(it) }.map { it.id }
-        assertThat(nautilus).hasSize(9)
+        // 9 nautilus packs, and Plan KB2's 5 manifest packs (content blank, a gbooks sidecar).
+        assertThat(nautilus).hasSize(14)
         assertThat(nautilus.filter { it.startsWith("prunelle_") }).hasSize(3)
+        assertThat(published.packs.filter { id -> id.id in nautilus && id.sidecars.any { it.kind == "gbooks" } }.map { it.zimName }).containsExactly(
+            "irp.fas.org_en_military-medicine", "smbc-comics.com_en_all", "jeffe.cs.illinois.edu_en_all",
+            "milneopentextbooks.org_en_all", "survivorlibrary.com_en_all",
+        )
 
         val libraries = viewModel(CatalogScope.KIWIX_BOOKS).ui.value
         assertThat(libraries.sections.map { it.title }).containsExactly(SourceViewModel.LIBRARIES)
