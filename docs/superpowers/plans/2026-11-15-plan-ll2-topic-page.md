@@ -46,19 +46,22 @@
 7. **Spanish from day one:** every label in both languages, and dates in the app's locale ("a. C." in Spanish).
 8. **Web highlights move out of LL2,** to LL3 with the Notebook. They don't depend on the topic page and shouldn't hold it up. The `article_marks` design stays as written in the spec (migration 15 → 16).
 
-## Open: the online layer (Neal, 2026-11-16, proposed, not decided)
-When a topic leads to a pack the phone lacks, read that article online from Kiwix's public library (`browse.library.kiwix.org/content/<zim>/A/<path>` answers today). Every online page is badged as online, and offers "Keep offline: <pack>, <size>". The reader keeps full control over what's stored.
-- **Content online, indexes local.** The topic page's richness comes from our indexes, not from the article text. For subject-sized packs they're small:
-  - time index: 0.6–2.3 MB per pack;
-  - QID index: 10–30 MB;
-  - one vector per article instead of per chunk: about 256 bytes an article, so ~13 MB for Top's 50,000.
-  A "map without the territory" download would let the topic page know about a pack's whole subject before its ZIM is installed.
-- **Limits:** full English Wikipedia is too big for this (its QID index alone is 580 MB, and it has no vectors), so online-complete means Top plus the subject packs. Kiwix's online library has none of our indexes; it supplies only the text.
-- **Questions before building:**
-  - On or off by default.
-  - Privacy wording: each online page tells Kiwix's server what was read.
-  - Kiwix's terms and capacity: their library runs on donations, so an app sending readers there should be cleared with them first.
-- A spike and a decision come after the topic page works offline. Likely LL2b.
+## The online layer (Neal, 2026-11-16): direction set, built after Task 6 as LL2b
+When a topic leads to an article the phone lacks, it reads that article online, clearly badged, with "Keep offline: <pack>, <size>". The reader keeps full control over what's stored.
+- **Text from Wikipedia itself, packs from Kiwix** (Neal):
+  - Online articles come from Wikipedia's own API (page HTML and summaries), found by Wikidata ID → sitelink title. It's the real source, and it's built for internet-scale use.
+  - Kiwix stays the source of downloads.
+  - Wikimedia asks API clients for a User-Agent with contact details. Use the project's own name and address (opengranger.org), never anything about the reader.
+- **Indexes local, text online.** The topic page's richness comes from our indexes, so they can be a separate download, ahead of the ZIM:
+  - per subject pack: time index 0.6–2.3 MB, QID index 10–30 MB, one vector per article at about 256 bytes;
+  - Top 1M: QID index 94 MB, plus about 130–260 MB of vectors.
+- **The scope** is Top 1M plus the subject packs (Neal: "totally fine"). Full English Wikipedia stays out: its QID index alone is 580 MB, and it has no vectors.
+- **Asked once, not switched on quietly.** It also doubles as a **demo of the tiers**: a reader can try the experience at Starter, Top 1M or a subject pack before committing gigabytes (Neal).
+- **Privacy is chosen in onboarding,** by intended use (for example "fully offline" against "online when it helps"). Whenever the app goes online it takes the pragmatic steps:
+  - no identifiers and no cookies;
+  - only the request the reader asked for;
+  - the reader can see when something came from the internet.
+- **Before building:** a spike covering Wikipedia API fetch and render in the reader, the title mapping, rate limits and etiquette, plus the onboarding question and site copy.
 
 ## Tasks
 ### Task 1: Related spike (phone, measured) — done, GO
@@ -137,7 +140,7 @@ When a topic leads to a pack the phone lacks, read that article online from Kiwi
 - **LL2 checkpoint with Neal,** then merge, push, and the tester build (flags on, `LINKED_CLASSICS` on in release).
 
 ## Order and size
-Tasks 2 → 3 first; they give a usable page. Then Task 5, the map, and Task 4, which needs a catalog change and Neal's signature. About four sessions. The online layer is decided after Task 6.
+Tasks 2 → 3 first; they give a usable page. Then Task 5, the map, and Task 4, which needs a catalog change and Neal's signature. About four sessions. The online layer (LL2b) follows Task 6.
 
 ## Not in LL2
-Web highlights (moved to LL3); the online layer (proposed above); Granger Music (its own plan); the Notebook, clips and export (LL3); Show on the map (LL6); tablet two-pane layouts.
+Web highlights (moved to LL3); the online layer (LL2b, above); Granger Music (its own plan); the Notebook, clips and export (LL3); Show on the map (LL6); tablet two-pane layouts.
