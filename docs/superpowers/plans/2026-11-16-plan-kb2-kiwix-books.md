@@ -103,6 +103,22 @@ Python for tools).
     streamed.
   - Test against `testdata` ZIMs.
   - Time it on the phone over a large pack (Gutenberg en_all, 60k EPUBs) and record it. This is the fallback's cost.
+  - **Code done 2026-11-16; phone timing still to do.**
+    - API: `ZimArchive.list(mimes: Set<String>, each: (ZimEntry) -> Boolean): Boolean`.
+      - It's a callback: nothing is gathered, and the native `EntryIterator` is disposed in `finally` under the read
+        lock. A lazy Sequence would keep the iterator and the lock open between steps, and leave an abandoned
+        iterator to a finalizer (the R5 dispose crash).
+      - `each` returning false stops the walk.
+      - It returns false for "can't list": the interface default (so fakes compile), a closed archive, or a native
+        error.
+    - `KiwixZimArchive`: skips redirects, takes the mime from `getItem(false)` and reads `size` only for matches.
+    - Tests:
+      - JVM `ZimArchiveListTest` covers the default.
+      - The device test `KiwixZimArchiveTest.listsTheEntriesOfTheGivenTypesInPathOrder` checks `granger-test.zim`'s
+        PDF and PNG in path order, the redirect left out, stop-early and after-close. It compiles; it wasn't run (no
+        instrumented runs).
+    - **Still to do (Neal's phone):** run that device test, and time `list(setOf("application/epub+zip"))` over
+      Gutenberg en_all (60k EPUBs).
 - [ ] **Task 0.3: extractor spike on the Mac.** Write `tools/bookpacks/build.py` with `kolibri` and `zimit-index`
   extractors, over `zim_probe.Reader`.
   - Build manifests for African Storybook, Military Medicine, SMBC, Algorithms, Milne and Survivor Library (its 194

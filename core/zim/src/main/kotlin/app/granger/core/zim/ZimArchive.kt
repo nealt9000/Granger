@@ -95,6 +95,23 @@ interface ZimArchive : Closeable {
         false
     }
 
+    /**
+     * Calls [each] with every entry whose MIME type is exactly one of [mimes] ("application/pdf",
+     * "application/epub+zip"), in path order, redirects skipped; [each] returns false to stop early. Only the entries'
+     * directory is read, never their content (Plan KB2 Task 0.2: a book pack's files when it has no manifest).
+     *
+     * A callback rather than a list or a [Sequence]: a pack like Gutenberg's `en_all` holds about 60k EPUBs, so nothing
+     * is gathered here, and the native iterator lives only inside this call, disposed before it returns, under the same
+     * lock as the other reads. A lazy [Sequence] would have to keep that iterator, and the lock, open between the
+     * caller's steps, and a caller that stopped early would leave it to a finalizer, which is how an earlier native
+     * object crashed (Plan R5 Task 1). [each] runs on the calling thread while the archive is held open: it may read
+     * this archive, but [close] waits until the walk ends.
+     *
+     * Returns false when the archive can't be listed: this default (an archive with no directory to walk), a closed
+     * archive, or a native error part way; true when the walk reached the end or [each] stopped it.
+     */
+    fun list(mimes: Set<String>, each: (ZimEntry) -> Boolean): Boolean = false
+
     /** The path of a random article, or null when the pack has none (or is closed). */
     fun randomPath(): String?
 
