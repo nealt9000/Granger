@@ -135,17 +135,25 @@ open class PackBooks(
                 }
             }
             if (writes.isNotEmpty() || gone.isNotEmpty()) {
+                // A book read as an ebook goes with its original pages: the PDF beside it and its hidden PAGES row,
+                // whose place and marks stay for a reinstall as the book's do.
+                val goneCovers = gone.mapNotNull { dao.get(BookIds.pagesOf(it.id))?.coverPath }
                 db.withTransaction {
                     if (writes.isNotEmpty()) dao.upsertAll(writes)
                     for (book in gone) {
                         dao.deleteChunks(book.id)
                         dao.delete(book.id)
+                        val pages = BookIds.pagesOf(book.id)
+                        dao.deleteChunks(pages)
+                        dao.delete(pages)
                     }
                 }
                 for (book in gone) {
                     File(book.filePath).delete()
+                    PdfEbooks.pagesOf(File(book.filePath))?.delete()
                     book.coverPath?.let { File(it).delete() }
                 }
+                for (cover in goneCovers) File(cover).delete()
             }
             afterSync(readable.map { it.first })
             writes
@@ -159,7 +167,8 @@ open class PackBooks(
      * Copies [book]'s file out of its pack when it isn't there (the first open, or storage cleared), then reads its
      * cover (an EPUB's own, a PDF's first page); false if it isn't this source's book or no installed pack can give it.
      * The pack its row names is asked first, then any other readable pack of the source with the same entry. The copy
-     * goes through a `.incoming-` file, after a check for free space, and a file that isn't readable isn't kept.
+     * goes through a `.incoming-` file, after a check for free space, and a file that isn't readable isn't kept. A PDF
+     * read as an ebook comes back as its PDF, made an ebook again ([ebookAgain]).
      */
     suspend fun restore(book: Book): Boolean = withContext(io) {
         if (book.origin != origin) return@withContext false
@@ -168,20 +177,35 @@ open class PackBooks(
         val path = book.sourceRef.substringAfter('/', "")
         if (path.isEmpty()) return@withContext false
         val packName = packNameOf(book)
+        // A PDF read as an ebook ([RoomBookshelf.readAsEbook]) points at `x.pdf.epub`: the pack's PDF goes back to
+        // `x.pdf`, its original pages, and the ebook is made from it again (Plan KB2 Task 2.5).
+        val pages = PdfEbooks.pagesOf(target)
+            ?.takeIf { book.format == BookFormat.EPUB && path.endsWith(".pdf", ignoreCase = true) }
+        if (pages != null && pages.isFile && PdfInspector.inspect(pages, book.title) is Inspection.Ok) {
+            return@withContext ebookAgain(dao.get(book.id) ?: book, pages, "$packName/$path")
+        }
+        val copyTo = pages ?: target
         val candidates = db.packDao().getAll()
             .filter { mine(it) && it.status == PackStatus.OK }
             .sortedByDescending { it.name == packName }
         for (pack in candidates) {
             val archive = archiveOf(pack.id) ?: continue
             val entry = archive.entry(path) ?: continue
-            val parent = target.parentFile?.apply { mkdirs() } ?: return@withContext false
+            val parent = copyTo.parentFile?.apply { mkdirs() } ?: return@withContext false
             if (parent.usableSpace < entry.sizeBytes) return@withContext false
-            val partial = File(parent, ".incoming-${target.name}")
-            if (!archive.copyTo(entry.path, partial) || !partial.renameTo(target)) {
+            val partial = File(parent, ".incoming-${copyTo.name}")
+            if (!archive.copyTo(entry.path, partial) || !partial.renameTo(copyTo)) {
                 partial.delete()
                 continue
             }
             val current = dao.get(book.id) ?: book
+            if (pages != null) {
+                if (PdfInspector.inspect(pages, book.title) !is Inspection.Ok) {
+                    pages.delete()
+                    return@withContext false
+                }
+                return@withContext ebookAgain(current, pages, "${pack.name}/$path")
+            }
             val cover = when (book.format) {
                 BookFormat.EPUB -> (EpubInspector.inspect(target, book.title) as? Inspection.Ok)?.meta
                     ?.let { Cover(it.cover, it.coverExtension) }
@@ -204,6 +228,57 @@ open class PackBooks(
             return@withContext true
         }
         false
+    }
+
+    /**
+     * Makes [book]'s ebook from [pdf] again, as "Read as ebook" did, keeping its place and marks. If the conversion no
+     * longer passes, the book goes back to being the PDF rather than a row that won't open: the PDF's place and marks,
+     * kept on its original pages, come back to it, and the pages' row goes.
+     */
+    private suspend fun ebookAgain(book: Book, pdf: File, sourceRef: String): Boolean {
+        val (report, meta) = try {
+            PdfEbooks.make(pdf, book.title, book.author, book.language)
+        } catch (_: OutOfMemoryError) {
+            PdfEbooks.ebookOf(pdf).delete()
+            null to null
+        }
+        if (meta != null) {
+            val ebook = PdfEbooks.ebookOf(pdf)
+            dao.upsert(
+                book.copy(
+                    sourceRef = sourceRef,
+                    filePath = ebook.absolutePath,
+                    sizeBytes = ebook.length(),
+                    coverPath = writeCover(book.id, meta.cover, meta.coverExtension) ?: book.coverPath,
+                    status = PackStatus.OK,
+                    indexedAt = null,
+                ),
+            )
+            return true
+        }
+        android.util.Log.w("Granger", "Making ${book.id} an ebook again failed (${report?.why ?: "out of memory"}); reading its PDF")
+        val pagesId = BookIds.pagesOf(book.id)
+        val pagesCover = dao.get(pagesId)?.coverPath
+        val cover = writeCover(book.id, pdfCovers.firstPage(pdf, COVER_HEIGHT_PX), "png")
+        db.withTransaction {
+            if (dao.position(pagesId) != null) dao.movePosition(pagesId, book.id)
+            dao.moveMarks(pagesId, book.id)
+            dao.deleteChunks(book.id)
+            dao.delete(pagesId)
+            dao.upsert(
+                book.copy(
+                    sourceRef = sourceRef,
+                    filePath = pdf.absolutePath,
+                    format = BookFormat.PDF,
+                    sizeBytes = pdf.length(),
+                    coverPath = cover ?: book.coverPath,
+                    status = PackStatus.OK,
+                    indexedAt = null,
+                ),
+            )
+        }
+        pagesCover?.takeIf { it != cover }?.let { File(it).delete() }
+        return true
     }
 
     /**

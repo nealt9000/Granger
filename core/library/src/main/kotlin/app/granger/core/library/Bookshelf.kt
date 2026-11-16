@@ -211,8 +211,7 @@ class RoomBookshelf(
     }
 
     /** The PDF [ebook] was made from: `x.pdf` for `x.pdf.epub`; null for an ebook that wasn't. */
-    private fun pagesFile(ebook: File): File? =
-        ebook.takeIf { it.name.endsWith(EBOOK_FROM_PDF, ignoreCase = true) }?.let { File(it.parentFile, it.name.dropLast(".epub".length)) }
+    private fun pagesFile(ebook: File): File? = PdfEbooks.pagesOf(ebook)
 
     override suspend fun originalPages(bookId: String): Book? = withContext(io) {
         val book = dao.get(bookId) ?: return@withContext null
@@ -252,11 +251,9 @@ class RoomBookshelf(
         val book = dao.get(bookId) ?: return@withContext null
         if (book.format != BookFormat.PDF || !book.onShelf) return@withContext null
         val pdf = File(book.filePath).takeIf { it.isFile } ?: return@withContext null
-        val target = File(pdf.parentFile, pdf.name + ".epub")
-        val report = PdfToEpub.convert(pdf, target, book.title, book.author, book.language)
-        if (!report.passes) return@withContext report
-        val meta = (EpubInspector.inspect(target) as? Inspection.Ok)?.meta
-            ?: return@withContext report.copy(passes = false, why = "the ebook didn't open").also { target.delete() }
+        val target = PdfEbooks.ebookOf(pdf)
+        val (report, made) = PdfEbooks.make(pdf, book.title, book.author, book.language)
+        val meta = made ?: return@withContext report
         // The PDF's place, bookmarks and highlights are on its pages: they go with them.
         val pages = BookIds.pagesOf(bookId)
         db.withTransaction {

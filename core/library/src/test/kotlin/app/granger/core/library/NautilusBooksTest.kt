@@ -13,7 +13,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -238,7 +237,6 @@ class NautilusBooksTest {
      * copy is gone (storage cleared, or the book removed), [PackBooks.restore] has to bring back a readable book; today
      * it copies the PDF entry into the `.pdf.epub` path, the EPUB inspector refuses it, and the book won't open.
      */
-    @Ignore("KB2 Task 2.5: restore of a nautilus PDF read as an ebook copies the PDF into the .pdf.epub path and fails")
     @Test fun aNautilusPdfReadAsAnEbookComesBackAfterItsCopyIsGone() = test {
         val pack = install("u-w", "zimgit-water_en", fixture("zimgit-water_en"), pdf = prosePdf().readBytes())
         books.sync(listOf(pack))
@@ -260,13 +258,64 @@ class NautilusBooksTest {
         }
         assertThat(inspection).isInstanceOf(Inspection.Ok::class.java)
         assertThat(back.status).isEqualTo(PackStatus.OK)
+        // Made an ebook again from the PDF copied back to its original pages' path.
+        assertThat(back.format).isEqualTo(BookFormat.EPUB)
+        assertThat(back.filePath).isEqualTo(ebook.filePath)
+        assertThat(File(back.filePath.removeSuffix(".epub")).isFile).isTrue()
+        assertThat(shelf.originalPages(row.id)).isNotNull()
+    }
+
+    @Test fun aPdfReadAsAnEbookKeepsItsPlaceWhenItComesBackAndItsPdfWasStillThere() = test {
+        val pack = install("u-w", "zimgit-water_en", fixture("zimgit-water_en"), pdf = prosePdf().readBytes())
+        books.sync(listOf(pack))
+        val row = db.bookDao().get("book:nautilus:zimgit-water_en/Water (1).pdf")!!
+        assertThat(books.restore(row)).isTrue()
+        shelf.savePosition(row.id, """{"href":"page/2"}""", 0.25, "Page 2")
+        assertThat(shelf.readAsEbook(row.id)!!.passes).isTrue()
+        shelf.savePosition(row.id, """{"href":"ch2.xhtml"}""", 0.5, "Two")
+        shelf.addMark(BookAnnotation(0, row.id, MarkKind.BOOKMARK, "{}", "", "", "", 1L, 1L))
+        val ebook = db.bookDao().get(row.id)!!
+        File(ebook.filePath).delete()
+
+        assertThat(books.restore(ebook)).isTrue()
+
+        val back = db.bookDao().get(row.id)!!
+        assertThat(back.format).isEqualTo(BookFormat.EPUB)
+        assertThat(File(back.filePath).isFile).isTrue()
+        assertThat(shelf.position(row.id)!!.totalProgression).isEqualTo(0.5)
+        assertThat(db.bookDao().observeMarks(row.id).first()).hasSize(1)
+        assertThat(shelf.position(BookIds.pagesOf(row.id))!!.totalProgression).isEqualTo(0.25)
+    }
+
+    @Test fun aPdfReadAsAnEbookThatNoLongerConvertsComesBackAsItsPdf() = test {
+        val pack = install("u-w", "zimgit-water_en", fixture("zimgit-water_en"), pdf = prosePdf().readBytes())
+        books.sync(listOf(pack))
+        val row = db.bookDao().get("book:nautilus:zimgit-water_en/Water (1).pdf")!!
+        assertThat(books.restore(row)).isTrue()
+        shelf.savePosition(row.id, """{"href":"page/2"}""", 0.25, "Page 2")
+        assertThat(shelf.readAsEbook(row.id)!!.passes).isTrue()
+        val ebook = db.bookDao().get(row.id)!!
+        File(ebook.filePath).delete()
+        File(ebook.filePath.removeSuffix(".epub")).delete()
+        // A new snapshot whose file no longer reads as prose (a scan).
+        install("u-w2", "zimgit-water_en", fixture("zimgit-water_en"), scanned = setOf("Water (1).pdf"))
+        db.packDao().delete(pack.id)
+
+        assertThat(books.restore(ebook)).isTrue()
+
+        val back = db.bookDao().get(row.id)!!
+        assertThat(back.format).isEqualTo(BookFormat.PDF)
+        assertThat(back.filePath).endsWith(".pdf")
+        assertThat(File(back.filePath).isFile).isTrue()
+        assertThat(back.status).isEqualTo(PackStatus.OK)
+        assertThat(shelf.position(row.id)!!.totalProgression).isEqualTo(0.25)
+        assertThat(db.bookDao().get(BookIds.pagesOf(row.id))).isNull()
     }
 
     /**
      * Design §4.4: removing the pack of a nautilus PDF read as an ebook takes the ebook, its PDF (the original pages)
      * and the hidden PAGES row together; today only the `.pdf.epub` goes.
      */
-    @Ignore("KB2 Task 2.5: sync deletes only the row's .pdf.epub, leaving the .pdf and the PAGES row behind")
     @Test fun aRemovedPackTakesAPdfReadAsAnEbookWithItsPages() = test {
         val pack = install("u-w", "zimgit-water_en", fixture("zimgit-water_en"), pdf = prosePdf().readBytes())
         books.sync(listOf(pack))

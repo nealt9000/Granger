@@ -243,10 +243,16 @@ Python for tools).
   - Adopt old UUID rows with place, marks, tabs and history (the KB Decision 5 pattern).
   - Supersede no longer deletes them.
   - Migration 16 if a column is needed; tell granger-d0 first.
-- [ ] **Task 2.5: fix the nautilus Read-as-ebook bug (design §4.4).**
+- [x] **Task 2.5: fix the nautilus Read-as-ebook bug (design §4.4).**
   - `restore` copies to the PDF path and re-runs the conversion when the row's EPUB is gone.
   - Sync removes the `.pdf`, the `.pdf.epub` and the PAGES row together.
   - The Task 0.1 test now passes.
+  - **Done 2026-11-16** (this commit). Generic in `PackBooks`, so Gutenberg too. New `PdfEbooks` (one conversion for
+    `readAsEbook` and `restore`). `restore` of an `x.pdf.epub` row copies the entry to `x.pdf` (or uses the PDF still
+    there) and makes the ebook again, place and marks kept; if it no longer passes, the row falls back to the PDF and
+    the pages' place and marks come back to it. `sync` drops the `.pdf` and the PAGES row (its place and marks stay,
+    as a pack book's do). Both Task 0.1 tests un-ignored, 2 new. `:core:library` 471/0 fail, `:app` 1797/0 fail
+    (112 skipped).
 
 ## Phase 3: African Storybook (D2: per-language sets)
 
