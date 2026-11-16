@@ -124,6 +124,8 @@ class ReaderViewModel(
         val topic: app.granger.topic.Topic? = null,
         /** The topic page is in front of the article. */
         val topicShown: Boolean = false,
+        /** The passage a search found in this article, shown on its topic page; Read it opens the article there. */
+        val found: String? = null,
     )
 
     /**
@@ -177,13 +179,16 @@ class ReaderViewModel(
                 )
             }
             // A Wikipedia article opened just now from outside the reader (search, a card, Home, Wander, the Timeline:
-            // each sets the tab's openedAt) starts at its topic page; a tab returned to, a section, or a cited passage
-            // opens the article itself, as does a link followed inside it.
+            // each sets the tab's openedAt) starts at its topic page, a search's passage too (Neal, 2026-11-16: the topic
+            // comes before the deep dive), shown on it as what was found. A tab returned to, or a section asked for
+            // without a passage, opens the article itself, as does a link followed inside it.
             val fresh = now() - tab.openedAt in 0..FRESH_MS
-            if (topics != null && prefs.value.topicFirst && fresh && fragment == null && quote.isNullOrBlank() &&
+            val passage = quote?.takeIf { it.isNotBlank() }
+            if (topics != null && prefs.value.topicFirst && fresh && (fragment == null || passage != null) &&
                 path != archive.mainPath && archive.metadata.name.startsWith(WIKIPEDIA)
             ) {
                 showTopicFor(tab.packId, path)
+                _state.update { it.copy(found = passage) }
             }
             if (!quote.isNullOrBlank()) {
                 citedPath = path

@@ -51,6 +51,8 @@ data class Topic(
     val books: ArticleFooter? = null,
     val related: List<TopicArticle>? = null,
     val relatedBooks: List<TopicBook>? = null,
+    /** The whole sentence each shown book's first mention sits in, by book id; a book missing here shows the link's words. */
+    val quotes: Map<String, String> = emptyMap(),
     /** True once every part has arrived. */
     val done: Boolean = false,
 ) {
@@ -84,6 +86,10 @@ class TopicSource(
     private val related: (suspend (packName: String, path: String, sameItem: (String, String) -> Boolean) -> Related)?,
     private val bookOf: suspend (bookId: String) -> LibraryBook?,
     private val now: () -> Int = { java.time.Year.now().value },
+    /** The library's languages (Settings): only their books are listed. Null lists every book. */
+    private val libraryLanguages: suspend () -> Set<String>? = { null },
+    /** The sentence a book's mention sits in, read from the book; null when it can't be. */
+    private val sentence: (suspend (bookId: String, mention: app.granger.core.library.BookMention) -> String?)? = null,
     /** The languages whose packs the other-language link may point to. */
     private val languages: List<String> = listOf("en", "es"),
 ) : TopicProvider {
@@ -104,8 +110,15 @@ class TopicSource(
             launch { val t = attempt { timeOf(packId, path) }; update { it.copy(time = t) } }
             launch { val o = attempt { otherOf(packId, qid.await()) }; update { it.copy(other = o) } }
             launch {
-                val b = footer?.let { f -> attempt { f.footer(packId, path) } } ?: ArticleFooter.NONE
+                val language = languageOf(packId)
+                val b = footer?.let { f -> attempt { f.footer(packId, path, libraryLanguages(), language) } } ?: ArticleFooter.NONE
                 update { it.copy(books = b) }
+                val read = sentence ?: return@launch
+                val quotes = b.inBooks.take(QUOTES).mapNotNull { hit ->
+                    val m = hit.passages.firstOrNull() ?: return@mapNotNull null
+                    attempt { read(hit.book.bookId, m) }?.let { hit.book.bookId to it }
+                }.toMap()
+                if (quotes.isNotEmpty()) update { it.copy(quotes = quotes) }
             }
             launch {
                 val (articles, books) = attempt { relatedOf(packId, path, qid.await()) } ?: (emptyList<TopicArticle>() to emptyList())
@@ -179,6 +192,8 @@ class TopicSource(
         private const val AROUND = 400
         /** Closest articles shown on the page (the map takes them too). */
         const val SHOWN = 8
+        /** Book quotes shown on the page, each read whole from its book. */
+        const val QUOTES = 3
 
         fun titleOf(path: String): String = app.granger.core.library.PageTitles.clean(path.substringAfterLast('/').replace('_', ' '))
     }

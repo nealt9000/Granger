@@ -136,6 +136,8 @@ fun ReaderScreen(
     onOpenArticle: (packId: String, path: String, title: String) -> Unit = { _, _, _ -> },
     /** Opens a book at a chapter near the topic in meaning. */
     onOpenBookAt: (bookId: String, chapter: String) -> Unit = { _, _ -> },
+    /** Starts Home's Wander at this article (Plan LL2: Wander from here). */
+    onWander: ((packId: String, path: String) -> Unit)? = null,
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -468,6 +470,8 @@ fun ReaderScreen(
                     onOpenBookAt = onOpenBookAt,
                     onAllBooks = { topicBooksOpen = true },
                     onShowInTime = if (topic.time == null) null else ({ onShowInTime(topic.packId, topic.path) }),
+                    found = state.found,
+                    onWander = onWander?.let { w -> { w(topic.packId, topic.path) } },
                 )
             }
             val packSearch = state.packSearch

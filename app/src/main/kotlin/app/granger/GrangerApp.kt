@@ -918,6 +918,7 @@ class AppContainer(context: Context) {
             wikipediaLanguage = { id ->
                 library.packs.first().firstOrNull { it.id == id }?.name?.let { WIKIPEDIA_LANGUAGE.find(it)?.groupValues?.get(1) }
             },
+            bookLanguage = { id -> bookLanguages[id] ?: bookshelf.book(id)?.language?.let(::twoLetter)?.also { bookLanguages[id] = it } },
         )
     }
 
@@ -961,6 +962,9 @@ class AppContainer(context: Context) {
     /** Related for a topic page (Plan LL2 Task 1's search): the installed vectors, on the dense search's threads. */
     val relatedFinder by lazy { app.granger.core.library.RelatedFinder(vectorSources, vectorPool, ::sourceLanguage) }
 
+    /** A topic page's Wander from here (Plan LL2): the article Home's Wander starts at next, taken once. */
+    val wanderFrom = kotlinx.coroutines.flow.MutableStateFlow<Pair<String, String>?>(null)
+
     /** The topic page in front of each Wikipedia article (Plan LL2). */
     val topics: app.granger.topic.TopicSource by lazy {
         val thumbs = app.granger.home.ArticleThumbnails(File(context.cacheDir, "home-thumbs"))
@@ -975,7 +979,20 @@ class AppContainer(context: Context) {
             footer = if (Features.LINKED_CLASSICS) referenceLinks else null,
             related = { name, path, same -> relatedFinder.related(name, path, same) },
             bookOf = { id -> bookshelf.book(id)?.takeIf { it.status == app.granger.core.library.PackStatus.OK }?.let { app.granger.ebook.LibraryBook(it.id, it.title, it.coverPath) } },
+            libraryLanguages = { knowledgeNow.value.toSet() },
+            sentence = { bookId, mention -> kotlinx.coroutines.withContext(io) { bookSentence(bookId, mention) } },
         )
+    }
+
+    /** The sentence a mention sits in, read from its chapter in the EPUB (Plan LL2). Blocking. */
+    private suspend fun bookSentence(bookId: String, mention: app.granger.core.library.BookMention): String? {
+        val file = bookshelf.book(bookId)?.filePath?.let(::File)?.takeIf { it.isFile } ?: return null
+        return runCatching {
+            java.util.zip.ZipFile(file).use { zip ->
+                val text = app.granger.core.books.XhtmlText.chunks(zip, mention.href).joinToString("\n") { it.text }
+                app.granger.topic.QuoteSentence.around(text, mention.before, mention.quote)
+            }
+        }.getOrNull()
     }
 
     /** A topic page's header: the article's title, its lead's first sentences, and its picture at header size. Blocking. */

@@ -136,6 +136,7 @@ fun HomeScreen(
         wander = wander, wanderActions = wanderActions, timeline = timeline, timelineActions = timelineActions,
         onOpenTimeline = onOpenTimeline, game = game, gameActions = gameActions, onOpenGames = onOpenGames,
         arrangeActions = remember(viewModel) { ArrangeActions(viewModel::arrange) },
+        wanderJump = viewModel.wanderJumps.collectAsStateWithLifecycle().value,
     )
 }
 
@@ -158,6 +159,8 @@ fun HomeContent(
     /** Wander (Plan H5a); null hides it. */
     wander: WanderUi? = null,
     wanderActions: WanderActions = WanderActions(),
+    /** Bumped when Wander was started from a topic page: Home scrolls to it. */
+    wanderJump: Int = 0,
     /** The timeline (Plan H5b); null hides it. */
     timeline: TimelineUi? = null,
     timelineActions: TimelineActions = TimelineActions(),
@@ -199,6 +202,16 @@ fun HomeContent(
     val keys = listOfNotNull(crashNotice?.let { "crash" }, ui.downloads?.let { "downloads" }) + ui.tidy.map { it.key } + parts.map { it.token }
     LaunchedEffect(keys) {
         if (!touched && (listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 0)) listState.scrollToItem(0)
+    }
+    // A topic page's Wander from here (Plan LL2): Wander is started there, and Home brings it into view.
+    LaunchedEffect(wanderJump) {
+        if (wanderJump > 0) {
+            val at = keys.indexOf(HomePart.Wander.token)
+            if (at >= 0) {
+                touched = true
+                listState.animateScrollToItem(at)
+            }
+        }
     }
     Scaffold(
         topBar = {

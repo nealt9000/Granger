@@ -44,6 +44,12 @@ data class ArticleFooter(
 /** Where the web reader gets an article's footer; the app's is [ReferenceLinksSource]. */
 fun interface ArticleFooterSource {
     suspend fun footer(packId: String, path: String): ArticleFooter
+
+    /**
+     * [footer] with *In your books* kept to books in [languages] (a book whose language isn't known stays), those in
+     * [first] listed first (Plan LL2: a Spanish page's Spanish books, and only the library's languages; Neal, 2026-11-16).
+     */
+    suspend fun footer(packId: String, path: String, languages: Set<String>?, first: String?): ArticleFooter = footer(packId, path)
 }
 
 /**
@@ -71,6 +77,8 @@ class ReferenceLinksSource(
     private val background: CoroutineScope? = null,
     /** A Wikipedia pack's language (`en`), for one with no QID index of its own; null for other packs. */
     private val wikipediaLanguage: suspend (packId: String) -> String? = { null },
+    /** A book's language as two letters, or null when unknown. */
+    private val bookLanguage: suspend (bookId: String) -> String? = { null },
 ) : BookLinkSource, ArticleFooterSource {
     private val lock = Mutex()
     private var opened: Pair<List<Pair<String, InstalledSidecar>>, QidIndexes>? = null
@@ -120,7 +128,9 @@ class ReferenceLinksSource(
         return null
     }
 
-    override suspend fun footer(packId: String, path: String): ArticleFooter {
+    override suspend fun footer(packId: String, path: String): ArticleFooter = footer(packId, path, null, null)
+
+    override suspend fun footer(packId: String, path: String, languages: Set<String>?, first: String?): ArticleFooter {
         val all = indexes()
         // A Wikipedia pack without its own index finds the page by title in another of its language.
         val qid = all.qidOf(packId, path)
@@ -129,7 +139,12 @@ class ReferenceLinksSource(
         val books = synced()
         val works = books.works()
         val thisWork = works.filterValues { it == qid }.keys
-        val counts = books.counts(qid)
+        val counts = if (languages == null && first == null) books.counts(qid) else {
+            val tagged = books.counts(qid).map { (bookId, n) -> Triple(bookId, n, bookLanguage(bookId)) }
+                .filter { (_, _, language) -> languages == null || language == null || language in languages }
+            // Stable: within each side the most mentions first, as counts come.
+            tagged.sortedBy { (_, _, language) -> if (first != null && language == first) 0 else 1 }.map { (bookId, n, _) -> bookId to n }
+        }
         val inBooks = ArrayList<InYourBook>()
         for ((bookId, n) in counts) {
             if (inBooks.size == BOOKS_SHOWN) break

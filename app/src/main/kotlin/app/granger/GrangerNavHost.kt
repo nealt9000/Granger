@@ -1136,6 +1136,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             container.sessions.tab(container.sessions.openTab(packId, path, title))?.let { nav.showTab(it, keepCurrent = true) }
                         }
                     },
+                    onWander = { packId, path ->
+                        container.wanderFrom.value = packId to path
+                        if (!nav.popBackStack<HomeRoute>(inclusive = false)) nav.navigate(HomeRoute) { launchSingleTop = true }
+                    },
                     onOpenBookAt = { bookId, chapter ->
                         scope.launch { openCitation(matchOpener.open(app.granger.core.library.PassageAddress.Book(bookId, chapter, 0.0))) }
                     },
@@ -1454,6 +1458,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                     archive.read(path)?.let { homeThumbs.thumbnail(archive, path, String(it.bytes, Charsets.UTF_8)) }
                                 }
                             },
+                            wanderFrom = container.wanderFrom,
                         )
                     },
                     onReadiness = { nav.navigate(ReadinessRoute) { launchSingleTop = true } },

@@ -26,4 +26,7 @@
     <string name="topic_setting_open_at">Open articles at</string>
     <string name="topic_setting_topic">Topic page</string>
     <string name="topic_setting_article">Full article</string>
+    <string name="topic_found">From your search</string>
+    <string name="topic_found_go">Read it in the article</string>
+    <string name="topic_wander">Wander from here</string>
 </resources>

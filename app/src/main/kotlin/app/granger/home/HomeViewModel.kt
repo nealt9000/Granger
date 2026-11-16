@@ -131,9 +131,30 @@ class HomeViewModel(
     gamesOf: ((kotlinx.coroutines.CoroutineScope) -> GameModel)? = null,
     /** An article tab's picture (its lead image, cached), or null; blocking, run on [io]. */
     private val tabPicture: (packId: String, path: String) -> String? = { _, _ -> null },
+    /** A topic page's Wander from here (Plan LL2): an article to start Wander at, taken once. */
+    private val wanderFrom: kotlinx.coroutines.flow.MutableStateFlow<Pair<String, String>?>? = null,
 ) : ViewModel() {
     /** Wander (Plan H5a): its own state, started when Home first shows it. */
     val wander: WanderModel? = wanderOf?.invoke(viewModelScope)
+
+    /** Bumped when Wander was started from a topic page, for Home to bring Wander into view. */
+    private val _wanderJumps = MutableStateFlow(0)
+    val wanderJumps: StateFlow<Int> = _wanderJumps
+
+    init {
+        val requests = wanderFrom
+        val model = wander
+        if (requests != null && model != null) {
+            viewModelScope.launch {
+                requests.collect { at ->
+                    if (at == null) return@collect
+                    requests.value = null
+                    model.startFrom(at.first, at.second)
+                    _wanderJumps.value++
+                }
+            }
+        }
+    }
 
     /** The timeline (Plan H5b): its own state, started when Home first shows it. */
     val timeline: TimelineModel? = timelineOf?.invoke(viewModelScope)

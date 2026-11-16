@@ -69,6 +69,8 @@ object TopicPageTags {
     const val TIME = "topic_time"
     const val BOOKS = "topic_books"
     const val RELATED = "topic_related"
+    const val FOUND = "topic_found"
+    const val WANDER = "topic_wander"
 }
 
 /**
@@ -90,6 +92,9 @@ fun TopicPage(
     onAllBooks: () -> Unit,
     onShowInTime: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    /** The passage a search found in this article: shown first, with the way to it. */
+    found: String? = null,
+    onWander: (() -> Unit)? = null,
 ) {
     val header = topic.header
     val words = yearWords()
@@ -140,16 +145,31 @@ fun TopicPage(
                     }
                 }
             }
+            found?.let { passage ->
+                item {
+                    Card(TopicPageTags.FOUND, R.string.topic_found) {
+                        Text("“$passage”", style = MaterialTheme.typography.bodyMedium.copy(fontFamily = Spectral, fontStyle = FontStyle.Italic), maxLines = 5, overflow = TextOverflow.Ellipsis)
+                        TextButton(onClick = onReadFull) { Text(stringResource(R.string.topic_found_go)) }
+                    }
+                }
+            }
             topic.time?.takeIf { it.people.isNotEmpty() || it.events.isNotEmpty() }?.let { time ->
                 item { TimeCard(time, words, onOpenArticle, onShowInTime) }
             }
             topic.books?.takeIf { it.inBooks.isNotEmpty() }?.let { books ->
-                item { BooksCard(books, onOpenPassage, onAllBooks) }
+                item { BooksCard(books, topic.quotes, onOpenPassage, onAllBooks) }
             }
             val related = topic.related.orEmpty()
             val relatedBooks = topic.relatedBooks.orEmpty()
             if (related.isNotEmpty() || relatedBooks.isNotEmpty()) {
                 item { RelatedCard(related, relatedBooks, onOpenArticle, onOpenBookAt) }
+            }
+            onWander?.let { wander ->
+                item {
+                    OutlinedButton(onClick = wander, modifier = Modifier.padding(horizontal = 12.dp).padding(top = 14.dp).heightIn(min = 48.dp).testTag(TopicPageTags.WANDER)) {
+                        Text(stringResource(R.string.topic_wander))
+                    }
+                }
             }
         }
     }
@@ -258,13 +278,13 @@ private fun Face(path: String?, title: String) {
 }
 
 @Composable
-private fun BooksCard(books: ArticleFooter, onOpenPassage: (bookId: String, mention: BookMention) -> Unit, onAllBooks: () -> Unit) {
+private fun BooksCard(books: ArticleFooter, quotes: Map<String, String>, onOpenPassage: (bookId: String, mention: BookMention) -> Unit, onAllBooks: () -> Unit) {
     Card(TopicPageTags.BOOKS, R.string.topic_in_books, action = { TextButton(onClick = onAllBooks) { Text(stringResource(R.string.topic_all_books, books.inBooksTotal)) } }) {
         Text(
             pluralStringResource(R.plurals.topic_named_in_books, books.inBooksTotal, books.inBooksTotal),
             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        for (hit in books.inBooks.take(QUOTES)) {
+        for (hit in books.inBooks.take(TopicSource.QUOTES)) {
             val m = hit.passages.firstOrNull() ?: continue
             Row(
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).clickable { onOpenPassage(hit.book.bookId, m) }.padding(vertical = 4.dp),
@@ -276,7 +296,7 @@ private fun BooksCard(books: ArticleFooter, onOpenPassage: (bookId: String, ment
                 }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
-                        "“${FooterSummary.lead(m)}${m.quote}…”",
+                        quotes[hit.book.bookId]?.let { "“$it”" } ?: "“${FooterSummary.lead(m)}${m.quote}…”",
                         style = MaterialTheme.typography.bodyMedium.copy(fontFamily = Spectral, fontStyle = FontStyle.Italic),
                         maxLines = 4, overflow = TextOverflow.Ellipsis,
                     )
@@ -348,5 +368,4 @@ private const val PICTURE_RATIO = 1.15f
 /** A picture at least this wide (px, as loaded) fills the width; a smaller one sits beside the title. */
 private const val WIDE_PICTURE_PX = 600
 private val SMALL_PICTURE = 112.dp
-private const val QUOTES = 3
 private const val RELATED_SHOWN = 6

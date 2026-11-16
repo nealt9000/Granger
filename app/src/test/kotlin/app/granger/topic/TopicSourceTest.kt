@@ -186,3 +186,30 @@ class AgeTest {
         assertThat(ageOf(-383, 0, -321, 0)).isEqualTo(62)       // Aristotle, across BC years
     }
 }
+
+class QuoteSentenceTest {
+    private val chapter = "Chapter One\nIn the midst of a conversation that was started about Napoleon’s Spanish affairs, which they all agreed in " +
+        "approving, Prince Andrew began to express a contrary opinion. Nobody answered.\nLater, Napoleon was named again here."
+
+    @Test fun theMentionsWholeSentence() {
+        assertThat(QuoteSentence.around(chapter, "conversation that was started about ", "Napoleon"))
+            .isEqualTo("In the midst of a conversation that was started about Napoleon’s Spanish affairs, which they all agreed in approving, Prince Andrew began to express a contrary opinion.")
+    }
+
+    @Test fun theWordsBeforeChooseTheOccurrence() {
+        assertThat(QuoteSentence.around(chapter, "Later, ", "Napoleon")).isEqualTo("Later, Napoleon was named again here.")
+    }
+
+    @Test fun aRunOnIsCutToAWindowAtWords() {
+        val long = "a ".repeat(300) + "Napoleon " + "b ".repeat(300)
+        val s = QuoteSentence.around(long, "a a ", "Napoleon")!!
+        assertThat(s).startsWith("…")
+        assertThat(s).endsWith("…")
+        assertThat(s).contains("Napoleon")
+        assertThat(s.length).isAtMost(330)
+    }
+
+    @Test fun aQuoteNotInTheTextIsNull() {
+        assertThat(QuoteSentence.around(chapter, "", "Wellington")).isNull()
+    }
+}

@@ -104,13 +104,20 @@ class ReaderViewModelTest {
         assertThat(topics.asked).containsExactly("Napoleon")
     }
 
-    @Test fun aTabReturnedToASectionAPassageAMainPageOrAnotherPackOpensTheArticle() = runTest(main.dispatcher) {
+    @Test fun aTabReturnedToASectionAMainPageOrAnotherPackOpensTheArticle() = runTest(main.dispatcher) {
         assertThat(topicReader("Napoleon", openedAt = 1L).state.value.topicShown).isFalse()                  // returned to
         assertThat(topicReader("Napoleon", fragment = "Exile").state.value.topicShown).isFalse()             // a section
-        assertThat(topicReader("Napoleon", quote = "Emperor of the French").state.value.topicShown).isFalse() // a cited passage
         assertThat(topicReader("index").state.value.topicShown).isFalse()                                    // the main page
         assertThat(topicReader("C++", pack = "p").state.value.topicShown).isFalse()                          // not a Wikipedia
         assertThat(topicReader("Napoleon", topicFirst = false).state.value.topicShown).isFalse()             // Aa: Full article
+    }
+
+    @Test fun aSearchsPassageOpensTheTopicPageShowingWhatWasFound() = runTest(main.dispatcher) {
+        // Neal, 2026-11-16: the topic before the deep dive, even from a Best match (which carries a section and a quote).
+        val vm = topicReader("Napoleon", fragment = "Exile", quote = "Napoleon was exiled to Saint Helena.")
+        assertThat(vm.state.value.topicShown).isTrue()
+        assertThat(vm.state.value.found).isEqualTo("Napoleon was exiled to Saint Helena.")
+        assertThat(vm.state.value.url).isEqualTo(ZimUrls.forEntry("w", "Napoleon", "Exile"))   // the article waits at the passage
     }
 
     @Test fun readTheFullArticleThenBackReturnsToTheTopicPageAndBackAgainLeaves() = runTest(main.dispatcher) {
