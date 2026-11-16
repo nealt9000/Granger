@@ -168,7 +168,7 @@ class CollectionViewModel(
      * Empty for any other collection.
      */
     val removed: StateFlow<List<Book>> = combine(ui.map { it?.collection?.defaultKey }.distinctUntilChanged(), bookshelf.books) { key, books ->
-        if (key == null || !Filing.isBookPackCollection(key)) emptyList() else books.filter { it.hidden && Filing.defaultKey(it) == key }
+        if (key == null || !Filing.isBookPackCollection(key)) emptyList() else books.filter { it.hidden && Filing.inBookPackCollection(it, key) }
     }.flowOn(compute).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     /** Puts the removed books back in the collection, to be copied out again when opened. */

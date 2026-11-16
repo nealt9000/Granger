@@ -140,13 +140,16 @@ class GutenbergBooksTest {
         )
         books.sync(listOf(all, pf))
         assertThat(rows()).hasSize(5)
-        // Filed under its subject pack, not the everything-pack.
+        // Filed under its subject pack, not the everything-pack, and a member of both (Plan KB2 Task 4.7).
         assertThat(db.bookDao().get(id(shared.id))!!.sourceRef).startsWith("gutenberg_en_lcc-pf/")
+        assertThat(db.bookDao().get(id(shared.id))!!.memberOf).isEqualTo("gutenberg_en_lcc-pf\ngutenberg_en_all")
+        assertThat(db.bookDao().get(id(12))!!.memberOf).isEqualTo("gutenberg_en_all")
 
         db.packDao().delete(pf.id)
         books.sync(listOf(all))
         assertThat(rows().map { it.id }).containsExactly(id(shared.id), id(12))
         assertThat(db.bookDao().get(id(shared.id))!!.sourceRef).startsWith("gutenberg_en_all/")
+        assertThat(db.bookDao().get(id(shared.id))!!.memberOf).isEqualTo("gutenberg_en_all")
 
         db.packDao().delete(all.id)
         books.sync(emptyList())

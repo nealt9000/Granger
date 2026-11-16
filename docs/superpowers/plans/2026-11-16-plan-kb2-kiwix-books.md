@@ -533,7 +533,21 @@ now)").
       (`kiwixbooks-list`, `gutenberg-list`, `kb2-*`) checked: "10 titles only until opened", "7 titles only until opened
       · 1 scan: title only". `:core:library` 498, `:app` 1819 (120 skipped), 0 failures.
 - [ ] **Task 4.6: Files in this pack.** A Files row on web packs with documents, from the manifest or `ZimArchive.list`.
-- [ ] **Task 4.7: per-pack membership.** Gutenberg books held by two packs list in both collections.
+- [x] **Task 4.7: per-pack membership.** Gutenberg books held by two packs list in both collections.
+  - **Done 2026-11-16** (this commit, worktree kb2ux).
+    - **Mechanism (decision):** a column, not a table: `books.memberOf TEXT` (`Book.memberOf`, the ZIM names of every
+      readable installed pack listing the book, `\n`-joined; null for other books), added to the existing
+      `MIGRATION_15_16` and `16.json`. `PackBooks.sync` writes it from the holders it already gathers (the first sync
+      after upgrading rewrites each pack book once). Still one Book row and one placement per id.
+    - `Filing.memberKeys(book)` turns it into collection keys; `Filing.inBookPackCollection(book, key)`.
+    - `RoomShelves`: a pack book is in the collection it's placed in plus every book pack collection whose pack lists it,
+      unless the user moved it by hand (then only where they put it). Each installed book pack's collection is made
+      even when all its books are filed by other packs (`packCollections`), so "Every English book" exists and lists
+      them. Headers and Library rows count `row.books`, so they include members. `CollectionViewModel.removed` uses
+      membership too.
+    - Tests: `ShelvesTest.aBookTwoPacksListIsInBothCollections` (both collections, one placement each, a hand move),
+      `GutenbergBooksTest` memberOf for one and two packs, `MigrationTest` memberOf null. `:core:library` 499, `:app`
+      1819 (120 skipped), 0 failures; `:app:assembleDebug` builds.
 
 - [ ] **Task 4.8: subjects for book collections (Explore).**
   - `book_packs.json` (and a `subjects` map for list-carrying packs by prefix) gives each collection one to three

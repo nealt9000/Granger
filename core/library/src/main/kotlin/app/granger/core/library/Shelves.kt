@@ -152,12 +152,38 @@ class RoomShelves(
         return Filable(key, Filing.mediaCollectionKey(mediaTypeId, originKey), { Filing.defaultName(originKey) }, mediaTypeId)
     }
 
-    /** Files unplaced packs and books, then reads the settled state. Idempotent: a second pass writes nothing. */
-    private suspend fun settled(items: List<Filable>): Triple<List<MediaType>, List<ShelfCollection>, Map<String, String>> =
+    /** The settled state: media types, collections, each item's collection by key, and the keys the user placed by hand. */
+    private data class Settled(
+        val types: List<MediaType>,
+        val collections: List<ShelfCollection>,
+        val placements: Map<String, String>,
+        val userSet: Set<String>,
+    )
+
+    /**
+     * Each installed book pack's collection, so a book another pack files has a place in it too (Plan KB2 Task 4.7): a
+     * pack whose books are all filed by another pack still has its collection.
+     */
+    private fun packCollections(bookPacks: List<Pack>): List<Filable> = bookPacks.filter { it.name.isNotBlank() }.map { pack ->
+        val key = Filing.defaultKey(pack)
+        Filable("", key, { Filing.defaultName(key, pack) }, Filing.defaultMediaType(pack))
+    }
+
+    /**
+     * Files unplaced packs and books, and makes the book packs' collections ([collectionsFor]), then reads the settled
+     * state. Idempotent: a second pass writes nothing.
+     */
+    private suspend fun settled(items: List<Filable>, collectionsFor: List<Filable> = emptyList()): Settled =
         db.withTransaction {
-            var placements = dao.getPlacements().associate { it.packKey to it.collectionId }
+            val all = dao.getPlacements()
+            var placements = all.associate { it.packKey to it.collectionId }
             val collections = dao.getCollections()
             var filed = false
+            for (wanted in collectionsFor) {
+                if (collections.any { it.defaultKey == wanted.defaultKey }) continue
+                fileInto(wanted)
+                filed = true
+            }
             for (item in items) {
                 val placed = placements[item.key]
                 if (placed != null && collections.any { it.id == placed }) continue
@@ -167,7 +193,10 @@ class RoomShelves(
                 filed = true
             }
             // Filing may have made collections (and a folder); read them back rather than track each.
-            Triple(dao.getMediaTypes(), if (filed) dao.getCollections() else collections, placements)
+            Settled(
+                dao.getMediaTypes(), if (filed) dao.getCollections() else collections, placements,
+                all.filter { it.userSet }.mapTo(HashSet()) { it.packKey },
+            )
         }
 
     /**
@@ -206,16 +235,30 @@ class RoomShelves(
         return combine(items, dao.observeMediaTypes(), dao.observeCollections(), dao.observePlacements()) { it, _, _, _ -> it }
     }
 
-    private fun rows(collections: List<ShelfCollection>, placements: Map<String, String>, items: Items) =
-        collections.sortedBy { it.name.lowercase() }.map { collection ->
+    /**
+     * Each collection's items. A pack book is also in every other book pack collection whose pack lists it (Plan KB2 Task
+     * 4.7), unless the user moved it somewhere by hand.
+     */
+    private fun rows(collections: List<ShelfCollection>, settled: Settled, items: Items): List<CollectionRow> {
+        val placements = settled.placements
+        val members = HashMap<String, MutableList<Book>>()
+        for (book in items.books) {
+            val key = Filing.bookKey(book)
+            if (key in settled.userSet) continue
+            for (member in Filing.memberKeys(book)) members.getOrPut(member) { ArrayList() } += book
+        }
+        return collections.sortedBy { it.name.lowercase() }.map { collection ->
+            val placed = items.books.filter { placements[Filing.bookKey(it)] == collection.id }
+            val more = collection.defaultKey?.let(members::get).orEmpty()
             CollectionRow(
                 collection,
                 items.packs.filter { placements[Filing.packKey(it)] == collection.id },
-                items.books.filter { placements[Filing.bookKey(it)] == collection.id },
+                if (more.isEmpty()) placed else (placed + more).distinctBy { it.id },
                 items.albums.filter { placements[Filing.albumKey(it)] == collection.id },
                 items.audiobooks.filter { placements[Filing.audiobookKey(it)] == collection.id },
             )
         }
+    }
 
     /**
      * Puts each row whose parent is a top-level collection of the same media type in that folder's [CollectionRow.children],
@@ -234,19 +277,19 @@ class RoomShelves(
     private fun shown(row: CollectionRow) = !row.isEmpty || row.collection.userCreated
 
     override val shelves: Flow<List<Shelf>> = trigger().map { items ->
-        val (types, collections, placements) = settled(filables(items))
-        val rows = nested(rows(collections, placements, items)).filter(::shown)
-        types.mapNotNull { type ->
+        val settled = settled(filables(items), packCollections(items.bookPacks))
+        val rows = nested(rows(settled.collections, settled, items)).filter(::shown)
+        settled.types.mapNotNull { type ->
             val inType = rows.filter { it.collection.mediaTypeId == type.id }
             if (inType.any { !it.isEmpty }) Shelf(type, inType) else null
         }
     }.distinctUntilChanged()
 
     override fun collection(id: String): Flow<CollectionRow?> = trigger().map { items ->
-        val (_, collections, placements) = settled(filables(items))
+        val settled = settled(filables(items), packCollections(items.bookPacks))
         // The collection and, if it's a folder, its children.
-        val wanted = collections.filter { it.id == id || it.parentId == id }
-        nested(rows(wanted, placements, items)).firstOrNull { it.collection.id == id }
+        val wanted = settled.collections.filter { it.id == id || it.parentId == id }
+        nested(rows(wanted, settled, items)).firstOrNull { it.collection.id == id }
     }.distinctUntilChanged()
 
     override suspend fun movePack(pack: Pack, toCollectionId: String) {

@@ -45,13 +45,15 @@ class MigrationTest {
             assertThat(it.getString(1)).isEqualTo("zimit 2.1")
             assertThat(it.isNull(2)).isTrue()
         }
-        db.query("SELECT title, format, groupName, ord, workKey, workTitle, partNo, hidden FROM books").use {
+        db.query("SELECT title, format, groupName, ord, workKey, workTitle, partNo, hidden, memberOf FROM books").use {
             it.moveToFirst()
             assertThat(it.getString(0)).isEqualTo("Water")
             assertThat(it.getString(1)).isEqualTo("PDF")
             assertThat((2..6).all { i -> it.isNull(i) }).isTrue()
             // Plan KB2 Task 4.3: no book starts removed.
             assertThat(it.getInt(7)).isEqualTo(0)
+            // Task 4.7: memberships are written by the next sync.
+            assertThat(it.isNull(8)).isTrue()
         }
         db.query("SELECT COUNT(*) FROM book_positions").use { it.moveToFirst(); assertThat(it.getInt(0)).isEqualTo(1) }
         db.execSQL("UPDATE packs SET bookManifest = '/s/m.gbooks' WHERE id = 'u-m'")

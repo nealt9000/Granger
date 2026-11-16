@@ -193,6 +193,11 @@ data class Book(
      * "Show removed" or opening it brings it back; its place and marks are kept. Always false for any other book.
      */
     @ColumnInfo(defaultValue = "0") val hidden: Boolean = false,
+    /**
+     * Every installed pack that lists this pack book, by ZIM name, `\n`-joined (Plan KB2 Task 4.7, version 16): the book
+     * is in each one's collection, though it's one row filed by its [sourceRef]'s pack. Null for any other book.
+     */
+    val memberOf: String? = null,
 )
 
 /** Where the reader left off in a book. [locatorJson] is opaque to the library. */

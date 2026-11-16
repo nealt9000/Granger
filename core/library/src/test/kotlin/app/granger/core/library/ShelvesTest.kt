@@ -88,6 +88,35 @@ class ShelvesTest {
         assertThat(db.shelfDao().getPlacements().map { it.packKey }).doesNotContain("gutenberg_en_lcc-m")
     }
 
+    /**
+     * Plan KB2 Task 4.7: a book two packs list is one row in both packs' collections, which count it; "Every English book"
+     * has its collection even when a subject pack files all its books. A book the user moved is only where they put it.
+     */
+    @Test fun aBookTwoPacksListIsInBothCollections() = runTest {
+        val music = named("g1", "gutenberg_en_lcc-m").copy(description = "Music and books on music")
+        val all = named("g2", "gutenberg_en_all").copy(description = "All books")
+        val both = "gutenberg_en_lcc-m\ngutenberg_en_all"
+        val bach = gutenbergBook("1001", "Bach").copy(memberOf = both)
+        val chopin = gutenbergBook("1002", "Chopin").copy(memberOf = both)
+        bookshelf.state.value = listOf(bach, chopin)
+        val (s, _) = shelves(music, all)
+        val rows = s.shelves.first().single().allCollections.associateBy { it.collection.defaultKey }
+        assertThat(rows.getValue("gutenberg-m").books.map { it.title }).containsExactly("Bach", "Chopin")
+        assertThat(rows.getValue("gutenberg-en_all").books.map { it.title }).containsExactly("Bach", "Chopin")
+        assertThat(rows.getValue("gutenberg-en_all").collection.id).isEqualTo("c:gutenberg-en_all")
+        // One placement per book: membership adds no rows.
+        assertThat(db.shelfDao().getPlacements().map { it.packKey }).containsExactly(bach.id, chopin.id)
+
+        val mine = s.createCollection("Favourites", "literature")
+        s.moveBook(bach, mine)
+        val moved = s.shelves.first().single().allCollections.associateBy { it.collection.id }
+        assertThat(moved.getValue(mine).books.map { it.title }).containsExactly("Bach")
+        assertThat(moved.getValue("c:gutenberg-en_all").books.map { it.title }).containsExactly("Chopin")
+        assertThat(s.collection("c:gutenberg-en_all").first()!!.books.map { it.title }).containsExactly("Chopin")
+        assertThat(Filing.inBookPackCollection(chopin, "gutenberg-en_all")).isTrue()
+        assertThat(Filing.inBookPackCollection(chopin, "gutenberg-pf")).isFalse()
+    }
+
     @Test fun gutenbergCollectionKeysAndNames() {
         assertThat(Filing.gutenbergKey("gutenberg_en_lcc-m")).isEqualTo("gutenberg-m")
         assertThat(Filing.gutenbergKey("gutenberg_en_lcc-pf")).isEqualTo("gutenberg-pf")

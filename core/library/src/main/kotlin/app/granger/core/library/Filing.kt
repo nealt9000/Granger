@@ -176,6 +176,24 @@ object Filing {
             ?: book.title
     }
 
+    /**
+     * The collections a pack book is in besides any it's placed in (Plan KB2 Task 4.7): one per installed pack listing it
+     * ([Book.memberOf]), so a Gutenberg book in a subject pack and in `gutenberg_en_all` is in both. Empty for any other
+     * book, or a row from before its packs were read.
+     */
+    fun memberKeys(book: Book): List<String> {
+        val names = book.memberOf?.split('\n')?.filter { it.isNotBlank() }.orEmpty()
+        return when (book.origin) {
+            BookOrigin.GUTENBERG -> names.map(::gutenbergKey)
+            BookOrigin.NAUTILUS, BookOrigin.KIWIX -> names.map(::kiwixBooksKey)
+            else -> emptyList()
+        }
+    }
+
+    /** Whether [book] belongs in the book pack collection with [defaultKey]: its own pack's, or another pack's listing it. */
+    fun inBookPackCollection(book: Book, defaultKey: String): Boolean =
+        defaultKey(book) == defaultKey || defaultKey in memberKeys(book)
+
     /** How an archive.org part's ref and title mark it (ArchiveDownloads.PART_SEPARATOR and PART_TITLE_SEPARATOR in the app). */
     private const val SET_PART = '~'
     private const val SET_TITLE = " · "

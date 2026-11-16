@@ -132,6 +132,8 @@ open class PackBooks(
                     workKey = item.workKey,
                     workTitle = item.workTitle,
                     partNo = item.partNo,
+                    // Every pack listing it, so each one's collection holds it (Plan KB2 Task 4.7).
+                    memberOf = holding.map { it.first.name }.distinct().joinToString("\n"),
                 )
                 if (row != old) writes += row
             }
