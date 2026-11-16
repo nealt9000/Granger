@@ -1761,7 +1761,7 @@ def test_book_packs_get_a_provider_and_other_packs_none():
     providers = cg.load_providers()
     assert cg.provider_of("irp.fas.org_en_military-medicine", "", providers) == "Federation of American Scientists"
     assert cg.provider_of("gutenberg_en_lcc-pr", "books", providers) == "Project Gutenberg"
-    assert cg.provider_of("zimgit-water_en", "books", providers) == "Zimgit"
+    assert cg.provider_of("zimgit-water_en", "books", providers) == ""  # Kiwix's own: "From Kiwix" alone
     assert cg.provider_of("usda-2015_en", "books", providers) == "USDA"
     assert cg.provider_of("prunelle_en_interactive-books", "books", providers) == "Prunelle"
     assert cg.provider_of("wikipedia_en_all", "", providers) == ""
