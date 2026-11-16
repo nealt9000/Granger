@@ -593,6 +593,29 @@ class CollectionViewModelTest {
         assertThat(rowCountText(vm.ui.value!!).en()).isEqualTo("3 books · African Storybook Initiative")
     }
 
+    /** Plan KB2 review: a book pack's catalog `provider` names its maker on Books, the Library row and the header. */
+    @Test fun aBookPacksCatalogProviderIsSaidWhereItsManifestNamesNoOne() = runTest(main.dispatcher) {
+        val knots = app.granger.packEntry("zimgit-knots_en", zimName = "zimgit-knots_en")
+            .copy(family = "zimgit-knots", content = "books", provider = "Zimgit")
+        assertThat(app.granger.sources.BookShelves.packMeta(knots).en()).endsWith(" · From Kiwix · Zimgit")
+        // A catalog from before the field keeps the family heuristic.
+        assertThat(app.granger.sources.BookShelves.provider(knots.copy(provider = "", family = "irp.fas.org"))).isEqualTo("irp.fas.org")
+        assertThat(app.granger.sources.BookShelves.provider(knots.copy(provider = ""))).isNull()
+        val key = "kiwixbooks-zimgit-knots_en"
+        assertThat(bookPackProviders(catalogOf(packs = listOf(knots)))).containsExactly(key, "Zimgit")
+        val doc = book("book:nautilus:zimgit-knots_en/a.pdf", "Bowline").copy(origin = BookOrigin.NAUTILUS, sourceRef = "zimgit-knots_en/a.pdf")
+        val row = CollectionRow(ShelfCollection("c:$key", "A Library of Knots", "lit", false, defaultKey = key), emptyList(), listOf(doc))
+        assertThat(rowCountText(row, null, "Zimgit").en()).isEqualTo("1 document · From Kiwix · Zimgit")
+        show(row)
+        val vm = CollectionViewModel(
+            "c:$key", shelves, library, sessions, bookshelf, downloads, appScope = this,
+            catalog = FakeCatalogSource(catalogOf(packs = listOf(knots))), viewPrefs = LibraryViewPrefs(), compute = main.dispatcher,
+        )
+        backgroundScope.launch { vm.gutenbergHeader.collect {} }
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.gutenbergHeader.value!!.provider.en()).isEqualTo("From Kiwix · Zimgit")
+    }
+
     private fun SectionRow.label(): String = when (this) {
         is SectionRow.Header -> "# $name"
         is SectionRow.Item -> (if (part) "- " else "") + book.title

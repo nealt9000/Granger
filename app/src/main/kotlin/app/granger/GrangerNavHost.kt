@@ -1000,6 +1000,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 onImported = { container.appScope.launch { container.prepareBooks() } },
                             ),
                             container.appScope,
+                            catalog = container.catalog,
                         )
                     },
                     notice = backStackEntry.toRoute<LibraryRoute>().noticeText(),

@@ -1755,3 +1755,35 @@ def test_book_packs_get_a_shelf_and_other_packs_none():
     assert cg.shelf_of("wikipedia_en_all", "", shelves) == ""
     assert cg.shelf_of("gutenberg_en_lcc-pr", "", shelves) == ""  # a prefix alone doesn't make a book pack
 
+
+def test_book_packs_get_a_provider_and_other_packs_none():
+    """Plan KB2 review: manifest packs by their own `provider`, list-carrying book packs by `providers` prefix."""
+    providers = cg.load_providers()
+    assert cg.provider_of("irp.fas.org_en_military-medicine", "", providers) == "Federation of American Scientists"
+    assert cg.provider_of("gutenberg_en_lcc-pr", "books", providers) == "Project Gutenberg"
+    assert cg.provider_of("zimgit-water_en", "books", providers) == "Zimgit"
+    assert cg.provider_of("usda-2015_en", "books", providers) == "USDA"
+    assert cg.provider_of("prunelle_en_interactive-books", "books", providers) == "Prunelle"
+    assert cg.provider_of("wikipedia_en_all", "", providers) == ""
+    assert cg.provider_of("zimgit-water_en", "", providers) == ""  # a prefix alone doesn't make a book pack
+
+
+def test_stamp_shelves_puts_shelf_and_provider_on_book_packs_and_takes_them_off_the_rest():
+    packs = [{"id": "a", "zimName": "irp.fas.org_en_military-medicine", "content": ""},
+             {"id": "b", "zimName": "prunelle_en_budding-authors", "content": "books", "shelf": "children"},
+             {"id": "c", "zimName": "wikipedia_en_all", "content": "", "shelf": "x", "provider": "y"}]
+    changed = cg.stamp_shelves(packs, cg.load_shelves(), cg.load_providers())
+    assert changed == 3
+    assert (packs[0]["shelf"], packs[0]["provider"]) == ("manuals", "Federation of American Scientists")
+    assert (packs[1]["shelf"], packs[1]["provider"]) == ("children", "Prunelle")
+    assert "shelf" not in packs[2] and "provider" not in packs[2]
+    assert cg.stamp_shelves(packs, cg.load_shelves(), cg.load_providers()) == 0
+
+
+def test_shelves_command_stamps_providers_in_place(tmp_path):
+    path = tmp_path / "catalog.json"
+    path.write_text(json.dumps({"generatedAt": "2026-01-01T00:00:00Z", "packs": [
+        {"id": "usda-2015_en", "zimName": "usda-2015_en", "content": "books"}]}))
+    cg.main(["shelves", str(path)])
+    [pack] = json.loads(path.read_text())["packs"]
+    assert pack["shelf"] == "manuals" and pack["provider"] == "USDA"

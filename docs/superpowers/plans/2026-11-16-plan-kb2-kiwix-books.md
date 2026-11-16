@@ -775,6 +775,14 @@ now)").
   - Stamp a `provider` field from `book_packs.json` (as `shelf` is) so rows read "From Kiwix · Federation of American
     Scientists", not "irp.fas.org"; add providers for the list-carrying packs (zimgit, USDA, Prunelle). Old apps ignore
     the key.
+    - [x] **Done 2026-11-16.** `book_packs.json` gains `providers` by prefix (gutenberg_ → Project Gutenberg, zimgit- →
+      Zimgit, usda- → USDA, prunelle_ → Prunelle); manifest packs keep their own `provider`. `catalog_gen.py` stamps
+      `provider` at build (curated and Kiwix packs, as `shelf`) and `catalog_gen.py shelves <file>` now stamps both on a
+      built catalog (`stamp_shelves`, also clearing them off non-book packs). App: `PackEntry.provider` (default "");
+      `BookShelves.provider` prefers it over the family heuristic; Library rows and collection headers use it when the
+      manifest names no one (nautilus packs: "From Kiwix · Prunelle"; `bookPackProviders`). Not yet on the published
+      catalog: run `shelves` in the Task 3.2 catalog change. Tests: catalog_gen +3 (124), `CollectionViewModelTest` +1;
+      `:app` 1840 (126 skipped), 0 failures.
   - Phase 5: confirm the >10 GB size check (KB Decision 9) fires from the Books screen's Get on Survivor Library
     (220 GB).
 

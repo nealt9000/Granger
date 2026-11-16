@@ -226,6 +226,8 @@ def pin(entry, row, fetch=http_get):
     }
     if row.get("shelf"):  # Plan KB2: the Books shelf of a book pack (old apps ignore the key)
         result["shelf"] = row["shelf"]
+    if row.get("provider"):  # Plan KB2: who made a book pack (old apps ignore the key)
+        result["provider"] = row["provider"]
     if row.get("nonCommercial"):
         result["nonCommercial"] = True
     # Plan L3: a curated row's copy in other languages ("i18n": {"en": {"title": …}} on a Spanish pack).
@@ -271,6 +273,24 @@ def shelf_of(name, content, shelves):
     if content == "books":
         return next((shelf for prefix, shelf in prefixes if name.startswith(prefix)), "")
     return ""
+
+
+def stamp_shelves(packs, shelves, providers):
+    """
+    Puts each book pack's `shelf` and `provider` on [packs] in place, and takes them off any other pack (Plan KB2).
+    Returns how many packs changed.
+    """
+    changed = 0
+    for p in packs:
+        name, content = p.get("zimName") or p["id"], p.get("content", "")
+        before = (p.get("shelf", ""), p.get("provider", ""))
+        for key, value in (("shelf", shelf_of(name, content, shelves)), ("provider", provider_of(name, content, providers))):
+            if value:
+                p[key] = value
+            else:
+                p.pop(key, None)
+        changed += before != (p.get("shelf", ""), p.get("provider", ""))
+    return changed
 
 
 def load_contents(root=None, path=CONTENTS):
@@ -322,8 +342,29 @@ def kiwix_copy(name, copy):
     return dict(copy)
 
 
+def load_providers(root=None, path=BOOKPACKS):
+    """
+    (Plan KB2 review) {ZIM name: provider} for manifest packs and [(name prefix, provider)] for list-carrying book
+    packs (`providers` in book_packs.json), the same shape as [load_shelves].
+    """
+    file = pathlib.Path(root or REPO_ROOT) / path
+    if not file.exists():
+        return {}, []
+    config = json.loads(file.read_text(encoding="utf-8"))
+    return ({name: row["provider"] for name, row in config.get("packs", {}).items() if row.get("provider")},
+            sorted(config.get("providers", {}).items(), key=lambda kv: -len(kv[0])))
+
+
+def provider_of(name, content, providers):
+    """
+    Who made a book pack, for the app's "From Kiwix · <provider>" (Plan KB2): a manifest pack's own, or a book pack's by
+    name prefix (gutenberg_ → Project Gutenberg). Blank for every other pack. [shelf_of]'s rule, over `providers`.
+    """
+    return shelf_of(name, content, providers)
+
+
 def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=8, tries=3, sleep=time.sleep,
-                  contents=None, shelves=({}, [])):
+                  contents=None, shelves=({}, []), providers=({}, [])):
     """
     Every pack in [feed] in one of the configured languages whose family has a license and no hold, pinned, except
     the curated ones ([curated_keys], (name, flavour) pairs). Returns (packs, report lines).
@@ -360,6 +401,7 @@ def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=
                   "nonCommercial": row.get("nonCommercial", False), "domain": row.get("domain"),
                   "content": content_of(e["name"], contents)}
         fields["shelf"] = shelf_of(e["name"], fields["content"], shelves)
+        fields["provider"] = provider_of(e["name"], fields["content"], providers)
         for attempt in range(tries):
             try:
                 return pin(e, fields, fetch), None
@@ -634,10 +676,12 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
                                      "domain": c.get("domain", row.get("domain") if row else ""),
                                      "content": content_of(c["name"], contents),
                                      "shelf": c.get("shelf") or shelf_of(c["name"], content_of(c["name"], contents),
-                                                                         load_shelves(root))}, fetch, feed))
+                                                                         load_shelves(root)),
+                                     "provider": c.get("provider") or provider_of(
+                                         c["name"], content_of(c["name"], contents), load_providers(root))}, fetch, feed))
         curated_keys = {(c["name"], c.get("flavour", "")) for c in curated["packs"] if "release" not in c}
         bulk, lines = kiwix_entries(kiwix, families, feed, curated_keys, fetch, contents=contents,
-                                    shelves=load_shelves(root))
+                                    shelves=load_shelves(root), providers=load_providers(root))
         packs += bulk
         if report is not None:
             report += lines
@@ -1450,22 +1494,16 @@ def main(argv):
               f"{sum(d['sizeBytes'] for d in used) / 1e6:.1f} MB to upload")
         for line in lines:
             print(line)
-    elif args.command == "shelves":  # Plan KB2: stamp each book pack's Books shelf on a built catalog, in place
+    elif args.command == "shelves":  # Plan KB2: stamp each book pack's Books shelf and provider on a built catalog
         path = pathlib.Path(args.file)
         catalog = json.loads(path.read_text(encoding="utf-8"))
-        shelves, changed = load_shelves(), 0
-        for p in catalog["packs"]:
-            shelf = shelf_of(p.get("zimName") or p["id"], p.get("content", ""), shelves)
-            if shelf != p.get("shelf", ""):
-                changed += 1
-                if shelf:
-                    p["shelf"] = shelf
-                else:
-                    p.pop("shelf", None)
+        changed = stamp_shelves(catalog["packs"], load_shelves(), load_providers())
         catalog["generatedAt"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         path.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         counts = collections.Counter(p["shelf"] for p in catalog["packs"] if p.get("shelf"))
-        print(f"{path}: {changed} packs changed; shelves {dict(sorted(counts.items()))}")
+        makers = collections.Counter(p["provider"] for p in catalog["packs"] if p.get("provider"))
+        print(f"{path}: {changed} packs changed; shelves {dict(sorted(counts.items()))}; "
+              f"providers {dict(sorted(makers.items()))}")
     elif args.command == "sets":
         path = pathlib.Path(args.file)
         catalog = json.loads(path.read_text(encoding="utf-8"))

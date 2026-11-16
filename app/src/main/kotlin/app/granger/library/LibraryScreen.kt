@@ -202,7 +202,7 @@ fun LibraryContent(
             for (kind in loaded.kinds) {
                 kindRows(kind, open = kind.id !in collapsed, onToggle = { open ->
                     collapsed = if (open) collapsed + kind.id else collapsed - kind.id
-                }, onOpenCollection = onOpenCollection, manifests = loaded.manifests)
+                }, onOpenCollection = onOpenCollection, manifests = loaded.manifests, providers = loaded.providers)
             }
         }
     }
@@ -225,6 +225,8 @@ internal fun LazyListScope.kindRows(
     onOpenAudiobooks: (collectionId: String?) -> Unit = {},
     /** The Kiwix book packs' manifests by collection default key, for their rows' noun and provider (Plan KB2). */
     manifests: Map<String, ManifestCollection> = emptyMap(),
+    /** The catalog's provider of each Kiwix book pack collection, by default key, when its manifest names none (Plan KB2). */
+    providers: Map<String, String> = emptyMap(),
 ) {
     val id = kind.id
     item(key = "kind:$id") {
@@ -267,7 +269,9 @@ internal fun LazyListScope.kindRows(
                     }
                     .padding(start = 16.dp),
                 headlineContent = { Text(row.collection.shownName().resolve()) },
-                supportingContent = { Text(rowCountText(row, row.collection.defaultKey?.let(manifests::get)).resolve()) },
+                supportingContent = {
+                    Text(rowCountText(row, row.collection.defaultKey?.let(manifests::get), row.collection.defaultKey?.let(providers::get)).resolve())
+                },
             )
         }
     }
@@ -287,7 +291,7 @@ private val IMPORT_TYPES = arrayOf(
  * pack's collection takes its noun and provider from [manifest], its pack's manifest (Plan KB2 Task 4.2); null for any
  * other collection, or one whose manifest isn't read yet.
  */
-internal fun rowCountText(row: CollectionRow, manifest: ManifestCollection? = null): UiText {
+internal fun rowCountText(row: CollectionRow, manifest: ManifestCollection? = null, catalogProvider: String? = null): UiText {
     val rows = row.withChildren
     val counts = countText(rows.sumOf { it.packs.size }, rows.sumOf { it.books.size }, rows.sumOf { it.albums.size }, rows.sumOf { it.audiobooks.size })
     // A book pack's collection is called by its subject or pack; the line under it says how many it holds and where they
@@ -307,7 +311,10 @@ internal fun rowCountText(row: CollectionRow, manifest: ManifestCollection? = nu
     val header = GutenbergHeader(pack = null, books = books, searchable = 0).let {
         // "17 documents · From Kiwix", "24 books · From Kiwix · Federation of American Scientists".
         if (Filing.isKiwixBooksCollection(key)) {
-            it.copy(kind = HeaderKind.KIWIX_LIBRARY, providerName = manifest?.provider?.takeIf(String::isNotBlank), documents = manifest?.documents ?: true)
+            it.copy(
+                kind = HeaderKind.KIWIX_LIBRARY, documents = manifest?.documents ?: true,
+                providerName = manifest?.provider?.takeIf(String::isNotBlank) ?: catalogProvider?.takeIf(String::isNotBlank),
+            )
         } else {
             it
         }

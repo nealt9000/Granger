@@ -50,6 +50,8 @@ data class LibraryUi(
     val kinds: List<KindRow>,
     val emptyLibrary: Boolean,
     val manifests: Map<String, app.granger.core.library.ManifestCollection> = emptyMap(),
+    /** Each Kiwix book pack collection's provider by default key, from the catalog (Plan KB2): when its manifest names none. */
+    val providers: Map<String, String> = emptyMap(),
 )
 
 const val BOOKS_KIND = "books"
@@ -100,6 +102,8 @@ class LibraryViewModel(
     /** What a Kiwix book pack's manifest says of its collection; read off the main thread. */
     private val manifestOf: (app.granger.core.library.Pack) -> app.granger.core.library.ManifestCollection? = ::manifestCollectionOf,
     private val io: kotlinx.coroutines.CoroutineDispatcher = kotlinx.coroutines.Dispatchers.IO,
+    /** Where a book pack's provider comes from when its manifest names none (Plan KB2); null leaves it out. */
+    private val catalog: app.granger.core.catalog.CatalogSource? = null,
 ) : ViewModel() {
     private val _notice = MutableStateFlow<app.granger.UiText?>(null)
 
@@ -119,10 +123,15 @@ class LibraryViewModel(
     }
 
     /** Null until the first load finishes. */
-    val ui: StateFlow<LibraryUi?> = kotlinx.coroutines.flow.combine(shelves.shelves, manifests()) { shelves, manifests ->
+    val ui: StateFlow<LibraryUi?> = kotlinx.coroutines.flow.combine(shelves.shelves, manifests(), providers()) { shelves, manifests, providers ->
         // Empty means no books: packs alone fill Browse, and music alone fills Listen.
-        libraryKinds(shelves).let { LibraryUi(it, emptyLibrary = it.isEmpty(), manifests = manifests) }
+        libraryKinds(shelves).let { LibraryUi(it, emptyLibrary = it.isEmpty(), manifests = manifests, providers = providers) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** The catalog's book pack providers by their collections' default key (Plan KB2): `kiwixbooks-<ZIM name>`. */
+    private fun providers() = (catalog?.state ?: kotlinx.coroutines.flow.flowOf(null))
+        .map { state -> bookPackProviders(state?.catalog) }
+        .distinctUntilChanged()
 
     /** The manifests of the Kiwix book packs on the phone, by their collection's default key. */
     private fun manifests() = library.packs
@@ -137,3 +146,11 @@ class LibraryViewModel(
         viewModelScope.launch { library.refresh() }
     }
 }
+
+/**
+ * The catalog's provider of each Kiwix book pack (Plan KB2), by its collection's default key (`kiwixbooks-<ZIM name>`):
+ * what a collection says when its manifest names no one (nautilus packs: "From Kiwix · Prunelle").
+ */
+fun bookPackProviders(catalog: app.granger.core.catalog.Catalog?): Map<String, String> =
+    catalog?.packs.orEmpty().filter { it.isBookPack && it.provider.isNotBlank() && it.zimName.isNotBlank() }
+        .associate { Filing.kiwixBooksKey(it.zimName) to it.provider }

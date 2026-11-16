@@ -60,10 +60,12 @@ object BookShelves {
     }
 
     /**
-     * Who made a Kiwix book pack, as far as the catalog says: Project Gutenberg, or its family when that names a site
-     * ("irp.fas.org") or a maker ("prunelle" → "Prunelle"); null for a family that is only an id ("zimgit-knots").
+     * Who made a Kiwix book pack: the catalog's `provider` (Plan KB2, from book_packs.json), else, for a catalog without
+     * it, Project Gutenberg, or its family when that names a site ("irp.fas.org") or a maker ("prunelle" → "Prunelle");
+     * null for a family that is only an id ("zimgit-knots").
      */
     fun provider(pack: PackEntry): String? = when {
+        pack.provider.isNotBlank() -> pack.provider
         isGutenberg(pack) -> GutenbergNames.PROVIDER
         pack.family.contains('.') -> pack.family
         pack.family.isNotBlank() && pack.family.all { it.isLetter() } -> pack.family.replaceFirstChar { it.uppercase() }

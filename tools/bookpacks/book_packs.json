@@ -1,10 +1,16 @@
 {
-  "about": "Plan KB2: the Kiwix packs shown as book collections through a .gbooks manifest, and how build.py reads each (extractor, filters, groups, title overrides). Gutenberg and nautilus packs carry their own lists and aren't here. `shelves` puts list-carrying book packs (content \"books\") on a Books shelf by name prefix (Plan KB2 Decision 4). `notBooks` lists packs the audit or Neal judged not to be book collections, with why, so upkeep doesn't raise them as candidates.",
+  "about": "Plan KB2: the Kiwix packs shown as book collections through a .gbooks manifest, and how build.py reads each (extractor, filters, groups, title overrides). Gutenberg and nautilus packs carry their own lists and aren't here. `shelves` puts list-carrying book packs (content \"books\") on a Books shelf by name prefix (Plan KB2 Decision 4), and `providers` names who made them, by the same prefixes (a manifest pack's `provider` is its own). `notBooks` lists packs the audit or Neal judged not to be book collections, with why, so upkeep doesn't raise them as candidates.",
   "shelves": {
     "gutenberg_": "literature",
     "zimgit-": "manuals",
     "usda-": "manuals",
     "prunelle_": "children"
+  },
+  "providers": {
+    "gutenberg_": "Project Gutenberg",
+    "zimgit-": "Zimgit",
+    "usda-": "USDA",
+    "prunelle_": "Prunelle"
   },
   "notBooks": {
     "theworldfactbook_en_all": "web: its PDFs repeat the country pages",

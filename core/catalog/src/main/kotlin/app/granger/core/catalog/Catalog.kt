@@ -203,6 +203,12 @@ data class PackEntry(
      * website, and in older catalogs.
      */
     val shelf: String = "",
+    /**
+     * Who made a book pack ("Federation of American Scientists", "Project Gutenberg", "Prunelle"), stamped from
+     * `book_packs.json` (Plan KB2): the Books screen and the Library say "From Kiwix · <provider>". Blank for a website,
+     * and in older catalogs.
+     */
+    val provider: String = "",
 ) : CatalogItem {
     /** The title in app language [appLang], else the catalog's own (Kiwix's, or the curated one). */
     fun title(appLang: String): String = localised(i18n, appLang, title)

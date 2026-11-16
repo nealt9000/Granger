@@ -114,6 +114,9 @@ class CollectionViewModel(
 
     private data class CatalogFacts(val categories: Map<String, String>, val levels: Map<String, Int>)
 
+    /** The catalog's book pack providers by collection key (Plan KB2), for a header whose manifest names no one. */
+    private val providers: Map<String, String> get() = bookPackProviders(catalog?.state?.value?.catalog)
+
     private data class Choices(val query: String, val sort: BookSort, val category: String?)
 
     /** A book pack collection's pack, when installed; null for any other collection. */
@@ -224,7 +227,8 @@ class CollectionViewModel(
             header.copy(
                 kind = HeaderKind.KIWIX_LIBRARY,
                 fromFileNames = m?.fromFileNames ?: (pack?.bookManifest == Pack.BOOK_FILES),
-                providerName = m?.provider?.takeIf { it.isNotBlank() },
+                // The manifest's maker, else the catalog's (Plan KB2: a nautilus pack's, "Prunelle").
+                providerName = m?.provider?.takeIf { it.isNotBlank() } ?: providers[key],
                 documents = m?.documents ?: true,
             )
         } else {
