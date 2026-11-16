@@ -122,7 +122,7 @@ fun PdfSettingsSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onDi
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WikiTextSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onDismiss: () -> Unit) {
+fun WikiTextSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onDismiss: () -> Unit, showTopicSetting: Boolean = false) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.navigationBarsPadding().padding(horizontal = 24.dp).padding(bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Setting(R.string.ebook_text_size) {
@@ -146,6 +146,14 @@ fun WikiTextSheet(prefs: ReadingPrefs, onChange: (ReadingPrefs) -> Unit, onDismi
                 val shown = if (prefs.theme == ReadingTheme.SEPIA) ReadingTheme.DAY else prefs.theme
                 Chips(listOf(ReadingTheme.APP to R.string.ebook_theme_match_app, ReadingTheme.DAY to R.string.ebook_theme_day, ReadingTheme.NIGHT to R.string.ebook_theme_night), shown) {
                     onChange(prefs.copy(theme = it))
+                }
+            }
+            // Plan LL2 Decision 1: what a Wikipedia article opens at.
+            if (showTopicSetting) {
+                Setting(R.string.topic_setting_open_at) {
+                    Chips(listOf(true to R.string.topic_setting_topic, false to R.string.topic_setting_article), prefs.topicFirst) {
+                        onChange(prefs.copy(topicFirst = it))
+                    }
                 }
             }
         }

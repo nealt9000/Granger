@@ -39,4 +39,10 @@ object Features {
      * Pixel check (Task 10).
      */
     val LINKED_CLASSICS = BuildConfig.DEBUG
+
+    /**
+     * Linked Library LL2: the topic page in front of a Wikipedia article (Plan LL2). Rides with [LINKED_CLASSICS]: off in
+     * release until the tester build turns both on.
+     */
+    val TOPIC_PAGE = LINKED_CLASSICS
 }

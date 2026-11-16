@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- La página del tema delante de un artículo de Wikipedia (Plan LL2). -->
+<resources>
+    <string name="topic_read_full">Leer el artículo completo</string>
+    <string name="topic_years_aged">%1$s · a los %2$d años</string>
+    <string name="topic_their_time">Su época</string>
+    <string name="topic_same_time">En la misma época</string>
+    <string name="topic_people_overlapped">Personas cuyas vidas coincidieron</string>
+    <string name="topic_events">Lo que pasó en esos años</string>
+    <string name="topic_open_timeline">Ver en la línea del tiempo</string>
+    <string name="topic_in_books">En tus libros</string>
+    <string name="topic_all_books">Los %1$d</string>
+    <plurals name="topic_named_in_books">
+        <item quantity="one">Aparece en uno de tus libros</item>
+        <item quantity="many">Aparece en %1$d de tus libros</item>
+        <item quantity="other">Aparece en %1$d de tus libros</item>
+    </plurals>
+    <string name="topic_closest">Temas cercanos</string>
+    <string name="topic_near_in_books">También cerca en tus libros</string>
+    <string name="topic_menu">Página del tema</string>
+    <string name="topic_setting_open_at">Abrir los artículos en</string>
+    <string name="topic_setting_topic">Página del tema</string>
+    <string name="topic_setting_article">Artículo completo</string>
+</resources>

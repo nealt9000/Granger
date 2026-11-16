@@ -46,6 +46,8 @@ data class ReadingPrefs(
     val wikiTextZoom: Int = 100,
     /** Reference links in the Classics (Plan LL1): Light by default (Neal, 2026-11-11). */
     val referenceLinks: LinkLevel = LinkLevel.LIGHT,
+    /** A Wikipedia article opens at its topic page (Plan LL2 Decision 1, on by default: Neal, 2026-11-16), or at the article. */
+    val topicFirst: Boolean = true,
 ) {
     /**
      * Readium's preferences. Publisher styles are always off so the reader's choices win over the book's CSS
@@ -171,6 +173,7 @@ class ReadingPrefsStore(private val shared: SharedPreferences) {
             .putBoolean(KEY_PDF_FIT_WIDTH, clamped.pdfFitWidth)
             .putInt(KEY_WIKI_TEXT_ZOOM, clamped.wikiTextZoom)
             .putString(KEY_REFERENCE_LINKS, clamped.referenceLinks.name)
+            .putBoolean(KEY_TOPIC_FIRST, clamped.topicFirst)
             .apply()
     }
 
@@ -188,6 +191,7 @@ class ReadingPrefsStore(private val shared: SharedPreferences) {
             pdfFitWidth = shared.getBoolean(KEY_PDF_FIT_WIDTH, d.pdfFitWidth),
             wikiTextZoom = shared.getInt(KEY_WIKI_TEXT_ZOOM, d.wikiTextZoom),
             referenceLinks = enumOr(shared.getString(KEY_REFERENCE_LINKS, null), d.referenceLinks),
+            topicFirst = shared.getBoolean(KEY_TOPIC_FIRST, d.topicFirst),
         ).clamped()
     }
 
@@ -205,5 +209,6 @@ class ReadingPrefsStore(private val shared: SharedPreferences) {
         const val KEY_PDF_FIT_WIDTH = "pdf_fit_width"
         const val KEY_WIKI_TEXT_ZOOM = "wiki_text_zoom"
         const val KEY_REFERENCE_LINKS = "reference_links"
+        const val KEY_TOPIC_FIRST = "topic_first"
     }
 }

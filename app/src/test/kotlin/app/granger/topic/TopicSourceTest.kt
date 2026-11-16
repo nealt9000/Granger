@@ -177,3 +177,12 @@ class TwoLetterTest {
         assertThat(app.granger.twoLetter("")).isNull()
     }
 }
+
+class AgeTest {
+    @Test fun ageCountsBirthdays() {
+        assertThat(ageOf(1769, 815, 1821, 505)).isEqualTo(51)   // Napoleon: died before his birthday
+        assertThat(ageOf(1775, 1216, 1817, 718)).isEqualTo(41)  // Jane Austen
+        assertThat(ageOf(1749, 828, 1832, 0)).isEqualTo(83)     // a death date known only to the year
+        assertThat(ageOf(-383, 0, -321, 0)).isEqualTo(62)       // Aristotle, across BC years
+    }
+}

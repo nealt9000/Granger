@@ -89,6 +89,7 @@ import app.granger.theme.FieldColors
 import app.granger.theme.GrangerTheme
 import app.granger.theme.NightColors
 import app.granger.R
+import app.granger.topic.TopicPage
 import app.granger.core.zim.ZimHit
 import app.granger.ebook.WikiTextSheet
 import app.granger.player.VoiceButton
@@ -131,6 +132,10 @@ fun ReaderScreen(
     onOpenBook: (bookId: String) -> Unit = {},
     /** Opens a book at a passage that mentions the article's subject. */
     onOpenPassage: (bookId: String, mention: app.granger.core.library.BookMention) -> Unit = { _, _ -> },
+    /** Opens an article in a new tab, at its own topic page (Plan LL2: a closest topic, a contemporary, the other language). */
+    onOpenArticle: (packId: String, path: String, title: String) -> Unit = { _, _, _ -> },
+    /** Opens a book at a chapter near the topic in meaning. */
+    onOpenBookAt: (bookId: String, chapter: String) -> Unit = { _, _ -> },
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -144,6 +149,7 @@ fun ReaderScreen(
     // so it holds only that page, and the next Back goes on down the stored stack instead of forward again.
     var clearHistoryOnShow by remember { mutableStateOf(false) }
     var matches by remember { mutableStateOf<FindMatches?>(null) }
+    var topicBooksOpen by remember { mutableStateOf(false) }
     val searchText by rememberUpdatedState(onSearchText)
     val research by rememberUpdatedState(onResearch)
 
@@ -174,6 +180,7 @@ fun ReaderScreen(
                     clearHistoryOnShow = true
                     navigate(step.url)
                 }
+                ReaderViewModel.BackStep.Topic -> Unit // the topic page is back in front
                 ReaderViewModel.BackStep.Leave -> onBack()
             }
         }
@@ -232,6 +239,7 @@ fun ReaderScreen(
         },
         onFind = viewModel::startFind,
         onShowInTime = if (!dated) null else ({ viewModel.packId?.let { pack -> state.page?.let { onShowInTime(pack, it.path) } } }),
+        onTopic = if (Features.TOPIC_PAGE && state.packTitle != null && viewModel.isWikipedia) viewModel::showTopic else null,
         onSearchPack = viewModel::startPackSearch,
         onContents = { viewModel.open(ReaderViewModel.Panel.CONTENTS) },
         onTextSettings = { viewModel.open(ReaderViewModel.Panel.TEXT) },
@@ -446,6 +454,22 @@ fun ReaderScreen(
         if (state.error == null) SlidingBar(state.chromeVisible, top = false, onHeight = { bottomBarPx = it }) { ReaderBottomBar(bars) }
         // The search and the panels over the page and its bars, clear of the shell's rail and mini-player above them.
         ClearOfShell {
+            // The topic page (Plan LL2) stands in front of the article, which is already loaded behind it.
+            val topic = state.topic
+            if (Features.TOPIC_PAGE && state.topicShown && topic != null) {
+                TopicPage(
+                    topic = topic,
+                    packTitle = state.packTitle,
+                    onBack = ::goBack,
+                    onReadFull = viewModel::readFullArticle,
+                    onOther = { other -> onOpenArticle(other.packId, other.path, other.title) },
+                    onOpenArticle = onOpenArticle,
+                    onOpenPassage = onOpenPassage,
+                    onOpenBookAt = onOpenBookAt,
+                    onAllBooks = { topicBooksOpen = true },
+                    onShowInTime = if (topic.time == null) null else ({ onShowInTime(topic.packId, topic.path) }),
+                )
+            }
             val packSearch = state.packSearch
             if (state.chromeVisible && packSearch != null) {
                 PackSearchPanel(
@@ -469,8 +493,20 @@ fun ReaderScreen(
                     },
                     onDismiss = { viewModel.open(null) },
                 )
-                ReaderViewModel.Panel.TEXT -> WikiTextSheet(prefs, viewModel::updatePrefs, onDismiss = { viewModel.open(null) })
+                ReaderViewModel.Panel.TEXT -> WikiTextSheet(
+                    prefs, viewModel::updatePrefs, onDismiss = { viewModel.open(null) },
+                    showTopicSetting = Features.TOPIC_PAGE && viewModel.isWikipedia,
+                )
                 null -> Unit
+            }
+            val topicBooks = state.topic?.books
+            if (topicBooksOpen && state.topicShown && topicBooks != null) {
+                ArticleFooterSheet(
+                    topicBooks,
+                    onOpenBook = { id -> topicBooksOpen = false; onOpenBook(id) },
+                    onOpenPassage = { id, m -> topicBooksOpen = false; onOpenPassage(id, m) },
+                    onDismiss = { topicBooksOpen = false },
+                )
             }
             val footer = state.footer
             if (state.footerOpen && footer != null) {
@@ -504,6 +540,8 @@ internal fun wikiBarActions(
     onFind: () -> Unit = {},
     /** Opens the Timeline on this article; null when it has no date there (Plan H5b). */
     onShowInTime: (() -> Unit)? = null,
+    /** Shows this article's topic page (Plan LL2); null outside Wikipedia or with the feature off. */
+    onTopic: (() -> Unit)? = null,
     onSearchPack: () -> Unit = {},
     onContents: () -> Unit = {},
     onTextSettings: () -> Unit = {},
@@ -521,6 +559,7 @@ internal fun wikiBarActions(
             ReaderMenuItem(R.string.reader_random_article, onRandom),
             ReaderMenuItem(R.string.reader_find_in_page, onFind).takeIf { hasPage },
             onShowInTime?.let { ReaderMenuItem(R.string.reader_show_in_time, it) }?.takeIf { hasPage },
+            onTopic?.let { ReaderMenuItem(R.string.topic_menu, it) }?.takeIf { hasPage },
         ),
         onContents = onContents.takeIf { hasPage },
         onSearch = onSearchPack.takeIf { hasPack },

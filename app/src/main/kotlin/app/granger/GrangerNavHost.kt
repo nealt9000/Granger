@@ -1106,6 +1106,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             player = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub else null,
                             quote = route.quote, savedPlace = container.voicePlace, prefsStore = container.readingPrefs,
                             footerSource = if (Features.LINKED_CLASSICS) container.referenceLinks else null,
+                            topics = if (Features.TOPIC_PAGE) container.topics else null,
                         )
                     },
                     resolver = container.resolver,
@@ -1128,6 +1129,15 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 ),
                             )
                         }
+                    },
+                    // From a topic page (Plan LL2): a new tab, which opens at its own topic page; Back returns here.
+                    onOpenArticle = { packId, path, title ->
+                        scope.launch {
+                            container.sessions.tab(container.sessions.openTab(packId, path, title))?.let { nav.showTab(it, keepCurrent = true) }
+                        }
+                    },
+                    onOpenBookAt = { bookId, chapter ->
+                        scope.launch { openCitation(matchOpener.open(app.granger.core.library.PassageAddress.Book(bookId, chapter, 0.0))) }
                     },
                     onBack = { nav.popBackStack() },
                 )

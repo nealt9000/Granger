@@ -21,7 +21,13 @@ import kotlinx.coroutines.sync.withLock
 data class TopicHeader(val title: String, val lead: String, val picture: String?)
 
 /** Its place in time: the page's own mark, the people alive with it and the events of its span (Decision 2). */
-data class TopicTimeView(val mark: TimeMark, val people: List<TimeMark>, val events: List<TimeMark>)
+data class TopicTimeView(
+    val mark: TimeMark,
+    val people: List<TimeMark>,
+    val events: List<TimeMark>,
+    /** Each person's picture (a cached file) by path, where the article has one. */
+    val pictures: Map<String, String> = emptyMap(),
+)
 
 /** The same subject in the other language, in an installed pack. */
 data class TopicOther(val language: String, val packId: String, val path: String, val title: String)
@@ -122,7 +128,9 @@ class TopicSource(
         val year = now()
         val window = TopicTime.window(mark, year)
         val around = index.marks(window.first, window.last, emptySet(), AROUND, year)
-        return TopicTimeView(mark, TopicTime.contemporaries(mark, around, year), TopicTime.events(mark, around, year))
+        val people = TopicTime.contemporaries(mark, around, year)
+        val pictures = (listOf(mark) + people).mapNotNull { p -> lead(p.packId, p.path)?.thumbnail?.let { p.path to it } }.toMap()
+        return TopicTimeView(mark, people, TopicTime.events(mark, around, year), pictures)
     }
 
     private suspend fun otherOf(packId: String, qid: Long?): TopicOther? {

@@ -66,6 +66,9 @@ class ReaderViewModel(
     private val prefsStore: ReadingPrefsStore? = null,
     /** What goes under an article (Plan LL1 Task 9: its work, *In your books*, by this author); null leaves it out. */
     private val footerSource: app.granger.ebook.ArticleFooterSource? = null,
+    /** The topic page in front of a Wikipedia article (Plan LL2); null leaves it out. */
+    private val topics: app.granger.topic.TopicProvider? = null,
+    private val now: () -> Long = System::currentTimeMillis,
 ) : ViewModel() {
     data class Page(val path: String, val title: String)
 
@@ -117,6 +120,10 @@ class ReaderViewModel(
         val footer: app.granger.ebook.ArticleFooter? = null,
         /** The footer's full sheet is open. */
         val footerOpen: Boolean = false,
+        /** The topic page for the article this tab opened on (Plan LL2), as its parts arrive; null when there's none. */
+        val topic: app.granger.topic.Topic? = null,
+        /** The topic page is in front of the article. */
+        val topicShown: Boolean = false,
     )
 
     /**
@@ -168,6 +175,15 @@ class ReaderViewModel(
                     packTitle = archive.metadata.title.takeIf { t -> t.isNotBlank() },
                     hasHome = archive.mainPath != null,
                 )
+            }
+            // A Wikipedia article opened just now from outside the reader (search, a card, Home, Wander, the Timeline:
+            // each sets the tab's openedAt) starts at its topic page; a tab returned to, a section, or a cited passage
+            // opens the article itself, as does a link followed inside it.
+            val fresh = now() - tab.openedAt in 0..FRESH_MS
+            if (topics != null && prefs.value.topicFirst && fresh && fragment == null && quote.isNullOrBlank() &&
+                path != archive.mainPath && archive.metadata.name.startsWith(WIKIPEDIA)
+            ) {
+                showTopicFor(tab.packId, path)
             }
             if (!quote.isNullOrBlank()) {
                 citedPath = path
@@ -353,6 +369,9 @@ class ReaderViewModel(
         /** Go back in the WebView's own history. */
         data object InWebView : BackStep
 
+        /** Back from the article the tab opened on, to its topic page (Plan LL2). */
+        data object Topic : BackStep
+
         /** Load the tab's previous page, from its stored back stack. */
         data class Load(val url: String) : BackStep
 
@@ -367,6 +386,12 @@ class ReaderViewModel(
      * shows. The stored stack steps back with the WebView, except out of a jump within the same page.
      */
     suspend fun back(webCurrent: String?, webPrevious: String?): BackStep {
+        // Back from the topic page leaves, as from the article it stands for; back from that article returns to it.
+        if (_state.value.topicShown) return BackStep.Leave
+        if (webPrevious == null && topicPath != null && page.value?.path == topicPath) {
+            _state.update { it.copy(topicShown = true) }
+            return BackStep.Topic
+        }
         if (webPrevious != null) {
             val samePage = webCurrent != null && ZimUrls.parse(webPrevious)?.path?.let { it == ZimUrls.parse(webCurrent)?.path } == true
             if (!samePage) writeStack { sessions.popPath(tabId) }.await()
@@ -395,6 +420,35 @@ class ReaderViewModel(
         val current = page.value ?: return
         val add = !_state.value.bookmarked
         appScope.launch { library.setBookmarked(pack, current.path, current.title, add) }
+    }
+
+    // ---- the topic page (Plan LL2) ----
+
+    /** Whether this tab's pack is a Wikipedia, which has topic pages. */
+    val isWikipedia: Boolean get() = archive?.metadata?.name?.startsWith(WIKIPEDIA) == true
+
+    /** The article the topic page stands for; Back from it returns to the topic page. */
+    private var topicPath: String? = null
+    private var topicJob: Job? = null
+
+    private fun showTopicFor(pack: String, path: String) {
+        val source = topics ?: return
+        topicPath = path
+        _state.update { it.copy(topicShown = true, topic = app.granger.topic.Topic(pack, path)) }
+        topicJob?.cancel()
+        topicJob = viewModelScope.launch {
+            source.topic(pack, path).collect { t -> _state.update { if (topicPath == path) it.copy(topic = t) else it } }
+        }
+    }
+
+    /** Read the full article: the topic page steps aside; the article is already loaded behind it. */
+    fun readFullArticle() = _state.update { it.copy(topicShown = false, chromeVisible = true) }
+
+    /** The ⋯ menu's Topic page: shows the page now shown's topic page (it may not be the one the tab opened on). */
+    fun showTopic() {
+        val pack = packId ?: return
+        val path = page.value?.path ?: return
+        if (path == topicPath && _state.value.topic != null) _state.update { it.copy(topicShown = true) } else showTopicFor(pack, path)
     }
 
     /** A middle tap. Hiding the chrome also closes the find bar and any panel. Errors keep the chrome up. */
@@ -523,6 +577,10 @@ class ReaderViewModel(
 
         /** How far a scroll down by hand goes before the chrome slides away, and a scroll up before it comes back. */
         const val HIDE_AFTER_DP = 24f
+
+        /** A tab opened this recently (ms) was opened from outside the reader just now: it starts at the topic page. */
+        const val FRESH_MS = 10_000L
+        private const val WIKIPEDIA = "wikipedia_"
         const val SHOW_AFTER_DP = 48f
 
         private const val SUGGEST_DEBOUNCE_MS = 200L
