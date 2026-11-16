@@ -448,7 +448,20 @@ Python for tools).
         Dropping them would save roughly 0.2–0.3 GB, but it's a bigger change than epubcheck needs. Left for Neal.
       - `.gvec`/`.glink` for these books: see "Later".
 - [ ] **Task 3.2: catalog.**
-  - Catalog `books` entries.
+  - **Decided 2026-11-16 (after Task 3.1 found the blocker):** the African Storybook books do **not** go in the catalog's
+    `books` array.
+    - Today's app files every `books` entry into Granger Classics (`CatalogScope.kt:34`, `Filing.kt:139`), and one
+      catalog serves every app version. So putting them there would put 1,120 children's books into testers' Granger
+      Classics, whatever build ships later.
+    - They go in a **new top-level array** that old apps ignore (`ignoreUnknownKeys`), for example `bookSets`: one set
+      per language with its shelf, titles, level presets and books. This is the same principle as Task 1.4: book-ness
+      that old apps can't see.
+    - The new app reads the array, files `asb-` books into their own collections (African Storybook · English /
+      Kiswahili) with Level sections, and lists the sets on the Books screen's Children's shelf.
+    - This is app work, so it follows Task 4.1 on `kb2-ux` and ships in the same catalog change as the rebuilt
+      Algorithms `.gbooks`.
+    - The prep below (`curated.json` `books` rows) changes to match: same rows, emitted into the new array.
+  - ~~Catalog `books` entries.~~
   - Presets: "African Storybook · English" (all levels), with Level 1–5 sets.
   - Spanish copy for titles and levels; book text stays in its own language.
   - Children's shelf.
