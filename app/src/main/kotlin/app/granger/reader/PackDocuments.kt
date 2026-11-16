@@ -65,9 +65,8 @@ class PackDocuments(
      */
     suspend fun restore(book: Book): Boolean {
         if (book.origin != BookOrigin.PACK) return false
-        val packId = book.sourceRef.substringBefore('/')
-        val path = book.sourceRef.substringAfter('/', "")
-        if (path.isEmpty()) return false
+        // The row names its pack by ZIM name (Plan KB2 Task 2.4): the bookshelf finds the installed snapshot.
+        val (packId, path) = bookshelf.packDocumentSource(book) ?: return false
         return open(packId, path, book.title) is Opened.Ready
     }
 

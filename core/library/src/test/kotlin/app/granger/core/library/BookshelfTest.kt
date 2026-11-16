@@ -195,6 +195,129 @@ class BookshelfTest {
         assertThat(pdfShelf.book(before.id)!!.title).isEqualTo("Camping Recipes")
     }
 
+    /** Plan KB2 Task 2.4: a web pack's PDF is filed under the pack's ZIM name, so a new snapshot keeps its place. */
+    @Test fun aPackDocumentKeepsItsPlaceAndMarksThroughANewSnapshot() = test {
+        val name = "zimgit-water_en"
+        db.packDao().upsert(webPack("u-old", name))
+        val path = "files/water.pdf"
+        val first = PdfFixtures.text(File(booksDir, "packs/u-old"), "doc.pdf")
+        val book = pdfShelf.registerPackDocument("u-old", path, "Water", first)!!
+        assertThat(book.id).isEqualTo("book:pack:$name/$path")
+        assertThat(book.sourceRef).isEqualTo("$name/$path")
+        pdfShelf.savePosition(book.id, "{}", 0.5, "Page 2")
+        pdfShelf.addMark(BookAnnotation(0, book.id, MarkKind.BOOKMARK, "{}", "p. 2", "", "", 1, 1))
+        val tab = db.sessionDao().insertTab(ReadingTab(0, book.id, "", "Water", 1L, onRail = true))
+
+        // A new snapshot supersedes the old one (RoomLibrary.supersede: the new row is in, the old one gone).
+        db.packDao().upsert(webPack("u-new", name))
+        db.packDao().delete("u-old")
+        pdfShelf.removePackDocuments("u-old", name)
+
+        assertThat(pdfShelf.book(book.id)).isNotNull()
+        assertThat(pdfShelf.position(book.id)!!.totalProgression).isEqualTo(0.5)
+        assertThat(pdfShelf.marks(book.id).first()).hasSize(1)
+        assertThat(db.sessionDao().tab(tab)!!.packId).isEqualTo(book.id)
+        // Its copy is found again in the new snapshot...
+        assertThat(pdfShelf.packDocumentSource(pdfShelf.book(book.id)!!)).isEqualTo("u-new" to path)
+        // ...and opening it from the new snapshot's article hits the same row; the earlier copy goes.
+        val second = PdfFixtures.text(File(booksDir, "packs/u-new"), "doc.pdf")
+        val again = pdfShelf.registerPackDocument("u-new", path, "Water", second)!!
+        assertThat(again.id).isEqualTo(book.id)
+        assertThat(again.filePath).isEqualTo(second.absolutePath)
+        assertThat(first.exists()).isFalse()
+        assertThat(pdfShelf.position(book.id)!!.totalProgression).isEqualTo(0.5)
+    }
+
+    @Test fun aPackRemovedOutrightTakesItsDocumentsKeyedByName() = test {
+        val name = "zimgit-water_en"
+        db.packDao().upsert(webPack("u-old", name))
+        val file = PdfFixtures.text(File(booksDir, "packs/u-old"), "doc.pdf")
+        val book = pdfShelf.registerPackDocument("u-old", "files/water.pdf", "Water", file)!!
+        pdfShelf.savePosition(book.id, "{}", 0.5, "Page 2")
+        db.sessionDao().insertTab(ReadingTab(0, book.id, "", "Water", 1L, onRail = true))
+        // Another pack's document stays.
+        db.packDao().upsert(webPack("u-other", "other_en"))
+        val other = pdfShelf.registerPackDocument("u-other", "files/water.pdf", "Water", PdfFixtures.text(File(booksDir, "packs/u-other"), "doc.pdf"))!!
+
+        db.packDao().delete("u-old")
+        pdfShelf.removePackDocuments("u-old", name)
+
+        assertThat(pdfShelf.book(book.id)).isNull()
+        assertThat(file.exists()).isFalse()
+        assertThat(pdfShelf.position(book.id)).isNull()
+        assertThat(db.sessionDao().observeHistory().first().map { it.packId }).doesNotContain(book.id)
+        assertThat(RoomReadingSessions(db).railTabs(10).first().map { it.packId }).doesNotContain(book.id)
+        assertThat(pdfShelf.book(other.id)).isNotNull()
+        assertThat(pdfShelf.packDocumentSource(other)).isEqualTo("u-other" to "files/water.pdf")
+    }
+
+    @Test fun aPackDocumentKeyedByUuidIsFiledUnderItsPacksNameOnRefresh() = test {
+        val path = "files/water.pdf"
+        val file = PdfFixtures.text(File(booksDir, "packs/u-old"), "doc.pdf")
+        // Read before Plan KB2: keyed by the pack's UUID (its pack isn't in the table yet, so the UUID is the key).
+        val old = pdfShelf.registerPackDocument("u-old", path, "Water", file)!!
+        assertThat(old.id).isEqualTo("book:pack:u-old/$path")
+        pdfShelf.savePosition(old.id, "{}", 0.4, "Page 3")
+        pdfShelf.addMark(BookAnnotation(0, old.id, MarkKind.HIGHLIGHT, "{}", "water", "", "", 1, 1))
+        val sessions = db.sessionDao()
+        val tab = sessions.insertTab(ReadingTab(0, old.id, "", "Water", 1L, onRail = true))
+        sessions.upsertHistory(HistoryEntry(old.id, "", "Water", 1L))
+        db.packDao().upsert(webPack("u-old", "zimgit-water_en"))
+
+        pdfShelf.refresh()
+
+        val id = "book:pack:zimgit-water_en/$path"
+        val row = pdfShelf.book(id)!!
+        assertThat(pdfShelf.book(old.id)).isNull()
+        assertThat(row.sourceRef).isEqualTo("zimgit-water_en/$path")
+        assertThat(row.filePath).isEqualTo(file.absolutePath)
+        assertThat(file.exists()).isTrue()
+        assertThat(pdfShelf.position(id)!!.totalProgression).isEqualTo(0.4)
+        assertThat(pdfShelf.position(old.id)).isNull()
+        assertThat(pdfShelf.marks(id).first().map { it.kind }).containsExactly(MarkKind.HIGHLIGHT)
+        assertThat(sessions.tab(tab)!!.packId).isEqualTo(id)
+        assertThat(sessions.observeHistory().first().map { it.packId }).containsExactly(id)
+        // A later refresh leaves it be.
+        pdfShelf.refresh()
+        assertThat(pdfShelf.book(id)).isNotNull()
+    }
+
+    @Test fun aPackDocumentKeyedByUuidSurvivesASnapshotUpdateBeforeItsAdopted() = test {
+        val path = "files/water.pdf"
+        val file = PdfFixtures.text(File(booksDir, "packs/u-old"), "doc.pdf")
+        val old = pdfShelf.registerPackDocument("u-old", path, "Water", file)!!
+        pdfShelf.savePosition(old.id, "{}", 0.4, "Page 3")
+        db.packDao().upsert(webPack("u-new", "zimgit-water_en"))
+
+        pdfShelf.removePackDocuments("u-old", "zimgit-water_en")
+
+        val id = "book:pack:zimgit-water_en/$path"
+        assertThat(pdfShelf.book(old.id)).isNull()
+        assertThat(pdfShelf.position(id)!!.totalProgression).isEqualTo(0.4)
+        assertThat(pdfShelf.packDocumentSource(pdfShelf.book(id)!!)).isEqualTo("u-new" to path)
+    }
+
+    @Test fun openingAPackDocumentKeyedByUuidFilesItUnderTheName() = test {
+        val path = "files/water.pdf"
+        val file = PdfFixtures.text(File(booksDir, "packs/u-old"), "doc.pdf")
+        val old = pdfShelf.registerPackDocument("u-old", path, "Water", file)!!
+        pdfShelf.savePosition(old.id, "{}", 0.4, "Page 3")
+        db.packDao().upsert(webPack("u-old", "zimgit-water_en"))
+
+        val opened = pdfShelf.registerPackDocument("u-old", path, "Water", file)!!
+
+        assertThat(opened.id).isEqualTo("book:pack:zimgit-water_en/$path")
+        assertThat(pdfShelf.book(old.id)).isNull()
+        assertThat(file.exists()).isTrue()
+        assertThat(pdfShelf.position(opened.id)!!.totalProgression).isEqualTo(0.4)
+    }
+
+    private fun webPack(id: String, name: String) = Pack(
+        id = id, filePath = "/packs/$id.zim", title = name, description = "", language = "eng", date = "2026-10-01",
+        sizeBytes = 1_000L, hasFulltextIndex = true, status = PackStatus.OK, addedAt = 0L, name = name,
+        scraper = "zimit 2.1",
+    )
+
     private fun test(block: suspend TestScope.() -> Unit) = runTest(dispatcher) { block() }
 
     private fun sha256(file: File) =

@@ -105,7 +105,7 @@ class StubBookshelf(initial: List<Book> = emptyList()) : Bookshelf {
     override suspend fun registerPackDocument(
         zimId: String, path: String, title: String, file: File, linkText: String, listedTitle: String,
     ): Book? = null
-    override suspend fun removePackDocuments(zimId: String) = Unit
+    override suspend fun removePackDocuments(zimId: String, zimName: String) = Unit
     override suspend fun savePosition(bookId: String, locatorJson: String, totalProgression: Double, chapterTitle: String) = Unit
     override suspend fun position(bookId: String): BookPosition? = null
     override fun marks(bookId: String): Flow<List<BookAnnotation>> = state.map { emptyList() }

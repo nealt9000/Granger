@@ -336,7 +336,7 @@ class FakeBookshelf : Bookshelf {
         return book
     }
 
-    override suspend fun removePackDocuments(zimId: String) {
+    override suspend fun removePackDocuments(zimId: String, zimName: String) {
         bookList.update { list -> list.filterNot { it.origin == BookOrigin.PACK && it.sourceRef.startsWith("$zimId/") } }
     }
 

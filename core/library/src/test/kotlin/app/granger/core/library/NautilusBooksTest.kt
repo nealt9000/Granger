@@ -182,8 +182,12 @@ class NautilusBooksTest {
         // Read before Plan KB: Food Preparation (2).pdf opened from the pack's page, a hidden PACK row.
         val path = "files/Food Preparation (2).pdf"
         val copy = PdfFixtures.text(File(booksRoot, "packs/u-food"), "copy.pdf")
-        val old = shelf.registerPackDocument(pack.id, path, "", copy, listedTitle = "Camping Recipes")!!
-        assertThat(old.id).isEqualTo("book:pack:u-food/$path")
+        val named = shelf.registerPackDocument(pack.id, path, "", copy, listedTitle = "Camping Recipes")!!
+        // Since Plan KB2 Task 2.4 a pack document is keyed by the pack's name; before it, by its UUID.
+        assertThat(named.id).isEqualTo("book:pack:zimgit-food-preparation_en/$path")
+        val old = named.copy(id = "book:pack:u-food/$path", sourceRef = "u-food/$path")
+        db.bookDao().upsert(old)
+        db.bookDao().delete(named.id)
         shelf.savePosition(old.id, """{"href":"page/3","locations":{"totalProgression":0.4}}""", 0.4, "Page 3")
         shelf.addMark(BookAnnotation(0, old.id, MarkKind.BOOKMARK, "{}", "", "", "", 1L, 1L))
         val sessions = db.sessionDao()
@@ -214,6 +218,18 @@ class NautilusBooksTest {
         // A second sync has nothing left to adopt.
         books.sync(listOf(pack))
         assertThat(books.adopted).isEqualTo(0)
+    }
+
+    @Test fun aPackDocumentKeyedByThePacksNameIsAdoptedToo() = test {
+        val pack = install("u-food", "zimgit-food-preparation_en", fixture("zimgit-food-preparation_en"))
+        val path = "files/Food Preparation (2).pdf"
+        val old = shelf.registerPackDocument(pack.id, path, "", PdfFixtures.text(File(booksRoot, "packs/u-food"), "copy.pdf"))!!
+        shelf.savePosition(old.id, "{}", 0.3, "Page 2")
+        books.sync(listOf(pack))
+        val id = "book:nautilus:zimgit-food-preparation_en/Food Preparation (2).pdf"
+        assertThat(db.bookDao().get(old.id)).isNull()
+        assertThat(books.adopted).isEqualTo(1)
+        assertThat(shelf.position(id)!!.totalProgression).isEqualTo(0.3)
     }
 
     @Test fun aPackDocumentTheListDoesntNameStays() = test {

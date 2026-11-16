@@ -238,11 +238,19 @@ Python for tools).
   - Section headers from manifest groups (Level 1–5; Handbooks; The book / Course materials).
   - A language chip when a collection holds more than one language.
   - The ThemeShots get the new states.
-- [ ] **Task 2.4: pack documents keyed by name (design §4.5).**
+- [x] **Task 2.4: pack documents keyed by name (design §4.5).**
   - `book:pack:<zimName>/<path>`.
   - Adopt old UUID rows with place, marks, tabs and history (the KB Decision 5 pattern).
   - Supersede no longer deletes them.
   - Migration 16 if a column is needed; tell granger-d0 first.
+  - **Done 2026-11-16** (this commit). No migration. `registerPackDocument` keys by the pack's name (UUID when it has
+    none) and drops a stale copy when reopened from a new snapshot. `RoomLibrary.onRemoved` now passes the `Pack`;
+    `removePackDocuments(id, name)` keeps (and files by name) the documents when another pack of that name is
+    installed, else removes as before. UUID rows are adopted on `refresh`, on open and on supersede via a shared
+    `handOverBook` (also used by `NautilusBooks.adopt`, which now adopts name-keyed rows too). New
+    `Bookshelf.packDocumentSource` finds the installed snapshot for `PackDocuments.restore` (one-line change there).
+    A cross-name flavour switch still removes them. 6 new tests. `:core:library` 477/0 fail, `:app` 1797/0 fail
+    (112 skipped).
 - [x] **Task 2.5: fix the nautilus Read-as-ebook bug (design §4.4).**
   - `restore` copies to the PDF path and re-runs the conversion when the row's EPUB is gone.
   - Sync removes the `.pdf`, the `.pdf.epub` and the PAGES row together.
@@ -315,6 +323,8 @@ Python for tools).
   - Rebase on main.
   - `check-links`; **Neal signs, merges and pushes.**
   - Update the roadmap row, and the upkeep README's finding kinds.
+  - **Message granger-d0** once it's on main, with the migration 16 column's final name. LL2 Task 4 (an item →
+    subject-packs sidecar) builds on the gbooks kind and `meta.py --url`, and LL3's article_marks takes 17 or later.
 
 ## Later (not this plan)
 

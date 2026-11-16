@@ -411,7 +411,7 @@ class RoomLibraryTest {
 
     @Test fun removingAPackRunsTheRemovedHook() = test {
         val gone = mutableListOf<String>()
-        val hooked = RoomLibrary(db, opener, { dirs() }, dispatcher, now = { clock }, onRemoved = { gone += it })
+        val hooked = RoomLibrary(db, opener, { dirs() }, dispatcher, now = { clock }, onRemoved = { gone += it.id })
         zim(internal, "a.zim", "u-a")
         hooked.refresh()
         assertThat(hooked.remove("u-a")).isTrue()
@@ -431,7 +431,7 @@ class RoomLibraryTest {
     /** Plan KB walkthrough: Switch's new flavour takes the old one's place, keeping what was saved in it. */
     @Test fun anotherFlavourSupersedesTheOldOneAndKeepsItsMarks() = test {
         val gone = mutableListOf<String>()
-        val hooked = RoomLibrary(db, opener, { dirs() }, dispatcher, now = { clock }, onRemoved = { gone += it })
+        val hooked = RoomLibrary(db, opener, { dirs() }, dispatcher, now = { clock }, onRemoved = { gone += it.id })
         val old = zim(internal, "wikipedia_en_medicine_nopic_2026-10.zim", "u-nopic", name = "wikipedia_en_medicine")
         hooked.refresh()
         hooked.setBookmarked("u-nopic", "index", "Home", true)
@@ -474,7 +474,7 @@ class RoomLibraryTest {
     /** Plan WF Decision 5: Top 1 million takes Best 50,000's place; a mark on an article it lacks becomes history. */
     @Test fun aBiggerSliceSupersedesAcrossZimNamesKeepingPlacesAndTurningMissingArticlesIntoHistory() = test {
         val gone = mutableListOf<String>()
-        val hooked = RoomLibrary(db, opener, { dirs() }, dispatcher, now = { clock }, onRemoved = { gone += it })
+        val hooked = RoomLibrary(db, opener, { dirs() }, dispatcher, now = { clock }, onRemoved = { gone += it.id })
         val old = zim(internal, "wikipedia_en_top_maxi_2026-09.zim", "u-top", name = "wikipedia_en_top", paths = setOf("index", "Lion", "Lost_in_Translation"))
         hooked.refresh()
         hooked.setBookmarked("u-top", "Lion", "Lion", true)

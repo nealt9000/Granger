@@ -353,8 +353,8 @@ class AppContainer(context: Context) {
     }
 
     private val libraryDb = LibraryDatabase.create(context)
-    // A removed pack takes its PDFs (pack documents, Plan P2) with it.
-    val library: Library = RoomLibrary(libraryDb, KiwixZimOpener(context), packDirs, onRemoved = { bookshelf.removePackDocuments(it) })
+    // A removed pack takes its PDFs (pack documents, Plan P2) with it; a new snapshot of it keeps them (Plan KB2).
+    val library: Library = RoomLibrary(libraryDb, KiwixZimOpener(context), packDirs, onRemoved = { bookshelf.removePackDocuments(it.id, it.name) })
     val bookshelf: Bookshelf = RoomBookshelf(
         libraryDb, bookDirs,
         importDir = { File(context.getExternalFilesDir(null) ?: context.filesDir, "books/imports") },
