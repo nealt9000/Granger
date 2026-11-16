@@ -386,12 +386,126 @@ Python for tools).
   - Make covers from the EPUB's own.
   - Ids are `asb-<lang>-<node>`.
   - Write release manifests for en and sw, with per-level sets.
+  - **Done 2026-11-16 (built, not uploaded).** `tools/pack-builder/africanstorybook.py build --date 2026-11-16
+    --epubcheck` (resumable; `--no-pull` reuses the originals; `describe` rewrites the descriptors offline).
+    - **Source:** the `kolibri` extractor over range reads of `africanstorybook.org_mul_all_2025-01.zim` (Date
+      2025-01-11): 5,165 items, 6.4 MB fetched for the list. Each EPUB sits alone in a stored cluster, so it's one
+      range read: 1.9 GB fetched for the 1,120 books, about 25 minutes with 8 threads.
+    - **Ids:** `asb-<lang>-<node>`, the Kolibri node id whole (32 hex, 39 characters). Classics ids have no length
+      rule (the longest is 63), and the whole node id needs no collision check. Files are `<id>.epub`.
+    - **Releases:** one per language, `asb-en-2026-11-16` and `asb-sw-2026-11-16`, not one `asb-<date>`. A GitHub
+      release holds at most 1,000 assets, and both languages together are 1,120. URLs:
+      `…/releases/download/asb-<lang>-<date>/<id>.epub`.
+    - **What the EPUBs carry:** each is African Storybook's own EPUB 3: `cover-image` (`images/cover.png`), one page
+      per spread, and a back cover giving title, author, illustrator, language, level, "© …", "Creative Commons:
+      Attribution 4.0", "Source www.africanstorybook.org" and the ASB logo. That already meets CC BY, so **no colophon
+      is added**. The OPF has title, creators with roles (aut, ill, adp), language and date, but no `dc:rights`.
+    - **Modify or not: modified, minimally.** Every original fails epubcheck 5.4.0 (3 errors each; 67 had more), so
+      shipping them untouched would break the Classics' epubcheck-clean bar. `fix_epub` is deterministic (same input,
+      same bytes) and idempotent. Each descriptor entry keeps `sourceSha256`, the sha256 of Kiwix's original, for the
+      upkeep diff. What it changes:
+      - In all 1,120:
+        - the OPF's misspelt "africanstroybook.org" and "African Stroybook Initiative" are corrected, which fixes
+          NCX-001 (identifier mismatch);
+        - `direction` and `unicode-bidi` are dropped from `epub.css` (CSS-001; only the unused `.alignRight` class
+          has them);
+        - `0.xhtml` becomes `cover.xhtml` and the back cover becomes `colophon.xhtml` (OPF, nav and NCX updated), so
+          Related skips them;
+        - `dc:rights` gets the back cover's credit line, e.g. "© African Storybook Initiative 2015 · Creative Commons:
+          Attribution 4.0 · Source: www.africanstorybook.org".
+      - In some:
+        - 46 had a **0-byte `cover.png`** (28 en, 18 sw; MED-004/PKG-021). They now use the first page's picture.
+        - 27 had an empty `dc:creator` (no illustrator, RSC-005). It's removed with its role.
+        - 12 had XML that doesn't parse (RSC-016): a 0x0B control character in 4, a bare `&` in 7 ("Romeo &
+          Basetsana", "Angie & Upesh") and an unclosed `<br>` in 1. These are mended.
+    - **epubcheck:** **0 failures out of 1,120** after the fix (693 en, 427 sw; 0 errors, 0 warnings). Before the
+      fix, all 1,120 failed.
+    - **Checks against the Kolibri page:** every EPUB's `dc:language` matches (0 wrong). Every book has a cover, an
+      author and a year. 12 titles differ from the EPUB's: 8 only by double spaces, 1 by a comma, and 3 are real differences ("Cows
+      at the market" / EPUB "Market cows"; "Young Pasitau" / "Young Palinyang’"; "Hare and Hyena fight"). The
+      descriptor uses the page's title, as the manifest does. Details are in `report.json`.
+    - **Numbers:**
+      - **English:** 693 books, 1.17 GB (largest 4.4 MB). Levels 1–5: 151 / 179 / 179 / 119 / 65.
+      - **Kiswahili:** 427 books, 0.74 GB (largest 3.4 MB). Levels 1–5: 141 / 97 / 89 / 71 / 29.
+      - En has 19 repeated titles and sw 10: different stories or versions with the same name, different nodes.
+    - **Release descriptors:** `tools/pack-builder/releases/african_storybook_{en,sw}_books.json`, in the Classics'
+      shape (`releaseDate`, `collection` = `african-storybook-<lang>`, `books[]` with id, title, author, translator,
+      published, section = "Level n", language, sizeBytes, sha256, urls, domain `literature`). Extra fields:
+      `description` (the Kolibri summary), `level`, `illustrator`, `cover`, `node`, `sourcePath` and `sourceSha256`.
+      The top level also has title, provider, license, source and level counts. They're 684 KB and 414 KB. **In the
+      catalog the books add about 0.8 MB to today's 1.9 MB `catalog.json`,** mostly descriptions.
+    - **Files:** `~/Developer/Granger/vectors-work/asb-2026-11-16/`:
+      - `en/` (693) and `sw/` (427): the files to upload;
+      - `source/<lang>/`: Kiwix's originals, 1.8 GB, kept for `--no-pull` and diffs; deletable once uploaded;
+      - `manifest.json`, `report.json` (changes, mismatches, epubcheck), and `build.log` / `build2.log`.
+    - **Neal runs:** `tools/pack-builder/upload_asb.sh en 2026-11-16`, then `… sw 2026-11-16`. Each is resumable and
+      uploads 10 files per `gh release upload`, with a 20 s pause.
+    - **Tests:** `tools/pack-builder/tests/test_africanstorybook.py`, 27 tests: ids, levels, release names, choice,
+      each fix, determinism and idempotence, facts, and the descriptor. The pack-builder suite has 315, all passing
+      (`~/.venvs/granger-pack/bin/python -m pytest tools/pack-builder/tests`).
+    - **Not done:**
+      - Each EPUB embeds about 830 KB of Noto fonts (Ethiopic and Arabic Kufi included), which en and sw never use.
+        Dropping them would save roughly 0.2–0.3 GB, but it's a bigger change than epubcheck needs. Left for Neal.
+      - `.gvec`/`.glink` for these books: see "Later".
 - [ ] **Task 3.2: catalog.**
   - Catalog `books` entries.
   - Presets: "African Storybook · English" (all levels), with Level 1–5 sets.
   - Spanish copy for titles and levels; book text stays in its own language.
   - Children's shelf.
   - `check-links`, then **Neal uploads and signs.**
+  - **Prep (2026-11-16, Task 3.1's session; nothing published, `catalog.json` untouched).** The exact change:
+    - **How the books get in: `curated.json` `books` rows, like the Classics.** No new source in catalog_gen. Two
+      rows after Clásicos Granger's:
+      ```json
+      {"bookRelease": "tools/pack-builder/releases/african_storybook_en_books.json",
+       "license": "CC BY 4.0, African Storybook Initiative", "title": "African Storybook · English",
+       "language": "en", "shelf": "children",
+       "i18n": {"es": {"title": "African Storybook · inglés"}},
+       "levelSets": {"label": "Level {n}", "i18n": {"es": "Nivel {n}"}}},
+      {"bookRelease": "tools/pack-builder/releases/african_storybook_sw_books.json",
+       "license": "CC BY 4.0, African Storybook Initiative", "title": "African Storybook · Kiswahili",
+       "language": "sw", "shelf": "children",
+       "i18n": {"es": {"title": "African Storybook · suajili"}},
+       "levelSets": {"label": "Level {n}", "i18n": {"es": "Nivel {n}"}}}
+      ```
+      The project name stays untranslated (it's the provider's name); the language and "Nivel" are Spanish. The book
+      text stays in its own language. `language: "sw"` puts Kiswahili under a language Granger has no UI for: check
+      that Get more's language chip shows it (`KiwixList.languageName("sw")`), or the set is hidden for es/en users.
+    - **catalog_gen side: done in this commit, with tests** (`test_catalog_gen.py`, 4 new, 116 pass).
+      - `book_entries` now takes a book's `description` from its descriptor (the Kolibri summary; Classics have none,
+        so theirs stay `""`), and adds `level` and the row's `shelf` when given. Old apps ignore both keys
+        (`ignoreUnknownKeys`).
+      - `level_presets`: a row with `levelSets` gets, beside its all-books preset, `<collection>-level-<n>` presets
+        (e.g. `african-storybook-en-level-1`, "African Storybook · English: Level 1", es "African Storybook · inglés:
+        Nivel 1"), with `level` and `setOf` keys. A book without a level fails the build.
+      - Presets: `african-storybook-en` (693) + `-level-1..5` (151/179/179/119/65); `african-storybook-sw` (427) +
+        `-level-1..5` (141/97/89/71/29). Category ("Level 2") is the descriptor's `section`.
+      - Not added to Starter, Readiness or onboarding (they're opt-in; Decision 5 counts manual collections, not these).
+    - **Shelf "children":** stamped per book by the row. Task 4.1's Books screen reads it; until then it's inert.
+    - **App work this needs before the catalog goes out (found while preparing; not Python):**
+      - Today's app (testers' builds) treats **every** `BookEntry` as Granger's own: `CatalogScope.scopeOf` puts it
+        under Granger Classics (`sources/CatalogScope.kt:34`), and `Filing.grangerKey` files any id that isn't
+        `gc-es-…` into Granger Classics (`core/library/.../Filing.kt:139`). So publishing these books before the app
+        knows them puts 1,120 children's books into Granger Classics on every tester's phone, and the Granger Classics
+        screen shows all 12 new presets.
+      - So 3.2 needs, in the app: `asb-` ids file into their own collection per language (key = the catalog
+        `collection`, `african-storybook-en|sw`, named by the preset title; a `Filing.grangerKey` rule on the `asb-`
+        prefix, as `gc-es-` has), and Get more lists them under Kiwix books / Children (Task 4.1) rather than Granger
+        Classics; the level presets show as sets inside that row.
+      - And the catalog change waits for the tester build that has this, or the books go in a key old apps ignore.
+        **Neal decides.** Recommended: ship them with the Task 4.1 build (the Books screen by kind), one catalog change.
+    - **Same catalog change, carried from Phase 2:** the rebuilt Algorithms manifest. Built 2026-11-16 into
+      `~/Developer/Granger/vectors-work/bookpacks-2026-11-16b/jeffe.cs.illinois.edu_en_all_2026-09.gbooks` (696 items;
+      groups "The book" then "Course materials", chapters in path order; `check.py --catalog` passes, no drift).
+      - It can't reuse `bookpacks-2026-11-16`: that release already holds a file of the same name, which the signed
+        catalog pins by sha256. Upload it as a new release `bookpacks-<date>` (`tools/bookpacks/upload_release.sh
+        bookpacks-<date> ~/Developer/Granger/vectors-work/bookpacks-2026-11-16b`), then rewrite its descriptor:
+        `tools/sidecar/meta.py release <file> --id jeffe.cs.illinois.edu_en_all --url
+        https://github.com/nealt9000/Granger/releases/download/bookpacks-<date>/jeffe.cs.illinois.edu_en_all_2026-09.gbooks`.
+    - **Order of work for 3.2:** Neal runs `upload_asb.sh en 2026-11-16`, `upload_asb.sh sw 2026-11-16` and the
+      bookpacks upload → add the two curated rows and the jeffe descriptor → `catalog_gen.py build --previous` (book
+      sizes are HEAD-checked against the descriptors) → semantic diff (1,120 books, 12 presets, 1 sidecar, generatedAt)
+      → `check-links` → `:core:catalog` tests (PublishedCatalogTest counts) → Neal signs.
 - [ ] **Task 3.3: upkeep.**
   - An `asb-snapshot` finding (the ZIM's `Date` changed) and a `rebuild-release` playbook: rebuild, diff ids, and
     report lost and added books.
