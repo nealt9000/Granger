@@ -53,6 +53,7 @@ shows the app language's copy and falls back to English. A family row's `flavour
 The app trusts only catalogs signed by the key whose public half is in catalog/public-key.txt.
 """
 import argparse
+import collections
 import base64
 import concurrent.futures
 import datetime
@@ -216,6 +217,8 @@ def pin(entry, row, fetch=http_get):
         "content": row.get("content") or "",
         "flavour": flavour if flavour in FLAVOURS else "",
     }
+    if row.get("shelf"):  # Plan KB2: the Books shelf of a book pack (old apps ignore the key)
+        result["shelf"] = row["shelf"]
     if row.get("nonCommercial"):
         result["nonCommercial"] = True
     # Plan L3: a curated row's copy in other languages ("i18n": {"en": {"title": …}} on a Spanish pack).
@@ -235,6 +238,32 @@ def content_of(name, contents):
     """ "books" when the pack named [name] was made by a book scraper, by its Scraper in [contents], else blank."""
     scraper = (contents or {}).get(name, "")
     return "books" if scraper.startswith(BOOK_SCRAPERS) else ""
+
+
+BOOKPACKS = "tools/bookpacks/book_packs.json"
+
+
+def load_shelves(root=None, path=BOOKPACKS):
+    """(Plan KB2) {ZIM name: shelf} for manifest packs and [(name prefix, shelf)] for list-carrying book packs."""
+    file = pathlib.Path(root or REPO_ROOT) / path
+    if not file.exists():
+        return {}, []
+    config = json.loads(file.read_text(encoding="utf-8"))
+    return ({name: row["shelf"] for name, row in config.get("packs", {}).items() if row.get("shelf")},
+            sorted(config.get("shelves", {}).items(), key=lambda kv: -len(kv[0])))
+
+
+def shelf_of(name, content, shelves):
+    """
+    The Books shelf a book pack sits on (Plan KB2 Decision 4: literature, children, manuals, learning): a manifest
+    pack's own, or a book pack's by name prefix (gutenberg_ → literature). Blank for every other pack.
+    """
+    by_name, prefixes = shelves
+    if name in by_name:
+        return by_name[name]
+    if content == "books":
+        return next((shelf for prefix, shelf in prefixes if name.startswith(prefix)), "")
+    return ""
 
 
 def load_contents(root=None, path=CONTENTS):
@@ -287,7 +316,7 @@ def kiwix_copy(name, copy):
 
 
 def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=8, tries=3, sleep=time.sleep,
-                  contents=None):
+                  contents=None, shelves=({}, [])):
     """
     Every pack in [feed] in one of the configured languages whose family has a license and no hold, pinned, except
     the curated ones ([curated_keys], (name, flavour) pairs). Returns (packs, report lines).
@@ -323,6 +352,7 @@ def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=
         fields = {"family": row["family"], "category": row["category"], "license": row["license"],
                   "nonCommercial": row.get("nonCommercial", False), "domain": row.get("domain"),
                   "content": content_of(e["name"], contents)}
+        fields["shelf"] = shelf_of(e["name"], fields["content"], shelves)
         for attempt in range(tries):
             try:
                 return pin(e, fields, fetch), None
@@ -526,9 +556,12 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
             row = family_of(sample, families) if sample else None
             packs.append(pack_entry({**c, "featured": True, "family": row["family"] if row else "",
                                      "domain": c.get("domain", row.get("domain") if row else ""),
-                                     "content": content_of(c["name"], contents)}, fetch, feed))
+                                     "content": content_of(c["name"], contents),
+                                     "shelf": c.get("shelf") or shelf_of(c["name"], content_of(c["name"], contents),
+                                                                         load_shelves(root))}, fetch, feed))
         curated_keys = {(c["name"], c.get("flavour", "")) for c in curated["packs"] if "release" not in c}
-        bulk, lines = kiwix_entries(kiwix, families, feed, curated_keys, fetch, contents=contents)
+        bulk, lines = kiwix_entries(kiwix, families, feed, curated_keys, fetch, contents=contents,
+                                    shelves=load_shelves(root))
         packs += bulk
         if report is not None:
             report += lines
@@ -1249,6 +1282,7 @@ def main(argv):
     p.add_argument("file")
     p = sub.add_parser("sidecars"); p.add_argument("--releases", required=True); p.add_argument("--release-url")
     p.add_argument("file")
+    p = sub.add_parser("shelves"); p.add_argument("file")
     p = sub.add_parser("sets"); p.add_argument("file")
     p.add_argument("--sets", default=str(REPO_ROOT / "tools/catalog-gen/pack_sets.json"))
     p.add_argument("--curated", default=str(REPO_ROOT / "tools/catalog-gen/curated.json"))
@@ -1320,6 +1354,22 @@ def main(argv):
               f"{sum(d['sizeBytes'] for d in used) / 1e6:.1f} MB to upload")
         for line in lines:
             print(line)
+    elif args.command == "shelves":  # Plan KB2: stamp each book pack's Books shelf on a built catalog, in place
+        path = pathlib.Path(args.file)
+        catalog = json.loads(path.read_text(encoding="utf-8"))
+        shelves, changed = load_shelves(), 0
+        for p in catalog["packs"]:
+            shelf = shelf_of(p.get("zimName") or p["id"], p.get("content", ""), shelves)
+            if shelf != p.get("shelf", ""):
+                changed += 1
+                if shelf:
+                    p["shelf"] = shelf
+                else:
+                    p.pop("shelf", None)
+        catalog["generatedAt"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        path.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        counts = collections.Counter(p["shelf"] for p in catalog["packs"] if p.get("shelf"))
+        print(f"{path}: {changed} packs changed; shelves {dict(sorted(counts.items()))}")
     elif args.command == "sets":
         path = pathlib.Path(args.file)
         catalog = json.loads(path.read_text(encoding="utf-8"))

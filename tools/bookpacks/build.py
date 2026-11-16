@@ -761,19 +761,68 @@ def read_gbooks(path):
         db.close()
 
 
+DATED = re.compile(r"_\d{4}-\d{2}$")
+
+
+def zim_name_of(src):
+    """`irp.fas.org_en_military-medicine` from `…/irp.fas.org_en_military-medicine_2026-10.zim`."""
+    stem = urllib.parse.urlsplit(src).path.rsplit("/", 1)[-1] if src.startswith(("http://", "https://")) \
+        else pathlib.Path(src).name
+    return DATED.sub("", re.sub(r"\.zim$", "", stem))
+
+
+def from_catalog(catalog_path, zim_name, src=None):
+    """
+    (the pack's sha256 for [src] when the catalog lists that file, the URL of its published `.gbooks`) from a catalog.
+    The published `.gbooks` is the previous manifest for a rebuild: its keys are kept and drift is measured from it.
+    """
+    catalog = json.loads(pathlib.Path(catalog_path).read_text(encoding="utf-8"))
+    sha, previous = None, None
+    file_name = urllib.parse.urlsplit(src).path.rsplit("/", 1)[-1] if src else None
+    for p in catalog.get("packs", []):
+        if p.get("zimName") != zim_name:
+            continue
+        if file_name and any(u.endswith("/" + file_name) for u in p.get("urls", [])):
+            sha = p.get("sha256")
+        previous = previous or next((s["url"] for s in p.get("sidecars", []) if s.get("kind") == "gbooks"), None)
+    return sha, previous
+
+
+def fetch(url, folder):
+    """Downloads a small file (a published `.gbooks`) into [folder]."""
+    import urllib.request
+    out = pathlib.Path(folder) / url.rsplit("/", 1)[-1]
+    request = urllib.request.Request(url, headers={"User-Agent": zp.UA})
+    with urllib.request.urlopen(request, timeout=120) as r:
+        out.write_bytes(r.read())
+    return out
+
+
 def main(argv):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("name")
+    ap.add_argument("name", help="the pack's ZIM name in book_packs.json, or `auto` to take it from SRC's file name")
     ap.add_argument("src", help="the ZIM: a local file or its URL")
+    ap.add_argument("--catalog", help="a catalog.json: the source's sha256 (for a URL) and the published .gbooks as "
+                                      "--previous, when they aren't given")
     ap.add_argument("--out", required=True, help="a .gbooks file (or .json, to review a manifest)")
     ap.add_argument("--source-sha256", help="the ZIM's sha256 (from the catalog), needed when SRC is a URL")
     ap.add_argument("--config", default=str(pathlib.Path(__file__).with_name("book_packs.json")))
     ap.add_argument("--previous", help="the pack's previous .gbooks (or .json): keys of moved files are kept")
     ap.add_argument("--sample", type=int, default=0, help="print N random items for grading")
     a = ap.parse_args(argv)
-    cfg = json.loads(pathlib.Path(a.config).read_text(encoding="utf-8"))["packs"][a.name]
+    name = zim_name_of(a.src) if a.name == "auto" else a.name
+    packs = json.loads(pathlib.Path(a.config).read_text(encoding="utf-8"))["packs"]
+    if name not in packs:
+        raise SystemExit(f"{name} isn't in {a.config}")
+    cfg = packs[name]
+    if a.catalog:
+        sha, published = from_catalog(a.catalog, name, a.src)
+        a.source_sha256 = a.source_sha256 or sha
+        if not a.previous and published:
+            import tempfile
+            a.previous = str(fetch(published, tempfile.mkdtemp(prefix="gbooks-")))
     prev = read_gbooks(a.previous) if a.previous else None
-    m = build(a.name, a.src, cfg, prev)
+    m = build(name, a.src, cfg, prev)
     out = pathlib.Path(a.out)
     if out.suffix == ".json":
         out.write_text(json.dumps(m, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")

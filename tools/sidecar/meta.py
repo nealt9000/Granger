@@ -12,7 +12,7 @@ A sidecar is a read-only SQLite file named after its source (`<zim stem>.<kind>`
   builtAt         UTC, ISO 8601
 
   meta.py check SIDECAR [--source ZIM]     verify the meta table (and, with --source, that it matches the file)
-  meta.py release SIDECAR --id ID [--kind pack|book] [--out DIR]
+  meta.py release SIDECAR --id ID [--kind pack|book] [--out DIR] [--url URL]
                                            write the release descriptor catalog_gen.py reads (SIDECAR_KEYS)
 """
 import argparse
@@ -85,6 +85,7 @@ def main(argv=None):
     c = sub.add_parser("check"); c.add_argument("sidecar"); c.add_argument("--source")
     r = sub.add_parser("release"); r.add_argument("sidecar"); r.add_argument("--id", required=True)
     r.add_argument("--kind", default="pack", choices=("pack", "book")); r.add_argument("--out", default=str(Path(__file__).parent / "releases"))
+    r.add_argument("--url", help="the file's own download URL, when it isn't in the curated sidecars release")
     a = p.parse_args(argv)
     if a.command == "check":
         problems = check(a.sidecar, a.source)
@@ -94,7 +95,7 @@ def main(argv=None):
     problems = check(a.sidecar)
     if problems:
         raise SystemExit("\n".join(problems))
-    d = descriptor(a.sidecar, a.id, a.kind)
+    d = descriptor(a.sidecar, a.id, a.kind, a.url)
     out = Path(a.out) / f"{a.id}.{d['sidecar']}.json"
     out.write_text(json.dumps(d, indent=1) + "\n", encoding="utf-8")
     print(f"wrote {out}")

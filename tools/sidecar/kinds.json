@@ -15,5 +15,14 @@
     "build": "~/.venvs/granger-links/bin/python tools/links/build.py {out} {zim} --ner-dir '/Volumes/X10 Pro/granger-ll/ll1/ner-cache' --releases tools/sidecar/releases",
     "check": "~/.venvs/granger-links/bin/python tools/links/check.py {out} --epub-dir $(dirname {zim})",
     "gpu": false
+  },
+  "gbooks": {
+    "plan": "KB2",
+    "for": "Kiwix packs shown as book collections (tools/bookpacks/book_packs.json lists them)",
+    "inputs": "the new ZIM: a local file, or its URL (range reads, nothing downloaded whole; the URL is in candidate.json). The pack's settings in tools/bookpacks/book_packs.json; the published .gbooks (found through catalog/catalog.json) for its keys",
+    "build": "~/.venvs/granger-catalog/bin/python -I tools/bookpacks/build.py auto {zim} --out {out}/{stem}.gbooks --catalog catalog/catalog.json",
+    "check": "~/.venvs/granger-catalog/bin/python -I tools/bookpacks/check.py {out}/{stem}.gbooks --source {zim} --catalog catalog/catalog.json",
+    "note": "check exits 2 on drift (books lost, count moved >10%, more titles from file names): report it as bookpack-drift and stop; the pack stays held. A URL {zim} needs --source-sha256 <candidate's sha256> on build.",
+    "gpu": false
   }
 }

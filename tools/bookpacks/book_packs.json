@@ -1,5 +1,11 @@
 {
-  "about": "Plan KB2: the Kiwix packs shown as book collections through a .gbooks manifest, and how build.py reads each (extractor, filters, groups, title overrides). Gutenberg and nautilus packs carry their own lists and aren't here.",
+  "about": "Plan KB2: the Kiwix packs shown as book collections through a .gbooks manifest, and how build.py reads each (extractor, filters, groups, title overrides). Gutenberg and nautilus packs carry their own lists and aren't here. `shelves` puts list-carrying book packs (content \"books\") on a Books shelf by name prefix (Plan KB2 Decision 4).",
+  "shelves": {
+    "gutenberg_": "literature",
+    "zimgit-": "manuals",
+    "usda-": "manuals",
+    "prunelle_": "children"
+  },
   "packs": {
     "africanstorybook.org_mul_all": {
       "extractor": "kolibri",

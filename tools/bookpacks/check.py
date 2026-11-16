@@ -80,7 +80,14 @@ def main(argv=None):
     ap.add_argument("file")
     ap.add_argument("--source")
     ap.add_argument("--previous")
+    ap.add_argument("--catalog", help="a catalog.json: its published .gbooks for this pack is --previous")
     a = ap.parse_args(argv)
+    if a.catalog and not a.previous:
+        name = build.read_gbooks(a.file).get("zimName") if not a.file.endswith(".json") else None
+        _, published = build.from_catalog(a.catalog, name) if name else (None, None)
+        if published:
+            import tempfile
+            a.previous = str(build.fetch(published, tempfile.mkdtemp(prefix="gbooks-")))
     problems = []
     if not a.file.endswith(".json"):
         sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "sidecar"))

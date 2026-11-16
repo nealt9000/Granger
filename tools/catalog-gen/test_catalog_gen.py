@@ -1649,3 +1649,14 @@ def test_sign_reads_the_default_key_file_and_names_it_when_missing(tmp_path, lin
     key.write_text(RFC_SEED.hex() + "\n")
     cg.main(["sign", str(path)])
     assert cg.verify_file(RFC_PUBLIC, path)
+
+
+def test_book_packs_get_a_shelf_and_other_packs_none():
+    """Plan KB2: manifest packs by name, list-carrying book packs by prefix, nothing else."""
+    shelves = cg.load_shelves()
+    assert cg.shelf_of("irp.fas.org_en_military-medicine", "", shelves) == "manuals"
+    assert cg.shelf_of("gutenberg_en_lcc-pr", "books", shelves) == "literature"
+    assert cg.shelf_of("prunelle_en_interactive-books", "books", shelves) == "children"
+    assert cg.shelf_of("zimgit-water_en", "books", shelves) == "manuals"
+    assert cg.shelf_of("wikipedia_en_all", "", shelves) == ""
+    assert cg.shelf_of("gutenberg_en_lcc-pr", "", shelves) == ""  # a prefix alone doesn't make a book pack

@@ -201,3 +201,17 @@ def test_every_configured_pack_names_a_known_extractor_and_shelf():
         assert pack["extractor"] in build.EXTRACTORS, name
         assert pack["shelf"] in {"literature", "children", "manuals", "learning"}, name
         assert pack.get("noun") in {"books", "documents"}, name
+
+
+def test_the_pack_name_and_catalog_lookups(tmp_path):
+    assert build.zim_name_of("https://x/zim/zimit/irp.fas.org_en_military-medicine_2026-10.zim") == \
+        "irp.fas.org_en_military-medicine"
+    assert build.zim_name_of("/a/storybooks_mul_all_2025-01.zim") == "storybooks_mul_all"
+    catalog = tmp_path / "catalog.json"
+    catalog.write_text(json.dumps({"packs": [{"zimName": "storybooks_mul_all", "sha256": "abc",
+        "urls": ["https://d/zim/other/storybooks_mul_all_2025-01.zim"],
+        "sidecars": [{"kind": "gqid", "url": "https://r/q.gqid"}, {"kind": "gbooks", "url": "https://r/s.gbooks"}]}]}))
+    assert build.from_catalog(catalog, "storybooks_mul_all", "https://m/storybooks_mul_all_2025-01.zim") == \
+        ("abc", "https://r/s.gbooks")
+    assert build.from_catalog(catalog, "storybooks_mul_all", "https://m/storybooks_mul_all_2026-05.zim") == \
+        (None, "https://r/s.gbooks")
