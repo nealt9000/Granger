@@ -47,8 +47,57 @@ Python for tools).
 
 ## Phase 0: proof (no app changes)
 
-- [ ] **Task 0.1: verify the survey's UX findings.** Confirm or drop each item in design §4 against main, with a test or a
+- [x] **Task 0.1: verify the survey's UX findings.** Confirm or drop each item in design §4 against main, with a test or a
   file:line. #4.4 (the nautilus Read-as-ebook restore bug) is already confirmed. Write a failing test for it now.
+  - **Done 2026-11-16** (main 33a4f60b). Paths under `app/src/main` and `core/library/src/main` unless given.
+  - 4.1 split by source: **CONFIRMED**. `sources/GetMoreScreen.kt:36-39` (Classics, Gutenberg, Kiwix libraries,
+    Archive.org books as separate rows).
+  - 4.2 vocabulary: **CONFIRMED**. "Kiwix libraries" `strings_sources.xml:29,50`; "Kiwix library · N documents"
+    `CollectionViewModel.kt:255-263`, `strings_library.xml:22,28-31`; "books" in the Make-searchable dialog
+    `strings_library.xml:78-82`.
+  - 4.3 Open/Remove:
+    - Classics have no Open: **CONFIRMED**. `SourceScreen.kt:681,719-725` (Open only when `row.packId != null`).
+    - archive.org texts have no Open: **CONFIRMED**. `ArchiveScreen.kt:428` (Installed → Remove only; Open is only
+      for `InLibrary` audio, :433).
+    - Downloads → Open on a book pack shows web pages: **CONFIRMED**. `GrangerNavHost.kt:1554` uses `openPack`;
+      Get more uses `openPackOrCollection` (:1296, :793).
+    - `sources_remove_pack_body` says places are deleted: **PARTLY**. It's shown for every pack in Get more
+      (`SourceScreen.kt:339`, `strings_sources.xml:108`). It's true for a web pack's article bookmarks and places
+      (`RoomLibrary.kt:125-126`). It's wrong for a book pack, whose books' places and marks stay (`PackBooks.kt:85`),
+      as the Library's own dialog says (`strings_library.xml:65`, `CollectionScreen.kt:325`).
+    - Removed pack books leave "Removed book" tabs: **CONFIRMED**. `PackBooks.sync` deletes gone rows without their
+      tabs (`PackBooks.kt:137-149`); the rail shows `REMOVED_BOOK` (`shell/RailViewModel.kt:313`).
+  - 4.4 one PDF rule:
+    - archive.org converts at install: **CONFIRMED** `Bookshelf.kt:152`.
+    - imports and nautilus offer Read as ebook, pack documents can't: **CONFIRMED**. `readAsEbook` needs `onShelf`
+      (`Bookshelf.kt:253`), false for PACK and PAGES (`BookIds.kt:46`); the menu is the same test
+      (`ebook/EbookReaderViewModel.kt:315`).
+    - nautilus restore bug: **CONFIRMED by test**. `readAsEbook` re-registers the row as EPUB at `x.pdf.epub`
+      (`Bookshelf.kt:255,267`). `PackBooks.restore` then copies the PDF entry to that path and the EPUB check fails
+      (`PackBooks.kt:166-193`). The reader then says `ebook_book_gone` (`EbookReaderViewModel.kt:274`). `sync`
+      deletes only `filePath` (`PackBooks.kt:146`), so the `.pdf` and the PAGES row stay.
+    - Tests: `NautilusBooksTest.aNautilusPdfReadAsAnEbookComesBackAfterItsCopyIsGone` and
+      `aRemovedPackTakesAPdfReadAsAnEbookWithItsPages`, `@Ignore("KB2 Task 2.5: …")`. Both fail when un-ignored, at
+      `restore(...)` false and at the PAGES row still there.
+  - 4.5 pack documents keyed by UUID, lost on supersede: **CONFIRMED**. `ref = "$zimId/$path"` with the pack id
+    (`Bookshelf.kt:461`). `supersede` calls `onRemoved(oldPackId)` (`RoomLibrary.kt:168`), which is
+    `removePackDocuments` (`GrangerApp.kt:357`): place, marks, tabs and history go (`Bookshelf.kt:470-486`).
+  - 4.6 search: **PARTLY**.
+    - Book-pack ZIMs are searched like any pack (`LibrarySearch.kt:229`, no `isBookPack` filter), so full-text hits
+      from them are article hits (`LibrarySearch.kt:175-185`).
+    - Title search already folds a book and an article of the same title into one row (Plan SQ `oneRowPerTitle`,
+      `LibrarySearch.kt:100-103`, cdf5940e). The doubling is mainly a full-text problem, and a title-row problem only
+      where the titles differ.
+    - "Searchable in full" is shown: **CONFIRMED** `CollectionViewModel.kt:267`.
+  - 4.7 Files in this pack: a new feature, nothing to check. `ZimArchive` has no listing until Task 0.2.
+  - 4.8 Gutenberg filed under one pack: **CONFIRMED**. `_all` packs sort last (`GutenbergBooks.kt:89`). A book is
+    one row filed with the first pack holding it (`PackBooks.kt:107-112`). Its collection comes from that one pack
+    name (`Filing.kt:151`).
+  - 4.9 small print:
+    - `ebook_book_gone` "download it again from Granger": **CONFIRMED** `strings_ebook.xml:112`.
+    - ReaderControls' "found from the library index" is untrue for pack documents: **CONFIRMED**. `ReaderControls.kt:24`;
+      PACK rows are never indexed (`core/library/.../Daos.kt:255`).
+    - Both are d0's to fix.
 - [ ] **Task 0.2: `ZimArchive.list(mimes)`.**
   - Wrap libkiwix `iterByPath()` in `KiwixZimArchive`: path, title, mime and size for entries of the given mimes,
     streamed.

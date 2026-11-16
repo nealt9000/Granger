@@ -1,7 +1,10 @@
 package app.granger.core.library
 
+import app.granger.core.books.EpubInspector
+import app.granger.core.books.Inspection
 import app.granger.core.books.PdfFixtures
 import app.granger.core.books.TestEpubs
+import app.granger.core.books.TextPdfFixtures
 import com.google.common.truth.Truth.assertThat
 import java.io.File
 import kotlinx.coroutines.flow.first
@@ -10,6 +13,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -230,14 +234,82 @@ class NautilusBooksTest {
     }
 
     /**
+     * Design §4.4 (Plan KB2 Task 0.1): "Read as ebook" on a nautilus PDF repoints its row at `x.pdf.epub`. When that
+     * copy is gone (storage cleared, or the book removed), [PackBooks.restore] has to bring back a readable book; today
+     * it copies the PDF entry into the `.pdf.epub` path, the EPUB inspector refuses it, and the book won't open.
+     */
+    @Ignore("KB2 Task 2.5: restore of a nautilus PDF read as an ebook copies the PDF into the .pdf.epub path and fails")
+    @Test fun aNautilusPdfReadAsAnEbookComesBackAfterItsCopyIsGone() = test {
+        val pack = install("u-w", "zimgit-water_en", fixture("zimgit-water_en"), pdf = prosePdf().readBytes())
+        books.sync(listOf(pack))
+        val row = db.bookDao().get("book:nautilus:zimgit-water_en/Water (1).pdf")!!
+        assertThat(books.restore(row)).isTrue()
+        assertThat(shelf.readAsEbook(row.id)!!.passes).isTrue()
+        val ebook = db.bookDao().get(row.id)!!
+        assertThat(ebook.filePath).endsWith(".pdf.epub")
+
+        File(ebook.filePath).delete()
+        assertThat(books.restore(ebook)).isTrue()
+
+        val back = db.bookDao().get(row.id)!!
+        val file = File(back.filePath)
+        assertThat(file.isFile).isTrue()
+        val inspection = when (back.format) {
+            BookFormat.EPUB -> EpubInspector.inspect(file, back.title)
+            BookFormat.PDF -> app.granger.core.books.PdfInspector.inspect(file, back.title)
+        }
+        assertThat(inspection).isInstanceOf(Inspection.Ok::class.java)
+        assertThat(back.status).isEqualTo(PackStatus.OK)
+    }
+
+    /**
+     * Design §4.4: removing the pack of a nautilus PDF read as an ebook takes the ebook, its PDF (the original pages)
+     * and the hidden PAGES row together; today only the `.pdf.epub` goes.
+     */
+    @Ignore("KB2 Task 2.5: sync deletes only the row's .pdf.epub, leaving the .pdf and the PAGES row behind")
+    @Test fun aRemovedPackTakesAPdfReadAsAnEbookWithItsPages() = test {
+        val pack = install("u-w", "zimgit-water_en", fixture("zimgit-water_en"), pdf = prosePdf().readBytes())
+        books.sync(listOf(pack))
+        val row = db.bookDao().get("book:nautilus:zimgit-water_en/Water (1).pdf")!!
+        assertThat(books.restore(row)).isTrue()
+        assertThat(shelf.readAsEbook(row.id)!!.passes).isTrue()
+        val pages = BookIds.pagesOf(row.id)
+        assertThat(db.bookDao().get(pages)).isNotNull()
+
+        db.packDao().delete(pack.id)
+        books.sync(emptyList())
+
+        assertThat(db.bookDao().get(row.id)).isNull()
+        assertThat(db.bookDao().get(pages)).isNull()
+        val left = File(booksRoot, "nautilus").listFiles().orEmpty().map { it.name }
+        assertThat(left.filter { it.endsWith(".pdf", ignoreCase = true) || it.endsWith(".pdf.epub", ignoreCase = true) }).isEmpty()
+    }
+
+    /** A PDF of plain prose that passes [app.granger.core.books.PdfToEpub]'s gate, as BookshelfTest's does. */
+    private fun prosePdf(): File {
+        val mono = com.tom_roush.pdfbox.pdmodel.font.PDType1Font.COURIER
+        val pages = (1..4).map { p ->
+            TextPdfFixtures.Page(
+                (0 until 40).map { i ->
+                    val text = "page $p line $i of a book set in plain words on a page of prose".padEnd(64, 'x').take(64)
+                        .let { if (i % 8 == 7) it.dropLast(1) + "." else it }
+                    TextPdfFixtures.Line(text, 72f + 14f * i, if (i % 8 == 0) 90f else 72f, 10f, mono)
+                },
+            )
+        }
+        return TextPdfFixtures.build(src, "prose.pdf", pages, title = "A Book of Prose")
+    }
+
+    /**
      * Installs a nautilus pack whose `database.js` is [js], holding a small PDF for each listed file ([files], else
-     * every one the list names); [scanned] ones have no text layer.
+     * every one the list names, or [pdf] in its place); [scanned] ones have no text layer.
      */
     private suspend fun install(
         uuid: String, name: String, js: String, files: List<String>? = null, scanned: Set<String> = emptySet(),
+        pdf: ByteArray? = null,
     ): Pack {
         val listed = files ?: NautilusDatabase.records(js).flatMap { it.files }
-        val text = PdfFixtures.text(src, "text.pdf").readBytes()
+        val text = pdf ?: PdfFixtures.text(src, "text.pdf").readBytes()
         val scan = PdfFixtures.imageOnly(src, "scan.pdf").readBytes()
         val entries = listed.associate { fp ->
             "${NautilusDatabase.FILES}$fp" to ("application/pdf" to if (fp in scanned) scan else text)
