@@ -47,6 +47,10 @@ The Timeline lanes can then take the same subjects (a lanes v2), so the shipped 
 
 ### Task 4: Sources (phone, tested)
 - The old Browse list, grouped by domain, one tap from Explore, with Downloads, Readiness and Import in its menu.
+- Reuse KB2's shared composables in `theme/GroupedRows.kt` (GroupLabel, SectionHeader, GroupedRows, GroupedItem, GroupedRow, Chevron, OutlineChip; kb2-ux `ca0a97cb`) rather than forking them.
+- Keep the pack-row long-press entry "Files in this pack (N)" (PackFilesRoute, KB2 `382c433d`).
+- The Books row counts every book collection on the phone (Classics, Gutenberg, Kiwix libraries, manifest packs, African Storybook).
+- Build after KB2 merges.
 
 ### Task 5: The library as a map (phone, tested)
 - C opened from A, built on the topic map's component.
