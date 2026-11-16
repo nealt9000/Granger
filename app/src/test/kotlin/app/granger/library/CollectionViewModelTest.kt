@@ -470,6 +470,35 @@ class CollectionViewModelTest {
             .isEqualTo("1 document · From Kiwix")
     }
 
+    // --- Plan KB2 Task 4.3: removing one pack book ---
+
+    @Test fun aRemovedPackBookIsListedForShowRemovedWhichPutsItBack() = runTest(main.dispatcher) {
+        library.packList.value = listOf(food)
+        val gone = document("Food Preparation (3).pdf", "Dutch Oven").copy(hidden = true)
+        val elsewhere = book("book:nautilus:zimgit-water_en/w.pdf", "Water").copy(
+            origin = BookOrigin.NAUTILUS, sourceRef = "zimgit-water_en/files/w.pdf", hidden = true,
+        )
+        bookshelf.bookList.value = foodRow.books.take(2) + gone + elsewhere
+        show(foodRow.copy(books = foodRow.books.take(2)))
+        val vm = CollectionViewModel(
+            "c:kiwixbooks-zimgit-food-preparation_en", shelves, library, sessions, bookshelf, downloads, appScope = this,
+            compute = main.dispatcher,
+        )
+        backgroundScope.launch { vm.removed.collect {} }
+        testScheduler.advanceUntilIdle()
+        // Only this collection's removed books.
+        assertThat(vm.removed.value.map { it.title }).containsExactly("Dutch Oven")
+        vm.showRemoved()
+        testScheduler.advanceUntilIdle()
+        assertThat(bookshelf.unhidden).containsExactly(gone.id)
+        assertThat(vm.removed.value).isEmpty()
+
+        // A pack book's Remove goes to the shelf, which hides it.
+        vm.removeBook(foodRow.books.first())
+        testScheduler.advanceUntilIdle()
+        assertThat(bookshelf.removed).containsExactly(foodRow.books.first().id)
+    }
+
     // --- Plan KB2 Task 2.2: a pure container listed by its files' names ---
 
     @Test fun aCollectionListedByFileNamesSaysSo() = runTest(main.dispatcher) {

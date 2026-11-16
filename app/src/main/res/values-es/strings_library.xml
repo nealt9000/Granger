@@ -57,6 +57,8 @@
     <string name="library_sort_recent">Recientes</string>
     <string name="library_remove_from_phone_title">¿Quitar del teléfono?</string>
     <string name="library_remove_book_body">Se eliminará %1$s de este teléfono. Se conservan tu lugar, tus marcadores y tus resaltados.</string>
+    <string name="library_remove_pack_book_body">Se eliminará %1$s de este teléfono y saldrá de esta lista; Mostrar los quitados lo trae de vuelta. Se conservan tu lugar, tus marcadores y tus resaltados.</string>
+    <string name="library_show_removed">Mostrar los quitados</string>
     <string name="library_remove_pack_body">Se eliminará %1$s de este teléfono, junto con los marcadores y lugares de lectura que guardaste en él. Puedes volver a descargarlo más tarde.</string>
     <string name="library_remove_book_pack_body">Se eliminará %1$s de este teléfono, con sus libros. Puedes volver a descargarlo más tarde. Se conservan tus lugares, marcadores y resaltados.</string>
     <string name="library_remove_document_pack_body">Se eliminará %1$s de este teléfono, con sus documentos. Puedes volver a descargarlo más tarde. Se conservan tus lugares, marcadores y resaltados.</string>

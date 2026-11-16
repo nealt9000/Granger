@@ -71,6 +71,10 @@
     <string name="library_remove_from_phone_title">Remove from phone?</string>
     <!-- %1$s is the book's title. -->
     <string name="library_remove_book_body">%1$s will be deleted from this phone. Your place, bookmarks and highlights are kept.</string>
+    <!-- One book of a pack (Plan KB2): its copy goes and it leaves the list until Show removed. -->
+    <string name="library_remove_pack_book_body">%1$s will be deleted from this phone and taken off this list; Show removed brings it back. Your place, bookmarks and highlights are kept.</string>
+    <!-- A collection's menu: brings back the pack books removed from it. -->
+    <string name="library_show_removed">Show removed</string>
     <!-- %1$s is the pack's title. -->
     <string name="library_remove_pack_body">%1$s will be deleted from this phone, with the bookmarks and reading places you saved in it. You can download it again later.</string>
     <!-- A pack of books (Gutenberg, Kiwix): its books go, but their places and marks stay for a reinstall. -->

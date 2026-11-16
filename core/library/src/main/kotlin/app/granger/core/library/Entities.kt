@@ -188,6 +188,11 @@ data class Book(
     val workTitle: String? = null,
     /** Which part this is, from 1; null when it isn't a numbered part. */
     val partNo: Int? = null,
+    /**
+     * A pack book the reader removed (Plan KB2 Task 4.3, version 16): its copy is gone and it's off the shelves until
+     * "Show removed" or opening it brings it back; its place and marks are kept. Always false for any other book.
+     */
+    @ColumnInfo(defaultValue = "0") val hidden: Boolean = false,
 )
 
 /** Where the reader left off in a book. [locatorJson] is opaque to the library. */

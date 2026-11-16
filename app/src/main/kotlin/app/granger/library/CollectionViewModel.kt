@@ -163,6 +163,20 @@ class CollectionViewModel(
     /** Null shows every category. */
     fun setCategory(category: String?) { savedState[CATEGORY] = category }
 
+    /**
+     * The pack books removed from this collection (Plan KB2 Task 4.3): hidden, their copies gone, for "Show removed".
+     * Empty for any other collection.
+     */
+    val removed: StateFlow<List<Book>> = combine(ui.map { it?.collection?.defaultKey }.distinctUntilChanged(), bookshelf.books) { key, books ->
+        if (key == null || !Filing.isBookPackCollection(key)) emptyList() else books.filter { it.hidden && Filing.defaultKey(it) == key }
+    }.flowOn(compute).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** Puts the removed books back in the collection, to be copied out again when opened. */
+    fun showRemoved() {
+        val ids = removed.value.map { it.id }
+        if (ids.isNotEmpty()) appScope.launch { bookshelf.unhide(ids) }
+    }
+
     /** Ids of the packs here that the Granger Classics e-books replace. */
     val superseded: StateFlow<Set<String>> = ui
         .map { row -> row?.packs.orEmpty().filter(Filing::isSuperseded).map { it.id }.toSet() }
@@ -235,7 +249,8 @@ class CollectionViewModel(
 
     /**
      * Deletes the book's file from the phone; its place, bookmarks and highlights are kept. A Granger book's download
-     * record goes first so it can be fetched again; an archive.org book's metadata sidecar goes last. Runs in the app scope so leaving the screen can't cut it short.
+     * record goes first so it can be fetched again; an archive.org book's metadata sidecar goes last. A pack book's row
+     * is hidden until "Show removed" (Plan KB2 Task 4.3). Runs in the app scope so leaving the screen can't cut it short.
      */
     fun removeBook(book: Book) {
         appScope.launch {

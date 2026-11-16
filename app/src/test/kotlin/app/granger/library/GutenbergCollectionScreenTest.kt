@@ -88,13 +88,15 @@ class GutenbergCollectionScreenTest {
         assertThat(compose.onAllNodesWithContentDescription("Searchable in full").fetchSemanticsNodes()).hasSize(1)
     }
 
-    @Test fun aBooksMenuSaysWhetherItIsSearchableAndOffersNoRemove() {
+    /** Plan KB2 Task 4.3: a pack book can be removed on its own; the dialog says Show removed brings it back. */
+    @Test fun aBooksMenuSaysWhetherItIsSearchableAndOffersRemove() {
         open()
         compose.onNodeWithText("The Art of Fugue").performTouchInput { longClick() }
         compose.onNodeWithText("Titles only until you open it").assertIsDisplayed()
         compose.onNodeWithText("Move to collection…").assertIsDisplayed()
-        assertThat(compose.onAllNodesWithContentDescription("Remove from phone").fetchSemanticsNodes()).isEmpty()
-        compose.onNodeWithText("Remove from phone").assertDoesNotExist()
+        compose.onNodeWithText("Remove from phone").performClick()
+        compose.onNodeWithText("The Art of Fugue will be deleted from this phone and taken off this list; Show removed brings it back. Your place, bookmarks and highlights are kept.")
+            .assertIsDisplayed()
     }
 
     @Test fun makeAllSearchableGivesTheSizeFirstAndQueuesTheWork() {

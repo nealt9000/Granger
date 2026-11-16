@@ -106,6 +106,7 @@ fun CollectionScreen(
     val sort by viewModel.sort.collectAsStateWithLifecycle()
     val view by viewModel.view.collectAsStateWithLifecycle()
     val gutenberg by viewModel.gutenbergHeader.collectAsStateWithLifecycle()
+    val removed by viewModel.removed.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     // The collection disappears when its last pack moves out or it is deleted; leave once it has been seen.
     var seen by remember { mutableStateOf(false) }
@@ -157,6 +158,11 @@ fun CollectionScreen(
                                     onClick = { menuOpen = false; dialog = CollectionDialog.RemovePack(pack) },
                                 )
                             }
+                            // Removed pack books come back (Plan KB2 Task 4.3).
+                            if (removed.isNotEmpty()) DropdownMenuItem(
+                                text = { Text(stringResource(R.string.library_show_removed)) },
+                                onClick = { menuOpen = false; viewModel.showRemoved() },
+                            )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.library_move_collection)) },
                                 onClick = { menuOpen = false; dialog = CollectionDialog.MoveCollection },
@@ -375,7 +381,8 @@ fun CollectionScreen(
         )
         is CollectionDialog.RemoveBook -> ConfirmDialog(
             title = stringResource(R.string.library_remove_from_phone_title),
-            message = stringResource(R.string.library_remove_book_body, d.book.title),
+            // A pack book leaves the list until Show removed (Plan KB2 Task 4.3).
+            message = stringResource(if (d.book.origin.isPackBook) R.string.library_remove_pack_book_body else R.string.library_remove_book_body, d.book.title),
             confirm = stringResource(R.string.common_remove),
             onConfirm = { viewModel.removeBook(d.book) },
             onDismiss = { dialog = null },
@@ -427,8 +434,8 @@ fun CollectionScreen(
 private class HeadItem(val key: String, val contentType: String, val content: @Composable () -> Unit)
 
 /**
- * A book's long-press menu. A pack's book (Gutenberg, nautilus) says whether its full text is searchable yet (Plan GB
- * Decision 6), and has no Remove: it's its pack's, and goes with the pack.
+ * A book's long-press menu. A pack's book (Gutenberg, nautilus, Kiwix) says whether its full text is searchable yet
+ * (Plan GB Decision 6). Every book has Remove (Plan KB2 Task 4.3): a pack book's copy goes and its row is hidden.
  */
 @Composable
 private fun BookMenu(book: Book, open: Boolean, onClose: () -> Unit, onMove: () -> Unit, onRemove: () -> Unit) {
@@ -449,7 +456,7 @@ private fun BookMenu(book: Book, open: Boolean, onClose: () -> Unit, onMove: () 
             enabled = false,
         )
         DropdownMenuItem(text = { Text(stringResource(R.string.library_move_to_collection)) }, onClick = { onClose(); onMove() })
-        if (!book.origin.isPackBook) DropdownMenuItem(text = { Text(stringResource(R.string.library_remove_from_phone)) }, onClick = { onClose(); onRemove() })
+        DropdownMenuItem(text = { Text(stringResource(R.string.library_remove_from_phone)) }, onClick = { onClose(); onRemove() })
     }
 }
 

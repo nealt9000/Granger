@@ -1295,6 +1295,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     // An installed book pack opens as its books, in the Library (Plan GB, Plan KB Decision 6), from any list.
                     onOpenPack = ::openPackOrCollection,
                     onOpenFamily = { family -> nav.navigate(SourceRoute(source, family = family)) },
+                    // An installed book opens in the reader (Plan KB2 Task 4.3).
+                    onOpenBook = { bookId, title -> scope.launch { showTab(container.sessions.openTab(bookId, "", title)) } },
                 )
             }
             composable<ArchiveRoute> { backStackEntry ->
@@ -1311,6 +1313,14 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onBack = { nav.popBackStack() },
                     onOpenLibriVox = { nav.openLibriVox() },
                     onOpenInLibrary = { identifier -> nav.navigate(inLibraryRoute(kind, identifier)) },
+                    // An installed text opens as a book, a set as its collection (Plan KB2 Task 4.3).
+                    onOpenText = { target ->
+                        when (target) {
+                            is app.granger.archive.ArchiveOpen.Book ->
+                                scope.launch { showTab(container.sessions.openTab(target.bookId, "", target.title)) }
+                            is app.granger.archive.ArchiveOpen.Collection -> nav.navigate(CollectionRoute(target.collectionId))
+                        }
+                    },
                 )
             }
             composable<LibriVoxRoute> {
@@ -1551,7 +1561,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     onBack = { nav.popBackStack() },
                     onOpened = ::showTab,
-                    onOpenPack = ::openPack,
+                    // A book pack opens as its books, as Get more's Open does (Plan KB2 Task 4.3).
+                    onOpenPack = ::openPackOrCollection,
                     onGetMore = { nav.navigate(GetMoreRoute()) { launchSingleTop = true } },
                 )
             }

@@ -472,11 +472,36 @@ now)").
     - Tests: `SourceViewModelTest.removeSaysWhatGoesWithTheFile`, `LibraryViewModelTest.aManifestPacksRowCountsInItsNounAndNamesItsProvider`,
       wording updates. ThemeShots `library-gutenberg` adds Military Medicine. `:core:library` 495, `:app` 1816 (120
       skipped), 0 failures.
-- [ ] **Task 4.3: Open and Remove everywhere.**
+- [x] **Task 4.3: Open and Remove everywhere.**
   - Open on installed Classics and archive.org texts.
   - Downloads → Open on a book pack opens its collection.
   - Remove one pack book: delete the copy and hide the row, with "Show removed".
   - Rail tabs of removed rows go.
+  - **Done 2026-11-16** (this commit, worktree kb2ux).
+    - Get more: an installed Granger book's row carries `ItemRow.bookId` (`book:granger:<id>`); `RowActions` opens on
+      `row.opens` (pack or book), so a book reads "Open" with Remove in its overflow, as a pack does.
+      `SourceScreen(onOpenBook)` opens it in the reader.
+    - archive.org texts: `ArchiveViewModel.openTarget` → `ArchiveOpen.Book` (the text, else the PDF beside it) or
+      `ArchiveOpen.Collection` (`c:archive-org:<identifier>` for a set). Installed rows show Open + overflow Remove
+      (`RemoveMenu`, now shared); the sheet shows Remove + Open. Audio views unchanged.
+    - Downloads → Open uses `openPackOrCollection`, as Get more does.
+    - **Hide mechanism (decision):** a new column in the existing migration: `books.hidden INTEGER NOT NULL DEFAULT 0`
+      (`Book.hidden`), added to `MIGRATION_15_16` and `16.json` (identity hash changed: the emulator at database 16 from
+      the Phase 2 check needs its data cleared or a reinstall). `onShelf` is false for a hidden book, so the shelves,
+      Home, title search and passage finders leave it out with no other change. `RoomBookshelf.remove` of a pack book
+      deletes the copy, cover, search text and its original pages' row (their place and marks kept now, as a pack's
+      removal keeps them), sets `hidden`, and deletes its rail tabs. `Bookshelf.unhide(ids)` brings rows back;
+      `PackBooks.restore` (opening it, e.g. from a link) clears `hidden` too. A sync keeps the flag (rows are copied).
+    - Collection: every book's menu has "Remove from phone"; a pack book's dialog says "… will be deleted from this
+      phone and taken off this list; Show removed brings it back. Your place, bookmarks and highlights are kept."
+      (`library_remove_pack_book_body`). The overflow shows "Show removed" (`library_show_removed`, es "Mostrar los
+      quitados") when `CollectionViewModel.removed` (hidden books of this collection) isn't empty.
+    - Rail: `PackBooks.sync` deletes the tabs of the rows it drops (and their pages' tabs), so a removed pack leaves no
+      "Removed book" tabs. History entries stay.
+    - Tests: `GutenbergBooksTest` +2 (hide/tabs/marks/unhide/restore; a removed pack's tabs), `MigrationTest` 15→16
+      hidden = 0, `CollectionViewModelTest.aRemovedPackBookIsListedForShowRemovedWhichPutsItBack`,
+      `ArchiveViewModelTest.openReadsTheTextItsPdfOrASetsCollection`, `SourceViewModelTest` book Open,
+      `GutenbergCollectionScreenTest` Remove on a pack book. `:core:library` 497, `:app` 1818 (120 skipped), 0 failures.
 - [ ] **Task 4.4: the PDF rule (D3: Read as ebook stays a choice).**
   - "Read as ebook" is offered for every text PDF from every source: pack books, imports and pack documents (today
     `onShelf` hides it for pack documents).

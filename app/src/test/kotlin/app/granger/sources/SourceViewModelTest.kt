@@ -579,6 +579,13 @@ class SourceViewModelTest {
         vm.setTab(SourceTab.INSTALLED)
         testScheduler.advanceUntilIdle()
         assertThat(vm.rowIds()).containsExactly("emma")
+        // Plan KB2 Task 4.3: an installed book opens, as an installed pack does.
+        val emma = vm.ui.value.sections.flatMap { it.rows }.single()
+        assertThat(emma.bookId).isEqualTo("book:granger:emma")
+        assertThat(emma.opens).isTrue()
+        vm.setTab(SourceTab.BROWSE)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.flatMap { it.rows }.single { it.id == "hamlet" }.bookId).isNull()
     }
 
     @Test fun presetSkipsInstalledAndActiveItems() = runTest(main.dispatcher) {

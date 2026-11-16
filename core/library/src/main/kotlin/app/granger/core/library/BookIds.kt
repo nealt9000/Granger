@@ -46,7 +46,7 @@ object BookIds {
 }
 
 /**
- * False for a pack document (it opens like a book, but it belongs to its pack) and for an ebook's original pages (they
- * belong to the ebook): not on the shelves.
+ * False for a pack document (it opens like a book, but it belongs to its pack), for an ebook's original pages (they
+ * belong to the ebook) and for a pack book the reader removed ([Book.hidden]): not on the shelves.
  */
-val Book.onShelf: Boolean get() = origin != BookOrigin.PACK && origin != BookOrigin.PAGES
+val Book.onShelf: Boolean get() = origin != BookOrigin.PACK && origin != BookOrigin.PAGES && !hidden

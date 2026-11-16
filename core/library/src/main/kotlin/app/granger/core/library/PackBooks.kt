@@ -162,6 +162,9 @@ open class PackBooks(
                         val pages = BookIds.pagesOf(book.id)
                         dao.deleteChunks(pages)
                         dao.delete(pages)
+                        // Its tabs would say "Removed book" on the rail (Plan KB2 Task 4.3); its place and marks stay.
+                        db.sessionDao().deleteTabsForPack(book.id)
+                        db.sessionDao().deleteTabsForPack(pages)
                     }
                 }
                 for (book in gone) {
@@ -232,6 +235,7 @@ open class PackBooks(
                 target.delete()
                 return@withContext false
             }
+            // Opening a removed book brings it back to the shelf (Plan KB2 Task 4.3).
             dao.upsert(
                 current.copy(
                     sourceRef = "${pack.name}/$path",
@@ -239,6 +243,7 @@ open class PackBooks(
                     coverPath = writeCover(book.id, cover.bytes, cover.extension) ?: current.coverPath,
                     status = PackStatus.OK,
                     indexedAt = null,
+                    hidden = false,
                 ),
             )
             return@withContext true
@@ -268,6 +273,7 @@ open class PackBooks(
                     coverPath = writeCover(book.id, meta.cover, meta.coverExtension) ?: book.coverPath,
                     status = PackStatus.OK,
                     indexedAt = null,
+                    hidden = false,
                 ),
             )
             return true
@@ -290,6 +296,7 @@ open class PackBooks(
                     coverPath = cover ?: book.coverPath,
                     status = PackStatus.OK,
                     indexedAt = null,
+                    hidden = false,
                 ),
             )
         }

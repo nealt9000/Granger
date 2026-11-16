@@ -102,7 +102,12 @@ data class ItemRow(
     val covered: Boolean = false,
     /** The pack on Kiwix's online library, for Preview before Get; null for anything Kiwix doesn't host. */
     val previewUrl: String? = null,
-)
+    /** The shelf book this entry is installed as (a Granger book): Open reads it (Plan KB2 Task 4.3). */
+    val bookId: String? = null,
+) {
+    /** Whether Open has something to open: an installed pack or book. */
+    val opens: Boolean get() = packId != null || bookId != null
+}
 
 /** What a Remove dialog says goes with the file (Plan KB2 Task 4.2). */
 enum class RemoveKind(@StringRes val body: Int) {
@@ -653,6 +658,7 @@ class SourceViewModel(
                 adds = adds?.text,
                 covered = adds?.covered ?: false,
                 previewUrl = (item as? PackEntry)?.let(KiwixList::previewUrl),
+                bookId = (item as? BookEntry)?.takeIf { status(it) in installedStates }?.let { BookIds.of(BookOrigin.GRANGER, it.id) },
             )
         }
         /** A folded family's row: "Developer docs", "243 packs". */

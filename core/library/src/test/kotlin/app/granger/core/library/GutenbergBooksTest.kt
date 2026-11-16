@@ -6,6 +6,7 @@ import app.granger.core.library.GutenbergFixtures.PF_BOOKS
 import app.granger.core.zim.ZimHit
 import com.google.common.truth.Truth.assertThat
 import java.io.File
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -172,6 +173,56 @@ class GutenbergBooksTest {
         books.sync(listOf(again))
         assertThat(db.bookDao().get(irish.id)).isNotNull()
         assertThat(db.bookDao().position(irish.id)!!.chapterTitle).isEqualTo("Chapter 2")
+    }
+
+    /**
+     * Plan KB2 Task 4.3: removing one pack book deletes its copy and cover, hides its row and closes its tabs, its place
+     * and marks kept. Show removed brings it back; so does opening it, and a sync keeps it hidden.
+     */
+    @Test fun aRemovedBookIsHiddenWithItsTabsClosedAndComesBack() = test {
+        val shelf = RoomBookshelf(db, { listOf(booksDir) }, { File(tmp.root, "imports") }, coversDir, dispatcher)
+        val pack = install(GutenbergFixtures.archive(src))
+        books.sync(listOf(pack))
+        val irish = db.bookDao().get(id(43349))!!
+        assertThat(books.restore(irish)).isTrue()
+        db.bookDao().upsertPosition(BookPosition(irish.id, "{}", 0.4, "Chapter 2", 9L))
+        db.bookDao().insertMark(BookAnnotation(0, irish.id, MarkKind.BOOKMARK, "{}", "", "", "", 1L, 1L))
+        val tab = db.sessionDao().insertTab(ReadingTab(0, irish.id, "", irish.title, 1L, onRail = true))
+        val other = db.sessionDao().insertTab(ReadingTab(0, id(48417), "", "Pennsylvania Dutch", 1L, onRail = true))
+
+        assertThat(shelf.remove(irish.id)).isTrue()
+        val hidden = db.bookDao().get(irish.id)!!
+        assertThat(hidden.hidden).isTrue()
+        assertThat(hidden.onShelf).isFalse()
+        assertThat(hidden.coverPath).isNull()
+        assertThat(File(irish.filePath).exists()).isFalse()
+        assertThat(coversDir.listFiles().orEmpty()).isEmpty()
+        assertThat(db.sessionDao().tab(tab)).isNull()
+        assertThat(db.sessionDao().tab(other)).isNotNull()
+        assertThat(db.bookDao().position(irish.id)!!.totalProgression).isEqualTo(0.4)
+        assertThat(db.bookDao().observeMarks(irish.id).first()).hasSize(1)
+        // A sync leaves it hidden.
+        books.sync(listOf(pack))
+        assertThat(db.bookDao().get(irish.id)!!.hidden).isTrue()
+
+        shelf.unhide(listOf(irish.id))
+        assertThat(db.bookDao().get(irish.id)!!.hidden).isFalse()
+        assertThat(File(irish.filePath).exists()).isFalse()
+
+        // Opening a removed book copies it out and puts it back.
+        shelf.remove(irish.id)
+        assertThat(books.restore(db.bookDao().get(irish.id)!!)).isTrue()
+        assertThat(db.bookDao().get(irish.id)!!.hidden).isFalse()
+    }
+
+    /** Plan KB2 Task 4.3: a removed pack's rows take their tabs with them, so the rail has no "Removed book" tabs. */
+    @Test fun aRemovedPacksBooksCloseTheirTabs() = test {
+        val pack = install(GutenbergFixtures.archive(src))
+        books.sync(listOf(pack))
+        val tab = db.sessionDao().insertTab(ReadingTab(0, id(43349), "", "Irish", 1L, onRail = true))
+        db.packDao().delete(pack.id)
+        books.sync(emptyList())
+        assertThat(db.sessionDao().tab(tab)).isNull()
     }
 
     @Test fun aPositionSurvivesANewSnapshot() = test {

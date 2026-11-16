@@ -239,6 +239,7 @@ abstract class LibraryDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE books ADD COLUMN workKey TEXT")
                 db.execSQL("ALTER TABLE books ADD COLUMN workTitle TEXT")
                 db.execSQL("ALTER TABLE books ADD COLUMN partNo INTEGER")
+                db.execSQL("ALTER TABLE books ADD COLUMN hidden INTEGER NOT NULL DEFAULT 0")
             }
         }
 

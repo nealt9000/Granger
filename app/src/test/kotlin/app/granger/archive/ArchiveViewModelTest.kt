@@ -704,6 +704,22 @@ class ArchiveViewModelTest {
         assertThat(bookshelf.removed).containsExactly("book:archive-org:$epubId", "book:archive-org:$epubId#pdf")
     }
 
+    /** Plan KB2 Task 4.3: Open on an installed text reads its book, the PDF beside it, or a set's collection. */
+    @Test fun openReadsTheTextItsPdfOrASetsCollection() = runTest(main.dispatcher) {
+        fun archiveBook(ref: String, title: String) = app.granger.book("book:archive-org:$ref", title).copy(
+            origin = app.granger.core.library.BookOrigin.ARCHIVE_ORG, sourceRef = ref,
+        )
+        bookshelf.bookList.value = listOf(
+            archiveBook("text", "A Text"), archiveBook("scan#pdf", "A Scan"),
+            archiveBook("run~01", "Batman · 01 (of 02)"), archiveBook("run~02", "Batman · 02 (of 02)"),
+        )
+        val vm = viewModel()
+        assertThat(vm.openTarget("text")).isEqualTo(ArchiveOpen.Book("book:archive-org:text", "A Text"))
+        assertThat(vm.openTarget("scan")).isEqualTo(ArchiveOpen.Book("book:archive-org:scan#pdf", "A Scan"))
+        assertThat(vm.openTarget("run")).isEqualTo(ArchiveOpen.Collection("c:archive-org:run"))
+        assertThat(vm.openTarget("nothing")).isNull()
+    }
+
     // --- Archive.org audio (Plan M2, Task 8) ---
 
     private val mediaRoot by lazy { tmp.newFolder("media") }

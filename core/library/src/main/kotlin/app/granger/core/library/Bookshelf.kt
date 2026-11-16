@@ -72,9 +72,13 @@ interface Bookshelf {
 
     /**
      * Deletes the file, cover and search text; the position and marks are kept. A pack book's row stays while its
-     * pack lists it, to be copied out again when opened. False if the file can't be deleted.
+     * pack lists it, hidden ([Book.hidden], Plan KB2 Task 4.3) until [unhide] or opening it brings it back, and its
+     * rail tabs close. False if the file can't be deleted.
      */
     suspend fun remove(id: String): Boolean
+
+    /** Puts removed pack books ([Book.hidden]) back on the shelves, still to be copied out when opened. */
+    suspend fun unhide(ids: Collection<String>) {}
 
     /**
      * The PDF the ebook [bookId] was made from (Plan IA), as a hidden book to open ([BookOrigin.PAGES]); null when it
@@ -252,14 +256,17 @@ class RoomBookshelf(
         true
     }
 
-    /** Forgets [bookId]'s original pages' row, cover, place and marks. */
-    private suspend fun dropPages(bookId: String) {
+    /** Forgets [bookId]'s original pages' row, cover and, unless [keepMarks], place and marks. */
+    private suspend fun dropPages(bookId: String, keepMarks: Boolean = false) {
         val id = BookIds.pagesOf(bookId)
         dao.get(id)?.coverPath?.let { File(it).delete() }
         db.withTransaction {
             dao.delete(id)
-            dao.deletePosition(id)
-            dao.deleteMarks(id)
+            dao.deleteChunks(id)
+            if (!keepMarks) {
+                dao.deletePosition(id)
+                dao.deleteMarks(id)
+            }
         }
     }
 
@@ -442,10 +449,11 @@ class RoomBookshelf(
         val book = dao.get(id) ?: return@withContext true
         val file = File(book.filePath)
         if (file.exists() && !file.delete()) return@withContext false
-        // An ebook made from a PDF takes its original pages with it.
+        // An ebook made from a PDF takes its original pages with it; a pack book's pages keep their place and marks for
+        // when it's copied out again, as its pack's removal leaves them (Plan KB2 Task 2.5).
         pagesFile(file)?.let { pdf ->
             if (pdf.exists() && !pdf.delete()) return@withContext false
-            dropPages(id)
+            dropPages(id, keepMarks = book.origin.isPackBook)
         }
         // A converted text or comic book's source stays beside it; left alone, the next refresh() would convert it again.
         if (book.origin == BookOrigin.ARCHIVE_ORG && !file.name.endsWith(EBOOK_FROM_PDF, ignoreCase = true)) {
@@ -458,10 +466,23 @@ class RoomBookshelf(
         book.coverPath?.let { File(it).delete() }
         db.withTransaction {
             dao.deleteChunks(id)
-            // A pack book stays listed while its pack is installed: only the copy and its search text go.
-            if (book.origin.isPackBook) dao.upsert(book.copy(coverPath = null, indexedAt = null)) else dao.delete(id)
+            // A pack book stays listed while its pack is installed, hidden (Plan KB2 Task 4.3): only the copy and its
+            // search text go, and its tabs, which would otherwise say "Removed book" on the rail.
+            if (book.origin.isPackBook) {
+                dao.upsert(book.copy(coverPath = null, indexedAt = null, hidden = true))
+                db.sessionDao().deleteTabsForPack(id)
+                db.sessionDao().deleteTabsForPack(BookIds.pagesOf(id))
+            } else {
+                dao.delete(id)
+            }
         }
         true
+    }
+
+    override suspend fun unhide(ids: Collection<String>): Unit = withContext(io) {
+        db.withTransaction {
+            for (id in ids) dao.get(id)?.takeIf { it.hidden }?.let { dao.upsert(it.copy(hidden = false)) }
+        }
     }
 
     override suspend fun registerPackDocument(

@@ -99,6 +99,8 @@ fun SourceScreen(
     onBack: () -> Unit,
     onOpenPack: (packId: String) -> Unit = {},
     onOpenFamily: (family: String) -> Unit = {},
+    /** Opens an installed book in the reader (Plan KB2 Task 4.3: the Classics have Open too). */
+    onOpenBook: (bookId: String, title: String) -> Unit = { _, _ -> },
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
@@ -266,7 +268,7 @@ fun SourceScreen(
                     onCancel = { viewModel.cancel(row.id) },
                     onRetry = { viewModel.retry(row.id) },
                     onRemove = { scope.launch { confirmRemove = row to viewModel.removeKind(row.id) } },
-                    onOpen = { row.packId?.let(onOpenPack) },
+                    onOpen = { row.packId?.let(onOpenPack) ?: row.bookId?.let { onOpenBook(it, row.title) } },
                     onChooseFlavour = viewModel::chooseFlavour,
                     onChooseSlice = { zim -> row.setId?.let { viewModel.chooseSlice(it, zim) } },
                     onChoosePictures = { f -> row.setId?.let { viewModel.choosePictures(it, f) } },
@@ -416,7 +418,7 @@ internal fun SizeCheckDialog(check: SizeCheck, onGet: (itemId: String) -> Unit, 
 
 /**
  * An installed pack opens here, where it's managed (Plan U3b Decision 3): Open is the row's action and Remove is in its
- * overflow. An installed item the library doesn't hold as a pack (a book, a model) keeps Remove as its action. A pack
+ * overflow; an installed book does the same (Plan KB2 Task 4.3). An installed model or voice keeps Remove as its action. A pack
  * with flavours offers them as chips, and says which is on the phone (Plan KB Decision 8); a tap on the row shows its
  * full licence.
  */
@@ -679,7 +681,7 @@ private fun RowActions(
     onSwitch: () -> Unit = onGet,
     preview: Boolean = true,
 ) {
-    val opens = row.packId != null
+    val opens = row.opens
     if (row.switches) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (opens) TextButton(onClick = onOpen) { Text(stringResource(R.string.common_open)) }
@@ -766,7 +768,7 @@ internal object SourceTags {
 
 /** A row's overflow, holding Remove (which still asks first). */
 @Composable
-private fun RemoveMenu(title: String, onRemove: () -> Unit) {
+internal fun RemoveMenu(title: String, onRemove: () -> Unit) {
     var open by remember { mutableStateOf(false) }
     Box {
         IconButton(onClick = { open = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.sources_more_for, title)) }

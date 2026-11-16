@@ -301,6 +301,13 @@ class FakeBookshelf : Bookshelf {
         return true
     }
 
+    /** Ids put back by Show removed (Plan KB2 Task 4.3); the books lose [Book.hidden]. */
+    val unhidden = mutableListOf<String>()
+    override suspend fun unhide(ids: Collection<String>) {
+        unhidden += ids
+        bookList.update { list -> list.map { if (it.id in ids) it.copy(hidden = false) else it } }
+    }
+
     /** Original pages by ebook id (Plan IA): the hidden PDF book and its size. */
     val originalPages = mutableMapOf<String, Pair<Book, Long>>()
 
