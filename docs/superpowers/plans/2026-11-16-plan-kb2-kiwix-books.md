@@ -119,7 +119,7 @@ Python for tools).
         instrumented runs).
     - **Still to do (Neal's phone):** run that device test, and time `list(setOf("application/epub+zip"))` over
       Gutenberg en_all (60k EPUBs).
-- [ ] **Task 0.3: extractor spike on the Mac.** Write `tools/bookpacks/build.py` with `kolibri` and `zimit-index`
+- [x] **Task 0.3: extractor spike on the Mac.** Write `tools/bookpacks/build.py` with `kolibri` and `zimit-index`
   extractors, over `zim_probe.Reader`.
   - Build manifests for African Storybook, Military Medicine, SMBC, Algorithms, Milne and Survivor Library (its 194
     category pages give the groups).
@@ -127,6 +127,49 @@ Python for tools).
   - **Pass:** 95% or more readable titles after overrides, 0 wrong languages in African Storybook, and parts folded
     for Military Medicine's "Full text / Part 1–3".
   - Record the result in the plan. **Stop and report if a shape fails.**
+  - **Result (2026-11-16): PASS on all six.** The samples are in
+    `docs/superpowers/spikes/2026-11-16-kiwix-books-audit/grading.txt`. The settings are in
+    `tools/bookpacks/book_packs.json`.
+
+    | Pack | Items | Readable | Build | Title sources |
+    |---|---|---|---|---|
+    | Military Medicine | 24 | 24/24 (whole pack) | 1 MB fetched | 18 link, 6 PDF Info |
+    | SMBC | 9 | 9/9 (whole pack) | 1.3 MB | 8 heading, 1 override |
+    | Milne Open Textbooks | 15 | 15/15 (whole pack) | 2 MB | 15 page, via one-hop links |
+    | Algorithms | 696 | 30/30 sampled | 0.4 MB | 644 path rules, 49 link, 2 overrides |
+    | Survivor Library | 11,802 | 30/30 sampled | 3.7 MB, 25 s | 11,793 table row, 168 groups |
+    | African Storybook | 5,165 | 30/30 sampled | 2.5 MB | 5,165 page |
+
+    - **African Storybook:** 693 English books (1.1 GB) and 427 Kiswahili (0.7 GB), in levels 1–5. Every book has an
+      author and "CC BY by African Storybook Initiative". Languages were spot-checked on 10 recognisable titles across
+      af, en, sw, pt and zu: 0 wrong.
+    - **Parts:** Military Medicine's Hospital Corpsman and Special Forces Medical Handbook each fold into one `work`
+      with parts 1–3 in order. The pack has no whole-book file for either.
+    - **Milne:** Milne also links 11 files under 200 KB (`minBytes`). Its textbook and lab manual on one page
+      ("X + Lab Manual") are told apart by each one's link ("X", "X · Lab manual").
+  - **What the spike settled for Phase 1:**
+    - Titles need a ranked mix:
+      1. override;
+      2. path rule;
+      3. specific link text;
+      4. the table row or list item around a generic link, tidied (no date-added column or sizes,
+         `Title_With_Underscores_1785` becomes "Title With Underscores (1785)");
+      5. the title of a page serving one file;
+      6. a fallback path rule;
+      7. the PDF Info/XMP title (only the document dictionary, not outline or structure `/Title`s);
+      8. heading plus qualifier;
+      9. the file name.
+    - Generic and boilerplate link texts are filtered: "Download PDF (13MB)", "please click here to start it
+      manually", "Download Page".
+    - A file served by a page of its own is named by the links that lead to that page (one hop back).
+    - Keys keep the query parameters that name a file (`viewcontent.cgi?article=1028`) and drop the ones that change
+      between snapshots (`tmstv`, nonces, `last`).
+    - PDF bytes are read only when the pages give no title, at most `pdfProbeMax` (3,000) per pack. The first
+      Survivor run hit the 1 GB fetch budget before the row-context fix. So `pdfKind` is mostly "unknown" in these
+      manifests: the phone's `PdfOrigin` decides, which Decision 3 makes enough.
+    - **Algorithms is pack-specific work:** 650 of its 696 files are homework, labs and exams, named only by
+      their paths. The path rules in `book_packs.json` turn `hwex/f24/hw/f24-hw2.pdf` into "Fall 2024 · Homework 2".
+      Course files outnumber the book 643 to 53, so the collection screen should fold "Course materials".
 
 ## Phase 1: manifests and upkeep (tools)
 
