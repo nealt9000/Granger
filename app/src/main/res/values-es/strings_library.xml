@@ -15,7 +15,8 @@
         <item quantity="other">%d audiolibros</item>
     </plurals>
     <string name="library_dotted">%1$s · %2$s</string>
-    <string name="library_kiwix_library">Biblioteca de Kiwix</string>
+    <string name="library_from_kiwix">De Kiwix</string>
+    <string name="library_from_kiwix_by">De Kiwix · %1$s</string>
     <string name="library_titles_from_file_names">Títulos tomados de los nombres de archivo</string>
     <string name="library_expanded">Expandido</string>
     <string name="library_collapsed">Contraído</string>
@@ -56,8 +57,9 @@
     <string name="library_sort_recent">Recientes</string>
     <string name="library_remove_from_phone_title">¿Quitar del teléfono?</string>
     <string name="library_remove_book_body">Se eliminará %1$s de este teléfono. Se conservan tu lugar, tus marcadores y tus resaltados.</string>
-    <string name="library_remove_pack_body">Se eliminará %1$s de este teléfono. Puedes volver a descargarlo más tarde.</string>
-    <string name="library_remove_book_pack_body">Se eliminará %1$s de este teléfono. Puedes volver a descargarlo más tarde. Sus libros se van con él; se conservan tus lugares, marcadores y resaltados.</string>
+    <string name="library_remove_pack_body">Se eliminará %1$s de este teléfono, junto con los marcadores y lugares de lectura que guardaste en él. Puedes volver a descargarlo más tarde.</string>
+    <string name="library_remove_book_pack_body">Se eliminará %1$s de este teléfono, con sus libros. Puedes volver a descargarlo más tarde. Se conservan tus lugares, marcadores y resaltados.</string>
+    <string name="library_remove_document_pack_body">Se eliminará %1$s de este teléfono, con sus documentos. Puedes volver a descargarlo más tarde. Se conservan tus lugares, marcadores y resaltados.</string>
     <string name="library_rename_collection">Cambiar nombre de la colección</string>
     <string name="library_collection_name">Nombre de la colección</string>
     <string name="library_delete_collection_title">¿Eliminar la colección?</string>
@@ -72,11 +74,21 @@
         <item quantity="many">Hacer buscables los %1$s libros requiere unos %2$s más, y este teléfono tiene %3$s libres.</item>
         <item quantity="other">Hacer buscables los %1$s libros requiere unos %2$s más, y este teléfono tiene %3$s libres.</item>
     </plurals>
+    <plurals name="library_searchable_no_room_documents">
+        <item quantity="one">Hacer buscable %1$s documento requiere unos %2$s más, y este teléfono tiene %3$s libres.</item>
+        <item quantity="many">Hacer buscables los %1$s documentos requiere unos %2$s más, y este teléfono tiene %3$s libres.</item>
+        <item quantity="other">Hacer buscables los %1$s documentos requiere unos %2$s más, y este teléfono tiene %3$s libres.</item>
+    </plurals>
     <string name="library_make_searchable_title">¿Hacer todos buscables?</string>
     <plurals name="library_make_searchable_body">
         <item quantity="one">Copia fuera del paquete %1$s libro aún sin abrir, para que Buscar pueda leerlo completo. Eso ocupa unos %2$s más (%3$s libres). Se hace en segundo plano; puedes salir de esta pantalla.</item>
         <item quantity="many">Copia fuera del paquete los %1$s libros aún sin abrir, para que Buscar pueda leerlos completos. Eso ocupa unos %2$s más (%3$s libres). Se hace en segundo plano; puedes salir de esta pantalla.</item>
         <item quantity="other">Copia fuera del paquete los %1$s libros aún sin abrir, para que Buscar pueda leerlos completos. Eso ocupa unos %2$s más (%3$s libres). Se hace en segundo plano; puedes salir de esta pantalla.</item>
+    </plurals>
+    <plurals name="library_make_searchable_body_documents">
+        <item quantity="one">Copia fuera del paquete %1$s documento aún sin abrir, para que Buscar pueda leerlo completo. Eso ocupa unos %2$s más (%3$s libres). Se hace en segundo plano; puedes salir de esta pantalla.</item>
+        <item quantity="many">Copia fuera del paquete los %1$s documentos aún sin abrir, para que Buscar pueda leerlos completos. Eso ocupa unos %2$s más (%3$s libres). Se hace en segundo plano; puedes salir de esta pantalla.</item>
+        <item quantity="other">Copia fuera del paquete los %1$s documentos aún sin abrir, para que Buscar pueda leerlos completos. Eso ocupa unos %2$s más (%3$s libres). Se hace en segundo plano; puedes salir de esta pantalla.</item>
     </plurals>
     <string name="library_make_searchable">Hacer buscables</string>
     <string name="library_pack_missing">No se encontró el archivo. Vuelve a insertar la tarjeta SD o descarga el paquete de nuevo.</string>

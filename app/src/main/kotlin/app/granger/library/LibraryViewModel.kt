@@ -15,6 +15,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onStart
+import app.granger.core.library.Filing
+import app.granger.core.library.bookSource
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -37,8 +42,15 @@ data class KindRow(val id: String, val title: app.granger.UiText, val mediaTypeI
     val allCollections: List<CollectionRow> get() = collections.flatMap { it.withChildren }
 }
 
-/** The Library: the books the phone holds, by kind. */
-data class LibraryUi(val kinds: List<KindRow>, val emptyLibrary: Boolean)
+/**
+ * The Library: the books the phone holds, by kind. [manifests] are the Kiwix book packs' manifests by their collection's
+ * default key, for the rows' noun and provider (Plan KB2 Task 4.2).
+ */
+data class LibraryUi(
+    val kinds: List<KindRow>,
+    val emptyLibrary: Boolean,
+    val manifests: Map<String, app.granger.core.library.ManifestCollection> = emptyMap(),
+)
 
 const val BOOKS_KIND = "books"
 
@@ -85,6 +97,9 @@ class LibraryViewModel(
     private val library: Library,
     private val importer: ImportRunner,
     private val appScope: CoroutineScope,
+    /** What a Kiwix book pack's manifest says of its collection; read off the main thread. */
+    private val manifestOf: (app.granger.core.library.Pack) -> app.granger.core.library.ManifestCollection? = ::manifestCollectionOf,
+    private val io: kotlinx.coroutines.CoroutineDispatcher = kotlinx.coroutines.Dispatchers.IO,
 ) : ViewModel() {
     private val _notice = MutableStateFlow<app.granger.UiText?>(null)
 
@@ -104,10 +119,18 @@ class LibraryViewModel(
     }
 
     /** Null until the first load finishes. */
-    val ui: StateFlow<LibraryUi?> = shelves.shelves
+    val ui: StateFlow<LibraryUi?> = kotlinx.coroutines.flow.combine(shelves.shelves, manifests()) { shelves, manifests ->
         // Empty means no books: packs alone fill Browse, and music alone fills Listen.
-        .map { shelves -> libraryKinds(shelves).let { LibraryUi(it, emptyLibrary = it.isEmpty()) } }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+        libraryKinds(shelves).let { LibraryUi(it, emptyLibrary = it.isEmpty(), manifests = manifests) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** The manifests of the Kiwix book packs on the phone, by their collection's default key. */
+    private fun manifests() = library.packs
+        .map { packs -> packs.filter { it.bookSource == app.granger.core.library.BookOrigin.KIWIX } }
+        .distinctUntilChanged()
+        .map { packs -> packs.mapNotNull { pack -> manifestOf(pack)?.let { Filing.defaultKey(pack) to it } }.toMap() }
+        .flowOn(io)
+        .onStart { emit(emptyMap()) }
 
     /** Re-scan pack folders; called whenever the screen resumes (an SD card may have come back). */
     fun refresh() {

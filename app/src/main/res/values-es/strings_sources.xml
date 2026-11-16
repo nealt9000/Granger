@@ -19,7 +19,7 @@
     <string name="sources_link_classics">Clásicos Granger</string>
     <string name="sources_link_classics_sub">Libros electrónicos de dominio público, listos para leer</string>
     <string name="sources_link_gutenberg_sub">Libros de dominio público por tema, en paquetes de Kiwix</string>
-    <string name="sources_link_kiwix_books">Bibliotecas de Kiwix</string>
+    <string name="sources_link_kiwix_books">Libros de Kiwix</string>
     <string name="sources_link_kiwix_books_sub">Guías y manuales: comida, agua, medicina, nudos y más</string>
     <string name="sources_link_archive_books">Libros de Archive.org</string>
     <string name="sources_link_archive_books_sub">Libros sin derechos de autor de Internet Archive</string>
@@ -34,7 +34,7 @@
     <string name="sources_import_own_sub">Libros EPUB, PDF, TXT o Markdown de este teléfono</string>
 
     <string name="sources_scope_models">Modelos</string>
-    <string name="sources_scope_kiwix_books">Bibliotecas de Kiwix</string>
+    <string name="sources_scope_kiwix_books">Libros de Kiwix</string>
 
     <string name="sources_check_updates">Buscar actualizaciones</string>
     <string name="sources_search">Buscar en %1$s</string>
@@ -88,6 +88,9 @@
     <string name="sources_remove_slice_title">¿Quitar %1$s: %2$s?</string>
     <string name="sources_remove_pack_body">Se eliminará el archivo, junto con los marcadores y lugares de lectura que guardaste en él.</string>
     <string name="sources_remove_body">Se eliminará el archivo.</string>
+    <string name="sources_remove_book_body">Se eliminará el archivo. Se conservan tu lugar, tus marcadores y tus resaltados.</string>
+    <string name="sources_remove_book_pack_body">Se eliminarán el paquete y sus libros. Se conservan tus lugares, marcadores y resaltados.</string>
+    <string name="sources_remove_document_pack_body">Se eliminarán el paquete y sus documentos. Se conservan tus lugares, marcadores y resaltados.</string>
     <!-- A preset ("Granger Classics set") is a "conjunto": "paquete" is taken by packs. -->
     <string name="sources_preset_title">Conjunto %1$s</string>
     <string name="sources_get_all">Descargar todo</string>

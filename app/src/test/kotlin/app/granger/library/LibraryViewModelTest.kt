@@ -28,6 +28,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.io.InputStream
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.launch
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -116,7 +117,7 @@ class LibraryViewModelTest {
         )
         val kinds = libraryKinds(listOf(shelf("Literature").copy(collections = listOf(bookRow("Granger Classics", 2), gutenberg))))
         assertThat(kinds.single().collections.map { it.collection.name }).containsExactly("Granger Classics", "Music and books on music").inOrder()
-        assertThat(rowCountText(kinds.single().collections[1]).resolve(ApplicationProvider.getApplicationContext())).isEqualTo("Project Gutenberg · 3 books")
+        assertThat(rowCountText(kinds.single().collections[1]).resolve(ApplicationProvider.getApplicationContext())).isEqualTo("3 books · From Kiwix · Project Gutenberg")
     }
 
     @Test fun aGutenbergRowSaysHowManyAreSearchableInFullOnceAnyAre() {
@@ -128,8 +129,39 @@ class LibraryViewModelTest {
             emptyList(), books = books.toList(),
         )
         assertThat(rowCountText(row(gutenberg(1, true), gutenberg(2, false), gutenberg(3, false))).resolve(ApplicationProvider.getApplicationContext()))
-            .isEqualTo("Project Gutenberg · 3 books · 1 searchable in full")
-        assertThat(rowCountText(row(gutenberg(1, false))).resolve(ApplicationProvider.getApplicationContext())).isEqualTo("Project Gutenberg · 1 book")
+            .isEqualTo("3 books · From Kiwix · Project Gutenberg · 1 searchable in full")
+        assertThat(rowCountText(row(gutenberg(1, false))).resolve(ApplicationProvider.getApplicationContext())).isEqualTo("1 book · From Kiwix · Project Gutenberg")
+    }
+
+    /**
+     * Plan KB2 Task 4.2: a manifest pack's row counts in its manifest's noun (not "documents"), a work once, and says it
+     * comes from Kiwix and who made it; the Library reads each Kiwix book pack's manifest for it.
+     */
+    @Test fun aManifestPacksRowCountsInItsNounAndNamesItsProvider() = runTest(main.dispatcher) {
+        val key = "kiwixbooks-military-medicine_en"
+        fun kiwix(id: String, work: String? = null) = book("book:kiwix:military-medicine_en/$id").copy(
+            origin = app.granger.core.library.BookOrigin.KIWIX, sourceRef = "military-medicine_en/$id.pdf", workKey = work, ord = 0,
+        )
+        val row = CollectionRow(
+            ShelfCollection("c:$key", "Military Medicine", "literature", userCreated = false, defaultKey = key), emptyList(),
+            books = listOf(kiwix("a"), kiwix("hc1", "hc"), kiwix("hc2", "hc"), kiwix("b")),
+        )
+        val manifest = app.granger.core.library.ManifestCollection("Military Medicine", "books", "Federation of American Scientists", emptyList())
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        assertThat(rowCountText(row, manifest).resolve(context)).isEqualTo("3 books · From Kiwix · Federation of American Scientists")
+        // Before its manifest is read, a Kiwix collection counts documents and names no one.
+        assertThat(rowCountText(row).resolve(context)).isEqualTo("4 documents · From Kiwix")
+
+        val mm = pack("u-mm").copy(name = "military-medicine_en", bookManifest = "/sidecars/mm.gbooks")
+        library.packList.value = listOf(mm, pack("u-wiki").copy(name = "wikipedia_en_all"))
+        shelves.shelfList.value = listOf(shelf("Literature").copy(collections = listOf(row)))
+        val vm = LibraryViewModel(
+            shelves, library, ImportRunner(ImportingShelf(), { java.io.ByteArrayInputStream(ByteArray(1)) }, nameOf = { "" }), appScope = this,
+            manifestOf = { if (it.id == "u-mm") manifest else null }, io = main.dispatcher,
+        )
+        backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value!!.manifests).containsExactly(key, manifest)
     }
 
     @Test fun anotherMediaTypeWithBooksComesAfterBooks() {

@@ -54,6 +54,7 @@ import app.granger.audiobooks.AUDIOBOOKS_TYPE_ID
 import app.granger.core.library.CollectionRow
 import app.granger.core.library.Filing
 import app.granger.core.library.GutenbergNames
+import app.granger.core.library.ManifestCollection
 import app.granger.music.MUSIC_TYPE_ID
 import app.granger.sources.GetMoreLink
 
@@ -201,7 +202,7 @@ fun LibraryContent(
             for (kind in loaded.kinds) {
                 kindRows(kind, open = kind.id !in collapsed, onToggle = { open ->
                     collapsed = if (open) collapsed + kind.id else collapsed - kind.id
-                }, onOpenCollection = onOpenCollection)
+                }, onOpenCollection = onOpenCollection, manifests = loaded.manifests)
             }
         }
     }
@@ -222,6 +223,8 @@ internal fun LazyListScope.kindRows(
     onOpenMusic: (collectionId: String?) -> Unit = {},
     /** An Audiobooks collection's shelf, or "All audiobooks" (null). */
     onOpenAudiobooks: (collectionId: String?) -> Unit = {},
+    /** The Kiwix book packs' manifests by collection default key, for their rows' noun and provider (Plan KB2). */
+    manifests: Map<String, ManifestCollection> = emptyMap(),
 ) {
     val id = kind.id
     item(key = "kind:$id") {
@@ -264,7 +267,7 @@ internal fun LazyListScope.kindRows(
                     }
                     .padding(start = 16.dp),
                 headlineContent = { Text(row.collection.shownName().resolve()) },
-                supportingContent = { Text(rowCountText(row).resolve()) },
+                supportingContent = { Text(rowCountText(row, row.collection.defaultKey?.let(manifests::get)).resolve()) },
             )
         }
     }
@@ -279,23 +282,31 @@ private val IMPORT_TYPES = arrayOf(
     "application/epub+zip", "application/pdf", "text/plain", "text/markdown", "text/x-markdown", "application/octet-stream",
 )
 
-/** What a collection row says it holds ("3 packs · 1 book"); a folder's is the total of its children. */
-internal fun rowCountText(row: CollectionRow): UiText {
+/**
+ * What a collection row says it holds ("3 packs · 1 book"); a folder's is the total of its children. A Kiwix book
+ * pack's collection takes its noun and provider from [manifest], its pack's manifest (Plan KB2 Task 4.2); null for any
+ * other collection, or one whose manifest isn't read yet.
+ */
+internal fun rowCountText(row: CollectionRow, manifest: ManifestCollection? = null): UiText {
     val rows = row.withChildren
     val counts = countText(rows.sumOf { it.packs.size }, rows.sumOf { it.books.size }, rows.sumOf { it.albums.size }, rows.sumOf { it.audiobooks.size })
-    // A book pack's collection is called by its subject or pack; the line under it says whose (Plan GB Decision 2, Plan
-    // KB Decision 7), and, as the collection's header does, how many of its books are searchable in full once any are.
+    // A book pack's collection is called by its subject or pack; the line under it says how many it holds and where they
+    // come from (Plan GB Decision 2, Plan KB Decision 7, Plan KB2 Task 4.2), and, as the collection's header does, how
+    // many of its books are searchable in full once any are.
     val key = row.collection.defaultKey
     if (!Filing.isBookPackCollection(key)) return counts
     val searchable = rows.sumOf { r -> r.books.count { it.searchableInFull } }
-    val books = rows.sumOf { it.books.size }
-    val header = GutenbergHeader(pack = null, books = books, searchable = searchable)
-    if (Filing.isKiwixBooksCollection(key)) {
-        // "Kiwix library · 17 documents · 3 searchable in full" (Plan KB Decision 7).
-        val kiwix = header.copy(kind = HeaderKind.KIWIX_LIBRARY)
-        return dotted(listOfNotNull(if (books > 0) kiwix.provenance else kiwix.provider, kiwix.searchableText.takeIf { searchable > 0 }))
+    // A work in parts counts once, as the header counts it.
+    val books = rows.sumOf { r -> if (manifest != null) r.books.distinctBy { it.workKey ?: it.id }.size else r.books.size }
+    val header = GutenbergHeader(pack = null, books = books, searchable = searchable).let {
+        // "17 documents · From Kiwix", "24 books · From Kiwix · Federation of American Scientists".
+        if (Filing.isKiwixBooksCollection(key)) {
+            it.copy(kind = HeaderKind.KIWIX_LIBRARY, providerName = manifest?.provider?.takeIf(String::isNotBlank), documents = manifest?.documents ?: true)
+        } else {
+            it
+        }
     }
-    return dotted(listOfNotNull(header.provider, counts.takeIf { it != EMPTY }, header.searchableText.takeIf { searchable > 0 }))
+    return dotted(listOfNotNull(if (books > 0) header.provenance else header.provider, header.searchableText.takeIf { searchable > 0 }))
 }
 
 private val EMPTY = UiText.Raw("")

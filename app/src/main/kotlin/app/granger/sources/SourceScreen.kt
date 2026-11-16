@@ -123,7 +123,8 @@ fun SourceScreen(
         notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
-    var confirmRemove by remember { mutableStateOf<ItemRow?>(null) }
+    // The row and what its dialog says goes with it (Plan KB2 Task 4.2).
+    var confirmRemove by remember { mutableStateOf<Pair<ItemRow, RemoveKind>?>(null) }
     val list = rememberLazyListState()
     val scope = rememberCoroutineScope()
     /** Show all or Show fewer; folding a section the list has scrolled into brings its heading back. */
@@ -264,7 +265,7 @@ fun SourceScreen(
                     },
                     onCancel = { viewModel.cancel(row.id) },
                     onRetry = { viewModel.retry(row.id) },
-                    onRemove = { confirmRemove = row },
+                    onRemove = { scope.launch { confirmRemove = row to viewModel.removeKind(row.id) } },
                     onOpen = { row.packId?.let(onOpenPack) },
                     onChooseFlavour = viewModel::chooseFlavour,
                     onChooseSlice = { zim -> row.setId?.let { viewModel.chooseSlice(it, zim) } },
@@ -325,7 +326,7 @@ fun SourceScreen(
         )
     }
 
-    confirmRemove?.let { row ->
+    confirmRemove?.let { (row, kind) ->
         AlertDialog(
             onDismissRequest = { confirmRemove = null },
             title = {
@@ -336,7 +337,7 @@ fun SourceScreen(
                 )
             },
             text = {
-                Text(stringResource(if (row.packId != null) R.string.sources_remove_pack_body else R.string.sources_remove_body))
+                Text(stringResource(kind.body))
             },
             confirmButton = {
                 TextButton(onClick = {

@@ -25,8 +25,8 @@
     <string name="sources_link_classics_sub">Public-domain e-books, ready to read</string>
     <string name="sources_link_gutenberg" translatable="false">Project Gutenberg</string>
     <string name="sources_link_gutenberg_sub">Public-domain books by subject, in packs from Kiwix</string>
-    <!-- Kiwix's book packs (nautilus libraries): Food for Preppers, Water, Prunelle. -->
-    <string name="sources_link_kiwix_books">Kiwix libraries</string>
+    <!-- Kiwix's book packs (nautilus and manifest packs): Food for Preppers, Water, Military Medicine (Plan KB2: no "libraries"). -->
+    <string name="sources_link_kiwix_books">Books from Kiwix</string>
     <string name="sources_link_kiwix_books_sub">Guides and handbooks: food, water, medicine, knots and more</string>
     <string name="sources_link_archive_books">Archive.org books</string>
     <string name="sources_link_archive_books_sub">Out-of-copyright books from the Internet Archive</string>
@@ -47,7 +47,7 @@
     <string name="sources_scope_kiwix" translatable="false">Kiwix</string>
     <string name="sources_scope_models">Models</string>
     <string name="sources_scope_gutenberg" translatable="false">Project Gutenberg</string>
-    <string name="sources_scope_kiwix_books">Kiwix libraries</string>
+    <string name="sources_scope_kiwix_books">Books from Kiwix</string>
 
     <!-- A source screen. -->
     <string name="sources_check_updates">Check for updates</string>
@@ -105,8 +105,14 @@
     <string name="sources_remove_title">Remove %1$s?</string>
     <!-- One slice of a set: %1$s is the set (Wikipedia), %2$s the slice (Best 50,000 articles). -->
     <string name="sources_remove_slice_title">Remove %1$s: %2$s?</string>
+    <!-- A web pack: its saved bookmarks and places go with it. -->
     <string name="sources_remove_pack_body">This deletes the file, and the bookmarks and reading places you saved in it.</string>
+    <!-- A model or a voice. -->
     <string name="sources_remove_body">This deletes the file.</string>
+    <!-- A book, and a pack of books or documents: their places and marks stay for a later download (Plan KB2). -->
+    <string name="sources_remove_book_body">This deletes the file. Your place, bookmarks and highlights are kept.</string>
+    <string name="sources_remove_book_pack_body">This deletes the pack and its books. Your places, bookmarks and highlights are kept.</string>
+    <string name="sources_remove_document_pack_body">This deletes the pack and its documents. Your places, bookmarks and highlights are kept.</string>
     <!-- A preset (a ready-made set of downloads); %1$s is its name, such as Granger Classics. -->
     <string name="sources_preset_title">%1$s set</string>
     <string name="sources_get_all">Get all</string>

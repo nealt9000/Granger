@@ -788,6 +788,26 @@ class SourceViewModelTest {
         assertThat(viewModel(CatalogScope.GUTENBERG).ui.value.sections.flatMap { it.rows }.map { it.id }).containsExactly(music.id)
     }
 
+    /**
+     * Plan KB2 Task 4.2: Remove says what goes with the file. A web pack's bookmarks and places go; a book's, and a book
+     * pack's books', are kept; a nautilus pack's are documents; a model or a voice is just its file.
+     */
+    @Test fun removeSaysWhatGoesWithTheFile() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(
+            catalog = catalogOf(listOf(kiwix("med", "Medical"), water, kiwix("rm", "Medical")), books = listOf(bookEntry("emma"))),
+        )
+        library.packList.value = listOf(
+            pack("u-med"),
+            pack("u-zimgit-water_en").copy(name = "zimgit-water_en", scraper = "nautiluszim 1.1.1"),
+        )
+        val vm = viewModel(CatalogScope.KIWIX)
+        assertThat(vm.removeKind("med")).isEqualTo(RemoveKind.WEB_PACK)
+        assertThat(vm.removeKind(water.id)).isEqualTo(RemoveKind.DOCUMENT_PACK)
+        assertThat(vm.removeKind("emma")).isEqualTo(RemoveKind.BOOK)
+        assertThat(vm.removeKind("nothing")).isEqualTo(RemoveKind.FILE)
+        assertThat(RemoveKind.BOOK_PACK.body).isEqualTo(app.granger.R.string.sources_remove_book_pack_body)
+    }
+
     @Test fun foodsDomainViewStillListsWaterAndFoodForPreppers() = runTest(main.dispatcher) {
         val cooking = kiwix("based.cooking_en_all", "How-to", zimName = "based.cooking_en_all").copy(domain = "food")
         val cat = catalogOf(listOf(cooking, water.copy(domain = "food"), prep.copy(domain = "food"), knots.copy(domain = "making"))).copy(

@@ -170,7 +170,7 @@ class CollectionViewModel(
 
     /**
      * A book pack's collection's header (Plan GB Decision 5, Plan KB Decision 7): its pack, when installed, for the
-     * overflow; whose it is ("Project Gutenberg", "Kiwix library"); how many books it lists and how many are searchable
+     * overflow; where it comes from ("From Kiwix · Project Gutenberg"); how many books it lists and how many are searchable
      * in full; and the "Make all searchable…" run, if one is going. Null for any other collection.
      */
     val gutenbergHeader: StateFlow<GutenbergHeader?> = combine(
@@ -301,10 +301,21 @@ class CollectionViewModel(
 fun manifestCollectionOf(pack: Pack): ManifestCollection? = when (val manifest = pack.bookManifest) {
     null -> null
     Pack.BOOK_FILES -> ManifestCollection(pack.title, ManifestCollection.NOUN_DOCUMENTS, "", emptyList(), fromFileNames = true)
-    else -> BookManifest.collection(java.io.File(manifest))
+    else -> BookManifest.collectionOf(manifest)
 }
 
-/** Whose a book pack's collection is: Project Gutenberg's books, or a Kiwix library's documents (Plan KB Decision 7). */
+/**
+ * Whether a book pack's books are counted as documents (Plan KB2 Task 4.2): a nautilus pack's always, a manifest pack's
+ * when its manifest's noun says so (or while it has none yet), a Gutenberg pack's never. Blocking: it may read the
+ * manifest.
+ */
+fun countsDocuments(pack: Pack): Boolean = when (pack.bookSource) {
+    BookOrigin.NAUTILUS -> true
+    BookOrigin.KIWIX -> manifestCollectionOf(pack)?.documents ?: true
+    else -> false
+}
+
+/** Whose a book pack's collection is: Project Gutenberg's books, or a Kiwix pack's books or documents (Plan KB Decision 7). */
 enum class HeaderKind { GUTENBERG, KIWIX_LIBRARY }
 
 /**
@@ -319,24 +330,30 @@ data class GutenbergHeader(
     val kind: HeaderKind = HeaderKind.GUTENBERG,
     /** A pack listed with no manifest (Plan KB2 Task 2.2): its titles are its files' names, and the header says so. */
     val fromFileNames: Boolean = false,
-    /** Who made a Kiwix collection, as its manifest names them ("Federation of American Scientists"); null says "Kiwix library". */
+    /** Who made a Kiwix collection, as its manifest names them ("Federation of American Scientists"); null says "From Kiwix" alone. */
     val providerName: String? = null,
     /** Whether a Kiwix collection counts documents (nautilus packs, and a manifest whose noun says so) rather than books. */
     val documents: Boolean = true,
 ) {
-    /** "Project Gutenberg", "Kiwix library", or the manifest's provider. */
+    /** Whether its books are counted as documents ("17 documents"): a Kiwix collection whose noun says so. */
+    val countsDocuments: Boolean get() = kind == HeaderKind.KIWIX_LIBRARY && documents
+
+    /**
+     * Where it comes from (Plan KB2 Task 4.2, one pattern for every book pack): "From Kiwix · Project Gutenberg",
+     * "From Kiwix · Federation of American Scientists", or "From Kiwix" when the manifest names no one.
+     */
     val provider: UiText get() = when (kind) {
-        HeaderKind.GUTENBERG -> UiText.Raw(app.granger.core.library.GutenbergNames.PROVIDER)
-        HeaderKind.KIWIX_LIBRARY -> providerName?.let { UiText.Raw(it) } ?: UiText.Res(R.string.library_kiwix_library)
+        HeaderKind.GUTENBERG -> UiText.Res(R.string.library_from_kiwix_by, app.granger.core.library.GutenbergNames.PROVIDER)
+        HeaderKind.KIWIX_LIBRARY -> providerName?.let { UiText.Res(R.string.library_from_kiwix_by, it) } ?: UiText.Res(R.string.library_from_kiwix)
     }
 
     /** "1,284 books", "17 documents". */
     val count: UiText get() = UiText.Plural(
-        if (kind == HeaderKind.KIWIX_LIBRARY && documents) R.plurals.library_documents else R.plurals.library_books_counted, books, number(books),
+        if (countsDocuments) R.plurals.library_documents else R.plurals.library_books_counted, books, number(books),
     )
 
-    /** "Project Gutenberg · 1,284 books", "Kiwix library · 17 documents". */
-    val provenance: UiText get() = UiText.Res(R.string.library_dotted, provider, count)
+    /** "1,284 books · From Kiwix · Project Gutenberg", "17 documents · From Kiwix". */
+    val provenance: UiText get() = UiText.Res(R.string.library_dotted, count, provider)
 
     /** "37 searchable in full". */
     val searchableText: UiText get() = UiText.Plural(R.plurals.library_searchable_in_full, searchable, number(searchable))
@@ -344,7 +361,7 @@ data class GutenbergHeader(
     /** "Titles from file names", for a collection listed with no manifest; null otherwise. */
     val fileNamesText: UiText? get() = if (fromFileNames) UiText.Res(R.string.library_titles_from_file_names) else null
 
-    /** "Project Gutenberg · 1,284 books · 37 searchable in full", and "Titles from file names" when it applies. */
+    /** "1,284 books · From Kiwix · Project Gutenberg · 37 searchable in full", and "Titles from file names" when it applies. */
     val text: UiText get() = UiText.Res(R.string.library_dotted, provenance, searchableText)
         .let { line -> fileNamesText?.let { UiText.Res(R.string.library_dotted, line, it) } ?: line }
 

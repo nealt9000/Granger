@@ -446,9 +446,32 @@ now)").
   - Provider line on each row.
   - Keep KiwixList's 10 GB set cap and the preset "N to update" behaviour.
   - Spanish strings (L1 rules).
-- [ ] **Task 4.2: one vocabulary.** No visible "collection" (Explore avoids it): a group of books is its title, plus
+- [x] **Task 4.2: one vocabulary.** No visible "collection" (Explore avoids it): a group of books is its title, plus
   the manifest `noun` count and the provider, in Get more, the header, the Make-searchable dialog and the Remove
   dialogs. Fix `sources_remove_pack_body`, which wrongly says places are deleted.
+  - **Done 2026-11-16** (this commit, worktree kb2ux).
+    - **Pattern (decision):** count first, then where from. Provider line "From Kiwix · <provider>" for every Kiwix book
+      pack (`library_from_kiwix_by`; Gutenberg "From Kiwix · Project Gutenberg", a manifest's provider, else "From
+      Kiwix" alone, `library_from_kiwix`; es "De Kiwix"). Library row "24 books · From Kiwix · Federation of American
+      Scientists"; header two lines (count, then provider). Classics, My books and Archive.org stay a bare count: their
+      title already names the source. "Kiwix library" (`library_kiwix_library`) is gone.
+    - The Library row reads the manifest noun: `LibraryViewModel` reads each KIWIX pack's manifest off the main thread
+      (`LibraryUi.manifests`, by collection key; `BookManifest.collectionOf` caches per file), so Military Medicine says
+      "books", a work counted once. Nautilus and file-name packs say documents.
+    - Get more: "Kiwix libraries" → "Books from Kiwix" (es "Libros de Kiwix").
+    - Make all searchable: documents plurals for a documents collection (`library_make_searchable_body_documents`,
+      `library_searchable_no_room_documents`).
+    - Remove dialogs, by type: Get more's `SourceViewModel.removeKind` → `RemoveKind` (FILE "This deletes the file.",
+      BOOK, WEB_PACK keeps `sources_remove_pack_body`, BOOK_PACK / DOCUMENT_PACK "This deletes the pack and its books.
+      Your places, bookmarks and highlights are kept."). Library: `library_remove_pack_body` (web pack) now says its
+      bookmarks and places go; `library_remove_book_pack_body` / new `library_remove_document_pack_body` end "Your
+      places, bookmarks and highlights are kept."; `archive_remove_text_body` adds bookmarks. Single-book bodies all end
+      "Your place, bookmarks and highlights are kept."
+    - Left: the organising menus ("Move to collection…", "Rename collection", "New collection") keep the word; they
+      name the user's own groups and weren't in scope.
+    - Tests: `SourceViewModelTest.removeSaysWhatGoesWithTheFile`, `LibraryViewModelTest.aManifestPacksRowCountsInItsNounAndNamesItsProvider`,
+      wording updates. ThemeShots `library-gutenberg` adds Military Medicine. `:core:library` 495, `:app` 1816 (120
+      skipped), 0 failures.
 - [ ] **Task 4.3: Open and Remove everywhere.**
   - Open on installed Classics and archive.org texts.
   - Downloads → Open on a book pack opens its collection.

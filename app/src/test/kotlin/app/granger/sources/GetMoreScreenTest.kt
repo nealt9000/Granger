@@ -36,10 +36,10 @@ class GetMoreScreenTest {
         assertThat(GET_MORE_SECTIONS.map { context.getString(it.first.heading) })
             .containsExactly("Knowledge packs", "Books", "Audiobooks & music", "Models & voices").inOrder()
         assertThat(GET_MORE_SECTIONS.flatMap { it.second }).containsExactlyElementsIn(GetMoreLink.entries)
-        // Project Gutenberg is books, after Granger Classics (Plan GB Decision 7); Kiwix libraries after it (Plan KB).
+        // Project Gutenberg is books, after Granger Classics (Plan GB Decision 7); Books from Kiwix after it (Plan KB).
         assertThat(GET_MORE_SECTIONS.single { it.first == GetMoreGroup.BOOKS }.second)
             .containsExactly(GetMoreLink.GRANGER_CLASSICS, GetMoreLink.GUTENBERG, GetMoreLink.KIWIX_BOOKS, GetMoreLink.ARCHIVE_ORG_BOOKS).inOrder()
-        assertThat(GetMoreLink.KIWIX_BOOKS.label).isEqualTo("Kiwix libraries")
+        assertThat(GetMoreLink.KIWIX_BOOKS.label).isEqualTo("Books from Kiwix")
         // Archive.org once per kind, its kind in the name.
         assertThat(GetMoreLink.entries.map { it.label }.filter { it.startsWith("Archive.org") })
             .containsExactly("Archive.org books", "Archive.org audiobooks", "Archive.org music")

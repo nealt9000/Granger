@@ -974,13 +974,23 @@ open class ThemeShots {
             ShelfCollection("c:gutenberg-m", "Music and books on music", "literature", false, defaultKey = "gutenberg-m"), emptyList(),
             books = List(412) { book("g$it") },
         )
+        // A manifest pack (Plan KB2 Task 4.2): its noun and provider from the manifest.
+        val mmKey = "kiwixbooks-zimgit-military-medicine_en"
+        val military = CollectionRow(
+            ShelfCollection("c:$mmKey", "Military Medicine", "literature", false, defaultKey = mmKey), emptyList(),
+            books = List(20) { book("mm$it") },
+        )
+        val mmManifest = app.granger.core.library.ManifestCollection("Military Medicine", "books", "Federation of American Scientists", emptyList())
         GrangerShell(
             rail = RailUi(listOf(owls, blue)), expanded = false, railVisible = true, selected = RailTool.LIBRARY,
             onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {}, onChat = {}, onPlay = {},
             actions = RailEntryActions(onPin = {}, onUnpin = {}, onRemove = {}),
         ) {
             LibraryContent(
-                LibraryUi(libraryKinds(listOf(Shelf(MediaType("literature", "Literature", true, 0), listOf(classics, music, mine)))), false),
+                LibraryUi(
+                    libraryKinds(listOf(Shelf(MediaType("literature", "Literature", true, 0), listOf(classics, military, music, mine)))), false,
+                    manifests = mapOf(mmKey to mmManifest),
+                ),
                 SnackbarHostState(), {}, {}, {}, downloadsBadge = 0, onDownloads = {}, onGetMore = {}, onImport = {},
             )
         }

@@ -389,9 +389,9 @@ class CollectionViewModelTest {
         assertThat(header.pack).isEqualTo(music)
         assertThat(header.books).isEqualTo(3)
         assertThat(header.searchable).isEqualTo(1)
-        assertThat(header.text.en()).isEqualTo("Project Gutenberg · 3 books · 1 searchable in full")
+        assertThat(header.text.en()).isEqualTo("3 books · From Kiwix · Project Gutenberg · 1 searchable in full")
         // The Library's row says the same (Plan GB walkthrough).
-        assertThat(rowCountText(gutenbergRow).en()).isEqualTo("Project Gutenberg · 3 books · 1 searchable in full")
+        assertThat(rowCountText(gutenbergRow).en()).isEqualTo("3 books · From Kiwix · Project Gutenberg · 1 searchable in full")
     }
 
     @Test fun anyOtherCollectionHasNoGutenbergHeader() = runTest(main.dispatcher) {
@@ -464,10 +464,10 @@ class CollectionViewModelTest {
         assertThat(header.pack).isEqualTo(food)
         assertThat(header.books).isEqualTo(3)
         assertThat(header.searchable).isEqualTo(1)
-        assertThat(header.text.en()).isEqualTo("Kiwix library · 3 documents · 1 searchable in full")
-        assertThat(rowCountText(foodRow).en()).isEqualTo("Kiwix library · 3 documents · 1 searchable in full")
+        assertThat(header.text.en()).isEqualTo("3 documents · From Kiwix · 1 searchable in full")
+        assertThat(rowCountText(foodRow).en()).isEqualTo("3 documents · From Kiwix · 1 searchable in full")
         assertThat(rowCountText(foodRow.copy(books = foodRow.books.take(1).map { it.copy(indexedAt = null) })).en())
-            .isEqualTo("Kiwix library · 1 document")
+            .isEqualTo("1 document · From Kiwix")
     }
 
     // --- Plan KB2 Task 2.2: a pure container listed by its files' names ---
@@ -542,7 +542,7 @@ class CollectionViewModelTest {
         assertThat(shown.languages).containsExactly("English", "Spanish").inOrder()
         // The header names the manifest's provider and counts a work once, in its noun.
         val header = vm.gutenbergHeader.value!!
-        assertThat(header.text.en()).isEqualTo("Federation of American Scientists · 63 books · 0 searchable in full")
+        assertThat(header.text.en()).isEqualTo("63 books · From Kiwix · Federation of American Scientists · 0 searchable in full")
 
         vm.toggleWork("hc")
         vm.toggleSection("Orders")

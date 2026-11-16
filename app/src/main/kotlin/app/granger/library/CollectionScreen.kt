@@ -380,10 +380,20 @@ fun CollectionScreen(
             onConfirm = { viewModel.removeBook(d.book) },
             onDismiss = { dialog = null },
         )
-        is CollectionDialog.MakeSearchable -> MakeSearchableDialog(d.cost, onConfirm = viewModel::makeAllSearchable, onDismiss = { dialog = null })
+        is CollectionDialog.MakeSearchable -> MakeSearchableDialog(
+            d.cost, documents = gutenberg?.countsDocuments == true, onConfirm = viewModel::makeAllSearchable, onDismiss = { dialog = null },
+        )
         is CollectionDialog.RemovePack -> ConfirmDialog(
             title = stringResource(R.string.library_remove_from_phone_title),
-            message = stringResource(if (d.pack.isBookPack) R.string.library_remove_book_pack_body else R.string.library_remove_pack_body, d.pack.title),
+            // A web pack's bookmarks and places go with it; a book pack's books keep theirs (Plan KB2 Task 4.2).
+            message = stringResource(
+                when {
+                    !d.pack.isBookPack -> R.string.library_remove_pack_body
+                    gutenberg?.countsDocuments == true -> R.string.library_remove_document_pack_body
+                    else -> R.string.library_remove_book_pack_body
+                },
+                d.pack.title,
+            ),
             confirm = stringResource(R.string.common_remove),
             onConfirm = { viewModel.remove(d.pack) },
             onDismiss = { dialog = null },
@@ -444,16 +454,19 @@ private fun BookMenu(book: Book, open: Boolean, onClose: () -> Unit, onMove: () 
 }
 
 /**
- * The lines under a Gutenberg collection's name: whose it is and what it holds, how much is searchable in full, and a
- * run's progress. Two lines rather than one that wraps mid-phrase at 360 dp; TalkBack reads them as one.
+ * The lines under a book pack collection's name: how many books it holds, where they come from, how much is searchable
+ * in full, and a run's progress. A line each rather than one that wraps mid-phrase at 360 dp; TalkBack reads them as one.
  */
 @Composable
 private fun GutenbergHead(header: GutenbergHeader) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         val all = header.text.resolve()
         Column(Modifier.clearAndSetSemantics { contentDescription = all }) {
-            Text(header.provenance.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(header.searchableText.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            // How many, then where from: one line each, as "24 books · From Kiwix · Federation of American Scientists"
+            // wraps mid-phrase at 360 dp.
+            Text(header.count.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(header.provider.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(header.searchableText.resolve(),style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             header.fileNamesText?.let {
                 Text(it.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -558,9 +571,12 @@ private fun WorkCell(work: SectionRow.Work, onToggle: () -> Unit) {
     }
 }
 
-/** Gives the size first (Plan GB Decision 5); with too little space, says so and offers nothing to run. */
+/**
+ * Gives the size first (Plan GB Decision 5); with too little space, says so and offers nothing to run. A collection of
+ * [documents] says documents, not books (Plan KB2 Task 4.2).
+ */
 @Composable
-private fun MakeSearchableDialog(cost: SearchableCost, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+private fun MakeSearchableDialog(cost: SearchableCost, documents: Boolean, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val size = Formatter.formatShortFileSize(context, cost.bytes)
     val free = Formatter.formatShortFileSize(context, cost.freeBytes)
@@ -569,13 +585,23 @@ private fun MakeSearchableDialog(cost: SearchableCost, onConfirm: () -> Unit, on
         androidx.compose.material3.AlertDialog(
             onDismissRequest = onDismiss,
             title = { Text(stringResource(R.string.library_not_enough_space)) },
-            text = { Text(pluralStringResource(R.plurals.library_searchable_no_room, cost.books, count, size, free)) },
+            text = {
+                Text(
+                    pluralStringResource(
+                        if (documents) R.plurals.library_searchable_no_room_documents else R.plurals.library_searchable_no_room,
+                        cost.books, count, size, free,
+                    ),
+                )
+            },
             confirmButton = { androidx.compose.material3.TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_ok)) } },
         )
     } else {
         ConfirmDialog(
             title = stringResource(R.string.library_make_searchable_title),
-            message = pluralStringResource(R.plurals.library_make_searchable_body, cost.books, count, size, free),
+            message = pluralStringResource(
+                if (documents) R.plurals.library_make_searchable_body_documents else R.plurals.library_make_searchable_body,
+                cost.books, count, size, free,
+            ),
             confirm = stringResource(R.string.library_make_searchable),
             onConfirm = onConfirm,
             onDismiss = onDismiss,

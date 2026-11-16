@@ -18,8 +18,9 @@
     </plurals>
     <!-- Two parts of a line with a dot between, such as "Project Gutenberg · 1,284 books". -->
     <string name="library_dotted">%1$s · %2$s</string>
-    <!-- A Kiwix book pack's collection, whose books are documents (Plan KB). -->
-    <string name="library_kiwix_library">Kiwix library</string>
+    <!-- Where a book pack's books come from, under its name (Plan KB2): "From Kiwix", or "From Kiwix · Project Gutenberg" with %1$s the provider. -->
+    <string name="library_from_kiwix">From Kiwix</string>
+    <string name="library_from_kiwix_by">From Kiwix · %1$s</string>
     <!-- Under a Kiwix collection listed with no book manifest: its titles are only its files' names (Plan KB2). -->
     <string name="library_titles_from_file_names">Titles from file names</string>
     <!-- A folded section or a work's parts, as TalkBack says its state (Plan KB2). -->
@@ -71,8 +72,10 @@
     <!-- %1$s is the book's title. -->
     <string name="library_remove_book_body">%1$s will be deleted from this phone. Your place, bookmarks and highlights are kept.</string>
     <!-- %1$s is the pack's title. -->
-    <string name="library_remove_pack_body">%1$s will be deleted from this phone. You can download it again later.</string>
-    <string name="library_remove_book_pack_body">%1$s will be deleted from this phone. You can download it again later. Its books go with it; your places, bookmarks and highlights are kept.</string>
+    <string name="library_remove_pack_body">%1$s will be deleted from this phone, with the bookmarks and reading places you saved in it. You can download it again later.</string>
+    <!-- A pack of books (Gutenberg, Kiwix): its books go, but their places and marks stay for a reinstall. -->
+    <string name="library_remove_book_pack_body">%1$s will be deleted from this phone, with its books. You can download it again later. Your places, bookmarks and highlights are kept.</string>
+    <string name="library_remove_document_pack_body">%1$s will be deleted from this phone, with its documents. You can download it again later. Your places, bookmarks and highlights are kept.</string>
     <string name="library_rename_collection">Rename collection</string>
     <string name="library_collection_name">Collection name</string>
     <string name="library_delete_collection_title">Delete collection?</string>
@@ -89,10 +92,19 @@
         <item quantity="one">Making %1$s book searchable needs about %2$s more, and this phone has %3$s free.</item>
         <item quantity="other">Making all %1$s books searchable needs about %2$s more, and this phone has %3$s free.</item>
     </plurals>
+    <!-- The same, for a pack whose books are documents (Plan KB2). -->
+    <plurals name="library_searchable_no_room_documents">
+        <item quantity="one">Making %1$s document searchable needs about %2$s more, and this phone has %3$s free.</item>
+        <item quantity="other">Making all %1$s documents searchable needs about %2$s more, and this phone has %3$s free.</item>
+    </plurals>
     <string name="library_make_searchable_title">Make all searchable?</string>
     <plurals name="library_make_searchable_body">
         <item quantity="one">Copies the %1$s book not yet opened out of the pack, so Search can read it in full. That takes about %2$s more (%3$s free). It runs in the background; you can leave this screen.</item>
         <item quantity="other">Copies the %1$s books not yet opened out of the pack, so Search can read them in full. That takes about %2$s more (%3$s free). It runs in the background; you can leave this screen.</item>
+    </plurals>
+    <plurals name="library_make_searchable_body_documents">
+        <item quantity="one">Copies the %1$s document not yet opened out of the pack, so Search can read it in full. That takes about %2$s more (%3$s free). It runs in the background; you can leave this screen.</item>
+        <item quantity="other">Copies the %1$s documents not yet opened out of the pack, so Search can read them in full. That takes about %2$s more (%3$s free). It runs in the background; you can leave this screen.</item>
     </plurals>
     <string name="library_make_searchable">Make searchable</string>
     <string name="library_pack_missing">File not found. Reinsert the SD card or download the pack again.</string>

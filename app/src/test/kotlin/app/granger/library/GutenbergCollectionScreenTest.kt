@@ -80,7 +80,7 @@ class GutenbergCollectionScreenTest {
     @Test fun calledByItsSubjectWithTheProviderAndCountsUnderIt() {
         open()
         compose.onNodeWithText("Music and books on music").assertIsDisplayed()
-        compose.onNodeWithContentDescription("Project Gutenberg · 3 books · 1 searchable in full").assertIsDisplayed()
+        compose.onNodeWithContentDescription("3 books · From Kiwix · Project Gutenberg · 1 searchable in full").assertIsDisplayed()
     }
 
     @Test fun onlyTheIndexedBookCarriesTheFullTextMark() {

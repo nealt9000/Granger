@@ -118,6 +118,16 @@ object BookManifest {
         ).use { c -> if (c.moveToFirst()) c.getString(0) else null }
     }
 
+    /** [collection] of the manifest at [path], kept per file (a verified manifest never changes; a new one has a new path). */
+    fun collectionOf(path: String): ManifestCollection? {
+        collections[path]?.let { return it }
+        val read = collection(File(path)) ?: return null
+        collections[path] = read
+        return read
+    }
+
+    private val collections = ConcurrentHashMap<String, ManifestCollection>()
+
     /** The collection title of [pack]'s manifest, when it has one ([Pack.bookManifest]); kept per file. */
     fun titleOf(pack: Pack): String? {
         val path = pack.bookManifest?.takeIf { it != Pack.BOOK_FILES } ?: return null

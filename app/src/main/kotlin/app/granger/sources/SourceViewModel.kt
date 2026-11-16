@@ -34,6 +34,7 @@ import app.granger.core.library.BookOrigin
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.Library
 import app.granger.core.library.Pack
+import app.granger.core.library.isBookPack
 import app.granger.formatBytes
 import app.granger.library.shelf.sortedByShelfKey
 import kotlinx.coroutines.CoroutineDispatcher
@@ -102,6 +103,19 @@ data class ItemRow(
     /** The pack on Kiwix's online library, for Preview before Get; null for anything Kiwix doesn't host. */
     val previewUrl: String? = null,
 )
+
+/** What a Remove dialog says goes with the file (Plan KB2 Task 4.2). */
+enum class RemoveKind(@StringRes val body: Int) {
+    /** A model or a voice: just the file. */
+    FILE(R.string.sources_remove_body),
+    /** A book: its place, bookmarks and highlights are kept. */
+    BOOK(R.string.sources_remove_book_body),
+    /** A web pack: the bookmarks and places saved in it go too. */
+    WEB_PACK(R.string.sources_remove_pack_body),
+    /** A book pack: its books go, their places, bookmarks and highlights are kept. */
+    BOOK_PACK(R.string.sources_remove_book_pack_body),
+    DOCUMENT_PACK(R.string.sources_remove_document_pack_body),
+}
 
 /**
  * One slice of a set's row: "Best 50,000 articles · 7.0 GB" for the chosen pictures; [note] when it doesn't offer them
@@ -452,6 +466,26 @@ class SourceViewModel(
 
     fun retry(itemId: String) {
         appScope.launch { downloads.retry(itemId) }
+    }
+
+    /**
+     * What Remove deletes besides the file, for its dialog (Plan KB2 Task 4.2): a web pack takes the bookmarks and places
+     * saved in it; a book or a book pack's books keep theirs. Reads a book pack's manifest, so off the main thread.
+     */
+    suspend fun removeKind(itemId: String): RemoveKind = withContext(io) {
+        when (val item = catalog.state.value.catalog?.item(itemId)) {
+            is BookEntry -> RemoveKind.BOOK
+            is PackEntry -> {
+                val packs = library.packs.first()
+                val pack = installedPackId(item, downloads.records.first(), packs)?.let { id -> packs.firstOrNull { it.id == id } }
+                when {
+                    pack?.isBookPack == true -> if (app.granger.library.countsDocuments(pack)) RemoveKind.DOCUMENT_PACK else RemoveKind.BOOK_PACK
+                    pack == null && item.isBookPack -> RemoveKind.BOOK_PACK
+                    else -> RemoveKind.WEB_PACK
+                }
+            }
+            else -> RemoveKind.FILE
+        }
     }
 
     /** Deletes an installed item. For packs the library goes first, so its bookmarks go with it. */
