@@ -20,7 +20,9 @@ for their own packs and are marked featured. `build` writes what it kept and lef
 Packs we build ourselves (tools/pack-builder) are listed with a "release" row in curated.json that names
 their release descriptor; the hosted file's size is checked against it. A "books" row names the descriptor
 of an e-book collection (`pack_builder.py describe-epubs`): every book becomes a catalog entry and the
-collection gets a preset. "@<collection>" in a preset's items expands to that collection's book ids.
+collection gets a preset. "@<collection>" in a preset's items expands to that collection's book ids. A books row may
+also give a `shelf` (stamped on each book) and `levelSets` (a preset per reading level, Plan KB2: African Storybook);
+a book's `description` and `level` come from its descriptor.
 
 Search vectors (Plan R1): a "vectors" setting in curated.json names the folder of `tools/vectors/build.py`'s release
 descriptors and the release URL their files are uploaded under; each descriptor's vectors go on the entries built from
@@ -457,15 +459,51 @@ def book_entries(curated, head=http_head, root=None):
             served = head(url)
             if served != book["sizeBytes"]:
                 raise SystemExit(f"{url} serves {served} bytes; the descriptor says {book['sizeBytes']}")
-        entries.append({
-            "id": book["id"], "title": book["title"], "author": book["author"], "description": "",
+        entry = {
+            "id": book["id"], "title": book["title"], "author": book["author"],
+            "description": book.get("description") or "",
             "category": book["section"], "language": bcp47(book["language"]), "sizeBytes": book["sizeBytes"],
             "sha256": book["sha256"], "urls": book["urls"], "releaseDate": descriptor["releaseDate"],
             "license": curated["license"], "collection": descriptor["collection"],
             "published": book["published"],
             "domain": book.get("domain") or BOOK_DOMAINS.get(book["section"], BOOK_DOMAIN_DEFAULT),
-        })
+        }
+        # Plan KB2 (African Storybook): a reading level and the Books screen's shelf, when the set has them. Old apps
+        # ignore both keys.
+        if book.get("level") is not None:
+            entry["level"] = book["level"]
+        if curated.get("shelf"):
+            entry["shelf"] = curated["shelf"]
+        entries.append(entry)
     return descriptor["collection"], entries
+
+
+def level_presets(name, row, entries):
+    """
+    Plan KB2: a set per reading level beside a collection's all-books preset, when its books row has `levelSets`
+    ({"label": "Level {n}", "i18n": {"es": "Nivel {n}"}}): `<collection>-level-<n>`, titled "<row title>: Level n",
+    with the row's copy in each of its languages ("African Storybook · inglés: Nivel n").
+    """
+    levels = row.get("levelSets")
+    if not levels:
+        return []
+    label, labels = levels.get("label", "Level {n}"), levels.get("i18n") or {}
+    title = row.get("title") or name
+    by_level = {}
+    for e in entries:
+        if e.get("level") is None:
+            raise SystemExit(f"books {name}: {e['id']} has no level, but the row asks for level sets")
+        by_level.setdefault(e["level"], []).append(e["id"])
+    presets = []
+    for n in sorted(by_level):
+        preset = {"id": f"{name}-level-{n}", "title": f"{title}: {label.format(n=n)}", "items": by_level[n],
+                  "level": n, "setOf": name}
+        if row.get("language"):
+            preset["language"] = bcp47(row["language"])
+        i18n = {code: {"title": f"{copy['title']}: {labels.get(code, label).format(n=n)}"}
+                for code, copy in (row.get("i18n") or {}).items() if copy.get("title")}
+        presets.append(with_i18n(preset, check_i18n(f"books {name} level {n}", i18n or None)))
+    return presets
 
 
 # Readiness tier budgets for English, (Efficient, Comprehensive) bytes as tier_sizes counts them ("All"). With pictures by
@@ -585,12 +623,13 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
             report += ["", "Newer snapshots held back:"] + ([h["text"] for h in held] or ["  none"])
     models = curated["models"]
     voices = curated.get("voices", [])       # Plan V1: one zip per voice, hand-written like models
-    books, collections, collection_rows = [], {}, {}
+    books, collections, collection_rows, collection_entries = [], {}, {}, {}
     for row in curated.get("books", []):
         collection, entries = book_entries(row, head)
         books += entries
         collections[collection] = [e["id"] for e in entries]
         collection_rows[collection] = row
+        collection_entries[collection] = entries
     for item in packs + models + voices:
         for key in ("id", "fileName"):
             if key in item and not SAFE_NAME.match(item[key]):
@@ -614,6 +653,7 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
         if row.get("language"):
             preset["language"] = bcp47(row["language"])
         presets.append(with_i18n(preset, check_i18n(f"books {name}", row.get("i18n"))))
+        presets += level_presets(name, row, collection_entries[name])
     vector_lines = []
     if "vectors" in curated:
         v = curated["vectors"]

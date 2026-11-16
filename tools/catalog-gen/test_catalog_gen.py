@@ -311,6 +311,62 @@ def test_collection_token_expands_to_book_ids_in_presets(tmp_path, monkeypatch):
     assert starter["items"] == ["gc-hamlet", "gc-macbeth"]
 
 
+ASB = {"releaseDate": "2026-11-16", "collection": "african-storybook-en", "books": [
+    {"id": f"asb-en-{c * 32}", "title": f"Story {c}", "author": "A. Writer", "translator": None, "published": 2014,
+     "section": f"Level {lvl}", "language": "en", "sizeBytes": 100 + i, "sha256": "cd" * 32,
+     "urls": [f"https://github.com/nealt9000/Granger/releases/download/asb-en-2026-11-16/asb-en-{c * 32}.epub"],
+     "domain": "literature", "description": f"About story {c}.", "level": lvl}
+    for i, (c, lvl) in enumerate([("a", 1), ("b", 2), ("c", 1)])]}
+ASB_ROW = {"bookRelease": "asb.json", "license": "CC BY 4.0, African Storybook Initiative",
+           "title": "African Storybook · English", "language": "en", "shelf": "children",
+           "i18n": {"es": {"title": "African Storybook · inglés"}},
+           "levelSets": {"label": "Level {n}", "i18n": {"es": "Nivel {n}"}}}
+
+
+def asb_build(tmp_path, monkeypatch, row=ASB_ROW, books=ASB):
+    (tmp_path / "asb.json").write_text(json.dumps(books))
+    monkeypatch.setattr(cg, "REPO_ROOT", tmp_path)
+    sizes = {b["urls"][0]: b["sizeBytes"] for b in books["books"]}
+    curated = {"packs": [], "models": [], "books": [row], "presets": []}
+    return cg.build(curated, fake_fetch(ROUTES), head=lambda url: sizes[url])
+
+
+def test_a_book_set_carries_descriptions_levels_and_its_shelf(tmp_path, monkeypatch):
+    catalog = asb_build(tmp_path, monkeypatch)
+    first = catalog["books"][0]
+    assert first["description"] == "About story a." and first["level"] == 1 and first["shelf"] == "children"
+    assert first["category"] == "Level 1" and first["collection"] == "african-storybook-en"
+    assert first["license"] == "CC BY 4.0, African Storybook Initiative" and first["domain"] == "literature"
+
+
+def test_a_book_set_gets_an_all_levels_preset_and_one_per_level_with_spanish_copy(tmp_path, monkeypatch):
+    presets = {p["id"]: p for p in asb_build(tmp_path, monkeypatch)["presets"]}
+    a, b, c = (f"asb-en-{x * 32}" for x in "abc")
+    assert presets["african-storybook-en"] == {"id": "african-storybook-en", "title": "African Storybook · English",
+                                               "items": [a, b, c], "language": "en",
+                                               "i18n": {"es": {"title": "African Storybook · inglés"}}}
+    assert presets["african-storybook-en-level-1"] == {
+        "id": "african-storybook-en-level-1", "title": "African Storybook · English: Level 1", "items": [a, c],
+        "level": 1, "setOf": "african-storybook-en", "language": "en",
+        "i18n": {"es": {"title": "African Storybook · inglés: Nivel 1"}}}
+    assert presets["african-storybook-en-level-2"]["items"] == [b]
+    assert "african-storybook-en-level-3" not in presets
+
+
+def test_level_sets_need_a_level_on_every_book(tmp_path, monkeypatch):
+    books = {**ASB, "books": [{k: v for k, v in ASB["books"][0].items() if k != "level"}]}
+    with pytest.raises(SystemExit, match="has no level"):
+        asb_build(tmp_path, monkeypatch, books=books)
+
+
+def test_a_books_row_without_level_sets_or_levels_stays_as_the_classics_are(tmp_path, monkeypatch):
+    row = {k: v for k, v in ASB_ROW.items() if k not in ("levelSets", "shelf")}
+    books = {**ASB, "books": [{k: v for k, v in b.items() if k not in ("level", "description")} for b in ASB["books"]]}
+    catalog = asb_build(tmp_path, monkeypatch, row=row, books=books)
+    assert [p["id"] for p in catalog["presets"]] == ["african-storybook-en"]
+    assert all("level" not in b and "shelf" not in b and b["description"] == "" for b in catalog["books"])
+
+
 def feed_entry(name, flavour="", language="eng", category="", updated="2026-10-01", title=None):
     return f"""
   <entry>
