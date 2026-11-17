@@ -33,9 +33,8 @@ import app.granger.R
 /** One place to get more from. Archive.org is one row per kind, with its kind in the name (Plan U3b Decision 2). */
 enum class GetMoreLink(@StringRes val title: Int, @StringRes val subtitle: Int) {
     KIWIX(R.string.sources_link_kiwix, R.string.sources_link_kiwix_sub),
-    GRANGER_CLASSICS(R.string.sources_link_classics, R.string.sources_link_classics_sub),
-    GUTENBERG(R.string.sources_link_gutenberg, R.string.sources_link_gutenberg_sub),
-    KIWIX_BOOKS(R.string.sources_link_kiwix_books, R.string.sources_link_kiwix_books_sub),
+    /** Every book source by kind, one screen (Plan KB2 Task 4.1): Granger Classics, Project Gutenberg, Kiwix's book packs. */
+    BOOKS(R.string.sources_link_books, R.string.sources_link_books_sub),
     ARCHIVE_ORG_BOOKS(R.string.sources_link_archive_books, R.string.sources_link_archive_books_sub),
     LIBRIVOX(R.string.sources_link_librivox, R.string.sources_link_librivox_sub),
     ARCHIVE_ORG_AUDIOBOOKS(R.string.sources_link_archive_audiobooks, R.string.sources_link_archive_audiobooks_sub),
@@ -52,13 +51,13 @@ enum class GetMoreGroup(@StringRes val heading: Int) {
 /** Get more's sections, in order. Models stay in Settings too. */
 val GET_MORE_SECTIONS: List<Pair<GetMoreGroup, List<GetMoreLink>>> = listOf(
     GetMoreGroup.KNOWLEDGE to listOf(GetMoreLink.KIWIX),
-    GetMoreGroup.BOOKS to listOf(GetMoreLink.GRANGER_CLASSICS, GetMoreLink.GUTENBERG, GetMoreLink.KIWIX_BOOKS, GetMoreLink.ARCHIVE_ORG_BOOKS),
+    GetMoreGroup.BOOKS to listOf(GetMoreLink.BOOKS, GetMoreLink.ARCHIVE_ORG_BOOKS),
     GetMoreGroup.AUDIO to listOf(GetMoreLink.LIBRIVOX, GetMoreLink.ARCHIVE_ORG_AUDIOBOOKS, GetMoreLink.ARCHIVE_ORG_MUSIC),
     GetMoreGroup.MODELS to listOf(GetMoreLink.MODELS),
 )
 
 /**
- * Whose + opened Get more (Plan KB walkthrough 2): the Library's offers only book sources, and importing your own;
+ * Whose + opened Get more (Plan KB walkthrough 2): the Library's is the Books screen itself (Plan KB2 Task 4.1);
  * Listen's only audiobooks and music. Browse's + opens Kiwix itself. Null is every source (Downloads).
  */
 enum class GetMoreFor(@StringRes val title: Int, val group: GetMoreGroup) {

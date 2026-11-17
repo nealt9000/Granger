@@ -263,7 +263,7 @@ def test_book_release_adds_books_and_preset(tmp_path, monkeypatch):
                       "category": "Drama", "language": "en", "sizeBytes": 10, "sha256": "ab" * 32,
                       "urls": BOOKS["books"][0]["urls"], "releaseDate": "2026-10-17",
                       "license": "Public domain (US)", "collection": "granger-classics", "published": 1603,
-                      "domain": "literature"}
+                      "domain": "literature", "subjects": ["literature"]}
     assert [b["id"] for b in catalog["books"]] == ["gc-hamlet", "gc-macbeth"]
     assert {"id": "granger-classics", "title": "Granger Classics: all books",
             "items": ["gc-hamlet", "gc-macbeth"]} in catalog["presets"]
@@ -309,6 +309,119 @@ def test_collection_token_expands_to_book_ids_in_presets(tmp_path, monkeypatch):
     catalog = cg.build(curated, fake_fetch(ROUTES), head=lambda url: 10 if "hamlet" in url else 11)
     starter = next(p for p in catalog["presets"] if p["id"] == "starter")
     assert starter["items"] == ["gc-hamlet", "gc-macbeth"]
+
+
+ASB = {"releaseDate": "2026-11-16", "collection": "african-storybook-en", "provider": "African Storybook Initiative",
+       "books": [
+    {"id": f"asb-en-{c * 32}", "title": f"Story {c}", "author": "A. Writer", "translator": None, "published": 2014,
+     "section": f"Level {lvl}", "language": "en", "sizeBytes": 100 + i, "sha256": "cd" * 32,
+     "urls": [f"https://github.com/nealt9000/Granger/releases/download/asb-en-2026-11-16/asb-en-{c * 32}.epub"],
+     "domain": "literature", "description": f"About story {c}.", "level": lvl}
+    for i, (c, lvl) in enumerate([("a", 1), ("b", 2), ("c", 1)])]}
+ASB_ROW = {"bookRelease": "asb.json", "license": "CC BY 4.0, African Storybook Initiative",
+           "title": "African Storybook · English", "language": "en", "shelf": "children",
+           "i18n": {"es": {"title": "African Storybook · inglés"}},
+           "levelSets": {"label": "Level {n}", "i18n": {"es": "Nivel {n}"}}}
+
+
+def asb_build(tmp_path, monkeypatch, row=ASB_ROW, books=ASB, key="bookSets"):
+    (tmp_path / "asb.json").write_text(json.dumps(books))
+    monkeypatch.setattr(cg, "REPO_ROOT", tmp_path)
+    sizes = {b["urls"][0]: b["sizeBytes"] for b in books["books"]}
+    curated = {"packs": [], "models": [], key: [row], "presets": []}
+    return cg.build(curated, fake_fetch(ROUTES), head=lambda url: sizes[url])
+
+
+def test_a_book_set_is_its_own_array_and_leaves_books_and_presets_alone(tmp_path, monkeypatch):
+    """Plan KB2 Task 3.2: released apps file every `books` entry into Granger Classics, so a set lives elsewhere."""
+    catalog = asb_build(tmp_path, monkeypatch)
+    assert catalog["books"] == [] and catalog["presets"] == []
+    [book_set] = catalog["bookSets"]
+    assert {k: v for k, v in book_set.items() if k not in ("presets", "books")} == {
+        "id": "african-storybook-en", "title": "African Storybook · English", "language": "en", "shelf": "children",
+        "provider": "African Storybook Initiative", "license": "CC BY 4.0, African Storybook Initiative",
+        "description": "", "i18n": {"es": {"title": "African Storybook · inglés"}}}
+    assert [b["id"] for b in book_set["books"]] == [f"asb-en-{x * 32}" for x in "abc"]
+    assert cg.catalog_urls(catalog) == [b["urls"][0] for b in ASB["books"]]
+
+
+def test_without_book_sets_the_catalog_has_no_book_sets_key(tmp_path, monkeypatch):
+    (tmp_path / "books.json").write_text(json.dumps(BOOKS))
+    monkeypatch.setattr(cg, "REPO_ROOT", tmp_path)
+    sizes = {b["urls"][0]: b["sizeBytes"] for b in BOOKS["books"]}
+    catalog = cg.build({"packs": [], "models": [], "books": [BOOK_ROW], "presets": []}, fake_fetch(ROUTES),
+                       head=lambda url: sizes[url])
+    assert "bookSets" not in catalog
+
+
+def test_a_book_set_carries_descriptions_and_levels(tmp_path, monkeypatch):
+    first = asb_build(tmp_path, monkeypatch)["bookSets"][0]["books"][0]
+    assert first["description"] == "About story a." and first["level"] == 1 and "shelf" not in first
+    assert first["category"] == "Level 1" and first["collection"] == "african-storybook-en"
+    assert first["license"] == "CC BY 4.0, African Storybook Initiative" and first["domain"] == "literature"
+
+
+def test_a_book_set_gets_an_all_levels_preset_and_one_per_level_with_spanish_copy(tmp_path, monkeypatch):
+    presets = {p["id"]: p for p in asb_build(tmp_path, monkeypatch)["bookSets"][0]["presets"]}
+    a, b, c = (f"asb-en-{x * 32}" for x in "abc")
+    assert presets["african-storybook-en"] == {"id": "african-storybook-en", "title": "African Storybook · English",
+                                               "items": [a, b, c], "language": "en",
+                                               "i18n": {"es": {"title": "African Storybook · inglés"}}}
+    assert presets["african-storybook-en-level-1"] == {
+        "id": "african-storybook-en-level-1", "title": "African Storybook · English: Level 1", "items": [a, c],
+        "level": 1, "setOf": "african-storybook-en", "language": "en",
+        "i18n": {"es": {"title": "African Storybook · inglés: Nivel 1"}}}
+    assert presets["african-storybook-en-level-2"]["items"] == [b]
+    assert "african-storybook-en-level-3" not in presets
+
+
+def test_level_sets_need_a_level_on_every_book(tmp_path, monkeypatch):
+    books = {**ASB, "books": [{k: v for k, v in ASB["books"][0].items() if k != "level"}]}
+    with pytest.raises(SystemExit, match="has no level"):
+        asb_build(tmp_path, monkeypatch, books=books)
+
+
+def test_a_book_set_without_level_sets_has_only_its_all_books_preset(tmp_path, monkeypatch):
+    row = {k: v for k, v in ASB_ROW.items() if k != "levelSets"}
+    book_set = asb_build(tmp_path, monkeypatch, row=row)["bookSets"][0]
+    assert [p["id"] for p in book_set["presets"]] == ["african-storybook-en"]
+
+
+def test_book_sets_go_onto_a_built_catalog_in_place_and_leave_the_rest_alone(tmp_path, monkeypatch):
+    """Plan KB2: `booksets` adds the sets without a full `build --previous` (which would move Kiwix packs too)."""
+    built = asb_build(tmp_path, monkeypatch)
+    sizes = {b["urls"][0]: b["sizeBytes"] for b in ASB["books"]}
+    catalog = {"packs": [{"id": "p1"}], "models": [], "books": [{"id": "gc-hamlet"}], "presets": [{"id": "starter"}]}
+    sets = cg.apply_book_sets(catalog, {"bookSets": [ASB_ROW]}, head=lambda url: sizes[url])
+    assert catalog["bookSets"] == sets == built["bookSets"]
+    assert catalog["packs"] == [{"id": "p1"}] and catalog["books"] == [{"id": "gc-hamlet"}]
+    assert cg.apply_book_sets(catalog, {"bookSets": []}) == [] and "bookSets" not in catalog
+
+
+def test_book_sets_in_place_refuse_an_id_the_catalog_already_has(tmp_path, monkeypatch):
+    asb_build(tmp_path, monkeypatch)
+    sizes = {b["urls"][0]: b["sizeBytes"] for b in ASB["books"]}
+    catalog = {"packs": [], "books": [{"id": f"asb-en-{'a' * 32}"}], "presets": []}
+    with pytest.raises(SystemExit, match="duplicate ids"):
+        cg.apply_book_sets(catalog, {"bookSets": [ASB_ROW]}, head=lambda url: sizes[url])
+
+
+def test_a_set_in_books_fails_the_build(tmp_path, monkeypatch):
+    with pytest.raises(SystemExit, match="goes under bookSets"):
+        asb_build(tmp_path, monkeypatch, key="books")
+
+
+def test_a_book_set_needs_its_shelf_and_a_provider(tmp_path, monkeypatch):
+    with pytest.raises(SystemExit, match="missing \\['shelf'\\]"):
+        asb_build(tmp_path, monkeypatch, row={k: v for k, v in ASB_ROW.items() if k != "shelf"})
+    with pytest.raises(SystemExit, match="no provider"):
+        asb_build(tmp_path, monkeypatch, books={k: v for k, v in ASB.items() if k != "provider"})
+
+
+def test_a_set_book_id_may_not_clash_with_another_item(tmp_path, monkeypatch):
+    books = {**ASB, "books": [{**ASB["books"][0], "id": "african-storybook-en-level-1"}]}
+    with pytest.raises(SystemExit, match="duplicate ids"):
+        asb_build(tmp_path, monkeypatch, books=books)
 
 
 def feed_entry(name, flavour="", language="eng", category="", updated="2026-10-01", title=None):
@@ -1649,3 +1762,102 @@ def test_sign_reads_the_default_key_file_and_names_it_when_missing(tmp_path, lin
     key.write_text(RFC_SEED.hex() + "\n")
     cg.main(["sign", str(path)])
     assert cg.verify_file(RFC_PUBLIC, path)
+
+
+def test_book_packs_get_a_shelf_and_other_packs_none():
+    """Plan KB2: manifest packs by name, list-carrying book packs by prefix, nothing else."""
+    shelves = cg.load_shelves()
+    assert cg.shelf_of("irp.fas.org_en_military-medicine", "", shelves) == "manuals"
+    assert cg.shelf_of("gutenberg_en_lcc-pr", "books", shelves) == "literature"
+    assert cg.shelf_of("prunelle_en_interactive-books", "books", shelves) == "children"
+    assert cg.shelf_of("zimgit-water_en", "books", shelves) == "manuals"
+    assert cg.shelf_of("wikipedia_en_all", "", shelves) == ""
+    assert cg.shelf_of("gutenberg_en_lcc-pr", "", shelves) == ""  # a prefix alone doesn't make a book pack
+
+
+def test_book_packs_get_a_provider_and_other_packs_none():
+    """Plan KB2 review: manifest packs by their own `provider`, list-carrying book packs by `providers` prefix."""
+    providers = cg.load_providers()
+    assert cg.provider_of("irp.fas.org_en_military-medicine", "", providers) == "Federation of American Scientists"
+    assert cg.provider_of("gutenberg_en_lcc-pr", "books", providers) == "Project Gutenberg"
+    assert cg.provider_of("zimgit-water_en", "books", providers) == ""  # Kiwix's own: "From Kiwix" alone
+    assert cg.provider_of("usda-2015_en", "books", providers) == "USDA"
+    assert cg.provider_of("prunelle_en_interactive-books", "books", providers) == "Prunelle"
+    assert cg.provider_of("wikipedia_en_all", "", providers) == ""
+    assert cg.provider_of("zimgit-water_en", "", providers) == ""  # a prefix alone doesn't make a book pack
+
+
+def test_stamp_shelves_puts_shelf_and_provider_on_book_packs_and_takes_them_off_the_rest():
+    packs = [{"id": "a", "zimName": "irp.fas.org_en_military-medicine", "content": ""},
+             {"id": "b", "zimName": "prunelle_en_budding-authors", "content": "books", "shelf": "children"},
+             {"id": "c", "zimName": "wikipedia_en_all", "content": "", "shelf": "x", "provider": "y"}]
+    changed = cg.stamp_shelves(packs, cg.load_shelves(), cg.load_providers())
+    assert changed == 3
+    assert (packs[0]["shelf"], packs[0]["provider"]) == ("manuals", "Federation of American Scientists")
+    assert (packs[1]["shelf"], packs[1]["provider"]) == ("children", "Prunelle")
+    assert "shelf" not in packs[2] and "provider" not in packs[2]
+    assert cg.stamp_shelves(packs, cg.load_shelves(), cg.load_providers()) == 0
+
+
+def test_shelves_command_stamps_providers_in_place(tmp_path):
+    path = tmp_path / "catalog.json"
+    path.write_text(json.dumps({"generatedAt": "2026-01-01T00:00:00Z", "packs": [
+        {"id": "usda-2015_en", "zimName": "usda-2015_en", "content": "books"}]}))
+    cg.main(["shelves", str(path)])
+    [pack] = json.loads(path.read_text())["packs"]
+    assert pack["shelf"] == "manuals" and pack["provider"] == "USDA"
+
+
+def test_book_packs_get_explore_subjects_and_other_packs_none():
+    """Plan KB2 Task 4.8: manifest packs by name, Gutenberg by LCC class, list-carrying book packs by prefix."""
+    subjects = cg.load_subjects()
+    of = lambda name, content="books": cg.subjects_of(name, content, subjects)
+    assert of("irp.fas.org_en_military-medicine", "") == ["health"]
+    assert of("survivorlibrary.com_en_all", "") == ["technology", "food", "health"]
+    assert of("gutenberg_en_lcc-b") == ["religion"]
+    assert of("gutenberg_en_lcc-h") == ["society"] and of("gutenberg_en_lcc-hb") == ["business"]
+    assert of("gutenberg_en_lcc-pe") == ["languages", "literature"]
+    assert of("gutenberg_en_lcc-pa") == ["literature", "languages"] and of("gutenberg_en_lcc-pr") == ["literature"]
+    assert of("gutenberg_en_lcc-s") == ["food", "nature"] and of("gutenberg_en_lcc-g") == ["places"]
+    assert of("gutenberg_en_all") == ["literature"] and of("gutenberg_es_all") == ["literature"]
+    assert of("zimgit-knots_en") == ["sports"] and of("zimgit-water_en") == ["food", "health"]
+    assert of("prunelle_en_interactive-books") == ["literature", "languages"]
+    assert of("wikipedia_en_all", "") == [] and of("gutenberg_en_lcc-pr", "") == []
+    assert cg.set_subjects("african-storybook-es", subjects) == ["literature", "languages"]
+
+
+def test_every_configured_subject_is_an_explore_id_and_a_bad_one_fails():
+    for _, value in cg.load_subjects()[1]:
+        assert set(value) <= set(cg.SUBJECT_IDS)
+    with pytest.raises(SystemExit, match="subjects"):
+        cg.check_subjects("x", ["cooking"])
+    with pytest.raises(SystemExit, match="subjects"):
+        cg.check_subjects("x", ["food", "health", "nature", "places"])
+    with pytest.raises(SystemExit, match="subjects"):
+        cg.check_subjects("x", [])
+
+
+def test_book_subjects_come_from_the_section():
+    assert cg.book_subjects("Novels & stories") == ["literature"]
+    assert cg.book_subjects("Scripture & religion") == ["religion"]
+    assert cg.book_subjects("Philosophy") == ["religion"]
+    assert cg.book_subjects("Historia y crónicas") == ["history"]
+    assert cg.book_subjects("Opera libretti") == ["literature", "music"]
+    assert cg.book_subjects("Escritura y religión") == ["religion"]
+    assert cg.book_subjects("Lecturas para aprender") == ["literature"]
+
+
+def test_shelves_command_stamps_subjects_on_packs_books_and_sets(tmp_path):
+    path = tmp_path / "catalog.json"
+    path.write_text(json.dumps({"generatedAt": "2026-01-01T00:00:00Z", "packs": [
+        {"id": "usda-2015_en", "zimName": "usda-2015_en", "content": "books"},
+        {"id": "wikipedia_en_all", "content": "", "subjects": ["history"]}],
+        "books": [{"id": "gc-x", "category": "Drama"}],
+        "bookSets": [{"id": "african-storybook-en", "books": [{"id": "asb-1"}]}]}))
+    cg.main(["shelves", str(path)])
+    catalog = json.loads(path.read_text())
+    assert catalog["packs"][0]["subjects"] == ["food"]
+    assert catalog["packs"][1]["subjects"] == ["history"]  # another tool's tags stay
+    assert catalog["books"][0]["subjects"] == ["literature"]
+    assert catalog["bookSets"][0]["subjects"] == ["literature", "languages"]
+    assert catalog["bookSets"][0]["books"][0]["subjects"] == ["literature", "languages"]

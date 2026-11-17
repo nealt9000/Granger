@@ -72,9 +72,13 @@ interface Bookshelf {
 
     /**
      * Deletes the file, cover and search text; the position and marks are kept. A pack book's row stays while its
-     * pack lists it, to be copied out again when opened. False if the file can't be deleted.
+     * pack lists it, hidden ([Book.hidden], Plan KB2 Task 4.3) until [unhide] or opening it brings it back, and its
+     * rail tabs close. False if the file can't be deleted.
      */
     suspend fun remove(id: String): Boolean
+
+    /** Puts removed pack books ([Book.hidden]) back on the shelves, still to be copied out when opened. */
+    suspend fun unhide(ids: Collection<String>) {}
 
     /**
      * The PDF the ebook [bookId] was made from (Plan IA), as a hidden book to open ([BookOrigin.PAGES]); null when it
@@ -101,13 +105,29 @@ interface Bookshelf {
      * own list of documents ([NautilusDatabase]), the entry's [title], the PDF's own title, the [linkText] tapped in the
      * article or its file name, whichever first reads as a title ([PackDocumentTitle]). Registering it again renames
      * it. Null if the file isn't a readable PDF.
+     *
+     * Its row is keyed by the pack's ZIM name, `book:pack:<name>/<path>` (the UUID for a pack without one), so a new
+     * snapshot of the pack finds the same row, with its place and marks (Plan KB2 Task 2.4).
      */
     suspend fun registerPackDocument(
         zimId: String, path: String, title: String, file: File, linkText: String = "", listedTitle: String = "",
     ): Book?
 
-    /** Removes every pack document of [zimId], with its file and cover (the pack itself is going). */
-    suspend fun removePackDocuments(zimId: String)
+    /**
+     * The pack [zimId] (named [zimName]) is going: its pack documents go too, with their files, covers, places, marks,
+     * tabs and history, unless another installed pack has the same name (a new snapshot), which keeps them.
+     */
+    suspend fun removePackDocuments(zimId: String, zimName: String = "")
+
+    /**
+     * The installed pack id and entry path to copy the pack document [book] out of again; null when no installed pack
+     * can give it. A row's `sourceRef` names its pack by ZIM name or, from before Plan KB2, by UUID.
+     */
+    suspend fun packDocumentSource(book: Book): Pair<String, String>? {
+        if (book.origin != BookOrigin.PACK) return null
+        val path = book.sourceRef.substringAfter('/', "").takeIf { it.isNotEmpty() } ?: return null
+        return book.sourceRef.substringBefore('/') to path
+    }
 
     suspend fun savePosition(bookId: String, locatorJson: String, totalProgression: Double, chapterTitle: String)
     suspend fun position(bookId: String): BookPosition?
@@ -211,8 +231,7 @@ class RoomBookshelf(
     }
 
     /** The PDF [ebook] was made from: `x.pdf` for `x.pdf.epub`; null for an ebook that wasn't. */
-    private fun pagesFile(ebook: File): File? =
-        ebook.takeIf { it.name.endsWith(EBOOK_FROM_PDF, ignoreCase = true) }?.let { File(it.parentFile, it.name.dropLast(".epub".length)) }
+    private fun pagesFile(ebook: File): File? = PdfEbooks.pagesOf(ebook)
 
     override suspend fun originalPages(bookId: String): Book? = withContext(io) {
         val book = dao.get(bookId) ?: return@withContext null
@@ -237,26 +256,28 @@ class RoomBookshelf(
         true
     }
 
-    /** Forgets [bookId]'s original pages' row, cover, place and marks. */
-    private suspend fun dropPages(bookId: String) {
+    /** Forgets [bookId]'s original pages' row, cover and, unless [keepMarks], place and marks. */
+    private suspend fun dropPages(bookId: String, keepMarks: Boolean = false) {
         val id = BookIds.pagesOf(bookId)
         dao.get(id)?.coverPath?.let { File(it).delete() }
         db.withTransaction {
             dao.delete(id)
-            dao.deletePosition(id)
-            dao.deleteMarks(id)
+            dao.deleteChunks(id)
+            if (!keepMarks) {
+                dao.deletePosition(id)
+                dao.deleteMarks(id)
+            }
         }
     }
 
     override suspend fun readAsEbook(bookId: String): PdfToEpub.Report? = withContext(io) {
         val book = dao.get(bookId) ?: return@withContext null
-        if (book.format != BookFormat.PDF || !book.onShelf) return@withContext null
+        // A shelf book's PDF, or a pack document's (Plan KB2 Task 4.4): every text PDF can be read as an ebook.
+        if (book.format != BookFormat.PDF || !(book.onShelf || book.origin == BookOrigin.PACK)) return@withContext null
         val pdf = File(book.filePath).takeIf { it.isFile } ?: return@withContext null
-        val target = File(pdf.parentFile, pdf.name + ".epub")
-        val report = PdfToEpub.convert(pdf, target, book.title, book.author, book.language)
-        if (!report.passes) return@withContext report
-        val meta = (EpubInspector.inspect(target) as? Inspection.Ok)?.meta
-            ?: return@withContext report.copy(passes = false, why = "the ebook didn't open").also { target.delete() }
+        val target = PdfEbooks.ebookOf(pdf)
+        val (report, made) = PdfEbooks.make(pdf, book.title, book.author, book.language)
+        val meta = made ?: return@withContext report
         // The PDF's place, bookmarks and highlights are on its pages: they go with them.
         val pages = BookIds.pagesOf(bookId)
         db.withTransaction {
@@ -361,6 +382,7 @@ class RoomBookshelf(
     }
 
     override suspend fun refresh(): Unit = withContext(io) {
+        adoptPackDocuments()
         forgetRemovedPackDocuments()
         val known = dao.getAll()
         for (book in known) {
@@ -428,10 +450,11 @@ class RoomBookshelf(
         val book = dao.get(id) ?: return@withContext true
         val file = File(book.filePath)
         if (file.exists() && !file.delete()) return@withContext false
-        // An ebook made from a PDF takes its original pages with it.
+        // An ebook made from a PDF takes its original pages with it; a pack book's pages keep their place and marks for
+        // when it's copied out again, as its pack's removal leaves them (Plan KB2 Task 2.5).
         pagesFile(file)?.let { pdf ->
             if (pdf.exists() && !pdf.delete()) return@withContext false
-            dropPages(id)
+            dropPages(id, keepMarks = book.origin.isPackBook)
         }
         // A converted text or comic book's source stays beside it; left alone, the next refresh() would convert it again.
         if (book.origin == BookOrigin.ARCHIVE_ORG && !file.name.endsWith(EBOOK_FROM_PDF, ignoreCase = true)) {
@@ -444,10 +467,23 @@ class RoomBookshelf(
         book.coverPath?.let { File(it).delete() }
         db.withTransaction {
             dao.deleteChunks(id)
-            // A pack book stays listed while its pack is installed: only the copy and its search text go.
-            if (book.origin.isPackBook) dao.upsert(book.copy(coverPath = null, indexedAt = null)) else dao.delete(id)
+            // A pack book stays listed while its pack is installed, hidden (Plan KB2 Task 4.3): only the copy and its
+            // search text go, and its tabs, which would otherwise say "Removed book" on the rail.
+            if (book.origin.isPackBook) {
+                dao.upsert(book.copy(coverPath = null, indexedAt = null, hidden = true))
+                db.sessionDao().deleteTabsForPack(id)
+                db.sessionDao().deleteTabsForPack(BookIds.pagesOf(id))
+            } else {
+                dao.delete(id)
+            }
         }
         true
+    }
+
+    override suspend fun unhide(ids: Collection<String>): Unit = withContext(io) {
+        db.withTransaction {
+            for (id in ids) dao.get(id)?.takeIf { it.hidden }?.let { dao.upsert(it.copy(hidden = false)) }
+        }
     }
 
     override suspend fun registerPackDocument(
@@ -458,22 +494,126 @@ class RoomBookshelf(
             // ("file://C:\WINDOWS\Desktop\…"): the pack's own list of documents first, then them, the link's words
             // and the file name, whichever reads as one.
             val meta = (PdfInspector.inspect(file, "") as? Inspection.Ok)?.meta ?: return@withContext null
-            val ref = "$zimId/$path"
+            val key = packKey(zimId)
+            val ref = "$key/$path"
+            val id = BookIds.of(BookOrigin.PACK, ref)
+            // Read before Plan KB2, under the pack's UUID: this row takes it over.
+            if (key != zimId) dao.get(BookIds.of(BookOrigin.PACK, "$zimId/$path"))?.let { rekey(it, ref) }
+            val before = dao.get(id)
+            // Read as an ebook (Plan KB2 Task 4.4): it stays one, made again from this copy when the copy is new.
+            // `pages`: the PDF its ebook was made from, when it is one.
+            val pages = before?.takeIf { it.format == BookFormat.EPUB }?.let { PdfEbooks.pagesOf(File(it.filePath)) }
+            if (before != null && pages != null) packEbookAgain(before, ref, file)?.let { return@withContext it }
             val details = BookDetails(PackDocumentTitle.choose(title, meta.title, linkText, path, listedTitle), "", "", emptyList(), "", "")
-            register(BookIds.of(BookOrigin.PACK, ref), BookOrigin.PACK, ref, file, meta, details, BookFormat.PDF)
+            if (before != null && pages != null) {
+                // It couldn't be made again: the PDF is the book once more, with the place and marks its pages had.
+                val pagesId = BookIds.pagesOf(id)
+                db.withTransaction {
+                    if (dao.position(pagesId) != null) dao.movePosition(pagesId, id)
+                    dao.moveMarks(pagesId, id)
+                    dao.deleteChunks(id)
+                }
+                dropPages(id, keepMarks = true)
+                pages.takeIf { it.absoluteFile != file.absoluteFile }?.delete()
+            }
+            val book = register(id, BookOrigin.PACK, ref, file, meta, details, BookFormat.PDF)
+            // Opened again from a new snapshot, it was copied out beside that pack: the earlier copy is stale.
+            if (before != null && before.filePath != book.filePath) File(before.filePath).delete()
+            book
         }
 
     /**
-     * A pack document can't come back without its pack, so unlike a removed book it leaves nothing behind: no tab on
-     * the rail or card in Continue saying "Removed book", no History row, place, bookmarks or index text.
+     * A pack document read as an ebook ([readAsEbook], Plan KB2 Task 4.4), copied out again as [pdf]: the same copy keeps
+     * its ebook; a new one (a new snapshot, or storage cleared) is made an ebook again, the old copy and ebook deleted.
+     * Its original pages' row follows the PDF, keeping their place and marks (same id). Null when the ebook can't be made.
      */
-    override suspend fun removePackDocuments(zimId: String): Unit = withContext(io) {
-        val prefix = "$zimId/"
+    private suspend fun packEbookAgain(before: Book, ref: String, pdf: File): Book? {
+        val ebook = File(before.filePath)
+        val oldPdf = PdfEbooks.pagesOf(ebook)
+        if (oldPdf?.absoluteFile == pdf.absoluteFile && ebook.isFile) {
+            val kept = before.copy(sourceRef = ref)
+            if (kept != before) dao.upsert(kept)
+            originalPages(before.id)
+            return kept
+        }
+        val meta = try {
+            PdfEbooks.make(pdf, before.title, before.author, before.language).second
+        } catch (_: OutOfMemoryError) {
+            PdfEbooks.ebookOf(pdf).delete()
+            null
+        } ?: return null
+        val details = BookDetails(before.title, before.author, before.date, before.subjects.split("; ").filter { it.isNotBlank() }, before.description, before.language)
+        val book = register(before.id, BookOrigin.PACK, ref, PdfEbooks.ebookOf(pdf), meta, details)
+        if (ebook.absoluteFile != File(book.filePath).absoluteFile) {
+            ebook.delete()
+            oldPdf?.takeIf { it.absoluteFile != pdf.absoluteFile }?.delete()
+        }
+        originalPages(before.id)
+        return book
+    }
+
+    /** The key a pack document's row is filed under: its pack's ZIM name, or its UUID when it has none (or isn't here). */
+    private fun packKey(zimId: String): String = db.packDao().get(zimId)?.name?.takeIf { it.isNotBlank() } ?: zimId
+
+    /**
+     * Files the pack document [old] under [ref] (`<name>/<path>`): the row keyed by it takes [old]'s place, marks, tabs
+     * and history (Plan KB Decision 5's hand-over); when there is none yet, [old] becomes it, copy and cover kept.
+     */
+    private suspend fun rekey(old: Book, ref: String) {
+        val id = BookIds.of(BookOrigin.PACK, ref)
+        if (id == old.id) return
+        val existing = dao.get(id)
+        db.withTransaction {
+            if (existing == null) dao.upsert(old.copy(id = id, sourceRef = ref))
+            handOverBook(db, old.id, id)
+        }
+        if (existing != null) {
+            if (existing.filePath != old.filePath) File(old.filePath).delete()
+            old.coverPath?.takeIf { it != existing.coverPath }?.let { File(it).delete() }
+        }
+    }
+
+    /** Pack documents still keyed by an installed pack's UUID (read before Plan KB2) are filed under its name. */
+    private suspend fun adoptPackDocuments() {
+        for (book in dao.byOrigin(BookOrigin.PACK)) {
+            val key = book.sourceRef.substringBefore('/')
+            val name = packKey(key)
+            if (name != key) rekey(book, "$name/${book.sourceRef.substringAfter('/', "")}")
+        }
+    }
+
+    override suspend fun packDocumentSource(book: Book): Pair<String, String>? = withContext(io) {
+        if (book.origin != BookOrigin.PACK) return@withContext null
+        val key = book.sourceRef.substringBefore('/')
+        val path = book.sourceRef.substringAfter('/', "").takeIf { it.isNotEmpty() } ?: return@withContext null
+        val pack = db.packDao().getAll()
+            .filter { it.status == PackStatus.OK && (it.id == key || it.name == key) }
+            .maxByOrNull { if (it.id == key) Long.MAX_VALUE else it.addedAt } ?: return@withContext null
+        pack.id to path
+    }
+
+    /**
+     * A pack document can't come back without its pack, so unlike a removed book it leaves nothing behind: no tab on
+     * the rail or card in Continue saying "Removed book", no History row, place, bookmarks or index text. A new snapshot
+     * of the pack (another installed pack of the same [zimName]) keeps them, and rows still keyed by [zimId] are filed
+     * under the name.
+     */
+    override suspend fun removePackDocuments(zimId: String, zimName: String): Unit = withContext(io) {
+        val continues = zimName.isNotBlank() && db.packDao().getAll().any { it.id != zimId && it.name == zimName }
         val sessions = db.sessionDao()
-        for (book in dao.getAll()) {
-            if (book.origin != BookOrigin.PACK || !book.sourceRef.startsWith(prefix)) continue
+        for (book in dao.byOrigin(BookOrigin.PACK)) {
+            val key = book.sourceRef.substringBefore('/')
+            if (key != zimId && (zimName.isBlank() || key != zimName)) continue
+            if (continues) {
+                if (key == zimId) rekey(book, "$zimName/${book.sourceRef.substringAfter('/', "")}")
+                continue
+            }
             File(book.filePath).delete()
             book.coverPath?.let { File(it).delete() }
+            // Read as an ebook (Plan KB2 Task 4.4): its PDF, the original pages, goes too.
+            PdfEbooks.pagesOf(File(book.filePath))?.delete()
+            dropPages(book.id)
+            sessions.deleteTabsForPack(BookIds.pagesOf(book.id))
             db.withTransaction {
                 sessions.deleteTabsForPack(book.id)
                 sessions.deleteHistoryForPack(book.id)
@@ -629,6 +769,26 @@ class RoomBookshelf(
         fun sha1(text: String): String = MessageDigest.getInstance("SHA-1").digest(text.toByteArray()).toHex()
 
         private fun ByteArray.toHex() = joinToString("") { "%02x".format(it) }
+    }
+}
+
+/**
+ * Hands book [from]'s place (unless [to] has one), bookmarks, highlights, reading tabs and history to book [to], and
+ * removes [from]'s row (Plan KB Decision 5, Plan KB2 Task 2.4). Its files are the caller's.
+ */
+internal suspend fun handOverBook(db: LibraryDatabase, from: String, to: String) {
+    val dao = db.bookDao()
+    val sessions = db.sessionDao()
+    db.withTransaction {
+        val position = dao.position(from)
+        if (position != null && dao.position(to) == null) dao.upsertPosition(position.copy(bookId = to))
+        dao.deletePosition(from)
+        dao.moveMarks(from, to)
+        sessions.moveTabsToPack(from, to)
+        sessions.moveHistoryToPack(from, to)
+        sessions.deleteHistoryForPack(from)
+        dao.deleteChunks(from)
+        dao.delete(from)
     }
 }
 

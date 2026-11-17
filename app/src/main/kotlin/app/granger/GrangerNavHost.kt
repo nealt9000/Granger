@@ -319,7 +319,7 @@ fun NavController.dropClosedReaders(keptTabIds: Set<Long>) {
  * [domain] filters the Kiwix list to a readiness domain (Plan H1); [family] is one folded family's A–Z list (Plan KB
  * Decision 10); null for both is the whole catalog.
  */
-@Serializable data class SourceRoute(val scope: CatalogScope, val domain: String? = null, val family: String? = null)
+@Serializable data class SourceRoute(val scope: CatalogScope, val domain: String? = null, val family: String? = null, val set: String? = null)
 /** [kind] picks the view: texts (Books), spoken word (Audiobooks) or music. */
 @Serializable data class ArchiveRoute(val kind: ArchiveKind = ArchiveKind.TEXTS)
 /** The LibriVox source: Recently added, six genres and search (Plan M2). */
@@ -346,9 +346,7 @@ fun NavController.importIntoLibrary() {
 /** Where each Get more row goes: today's source screens. */
 internal fun routeOf(link: GetMoreLink): Any = when (link) {
     GetMoreLink.KIWIX -> SourceRoute(CatalogScope.KIWIX)
-    GetMoreLink.GRANGER_CLASSICS -> SourceRoute(CatalogScope.GRANGER)
-    GetMoreLink.GUTENBERG -> SourceRoute(CatalogScope.GUTENBERG)
-    GetMoreLink.KIWIX_BOOKS -> SourceRoute(CatalogScope.KIWIX_BOOKS)
+    GetMoreLink.BOOKS -> GetMoreRoute(GetMoreFor.BOOKS)
     GetMoreLink.ARCHIVE_ORG_BOOKS -> ArchiveRoute(ArchiveKind.TEXTS)
     GetMoreLink.LIBRIVOX -> LibriVoxRoute
     GetMoreLink.ARCHIVE_ORG_AUDIOBOOKS -> ArchiveRoute(ArchiveKind.SPOKEN_WORD)
@@ -410,7 +408,7 @@ internal fun railToolOf(
         CatalogScope.KIWIX -> RailTool.BROWSE
         else -> RailTool.LIBRARY
     }
-    destination.hasRoute<BrowseRoute>() || destination.hasRoute<ReaderRoute>() ||
+    destination.hasRoute<BrowseRoute>() || destination.hasRoute<ReaderRoute>() || destination.hasRoute<PackFilesRoute>() ||
         destination.hasRoute<ExploreRoute>() || destination.hasRoute<SubjectRoute>() || destination.hasRoute<SubjectGamesRoute>() -> RailTool.BROWSE
     destination.hasRoute<BookRoute>() -> RailTool.LIBRARY
     destination.hasRoute<GetMoreRoute>() && getMoreFor == GetMoreFor.LISTEN -> RailTool.LISTEN
@@ -427,6 +425,8 @@ internal fun railToolOf(
 
 /** Browse's home (Plan U3c Decision 1): the packs and the maps, each a row opening its main page. The tool's landing. */
 @Serializable object BrowseRoute
+/** Files in this pack (Plan KB2 Task 4.6): a website pack's PDFs and EPUBs. */
+@Serializable data class PackFilesRoute(val packId: String)
 
 /** Explore (Plan EX, with [Features.EXPLORE]): the rail's Browse tool lands here; Your sources leads on to [BrowseRoute]. */
 @Serializable object ExploreRoute
@@ -1077,6 +1077,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 onImported = { container.appScope.launch { container.prepareBooks() } },
                             ),
                             container.appScope,
+                            catalog = container.catalog,
                         )
                     },
                     notice = backStackEntry.toRoute<LibraryRoute>().noticeText(),
@@ -1145,8 +1146,18 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         onGetPacks = { domain -> nav.navigate(SourceRoute(CatalogScope.KIWIX, domain)) },
                         onDownloads = { nav.navigate(DownloadsRoute) { launchSingleTop = true } },
                         onReadiness = { nav.navigate(ReadinessRoute) },
+                        onFiles = { packId -> nav.navigate(PackFilesRoute(packId)) },
                     ),
                     importPack = { uri -> container.packImports.add(uri).text() },
+                )
+            }
+            composable<PackFilesRoute> { backStackEntry ->
+                val packId = backStackEntry.toRoute<PackFilesRoute>().packId
+                app.granger.browse.PackFilesScreen(
+                    viewModel { app.granger.browse.PackFilesViewModel(packId, container.library) },
+                    onBack = { nav.popBackStack() },
+                    // Opened as a pack document (Plan P2's path), as a link to it in the pack would be.
+                    onOpen = { path, title -> scope.launch { openPackDocument(packId, path, title) } },
                 )
             }
             composable<CollectionRoute> { backStackEntry ->
@@ -1158,6 +1169,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             container.bookshelf, container.downloads, container.appScope, container.archiveSidecarDir,
                             container.catalog, createSavedStateHandle(), container.libraryViews,
                             gutenberg = container.gutenbergShelf,
+                            levelName = { appContext.getString(R.string.sources_level, it) },
                         )
                     },
                     onOpened = ::showTab,
@@ -1421,7 +1433,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             source, container.catalog, container.downloads, container.library, container.bookshelf, container.volumes,
                             container.downloadPrefs, container.deviceTier, container.appScope, askOn = container.askOn, meaningSearch = container.meaningSearch, domain = route.domain,
                             family = route.family, knowledge = container.knowledgeLanguages.languages,
-                            voiceTitles = app.granger.core.speech.VoiceTitles.of(appContext),
+                            voiceTitles = app.granger.core.speech.VoiceTitles.of(appContext), bookSet = route.set,
                         )
                     },
                     title = stringResource(source.title),
@@ -1429,6 +1441,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     // An installed book pack opens as its books, in the Library (Plan GB, Plan KB Decision 6), from any list.
                     onOpenPack = ::openPackOrCollection,
                     onOpenFamily = { family -> nav.navigate(SourceRoute(source, family = family)) },
+                    // An installed book opens in the reader (Plan KB2 Task 4.3).
+                    onOpenBook = { bookId, title -> scope.launch { showTab(container.sessions.openTab(bookId, "", title)) } },
                 )
             }
             composable<ArchiveRoute> { backStackEntry ->
@@ -1445,6 +1459,14 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onBack = { nav.popBackStack() },
                     onOpenLibriVox = { nav.openLibriVox() },
                     onOpenInLibrary = { identifier -> nav.navigate(inLibraryRoute(kind, identifier)) },
+                    // An installed text opens as a book, a set as its collection (Plan KB2 Task 4.3).
+                    onOpenText = { target ->
+                        when (target) {
+                            is app.granger.archive.ArchiveOpen.Book ->
+                                scope.launch { showTab(container.sessions.openTab(target.bookId, "", target.title)) }
+                            is app.granger.archive.ArchiveOpen.Collection -> nav.navigate(CollectionRoute(target.collectionId))
+                        }
+                    },
                 )
             }
             composable<LibriVoxRoute> {
@@ -1686,12 +1708,33 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     onBack = { nav.popBackStack() },
                     onOpened = ::showTab,
-                    onOpenPack = ::openPack,
+                    // A book pack opens as its books, as Get more's Open does (Plan KB2 Task 4.3).
+                    onOpenPack = ::openPackOrCollection,
                     onGetMore = { nav.navigate(GetMoreRoute()) { launchSingleTop = true } },
                 )
             }
             composable<GetMoreRoute> { backStackEntry ->
                 val only = backStackEntry.toRoute<GetMoreRoute>().only
+                // The Library's + is Books by kind itself (Plan KB2 Task 4.1).
+                if (only == GetMoreFor.BOOKS) {
+                    app.granger.sources.BooksScreen(
+                        viewModel = viewModel {
+                            SourceViewModel(
+                                CatalogScope.BOOKS, container.catalog, container.downloads, container.library, container.bookshelf, container.volumes,
+                                container.downloadPrefs, container.deviceTier, container.appScope, askOn = container.askOn, meaningSearch = container.meaningSearch,
+                                knowledge = container.knowledgeLanguages.languages,
+                            )
+                        },
+                        onBack = { nav.popBackStack() },
+                        onOpenScope = { s -> nav.navigate(SourceRoute(s)) },
+                        onOpenPack = ::openPackOrCollection,
+                        onOpenBook = { bookId, title -> scope.launch { showTab(container.sessions.openTab(bookId, "", title)) } },
+                        onArchive = { nav.navigate(ArchiveRoute(ArchiveKind.TEXTS)) },
+                        onImport = if (Features.IMPORT) nav::importIntoLibrary else null,
+                        onOpenSet = { id -> nav.navigate(SourceRoute(CatalogScope.BOOK_SET, set = id)) },
+                    )
+                    return@composable
+                }
                 GetMoreScreen(
                     onOpen = nav::openGetMore,
                     onBack = { nav.popBackStack() },

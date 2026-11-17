@@ -11,6 +11,9 @@ import app.granger.FakePrefs
 import app.granger.FakeVolumes
 import app.granger.MainDispatcherRule
 import app.granger.catalogOf
+import app.granger.asbSet
+import app.granger.core.library.BookIds
+import app.granger.core.library.BookOrigin
 import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.CatalogError
 import app.granger.core.catalog.CatalogState
@@ -579,6 +582,13 @@ class SourceViewModelTest {
         vm.setTab(SourceTab.INSTALLED)
         testScheduler.advanceUntilIdle()
         assertThat(vm.rowIds()).containsExactly("emma")
+        // Plan KB2 Task 4.3: an installed book opens, as an installed pack does.
+        val emma = vm.ui.value.sections.flatMap { it.rows }.single()
+        assertThat(emma.bookId).isEqualTo("book:granger:emma")
+        assertThat(emma.opens).isTrue()
+        vm.setTab(SourceTab.BROWSE)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.flatMap { it.rows }.single { it.id == "hamlet" }.bookId).isNull()
     }
 
     @Test fun presetSkipsInstalledAndActiveItems() = runTest(main.dispatcher) {
@@ -786,6 +796,26 @@ class SourceViewModelTest {
         assertThat(libraries.categories).isEmpty()
         // Gutenberg keeps its own screen.
         assertThat(viewModel(CatalogScope.GUTENBERG).ui.value.sections.flatMap { it.rows }.map { it.id }).containsExactly(music.id)
+    }
+
+    /**
+     * Plan KB2 Task 4.2: Remove says what goes with the file. A web pack's bookmarks and places go; a book's, and a book
+     * pack's books', are kept; a nautilus pack's are documents; a model or a voice is just its file.
+     */
+    @Test fun removeSaysWhatGoesWithTheFile() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(
+            catalog = catalogOf(listOf(kiwix("med", "Medical"), water, kiwix("rm", "Medical")), books = listOf(bookEntry("emma"))),
+        )
+        library.packList.value = listOf(
+            pack("u-med"),
+            pack("u-zimgit-water_en").copy(name = "zimgit-water_en", scraper = "nautiluszim 1.1.1"),
+        )
+        val vm = viewModel(CatalogScope.KIWIX)
+        assertThat(vm.removeKind("med")).isEqualTo(RemoveKind.WEB_PACK)
+        assertThat(vm.removeKind(water.id)).isEqualTo(RemoveKind.DOCUMENT_PACK)
+        assertThat(vm.removeKind("emma")).isEqualTo(RemoveKind.BOOK)
+        assertThat(vm.removeKind("nothing")).isEqualTo(RemoveKind.FILE)
+        assertThat(RemoveKind.BOOK_PACK.body).isEqualTo(app.granger.R.string.sources_remove_book_pack_body)
     }
 
     @Test fun foodsDomainViewStillListsWaterAndFoodForPreppers() = runTest(main.dispatcher) {
@@ -1060,8 +1090,13 @@ class SourceViewModelTest {
         val published = publishedCatalog()
         catalog.mutable.value = CatalogState(catalog = published)
         val nautilus = published.packs.filter { it.isBookPack && !isGutenberg(it) }.map { it.id }
-        assertThat(nautilus).hasSize(9)
+        // 9 nautilus packs, and Plan KB2's 5 manifest packs (content blank, a gbooks sidecar).
+        assertThat(nautilus).hasSize(14)
         assertThat(nautilus.filter { it.startsWith("prunelle_") }).hasSize(3)
+        assertThat(published.packs.filter { id -> id.id in nautilus && id.sidecars.any { it.kind == "gbooks" } }.map { it.zimName }).containsExactly(
+            "irp.fas.org_en_military-medicine", "smbc-comics.com_en_all", "jeffe.cs.illinois.edu_en_all",
+            "milneopentextbooks.org_en_all", "survivorlibrary.com_en_all",
+        )
 
         val libraries = viewModel(CatalogScope.KIWIX_BOOKS).ui.value
         assertThat(libraries.sections.map { it.title }).containsExactly(SourceViewModel.LIBRARIES)
@@ -1079,18 +1114,144 @@ class SourceViewModelTest {
     }
 
     /**
-     * Plan KB walkthrough 2: every book source the Library's + offers that lists the catalog (Granger Classics, Project
-     * Gutenberg, Kiwix libraries) lists something from the published catalog; archive.org books searches the network.
+     * Plan KB2 Task 4.1: the Library's + is Books by kind over the published catalog: Literature (Granger Classics' set,
+     * Project Gutenberg folded to one row, SMBC), Children's books, Manuals & references, Learning; each Kiwix book pack
+     * its own row, its meta line its size and "From Kiwix · <provider>".
      */
-    @Test fun everyBookSourceOfTheLibrarysGetMoreListsThePublishedCatalog() = runTest(main.dispatcher) {
-        catalog.mutable.value = CatalogState(catalog = publishedCatalog())
-        val scopes = getMoreSections(GetMoreFor.BOOKS).flatMap { it.second }
-            .mapNotNull { (app.granger.routeOf(it) as? app.granger.SourceRoute)?.scope }
-        assertThat(scopes).containsExactly(CatalogScope.GRANGER, CatalogScope.GUTENBERG, CatalogScope.KIWIX_BOOKS).inOrder()
-        for (scope in scopes) {
-            val ui = viewModel(scope).ui.value
-            assertWithMessage(context.getString(scope.title)).that(ui.sections.flatMap { it.rows }).isNotEmpty()
-        }
+    @Test fun theBooksScreenShelvesEveryBookSourceByKind() = runTest(main.dispatcher) {
+        val published = publishedCatalog()
+        catalog.mutable.value = CatalogState(catalog = published)
+        val ui = viewModel(CatalogScope.BOOKS).ui.value
+        assertThat(ui.sections.map { it.title }).containsExactly("literature", "children", "manuals", "learning").inOrder()
+        assertThat(ui.sections.map { it.heading.en() })
+            .containsExactly("Literature", "Children's books", "Manuals & references", "Learning").inOrder()
+        // Granger Classics' set leads Literature (the screen puts the presets there); Clásicos waits for All languages.
+        assertThat(ui.presets.map { BookShelves.presetName(it) }).containsExactly("Granger Classics")
+        assertThat(BookShelves.presetMeta(ui.presets.single()).en()).startsWith("437 books · ")
+        val literature = ui.sections.first().rows
+        val gutenberg = literature.first()
+        assertThat(gutenberg.title).isEqualTo("Project Gutenberg")
+        assertThat(gutenberg.opensScope).isEqualTo(CatalogScope.GUTENBERG)
+        assertThat(gutenberg.meta.en()).isEqualTo("39 subjects · From Kiwix")
+        assertThat(literature.drop(1).map { it.id }).containsExactly("smbc-comics.com_en_all")
+        // No Gutenberg pack is its own row anywhere.
+        assertThat(ui.sections.flatMap { it.rows }.map { it.id }.filter { it.startsWith("gutenberg_") }).isEmpty()
+        val manuals = ui.sections.single { it.title == "manuals" }.rows
+        val military = manuals.single { it.id == "irp.fas.org_en_military-medicine" }
+        assertThat(military.meta.en()).endsWith(" · From Kiwix · Federation of American Scientists")
+        assertThat(manuals.single { it.id == "zimgit-knots_en" }.meta.en()).endsWith(" · From Kiwix")
+        // The published catalog's African Storybook set (English; Kiswahili is behind All languages) leads, then Prunelle.
+        val children = ui.sections.single { it.title == "children" }.rows
+        assertThat(children.first().title).isEqualTo("African Storybook · English")
+        assertThat(children.first().meta.en()).endsWith(" · African Storybook Initiative")
+        assertThat(children.drop(1).map { it.meta.en()!!.substringAfter(" · ") }.distinct()).containsExactly("From Kiwix · Prunelle")
+        assertThat(ui.sections.single { it.title == "learning" }.rows.map { it.title })
+            .containsExactly("Algorithms", "Milne Open Textbooks").inOrder()
+        // Searching: one section of matches from every book source, Granger's books first.
+        val vm = viewModel(CatalogScope.BOOKS)
+        vm.setQuery("hamlet")
+        testScheduler.advanceUntilIdle()
+        val hamlet = vm.ui.value.sections.single()
+        assertThat(hamlet.title).isEqualTo(SourceViewModel.BOOK_RESULTS)
+        assertThat(hamlet.rows.first().title).contains("Hamlet")
+        vm.setQuery("military medicine")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.single().rows.map { it.id }).contains("irp.fas.org_en_military-medicine")
+        vm.setQuery("music")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.single().rows.map { it.id }).contains("gutenberg_en_lcc-m")
+    }
+
+    // --- Plan KB2 Task 3.2: African Storybook, sets in their own catalog array ---
+
+    private fun asbCatalog(vararg sets: app.granger.core.catalog.BookSet) = catalogOf(
+        books = listOf(bookEntry("gc-emma")),
+        presets = listOf(Preset("granger-classics", "Granger Classics: all books", listOf("gc-emma"))),
+    ).copy(bookSets = sets.toList())
+
+    @Test fun aBookSetIsOneRowOnItsShelfAndStaysOffGrangersScreen() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = asbCatalog(asbSet(), asbSet("sw", "Kiswahili")))
+        val ui = viewModel(CatalogScope.BOOKS).ui.value
+        val children = ui.sections.single { it.title == "children" }.rows
+        // Kiswahili waits for All languages, as any book in another language does.
+        assertThat(children.map { it.id }).containsExactly("set:african-storybook-en")
+        val row = children.single()
+        assertThat(row.title).isEqualTo("African Storybook · English")
+        assertThat(row.opensSet).isEqualTo("african-storybook-en")
+        assertThat(row.meta.en()).isEqualTo("3 books · 6.0 MB · African Storybook Initiative")
+        assertThat(ui.languageChip).isTrue()
+        // The set's presets aren't Granger's: Literature's sets are Granger Classics alone.
+        assertThat(ui.presets.map { it.id }).containsExactly("granger-classics")
+        // Granger's own screen lists only Granger's books.
+        val granger = viewModel(CatalogScope.GRANGER).ui.value
+        assertThat(granger.sections.flatMap { it.rows }.map { it.id }).containsExactly("gc-emma")
+        assertThat(granger.presets.map { it.id }).containsExactly("granger-classics")
+        assertThat(scopeOf(asbSet().books.first())).isEqualTo(CatalogScope.BOOK_SET)
+        // All languages brings Kiswahili's row; a search finds the sets' books.
+        val vm = viewModel(CatalogScope.BOOKS)
+        vm.setAllLanguages(true)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.single { it.title == "children" }.rows.map { it.title })
+            .containsExactly("African Storybook · English", "African Storybook · Kiswahili").inOrder()
+        vm.setQuery("hyena")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.single().rows.map { it.title }).containsExactly("Goat and the hyena", "Goat and the hyena")
+    }
+
+    @Test fun aBookSetsScreenOffersItsLevelsAndGetsThem() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(catalog = asbCatalog(asbSet()))
+        val set = asbSet()
+        val (a, b, c) = set.books
+        downloads.list.value = listOf(record(a.id, DownloadState.INSTALLED, kind = ItemKind.BOOK, filePath = "/internal/books/granger/${a.id}_2026-11-16.epub"))
+        val vm = SourceViewModel(
+            CatalogScope.BOOK_SET, catalog, downloads, library, bookshelf, volumes, prefs, DeviceTier.ASK, appScope = this,
+            io = main.dispatcher, bookSet = set.id,
+        )
+        backgroundScope.launch { vm.ui.collect {} }
+        testScheduler.advanceUntilIdle()
+        val ui = vm.ui.value
+        assertThat(ui.screenTitle.en()).isEqualTo("African Storybook · English")
+        assertThat(ui.presets.map { it.id }).containsExactly(set.id, "${set.id}-level-1", "${set.id}-level-2").inOrder()
+        assertThat(ui.presets.first().books).isEqualTo(3)
+        assertThat(ui.presets.first().onPhone).isEqualTo(1)
+        assertThat(ui.sections.map { it.heading.en() }).containsExactly("Level 1", "Level 2").inOrder()
+        assertThat(ui.sections.first().rows.map { it.id }).containsExactly(a.id, c.id).inOrder()
+        assertThat(ui.sections.first().noun).isEqualTo(SectionNoun.BOOKS)
+        // An installed set book opens as a Granger book, as the Classics do.
+        assertThat(ui.sections.first().rows.first().bookId).isEqualTo(BookIds.of(BookOrigin.GRANGER, a.id))
+        vm.getPreset("${set.id}-level-1")
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.enqueued.map { it.first }).containsExactly(c.id)
+        vm.get(b.id)
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.enqueued.map { it.first }).containsExactly(c.id, b.id).inOrder()
+        // Remove takes its shelf row, as a Classic's.
+        vm.remove(a.id)
+        testScheduler.advanceUntilIdle()
+        assertThat(downloads.calls).contains("remove:${a.id}")
+    }
+
+    /** Plan KB2 Task 4.1: installed rows show where they stand: a Gutenberg pack on the phone, a Granger book updated. */
+    @Test fun theBooksScreenSaysWhatsOnThePhone() = runTest(main.dispatcher) {
+        val published = publishedCatalog()
+        catalog.mutable.value = CatalogState(catalog = published)
+        val music = published.packs.single { it.zimName == "gutenberg_en_lcc-m" }
+        val military = published.packs.single { it.zimName == "irp.fas.org_en_military-medicine" }
+        library.packList.value = listOf(pack(music.zimUuid).copy(name = music.zimName), pack(military.zimUuid).copy(name = military.zimName))
+        val ui = viewModel(CatalogScope.BOOKS).ui.value
+        assertThat(ui.sections.first().rows.first().meta.en()).isEqualTo("39 subjects · From Kiwix · 1 on this phone")
+        val row = ui.sections.single { it.title == "manuals" }.rows.single { it.id == military.id }
+        assertThat(row.status).isEqualTo(ItemStatus.Installed)
+        assertThat(row.packId).isEqualTo(military.zimUuid)
+        assertThat(row.opens).isTrue()
+    }
+
+    @Test fun aPresetRowSaysWhatsLeftOnlyOnceSomeIsHere() {
+        val fresh = PresetRow("granger-classics", "Granger Classics: all books", 437, 437, 1_000_000, books = 437, totalBytes = 1_000_000)
+        assertThat(BookShelves.presetName(fresh)).isEqualTo("Granger Classics")
+        assertThat(BookShelves.presetMeta(fresh).en()).isEqualTo("437 books · 1.0 MB")
+        assertThat(BookShelves.presetMeta(fresh.copy(onPhone = 430, updates = 3, remainingCount = 7)).en())
+            .isEqualTo("437 books · 1.0 MB · 4 of 437 to get · 3 to update")
     }
 
     /**

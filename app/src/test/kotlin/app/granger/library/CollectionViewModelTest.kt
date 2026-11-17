@@ -5,6 +5,8 @@ import app.granger.FakeBookshelf
 import app.granger.FakeCatalogSource
 import app.granger.bookEntry
 import app.granger.catalogOf
+import app.granger.asbSet
+import app.granger.core.library.BookIds
 import app.granger.FakeDownloads
 import app.granger.FakeLibrary
 import app.granger.book
@@ -389,9 +391,20 @@ class CollectionViewModelTest {
         assertThat(header.pack).isEqualTo(music)
         assertThat(header.books).isEqualTo(3)
         assertThat(header.searchable).isEqualTo(1)
-        assertThat(header.text.en()).isEqualTo("Project Gutenberg · 3 books · 1 searchable in full")
+        // Plan KB2 Task 4.5: only the exception is said.
+        assertThat(header.text.en()).isEqualTo("3 books · From Kiwix · Project Gutenberg · 2 titles only until opened")
         // The Library's row says the same (Plan GB walkthrough).
-        assertThat(rowCountText(gutenbergRow).en()).isEqualTo("Project Gutenberg · 3 books · 1 searchable in full")
+        assertThat(rowCountText(gutenbergRow).en()).isEqualTo("3 books · From Kiwix · Project Gutenberg")
+    }
+
+    /** Review polish: when every book is the exception, the line doesn't count them again. */
+    @Test fun anExceptionForEveryBookIsSaidWithoutItsCount() {
+        fun line(unopened: Int, scans: Int) = GutenbergHeader(null, 65, 0, unopened = unopened, scans = scans).exceptionText?.en()
+        assertThat(line(65, 0)).isEqualTo("Titles only until opened")
+        assertThat(line(12, 0)).isEqualTo("12 titles only until opened")
+        assertThat(line(0, 65)).isEqualTo("Scans: titles only")
+        assertThat(line(60, 5)).isEqualTo("60 titles only until opened · 5 scans: titles only")
+        assertThat(line(0, 0)).isNull()
     }
 
     @Test fun anyOtherCollectionHasNoGutenbergHeader() = runTest(main.dispatcher) {
@@ -464,9 +477,193 @@ class CollectionViewModelTest {
         assertThat(header.pack).isEqualTo(food)
         assertThat(header.books).isEqualTo(3)
         assertThat(header.searchable).isEqualTo(1)
-        assertThat(header.text.en()).isEqualTo("Kiwix library · 3 documents · 1 searchable in full")
-        assertThat(rowCountText(foodRow).en()).isEqualTo("Kiwix library · 3 documents · 1 searchable in full")
+        assertThat(header.text.en()).isEqualTo("3 documents · From Kiwix · 1 title only until opened · 1 scan: title only")
+        assertThat(rowCountText(foodRow).en()).isEqualTo("3 documents · From Kiwix")
         assertThat(rowCountText(foodRow.copy(books = foodRow.books.take(1).map { it.copy(indexedAt = null) })).en())
-            .isEqualTo("Kiwix library · 1 document")
+            .isEqualTo("1 document · From Kiwix")
+    }
+
+    // --- Plan KB2 Task 4.3: removing one pack book ---
+
+    @Test fun aRemovedPackBookIsListedForShowRemovedWhichPutsItBack() = runTest(main.dispatcher) {
+        library.packList.value = listOf(food)
+        val gone = document("Food Preparation (3).pdf", "Dutch Oven").copy(hidden = true)
+        val elsewhere = book("book:nautilus:zimgit-water_en/w.pdf", "Water").copy(
+            origin = BookOrigin.NAUTILUS, sourceRef = "zimgit-water_en/files/w.pdf", hidden = true,
+        )
+        bookshelf.bookList.value = foodRow.books.take(2) + gone + elsewhere
+        show(foodRow.copy(books = foodRow.books.take(2)))
+        val vm = CollectionViewModel(
+            "c:kiwixbooks-zimgit-food-preparation_en", shelves, library, sessions, bookshelf, downloads, appScope = this,
+            compute = main.dispatcher,
+        )
+        backgroundScope.launch { vm.removed.collect {} }
+        testScheduler.advanceUntilIdle()
+        // Only this collection's removed books.
+        assertThat(vm.removed.value.map { it.title }).containsExactly("Dutch Oven")
+        vm.showRemoved()
+        testScheduler.advanceUntilIdle()
+        assertThat(bookshelf.unhidden).containsExactly(gone.id)
+        assertThat(vm.removed.value).isEmpty()
+
+        // A pack book's Remove goes to the shelf, which hides it.
+        vm.removeBook(foodRow.books.first())
+        testScheduler.advanceUntilIdle()
+        assertThat(bookshelf.removed).containsExactly(foodRow.books.first().id)
+    }
+
+    // --- Plan KB2 Task 2.2: a pure container listed by its files' names ---
+
+    @Test fun aCollectionListedByFileNamesSaysSo() = runTest(main.dispatcher) {
+        val box = pack("u-box", "Box of manuals").copy(name = "box_en_all", scraper = "zimit", bookManifest = app.granger.core.library.Pack.BOOK_FILES)
+        val key = "kiwixbooks-box_en_all"
+        val row = CollectionRow(
+            ShelfCollection("c:$key", "Box of manuals", "lit", false, defaultKey = key), emptyList(),
+            listOf(book("book:kiwix:box_en_all/files/a.pdf", "a").copy(origin = BookOrigin.KIWIX, sourceRef = "box_en_all/files/a.pdf", ord = 0)),
+        )
+        library.packList.value = listOf(box)
+        show(row)
+        val vm = vm("c:$key")
+        backgroundScope.launch { vm.gutenbergHeader.collect {} }
+        testScheduler.advanceUntilIdle()
+        val header = vm.gutenbergHeader.value!!
+        assertThat(header.pack).isEqualTo(box)
+        assertThat(header.fromFileNames).isTrue()
+        assertThat(header.fileNamesText.en()).isEqualTo("Titles from file names")
+        assertThat(header.text.en()).endsWith(" · Titles from file names")
+        // A manifest pack's header doesn't.
+        library.packList.value = listOf(box.copy(bookManifest = "/s/box.gbooks"))
+        assertThat(vm.gutenbergHeader.first { it?.pack?.bookManifest == "/s/box.gbooks" && it.fromFileNames == false }).isNotNull()
+    }
+
+    // --- Plan KB2 Task 2.3: groups, parts and languages ---
+
+    private val mm = pack("u-mm", "Military Medicine").copy(name = "mm_en_all", scraper = "zimit", bookManifest = "/s/mm.gbooks")
+    private val mmKey = "kiwixbooks-mm_en_all"
+
+    private fun mmBook(key: String, title: String, group: String, ord: Int, workKey: String? = null, partNo: Int? = null, language: String = "en") =
+        book("book:kiwix:mm_en_all/$key", title).copy(
+            origin = BookOrigin.KIWIX, sourceRef = "mm_en_all/$key.pdf", format = app.granger.core.library.BookFormat.PDF,
+            groupName = group, ord = ord, workKey = workKey, workTitle = workKey?.let { "Hospital Corpsman" }, partNo = partNo, language = language,
+        )
+
+    private val mmBooks = listOf(
+        mmBook("intro", "Introduction", "", 0),
+        mmBook("hc1", "Hospital Corpsman (Part 1)", "Handbooks", 1, workKey = "hc", partNo = 1),
+        mmBook("hc2", "Hospital Corpsman (Part 2)", "Handbooks", 2, workKey = "hc", partNo = 2),
+        mmBook("fa", "Primeros auxilios", "Handbooks", 3, language = "es"),
+    ) + (1..60).map { mmBook("o$it", "Order $it", "Orders", 10 + it) }
+
+    private fun TestScope.mmVm(): CollectionViewModel {
+        library.packList.value = listOf(mm)
+        show(CollectionRow(ShelfCollection("c:$mmKey", "Military Medicine", "lit", false, defaultKey = mmKey), emptyList(), mmBooks))
+        return CollectionViewModel(
+            "c:$mmKey", shelves, library, sessions, bookshelf, downloads, appScope = this, viewPrefs = LibraryViewPrefs(),
+            compute = main.dispatcher,
+            manifestOf = { app.granger.core.library.ManifestCollection("Military Medicine", "books", "Federation of American Scientists", listOf("Handbooks", "Orders")) },
+            languageName = { mapOf("en" to "English", "es" to "Spanish")[it] ?: it },
+        )
+    }
+
+    /**
+     * Plan KB2 Task 3.2: an African Storybook collection is its levels, lowest first, each headed in the app's words, and
+     * its header says how many books and who made them, with no "From Kiwix".
+     */
+    @Test fun anAfricanStorybookCollectionIsItsLevelsAndNamesItsMaker() = runTest(main.dispatcher) {
+        val set = asbSet()
+        val books = set.books.map { e -> book(BookIds.of(BookOrigin.GRANGER, e.id), e.title).copy(sourceRef = e.id, indexedAt = 1L) }
+        val key = "african-storybook-en"
+        show(CollectionRow(ShelfCollection("c:$key", "African Storybook · English", "lit", false, defaultKey = key), emptyList(), books))
+        val vm = CollectionViewModel(
+            "c:$key", shelves, library, sessions, bookshelf, downloads, appScope = this,
+            catalog = FakeCatalogSource(catalogOf().copy(bookSets = listOf(set))), viewPrefs = LibraryViewPrefs(), compute = main.dispatcher,
+            levelName = { "Nivel $it" },
+        )
+        backgroundScope.launch { vm.books.collect {} }
+        backgroundScope.launch { vm.gutenbergHeader.collect {} }
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.books.value.rows!!.map { it.label() }).containsExactly(
+            "# Nivel 1", "A very tall man", "Cows at the market", "# Nivel 2", "Goat and the hyena",
+        ).inOrder()
+        assertThat(vm.books.value.languages).isEmpty()
+        val header = vm.gutenbergHeader.value!!
+        assertThat(header.kind).isEqualTo(HeaderKind.BOOK_SET)
+        assertThat(header.text.en()).isEqualTo("3 books · African Storybook Initiative")
+        // The Library's row says the same.
+        assertThat(rowCountText(vm.ui.value!!).en()).isEqualTo("3 books · African Storybook Initiative")
+    }
+
+    /** Plan KB2 review: a book pack's catalog `provider` names its maker on Books, the Library row and the header. */
+    @Test fun aBookPacksCatalogProviderIsSaidWhereItsManifestNamesNoOne() = runTest(main.dispatcher) {
+        val knots = app.granger.packEntry("zimgit-knots_en", zimName = "zimgit-knots_en")
+            .copy(family = "zimgit-knots", content = "books", provider = "Zimgit")
+        assertThat(app.granger.sources.BookShelves.packMeta(knots).en()).endsWith(" · From Kiwix · Zimgit")
+        // A catalog from before the field keeps the family heuristic.
+        assertThat(app.granger.sources.BookShelves.provider(knots.copy(provider = "", family = "irp.fas.org"))).isEqualTo("irp.fas.org")
+        assertThat(app.granger.sources.BookShelves.provider(knots.copy(provider = ""))).isNull()
+        val key = "kiwixbooks-zimgit-knots_en"
+        assertThat(bookPackProviders(catalogOf(packs = listOf(knots)))).containsExactly(key, "Zimgit")
+        val doc = book("book:nautilus:zimgit-knots_en/a.pdf", "Bowline").copy(origin = BookOrigin.NAUTILUS, sourceRef = "zimgit-knots_en/a.pdf")
+        val row = CollectionRow(ShelfCollection("c:$key", "A Library of Knots", "lit", false, defaultKey = key), emptyList(), listOf(doc))
+        assertThat(rowCountText(row, null, "Zimgit").en()).isEqualTo("1 document · From Kiwix · Zimgit")
+        show(row)
+        val vm = CollectionViewModel(
+            "c:$key", shelves, library, sessions, bookshelf, downloads, appScope = this,
+            catalog = FakeCatalogSource(catalogOf(packs = listOf(knots))), viewPrefs = LibraryViewPrefs(), compute = main.dispatcher,
+        )
+        backgroundScope.launch { vm.gutenbergHeader.collect {} }
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.gutenbergHeader.value!!.provider.en()).isEqualTo("From Kiwix · Zimgit")
+    }
+
+    private fun SectionRow.label(): String = when (this) {
+        is SectionRow.Header -> "# $name"
+        is SectionRow.Item -> (if (part) "- " else "") + book.title
+        is SectionRow.Work -> "$title (${parts.size})"
+    }
+
+    @Test fun aManifestCollectionShowsItsSectionsPartsAndLanguages() = runTest(main.dispatcher) {
+        val vm = mmVm()
+        backgroundScope.launch { vm.books.collect {} }
+        backgroundScope.launch { vm.gutenbergHeader.collect {} }
+        testScheduler.advanceUntilIdle()
+        val shown = vm.books.value
+        assertThat(shown.rows!!.map { it.label() }).containsExactly(
+            "Introduction", "# Handbooks", "Hospital Corpsman (2)", "Primeros auxilios", "# Orders",
+        ).inOrder()
+        assertThat((shown.rows!!.last() as SectionRow.Header).let { it.count to it.foldable }).isEqualTo(60 to true)
+        assertThat(shown.languages).containsExactly("English", "Spanish").inOrder()
+        // The header names the manifest's provider and counts a work once, in its noun.
+        val header = vm.gutenbergHeader.value!!
+        assertThat(header.text.en()).isEqualTo("63 books · From Kiwix · Federation of American Scientists · Titles only until opened")
+
+        vm.toggleWork("hc")
+        vm.toggleSection("Orders")
+        testScheduler.advanceUntilIdle()
+        val open = vm.books.value.rows!!.map { it.label() }
+        assertThat(open.take(6)).containsExactly(
+            "Introduction", "# Handbooks", "Hospital Corpsman (2)", "- Hospital Corpsman (Part 1)", "- Hospital Corpsman (Part 2)", "Primeros auxilios",
+        ).inOrder()
+        assertThat(open).hasSize(7 + 60)
+
+        vm.setLanguage("Spanish")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.books.value.rows!!.map { it.label() }).containsExactly("# Handbooks", "Primeros auxilios").inOrder()
+        assertThat(vm.books.value.language).isEqualTo("Spanish")
+
+        // Find, or another sort, lists the books flat as before.
+        vm.setLanguage(null)
+        vm.setQuery("hospital")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.books.value.rows).isNull()
+        assertThat(vm.books.value.books.map { it.title }).containsExactly("Hospital Corpsman (Part 1)", "Hospital Corpsman (Part 2)")
+    }
+
+    @Test fun otherCollectionsHaveNoSectionsOrLanguageChips() = runTest(main.dispatcher) {
+        show(collection("c:mine", true, books = listOf(book("a", "Alpha"), book("b", "Beta").copy(language = "spa"))))
+        val shown = vm("c:mine").books.first { it.total == 2 }
+        assertThat(shown.rows).isNull()
+        assertThat(shown.languages).isEmpty()
+        assertThat(shown.books).hasSize(2)
     }
 }

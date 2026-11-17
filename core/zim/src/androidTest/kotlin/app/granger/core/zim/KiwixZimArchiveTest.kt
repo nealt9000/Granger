@@ -109,6 +109,32 @@ class KiwixZimArchiveTest {
         out.delete()
     }
 
+    /** Plan KB2 Task 0.2: a pack's files of the given types, from libzim's directory, redirects left out. */
+    @Test fun listsTheEntriesOfTheGivenTypesInPathOrder() {
+        val docs = mutableListOf<ZimEntry>()
+        assertThat(archive.list(setOf("application/pdf", "image/png")) { docs += it; true }).isTrue()
+        assertThat(docs.map { it.path }).containsExactly("docs/water.pdf", "leaf.png").inOrder()
+        val water = docs.first()
+        assertThat(water.title).isEqualTo("Water treatment")
+        assertThat(water.mimeType).isEqualTo("application/pdf")
+        assertThat(water.sizeBytes).isEqualTo(archive.read("docs/water.pdf")!!.bytes.size.toLong())
+
+        // "Plants" is a redirect to an HTML page: not listed.
+        val pages = mutableListOf<String>()
+        assertThat(archive.list(setOf("text/html")) { pages += it.path; true }).isTrue()
+        assertThat(pages).containsAtLeast("index", "Photosynthesis", "C++")
+        assertThat(pages).doesNotContain("Plants")
+
+        // Stopping after the first; nothing of a type the pack lacks.
+        var calls = 0
+        assertThat(archive.list(setOf("application/pdf", "image/png")) { calls++; false }).isTrue()
+        assertThat(calls).isEqualTo(1)
+        assertThat(archive.list(setOf("application/epub+zip")) { error("no EPUBs") }).isTrue()
+
+        archive.close()
+        assertThat(archive.list(setOf("application/pdf")) { error("closed") }).isFalse()
+    }
+
     @Test fun callsAfterCloseReturnEmpty() {
         archive.close()
         assertThat(archive.read("index")).isNull()

@@ -16,11 +16,6 @@
     <string name="sources_group_audio">Audiolibros y música</string>
     <string name="sources_group_models">Modelos y voces</string>
     <string name="sources_link_kiwix_sub">Wikipedia, Stack Exchange, medicina, guías prácticas y más, sin conexión</string>
-    <string name="sources_link_classics">Clásicos Granger</string>
-    <string name="sources_link_classics_sub">Libros electrónicos de dominio público, listos para leer</string>
-    <string name="sources_link_gutenberg_sub">Libros de dominio público por tema, en paquetes de Kiwix</string>
-    <string name="sources_link_kiwix_books">Bibliotecas de Kiwix</string>
-    <string name="sources_link_kiwix_books_sub">Guías y manuales: comida, agua, medicina, nudos y más</string>
     <string name="sources_link_archive_books">Libros de Archive.org</string>
     <string name="sources_link_archive_books_sub">Libros sin derechos de autor de Internet Archive</string>
     <string name="sources_link_librivox_sub">Audiolibros de dominio público, leídos por voluntarios</string>
@@ -30,11 +25,33 @@
     <string name="sources_link_archive_music_sub">Grabaciones de Internet Archive</string>
     <string name="sources_link_models">Modelos y voces</string>
     <string name="sources_link_models_sub">Lo que hace funcionar la lectura en voz alta</string>
+    <string name="sources_link_books">Libros por tipo</string>
+    <string name="sources_link_books_sub">Literatura, libros infantiles, manuales y aprendizaje</string>
+    <string name="sources_shelf_literature">Literatura</string>
+    <string name="sources_shelf_children">Libros infantiles</string>
+    <string name="sources_shelf_manuals">Manuales y obras de consulta</string>
+    <string name="sources_shelf_learning">Aprendizaje</string>
+    <string name="sources_shelf_other">Más libros</string>
+    <!-- Plan KB2 Task 3.2: a book set's reading level (African Storybook), as a section and a collection's heading. -->
+    <string name="sources_level">Nivel %1$d</string>
+    <string name="sources_books_find">Buscar un libro</string>
+    <string name="sources_search_all_books">Buscar en todos los libros</string>
+    <string name="sources_search_all_books_sub">Títulos de todas las fuentes de libros de aquí</string>
+    <plurals name="sources_subjects">
+        <item quantity="one">%1$d tema</item>
+        <item quantity="many">%1$d temas</item>
+        <item quantity="other">%1$d temas</item>
+    </plurals>
+    <plurals name="sources_on_this_phone">
+        <item quantity="one">%1$d en este teléfono</item>
+        <item quantity="many">%1$d en este teléfono</item>
+        <item quantity="other">%1$d en este teléfono</item>
+    </plurals>
     <string name="sources_import_own">Importar los tuyos</string>
     <string name="sources_import_own_sub">Libros EPUB, PDF, TXT o Markdown de este teléfono</string>
 
     <string name="sources_scope_models">Modelos</string>
-    <string name="sources_scope_kiwix_books">Bibliotecas de Kiwix</string>
+    <string name="sources_scope_kiwix_books">Libros de Kiwix</string>
 
     <string name="sources_check_updates">Buscar actualizaciones</string>
     <string name="sources_search">Buscar en %1$s</string>
@@ -88,9 +105,13 @@
     <string name="sources_remove_slice_title">¿Quitar %1$s: %2$s?</string>
     <string name="sources_remove_pack_body">Se eliminará el archivo, junto con los marcadores y lugares de lectura que guardaste en él.</string>
     <string name="sources_remove_body">Se eliminará el archivo.</string>
+    <string name="sources_remove_book_body">Se eliminará el archivo. Se conservan tu lugar, tus marcadores y tus resaltados.</string>
+    <string name="sources_remove_book_pack_body">Se eliminarán el paquete y sus libros. Se conservan tus lugares, marcadores y resaltados.</string>
+    <string name="sources_remove_document_pack_body">Se eliminarán el paquete y sus documentos. Se conservan tus lugares, marcadores y resaltados.</string>
     <!-- A preset ("Granger Classics set") is a "conjunto": "paquete" is taken by packs. -->
     <string name="sources_preset_title">Conjunto %1$s</string>
     <string name="sources_get_all">Descargar todo</string>
+    <string name="sources_get_all_named">Descargar todo: %1$s</string>
     <plurals name="sources_packs">
         <item quantity="one">%d paquete</item>
         <item quantity="many">%d paquetes</item>
@@ -143,6 +164,10 @@
     <string name="sources_switch_text">¿Cambiar %1$s de %2$s (%3$s) a %4$s (%5$s)? La versión %2$s se quita cuando la nueva termine de descargarse. Tus lugares y marcadores se conservan.</string>
     <string name="sources_update">Actualizar</string>
     <string name="sources_more_for">Más opciones de %1$s</string>
+    <string name="sources_get_named">Descargar %1$s</string>
+    <string name="sources_open_named">Abrir %1$s</string>
+    <string name="sources_update_named">Actualizar %1$s</string>
+    <string name="sources_cancel_named">Cancelar %1$s</string>
 
     <string name="sources_retrying">Reintentando: %1$s</string>
     <string name="sources_waiting_wifi">Esperando Wi-Fi</string>

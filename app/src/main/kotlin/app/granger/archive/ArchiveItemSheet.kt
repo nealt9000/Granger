@@ -95,6 +95,8 @@ internal fun ArchiveItemSheet(
     /** A set's part, by number (Plan IA): get it, or remove it. */
     onGetPart: (Int) -> Unit = {},
     onRemovePart: (Int) -> Unit = {},
+    /** An installed text: open it (Plan KB2 Task 4.3); null for audio. */
+    onOpenText: (() -> Unit)? = null,
 ) {
     var choosing by rememberSaveable(sheet.identifier) { mutableStateOf(false) }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
@@ -134,7 +136,7 @@ internal fun ArchiveItemSheet(
             }
             ItemStatusText(sheet.status)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                SheetButtons(sheet, audio, onGet, onCancel, onRetry, onRemove, onOpenInBrowser, onOpenInLibrary)
+                SheetButtons(sheet, audio, onGet, onCancel, onRetry, onRemove, onOpenInBrowser, onOpenInLibrary, onOpenText)
                 // The PDF beside the text, side by side with Get: its own download, and its own book once in.
                 if (sheet.pdfSizeBytes != null && sheet.status !is ItemStatus.InLibrary) {
                     when (sheet.pdfStatus) {
@@ -166,6 +168,7 @@ private fun SheetButtons(
     onRemove: () -> Unit,
     onOpenInBrowser: () -> Unit,
     onOpenInLibrary: () -> Unit,
+    onOpenText: (() -> Unit)?,
 ) {
     // The ledger decides first: something installed or in flight is managed whatever the metadata offers now.
     when (sheet.status) {
@@ -174,7 +177,10 @@ private fun SheetButtons(
             TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) }
             Button(onClick = onRetry) { Text(stringResource(R.string.common_retry)) }
         }
-        ItemStatus.Installed, ItemStatus.UpdateAvailable -> TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
+        ItemStatus.Installed, ItemStatus.UpdateAvailable -> {
+            TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
+            if (onOpenText != null) Button(onClick = onOpenText) { Text(stringResource(R.string.common_open)) }
+        }
         is ItemStatus.Partial -> {
             TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
             Button(onClick = onGet) { Text(stringResource(R.string.archive_get_the_rest)) }

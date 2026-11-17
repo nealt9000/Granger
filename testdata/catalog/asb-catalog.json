@@ -1,0 +1,165 @@
+{
+  "formatVersion": 1,
+  "generatedAt": "2026-11-16T00:00:00Z",
+  "packs": [],
+  "models": [],
+  "books": [
+    {
+      "id": "gc-emma",
+      "title": "Emma",
+      "author": "Jane Austen",
+      "category": "Novels",
+      "language": "en",
+      "sizeBytes": 500,
+      "sha256": "74f9d80ad6183ede02e5c6f4a023676444c0c212889ed0dd9496f3738f72b976",
+      "urls": [
+        "https://example.com/gc-emma.epub"
+      ],
+      "releaseDate": "2026-10-17",
+      "license": "Public domain (US)",
+      "collection": "granger-classics",
+      "domain": "literature"
+    }
+  ],
+  "presets": [
+    {
+      "id": "granger-classics",
+      "title": "Granger Classics: all books",
+      "items": [
+        "gc-emma"
+      ]
+    },
+    {
+      "id": "sneaky",
+      "title": "A top-level preset naming set books",
+      "items": [
+        "asb-en-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "asb-en-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "asb-en-cccccccccccccccccccccccccccccccc"
+      ]
+    }
+  ],
+  "bookSets": [
+    {
+      "id": "african-storybook-en",
+      "title": "African Storybook · English",
+      "language": "en",
+      "shelf": "children",
+      "provider": "African Storybook Initiative",
+      "license": "CC BY 4.0, African Storybook Initiative",
+      "description": "",
+      "i18n": {
+        "es": {
+          "title": "African Storybook · inglés"
+        }
+      },
+      "presets": [
+        {
+          "id": "african-storybook-en",
+          "title": "African Storybook · English",
+          "items": [
+            "asb-en-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "asb-en-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "asb-en-cccccccccccccccccccccccccccccccc"
+          ],
+          "language": "en",
+          "i18n": {
+            "es": {
+              "title": "African Storybook · inglés"
+            }
+          }
+        },
+        {
+          "id": "african-storybook-en-level-1",
+          "title": "African Storybook · English: Level 1",
+          "items": [
+            "asb-en-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "asb-en-cccccccccccccccccccccccccccccccc"
+          ],
+          "level": 1,
+          "setOf": "african-storybook-en",
+          "language": "en",
+          "i18n": {
+            "es": {
+              "title": "African Storybook · inglés: Nivel 1"
+            }
+          }
+        },
+        {
+          "id": "african-storybook-en-level-2",
+          "title": "African Storybook · English: Level 2",
+          "items": [
+            "asb-en-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          ],
+          "level": 2,
+          "setOf": "african-storybook-en",
+          "language": "en",
+          "i18n": {
+            "es": {
+              "title": "African Storybook · inglés: Nivel 2"
+            }
+          }
+        }
+      ],
+      "books": [
+        {
+          "id": "asb-en-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "title": "A very tall man",
+          "author": "A. Writer",
+          "description": "About A very tall man.",
+          "category": "Level 1",
+          "language": "en",
+          "sizeBytes": 1000,
+          "sha256": "74f9d80ad6183ede02e5c6f4a023676444c0c212889ed0dd9496f3738f72b976",
+          "urls": [
+            "https://github.com/nealt9000/Granger/releases/download/asb-en-2026-11-16/asb-en-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.epub"
+          ],
+          "releaseDate": "2026-11-16",
+          "license": "CC BY 4.0, African Storybook Initiative",
+          "collection": "african-storybook-en",
+          "published": 2014,
+          "domain": "literature",
+          "level": 1
+        },
+        {
+          "id": "asb-en-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "title": "Goat and the hyena",
+          "author": "A. Writer",
+          "description": "About Goat and the hyena.",
+          "category": "Level 2",
+          "language": "en",
+          "sizeBytes": 2000,
+          "sha256": "74f9d80ad6183ede02e5c6f4a023676444c0c212889ed0dd9496f3738f72b976",
+          "urls": [
+            "https://github.com/nealt9000/Granger/releases/download/asb-en-2026-11-16/asb-en-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.epub"
+          ],
+          "releaseDate": "2026-11-16",
+          "license": "CC BY 4.0, African Storybook Initiative",
+          "collection": "african-storybook-en",
+          "published": 2014,
+          "domain": "literature",
+          "level": 2
+        },
+        {
+          "id": "asb-en-cccccccccccccccccccccccccccccccc",
+          "title": "Cows at the market",
+          "author": "A. Writer",
+          "description": "About Cows at the market.",
+          "category": "Level 1",
+          "language": "en",
+          "sizeBytes": 3000,
+          "sha256": "74f9d80ad6183ede02e5c6f4a023676444c0c212889ed0dd9496f3738f72b976",
+          "urls": [
+            "https://github.com/nealt9000/Granger/releases/download/asb-en-2026-11-16/asb-en-cccccccccccccccccccccccccccccccc.epub"
+          ],
+          "releaseDate": "2026-11-16",
+          "license": "CC BY 4.0, African Storybook Initiative",
+          "collection": "african-storybook-en",
+          "published": 2014,
+          "domain": "literature",
+          "level": 1
+        }
+      ]
+    }
+  ]
+}

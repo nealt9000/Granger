@@ -77,6 +77,24 @@ class SearchViewModelTest {
         assertThat(state.searching).isFalse()
     }
 
+    /** Plan KB2 Task 4.5: a book pack's text hit is its book: it joins the books, once, and leaves the articles. */
+    @Test fun aBookPacksTextHitJoinsTheBooksOnce() = runTest(main.dispatcher) {
+        search.fullText = listOf(
+            SearchHit("p", "Pack", "Leaf", "Leaf", "<b>photo</b>"),
+            SearchHit("book:gutenberg:12", "Music", "", "The Art of Fugue", "a <b>photo</b> fugue", author = "Bach"),
+            SearchHit("book:gutenberg:12", "Music", "", "The Art of Fugue", "<b>photo</b> again", author = "Bach"),
+        )
+        val vm = SearchViewModel(search, sessions, "")
+        vm.onQueryChange("photo")
+        testScheduler.advanceUntilIdle()
+        val state = vm.state.value
+        assertThat(state.fullText.map { it.path }).containsExactly("Leaf")
+        // Emma's index hit stays first; the Gutenberg book follows once, opening where the reader left it.
+        assertThat(state.books.map { it.bookId }).containsExactly("import:abc", "book:gutenberg:12").inOrder()
+        val fugue = state.books.last()
+        assertThat(listOf(fugue.bookTitle, fugue.author, fugue.href, fugue.snippet)).containsExactly("The Art of Fugue", "Bach", "", "a <b>photo</b> fugue").inOrder()
+    }
+
     @Test fun clearingTheQueryClearsResults() = runTest(main.dispatcher) {
         val vm = SearchViewModel(search, sessions, "")
         vm.onQueryChange("photo")

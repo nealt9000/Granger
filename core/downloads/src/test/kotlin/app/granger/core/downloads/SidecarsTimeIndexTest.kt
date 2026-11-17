@@ -101,6 +101,25 @@ class SidecarsTimeIndexTest {
         assertThat(manager.records.first().filter { it.kind == ItemKind.SIDECAR }).isEmpty()
     }
 
+    /** Plan KB2: a Kiwix pack's book manifest downloads with it and goes with it. */
+    @Test fun aBookManifestFollowsItsPack() = test {
+        val gbooks = SidecarEntry("gbooks", "https://github.test/bookpacks-1/med.gbooks", "8".repeat(64), 40_000, 1)
+        val all = med.copy(sidecars = listOf(gbooks))
+        install(all)
+        reconcile(catalog(all))
+        val record = manager.records.first().single { it.kind == ItemKind.SIDECAR }
+        assertThat(record.itemId).isEqualTo("med.gbooks")
+        assertThat(record.filePath).isEqualTo(File(sd, "sidecars/med_888888888888.gbooks").path)
+        assertThat(SidecarKind.ofItem("med.gbooks")).isEqualTo(SidecarKind.BOOK_MANIFEST)
+        assertThat(SidecarKind.BOOK_MANIFEST.parentOf("med.gbooks")).isEqualTo("med")
+        assertThat(SidecarKind.BOOK_MANIFEST.parentOf("med.gqid")).isNull()
+        assertThat(SidecarKind.parentOf("med.gbooks")).isEqualTo("med")
+        assertThat(SidecarKind.BOOK_MANIFEST.fileOf(all)?.sha256).isEqualTo("8".repeat(64))
+        manager.remove("med")
+        reconcile(catalog(all))
+        assertThat(manager.records.first().filter { it.kind == ItemKind.SIDECAR }).isEmpty()
+    }
+
     @Test fun aKindNoFeatureReadsIsNotQueued() = test {
         val gqid = SidecarEntry("gqid", "https://github.test/sidecars-1/med.gqid", "6".repeat(64), 300, 1)
         val all = med.copy(sidecars = listOf(gqid))

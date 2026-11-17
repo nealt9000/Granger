@@ -20,6 +20,8 @@ enum class SidecarKind(val id: String, val itemKind: ItemKind, private val suffi
     TIME_INDEX("gtime", ItemKind.TIME_INDEX, ".timeindex", "timeindex", "gtime"),
     QID_INDEX("gqid", ItemKind.SIDECAR, ".gqid", "sidecars", "gqid"),
     LINKS("glink", ItemKind.SIDECAR, ".glink", "sidecars", "glink"),
+    /** A Kiwix pack's book manifest (Plan KB2): which of its entries are books, and how they're grouped. */
+    BOOK_MANIFEST("gbooks", ItemKind.SIDECAR, ".gbooks", "sidecars", "gbooks"),
     ;
 
     /** The download item of [parentId]'s file of this kind. */

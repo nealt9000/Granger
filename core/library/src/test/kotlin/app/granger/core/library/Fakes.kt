@@ -31,9 +31,18 @@ class FakeZimArchive(
     /** Entries of any type: path to (MIME type, content), beside [paths]' HTML ones. */
     private val files: Map<String, Pair<String, ByteArray>> = emptyMap(),
     scraper: String = "",
+    counter: String = "",
+    /** What [list] walks: entries in path order. */
+    private val listed: List<app.granger.core.zim.ZimEntry>? = null,
     language: String = "eng",
 ) : ZimArchive {
-    override val metadata = ZimMetadata(title, description, language, "2026-10-15", name, scraper)
+    override val metadata = ZimMetadata(title, description, language, "2026-10-15", name, scraper, counter)
+
+    override fun list(mimes: Set<String>, each: (app.granger.core.zim.ZimEntry) -> Boolean): Boolean {
+        val entries = listed ?: return false
+        for (e in entries) if (e.mimeType in mimes && !each(e)) break
+        return true
+    }
     var closed = false
     var searches = 0
 
@@ -106,7 +115,7 @@ class StubBookshelf(initial: List<Book> = emptyList()) : Bookshelf {
     override suspend fun registerPackDocument(
         zimId: String, path: String, title: String, file: File, linkText: String, listedTitle: String,
     ): Book? = null
-    override suspend fun removePackDocuments(zimId: String) = Unit
+    override suspend fun removePackDocuments(zimId: String, zimName: String) = Unit
     override suspend fun savePosition(bookId: String, locatorJson: String, totalProgression: Double, chapterTitle: String) = Unit
     override suspend fun position(bookId: String): BookPosition? = null
     override fun marks(bookId: String): Flow<List<BookAnnotation>> = state.map { emptyList() }

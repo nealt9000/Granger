@@ -3,8 +3,9 @@ package app.granger.core.library
 /**
  * Which kind of book pack [this] is (Plan KB Decision 3), by the tool that made it: [BookOrigin.GUTENBERG] for
  * gutenberg2zim (or a `gutenberg_` name, for a row whose scraper isn't read yet), [BookOrigin.NAUTILUS] for
- * nautiluszim, null for a website. The pack decides from its own file, so it holds for a sideloaded pack and with no
- * catalog. Filing, the shelves, Browse and the collection screens ask this.
+ * nautiluszim, [BookOrigin.KIWIX] for a pack with a verified book manifest or listed by its files' names
+ * ([Pack.bookManifest], Plan KB2), null for a website. The pack decides from its own file (and its manifest), so it holds
+ * for a sideloaded pack and with no catalog. Filing, the shelves, Browse and the collection screens ask this.
  */
 val Pack.bookSource: BookOrigin?
     get() {
@@ -12,6 +13,7 @@ val Pack.bookSource: BookOrigin?
         return when {
             scraper.startsWith(GUTENBERG_SCRAPER) || GutenbergNames.isGutenberg(name) -> BookOrigin.GUTENBERG
             scraper.startsWith(NAUTILUS_SCRAPER) -> BookOrigin.NAUTILUS
+            bookManifest != null -> BookOrigin.KIWIX
             else -> null
         }
     }

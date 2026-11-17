@@ -17,7 +17,7 @@
     <string name="archive_empty_search">Nada coincide con esa búsqueda.</string>
     <string name="archive_load_more">Cargar más</string>
     <string name="archive_remove_title">¿Quitar %1$s?</string>
-    <string name="archive_remove_text_body">Se eliminará el archivo. Se conservan tu lugar y tus resaltados.</string>
+    <string name="archive_remove_text_body">Se eliminará el archivo. Se conservan tu lugar, tus marcadores y tus resaltados.</string>
     <string name="archive_remove_audio_body">Se eliminarán sus archivos. Se conservan tu lugar y tus marcadores.</string>
     <string name="archive_large_pdf">Este PDF pesa %1$s. ¿Descargarlo?</string>
     <string name="archive_large_download">Esta descarga pesa %1$s. ¿Descargarla?</string>

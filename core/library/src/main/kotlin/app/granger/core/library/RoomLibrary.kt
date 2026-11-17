@@ -22,8 +22,11 @@ class RoomLibrary(
     private val packDirs: () -> List<File>,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
-    /** Runs after a pack is removed: its pack documents (Plan P2) go too. */
-    private val onRemoved: suspend (packId: String) -> Unit = {},
+    /**
+     * Runs after a pack is removed or superseded, with its row: its pack documents (Plan P2) go too, unless a pack of
+     * the same name continues them (Plan KB2 Task 2.4).
+     */
+    private val onRemoved: suspend (pack: Pack) -> Unit = {},
 ) : Library {
     private val packDao = db.packDao()
     private val bookmarkDao = db.bookmarkDao()
@@ -54,7 +57,9 @@ class RoomLibrary(
                     is ZimOpenResult.Opened -> result.archive.use { archive ->
                         // A pack moved to another folder or volume keeps its addedAt.
                         val sameZim = previous ?: known.firstOrNull { it.id == archive.uuid }
+                        // The file doesn't say whether it has a book manifest (Plan KB2): the same ZIM keeps its own.
                         Pack.from(archive, file, sameZim?.addedAt ?: now())
+                            .copy(bookManifest = sameZim?.takeIf { it.id == archive.uuid }?.bookManifest)
                     }
                     is ZimOpenResult.Failed ->
                         previous?.copy(status = PackStatus.CORRUPT, sizeBytes = file.length())
@@ -128,7 +133,7 @@ class RoomLibrary(
                 sessionDao.deleteTabsForPack(packId)
                 packDao.delete(packId)
             }
-            onRemoved(packId)
+            onRemoved(pack)
             true
         }
     }
@@ -165,7 +170,7 @@ class RoomLibrary(
                 }
             }
             inherit(old, new)
-            onRemoved(oldPackId)
+            onRemoved(old)
             true
         }
     }

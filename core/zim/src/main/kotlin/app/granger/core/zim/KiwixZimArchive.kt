@@ -31,6 +31,7 @@ internal class KiwixZimArchive(private val archive: Archive, fallbackTitle: Stri
         date = meta("Date"),
         name = meta("Name"),
         scraper = meta("Scraper"),
+        counter = meta("Counter"),
     )
     override val mainPath: String? =
         if (archive.hasMainEntry()) archive.mainEntry.getItem(true).path else null
@@ -107,6 +108,38 @@ internal class KiwixZimArchive(private val archive: Archive, fallbackTitle: Stri
         } catch (e: Exception) {
             out.delete()
             false
+        }
+    }
+
+    /**
+     * Walks libzim's path-ordered directory ([Archive.iterByPath]). Each entry's MIME type comes from its directory
+     * record (`getItem(false)` on a non-redirect reads no cluster); its size only for the entries that match, which
+     * for the stored clusters PDFs and EPUBs sit in is a header read. The iterator is disposed in `finally`, under the
+     * read lock, so [close] can never dispose the archive under it. A native failure ends the walk with false; an
+     * exception from [each] is the caller's and goes to it.
+     */
+    override fun list(mimes: Set<String>, each: (ZimEntry) -> Boolean): Boolean = lock.read {
+        if (closed || mimes.isEmpty()) return@read !closed
+        val entries = try { archive.iterByPath() } catch (e: Exception) { return@read false }
+        try {
+            var more = true
+            while (more) {
+                val found = try {
+                    if (!entries.hasNext()) break
+                    val entry = entries.next()
+                    if (entry.isRedirect) continue
+                    val item = entry.getItem(false)
+                    val mime = item.mimetype
+                    if (mime !in mimes) continue
+                    ZimEntry(item.path, entry.title, mime, item.size)
+                } catch (e: Exception) {
+                    return@read false
+                }
+                more = each(found)
+            }
+            true
+        } finally {
+            entries.dispose()
         }
     }
 

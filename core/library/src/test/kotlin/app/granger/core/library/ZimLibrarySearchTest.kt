@@ -182,6 +182,40 @@ class ZimLibrarySearchTest {
         assertThat(search.titles("peter pan").hits.map { it.packId }).doesNotContain(peterPan.id)
     }
 
+    /**
+     * Plan KB2 Task 4.5: a book pack's hits are its shelf books, once each, opening the book; its other pages (an index,
+     * an author's list, a removed book's page) are dropped, in full text and in titles alike.
+     */
+    @Test fun aBookPacksHitsAreItsBooksOnceAndTheRestAreDropped() = test {
+        install("music.zim", FakeZimArchive(
+            "u-music", "Music · Project Gutenberg", name = "gutenberg_en_lcc-m", scraper = "gutenberg2zim 2.1",
+            suggestions = listOf(ZimHit("Bach_cover.12", "Bach"), ZimHit("Bach (author)", "Bach (author)")),
+            results = listOf(
+                ZimHit("Bach.12.html", "Bach", "the <b>fugue</b>", 90), ZimHit("Bach_cover.12", "Bach", "s", 80),
+                ZimHit("Gone.13.html", "Gone", "s", 70), ZimHit("index", "Index", "s", 60),
+            ),
+        ))
+        install("water.zim", FakeZimArchive(
+            "u-water", "Water", name = "zimgit-water_en", scraper = "nautiluszim 1.1",
+            results = listOf(ZimHit("files/w.pdf", "w.pdf", "s", 50), ZimHit("index.html", "Water", "s", 40)),
+        ))
+        library.refresh()
+        val bach = book("12", BookOrigin.GUTENBERG, "The Art of Fugue").copy(sourceRef = "gutenberg_en_lcc-m/Bach.12.epub")
+        val gone = book("13", BookOrigin.GUTENBERG, "Gone").copy(sourceRef = "gutenberg_en_lcc-m/Gone.13.epub", hidden = true)
+        val water = book("zimgit-water_en/files/w.pdf", BookOrigin.NAUTILUS, "Water Treatment").copy(sourceRef = "zimgit-water_en/files/w.pdf")
+        val withBooks = ZimLibrarySearch(library, io = dispatcher, fullTextLimit = 30, bookshelf = StubBookshelf(listOf(bach, gone, water)))
+
+        val text = withBooks.fullText("fugue").filter { it.packId != "u-med" && it.packId != "u-cls" }
+        assertThat(text.map { it.packId to it.path }).containsExactly(bach.id to "", water.id to "").inOrder()
+        assertThat(text.first().let { listOf(it.title, it.snippet) }).containsExactly("The Art of Fugue", "the <b>fugue</b>").inOrder()
+
+        val titles = withBooks.titles("bach").hits
+        assertThat(titles.map { it.packId }).doesNotContain("u-music")
+        assertThat(titles.map { it.packId }).contains(bach.id)
+        // With no shelf, a book pack's hits all go.
+        assertThat(search.fullText("fugue").map { it.packId }).containsNoneOf("u-music", "u-water")
+    }
+
     @Test fun titlesLoseTheirSiteBeforeTheyAreRanked() = test {
         install("cooking.zim", FakeZimArchive(
             "u-cook", "based.cooking LukeSmith",

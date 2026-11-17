@@ -38,6 +38,19 @@ class CatalogScopeTest {
         assertThat(PACK_SCOPES).containsExactly(CatalogScope.KIWIX, CatalogScope.KIWIX_BOOKS, CatalogScope.GUTENBERG)
     }
 
+    /** Plan KB2: a pack with a book manifest leaves the Kiwix web list for Kiwix libraries, though its content is blank. */
+    @Test fun aPackWithABookManifestIsAKiwixLibrary() {
+        val kiwix = listOf("https://download.kiwix.org/zim/zimit/irp.fas.org_en_military-medicine_2026-10.zim")
+        val site = packEntry("irp.fas.org_en_military-medicine", urls = kiwix, zimName = "irp.fas.org_en_military-medicine")
+        assertThat(scopeOf(site)).isEqualTo(CatalogScope.KIWIX)
+        val gbooks = app.granger.core.catalog.SidecarEntry("gbooks", "https://github.com/x/releases/download/bookpacks-1/mm.gbooks", "8".repeat(64), 40_000, 1)
+        val withManifest = site.copy(sidecars = listOf(gbooks))
+        assertThat(withManifest.content).isEmpty()
+        assertThat(scopeOf(withManifest)).isEqualTo(CatalogScope.KIWIX_BOOKS)
+        // Another sidecar doesn't make it books.
+        assertThat(scopeOf(site.copy(sidecars = listOf(gbooks.copy(kind = "gqid"))))).isEqualTo(CatalogScope.KIWIX)
+    }
+
     @Test fun modelsAreModels() {
         assertThat(scopeOf(modelEntry("e2b"))).isEqualTo(CatalogScope.MODELS)
     }

@@ -24,7 +24,7 @@
     <string name="archive_load_more">Load more</string>
     <!-- %1$s is the item's title. -->
     <string name="archive_remove_title">Remove %1$s?</string>
-    <string name="archive_remove_text_body">This deletes the file. Your place and highlights are kept.</string>
+    <string name="archive_remove_text_body">This deletes the file. Your place, bookmarks and highlights are kept.</string>
     <string name="archive_remove_audio_body">This deletes its files. Your place and bookmarks are kept.</string>
     <!-- Asks before a big download; %1$s is its size, such as 212 MB. -->
     <string name="archive_large_pdf">This PDF is %1$s. Download it?</string>

@@ -24,6 +24,47 @@ class MigrationTest {
         buildMap { while (it.moveToNext()) put(it.getString(0), it.getString(1)) }
     }
 
+    /** Plan KB2: packs gain a nullable book manifest, books their section, order and parts; every row is kept, all null. */
+    @Test fun migration15To16AddsBookManifestsAndCollectionPlacesAndKeepsEveryRow() {
+        helper.createDatabase("migrate16.db", 15).apply {
+            insertPack("u-m", "irp.fas.org_en_military-medicine", "Military Medicine", "Field manuals")
+            execSQL("UPDATE packs SET scraper = 'zimit 2.1' WHERE id = 'u-m'")
+            execSQL(
+                "INSERT INTO books (id, origin, sourceRef, filePath, title, author, translator, date, language, subjects, " +
+                    "description, coverPath, sizeBytes, status, indexedAt, addedAt, format, searchable) VALUES " +
+                    "('book:nautilus:zimgit-water_en/w.pdf', 'NAUTILUS', 'zimgit-water_en/files/w.pdf', '/b/w.pdf', 'Water', '', '', '', " +
+                    "'eng', '', '', NULL, 10, 'OK', NULL, 1, 'PDF', 1)",
+            )
+            execSQL("INSERT INTO book_positions (bookId, locatorJson, totalProgression, chapterTitle, updatedAt) VALUES ('book:nautilus:zimgit-water_en/w.pdf', '{}', 0.5, 'Two', 3)")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("migrate16.db", 16, true, LibraryDatabase.MIGRATION_15_16)
+        db.query("SELECT id, scraper, bookManifest FROM packs").use {
+            it.moveToFirst()
+            assertThat(it.getString(0)).isEqualTo("u-m")
+            assertThat(it.getString(1)).isEqualTo("zimit 2.1")
+            assertThat(it.isNull(2)).isTrue()
+        }
+        db.query("SELECT title, format, groupName, ord, workKey, workTitle, partNo, hidden, memberOf FROM books").use {
+            it.moveToFirst()
+            assertThat(it.getString(0)).isEqualTo("Water")
+            assertThat(it.getString(1)).isEqualTo("PDF")
+            assertThat((2..6).all { i -> it.isNull(i) }).isTrue()
+            // Plan KB2 Task 4.3: no book starts removed.
+            assertThat(it.getInt(7)).isEqualTo(0)
+            // Task 4.7: memberships are written by the next sync.
+            assertThat(it.isNull(8)).isTrue()
+        }
+        db.query("SELECT COUNT(*) FROM book_positions").use { it.moveToFirst(); assertThat(it.getInt(0)).isEqualTo(1) }
+        db.execSQL("UPDATE packs SET bookManifest = '/s/m.gbooks' WHERE id = 'u-m'")
+        db.execSQL("UPDATE books SET groupName = 'Handbooks', ord = 3, workKey = 'hc', workTitle = 'Hospital Corpsman', partNo = 2")
+        db.query("SELECT bookManifest FROM packs").use { it.moveToFirst(); assertThat(it.getString(0)).isEqualTo("/s/m.gbooks") }
+        db.query("SELECT groupName, ord, partNo FROM books").use {
+            it.moveToFirst()
+            assertThat(listOf(it.getString(0), it.getInt(1), it.getInt(2))).containsExactly("Handbooks", 3, 2).inOrder()
+        }
+    }
+
     /** Plan KB Decision 3: packs gain a nullable scraper, null for every row until the library reads the file again. */
     @Test fun migration14To15AddsANullScraperAndKeepsEveryPack() {
         helper.createDatabase("migrate15.db", 14).apply {

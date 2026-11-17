@@ -60,6 +60,13 @@ object GutenbergList {
     fun coverPath(archive: ZimArchive, gutenbergId: String): String? =
         COVER_NAMES.asSequence().map { it.replace("{id}", gutenbergId) }.firstNotNullOfOrNull { archive.resolvePath(it) }
 
+    /**
+     * The Gutenberg id of one of a book's own pages (`Some Title.22636.html`, `Some Title_cover.22636`) or its EPUB, for
+     * a search hit (Plan KB2 Task 4.5); null for any other page (`index`, an author's list).
+     */
+    fun idOfPage(path: String): String? =
+        path.removeSuffix(".html").removeSuffix(".epub").substringAfterLast('.', "").takeIf { it.isNotEmpty() && it.all(Char::isDigit) }
+
     /** The Gutenberg id in an EPUB entry's path (`Some Title.22636.epub`), or null if it isn't one. */
     fun idOfEpub(path: String): String? =
         path.takeIf { it.endsWith(".epub") }?.removeSuffix(".epub")?.substringAfterLast('.', "")?.takeIf { it.isNotEmpty() && it.all(Char::isDigit) }

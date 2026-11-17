@@ -27,6 +27,10 @@ interface PackDao {
 
     @Query("DELETE FROM packs WHERE id = :id")
     suspend fun delete(id: String)
+
+    /** Plan KB2: sets [Pack.bookManifest]; the rows changed, 0 when it already had [value]. */
+    @Query("UPDATE packs SET bookManifest = :value WHERE id = :id AND bookManifest IS NOT :value")
+    suspend fun setBookManifest(id: String, value: String?): Int
 }
 
 @Dao

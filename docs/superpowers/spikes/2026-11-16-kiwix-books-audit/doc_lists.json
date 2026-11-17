@@ -1,0 +1,648 @@
+{
+ "wikiversity_en_all": {
+  "docs": 2086,
+  "html": 60909,
+  "docBytes": 1369895673,
+  "length": 1614819328,
+  "scraper": "mwoffliner 2.1.1",
+  "sample": [
+   "_assets_/0c70a452f799bfe840676ee341124611/0.Directories.H1.20150331.pdf",
+   "_assets_/0c70a452f799bfe840676ee341124611/1.Capacitors.wiki.20150315.pdf",
+   "_assets_/0c70a452f799bfe840676ee341124611/1.Photosensor.wiki.20150317.pdf",
+   "_assets_/0c70a452f799bfe840676ee341124611/1.Resistors.wiki.20150309.pdf",
+   "_assets_/0c70a452f799bfe840676ee341124611/1.SOC.2.B.CMOS.Process.20130430.pdf",
+   "_assets_/0c70a452f799bfe840676ee341124611/1.SOC.2.C.CMOS.Digital.20130318.2.pdf",
+   "_assets_/0c70a452f799bfe840676ee341124611/1.SOC.2.D.CMOS.Analog.20130320.pdf",
+   "_assets_/0c70a452f799bfe840676ee341124611/1.SOC.4.B.FSM.20160308.pdf",
+   "_assets_/0c70a452f799bfe840676ee341124611/1.Triac.wiki.20150317.pdf",
+   "_assets_/0c70a452f799bfe840676ee341124611/1.Types_of_Computer_Softwares.wiki.20150309.pdf"
+  ]
+ },
+ "tomlehrersongs.com_en_all": {
+  "docs": 159,
+  "html": 147,
+  "docBytes": 89991493,
+  "length": 1329083392,
+  "scraper": "warc2zim 2.3.1,Browsertrix-Crawler 1.14.1 (with warcio.js 2.4.11),zimit 3.1.3",
+  "sample": [
+   "tomlehrersongs.com/wp-content/uploads/1967/09/national-brotherhood-week.pdf",
+   "tomlehrersongs.com/wp-content/uploads/2018/11/alma.pdf",
+   "tomlehrersongs.com/wp-content/uploads/2018/11/so-long-mom.pdf",
+   "tomlehrersongs.com/wp-content/uploads/2018/12/No-Rice-1.pdf",
+   "tomlehrersongs.com/wp-content/uploads/2018/12/No-Rice-Its-Gotta-Just-Happen-score.pdf",
+   "tomlehrersongs.com/wp-content/uploads/2018/12/Political-Action-Song-score.pdf",
+   "tomlehrersongs.com/wp-content/uploads/2018/12/The-Slide-Rule-Song-score.pdf",
+   "tomlehrersongs.com/wp-content/uploads/2018/12/Theres-a-Delta-for-Every-Epsilon-Calypso-Full-Score.pdf",
+   "tomlehrersongs.com/wp-content/uploads/2018/12/Why-Not-Fight_-.pdf",
+   "tomlehrersongs.com/wp-content/uploads/2018/12/Why-not-fight_-score-p.1.pdf"
+  ]
+ },
+ "marxists.org_es_all": {
+  "docs": 2434,
+  "html": 7423,
+  "docBytes": 12942911703,
+  "length": 13305819136,
+  "scraper": "warc2zim 2.3.0,Browsertrix-Crawler 1.11.2 (with warcio.js 2.4.9),zimit 3.1.2",
+  "sample": [
+   "marxists.architexturez.net/espanol/afanasiev/1960/fundamentos-de-filosofia.pdf",
+   "marxists.architexturez.net/espanol/allende/discursos-fundamentales.pdf",
+   "marxists.architexturez.net/espanol/allende/discursos_a_la_juventud.pdf",
+   "marxists.architexturez.net/espanol/allende/libro-compa-presidente.pdf",
+   "marxists.architexturez.net/espanol/allende/reforma-agraria.pdf",
+   "marxists.architexturez.net/espanol/althusser/1971/1971_marxismo-y-lucha-de-clases.pdf",
+   "marxists.architexturez.net/espanol/alvarado/1974/clases-sociales.pdf",
+   "marxists.architexturez.net/espanol/arismendi/lenin-rev-amer-latina.pdf",
+   "marxists.architexturez.net/espanol/armand/la-obrera-sovietica.pdf",
+   "marxists.architexturez.net/espanol/ave-lallemant/CONICET_Digital_Nro.5909_A.pdf"
+  ]
+ },
+ "womenshistory.si.edu_en_all": {
+  "docs": 16,
+  "html": 1076,
+  "docBytes": 21059006,
+  "length": 4960311296,
+  "scraper": "warc2zim 2.2.2,Browsertrix-Crawler 1.5.7 (with warcio.js 2.4.3),zimit 3.0.3",
+  "sample": [
+   "womenshistory.si.edu/sites/default/files/documents/africanamericanmedicalprofessionals_conversations_0.pdf",
+   "womenshistory.si.edu/sites/default/files/documents/becoming-visible-bibliography-pdf.pdf",
+   "womenshistory.si.edu/sites/default/files/documents/bessiecoleman_conversations.pdf",
+   "womenshistory.si.edu/sites/default/files/documents/bv-activity-guide-v2-final_cp_03062024.pdf",
+   "womenshistory.si.edu/sites/default/files/documents/bv-book-club-questions-v2-final_cp03062024.pdf",
+   "womenshistory.si.edu/sites/default/files/documents/bv-conversation-kit-v2-final_cp_03062024.pdf",
+   "womenshistory.si.edu/sites/default/files/documents/cindywhitehead_conversations.pdf",
+   "womenshistory.si.edu/sites/default/files/documents/dead_letter_office_album_conversations.pdf",
+   "womenshistory.si.edu/sites/default/files/documents/discoverability-lab-further-reading.pdf",
+   "womenshistory.si.edu/sites/default/files/documents/doloresdelrio_conversations.pdf"
+  ]
+ },
+ "wwwnc.cdc.gov_en_all": {
+  "docs": 5,
+  "html": 1878,
+  "docBytes": 3657285,
+  "length": 178327552,
+  "scraper": "warc2zim 2.1.3,Browsertrix-Crawler 1.3.5 (with warcio.js 2.3.1),zimit 2.1.6",
+  "sample": [
+   "wwwnc.cdc.gov/travel/files/xdr-typhoid-fever-pakistan-thn-bengali-h.pdf",
+   "wwwnc.cdc.gov/travel/files/xdr-typhoid-fever-pakistan-thn-hindi-h.pdf",
+   "wwwnc.cdc.gov/travel/files/xdr-typhoid-fever-pakistan-thn-urdu-h.pdf",
+   "wwwnc.cdc.gov/travel/files/zika-travel-brochure-508.pdf",
+   "wwwnc.cdc.gov/travel/files/zika-travel-brochure-sp.pdf"
+  ]
+ },
+ "partituras-gratis.es_es_all": {
+  "docs": 2242,
+  "html": 5416,
+  "docBytes": 894352275,
+  "length": 3782315008,
+  "scraper": "warc2zim 2.3.0,Browsertrix-Crawler 1.11.2 (with warcio.js 2.4.9),zimit 3.1.2",
+  "sample": [
+   "www.partituras-gratis.es/archivo/1001_Auld_Lang_Syne.pdf",
+   "www.partituras-gratis.es/archivo/1003_Jingle_Bells.pdf",
+   "www.partituras-gratis.es/archivo/1008_Kas_a-rhab.pdf",
+   "www.partituras-gratis.es/archivo/1012_Kost_er_hoët.pdf",
+   "www.partituras-gratis.es/archivo/1017_Fisel_–_ton_kentañ.pdf",
+   "www.partituras-gratis.es/archivo/1021_Bal_fisel.pdf",
+   "www.partituras-gratis.es/archivo/1025_Fisel_–_ton_diwezhañ.pdf",
+   "www.partituras-gratis.es/archivo/1029_Elle_est_où_ma_valise.pdf",
+   "www.partituras-gratis.es/archivo/1045_An_Ter_Vari.pdf",
+   "www.partituras-gratis.es/archivo/1050_An_Ter_Vari.pdf"
+  ]
+ },
+ "rabbitwaves.ca_en_all": {
+  "docs": 3,
+  "html": 16,
+  "docBytes": 53281976,
+  "length": 71122944,
+  "scraper": "warc2zim 2.3.1,Browsertrix-Crawler 1.14.1 (with warcio.js 2.4.11),zimit 3.1.3",
+  "sample": [
+   "rabbitwaves.ca/media/docs/abbreviations.pdf",
+   "rabbitwaves.ca/media/docs/ics_pub102bk.pdf",
+   "rabbitwaves.ca/media/docs/semaphore_history.pdf"
+  ]
+ },
+ "ready.gov_en_all": {
+  "docs": 401,
+  "html": 2243,
+  "docBytes": 908304561,
+  "length": 2063895552,
+  "scraper": "warc2zim 2.3.1,Browsertrix-Crawler 1.14.1 (with warcio.js 2.4.11),zimit 3.1.3",
+  "sample": [
+   "www.fema.gov/sites/default/files/documents/fema_npd_developing-and-maintaining-emergency_052125.pdf",
+   "www.ready.gov/sites/default/files/2019-06/campus_cert_starter_guide_final.pdf",
+   "www.ready.gov/sites/default/files/2019-06/cert_train_the_trainer_campus_cert_annex_instructor_guide.pdf",
+   "www.ready.gov/sites/default/files/2019-06/emergency_checklist_kids.pdf",
+   "www.ready.gov/sites/default/files/2019-06/family_communications_plan_kids.pdf",
+   "www.ready.gov/sites/default/files/2019-06/family_communications_plan_parents.pdf",
+   "www.ready.gov/sites/default/files/2019-06/fema_youth_preparedness_program_implementation_checklist.pdf",
+   "www.ready.gov/sites/default/files/2019-06/megashelter_planning_guide.pdf",
+   "www.ready.gov/sites/default/files/2019-06/national_disaster_recovery_framework.pdf",
+   "www.ready.gov/sites/default/files/2019-06/national_response_framework.pdf"
+  ]
+ },
+ "smbc-comics.com_en_all": {
+  "docs": 9,
+  "html": 1,
+  "docBytes": 109272348,
+  "length": 112859136,
+  "scraper": "warc2zim 2.3.1,Browsertrix-Crawler 1.14.1 (with warcio.js 2.4.11),zimit 3.1.3",
+  "sample": [
+   "www.smbc-comics.com/covid/files/Mini-Sonnets-web-v2.pdf",
+   "www.smbc-comics.com/covid/files/SMBCReligionv2.pdf",
+   "www.smbc-comics.com/covid/files/SMBCScience.pdf",
+   "www.smbc-comics.com/covid/files/TrialoftheClone1.pdf",
+   "www.smbc-comics.com/covid/files/augie.pdf",
+   "www.smbc-comics.com/covid/files/augie_german.pdf",
+   "www.smbc-comics.com/covid/files/miniSciWebv6.pdf",
+   "www.smbc-comics.com/covid/files/minibibleWebV2.pdf",
+   "www.smbc-comics.com/covid/files/nerddissesv17.pdf"
+  ]
+ },
+ "theworldfactbook_en_all": {
+  "docs": 839,
+  "html": 830,
+  "docBytes": 371758789,
+  "length": 407350272,
+  "scraper": null,
+  "sample": [
+   "attachments/docs/EVOLUTION OF THE WFB LOGO.pdf",
+   "attachments/docs/What's New Quiz answers.pdf",
+   "attachments/docs/original/AC_general_summary.pdf",
+   "attachments/docs/original/AF_general_one_pager.pdf",
+   "attachments/docs/original/AF_general_summary.pdf",
+   "attachments/docs/original/AO_general_summary.pdf",
+   "attachments/docs/original/AR_general_one_pager.pdf",
+   "attachments/docs/original/AR_general_summary.pdf",
+   "attachments/docs/original/AR_w_cup_one_pager.pdf",
+   "attachments/docs/original/AS_general_summary.pdf"
+  ]
+ },
+ "folgerpedia.folger.edu_en_all": {
+  "docs": 346,
+  "html": 5851,
+  "docBytes": 791259111,
+  "length": 4201535488,
+  "scraper": "warc2zim 2.3.0,Browsertrix-Crawler 1.11.2 (with warcio.js 2.4.9),zimit 3.1.2",
+  "sample": [
+   "folgerpedia.folger.edu/mediawiki/media/images_pedia_folgerpedia_mw/0/03/July_pop_up_catalog.pdf",
+   "folgerpedia.folger.edu/mediawiki/media/images_pedia_folgerpedia_mw/0/03/Shakespeare's_Sisters_FAMILY_GUIDE.pdf",
+   "folgerpedia.folger.edu/mediawiki/media/images_pedia_folgerpedia_mw/0/04/Teaching_Resources_for_Folgerpedia_8_10.pdf",
+   "folgerpedia.folger.edu/mediawiki/media/images_pedia_folgerpedia_mw/0/05/A_Manuscript_Miscellany.pdf",
+   "folgerpedia.folger.edu/mediawiki/media/images_pedia_folgerpedia_mw/0/06/English_Caribbean_at_the_Folger_Bibliography.pdf",
+   "folgerpedia.folger.edu/mediawiki/media/images_pedia_folgerpedia_mw/0/06/V.a.140_Reading_Copy.pdf",
+   "folgerpedia.folger.edu/mediawiki/media/images_pedia_folgerpedia_mw/0/07/W.a.315_Reading_Copy.pdf",
+   "folgerpedia.folger.edu/mediawiki/media/images_pedia_folgerpedia_mw/0/08/Speed_Dating_Sheet.pdf",
+   "folgerpedia.folger.edu/mediawiki/media/images_pedia_folgerpedia_mw/0/09/Hill.pdf",
+   "folgerpedia.folger.edu/mediawiki/media/images_pedia_folgerpedia_mw/0/09/X.d.738_Reading_Copy.pdf"
+  ]
+ },
+ "africanstorybook.org_mul_all": {
+  "docs": 5165,
+  "html": 5726,
+  "docBytes": 8673472434,
+  "length": 8694230016,
+  "scraper": null,
+  "sample": [
+   "00032bb60fa93dc09610594468dbe19b.epub",
+   "000f4f76654b1ff5169f66b209bac516.epub",
+   "000f769bed2cade1b114408c3960589f.epub",
+   "001565c792c33023e693f9be4400065b.epub",
+   "00163b353af21ad50d5a39b67abc8827.epub",
+   "002f3714aaf821f185a51ec334c496ab.epub",
+   "00309f39d26b770b3fa64f3fa8923dd8.epub",
+   "00356b4eb91e11f9a4d2dfe769d9ee3b.epub",
+   "0042ae943685d412288d0b4d6aa90598.epub",
+   "005e2926f1b17908288b40122cbca12d.epub"
+  ]
+ },
+ "energypedia_en_all": {
+  "docs": 62,
+  "html": 10549,
+  "docBytes": 685553646,
+  "length": 722590720,
+  "scraper": "mwoffliner 1.17.5",
+  "sample": [
+   "_assets_/480bd3581ed26a415c5821a7fad8589c/A_Multi-Criteria_Assessment_ofWater_Supply_in_Ugandan_Refugee_Settlements.pdf",
+   "_assets_/480bd3581ed26a415c5821a7fad8589c/Caja_de_Herramientas_de_SPIS_Modulos_Completo_ES.pdf",
+   "_assets_/480bd3581ed26a415c5821a7fad8589c/Case_Study_Chile_-_La_Tirana.pdf",
+   "_assets_/480bd3581ed26a415c5821a7fad8589c/Case_Study_India-_Lalpura.pdf",
+   "_assets_/480bd3581ed26a415c5821a7fad8589c/Case_Study_Kenya-_Ongata_Rongai.pdf",
+   "_assets_/480bd3581ed26a415c5821a7fad8589c/Case_Study_Kenya_-_Holgajo_Farm.pdf",
+   "_assets_/480bd3581ed26a415c5821a7fad8589c/Case_Study_Morocco-_Alaoui.pdf",
+   "_assets_/480bd3581ed26a415c5821a7fad8589c/Costs_and_Benefits_of_Clean_Energy_Technologies_in_Kenyas_Milk_Value_Chain.pdf",
+   "_assets_/480bd3581ed26a415c5821a7fad8589c/Costs_and_Benefits_of_Clean_Energy_Technologies_in_Kenya’s_Vegetable_Value_Chain.pdf",
+   "_assets_/480bd3581ed26a415c5821a7fad8589c/Costs_and_Benefits_of_Clean_Energy_Technologies_in_Tanzania’s_Milk_Value_Chain.pdf"
+  ]
+ },
+ "medlineplus.gov_en_all": {
+  "docs": 2851,
+  "html": 14940,
+  "docBytes": 177663244,
+  "length": 1944841216,
+  "scraper": "warc2zim 2.1.3,Browsertrix-Crawler 1.3.5 (with warcio.js 2.3.1),zimit 2.1.6",
+  "sample": [
+   "medlineplus.gov/about/aboutmedlineplus.pdf",
+   "medlineplus.gov/connect/medlineplusconnecthandout.pdf",
+   "medlineplus.gov/download/genetics/chromosome/1.pdf",
+   "medlineplus.gov/download/genetics/chromosome/10.pdf",
+   "medlineplus.gov/download/genetics/chromosome/11.pdf",
+   "medlineplus.gov/download/genetics/chromosome/12.pdf",
+   "medlineplus.gov/download/genetics/chromosome/13.pdf",
+   "medlineplus.gov/download/genetics/chromosome/14.pdf",
+   "medlineplus.gov/download/genetics/chromosome/15.pdf",
+   "medlineplus.gov/download/genetics/chromosome/16.pdf"
+  ]
+ },
+ "phzh_core-english-one_en": {
+  "docs": 10,
+  "html": 157,
+  "docBytes": 8432412,
+  "length": 96982016,
+  "scraper": "openedx2zim 1.0.1",
+  "sample": [
+   "instance_assets/CORE_Training_Booklet_Topic_1.pdf",
+   "instance_assets/CORE_Training_Booklet_Topic_2.pdf",
+   "instance_assets/CORE_Training_Booklet_Topic_3.pdf",
+   "instance_assets/CORE_Training_Booklet_Topic_4.pdf",
+   "instance_assets/CORE_Training_Booklet_Topic_5.pdf",
+   "instance_assets/CORE_Training_Booklet_Topic_6.pdf",
+   "instance_assets/CORE_Training_Booklet_Topic_7.pdf",
+   "instance_assets/CORE_Training_Booklet_Topic_8.pdf",
+   "instance_assets/CORE_Training_Booklet_Topic_9.pdf",
+   "instance_assets/CORE_Training_Booklet_all_Topics.pdf"
+  ]
+ },
+ "alexandria.dk_en_all": {
+  "docs": 5351,
+  "html": 42965,
+  "docBytes": 35403359312,
+  "length": 43048123392,
+  "scraper": "warc2zim 2.3.1,Browsertrix-Crawler 1.14.1 (with warcio.js 2.4.11),zimit 3.1.3",
+  "sample": [
+   "download.alexandria.dk/files/conset/1/36 Fastaval 1986-2011 50 kr..pdf",
+   "download.alexandria.dk/files/conset/1/the-best-one-shots-in-the-world-the-danish-scenario-tradition.pdf",
+   "download.alexandria.dk/files/conset/6/Viking-con-folder.pdf",
+   "download.alexandria.dk/files/convent/1/bagdad2.pdf",
+   "download.alexandria.dk/files/convent/1/bagdad3.pdf",
+   "download.alexandria.dk/files/convent/1000/SillyCon15.pdf",
+   "download.alexandria.dk/files/convent/1001/SillyCon-8-folder.pdf",
+   "download.alexandria.dk/files/convent/1001/SillyCon-8.pdf",
+   "download.alexandria.dk/files/convent/1002/Katastrofe2program.pdf",
+   "download.alexandria.dk/files/convent/1005/Snökon 96 folder.pdf"
+  ]
+ },
+ "celticscores.com_en_all": {
+  "docs": 3364,
+  "html": 8131,
+  "docBytes": 1377158413,
+  "length": 5669663744,
+  "scraper": "warc2zim 2.3.0,Browsertrix-Crawler 1.11.2 (with warcio.js 2.4.9),zimit 3.1.2",
+  "sample": [
+   "www.celticscores.com/file/1001_Auld_Lang_Syne.pdf",
+   "www.celticscores.com/file/1003_Jingle_Bells.pdf",
+   "www.celticscores.com/file/1008_Kas_a-rhab.pdf",
+   "www.celticscores.com/file/1012_Kost_er_hoët.pdf",
+   "www.celticscores.com/file/1017_Fisel_–_ton_kentañ.pdf",
+   "www.celticscores.com/file/1021_Bal_fisel.pdf",
+   "www.celticscores.com/file/1025_Fisel_–_ton_diwezhañ.pdf",
+   "www.celticscores.com/file/1029_Elle_est_où_ma_valise.pdf",
+   "www.celticscores.com/file/1045_An_Ter_Vari.pdf",
+   "www.celticscores.com/file/1050_An_Ter_Vari.pdf"
+  ]
+ },
+ "jeffe.cs.illinois.edu_en_all": {
+  "docs": 696,
+  "html": 3,
+  "docBytes": 516408317,
+  "length": 516538368,
+  "scraper": "warc2zim 2.3.1,Browsertrix-Crawler 1.14.1 (with warcio.js 2.4.11),zimit 3.1.3",
+  "sample": [
+   "jeffe.cs.illinois.edu/teaching/algorithms/book/!!-frontmatter.pdf",
+   "jeffe.cs.illinois.edu/teaching/algorithms/book/00-intro.pdf",
+   "jeffe.cs.illinois.edu/teaching/algorithms/book/01-recursion.pdf",
+   "jeffe.cs.illinois.edu/teaching/algorithms/book/02-backtracking.pdf",
+   "jeffe.cs.illinois.edu/teaching/algorithms/book/03-dynprog.pdf",
+   "jeffe.cs.illinois.edu/teaching/algorithms/book/04-greedy.pdf",
+   "jeffe.cs.illinois.edu/teaching/algorithms/book/05-graphs.pdf",
+   "jeffe.cs.illinois.edu/teaching/algorithms/book/06-dfs.pdf",
+   "jeffe.cs.illinois.edu/teaching/algorithms/book/07-mst.pdf",
+   "jeffe.cs.illinois.edu/teaching/algorithms/book/08-sssp.pdf"
+  ]
+ },
+ "chopin.lib.uchicago.edu_en_all": {
+  "docs": 87,
+  "html": 91095,
+  "docBytes": 33722587,
+  "length": 8834036736,
+  "scraper": "warc2zim 2.2.0,Browsertrix-Crawler 1.3.5 (with warcio.js 2.3.1),zimit 2.1.7",
+  "sample": [
+   "chopin.lib.uchicago.edu/chopin-catalog/contents/app.pdf",
+   "chopin.lib.uchicago.edu/chopin-catalog/contents/tab.pdf",
+   "chopin.lib.uchicago.edu/chopin-catalog/descriptions/01.pdf",
+   "chopin.lib.uchicago.edu/chopin-catalog/descriptions/02.pdf",
+   "chopin.lib.uchicago.edu/chopin-catalog/descriptions/03.pdf",
+   "chopin.lib.uchicago.edu/chopin-catalog/descriptions/04.pdf",
+   "chopin.lib.uchicago.edu/chopin-catalog/descriptions/05.pdf",
+   "chopin.lib.uchicago.edu/chopin-catalog/descriptions/06.pdf",
+   "chopin.lib.uchicago.edu/chopin-catalog/descriptions/07.pdf",
+   "chopin.lib.uchicago.edu/chopin-catalog/descriptions/08.pdf"
+  ]
+ },
+ "irp.fas.org_en_military-medicine": {
+  "docs": 24,
+  "html": 2,
+  "docBytes": 64758667,
+  "length": 64986112,
+  "scraper": "warc2zim 2.3.1,Browsertrix-Crawler 1.14.1 (with warcio.js 2.4.11),zimit 3.1.3",
+  "sample": [
+   "irp.fas.org/doddir/milmed/bandage.pdf",
+   "irp.fas.org/doddir/milmed/childbirth.pdf",
+   "irp.fas.org/doddir/milmed/corpsman-pt1.pdf",
+   "irp.fas.org/doddir/milmed/corpsman-pt2.pdf",
+   "irp.fas.org/doddir/milmed/corpsman-pt3.pdf",
+   "irp.fas.org/doddir/milmed/dental.pdf",
+   "irp.fas.org/doddir/milmed/dosimetry.pdf",
+   "irp.fas.org/doddir/milmed/duequip.pdf",
+   "irp.fas.org/doddir/milmed/family.pdf",
+   "irp.fas.org/doddir/milmed/first.pdf"
+  ]
+ },
+ "openmusictheory.com_en_all": {
+  "docs": 4,
+  "html": 254,
+  "docBytes": 6571003,
+  "length": 76967936,
+  "scraper": "warc2zim 2.3.1,Browsertrix-Crawler 1.14.1 (with warcio.js 2.4.11),zimit 3.1.3",
+  "sample": [
+   "openmusictheory.github.io/Graphics/Handouts/HarmoniesByBassScaleDegree.pdf",
+   "openmusictheory.github.io/Graphics/Handouts/LSandFBsymbols.pdf",
+   "openmusictheory.github.io/Graphics/blankClockFaces.pdf",
+   "openmusictheory.github.io/Graphics/counterpoint/cantusFirmi.pdf"
+  ]
+ },
+ "opendatastructures.org_en_all": {
+  "docs": 34,
+  "html": 1153,
+  "docBytes": 72289506,
+  "length": 116369408,
+  "scraper": "warc2zim 2.3.0,Browsertrix-Crawler 1.11.2 (with warcio.js 2.4.9),zimit 3.1.2",
+  "sample": [
+   "opendatastructures.org/mcs.pdf",
+   "opendatastructures.org/ods-cpp-screen.pdf",
+   "opendatastructures.org/ods-cpp.pdf",
+   "opendatastructures.org/ods-java-screen.pdf",
+   "opendatastructures.org/ods-java.pdf",
+   "opendatastructures.org/ods-python-screen.pdf",
+   "opendatastructures.org/ods-python.pdf",
+   "opendatastructures.org/versions/edition-0.1/ods-cpp-grayscale.pdf",
+   "opendatastructures.org/versions/edition-0.1/ods-cpp.pdf",
+   "opendatastructures.org/versions/edition-0.1/ods-java-grayscale.pdf"
+  ]
+ },
+ "armypubs_en_all": {
+  "docs": 5768,
+  "html": 36363,
+  "docBytes": 7562266573,
+  "length": 8232397824,
+  "scraper": "warc2zim 2.1.3,Browsertrix-Crawler 1.3.5 (with warcio.js 2.3.1),zimit 2.1.6",
+  "sample": [
+   "armypubs.army.mil/epubs/DR_pubs/DR_a/ARN1019-AR_11-7-000-WEB-0.pdf",
+   "armypubs.army.mil/epubs/DR_pubs/DR_a/ARN11363-AR_40-1-000-WEB-1.pdf",
+   "armypubs.army.mil/epubs/DR_pubs/DR_a/ARN11484-ATP_1-05.01-000-WEB-1.pdf",
+   "armypubs.army.mil/epubs/DR_pubs/DR_a/ARN11631-AGO_2018-21-000-WEB-1.pdf",
+   "armypubs.army.mil/epubs/DR_pubs/DR_a/ARN13247-AGO_2018-34-000-WEB-2.pdf",
+   "armypubs.army.mil/epubs/DR_pubs/DR_a/ARN13996-ARMY_DIR_2018-16-000-WEB-1.pdf",
+   "armypubs.army.mil/epubs/DR_pubs/DR_a/ARN14135-TC_4-02.1-002-WEB-3.pdf",
+   "armypubs.army.mil/epubs/DR_pubs/DR_a/ARN14342-AR_623-3-000-WEB-1.pdf",
+   "armypubs.army.mil/epubs/DR_pubs/DR_a/ARN14652-TC_3-04.93-001-WEB-2.pdf",
+   "armypubs.army.mil/epubs/DR_pubs/DR_a/ARN15132-AR_50-5-001-WEB-2.pdf"
+  ]
+ },
+ "milneopentextbooks.org_en_all": {
+  "docs": 26,
+  "html": 557,
+  "docBytes": 88328359,
+  "length": 422804480,
+  "scraper": "warc2zim 2.3.1,Browsertrix-Crawler 1.14.1 (with warcio.js 2.4.11),zimit 3.1.3",
+  "sample": [
+   "knightscholar.geneseo.edu/cgi/viewcontent.cgi?article=1036&context=oer-ost",
+   "knightscholar.geneseo.edu/cgi/viewcontent.cgi?filename=0&article=1028&context=oer-ost&type=additional",
+   "milneopentextbooks.org/download/ac-electrical-circuit-pdf/?tmstv=1786808683&dlm-dp-dl-force=1&dlm-dp-dl-nonce=e639d8aa46",
+   "milneopentextbooks.org/download/applications-of-control-charts-for-quality-improvement-in-health-care-pdf/?tmstv=1786808517&dlm-dp-dl-force=1&dlm-dp-dl-nonce=e639d8aa46",
+   "milneopentextbooks.org/download/basic-tools-for-quality-improvement-pdf/?tmstv=1786808526&dlm-dp-dl-force=1&dlm-dp-dl-nonce=e639d8aa46",
+   "milneopentextbooks.org/download/dc-electrical-circuit-pdf/?tmstv=1786808652&dlm-dp-dl-force=1&dlm-dp-dl-nonce=e639d8aa46",
+   "milneopentextbooks.org/download/embedded-controllers-lab-manual-pdf/?tmstv=1786808329&dlm-dp-dl-force=1&dlm-dp-dl-nonce=e639d8aa46",
+   "milneopentextbooks.org/download/embedded-controllers-pdf/?tmstv=1786808305&dlm-dp-dl-force=1&dlm-dp-dl-nonce=e639d8aa46",
+   "milneopentextbooks.org/download/forallx-pdf/?tmstv=1786808471&dlm-dp-dl-force=1&dlm-dp-dl-nonce=e639d8aa46",
+   "milneopentextbooks.org/download/gendered-lives-quiz/?tmstv=1786808754&dlm-dp-dl-force=1&dlm-dp-dl-nonce=e639d8aa46"
+  ]
+ },
+ "thalesdoc_en_all": {
+  "docs": 806,
+  "html": 136032,
+  "docBytes": 814308323,
+  "length": 3105813504,
+  "scraper": "warc2zim 2.2.2,Browsertrix-Crawler 1.6.0 (with warcio.js 2.4.4),zimit 3.0.5",
+  "sample": [
+   "thalesdocs.com/ctp/cm/2.10/extern/007-500223-001_Quick_Start_Guide_CipherTrust_k160_revE.pdf",
+   "thalesdocs.com/ctp/cm/2.11/extern/007-500223-001_Quick_Start_Guide_CipherTrust_k160_revF.pdf",
+   "thalesdocs.com/ctp/cm/2.12/extern/007-500223-001_Quick_Start_Guide_CipherTrust_k160_revF.pdf",
+   "thalesdocs.com/ctp/cm/2.13/extern/007-500223-001_Quick_Start_Guide_CipherTrust_k160_revF.pdf",
+   "thalesdocs.com/ctp/cm/2.14/extern/007-500223-001_Quick_Start_Guide_CipherTrust_k160_revF.pdf",
+   "thalesdocs.com/ctp/cm/2.15/extern/007-500223-001_Quick_Start_Guide_CipherTrust_k160_revH.pdf",
+   "thalesdocs.com/ctp/cm/2.16/extern/007-500223-001_Quick_Start_Guide_CipherTrust_k160_revJ.pdf",
+   "thalesdocs.com/ctp/cm/2.17/extern/007-500223-001_Quick_Start_Guide_CipherTrust_k160_revH.pdf",
+   "thalesdocs.com/ctp/cm/2.18/extern/007-500223-001_Quick_Start_Guide_CipherTrust_k160_revH.pdf",
+   "thalesdocs.com/ctp/cm/2.19/extern/007-500223-001_Quick_Start_Guide_CipherTrust_k160_revH.pdf"
+  ]
+ },
+ "wikibooks_en_all": {
+  "docs": 293,
+  "html": 110232,
+  "docBytes": 3029165156,
+  "length": 3544612864,
+  "scraper": "mwoffliner 2.1.1",
+  "sample": [
+   "_assets_/0c70a452f799bfe840676ee341124611/AERASymposiumPresentation.pdf",
+   "_assets_/0c70a452f799bfe840676ee341124611/A_Guidebook_for_Managing_Telecentre_Networks.pdf",
+   "_assets_/0c70a452f799bfe840676ee341124611/Accordion.pdf",
+   "_assets_/0c70a452f799bfe840676ee341124611/Acoustics.pdf",
+   "_assets_/0c70a452f799bfe840676ee341124611/Ada_Programming.pdf",
+   "_assets_/0c70a452f799bfe840676ee341124611/Ada_Programming_Keywords.pdf",
+   "_assets_/0c70a452f799bfe840676ee341124611/Ada_Programming_Operators.pdf",
+   "_assets_/0c70a452f799bfe840676ee341124611/Ada_Style_Guide.pdf",
+   "_assets_/0c70a452f799bfe840676ee341124611/Algorithms.pdf",
+   "_assets_/0c70a452f799bfe840676ee341124611/Anatomy_and_Physiology_of_Animals.pdf"
+  ]
+ },
+ "cd3wdproject.org_en_all": {
+  "docs": 77,
+  "html": 13220,
+  "docBytes": 97323780,
+  "length": 572638208,
+  "scraper": "warc2zim 2.3.1,Browsertrix-Crawler 1.14.1 (with warcio.js 2.4.11),zimit 3.1.3",
+  "sample": [
+   "www.cd3wdproject.org/CD3WD/APPRTECH/PEDALGEN/BOSCH1.PDF",
+   "www.cd3wdproject.org/CD3WD/APPRTECH/PEDALGEN/BOSCH2.PDF",
+   "www.cd3wdproject.org/CD3WD/APPRTECH/PEDALGEN/HOMEPWR.PDF",
+   "www.cd3wdproject.org/CD3WD/APPRTECH/PEDALGEN/PPGMAN.PDF",
+   "www.cd3wdproject.org/CD3WD/APPRTECH/VLG_ENG/VLG_ENG1.PDF",
+   "www.cd3wdproject.org/CD3WD/APPRTECH/VLG_ENG/VLG_ENG2.PDF",
+   "www.cd3wdproject.org/CD3WD/APPRTECH/VLG_ENG/VLG_ENG3.PDF",
+   "www.cd3wdproject.org/CD3WD/APPRTECH/VLG_ENG/VLG_ENG4.PDF",
+   "www.cd3wdproject.org/GATE_DL/AGRIC/G25HAE.PDF",
+   "www.cd3wdproject.org/GATE_DL/AGRIC/X0064E.PDF"
+  ]
+ },
+ "libretexts.org_en_human": {
+  "docs": 23,
+  "html": 70113,
+  "docBytes": 32219433,
+  "length": 4433683456,
+  "scraper": "mindtouch2zim v0.1.1",
+  "sample": [
+   "content/human.libretexts.org/@api/deki/files/123350/downloadac13639?revision=1",
+   "content/human.libretexts.org/@api/deki/files/132812/tour-bus-paris.pdf?revision=1",
+   "content/human.libretexts.org/@api/deki/files/150245/clipboard_e4d7b8a33c8c270c18a335b2f24620fd0.png?revision=1",
+   "content/human.libretexts.org/@api/deki/files/150246/clipboard_e6fbad35ec45c59f5c652a37b9dc074ba.png?revision=1",
+   "content/human.libretexts.org/@api/deki/files/150247/clipboard_efc72ed2dfa22a6374b6055c6c9a494c9.png?revision=1",
+   "content/human.libretexts.org/@api/deki/files/150248/clipboard_e02ebd9131957aadec111d0afe794a8b3.png?revision=1",
+   "content/human.libretexts.org/@api/deki/files/150249/clipboard_e4680e1ed9185553456d53b0836c6cf28.png?revision=1",
+   "content/human.libretexts.org/@api/deki/files/150250/clipboard_ef627b0c50f445ef357acf5bbfa0d6b6f.png?revision=1",
+   "content/human.libretexts.org/@api/deki/files/150251/clipboard_e351943d9419b9ae3d754132a6ebb3385.png?revision=1",
+   "content/human.libretexts.org/@api/deki/files/150252/clipboard_e5e4748d65a840c66bf4766a7a7db3c2b.png?revision=1"
+  ]
+ },
+ "music.dalitio.de_en_all": {
+  "docs": 441,
+  "html": 293,
+  "docBytes": 34599297,
+  "length": 40445952,
+  "scraper": "warc2zim 2.3.1,Browsertrix-Crawler 1.14.1 (with warcio.js 2.4.11),zimit 3.1.3",
+  "sample": [
+   "music.dalitio.de/choir/asola/decantabat/asola_f15_decantabat_sat.pdf",
+   "music.dalitio.de/choir/asola/gustate/asola_f19_gustate_sat.pdf",
+   "music.dalitio.de/choir/campion/as-by-the-streams/as_by_the_streams.pdf",
+   "music.dalitio.de/choir/campion/ayres-book2/o_what_unhoped.pdf",
+   "music.dalitio.de/choir/campion/ayres-book2/sweet_exclude_me_not.pdf",
+   "music.dalitio.de/choir/dalitz/aarona-benu/aarona-beno-en.pdf",
+   "music.dalitio.de/choir/dalitz/aarona-benu/aarona-beno-ssa-en.pdf",
+   "music.dalitio.de/choir/dalitz/aarona-benu/aarona-beno-ttb-en.pdf",
+   "music.dalitio.de/choir/dalitz/aarona-benu/aarona-benu-a3.pdf",
+   "music.dalitio.de/choir/dalitz/aarona-benu/aarona-benu-ssa.pdf"
+  ]
+ },
+ "encyclopedie-environnement.org_en_all": {
+  "docs": 468,
+  "html": 6965,
+  "docBytes": 1175316096,
+  "length": 4306091008,
+  "scraper": "warc2zim 2.3.1,Browsertrix-Crawler 1.14.1 (with warcio.js 2.4.11),zimit 3.1.3",
+  "sample": [
+   "www.encyclopedie-environnement.org/app/pdf/?idpost=1&idauthor=A-179&urlimg=https:/www.encyclopedie-environnement.org/app/uploads/2016/02/contribuer-encyclopedie-environnement2.png",
+   "www.encyclopedie-environnement.org/app/pdf/?idpost=10015&idauthor=A-145-146&urlimg=https:/www.encyclopedie-environnement.org/app/uploads/2019/09/Criqui_couv.jpg",
+   "www.encyclopedie-environnement.org/app/pdf/?idpost=10032&idauthor=A-145-146&urlimg=https:/www.encyclopedie-environnement.org/app/uploads/2019/09/Criqui_couv.jpg",
+   "www.encyclopedie-environnement.org/app/pdf/?idpost=1008&idauthor=A-33&urlimg=https:/www.encyclopedie-environnement.org/app/uploads/2016/07/Vie-plantes_couverture.jpg",
+   "www.encyclopedie-environnement.org/app/pdf/?idpost=10117&idauthor=A-169&urlimg=https:/www.encyclopedie-environnement.org/app/uploads/2019/10/Amazonie_couv-foret.jpg",
+   "www.encyclopedie-environnement.org/app/pdf/?idpost=10177&idauthor=A-169&urlimg=https:/www.encyclopedie-environnement.org/app/uploads/2019/10/Amazonie_couv-foret.jpg",
+   "www.encyclopedie-environnement.org/app/pdf/?idpost=10181&idauthor=A-173-174&urlimg=https:/www.encyclopedie-environnement.org/app/uploads/2019/10/bacteries_couv-euprymna-scolopes.jpg",
+   "www.encyclopedie-environnement.org/app/pdf/?idpost=10229&idauthor=A-168&urlimg=https:/www.encyclopedie-environnement.org/app/uploads/2019/09/Changement-climatique_couv-pyramide-kukulkan.jpg",
+   "www.encyclopedie-environnement.org/app/pdf/?idpost=10295&idauthor=A-173-174&urlimg=https:/www.encyclopedie-environnement.org/app/uploads/2019/10/bacteries_couv-euprymna-scolopes.jpg",
+   "www.encyclopedie-environnement.org/app/pdf/?idpost=1031&idauthor=A-35-87-85&urlimg=https:/www.encyclopedie-environnement.org/app/uploads/2016/07/Reproduction-plantes-alpines_couverture.jpg"
+  ]
+ },
+ "mutopiaproject.org_en_all": {
+  "docs": 3911,
+  "html": 45175,
+  "docBytes": 2842652785,
+  "length": 6632491008,
+  "scraper": "warc2zim 2.3.1,Browsertrix-Crawler 1.14.1 (with warcio.js 2.4.11),zimit 3.1.3",
+  "sample": [
+   "www.mutopiaproject.org/collections/blakeop2/blake_op2-a4.pdf",
+   "www.mutopiaproject.org/collections/blakeop2/blake_op2-let.pdf",
+   "www.mutopiaproject.org/collections/hymnproject/hymnproject.pdf",
+   "www.mutopiaproject.org/collections/mozstrq/op10.pdf",
+   "www.mutopiaproject.org/collections/sorop1/boekje-a4.pdf",
+   "www.mutopiaproject.org/collections/sorop1/boekje-let.pdf",
+   "www.mutopiaproject.org/collections/sorop2/sor_op2-a4.pdf",
+   "www.mutopiaproject.org/collections/sorop2/sor_op2-let.pdf",
+   "www.mutopiaproject.org/ftp/AbtF/Vocalise1/Vocalise1-a4.pdf",
+   "www.mutopiaproject.org/ftp/AbtF/Vocalise1/Vocalise1-let.pdf"
+  ]
+ },
+ "cheatography.com_en_all": {
+  "docs": 27202,
+  "html": 66886,
+  "docBytes": 3918406175,
+  "length": 11439513600,
+  "scraper": "warc2zim 2.2.2,Browsertrix-Crawler 1.6.0 (with warcio.js 2.4.4),zimit 3.0.5",
+  "sample": [
+   "cheatography.com/-n-e-v-a-e-h-/cheat-sheets/biology-unit-2-cells/pdf/?last=1680189752",
+   "cheatography.com/-n-e-v-a-e-h-/cheat-sheets/biology-unit-2-cells/pdf_bw/?last=1680189752",
+   "cheatography.com/-n-e-v-a-e-h-/cheat-sheets/spanish-tuition-semester-1/pdf/?last=1662554227",
+   "cheatography.com/-n-e-v-a-e-h-/cheat-sheets/spanish-tuition-semester-1/pdf_bw/?last=1662554227",
+   "cheatography.com/-n-e-v-a-e-h-/cheat-sheets/spanish-unit-2-summative/pdf/?last=1669393581",
+   "cheatography.com/-n-e-v-a-e-h-/cheat-sheets/spanish-unit-2-summative/pdf_bw/?last=1669393581",
+   "cheatography.com/-n-e-v-a-e-h-/cheat-sheets/spanish/pdf/?last=1739205831",
+   "cheatography.com/-n-e-v-a-e-h-/cheat-sheets/spanish/pdf_bw/?last=1739205831",
+   "cheatography.com/-n-e-v-a-e-h-/cheat-sheets/spanishfinal/pdf/?last=1746907871",
+   "cheatography.com/-n-e-v-a-e-h-/cheat-sheets/spanishfinal/pdf_bw/?last=1746907871"
+  ]
+ },
+ "stacks.math.columbia.edu_en_all": {
+  "docs": 117,
+  "html": 22386,
+  "docBytes": 116233138,
+  "length": 154074112,
+  "scraper": "warc2zim 2.2.2,Browsertrix-Crawler 1.6.0 (with warcio.js 2.4.4),zimit 3.0.5",
+  "sample": [
+   "stacks.math.columbia.edu/download/adequate.pdf",
+   "stacks.math.columbia.edu/download/algebra.pdf",
+   "stacks.math.columbia.edu/download/algebraic.pdf",
+   "stacks.math.columbia.edu/download/algebraization.pdf",
+   "stacks.math.columbia.edu/download/artin.pdf",
+   "stacks.math.columbia.edu/download/book.pdf",
+   "stacks.math.columbia.edu/download/bootstrap.pdf",
+   "stacks.math.columbia.edu/download/brauer.pdf",
+   "stacks.math.columbia.edu/download/categories.pdf",
+   "stacks.math.columbia.edu/download/chow.pdf"
+  ]
+ },
+ "lua.org_en_all": {
+  "docs": 278,
+  "html": 1611,
+  "docBytes": 298568266,
+  "length": 379804672,
+  "scraper": "warc2zim 2.3.1,Browsertrix-Crawler 1.14.1 (with warcio.js 2.4.11),zimit 3.1.3",
+  "sample": [
+   "lua.org/doc/Masterminds.pdf",
+   "lua.org/doc/apostila_lua_2008.pdf",
+   "lua.org/doc/jai2009.pdf",
+   "lua.org/doc/jucs04.pdf",
+   "lua.org/doc/jucs05.pdf",
+   "lua.org/doc/jucs17.pdf",
+   "lua.org/doc/sblp2005.pdf",
+   "lua.org/ftp/refman-3.2.pdf",
+   "lua.org/ftp/refman-4.0.pdf",
+   "lua.org/ftp/refman-5.0.pdf"
+  ]
+ },
+ "survivorlibrary.com_en_all": {
+  "docs": 11802,
+  "html": 194,
+  "docBytes": 220338009275,
+  "length": 220347600896,
+  "scraper": "warc2zim 2.3.1,Browsertrix-Crawler 1.14.1 (with warcio.js 2.4.11),zimit 3.1.3",
+  "sample": [
+   "www.survivorlibrary.com/library/(socialism)-bankruptcy_of_reform_1932.pdf",
+   "www.survivorlibrary.com/library/(socialism)-victorious_socialist_construction_in_the_soviet_union_1931.pdf",
+   "www.survivorlibrary.com/library/(socialism)-why_every_worker_should_join_the_communist_party_1930.pdf",
+   "www.survivorlibrary.com/library/(socialism)-why_i_am_a_socialist_1936.pdf",
+   "www.survivorlibrary.com/library/(socialism)-why_unemployment_1935.pdf",
+   "www.survivorlibrary.com/library/1000_pedagogical_donts_1892.pdf",
+   "www.survivorlibrary.com/library/1000_ways_of_1000_teachers_1882.pdf",
+   "www.survivorlibrary.com/library/1001_household_hints_1910.pdf",
+   "www.survivorlibrary.com/library/1001_questions_and_answers_on_teaching_1886.pdf",
+   "www.survivorlibrary.com/library/1001_questions_answered_about_astronomy_1975.pdf"
+  ]
+ }
+}

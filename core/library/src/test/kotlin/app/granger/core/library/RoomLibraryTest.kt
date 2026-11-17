@@ -287,6 +287,22 @@ class RoomLibraryTest {
         assertThat(packs().single().addedAt).isEqualTo(7L)
     }
 
+    /** Plan KB2: the file doesn't say it has a book manifest, so a refresh keeps the one attached to the same ZIM. */
+    @Test fun aRefreshKeepsThePacksBookManifest() = test {
+        opener.archives["mm.zim"] = { FakeZimArchive("u-m", "Military Medicine", name = "irp.fas.org_en_military-medicine") }
+        File(internal, "mm.zim").writeText("zim u-m")
+        library.refresh()
+        db.packDao().setBookManifest("u-m", "/s/mm.gbooks")
+        library.refresh()
+        assertThat(packs().single().bookManifest).isEqualTo("/s/mm.gbooks")
+        assertThat(packs().single().bookSource).isEqualTo(BookOrigin.KIWIX)
+        // Another ZIM at that path (a new snapshot) starts without it: the manifest was for the old file.
+        opener.archives["mm.zim"] = { FakeZimArchive("u-m2", "Military Medicine", name = "irp.fas.org_en_military-medicine") }
+        library.refresh()
+        assertThat(packs().single().id).isEqualTo("u-m2")
+        assertThat(packs().single().bookManifest).isNull()
+    }
+
     @Test fun updatedSnapshotKeepsBookmarksPositionsAndAddedAt() = test {
         val old = zim(internal, "top_2026-08.zim", "u-old", name = "wikipedia_en_top", paths = setOf("index", "C++"))
         library.refresh()
@@ -411,7 +427,7 @@ class RoomLibraryTest {
 
     @Test fun removingAPackRunsTheRemovedHook() = test {
         val gone = mutableListOf<String>()
-        val hooked = RoomLibrary(db, opener, { dirs() }, dispatcher, now = { clock }, onRemoved = { gone += it })
+        val hooked = RoomLibrary(db, opener, { dirs() }, dispatcher, now = { clock }, onRemoved = { gone += it.id })
         zim(internal, "a.zim", "u-a")
         hooked.refresh()
         assertThat(hooked.remove("u-a")).isTrue()
@@ -431,7 +447,7 @@ class RoomLibraryTest {
     /** Plan KB walkthrough: Switch's new flavour takes the old one's place, keeping what was saved in it. */
     @Test fun anotherFlavourSupersedesTheOldOneAndKeepsItsMarks() = test {
         val gone = mutableListOf<String>()
-        val hooked = RoomLibrary(db, opener, { dirs() }, dispatcher, now = { clock }, onRemoved = { gone += it })
+        val hooked = RoomLibrary(db, opener, { dirs() }, dispatcher, now = { clock }, onRemoved = { gone += it.id })
         val old = zim(internal, "wikipedia_en_medicine_nopic_2026-10.zim", "u-nopic", name = "wikipedia_en_medicine")
         hooked.refresh()
         hooked.setBookmarked("u-nopic", "index", "Home", true)
@@ -474,7 +490,7 @@ class RoomLibraryTest {
     /** Plan WF Decision 5: Top 1 million takes Best 50,000's place; a mark on an article it lacks becomes history. */
     @Test fun aBiggerSliceSupersedesAcrossZimNamesKeepingPlacesAndTurningMissingArticlesIntoHistory() = test {
         val gone = mutableListOf<String>()
-        val hooked = RoomLibrary(db, opener, { dirs() }, dispatcher, now = { clock }, onRemoved = { gone += it })
+        val hooked = RoomLibrary(db, opener, { dirs() }, dispatcher, now = { clock }, onRemoved = { gone += it.id })
         val old = zim(internal, "wikipedia_en_top_maxi_2026-09.zim", "u-top", name = "wikipedia_en_top", paths = setOf("index", "Lion", "Lost_in_Translation"))
         hooked.refresh()
         hooked.setBookmarked("u-top", "Lion", "Lion", true)

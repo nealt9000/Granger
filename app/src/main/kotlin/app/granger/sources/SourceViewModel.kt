@@ -32,8 +32,10 @@ import app.granger.core.downloads.isActive
 import app.granger.core.library.BookIds
 import app.granger.core.library.BookOrigin
 import app.granger.core.library.Bookshelf
+import app.granger.core.library.GutenbergNames
 import app.granger.core.library.Library
 import app.granger.core.library.Pack
+import app.granger.core.library.isBookPack
 import app.granger.formatBytes
 import app.granger.library.shelf.sortedByShelfKey
 import kotlinx.coroutines.CoroutineDispatcher
@@ -101,7 +103,31 @@ data class ItemRow(
     val covered: Boolean = false,
     /** The pack on Kiwix's online library, for Preview before Get; null for anything Kiwix doesn't host. */
     val previewUrl: String? = null,
-)
+    /** The shelf book this entry is installed as (a Granger book): Open reads it (Plan KB2 Task 4.3). */
+    val bookId: String? = null,
+    /** A folded row on Get more → Books (Project Gutenberg's subjects): the source screen it opens (Plan KB2 Task 4.1). */
+    val opensScope: CatalogScope? = null,
+    /** The row's one meta line on Get more → Books: "65 MB · From Kiwix · irp.fas.org"; null elsewhere. */
+    val meta: UiText? = null,
+    /** A catalog book set's row on Get more → Books (Plan KB2 Task 3.2): the set whose screen it opens. */
+    val opensSet: String? = null,
+) {
+    /** Whether Open has something to open: an installed pack or book. */
+    val opens: Boolean get() = packId != null || bookId != null
+}
+
+/** What a Remove dialog says goes with the file (Plan KB2 Task 4.2). */
+enum class RemoveKind(@StringRes val body: Int) {
+    /** A model or a voice: just the file. */
+    FILE(R.string.sources_remove_body),
+    /** A book: its place, bookmarks and highlights are kept. */
+    BOOK(R.string.sources_remove_book_body),
+    /** A web pack: the bookmarks and places saved in it go too. */
+    WEB_PACK(R.string.sources_remove_pack_body),
+    /** A book pack: its books go, their places, bookmarks and highlights are kept. */
+    BOOK_PACK(R.string.sources_remove_book_pack_body),
+    DOCUMENT_PACK(R.string.sources_remove_document_pack_body),
+}
 
 /**
  * One slice of a set's row: "Best 50,000 articles · 7.0 GB" for the chosen pictures; [note] when it doesn't offer them
@@ -237,6 +263,8 @@ data class SourceUi(
      */
     val languageChip: Boolean = false,
     val allLanguages: Boolean = false,
+    /** The screen's own title, when it isn't its scope's: a book set's ("African Storybook · English", Plan KB2). */
+    val screenTitle: UiText? = null,
 )
 
 /** One row per volume, with what is still to download onto it. */
@@ -280,6 +308,8 @@ class SourceViewModel(
     knowledge: kotlinx.coroutines.flow.Flow<List<String>> = kotlinx.coroutines.flow.flowOf(listOf(app.granger.core.catalog.ENGLISH)),
     /** How the app names Granger voices ("Voz de Granger (Owl)"); null keeps the catalog's English title. */
     private val voiceTitles: app.granger.core.speech.VoiceTitles? = null,
+    /** The catalog book set a [CatalogScope.BOOK_SET] screen shows (Plan KB2 Task 3.2); null elsewhere. */
+    private val bookSet: String? = null,
 ) : ViewModel() {
     private data class Choices(val volumes: List<Volume>, val selectedPath: String?, val wifiOnly: Boolean, val notice: UiText?, val domainCleared: Boolean)
 
@@ -424,7 +454,9 @@ class SourceViewModel(
 
     fun getPreset(presetId: String) {
         val current = catalog.state.value.catalog ?: return
-        val preset = current.presets.firstOrNull { it.id == presetId } ?: return
+        // A set's screen gets its set's presets (Plan KB2 Task 3.2), which aren't the catalog's.
+        val preset = (if (scope == CatalogScope.BOOK_SET) current.bookSet(bookSet.orEmpty())?.presets.orEmpty() else current.presets)
+            .firstOrNull { it.id == presetId } ?: return
         appScope.launch {
             val records = downloads.records.first()
             val packs = library.packs.first()
@@ -452,6 +484,26 @@ class SourceViewModel(
 
     fun retry(itemId: String) {
         appScope.launch { downloads.retry(itemId) }
+    }
+
+    /**
+     * What Remove deletes besides the file, for its dialog (Plan KB2 Task 4.2): a web pack takes the bookmarks and places
+     * saved in it; a book or a book pack's books keep theirs. Reads a book pack's manifest, so off the main thread.
+     */
+    suspend fun removeKind(itemId: String): RemoveKind = withContext(io) {
+        when (val item = catalog.state.value.catalog?.item(itemId)) {
+            is BookEntry -> RemoveKind.BOOK
+            is PackEntry -> {
+                val packs = library.packs.first()
+                val pack = installedPackId(item, downloads.records.first(), packs)?.let { id -> packs.firstOrNull { it.id == id } }
+                when {
+                    pack?.isBookPack == true -> if (app.granger.library.countsDocuments(pack)) RemoveKind.DOCUMENT_PACK else RemoveKind.BOOK_PACK
+                    pack == null && item.isBookPack -> RemoveKind.BOOK_PACK
+                    else -> RemoveKind.WEB_PACK
+                }
+            }
+            else -> RemoveKind.FILE
+        }
     }
 
     /** Deletes an installed item. For packs the library goes first, so its bookmarks go with it. */
@@ -529,7 +581,10 @@ class SourceViewModel(
     private fun buildUi(state: CatalogState, records: List<DownloadRecord>, packs: List<Pack>, s: Settings, lang: LanguageChoice): SourceUi {
         val current = state.catalog
         val gutenberg = scope == CatalogScope.GUTENBERG
+        val booksScope = scope == CatalogScope.BOOKS
         val kiwixBooks = scope == CatalogScope.KIWIX_BOOKS
+        val setScope = scope == CatalogScope.BOOK_SET
+        val theSet = if (setScope) current?.bookSet(bookSet.orEmpty()) else null
         val volumeRows = volumeRows(s.volumes, records)
         // With the whole Kiwix catalog listed, each item's status is worked out once, from its own records only.
         val recordsById = records.groupBy { it.itemId }
@@ -619,6 +674,7 @@ class SourceViewModel(
                 adds = adds?.text,
                 covered = adds?.covered ?: false,
                 previewUrl = (item as? PackEntry)?.let(KiwixList::previewUrl),
+                bookId = (item as? BookEntry)?.takeIf { status(it) in installedStates }?.let { BookIds.of(BookOrigin.GRANGER, it.id) },
             )
         }
         /** A folded family's row: "Developer docs", "243 packs". */
@@ -713,11 +769,15 @@ class SourceViewModel(
         fun inList(item: CatalogItem): Boolean {
             // The 2 MB Ray Charles sample is a test pack (Plan WF Decision 4).
             if (item is PackEntry && item.sample) return false
+            // A book set's screen (Plan KB2 Task 3.2): its books, whatever the library's languages; it was chosen.
+            if (setScope) return item is BookEntry && item.bookSet == bookSet
             if (!shownInLanguage(item)) return false
             // The subjects list (Plan WF Decision 4): its set's subject packs.
             if (subjectsSet != null) return item is PackEntry && item.subjectOf == subjectsSet
             // A readiness domain lists its packs whichever scope they're offered in: Food keeps Water and Food for
             // Preppers, which are offered under Books (Plan KB Decision 6).
+            // Get more → Books lists every book source, Granger's and Kiwix's (Plan KB2 Task 4.1).
+            if (booksScope) return BookShelves.isBookItem(item)
             if (scopeOf(item) != scope && !(inDomain && scopeOf(item) in PACK_SCOPES)) return false
             if (familyView != null && (item !is PackEntry || item.family != familyView.family)) return false
             return !(inDomain && (item !is PackEntry || item.domain != domainId))
@@ -819,6 +879,25 @@ class SourceViewModel(
                     }
                 return@buildList
             }
+            if (booksScope) {
+                addBookShelves(current, needle.isNotEmpty(), ::shown, ::row, ::groupRow, ::status, lang, ::inLanguage)
+                return@buildList
+            }
+            if (setScope) {
+                // A set's books by reading level (Plan KB2 Task 3.2), each level folded as Granger's categories are.
+                theSet?.books.orEmpty().filter(::shown).groupBy { it.level }.toSortedMap().forEach { (level, entries) ->
+                    val title = "$LEVEL_PREFIX$level"
+                    val open = needle.isNotEmpty() || title in s.expanded || entries.size <= FOLDED_ROWS
+                    add(
+                        Section(
+                            title, (if (open) entries else entries.take(FOLDED_ROWS)).map(::row), entries.size,
+                            foldable = needle.isEmpty() && entries.size > FOLDED_ROWS, noun = SectionNoun.BOOKS,
+                            heading = if (level > 0) UiText.Res(R.string.sources_level, level) else UiText.Res(R.string.sources_shelf_other),
+                        ),
+                    )
+                }
+                return@buildList
+            }
             val packs = current.packs.filter { shown(it) && (chosen == null || it.category == chosen) }
             val (featured, rest) = if (inDomain) {
                 // Recommended in a domain: its tier items (essential first), the uninstalled before the installed.
@@ -859,7 +938,8 @@ class SourceViewModel(
         }
         // Granger's screen is Get more's Granger Classics, under Books: only a set of books is offered there. Starter,
         // Efficient and Comprehensive bring Kiwix's wikis and the models, which aren't books (Plan GB walkthrough).
-        val presets = if (scope != CatalogScope.GRANGER) emptyList() else current?.presets.orEmpty().filter { preset ->
+        val presetList = if (setScope) theSet?.presets.orEmpty()
+        else if (scope != CatalogScope.GRANGER && scope != CatalogScope.BOOKS) emptyList() else current?.presets.orEmpty().filter { preset ->
             preset.items.isNotEmpty() && preset.items.all { current?.item(it) is BookEntry } &&
                 // A collection in another language (Clásicos Granger for an English library) waits for All languages (Plan L3).
                 (lang.all || app.granger.core.catalog.Languages.normalise(preset.language) in lang.languages)
@@ -869,12 +949,15 @@ class SourceViewModel(
                 { it.id !in GRANGER_PRESETS },
                 { lang.languages.indexOf(app.granger.core.catalog.Languages.normalise(it.language)).let { i -> if (i < 0) Int.MAX_VALUE else i } },
             ),
-        ).map { preset ->
+        )
+        val presets = presetList.map { preset ->
             val items = preset.items.mapNotNull { current?.item(it) }
             val statuses = items.map(::status)
             val todo = items.filterIndexed { i, _ -> wanted(statuses[i]) }
             PresetRow(
-                preset.id, preset.title(java.util.Locale.getDefault().language), items.size, todo.size, todo.sumOf { it.downloadBytes },
+                // On a set's own screen a level's set is just "Level 2" (its catalog title repeats the set's name).
+                preset.id, preset.title(java.util.Locale.getDefault().language).let { if (setScope) it.substringAfter(": ", it) else it },
+                items.size, todo.size, todo.sumOf { it.downloadBytes },
                 packs = items.count { it is PackEntry }, books = items.count { it is BookEntry },
                 others = items.count { it !is PackEntry && it !is BookEntry }, totalBytes = items.sumOf { it.downloadBytes },
                 onPhone = statuses.count { it == ItemStatus.Installed },
@@ -901,9 +984,89 @@ class SourceViewModel(
             familyTitle = familyView?.let { UiText.Res(it.label) }
                 ?: subjectsSet?.let { set -> UiText.Res(R.string.sources_set_subjects, setGroup(set)?.title ?: "Wikipedia") },
             languageChip = current != null && (lang.all || (scope in PACK_SCOPES || scope == CatalogScope.GRANGER) &&
-                (current.packs.any { scopeOf(it) == scope && !it.sample && !inLanguage(it) } || current.books.any { scopeOf(it) == scope && !inLanguage(it) })),
+                (current.packs.any { scopeOf(it) == scope && !it.sample && !inLanguage(it) } || current.books.any { scopeOf(it) == scope && !inLanguage(it) }) ||
+                booksScope && (current.packs.any { BookShelves.isBookItem(it) && !it.sample && !inLanguage(it) } ||
+                    (current.books + current.setBooks).any { !inLanguage(it) })),
             allLanguages = lang.all,
+            screenTitle = theSet?.let { UiText.Raw(it.title(java.util.Locale.getDefault().language)) },
         )
+    }
+
+    /**
+     * Get more → Books (Plan KB2 Task 4.1): a section per shelf, in order. Literature's Granger sets are [SourceUi.presets]
+     * (the screen puts them first); a catalog with Granger books but no set gets one row opening Granger's screen.
+     * Project Gutenberg's subject packs fold to one row opening its own list; every other book pack is its own row, A–Z.
+     * A search ([searching]) is one section of every match instead: Granger books, Gutenberg packs and book packs, by
+     * title (and author, description), Granger's first.
+     */
+    private fun MutableList<Section>.addBookShelves(
+        current: app.granger.core.catalog.Catalog,
+        searching: Boolean,
+        shown: (CatalogItem) -> Boolean,
+        row: (CatalogItem) -> ItemRow,
+        groupRow: (PackGroup) -> ItemRow,
+        status: (CatalogItem) -> ItemStatus,
+        lang: LanguageChoice,
+        inLanguage: (CatalogItem) -> Boolean,
+    ) {
+        val installed = setOf(ItemStatus.Installed, ItemStatus.UpdateAvailable)
+        // A book set (Plan KB2 Task 3.2) shows in the library's languages, or once any of its books is here or coming.
+        val sets = current.bookSets.filter { set -> lang.all || set.books.any(inLanguage) }
+        fun packRow(group: PackGroup) = groupRow(group).let { r ->
+            r.copy(meta = BookShelves.packMeta(group.flavour(r.id) ?: group.default, r.sizeBytes))
+        }
+        val packs = current.packs.filter { BookShelves.isBookItem(it) && shown(it) }
+        if (searching) {
+            val books = (current.books + current.setBooks).filter(shown).map { row(it).copy(meta = BookShelves.bookMeta(it)) }
+            val packRows = KiwixList.group(packs).sortedBy { it.title.lowercase() }.map(::packRow)
+            val rows = books + packRows
+            if (rows.isNotEmpty()) add(Section(BOOK_RESULTS, rows, heading = UiText.Res(R.string.sources_group_books)))
+            return
+        }
+        for (shelf in BookShelves.ORDER) {
+            val onShelf = packs.filter { BookShelves.shelfOf(it) == shelf }
+            val (gutenbergPacks, others) = onShelf.partition(::isGutenberg)
+            val rows = buildList {
+                if (shelf == app.granger.core.catalog.Shelves.LITERATURE && current.presets.none { p -> p.items.isNotEmpty() && p.items.all { current.item(it) is BookEntry } }) {
+                    val grangerBooks = current.books.filter(shown)
+                    if (grangerBooks.isNotEmpty()) {
+                        add(
+                            ItemRow(
+                                "scope:${CatalogScope.GRANGER}", "Granger Classics", UiText.Raw(""), UiText.Raw(""), 0L, ItemStatus.NotInstalled, null,
+                                opensScope = CatalogScope.GRANGER,
+                                meta = UiText.Plural(R.plurals.common_books, grangerBooks.size, grangerBooks.size),
+                            ),
+                        )
+                    }
+                }
+                if (gutenbergPacks.isNotEmpty()) {
+                    val subjects = gutenbergPacks.count { !it.zimName.endsWith("_all") }.takeIf { it > 0 } ?: gutenbergPacks.size
+                    add(
+                        ItemRow(
+                            "scope:${CatalogScope.GUTENBERG}:$shelf", GutenbergNames.PROVIDER, UiText.Raw(""), UiText.Raw(""), 0L, ItemStatus.NotInstalled, null,
+                            opensScope = CatalogScope.GUTENBERG,
+                            meta = BookShelves.gutenbergMeta(subjects, gutenbergPacks.count { status(it) in installed }),
+                        ),
+                    )
+                }
+                // A set's one row (Plan KB2 Task 3.2): "693 books · 1.2 GB · African Storybook Initiative", opening its screen.
+                addAll(
+                    sets.filter { BookShelves.shelfOf(it) == shelf }.map { set ->
+                        ItemRow(
+                            "set:${set.id}", set.title(java.util.Locale.getDefault().language), UiText.Raw(""), UiText.Raw(set.description), 0L,
+                            ItemStatus.NotInstalled, null,
+                            opensSet = set.id,
+                            meta = BookShelves.setMeta(set, set.books.count { status(it) in installed }),
+                        )
+                    },
+                )
+                addAll(KiwixList.group(others).sortedBy { it.title.lowercase() }.map(::packRow))
+            }
+            // Literature stays, even empty, for the Granger sets the screen puts in it.
+            if (rows.isNotEmpty() || shelf == app.granger.core.catalog.Shelves.LITERATURE) {
+                add(Section(shelf, rows, heading = UiText.Res(BookShelves.heading(shelf))))
+            }
+        }
     }
 
     private fun catalogProblem(state: CatalogState): UiText? {
@@ -928,6 +1091,10 @@ class SourceViewModel(
         const val EVERYTHING = "Everything"
         const val LIBRARIES = "Libraries"
         const val AI_MODELS = "AI models"
+        /** Get more → Books' one section while searching (Plan KB2 Task 4.1). */
+        const val BOOK_RESULTS = "Book results"
+        /** A book set's level sections' keys, "level-2" (Plan KB2 Task 3.2); each shows "Level 2". */
+        const val LEVEL_PREFIX = "level-"
         /** A subjects list's family token: "subjects:<set id>:<slice ZIM name>" (Plan WF Decision 4). */
         const val SUBJECTS_PREFIX = "subjects:"
         /**

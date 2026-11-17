@@ -31,6 +31,7 @@ class BrowseScreenTest {
         onDownloads = { calls += "downloads" },
         onReadiness = { calls += "readiness" },
         onRemove = { calls += "remove:${it.id}" },
+        onFiles = { calls += "files:$it" },
     )
 
     private val wikipedia = PackItem(pack("w", "Wikipedia").copy(sizeBytes = 1_200_000_000), AskReach.MEANING)
@@ -81,6 +82,17 @@ class BrowseScreenTest {
         compose.onNodeWithText("Remove Wikipedia?").assertExists()
         compose.onNodeWithText("Remove").performClick()
         assertThat(calls).containsExactly("remove:w")
+    }
+
+    /** Plan KB2 Task 4.6: a pack holding PDFs or EPUBs offers Files in this pack on its long press; one without doesn't. */
+    @Test fun aLongPressOffersTheFilesInThePackWhenItHasSome() {
+        show(BrowseUi(listOf(BrowseSection("reference", UiText.Raw("General reference"), listOf(wikipedia.copy(files = 12), iceland)))))
+        compose.onNodeWithText("Wikipedia").performTouchInput { longClick() }
+        compose.onNodeWithText("Files in this pack (12)").performClick()
+        assertThat(calls).containsExactly("files:w")
+        compose.onNodeWithText("Iceland").performTouchInput { longClick() }
+        compose.onNodeWithText("Files in this pack", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("Remove from phone").assertExists()
     }
 
     @Test fun theHeaderIsGetMoreThenMoreWithDownloadsAndReadiness() {

@@ -1,0 +1,13 @@
+{
+ "id": "irp.fas.org_en_military-medicine",
+ "kind": "pack",
+ "sidecar": "gbooks",
+ "fileName": "irp.fas.org_en_military-medicine_2026-10.gbooks",
+ "sizeBytes": 45056,
+ "sha256": "0c42c9cac2be27d4dff9897b69d2270e0ea5e5234d7546e2dc2fc473aecd528a",
+ "schemaVersion": 1,
+ "sourceSha256": "9fc5e5d0302504f57a33e0d3aad9c94761cfd6caab22354ed04b9e9bad2ff57f",
+ "builder": "tools/bookpacks/build.py",
+ "builderVersion": 1,
+ "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-16/irp.fas.org_en_military-medicine_2026-10.gbooks"
+}

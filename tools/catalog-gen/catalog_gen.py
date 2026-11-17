@@ -20,7 +20,14 @@ for their own packs and are marked featured. `build` writes what it kept and lef
 Packs we build ourselves (tools/pack-builder) are listed with a "release" row in curated.json that names
 their release descriptor; the hosted file's size is checked against it. A "books" row names the descriptor
 of an e-book collection (`pack_builder.py describe-epubs`): every book becomes a catalog entry and the
-collection gets a preset. "@<collection>" in a preset's items expands to that collection's book ids.
+collection gets a preset. "@<collection>" in a preset's items expands to that collection's book ids. A book's
+`description` and `level` come from its descriptor.
+
+Book sets (Plan KB2 Task 3.2, African Storybook): a "bookSets" row names a descriptor as a books row does, plus `title`,
+`language`, `shelf`, `license`, optional `provider` (else the descriptor's), `i18n` and `levelSets` ({"label": "Level
+{n}", "i18n": {"es": "Nivel {n}"}}). Each becomes one entry of the top-level `bookSets` array, holding its own presets
+and books. Released apps file every `books` entry into Granger Classics and skip keys they don't know, so a set must
+never go in `books` (a books row with `shelf` or `levelSets` fails the build).
 
 Search vectors (Plan R1): a "vectors" setting in curated.json names the folder of `tools/vectors/build.py`'s release
 descriptors and the release URL their files are uploaded under; each descriptor's vectors go on the entries built from
@@ -53,6 +60,7 @@ shows the app language's copy and falls back to English. A family row's `flavour
 The app trusts only catalogs signed by the key whose public half is in catalog/public-key.txt.
 """
 import argparse
+import collections
 import base64
 import concurrent.futures
 import datetime
@@ -216,6 +224,12 @@ def pin(entry, row, fetch=http_get):
         "content": row.get("content") or "",
         "flavour": flavour if flavour in FLAVOURS else "",
     }
+    if row.get("shelf"):  # Plan KB2: the Books shelf of a book pack (old apps ignore the key)
+        result["shelf"] = row["shelf"]
+    if row.get("provider"):  # Plan KB2: who made a book pack (old apps ignore the key)
+        result["provider"] = row["provider"]
+    if row.get("subjects"):  # Plan KB2 Task 4.8: Explore's subject ids (old apps ignore the key)
+        result["subjects"] = check_subjects(result.get("id", "pack"), row["subjects"])
     if row.get("nonCommercial"):
         result["nonCommercial"] = True
     # Plan L3: a curated row's copy in other languages ("i18n": {"en": {"title": …}} on a Spanish pack).
@@ -235,6 +249,155 @@ def content_of(name, contents):
     """ "books" when the pack named [name] was made by a book scraper, by its Scraper in [contents], else blank."""
     scraper = (contents or {}).get(name, "")
     return "books" if scraper.startswith(BOOK_SCRAPERS) else ""
+
+
+BOOKPACKS = "tools/bookpacks/book_packs.json"
+
+
+def load_shelves(root=None, path=BOOKPACKS):
+    """(Plan KB2) {ZIM name: shelf} for manifest packs and [(name prefix, shelf)] for list-carrying book packs."""
+    file = pathlib.Path(root or REPO_ROOT) / path
+    if not file.exists():
+        return {}, []
+    config = json.loads(file.read_text(encoding="utf-8"))
+    return ({name: row["shelf"] for name, row in config.get("packs", {}).items() if row.get("shelf")},
+            sorted(config.get("shelves", {}).items(), key=lambda kv: -len(kv[0])))
+
+
+def shelf_of(name, content, shelves):
+    """
+    The Books shelf a book pack sits on (Plan KB2 Decision 4: literature, children, manuals, learning): a manifest
+    pack's own, or a book pack's by name prefix (gutenberg_ → literature). Blank for every other pack.
+    """
+    by_name, prefixes = shelves
+    if name in by_name:
+        return by_name[name]
+    if content == "books":
+        return next((shelf for prefix, shelf in prefixes if name.startswith(prefix)), "")
+    return ""
+
+
+def stamp_shelves(packs, shelves, providers):
+    """
+    Puts each book pack's `shelf` and `provider` on [packs] in place, and takes them off any other pack (Plan KB2).
+    Returns how many packs changed.
+    """
+    changed = 0
+    for p in packs:
+        name, content = p.get("zimName") or p["id"], p.get("content", "")
+        before = (p.get("shelf", ""), p.get("provider", ""))
+        for key, value in (("shelf", shelf_of(name, content, shelves)), ("provider", provider_of(name, content, providers))):
+            if value:
+                p[key] = value
+            else:
+                p.pop(key, None)
+        changed += before != (p.get("shelf", ""), p.get("provider", ""))
+    return changed
+
+
+# Plan KB2 Task 4.8: Explore's subject ids, v1 (tools/subjects/subjects.json on ll-linked-library, e227798e). Ids are
+# final and never renamed; display names live in that file and the app, not the catalog.
+SUBJECT_IDS = ("history", "society", "business", "places", "science", "nature", "health", "technology", "art",
+               "literature", "music", "film", "sports", "games", "religion", "languages", "food")
+
+
+def check_subjects(scope, subjects):
+    """[subjects] as a list after checking it holds 1–3 distinct ids from [SUBJECT_IDS]; a bad one fails the build."""
+    subjects = list(subjects)
+    bad = [s for s in subjects if s not in SUBJECT_IDS]
+    if bad or not 1 <= len(subjects) <= 3 or len(set(subjects)) != len(subjects):
+        raise SystemExit(f"{scope}: subjects must be 1-3 distinct ids of {SUBJECT_IDS}, got {subjects}")
+    return subjects
+
+
+def load_subjects(root=None, path=BOOKPACKS):
+    """
+    (Plan KB2 Task 4.8) {ZIM name: subjects} for manifest packs and [(prefix, subjects)] from `subjectsByPrefix` (list-
+    carrying book packs by ZIM name, book sets by collection id), longest prefix first, every id checked.
+    """
+    file = pathlib.Path(root or REPO_ROOT) / path
+    if not file.exists():
+        return {}, []
+    config = json.loads(file.read_text(encoding="utf-8"))
+    by_name = {name: check_subjects(name, row["subjects"]) for name, row in config.get("packs", {}).items()
+               if row.get("subjects")}
+    prefixes = sorted(((k, check_subjects(k, v)) for k, v in config.get("subjectsByPrefix", {}).items()),
+                      key=lambda kv: -len(kv[0]))
+    return by_name, prefixes
+
+
+# Gutenberg's Library of Congress classes (gutenberg_en_lcc-<class>) as subjects: two-letter exceptions, then letters.
+LCC_SUBJECTS = {"hb": ["business"], "hc": ["business"], "hd": ["business"], "he": ["business"], "hf": ["business"],
+                "hg": ["business"], "hj": ["business"], "pe": ["languages", "literature"],
+                **{f"p{x}": ["literature", "languages"] for x in "abcdfghjklm"},
+                "a": ["society"], "b": ["religion"], "c": ["history"], "d": ["history"], "e": ["history"],
+                "f": ["history"], "g": ["places"], "h": ["society"], "j": ["society"], "k": ["society"],
+                "l": ["society"], "m": ["music"], "n": ["art"], "p": ["literature"], "q": ["science"],
+                "r": ["health"], "s": ["food", "nature"], "t": ["technology"], "u": ["history"], "v": ["history"],
+                "z": ["literature"]}
+
+
+def subjects_of(name, content, subjects):
+    """
+    Explore's subject ids for a book pack (Plan KB2 Task 4.8): a manifest pack's own; a Gutenberg LCC pack's by its
+    class; else a book pack's by name prefix. Empty for every other pack (web packs are tagged elsewhere).
+    """
+    by_name, prefixes = subjects
+    if name in by_name:
+        return list(by_name[name])
+    if content != "books":
+        return []
+    match = re.fullmatch(r"gutenberg_en_lcc-([a-z]+)", name)
+    if match:
+        lcc = match.group(1)
+        found = LCC_SUBJECTS.get(lcc[:2]) or LCC_SUBJECTS.get(lcc[:1])
+        if found:
+            return list(found)
+    return next((list(v) for prefix, v in prefixes if name.startswith(prefix)), [])
+
+
+def book_subjects(category):
+    """A Classics / Clásicos book's subjects from its section (Plan KB2 Task 4.8), by keyword; literature otherwise."""
+    c = category.lower()
+    for words, found in ((("libretti", "opera", "ópera"), ["literature", "music"]),
+                         (("econom",), ["business", "society"]),
+                         (("scripture", "religi", "philosoph", "filosof", "escritura"), ["religion"]),
+                         (("histor", "biograf", "biograph", "crónica"), ["history"]),
+                         (("politic", "polític", " law", "derecho"), ["society"]),
+                         (("science", "ciencia"), ["science"])):
+        if any(w in c for w in words):
+            return list(found)
+    return ["literature"]
+
+
+def set_subjects(collection, subjects):
+    """A book set's subjects by its collection id (`african-storybook-` prefix), or empty."""
+    return next((list(v) for prefix, v in subjects[1] if collection.startswith(prefix)), [])
+
+
+def stamp_subjects(catalog, subjects):
+    """
+    Puts `subjects` on each book pack, book and book set (and its books) of a built [catalog] in place. It never takes
+    `subjects` off (web packs' subjects come from another tool). Returns how many entries changed.
+    """
+    changed = 0
+
+    def put(item, value):
+        nonlocal changed
+        if value and item.get("subjects") != value:
+            item["subjects"] = value
+            changed += 1
+
+    for p in catalog.get("packs", []):
+        put(p, subjects_of(p.get("zimName") or p["id"], p.get("content", ""), subjects))
+    for b in catalog.get("books", []):
+        put(b, book_subjects(b.get("category", "")))
+    for s in catalog.get("bookSets", []):
+        value = set_subjects(s["id"], subjects)
+        put(s, value)
+        for b in s.get("books", []):
+            put(b, value)
+    return changed
 
 
 def load_contents(root=None, path=CONTENTS):
@@ -286,8 +449,29 @@ def kiwix_copy(name, copy):
     return dict(copy)
 
 
+def load_providers(root=None, path=BOOKPACKS):
+    """
+    (Plan KB2 review) {ZIM name: provider} for manifest packs and [(name prefix, provider)] for list-carrying book
+    packs (`providers` in book_packs.json), the same shape as [load_shelves].
+    """
+    file = pathlib.Path(root or REPO_ROOT) / path
+    if not file.exists():
+        return {}, []
+    config = json.loads(file.read_text(encoding="utf-8"))
+    return ({name: row["provider"] for name, row in config.get("packs", {}).items() if row.get("provider")},
+            sorted(config.get("providers", {}).items(), key=lambda kv: -len(kv[0])))
+
+
+def provider_of(name, content, providers):
+    """
+    Who made a book pack, for the app's "From Kiwix · <provider>" (Plan KB2): a manifest pack's own, or a book pack's by
+    name prefix (gutenberg_ → Project Gutenberg). Blank for every other pack. [shelf_of]'s rule, over `providers`.
+    """
+    return shelf_of(name, content, providers)
+
+
 def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=8, tries=3, sleep=time.sleep,
-                  contents=None):
+                  contents=None, shelves=({}, []), providers=({}, []), subjects=({}, [])):
     """
     Every pack in [feed] in one of the configured languages whose family has a license and no hold, pinned, except
     the curated ones ([curated_keys], (name, flavour) pairs). Returns (packs, report lines).
@@ -323,6 +507,9 @@ def kiwix_entries(config, families, feed, curated_keys, fetch=http_get, workers=
         fields = {"family": row["family"], "category": row["category"], "license": row["license"],
                   "nonCommercial": row.get("nonCommercial", False), "domain": row.get("domain"),
                   "content": content_of(e["name"], contents)}
+        fields["shelf"] = shelf_of(e["name"], fields["content"], shelves)
+        fields["provider"] = provider_of(e["name"], fields["content"], providers)
+        fields["subjects"] = subjects_of(e["name"], fields["content"], subjects)
         for attempt in range(tries):
             try:
                 return pin(e, fields, fetch), None
@@ -427,15 +614,124 @@ def book_entries(curated, head=http_head, root=None):
             served = head(url)
             if served != book["sizeBytes"]:
                 raise SystemExit(f"{url} serves {served} bytes; the descriptor says {book['sizeBytes']}")
-        entries.append({
-            "id": book["id"], "title": book["title"], "author": book["author"], "description": "",
+        entry = {
+            "id": book["id"], "title": book["title"], "author": book["author"],
+            "description": book.get("description") or "",
             "category": book["section"], "language": bcp47(book["language"]), "sizeBytes": book["sizeBytes"],
             "sha256": book["sha256"], "urls": book["urls"], "releaseDate": descriptor["releaseDate"],
             "license": curated["license"], "collection": descriptor["collection"],
             "published": book["published"],
             "domain": book.get("domain") or BOOK_DOMAINS.get(book["section"], BOOK_DOMAIN_DEFAULT),
-        })
+            "subjects": book_subjects(book["section"]),  # Plan KB2 Task 4.8 (a set's books take the set's instead)
+        }
+        # Plan KB2 (African Storybook): a reading level, when the set has them (its shelf is the set's).
+        if book.get("level") is not None:
+            entry["level"] = book["level"]
+        entries.append(entry)
     return descriptor["collection"], entries
+
+
+def level_presets(name, row, entries):
+    """
+    Plan KB2: a set per reading level beside a collection's all-books preset, when its books row has `levelSets`
+    ({"label": "Level {n}", "i18n": {"es": "Nivel {n}"}}): `<collection>-level-<n>`, titled "<row title>: Level n",
+    with the row's copy in each of its languages ("African Storybook · inglés: Nivel n").
+    """
+    levels = row.get("levelSets")
+    if not levels:
+        return []
+    label, labels = levels.get("label", "Level {n}"), levels.get("i18n") or {}
+    title = row.get("title") or name
+    by_level = {}
+    for e in entries:
+        if e.get("level") is None:
+            raise SystemExit(f"books {name}: {e['id']} has no level, but the row asks for level sets")
+        by_level.setdefault(e["level"], []).append(e["id"])
+    presets = []
+    for n in sorted(by_level):
+        preset = {"id": f"{name}-level-{n}", "title": f"{title}: {label.format(n=n)}", "items": by_level[n],
+                  "level": n, "setOf": name}
+        if row.get("language"):
+            preset["language"] = bcp47(row["language"])
+        i18n = {code: {"title": f"{copy['title']}: {labels.get(code, label).format(n=n)}"}
+                for code, copy in (row.get("i18n") or {}).items() if copy.get("title")}
+        presets.append(with_i18n(preset, check_i18n(f"books {name} level {n}", i18n or None)))
+    return presets
+
+
+SET_ROW_KEYS = ("bookRelease", "license", "title", "language", "shelf")
+
+
+def book_set(row, head=http_head, root=None):
+    """
+    Plan KB2 Task 3.2: one `bookSets` entry (African Storybook, one per language) from a curated `bookSets` row, which
+    names a release descriptor as a `books` row does. Released apps file every `books` entry into Granger Classics, and
+    one catalog serves every app version, so a set's books live inside the set, in a top-level array old apps skip
+    (their parser reads only the keys it knows). Its presets (all books, then one per level) live inside it too: an old
+    app's `presets` would keep such a preset with its unknown items filtered out, an empty set on Granger's screen.
+
+    {id, title, language, shelf, provider, license, description, i18n?, presets: [...], books: [BookEntry-shaped]}.
+    The id is the descriptor's `collection` (`african-storybook-en`); `provider` is the row's, else the descriptor's.
+    """
+    missing = [key for key in SET_ROW_KEYS if not row.get(key)]
+    if missing:
+        raise SystemExit(f"bookSets {row.get('bookRelease')}: missing {missing}")
+    descriptor = json.loads((pathlib.Path(root or REPO_ROOT) / row["bookRelease"]).read_text(encoding="utf-8"))
+    collection, entries = book_entries(row, head, root)
+    provider = row.get("provider") or descriptor.get("provider") or ""
+    if not provider:
+        raise SystemExit(f"bookSets {collection}: no provider in the row or its descriptor")
+    language = bcp47(row["language"])
+    i18n = check_i18n(f"bookSets {collection}", row.get("i18n"))
+    subjects = check_subjects(f"bookSets {collection}", row["subjects"]) if row.get("subjects") else \
+        set_subjects(collection, load_subjects(root))
+    if subjects:  # Plan KB2 Task 4.8: the set and each of its books carry the set's subjects
+        for e in entries:
+            e["subjects"] = subjects
+    everything = with_i18n({"id": collection, "title": row["title"], "items": [e["id"] for e in entries],
+                            "language": language}, i18n)
+    return with_i18n({
+        "id": collection, "title": row["title"], "language": language, "shelf": row["shelf"], "provider": provider,
+        "license": row["license"], "description": row.get("description", ""),
+        **({"subjects": subjects} if subjects else {}),
+        "presets": [everything] + level_presets(collection, row, entries),
+        "books": entries,
+    }, i18n)
+
+
+def book_sets_of(curated, other_ids, head=http_head, root=None):
+    """
+    The `bookSets` entries of [curated]'s `bookSets` rows. A set's books and presets are its own: their ids must be safe
+    file names and clash with nothing in [other_ids] (the catalog's packs, models, books and voices) or each other.
+    """
+    sets = [book_set(row, head, root) for row in curated.get("bookSets", [])]
+    set_books = [b for s in sets for b in s["books"]]
+    for book in set_books:
+        if not SAFE_NAME.match(book["id"]):
+            raise SystemExit(f"unsafe id: {book['id']!r}")
+    # (A set's id is its all-books preset's id, so the presets stand for it.)
+    set_ids = [b["id"] for b in set_books] + [p["id"] for s in sets for p in s["presets"]]
+    seen, clashes = set(), set()
+    for i in set_ids + list(other_ids):
+        (clashes if i in seen else seen).add(i)
+    if clashes:
+        raise SystemExit(f"bookSets: duplicate ids {sorted(clashes)[:10]}")
+    return sets
+
+
+def apply_book_sets(catalog, curated, head=http_head, root=None):
+    """
+    Plan KB2: puts [curated]'s book sets on an already-built [catalog] in place (replacing any it had), without a full
+    `build --previous`, which would also move every Kiwix pack to its newest safe snapshot. Returns the sets.
+    """
+    others = [i["id"] for key in ("packs", "models", "books", "voices") for i in catalog.get(key, [])]
+    others += [p["id"] for p in catalog.get("presets", [])]
+    sets = book_sets_of(curated, others, head, root)
+    if sets:
+        catalog["bookSets"] = sets
+    else:
+        catalog.pop("bookSets", None)
+    return sets
 
 
 # Readiness tier budgets for English, (Efficient, Comprehensive) bytes as tier_sizes counts them ("All"). With pictures by
@@ -487,7 +783,9 @@ def hold_back(packs, previous, derived, status=None, sleep=time.sleep):
         if not why:
             continue
         old, new = before[moved[0]["id"]].get("snapshotDate"), moved[0].get("snapshotDate")
-        record = {"zim": name, "ids": [p["id"] for p in moved], "from": old, "to": new, "reasons": reasons}
+        record = {"zim": name, "ids": [p["id"] for p in moved], "from": old, "to": new, "reasons": reasons,
+                  # Plan KB2: the new file, for a sidecar rebuild (and upkeep's dry manifest build) before it's pinned
+                  "toUrl": (moved[0].get("urls") or [None])[0], "toSha256": moved[0].get("sha256")}
         if dead_links([u for p in moved for u in before[p["id"]].get("urls", [])], status, sleep=sleep):
             lines.append({**record, "held": False,
                           "text": f"  {name}: moved to {new} anyway, {old} no longer answers; " + "; ".join(why)})
@@ -526,9 +824,17 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
             row = family_of(sample, families) if sample else None
             packs.append(pack_entry({**c, "featured": True, "family": row["family"] if row else "",
                                      "domain": c.get("domain", row.get("domain") if row else ""),
-                                     "content": content_of(c["name"], contents)}, fetch, feed))
+                                     "content": content_of(c["name"], contents),
+                                     "shelf": c.get("shelf") or shelf_of(c["name"], content_of(c["name"], contents),
+                                                                         load_shelves(root)),
+                                     "provider": c.get("provider") or provider_of(
+                                         c["name"], content_of(c["name"], contents), load_providers(root)),
+                                     "subjects": c.get("subjects") or subjects_of(
+                                         c["name"], content_of(c["name"], contents), load_subjects(root))}, fetch, feed))
         curated_keys = {(c["name"], c.get("flavour", "")) for c in curated["packs"] if "release" not in c}
-        bulk, lines = kiwix_entries(kiwix, families, feed, curated_keys, fetch, contents=contents)
+        bulk, lines = kiwix_entries(kiwix, families, feed, curated_keys, fetch, contents=contents,
+                                    shelves=load_shelves(root), providers=load_providers(root),
+                                    subjects=load_subjects(root))
         packs += bulk
         if report is not None:
             report += lines
@@ -550,12 +856,16 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
             report += ["", "Newer snapshots held back:"] + ([h["text"] for h in held] or ["  none"])
     models = curated["models"]
     voices = curated.get("voices", [])       # Plan V1: one zip per voice, hand-written like models
-    books, collections, collection_rows = [], {}, {}
+    books, collections, collection_rows, collection_entries = [], {}, {}, {}
     for row in curated.get("books", []):
+        if row.get("levelSets") or row.get("shelf"):
+            # Plan KB2 Task 3.2: released apps file every `books` entry into Granger Classics.
+            raise SystemExit(f"books {row['bookRelease']}: a set with a shelf or levels goes under bookSets, not books")
         collection, entries = book_entries(row, head)
         books += entries
         collections[collection] = [e["id"] for e in entries]
         collection_rows[collection] = row
+        collection_entries[collection] = entries
     for item in packs + models + voices:
         for key in ("id", "fileName"):
             if key in item and not SAFE_NAME.match(item[key]):
@@ -566,6 +876,7 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
     ids = [item["id"] for item in packs + models + books + voices]
     if len(ids) != len(set(ids)):
         raise SystemExit(f"duplicate ids in {ids}")
+    book_sets = book_sets_of(curated, ids, head)
     # "@<collection>" in a preset stands for every book of that collection.
     presets = [with_i18n({**{k: v for k, v in p.items() if k != "i18n"},
                           "items": [i for item in p["items"] for i in
@@ -579,6 +890,7 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
         if row.get("language"):
             preset["language"] = bcp47(row["language"])
         presets.append(with_i18n(preset, check_i18n(f"books {name}", row.get("i18n"))))
+        presets += level_presets(name, row, collection_entries[name])
     vector_lines = []
     if "vectors" in curated:
         v = curated["vectors"]
@@ -621,6 +933,8 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
         "presets": presets,
         "voices": voices,
     }
+    if book_sets:  # Plan KB2 Task 3.2: absent when there are none, so the catalog is unchanged
+        catalog["bookSets"] = book_sets
     if readiness is not None:
         catalog["readiness"] = readiness
     if onboarding is not None:
@@ -1128,6 +1442,9 @@ def catalog_urls(catalog):
             if entry.get("timeIndex", {}).get("url"):
                 urls.append(entry["timeIndex"]["url"])
             urls += [s["url"] for s in entry.get("sidecars", []) if s.get("url")]
+    for book_set_ in catalog.get("bookSets", []):  # Plan KB2: a set's books are downloads too
+        for entry in book_set_.get("books", []):
+            urls += entry.get("urls", [])
     return list(dict.fromkeys(urls))
 
 
@@ -1249,6 +1566,9 @@ def main(argv):
     p.add_argument("file")
     p = sub.add_parser("sidecars"); p.add_argument("--releases", required=True); p.add_argument("--release-url")
     p.add_argument("file")
+    p = sub.add_parser("shelves"); p.add_argument("file")
+    p = sub.add_parser("booksets"); p.add_argument("file")
+    p.add_argument("--curated", default=str(REPO_ROOT / "tools/catalog-gen/curated.json"))
     p = sub.add_parser("sets"); p.add_argument("file")
     p.add_argument("--sets", default=str(REPO_ROOT / "tools/catalog-gen/pack_sets.json"))
     p.add_argument("--curated", default=str(REPO_ROOT / "tools/catalog-gen/curated.json"))
@@ -1320,6 +1640,26 @@ def main(argv):
               f"{sum(d['sizeBytes'] for d in used) / 1e6:.1f} MB to upload")
         for line in lines:
             print(line)
+    elif args.command == "shelves":  # Plan KB2: stamp each book pack's Books shelf and provider on a built catalog
+        path = pathlib.Path(args.file)
+        catalog = json.loads(path.read_text(encoding="utf-8"))
+        changed = stamp_shelves(catalog["packs"], load_shelves(), load_providers())
+        tagged = stamp_subjects(catalog, load_subjects())  # Plan KB2 Task 4.8
+        catalog["generatedAt"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        path.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        counts = collections.Counter(p["shelf"] for p in catalog["packs"] if p.get("shelf"))
+        makers = collections.Counter(p["provider"] for p in catalog["packs"] if p.get("provider"))
+        print(f"{path}: {changed} packs changed; shelves {dict(sorted(counts.items()))}; "
+              f"providers {dict(sorted(makers.items()))}; {tagged} subjects stamped")
+    elif args.command == "booksets":  # Plan KB2 Task 3.2: the curated book sets onto a built catalog, in place
+        path = pathlib.Path(args.file)
+        catalog = json.loads(path.read_text(encoding="utf-8"))
+        sets = apply_book_sets(catalog, json.loads(pathlib.Path(args.curated).read_text(encoding="utf-8")))
+        catalog["generatedAt"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        path.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        print(f"{path}: {len(sets)} book sets, {sum(len(s['books']) for s in sets)} books, "
+              f"{sum(len(s['presets']) for s in sets)} presets, "
+              f"{sum(b['sizeBytes'] for s in sets for b in s['books']) / 1e9:.2f} GB")
     elif args.command == "sets":
         path = pathlib.Path(args.file)
         catalog = json.loads(path.read_text(encoding="utf-8"))

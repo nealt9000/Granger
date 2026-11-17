@@ -1,0 +1,13 @@
+{
+ "id": "milneopentextbooks.org_en_all",
+ "kind": "pack",
+ "sidecar": "gbooks",
+ "fileName": "milneopentextbooks.org_en_all_2026-08.gbooks",
+ "sizeBytes": 45056,
+ "sha256": "65b64714b464bdb8ba2c467e82cebb6a6b94bc586ebe2928b8bf8b7f10bcec7c",
+ "schemaVersion": 1,
+ "sourceSha256": "bec4e9bff82eac6e0faf6286c402003a781b53c824feb9898ce4bb21fb6129f7",
+ "builder": "tools/bookpacks/build.py",
+ "builderVersion": 1,
+ "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-16/milneopentextbooks.org_en_all_2026-08.gbooks"
+}

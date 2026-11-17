@@ -18,8 +18,19 @@
     </plurals>
     <!-- Two parts of a line with a dot between, such as "Project Gutenberg · 1,284 books". -->
     <string name="library_dotted">%1$s · %2$s</string>
-    <!-- A Kiwix book pack's collection, whose books are documents (Plan KB). -->
-    <string name="library_kiwix_library">Kiwix library</string>
+    <!-- Where a book pack's books come from, under its name (Plan KB2): "From Kiwix", or "From Kiwix · Project Gutenberg" with %1$s the provider. -->
+    <string name="library_from_kiwix">From Kiwix</string>
+    <string name="library_from_kiwix_by">From Kiwix · %1$s</string>
+    <!-- Under a Kiwix collection listed with no book manifest: its titles are only its files' names (Plan KB2). -->
+    <string name="library_titles_from_file_names">Titles from file names</string>
+    <!-- A folded section or a work's parts, as TalkBack says its state (Plan KB2). -->
+    <string name="library_expanded">Expanded</string>
+    <string name="library_collapsed">Collapsed</string>
+    <!-- A work in parts shown as one row in a collection: "3 parts" (Plan KB2). -->
+    <plurals name="library_parts">
+        <item quantity="one">%1$d part</item>
+        <item quantity="other">%1$d parts</item>
+    </plurals>
     <!-- %1$s is the count, formatted, such as 1,284. -->
     <plurals name="library_books_counted">
         <item quantity="one">%1$s book</item>
@@ -29,11 +40,19 @@
         <item quantity="one">%1$s document</item>
         <item quantity="other">%1$s documents</item>
     </plurals>
-    <!-- How many of a pack's books Search can read in full; %1$s is the count, formatted. -->
-    <plurals name="library_searchable_in_full">
-        <item quantity="one">%1$s searchable in full</item>
-        <item quantity="other">%1$s searchable in full</item>
+    <!-- The exceptions to "searchable in full", the default, which isn't shown (Plan KB2): a collection's books Search finds
+         by title only until they're opened, and its scans; %1$s is the count, formatted. -->
+    <plurals name="library_titles_only_until_opened">
+        <item quantity="one">%1$s title only until opened</item>
+        <item quantity="other">%1$s titles only until opened</item>
     </plurals>
+    <plurals name="library_scans_titles_only">
+        <item quantity="one">%1$s scan: title only</item>
+        <item quantity="other">%1$s scans: titles only</item>
+    </plurals>
+    <!-- The same, when it's every book in the collection: the count is already on the line. -->
+    <string name="library_all_titles_only_until_opened">Titles only until opened</string>
+    <string name="library_all_scans_titles_only">Scans: titles only</string>
 
     <!-- The source names an empty Music or Audiobooks screen links to. -->
     <string name="library_link_granger" translatable="false">Granger</string>
@@ -60,17 +79,22 @@
     <string name="library_remove_from_phone_title">Remove from phone?</string>
     <!-- %1$s is the book's title. -->
     <string name="library_remove_book_body">%1$s will be deleted from this phone. Your place, bookmarks and highlights are kept.</string>
+    <!-- One book of a pack (Plan KB2): its copy goes and it leaves the list until Show removed. -->
+    <string name="library_remove_pack_book_body">%1$s will be deleted from this phone and taken off this list; Show removed brings it back. Your place, bookmarks and highlights are kept.</string>
+    <!-- A collection's menu: brings back the pack books removed from it. -->
+    <string name="library_show_removed">Show removed</string>
     <!-- %1$s is the pack's title. -->
-    <string name="library_remove_pack_body">%1$s will be deleted from this phone. You can download it again later.</string>
-    <string name="library_remove_book_pack_body">%1$s will be deleted from this phone. You can download it again later. Its books go with it; your places, bookmarks and highlights are kept.</string>
+    <string name="library_remove_pack_body">%1$s will be deleted from this phone, with the bookmarks and reading places you saved in it. You can download it again later.</string>
+    <!-- A pack of books (Gutenberg, Kiwix): its books go, but their places and marks stay for a reinstall. -->
+    <string name="library_remove_book_pack_body">%1$s will be deleted from this phone, with its books. You can download it again later. Your places, bookmarks and highlights are kept.</string>
+    <string name="library_remove_document_pack_body">%1$s will be deleted from this phone, with its documents. You can download it again later. Your places, bookmarks and highlights are kept.</string>
     <string name="library_rename_collection">Rename collection</string>
     <string name="library_collection_name">Collection name</string>
     <string name="library_delete_collection_title">Delete collection?</string>
     <string name="library_delete_collection_body">Its packs go back to their usual collections. Nothing is removed from the phone.</string>
-    <!-- A pack's book: whether Search can read it in full yet. -->
-    <string name="library_searchable_full">Searchable in full</string>
-    <string name="library_title_only_scan">Title only: it\'s a scan</string>
-    <string name="library_titles_only">Titles only until you open it</string>
+    <!-- A pack's book that Search can't read in full (Plan KB2: only the exceptions are said). -->
+    <string name="library_title_only_scan">A scan: title only</string>
+    <string name="library_titles_only">Title only until opened</string>
     <!-- %1$s of %2$s books copied out, both formatted. -->
     <string name="library_making_searchable">Making searchable: %1$s of %2$s copied</string>
     <string name="library_not_enough_space">Not enough space</string>
@@ -79,10 +103,19 @@
         <item quantity="one">Making %1$s book searchable needs about %2$s more, and this phone has %3$s free.</item>
         <item quantity="other">Making all %1$s books searchable needs about %2$s more, and this phone has %3$s free.</item>
     </plurals>
+    <!-- The same, for a pack whose books are documents (Plan KB2). -->
+    <plurals name="library_searchable_no_room_documents">
+        <item quantity="one">Making %1$s document searchable needs about %2$s more, and this phone has %3$s free.</item>
+        <item quantity="other">Making all %1$s documents searchable needs about %2$s more, and this phone has %3$s free.</item>
+    </plurals>
     <string name="library_make_searchable_title">Make all searchable?</string>
     <plurals name="library_make_searchable_body">
         <item quantity="one">Copies the %1$s book not yet opened out of the pack, so Search can read it in full. That takes about %2$s more (%3$s free). It runs in the background; you can leave this screen.</item>
         <item quantity="other">Copies the %1$s books not yet opened out of the pack, so Search can read them in full. That takes about %2$s more (%3$s free). It runs in the background; you can leave this screen.</item>
+    </plurals>
+    <plurals name="library_make_searchable_body_documents">
+        <item quantity="one">Copies the %1$s document not yet opened out of the pack, so Search can read it in full. That takes about %2$s more (%3$s free). It runs in the background; you can leave this screen.</item>
+        <item quantity="other">Copies the %1$s documents not yet opened out of the pack, so Search can read them in full. That takes about %2$s more (%3$s free). It runs in the background; you can leave this screen.</item>
     </plurals>
     <string name="library_make_searchable">Make searchable</string>
     <string name="library_pack_missing">File not found. Reinsert the SD card or download the pack again.</string>
@@ -93,10 +126,8 @@
     <string name="library_damaged">Damaged</string>
     <!-- How far through a book the reader is. -->
     <string name="library_percent">%1$d%%</string>
-    <!-- The small mark on a book Search can read in full. -->
-    <string name="library_full_text">Full text</string>
-    <!-- A PDF scan's text can't be searched. -->
-    <string name="library_pdf_not_searchable">PDF · Not searchable</string>
+    <!-- A PDF scan's text can't be searched: Search finds its title only. -->
+    <string name="library_pdf_not_searchable">PDF · A scan: title only</string>
 
     <!-- Moving packs and collections. -->
     <string name="library_new_collection">New collection</string>

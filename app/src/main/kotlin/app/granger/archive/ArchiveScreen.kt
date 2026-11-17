@@ -51,6 +51,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.platform.LocalContext
@@ -98,8 +99,17 @@ fun ArchiveScreen(
     onBack: () -> Unit,
     onOpenLibriVox: () -> Unit,
     onOpenInLibrary: (identifier: String) -> Unit = {},
+    /** Opens an installed text: its book in the reader, or a set's collection (Plan KB2 Task 4.3). */
+    onOpenText: (ArchiveOpen) -> Unit = {},
 ) {
     val ui by viewModel.ui.collectAsStateWithLifecycle()
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    // Texts open as books; audio keeps its own ways in.
+    val openText: ((String) -> Unit)? = if (ui.kind == ArchiveKind.TEXTS) {
+        { identifier -> scope.launch { viewModel.openTarget(identifier)?.let(onOpenText) } }
+    } else {
+        null
+    }
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
     LaunchedEffect(ui.notice) {
@@ -148,6 +158,7 @@ fun ArchiveScreen(
         onOpenLibriVox = onOpenLibriVox,
         onBack = onBack,
         onOpenInLibraryRow = onOpenInLibrary,
+        onOpenTextRow = openText,
     )
 
     ui.sheet?.let { sheet ->
@@ -176,6 +187,7 @@ fun ArchiveScreen(
                 viewModel.closeItem()
                 onOpenInLibrary(sheet.identifier)
             },
+            onOpenText = openText?.let { open -> { viewModel.closeItem(); open(sheet.identifier) } },
         )
     }
 
@@ -260,6 +272,8 @@ internal fun ArchiveContent(
     onBack: () -> Unit,
     /** An item got from the other audio view ([ItemStatus.InLibrary]): open it there. */
     onOpenInLibraryRow: (String) -> Unit = {},
+    /** An installed text: open it (Plan KB2 Task 4.3); null where items have no Open of their own (audio). */
+    onOpenTextRow: ((String) -> Unit)? = null,
 ) {
     var showWaiver by rememberSaveable { mutableStateOf(false) }
     // Spoken word before the waiver shows nothing of archive.org's results, only the note (Decisions, Plan M2).
@@ -356,6 +370,7 @@ internal fun ArchiveContent(
                     onRetry = { onRetryRow(row.identifier) },
                     onRemove = { onRemoveRow(row) },
                     onOpenInLibrary = { onOpenInLibraryRow(row.identifier) },
+                    onOpenText = onOpenTextRow?.let { open -> { open(row.identifier) } },
                 )
                 HorizontalDivider()
             }
@@ -400,6 +415,7 @@ private fun ArchiveResultRow(
     onRetry: () -> Unit,
     onRemove: () -> Unit,
     onOpenInLibrary: () -> Unit,
+    onOpenText: (() -> Unit)? = null,
 ) {
     ListItem(
         modifier = Modifier.clickable(onClick = onOpen),
@@ -425,7 +441,15 @@ private fun ArchiveResultRow(
                     TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) }
                     TextButton(onClick = onRetry) { Text(stringResource(R.string.common_retry)) }
                 }
-                ItemStatus.Installed, ItemStatus.UpdateAvailable -> TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
+                // An installed text opens, as an installed pack or book does in Get more; Remove is in its overflow.
+                ItemStatus.Installed, ItemStatus.UpdateAvailable -> if (onOpenText != null) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        TextButton(onClick = onOpenText) { Text(stringResource(R.string.common_open)) }
+                        app.granger.sources.RemoveMenu(row.title, onRemove)
+                    }
+                } else {
+                    TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
+                }
                 is ItemStatus.Partial -> Row {
                     TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
                     TextButton(onClick = onGet) { Text(stringResource(R.string.archive_get_the_rest)) }

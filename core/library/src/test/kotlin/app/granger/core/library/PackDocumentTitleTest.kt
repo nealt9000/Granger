@@ -18,6 +18,13 @@ class PackDocumentTitleTest {
         assertThat(PackDocumentTitle.choose("", "", "Click here", "docs/first%20aid_kit.pdf")).isEqualTo("first aid kit")
     }
 
+    @Test fun anEntryTitledNullByItsScraperGivesWay() {
+        // openzim_en_all (zimit) titles its PDFs "null"; Files in this pack passes the file's title as the link's words.
+        val pdf = "_assets_/96abdbe1c142a9656fe5e59601669ee2/Budget_2010.pdf"
+        assertThat(PackDocumentTitle.choose("null", "", "Budget 2010", pdf)).isEqualTo("Budget 2010")
+        assertThat(PackDocumentTitle.choose("undefined", "None", "", pdf)).isEqualTo("Budget 2010")
+    }
+
     @Test fun thePacksOwnListComesBeforeEverything() {
         // zimgit-food-preparation: the link's words were the file's name, and the PDF's Title junk (2026-10-29).
         val pdf = "files/Food Preparation (2).pdf"

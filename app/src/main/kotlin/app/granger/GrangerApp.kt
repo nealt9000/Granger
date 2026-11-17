@@ -168,6 +168,9 @@ import java.util.concurrent.TimeUnit
 import app.granger.core.library.BookIds
 import app.granger.core.library.GutenbergBooks
 import app.granger.core.library.NautilusBooks
+import app.granger.core.library.BookManifests
+import app.granger.core.library.ManifestBooks
+import app.granger.core.library.ManifestFile
 import app.granger.core.library.PackBookLinks
 import app.granger.core.library.PackBooks
 import app.granger.core.library.bookSource
@@ -353,8 +356,8 @@ class AppContainer(context: Context) {
     }
 
     private val libraryDb = LibraryDatabase.create(context)
-    // A removed pack takes its PDFs (pack documents, Plan P2) with it.
-    val library: Library = RoomLibrary(libraryDb, KiwixZimOpener(context), packDirs, onRemoved = { bookshelf.removePackDocuments(it) })
+    // A removed pack takes its PDFs (pack documents, Plan P2) with it; a new snapshot of it keeps them (Plan KB2).
+    val library: Library = RoomLibrary(libraryDb, KiwixZimOpener(context), packDirs, onRemoved = { bookshelf.removePackDocuments(it.id, it.name) })
     val bookshelf: Bookshelf = RoomBookshelf(
         libraryDb, bookDirs,
         importDir = { File(context.getExternalFilesDir(null) ?: context.filesDir, "books/imports") },
@@ -381,8 +384,19 @@ class AppContainer(context: Context) {
         libraryDb, library::archive, dir = { File(bookDirs().first(), "nautilus") }, coversDir = File(context.filesDir, "covers"),
     )
 
+    /**
+     * The books of the Kiwix packs with a book manifest, or listed by their files' names (Plan KB2: Military Medicine,
+     * Survivor Library…), copied out to the internal volume's `books/kiwix` when opened.
+     */
+    val manifestBooks = ManifestBooks(
+        libraryDb, library::archive, dir = { File(bookDirs().first(), "kiwix") }, coversDir = File(context.filesDir, "covers"),
+    )
+
+    /** Which packs are manifest packs: [Pack.bookManifest] kept in step with the installed `.gbooks` (Plan KB2). */
+    private val bookManifests = BookManifests(libraryDb, library::archive)
+
     /** A link on a book pack's own page opens the pack's row for it (Plan KB Decision 4). */
-    val packBookLinks = PackBookLinks({ library.packs.first() }, listOf(gutenbergBooks, nautilusBooks))
+    val packBookLinks = PackBookLinks({ library.packs.first() }, listOf(gutenbergBooks, nautilusBooks, manifestBooks))
 
     /**
      * "Make all searchable…" for book pack collections (Plan GB, Plan KB): runs on the app scope, so leaving the screen
@@ -390,7 +404,7 @@ class AppContainer(context: Context) {
      */
     val gutenbergShelf by lazy {
         GutenbergShelf(
-            { book -> gutenbergBooks.restore(book) || nautilusBooks.restore(book) }, bookIndex::indexPending,
+            { book -> gutenbergBooks.restore(book) || nautilusBooks.restore(book) || manifestBooks.restore(book) }, bookIndex::indexPending,
             dir = { File(bookDirs().first(), "gutenberg") }, appScope,
         )
     }
@@ -404,7 +418,8 @@ class AppContainer(context: Context) {
      */
     suspend fun restoreBook(book: Book): Boolean =
         packDocuments.restore(book) ||
-            (gutenbergBooks.restore(book) || nautilusBooks.restore(book)).also { if (it) appScope.launch { bookIndex.indexPending() } }
+            (gutenbergBooks.restore(book) || nautilusBooks.restore(book) || manifestBooks.restore(book))
+                .also { if (it) appScope.launch { bookIndex.indexPending() } }
 
     /**
      * Keeps the Gutenberg books' rows following the installed Gutenberg packs (Plan GB Decision 3): synced on start, on
@@ -414,13 +429,44 @@ class AppContainer(context: Context) {
         follow(gutenbergBooks, "Gutenberg")
         // Plan KB: the nautilus packs' documents, the same way; a pack's earlier PDFs are adopted, and indexed once moved.
         follow(nautilusBooks, "Nautilus") { if (nautilusBooks.adopted > 0) bookIndex.indexPending() }
+        // Plan KB2: the manifest packs' books, once their manifests are attached.
+        followBookManifests()
+        follow(manifestBooks, "Kiwix books")
+    }
+
+    /**
+     * Keeps each pack's [app.granger.core.library.Pack.bookManifest] in step with the installed `.gbooks` sidecars
+     * (Plan KB2): on start, and whenever a pack or a download changes.
+     */
+    private fun followBookManifests() {
+        appScope.launch {
+            combine(
+                downloads.records.map { r -> r.filter { SidecarKind.BOOK_MANIFEST.parentOf(it.itemId) != null }.map { it.itemId to it.state } }
+                    .distinctUntilChanged(),
+                library.packs.map { packs -> packs.map { Triple(it.id, it.status, it.filePath) } }.distinctUntilChanged(),
+            ) { a, b -> a to b }
+                .collectLatest {
+                    try {
+                        val installed = installedSidecars(SidecarKind.BOOK_MANIFEST).mapValues { ManifestFile(it.value.file, it.value.packSha256) }
+                        val changed = bookManifests.attach(installed)
+                        if (changed > 0) Log.i("Granger", "Book manifests: $changed packs changed")
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Log.w("Granger", "Couldn't attach the book manifests", e)
+                    }
+                }
+        }
     }
 
     private fun follow(books: PackBooks, label: String, after: suspend () -> Unit = {}) {
         appScope.launch {
             library.packs
                 .map { packs -> packs.filter { it.bookSource == books.source.origin } }
-                .distinctUntilChanged { old, new -> old.map { it.id to it.status } == new.map { it.id to it.status } }
+                // A manifest arriving (or changing) re-lists the pack's books (Plan KB2).
+                .distinctUntilChanged { old, new ->
+                    old.map { Triple(it.id, it.status, it.bookManifest) } == new.map { Triple(it.id, it.status, it.bookManifest) }
+                }
                 .collectLatest { packs ->
                     try {
                         val started = SystemClock.elapsedRealtime()
@@ -783,7 +829,8 @@ class AppContainer(context: Context) {
 
     /** A sidecar kind downloads only once a feature reads it (Linked Library spec §5.8). */
     private fun sidecarWanted(kind: SidecarKind): Boolean = when (kind) {
-        SidecarKind.VECTORS, SidecarKind.TIME_INDEX -> true
+        // A book manifest is small, and it's what makes its pack a collection (Plan KB2).
+        SidecarKind.VECTORS, SidecarKind.TIME_INDEX, SidecarKind.BOOK_MANIFEST -> true
         SidecarKind.QID_INDEX, SidecarKind.LINKS -> Features.LINKED_CLASSICS
     }
 

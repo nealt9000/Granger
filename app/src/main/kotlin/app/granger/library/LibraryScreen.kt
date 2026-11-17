@@ -54,6 +54,7 @@ import app.granger.audiobooks.AUDIOBOOKS_TYPE_ID
 import app.granger.core.library.CollectionRow
 import app.granger.core.library.Filing
 import app.granger.core.library.GutenbergNames
+import app.granger.core.library.ManifestCollection
 import app.granger.music.MUSIC_TYPE_ID
 import app.granger.sources.GetMoreLink
 
@@ -201,7 +202,7 @@ fun LibraryContent(
             for (kind in loaded.kinds) {
                 kindRows(kind, open = kind.id !in collapsed, onToggle = { open ->
                     collapsed = if (open) collapsed + kind.id else collapsed - kind.id
-                }, onOpenCollection = onOpenCollection)
+                }, onOpenCollection = onOpenCollection, manifests = loaded.manifests, providers = loaded.providers)
             }
         }
     }
@@ -222,6 +223,10 @@ internal fun LazyListScope.kindRows(
     onOpenMusic: (collectionId: String?) -> Unit = {},
     /** An Audiobooks collection's shelf, or "All audiobooks" (null). */
     onOpenAudiobooks: (collectionId: String?) -> Unit = {},
+    /** The Kiwix book packs' manifests by collection default key, for their rows' noun and provider (Plan KB2). */
+    manifests: Map<String, ManifestCollection> = emptyMap(),
+    /** The catalog's provider of each Kiwix book pack collection, by default key, when its manifest names none (Plan KB2). */
+    providers: Map<String, String> = emptyMap(),
 ) {
     val id = kind.id
     item(key = "kind:$id") {
@@ -264,7 +269,9 @@ internal fun LazyListScope.kindRows(
                     }
                     .padding(start = 16.dp),
                 headlineContent = { Text(row.collection.shownName().resolve()) },
-                supportingContent = { Text(rowCountText(row).resolve()) },
+                supportingContent = {
+                    Text(rowCountText(row, row.collection.defaultKey?.let(manifests::get), row.collection.defaultKey?.let(providers::get)).resolve())
+                },
             )
         }
     }
@@ -272,30 +279,47 @@ internal fun LazyListScope.kindRows(
 }
 
 
-/** The book sources an empty Library links to: Get more's own rows (Plan U3c Decision 2). */
-internal val BOOK_SOURCES = listOf(GetMoreLink.GRANGER_CLASSICS, GetMoreLink.GUTENBERG, GetMoreLink.KIWIX_BOOKS, GetMoreLink.ARCHIVE_ORG_BOOKS)
+/** The book sources an empty Library links to: Get more's own rows (Plan U3c Decision 2), Books by kind first (Plan KB2 Task 4.1). */
+internal val BOOK_SOURCES = listOf(GetMoreLink.BOOKS, GetMoreLink.ARCHIVE_ORG_BOOKS)
 
 private val IMPORT_TYPES = arrayOf(
     "application/epub+zip", "application/pdf", "text/plain", "text/markdown", "text/x-markdown", "application/octet-stream",
 )
 
-/** What a collection row says it holds ("3 packs · 1 book"); a folder's is the total of its children. */
-internal fun rowCountText(row: CollectionRow): UiText {
+/**
+ * What a collection row says it holds ("3 packs · 1 book"); a folder's is the total of its children. A Kiwix book
+ * pack's collection takes its noun and provider from [manifest], its pack's manifest (Plan KB2 Task 4.2); null for any
+ * other collection, or one whose manifest isn't read yet.
+ */
+internal fun rowCountText(row: CollectionRow, manifest: ManifestCollection? = null, catalogProvider: String? = null): UiText {
     val rows = row.withChildren
     val counts = countText(rows.sumOf { it.packs.size }, rows.sumOf { it.books.size }, rows.sumOf { it.albums.size }, rows.sumOf { it.audiobooks.size })
-    // A book pack's collection is called by its subject or pack; the line under it says whose (Plan GB Decision 2, Plan
-    // KB Decision 7), and, as the collection's header does, how many of its books are searchable in full once any are.
+    // A book pack's collection is called by its subject or pack; the line under it says how many it holds and where they
+    // come from (Plan GB Decision 2, Plan KB Decision 7, Plan KB2 Task 4.2). Whether they're searchable in full is the
+    // collection header's to say, and only where they aren't (Task 4.5).
     val key = row.collection.defaultKey
-    if (!Filing.isBookPackCollection(key)) return counts
-    val searchable = rows.sumOf { r -> r.books.count { it.searchableInFull } }
-    val books = rows.sumOf { it.books.size }
-    val header = GutenbergHeader(pack = null, books = books, searchable = searchable)
-    if (Filing.isKiwixBooksCollection(key)) {
-        // "Kiwix library · 17 documents · 3 searchable in full" (Plan KB Decision 7).
-        val kiwix = header.copy(kind = HeaderKind.KIWIX_LIBRARY)
-        return dotted(listOfNotNull(if (books > 0) kiwix.provenance else kiwix.provider, kiwix.searchableText.takeIf { searchable > 0 }))
+    // A catalog book set's collection (Plan KB2 Task 3.2): "693 books · African Storybook Initiative".
+    if (Filing.isBookSetCollection(key)) {
+        val books = rows.sumOf { it.books.size }
+        if (books == 0) return counts
+        return GutenbergHeader(pack = null, books = books, searchable = 0, kind = HeaderKind.BOOK_SET,
+            providerName = Filing.bookSetProvider(key), documents = false).provenance
     }
-    return dotted(listOfNotNull(header.provider, counts.takeIf { it != EMPTY }, header.searchableText.takeIf { searchable > 0 }))
+    if (!Filing.isBookPackCollection(key)) return counts
+    // A work in parts counts once, as the header counts it.
+    val books = rows.sumOf { r -> if (manifest != null) r.books.distinctBy { it.workKey ?: it.id }.size else r.books.size }
+    val header = GutenbergHeader(pack = null, books = books, searchable = 0).let {
+        // "17 documents · From Kiwix", "24 books · From Kiwix · Federation of American Scientists".
+        if (Filing.isKiwixBooksCollection(key)) {
+            it.copy(
+                kind = HeaderKind.KIWIX_LIBRARY, documents = manifest?.documents ?: true,
+                providerName = manifest?.provider?.takeIf(String::isNotBlank) ?: catalogProvider?.takeIf(String::isNotBlank),
+            )
+        } else {
+            it
+        }
+    }
+    return if (books > 0) header.provenance else header.provider
 }
 
 private val EMPTY = UiText.Raw("")

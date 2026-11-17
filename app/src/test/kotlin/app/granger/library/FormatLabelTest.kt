@@ -17,6 +17,6 @@ class FormatLabelTest {
     @Test fun onlyPdfsSayTheirFormat() {
         assertThat(formatLabel(book("e"))).isNull()
         assertThat(formatLabel(book("p").copy(format = BookFormat.PDF)).en()).isEqualTo("PDF")
-        assertThat(formatLabel(book("s").copy(format = BookFormat.PDF, searchable = false)).en()).isEqualTo("PDF · Not searchable")
+        assertThat(formatLabel(book("s").copy(format = BookFormat.PDF, searchable = false)).en()).isEqualTo("PDF · A scan: title only")
     }
 }

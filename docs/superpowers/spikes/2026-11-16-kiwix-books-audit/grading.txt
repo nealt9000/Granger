@@ -1,0 +1,150 @@
+== irp.fas.org_en_military-medicine
+{"docsInPack": 24, "items": 24, "keysKept": 0, "titleSources": {"link": 18, "pdf": 6}, "fetchedBytes": 1046002, "requests": 2
+  [link    ] 'Malaria Prevention and Control'                                                              irp.fas.org/doddir
+  [link    ] 'Preventive Medicine Services'                                                                irp.fas.org/doddir
+  [pdf     ] 'US Army Special Forces Military Handbook (Part 2 of 3)'                                      irp.fas.org/doddir
+  [pdf     ] 'Hospital Corpsman (Part 2 of 3)'                                                             irp.fas.org/doddir
+  [link    ] 'Personnel Dosimetry Guidance and Dose Recording Procedures for Personn'                      irp.fas.org/doddir
+  [link    ] 'Handling Procedures for Equipment Contaminated with Depleted Uranium o'                      irp.fas.org/doddir
+  [link    ] 'Preventive Medicine'                                                                         irp.fas.org/doddir
+  [link    ] 'Bandaging and Splinting'                                                                     irp.fas.org/doddir
+  [link    ] 'Unit Field Sanitation Team'                                                                  irp.fas.org/doddir
+  [pdf     ] 'US Army Special Forces Medical Handbook (Part 3 of 3)'                                       irp.fas.org/doddir
+  [pdf     ] 'Hospital Corpsman (Part 3 of 3)'                                                             irp.fas.org/doddir
+  [link    ] 'War Psychiatry'                                                                              irp.fas.org/doddir
+  [link    ] 'Family Guide Emergency Health Care'                                                          irp.fas.org/doddir
+  [link    ] 'Emergency Childbirth'                                                                        irp.fas.org/doddir
+  [link    ] 'Sterilizing Medical, Surgical, Dental and Veterinary Materiel'                               irp.fas.org/doddir
+  [link    ] 'Radiation Health Protection Manual'                                                          irp.fas.org/doddir
+  [link    ] 'Military Dermatology (Redacted)'                                                             irp.fas.org/doddir
+  [link    ] "Division and Brigade Surgeon's Handbook"                                                     irp.fas.org/doddir
+  [link    ] 'First Aid for Soldiers'                                                                      irp.fas.org/doddir
+  [link    ] 'Disinfection and Sterilization of Dental Instruments and Materials'                          irp.fas.org/doddir
+  [link    ] 'First Aid'                                                                                   irp.fas.org/doddir
+  [pdf     ] 'Hospital Corpsman (part 1 of 3)'                                                             irp.fas.org/doddir
+  [pdf     ] 'US Army Special Forces Medical Handbook (part 1 of 3)'                                       irp.fas.org/doddir
+  [link    ] "The Ship's Medicine Chest and Medical Aid at Sea"                                            irp.fas.org/doddir
+== smbc-comics.com_en_all
+{"docsInPack": 9, "items": 9, "keysKept": 0, "titleSources": {"heading": 8, "override": 1}, "fetchedBytes": 1295827, "request
+  [heading ] 'Science: Ruining Everything Since 1543'                                                      w.smbc-comics.com/
+  [heading ] 'The Holy Bible: Abridged Beyond the Point of Usefulness'                                     mbc-comics.com/cov
+  [heading ] 'Religion: Ruining Everything Since 4004 B.C.'                                                mbc-comics.com/cov
+  [override] 'Augie and the Green Knight (German)'                                                         .smbc-comics.com/c
+  [heading ] 'Shakespeare’s Sonnets: Abridged Beyond the Point of Usefulness'                              omics.com/covid/fi
+  [heading ] 'Augie and the Green Knight'                                                                  www.smbc-comics.co
+  [heading ] 'Science: Abridged Beyond the Point of Usefulness'                                            .smbc-comics.com/c
+  [heading ] '27 Nerd Disses: A Significant Quantity of Disrespect'                                        smbc-comics.com/co
+  [heading ] 'Trial of the Clone'                                                                          c-comics.com/covid
+== jeffe.cs.illinois.edu_en_all
+{"docsInPack": 696, "items": 696, "keysKept": 0, "titleSources": {"link": 49, "path": 644, "heading": 1, "override": 2}, "fet
+  [path    ] 'Fall 2021 · Lab 2'                                                      course               du/teaching/algori
+  [path    ] 'Fall 2024 · Homework 3'                                                 course               u/teaching/algorit
+  [path    ] 'Fall 2024 · Midterm 2c'                                                 course               aching/algorithms/
+  [path    ] 'Fall 2019 · Final exam fodder'                                          course               ng/algorithms/hwex
+  [path    ] 'Fall 2023 · Homework 3'                                                 course               u/teaching/algorit
+  [path    ] 'Fall 2014 · Lab 11 14'                                                  course               du/teaching/algori
+  [path    ] 'Fall 2023 · Lab 8a'                                                     course               aching/algorithms/
+  [link    ] 'Appendix II. Solving Recurrences'                                       book                 /teaching/algorith
+  [path    ] 'Fall 2023 · Final exam practice2'                                       course               rithms/hwex/f23/ex
+  [path    ] 'Spring 2018 · Lab s'                                                    course               edu/teaching/algor
+  [path    ] 'Fall 2016 · Lab 1bis'                                                   course               .edu/teaching/algo
+  [path    ] 'Fall 2016 · Homework 1'                                                 course               nois.edu/teaching/
+  [path    ] 'Spring 2018 · Lab 10'                                                   course               is.edu/teaching/al
+  [path    ] 'Fall 2014 · Lab 10 24'                                                  course               du/teaching/algori
+  [link    ] 'Balances and Pseudoflows'                                               book                 u/teaching/algorit
+  [path    ] 'Fall 2019 · Homework 8'                                                 course               s.edu/teaching/alg
+  [path    ] 'Fall 2019 · Lab 11'                                                     course               du/teaching/algori
+  [path    ] 'Fall 2021 · Final exam'                                                 course               /teaching/algorith
+  [path    ] 'Spring 2020 · Homework 1'                                               course               s.edu/teaching/alg
+  [path    ] 'Fall 2012 · Head-banging session 2'                                     course               is.edu/teaching/al
+  [path    ] 'Spring 2016 · Homework and exams'                                       course               ois.edu/teaching/a
+  [path    ] 'Fall 2019 · Lab 2'                                                      course               edu/teaching/algor
+  [link    ] 'Finite-state automata'                                                  book                 du/teaching/algori
+  [path    ] 'Fall 2014 · Lab 10 17'                                                  course               du/teaching/algori
+  [path    ] 'Spring 2016 · Midterm 1'                                                course               edu/teaching/algor
+  [path    ] 'Fall 2016 · Lab 12'                                                     course               is.edu/teaching/al
+  [link    ] 'Fast Fourier Transforms'                                                book                 inois.edu/teaching
+  [path    ] 'Fall 2012 · Homework 3'                                                 course               nois.edu/teaching/
+  [path    ] 'Spring 2017 · Homework 0'                                               course               nois.edu/teaching/
+  [path    ] 'Spring 2020 · Homework 10'                                              course               .edu/teaching/algo
+== milneopentextbooks.org_en_all
+{"docsInPack": 26, "items": 15, "keysKept": 0, "titleSources": {"page": 15}, "fetchedBytes": 2086101, "requests": 49}
+  [page    ] 'DC Electrical Circuit Analysis: A Practical Approach · Lab manual'                           &dlm-dp-dl-force=1
+  [page    ] 'Embedded Controllers using C and Arduino'                                                    &dlm-dp-dl-force=1
+  [page    ] 'Semiconductor Devices: Theory & Application'                                                 &dlm-dp-dl-force=1
+  [page    ] 'DC Electrical Circuit Analysis: A Practical Approach'                                        &dlm-dp-dl-force=1
+  [page    ] 'Drink, Swear, Steal, and Lie: Leadership in Four Easy Steps'                                 &dlm-dp-dl-force=1
+  [page    ] 'An OER Ethics Reader'                                                                        &dlm-dp-dl-force=1
+  [page    ] 'Operational Amplifiers & Linear Integrated Circuits · Lab'                                   &dlm-dp-dl-force=1
+  [page    ] 'AC Electrical Circuit Analysis: A Practical Approach'                                        &dlm-dp-dl-force=1
+  [page    ] 'Foundations for Assisting in Home Care'                                                      o.edu/home-health-
+  [page    ] 'Semiconductor Devices: Theory & Application · Lab manual'                                    &dlm-dp-dl-force=1
+  [page    ] 'An Introduction to Labor and Employment Law'                                                 &dlm-dp-dl-force=1
+  [page    ] 'AC Electrical Circuit Analysis: A Practical Approach · Lab manual'                           &dlm-dp-dl-force=1
+  [page    ] 'Operational Amplifiers & Linear Integrated Circuits'                                         &dlm-dp-dl-force=1
+  [page    ] 'Embedded Controllers using C and Arduino · Lab'                                              &dlm-dp-dl-force=1
+  [page    ] 'Interpersonal Communication: A Mindful Approach to Relationships · Stu'                      &article=1028&cont
+== survivorlibrary.com_en_all
+{"docsInPack": 11802, "items": 11802, "keysKept": 0, "titleSources": {"block": 11793, "pdf": 6, "heading": 3}, "fetchedBytes"
+  [block   ] 'Current Law – A Complete Encyclopedia Of New Law Vol 1 (1904)'          Law                  mplete_encyclopedi
+  [block   ] 'Effects Of Nuclear Weapons 3Rd Ed 1977 Ch 3 Air Blast Phenomena In Air' NBC                  blast_phenomena_in
+  [block   ] 'Perspective Or The Art Of Drawing What One Sees (1872)'                 Painting Drawing     _or_the_art_of_dra
+  [block   ] 'A Handbook Of Practical Gas – Fitting (1901)'                           Fuels                /a_handbook_of_pra
+  [block   ] 'The Prescriber – A Dictionary Of The New Therapeutics (1900)'           Medical Anesthesia   a_dictionary_of_th
+  [block   ] 'Crosman 120 Air Rifle'                                                  Firearms Manuals     library.com/librar
+  [block   ] 'Studies In Anatomy And Surgery Of The Nose And Ear (1918)'              Medical Surgery 1900 tomy_and_surgery_o
+  [block   ] 'On The Structure And Affinities Of The Composite Bow (1889)'            Archery              _and_affinities_of
+  [block   ] 'The Logic And Utility Of Mathematics (1869)'                            Mathematics          the_logic_and_util
+  [block   ] 'Glue Gelatine Animal Charcoal Phosphorus Cements Pastes And Mucilages ' Turpentine Glue Solv sphorus_cements_pa
+  [block   ] 'Scientific-American-1906-01-20-V94-N03'                                 X Scientific America ry/scientific-amer
+  [block   ] 'Winchester Model63Om'                                                   Firearms Manuals     rlibrary.com/libra
+  [block   ] 'Izh Mp153 Semi Automatic Shotgun'                                       Firearms Manuals     /library/izh_mp153
+  [block   ] 'The Woman Citizen Vol 09 Issue 01 – 12 (1924)'                          Teaching Civics      the_woman_citizen_
+  [block   ] 'Blueprints – M203 40Mm Grenade Launcher 1'                              Firearms Manuals     y/blueprints-m203_
+  [block   ] 'An Architects Sketch Book (1912)'                                       Architecture         om/library/an_arch
+  [block   ] 'The Work Of The Coast And Geodetic Survey (1905)'                       Geodesy              ork_of_the_coast_a
+  [block   ] 'Encyclopedia Britannica Great Books Of The Western World – Vol 07 – Pl' Great Books          t_books_of_the_wes
+  [block   ] 'A Treatise On The Cavalry And Saddle Horse (1803)'                      Horses               tise_on_the_cavalr
+  [block   ] 'A Manual Of The Art Of Dyeing (1853)'                                   Weaving              ibrary/a_manual_of
+  [block   ] 'A Bicycle Tour In England And Wales (1881)'                             Cycles Bi Tri Motor  /a_bicycle_tour_in
+  [block   ] 'Stresses In Masonry (1909)'                                             Stone and Masonry    rary.com/library/s
+  [block   ] 'Sunshine Stoves – Ranges (1923)'                                        Heating              y.com/library/suns
+  [block   ] 'A Centurys Progress In Astronomy (1906)'                                Astronomy            ary/a_centurys_pro
+  [block   ] 'Beretta 22'                                                             Firearms Manuals     ww.survivorlibrary
+  [block   ] 'Sulphuric Acid Alkalies And Hydrochloric Acid Manufacture (1905)'       Sulphuric Acid       es_and_hydrochlori
+  [block   ] 'Steyr Aug Stg77 Assault Rifle'                                          Firearms Manuals     com/library/steyr_
+  [block   ] 'Rudimentary Treatise On The Principles Of Design In Architecture (1850' Architecture         principles_of_desi
+  [block   ] 'A Synopsis Of The First Three Books Of John Stuart Mills Principles Of' Economics            ills_principles_of
+  [block   ] 'Australian Bushcraft'                                                   Survival Individual  rary.com/library/a
+== africanstorybook.org_mul_all
+{"docsInPack": 5165, "items": 5165, "keysKept": 0, "titleSources": {"page": 5165}, "fetchedBytes": 2502961, "requests": 45}
+  [page    ] 'Dhaada Omukazi, Wakaima ne Endovu'                                      Level 1              0b6e2c2dcfd4b9cf0f
+  [page    ] 'Kanegelo ya Mollo'                                                      Level 2              1acdc87e945d83bc6b
+  [page    ] 'Nthabi o etsa hantle!'                                                  Level 2              fe75e59cfc06f9f7ac
+  [page    ] 'Kuku amfanyia Tai hila'                                                 Level 3              16dc0e11d12520a93b
+  [page    ] 'Linakanda Lisebushe'                                                    Level 1              135af563919730c73e
+  [page    ] 'UNkukhu lo Tshongololo'                                                 Level 1              4a3016f69fe05197bf
+  [page    ] 'Menina Telefone'                                                        Level 2              c234ccc5082ac6414b
+  [page    ] 'Waraabesootnii maaliif okkolan?'                                        Level 4              c59e9a0fec3257ff6c
+  [page    ] "Akamu ka Ang'olol a Apiaro"                                             Level 4              37f736e48d069ab062
+  [page    ] 'Kwenda Jijini'                                                          Level 1              9c7625312424ba6812
+  [page    ] 'Amenyo'                                                                 Level 1              e612383a049875a2f7
+  [page    ] 'Byantaka noomutondo waafwa'                                             Level 3              7f68392e5b30dbf830
+  [page    ] 'Bok, Hond en Koei'                                                      Level 2              7590745e0d10174d38
+  [page    ] 'Likizo kwa Bibi'                                                        Level 4              29f0e691546d6808db
+  [page    ] 'Familia ya Pembenyingi'                                                 Level 5              a8b777f63597056b2f
+  [page    ] "Má 'ɨ́ Àzɨ́nɨ Àkú Àma Vɨ́lé Rɨ̀"                                        Level 2              51ce77677f90b6ff2d
+  [page    ] 'Chameleon Races Rabbit'                                                 Level 3              9f00fd5d8f359fc9f5
+  [page    ] 'Lalela umzimba wami'                                                    Level 2              ba96093788609b7796
+  [page    ] 'Nàʼ wo wù kér loŋ e mòʼón'                                         Level 2              9a9b920608ec95264b
+  [page    ] 'Vakansies by ouma'                                                      Level 4              195e579783c06292e9
+  [page    ] 'Nalitemwa Ukucita Ifintu'                                               Level 1              55467ec4f5472902b7
+  [page    ] 'Ukubala izilwane'                                                       Level 2              c0d1970c103db43317
+  [page    ] 'Anansi mlafi'                                                           Level 1              dbbc43d532ee799396
+  [page    ] 'Leeu se vuurstokke'                                                     Level 4              334bb0460fc649aef8
+  [page    ] "Sakima's song"                                                          Level 3              337de9e30c2b43790b
+  [page    ] 'Inkosi yezinyoni'                                                       Level 3              873e47d84baaac5ab3
+  [page    ] 'ሰውነት'                                                                   Level 1              74cd89efebf35c2666
+  [page    ] 'Amikap Koron'                                                           Level 1              a9754552a986387748
+  [page    ] 'Um Ovo Para Conseguir Uma Noiva'                                        Level 4              e9a8ebf0c9d311d605
+  [page    ] 'Uthisha wami'                                                           Level 1              970ea3129ea25a3f0f

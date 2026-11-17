@@ -94,6 +94,15 @@ data class ItemSheet(
     val parts: List<PartRow> = emptyList(),
 )
 
+/** What Open on an installed archive.org text reads (Plan KB2 Task 4.3). */
+sealed interface ArchiveOpen {
+    /** One book, in the reader. */
+    data class Book(val bookId: String, val title: String) : ArchiveOpen
+
+    /** A set's parts, in their Library collection. */
+    data class Collection(val collectionId: String) : ArchiveOpen
+}
+
 /** One part of a set on the sheet: its [number], [title], size and where its download stands. */
 data class PartRow(val number: Int, val title: String, val sizeBytes: Long, val status: ItemStatus)
 
@@ -387,6 +396,20 @@ class ArchiveViewModel(
             for (key in partKeys(identifier, downloads.records.first())) removeKey(key)
             withContext(io) { ArchiveDownloads.deleteSidecar(sidecarDir(), identifier) }.also { sidecarKinds.remove(identifier) }
         }
+    }
+
+    /**
+     * What Open reads for an installed text (Plan KB2 Task 4.3): its book (the text, else the PDF beside it), or, for a
+     * set, the collection of its parts; null when none of it is on the shelf.
+     */
+    suspend fun openTarget(identifier: String): ArchiveOpen? {
+        if (audio) return null
+        val single = bookshelf.book(BookIds.of(BookOrigin.ARCHIVE_ORG, identifier))
+            ?: bookshelf.book(BookIds.of(BookOrigin.ARCHIVE_ORG, identifier + ArchiveDownloads.PDF_SUFFIX))
+        if (single != null) return ArchiveOpen.Book(single.id, single.title)
+        val prefix = BookIds.of(BookOrigin.ARCHIVE_ORG, identifier + ArchiveDownloads.PART_SEPARATOR)
+        val part = bookshelf.books.first().firstOrNull { it.id.startsWith(prefix) } ?: return null
+        return ArchiveOpen.Collection("c:" + app.granger.core.library.Filing.defaultKey(part))
     }
 
     /** Removes part [number] of a set: its download, its book and its sidecar (Plan IA). */

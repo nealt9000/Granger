@@ -95,13 +95,16 @@ class PublishedCatalogTest {
         // English (and multilingual) packs; the Spanish ones are checked below (Plan L3).
         val english = catalog.packs.filterNot { it.language == "es" || it.language == "sw" }
         val books = english.filter { it.isBookPack }
-        assertThat(books).hasSize(50)
+        assertThat(books).hasSize(55)
         assertThat(books.count { it.family == "gutenberg" }).isEqualTo(41)
         assertThat(catalog.packs.filter { it.family == "gutenberg" }.all { it.isBookPack }).isTrue()
         assertThat(books.filter { it.family != "gutenberg" }.map { it.zimName }).containsExactly(
             "zimgit-food-preparation_en", "zimgit-knots_en", "zimgit-medicine_en", "zimgit-post-disaster_en",
             "zimgit-water_en", "usda-2015_en", "prunelle_en_budding-authors", "prunelle_en_draw-your-african-story",
             "prunelle_en_interactive-books",
+            // Plan KB2: book manifests, content blank.
+            "irp.fas.org_en_military-medicine", "smbc-comics.com_en_all", "jeffe.cs.illinois.edu_en_all",
+            "milneopentextbooks.org_en_all", "survivorlibrary.com_en_all",
         )
         assertThat(catalog.packs.filter { it.flavour.isNotEmpty() }.all { it.id == "${it.zimName}_${it.flavour}" }).isTrue()
         assertThat(english.groupingBy { it.flavour }.eachCount())
@@ -111,6 +114,11 @@ class PublishedCatalogTest {
             .containsExactly("", 6, "maxi", 1, "nopic", 2)
         // Spanish: Project Gutenberg's Spanish pack is a book pack too (the walkthrough, 2026-11-02).
         assertThat(catalog.packs.filter { it.language == "es" && it.isBookPack }.map { it.zimName }).contains("gutenberg_es_all")
+        // Plan KB2 Task 4.1: every book pack has a shelf by kind, and only book packs do.
+        assertThat(catalog.packs.filter { it.isBookPack }.map { it.shelf }.toSet()).containsExactlyElementsIn(Shelves.ORDER)
+        assertThat(catalog.packs.filter { it.shelf.isNotEmpty() }.all { it.isBookPack }).isTrue()
+        assertThat(catalog.packs.single { it.zimName == "irp.fas.org_en_military-medicine" }.shelf).isEqualTo(Shelves.MANUALS)
+        assertThat(catalog.packs.single { it.zimName == "jeffe.cs.illinois.edu_en_all" }.shelf).isEqualTo(Shelves.LEARNING)
     }
 
     /** Plan WF: Wikipedia and Wikivoyage as sets, the subjects with what they add, the sample marked. */

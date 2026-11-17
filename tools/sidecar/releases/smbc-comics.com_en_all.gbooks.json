@@ -1,0 +1,13 @@
+{
+ "id": "smbc-comics.com_en_all",
+ "kind": "pack",
+ "sidecar": "gbooks",
+ "fileName": "smbc-comics.com_en_all_2026-10.gbooks",
+ "sizeBytes": 36864,
+ "sha256": "20c66020533ecfc56a89c0d6e633e180b26ef6899073fa956e29fef60401468c",
+ "schemaVersion": 1,
+ "sourceSha256": "e4dd9d5583d348c1a3c45e7ded08d9a636d87a2bf13355b93473bc0a7af85f3e",
+ "builder": "tools/bookpacks/build.py",
+ "builderVersion": 1,
+ "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-16/smbc-comics.com_en_all_2026-10.gbooks"
+}

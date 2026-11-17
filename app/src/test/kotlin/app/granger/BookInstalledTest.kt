@@ -9,6 +9,7 @@ import app.granger.core.archive.ArchiveItem
 import app.granger.core.archive.TextKind
 import app.granger.core.downloads.DownloadState
 import app.granger.core.downloads.ItemKind
+import app.granger.core.downloads.isFromCatalog
 import com.google.common.truth.Truth.assertThat
 import java.io.File
 import kotlinx.coroutines.test.runTest
@@ -78,6 +79,25 @@ class BookInstalledTest {
         fileBookRecord(shelf, tmp.newFolder("sidecars"), bookRecord("pg1342")) {}
         assertThat(shelf.filed.single()).isEqualTo(Triple(BookOrigin.GRANGER, "pg1342", null))
     }
+    /**
+     * Plan KB2 Task 3.2: a set book (African Storybook) downloads as a catalog book, to Granger's books folder, and is
+     * filed as a Granger book by its id, which files it into its set's collection, not Granger Classics.
+     */
+    @Test fun anAfricanStorybookBookDownloadsAndFilesAsItsSetsBook() = runTest {
+        val book = asbSet().books.first()
+        val spec = app.granger.core.downloads.downloadSpecOf(book)
+        assertThat(spec.kind).isEqualTo(ItemKind.BOOK)
+        assertThat(spec.relativePath).isEqualTo("books/granger/${book.id}_2026-11-16.epub")
+        assertThat(spec.hash).isEqualTo(book.sha256)
+        val record = record(book.id, DownloadState.INSTALLED, kind = ItemKind.BOOK, filePath = "/internal/${spec.relativePath}")
+        assertThat(record.isFromCatalog).isTrue()
+        val shelf = Recording()
+        fileBookRecord(shelf, tmp.newFolder("sidecars"), record) {}
+        assertThat(shelf.filed.single()).isEqualTo(Triple(BookOrigin.GRANGER, book.id, null))
+        val filed = app.granger.book(app.granger.core.library.BookIds.of(BookOrigin.GRANGER, book.id)).copy(sourceRef = book.id)
+        assertThat(app.granger.core.library.Filing.defaultKey(filed)).isEqualTo("african-storybook-en")
+    }
+
     private class Shelf(val result: () -> Book?) : Bookshelf by FakeBookshelf() {
         override suspend fun addDownloaded(file: File, origin: BookOrigin, ref: String, details: BookDetails?): Book? = result()
     }

@@ -21,13 +21,6 @@
     <string name="sources_group_models">Models &amp; voices</string>
     <string name="sources_link_kiwix" translatable="false">Kiwix</string>
     <string name="sources_link_kiwix_sub">Wikipedia, Stack Exchange, medicine, how-to and more, offline</string>
-    <string name="sources_link_classics">Granger Classics</string>
-    <string name="sources_link_classics_sub">Public-domain e-books, ready to read</string>
-    <string name="sources_link_gutenberg" translatable="false">Project Gutenberg</string>
-    <string name="sources_link_gutenberg_sub">Public-domain books by subject, in packs from Kiwix</string>
-    <!-- Kiwix's book packs (nautilus libraries): Food for Preppers, Water, Prunelle. -->
-    <string name="sources_link_kiwix_books">Kiwix libraries</string>
-    <string name="sources_link_kiwix_books_sub">Guides and handbooks: food, water, medicine, knots and more</string>
     <string name="sources_link_archive_books">Archive.org books</string>
     <string name="sources_link_archive_books_sub">Out-of-copyright books from the Internet Archive</string>
     <string name="sources_link_librivox" translatable="false">LibriVox</string>
@@ -38,6 +31,30 @@
     <string name="sources_link_archive_music_sub">Recordings from the Internet Archive</string>
     <string name="sources_link_models">Models and voices</string>
     <string name="sources_link_models_sub">What Read aloud runs on</string>
+    <!-- Get more → Books (Plan KB2 Task 4.1): every book source in one screen, by kind. -->
+    <string name="sources_link_books">Books by kind</string>
+    <string name="sources_link_books_sub">Literature, children\'s books, manuals and learning</string>
+    <!-- Its shelves, from the catalog's shelf field; More books holds a book pack with none. -->
+    <string name="sources_shelf_literature">Literature</string>
+    <string name="sources_shelf_children">Children\'s books</string>
+    <string name="sources_shelf_manuals">Manuals &amp; references</string>
+    <string name="sources_shelf_learning">Learning</string>
+    <string name="sources_shelf_other">More books</string>
+    <!-- Plan KB2 Task 3.2: a book set's reading level (African Storybook), as a section and a collection's heading. -->
+    <string name="sources_level">Level %1$d</string>
+    <!-- Under the shelves: the ways to find a book that aren't a shelf. -->
+    <string name="sources_books_find">Find a book</string>
+    <string name="sources_search_all_books">Search all books</string>
+    <string name="sources_search_all_books_sub">Titles from every book source here</string>
+    <!-- Project Gutenberg's folded row: "41 subjects · From Kiwix · 2 on this phone". -->
+    <plurals name="sources_subjects">
+        <item quantity="one">%1$d subject</item>
+        <item quantity="other">%1$d subjects</item>
+    </plurals>
+    <plurals name="sources_on_this_phone">
+        <item quantity="one">%1$d on this phone</item>
+        <item quantity="other">%1$d on this phone</item>
+    </plurals>
     <!-- Imports the user's own books from files on the phone. -->
     <string name="sources_import_own">Import your own</string>
     <string name="sources_import_own_sub">EPUB, PDF, TXT or Markdown books from this phone</string>
@@ -47,7 +64,7 @@
     <string name="sources_scope_kiwix" translatable="false">Kiwix</string>
     <string name="sources_scope_models">Models</string>
     <string name="sources_scope_gutenberg" translatable="false">Project Gutenberg</string>
-    <string name="sources_scope_kiwix_books">Kiwix libraries</string>
+    <string name="sources_scope_kiwix_books">Books from Kiwix</string>
 
     <!-- A source screen. -->
     <string name="sources_check_updates">Check for updates</string>
@@ -105,11 +122,18 @@
     <string name="sources_remove_title">Remove %1$s?</string>
     <!-- One slice of a set: %1$s is the set (Wikipedia), %2$s the slice (Best 50,000 articles). -->
     <string name="sources_remove_slice_title">Remove %1$s: %2$s?</string>
+    <!-- A web pack: its saved bookmarks and places go with it. -->
     <string name="sources_remove_pack_body">This deletes the file, and the bookmarks and reading places you saved in it.</string>
+    <!-- A model or a voice. -->
     <string name="sources_remove_body">This deletes the file.</string>
+    <!-- A book, and a pack of books or documents: their places and marks stay for a later download (Plan KB2). -->
+    <string name="sources_remove_book_body">This deletes the file. Your place, bookmarks and highlights are kept.</string>
+    <string name="sources_remove_book_pack_body">This deletes the pack and its books. Your places, bookmarks and highlights are kept.</string>
+    <string name="sources_remove_document_pack_body">This deletes the pack and its documents. Your places, bookmarks and highlights are kept.</string>
     <!-- A preset (a ready-made set of downloads); %1$s is its name, such as Granger Classics. -->
     <string name="sources_preset_title">%1$s set</string>
     <string name="sources_get_all">Get all</string>
+    <string name="sources_get_all_named">Get all of %1$s</string>
     <!-- Counts in a preset's line: "12 packs and 347 books · 17.7 GB". -->
     <plurals name="sources_packs">
         <item quantity="one">%d pack</item>
@@ -180,6 +204,11 @@
     <string name="sources_update">Update</string>
     <!-- The overflow menu of a row; %1$s is its title. -->
     <string name="sources_more_for">More for %1$s</string>
+    <!-- What TalkBack says for a row's button, with the row's name: "Get Military Medicine". -->
+    <string name="sources_get_named">Get %1$s</string>
+    <string name="sources_open_named">Open %1$s</string>
+    <string name="sources_update_named">Update %1$s</string>
+    <string name="sources_cancel_named">Cancel %1$s</string>
 
     <!-- A download's status. %1$s is why the last try stopped. -->
     <string name="sources_retrying">Retrying: %1$s</string>

@@ -32,10 +32,15 @@ import app.granger.R
 import app.granger.core.library.Book
 import app.granger.core.library.isBookPack
 import app.granger.core.library.isPackBook
-import androidx.compose.foundation.border
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.Role
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
@@ -99,6 +104,7 @@ fun CollectionScreen(
     val sort by viewModel.sort.collectAsStateWithLifecycle()
     val view by viewModel.view.collectAsStateWithLifecycle()
     val gutenberg by viewModel.gutenbergHeader.collectAsStateWithLifecycle()
+    val removed by viewModel.removed.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     // The collection disappears when its last pack moves out or it is deleted; leave once it has been seen.
     var seen by remember { mutableStateOf(false) }
@@ -133,7 +139,7 @@ fun CollectionScreen(
                         IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.common_more)) }
                         DropdownMenu(menuOpen, { menuOpen = false }) {
                             gutenberg?.let { g ->
-                                if (g.progress == null && g.searchable < g.books) DropdownMenuItem(
+                                if (g.kind != HeaderKind.BOOK_SET && g.progress == null && g.searchable < g.books) DropdownMenuItem(
                                     text = { Text(stringResource(R.string.library_make_searchable_menu)) },
                                     onClick = {
                                         menuOpen = false
@@ -150,6 +156,11 @@ fun CollectionScreen(
                                     onClick = { menuOpen = false; dialog = CollectionDialog.RemovePack(pack) },
                                 )
                             }
+                            // Removed pack books come back (Plan KB2 Task 4.3).
+                            if (removed.isNotEmpty()) DropdownMenuItem(
+                                text = { Text(stringResource(R.string.library_show_removed)) },
+                                onClick = { menuOpen = false; viewModel.showRemoved() },
+                            )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.library_move_collection)) },
                                 onClick = { menuOpen = false; dialog = CollectionDialog.MoveCollection },
@@ -253,6 +264,21 @@ fun CollectionScreen(
                             }
                         }
                     })
+                    // A collection in more than one language (Plan KB2): one chip shows that language alone.
+                    if (shown.languages.isNotEmpty()) add(HeadItem("languages", "chips") {
+                        LazyRow(contentPadding = PaddingValues(horizontal = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            item(key = "all") {
+                                FilterChip(selected = shown.language == null, onClick = { viewModel.setLanguage(null) }, label = { Text(stringResource(R.string.sources_all)) })
+                            }
+                            items(shown.languages, key = { it }) { language ->
+                                FilterChip(
+                                    selected = shown.language == language,
+                                    onClick = { viewModel.setLanguage(if (shown.language == language) null else language) },
+                                    label = { Text(language) },
+                                )
+                            }
+                        }
+                    })
                     if (shown.books.isEmpty()) add(HeadItem("none", "none") {
                         Text(
                             stringResource(R.string.library_no_books_match),
@@ -264,7 +290,46 @@ fun CollectionScreen(
                 }
             }
             val open = { book: Book -> scope.launch { viewModel.openBook(book)?.let(onOpened) }; Unit }
-            if (view == ShelfView.LIST) ShelfList(
+            val sectioned = shown.rows
+            // A manifest collection in its own order (Plan KB2 Task 2.3): sections, folded sections and works in parts.
+            if (sectioned != null && view == ShelfView.LIST) LazyColumn(Modifier.padding(padding).fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)) {
+                for (h in head) item(key = h.key, contentType = h.contentType) { h.content() }
+                items(sectioned, key = { it.key }, contentType = { it::class.simpleName }) { entry ->
+                    when (entry) {
+                        is SectionRow.Header -> SectionHeaderRow(entry, onToggle = { viewModel.toggleSection(entry.name) })
+                        is SectionRow.Work -> WorkRow(entry, onToggle = { viewModel.toggleWork(entry.workKey) })
+                        is SectionRow.Item -> Box(if (entry.part) Modifier.padding(start = 24.dp) else Modifier) {
+                            val book = entry.book
+                            var bookMenu by remember { mutableStateOf(false) }
+                            BookRow(book, positions[book.id]?.totalProgression, onClick = { open(book) }, onLongClick = { bookMenu = true })
+                            BookMenu(book, bookMenu, { bookMenu = false }, onMove = { dialog = CollectionDialog.MoveBook(book) }, onRemove = { dialog = CollectionDialog.RemoveBook(book) })
+                        }
+                    }
+                }
+            } else if (sectioned != null) androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
+                columns = androidx.compose.foundation.lazy.grid.GridCells.Adaptive(104.dp),
+                modifier = Modifier.padding(padding).fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                for (h in head) item(key = h.key, span = { GridItemSpan(maxLineSpan) }, contentType = h.contentType) { h.content() }
+                for (entry in sectioned) when (entry) {
+                    is SectionRow.Header -> item(key = entry.key, span = { GridItemSpan(maxLineSpan) }, contentType = "section") {
+                        SectionHeaderRow(entry, onToggle = { viewModel.toggleSection(entry.name) })
+                    }
+                    is SectionRow.Work -> item(key = entry.key, contentType = "work") {
+                        Box(Modifier.padding(horizontal = 8.dp)) { WorkCell(entry, onToggle = { viewModel.toggleWork(entry.workKey) }) }
+                    }
+                    is SectionRow.Item -> item(key = entry.key, contentType = "book") {
+                        val book = entry.book
+                        Box(Modifier.padding(horizontal = 8.dp)) {
+                            var bookMenu by remember { mutableStateOf(false) }
+                            BookCell(book, positions[book.id]?.totalProgression, onClick = { open(book) }, onLongClick = { bookMenu = true })
+                            BookMenu(book, bookMenu, { bookMenu = false }, onMove = { dialog = CollectionDialog.MoveBook(book) }, onRemove = { dialog = CollectionDialog.RemoveBook(book) })
+                        }
+                    }
+                }
+            } else if (view == ShelfView.LIST) ShelfList(
                 shown.sections,
                 Modifier.padding(padding).fillMaxSize(),
                 contentType = "book",
@@ -314,15 +379,26 @@ fun CollectionScreen(
         )
         is CollectionDialog.RemoveBook -> ConfirmDialog(
             title = stringResource(R.string.library_remove_from_phone_title),
-            message = stringResource(R.string.library_remove_book_body, d.book.title),
+            // A pack book leaves the list until Show removed (Plan KB2 Task 4.3).
+            message = stringResource(if (d.book.origin.isPackBook) R.string.library_remove_pack_book_body else R.string.library_remove_book_body, d.book.title),
             confirm = stringResource(R.string.common_remove),
             onConfirm = { viewModel.removeBook(d.book) },
             onDismiss = { dialog = null },
         )
-        is CollectionDialog.MakeSearchable -> MakeSearchableDialog(d.cost, onConfirm = viewModel::makeAllSearchable, onDismiss = { dialog = null })
+        is CollectionDialog.MakeSearchable -> MakeSearchableDialog(
+            d.cost, documents = gutenberg?.countsDocuments == true, onConfirm = viewModel::makeAllSearchable, onDismiss = { dialog = null },
+        )
         is CollectionDialog.RemovePack -> ConfirmDialog(
             title = stringResource(R.string.library_remove_from_phone_title),
-            message = stringResource(if (d.pack.isBookPack) R.string.library_remove_book_pack_body else R.string.library_remove_pack_body, d.pack.title),
+            // A web pack's bookmarks and places go with it; a book pack's books keep theirs (Plan KB2 Task 4.2).
+            message = stringResource(
+                when {
+                    !d.pack.isBookPack -> R.string.library_remove_pack_body
+                    gutenberg?.countsDocuments == true -> R.string.library_remove_document_pack_body
+                    else -> R.string.library_remove_book_pack_body
+                },
+                d.pack.title,
+            ),
             confirm = stringResource(R.string.common_remove),
             onConfirm = { viewModel.remove(d.pack) },
             onDismiss = { dialog = null },
@@ -356,43 +432,44 @@ fun CollectionScreen(
 private class HeadItem(val key: String, val contentType: String, val content: @Composable () -> Unit)
 
 /**
- * A book's long-press menu. A pack's book (Gutenberg, nautilus) says whether its full text is searchable yet (Plan GB
- * Decision 6), and has no Remove: it's its pack's, and goes with the pack.
+ * A book's long-press menu. A book Search can't yet read in full says so (Plan GB Decision 6; since Plan KB2 Task 4.5
+ * only the exceptions: a pack book not yet opened, a scan). Every book has Remove (Plan KB2 Task 4.3): a pack book's copy goes and its row is hidden.
  */
 @Composable
 private fun BookMenu(book: Book, open: Boolean, onClose: () -> Unit, onMove: () -> Unit, onRemove: () -> Unit) {
     DropdownMenu(open, onClose) {
-        if (book.origin.isPackBook) DropdownMenuItem(
-            text = {
-                Text(
-                    stringResource(
-                        when {
-                            book.searchableInFull -> R.string.library_searchable_full
-                            book.indexedAt != null && !book.searchable -> R.string.library_title_only_scan
-                            else -> R.string.library_titles_only
-                        },
-                    ),
-                )
-            },
-            onClick = {},
-            enabled = false,
-        )
+        // Searchable in full is the default and isn't said; only an exception is (Plan KB2 Task 4.5).
+        val exception = when {
+            book.scanTitleOnly -> R.string.library_title_only_scan
+            book.titleOnlyUntilOpened -> R.string.library_titles_only
+            else -> null
+        }
+        if (exception != null) DropdownMenuItem(text = { Text(stringResource(exception)) }, onClick = {}, enabled = false)
         DropdownMenuItem(text = { Text(stringResource(R.string.library_move_to_collection)) }, onClick = { onClose(); onMove() })
-        if (!book.origin.isPackBook) DropdownMenuItem(text = { Text(stringResource(R.string.library_remove_from_phone)) }, onClick = { onClose(); onRemove() })
+        DropdownMenuItem(text = { Text(stringResource(R.string.library_remove_from_phone)) }, onClick = { onClose(); onRemove() })
     }
 }
 
 /**
- * The lines under a Gutenberg collection's name: whose it is and what it holds, how much is searchable in full, and a
- * run's progress. Two lines rather than one that wraps mid-phrase at 360 dp; TalkBack reads them as one.
+ * The lines under a book pack collection's name: how many books it holds, where they come from, how much is searchable
+ * in full, and a run's progress. A line each rather than one that wraps mid-phrase at 360 dp; TalkBack reads them as one.
  */
 @Composable
 private fun GutenbergHead(header: GutenbergHeader) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         val all = header.text.resolve()
         Column(Modifier.clearAndSetSemantics { contentDescription = all }) {
-            Text(header.provenance.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(header.searchableText.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            // How many, then where from: one line each, as "24 books · From Kiwix · Federation of American Scientists"
+            // wraps mid-phrase at 360 dp.
+            Text(header.count.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(header.provider.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            // Searchable in full is the default and isn't said; only the exceptions are (Plan KB2 Task 4.5).
+            header.exceptionText?.let {
+                Text(it.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            header.fileNamesText?.let {
+                Text(it.resolve(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
         header.progress?.let { p ->
             val number = java.text.NumberFormat.getIntegerInstance()
@@ -409,9 +486,97 @@ private fun GutenbergHead(header: GutenbergHeader) {
     }
 }
 
-/** Gives the size first (Plan GB Decision 5); with too little space, says so and offers nothing to run. */
+/**
+ * A section's header in a manifest collection (Plan KB2 Task 2.3), read by TalkBack as a heading. A long section is
+ * folded behind it: then it's a button, "Course materials · 643", with its state (expanded or collapsed).
+ */
 @Composable
-private fun MakeSearchableDialog(cost: SearchableCost, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+private fun SectionHeaderRow(header: SectionRow.Header, onToggle: () -> Unit) {
+    val style = MaterialTheme.typography.titleMedium
+    val colour = MaterialTheme.colorScheme.primary
+    if (!header.foldable) {
+        Text(
+            header.name,
+            style = style,
+            color = colour,
+            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp).semantics { heading() },
+        )
+        return
+    }
+    val count = java.text.NumberFormat.getIntegerInstance().format(header.count)
+    val state = stringResource(if (header.expanded) R.string.library_expanded else R.string.library_collapsed)
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clickable(
+                onClickLabel = stringResource(if (header.expanded) R.string.library_collapse else R.string.library_expand),
+                role = Role.Button,
+                onClick = onToggle,
+            )
+            .padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 4.dp)
+            .semantics(mergeDescendants = true) { heading(); stateDescription = state },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(stringResource(R.string.library_dotted, header.name, count), style = style, color = colour, modifier = Modifier.weight(1f))
+        Icon(if (header.expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = colour)
+    }
+}
+
+/**
+ * A work in parts as one row (Plan KB2 Task 2.3): its title, author and "3 parts"; a tap shows its parts beneath it
+ * (the whole file first, when the pack has one), another hides them. A button with its state for TalkBack.
+ */
+@Composable
+private fun WorkRow(work: SectionRow.Work, onToggle: () -> Unit) {
+    val state = stringResource(if (work.expanded) R.string.library_expanded else R.string.library_collapsed)
+    ShelfRow(
+        title = work.title,
+        subtitle = work.author,
+        cover = { BookCover(work.first, Modifier.height(ShelfCoverSize)) },
+        onClick = onToggle,
+        modifier = Modifier.semantics { role = Role.Button; stateDescription = state },
+        detail = {
+            Text(
+                pluralStringResource(R.plurals.library_parts, work.parts.size, work.parts.size),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        },
+        trailing = { Icon(if (work.expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown, contentDescription = null) },
+    )
+}
+
+/** A work in parts in the grid: its first file's cover, its title and "3 parts"; a tap shows or hides the parts. */
+@Composable
+private fun WorkCell(work: SectionRow.Work, onToggle: () -> Unit) {
+    val state = stringResource(if (work.expanded) R.string.library_expanded else R.string.library_collapsed)
+    Column(
+        Modifier
+            .clickable(role = Role.Button, onClick = onToggle)
+            .semantics(mergeDescendants = true) { stateDescription = state },
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        BookCover(work.first, Modifier.fillMaxWidth())
+        Text(work.title, style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis, minLines = 2)
+        Text(work.author, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, minLines = 1, overflow = TextOverflow.Ellipsis)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                pluralStringResource(R.plurals.library_parts, work.parts.size, work.parts.size),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.weight(1f),
+            )
+            Icon(if (work.expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        }
+    }
+}
+
+/**
+ * Gives the size first (Plan GB Decision 5); with too little space, says so and offers nothing to run. A collection of
+ * [documents] says documents, not books (Plan KB2 Task 4.2).
+ */
+@Composable
+private fun MakeSearchableDialog(cost: SearchableCost, documents: Boolean, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val size = Formatter.formatShortFileSize(context, cost.bytes)
     val free = Formatter.formatShortFileSize(context, cost.freeBytes)
@@ -420,13 +585,23 @@ private fun MakeSearchableDialog(cost: SearchableCost, onConfirm: () -> Unit, on
         androidx.compose.material3.AlertDialog(
             onDismissRequest = onDismiss,
             title = { Text(stringResource(R.string.library_not_enough_space)) },
-            text = { Text(pluralStringResource(R.plurals.library_searchable_no_room, cost.books, count, size, free)) },
+            text = {
+                Text(
+                    pluralStringResource(
+                        if (documents) R.plurals.library_searchable_no_room_documents else R.plurals.library_searchable_no_room,
+                        cost.books, count, size, free,
+                    ),
+                )
+            },
             confirmButton = { androidx.compose.material3.TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_ok)) } },
         )
     } else {
         ConfirmDialog(
             title = stringResource(R.string.library_make_searchable_title),
-            message = pluralStringResource(R.plurals.library_make_searchable_body, cost.books, count, size, free),
+            message = pluralStringResource(
+                if (documents) R.plurals.library_make_searchable_body_documents else R.plurals.library_make_searchable_body,
+                cost.books, count, size, free,
+            ),
             confirm = stringResource(R.string.library_make_searchable),
             onConfirm = onConfirm,
             onDismiss = onDismiss,
@@ -492,7 +667,6 @@ internal fun BookRow(book: Book, progress: Double?, onClick: () -> Unit, onLongC
         PackStatus.CORRUPT -> stringResource(R.string.library_damaged)
     }
     val label = formatLabel(book)?.resolve()
-    val fullText = book.searchableInFull
     ShelfRow(
         title = book.title,
         subtitle = book.author,
@@ -500,9 +674,8 @@ internal fun BookRow(book: Book, progress: Double?, onClick: () -> Unit, onLongC
         onClick = { if (readable) onClick() },
         onLongClick = onLongClick,
         dimmed = !readable,
-        detail = if (label == null && problem == null && !fullText) null else {
+        detail = if (label == null && problem == null) null else {
             {
-                if (fullText) FullTextMark()
                 if (label != null) Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (problem != null) Text(problem, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
             }
@@ -543,7 +716,6 @@ internal fun BookCell(book: Book, progress: Double?, onClick: () -> Unit, onLong
         formatLabel(book)?.let {
             Text(it.resolve(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        if (book.searchableInFull) FullTextMark()
         when (book.status) {
             PackStatus.OK -> LinearProgressIndicator(
                 progress = { (progress ?: 0.0).toFloat().coerceIn(0f, 1f) },
@@ -553,24 +725,4 @@ internal fun BookCell(book: Book, progress: Double?, onClick: () -> Unit, onLong
             PackStatus.CORRUPT -> Text(stringResource(R.string.library_damaged), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
         }
     }
-}
-
-/**
- * The mark on a Gutenberg book whose full text is in Search and Ask (Plan GB Decision 6): a small outlined label,
- * read by TalkBack as "Searchable in full".
- */
-@Composable
-internal fun FullTextMark() {
-    val described = stringResource(R.string.library_searchable_full)
-    Text(
-        stringResource(R.string.library_full_text),
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.primary,
-        maxLines = 1,
-        modifier = Modifier
-            .padding(vertical = 2.dp)
-            .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp))
-            .padding(horizontal = 5.dp, vertical = 1.dp)
-            .clearAndSetSemantics { contentDescription = described },
-    )
 }

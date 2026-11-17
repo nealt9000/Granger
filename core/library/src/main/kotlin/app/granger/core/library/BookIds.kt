@@ -23,10 +23,16 @@ enum class BookOrigin(val key: String) {
      * `<pack name>/<file>`: listed from the pack's own `database.js`, PDF or EPUB, copied out when first opened.
      */
     NAUTILUS("nautilus"),
+    /**
+     * A book in a Kiwix pack with a book manifest (Plan KB2: Military Medicine, Survivor Library…), ref
+     * `<pack name>/<key>`, the manifest's key, stable across snapshots; or a pure container's file, ref
+     * `<pack name>/<path>`. PDF or EPUB, copied out when first opened.
+     */
+    KIWIX("kiwix"),
 }
 
 /** A book listed from a book pack's own list ([PackBooks]): its row follows the pack, its file is copied out on open. */
-val BookOrigin.isPackBook: Boolean get() = this == BookOrigin.GUTENBERG || this == BookOrigin.NAUTILUS
+val BookOrigin.isPackBook: Boolean get() = this == BookOrigin.GUTENBERG || this == BookOrigin.NAUTILUS || this == BookOrigin.KIWIX
 
 object BookIds {
     private const val PREFIX = "book:"
@@ -40,7 +46,7 @@ object BookIds {
 }
 
 /**
- * False for a pack document (it opens like a book, but it belongs to its pack) and for an ebook's original pages (they
- * belong to the ebook): not on the shelves.
+ * False for a pack document (it opens like a book, but it belongs to its pack), for an ebook's original pages (they
+ * belong to the ebook) and for a pack book the reader removed ([Book.hidden]): not on the shelves.
  */
-val Book.onShelf: Boolean get() = origin != BookOrigin.PACK && origin != BookOrigin.PAGES
+val Book.onShelf: Boolean get() = origin != BookOrigin.PACK && origin != BookOrigin.PAGES && !hidden

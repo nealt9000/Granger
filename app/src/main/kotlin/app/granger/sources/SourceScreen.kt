@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -99,6 +100,8 @@ fun SourceScreen(
     onBack: () -> Unit,
     onOpenPack: (packId: String) -> Unit = {},
     onOpenFamily: (family: String) -> Unit = {},
+    /** Opens an installed book in the reader (Plan KB2 Task 4.3: the Classics have Open too). */
+    onOpenBook: (bookId: String, title: String) -> Unit = { _, _ -> },
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
@@ -123,7 +126,8 @@ fun SourceScreen(
         notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
-    var confirmRemove by remember { mutableStateOf<ItemRow?>(null) }
+    // The row and what its dialog says goes with it (Plan KB2 Task 4.2).
+    var confirmRemove by remember { mutableStateOf<Pair<ItemRow, RemoveKind>?>(null) }
     val list = rememberLazyListState()
     val scope = rememberCoroutineScope()
     /** Show all or Show fewer; folding a section the list has scrolled into brings its heading back. */
@@ -141,7 +145,7 @@ fun SourceScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(ui.familyTitle?.resolve() ?: title) },
+                title = { Text((ui.familyTitle ?: ui.screenTitle)?.resolve() ?: title) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) }
                 },
@@ -159,7 +163,7 @@ fun SourceScreen(
                 OutlinedTextField(
                     value = viewModel.searchText,
                     onValueChange = viewModel::setQuery,
-                    placeholder = { Text(stringResource(R.string.sources_search, ui.familyTitle?.resolve() ?: title)) },
+                    placeholder = { Text(stringResource(R.string.sources_search, (ui.familyTitle ?: ui.screenTitle)?.resolve() ?: title)) },
                     leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
@@ -264,8 +268,8 @@ fun SourceScreen(
                     },
                     onCancel = { viewModel.cancel(row.id) },
                     onRetry = { viewModel.retry(row.id) },
-                    onRemove = { confirmRemove = row },
-                    onOpen = { row.packId?.let(onOpenPack) },
+                    onRemove = { scope.launch { confirmRemove = row to viewModel.removeKind(row.id) } },
+                    onOpen = { row.packId?.let(onOpenPack) ?: row.bookId?.let { onOpenBook(it, row.title) } },
                     onChooseFlavour = viewModel::chooseFlavour,
                     onChooseSlice = { zim -> row.setId?.let { viewModel.chooseSlice(it, zim) } },
                     onChoosePictures = { f -> row.setId?.let { viewModel.choosePictures(it, f) } },
@@ -325,32 +329,36 @@ fun SourceScreen(
         )
     }
 
-    confirmRemove?.let { row ->
-        AlertDialog(
-            onDismissRequest = { confirmRemove = null },
-            title = {
-                val slice = row.slices.firstOrNull { it.chosen }
-                Text(
-                    if (slice != null) stringResource(R.string.sources_remove_slice_title, row.title, slice.label)
-                    else stringResource(R.string.sources_remove_title, row.title),
-                )
-            },
-            text = {
-                Text(stringResource(if (row.packId != null) R.string.sources_remove_pack_body else R.string.sources_remove_body))
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.remove(row.id)
-                    confirmRemove = null
-                }) { Text(stringResource(R.string.common_remove)) }
-            },
-            dismissButton = { TextButton(onClick = { confirmRemove = null }) { Text(stringResource(R.string.common_keep)) } },
-        )
+    confirmRemove?.let { (row, kind) ->
+        RemoveDialog(row, kind, onRemove = { viewModel.remove(row.id) }, onDismiss = { confirmRemove = null })
     }
 }
 
+/** Remove [row]? Its dialog says what goes with it ([kind], Plan KB2 Task 4.2); Keep closes it. */
+@Composable
+internal fun RemoveDialog(row: ItemRow, kind: RemoveKind, onRemove: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            val slice = row.slices.firstOrNull { it.chosen }
+            Text(
+                if (slice != null) stringResource(R.string.sources_remove_slice_title, row.title, slice.label)
+                else stringResource(R.string.sources_remove_title, row.title),
+            )
+        },
+        text = { Text(stringResource(kind.body)) },
+        confirmButton = {
+            TextButton(onClick = {
+                onRemove()
+                onDismiss()
+            }) { Text(stringResource(R.string.common_remove)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_keep)) } },
+    )
+}
+
 /** "38.2 GB free on Phone · Granger uses 4.1 GB" for the volume downloads will go to. */
-private fun storageSummary(ui: SourceUi): UiText? {
+internal fun storageSummary(ui: SourceUi): UiText? {
     val volume = ui.volumes.firstOrNull { it.path == ui.selectedVolume } ?: return null
     return UiText.Res(R.string.sources_storage_summary, formatBytes(volume.freeBytes), volume.label, formatBytes(volume.grangerBytes))
 }
@@ -365,7 +373,13 @@ private fun PresetItem(preset: PresetRow, onGet: () -> Unit) {
                 Text(PresetText.status(preset).resolve())
             }
         },
-        trailingContent = { if (preset.remainingCount > 0) Button(onClick = onGet) { Text(stringResource(R.string.sources_get_all)) } },
+        trailingContent = {
+            if (preset.remainingCount > 0) {
+                // "Get all of Level 1 set", not a bare "Get all" (KB2 Task 5.1, TalkBack).
+                val label = stringResource(R.string.sources_get_all_named, stringResource(R.string.sources_preset_title, preset.title))
+                Button(onClick = onGet, modifier = Modifier.semantics { contentDescription = label }) { Text(stringResource(R.string.sources_get_all)) }
+            }
+        },
     )
 }
 
@@ -415,7 +429,7 @@ internal fun SizeCheckDialog(check: SizeCheck, onGet: (itemId: String) -> Unit, 
 
 /**
  * An installed pack opens here, where it's managed (Plan U3b Decision 3): Open is the row's action and Remove is in its
- * overflow. An installed item the library doesn't hold as a pack (a book, a model) keeps Remove as its action. A pack
+ * overflow; an installed book does the same (Plan KB2 Task 4.3). An installed model or voice keeps Remove as its action. A pack
  * with flavours offers them as chips, and says which is on the phone (Plan KB Decision 8); a tap on the row shows its
  * full licence.
  */
@@ -673,15 +687,20 @@ private fun FlavourOption(flavour: FlavourChoice, onChoose: () -> Unit) {
  * asks first.
  */
 @Composable
-private fun RowActions(
+internal fun RowActions(
     row: ItemRow, onGet: () -> Unit, onCancel: () -> Unit, onRetry: () -> Unit, onRemove: () -> Unit, onOpen: () -> Unit,
     onSwitch: () -> Unit = onGet,
     preview: Boolean = true,
 ) {
-    val opens = row.packId != null
+    val opens = row.opens
+    // TalkBack hears the row's name with each button ("Get Military Medicine"), not a bare "Get" (KB2 Task 5.1).
+    val getLabel = stringResource(R.string.sources_get_named, row.title)
+    val openLabel = stringResource(R.string.sources_open_named, row.title)
+    val cancelLabel = stringResource(R.string.sources_cancel_named, row.title)
+    val named = { label: String -> Modifier.semantics { contentDescription = label } }
     if (row.switches) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (opens) TextButton(onClick = onOpen) { Text(stringResource(R.string.common_open)) }
+            if (opens) TextButton(onClick = onOpen, modifier = named(openLabel)) { Text(stringResource(R.string.common_open)) }
             TextButton(onClick = onSwitch) {
                 Text(row.flavours.firstOrNull { it.chosen }?.let { stringResource(R.string.sources_switch_to, it.label.resolve()) } ?: stringResource(R.string.sources_switch))
             }
@@ -691,7 +710,7 @@ private fun RowActions(
     if (row.status == ItemStatus.Installed && opens && row.flavours.size > 1 && row.flavours.any { it.installed }) {
         // The flavour on the phone is the one chosen: nothing to switch to yet.
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onOpen) { Text(stringResource(R.string.common_open)) }
+            TextButton(onClick = onOpen, modifier = named(openLabel)) { Text(stringResource(R.string.common_open)) }
             TextButton(onClick = {}, enabled = false) { Text(stringResource(R.string.sources_switch)) }
             RemoveMenu(row.title, onRemove)
         }
@@ -702,24 +721,24 @@ private fun RowActions(
         ItemStatus.NotInstalled -> Row(verticalAlignment = Alignment.CenterVertically) {
             if (preview) row.previewUrl?.let { PreviewButton(it) }
             if (row.covered) {
-                TextButton(onClick = onGet) { Text(stringResource(R.string.common_get), color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                TextButton(onClick = onGet, modifier = named(getLabel)) { Text(stringResource(R.string.common_get), color = MaterialTheme.colorScheme.onSurfaceVariant) }
             } else {
-                TextButton(onClick = onGet) { Text(stringResource(R.string.common_get)) }
+                TextButton(onClick = onGet, modifier = named(getLabel)) { Text(stringResource(R.string.common_get)) }
             }
         }
         ItemStatus.UpdateAvailable -> Row(verticalAlignment = Alignment.CenterVertically) {
-            if (opens) TextButton(onClick = onOpen) { Text(stringResource(R.string.common_open)) } else TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
-            TextButton(onClick = onGet) { Text(stringResource(R.string.sources_update)) }
+            if (opens) TextButton(onClick = onOpen, modifier = named(openLabel)) { Text(stringResource(R.string.common_open)) } else TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
+            TextButton(onClick = onGet, modifier = named(stringResource(R.string.sources_update_named, row.title))) { Text(stringResource(R.string.sources_update)) }
             if (opens) RemoveMenu(row.title, onRemove)
         }
-        is ItemStatus.Queued, is ItemStatus.Downloading -> TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) }
+        is ItemStatus.Queued, is ItemStatus.Downloading -> TextButton(onClick = onCancel, modifier = named(cancelLabel)) { Text(stringResource(R.string.common_cancel)) }
         is ItemStatus.Failed -> Row {
-            TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) }
+            TextButton(onClick = onCancel, modifier = named(cancelLabel)) { Text(stringResource(R.string.common_cancel)) }
             TextButton(onClick = onRetry) { Text(stringResource(R.string.common_retry)) }
         }
         ItemStatus.Installed -> if (opens) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = onOpen) { Text(stringResource(R.string.common_open)) }
+                TextButton(onClick = onOpen, modifier = named(openLabel)) { Text(stringResource(R.string.common_open)) }
                 RemoveMenu(row.title, onRemove)
             }
         } else {
@@ -765,7 +784,7 @@ internal object SourceTags {
 
 /** A row's overflow, holding Remove (which still asks first). */
 @Composable
-private fun RemoveMenu(title: String, onRemove: () -> Unit) {
+internal fun RemoveMenu(title: String, onRemove: () -> Unit) {
     var open by remember { mutableStateOf(false) }
     Box {
         IconButton(onClick = { open = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.sources_more_for, title)) }

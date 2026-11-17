@@ -60,6 +60,18 @@ class BrowseViewModelTest {
         children = listOf(row("Wikipedia", "literature", wikipedia), row("DevDocs", "literature", devdocs)),
     )
 
+    /** Plan KB2 Task 4.6: a website pack's PDFs and EPUBs, counted once from its ZIM's Counter, offer Files in this pack. */
+    @Test fun aWebPackCountsItsFilesFromItsCounter() = runTest(main.dispatcher) {
+        shelves.shelfList.value = listOf(shelf("Literature", folder))
+        library.packList.value = listOf(wikipedia, devdocs)
+        library.archives[wikipedia.id] = app.granger.FakeZimArchive(wikipedia.id, counter = "text/html=830;application/pdf=839;application/epub+zip=2")
+        library.archives[devdocs.id] = app.granger.FakeZimArchive(devdocs.id, counter = "text/html=40")
+        val ui = BrowseViewModel(shelves, library, io = main.dispatcher).ui.filterNotNull()
+            .first { u -> u.sections.flatMap { it.packs }.any { it.files > 0 } }
+        val files = ui.sections.flatMap { it.packs }.associate { it.pack.title to it.files }
+        assertThat(files).containsExactly("Wikipedia", 841, "DevDocs: Kotlin", 0)
+    }
+
     @Test fun thePacksThemselvesAreRowsInTheirSections() = runTest(main.dispatcher) {
         val mine = row("Medicine", "literature", pack("u-med", "Medicine"), userCreated = true)
         shelves.shelfList.value = listOf(

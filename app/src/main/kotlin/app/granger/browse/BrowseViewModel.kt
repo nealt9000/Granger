@@ -26,11 +26,18 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** One pack as Browse lists it: the pack itself, and how Ask searches it (null for maps, which say nothing). */
-data class PackItem(val pack: Pack, val ask: AskReach? = null)
+data class PackItem(
+    val pack: Pack,
+    val ask: AskReach? = null,
+    /** The PDFs and EPUBs a website pack holds, by its Counter (Plan KB2 Task 4.6): its menu offers Files in this pack. */
+    val files: Int = 0,
+)
 
 /** One of Browse's sections, shown only when it holds a pack; [id] keeps its collapsed state. */
 data class BrowseSection(val id: String, val title: UiText, val packs: List<PackItem>)
@@ -137,17 +144,31 @@ class BrowseViewModel(
     knowledge: Flow<List<String>> = flowOf(listOf(app.granger.core.catalog.ENGLISH)),
     /** False on a phone without Ask: the packs carry no Ask line (Plan E1 phone check). */
     askOffered: Boolean = true,
+    private val io: kotlinx.coroutines.CoroutineDispatcher = kotlinx.coroutines.Dispatchers.IO,
 ) : ViewModel() {
+    /** Each website pack's file count, read once per pack from its Counter (opening the ZIM), off the main thread. */
+    private val countsCache = java.util.concurrent.ConcurrentHashMap<String, Int>()
+    private val fileCounts: Flow<Map<String, Int>> = library.packs.map { packs ->
+        kotlinx.coroutines.withContext(io) {
+            packs.filter { it.status == app.granger.core.library.PackStatus.OK && !it.isBookPack }.associate { pack ->
+                pack.id to countsCache.getOrPut(pack.id) {
+                    runCatching { library.archive(pack.id)?.metadata?.counter?.let(app.granger.core.library.PackFiles::count) }.getOrNull() ?: 0
+                }
+            }
+        }
+    }.onStart { emit(emptyMap()) }
+
     /** Null until the shelves first load. */
     val ui: StateFlow<BrowseUi?> = combine(
-        shelves.shelves, catalog?.state ?: flowOf(null), records, knowledge,
-    ) { list, state, recs, langs ->
+        shelves.shelves, catalog?.state ?: flowOf(null), records, knowledge, fileCounts,
+    ) { list, state, recs, langs, counts ->
         val catalog = state?.catalog
         val sections = browseSections(
             list,
             domains = catalog?.readiness?.domains.orEmpty(),
             domainOf = { installedEntry(it, catalog, recs)?.domain },
         ) { if (askOffered) installedAskReach(it, catalog, recs) else null }
+            .map { section -> section.copy(packs = section.packs.map { it.copy(files = counts[it.pack.id] ?: 0) }) }
         BrowseUi(sections, if (sections.isEmpty()) browseSuggestions(state?.catalog, countryCode, langs.firstOrNull() ?: app.granger.core.catalog.ENGLISH) else emptyList())
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 

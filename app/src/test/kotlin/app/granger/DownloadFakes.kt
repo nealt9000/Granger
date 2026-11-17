@@ -56,6 +56,33 @@ fun bookEntry(id: String, category: String = "Novels", sha256: String = SHA_A, a
     urls = listOf("https://a.test/$id.epub"), releaseDate = "2026-10-10", license = "Public domain", collection = "classics",
 )
 
+/**
+ * Plan KB2 Task 3.2: African Storybook · English as the parser leaves it (testdata/catalog/asb-catalog.json's set): three
+ * books at levels 1, 2 and 1, each stamped with its set, an all-books preset and one per level.
+ */
+fun asbSet(language: String = "en", languageName: String = "English"): app.granger.core.catalog.BookSet {
+    val setId = "african-storybook-$language"
+    fun book(node: Char, title: String, level: Int, size: Long) = BookEntry(
+        id = "asb-$language-${node.toString().repeat(32)}", title = title, author = "A. Writer", description = "About $title.",
+        category = "Level $level", language = language, sizeBytes = size, sha256 = SHA_A,
+        urls = listOf("https://github.com/nealt9000/Granger/releases/download/asb-$language-2026-11-16/asb-$language-$node.epub"),
+        releaseDate = "2026-11-16", license = "CC BY 4.0, African Storybook Initiative", collection = setId, published = 2014,
+        domain = "literature", level = level, bookSet = setId,
+    )
+    val books = listOf(book('a', "A very tall man", 1, 1_000_000), book('b', "Goat and the hyena", 2, 2_000_000), book('c', "Cows at the market", 1, 3_000_000))
+    val title = "African Storybook · $languageName"
+    return app.granger.core.catalog.BookSet(
+        id = setId, title = title, language = language, shelf = "children", provider = "African Storybook Initiative",
+        license = "CC BY 4.0, African Storybook Initiative",
+        presets = listOf(
+            Preset(setId, title, books.map { it.id }, language),
+            Preset("$setId-level-1", "$title: Level 1", listOf(books[0].id, books[2].id), language),
+            Preset("$setId-level-2", "$title: Level 2", listOf(books[1].id), language),
+        ),
+        books = books,
+    )
+}
+
 fun catalogOf(
     packs: List<PackEntry> = emptyList(),
     models: List<ModelEntry> = emptyList(),

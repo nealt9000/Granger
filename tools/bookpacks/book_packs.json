@@ -1,0 +1,215 @@
+{
+  "about": "Plan KB2: the Kiwix packs shown as book collections through a .gbooks manifest, and how build.py reads each (extractor, filters, groups, title overrides). Gutenberg and nautilus packs carry their own lists and aren't here. `shelves` puts list-carrying book packs (content \"books\") on a Books shelf by name prefix (Plan KB2 Decision 4), and `providers` names who made them, by the same prefixes (a manifest pack's `provider` is its own). `notBooks` lists packs the audit or Neal judged not to be book collections, with why, so upkeep doesn't raise them as candidates. `subjects` (on a manifest pack) and `subjectsByPrefix` (list-carrying book packs, and bookSets by collection id) give Explore's subject ids (tools/subjects/subjects.json v1), 1–3, main first; Gutenberg LCC packs (gutenberg_en_lcc-<class>) get theirs from the class in catalog_gen.",
+  "shelves": {
+    "gutenberg_": "literature",
+    "zimgit-": "manuals",
+    "usda-": "manuals",
+    "prunelle_": "children"
+  },
+  "providers": {
+    "gutenberg_": "Project Gutenberg",
+    "usda-": "USDA",
+    "prunelle_": "Prunelle"
+  },
+  "subjectsByPrefix": {
+    "zimgit-water_en": [
+      "food",
+      "health"
+    ],
+    "zimgit-food-preparation_en": [
+      "food"
+    ],
+    "zimgit-medicine_en": [
+      "health"
+    ],
+    "zimgit-post-disaster_en": [
+      "technology",
+      "health"
+    ],
+    "zimgit-knots_en": [
+      "sports"
+    ],
+    "usda-2015_en": [
+      "food"
+    ],
+    "prunelle_": [
+      "literature",
+      "languages"
+    ],
+    "gutenberg_": [
+      "literature"
+    ],
+    "african-storybook-": [
+      "literature",
+      "languages"
+    ]
+  },
+  "notBooks": {
+    "theworldfactbook_en_all": "web: its PDFs repeat the country pages",
+    "tomlehrersongs.com_en_all": "web: one lyric sheet beside each song page",
+    "music.dalitio.de_en_all": "scores (a Scores collection type later)",
+    "mutopiaproject.org_en_all": "scores",
+    "celticscores.com_en_all": "scores",
+    "partituras-gratis.es_es_all": "scores",
+    "cheatography.com_en_all": "web: PDF copies of its sheets",
+    "medlineplus.gov_en_all": "web: handouts repeat pages",
+    "ready.gov_en_all": "web, with files (Files in this pack)",
+    "ready.gov_es_all": "web, with files (Files in this pack)",
+    "wikibooks_en_all": "web: printable copies of its books",
+    "marxists.org_es_all": "not listed in Granger's catalog",
+    "booksdash_en_all": "picture books as page images: later (design §1 B)",
+    "armypubs_en_all": "book pack, second pass (Decision 1)",
+    "alexandria.dk_en_all": "Danish scenarios, not in Granger's languages"
+  },
+  "packs": {
+    "africanstorybook.org_mul_all": {
+      "extractor": "kolibri",
+      "title": "African Storybook",
+      "noun": "books",
+      "provider": "African Storybook Initiative",
+      "licence": "CC BY",
+      "shelf": "children",
+      "subjects": [
+        "literature",
+        "languages"
+      ]
+    },
+    "irp.fas.org_en_military-medicine": {
+      "extractor": "zimit-index",
+      "title": "Military Medicine",
+      "noun": "books",
+      "provider": "Federation of American Scientists",
+      "shelf": "manuals",
+      "subjects": [
+        "health"
+      ]
+    },
+    "smbc-comics.com_en_all": {
+      "extractor": "zimit-index",
+      "title": "SMBC COVID-19 Book Pack",
+      "noun": "books",
+      "provider": "Saturday Morning Breakfast Cereal",
+      "shelf": "literature",
+      "overrides": {
+        "www.smbc-comics.com/covid/files/augie_german.pdf": "Augie and the Green Knight (German)"
+      },
+      "subjects": [
+        "literature"
+      ]
+    },
+    "jeffe.cs.illinois.edu_en_all": {
+      "extractor": "zimit-index",
+      "title": "Algorithms",
+      "noun": "documents",
+      "provider": "Jeff Erickson",
+      "licence": "CC BY 4.0",
+      "shelf": "learning",
+      "groups": [
+        {
+          "key": "book",
+          "title": "The book",
+          "match": "/teaching/algorithms/(book|notes|models)/"
+        },
+        {
+          "key": "course",
+          "title": "Course materials",
+          "match": "/teaching/algorithms/"
+        }
+      ],
+      "pathTitles": [
+        {
+          "match": "hwex/(?P<t>[fs])(?P<yy>\\d\\d)-hwex\\.pdf$",
+          "title": "{t} {yy} · Homework and exams",
+          "maps": {
+            "t": {
+              "f": "Fall",
+              "s": "Spring"
+            }
+          }
+        },
+        {
+          "match": "hwex/(?P<t>[fs])(?P<yy>\\d\\d)-everything\\.pdf$",
+          "title": "{t} {yy} · Everything",
+          "maps": {
+            "t": {
+              "f": "Fall",
+              "s": "Spring"
+            }
+          }
+        },
+        {
+          "match": "hwex/(?P<t>[fs])(?P<yy>\\d\\d)/(?:[a-z]+/)?(?:[fs]\\d\\d-)?(?P<kind>all-hw|all-exams|all-labs|allhw|allex|labs|hw|lab|hbs|bang|midterm|mt|final|exam|quiz|conflict)(?P<n>[^/]*)\\.pdf$",
+          "title": "{t} {yy} · {kind} {n}",
+          "maps": {
+            "t": {
+              "f": "Fall",
+              "s": "Spring"
+            },
+            "kind": {
+              "hw": "Homework",
+              "lab": "Lab",
+              "hbs": "Head-banging session",
+              "bang": "Head-banging session",
+              "mt": "Midterm",
+              "midterm": "Midterm",
+              "final": "Final exam",
+              "exam": "Exam",
+              "quiz": "Quiz",
+              "conflict": "Conflict exam",
+              "all-hw": "All homework",
+              "allhw": "All homework",
+              "all-exams": "All exams",
+              "allex": "All exams",
+              "all-labs": "All labs",
+              "labs": "All labs"
+            }
+          }
+        },
+        {
+          "match": "algorithms/(book|models|notes)/(?P<n>[0-9A-Z!]+)-(?P<name>[^/]+)\\.pdf$",
+          "title": "{name}",
+          "fallback": true,
+          "capitalize": true
+        }
+      ],
+      "overrides": {
+        "jeffe.cs.illinois.edu/teaching/algorithms/hwex/old-hwex.pdf": "Homework and exams · 2003 revision",
+        "jeffe.cs.illinois.edu/teaching/algorithms/hwex/ancient-hwex.pdf": "Homework and exams · before 2003"
+      },
+      "order": "path",
+      "subjects": [
+        "science",
+        "technology"
+      ]
+    },
+    "milneopentextbooks.org_en_all": {
+      "extractor": "zimit-index",
+      "title": "Milne Open Textbooks",
+      "noun": "books",
+      "provider": "SUNY Geneseo Milne Library",
+      "shelf": "learning",
+      "minBytes": 200000,
+      "site": "Milne Open Textbooks",
+      "exclude": "(?i)vpat|accessibility-conformance",
+      "subjects": [
+        "technology",
+        "science"
+      ]
+    },
+    "survivorlibrary.com_en_all": {
+      "extractor": "zimit-index",
+      "title": "Survivor Library",
+      "noun": "books",
+      "provider": "Survivor Library",
+      "shelf": "manuals",
+      "groupBy": "page",
+      "groupPattern": "^Library-(?P<g>.+)$",
+      "yearSuffix": true,
+      "subjects": [
+        "technology",
+        "food",
+        "health"
+      ]
+    }
+  }
+}

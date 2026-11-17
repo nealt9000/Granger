@@ -59,7 +59,8 @@ object NautilusSource : PackBookSource {
  * The documents of the installed nautilus packs as shelf rows (Plan KB Decisions 4 and 5): [PackBooks] over
  * [NautilusSource], copied out to [dir] (`books/nautilus`) when first opened.
  *
- * A PDF read before Plan KB was a hidden pack document ([BookOrigin.PACK], `book:pack:<uuid>/files/<fp>`). Each sync
+ * A PDF read before Plan KB was a hidden pack document ([BookOrigin.PACK], `book:pack:<uuid>/files/<fp>`, or
+ * `<name>/files/<fp>` once filed by name, Plan KB2 Task 2.4). Each sync
  * hands such a row's place, bookmarks, highlights, reading tabs and history to the pack's listed row for the same file,
  * moves its copy (and cover) over when the listed row has none, and removes it.
  */
@@ -82,9 +83,10 @@ class NautilusBooks(
         if (documents.isEmpty()) return
         var count = 0
         for (pack in listed) {
-            val prefix = "${pack.id}/${NautilusDatabase.FILES}"
+            // Keyed by the pack's UUID (before Plan KB2) or its name (since Task 2.4).
+            val prefixes = listOf("${pack.id}/${NautilusDatabase.FILES}", "${pack.name}/${NautilusDatabase.FILES}")
             for (old in documents) {
-                if (!old.sourceRef.startsWith(prefix)) continue
+                val prefix = prefixes.firstOrNull { old.sourceRef.startsWith(it) } ?: continue
                 val fp = old.sourceRef.removePrefix(prefix)
                 val new = dao.get(BookIds.of(BookOrigin.NAUTILUS, "${pack.name}/$fp")) ?: continue
                 adopt(old, new)
@@ -96,7 +98,6 @@ class NautilusBooks(
 
     /** [new] takes [old]'s place, marks, tabs and history, and its copy and cover if it has none; [old] goes. */
     private suspend fun adopt(old: Book, new: Book) {
-        val sessions = db.sessionDao()
         val oldFile = File(old.filePath)
         val newFile = File(new.filePath)
         var moved: Book? = null
@@ -114,15 +115,7 @@ class NautilusBooks(
             }
         }
         db.withTransaction {
-            val oldPosition = dao.position(old.id)
-            if (oldPosition != null && dao.position(new.id) == null) dao.upsertPosition(oldPosition.copy(bookId = new.id))
-            dao.deletePosition(old.id)
-            dao.moveMarks(old.id, new.id)
-            sessions.moveTabsToPack(old.id, new.id)
-            sessions.moveHistoryToPack(old.id, new.id)
-            sessions.deleteHistoryForPack(old.id)
-            dao.deleteChunks(old.id)
-            dao.delete(old.id)
+            handOverBook(db, old.id, new.id)
             moved?.let { dao.upsert(it) }
         }
         if (moved == null) oldFile.delete()
