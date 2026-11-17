@@ -100,4 +100,13 @@
         <item quantity="many">%1$s libros</item>
         <item quantity="other">%1$s libros</item>
     </plurals>
+    <string name="explore_featured_in">Tema de hoy · %1$s</string>
+    <string name="explore_featured_more">Más de %1$s · %2$s</string>
+    <plurals name="explore_see_all">
+        <item quantity="one">Ver %1$s tema</item>
+        <item quantity="many">Ver los %1$s temas</item>
+        <item quantity="other">Ver los %1$s temas</item>
+    </plurals>
+    <string name="explore_all_in">Todo %1$s</string>
+    <string name="explore_in_subject">%1$s en %2$s</string>
 </resources>

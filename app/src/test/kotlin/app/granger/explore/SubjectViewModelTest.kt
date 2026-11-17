@@ -45,6 +45,14 @@ class SubjectViewModelTest {
             db.execSQL("INSERT INTO meta VALUES ('kind', 'gqid'), ('schemaVersion', '1'), ('sourceSha256', 'x')")
             articles.forEach { db.execSQL("INSERT INTO articles VALUES (?, ?, ?, NULL)", it.toTypedArray()) }
             subjects.forEach { db.execSQL("INSERT INTO subjects VALUES (?, ?, ?)", it.toTypedArray()) }
+            // Sub-categories: Hastings in Wars, Napoleon in Rulers, Rome in Empires (codes 0-2).
+            db.execSQL("CREATE TABLE facets(facet INTEGER NOT NULL, qid INTEGER NOT NULL, PRIMARY KEY(facet, qid)) WITHOUT ROWID")
+            db.execSQL("INSERT INTO facets VALUES (0, 83224), (1, 517), (2, 2277)")
+            db.execSQL(
+                "INSERT INTO meta VALUES ('facets', ?)",
+                arrayOf("""{"history":[{"id":"war","en":"Wars & battles","es":"Guerras","code":0},{"id":"rulers","en":"Rulers","es":"Gobernantes","code":1},""" +
+                    """{"id":"states","en":"Empires","es":"Imperios","code":2},{"id":"turning","en":"Turning points","es":"Momentos","code":3}]}"""),
+            )
         }
     }
 
@@ -65,13 +73,13 @@ class SubjectViewModelTest {
 
     private operator fun <T> List<T>.component6() = this[5]
 
-    private fun model(): SubjectViewModel {
+    private fun model(facet: String? = null, listing: Boolean = facet != null): SubjectViewModel {
         val qids = QidIndexes(listOf(QidIndex.open(gqid(), "top")!!))
         val times = TimeIndexes(listOf(TimeIndex.open(gtime(), "top")!!))
         val sources = ExploreSources({ qids }, { times }, { _, _ -> null }, flowOf(listOf(pack("c", "History pack") to null)), { true })
         return SubjectViewModel(Subject.HISTORY, sources, books = {
             listOf(ExploreBook("gc-pp", "Pride and Prejudice", null, 170583L), ExploreBook("gc-g", "Decline and Fall", null, 2277L))
-        })
+        }, facetId = facet, listing = listing)
     }
 
     private fun SubjectViewModel.until(test: (SubjectUi) -> Boolean): SubjectUi = runBlocking {
@@ -117,5 +125,28 @@ class SubjectViewModelTest {
         val vm = model()
         vm.until { true }
         repeat(10) { assertThat(vm.wanderStart()?.path).isIn(listOf("Napoleon", "Roman_Empire", "Battle_of_Hastings")) }
+    }
+
+    @Test fun thePageCarriesItsSubCategoriesWithCountsInOrderLeavingEmptyOnesOut() {
+        val ui = model().until { it.facets.isNotEmpty() }
+        assertThat(ui.facets.map { it.facet.id }).containsExactly("war", "rulers", "states").inOrder()
+        assertThat(ui.facets.map { it.count }).containsExactly(1, 1, 1)
+        assertThat(ui.facets[1].examples.map { it.title }).containsExactly("Napoleon")
+    }
+
+    @Test fun aSubCategoryListsOnlyItsArticlesWithItsOwnEras() {
+        val ui = model("rulers").until { it.articles.isNotEmpty() && it.eras.isNotEmpty() && !it.loading }
+        assertThat(ui.facet?.en).isEqualTo("Rulers")
+        assertThat(ui.count).isEqualTo(1)
+        assertThat(ui.articles.map { it.title }).containsExactly("Napoleon")
+        assertThat(ui.eras.map { it.first }).containsExactly(Era.C19)   // a life at about forty: 1809
+        assertThat(ui.books).isEmpty()
+        assertThat(ui.more).isFalse()
+    }
+
+    @Test fun theWholeSubjectsListingHasEveryArticle() {
+        val ui = model(listing = true).until { it.articles.size == 4 && !it.loading }
+        assertThat(ui.facet).isNull()
+        assertThat(ui.articles.first().title).isEqualTo("Napoleon")
     }
 }

@@ -101,4 +101,17 @@
         <item quantity="one">%1$s book</item>
         <item quantity="other">%1$s books</item>
     </plurals>
+    <!-- Today's subject with one of its topics (Plan EX editorial pass). %1$s is the subject. -->
+    <string name="explore_featured_in">Today\'s subject · %1$s</string>
+    <!-- Below today's topic: on into its subject. %1$s is the subject, %2$s its count ("7,797 topics"). -->
+    <string name="explore_featured_more">More in %1$s · %2$s</string>
+    <!-- A subject page's way into the listing of all its articles. %1$s is the count. -->
+    <plurals name="explore_see_all">
+        <item quantity="one">See all %1$s topic</item>
+        <item quantity="other">See all %1$s topics</item>
+    </plurals>
+    <!-- The listing of a whole subject's articles. %1$s is the subject. -->
+    <string name="explore_all_in">All of %1$s</string>
+    <!-- A listing's head: how many articles it holds, in which subject. %1$s is the count line, %2$s the subject. -->
+    <string name="explore_in_subject">%1$s in %2$s</string>
 </resources>

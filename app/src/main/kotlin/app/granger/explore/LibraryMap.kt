@@ -103,7 +103,6 @@ object LibraryMapTags {
     const val OPEN = "library_map_open"
 }
 
-private fun count(n: Int): String = NumberFormat.getIntegerInstance().format(n)
 
 /**
  * The library as a map (Plan EX Task 5, mockup C): your library in the middle, its subjects (or its eras) around it,

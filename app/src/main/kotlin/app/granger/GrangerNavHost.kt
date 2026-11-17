@@ -410,7 +410,8 @@ internal fun railToolOf(
         else -> RailTool.LIBRARY
     }
     destination.hasRoute<BrowseRoute>() || destination.hasRoute<ReaderRoute>() || destination.hasRoute<PackFilesRoute>() ||
-        destination.hasRoute<ExploreRoute>() || destination.hasRoute<SubjectRoute>() || destination.hasRoute<SubjectGamesRoute>() -> RailTool.BROWSE
+        destination.hasRoute<ExploreRoute>() || destination.hasRoute<SubjectRoute>() || destination.hasRoute<SubjectGamesRoute>() ||
+            destination.hasRoute<TopicsRoute>() -> RailTool.BROWSE
     destination.hasRoute<BookRoute>() -> RailTool.LIBRARY
     destination.hasRoute<GetMoreRoute>() && getMoreFor == GetMoreFor.LISTEN -> RailTool.LISTEN
     destination.hasRoute<ArchiveRoute>() -> if (archiveKind == null || archiveKind == ArchiveKind.TEXTS) RailTool.LIBRARY else RailTool.LISTEN
@@ -437,6 +438,9 @@ internal fun railToolOf(
 
 /** A subject's quiz (Plan EX Task 3): the Games screen, dealing only that subject's dated articles. */
 @Serializable data class SubjectGamesRoute(val subject: String)
+
+/** A subject's articles as a mosaic (Plan EX editorial pass): one sub-category's ([facet]), or the whole subject's (null). */
+@Serializable data class TopicsRoute(val subject: String, val facet: String? = null)
 
 /** Listen's home (Plan U2 Decision 4): the Now playing card and the Music and Audiobooks shelves. The tool's landing. */
 @Serializable object ListenRoute
@@ -1133,8 +1137,25 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             if (!nav.popBackStack<HomeRoute>(inclusive = false)) nav.navigate(HomeRoute) { launchSingleTop = true }
                         },
                         onQuiz = { nav.navigate(SubjectGamesRoute(subject.id)) { launchSingleTop = true } },
+                        onOpenFacet = { facet -> nav.navigate(TopicsRoute(subject.id, facet)) },
                         onOpenBook = ::openLinkedBook,
                         onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
+                    ),
+                )
+            }
+            composable<TopicsRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<TopicsRoute>()
+                val subject = app.granger.explore.Subject.of(route.subject) ?: app.granger.explore.Subject.HISTORY
+                app.granger.explore.TopicsScreen(
+                    viewModel(key = "topics:${route.subject}:${route.facet}") {
+                        SubjectViewModel(subject, exploreSources, facetId = route.facet, listing = true)
+                    },
+                    exploreActions,
+                    app.granger.explore.SubjectActions(
+                        onWanderAt = { packId, path ->
+                            container.wanderFrom.value = packId to path
+                            if (!nav.popBackStack<HomeRoute>(inclusive = false)) nav.navigate(HomeRoute) { launchSingleTop = true }
+                        },
                     ),
                 )
             }

@@ -125,7 +125,40 @@ fun collectionsBySubject(members: List<CollectionMember>): Map<String, List<Expl
 }
 
 /** An article Explore shows: where to open it, its title, (when loaded) its picture, and its dates when it has them. */
-data class ExploreArticle(val packId: String, val path: String, val title: String, val picture: String? = null, val mark: TimeMark? = null)
+data class ExploreArticle(
+    val packId: String,
+    val path: String,
+    val title: String,
+    val picture: String? = null,
+    val mark: TimeMark? = null,
+    /** The picture's width over its height, once read (the mosaic shapes its tile by it); 0 when unknown or none. */
+    val ratio: Float = 0f,
+)
+
+/**
+ * Today's subject (Neal, 2026-11-17: highlight one topic behind it, so every day is different): the subject, and one of
+ * its best-known articles with a picture, its opening sentence beside it. [candidates] are the day's picks in order; the
+ * first with a picture is [article].
+ */
+data class FeaturedTopic(
+    val subject: Subject,
+    val count: Int,
+    val article: ExploreArticle,
+    val candidates: List<ExploreArticle>,
+    val sentence: String? = null,
+)
+
+/**
+ * Today's topic in a subject (pure, for tests): the subject is today's door ([featuredIndex]); within it, the day's place
+ * in a pool of its best-known articles, stepping once each time the doors come round, so a (subject, topic) pair comes back
+ * only after doors × pool days. A few after it are kept in case it has no picture.
+ */
+fun featuredCandidates(day: Long, doors: Int, pool: List<ExploreArticle>, keep: Int = 8, rotation: Int = 8): List<ExploreArticle> {
+    if (pool.isEmpty() || doors <= 0) return emptyList()
+    val turn = Math.floorDiv(day, minOf(doors, rotation).toLong())
+    val start = Math.floorMod(turn, pool.size.toLong()).toInt()
+    return (0 until minOf(keep, pool.size)).map { pool[(start + it) % pool.size] }
+}
 
 /** A subject's door: how many articles it holds across the packs, its best-known three, and the packs on it. */
 data class SubjectDoor(
@@ -151,6 +184,8 @@ data class ExploreUi(
     val eras: List<EraRow>,
     /** Every pack Your sources lists (Browse's), by title. */
     val sources: List<String>,
+    /** Today's subject and its topic; null with no subjects. */
+    val featured: FeaturedTopic? = null,
 ) {
     /** No subjects to show: no Wikipedia, or one whose QID index predates subjects (it updates with the catalog). */
     val noSubjects: Boolean get() = doors.none { it.count > 0 }
@@ -219,6 +254,13 @@ class ExploreSources(
 /** An article as a feature shows it: its lead picture, larger than a thumbnail, and its opening sentence. */
 data class ArticleLook(val picture: String?, val sentence: String?)
 
+/** A picture file's width over its height, from its header only; 0 when it won't read. */
+fun ratioOf(path: String): Float = runCatching {
+    val o = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+    android.graphics.BitmapFactory.decodeFile(path, o)
+    if (o.outWidth > 0 && o.outHeight > 0) o.outWidth.toFloat() / o.outHeight else 0f
+}.getOrDefault(0f)
+
 /** The first sentence of [text], at most about [max] characters (cut at a word, with an ellipsis). */
 fun firstSentence(text: String, max: Int = 180): String {
     val t = text.trim().replace(Regex("\\s+"), " ")
@@ -234,7 +276,11 @@ fun firstSentence(text: String, max: Int = 180): String {
 fun featuredIndex(day: Long, doors: Int, pool: Int = 8): Int = if (doors <= 0) -1 else Math.floorMod(day, minOf(doors, pool).toLong()).toInt()
 
 /** Explore's landing, built off the main thread whenever the packs change; null until the first build. */
-class ExploreViewModel(private val sources: ExploreSources) : ViewModel() {
+class ExploreViewModel(
+    private val sources: ExploreSources,
+    /** Today, as days since 1970: today's subject and topic follow it. */
+    private val today: () -> Long = { java.time.LocalDate.now().toEpochDay() },
+) : ViewModel() {
     private val state = MutableStateFlow<ExploreUi?>(null)
     val ui: StateFlow<ExploreUi?> = state.asStateFlow()
 
@@ -280,14 +326,24 @@ class ExploreViewModel(private val sources: ExploreSources) : ViewModel() {
         val doors = subjectDoors(counts, { s ->
             qids.topIn(s.id, EXAMPLES + s.namesakes.size, mainOnly = true).filter { it.qid !in s.namesakes }.take(EXAMPLES).map { it.toExplore() }
         }, others, collections)
+        val lead = doors.getOrNull(featuredIndex(today(), doors.size))
+        val featured = lead?.takeIf { it.count > 0 }?.let { d ->
+            val pool = qids.topIn(d.subject.id, FEATURE_POOL + d.subject.namesakes.size, mainOnly = true)
+                .filter { it.qid !in d.subject.namesakes }.map { it.toExplore() }
+            featuredCandidates(today(), doors.size, pool).takeIf { it.isNotEmpty() }?.let { FeaturedTopic(d.subject, d.count, it.first(), it) }
+        }
         val times = sources.times()
         val eras = if (times.isEmpty) emptyList() else Era.entries.map { era ->
             EraRow(era, times.countActive(era.from, era.to), eraExamples(times.topActive(era.from, era.to, ERA_POOL), qids::subjectsOf))
         }.filter { it.count > 0 }
-        return ExploreUi(articles, doors, eras, packs.map { it.first.title }.sortedBy { it.lowercase() })
+        return ExploreUi(articles, doors, eras, packs.map { it.first.title }.sortedBy { it.lowercase() }, featured)
     }
 
-    private fun withoutPictures(ui: ExploreUi) = ui.copy(doors = ui.doors.map { it.copy(picture = null, lead = null) }, eras = ui.eras.map { it.copy(picture = null, lead = null) })
+    private fun withoutPictures(ui: ExploreUi) = ui.copy(
+        doors = ui.doors.map { it.copy(picture = null, lead = null) },
+        eras = ui.eras.map { it.copy(picture = null, lead = null) },
+        featured = ui.featured?.let { f -> f.copy(article = f.candidates.first(), sentence = null) },
+    )
 
     /**
      * Each door and era gets its own article's picture and opening sentence (History's for History, the Middle Ages' for
@@ -301,8 +357,18 @@ class ExploreViewModel(private val sources: ExploreSources) : ViewModel() {
             .mapNotNull { a -> runCatching { sources.look(a.packId, a.path) }.getOrNull() }
             .firstOrNull { it.picture != null }
         var ui = start
-        // The landing's order: today's subject, the blocks, then Through time, then the rest of the subjects.
-        val featured = featuredIndex(java.time.LocalDate.now().toEpochDay(), ui.doors.size)
+        // Today's topic first: the first of the day's picks with a picture, large, with its opening sentence.
+        ui.featured?.let { f ->
+            val pick = f.candidates.asSequence().mapNotNull { a ->
+                runCatching { sources.look(a.packId, a.path) }.getOrNull()?.takeIf { it.picture != null }?.let { a to it }
+            }.firstOrNull()
+            if (pick != null) {
+                ui = ui.copy(featured = f.copy(article = pick.first.copy(picture = pick.second.picture), sentence = pick.second.sentence?.let(::firstSentence)))
+                shown(ui)
+            }
+        }
+        // Then the landing's order: today's subject, the blocks, then Through time, then the rest of the subjects.
+        val featured = featuredIndex(today(), ui.doors.size)
         val blocks = 6    // two blocks of three (ExploreScreen BLOCK)
         val doorOrder = (listOf(featured) + ui.doors.indices.filter { it != featured }).filter { it >= 0 }
         fun door(i: Int) {
@@ -348,6 +414,9 @@ class ExploreViewModel(private val sources: ExploreSources) : ViewModel() {
 
         /** How many of an era's best-known marks [eraExamples] picks from. */
         const val ERA_POOL = 40
+
+        /** Today's topic comes from this many of the subject's best-known articles. */
+        const val FEATURE_POOL = 60
     }
 }
 
@@ -356,6 +425,12 @@ data class ExploreBook(val bookId: String, val title: String, val cover: String?
 
 /** The order a subject's articles take: most linked (main subject first), or oldest first (dated ones only). */
 enum class SubjectSort { LINKED, OLDEST }
+
+/**
+ * One of a subject's sub-categories as its page shows it (Plan EX editorial pass): the facet, how many articles it holds,
+ * its best-known few, and the first of their pictures (large, cropped round its subject later).
+ */
+data class FacetCard(val facet: app.granger.core.library.Facet, val count: Int, val examples: List<ExploreArticle>, val picture: String? = null)
 
 /**
  * One subject opened (Plan EX Task 3): its eras with counts, its articles most linked or oldest first, a page at a time,
@@ -379,17 +454,30 @@ data class SubjectUi(
     val collections: List<ExploreCollection> = emptyList(),
     /** Still reading this view's articles (a chip or sort just changed). */
     val loading: Boolean = false,
+    /** The sub-category this list is (its listing page); null for the whole subject. */
+    val facet: app.granger.core.library.Facet? = null,
+    /** The subject page's sub-categories, in their curated order (Plan EX editorial pass); empty on a listing. */
+    val facets: List<FacetCard> = emptyList(),
+    /** The subject's own article's picture and opening sentence, for the page's head; null until read. */
+    val hero: ArticleLook? = null,
 ) {
     /** Enough dated main-subject articles for a run of the time games. */
     val canQuiz: Boolean get() = datedMain >= SubjectViewModel.QUIZ_MIN
     val canWander: Boolean get() = count > 0
 }
 
-/** What a subject page reads, beyond the landing's sources: the books on the shelf that have a Wikidata work. */
+/**
+ * A subject opened. The subject's page (Plan EX editorial pass: its head, Wander and Quiz, its sub-categories, its books)
+ * when [listing] is false; else a listing of its articles, the whole subject's or [facet]'s, with eras and order, each
+ * page's pictures read before it shows (the mosaic shapes its tiles by them).
+ */
 class SubjectViewModel(
     private val subject: Subject,
     private val sources: ExploreSources,
     private val books: suspend () -> List<ExploreBook> = { emptyList() },
+    /** The sub-category (`subject.facet` key's facet) to list; null for the whole subject. */
+    private val facetId: String? = null,
+    private val listing: Boolean = facetId != null,
 ) : ViewModel() {
     private val state = MutableStateFlow<SubjectUi?>(null)
     val ui: StateFlow<SubjectUi?> = state.asStateFlow()
@@ -408,30 +496,101 @@ class SubjectViewModel(
                     .filter { Subject.ofDomain(it.second) == subject }.map { it.first }.sortedBy { it.title.lowercase() }
                 val first = withContext(Dispatchers.IO) {
                     val qids = sources.qids()
-                    val count = if (qids.hasSubjects) qids.subjectCounts(listOf(subject.id))[subject.id] ?: 0 else 0
-                    val page = qids.topIn(subject.id, PAGE).map { it.toExplore() }
-                    SubjectUi(subject, count, page, others, more = page.size < count, collections = shelved)
+                    val facet = facetId?.let { id -> qids.facets(subject.id).firstOrNull { it.id == id } }
+                    val count = when {
+                        facet != null -> qids.facetCounts(subject.id)[facet.id] ?: 0
+                        qids.hasSubjects -> qids.subjectCounts(listOf(subject.id))[subject.id] ?: 0
+                        else -> 0
+                    }
+                    val page = linked(facet, 0)
+                    SubjectUi(subject, count, if (listing) emptyList() else page, others, more = page.size < count,
+                        collections = if (listing) emptyList() else shelved, facet = facet, loading = listing) to page
                 }
                 val was = state.value
-                state.value = was?.copy(count = first.count, packs = first.packs, collections = shelved) ?: first
-                if (was == null) launch { details() }
+                state.value = was?.copy(count = first.first.count, packs = first.first.packs, collections = if (listing) emptyList() else shelved)
+                    ?: first.first
+                if (was == null) {
+                    if (listing) launch { appendWithPictures(first.second, total = first.first.count) }
+                    launch { details() }
+                    if (!listing) launch { page() }
+                }
             }
         }
     }
 
+    /** The articles most linked first, from [offset]: the facet's, or the subject's (main subject first). Blocking. */
+    private suspend fun linked(facet: app.granger.core.library.Facet?, offset: Int): List<ExploreArticle> {
+        val qids = sources.qids()
+        return if (facet != null) qids.topInFacet(facet.key, PAGE, offset).map { it.toExplore() }
+        else qids.topIn(subject.id, PAGE, offset).map { it.toExplore() }
+    }
+
     /** The eras (one pass over the time indexes) and In your books, after the first page shows. */
     private suspend fun details() {
+        val facet = state.value?.facet
         val (t, eras) = withContext(Dispatchers.IO) {
             val qids = sources.qids()
             val times = sources.times()
             if (!qids.hasSubjects || times.isEmpty) return@withContext null to emptyList()
-            val t = times.datedIn(qids.subjectSet(subject.id))
+            val t = times.datedIn(if (facet != null) qids.facetSet(facet.key) else qids.subjectSet(subject.id))
             t to Era.entries.map { it to t.count(it.from, it.to) }.filter { it.second > 0 }
         }
         time = t
         state.value = state.value?.copy(eras = eras, dated = t?.size ?: 0, datedMain = t?.main?.count { it } ?: 0)
+        if (listing) return
         val shelf = withContext(Dispatchers.IO) { runCatching { inYourBooks() }.getOrDefault(emptyList()) }
         state.value = state.value?.copy(books = shelf)
+    }
+
+    /**
+     * The page's head and its sub-categories: the subject's own article's look (as the landing's door), then each facet
+     * with its count and best-known few, then their pictures, one by one.
+     */
+    private suspend fun page() {
+        val hero = withContext(Dispatchers.IO) {
+            val qids = sources.qids()
+            subject.namesakes.asSequence().mapNotNull { q -> qids.articlesOf(q).firstOrNull() }
+                .mapNotNull { a -> runCatching { sources.look(a.packId, a.path) }.getOrNull() }.firstOrNull { it.picture != null }
+        }
+        state.value = state.value?.copy(hero = hero)
+        var cards = withContext(Dispatchers.IO) {
+            val qids = sources.qids()
+            if (!qids.hasFacets) return@withContext emptyList()
+            val counts = qids.facetCounts(subject.id)
+            qids.facets(subject.id).mapNotNull { f ->
+                val n = counts[f.id] ?: 0
+                if (n == 0) null else FacetCard(f, n, qids.topInFacet(f.key, FACET_EXAMPLES).map { it.toExplore() })
+            }
+        }
+        state.value = state.value?.copy(facets = cards)
+        for (i in cards.indices) {
+            val picture = withContext(Dispatchers.IO) {
+                cards[i].examples.asSequence().mapNotNull { a -> runCatching { sources.look(a.packId, a.path) }.getOrNull()?.picture }.firstOrNull()
+            }
+            cards = cards.toMutableList().also { it[i] = it[i].copy(picture = picture) }
+            state.value = state.value?.copy(facets = cards)
+        }
+    }
+
+    /**
+     * A listing's next articles, shown a few at a time as their pictures are read (with each picture's shape), so the
+     * mosaic's first tiles come quickly and no tile changes shape once shown.
+     */
+    private suspend fun appendWithPictures(next: List<ExploreArticle>, total: Int, replace: Boolean = false) {
+        if (replace) state.value = state.value?.copy(articles = emptyList())
+        for (chunk in next.chunked(PICTURE_CHUNK)) {
+            val shown = withContext(Dispatchers.IO) { chunk.map { a -> withPicture(a) } }
+            val all = (state.value?.articles ?: emptyList()) + shown
+            state.value = state.value?.copy(articles = all, loading = false)
+        }
+        val now = state.value ?: return
+        state.value = now.copy(more = next.isNotEmpty() && now.articles.size < total, loading = false)
+    }
+
+    /** [a] with its picture and that picture's shape. Blocking. */
+    private fun withPicture(a: ExploreArticle): ExploreArticle {
+        val p = runCatching { sources.picture(a.packId, a.path) }.getOrNull() ?: return a
+        return a.copy(picture = p, ratio = ratioOf(p))
     }
 
     /** The shelf's books whose work has this subject, best-known work first. */
@@ -461,14 +620,15 @@ class SubjectViewModel(
             val (list, page, total) = withContext(Dispatchers.IO) {
                 val t = time
                 if (era == null && sort == SubjectSort.LINKED || t == null) {
-                    Triple(null, sources.qids().topIn(subject.id, PAGE).map { it.toExplore() }, now.count)
+                    Triple(null, linked(now.facet, 0), now.count)
                 } else {
                     val o = t.order(era?.from ?: Long.MIN_VALUE, era?.to ?: Long.MAX_VALUE, sort == SubjectSort.OLDEST)
                     Triple(o, sources.times().marksOf(t, o.take(PAGE)).map { it.toExplore() }, o.size)
                 }
             }
             order = list
-            state.value = state.value?.copy(articles = page, more = page.size < total, loading = false)
+            if (listing) appendWithPictures(page, total, replace = true)
+            else state.value = state.value?.copy(articles = page, more = page.size < total, loading = false)
         }
     }
 
@@ -476,21 +636,27 @@ class SubjectViewModel(
     fun more() {
         val now = state.value ?: return
         if (!now.more || now.loading) return
-        viewModelScope.launch {
+        state.value = now.copy(loading = true)
+        viewing = viewModelScope.launch {
             val o = order
             val t = time
             val next = withContext(Dispatchers.IO) {
                 if (o != null && t != null) sources.times().marksOf(t, o.drop(now.articles.size).take(PAGE)).map { it.toExplore() }
-                else sources.qids().topIn(subject.id, PAGE, offset = now.articles.size).map { it.toExplore() }
+                else linked(now.facet, now.articles.size)
             }
-            val all = now.articles + next
-            state.value = state.value?.copy(articles = all, more = next.isNotEmpty() && all.size < (o?.size ?: now.count))
+            if (listing) appendWithPictures(next, o?.size ?: now.count)
+            else {
+                val all = now.articles + next
+                state.value = state.value?.copy(articles = all, more = next.isNotEmpty() && all.size < (o?.size ?: now.count), loading = false)
+            }
         }
     }
 
     /** A well-known article of this subject, at random, for Wander to start at; null without any. */
     suspend fun wanderStart(random: Random = Random.Default): ExploreArticle? = withContext(Dispatchers.IO) {
-        sources.qids().topIn(subject.id, WANDER_POOL, mainOnly = true).takeIf { it.isNotEmpty() }?.random(random)?.toExplore()
+        val facet = state.value?.facet
+        val pool = if (facet != null) sources.qids().topInFacet(facet.key, WANDER_POOL) else sources.qids().topIn(subject.id, WANDER_POOL, mainOnly = true)
+        pool.takeIf { it.isNotEmpty() }?.random(random)?.toExplore()
     }
 
     /** The article's picture, cached; null when it has none. Blocking. */
@@ -504,5 +670,11 @@ class SubjectViewModel(
 
         /** Wander starts among the subject's best-known articles, not its stubs. */
         const val WANDER_POOL = 300
+
+        /** Each sub-category's best-known articles on the subject page. */
+        const val FACET_EXAMPLES = 4
+
+        /** A listing shows its articles this many at a time as their pictures are read. */
+        const val PICTURE_CHUNK = 12
     }
 }

@@ -84,9 +84,10 @@ object ExploreTags {
     const val SOURCES = "explore_sources"
     const val NO_SUBJECTS = "explore_no_subjects"
     const val MAP = "explore_map"
+    const val FEATURED = "explore_featured"
 }
 
-private fun count(n: Int): String = NumberFormat.getIntegerInstance().format(n)
+internal fun count(n: Int): String = NumberFormat.getIntegerInstance().format(n)
 
 @Composable
 fun ExploreScreen(viewModel: ExploreViewModel, actions: ExploreActions) {
@@ -141,12 +142,19 @@ fun ExploreContent(ui: ExploreUi?, actions: ExploreActions, onMap: () -> Unit = 
             }
             // The editorial flow (Neal, 2026-11-16: not a grid; read like a page): today's subject as the lead, two
             // asymmetric blocks of three, Through time, then the rest of the subjects as picture-led rows.
-            val lead = featuredIndex(day, loaded.doors.size)
+            val lead = loaded.featured?.let { f -> loaded.doors.indexOfFirst { it.subject == f.subject } }?.takeIf { it >= 0 }
+                ?: featuredIndex(day, loaded.doors.size)
             val featured = loaded.doors.getOrNull(lead)
             val rest = loaded.doors.filterIndexed { i, _ -> i != lead }
             val blocks = rest.take(BLOCK * 2).chunked(BLOCK).filter { it.size == BLOCK }
             val tail = rest.drop(blocks.size * BLOCK)
-            if (featured != null) {
+            val topic = loaded.featured
+            if (topic != null && featured != null) {
+                item(key = "featured") {
+                    TopicFeature(topic, featured, onOpenTopic = { actions.onOpenArticle(topic.article.packId, topic.article.path, topic.article.title) },
+                        onOpenSubject = { actions.onOpenSubject(topic.subject) })
+                }
+            } else if (featured != null) {
                 item(key = "featured") { FeatureCard(featured) { actions.onOpenSubject(featured.subject) } }
             }
             blocks.forEachIndexed { b, block ->
@@ -197,7 +205,7 @@ fun ExploreContent(ui: ExploreUi?, actions: ExploreActions, onMap: () -> Unit = 
 }
 
 @Composable
-private fun SectionHead(text: String, modifier: Modifier = Modifier) {
+internal fun SectionHead(text: String, modifier: Modifier = Modifier) {
     Text(text, style = MaterialTheme.typography.titleLarge, modifier = modifier.semantics { heading() })
 }
 
@@ -236,6 +244,33 @@ private fun FeatureCard(door: SubjectDoor, onOpen: () -> Unit) {
             door.lead?.let { Text(it, style = MaterialTheme.typography.bodyLarge, maxLines = 4, overflow = TextOverflow.Ellipsis) }
             Text(countLine(door) + " · " + examplesLine(door), style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        }
+    }
+}
+
+/**
+ * Today's subject with one of its topics (Neal, 2026-11-17: highlight a topic behind the subject, so each day is new): the
+ * topic's picture, large and framed on its subject; the subject named above the topic's title; the topic's opening
+ * sentence; and a way on into the subject.
+ */
+@Composable
+private fun TopicFeature(topic: FeaturedTopic, door: SubjectDoor, onOpenTopic: () -> Unit, onOpenSubject: () -> Unit) {
+    val subject = stringResource(topic.subject.label)
+    Card(
+        onClick = onOpenTopic,
+        modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 12.dp).fillMaxWidth().testTag(ExploreTags.FEATURED),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+    ) {
+        FramedPicture(topic.article.picture, 400.dp, Modifier.fillMaxWidth().height(250.dp).clearAndSetSemantics {})
+        Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(stringResource(R.string.explore_featured_in, subject).uppercase(), style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary, letterSpacing = androidx.compose.ui.unit.TextUnit(1.5f, androidx.compose.ui.unit.TextUnitType.Sp))
+            Text(topic.article.title, style = MaterialTheme.typography.headlineMedium)
+            topic.sentence?.let { Text(it, style = MaterialTheme.typography.bodyLarge, maxLines = 4, overflow = TextOverflow.Ellipsis) }
+        }
+        TextButton(onClick = onOpenSubject, modifier = Modifier.padding(start = 4.dp, bottom = 4.dp).testTag(ExploreTags.door(door.subject))) {
+            Text(stringResource(R.string.explore_featured_more, subject, pluralStringResource(R.plurals.explore_topics, door.count, count(door.count))))
         }
     }
 }
@@ -331,7 +366,7 @@ private fun EraLine(row: EraRow, first: Boolean, last: Boolean, onOpen: () -> Un
 fun SubjectScreen(viewModel: SubjectViewModel, actions: ExploreActions, subjectActions: SubjectActions) {
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val scope = androidx.compose.runtime.rememberCoroutineScope()
-    SubjectContent(
+    SubjectPageContent(
         ui, actions,
         SubjectActions(
             onMore = viewModel::more,
@@ -341,6 +376,7 @@ fun SubjectScreen(viewModel: SubjectViewModel, actions: ExploreActions, subjectA
             onQuiz = subjectActions.onQuiz,
             onOpenBook = subjectActions.onOpenBook,
             onOpenCollection = subjectActions.onOpenCollection,
+            onOpenFacet = subjectActions.onOpenFacet,
             onWanderAt = subjectActions.onWanderAt,
             picture = viewModel::picture,
         ),
@@ -359,6 +395,8 @@ class SubjectActions(
     val onOpenBook: (bookId: String) -> Unit = {},
     /** A book collection's Library page (`c:<key>`). */
     val onOpenCollection: (collectionId: String) -> Unit = {},
+    /** A sub-category's listing (its facet id), or the whole subject's (null). */
+    val onOpenFacet: (facetId: String?) -> Unit = {},
     /** An article's cached picture; null when it has none. Blocking. */
     val picture: (ExploreArticle) -> String? = { null },
 )
@@ -371,118 +409,13 @@ object SubjectTags {
     fun sort(sort: SubjectSort) = "subject_sort_${sort.name.lowercase()}"
     fun book(id: String) = "subject_book_$id"
     fun collection(id: String) = "subject_collection_$id"
+    fun facet(id: String) = "subject_facet_$id"
+    const val SEE_ALL = "subject_see_all"
 }
 
-/**
- * One subject opened (Plan EX Task 3): Wander and Quiz, its eras as chips with counts, most linked or oldest first, In
- * your books, the packs on it, then its articles, each opening its topic page.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SubjectContent(ui: SubjectUi?, actions: ExploreActions, subject: SubjectActions = SubjectActions()) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(ui?.let { stringResource(it.subject.label) }.orEmpty(), maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                navigationIcon = { IconButton(onClick = actions.onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) } },
-            )
-        },
-    ) { padding ->
-        val loaded = ui ?: return@Scaffold
-        val words = app.granger.home.yearWords()
-        LazyColumn(Modifier.padding(padding).fillMaxSize()) {
-            if (loaded.count > 0) {
-                item(key = "count") {
-                    val all = pluralStringResource(R.plurals.explore_topics, loaded.count, count(loaded.count))
-                    val text = if (loaded.dated > 0) stringResource(R.string.explore_subject_counts, all, pluralStringResource(R.plurals.explore_dated, loaded.dated, count(loaded.dated))) else all
-                    Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 16.dp))
-                }
-            }
-            if (loaded.canWander || loaded.canQuiz) {
-                item(key = "do") {
-                    Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        if (loaded.canWander) FilledTonalButton(onClick = subject.onWander, modifier = Modifier.testTag(SubjectTags.WANDER)) { Text(stringResource(R.string.explore_subject_wander)) }
-                        if (loaded.canQuiz) FilledTonalButton(onClick = subject.onQuiz, modifier = Modifier.testTag(SubjectTags.QUIZ)) { Text(stringResource(R.string.explore_subject_quiz)) }
-                    }
-                }
-            }
-            if (loaded.eras.isNotEmpty()) {
-                item(key = "eras") {
-                    LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        item(key = "all") {
-                            FilterChip(loaded.era == null, onClick = { subject.onEra(null) }, label = { Text(stringResource(R.string.explore_subject_all_eras)) },
-                                modifier = Modifier.testTag(SubjectTags.ALL_ERAS))
-                        }
-                        items(loaded.eras, key = { it.first.name }) { (era, n) ->
-                            FilterChip(loaded.era == era, onClick = { subject.onEra(era) },
-                                label = { Text(stringResource(R.string.explore_subject_era_chip, stringResource(era.label), count(n))) },
-                                modifier = Modifier.testTag(SubjectTags.era(era)))
-                        }
-                    }
-                }
-                item(key = "sort") {
-                    Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text(stringResource(R.string.explore_subject_sort), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        for (s in SubjectSort.entries) {
-                            FilterChip(loaded.sort == s, onClick = { subject.onSort(s) },
-                                label = { Text(stringResource(if (s == SubjectSort.LINKED) R.string.explore_subject_sort_linked else R.string.explore_subject_sort_oldest)) },
-                                modifier = Modifier.testTag(SubjectTags.sort(s)))
-                        }
-                    }
-                }
-            }
-            if (loaded.collections.isNotEmpty()) {
-                item(key = "collections-head") { SectionHead(stringResource(R.string.explore_subject_collections), Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)) }
-                items(loaded.collections, key = { "collection:" + it.id }) { c ->
-                    ListItem(
-                        headlineContent = { Text(c.title) },
-                        supportingContent = if (c.books > 0) ({ Text(pluralStringResource(R.plurals.explore_collection_books, c.books, count(c.books))) }) else null,
-                        modifier = Modifier.testTag(SubjectTags.collection(c.id)).clickable { subject.onOpenCollection(c.id) },
-                    )
-                }
-            }
-            if (loaded.books.isNotEmpty()) {
-                item(key = "books-head") {
-                    SectionHead(pluralStringResource(R.plurals.explore_subject_books, loaded.books.size, count(loaded.books.size)), Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp))
-                }
-                item(key = "books") {
-                    LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(loaded.books.take(BOOKS_SHOWN), key = { it.bookId }) { BookCover(it) { subject.onOpenBook(it.bookId) } }
-                    }
-                }
-            }
-            if (loaded.packs.isNotEmpty()) {
-                item(key = "packs-head") { SectionHead(stringResource(R.string.explore_subject_packs), Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)) }
-                items(loaded.packs, key = { "pack:" + it.id }) { pack ->
-                    ListItem(headlineContent = { Text(pack.title) }, modifier = Modifier.clickable { actions.onOpenPack(pack.id) })
-                }
-            }
-            if (loaded.articles.isNotEmpty()) {
-                item(key = "articles-head") {
-                    val head = loaded.era?.let { stringResource(R.string.explore_subject_in_era, stringResource(it.label)) } ?: stringResource(R.string.explore_subject_articles)
-                    SectionHead(head, Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp))
-                }
-            }
-            if (loaded.articles.isEmpty() && loaded.packs.isEmpty() && loaded.collections.isEmpty() && !loaded.loading) {
-                item(key = "empty") { Text(stringResource(R.string.explore_nothing_here), modifier = Modifier.padding(16.dp)) }
-            }
-            items(loaded.articles, key = { "a:" + it.packId + "/" + it.path }) { a ->
-                ArticleRow(a, words, subject.picture) { actions.onOpenArticle(a.packId, a.path, a.title) }
-            }
-            if (loaded.more) {
-                item(key = "more") {
-                    TextButton(onClick = subject.onMore, modifier = Modifier.padding(start = 8.dp)) { Text(stringResource(R.string.explore_show_more)) }
-                }
-            }
-        }
-    }
-}
-
-/** Covers shown in In your books; the shelf holds the rest. */
-private const val BOOKS_SHOWN = 24
 
 @Composable
-private fun ArticleRow(a: ExploreArticle, words: app.granger.home.YearWords, pictureOf: (ExploreArticle) -> String?, onOpen: () -> Unit) {
+internal fun ArticleRow(a: ExploreArticle, words: app.granger.home.YearWords, pictureOf: (ExploreArticle) -> String?, onOpen: () -> Unit) {
     val path by androidx.compose.runtime.produceState<String?>(a.picture, a) { if (value == null) value = withContext(Dispatchers.IO) { pictureOf(a) } }
     val picture = rememberRailCover(path, 48.dp)
     ListItem(
@@ -498,7 +431,7 @@ private fun ArticleRow(a: ExploreArticle, words: app.granger.home.YearWords, pic
 }
 
 @Composable
-private fun BookCover(book: ExploreBook, onOpen: () -> Unit) {
+internal fun BookCover(book: ExploreBook, onOpen: () -> Unit) {
     val cover = rememberRailCover(book.cover, 120.dp)
     Column(Modifier.width(84.dp).clickable(onClick = onOpen).testTag(SubjectTags.book(book.bookId))) {
         Box(Modifier.width(84.dp).height(120.dp).clip(RoundedCornerShape(6.dp)).background(MaterialTheme.colorScheme.surfaceContainerHighest)) {
