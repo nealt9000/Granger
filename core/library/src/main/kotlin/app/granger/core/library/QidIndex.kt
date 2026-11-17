@@ -249,7 +249,7 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
         return best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).drop(offset).take(limit)
     }
 
-    /** Every item in [facet] across the packs, each once, as a sorted set (all main: a facet is within the main subject). */
+    /** Every item in [facet] across the packs, each once, as a sorted set (all main: a lens lists its own articles, from any subject). */
     fun facetSet(facet: String): SubjectSet = merged(indexes.mapNotNull { it.qidsInFacet(facet) })
 
     /** The qid-sorted (qid, ord) [cursors] merged into one set, each item once, main when any pack has ord 0; closes them. */

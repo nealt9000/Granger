@@ -8,9 +8,10 @@ Every article of every `.gqid` in DIR gets subjects (assign.py): the whole metho
 role words) for the packs named by --full (Top en and es), rules alone for the rest (no vectors there). One item has one
 set of subjects whatever the pack or language: English Top first, then Spanish Top, then rules. Writes a small SQLite
 file (subjects(qid, ord, subject), ord 0 the main subject, and a meta table) that tools/qidindex attaches to each .gqid.
-Also each item's sub-category in its main subject (facets.py, facets.json): the rule, and for the packs with vectors the
-neighbours' vote where the rule leaves none; a facets(qid, facet) table, facet as `subject.facet`, and the facet list
-with its names in meta `facets`.
+Also each item's lenses (lenses.py, lenses.json; Neal 2026-11-17): curated ways into a subject, many per item and
+across subjects. A lens may seed from an item's sub-category in its main subject (facets.py, facets.json: the rule, and
+for the packs with vectors the neighbours' vote where the rule leaves none). A facets(qid, facet) table, one row per
+item and lens, facet as `subject.lens`; the lens list with its names in meta `facets`.
 Run with ~/.venvs/granger-links/bin/python (numpy, libzim).
 """
 import argparse
@@ -26,8 +27,9 @@ import time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from assign import HUMAN, Rules, article_vectors, full, load_classes, load_spec, path_of, read_items  # noqa: E402
 from facets import Facets, load_facets  # noqa: E402
+from lenses import Lenses, lens_meta, load_lenses  # noqa: E402
 
-VERSION = 2
+VERSION = 3
 
 
 def gqid_paths(gqid_dir):
@@ -41,10 +43,9 @@ def gqid_paths(gqid_dir):
     return out
 
 
-def facets_meta(facet_spec):
-    """The facet list the app shows, in order, with its names: {subject: [{id, en, es}]} as JSON."""
-    return json.dumps({s: [{"id": f["id"], "en": f["en"], "es": f["es"]} for f in fs] for s, fs in facet_spec.items()},
-                      ensure_ascii=False, separators=(",", ":"))
+def facets_meta(lenses):
+    """The lens list the app shows, in order, with its names: {subject: [{id, en, es}]} as JSON."""
+    return json.dumps(lens_meta(lenses), ensure_ascii=False, separators=(",", ":"))
 
 
 def build(classes, out, gqid_dir, items, fulls, log=print):
@@ -58,7 +59,11 @@ def build(classes, out, gqid_dir, items, fulls, log=print):
     if fbad:
         raise SystemExit("FACET PROBLEMS (fix facets.json):\n  " + "\n  ".join(fbad))
     fx = Facets(facet_spec, parents, spec, weak)
-    facet_of = {}   # qid -> "subject.facet"
+    lenses, lbad = load_lenses(spec, labels, facet_spec=facet_spec)
+    if lbad:
+        raise SystemExit("LENS PROBLEMS (fix lenses.json):\n  " + "\n  ".join(lbad))
+    lx = Lenses(lenses, parents, spec)
+    lenses_of = {}   # qid -> ["subject.lens"]
     wanted = gqid_paths(gqid_dir)
     log(f"classes loaded, {sum(map(len, wanted.values())):,} pack articles ({', '.join(f'{k} {len(v):,}' for k, v in wanted.items())}) "
         f"[{time.time() - t0:.0f}s]")
@@ -82,9 +87,11 @@ def build(classes, out, gqid_dir, items, fulls, log=print):
         person = {t: HUMAN in pack[t].get("P31", []) for t in main}
         final = fx.final(ruled, main, person, article_vectors(G(gvec), main.keys()))
         for t, f in final.items():
-            if f:
-                facet_of[pack[t]["q"]] = f"{main[t]}.{f}"
-        counts[f"facets-full-{lang}"] = sum(1 for f in final.values() if f)
+            ls = lx.match(pack[t], res[t]["subjects"], f"{main[t]}.{f}" if f else None)
+            if ls:
+                lenses_of[pack[t]["q"]] = ls
+                counts[f"lensed-full-{lang}"] += 1
+                counts[f"lens-rows-full-{lang}"] += len(ls)
         log(f"full {lang}: {len(res):,} articles, {counts[f'full-{lang}']:,} items [{time.time() - t0:.0f}s]")
     for lang in ("en", "es"):
         if lang not in items:
@@ -104,9 +111,11 @@ def build(classes, out, gqid_dir, items, fulls, log=print):
                     chosen[r["q"]] = (subjects, f"rules-{lang}")
                     counts[f"rules-{lang}"] += 1
                     f = fx.rule(r, main)
-                    if f:
-                        facet_of[r["q"]] = f"{main}.{f}"
-                        counts[f"facets-rules-{lang}"] += 1
+                    ls = lx.match(r, subjects, f"{main}.{f}" if f else None)
+                    if ls:
+                        lenses_of[r["q"]] = ls
+                        counts[f"lensed-rules-{lang}"] += 1
+                        counts[f"lens-rows-rules-{lang}"] += len(ls)
                 else:
                     counts[f"none-{lang}" if mode != "dropped" else "dropped"] += 1
         log(f"rules {lang}: {n:,} items read [{time.time() - t0:.0f}s]")
@@ -118,14 +127,14 @@ def build(classes, out, gqid_dir, items, fulls, log=print):
     db.executemany("INSERT INTO subjects VALUES (?,?,?)",
                    ((int(q[1:]), i, s) for q, (subs, _) in chosen.items() for i, s in enumerate(subs)))
     db.executemany("INSERT INTO how VALUES (?,?)", ((int(q[1:]), h) for q, (_, h) in chosen.items()))
-    db.execute("CREATE TABLE facets(qid INTEGER PRIMARY KEY, facet TEXT NOT NULL)")
-    db.executemany("INSERT INTO facets VALUES (?,?)", ((int(q[1:]), f) for q, f in facet_of.items()))
+    db.execute("CREATE TABLE facets(qid INTEGER NOT NULL, facet TEXT NOT NULL, PRIMARY KEY(qid, facet)) WITHOUT ROWID")
+    db.executemany("INSERT INTO facets VALUES (?,?)", ((int(q[1:]), f) for q, ls in lenses_of.items() for f in ls))
     db.execute("CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT NOT NULL)")
     db.executemany("INSERT INTO meta VALUES (?,?)", [
         ("subjectsVersion", str(spec["version"])), ("builder", "tools/subjects/build.py"), ("builderVersion", str(VERSION)),
         ("builtAt", datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")),
         ("counts", json.dumps(counts, sort_keys=True)),
-        ("facets", facets_meta(facet_spec))])
+        ("facets", facets_meta(lenses))])
     db.commit()
     db.execute("VACUUM")
     db.close()

@@ -1,0 +1,2217 @@
+{
+ "version": 1,
+ "note": "Plan EX lenses (Neal 2026-11-17): curated ways into a subject, not partitions. An article joins every lens whose criteria it meets, from any subject in the lens's `in` (default its own). A lens is a list of clauses (`any`); an article joins when one clause holds, and a clause holds when all its keys do: `seeds` (its sub-category by facets.py, facets.json), `classes` (a thing's P31/P279/P136 reach one within the spec depth, P279 up), `occupations` (one of a person's P106; only people whose main subject is in `main`, default `in`), `genres` (one of its P136), `not_classes`/`not_occupations` (none reached), `after`/`before` (the item's year: a thing's start or date, a person's birth + 40), `things` (any non-person), `not_main` (main subject not one of these). An article no clause places stays in its subject's whole listing only: a neighbours' vote was tried and was wrong about a third of the time (2026-11-17). Labels sit beside the QIDs for reading; the build checks them. Nothing is set per article.",
+ "subjects": {
+  "nature": [
+   {
+    "id": "animals",
+    "en": "Animal kingdom",
+    "es": "Reino animal",
+    "any": [
+     {
+      "seeds": [
+       "nature.animals",
+       "nature.breeds"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "plants",
+    "en": "Plant kingdom & fungi",
+    "es": "Plantas y hongos",
+    "any": [
+     {
+      "seeds": [
+       "nature.plants"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "habitats",
+    "en": "Ecosystems & habitats",
+    "es": "Ecosistemas y hábitats",
+    "in": [
+     "nature",
+     "places",
+     "science"
+    ],
+    "any": [
+     {
+      "classes": {
+       "Q101998": "biome",
+       "Q11292": "coral reef",
+       "Q8514": "desert",
+       "Q295469": "ecoregion",
+       "Q37813": "ecosystem",
+       "Q4421": "forest",
+       "Q1506875": "forest",
+       "Q1006733": "grassland",
+       "Q52105": "habitat",
+       "Q30198": "marsh",
+       "Q46169": "national park",
+       "Q354009": "national park",
+       "Q1814183": "national park",
+       "Q108060629": "national park",
+       "Q179049": "nature reserve",
+       "Q473972": "protected area",
+       "Q140460149": "protected area",
+       "Q9444": "rainforest",
+       "Q42320": "savanna",
+       "Q123991": "steppe",
+       "Q166735": "swamp",
+       "Q170321": "wetland"
+      },
+      "not_classes": {
+       "Q5003624": "memorial"
+      }
+     }
+    ]
+   },
+   {
+    "id": "sea",
+    "en": "Life in water",
+    "es": "Vida en el agua",
+    "any": [
+     {
+      "classes": {
+       "Q160": "Cetacea",
+       "Q25441": "Cnidaria",
+       "Q25326": "Mollusca",
+       "Q1756633": "aquatic animal",
+       "Q152": "fish",
+       "Q108555493": "marine invertebrate",
+       "Q382441": "marine mammal",
+       "Q192935": "seafood",
+       "Q1865281": "whale"
+      }
+     }
+    ]
+   },
+   {
+    "id": "farm",
+    "en": "Pets & farm animals",
+    "es": "Mascotas y animales de granja",
+    "in": [
+     "nature",
+     "food"
+    ],
+    "any": [
+     {
+      "classes": {
+       "Q38829": "breed",
+       "Q43577": "cat breed",
+       "Q39367": "dog breed",
+       "Q38672": "dog type",
+       "Q622852": "domesticated animal",
+       "Q57814795": "domesticated mammal",
+       "Q1160573": "horse breed",
+       "Q103459": "livestock",
+       "Q110878538": "milk yielding animal",
+       "Q39201": "pet",
+       "Q178559": "poultry"
+      }
+     }
+    ]
+   },
+   {
+    "id": "prehistoric",
+    "en": "Prehistoric life",
+    "es": "Vida prehistórica",
+    "in": [
+     "nature",
+     "science",
+     "history"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "nature.prehistoric"
+      ]
+     },
+     {
+      "classes": {
+       "Q430": "dinosaur",
+       "Q98961713": "extinct taxon",
+       "Q23038290": "fossil taxon"
+      }
+     }
+    ]
+   },
+   {
+    "id": "environment",
+    "en": "The environment",
+    "es": "El medio ambiente",
+    "in": [
+     "nature",
+     "science",
+     "society"
+    ],
+    "any": [
+     {
+      "classes": {
+       "Q131123": "air pollution",
+       "Q125928": "climate change",
+       "Q628403": "conservation",
+       "Q141662568": "conservation",
+       "Q2144359": "environmental issue",
+       "Q123509": "extinction",
+       "Q105766453": "extinction",
+       "Q574376": "human impact on the environment",
+       "Q58734": "pollution",
+       "Q12705": "renewable energy",
+       "Q183129": "water pollution"
+      }
+     }
+    ]
+   },
+   {
+    "id": "evolution",
+    "en": "Evolution & genetics",
+    "es": "Evolución y genética",
+    "in": [
+     "nature",
+     "science"
+    ],
+    "any": [
+     {
+      "classes": {
+       "Q1063": "evolution",
+       "Q5418608": "evolution",
+       "Q840400": "evolutionary biology",
+       "Q7187": "gene",
+       "Q7162": "genetics",
+       "Q178694": "heredity",
+       "Q42918": "mutation",
+       "Q43478": "natural selection"
+      }
+     },
+     {
+      "occupations": {
+       "Q864503": "biologist",
+       "Q2374149": "botanist",
+       "Q16831721": "ethologist",
+       "Q16063497": "evolutionary biologist",
+       "Q3126128": "geneticist",
+       "Q18805": "naturalist",
+       "Q350979": "zoologist"
+      }
+     }
+    ]
+   }
+  ],
+  "science": [
+   {
+    "id": "space",
+    "en": "Space & astronomy",
+    "es": "Espacio y astronomía",
+    "any": [
+     {
+      "seeds": [
+       "science.space"
+      ]
+     },
+     {
+      "occupations": {
+       "Q11631": "astronaut",
+       "Q11063": "astronomer",
+       "Q752129": "astrophysicist",
+       "Q2998308": "cosmologist"
+      }
+     }
+    ]
+   },
+   {
+    "id": "physics",
+    "en": "Matter & energy",
+    "es": "Materia y energía",
+    "any": [
+     {
+      "seeds": [
+       "science.physics"
+      ]
+     },
+     {
+      "occupations": {
+       "Q16742096": "nuclear physicist",
+       "Q169470": "physicist",
+       "Q19350898": "theoretical physicist"
+      }
+     }
+    ]
+   },
+   {
+    "id": "chem",
+    "en": "Elements & materials",
+    "es": "Elementos y materiales",
+    "any": [
+     {
+      "seeds": [
+       "science.chemistry"
+      ]
+     },
+     {
+      "occupations": {
+       "Q2919046": "biochemist",
+       "Q593644": "chemist"
+      }
+     }
+    ]
+   },
+   {
+    "id": "earth",
+    "en": "Earth, weather & climate",
+    "es": "Tierra, tiempo y clima",
+    "in": [
+     "science",
+     "nature",
+     "places"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "science.earth"
+      ]
+     },
+     {
+      "classes": {
+       "Q7937": "climate",
+       "Q7944": "earthquake",
+       "Q7946": "mineral",
+       "Q8065": "natural disaster",
+       "Q8063": "rock",
+       "Q1404150": "rock",
+       "Q8072": "volcano",
+       "Q11663": "weather"
+      }
+     }
+    ]
+   },
+   {
+    "id": "life",
+    "en": "Life & the cell",
+    "es": "La vida y la célula",
+    "any": [
+     {
+      "seeds": [
+       "science.life"
+      ]
+     },
+     {
+      "occupations": {
+       "Q864503": "biologist",
+       "Q3779582": "microbiologist",
+       "Q2055046": "physiologist"
+      }
+     }
+    ]
+   },
+   {
+    "id": "maths",
+    "en": "Numbers, shapes & logic",
+    "es": "Números, formas y lógica",
+    "any": [
+     {
+      "seeds": [
+       "science.maths"
+      ]
+     },
+     {
+      "occupations": {
+       "Q14565331": "logician",
+       "Q170790": "mathematician",
+       "Q2732142": "statistician"
+      }
+     }
+    ]
+   },
+   {
+    "id": "mind",
+    "en": "Mind & behaviour",
+    "es": "Mente y conducta",
+    "in": [
+     "science",
+     "health",
+     "society"
+    ],
+    "any": [
+     {
+      "classes": {
+       "Q9415": "emotion",
+       "Q9418": "psychology"
+      }
+     },
+     {
+      "occupations": {
+       "Q14565186": "cognitive scientist",
+       "Q6337803": "neuroscientist",
+       "Q211346": "psychiatrist",
+       "Q3410028": "psychoanalyst",
+       "Q212980": "psychologist"
+      },
+      "main": [
+       "science",
+       "health"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "discoveries",
+    "en": "Great scientists & discoveries",
+    "es": "Grandes científicos y descubrimientos",
+    "in": [
+     "science",
+     "technology",
+     "health"
+    ],
+    "any": [
+     {
+      "classes": {
+       "Q12772819": "discovery",
+       "Q214070": "physical law",
+       "Q408891": "scientific law",
+       "Q3239681": "scientific theory",
+       "Q17737": "theory",
+       "Q10859910": "theory"
+      }
+     },
+     {
+      "occupations": {
+       "Q11063": "astronomer",
+       "Q864503": "biologist",
+       "Q2374149": "botanist",
+       "Q593644": "chemist",
+       "Q205375": "inventor",
+       "Q170790": "mathematician",
+       "Q18805": "naturalist",
+       "Q39631": "physician",
+       "Q169470": "physicist",
+       "Q901": "scientist"
+      },
+      "main": [
+       "science",
+       "health"
+      ]
+     }
+    ]
+   }
+  ],
+  "history": [
+   {
+    "id": "ancient",
+    "en": "The ancient world",
+    "es": "El mundo antiguo",
+    "in": [
+     "history",
+     "places",
+     "religion"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "history.ancient"
+      ],
+      "before": 500
+     }
+    ]
+   },
+   {
+    "id": "medieval",
+    "en": "Middle Ages",
+    "es": "Edad Media",
+    "in": [
+     "history",
+     "places",
+     "religion",
+     "society"
+    ],
+    "any": [
+     {
+      "things": true,
+      "not_main": [
+       "places"
+      ],
+      "after": 500,
+      "before": 1500
+     }
+    ]
+   },
+   {
+    "id": "empires",
+    "en": "Empires & kingdoms",
+    "es": "Imperios y reinos",
+    "any": [
+     {
+      "seeds": [
+       "history.states"
+      ]
+     },
+     {
+      "classes": {
+       "Q131401": "caliphate",
+       "Q133442": "city-state",
+       "Q164950": "dynasty",
+       "Q48349": "empire",
+       "Q3024240": "historical country",
+       "Q417175": "kingdom"
+      }
+     }
+    ]
+   },
+   {
+    "id": "rulers",
+    "en": "Rulers & royalty",
+    "es": "Gobernantes y realeza",
+    "in": [
+     "history",
+     "society"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "history.rulers"
+      ]
+     },
+     {
+      "occupations": {
+       "Q39018": "emperor",
+       "Q12097": "king",
+       "Q116": "monarch",
+       "Q37110": "pharaoh",
+       "Q16511993": "queen",
+       "Q477406": "regent",
+       "Q1097498": "ruler",
+       "Q2304859": "sovereign",
+       "Q43292": "sultan",
+       "Q44356": "tsar"
+      }
+     }
+    ]
+   },
+   {
+    "id": "war",
+    "en": "Wars & battles",
+    "es": "Guerras y batallas",
+    "in": [
+     "history",
+     "society"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "history.war"
+      ]
+     },
+     {
+      "occupations": {
+       "Q132851": "admiral",
+       "Q11545923": "military commander",
+       "Q1402561": "military leader",
+       "Q189290": "military officer",
+       "Q47064": "military personnel",
+       "Q4991371": "soldier"
+      },
+      "not_occupations": {
+       "Q2285706": "head of government",
+       "Q48352": "head of state",
+       "Q82955": "politician",
+       "Q372436": "statesperson",
+       "Q11900058": "explorer"
+      }
+     }
+    ]
+   },
+   {
+    "id": "revolutions",
+    "en": "Revolutions & uprisings",
+    "es": "Revoluciones y levantamientos",
+    "in": [
+     "history",
+     "society"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "history.revolutions"
+      ]
+     },
+     {
+      "classes": {
+       "Q8465": "civil war",
+       "Q45382": "coup d'état",
+       "Q273120": "protest",
+       "Q124734": "rebellion",
+       "Q10931": "revolution"
+      }
+     }
+    ]
+   },
+   {
+    "id": "exploration",
+    "en": "Exploration & discovery",
+    "es": "Exploración y descubrimiento",
+    "in": [
+     "history",
+     "places",
+     "science"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "history.explorers"
+      ]
+     },
+     {
+      "occupations": {
+       "Q11631": "astronaut",
+       "Q1734662": "cartographer",
+       "Q11900058": "explorer",
+       "Q254651": "navigator"
+      },
+      "main": [
+       "history"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "disasters",
+    "en": "Disasters & tragedies",
+    "es": "Desastres y tragedias",
+    "in": [
+     "history",
+     "society",
+     "science"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "history.disasters"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "modern",
+    "en": "The modern world",
+    "es": "El mundo moderno",
+    "in": [
+     "history"
+    ],
+    "any": [
+     {
+      "things": true,
+      "after": 1900,
+      "main": [
+       "history"
+      ]
+     }
+    ]
+   }
+  ],
+  "society": [
+   {
+    "id": "government",
+    "en": "Politics & government",
+    "es": "Política y gobierno",
+    "any": [
+     {
+      "seeds": [
+       "society.government"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "leaders",
+    "en": "World leaders",
+    "es": "Líderes mundiales",
+    "in": [
+     "society",
+     "history"
+    ],
+    "any": [
+     {
+      "occupations": {
+       "Q193391": "diplomat",
+       "Q2285706": "head of government",
+       "Q48352": "head of state",
+       "Q116": "monarch",
+       "Q82955": "politician",
+       "Q30461": "president",
+       "Q372436": "statesperson"
+      }
+     }
+    ]
+   },
+   {
+    "id": "rights",
+    "en": "Rights & movements",
+    "es": "Derechos y movimientos",
+    "in": [
+     "society",
+     "history",
+     "religion"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "society.movements"
+      ]
+     },
+     {
+      "occupations": {
+       "Q12526417": "abolitionist",
+       "Q15253558": "activist",
+       "Q1021386": "civil rights advocate",
+       "Q34074720": "feminist",
+       "Q3242115": "revolutionary",
+       "Q27532437": "suffragist"
+      }
+     }
+    ]
+   },
+   {
+    "id": "law",
+    "en": "Law & justice",
+    "es": "Ley y justicia",
+    "in": [
+     "society"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "society.law"
+      ]
+     },
+     {
+      "occupations": {
+       "Q16533": "judge",
+       "Q185351": "jurist",
+       "Q40348": "lawyer"
+      },
+      "not_occupations": {
+       "Q2285706": "head of government",
+       "Q48352": "head of state",
+       "Q82955": "politician",
+       "Q30461": "president",
+       "Q372436": "statesperson"
+      }
+     }
+    ]
+   },
+   {
+    "id": "crime",
+    "en": "Crime & espionage",
+    "es": "Crimen y espionaje",
+    "in": [
+     "society",
+     "history"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "society.crime"
+      ]
+     },
+     {
+      "occupations": {
+       "Q2159907": "criminal",
+       "Q46961": "gangster",
+       "Q931260": "murderer",
+       "Q484188": "serial killer",
+       "Q9352089": "spy",
+       "Q12414919": "terrorist"
+      }
+     }
+    ]
+   },
+   {
+    "id": "peoples",
+    "en": "Peoples & customs",
+    "es": "Pueblos y costumbres",
+    "in": [
+     "society",
+     "religion",
+     "places"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "society.peoples"
+      ]
+     },
+     {
+      "classes": {
+       "Q251777": "custom",
+       "Q41710": "ethnic group",
+       "Q132241": "festival",
+       "Q1445650": "holiday",
+       "Q851990": "population group",
+       "Q1197685": "public holiday",
+       "Q82821": "tradition"
+      }
+     }
+    ]
+   },
+   {
+    "id": "world",
+    "en": "The world stage",
+    "es": "El escenario mundial",
+    "any": [
+     {
+      "seeds": [
+       "society.world"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "media",
+    "en": "News, media & schools",
+    "es": "Noticias, medios y escuelas",
+    "in": [
+     "society",
+     "technology",
+     "business"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "society.media"
+      ]
+     },
+     {
+      "occupations": {
+       "Q974144": "educator",
+       "Q1930187": "journalist",
+       "Q17351648": "newspaper editor",
+       "Q37226": "teacher",
+       "Q947873": "television presenter"
+      },
+      "not_occupations": {
+       "Q82955": "politician"
+      }
+     }
+    ]
+   }
+  ],
+  "places": [
+   {
+    "id": "countries",
+    "en": "Countries",
+    "es": "Países",
+    "any": [
+     {
+      "seeds": [
+       "places.countries"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "cities",
+    "en": "Cities & towns",
+    "es": "Ciudades y pueblos",
+    "any": [
+     {
+      "seeds": [
+       "places.cities"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "regions",
+    "en": "Continents & regions",
+    "es": "Continentes y regiones",
+    "any": [
+     {
+      "seeds": [
+       "places.regions"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "nature",
+    "en": "Rivers, mountains & seas",
+    "es": "Ríos, montañas y mares",
+    "in": [
+     "places",
+     "nature",
+     "science"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "places.landscape"
+      ]
+     },
+     {
+      "classes": {
+       "Q33837": "archipelago",
+       "Q39594": "bay",
+       "Q1124247": "bay",
+       "Q8514": "desert",
+       "Q35666": "glacier",
+       "Q23442": "island",
+       "Q23397": "lake",
+       "Q8502": "mountain",
+       "Q46831": "mountain range",
+       "Q9430": "ocean",
+       "Q34763": "peninsula",
+       "Q4022": "river",
+       "Q165": "sea",
+       "Q37901": "strait",
+       "Q8072": "volcano",
+       "Q34038": "waterfall"
+      },
+      "not_classes": {
+       "Q6256": "country",
+       "Q112099": "island country",
+       "Q3624078": "sovereign state"
+      }
+     }
+    ]
+   },
+   {
+    "id": "landmarks",
+    "en": "Buildings & landmarks",
+    "es": "Edificios y monumentos",
+    "in": [
+     "places",
+     "art",
+     "history",
+     "religion"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "places.landmarks"
+      ]
+     },
+     {
+      "classes": {
+       "Q9259": "World Heritage Site",
+       "Q839954": "archaeological site",
+       "Q12280": "bridge",
+       "Q23413": "castle",
+       "Q2977": "cathedral",
+       "Q16970": "church building",
+       "Q57821": "fortification",
+       "Q4989906": "monument",
+       "Q32815": "mosque",
+       "Q33506": "museum",
+       "Q16560": "palace",
+       "Q44539": "temple",
+       "Q12518": "tower"
+      },
+      "not_classes": {
+       "Q515": "city",
+       "Q1549591": "big city",
+       "Q5119": "capital city",
+       "Q486972": "human settlement",
+       "Q23397": "lake",
+       "Q6256": "country",
+       "Q3624078": "sovereign state"
+      }
+     }
+    ]
+   },
+   {
+    "id": "travel",
+    "en": "Travel & transport",
+    "es": "Viajes y transporte",
+    "in": [
+     "places",
+     "technology"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "places.travel"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "wonders",
+    "en": "World heritage",
+    "es": "Patrimonio mundial",
+    "in": [
+     "places",
+     "art",
+     "history",
+     "religion",
+     "nature"
+    ],
+    "any": [
+     {
+      "classes": {
+       "Q9259": "World Heritage Site"
+      }
+     }
+    ]
+   }
+  ],
+  "technology": [
+   {
+    "id": "computers",
+    "en": "Computers & software",
+    "es": "Computadoras y software",
+    "any": [
+     {
+      "seeds": [
+       "technology.computing"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "internet",
+    "en": "The internet",
+    "es": "Internet",
+    "any": [
+     {
+      "seeds": [
+       "technology.internet"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "vehicles",
+    "en": "Cars, planes & ships",
+    "es": "Autos, aviones y barcos",
+    "in": [
+     "technology",
+     "places"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "technology.transport"
+      ]
+     },
+     {
+      "classes": {
+       "Q11436": "aircraft",
+       "Q197": "airplane",
+       "Q11442": "bicycle",
+       "Q35872": "boat",
+       "Q1420": "car",
+       "Q752870": "motor vehicle",
+       "Q11446": "ship",
+       "Q870": "train",
+       "Q42889": "vehicle",
+       "Q1229765": "watercraft"
+      }
+     }
+    ]
+   },
+   {
+    "id": "space",
+    "en": "Spaceflight",
+    "es": "Vuelos espaciales",
+    "in": [
+     "technology",
+     "science"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "technology.space"
+      ]
+     },
+     {
+      "occupations": {
+       "Q15895020": "aerospace engineer",
+       "Q11631": "astronaut"
+      }
+     }
+    ]
+   },
+   {
+    "id": "machines",
+    "en": "Machines & gadgets",
+    "es": "Máquinas y aparatos",
+    "any": [
+     {
+      "seeds": [
+       "technology.gadgets"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "inventions",
+    "en": "Inventions & inventors",
+    "es": "Inventos e inventores",
+    "in": [
+     "technology",
+     "science",
+     "business"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "technology.inventions"
+      ]
+     },
+     {
+      "occupations": {
+       "Q81096": "engineer",
+       "Q205375": "inventor"
+      },
+      "main": [
+       "technology",
+       "business"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "energy",
+    "en": "Energy & power",
+    "es": "Energía",
+    "in": [
+     "technology",
+     "science"
+    ],
+    "any": [
+     {
+      "classes": {
+       "Q267298": "battery",
+       "Q12725": "electricity",
+       "Q11379": "energy",
+       "Q1522115": "energy source",
+       "Q44167": "engine",
+       "Q42501": "fuel",
+       "Q80877": "nuclear reactor",
+       "Q159719": "power station",
+       "Q12705": "renewable energy"
+      }
+     }
+    ]
+   },
+   {
+    "id": "weapons",
+    "en": "Weapons & warfare",
+    "es": "Armas y guerra",
+    "in": [
+     "technology",
+     "history"
+    ],
+    "any": [
+     {
+      "classes": {
+       "Q127197": "bomb",
+       "Q64225484": "combat airplane",
+       "Q127771": "fighter aircraft",
+       "Q12796": "firearm",
+       "Q216916": "military aircraft",
+       "Q1184840": "military vehicle",
+       "Q974850": "missile",
+       "Q12802": "nuclear weapon",
+       "Q12876": "tank",
+       "Q2031121": "warship",
+       "Q728": "weapon"
+      }
+     }
+    ]
+   }
+  ],
+  "art": [
+   {
+    "id": "painting",
+    "en": "Painting & sculpture",
+    "es": "Pintura y escultura",
+    "any": [
+     {
+      "seeds": [
+       "art.painting"
+      ]
+     },
+     {
+      "occupations": {
+       "Q1028181": "painter",
+       "Q1281618": "sculptor"
+      }
+     }
+    ]
+   },
+   {
+    "id": "architecture",
+    "en": "Architecture",
+    "es": "Arquitectura",
+    "in": [
+     "art",
+     "places",
+     "religion"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "art.architecture"
+      ]
+     },
+     {
+      "occupations": {
+       "Q42973": "architect"
+      },
+      "main": [
+       "art"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "movements",
+    "en": "Styles & movements",
+    "es": "Estilos y movimientos",
+    "in": [
+     "art",
+     "literature",
+     "music"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "art.movements"
+      ]
+     },
+     {
+      "classes": {
+       "Q32880": "architectural style",
+       "Q968159": "art movement",
+       "Q1792644": "art style",
+       "Q2198855": "cultural movement"
+      }
+     }
+    ]
+   },
+   {
+    "id": "works",
+    "en": "Famous works",
+    "es": "Obras famosas",
+    "in": [
+     "art"
+    ],
+    "any": [
+     {
+      "classes": {
+       "Q22669139": "fresco",
+       "Q219423": "mural",
+       "Q11629": "painting",
+       "Q3305213": "painting",
+       "Q860861": "sculpture",
+       "Q17310537": "sculpture",
+       "Q4502142": "visual artwork",
+       "Q838948": "work of art"
+      }
+     }
+    ]
+   },
+   {
+    "id": "design",
+    "en": "Photography, fashion & design",
+    "es": "Fotografía, moda y diseño",
+    "any": [
+     {
+      "seeds": [
+       "art.photography"
+      ]
+     },
+     {
+      "occupations": {
+       "Q3501317": "fashion designer",
+       "Q627325": "graphic designer",
+       "Q33231": "photographer"
+      },
+      "not_occupations": {
+       "Q1028181": "painter",
+       "Q1281618": "sculptor"
+      }
+     }
+    ]
+   },
+   {
+    "id": "comics",
+    "en": "Comics & animation",
+    "es": "Cómics y animación",
+    "in": [
+     "art",
+     "literature",
+     "film"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "art.comics",
+       "literature.characters"
+      ]
+     },
+     {
+      "occupations": {
+       "Q266569": "animator",
+       "Q1114448": "cartoonist",
+       "Q715301": "comics artist"
+      }
+     }
+    ]
+   }
+  ],
+  "literature": [
+   {
+    "id": "books",
+    "en": "Great books",
+    "es": "Grandes libros",
+    "any": [
+     {
+      "seeds": [
+       "literature.works"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "poets",
+    "en": "Poets & playwrights",
+    "es": "Poetas y dramaturgos",
+    "any": [
+     {
+      "seeds": [
+       "literature.poetry"
+      ]
+     },
+     {
+      "occupations": {
+       "Q214917": "playwright",
+       "Q49757": "poet"
+      }
+     }
+    ]
+   },
+   {
+    "id": "novelists",
+    "en": "Novelists & writers",
+    "es": "Novelistas y escritores",
+    "any": [
+     {
+      "seeds": [
+       "literature.writers"
+      ]
+     },
+     {
+      "occupations": {
+       "Q482980": "author",
+       "Q11774202": "essayist",
+       "Q6625963": "novelist",
+       "Q15949613": "short story writer",
+       "Q36180": "writer"
+      }
+     }
+    ]
+   },
+   {
+    "id": "characters",
+    "en": "Characters & heroes",
+    "es": "Personajes y héroes",
+    "in": [
+     "literature",
+     "film",
+     "art",
+     "games"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "literature.characters",
+       "film.characters"
+      ]
+     },
+     {
+      "classes": {
+       "Q15632617": "fictional human",
+       "Q3658341": "literary character",
+       "Q188784": "superhero"
+      }
+     }
+    ]
+   },
+   {
+    "id": "myths",
+    "en": "Myths, legends & tales",
+    "es": "Mitos, leyendas y cuentos",
+    "in": [
+     "literature",
+     "religion"
+    ],
+    "any": [
+     {
+      "classes": {
+       "Q37484": "epic poem",
+       "Q699": "fairy tale",
+       "Q1221280": "folk tale",
+       "Q36192": "folklore",
+       "Q44342": "legend",
+       "Q12827256": "myth",
+       "Q9134": "mythology"
+      }
+     }
+    ]
+   },
+   {
+    "id": "kinds",
+    "en": "Kinds of writing",
+    "es": "Géneros literarios",
+    "any": [
+     {
+      "seeds": [
+       "literature.craft"
+      ]
+     },
+     {
+      "classes": {
+       "Q483394": "genre",
+       "Q4263830": "literary form",
+       "Q223393": "literary genre"
+      }
+     }
+    ]
+   }
+  ],
+  "music": [
+   {
+    "id": "pop",
+    "en": "Singers & bands",
+    "es": "Cantantes y bandas",
+    "any": [
+     {
+      "seeds": [
+       "music.singers"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "classical",
+    "en": "Classical music",
+    "es": "Música clásica",
+    "any": [
+     {
+      "classes": {
+       "Q9730": "classical music",
+       "Q1344": "opera"
+      }
+     },
+     {
+      "occupations": {
+       "Q36834": "composer",
+       "Q158852": "conductor",
+       "Q486748": "pianist",
+       "Q1259917": "violinist"
+      },
+      "before": 1940
+     },
+     {
+      "occupations": {
+       "Q36834": "composer",
+       "Q158852": "conductor",
+       "Q486748": "pianist",
+       "Q1259917": "violinist"
+      },
+      "genres": {
+       "Q8361": "Baroque music",
+       "Q17723": "Classical period",
+       "Q207591": "Romantic music",
+       "Q1583807": "art music",
+       "Q189201": "chamber music",
+       "Q9730": "classical music",
+       "Q612024": "contemporary classical music",
+       "Q1344": "opera",
+       "Q9734": "symphony"
+      }
+     }
+    ]
+   },
+   {
+    "id": "songs",
+    "en": "Albums & songs",
+    "es": "Álbumes y canciones",
+    "any": [
+     {
+      "seeds": [
+       "music.albums"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "instruments",
+    "en": "Instruments",
+    "es": "Instrumentos",
+    "in": [
+     "music",
+     "technology"
+    ],
+    "any": [
+     {
+      "classes": {
+       "Q52954": "keyboard instrument",
+       "Q34379": "musical instrument",
+       "Q133163": "percussion instrument",
+       "Q1798603": "string instrument",
+       "Q173453": "wind instrument"
+      }
+     }
+    ]
+   },
+   {
+    "id": "genres",
+    "en": "Genres & styles",
+    "es": "Géneros y estilos",
+    "any": [
+     {
+      "seeds": [
+       "music.genres"
+      ]
+     },
+     {
+      "classes": {
+       "Q188451": "music genre"
+      }
+     }
+    ]
+   },
+   {
+    "id": "anthems",
+    "en": "Anthems & folk songs",
+    "es": "Himnos y canciones populares",
+    "in": [
+     "music",
+     "society"
+    ],
+    "any": [
+     {
+      "classes": {
+       "Q541947": "anthem",
+       "Q484692": "hymn",
+       "Q23691": "national anthem"
+      }
+     }
+    ]
+   }
+  ],
+  "film": [
+   {
+    "id": "films",
+    "en": "Films",
+    "es": "Películas",
+    "any": [
+     {
+      "seeds": [
+       "film.films"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "tv",
+    "en": "Television",
+    "es": "Televisión",
+    "any": [
+     {
+      "seeds": [
+       "film.tv"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "directors",
+    "en": "Directors & producers",
+    "es": "Directores y productores",
+    "any": [
+     {
+      "seeds": [
+       "film.directors"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "actors",
+    "en": "Actors",
+    "es": "Actores",
+    "any": [
+     {
+      "seeds": [
+       "film.actors",
+       "film.comedy"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "animation",
+    "en": "Animation",
+    "es": "Animación",
+    "in": [
+     "film",
+     "art"
+    ],
+    "any": [
+     {
+      "classes": {
+       "Q202866": "animated film",
+       "Q581714": "animated series",
+       "Q117467246": "animated television series",
+       "Q1107": "anime",
+       "Q627603": "cartoon"
+      }
+     },
+     {
+      "occupations": {
+       "Q266569": "animator"
+      }
+     }
+    ]
+   },
+   {
+    "id": "characters",
+    "en": "Characters",
+    "es": "Personajes",
+    "in": [
+     "film",
+     "literature",
+     "games"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "film.characters",
+       "literature.characters"
+      ]
+     }
+    ]
+   }
+  ],
+  "sports": [
+   {
+    "id": "football",
+    "en": "Football",
+    "es": "Fútbol",
+    "any": [
+     {
+      "seeds": [
+       "sports.football"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "olympics",
+    "en": "The Olympics",
+    "es": "Los Juegos Olímpicos",
+    "any": [
+     {
+      "classes": {
+       "Q5389": "Olympic Games",
+       "Q135976384": "Summer Olympic Games edition",
+       "Q137592217": "Winter Olympic Games edition"
+      }
+     }
+    ]
+   },
+   {
+    "id": "cups",
+    "en": "Tournaments & cups",
+    "es": "Torneos y copas",
+    "any": [
+     {
+      "seeds": [
+       "sports.events"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "stars",
+    "en": "Sports stars",
+    "es": "Estrellas del deporte",
+    "any": [
+     {
+      "seeds": [
+       "sports.athletes",
+       "sports.football",
+       "sports.racing"
+      ]
+     },
+     {
+      "occupations": {
+       "Q937857": "association football player",
+       "Q2066131": "athlete",
+       "Q3665646": "basketball player",
+       "Q11338576": "boxer",
+       "Q12299841": "cricketer",
+       "Q378622": "racing driver",
+       "Q10843402": "swimmer",
+       "Q10833314": "tennis player"
+      }
+     }
+    ]
+   },
+   {
+    "id": "motorsport",
+    "en": "Racing & motorsport",
+    "es": "Carreras y automovilismo",
+    "any": [
+     {
+      "seeds": [
+       "sports.racing"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "sports",
+    "en": "Sports & how they're played",
+    "es": "Deportes y cómo se juegan",
+    "any": [
+     {
+      "classes": {
+       "Q877517": "ball game",
+       "Q7128792": "combat sport",
+       "Q349": "sport",
+       "Q1567764": "sport",
+       "Q216048": "team sport"
+      }
+     }
+    ]
+   },
+   {
+    "id": "venues",
+    "en": "Stadiums & venues",
+    "es": "Estadios y sedes",
+    "any": [
+     {
+      "seeds": [
+       "sports.venues"
+      ]
+     }
+    ]
+   }
+  ],
+  "games": [
+   {
+    "id": "video",
+    "en": "Video games",
+    "es": "Videojuegos",
+    "any": [
+     {
+      "seeds": [
+       "games.video"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "chars",
+    "en": "Characters & studios",
+    "es": "Personajes y estudios",
+    "any": [
+     {
+      "seeds": [
+       "games.characters"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "table",
+    "en": "Board, card & table games",
+    "es": "Juegos de mesa y de cartas",
+    "any": [
+     {
+      "seeds": [
+       "games.table"
+      ]
+     }
+    ]
+   }
+  ],
+  "religion": [
+   {
+    "id": "faiths",
+    "en": "World religions",
+    "es": "Religiones del mundo",
+    "any": [
+     {
+      "seeds": [
+       "religion.faiths"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "myths",
+    "en": "Gods & myths",
+    "es": "Dioses y mitos",
+    "in": [
+     "religion",
+     "literature"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "religion.myth"
+      ]
+     },
+     {
+      "classes": {
+       "Q178885": "deity",
+       "Q6058157": "god",
+       "Q205985": "goddess",
+       "Q9134": "mythology"
+      }
+     }
+    ]
+   },
+   {
+    "id": "scripture",
+    "en": "Sacred texts & practice",
+    "es": "Textos sagrados y práctica",
+    "any": [
+     {
+      "seeds": [
+       "religion.scripture"
+      ]
+     },
+     {
+      "classes": {
+       "Q1445650": "holiday",
+       "Q40953": "prayer",
+       "Q375011": "religious holiday",
+       "Q179461": "religious text",
+       "Q189819": "ritual"
+      }
+     }
+    ]
+   },
+   {
+    "id": "figures",
+    "en": "Prophets, saints & clergy",
+    "es": "Profetas, santos y clero",
+    "any": [
+     {
+      "occupations": {
+       "Q250867": "Catholic priest",
+       "Q29182": "bishop",
+       "Q125482": "imam",
+       "Q733786": "monk",
+       "Q42603": "priest",
+       "Q42857": "prophet",
+       "Q133485": "rabbi",
+       "Q1234713": "theologian"
+      },
+      "main": [
+       "religion"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "philosophy",
+    "en": "Philosophy",
+    "es": "Filosofía",
+    "in": [
+     "religion",
+     "society",
+     "science"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "religion.philosophy"
+      ]
+     },
+     {
+      "occupations": {
+       "Q4964182": "philosopher"
+      },
+      "main": [
+       "religion"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "places",
+    "en": "Holy places",
+    "es": "Lugares sagrados",
+    "in": [
+     "religion",
+     "places",
+     "art"
+    ],
+    "any": [
+     {
+      "classes": {
+       "Q163687": "basilica",
+       "Q4846867": "basilica",
+       "Q2977": "cathedral",
+       "Q16970": "church building",
+       "Q692581": "holy city",
+       "Q44613": "monastery",
+       "Q32815": "mosque",
+       "Q15135589": "pilgrimage site",
+       "Q697295": "shrine",
+       "Q34627": "synagogue",
+       "Q44539": "temple"
+      }
+     }
+    ]
+   }
+  ],
+  "languages": [
+   {
+    "id": "langs",
+    "en": "Languages of the world",
+    "es": "Lenguas del mundo",
+    "any": [
+     {
+      "seeds": [
+       "languages.languages"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "scripts",
+    "en": "Scripts & alphabets",
+    "es": "Escrituras y alfabetos",
+    "any": [
+     {
+      "seeds": [
+       "languages.writing"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "words",
+    "en": "Words & grammar",
+    "es": "Palabras y gramática",
+    "any": [
+     {
+      "seeds": [
+       "languages.grammar"
+      ]
+     },
+     {
+      "occupations": {
+       "Q14972848": "lexicographer",
+       "Q14467526": "linguist",
+       "Q13418253": "philologist"
+      }
+     }
+    ]
+   }
+  ],
+  "food": [
+   {
+    "id": "dishes",
+    "en": "Dishes & cuisines",
+    "es": "Platos y cocinas",
+    "any": [
+     {
+      "seeds": [
+       "food.dishes"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "drinks",
+    "en": "Drinks",
+    "es": "Bebidas",
+    "any": [
+     {
+      "seeds": [
+       "food.drinks"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "fruitveg",
+    "en": "Fruit & vegetables",
+    "es": "Frutas y verduras",
+    "in": [
+     "food",
+     "nature"
+    ],
+    "any": [
+     {
+      "classes": {
+       "Q13184": "berry",
+       "Q16128920": "berry",
+       "Q1364": "fruit",
+       "Q3314483": "fruit",
+       "Q20134": "leaf vegetable",
+       "Q11009": "nut",
+       "Q3320037": "nut",
+       "Q20136": "root vegetable",
+       "Q11004": "vegetable"
+      },
+      "not_classes": {
+       "Q12117": "cereal",
+       "Q2995529": "grain",
+       "Q736427": "staple food"
+      }
+     }
+    ]
+   },
+   {
+    "id": "ingredients",
+    "en": "Ingredients & spices",
+    "es": "Ingredientes y especias",
+    "any": [
+     {
+      "seeds": [
+       "food.ingredients"
+      ]
+     },
+     {
+      "classes": {
+       "Q2596997": "condiment",
+       "Q25403900": "food ingredient",
+       "Q207123": "herb",
+       "Q42527": "spice"
+      }
+     }
+    ]
+   },
+   {
+    "id": "farming",
+    "en": "Farming & crops",
+    "es": "Agricultura y cultivos",
+    "in": [
+     "food",
+     "nature",
+     "business"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "food.farming"
+      ]
+     },
+     {
+      "classes": {
+       "Q11451": "agriculture",
+       "Q12117": "cereal",
+       "Q235352": "crop",
+       "Q103459": "livestock"
+      }
+     }
+    ]
+   },
+   {
+    "id": "sweet",
+    "en": "Sweets & baking",
+    "es": "Dulces y repostería",
+    "any": [
+     {
+      "classes": {
+       "Q13276": "cake",
+       "Q5159627": "confectionery",
+       "Q182940": "dessert",
+       "Q2382369": "sweet dish"
+      }
+     }
+    ]
+   }
+  ],
+  "health": [
+   {
+    "id": "diseases",
+    "en": "Diseases & conditions",
+    "es": "Enfermedades y trastornos",
+    "any": [
+     {
+      "seeds": [
+       "health.conditions"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "body",
+    "en": "The human body",
+    "es": "El cuerpo humano",
+    "in": [
+     "health",
+     "science"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "health.body"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "symptoms",
+    "en": "Signs & symptoms",
+    "es": "Signos y síntomas",
+    "any": [
+     {
+      "seeds": [
+       "health.symptoms"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "medicines",
+    "en": "Medicines & treatment",
+    "es": "Medicamentos y tratamientos",
+    "any": [
+     {
+      "seeds": [
+       "health.treatment"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "mind",
+    "en": "Mental health",
+    "es": "Salud mental",
+    "in": [
+     "health",
+     "science"
+    ],
+    "any": [
+     {
+      "classes": {
+       "Q12029": "addiction",
+       "Q544006": "anxiety disorder",
+       "Q12135": "mental disorder",
+       "Q317309": "mental health",
+       "Q270673": "personality disorder"
+      }
+     }
+    ]
+   },
+   {
+    "id": "history",
+    "en": "Doctors & medical history",
+    "es": "Médicos e historia de la medicina",
+    "in": [
+     "health",
+     "science",
+     "history"
+    ],
+    "any": [
+     {
+      "seeds": [
+       "health.care"
+      ]
+     },
+     {
+      "occupations": {
+       "Q186360": "nurse",
+       "Q105186": "pharmacist",
+       "Q39631": "physician",
+       "Q211346": "psychiatrist",
+       "Q774306": "surgeon"
+      }
+     }
+    ]
+   },
+   {
+    "id": "infection",
+    "en": "Infections & pandemics",
+    "es": "Infecciones y pandemias",
+    "in": [
+     "health",
+     "history"
+    ],
+    "any": [
+     {
+      "classes": {
+       "Q727028": "bacterial infectious disease",
+       "Q44512": "epidemic",
+       "Q18123741": "infectious disease",
+       "Q12184": "pandemic",
+       "Q1928978": "viral infectious disease",
+       "Q808": "virus"
+      }
+     }
+    ]
+   }
+  ],
+  "business": [
+   {
+    "id": "companies",
+    "en": "Companies & brands",
+    "es": "Empresas y marcas",
+    "any": [
+     {
+      "seeds": [
+       "business.companies"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "founders",
+    "en": "Founders & tycoons",
+    "es": "Fundadores y magnates",
+    "any": [
+     {
+      "seeds": [
+       "business.leaders"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "money",
+    "en": "Money & markets",
+    "es": "Dinero y mercados",
+    "any": [
+     {
+      "seeds": [
+       "business.money"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "industry",
+    "en": "Economics & industry",
+    "es": "Economía e industria",
+    "any": [
+     {
+      "seeds": [
+       "business.economy"
+      ]
+     },
+     {
+      "occupations": {
+       "Q188094": "economist"
+      }
+     }
+    ]
+   }
+  ]
+ }
+}

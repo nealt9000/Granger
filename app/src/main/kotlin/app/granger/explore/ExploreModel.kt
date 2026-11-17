@@ -563,9 +563,14 @@ class SubjectViewModel(
             }
         }
         state.value = state.value?.copy(facets = cards)
+        // Lenses overlap (Napoleon leads Rulers and Wars): each card's picture comes from an article no earlier card used.
+        val used = HashSet<String>()
         for (i in cards.indices) {
             val picture = withContext(Dispatchers.IO) {
-                cards[i].examples.asSequence().mapNotNull { a -> runCatching { sources.look(a.packId, a.path) }.getOrNull()?.picture }.firstOrNull()
+                val looks = cards[i].examples.asSequence().mapNotNull { a ->
+                    runCatching { sources.look(a.packId, a.path) }.getOrNull()?.picture?.let { a.path to it }
+                }
+                (looks.firstOrNull { it.first !in used } ?: looks.firstOrNull())?.also { used += it.first }?.second
             }
             cards = cards.toMutableList().also { it[i] = it[i].copy(picture = picture) }
             state.value = state.value?.copy(facets = cards)

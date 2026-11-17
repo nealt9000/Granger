@@ -35,7 +35,7 @@ class SubjectViewModelTest {
         listOf(170583L, 0, "literature"),
     )
 
-    private fun gqid(): File = File(tmp.root, "top.gqid").also { f ->
+    private fun gqid(extraFacets: String = ""): File = File(tmp.root, "top.gqid").also { f ->
         SQLiteDatabase.openOrCreateDatabase(f, null).use { db ->
             db.execSQL("CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT NOT NULL)")
             db.execSQL("CREATE TABLE articles(path TEXT PRIMARY KEY, qid INTEGER NOT NULL, rank INTEGER NOT NULL, other TEXT) WITHOUT ROWID")
@@ -45,9 +45,9 @@ class SubjectViewModelTest {
             db.execSQL("INSERT INTO meta VALUES ('kind', 'gqid'), ('schemaVersion', '1'), ('sourceSha256', 'x')")
             articles.forEach { db.execSQL("INSERT INTO articles VALUES (?, ?, ?, NULL)", it.toTypedArray()) }
             subjects.forEach { db.execSQL("INSERT INTO subjects VALUES (?, ?, ?)", it.toTypedArray()) }
-            // Sub-categories: Hastings in Wars, Napoleon in Rulers, Rome in Empires (codes 0-2).
+            // Lenses (many per item): Hastings and Napoleon in Wars, Napoleon in Rulers, Rome in Empires (codes 0-2).
             db.execSQL("CREATE TABLE facets(facet INTEGER NOT NULL, qid INTEGER NOT NULL, PRIMARY KEY(facet, qid)) WITHOUT ROWID")
-            db.execSQL("INSERT INTO facets VALUES (0, 83224), (1, 517), (2, 2277)")
+            db.execSQL("INSERT INTO facets VALUES (0, 83224), (0, 517), (1, 517), (2, 2277)$extraFacets")
             db.execSQL(
                 "INSERT INTO meta VALUES ('facets', ?)",
                 arrayOf("""{"history":[{"id":"war","en":"Wars & battles","es":"Guerras","code":0},{"id":"rulers","en":"Rulers","es":"Gobernantes","code":1},""" +
@@ -73,10 +73,13 @@ class SubjectViewModelTest {
 
     private operator fun <T> List<T>.component6() = this[5]
 
-    private fun model(facet: String? = null, listing: Boolean = facet != null): SubjectViewModel {
-        val qids = QidIndexes(listOf(QidIndex.open(gqid(), "top")!!))
+    private fun model(
+        facet: String? = null, listing: Boolean = facet != null, look: (String, String) -> ArticleLook? = { _, _ -> null },
+        extraFacets: String = "",
+    ): SubjectViewModel {
+        val qids = QidIndexes(listOf(QidIndex.open(gqid(extraFacets), "top")!!))
         val times = TimeIndexes(listOf(TimeIndex.open(gtime(), "top")!!))
-        val sources = ExploreSources({ qids }, { times }, { _, _ -> null }, flowOf(listOf(pack("c", "History pack") to null)), { true })
+        val sources = ExploreSources({ qids }, { times }, { _, _ -> null }, flowOf(listOf(pack("c", "History pack") to null)), { true }, look = look)
         return SubjectViewModel(Subject.HISTORY, sources, books = {
             listOf(ExploreBook("gc-pp", "Pride and Prejudice", null, 170583L), ExploreBook("gc-g", "Decline and Fall", null, 2277L))
         }, facetId = facet, listing = listing)
@@ -130,8 +133,17 @@ class SubjectViewModelTest {
     @Test fun thePageCarriesItsSubCategoriesWithCountsInOrderLeavingEmptyOnesOut() {
         val ui = model().until { it.facets.isNotEmpty() }
         assertThat(ui.facets.map { it.facet.id }).containsExactly("war", "rulers", "states").inOrder()
-        assertThat(ui.facets.map { it.count }).containsExactly(1, 1, 1)
+        assertThat(ui.facets.map { it.count }).containsExactly(2, 1, 1)
+        assertThat(ui.facets[0].examples.map { it.title }).containsExactly("Napoleon", "Battle of Hastings").inOrder()
         assertThat(ui.facets[1].examples.map { it.title }).containsExactly("Napoleon")
+    }
+
+    @Test fun overlappingLensesTakeTheirPicturesFromDifferentArticlesWhenTheyCan() {
+        // Napoleon leads Wars and Rulers (Rome in Rulers too here): Wars shows Napoleon, so Rulers shows Rome; Empires has
+        // only Rome, already used, so it shows Rome anyway rather than nothing.
+        val ui = model(look = { _, path -> ArticleLook("pic:$path", null) }, extraFacets = ", (1, 2277)")
+            .until { f -> f.facets.size == 3 && f.facets.all { it.picture != null } }
+        assertThat(ui.facets.map { it.picture }).containsExactly("pic:Napoleon", "pic:Roman_Empire", "pic:Roman_Empire").inOrder()
     }
 
     @Test fun aSubCategoryListsOnlyItsArticlesWithItsOwnEras() {
