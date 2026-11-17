@@ -440,3 +440,34 @@ separates them from the cases the rule gets right.
 **Round 2 held-out:** a fresh 400 (seed 7723), 34 picks changed, none looked at before publishing. The same page,
 https://claude.ai/artifact/SdvFpPuoQLthuqniGYEe8g, now shows those 34 blind pairs and saves to `grades2`. Same bar.
 If v3 fails it too, the fallback is to ship only the parts with a clear record (rules 1, 2 and 6 plus the app's rule).
+
+### P0 round 2 result: rule v3 fails too; what survives is one narrow swap (2026-11-17)
+
+Neal graded the 34 fresh pairs (seed 7723): **new better 17, old better 15, neither 2.** Worse is 44% against a bar of
+under 10%. Swapping a drawing for a later photo is a coin flip overall, so v3 is dropped.
+
+By what the first picture was:
+
+| First picture | New better | Old better | Neither |
+|---|---|---|---|
+| A series sidebar's drawn symbol (Dharma wheel, handcuffs icon, MTV logo on a series box) | 7 | 0 | 1 |
+| An infobox flag, seal, coat of arms or map | 5 | 9 | 1 |
+| A chart, diagram or map in the text | 3 | 4 | 0 |
+| An infobox logo | 2 | 2 | 0 |
+
+The lesson: an infobox emblem or a map is the article's own chosen identity (Paraguay, Tanzania, Eurasia, the PLO),
+and the next photo down is often incidental (a battle painting, a stone tool, a campaign poster). A series sidebar's
+symbol belongs to the series, not the article, so there the first photo is better.
+
+**Rule v4** (`rule4.py`): today's rule, plus one swap. When the first usable picture is a series sidebar's drawing,
+take the first roomy JPEG photo among the first eight pictures, wide before tall; otherwise keep the first picture.
+
+Record across both graded rounds: 11 pairs, new better 9, neither 2, old better 0. It changes about 1.5% of articles
+(3 of 400, 8 of 400, 5 of 200). Caveat: the slice was chosen after seeing round 2, so only round 1's three pairs
+(2 new, 1 neither) count as an independent check. A clean confirmation would be a third fresh sample of about 800
+articles, giving roughly 12 pairs.
+
+What this means for the design: the picture problem is smaller than the mockups suggested. Today's rule gives a
+picture Neal accepts 97% of the time where the rules agree, and the drawings it picks are mostly the right identity.
+Plates must therefore be designed to carry flags, seals, logos and maps well (contain, not crop, on a paper ground),
+since no markup rule will reliably replace them.
