@@ -266,8 +266,9 @@ class ExploreViewModel(private val sources: ExploreSources) : ViewModel() {
         // Unchanged since last time (pictures aside): keep what's on screen, pictures and all.
         if (state.value?.let { shown -> withoutPictures(shown) == built } == true) return
         state.value = built
-        // Pictures second: the doors and eras show at once, then fill in.
-        state.value = withContext(Dispatchers.IO) { withPictures(built) }
+        // Pictures second: the doors and eras show at once, then fill in one by one, the page's top first (all at once
+        // took 10–14 s on a cold Pixel).
+        withContext(Dispatchers.IO) { withPictures(built) { ui -> state.value = ui } }
     }
 
     private suspend fun build(packs: List<Pair<Pack, String?>>): ExploreUi {
@@ -292,17 +293,32 @@ class ExploreViewModel(private val sources: ExploreSources) : ViewModel() {
      * Each door and era gets its own article's picture and opening sentence (History's for History, the Middle Ages' for
      * the Middle Ages), so the picture stands for the whole of it; without one, the first picture among its examples.
      */
-    private suspend fun withPictures(ui: ExploreUi): ExploreUi {
+    private suspend fun withPictures(start: ExploreUi, shown: (ExploreUi) -> Unit) {
         val qids = sources.qids()
         fun first(examples: List<ExploreArticle>) = examples.firstNotNullOfOrNull { a -> runCatching { sources.picture(a.packId, a.path) }.getOrNull() }
         fun own(items: List<Long>): ArticleLook? = items.asSequence()
             .mapNotNull { q -> qids.articlesOf(q).firstOrNull() }
             .mapNotNull { a -> runCatching { sources.look(a.packId, a.path) }.getOrNull() }
             .firstOrNull { it.picture != null }
-        return ui.copy(
-            doors = ui.doors.map { d -> own(d.subject.namesakes).let { l -> d.copy(picture = l?.picture ?: first(d.examples), lead = l?.sentence?.let(::firstSentence)) } },
-            eras = ui.eras.map { e -> own(e.era.articles).let { l -> e.copy(picture = l?.picture ?: first(e.examples), lead = l?.sentence?.let(::firstSentence)) } },
-        )
+        var ui = start
+        // The landing's order: today's subject, the blocks, then Through time, then the rest of the subjects.
+        val featured = featuredIndex(java.time.LocalDate.now().toEpochDay(), ui.doors.size)
+        val blocks = 6    // two blocks of three (ExploreScreen BLOCK)
+        val doorOrder = (listOf(featured) + ui.doors.indices.filter { it != featured }).filter { it >= 0 }
+        fun door(i: Int) {
+            val d = ui.doors[i]
+            val l = own(d.subject.namesakes)
+            ui = ui.copy(doors = ui.doors.toMutableList().also { it[i] = d.copy(picture = l?.picture ?: first(d.examples), lead = l?.sentence?.let(::firstSentence)) })
+            shown(ui)
+        }
+        doorOrder.take(1 + blocks).forEach(::door)
+        for (i in ui.eras.indices) {
+            val e = ui.eras[i]
+            val l = own(e.era.articles)
+            ui = ui.copy(eras = ui.eras.toMutableList().also { it[i] = e.copy(picture = l?.picture ?: first(e.examples), lead = l?.sentence?.let(::firstSentence)) })
+            shown(ui)
+        }
+        doorOrder.drop(1 + blocks).forEach(::door)
     }
 
     /**

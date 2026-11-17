@@ -17,13 +17,14 @@ class ArticleThumbnails(private val dir: File) {
     fun thumbnail(archive: ZimArchive, articlePath: String, html: String, targetPx: Int = TARGET_PX): String? = try {
         val imagePath = candidates(html, articlePath).firstNotNullOfOrNull { archive.resolvePath(it) } ?: return null
         val size = if (targetPx == TARGET_PX) "" else "@$targetPx"
-        val file = File(dir, "${sha1("${archive.uuid}/$imagePath$size")}.jpg")
+        // "#2": thumbnails made before transparent pictures were flattened onto white (they came out black) are remade.
+        val file = File(dir, "${sha1("${archive.uuid}/$imagePath$size#2")}.jpg")
         if (file.isFile && file.length() > 0L) {
             file.setLastModified(System.currentTimeMillis())    // last shown: the pruning keeps the ones in use
             return file.path
         }
         val bytes = archive.read(imagePath)?.bytes?.takeIf { it.isNotEmpty() } ?: return null
-        val bitmap = decode(bytes, targetPx) ?: return null
+        val bitmap = decode(bytes, targetPx)?.let(::opaque) ?: return null
         dir.mkdirs()
         val tmp = File(dir, "${file.name}.tmp")
         tmp.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 80, it) }
@@ -54,6 +55,20 @@ class ArticleThumbnails(private val dir: File) {
         if (bounds.outWidth < MIN_SIDE || bounds.outHeight < MIN_SIDE || bounds.outWidth > RailCovers.MAX_SIDE || bounds.outHeight > RailCovers.MAX_SIDE) return null
         val options = BitmapFactory.Options().apply { inSampleSize = RailCovers.sampleSize(bounds.outWidth, bounds.outHeight, targetPx) }
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
+    }
+
+    /**
+     * A JPEG has no transparency: a transparent picture (a logo, a map, a symbol on nothing) would turn black where it's
+     * clear. Flattened onto white, as Wikipedia shows it.
+     */
+    private fun opaque(bitmap: Bitmap): Bitmap {
+        if (!bitmap.hasAlpha()) return bitmap
+        val out = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
+        android.graphics.Canvas(out).apply {
+            drawColor(android.graphics.Color.WHITE)
+            drawBitmap(bitmap, 0f, 0f, null)
+        }
+        return out
     }
 
     private fun sha1(text: String): String =
