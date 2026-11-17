@@ -139,4 +139,20 @@ class QidIndexTest {
         mixed.close()
         all.close()
     }
+
+    @Test fun aSubjectSetHoldsEachItemOnceWithItsMainFlag() {
+        val en = QidIndex.open(gqid("en", top, subjects = listOf(listOf(36322L, 0, "literature"), listOf(36322L, 1, "history"), listOf(84L, 1, "history"))), "en")!!
+        val es = QidIndex.open(gqid("es", listOf(listOf("Londres", 84L, 300, "London"), listOf("Roma", 220L, 300, "Rome")),
+            subjects = listOf(listOf(84L, 1, "history"), listOf(220L, 0, "history"))), "es")!!
+        val all = QidIndexes(listOf(en, es))
+        val set = all.subjectSet("history")
+        assertThat(set.size).isEqualTo(3)
+        assertThat(36322L in set && 84L in set && 220L in set).isTrue()
+        assertThat(170583L in set).isFalse()
+        assertThat(set.isMain(220L)).isTrue()
+        assertThat(set.isMain(84L)).isFalse()
+        assertThat(all.subjectSet("music").size).isEqualTo(0)
+        all.close()
+    }
 }
+

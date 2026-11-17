@@ -47,28 +47,41 @@ data class TimeMark(
  * A pack's time index (Plan H5b, a read-only SQLite `.gtime` built by tools/timeindex). Lanes are mapped by name from the
  * file's meta, so a file built with other lanes still reads correctly, and lanes it lacks simply match nothing.
  */
-class TimeIndex private constructor(private val db: SQLiteDatabase, val packId: String, private val bits: Map<Lane, Int>) : Closeable {
+class TimeIndex private constructor(
+    private val db: SQLiteDatabase,
+    val packId: String,
+    private val bits: Map<Lane, Int>,
+    /** Only marks of these items (see [only]); null for all. */
+    private val keep: ((Long) -> Boolean)? = null,
+) : Closeable {
+
+    /**
+     * This index seen through [keep]: every list (marks, top, around, search…) holds only the items it accepts (a subject's
+     * articles, for its quiz: Plan EX Task 3). Counts and the histogram stay the whole pack's. Shares this one's file, so
+     * close only one of them.
+     */
+    fun only(keep: (Long) -> Boolean): TimeIndex = TimeIndex(db, packId, bits, keep)
 
     /** The marks overlapping [from]..[to] in any of [lanes] (all marks when empty), highest ranked first. */
     fun marks(from: Int, to: Int, lanes: Set<Lane>, limit: Int, now: Int): List<TimeMark> {
         val lane = laneFilter(lanes) ?: return emptyList()
         // Integers go into the SQL itself: Android binds arguments as text, and an expression like COALESCE(...) has no
         // column affinity to turn text back into a number, so every comparison against it would fail.
-        return query("y0 <= $to AND COALESCE(y1, CASE kind WHEN 0 THEN y0 ELSE $now END) >= $from$lane ORDER BY rank DESC LIMIT $limit")
+        return query("y0 <= $to AND COALESCE(y1, CASE kind WHEN 0 THEN y0 ELSE $now END) >= $from$lane ORDER BY rank DESC", limit)
     }
 
     /** Up to [n] marks starting nearest [year] on each side, by start year. */
     fun around(year: Int, lanes: Set<Lane>, n: Int): List<TimeMark> {
         val lane = laneFilter(lanes) ?: return emptyList()
-        val after = query("y0 >= $year$lane ORDER BY y0, rank DESC LIMIT $n")
-        val before = query("y0 < $year$lane ORDER BY y0 DESC, rank DESC LIMIT $n")
+        val after = query("y0 >= $year$lane ORDER BY y0, rank DESC", n)
+        val before = query("y0 < $year$lane ORDER BY y0 DESC, rank DESC", n)
         return before.reversed() + after
     }
 
     /** The best-known [k] marks starting within [from]..[to] (one slice of the river), highest ranked first. */
     fun top(from: Int, to: Int, lanes: Set<Lane>, k: Int): List<TimeMark> {
         val lane = laneFilter(lanes) ?: return emptyList()
-        return query("y0 >= $from AND y0 <= $to$lane ORDER BY rank DESC LIMIT $k")
+        return query("y0 >= $from AND y0 <= $to$lane ORDER BY rank DESC", k)
     }
 
     /** The items whose mark falls in [from]..[to] by [ACTIVE], in qid order, for [TimeIndexes.countActive]. */
@@ -76,12 +89,19 @@ class TimeIndex private constructor(private val db: SQLiteDatabase, val packId: 
         db.rawQuery("SELECT DISTINCT qid FROM marks WHERE $ACTIVE >= $from AND $ACTIVE <= $to ORDER BY qid", null)
 
     /** The best-known [k] marks falling in [from]..[to] by [ACTIVE], highest ranked first. */
-    fun topActive(from: Int, to: Int, k: Int): List<TimeMark> = query("$ACTIVE >= $from AND $ACTIVE <= $to ORDER BY rank DESC LIMIT $k")
+    fun topActive(from: Int, to: Int, k: Int): List<TimeMark> = query("$ACTIVE >= $from AND $ACTIVE <= $to ORDER BY rank DESC", k)
+
+    /** Every mark's (rowid, qid, [ACTIVE] year, rank), for [TimeIndexes.datedIn]. */
+    internal fun activeRows(): android.database.Cursor = db.rawQuery("SELECT rowid, qid, $ACTIVE, rank FROM marks", null)
+
+    /** The marks with these rowids (from [activeRows]), in no particular order. */
+    internal fun atRows(rows: Collection<Long>): List<TimeMark> =
+        if (rows.isEmpty()) emptyList() else query("rowid IN (${rows.joinToString(",")})", rows.size, filtered = false)
 
     /** The mark for the article at [path], if this pack has it dated. */
     fun find(path: String): TimeMark? {
         val quoted = DatabaseUtils.sqlEscapeString(path)
-        return query("path = $quoted LIMIT 1").firstOrNull()
+        return query("path = $quoted", 1).firstOrNull()
     }
 
     /** Marks whose title contains [text] (any case), best known first: the Timeline's search. */
@@ -93,7 +113,7 @@ class TimeIndex private constructor(private val db: SQLiteDatabase, val packId: 
             val pattern = "%" + w.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
             "title LIKE ${DatabaseUtils.sqlEscapeString(pattern)} ESCAPE '\\'"
         }
-        return query("$like$lane ORDER BY rank DESC LIMIT $limit")
+        return query("$like$lane ORDER BY rank DESC", limit)
     }
 
     /** The latest start year here, or null for an empty file. */
@@ -129,10 +149,17 @@ class TimeIndex private constructor(private val db: SQLiteDatabase, val packId: 
         return " AND lanes & $mask != 0"
     }
 
-    private fun query(where: String): List<TimeMark> =
-        db.rawQuery("SELECT qid, path, title, kind, y0, md0, y1, md1, prec, lanes, rank FROM marks WHERE $where", null).use { c ->
+    /**
+     * Up to [limit] marks matching [where] (which may end in ORDER BY). Seen through [keep], the rows are read in order and
+     * the first [limit] it accepts are kept, as a LIMIT can't know which those are.
+     */
+    private fun query(where: String, limit: Int, filtered: Boolean = true): List<TimeMark> {
+        val keep = keep.takeIf { filtered }
+        val sql = "SELECT qid, path, title, kind, y0, md0, y1, md1, prec, lanes, rank FROM marks WHERE $where" + if (keep == null) " LIMIT $limit" else ""
+        return db.rawQuery(sql, null).use { c ->
             buildList {
-                while (c.moveToNext()) {
+                while (size < limit && c.moveToNext()) {
+                    if (keep != null && !keep(c.getLong(0))) continue
                     val mask = c.getLong(9)
                     add(
                         TimeMark(
@@ -148,6 +175,7 @@ class TimeIndex private constructor(private val db: SQLiteDatabase, val packId: 
                 }
             }
         }
+    }
 
     companion object {
         /**
@@ -250,6 +278,45 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
     fun topActive(from: Int, to: Int, k: Int): List<TimeMark> =
         merge(indexes.map { it.topActive(from, to, k) }).sortedByDescending { it.rank }.take(k)
 
+    /** These indexes seen through [keep] (see [TimeIndex.only]): a subject's quiz draws only its articles. */
+    fun only(keep: (Long) -> Boolean): TimeIndexes = TimeIndexes(indexes.map { it.only(keep) })
+
+    /**
+     * The dated items of [set], each once (its first pack's mark, in preference order), with its [TimeIndex.ACTIVE] year
+     * and rank: a subject's eras and its oldest-first list (Plan EX Task 3). One pass over each pack's marks; the result is
+     * a few primitive arrays, so Top 1M's History (~150k dated) stays a couple of MB.
+     */
+    fun datedIn(set: SubjectSet): SubjectTime {
+        val seen = java.util.BitSet(set.size)
+        val pack = IntArrayList()
+        val row = LongArrayList()
+        val qid = LongArrayList()
+        val year = IntArrayList()
+        val rank = IntArrayList()
+        indexes.forEachIndexed { p, index ->
+            index.activeRows().use { c ->
+                while (c.moveToNext()) {
+                    val q = c.getLong(1)
+                    val i = set.indexOf(q)
+                    if (i < 0 || seen.get(i)) continue
+                    seen.set(i)
+                    pack.add(p); row.add(c.getLong(0)); qid.add(q); year.add(c.getInt(2)); rank.add(c.getInt(3))
+                }
+            }
+        }
+        val n = qid.size
+        return SubjectTime(pack.toArray(), row.toArray(), qid.toArray(), year.toArray(), rank.toArray(), BooleanArray(n) { set.isMain(qid[it]) })
+    }
+
+    /** The marks of [items] (indexes into [time]), in that order. */
+    fun marksOf(time: SubjectTime, items: List<Int>): List<TimeMark> {
+        val found = HashMap<Long, TimeMark>()
+        items.groupBy { time.pack[it] }.forEach { (p, its) ->
+            indexes.getOrNull(p)?.atRows(its.map { time.row[it] })?.forEach { found[it.qid] = it }
+        }
+        return items.mapNotNull { found[time.qid[it]] }
+    }
+
     /** The latest year any pack has a mark starting in. */
     fun latestYear(): Int? = indexes.mapNotNull { it.latestYear() }.maxOrNull()
 
@@ -264,6 +331,52 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
         val seen = HashSet<Long>()
         return lists.flatten().filter { seen.add(it.qid) }
     }
+}
+
+/**
+ * A subject's dated items ([TimeIndexes.datedIn]): item i is [qid]\[i], placed in [year]\[i] by [TimeIndex.ACTIVE], with its
+ * [rank] and whether the subject is its [main] one; [pack] and [row] find its mark again.
+ */
+class SubjectTime internal constructor(
+    internal val pack: IntArray,
+    internal val row: LongArray,
+    val qid: LongArray,
+    val year: IntArray,
+    val rank: IntArray,
+    val main: BooleanArray,
+) {
+    val size: Int get() = qid.size
+
+    /** How many fall in [from]..[to]. */
+    fun count(from: Int, to: Int): Int = year.count { it in from..to }
+
+    /**
+     * The items in [from]..[to]: [oldest] by year (best known first within one), else main subject first, then best known
+     * (as the subject page's whole list is).
+     */
+    fun order(from: Int, to: Int, oldest: Boolean): List<Int> {
+        val its = (0 until size).filter { year[it] in from..to }
+        return if (oldest) its.sortedWith(compareBy<Int> { year[it] }.thenByDescending { rank[it] }.thenBy { qid[it] })
+        else its.sortedWith(compareByDescending<Int> { main[it] }.thenByDescending { rank[it] }.thenBy { qid[it] })
+    }
+}
+
+/** A growable list of ints without boxing, for one pass over a big index. */
+internal class IntArrayList {
+    private var a = IntArray(64)
+    var size = 0
+        private set
+    fun add(v: Int) { if (size == a.size) a = a.copyOf(size * 2); a[size++] = v }
+    fun toArray(): IntArray = a.copyOf(size)
+}
+
+internal class LongArrayList {
+    private var a = LongArray(64)
+    var size = 0
+        private set
+    fun add(v: Long) { if (size == a.size) a = a.copyOf(size * 2); a[size++] = v }
+    operator fun get(i: Int): Long = a[i]
+    fun toArray(): LongArray = a.copyOf(size)
 }
 
 /** How many marks start in each year, by lane mix, held in memory so the river can shade density at any zoom. */

@@ -81,13 +81,40 @@ class ExploreScreenTest {
     @Test fun aSubjectListsItsPacksThenItsArticlesAndPagesOn() {
         var more = 0
         val ui = SubjectUi(Subject.FOOD, 658, listOf(a("Pizza"), a("Coffee")), listOf(pack("c", "based.cooking")), more = true)
-        compose.setContent { SubjectContent(ui, actions) { more++ } }
+        compose.setContent { SubjectContent(ui, actions, SubjectActions(onMore = { more++ })) }
         compose.onNodeWithText("658 topics").assertExists()
         compose.onNodeWithText("based.cooking").performClick()
         compose.onNodeWithText("Coffee").performClick()
         compose.onNodeWithText("Show more").performClick()
         assertThat(calls).containsExactly("pack:c", "article:top/Coffee").inOrder()
         assertThat(more).isEqualTo(1)
+    }
+
+    @Test fun aSubjectsErasSortBooksWanderAndQuizLeadOn() {
+        val napoleon = app.granger.core.library.TimeMark(517L, "top", "Napoleon", "Napoleon", app.granger.core.library.TimeKind.LIFE, 1769, 0, 1821, null, 9, emptySet(), 300)
+        val ui = SubjectUi(
+            Subject.HISTORY, 4_210, listOf(napoleon.toExplore()), emptyList(), more = false,
+            eras = listOf(Era.ANCIENT to 12, Era.C19 to 340), dated = 352, era = Era.C19, sort = SubjectSort.OLDEST,
+            books = listOf(ExploreBook("gc-g", "Decline and Fall", null, 2277L)),
+        )
+        val seen = mutableListOf<String>()
+        compose.setContent {
+            SubjectContent(ui, actions, SubjectActions(
+                onEra = { seen += "era:${it?.name}" }, onSort = { seen += "sort:${it.name}" }, onWander = { seen += "wander" },
+                onQuiz = { seen += "quiz" }, onOpenBook = { seen += "book:$it" },
+            ))
+        }
+        compose.onNodeWithText("4,210 topics · 352 dated").assertExists()
+        compose.onNodeWithText("The 1800s · 340").assertExists()
+        compose.onNodeWithText("Articles · The 1800s").assertExists()
+        compose.onNodeWithText("1769 – 1821", substring = true).assertExists()
+        compose.onNodeWithTag(SubjectTags.ALL_ERAS).performClick()
+        compose.onNodeWithTag(SubjectTags.era(Era.ANCIENT)).performClick()
+        compose.onNodeWithTag(SubjectTags.sort(SubjectSort.LINKED)).performClick()
+        compose.onNodeWithTag(SubjectTags.WANDER).performClick()
+        compose.onNodeWithTag(SubjectTags.QUIZ).performClick()
+        compose.onNodeWithTag(SubjectTags.book("gc-g")).performClick()
+        assertThat(seen).containsExactly("era:null", "era:ANCIENT", "sort:LINKED", "wander", "quiz", "book:gc-g").inOrder()
     }
 
     @Test fun anErasExamplesLeaveOutPlacesAndCreatures() {

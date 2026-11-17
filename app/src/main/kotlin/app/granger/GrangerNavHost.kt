@@ -411,7 +411,7 @@ internal fun railToolOf(
         else -> RailTool.LIBRARY
     }
     destination.hasRoute<BrowseRoute>() || destination.hasRoute<ReaderRoute>() ||
-        destination.hasRoute<ExploreRoute>() || destination.hasRoute<SubjectRoute>() -> RailTool.BROWSE
+        destination.hasRoute<ExploreRoute>() || destination.hasRoute<SubjectRoute>() || destination.hasRoute<SubjectGamesRoute>() -> RailTool.BROWSE
     destination.hasRoute<BookRoute>() -> RailTool.LIBRARY
     destination.hasRoute<GetMoreRoute>() && getMoreFor == GetMoreFor.LISTEN -> RailTool.LISTEN
     destination.hasRoute<ArchiveRoute>() -> if (archiveKind == null || archiveKind == ArchiveKind.TEXTS) RailTool.LIBRARY else RailTool.LISTEN
@@ -433,6 +433,9 @@ internal fun railToolOf(
 
 /** One subject opened from Explore (Plan EX): [subject] is its subjects.json id. */
 @Serializable data class SubjectRoute(val subject: String)
+
+/** A subject's quiz (Plan EX Task 3): the Games screen, dealing only that subject's dated articles. */
+@Serializable data class SubjectGamesRoute(val subject: String)
 
 /** Listen's home (Plan U2 Decision 4): the Now playing card and the Music and Audiobooks shelves. The tool's landing. */
 @Serializable object ListenRoute
@@ -739,6 +742,28 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         mixed = mixed,
         start = start,
     )
+
+    /**
+     * A subject's quiz (Plan EX Task 3): the same games, dealt only from the subject's dated articles; its own count and
+     * best runs, kept apart from the main games'.
+     */
+    fun subjectGameModel(scope: kotlinx.coroutines.CoroutineScope, thumbs: ArticleThumbnails, subject: String): GameModel {
+        var set: app.granger.core.library.SubjectSet? = null
+        return GameModel(
+            scope = scope,
+            indexes = {
+                val s = set ?: container.referenceLinks.qidIndexes().subjectSet(subject).also { set = it }
+                timeIndexes().only { it in s }
+            },
+            picture = { packId, path ->
+                container.library.archive(packId)?.let { archive ->
+                    archive.read(path)?.let { thumbs.thumbnail(archive, path, String(it.bytes, Charsets.UTF_8)) }
+                }
+            },
+            store = GameStore.Prefs(appContext.getSharedPreferences("games_$subject", android.content.Context.MODE_PRIVATE)),
+            mixed = false,
+        )
+    }
 
     // Send feedback and the crash log (Plan F1 part 2): one sheet, opened from Settings → About or Home's crash line.
     val activityContext = LocalContext.current
@@ -1058,7 +1083,42 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             composable<SubjectRoute> { backStackEntry ->
                 val id = backStackEntry.toRoute<SubjectRoute>().subject
                 val subject = app.granger.explore.Subject.of(id) ?: app.granger.explore.Subject.HISTORY
-                SubjectScreen(viewModel(key = "subject:$id") { SubjectViewModel(subject, exploreSources) }, exploreActions)
+                SubjectScreen(
+                    viewModel(key = "subject:$id") {
+                        SubjectViewModel(subject, exploreSources, books = {
+                            container.referenceLinks.booksWithWorks().map { (b, work) -> app.granger.explore.ExploreBook(b.bookId, b.title, b.cover, work) }
+                        })
+                    },
+                    exploreActions,
+                    app.granger.explore.SubjectActions(
+                        onWanderAt = { packId, path ->
+                            container.wanderFrom.value = packId to path
+                            if (!nav.popBackStack<HomeRoute>(inclusive = false)) nav.navigate(HomeRoute) { launchSingleTop = true }
+                        },
+                        onQuiz = { nav.navigate(SubjectGamesRoute(subject.id)) { launchSingleTop = true } },
+                        onOpenBook = ::openLinkedBook,
+                    ),
+                )
+            }
+            composable<SubjectGamesRoute> { backStackEntry ->
+                val id = backStackEntry.toRoute<SubjectGamesRoute>().subject
+                val subject = app.granger.explore.Subject.of(id) ?: app.granger.explore.Subject.HISTORY
+                val thumbs = remember { ArticleThumbnails(File(appContext.cacheDir, "home-thumbs")) }
+                val model = viewModel(key = "subject-games:$id") {
+                    GamesViewModel { scope -> subjectGameModel(scope, thumbs, id) }
+                }.model
+                val ui by model.ui.collectAsStateWithLifecycle()
+                GamesScreen(
+                    ui, remember(model) { gameActions(model) },
+                    title = stringResource(R.string.explore_subject_quiz_title, stringResource(subject.label)),
+                    onOpen = { mark ->
+                        scope.launch {
+                            val tabId = container.sessions.openTab(mark.packId, mark.path, mark.title)
+                            container.sessions.tab(tabId)?.let { nav.showTab(it) }
+                        }
+                    },
+                    onBack = { nav.popBackStack() },
+                )
             }
             composable<BrowseRoute> {
                 BrowseScreen(

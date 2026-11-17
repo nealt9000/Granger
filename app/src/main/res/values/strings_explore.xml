@@ -63,4 +63,24 @@
     <string name="explore_era_wars_span">two world wars</string>
     <string name="explore_era_recent">Since 1946</string>
     <string name="explore_era_recent_span">1946 – now</string>
+    <!-- A subject opened (Plan EX Task 3). -->
+    <string name="explore_subject_counts">%1$s · %2$s</string>
+    <plurals name="explore_dated">
+        <item quantity="one">%1$s dated</item>
+        <item quantity="other">%1$s dated</item>
+    </plurals>
+    <string name="explore_subject_wander">Wander</string>
+    <string name="explore_subject_quiz">Quiz</string>
+    <string name="explore_subject_all_eras">All eras</string>
+    <string name="explore_subject_era_chip">%1$s · %2$s</string>
+    <string name="explore_subject_sort">Order</string>
+    <string name="explore_subject_sort_linked">Most linked</string>
+    <string name="explore_subject_sort_oldest">Oldest first</string>
+    <plurals name="explore_subject_books">
+        <item quantity="one">In your books (%1$s)</item>
+        <item quantity="other">In your books (%1$s)</item>
+    </plurals>
+    <string name="explore_subject_articles">Articles</string>
+    <string name="explore_subject_in_era">Articles · %1$s</string>
+    <string name="explore_subject_quiz_title">%1$s quiz</string>
 </resources>

@@ -66,6 +66,10 @@ class QidIndex private constructor(private val db: SQLiteDatabase, val packId: S
     internal fun qidsWith(subject: String): android.database.Cursor? = if (!hasSubjects) null else
         db.rawQuery("SELECT DISTINCT qid FROM subjects WHERE subject = ? ORDER BY qid", arrayOf(subject))
 
+    /** The items with [subject] and whether it's their main one (ord 0), in qid order, for [QidIndexes.subjectSet]. */
+    internal fun qidsAndMain(subject: String): android.database.Cursor? = if (!hasSubjects) null else
+        db.rawQuery("SELECT qid, MIN(ord) FROM subjects WHERE subject = ? GROUP BY qid ORDER BY qid", arrayOf(subject))
+
     /** Every item here, in qid order. */
     internal fun allQids(): android.database.Cursor = db.rawQuery("SELECT DISTINCT qid FROM articles ORDER BY qid", null)
 
@@ -181,7 +185,47 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
             .drop(offset).take(limit)
     }
 
+    /**
+     * Every item with [subject] across the packs, each once, as a sorted set (Plan EX Task 3: a subject's eras, its quiz).
+     * An item's subjects are the same in every pack, so its main flag is too.
+     */
+    fun subjectSet(subject: String): SubjectSet {
+        val cursors = indexes.mapNotNull { it.qidsAndMain(subject) }.filter { c -> c.moveToFirst().also { if (!it) c.close() } }.toMutableList()
+        val qids = LongArrayList()
+        val main = java.util.BitSet()
+        while (cursors.isNotEmpty()) {
+            val low = cursors.minOf { it.getLong(0) }
+            var isMain = false
+            val each = cursors.iterator()
+            while (each.hasNext()) {
+                val c = each.next()
+                if (c.getLong(0) != low) continue
+                if (c.getInt(1) == 0) isMain = true
+                if (!c.moveToNext()) { c.close(); each.remove() }
+            }
+            if (isMain) main.set(qids.size)
+            qids.add(low)
+        }
+        return SubjectSet(qids.toArray(), main)
+    }
+
     override fun close() = indexes.forEach { it.close() }
+}
+
+/** A subject's items ([QidIndexes.subjectSet]), sorted, with which have it as their main subject. */
+class SubjectSet internal constructor(private val qids: LongArray, private val main: java.util.BitSet) {
+    val size: Int get() = qids.size
+
+    /** The item's place in the set, or a negative number when it isn't in it. */
+    fun indexOf(qid: Long): Int = java.util.Arrays.binarySearch(qids, qid)
+
+    operator fun contains(qid: Long): Boolean = indexOf(qid) >= 0
+
+    fun isMain(qid: Long): Boolean = indexOf(qid).let { it >= 0 && main.get(it) }
+
+    companion object {
+        val EMPTY = SubjectSet(LongArray(0), java.util.BitSet())
+    }
 }
 
 /** The meta table every sidecar keeps (Linked Library spec §5.1; tools/sidecar/meta.py writes it). */

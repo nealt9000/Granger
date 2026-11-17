@@ -52,6 +52,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import app.granger.R
 import app.granger.shell.rememberRailCover
 import java.text.NumberFormat
@@ -234,15 +241,54 @@ private fun EraLine(row: EraRow, first: Boolean, last: Boolean, onOpen: () -> Un
 }
 
 @Composable
-fun SubjectScreen(viewModel: SubjectViewModel, actions: ExploreActions) {
+fun SubjectScreen(viewModel: SubjectViewModel, actions: ExploreActions, subjectActions: SubjectActions) {
     val ui by viewModel.ui.collectAsStateWithLifecycle()
-    SubjectContent(ui, actions, viewModel::more)
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    SubjectContent(
+        ui, actions,
+        SubjectActions(
+            onMore = viewModel::more,
+            onEra = viewModel::choose,
+            onSort = viewModel::sort,
+            onWander = { scope.launch { viewModel.wanderStart()?.let { subjectActions.onWanderAt(it.packId, it.path) } } },
+            onQuiz = subjectActions.onQuiz,
+            onOpenBook = subjectActions.onOpenBook,
+            onWanderAt = subjectActions.onWanderAt,
+            picture = viewModel::picture,
+        ),
+    )
 }
 
-/** One subject opened: the packs on it, then its articles most-linked first, each opening its topic page. */
+/** What a subject page's own controls do; [SubjectScreen] fills the paging and filters from its view model. */
+class SubjectActions(
+    val onMore: () -> Unit = {},
+    val onEra: (Era?) -> Unit = {},
+    val onSort: (SubjectSort) -> Unit = {},
+    val onWander: () -> Unit = {},
+    /** Wander from an article: Home's Wander, started there. */
+    val onWanderAt: (packId: String, path: String) -> Unit = { _, _ -> },
+    val onQuiz: () -> Unit = {},
+    val onOpenBook: (bookId: String) -> Unit = {},
+    /** An article's cached picture; null when it has none. Blocking. */
+    val picture: (ExploreArticle) -> String? = { null },
+)
+
+object SubjectTags {
+    const val WANDER = "subject_wander"
+    const val QUIZ = "subject_quiz"
+    const val ALL_ERAS = "subject_era_all"
+    fun era(era: Era) = "subject_era_${era.name.lowercase()}"
+    fun sort(sort: SubjectSort) = "subject_sort_${sort.name.lowercase()}"
+    fun book(id: String) = "subject_book_$id"
+}
+
+/**
+ * One subject opened (Plan EX Task 3): Wander and Quiz, its eras as chips with counts, most linked or oldest first, In
+ * your books, the packs on it, then its articles, each opening its topic page.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SubjectContent(ui: SubjectUi?, actions: ExploreActions, onMore: () -> Unit) {
+fun SubjectContent(ui: SubjectUi?, actions: ExploreActions, subject: SubjectActions = SubjectActions()) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -252,37 +298,111 @@ fun SubjectContent(ui: SubjectUi?, actions: ExploreActions, onMore: () -> Unit) 
         },
     ) { padding ->
         val loaded = ui ?: return@Scaffold
+        val words = app.granger.home.yearWords()
         LazyColumn(Modifier.padding(padding).fillMaxSize()) {
             if (loaded.count > 0) {
                 item(key = "count") {
-                    Text(
-                        pluralStringResource(R.plurals.explore_topics, loaded.count, count(loaded.count)),
-                        style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                    )
+                    val all = pluralStringResource(R.plurals.explore_topics, loaded.count, count(loaded.count))
+                    val text = if (loaded.dated > 0) stringResource(R.string.explore_subject_counts, all, pluralStringResource(R.plurals.explore_dated, loaded.dated, count(loaded.dated))) else all
+                    Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 16.dp))
+                }
+            }
+            if (loaded.canWander || loaded.canQuiz) {
+                item(key = "do") {
+                    Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (loaded.canWander) FilledTonalButton(onClick = subject.onWander, modifier = Modifier.testTag(SubjectTags.WANDER)) { Text(stringResource(R.string.explore_subject_wander)) }
+                        if (loaded.canQuiz) FilledTonalButton(onClick = subject.onQuiz, modifier = Modifier.testTag(SubjectTags.QUIZ)) { Text(stringResource(R.string.explore_subject_quiz)) }
+                    }
+                }
+            }
+            if (loaded.eras.isNotEmpty()) {
+                item(key = "eras") {
+                    LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        item(key = "all") {
+                            FilterChip(loaded.era == null, onClick = { subject.onEra(null) }, label = { Text(stringResource(R.string.explore_subject_all_eras)) },
+                                modifier = Modifier.testTag(SubjectTags.ALL_ERAS))
+                        }
+                        items(loaded.eras, key = { it.first.name }) { (era, n) ->
+                            FilterChip(loaded.era == era, onClick = { subject.onEra(era) },
+                                label = { Text(stringResource(R.string.explore_subject_era_chip, stringResource(era.label), count(n))) },
+                                modifier = Modifier.testTag(SubjectTags.era(era)))
+                        }
+                    }
+                }
+                item(key = "sort") {
+                    Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.explore_subject_sort), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        for (s in SubjectSort.entries) {
+                            FilterChip(loaded.sort == s, onClick = { subject.onSort(s) },
+                                label = { Text(stringResource(if (s == SubjectSort.LINKED) R.string.explore_subject_sort_linked else R.string.explore_subject_sort_oldest)) },
+                                modifier = Modifier.testTag(SubjectTags.sort(s)))
+                        }
+                    }
+                }
+            }
+            if (loaded.books.isNotEmpty()) {
+                item(key = "books-head") {
+                    SectionHead(pluralStringResource(R.plurals.explore_subject_books, loaded.books.size, count(loaded.books.size)), Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp))
+                }
+                item(key = "books") {
+                    LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        items(loaded.books.take(BOOKS_SHOWN), key = { it.bookId }) { BookCover(it) { subject.onOpenBook(it.bookId) } }
+                    }
                 }
             }
             if (loaded.packs.isNotEmpty()) {
-                item(key = "packs-head") { SectionHead(stringResource(R.string.explore_subject_packs), Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp)) }
+                item(key = "packs-head") { SectionHead(stringResource(R.string.explore_subject_packs), Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)) }
                 items(loaded.packs, key = { "pack:" + it.id }) { pack ->
                     ListItem(headlineContent = { Text(pack.title) }, modifier = Modifier.clickable { actions.onOpenPack(pack.id) })
                 }
-                item(key = "packs-divider") { HorizontalDivider(Modifier.padding(top = 8.dp)) }
             }
-            if (loaded.articles.isEmpty() && loaded.packs.isEmpty()) {
+            if (loaded.articles.isNotEmpty()) {
+                item(key = "articles-head") {
+                    val head = loaded.era?.let { stringResource(R.string.explore_subject_in_era, stringResource(it.label)) } ?: stringResource(R.string.explore_subject_articles)
+                    SectionHead(head, Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp))
+                }
+            }
+            if (loaded.articles.isEmpty() && loaded.packs.isEmpty() && !loaded.loading) {
                 item(key = "empty") { Text(stringResource(R.string.explore_nothing_here), modifier = Modifier.padding(16.dp)) }
             }
             items(loaded.articles, key = { "a:" + it.packId + "/" + it.path }) { a ->
-                ListItem(
-                    headlineContent = { Text(a.title, maxLines = 2, overflow = TextOverflow.Ellipsis) },
-                    modifier = Modifier.clickable { actions.onOpenArticle(a.packId, a.path, a.title) },
-                )
+                ArticleRow(a, words, subject.picture) { actions.onOpenArticle(a.packId, a.path, a.title) }
             }
             if (loaded.more) {
                 item(key = "more") {
-                    TextButton(onClick = onMore, modifier = Modifier.padding(start = 8.dp)) { Text(stringResource(R.string.explore_show_more)) }
+                    TextButton(onClick = subject.onMore, modifier = Modifier.padding(start = 8.dp)) { Text(stringResource(R.string.explore_show_more)) }
                 }
             }
         }
+    }
+}
+
+/** Covers shown in In your books; the shelf holds the rest. */
+private const val BOOKS_SHOWN = 24
+
+@Composable
+private fun ArticleRow(a: ExploreArticle, words: app.granger.home.YearWords, pictureOf: (ExploreArticle) -> String?, onOpen: () -> Unit) {
+    val path by androidx.compose.runtime.produceState<String?>(a.picture, a) { if (value == null) value = withContext(Dispatchers.IO) { pictureOf(a) } }
+    val picture = rememberRailCover(path, 48.dp)
+    ListItem(
+        headlineContent = { Text(a.title, maxLines = 2, overflow = TextOverflow.Ellipsis) },
+        supportingContent = a.mark?.let { m -> { Text(words.of(m)) } },
+        leadingContent = {
+            Box(Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHighest)) {
+                if (picture != null) Image(picture, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+            }
+        },
+        modifier = Modifier.clickable(onClick = onOpen),
+    )
+}
+
+@Composable
+private fun BookCover(book: ExploreBook, onOpen: () -> Unit) {
+    val cover = rememberRailCover(book.cover, 120.dp)
+    Column(Modifier.width(84.dp).clickable(onClick = onOpen).testTag(SubjectTags.book(book.bookId))) {
+        Box(Modifier.width(84.dp).height(120.dp).clip(RoundedCornerShape(6.dp)).background(MaterialTheme.colorScheme.surfaceContainerHighest)) {
+            if (cover != null) Image(cover, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+        }
+        Text(book.title, style = MaterialTheme.typography.labelMedium, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp))
     }
 }

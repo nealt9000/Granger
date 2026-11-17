@@ -95,6 +95,10 @@ class ReferenceLinksSource(
         fresh
     }
 
+    /** The shelf's books with a Wikidata work (from their links files), for a subject's In your books (Plan EX Task 3). */
+    suspend fun booksWithWorks(): List<Pair<LibraryBook, Long>> =
+        synced().works().mapNotNull { (id, work) -> bookOf(id)?.let { it to work } }
+
     /** [index] brought into step with the installed links files (a no-op when they haven't changed). */
     private suspend fun synced(): MentionIndex {
         val t0 = System.nanoTime()

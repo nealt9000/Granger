@@ -7,9 +7,12 @@ import app.granger.R
 import app.granger.core.library.Pack
 import app.granger.core.library.QidArticle
 import app.granger.core.library.QidIndexes
+import app.granger.core.library.SubjectTime
 import app.granger.core.library.TimeIndexes
 import app.granger.core.library.TimeMark
+import kotlin.random.Random
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -78,8 +81,8 @@ enum class Era(val from: Int, val to: Int, @StringRes val label: Int, @StringRes
     RECENT(1946, Int.MAX_VALUE / 2, R.string.explore_era_recent, R.string.explore_era_recent_span),
 }
 
-/** An article Explore shows: where to open it, its title and (when loaded) its picture. */
-data class ExploreArticle(val packId: String, val path: String, val title: String, val picture: String? = null)
+/** An article Explore shows: where to open it, its title, (when loaded) its picture, and its dates when it has them. */
+data class ExploreArticle(val packId: String, val path: String, val title: String, val picture: String? = null, val mark: TimeMark? = null)
 
 /** A subject's door: how many articles it holds across the packs, its best-known three, and the packs on it. */
 data class SubjectDoor(val subject: Subject, val count: Int, val examples: List<ExploreArticle>, val packs: List<Pack>, val picture: String? = null)
@@ -107,7 +110,7 @@ fun QidArticle.toExplore() = ExploreArticle(packId, path, titleOf(path))
 fun titleOf(path: String) = path.substringAfterLast('/').replace('_', ' ')
 
 /** A time mark as Explore shows it. */
-fun TimeMark.toExplore() = ExploreArticle(packId, path, title)
+fun TimeMark.toExplore() = ExploreArticle(packId, path, title, mark = this)
 
 /**
  * The doors (pure, for tests): each subject with any article or pack, the most articles first ([Subject] order breaking
@@ -213,40 +216,153 @@ class ExploreViewModel(private val sources: ExploreSources) : ViewModel() {
     }
 }
 
-/** One subject opened (Plan EX Task 3 builds it out): its articles most-linked first, a page at a time, and its packs. */
-data class SubjectUi(val subject: Subject, val count: Int, val articles: List<ExploreArticle>, val packs: List<Pack>, val more: Boolean)
+/** A book on the shelf with a Wikidata work (from its links file): In your books on a subject page. */
+data class ExploreBook(val bookId: String, val title: String, val cover: String?, val work: Long)
 
-class SubjectViewModel(private val subject: Subject, private val sources: ExploreSources) : ViewModel() {
+/** The order a subject's articles take: most linked (main subject first), or oldest first (dated ones only). */
+enum class SubjectSort { LINKED, OLDEST }
+
+/**
+ * One subject opened (Plan EX Task 3): its eras with counts, its articles most linked or oldest first, a page at a time,
+ * In your books, its packs, and Wander and Quiz. [eras] and [dated] arrive after the articles (one pass over the time
+ * indexes); [era] null is every era.
+ */
+data class SubjectUi(
+    val subject: Subject,
+    val count: Int,
+    val articles: List<ExploreArticle>,
+    val packs: List<Pack>,
+    val more: Boolean,
+    val eras: List<Pair<Era, Int>> = emptyList(),
+    val dated: Int = 0,
+    val era: Era? = null,
+    val sort: SubjectSort = SubjectSort.LINKED,
+    val books: List<ExploreBook> = emptyList(),
+    /** Still reading this view's articles (a chip or sort just changed). */
+    val loading: Boolean = false,
+) {
+    /** Enough dated articles for a run of the time games. */
+    val canQuiz: Boolean get() = dated >= SubjectViewModel.QUIZ_MIN
+    val canWander: Boolean get() = count > 0
+}
+
+/** What a subject page reads, beyond the landing's sources: the books on the shelf that have a Wikidata work. */
+class SubjectViewModel(
+    private val subject: Subject,
+    private val sources: ExploreSources,
+    private val books: suspend () -> List<ExploreBook> = { emptyList() },
+) : ViewModel() {
     private val state = MutableStateFlow<SubjectUi?>(null)
     val ui: StateFlow<SubjectUi?> = state.asStateFlow()
+
+    /** The subject's dated items, once read; null before (the eras and the oldest-first order need it). */
+    private var time: SubjectTime? = null
+    /** The current view's order when it comes from [time] (an era chosen, or oldest first); null for most linked overall. */
+    private var order: List<Int>? = null
+    private var viewing: Job? = null
 
     init {
         viewModelScope.launch {
             sources.packs.collect { packs ->
                 val others = packs.filterNot { sources.isWikipedia(it.first) }
                     .filter { Subject.ofDomain(it.second) == subject }.map { it.first }.sortedBy { it.title.lowercase() }
-                state.value = withContext(Dispatchers.IO) {
+                val first = withContext(Dispatchers.IO) {
                     val qids = sources.qids()
                     val count = if (qids.hasSubjects) qids.subjectCounts(listOf(subject.id))[subject.id] ?: 0 else 0
                     val page = qids.topIn(subject.id, PAGE).map { it.toExplore() }
                     SubjectUi(subject, count, page, others, more = page.size < count)
                 }
+                val was = state.value
+                state.value = was?.copy(count = first.count, packs = first.packs) ?: first
+                if (was == null) launch { details() }
             }
+        }
+    }
+
+    /** The eras (one pass over the time indexes) and In your books, after the first page shows. */
+    private suspend fun details() {
+        val (t, eras) = withContext(Dispatchers.IO) {
+            val qids = sources.qids()
+            val times = sources.times()
+            if (!qids.hasSubjects || times.isEmpty) return@withContext null to emptyList()
+            val t = times.datedIn(qids.subjectSet(subject.id))
+            t to Era.entries.map { it to t.count(it.from, it.to) }.filter { it.second > 0 }
+        }
+        time = t
+        state.value = state.value?.copy(eras = eras, dated = t?.size ?: 0)
+        val shelf = withContext(Dispatchers.IO) { runCatching { inYourBooks() }.getOrDefault(emptyList()) }
+        state.value = state.value?.copy(books = shelf)
+    }
+
+    /** The shelf's books whose work has this subject, best-known work first. */
+    private suspend fun inYourBooks(): List<ExploreBook> {
+        val qids = sources.qids()
+        if (!qids.hasSubjects) return emptyList()
+        return books().filter { subject.id in qids.subjectsOf(it.work) }
+            .sortedWith(compareByDescending<ExploreBook> { b -> qids.articlesOf(b.work).maxOfOrNull { it.rank } ?: 0 }.thenBy { it.title.lowercase() })
+    }
+
+    /** Shows [era] (null: every era); choosing the one showing goes back to every era. */
+    fun choose(era: Era?) {
+        val now = state.value ?: return
+        show(if (era == now.era) null else era, now.sort)
+    }
+
+    fun sort(by: SubjectSort) {
+        val now = state.value ?: return
+        if (by != now.sort) show(now.era, by)
+    }
+
+    private fun show(era: Era?, sort: SubjectSort) {
+        val now = state.value ?: return
+        state.value = now.copy(era = era, sort = sort, loading = true)
+        viewing?.cancel()
+        viewing = viewModelScope.launch {
+            val (list, page, total) = withContext(Dispatchers.IO) {
+                val t = time
+                if (era == null && sort == SubjectSort.LINKED || t == null) {
+                    Triple(null, sources.qids().topIn(subject.id, PAGE).map { it.toExplore() }, now.count)
+                } else {
+                    val o = t.order(era?.from ?: Int.MIN_VALUE, era?.to ?: Int.MAX_VALUE, sort == SubjectSort.OLDEST)
+                    Triple(o, sources.times().marksOf(t, o.take(PAGE)).map { it.toExplore() }, o.size)
+                }
+            }
+            order = list
+            state.value = state.value?.copy(articles = page, more = page.size < total, loading = false)
         }
     }
 
     /** The next page of articles. */
     fun more() {
         val now = state.value ?: return
-        if (!now.more) return
+        if (!now.more || now.loading) return
         viewModelScope.launch {
-            val next = withContext(Dispatchers.IO) { sources.qids().topIn(subject.id, PAGE, offset = now.articles.size).map { it.toExplore() } }
+            val o = order
+            val t = time
+            val next = withContext(Dispatchers.IO) {
+                if (o != null && t != null) sources.times().marksOf(t, o.drop(now.articles.size).take(PAGE)).map { it.toExplore() }
+                else sources.qids().topIn(subject.id, PAGE, offset = now.articles.size).map { it.toExplore() }
+            }
             val all = now.articles + next
-            state.value = now.copy(articles = all, more = next.isNotEmpty() && all.size < now.count)
+            state.value = state.value?.copy(articles = all, more = next.isNotEmpty() && all.size < (o?.size ?: now.count))
         }
     }
 
+    /** A well-known article of this subject, at random, for Wander to start at; null without any. */
+    suspend fun wanderStart(random: Random = Random.Default): ExploreArticle? = withContext(Dispatchers.IO) {
+        sources.qids().topIn(subject.id, WANDER_POOL, mainOnly = true).takeIf { it.isNotEmpty() }?.random(random)?.toExplore()
+    }
+
+    /** The article's picture, cached; null when it has none. Blocking. */
+    fun picture(a: ExploreArticle): String? = runCatching { sources.picture(a.packId, a.path) }.getOrNull()
+
     companion object {
         const val PAGE = 60
+
+        /** Dated articles a subject needs before it offers Quiz (the games need a spread of years to deal from). */
+        const val QUIZ_MIN = 40
+
+        /** Wander starts among the subject's best-known articles, not its stubs. */
+        const val WANDER_POOL = 300
     }
 }

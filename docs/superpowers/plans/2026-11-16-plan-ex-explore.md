@@ -9,6 +9,11 @@
 2. **C, the map, is a view opened from A,** like the topic page's connections map. It isn't the landing.
 3. **The packs move one tap back** (Sources), and open as sites, as Browse does today. Non-Wikipedia packs become subject doors by their catalog domain (Health, Cooking & food, Knots).
 4. **No hand fixes per article.** The mockup data exposed basic misfiles (Einstein in Philosophy, Butter in Science, Reagan in Music & film). The subjects have to come right by rule and be measured, before any UI is built.
+5. **After Task 2 on the Pixel (2026-11-16):**
+   - **Rail icon:** Explore takes a compass before we ship.
+   - **The final landing** is editorial, not a grid: an asymmetric flow you read like a page, more alive, curated, with pictures that frame their subject and stand for the whole subject or topic. That's a design pass before the tester build. The Task 2 landing is its working skeleton.
+   - **Door order by size is fine** for now.
+   - **Spanish** gets looked at in its final form.
 
 ## Why the current lanes aren't enough
 The Timeline lanes (`tools/timeindex/lanes.json`) were traced item by item (2026-11-16). They have three general faults:

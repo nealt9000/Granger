@@ -1,5 +1,7 @@
 package app.granger.shell
 
+import app.granger.Features
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.getValue
@@ -142,12 +144,12 @@ class RailTest {
         assertThat(calls).containsExactly("tool:LISTEN")
     }
 
-    /** Plan U3c Decision 1: Browse, a globe, between Ask and Library; Settings stays at the foot. */
+    /** Plan U3c Decision 1: Browse, a globe, between Ask and Library; Settings stays at the foot. Explore takes a compass (Plan EX). */
     @Test fun browseSitsBetweenAskAndLibrary() {
         assertThat(RailTool.entries.map { it.text() })
             .containsExactly("Home", "Search", "Ask", BROWSE, "Library", "Listen", "Settings").inOrder()
         assertThat(RailTool.BROWSE.shown).isTrue()
-        assertThat(RailTool.BROWSE.drawable()).isEqualTo(app.granger.R.drawable.ic_browse)
+        assertThat(RailTool.BROWSE.drawable()).isEqualTo(if (Features.EXPLORE) app.granger.R.drawable.ic_explore else app.granger.R.drawable.ic_browse)
         assertThat(RailTool.entries.mapNotNull { it.drawable() }.toSet()).hasSize(5)
         shell()
         val top = { d: String -> compose.onNodeWithContentDescription(d).fetchSemanticsNode().boundsInRoot.top }

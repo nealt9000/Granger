@@ -93,6 +93,8 @@ fun GamesScreen(
     onBack: () -> Unit,
     carry: GameUi? = null,
     onContinue: () -> Unit = {},
+    /** The list's title: Games, or a subject's quiz (Plan EX Task 3). */
+    title: String? = null,
 ) {
     LaunchedEffect(Unit) { actions.onShown() }
     val run = ui.run
@@ -100,7 +102,7 @@ fun GamesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (run != null) stringResource(run.kind.label()) else stringResource(R.string.games_title)) },
+                title = { Text(if (run != null) stringResource(run.kind.label()) else title ?: stringResource(R.string.games_title)) },
                 navigationIcon = {
                     if (run != null) {
                         IconButton(onClick = actions.onEndRun, modifier = Modifier.testTag("games-to-list")) {

@@ -153,4 +153,31 @@ class TimeIndexTest {
         assertThat(all.topActive(1850, 1899, 5).map { it.path }).containsExactly("Ada_Lovelace")
         assertThat(all.topActive(1946, 2100, 5).map { it.path }).containsExactly("Living_Person")
     }
+
+    @Test fun aSubjectsDatedItemsAreCountedByEraAndListedEitherWay() {
+        val history = listOf(listOf(83224L, "Battle_of_Hastings", 0, 1066, null, bit(Lane.WARS), 80), listOf(42L, "Domesday_Book", 0, 1086, null, 0L, 40))
+        val all = TimeIndexes(listOf(TimeIndex.open(gtime("top", top), "top")!!, TimeIndex.open(gtime("history", history), "history")!!))
+        // History: Hastings (main, in both packs), Domesday (main), Rome (second); Aristotle and Ada aren't History.
+        val bits = java.util.BitSet().apply { set(0); set(2) }
+        val set = SubjectSet(longArrayOf(42L, 2277L, 83224L), bits)
+        val time = all.datedIn(set)
+        assertThat(time.size).isEqualTo(3)
+        assertThat(time.count(500, 1499)).isEqualTo(2)
+        assertThat(time.count(-3000, 499)).isEqualTo(1)
+        // Most linked, main subject first: Hastings, Domesday, then Rome though it's best known.
+        assertThat(all.marksOf(time, time.order(-3000, 2100, oldest = false)).map { it.path })
+            .containsExactly("Battle_of_Hastings", "Domesday_Book", "Roman_Empire").inOrder()
+        val oldest = all.marksOf(time, time.order(-3000, 2100, oldest = true))
+        assertThat(oldest.map { it.path }).containsExactly("Roman_Empire", "Battle_of_Hastings", "Domesday_Book").inOrder()
+        assertThat(oldest[1].packId).isEqualTo("top")   // the preferred pack's copy
+    }
+
+    @Test fun anIndexSeenThroughASubjectListsOnlyItsItems() {
+        val all = TimeIndexes(listOf(TimeIndex.open(gtime("top", top), "top")!!))
+        val people = all.only { it in setOf(868L, 7259L) }
+        assertThat(people.top(-3000, 2100, emptySet(), 10).map { it.path }).containsExactly("Aristotle", "Ada_Lovelace").inOrder()
+        assertThat(people.top(-3000, 2100, emptySet(), 1).map { it.path }).containsExactly("Aristotle")
+        assertThat(people.marks(1000, 1100, emptySet(), 10, now = 2026)).isEmpty()
+        assertThat(all.top(-3000, 2100, emptySet(), 10)).hasSize(5)   // the whole index is untouched
+    }
 }
