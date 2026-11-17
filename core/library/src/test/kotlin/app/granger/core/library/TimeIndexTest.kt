@@ -180,4 +180,19 @@ class TimeIndexTest {
         assertThat(people.marks(1000, 1100, emptySet(), 10, now = 2026)).isEmpty()
         assertThat(all.top(-3000, 2100, emptySet(), 10)).hasSize(5)   // the whole index is untouched
     }
+
+    @Test fun yearsBeyondAnIntReadWholeAndCanBeAskedFor() {
+        // The Spanish Top dates the Big Bang -13,786,999,999: read as an int it wrapped to -902 million (Pixel, 2026-11-16).
+        val deep = listOf(listOf(323L, "Big_Bang", 0, -13_786_999_999L, null, bit(Lane.SCIENCE), 200), listOf(1L, "Hádico", 1, -4_567_299_999L, -4_030_999_999L, 0L, 50))
+        val all = TimeIndexes(listOf(TimeIndex.open(gtime("deep", deep), "deep")!!))
+        val bang = all.marks(-14_000_000_000L, -13_000_000_000L, emptySet(), 5, now = 2026).single()
+        assertThat(bang.y0).isEqualTo(-13_786_999_999L)
+        assertThat(all.marks(-1_000_000_000L, 0, emptySet(), 5, now = 2026)).isEmpty()
+        assertThat(all.find("deep", "Hádico")!!.y1).isEqualTo(-4_030_999_999L)
+        assertThat(all.histogram().count(-14_000_000_000L, -13_000_000_000L, emptySet())).isEqualTo(1)
+        assertThat(all.around(-5_000_000_000L, emptySet(), 1).map { it.path }).containsExactly("Big_Bang", "Hádico").inOrder()
+        // Explore's Prehistory reaches the Big Bang (it stopped at an int's reach before).
+        assertThat(all.countActive(Long.MIN_VALUE / 2, -3001)).isEqualTo(2)
+    }
 }
+

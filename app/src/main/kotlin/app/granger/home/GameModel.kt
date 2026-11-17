@@ -35,17 +35,17 @@ sealed interface Round {
     data class Order(override val marks: List<TimeMark>, val picked: List<Long> = emptyList(), override val revealed: Boolean = false) : Round {
         override val kind get() = GameKind.ORDER
         /** The real order, earliest first. */
-        val answer: List<TimeMark> get() = marks.sortedBy { it.y0 }
+        val answer: List<TimeMark> get() = marks.sortedBy { it.year }
         val right: Boolean get() = picked == answer.map { it.qid }
         /** Years from the first to the last. */
-        val gap: Int get() = answer.last().y0 - answer.first().y0
+        val gap: Int get() = answer.last().year - answer.first().year
     }
 
     /** Guess the year: [guess] is where the marker sits, as an astronomical year. */
     data class Guess(val mark: TimeMark, val guess: Int, override val revealed: Boolean = false) : Round {
         override val kind get() = GameKind.GUESS
         override val marks get() = listOf(mark)
-        val off: Int get() = abs(guess - mark.y0)
+        val off: Int get() = abs(guess - mark.year)
     }
 
     /** Before or after?: did [mark] come before [anchor], whose year is shown? [said] is the answer given (true = before). */
@@ -53,9 +53,9 @@ sealed interface Round {
         override val kind get() = GameKind.BEFORE_AFTER
         override val marks get() = listOf(anchor, mark)
         override val revealed get() = said != null
-        val before: Boolean get() = mark.y0 < anchor.y0
+        val before: Boolean get() = mark.year < anchor.year
         val right: Boolean get() = said == before
-        val gap: Int get() = abs(mark.y0 - anchor.y0)
+        val gap: Int get() = abs(mark.year - anchor.year)
     }
 
     /** Alive at the same time?: two lifetimes; [said] is the answer given (true = yes). */
@@ -63,10 +63,10 @@ sealed interface Round {
         override val kind get() = GameKind.OVERLAP
         override val marks get() = listOf(a, b)
         override val revealed get() = said != null
-        val overlaps: Boolean get() = a.y0 <= b.end(now) && b.y0 <= a.end(now)
+        val overlaps: Boolean get() = a.year <= b.endYear(now) && b.year <= a.endYear(now)
         val right: Boolean get() = said == overlaps
         /** Years they shared, or years between one dying and the other being born. */
-        val years: Int get() = if (overlaps) minOf(a.end(now), b.end(now)) - maxOf(a.y0, b.y0) else maxOf(a.y0, b.y0) - minOf(a.end(now), b.end(now))
+        val years: Int get() = if (overlaps) minOf(a.endYear(now), b.endYear(now)) - maxOf(a.year, b.year) else maxOf(a.year, b.year) - minOf(a.endYear(now), b.endYear(now))
     }
 
     /** Odd one out: three from about the same time and [odd] from far off; [picked] the one tapped. */
@@ -81,7 +81,7 @@ sealed interface Round {
         override val kind get() = GameKind.CENTURY
         override val marks get() = listOf(mark)
         override val revealed get() = picked != null
-        val answer: Int get() = centuryOf(mark.y0)
+        val answer: Int get() = centuryOf(mark.year)
         val right: Boolean get() = picked == answer
     }
 }
@@ -92,10 +92,16 @@ sealed interface Round {
  */
 fun centuryOf(year: Int): Int = Math.floorDiv(year - 1, 100)
 
+/** A mark's start year as an Int: exact for the games, which deal only marks in recorded history ([GameModel.playable]). */
+val TimeMark.year: Int get() = y0.coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong()).toInt()
+
+/** [TimeMark.end] as an Int, likewise. */
+fun TimeMark.endYear(now: Int): Int = end(now).coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong()).toInt()
+
 /** Whether a revealed round counts as right; a guess does when it's anything but further off. */
 fun Round.isRight(now: Int): Boolean = when (this) {
     is Round.Order -> right
-    is Round.Guess -> closeness(off, mark.y0, now) != Closeness.OFF
+    is Round.Guess -> closeness(off, mark.year, now) != Closeness.OFF
     is Round.BeforeAfter -> right
     is Round.Overlap -> right
     is Round.OddOneOut -> right
@@ -385,7 +391,7 @@ class GameModel(
 
     /** Playable marks from [from]..[to], well-known enough and not asked lately, shuffled. */
     private fun candidates(idx: TimeIndexes, from: Int, to: Int, latest: Int, minRank: Int, k: Int = POOL): List<TimeMark> =
-        idx.top(from, to, emptySet(), k).filter { it.rank >= minRank && playable(it, latest) && it.qid !in recent && it.y0 in from..to }.shuffled(random)
+        idx.top(from.toLong(), to.toLong(), emptySet(), k).filter { it.rank >= minRank && playable(it, latest) && it.qid !in recent && it.year in from..to }.shuffled(random)
 
     /** Two cards, or three from level 2; their years at least a third of the level's gap apart and at most twice it. */
     private fun orderRound(idx: TimeIndexes, latest: Int, minRank: Int): Round.Order? {
@@ -395,12 +401,12 @@ class GameModel(
         val min = maxOf(1, gap / 3)
         repeat(TRIES) {
             val anchor = anchorYear(latest)
-            val pool = idx.top(anchor - gap * 2, anchor + gap * 2, emptySet(), POOL).filter { it.rank >= minRank && playable(it, latest) && it.qid !in recent }.shuffled(random)
+            val pool = idx.top(anchor - gap * 2L, anchor + gap * 2L, emptySet(), POOL).filter { it.rank >= minRank && playable(it, latest) && it.qid !in recent }.shuffled(random)
             for (first in pool) {
                 val chosen = mutableListOf(first)
                 for (c in pool) {
                     if (chosen.size == n) break
-                    if (chosen.all { abs(it.y0 - c.y0) >= min } && (chosen + c).let { s -> s.maxOf { it.y0 } - s.minOf { it.y0 } } <= gap * 2) chosen += c
+                    if (chosen.all { abs(it.year - c.year) >= min } && (chosen + c).let { s -> s.maxOf { it.year } - s.minOf { it.year } } <= gap * 2) chosen += c
                 }
                 if (chosen.size == n) return Round.Order(chosen.shuffled(random))
             }
@@ -412,7 +418,7 @@ class GameModel(
     private fun guessRound(idx: TimeIndexes, latest: Int, minRank: Int): Round.Guess? {
         repeat(TRIES) {
             val anchor = anchorYear(latest)
-            val mark = idx.top(anchor - 60, anchor + 60, emptySet(), POOL).firstOrNull { it.rank >= minRank && playable(it, latest) && it.qid !in recent }
+            val mark = idx.top(anchor - 60L, anchor + 60L, emptySet(), POOL).firstOrNull { it.rank >= minRank && playable(it, latest) && it.qid !in recent }
             if (mark != null) {
                 val w = TimeScale.history(latest)
                 return Round.Guess(mark, TimeScale.toYear((w.start + w.end) / 2).toInt())
@@ -433,7 +439,7 @@ class GameModel(
             val max = maxOf(25, age / 3)
             val pool = candidates(idx, y - max, minOf(latest, y + max), latest, minRank)
             for (anchor in pool) {
-                val other = pool.firstOrNull { it.qid != anchor.qid && abs(it.y0 - anchor.y0) in min..max } ?: continue
+                val other = pool.firstOrNull { it.qid != anchor.qid && abs(it.year - anchor.year) in min..max } ?: continue
                 return Round.BeforeAfter(other, anchor)
             }
         }
@@ -464,7 +470,7 @@ class GameModel(
     }
 
     /** A lifetime with both ends, of a believable length (Wikidata has a few with the wrong death year). */
-    private fun lived(m: TimeMark): Boolean = m.kind == TimeKind.LIFE && m.y1 != null && (m.y1!! - m.y0) in 15..110 && m.y1!! <= now
+    private fun lived(m: TimeMark): Boolean = m.kind == TimeKind.LIFE && m.y1 != null && (m.y1!! - m.year) in 15..110 && m.y1!! <= now
 
     /** Three marks within a span that scales with how long ago, and one from well outside it, before or after. */
     private fun oddRound(idx: TimeIndexes, latest: Int, minRank: Int): Round.OddOneOut? {
@@ -473,8 +479,8 @@ class GameModel(
             val w = maxOf(5, (latest - y) / 12)
             val cluster = candidates(idx, y - w, minOf(latest, y + w), latest, minRank).distinctBy { it.title }.take(3)
             if (cluster.size < 3) return@repeat
-            val lo = cluster.minOf { it.y0 }
-            val hi = cluster.maxOf { it.y0 }
+            val lo = cluster.minOf { it.year }
+            val hi = cluster.maxOf { it.year }
             val later = hi + 6 * w <= latest && (random.nextBoolean() || lo - 6 * w < TimeScale.HISTORY_START)
             val (from, to) = if (later) (hi + 6 * w) to minOf(latest, hi + 20 * w) else maxOf(TimeScale.HISTORY_START, lo - 20 * w) to (lo - 6 * w)
             if (from > to) return@repeat
@@ -489,7 +495,7 @@ class GameModel(
         repeat(TRIES) {
             val y = anchorYear(latest)
             val mark = candidates(idx, y - 60, minOf(latest, y + 60), latest, minRank).firstOrNull() ?: return@repeat
-            val c = centuryOf(mark.y0)
+            val c = centuryOf(mark.year)
             val top = centuryOf(latest)
             var first = c - random.nextInt(4)
             if (first + 3 > top) first = top - 3
@@ -527,7 +533,7 @@ class GameModel(
 
         /** Dated to the year, in recorded history and not after today, and its title doesn't give the year away. */
         fun playable(m: TimeMark, latest: Int): Boolean =
-            m.prec >= 9 && m.y0 in TimeScale.HISTORY_START..latest && !GIVEAWAY.containsMatchIn(m.title) && LISTS.none { m.title.startsWith(it) }
+            m.prec >= 9 && m.y0 in TimeScale.HISTORY_START.toLong()..latest.toLong() && !GIVEAWAY.containsMatchIn(m.title) && LISTS.none { m.title.startsWith(it) }
     }
 }
 

@@ -32,7 +32,7 @@ class GamesSectionTest {
     @get:Rule val compose = createComposeRule()
 
     private fun mark(qid: Long, title: String, y0: Int, kind: TimeKind = TimeKind.POINT) =
-        TimeMark(qid, "top", title.replace(' ', '_'), title, kind, y0, 0, null, null, 9, setOf(Lane.EVENTS_POLITICS), 10)
+        TimeMark(qid, "top", title.replace(' ', '_'), title, kind, y0.toLong(), 0, null, null, 9, setOf(Lane.EVENTS_POLITICS), 10)
 
     private val hastings = mark(1, "Battle of Hastings", 1066)
     private val magna = mark(2, "Magna Carta", 1215)

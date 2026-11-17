@@ -259,7 +259,7 @@ class GameModelTest {
         val m = model(start = GameKind.GUESS)
         m.ensureStarted(); advanceUntilIdle()
         val mark = (m.ui.value.round as Round.Guess).mark
-        m.guess(mark.y0 - 20)
+        m.guess(mark.year - 20)
         m.nudge(10)
         m.nudge(1)
         assertThat((m.ui.value.round as Round.Guess).guess).isEqualTo(mark.y0 - 9)
@@ -303,7 +303,7 @@ class GameModelTest {
     }
 
     @Test fun playableNeedsAYearPrecisionInHistoryAndATitleThatDoesntGiveItAway() {
-        fun mark(title: String, y0: Int = 1800, prec: Int = 9) = TimeMark(1, "top", title, title, TimeKind.POINT, y0, 0, null, null, prec, emptySet(), 1)
+        fun mark(title: String, y0: Int = 1800, prec: Int = 9) = TimeMark(1, "top", title, title, TimeKind.POINT, y0.toLong(), 0, null, null, prec, emptySet(), 1)
         assertThat(GameModel.playable(mark("Battle of Waterloo"), 2026)).isTrue()
         assertThat(GameModel.playable(mark("1812 Overture"), 2026)).isFalse()
         assertThat(GameModel.playable(mark("19th century"), 2026)).isFalse()

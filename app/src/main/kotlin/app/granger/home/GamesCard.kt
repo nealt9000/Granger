@@ -299,12 +299,12 @@ private fun OrderRound(round: Round.Order, ui: GameUi, actions: GameActions, onO
         pluralStringResource(R.plurals.game_years_apart, round.gap, round.gap),
         good = round.right,
     )
-    RevealStrip(round.answer.map { it.y0 to words.year(it.y0.toLong()) }, guess = null)
+    RevealStrip(round.answer.map { it.year to words.year(it.year.toLong()) }, guess = null)
     val open = stringResource(R.string.home_wander_open)
     for ((i, m) in round.answer.withIndex()) {
         val placed = round.picked.getOrNull(i) == m.qid
         MarkCard(
-            m, ui.pictures[m.qid], year = words.year(m.y0.toLong()), badge = null, mark = placed,
+            m, ui.pictures[m.qid], year = words.year(m.year.toLong()), badge = null, mark = placed,
             onTap = { onOpen(m) }, clickLabel = open,
             state = stringResource(if (placed) R.string.game_right_place else R.string.game_wrong_place), tag = "game-answer-${m.qid}",
         )
@@ -355,7 +355,7 @@ private fun GuessRound(round: Round.Guess, ui: GameUi, actions: GameActions, onO
         }
         return
     }
-    val near = closeness(round.off, m.y0, ui.now)
+    val near = closeness(round.off, m.year, ui.now)
     Verdict(
         stringResource(
             when (near) {
@@ -365,19 +365,19 @@ private fun GuessRound(round: Round.Guess, ui: GameUi, actions: GameActions, onO
                 Closeness.OFF -> R.string.game_off
             },
         ),
-        if (round.off == 0) stringResource(R.string.game_it_was, words.year(m.y0.toLong()))
-        else stringResource(R.string.game_it_was, words.year(m.y0.toLong())) + " · " + pluralStringResource(R.plurals.game_years_off, round.off, round.off),
+        if (round.off == 0) stringResource(R.string.game_it_was, words.year(m.year.toLong()))
+        else stringResource(R.string.game_it_was, words.year(m.year.toLong())) + " · " + pluralStringResource(R.plurals.game_years_off, round.off, round.off),
         good = near != Closeness.OFF,
     )
-    RevealStrip(listOf(m.y0 to words.year(m.y0.toLong())), guess = round.guess to stringResource(R.string.game_guess_year, words.year(round.guess.toLong())))
-    MarkCard(m, ui.pictures[m.qid], year = words.year(m.y0.toLong()), badge = null, onTap = { onOpen(m) }, clickLabel = open, state = null, tag = "game-answer-${m.qid}")
+    RevealStrip(listOf(m.year to words.year(m.year.toLong())), guess = round.guess to stringResource(R.string.game_guess_year, words.year(round.guess.toLong())))
+    MarkCard(m, ui.pictures[m.qid], year = words.year(m.year.toLong()), badge = null, onTap = { onOpen(m) }, clickLabel = open, state = null, tag = "game-answer-${m.qid}")
 }
 
 /** Before or after?: the anchor shows its year; the other card is placed against it with two buttons. */
 @Composable
 private fun BeforeAfterRound(round: Round.BeforeAfter, ui: GameUi, actions: GameActions, onOpen: (TimeMark) -> Unit, words: YearWords) {
     val open = stringResource(R.string.home_wander_open)
-    val anchorYear = words.year(round.anchor.y0.toLong())
+    val anchorYear = words.year(round.anchor.year.toLong())
     if (!round.revealed) {
         Prompt(stringResource(R.string.game_before_after_prompt, round.anchor.title, anchorYear))
         MarkCard(round.mark, ui.pictures[round.mark.qid], year = null, badge = null, onTap = null, clickLabel = null, state = null, tag = "game-question-card")
@@ -390,9 +390,9 @@ private fun BeforeAfterRound(round: Round.BeforeAfter, ui: GameUi, actions: Game
         pluralStringResource(if (round.before) R.plurals.game_years_before else R.plurals.game_years_after, round.gap, round.gap),
         good = round.right,
     )
-    RevealStrip(listOf(round.anchor, round.mark).map { it.y0 to words.year(it.y0.toLong()) }, guess = null)
-    for (m in listOf(round.anchor, round.mark).sortedBy { it.y0 }) {
-        MarkCard(m, ui.pictures[m.qid], year = words.year(m.y0.toLong()), badge = null, onTap = { onOpen(m) }, clickLabel = open, state = null, tag = "game-answer-${m.qid}")
+    RevealStrip(listOf(round.anchor, round.mark).map { it.year to words.year(it.year.toLong()) }, guess = null)
+    for (m in listOf(round.anchor, round.mark).sortedBy { it.year }) {
+        MarkCard(m, ui.pictures[m.qid], year = words.year(m.year.toLong()), badge = null, onTap = { onOpen(m) }, clickLabel = open, state = null, tag = "game-answer-${m.qid}")
     }
 }
 
@@ -414,8 +414,8 @@ private fun OverlapRound(round: Round.Overlap, ui: GameUi, actions: GameActions,
         else pluralStringResource(R.plurals.game_years_apart, round.years, round.years),
         good = round.right,
     )
-    LifeStrip(listOf(round.a, round.b).sortedBy { it.y0 }, ui.now)
-    for (m in listOf(round.a, round.b).sortedBy { it.y0 }) {
+    LifeStrip(listOf(round.a, round.b).sortedBy { it.year }, ui.now)
+    for (m in listOf(round.a, round.b).sortedBy { it.year }) {
         MarkCard(m, ui.pictures[m.qid], year = words.of(m), badge = null, onTap = { onOpen(m) }, clickLabel = open, state = null, tag = "game-answer-${m.qid}", plain = true)
     }
 }
@@ -435,14 +435,14 @@ private fun OddRound(round: Round.OddOneOut, ui: GameUi, actions: GameActions, o
     val odd = round.marks.first { it.qid == round.odd }
     Verdict(
         stringResource(if (round.right) R.string.game_order_right else R.string.game_wrong),
-        stringResource(R.string.game_odd_was, odd.title, words.year(odd.y0.toLong())),
+        stringResource(R.string.game_odd_was, odd.title, words.year(odd.year.toLong())),
         good = round.right,
     )
-    RevealStrip(round.marks.map { it.y0 to words.year(it.y0.toLong()) }, guess = null)
-    for (m in round.marks.sortedBy { it.y0 }) {
+    RevealStrip(round.marks.map { it.year to words.year(it.year.toLong()) }, guess = null)
+    for (m in round.marks.sortedBy { it.year }) {
         val mark = when (m.qid) { round.odd -> true; round.picked -> false; else -> null }
         MarkCard(
-            m, ui.pictures[m.qid], year = words.year(m.y0.toLong()), badge = null, mark = mark, onTap = { onOpen(m) }, clickLabel = open,
+            m, ui.pictures[m.qid], year = words.year(m.year.toLong()), badge = null, mark = mark, onTap = { onOpen(m) }, clickLabel = open,
             state = if (m.qid == round.odd) stringResource(R.string.game_odd_state) else null, tag = "game-answer-${m.qid}",
         )
     }
@@ -477,10 +477,10 @@ private fun CenturyRound(round: Round.Century, ui: GameUi, actions: GameActions,
     }
     Verdict(
         stringResource(if (round.right) R.string.game_order_right else R.string.game_wrong),
-        stringResource(R.string.game_it_was, words.year(m.y0.toLong())) + " · " + names.of(round.answer),
+        stringResource(R.string.game_it_was, words.year(m.year.toLong())) + " · " + names.of(round.answer),
         good = round.right,
     )
-    MarkCard(m, ui.pictures[m.qid], year = words.year(m.y0.toLong()), badge = null, onTap = { onOpen(m) }, clickLabel = stringResource(R.string.home_wander_open), state = null, tag = "game-answer-${m.qid}")
+    MarkCard(m, ui.pictures[m.qid], year = words.year(m.year.toLong()), badge = null, onTap = { onOpen(m) }, clickLabel = stringResource(R.string.home_wander_open), state = null, tag = "game-answer-${m.qid}")
 }
 
 /** Century names in the app's language: "19th century", "5th century BC"; "Siglo XIX", "Siglo V a. C.". */
@@ -644,7 +644,7 @@ private fun RevealStrip(years: List<Pair<Int, String>>, guess: Pair<Int, String>
 /** Two lifetimes as bars on one plain axis of years, so the overlap, or the gap, is what the eye sees. */
 @Composable
 private fun LifeStrip(people: List<TimeMark>, now: Int) {
-    val lo = people.minOf { it.y0 }
+    val lo = people.minOf { it.year }
     val hi = people.maxOf { it.end(now) }
     val pad = maxOf(5, (hi - lo) / 10)
     val from = lo - pad
@@ -654,13 +654,13 @@ private fun LifeStrip(people: List<TimeMark>, now: Int) {
     val shared = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
     Canvas(Modifier.fillMaxWidth().height(56.dp).testTag("game-life-strip").clearAndSetSemantics {}) {
         fun x(year: Int) = (year - from) / span * size.width
-        val s = maxOf(people[0].y0, people[1].y0)
-        val e = minOf(people[0].end(now), people[1].end(now))
+        val s = maxOf(people[0].year, people[1].year)
+        val e = minOf(people[0].endYear(now), people[1].endYear(now))
         if (s <= e) drawRect(shared, Offset(x(s), 0f), Size(maxOf(2f, x(e) - x(s)), size.height))
         val bar = 12.dp.toPx()
         for ((i, p) in people.withIndex()) {
             val top = size.height * (if (i == 0) 0.22f else 0.58f) - bar / 2
-            drawRoundRect(colours[i], Offset(x(p.y0), top), Size(maxOf(bar, x(p.end(now)) - x(p.y0)), bar), CornerRadius(bar / 2))
+            drawRoundRect(colours[i], Offset(x(p.year), top), Size(maxOf(bar, x(p.endYear(now)) - x(p.year)), bar), CornerRadius(bar / 2))
         }
         drawLine(line, Offset(0f, size.height - 1.dp.toPx()), Offset(size.width, size.height - 1.dp.toPx()), strokeWidth = 1.dp.toPx())
     }

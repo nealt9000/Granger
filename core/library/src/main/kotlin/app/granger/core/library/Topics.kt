@@ -16,7 +16,7 @@ import kotlinx.coroutines.withContext
  */
 object TopicTime {
     /** The years to ask the time index for, around [subject]'s own span. */
-    fun window(subject: TimeMark, now: Int): IntRange = when (subject.kind) {
+    fun window(subject: TimeMark, now: Int): LongRange = when (subject.kind) {
         TimeKind.LIFE -> (subject.y0 - ELDER_YEARS)..subject.end(now)
         else -> (subject.y0 - ADULT_YEARS)..subject.end(now)
     }

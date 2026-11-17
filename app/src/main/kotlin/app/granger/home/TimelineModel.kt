@@ -93,7 +93,7 @@ class TimelineModel(
             val first = withContext(io) {
                 startAt?.let { (pack, path) -> idx.find(pack, path) } ?: run {
                     val century = random.nextInt(-5, 20) * 100
-                    idx.marks(century, century + 99, emptySet(), 1, now).firstOrNull()
+                    idx.marks(century.toLong(), century + 99L, emptySet(), 1, now).firstOrNull()
                 }
             }
             refresh(state.value.window, immediate = true)
@@ -140,7 +140,7 @@ class TimelineModel(
         val idx = index ?: return
         scope.launch {
             val on = state.value.on
-            val near = withContext(io) { idx.around(year.toInt(), on, 4) }
+            val near = withContext(io) { idx.around(year.toLong(), on, 4) }
             near.minWithOrNull(compareBy<TimeMark> { abs(it.y0 - year) }.thenByDescending { it.rank })?.let { select(it) }
         }
     }

@@ -375,8 +375,8 @@ private fun River(ui: TimelineUi, actions: TimelineActions, words: YearWords, fu
             for ((r, rowLane) in rows.withIndex()) {
                 val laneSet = rowLane?.let { setOf(it) } ?: ui.on
                 val counts = IntArray(bins) { i ->
-                    val a = kotlin.math.ceil(ui.window.year(w * i / bins, w)).toInt()
-                    val b = kotlin.math.ceil(ui.window.year(w * (i + 1) / bins, w)).toInt() - 1
+                    val a = kotlin.math.ceil(ui.window.year(w * i / bins, w)).toLong()
+                    val b = kotlin.math.ceil(ui.window.year(w * (i + 1) / bins, w)).toLong() - 1
                     ui.density.count(a, b, laneSet)
                 }
                 val peak = kotlin.math.ln(1.0 + (counts.maxOrNull() ?: 0)).coerceAtLeast(1.0)
@@ -644,9 +644,9 @@ internal class YearWords(
      * A year rounded to what its precision supports, as people write it: Wikidata stores "the 4th century" as 301, which
      * reads as c. 300; 1450s as c. 1450; 1500 BC (astronomical -1499) stays 1500 BC.
      */
-    private fun rounded(y: Int, prec: Int): Long {
-        val unit = when (prec) { 8 -> 10; 7 -> 100; 6 -> 1000; else -> return y.toLong() }
-        val written = if (y > 0) y.toLong() else 1L - y
+    private fun rounded(y: Long, prec: Int): Long {
+        val unit = when (prec) { 8 -> 10; 7 -> 100; 6 -> 1000; else -> return y }
+        val written = if (y > 0) y else 1L - y
         val r = written / unit * unit
         val w = if (r == 0L) written else r
         return if (y > 0) w else 1 - w

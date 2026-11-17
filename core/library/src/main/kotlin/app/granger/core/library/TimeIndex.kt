@@ -31,16 +31,16 @@ data class TimeMark(
     val path: String,
     val title: String,
     val kind: TimeKind,
-    val y0: Int,
+    val y0: Long,
     val md0: Int,
-    val y1: Int?,
+    val y1: Long?,
     val md1: Int?,
     val prec: Int,
     val lanes: Set<Lane>,
     val rank: Int,
 ) {
     /** The last year the mark covers: its end, the start for a point, [now] for something still running. */
-    fun end(now: Int): Int = y1 ?: if (kind == TimeKind.POINT) y0 else now
+    fun end(now: Int): Long = y1 ?: if (kind == TimeKind.POINT) y0 else now.toLong()
 }
 
 /**
@@ -63,7 +63,7 @@ class TimeIndex private constructor(
     fun only(keep: (Long) -> Boolean): TimeIndex = TimeIndex(db, packId, bits, keep)
 
     /** The marks overlapping [from]..[to] in any of [lanes] (all marks when empty), highest ranked first. */
-    fun marks(from: Int, to: Int, lanes: Set<Lane>, limit: Int, now: Int): List<TimeMark> {
+    fun marks(from: Long, to: Long, lanes: Set<Lane>, limit: Int, now: Int): List<TimeMark> {
         val lane = laneFilter(lanes) ?: return emptyList()
         // Integers go into the SQL itself: Android binds arguments as text, and an expression like COALESCE(...) has no
         // column affinity to turn text back into a number, so every comparison against it would fail.
@@ -71,7 +71,7 @@ class TimeIndex private constructor(
     }
 
     /** Up to [n] marks starting nearest [year] on each side, by start year. */
-    fun around(year: Int, lanes: Set<Lane>, n: Int): List<TimeMark> {
+    fun around(year: Long, lanes: Set<Lane>, n: Int): List<TimeMark> {
         val lane = laneFilter(lanes) ?: return emptyList()
         val after = query("y0 >= $year$lane ORDER BY y0, rank DESC", n)
         val before = query("y0 < $year$lane ORDER BY y0 DESC, rank DESC", n)
@@ -79,17 +79,17 @@ class TimeIndex private constructor(
     }
 
     /** The best-known [k] marks starting within [from]..[to] (one slice of the river), highest ranked first. */
-    fun top(from: Int, to: Int, lanes: Set<Lane>, k: Int): List<TimeMark> {
+    fun top(from: Long, to: Long, lanes: Set<Lane>, k: Int): List<TimeMark> {
         val lane = laneFilter(lanes) ?: return emptyList()
         return query("y0 >= $from AND y0 <= $to$lane ORDER BY rank DESC", k)
     }
 
     /** The items whose mark falls in [from]..[to] by [ACTIVE], in qid order, for [TimeIndexes.countActive]. */
-    internal fun qidsActive(from: Int, to: Int): android.database.Cursor =
+    internal fun qidsActive(from: Long, to: Long): android.database.Cursor =
         db.rawQuery("SELECT DISTINCT qid FROM marks WHERE $ACTIVE >= $from AND $ACTIVE <= $to ORDER BY qid", null)
 
     /** The best-known [k] marks falling in [from]..[to] by [ACTIVE], highest ranked first. */
-    fun topActive(from: Int, to: Int, k: Int): List<TimeMark> = query("$ACTIVE >= $from AND $ACTIVE <= $to ORDER BY rank DESC", k)
+    fun topActive(from: Long, to: Long, k: Int): List<TimeMark> = query("$ACTIVE >= $from AND $ACTIVE <= $to ORDER BY rank DESC", k)
 
     /** Every mark's (rowid, qid, [ACTIVE] year, rank), for [TimeIndexes.datedIn]. */
     internal fun activeRows(): android.database.Cursor = db.rawQuery("SELECT rowid, qid, $ACTIVE, rank FROM marks", null)
@@ -120,13 +120,13 @@ class TimeIndex private constructor(
     fun latestYear(): Int? = db.rawQuery("SELECT MAX(y0) FROM marks", null).use { c -> if (c.moveToFirst() && !c.isNull(0)) c.getInt(0) else null }
 
     /** (start year, lanes as a [Lane.ordinal] bitmask, count) for every year and lane mix: the river's density. */
-    fun histogram(): List<Triple<Int, Int, Int>> =
+    fun histogram(): List<Triple<Long, Int, Int>> =
         db.rawQuery("SELECT y0, lanes, COUNT(*) FROM marks GROUP BY y0, lanes", null).use { c ->
             buildList {
                 while (c.moveToNext()) {
                     val fileMask = c.getLong(1)
                     val mask = bits.entries.fold(0) { m, (lane, bit) -> if (fileMask shr bit and 1L == 1L) m or (1 shl lane.ordinal) else m }
-                    add(Triple(c.getInt(0), mask, c.getInt(2)))
+                    add(Triple(c.getLong(0), mask, c.getInt(2)))
                 }
             }
         }
@@ -165,8 +165,8 @@ class TimeIndex private constructor(
                         TimeMark(
                             qid = c.getLong(0), packId = packId, path = c.getString(1), title = c.getString(2),
                             kind = TimeKind.entries.getOrElse(c.getInt(3)) { TimeKind.POINT },
-                            y0 = c.getInt(4), md0 = c.getInt(5),
-                            y1 = if (c.isNull(6)) null else c.getInt(6), md1 = if (c.isNull(7)) null else c.getInt(7),
+                            y0 = c.getLong(4), md0 = c.getInt(5),
+                            y1 = if (c.isNull(6)) null else c.getLong(6), md1 = if (c.isNull(7)) null else c.getInt(7),
                             prec = c.getInt(8),
                             lanes = bits.filterValues { mask shr it and 1L == 1L }.keys,
                             rank = c.getInt(10),
@@ -227,11 +227,11 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
     val isEmpty: Boolean get() = indexes.isEmpty()
 
     /** [prefer]: a pack whose copy of a mark wins over the others' (a Spanish topic page gets the Spanish titles). */
-    fun marks(from: Int, to: Int, lanes: Set<Lane>, limit: Int, now: Int, prefer: String? = null): List<TimeMark> =
+    fun marks(from: Long, to: Long, lanes: Set<Lane>, limit: Int, now: Int, prefer: String? = null): List<TimeMark> =
         merge(indexes.sortedBy { if (it.packId == prefer) 0 else 1 }.map { it.marks(from, to, lanes, limit, now) })
             .sortedByDescending { it.rank }.take(limit)
 
-    fun around(year: Int, lanes: Set<Lane>, n: Int): List<TimeMark> {
+    fun around(year: Long, lanes: Set<Lane>, n: Int): List<TimeMark> {
         val all = merge(indexes.map { it.around(year, lanes, n) })
         val (before, after) = all.partition { it.y0 < year }
         return before.sortedWith(compareBy<TimeMark> { it.y0 }.thenBy { -it.rank }).takeLast(n) +
@@ -243,7 +243,7 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
      * years, ascending), so a quiet century isn't left blank beside a crowded one, plus the [spans] best-known marks
      * overlapping the whole view (long spans and lifetimes that started before it).
      */
-    fun spread(edges: List<Int>, lanes: Set<Lane>, perSlice: Int, spans: Int, now: Int): List<TimeMark> {
+    fun spread(edges: List<Long>, lanes: Set<Lane>, perSlice: Int, spans: Int, now: Int): List<TimeMark> {
         if (edges.size < 2) return emptyList()
         val out = ArrayList<List<TimeMark>>()
         for (i in 0 until edges.size - 1) {
@@ -257,7 +257,7 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
     }
 
     /** The [k] best-known marks starting in [from]..[to], across packs (the games' draw, Plan H5c). */
-    fun top(from: Int, to: Int, lanes: Set<Lane>, k: Int): List<TimeMark> =
+    fun top(from: Long, to: Long, lanes: Set<Lane>, k: Int): List<TimeMark> =
         merge(indexes.map { it.top(from, to, lanes, k) }).sortedByDescending { it.rank }.take(k)
 
     /** The mark for an article: from its own pack when that pack is indexed, else from any pack that has the same path. */
@@ -272,10 +272,10 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
      * How many items fall in [from]..[to] by [TimeIndex.ACTIVE] (a life at about forty, anything else at its start), each
      * once however many packs date it: Explore's eras.
      */
-    fun countActive(from: Int, to: Int): Int = countDistinct(indexes.map { it.qidsActive(from, to) })
+    fun countActive(from: Long, to: Long): Int = countDistinct(indexes.map { it.qidsActive(from, to) })
 
     /** The [k] best-known marks falling in [from]..[to] by [TimeIndex.ACTIVE], across packs. */
-    fun topActive(from: Int, to: Int, k: Int): List<TimeMark> =
+    fun topActive(from: Long, to: Long, k: Int): List<TimeMark> =
         merge(indexes.map { it.topActive(from, to, k) }).sortedByDescending { it.rank }.take(k)
 
     /** These indexes seen through [keep] (see [TimeIndex.only]): a subject's quiz draws only its articles. */
@@ -291,7 +291,7 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
         val pack = IntArrayList()
         val row = LongArrayList()
         val qid = LongArrayList()
-        val year = IntArrayList()
+        val year = LongArrayList()
         val rank = IntArrayList()
         indexes.forEachIndexed { p, index ->
             index.activeRows().use { c ->
@@ -300,7 +300,7 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
                     val i = set.indexOf(q)
                     if (i < 0 || seen.get(i)) continue
                     seen.set(i)
-                    pack.add(p); row.add(c.getLong(0)); qid.add(q); year.add(c.getInt(2)); rank.add(c.getInt(3))
+                    pack.add(p); row.add(c.getLong(0)); qid.add(q); year.add(c.getLong(2)); rank.add(c.getInt(3))
                 }
             }
         }
@@ -341,20 +341,20 @@ class SubjectTime internal constructor(
     internal val pack: IntArray,
     internal val row: LongArray,
     val qid: LongArray,
-    val year: IntArray,
+    val year: LongArray,
     val rank: IntArray,
     val main: BooleanArray,
 ) {
     val size: Int get() = qid.size
 
     /** How many fall in [from]..[to]. */
-    fun count(from: Int, to: Int): Int = year.count { it in from..to }
+    fun count(from: Long, to: Long): Int = year.count { it in from..to }
 
     /**
      * The items in [from]..[to]: [oldest] by year (best known first within one), else main subject first, then best known
      * (as the subject page's whole list is).
      */
-    fun order(from: Int, to: Int, oldest: Boolean): List<Int> {
+    fun order(from: Long, to: Long, oldest: Boolean): List<Int> {
         val its = (0 until size).filter { year[it] in from..to }
         return if (oldest) its.sortedWith(compareBy<Int> { year[it] }.thenByDescending { rank[it] }.thenBy { qid[it] })
         else its.sortedWith(compareByDescending<Int> { main[it] }.thenByDescending { rank[it] }.thenBy { qid[it] })
@@ -380,9 +380,9 @@ internal class LongArrayList {
 }
 
 /** How many marks start in each year, by lane mix, held in memory so the river can shade density at any zoom. */
-class TimeHistogram private constructor(private val years: IntArray, private val masks: IntArray, private val counts: IntArray) {
+class TimeHistogram private constructor(private val years: LongArray, private val masks: IntArray, private val counts: IntArray) {
     /** Marks starting in [from]..[to] in any of [lanes] (all when empty). */
-    fun count(from: Int, to: Int, lanes: Set<Lane>): Int {
+    fun count(from: Long, to: Long, lanes: Set<Lane>): Int {
         if (to < from || years.isEmpty()) return 0
         val want = lanes.fold(0) { m, l -> m or (1 shl l.ordinal) }
         var i = lowerBound(from)
@@ -401,7 +401,7 @@ class TimeHistogram private constructor(private val years: IntArray, private val
         n
     }
 
-    private fun lowerBound(y: Int): Int {
+    private fun lowerBound(y: Long): Int {
         var lo = 0
         var hi = years.size
         while (lo < hi) {
@@ -412,11 +412,11 @@ class TimeHistogram private constructor(private val years: IntArray, private val
     }
 
     companion object {
-        val EMPTY = TimeHistogram(IntArray(0), IntArray(0), IntArray(0))
+        val EMPTY = TimeHistogram(LongArray(0), IntArray(0), IntArray(0))
 
-        fun of(rows: List<Triple<Int, Int, Int>>): TimeHistogram {
+        fun of(rows: List<Triple<Long, Int, Int>>): TimeHistogram {
             val sorted = rows.sortedBy { it.first }
-            return TimeHistogram(IntArray(sorted.size) { sorted[it].first }, IntArray(sorted.size) { sorted[it].second }, IntArray(sorted.size) { sorted[it].third })
+            return TimeHistogram(LongArray(sorted.size) { sorted[it].first }, IntArray(sorted.size) { sorted[it].second }, IntArray(sorted.size) { sorted[it].third })
         }
     }
 }

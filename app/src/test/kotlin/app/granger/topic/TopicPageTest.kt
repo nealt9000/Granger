@@ -29,7 +29,7 @@ class TopicPageTest {
     @get:Rule val compose = createComposeRule()
 
     private fun life(qid: Long, path: String, y0: Int, y1: Int) =
-        TimeMark(qid, "w", path, path.replace('_', ' '), TimeKind.LIFE, y0, 0, y1, null, 9, setOf(Lane.PEOPLE), 100)
+        TimeMark(qid, "w", path, path.replace('_', ' '), TimeKind.LIFE, y0.toLong(), 0, y1.toLong(), null, 9, setOf(Lane.PEOPLE), 100)
 
     private val napoleon = life(517, "Napoleon", 1769, 1821)
     private val warAndPeace = LibraryBook("book:granger:gc-war-and-peace", "War and Peace", null)

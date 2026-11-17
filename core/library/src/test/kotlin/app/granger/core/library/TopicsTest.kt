@@ -15,13 +15,13 @@ import org.junit.rules.TemporaryFolder
 
 class TopicTimeTest {
     private fun life(qid: Long, title: String, y0: Int, y1: Int?, rank: Int) =
-        TimeMark(qid, "top", title, title, TimeKind.LIFE, y0, 0, y1, null, 9, setOf(Lane.PEOPLE), rank)
+        TimeMark(qid, "top", title, title, TimeKind.LIFE, y0.toLong(), 0, y1?.toLong(), null, 9, setOf(Lane.PEOPLE), rank)
 
     private fun span(qid: Long, title: String, y0: Int, y1: Int?, rank: Int, lanes: Set<Lane> = setOf(Lane.EVENTS_POLITICS)) =
-        TimeMark(qid, "top", title, title, TimeKind.SPAN, y0, 0, y1, null, 9, lanes, rank)
+        TimeMark(qid, "top", title, title, TimeKind.SPAN, y0.toLong(), 0, y1?.toLong(), null, 9, lanes, rank)
 
     private fun point(qid: Long, title: String, y0: Int, rank: Int, lanes: Set<Lane>) =
-        TimeMark(qid, "top", title, title, TimeKind.POINT, y0, 0, null, null, 9, lanes, rank)
+        TimeMark(qid, "top", title, title, TimeKind.POINT, y0.toLong(), 0, null, null, 9, lanes, rank)
 
     // Napoleon's marks as the Pixel's Top index gives them (2026-11-16), plus edge cases.
     private val napoleon = life(517, "Napoleon", 1769, 1821, 288)
@@ -67,12 +67,12 @@ class TopicTimeTest {
         val living = life(99, "Living", 1950, null, 10)
         val others = listOf(life(98, "Elder", 1930, null, 50), life(97, "Child", 2010, null, 60))
         assertThat(TopicTime.contemporaries(living, others, now = 2026).map { it.path }).containsExactly("Elder")
-        assertThat(TopicTime.window(living, now = 2026)).isEqualTo(1905..2026)
+        assertThat(TopicTime.window(living, now = 2026)).isEqualTo(1905L..2026L)
     }
 
     @Test fun theWindowReachesBackForElders() {
-        assertThat(TopicTime.window(napoleon, now = 2026)).isEqualTo(1724..1821)
-        assertThat(TopicTime.window(point(1, "x", 1066, 1, emptySet()), now = 2026)).isEqualTo(1046..1066)
+        assertThat(TopicTime.window(napoleon, now = 2026)).isEqualTo(1724L..1821L)
+        assertThat(TopicTime.window(point(1, "x", 1066, 1, emptySet()), now = 2026)).isEqualTo(1046L..1066L)
     }
 }
 

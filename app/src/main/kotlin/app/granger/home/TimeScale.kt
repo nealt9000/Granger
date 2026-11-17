@@ -69,8 +69,8 @@ object TimeScale {
         fun years(): Pair<Int, Int> = toYear(start).toLong().coerceAtLeast(Int.MIN_VALUE.toLong()).toInt() to toYear(end).toInt()
 
         /** [n] slices of equal width on screen, as start-year edges (n + 1 of them), for spreading dots evenly. */
-        fun slices(n: Int): List<Int> =
-            (0..n).map { i -> kotlin.math.floor(toYear(start + span * i / n) + 1e-6).coerceIn(Int.MIN_VALUE.toDouble(), Int.MAX_VALUE.toDouble()).toInt() }.distinct()
+        fun slices(n: Int): List<Long> =
+            (0..n).map { i -> kotlin.math.floor(toYear(start + span * i / n) + 1e-6).toLong() }.distinct()
     }
 
     /**

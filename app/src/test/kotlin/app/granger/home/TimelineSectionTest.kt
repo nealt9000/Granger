@@ -35,7 +35,7 @@ class TimelineSectionTest {
     @get:Rule val compose = createComposeRule()
 
     private fun mark(qid: Long, title: String, y0: Int, y1: Int? = null, kind: TimeKind = TimeKind.POINT, lanes: Set<Lane> = setOf(Lane.EVENTS_POLITICS)) =
-        TimeMark(qid, "top", title.replace(' ', '_'), title, kind, y0, 0, y1, null, 9, lanes, 10)
+        TimeMark(qid, "top", title.replace(' ', '_'), title, kind, y0.toLong(), 0, y1?.toLong(), null, 9, lanes, 10)
 
     private val un = mark(1, "United Nations", 1945)
     private val yalta = mark(2, "Yalta Conference", 1945)

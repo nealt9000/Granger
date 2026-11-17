@@ -71,14 +71,14 @@ enum class Subject(val id: String, @StringRes val label: Int) {
  * Through time's eras (the mockup's B timeline), by year (astronomical: 1 BC is 0): each counts the dated items that fall
  * in it, a life at about forty ([app.granger.core.library.TimeIndex.ACTIVE]). [to] is inclusive; the last runs to the far future.
  */
-enum class Era(val from: Int, val to: Int, @StringRes val label: Int, @StringRes val span: Int) {
-    PREHISTORY(Int.MIN_VALUE / 2, -3001, R.string.explore_era_prehistory, R.string.explore_era_prehistory_span),
+enum class Era(val from: Long, val to: Long, @StringRes val label: Int, @StringRes val span: Int) {
+    PREHISTORY(Long.MIN_VALUE / 2, -3001, R.string.explore_era_prehistory, R.string.explore_era_prehistory_span),
     ANCIENT(-3000, 499, R.string.explore_era_ancient, R.string.explore_era_ancient_span),
     MIDDLE_AGES(500, 1499, R.string.explore_era_middle_ages, R.string.explore_era_middle_ages_span),
     EARLY_MODERN(1500, 1799, R.string.explore_era_early_modern, R.string.explore_era_early_modern_span),
     C19(1800, 1899, R.string.explore_era_c19, R.string.explore_era_c19_span),
     WARS(1900, 1945, R.string.explore_era_wars, R.string.explore_era_wars_span),
-    RECENT(1946, Int.MAX_VALUE / 2, R.string.explore_era_recent, R.string.explore_era_recent_span),
+    RECENT(1946, Long.MAX_VALUE / 2, R.string.explore_era_recent, R.string.explore_era_recent_span),
 }
 
 /** An article Explore shows: where to open it, its title, (when loaded) its picture, and its dates when it has them. */
@@ -325,7 +325,7 @@ class SubjectViewModel(
                 if (era == null && sort == SubjectSort.LINKED || t == null) {
                     Triple(null, sources.qids().topIn(subject.id, PAGE).map { it.toExplore() }, now.count)
                 } else {
-                    val o = t.order(era?.from ?: Int.MIN_VALUE, era?.to ?: Int.MAX_VALUE, sort == SubjectSort.OLDEST)
+                    val o = t.order(era?.from ?: Long.MIN_VALUE, era?.to ?: Long.MAX_VALUE, sort == SubjectSort.OLDEST)
                     Triple(o, sources.times().marksOf(t, o.take(PAGE)).map { it.toExplore() }, o.size)
                 }
             }
