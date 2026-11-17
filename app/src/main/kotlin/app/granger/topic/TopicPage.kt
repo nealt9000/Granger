@@ -24,6 +24,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -77,7 +84,9 @@ object TopicPageTags {
 /**
  * The topic page (Plan LL2, layout A as Neal chose it on 2026-11-16): the article's picture, title, years and lead, the
  * way into the full article and the other language, then its time, the reader's books that name it, and the closest
- * topics. A section appears only when it has something; the parts fill in as they arrive.
+ * topics. A section appears only when it has something; the parts fill in as they arrive. A broad topic (Plan EX:
+ * Airplane, Mountain, Economics) adds its kinds, its story, its people and its chapters after the lead, and "As a map"
+ * opens them as a ring.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -101,14 +110,23 @@ fun TopicPage(
 ) {
     val header = topic.header
     val words = yearWords()
+    val list = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    var ring by remember { mutableStateOf(false) }
+    // Each list item's place, by key, recorded as the list is laid out: the ring scrolls to a part by it.
+    val places = remember { HashMap<String, Int>() }
     Surface(modifier.fillMaxSize().testTag(TopicPageTags.PAGE), color = MaterialTheme.colorScheme.background) {
-        LazyColumn(contentPadding = PaddingValues(bottom = 24.dp), modifier = Modifier.statusBarsPadding().navigationBarsPadding()) {
+        LazyColumn(state = list, contentPadding = PaddingValues(bottom = 24.dp), modifier = Modifier.statusBarsPadding().navigationBarsPadding()) {
+            var at = 0
+            places.clear()
+            at++
             item {
                 Row(Modifier.fillMaxWidth().height(52.dp).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.common_back)) }
                     Text(packTitle.orEmpty(), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
+            at++
             item {
                 // The packs' pictures are often small: a large one fills the width; a small one sits beside the title
                 // at a size it can bear, rather than blown up and blurred.
@@ -133,8 +151,10 @@ fun TopicPage(
                     }
                 }
             }
+            at++
             item {
                 Column(Modifier.padding(horizontal = 16.dp).padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    topic.broad?.let { BroadSummary(it) }
                     if (!header?.lead.isNullOrBlank()) Text(header!!.lead, style = MaterialTheme.typography.bodyLarge)
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(onClick = onReadFull, modifier = Modifier.heightIn(min = 48.dp).testTag(TopicPageTags.READ_FULL)) {
@@ -143,6 +163,11 @@ fun TopicPage(
                         topic.other?.let { other ->
                             OutlinedButton(onClick = { onOther(other) }, modifier = Modifier.heightIn(min = 48.dp).testTag(TopicPageTags.OTHER)) {
                                 Text(stringResource(if (other.language == "es") R.string.topic_read_in_spanish else R.string.topic_read_in_english))
+                            }
+                        }
+                        if (topic.broad != null) {
+                            OutlinedButton(onClick = { ring = true }, modifier = Modifier.heightIn(min = 48.dp).testTag(BroadTags.MAP)) {
+                                Text(stringResource(R.string.topic_broad_map))
                             }
                         }
                         val connections = (topic.related?.size ?: 0) + (topic.time?.people?.size ?: 0) + (topic.time?.events?.size ?: 0)
@@ -155,6 +180,7 @@ fun TopicPage(
                 }
             }
             found?.let { passage ->
+                at++
                 item {
                     Card(TopicPageTags.FOUND, R.string.topic_found) {
                         Text("“$passage”", style = MaterialTheme.typography.bodyMedium.copy(fontFamily = Spectral, fontStyle = FontStyle.Italic), maxLines = 5, overflow = TextOverflow.Ellipsis)
@@ -162,15 +188,29 @@ fun TopicPage(
                     }
                 }
             }
+            topic.broad?.let { broad ->
+                val first = at
+                broadSections(broad, words, onOpenArticle)
+                // The broad sections' places, in the order broadSections adds them.
+                var i = first
+                if (broad.kinds.isNotEmpty()) places["${BroadPart.KINDS}:0"] = i++
+                if (broad.story != null) places["${BroadPart.STORY}:0"] = i++
+                if (broad.people.isNotEmpty()) places["${BroadPart.PEOPLE}:0"] = i++
+                broad.chapters.indices.forEach { c -> places["${BroadPart.CHAPTER}:$c"] = i++ }
+                at = i
+            }
             topic.time?.takeIf { it.people.isNotEmpty() || it.events.isNotEmpty() }?.let { time ->
+                at++
                 item { TimeCard(time, words, onOpenArticle, onShowInTime) }
             }
             topic.books?.takeIf { it.inBooks.isNotEmpty() }?.let { books ->
+                at++
                 item { BooksCard(books, topic.quotes, onOpenPassage, onAllBooks) }
             }
             val related = topic.related.orEmpty()
             val relatedBooks = topic.relatedBooks.orEmpty()
             if (related.isNotEmpty() || relatedBooks.isNotEmpty()) {
+                places["${BroadPart.CLOSE}:0"] = at++
                 item { RelatedCard(related, relatedBooks, onOpenArticle, onOpenBookAt) }
             }
             onWander?.let { wander ->
@@ -180,6 +220,14 @@ fun TopicPage(
                     }
                 }
             }
+        }
+        val broad = topic.broad
+        if (ring && broad != null) {
+            BroadRing(
+                header?.title ?: TopicSource.titleOf(topic.path), header?.picture, ringStops(broad, topic.related.orEmpty()),
+                onStop = { s -> ring = false; places["${s.part}:${s.index}"]?.let { i -> scope.launch { list.animateScrollToItem(i) } } },
+                onDismiss = { ring = false },
+            )
         }
     }
 }

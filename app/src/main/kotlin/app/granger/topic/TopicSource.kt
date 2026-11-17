@@ -63,6 +63,8 @@ data class Topic(
     val relatedBooks: List<TopicBook>? = null,
     /** The whole sentence each shown book's first mention sits in, by book id; a book missing here shows the link's words. */
     val quotes: Map<String, String> = emptyMap(),
+    /** A broad topic's editorial parts (Plan EX); null for any other topic, or until they arrive. */
+    val broad: BroadTopic? = null,
     /** True once every part has arrived. */
     val done: Boolean = false,
 ) {
@@ -102,6 +104,8 @@ class TopicSource(
     private val sentence: (suspend (bookId: String, mention: app.granger.core.library.BookMention) -> String?)? = null,
     /** The languages whose packs the other-language link may point to. */
     private val languages: List<String> = listOf("en", "es"),
+    /** One of a pack's pictures by its path in the ZIM (a broad topic's figures), cached; null when it has none. */
+    private val figure: (suspend (packId: String, image: String) -> String?)? = null,
 ) : TopicProvider {
     private val lock = Mutex()
     private val cache = object : LinkedHashMap<Pair<String, String>, Topic>(CACHED, 0.75f, true) {
@@ -134,6 +138,7 @@ class TopicSource(
                 val (articles, books) = attempt { relatedOf(packId, path, qid.await()) } ?: (emptyList<TopicArticle>() to emptyList())
                 update { it.copy(related = articles, relatedBooks = books) }
             }
+            launch { attempt { broadOf(packId, qid.await()) }?.let { b -> update { it.copy(broad = b) } } }
         }
         update { it.copy(done = true) }
         lock.withLock { cache[packId to path] = topic }
@@ -142,6 +147,23 @@ class TopicSource(
     private suspend fun qidOf(packId: String, path: String): Long? {
         val all = qids()
         return all.qidOf(packId, path) ?: if (all.has(packId)) null else languageOf(packId)?.let { all.qidOfTitle(path, it) }
+    }
+
+    /** A broad topic's parts (Plan EX T1), each item resolved in the installed packs, the page's language first. */
+    private suspend fun broadOf(packId: String, qid: Long?): BroadTopic? {
+        qid ?: return null
+        val all = qids()
+        val language = languageOf(packId)
+        val parts = all.topicParts(qid, packId, language) ?: return null
+        val times = attempt { times() }
+        return BroadTopics.build(
+            parts,
+            resolve = { q -> all.articlesOf(q, language).firstOrNull()?.let { it.packId to it.path } },
+            card = { p, path -> lead(p, path).let { l -> TopicArticle(p, path, l?.title ?: titleOf(path), blurb(l?.sentence.orEmpty()), l?.thumbnail) } },
+            figure = { image -> figure?.let { f -> attempt { f(packId, image) } ?: attempt { f(parts.packId, image) } } },
+            markOf = { p, path -> runCatching { times?.find(p, path) }.getOrNull() },
+            now = now(),
+        )
     }
 
     private suspend fun timeOf(packId: String, path: String): TopicTimeView? {

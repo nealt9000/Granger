@@ -33,4 +33,26 @@
     <string name="topic_map_books">Libros</string>
     <string name="topic_map_open">Abrir la página del tema</string>
     <string name="topic_map_hint">Toca un círculo para centrar el mapa en él. Mantén pulsado para abrirlo.</string>
+    <string name="topic_broad_kicker">Un tema para explorar</string>
+    <string name="topic_broad_kinds">Tipos</string>
+    <string name="topic_broad_kinds_title">Tipos · %1$d</string>
+    <string name="topic_broad_all">Todos</string>
+    <string name="topic_broad_people">Personas</string>
+    <string name="topic_broad_map">Como mapa</string>
+    <string name="topic_broad_map_title">Caminos hacia %1$s</string>
+    <plurals name="topic_broad_kinds_count">
+        <item quantity="one">%1$d tipo</item>
+        <item quantity="many">%1$d tipos</item>
+        <item quantity="other">%1$d tipos</item>
+    </plurals>
+    <plurals name="topic_broad_people_count">
+        <item quantity="one">%1$d persona</item>
+        <item quantity="many">%1$d personas</item>
+        <item quantity="other">%1$d personas</item>
+    </plurals>
+    <plurals name="topic_broad_chapters_count">
+        <item quantity="one">%1$d capítulo</item>
+        <item quantity="many">%1$d capítulos</item>
+        <item quantity="other">%1$d capítulos</item>
+    </plurals>
 </resources>

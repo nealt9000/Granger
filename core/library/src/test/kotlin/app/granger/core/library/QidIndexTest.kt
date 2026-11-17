@@ -21,6 +21,7 @@ class QidIndexTest {
         kind: String = "gqid", schema: Int = 1, source: String = "a".repeat(64), sourceZim: String? = null,
         subjects: List<List<Any>>? = null,
         facets: List<List<Any>>? = null, facetList: String? = null,
+        topicParts: List<List<Any?>>? = null,
     ): File {
         val f = File(tmp.root, "$name.gqid")
         SQLiteDatabase.openOrCreateDatabase(f, null).use { db ->
@@ -43,8 +44,43 @@ class QidIndexTest {
                 facets.forEach { db.execSQL("INSERT INTO facets VALUES (?, ?)", it.toTypedArray()) }
                 facetList?.let { db.execSQL("INSERT INTO meta VALUES ('facets', ?)", arrayOf(it)) }
             }
+            if (topicParts != null) {
+                db.execSQL("CREATE TABLE topics(qid INTEGER PRIMARY KEY, under INTEGER NOT NULL, inlinks INTEGER NOT NULL)")
+                db.execSQL("CREATE TABLE topic_parts(topic INTEGER NOT NULL, part INTEGER NOT NULL, ord INTEGER NOT NULL, item INTEGER, grp INTEGER, text TEXT, note TEXT, PRIMARY KEY(topic, part, ord)) WITHOUT ROWID")
+                topicParts.map { it[0] }.distinct().forEach { db.execSQL("INSERT INTO topics VALUES (?, 72, 86)", arrayOf(it)) }
+                topicParts.forEach { db.execSQL("INSERT INTO topic_parts VALUES (?, ?, ?, ?, ?, ?, ?)", it.toTypedArray()) }
+            }
         }
         return f
+    }
+
+    @Test fun aBroadTopicsPartsReadInOrderFromItsOwnPackFirstThenItsLanguage() {
+        val parts = listOf<List<Any?>>(
+            listOf(197L, 1, 0, 127771L, 2, "Fighter aircraft", null),
+            listOf(197L, 2, 0, 1005L, 0, null, null), listOf(197L, 2, 1, 1006L, -1, null, null),
+            listOf(197L, 3, 0, null, null, "History", "History"),
+            listOf(197L, 4, 0, 8008L, -1, null, null), listOf(197L, 4, 1, 9009L, 0, null, null),
+            listOf(197L, 5, 0, null, 0, "The Wright Flyer, 1903", "_assets_/a/Flyer.jpg"),
+            listOf(197L, 6, 0, 1385L, null, null, null),
+        )
+        val en = QidIndex.open(gqid("en", listOf(listOf("Airplane", 197L, 86, "Avión")), sourceZim = "wikipedia_en_top_maxi_2026-09-14.zim", topicParts = parts), "en")!!
+        val es = QidIndex.open(gqid("es", listOf(listOf("Avión", 197L, 86, "Airplane")), sourceZim = "wikipedia_es_top_nopic_2026-10-10.zim",
+            topicParts = listOf(listOf(197L, 3, 0, null, null, "Historia", "Historia"))), "es")!!
+        val old = QidIndex.open(gqid("old", top), "old")!!   // built before topics
+        val all = QidIndexes(listOf(old, es, en))
+        val p = all.topicParts(197L, packId = "en", language = "en")!!
+        assertThat(p.packId).isEqualTo("en")
+        assertThat(p.under).isEqualTo(72)
+        assertThat(p.groups).containsExactly(TopicParts.Group(127771L, "Fighter aircraft", 2))
+        assertThat(p.kinds).containsExactly(TopicParts.Kind(1005L, 0), TopicParts.Kind(1006L, -1)).inOrder()
+        assertThat(p.sections).containsExactly(TopicParts.Section("History", "History"))
+        assertThat(p.links).containsExactly(TopicParts.Link(8008L, -1), TopicParts.Link(9009L, 0)).inOrder()
+        assertThat(p.figures).containsExactly(TopicParts.Figure("_assets_/a/Flyer.jpg", "The Wright Flyer, 1903", 0))
+        assertThat(p.people).containsExactly(1385L)
+        // From a Spanish page: the Spanish parts.
+        assertThat(all.topicParts(197L, packId = "es", language = "es")!!.sections.single().title).isEqualTo("Historia")
+        assertThat(all.topicParts(36322L, packId = "en", language = "en")).isNull()
+        assertThat(old.topicParts(197L)).isNull()
     }
 
     private val top = listOf(

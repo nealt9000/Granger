@@ -15,7 +15,19 @@ import org.jsoup.Jsoup
 class ArticleThumbnails(private val dir: File) {
     /** The cached file's path, or null when the article has no usable image; [targetPx] sizes it (a topic page's header is larger). */
     fun thumbnail(archive: ZimArchive, articlePath: String, html: String, targetPx: Int = TARGET_PX): String? = try {
-        val imagePath = candidates(html, articlePath).firstNotNullOfOrNull { archive.resolvePath(it) } ?: return null
+        candidates(html, articlePath).firstNotNullOfOrNull { archive.resolvePath(it) }?.let { cached(archive, it, targetPx) }
+    } catch (_: Throwable) { // Includes OutOfMemoryError: a bad image never takes Home down.
+        null
+    }
+
+    /** One picture of the archive by its path (a broad topic's figure, Plan EX), kept the same way; null when it's absent. */
+    fun picture(archive: ZimArchive, imagePath: String, targetPx: Int = TARGET_PX): String? = try {
+        archive.resolvePath(imagePath)?.let { cached(archive, it, targetPx) }
+    } catch (_: Throwable) {
+        null
+    }
+
+    private fun cached(archive: ZimArchive, imagePath: String, targetPx: Int): String? {
         val size = if (targetPx == TARGET_PX) "" else "@$targetPx"
         // "#2": thumbnails made before transparent pictures were flattened onto white (they came out black) are remade.
         val file = File(dir, "${sha1("${archive.uuid}/$imagePath$size#2")}.jpg")
@@ -28,9 +40,7 @@ class ArticleThumbnails(private val dir: File) {
         dir.mkdirs()
         val tmp = File(dir, "${file.name}.tmp")
         tmp.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 80, it) }
-        if (tmp.renameTo(file)) file.path else null
-    } catch (_: Throwable) { // Includes OutOfMemoryError: a bad image never takes Home down.
-        null
+        return if (tmp.renameTo(file)) file.path else null
     }
 
     /**

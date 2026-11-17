@@ -1028,6 +1028,7 @@ class AppContainer(context: Context) {
             bookOf = { id -> bookshelf.book(id)?.takeIf { it.status == app.granger.core.library.PackStatus.OK }?.let { app.granger.ebook.LibraryBook(it.id, it.title, it.coverPath) } },
             libraryLanguages = { knowledgeNow.value.toSet() },
             sentence = { bookId, mention -> kotlinx.coroutines.withContext(io) { bookSentence(bookId, mention) } },
+            figure = { packId, image -> kotlinx.coroutines.withContext(io) { library.archive(packId)?.let { thumbs.picture(it, image, TOPIC_PICTURE_PX) } } },
         )
     }
 

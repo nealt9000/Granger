@@ -39,4 +39,26 @@
     <string name="topic_map_books">Books</string>
     <string name="topic_map_open">Open the topic page</string>
     <string name="topic_map_hint">Tap a circle to centre the map on it. Hold to open it.</string>
+    <!-- A broad topic's page (Plan EX): Airplane, Mountain, Economics. -->
+    <string name="topic_broad_kicker">A topic to explore</string>
+    <string name="topic_broad_kinds">Kinds</string>
+    <!-- The kinds section's heading: "Kinds · 72". -->
+    <string name="topic_broad_kinds_title">Kinds · %1$d</string>
+    <string name="topic_broad_all">All</string>
+    <string name="topic_broad_people">People</string>
+    <string name="topic_broad_map">As a map</string>
+    <!-- The ring's heading: "Ways into Airplane". -->
+    <string name="topic_broad_map_title">Ways into %1$s</string>
+    <plurals name="topic_broad_kinds_count">
+        <item quantity="one">%1$d kind</item>
+        <item quantity="other">%1$d kinds</item>
+    </plurals>
+    <plurals name="topic_broad_people_count">
+        <item quantity="one">%1$d person</item>
+        <item quantity="other">%1$d people</item>
+    </plurals>
+    <plurals name="topic_broad_chapters_count">
+        <item quantity="one">%1$d chapter</item>
+        <item quantity="other">%1$d chapters</item>
+    </plurals>
 </resources>

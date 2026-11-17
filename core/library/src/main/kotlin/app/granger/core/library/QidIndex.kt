@@ -78,6 +78,38 @@ class QidIndex private constructor(private val db: SQLiteDatabase, val packId: S
         db.rawQuery("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'facets'", null).use { it.moveToFirst() }
     }
 
+    /** Whether the index carries broad topics' parts (Plan EX T1; files built before it don't). */
+    val hasTopics: Boolean by lazy {
+        db.rawQuery("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'topic_parts'", null).use { it.moveToFirst() }
+    }
+
+    /** The broad topic [qid]'s page parts (tools/topics/parts.py), or null when it isn't one here. */
+    fun topicParts(qid: Long): TopicParts? {
+        if (!hasTopics) return null
+        val groups = ArrayList<TopicParts.Group>(); val kinds = ArrayList<TopicParts.Kind>()
+        val sections = ArrayList<TopicParts.Section>(); val links = ArrayList<TopicParts.Link>()
+        val figures = ArrayList<TopicParts.Figure>(); val people = ArrayList<Long>()
+        db.rawQuery("SELECT part, item, grp, text, note FROM topic_parts WHERE topic = ? ORDER BY part, ord", arrayOf(qid.toString())).use { c ->
+            while (c.moveToNext()) {
+                val item = if (c.isNull(1)) 0L else c.getLong(1)
+                val grp = if (c.isNull(2)) -1 else c.getInt(2)
+                val text = if (c.isNull(3)) "" else c.getString(3)
+                val note = if (c.isNull(4)) "" else c.getString(4)
+                when (c.getInt(0)) {
+                    TopicParts.GROUP -> groups += TopicParts.Group(item, text, grp)
+                    TopicParts.KIND -> kinds += TopicParts.Kind(item, grp)
+                    TopicParts.SECTION -> sections += TopicParts.Section(note, text)
+                    TopicParts.LINK -> links += TopicParts.Link(item, grp)
+                    TopicParts.FIGURE -> figures += TopicParts.Figure(note, text, grp)
+                    TopicParts.PERSON -> people += item
+                }
+            }
+        }
+        if (groups.isEmpty() && kinds.isEmpty() && sections.isEmpty() && people.isEmpty()) return null
+        val under = db.rawQuery("SELECT under FROM topics WHERE qid = ?", arrayOf(qid.toString())).use { if (it.moveToFirst()) it.getInt(0) else kinds.size }
+        return TopicParts(qid, packId, under, groups, kinds, sections, links, figures, people)
+    }
+
     /** The facet list with its names and codes (meta `facets`, JSON {subject: [{id, en, es, code}]}); null without one. */
     internal val facetList: String? by lazy {
         if (!hasFacets) null else runCatching {
@@ -235,6 +267,15 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
     /** Whether any index carries sub-categories (Plan EX editorial pass). */
     val hasFacets: Boolean get() = indexes.any { it.hasFacets }
 
+    /**
+     * The broad topic [qid]'s page parts (Plan EX T1), from [packId]'s own index first, then the packs in [language]
+     * (parts are in their pack's language: section titles, captions, group names); null when it isn't a broad topic.
+     */
+    fun topicParts(qid: Long, packId: String? = null, language: String? = null): TopicParts? {
+        val order = indexes.filter { it.packId == packId } + indexes.filter { it.packId != packId && (language == null || it.language == language) }
+        return order.firstNotNullOfOrNull { it.topicParts(qid) }
+    }
+
     /** [subject]'s sub-categories, in their curated order, with their names; empty without any. */
     fun facets(subject: String): List<Facet> = indexes.firstNotNullOfOrNull { it.facetList }?.let { Facet.parse(it, subject) }.orEmpty()
 
@@ -342,4 +383,43 @@ internal fun countDistinct(cursors: List<android.database.Cursor>): Int {
         }
     }
     return n
+}
+
+/**
+ * A broad topic's page parts (Plan EX T1, tools/topics/parts.py), read from one pack's index: its kinds (the articles
+ * under its class, best known first) and their groups, its article's sections with the articles each links, its
+ * figures with their captions, and the people characteristic of it. Items are QIDs, to resolve in any installed pack.
+ */
+data class TopicParts(
+    val qid: Long,
+    /** The pack whose index these came from (its language; its ZIM holds the figures, when it has pictures). */
+    val packId: String,
+    /** How many of its pack's articles are under it (the kinds kept are the best known of these). */
+    val under: Int,
+    val groups: List<Group>,
+    val kinds: List<Kind>,
+    val sections: List<Section>,
+    val links: List<Link>,
+    val figures: List<Figure>,
+    val people: List<Long>,
+) {
+    /** A group of kinds: its class, its name in the pack's language, how many of the kinds it holds. */
+    data class Group(val cls: Long, val name: String, val count: Int)
+    /** A kind: its item and its group (an index into [groups]), or -1. */
+    data class Kind(val qid: Long, val group: Int)
+    /** One of the article's sections: its anchor and title. */
+    data class Section(val anchor: String, val title: String)
+    /** An article the topic's article links, in [section] (an index into [sections]; -1 the lead). */
+    data class Link(val qid: Long, val section: Int)
+    /** A figure: its picture's path in the pack's ZIM, its caption, its section (-1 the lead). */
+    data class Figure(val image: String, val caption: String, val section: Int)
+
+    companion object {
+        const val GROUP = 1
+        const val KIND = 2
+        const val SECTION = 3
+        const val LINK = 4
+        const val FIGURE = 5
+        const val PERSON = 6
+    }
 }
