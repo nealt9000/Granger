@@ -97,3 +97,8 @@ Places as a subject door beyond counts (the Atlas is LL6); Trails (LL6); the onl
   - **Pack doors** use a domain → subject map for now (medicine → Health, food → Food, thought → Religion…); switch to the catalog `subjects` field once KB2 merges. Book collections join the doors then too (`Catalog.bookCollectionsBySubject`).
   - **Neal to look at:** door order is by size, so WikiMed puts Health first (39k); Spanish screens not yet seen on the phone (strings done).
   - Tests: 3,159 green. The Pixel ran with `-PcatalogUrl` (local signed catalog) to fetch the new indexes; reinstalled on the normal catalog URL after.
+- **Task 3 built (desk) `30dc646a`, Pixel check pending (phone was locked):**
+  - **A subject opened:** Wander (a random well-known main-subject article, into Home's Wander) and Quiz (the six time games dealing only the subject's dated articles; own best runs; shown from 40 dated); era chips with counts; Most linked / Oldest first; rows show pictures and dates; In your books; packs; articles, 60 a page.
+  - **Eras:** one pass over the time indexes per subject (`datedIn`), kept as primitive arrays; a life counts at forty, as on the landing.
+  - **Books:** subjects from each book's Wikidata work (404 of 622 Classics have one, almost all Books & writing; Religion and History where they fit). Measured and rejected: a book's subject from what it mentions (Places leads for 555 of 622). KB2's catalog book subjects join after its merge.
+  - **Explore's rail icon is a compass.**
