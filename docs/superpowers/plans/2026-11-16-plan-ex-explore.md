@@ -321,10 +321,13 @@ Data is flagged against what the gqid-v5 index holds: **have** (on the phone tod
 - Doors bar: the topics before and after in the room, best known first: **have**.
 - Viewpoints: not built; no placeholder ships.
 
-**D4. Connections**
-- For a broad topic: one plate each from kinds, people, up to three chapters, and Related; labels are the part or chapter name: **have**.
-- For other topics: today's topic map (links, Related, books) redrawn as plates with labelled lines: **have**.
-- Touching a line shows that thing's card and the rest of its group.
+**D4. Connections: the quilt** (Neal 2026-11-17: the right direction, clears the bar, needs design polish)
+- The middle plate with its groups touching it; a paper tab starts each group. For a broad topic the groups are kinds, people, chapters and close kin: **have** (`topic_parts`, the vectors). For other topics: leads to, close kin, born within a year, rooms, in your books: **have** (time index, `facets`, mention index).
+- Touching a plate re-forms the quilt round it; a thread strip keeps the walk. The shared-plate square: **compute** from the last quilt.
+- Leads to, and the corner number: a lookup on `topic_parts.item`. It needs an index on that column: **new**, small, in the next rebuild.
+- Holding a plate shows its label: where the link was found, its rooms, and the topics that lead on.
+- Draw order: parts, rooms and time first; close kin fills in when the vectors answer (0.7 to 1 s in the spike).
+- Still to design: polish (Neal), a topic with very few connections, and the TalkBack form (a list of groups).
 
 **R. Rooms seen**
 - **New** user data: a small table (kind, id, first seen). Rooms, subjects and eras only, never articles. A switch to turn it off and one to clear it in Settings. The next free migration number after `article_marks`.
@@ -340,10 +343,10 @@ Data is flagged against what the gqid-v5 index holds: **have** (on the phone tod
 - **D is the strongest so far** and is OK'd as the point to iterate from. It's barely at the bar for testers.
 - **The map is now the weakest part.** It's the next thing to redesign, before D4 is built.
 - **Lenses are called rooms** in the app, for now.
-- The build plan above stands as the working plan, with D4 (Connections) held until the map is redrawn.
+- The build plan above stands as the working plan. D4 (Connections) was held until the map was redrawn; it's now the quilt.
 
 ### The map, redrawn as a quilt (2026-11-17)
-Neal on D's map: it says little a list couldn't, a few taps in it dead-ends without leading on to interesting connections, and it's visually uninteresting, with no designer's hand. A redraw is on the canvas, row 8 (four boards: Airplane, one touch later on Charles Lindbergh, a held plate, Night). **Awaiting Neal.**
+Neal on D's map: it says little a list couldn't, a few taps in it dead-ends without leading on to interesting connections, and it's visually uninteresting, with no designer's hand. A redraw is on the canvas, row 8 (four boards: Airplane, one touch later on Charles Lindbergh, a held plate, Night).
 
 - **No spokes.** Plates that touch the middle plate are connected to it. Each group starts with a paper tab (Kinds · 60, Pilots · 12, History · 24).
 - **No dead ends.** Touching a plate re-forms the quilt round it. A corner number says how many other topics lead to that plate.
@@ -361,4 +364,4 @@ Neal on D's map: it says little a list couldn't, a few taps in it dead-ends with
 
 **Not yet known:** how a topic with very few connections looks, and how the quilt reads with TalkBack (a list of groups is the likely form).
 
-If Neal OKs it, the quilt replaces D4 in the build plan.
+**Neal (2026-11-17):** the quilt is the right direction and much better; it clears the bar for the map and needs some design polish. It's swapped into D on the canvas (row 7) and into D4 above.
