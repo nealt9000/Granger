@@ -4,7 +4,7 @@
  "sidecar": "gqid",
  "fileName": "wikipedia_en_geography_nopic_2026-10.gqid",
  "sizeBytes": 10338304,
- "sha256": "a9a5100a936b8f0170e48b7aa21b4cc247e1a69d7279936de6624624a1704e51",
+ "sha256": "56a53515a5a46d16e103402c5080038aacf9729c16338d36de81f29e463bc04d",
  "schemaVersion": 1,
  "sourceSha256": "eb8e7c2d91fef97c3c6578c52b98894129afeaed58f1f2ec72543db2d61ad1e3",
  "builder": "tools/qidindex/build.py",

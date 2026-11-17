@@ -4,7 +4,7 @@
  "sidecar": "gqid",
  "fileName": "wikipedia_en_golf_nopic_2026-10.gqid",
  "sizeBytes": 1277952,
- "sha256": "037929f312fe73a34258982a25cafe10c1ba5b3231498da8dc4cd6c6c526f8be",
+ "sha256": "af87b3a94e65a17f125bb4d8d365e4984a476d92e0db30c7a00a2e2a77792017",
  "schemaVersion": 1,
  "sourceSha256": "4d589c84d57203c1356e0620d7e9efccf0f134426fe0d6773fd123e9056bfd76",
  "builder": "tools/qidindex/build.py",

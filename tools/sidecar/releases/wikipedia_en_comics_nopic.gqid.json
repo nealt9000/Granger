@@ -4,7 +4,7 @@
  "sidecar": "gqid",
  "fileName": "wikipedia_en_comics_nopic_2026-10.gqid",
  "sizeBytes": 2830336,
- "sha256": "1372fb369d88821917b393bdb32e7c4a7888ac7577c658874dd58a7197c21ed6",
+ "sha256": "535f48e86e29516d0f3eb9f6f148af9f2586d312a931be5dbd5cd70a17c67323",
  "schemaVersion": 1,
  "sourceSha256": "5c1a35dd4c1b86f56edfdf8be999685d534651f536c2293e64ddbd92dc4ff05b",
  "builder": "tools/qidindex/build.py",

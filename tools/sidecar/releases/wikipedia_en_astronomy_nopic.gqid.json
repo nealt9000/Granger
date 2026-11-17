@@ -4,7 +4,7 @@
  "sidecar": "gqid",
  "fileName": "wikipedia_en_astronomy_nopic_2026-08.gqid",
  "sizeBytes": 2973696,
- "sha256": "47dbc3ae090ed937200a6604a16ab4b66ffe3a323f6645f3bc6637e1a0f3e846",
+ "sha256": "0abdb591cfcf8c14b80e717ef6d293e2a803579f01e4f01d70c992ac3401fe39",
  "schemaVersion": 1,
  "sourceSha256": "05eeb2dacfa1e79d66f43b01fb9531eaf22cf2d5b829ff856e75504863e6526c",
  "builder": "tools/qidindex/build.py",

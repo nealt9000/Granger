@@ -4,7 +4,7 @@
  "sidecar": "gqid",
  "fileName": "wikipedia_en_ice-hockey_nopic_2026-10.gqid",
  "sizeBytes": 4087808,
- "sha256": "5c7ec55a32603e5316f9b12591ce6acf8f85b8cfe0079eb31a081b98503962f1",
+ "sha256": "65a38e6fba37b64cf1e313e6361fe7f1aa3d472825d50fa8f888196200d33ce0",
  "schemaVersion": 1,
  "sourceSha256": "564620664169b5cbb72bf522caeabf8b8fe9d176864edb80aacb5e69162208ea",
  "builder": "tools/qidindex/build.py",

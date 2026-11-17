@@ -38,6 +38,10 @@ def load_spec(labels=None):
                 for q, want in s.get(table, {}).items():
                     if labels.get(q) != want:
                         bad.append(f"{s['id']}.{table} {q} wants {want!r}, has {labels.get(q)!r}")
+            # A namesake is an item, often not a class: checked only when the classes know it.
+            for q, want in s.get("namesakes", {}).items():
+                if labels.get(q) is not None and labels.get(q) != want:
+                    bad.append(f"{s['id']}.namesakes {q} wants {want!r}, has {labels.get(q)!r}")
         for table in ("fictional", "drop", "stop"):
             for q, want in spec.get(table, {}).items():
                 if labels.get(q) != want:
@@ -107,6 +111,8 @@ class Rules:
         self.event_walk = Walker(parents, {q: {"event"} for q in self.hist.get("event_class", {})},
                                  self.hist.get("event_depth", 4), stop)
         self.drop = set(spec["drop"])
+        # The article about a subject itself (Art, Health, Politics) belongs to that subject alone.
+        self.namesake = {q: s["id"] for s in spec["subjects"] for q in s.get("namesakes", {})}
         self.max = spec.get("max_subjects", 3)
 
     def dropped(self, r):
@@ -150,10 +156,17 @@ class Rules:
         end = year(r.get("P582")) or year(r.get("P585")) or year(r.get("P580"))
         if end is None or end > self.this_year - self.hist.get("recent_years", 5):
             return False
+        # Recorded history only: the Big Bang and the Cambrian explosion are dated past events, but not History.
+        start = min(y for y in (year(r.get("P580")), year(r.get("P585")), year(r.get("P582"))) if y is not None)
+        if start < self.hist.get("from_year", -10**12):
+            return False
         return any(self.event_walk.subjects(q) for q in r.get("P31", []) + r.get("P279", []))
 
     def decide(self, r, cand, sims, lead_w):
         """(main, subjects, mode, share) from the rule candidates, the neighbours' vote and the lead's role words."""
+        if r["q"] in self.namesake:
+            s = self.namesake[r["q"]]
+            return s, [s], "namesake", {s: 1.0}
         person = HUMAN in r.get("P31", [])
         near = sorted(cand.values())
         if len(cand) == 1 and not lead_w:

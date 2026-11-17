@@ -4,7 +4,7 @@
  "sidecar": "gqid",
  "fileName": "wikipedia_en_basketball_nopic_2026-09.gqid",
  "sizeBytes": 3928064,
- "sha256": "d773cf7e1f873dfd0371ce43e3c0fd32b73972731c0c17fcc4c98fd967eca801",
+ "sha256": "57bc3c64a9dc367f3875fd5829bc087efc91bc1a714d64eacff58ad518ceaf65",
  "schemaVersion": 1,
  "sourceSha256": "ae93ba06a548a1e7819876ec46d2535e5117e082e42fe0bb14e99614e1588d9e",
  "builder": "tools/qidindex/build.py",

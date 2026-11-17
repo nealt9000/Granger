@@ -4,7 +4,7 @@
  "sidecar": "gqid",
  "fileName": "wikipedia_en_100_2026-08.gqid",
  "sizeBytes": 53248,
- "sha256": "152c59196a1608bfa9b029d169625d25b036de9cfbffce78c64e0afdb3203f71",
+ "sha256": "5318f4c0beffd9bfc445241efcec7f27084480b801b5439b4a402f8f628e396b",
  "schemaVersion": 1,
  "sourceSha256": "2eb7fd115bfb8644a08a9482f01f52b507428b1b8a30129fead92f7b6715440b",
  "builder": "tools/qidindex/build.py",

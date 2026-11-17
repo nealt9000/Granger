@@ -4,7 +4,7 @@
  "sidecar": "gqid",
  "fileName": "wikipedia_es_venezuela_nopic_2026-09.gqid",
  "sizeBytes": 1114112,
- "sha256": "f3f774014b96a196024f121b21ed40d5183acf70500f9d97c59600e57ebbbd11",
+ "sha256": "41d04899d6ed263915f0115f67f6f4786a51e440052f5bbf6ecbc7d3988e2cae",
  "schemaVersion": 1,
  "sourceSha256": "ae4adade5606e8fe2ffe07885ce6e836d3a973b0c983e6f6de18fd2199f34a56",
  "builder": "tools/qidindex/build.py",

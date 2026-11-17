@@ -64,3 +64,19 @@ def test_year_reads_wikidata_times():
     assert assign.year([["+1830-10-04T00:00:00Z", 11]]) == 1830
     assert assign.year([["-0044-03-15T00:00:00Z", 11]]) == -44
     assert assign.year(None) is None
+
+
+def test_a_subjects_own_article_belongs_to_it_alone():
+    r = rules()
+    # Wikidata calls Art an Olympic sport (the old art competitions); it's Art & architecture's own article.
+    art = {"q": "Q735", "P31": ["Q31629"]}
+    assert r.rules_only(art)[:2] == ("art", ["art"])
+    assert r.decide({"q": "Q12147"}, {"food": 1}, {"food": 0.9}, {})[:2] == ("health", ["health"])
+    assert r.rules_only({"q": "Q8434"})[:2] == ("society", ["society"])   # Education: Society & politics
+
+
+def test_history_starts_with_recorded_history():
+    r = rules()
+    deep = {"q": "Q_c", "P31": ["Q_assassination"], "P580": [["-538800000-01-01T00:00:00Z", 3]]}
+    assert not r.past(deep, "science")
+    assert r.past(dict(deep, P580=[["-2560-01-01T00:00:00Z", 9]]), "science")   # the Great Pyramid's age is History

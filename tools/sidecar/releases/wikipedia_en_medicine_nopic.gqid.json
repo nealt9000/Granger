@@ -4,7 +4,7 @@
  "sidecar": "gqid",
  "fileName": "wikipedia_en_medicine_nopic_2026-10-10.gqid",
  "sizeBytes": 7671808,
- "sha256": "87ade9758bbab98860f68a5395d7b5e02ef43a63710b24d59220fd61a4375cdb",
+ "sha256": "005373916a69db8eb0e65cc502b43130a93f8602fb24f05a79977f78cf5c6e0b",
  "schemaVersion": 1,
  "sourceSha256": "718fadad40b3491be3fa8f95181a948e4d726f97a79a14e0ef1b90c6b2b03625",
  "builder": "tools/qidindex/build.py",

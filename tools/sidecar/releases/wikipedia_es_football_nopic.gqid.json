@@ -4,7 +4,7 @@
  "sidecar": "gqid",
  "fileName": "wikipedia_es_football_nopic_2026-10.gqid",
  "sizeBytes": 9416704,
- "sha256": "7f0dccc36ce29e716cfd91d8128f39c1c018191ac885d826a0926fa4972173b5",
+ "sha256": "6829cbe2cec34dc2c9c28cb001c9a1e62c3be035c9ad1ec77aab6f3e326cde7b",
  "schemaVersion": 1,
  "sourceSha256": "7eabde99c5bc258824b56741193bfccb8dd1da55027c5f64a074cd2476e7647d",
  "builder": "tools/qidindex/build.py",

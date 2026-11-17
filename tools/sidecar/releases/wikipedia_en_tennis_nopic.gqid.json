@@ -4,7 +4,7 @@
  "sidecar": "gqid",
  "fileName": "wikipedia_en_tennis_nopic_2026-10.gqid",
  "sizeBytes": 5955584,
- "sha256": "9d26feef6b245fffc103456d5082f92c2c409d8a98286e47ad24441ebb0827ba",
+ "sha256": "b9727866e733ecad606e93348337efa5e182fafd42025a0731e115fde263a906",
  "schemaVersion": 1,
  "sourceSha256": "f38dac5d9c3ce31e4845e3eeec819437ccfdfbef3f9cd073101fb33e0849233a",
  "builder": "tools/qidindex/build.py",

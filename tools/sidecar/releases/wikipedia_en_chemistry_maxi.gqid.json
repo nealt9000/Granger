@@ -4,7 +4,7 @@
  "sidecar": "gqid",
  "fileName": "wikipedia_en_chemistry_maxi_2026-10-15.gqid",
  "sizeBytes": 1040384,
- "sha256": "9257a70768d3964e68bb857d0a8426e1ce82dcf245476f2a3097b23ec57ad246",
+ "sha256": "b0593f59880b94d9098bb7a6f8d751cc48f56b9da86dd96ecc4018d9ce51f046",
  "schemaVersion": 1,
  "sourceSha256": "c197e6d3ce1bdf8838e8abbc63226bd6849a31ec81913bacb779d1d83bcc7d7b",
  "builder": "tools/qidindex/build.py",

@@ -4,7 +4,7 @@
  "sidecar": "gqid",
  "fileName": "wikipedia_es_climate-change_mini_2026-10.gqid",
  "sizeBytes": 249856,
- "sha256": "a5728623f5a0d959c0d4b1f3a0b203e77b29591772ff4ee710f53d1e74a19dfe",
+ "sha256": "993302af6b16e5d3d89430046bfbeb819cdb8e7ce56bedb7d07c4836cd063ea6",
  "schemaVersion": 1,
  "sourceSha256": "928e89fdfe3e92e6cf63d4c640c27f318ba7515bdd87a76ddaa6fe96bd30eadc",
  "builder": "tools/qidindex/build.py",

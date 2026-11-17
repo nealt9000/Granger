@@ -4,7 +4,7 @@
  "sidecar": "gqid",
  "fileName": "wikipedia_es_mathematics_nopic_2026-10-14.gqid",
  "sizeBytes": 1159168,
- "sha256": "14b864bb4f914b54e0156043894778749239afb26fb2584b88436aaef5b006e7",
+ "sha256": "d92e3247faa689fdc539e0875189063ba1f7eaca7503ff95e6f4c7c9a8e6c1ef",
  "schemaVersion": 1,
  "sourceSha256": "2f47a05625b9f45ffa01591b449e2cb20760bb4838b7040f1dd1d5eb16831eb9",
  "builder": "tools/qidindex/build.py",

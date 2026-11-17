@@ -4,7 +4,7 @@
  "sidecar": "gqid",
  "fileName": "wikipedia_en_baseball_nopic_2026-09.gqid",
  "sizeBytes": 5033984,
- "sha256": "24a30ac2f37b6cd2f7066da60cc5629a99a69df888a1edbd0afc6d7db9fb5488",
+ "sha256": "0f2a44d76fd9bd7fc5358102ac01dff2048110d5028c5e0b7e26d8e15e0c4100",
  "schemaVersion": 1,
  "sourceSha256": "c307422c8a3c8e0edf367c14995b2ff41a07d75b1773d4f4ea6427be3c3642a2",
  "builder": "tools/qidindex/build.py",

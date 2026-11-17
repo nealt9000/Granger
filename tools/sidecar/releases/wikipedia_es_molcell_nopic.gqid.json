@@ -4,7 +4,7 @@
  "sidecar": "gqid",
  "fileName": "wikipedia_es_molcell_nopic_2026-10.gqid",
  "sizeBytes": 614400,
- "sha256": "2101eb25ac0277c365411c907e1e1d3b0239f0d72bce47d2bae06ad3e8052979",
+ "sha256": "320f8a244bcfd704a4b2d86ddaa73e2baf5c47330335ad4cf60b79acb6985995",
  "schemaVersion": 1,
  "sourceSha256": "f4021e9d7c8aacca64f9c3c067926a44948c2ac66ef6b0d601947e10c7e4805b",
  "builder": "tools/qidindex/build.py",

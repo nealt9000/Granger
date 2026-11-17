@@ -4,7 +4,7 @@
  "sidecar": "gqid",
  "fileName": "wikipedia_en_ray-charles_mini_2026-10.gqid",
  "sizeBytes": 2777088,
- "sha256": "d36f36d1f51a1dd393028e8ae602a53616edce6e3fe3bb74dfd00e90640e07a8",
+ "sha256": "dd3ff246fe0c784a9ee201ea2b04c0b48067e14b073429102a8d91c42964184b",
  "schemaVersion": 1,
  "sourceSha256": "ad37a9355a356b12cc4f2e339fcd15940dd93099de0c2851b6a25cc5b9c33c31",
  "builder": "tools/qidindex/build.py",

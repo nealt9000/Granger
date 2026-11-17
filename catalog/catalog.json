@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-11-16T20:45:23Z",
+  "generatedAt": "2026-11-17T03:03:24Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -53,8 +53,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_medicine_nopic_2026-10-10.gqid",
-          "sha256": "87ade9758bbab98860f68a5395d7b5e02ef43a63710b24d59220fd61a4375cdb",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_medicine_nopic_2026-10-10.gqid",
+          "sha256": "005373916a69db8eb0e65cc502b43130a93f8602fb24f05a79977f78cf5c6e0b",
           "sizeBytes": 7671808,
           "schemaVersion": 1
         }
@@ -111,8 +111,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_medicine_nopic_2026-10-10.gqid",
-          "sha256": "87ade9758bbab98860f68a5395d7b5e02ef43a63710b24d59220fd61a4375cdb",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_medicine_nopic_2026-10-10.gqid",
+          "sha256": "005373916a69db8eb0e65cc502b43130a93f8602fb24f05a79977f78cf5c6e0b",
           "sizeBytes": 7671808,
           "schemaVersion": 1
         }
@@ -168,8 +168,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_top_nopic_2026-09-14.gqid",
-          "sha256": "9df7f8b930fc10b170bbde843ce7f6cf31eceeaf20e15f37dbe4a52632469f6a",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_top_nopic_2026-09-14.gqid",
+          "sha256": "f2bf0184bff48b1c0ae9ff226614bc49ad6298e4b20df43bc3835ca96288c9cd",
           "sizeBytes": 7720960,
           "schemaVersion": 1
         }
@@ -225,8 +225,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_top_nopic_2026-09-14.gqid",
-          "sha256": "9df7f8b930fc10b170bbde843ce7f6cf31eceeaf20e15f37dbe4a52632469f6a",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_top_nopic_2026-09-14.gqid",
+          "sha256": "f2bf0184bff48b1c0ae9ff226614bc49ad6298e4b20df43bc3835ca96288c9cd",
           "sizeBytes": 7720960,
           "schemaVersion": 1
         }
@@ -265,8 +265,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_100_2026-08.gqid",
-          "sha256": "152c59196a1608bfa9b029d169625d25b036de9cfbffce78c64e0afdb3203f71",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_100_2026-08.gqid",
+          "sha256": "5318f4c0beffd9bfc445241efcec7f27084480b801b5439b4a402f8f628e396b",
           "sizeBytes": 53248,
           "schemaVersion": 1
         }
@@ -307,8 +307,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_ray-charles_mini_2026-10.gqid",
-          "sha256": "d36f36d1f51a1dd393028e8ae602a53616edce6e3fe3bb74dfd00e90640e07a8",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_ray-charles_mini_2026-10.gqid",
+          "sha256": "dd3ff246fe0c784a9ee201ea2b04c0b48067e14b073429102a8d91c42964184b",
           "sizeBytes": 2777088,
           "schemaVersion": 1
         }
@@ -491,8 +491,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_geography_nopic_2026-10.gqid",
-          "sha256": "a9a5100a936b8f0170e48b7aa21b4cc247e1a69d7279936de6624624a1704e51",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_geography_nopic_2026-10.gqid",
+          "sha256": "56a53515a5a46d16e103402c5080038aacf9729c16338d36de81f29e463bc04d",
           "sizeBytes": 10338304,
           "schemaVersion": 1
         }
@@ -549,8 +549,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_physics_maxi_2026-10-14.gqid",
-          "sha256": "89c4a925c8ccaf81c761eaa0f62809324dc61acb1224b7b3c09f078742772685",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_physics_maxi_2026-10-14.gqid",
+          "sha256": "99a11a443febe17b21a1953dba8abb087500a2dd5818a5992986cf93a6487e4b",
           "sizeBytes": 2494464,
           "schemaVersion": 1
         }
@@ -607,8 +607,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_chemistry_maxi_2026-10-15.gqid",
-          "sha256": "9257a70768d3964e68bb857d0a8426e1ce82dcf245476f2a3097b23ec57ad246",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_chemistry_maxi_2026-10-15.gqid",
+          "sha256": "b0593f59880b94d9098bb7a6f8d751cc48f56b9da86dd96ecc4018d9ce51f046",
           "sizeBytes": 1040384,
           "schemaVersion": 1
         }
@@ -665,8 +665,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_mathematics_maxi_2026-09-15.gqid",
-          "sha256": "2e2bb96e4a37196b2aa48bbabbdf728a90cbfc6fdaafa181310117138d48e5fc",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_mathematics_maxi_2026-09-15.gqid",
+          "sha256": "21ec03dace397f09d47d218830e3a373a236a6d3852cf04b0e71de0983b0fbc3",
           "sizeBytes": 2715648,
           "schemaVersion": 1
         }
@@ -723,8 +723,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_knots_maxi_2026-10-18.gqid",
-          "sha256": "a7db390c7afd0b029ea1b64161c3a46d98a1b8abe0cf394469ef699b977a6246",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_knots_maxi_2026-10-18.gqid",
+          "sha256": "e2c42615fe0c85e2fb7dfd24de9dece24cd2c6d05aae71fa1a4c1b49818d282a",
           "sizeBytes": 73728,
           "schemaVersion": 1
         }
@@ -817,8 +817,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_medicine_nopic_2026-10-15.gqid",
-          "sha256": "865ef999e9bc65d67a87ff5ba4e817675f69d2652dfa758f89a4a861facf9d3d",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_medicine_nopic_2026-10-15.gqid",
+          "sha256": "b8d643345eddb897f4ee5ccea50994c6a7711c54957836b4174e9de0d273fb1d",
           "sizeBytes": 2297856,
           "schemaVersion": 1
         }
@@ -878,8 +878,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_medicine_nopic_2026-10-15.gqid",
-          "sha256": "865ef999e9bc65d67a87ff5ba4e817675f69d2652dfa758f89a4a861facf9d3d",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_medicine_nopic_2026-10-15.gqid",
+          "sha256": "b8d643345eddb897f4ee5ccea50994c6a7711c54957836b4174e9de0d273fb1d",
           "sizeBytes": 2297856,
           "schemaVersion": 1
         }
@@ -943,8 +943,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_top_nopic_2026-10-10.gqid",
-          "sha256": "1fc5c7145001b3ca93c397405ada17dd0af17035e7765e2a1464b879487d27b4",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_top_nopic_2026-10-10.gqid",
+          "sha256": "c6a4fb08985e00d1d106c18e435da111d093cc0a8ed402f004ada687a3dac994",
           "sizeBytes": 7766016,
           "schemaVersion": 1
         }
@@ -1008,8 +1008,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_top_nopic_2026-10-10.gqid",
-          "sha256": "1fc5c7145001b3ca93c397405ada17dd0af17035e7765e2a1464b879487d27b4",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_top_nopic_2026-10-10.gqid",
+          "sha256": "c6a4fb08985e00d1d106c18e435da111d093cc0a8ed402f004ada687a3dac994",
           "sizeBytes": 7766016,
           "schemaVersion": 1
         }
@@ -1056,9 +1056,9 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_all_mini_2026-10.gqid",
-          "sha256": "dc66a8b73636e0820b9eb8e2c6d83407dd708367c7c5dc07dba137185a648e6e",
-          "sizeBytes": 260202496,
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_all_mini_2026-10.gqid",
+          "sha256": "cd430d1b63d1a0c8760514d49d4eaa2edaf4f61623ca5a788d33503bbe895919",
+          "sizeBytes": 260206592,
           "schemaVersion": 1
         }
       ]
@@ -1104,9 +1104,9 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_all_mini_2026-10.gqid",
-          "sha256": "dc66a8b73636e0820b9eb8e2c6d83407dd708367c7c5dc07dba137185a648e6e",
-          "sizeBytes": 260202496,
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_all_mini_2026-10.gqid",
+          "sha256": "cd430d1b63d1a0c8760514d49d4eaa2edaf4f61623ca5a788d33503bbe895919",
+          "sizeBytes": 260206592,
           "schemaVersion": 1
         }
       ]
@@ -20141,8 +20141,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_astronomy_nopic_2026-08.gqid",
-          "sha256": "47dbc3ae090ed937200a6604a16ab4b66ffe3a323f6645f3bc6637e1a0f3e846",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_astronomy_nopic_2026-08.gqid",
+          "sha256": "0abdb591cfcf8c14b80e717ef6d293e2a803579f01e4f01d70c992ac3401fe39",
           "sizeBytes": 2973696,
           "schemaVersion": 1
         }
@@ -20182,8 +20182,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_astronomy_nopic_2026-08.gqid",
-          "sha256": "47dbc3ae090ed937200a6604a16ab4b66ffe3a323f6645f3bc6637e1a0f3e846",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_astronomy_nopic_2026-08.gqid",
+          "sha256": "0abdb591cfcf8c14b80e717ef6d293e2a803579f01e4f01d70c992ac3401fe39",
           "sizeBytes": 2973696,
           "schemaVersion": 1
         }
@@ -20221,8 +20221,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_basketball_nopic_2026-09.gqid",
-          "sha256": "fe6de3780d0d318c54986985bc0184ec9991a1208e2b8ce002025877af3cd5d2",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_basketball_nopic_2026-09.gqid",
+          "sha256": "9613f49037e605e9e6d36019f11abd4a033424735a4bafd7f4ad6f311dc42306",
           "sizeBytes": 1507328,
           "schemaVersion": 1
         }
@@ -20260,8 +20260,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_basketball_nopic_2026-09.gqid",
-          "sha256": "fe6de3780d0d318c54986985bc0184ec9991a1208e2b8ce002025877af3cd5d2",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_basketball_nopic_2026-09.gqid",
+          "sha256": "9613f49037e605e9e6d36019f11abd4a033424735a4bafd7f4ad6f311dc42306",
           "sizeBytes": 1507328,
           "schemaVersion": 1
         }
@@ -20301,8 +20301,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_baseball_nopic_2026-09.gqid",
-          "sha256": "24a30ac2f37b6cd2f7066da60cc5629a99a69df888a1edbd0afc6d7db9fb5488",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_baseball_nopic_2026-09.gqid",
+          "sha256": "0f2a44d76fd9bd7fc5358102ac01dff2048110d5028c5e0b7e26d8e15e0c4100",
           "sizeBytes": 5033984,
           "schemaVersion": 1
         }
@@ -20342,8 +20342,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_baseball_nopic_2026-09.gqid",
-          "sha256": "24a30ac2f37b6cd2f7066da60cc5629a99a69df888a1edbd0afc6d7db9fb5488",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_baseball_nopic_2026-09.gqid",
+          "sha256": "0f2a44d76fd9bd7fc5358102ac01dff2048110d5028c5e0b7e26d8e15e0c4100",
           "sizeBytes": 5033984,
           "schemaVersion": 1
         }
@@ -20383,8 +20383,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_basketball_nopic_2026-09.gqid",
-          "sha256": "d773cf7e1f873dfd0371ce43e3c0fd32b73972731c0c17fcc4c98fd967eca801",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_basketball_nopic_2026-09.gqid",
+          "sha256": "57bc3c64a9dc367f3875fd5829bc087efc91bc1a714d64eacff58ad518ceaf65",
           "sizeBytes": 3928064,
           "schemaVersion": 1
         }
@@ -20424,8 +20424,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_basketball_nopic_2026-09.gqid",
-          "sha256": "d773cf7e1f873dfd0371ce43e3c0fd32b73972731c0c17fcc4c98fd967eca801",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_basketball_nopic_2026-09.gqid",
+          "sha256": "57bc3c64a9dc367f3875fd5829bc087efc91bc1a714d64eacff58ad518ceaf65",
           "sizeBytes": 3928064,
           "schemaVersion": 1
         }
@@ -20472,8 +20472,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_top_nopic_2026-09-14.gqid",
-          "sha256": "9df7f8b930fc10b170bbde843ce7f6cf31eceeaf20e15f37dbe4a52632469f6a",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_top_nopic_2026-09-14.gqid",
+          "sha256": "f2bf0184bff48b1c0ae9ff226614bc49ad6298e4b20df43bc3835ca96288c9cd",
           "sizeBytes": 7720960,
           "schemaVersion": 1
         }
@@ -20511,8 +20511,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_molcell_nopic_2026-10.gqid",
-          "sha256": "2101eb25ac0277c365411c907e1e1d3b0239f0d72bce47d2bae06ad3e8052979",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_molcell_nopic_2026-10.gqid",
+          "sha256": "320f8a244bcfd704a4b2d86ddaa73e2baf5c47330335ad4cf60b79acb6985995",
           "sizeBytes": 614400,
           "schemaVersion": 1
         }
@@ -20550,8 +20550,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_molcell_nopic_2026-10.gqid",
-          "sha256": "2101eb25ac0277c365411c907e1e1d3b0239f0d72bce47d2bae06ad3e8052979",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_molcell_nopic_2026-10.gqid",
+          "sha256": "320f8a244bcfd704a4b2d86ddaa73e2baf5c47330335ad4cf60b79acb6985995",
           "sizeBytes": 614400,
           "schemaVersion": 1
         }
@@ -20660,8 +20660,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_indian-cinema_nopic_2026-10.gqid",
-          "sha256": "558ddc0eb256266002ec9f1aac6adc663f03186d00a2bc1130f50cec88a02e76",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_indian-cinema_nopic_2026-10.gqid",
+          "sha256": "1cd000df0438601a1daafb2e61963536021565f1f89c858c6ef442c3fccb778a",
           "sizeBytes": 3575808,
           "schemaVersion": 1
         }
@@ -20701,8 +20701,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_indian-cinema_nopic_2026-10.gqid",
-          "sha256": "558ddc0eb256266002ec9f1aac6adc663f03186d00a2bc1130f50cec88a02e76",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_indian-cinema_nopic_2026-10.gqid",
+          "sha256": "1cd000df0438601a1daafb2e61963536021565f1f89c858c6ef442c3fccb778a",
           "sizeBytes": 3575808,
           "schemaVersion": 1
         }
@@ -20740,8 +20740,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_climate-change_mini_2026-10.gqid",
-          "sha256": "a5728623f5a0d959c0d4b1f3a0b203e77b29591772ff4ee710f53d1e74a19dfe",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_climate-change_mini_2026-10.gqid",
+          "sha256": "993302af6b16e5d3d89430046bfbeb819cdb8e7ce56bedb7d07c4836cd063ea6",
           "sizeBytes": 249856,
           "schemaVersion": 1
         }
@@ -20779,8 +20779,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_climate-change_mini_2026-10.gqid",
-          "sha256": "a5728623f5a0d959c0d4b1f3a0b203e77b29591772ff4ee710f53d1e74a19dfe",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_climate-change_mini_2026-10.gqid",
+          "sha256": "993302af6b16e5d3d89430046bfbeb819cdb8e7ce56bedb7d07c4836cd063ea6",
           "sizeBytes": 249856,
           "schemaVersion": 1
         }
@@ -20818,8 +20818,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_climate-change_mini_2026-10.gqid",
-          "sha256": "a5728623f5a0d959c0d4b1f3a0b203e77b29591772ff4ee710f53d1e74a19dfe",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_climate-change_mini_2026-10.gqid",
+          "sha256": "993302af6b16e5d3d89430046bfbeb819cdb8e7ce56bedb7d07c4836cd063ea6",
           "sizeBytes": 249856,
           "schemaVersion": 1
         }
@@ -20867,8 +20867,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_chemistry_maxi_2026-10-15.gqid",
-          "sha256": "9257a70768d3964e68bb857d0a8426e1ce82dcf245476f2a3097b23ec57ad246",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_chemistry_maxi_2026-10-15.gqid",
+          "sha256": "b0593f59880b94d9098bb7a6f8d751cc48f56b9da86dd96ecc4018d9ce51f046",
           "sizeBytes": 1040384,
           "schemaVersion": 1
         }
@@ -20925,8 +20925,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_chemistry_maxi_2026-10-15.gqid",
-          "sha256": "9257a70768d3964e68bb857d0a8426e1ce82dcf245476f2a3097b23ec57ad246",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_chemistry_maxi_2026-10-15.gqid",
+          "sha256": "b0593f59880b94d9098bb7a6f8d751cc48f56b9da86dd96ecc4018d9ce51f046",
           "sizeBytes": 1040384,
           "schemaVersion": 1
         }
@@ -20987,8 +20987,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_movies_nopic_2026-10.gqid",
-          "sha256": "8b63f8f95fda735bc5956252bbe70cc36c00301f74f9f782c1d51951922f4d35",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_movies_nopic_2026-10.gqid",
+          "sha256": "a452a0ecf998869c1571e910175f1afc1638850ec63d22be2117930fbca1a04f",
           "sizeBytes": 11804672,
           "schemaVersion": 1
         }
@@ -21026,8 +21026,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_movies_nopic_2026-10.gqid",
-          "sha256": "8b63f8f95fda735bc5956252bbe70cc36c00301f74f9f782c1d51951922f4d35",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_movies_nopic_2026-10.gqid",
+          "sha256": "a452a0ecf998869c1571e910175f1afc1638850ec63d22be2117930fbca1a04f",
           "sizeBytes": 11804672,
           "schemaVersion": 1
         }
@@ -21090,8 +21090,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_climate-change_mini_2026-10.gqid",
-          "sha256": "3950a734a20b36197537109c3e3f9628dd2b002e8bf539856383f007950c2c10",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_climate-change_mini_2026-10.gqid",
+          "sha256": "47df97aef2ee6b981fe87137e33c30da384aa9feccd3864bd1884ff5d80d0016",
           "sizeBytes": 528384,
           "schemaVersion": 1
         }
@@ -21131,8 +21131,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_climate-change_mini_2026-10.gqid",
-          "sha256": "3950a734a20b36197537109c3e3f9628dd2b002e8bf539856383f007950c2c10",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_climate-change_mini_2026-10.gqid",
+          "sha256": "47df97aef2ee6b981fe87137e33c30da384aa9feccd3864bd1884ff5d80d0016",
           "sizeBytes": 528384,
           "schemaVersion": 1
         }
@@ -21172,8 +21172,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_climate-change_mini_2026-10.gqid",
-          "sha256": "3950a734a20b36197537109c3e3f9628dd2b002e8bf539856383f007950c2c10",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_climate-change_mini_2026-10.gqid",
+          "sha256": "47df97aef2ee6b981fe87137e33c30da384aa9feccd3864bd1884ff5d80d0016",
           "sizeBytes": 528384,
           "schemaVersion": 1
         }
@@ -21213,8 +21213,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_comics_nopic_2026-10.gqid",
-          "sha256": "1372fb369d88821917b393bdb32e7c4a7888ac7577c658874dd58a7197c21ed6",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_comics_nopic_2026-10.gqid",
+          "sha256": "535f48e86e29516d0f3eb9f6f148af9f2586d312a931be5dbd5cd70a17c67323",
           "sizeBytes": 2830336,
           "schemaVersion": 1
         }
@@ -21254,8 +21254,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_comics_nopic_2026-10.gqid",
-          "sha256": "1372fb369d88821917b393bdb32e7c4a7888ac7577c658874dd58a7197c21ed6",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_comics_nopic_2026-10.gqid",
+          "sha256": "535f48e86e29516d0f3eb9f6f148af9f2586d312a931be5dbd5cd70a17c67323",
           "sizeBytes": 2830336,
           "schemaVersion": 1
         }
@@ -21295,8 +21295,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_computer_nopic_2026-09.gqid",
-          "sha256": "19e8f8abbb78463d1e8a013e946868351ecbdc94018f2da18c4a566ec5d93e90",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_computer_nopic_2026-09.gqid",
+          "sha256": "81b93dcdb2a7d2ac8a9563acd73901016a9a5d9f48d980dacd058d6ea8bee475",
           "sizeBytes": 4587520,
           "schemaVersion": 1
         }
@@ -21336,8 +21336,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_computer_nopic_2026-09.gqid",
-          "sha256": "19e8f8abbb78463d1e8a013e946868351ecbdc94018f2da18c4a566ec5d93e90",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_computer_nopic_2026-09.gqid",
+          "sha256": "81b93dcdb2a7d2ac8a9563acd73901016a9a5d9f48d980dacd058d6ea8bee475",
           "sizeBytes": 4587520,
           "schemaVersion": 1
         }
@@ -21400,8 +21400,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_cricket_nopic_2026-10.gqid",
-          "sha256": "6cef5a7ebbf6af240bd3b436cb8426afc82a24e52fae96379c43f87a6dede625",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_cricket_nopic_2026-10.gqid",
+          "sha256": "31caaa5989e23eeedd9d37db906f3fd2e936039a8f2c2bb07ef60d0dceebcb4a",
           "sizeBytes": 4661248,
           "schemaVersion": 1
         }
@@ -21441,8 +21441,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_cricket_nopic_2026-10.gqid",
-          "sha256": "6cef5a7ebbf6af240bd3b436cb8426afc82a24e52fae96379c43f87a6dede625",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_cricket_nopic_2026-10.gqid",
+          "sha256": "31caaa5989e23eeedd9d37db906f3fd2e936039a8f2c2bb07ef60d0dceebcb4a",
           "sizeBytes": 4661248,
           "schemaVersion": 1
         }
@@ -21503,8 +21503,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_comics_nopic_2026-10.gqid",
-          "sha256": "efcab11ba141284819f65f7951a26809a877c418f24f3fc4f17d82d7073ac6f0",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_comics_nopic_2026-10.gqid",
+          "sha256": "d9f17df38ef621cddab1631fb0698e2dde8274f6ca2142b01011e27ffd11bc97",
           "sizeBytes": 1179648,
           "schemaVersion": 1
         }
@@ -21542,8 +21542,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_comics_nopic_2026-10.gqid",
-          "sha256": "efcab11ba141284819f65f7951a26809a877c418f24f3fc4f17d82d7073ac6f0",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_comics_nopic_2026-10.gqid",
+          "sha256": "d9f17df38ef621cddab1631fb0698e2dde8274f6ca2142b01011e27ffd11bc97",
           "sizeBytes": 1179648,
           "schemaVersion": 1
         }
@@ -21605,8 +21605,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_venezuela_nopic_2026-09.gqid",
-          "sha256": "f3f774014b96a196024f121b21ed40d5183acf70500f9d97c59600e57ebbbd11",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_venezuela_nopic_2026-09.gqid",
+          "sha256": "41d04899d6ed263915f0115f67f6f4786a51e440052f5bbf6ecbc7d3988e2cae",
           "sizeBytes": 1114112,
           "schemaVersion": 1
         }
@@ -21644,8 +21644,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_venezuela_nopic_2026-09.gqid",
-          "sha256": "f3f774014b96a196024f121b21ed40d5183acf70500f9d97c59600e57ebbbd11",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_venezuela_nopic_2026-09.gqid",
+          "sha256": "41d04899d6ed263915f0115f67f6f4786a51e440052f5bbf6ecbc7d3988e2cae",
           "sizeBytes": 1114112,
           "schemaVersion": 1
         }
@@ -21708,8 +21708,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_football_nopic_2026-10.gqid",
-          "sha256": "b0ec10693ed8d2e31af1fd1ad0573b8e28fb3f83f9f319b8a348f3692c181cac",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_football_nopic_2026-10.gqid",
+          "sha256": "c70befe2722e7fb235e297731fafd188c0a9fd8c1111f28fff3bd0ee59e5cf59",
           "sizeBytes": 31653888,
           "schemaVersion": 1
         }
@@ -21749,8 +21749,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_football_nopic_2026-10.gqid",
-          "sha256": "b0ec10693ed8d2e31af1fd1ad0573b8e28fb3f83f9f319b8a348f3692c181cac",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_football_nopic_2026-10.gqid",
+          "sha256": "c70befe2722e7fb235e297731fafd188c0a9fd8c1111f28fff3bd0ee59e5cf59",
           "sizeBytes": 31653888,
           "schemaVersion": 1
         }
@@ -21788,8 +21788,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_football_nopic_2026-10.gqid",
-          "sha256": "7f0dccc36ce29e716cfd91d8128f39c1c018191ac885d826a0926fa4972173b5",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_football_nopic_2026-10.gqid",
+          "sha256": "6829cbe2cec34dc2c9c28cb001c9a1e62c3be035c9ad1ec77aab6f3e326cde7b",
           "sizeBytes": 9416704,
           "schemaVersion": 1
         }
@@ -21827,8 +21827,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_football_nopic_2026-10.gqid",
-          "sha256": "7f0dccc36ce29e716cfd91d8128f39c1c018191ac885d826a0926fa4972173b5",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_football_nopic_2026-10.gqid",
+          "sha256": "6829cbe2cec34dc2c9c28cb001c9a1e62c3be035c9ad1ec77aab6f3e326cde7b",
           "sizeBytes": 9416704,
           "schemaVersion": 1
         }
@@ -21874,8 +21874,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_geography_nopic_2026-10-15.gqid",
-          "sha256": "b9e56a57cc231eda0e3805c6cf597cb71b31704ad90801b78ce7e2bddbf16682",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_geography_nopic_2026-10-15.gqid",
+          "sha256": "1d1c8386945a1d0f42b605391686c009705ca88021dd716422dd9aaf55fbd22b",
           "sizeBytes": 1015808,
           "schemaVersion": 1
         }
@@ -21921,8 +21921,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_geography_nopic_2026-10-15.gqid",
-          "sha256": "b9e56a57cc231eda0e3805c6cf597cb71b31704ad90801b78ce7e2bddbf16682",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_geography_nopic_2026-10-15.gqid",
+          "sha256": "1d1c8386945a1d0f42b605391686c009705ca88021dd716422dd9aaf55fbd22b",
           "sizeBytes": 1015808,
           "schemaVersion": 1
         }
@@ -21970,8 +21970,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_geography_nopic_2026-10.gqid",
-          "sha256": "a9a5100a936b8f0170e48b7aa21b4cc247e1a69d7279936de6624624a1704e51",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_geography_nopic_2026-10.gqid",
+          "sha256": "56a53515a5a46d16e103402c5080038aacf9729c16338d36de81f29e463bc04d",
           "sizeBytes": 10338304,
           "schemaVersion": 1
         }
@@ -22011,8 +22011,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_golf_nopic_2026-10.gqid",
-          "sha256": "037929f312fe73a34258982a25cafe10c1ba5b3231498da8dc4cd6c6c526f8be",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_golf_nopic_2026-10.gqid",
+          "sha256": "af87b3a94e65a17f125bb4d8d365e4984a476d92e0db30c7a00a2e2a77792017",
           "sizeBytes": 1277952,
           "schemaVersion": 1
         }
@@ -22052,8 +22052,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_golf_nopic_2026-10.gqid",
-          "sha256": "037929f312fe73a34258982a25cafe10c1ba5b3231498da8dc4cd6c6c526f8be",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_golf_nopic_2026-10.gqid",
+          "sha256": "af87b3a94e65a17f125bb4d8d365e4984a476d92e0db30c7a00a2e2a77792017",
           "sizeBytes": 1277952,
           "schemaVersion": 1
         }
@@ -22108,8 +22108,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_history_nopic_2026-10-14.gqid",
-          "sha256": "0afab418c1470b1495ce390dc8a4ef8f62f83858a4b11f5c59028b9e8e79ad28",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_history_nopic_2026-10-14.gqid",
+          "sha256": "e6fb737c88b41210883d58dcc4d31a6abfb49fd5916e2024173b72ec6f81f5d5",
           "sizeBytes": 2342912,
           "schemaVersion": 1
         }
@@ -22164,8 +22164,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_history_nopic_2026-10-14.gqid",
-          "sha256": "0afab418c1470b1495ce390dc8a4ef8f62f83858a4b11f5c59028b9e8e79ad28",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_history_nopic_2026-10-14.gqid",
+          "sha256": "e6fb737c88b41210883d58dcc4d31a6abfb49fd5916e2024173b72ec6f81f5d5",
           "sizeBytes": 2342912,
           "schemaVersion": 1
         }
@@ -22222,8 +22222,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_history_nopic_2026-10-12.gqid",
-          "sha256": "e646dceadbca22a2f939f497b182cc816dbf8c49245f45a99cac9f748c653c4c",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_history_nopic_2026-10-12.gqid",
+          "sha256": "b216f6ef7ebbbcd70fe35388fa765ffe386166826051c37fe7d2ec950b7f47e4",
           "sizeBytes": 5758976,
           "schemaVersion": 1
         }
@@ -22280,8 +22280,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_history_nopic_2026-10-12.gqid",
-          "sha256": "e646dceadbca22a2f939f497b182cc816dbf8c49245f45a99cac9f748c653c4c",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_history_nopic_2026-10-12.gqid",
+          "sha256": "b216f6ef7ebbbcd70fe35388fa765ffe386166826051c37fe7d2ec950b7f47e4",
           "sizeBytes": 5758976,
           "schemaVersion": 1
         }
@@ -22321,8 +22321,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_ice-hockey_nopic_2026-10.gqid",
-          "sha256": "5c7ec55a32603e5316f9b12591ce6acf8f85b8cfe0079eb31a081b98503962f1",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_ice-hockey_nopic_2026-10.gqid",
+          "sha256": "65a38e6fba37b64cf1e313e6361fe7f1aa3d472825d50fa8f888196200d33ce0",
           "sizeBytes": 4087808,
           "schemaVersion": 1
         }
@@ -22362,8 +22362,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_ice-hockey_nopic_2026-10.gqid",
-          "sha256": "5c7ec55a32603e5316f9b12591ce6acf8f85b8cfe0079eb31a081b98503962f1",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_ice-hockey_nopic_2026-10.gqid",
+          "sha256": "65a38e6fba37b64cf1e313e6361fe7f1aa3d472825d50fa8f888196200d33ce0",
           "sizeBytes": 4087808,
           "schemaVersion": 1
         }
@@ -22418,8 +22418,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_computer_nopic_2026-10-15.gqid",
-          "sha256": "9e29a9214cd2983ef77f4ca68715ea3e6cf85fb1702d69db7049a150d2bdef01",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_computer_nopic_2026-10-15.gqid",
+          "sha256": "c18b67cad2de1a40769957ca63236afa6cdb6ad709d8fb8178d83e6f55e45d9f",
           "sizeBytes": 1695744,
           "schemaVersion": 1
         }
@@ -22474,8 +22474,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_computer_nopic_2026-10-15.gqid",
-          "sha256": "9e29a9214cd2983ef77f4ca68715ea3e6cf85fb1702d69db7049a150d2bdef01",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_computer_nopic_2026-10-15.gqid",
+          "sha256": "c18b67cad2de1a40769957ca63236afa6cdb6ad709d8fb8178d83e6f55e45d9f",
           "sizeBytes": 1695744,
           "schemaVersion": 1
         }
@@ -22530,8 +22530,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_physics_nopic_2026-10-15.gqid",
-          "sha256": "aca748387a9c9840f8fda299fb60ed0a69d92f2b1ea5bb0af661d79563e49e95",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_physics_nopic_2026-10-15.gqid",
+          "sha256": "cb4414efc490fe2dfad765af4afce14244ec93fd1e406eaa3b661627ddc0db25",
           "sizeBytes": 1093632,
           "schemaVersion": 1
         }
@@ -22577,8 +22577,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_physics_nopic_2026-10-15.gqid",
-          "sha256": "aca748387a9c9840f8fda299fb60ed0a69d92f2b1ea5bb0af661d79563e49e95",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_physics_nopic_2026-10-15.gqid",
+          "sha256": "cb4414efc490fe2dfad765af4afce14244ec93fd1e406eaa3b661627ddc0db25",
           "sizeBytes": 1093632,
           "schemaVersion": 1
         }
@@ -22633,8 +22633,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_physics_nopic_2026-10-15.gqid",
-          "sha256": "aca748387a9c9840f8fda299fb60ed0a69d92f2b1ea5bb0af661d79563e49e95",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_physics_nopic_2026-10-15.gqid",
+          "sha256": "cb4414efc490fe2dfad765af4afce14244ec93fd1e406eaa3b661627ddc0db25",
           "sizeBytes": 1093632,
           "schemaVersion": 1
         }
@@ -22712,8 +22712,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_top_nopic_2026-10-10.gqid",
-          "sha256": "1fc5c7145001b3ca93c397405ada17dd0af17035e7765e2a1464b879487d27b4",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_top_nopic_2026-10-10.gqid",
+          "sha256": "c6a4fb08985e00d1d106c18e435da111d093cc0a8ed402f004ada687a3dac994",
           "sizeBytes": 7766016,
           "schemaVersion": 1
         }
@@ -22768,8 +22768,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_mathematics_nopic_2026-10-14.gqid",
-          "sha256": "14b864bb4f914b54e0156043894778749239afb26fb2584b88436aaef5b006e7",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_mathematics_nopic_2026-10-14.gqid",
+          "sha256": "d92e3247faa689fdc539e0875189063ba1f7eaca7503ff95e6f4c7c9a8e6c1ef",
           "sizeBytes": 1159168,
           "schemaVersion": 1
         }
@@ -22815,8 +22815,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_mathematics_nopic_2026-10-14.gqid",
-          "sha256": "14b864bb4f914b54e0156043894778749239afb26fb2584b88436aaef5b006e7",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_mathematics_nopic_2026-10-14.gqid",
+          "sha256": "d92e3247faa689fdc539e0875189063ba1f7eaca7503ff95e6f4c7c9a8e6c1ef",
           "sizeBytes": 1159168,
           "schemaVersion": 1
         }
@@ -22871,8 +22871,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_mathematics_nopic_2026-10-14.gqid",
-          "sha256": "14b864bb4f914b54e0156043894778749239afb26fb2584b88436aaef5b006e7",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_mathematics_nopic_2026-10-14.gqid",
+          "sha256": "d92e3247faa689fdc539e0875189063ba1f7eaca7503ff95e6f4c7c9a8e6c1ef",
           "sizeBytes": 1159168,
           "schemaVersion": 1
         }
@@ -22912,8 +22912,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_mathematics_mini_2026-06.gqid",
-          "sha256": "42d0cc3e34a4c570746f463fc176030390292f5cc8a05300abe359b5e5f98270",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_mathematics_mini_2026-06.gqid",
+          "sha256": "5f1231ae0edb59ab8bf71fc8d354074e285719a120460e53bab366ade45cbdd9",
           "sizeBytes": 2715648,
           "schemaVersion": 1
         }
@@ -22970,8 +22970,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_mathematics_maxi_2026-09-15.gqid",
-          "sha256": "2e2bb96e4a37196b2aa48bbabbdf728a90cbfc6fdaafa181310117138d48e5fc",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_mathematics_maxi_2026-09-15.gqid",
+          "sha256": "21ec03dace397f09d47d218830e3a373a236a6d3852cf04b0e71de0983b0fbc3",
           "sizeBytes": 2715648,
           "schemaVersion": 1
         }
@@ -23034,8 +23034,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_molcell_nopic_2026-10.gqid",
-          "sha256": "9e67088ca8e50523fbde04bf0cb48c53469462c3e59150fb86bae1cd60970c51",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_molcell_nopic_2026-10.gqid",
+          "sha256": "8cec76434f2b6b486cf019d5c79d837296169e29fec93796a3ff0f9675661ffc",
           "sizeBytes": 2768896,
           "schemaVersion": 1
         }
@@ -23075,8 +23075,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_molcell_nopic_2026-10.gqid",
-          "sha256": "9e67088ca8e50523fbde04bf0cb48c53469462c3e59150fb86bae1cd60970c51",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_molcell_nopic_2026-10.gqid",
+          "sha256": "8cec76434f2b6b486cf019d5c79d837296169e29fec93796a3ff0f9675661ffc",
           "sizeBytes": 2768896,
           "schemaVersion": 1
         }
@@ -23116,8 +23116,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_movies_nopic_2026-10.gqid",
-          "sha256": "419ef06295d8dce1678940a1c3022883aa4114f80979e07780f001ba967062fe",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_movies_nopic_2026-10.gqid",
+          "sha256": "7e906f079bd50a61aa91ed9e3744025d4cfbe768a4d073bfa5079dd63281be7a",
           "sizeBytes": 39735296,
           "schemaVersion": 1
         }
@@ -23157,8 +23157,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_movies_nopic_2026-10.gqid",
-          "sha256": "419ef06295d8dce1678940a1c3022883aa4114f80979e07780f001ba967062fe",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_movies_nopic_2026-10.gqid",
+          "sha256": "7e906f079bd50a61aa91ed9e3744025d4cfbe768a4d073bfa5079dd63281be7a",
           "sizeBytes": 39735296,
           "schemaVersion": 1
         }
@@ -23198,8 +23198,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_nollywood_maxi_2026-10.gqid",
-          "sha256": "29d8c4280fc4f8974a9532df23fe522a7a170cf163dcac844664a258d6ddb83e",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_nollywood_maxi_2026-10.gqid",
+          "sha256": "bc5419c721192e38ce4fb6e2ce3980a09c78d4c787aa0cd6c8731f4ce9ead131",
           "sizeBytes": 266240,
           "schemaVersion": 1
         }
@@ -23247,8 +23247,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_physics_maxi_2026-10-14.gqid",
-          "sha256": "89c4a925c8ccaf81c761eaa0f62809324dc61acb1224b7b3c09f078742772685",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_physics_maxi_2026-10-14.gqid",
+          "sha256": "99a11a443febe17b21a1953dba8abb087500a2dd5818a5992986cf93a6487e4b",
           "sizeBytes": 2494464,
           "schemaVersion": 1
         }
@@ -23305,8 +23305,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_physics_maxi_2026-10-14.gqid",
-          "sha256": "89c4a925c8ccaf81c761eaa0f62809324dc61acb1224b7b3c09f078742772685",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_physics_maxi_2026-10-14.gqid",
+          "sha256": "99a11a443febe17b21a1953dba8abb087500a2dd5818a5992986cf93a6487e4b",
           "sizeBytes": 2494464,
           "schemaVersion": 1
         }
@@ -23384,8 +23384,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_chemistry_nopic_2026-10-15.gqid",
-          "sha256": "a81d0c9bcc93d29f6bbda4ab62ddd444e2b60712bfaf0f12ba5dd3ef5c8d38b6",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_chemistry_nopic_2026-10-15.gqid",
+          "sha256": "2c807a4857e75d7be6ed73abfd8f2dee1556e3cc629c07c531d7ddc6b1412986",
           "sizeBytes": 458752,
           "schemaVersion": 1
         }
@@ -23431,8 +23431,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_chemistry_nopic_2026-10-15.gqid",
-          "sha256": "a81d0c9bcc93d29f6bbda4ab62ddd444e2b60712bfaf0f12ba5dd3ef5c8d38b6",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_chemistry_nopic_2026-10-15.gqid",
+          "sha256": "2c807a4857e75d7be6ed73abfd8f2dee1556e3cc629c07c531d7ddc6b1412986",
           "sizeBytes": 458752,
           "schemaVersion": 1
         }
@@ -23487,8 +23487,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_chemistry_nopic_2026-10-15.gqid",
-          "sha256": "a81d0c9bcc93d29f6bbda4ab62ddd444e2b60712bfaf0f12ba5dd3ef5c8d38b6",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_chemistry_nopic_2026-10-15.gqid",
+          "sha256": "2c807a4857e75d7be6ed73abfd8f2dee1556e3cc629c07c531d7ddc6b1412986",
           "sizeBytes": 458752,
           "schemaVersion": 1
         }
@@ -23575,8 +23575,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_ray-charles_mini_2026-10.gqid",
-          "sha256": "d36f36d1f51a1dd393028e8ae602a53616edce6e3fe3bb74dfd00e90640e07a8",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_ray-charles_mini_2026-10.gqid",
+          "sha256": "dd3ff246fe0c784a9ee201ea2b04c0b48067e14b073429102a8d91c42964184b",
           "sizeBytes": 2777088,
           "schemaVersion": 1
         }
@@ -23617,8 +23617,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_ray-charles_mini_2026-10.gqid",
-          "sha256": "d36f36d1f51a1dd393028e8ae602a53616edce6e3fe3bb74dfd00e90640e07a8",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_ray-charles_mini_2026-10.gqid",
+          "sha256": "dd3ff246fe0c784a9ee201ea2b04c0b48067e14b073429102a8d91c42964184b",
           "sizeBytes": 2777088,
           "schemaVersion": 1
         }
@@ -23658,8 +23658,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_sociology_nopic_2026-10.gqid",
-          "sha256": "8b0f658b28c56edba652ac5690664ecddbcbe9d9ae6d28e68bc8f786e4c4079c",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_sociology_nopic_2026-10.gqid",
+          "sha256": "154bf7a89d490084a38e47644cbaa26ef0037899f166d78031e22fb3572b4383",
           "sizeBytes": 1282048,
           "schemaVersion": 1
         }
@@ -23699,8 +23699,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_sociology_nopic_2026-10.gqid",
-          "sha256": "8b0f658b28c56edba652ac5690664ecddbcbe9d9ae6d28e68bc8f786e4c4079c",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_sociology_nopic_2026-10.gqid",
+          "sha256": "154bf7a89d490084a38e47644cbaa26ef0037899f166d78031e22fb3572b4383",
           "sizeBytes": 1282048,
           "schemaVersion": 1
         }
@@ -23740,8 +23740,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_tennis_nopic_2026-10.gqid",
-          "sha256": "9d26feef6b245fffc103456d5082f92c2c409d8a98286e47ad24441ebb0827ba",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_tennis_nopic_2026-10.gqid",
+          "sha256": "b9727866e733ecad606e93348337efa5e182fafd42025a0731e115fde263a906",
           "sizeBytes": 5955584,
           "schemaVersion": 1
         }
@@ -23781,8 +23781,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_tennis_nopic_2026-10.gqid",
-          "sha256": "9d26feef6b245fffc103456d5082f92c2c409d8a98286e47ad24441ebb0827ba",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_tennis_nopic_2026-10.gqid",
+          "sha256": "b9727866e733ecad606e93348337efa5e182fafd42025a0731e115fde263a906",
           "sizeBytes": 5955584,
           "schemaVersion": 1
         }
@@ -24022,8 +24022,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_medicine_nopic_2026-10-10.gqid",
-          "sha256": "87ade9758bbab98860f68a5395d7b5e02ef43a63710b24d59220fd61a4375cdb",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_medicine_nopic_2026-10-10.gqid",
+          "sha256": "005373916a69db8eb0e65cc502b43130a93f8602fb24f05a79977f78cf5c6e0b",
           "sizeBytes": 7671808,
           "schemaVersion": 1
         }
@@ -24163,9 +24163,9 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_es_all_mini_2026-10.gqid",
-          "sha256": "dc66a8b73636e0820b9eb8e2c6d83407dd708367c7c5dc07dba137185a648e6e",
-          "sizeBytes": 260202496,
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_es_all_mini_2026-10.gqid",
+          "sha256": "cd430d1b63d1a0c8760514d49d4eaa2edaf4f61623ca5a788d33503bbe895919",
+          "sizeBytes": 260206592,
           "schemaVersion": 1
         }
       ]
@@ -24278,8 +24278,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_top1m_mini_2026-04.gqid",
-          "sha256": "f3657c823bc68bf23e840677a02d517300bed53baec0fb7dd52491d856d6da30",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_top1m_mini_2026-04.gqid",
+          "sha256": "26da57d9d5270ee3a7e097368854ff30c481ce919cfe9d9fc7e114afe95a3ac5",
           "sizeBytes": 124129280,
           "schemaVersion": 1
         }
@@ -24318,8 +24318,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_top1m_mini_2026-04.gqid",
-          "sha256": "f3657c823bc68bf23e840677a02d517300bed53baec0fb7dd52491d856d6da30",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_top1m_mini_2026-04.gqid",
+          "sha256": "26da57d9d5270ee3a7e097368854ff30c481ce919cfe9d9fc7e114afe95a3ac5",
           "sizeBytes": 124129280,
           "schemaVersion": 1
         }
@@ -24358,8 +24358,8 @@
       "sidecars": [
         {
           "kind": "gqid",
-          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/wikipedia_en_top1m_mini_2026-04.gqid",
-          "sha256": "f3657c823bc68bf23e840677a02d517300bed53baec0fb7dd52491d856d6da30",
+          "url": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/wikipedia_en_top1m_mini_2026-04.gqid",
+          "sha256": "26da57d9d5270ee3a7e097368854ff30c481ce919cfe9d9fc7e114afe95a3ac5",
           "sizeBytes": 124129280,
           "schemaVersion": 1
         }

@@ -221,7 +221,7 @@ class PublishedCatalogTest {
         assertThat(indexed.map { it.id }.filter { it.startsWith("wikipedia_en_all_") }).isEmpty()
         assertThat(indexed.size).isAtLeast(90)
         for (s in indexed.flatMap { it.sidecars }) {
-            assertThat(s.url).startsWith("https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16/")
+            assertThat(s.url).startsWith("https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/")
             assertThat(s.sha256).hasLength(64)
             assertThat(s.schemaVersion).isEqualTo(1)
         }

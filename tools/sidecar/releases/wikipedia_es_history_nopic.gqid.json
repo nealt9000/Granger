@@ -4,7 +4,7 @@
  "sidecar": "gqid",
  "fileName": "wikipedia_es_history_nopic_2026-10-14.gqid",
  "sizeBytes": 2342912,
- "sha256": "0afab418c1470b1495ce390dc8a4ef8f62f83858a4b11f5c59028b9e8e79ad28",
+ "sha256": "e6fb737c88b41210883d58dcc4d31a6abfb49fd5916e2024173b72ec6f81f5d5",
  "schemaVersion": 1,
  "sourceSha256": "e30aa60ec881f7b33164689a3eda03daa91dee94b83aaf5123857e211801e21d",
  "builder": "tools/qidindex/build.py",

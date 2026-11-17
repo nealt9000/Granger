@@ -6,6 +6,7 @@
  "subjects": [
   {
    "id": "history",
+   "namesakes": {"Q309": "history"},
    "en": "History",
    "es": "Historia",
    "roots": {
@@ -147,6 +148,7 @@
   },
   {
    "id": "society",
+   "namesakes": {"Q8425": "society", "Q7163": "politics", "Q8434": "education"},
    "en": "Society & politics",
    "es": "Sociedad y política",
    "roots": {
@@ -293,6 +295,7 @@
   },
   {
    "id": "business",
+   "namesakes": {"Q8134": "economics", "Q159810": "economy"},
    "en": "Business & economy",
    "es": "Economía y empresa",
    "roots": {
@@ -351,6 +354,7 @@
   },
   {
    "id": "places",
+   "namesakes": {"Q1071": "geography"},
    "en": "Places",
    "es": "Lugares",
    "roots": {
@@ -401,6 +405,7 @@
   },
   {
    "id": "science",
+   "namesakes": {"Q336": "science", "Q395": "mathematics"},
    "en": "Science & maths",
    "es": "Ciencia y matemáticas",
    "roots": {
@@ -485,6 +490,7 @@
   },
   {
    "id": "nature",
+   "namesakes": {"Q7860": "nature"},
    "en": "Nature & animals",
    "es": "Naturaleza y animales",
    "roots": {
@@ -505,6 +511,7 @@
   },
   {
    "id": "health",
+   "namesakes": {"Q12147": "health", "Q11190": "medicine"},
    "en": "Health & medicine",
    "es": "Salud y medicina",
    "roots": {
@@ -551,6 +558,7 @@
   },
   {
    "id": "technology",
+   "namesakes": {"Q11016": "technology"},
    "en": "Technology",
    "es": "Tecnología",
    "roots": {
@@ -620,6 +628,7 @@
   },
   {
    "id": "art",
+   "namesakes": {"Q735": "art", "Q12271": "architecture"},
    "en": "Art & architecture",
    "es": "Arte y arquitectura",
    "roots": {
@@ -672,6 +681,7 @@
   },
   {
    "id": "literature",
+   "namesakes": {"Q8242": "literature"},
    "en": "Books & writing",
    "es": "Libros y escritura",
    "roots": {
@@ -723,6 +733,7 @@
   },
   {
    "id": "music",
+   "namesakes": {"Q638": "music"},
    "en": "Music",
    "es": "Música",
    "roots": {
@@ -792,6 +803,7 @@
   },
   {
    "id": "film",
+   "namesakes": {"Q11424": "film", "Q289": "television"},
    "en": "Film & TV",
    "es": "Cine y televisión",
    "roots": {
@@ -852,6 +864,7 @@
   },
   {
    "id": "sports",
+   "namesakes": {"Q349": "sport"},
    "en": "Sports",
    "es": "Deportes",
    "roots": {
@@ -946,6 +959,7 @@
   },
   {
    "id": "games",
+   "namesakes": {"Q11410": "game"},
    "en": "Games",
    "es": "Juegos",
    "roots": {
@@ -977,6 +991,7 @@
   },
   {
    "id": "religion",
+   "namesakes": {"Q9174": "religion", "Q5891": "philosophy"},
    "en": "Philosophy & religion",
    "es": "Filosofía y religión",
    "roots": {
@@ -1056,6 +1071,7 @@
   },
   {
    "id": "languages",
+   "namesakes": {"Q315": "language"},
    "en": "Languages",
    "es": "Idiomas",
    "roots": {
@@ -1087,6 +1103,7 @@
   },
   {
    "id": "food",
+   "namesakes": {"Q2095": "food", "Q11451": "agriculture"},
    "en": "Food & farming",
    "es": "Comida y agricultura",
    "roots": {
@@ -1173,7 +1190,9 @@
   "event_class": {
    "Q1190554": "occurrence"
   },
-  "event_depth": 4
+  "event_depth": 4,
+  "from_year": -3000,
+  "from_year_note": "Only recorded history: the Big Bang and the Cambrian explosion are not History."
  },
  "max_subjects": 3,
  "packs": {

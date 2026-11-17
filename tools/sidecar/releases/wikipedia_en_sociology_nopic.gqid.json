@@ -4,7 +4,7 @@
  "sidecar": "gqid",
  "fileName": "wikipedia_en_sociology_nopic_2026-10.gqid",
  "sizeBytes": 1282048,
- "sha256": "8b0f658b28c56edba652ac5690664ecddbcbe9d9ae6d28e68bc8f786e4c4079c",
+ "sha256": "154bf7a89d490084a38e47644cbaa26ef0037899f166d78031e22fb3572b4383",
  "schemaVersion": 1,
  "sourceSha256": "2391c27d07a9b13d3b430cada133279b725ce5401f4b1cbde45c3bc17e89a558",
  "builder": "tools/qidindex/build.py",
