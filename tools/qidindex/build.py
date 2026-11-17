@@ -40,6 +40,12 @@ CREATE TABLE subjects(qid INTEGER NOT NULL, ord INTEGER NOT NULL, subject TEXT N
 CREATE INDEX subjects_subject ON subjects(subject, qid);
 """
 
+# Each item's sub-category in its main subject (Plan EX editorial pass), as the facet's code (its place in meta
+# `facets`): one small table keyed for listing a facet, about 6 bytes an item. An extra table; schema 1 kept.
+FACETS_SCHEMA = """
+CREATE TABLE main.facets(facet INTEGER NOT NULL, qid INTEGER NOT NULL, PRIMARY KEY(facet, qid)) WITHOUT ROWID;
+"""
+
 
 SUBJECTS_SPEC = Path(__file__).resolve().parents[1] / "subjects" / "subjects.json"
 
@@ -60,6 +66,24 @@ def add_subjects(db: sqlite3.Connection, subjects_path) -> int:
     db.execute("INSERT INTO subjects SELECT qid, ord, subject FROM s.subjects WHERE qid IN (SELECT qid FROM articles)")
     version = db.execute("SELECT value FROM s.meta WHERE key = 'subjectsVersion'").fetchone()[0]
     built = db.execute("SELECT value FROM s.meta WHERE key = 'builtAt'").fetchone()[0]
+    # Sub-categories (Plan EX editorial pass), when the subjects file has them: the items' facets and the facet list.
+    db.execute("DROP TABLE IF EXISTS main.facets")
+    facets_meta = None
+    row = db.execute("SELECT value FROM s.meta WHERE key = 'facets'").fetchone() \
+        if db.execute("SELECT 1 FROM s.sqlite_master WHERE name = 'facets'").fetchone() else None
+    if row:
+        # Codes in the list's order: {subject: [{id, en, es, code}]}.
+        listed = json.loads(row[0])
+        code, n = {}, 0
+        for subject, fs in listed.items():
+            for f in fs:
+                f["code"] = n
+                code[f"{subject}.{f['id']}"] = n
+                n += 1
+        facets_meta = json.dumps(listed, ensure_ascii=False, separators=(",", ":"))
+        db.executescript(FACETS_SCHEMA)
+        rows = db.execute("SELECT qid, facet FROM s.facets WHERE qid IN (SELECT qid FROM articles)").fetchall()
+        db.executemany("INSERT INTO main.facets VALUES (?, ?)", ((code[f], q) for q, f in rows if f in code))
     db.commit()
     db.execute("DETACH DATABASE s")
     default = pack_subject(db.execute("SELECT value FROM meta WHERE key = 'sourceZim'").fetchone()[0])
@@ -68,6 +92,8 @@ def add_subjects(db: sqlite3.Connection, subjects_path) -> int:
     n = db.execute("SELECT COUNT(DISTINCT qid) FROM subjects").fetchone()[0]
     db.executemany("INSERT OR REPLACE INTO meta VALUES (?, ?)",
                    [("subjectsVersion", version), ("subjectsBuiltAt", built), ("withSubjects", str(n)), ("packSubject", default or "")])
+    if facets_meta:
+        db.execute("INSERT OR REPLACE INTO meta VALUES ('facets', ?)", (facets_meta,))
     return n
 
 

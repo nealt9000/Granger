@@ -80,3 +80,15 @@ def test_history_starts_with_recorded_history():
     deep = {"q": "Q_c", "P31": ["Q_assassination"], "P580": [["-538800000-01-01T00:00:00Z", 3]]}
     assert not r.past(deep, "science")
     assert r.past(dict(deep, P580=[["-2560-01-01T00:00:00Z", 9]]), "science")   # the Great Pyramid's age is History
+
+
+def test_nothing_before_recorded_history_is_history():
+    # The Hadean reaches History through "historical period"; dated 4.6 billion years ago, it never takes it.
+    r = rules()
+    hadean = {"q": "Q_h", "P31": ["Q11514315"], "P580": [["-4600000000-01-01T00:00:00Z", 3]]}
+    assert "history" not in r.rules_only(hadean)[1]
+    assert r.rules_only(dict(hadean, P580=[["-500-01-01T00:00:00Z", 9]]))[0] == "history"
+
+
+def test_wikimedia_internal_items_are_dropped():
+    assert rules().rules_only({"q": "Q5296", "P31": ["Q17442446", "Q35127"]})[2] == "dropped"

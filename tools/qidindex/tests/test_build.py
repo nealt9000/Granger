@@ -131,3 +131,34 @@ def test_a_subject_pack_gives_its_subject_to_items_the_rules_leave_without_one(t
     assert build.pack_subject("wikipedia_es_movies_nopic_2026-10.zim") == "film"
     assert build.pack_subject("wikipedia_en_top_nopic_2026-09-14.zim") is None
     assert build.pack_subject("wikipedia_en_all_maxi_2026-08.zim") is None
+
+
+def test_facets_are_attached_with_their_list_when_the_subjects_file_has_them(tmp_path):
+    db = sqlite3.connect(tmp_path / "wikipedia_en_top_maxi_2026-09.gqid")
+    db.executescript(build.SCHEMA)
+    db.executemany("INSERT INTO articles VALUES (?,?,?,?)", [("Napoleon", 517, 9, None), ("Paris", 90, 9, None)])
+    db.execute("CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+    db.execute("INSERT INTO meta VALUES ('sourceZim', 'wikipedia_en_top_maxi_2026-09.zim')")
+    f = make_subjects(tmp_path, [(517, 0, "history"), (90, 0, "places")])
+    s = sqlite3.connect(f)
+    s.execute("CREATE TABLE facets(qid INTEGER PRIMARY KEY, facet TEXT NOT NULL)")
+    s.executemany("INSERT INTO facets VALUES (?,?)", [(517, "history.rulers"), (999, "science.space")])
+    s.execute("INSERT INTO meta VALUES ('facets', '{\"history\":[{\"id\":\"rulers\",\"en\":\"Rulers\",\"es\":\"Gobernantes\"}]}')")
+    s.commit(); s.close()
+    build.add_subjects(db, f)
+    assert db.execute("SELECT facet, qid FROM facets").fetchall() == [(0, 517)]
+    assert '"code":0' in db.execute("SELECT value FROM meta WHERE key = 'facets'").fetchone()[0]
+    assert "Gobernantes" in db.execute("SELECT value FROM meta WHERE key = 'facets'").fetchone()[0]
+    # A subjects file without facets leaves none (older files).
+    db2 = sqlite3.connect(tmp_path / "b.gqid")
+    db2.executescript(build.SCHEMA)
+    db2.execute("CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+    db2.execute("INSERT INTO meta VALUES ('sourceZim', 'x.zim')")
+    build.add_subjects(db2, make_subjects_plain(tmp_path))
+    assert not db2.execute("SELECT 1 FROM sqlite_master WHERE name = 'facets'").fetchone()
+
+
+def make_subjects_plain(tmp_path):
+    d = tmp_path / "plain"
+    d.mkdir()
+    return make_subjects(d, [])

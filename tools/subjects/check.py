@@ -55,6 +55,8 @@ def main(argv=None):
         items = db.execute("SELECT COUNT(DISTINCT qid) FROM articles").fetchone()[0]
         by = dict(db.execute("SELECT subject, COUNT(*) FROM subjects WHERE ord = 0 GROUP BY subject"))
         m = dict(db.execute("SELECT key, value FROM meta"))
+        has_facets = db.execute("SELECT 1 FROM sqlite_master WHERE name = 'facets'").fetchone() is not None
+        facet_rows = dict(db.execute("SELECT facet, COUNT(*) FROM facets GROUP BY facet")) if has_facets else {}
     except sqlite3.Error as e:
         print(f"FAIL {a.gqid}: {e}")
         return 1
@@ -73,6 +75,18 @@ def main(argv=None):
     encyclopedia = len(topic) > 3 and topic[2] in ENCYCLOPEDIAS
     if share < a.min_share and (encyclopedia or m.get("packSubject")):
         problems.append(f"only {share:.1%} of items have subjects (floor {a.min_share:.0%})")
+    # Sub-categories (Plan EX editorial pass): every code in the facet list, and how many main-subject items have one.
+    if has_facets:
+        listed = json.loads(m.get("facets") or "{}")
+        codes = {f["code"]: f"{s}.{f['id']}" for s, fs in listed.items() for f in fs if "code" in f}
+        if not codes:
+            problems.append("facets table without a facet list in meta")
+        stray = set(facet_rows) - set(codes)
+        if stray:
+            problems.append(f"facet codes not in the list: {sorted(stray)[:5]}")
+        n = sum(facet_rows.values())
+        print(f"  sub-categories: {n:,}/{len(subs):,} items with subjects have one ({n / max(1, len(subs)):.1%}), "
+              f"{len(facet_rows)} of {len(codes)} in use")
     if a.graded:
         c = score(subs, json.loads(Path(a.graded).read_text(encoding="utf8"))["items"])
         judged = c["right"] + c["wrong"]

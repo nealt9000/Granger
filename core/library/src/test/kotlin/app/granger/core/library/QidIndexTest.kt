@@ -20,6 +20,7 @@ class QidIndexTest {
         name: String, articles: List<List<Any?>>, links: List<List<Any>> = emptyList(), coords: List<List<Any>> = emptyList(),
         kind: String = "gqid", schema: Int = 1, source: String = "a".repeat(64), sourceZim: String? = null,
         subjects: List<List<Any>>? = null,
+        facets: List<List<Any>>? = null, facetList: String? = null,
     ): File {
         val f = File(tmp.root, "$name.gqid")
         SQLiteDatabase.openOrCreateDatabase(f, null).use { db ->
@@ -36,6 +37,11 @@ class QidIndexTest {
                 db.execSQL("CREATE TABLE subjects(qid INTEGER NOT NULL, ord INTEGER NOT NULL, subject TEXT NOT NULL, PRIMARY KEY(qid, ord)) WITHOUT ROWID")
                 db.execSQL("CREATE INDEX subjects_subject ON subjects(subject, qid)")
                 subjects.forEach { db.execSQL("INSERT INTO subjects VALUES (?, ?, ?)", it.toTypedArray()) }
+            }
+            if (facets != null) {
+                db.execSQL("CREATE TABLE facets(facet INTEGER NOT NULL, qid INTEGER NOT NULL, PRIMARY KEY(facet, qid)) WITHOUT ROWID")
+                facets.forEach { db.execSQL("INSERT INTO facets VALUES (?, ?)", it.toTypedArray()) }
+                facetList?.let { db.execSQL("INSERT INTO meta VALUES ('facets', ?)", arrayOf(it)) }
             }
         }
         return f
@@ -154,5 +160,27 @@ class QidIndexTest {
         assertThat(all.subjectSet("music").size).isEqualTo(0)
         all.close()
     }
-}
 
+    @Test fun subCategoriesAreListedInOrderCountedOnceAndRankedAcrossPacks() {
+        // Two builds with different codes for the same facets: the app asks by key, each index answers with its own code.
+        val list = """{"literature":[{"id":"works","en":"Great books","es":"Grandes libros","code":0},{"id":"writers","en":"Writers","es":"Escritores","code":1}]}"""
+        val list2 = """{"literature":[{"id":"works","en":"Great books","es":"Grandes libros","code":7},{"id":"writers","en":"Writers","es":"Escritores","code":8}]}"""
+        val en = QidIndex.open(gqid("en", top, subjects = listOf(listOf(36322L, 0, "literature"), listOf(170583L, 0, "literature")),
+            facets = listOf(listOf(1, 36322L), listOf(0, 170583L)), facetList = list), "en")!!
+        val es = QidIndex.open(gqid("es", listOf(listOf("Jane_Austen", 36322L, 150, null), listOf("Cervantes", 5682L, 200, null)),
+            subjects = listOf(listOf(36322L, 0, "literature"), listOf(5682L, 0, "literature")),
+            facets = listOf(listOf(8, 36322L), listOf(8, 5682L)), facetList = list2), "es")!!
+        val old = QidIndex.open(gqid("old", listOf(listOf("Paris", 90L, 400, null)), subjects = listOf(listOf(90L, 0, "places"))), "old")!!
+        val all = QidIndexes(listOf(en, es, old))
+        assertThat(all.hasFacets).isTrue()
+        assertThat(all.facets("literature").map { it.id }).containsExactly("works", "writers").inOrder()
+        assertThat(all.facets("literature")[1].name("es")).isEqualTo("Escritores")
+        assertThat(all.facets("music")).isEmpty()
+        assertThat(all.facetCounts("literature")).containsExactly("works", 1, "writers", 2)
+        assertThat(all.topInFacet("literature.writers", 10).map { it.qid }).containsExactly(5682L, 36322L).inOrder()
+        val set = all.facetSet("literature.writers")
+        assertThat(set.size).isEqualTo(2)
+        assertThat(set.isMain(5682L)).isTrue()
+        all.close()
+    }
+}

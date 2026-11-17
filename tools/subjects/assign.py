@@ -157,16 +157,27 @@ class Rules:
         if end is None or end > self.this_year - self.hist.get("recent_years", 5):
             return False
         # Recorded history only: the Big Bang and the Cambrian explosion are dated past events, but not History.
-        start = min(y for y in (year(r.get("P580")), year(r.get("P585")), year(r.get("P582"))) if y is not None)
-        if start < self.hist.get("from_year", -10**12):
+        if self.before_history(r):
             return False
         return any(self.event_walk.subjects(q) for q in r.get("P31", []) + r.get("P279", []))
+
+    def before_history(self, r):
+        """Dated before recorded history (history.from_year): the Hadean, the Cambrian explosion. Never History, as a
+        main subject or a second one, however its classes reach it."""
+        if HUMAN in r.get("P31", []):
+            return False
+        ys = [y for y in (year(r.get("P580")), year(r.get("P585")), year(r.get("P582"))) if y is not None]
+        return bool(ys) and min(ys) < self.hist.get("from_year", -10**12)
 
     def decide(self, r, cand, sims, lead_w):
         """(main, subjects, mode, share) from the rule candidates, the neighbours' vote and the lead's role words."""
         if r["q"] in self.namesake:
             s = self.namesake[r["q"]]
             return s, [s], "namesake", {s: 1.0}
+        if self.before_history(r):
+            cand = {k: v for k, v in cand.items() if k != "history"}
+            sims = {k: v for k, v in sims.items() if k != "history"}
+            lead_w = {k: v for k, v in lead_w.items() if k != "history"}
         person = HUMAN in r.get("P31", [])
         near = sorted(cand.values())
         if len(cand) == 1 and not lead_w:

@@ -73,6 +73,47 @@ class QidIndex private constructor(private val db: SQLiteDatabase, val packId: S
     /** Every item here, in qid order. */
     internal fun allQids(): android.database.Cursor = db.rawQuery("SELECT DISTINCT qid FROM articles ORDER BY qid", null)
 
+    /** Whether the index carries sub-categories (Plan EX editorial pass; files built before it don't). */
+    val hasFacets: Boolean by lazy {
+        db.rawQuery("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'facets'", null).use { it.moveToFirst() }
+    }
+
+    /** The facet list with its names and codes (meta `facets`, JSON {subject: [{id, en, es, code}]}); null without one. */
+    internal val facetList: String? by lazy {
+        if (!hasFacets) null else runCatching {
+            db.rawQuery("SELECT value FROM meta WHERE key = 'facets'", null).use { if (it.moveToFirst()) it.getString(0) else null }
+        }.getOrNull()
+    }
+
+    /** This index's code for each facet key (`subject.facet`): codes are per build, keys are what the app asks by. */
+    private val codes: Map<String, Int> by lazy {
+        val json = facetList ?: return@lazy emptyMap()
+        runCatching {
+            val o = org.json.JSONObject(json)
+            buildMap {
+                for (subject in o.keys()) {
+                    val arr = o.getJSONArray(subject)
+                    for (i in 0 until arr.length()) arr.getJSONObject(i).let { f -> if (f.has("code")) put("$subject.${f.getString("id")}", f.getInt("code")) }
+                }
+            }
+        }.getOrDefault(emptyMap())
+    }
+
+    /** The articles in [facet] (`subject.facet`), most-linked first. */
+    fun topInFacet(facet: String, limit: Int, offset: Int = 0): List<QidArticle> {
+        val code = codes[facet] ?: return emptyList()
+        return db.rawQuery(
+            "SELECT a.qid, a.path, a.rank FROM facets f JOIN articles a ON a.qid = f.qid WHERE f.facet = ? ORDER BY a.rank DESC, a.qid LIMIT ? OFFSET ?",
+            arrayOf(code.toString(), limit.toString(), offset.toString()),
+        ).use { c -> buildList { while (c.moveToNext()) add(QidArticle(c.getLong(0), packId, c.getString(1), c.getInt(2))) } }
+    }
+
+    /** The items in [facet], in qid order, each with 0 (its main subject's), for [countDistinct] and [QidIndexes.facetSet]. */
+    internal fun qidsInFacet(facet: String): android.database.Cursor? {
+        val code = codes[facet] ?: return null
+        return db.rawQuery("SELECT qid, 0 FROM facets WHERE facet = ? ORDER BY qid", arrayOf(code.toString()))
+    }
+
     override fun close() = db.close()
 
     companion object {
@@ -189,8 +230,31 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
      * Every item with [subject] across the packs, each once, as a sorted set (Plan EX Task 3: a subject's eras, its quiz).
      * An item's subjects are the same in every pack, so its main flag is too.
      */
-    fun subjectSet(subject: String): SubjectSet {
-        val cursors = indexes.mapNotNull { it.qidsAndMain(subject) }.filter { c -> c.moveToFirst().also { if (!it) c.close() } }.toMutableList()
+    fun subjectSet(subject: String): SubjectSet = merged(indexes.mapNotNull { it.qidsAndMain(subject) })
+
+    /** Whether any index carries sub-categories (Plan EX editorial pass). */
+    val hasFacets: Boolean get() = indexes.any { it.hasFacets }
+
+    /** [subject]'s sub-categories, in their curated order, with their names; empty without any. */
+    fun facets(subject: String): List<Facet> = indexes.firstNotNullOfOrNull { it.facetList }?.let { Facet.parse(it, subject) }.orEmpty()
+
+    /** How many items each of [subject]'s sub-categories holds across the packs, each item once. */
+    fun facetCounts(subject: String): Map<String, Int> =
+        facets(subject).associate { f -> f.id to countDistinct(indexes.mapNotNull { it.qidsInFacet(f.key) }) }
+
+    /** The articles in [facet] (`subject.facet`), most-linked first, each item once, in the first pack that has it. */
+    fun topInFacet(facet: String, limit: Int, offset: Int = 0): List<QidArticle> {
+        val best = LinkedHashMap<Long, QidArticle>()
+        for (index in indexes) for (a in index.topInFacet(facet, offset + limit)) best.putIfAbsent(a.qid, a)
+        return best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).drop(offset).take(limit)
+    }
+
+    /** Every item in [facet] across the packs, each once, as a sorted set (all main: a facet is within the main subject). */
+    fun facetSet(facet: String): SubjectSet = merged(indexes.mapNotNull { it.qidsInFacet(facet) })
+
+    /** The qid-sorted (qid, ord) [cursors] merged into one set, each item once, main when any pack has ord 0; closes them. */
+    private fun merged(all: List<android.database.Cursor>): SubjectSet {
+        val cursors = all.filter { c -> c.moveToFirst().also { if (!it) c.close() } }.toMutableList()
         val qids = LongArrayList()
         val main = java.util.BitSet()
         while (cursors.isNotEmpty()) {
@@ -210,6 +274,28 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
     }
 
     override fun close() = indexes.forEach { it.close() }
+}
+
+/**
+ * One of a subject's sub-categories (Plan EX editorial pass; tools/subjects/facets.json): [id] within the subject, and
+ * its names. [key] is how the index files it (`subject.facet`).
+ */
+data class Facet(val subject: String, val id: String, val en: String, val es: String) {
+    val key: String get() = "$subject.$id"
+
+    /** Its name in [language] ("es" for Spanish), English otherwise. */
+    fun name(language: String): String = if (language == "es" && es.isNotBlank()) es else en
+
+    companion object {
+        /** [subject]'s facets from the index's JSON list, in order; empty when it has none or the list won't read. */
+        fun parse(json: String, subject: String): List<Facet> = runCatching {
+            val arr = org.json.JSONObject(json).optJSONArray(subject) ?: return emptyList()
+            (0 until arr.length()).map { i ->
+                val o = arr.getJSONObject(i)
+                Facet(subject, o.getString("id"), o.optString("en"), o.optString("es"))
+            }
+        }.getOrDefault(emptyList())
+    }
 }
 
 /** A subject's items ([QidIndexes.subjectSet]), sorted, with which have it as their main subject. */

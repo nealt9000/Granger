@@ -8,6 +8,9 @@ Every article of every `.gqid` in DIR gets subjects (assign.py): the whole metho
 role words) for the packs named by --full (Top en and es), rules alone for the rest (no vectors there). One item has one
 set of subjects whatever the pack or language: English Top first, then Spanish Top, then rules. Writes a small SQLite
 file (subjects(qid, ord, subject), ord 0 the main subject, and a meta table) that tools/qidindex attaches to each .gqid.
+Also each item's sub-category in its main subject (facets.py, facets.json): the rule, and for the packs with vectors the
+neighbours' vote where the rule leaves none; a facets(qid, facet) table, facet as `subject.facet`, and the facet list
+with its names in meta `facets`.
 Run with ~/.venvs/granger-links/bin/python (numpy, libzim).
 """
 import argparse
@@ -21,9 +24,10 @@ import sys
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from assign import Rules, full, load_classes, load_spec, path_of, read_items  # noqa: E402
+from assign import HUMAN, Rules, article_vectors, full, load_classes, load_spec, path_of, read_items  # noqa: E402
+from facets import Facets, load_facets  # noqa: E402
 
-VERSION = 1
+VERSION = 2
 
 
 def gqid_paths(gqid_dir):
@@ -37,6 +41,12 @@ def gqid_paths(gqid_dir):
     return out
 
 
+def facets_meta(facet_spec):
+    """The facet list the app shows, in order, with its names: {subject: [{id, en, es}]} as JSON."""
+    return json.dumps({s: [{"id": f["id"], "en": f["en"], "es": f["es"]} for f in fs] for s, fs in facet_spec.items()},
+                      ensure_ascii=False, separators=(",", ":"))
+
+
 def build(classes, out, gqid_dir, items, fulls, log=print):
     t0 = time.time()
     parents, labels = load_classes(classes)
@@ -44,6 +54,11 @@ def build(classes, out, gqid_dir, items, fulls, log=print):
     if bad:
         raise SystemExit("LABEL MISMATCHES (fix subjects.json):\n  " + "\n  ".join(bad))
     rules = Rules(spec, parents, labels)
+    facet_spec, fbad, weak = load_facets(spec)
+    if fbad:
+        raise SystemExit("FACET PROBLEMS (fix facets.json):\n  " + "\n  ".join(fbad))
+    fx = Facets(facet_spec, parents, spec, weak)
+    facet_of = {}   # qid -> "subject.facet"
     wanted = gqid_paths(gqid_dir)
     log(f"classes loaded, {sum(map(len, wanted.values())):,} pack articles ({', '.join(f'{k} {len(v):,}' for k, v in wanted.items())}) "
         f"[{time.time() - t0:.0f}s]")
@@ -57,10 +72,19 @@ def build(classes, out, gqid_dir, items, fulls, log=print):
         from related_spike import G
         pack = read_items(items[lang], set(G(gvec).keymap()))
         res = full(rules, pack, gvec, zim, lang)
+        main = {t: r["main"] for t, r in res.items() if r["main"] and r["q"] not in chosen}
         for r in res.values():
             if r["main"] and r["q"] not in chosen:
                 chosen[r["q"]] = (r["subjects"], f"full-{lang}")
                 counts[f"full-{lang}"] += 1
+        # Sub-categories: the rule, then the neighbours' vote where it leaves none (or only a catch-all).
+        ruled = {t: fx.rule(pack[t], s) for t, s in main.items()}
+        person = {t: HUMAN in pack[t].get("P31", []) for t in main}
+        final = fx.final(ruled, main, person, article_vectors(G(gvec), main.keys()))
+        for t, f in final.items():
+            if f:
+                facet_of[pack[t]["q"]] = f"{main[t]}.{f}"
+        counts[f"facets-full-{lang}"] = sum(1 for f in final.values() if f)
         log(f"full {lang}: {len(res):,} articles, {counts[f'full-{lang}']:,} items [{time.time() - t0:.0f}s]")
     for lang in ("en", "es"):
         if lang not in items:
@@ -79,6 +103,10 @@ def build(classes, out, gqid_dir, items, fulls, log=print):
                 if main:
                     chosen[r["q"]] = (subjects, f"rules-{lang}")
                     counts[f"rules-{lang}"] += 1
+                    f = fx.rule(r, main)
+                    if f:
+                        facet_of[r["q"]] = f"{main}.{f}"
+                        counts[f"facets-rules-{lang}"] += 1
                 else:
                     counts[f"none-{lang}" if mode != "dropped" else "dropped"] += 1
         log(f"rules {lang}: {n:,} items read [{time.time() - t0:.0f}s]")
@@ -90,11 +118,14 @@ def build(classes, out, gqid_dir, items, fulls, log=print):
     db.executemany("INSERT INTO subjects VALUES (?,?,?)",
                    ((int(q[1:]), i, s) for q, (subs, _) in chosen.items() for i, s in enumerate(subs)))
     db.executemany("INSERT INTO how VALUES (?,?)", ((int(q[1:]), h) for q, (_, h) in chosen.items()))
+    db.execute("CREATE TABLE facets(qid INTEGER PRIMARY KEY, facet TEXT NOT NULL)")
+    db.executemany("INSERT INTO facets VALUES (?,?)", ((int(q[1:]), f) for q, f in facet_of.items()))
     db.execute("CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT NOT NULL)")
     db.executemany("INSERT INTO meta VALUES (?,?)", [
         ("subjectsVersion", str(spec["version"])), ("builder", "tools/subjects/build.py"), ("builderVersion", str(VERSION)),
         ("builtAt", datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")),
-        ("counts", json.dumps(counts, sort_keys=True))])
+        ("counts", json.dumps(counts, sort_keys=True)),
+        ("facets", facets_meta(facet_spec))])
     db.commit()
     db.execute("VACUUM")
     db.close()
