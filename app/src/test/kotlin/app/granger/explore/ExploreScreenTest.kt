@@ -44,6 +44,40 @@ class ExploreScreenTest {
         assertThat(Subject.ofDomain("reference")).isNull()
     }
 
+    @Test fun bookCollectionsGroupByCollectionUnderEachSubjectTheirBooksCarry() {
+        val members = listOf(
+            CollectionMember("c:granger-classics", "Granger Classics", listOf("literature", "history")),
+            CollectionMember("c:granger-classics", "Granger Classics", listOf("literature")),
+            CollectionMember("c:asb-en", "African Storybook · English", listOf("literature", "languages")),
+            CollectionMember("c:gutenberg-poetry", "Gutenberg · Poetry", listOf("literature", "literature"), pack = true),
+        )
+        val by = collectionsBySubject(members)
+        assertThat(by.getValue("literature")).containsExactly(
+            ExploreCollection("c:granger-classics", "Granger Classics", 2),
+            ExploreCollection("c:asb-en", "African Storybook · English", 1),
+            ExploreCollection("c:gutenberg-poetry", "Gutenberg · Poetry", 0),
+        ).inOrder()
+        assertThat(by.getValue("history")).containsExactly(ExploreCollection("c:granger-classics", "Granger Classics", 1))
+        // A subject with only a book collection still gets a door, after those with articles.
+        val doors = subjectDoors(mapOf("history" to 10), { emptyList() }, emptyList(), by)
+        assertThat(doors.map { it.subject }).containsExactly(Subject.HISTORY, Subject.LITERATURE, Subject.LANGUAGES).inOrder()
+        assertThat(doors[1].collections.map { it.id }).containsExactly("c:granger-classics", "c:asb-en", "c:gutenberg-poetry").inOrder()
+    }
+
+    @Test fun aSubjectPageListsItsBookCollectionsAndOpensThem() {
+        val ui = SubjectUi(
+            Subject.LITERATURE, 0, emptyList(), emptyList(), more = false,
+            collections = listOf(ExploreCollection("c:granger-classics", "Granger Classics", 120), ExploreCollection("c:gp", "Gutenberg · Poetry")),
+        )
+        val seen = mutableListOf<String>()
+        compose.setContent { SubjectContent(ui, actions, SubjectActions(onOpenCollection = { seen += it })) }
+        compose.onNodeWithText("Book collections").assertExists()
+        compose.onNodeWithText("120 books").assertExists()
+        compose.onNodeWithText("Nothing on this subject yet").assertDoesNotExist()
+        compose.onNodeWithTag(SubjectTags.collection("c:gp")).performClick()
+        assertThat(seen).containsExactly("c:gp")
+    }
+
     @Test fun theLandingShowsDoorsErasAndSourcesAndEachLeadsOn() {
         val ui = ExploreUi(
             articles = 77_019,

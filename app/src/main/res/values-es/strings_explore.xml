@@ -93,4 +93,11 @@
     <string name="explore_map_more">También</string>
     <string name="explore_featured">El tema de hoy</string>
     <string name="explore_more_subjects">Más temas</string>
+    <string name="explore_subject_collections">Colecciones de libros</string>
+    <!-- A book collection on a subject page: how many of its books are on the subject. %1$s is the count. -->
+    <plurals name="explore_collection_books">
+        <item quantity="one">%1$s libro</item>
+        <item quantity="many">%1$s libros</item>
+        <item quantity="other">%1$s libros</item>
+    </plurals>
 </resources>

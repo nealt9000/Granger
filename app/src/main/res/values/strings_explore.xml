@@ -95,4 +95,10 @@
     <string name="explore_map_more">Also</string>
     <string name="explore_featured">Today\'s subject</string>
     <string name="explore_more_subjects">More subjects</string>
+    <string name="explore_subject_collections">Book collections</string>
+    <!-- A book collection on a subject page: how many of its books are on the subject. %1$s is the count. -->
+    <plurals name="explore_collection_books">
+        <item quantity="one">%1$s book</item>
+        <item quantity="other">%1$s books</item>
+    </plurals>
 </resources>

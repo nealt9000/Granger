@@ -126,6 +126,7 @@ import app.granger.settings.VoiceSettingsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import app.granger.settings.SettingsViewModel
 import app.granger.shell.GrangerShell
 import app.granger.shell.HistoryScreen
@@ -712,6 +713,27 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             },
             isWikipedia = { it.name.startsWith("wikipedia_") },
             load = { container.catalog.load() },
+            // Book collections join subjects by the catalog's own `subjects` (KB2): book packs, Classics and book sets.
+            collections = kotlinx.coroutines.flow.combine(
+                container.library.packs, container.bookshelf.books, container.catalog.state, container.downloads.records,
+            ) { packs, books, state, records ->
+                val catalog = state?.catalog
+                val bookSubjects = HashMap<String, List<String>>()
+                catalog?.books?.forEach { bookSubjects[it.id] = it.subjects }
+                catalog?.bookSets?.forEach { set -> set.books.forEach { bookSubjects[it.id] = it.subjects.ifEmpty { set.subjects } } }
+                val members = packs.filter { it.isBookPack }.mapNotNull { pack ->
+                    app.granger.browse.installedEntry(pack, catalog, records)?.subjects?.takeIf { it.isNotEmpty() }?.let {
+                        val key = app.granger.core.library.Filing.defaultKey(pack)
+                        app.granger.explore.CollectionMember("c:$key", app.granger.core.library.Filing.defaultName(key, pack), it, pack = true)
+                    }
+                } + books.filter { it.origin == app.granger.core.library.BookOrigin.GRANGER }.mapNotNull { book ->
+                    bookSubjects[book.sourceRef]?.takeIf { it.isNotEmpty() }?.let {
+                        val key = app.granger.core.library.Filing.defaultKey(book)
+                        app.granger.explore.CollectionMember("c:$key", app.granger.core.library.Filing.defaultName(key, book, packs), it)
+                    }
+                }
+                app.granger.explore.collectionsBySubject(members)
+            }.flowOn(kotlinx.coroutines.Dispatchers.Default),
             look = { packId, path ->
                 container.library.archive(packId)?.let { archive ->
                     archive.resolvePath(path)?.let { resolved ->
@@ -1112,6 +1134,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         },
                         onQuiz = { nav.navigate(SubjectGamesRoute(subject.id)) { launchSingleTop = true } },
                         onOpenBook = ::openLinkedBook,
+                        onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
                     ),
                 )
             }

@@ -58,9 +58,10 @@ enum class Subject(
         fun of(id: String): Subject? = entries.firstOrNull { it.id == id }
 
         /**
-         * A non-Wikipedia pack's subject from its catalog knowledge area (Neal, 2026-11-16: packs become subject doors by
-         * their domain). For now: once KB2's catalog `subjects` field is merged, a pack's own subjects replace this.
-         * General reference and anything unknown join no door; they stay under Your sources.
+         * A website pack's subject from its catalog knowledge area (Neal, 2026-11-16: packs become subject doors by their
+         * domain). The catalog's `subjects` field tags book packs, Classics and book sets only (KB2), never websites, so
+         * this stays: book collections join by their own subjects ([ExploreCollection]). General reference and anything
+         * unknown join no door; they stay under Your sources.
          */
         fun ofDomain(domain: String?): Subject? = when (domain) {
             "medicine" -> HEALTH
@@ -96,6 +97,33 @@ enum class Era(
     RECENT(1946, Long.MAX_VALUE / 2, R.string.explore_era_recent, R.string.explore_era_recent_span, listOf(186075L)),
 }
 
+/**
+ * An installed book collection on a subject (Plan EX, KB2's catalog `subjects`): a book pack, Granger Classics, Clásicos
+ * Granger or a book set, opened as its Library collection [id] (`c:<key>`). [books] counts its books with the subject; 0
+ * for a book pack, whose books live inside its file.
+ */
+data class ExploreCollection(val id: String, val title: String, val books: Int = 0)
+
+/** One installed book or book pack and its catalog subjects (main first), for [collectionsBySubject]. */
+data class CollectionMember(val collectionId: String, val title: String, val subjects: List<String>, val pack: Boolean = false)
+
+/**
+ * Each subject id's book collections (pure, for tests): the members grouped by collection under every subject they
+ * carry. A collection with more books on a subject comes first; packs, then titles, break ties.
+ */
+fun collectionsBySubject(members: List<CollectionMember>): Map<String, List<ExploreCollection>> {
+    val out = HashMap<String, LinkedHashMap<String, ExploreCollection>>()
+    for (m in members) for (sub in m.subjects.distinct()) {
+        val byId = out.getOrPut(sub) { LinkedHashMap() }
+        val was = byId[m.collectionId]
+        byId[m.collectionId] = if (m.pack) was ?: ExploreCollection(m.collectionId, m.title)
+        else (was ?: ExploreCollection(m.collectionId, m.title)).let { it.copy(books = it.books + 1) }
+    }
+    return out.mapValues { (_, byId) ->
+        byId.values.sortedWith(compareByDescending<ExploreCollection> { it.books }.thenBy { it.title.lowercase() })
+    }
+}
+
 /** An article Explore shows: where to open it, its title, (when loaded) its picture, and its dates when it has them. */
 data class ExploreArticle(val packId: String, val path: String, val title: String, val picture: String? = null, val mark: TimeMark? = null)
 
@@ -108,6 +136,8 @@ data class SubjectDoor(
     val picture: String? = null,
     /** The subject's own article's opening sentence, for the landing's features; null until read, or with none. */
     val lead: String? = null,
+    /** The installed book collections on it. */
+    val collections: List<ExploreCollection> = emptyList(),
 )
 
 /** An era's row: how many dated articles start in it, its best-known three, and where the Timeline opens for it. */
@@ -139,13 +169,21 @@ fun TimeMark.toExplore() = ExploreArticle(packId, path, title, mark = this)
  * The doors (pure, for tests): each subject with any article or pack, the most articles first ([Subject] order breaking
  * ties), its three best-known articles, and the non-Wikipedia [packs] its catalog domain puts on it.
  */
-fun subjectDoors(counts: Map<String, Int>, examples: (Subject) -> List<ExploreArticle>, packs: List<Pair<Pack, String?>>): List<SubjectDoor> {
+fun subjectDoors(
+    counts: Map<String, Int>,
+    examples: (Subject) -> List<ExploreArticle>,
+    packs: List<Pair<Pack, String?>>,
+    collections: Map<String, List<ExploreCollection>> = emptyMap(),
+): List<SubjectDoor> {
     val bySubject = packs.mapNotNull { (pack, domain) -> Subject.ofDomain(domain)?.let { it to pack } }.groupBy({ it.first }, { it.second })
     return Subject.entries
         .map { s -> s to (counts[s.id] ?: 0) }
-        .filter { (s, n) -> n > 0 || bySubject[s].orEmpty().isNotEmpty() }
+        .filter { (s, n) -> n > 0 || bySubject[s].orEmpty().isNotEmpty() || collections[s.id].orEmpty().isNotEmpty() }
         .sortedWith(compareByDescending<Pair<Subject, Int>> { it.second }.thenBy { it.first.ordinal })
-        .map { (s, n) -> SubjectDoor(s, n, if (n > 0) examples(s) else emptyList(), bySubject[s].orEmpty().sortedBy { it.title.lowercase() }) }
+        .map { (s, n) ->
+            SubjectDoor(s, n, if (n > 0) examples(s) else emptyList(), bySubject[s].orEmpty().sortedBy { it.title.lowercase() },
+                collections = collections[s.id].orEmpty())
+        }
 }
 
 /** Main subjects that don't make an era's example: the best-known items dated in an era are otherwise countries, cities and tamed animals. */
@@ -174,6 +212,8 @@ class ExploreSources(
     val load: suspend () -> Unit = {},
     /** An article's large picture (cropped later, around its subject) and opening sentence; null when unreadable. Blocking. */
     val look: (packId: String, path: String) -> ArticleLook? = { _, _ -> null },
+    /** The installed book collections by subject id ([collectionsBySubject]). */
+    val collections: Flow<Map<String, List<ExploreCollection>>> = kotlinx.coroutines.flow.flowOf(emptyMap()),
 )
 
 /** An article as a feature shows it: its lead picture, larger than a thumbnail, and its opening sentence. */
@@ -199,12 +239,17 @@ class ExploreViewModel(private val sources: ExploreSources) : ViewModel() {
     val ui: StateFlow<ExploreUi?> = state.asStateFlow()
 
     private var packs: List<Pair<Pack, String?>>? = null
+    private var collections: Map<String, List<ExploreCollection>> = emptyMap()
 
     init {
         viewModelScope.launch { runCatching { sources.load() } }
         viewModelScope.launch {
-            sources.packs.map { list -> list.sortedBy { it.first.id } }.distinctUntilChanged().collect { list ->
+            kotlinx.coroutines.flow.combine(
+                sources.packs.map { list -> list.sortedBy { it.first.id } }.distinctUntilChanged(),
+                sources.collections.distinctUntilChanged(),
+            ) { list, c -> list to c }.collect { (list, c) ->
                 packs = list
+                collections = c
                 rebuild(list)
             }
         }
@@ -233,7 +278,7 @@ class ExploreViewModel(private val sources: ExploreSources) : ViewModel() {
         // The subject's own article (History in History) stands for the door already; examples are what it holds.
         val doors = subjectDoors(counts, { s ->
             qids.topIn(s.id, EXAMPLES + s.namesakes.size, mainOnly = true).filter { it.qid !in s.namesakes }.take(EXAMPLES).map { it.toExplore() }
-        }, others)
+        }, others, collections)
         val times = sources.times()
         val eras = if (times.isEmpty) emptyList() else Era.entries.map { era ->
             EraRow(era, times.countActive(era.from, era.to), eraExamples(times.topActive(era.from, era.to, ERA_POOL), qids::subjectsOf))
@@ -314,6 +359,8 @@ data class SubjectUi(
     val era: Era? = null,
     val sort: SubjectSort = SubjectSort.LINKED,
     val books: List<ExploreBook> = emptyList(),
+    /** The installed book collections on this subject. */
+    val collections: List<ExploreCollection> = emptyList(),
     /** Still reading this view's articles (a chip or sort just changed). */
     val loading: Boolean = false,
 ) {
@@ -339,17 +386,18 @@ class SubjectViewModel(
 
     init {
         viewModelScope.launch {
-            sources.packs.collect { packs ->
+            kotlinx.coroutines.flow.combine(sources.packs, sources.collections) { p, c -> p to c }.collect { (packs, c) ->
+                val shelved = c[subject.id].orEmpty()
                 val others = packs.filterNot { sources.isWikipedia(it.first) }
                     .filter { Subject.ofDomain(it.second) == subject }.map { it.first }.sortedBy { it.title.lowercase() }
                 val first = withContext(Dispatchers.IO) {
                     val qids = sources.qids()
                     val count = if (qids.hasSubjects) qids.subjectCounts(listOf(subject.id))[subject.id] ?: 0 else 0
                     val page = qids.topIn(subject.id, PAGE).map { it.toExplore() }
-                    SubjectUi(subject, count, page, others, more = page.size < count)
+                    SubjectUi(subject, count, page, others, more = page.size < count, collections = shelved)
                 }
                 val was = state.value
-                state.value = was?.copy(count = first.count, packs = first.packs) ?: first
+                state.value = was?.copy(count = first.count, packs = first.packs, collections = shelved) ?: first
                 if (was == null) launch { details() }
             }
         }

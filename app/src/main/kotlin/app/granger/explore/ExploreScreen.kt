@@ -204,16 +204,20 @@ private fun SectionHead(text: String, modifier: Modifier = Modifier) {
 /** Subjects in each asymmetric block: one big, two small. */
 private const val BLOCK = 3
 
-/** A door's count line: its articles, else its one pack's name, else how many packs. */
+/** A door's count line: its articles, else its one pack or collection's name, else how many. */
 @Composable
-private fun countLine(door: SubjectDoor): String = when {
-    door.count > 0 -> pluralStringResource(R.plurals.explore_topics, door.count, count(door.count))
-    door.packs.size == 1 -> door.packs.single().title
-    else -> pluralStringResource(R.plurals.explore_packs, door.packs.size, door.packs.size)
+private fun countLine(door: SubjectDoor): String {
+    val names = door.packs.map { it.title } + door.collections.map { it.title }
+    return when {
+        door.count > 0 -> pluralStringResource(R.plurals.explore_topics, door.count, count(door.count))
+        names.size == 1 -> names.single()
+        else -> pluralStringResource(R.plurals.explore_packs, names.size, names.size)
+    }
 }
 
 private fun examplesLine(door: SubjectDoor) =
-    if (door.examples.isNotEmpty()) door.examples.joinToString(" · ") { it.title } else door.packs.joinToString(" · ") { it.title }
+    if (door.examples.isNotEmpty()) door.examples.joinToString(" · ") { it.title }
+    else (door.packs.map { it.title } + door.collections.map { it.title }).joinToString(" · ")
 
 /** Today's subject: the landing's lead, a large picture framed on its subject, the subject's own opening sentence. */
 @Composable
@@ -336,6 +340,7 @@ fun SubjectScreen(viewModel: SubjectViewModel, actions: ExploreActions, subjectA
             onWander = { scope.launch { viewModel.wanderStart()?.let { subjectActions.onWanderAt(it.packId, it.path) } } },
             onQuiz = subjectActions.onQuiz,
             onOpenBook = subjectActions.onOpenBook,
+            onOpenCollection = subjectActions.onOpenCollection,
             onWanderAt = subjectActions.onWanderAt,
             picture = viewModel::picture,
         ),
@@ -352,6 +357,8 @@ class SubjectActions(
     val onWanderAt: (packId: String, path: String) -> Unit = { _, _ -> },
     val onQuiz: () -> Unit = {},
     val onOpenBook: (bookId: String) -> Unit = {},
+    /** A book collection's Library page (`c:<key>`). */
+    val onOpenCollection: (collectionId: String) -> Unit = {},
     /** An article's cached picture; null when it has none. Blocking. */
     val picture: (ExploreArticle) -> String? = { null },
 )
@@ -363,6 +370,7 @@ object SubjectTags {
     fun era(era: Era) = "subject_era_${era.name.lowercase()}"
     fun sort(sort: SubjectSort) = "subject_sort_${sort.name.lowercase()}"
     fun book(id: String) = "subject_book_$id"
+    fun collection(id: String) = "subject_collection_$id"
 }
 
 /**
@@ -423,6 +431,16 @@ fun SubjectContent(ui: SubjectUi?, actions: ExploreActions, subject: SubjectActi
                     }
                 }
             }
+            if (loaded.collections.isNotEmpty()) {
+                item(key = "collections-head") { SectionHead(stringResource(R.string.explore_subject_collections), Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)) }
+                items(loaded.collections, key = { "collection:" + it.id }) { c ->
+                    ListItem(
+                        headlineContent = { Text(c.title) },
+                        supportingContent = if (c.books > 0) ({ Text(pluralStringResource(R.plurals.explore_collection_books, c.books, count(c.books))) }) else null,
+                        modifier = Modifier.testTag(SubjectTags.collection(c.id)).clickable { subject.onOpenCollection(c.id) },
+                    )
+                }
+            }
             if (loaded.books.isNotEmpty()) {
                 item(key = "books-head") {
                     SectionHead(pluralStringResource(R.plurals.explore_subject_books, loaded.books.size, count(loaded.books.size)), Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp))
@@ -445,7 +463,7 @@ fun SubjectContent(ui: SubjectUi?, actions: ExploreActions, subject: SubjectActi
                     SectionHead(head, Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp))
                 }
             }
-            if (loaded.articles.isEmpty() && loaded.packs.isEmpty() && !loaded.loading) {
+            if (loaded.articles.isEmpty() && loaded.packs.isEmpty() && loaded.collections.isEmpty() && !loaded.loading) {
                 item(key = "empty") { Text(stringResource(R.string.explore_nothing_here), modifier = Modifier.padding(16.dp)) }
             }
             items(loaded.articles, key = { "a:" + it.packId + "/" + it.path }) { a ->
