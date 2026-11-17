@@ -471,3 +471,12 @@ What this means for the design: the picture problem is smaller than the mockups 
 picture Neal accepts 97% of the time where the rules agree, and the drawings it picks are mostly the right identity.
 Plates must therefore be designed to carry flags, seals, logos and maps well (contain, not crop, on a paper ground),
 since no markup rule will reliably replace them.
+
+### P0 closed on the picture rule; room descriptions drafted (2026-11-17)
+
+- **Neal accepted rule v4**: today's first-picture rule, plus the series-sidebar swap. No third grading round. The
+  phone can apply it from the article's HTML, so no index change is needed. The build plan's P0 picture line is
+  superseded by this, and its examples (Wikipedia, Electric car, Earhart) were wrong, as noted above.
+- **Design consequence for G0:** plates must show flags, seals, logos and maps whole on a paper ground, not cropped.
+- **Room descriptions** are drafted for review in `2026-11-17-ex-room-descriptions.md` (108 rooms, en + es). They
+  move into `lenses.json` after Neal's OK. The draft also lists eleven rooms whose contents and names pull apart.
