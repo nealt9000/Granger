@@ -94,7 +94,7 @@ class ExploreScreenTest {
         val napoleon = app.granger.core.library.TimeMark(517L, "top", "Napoleon", "Napoleon", app.granger.core.library.TimeKind.LIFE, 1769, 0, 1821, null, 9, emptySet(), 300)
         val ui = SubjectUi(
             Subject.HISTORY, 4_210, listOf(napoleon.toExplore()), emptyList(), more = false,
-            eras = listOf(Era.ANCIENT to 12, Era.C19 to 340), dated = 352, era = Era.C19, sort = SubjectSort.OLDEST,
+            eras = listOf(Era.ANCIENT to 12, Era.C19 to 340), dated = 352, datedMain = 300, era = Era.C19, sort = SubjectSort.OLDEST,
             books = listOf(ExploreBook("gc-g", "Decline and Fall", null, 2277L)),
         )
         val seen = mutableListOf<String>()

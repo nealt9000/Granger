@@ -744,7 +744,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     )
 
     /**
-     * A subject's quiz (Plan EX Task 3): the same games, dealt only from the subject's dated articles; its own count and
+     * A subject's quiz (Plan EX Task 3): the same games, dealt only from the dated articles whose main subject it is; its own count and
      * best runs, kept apart from the main games'.
      */
     fun subjectGameModel(scope: kotlinx.coroutines.CoroutineScope, thumbs: ArticleThumbnails, subject: String): GameModel {
@@ -753,7 +753,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             scope = scope,
             indexes = {
                 val s = set ?: container.referenceLinks.qidIndexes().subjectSet(subject).also { set = it }
-                timeIndexes().only { it in s }
+                // Articles whose main subject it is: countries carry History second, and a History quiz isn't El Salvador vs Russia.
+                timeIndexes().only { s.isMain(it) }
             },
             picture = { packId, path ->
                 container.library.archive(packId)?.let { archive ->

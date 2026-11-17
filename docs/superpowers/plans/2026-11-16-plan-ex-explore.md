@@ -97,8 +97,15 @@ Places as a subject door beyond counts (the Atlas is LL6); Trails (LL6); the onl
   - **Pack doors** use a domain → subject map for now (medicine → Health, food → Food, thought → Religion…); switch to the catalog `subjects` field once KB2 merges. Book collections join the doors then too (`Catalog.bookCollectionsBySubject`).
   - **Neal to look at:** door order is by size, so WikiMed puts Health first (39k); Spanish screens not yet seen on the phone (strings done).
   - Tests: 3,159 green. The Pixel ran with `-PcatalogUrl` (local signed catalog) to fetch the new indexes; reinstalled on the normal catalog URL after.
-- **Task 3 built (desk) `30dc646a`, Pixel check pending (phone was locked):**
+- **Task 3 built `30dc646a`, Pixel-checked 2026-11-16** (History: 10,430 topics, 8,130 dated; eras, both orders, Middle Ages most linked = Columbus, Marco Polo, Ottoman Empire…; Quiz; Wander → Abel Tasman; Books & writing: In your books 171, a cover opens the book):
   - **A subject opened:** Wander (a random well-known main-subject article, into Home's Wander) and Quiz (the six time games dealing only the subject's dated articles; own best runs; shown from 40 dated); era chips with counts; Most linked / Oldest first; rows show pictures and dates; In your books; packs; articles, 60 a page.
   - **Eras:** one pass over the time indexes per subject (`datedIn`), kept as primitive arrays; a life counts at forty, as on the landing.
   - **Books:** subjects from each book's Wikidata work (404 of 622 Classics have one, almost all Books & writing; Religion and History where they fit). Measured and rejected: a book's subject from what it mentions (Places leads for 555 of 622). KB2's catalog book subjects join after its merge.
   - **Explore's rail icon is a compass.**
+  - **Fixed on the Pixel:** the quiz dealt countries (El Salvador vs Russia carry History second) → it deals only main-subject articles, and offers itself from 40 of those.
+  - **Found, not fixed:**
+    - **Deep years wrap:** 18 Spanish Top marks before −2.1 billion (Universe, Big Bang, Hadean) read through `getInt`, so Big Bang shows "c. 902 million years ago". Shipped bug, Timeline too; the fix is `TimeMark.y0/y1` as Long (~70 uses). Its own small task.
+    - **Deep time carries History:** the past-event rule gives Big Bang and Cambrian explosion History second, so History's Oldest first opens on geology. Rule fix: no History before ~3000 BC (needs a subjects rebuild and re-sign).
+    - **Spanish-only articles** (Ediacárico, Fanerozoico) appear in an English list when English Top lacks them: right by Decision 6, but worth a look in the editorial pass.
+    - **Two editions of one work** (Don Quijote, Don Quixote) both in In your books.
+    - **Landing examples** show odd mains from subject packs (Technology: Main Page, Wikipedia; Sports: Art; Business: Education, Architecture). For the editorial landing's curation.

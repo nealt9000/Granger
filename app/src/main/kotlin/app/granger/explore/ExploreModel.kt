@@ -235,14 +235,16 @@ data class SubjectUi(
     val more: Boolean,
     val eras: List<Pair<Era, Int>> = emptyList(),
     val dated: Int = 0,
+    /** Dated articles whose main subject this is: the quiz deals only these. */
+    val datedMain: Int = 0,
     val era: Era? = null,
     val sort: SubjectSort = SubjectSort.LINKED,
     val books: List<ExploreBook> = emptyList(),
     /** Still reading this view's articles (a chip or sort just changed). */
     val loading: Boolean = false,
 ) {
-    /** Enough dated articles for a run of the time games. */
-    val canQuiz: Boolean get() = dated >= SubjectViewModel.QUIZ_MIN
+    /** Enough dated main-subject articles for a run of the time games. */
+    val canQuiz: Boolean get() = datedMain >= SubjectViewModel.QUIZ_MIN
     val canWander: Boolean get() = count > 0
 }
 
@@ -289,7 +291,7 @@ class SubjectViewModel(
             t to Era.entries.map { it to t.count(it.from, it.to) }.filter { it.second > 0 }
         }
         time = t
-        state.value = state.value?.copy(eras = eras, dated = t?.size ?: 0)
+        state.value = state.value?.copy(eras = eras, dated = t?.size ?: 0, datedMain = t?.main?.count { it } ?: 0)
         val shelf = withContext(Dispatchers.IO) { runCatching { inYourBooks() }.getOrDefault(emptyList()) }
         state.value = state.value?.copy(books = shelf)
     }
