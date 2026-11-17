@@ -2,6 +2,8 @@ package app.granger.explore
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
@@ -176,7 +178,8 @@ fun TopicsContent(ui: SubjectUi?, actions: ExploreActions, subject: SubjectActio
             }
             if (loaded.count > 0) {
                 item(key = "sort", span = StaggeredGridItemSpan.FullLine) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    // Scrolls sideways on a narrow screen: three orders and the word don't always fit (A–Z wrapped on a Pixel 6).
+                    Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(stringResource(R.string.explore_subject_sort), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         // Oldest first needs dated articles; A–Z and most linked always work.
                         for (s in SubjectSort.entries.filter { it != SubjectSort.OLDEST || loaded.eras.isNotEmpty() }) {
@@ -185,7 +188,7 @@ fun TopicsContent(ui: SubjectUi?, actions: ExploreActions, subject: SubjectActio
                                     SubjectSort.LINKED -> R.string.explore_subject_sort_linked
                                     SubjectSort.OLDEST -> R.string.explore_subject_sort_oldest
                                     SubjectSort.AZ -> R.string.explore_subject_sort_az
-                                })) },
+                                }), maxLines = 1, softWrap = false) },
                                 modifier = Modifier.testTag(SubjectTags.sort(s)))
                         }
                     }

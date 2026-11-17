@@ -362,15 +362,23 @@ private fun Chapter(c: BroadChapter, index: Int, onOpenArticle: (packId: String,
 /** One disc on the ring: what it opens, its label and picture. */
 data class RingStop(val part: BroadPart, val index: Int, val label: String, val picture: String?)
 
-/** The ring's stops, in the page's order: kinds, the story, people, each chapter, close kin. */
+/**
+ * The ring's stops (at most [RING_MAX]): kinds, the story, people and close kin always, then the chapters, those with a
+ * picture first; shown in the page's order.
+ */
 @Composable
-fun ringStops(broad: BroadTopic, related: List<TopicArticle>): List<RingStop> = buildList {
-    if (broad.kinds.isNotEmpty()) add(RingStop(BroadPart.KINDS, 0, stringResource(R.string.topic_broad_kinds), broad.kinds.firstNotNullOfOrNull { it.first.picture }))
-    broad.story?.let { add(RingStop(BroadPart.STORY, 0, it.title, it.entries.firstNotNullOfOrNull { e -> e.picture })) }
-    if (broad.people.isNotEmpty()) add(RingStop(BroadPart.PEOPLE, 0, stringResource(R.string.topic_broad_people), broad.people.firstNotNullOfOrNull { it.article.picture }))
-    broad.chapters.forEachIndexed { i, c -> add(RingStop(BroadPart.CHAPTER, i, c.title, c.picture)) }
-    if (related.isNotEmpty()) add(RingStop(BroadPart.CLOSE, 0, stringResource(R.string.topic_closest), related.firstNotNullOfOrNull { it.picture }))
-}.take(RING_MAX)
+fun ringStops(broad: BroadTopic, related: List<TopicArticle>): List<RingStop> {
+    val fixed = buildList {
+        if (broad.kinds.isNotEmpty()) add(RingStop(BroadPart.KINDS, 0, stringResource(R.string.topic_broad_kinds), broad.kinds.firstNotNullOfOrNull { it.first.picture }))
+        broad.story?.let { add(RingStop(BroadPart.STORY, 0, it.title, it.entries.firstNotNullOfOrNull { e -> e.picture })) }
+        if (broad.people.isNotEmpty()) add(RingStop(BroadPart.PEOPLE, 0, stringResource(R.string.topic_broad_people), broad.people.firstNotNullOfOrNull { it.article.picture }))
+    }
+    val close = if (related.isNotEmpty()) RingStop(BroadPart.CLOSE, 0, stringResource(R.string.topic_closest), related.firstNotNullOfOrNull { it.picture }) else null
+    val room = RING_MAX - fixed.size - (if (close != null) 1 else 0)
+    val chapters = broad.chapters.mapIndexed { i, c -> RingStop(BroadPart.CHAPTER, i, c.title, c.picture) }
+        .sortedBy { it.picture == null }.take(room.coerceAtLeast(0)).sortedBy { it.index }
+    return fixed + chapters + listOfNotNull(close)
+}
 
 /**
  * C's ring, as a map of the page (Neal's pick: it opens from "As a map"): the topic in the middle, its parts around it;
@@ -392,13 +400,13 @@ fun BroadRing(title: String, picture: String?, stops: List<RingStop>, onStop: (R
                         val x = radius * cos(a).toFloat()
                         val y = radius * sin(a).toFloat()
                         Column(
-                            Modifier.align(Alignment.Center).offset(x = x, y = y).width(84.dp).clip(RoundedCornerShape(12.dp))
+                            Modifier.align(Alignment.Center).offset(x = x, y = y).width(104.dp).clip(RoundedCornerShape(12.dp))
                                 .clickable { onStop(s) }.semantics(mergeDescendants = true) { role = Role.Button; contentDescription = s.label }
                                 .testTag(BroadTags.ring(i)),
                             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp),
                         ) {
-                            Disc(s.picture, 56.dp)
-                            Text(s.label, style = MaterialTheme.typography.labelMedium.copy(fontFamily = Spectral), textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.clearAndSetSemantics {})
+                            Disc(s.picture, 56.dp, initial = s.label.take(1))
+                            Text(s.label, style = MaterialTheme.typography.labelSmall.copy(fontFamily = Spectral), textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.clearAndSetSemantics {})
                         }
                     }
                 }
@@ -409,19 +417,21 @@ fun BroadRing(title: String, picture: String?, stops: List<RingStop>, onStop: (R
 }
 
 @Composable
-private fun Disc(path: String?, size: Dp, modifier: Modifier = Modifier, selected: Boolean = false) {
+private fun Disc(path: String?, size: Dp, modifier: Modifier = Modifier, selected: Boolean = false, initial: String = "") {
     val picture = rememberRailCover(path, size)
     Box(
         modifier.size(size).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .border(if (selected) 3.dp else 2.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface, CircleShape),
+        contentAlignment = Alignment.Center,
     ) {
         if (picture != null) Image(picture, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+        else Text(initial, style = MaterialTheme.typography.titleLarge.copy(fontFamily = Spectral), color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 private const val KINDS_SHOWN = 9
 private const val PEOPLE_SHOWN = 9
-private const val RING_MAX = 8
+private const val RING_MAX = 7
 /** The story's dark ground and its year colour (the brand's ink and ember). */
 private val INK = Color(0xFF231C17)
 private val EMBER = Color(0xFFE0A86A)
