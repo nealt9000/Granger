@@ -1160,7 +1160,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             }
             composable<BrowseRoute> {
                 BrowseScreen(
-                    viewModel { BrowseViewModel(container.shelves, container.library, container.catalog, container.downloads.records, countryCode = container.phoneCountry, knowledge = container.knowledgeLanguages.languages, askOffered = container.askOn) },
+                    viewModel { BrowseViewModel(container.shelves, container.library, container.catalog, container.downloads.records, countryCode = container.phoneCountry, knowledge = container.knowledgeLanguages.languages, askOffered = container.askOn, books = container.bookshelf.books) },
                     packsFolder = container.packDirs().firstOrNull()?.path.orEmpty(),
                     downloadsBadge = downloadsBadge,
                     actions = BrowseActions(
@@ -1170,6 +1170,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         onDownloads = { nav.navigate(DownloadsRoute) { launchSingleTop = true } },
                         onReadiness = { nav.navigate(ReadinessRoute) },
                         onFiles = { packId -> nav.navigate(PackFilesRoute(packId)) },
+                        onBooks = { if (!nav.popBackStack<LibraryRoute>(inclusive = false)) nav.navigate(LibraryRoute()) },
+                        // Opened from Explore's Your sources: Back returns there (Plan EX Task 4).
+                        onBack = if (Features.EXPLORE) ({ nav.popBackStack() }) else null,
                     ),
                     importPack = { uri -> container.packImports.add(uri).text() },
                 )

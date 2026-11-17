@@ -106,6 +106,32 @@ class BrowseScreenTest {
         assertThat(calls).containsExactly("get:null", "downloads", "readiness").inOrder()
     }
 
+    /** Plan EX Task 4: Sources leads with a Books row counting every book collection, and has Back to Explore. */
+    @Test fun theBooksRowOpensTheLibraryAndSourcesHasBack() {
+        var back = 0
+        var books = 0
+        compose.setContent {
+            BrowseContent(
+                BrowseUi(listOf(BrowseSection("reference", UiText.Raw("General reference"), listOf(wikipedia))), bookCollections = 4),
+                "/packs", downloadsBadge = 0, BrowseActions(onBooks = { books++ }, onBack = { back++ }),
+            )
+        }
+        compose.onNodeWithText("Your sources").assertExists()
+        compose.onNodeWithText("4 collections").assertExists()
+        compose.onNodeWithText("Your books").performClick()
+        compose.onNodeWithContentDescription("Back").performClick()
+        assertThat(books to back).isEqualTo(1 to 1)
+    }
+
+    @Test fun bookCollectionsCountEachPackAndEachOfGrangersOnce() {
+        val books = listOf(
+            app.granger.book("gc-hamlet"), app.granger.book("gc-iliad"), app.granger.book("gc-es-quijote"),
+            app.granger.book("asb-en-1"), app.granger.book("asb-sw-2"),
+        )
+        val gutenberg = pack("gp", "Gutenberg poetry").copy(name = "gutenberg_en_lcc-p")
+        assertThat(bookCollectionCount(listOf(gutenberg, pack("w", "Wikipedia")), books)).isEqualTo(5)
+    }
+
     @Test fun anEmptyBrowseSuggestsWhatToGetFirst() {
         show(BrowseUi(emptyList(), listOf(BrowseSuggestion("Wikipedia (top)", 1_000_000_000, map = false, domain = "reference"), BrowseSuggestion("France", 300_000_000, map = true, domain = "maps"))))
         compose.onNodeWithText("Nothing to browse yet").assertExists()

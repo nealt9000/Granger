@@ -6,7 +6,23 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.text.font.FontWeight
+import app.granger.theme.Chevron
+import app.granger.theme.GroupLabel
+import app.granger.theme.GroupedItem
+import app.granger.theme.GroupedRow
+import app.granger.theme.GroupedRows
+import app.granger.theme.groupTeal
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -74,12 +90,18 @@ class BrowseActions(
     val onImportPack: (() -> Unit)? = null,
     /** Files in this pack (Plan KB2 Task 4.6): a website pack's PDFs and EPUBs. */
     val onFiles: (packId: String) -> Unit = {},
+    /** The Books row (Plan EX Task 4): the Library, where every book collection is. */
+    val onBooks: () -> Unit = {},
+    /** Back to Explore, when Sources is opened from it (Plan EX Task 4); null: Browse is the rail's own screen. */
+    val onBack: (() -> Unit)? = null,
 )
 
 /** How many packs a section shows before its Show all. */
 const val SECTION_PREVIEW = 4
 
 object BrowseTags {
+    /** The Books row (Plan EX Task 4). */
+    const val BOOKS = "browse_books"
     /** A section's Show all / Show fewer. */
     fun more(sectionId: String) = "browse_more_$sectionId"
 }
@@ -111,6 +133,8 @@ fun BrowseScreen(
             actions.onOpenPack, actions.onGetPacks, actions.onDownloads, actions.onReadiness, viewModel::remove,
             onImportPack = importPack?.let { { packPicker.launch(arrayOf("*/*")) } },
             onFiles = actions.onFiles,
+            onBooks = actions.onBooks,
+            onBack = actions.onBack,
         ),
         snackbar,
     )
@@ -134,7 +158,13 @@ fun BrowseContent(ui: BrowseUi?, packsFolder: String, downloadsBadge: Int, actio
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.browse_title), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                // Opened from Explore it's Your sources, with Back (Plan EX Task 4); else the rail's Browse.
+                title = { Text(stringResource(if (actions.onBack != null) R.string.explore_sources else R.string.browse_title), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                navigationIcon = {
+                    actions.onBack?.let { back ->
+                        IconButton(onClick = back) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) }
+                    }
+                },
                 actions = {
                     IconButton(onClick = { actions.onGetPacks(null) }) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.browse_get_more)) }
                     Box {
@@ -193,46 +223,63 @@ fun BrowseContent(ui: BrowseUi?, packsFolder: String, downloadsBadge: Int, actio
                     }
                 }
             }
+            if (loaded.bookCollections > 0) {
+                item(key = "books") {
+                    // Every book collection on the phone, as one way into the Library (Plan EX Task 4).
+                    GroupLabel(stringResource(R.string.browse_books_label))
+                    GroupedRows(listOf {
+                        GroupedRow(
+                            stringResource(R.string.browse_books),
+                            pluralStringResource(R.plurals.browse_book_collections, loaded.bookCollections, loaded.bookCollections),
+                            modifier = Modifier.testTag(BrowseTags.BOOKS),
+                            onClick = actions.onBooks,
+                        )
+                    })
+                }
+            }
             for (section in loaded.sections) {
                 val open = section.id !in collapsed
                 item(key = "section:${section.id}") {
-                    ListItem(
-                        modifier = Modifier.clickable {
-                            collapsed = if (open) collapsed + section.id else collapsed - section.id
-                        },
-                        headlineContent = { Text(section.title.resolve(), style = MaterialTheme.typography.titleMedium) },
-                        trailingContent = {
-                            Icon(
-                                if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                                contentDescription = stringResource(if (open) R.string.browse_collapse else R.string.browse_expand),
-                            )
-                        },
-                    )
+                    // The section's label collapses it, as the Library's do.
+                    Row(
+                        Modifier.fillMaxWidth().clickable { collapsed = if (open) collapsed + section.id else collapsed - section.id }.padding(end = 12.dp),
+                        verticalAlignment = Alignment.Bottom,
+                    ) {
+                        GroupLabel(section.title.resolve(), Modifier.weight(1f))
+                        Icon(
+                            if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                            contentDescription = stringResource(if (open) R.string.browse_collapse else R.string.browse_expand),
+                            tint = groupTeal,
+                            modifier = Modifier.padding(bottom = 4.dp).size(20.dp),
+                        )
+                    }
                 }
                 if (open) {
                     val all = section.id in showingAll
                     val shown = if (all) section.packs else section.packs.take(SECTION_PREVIEW)
-                    for (item in shown) {
+                    shown.forEachIndexed { i, item ->
                         item(key = "pack:${item.pack.id}") {
-                            PackItemRow(
-                                item, map = section.id == MAPS_SECTION, onOpen = { actions.onOpenPack(item.pack.id) }, onRemove = { removing = item.pack },
-                                onFiles = { actions.onFiles(item.pack.id) },
-                            )
+                            GroupedItem(i, shown.size) {
+                                PackItemRow(
+                                    item, map = section.id == MAPS_SECTION, onOpen = { actions.onOpenPack(item.pack.id) }, onRemove = { removing = item.pack },
+                                    onFiles = { actions.onFiles(item.pack.id) },
+                                )
+                            }
                         }
                     }
                     if (section.packs.size > SECTION_PREVIEW) {
                         item(key = "more:${section.id}") {
                             TextButton(
                                 onClick = { showingAll = if (all) showingAll - section.id else showingAll + section.id },
-                                modifier = Modifier.padding(start = 8.dp, bottom = 4.dp).testTag(BrowseTags.more(section.id)),
+                                modifier = Modifier.padding(start = 8.dp).testTag(BrowseTags.more(section.id)),
                             ) {
-                                Text(if (all) stringResource(R.string.browse_show_fewer) else stringResource(R.string.browse_show_all, section.packs.size))
+                                Text(if (all) stringResource(R.string.browse_show_fewer) else stringResource(R.string.browse_show_all, section.packs.size), color = groupTeal)
                             }
                         }
                     }
                 }
-                item(key = "divider:${section.id}") { HorizontalDivider() }
             }
+            item(key = "end") { Spacer(Modifier.height(16.dp)) }
         }
     }
     removing?.let { pack ->
@@ -262,22 +309,27 @@ private fun PackItemRow(item: PackItem, map: Boolean, onOpen: () -> Unit, onRemo
         PackStatus.CORRUPT -> stringResource(R.string.browse_pack_corrupt)
     }
     Box {
-        ListItem(
-            modifier = Modifier.combinedClickable(
+        Row(
+            Modifier.fillMaxWidth().heightIn(min = 64.dp).combinedClickable(
                 onClickLabel = stringResource(R.string.common_open),
                 onClick = { if (pack.status == PackStatus.OK) onOpen() },
                 onLongClickLabel = stringResource(if (item.files > 0) R.string.common_more else R.string.browse_remove_from_phone),
                 onLongClick = { menu = true },
-            ),
-            leadingContent = { PackTile(pack, map) },
-            headlineContent = { Text(pack.title, maxLines = 2, overflow = TextOverflow.Ellipsis) },
-            supportingContent = {
-                Column {
-                    Text(item.ask?.let { stringResource(R.string.sources_dotted, formatBytes(pack.sizeBytes), it.text.resolve()) } ?: formatBytes(pack.sizeBytes))
-                    if (problem != null) Text(problem, color = MaterialTheme.colorScheme.error)
-                }
-            },
-        )
+            ).padding(start = 12.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            PackTile(pack, map)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(pack.title, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(
+                    item.ask?.let { stringResource(R.string.sources_dotted, formatBytes(pack.sizeBytes), it.text.resolve()) } ?: formatBytes(pack.sizeBytes),
+                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (problem != null) Text(problem, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+            }
+            Chevron()
+        }
         DropdownMenu(menu, { menu = false }) {
             if (item.files > 0 && pack.status == PackStatus.OK) {
                 DropdownMenuItem(text = { Text(stringResource(R.string.browse_pack_files_count, item.files)) }, onClick = { menu = false; onFiles() })

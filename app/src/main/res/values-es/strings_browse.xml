@@ -24,4 +24,12 @@
     <string name="browse_pack_files_count">Archivos de este paquete (%1$d)</string>
     <string name="browse_pack_files">Archivos de este paquete</string>
     <string name="browse_pack_files_none">No se pudo listar ningún archivo de este paquete.</string>
+    <!-- Sources (Plan EX Task 4): the label over the Books row, the row, and how many book collections it holds. -->
+    <string name="browse_books_label">Libros</string>
+    <string name="browse_books">Tus libros</string>
+    <plurals name="browse_book_collections">
+        <item quantity="one">%1$d colección</item>
+        <item quantity="many">%1$d colecciones</item>
+        <item quantity="other">%1$d colecciones</item>
+    </plurals>
 </resources>

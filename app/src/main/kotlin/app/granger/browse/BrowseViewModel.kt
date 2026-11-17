@@ -46,8 +46,26 @@ data class BrowseSection(val id: String, val title: UiText, val packs: List<Pack
 data class BrowseSuggestion(val title: String, val bytes: Long, val map: Boolean, val domain: String?)
 
 /** Browse's home (Plan U3c Decision 1): the packs by section; with none, [empty], and what to get first. */
-data class BrowseUi(val sections: List<BrowseSection>, val suggestions: List<BrowseSuggestion> = emptyList()) {
+data class BrowseUi(
+    val sections: List<BrowseSection>,
+    val suggestions: List<BrowseSuggestion> = emptyList(),
+    /** Every book collection on the phone ([bookCollectionCount]): the Books row's count (Plan EX Task 4); 0 hides it. */
+    val bookCollections: Int = 0,
+) {
+    /** No packs: what to get first shows (the Books row too, when there are books). */
     val empty: Boolean get() = sections.isEmpty()
+}
+
+/**
+ * How many book collections the phone holds (Plan EX Task 4), as the Library files them: each book pack's (Gutenberg,
+ * Kiwix libraries, manifest packs) and each of Granger's (Classics, Clásicos, each African Storybook language). A pack's
+ * books share its pack's collection, so they count once.
+ */
+fun bookCollectionCount(packs: List<Pack>, books: List<app.granger.core.library.Book>): Int {
+    val keys = HashSet<String>()
+    packs.filter { it.isBookPack }.mapTo(keys) { Filing.defaultKey(it) }
+    books.filter { it.origin == app.granger.core.library.BookOrigin.GRANGER }.mapTo(keys) { Filing.defaultKey(it) }
+    return keys.size
 }
 
 /** The section of packs whose catalog entry has no knowledge area (or that the catalog doesn't know): just before Maps. */
@@ -144,6 +162,8 @@ class BrowseViewModel(
     knowledge: Flow<List<String>> = flowOf(listOf(app.granger.core.catalog.ENGLISH)),
     /** False on a phone without Ask: the packs carry no Ask line (Plan E1 phone check). */
     askOffered: Boolean = true,
+    /** The shelf's books, for the Books row's count of collections (Plan EX Task 4). */
+    books: Flow<List<app.granger.core.library.Book>> = flowOf(emptyList()),
     private val io: kotlinx.coroutines.CoroutineDispatcher = kotlinx.coroutines.Dispatchers.IO,
 ) : ViewModel() {
     /** Each website pack's file count, read once per pack from its Counter (opening the ZIM), off the main thread. */
@@ -159,9 +179,12 @@ class BrowseViewModel(
     }.onStart { emit(emptyMap()) }
 
     /** Null until the shelves first load. */
+    private val bookCollections: Flow<Int> = combine(library.packs, books) { p, b -> bookCollectionCount(p, b) }.onStart { emit(0) }
+
     val ui: StateFlow<BrowseUi?> = combine(
-        shelves.shelves, catalog?.state ?: flowOf(null), records, knowledge, fileCounts,
-    ) { list, state, recs, langs, counts ->
+        combine(shelves.shelves, catalog?.state ?: flowOf(null), records) { a, b, c -> Triple(a, b, c) },
+        knowledge, fileCounts, bookCollections,
+    ) { (list, state, recs), langs, counts, booksN ->
         val catalog = state?.catalog
         val sections = browseSections(
             list,
@@ -169,7 +192,11 @@ class BrowseViewModel(
             domainOf = { installedEntry(it, catalog, recs)?.domain },
         ) { if (askOffered) installedAskReach(it, catalog, recs) else null }
             .map { section -> section.copy(packs = section.packs.map { it.copy(files = counts[it.pack.id] ?: 0) }) }
-        BrowseUi(sections, if (sections.isEmpty()) browseSuggestions(state?.catalog, countryCode, langs.firstOrNull() ?: app.granger.core.catalog.ENGLISH) else emptyList())
+        BrowseUi(
+            sections,
+            if (sections.isEmpty()) browseSuggestions(state?.catalog, countryCode, langs.firstOrNull() ?: app.granger.core.catalog.ENGLISH) else emptyList(),
+            booksN,
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     init {

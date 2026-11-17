@@ -35,4 +35,11 @@
     <string name="browse_pack_files_count">Files in this pack (%1$d)</string>
     <string name="browse_pack_files">Files in this pack</string>
     <string name="browse_pack_files_none">No files could be listed from this pack.</string>
+    <!-- Sources (Plan EX Task 4): the label over the Books row, the row, and how many book collections it holds. -->
+    <string name="browse_books_label">Books</string>
+    <string name="browse_books">Your books</string>
+    <plurals name="browse_book_collections">
+        <item quantity="one">%1$d collection</item>
+        <item quantity="other">%1$d collections</item>
+    </plurals>
 </resources>
