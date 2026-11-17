@@ -371,3 +371,28 @@ Neal on D's map: it says little a list couldn't, a few taps in it dead-ends with
 - The key is drawn with the marks themselves: the corner number, the shared square, "Hold a plate for its label".
 - Every group sits in a two-column index, largest first; empty groups are left out.
 - The held plate's label carries where the link was found, its date and rooms, and its opening sentence.
+
+### P0: the picture rule study (started 2026-11-17)
+**A correction first.** The round-2 notes say today's rule gives Wikipedia a portrait, Electric car a Tesla and Amelia Earhart a house. Those came from the mockup script's own extractor (it skipped `.svg` names and failed on doubly-encoded paths), not from the app. The app's rule (`ArticleThumbnails.candidates`) takes the first `img` that isn't svg/ico, isn't an icon or formula, and is 64 px or more a side. It gives Earhart her infobox portrait and Wikipedia its logo. The study below measures the app's rule.
+
+**What the app's rule picks** (random 200 Top en articles, seed 1117, used for development):
+- 197 of 200 get a picture. 188 come from the lead; 124 are the infobox picture.
+- 154 picks are photos. When the pick is a photo it nearly always stands for the topic.
+- **43 picks (21%) are drawings:** flags, coats of arms and seals (Mexico, Honduras, Venezuela, South Carolina, Columbia University), locator and diaspora maps, logos (NeXT, Star Wars, HTML), chemical structures, charts, and series-sidebar symbols.
+- A few photo-type picks are really maps or diagrams (a battle map, a climate map).
+- Pixel statistics (share of white, number of colours) don't separate these: old black-and-white portraits look like diagrams. The rule has to work from the page's markup.
+
+**Proposed rule v2** (markup only: order, container, file type, file name, drawn size; no extra decoding):
+1. Take the first usable picture, as today, if it's a photo and not an emblem. (An emblem is a file named as a flag, coat of arms, seal, emblem, map, locator, projection, chart or signature, or a series sidebar's drawing or small picture.)
+2. If the first is an infobox drawing that isn't an emblem (a logo, a structure, a character), keep it: it's the topic's identity.
+3. If the first is a chart or diagram in the text, take a JPEG photo from the same or the next section, if there is one.
+4. If the first is an emblem, take the first JPEG photo among the first eight pictures (120 × 100 or more), wide ones before tall ones, because a tall photo there is usually one person's portrait. Failing that, a non-emblem drawing; failing that, the emblem.
+
+On the development 200 it changes 22 picks (Mexico's flag → the Pyramid of the Sun, Ibiza's flag → the island from orbit, Colombians' map → people, Poultry farming's chart → hens). Known misses there: South Carolina falls to a locator map, Zurvanism's symbol goes to a statue.
+
+**Held-out test for Neal** (seed 4417, 400 articles, not looked at): the rule changes 28 picks (places 10, society 7, history 3). Grading page: https://claude.ai/artifact/SdvFpPuoQLthuqniGYEe8g (db collection `grades`; doc `p<n>` verdict `new`|`old`|`both`|`neither`, doc `s<n>` verdict `yes`|`no`|`unsure`). Part one is the 28 pairs in a blind left/right order; part two is 100 pictures where both rules agree.
+- **Proposed bar:** on the pairs, the new pick is better or as good in 85%+, and worse in under 10%. On the singles, 90%+ yes of those judged.
+
+Desk files: X10 `granger-ll/p0/` (`extract.py`, `rule.py`, `sheet.py`, the samples and the grading page).
+
+**Not covered yet:** other packs and Spanish (file names differ: `Bandera_de`, `Escudo_de` are in the pattern, others may not be); a subject's or room's own picture; whether the phone can read `data-file-type` from every pack's HTML.
