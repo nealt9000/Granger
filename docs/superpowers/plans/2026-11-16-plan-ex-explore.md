@@ -109,3 +109,11 @@ Places as a subject door beyond counts (the Atlas is LL6); Trails (LL6); the onl
     - **Spanish-only articles** (Ediacárico, Fanerozoico) appear in an English list when English Top lacks them: right by Decision 6, but worth a look in the editorial pass.
     - **Two editions of one work** (Don Quijote, Don Quixote) both in In your books.
     - **Landing examples** show odd mains from subject packs (Technology: Main Page, Wikipedia; Sports: Art; Business: Education, Architecture). For the editorial landing's curation.
+- **Deep years fixed** (`bba6ecf6`): `TimeMark.y0/y1`, the histogram, time-index query bounds, Timeline slices and Explore's eras are Long; the games keep an Int view. Pixel: Big Bang "c. 13.8 billion years ago", first in History's Oldest first (Prehistory 98 → 100).
+- **Task 5 built, Pixel-checked (2026-11-16):** "As a map" beside the landing's summary opens the library as a map (mockup C), over Explore as the topic map is over a topic page.
+  - **Subjects:** your library (the Granger mark) in the middle; the ten biggest subjects round it, each circle's area by its count (six inside, four on the diagonals, the topic map's spacing). The rest are chips below ("Also"). 16, then 12 circles crowded the Pixel; 10 fit.
+  - **Time:** the seven eras clockwise round one ring.
+  - **A tap steps inside:** its ten best-known main-subject articles (an era's, as its examples are picked) take the ring; a tap opens a topic page; hold or "Open the subject" opens the subject page (an era: the Timeline at its best-known). Back steps out, then closes.
+  - **Built on the topic map:** its circle is now `MapCircle`, shared by both maps.
+  - **Places** waits for the Atlas (LL6).
+  - **For the editorial pass:** some pictures don't stand for their subject or era: Sports shows an art collage (its top article is "Art"), Technology a manuscript, Health a blue sphere (Eye), Since 1946 the Wikipedia logo (the article "Wikipedia"). Landing door pictures also arrive slowly at the top.

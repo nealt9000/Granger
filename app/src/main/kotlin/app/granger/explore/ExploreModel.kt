@@ -132,9 +132,9 @@ private val NOT_ERA_EXAMPLES = setOf("places", "nature")
  * An era's examples (pure, for tests): its best-known [marks] whose main subject (from the QID index) isn't a place or
  * a creature, [ExploreViewModel.EXAMPLES] of them. With no subjects at all, the best-known marks as they come.
  */
-fun eraExamples(marks: List<TimeMark>, subjectsOf: (Long) -> List<String>): List<ExploreArticle> {
+fun eraExamples(marks: List<TimeMark>, subjectsOf: (Long) -> List<String>, n: Int = ExploreViewModel.EXAMPLES): List<ExploreArticle> {
     val kept = marks.filter { subjectsOf(it.qid).firstOrNull() !in NOT_ERA_EXAMPLES }
-    return kept.take(ExploreViewModel.EXAMPLES).map { it.toExplore() }
+    return kept.take(n).map { it.toExplore() }
 }
 
 /** What Explore reads; the app's comes from the container (QID and time indexes, thumbnails, the shelves). */
@@ -207,7 +207,27 @@ class ExploreViewModel(private val sources: ExploreSources) : ViewModel() {
         )
     }
 
+    /**
+     * The library map's ring inside [centre] (Plan EX Task 5): a subject's or an era's best-known articles, as its examples
+     * are chosen, with their pictures.
+     */
+    suspend fun inside(centre: MapCentre): List<ExploreArticle> = withContext(Dispatchers.IO) {
+        val qids = sources.qids()
+        val found = when (centre) {
+            is MapCentre.OfSubject -> qids.topIn(centre.subject.id, MAP_RING, mainOnly = true).map { it.toExplore() }
+            is MapCentre.OfEra -> {
+                val times = sources.times()
+                if (times.isEmpty) emptyList() else eraExamples(times.topActive(centre.era.from, centre.era.to, ERA_POOL * 3), qids::subjectsOf, MAP_RING)
+            }
+            MapCentre.Library -> emptyList()
+        }
+        found.map { a -> a.copy(picture = runCatching { sources.picture(a.packId, a.path) }.getOrNull()) }
+    }
+
     companion object {
+        /** Articles around a subject or era on the library map: an inner ring of six and four outside, as on the topic map. */
+        const val MAP_RING = 10
+
         /** Examples per door and per era (the mockup's three). */
         const val EXAMPLES = 3
 

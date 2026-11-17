@@ -227,16 +227,35 @@ fun TopicMap(
     }
 }
 
+@Composable
+private fun Node(n: MapNode, size: Dp, centre: Boolean, modifier: Modifier, onTap: () -> Unit, onHold: () -> Unit) =
+    MapCircle(n.title, null, n.picture, size, ringColour(n.kind, centre), n.kind == NodeKind.BOOK, centre, modifier, onTap, onHold)
+
+/**
+ * One circle of a map (the topic map's, and Explore's library map, Plan EX Task 5): a picture in a coloured ring, or the
+ * title's first letter, with the title under it and, if given, a [subtitle] (a count). A [book] is a cover, not a circle.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun Node(n: MapNode, size: Dp, centre: Boolean, modifier: Modifier, onTap: () -> Unit, onHold: () -> Unit) {
-    val ring = ringColour(n.kind, centre)
-    val picture = rememberRailCover(n.picture, size)
-    val book = n.kind == NodeKind.BOOK
-    val width = if (centre) NODE_WIDTH + (CENTRE_SIZE - NODE_SIZE) else NODE_WIDTH
+internal fun MapCircle(
+    title: String,
+    subtitle: String?,
+    pictureFile: String?,
+    size: Dp,
+    ring: Color,
+    book: Boolean,
+    centre: Boolean,
+    modifier: Modifier,
+    onTap: () -> Unit,
+    onHold: () -> Unit,
+    /** A drawn mark instead of a picture (the library map's centre). */
+    painter: androidx.compose.ui.graphics.painter.Painter? = null,
+) {
+    val picture = rememberRailCover(pictureFile, size)
+    val width = if (centre) MAP_NODE_WIDTH + (CENTRE_SIZE - NODE_SIZE) else MAP_NODE_WIDTH
     Column(
         modifier.width(width).clip(RoundedCornerShape(12.dp)).combinedClickable(onClick = onTap, onLongClick = onHold)
-            .semantics(mergeDescendants = true) { contentDescription = n.title },
+            .semantics(mergeDescendants = true) { contentDescription = listOfNotNull(title, subtitle).joinToString(", ") },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(3.dp),
     ) {
@@ -246,10 +265,12 @@ private fun Node(n: MapNode, size: Dp, centre: Boolean, modifier: Modifier, onTa
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh),
             contentAlignment = Alignment.Center,
         ) {
-            if (picture != null) Image(picture, null, contentScale = ContentScale.Crop, alignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize())
-            else Text(n.title.take(1), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (painter != null) Image(painter, null, modifier = Modifier.fillMaxSize().padding(size * 0.18f))
+            else if (picture != null) Image(picture, null, contentScale = ContentScale.Crop, alignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize())
+            else Text(title.take(1), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Text(n.title, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(title, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        if (subtitle != null) Text(subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
     }
 }
 
@@ -274,4 +295,6 @@ private val OUTER_ANGLES = listOf(-125.0, -55.0, 125.0, 55.0)
 private val NODE_SIZE = 56.dp
 private val SMALL_NODE = 44.dp
 private val CENTRE_SIZE = 88.dp
-private val NODE_WIDTH = 84.dp
+/** A map circle's label width. */
+internal val MAP_NODE_WIDTH = 84.dp
+private val NODE_WIDTH = MAP_NODE_WIDTH

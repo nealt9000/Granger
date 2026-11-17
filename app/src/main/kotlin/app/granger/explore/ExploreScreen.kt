@@ -39,6 +39,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -82,6 +83,7 @@ object ExploreTags {
     fun era(era: Era) = "explore_era_${era.name.lowercase()}"
     const val SOURCES = "explore_sources"
     const val NO_SUBJECTS = "explore_no_subjects"
+    const val MAP = "explore_map"
 }
 
 private fun count(n: Int): String = NumberFormat.getIntegerInstance().format(n)
@@ -93,13 +95,16 @@ fun ExploreScreen(viewModel: ExploreViewModel, actions: ExploreActions) {
         onPauseOrDispose {}
     }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
-    ExploreContent(ui, actions)
+    var map by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+    ExploreContent(ui, actions, onMap = { map = true })
+    val shown = ui
+    if (map && shown != null) LibraryMap(shown, viewModel::inside, actions, onClose = { map = false })
 }
 
 /** Explore's landing (Plan EX Task 2): subject doors, Through time as a vertical timeline, Your sources. Null [ui] is loading. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExploreContent(ui: ExploreUi?, actions: ExploreActions) {
+fun ExploreContent(ui: ExploreUi?, actions: ExploreActions, onMap: () -> Unit = {}) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -114,12 +119,16 @@ fun ExploreContent(ui: ExploreUi?, actions: ExploreActions) {
         LazyColumn(Modifier.padding(padding).fillMaxSize(), contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 24.dp)) {
             if (loaded.articles > 0) {
                 item(key = "summary") {
-                    Text(
-                        stringResource(R.string.explore_summary, count(loaded.articles), pluralStringResource(R.plurals.explore_packs, loaded.sources.size, loaded.sources.size)),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                    )
+                    Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            stringResource(R.string.explore_summary, count(loaded.articles), pluralStringResource(R.plurals.explore_packs, loaded.sources.size, loaded.sources.size)),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f),
+                        )
+                        // The library as a map (Plan EX Task 5, mockup C), opened from here as the topic map is from a topic page.
+                        if (!loaded.noSubjects) TextButton(onClick = onMap, modifier = Modifier.testTag(ExploreTags.MAP)) { Text(stringResource(R.string.explore_as_map)) }
+                    }
                 }
             }
             if (loaded.noSubjects) {

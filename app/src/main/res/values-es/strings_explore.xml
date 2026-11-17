@@ -81,4 +81,14 @@
     <string name="explore_subject_articles">Artículos</string>
     <string name="explore_subject_in_era">Artículos · %1$s</string>
     <string name="explore_subject_quiz_title">Juegos: %1$s</string>
+    <!-- La biblioteca como mapa (Plan EX Task 5). -->
+    <string name="explore_as_map">Como mapa</string>
+    <string name="explore_map_library">Tu biblioteca</string>
+    <string name="explore_map_subjects">Temas</string>
+    <string name="explore_map_time">Tiempo</string>
+    <string name="explore_map_open_subject">Abrir el tema</string>
+    <string name="explore_map_open_era">Abrir en la línea de tiempo</string>
+    <string name="explore_map_hint">Cada círculo es tan grande como los artículos que reúne. Toca uno para entrar; mantén pulsado para abrirlo.</string>
+    <string name="explore_map_hint_inside">Toca un artículo para abrir su página de tema. Atrás para salir.</string>
+    <string name="explore_map_more">También</string>
 </resources>
