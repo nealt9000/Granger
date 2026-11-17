@@ -365,3 +365,9 @@ Neal on D's map: it says little a list couldn't, a few taps in it dead-ends with
 **Not yet known:** how a topic with very few connections looks, and how the quilt reads with TalkBack (a list of groups is the likely form).
 
 **Neal (2026-11-17):** the quilt is the right direction and much better; it clears the bar for the map and needs some design polish. It's swapped into D on the canvas (row 7) and into D4 above.
+
+**Quilt text pass (2026-11-17).** Neal: the polish it needs is the text around it, which should be more useful and easier on the eyes. Redone on the canvas (rows 7 and 8):
+- One short finding replaces the title and the instructions ("137 connections in eight groups. Kinds is the largest, with 60.").
+- The key is drawn with the marks themselves: the corner number, the shared square, "Hold a plate for its label".
+- Every group sits in a two-column index, largest first; empty groups are left out.
+- The held plate's label carries where the link was found, its date and rooms, and its opening sentence.
