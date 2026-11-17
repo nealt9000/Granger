@@ -712,6 +712,19 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             },
             isWikipedia = { it.name.startsWith("wikipedia_") },
             load = { container.catalog.load() },
+            look = { packId, path ->
+                container.library.archive(packId)?.let { archive ->
+                    archive.resolvePath(path)?.let { resolved ->
+                        archive.read(resolved)?.takeIf { it.mimeType.startsWith("text/html") }?.let { item ->
+                            val html = String(item.bytes, Charsets.UTF_8)
+                            app.granger.explore.ArticleLook(
+                                thumbs.thumbnail(archive, resolved, html, targetPx = 800),
+                                app.granger.home.LeadLinks.parse(html, resolved).summary.takeIf { it.isNotBlank() },
+                            )
+                        }
+                    }
+                }
+            },
         )
     }
     val exploreActions = app.granger.explore.ExploreActions(

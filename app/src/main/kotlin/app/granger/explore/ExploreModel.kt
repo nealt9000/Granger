@@ -26,24 +26,32 @@ import kotlinx.coroutines.withContext
  * The subjects (tools/subjects/subjects.json; ids locked in v1, 2026-11-16), in the order the doors take when two hold
  * as many articles. Every article in a Wikipedia pack carries up to three of them in its QID index (Plan EX Task 1).
  */
-enum class Subject(val id: String, @StringRes val label: Int) {
-    HISTORY("history", R.string.explore_subject_history),
-    SOCIETY("society", R.string.explore_subject_society),
-    SCIENCE("science", R.string.explore_subject_science),
-    PLACES("places", R.string.explore_subject_places),
-    NATURE("nature", R.string.explore_subject_nature),
-    HEALTH("health", R.string.explore_subject_health),
-    TECHNOLOGY("technology", R.string.explore_subject_technology),
-    BUSINESS("business", R.string.explore_subject_business),
-    ART("art", R.string.explore_subject_art),
-    LITERATURE("literature", R.string.explore_subject_literature),
-    MUSIC("music", R.string.explore_subject_music),
-    FILM("film", R.string.explore_subject_film),
-    SPORTS("sports", R.string.explore_subject_sports),
-    GAMES("games", R.string.explore_subject_games),
-    RELIGION("religion", R.string.explore_subject_religion),
-    LANGUAGES("languages", R.string.explore_subject_languages),
-    FOOD("food", R.string.explore_subject_food),
+enum class Subject(
+    val id: String,
+    @StringRes val label: Int,
+    /**
+     * The subject's own articles (subjects.json `namesakes`): their lead picture and opening sentence stand for the whole
+     * subject on the landing (Neal, 2026-11-16: pictures chosen to represent the whole subject), first that the phone has.
+     */
+    val namesakes: List<Long> = emptyList(),
+) {
+    HISTORY("history", R.string.explore_subject_history, listOf(309L)),
+    SOCIETY("society", R.string.explore_subject_society, listOf(8425L, 7163L)),
+    SCIENCE("science", R.string.explore_subject_science, listOf(336L, 395L)),
+    PLACES("places", R.string.explore_subject_places, listOf(1071L)),
+    NATURE("nature", R.string.explore_subject_nature, listOf(7860L)),
+    HEALTH("health", R.string.explore_subject_health, listOf(11190L, 12147L)),
+    TECHNOLOGY("technology", R.string.explore_subject_technology, listOf(11016L)),
+    BUSINESS("business", R.string.explore_subject_business, listOf(8134L, 159810L)),
+    ART("art", R.string.explore_subject_art, listOf(735L, 12271L)),
+    LITERATURE("literature", R.string.explore_subject_literature, listOf(8242L)),
+    MUSIC("music", R.string.explore_subject_music, listOf(638L)),
+    FILM("film", R.string.explore_subject_film, listOf(11424L, 289L)),
+    SPORTS("sports", R.string.explore_subject_sports, listOf(349L)),
+    GAMES("games", R.string.explore_subject_games, listOf(11410L)),
+    RELIGION("religion", R.string.explore_subject_religion, listOf(9174L, 5891L)),
+    LANGUAGES("languages", R.string.explore_subject_languages, listOf(315L)),
+    FOOD("food", R.string.explore_subject_food, listOf(2095L, 11451L)),
     ;
 
     companion object {
@@ -71,24 +79,39 @@ enum class Subject(val id: String, @StringRes val label: Int) {
  * Through time's eras (the mockup's B timeline), by year (astronomical: 1 BC is 0): each counts the dated items that fall
  * in it, a life at about forty ([app.granger.core.library.TimeIndex.ACTIVE]). [to] is inclusive; the last runs to the far future.
  */
-enum class Era(val from: Long, val to: Long, @StringRes val label: Int, @StringRes val span: Int) {
-    PREHISTORY(Long.MIN_VALUE / 2, -3001, R.string.explore_era_prehistory, R.string.explore_era_prehistory_span),
-    ANCIENT(-3000, 499, R.string.explore_era_ancient, R.string.explore_era_ancient_span),
-    MIDDLE_AGES(500, 1499, R.string.explore_era_middle_ages, R.string.explore_era_middle_ages_span),
-    EARLY_MODERN(1500, 1799, R.string.explore_era_early_modern, R.string.explore_era_early_modern_span),
-    C19(1800, 1899, R.string.explore_era_c19, R.string.explore_era_c19_span),
-    WARS(1900, 1945, R.string.explore_era_wars, R.string.explore_era_wars_span),
-    RECENT(1946, Long.MAX_VALUE / 2, R.string.explore_era_recent, R.string.explore_era_recent_span),
+enum class Era(
+    val from: Long,
+    val to: Long,
+    @StringRes val label: Int,
+    @StringRes val span: Int,
+    /** The era's own articles (Middle Ages, 19th century…), whose picture stands for it, first that the phone has. */
+    val articles: List<Long> = emptyList(),
+) {
+    PREHISTORY(Long.MIN_VALUE / 2, -3001, R.string.explore_era_prehistory, R.string.explore_era_prehistory_span, listOf(11756L)),
+    ANCIENT(-3000, 499, R.string.explore_era_ancient, R.string.explore_era_ancient_span, listOf(41493L)),
+    MIDDLE_AGES(500, 1499, R.string.explore_era_middle_ages, R.string.explore_era_middle_ages_span, listOf(12554L)),
+    EARLY_MODERN(1500, 1799, R.string.explore_era_early_modern, R.string.explore_era_early_modern_span, listOf(5308718L)),
+    C19(1800, 1899, R.string.explore_era_c19, R.string.explore_era_c19_span, listOf(6955L)),
+    WARS(1900, 1945, R.string.explore_era_wars, R.string.explore_era_wars_span, listOf(361L, 362L)),
+    RECENT(1946, Long.MAX_VALUE / 2, R.string.explore_era_recent, R.string.explore_era_recent_span, listOf(186075L)),
 }
 
 /** An article Explore shows: where to open it, its title, (when loaded) its picture, and its dates when it has them. */
 data class ExploreArticle(val packId: String, val path: String, val title: String, val picture: String? = null, val mark: TimeMark? = null)
 
 /** A subject's door: how many articles it holds across the packs, its best-known three, and the packs on it. */
-data class SubjectDoor(val subject: Subject, val count: Int, val examples: List<ExploreArticle>, val packs: List<Pack>, val picture: String? = null)
+data class SubjectDoor(
+    val subject: Subject,
+    val count: Int,
+    val examples: List<ExploreArticle>,
+    val packs: List<Pack>,
+    val picture: String? = null,
+    /** The subject's own article's opening sentence, for the landing's features; null until read, or with none. */
+    val lead: String? = null,
+)
 
 /** An era's row: how many dated articles start in it, its best-known three, and where the Timeline opens for it. */
-data class EraRow(val era: Era, val count: Int, val examples: List<ExploreArticle>, val picture: String? = null)
+data class EraRow(val era: Era, val count: Int, val examples: List<ExploreArticle>, val picture: String? = null, val lead: String? = null)
 
 /** Explore's landing (Plan EX Task 2, Neal's layout A): subject doors, Through time, then Your sources as one line. */
 data class ExploreUi(
@@ -149,7 +172,26 @@ class ExploreSources(
     val isWikipedia: (Pack) -> Boolean,
     /** Loads the catalog, as Browse does, so the QID indexes with subjects arrive (the sidecars follow the catalog). */
     val load: suspend () -> Unit = {},
+    /** An article's large picture (cropped later, around its subject) and opening sentence; null when unreadable. Blocking. */
+    val look: (packId: String, path: String) -> ArticleLook? = { _, _ -> null },
 )
+
+/** An article as a feature shows it: its lead picture, larger than a thumbnail, and its opening sentence. */
+data class ArticleLook(val picture: String?, val sentence: String?)
+
+/** The first sentence of [text], at most about [max] characters (cut at a word, with an ellipsis). */
+fun firstSentence(text: String, max: Int = 180): String {
+    val t = text.trim().replace(Regex("\\s+"), " ")
+    // A full stop ends a sentence when a space and a capital follow ("c. 500" and "U.S." don't end one).
+    val end = Regex("[.!?](?=\\s+[\\p{Lu}¿¡\"“])").find(t)?.range?.first
+    val one = if (end != null) t.substring(0, end + 1) else t
+    if (one.length <= max) return one
+    val cut = one.lastIndexOf(' ', max).takeIf { it > max / 2 } ?: max
+    return one.substring(0, cut).trimEnd(',', ';', ':') + "…"
+}
+
+/** Which door the landing features today: a different one of the biggest [pool] each day, the same all day. */
+fun featuredIndex(day: Long, doors: Int, pool: Int = 8): Int = if (doors <= 0) -1 else Math.floorMod(day, minOf(doors, pool).toLong()).toInt()
 
 /** Explore's landing, built off the main thread whenever the packs change; null until the first build. */
 class ExploreViewModel(private val sources: ExploreSources) : ViewModel() {
@@ -188,7 +230,10 @@ class ExploreViewModel(private val sources: ExploreSources) : ViewModel() {
         val counts = if (qids.hasSubjects) qids.subjectCounts(Subject.entries.map { it.id }) else emptyMap()
         val articles = if (qids.hasSubjects) qids.itemCount() else 0
         val others = packs.filterNot { sources.isWikipedia(it.first) }
-        val doors = subjectDoors(counts, { s -> qids.topIn(s.id, EXAMPLES, mainOnly = true).map { it.toExplore() } }, others)
+        // The subject's own article (History in History) stands for the door already; examples are what it holds.
+        val doors = subjectDoors(counts, { s ->
+            qids.topIn(s.id, EXAMPLES + s.namesakes.size, mainOnly = true).filter { it.qid !in s.namesakes }.take(EXAMPLES).map { it.toExplore() }
+        }, others)
         val times = sources.times()
         val eras = if (times.isEmpty) emptyList() else Era.entries.map { era ->
             EraRow(era, times.countActive(era.from, era.to), eraExamples(times.topActive(era.from, era.to, ERA_POOL), qids::subjectsOf))
@@ -196,14 +241,22 @@ class ExploreViewModel(private val sources: ExploreSources) : ViewModel() {
         return ExploreUi(articles, doors, eras, packs.map { it.first.title }.sortedBy { it.lowercase() })
     }
 
-    private fun withoutPictures(ui: ExploreUi) = ui.copy(doors = ui.doors.map { it.copy(picture = null) }, eras = ui.eras.map { it.copy(picture = null) })
+    private fun withoutPictures(ui: ExploreUi) = ui.copy(doors = ui.doors.map { it.copy(picture = null, lead = null) }, eras = ui.eras.map { it.copy(picture = null, lead = null) })
 
-    /** Each door and era gets the first picture among its examples. */
-    private fun withPictures(ui: ExploreUi): ExploreUi {
+    /**
+     * Each door and era gets its own article's picture and opening sentence (History's for History, the Middle Ages' for
+     * the Middle Ages), so the picture stands for the whole of it; without one, the first picture among its examples.
+     */
+    private suspend fun withPictures(ui: ExploreUi): ExploreUi {
+        val qids = sources.qids()
         fun first(examples: List<ExploreArticle>) = examples.firstNotNullOfOrNull { a -> runCatching { sources.picture(a.packId, a.path) }.getOrNull() }
+        fun own(items: List<Long>): ArticleLook? = items.asSequence()
+            .mapNotNull { q -> qids.articlesOf(q).firstOrNull() }
+            .mapNotNull { a -> runCatching { sources.look(a.packId, a.path) }.getOrNull() }
+            .firstOrNull { it.picture != null }
         return ui.copy(
-            doors = ui.doors.map { it.copy(picture = first(it.examples)) },
-            eras = ui.eras.map { it.copy(picture = first(it.examples)) },
+            doors = ui.doors.map { d -> own(d.subject.namesakes).let { l -> d.copy(picture = l?.picture ?: first(d.examples), lead = l?.sentence?.let(::firstSentence)) } },
+            eras = ui.eras.map { e -> own(e.era.articles).let { l -> e.copy(picture = l?.picture ?: first(e.examples), lead = l?.sentence?.let(::firstSentence)) } },
         )
     }
 
@@ -214,7 +267,8 @@ class ExploreViewModel(private val sources: ExploreSources) : ViewModel() {
     suspend fun inside(centre: MapCentre): List<ExploreArticle> = withContext(Dispatchers.IO) {
         val qids = sources.qids()
         val found = when (centre) {
-            is MapCentre.OfSubject -> qids.topIn(centre.subject.id, MAP_RING, mainOnly = true).map { it.toExplore() }
+            is MapCentre.OfSubject -> qids.topIn(centre.subject.id, MAP_RING + centre.subject.namesakes.size, mainOnly = true)
+                .filter { it.qid !in centre.subject.namesakes }.take(MAP_RING).map { it.toExplore() }
             is MapCentre.OfEra -> {
                 val times = sources.times()
                 if (times.isEmpty) emptyList() else eraExamples(times.topActive(centre.era.from, centre.era.to, ERA_POOL * 3), qids::subjectsOf, MAP_RING)

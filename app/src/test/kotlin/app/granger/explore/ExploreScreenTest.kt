@@ -54,14 +54,15 @@ class ExploreScreenTest {
             eras = listOf(EraRow(Era.MIDDLE_AGES, 1_159, listOf(a("Islam"), a("Dante_Alighieri"))), EraRow(Era.RECENT, 14_970, listOf(a("The_Beatles")))),
             sources = listOf("based.cooking", "Best of Wikipedia"),
         )
-        compose.setContent { ExploreContent(ui, actions) }
+        // Day 0 features the first door; the rest follow (here the one other door, as a row under More subjects).
+        compose.setContent { ExploreContent(ui, actions, day = 0) }
         compose.onNodeWithText("77,019 articles · 2 packs").assertExists()
+        compose.onNodeWithText("Today's subject".uppercase()).assertExists()
         compose.onNodeWithText("Science & maths").assertExists()
-        compose.onNodeWithText("5,233 topics").assertExists()
-        compose.onNodeWithText("Physics, DNA, Moon").assertExists()
-        compose.onNodeWithText("Food & farming").assertExists()
-        compose.onNodeWithTag(ExploreTags.door(Subject.SCIENCE)).performClick()
-        compose.onNodeWithText("Middle Ages").assertExists()
+        compose.onNodeWithText("5,233 topics · Physics · DNA · Moon").assertExists()
+        compose.onNodeWithText("Food & farming").performScrollTo().assertExists()
+        compose.onNodeWithTag(ExploreTags.door(Subject.SCIENCE)).performScrollTo().performClick()
+        compose.onNodeWithText("Middle Ages").performScrollTo().assertExists()
         compose.onNodeWithText("Islam · Dante Alighieri").assertExists()
         compose.onNodeWithTag(ExploreTags.era(Era.MIDDLE_AGES)).performScrollTo().performClick()
         compose.onNodeWithText("Open the Timeline").performScrollTo().performClick()
@@ -123,4 +124,24 @@ class ExploreScreenTest {
         val picked = eraExamples(listOf(m(142, "France"), m(1, "Battle of Hastings"), m(144, "Dog"), m(2, "Islam"), m(3, "Undated thing")), { subjects[it].orEmpty() })
         assertThat(picked.map { it.title }).containsExactly("Battle of Hastings", "Islam", "Undated thing").inOrder()
     }
+
+    @Test fun theFeatureTakesAnotherOfTheBiggestDoorsEachDayAndItsOpeningSentence() {
+        assertThat((0L..7L).map { featuredIndex(it, 17) }).containsExactly(0, 1, 2, 3, 4, 5, 6, 7).inOrder()
+        assertThat(featuredIndex(8, 17)).isEqualTo(0)
+        assertThat(featuredIndex(5, 3)).isEqualTo(2)
+        assertThat(featuredIndex(5, 0)).isEqualTo(-1)
+        assertThat(firstSentence("History is the systematic study of the past. It focuses on people.")).isEqualTo("History is the systematic study of the past.")
+        assertThat(firstSentence("Founded c. 500 by the Franks. Later it grew.")).isEqualTo("Founded c. 500 by the Franks.")
+        assertThat(firstSentence("word ".repeat(60), max = 40)).endsWith("…")
+    }
+
+    @Test fun framingCentresAFaceAsFarAsTheCropAllows() {
+        // A tall portrait in a wide box: the crop can only move up and down; a face near the top stays near the top.
+        val a = Framing.alignment(0.5f, 0.2f, 200, 400, 400f, 200f)
+        assertThat(a.horizontalBias).isEqualTo(0f)
+        assertThat(a.verticalBias).isWithin(0.01f).of(-0.8f)
+        assertThat(Framing.alignment(0.5f, 0.5f, 200, 400, 400f, 200f).verticalBias).isWithin(0.01f).of(0f)
+        assertThat(Framing.alignment(0.5f, 0.0f, 200, 400, 400f, 200f).verticalBias).isEqualTo(-1f)
+    }
 }
+

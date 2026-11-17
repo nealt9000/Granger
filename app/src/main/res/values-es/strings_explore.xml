@@ -91,4 +91,6 @@
     <string name="explore_map_hint">Cada círculo es tan grande como los artículos que reúne. Toca uno para entrar; mantén pulsado para abrirlo.</string>
     <string name="explore_map_hint_inside">Toca un artículo para abrir su página de tema. Atrás para salir.</string>
     <string name="explore_map_more">También</string>
+    <string name="explore_featured">El tema de hoy</string>
+    <string name="explore_more_subjects">Más temas</string>
 </resources>

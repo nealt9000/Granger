@@ -93,4 +93,6 @@
     <string name="explore_map_hint">Each circle is as big as the articles it holds. Tap one to step inside it; hold to open it.</string>
     <string name="explore_map_hint_inside">Tap an article to open its topic page. Back steps out.</string>
     <string name="explore_map_more">Also</string>
+    <string name="explore_featured">Today\'s subject</string>
+    <string name="explore_more_subjects">More subjects</string>
 </resources>

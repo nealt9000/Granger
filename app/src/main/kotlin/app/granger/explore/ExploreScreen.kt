@@ -104,7 +104,7 @@ fun ExploreScreen(viewModel: ExploreViewModel, actions: ExploreActions) {
 /** Explore's landing (Plan EX Task 2): subject doors, Through time as a vertical timeline, Your sources. Null [ui] is loading. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExploreContent(ui: ExploreUi?, actions: ExploreActions, onMap: () -> Unit = {}) {
+fun ExploreContent(ui: ExploreUi?, actions: ExploreActions, onMap: () -> Unit = {}, day: Long = java.time.LocalDate.now().toEpochDay()) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -139,18 +139,24 @@ fun ExploreContent(ui: ExploreUi?, actions: ExploreActions, onMap: () -> Unit = 
                     }
                 }
             }
-            if (loaded.doors.isNotEmpty()) {
-                item(key = "subjects-head") { SectionHead(stringResource(R.string.explore_start), Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)) }
-                items(loaded.doors.chunked(2), key = { row -> "doors:" + row.joinToString { it.subject.id } }) { row ->
-                    Row(Modifier.padding(horizontal = 12.dp, vertical = 5.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        for (door in row) DoorCard(door, Modifier.weight(1f)) { actions.onOpenSubject(door.subject) }
-                        if (row.size == 1) Spacer(Modifier.weight(1f))
-                    }
+            // The editorial flow (Neal, 2026-11-16: not a grid; read like a page): today's subject as the lead, two
+            // asymmetric blocks of three, Through time, then the rest of the subjects as picture-led rows.
+            val lead = featuredIndex(day, loaded.doors.size)
+            val featured = loaded.doors.getOrNull(lead)
+            val rest = loaded.doors.filterIndexed { i, _ -> i != lead }
+            val blocks = rest.take(BLOCK * 2).chunked(BLOCK).filter { it.size == BLOCK }
+            val tail = rest.drop(blocks.size * BLOCK)
+            if (featured != null) {
+                item(key = "featured") { FeatureCard(featured) { actions.onOpenSubject(featured.subject) } }
+            }
+            blocks.forEachIndexed { b, block ->
+                item(key = "block:" + block.joinToString { it.subject.id }) {
+                    Block(block, bigFirst = b % 2 == 0) { actions.onOpenSubject(it) }
                 }
             }
             if (loaded.eras.isNotEmpty()) {
                 item(key = "time-head") {
-                    Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 24.dp), verticalAlignment = Alignment.CenterVertically) {
                         SectionHead(stringResource(R.string.explore_time), Modifier.weight(1f))
                         TextButton(onClick = { actions.onOpenTimeline(null, null) }) { Text(stringResource(R.string.explore_open_timeline)) }
                     }
@@ -161,6 +167,10 @@ fun ExploreContent(ui: ExploreUi?, actions: ExploreActions, onMap: () -> Unit = 
                         actions.onOpenTimeline(top?.packId, top?.path)
                     }
                 }
+            }
+            if (tail.isNotEmpty()) {
+                item(key = "more-head") { SectionHead(stringResource(R.string.explore_more_subjects), Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 4.dp)) }
+                items(tail, key = { "band:" + it.subject.id }) { door -> Band(door) { actions.onOpenSubject(door.subject) } }
             }
             if (loaded.sources.isNotEmpty()) {
                 item(key = "sources") {
@@ -191,29 +201,96 @@ private fun SectionHead(text: String, modifier: Modifier = Modifier) {
     Text(text, style = MaterialTheme.typography.titleLarge, modifier = modifier.semantics { heading() })
 }
 
-/** A subject's door: its picture, name, count (or its packs) and best-known three. */
+/** Subjects in each asymmetric block: one big, two small. */
+private const val BLOCK = 3
+
+/** A door's count line: its articles, else its one pack's name, else how many packs. */
 @Composable
-private fun DoorCard(door: SubjectDoor, modifier: Modifier, onOpen: () -> Unit) {
-    val picture = rememberRailCover(door.picture, 160.dp)
+private fun countLine(door: SubjectDoor): String = when {
+    door.count > 0 -> pluralStringResource(R.plurals.explore_topics, door.count, count(door.count))
+    door.packs.size == 1 -> door.packs.single().title
+    else -> pluralStringResource(R.plurals.explore_packs, door.packs.size, door.packs.size)
+}
+
+private fun examplesLine(door: SubjectDoor) =
+    if (door.examples.isNotEmpty()) door.examples.joinToString(" · ") { it.title } else door.packs.joinToString(" · ") { it.title }
+
+/** Today's subject: the landing's lead, a large picture framed on its subject, the subject's own opening sentence. */
+@Composable
+private fun FeatureCard(door: SubjectDoor, onOpen: () -> Unit) {
     Card(
         onClick = onOpen,
-        modifier = modifier.testTag(ExploreTags.door(door.subject)),
-        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 12.dp).fillMaxWidth().testTag(ExploreTags.door(door.subject)),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
-        Box(Modifier.fillMaxWidth().height(78.dp).background(MaterialTheme.colorScheme.surfaceContainerHighest)) {
-            if (picture != null) Image(picture, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+        FramedPicture(door.picture, 400.dp, Modifier.fillMaxWidth().height(230.dp).clearAndSetSemantics {})
+        Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(stringResource(R.string.explore_featured).uppercase(), style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary, letterSpacing = androidx.compose.ui.unit.TextUnit(1.5f, androidx.compose.ui.unit.TextUnitType.Sp))
+            Text(stringResource(door.subject.label), style = MaterialTheme.typography.headlineMedium)
+            door.lead?.let { Text(it, style = MaterialTheme.typography.bodyLarge, maxLines = 4, overflow = TextOverflow.Ellipsis) }
+            Text(countLine(door) + " · " + examplesLine(door), style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
-        Column(Modifier.padding(start = 10.dp, end = 10.dp, top = 9.dp, bottom = 11.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Text(stringResource(door.subject.label), style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            val line = when {
-                door.count > 0 -> pluralStringResource(R.plurals.explore_topics, door.count, count(door.count))
-                door.packs.size == 1 -> door.packs.single().title
-                else -> pluralStringResource(R.plurals.explore_packs, door.packs.size, door.packs.size)
-            }
-            Text(line, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-            val examples = if (door.examples.isNotEmpty()) door.examples.joinToString(", ") { it.title } else door.packs.joinToString(", ") { it.title }
-            Text(examples, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 3, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+/** Three subjects: one large with its opening sentence, two small stacked beside it; [bigFirst] puts the large one left. */
+@Composable
+private fun Block(doors: List<SubjectDoor>, bigFirst: Boolean, onOpen: (Subject) -> Unit) {
+    val (big, a, b) = doors
+    Row(Modifier.padding(start = 12.dp, end = 12.dp, top = 12.dp).fillMaxWidth().height(BLOCK_HEIGHT), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        @Composable fun smalls() = Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            SmallTile(a, Modifier.weight(1f)) { onOpen(a.subject) }
+            SmallTile(b, Modifier.weight(1f)) { onOpen(b.subject) }
+        }
+        if (!bigFirst) smalls()
+        BigTile(big, Modifier.weight(1.35f).fillMaxHeight()) { onOpen(big.subject) }
+        if (bigFirst) smalls()
+    }
+}
+
+private val BLOCK_HEIGHT = 320.dp
+
+@Composable
+private fun BigTile(door: SubjectDoor, modifier: Modifier, onOpen: () -> Unit) {
+    Card(onClick = onOpen, modifier = modifier.testTag(ExploreTags.door(door.subject)), shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
+        FramedPicture(door.picture, 240.dp, Modifier.fillMaxWidth().height(150.dp).clearAndSetSemantics {})
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(stringResource(door.subject.label), style = MaterialTheme.typography.titleLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(countLine(door), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+            Text(door.lead ?: examplesLine(door), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 4, overflow = TextOverflow.Ellipsis)
+        }
+    }
+}
+
+@Composable
+private fun SmallTile(door: SubjectDoor, modifier: Modifier, onOpen: () -> Unit) {
+    Card(onClick = onOpen, modifier = modifier.fillMaxWidth().testTag(ExploreTags.door(door.subject)), shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
+        FramedPicture(door.picture, 160.dp, Modifier.fillMaxWidth().height(84.dp).clearAndSetSemantics {})
+        Column(Modifier.padding(horizontal = 10.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(stringResource(door.subject.label), style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(countLine(door), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+        }
+    }
+}
+
+/** A smaller subject as a row: its picture beside its name, count and best-known articles. */
+@Composable
+private fun Band(door: SubjectDoor, onOpen: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onOpen).padding(horizontal = 16.dp, vertical = 8.dp).testTag(ExploreTags.door(door.subject)),
+        horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically,
+    ) {
+        FramedPicture(door.picture, 72.dp, Modifier.size(72.dp).clip(RoundedCornerShape(14.dp)).clearAndSetSemantics {})
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(stringResource(door.subject.label), style = MaterialTheme.typography.titleMedium)
+            Text(countLine(door), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+            Text(examplesLine(door), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
@@ -221,7 +298,6 @@ private fun DoorCard(door: SubjectDoor, modifier: Modifier, onOpen: () -> Unit) 
 /** One era on the vertical timeline: the line and its dot, a picture, the era's name, count, years and best-known three. */
 @Composable
 private fun EraLine(row: EraRow, first: Boolean, last: Boolean, onOpen: () -> Unit) {
-    val picture = rememberRailCover(row.picture, 64.dp)
     val line = MaterialTheme.colorScheme.outlineVariant
     Row(
         Modifier.fillMaxWidth().height(androidx.compose.foundation.layout.IntrinsicSize.Min).heightIn(min = 78.dp)
@@ -234,9 +310,7 @@ private fun EraLine(row: EraRow, first: Boolean, last: Boolean, onOpen: () -> Un
             Box(Modifier.width(2.dp).weight(1f).background(if (last) androidx.compose.ui.graphics.Color.Transparent else line))
         }
         Row(Modifier.weight(1f).padding(vertical = 7.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Box(Modifier.size(64.dp).clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.surfaceContainerHighest).clearAndSetSemantics {}) {
-                if (picture != null) Image(picture, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-            }
+            FramedPicture(row.picture, 64.dp, Modifier.size(64.dp).clip(RoundedCornerShape(10.dp)).clearAndSetSemantics {})
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.Bottom) {
                     Text(stringResource(row.era.label), style = MaterialTheme.typography.titleSmall)
