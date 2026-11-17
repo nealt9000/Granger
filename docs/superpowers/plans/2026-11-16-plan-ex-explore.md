@@ -396,3 +396,47 @@ On the development 200 it changes 22 picks (Mexico's flag → the Pyramid of the
 Desk files: X10 `granger-ll/p0/` (`extract.py`, `rule.py`, `sheet.py`, the samples and the grading page).
 
 **Not covered yet:** other packs and Spanish (file names differ: `Bandera_de`, `Escudo_de` are in the pattern, others may not be); a subject's or room's own picture; whether the phone can read `data-file-type` from every pack's HTML.
+
+### P0 round 1 result: rule v2 fails the pairs bar (2026-11-17)
+
+Neal graded all 128 items on the held-out set (seed 4417).
+
+- **Singles (both rules agree): pass.** 86 yes, 3 no, 11 not sure; 97% yes of the 89 judged (bar 90%). The three no's:
+  Waldorf Astoria New York (logo, with the building next in the infobox), Medical history, Compiler (diagram).
+- **Pairs (the 28 picks v2 changes): fail.** New better 14, both fine 2, neither 5, old better 7. Better-or-equal is 57%
+  (75% if "neither" counts as equal) against a bar of 85%; worse is 25% against a bar of under 10%.
+
+What the seven losses share:
+
+| Loss | Cause |
+|---|---|
+| Flag of Washington, Coat of arms of Hungary | the topic is the emblem, so the emblem is the right picture |
+| Uncharted 3 | a file-name bug: "chart" matched inside "Uncharted", so the cover art was treated as a chart |
+| Monothelitism | a small sidebar photo was treated as a series symbol; that part of the rule won 0 of 3 pairs |
+| IGN | an infobox logo under 80 px tall gave way to an office photo |
+| Scramble for Africa | the maps are the topic, though the title doesn't say "map" |
+| Confederate government of Kentucky | the flag gave way to one man's portrait |
+
+Also found: the pack stores some drawings far smaller than the page draws them (Washington's flag is 85×53 px in the
+file, drawn at 255×152). The app's decode check already skips these; the rule has to test the stored size, not the
+drawn size.
+
+**Rule v3** (`rule3.py`), tuned with seed 4417 now counted as development data:
+
+1. A photo that comes first stands. A sidebar photo counts as a photo.
+2. If the title names an emblem kind (flag, coat of arms, seal, emblem, map, logo, insignia, symbol), the first picture stands.
+3. An infobox logo, structure or character of 80 px or more stands.
+4. A chart or diagram gives way to a JPEG photo in the same or next section.
+5. A flag, seal, map or series symbol gives way to the first roomy JPEG photo among the first eight, wide before tall.
+6. File-name words match as whole words only. A candidate must be stored at 64 px or more a side.
+
+Tried and dropped: letting an infobox photo beat the infobox logo (it gave Sega an office tower and In-N-Out a
+university building), and lowering the logo size to 64 px (it lost Virgin Atlantic's aircraft).
+
+On seed 4417, v3 changes 19 picks instead of 28. Of those, Neal's round-1 grades read new 12, both 1, neither 3, old 3.
+That is tuning data, so it is not a score. Scramble for Africa, Kentucky and IGN stay wrong; nothing in the markup
+separates them from the cases the rule gets right.
+
+**Round 2 held-out:** a fresh 400 (seed 7723), 34 picks changed, none looked at before publishing. The same page,
+https://claude.ai/artifact/SdvFpPuoQLthuqniGYEe8g, now shows those 34 blind pairs and saves to `grades2`. Same bar.
+If v3 fails it too, the fallback is to ship only the parts with a clear record (rules 1, 2 and 6 plus the app's rule).
