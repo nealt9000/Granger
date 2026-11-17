@@ -34,8 +34,9 @@ class FakeZimArchive(
     counter: String = "",
     /** What [list] walks: entries in path order. */
     private val listed: List<app.granger.core.zim.ZimEntry>? = null,
+    language: String = "eng",
 ) : ZimArchive {
-    override val metadata = ZimMetadata(title, description, "eng", "2026-10-15", name, scraper, counter)
+    override val metadata = ZimMetadata(title, description, language, "2026-10-15", name, scraper, counter)
 
     override fun list(mimes: Set<String>, each: (app.granger.core.zim.ZimEntry) -> Boolean): Boolean {
         val entries = listed ?: return false

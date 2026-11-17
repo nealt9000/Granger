@@ -74,6 +74,11 @@ class ZimLibrarySearch(
     private val bookshelf: Bookshelf? = null,
     /** The sets the packs are slices of, so a smaller slice's hits don't double a bigger one's (Plan WF Decision 6). */
     private val slices: PackSlices? = null,
+    /**
+     * The library's languages (Settings, two letters): packs and books in others aren't searched (Neal, 2026-11-16: only
+     * the languages chosen show up). A pack or book with no language, or several ("mul"), is always searched. Null: all.
+     */
+    private val languages: suspend () -> Set<String>? = { null },
 ) : LibrarySearch {
     // The packs take turns, each in its own order, so a big pack can't push the others below the first few or past the limit.
     // Then a title that is the query comes first, and one that starts with it next (Plan U3b Decision 10). Books on the
@@ -124,6 +129,8 @@ class ZimLibrarySearch(
         return fuzzy(query, q, shown.map { it.packId to it.path }.toSet()).distinctBy { family(it) to it.path }
     }
 
+    private fun inLanguages(language: String, allowed: Set<String>) = allowed.any { TitleMatch.inLanguage(language, it) }
+
     /** The query's language when it is plainly one ([ResearchLanguage.of] gives it alone), else null. */
     private fun queryLanguage(query: String): ResearchLanguage? = ResearchLanguage.of(query).singleOrNull()
 
@@ -166,7 +173,8 @@ class ZimLibrarySearch(
 
     /** The shelf's books matching [query] by title or author, as title hits that open the book. */
     private suspend fun bookTitles(query: String): List<Pair<BookTitleSearch.Rank?, SearchHit>> {
-        val shelf = bookshelf?.books?.first() ?: return emptyList()
+        val allowed = languages()
+        val shelf = bookshelf?.books?.first()?.filter { allowed == null || inLanguages(it.language, allowed) } ?: return emptyList()
         return BookTitleSearch.search(shelf, query).map { (rank, book) ->
             rank to SearchHit(book.id, Filing.defaultName(Filing.defaultKey(book), book), "", book.title, author = book.author)
         }
@@ -227,7 +235,9 @@ class ZimLibrarySearch(
     private suspend fun across(query: String, suggesting: Boolean = false, run: (ZimArchive) -> List<ZimHit>): List<PackHits> {
         if (query.isBlank()) return emptyList()
         val packs = library.packs.first().filter { it.status == PackStatus.OK }
+        val allowed = languages()
         val asked = packs.filterNot { suggesting && TitleMatch.skipsSuggest(it.name, query) }
+            .filter { allowed == null || inLanguages(it.language, allowed) }
         val asBook = bookHits(asked)
         // A few packs at a time, in their order (each archive reads under its own lock): one after another, 31 packs' title
         // suggestions added up to 1–2 s on the emulator.

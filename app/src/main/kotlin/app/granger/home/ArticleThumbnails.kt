@@ -13,16 +13,17 @@ import org.jsoup.Jsoup
  * under the app's cache (the OS may clear it; the card then shows its icon). Blocking; call off the main thread.
  */
 class ArticleThumbnails(private val dir: File) {
-    /** The cached file's path, or null when the article has no usable image. */
-    fun thumbnail(archive: ZimArchive, articlePath: String, html: String): String? = try {
+    /** The cached file's path, or null when the article has no usable image; [targetPx] sizes it (a topic page's header is larger). */
+    fun thumbnail(archive: ZimArchive, articlePath: String, html: String, targetPx: Int = TARGET_PX): String? = try {
         val imagePath = candidates(html, articlePath).firstNotNullOfOrNull { archive.resolvePath(it) } ?: return null
-        val file = File(dir, "${sha1("${archive.uuid}/$imagePath")}.jpg")
+        val size = if (targetPx == TARGET_PX) "" else "@$targetPx"
+        val file = File(dir, "${sha1("${archive.uuid}/$imagePath$size")}.jpg")
         if (file.isFile && file.length() > 0L) {
             file.setLastModified(System.currentTimeMillis())    // last shown: the pruning keeps the ones in use
             return file.path
         }
         val bytes = archive.read(imagePath)?.bytes?.takeIf { it.isNotEmpty() } ?: return null
-        val bitmap = decode(bytes) ?: return null
+        val bitmap = decode(bytes, targetPx) ?: return null
         dir.mkdirs()
         val tmp = File(dir, "${file.name}.tmp")
         tmp.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 80, it) }
@@ -47,11 +48,11 @@ class ArticleThumbnails(private val dir: File) {
         }
     }
 
-    private fun decode(bytes: ByteArray): Bitmap? {
+    private fun decode(bytes: ByteArray, targetPx: Int): Bitmap? {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
         if (bounds.outWidth < MIN_SIDE || bounds.outHeight < MIN_SIDE || bounds.outWidth > RailCovers.MAX_SIDE || bounds.outHeight > RailCovers.MAX_SIDE) return null
-        val options = BitmapFactory.Options().apply { inSampleSize = RailCovers.sampleSize(bounds.outWidth, bounds.outHeight, TARGET_PX) }
+        val options = BitmapFactory.Options().apply { inSampleSize = RailCovers.sampleSize(bounds.outWidth, bounds.outHeight, targetPx) }
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
     }
 

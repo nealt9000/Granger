@@ -67,6 +67,20 @@ class ZimLibrarySearchTest {
         assertThat(hits.first { it.path == "Aspirin" }.packId).isEqualTo("u-med")
     }
 
+    @Test fun onlyTheLibrarysLanguagesAreSearched() = test {
+        install("es.zim", FakeZimArchive("u-es", "Lo mejor", language = "spa", suggestions = listOf(ZimHit("Asma", "Asma")), results = listOf(ZimHit("Asma", "Asma", "s", 99))))
+        install("mul.zim", FakeZimArchive("u-mul", "Atlas", language = "mul", suggestions = listOf(ZimHit("Asia", "Asia"))))
+        library.refresh()
+        // English alone: the Spanish pack isn't searched; a pack in many languages always is.
+        var languages: Set<String>? = setOf("en")
+        val only = ZimLibrarySearch(library, io = dispatcher, titlesPerPack = 2, fullTextLimit = 3, languages = { languages })
+        assertThat(only.titles("as").hits.map { it.title }).containsExactly("Aspirin", "Asthma", "As You Like It", "Asia")
+        assertThat(only.fullText("as").map { it.packId }).doesNotContain("u-es")
+        // English and Spanish: both.
+        languages = setOf("en", "es")
+        assertThat(only.titles("as").hits.map { it.title }).contains("Asma")
+    }
+
     private fun big(id: String, count: Int) =
         FakeZimArchive(id, id, suggestions = (1..count).map { ZimHit("${id}_$it", "$id $it") })
 

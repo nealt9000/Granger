@@ -32,6 +32,18 @@ class VectorFileTest {
         assertThat(hits[1].score.toDouble()).isWithin(0.02).of(0.6)
     }
 
+    // Plan LL2 Related: an article's own rows, found by key, and read back as vectors.
+    @Test fun findsAKeysRowsAndCopiesThem() {
+        val f = VectorFile.open(fixture())!!
+        assertThat(f.rowsOf("A/Knot").toList()).containsExactly(0, 1).inOrder()
+        assertThat(f.rowsOf("OEBPS/c001.xhtml").toList()).containsExactly(2)
+        assertThat(f.rowsOf("A/Kno").toList()).isEmpty()
+        assertThat(f.rowsOf("A/Knots").toList()).isEmpty()
+        val row = ByteArray(4)
+        f.copyRow(0, row)
+        assertThat(row.toList()).containsExactly(127.toByte(), 0.toByte(), 0.toByte(), 0.toByte()).inOrder()
+    }
+
     @Test fun rejectsOtherFilesAndTruncation() {
         assertThat(VectorFile.open(tmp.newFile("x.gvec").apply { writeText("not a vector file") })).isNull()
         val bytes = fixture().readBytes()

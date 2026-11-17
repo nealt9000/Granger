@@ -71,6 +71,88 @@ class ReaderViewModelTest {
         assertThat(vm.state.value.footerOpen).isFalse()
     }
 
+    // ---- the topic page (Plan LL2) ----
+
+    private val wiki = FakeZimArchive("wikipedia_en_top_maxi", setOf("index", "Napoleon", "Jazz"))
+
+    private class FakeTopics : app.granger.topic.TopicProvider {
+        val asked = mutableListOf<String>()
+        override fun topic(packId: String, path: String) = kotlinx.coroutines.flow.flowOf(
+            app.granger.topic.Topic(packId, path, header = app.granger.topic.TopicHeader(path, "Lead.", null), done = true),
+        ).also { asked += path }
+    }
+
+    /** Tab 1 in the Wikipedia pack "w", opened at [openedAt]; the clock reads 1,002,000 ms. */
+    private fun TestScope.topicReader(
+        path: String, openedAt: Long = 1_000_000L, topics: FakeTopics = FakeTopics(),
+        fragment: String? = null, quote: String? = null, pack: String = "w", topicFirst: Boolean = true,
+    ): ReaderViewModel {
+        library.archives["w"] = wiki
+        sessions.tabs.value = listOf(ReadingTab(1, pack, path, path, openedAt, onRail = true))
+        val vm = ReaderViewModel(1, library, sessions, this, main.dispatcher, fragment = fragment, quote = quote, topics = topics, now = { 1_002_000L })
+        if (!topicFirst) vm.updatePrefs(vm.prefs.value.copy(topicFirst = false))
+        testScheduler.advanceUntilIdle()
+        return vm
+    }
+
+    @Test fun aWikipediaArticleOpenedJustNowStartsAtItsTopicPage() = runTest(main.dispatcher) {
+        val topics = FakeTopics()
+        val vm = topicReader("Napoleon", topics = topics)
+        assertThat(vm.state.value.topicShown).isTrue()
+        assertThat(vm.state.value.topic?.header?.title).isEqualTo("Napoleon")
+        assertThat(vm.state.value.url).isEqualTo(ZimUrls.forEntry("w", "Napoleon", null))   // the article loads behind it
+        assertThat(topics.asked).containsExactly("Napoleon")
+    }
+
+    @Test fun aTabReturnedToASectionAMainPageOrAnotherPackOpensTheArticle() = runTest(main.dispatcher) {
+        assertThat(topicReader("Napoleon", openedAt = 1L).state.value.topicShown).isFalse()                  // returned to
+        assertThat(topicReader("Napoleon", fragment = "Exile").state.value.topicShown).isFalse()             // a section
+        assertThat(topicReader("index").state.value.topicShown).isFalse()                                    // the main page
+        assertThat(topicReader("C++", pack = "p").state.value.topicShown).isFalse()                          // not a Wikipedia
+        assertThat(topicReader("Napoleon", topicFirst = false).state.value.topicShown).isFalse()             // Aa: Full article
+    }
+
+    @Test fun aSearchsPassageOpensTheTopicPageShowingWhatWasFound() = runTest(main.dispatcher) {
+        // Neal, 2026-11-16: the topic before the deep dive, even from a Best match (which carries a section and a quote).
+        val vm = topicReader("Napoleon", fragment = "Exile", quote = "Napoleon was exiled to Saint Helena.")
+        assertThat(vm.state.value.topicShown).isTrue()
+        assertThat(vm.state.value.found).isEqualTo("Napoleon was exiled to Saint Helena.")
+        assertThat(vm.state.value.url).isEqualTo(ZimUrls.forEntry("w", "Napoleon", "Exile"))   // the article waits at the passage
+    }
+
+    @Test fun readTheFullArticleThenBackReturnsToTheTopicPageAndBackAgainLeaves() = runTest(main.dispatcher) {
+        val vm = topicReader("Napoleon")
+        vm.onPageShown(ZimUrls.forEntry("w", "Napoleon", null), "Napoleon")
+        vm.readFullArticle()
+        assertThat(vm.state.value.topicShown).isFalse()
+        val current = ZimUrls.forEntry("w", "Napoleon", null)
+        assertThat(vm.back(current, null)).isEqualTo(ReaderViewModel.BackStep.Topic)
+        assertThat(vm.state.value.topicShown).isTrue()
+        assertThat(vm.back(current, null)).isEqualTo(ReaderViewModel.BackStep.Leave)
+    }
+
+    @Test fun backFromALinkedPageGoesBackThroughTheArticleFirst() = runTest(main.dispatcher) {
+        val vm = topicReader("Napoleon")
+        vm.readFullArticle()
+        vm.onPageVisited(ZimUrls.forEntry("w", "Jazz", null))
+        vm.onPageShown(ZimUrls.forEntry("w", "Jazz", null), "Jazz")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.back(ZimUrls.forEntry("w", "Jazz", null), ZimUrls.forEntry("w", "Napoleon", null))).isEqualTo(ReaderViewModel.BackStep.InWebView)
+        assertThat(vm.state.value.topicShown).isFalse()
+    }
+
+    @Test fun theMenusTopicPageShowsThePageNowShown() = runTest(main.dispatcher) {
+        val topics = FakeTopics()
+        val vm = topicReader("Napoleon", openedAt = 1L, topics = topics)
+        vm.onPageShown(ZimUrls.forEntry("w", "Jazz", null), "Jazz")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.isWikipedia).isTrue()
+        vm.showTopic()
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.topicShown).isTrue()
+        assertThat(vm.state.value.topic?.path).isEqualTo("Jazz")
+    }
+
     @Test fun theFootersCardLineCountsWhatItHolds() {
         val b = app.granger.ebook.LibraryBook("b", "B", null)
         val m = app.granger.core.library.BookMention("c1", 0, "London", "Chapter 1\nShe went to ", 84L, 1)

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The topic page in front of a Wikipedia article (Plan LL2). -->
+<resources>
+    <string name="topic_read_full">Read the full article</string>
+    <!-- The other-language button is written in that language, whatever the app's own. -->
+    <string name="topic_read_in_spanish" translatable="false">Leer en español</string>
+    <string name="topic_read_in_english" translatable="false">Read in English</string>
+    <!-- A life's years and the age reached: "1769 – 1821 · aged 51". -->
+    <string name="topic_years_aged">%1$s · aged %2$d</string>
+    <string name="topic_their_time">Their time</string>
+    <string name="topic_same_time">At the same time</string>
+    <string name="topic_people_overlapped">People whose lives overlapped</string>
+    <string name="topic_events">What happened in those years</string>
+    <string name="topic_open_timeline">Open in Timeline</string>
+    <string name="topic_in_books">In your books</string>
+    <string name="topic_all_books">All %1$d</string>
+    <plurals name="topic_named_in_books">
+        <item quantity="one">Named in one of your books</item>
+        <item quantity="other">Named in %1$d of your books</item>
+    </plurals>
+    <string name="topic_closest">Closest topics</string>
+    <string name="topic_near_in_books">Also near in your books</string>
+    <!-- The ⋯ menu entry that shows the page's topic page again. -->
+    <string name="topic_menu">Topic page</string>
+    <!-- Aa: what a Wikipedia article opens at. -->
+    <string name="topic_setting_open_at">Open articles at</string>
+    <string name="topic_setting_topic">Topic page</string>
+    <string name="topic_setting_article">Full article</string>
+    <string name="topic_found">From your search</string>
+    <string name="topic_found_go">Read it in the article</string>
+    <string name="topic_wander">Wander from here</string>
+    <!-- Explore connections (the map). -->
+    <string name="topic_explore">Explore connections</string>
+    <string name="topic_map_all">All</string>
+    <string name="topic_map_people">People</string>
+    <string name="topic_map_events">Events</string>
+    <string name="topic_map_places">Places</string>
+    <string name="topic_map_topics">Topics</string>
+    <string name="topic_map_books">Books</string>
+    <string name="topic_map_open">Open the topic page</string>
+    <string name="topic_map_hint">Tap a circle to centre the map on it. Hold to open it.</string>
+</resources>

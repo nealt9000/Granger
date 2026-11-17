@@ -126,7 +126,9 @@ The tech-debt session comes next, and these rules exist so the Linked Library do
 | **LL5** | Study | Review deck, Quiz me |
 | **LL6** | Explore | Trails, the Atlas (living Home §6), topic map |
 
-Music links (MusicBrainz) and the first Granger Music pack (§3.7) ride in LL2 with Related, a plan of their own if they grow. The LibriVox join (only for fallback phones) comes in LL4.
+Music links (MusicBrainz) and the first Granger Music pack (§3.7) are **a plan of their own**, beside LL2 (Neal, 2026-11-15). The LibriVox join (only for fallback phones) comes in LL4.
+
+**Tester build:** the next Play build for testers comes once LL2 is pushed, with LL1 and LL2 turned on (Neal, 2026-11-15).
 
 ## 7. Open questions
 

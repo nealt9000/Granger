@@ -259,6 +259,31 @@ class ReferenceLinksTest {
         assertThat(source.footer("top", "London").inBooks.map { it.book.bookId }).containsExactly("book:granger:gc-pp")
     }
 
+    @Test fun aTopicPagesBooksAreTheLibrarysLanguagesThePagesFirst() = runBlocking<Unit> {
+        val top = gqid("t".repeat(64), "London" to 84L)
+        val books = mapOf(
+            "book:granger:gc-pp" to InstalledSidecar(glink("gc-pp", 170583L), "e".repeat(64)),   // London twice, English
+            "book:granger:gc-es-a" to InstalledSidecar(glink("gc-es-a", null, listOf(mention("c001.xhtml", 1, "Londres", 84L))), "e".repeat(64)),
+            "book:granger:gc-fr" to InstalledSidecar(glink("gc-fr", null, listOf(mention("c001.xhtml", 1, "Londres", 84L))), "e".repeat(64)),
+        )
+        val languages = mapOf("book:granger:gc-pp" to "en", "book:granger:gc-es-a" to "es", "book:granger:gc-fr" to "fr")
+        val source = ReferenceLinksSource(
+            linksFiles = { books },
+            qidFiles = { listOf("top" to InstalledSidecar(top, "t".repeat(64))) },
+            lead = { _, p -> ArticleLead(p, "", null) },
+            bookOf = { id -> shelf(id) },
+            index = mentionIndex(),
+            bookLanguage = { languages[it] },
+        )
+        // Every book, most mentions first, as the footer always had it.
+        assertThat(source.footer("top", "London").inBooks.map { it.book.bookId }).hasSize(3)
+        // A Spanish page in a library of English and Spanish: the Spanish book first, the French one left out.
+        val es = source.footer("top", "London", setOf("en", "es"), "es")
+        assertThat(es.inBooks.map { it.book.bookId }).containsExactly("book:granger:gc-es-a", "book:granger:gc-pp").inOrder()
+        // An English-only library lists English books alone.
+        assertThat(source.footer("top", "London", setOf("en"), "en").inBooks.map { it.book.bookId }).containsExactly("book:granger:gc-pp")
+    }
+
     @Test fun aSubjectInManyBooksListsTheMostMentioningAndCountsTheRest() = runBlocking<Unit> {
         val top = gqid("t".repeat(64), "London" to 84L)
         // Book n mentions London n times.

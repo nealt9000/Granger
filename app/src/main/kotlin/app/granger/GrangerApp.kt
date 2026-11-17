@@ -623,7 +623,7 @@ class AppContainer(context: Context) {
     )
     /** Each installed pack's set and rank from the catalog, for Search and Ask's slice dedupe (Plan WF Decision 6). */
     val packSlices: app.granger.core.library.PackSlices = app.granger.sources.CatalogPackSlices { catalog.state.value.catalog }
-    val search: LibrarySearch = ZimLibrarySearch(library, bookIndex, bookshelf = bookshelf, slices = packSlices)
+    val search: LibrarySearch = ZimLibrarySearch(library, bookIndex, bookshelf = bookshelf, slices = packSlices, languages = { knowledgeNow.value.toSet() })
     val resolver = ZimResolver(library::archive, library::cachedArchive)
 
     val totalRamBytes: Long = BuildConfig.FAKE_RAM_BYTES.takeIf { it > 0 } ?: ActivityManager.MemoryInfo()
@@ -965,6 +965,7 @@ class AppContainer(context: Context) {
             wikipediaLanguage = { id ->
                 library.packs.first().firstOrNull { it.id == id }?.name?.let { WIKIPEDIA_LANGUAGE.find(it)?.groupValues?.get(1) }
             },
+            bookLanguage = { id -> bookLanguages[id] ?: bookshelf.book(id)?.language?.let(::twoLetter)?.also { bookLanguages[id] = it } },
         )
     }
 
@@ -978,6 +979,81 @@ class AppContainer(context: Context) {
         val title = lead.title.ifBlank { resolved.substringAfterLast('/').replace('_', ' ') }
         return app.granger.ebook.ArticleLead(
             app.granger.core.library.PageTitles.clean(title), lead.summary, runCatching { thumbs.thumbnail(archive, resolved, html) }.getOrNull(),
+        )
+    }
+
+    private val timeIndexCache = app.granger.core.library.TimeIndexCache()
+
+    /** The phone's time indexes in Wander's pack order (Plan H5b), opened once and reopened when the packs or files change. */
+    suspend fun timeIndexes(): app.granger.core.library.TimeIndexes {
+        // Downloaded with each pack from the catalog (Plan H5b Task 3); files pushed for development fill any gap.
+        val installed = installedTimeIndexes()
+        val listed = app.granger.core.library.TimeIndexDirectory.listed(File(appContext.getExternalFilesDir(null), "timeindex"))
+        val packs = app.granger.home.WanderModel.encyclopediasOf(library.packs.first(), knowledgeNow.value)
+        val files = packs.mapNotNull { pack -> (installed[pack.id] ?: listed[pack.name])?.let { pack to it } }
+        return timeIndexCache.get(files.map { (p, f) -> "${p.id}|${f.path}|${f.lastModified()}" }) {
+            app.granger.core.library.TimeIndexes(files.mapNotNull { (pack, file) -> app.granger.core.library.TimeIndex.open(file, pack.id) })
+        }
+    }
+
+    /** A vector source's language, for Related to stay in the page's (Plan LL2): a Wikipedia's from its name, a book's from the shelf. */
+    private val bookLanguages = java.util.concurrent.ConcurrentHashMap<String, String>()
+
+    private suspend fun sourceLanguage(source: app.granger.core.library.VectorSource): String? = when (source.kind) {
+        app.granger.core.research.SourceKind.ARTICLE -> WIKIPEDIA_LANGUAGE.find(source.target)?.groupValues?.get(1)
+        app.granger.core.research.SourceKind.BOOK -> bookLanguages[source.target]
+            ?: bookshelf.book(source.target)?.language?.let(::twoLetter)?.also { bookLanguages[source.target] = it }
+        else -> null
+    }
+
+    /** Related for a topic page (Plan LL2 Task 1's search): the installed vectors, on the dense search's threads. */
+    val relatedFinder by lazy { app.granger.core.library.RelatedFinder(vectorSources, vectorPool, ::sourceLanguage) }
+
+    /** A topic page's Wander from here (Plan LL2): the article Home's Wander starts at next, taken once. */
+    val wanderFrom = kotlinx.coroutines.flow.MutableStateFlow<Pair<String, String>?>(null)
+
+    /** The topic page in front of each Wikipedia article (Plan LL2). */
+    val topics: app.granger.topic.TopicSource by lazy {
+        val thumbs = app.granger.home.ArticleThumbnails(File(context.cacheDir, "home-thumbs"))
+        val io = kotlinx.coroutines.Dispatchers.IO
+        app.granger.topic.TopicSource(
+            header = { packId, path -> kotlinx.coroutines.withContext(io) { topicHeader(packId, path, thumbs) } },
+            lead = { packId, path -> kotlinx.coroutines.withContext(io) { articleLead(packId, path, thumbs) } },
+            times = { kotlinx.coroutines.withContext(io) { timeIndexes() } },
+            qids = { kotlinx.coroutines.withContext(io) { referenceLinks.qidIndexes() } },
+            languageOf = { id -> library.packs.first().firstOrNull { it.id == id }?.name?.let { WIKIPEDIA_LANGUAGE.find(it)?.groupValues?.get(1) } },
+            packIds = { library.packs.first().filter { it.name.isNotBlank() }.associate { it.name to it.id } },
+            footer = if (Features.LINKED_CLASSICS) referenceLinks else null,
+            related = { name, path, same -> relatedFinder.related(name, path, same) },
+            bookOf = { id -> bookshelf.book(id)?.takeIf { it.status == app.granger.core.library.PackStatus.OK }?.let { app.granger.ebook.LibraryBook(it.id, it.title, it.coverPath) } },
+            libraryLanguages = { knowledgeNow.value.toSet() },
+            sentence = { bookId, mention -> kotlinx.coroutines.withContext(io) { bookSentence(bookId, mention) } },
+        )
+    }
+
+    /** The sentence a mention sits in, read from its chapter in the EPUB (Plan LL2). Blocking. */
+    private suspend fun bookSentence(bookId: String, mention: app.granger.core.library.BookMention): String? {
+        val file = bookshelf.book(bookId)?.filePath?.let(::File)?.takeIf { it.isFile } ?: return null
+        return runCatching {
+            java.util.zip.ZipFile(file).use { zip ->
+                val text = app.granger.core.books.XhtmlText.chunks(zip, mention.href).joinToString("\n") { it.text }
+                app.granger.topic.QuoteSentence.around(text, mention.before, mention.quote)
+            }
+        }.getOrNull()
+    }
+
+    /** A topic page's header: the article's title, its lead's first sentences, and its picture at header size. Blocking. */
+    private fun topicHeader(packId: String, path: String, thumbs: app.granger.home.ArticleThumbnails): app.granger.topic.TopicHeader? {
+        val archive = library.archive(packId) ?: return null
+        val resolved = archive.resolvePath(path) ?: return null
+        val item = archive.read(resolved)?.takeIf { it.mimeType.startsWith("text/html") } ?: return null
+        val html = String(item.bytes, Charsets.UTF_8)
+        val lead = app.granger.home.LeadLinks.parse(html, resolved, sentences = 3, maxChars = TOPIC_LEAD_CHARS)
+        val title = lead.title.ifBlank { resolved.substringAfterLast('/').replace('_', ' ') }
+        return app.granger.topic.TopicHeader(
+            // The lead without its bracketed asides (birth names, dates and pronunciations the page shows already).
+            app.granger.core.library.PageTitles.clean(title), app.granger.topic.TopicSource.blurb(lead.summary),
+            runCatching { thumbs.thumbnail(archive, resolved, html, TOPIC_PICTURE_PX) }.getOrNull(),
         )
     }
 
@@ -1028,12 +1104,21 @@ class AppContainer(context: Context) {
     /** Best matches for Search, each query's meaning step timed into [embedSpeed]. */
     fun bestStream(query: String): kotlinx.coroutines.flow.Flow<app.granger.core.research.BestMatches.Result> = kotlinx.coroutines.flow.flow {
         var timed = false
+        // Best matches keep to the library's languages too (Neal, 2026-11-16), as Titles and Articles do.
+        val allowed = knowledgeNow.value.toSet()
+        val packLanguages = library.packs.first().associate { it.id to it.language }
+        suspend fun allowedSource(p: app.granger.core.research.Passage): Boolean = when (p.kind) {
+            app.granger.core.research.SourceKind.ARTICLE -> packLanguages[p.sourceId]?.let { l -> allowed.any { app.granger.core.library.TitleMatch.inLanguage(l, it) } } ?: true
+            app.granger.core.research.SourceKind.BOOK -> (bookLanguages[p.sourceId] ?: bookshelf.book(p.sourceId)?.language?.let(::twoLetter)?.also { bookLanguages[p.sourceId] = it })
+                ?.let { it in allowed } ?: true
+            else -> true
+        }
         bestMatches.stream(query).collect { result ->
             if (!timed && result.byMeaning && result.embedMs + result.denseMs > 0) {
                 embedSpeed.record(result.embedMs + result.denseMs)
                 timed = true
             }
-            emit(result)
+            emit(result.copy(matches = result.matches.filter { allowedSource(it.passage) }))
         }
     }
 
@@ -1084,3 +1169,17 @@ data class InstalledSidecar(val file: File, val packSha256: String, val packName
 
 /** `wikipedia_en_history_maxi_2026-09.zim` -> `en`: a Wikipedia pack's language, as its QID index names it. */
 private val WIKIPEDIA_LANGUAGE = Regex("^wikipedia_([a-z]{2,3})_")
+
+/** A topic page's lead and header picture (Plan LL2). */
+private const val TOPIC_LEAD_CHARS = 420
+private const val TOPIC_PICTURE_PX = 900
+
+/** A book's language as two letters: `en` from `en`, `eng` or `en-GB`; `es` from `spa`. */
+internal fun twoLetter(language: String): String? {
+    val l = language.lowercase().substringBefore('-').substringBefore('_')
+    return when {
+        l.isBlank() -> null
+        l.length == 2 -> l
+        else -> java.util.Locale.forLanguageTag(l).language.takeIf { it.length == 2 } ?: mapOf("eng" to "en", "spa" to "es")[l]
+    }
+}
