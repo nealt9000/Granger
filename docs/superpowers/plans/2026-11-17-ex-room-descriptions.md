@@ -7,7 +7,7 @@ How they were written:
 
 - Each line lists what the room holds, taken from the room's rule in `lenses.json` and from a sample of its topics in the Top English index (gqid-v5).
 - No claims about importance or quality, and no facts that the index doesn't hold.
-- One sentence, 83 characters at most in English and 91 in Spanish, so it fits two lines at 334 dp.
+- One sentence, 84 characters at most in English and 92 in Spanish, so it fits two lines at 334 dp.
 - Where a room's rule pulls in something the name doesn't suggest, the line says so (coins in Famous works, visa rules in The world stage).
 
 Rooms whose contents don't match their names well are listed at the end; those are naming or rule questions, not copy questions.
