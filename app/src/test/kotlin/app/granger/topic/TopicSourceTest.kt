@@ -100,6 +100,27 @@ class TopicSourceTest {
         assertThat(all.dropLast(1).none { it.done }).isTrue()
     }
 
+    @Test fun aBroadTopicGetsItsPartsResolvedInTheInstalledPacks() = runBlocking<Unit> {
+        val f = gqid("wikipedia_en_top_maxi_2026-09-14.zim", "Airplane" to 197L, "F-16" to 101L, "Engine" to 211L, "Propeller" to 212L, "Jet_engine" to 213L, "Charles_Lindbergh" to 301L)
+        SQLiteDatabase.openDatabase(f.path, null, SQLiteDatabase.OPEN_READWRITE).use { db ->
+            db.execSQL("CREATE TABLE topics(qid INTEGER PRIMARY KEY, under INTEGER NOT NULL, inlinks INTEGER NOT NULL)")
+            db.execSQL("CREATE TABLE topic_parts(topic INTEGER NOT NULL, part INTEGER NOT NULL, ord INTEGER NOT NULL, item INTEGER, grp INTEGER, text TEXT, note TEXT, PRIMARY KEY(topic, part, ord)) WITHOUT ROWID")
+            db.execSQL("INSERT INTO topics VALUES (197, 72, 86)")
+            for (r in listOf<Array<Any?>>(
+                arrayOf(197, 2, 0, 101, -1, null, null), arrayOf(197, 3, 0, null, null, "Propulsion", "Propulsion"),
+                arrayOf(197, 4, 0, 211, 0, null, null), arrayOf(197, 4, 1, 212, 0, null, null), arrayOf(197, 4, 2, 213, 0, null, null),
+                arrayOf(197, 6, 0, 301, null, null, null),
+            )) db.execSQL("INSERT INTO topic_parts VALUES (?, ?, ?, ?, ?, ?, ?)", r)
+        }
+        val qids = QidIndexes(listOf(QidIndex.open(f, "en-top")!!))
+        val broad = source(qids = qids).topic("en-top", "Airplane").toList().last().broad!!
+        assertThat(broad.kinds.map { it.first.path }).containsExactly("F-16")
+        assertThat(broad.chapters.single().links.map { it.path }).containsExactly("Engine", "Propeller", "Jet_engine").inOrder()
+        assertThat(broad.people.single().article.title).isEqualTo("Charles Lindbergh")
+        // Not a broad topic: no part.
+        assertThat(source(qids = qids).topic("en-top", "Engine").toList().last().broad).isNull()
+    }
+
     @Test fun aFinishedTopicIsCachedForBack() = runBlocking<Unit> {
         val headers = mutableListOf<String>()
         val s = source(headers = headers)
