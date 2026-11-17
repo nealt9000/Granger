@@ -25,6 +25,8 @@ object PackDocumentTitle {
         "untitled", "untitled document", "no title", "title", "document", "new document", "pdf", "pdf document",
         "powerpoint presentation", "slide 1", "here", "click here", "click", "download", "download pdf", "link",
         "open", "view", "view pdf", "read", "read more", "more", "file", "print",
+        // A missing value written out: zimit titles some entries "null" (openzim_en_all's PDFs, 2026-11 emulator pass).
+        "null", "undefined", "none", "nil",
     )
 
     /** A link's "(PDF)", "[PDF, 2 MB]" or "(1.2 MB)" after the name. */
