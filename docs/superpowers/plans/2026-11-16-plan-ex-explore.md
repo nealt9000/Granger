@@ -272,3 +272,66 @@ Canvas https://claude.ai/artifact/HG4yrYyYPFssmRvsYscdvq, rows 4–6. Each row i
 Desk files: X10 `granger-ll/ex4/` (`gather2.py` pulls the data; `ex.py`, `dirA.py`, `dirB.py`, `dirC.py`, `build.py` generate the artboards; `view.py` renders them with headless Chrome).
 
 **Waiting on Neal:** which direction leads, and which parts of the others to fold in.
+
+### Neal's picks (2026-11-17) and the converged direction, D
+- **A blend leads:** A's plates and captions as the page grammar.
+- **Kept from the others:** B's doors left and right (a bar at the foot of every screen); C's finding headlines and side by side.
+- **The map:** A's, plates round the topic with every line labelled.
+- **Not picked, so left out:** B's floor plan, C's date cover and On this day, the time squares, Threads by room and through time. The rooms-seen layer stays as A's thin bar.
+- **D is drawn** on the canvas, row 7 (same flow, same data), generated from A's source by `ex4/dirD.py`. Neal hasn't looked at D yet; the build plan below is a draft until he has.
+
+### Build plan for D (draft)
+Data is flagged against what the gqid-v5 index holds: **have** (on the phone today), **compute** (derivable on the phone from what it holds), **new** (needs a desk build or new user data).
+
+**P0. Two desk jobs first (Neal reviews both before any app work)**
+- **The picture rule.** Today's rule takes an article's first usable image. It gives Wikipedia a portrait, Electric car a modern Tesla and Amelia Earhart a house. Study the candidates per article (position, size, caption, whether it shows a person) on a sample of 200, propose a rule, and grade it with Neal as the subjects were graded. **New:** a chosen picture per article in the index, or a rule the phone can apply.
+- **Room descriptions.** One line for each of the 108 rooms, en and es, in `lenses.json` beside the names. **New**, written once.
+
+**G0. Shared pieces (app, theme shots in Field and Night)**
+- Plate mosaic: square edges, 2 dp seams, the title over the foot, a word tile when there's no picture. Row patterns by rule from the count and the pictures' shapes.
+- Numbered captions, the trail (collapses past three steps), the doors bar, the three-ways-on list, the rooms-seen bar.
+- TalkBack: each plate is one button with its title; plate numbers and seams are hidden; the doors bar reads "the room before, The internet".
+- Data: none.
+
+**D3. A room** (was the lens listing)
+- Description line: **new** (P0).
+- Finding sentence (oldest thing, share in the busiest century): **compute** from `facets` and the time index; precompute into the index meta if it's slow on big packs.
+- The room in six plates (best-known dated topic per era): **compute**; the eras pass exists (`datedIn`).
+- Views Plates, Through time, A–Z: **have** (mosaic, era chips, A–Z rail). Narrow keeps the era and order filters.
+- Where these also hang (shared topics with other rooms, top four): **compute**, one join on `facets`. Its heading states the largest share.
+- Doors bar: the rooms before and after in the subject: **have**.
+
+**D2. A subject**
+- Three opening plates and their captions: the pictures are **have**; a caption for an article's lead picture is **new** (only broad topics carry captions). Fall back to the article's title.
+- Room tiles in pairs with a sentence each: tiles **have**; sentences as in D3.
+- Finding heading from the rooms' century counts: **compute**.
+- In your books, Wander, Quiz: **have**. Rooms seen: **new** user data (below).
+- Doors bar: the subjects before and after: **have**.
+
+**D1. The landing**
+- Today's spread: the topic's own picture and two of its figures with captions, and its counts: **have** (`topic_parts`).
+- Subject mosaic with a finding heading: **have** (counts, namesake pictures, P0's rule).
+- Through time rows with bars: **have**.
+- Wander, Quiz, Your sources as three ways on: **have**. Rooms seen bar: **new**.
+
+**D5. A broad topic**
+- Plates and captions, kinds in families, the History story, people, chapters: **have** (`topic_parts`).
+- The diagram plate: **compute**; it needs a rule for which figure (a first try: the first figure outside the story chapter whose picture is a drawing).
+- Side by side: the two best-known other broad topics in the same room; rows from `topics` and `topic_parts` (kinds, families, people, chapters, links in): **have**. Left out when the room has no other broad topic.
+- Doors bar: the topics before and after in the room, best known first: **have**.
+- Viewpoints: not built; no placeholder ships.
+
+**D4. Connections**
+- For a broad topic: one plate each from kinds, people, up to three chapters, and Related; labels are the part or chapter name: **have**.
+- For other topics: today's topic map (links, Related, books) redrawn as plates with labelled lines: **have**.
+- Touching a line shows that thing's card and the rest of its group.
+
+**R. Rooms seen**
+- **New** user data: a small table (kind, id, first seen). Rooms, subjects and eras only, never articles. A switch to turn it off and one to clear it in Settings. The next free migration number after `article_marks`.
+
+**Order:** P0 → G0 → D3 → D2 → D1 → D5 → D4 → R → walkthrough on the Pixel in Field and Night, with TalkBack, then Spanish.
+
+**Open for Neal:**
+- Whether lenses are called rooms in the app (the mockups do).
+- The picture rule and the room descriptions (P0) are his to review.
+- The rebuild: sentences and overlaps can be computed on the phone, so no new index is needed unless they're slow. P0's picture choice would need one.
