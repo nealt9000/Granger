@@ -812,10 +812,26 @@ now)").
 
 ## Phase 5: check and merge
 
-- [ ] **Task 5.1: emulator pass.**
+- [x] **Task 5.1: emulator pass.**
   - Every source: install, open, remove, update a snapshot (supersede), and search.
   - Spanish UI.
   - TalkBack on the new screens.
+  - **Done 2026-11-16** on emulator-5580 (d0 freed it), app data cleared, debug build against the signed catalog
+    (261d4d00) served locally.
+    - Pass: Books screen by kind, providers named; African Storybook Level 5 (65 books) downloads from asb-en-2026-11-16
+      and reads (fonts gone, reader serif, pictures intact), files as its own collection; Survivor Library's size check
+      fires (220 GB vs 56 GB free; the dialog still offers Get, as before KB2); Military Medicine opens as 20 books, a PDF
+      opens, Read as ebook converts it, Remove clears pack + PDF + ebook + rows; Algorithms (rebuilt manifest) shows
+      "The book" first, chapters in order; Gutenberg lcc-pf installs with memberOf on its 20 books and opens; Files in
+      this pack (openzim_en_all, 6 PDFs) lists and opens.
+    - Fixed: 8baafac1, a pack entry titled "null" (zimit) became the document's title; now it says nothing.
+    - Fixed: TalkBack heard bare "Get"/"Get all": RowActions' Get/Open/Update/Cancel and the set's Get all now name
+      their row ("Get Military Medicine", "Get all of Level 1 set"), en + es.
+    - Noted, not changed: the Library names the set "African Storybook · English" in Spanish too (Filing names a set's
+      language in that language, by design), while Get books uses the catalog's "African Storybook · inglés"; Files in
+      this pack shows one openzim PDF by its hash name (its only name). The storage line lags a download by a minute.
+    - Not on the emulator: memberOf's first-sync time with an existing library (Pixel 6, Task 5.2); snapshot supersede
+      (no newer snapshot to move to tonight).
 - [ ] **Task 5.2: Pixel 6 walkthrough.** Follow the install rules above. Use African Storybook English Level 1, Military
   Medicine, and an archive.org text PDF for the one PDF rule.
 - [ ] **Task 5.3: merge.**

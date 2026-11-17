@@ -111,6 +111,7 @@
     <!-- A preset ("Granger Classics set") is a "conjunto": "paquete" is taken by packs. -->
     <string name="sources_preset_title">Conjunto %1$s</string>
     <string name="sources_get_all">Descargar todo</string>
+    <string name="sources_get_all_named">Descargar todo: %1$s</string>
     <plurals name="sources_packs">
         <item quantity="one">%d paquete</item>
         <item quantity="many">%d paquetes</item>
@@ -163,6 +164,10 @@
     <string name="sources_switch_text">¿Cambiar %1$s de %2$s (%3$s) a %4$s (%5$s)? La versión %2$s se quita cuando la nueva termine de descargarse. Tus lugares y marcadores se conservan.</string>
     <string name="sources_update">Actualizar</string>
     <string name="sources_more_for">Más opciones de %1$s</string>
+    <string name="sources_get_named">Descargar %1$s</string>
+    <string name="sources_open_named">Abrir %1$s</string>
+    <string name="sources_update_named">Actualizar %1$s</string>
+    <string name="sources_cancel_named">Cancelar %1$s</string>
 
     <string name="sources_retrying">Reintentando: %1$s</string>
     <string name="sources_waiting_wifi">Esperando Wi-Fi</string>

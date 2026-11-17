@@ -133,6 +133,7 @@
     <!-- A preset (a ready-made set of downloads); %1$s is its name, such as Granger Classics. -->
     <string name="sources_preset_title">%1$s set</string>
     <string name="sources_get_all">Get all</string>
+    <string name="sources_get_all_named">Get all of %1$s</string>
     <!-- Counts in a preset's line: "12 packs and 347 books · 17.7 GB". -->
     <plurals name="sources_packs">
         <item quantity="one">%d pack</item>
@@ -203,6 +204,11 @@
     <string name="sources_update">Update</string>
     <!-- The overflow menu of a row; %1$s is its title. -->
     <string name="sources_more_for">More for %1$s</string>
+    <!-- What TalkBack says for a row's button, with the row's name: "Get Military Medicine". -->
+    <string name="sources_get_named">Get %1$s</string>
+    <string name="sources_open_named">Open %1$s</string>
+    <string name="sources_update_named">Update %1$s</string>
+    <string name="sources_cancel_named">Cancel %1$s</string>
 
     <!-- A download's status. %1$s is why the last try stopped. -->
     <string name="sources_retrying">Retrying: %1$s</string>

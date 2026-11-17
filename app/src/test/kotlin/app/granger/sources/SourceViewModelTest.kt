@@ -1138,10 +1138,13 @@ class SourceViewModelTest {
         assertThat(ui.sections.flatMap { it.rows }.map { it.id }.filter { it.startsWith("gutenberg_") }).isEmpty()
         val manuals = ui.sections.single { it.title == "manuals" }.rows
         val military = manuals.single { it.id == "irp.fas.org_en_military-medicine" }
-        assertThat(military.meta.en()).endsWith(" · From Kiwix · irp.fas.org")
+        assertThat(military.meta.en()).endsWith(" · From Kiwix · Federation of American Scientists")
         assertThat(manuals.single { it.id == "zimgit-knots_en" }.meta.en()).endsWith(" · From Kiwix")
-        assertThat(ui.sections.single { it.title == "children" }.rows.map { it.meta.en()!!.substringAfter(" · ") }.distinct())
-            .containsExactly("From Kiwix · Prunelle")
+        // The published catalog's African Storybook set (English; Kiswahili is behind All languages) leads, then Prunelle.
+        val children = ui.sections.single { it.title == "children" }.rows
+        assertThat(children.first().title).isEqualTo("African Storybook · English")
+        assertThat(children.first().meta.en()).endsWith(" · African Storybook Initiative")
+        assertThat(children.drop(1).map { it.meta.en()!!.substringAfter(" · ") }.distinct()).containsExactly("From Kiwix · Prunelle")
         assertThat(ui.sections.single { it.title == "learning" }.rows.map { it.title })
             .containsExactly("Algorithms", "Milne Open Textbooks").inOrder()
         // Searching: one section of matches from every book source, Granger's books first.

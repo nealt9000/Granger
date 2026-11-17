@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -372,7 +373,13 @@ private fun PresetItem(preset: PresetRow, onGet: () -> Unit) {
                 Text(PresetText.status(preset).resolve())
             }
         },
-        trailingContent = { if (preset.remainingCount > 0) Button(onClick = onGet) { Text(stringResource(R.string.sources_get_all)) } },
+        trailingContent = {
+            if (preset.remainingCount > 0) {
+                // "Get all of Level 1 set", not a bare "Get all" (KB2 Task 5.1, TalkBack).
+                val label = stringResource(R.string.sources_get_all_named, stringResource(R.string.sources_preset_title, preset.title))
+                Button(onClick = onGet, modifier = Modifier.semantics { contentDescription = label }) { Text(stringResource(R.string.sources_get_all)) }
+            }
+        },
     )
 }
 
@@ -686,9 +693,14 @@ internal fun RowActions(
     preview: Boolean = true,
 ) {
     val opens = row.opens
+    // TalkBack hears the row's name with each button ("Get Military Medicine"), not a bare "Get" (KB2 Task 5.1).
+    val getLabel = stringResource(R.string.sources_get_named, row.title)
+    val openLabel = stringResource(R.string.sources_open_named, row.title)
+    val cancelLabel = stringResource(R.string.sources_cancel_named, row.title)
+    val named = { label: String -> Modifier.semantics { contentDescription = label } }
     if (row.switches) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (opens) TextButton(onClick = onOpen) { Text(stringResource(R.string.common_open)) }
+            if (opens) TextButton(onClick = onOpen, modifier = named(openLabel)) { Text(stringResource(R.string.common_open)) }
             TextButton(onClick = onSwitch) {
                 Text(row.flavours.firstOrNull { it.chosen }?.let { stringResource(R.string.sources_switch_to, it.label.resolve()) } ?: stringResource(R.string.sources_switch))
             }
@@ -698,7 +710,7 @@ internal fun RowActions(
     if (row.status == ItemStatus.Installed && opens && row.flavours.size > 1 && row.flavours.any { it.installed }) {
         // The flavour on the phone is the one chosen: nothing to switch to yet.
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onOpen) { Text(stringResource(R.string.common_open)) }
+            TextButton(onClick = onOpen, modifier = named(openLabel)) { Text(stringResource(R.string.common_open)) }
             TextButton(onClick = {}, enabled = false) { Text(stringResource(R.string.sources_switch)) }
             RemoveMenu(row.title, onRemove)
         }
@@ -709,24 +721,24 @@ internal fun RowActions(
         ItemStatus.NotInstalled -> Row(verticalAlignment = Alignment.CenterVertically) {
             if (preview) row.previewUrl?.let { PreviewButton(it) }
             if (row.covered) {
-                TextButton(onClick = onGet) { Text(stringResource(R.string.common_get), color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                TextButton(onClick = onGet, modifier = named(getLabel)) { Text(stringResource(R.string.common_get), color = MaterialTheme.colorScheme.onSurfaceVariant) }
             } else {
-                TextButton(onClick = onGet) { Text(stringResource(R.string.common_get)) }
+                TextButton(onClick = onGet, modifier = named(getLabel)) { Text(stringResource(R.string.common_get)) }
             }
         }
         ItemStatus.UpdateAvailable -> Row(verticalAlignment = Alignment.CenterVertically) {
-            if (opens) TextButton(onClick = onOpen) { Text(stringResource(R.string.common_open)) } else TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
-            TextButton(onClick = onGet) { Text(stringResource(R.string.sources_update)) }
+            if (opens) TextButton(onClick = onOpen, modifier = named(openLabel)) { Text(stringResource(R.string.common_open)) } else TextButton(onClick = onRemove) { Text(stringResource(R.string.common_remove)) }
+            TextButton(onClick = onGet, modifier = named(stringResource(R.string.sources_update_named, row.title))) { Text(stringResource(R.string.sources_update)) }
             if (opens) RemoveMenu(row.title, onRemove)
         }
-        is ItemStatus.Queued, is ItemStatus.Downloading -> TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) }
+        is ItemStatus.Queued, is ItemStatus.Downloading -> TextButton(onClick = onCancel, modifier = named(cancelLabel)) { Text(stringResource(R.string.common_cancel)) }
         is ItemStatus.Failed -> Row {
-            TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) }
+            TextButton(onClick = onCancel, modifier = named(cancelLabel)) { Text(stringResource(R.string.common_cancel)) }
             TextButton(onClick = onRetry) { Text(stringResource(R.string.common_retry)) }
         }
         ItemStatus.Installed -> if (opens) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = onOpen) { Text(stringResource(R.string.common_open)) }
+                TextButton(onClick = onOpen, modifier = named(openLabel)) { Text(stringResource(R.string.common_open)) }
                 RemoveMenu(row.title, onRemove)
             }
         } else {
