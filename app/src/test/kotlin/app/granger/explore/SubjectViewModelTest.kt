@@ -156,6 +156,38 @@ class SubjectViewModelTest {
         assertThat(ui.more).isFalse()
     }
 
+    @Test fun aToZListsByTitleWithARailOfLettersAndJumps() {
+        val vm = model(listing = true)
+        vm.until { it.articles.size == 4 && !it.loading }
+        vm.sort(SubjectSort.AZ)
+        val az = vm.until { it.sort == SubjectSort.AZ && !it.loading && it.letters.isNotEmpty() }
+        assertThat(az.articles.map { it.title }).containsExactly("Battle of Hastings", "London", "Napoleon", "Roman Empire").inOrder()
+        assertThat(az.letters).containsExactly("B", "L", "N", "R").inOrder()
+        assertThat(az.era).isNull()
+
+        vm.jump("N")
+        val n = vm.until { it.letter == "N" && !it.loading }
+        assertThat(n.articles.map { it.title }).containsExactly("Napoleon", "Roman Empire").inOrder()
+        assertThat(n.more).isFalse()
+
+        // An era from A–Z goes back to most linked, the rail gone.
+        vm.until { it.eras.isNotEmpty() }
+        vm.choose(Era.C19)
+        val era = vm.until { it.era == Era.C19 && !it.loading }
+        assertThat(era.sort).isEqualTo(SubjectSort.LINKED)
+        assertThat(era.letters).isEmpty()
+    }
+
+    @Test fun railLettersSetAccentsAndSymbolsAside() {
+        assertThat(railLetter("Ángel Falls")).isEqualTo("A")
+        assertThat(railLetter("élan")).isEqualTo("E")
+        assertThat(railLetter("Œdipus")).isEqualTo("O")
+        assertThat(railLetter("1984 (novel)")).isEqualTo("#")
+        assertThat(railLetter("\"Weird Al\" Yankovic")).isEqualTo("W")
+        val es = alphabetical(listOf("Zaragoza", "Ávila", "Bilbao", "avión").map { ExploreArticle("p", it, it) }, java.util.Locale("es"))
+        assertThat(es.map { it.title }).containsExactly("Ávila", "avión", "Bilbao", "Zaragoza").inOrder()
+    }
+
     @Test fun theWholeSubjectsListingHasEveryArticle() {
         val ui = model(listing = true).until { it.articles.size == 4 && !it.loading }
         assertThat(ui.facet).isNull()

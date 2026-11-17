@@ -424,7 +424,25 @@ class ExploreViewModel(
 data class ExploreBook(val bookId: String, val title: String, val cover: String?, val work: Long)
 
 /** The order a subject's articles take: most linked (main subject first), or oldest first (dated ones only). */
-enum class SubjectSort { LINKED, OLDEST }
+enum class SubjectSort { LINKED, OLDEST, AZ }
+
+/**
+ * A title's letter on the A–Z rail (Neal's review 2026-11-17): its first letter without accents, upper case ("Ángel" is
+ * A, "Œdipus" is O); "#" for a digit or symbol.
+ */
+fun railLetter(title: String): String {
+    val c = java.text.Normalizer.normalize(title.trimStart().take(2), java.text.Normalizer.Form.NFD)
+        .firstOrNull { it.isLetterOrDigit() } ?: return "#"
+    if (!c.isLetter()) return "#"
+    return when (val u = c.uppercaseChar()) { 'Œ' -> "O"; 'Æ' -> "A"; 'Ø' -> "O"; 'ß' -> "S"; else -> u.toString() }
+}
+
+/** [articles] in A–Z order by title, for [locale]'s alphabet, accents and case set aside (ties: path). */
+fun alphabetical(articles: List<ExploreArticle>, locale: java.util.Locale): List<ExploreArticle> {
+    val c = java.text.Collator.getInstance(locale).apply { strength = java.text.Collator.PRIMARY }
+    val keys = articles.associateWith { c.getCollationKey(it.title) }
+    return articles.sortedWith(compareBy<ExploreArticle> { keys.getValue(it) }.thenBy { it.path })
+}
 
 /**
  * One of a subject's sub-categories as its page shows it (Plan EX editorial pass): the facet, how many articles it holds,
@@ -460,6 +478,10 @@ data class SubjectUi(
     val facets: List<FacetCard> = emptyList(),
     /** The subject's own article's picture and opening sentence, for the page's head; null until read. */
     val hero: ArticleLook? = null,
+    /** In A–Z order: the letters its titles start with, for the rail; empty in the other orders. */
+    val letters: List<String> = emptyList(),
+    /** In A–Z order: the letter the list now starts at; null at the start. */
+    val letter: String? = null,
 ) {
     /** Enough dated main-subject articles for a run of the time games. */
     val canQuiz: Boolean get() = datedMain >= SubjectViewModel.QUIZ_MIN
@@ -478,6 +500,8 @@ class SubjectViewModel(
     /** The sub-category (`subject.facet` key's facet) to list; null for the whole subject. */
     private val facetId: String? = null,
     private val listing: Boolean = facetId != null,
+    /** The alphabet A–Z follows (the app's language). */
+    private val locale: java.util.Locale = java.util.Locale.getDefault(),
 ) : ViewModel() {
     private val state = MutableStateFlow<SubjectUi?>(null)
     val ui: StateFlow<SubjectUi?> = state.asStateFlow()
@@ -486,6 +510,9 @@ class SubjectViewModel(
     private var time: SubjectTime? = null
     /** The current view's order when it comes from [time] (an era chosen, or oldest first); null for most linked overall. */
     private var order: List<Int>? = null
+    /** In A–Z order: every article of the view, alphabetical, and where the list now starts in it. */
+    private var az: List<ExploreArticle>? = null
+    private var azStart = 0
     private var viewing: Job? = null
 
     init {
@@ -606,10 +633,27 @@ class SubjectViewModel(
             .sortedWith(compareByDescending<ExploreBook> { b -> qids.articlesOf(b.work).maxOfOrNull { it.rank } ?: 0 }.thenBy { it.title.lowercase() })
     }
 
-    /** Shows [era] (null: every era); choosing the one showing goes back to every era. */
+    /** Shows [era] (null: every era); choosing the one showing goes back to every era. An era from A–Z: most linked. */
     fun choose(era: Era?) {
         val now = state.value ?: return
-        show(if (era == now.era) null else era, now.sort)
+        val next = if (era == now.era) null else era
+        show(next, if (next != null && now.sort == SubjectSort.AZ) SubjectSort.LINKED else now.sort)
+    }
+
+    /** In A–Z order: the list from [letter]'s first title on (the rail). */
+    fun jump(letter: String) {
+        val now = state.value ?: return
+        val all = az ?: return
+        if (now.sort != SubjectSort.AZ) return
+        val at = all.indexOfFirst { railLetter(it.title) == letter }.takeIf { it >= 0 } ?: return
+        azStart = at
+        state.value = now.copy(letter = letter, loading = true)
+        viewing?.cancel()
+        viewing = viewModelScope.launch {
+            val page = all.drop(at).take(PAGE)
+            if (listing) appendWithPictures(page, all.size - at, replace = true)
+            else state.value = state.value?.copy(articles = page, more = page.size < all.size - at, loading = false)
+        }
     }
 
     fun sort(by: SubjectSort) {
@@ -619,9 +663,24 @@ class SubjectViewModel(
 
     private fun show(era: Era?, sort: SubjectSort) {
         val now = state.value ?: return
-        state.value = now.copy(era = era, sort = sort, loading = true)
+        val toAz = sort == SubjectSort.AZ
+        state.value = now.copy(era = if (toAz) null else era, sort = sort, loading = true, letters = if (toAz) now.letters else emptyList(), letter = null)
         viewing?.cancel()
         viewing = viewModelScope.launch {
+            if (toAz) {
+                val all = az ?: withContext(Dispatchers.IO) {
+                    val qids = sources.qids()
+                    val every = if (now.facet != null) qids.topInFacet(now.facet.key, now.count) else qids.topIn(subject.id, now.count)
+                    alphabetical(every.map { it.toExplore() }, locale)
+                }.also { az = it }
+                order = null
+                azStart = 0
+                state.value = state.value?.copy(letters = all.map { railLetter(it.title) }.distinct())
+                val page = all.take(PAGE)
+                if (listing) appendWithPictures(page, all.size, replace = true)
+                else state.value = state.value?.copy(articles = page, more = page.size < all.size, loading = false)
+                return@launch
+            }
             val (list, page, total) = withContext(Dispatchers.IO) {
                 val t = time
                 if (era == null && sort == SubjectSort.LINKED || t == null) {
@@ -645,9 +704,21 @@ class SubjectViewModel(
         viewing = viewModelScope.launch {
             val o = order
             val t = time
+            val all = az.takeIf { now.sort == SubjectSort.AZ }
             val next = withContext(Dispatchers.IO) {
-                if (o != null && t != null) sources.times().marksOf(t, o.drop(now.articles.size).take(PAGE)).map { it.toExplore() }
-                else linked(now.facet, now.articles.size)
+                when {
+                    all != null -> all.drop(azStart + now.articles.size).take(PAGE)
+                    o != null && t != null -> sources.times().marksOf(t, o.drop(now.articles.size).take(PAGE)).map { it.toExplore() }
+                    else -> linked(now.facet, now.articles.size)
+                }
+            }
+            if (all != null) {
+                if (listing) appendWithPictures(next, all.size - azStart)
+                else {
+                    val shown = now.articles + next
+                    state.value = state.value?.copy(articles = shown, more = next.isNotEmpty() && shown.size < all.size - azStart, loading = false)
+                }
+                return@launch
             }
             if (listing) appendWithPictures(next, o?.size ?: now.count)
             else {

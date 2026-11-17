@@ -1,6 +1,19 @@
 package app.granger.explore
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -90,6 +103,7 @@ fun TopicsScreen(viewModel: SubjectViewModel, actions: ExploreActions, subjectAc
             onMore = viewModel::more,
             onEra = viewModel::choose,
             onSort = viewModel::sort,
+            onJump = viewModel::jump,
             onWander = { scope.launch { viewModel.wanderStart()?.let { subjectActions.onWanderAt(it.packId, it.path) } } },
             onWanderAt = subjectActions.onWanderAt,
         ),
@@ -99,7 +113,8 @@ fun TopicsScreen(viewModel: SubjectViewModel, actions: ExploreActions, subjectAc
 /**
  * A listing: a sub-category's articles, or the whole subject's (Plan EX editorial pass), as a picture mosaic, titles over
  * the foot of each picture, the subject page's look carried on but laid out by the pictures themselves. Its count and
- * Wander, then its eras as chips and the order (most linked, oldest first); more load as the end nears.
+ * Wander, then its eras as chips and the order (most linked, oldest first, A–Z); more load as the end nears. In A–Z
+ * order a rail of letters runs down the edge: a tap or a drag along it starts the list at that letter.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -122,11 +137,15 @@ fun TopicsContent(ui: SubjectUi?, actions: ExploreActions, subject: SubjectActio
         // More as the end nears: within a screen of the last tile.
         val nearEnd by remember { derivedStateOf { grid.layoutInfo.visibleItemsInfo.lastOrNull()?.index?.let { it >= grid.layoutInfo.totalItemsCount - 8 } == true } }
         LaunchedEffect(nearEnd, loaded.articles.size, loaded.more) { if (nearEnd && loaded.more && !loaded.loading) subject.onMore() }
+        val rail = loaded.sort == SubjectSort.AZ && loaded.letters.size > 1
+        // A letter chosen: back to the top of the list, where that letter now starts.
+        LaunchedEffect(loaded.letter) { if (loaded.letter != null) grid.scrollToItem(0) }
+        Box(Modifier.padding(padding).fillMaxSize()) {
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Fixed(2),
             state = grid,
-            modifier = Modifier.padding(padding).fillMaxSize().testTag(TopicsTags.GRID),
-            contentPadding = PaddingValues(start = 12.dp, end = 12.dp, bottom = 24.dp),
+            modifier = Modifier.fillMaxSize().testTag(TopicsTags.GRID),
+            contentPadding = PaddingValues(start = 12.dp, end = if (rail) 36.dp else 12.dp, bottom = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalItemSpacing = 8.dp,
         ) {
@@ -140,7 +159,7 @@ fun TopicsContent(ui: SubjectUi?, actions: ExploreActions, subject: SubjectActio
                     if (loaded.canWander) FilledTonalButton(onClick = subject.onWander, modifier = Modifier.testTag(SubjectTags.WANDER)) { Text(stringResource(R.string.explore_subject_wander)) }
                 }
             }
-            if (loaded.eras.isNotEmpty()) {
+            if (loaded.eras.isNotEmpty() && loaded.sort != SubjectSort.AZ) {
                 item(key = "eras", span = StaggeredGridItemSpan.FullLine) {
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         item(key = "all") {
@@ -154,12 +173,19 @@ fun TopicsContent(ui: SubjectUi?, actions: ExploreActions, subject: SubjectActio
                         }
                     }
                 }
+            }
+            if (loaded.count > 0) {
                 item(key = "sort", span = StaggeredGridItemSpan.FullLine) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(stringResource(R.string.explore_subject_sort), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        for (s in SubjectSort.entries) {
+                        // Oldest first needs dated articles; A–Z and most linked always work.
+                        for (s in SubjectSort.entries.filter { it != SubjectSort.OLDEST || loaded.eras.isNotEmpty() }) {
                             FilterChip(loaded.sort == s, onClick = { subject.onSort(s) },
-                                label = { Text(stringResource(if (s == SubjectSort.LINKED) R.string.explore_subject_sort_linked else R.string.explore_subject_sort_oldest)) },
+                                label = { Text(stringResource(when (s) {
+                                    SubjectSort.LINKED -> R.string.explore_subject_sort_linked
+                                    SubjectSort.OLDEST -> R.string.explore_subject_sort_oldest
+                                    SubjectSort.AZ -> R.string.explore_subject_sort_az
+                                })) },
                                 modifier = Modifier.testTag(SubjectTags.sort(s)))
                         }
                     }
@@ -178,6 +204,52 @@ fun TopicsContent(ui: SubjectUi?, actions: ExploreActions, subject: SubjectActio
                 }
             } else if (loaded.articles.isEmpty()) {
                 item(key = "empty", span = StaggeredGridItemSpan.FullLine) { Text(stringResource(R.string.explore_nothing_here), modifier = Modifier.padding(8.dp)) }
+            }
+        }
+        if (rail) LetterRail(loaded.letters, loaded.letter, subject.onJump, Modifier.align(Alignment.CenterEnd))
+        }
+    }
+}
+
+/**
+ * The A–Z rail: the letters the listing's titles start with, top to bottom. A tap, or a drag along the rail, jumps; the
+ * letter under the finger shows large beside the rail while dragging. Each letter is its own button for TalkBack.
+ */
+@Composable
+private fun LetterRail(letters: List<String>, current: String?, onJump: (String) -> Unit, modifier: Modifier = Modifier) {
+    var height by remember { mutableIntStateOf(0) }
+    var dragging by remember { mutableStateOf<String?>(null) }
+    fun at(y: Float): String? = if (height <= 0) null else letters[(y / height * letters.size).toInt().coerceIn(0, letters.lastIndex)]
+    Box(modifier.padding(end = 2.dp)) {
+        Column(
+            Modifier.width(32.dp).onSizeChanged { height = it.height }.testTag(SubjectTags.RAIL)
+                .clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.92f))
+                .pointerInput(letters) {
+                    detectVerticalDragGestures(
+                        onDragStart = { o -> at(o.y)?.let { dragging = it; onJump(it) } },
+                        onDragEnd = { dragging = null },
+                        onDragCancel = { dragging = null },
+                    ) { change, _ -> at(change.position.y)?.takeIf { it != dragging }?.let { dragging = it; onJump(it) } }
+                }
+                .padding(vertical = 6.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            for (l in letters) {
+                val label = stringResource(R.string.explore_jump_letter, l)
+                Text(
+                    l,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = if (l == (dragging ?: current)) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = if (l == (dragging ?: current)) FontWeight.Bold else null,
+                    modifier = Modifier.clickable(onClickLabel = label) { onJump(l) }.semantics { contentDescription = label }
+                        .padding(vertical = 1.dp, horizontal = 8.dp).testTag(SubjectTags.letter(l)),
+                )
+            }
+        }
+        dragging?.let { l ->
+            Box(Modifier.align(Alignment.CenterStart).offset(x = (-72).dp).size(56.dp).clip(RoundedCornerShape(28.dp))
+                .background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
+                Text(l, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onPrimary)
             }
         }
     }

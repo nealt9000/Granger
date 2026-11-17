@@ -76,6 +76,9 @@
     <string name="explore_subject_sort">Order</string>
     <string name="explore_subject_sort_linked">Most linked</string>
     <string name="explore_subject_sort_oldest">Oldest first</string>
+    <string name="explore_subject_sort_az">A–Z</string>
+    <!-- The A–Z rail beside a listing: a letter, read out (e.g. "Jump to M"). -->
+    <string name="explore_jump_letter">Jump to %1$s</string>
     <plurals name="explore_subject_books">
         <item quantity="one">In your books (%1$s)</item>
         <item quantity="other">In your books (%1$s)</item>

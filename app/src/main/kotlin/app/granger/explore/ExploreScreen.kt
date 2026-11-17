@@ -388,6 +388,8 @@ class SubjectActions(
     val onMore: () -> Unit = {},
     val onEra: (Era?) -> Unit = {},
     val onSort: (SubjectSort) -> Unit = {},
+    /** In A–Z order: the list from a letter on (the rail). */
+    val onJump: (letter: String) -> Unit = {},
     val onWander: () -> Unit = {},
     /** Wander from an article: Home's Wander, started there. */
     val onWanderAt: (packId: String, path: String) -> Unit = { _, _ -> },
@@ -407,6 +409,8 @@ object SubjectTags {
     const val ALL_ERAS = "subject_era_all"
     fun era(era: Era) = "subject_era_${era.name.lowercase()}"
     fun sort(sort: SubjectSort) = "subject_sort_${sort.name.lowercase()}"
+    const val RAIL = "subject_az_rail"
+    fun letter(l: String) = "subject_az_$l"
     fun book(id: String) = "subject_book_$id"
     fun collection(id: String) = "subject_collection_$id"
     fun facet(id: String) = "subject_facet_$id"

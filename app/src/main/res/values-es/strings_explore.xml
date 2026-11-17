@@ -73,6 +73,8 @@
     <string name="explore_subject_sort">Orden</string>
     <string name="explore_subject_sort_linked">Más enlazados</string>
     <string name="explore_subject_sort_oldest">Más antiguos</string>
+    <string name="explore_subject_sort_az">A–Z</string>
+    <string name="explore_jump_letter">Ir a la %1$s</string>
     <plurals name="explore_subject_books">
         <item quantity="one">En tus libros (%1$s)</item>
         <item quantity="many">En tus libros (%1$s)</item>
