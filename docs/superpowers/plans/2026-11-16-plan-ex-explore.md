@@ -252,3 +252,23 @@ Written from what I know of these, not from a fresh look at each this session.
 - **Are.na and Kinopio.** A connection is worth drawing only when it's named. *Borrow:* labelled lines on the map (wrote, fought in, same decade, also in).
 
 **Patterns to carry into every direction:** the captioned plate; the doorway sign; the standfirst; three doors on; one set, several views; named connections; the parallels strip ("the same shape elsewhere"); the library filling in.
+
+### Three directions on the canvas (2026-11-17)
+Canvas https://claude.ai/artifact/HG4yrYyYPFssmRvsYscdvq, rows 4–6. Each row is the whole flow on the same real data (Top en, the lenses, Airplane's parts): landing → Technology → Cars, planes & ships → connections → Airplane → a thin room (Words & grammar, 17 topics) → the landing in the other theme. The lenses are called **rooms** in all three. Every sentence that teaches is a template filled from the data. Each screen was rendered and looked at before it went up.
+
+- **A · Plates** (Field leads): every screen is a spread from an illustrated encyclopedia. Numbered plates at the size their pixels can bear, each with a caption; a sentence per room; "Where these also hang"; a connections plate with each line labelled by where the link was found. Thin rooms set a pictureless topic as a word tile. Weakest point: closest to what's built.
+- **B · Galleries** (Night leads): the library is a museum. One lit object and its label per wall; doors left and right on every screen; a floor plan (17 wings, a square per room, lit when seen) that is the trail and the game layer in one; Threads draws the rooms a topic reaches into. Weakest point: fewer pictures per screen.
+- **C · Almanac** (Field leads): a daily edition. The date as the cover, On this day, headlines that state a finding, each room as seven squares from the 1400s to the 2000s, a room read era by era, Airplane side by side with Ship and Car, view tabs that keep the set. Weakest point: fewest pictures.
+
+**What the data can't support yet (all three):**
+- A one-line description per room. It needs writing once for the 108, like their names.
+- Room sentences (oldest, busiest century) and room overlaps are computable from the index and the time index, but should be precomputed.
+- Dates are thin: 228 of this room's 882 topics carry one, and the time index dates a life at birth.
+- Pictures by rule are hit and miss: Wikipedia's is a portrait, Electric car (1835) shows a modern Tesla, Amelia Earhart shows a house. A better picture rule is needed whichever direction wins.
+- Parallels need broad-topic parts on both sides: Ship and Car have them; Train, Bicycle and Helicopter don't.
+- Rooms seen is new user data (a small table on the phone).
+- Connection labels can only say what the parts hold: chapter name, kind, people near it, close in meaning.
+
+Desk files: X10 `granger-ll/ex4/` (`gather2.py` pulls the data; `ex.py`, `dirA.py`, `dirB.py`, `dirC.py`, `build.py` generate the artboards; `view.py` renders them with headless Chrome).
+
+**Waiting on Neal:** which direction leads, and which parts of the others to fold in.
