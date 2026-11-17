@@ -341,3 +341,24 @@ Data is flagged against what the gqid-v5 index holds: **have** (on the phone tod
 - **The map is now the weakest part.** It's the next thing to redesign, before D4 is built.
 - **Lenses are called rooms** in the app, for now.
 - The build plan above stands as the working plan, with D4 (Connections) held until the map is redrawn.
+
+### The map, redrawn as a quilt (2026-11-17)
+Neal on D's map: it says little a list couldn't, a few taps in it dead-ends without leading on to interesting connections, and it's visually uninteresting, with no designer's hand. A redraw is on the canvas, row 8 (four boards: Airplane, one touch later on Charles Lindbergh, a held plate, Night). **Awaiting Neal.**
+
+- **No spokes.** Plates that touch the middle plate are connected to it. Each group starts with a paper tab (Kinds · 60, Pilots · 12, History · 24).
+- **No dead ends.** Touching a plate re-forms the quilt round it. A corner number says how many other topics lead to that plate.
+- **What a list can't show.** After a touch, a small square marks the plates that were on the last quilt too: three of the people closest to Lindbergh also stand near Airplane.
+- **A thread** at the top keeps the walk; any step in it goes back.
+- **Hold a plate** for its label: where the link was found, its rooms, and the topics that lead on from it.
+- **Every group in full** is one tap away, as a list.
+
+**Data, against the index:**
+- Groups for a broad topic (kinds, people, chapters): **have** (`topic_parts`).
+- Leads to (the broad topics whose parts hold this plate) and the corner number: **compute**, a lookup on `topic_parts.item`; it needs an index on that column, so a small **new** index in the next rebuild, or a slow scan.
+- Close kin: **have** (the vectors; 0.7 to 1 s per topic in the LL2 spike, so the quilt should draw its other groups first).
+- Born within a year: **have** (time index). Rooms: **have**. In your books: **have** (mention index).
+- The shared-plate mark: **compute** on the phone from the last quilt.
+
+**Not yet known:** how a topic with very few connections looks, and how the quilt reads with TalkBack (a list of groups is the likely form).
+
+If Neal OKs it, the quilt replaces D4 in the build plan.
