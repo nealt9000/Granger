@@ -195,3 +195,60 @@ Neal's verdict after the build: Explore, its subject view and the map view still
 > - Commit only docs and plan notes, on a branch off main.
 
 Still open after the design round (from the build): lens accuracy 91–94% (inherited from the sub-category seeds and upstream subjects: a facets/subjects rules rebuild); Spanish-only articles in English listings; Spanish weekdays in Matter & energy; Helicopter leading Airplane's kinds; Life & the cell's card picture; the 2 s blank landing on a cold start; the Spanish walk and the light theme.
+
+## UX design round 2 (2026-11-17)
+
+Branch `ex-design-round-2` (docs only). Screens captured from the Pixel as it stood (landing, History, Wars & battles, the map) before the interview.
+
+### Interview: Neal's answers
+- **Who explores:** a curious adult with ten idle minutes; a kid or teen alone; a learner with a subject. (Not parent-and-child on a shared screen.)
+- **The feel:** all four together: Encarta / DK Eyewitness (a rich spread per topic), a good museum (rooms, wayfinding, one lit object and its label), a magazine or atlas (edited, authored, different each day), and the wiki rabbit hole (momentum, tempting doors).
+- **Why it reads as a POC:** it lists and doesn't teach; the pictures feel arbitrary; the map is a diagram. In Neal's words: it doesn't feel curated for exploration. All the information and pieces are here, but the design, the UX and the ability to feel that at every depth aren't.
+- **Pictures:** no curved edges. Pictures touch and connect in mosaics. Explore pages keep that feel, and the first couple of layers in are the most thoughtfully constructed.
+- **Isomorphisms:** parallels (the same shape elsewhere: a revolution beside the other revolutions) and one topic through every dataset (article, books, time, place, other language, kin). More broadly, insightful ways to cross-analyse the data for learning.
+- **Viewpoints** (how cultures and politics shape the same event): later, as its own plan. This round leaves a marked place for it.
+- **Control:** where am I and how did I get here: a visible trail to step back along.
+- **Play:** a game layer on top of a calm Explore. It rewards discovery (rooms visited).
+- **Privacy:** the record holds rooms only (subjects, lenses, eras), never articles. On the phone only, with a switch to turn it off and one to clear it.
+- **Density:** a spread: one idea per screenful (a lead image group, one sentence that teaches, a few ways on).
+- **The map's job:** show connections, which a list can't. Lines mean something, and it opens on a topic or a lens, not on the whole library.
+- **Cuts:** none. Lenses, A–Z, time, Today's subject, Wander, Quiz and Your sources all stay; the round is about craft.
+
+### Design brief (for Neal's OK)
+**The experience.** Opening Explore is like opening a well-edited illustrated encyclopedia at today's page. Each screenful is a composed spread that teaches one thing before you tap. Going deeper feels like walking from the entrance hall into a wing, then a room, then up to one object. You always see the way you came, and each stop shows what it resembles elsewhere in the library.
+
+**Audiences.** The curious adult with ten minutes sets the tone and the reading level. A teen alone has to be able to steer by pictures. A learner with a subject has to be able to come back and see how much of it they've walked.
+
+**Principles.**
+1. **Teach before the tap.** Every spread carries a fact, a caption, a date or a pattern drawn from the data (lead sentences, figure captions, time marks, counts turned into sentences). A count alone doesn't teach.
+2. **Spreads, not lists.** One idea per screenful. Lists and A–Z are still there, one step behind the spread.
+3. **Connected mosaics.** Square-edged pictures that touch. A picture is chosen by rule to stand for its subject and is framed at the size its pixels can bear; where no picture is good enough, the tile is type.
+4. **Each depth has its own character.** The landing is a cover, a subject is a wing, a lens is a room, a topic is an object on its spread. They share one grammar, so they read as one book, but no two levels are the same card.
+5. **You are here.** A trail (Explore › History › Wars & battles › Napoleon) is always in sight, and you can step back along it.
+6. **Parallels and cross-views.** Each topic and room shows its counterparts and its other datasets: books, time, the other language, kin by meaning.
+7. **The map shows connections only.** It opens on a topic or a lens. Every line says what it means.
+8. **A quiet game layer.** Rooms visited, shown as the library filling in. Rooms only, never articles; on the phone; one switch off, one to clear.
+9. **Procedural content, editorial design.** No hand-picked articles. The editing is in the templates and the rules.
+10. **Nothing is cut.** Lenses, A–Z, time, Today's subject, Wander, Quiz and Your sources all stay.
+
+**Success looks like this.**
+- A screenshot taken at any depth looks designed and teaches one thing.
+- In ten minutes a new person goes three levels down, moves sideways once, and can say where they are.
+- A thin subject (Games, Languages) still makes a good spread.
+- The map shows something its list can't.
+- Nothing reads as a file browser or a dashboard.
+- It holds in Field and Night, with TalkBack, at 48 dp targets, in the width the rail leaves (about 316 dp of a 390 dp phone).
+
+**Left for later, with a marked place:** Viewpoints (its own plan); the Atlas (LL6).
+
+### References and the patterns worth borrowing
+Written from what I know of these, not from a fresh look at each this session.
+- **Encarta (1995–99).** An article was a stage: text in the middle, media in a margin, and always "related" one click off. Its Timeline and Collages let one set be seen in a different shape. *Borrow:* the topic as a spread with a margin of media; one set, several views.
+- **DK Eyewitness.** One idea per spread. A hero object on a plain ground, smaller objects round it, and every picture has a caption that teaches. Small pictures look deliberate because they're arranged, not enlarged. *Borrow:* the captioned plate; arrangement over enlargement; the plain ground.
+- **Museum wayfinding and labels** (the V&A, the Rijksmuseum's Rijksstudio). A hall, wings, rooms; a sign at each doorway says where you are and what's next door. A label is a title, a date and one sentence. *Borrow:* the doorway sign (the trail plus the neighbours); the label as the unit of teaching.
+- **A magazine or atlas** (National Geographic, a Times atlas). A cover that changes, a contents page, a standfirst under each headline, pacing between plates and type. *Borrow:* the daily cover; the standfirst; type and a rule line as layout, with no boxes.
+- **Google Arts & Culture.** One collection re-sorted by time, by colour, by place; "stories" stitched from objects. *Borrow:* re-sorting the same set in place; a short procedural story (five dated plates) as a way into a lens.
+- **The Wikipedia rabbit hole** (the Wiki Game, the app's Explore feed). Momentum comes from a few tempting doors on every page and from seeing your path. *Borrow:* three doors at the foot of every spread; the trail as a thing you can read back.
+- **Are.na and Kinopio.** A connection is worth drawing only when it's named. *Borrow:* labelled lines on the map (wrote, fought in, same decade, also in).
+
+**Patterns to carry into every direction:** the captioned plate; the doorway sign; the standfirst; three doors on; one set, several views; named connections; the parallels strip ("the same shape elsewhere"); the library filling in.
