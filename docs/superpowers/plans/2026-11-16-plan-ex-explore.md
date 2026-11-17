@@ -163,3 +163,35 @@ Places as a subject door beyond counts (the Atlas is LL6); Trails (LL6); the onl
   - **Rebuild, held (2026-11-17):** `granger-ll/subjects-v3.sqlite` (lenses: 95% of Top en items) and `granger-ll/gqid-v5/` (44, builder 3, lenses + broad topics; 599 → 640 MB, Top en 8.2 → 15.8 MB, Top es 8.3 → 14.8 MB). All 44 pass check.py at the default floor, same as v4. Not uploaded, catalog not touched. Next: Pixel pass on a debug build of the branch tip with gqid-v5 pushed by hand (the Pixel dropped off wireless adb mid-session), then Neal looks; then upload + catalog attach for Neal to sign.
   - **Pixel pass (2026-11-17, debug on the Pixel 6, DB 16, gqid-v5 for Top en/es + Medicine pushed by hand; v4 backups in scratchpad `gqid-phone-v4-backup/`):** Airplane's broad page renders (summary, kinds mosaic, History timeline with captions and pictures, 12 pilots with years, chapters with figure + chips); the ring opens and a stop scrolls to its part; lens cards with distinct pictures; a lens listing in A–Z with the rail, M jumps. Fixed on the way: the ring (7 stops, kinds/story/people/close kin always, chapters with pictures first; wider, smaller labels; an initial when a disc has no picture), the story's gap (24 links a section, so Airplane's runs 1868 → 1903 → WWII → Battle of Britain → 2000 Concorde crash → 2024), and the order row (scrolls; A–Z had wrapped). gqid-v5 re-attached (646 MB) and re-checked: all 44 pass. Seen, inherited, not fixed: Helicopter leads Airplane's kinds (Wikidata files it under airplane); Spanish weekdays (Domingo, Lunes) among Matter & energy's examples and Spanish-only articles (Miedo) in English listings; Life & the cell's card picture from "Science".
   - **Published for signing (2026-11-17):** the 44 gqid-v5 on release `sidecars-2026-11-17` (sizes match the descriptors); catalog's 97 index entries point there (`a6c8478f`), nothing else changed; check-links 4,346 OK. Unsigned: Neal signs (`catalog_gen.py sign catalog/catalog.json`), then PublishedCatalogTest passes.
+
+## Next session: UX design round 2 (Neal, 2026-11-17)
+
+Neal's verdict after the build: Explore, its subject view and the map view still present as early proofs of concept at best, with no crafted design or thought yet towards the most enjoyable learning and exploration experience. The Spanish walk and the light-theme run are skipped until the design passes his bar. The brief for a fresh session:
+
+> Plan EX: Explore UX design round 2. Design only: no app code, no data rebuilds.
+>
+> Branch: main (Granger repo). Read first:
+> - docs/superpowers/plans/2026-11-16-plan-ex-explore.md, all of it, especially Neal's calls, Neal's checkpoint (2026-11-17), Neal's review (2026-11-17), and the Build and Pixel pass bullets at the end.
+> - Memory: linked-library-2026-11-16-ex.md, linked-library-2026-11-11.md, brand-vision-2026-10-23.md, t1-field-and-night-2026-10-26.md, feedback-marks-trace-dont-draw.md.
+> - The design canvas https://claude.ai/artifact/HG4yrYyYPFssmRvsYscdvq (rows 1–3: topic page layouts, Explore A/B/C, broad topic A/B/C).
+> - The code as it stands: app/src/main/kotlin/app/granger/explore/ (ExploreScreen, SubjectPage, Mosaic, the library map) and app/src/main/kotlin/app/granger/topic/ (TopicPage, BroadTopic, TopicMap).
+>
+> Where we are: Explore works end to end on the Pixel. It has a landing, subject pages with 108 many-to-many lenses, mosaic listings with A–Z, the library-as-a-map ring view, and broad topic pages. Neal's verdict (2026-11-17): Explore, its subject view and the map view still present as early proofs of concept at best. There's no crafted design and no thought yet towards the most enjoyable learning and exploration experience possible. This round fixes that before any more polish or data work.
+>
+> What it has to be: Granger is an offline library, "Your door to knowledge. Always open." Explore should feel like wandering a beautiful, curious, well-edited encyclopedia: Encarta-feel, learning leads, delight and discovery. It should not feel like a file browser or a dashboard. Everything stays procedural from the data (no hand-picked articles; Neal's rule), but the design can and should be editorial.
+>
+> How to work:
+> 1. Before designing anything, interview Neal with AskUserQuestion, a few questions at a time, until the target is clear. Cover at least: who he pictures exploring and in what moments (a curious adult, a family, a kid, a learner with 10 minutes); what "enjoyable learning" should feel like here, and the products, books, museums or apps he loves for that feel (Encarta, DK books, museum wayfinding, Apple TV, Arc, Readwise, Kinopio…); what exactly feels POC about the subject view and the map view today (show him screenshots from the Pixel if useful); the jobs each screen must do (land, choose, browse, dive, wander, come back); how much motion, play and game he wants; density versus calm; how the map should earn its place against plain lists; what must stay (lenses, A–Z, time, Today's subject, Wander and Quiz) and what can go. Propose options with previews where it helps him choose. Don't ask what the code or plan already answers.
+> 2. Write back a short design brief (principles, audiences, the experience in a few sentences, what success looks like) and get Neal's OK.
+> 3. Look outward. Study 4–6 strong references for exploratory learning interfaces and note what each does well. Name the patterns worth borrowing, without copying any product's look.
+> 4. Design 2–3 distinct directions for the full Explore flow: landing → subject → lens listing → map view → broad topic page. Put them on the same canvas as new rows (load the artifact-design skill; real Pixel data and pictures, as before: Top en, the 108 lenses, the topic parts in X10 granger-ll/ex3). Every direction should state its idea in a line and show how it delights, how it teaches and how it scales to thin subjects. Note where the data can't support something yet.
+> 5. Review with Neal, iterate, and converge on one direction. Then write the build plan into the plan doc as a new section, with the data each screen needs flagged against what the .gqid already holds.
+>
+> Constraints:
+> - Field (light) and Night (dark) palettes, Spectral for display, Roboto for UI; phone first (a 390 dp frame); TalkBack and 48 dp targets.
+> - The pack pictures are small (about 250–300 px), so design around them (framing, crops, collage, type-led tiles) rather than full-bleed blow-ups.
+> - Never name Claude in user-facing copy.
+> - Don't install to any phone or touch the catalog this round.
+> - Commit only docs and plan notes, on a branch off main.
+
+Still open after the design round (from the build): lens accuracy 91–94% (inherited from the sub-category seeds and upstream subjects: a facets/subjects rules rebuild); Spanish-only articles in English listings; Spanish weekdays in Matter & energy; Helicopter leading Airplane's kinds; Life & the cell's card picture; the 2 s blank landing on a cold start; the Spanish walk and the light theme.
