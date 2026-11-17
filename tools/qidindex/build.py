@@ -21,7 +21,7 @@ from zim_articles import articles  # noqa: E402
 KIND = "gqid"
 SCHEMA_VERSION = 1
 BUILDER = "tools/qidindex/build.py"
-BUILDER_VERSION = 2  # 2: the subjects table (Plan EX Task 1)
+BUILDER_VERSION = 3  # 2: the subjects table (Plan EX Task 1); 3: lenses (many per item) and broad topics' parts (Plan EX T1)
 
 # The joins the phone reads (plan Decision 3): author, notable work, edition of, main subject, composer, performer
 # (item-valued, stored as "Q123"); Gutenberg, LibriVox, MusicBrainz artist and work, archive.org (strings).
@@ -47,7 +47,42 @@ CREATE TABLE main.facets(facet INTEGER NOT NULL, qid INTEGER NOT NULL, PRIMARY K
 """
 
 
+# Plan EX T1: broad topics' page parts (tools/topics/parts.py), for the topics whose article is in this index, from the
+# parts file of the index's language. Extra tables; schema 1 kept.
+TOPICS_SCHEMA = """
+CREATE TABLE main.topics(qid INTEGER PRIMARY KEY, under INTEGER NOT NULL, inlinks INTEGER NOT NULL);
+CREATE TABLE main.topic_parts(topic INTEGER NOT NULL, part INTEGER NOT NULL, ord INTEGER NOT NULL, item INTEGER,
+    grp INTEGER, text TEXT, note TEXT, PRIMARY KEY(topic, part, ord)) WITHOUT ROWID;
+"""
+
 SUBJECTS_SPEC = Path(__file__).resolve().parents[1] / "subjects" / "subjects.json"
+
+
+def index_language(db: sqlite3.Connection):
+    """The index's language, from its source ZIM's name (wikipedia_<lang>_…); None otherwise."""
+    z = db.execute("SELECT value FROM meta WHERE key = 'sourceZim'").fetchone()
+    parts = z[0].split("_") if z else []
+    return parts[1] if len(parts) > 2 and parts[0] == "wikipedia" else None
+
+
+def add_topics(db: sqlite3.Connection, topics_files) -> int:
+    """Copies the parts of the broad topics whose article is in this index, from the parts file (tools/topics/parts.py)
+    of the index's language ({lang: path}); returns how many topics. Without a file for its language: none, no tables."""
+    db.execute("DROP TABLE IF EXISTS main.topic_parts")
+    db.execute("DROP TABLE IF EXISTS main.topics")
+    path = (topics_files or {}).get(index_language(db))
+    if not path:
+        return 0
+    db.execute("ATTACH DATABASE ? AS t", (f"file:{path}?mode=ro",))
+    db.executescript(TOPICS_SCHEMA)
+    db.execute("INSERT INTO main.topics SELECT qid, under, inlinks FROM t.topics WHERE qid IN (SELECT qid FROM articles)")
+    db.execute("INSERT INTO main.topic_parts SELECT p.* FROM t.topic_parts p JOIN main.topics m ON m.qid = p.topic")
+    built = db.execute("SELECT value FROM t.meta WHERE key = 'builtAt'").fetchone()[0]
+    db.commit()
+    db.execute("DETACH DATABASE t")
+    n = db.execute("SELECT COUNT(*) FROM main.topics").fetchone()[0]
+    db.executemany("INSERT OR REPLACE INTO meta VALUES (?, ?)", [("topicsBuiltAt", built), ("withTopics", str(n))])
+    return n
 
 
 def pack_subject(source_zim: str):
@@ -106,7 +141,7 @@ def rows_of(rec: dict):
     return (qid, rec.get("sl", 0), other), links, ((qid, c[0], c[1]) if c else None)
 
 
-def build(paths, items, out: Path, source: Path, source_sha256: str, subjects=None) -> dict:
+def build(paths, items, out: Path, source: Path, source_sha256: str, subjects=None, topics=None) -> dict:
     """Write the .gqid from the ZIM's real article [paths] and an iterable of wdfilter records; returns counts."""
     wanted = set(paths)
     if out.exists():
@@ -139,6 +174,9 @@ def build(paths, items, out: Path, source: Path, source_sha256: str, subjects=No
     db.commit()
     if subjects:
         counts["subjects"] = add_subjects(db, subjects)
+        db.commit()
+    if topics:
+        counts["topics"] = add_topics(db, topics)
         db.commit()
     db.execute("VACUUM")
     db.close()
@@ -175,6 +213,7 @@ def main(argv=None):
     p.add_argument("items"); p.add_argument("out"); p.add_argument("zims", nargs="+")
     p.add_argument("--releases", help="write the release descriptors here")
     p.add_argument("--subjects", help="tools/subjects/build.py's file: attach each item's subjects")
+    p.add_argument("--topics", action="append", default=[], help="LANG=tools/topics/parts.py's file: attach broad topics' parts")
     a = p.parse_args(argv)
     from libzim.reader import Archive
 
@@ -183,7 +222,8 @@ def main(argv=None):
         out = Path(a.out) / f"{zim.stem}.{KIND}"
         out.parent.mkdir(parents=True, exist_ok=True)
         paths = [path for path, _ in articles(Archive(zim))]
-        counts = build(paths, read_items(a.items, set(paths)), out, zim, meta.sha256(zim), a.subjects)
+        topics = dict(x.split("=", 1) for x in a.topics)
+        counts = build(paths, read_items(a.items, set(paths)), out, zim, meta.sha256(zim), a.subjects, topics)
         share = counts["matched"] / max(1, counts["articles"])
         print(f"{zim.name}: {counts['matched']:,}/{counts['articles']:,} articles ({share:.1%}), {counts['links']:,} links, "
               f"{counts['coords']:,} coords, {out.stat().st_size / 1e6:.1f} MB", file=sys.stderr, flush=True)

@@ -114,7 +114,7 @@ def test_subjects_are_attached_for_the_index_items_only_and_schema_stays_1(tmp_p
         (36322, 0, "literature"), (36322, 1, "history"), (170583, 0, "literature")]
     db.close()
     m = meta.read_meta(out)
-    assert m["schemaVersion"] == "1" and m["builderVersion"] == "2" and m["subjectsVersion"] == "1"
+    assert m["schemaVersion"] == "1" and m["builderVersion"] == "3" and m["subjectsVersion"] == "1"
     assert m["withSubjects"] == "2" and m["packSubject"] == ""
 
 
@@ -162,3 +162,56 @@ def make_subjects_plain(tmp_path):
     d = tmp_path / "plain"
     d.mkdir()
     return make_subjects(d, [])
+
+
+def test_an_item_may_sit_in_several_lenses(tmp_path):
+    db = sqlite3.connect(tmp_path / "wikipedia_en_top_maxi_2026-09.gqid")
+    db.executescript(build.SCHEMA)
+    db.executemany("INSERT INTO articles VALUES (?,?,?,?)", [("Dog", 144, 9, None)])
+    db.execute("CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+    db.execute("INSERT INTO meta VALUES ('sourceZim', 'wikipedia_en_top_maxi_2026-09.zim')")
+    f = make_subjects(tmp_path, [(144, 0, "nature")])
+    s = sqlite3.connect(f)
+    s.execute("CREATE TABLE facets(qid INTEGER NOT NULL, facet TEXT NOT NULL, PRIMARY KEY(qid, facet)) WITHOUT ROWID")
+    s.executemany("INSERT INTO facets VALUES (?,?)", [(144, "nature.animals"), (144, "nature.farm")])
+    s.execute("INSERT INTO meta VALUES ('facets', '{\"nature\":[{\"id\":\"animals\",\"en\":\"Animal kingdom\",\"es\":\"Reino animal\"},"
+              "{\"id\":\"farm\",\"en\":\"Pets & farm animals\",\"es\":\"Mascotas\"}]}')")
+    s.commit(); s.close()
+    build.add_subjects(db, f)
+    assert sorted(db.execute("SELECT facet, qid FROM facets").fetchall()) == [(0, 144), (1, 144)]
+
+
+def make_topics(tmp_path, lang):
+    f = tmp_path / f"topics-{lang}.sqlite"
+    f.unlink(missing_ok=True)
+    t = sqlite3.connect(f)
+    t.execute("CREATE TABLE topics(qid INTEGER PRIMARY KEY, under INTEGER NOT NULL, inlinks INTEGER NOT NULL)")
+    t.execute("CREATE TABLE topic_parts(topic INTEGER NOT NULL, part INTEGER NOT NULL, ord INTEGER NOT NULL, item INTEGER, "
+              "grp INTEGER, text TEXT, note TEXT, PRIMARY KEY(topic, part, ord)) WITHOUT ROWID")
+    t.executemany("INSERT INTO topics VALUES (?,?,?)", [(197, 72, 86), (8502, 147, 139)])
+    t.executemany("INSERT INTO topic_parts VALUES (?,?,?,?,?,?,?)", [
+        (197, 2, 0, 5, -1, None, None), (197, 3, 0, None, None, "History", "History"), (8502, 2, 0, 513, -1, None, None)])
+    t.execute("CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+    t.executemany("INSERT INTO meta VALUES (?,?)", [("lang", lang), ("builtAt", "2026-11-17T00:00:00Z")])
+    t.commit(); t.close()
+    return f
+
+
+def test_broad_topics_attach_for_the_index_language_and_its_own_articles(tmp_path):
+    db = sqlite3.connect(tmp_path / "wikipedia_en_top_maxi_2026-09.gqid")
+    db.executescript(build.SCHEMA)
+    db.executemany("INSERT INTO articles VALUES (?,?,?,?)", [("Airplane", 197, 9, None), ("Paris", 90, 9, None)])
+    db.execute("CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+    db.execute("INSERT INTO meta VALUES ('sourceZim', 'wikipedia_en_top_maxi_2026-09.zim')")
+    n = build.add_topics(db, {"en": make_topics(tmp_path, "en"), "es": tmp_path / "missing.sqlite"})
+    assert n == 1   # Mountain's article isn't in this index
+    assert db.execute("SELECT topic, part, ord, text FROM topic_parts ORDER BY part").fetchall() == [
+        (197, 2, 0, None), (197, 3, 0, "History")]
+    assert db.execute("SELECT value FROM meta WHERE key = 'withTopics'").fetchone()[0] == "1"
+    # No file for its language: no tables.
+    es = sqlite3.connect(tmp_path / "wikipedia_es_top_maxi_2026-10.gqid")
+    es.executescript(build.SCHEMA)
+    es.execute("CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+    es.execute("INSERT INTO meta VALUES ('sourceZim', 'wikipedia_es_top_maxi_2026-10.zim')")
+    assert build.add_topics(es, {"en": make_topics(tmp_path, "en")}) == 0
+    assert not es.execute("SELECT 1 FROM sqlite_master WHERE name = 'topic_parts'").fetchone()
