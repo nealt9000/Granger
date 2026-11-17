@@ -1032,6 +1032,6 @@
   },
   "sidecars": {
     "releases": "tools/sidecar/releases",
-    "releaseUrl": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-16b/"
+    "releaseUrl": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-17/"
   }
 }

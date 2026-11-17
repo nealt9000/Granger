@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_es_history_nopic_2026-10-14.gqid",
- "sizeBytes": 2342912,
- "sha256": "e6fb737c88b41210883d58dcc4d31a6abfb49fd5916e2024173b72ec6f81f5d5",
+ "sizeBytes": 2953216,
+ "sha256": "cebdbef0e5c8a5c9167e980dca26e8e661cffbbf0b96eeda118601ebcd300fcb",
  "schemaVersion": 1,
  "sourceSha256": "e30aa60ec881f7b33164689a3eda03daa91dee94b83aaf5123857e211801e21d",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 2,
+ "builderVersion": 3,
  "url": null
 }

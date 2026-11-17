@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_en_chemistry_maxi_2026-10-15.gqid",
- "sizeBytes": 1040384,
- "sha256": "b0593f59880b94d9098bb7a6f8d751cc48f56b9da86dd96ecc4018d9ce51f046",
+ "sizeBytes": 1699840,
+ "sha256": "f45501dbaa57c5b836c2157a1e99916eb5eeef0285e0b1c0c9ff781de2bf38b6",
  "schemaVersion": 1,
  "sourceSha256": "c197e6d3ce1bdf8838e8abbc63226bd6849a31ec81913bacb779d1d83bcc7d7b",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 2,
+ "builderVersion": 3,
  "url": null
 }

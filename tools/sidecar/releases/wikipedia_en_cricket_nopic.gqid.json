@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_en_cricket_nopic_2026-10.gqid",
- "sizeBytes": 4661248,
- "sha256": "31caaa5989e23eeedd9d37db906f3fd2e936039a8f2c2bb07ef60d0dceebcb4a",
+ "sizeBytes": 5148672,
+ "sha256": "f07088bf9480930e956642cbbd7e5e81a68e6a83ee5c6f4a92311e46766e1e37",
  "schemaVersion": 1,
  "sourceSha256": "a7fed0dd8d489eb5b92525f5c9dbec4a61076372e84c8995fe70ac89e83f8c00",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 2,
+ "builderVersion": 3,
  "url": null
 }

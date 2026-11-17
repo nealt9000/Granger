@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_en_nollywood_maxi_2026-10.gqid",
- "sizeBytes": 266240,
- "sha256": "bc5419c721192e38ce4fb6e2ce3980a09c78d4c787aa0cd6c8731f4ce9ead131",
+ "sizeBytes": 307200,
+ "sha256": "ff5bd4bdc2367b512f86fa62bc2eb172ab39e6056f39374753a2511350aca670",
  "schemaVersion": 1,
  "sourceSha256": "faa53e0c8ef641206867ce21f0e107d4e2aa9012e3b2263f05fe9bddf4f72aa3",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 2,
+ "builderVersion": 3,
  "url": null
 }

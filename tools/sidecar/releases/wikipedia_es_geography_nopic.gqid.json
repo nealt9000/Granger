@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_es_geography_nopic_2026-10-15.gqid",
- "sizeBytes": 1015808,
- "sha256": "1d1c8386945a1d0f42b605391686c009705ca88021dd716422dd9aaf55fbd22b",
+ "sizeBytes": 1380352,
+ "sha256": "b46fb608524c36fe3f6bd9379b7f1130ff6be248ee162a8d7fe16c6ec708b8ce",
  "schemaVersion": 1,
  "sourceSha256": "5e5f785a2bc4469b56af5e083ae0108e7e6337c612842ce46b63b3c81815275d",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 2,
+ "builderVersion": 3,
  "url": null
 }

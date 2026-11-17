@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_en_ray-charles_mini_2026-10.gqid",
- "sizeBytes": 2777088,
- "sha256": "dd3ff246fe0c784a9ee201ea2b04c0b48067e14b073429102a8d91c42964184b",
+ "sizeBytes": 2797568,
+ "sha256": "0ebdd8a977cac26c31f4b4141f33e6d476e2f807cb01bc4aef363a7b83b645c4",
  "schemaVersion": 1,
  "sourceSha256": "ad37a9355a356b12cc4f2e339fcd15940dd93099de0c2851b6a25cc5b9c33c31",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 2,
+ "builderVersion": 3,
  "url": null
 }

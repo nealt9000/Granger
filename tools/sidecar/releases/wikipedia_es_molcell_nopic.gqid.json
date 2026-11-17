@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_es_molcell_nopic_2026-10.gqid",
- "sizeBytes": 614400,
- "sha256": "320f8a244bcfd704a4b2d86ddaa73e2baf5c47330335ad4cf60b79acb6985995",
+ "sizeBytes": 913408,
+ "sha256": "057d31f1d7a64047fbd503fe6a408c3e30e1ea29f99b8b05127b95ab69db6c80",
  "schemaVersion": 1,
  "sourceSha256": "f4021e9d7c8aacca64f9c3c067926a44948c2ac66ef6b0d601947e10c7e4805b",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 2,
+ "builderVersion": 3,
  "url": null
 }

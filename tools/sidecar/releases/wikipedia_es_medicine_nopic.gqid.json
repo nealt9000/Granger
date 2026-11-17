@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_es_medicine_nopic_2026-10-15.gqid",
- "sizeBytes": 2297856,
- "sha256": "b8d643345eddb897f4ee5ccea50994c6a7711c54957836b4174e9de0d273fb1d",
+ "sizeBytes": 3018752,
+ "sha256": "64c7ee61248d766b8b5c97cb05b654b7d8599671728939b6cba37e141838cf65",
  "schemaVersion": 1,
  "sourceSha256": "d52b3fddfb5cb4fb0bd79b9eb38fa0734ef247e3695ee01d1cdc7ffc89e00fb0",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 2,
+ "builderVersion": 3,
  "url": null
 }

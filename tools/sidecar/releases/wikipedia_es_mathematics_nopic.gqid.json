@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_es_mathematics_nopic_2026-10-14.gqid",
- "sizeBytes": 1159168,
- "sha256": "d92e3247faa689fdc539e0875189063ba1f7eaca7503ff95e6f4c7c9a8e6c1ef",
+ "sizeBytes": 1552384,
+ "sha256": "9a1338c97115c9aa4ef6dc8beffe705e5e18fbd3587b4523b69b44a3e84b81c8",
  "schemaVersion": 1,
  "sourceSha256": "2f47a05625b9f45ffa01591b449e2cb20760bb4838b7040f1dd1d5eb16831eb9",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 2,
+ "builderVersion": 3,
  "url": null
 }
