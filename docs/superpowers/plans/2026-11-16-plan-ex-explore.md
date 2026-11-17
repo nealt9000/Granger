@@ -335,3 +335,9 @@ Data is flagged against what the gqid-v5 index holds: **have** (on the phone tod
 - Whether lenses are called rooms in the app (the mockups do).
 - The picture rule and the room descriptions (P0) are his to review.
 - The rebuild: sentences and overlaps can be computed on the phone, so no new index is needed unless they're slow. P0's picture choice would need one.
+
+### Neal on D (2026-11-17)
+- **D is the strongest so far** and is OK'd as the point to iterate from. It's barely at the bar for testers.
+- **The map is now the weakest part.** It's the next thing to redesign, before D4 is built.
+- **Lenses are called rooms** in the app, for now.
+- The build plan above stands as the working plan, with D4 (Connections) held until the map is redrawn.
