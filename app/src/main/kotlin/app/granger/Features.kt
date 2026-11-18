@@ -34,15 +34,15 @@ object Features {
     val SPANISH_ASK = BuildConfig.DEBUG
 
     /**
-     * Linked Library LL1: reference links in the Classics. Off in release until LL1 ships; while off, phones don't
-     * download the QID index or links sidecars (Neal, 2026-11-12). Debug builds read them from Task 8 on, for the
-     * Pixel check (Task 10).
+     * Linked Library LL1: reference links in the Classics, and with it the QID index and links sidecars downloaded with
+     * their packs. On in every build from the tester build after EX (Neal, 2026-11-18), with [TOPIC_PAGE] and [EXPLORE];
+     * before that, release builds kept it off (Neal, 2026-11-12).
      */
-    val LINKED_CLASSICS = BuildConfig.DEBUG
+    const val LINKED_CLASSICS = true
 
     /**
-     * Linked Library LL2: the topic page in front of a Wikipedia article (Plan LL2). Rides with [LINKED_CLASSICS]: off in
-     * release until the tester build turns both on.
+     * Linked Library LL2: the topic page in front of a Wikipedia article (Plan LL2). Rides with [LINKED_CLASSICS]: on in
+     * every build with it (Neal, 2026-11-18).
      */
     val TOPIC_PAGE = LINKED_CLASSICS
 
