@@ -105,6 +105,11 @@ class QidIndexTest {
         assertThat(all.facetOf(197L, "technology")?.id).isEqualTo("transport")
         assertThat(all.facetOf(11446L, "technology")?.id).isEqualTo("weapons")
         assertThat(all.facetOf(42861L, "technology")).isNull()
+        // The room's other broad topics, for setting one beside another; and how many articles link to one.
+        assertThat(all.broadInFacet("technology.transport", 5).map { it.path }).containsExactly("Ship", "Airplane").inOrder()
+        assertThat(all.broadInFacet("technology.weapons", 5).map { it.path }).containsExactly("Ship")
+        assertThat(all.broadInFacet("technology.nowhere", 5)).isEmpty()
+        assertThat(all.topicParts(197L)!!.inlinks).isEqualTo(86)
     }
 
     private val top = listOf(

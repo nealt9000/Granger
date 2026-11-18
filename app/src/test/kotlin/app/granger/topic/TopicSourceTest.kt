@@ -113,12 +113,22 @@ class TopicSourceTest {
             )) db.execSQL("INSERT INTO topic_parts VALUES (?, ?, ?, ?, ?, ?, ?)", r)
         }
         val qids = QidIndexes(listOf(QidIndex.open(f, "en-top")!!))
-        val broad = source(qids = qids).topic("en-top", "Airplane").toList().last().broad!!
-        assertThat(broad.kinds.map { it.first.path }).containsExactly("F-16")
+        val states = source(qids = qids).topic("en-top", "Airplane").toList()
+        val broad = states.last().broad!!
+        // From its header on, the page knows it is a broad topic: it is laid out as a spread and never changes.
+        assertThat(states.filter { it.header != null }.all { it.broadPending || it.broad != null }).isTrue()
+        assertThat(states.last().broadPending).isFalse()
+        assertThat(broad.families.single().all.map { it.path }).containsExactly("F-16")
+        assertThat(broad.families.single().name).isNull()
+        assertThat(broad.inlinks).isEqualTo(86)
+        // An index with no subjects gives it no place.
+        assertThat(broad.place).isNull()
         assertThat(broad.chapters.single().links.map { it.path }).containsExactly("Engine", "Propeller", "Jet_engine").inOrder()
         assertThat(broad.people.single().article.title).isEqualTo("Charles Lindbergh")
         // Not a broad topic: no part.
-        assertThat(source(qids = qids).topic("en-top", "Engine").toList().last().broad).isNull()
+        val engine = source(qids = qids).topic("en-top", "Engine").toList()
+        assertThat(engine.last().broad).isNull()
+        assertThat(engine.none { it.broadPending }).isTrue()
     }
 
     @Test fun aFinishedTopicIsCachedForBack() = runBlocking<Unit> {

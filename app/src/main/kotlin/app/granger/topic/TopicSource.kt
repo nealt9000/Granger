@@ -65,6 +65,8 @@ data class Topic(
     val quotes: Map<String, String> = emptyMap(),
     /** A broad topic's editorial parts (Plan EX); null for any other topic, or until they arrive. */
     val broad: BroadTopic? = null,
+    /** It is a broad topic whose parts are still being read: the page is laid out as a spread from the start. */
+    val broadPending: Boolean = false,
     /** True once every part has arrived. */
     val done: Boolean = false,
 ) {
@@ -119,8 +121,15 @@ class TopicSource(
         suspend fun update(change: (Topic) -> Topic) = sending.withLock { topic = change(topic); send(topic) }
 
         coroutineScope {
-            launch { val h = header(packId, path) ?: TopicHeader(titleOf(path), "", null); update { it.copy(header = h) } }
             val qid = async { attempt { qidOf(packId, path) } }
+            // Whether it is a broad topic is known before its header shows, so the page never changes its layout.
+            val parts = async { attempt { qid.await()?.let { q -> qids().topicParts(q, packId, languageOf(packId)) } } }
+            var broadRead = false    // changed and read only inside update, one at a time
+            launch {
+                val h = header(packId, path) ?: TopicHeader(titleOf(path), "", null)
+                val pending = parts.await() != null
+                update { it.copy(header = h, broadPending = pending && !broadRead) }
+            }
             launch { val t = attempt { timeOf(packId, path) }; update { it.copy(time = t) } }
             launch { val o = attempt { otherOf(packId, qid.await()) }; update { it.copy(other = o) } }
             launch {
@@ -138,7 +147,13 @@ class TopicSource(
                 val (articles, books) = attempt { relatedOf(packId, path, qid.await()) } ?: (emptyList<TopicArticle>() to emptyList())
                 update { it.copy(related = articles, relatedBooks = books) }
             }
-            launch { attempt { broadOf(packId, qid.await()) }?.let { b -> update { it.copy(broad = b) } } }
+            launch {
+                val p = parts.await()
+                val b = p?.let { attempt { broadOf(packId, it) } }
+                update { broadRead = true; it.copy(broad = b, broadPending = false) }
+                // Where it hangs and what stands beside it come after the page's own parts.
+                if (b != null && p != null) attempt { placed(b, p, packId, path) }?.let { full -> update { it.copy(broad = full) } }
+            }
         }
         update { it.copy(done = true) }
         lock.withLock { cache[packId to path] = topic }
@@ -150,20 +165,47 @@ class TopicSource(
     }
 
     /** A broad topic's parts (Plan EX T1), each item resolved in the installed packs, the page's language first. */
-    private suspend fun broadOf(packId: String, qid: Long?): BroadTopic? {
-        qid ?: return null
+    private suspend fun broadOf(packId: String, parts: app.granger.core.library.TopicParts, pictures: Boolean = true): BroadTopic? {
         val all = qids()
         val language = languageOf(packId)
-        val parts = all.topicParts(qid, packId, language) ?: return null
         val times = attempt { times() }
         return BroadTopics.build(
             parts,
             resolve = { q -> all.articlesOf(q, language).firstOrNull()?.let { it.packId to it.path } },
-            card = { p, path -> lead(p, path).let { l -> TopicArticle(p, path, l?.title ?: titleOf(path), blurb(l?.sentence.orEmpty()), l?.thumbnail) } },
+            card = { p, path -> cardOf(p, path) },
             figure = { image -> figure?.let { f -> attempt { f(packId, image) } ?: attempt { f(parts.packId, image) } } },
             markOf = { p, path -> runCatching { times?.find(p, path) }.getOrNull() },
             now = now(),
+            pictures = pictures,
         )
+    }
+
+    private suspend fun cardOf(packId: String, path: String): TopicArticle =
+        lead(packId, path).let { l -> TopicArticle(packId, path, l?.title ?: titleOf(path), blurb(l?.sentence.orEmpty()), l?.thumbnail) }
+
+    /**
+     * [broad] with its place (its subject, its room, the topics before and after it there, best known first) and the
+     * room's two best-known other broad topics set beside it, each counted by its own page's rule.
+     */
+    private suspend fun placed(broad: BroadTopic, parts: app.granger.core.library.TopicParts, packId: String, path: String): BroadTopic {
+        val all = qids()
+        val language = languageOf(packId)
+        val subject = all.subjectsOf(parts.qid).firstOrNull() ?: return broad
+        val room = all.facetOf(parts.qid, subject) ?: return broad.copy(place = BroadPlace(subject))
+        fun plain(a: app.granger.core.library.QidArticle) = TopicArticle(a.packId, a.path, titleOf(a.path), "", null)
+        val ranked = all.topInFacet(room.key, ROOM_MAX)
+        val (before, at, after) = app.granger.explore.neighbours(ranked) { it.qid == parts.qid }
+        val place = BroadPlace(subject, room, before?.let(::plain), after?.let(::plain), at, ranked.size)
+        fun column(a: TopicArticle, b: BroadTopic) = BroadColumn(
+            a, if (b.hasKinds) b.under else 0, b.groups.sortedByDescending { it.count }.take(BroadTopics.FAMILIES).map { it.name },
+            b.people.take(COLUMN_PEOPLE).map { it.article.title }, b.chapters.size + (if (b.story != null) 1 else 0), b.inlinks,
+        )
+        val others = all.broadInFacet(room.key, BESIDE + 1, language).filter { it.qid != parts.qid }.take(BESIDE).mapNotNull { o ->
+            val theirs = all.topicParts(o.qid, o.packId, language) ?: return@mapNotNull null
+            broadOf(o.packId, theirs, pictures = false)?.let { column(cardOf(o.packId, o.path), it) }
+        }
+        val mine = TopicArticle(packId, path, titleOf(path), "", null)
+        return broad.copy(place = place, beside = if (others.isEmpty()) emptyList() else listOf(column(mine, broad)) + others)
     }
 
     private suspend fun timeOf(packId: String, path: String): TopicTimeView? {
@@ -234,6 +276,12 @@ class TopicSource(
     }
 
     companion object {
+        /** A room's topics read to find a topic's neighbours in it. */
+        private const val ROOM_MAX = 50_000
+        /** The other broad topics set beside one, and the people named in each column. */
+        private const val BESIDE = 2
+        private const val COLUMN_PEOPLE = 3
+
         /** Topics kept, so Back to a topic page is instant. */
         private const val CACHED = 16
         /** Marks read around a subject's span, from which contemporaries and events are picked. */

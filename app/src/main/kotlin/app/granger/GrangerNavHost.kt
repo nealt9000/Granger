@@ -1345,6 +1345,13 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         container.wanderFrom.value = packId to path
                         if (!nav.popBackStack<HomeRoute>(inclusive = false)) nav.navigate(HomeRoute) { launchSingleTop = true }
                     },
+                    onOpenPlace = { subject, room ->
+                        when {
+                            subject == null -> nav.navigate(ExploreRoute) { launchSingleTop = true }
+                            room == null -> nav.navigate(SubjectRoute(subject)) { launchSingleTop = true }
+                            else -> nav.navigate(TopicsRoute(subject, room)) { launchSingleTop = true }
+                        }
+                    },
                     onOpenBookAt = { bookId, chapter ->
                         scope.launch { openCitation(matchOpener.open(app.granger.core.library.PassageAddress.Book(bookId, chapter, 0.0))) }
                     },

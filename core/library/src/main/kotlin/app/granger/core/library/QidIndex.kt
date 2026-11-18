@@ -106,8 +106,21 @@ class QidIndex private constructor(private val db: SQLiteDatabase, val packId: S
             }
         }
         if (groups.isEmpty() && kinds.isEmpty() && sections.isEmpty() && people.isEmpty()) return null
-        val under = db.rawQuery("SELECT under FROM topics WHERE qid = ?", arrayOf(qid.toString())).use { if (it.moveToFirst()) it.getInt(0) else kinds.size }
-        return TopicParts(qid, packId, under, groups, kinds, sections, links, figures, people)
+        val (under, inlinks) = db.rawQuery("SELECT under, inlinks FROM topics WHERE qid = ?", arrayOf(qid.toString())).use {
+            if (it.moveToFirst()) it.getInt(0) to it.getInt(1) else kinds.size to 0
+        }
+        return TopicParts(qid, packId, under, groups, kinds, sections, links, figures, people, inlinks)
+    }
+
+    /** The broad topics in [facet] (`subject.facet`), best known first. Empty without topics or sub-categories. */
+    fun broadInFacet(facet: String, limit: Int): List<QidArticle> {
+        val code = codes[facet] ?: return emptyList()
+        if (!hasTopics) return emptyList()
+        return db.rawQuery(
+            "SELECT a.qid, a.path, a.rank FROM topics t JOIN facets f ON f.qid = t.qid AND f.facet = $code JOIN articles a ON a.qid = t.qid " +
+                "ORDER BY a.rank DESC, a.qid LIMIT $limit",
+            null,
+        ).use { c -> buildList { while (c.moveToNext()) add(QidArticle(c.getLong(0), packId, c.getString(1), c.getInt(2))) } }
     }
 
     /**
@@ -310,6 +323,20 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
         return from(indexes)
     }
 
+    /**
+     * The broad topics in [facet], best known first, each item once; with [language], only its packs' when they have any
+     * (their parts are in the pack's language).
+     */
+    fun broadInFacet(facet: String, limit: Int, language: String? = null): List<QidArticle> {
+        fun from(some: List<QidIndex>): List<QidArticle> {
+            val best = LinkedHashMap<Long, QidArticle>()
+            for (index in some) for (a in index.broadInFacet(facet, limit)) best.putIfAbsent(a.qid, a)
+            return best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).take(limit)
+        }
+        if (language != null) from(indexes.filter { it.language == language }).takeIf { it.isNotEmpty() }?.let { return it }
+        return from(indexes)
+    }
+
     /** The first of [subject]'s sub-categories, in their curated order, that holds the item [qid]; null when none does. */
     fun facetOf(qid: Long, subject: String): Facet? = facets(subject).firstOrNull { f -> indexes.any { it.inFacet(f.key, qid) } }
 
@@ -456,6 +483,8 @@ data class TopicParts(
     val links: List<Link>,
     val figures: List<Figure>,
     val people: List<Long>,
+    /** How many of its pack's articles link to it. */
+    val inlinks: Int = 0,
 ) {
     /** A group of kinds: its class, its name in the pack's language, how many of the kinds it holds. */
     data class Group(val cls: Long, val name: String, val count: Int)

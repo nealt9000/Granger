@@ -1561,6 +1561,74 @@ open class ThemeShots {
         }
     }
 
+    /**
+     * Plan EX round 2, D5: a broad topic as a spread, beside the rail on a 390 dp phone: Airplane's opening plates, its
+     * diagram, its kinds by family, its story by year, the people near it, Ship and Car beside it, its other chapters,
+     * the ways on and the doors to its neighbours in the room.
+     */
+    @Config(qualifiers = "+w390dp-h3780dp")
+    @Test fun broadTopic() {
+        fun pic(title: String, rgb: Int = 0x5B6C7A, w: Int = 300, h: Int = 200) = shotPlate(title, w, h, rgb).picture
+        fun a(title: String, rgb: Int = 0x5B6C7A, w: Int = 300, h: Int = 200) = app.granger.topic.TopicArticle("top", title.replace(' ', '_'), title, "", pic(title, rgb, w, h))
+        fun plain(title: String) = app.granger.topic.TopicArticle("top", title.replace(' ', '_'), title, "", null)
+        fun life(title: String, y0: Long, y1: Long) = app.granger.core.library.TimeMark(1, "top", title, title, app.granger.core.library.TimeKind.LIFE, y0, 0, y1, null, 9, emptySet(), 1)
+        fun family(name: String, vararg kinds: String, more: Int) =
+            app.granger.topic.BroadFamily(name, kinds.map { a(it, 0x4A6478) }, kinds.map { plain(it) } + (1..more).map { plain("$name $it") })
+        fun step(year: Long, text: String, fig: Int?) = app.granger.topic.StoryEntry(year, text, fig?.let { pic("Airfig $it", 0x7A6A55, 280, 200) }, null)
+        val broad = app.granger.topic.BroadTopic(
+            under = 72,
+            groups = listOf(app.granger.topic.BroadGroup("Jet aircraft", 24), app.granger.topic.BroadGroup("Transport airplanes", 19), app.granger.topic.BroadGroup("Combat airplanes", 17)),
+            families = listOf(
+                family("Jet aircraft", "Boeing 747", "Boeing 787 Dreamliner", "Boeing B-52 Stratofortress", more = 21),
+                family("Transport airplanes", "Airbus A380", "Concorde", "Boeing 777", more = 16),
+                family("Combat airplanes", "General Dynamics F-16 Fighting Falcon", "Lockheed Martin F-22 Raptor", "Mikoyan MiG-29", more = 14),
+            ),
+            story = app.granger.topic.BroadStory("History", listOf(
+                step(1868, "Le Bris and his glider, Albatros II, photographed by Nadar, 1868", 0), step(1895, "Otto Lilienthal in mid-flight, Berlin, c. 1895", 1),
+                step(1903, "The Wright Flyer's first flight on 17 December 1903", 3), step(1906, "Santos-Dumont 14-bis, between 1906 and 1907", 4),
+                app.granger.topic.StoryEntry(1939, "World War II", null, plain("World War II")),
+                step(2024, "An American Airlines Boeing 737-800 landing at Ronald Reagan Washington National Airport in July 2024", 6),
+            )),
+            people = listOf(
+                "Igor Sikorsky" to (1889L to 1972L), "Charles Lindbergh" to (1902L to 1974L), "Chuck Yeager" to (1923L to 2020L),
+                "Manfred von Richthofen" to (1892L to 1918L), "Neil Armstrong" to (1930L to 2012L), "John Glenn" to (1921L to 2016L),
+            ).map { (n, y) -> app.granger.topic.BroadPerson(a(n, 0x6B5D52, 200, 260), life(n, y.first, y.second)) } + (1..6).map { app.granger.topic.BroadPerson(plain("Pilot $it"), null) },
+            chapters = listOf(
+                app.granger.topic.BroadChapter("Propulsion", listOf("Engine", "Propeller", "Electric motor", "Speed of sound", "Mach number", "Fuel cell").map { plain(it) }, null, null),
+                app.granger.topic.BroadChapter("Design and manufacture", listOf("Boeing", "Airbus", "Federal Aviation Administration").map { plain(it) }, null, null),
+                app.granger.topic.BroadChapter("Environmental impact", listOf("Combustion", "Soot", "Greenhouse gas", "Carbon dioxide", "Noise pollution").map { plain(it) }, null, null),
+            ),
+            figures = listOf(
+                app.granger.topic.BroadFigure(pic("Airfig 3", 0x7A6A55, 280, 200)!!, "The Wright Flyer's first flight on 17 December 1903", "History"),
+                app.granger.topic.BroadFigure(pic("Airfig 7", 0x44606B, 300, 180)!!, "The Concorde supersonic transport aircraft", "History"),
+            ),
+            diagram = app.granger.topic.BroadFigure(pic("Airfig 14", 0xE8E4DA, 300, 190)!!, "Major components of an airplane", "Characteristics"),
+            inlinks = 86,
+            place = app.granger.topic.BroadPlace(
+                "technology", app.granger.core.library.Facet("technology", "transport", "Cars, planes & ships", "Autos, aviones y barcos"),
+                before = plain("Bicycle"), after = plain("Ship"), position = 5, total = 882,
+            ),
+            beside = listOf(
+                app.granger.topic.BroadColumn(plain("Airplane"), 72, listOf("Jet aircraft", "Transport airplanes", "Combat airplanes"), listOf("Igor Sikorsky", "Charles Lindbergh", "Chuck Yeager"), 7, 86),
+                app.granger.topic.BroadColumn(a("Ship", 0x3F6B78), 217, listOf("Cruisers", "Battleships", "Aircraft carriers"), listOf("Matthew Perry", "Robert Surcouf", "Vasco da Gama"), 8, 74),
+                app.granger.topic.BroadColumn(a("Car", 0x6B6B4A), 201, listOf("Sports cars", "Compact cars", "Family cars"), listOf("Henry Ford", "Gottlieb Daimler", "Enzo Ferrari"), 11, 366),
+            ),
+        )
+        val topic = app.granger.topic.Topic(
+            "top", "Airplane",
+            header = app.granger.topic.TopicHeader("Airplane", "An airplane is a fixed-wing aircraft that is propelled forward by thrust from a jet engine, propeller, or rocket engine. Airplanes come in a variety of sizes.", pic("Airplane", 0x5B7C99)),
+            related = listOf(plain("Helicopter"), plain("Glider"), plain("Airship")), relatedBooks = emptyList(), broad = broad, done = true,
+        )
+        shoot("broadTopic", pictures = true) {
+            GrangerShell(
+                rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = null,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+            ) {
+                app.granger.topic.TopicPage(topic, "Wikipedia", {}, {}, {}, { _, _, _ -> }, { _, _ -> }, { _, _ -> }, {}, null, onWander = {}, onExplore = {}, onOpenPlace = { _, _ -> })
+            }
+        }
+    }
+
     /** A thin room's mosaic (Words & grammar): words side by side, portraits upright, then words three across; and a first door. */
     @Config(qualifiers = "+w334dp-h760dp")
     @Test fun spreadThin() {

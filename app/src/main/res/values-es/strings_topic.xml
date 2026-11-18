@@ -33,13 +33,8 @@
     <string name="topic_map_books">Libros</string>
     <string name="topic_map_open">Abrir la página del tema</string>
     <string name="topic_map_hint">Toca un círculo para centrar el mapa en él. Mantén pulsado para abrirlo.</string>
-    <string name="topic_broad_kicker">Un tema para explorar</string>
     <string name="topic_broad_kinds">Tipos</string>
-    <string name="topic_broad_kinds_title">Tipos · %1$d</string>
-    <string name="topic_broad_all">Todos</string>
     <string name="topic_broad_people">Personas</string>
-    <string name="topic_broad_map">Como mapa</string>
-    <string name="topic_broad_map_title">Caminos hacia %1$s</string>
     <plurals name="topic_broad_kinds_count">
         <item quantity="one">%1$d tipo</item>
         <item quantity="many">%1$d tipos</item>
@@ -55,4 +50,45 @@
         <item quantity="many">%1$d capítulos</item>
         <item quantity="other">%1$d capítulos</item>
     </plurals>
+
+    <string name="topic_spread_read">Leer el artículo</string>
+    <string name="topic_spread_connections">Conexiones</string>
+    <string name="topic_spread_plate_from">Lámina %1$d · de %2$s</string>
+    <string name="topic_spread_plate">Lámina %1$d</string>
+    <plurals name="topic_spread_kinds_eyebrow">
+        <item quantity="one">Tipos · %1$d en tu biblioteca</item>
+        <item quantity="many">Tipos · %1$d en tu biblioteca</item>
+        <item quantity="other">Tipos · %1$d en tu biblioteca</item>
+    </plurals>
+    <plurals name="topic_spread_families">
+        <item quantity="one">%1$d familia</item>
+        <item quantity="many">%1$d familias</item>
+        <item quantity="other">%1$d familias</item>
+    </plurals>
+    <string name="topic_spread_families_named">%1$s: %2$s</string>
+    <string name="topic_spread_families_largest">%1$s. Las mayores: %2$s</string>
+    <string name="topic_spread_family_others">Otros tipos</string>
+    <string name="topic_spread_family_all">Ver %1$d</string>
+    <string name="topic_spread_family_fewer">Menos</string>
+    <string name="topic_spread_chapter">Capítulo · %1$s</string>
+    <string name="topic_spread_years">De %1$s a %2$s</string>
+    <plurals name="topic_spread_people">
+        <item quantity="one">%1$d persona cercana</item>
+        <item quantity="many">%1$d personas cercanas</item>
+        <item quantity="other">%1$d personas cercanas</item>
+    </plurals>
+    <string name="topic_spread_beside">La misma forma en otros temas</string>
+    <string name="topic_spread_beside_most">%1$s tiene más tipos: %2$d</string>
+    <string name="topic_spread_beside_plain">Lado a lado</string>
+    <string name="topic_spread_row_kinds">Tipos aquí</string>
+    <string name="topic_spread_row_families">Familias mayores</string>
+    <string name="topic_spread_row_people">Personas cercanas</string>
+    <string name="topic_spread_row_chapters">Capítulos</string>
+    <string name="topic_spread_row_inlinks">Artículos que enlazan aquí</string>
+    <string name="topic_spread_beside_rule">Elegidos por regla: los otros temas amplios de esta sala. Cada columna abre su tema.</string>
+    <string name="topic_spread_chapters">Más capítulos</string>
+    <string name="topic_spread_chapters_title">A dónde lleva el artículo</string>
+    <string name="topic_spread_way_close">Cercano en significado</string>
+    <string name="topic_spread_way_chapter">De su capítulo %1$s</string>
+    <string name="topic_spread_way_here">Empezando aquí</string>
 </resources>

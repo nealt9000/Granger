@@ -138,6 +138,8 @@ fun ReaderScreen(
     onOpenBookAt: (bookId: String, chapter: String) -> Unit = { _, _ -> },
     /** Starts Home's Wander at this article (Plan LL2: Wander from here). */
     onWander: ((packId: String, path: String) -> Unit)? = null,
+    /** A broad topic's trail: Explore's landing (null, null), a subject (its id), or a room (the subject's id and the room's). */
+    onOpenPlace: ((subject: String?, room: String?) -> Unit)? = null,
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -473,6 +475,7 @@ fun ReaderScreen(
                     found = state.found,
                     onWander = onWander?.let { w -> { w(topic.packId, topic.path) } },
                     onExplore = { viewModel.showMap(true) },
+                    onOpenPlace = onOpenPlace,
                 )
                 if (state.mapShown) {
                     app.granger.topic.TopicMap(

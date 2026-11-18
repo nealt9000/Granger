@@ -39,16 +39,8 @@
     <string name="topic_map_books">Books</string>
     <string name="topic_map_open">Open the topic page</string>
     <string name="topic_map_hint">Tap a circle to centre the map on it. Hold to open it.</string>
-    <!-- A broad topic's page (Plan EX): Airplane, Mountain, Economics. -->
-    <string name="topic_broad_kicker">A topic to explore</string>
     <string name="topic_broad_kinds">Kinds</string>
-    <!-- The kinds section's heading: "Kinds · 72". -->
-    <string name="topic_broad_kinds_title">Kinds · %1$d</string>
-    <string name="topic_broad_all">All</string>
     <string name="topic_broad_people">People</string>
-    <string name="topic_broad_map">As a map</string>
-    <!-- The ring's heading: "Ways into Airplane". -->
-    <string name="topic_broad_map_title">Ways into %1$s</string>
     <plurals name="topic_broad_kinds_count">
         <item quantity="one">%1$d kind</item>
         <item quantity="other">%1$d kinds</item>
@@ -61,4 +53,48 @@
         <item quantity="one">%1$d chapter</item>
         <item quantity="other">%1$d chapters</item>
     </plurals>
+
+    <!-- Plan EX round 2, a broad topic as a spread (D5). -->
+    <string name="topic_spread_read">Read the article</string>
+    <string name="topic_spread_connections">Connections</string>
+    <!-- Over the diagram: %1$d is the plate's number, %2$s the chapter it comes from. -->
+    <string name="topic_spread_plate_from">Plate %1$d · from %2$s</string>
+    <string name="topic_spread_plate">Plate %1$d</string>
+    <plurals name="topic_spread_kinds_eyebrow">
+        <item quantity="one">Kinds · %1$d in your library</item>
+        <item quantity="other">Kinds · %1$d in your library</item>
+    </plurals>
+    <plurals name="topic_spread_families">
+        <item quantity="one">%1$d family</item>
+        <item quantity="other">%1$d families</item>
+    </plurals>
+    <!-- The heading over the kinds: %1$s how many families (topic_spread_families), %2$s their names as a list. -->
+    <string name="topic_spread_families_named">%1$s: %2$s</string>
+    <string name="topic_spread_families_largest">%1$s. The largest: %2$s</string>
+    <string name="topic_spread_family_others">Other kinds</string>
+    <string name="topic_spread_family_all">All %1$d</string>
+    <string name="topic_spread_family_fewer">Fewer</string>
+    <!-- Over the story: %1$s is the chapter's title. Its heading: the first and last year. -->
+    <string name="topic_spread_chapter">Chapter · %1$s</string>
+    <string name="topic_spread_years">From %1$s to %2$s</string>
+    <plurals name="topic_spread_people">
+        <item quantity="one">%1$d person stands near it</item>
+        <item quantity="other">%1$d people stand near it</item>
+    </plurals>
+    <string name="topic_spread_beside">The same shape elsewhere</string>
+    <!-- %1$s is a topic, %2$d how many kinds it has. -->
+    <string name="topic_spread_beside_most">%1$s has the most kinds: %2$d</string>
+    <string name="topic_spread_beside_plain">Side by side</string>
+    <string name="topic_spread_row_kinds">Kinds here</string>
+    <string name="topic_spread_row_families">Largest families</string>
+    <string name="topic_spread_row_people">People beside it</string>
+    <string name="topic_spread_row_chapters">Chapters</string>
+    <string name="topic_spread_row_inlinks">Articles that link to it</string>
+    <string name="topic_spread_beside_rule">Chosen by rule: the other broad topics in this room. A column opens its topic.</string>
+    <string name="topic_spread_chapters">More chapters</string>
+    <string name="topic_spread_chapters_title">What the article leads to</string>
+    <string name="topic_spread_way_close">Close in meaning</string>
+    <!-- %1$s is a chapter's title. -->
+    <string name="topic_spread_way_chapter">From its %1$s chapter</string>
+    <string name="topic_spread_way_here">Starting from here</string>
 </resources>

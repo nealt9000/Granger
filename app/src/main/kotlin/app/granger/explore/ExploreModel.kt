@@ -472,13 +472,13 @@ class ExploreViewModel(
                     card = { packId, path -> app.granger.topic.TopicArticle(packId, path, titleOf(path), "", null) },
                     figure = { null },
                     markOf = { packId, path -> runCatching { times?.find(packId, path) }.getOrNull() },
-                    now = java.time.Year.now().value,
+                    now = java.time.Year.now().value, pictures = false,
                 )
             }.getOrNull()
         }
         f = f.copy(
             room = room,
-            kinds = if (broad != null && broad.kinds.isNotEmpty()) broad.under else 0,
+            kinds = if (broad != null && broad.hasKinds) broad.under else 0,
             people = broad?.people?.size ?: 0,
             chapters = broad?.let { it.chapters.size + if (it.story != null) 1 else 0 } ?: 0,
         )

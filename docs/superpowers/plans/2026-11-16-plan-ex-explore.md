@@ -552,3 +552,19 @@ Debug 1478 on the Pixel 6 (DB 16, same as the phone's), Night and Field, English
 - A spread whose pack holds fewer than two of its figures shows one plate (Television show did).
 - The time index gives some titles in Spanish in the English app ("Herón de Alejandría", "Catapulta" as a room's oldest): the dated set takes an item from whichever pack has it first.
 - Not done here: TalkBack, the Spanish app, a cold start. They belong to the final walkthrough.
+
+### D5 done (2026-11-18)
+On `ex-build`. A broad topic's page is now a spread (`topic/BroadSpread.kt`); other topics keep the page they had. The page is laid out as a spread from its first frame (`Topic.broadPending`: whether a topic is broad is read before its header shows).
+
+- **Head:** the trail (Explore › subject › room › topic, folded; each step opens that place in Explore); the topic's picture and two of its figures as numbered plates; its name, opening sentence and captions; Read the article, Connections (the map as it is, until D4), and the other language.
+- **Diagram plate:** the first drawing among the figures outside the story chapter (a figure that isn't a JPEG), whole on white, as "Plate 4 · from Characteristics".
+- **Kinds:** "Kinds · 72 in your library"; the heading names the families ("3 families: …", or "4 families. The largest: …" past three). Each of the three largest families has three plates and "All 24", which opens the family's names as a list under them; the kinds outside them stand as "Other kinds".
+- **Story:** "Chapter · History", headed by its span ("From 1868 to 2024"); a line a year with its picture and caption, or the linked topic.
+- **People:** "12 people stand near it"; the six best known as upright plates with their years.
+- **Side by side:** this topic and the room's two best-known other broad topics, a row each for kinds, largest families, people, chapters and articles that link to it, every column counted by its own page's rule. The heading names the one with the most kinds. Left out when the room has no other broad topic.
+- **More chapters:** each chapter's title and the topics it links, each a way on.
+- **Then:** In your books (the card as it was); ways on (closest in meaning, the first linked step of the story, Wander from here); and at the foot the doors to the topics before and after it in its room, best known first ("14 of 8,820").
+- **Gone:** the ring ("As a map" of the page's own parts), the kinds' filter chips, the dark story card, and on a broad topic the time card and the closest-topics grid (the closest is a way on; the rest is behind Connections).
+- **Not built:** "See these on the Timeline" under the story; Viewpoints (no placeholder ships).
+- **Index:** `QidIndex.broadInFacet`, `TopicParts.inlinks`. No new build.
+- **Checks:** app 1,932 and core/library 525 tests pass. Shots `broadTopic` in Field, Night and Spanish looked at. On the Pixel (Night, English): Pandemic opens as a spread at once and its parts arrive together after about five seconds; every section showed with real data.
