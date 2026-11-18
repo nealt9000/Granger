@@ -39,7 +39,25 @@ class BestMatches(
     private val quoted: (suspend (String) -> List<Passage>)? = null,
 ) {
     /** One row: an article or chapter, its best passage, and the [sentence] of it (character range) to highlight. */
-    data class Match(val passage: Passage, val sentence: IntRange?)
+    data class Match(val passage: Passage, val sentence: IntRange?) {
+        /**
+         * What the row quotes and the reader marks when it's opened: the [sentence], else the passage's first sentence (a
+         * match deep in an article with no sentence picked opened at its section and skipped the topic page, Plan LL2).
+         * Null for a passage with no text.
+         */
+        fun quote(): String? {
+            sentence?.let { r -> passage.text.substring(r).trim().takeIf { it.isNotEmpty() }?.let { return it } }
+            val text = passage.text.trim()
+            if (text.isEmpty()) return null
+            val end = SENTENCE_END.find(text)?.range?.first?.plus(1) ?: text.length
+            return text.take(minOf(end, QUOTE_MAX)).trim()
+        }
+
+        private companion object {
+            val SENTENCE_END = Regex("""[.!?](?=\s)""")
+            const val QUOTE_MAX = 300
+        }
+    }
 
     /** [embedMs], [denseMs] (the dense search after the embedding) and [keywordMs] as measured; 0 when not run. */
     data class Result(

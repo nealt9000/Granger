@@ -1425,8 +1425,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onOpenMatch = { match ->
                         scope.launch {
                             val p = match.passage
-                            val sentence = match.sentence?.let { p.text.substring(it).trim() }
-                            openCitation(matchOpener.open(app.granger.core.library.PassageAddress.of(p, sentence), title = p.sourceTitle))
+                            openCitation(matchOpener.open(app.granger.core.library.PassageAddress.of(p, match.quote()), title = p.sourceTitle))
                         }
                     },
                     onOpenTab = ::showTab,

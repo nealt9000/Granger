@@ -125,4 +125,13 @@ class BestMatchesTest {
         val steps = BestMatches(PassageFinder { listOf(burnFirstAid) }).stream("treat a burn").toList()
         assertThat(steps.map { it.final }).containsExactly(true)
     }
+
+    @Test fun aMatchQuotesItsSentenceElseThePassagesFirstSentence() {
+        val text = "While the details may differ, the process begins with light. Then water is split. And so on"
+        val p = Passage(SourceKind.ARTICLE, "top", "Photosynthesis", location = "Photosynthesis", text = text, cosine = 0.5, language = ResearchLanguage.EN)
+        assertThat(BestMatches.Match(p, 61..80).quote()).isEqualTo("Then water is split.")
+        assertThat(BestMatches.Match(p, null).quote()).isEqualTo("While the details may differ, the process begins with light.")
+        assertThat(BestMatches.Match(p.copy(text = "No full stop here"), null).quote()).isEqualTo("No full stop here")
+        assertThat(BestMatches.Match(p.copy(text = "  "), null).quote()).isNull()
+    }
 }
