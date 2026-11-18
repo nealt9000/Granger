@@ -652,7 +652,7 @@ Debug 1482/1483 on the Pixel 6. The landing, a subject, a room (its three views,
 - What reads: each plate one stop with its name and count or dates; eras as "Middle Ages, 500 – 1500, 1,954 topics"; doors as "The room before, The ancient world"; the trail's last step as "You are here"; the quilt's plates with their group and what leads to them. No button without something to say. Every button 48 dp or more except where the screen's edge or the doors bar cuts one off mid-scroll.
 
 **For Neal**
-- **An adult topic on a default screen.** Cinematografía's kinds lead with Anime and Hentai, with a suggestive picture, on its spread and its quilt (the Spanish pack's best-known kinds of "Animación"). Nothing in the app filters topics by what they are. A rule is his to make.
+- **An adult topic on a default screen.** Cinematografía's kinds lead with Anime and Hentai, with a suggestive picture, on its spread and its quilt (the Spanish pack's best-known kinds of "Animación"). Nothing in the app filters topics by what they are. A rule is his to make. Neal, 2026-11-18: later work; noted in the roadmap under "Carried forward from EX".
 - Caption numbers ("1", "History") may read as separate stops; the tree can't settle it. To hear with TalkBack.
 - Thousands are written with a comma in Spanish (7,796 temas), as es-419 does.
 - "Closest in meaning" is still slow (see the performance pass).
