@@ -832,7 +832,7 @@ now)").
       this pack shows one openzim PDF by its hash name (its only name). The storage line lags a download by a minute.
     - Not on the emulator: memberOf's first-sync time with an existing library (Pixel 6, Task 5.2); snapshot supersede
       (no newer snapshot to move to tonight).
-- [ ] **Task 5.2: Pixel 6 walkthrough.** Follow the install rules above. Use African Storybook English Level 1, Military
+- [x] **Task 5.2: Pixel 6 walkthrough.** Passed 2026-11-18 on debug 1493 (KB2 already on main): Get books → African Storybook · English → Level 1 set (151 books, 192 MB) downloaded and files as one collection grouped "Level 1 · 151" with covers, titles and authors; a story opens at its cover (13 pages). Military Medicine (65 MB) files as 20 PDFs, "Titles only until opened"; First Aid opens (224 pages) and its menu offers Read as ebook. The archive.org text PDF (converted on install) opens as an ebook. Finding: Kiwix's search doesn't find book packs ("Military Medicine": nothing matches), which live only under Get books. Follow the install rules above. Use African Storybook English Level 1, Military
   Medicine, and an archive.org text PDF for the one PDF rule.
 - [ ] **Task 5.3: merge.**
   - Rebase on main.
