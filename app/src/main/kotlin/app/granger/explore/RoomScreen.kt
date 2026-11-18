@@ -64,7 +64,7 @@ object RoomTags {
 private const val SMALL_ROOM = 30
 
 @Composable
-private fun Share.dated(): String = stringResource(
+internal fun Share.dated(): String = stringResource(
     when (this) {
         Share.NEARLY_ALL -> R.string.explore_dated_nearly_all
         Share.THREE_IN_FOUR -> R.string.explore_dated_three_in_four

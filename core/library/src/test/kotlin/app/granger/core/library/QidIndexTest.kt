@@ -83,6 +83,30 @@ class QidIndexTest {
         assertThat(old.topicParts(197L)).isNull()
     }
 
+    @Test fun aSubjectsBroadTopicsFitForASpreadAreItsOwnWithEnoughFiguresBestKnownFirst() {
+        fun figure(topic: Long, ord: Int) = listOf<Any?>(topic, 5, ord, null, 0, "A caption", "_assets_/a/$topic-$ord.jpg")
+        fun kind(topic: Long) = listOf<Any?>(topic, 2, 0, 1005L, -1, null, null)
+        // Airplane and Ship have two figures; Kite has one; Bread's main subject is Food (Technology is its second).
+        val parts = listOf(kind(197L), figure(197L, 0), figure(197L, 1), kind(11446L), figure(11446L, 0), figure(11446L, 1), kind(42861L), figure(42861L, 0),
+            kind(7802L), figure(7802L, 0), figure(7802L, 1))
+        val index = QidIndex.open(gqid(
+            "en", listOf(listOf("Airplane", 197L, 86, null), listOf("Ship", 11446L, 120, null), listOf("Kite", 42861L, 60, null), listOf("Bread", 7802L, 140, null)),
+            subjects = listOf(listOf(197L, 0, "technology"), listOf(11446L, 0, "technology"), listOf(42861L, 0, "technology"), listOf(7802L, 0, "food"), listOf(7802L, 1, "technology")),
+            facets = listOf(listOf(1, 197L), listOf(1, 11446L), listOf(0, 11446L)),
+            facetList = """{"technology":[{"id":"weapons","en":"Weapons","es":"Armas","code":0},{"id":"transport","en":"Cars, planes & ships","es":"Autos","code":1}]}""",
+            topicParts = parts,
+        ), "en")!!
+        val all = QidIndexes(listOf(QidIndex.open(gqid("old", top), "old")!!, index))
+        assertThat(all.broadIn("technology", minKinds = 8, minFigures = 2, limit = 10).map { it.path }).containsExactly("Ship", "Airplane").inOrder()
+        assertThat(all.broadIn("technology", minKinds = 8, minFigures = 1, limit = 2).map { it.path }).containsExactly("Ship", "Airplane").inOrder()
+        assertThat(all.broadIn("technology", minKinds = 100, minFigures = 2, limit = 10)).isEmpty()
+        assertThat(all.broadIn("food", minKinds = 8, minFigures = 2, limit = 10).map { it.path }).containsExactly("Bread")
+        // A topic's room: the first of its subject's, in their order, that holds it.
+        assertThat(all.facetOf(197L, "technology")?.id).isEqualTo("transport")
+        assertThat(all.facetOf(11446L, "technology")?.id).isEqualTo("weapons")
+        assertThat(all.facetOf(42861L, "technology")).isNull()
+    }
+
     private val top = listOf(
         listOf("Jane_Austen", 36322L, 150, "Jane Austen"),
         listOf("Pride_and_Prejudice", 170583L, 90, "Orgullo y prejuicio"),

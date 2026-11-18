@@ -138,9 +138,11 @@ data class ExploreArticle(
 )
 
 /**
- * Today's subject (Neal, 2026-11-17: highlight one topic behind it, so every day is different): the subject, and one of
- * its best-known articles with a picture, its opening sentence beside it. [candidates] are the day's picks in order; the
- * first with a picture is [article].
+ * Today's spread (Neal, 2026-11-17: highlight one topic behind a subject, so every day is different; Plan EX round 2,
+ * D1): the day's subject and one of its broad topics, with its picture, its opening sentence, two of its article's
+ * [figures], its [room] and what its page holds ([kinds], [people], [chapters]). A subject with no broad topic fit for
+ * a spread gives one of its best-known articles, alone. [candidates] are the day's picks in order; the first with a
+ * picture is [article].
  */
 data class FeaturedTopic(
     val subject: Subject,
@@ -148,7 +150,58 @@ data class FeaturedTopic(
     val article: ExploreArticle,
     val candidates: List<ExploreArticle>,
     val sentence: String? = null,
+    /** The first of the subject's rooms that holds the topic. */
+    val room: app.granger.core.library.Facet? = null,
+    val figures: List<SpreadFigure> = emptyList(),
+    /** As the topic's own page counts them; 0 for a topic that isn't broad, or until read. */
+    val kinds: Int = 0,
+    val people: Int = 0,
+    val chapters: Int = 0,
 )
+
+/** A figure from a broad topic's article: its picture (a cached file) and its caption. */
+data class SpreadFigure(val picture: String, val caption: String)
+
+/**
+ * The order to try a topic's [n] figures in for a spread's two small plates (pure, for tests): one a third of the way
+ * through and one two thirds, so they come from different parts of the article, then the rest as they stand.
+ */
+fun figureOrder(n: Int): List<Int> = if (n <= 0) emptyList() else (listOf(n / 3, 2 * n / 3) + (0 until n)).distinct()
+
+/** How a row of the landing's subject mosaic is cut. */
+enum class DoorRowKind(val size: Int) { WIDE_FIRST(2), THREE(3), WIDE_LAST(2), PAIR(2), SINGLE(1) }
+
+/**
+ * The rows of the subject mosaic for [n] doors in their order (pure, for tests): a wide plate and a narrow one, three
+ * across, a narrow and a wide, three across, and round again; two left over stand side by side and one runs the width.
+ */
+fun doorRows(n: Int): List<DoorRowKind> {
+    val cycle = listOf(DoorRowKind.WIDE_FIRST, DoorRowKind.THREE, DoorRowKind.WIDE_LAST, DoorRowKind.THREE)
+    val out = ArrayList<DoorRowKind>()
+    var left = n
+    while (left > 0) {
+        val next = cycle[out.size % cycle.size]
+        val kind = when {
+            left == 1 -> DoorRowKind.SINGLE
+            left < next.size || left == 2 -> DoorRowKind.PAIR
+            else -> next
+        }
+        out += kind
+        left -= kind.size
+    }
+    return out
+}
+
+/**
+ * The era that holds the most of the dated topics and its share of them in words (pure, for tests); null when too few are
+ * dated or the share isn't worth saying.
+ */
+fun busiestEra(eras: List<EraRow>): Pair<EraRow, Share>? {
+    val total = eras.sumOf { it.count }
+    val top = eras.maxByOrNull { it.count } ?: return null
+    if (total < RoomFinding.SAYABLE) return null
+    return shareOf(top.count, total)?.let { top to it }
+}
 
 /**
  * Today's topic in a subject (pure, for tests): the subject is today's door ([featuredIndex]); within it, the day's place
@@ -188,6 +241,10 @@ data class ExploreUi(
     val sources: List<String>,
     /** Today's subject and its topic; null with no subjects. */
     val featured: FeaturedTopic? = null,
+    /** How many rooms the doors' subjects hold between them. */
+    val rooms: Int = 0,
+    /** How many times the reader has asked for another spread: 0 is today's. */
+    val skipped: Int = 0,
 ) {
     /** No subjects to show: no Wikipedia, or one whose QID index predates subjects (it updates with the catalog). */
     val noSubjects: Boolean get() = doors.none { it.count > 0 }
@@ -253,6 +310,8 @@ class ExploreSources(
     val collections: Flow<Map<String, List<ExploreCollection>>> = kotlinx.coroutines.flow.flowOf(emptyMap()),
     /** A room's one-line description (`subject.lens`) in a language, from the app's own list; null when it has none. */
     val roomDescription: (key: String, language: String) -> String? = { _, _ -> null },
+    /** One of a pack's pictures by its path in the ZIM (a broad topic's figure), cached; null when it's absent. Blocking. */
+    val figure: (packId: String, image: String) -> String? = { _, _ -> null },
 )
 
 /** An article as a feature shows it: its lead picture, larger than a thumbnail, and its opening sentence. */
@@ -290,6 +349,9 @@ class ExploreViewModel(
 
     private var packs: List<Pair<Pack, String?>>? = null
     private var collections: Map<String, List<ExploreCollection>> = emptyMap()
+    /** Spreads asked for past today's ([another]): each is the next day's. */
+    private var skipped = 0
+    private var filling: Job? = null
 
     init {
         viewModelScope.launch { runCatching { sources.load() } }
@@ -318,7 +380,92 @@ class ExploreViewModel(
         state.value = built
         // Pictures second: the doors and eras show at once, then fill in one by one, the page's top first (all at once
         // took 10–14 s on a cold Pixel).
-        withContext(Dispatchers.IO) { withPictures(built) { ui -> state.value = ui } }
+        filling?.cancel()
+        withContext(Dispatchers.IO) {
+            withPictures(built) { ui ->
+                // Another spread asked for meanwhile stays: only the rest of the page is this pass's to fill.
+                val now = state.value
+                state.value = if (now != null && now.skipped != ui.skipped) ui.copy(featured = now.featured, skipped = now.skipped) else ui
+            }
+        }
+    }
+
+    /** Another spread: tomorrow's, then the day after's, so each press changes the subject as well as the topic. */
+    fun another() {
+        val shown = state.value ?: return
+        filling?.cancel()
+        filling = viewModelScope.launch {
+            skipped++
+            val next = withContext(Dispatchers.IO) { featuredOf(today() + skipped, shown.doors, sources.qids()) } ?: return@launch
+            state.value = (state.value ?: shown).copy(featured = next, skipped = skipped)
+            withContext(Dispatchers.IO) { spread(next) { f -> state.value?.let { ui -> if (ui.featured?.candidates == f.candidates) state.value = ui.copy(featured = f) } } }
+        }
+    }
+
+    /** A well-known article from anywhere in the library, at random, for Wander to start at; null without any. */
+    suspend fun wanderStart(random: Random = Random.Default): ExploreArticle? = withContext(Dispatchers.IO) {
+        val door = state.value?.doors?.filter { it.count > 0 }?.takeIf { it.isNotEmpty() }?.random(random) ?: return@withContext null
+        sources.qids().topIn(door.subject.id, SubjectViewModel.WANDER_POOL, mainOnly = true).takeIf { it.isNotEmpty() }?.random(random)?.toExplore()
+    }
+
+    /**
+     * The spread for [day]: the day's door, and the day's place among its broad topics that can fill a spread (enough
+     * kinds and figures), best known first; a subject with none takes one of its best-known articles.
+     */
+    private fun featuredOf(day: Long, doors: List<SubjectDoor>, qids: QidIndexes): FeaturedTopic? {
+        val d = doors.getOrNull(featuredIndex(day, doors.size))?.takeIf { it.count > 0 } ?: return null
+        val own = d.subject.namesakes
+        val broad = qids.broadIn(d.subject.id, BROAD_KINDS, BROAD_FIGURES, BROAD_POOL + own.size).filter { it.qid !in own }.take(BROAD_POOL)
+        val pool = broad.ifEmpty { qids.topIn(d.subject.id, FEATURE_POOL + own.size, mainOnly = true).filter { it.qid !in own } }.map { it.toExplore() }
+        return featuredCandidates(day, doors.size, pool).takeIf { it.isNotEmpty() }?.let { FeaturedTopic(d.subject, d.count, it.first(), it) }
+    }
+
+    /**
+     * Fills a spread, each part [shown] as it arrives: the first of the day's picks with a picture and its opening
+     * sentence; then two of its figures; then its room and what its page holds.
+     */
+    private suspend fun spread(start: FeaturedTopic, shown: (FeaturedTopic) -> Unit) {
+        val qids = sources.qids()
+        val pick = start.candidates.asSequence().mapNotNull { a ->
+            runCatching { sources.look(a.packId, a.path) }.getOrNull()?.takeIf { it.picture != null }?.let { a to it }
+        }.firstOrNull()
+        var f = start
+        if (pick != null) {
+            f = f.copy(article = pick.first.copy(picture = pick.second.picture), sentence = pick.second.sentence?.let(::firstSentence))
+            shown(f)
+        }
+        val a = f.article
+        val qid = runCatching { qids.qidOf(a.packId, a.path) }.getOrNull() ?: return
+        val parts = runCatching { qids.topicParts(qid, a.packId) }.getOrNull()
+        if (parts != null && f.article.picture != null) {
+            val figures = figureOrder(parts.figures.size).asSequence().take(FIGURE_TRIES).map { parts.figures[it] }.filter { it.caption.isNotBlank() }
+                .mapNotNull { fig -> runCatching { sources.figure(parts.packId, fig.image) }.getOrNull()?.let { SpreadFigure(it, fig.caption) } }
+                .take(FIGURES).toList()
+            // Two or none: the opening group is one plate or three.
+            if (figures.size == FIGURES) { f = f.copy(figures = figures); shown(f) }
+        }
+        val room = runCatching { qids.facetOf(qid, f.subject.id) }.getOrNull()
+        val broad = parts?.let { p ->
+            val times = runCatching { sources.times() }.getOrNull()
+            // The page's own rule, without its pictures: the landing says what the page will show.
+            runCatching {
+                app.granger.topic.BroadTopics.build(
+                    p,
+                    resolve = { q -> qids.articlesOf(q).firstOrNull()?.let { it.packId to it.path } },
+                    card = { packId, path -> app.granger.topic.TopicArticle(packId, path, titleOf(path), "", null) },
+                    figure = { null },
+                    markOf = { packId, path -> runCatching { times?.find(packId, path) }.getOrNull() },
+                    now = java.time.Year.now().value,
+                )
+            }.getOrNull()
+        }
+        f = f.copy(
+            room = room,
+            kinds = if (broad != null && broad.kinds.isNotEmpty()) broad.under else 0,
+            people = broad?.people?.size ?: 0,
+            chapters = broad?.let { it.chapters.size + if (it.story != null) 1 else 0 } ?: 0,
+        )
+        shown(f)
     }
 
     private suspend fun build(packs: List<Pair<Pack, String?>>): ExploreUi {
@@ -330,23 +477,19 @@ class ExploreViewModel(
         val doors = subjectDoors(counts, { s ->
             qids.topIn(s.id, EXAMPLES + s.namesakes.size, mainOnly = true).filter { it.qid !in s.namesakes }.take(EXAMPLES).map { it.toExplore() }
         }, others, collections)
-        val lead = doors.getOrNull(featuredIndex(today(), doors.size))
-        val featured = lead?.takeIf { it.count > 0 }?.let { d ->
-            val pool = qids.topIn(d.subject.id, FEATURE_POOL + d.subject.namesakes.size, mainOnly = true)
-                .filter { it.qid !in d.subject.namesakes }.map { it.toExplore() }
-            featuredCandidates(today(), doors.size, pool).takeIf { it.isNotEmpty() }?.let { FeaturedTopic(d.subject, d.count, it.first(), it) }
-        }
+        val featured = featuredOf(today() + skipped, doors, qids)
         val times = sources.times()
         val eras = if (times.isEmpty) emptyList() else Era.entries.map { era ->
             EraRow(era, times.countActive(era.from, era.to), eraExamples(times.topActive(era.from, era.to, ERA_POOL), qids::subjectsOf))
         }.filter { it.count > 0 }
-        return ExploreUi(articles, doors, eras, packs.map { it.first.title }.sortedBy { it.lowercase() }, featured)
+        val rooms = doors.sumOf { qids.facets(it.subject.id).size }
+        return ExploreUi(articles, doors, eras, packs.map { it.first.title }.sortedBy { it.lowercase() }, featured, rooms, skipped)
     }
 
     private fun withoutPictures(ui: ExploreUi) = ui.copy(
         doors = ui.doors.map { it.copy(picture = null, lead = null) },
         eras = ui.eras.map { it.copy(picture = null, lead = null) },
-        featured = ui.featured?.let { f -> f.copy(article = f.candidates.first(), sentence = null) },
+        featured = ui.featured?.let { f -> FeaturedTopic(f.subject, f.count, f.candidates.first(), f.candidates) },
     )
 
     /**
@@ -361,34 +504,15 @@ class ExploreViewModel(
             .mapNotNull { a -> runCatching { sources.look(a.packId, a.path) }.getOrNull() }
             .firstOrNull { it.picture != null }
         var ui = start
-        // Today's topic first: the first of the day's picks with a picture, large, with its opening sentence.
-        ui.featured?.let { f ->
-            val pick = f.candidates.asSequence().mapNotNull { a ->
-                runCatching { sources.look(a.packId, a.path) }.getOrNull()?.takeIf { it.picture != null }?.let { a to it }
-            }.firstOrNull()
-            if (pick != null) {
-                ui = ui.copy(featured = f.copy(article = pick.first.copy(picture = pick.second.picture), sentence = pick.second.sentence?.let(::firstSentence)))
-                shown(ui)
-            }
-        }
-        // Then the landing's order: today's subject, the blocks, then Through time, then the rest of the subjects.
-        val featured = featuredIndex(today(), ui.doors.size)
-        val blocks = 6    // two blocks of three (ExploreScreen BLOCK)
-        val doorOrder = (listOf(featured) + ui.doors.indices.filter { it != featured }).filter { it >= 0 }
-        fun door(i: Int) {
+        // Today's spread first: its picture, large, with its opening sentence, then its figures and its counts.
+        ui.featured?.let { f -> spread(f) { ui = ui.copy(featured = it); shown(ui) } }
+        // Then the subjects, in the mosaic's order. (Through time is bars now: the eras' pictures aren't read.)
+        for (i in ui.doors.indices) {
             val d = ui.doors[i]
             val l = own(d.subject.namesakes)
             ui = ui.copy(doors = ui.doors.toMutableList().also { it[i] = d.copy(picture = l?.picture ?: first(d.examples), lead = l?.sentence?.let(::firstSentence)) })
             shown(ui)
         }
-        doorOrder.take(1 + blocks).forEach(::door)
-        for (i in ui.eras.indices) {
-            val e = ui.eras[i]
-            val l = own(e.era.articles)
-            ui = ui.copy(eras = ui.eras.toMutableList().also { it[i] = e.copy(picture = l?.picture ?: first(e.examples), lead = l?.sentence?.let(::firstSentence)) })
-            shown(ui)
-        }
-        doorOrder.drop(1 + blocks).forEach(::door)
     }
 
     /**
@@ -421,6 +545,17 @@ class ExploreViewModel(
 
         /** Today's topic comes from this many of the subject's best-known articles. */
         const val FEATURE_POOL = 60
+
+        /** A broad topic fills a spread with at least this many articles under it and this many figures. */
+        const val BROAD_KINDS = 8
+        const val BROAD_FIGURES = 2
+
+        /** Today's spread comes from this many of the subject's best-known broad topics. */
+        const val BROAD_POOL = 12
+
+        /** A spread's small plates, and how many of the topic's figures are tried for them. */
+        const val FIGURES = 2
+        const val FIGURE_TRIES = 8
     }
 }
 

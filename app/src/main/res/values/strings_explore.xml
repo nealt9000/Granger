@@ -13,11 +13,6 @@
     <string name="explore_subject_packs">Packs on this subject</string>
     <string name="explore_show_more">Show more</string>
     <string name="explore_nothing_here">Nothing on this subject yet</string>
-    <!-- The Your sources row: how many packs there are. %1$d is the count. -->
-    <plurals name="explore_all_packs">
-        <item quantity="one">Your one pack</item>
-        <item quantity="other">All %1$d packs</item>
-    </plurals>
     <!-- How many articles a subject or an era holds. %1$s is the number, already formatted (2,776). -->
     <plurals name="explore_topics">
         <item quantity="one">%1$s topic</item>
@@ -86,8 +81,6 @@
     <string name="explore_subject_articles">Articles</string>
     <string name="explore_subject_in_era">Articles · %1$s</string>
     <string name="explore_subject_quiz_title">%1$s quiz</string>
-    <!-- The library as a map (Plan EX Task 5). -->
-    <string name="explore_as_map">As a map</string>
     <string name="explore_map_library">Your library</string>
     <string name="explore_map_subjects">Subjects</string>
     <string name="explore_map_time">Time</string>
@@ -96,18 +89,12 @@
     <string name="explore_map_hint">Each circle is as big as the articles it holds. Tap one to step inside it; hold to open it.</string>
     <string name="explore_map_hint_inside">Tap an article to open its topic page. Back steps out.</string>
     <string name="explore_map_more">Also</string>
-    <string name="explore_featured">Today\'s subject</string>
-    <string name="explore_more_subjects">More subjects</string>
     <string name="explore_subject_collections">Book collections</string>
     <!-- A book collection on a subject page: how many of its books are on the subject. %1$s is the count. -->
     <plurals name="explore_collection_books">
         <item quantity="one">%1$s book</item>
         <item quantity="other">%1$s books</item>
     </plurals>
-    <!-- Today's subject with one of its topics (Plan EX editorial pass). %1$s is the subject. -->
-    <string name="explore_featured_in">Today\'s subject · %1$s</string>
-    <!-- Below today's topic: on into its subject. %1$s is the subject, %2$s its count ("7,797 topics"). -->
-    <string name="explore_featured_more">More in %1$s · %2$s</string>
     <!-- A subject page's way into the listing of all its articles. %1$s is the count. -->
     <plurals name="explore_see_all">
         <item quantity="one">See all %1$s topic</item>
@@ -210,4 +197,41 @@
     <string name="explore_subject_rooms_finding">%1$s. %2$s</string>
     <!-- The same heading with no finding to state: %1$s is how many rooms, %2$s how many topics. -->
     <string name="explore_subject_rooms_topics">%1$s, %2$s</string>
+
+    <!-- Plan EX round 2, the landing (D1). The eyebrow over today's spread: %1$s is the date ("Tuesday 17 November"). -->
+    <string name="explore_spread_today">%1$s · today\'s spread</string>
+    <string name="explore_spread_another">Another spread</string>
+    <!-- Where the spread's topic hangs: %1$s its subject, %2$s its room. -->
+    <string name="explore_spread_in_room">%1$s · %2$s</string>
+    <!-- What the topic's page holds: %1$s is a list ("72 kinds, 12 people, 5 chapters"). -->
+    <string name="explore_spread_holds">On this spread: %1$s.</string>
+    <string name="explore_spread_open">Open the spread</string>
+    <string name="explore_spread_next">Another</string>
+    <plurals name="explore_subjects_count">
+        <item quantity="one">%1$d subject</item>
+        <item quantity="other">%1$d subjects</item>
+    </plurals>
+    <!-- The eyebrow over the subjects: %1$s how many subjects (explore_subjects_count), %2$s how many rooms (explore_rooms). -->
+    <string name="explore_library">The library · %1$s</string>
+    <string name="explore_library_rooms">The library · %1$s, %2$s</string>
+    <!-- The heading: the three subjects with the most topics, largest first. -->
+    <string name="explore_library_largest">%1$s, %2$s and %3$s are your largest subjects</string>
+    <!-- %1$s the smallest subject, %2$s its topics (explore_topics); %3$s the largest subject, %4$s how many times as many it holds. -->
+    <string name="explore_library_smallest">%1$s is the smallest, with %2$s.</string>
+    <string name="explore_library_smallest_times">%1$s is the smallest, with %2$s; %3$s has %4$s times as many.</string>
+    <string name="explore_library_opens">Each picture opens its subject.</string>
+    <!-- An era as "%1$s are from %2$s." (explore_room_century) names it. -->
+    <string name="explore_era_prehistory_from">before 3000 BC</string>
+    <string name="explore_era_ancient_from">the ancient world</string>
+    <string name="explore_era_middle_ages_from">the Middle Ages</string>
+    <string name="explore_era_early_modern_from">1500 to 1800</string>
+    <string name="explore_era_c19_from">the 1800s</string>
+    <string name="explore_era_wars_from">1900 to 1945</string>
+    <string name="explore_era_recent_from">1946 or later</string>
+    <string name="explore_time_opens">Each line opens its era on the Timeline.</string>
+    <string name="explore_way_anywhere_library">Anywhere in your library</string>
+    <plurals name="explore_way_games">
+        <item quantity="one">%1$d game with dates</item>
+        <item quantity="other">%1$d games with dates</item>
+    </plurals>
 </resources>

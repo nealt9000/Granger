@@ -1519,6 +1519,48 @@ open class ThemeShots {
         }
     }
 
+    /**
+     * Plan EX round 2, D1: Explore's landing beside the rail on a 390 dp phone. Today's spread (Airplane in three numbered
+     * plates, its captions and what its page holds), the seventeen subjects as a mosaic under their finding, Through time
+     * as bars, and the three ways on.
+     */
+    @Config(qualifiers = "+w390dp-h2720dp")
+    @Test fun landing() {
+        val e = app.granger.explore.Subject.entries.associateBy { it.id }
+        val doors = listOf(
+            Triple("society", 6_017, "Society"), Triple("places", 5_748, "Geography"), Triple("science", 5_233, "Science"), Triple("sports", 4_040, "Sport"),
+            Triple("film", 4_005, "Film"), Triple("technology", 3_538, "Technology"), Triple("history", 3_503, "History"), Triple("music", 3_179, "Music"),
+            Triple("nature", 2_563, "Nature"), Triple("business", 2_540, "Economy"), Triple("religion", 2_384, "Religion"), Triple("health", 1_919, "Medicine"),
+            Triple("literature", 1_516, "Literature"), Triple("games", 1_065, "Game"), Triple("languages", 766, "Language"), Triple("food", 662, "Food"), Triple("art", 478, "Art"),
+        ).mapIndexed { i, (id, n, picture) ->
+            app.granger.explore.SubjectDoor(e.getValue(id), n, emptyList(), emptyList(), picture = shotPlate(picture, 300, 200, 0x40545E + i * 0x070503).picture)
+        }
+        val eras = listOf(687, 1_219, 1_954, 2_890, 4_713, 5_623, 28_141).mapIndexed { i, n -> app.granger.explore.EraRow(app.granger.explore.Era.entries[i], n, emptyList()) }
+        val airplane = shotPlate("Airplane", 300, 200, 0x5B7C99)
+        val spanish = language == "es"
+        val ui = app.granger.explore.ExploreUi(
+            articles = 146_618, doors = doors, eras = eras, sources = listOf("a", "b", "c", "d", "e", "f"), rooms = 108,
+            featured = app.granger.explore.FeaturedTopic(
+                app.granger.explore.Subject.TECHNOLOGY, 3_538,
+                app.granger.explore.ExploreArticle("top", if (spanish) "Avión" else "Airplane", if (spanish) "Avión" else "Airplane", airplane.picture, ratio = airplane.ratio), emptyList(),
+                if (spanish) "Un avión es una aeronave de ala fija, más pesada que el aire, capaz de volar impulsada por uno o más motores."
+                else "An airplane is a fixed-wing aircraft that is propelled forward by thrust from a jet engine, propeller, or rocket engine.",
+                room = app.granger.core.library.Facet("technology", "transport", "Cars, planes & ships", "Autos, aviones y barcos"),
+                figures = listOf(
+                    app.granger.explore.SpreadFigure(shotPlate("Airfig 3", 280, 200, 0x7A6A55).picture!!, if (spanish) "El primer vuelo del Wright Flyer, el 17 de diciembre de 1903" else "The Wright Flyer's first flight on 17 December 1903"),
+                    app.granger.explore.SpreadFigure(shotPlate("Airfig 7", 300, 180, 0x44606B).picture!!, if (spanish) "El avión supersónico de pasajeros Concorde" else "The Concorde supersonic transport aircraft"),
+                ),
+                kinds = 72, people = 12, chapters = 6,
+            ),
+        )
+        shoot("landing", pictures = true) {
+            GrangerShell(
+                rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = null,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+            ) { app.granger.explore.ExploreContent(ui, app.granger.explore.ExploreActions(), day = java.time.LocalDate.of(2026, 11, 18).toEpochDay()) }
+        }
+    }
+
     /** A thin room's mosaic (Words & grammar): words side by side, portraits upright, then words three across; and a first door. */
     @Config(qualifiers = "+w334dp-h760dp")
     @Test fun spreadThin() {

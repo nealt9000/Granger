@@ -1,5 +1,7 @@
 package app.granger.explore
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHeightIsAtLeast
@@ -84,39 +86,75 @@ class ExploreScreenTest {
         assertThat(seen).containsExactly("c:gp")
     }
 
-    @Test fun theLandingShowsDoorsErasAndSourcesAndEachLeadsOn() {
-        val ui = ExploreUi(
-            articles = 77_019,
-            doors = listOf(
-                SubjectDoor(Subject.SCIENCE, 5_233, listOf(a("Physics"), a("DNA"), a("Moon")), emptyList()),
-                SubjectDoor(Subject.FOOD, 0, emptyList(), listOf(pack("c", "based.cooking"))),
-            ),
-            eras = listOf(EraRow(Era.MIDDLE_AGES, 1_159, listOf(a("Islam"), a("Dante_Alighieri"))), EraRow(Era.RECENT, 14_970, listOf(a("The_Beatles")))),
-            sources = listOf("based.cooking", "Best of Wikipedia"),
+    @Test fun theLandingIsTheSubjectsAsAMosaicThroughTimeAsBarsAndThreeWaysOn() {
+        val doors = listOf(
+            SubjectDoor(Subject.SOCIETY, 6_300, emptyList(), emptyList()), SubjectDoor(Subject.PLACES, 5_900, emptyList(), emptyList()),
+            SubjectDoor(Subject.SCIENCE, 5_233, emptyList(), emptyList()), SubjectDoor(Subject.ART, 478, emptyList(), emptyList()),
+            SubjectDoor(Subject.FOOD, 0, emptyList(), listOf(pack("c", "based.cooking"))),
         )
-        // Day 0 features the first door; the rest follow (here the one other door, as a row under More subjects).
-        compose.setContent { ExploreContent(ui, actions, day = 0) }
-        compose.onNodeWithText("77,019 articles · 2 packs").assertExists()
-        compose.onNodeWithText("Today's subject".uppercase()).assertExists()
-        compose.onNodeWithText("Science & maths").assertExists()
-        compose.onNodeWithText("5,233 topics · Physics · DNA · Moon").assertExists()
-        compose.onNodeWithText("Food & farming").performScrollTo().assertExists()
-        compose.onNodeWithTag(ExploreTags.door(Subject.SCIENCE)).performScrollTo().performClick()
-        compose.onNodeWithText("Middle Ages").performScrollTo().assertExists()
-        compose.onNodeWithText("Islam · Dante Alighieri").assertExists()
-        compose.onNodeWithTag(ExploreTags.era(Era.MIDDLE_AGES)).performScrollTo().performClick()
-        compose.onNodeWithText("Open the Timeline").performScrollTo().performClick()
-        compose.onNodeWithText("All 2 packs").assertExists()
-        compose.onNodeWithTag(ExploreTags.SOURCES).performScrollTo().performClick()
+        val ui = ExploreUi(
+            articles = 77_019, doors = doors,
+            eras = listOf(EraRow(Era.MIDDLE_AGES, 1_159, listOf(a("Islam"), a("Dante_Alighieri"))), EraRow(Era.RECENT, 14_970, listOf(a("The_Beatles")))),
+            sources = listOf("based.cooking", "Best of Wikipedia"), rooms = 31,
+        )
+        val more = mutableListOf<String>()
+        compose.setContent { ExploreContent(ui, ExploreActions(
+            onOpenSubject = actions.onOpenSubject, onOpenTimeline = actions.onOpenTimeline, onOpenSources = actions.onOpenSources, onGetMore = actions.onGetMore,
+            onOpenGames = { calls += "games" },
+        ), onWander = { calls += "wander" }, day = 0) }
+        // The head says what the counts say: the three largest, and the smallest beside the largest.
+        compose.onNodeWithContentDescription("The library · 5 subjects, 31 rooms").assertExists()
+        compose.onNodeWithText("Society & politics, Places and Science & maths are your largest subjects").assertExists()
+        compose.onNodeWithText("Art & architecture is the smallest, with 478 topics; Society & politics has 13 times as many. Each picture opens its subject.").assertExists()
+        // Each subject is one plate, read with what it holds; a subject with only a pack names it.
+        compose.onNodeWithContentDescription("Science & maths, 5,233 topics").assertHasClickAction()
+        compose.onNodeWithContentDescription("Food & farming, based.cooking").assertExists()
+        compose.onNodeWithTag(ExploreTags.door(Subject.SCIENCE)).performClick()
+        // Through time: the fullest era's share heads it; a line opens its era.
+        compose.onNodeWithText("Nearly all the dated topics are from 1946 or later").performScrollTo().assertExists()
+        compose.onNodeWithContentDescription("Middle Ages, 500 – 1500, 1,159 topics").assertExists()
+        compose.onNodeWithTag(ExploreTags.era(Era.MIDDLE_AGES)).performScrollTo().assertHeightIsAtLeast(48.dp).performClick()
+        compose.onNodeWithTag(ExploreTags.TIMELINE).performScrollTo().performClick()
+        // Three ways on: Wander, the games, Your sources with what the phone holds.
+        compose.onNodeWithText("Wander").performScrollTo().performClick()
+        compose.onNodeWithContentDescription("6 games with dates").assertExists()
+        compose.onNodeWithText("Games").performScrollTo().performClick()
+        compose.onNodeWithContentDescription("77,019 articles · 2 packs").assertExists()
+        compose.onNodeWithText("Your sources").performScrollTo().performClick()
+        compose.onNodeWithTag(ExploreTags.GET_MORE).performClick()
         compose.onNodeWithTag(ExploreTags.NO_SUBJECTS).assertDoesNotExist()
-        assertThat(calls).containsExactly("subject:science", "timeline:top/Islam", "timeline:null/null", "sources").inOrder()
+        compose.onNodeWithTag(ExploreTags.OPEN_SPREAD).assertDoesNotExist()
+        assertThat(calls).containsExactly("subject:science", "timeline:top/Islam", "timeline:null/null", "wander", "games", "sources", "get").inOrder()
     }
 
-    @Test fun withoutSubjectsItSaysHowToGetThem() {
+    @Test fun withoutSubjectsItSaysHowToGetThemAndStillLeadsToTheSources() {
         compose.setContent { ExploreContent(ExploreUi(0, emptyList(), emptyList(), listOf("based.cooking")), actions) }
         compose.onNodeWithTag(ExploreTags.NO_SUBJECTS).assertExists()
         compose.onNodeWithText("Get a Wikipedia").performClick()
-        assertThat(calls).containsExactly("get")
+        compose.onNodeWithContentDescription("1 pack").assertExists()
+        compose.onNodeWithText("Wander").assertDoesNotExist()
+        compose.onNodeWithText("Your sources").performClick()
+        assertThat(calls).containsExactly("get", "sources").inOrder()
+    }
+
+    @Test fun theSubjectMosaicIsCutByRuleFromHowManyThereAre() {
+        fun sizes(n: Int) = doorRows(n).map { it.name }
+        // Seventeen: wide and narrow, three, narrow and wide, three, round once more, and the last two side by side.
+        assertThat(sizes(17)).containsExactly("WIDE_FIRST", "THREE", "WIDE_LAST", "THREE", "WIDE_FIRST", "THREE", "PAIR").inOrder()
+        assertThat(sizes(4)).containsExactly("WIDE_FIRST", "PAIR").inOrder()
+        assertThat(sizes(3)).containsExactly("WIDE_FIRST", "SINGLE").inOrder()
+        assertThat(sizes(1)).containsExactly("SINGLE")
+        assertThat(sizes(0)).isEmpty()
+        for (n in 0..40) assertThat(doorRows(n).sumOf { it.size }).isEqualTo(n)
+        // A spread's two figures come from different parts of the article; the rest stand by in order.
+        assertThat(figureOrder(12).take(4)).containsExactly(4, 8, 0, 1).inOrder()
+        assertThat(figureOrder(2)).containsExactly(0, 1).inOrder()
+        assertThat(figureOrder(0)).isEmpty()
+        // The fullest era's share, when enough is dated to say one.
+        val eras = listOf(EraRow(Era.C19, 30, emptyList()), EraRow(Era.RECENT, 70, emptyList()))
+        assertThat(busiestEra(eras)).isEqualTo(eras[1] to Share.TWO_IN_THREE)
+        assertThat(busiestEra(listOf(EraRow(Era.C19, 3, emptyList())))).isNull()
+        assertThat(busiestEra(emptyList())).isNull()
     }
 
     @Test fun aSubjectPageWithoutSubCategoriesListsItsBestKnownAndItsPacksAndSeesAll() {
@@ -221,19 +259,40 @@ class ExploreScreenTest {
         assertThat(featuredCandidates(0, 0, pool)).isEmpty()
     }
 
-    @Test fun theLandingLeadsWithTodaysTopicInItsSubject() {
-        val science = SubjectDoor(Subject.SCIENCE, 5_233, listOf(a("Physics")), emptyList())
-        val ui = ExploreUi(
-            articles = 77_019, doors = listOf(science), eras = emptyList(), sources = emptyList(),
-            featured = FeaturedTopic(Subject.SCIENCE, 5_233, a("Black_hole"), listOf(a("Black_hole")), "A black hole is a region of spacetime."),
+    @Test fun theLandingLeadsWithTodaysSpreadItsPlatesCaptionsAndWhatItsPageHolds() {
+        val technology = SubjectDoor(Subject.TECHNOLOGY, 4_611, emptyList(), emptyList())
+        val airplane = a("Airplane").copy(picture = "/none/airplane.jpg")
+        val topic = FeaturedTopic(
+            Subject.TECHNOLOGY, 4_611, airplane, listOf(airplane), "An airplane is a fixed-wing aircraft.",
+            room = app.granger.core.library.Facet("technology", "transport", "Cars, planes & ships", "Autos, aviones y barcos"),
+            figures = listOf(SpreadFigure("/none/flyer.jpg", "The Wright Flyer's first flight on 17 December 1903"), SpreadFigure("/none/concorde.jpg", "The Concorde supersonic transport aircraft")),
+            kinds = 72, people = 12, chapters = 5,
         )
-        compose.setContent { ExploreContent(ui, actions, day = 3) }
-        compose.onNodeWithText("Today's subject · Science & maths".uppercase()).assertExists()
-        compose.onNodeWithText("Black hole").assertExists()
-        compose.onNodeWithText("A black hole is a region of spacetime.").assertExists()
-        compose.onNodeWithTag(ExploreTags.FEATURED).performClick()
-        compose.onNodeWithText("More in Science & maths · 5,233 topics").performClick()
-        assertThat(calls).containsExactly("article:top/Black_hole", "subject:science").inOrder()
+        var another = 0
+        var ui by androidx.compose.runtime.mutableStateOf(ExploreUi(articles = 77_019, doors = listOf(technology), eras = emptyList(), sources = emptyList(), featured = topic))
+        // 1970-01-04 was a Sunday.
+        compose.setContent { ExploreContent(ui, actions, onAnother = { another++ }, day = 3) }
+        compose.onNodeWithContentDescription("Sunday, January 4 · today's spread").assertExists()
+        compose.onNodeWithContentDescription("Technology · Cars, planes & ships").assertExists()
+        compose.onNodeWithText("An airplane is a fixed-wing aircraft.").assertExists()
+        // Three numbered plates; the captions under them carry their words, and each plate opens the spread.
+        compose.onAllNodes(androidx.compose.ui.test.hasTestTag(PlateTags.NUMBER), useUnmergedTree = true).assertCountEquals(3)
+        compose.onNodeWithText("The Concorde supersonic transport aircraft").assertExists()
+        compose.onNodeWithText("On this spread: 72 kinds, 12 people, 5 chapters.").assertExists()
+        compose.onNodeWithTag(ExploreTags.spreadPlate(1)).assertHasClickAction().performClick()
+        compose.onNodeWithTag(ExploreTags.OPEN_SPREAD).assertHeightIsAtLeast(48.dp).performClick()
+        compose.onNodeWithTag(ExploreTags.ANOTHER).assertHeightIsAtLeast(48.dp).performClick()
+        assertThat(calls).containsExactly("article:top/Airplane", "article:top/Airplane").inOrder()
+        assertThat(another).isEqualTo(1)
+        // Another spread is no longer today's; a topic that isn't broad stands alone, with no captions or counts.
+        val hole = a("Black_hole")
+        ui = ui.copy(featured = FeaturedTopic(Subject.SCIENCE, 5_233, hole, listOf(hole), "A black hole is a region of spacetime."), skipped = 1)
+        compose.onNodeWithContentDescription("Another spread").assertExists()
+        compose.onNodeWithContentDescription("Science & maths").assertExists()
+        compose.onAllNodes(androidx.compose.ui.test.hasTestTag(PlateTags.NUMBER), useUnmergedTree = true).assertCountEquals(0)
+        compose.onNodeWithText("On this spread", substring = true).assertDoesNotExist()
+        compose.onNodeWithTag(ExploreTags.spreadPlate(0)).performClick()
+        assertThat(calls.last()).isEqualTo("article:top/Black_hole")
     }
 
     @Test fun anErasExamplesLeaveOutPlacesAndCreatures() {

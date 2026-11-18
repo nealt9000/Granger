@@ -718,6 +718,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             isWikipedia = { it.name.startsWith("wikipedia_") },
             load = { container.catalog.load() },
             roomDescription = app.granger.explore.RoomDescriptions(appContext.assets)::of,
+            figure = { packId, image -> container.library.archive(packId)?.let { thumbs.picture(it, image, 800) } },
             // Book collections join subjects by the catalog's own `subjects` (KB2): book packs, Classics and book sets.
             collections = kotlinx.coroutines.flow.combine(
                 container.library.packs, container.bookshelf.books, container.catalog.state, container.downloads.records,
@@ -764,6 +765,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         onOpenPack = { packId -> openPack(packId, newTab = true) },
         onGetMore = { nav.navigate(SourceRoute(CatalogScope.KIWIX)) },
         onBack = { nav.popBackStack() },
+        onWanderAt = { packId, path ->
+            container.wanderFrom.value = packId to path
+            if (!nav.popBackStack<HomeRoute>(inclusive = false)) nav.navigate(HomeRoute) { launchSingleTop = true }
+        },
+        onOpenGames = { nav.navigate(GamesRoute) { launchSingleTop = true } },
     )
 
     // Play and the Games screen (Plan H5c) share one count of rounds played and Which came first?'s level.

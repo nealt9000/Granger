@@ -156,7 +156,7 @@ private const val BOOKS_ON_PAGE = 24
 
 /** Wander or Quiz: a square-cornered outlined button in the spread's own type. */
 @Composable
-private fun DoButton(label: String, tag: String, onClick: () -> Unit) {
+internal fun DoButton(label: String, tag: String, onClick: () -> Unit) {
     OutlinedButton(onClick = onClick, shape = RoundedCornerShape(2.dp), modifier = Modifier.heightIn(min = 48.dp).testTag(tag)) {
         Text(label, style = SpreadType.uiMedium.copy(fontSize = 14.sp), color = MaterialTheme.colorScheme.onSurface)
     }

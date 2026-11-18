@@ -110,6 +110,25 @@ class QidIndex private constructor(private val db: SQLiteDatabase, val packId: S
         return TopicParts(qid, packId, under, groups, kinds, sections, links, figures, people)
     }
 
+    /**
+     * The broad topics whose main subject is [subject], best known first: those with at least [minKinds] articles under
+     * them and [minFigures] figures (enough for a spread of plates). Empty without topics or subjects.
+     */
+    fun broadIn(subject: String, minKinds: Int, minFigures: Int, limit: Int): List<QidArticle> = if (!hasTopics || !hasSubjects) emptyList() else
+        db.rawQuery(
+            "SELECT a.qid, a.path, a.rank FROM topics t JOIN subjects s ON s.qid = t.qid AND s.ord = 0 JOIN articles a ON a.qid = t.qid " +
+                // The numbers are written in: a bound argument is text, and a count compared with text is never the greater.
+                "WHERE s.subject = ? AND t.under >= $minKinds AND (SELECT COUNT(*) FROM topic_parts p WHERE p.topic = t.qid AND p.part = ${TopicParts.FIGURE}) >= $minFigures " +
+                "ORDER BY a.rank DESC, a.qid LIMIT $limit",
+            arrayOf(subject),
+        ).use { c -> buildList { while (c.moveToNext()) add(QidArticle(c.getLong(0), packId, c.getString(1), c.getInt(2))) } }
+
+    /** Whether the item [qid] is in [facet] (`subject.facet`). */
+    fun inFacet(facet: String, qid: Long): Boolean {
+        val code = codes[facet] ?: return false
+        return db.rawQuery("SELECT 1 FROM facets WHERE facet = ? AND qid = ?", arrayOf(code.toString(), qid.toString())).use { it.moveToFirst() }
+    }
+
     /** The facet list with its names and codes (meta `facets`, JSON {subject: [{id, en, es, code}]}); null without one. */
     internal val facetList: String? by lazy {
         if (!hasFacets) null else runCatching {
@@ -275,6 +294,16 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
         val order = indexes.filter { it.packId == packId } + indexes.filter { it.packId != packId && (language == null || it.language == language) }
         return order.firstNotNullOfOrNull { it.topicParts(qid) }
     }
+
+    /** [subject]'s broad topics fit for a spread ([QidIndex.broadIn]), best known first, each item once, in the first pack that has it. */
+    fun broadIn(subject: String, minKinds: Int, minFigures: Int, limit: Int): List<QidArticle> {
+        val best = LinkedHashMap<Long, QidArticle>()
+        for (index in indexes) for (a in index.broadIn(subject, minKinds, minFigures, limit)) best.putIfAbsent(a.qid, a)
+        return best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).take(limit)
+    }
+
+    /** The first of [subject]'s sub-categories, in their curated order, that holds the item [qid]; null when none does. */
+    fun facetOf(qid: Long, subject: String): Facet? = facets(subject).firstOrNull { f -> indexes.any { it.inFacet(f.key, qid) } }
 
     /** [subject]'s sub-categories, in their curated order, with their names; empty without any. */
     fun facets(subject: String): List<Facet> = indexes.firstNotNullOfOrNull { it.facetList }?.let { Facet.parse(it, subject) }.orEmpty()

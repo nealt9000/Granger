@@ -12,11 +12,6 @@
     <string name="explore_subject_packs">Paquetes sobre este tema</string>
     <string name="explore_show_more">Mostrar más</string>
     <string name="explore_nothing_here">Todavía no hay nada sobre este tema</string>
-    <plurals name="explore_all_packs">
-        <item quantity="one">Tu único paquete</item>
-        <item quantity="many">Los %1$d paquetes</item>
-        <item quantity="other">Los %1$d paquetes</item>
-    </plurals>
     <plurals name="explore_topics">
         <item quantity="one">%1$s tema</item>
         <item quantity="many">%1$s temas</item>
@@ -83,8 +78,6 @@
     <string name="explore_subject_articles">Artículos</string>
     <string name="explore_subject_in_era">Artículos · %1$s</string>
     <string name="explore_subject_quiz_title">Juegos: %1$s</string>
-    <!-- La biblioteca como mapa (Plan EX Task 5). -->
-    <string name="explore_as_map">Como mapa</string>
     <string name="explore_map_library">Tu biblioteca</string>
     <string name="explore_map_subjects">Temas</string>
     <string name="explore_map_time">Tiempo</string>
@@ -93,8 +86,6 @@
     <string name="explore_map_hint">Cada círculo es tan grande como los artículos que reúne. Toca uno para entrar; mantén pulsado para abrirlo.</string>
     <string name="explore_map_hint_inside">Toca un artículo para abrir su página de tema. Atrás para salir.</string>
     <string name="explore_map_more">También</string>
-    <string name="explore_featured">El tema de hoy</string>
-    <string name="explore_more_subjects">Más temas</string>
     <string name="explore_subject_collections">Colecciones de libros</string>
     <!-- A book collection on a subject page: how many of its books are on the subject. %1$s is the count. -->
     <plurals name="explore_collection_books">
@@ -102,8 +93,6 @@
         <item quantity="many">%1$s libros</item>
         <item quantity="other">%1$s libros</item>
     </plurals>
-    <string name="explore_featured_in">Tema de hoy · %1$s</string>
-    <string name="explore_featured_more">Más de %1$s · %2$s</string>
     <plurals name="explore_see_all">
         <item quantity="one">Ver %1$s tema</item>
         <item quantity="many">Ver los %1$s temas</item>
@@ -182,4 +171,36 @@
     <string name="explore_subject_rooms_eyebrow">Las salas</string>
     <string name="explore_subject_rooms_finding">%1$s. %2$s</string>
     <string name="explore_subject_rooms_topics">%1$s, %2$s</string>
+
+    <string name="explore_spread_today">%1$s · lámina de hoy</string>
+    <string name="explore_spread_another">Otra lámina</string>
+    <string name="explore_spread_in_room">%1$s · %2$s</string>
+    <string name="explore_spread_holds">En esta lámina: %1$s.</string>
+    <string name="explore_spread_open">Abrir la lámina</string>
+    <string name="explore_spread_next">Otra</string>
+    <plurals name="explore_subjects_count">
+        <item quantity="one">%1$d tema</item>
+        <item quantity="many">%1$d temas</item>
+        <item quantity="other">%1$d temas</item>
+    </plurals>
+    <string name="explore_library">La biblioteca · %1$s</string>
+    <string name="explore_library_rooms">La biblioteca · %1$s, %2$s</string>
+    <string name="explore_library_largest">Tus temas más grandes: %1$s, %2$s, %3$s</string>
+    <string name="explore_library_smallest">%1$s es el tema más pequeño, con %2$s.</string>
+    <string name="explore_library_smallest_times">%1$s es el tema más pequeño, con %2$s; %3$s tiene %4$s veces más.</string>
+    <string name="explore_library_opens">Cada imagen abre su tema.</string>
+    <string name="explore_era_prehistory_from">de antes del 3000 a. C.</string>
+    <string name="explore_era_ancient_from">del mundo antiguo</string>
+    <string name="explore_era_middle_ages_from">de la Edad Media</string>
+    <string name="explore_era_early_modern_from">de entre 1500 y 1800</string>
+    <string name="explore_era_c19_from">del siglo XIX</string>
+    <string name="explore_era_wars_from">de entre 1900 y 1945</string>
+    <string name="explore_era_recent_from">de 1946 en adelante</string>
+    <string name="explore_time_opens">Cada línea abre su época en la línea del tiempo.</string>
+    <string name="explore_way_anywhere_library">Por cualquier parte de tu biblioteca</string>
+    <plurals name="explore_way_games">
+        <item quantity="one">%1$d juego con fechas</item>
+        <item quantity="many">%1$d juegos con fechas</item>
+        <item quantity="other">%1$d juegos con fechas</item>
+    </plurals>
 </resources>

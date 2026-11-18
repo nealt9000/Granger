@@ -524,3 +524,14 @@ On `ex-build`. A subject's page is now a spread (`SubjectPage.kt`), and the whol
 - **Data:** each room's dates are read one room at a time after its picture (`datedIn` per room), so sentences fill in down the page; three lines are held for each so nothing moves. A room's picture avoids the opening plates' articles.
 - **Not in D2:** rooms seen (R). Captions for lead pictures (new data).
 - **Checks:** app 1,924 and core/library 524 tests pass. Shots `subject` in Field, Night and Spanish looked at. Not timed on the real index, not on a phone.
+
+### D1 done (2026-11-18)
+On `ex-build`. Explore's landing is now a spread (`Landing.kt`); the cards, blocks and era timeline of the first landing are gone.
+
+- **Today's spread:** a broad topic of the day's subject in three numbered plates (its own picture, and two of its article's figures from a third and two thirds of the way through), under the date. Then its subject and room, its name, its opening sentence, the captions (plate 1's is the title; the figures carry their own), "On this spread: 72 kinds, 12 people, 6 chapters" (counted by the topic page's own rule, so the two agree), Open the spread and Another.
+- **Which topic:** the day's subject as before (the eight largest in turn), then the day's place among that subject's broad topics with at least 8 kinds and 2 figures, best known first, twelve deep (`QidIndex.broadIn`; Technology gives Computer, Car, Transport, Clothing, Telephone, Time zone, Airplane…). A subject with none takes one of its best-known articles as a single plate. Another shows the next day's spread, so the subject changes too.
+- **The library:** "The library · 17 subjects, 108 rooms"; the heading names the three largest subjects; the standfirst sets the smallest beside the largest ("Art & architecture is the smallest, with 478 topics; Society & politics has 13 times as many."). The subjects are a mosaic cut by rule from how many there are (`doorRows`): wide and narrow, three across, narrow and wide, three across, round again. Each plate carries its name and count.
+- **Through time:** the heading states the fullest era's share ("About two in three dated topics are from 1946 or later"); each era is a line with a bar and its count, and opens the Timeline there. The eras' pictures are no longer read.
+- **Ways on:** Wander (a well-known article of a random subject), Games, Your sources with what the phone holds.
+- **Left out:** the library map's link (D's landing has none; `LibraryMap.kt` is still in the code, unreachable). Rooms seen (R). The mockup's line "the further back you go, the less was written down" (not from data).
+- **Checks:** app 1,928 and core/library 525 tests pass. Shots `landing` in Field, Night and Spanish looked at. The new index query takes 6 ms on the real Top index at the desk. Not on a phone.
