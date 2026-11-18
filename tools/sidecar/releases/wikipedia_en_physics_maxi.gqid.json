@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_en_physics_maxi_2026-10-14.gqid",
- "sizeBytes": 3162112,
- "sha256": "b0b636b44b1010313f775c5781feebdc2424eea932199d7cb0853b9d39fe1f16",
+ "sizeBytes": 3166208,
+ "sha256": "92fe19d56e5eca9f7cf11c5e39263743ec377f1969b7158b537b82ac8af4e9af",
  "schemaVersion": 1,
  "sourceSha256": "2751c32efda00e18093e7ff4934269fcf916b6f0c7e5f2304efa83699d25442f",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 3,
+ "builderVersion": 4,
  "url": null
 }

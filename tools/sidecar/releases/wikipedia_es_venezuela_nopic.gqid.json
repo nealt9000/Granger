@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_es_venezuela_nopic_2026-09.gqid",
- "sizeBytes": 1232896,
- "sha256": "b6c8c2b972e4ec6382b296a950a59c79bb756d5f476fbb720420095eaff5c6a6",
+ "sizeBytes": 1236992,
+ "sha256": "8c2618f8a7a9bb712cfa5db38986b732058a4b75b17ebc2fdbbac21806127c16",
  "schemaVersion": 1,
  "sourceSha256": "ae4adade5606e8fe2ffe07885ce6e836d3a973b0c983e6f6de18fd2199f34a56",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 3,
+ "builderVersion": 4,
  "url": null
 }

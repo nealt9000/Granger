@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_es_physics_nopic_2026-10-15.gqid",
- "sizeBytes": 1634304,
- "sha256": "4f90fc7b03dc116ece52041ba344306c18309f41fc02abce1a52dba1ace27b2a",
+ "sizeBytes": 1638400,
+ "sha256": "ef2dc9ed3a91ff911eb40aa0c99f346dee006a1a4a1798f5ee9f1ab0af68aa60",
  "schemaVersion": 1,
  "sourceSha256": "9bf0ab816f24c64b77059197b117838073cc3401a795c44d23dd4392b4a48dc7",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 3,
+ "builderVersion": 4,
  "url": null
 }

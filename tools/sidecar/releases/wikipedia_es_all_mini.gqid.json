@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_es_all_mini_2026-10.gqid",
- "sizeBytes": 286605312,
- "sha256": "c42dcc34bdad2a84eb3ebd90208fe0672c6e1f3faac188bc5f357a11c257e252",
+ "sizeBytes": 286638080,
+ "sha256": "32c856b45f5a8e5c7421ffcced58f05ea250ab3c9d7a082003c8baa30bc74a23",
  "schemaVersion": 1,
  "sourceSha256": "132e9182656bcdde34429a1f09ab0c7284305c5afef19918ffd0a833d6c5a94c",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 3,
+ "builderVersion": 4,
  "url": null
 }

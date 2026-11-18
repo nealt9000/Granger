@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_en_golf_nopic_2026-10.gqid",
- "sizeBytes": 1417216,
- "sha256": "d76237a5ee45b91a7d07ad798c20b432fc9301144e1bbd5bb6d4d69487ed8754",
+ "sizeBytes": 1421312,
+ "sha256": "3868267551ca4becdc4896c4e89621df85b81953cb688c78579f7a49c073797f",
  "schemaVersion": 1,
  "sourceSha256": "4d589c84d57203c1356e0620d7e9efccf0f134426fe0d6773fd123e9056bfd76",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 3,
+ "builderVersion": 4,
  "url": null
 }

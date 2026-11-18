@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_es_football_nopic_2026-10.gqid",
- "sizeBytes": 11075584,
- "sha256": "32358e6c3b4d76e62605cc5c8c5cfcfde0669d6cec6ec9e7d6dc5860b9ebe4ec",
+ "sizeBytes": 11079680,
+ "sha256": "dd6732a922e5652bf4c18092acd828e0356309f9e07c903722b8ca005a0e029f",
  "schemaVersion": 1,
  "sourceSha256": "7eabde99c5bc258824b56741193bfccb8dd1da55027c5f64a074cd2476e7647d",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 3,
+ "builderVersion": 4,
  "url": null
 }

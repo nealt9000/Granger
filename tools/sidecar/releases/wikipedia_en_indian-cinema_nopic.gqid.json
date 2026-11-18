@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_en_indian-cinema_nopic_2026-10.gqid",
- "sizeBytes": 3870720,
- "sha256": "9471db9c46eecb51bcb6d5e6a6aebb5b2da30d3cc34cef44a70e5f83ed09e35f",
+ "sizeBytes": 3874816,
+ "sha256": "f58d6708263fe70ab6732173837603b603ac884978310f990d0a4f01a805de22",
  "schemaVersion": 1,
  "sourceSha256": "c6b2b2fbb0321052063b0e08400f0a20d8d987d8aee094d48cdb4e2d5572a5da",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 3,
+ "builderVersion": 4,
  "url": null
 }

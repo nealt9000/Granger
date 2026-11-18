@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_en_tennis_nopic_2026-10.gqid",
- "sizeBytes": 6430720,
- "sha256": "5910ad19e50b91c56de2854d7f47fc8b46bfb098f909146d4b4561ed97ef0c8f",
+ "sizeBytes": 6434816,
+ "sha256": "584d54ae04869fbec3f57be629a404a45bd4f8f602bc137bdca28e289eb95ada",
  "schemaVersion": 1,
  "sourceSha256": "f38dac5d9c3ce31e4845e3eeec819437ccfdfbef3f9cd073101fb33e0849233a",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 3,
+ "builderVersion": 4,
  "url": null
 }

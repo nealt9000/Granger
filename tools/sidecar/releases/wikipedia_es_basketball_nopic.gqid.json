@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_es_basketball_nopic_2026-09.gqid",
- "sizeBytes": 1650688,
- "sha256": "ff55a9ee5397063446033381865620fdf97b1394c51e471e5f96e23b7cf2ce1e",
+ "sizeBytes": 1654784,
+ "sha256": "55c52405791dd1725e1a2081f656410aea06b6fc4b229dc0d4894049b310c684",
  "schemaVersion": 1,
  "sourceSha256": "600872688b73f29874189b0f4cf5fe98b9f8dab56be26aba4d82714e916c7d43",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 3,
+ "builderVersion": 4,
  "url": null
 }

@@ -3,11 +3,11 @@
  "kind": "pack",
  "sidecar": "gqid",
  "fileName": "wikipedia_en_ice-hockey_nopic_2026-10.gqid",
- "sizeBytes": 4476928,
- "sha256": "7de9a4806a8d99fe178821b382216cf28033ac43c9ea25535a9f44bf3eb421fb",
+ "sizeBytes": 4481024,
+ "sha256": "5d28920d155e1e3704fd77de7276bfaa32bf72872ab590534c84beea8102fb00",
  "schemaVersion": 1,
  "sourceSha256": "564620664169b5cbb72bf522caeabf8b8fe9d176864edb80aacb5e69162208ea",
  "builder": "tools/qidindex/build.py",
- "builderVersion": 3,
+ "builderVersion": 4,
  "url": null
 }
