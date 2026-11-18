@@ -636,3 +636,24 @@ On `ex-build`. Measured first, on the Pixel 6, with debug-only timings (`Perf`, 
 - Not measured: a release build (it will be faster), the Timeline, Home, search.
 
 **Checks:** app 1,941 and core/library 525 tests pass.
+
+### Walkthrough on the Pixel (2026-11-18)
+Debug 1482/1483 on the Pixel 6. The landing, a subject, a room (its three views, Narrow, its foot), a broad topic and the quilt (a held plate, a step, a group as a list), in Night and in Field, in English, then the same path in Spanish (Field). TalkBack was checked through the accessibility tree (what each stop reads, every button's size, buttons with nothing to say), not by ear: TalkBack itself was not turned on.
+
+**Found and fixed**
+- In A–Z order a room's heading and plates ran under the letter rail: the list keeps clear of it.
+- The quilt's thread showed an empty square for the step just taken: a step carries the name and picture its page found.
+- Long words broke anywhere in small plates ("Posproducció / n"): titles hyphenate.
+- A subject's opening sentence kept its bracketed aside in Spanish ("(del griego τέχνη téchnē …)"): it is set as a topic's lead is.
+
+**Held up**
+- Field and Night: every screen legible, drawings whole on white, bars and doors in the right colours.
+- Spanish: every label, heading, finding and count in Spanish; today's spread a Spanish topic (Cinematografía) with Spanish captions; dates as "c. 57,000 a. C." and "siglo XX"; the trail, doors and ways on.
+- What reads: each plate one stop with its name and count or dates; eras as "Middle Ages, 500 – 1500, 1,954 topics"; doors as "The room before, The ancient world"; the trail's last step as "You are here"; the quilt's plates with their group and what leads to them. No button without something to say. Every button 48 dp or more except where the screen's edge or the doors bar cuts one off mid-scroll.
+
+**For Neal**
+- **An adult topic on a default screen.** Cinematografía's kinds lead with Anime and Hentai, with a suggestive picture, on its spread and its quilt (the Spanish pack's best-known kinds of "Animación"). Nothing in the app filters topics by what they are. A rule is his to make.
+- Caption numbers ("1", "History") may read as separate stops; the tree can't settle it. To hear with TalkBack.
+- Thousands are written with a comma in Spanish (7,796 temas), as es-419 does.
+- "Closest in meaning" is still slow (see the performance pass).
+- Not walked: a cold first install, a phone with one small pack, a tablet, large font sizes.

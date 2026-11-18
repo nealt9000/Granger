@@ -85,7 +85,7 @@ fun SubjectPageContent(ui: SubjectUi?, actions: ExploreActions, subject: Subject
                 Column(Modifier.padding(start = 16.dp, end = 16.dp, top = if (opening.isEmpty()) 4.dp else 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     val eyebrow = if (cards.isEmpty()) stringResource(R.string.explore_subject_a)
                     else stringResource(R.string.explore_subject_a_rooms, pluralStringResource(R.plurals.explore_rooms, cards.size, count(cards.size)))
-                    SpreadHead(eyebrow, name, standfirst = loaded.hero?.sentence?.let { firstSentence(it, 240) }, large = true)
+                    SpreadHead(eyebrow, name, standfirst = loaded.hero?.sentence?.let { firstSentence(app.granger.topic.TopicSource.blurb(it), 240) }, large = true)
                     if (opening.isNotEmpty()) Captions(opening.map { it.title })
                     if (loaded.canWander || loaded.canQuiz) {
                         Row(Modifier.padding(top = 2.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {

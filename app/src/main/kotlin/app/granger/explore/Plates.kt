@@ -217,7 +217,7 @@ private fun androidx.compose.foundation.layout.BoxScope.Foot(plate: Plate, size:
             .background(Brush.verticalGradient(listOf(Color.Transparent, FOOT)))
             .padding(start = 8.dp, end = 8.dp, top = 26.dp, bottom = 7.dp),
     ) {
-        Text(plate.title, style = SpreadType.display.copy(fontSize = size, lineHeight = size * 1.15f), color = Color.White, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(plate.title, style = SpreadType.display.copy(fontSize = size, lineHeight = size * 1.15f, hyphens = androidx.compose.ui.text.style.Hyphens.Auto), color = Color.White, maxLines = 2, overflow = TextOverflow.Ellipsis)
         plate.sub?.let { Text(it, style = SpreadType.ui.copy(fontSize = 11.sp), color = Color.White.copy(alpha = 0.92f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
     }
 }

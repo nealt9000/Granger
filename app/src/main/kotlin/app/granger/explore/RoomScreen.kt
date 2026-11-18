@@ -164,7 +164,8 @@ fun RoomContent(ui: SubjectUi?, actions: ExploreActions, subject: SubjectActions
         val byKey = loaded.articles.associateBy { "${it.packId}/${it.path}" }
         val open: (Plate) -> Unit = { p -> byKey[p.key]?.let { actions.onOpenArticle(it.packId, it.path, it.title) } }
         Box(Modifier.padding(padding).fillMaxSize()) {
-            LazyColumn(Modifier.fillMaxSize().testTag(RoomTags.LIST), state = list, contentPadding = PaddingValues(bottom = 24.dp)) {
+            // In A–Z order the list keeps clear of the letter rail, so nothing runs under it.
+            LazyColumn(Modifier.fillMaxSize().testTag(RoomTags.LIST), state = list, contentPadding = PaddingValues(bottom = 24.dp, end = if (rail) 36.dp else 0.dp)) {
                 item(key = "head") {
                     SpreadHead(
                         if (whole) stringResource(R.string.explore_way_subject)

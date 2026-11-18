@@ -165,6 +165,8 @@ fun TopicQuilt(
                 if (p.packId == here.packId && p.path == here.path) return
                 last = title to cells.mapTo(HashSet()) { it.plate.key }
                 open = null
+                // The step being left keeps the name and picture its page gave it.
+                walk[walk.lastIndex] = here.copy(title = title, picture = picture ?: here.picture)
                 walk += Step(p.packId, p.path, p.title, p.picture)
             }
             p.room != null -> actions.onOpenPlace?.invoke(p.room.subject, p.room.id)
@@ -180,7 +182,7 @@ fun TopicQuilt(
                 val scroll = rememberScrollState()
                 LaunchedEffect(here) { scroll.scrollTo(0) }
                 Column(Modifier.weight(1f).verticalScroll(scroll).padding(bottom = 28.dp)) {
-                    if (walk.size > 1) Thread(walk) { i -> while (walk.size > i + 1) walk.removeAt(walk.lastIndex); last = null; open = null; held = null }
+                    if (walk.size > 1) Thread(walk.dropLast(1) + here.copy(title = title, picture = picture ?: here.picture)) { i -> while (walk.size > i + 1) walk.removeAt(walk.lastIndex); last = null; open = null; held = null }
                     Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 14.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         Eyebrow(stringResource(R.string.topic_quilt_around, title))
                         val onLast = cells.count { it.plate.key in shared }
@@ -372,12 +374,12 @@ private fun Tile(
             val file = picture
             when {
                 file == null -> Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainer).padding(8.dp), verticalArrangement = Arrangement.Bottom) {
-                    Text(plate.title, style = SpreadType.display.copy(fontSize = size, lineHeight = size * 1.12f), color = MaterialTheme.colorScheme.onSurface, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                    Text(plate.title, style = SpreadType.display.copy(fontSize = size, lineHeight = size * 1.12f, hyphens = androidx.compose.ui.text.style.Hyphens.Auto), color = MaterialTheme.colorScheme.onSurface, maxLines = 3, overflow = TextOverflow.Ellipsis)
                     plate.sub?.let { Text(it, style = SpreadType.ui.copy(fontSize = 10.5.sp, lineHeight = 13.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1) }
                 }
                 ArticleThumbnails.isWhole(file) -> Column(Modifier.fillMaxSize().background(Color.White)) {
                     WholePicture(file, 240.dp, Modifier.weight(1f).fillMaxWidth().padding(start = 6.dp, end = 6.dp, top = if (tab != null) 20.dp else 6.dp, bottom = 2.dp))
-                    Text(plate.title, style = SpreadType.display.copy(fontSize = size, lineHeight = size * 1.12f), color = FieldKit.Ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(start = 7.dp, end = 7.dp, bottom = 6.dp))
+                    Text(plate.title, style = SpreadType.display.copy(fontSize = size, lineHeight = size * 1.12f, hyphens = androidx.compose.ui.text.style.Hyphens.Auto), color = FieldKit.Ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(start = 7.dp, end = 7.dp, bottom = 6.dp))
                 }
                 else -> {
                     FramedPicture(file, 240.dp, Modifier.fillMaxSize())
@@ -385,7 +387,7 @@ private fun Tile(
                         Modifier.fillMaxWidth().align(Alignment.BottomCenter).background(Brush.verticalGradient(listOf(Color.Transparent, FADE)))
                             .padding(start = 7.dp, end = 7.dp, top = 22.dp, bottom = 6.dp),
                     ) {
-                        Text(plate.title, style = SpreadType.display.copy(fontSize = size, lineHeight = size * 1.12f), color = Color.White, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Text(plate.title, style = SpreadType.display.copy(fontSize = size, lineHeight = size * 1.12f, hyphens = androidx.compose.ui.text.style.Hyphens.Auto), color = Color.White, maxLines = 2, overflow = TextOverflow.Ellipsis)
                         plate.sub?.let { Text(it, style = SpreadType.ui.copy(fontSize = 10.5.sp, lineHeight = 13.sp), color = Color.White.copy(alpha = 0.92f), maxLines = 1) }
                     }
                 }
