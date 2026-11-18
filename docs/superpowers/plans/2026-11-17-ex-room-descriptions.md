@@ -1,7 +1,7 @@
 # Explore room descriptions (Plan EX, P0)
 
-Draft for Neal's review, 2026-11-17. One line for each of the 108 rooms, in English and Spanish (neutral Latin American).
-Once approved they go into `tools/subjects/lenses.json` beside the names as `desc_en` and `desc_es`; nothing in the app or the index changes until then.
+Approved by Neal "for now" on 2026-11-17 and copied into `tools/subjects/lenses.json` as `desc_en` and `desc_es`. One line for each of the 108 rooms, in English and Spanish (neutral Latin American).
+The index meta and the app do not carry them yet; that is build step D3.
 
 How they were written:
 

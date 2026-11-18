@@ -1,12 +1,14 @@
 {
  "version": 1,
- "note": "Plan EX lenses (Neal 2026-11-17): curated ways into a subject, not partitions. An article joins every lens whose criteria it meets, from any subject in the lens's `in` (default its own). A lens is a list of clauses (`any`); an article joins when one clause holds, and a clause holds when all its keys do: `seeds` (its sub-category by facets.py, facets.json), `classes` (a thing's P31/P279/P136 reach one within the spec depth, P279 up), `occupations` (one of a person's P106; only people whose main subject is in `main`, default `in`), `genres` (one of its P136), `not_classes`/`not_occupations` (none reached), `after`/`before` (the item's year: a thing's start or date, a person's birth + 40), `things` (any non-person), `not_main` (main subject not one of these). An article no clause places stays in its subject's whole listing only: a neighbours' vote was tried and was wrong about a third of the time (2026-11-17). Labels sit beside the QIDs for reading; the build checks them. Nothing is set per article.",
+ "note": "Plan EX lenses (Neal 2026-11-17): curated ways into a subject, not partitions. An article joins every lens whose criteria it meets, from any subject in the lens's `in` (default its own). A lens is a list of clauses (`any`); an article joins when one clause holds, and a clause holds when all its keys do: `seeds` (its sub-category by facets.py, facets.json), `classes` (a thing's P31/P279/P136 reach one within the spec depth, P279 up), `occupations` (one of a person's P106; only people whose main subject is in `main`, default `in`), `genres` (one of its P136), `not_classes`/`not_occupations` (none reached), `after`/`before` (the item's year: a thing's start or date, a person's birth + 40), `things` (any non-person), `not_main` (main subject not one of these). An article no clause places stays in its subject's whole listing only: a neighbours' vote was tried and was wrong about a third of the time (2026-11-17). Labels sit beside the QIDs for reading; the build checks them. Nothing is set per article. `desc_en`/`desc_es` are the room's one-line description (Plan EX P0, Neal OK 2026-11-17): what the room holds, no claims; not yet in the index meta.",
  "subjects": {
   "nature": [
    {
     "id": "animals",
     "en": "Animal kingdom",
     "es": "Reino animal",
+    "desc_en": "Mammals, birds, reptiles, insects and the rest, with the breeds people have raised.",
+    "desc_es": "Mamíferos, aves, reptiles, insectos y los demás, con las razas que la gente ha criado.",
     "any": [
      {
       "seeds": [
@@ -20,6 +22,8 @@
     "id": "plants",
     "en": "Plant kingdom & fungi",
     "es": "Plantas y hongos",
+    "desc_en": "Trees, flowers, crops, mosses, mushrooms and lichens.",
+    "desc_es": "Árboles, flores, cultivos, musgos, setas y líquenes.",
     "any": [
      {
       "seeds": [
@@ -32,6 +36,8 @@
     "id": "habitats",
     "en": "Ecosystems & habitats",
     "es": "Ecosistemas y hábitats",
+    "desc_en": "Forests, deserts, reefs, wetlands and grasslands, and the parks that protect them.",
+    "desc_es": "Bosques, desiertos, arrecifes, humedales y praderas, y los parques que los protegen.",
     "in": [
      "nature",
      "places",
@@ -73,6 +79,8 @@
     "id": "sea",
     "en": "Life in water",
     "es": "Vida en el agua",
+    "desc_en": "Fish, whales, shellfish, corals and jellyfish.",
+    "desc_es": "Peces, ballenas, mariscos, corales y medusas.",
     "any": [
      {
       "classes": {
@@ -93,6 +101,8 @@
     "id": "farm",
     "en": "Pets & farm animals",
     "es": "Mascotas y animales de granja",
+    "desc_en": "Dogs, cats, horses, cattle, sheep and poultry, breed by breed.",
+    "desc_es": "Perros, gatos, caballos, vacas, ovejas y aves de corral, raza por raza.",
     "in": [
      "nature",
      "food"
@@ -119,6 +129,8 @@
     "id": "prehistoric",
     "en": "Prehistoric life",
     "es": "Vida prehistórica",
+    "desc_en": "Dinosaurs, early mammals and other creatures known only from fossils.",
+    "desc_es": "Dinosaurios, primeros mamíferos y otras criaturas conocidas solo por sus fósiles.",
     "in": [
      "nature",
      "science",
@@ -143,6 +155,8 @@
     "id": "environment",
     "en": "The environment",
     "es": "El medio ambiente",
+    "desc_en": "Pollution, climate change, extinction and the work of conservation.",
+    "desc_es": "Contaminación, cambio climático, extinción y el trabajo de conservación.",
     "in": [
      "nature",
      "science",
@@ -170,6 +184,8 @@
     "id": "evolution",
     "en": "Evolution & genetics",
     "es": "Evolución y genética",
+    "desc_en": "How living things change and inherit, and the naturalists who worked it out.",
+    "desc_es": "Cómo cambian y heredan los seres vivos, y los naturalistas que lo descifraron.",
     "in": [
      "nature",
      "science"
@@ -206,6 +222,8 @@
     "id": "space",
     "en": "Space & astronomy",
     "es": "Espacio y astronomía",
+    "desc_en": "Planets, stars, galaxies and the people who study the sky.",
+    "desc_es": "Planetas, estrellas, galaxias y quienes estudian el cielo.",
     "any": [
      {
       "seeds": [
@@ -226,6 +244,8 @@
     "id": "physics",
     "en": "Matter & energy",
     "es": "Materia y energía",
+    "desc_en": "Forces, particles, heat, light and electricity, and the physicists behind them.",
+    "desc_es": "Fuerzas, partículas, calor, luz y electricidad, y los físicos detrás de ellas.",
     "any": [
      {
       "seeds": [
@@ -245,6 +265,8 @@
     "id": "chem",
     "en": "Elements & materials",
     "es": "Elementos y materiales",
+    "desc_en": "The elements, compounds and reactions, and the chemists who studied them.",
+    "desc_es": "Los elementos, los compuestos y las reacciones, y los químicos que los estudiaron.",
     "any": [
      {
       "seeds": [
@@ -263,6 +285,8 @@
     "id": "earth",
     "en": "Earth, weather & climate",
     "es": "Tierra, tiempo y clima",
+    "desc_en": "Rocks, minerals, volcanoes, earthquakes, storms and climate.",
+    "desc_es": "Rocas, minerales, volcanes, terremotos, tormentas y clima.",
     "in": [
      "science",
      "nature",
@@ -292,6 +316,8 @@
     "id": "life",
     "en": "Life & the cell",
     "es": "La vida y la célula",
+    "desc_en": "Cells, organs and the workings of living bodies.",
+    "desc_es": "Células, órganos y el funcionamiento de los cuerpos vivos.",
     "any": [
      {
       "seeds": [
@@ -311,6 +337,8 @@
     "id": "maths",
     "en": "Numbers, shapes & logic",
     "es": "Números, formas y lógica",
+    "desc_en": "Arithmetic, geometry, statistics and proof, and the mathematicians who shaped them.",
+    "desc_es": "Aritmética, geometría, estadística y demostración, y los matemáticos que les dieron forma.",
     "any": [
      {
       "seeds": [
@@ -330,6 +358,8 @@
     "id": "mind",
     "en": "Mind & behaviour",
     "es": "Mente y conducta",
+    "desc_en": "Emotion, memory and behaviour, and the psychologists who study them.",
+    "desc_es": "Emoción, memoria y conducta, y los psicólogos que las estudian.",
     "in": [
      "science",
      "health",
@@ -361,6 +391,8 @@
     "id": "discoveries",
     "en": "Great scientists & discoveries",
     "es": "Grandes científicos y descubrimientos",
+    "desc_en": "Theories and laws of science, and the scientists and inventors who found them.",
+    "desc_es": "Teorías y leyes de la ciencia, y los científicos e inventores que las hallaron.",
     "in": [
      "science",
      "technology",
@@ -403,6 +435,8 @@
     "id": "ancient",
     "en": "The ancient world",
     "es": "El mundo antiguo",
+    "desc_en": "Peoples, places and objects from before the year 500.",
+    "desc_es": "Pueblos, lugares y objetos anteriores al año 500.",
     "in": [
      "history",
      "places",
@@ -421,6 +455,8 @@
     "id": "medieval",
     "en": "Middle Ages",
     "es": "Edad Media",
+    "desc_en": "Events, institutions and works from the years 500 to 1500.",
+    "desc_es": "Hechos, instituciones y obras de los años 500 a 1500.",
     "in": [
      "history",
      "places",
@@ -442,6 +478,8 @@
     "id": "empires",
     "en": "Empires & kingdoms",
     "es": "Imperios y reinos",
+    "desc_en": "Empires, kingdoms, dynasties, caliphates and city-states.",
+    "desc_es": "Imperios, reinos, dinastías, califatos y ciudades-estado.",
     "any": [
      {
       "seeds": [
@@ -464,6 +502,8 @@
     "id": "rulers",
     "en": "Rulers & royalty",
     "es": "Gobernantes y realeza",
+    "desc_en": "Kings, queens, emperors, pharaohs and sultans, and their families.",
+    "desc_es": "Reyes, reinas, emperadores, faraones y sultanes, y sus familias.",
     "in": [
      "history",
      "society"
@@ -494,6 +534,8 @@
     "id": "war",
     "en": "Wars & battles",
     "es": "Guerras y batallas",
+    "desc_en": "Wars, campaigns and battles, and the soldiers and commanders who fought them.",
+    "desc_es": "Guerras, campañas y batallas, y los soldados y comandantes que las libraron.",
     "in": [
      "history",
      "society"
@@ -527,6 +569,8 @@
     "id": "revolutions",
     "en": "Revolutions & uprisings",
     "es": "Revoluciones y levantamientos",
+    "desc_en": "Revolutions, civil wars, coups, rebellions and protests.",
+    "desc_es": "Revoluciones, guerras civiles, golpes de Estado, rebeliones y protestas.",
     "in": [
      "history",
      "society"
@@ -552,6 +596,8 @@
     "id": "exploration",
     "en": "Exploration & discovery",
     "es": "Exploración y descubrimiento",
+    "desc_en": "Explorers, navigators and map-makers, and the journeys they made.",
+    "desc_es": "Exploradores, navegantes y cartógrafos, y los viajes que hicieron.",
     "in": [
      "history",
      "places",
@@ -580,6 +626,8 @@
     "id": "disasters",
     "en": "Disasters & tragedies",
     "es": "Desastres y tragedias",
+    "desc_en": "Disasters, massacres, bombings, shootings and other dark days.",
+    "desc_es": "Desastres, masacres, atentados, tiroteos y otros días oscuros.",
     "in": [
      "history",
      "society",
@@ -597,6 +645,8 @@
     "id": "modern",
     "en": "The modern world",
     "es": "El mundo moderno",
+    "desc_en": "Events and movements since 1900.",
+    "desc_es": "Hechos y movimientos desde 1900.",
     "in": [
      "history"
     ],
@@ -616,6 +666,8 @@
     "id": "government",
     "en": "Politics & government",
     "es": "Política y gobierno",
+    "desc_en": "Offices, parliaments, courts, parties and elections.",
+    "desc_es": "Cargos, parlamentos, tribunales, partidos y elecciones.",
     "any": [
      {
       "seeds": [
@@ -628,6 +680,8 @@
     "id": "leaders",
     "en": "World leaders",
     "es": "Líderes mundiales",
+    "desc_en": "Presidents, prime ministers, monarchs, politicians and diplomats.",
+    "desc_es": "Presidentes, primeros ministros, monarcas, políticos y diplomáticos.",
     "in": [
      "society",
      "history"
@@ -650,6 +704,8 @@
     "id": "rights",
     "en": "Rights & movements",
     "es": "Derechos y movimientos",
+    "desc_en": "Campaigns for rights and reform, and the activists who led them.",
+    "desc_es": "Campañas por los derechos y la reforma, y los activistas que las encabezaron.",
     "in": [
      "society",
      "history",
@@ -677,6 +733,8 @@
     "id": "law",
     "en": "Law & justice",
     "es": "Ley y justicia",
+    "desc_en": "Laws, court cases and legal ideas, and the judges and lawyers behind them.",
+    "desc_es": "Leyes, casos judiciales e ideas jurídicas, y los jueces y abogados detrás de ellos.",
     "in": [
      "society"
     ],
@@ -706,6 +764,8 @@
     "id": "crime",
     "en": "Crime & espionage",
     "es": "Crimen y espionaje",
+    "desc_en": "Crimes and trials, outlaws, gangsters and spies.",
+    "desc_es": "Crímenes y juicios, forajidos, gánsteres y espías.",
     "in": [
      "society",
      "history"
@@ -732,6 +792,8 @@
     "id": "peoples",
     "en": "Peoples & customs",
     "es": "Pueblos y costumbres",
+    "desc_en": "Peoples and communities, their festivals, holidays and traditions.",
+    "desc_es": "Pueblos y comunidades, sus fiestas, días festivos y tradiciones.",
     "in": [
      "society",
      "religion",
@@ -760,6 +822,8 @@
     "id": "world",
     "en": "The world stage",
     "es": "El escenario mundial",
+    "desc_en": "World bodies, alliances and agreements, national flags and visa rules.",
+    "desc_es": "Organismos mundiales, alianzas y acuerdos, banderas nacionales y reglas de visado.",
     "any": [
      {
       "seeds": [
@@ -772,6 +836,8 @@
     "id": "media",
     "en": "News, media & schools",
     "es": "Noticias, medios y escuelas",
+    "desc_en": "Newspapers, broadcasters and schools, and the journalists and teachers in them.",
+    "desc_es": "Periódicos, emisoras y escuelas, y los periodistas y maestros que trabajan en ellos.",
     "in": [
      "society",
      "technology",
@@ -803,6 +869,8 @@
     "id": "countries",
     "en": "Countries",
     "es": "Países",
+    "desc_en": "The world's countries, past and present.",
+    "desc_es": "Los países del mundo, de ayer y de hoy.",
     "any": [
      {
       "seeds": [
@@ -815,6 +883,8 @@
     "id": "cities",
     "en": "Cities & towns",
     "es": "Ciudades y pueblos",
+    "desc_en": "Cities, towns and neighbourhoods.",
+    "desc_es": "Ciudades, pueblos y barrios.",
     "any": [
      {
       "seeds": [
@@ -827,6 +897,8 @@
     "id": "regions",
     "en": "Continents & regions",
     "es": "Continentes y regiones",
+    "desc_en": "Continents, regions, states and provinces.",
+    "desc_es": "Continentes, regiones, estados y provincias.",
     "any": [
      {
       "seeds": [
@@ -839,6 +911,8 @@
     "id": "nature",
     "en": "Rivers, mountains & seas",
     "es": "Ríos, montañas y mares",
+    "desc_en": "Rivers, lakes, mountains, islands, glaciers and seas.",
+    "desc_es": "Ríos, lagos, montañas, islas, glaciares y mares.",
     "in": [
      "places",
      "nature",
@@ -881,6 +955,8 @@
     "id": "landmarks",
     "en": "Buildings & landmarks",
     "es": "Edificios y monumentos",
+    "desc_en": "Castles, cathedrals, bridges, monuments and ancient sites.",
+    "desc_es": "Castillos, catedrales, puentes, monumentos y sitios antiguos.",
     "in": [
      "places",
      "art",
@@ -925,6 +1001,8 @@
     "id": "travel",
     "en": "Travel & transport",
     "es": "Viajes y transporte",
+    "desc_en": "Roads, railways, stations, airports and transit systems.",
+    "desc_es": "Carreteras, ferrocarriles, estaciones, aeropuertos y sistemas de transporte.",
     "in": [
      "places",
      "technology"
@@ -941,6 +1019,8 @@
     "id": "wonders",
     "en": "World heritage",
     "es": "Patrimonio mundial",
+    "desc_en": "Places on the World Heritage list.",
+    "desc_es": "Lugares de la lista del Patrimonio Mundial.",
     "in": [
      "places",
      "art",
@@ -962,6 +1042,8 @@
     "id": "computers",
     "en": "Computers & software",
     "es": "Computadoras y software",
+    "desc_en": "Computers, chips, operating systems, programming languages and software.",
+    "desc_es": "Computadoras, chips, sistemas operativos, lenguajes de programación y software.",
     "any": [
      {
       "seeds": [
@@ -974,6 +1056,8 @@
     "id": "internet",
     "en": "The internet",
     "es": "Internet",
+    "desc_en": "Websites, networks, protocols and online media.",
+    "desc_es": "Sitios web, redes, protocolos y medios en línea.",
     "any": [
      {
       "seeds": [
@@ -986,6 +1070,8 @@
     "id": "vehicles",
     "en": "Cars, planes & ships",
     "es": "Autos, aviones y barcos",
+    "desc_en": "Cars, trains, aircraft, ships and bicycles.",
+    "desc_es": "Autos, trenes, aviones, barcos y bicicletas.",
     "in": [
      "technology",
      "places"
@@ -1016,6 +1102,8 @@
     "id": "space",
     "en": "Spaceflight",
     "es": "Vuelos espaciales",
+    "desc_en": "Rockets, spacecraft and missions, and the astronauts and engineers who flew them.",
+    "desc_es": "Cohetes, naves y misiones, y los astronautas e ingenieros que las hicieron volar.",
     "in": [
      "technology",
      "science"
@@ -1038,6 +1126,8 @@
     "id": "machines",
     "en": "Machines & gadgets",
     "es": "Máquinas y aparatos",
+    "desc_en": "Engines, tools, phones, consoles and other devices.",
+    "desc_es": "Motores, herramientas, teléfonos, consolas y otros aparatos.",
     "any": [
      {
       "seeds": [
@@ -1050,6 +1140,8 @@
     "id": "inventions",
     "en": "Inventions & inventors",
     "es": "Inventos e inventores",
+    "desc_en": "Inventions and standards, and the inventors and engineers who made them.",
+    "desc_es": "Inventos y estándares, y los inventores e ingenieros que los crearon.",
     "in": [
      "technology",
      "science",
@@ -1077,6 +1169,8 @@
     "id": "energy",
     "en": "Energy & power",
     "es": "Energía",
+    "desc_en": "Electricity, fuels, engines, batteries and power stations.",
+    "desc_es": "Electricidad, combustibles, motores, baterías y centrales eléctricas.",
     "in": [
      "technology",
      "science"
@@ -1101,6 +1195,8 @@
     "id": "weapons",
     "en": "Weapons & warfare",
     "es": "Armas y guerra",
+    "desc_en": "Firearms, tanks, warships, military aircraft, missiles and bombs.",
+    "desc_es": "Armas de fuego, tanques, buques de guerra, aviones militares, misiles y bombas.",
     "in": [
      "technology",
      "history"
@@ -1129,6 +1225,8 @@
     "id": "painting",
     "en": "Painting & sculpture",
     "es": "Pintura y escultura",
+    "desc_en": "Painters and sculptors, and the subjects they returned to.",
+    "desc_es": "Pintores y escultores, y los temas a los que volvieron.",
     "any": [
      {
       "seeds": [
@@ -1147,6 +1245,8 @@
     "id": "architecture",
     "en": "Architecture",
     "es": "Arquitectura",
+    "desc_en": "Building styles and traditions, and the architects who designed them.",
+    "desc_es": "Estilos y tradiciones de construcción, y los arquitectos que los diseñaron.",
     "in": [
      "art",
      "places",
@@ -1172,6 +1272,8 @@
     "id": "movements",
     "en": "Styles & movements",
     "es": "Estilos y movimientos",
+    "desc_en": "Styles and movements in art, architecture, writing and music.",
+    "desc_es": "Estilos y movimientos del arte, la arquitectura, las letras y la música.",
     "in": [
      "art",
      "literature",
@@ -1197,6 +1299,8 @@
     "id": "works",
     "en": "Famous works",
     "es": "Obras famosas",
+    "desc_en": "Paintings, sculptures, carvings and coins, one work at a time.",
+    "desc_es": "Pinturas, esculturas, tallas y monedas, una obra a la vez.",
     "in": [
      "art"
     ],
@@ -1219,6 +1323,8 @@
     "id": "design",
     "en": "Photography, fashion & design",
     "es": "Fotografía, moda y diseño",
+    "desc_en": "Photographers, fashion designers and graphic designers, and their work.",
+    "desc_es": "Fotógrafos, diseñadores de moda y diseñadores gráficos, y su obra.",
     "any": [
      {
       "seeds": [
@@ -1242,6 +1348,8 @@
     "id": "comics",
     "en": "Comics & animation",
     "es": "Cómics y animación",
+    "desc_en": "Comics, cartoons and their characters, and the artists who drew them.",
+    "desc_es": "Cómics, dibujos animados y sus personajes, y los artistas que los dibujaron.",
     "in": [
      "art",
      "literature",
@@ -1269,6 +1377,8 @@
     "id": "books",
     "en": "Great books",
     "es": "Grandes libros",
+    "desc_en": "Novels, poems, plays and other books, and the lists of what authors wrote.",
+    "desc_es": "Novelas, poemas, obras de teatro y otros libros, y las listas de lo que escribió cada autor.",
     "any": [
      {
       "seeds": [
@@ -1281,6 +1391,8 @@
     "id": "poets",
     "en": "Poets & playwrights",
     "es": "Poetas y dramaturgos",
+    "desc_en": "Poets and playwrights, and the verse and drama they wrote.",
+    "desc_es": "Poetas y dramaturgos, y los versos y dramas que escribieron.",
     "any": [
      {
       "seeds": [
@@ -1299,6 +1411,8 @@
     "id": "novelists",
     "en": "Novelists & writers",
     "es": "Novelistas y escritores",
+    "desc_en": "Novelists, essayists, short-story writers and other authors.",
+    "desc_es": "Novelistas, ensayistas, cuentistas y otros autores.",
     "any": [
      {
       "seeds": [
@@ -1320,6 +1434,8 @@
     "id": "characters",
     "en": "Characters & heroes",
     "es": "Personajes y héroes",
+    "desc_en": "People of fiction: literary characters, screen characters and superheroes.",
+    "desc_es": "Gente de ficción: personajes literarios, de pantalla y superhéroes.",
     "in": [
      "literature",
      "film",
@@ -1346,6 +1462,8 @@
     "id": "myths",
     "en": "Myths, legends & tales",
     "es": "Mitos, leyendas y cuentos",
+    "desc_en": "Myths, legends, epics, folk tales and fairy tales.",
+    "desc_es": "Mitos, leyendas, epopeyas, cuentos populares y cuentos de hadas.",
     "in": [
      "literature",
      "religion"
@@ -1368,6 +1486,8 @@
     "id": "kinds",
     "en": "Kinds of writing",
     "es": "Géneros literarios",
+    "desc_en": "Genres and forms of writing, with the prizes and publishers around them.",
+    "desc_es": "Géneros y formas de escritura, con los premios y editoriales que los rodean.",
     "any": [
      {
       "seeds": [
@@ -1389,6 +1509,8 @@
     "id": "pop",
     "en": "Singers & bands",
     "es": "Cantantes y bandas",
+    "desc_en": "Singers, bands and other performers.",
+    "desc_es": "Cantantes, bandas y otros intérpretes.",
     "any": [
      {
       "seeds": [
@@ -1401,6 +1523,8 @@
     "id": "classical",
     "en": "Classical music",
     "es": "Música clásica",
+    "desc_en": "Composers, conductors and players, and their operas, symphonies and sonatas.",
+    "desc_es": "Compositores, directores e intérpretes, y sus óperas, sinfonías y sonatas.",
     "any": [
      {
       "classes": {
@@ -1442,6 +1566,8 @@
     "id": "songs",
     "en": "Albums & songs",
     "es": "Álbumes y canciones",
+    "desc_en": "Albums, songs and the lists of what artists recorded.",
+    "desc_es": "Álbumes, canciones y las listas de lo que grabaron los artistas.",
     "any": [
      {
       "seeds": [
@@ -1454,6 +1580,8 @@
     "id": "instruments",
     "en": "Instruments",
     "es": "Instrumentos",
+    "desc_en": "Strings, winds, keyboards, drums and electronic instruments.",
+    "desc_es": "Cuerdas, vientos, teclados, tambores e instrumentos electrónicos.",
     "in": [
      "music",
      "technology"
@@ -1474,6 +1602,8 @@
     "id": "genres",
     "en": "Genres & styles",
     "es": "Géneros y estilos",
+    "desc_en": "Kinds of music, from jazz to hip hop, and the scenes around them.",
+    "desc_es": "Tipos de música, del jazz al hip hop, y las escenas que los rodean.",
     "any": [
      {
       "seeds": [
@@ -1491,6 +1621,8 @@
     "id": "anthems",
     "en": "Anthems & folk songs",
     "es": "Himnos y canciones populares",
+    "desc_en": "National anthems and hymns.",
+    "desc_es": "Himnos nacionales e himnos religiosos.",
     "in": [
      "music",
      "society"
@@ -1511,6 +1643,8 @@
     "id": "films",
     "en": "Films",
     "es": "Películas",
+    "desc_en": "Feature films and film series.",
+    "desc_es": "Largometrajes y series de películas.",
     "any": [
      {
       "seeds": [
@@ -1523,6 +1657,8 @@
     "id": "tv",
     "en": "Television",
     "es": "Televisión",
+    "desc_en": "Television series, episodes and channels.",
+    "desc_es": "Series, episodios y canales de televisión.",
     "any": [
      {
       "seeds": [
@@ -1535,6 +1671,8 @@
     "id": "directors",
     "en": "Directors & producers",
     "es": "Directores y productores",
+    "desc_en": "Directors, producers and screenwriters.",
+    "desc_es": "Directores, productores y guionistas.",
     "any": [
      {
       "seeds": [
@@ -1547,6 +1685,8 @@
     "id": "actors",
     "en": "Actors",
     "es": "Actores",
+    "desc_en": "Actors, comedians and presenters of screen and stage.",
+    "desc_es": "Actores, comediantes y presentadores de la pantalla y el escenario.",
     "any": [
      {
       "seeds": [
@@ -1560,6 +1700,8 @@
     "id": "animation",
     "en": "Animation",
     "es": "Animación",
+    "desc_en": "Animated films and series, anime, cartoons and the animators who made them.",
+    "desc_es": "Películas y series animadas, anime, caricaturas y los animadores que las hicieron.",
     "in": [
      "film",
      "art"
@@ -1585,6 +1727,8 @@
     "id": "characters",
     "en": "Characters",
     "es": "Personajes",
+    "desc_en": "Characters from films, television, books and games.",
+    "desc_es": "Personajes del cine, la televisión, los libros y los juegos.",
     "in": [
      "film",
      "literature",
@@ -1605,6 +1749,8 @@
     "id": "football",
     "en": "Football",
     "es": "Fútbol",
+    "desc_en": "Clubs, players, managers and competitions of football.",
+    "desc_es": "Clubes, jugadores, entrenadores y competiciones de fútbol.",
     "any": [
      {
       "seeds": [
@@ -1617,6 +1763,8 @@
     "id": "olympics",
     "en": "The Olympics",
     "es": "Los Juegos Olímpicos",
+    "desc_en": "The Summer and Winter Games, edition by edition.",
+    "desc_es": "Los Juegos de verano y de invierno, edición por edición.",
     "any": [
      {
       "classes": {
@@ -1631,6 +1779,8 @@
     "id": "cups",
     "en": "Tournaments & cups",
     "es": "Torneos y copas",
+    "desc_en": "Leagues, championships, seasons and cups.",
+    "desc_es": "Ligas, campeonatos, temporadas y copas.",
     "any": [
      {
       "seeds": [
@@ -1643,6 +1793,8 @@
     "id": "stars",
     "en": "Sports stars",
     "es": "Estrellas del deporte",
+    "desc_en": "Athletes of every sport: footballers, boxers, swimmers, drivers and more.",
+    "desc_es": "Atletas de todos los deportes: futbolistas, boxeadores, nadadores, pilotos y más.",
     "any": [
      {
       "seeds": [
@@ -1669,6 +1821,8 @@
     "id": "motorsport",
     "en": "Racing & motorsport",
     "es": "Carreras y automovilismo",
+    "desc_en": "Drivers, races and circuits.",
+    "desc_es": "Pilotos, carreras y circuitos.",
     "any": [
      {
       "seeds": [
@@ -1681,6 +1835,8 @@
     "id": "sports",
     "en": "Sports & how they're played",
     "es": "Deportes y cómo se juegan",
+    "desc_en": "The sports themselves, their rules and their techniques.",
+    "desc_es": "Los deportes en sí, sus reglas y sus técnicas.",
     "any": [
      {
       "classes": {
@@ -1697,6 +1853,8 @@
     "id": "venues",
     "en": "Stadiums & venues",
     "es": "Estadios y sedes",
+    "desc_en": "Stadiums, arenas and grounds.",
+    "desc_es": "Estadios, arenas y campos.",
     "any": [
      {
       "seeds": [
@@ -1711,6 +1869,8 @@
     "id": "video",
     "en": "Video games",
     "es": "Videojuegos",
+    "desc_en": "Video games, their series and the worlds inside them.",
+    "desc_es": "Videojuegos, sus series y los mundos que contienen.",
     "any": [
      {
       "seeds": [
@@ -1723,6 +1883,8 @@
     "id": "chars",
     "en": "Characters & studios",
     "es": "Personajes y estudios",
+    "desc_en": "Video game characters and the studios that made them.",
+    "desc_es": "Personajes de videojuegos y los estudios que los crearon.",
     "any": [
      {
       "seeds": [
@@ -1735,6 +1897,8 @@
     "id": "table",
     "en": "Board, card & table games",
     "es": "Juegos de mesa y de cartas",
+    "desc_en": "Board games, card games, role-playing games and quiz shows.",
+    "desc_es": "Juegos de mesa, de cartas y de rol, y concursos de preguntas.",
     "any": [
      {
       "seeds": [
@@ -1749,6 +1913,8 @@
     "id": "faiths",
     "en": "World religions",
     "es": "Religiones del mundo",
+    "desc_en": "The world's religions, their branches and their churches.",
+    "desc_es": "Las religiones del mundo, sus ramas y sus iglesias.",
     "any": [
      {
       "seeds": [
@@ -1761,6 +1927,8 @@
     "id": "myths",
     "en": "Gods & myths",
     "es": "Dioses y mitos",
+    "desc_en": "Gods, goddesses and the mythologies they belong to.",
+    "desc_es": "Dioses, diosas y las mitologías a las que pertenecen.",
     "in": [
      "religion",
      "literature"
@@ -1785,6 +1953,8 @@
     "id": "scripture",
     "en": "Sacred texts & practice",
     "es": "Textos sagrados y práctica",
+    "desc_en": "Holy books, prayers, rituals and holy days.",
+    "desc_es": "Libros sagrados, oraciones, rituales y días santos.",
     "any": [
      {
       "seeds": [
@@ -1806,6 +1976,8 @@
     "id": "figures",
     "en": "Prophets, saints & clergy",
     "es": "Profetas, santos y clero",
+    "desc_en": "Prophets, saints, priests, bishops, rabbis, imams and monks.",
+    "desc_es": "Profetas, santos, sacerdotes, obispos, rabinos, imanes y monjes.",
     "any": [
      {
       "occupations": {
@@ -1828,6 +2000,8 @@
     "id": "philosophy",
     "en": "Philosophy",
     "es": "Filosofía",
+    "desc_en": "Philosophers and their ideas about knowledge, right and wrong, and how to live.",
+    "desc_es": "Filósofos y sus ideas sobre el conocimiento, el bien y el mal, y cómo vivir.",
     "in": [
      "religion",
      "society",
@@ -1853,6 +2027,8 @@
     "id": "places",
     "en": "Holy places",
     "es": "Lugares sagrados",
+    "desc_en": "Cathedrals, mosques, temples, monasteries, shrines and holy cities.",
+    "desc_es": "Catedrales, mezquitas, templos, monasterios, santuarios y ciudades santas.",
     "in": [
      "religion",
      "places",
@@ -1882,6 +2058,8 @@
     "id": "langs",
     "en": "Languages of the world",
     "es": "Lenguas del mundo",
+    "desc_en": "Languages, dialects, accents and names.",
+    "desc_es": "Lenguas, dialectos, acentos y nombres.",
     "any": [
      {
       "seeds": [
@@ -1894,6 +2072,8 @@
     "id": "scripts",
     "en": "Scripts & alphabets",
     "es": "Escrituras y alfabetos",
+    "desc_en": "Alphabets, scripts, spelling and shorthand.",
+    "desc_es": "Alfabetos, escrituras, ortografía y taquigrafía.",
     "any": [
      {
       "seeds": [
@@ -1906,6 +2086,8 @@
     "id": "words",
     "en": "Words & grammar",
     "es": "Palabras y gramática",
+    "desc_en": "Grammar and the parts of speech, and the linguists who described them.",
+    "desc_es": "La gramática y las clases de palabras, y los lingüistas que las describieron.",
     "any": [
      {
       "seeds": [
@@ -1927,6 +2109,8 @@
     "id": "dishes",
     "en": "Dishes & cuisines",
     "es": "Platos y cocinas",
+    "desc_en": "Dishes and the cuisines they come from.",
+    "desc_es": "Platos y las cocinas de donde vienen.",
     "any": [
      {
       "seeds": [
@@ -1939,6 +2123,8 @@
     "id": "drinks",
     "en": "Drinks",
     "es": "Bebidas",
+    "desc_en": "Wine, beer, spirits, cocktails, tea and coffee.",
+    "desc_es": "Vino, cerveza, licores, cócteles, té y café.",
     "any": [
      {
       "seeds": [
@@ -1951,6 +2137,8 @@
     "id": "fruitveg",
     "en": "Fruit & vegetables",
     "es": "Frutas y verduras",
+    "desc_en": "Fruit, berries, nuts, roots and leafy vegetables.",
+    "desc_es": "Frutas, bayas, frutos secos, raíces y verduras de hoja.",
     "in": [
      "food",
      "nature"
@@ -1980,6 +2168,8 @@
     "id": "ingredients",
     "en": "Ingredients & spices",
     "es": "Ingredientes y especias",
+    "desc_en": "Spices, herbs, sauces and other things cooks reach for.",
+    "desc_es": "Especias, hierbas, salsas y otras cosas que usan los cocineros.",
     "any": [
      {
       "seeds": [
@@ -2000,6 +2190,8 @@
     "id": "farming",
     "en": "Farming & crops",
     "es": "Agricultura y cultivos",
+    "desc_en": "Crops, grains, livestock and the business of growing food.",
+    "desc_es": "Cultivos, cereales, ganado y el oficio de producir alimentos.",
     "in": [
      "food",
      "nature",
@@ -2025,6 +2217,8 @@
     "id": "sweet",
     "en": "Sweets & baking",
     "es": "Dulces y repostería",
+    "desc_en": "Cakes, biscuits, desserts and confectionery.",
+    "desc_es": "Pasteles, galletas, postres y golosinas.",
     "any": [
      {
       "classes": {
@@ -2042,6 +2236,8 @@
     "id": "diseases",
     "en": "Diseases & conditions",
     "es": "Enfermedades y trastornos",
+    "desc_en": "Illnesses, injuries and disorders, and how they are told apart.",
+    "desc_es": "Enfermedades, lesiones y trastornos, y cómo se distinguen.",
     "any": [
      {
       "seeds": [
@@ -2054,6 +2250,8 @@
     "id": "body",
     "en": "The human body",
     "es": "El cuerpo humano",
+    "desc_en": "Organs, muscles, bones, nerves and senses.",
+    "desc_es": "Órganos, músculos, huesos, nervios y sentidos.",
     "in": [
      "health",
      "science"
@@ -2070,6 +2268,8 @@
     "id": "symptoms",
     "en": "Signs & symptoms",
     "es": "Signos y síntomas",
+    "desc_en": "Pain, rashes, bleeding, shortness of breath and other signs that something is wrong.",
+    "desc_es": "Dolor, erupciones, sangrado, falta de aire y otras señales de que algo anda mal.",
     "any": [
      {
       "seeds": [
@@ -2082,6 +2282,8 @@
     "id": "medicines",
     "en": "Medicines & treatment",
     "es": "Medicamentos y tratamientos",
+    "desc_en": "Drugs, vaccines, surgery and other treatments.",
+    "desc_es": "Medicamentos, vacunas, cirugía y otros tratamientos.",
     "any": [
      {
       "seeds": [
@@ -2094,6 +2296,8 @@
     "id": "mind",
     "en": "Mental health",
     "es": "Salud mental",
+    "desc_en": "Mental disorders, addiction and anxiety.",
+    "desc_es": "Trastornos mentales, adicción y ansiedad.",
     "in": [
      "health",
      "science"
@@ -2114,6 +2318,8 @@
     "id": "history",
     "en": "Doctors & medical history",
     "es": "Médicos e historia de la medicina",
+    "desc_en": "Physicians, surgeons and nurses, and the practice of medicine.",
+    "desc_es": "Médicos, cirujanos y enfermeras, y el ejercicio de la medicina.",
     "in": [
      "health",
      "science",
@@ -2140,6 +2346,8 @@
     "id": "infection",
     "en": "Infections & pandemics",
     "es": "Infecciones y pandemias",
+    "desc_en": "Viruses, bacterial diseases, epidemics and pandemics.",
+    "desc_es": "Virus, enfermedades bacterianas, epidemias y pandemias.",
     "in": [
      "health",
      "history"
@@ -2163,6 +2371,8 @@
     "id": "companies",
     "en": "Companies & brands",
     "es": "Empresas y marcas",
+    "desc_en": "Companies, brands, shops and restaurants.",
+    "desc_es": "Empresas, marcas, tiendas y restaurantes.",
     "any": [
      {
       "seeds": [
@@ -2175,6 +2385,8 @@
     "id": "founders",
     "en": "Founders & tycoons",
     "es": "Fundadores y magnates",
+    "desc_en": "Founders, executives, investors and owners.",
+    "desc_es": "Fundadores, ejecutivos, inversionistas y dueños.",
     "any": [
      {
       "seeds": [
@@ -2187,6 +2399,8 @@
     "id": "money",
     "en": "Money & markets",
     "es": "Dinero y mercados",
+    "desc_en": "Coins, banknotes, currencies, banks and stock exchanges.",
+    "desc_es": "Monedas, billetes, divisas, bancos y bolsas de valores.",
     "any": [
      {
       "seeds": [
@@ -2199,6 +2413,8 @@
     "id": "industry",
     "en": "Economics & industry",
     "es": "Economía e industria",
+    "desc_en": "Economies, industries, trade and work, and the economists who study them.",
+    "desc_es": "Economías, industrias, comercio y trabajo, y los economistas que los estudian.",
     "any": [
      {
       "seeds": [

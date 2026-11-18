@@ -480,3 +480,11 @@ since no markup rule will reliably replace them.
 - **Design consequence for G0:** plates must show flags, seals, logos and maps whole on a paper ground, not cropped.
 - **Room descriptions** are drafted for review in `2026-11-17-ex-room-descriptions.md` (108 rooms, en + es). They
   move into `lenses.json` after Neal's OK. The draft also lists eleven rooms whose contents and names pull apart.
+
+### P0 done (2026-11-17)
+
+Neal OK'd the room descriptions "for now". They are in `tools/subjects/lenses.json` as `desc_en`/`desc_es`.
+`lens_meta` still emits only id and names, so no index changes until D3 adds them to the meta `facets` list (a
+metadata-only rebuild). The eleven rooms whose names and contents pull apart stay open. Next: G0.
+
+Note: `test_facets.py::test_the_vote_fills_gaps_and_may_move_a_catch_all` fails on main before this change.
