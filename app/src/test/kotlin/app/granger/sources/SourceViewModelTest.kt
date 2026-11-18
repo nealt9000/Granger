@@ -235,6 +235,17 @@ class SourceViewModelTest {
         assertThat(sections.single().foldable).isFalse()
     }
 
+    @Test fun aKiwixSearchFindsTheBookPacksGetBooksOffers() = runTest(main.dispatcher) {
+        val military = kiwix("military", "Medical").copy(title = "Military Medicine", content = app.granger.core.catalog.CONTENT_BOOKS)
+        catalog.mutable.value = CatalogState(catalog = catalogOf(listOf(kiwix("wiki", "Reference"), military)))
+        val vm = viewModel(CatalogScope.KIWIX)
+        // Browsing, the book pack stays under Get books.
+        assertThat(vm.ui.value.sections.flatMap { it.rows }.map { it.id }).containsExactly("wiki")
+        vm.setQuery("military medicine")
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.sections.flatMap { it.rows }.map { it.id }).containsExactly("military")
+    }
+
     @Test fun grangerSectionsNeverFold() = runTest(main.dispatcher) {
         catalog.mutable.value = CatalogState(catalog = catalogOf((1..20).map { packEntry("p$it") }))
         val section = viewModel().ui.value.sections.single()

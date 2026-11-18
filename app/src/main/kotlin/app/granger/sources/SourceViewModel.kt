@@ -778,7 +778,10 @@ class SourceViewModel(
             // Preppers, which are offered under Books (Plan KB Decision 6).
             // Get more → Books lists every book source, Granger's and Kiwix's (Plan KB2 Task 4.1).
             if (booksScope) return BookShelves.isBookItem(item)
-            if (scopeOf(item) != scope && !(inDomain && scopeOf(item) in PACK_SCOPES)) return false
+            // A search in Kiwix finds its book packs too (Military Medicine, African Storybook, Gutenberg), which are
+            // offered under Get books: a pack looked for by name isn't "nothing matches" (walkthrough, 2026-11-18).
+            val searched = kiwix && needle.isNotEmpty() && scopeOf(item) in PACK_SCOPES
+            if (scopeOf(item) != scope && !(inDomain && scopeOf(item) in PACK_SCOPES) && !searched) return false
             if (familyView != null && (item !is PackEntry || item.family != familyView.family)) return false
             return !(inDomain && (item !is PackEntry || item.domain != domainId))
         }
