@@ -122,6 +122,8 @@
     </plurals>
 
     <string name="settings_section_explore">Explorar</string>
+    <string name="settings_keep_adult_off">No sugerir temas para adultos</string>
+    <string name="settings_keep_adult_off_summary">Explorar, Inicio, la línea del tiempo y los juegos dejan fuera los temas sexuales y las imágenes explícitas. No afecta a la búsqueda ni a los artículos que abres.</string>
     <string name="settings_seen">Llevar la cuenta de las salas que has visto</string>
     <string name="settings_seen_summary">Solo salas, temas y épocas, nunca artículos. Se guarda en este teléfono.</string>
     <string name="settings_seen_clear">Borrar lo que has visto</string>

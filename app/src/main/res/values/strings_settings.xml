@@ -159,6 +159,8 @@
 
     <!-- Explore's rooms seen (Plan EX round 2, R). -->
     <string name="settings_section_explore">Explore</string>
+    <string name="settings_keep_adult_off">Keep adult topics out of suggestions</string>
+    <string name="settings_keep_adult_off_summary">Explore, Home, Timeline and games leave out sexual topics and explicit pictures. Search and the articles you open aren\'t affected.</string>
     <string name="settings_seen">Keep track of rooms you\'ve seen</string>
     <string name="settings_seen_summary">Rooms, subjects and eras only, never articles. Kept on this phone.</string>
     <string name="settings_seen_clear">Clear what you\'ve seen</string>

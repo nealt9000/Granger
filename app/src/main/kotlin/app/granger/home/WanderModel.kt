@@ -48,6 +48,10 @@ class WanderModel(
     private val thumbnail: (archive: ZimArchive, path: String, html: String) -> String?,
     /** Title search across the library ([app.granger.core.library.LibrarySearch.titles]). */
     private val titles: suspend (String) -> List<SearchHit>,
+    /** An article the adult-content filter keeps off volunteered screens: never a random start or a node in the orbit. */
+    private val hides: (packId: String, path: String) -> Boolean = { _, _ -> false },
+    /** An article whose picture the adult-content filter leaves out. */
+    private val noPicture: (packId: String, path: String) -> Boolean = { _, _ -> false },
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val random: Random = Random.Default,
     private val debounceMillis: Long = 250L,
@@ -76,7 +80,7 @@ class WanderModel(
         repeat(START_TRIES) {
             val pack = from[random.nextInt(from.size)]
             val archive = archiveOf(pack) ?: return@repeat
-            val path = archive.randomPath()?.takeUnless { IndexPages.isIndex(it) } ?: return@repeat
+            val path = archive.randomPath()?.takeUnless { IndexPages.isIndex(it) || hides(pack.id, it) } ?: return@repeat
             val loaded = load(pack, archive, path, packs) ?: return@repeat
             if (best == null || loaded.reachable > best!!.reachable) best = loaded
             if (loaded.reachable >= START_REACHABLE) return@move loaded
@@ -192,6 +196,7 @@ class WanderModel(
                 val hit = a.resolvePath(link) ?: a.resolvePath(name).takeIf { link != name } ?: a.resolvePath("A/$name")
                 if (hit != null) { found = WanderNode(p.id, hit, plainTitle(hit)); break }
             }
+            if (found != null && hides(found.packId, found.path)) continue
             val key = (found?.path ?: link).substringAfterLast('/')
             if (!seen.add(key) || key == resolved.substringAfterLast('/')) continue
             if (found != null) reachable += found else missing += WanderNode(pack.id, link, plainTitle(link), onPhone = false)
@@ -205,6 +210,7 @@ class WanderModel(
      * no-pictures Medicine pack's "Antipsychotic" takes Top's picture).
      */
     private fun picture(pack: Pack, archive: ZimArchive, path: String, html: String, packs: Collection<Pack>): String? {
+        if (noPicture(pack.id, path)) return null
         runCatching { thumbnail(archive, path, html) }.getOrNull()?.let { return it }
         val name = path.substringAfterLast('/')
         for (other in packs) {

@@ -79,6 +79,8 @@ class ReferenceLinksSource(
     private val wikipediaLanguage: suspend (packId: String) -> String? = { null },
     /** A book's language as two letters, or null when unknown. */
     private val bookLanguage: suspend (bookId: String) -> String? = { null },
+    /** The adult-content filter, pointed at each fresh set of indexes, whose ranked lists then leave its hidden items out. */
+    private val contentFilter: app.granger.core.library.ContentFilter? = null,
 ) : BookLinkSource, ArticleFooterSource {
     private val lock = Mutex()
     private var opened: Pair<List<Pair<String, InstalledSidecar>>, QidIndexes>? = null
@@ -94,6 +96,11 @@ class ReferenceLinksSource(
         opened?.takeIf { it.first == files }?.let { return it.second }
         opened?.second?.close()
         val fresh = QidIndexes(files.mapNotNull { (packId, s) -> QidIndex.open(s.file, packId, s.packSha256, s.packName) })
+        contentFilter?.let { f ->
+            fresh.hide = { f.hides(it) }
+            fresh.noPicture = { f.noPicture(it) }
+            f.indexes = fresh
+        }
         opened = files to fresh
         fresh
     }

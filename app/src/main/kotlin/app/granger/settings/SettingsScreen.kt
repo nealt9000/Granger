@@ -82,6 +82,8 @@ fun SettingsScreen(
     voiceInput: app.granger.voiceinput.VoiceInput? = null,
     /** Explore's rooms seen (Plan EX round 2, R): the switch that keeps them and the row that clears them; null leaves the section out. */
     seen: app.granger.explore.SeenStore? = null,
+    /** The switch that keeps adult topics and pictures off the screens Granger fills by itself; null leaves it out. */
+    content: ContentPrefs? = null,
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
@@ -159,7 +161,7 @@ fun SettingsScreen(
             if (voiceInput != null) item(key = "voice_input") {
                 app.granger.voiceinput.VoiceInputSettingsSection(voiceInput)
             }
-            if (seen != null) item(key = "explore") { ExploreSection(seen) }
+            if (seen != null) item(key = "explore") { ExploreSection(seen, content) }
             item(key = "appearance") {
                 AppearanceSection(railSide, viewModel::setRailSide, openTo, viewModel::setOpenTo, theme, viewModel::setTheme)
                 if (onLanguage != null) LinkRow(stringResource(R.string.settings_language), languageSummary, onLanguage)
@@ -408,10 +410,18 @@ private fun About() {
  * asked once before it is done.
  */
 @Composable
-private fun ExploreSection(store: app.granger.explore.SeenStore) {
+private fun ExploreSection(store: app.granger.explore.SeenStore, content: ContentPrefs? = null) {
     val seen by store.state.collectAsStateWithLifecycle()
     var asking by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
     SettingsHeader(stringResource(R.string.settings_section_explore))
+    if (content != null) {
+        val keepOff by content.keepOff.collectAsStateWithLifecycle()
+        ListItem(
+            headlineContent = { Text(stringResource(R.string.settings_keep_adult_off)) },
+            supportingContent = { Text(stringResource(R.string.settings_keep_adult_off_summary)) },
+            trailingContent = { Switch(checked = keepOff, onCheckedChange = content::setKeepOff, modifier = Modifier.testTag(SettingsTags.KEEP_ADULT_OFF)) },
+        )
+    }
     ListItem(
         headlineContent = { Text(stringResource(R.string.settings_seen)) },
         supportingContent = { Text(stringResource(R.string.settings_seen_summary)) },
@@ -439,5 +449,6 @@ private fun ExploreSection(store: app.granger.explore.SeenStore) {
 
 object SettingsTags {
     const val SEEN = "settings_seen"
+    const val KEEP_ADULT_OFF = "settings_keep_adult_off"
     const val SEEN_CLEAR = "settings_seen_clear"
 }

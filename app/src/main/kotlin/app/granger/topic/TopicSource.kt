@@ -278,7 +278,9 @@ class TopicSource(
         // The same subject under another title: a redirect's target, or the article in another pack.
         val r = find(name, path) { packName, key -> qid != null && ids[packName]?.let { all.qidOf(it, key) } == qid }
         val times = attempt { times() }
-        val articles = r.articles.take(SHOWN).side { h ->
+        // Related is volunteered: an item the adult-content filter hides isn't offered (the indexes' own filter, QidIndexes.hide).
+        val shown = r.articles.filterNot { h -> ids[h.target]?.let { all.qidOf(it, h.key) }?.let(all.hide) == true }
+        val articles = shown.take(SHOWN).side { h ->
             val id = ids[h.target] ?: return@side null
             val l = lead(id, h.key)
             TopicArticle(id, h.key, l?.title ?: titleOf(h.key), blurb(l?.sentence.orEmpty()), l?.thumbnail, kindOf(id, h.key, times, all))

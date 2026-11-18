@@ -194,5 +194,19 @@ class TimeIndexTest {
         // Explore's Prehistory reaches the Big Bang (it stopped at an int's reach before).
         assertThat(all.countActive(Long.MIN_VALUE / 2, -3001)).isEqualTo(2)
     }
-}
 
+    @Test fun hiddenItemsLeaveTheVolunteeredListsButNotFindOrSearch() {
+        val all = TimeIndexes(listOf(TimeIndex.open(gtime("top", top), "top")!!))
+        all.hide = { it == 868L }   // Aristotle, as if flagged
+        assertThat(all.marks(-1000, 2026, emptySet(), 2, now = 2026).map { it.path }).containsExactly("Roman_Empire", "Ada_Lovelace").inOrder()
+        assertThat(all.top(-1000, 2026, emptySet(), 10).map { it.path }).doesNotContain("Aristotle")
+        assertThat(all.topActive(-1000, 2026, 10).map { it.path }).doesNotContain("Aristotle")
+        assertThat(all.around(1066, emptySet(), 2).map { it.path }).doesNotContain("Aristotle")
+        assertThat(all.only { true }.top(-1000, 2026, emptySet(), 10).map { it.path }).doesNotContain("Aristotle")
+        assertThat(all.find("top", "Aristotle")).isNotNull()
+        assertThat(all.search("Aristotle", emptySet(), 5).map { it.path }).containsExactly("Aristotle")
+        // The switch off: back again, through the same cache.
+        all.hide = { false }
+        assertThat(all.topActive(-1000, 2026, 10).map { it.path }).contains("Aristotle")
+    }
+}

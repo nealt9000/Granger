@@ -254,16 +254,27 @@ object TimeIndexDirectory {
  * Every pack's time index as one: [indexes] in preference order (Wander's: whole encyclopedias in the main language
  * first), so an article in several packs appears once, from the first that has it (Plan H5b, Decision 5).
  */
+/** How many more marks the volunteered lists read than asked, for the hidden ones they may leave out. */
+private const val HIDDEN_SPARE = 8
+
 class TimeIndexes(private val indexes: List<TimeIndex>) {
     val isEmpty: Boolean get() = indexes.isEmpty()
 
+    /**
+     * Items the volunteered lists leave out ([ContentFilter.hides], set by the app): [marks], [around], [spread], [top],
+     * [topActive], [datedIn] and [marksOf]. [find] and [search] (an opened article, a typed search) never filter.
+     */
+    @Volatile var hide: (Long) -> Boolean = { false }
+
+    private fun List<TimeMark>.shown(): List<TimeMark> = filterNot { hide(it.qid) }
+
     /** [prefer]: a pack whose copy of a mark wins over the others' (a Spanish topic page gets the Spanish titles). */
     fun marks(from: Long, to: Long, lanes: Set<Lane>, limit: Int, now: Int, prefer: String? = null): List<TimeMark> =
-        merge(indexes.sortedBy { if (it.packId == prefer) 0 else 1 }.map { it.marks(from, to, lanes, limit, now) })
-            .sortedByDescending { it.rank }.take(limit)
+        merge(indexes.sortedBy { if (it.packId == prefer) 0 else 1 }.map { it.marks(from, to, lanes, limit + HIDDEN_SPARE, now) })
+            .shown().sortedByDescending { it.rank }.take(limit)
 
     fun around(year: Long, lanes: Set<Lane>, n: Int): List<TimeMark> {
-        val all = merge(indexes.map { it.around(year, lanes, n) })
+        val all = merge(indexes.map { it.around(year, lanes, n + HIDDEN_SPARE) }).shown()
         val (before, after) = all.partition { it.y0 < year }
         return before.sortedWith(compareBy<TimeMark> { it.y0 }.thenBy { -it.rank }).takeLast(n) +
             after.sortedWith(compareBy<TimeMark> { it.y0 }.thenBy { -it.rank }).take(n)
@@ -281,7 +292,7 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
             val a = edges[i]
             val b = if (i == edges.size - 2) edges[i + 1] else edges[i + 1] - 1
             if (b < a) continue
-            out += merge(indexes.map { it.top(a, b, lanes, perSlice) }).sortedByDescending { it.rank }.take(perSlice)
+            out += merge(indexes.map { it.top(a, b, lanes, perSlice + HIDDEN_SPARE) }).shown().sortedByDescending { it.rank }.take(perSlice)
         }
         out += marks(edges.first(), edges.last(), lanes, spans, now)
         return merge(out)
@@ -289,7 +300,7 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
 
     /** The [k] best-known marks starting in [from]..[to], across packs (the games' draw, Plan H5c). */
     fun top(from: Long, to: Long, lanes: Set<Lane>, k: Int): List<TimeMark> =
-        merge(indexes.map { it.top(from, to, lanes, k) }).sortedByDescending { it.rank }.take(k)
+        merge(indexes.map { it.top(from, to, lanes, k + HIDDEN_SPARE) }).shown().sortedByDescending { it.rank }.take(k)
 
     /** The mark for an article: from its own pack when that pack is indexed, else from any pack that has the same path. */
     fun find(packId: String, path: String): TimeMark? =
@@ -311,10 +322,12 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
 
     /** The [k] best-known marks falling in [from]..[to] by [TimeIndex.ACTIVE], across packs. */
     fun topActive(from: Long, to: Long, k: Int): List<TimeMark> =
-        tops.computeIfAbsent(Triple(from, to, k)) { merge(indexes.map { it.topActive(from, to, k) }).sortedByDescending { it.rank }.take(k) }
+        tops.computeIfAbsent(Triple(from, to, k)) {
+            merge(indexes.map { it.topActive(from, to, k + HIDDEN_SPARE) }).sortedByDescending { it.rank }.take(k + HIDDEN_SPARE)
+        }.shown().take(k)
 
     /** These indexes seen through [keep] (see [TimeIndex.only]): a subject's quiz draws only its articles. */
-    fun only(keep: (Long) -> Boolean): TimeIndexes = TimeIndexes(indexes.map { it.only(keep) })
+    fun only(keep: (Long) -> Boolean): TimeIndexes = TimeIndexes(indexes.map { it.only(keep) }).also { it.hide = hide }
 
     /**
      * The dated items of [set], each once (its first pack's mark, in preference order), with its [TimeIndex.ACTIVE] year
@@ -334,6 +347,7 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
             val i = set.indexOf(q)
             if (i < 0 || seen.get(i)) continue
             seen.set(i)
+            if (hide(q)) continue
             pack.add(all.pack[at]); row.add(all.row[at]); qid.add(q); year.add(all.year[at]); rank.add(all.rank[at])
         }
         val n = qid.size
@@ -368,7 +382,7 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
         items.groupBy { time.pack[it] }.forEach { (p, its) ->
             indexes.getOrNull(p)?.atRows(its.map { time.row[it] })?.forEach { found[it.qid] = it }
         }
-        return items.mapNotNull { found[time.qid[it]] }
+        return items.mapNotNull { found[time.qid[it]] }.shown()
     }
 
     /** The latest year any pack has a mark starting in. */

@@ -7,6 +7,9 @@ import java.io.File
 /** The longest best-known list [QidIndexes.topIn] keeps. */
 private const val TOP_KEPT = 400
 
+/** How many more than asked [QidIndexes.topIn] keeps, for the hidden items it may leave out. */
+private const val HIDDEN_SPARE = 16
+
 /** The parts that make a broad topic lead to an item: a kind, a linked article, a person. */
 private const val HELD = "${TopicParts.KIND}, ${TopicParts.LINK}, ${TopicParts.PERSON}"
 
@@ -45,6 +48,15 @@ class QidIndex private constructor(private val db: SQLiteDatabase, val packId: S
 
     fun coordinates(qid: Long): Pair<Double, Double>? =
         db.rawQuery("SELECT lat, lon FROM coords WHERE qid = ?", arrayOf(qid.toString())).use { if (it.moveToFirst()) it.getDouble(0) to it.getDouble(1) else null }
+
+    /** The index's adult-content flags (qid -> [ContentFlags.TOPIC] or [ContentFlags.PICTURE]); empty in files built before them. */
+    fun flags(): Map<Long, Int> {
+        val has = db.rawQuery("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'flags'", null).use { it.moveToFirst() }
+        if (!has) return emptyMap()
+        return db.rawQuery("SELECT qid, kind FROM flags", null).use { c ->
+            HashMap<Long, Int>(c.count * 2).apply { while (c.moveToNext()) put(c.getLong(0), c.getInt(1)) }
+        }
+    }
 
     /** Whether the index carries subjects (Plan EX Task 1; files built before it don't). */
     val hasSubjects: Boolean by lazy {
@@ -255,6 +267,33 @@ class QidIndex private constructor(private val db: SQLiteDatabase, val packId: S
 class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
     val isEmpty: Boolean get() = indexes.isEmpty()
 
+    /** Every pack's adult-content flags as one (a topic in any pack is a topic everywhere: flags are per item). */
+    val flags: ContentFlags by lazy {
+        val topics = HashSet<Long>(); val pictures = HashSet<Long>()
+        for (index in indexes) for ((qid, kind) in index.flags()) if (kind == ContentFlags.TOPIC) topics += qid else pictures += qid
+        if (topics.isEmpty() && pictures.isEmpty()) ContentFlags.NONE else ContentFlags(topics, pictures - topics)
+    }
+
+    /**
+     * Items the ranked lists leave out ([ContentFilter.hides], set by the app): [topIn], [topInFacet], [broadIn],
+     * [broadInFacet], [holders] and a broad topic's parts. Lookups ([qidOf], [articlesOf]…) never filter.
+     */
+    @Volatile var hide: (Long) -> Boolean = { false }
+
+    /** Items whose pictures volunteered screens leave out ([ContentFilter.noPicture]): a broad topic's own figures. */
+    @Volatile var noPicture: (Long) -> Boolean = { false }
+
+    /** [want] articles [fetch]ed past the hidden ones, asking for more when hidden ones left it short. */
+    private fun kept(want: Int, fetch: (Int) -> List<QidArticle>): List<QidArticle> {
+        var n = want
+        while (true) {
+            val raw = fetch(n)
+            val kept = raw.filterNot { hide(it.qid) }
+            if (kept.size >= want || raw.size < n || n >= want * 8) return kept
+            n *= 2
+        }
+    }
+
     fun qidOf(packId: String, path: String): Long? = indexes.firstOrNull { it.packId == packId }?.qidOf(path)
 
     /** Whether [packId] has an index of its own here. */
@@ -324,15 +363,21 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
      * order: the library's main language first) that has it. [limit] past [offset].
      */
     fun topIn(subject: String, limit: Int, offset: Int = 0, mainOnly: Boolean = false): List<QidArticle> {
-        fun read(): List<QidArticle> {
-            val want = offset + limit
+        fun read(want: Int): List<QidArticle> {
             val best = LinkedHashMap<Long, QidArticle>()
             for (index in indexes) for (a in index.topIn(subject, want, mainOnly = mainOnly)) best.putIfAbsent(a.qid, a)
             return best.values.sortedWith(compareByDescending<QidArticle> { it.mainSubject }.thenByDescending { it.rank }.thenBy { it.qid })
-                .drop(offset).take(limit)
+                .take(want)
         }
-        // A subject's best known from the top are asked for again and again (the landing's doors, on every return to it).
-        return if (offset == 0 && limit <= TOP_KEPT) tops.computeIfAbsent("$subject|$limit|$mainOnly") { read() } else read()
+        // A subject's best known from the top are asked for again and again (the landing's doors, on every return to it):
+        // kept unfiltered, a few spare, and filtered on the way out (the switch can change between asks).
+        val want = offset + limit
+        if (offset == 0 && limit <= TOP_KEPT) {
+            val raw = tops.computeIfAbsent("$subject|$limit|$mainOnly") { read(limit + HIDDEN_SPARE) }
+            val out = raw.filterNot { hide(it.qid) }
+            if (out.size >= limit || raw.size < limit + HIDDEN_SPARE) return out.take(limit)
+        }
+        return kept(want, ::read).drop(offset).take(limit)
     }
 
     private val tops = java.util.concurrent.ConcurrentHashMap<String, List<QidArticle>>()
@@ -352,7 +397,16 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
      */
     fun topicParts(qid: Long, packId: String? = null, language: String? = null): TopicParts? {
         val order = indexes.filter { it.packId == packId } + indexes.filter { it.packId != packId && (language == null || it.language == language) }
-        return order.firstNotNullOfOrNull { it.topicParts(qid) }
+        return order.firstNotNullOfOrNull { it.topicParts(qid) }?.let(::withoutHidden)
+    }
+
+    /** A broad topic's parts without the items [hide] keeps off (its kinds, linked articles and people), and without its figures when [noPicture]. */
+    private fun withoutHidden(p: TopicParts): TopicParts {
+        val figures = if (p.figures.isNotEmpty() && noPicture(p.qid)) emptyList() else p.figures
+        if (figures === p.figures && p.kinds.none { hide(it.qid) } && p.links.none { hide(it.qid) } && p.people.none(hide)) return p
+        return p.copy(
+            kinds = p.kinds.filterNot { hide(it.qid) }, links = p.links.filterNot { hide(it.qid) }, people = p.people.filterNot(hide), figures = figures,
+        )
     }
 
     /**
@@ -363,8 +417,11 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
     fun broadIn(subject: String, minKinds: Int, minFigures: Int, limit: Int, language: String? = null): List<QidArticle> {
         fun from(some: List<QidIndex>): List<QidArticle> {
             val best = LinkedHashMap<Long, QidArticle>()
-            for (index in some) for (a in index.broadIn(subject, minKinds, minFigures, limit)) best.putIfAbsent(a.qid, a)
-            return best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).take(limit)
+            return kept(limit) { n ->
+                best.clear()
+                for (index in some) for (a in index.broadIn(subject, minKinds, minFigures, n)) best.putIfAbsent(a.qid, a)
+                best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).take(n)
+            }.take(limit)
         }
         if (language != null) from(indexes.filter { it.language == language }).takeIf { it.isNotEmpty() }?.let { return it }
         return from(indexes)
@@ -377,8 +434,11 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
     fun broadInFacet(facet: String, limit: Int, language: String? = null): List<QidArticle> {
         fun from(some: List<QidIndex>): List<QidArticle> {
             val best = LinkedHashMap<Long, QidArticle>()
-            for (index in some) for (a in index.broadInFacet(facet, limit)) best.putIfAbsent(a.qid, a)
-            return best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).take(limit)
+            return kept(limit) { n ->
+                best.clear()
+                for (index in some) for (a in index.broadInFacet(facet, n)) best.putIfAbsent(a.qid, a)
+                best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).take(n)
+            }.take(limit)
         }
         if (language != null) from(indexes.filter { it.language == language }).takeIf { it.isNotEmpty() }?.let { return it }
         return from(indexes)
@@ -388,8 +448,11 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
     fun holders(item: Long, limit: Int, language: String? = null): List<QidArticle> {
         fun from(some: List<QidIndex>): List<QidArticle> {
             val best = LinkedHashMap<Long, QidArticle>()
-            for (index in some) for (a in index.holders(item, limit)) best.putIfAbsent(a.qid, a)
-            return best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).take(limit)
+            return kept(limit) { n ->
+                best.clear()
+                for (index in some) for (a in index.holders(item, n)) best.putIfAbsent(a.qid, a)
+                best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).take(n)
+            }.take(limit)
         }
         if (language != null) from(indexes.filter { it.language == language }).takeIf { it.isNotEmpty() }?.let { return it }
         return from(indexes)
@@ -423,11 +486,12 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
         facets(subject).associate { f -> f.id to counted.computeIfAbsent("room:${f.key}") { countDistinct(indexes.mapNotNull { it.qidsInFacet(f.key) }) } }
 
     /** The articles in [facet] (`subject.facet`), most-linked first, each item once, in the first pack that has it. */
-    fun topInFacet(facet: String, limit: Int, offset: Int = 0): List<QidArticle> {
-        val best = LinkedHashMap<Long, QidArticle>()
-        for (index in indexes) for (a in index.topInFacet(facet, offset + limit)) best.putIfAbsent(a.qid, a)
-        return best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).drop(offset).take(limit)
-    }
+    fun topInFacet(facet: String, limit: Int, offset: Int = 0): List<QidArticle> =
+        kept(offset + limit) { n ->
+            val best = LinkedHashMap<Long, QidArticle>()
+            for (index in indexes) for (a in index.topInFacet(facet, n)) best.putIfAbsent(a.qid, a)
+            best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).take(n)
+        }.drop(offset).take(limit)
 
     /** Every item in [facet] across the packs, each once, as a sorted set (all main: a lens lists its own articles, from any subject). */
     fun facetSet(facet: String): SubjectSet = merged(indexes.mapNotNull { it.qidsInFacet(facet) })

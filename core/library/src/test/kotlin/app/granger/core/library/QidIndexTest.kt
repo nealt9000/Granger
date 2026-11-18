@@ -22,6 +22,7 @@ class QidIndexTest {
         subjects: List<List<Any>>? = null,
         facets: List<List<Any>>? = null, facetList: String? = null,
         topicParts: List<List<Any?>>? = null,
+        flags: List<List<Any>>? = null,
     ): File {
         val f = File(tmp.root, "$name.gqid")
         SQLiteDatabase.openOrCreateDatabase(f, null).use { db ->
@@ -43,6 +44,10 @@ class QidIndexTest {
                 db.execSQL("CREATE TABLE facets(facet INTEGER NOT NULL, qid INTEGER NOT NULL, PRIMARY KEY(facet, qid)) WITHOUT ROWID")
                 facets.forEach { db.execSQL("INSERT INTO facets VALUES (?, ?)", it.toTypedArray()) }
                 facetList?.let { db.execSQL("INSERT INTO meta VALUES ('facets', ?)", arrayOf(it)) }
+            }
+            if (flags != null) {
+                db.execSQL("CREATE TABLE flags(qid INTEGER PRIMARY KEY, kind INTEGER NOT NULL) WITHOUT ROWID")
+                flags.forEach { db.execSQL("INSERT INTO flags VALUES (?, ?)", it.toTypedArray()) }
             }
             if (topicParts != null) {
                 db.execSQL("CREATE TABLE topics(qid INTEGER PRIMARY KEY, under INTEGER NOT NULL, inlinks INTEGER NOT NULL)")
@@ -125,7 +130,8 @@ class QidIndexTest {
         assertThat(all.firstArticleOf(84L)?.packId).isEqualTo("old")
         assertThat(all.firstArticleOf(999_999L)).isNull()
         assertThat(all.subjectCounts(listOf("technology"))).isEqualTo(all.subjectCounts(listOf("technology")))
-        assertThat(all.topIn("technology", 2, mainOnly = true)).isSameInstanceAs(all.topIn("technology", 2, mainOnly = true))
+        // Kept unfiltered and filtered on the way out (the adult-content switch can change between asks).
+        assertThat(all.topIn("technology", 2, mainOnly = true)).isEqualTo(all.topIn("technology", 2, mainOnly = true))
     }
 
     private val top = listOf(
@@ -263,5 +269,62 @@ class QidIndexTest {
         assertThat(set.size).isEqualTo(2)
         assertThat(set.isMain(5682L)).isTrue()
         all.close()
+    }
+
+    @Test fun adultFlagsMergeAcrossPacksAndRankedListsLeaveHiddenItemsOut() {
+        val films = listOf(listOf("Casablanca", 1L, 300, null), listOf("Deep_Throat", 2L, 200, null), listOf("Vertigo", 3L, 100, null))
+        val en = QidIndex.open(gqid("en", films, subjects = films.map { listOf(it[1]!!, 0, "film") }, flags = listOf(listOf(2L, 1), listOf(3L, 2))), "en")!!
+        val old = QidIndex.open(gqid("old", listOf(listOf("Paris", 90L, 400, null))), "old")!!   // built before flags
+        assertThat(old.flags()).isEmpty()
+        val all = QidIndexes(listOf(old, en))
+        assertThat(all.flags.hides(2L)).isTrue()
+        assertThat(all.flags.hides(3L)).isFalse()
+        assertThat(all.flags.noPicture(3L)).isTrue()
+        assertThat(all.flags.noPicture(2L)).isTrue()   // a hidden topic shows no picture either
+        // Unfiltered until the app sets hide; lookups never filter.
+        assertThat(all.topIn("film", 3).map { it.qid }).containsExactly(1L, 2L, 3L).inOrder()
+        all.hide = { all.flags.hides(it) }
+        assertThat(all.topIn("film", 3).map { it.qid }).containsExactly(1L, 3L).inOrder()
+        assertThat(all.topIn("film", 1, offset = 1).map { it.qid }).containsExactly(3L)
+        assertThat(all.qidOf("en", "Deep_Throat")).isEqualTo(2L)
+        assertThat(all.articlesOf(2L)).hasSize(1)
+        // The switch off: everything again, from the same cache.
+        all.hide = { false }
+        assertThat(all.topIn("film", 3).map { it.qid }).containsExactly(1L, 2L, 3L).inOrder()
+    }
+
+    @Test fun aBroadTopicsPartsLeaveHiddenItemsOutAndItsFiguresWhenItsPictureIsFlagged() {
+        val parts = listOf<List<Any?>>(
+            listOf(197L, 2, 0, 1005L, 0, null, null), listOf(197L, 2, 1, 1006L, -1, null, null),
+            listOf(197L, 4, 0, 1006L, -1, null, null),
+            listOf(197L, 5, 0, null, 0, "A figure", "_assets_/a/F.jpg"),
+            listOf(197L, 6, 0, 1006L, null, null, null), listOf(197L, 6, 1, 1385L, null, null, null),
+        )
+        val en = QidIndex.open(gqid("en", listOf(listOf("Topic", 197L, 86, null)), sourceZim = "wikipedia_en_top_maxi_2026-09-14.zim", topicParts = parts), "en")!!
+        val all = QidIndexes(listOf(en))
+        all.hide = { it == 1006L }
+        val p = all.topicParts(197L)!!
+        assertThat(p.kinds.map { it.qid }).containsExactly(1005L)
+        assertThat(p.links).isEmpty()
+        assertThat(p.people).containsExactly(1385L)
+        assertThat(p.figures).hasSize(1)
+        all.noPicture = { it == 197L }
+        assertThat(all.topicParts(197L)!!.figures).isEmpty()
+    }
+
+    @Test fun theContentFilterAppliesOnlyWhileOnAndByPackAndPath() {
+        val en = QidIndex.open(gqid("en", listOf(listOf("Deep_Throat", 2L, 200, null), listOf("Vertigo", 3L, 100, null)), flags = listOf(listOf(2L, 1), listOf(3L, 2))), "en")!!
+        var on = true
+        val f = ContentFilter { on }
+        assertThat(f.hides(2L)).isFalse()   // no indexes yet
+        f.indexes = QidIndexes(listOf(en))
+        assertThat(f.hides(2L)).isTrue()
+        assertThat(f.hides("en", "Deep_Throat")).isTrue()
+        assertThat(f.hides("en", "Vertigo")).isFalse()
+        assertThat(f.noPicture("en", "Vertigo")).isTrue()
+        assertThat(f.noPicture("other", "Vertigo")).isFalse()   // a pack with no index of its own
+        on = false
+        assertThat(f.hides(2L)).isFalse()
+        assertThat(f.noPicture("en", "Vertigo")).isFalse()
     }
 }

@@ -674,6 +674,16 @@ class AppContainer(context: Context) {
     val seen: app.granger.explore.SeenStore by lazy {
         app.granger.explore.SeenStore.Prefs(context.getSharedPreferences("explore_seen", android.content.Context.MODE_PRIVATE))
     }
+
+    /** Settings' switch for adult topics and pictures on the screens Granger fills by itself, in a preferences file of its own. */
+    val contentPrefs: app.granger.settings.ContentPrefs by lazy {
+        app.granger.settings.ContentPrefs.Prefs(context.getSharedPreferences("content", android.content.Context.MODE_PRIVATE))
+    }
+
+    /** The adult-content flags as volunteered screens apply them (the QID indexes' flags, while [contentPrefs] says so). */
+    val contentFilter: app.granger.core.library.ContentFilter by lazy {
+        app.granger.core.library.ContentFilter { contentPrefs.keepOff.value }
+    }
     val appLanguages: AppLanguages = AppLanguages.create(context, onLegacyChange = { (context as? GrangerApp)?.relocalize() })
 
     /** Voice input (Plan A1): the phone's on-device recognizer, in the app's language; read-aloud stops before a take. */
@@ -971,6 +981,7 @@ class AppContainer(context: Context) {
                 library.packs.first().firstOrNull { it.id == id }?.name?.let { WIKIPEDIA_LANGUAGE.find(it)?.groupValues?.get(1) }
             },
             bookLanguage = { id -> bookLanguages[id] ?: bookshelf.book(id)?.language?.let(::twoLetter)?.also { bookLanguages[id] = it } },
+            contentFilter = contentFilter,
         )
     }
 
@@ -1002,7 +1013,7 @@ class AppContainer(context: Context) {
         val files = packs.mapNotNull { pack -> (installed[pack.id] ?: listed[pack.name])?.let { pack to it } }
         return timeIndexCache.get(files.map { (p, f) -> "${p.id}|${f.path}|${f.lastModified()}" }) {
             app.granger.core.library.TimeIndexes(files.mapNotNull { (pack, file) -> app.granger.core.library.TimeIndex.open(file, pack.id) })
-        }
+        }.also { t -> t.hide = { contentFilter.hides(it) } }
     }
 
     /** A vector source's language, for Related to stay in the page's (Plan LL2): a Wikipedia's from its name, a book's from the shelf. */
@@ -1027,7 +1038,11 @@ class AppContainer(context: Context) {
         val io = kotlinx.coroutines.Dispatchers.IO
         app.granger.topic.TopicSource(
             header = { packId, path -> kotlinx.coroutines.withContext(io) { topicHeader(packId, path, thumbs) } },
-            lead = { packId, path -> kotlinx.coroutines.withContext(io) { articleLead(packId, path, thumbs) } },
+            lead = { packId, path ->
+                kotlinx.coroutines.withContext(io) {
+                    articleLead(packId, path, thumbs)?.let { if (contentFilter.noPicture(packId, path)) it.copy(thumbnail = null) else it }
+                }
+            },
             times = { kotlinx.coroutines.withContext(io) { timeIndexes() } },
             qids = { kotlinx.coroutines.withContext(io) { referenceLinks.qidIndexes() } },
             languageOf = { id -> library.packs.first().firstOrNull { it.id == id }?.name?.let { WIKIPEDIA_LANGUAGE.find(it)?.groupValues?.get(1) } },

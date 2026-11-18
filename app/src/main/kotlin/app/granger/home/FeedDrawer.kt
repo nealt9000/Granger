@@ -33,6 +33,10 @@ class FeedDrawer(
     private val librarySearch: LibrarySearch,
     /** The library's languages, main first (Plan L3): On this day reads the first one's encyclopedia. */
     private val languages: () -> List<String> = { listOf("en") },
+    /** An article the adult-content filter keeps off volunteered screens: never a Random card. */
+    private val hides: (packId: String, path: String) -> Boolean = { _, _ -> false },
+    /** An article whose picture the adult-content filter leaves out of its card. */
+    private val noPicture: (packId: String, path: String) -> Boolean = { _, _ -> false },
     /** A cached thumbnail for an article (its lead image), or null; see [ArticleThumbnails]. Last, for a trailing lambda. */
     private val thumbnail: (archive: ZimArchive, path: String, html: String) -> String? = { _, _, _ -> null },
 ) {
@@ -75,7 +79,7 @@ class FeedDrawer(
                 val archive = archiveOf(pack) ?: return@repeat
                 val path = archive.randomPath() ?: return@repeat
                 // A user or tag list isn't a page to suggest (Plan U3b Decision 10).
-                if (IndexPages.isIndex(path)) return@repeat
+                if (IndexPages.isIndex(path) || hides(pack.id, path)) return@repeat
                 val key = "${pack.id}/$path"
                 if (key in good || key in plain) return@repeat
                 val html = archive.read(path)?.let { String(it.bytes, Charsets.UTF_8) } ?: return@repeat
@@ -108,7 +112,7 @@ class FeedDrawer(
             title = html?.let { pageTitle(it, pack.title) } ?: pathTitle(path),
             subtitle = pack.title,
             target = CardTarget.Article(pack.id, path),
-            imagePath = html?.let { thumbnail(archive, path, it) },
+            imagePath = html?.takeUnless { noPicture(pack.id, path) }?.let { thumbnail(archive, path, it) },
         )
     }
 
@@ -188,7 +192,7 @@ class FeedDrawer(
             val pack = packsById[target.packId] ?: return@map card
             val archive = archiveOf(pack) ?: return@map card
             val html = archive.read(target.path)?.let { String(it.bytes, Charsets.UTF_8) } ?: return@map card
-            card.copy(imagePath = thumbnail(archive, target.path, html))
+            card.copy(imagePath = if (noPicture(pack.id, target.path)) null else thumbnail(archive, target.path, html))
         }
     }
 

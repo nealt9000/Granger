@@ -687,14 +687,20 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     /** The phone's time indexes, shared with the topic page (the container keeps them open). */
     suspend fun timeIndexes(): TimeIndexes = container.timeIndexes()
 
+    /**
+     * An article's picture for a screen Granger fills by itself (Timeline, games, a subject's quiz): none for an item the
+     * adult-content filter flags. Blocking.
+     */
+    fun volunteeredThumbnail(thumbs: ArticleThumbnails, packId: String, path: String): String? {
+        if (container.contentFilter.noPicture(packId, path)) return null
+        val archive = container.library.archive(packId) ?: return null
+        return archive.read(path)?.let { thumbs.thumbnail(archive, path, String(it.bytes, Charsets.UTF_8)) }
+    }
+
     fun timelineModel(scope: kotlinx.coroutines.CoroutineScope, thumbs: ArticleThumbnails, startAt: Pair<String, String>? = null) = TimelineModel(
         scope = scope,
         indexes = { timeIndexes() },
-        picture = { packId, path ->
-            container.library.archive(packId)?.let { archive ->
-                archive.read(path)?.let { thumbs.thumbnail(archive, path, String(it.bytes, Charsets.UTF_8)) }
-            }
-        },
+        picture = { packId, path -> volunteeredThumbnail(thumbs, packId, path) },
         startAt = startAt,
     )
 
@@ -704,7 +710,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         app.granger.explore.ExploreSources(
             qids = { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { container.referenceLinks.qidIndexes() } },
             times = { timeIndexes() },
-            picture = { packId, path -> container.library.archive(packId)?.let { archive -> container.articleCards.card(archive, path)?.thumbnail } },
+            picture = { packId, path ->
+                if (container.contentFilter.noPicture(packId, path)) null
+                else container.library.archive(packId)?.let { archive -> container.articleCards.card(archive, path)?.thumbnail }
+            },
             packs = kotlinx.coroutines.flow.combine(
                 container.library.packs, container.catalog.state, container.downloads.records,
             ) { packs, state, records ->
@@ -743,7 +752,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             look = { packId, path ->
                 container.library.archive(packId)?.let { archive ->
                     app.granger.Perf.time("look $path") { container.articleCards.card(archive, path, targetPx = 800) }
-                        ?.let { app.granger.explore.ArticleLook(it.thumbnail, it.summary.takeIf { s -> s.isNotBlank() }) }
+                        ?.let {
+                            val thumbnail = it.thumbnail.takeUnless { _ -> container.contentFilter.noPicture(packId, path) }
+                            app.granger.explore.ArticleLook(thumbnail, it.summary.takeIf { s -> s.isNotBlank() })
+                        }
                 }
             },
         )
@@ -779,11 +791,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     fun gameModel(scope: kotlinx.coroutines.CoroutineScope, thumbs: ArticleThumbnails, mixed: Boolean, start: GameKind? = null) = GameModel(
         scope = scope,
         indexes = { timeIndexes() },
-        picture = { packId, path ->
-            container.library.archive(packId)?.let { archive ->
-                archive.read(path)?.let { thumbs.thumbnail(archive, path, String(it.bytes, Charsets.UTF_8)) }
-            }
-        },
+        picture = { packId, path -> volunteeredThumbnail(thumbs, packId, path) },
         store = gameStore,
         mixed = mixed,
         start = start,
@@ -802,11 +810,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 // Articles whose main subject it is: countries carry History second, and a History quiz isn't El Salvador vs Russia.
                 timeIndexes().only { s.isMain(it) }
             },
-            picture = { packId, path ->
-                container.library.archive(packId)?.let { archive ->
-                    archive.read(path)?.let { thumbs.thumbnail(archive, path, String(it.bytes, Charsets.UTF_8)) }
-                }
-            },
+            picture = { packId, path -> volunteeredThumbnail(thumbs, packId, path) },
             store = GameStore.Prefs(appContext.getSharedPreferences("games_$subject", android.content.Context.MODE_PRIVATE)),
             mixed = false,
         )
@@ -1559,6 +1563,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         )
                     },
                     seen = container.seen,
+                    content = container.contentPrefs,
                     onModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },
                     onSetUpAgain = { nav.navigate(OnboardingRoute) { launchSingleTop = true } },
                     onBack = { nav.popBackStack() },
@@ -1662,6 +1667,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 librarySearch = container.search,
                                 thumbnail = homeThumbs::thumbnail,
                                 languages = { container.knowledgeNow.value },
+                                hides = container.contentFilter::hides,
+                                noPicture = container.contentFilter::noPicture,
                             ),
                             container.shelves, container.media, container.homePrefs, tidyDismissals = container.tidyDismissals,
                             knowledge = container.knowledgeLanguages.languages, appLanguage = container.appLanguages.code,
@@ -1672,6 +1679,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                     archiveOf = { container.library.archive(it.id) },
                                     thumbnail = homeThumbs::thumbnail,
                                     titles = { container.search.titles(it).hits },
+                                    hides = container.contentFilter::hides,
+                                    noPicture = container.contentFilter::noPicture,
                                 )
                             },
                             timelineOf = { scope -> timelineModel(scope, homeThumbs) },
