@@ -452,7 +452,21 @@ fun alphabetical(articles: List<ExploreArticle>, locale: java.util.Locale): List
  * One of a subject's sub-categories as its page shows it (Plan EX editorial pass): the facet, how many articles it holds,
  * its best-known few, and the first of their pictures (large, cropped round its subject later).
  */
-data class FacetCard(val facet: app.granger.core.library.Facet, val count: Int, val examples: List<ExploreArticle>, val picture: String? = null)
+data class FacetCard(
+    val facet: app.granger.core.library.Facet,
+    val count: Int,
+    val examples: List<ExploreArticle>,
+    val picture: String? = null,
+    /** The room's one-line description (the app's own list); null when it has none. */
+    val description: String? = null,
+    /** What the room's dates say, as its own page says it; null with none dated, or until read ([told]). */
+    val finding: RoomFinding? = null,
+    /** The room's dates have been read, so its sentence is final (its finding, else its description). */
+    val told: Boolean = false,
+)
+
+/** A subject's doors: the subjects [before] and [after] it in the library's order (the landing's), where it stands [position] of [total]. */
+data class SubjectDoors(val before: Subject?, val after: Subject?, val position: Int, val total: Int)
 
 /**
  * One subject opened (Plan EX Task 3): its eras with counts, its articles most linked or oldest first, a page at a time,
@@ -488,6 +502,12 @@ data class SubjectUi(
     val letter: String? = null,
     /** A room's own parts (its description, finding, plates through time, overlaps, doors); null on other pages. */
     val room: RoomUi? = null,
+    /** The subject page's opening plates: its own article, then its best known with a photograph; up to three. */
+    val opening: List<ExploreArticle> = emptyList(),
+    /** What the subject's dates say (its busiest century), for the heading over its rooms; null until read. */
+    val finding: RoomFinding? = null,
+    /** The subject page's doors; null on a listing, or when the subject stands alone. */
+    val doors: SubjectDoors? = null,
 ) {
     /** Enough dated main-subject articles for a run of the time games. */
     val canQuiz: Boolean get() = datedMain >= SubjectViewModel.QUIZ_MIN
@@ -521,8 +541,8 @@ class SubjectViewModel(
     private var azStart = 0
     private var viewing: Job? = null
 
-    /** A room shows fewer at a time, so its foot (where its topics also hang, the ways on) stays in reach. */
-    private val pageSize = if (listing && facetId != null) ROOM_PAGE else PAGE
+    /** A listing shows fewer at a time, so its foot (where its topics also hang, the ways on) stays in reach. */
+    private val pageSize = if (listing) ROOM_PAGE else PAGE
 
     init {
         viewModelScope.launch {
@@ -544,11 +564,17 @@ class SubjectViewModel(
                         val (before, at, after) = neighbours(qids.facets(subject.id).filter { (counts[it.id] ?: 0) > 0 }) { it.id == facet.id }
                         RoomUi(sources.roomDescription(facet.key, locale.language), before = before, after = after, position = at, total = counts.count { it.value > 0 })
                     } else null
+                    // The doors run in the landing's order: the subjects with anything on them, the largest first.
+                    val doors = if (!listing && qids.hasSubjects) {
+                        val all = subjectDoors(qids.subjectCounts(Subject.entries.map { it.id }), { emptyList() }, packs.filterNot { sources.isWikipedia(it.first) }, c).map { it.subject }
+                        val (before, at, after) = neighbours(all) { it == subject }
+                        if (at > 0 && all.size > 1) SubjectDoors(before, after, at, all.size) else null
+                    } else null
                     SubjectUi(subject, count, if (listing) emptyList() else page, others, more = page.size < count,
-                        collections = if (listing) emptyList() else shelved, facet = facet, loading = listing, room = room) to page
+                        collections = if (listing) emptyList() else shelved, facet = facet, loading = listing, room = room, doors = doors) to page
                 }
                 val was = state.value
-                state.value = was?.copy(count = first.first.count, packs = first.first.packs, collections = if (listing) emptyList() else shelved)
+                state.value = was?.copy(count = first.first.count, packs = first.first.packs, collections = if (listing) emptyList() else shelved, doors = first.first.doors)
                     ?: first.first
                 if (was == null) {
                     if (listing) launch { appendWithPictures(first.second, total = first.first.count) }
@@ -582,6 +608,7 @@ class SubjectViewModel(
             if (facet != null) room(facet, t)
             return
         }
+        if (t != null) findingOf(t)?.let { f -> state.value = state.value?.copy(finding = f) }
         val shelf = withContext(Dispatchers.IO) { runCatching { inYourBooks() }.getOrDefault(emptyList()) }
         state.value = state.value?.copy(books = shelf)
     }
@@ -594,11 +621,7 @@ class SubjectViewModel(
     private suspend fun room(facet: app.granger.core.library.Facet, t: SubjectTime?) {
         fun update(change: (RoomUi) -> RoomUi) { state.value = state.value?.let { ui -> ui.copy(room = ui.room?.let(change)) } }
         if (t != null && t.size > 0) {
-            val finding = withContext(Dispatchers.IO) {
-                val oldest = (0 until t.size).minWithOrNull(compareBy<Int> { t.year[it] }.thenByDescending { t.rank[it] })
-                val busiest = busiestCentury(t.year)
-                RoomFinding(oldest?.let { sources.times().marksOf(t, listOf(it)).firstOrNull()?.toExplore() }, t.size, busiest?.first, busiest?.second ?: 0)
-            }
+            val finding = findingOf(t)
             update { it.copy(finding = finding) }
             val story = withContext(Dispatchers.IO) {
                 Era.entries.mapNotNull { era ->
@@ -625,29 +648,47 @@ class SubjectViewModel(
         update { it.copy(overlaps = overlaps) }
     }
 
+    /** What [t]'s dates say: the oldest dated topic and the busiest century; null with nothing dated. */
+    private suspend fun findingOf(t: SubjectTime): RoomFinding? = if (t.size == 0) null else withContext(Dispatchers.IO) {
+        val oldest = (0 until t.size).minWithOrNull(compareBy<Int> { t.year[it] }.thenByDescending { t.rank[it] })
+        val busiest = busiestCentury(t.year)
+        RoomFinding(oldest?.let { sources.times().marksOf(t, listOf(it)).firstOrNull()?.toExplore() }, t.size, busiest?.first, busiest?.second ?: 0)
+    }
+
     /**
      * The page's head and its sub-categories: the subject's own article's look (as the landing's door), then each facet
      * with its count and best-known few, then their pictures, one by one.
      */
     private suspend fun page() {
-        val hero = withContext(Dispatchers.IO) {
+        val own = withContext(Dispatchers.IO) {
             val qids = sources.qids()
             subject.namesakes.asSequence().mapNotNull { q -> qids.articlesOf(q).firstOrNull() }
-                .mapNotNull { a -> runCatching { sources.look(a.packId, a.path) }.getOrNull() }.firstOrNull { it.picture != null }
+                .mapNotNull { a -> runCatching { sources.look(a.packId, a.path) }.getOrNull()?.let { a to it } }.firstOrNull { it.second.picture != null }
         }
-        state.value = state.value?.copy(hero = hero)
+        // The opening plates: the subject's own picture leads, then its best known that have a photograph.
+        val lead = own?.let { (a, look) -> a.toExplore().copy(picture = look.picture, ratio = look.picture?.let(::ratioOf) ?: 0f) }
+        state.value = state.value?.copy(hero = own?.second, opening = listOfNotNull(lead))
+        val opening = withContext(Dispatchers.IO) {
+            val qids = sources.qids()
+            if (!qids.hasSubjects) return@withContext listOfNotNull(lead)
+            listOfNotNull(lead) + qids.topIn(subject.id, OPENING_TRIES + subject.namesakes.size, mainOnly = true).asSequence()
+                .filter { it.qid !in subject.namesakes }.map { withPicture(it.toExplore()) }.filter { it.picture != null && !it.whole }
+                .take(OPENING - (if (lead != null) 1 else 0)).toList()
+        }
+        state.value = state.value?.copy(opening = opening)
         var cards = withContext(Dispatchers.IO) {
             val qids = sources.qids()
             if (!qids.hasFacets) return@withContext emptyList()
             val counts = qids.facetCounts(subject.id)
             qids.facets(subject.id).mapNotNull { f ->
                 val n = counts[f.id] ?: 0
-                if (n == 0) null else FacetCard(f, n, qids.topInFacet(f.key, FACET_EXAMPLES).map { it.toExplore() })
+                if (n == 0) null else FacetCard(f, n, qids.topInFacet(f.key, FACET_EXAMPLES).map { it.toExplore() }, description = sources.roomDescription(f.key, locale.language))
             }
         }
         state.value = state.value?.copy(facets = cards)
-        // Lenses overlap (Napoleon leads Rulers and Wars): each card's picture comes from an article no earlier card used.
-        val used = HashSet<String>()
+        // Rooms overlap (Napoleon leads Rulers and Wars): each card's picture comes from an article no earlier card, and
+        // no opening plate, used. Then the room's sentence, from its dates, as its own page says it.
+        val used = opening.mapTo(HashSet()) { it.path }
         for (i in cards.indices) {
             val picture = withContext(Dispatchers.IO) {
                 val looks = cards[i].examples.asSequence().mapNotNull { a ->
@@ -656,6 +697,12 @@ class SubjectViewModel(
                 (looks.firstOrNull { it.first !in used } ?: looks.firstOrNull())?.also { used += it.first }?.second
             }
             cards = cards.toMutableList().also { it[i] = it[i].copy(picture = picture) }
+            state.value = state.value?.copy(facets = cards)
+            val finding = withContext(Dispatchers.IO) {
+                val times = sources.times()
+                if (times.isEmpty) null else times.datedIn(sources.qids().facetSet(cards[i].facet.key))
+            }?.let { findingOf(it) }
+            cards = cards.toMutableList().also { it[i] = it[i].copy(finding = finding, told = true) }
             state.value = state.value?.copy(facets = cards)
         }
     }
@@ -813,6 +860,10 @@ class SubjectViewModel(
 
         /** Wander starts among the subject's best-known articles, not its stubs. */
         const val WANDER_POOL = 300
+
+        /** A subject page opens on this many plates, the others found among this many of its best known. */
+        const val OPENING = 3
+        const val OPENING_TRIES = 12
 
         /** Each sub-category's best-known articles on the subject page. */
         const val FACET_EXAMPLES = 4

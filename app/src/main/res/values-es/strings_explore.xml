@@ -169,4 +169,17 @@
     <string name="explore_ways_on">Para seguir</string>
     <string name="explore_way_anywhere">En cualquier parte de esta sala</string>
     <string name="explore_way_subject">Todo el tema</string>
+    <string name="explore_room_oldest_short">Lo más antiguo con fecha: %1$s (%2$s).</string>
+    <string name="explore_way_anywhere_subject">En cualquier parte de este tema</string>
+    <string name="explore_way_rooms">Sus salas</string>
+    <string name="explore_subject_a">Un tema</string>
+    <string name="explore_subject_a_rooms">Un tema · %1$s</string>
+    <plurals name="explore_rooms">
+        <item quantity="one">%1$s sala</item>
+        <item quantity="many">%1$s salas</item>
+        <item quantity="other">%1$s salas</item>
+    </plurals>
+    <string name="explore_subject_rooms_eyebrow">Las salas</string>
+    <string name="explore_subject_rooms_finding">%1$s. %2$s</string>
+    <string name="explore_subject_rooms_topics">%1$s, %2$s</string>
 </resources>

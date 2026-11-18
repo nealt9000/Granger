@@ -100,17 +100,24 @@ private fun standfirst(ui: SubjectUi, words: app.granger.home.YearWords): String
     val parts = ArrayList<String>()
     ui.room?.description?.let { parts += it }
     if (ui.count > 0) parts += pluralStringResource(R.plurals.explore_topics, ui.count, count(ui.count)) + "."
-    ui.room?.finding?.let { f ->
-        f.oldest?.let { o -> o.mark?.let { m -> parts += stringResource(R.string.explore_room_oldest, o.title, words.of(m)) } }
-        val share = f.share
-        if (share != null && f.centuryStart != null) {
-            // English names a century by its years (the 1900s); Spanish counts it (el siglo XX).
-            val spanish = LocalConfiguration.current.locales[0].language == "es"
-            val century = stringResource(R.string.explore_century, if (spanish) romanCentury(f.centuryStart) else f.centuryStart.toString())
-            parts += stringResource(R.string.explore_room_century, share.dated(), century)
-        }
-    }
+    ui.room?.finding?.let { parts += it.sentences(words) }
     return parts.joinToString(" ")
+}
+
+/** What a finding says, a sentence each: the oldest dated topic; the share of the dated topics in their busiest century. */
+@Composable
+internal fun RoomFinding.sentences(words: app.granger.home.YearWords, oldest: Boolean = true, short: Boolean = false): List<String> {
+    val parts = ArrayList<String>()
+    // [short]: under a room's plate, one of several side by side, the oldest is a label and not a sentence.
+    if (oldest) this.oldest?.let { o -> o.mark?.let { m -> parts += stringResource(if (short) R.string.explore_room_oldest_short else R.string.explore_room_oldest, o.title, words.of(m)) } }
+    val share = share
+    if (share != null && centuryStart != null) {
+        // English names a century by its years (the 1900s); Spanish counts it (el siglo XX).
+        val spanish = LocalConfiguration.current.locales[0].language == "es"
+        val century = stringResource(R.string.explore_century, if (spanish) romanCentury(centuryStart) else centuryStart.toString())
+        parts += stringResource(R.string.explore_room_century, share.dated(), century)
+    }
+    return parts
 }
 
 private fun ExploreArticle.plate(dates: String?) = Plate("$packId/$path", title, picture, ratio, whole, sub = dates)
@@ -124,8 +131,10 @@ private fun ExploreArticle.plate(dates: String?) = Plate("$packId/$path", title,
 @Composable
 fun RoomContent(ui: SubjectUi?, actions: ExploreActions, subject: SubjectActions = SubjectActions()) {
     val language = LocalConfiguration.current.locales[0].language
-    val name = ui?.facet?.name(language).orEmpty()
     val subjectName = ui?.let { stringResource(it.subject.label) }.orEmpty()
+    // The whole subject's listing has a room's views and none of a room's own parts.
+    val whole = ui != null && ui.facet == null
+    val name = if (whole) stringResource(R.string.explore_all_in, subjectName) else ui?.facet?.name(language).orEmpty()
     Scaffold(
         topBar = {
             Box(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background).windowInsetsPadding(TopAppBarDefaults.windowInsets)) {
@@ -158,7 +167,8 @@ fun RoomContent(ui: SubjectUi?, actions: ExploreActions, subject: SubjectActions
             LazyColumn(Modifier.fillMaxSize().testTag(RoomTags.LIST), state = list, contentPadding = PaddingValues(bottom = 24.dp)) {
                 item(key = "head") {
                     SpreadHead(
-                        stringResource(if (loaded.count in 1 until SMALL_ROOM) R.string.explore_room_small_in else R.string.explore_room_in, subjectName),
+                        if (whole) stringResource(R.string.explore_way_subject)
+                        else stringResource(if (loaded.count in 1 until SMALL_ROOM) R.string.explore_room_small_in else R.string.explore_room_in, subjectName),
                         name, Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp), standfirst = standfirst(loaded, words), large = true,
                     )
                 }
@@ -238,8 +248,8 @@ fun RoomContent(ui: SubjectUi?, actions: ExploreActions, subject: SubjectActions
                     WaysOn(
                         stringResource(R.string.explore_ways_on),
                         listOfNotNull(
-                            if (loaded.canWander) WayOn(stringResource(R.string.explore_way_anywhere), stringResource(R.string.explore_subject_wander), subject.onWander) else null,
-                            WayOn(stringResource(R.string.explore_way_subject), subjectName, subject.onOpenSubject),
+                            if (loaded.canWander) WayOn(stringResource(if (whole) R.string.explore_way_anywhere_subject else R.string.explore_way_anywhere), stringResource(R.string.explore_subject_wander), subject.onWander) else null,
+                            WayOn(stringResource(if (whole) R.string.explore_way_rooms else R.string.explore_way_subject), subjectName, subject.onOpenSubject),
                         ),
                         Modifier.padding(top = 28.dp),
                     )

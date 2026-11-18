@@ -379,6 +379,8 @@ fun SubjectScreen(viewModel: SubjectViewModel, actions: ExploreActions, subjectA
             onOpenFacet = subjectActions.onOpenFacet,
             onWanderAt = subjectActions.onWanderAt,
             picture = viewModel::picture,
+            onOpenExplore = subjectActions.onOpenExplore,
+            onOpenDoor = subjectActions.onOpenDoor,
         ),
     )
 }
@@ -406,6 +408,8 @@ class SubjectActions(
     val onOpenSubject: () -> Unit = {},
     /** Another room. [through] a door (the neighbour takes this room's place) or by a link (it opens on top). */
     val onOpenRoom: (subject: String, facet: String, through: Boolean) -> Unit = { _, _, _ -> },
+    /** Through a subject page's door: the neighbouring subject takes this one's place. */
+    val onOpenDoor: (subject: String) -> Unit = {},
 )
 
 object SubjectTags {
@@ -418,7 +422,9 @@ object SubjectTags {
     fun letter(l: String) = "subject_az_$l"
     fun book(id: String) = "subject_book_$id"
     fun collection(id: String) = "subject_collection_$id"
-    fun facet(id: String) = "subject_facet_$id"
+    /** A room's plate on the subject page. */
+    fun facet(id: String) = PlateTags.plate("room:$id")
+    fun opening(path: String) = PlateTags.plate("opening:$path")
     const val SEE_ALL = "subject_see_all"
 }
 

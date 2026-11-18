@@ -513,3 +513,14 @@ On `ex-build`. A sub-category's listing is now a room (`RoomScreen.kt`, `Room.kt
 - **Descriptions:** read from an app asset, `assets/explore/rooms.json`, written from `lenses.json` by `tools/subjects/room_descriptions.py`. A test holds the two word for word. This replaces the plan's metadata-only index rebuild; nothing in the index or the catalog changed.
 - **Speed (desk, real Top index):** a room's finding, plates and overlaps are ready in 60 to 160 ms. Not measured on a phone or on Top 1M.
 - **Not done here:** rooms seen (R). The Spanish strings have had no second reader.
+
+### D2 done (2026-11-18)
+On `ex-build`. A subject's page is now a spread (`SubjectPage.kt`), and the whole-subject listing ("See all") is the room's spread without a room's own parts, so the old mosaic listing (`TopicsContent`, `tileShape`) is gone.
+
+- **Head:** the trail; up to three numbered opening plates (the subject's own article, then its best known that have a photograph); the eyebrow "A subject · 8 rooms"; the name; its own article's opening sentence; the plates' captions, which are their titles (the index holds no caption for a lead picture); Wander and Quiz.
+- **The rooms:** plates in pairs, the wide side swapping row by row, each with its name and count. Under each, the room's own dates as its page states them ("Oldest dated: Boat (900,000 BC). About three in four dated topics are from the 1900s."); a room whose dates say nothing shows its description. The heading states the subject's busiest century, or the room and topic counts when there is nothing to state.
+- **Then:** See all its topics; the shelf's books on it; book collections and packs as ruled lines.
+- **Doors bar** (pinned, as on a room): the subjects before and after in the landing's order, ends meeting. A door replaces the page, so Back leaves the subjects.
+- **Data:** each room's dates are read one room at a time after its picture (`datedIn` per room), so sentences fill in down the page; three lines are held for each so nothing moves. A room's picture avoids the opening plates' articles.
+- **Not in D2:** rooms seen (R). Captions for lead pictures (new data).
+- **Checks:** app 1,924 and core/library 524 tests pass. Shots `subject` in Field, Night and Spanish looked at. Not timed on the real index, not on a phone.

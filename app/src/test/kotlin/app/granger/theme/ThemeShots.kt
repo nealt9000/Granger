@@ -1470,6 +1470,55 @@ open class ThemeShots {
         }
     }
 
+    /**
+     * Plan EX round 2, D2: a subject (Technology) beside the rail: the trail, three opening plates and their captions, the
+     * head, Wander and Quiz, the rooms in pairs each over its sentence, all its topics, in your books, the doors bar.
+     */
+    @Config(qualifiers = "+w390dp-h2250dp")
+    @Test fun subject() {
+        fun mark(title: String, y0: Long) = app.granger.core.library.TimeMark(1, "top", title, title, app.granger.core.library.TimeKind.POINT, y0, 0, null, null, 9, emptySet(), 1)
+        fun article(title: String, rgb: Int = 0x5B6C7A, year: Long? = null): app.granger.explore.ExploreArticle {
+            val p = shotPlate(title, 300, 200, rgb)
+            return app.granger.explore.ExploreArticle("top", title.replace(' ', '_'), title, p.picture, year?.let { mark(title, it) }, p.ratio)
+        }
+        fun room(id: String, en: String, es: String, n: Int, picture: String, rgb: Int, description: String, finding: app.granger.explore.RoomFinding? = null) = app.granger.explore.FacetCard(
+            app.granger.core.library.Facet("technology", id, en, es), n, emptyList(), shotPlate(picture, 300, 200, rgb).picture, description, finding, told = true,
+        )
+        val rooms = listOf(
+            room("computers", "Computers & software", "Computadoras y software", 1_204, "Computer", 0x4F5D4A, "Machines that compute, and the programs that run on them.",
+                app.granger.explore.RoomFinding(article("Gantt chart", year = 1910), 310, 1900, 262)),
+            room("internet", "The internet", "Internet", 512, "Internet", 0x35566B, "The network of networks, and what people do on it.",
+                app.granger.explore.RoomFinding(article("News agency", year = 1835), 96, 1900, 61)),
+            room("vehicles", "Cars, planes & ships", "Autos, aviones y barcos", 882, "Ship", 0x2F4050, "Everything people have built to carry themselves.",
+                app.granger.explore.RoomFinding(article("Boat", year = -899_999), 228, 1900, 171)),
+            room("space", "Spaceflight", "Vuelos espaciales", 214, "Neil Armstrong", 0x6B6F7A, "Rockets, probes, stations and the people who flew them.",
+                app.granger.explore.RoomFinding(article("Rocket", year = 1232), 66, 1900, 64)),
+            room("machines", "Machines & gadgets", "Máquinas y aparatos", 655, "Telephone", 0x8C5A3C, "Tools and devices, from the wheel to the mobile phone.",
+                app.granger.explore.RoomFinding(article("Clothing", year = -56_999), 120, 1800, 44)),
+            room("inventions", "Inventions & inventors", "Inventos e inventores", 398, "Thomas Edison", 0x7A6A55, "The people who made new things, and the things they made.",
+                app.granger.explore.RoomFinding(article("Johannes Gutenberg", year = 1400), 240, 1800, 118)),
+            // Two dated topics: too few for its dates to say anything, so the room says what it is.
+            room("energy", "Energy & power", "Energía", 263, "Energy", 0x9A4B3A, "Coal, petroleum, electricity and nuclear power: where the world's energy comes from."),
+            room("weapons", "Weapons & warfare", "Armas y guerra", 742, "Nuclear weapon", 0x44606B, "From the sword and the arrow to the nuclear weapon.",
+                app.granger.explore.RoomFinding(article("Arrow", year = -62_000), 6, null, 0)),
+        )
+        val ui = app.granger.explore.SubjectUi(
+            app.granger.explore.Subject.TECHNOLOGY, 4_611, emptyList(), emptyList(), more = true, dated = 1_180, datedMain = 700, facets = rooms,
+            hero = app.granger.explore.ArticleLook(null, "Technology is the application of conceptual knowledge to achieve practical goals, especially in a reproducible way."),
+            opening = listOf(article("Technology", 0x7A6A55), article("Computer", 0x4F5D4A), article("Telephone", 0x8C5A3C)),
+            finding = app.granger.explore.RoomFinding(null, 1_180, 1900, 640),
+            books = listOf(app.granger.explore.ExploreBook("b1", "The Mechanical Arts", null, 1L), app.granger.explore.ExploreBook("b2", "On Aqueducts", null, 2L)),
+            collections = listOf(app.granger.explore.ExploreCollection("c:granger-classics", "Granger Classics", 4)),
+            doors = app.granger.explore.SubjectDoors(app.granger.explore.Subject.HEALTH, app.granger.explore.Subject.BUSINESS, 7, 17),
+        )
+        shoot("subject", pictures = true) {
+            GrangerShell(
+                rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = null,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+            ) { app.granger.explore.SubjectPageContent(ui, app.granger.explore.ExploreActions()) }
+        }
+    }
+
     /** A thin room's mosaic (Words & grammar): words side by side, portraits upright, then words three across; and a first door. */
     @Config(qualifiers = "+w334dp-h760dp")
     @Test fun spreadThin() {

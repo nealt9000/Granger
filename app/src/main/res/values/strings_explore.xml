@@ -193,4 +193,21 @@
     <string name="explore_ways_on">Ways on</string>
     <string name="explore_way_anywhere">Anywhere in this room</string>
     <string name="explore_way_subject">The whole subject</string>
+    <!-- The same under a room's plate on its subject's page, where there is little room. -->
+    <string name="explore_room_oldest_short">Oldest dated: %1$s (%2$s).</string>
+    <string name="explore_way_anywhere_subject">Anywhere in this subject</string>
+    <!-- On the whole subject's listing: back to the subject's page, where its rooms are. -->
+    <string name="explore_way_rooms">Its rooms</string>
+    <!-- Plan EX round 2, a subject (D2). The eyebrow over a subject's name; %1$s is how many rooms it has (explore_rooms). -->
+    <string name="explore_subject_a">A subject</string>
+    <string name="explore_subject_a_rooms">A subject · %1$s</string>
+    <plurals name="explore_rooms">
+        <item quantity="one">%1$s room</item>
+        <item quantity="other">%1$s rooms</item>
+    </plurals>
+    <string name="explore_subject_rooms_eyebrow">The rooms</string>
+    <!-- The heading over a subject's rooms: %1$s is how many rooms, %2$s a finding sentence (explore_room_century). -->
+    <string name="explore_subject_rooms_finding">%1$s. %2$s</string>
+    <!-- The same heading with no finding to state: %1$s is how many rooms, %2$s how many topics. -->
+    <string name="explore_subject_rooms_topics">%1$s, %2$s</string>
 </resources>

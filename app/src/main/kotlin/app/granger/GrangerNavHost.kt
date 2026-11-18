@@ -1139,6 +1139,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         },
                         onQuiz = { nav.navigate(SubjectGamesRoute(subject.id)) { launchSingleTop = true } },
                         onOpenFacet = { facet -> nav.navigate(TopicsRoute(subject.id, facet)) },
+                        onOpenExplore = { if (!nav.popBackStack<ExploreRoute>(inclusive = false)) nav.navigate(ExploreRoute) { launchSingleTop = true } },
+                        // Through a door the next subject takes this one's place, so Back leaves the subjects.
+                        onOpenDoor = { next -> nav.navigate(SubjectRoute(next)) { popUpTo(SubjectRoute(subject.id)) { inclusive = true } } },
                         onOpenBook = ::openLinkedBook,
                         onOpenCollection = { id -> nav.navigate(CollectionRoute(id)) },
                     ),
@@ -1163,7 +1166,6 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         // Through a door the next room takes this one's place, so Back leaves the rooms; a link opens on top.
                         onOpenRoom = { s, f, through -> nav.navigate(TopicsRoute(s, f)) { if (through) popUpTo(route) { inclusive = true } } },
                     ),
-                    room = route.facet != null,
                 )
             }
             composable<SubjectGamesRoute> { backStackEntry ->

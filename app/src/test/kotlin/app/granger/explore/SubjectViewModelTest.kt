@@ -75,11 +75,11 @@ class SubjectViewModelTest {
 
     private fun model(
         facet: String? = null, listing: Boolean = facet != null, look: (String, String) -> ArticleLook? = { _, _ -> null },
-        extraFacets: String = "", describe: (String, String) -> String? = { _, _ -> null },
+        extraFacets: String = "", describe: (String, String) -> String? = { _, _ -> null }, picture: (String, String) -> String? = { _, _ -> null },
     ): SubjectViewModel {
         val qids = QidIndexes(listOf(QidIndex.open(gqid(extraFacets), "top")!!))
         val times = TimeIndexes(listOf(TimeIndex.open(gtime(), "top")!!))
-        val sources = ExploreSources({ qids }, { times }, { _, _ -> null }, flowOf(listOf(pack("c", "History pack") to null)), { true }, look = look, roomDescription = describe)
+        val sources = ExploreSources({ qids }, { times }, picture, flowOf(listOf(pack("c", "History pack") to null)), { true }, look = look, roomDescription = describe)
         return SubjectViewModel(Subject.HISTORY, sources, books = {
             listOf(ExploreBook("gc-pp", "Pride and Prejudice", null, 170583L), ExploreBook("gc-g", "Decline and Fall", null, 2277L))
         }, facetId = facet, listing = listing)
@@ -142,6 +142,22 @@ class SubjectViewModelTest {
         assertThat(room.overlaps).containsExactly(
             RoomOverlap(Subject.HISTORY, app.granger.core.library.Facet("history", "rulers", "Rulers", "Gobernantes"), 3, listOf("Napoleon", "Roman Empire", "Battle of Hastings")),
         )
+    }
+
+    /** Plan EX round 2, D2: a subject's opening plates, what its dates say, each room's own sentence, and its doors. */
+    @Test fun aSubjectCarriesItsOpeningPlatesItsFindingEachRoomsSentenceAndItsDoors() {
+        val vm = model(picture = { _, path -> "pic:$path" }, look = { _, path -> ArticleLook("look:$path", null) }, describe = { key, _ -> "About $key" })
+        val ui = vm.until { u -> u.facets.size == 3 && u.facets.all { it.told } && u.finding != null }
+        // No article of its own here, so its three best known whose main subject it is open the page (London's is Places).
+        assertThat(ui.opening.map { it.path }).containsExactly("Napoleon", "Roman_Empire", "Battle_of_Hastings").inOrder()
+        assertThat(ui.opening.map { it.picture }).containsExactly("pic:Napoleon", "pic:Roman_Empire", "pic:Battle_of_Hastings").inOrder()
+        // Hastings, Napoleon and Rome are dated; London is not.
+        assertThat(ui.finding?.dated).isEqualTo(3)
+        assertThat(ui.facets.map { it.description }).containsExactly("About history.war", "About history.rulers", "About history.states").inOrder()
+        assertThat(ui.facets.map { it.finding?.oldest?.path }).containsExactly("Battle_of_Hastings", "Napoleon", "Roman_Empire").inOrder()
+        assertThat(ui.facets.map { it.finding?.dated }).containsExactly(2, 1, 1).inOrder()
+        // The library's order, largest first: History (4), then Places and Books & writing (1 each). The ends meet.
+        assertThat(ui.doors).isEqualTo(SubjectDoors(Subject.LITERATURE, Subject.PLACES, 1, 3))
     }
 
     @Test fun wanderStartsAtAWellKnownMainSubjectArticle() = runBlocking {
@@ -210,6 +226,8 @@ class SubjectViewModelTest {
 
     @Test fun theWholeSubjectsListingHasEveryArticle() {
         val ui = model(listing = true).until { it.articles.size == 4 && !it.loading }
+        // A listing has none of the subject page's doors.
+        assertThat(ui.doors).isNull()
         assertThat(ui.facet).isNull()
         assertThat(ui.articles.first().title).isEqualTo("Napoleon")
         assertThat(ui.room).isNull()    // the whole subject is no room

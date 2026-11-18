@@ -1,10 +1,16 @@
 package app.granger.explore
 
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.unit.dp
 import app.granger.pack
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -71,7 +77,7 @@ class ExploreScreenTest {
         )
         val seen = mutableListOf<String>()
         compose.setContent { SubjectPageContent(ui, actions, SubjectActions(onOpenCollection = { seen += it })) }
-        compose.onNodeWithText("Book collections").assertExists()
+        compose.onNodeWithContentDescription("Book collections").assertExists()
         compose.onNodeWithText("120 books").assertExists()
         compose.onNodeWithText("Nothing on this subject yet").assertDoesNotExist()
         compose.onNodeWithTag(SubjectTags.collection("c:gp")).performClick()
@@ -117,78 +123,91 @@ class ExploreScreenTest {
         val seen = mutableListOf<String?>()
         val ui = SubjectUi(Subject.FOOD, 658, listOf(a("Pizza"), a("Coffee")), listOf(pack("c", "based.cooking")), more = true)
         compose.setContent { SubjectPageContent(ui, actions, SubjectActions(onOpenFacet = { seen += it })) }
-        compose.onNodeWithText("658 topics").assertExists()
+        compose.onNodeWithContentDescription("A subject").assertExists()
         compose.onNodeWithText("Coffee").performClick()
+        compose.onNodeWithText("See all 658 topics").assertHeightIsAtLeast(48.dp)
         compose.onNodeWithTag(SubjectTags.SEE_ALL).performScrollTo().performClick()
         compose.onNodeWithText("based.cooking").performScrollTo().performClick()
         assertThat(calls).containsExactly("article:top/Coffee", "pack:c").inOrder()
         assertThat(seen).containsExactly(null)
     }
 
-    @Test fun aSubjectPageIsItsHeadThenItsSubCategoriesAsAFlowThenItsBooks() {
+    @Test fun aSubjectIsItsOpeningPlatesItsRoomsInPairsEachWithASentenceItsBooksAndItsDoors() {
         fun facet(id: String, en: String) = app.granger.core.library.Facet("history", id, en, en)
+        val boat = app.granger.core.library.TimeMark(35872L, "top", "Boat", "Boat", app.granger.core.library.TimeKind.POINT, -3000, 0, null, null, 9, emptySet(), 300)
         val cards = listOf(
-            FacetCard(facet("war", "Wars & battles"), 954, listOf(a("World_War_II"), a("Napoleon"))),
-            FacetCard(facet("rulers", "Rulers & royalty"), 636, listOf(a("Augustus"))),
-            FacetCard(facet("states", "Empires & kingdoms"), 416, listOf(a("Roman_Empire"))),
-            FacetCard(facet("turning", "Periods & turning points"), 542, listOf(a("Cold_War"))),
-            FacetCard(facet("revolutions", "Revolutions & uprisings"), 64, listOf(a("French_Revolution"))),
+            // Dated: the room's own finding. Nothing dated: what the room is. Dates not read yet: nothing said.
+            FacetCard(facet("war", "Wars & battles"), 954, listOf(a("World_War_II")), finding = RoomFinding(boat.toExplore(), 400, 1900, 300), told = true),
+            FacetCard(facet("rulers", "Rulers & royalty"), 636, listOf(a("Augustus")), description = "Kings, queens, emperors and the houses they belonged to.", told = true),
+            FacetCard(facet("states", "Empires & kingdoms"), 416, listOf(a("Roman_Empire")), description = "States that rose and fell."),
+            FacetCard(facet("turning", "Periods & turning points"), 542, listOf(a("Cold_War")), told = true),
+            FacetCard(facet("revolutions", "Revolutions & uprisings"), 64, listOf(a("French_Revolution")), told = true),
         )
         val ui = SubjectUi(
             Subject.HISTORY, 3_531, emptyList(), emptyList(), more = true, dated = 2_900, datedMain = 2_000, facets = cards,
             hero = ArticleLook(null, "History is the systematic study of the past."),
             books = listOf(ExploreBook("gc-g", "Decline and Fall", null, 2277L)),
+            opening = listOf(a("History"), a("World_War_II"), a("Roman_Empire")),
+            finding = RoomFinding(null, 2_900, 1900, 1_500),
+            doors = SubjectDoors(Subject.PLACES, Subject.SCIENCE, 3, 17),
         )
         val seen = mutableListOf<String>()
         compose.setContent {
-            SubjectPageContent(ui, actions, SubjectActions(onWander = { seen += "wander" }, onQuiz = { seen += "quiz" },
-                onOpenFacet = { seen += "facet:$it" }, onOpenBook = { seen += "book:$it" }))
+            app.granger.theme.GrangerTheme(night = false) {
+                SubjectPageContent(ui, actions, SubjectActions(onWander = { seen += "wander" }, onQuiz = { seen += "quiz" },
+                    onOpenFacet = { seen += "facet:$it" }, onOpenBook = { seen += "book:$it" }, onOpenExplore = { seen += "explore" }, onOpenDoor = { seen += "door:$it" }))
+            }
         }
+        // The head: where the reader is, what this is, its own article's sentence, and the plates' captions.
+        compose.onNodeWithContentDescription("You are here: History").assertExists()
+        compose.onNodeWithContentDescription("A subject · 5 rooms").assertExists()
         compose.onNodeWithText("History is the systematic study of the past.").assertExists()
-        compose.onNodeWithText("3,531 topics · 2,900 dated").assertExists()
-        // The first sub-category leads wide with its best-known; the next three make a block; the last is a row.
-        compose.onNodeWithText("World War II · Napoleon").assertExists()
-        compose.onNodeWithTag(SubjectTags.WANDER).performClick()
+        // With no picture a numbered plate is its word, and the caption under the group names it again.
+        compose.onAllNodesWithText("Roman Empire", useUnmergedTree = true).assertCountEquals(2)
+        compose.onNodeWithTag(SubjectTags.opening("World_War_II")).assertHasClickAction().performClick()
+        // The heading over the rooms states what the subject's dates say; each room, what its own say.
+        compose.onNodeWithText("5 rooms. About half the dated topics are from the 1900s.").performScrollTo().assertExists()
+        compose.onNodeWithText("Oldest dated: Boat", substring = true).assertExists()
+        compose.onNodeWithText("About three in four the dated topics", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("Kings, queens, emperors and the houses they belonged to.").assertExists()
+        compose.onNodeWithText("States that rose and fell.").assertDoesNotExist()
+        // A room's plate is one button: its name and how much it holds.
+        compose.onNodeWithContentDescription("Wars & battles, 954 topics").assertHasClickAction()
+        compose.onNodeWithTag(SubjectTags.WANDER).assertHeightIsAtLeast(48.dp).performClick()
         compose.onNodeWithTag(SubjectTags.QUIZ).performClick()
         compose.onNodeWithTag(SubjectTags.facet("war")).performClick()
         compose.onNodeWithTag(SubjectTags.facet("states")).performScrollTo().performClick()
-        compose.onNodeWithText("Revolutions & uprisings").performScrollTo().performClick()
+        compose.onNodeWithTag(SubjectTags.facet("revolutions")).performScrollTo().performClick()
+        compose.onNodeWithContentDescription("In your books (1)").performScrollTo().assertExists()
         compose.onNodeWithTag(SubjectTags.book("gc-g")).performScrollTo().performClick()
-        assertThat(seen).containsExactly("wander", "quiz", "facet:war", "facet:states", "facet:revolutions", "book:gc-g").inOrder()
+        // The trail leads back, and the doors lead to the subjects either side.
+        compose.onNodeWithText("Explore").performClick()
+        compose.onNodeWithContentDescription("The subject before, Places").performClick()
+        compose.onNodeWithContentDescription("The subject after, Science & maths").performClick()
+        compose.onNodeWithContentDescription("Subject 3\u00A0of\u00A017").assertExists()
+        assertThat(seen).containsExactly("wander", "quiz", "facet:war", "facet:states", "facet:revolutions", "book:gc-g", "explore", "door:places", "door:science").inOrder()
+        assertThat(calls).containsExactly("article:top/World_War_II")
     }
 
-    @Test fun aListingIsAMosaicWithItsErasAndOrder() {
-        val napoleon = app.granger.core.library.TimeMark(517L, "top", "Napoleon", "Napoleon", app.granger.core.library.TimeKind.LIFE, 1769, 0, 1821, null, 9, emptySet(), 300)
-        val ui = SubjectUi(
-            Subject.HISTORY, 636, listOf(napoleon.toExplore(), a("Augustus")), emptyList(), more = false,
-            eras = listOf(Era.ANCIENT to 12, Era.C19 to 340), dated = 352, datedMain = 300, era = Era.C19, sort = SubjectSort.OLDEST,
-            facet = app.granger.core.library.Facet("history", "rulers", "Rulers & royalty", "Gobernantes y realeza"),
-        )
+    @Test fun theWholeSubjectsListingIsARoomsSpreadWithoutARoomsOwnParts() {
+        val ui = SubjectUi(Subject.HISTORY, 3_531, listOf(a("Napoleon"), a("Augustus"), a("Cold_War")), emptyList(), more = true, eras = listOf(Era.ANCIENT to 12, Era.C19 to 340), dated = 352)
         val seen = mutableListOf<String>()
         compose.setContent {
-            TopicsContent(ui, actions, SubjectActions(onEra = { seen += "era:${it?.name}" }, onSort = { seen += "sort:${it.name}" }, onWander = { seen += "wander" }))
+            app.granger.theme.GrangerTheme(night = false) {
+                RoomContent(ui, actions, SubjectActions(onMore = { seen += "more" }, onSort = { seen += "sort:${it.name}" }, onOpenSubject = { seen += "subject" }))
+            }
         }
-        compose.onNodeWithText("Rulers & royalty").assertExists()
-        compose.onNodeWithText("636 topics in History").assertExists()
-        compose.onNodeWithText("The 1800s · 340").assertExists()
-        compose.onNodeWithText("1769 – 1821", substring = true).assertExists()
-        compose.onNodeWithTag(SubjectTags.ALL_ERAS).performClick()
-        compose.onNodeWithTag(SubjectTags.era(Era.ANCIENT)).performClick()
-        compose.onNodeWithTag(SubjectTags.sort(SubjectSort.LINKED)).performClick()
-        compose.onNodeWithTag(SubjectTags.WANDER).performClick()
-        compose.onNodeWithTag(TopicsTags.tile("Augustus")).performClick()
-        assertThat(seen).containsExactly("era:null", "era:ANCIENT", "sort:LINKED", "wander").inOrder()
+        compose.onNodeWithContentDescription("You are here: All of History").assertExists()
+        compose.onNodeWithText("3,531 topics.").assertExists()
+        compose.onNodeWithTag(SpreadTags.DOOR_BEFORE).assertDoesNotExist()
+        compose.onNodeWithTag(RoomTags.view(SubjectSort.AZ)).performClick()
+        compose.onNodeWithContentDescription("Augustus").performClick()
+        compose.onNodeWithTag(RoomTags.MORE).performScrollTo().performClick()
+        // The way on is back to the subject's page, where its rooms are.
+        compose.onNodeWithText("Its rooms".uppercase(), useUnmergedTree = true).performScrollTo().assertExists()
+        compose.onNodeWithTag(SpreadTags.way(1)).performClick()
+        assertThat(seen).containsExactly("sort:AZ", "more", "subject").inOrder()
         assertThat(calls).containsExactly("article:top/Augustus")
-    }
-
-    @Test fun aTileTakesItsPicturesShapeAndNowAndThenALandscapeSpansBoth() {
-        assertThat(tileShape(0, 0.66f, hasPicture = true)).isEqualTo(TileShape(3f / 4f))
-        assertThat(tileShape(1, 1.5f, hasPicture = true)).isEqualTo(TileShape(4f / 3f))
-        assertThat(tileShape(2, 1.0f, hasPicture = true)).isEqualTo(TileShape(1f))
-        assertThat(tileShape(3, 1.5f, hasPicture = false)).isEqualTo(TileShape(1f))
-        // Never in the first rows; then one landscape place in seven goes wide.
-        val wide = (0 until 30).filter { tileShape(it, 1.6f, hasPicture = true).wide }
-        assertThat(wide).containsExactly(4, 11, 18, 25).inOrder()
     }
 
     @Test fun todaysTopicStepsThroughItsSubjectsBestKnownSoDaysDontRepeat() {
