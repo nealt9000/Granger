@@ -669,6 +669,11 @@ class AppContainer(context: Context) {
     val librivoxClient = LibriVoxClient(http, archiveUserAgent)
     val archivePrefs: ArchivePrefs = if (Features.ARCHIVE_WAIVER) SharedArchivePrefs(context) else FixedFilterArchivePrefs
     val appearancePrefs: AppearancePrefs = SharedAppearancePrefs(context)
+
+    /** Explore's rooms seen (Plan EX round 2, R), in a preferences file of its own. */
+    val seen: app.granger.explore.SeenStore by lazy {
+        app.granger.explore.SeenStore.Prefs(context.getSharedPreferences("explore_seen", android.content.Context.MODE_PRIVATE))
+    }
     val appLanguages: AppLanguages = AppLanguages.create(context, onLegacyChange = { (context as? GrangerApp)?.relocalize() })
 
     /** Voice input (Plan A1): the phone's on-device recognizer, in the app's language; read-aloud stops before a take. */

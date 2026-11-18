@@ -582,3 +582,16 @@ On `ex-build`. Connections is the quilt (`topic/TopicQuilt.kt`, `topic/Quilt.kt`
 - **Index:** `QidIndex.holders`, `heldBy`, `roomsOf`. No new index was needed: what leads to an item is one pass over the parts, 15 to 34 ms on Top at the desk.
 - **Not built:** "born within a year" (the page's lives and events of its years stand in); the label has no "its own rooms' plates"; the quilt's pictures for plates the page didn't picture are read one by one as they show.
 - **Checks:** app 1,935 and core/library 525 tests pass. Shot `quilt` in Field, Night and Spanish looked at. On the Pixel (Night, English): Pandemic's quilt forms at once and its corner numbers follow within a few seconds; touching Anthony Fauci re-formed it with the thread and the shared mark; holding him showed his label; Stand here worked. Found there and fixed: pictures stayed on a place when the quilt re-formed, so plates showed the wrong pictures.
+
+### R done (2026-11-18)
+On `ex-build`. Rooms seen: the quiet game layer.
+
+- **What is kept:** a room when its page is opened, a subject when its page is opened, an era when its line on the landing is opened; each with when it was first seen. Never an article, and not the whole-subject listing.
+- **Where it shows:** "Rooms you have seen · 14 of 108" at the foot of the landing, and "Rooms seen in Technology · 3 of 8" at the foot of a subject. Only rooms the library holds are counted. Subjects and eras are kept but not shown anywhere yet.
+- **Settings › Explore:** "Keep track of rooms you've seen" (off: nothing more is kept and the bars go; what was kept stays), and "Clear what you've seen", which asks first.
+- **A change from the plan:** it is kept in a preferences file of its own (`explore_seen`) behind `SeenStore`, not in a new database table. The plan said a table and the next migration; a hundred-odd small entries don't need one, and a migration would put the shared Pixel past the database version every other branch has (16), so none of them could install on it until they carried this one. Moving it into a table later is a change inside `SeenStore` only.
+- **Checks:** app 1,938 and core/library 525 tests pass. Shots `landing` and `subject` with their bars in Field, Night and Spanish looked at. On the Pixel: opening Technology and then Cars, planes & ships gave 1 of 8 on the subject, 1 of 108 on the landing and "2 places kept" in Settings.
+
+### Still to do
+- **A performance pass (Neal, 2026-11-18):** things take too long to load for being local on the phone. Known waits, warm: a broad topic's parts about five seconds (they arrive together), the landing's pictures about four, a subject's room lines about two, the quilt's corner numbers a few seconds. Nothing has been timed cold.
+- The walkthrough on the Pixel in Field and Night, with TalkBack, then Spanish.

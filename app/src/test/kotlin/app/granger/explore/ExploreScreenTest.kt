@@ -137,6 +137,29 @@ class ExploreScreenTest {
         assertThat(calls).containsExactly("get", "sources").inOrder()
     }
 
+    @Test fun roomsSeenAreCountedOnTheLandingAndInASubjectAndNotShownWhenTheyArentKept() {
+        val doors = listOf(SubjectDoor(Subject.HISTORY, 3_503, emptyList(), emptyList()))
+        fun facet(id: String) = app.granger.core.library.Facet("history", id, id, id)
+        var landing by androidx.compose.runtime.mutableStateOf(ExploreUi(77_019, doors, emptyList(), emptyList(), rooms = 3,
+            roomKeys = setOf("history.war", "history.rulers", "history.states"), seen = setOf("history.war", "history.gone", "art.painting")))
+        var subject by androidx.compose.runtime.mutableStateOf(SubjectUi(Subject.HISTORY, 3_503, emptyList(), emptyList(), more = false,
+            facets = listOf(FacetCard(facet("war"), 10, emptyList()), FacetCard(facet("rulers"), 8, emptyList())), seen = setOf("history.war", "history.rulers", "art.painting")))
+        compose.setContent {
+            androidx.compose.foundation.layout.Column {
+                androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.weight(1f)) { ExploreContent(landing, actions, onEra = { calls += "era:${it.name}" }, day = 0) }
+                androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.weight(1f)) { SubjectPageContent(subject, actions) }
+            }
+        }
+        // Only rooms that are there count: one of the library's three; both of the subject's two.
+        compose.onNodeWithContentDescription("Rooms you have seen, 1 of 3").assertExists()
+        compose.onNodeWithContentDescription("Rooms seen in History, 2 of 2").assertExists()
+        // Not kept: no bars.
+        landing = landing.copy(seen = null)
+        subject = subject.copy(seen = null)
+        compose.onNodeWithContentDescription("Rooms you have seen, 1 of 3").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Rooms seen in History, 2 of 2").assertDoesNotExist()
+    }
+
     @Test fun theSubjectMosaicIsCutByRuleFromHowManyThereAre() {
         fun sizes(n: Int) = doorRows(n).map { it.name }
         // Seventeen: wide and narrow, three, narrow and wide, three, round once more, and the last two side by side.

@@ -1,5 +1,7 @@
 package app.granger.settings
 
+import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -43,6 +45,8 @@ class SettingsScreenTest {
 
     private val calls = mutableListOf<String>()
 
+    private val seen = app.granger.explore.SeenStore.Memory()
+
     private fun show(listening: Boolean = true, audiobooks: Boolean = true, crashReports: Int = 0) = compose.setContent {
         SettingsScreen(
             SettingsViewModel(
@@ -59,7 +63,31 @@ class SettingsScreenTest {
             languageSummary = "Follow the phone (English)",
             onFeedback = { calls += "feedback" },
             crashReports = crashReports,
+            seen = seen,
         )
+    }
+
+    @Test fun exploresRoomsSeenCanBeTurnedOffAndClearedAfterAsking() {
+        seen.mark(app.granger.explore.SeenKind.ROOM, "technology.transport")
+        seen.mark(app.granger.explore.SeenKind.SUBJECT, "technology")
+        show()
+        fun scroll(tag: String) = compose.onNode(androidx.compose.ui.test.hasScrollAction()).performScrollToNode(androidx.compose.ui.test.hasTestTag(tag))
+        scroll(SettingsTags.SEEN_CLEAR)
+        compose.onNodeWithText("Rooms, subjects and eras only, never articles. Kept on this phone.").assertExists()
+        compose.onNodeWithText("2 places kept").assertExists()
+        // Clearing asks first; Cancel keeps everything.
+        compose.onNodeWithTag(SettingsTags.SEEN_CLEAR).performClick()
+        compose.onNodeWithText("Cancel").performClick()
+        assertThat(seen.state.value.first).hasSize(2)
+        compose.onNodeWithTag(SettingsTags.SEEN_CLEAR).performClick()
+        compose.onNodeWithText("Clear").performClick()
+        assertThat(seen.state.value.first).isEmpty()
+        compose.onNodeWithText("Nothing kept").assertExists()
+        // Off: nothing more is marked.
+        compose.onNodeWithTag(SettingsTags.SEEN).performClick()
+        assertThat(seen.state.value.on).isFalse()
+        seen.mark(app.granger.explore.SeenKind.ROOM, "technology.transport")
+        assertThat(seen.state.value.first).isEmpty()
     }
 
     private fun top(text: String) = compose.onNodeWithText(text).getBoundsInRoot().top

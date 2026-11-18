@@ -47,6 +47,8 @@ class ExploreViewModelTest {
 
     private val qids by lazy { QidIndexes(listOf(QidIndex.open(gqid(), "top")!!)) }
 
+    private val seen = SeenStore.Memory(now = { 7L })
+
     private fun model(day: Long) = ExploreViewModel(
         ExploreSources(
             qids = { qids }, times = { TimeIndexes(emptyList()) },
@@ -54,6 +56,7 @@ class ExploreViewModelTest {
             look = { _, path -> ArticleLook("/look/$path.jpg", "$path opens. And goes on.") },
             // The second figure isn't in the pack: the next stands in.
             figure = { _, image -> image.takeIf { it != "img/2.jpg" }?.let { "/fig/$it" } },
+            seen = seen,
         ),
         today = { day },
     )
@@ -90,6 +93,15 @@ class ExploreViewModelTest {
         assertThat(next.featured!!.article.path).isEqualTo("Atom")
         assertThat(next.featured!!.figures).isEmpty()
         assertThat(next.featured!!.kinds).isEqualTo(0)
+        // Rooms seen follow the store as it changes: a room that is there counts, another doesn't; an era opened is kept.
+        assertThat(next.roomsSeen).isEqualTo(0)
+        seen.mark(SeenKind.ROOM, "technology.transport")
+        seen.mark(SeenKind.ROOM, "technology.gone")
+        assertThat(vm.until { it.roomsSeen == 1 }.rooms).isEqualTo(2)
+        vm.sawEra(Era.MIDDLE_AGES)
+        assertThat(seen.state.value.first).containsEntry("era:middle_ages", 7L)
+        seen.setOn(false)
+        assertThat(vm.until { it.roomsSeen == null }.seen).isNull()
         // The doors keep their pictures.
         assertThat(next.doors.map { it.subject }).containsExactly(Subject.TECHNOLOGY, Subject.SCIENCE).inOrder()
     }

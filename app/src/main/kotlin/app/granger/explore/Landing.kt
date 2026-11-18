@@ -59,6 +59,8 @@ import app.granger.theme.GrangerTheme
 @Composable
 fun ExploreContent(
     ui: ExploreUi?, actions: ExploreActions, onAnother: () -> Unit = {}, onWander: () -> Unit = {}, day: Long = java.time.LocalDate.now().toEpochDay(),
+    /** An era's line was opened. */
+    onEra: (Era) -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -114,6 +116,7 @@ fun ExploreContent(
                 val most = loaded.eras.maxOf { it.count }
                 items(loaded.eras, key = { "era:" + it.era.name }) { row ->
                     EraBar(row, most) {
+                        onEra(row.era)
                         val top = row.examples.firstOrNull()
                         actions.onOpenTimeline(top?.packId, top?.path)
                     }
@@ -140,6 +143,9 @@ fun ExploreContent(
                 }
                 if (ways.isNotEmpty()) WaysOn(stringResource(R.string.explore_ways_on), ways, Modifier.padding(top = 30.dp))
             }
+            // The quiet game layer: how many of the library's rooms the reader has been in.
+            val seen = loaded.roomsSeen
+            if (seen != null && loaded.rooms > 0) item(key = "seen") { RoomsSeen(stringResource(R.string.explore_rooms_seen), seen, loaded.rooms, Modifier.padding(top = 12.dp)) }
         }
     }
 }

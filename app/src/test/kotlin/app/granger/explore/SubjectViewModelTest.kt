@@ -36,6 +36,7 @@ class SubjectViewModelTest {
     )
 
     private fun gqid(extraFacets: String = ""): File = File(tmp.root, "top.gqid").also { f ->
+        f.delete()    // a test may make more than one model
         SQLiteDatabase.openOrCreateDatabase(f, null).use { db ->
             db.execSQL("CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT NOT NULL)")
             db.execSQL("CREATE TABLE articles(path TEXT PRIMARY KEY, qid INTEGER NOT NULL, rank INTEGER NOT NULL, other TEXT) WITHOUT ROWID")
@@ -57,6 +58,7 @@ class SubjectViewModelTest {
     }
 
     private fun gtime(): File = File(tmp.root, "top.gtime").also { f ->
+        f.delete()
         SQLiteDatabase.openOrCreateDatabase(f, null).use { db ->
             db.execSQL("CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT NOT NULL)")
             db.execSQL(
@@ -73,13 +75,15 @@ class SubjectViewModelTest {
 
     private operator fun <T> List<T>.component6() = this[5]
 
+    private val seen = SeenStore.Memory()
+
     private fun model(
         facet: String? = null, listing: Boolean = facet != null, look: (String, String) -> ArticleLook? = { _, _ -> null },
         extraFacets: String = "", describe: (String, String) -> String? = { _, _ -> null }, picture: (String, String) -> String? = { _, _ -> null },
     ): SubjectViewModel {
         val qids = QidIndexes(listOf(QidIndex.open(gqid(extraFacets), "top")!!))
         val times = TimeIndexes(listOf(TimeIndex.open(gtime(), "top")!!))
-        val sources = ExploreSources({ qids }, { times }, picture, flowOf(listOf(pack("c", "History pack") to null)), { true }, look = look, roomDescription = describe)
+        val sources = ExploreSources({ qids }, { times }, picture, flowOf(listOf(pack("c", "History pack") to null)), { true }, look = look, roomDescription = describe, seen = seen)
         return SubjectViewModel(Subject.HISTORY, sources, books = {
             listOf(ExploreBook("gc-pp", "Pride and Prejudice", null, 170583L), ExploreBook("gc-g", "Decline and Fall", null, 2277L))
         }, facetId = facet, listing = listing)
@@ -231,5 +235,36 @@ class SubjectViewModelTest {
         assertThat(ui.facet).isNull()
         assertThat(ui.articles.first().title).isEqualTo("Napoleon")
         assertThat(ui.room).isNull()    // the whole subject is no room
+    }
+
+    @Test fun openingASubjectOrARoomIsSeeingItButNotTheWholeListingAndThePrefsKeepIt() {
+        model().until { !it.roomsPending }
+        assertThat(seen.state.value.ids(SeenKind.SUBJECT)).containsExactly("history")
+        assertThat(seen.state.value.ids(SeenKind.ROOM)).isEmpty()
+        // The whole subject's listing is no room.
+        model(listing = true).until { it.articles.isNotEmpty() }
+        assertThat(seen.state.value.ids(SeenKind.ROOM)).isEmpty()
+        val room = model(facet = "war").until { it.articles.isNotEmpty() }
+        assertThat(seen.state.value.ids(SeenKind.ROOM)).containsExactly("history.war")
+        assertThat(room.seen).containsExactly("history.war")
+
+        // On the phone it lives in a preferences file: first seen once, read back, cleared without losing the switch.
+        val prefs = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("seen-test", 0)
+        var now = 100L
+        val kept = SeenStore.Prefs(prefs) { now }
+        kept.mark(SeenKind.ROOM, "history.war")
+        now = 200L
+        kept.mark(SeenKind.ROOM, "history.war")
+        kept.mark(SeenKind.ERA, "c19")
+        val again = SeenStore.Prefs(prefs)
+        assertThat(again.state.value.first).containsExactly("room:history.war", 100L, "era:c19", 200L)
+        assertThat(again.state.value.ids(SeenKind.ROOM)).containsExactly("history.war")
+        again.setOn(false)
+        again.mark(SeenKind.ROOM, "history.rulers")
+        assertThat(again.state.value.ids(SeenKind.ROOM)).isNull()
+        again.clear()
+        val last = SeenStore.Prefs(prefs).state.value
+        assertThat(last.first).isEmpty()
+        assertThat(last.on).isFalse()
     }
 }

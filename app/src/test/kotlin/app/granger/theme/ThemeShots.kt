@@ -1474,7 +1474,7 @@ open class ThemeShots {
      * Plan EX round 2, D2: a subject (Technology) beside the rail: the trail, three opening plates and their captions, the
      * head, Wander and Quiz, the rooms in pairs each over its sentence, all its topics, in your books, the doors bar.
      */
-    @Config(qualifiers = "+w390dp-h2250dp")
+    @Config(qualifiers = "+w390dp-h2320dp")
     @Test fun subject() {
         fun mark(title: String, y0: Long) = app.granger.core.library.TimeMark(1, "top", title, title, app.granger.core.library.TimeKind.POINT, y0, 0, null, null, 9, emptySet(), 1)
         fun article(title: String, rgb: Int = 0x5B6C7A, year: Long? = null): app.granger.explore.ExploreArticle {
@@ -1510,6 +1510,7 @@ open class ThemeShots {
             books = listOf(app.granger.explore.ExploreBook("b1", "The Mechanical Arts", null, 1L), app.granger.explore.ExploreBook("b2", "On Aqueducts", null, 2L)),
             collections = listOf(app.granger.explore.ExploreCollection("c:granger-classics", "Granger Classics", 4)),
             doors = app.granger.explore.SubjectDoors(app.granger.explore.Subject.HEALTH, app.granger.explore.Subject.BUSINESS, 7, 17),
+            seen = rooms.take(3).mapTo(HashSet()) { it.facet.key },
         )
         shoot("subject", pictures = true) {
             GrangerShell(
@@ -1524,7 +1525,7 @@ open class ThemeShots {
      * plates, its captions and what its page holds), the seventeen subjects as a mosaic under their finding, Through time
      * as bars, and the three ways on.
      */
-    @Config(qualifiers = "+w390dp-h2720dp")
+    @Config(qualifiers = "+w390dp-h2790dp")
     @Test fun landing() {
         val e = app.granger.explore.Subject.entries.associateBy { it.id }
         val doors = listOf(
@@ -1540,6 +1541,7 @@ open class ThemeShots {
         val spanish = language == "es"
         val ui = app.granger.explore.ExploreUi(
             articles = 146_618, doors = doors, eras = eras, sources = listOf("a", "b", "c", "d", "e", "f"), rooms = 108,
+            roomKeys = (1..108).mapTo(HashSet()) { "r$it" }, seen = (1..14).mapTo(HashSet()) { "r$it" },
             featured = app.granger.explore.FeaturedTopic(
                 app.granger.explore.Subject.TECHNOLOGY, 3_538,
                 app.granger.explore.ExploreArticle("top", if (spanish) "Avión" else "Airplane", if (spanish) "Avión" else "Airplane", airplane.picture, ratio = airplane.ratio), emptyList(),

@@ -120,4 +120,18 @@
         <item quantity="many">Un correo desde tu app de correo · %1$d informes de error guardados en este teléfono</item>
         <item quantity="other">Un correo desde tu app de correo · %1$d informes de error guardados en este teléfono</item>
     </plurals>
+
+    <string name="settings_section_explore">Explorar</string>
+    <string name="settings_seen">Llevar la cuenta de las salas que has visto</string>
+    <string name="settings_seen_summary">Solo salas, temas y épocas, nunca artículos. Se guarda en este teléfono.</string>
+    <string name="settings_seen_clear">Borrar lo que has visto</string>
+    <string name="settings_seen_none">No hay nada guardado</string>
+    <plurals name="settings_seen_places">
+        <item quantity="one">%1$d lugar guardado</item>
+        <item quantity="many">%1$d lugares guardados</item>
+        <item quantity="other">%1$d lugares guardados</item>
+    </plurals>
+    <string name="settings_seen_clear_title">¿Borrar lo que has visto?</string>
+    <string name="settings_seen_clear_text">Explorar volverá a contar tus salas desde cero. Nada más cambia.</string>
+    <string name="settings_seen_clear_confirm">Borrar</string>
 </resources>

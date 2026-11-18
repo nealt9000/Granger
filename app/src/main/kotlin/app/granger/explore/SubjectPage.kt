@@ -148,6 +148,12 @@ fun SubjectPageContent(ui: SubjectUi?, actions: ExploreActions, subject: Subject
                     Lines(stringResource(R.string.explore_subject_packs), loaded.packs.map { pack -> Line(pack.title, null, "subject_pack_" + pack.id) { actions.onOpenPack(pack.id) } })
                 }
             }
+            val seen = loaded.seen
+            if (seen != null && cards.isNotEmpty()) {
+                item(key = "seen") {
+                    RoomsSeen(stringResource(R.string.explore_rooms_seen_in, name), cards.count { it.facet.key in seen }, cards.size, Modifier.padding(top = 18.dp))
+                }
+            }
             if (loaded.count == 0 && loaded.packs.isEmpty() && loaded.collections.isEmpty()) {
                 item(key = "empty") { Text(stringResource(R.string.explore_nothing_here), style = SpreadType.serif.copy(fontSize = 15.sp), modifier = Modifier.padding(16.dp)) }
             }

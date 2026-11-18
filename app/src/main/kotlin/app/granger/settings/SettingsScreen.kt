@@ -1,5 +1,7 @@
 package app.granger.settings
 
+import androidx.compose.ui.platform.testTag
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -78,6 +80,8 @@ fun SettingsScreen(
     crashReports: Int = 0,
     /** Settings → Voice input (Plan A1); null leaves the section out. */
     voiceInput: app.granger.voiceinput.VoiceInput? = null,
+    /** Explore's rooms seen (Plan EX round 2, R): the switch that keeps them and the row that clears them; null leaves the section out. */
+    seen: app.granger.explore.SeenStore? = null,
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
@@ -155,6 +159,7 @@ fun SettingsScreen(
             if (voiceInput != null) item(key = "voice_input") {
                 app.granger.voiceinput.VoiceInputSettingsSection(voiceInput)
             }
+            if (seen != null) item(key = "explore") { ExploreSection(seen) }
             item(key = "appearance") {
                 AppearanceSection(railSide, viewModel::setRailSide, openTo, viewModel::setOpenTo, theme, viewModel::setTheme)
                 if (onLanguage != null) LinkRow(stringResource(R.string.settings_language), languageSummary, onLanguage)
@@ -396,4 +401,43 @@ private fun About() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+}
+
+/**
+ * Explore: whether the rooms, subjects and eras the reader opens are kept (never articles), and the way to clear them,
+ * asked once before it is done.
+ */
+@Composable
+private fun ExploreSection(store: app.granger.explore.SeenStore) {
+    val seen by store.state.collectAsStateWithLifecycle()
+    var asking by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+    SettingsHeader(stringResource(R.string.settings_section_explore))
+    ListItem(
+        headlineContent = { Text(stringResource(R.string.settings_seen)) },
+        supportingContent = { Text(stringResource(R.string.settings_seen_summary)) },
+        trailingContent = { Switch(checked = seen.on, onCheckedChange = store::setOn, modifier = Modifier.testTag(SettingsTags.SEEN)) },
+    )
+    val places = seen.first.size
+    ListItem(
+        headlineContent = { Text(stringResource(R.string.settings_seen_clear)) },
+        supportingContent = {
+            Text(if (places == 0) stringResource(R.string.settings_seen_none) else pluralStringResource(R.plurals.settings_seen_places, places, places))
+        },
+        modifier = Modifier.clickable(enabled = places > 0, role = androidx.compose.ui.semantics.Role.Button) { asking = true }.testTag(SettingsTags.SEEN_CLEAR),
+    )
+    HorizontalDivider()
+    if (asking) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { asking = false },
+            title = { Text(stringResource(R.string.settings_seen_clear_title)) },
+            text = { Text(stringResource(R.string.settings_seen_clear_text)) },
+            confirmButton = { androidx.compose.material3.TextButton(onClick = { store.clear(); asking = false }) { Text(stringResource(R.string.settings_seen_clear_confirm)) } },
+            dismissButton = { androidx.compose.material3.TextButton(onClick = { asking = false }) { Text(stringResource(R.string.common_cancel)) } },
+        )
+    }
+}
+
+object SettingsTags {
+    const val SEEN = "settings_seen"
+    const val SEEN_CLEAR = "settings_seen_clear"
 }

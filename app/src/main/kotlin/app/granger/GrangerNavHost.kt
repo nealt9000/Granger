@@ -719,6 +719,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             load = { container.catalog.load() },
             roomDescription = app.granger.explore.RoomDescriptions(appContext.assets)::of,
             figure = { packId, image -> container.library.archive(packId)?.let { thumbs.picture(it, image, 800) } },
+            seen = container.seen,
             // Book collections join subjects by the catalog's own `subjects` (KB2): book packs, Classics and book sets.
             collections = kotlinx.coroutines.flow.combine(
                 container.library.packs, container.bookshelf.books, container.catalog.state, container.downloads.records,
@@ -1558,6 +1559,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             refreshVoices = { if (Features.PLAYER && Features.READ_ALOUD) container.installedVoices.refresh() },
                         )
                     },
+                    seen = container.seen,
                     onModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },
                     onSetUpAgain = { nav.navigate(OnboardingRoute) { launchSingleTop = true } },
                     onBack = { nav.popBackStack() },

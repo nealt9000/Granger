@@ -108,6 +108,7 @@ fun ExploreScreen(viewModel: ExploreViewModel, actions: ExploreActions) {
     ExploreContent(
         ui, actions, onAnother = viewModel::another,
         onWander = { scope.launch { viewModel.wanderStart()?.let { actions.onWanderAt(it.packId, it.path) } } },
+        onEra = viewModel::sawEra,
     )
 }
 

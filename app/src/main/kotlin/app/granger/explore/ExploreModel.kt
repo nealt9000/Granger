@@ -254,7 +254,13 @@ data class ExploreUi(
     val rooms: Int = 0,
     /** How many times the reader has asked for another spread: 0 is today's. */
     val skipped: Int = 0,
+    /** Every room of the doors' subjects (`subject.room`), and those the reader has seen; [seen] is null when that isn't kept. */
+    val roomKeys: Set<String> = emptySet(),
+    val seen: Set<String>? = null,
 ) {
+    /** How many of the rooms there are the reader has seen; null when that isn't kept. */
+    val roomsSeen: Int? get() = seen?.count { it in roomKeys }
+
     /** No subjects to show: no Wikipedia, or one whose QID index predates subjects (it updates with the catalog). */
     val noSubjects: Boolean get() = doors.none { it.count > 0 }
 }
@@ -321,6 +327,8 @@ class ExploreSources(
     val roomDescription: (key: String, language: String) -> String? = { _, _ -> null },
     /** One of a pack's pictures by its path in the ZIM (a broad topic's figure), cached; null when it's absent. Blocking. */
     val figure: (packId: String, image: String) -> String? = { _, _ -> null },
+    /** Where the reader has been (rooms, subjects, eras), kept on this phone. */
+    val seen: SeenStore = SeenStore.Memory(),
 )
 
 /** An article as a feature shows it: its lead picture, larger than a thumbnail, and its opening sentence. */
@@ -366,6 +374,8 @@ class ExploreViewModel(
 
     init {
         viewModelScope.launch { runCatching { sources.load() } }
+        // Rooms seen follow the store: a room opened and come back from is counted at once.
+        viewModelScope.launch { sources.seen.state.collect { s -> state.value = state.value?.copy(seen = s.ids(SeenKind.ROOM)) } }
         viewModelScope.launch {
             kotlinx.coroutines.flow.combine(
                 sources.packs.map { list -> list.sortedBy { it.first.id } }.distinctUntilChanged(),
@@ -499,9 +509,15 @@ class ExploreViewModel(
         val eras = if (times.isEmpty) emptyList() else Era.entries.map { era ->
             EraRow(era, times.countActive(era.from, era.to), eraExamples(times.topActive(era.from, era.to, ERA_POOL), qids::subjectsOf))
         }.filter { it.count > 0 }
-        val rooms = doors.sumOf { qids.facets(it.subject.id).size }
-        return ExploreUi(articles, doors, eras, packs.map { it.first.title }.sortedBy { it.lowercase() }, featured, rooms, skipped)
+        val roomKeys = doors.flatMapTo(HashSet()) { d -> qids.facets(d.subject.id).map { it.key } }
+        return ExploreUi(
+            articles, doors, eras, packs.map { it.first.title }.sortedBy { it.lowercase() }, featured, roomKeys.size, skipped,
+            roomKeys, sources.seen.state.value.ids(SeenKind.ROOM),
+        )
     }
+
+    /** An era opened from the landing: it is seen. */
+    fun sawEra(era: Era) = sources.seen.mark(SeenKind.ERA, era.name.lowercase())
 
     private fun withoutPictures(ui: ExploreUi) = ui.copy(
         doors = ui.doors.map { it.copy(picture = null, lead = null) },
@@ -660,6 +676,8 @@ data class SubjectUi(
     val finding: RoomFinding? = null,
     /** The subject page's doors; null on a listing, or when the subject stands alone. */
     val doors: SubjectDoors? = null,
+    /** The rooms (`subject.room`) the reader has seen; null when that isn't kept. */
+    val seen: Set<String>? = null,
     /** The subject page's opening plates, and its rooms, are still being read: their places are kept, and nothing stands in for them. */
     val openingPending: Boolean = false,
     val roomsPending: Boolean = false,
@@ -695,11 +713,15 @@ class SubjectViewModel(
     private var az: List<ExploreArticle>? = null
     private var azStart = 0
     private var viewing: Job? = null
+    private var seen: Set<String>? = null
 
     /** A listing shows fewer at a time, so its foot (where its topics also hang, the ways on) stays in reach. */
     private val pageSize = if (listing) ROOM_PAGE else PAGE
 
     init {
+        // Opening a subject's page, or a room, is seeing it (never an article, and not the whole-subject listing).
+        if (!listing) sources.seen.mark(SeenKind.SUBJECT, subject.id) else if (facetId != null) sources.seen.mark(SeenKind.ROOM, "${subject.id}.$facetId")
+        viewModelScope.launch { sources.seen.state.collect { s -> seen = s.ids(SeenKind.ROOM); state.value = state.value?.copy(seen = seen) } }
         viewModelScope.launch {
             kotlinx.coroutines.flow.combine(sources.packs, sources.collections) { p, c -> p to c }.collect { (packs, c) ->
                 val shelved = c[subject.id].orEmpty()
@@ -727,7 +749,7 @@ class SubjectViewModel(
                     } else null
                     SubjectUi(subject, count, if (listing) emptyList() else page, others, more = page.size < count,
                         collections = if (listing) emptyList() else shelved, facet = facet, loading = listing, room = room, doors = doors,
-                        openingPending = !listing, roomsPending = !listing) to page
+                        openingPending = !listing, roomsPending = !listing, seen = seen) to page
                 }
                 val was = state.value
                 state.value = was?.copy(count = first.first.count, packs = first.first.packs, collections = if (listing) emptyList() else shelved, doors = first.first.doors)
