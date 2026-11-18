@@ -126,6 +126,12 @@ class TopicSourceTest {
         assertThat(broad.chapters.single().links.map { it.path }).containsExactly("Engine", "Propeller", "Jet_engine").inOrder()
         assertThat(broad.people.single().article.title).isEqualTo("Charles Lindbergh")
         // Not a broad topic: no part.
+        // Round a topic, for its quilt: the broad topics that lead to it, and for the plates asked about how many others do.
+        val round = source(qids = qids).around("en-top", "F-16", listOf("en-top" to "Engine", "en-top" to "Airplane"))
+        assertThat(round.leads.map { it.path }).containsExactly("Airplane")
+        assertThat(round.more).containsExactly("en-top/Engine", 1)
+        assertThat(round.rooms).isEmpty()
+        assertThat(source(qids = qids).around("en-top", "Airplane").leads).isEmpty()
         val engine = source(qids = qids).topic("en-top", "Engine").toList()
         assertThat(engine.last().broad).isNull()
         assertThat(engine.none { it.broadPending }).isTrue()
@@ -252,39 +258,5 @@ class BlurbTest {
             .isEqualTo("The Panthéon is a monument in Paris.")
         assertThat(TopicSource.blurb("Napoleon III (born Charles-Louis Napoléon Bonaparte; 20 April 1808 – 9 January 1873) was the first President of France."))
             .isEqualTo("Napoleon III was the first President of France.")
-    }
-}
-
-class TopicMapNodesTest {
-    private fun life(qid: Long, path: String) =
-        app.granger.core.library.TimeMark(qid, "w", path, path, app.granger.core.library.TimeKind.LIFE, 1750, 0, 1820, null, 9, emptySet(), 10)
-    private fun event(qid: Long, path: String) =
-        app.granger.core.library.TimeMark(qid, "w", path, path, app.granger.core.library.TimeKind.SPAN, 1800, 0, 1815, null, 9, emptySet(), 10)
-    private val book = LibraryBook("book:granger:gc-wp", "War and Peace", null)
-
-    private val topic = Topic(
-        "w", "Napoleon",
-        time = TopicTimeView(life(517, "Napoleon"), listOf(life(1, "Goethe"), life(2, "Beethoven")), listOf(event(3, "Napoleonic_Wars"), event(4, "Congress_of_Vienna"))),
-        related = listOf(
-            TopicArticle("w", "Napoleon_III", "Napoleon III", "", null, NodeKind.PERSON),
-            TopicArticle("w", "Napoleonic_Wars", "Napoleonic Wars", "", null, NodeKind.EVENT),   // also an event: once
-            TopicArticle("w", "Tuileries_Palace", "Tuileries Palace", "", null, NodeKind.PLACE),
-            TopicArticle("w", "19th_century", "19th century", "", null, NodeKind.TOPIC),
-        ),
-        relatedBooks = listOf(TopicBook(book, "OEBPS/c170.xhtml")),
-    )
-
-    @Test fun theInnerRingMixesKindsAndNothingRepeats() {
-        val nodes = TopicMapNodes.of(topic)
-        assertThat(nodes.take(6).map { it.title }).containsExactly(
-            "Napoleon III", "Napoleonic Wars", "Tuileries Palace", "Goethe", "Congress of Vienna", "War and Peace",
-        ).inOrder()
-        assertThat(nodes.map { it.title }).containsNoDuplicates()
-        assertThat(nodes.map { it.title }).containsAtLeast("19th century", "Beethoven")
-    }
-
-    @Test fun aFilterKeepsOneKind() {
-        assertThat(TopicMapNodes.of(topic, NodeKind.PERSON).map { it.title }).containsExactly("Napoleon III", "Goethe", "Beethoven")
-        assertThat(TopicMapNodes.of(topic, NodeKind.BOOK).single().chapter).isEqualTo("OEBPS/c170.xhtml")
     }
 }

@@ -110,6 +110,16 @@ class QidIndexTest {
         assertThat(all.broadInFacet("technology.weapons", 5).map { it.path }).containsExactly("Ship")
         assertThat(all.broadInFacet("technology.nowhere", 5)).isEmpty()
         assertThat(all.topicParts(197L)!!.inlinks).isEqualTo(86)
+        // What leads to an item: the broad topics whose parts hold it. Every topic here has kind 1005 (not installed).
+        assertThat(all.holders(1005L, 10).map { it.path }).containsExactly("Bread", "Ship", "Airplane", "Kite").inOrder()
+        assertThat(all.holders(1005L, 2).map { it.path }).containsExactly("Bread", "Ship").inOrder()
+        assertThat(all.holders(197L, 10)).isEmpty()
+        assertThat(all.heldBy(listOf(1005L, 197L), except = 197L)).containsExactly(1005L, 3)
+        assertThat(all.heldBy(listOf(1005L), except = null)).containsExactly(1005L, 4)
+        assertThat(all.heldBy(emptyList(), except = null)).isEmpty()
+        // An item's rooms, in their order.
+        assertThat(all.roomsOf(11446L).map { it.id }).containsExactly("weapons", "transport").inOrder()
+        assertThat(all.roomsOf(42861L)).isEmpty()
     }
 
     private val top = listOf(

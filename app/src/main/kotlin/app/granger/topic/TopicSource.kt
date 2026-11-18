@@ -76,6 +76,12 @@ data class Topic(
 /** Where a topic page gets its topic; the app's is [TopicSource]. */
 fun interface TopicProvider {
     fun topic(packId: String, path: String): Flow<Topic>
+
+    /** What stands round a topic for its quilt ([QuiltAround]); [plates] are the articles (pack, path) to count the leads of. */
+    suspend fun around(packId: String, path: String, plates: List<Pair<String, String>> = emptyList()): QuiltAround = QuiltAround()
+
+    /** An article's card (its title, opening sentence and picture); null when it can't be read. */
+    suspend fun card(packId: String, path: String): TopicArticle? = null
 }
 
 /**
@@ -180,6 +186,22 @@ class TopicSource(
         )
     }
 
+    override suspend fun card(packId: String, path: String): TopicArticle? = attempt { cardOf(packId, path) }
+
+    override suspend fun around(packId: String, path: String, plates: List<Pair<String, String>>): QuiltAround {
+        val all = attempt { qids() } ?: return QuiltAround()
+        val language = languageOf(packId)
+        val qid = attempt { qidOf(packId, path) }
+        fun plain(a: app.granger.core.library.QidArticle) = TopicArticle(a.packId, a.path, titleOf(a.path), "", null)
+        val leads = qid?.let { q -> attempt { all.holders(q, LEADS, language) } }.orEmpty().map(::plain)
+        val rooms = qid?.let { q -> attempt { all.roomsOf(q) } }.orEmpty()
+        val byQid = plates.mapNotNull { (p, at) -> attempt { all.qidOf(p, at) }?.let { it to Quilts.key(p, at) } }
+        val held = attempt { all.heldBy(byQid.map { it.first }.distinct(), qid) }.orEmpty()
+        val more = byQid.mapNotNull { (q, key) -> held[q]?.let { key to it } }.toMap()
+        val mark = attempt { times().takeIf { !it.isEmpty }?.find(packId, path) }
+        return QuiltAround(leads, rooms, more, card(packId, path), mark)
+    }
+
     private suspend fun cardOf(packId: String, path: String): TopicArticle =
         lead(packId, path).let { l -> TopicArticle(packId, path, l?.title ?: titleOf(path), blurb(l?.sentence.orEmpty()), l?.thumbnail) }
 
@@ -276,6 +298,9 @@ class TopicSource(
     }
 
     companion object {
+        /** The broad topics that lead to a topic, as its quilt and a held plate's label show them. */
+        private const val LEADS = 12
+
         /** A room's topics read to find a topic's neighbours in it. */
         private const val ROOM_MAX = 50_000
         /** The other broad topics set beside one, and the people named in each column. */

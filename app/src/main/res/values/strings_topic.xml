@@ -31,14 +31,6 @@
     <string name="topic_wander">Wander from here</string>
     <!-- Explore connections (the map). -->
     <string name="topic_explore">Explore connections</string>
-    <string name="topic_map_all">All</string>
-    <string name="topic_map_people">People</string>
-    <string name="topic_map_events">Events</string>
-    <string name="topic_map_places">Places</string>
-    <string name="topic_map_topics">Topics</string>
-    <string name="topic_map_books">Books</string>
-    <string name="topic_map_open">Open the topic page</string>
-    <string name="topic_map_hint">Tap a circle to centre the map on it. Hold to open it.</string>
     <string name="topic_broad_kinds">Kinds</string>
     <string name="topic_broad_people">People</string>
     <plurals name="topic_broad_kinds_count">
@@ -97,4 +89,52 @@
     <!-- %1$s is a chapter's title. -->
     <string name="topic_spread_way_chapter">From its %1$s chapter</string>
     <string name="topic_spread_way_here">Starting from here</string>
+
+    <!-- Plan EX round 2, connections as a quilt (D4). -->
+    <string name="topic_quilt_around">Around %1$s</string>
+    <string name="topic_quilt_looking">Looking round %1$s…</string>
+    <string name="topic_quilt_none">Nothing on this phone stands near it yet.</string>
+    <plurals name="topic_quilt_connections">
+        <item quantity="one">%1$d connection</item>
+        <item quantity="other">%1$d connections</item>
+    </plurals>
+    <plurals name="topic_quilt_groups">
+        <item quantity="one">%1$d group</item>
+        <item quantity="other">%1$d groups</item>
+    </plurals>
+    <!-- %1$s connections (topic_quilt_connections), %2$s groups (topic_quilt_groups), %3$s the largest group, %4$d how many it holds. -->
+    <string name="topic_quilt_finding">%1$s in %2$s. %3$s is the largest, with %4$d.</string>
+    <string name="topic_quilt_finding_one">%1$s in %2$s.</string>
+    <!-- After a step: %1$d plates of this quilt were on the last one too, round %2$s. -->
+    <plurals name="topic_quilt_shared">
+        <item quantity="one">%1$d of these plates stood round %2$s too.</item>
+        <item quantity="other">%1$d of these plates stood round %2$s too.</item>
+    </plurals>
+    <string name="topic_quilt_close">Close kin</string>
+    <string name="topic_quilt_leads">Leads to it</string>
+    <string name="topic_quilt_lives">Lives of its time</string>
+    <string name="topic_quilt_events">Events of its time</string>
+    <string name="topic_quilt_rooms">Its rooms</string>
+    <!-- A group's tab when it holds more than the quilt shows: its name and how many. -->
+    <string name="topic_quilt_tab">%1$s · %2$d</string>
+    <plurals name="topic_quilt_more">
+        <item quantity="one">%1$d more topic leads here</item>
+        <item quantity="other">%1$d more topics lead here</item>
+    </plurals>
+    <string name="topic_quilt_key_more">more topics lead here</string>
+    <string name="topic_quilt_key_shared">also on the last quilt</string>
+    <string name="topic_quilt_key_hold">Hold a plate for its label</string>
+    <string name="topic_quilt_show_label">Show its label</string>
+    <string name="topic_quilt_index">All of it, by group</string>
+    <string name="topic_quilt_thread">Your thread</string>
+    <string name="topic_quilt_read">Read %1$s</string>
+    <string name="topic_quilt_back">Back a step</string>
+    <string name="topic_quilt_stand">Stand here</string>
+    <!-- Where a held plate's link was found; %1$s is the topic in the middle (in the chapter one, %1$s the chapter and %2$s the topic). -->
+    <string name="topic_quilt_found_kind">A kind of %1$s</string>
+    <string name="topic_quilt_found_person">A person near %1$s</string>
+    <string name="topic_quilt_found_chapter">From the %1$s chapter of %2$s</string>
+    <string name="topic_quilt_found_close">Close in meaning to %1$s</string>
+    <string name="topic_quilt_found_leads">Leads to %1$s</string>
+    <string name="topic_quilt_found_years">Of the same years as %1$s</string>
 </resources>

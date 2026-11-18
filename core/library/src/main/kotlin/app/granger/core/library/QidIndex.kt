@@ -4,6 +4,9 @@ import android.database.sqlite.SQLiteDatabase
 import java.io.Closeable
 import java.io.File
 
+/** The parts that make a broad topic lead to an item: a kind, a linked article, a person. */
+private const val HELD = "${TopicParts.KIND}, ${TopicParts.LINK}, ${TopicParts.PERSON}"
+
 /** One article an item has in a pack: where to open it, and the item's rank (sitelink count). */
 data class QidArticle(val qid: Long, val packId: String, val path: String, val rank: Int, val mainSubject: Boolean = true)
 
@@ -111,6 +114,25 @@ class QidIndex private constructor(private val db: SQLiteDatabase, val packId: S
         }
         return TopicParts(qid, packId, under, groups, kinds, sections, links, figures, people, inlinks)
     }
+
+    /**
+     * The broad topics whose parts hold [item] (as a kind, a linked article or a person), best known first: the topics
+     * that lead to it. There is no index on the column: one pass over the parts (30 ms on Top at the desk).
+     */
+    fun holders(item: Long, limit: Int): List<QidArticle> = if (!hasTopics) emptyList() else
+        db.rawQuery(
+            "SELECT a.qid, a.path, a.rank FROM (SELECT DISTINCT topic FROM topic_parts WHERE item = $item AND part IN ($HELD) AND topic != $item) h " +
+                "JOIN articles a ON a.qid = h.topic ORDER BY a.rank DESC, a.qid LIMIT $limit",
+            null,
+        ).use { c -> buildList { while (c.moveToNext()) add(QidArticle(c.getLong(0), packId, c.getString(1), c.getInt(2))) } }
+
+    /** For each of [items], how many broad topics other than [except] hold it in their parts; an item none holds is left out. */
+    fun heldBy(items: Collection<Long>, except: Long?): Map<Long, Int> = if (!hasTopics || items.isEmpty()) emptyMap() else
+        db.rawQuery(
+            "SELECT item, COUNT(DISTINCT topic) FROM topic_parts WHERE item IN (${items.joinToString(",")}) AND part IN ($HELD) AND topic != item " +
+                (if (except != null) "AND topic != $except " else "") + "GROUP BY item",
+            null,
+        ).use { c -> buildMap { while (c.moveToNext()) put(c.getLong(0), c.getInt(1)) } }
 
     /** The broad topics in [facet] (`subject.facet`), best known first. Empty without topics or sub-categories. */
     fun broadInFacet(facet: String, limit: Int): List<QidArticle> {
@@ -335,6 +357,31 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
         }
         if (language != null) from(indexes.filter { it.language == language }).takeIf { it.isNotEmpty() }?.let { return it }
         return from(indexes)
+    }
+
+    /** The broad topics that lead to [item] ([QidIndex.holders]), best known first, each once; [language]'s packs' when they have any. */
+    fun holders(item: Long, limit: Int, language: String? = null): List<QidArticle> {
+        fun from(some: List<QidIndex>): List<QidArticle> {
+            val best = LinkedHashMap<Long, QidArticle>()
+            for (index in some) for (a in index.holders(item, limit)) best.putIfAbsent(a.qid, a)
+            return best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).take(limit)
+        }
+        if (language != null) from(indexes.filter { it.language == language }).takeIf { it.isNotEmpty() }?.let { return it }
+        return from(indexes)
+    }
+
+    /** For each of [items], how many broad topics other than [except] lead to it: the most any one pack counts (packs share their topics). */
+    fun heldBy(items: Collection<Long>, except: Long?): Map<Long, Int> {
+        val out = HashMap<Long, Int>()
+        for (index in indexes) for ((item, n) in index.heldBy(items, except)) out.merge(item, n, ::maxOf)
+        return out
+    }
+
+    /** Every room that holds the item [qid], in the subjects' own order and each subject's curated order. */
+    fun roomsOf(qid: Long): List<Facet> {
+        val json = indexes.firstNotNullOfOrNull { it.facetList } ?: return emptyList()
+        val subjects = runCatching { org.json.JSONObject(json).keys().asSequence().toList() }.getOrDefault(emptyList())
+        return subjects.flatMap { Facet.parse(json, it) }.filter { f -> indexes.any { it.inFacet(f.key, qid) } }
     }
 
     /** The first of [subject]'s sub-categories, in their curated order, that holds the item [qid]; null when none does. */

@@ -478,13 +478,15 @@ fun ReaderScreen(
                     onOpenPlace = onOpenPlace,
                 )
                 if (state.mapShown) {
-                    app.granger.topic.TopicMap(
+                    app.granger.topic.TopicQuilt(
                         start = topic,
                         topicOf = viewModel::topicOf,
-                        onOpenArticle = onOpenArticle,
-                        onOpenBookAt = onOpenBookAt,
-                        onOpenPassage = onOpenPassage,
-                        onClose = { viewModel.showMap(false) },
+                        around = viewModel::around,
+                        cardOf = viewModel::cardOf,
+                        actions = app.granger.topic.QuiltActions(
+                            onOpenArticle = onOpenArticle, onOpenBookAt = onOpenBookAt, onOpenPassage = onOpenPassage, onOpenPlace = onOpenPlace,
+                            onClose = { viewModel.showMap(false) },
+                        ),
                     )
                 }
             }

@@ -161,7 +161,8 @@ internal fun BroadSpread(
                                 ),
                             ) { Text(stringResource(R.string.topic_spread_read), style = SpreadType.uiMedium.copy(fontSize = 14.sp)) }
                             val connections = (topic.related?.size ?: 0) + (topic.time?.people?.size ?: 0) + (topic.time?.events?.size ?: 0)
-                            if (onExplore != null && connections >= MIN_CONNECTIONS) DoButton(stringResource(R.string.topic_spread_connections), TopicPageTags.EXPLORE, onExplore)
+                            // A broad topic always has something round it: its own parts.
+                            if (onExplore != null && (broad != null || connections >= MIN_CONNECTIONS)) DoButton(stringResource(R.string.topic_spread_connections), TopicPageTags.EXPLORE, onExplore)
                             topic.other?.let { other ->
                                 DoButton(stringResource(if (other.language == "es") R.string.topic_read_in_spanish else R.string.topic_read_in_english), TopicPageTags.OTHER) { onOther(other) }
                             }

@@ -46,8 +46,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.granger.R
-import app.granger.topic.MAP_NODE_WIDTH
-import app.granger.topic.MapCircle
 import java.text.NumberFormat
 import kotlin.math.cos
 import kotlin.math.sin

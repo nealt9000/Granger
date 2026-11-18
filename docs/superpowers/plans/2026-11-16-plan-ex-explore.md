@@ -568,3 +568,17 @@ On `ex-build`. A broad topic's page is now a spread (`topic/BroadSpread.kt`); ot
 - **Not built:** "See these on the Timeline" under the story; Viewpoints (no placeholder ships).
 - **Index:** `QidIndex.broadInFacet`, `TopicParts.inlinks`. No new build.
 - **Checks:** app 1,932 and core/library 525 tests pass. Shots `broadTopic` in Field, Night and Spanish looked at. On the Pixel (Night, English): Pandemic opens as a spread at once and its parts arrive together after about five seconds; every section showed with real data.
+
+### D4 done (2026-11-18)
+On `ex-build`. Connections is the quilt (`topic/TopicQuilt.kt`, `topic/Quilt.kt`); the circles-and-spokes map is gone. It opens from Connections on a broad topic's spread and from Explore connections on any other topic page.
+
+- **The quilt:** the topic in the middle, ringed; three plates above it, two beside, three below, four along the foot. Groups take turns for places, the largest first (three, two, three, two, two, then round again); a thing in two groups stands once. Each run of a group starts with a paper tab, with its count when there is room.
+- **Groups:** for a broad topic its kinds, people, story chapter and other chapters (from its page's parts); for any topic its closest in meaning, the broad topics that lead to it, the lives and events of its years, its rooms, and the reader's books that name it.
+- **One finding:** "89 connections in 10 groups. Kinds is the largest, with 47." After a step: "1 of these plates stood round Pandemic too."
+- **No dead ends:** touching a plate re-forms the quilt round it. A thread along the top keeps the walk, and a step in it goes back. The corner number says how many other broad topics lead to a plate; a small square marks a plate that was on the last quilt too.
+- **Hold a plate** for its label, on a dark band: where the link was found ("A person near Pandemic", "From the History chapter of Airplane"), its dates and rooms, its opening sentence, up to three of the topics that lead on from it, then Stand here and Read the article.
+- **Key and index:** the key is drawn with the marks themselves. Under it every group is listed with its count in two columns; a group opens in full as a list.
+- **TalkBack:** a plate is one button that reads its name, dates, group and what leads to it ("World War I, History, 102 more topics lead here"), with "Show its label" as an action. A room plate opens its room; a book plate opens the book at the passage.
+- **Index:** `QidIndex.holders`, `heldBy`, `roomsOf`. No new index was needed: what leads to an item is one pass over the parts, 15 to 34 ms on Top at the desk.
+- **Not built:** "born within a year" (the page's lives and events of its years stand in); the label has no "its own rooms' plates"; the quilt's pictures for plates the page didn't picture are read one by one as they show.
+- **Checks:** app 1,935 and core/library 525 tests pass. Shot `quilt` in Field, Night and Spanish looked at. On the Pixel (Night, English): Pandemic's quilt forms at once and its corner numbers follow within a few seconds; touching Anthony Fauci re-formed it with the thread and the shared mark; holding him showed his label; Stand here worked. Found there and fixed: pictures stayed on a place when the quilt re-formed, so plates showed the wrong pictures.

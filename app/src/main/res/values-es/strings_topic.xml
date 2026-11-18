@@ -25,14 +25,6 @@
     <string name="topic_found_go">Leerlo en el artículo</string>
     <string name="topic_wander">Pasear desde aquí</string>
     <string name="topic_explore">Explorar conexiones</string>
-    <string name="topic_map_all">Todo</string>
-    <string name="topic_map_people">Personas</string>
-    <string name="topic_map_events">Hechos</string>
-    <string name="topic_map_places">Lugares</string>
-    <string name="topic_map_topics">Temas</string>
-    <string name="topic_map_books">Libros</string>
-    <string name="topic_map_open">Abrir la página del tema</string>
-    <string name="topic_map_hint">Toca un círculo para centrar el mapa en él. Mantén pulsado para abrirlo.</string>
     <string name="topic_broad_kinds">Tipos</string>
     <string name="topic_broad_people">Personas</string>
     <plurals name="topic_broad_kinds_count">
@@ -91,4 +83,51 @@
     <string name="topic_spread_way_close">Cercano en significado</string>
     <string name="topic_spread_way_chapter">De su capítulo %1$s</string>
     <string name="topic_spread_way_here">Empezando aquí</string>
+
+    <string name="topic_quilt_around">Alrededor de %1$s</string>
+    <string name="topic_quilt_looking">Mirando alrededor de %1$s…</string>
+    <string name="topic_quilt_none">Todavía no hay nada cerca en este teléfono.</string>
+    <plurals name="topic_quilt_connections">
+        <item quantity="one">%1$d conexión</item>
+        <item quantity="many">%1$d conexiones</item>
+        <item quantity="other">%1$d conexiones</item>
+    </plurals>
+    <plurals name="topic_quilt_groups">
+        <item quantity="one">%1$d grupo</item>
+        <item quantity="many">%1$d grupos</item>
+        <item quantity="other">%1$d grupos</item>
+    </plurals>
+    <string name="topic_quilt_finding">%1$s en %2$s. El mayor es %3$s, con %4$d.</string>
+    <string name="topic_quilt_finding_one">%1$s en %2$s.</string>
+    <plurals name="topic_quilt_shared">
+        <item quantity="one">%1$d de estas láminas también estaba alrededor de %2$s.</item>
+        <item quantity="many">%1$d de estas láminas también estaban alrededor de %2$s.</item>
+        <item quantity="other">%1$d de estas láminas también estaban alrededor de %2$s.</item>
+    </plurals>
+    <string name="topic_quilt_close">Temas cercanos</string>
+    <string name="topic_quilt_leads">Llevan aquí</string>
+    <string name="topic_quilt_lives">Vidas de su tiempo</string>
+    <string name="topic_quilt_events">Hechos de su tiempo</string>
+    <string name="topic_quilt_rooms">Sus salas</string>
+    <string name="topic_quilt_tab">%1$s · %2$d</string>
+    <plurals name="topic_quilt_more">
+        <item quantity="one">%1$d tema más lleva aquí</item>
+        <item quantity="many">%1$d temas más llevan aquí</item>
+        <item quantity="other">%1$d temas más llevan aquí</item>
+    </plurals>
+    <string name="topic_quilt_key_more">temas más llevan aquí</string>
+    <string name="topic_quilt_key_shared">también en la colcha anterior</string>
+    <string name="topic_quilt_key_hold">Mantén una lámina para ver su etiqueta</string>
+    <string name="topic_quilt_show_label">Ver su etiqueta</string>
+    <string name="topic_quilt_index">Todo, por grupo</string>
+    <string name="topic_quilt_thread">Tu hilo</string>
+    <string name="topic_quilt_read">Leer %1$s</string>
+    <string name="topic_quilt_back">Un paso atrás</string>
+    <string name="topic_quilt_stand">Ponerse aquí</string>
+    <string name="topic_quilt_found_kind">Un tipo de %1$s</string>
+    <string name="topic_quilt_found_person">Una persona cercana a %1$s</string>
+    <string name="topic_quilt_found_chapter">Del capítulo %1$s de %2$s</string>
+    <string name="topic_quilt_found_close">Cercano en significado a %1$s</string>
+    <string name="topic_quilt_found_leads">Lleva a %1$s</string>
+    <string name="topic_quilt_found_years">De los mismos años que %1$s</string>
 </resources>

@@ -1629,6 +1629,51 @@ open class ThemeShots {
         }
     }
 
+    /**
+     * Plan EX round 2, D4: connections as a quilt, beside the rail on a 390 dp phone: Airplane in the middle, its groups
+     * touching it under their tabs, the corner numbers, the key and the index of every group.
+     */
+    @Config(qualifiers = "+w390dp-h1000dp")
+    @Test fun quilt() {
+        fun pic(title: String, rgb: Int = 0x5B6C7A, w: Int = 300, h: Int = 200) = shotPlate(title, w, h, rgb).picture
+        fun a(title: String, rgb: Int = 0x5B6C7A, w: Int = 300, h: Int = 200) = app.granger.topic.TopicArticle("top", title.replace(' ', '_'), title, "", pic(title, rgb, w, h))
+        fun plain(title: String) = app.granger.topic.TopicArticle("top", title.replace(' ', '_'), title, "", null)
+        fun many(name: String, n: Int) = (1..n).map { plain("$name $it") }
+        val broad = app.granger.topic.BroadTopic(
+            under = 60, groups = listOf(app.granger.topic.BroadGroup("Jet aircraft", 24)),
+            families = listOf(app.granger.topic.BroadFamily(null, listOf(a("Boeing 747", 0x4A6478), a("Concorde", 0x44606B), a("General Dynamics F-16 Fighting Falcon", 0x6A6A55)),
+                listOf(plain("Boeing 747"), plain("Concorde"), plain("General Dynamics F-16 Fighting Falcon")) + many("Kind", 57))),
+            story = app.granger.topic.BroadStory("History", (listOf(a("Wright brothers", 0x7A6A55), a("World War I", 0x5A5A4A), a("Battle of Britain", 0x4A5A6A)) + many("Step", 21)).mapIndexed { i, t ->
+                app.granger.topic.StoryEntry(1900L + i, t.title, t.picture, t)
+            }),
+            people = (listOf(a("Charles Lindbergh", 0x6B5D52, 200, 260), a("Chuck Yeager", 0x5D6B52, 200, 260)) + many("Pilot", 10)).map { app.granger.topic.BroadPerson(it, null) },
+            chapters = listOf(
+                app.granger.topic.BroadChapter("Propulsion", listOf(a("Engine", 0x555555), a("Propeller", 0x665544)) + many("Part", 11), null, null),
+                app.granger.topic.BroadChapter("Environmental impact", many("Effect", 8), null, null),
+                app.granger.topic.BroadChapter("Design and manufacture", many("Maker", 4), null, null),
+                app.granger.topic.BroadChapter("Characteristics", many("Trait", 4), null, null),
+            ),
+        )
+        val topic = app.granger.topic.Topic(
+            "top", "Airplane", header = app.granger.topic.TopicHeader("Airplane", "An airplane is a fixed-wing aircraft.", pic("Airplane", 0x5B7C99)),
+            related = listOf(a("Helicopter", 0x556677), a("Rocket", 0x443322)) + many("Kin", 10), relatedBooks = emptyList(), broad = broad, done = true,
+        )
+        val more = mapOf("Boeing_747" to 6, "Concorde" to 3, "Charles_Lindbergh" to 3, "Chuck_Yeager" to 4, "Wright_brothers" to 6, "World_War_I" to 102, "Battle_of_Britain" to 3,
+            "Engine" to 7, "Propeller" to 7, "Helicopter" to 15, "Rocket" to 7).mapKeys { "top/" + it.key }
+        shoot("quilt", pictures = true) {
+            GrangerShell(
+                rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = null,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+            ) {
+                app.granger.topic.TopicQuilt(
+                    topic, topicOf = { _, _ -> kotlinx.coroutines.flow.emptyFlow() },
+                    around = { _, _, plates -> app.granger.topic.QuiltAround(more = if (plates.isEmpty()) emptyMap() else more) }, cardOf = { _, _ -> null },
+                    actions = app.granger.topic.QuiltActions({ _, _, _ -> }, { _, _ -> }, { _, _ -> }, null, {}),
+                )
+            }
+        }
+    }
+
     /** A thin room's mosaic (Words & grammar): words side by side, portraits upright, then words three across; and a first door. */
     @Config(qualifiers = "+w334dp-h760dp")
     @Test fun spreadThin() {

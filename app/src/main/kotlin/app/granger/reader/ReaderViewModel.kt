@@ -455,6 +455,12 @@ class ReaderViewModel(
     fun topicOf(packId: String, path: String): kotlinx.coroutines.flow.Flow<app.granger.topic.Topic> =
         topics?.topic(packId, path) ?: kotlinx.coroutines.flow.emptyFlow()
 
+    /** What stands round a topic, and an article's card, for the quilt. */
+    suspend fun around(packId: String, path: String, plates: List<Pair<String, String>>): app.granger.topic.QuiltAround =
+        topics?.around(packId, path, plates) ?: app.granger.topic.QuiltAround()
+
+    suspend fun cardOf(packId: String, path: String): app.granger.topic.TopicArticle? = topics?.card(packId, path)
+
     /** Read the full article: the topic page steps aside; the article is already loaded behind it. */
     fun readFullArticle() = _state.update { it.copy(topicShown = false, chromeVisible = true) }
 
