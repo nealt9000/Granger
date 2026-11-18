@@ -21,7 +21,8 @@ from zim_articles import articles  # noqa: E402
 KIND = "gqid"
 SCHEMA_VERSION = 1
 BUILDER = "tools/qidindex/build.py"
-BUILDER_VERSION = 3  # 2: the subjects table (Plan EX Task 1); 3: lenses (many per item) and broad topics' parts (Plan EX T1)
+BUILDER_VERSION = 4  # 2: the subjects table (Plan EX Task 1); 3: lenses (many per item) and broad topics' parts (Plan EX T1);
+# 4: adult-content flags (roadmap, "Carried forward from EX")
 
 # The joins the phone reads (plan Decision 3): author, notable work, edition of, main subject, composer, performer
 # (item-valued, stored as "Q123"); Gutenberg, LibriVox, MusicBrainz artist and work, archive.org (strings).
@@ -55,6 +56,12 @@ CREATE TABLE main.topic_parts(topic INTEGER NOT NULL, part INTEGER NOT NULL, ord
     grp INTEGER, text TEXT, note TEXT, PRIMARY KEY(topic, part, ord)) WITHOUT ROWID;
 """
 
+# Adult-content flags (tools/adultflags): kind 1, the topic is never volunteered on a screen that picks by rank; kind 2,
+# its plate shows no picture. Search and opened articles aren't filtered. An extra table; schema 1 kept.
+FLAGS_SCHEMA = """
+CREATE TABLE main.flags(qid INTEGER PRIMARY KEY, kind INTEGER NOT NULL) WITHOUT ROWID;
+"""
+
 SUBJECTS_SPEC = Path(__file__).resolve().parents[1] / "subjects" / "subjects.json"
 
 
@@ -82,6 +89,22 @@ def add_topics(db: sqlite3.Connection, topics_files) -> int:
     db.execute("DETACH DATABASE t")
     n = db.execute("SELECT COUNT(*) FROM main.topics").fetchone()[0]
     db.executemany("INSERT OR REPLACE INTO meta VALUES (?, ?)", [("topicsBuiltAt", built), ("withTopics", str(n))])
+    return n
+
+
+def add_flags(db: sqlite3.Connection, flags_path) -> int:
+    """Copies the adult-content flags of the index's items, for its language, from tools/adultflags/flags_build.py's file;
+    returns how many. An index of no known language gets the table, empty."""
+    db.execute("DROP TABLE IF EXISTS main.flags")
+    db.executescript(FLAGS_SCHEMA)
+    db.execute("ATTACH DATABASE ? AS f", (f"file:{flags_path}?mode=ro",))
+    db.execute("INSERT INTO main.flags SELECT qid, kind FROM f.flags WHERE lang = ? AND qid IN (SELECT qid FROM articles)",
+               (index_language(db),))
+    version = db.execute("SELECT value FROM f.meta WHERE key = 'flagsVersion'").fetchone()[0]
+    db.commit()
+    db.execute("DETACH DATABASE f")
+    n = db.execute("SELECT COUNT(*) FROM main.flags").fetchone()[0]
+    db.executemany("INSERT OR REPLACE INTO meta VALUES (?, ?)", [("flagsVersion", version), ("withFlags", str(n))])
     return n
 
 
@@ -141,7 +164,7 @@ def rows_of(rec: dict):
     return (qid, rec.get("sl", 0), other), links, ((qid, c[0], c[1]) if c else None)
 
 
-def build(paths, items, out: Path, source: Path, source_sha256: str, subjects=None, topics=None) -> dict:
+def build(paths, items, out: Path, source: Path, source_sha256: str, subjects=None, topics=None, flags=None) -> dict:
     """Write the .gqid from the ZIM's real article [paths] and an iterable of wdfilter records; returns counts."""
     wanted = set(paths)
     if out.exists():
@@ -177,6 +200,9 @@ def build(paths, items, out: Path, source: Path, source_sha256: str, subjects=No
         db.commit()
     if topics:
         counts["topics"] = add_topics(db, topics)
+        db.commit()
+    if flags:
+        counts["flags"] = add_flags(db, flags)
         db.commit()
     db.execute("VACUUM")
     db.close()
@@ -214,6 +240,7 @@ def main(argv=None):
     p.add_argument("--releases", help="write the release descriptors here")
     p.add_argument("--subjects", help="tools/subjects/build.py's file: attach each item's subjects")
     p.add_argument("--topics", action="append", default=[], help="LANG=tools/topics/parts.py's file: attach broad topics' parts")
+    p.add_argument("--flags", help="tools/adultflags/flags_build.py's file: attach adult-content flags")
     a = p.parse_args(argv)
     from libzim.reader import Archive
 
@@ -223,7 +250,7 @@ def main(argv=None):
         out.parent.mkdir(parents=True, exist_ok=True)
         paths = [path for path, _ in articles(Archive(zim))]
         topics = dict(x.split("=", 1) for x in a.topics)
-        counts = build(paths, read_items(a.items, set(paths)), out, zim, meta.sha256(zim), a.subjects, topics)
+        counts = build(paths, read_items(a.items, set(paths)), out, zim, meta.sha256(zim), a.subjects, topics, a.flags)
         share = counts["matched"] / max(1, counts["articles"])
         print(f"{zim.name}: {counts['matched']:,}/{counts['articles']:,} articles ({share:.1%}), {counts['links']:,} links, "
               f"{counts['coords']:,} coords, {out.stat().st_size / 1e6:.1f} MB", file=sys.stderr, flush=True)

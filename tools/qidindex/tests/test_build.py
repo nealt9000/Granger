@@ -114,7 +114,7 @@ def test_subjects_are_attached_for_the_index_items_only_and_schema_stays_1(tmp_p
         (36322, 0, "literature"), (36322, 1, "history"), (170583, 0, "literature")]
     db.close()
     m = meta.read_meta(out)
-    assert m["schemaVersion"] == "1" and m["builderVersion"] == "3" and m["subjectsVersion"] == "1"
+    assert m["schemaVersion"] == "1" and m["builderVersion"] == "4" and m["subjectsVersion"] == "1"
     assert m["withSubjects"] == "2" and m["packSubject"] == ""
 
 
@@ -215,3 +215,21 @@ def test_broad_topics_attach_for_the_index_language_and_its_own_articles(tmp_pat
     es.execute("INSERT INTO meta VALUES ('sourceZim', 'wikipedia_es_top_maxi_2026-10.zim')")
     assert build.add_topics(es, {"en": make_topics(tmp_path, "en")}) == 0
     assert not es.execute("SELECT 1 FROM sqlite_master WHERE name = 'topic_parts'").fetchone()
+
+
+def test_flags_attach_for_the_index_language_and_its_own_items(tmp_path):
+    f = tmp_path / "flags.sqlite"
+    fl = sqlite3.connect(f)
+    fl.executescript("CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT NOT NULL);"
+                     "CREATE TABLE flags(lang TEXT NOT NULL, qid INTEGER NOT NULL, kind INTEGER NOT NULL, PRIMARY KEY(lang, qid));")
+    fl.executemany("INSERT INTO flags VALUES (?,?,?)", [("en", 197, 1), ("en", 90, 2), ("es", 90, 1), ("en", 5, 1)])
+    fl.execute("INSERT INTO meta VALUES ('flagsVersion', '1')")
+    fl.commit(); fl.close()
+    db = sqlite3.connect(tmp_path / "wikipedia_en_top_maxi_2026-09.gqid")
+    db.executescript(build.SCHEMA)
+    db.executemany("INSERT INTO articles VALUES (?,?,?,?)", [("Airplane", 197, 9, None), ("Paris", 90, 9, None)])
+    db.execute("CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+    db.execute("INSERT INTO meta VALUES ('sourceZim', 'wikipedia_en_top_maxi_2026-09.zim')")
+    assert build.add_flags(db, f) == 2   # item 5 isn't in this index; Spanish rows aren't read
+    assert db.execute("SELECT qid, kind FROM flags ORDER BY qid").fetchall() == [(90, 2), (197, 1)]
+    assert db.execute("SELECT value FROM meta WHERE key = 'withFlags'").fetchone()[0] == "2"
