@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -71,7 +72,10 @@ fun SubjectPageContent(ui: SubjectUi?, actions: ExploreActions, subject: Subject
         val cards = loaded.facets
         LazyColumn(Modifier.padding(padding).fillMaxSize(), contentPadding = PaddingValues(bottom = 28.dp)) {
             val opening = loaded.opening.map { a -> Plate("opening:" + a.path, a.title, a.picture, a.ratio, a.whole) }
-            openingRow(opening)?.let { row ->
+            if (loaded.openingPending) {
+                // The plates' place is kept while they are read, so the page doesn't open scrolled past them.
+                item(key = "opening") { Box(Modifier.fillMaxWidth().aspectRatio(PlateRowKind.OPENING.ratio).background(MaterialTheme.colorScheme.surfaceContainer)) }
+            } else openingRow(opening)?.let { row ->
                 item(key = "opening") {
                     val byKey = loaded.opening.associateBy { "opening:" + it.path }
                     PlateRowView(row, { p -> byKey[p.key]?.let { actions.onOpenArticle(it.packId, it.path, it.title) } }, firstNumber = 1)
@@ -104,7 +108,7 @@ fun SubjectPageContent(ui: SubjectUi?, actions: ExploreActions, subject: Subject
                 items(pairs.size, key = { "rooms:" + pairs[it].first().facet.id }) { i ->
                     RoomPair(pairs[i], wideFirst = i % 2 == 0, language, words) { subject.onOpenFacet(it) }
                 }
-            } else if (loaded.articles.isNotEmpty()) {
+            } else if (loaded.articles.isNotEmpty() && !loaded.roomsPending) {
                 // An index from before rooms: the best-known articles, as the page was.
                 item(key = "articles-head") { Eyebrow(stringResource(R.string.explore_subject_articles), Modifier.padding(start = 16.dp, end = 16.dp, top = 28.dp, bottom = 4.dp).semantics { heading() }) }
                 items(loaded.articles.take(FALLBACK_ARTICLES), key = { "a:" + it.packId + "/" + it.path }) { a ->
@@ -176,7 +180,7 @@ private fun RoomPair(cards: List<FacetCard>, wideFirst: Boolean, language: Strin
     Column(Modifier.fillMaxWidth()) {
         Row(Modifier.fillMaxWidth().height(if (wideFirst) 150.dp else 128.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
             for ((i, c) in cards.withIndex()) {
-                val plate = Plate("room:" + c.facet.id, c.facet.name(language), c.picture, sub = pluralStringResource(R.plurals.explore_topics, c.count, count(c.count)))
+                val plate = Plate("room:" + c.facet.id, c.facet.name(language), c.picture, whole = app.granger.home.ArticleThumbnails.isWhole(c.picture), sub = pluralStringResource(R.plurals.explore_topics, c.count, count(c.count)))
                 PlateView(plate, 16.sp, null, Modifier.weight(weights[i]).fillMaxHeight(), wordSize = 20.sp) { onOpen(c.facet.id) }
             }
         }

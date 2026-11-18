@@ -168,6 +168,15 @@ data class SpreadFigure(val picture: String, val caption: String)
  */
 fun figureOrder(n: Int): List<Int> = if (n <= 0) emptyList() else (listOf(n / 3, 2 * n / 3) + (0 until n)).distinct()
 
+/** A figure's caption as a spread sets it: its first sentence, without the article's footnote marks ("per million people[62]"). */
+fun captionOf(caption: String): String = firstSentence(caption.replace(Regex("\\[[^\\]\\s]{1,12}\\]"), ""), 140).trimEnd('.')
+
+/** Whether two cached pictures are the same picture of a pack (one may be kept as a drawing, the other not). */
+fun samePicture(a: String?, b: String?): Boolean {
+    fun stem(p: String) = p.substringAfterLast('/').substringBefore('.')
+    return a != null && b != null && stem(a) == stem(b)
+}
+
 /** How a row of the landing's subject mosaic is cut. */
 enum class DoorRowKind(val size: Int) { WIDE_FIRST(2), THREE(3), WIDE_LAST(2), PAIR(2), SINGLE(1) }
 
@@ -343,6 +352,8 @@ class ExploreViewModel(
     private val sources: ExploreSources,
     /** Today, as days since 1970: today's subject and topic follow it. */
     private val today: () -> Long = { java.time.LocalDate.now().toEpochDay() },
+    /** The reader's language: today's spread comes from its packs when they have one. */
+    private val language: () -> String = { java.util.Locale.getDefault().language },
 ) : ViewModel() {
     private val state = MutableStateFlow<ExploreUi?>(null)
     val ui: StateFlow<ExploreUi?> = state.asStateFlow()
@@ -415,7 +426,7 @@ class ExploreViewModel(
     private fun featuredOf(day: Long, doors: List<SubjectDoor>, qids: QidIndexes): FeaturedTopic? {
         val d = doors.getOrNull(featuredIndex(day, doors.size))?.takeIf { it.count > 0 } ?: return null
         val own = d.subject.namesakes
-        val broad = qids.broadIn(d.subject.id, BROAD_KINDS, BROAD_FIGURES, BROAD_POOL + own.size).filter { it.qid !in own }.take(BROAD_POOL)
+        val broad = qids.broadIn(d.subject.id, BROAD_KINDS, BROAD_FIGURES, BROAD_POOL + own.size, language()).filter { it.qid !in own }.take(BROAD_POOL)
         val pool = broad.ifEmpty { qids.topIn(d.subject.id, FEATURE_POOL + own.size, mainOnly = true).filter { it.qid !in own } }.map { it.toExplore() }
         return featuredCandidates(day, doors.size, pool).takeIf { it.isNotEmpty() }?.let { FeaturedTopic(d.subject, d.count, it.first(), it) }
     }
@@ -431,7 +442,11 @@ class ExploreViewModel(
         }.firstOrNull()
         var f = start
         if (pick != null) {
-            f = f.copy(article = pick.first.copy(picture = pick.second.picture), sentence = pick.second.sentence?.let(::firstSentence))
+            val p = pick.second.picture
+            f = f.copy(
+                article = pick.first.copy(picture = p, ratio = p?.let(::ratioOf) ?: 0f, whole = app.granger.home.ArticleThumbnails.isWhole(p)),
+                sentence = pick.second.sentence?.let(::firstSentence),
+            )
             shown(f)
         }
         val a = f.article
@@ -439,7 +454,9 @@ class ExploreViewModel(
         val parts = runCatching { qids.topicParts(qid, a.packId) }.getOrNull()
         if (parts != null && f.article.picture != null) {
             val figures = figureOrder(parts.figures.size).asSequence().take(FIGURE_TRIES).map { parts.figures[it] }.filter { it.caption.isNotBlank() }
-                .mapNotNull { fig -> runCatching { sources.figure(parts.packId, fig.image) }.getOrNull()?.let { SpreadFigure(it, fig.caption) } }
+                .mapNotNull { fig -> runCatching { sources.figure(parts.packId, fig.image) }.getOrNull()?.let { SpreadFigure(it, captionOf(fig.caption)) } }
+                // The article's own picture is often one of its figures too: it is on the spread already.
+                .filter { samePicture(it.picture, a.picture).not() }.distinctBy { it.picture }
                 .take(FIGURES).toList()
             // Two or none: the opening group is one plate or three.
             if (figures.size == FIGURES) { f = f.copy(figures = figures); shown(f) }
@@ -643,6 +660,9 @@ data class SubjectUi(
     val finding: RoomFinding? = null,
     /** The subject page's doors; null on a listing, or when the subject stands alone. */
     val doors: SubjectDoors? = null,
+    /** The subject page's opening plates, and its rooms, are still being read: their places are kept, and nothing stands in for them. */
+    val openingPending: Boolean = false,
+    val roomsPending: Boolean = false,
 ) {
     /** Enough dated main-subject articles for a run of the time games. */
     val canQuiz: Boolean get() = datedMain >= SubjectViewModel.QUIZ_MIN
@@ -697,7 +717,7 @@ class SubjectViewModel(
                     val room = if (listing && facet != null) {
                         val counts = qids.facetCounts(subject.id)
                         val (before, at, after) = neighbours(qids.facets(subject.id).filter { (counts[it.id] ?: 0) > 0 }) { it.id == facet.id }
-                        RoomUi(sources.roomDescription(facet.key, locale.language), before = before, after = after, position = at, total = counts.count { it.value > 0 })
+                        RoomUi(sources.roomDescription(facet.key, locale.language), before = before, after = after, position = at, total = counts.count { it.value > 0 }, storyPending = true)
                     } else null
                     // The doors run in the landing's order: the subjects with anything on them, the largest first.
                     val doors = if (!listing && qids.hasSubjects) {
@@ -706,7 +726,8 @@ class SubjectViewModel(
                         if (at > 0 && all.size > 1) SubjectDoors(before, after, at, all.size) else null
                     } else null
                     SubjectUi(subject, count, if (listing) emptyList() else page, others, more = page.size < count,
-                        collections = if (listing) emptyList() else shelved, facet = facet, loading = listing, room = room, doors = doors) to page
+                        collections = if (listing) emptyList() else shelved, facet = facet, loading = listing, room = room, doors = doors,
+                        openingPending = !listing, roomsPending = !listing) to page
                 }
                 val was = state.value
                 state.value = was?.copy(count = first.first.count, packs = first.first.packs, collections = if (listing) emptyList() else shelved, doors = first.first.doors)
@@ -758,15 +779,16 @@ class SubjectViewModel(
         if (t != null && t.size > 0) {
             val finding = findingOf(t)
             update { it.copy(finding = finding) }
-            val story = withContext(Dispatchers.IO) {
+            // Each era's best few, then its plate: the best known of them with a picture, else the best known.
+            val eras = withContext(Dispatchers.IO) {
                 Era.entries.mapNotNull { era ->
                     val best = (0 until t.size).filter { t.year[it] in era.from..era.to }.sortedWith(compareByDescending<Int> { t.rank[it] }.thenBy { t.qid[it] }).take(STORY_TRIES)
-                    val marks = sources.times().marksOf(t, best).map { it.toExplore() }
-                    marks.asSequence().map { withPicture(it) }.firstOrNull { it.picture != null } ?: marks.firstOrNull()
+                    sources.times().marksOf(t, best).map { it.toExplore() }.takeIf { it.isNotEmpty() }
                 }
             }
-            update { it.copy(story = story) }
-        }
+            val story = withContext(Dispatchers.IO) { eras.map { marks -> marks.asSequence().map { withPicture(it) }.firstOrNull { it.picture != null } ?: marks.first() } }
+            update { it.copy(story = story, storyPending = false) }
+        } else update { it.copy(storyPending = false) }
         val overlaps = withContext(Dispatchers.IO) {
             val qids = sources.qids()
             val mine = qids.facetSet(facet.key)
@@ -801,8 +823,11 @@ class SubjectViewModel(
                 .mapNotNull { a -> runCatching { sources.look(a.packId, a.path) }.getOrNull()?.let { a to it } }.firstOrNull { it.second.picture != null }
         }
         // The opening plates: the subject's own picture leads, then its best known that have a photograph.
-        val lead = own?.let { (a, look) -> a.toExplore().copy(picture = look.picture, ratio = look.picture?.let(::ratioOf) ?: 0f) }
-        state.value = state.value?.copy(hero = own?.second, opening = listOfNotNull(lead))
+        val lead = own?.let { (a, look) ->
+            a.toExplore().copy(picture = look.picture, ratio = look.picture?.let(::ratioOf) ?: 0f, whole = app.granger.home.ArticleThumbnails.isWhole(look.picture))
+        }
+        // The plates show together, once: a group that grew from one plate to three would change shape under the reader.
+        state.value = state.value?.copy(hero = own?.second)
         val opening = withContext(Dispatchers.IO) {
             val qids = sources.qids()
             if (!qids.hasSubjects) return@withContext listOfNotNull(lead)
@@ -810,7 +835,7 @@ class SubjectViewModel(
                 .filter { it.qid !in subject.namesakes }.map { withPicture(it.toExplore()) }.filter { it.picture != null && !it.whole }
                 .take(OPENING - (if (lead != null) 1 else 0)).toList()
         }
-        state.value = state.value?.copy(opening = opening)
+        state.value = state.value?.copy(opening = opening, openingPending = false)
         var cards = withContext(Dispatchers.IO) {
             val qids = sources.qids()
             if (!qids.hasFacets) return@withContext emptyList()
@@ -820,7 +845,7 @@ class SubjectViewModel(
                 if (n == 0) null else FacetCard(f, n, qids.topInFacet(f.key, FACET_EXAMPLES).map { it.toExplore() }, description = sources.roomDescription(f.key, locale.language))
             }
         }
-        state.value = state.value?.copy(facets = cards)
+        state.value = state.value?.copy(facets = cards, roomsPending = false)
         // Rooms overlap (Napoleon leads Rulers and Wars): each card's picture comes from an article no earlier card, and
         // no opening plate, used. Then the room's sentence, from its dates, as its own page says it.
         val used = opening.mapTo(HashSet()) { it.path }

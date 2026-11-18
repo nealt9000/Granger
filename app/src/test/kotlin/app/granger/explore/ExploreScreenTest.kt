@@ -150,6 +150,12 @@ class ExploreScreenTest {
         assertThat(figureOrder(12).take(4)).containsExactly(4, 8, 0, 1).inOrder()
         assertThat(figureOrder(2)).containsExactly(0, 1).inOrder()
         assertThat(figureOrder(0)).isEmpty()
+        // A caption is one sentence, without the article's footnote marks; a figure that is the lead picture again is left out.
+        assertThat(captionOf("Total confirmed cases of COVID-19 per million people[62]")).isEqualTo("Total confirmed cases of COVID-19 per million people")
+        assertThat(captionOf("Two-dimensional space depicted in spacetime. The past and future light cones are absolute.")).isEqualTo("Two-dimensional space depicted in spacetime")
+        assertThat(samePicture("/c/abc.w.jpg", "/c/abc.jpg")).isTrue()
+        assertThat(samePicture("/c/abc.jpg", "/c/abd.jpg")).isFalse()
+        assertThat(samePicture(null, "/c/abd.jpg")).isFalse()
         // The fullest era's share, when enough is dated to say one.
         val eras = listOf(EraRow(Era.C19, 30, emptyList()), EraRow(Era.RECENT, 70, emptyList()))
         assertThat(busiestEra(eras)).isEqualTo(eras[1] to Share.TWO_IN_THREE)

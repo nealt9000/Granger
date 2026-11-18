@@ -158,7 +158,7 @@ fun RoomContent(ui: SubjectUi?, actions: ExploreActions, subject: SubjectActions
         var narrow by rememberSaveable { mutableStateOf(false) }
         val rail = loaded.sort == SubjectSort.AZ && loaded.letters.size > 1
         // A letter chosen on the rail brings the list back to the views, over the letter's first plates.
-        val viewsAt = if ((loaded.room?.story?.size ?: 0) > 1) 2 else 1
+        val viewsAt = if ((loaded.room?.story?.size ?: 0) > 1 || loaded.room?.storyPending == true) 2 else 1
         LaunchedEffect(loaded.letter) { if (loaded.letter != null) list.scrollToItem(viewsAt) }
         val rows = plateRows(loaded.articles.map { a -> a.plate(a.mark?.let { words.of(it) }) }, complete = !loaded.more && !loaded.loading)
         val byKey = loaded.articles.associateBy { "${it.packId}/${it.path}" }
@@ -173,9 +173,12 @@ fun RoomContent(ui: SubjectUi?, actions: ExploreActions, subject: SubjectActions
                     )
                 }
                 val story = loaded.room?.story.orEmpty()
-                if (story.size > 1) {
+                if (loaded.room?.storyPending == true) {
+                    // The strip's place, while its plates are read: the wall of plates under it stays where it is.
+                    item(key = "story") { Box(Modifier.padding(top = 22.dp).fillMaxWidth().height(STORY_HEIGHT)) }
+                } else if (story.size > 1) {
                     item(key = "story") {
-                        Column(Modifier.padding(top = 22.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Column(Modifier.padding(top = 22.dp).heightIn(min = STORY_HEIGHT), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             Eyebrow(pluralStringResource(R.plurals.explore_room_story, story.size, story.size), Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                             LazyRow(Modifier.testTag(RoomTags.STORY), contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                                 items(story, key = { it.packId + "/" + it.path }) { a -> StoryPlate(a, a.mark?.let { words.of(it) }) { actions.onOpenArticle(a.packId, a.path, a.title) } }
@@ -274,6 +277,9 @@ private fun ViewTab(label: String, sort: SubjectSort, current: SubjectSort, onSo
     }
 }
 
+/** The strip's height: its eyebrow, a plate, its date and two lines of title. */
+private val STORY_HEIGHT = 185.dp
+
 /** One era's plate in the room through time: the picture, its date, its title. One button for TalkBack. */
 @Composable
 private fun StoryPlate(a: ExploreArticle, dates: String?, onOpen: () -> Unit) {
@@ -288,7 +294,7 @@ private fun StoryPlate(a: ExploreArticle, dates: String?, onOpen: () -> Unit) {
                 else -> FramedPicture(a.picture, 240.dp, Modifier.fillMaxWidth().height(100.dp))
             }
             dates?.let { Text(it, style = SpreadType.uiMedium.copy(fontSize = 11.sp), color = SpreadColors.accent, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(end = 6.dp)) }
-            Text(a.title, style = SpreadType.display.copy(fontSize = 15.sp, lineHeight = 17.sp), color = MaterialTheme.colorScheme.onSurface, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(end = 6.dp))
+            Text(a.title, style = SpreadType.display.copy(fontSize = 15.sp, lineHeight = 17.sp), color = MaterialTheme.colorScheme.onSurface, minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(end = 6.dp))
         }
     }
 }

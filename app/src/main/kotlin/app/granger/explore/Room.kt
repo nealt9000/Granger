@@ -16,6 +16,8 @@ data class RoomUi(
     val after: Facet? = null,
     val position: Int = 0,
     val total: Int = 0,
+    /** The plates through time are still being read: their place is kept, so the wall under them doesn't move. */
+    val storyPending: Boolean = false,
 )
 
 /**

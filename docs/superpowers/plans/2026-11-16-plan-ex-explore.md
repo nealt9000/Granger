@@ -535,3 +535,20 @@ On `ex-build`. Explore's landing is now a spread (`Landing.kt`); the cards, bloc
 - **Ways on:** Wander (a well-known article of a random subject), Games, Your sources with what the phone holds.
 - **Left out:** the library map's link (D's landing has none; `LibraryMap.kt` is still in the code, unreachable). Rooms seen (R). The mockup's line "the further back you go, the less was written down" (not from data).
 - **Checks:** app 1,928 and core/library 525 tests pass. Shots `landing` in Field, Night and Spanish looked at. The new index query takes 6 ms on the real Top index at the desk. Not on a phone.
+
+### Pixel check of D1–D3 (2026-11-18)
+Debug 1478 on the Pixel 6 (DB 16, same as the phone's), Night and Field, English. The landing, Technology, History, a door between subjects, and the room Cars, planes & ships.
+
+**Found and fixed:**
+- Today's spread was a Spanish topic in the English app: `broadIn` now takes the reader's language and uses its packs' topics when they have any.
+- The spread's third plate repeated the lead picture (an article's own picture is often one of its figures): a figure that is the lead picture again is left out.
+- A figure that is a drawing (a logo, a map) was cropped: `ArticleThumbnails.picture` keeps anything that isn't a JPEG as a whole plate. Room pictures and the subject's lead plate honour it too.
+- Captions carried footnote marks ("people[62]") and ran to four lines: one sentence, marks out.
+- A subject opened scrolled past its opening plates, and showed its old article list for a second before the rooms: the plates' place is kept while they're read and they arrive together; the list waits until the rooms are known to be none.
+- A room's "in 7 plates" strip arrived late and pushed the wall down: its place is kept.
+
+**Seen, not changed:**
+- Timing, warm: the landing's words are there within a second and the spread's pictures within about four; a subject's rooms and their sentences within about two; a room within one.
+- A spread whose pack holds fewer than two of its figures shows one plate (Television show did).
+- The time index gives some titles in Spanish in the English app ("Herón de Alejandría", "Catapulta" as a room's oldest): the dated set takes an item from whichever pack has it first.
+- Not done here: TalkBack, the Spanish app, a cold start. They belong to the final walkthrough.

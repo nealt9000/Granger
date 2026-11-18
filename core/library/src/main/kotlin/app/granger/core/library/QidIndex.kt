@@ -295,11 +295,19 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
         return order.firstNotNullOfOrNull { it.topicParts(qid) }
     }
 
-    /** [subject]'s broad topics fit for a spread ([QidIndex.broadIn]), best known first, each item once, in the first pack that has it. */
-    fun broadIn(subject: String, minKinds: Int, minFigures: Int, limit: Int): List<QidArticle> {
-        val best = LinkedHashMap<Long, QidArticle>()
-        for (index in indexes) for (a in index.broadIn(subject, minKinds, minFigures, limit)) best.putIfAbsent(a.qid, a)
-        return best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).take(limit)
+    /**
+     * [subject]'s broad topics fit for a spread ([QidIndex.broadIn]), best known first, each item once, in the first pack
+     * that has it. With [language], only its packs' topics when they have any (a spread reads in the reader's language:
+     * its sentence and captions come from the pack); the other packs' otherwise.
+     */
+    fun broadIn(subject: String, minKinds: Int, minFigures: Int, limit: Int, language: String? = null): List<QidArticle> {
+        fun from(some: List<QidIndex>): List<QidArticle> {
+            val best = LinkedHashMap<Long, QidArticle>()
+            for (index in some) for (a in index.broadIn(subject, minKinds, minFigures, limit)) best.putIfAbsent(a.qid, a)
+            return best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).take(limit)
+        }
+        if (language != null) from(indexes.filter { it.language == language }).takeIf { it.isNotEmpty() }?.let { return it }
+        return from(indexes)
     }
 
     /** The first of [subject]'s sub-categories, in their curated order, that holds the item [qid]; null when none does. */

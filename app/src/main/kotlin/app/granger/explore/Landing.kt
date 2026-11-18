@@ -159,7 +159,7 @@ private fun dateWords(day: Long): String {
 private fun SpreadPlates(topic: FeaturedTopic, onOpen: () -> Unit) {
     val a = topic.article
     val plates = listOf(Plate("spread:0", a.title, a.picture, a.ratio, a.whole)) +
-        topic.figures.mapIndexed { i, f -> Plate("spread:${i + 1}", f.caption, f.picture) }
+        topic.figures.mapIndexed { i, f -> Plate("spread:${i + 1}", f.caption, f.picture, whole = app.granger.home.ArticleThumbnails.isWhole(f.picture)) }
     val row = openingRow(plates) ?: return
     PlateRowView(row, onOpen = { onOpen() }, firstNumber = if (plates.size > 1) 1 else null)
 }
@@ -234,7 +234,7 @@ private fun countLine(door: SubjectDoor): String {
     }
 }
 
-/** One row of the subject mosaic: each subject a plate, by its own article's picture, that opens it. */
+/** One row of the subject mosaic: each subject a plate, by its own article's picture (filling the plate, a map included), that opens it. */
 @Composable
 private fun DoorRow(kind: DoorRowKind, doors: List<SubjectDoor>, onOpen: (Subject) -> Unit) {
     val ratio = when (kind) {

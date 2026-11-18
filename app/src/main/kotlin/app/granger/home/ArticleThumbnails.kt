@@ -23,9 +23,13 @@ class ArticleThumbnails(private val dir: File) {
         null
     }
 
-    /** One picture of the archive by its path (a broad topic's figure, Plan EX), kept the same way; null when it's absent. */
+    /**
+     * One picture of the archive by its path (a broad topic's figure, Plan EX), kept the same way; null when it's absent.
+     * One that isn't a JPEG is a drawing (a logo, a diagram, a map), to be shown whole ([isWhole]).
+     */
     fun picture(archive: ZimArchive, imagePath: String, targetPx: Int = TARGET_PX): String? = try {
-        archive.resolvePath(imagePath)?.let { cached(archive, it, targetPx) }
+        val drawing = imagePath.lowercase().removeSuffix(".webp").substringAfterLast('.', "") !in setOf("jpg", "jpeg")
+        archive.resolvePath(imagePath)?.let { cached(archive, it, targetPx, drawing) }
     } catch (_: Throwable) {
         null
     }
