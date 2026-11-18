@@ -15,7 +15,10 @@ import org.jsoup.Jsoup
 class ArticleThumbnails(private val dir: File) {
     /** The cached file's path, or null when the article has no usable image; [targetPx] sizes it (a topic page's header is larger). */
     fun thumbnail(archive: ZimArchive, articlePath: String, html: String, targetPx: Int = TARGET_PX): String? = try {
-        candidates(html, articlePath).firstNotNullOfOrNull { archive.resolvePath(it) }?.let { cached(archive, it, targetPx) }
+        // The first that the pack holds and that is big enough as stored: a pack can keep a drawing far smaller than the
+        // page draws it, and the next picture then stands (as the picture rule was graded, Plan EX P0).
+        candidates(html, articlePath).asSequence().mapNotNull { archive.resolvePath(it) }.distinct().take(MAX_TRIED)
+            .firstNotNullOfOrNull { cached(archive, it, targetPx) }
     } catch (_: Throwable) { // Includes OutOfMemoryError: a bad image never takes Home down.
         null
     }
@@ -93,14 +96,67 @@ class ArticleThumbnails(private val dir: File) {
         private const val MIN_SIDE = 64
         private val SKIPPED_EXTENSIONS = setOf("svg", "ico")
 
+        /** How many of an article's pictures the rule looks at, and how many it will read before giving up. */
+        private const val CONSIDERED = 8
+        private const val MAX_TRIED = 4
+        private const val ROOMY_WIDTH = 120
+        private const val ROOMY_HEIGHT = 100
+
+        private fun word(s: String) = "(?<![a-z])(?:$s)(?![a-z])"
+
+        /** A picture whose file name says flag, seal, map or the like: never the photo a series symbol gives way to. */
+        private val EMBLEM = Regex(
+            listOf(
+                word("flags?"), "coat[_ ]of[_ ]arms", word("coa"), "seal[_ ]of", word("emblem"), word("escudo"), word("bandera"), word("wappen"),
+                word("blason"), "locator", "location[_ ]map", word("maps?"), "orthographic", word("projection"), word("signature"), "diaspora",
+                word("insignia"), word("crest"), word("karte"), word("carte"), "carta[_ ](?:nav|geo|de)", word("charts?"),
+            ).joinToString("|"),
+            RegexOption.IGNORE_CASE,
+        )
+
+        /** An article about a symbol itself (Flag of Washington, Coat of arms of…): its drawn symbol is its picture. */
+        private val SYMBOL_TOPIC =
+            Regex(word("flags?|coat of arms|seal|emblem|maps?|logo|insignia|banner|symbols?|heraldry|cartography|atlas"), RegexOption.IGNORE_CASE)
+
+        private class Found(val src: String, val name: String, val width: Int?, val height: Int?, val kind: String, val drawing: Boolean) {
+            val emblem get() = EMBLEM.containsMatchIn(name) || kind == "chrome" || (kind == "sidebar" && drawing)
+            val jpeg get() = name.lowercase().removeSuffix(".webp").substringAfterLast('.', "") in setOf("jpg", "jpeg")
+            val roomy get() = (width ?: 0) >= ROOMY_WIDTH && (height ?: 0) >= ROOMY_HEIGHT
+            val wide get() = (width ?: 0) >= (height ?: 0)
+        }
+
+        private fun decoded(s: String): String = runCatching { java.net.URLDecoder.decode(s.replace("+", "%2B"), "UTF-8") }.getOrDefault(s)
+
+        /** What holds the picture, by its nearest telling ancestor: a figure, the infobox, a series sidebar, page chrome… */
+        private fun kind(img: org.jsoup.nodes.Element): String {
+            for (a in img.parents()) {
+                val cls = a.className()
+                val table = a.tagName() == "table"
+                return when {
+                    a.tagName() == "figure" -> "figure"
+                    "infobox-image" in cls -> "infobox"
+                    "sidebar" in cls -> "sidebar"
+                    "multiimage" in cls || "tsingle" in cls -> "multi"
+                    "gallery" in cls -> "gallery"
+                    "navbox" in cls || "metadata" in cls || "ambox" in cls || "noprint" in cls -> "chrome"
+                    table -> "table"
+                    else -> continue
+                }
+            }
+            return "other"
+        }
+
         /**
-         * The ZIM paths that may hold the article's lead image, best first: the first `img` that isn't an icon, a formula
-         * or a data URI, resolved against the article's path (`../I/x.jpg` from `A/Cat`, `I/x.jpg` from `Cat`), with
-         * the bare `I/<name>` form as a fallback for either layout.
+         * The ZIM paths that may hold the article's lead image, best first (the picture rule, Plan EX P0, graded with Neal
+         * 2026-11-17): the article's pictures in page order, skipping icons, formulas, data URIs and anything drawn
+         * under 64 px; except that when the first is a series sidebar's drawn symbol (a Dharma wheel on every Buddhism
+         * page, a coat of arms on "Constitution of…") and the article isn't about a symbol, the first roomy JPEG photo among
+         * the first eight goes ahead of it, wide before tall. Each picture gives two paths: resolved against the article's
+         * path (`../I/x.jpg` from `A/Cat`, `I/x.jpg` from `Cat`), then the bare `I/<name>` form, for either layout.
          */
         fun candidates(html: String, articlePath: String): List<String> {
             val doc = Jsoup.parse(html)
-            val out = LinkedHashSet<String>()
+            val found = ArrayList<Found>()
             for (img in doc.select("img[src]")) {
                 val src = img.attr("src").trim()
                 if (src.isEmpty() || src.startsWith("data:")) continue
@@ -111,9 +167,18 @@ class ArticleThumbnails(private val dir: File) {
                 val w = img.attr("width").toIntOrNull()
                 val h = img.attr("height").toIntOrNull()
                 if ((w != null && w < MIN_SIDE) || (h != null && h < MIN_SIDE)) continue
-                out += ZimPaths.resolve(src, articlePath)
-                out += "I/" + src.substringAfterLast('/')
-                if (out.size >= 6) break
+                found += Found(src, decoded(decoded(src)).substringAfterLast('/'), w, h, kind(img), img.attr("data-file-type") == "drawing")
+                if (found.size >= CONSIDERED) break
+            }
+            val first = found.firstOrNull() ?: return emptyList()
+            val title = decoded(articlePath).substringAfterLast('/').replace('_', ' ')
+            val ahead = if (first.kind == "sidebar" && first.drawing && !SYMBOL_TOPIC.containsMatchIn(title)) {
+                found.drop(1).filter { !it.drawing && !it.emblem && it.jpeg && it.roomy }.let { photos -> photos.firstOrNull { it.wide } ?: photos.firstOrNull() }
+            } else null
+            val out = LinkedHashSet<String>()
+            for (f in listOfNotNull(ahead) + found) {
+                out += ZimPaths.resolve(f.src, articlePath)
+                out += "I/" + f.src.substringAfterLast('/')
             }
             return out.toList()
         }

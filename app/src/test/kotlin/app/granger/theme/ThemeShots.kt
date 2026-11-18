@@ -139,12 +139,14 @@ open class ThemeShots {
     private fun text(id: Int, vararg args: Any): String =
         androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>().getString(id, *args)
 
-    private fun shoot(name: String, content: @Composable () -> Unit) {
+    private fun shoot(name: String, pictures: Boolean = false, content: @Composable () -> Unit) {
         var night by mutableStateOf(true)
         compose.setContent { GrangerTheme(night = night) { content() } }
         for (n in listOf(true, false)) {
             night = n
             compose.waitForIdle()
+            // Pictures read off the main thread: give them a moment, then let their frames draw.
+            if (pictures) repeat(4) { Thread.sleep(250); compose.waitForIdle() }
             val bmp = compose.onRoot().captureToImage().asAndroidBitmap()
             File(out).mkdirs()
             File(out, "$name-${if (n) "night" else "field"}.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
@@ -1346,6 +1348,109 @@ open class ThemeShots {
         "search-empty",
         app.granger.search.SearchViewModel(ShotSearch(), app.granger.FakeReadingSessions(), "gin joints in casablanca"),
     )
+
+    /**
+     * A picture for a shot: `<name>.jpg` from the folder GRANGER_SHOT_PICTURES names when it's there (real pack pictures,
+     * for looking at), else a flat stand-in of [w]×[h] in [rgb]. The plate with its shape read from the file.
+     */
+    private fun shotPlate(title: String, w: Int, h: Int, rgb: Int, sub: String? = null, flag: Boolean = false): app.granger.explore.Plate {
+        val name = title.lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-')
+        val real = System.getenv("GRANGER_SHOT_PICTURES")?.let { File(it, "$name.jpg") }?.takeIf { it.isFile && !flag }
+        val file = real ?: File(File(System.getProperty("java.io.tmpdir"), "ex-plates").apply { mkdirs() }, "$name.png").also { f ->
+            val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+            val canvas = android.graphics.Canvas(bmp)
+            val paint = android.graphics.Paint()
+            if (flag) {
+                // A tricolour with a disc: an emblem, to be shown whole.
+                for ((i, c) in listOf(0xFF1B4D8F.toInt(), 0xFFFFFFFF.toInt(), 0xFFC8102E.toInt()).withIndex()) {
+                    paint.color = c
+                    canvas.drawRect(0f, h * i / 3f, w.toFloat(), h * (i + 1) / 3f, paint)
+                }
+                paint.color = 0xFFF2C230.toInt()
+                canvas.drawCircle(w / 2f, h / 2f, h / 5f, paint)
+            } else {
+                canvas.drawColor(rgb or 0xFF000000.toInt())
+                paint.color = 0x33FFFFFF
+                canvas.drawCircle(w * 0.5f, h * 0.42f, minOf(w, h) * 0.28f, paint)
+            }
+            f.outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        }
+        val bounds = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        android.graphics.BitmapFactory.decodeFile(file.path, bounds)
+        val ratio = if (bounds.outHeight > 0) bounds.outWidth.toFloat() / bounds.outHeight else w.toFloat() / h
+        return app.granger.explore.Plate(title, title, picture = file.path, ratio = ratio, whole = flag, sub = sub)
+    }
+
+    /**
+     * Plan EX round 2, G0: the shared pieces of a spread on one sheet, at the width the rail leaves on a 390 dp phone: the
+     * trail (folded), a numbered opening group with its head and captions, a finding head over a mosaic (led rows, three
+     * across, an emblem shown whole, a plate with no picture), the ways on, rooms seen and the doors bar.
+     */
+    @Config(qualifiers = "+w334dp-h1560dp")
+    @Test fun spreadPieces() {
+        val opening = listOf(shotPlate("Airplane", 300, 200, 0x5B7C99), shotPlate("Airfig 3", 280, 200, 0x7A6A55), shotPlate("Airfig 7", 300, 180, 0x44606B))
+        val wall = listOf(
+            shotPlate("Car", 300, 200, 0x8C5A3C), shotPlate("Train", 300, 190, 0x4F5D4A), shotPlate("Bicycle", 280, 210, 0x6B6F7A),
+            shotPlate("Ship", 300, 200, 0x35566B), shotPlate("Flag of the Netherlands", 255, 170, 0, flag = true), shotPlate("Bus", 290, 200, 0x9A4B3A),
+            shotPlate("Boat", 300, 190, 0x4B7A7A), app.granger.explore.Plate("Hovercraft", "Hovercraft", blurb = "A hovercraft is an amphibious craft that travels over land, water, mud and ice."), shotPlate("Submarine", 300, 180, 0x2F4050),
+            shotPlate("Charles Lindbergh", 220, 300, 0x6A5A4A, sub = "1902–1974"), shotPlate("Amelia Earhart", 220, 290, 0x7B6B5B, sub = "1897–1937"), shotPlate("Chuck Yeager", 220, 300, 0x4F5560, sub = "1923–2020"),
+        )
+        shoot("spread-pieces", pictures = true) {
+            Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+                app.granger.explore.Trail(listOf("Explore", "Technology", "Cars, planes & ships").map { app.granger.explore.TrailStep(it) {} }, here = "Airplane")
+                app.granger.explore.PlateRowView(app.granger.explore.openingRow(opening)!!, onOpen = {}, firstNumber = 1)
+                app.granger.explore.SpreadHead(
+                    "Technology · Cars, planes & ships", "Airplane", Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp), large = true,
+                    standfirst = "An airplane is a fixed-wing aircraft that is propelled forward by thrust from a jet engine, propeller, or rocket engine.",
+                )
+                app.granger.explore.Captions(
+                    listOf("A United Airlines Boeing 777.", "The Wright Flyer’s first flight on 17 December 1903.", "The Concorde supersonic transport aircraft."),
+                    Modifier.padding(start = 16.dp, end = 16.dp, top = 10.dp),
+                )
+                app.granger.explore.SpreadHead("The same things, other rooms", "One in five is also a weapon", Modifier.padding(start = 16.dp, end = 16.dp, top = 30.dp, bottom = 12.dp))
+                app.granger.explore.PlateMosaic(app.granger.explore.plateRows(wall), onOpen = {})
+                Box(Modifier.padding(top = 24.dp)) {
+                    app.granger.explore.WaysOn(
+                        "Three ways on",
+                        listOf(
+                            app.granger.explore.WayOn("Close in meaning", "Helicopter") {}, app.granger.explore.WayOn("From its History chapter", "Wright brothers") {},
+                            app.granger.explore.WayOn("Anywhere in this room", "Wander") {},
+                        ),
+                    )
+                }
+                app.granger.explore.RoomsSeen("Rooms seen in Technology", 3, 8, Modifier.padding(top = 8.dp)) {}
+                app.granger.explore.DoorsBar(
+                    app.granger.explore.DoorKind.ROOM, app.granger.explore.Door("The internet") {}, app.granger.explore.Door("Spaceflight") {}, position = 3, total = 8,
+                    modifier = Modifier.padding(top = 12.dp),
+                )
+            }
+        }
+    }
+
+    /** A thin room's mosaic (Words & grammar): words side by side, portraits upright, then words three across; and a first door. */
+    @Config(qualifiers = "+w334dp-h760dp")
+    @Test fun spreadThin() {
+        fun word(title: String, blurb: String) = app.granger.explore.Plate(title, title, blurb = blurb)
+        val wall = listOf(
+            word("Noun", "In grammar, a noun is a word that represents a concrete or abstract thing."), word("Adjective", "An adjective is a word that describes or defines a noun or noun phrase."),
+            shotPlate("Pāṇini", 200, 260, 0x7A5B3A, sub = "c. 520 BC"), shotPlate("William Tyndale", 200, 250, 0x4A3F35, sub = "1494–1536"), shotPlate("Jacob Grimm", 200, 260, 0x5A5F55, sub = "1785–1863"),
+            word("Pronoun", "A pronoun is a word that substitutes for a noun or noun phrase."), word("Interjection", "An interjection is a word that occurs as an utterance on its own."), word("Adposition", "Adpositions are words used to express spatial or temporal relations."),
+        )
+        shoot("spread-thin", pictures = true) {
+            Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+                app.granger.explore.Trail(listOf("Explore", "Languages").map { app.granger.explore.TrailStep(it) {} }, here = "Words & grammar")
+                app.granger.explore.SpreadHead(
+                    "A small room in Languages", "Words & grammar", Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 18.dp), large = true,
+                    standfirst = "The parts of speech, and the people who studied them.",
+                )
+                app.granger.explore.PlateMosaic(app.granger.explore.plateRows(wall), onOpen = {})
+                app.granger.explore.RoomsSeen("Rooms you have seen", 14, 108, Modifier.padding(top = 8.dp))
+                app.granger.explore.DoorsBar(
+                    app.granger.explore.DoorKind.ROOM, null, app.granger.explore.Door("Scripts & alphabets") {}, position = 1, total = 3, modifier = Modifier.padding(top = 12.dp),
+                )
+            }
+        }
+    }
 }
 
 /**

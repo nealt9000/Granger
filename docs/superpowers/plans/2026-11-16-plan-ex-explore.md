@@ -488,3 +488,13 @@ Neal OK'd the room descriptions "for now". They are in `tools/subjects/lenses.js
 metadata-only rebuild). The eleven rooms whose names and contents pull apart stay open. Next: G0.
 
 Note: `test_facets.py::test_the_vote_fills_gaps_and_may_move_a_catch_all` fails on main before this change.
+
+### G0 done (2026-11-17)
+Branch `ex-build` (off main at 40e4fe31). Nothing is wired into a screen yet; D3 is the first to use these.
+
+- **The picture rule (P0's v4) is in the app:** `ArticleThumbnails.candidates`. A series sidebar's drawn symbol gives way to the first roomy JPEG photo among the first eight pictures, wide before tall, unless the article is about a symbol. The thumbnail now also falls through to the next picture when the first is stored under 64 px, as the study assumed. Checked against the study's 978 articles: 968 pick the same first picture from the page alone, all 16 swaps among them; the other 10 are drawings the pack stores too small, which the fall-through handles on the phone. It applies wherever the app makes a thumbnail (Home as well as Explore).
+- **`Plates.kt`:** `Plate`, `plateRows` (the row rule), `openingRow`, `PlateRowView`, `PlateMosaic`. Threes alternate a led row (large side swapping) with three across; portraits stand upright; a mosaic that opens on two pictureless plates sets them side by side as words; while more is loading the leftover waits, so no row is re-cut. An emblem (`Plate.whole`) sits whole on white with its title in ink. A one-word title shrinks instead of breaking.
+- **`Spread.kt`:** `SpreadHead`, `Eyebrow`, `Captions`, `Trail` (folds past three places; "…" lists the whole trail), `DoorsBar`, `WaysOn`, `RoomsSeen`, with Spectral for what is read and Roboto for what is used. Strings in English and Spanish.
+- **TalkBack:** each plate is one button with its title (and dates); numbers and seams aren't read; a door reads "The room before, The internet"; rooms seen reads as one line.
+- **Shots:** `./gradlew :app:testDebugUnitTest --tests '*ThemeShots.spread*' -PthemeShots` writes `spread-pieces` and `spread-thin` in Field and Night. With `GRANGER_SHOT_PICTURES` set to a folder of pictures they use those; otherwise flat stand-ins.
+- **Left for D3:** which plates are emblems. `Plate.whole` has to be set from the picture's source (a drawing by `data-file-type`, or an emblem by name), which `ExploreArticle` doesn't carry yet.

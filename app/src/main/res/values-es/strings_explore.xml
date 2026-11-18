@@ -111,4 +111,20 @@
     </plurals>
     <string name="explore_all_in">Todo %1$s</string>
     <string name="explore_in_subject">%1$s en %2$s</string>
+    <!-- Plan EX round 2, the shared pieces of a spread (G0). -->
+    <string name="explore_trail_here">Estás aquí: %1$s</string>
+    <string name="explore_trail_whole">Ver todo el recorrido</string>
+    <string name="explore_door_room_before">La sala anterior</string>
+    <string name="explore_door_room_after">La sala siguiente</string>
+    <string name="explore_door_subject_before">El tema anterior</string>
+    <string name="explore_door_subject_after">El tema siguiente</string>
+    <string name="explore_door_topic_before">El tema anterior</string>
+    <string name="explore_door_topic_after">El tema siguiente</string>
+    <string name="explore_place_room">Sala %1$s\u00A0de\u00A0%2$s</string>
+    <string name="explore_place_subject">Tema %1$s\u00A0de\u00A0%2$s</string>
+    <string name="explore_place_topic">%1$s de %2$s</string>
+    <string name="explore_door_reads">%1$s, %2$s</string>
+    <string name="explore_rooms_seen">Salas que has visto</string>
+    <string name="explore_rooms_seen_in">Salas vistas en %1$s</string>
+    <string name="explore_seen_of">%1$s de %2$s</string>
 </resources>

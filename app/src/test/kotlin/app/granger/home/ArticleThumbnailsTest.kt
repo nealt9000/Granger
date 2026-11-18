@@ -18,6 +18,33 @@ class ArticleThumbnailsTest {
         assertThat(ArticleThumbnails.candidates("<p>No pictures</p>", "Cat")).isEmpty()
     }
 
+    private val wheel = """<table class="sidebar nomobile"><tr><td class="sidebar-image"><img src="../I/Dharma_Wheel.svg.png" width="100" height="100" data-file-type="drawing"></td></tr></table>"""
+    private fun photo(name: String, w: Int = 220, h: Int = 160) = """<figure><img src="../I/$name" width="$w" height="$h" data-file-type="bitmap"></figure>"""
+
+    /** Plan EX P0, the rule Neal accepted (v4): a series sidebar's drawn symbol gives way to the first roomy JPEG photo. */
+    @Test fun aSeriesSidebarsSymbolGivesWayToTheFirstPhotoWideBeforeTall() {
+        val html = wheel + photo("Monk.jpg", 160, 240) + photo("Temple.jpg") + photo("Later.jpg")
+        assertThat(ArticleThumbnails.candidates(html, "A/Noble_Eightfold_Path").take(4))
+            .containsExactly("I/Temple.jpg", "I/Dharma_Wheel.svg.png", "I/Monk.jpg", "I/Later.jpg").inOrder()
+    }
+
+    @Test fun theSymbolStandsWhenTheArticleIsAboutASymbolOrNoPhotoIsFit() {
+        val first = { html: String, path: String -> ArticleThumbnails.candidates(html, path).first() }
+        // The topic is the symbol.
+        assertThat(first(wheel + photo("Temple.jpg"), "A/Buddhist_symbols")).isEqualTo("I/Dharma_Wheel.svg.png")
+        // Only a small photo, a PNG screenshot, a map by name and a drawing follow: none takes its place.
+        val unfit = wheel + photo("Small.jpg", 100, 80) + photo("Screen.png") + photo("Location_map_of_India.jpg") +
+            """<figure><img src="../I/Plan.jpg" width="220" height="160" data-file-type="drawing"></figure>"""
+        assertThat(first(unfit, "A/Noble_Eightfold_Path")).isEqualTo("I/Dharma_Wheel.svg.png")
+        // A photograph in a sidebar, an infobox's drawing and a figure's drawing all stand as the first picture.
+        val sidebarPhoto = """<table class="sidebar"><tr><td><img src="../I/Buddha.jpg" width="200" height="260" data-file-type="bitmap"></td></tr></table>"""
+        assertThat(first(sidebarPhoto + photo("Temple.jpg"), "A/Noble_Eightfold_Path")).isEqualTo("I/Buddha.jpg")
+        val infobox = """<table class="infobox"><tr><td class="infobox-image"><img src="../I/Logo.png" width="200" height="120" data-file-type="drawing"></td></tr></table>"""
+        assertThat(first(infobox + photo("Office.jpg"), "A/Sega")).isEqualTo("I/Logo.png")
+        // A word inside another word is not the word: "Uncharted" has no chart.
+        assertThat(first(wheel + photo("Uncharted_waters.jpg"), "A/Noble_Eightfold_Path")).isEqualTo("I/Uncharted_waters.jpg")
+    }
+
     @Test fun pruneKeepsTheMostRecentlyShownUnderTheCap() {
         val dir = kotlin.io.path.createTempDirectory("thumbs").toFile()
         try {

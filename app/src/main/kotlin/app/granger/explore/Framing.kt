@@ -99,3 +99,15 @@ fun FramedPicture(path: String?, sizePx: Dp, modifier: Modifier = Modifier) {
         Image(bitmap.asImageBitmap(), null, contentScale = ContentScale.Crop, alignment = align, modifier = Modifier.fillMaxSize())
     }
 }
+
+/** [path]'s picture whole inside its box, never cropped (an emblem: a flag, a seal, a map, a diagram); nothing while it loads or with none. */
+@Composable
+fun WholePicture(path: String?, sizePx: Dp, modifier: Modifier = Modifier) {
+    val px = with(LocalDensity.current) { sizePx.roundToPx() }
+    val loaded by produceState<Bitmap?>(null, path, px) {
+        value = if (path == null) null else withContext(Dispatchers.IO) { RailCovers.load(path, px) }
+    }
+    androidx.compose.foundation.layout.Box(modifier) {
+        loaded?.let { Image(it.asImageBitmap(), null, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize()) }
+    }
+}

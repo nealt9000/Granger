@@ -117,4 +117,25 @@
     <string name="explore_all_in">All of %1$s</string>
     <!-- A listing's head: how many articles it holds, in which subject. %1$s is the count line, %2$s the subject. -->
     <string name="explore_in_subject">%1$s in %2$s</string>
+    <!-- Plan EX round 2, the shared pieces of a spread (G0). -->
+    <!-- The trail's last place, read out. %1$s is where the reader stands. -->
+    <string name="explore_trail_here">You are here: %1$s</string>
+    <string name="explore_trail_whole">Show the whole trail</string>
+    <!-- The doors bar at the foot of a spread: the neighbours either side. -->
+    <string name="explore_door_room_before">The room before</string>
+    <string name="explore_door_room_after">The room after</string>
+    <string name="explore_door_subject_before">The subject before</string>
+    <string name="explore_door_subject_after">The subject after</string>
+    <string name="explore_door_topic_before">The topic before</string>
+    <string name="explore_door_topic_after">The topic after</string>
+    <!-- Where a spread stands among its neighbours. %1$s is its place, %2$s how many there are, both formatted. -->
+    <string name="explore_place_room">Room %1$s\u00A0of\u00A0%2$s</string>
+    <string name="explore_place_subject">Subject %1$s\u00A0of\u00A0%2$s</string>
+    <string name="explore_place_topic">%1$s of %2$s</string>
+    <!-- A label and what it names, read out as one: "The room before, The internet". -->
+    <string name="explore_door_reads">%1$s, %2$s</string>
+    <!-- Rooms seen: the quiet count of rooms the reader has opened. %1$s of %2$s rooms. -->
+    <string name="explore_rooms_seen">Rooms you have seen</string>
+    <string name="explore_rooms_seen_in">Rooms seen in %1$s</string>
+    <string name="explore_seen_of">%1$s of %2$s</string>
 </resources>
