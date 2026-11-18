@@ -17,8 +17,8 @@ class ArticleThumbnails(private val dir: File) {
     fun thumbnail(archive: ZimArchive, articlePath: String, html: String, targetPx: Int = TARGET_PX): String? = try {
         // The first that the pack holds and that is big enough as stored: a pack can keep a drawing far smaller than the
         // page draws it, and the next picture then stands (as the picture rule was graded, Plan EX P0).
-        candidates(html, articlePath).asSequence().mapNotNull { archive.resolvePath(it) }.distinct().take(MAX_TRIED)
-            .firstNotNullOfOrNull { cached(archive, it, targetPx) }
+        ranked(html, articlePath).asSequence().mapNotNull { (path, whole) -> archive.resolvePath(path)?.let { it to whole } }.distinctBy { it.first }.take(MAX_TRIED)
+            .firstNotNullOfOrNull { (path, whole) -> cached(archive, path, targetPx, whole) }
     } catch (_: Throwable) { // Includes OutOfMemoryError: a bad image never takes Home down.
         null
     }
@@ -30,10 +30,11 @@ class ArticleThumbnails(private val dir: File) {
         null
     }
 
-    private fun cached(archive: ZimArchive, imagePath: String, targetPx: Int): String? {
+    private fun cached(archive: ZimArchive, imagePath: String, targetPx: Int, whole: Boolean = false): String? {
         val size = if (targetPx == TARGET_PX) "" else "@$targetPx"
         // "#2": thumbnails made before transparent pictures were flattened onto white (they came out black) are remade.
-        val file = File(dir, "${sha1("${archive.uuid}/$imagePath$size#2")}.jpg")
+        // A drawing or an emblem says so in its name ([isWhole]): whoever shows it knows not to crop it.
+        val file = File(dir, "${sha1("${archive.uuid}/$imagePath$size#2")}${if (whole) WHOLE_SUFFIX else ".jpg"}")
         if (file.isFile && file.length() > 0L) {
             file.setLastModified(System.currentTimeMillis())    // last shown: the pruning keeps the ones in use
             return file.path
@@ -154,7 +155,18 @@ class ArticleThumbnails(private val dir: File) {
          * the first eight goes ahead of it, wide before tall. Each picture gives two paths: resolved against the article's
          * path (`../I/x.jpg` from `A/Cat`, `I/x.jpg` from `Cat`), then the bare `I/<name>` form, for either layout.
          */
-        fun candidates(html: String, articlePath: String): List<String> {
+        fun candidates(html: String, articlePath: String): List<String> = ranked(html, articlePath).map { it.first }
+
+        private const val WHOLE_SUFFIX = ".w.jpg"
+
+        /**
+         * Whether a thumbnail made by [thumbnail] is of a drawing or an emblem (a flag, a seal, a logo, a map, a diagram):
+         * one to show whole on a plain ground, never cropped (Plan EX P0).
+         */
+        fun isWhole(thumbnail: String?): Boolean = thumbnail?.endsWith(WHOLE_SUFFIX) == true
+
+        /** [candidates], each with whether it is a drawing or an emblem. */
+        private fun ranked(html: String, articlePath: String): List<Pair<String, Boolean>> {
             val doc = Jsoup.parse(html)
             val found = ArrayList<Found>()
             for (img in doc.select("img[src]")) {
@@ -175,10 +187,11 @@ class ArticleThumbnails(private val dir: File) {
             val ahead = if (first.kind == "sidebar" && first.drawing && !SYMBOL_TOPIC.containsMatchIn(title)) {
                 found.drop(1).filter { !it.drawing && !it.emblem && it.jpeg && it.roomy }.let { photos -> photos.firstOrNull { it.wide } ?: photos.firstOrNull() }
             } else null
-            val out = LinkedHashSet<String>()
+            val out = LinkedHashMap<String, Boolean>()
             for (f in listOfNotNull(ahead) + found) {
-                out += ZimPaths.resolve(f.src, articlePath)
-                out += "I/" + f.src.substringAfterLast('/')
+                val whole = f.drawing || EMBLEM.containsMatchIn(f.name)
+                out.putIfAbsent(ZimPaths.resolve(f.src, articlePath), whole)
+                out.putIfAbsent("I/" + f.src.substringAfterLast('/'), whole)
             }
             return out.toList()
         }

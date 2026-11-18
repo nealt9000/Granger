@@ -350,6 +350,23 @@ class SubjectSet internal constructor(private val qids: LongArray, private val m
 
     fun isMain(qid: Long): Boolean = indexOf(qid).let { it >= 0 && main.get(it) }
 
+    /** How many items this set and [other] both hold (one pass over the two sorted lists). */
+    fun shared(other: SubjectSet): Int {
+        var i = 0
+        var j = 0
+        var n = 0
+        while (i < qids.size && j < other.qids.size) {
+            val a = qids[i]
+            val b = other.qids[j]
+            when {
+                a == b -> { n++; i++; j++ }
+                a < b -> i++
+                else -> j++
+            }
+        }
+        return n
+    }
+
     companion object {
         val EMPTY = SubjectSet(LongArray(0), java.util.BitSet())
     }

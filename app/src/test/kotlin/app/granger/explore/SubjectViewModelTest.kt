@@ -75,11 +75,11 @@ class SubjectViewModelTest {
 
     private fun model(
         facet: String? = null, listing: Boolean = facet != null, look: (String, String) -> ArticleLook? = { _, _ -> null },
-        extraFacets: String = "",
+        extraFacets: String = "", describe: (String, String) -> String? = { _, _ -> null },
     ): SubjectViewModel {
         val qids = QidIndexes(listOf(QidIndex.open(gqid(extraFacets), "top")!!))
         val times = TimeIndexes(listOf(TimeIndex.open(gtime(), "top")!!))
-        val sources = ExploreSources({ qids }, { times }, { _, _ -> null }, flowOf(listOf(pack("c", "History pack") to null)), { true }, look = look)
+        val sources = ExploreSources({ qids }, { times }, { _, _ -> null }, flowOf(listOf(pack("c", "History pack") to null)), { true }, look = look, roomDescription = describe)
         return SubjectViewModel(Subject.HISTORY, sources, books = {
             listOf(ExploreBook("gc-pp", "Pride and Prejudice", null, 170583L), ExploreBook("gc-g", "Decline and Fall", null, 2277L))
         }, facetId = facet, listing = listing)
@@ -122,6 +122,26 @@ class SubjectViewModelTest {
         vm.sort(SubjectSort.LINKED)
         val back = vm.until { it.era == null && it.sort == SubjectSort.LINKED && !it.loading }
         assertThat(back.articles).hasSize(4)
+    }
+
+    /** Plan EX round 2, D3: a room's own parts, each from the indexes. */
+    @Test fun aRoomCarriesItsDescriptionFindingPlatesThroughTimeOverlapsAndDoors() {
+        // Wars now holds Rome too, and Rulers holds all three: the two rooms share three topics. Empires shares one.
+        val vm = model(facet = "war", extraFacets = ", (0, 2277), (1, 83224), (1, 2277)", describe = { key, language -> "$key in $language" })
+        val ui = vm.until { it.room?.overlaps?.isNotEmpty() == true && !it.loading }
+        val room = ui.room!!
+        assertThat(room.description).isEqualTo("history.war in ${java.util.Locale.getDefault().language}")
+        // Turning points is empty, so it is no room: three rooms, and the ends meet.
+        assertThat(room.position to room.total).isEqualTo(1 to 3)
+        assertThat(room.before?.id).isEqualTo("states")
+        assertThat(room.after?.id).isEqualTo("rulers")
+        assertThat(room.finding?.oldest?.path).isEqualTo("Roman_Empire")
+        assertThat(room.finding?.dated).isEqualTo(3)
+        assertThat(room.finding?.share).isNull()    // three dated topics are too few to speak of a share
+        assertThat(room.story.map { it.path }).containsExactly("Roman_Empire", "Battle_of_Hastings", "Napoleon").inOrder()
+        assertThat(room.overlaps).containsExactly(
+            RoomOverlap(Subject.HISTORY, app.granger.core.library.Facet("history", "rulers", "Rulers", "Gobernantes"), 3, listOf("Napoleon", "Roman Empire", "Battle of Hastings")),
+        )
     }
 
     @Test fun wanderStartsAtAWellKnownMainSubjectArticle() = runBlocking {
@@ -192,5 +212,6 @@ class SubjectViewModelTest {
         val ui = model(listing = true).until { it.articles.size == 4 && !it.loading }
         assertThat(ui.facet).isNull()
         assertThat(ui.articles.first().title).isEqualTo("Napoleon")
+        assertThat(ui.room).isNull()    // the whole subject is no room
     }
 }

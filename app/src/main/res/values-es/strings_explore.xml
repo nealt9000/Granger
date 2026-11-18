@@ -127,4 +127,46 @@
     <string name="explore_rooms_seen">Salas que has visto</string>
     <string name="explore_rooms_seen_in">Salas vistas en %1$s</string>
     <string name="explore_seen_of">%1$s de %2$s</string>
+    <!-- Plan EX round 2, a room (D3). -->
+    <string name="explore_room_in">Una sala de %1$s</string>
+    <string name="explore_room_small_in">Una sala pequeña de %1$s</string>
+    <string name="explore_room_oldest">Lo más antiguo con fecha aquí es %1$s (%2$s).</string>
+    <string name="explore_room_century">%1$s son %2$s.</string>
+    <string name="explore_century">del siglo %1$s</string>
+    <string name="explore_dated_nearly_all">Casi todos los temas con fecha</string>
+    <string name="explore_dated_three_in_four">Unos tres de cada cuatro temas con fecha</string>
+    <string name="explore_dated_two_in_three">Unos dos de cada tres temas con fecha</string>
+    <string name="explore_dated_half">Cerca de la mitad de los temas con fecha</string>
+    <string name="explore_dated_one_in_three">Cerca de uno de cada tres temas con fecha</string>
+    <string name="explore_dated_one_in_four">Cerca de uno de cada cuatro temas con fecha</string>
+    <string name="explore_dated_one_in_five">Cerca de uno de cada cinco temas con fecha</string>
+    <string name="explore_dated_one_in_ten">Cerca de uno de cada diez temas con fecha</string>
+    <string name="explore_share_nearly_all">Casi todos</string>
+    <string name="explore_share_three_in_four">Unos tres de cada cuatro</string>
+    <string name="explore_share_two_in_three">Unos dos de cada tres</string>
+    <string name="explore_share_half">Cerca de la mitad</string>
+    <string name="explore_share_one_in_three">Cerca de uno de cada tres</string>
+    <string name="explore_share_one_in_four">Cerca de uno de cada cuatro</string>
+    <string name="explore_share_one_in_five">Cerca de uno de cada cinco</string>
+    <string name="explore_share_one_in_ten">Cerca de uno de cada diez</string>
+    <plurals name="explore_room_story">
+        <item quantity="one">La sala en %1$d lámina</item>
+        <item quantity="many">La sala en %1$d láminas</item>
+        <item quantity="other">La sala en %1$d láminas</item>
+    </plurals>
+    <string name="explore_view_plates">Láminas</string>
+    <string name="explore_view_time">En el tiempo</string>
+    <string name="explore_view_az">A–Z</string>
+    <string name="explore_order_known">Lo más conocido primero</string>
+    <string name="explore_order_oldest">Lo más antiguo primero</string>
+    <string name="explore_order_line">%1$s · %2$s</string>
+    <string name="explore_narrow">Acotar</string>
+    <string name="explore_show_next">Ver los siguientes %1$s de %2$s</string>
+    <string name="explore_also_eyebrow">Las mismas cosas, otras salas</string>
+    <string name="explore_also_heading">%1$s, también en %2$s</string>
+    <string name="explore_also_in">también en %1$s</string>
+    <string name="explore_also_detail">%1$s · %2$s</string>
+    <string name="explore_ways_on">Para seguir</string>
+    <string name="explore_way_anywhere">En cualquier parte de esta sala</string>
+    <string name="explore_way_subject">Todo el tema</string>
 </resources>

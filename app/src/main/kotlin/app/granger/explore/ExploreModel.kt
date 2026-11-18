@@ -133,6 +133,8 @@ data class ExploreArticle(
     val mark: TimeMark? = null,
     /** The picture's width over its height, once read (the mosaic shapes its tile by it); 0 when unknown or none. */
     val ratio: Float = 0f,
+    /** The picture is a drawing or an emblem (a flag, a seal, a map): shown whole, never cropped. */
+    val whole: Boolean = false,
 )
 
 /**
@@ -249,6 +251,8 @@ class ExploreSources(
     val look: (packId: String, path: String) -> ArticleLook? = { _, _ -> null },
     /** The installed book collections by subject id ([collectionsBySubject]). */
     val collections: Flow<Map<String, List<ExploreCollection>>> = kotlinx.coroutines.flow.flowOf(emptyMap()),
+    /** A room's one-line description (`subject.lens`) in a language, from the app's own list; null when it has none. */
+    val roomDescription: (key: String, language: String) -> String? = { _, _ -> null },
 )
 
 /** An article as a feature shows it: its lead picture, larger than a thumbnail, and its opening sentence. */
@@ -482,6 +486,8 @@ data class SubjectUi(
     val letters: List<String> = emptyList(),
     /** In A–Z order: the letter the list now starts at; null at the start. */
     val letter: String? = null,
+    /** A room's own parts (its description, finding, plates through time, overlaps, doors); null on other pages. */
+    val room: RoomUi? = null,
 ) {
     /** Enough dated main-subject articles for a run of the time games. */
     val canQuiz: Boolean get() = datedMain >= SubjectViewModel.QUIZ_MIN
@@ -515,6 +521,9 @@ class SubjectViewModel(
     private var azStart = 0
     private var viewing: Job? = null
 
+    /** A room shows fewer at a time, so its foot (where its topics also hang, the ways on) stays in reach. */
+    private val pageSize = if (listing && facetId != null) ROOM_PAGE else PAGE
+
     init {
         viewModelScope.launch {
             kotlinx.coroutines.flow.combine(sources.packs, sources.collections) { p, c -> p to c }.collect { (packs, c) ->
@@ -530,8 +539,13 @@ class SubjectViewModel(
                         else -> 0
                     }
                     val page = linked(facet, 0)
+                    val room = if (listing && facet != null) {
+                        val counts = qids.facetCounts(subject.id)
+                        val (before, at, after) = neighbours(qids.facets(subject.id).filter { (counts[it.id] ?: 0) > 0 }) { it.id == facet.id }
+                        RoomUi(sources.roomDescription(facet.key, locale.language), before = before, after = after, position = at, total = counts.count { it.value > 0 })
+                    } else null
                     SubjectUi(subject, count, if (listing) emptyList() else page, others, more = page.size < count,
-                        collections = if (listing) emptyList() else shelved, facet = facet, loading = listing) to page
+                        collections = if (listing) emptyList() else shelved, facet = facet, loading = listing, room = room) to page
                 }
                 val was = state.value
                 state.value = was?.copy(count = first.first.count, packs = first.first.packs, collections = if (listing) emptyList() else shelved)
@@ -548,8 +562,8 @@ class SubjectViewModel(
     /** The articles most linked first, from [offset]: the facet's, or the subject's (main subject first). Blocking. */
     private suspend fun linked(facet: app.granger.core.library.Facet?, offset: Int): List<ExploreArticle> {
         val qids = sources.qids()
-        return if (facet != null) qids.topInFacet(facet.key, PAGE, offset).map { it.toExplore() }
-        else qids.topIn(subject.id, PAGE, offset).map { it.toExplore() }
+        return if (facet != null) qids.topInFacet(facet.key, pageSize, offset).map { it.toExplore() }
+        else qids.topIn(subject.id, pageSize, offset).map { it.toExplore() }
     }
 
     /** The eras (one pass over the time indexes) and In your books, after the first page shows. */
@@ -564,9 +578,51 @@ class SubjectViewModel(
         }
         time = t
         state.value = state.value?.copy(eras = eras, dated = t?.size ?: 0, datedMain = t?.main?.count { it } ?: 0)
-        if (listing) return
+        if (listing) {
+            if (facet != null) room(facet, t)
+            return
+        }
         val shelf = withContext(Dispatchers.IO) { runCatching { inYourBooks() }.getOrDefault(emptyList()) }
         state.value = state.value?.copy(books = shelf)
+    }
+
+    /**
+     * A room's finding (its oldest dated topic, its busiest century), its plates through time (each era's best-known dated
+     * topic, one with a picture when the era's best few have any), and where its topics also hang: the other rooms that
+     * share the most of them, each with its best-known shared few. Each part shows as it is ready.
+     */
+    private suspend fun room(facet: app.granger.core.library.Facet, t: SubjectTime?) {
+        fun update(change: (RoomUi) -> RoomUi) { state.value = state.value?.let { ui -> ui.copy(room = ui.room?.let(change)) } }
+        if (t != null && t.size > 0) {
+            val finding = withContext(Dispatchers.IO) {
+                val oldest = (0 until t.size).minWithOrNull(compareBy<Int> { t.year[it] }.thenByDescending { t.rank[it] })
+                val busiest = busiestCentury(t.year)
+                RoomFinding(oldest?.let { sources.times().marksOf(t, listOf(it)).firstOrNull()?.toExplore() }, t.size, busiest?.first, busiest?.second ?: 0)
+            }
+            update { it.copy(finding = finding) }
+            val story = withContext(Dispatchers.IO) {
+                Era.entries.mapNotNull { era ->
+                    val best = (0 until t.size).filter { t.year[it] in era.from..era.to }.sortedWith(compareByDescending<Int> { t.rank[it] }.thenBy { t.qid[it] }).take(STORY_TRIES)
+                    val marks = sources.times().marksOf(t, best).map { it.toExplore() }
+                    marks.asSequence().map { withPicture(it) }.firstOrNull { it.picture != null } ?: marks.firstOrNull()
+                }
+            }
+            update { it.copy(story = story) }
+        }
+        val overlaps = withContext(Dispatchers.IO) {
+            val qids = sources.qids()
+            val mine = qids.facetSet(facet.key)
+            val top = Subject.entries.flatMap { s -> qids.facets(s.id).filter { it.key != facet.key }.map { s to it } }
+                .map { (s, f) -> Triple(s, f, mine.shared(qids.facetSet(f.key))) }.filter { it.third >= OVERLAP_MIN }
+                .sortedWith(compareByDescending<Triple<Subject, app.granger.core.library.Facet, Int>> { it.third }.thenBy { it.second.key }).take(OVERLAPS)
+            if (top.isEmpty()) return@withContext emptyList()
+            val ranked = qids.topInFacet(facet.key, mine.size)
+            top.map { (s, f, n) ->
+                val theirs = qids.facetSet(f.key)
+                RoomOverlap(s, f, n, ranked.asSequence().filter { it.qid in theirs }.take(OVERLAP_EXAMPLES).map { titleOf(it.path) }.toList())
+            }
+        }
+        update { it.copy(overlaps = overlaps) }
     }
 
     /**
@@ -622,7 +678,7 @@ class SubjectViewModel(
     /** [a] with its picture and that picture's shape. Blocking. */
     private fun withPicture(a: ExploreArticle): ExploreArticle {
         val p = runCatching { sources.picture(a.packId, a.path) }.getOrNull() ?: return a
-        return a.copy(picture = p, ratio = ratioOf(p))
+        return a.copy(picture = p, ratio = ratioOf(p), whole = app.granger.home.ArticleThumbnails.isWhole(p))
     }
 
     /** The shelf's books whose work has this subject, best-known work first. */
@@ -650,7 +706,7 @@ class SubjectViewModel(
         state.value = now.copy(letter = letter, loading = true)
         viewing?.cancel()
         viewing = viewModelScope.launch {
-            val page = all.drop(at).take(PAGE)
+            val page = all.drop(at).take(pageSize)
             if (listing) appendWithPictures(page, all.size - at, replace = true)
             else state.value = state.value?.copy(articles = page, more = page.size < all.size - at, loading = false)
         }
@@ -676,7 +732,7 @@ class SubjectViewModel(
                 order = null
                 azStart = 0
                 state.value = state.value?.copy(letters = all.map { railLetter(it.title) }.distinct())
-                val page = all.take(PAGE)
+                val page = all.take(pageSize)
                 if (listing) appendWithPictures(page, all.size, replace = true)
                 else state.value = state.value?.copy(articles = page, more = page.size < all.size, loading = false)
                 return@launch
@@ -687,7 +743,7 @@ class SubjectViewModel(
                     Triple(null, linked(now.facet, 0), now.count)
                 } else {
                     val o = t.order(era?.from ?: Long.MIN_VALUE, era?.to ?: Long.MAX_VALUE, sort == SubjectSort.OLDEST)
-                    Triple(o, sources.times().marksOf(t, o.take(PAGE)).map { it.toExplore() }, o.size)
+                    Triple(o, sources.times().marksOf(t, o.take(pageSize)).map { it.toExplore() }, o.size)
                 }
             }
             order = list
@@ -707,8 +763,8 @@ class SubjectViewModel(
             val all = az.takeIf { now.sort == SubjectSort.AZ }
             val next = withContext(Dispatchers.IO) {
                 when {
-                    all != null -> all.drop(azStart + now.articles.size).take(PAGE)
-                    o != null && t != null -> sources.times().marksOf(t, o.drop(now.articles.size).take(PAGE)).map { it.toExplore() }
+                    all != null -> all.drop(azStart + now.articles.size).take(pageSize)
+                    o != null && t != null -> sources.times().marksOf(t, o.drop(now.articles.size).take(pageSize)).map { it.toExplore() }
                     else -> linked(now.facet, now.articles.size)
                 }
             }
@@ -740,6 +796,17 @@ class SubjectViewModel(
 
     companion object {
         const val PAGE = 60
+
+        /** A room's page: eight rows of plates. */
+        const val ROOM_PAGE = 24
+
+        /** A room's plate for an era is the first with a picture among this many of the era's best known. */
+        const val STORY_TRIES = 4
+
+        /** Where a room's topics also hang: this many other rooms, each sharing at least [OVERLAP_MIN], with a few named. */
+        const val OVERLAPS = 4
+        const val OVERLAP_MIN = 3
+        const val OVERLAP_EXAMPLES = 3
 
         /** Dated articles a subject needs before it offers Quiz (the games need a spread of years to deal from). */
         const val QUIZ_MIN = 40

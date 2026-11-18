@@ -96,20 +96,22 @@ object TopicsTags {
 }
 
 @Composable
-fun TopicsScreen(viewModel: SubjectViewModel, actions: ExploreActions, subjectActions: SubjectActions) {
+fun TopicsScreen(viewModel: SubjectViewModel, actions: ExploreActions, subjectActions: SubjectActions, room: Boolean = false) {
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val scope = androidx.compose.runtime.rememberCoroutineScope()
-    TopicsContent(
-        ui, actions,
-        SubjectActions(
-            onMore = viewModel::more,
-            onEra = viewModel::choose,
-            onSort = viewModel::sort,
-            onJump = viewModel::jump,
-            onWander = { scope.launch { viewModel.wanderStart()?.let { subjectActions.onWanderAt(it.packId, it.path) } } },
-            onWanderAt = subjectActions.onWanderAt,
-        ),
+    val all = SubjectActions(
+        onMore = viewModel::more,
+        onEra = viewModel::choose,
+        onSort = viewModel::sort,
+        onJump = viewModel::jump,
+        onWander = { scope.launch { viewModel.wanderStart()?.let { subjectActions.onWanderAt(it.packId, it.path) } } },
+        onWanderAt = subjectActions.onWanderAt,
+        onOpenExplore = subjectActions.onOpenExplore,
+        onOpenSubject = subjectActions.onOpenSubject,
+        onOpenRoom = subjectActions.onOpenRoom,
     )
+    // A sub-category is a room, with a room's spread (Plan EX round 2, D3); the whole subject keeps its listing.
+    if (room) RoomContent(ui, actions, all) else TopicsContent(ui, actions, all)
 }
 
 /**
@@ -219,7 +221,7 @@ fun TopicsContent(ui: SubjectUi?, actions: ExploreActions, subject: SubjectActio
  * letter under the finger shows large beside the rail while dragging. Each letter is its own button for TalkBack.
  */
 @Composable
-private fun LetterRail(letters: List<String>, current: String?, onJump: (String) -> Unit, modifier: Modifier = Modifier) {
+internal fun LetterRail(letters: List<String>, current: String?, onJump: (String) -> Unit, modifier: Modifier = Modifier) {
     var height by remember { mutableIntStateOf(0) }
     var dragging by remember { mutableStateOf<String?>(null) }
     fun at(y: Float): String? = if (height <= 0) null else letters[(y / height * letters.size).toInt().coerceIn(0, letters.lastIndex)]

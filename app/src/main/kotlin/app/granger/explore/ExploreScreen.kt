@@ -401,6 +401,11 @@ class SubjectActions(
     val onOpenFacet: (facetId: String?) -> Unit = {},
     /** An article's cached picture; null when it has none. Blocking. */
     val picture: (ExploreArticle) -> String? = { null },
+    /** Back along the trail: Explore's landing, and this subject's page. */
+    val onOpenExplore: () -> Unit = {},
+    val onOpenSubject: () -> Unit = {},
+    /** Another room. [through] a door (the neighbour takes this room's place) or by a link (it opens on top). */
+    val onOpenRoom: (subject: String, facet: String, through: Boolean) -> Unit = { _, _, _ -> },
 )
 
 object SubjectTags {

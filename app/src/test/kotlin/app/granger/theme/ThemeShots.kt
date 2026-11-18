@@ -146,7 +146,7 @@ open class ThemeShots {
             night = n
             compose.waitForIdle()
             // Pictures read off the main thread: give them a moment, then let their frames draw.
-            if (pictures) repeat(4) { Thread.sleep(250); compose.waitForIdle() }
+            if (pictures) repeat(8) { Thread.sleep(250); compose.waitForIdle() }
             val bmp = compose.onRoot().captureToImage().asAndroidBitmap()
             File(out).mkdirs()
             File(out, "$name-${if (n) "night" else "field"}.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
@@ -1424,6 +1424,49 @@ open class ThemeShots {
                     modifier = Modifier.padding(top = 12.dp),
                 )
             }
+        }
+    }
+
+    /**
+     * Plan EX round 2, D3: a room (Cars, planes & ships) as the phone draws it beside the rail: the trail, the head and its
+     * standfirst, the room through time, the views, the mosaic, where its topics also hang, the ways on, the doors bar.
+     */
+    @Config(qualifiers = "+w390dp-h2150dp")
+    @Test fun room() {
+        fun mark(title: String, y0: Long, y1: Long? = null) =
+            app.granger.core.library.TimeMark(1, "top", title, title, app.granger.core.library.TimeKind.POINT, y0, 0, y1, null, 9, emptySet(), 1)
+        fun article(title: String, w: Int = 300, h: Int = 200, rgb: Int = 0x5B6C7A, year: Long? = null, flag: Boolean = false): app.granger.explore.ExploreArticle {
+            val p = shotPlate(title, w, h, rgb, flag = flag)
+            return app.granger.explore.ExploreArticle("top", title.replace(' ', '_'), title, p.picture, year?.let { mark(title, it) }, p.ratio, p.whole)
+        }
+        fun facet(id: String, en: String, subject: String = "technology") = app.granger.core.library.Facet(subject, id, en, "")
+        val wall = listOf("Car", "Train", "Bicycle", "Ship", "Titanic", "Bus", "Boat", "Submarine", "Airplane", "Helicopter", "Rocket", "Motorcycle")
+            .mapIndexed { i, t -> article(t, rgb = listOf(0x8C5A3C, 0x4F5D4A, 0x6B6F7A, 0x35566B, 0x2F4050, 0x9A4B3A)[i % 6]) }
+        val ui = app.granger.explore.SubjectUi(
+            app.granger.explore.Subject.TECHNOLOGY, 882, wall, emptyList(), more = true,
+            eras = listOf(app.granger.explore.Era.PREHISTORY to 1, app.granger.explore.Era.ANCIENT to 4, app.granger.explore.Era.EARLY_MODERN to 9, app.granger.explore.Era.C19 to 38, app.granger.explore.Era.WARS to 79, app.granger.explore.Era.RECENT to 97),
+            dated = 228, facet = facet("vehicles", "Cars, planes & ships"),
+            room = app.granger.explore.RoomUi(
+                "Everything people have built to carry themselves, on land, on water, in the air and into space.",
+                app.granger.explore.RoomFinding(article("Boat", year = -899_999), 228, 1900, 171),
+                story = listOf(
+                    article("Boat", year = -899_999), article("Trireme", year = -700), article("Manila galleon", year = 1565), article("Electric car", year = 1835),
+                    article("Titanic", year = 1909), article("International Space Station", year = 1998),
+                ),
+                overlaps = listOf(
+                    app.granger.explore.RoomOverlap(app.granger.explore.Subject.TECHNOLOGY, facet("weapons", "Weapons & warfare"), 179, listOf("Aircraft carrier", "F-16", "MiG-21")),
+                    app.granger.explore.RoomOverlap(app.granger.explore.Subject.PLACES, facet("landmarks", "Buildings & landmarks", "places"), 54, listOf("Titanic", "HMS Hood", "Bismarck")),
+                    app.granger.explore.RoomOverlap(app.granger.explore.Subject.HISTORY, facet("war", "Wars & battles", "history"), 49, listOf("Battleship", "Vasa", "HMS Dreadnought")),
+                    app.granger.explore.RoomOverlap(app.granger.explore.Subject.HISTORY, facet("disasters", "Disasters & tragedies", "history"), 37, listOf("Titanic", "Britannic", "Carpathia")),
+                ),
+                before = facet("internet", "The internet"), after = facet("space", "Spaceflight"), position = 3, total = 8,
+            ),
+        )
+        shoot("room", pictures = true) {
+            GrangerShell(
+                rail = RailUi(listOf(owls)), expanded = false, railVisible = true, selected = null,
+                onToggleExpanded = {}, onEdgeSwipe = {}, onTool = {}, onTab = {}, onHistory = {}, onSearch = {},
+            ) { app.granger.explore.RoomContent(ui, app.granger.explore.ExploreActions()) }
         }
     }
 

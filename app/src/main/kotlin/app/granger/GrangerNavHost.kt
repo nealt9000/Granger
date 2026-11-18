@@ -717,6 +717,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             },
             isWikipedia = { it.name.startsWith("wikipedia_") },
             load = { container.catalog.load() },
+            roomDescription = app.granger.explore.RoomDescriptions(appContext.assets)::of,
             // Book collections join subjects by the catalog's own `subjects` (KB2): book packs, Classics and book sets.
             collections = kotlinx.coroutines.flow.combine(
                 container.library.packs, container.bookshelf.books, container.catalog.state, container.downloads.records,
@@ -1156,7 +1157,13 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             container.wanderFrom.value = packId to path
                             if (!nav.popBackStack<HomeRoute>(inclusive = false)) nav.navigate(HomeRoute) { launchSingleTop = true }
                         },
+                        // The trail leads back the way the reader came when that way is still behind them.
+                        onOpenExplore = { if (!nav.popBackStack<ExploreRoute>(inclusive = false)) nav.navigate(ExploreRoute) { launchSingleTop = true } },
+                        onOpenSubject = { if (!nav.popBackStack(SubjectRoute(subject.id), inclusive = false)) nav.navigate(SubjectRoute(subject.id)) { launchSingleTop = true } },
+                        // Through a door the next room takes this one's place, so Back leaves the rooms; a link opens on top.
+                        onOpenRoom = { s, f, through -> nav.navigate(TopicsRoute(s, f)) { if (through) popUpTo(route) { inclusive = true } } },
                     ),
+                    room = route.facet != null,
                 )
             }
             composable<SubjectGamesRoute> { backStackEntry ->

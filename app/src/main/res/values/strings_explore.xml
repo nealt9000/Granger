@@ -138,4 +138,59 @@
     <string name="explore_rooms_seen">Rooms you have seen</string>
     <string name="explore_rooms_seen_in">Rooms seen in %1$s</string>
     <string name="explore_seen_of">%1$s of %2$s</string>
+    <!-- Plan EX round 2, a room (D3; a room is a lens). -->
+    <!-- Over a room's name. %1$s is its subject. -->
+    <string name="explore_room_in">A room in %1$s</string>
+    <string name="explore_room_small_in">A small room in %1$s</string>
+    <!-- A room's finding sentences. %1$s is a topic's title, %2$s its date in words. -->
+    <string name="explore_room_oldest">The oldest dated here is %1$s (%2$s).</string>
+    <!-- %1$s is a share phrase (explore_dated_*), %2$s a century (explore_century). -->
+    <string name="explore_room_century">%1$s are from %2$s.</string>
+    <!-- A century. %1$s is its first year (1900) in English; in Spanish, which counts centuries, its Roman numeral (XX). -->
+    <string name="explore_century">the %1$ss</string>
+    <!-- A share of a room's dated topics, starting a sentence. -->
+    <string name="explore_dated_nearly_all">Nearly all the dated topics</string>
+    <string name="explore_dated_three_in_four">About three in four dated topics</string>
+    <string name="explore_dated_two_in_three">About two in three dated topics</string>
+    <string name="explore_dated_half">About half the dated topics</string>
+    <string name="explore_dated_one_in_three">About one in three dated topics</string>
+    <string name="explore_dated_one_in_four">About one in four dated topics</string>
+    <string name="explore_dated_one_in_five">About one in five dated topics</string>
+    <string name="explore_dated_one_in_ten">About one in ten dated topics</string>
+    <!-- A share of a room's topics, starting a heading. -->
+    <string name="explore_share_nearly_all">Nearly all</string>
+    <string name="explore_share_three_in_four">About three in four</string>
+    <string name="explore_share_two_in_three">About two in three</string>
+    <string name="explore_share_half">About half</string>
+    <string name="explore_share_one_in_three">About one in three</string>
+    <string name="explore_share_one_in_four">About one in four</string>
+    <string name="explore_share_one_in_five">About one in five</string>
+    <string name="explore_share_one_in_ten">About one in ten</string>
+    <!-- A room's plates through time: one per era. %1$d is how many. -->
+    <plurals name="explore_room_story">
+        <item quantity="one">The room in %1$d plate</item>
+        <item quantity="other">The room in %1$d plates</item>
+    </plurals>
+    <!-- A room's views. -->
+    <string name="explore_view_plates">Plates</string>
+    <string name="explore_view_time">Through time</string>
+    <string name="explore_view_az">A–Z</string>
+    <string name="explore_order_known">Best known first</string>
+    <string name="explore_order_oldest">Oldest first</string>
+    <!-- The order and the era showing: "Best known first · All eras". -->
+    <string name="explore_order_line">%1$s · %2$s</string>
+    <string name="explore_narrow">Narrow</string>
+    <!-- More plates. %1$s is how many come next, %2$s how many the room holds. -->
+    <string name="explore_show_next">Show the next %1$s of %2$s</string>
+    <!-- Where a room's topics also hang. -->
+    <string name="explore_also_eyebrow">The same things, other rooms</string>
+    <!-- The heading: %1$s is a share phrase (explore_share_*) or a count, %2$s the other room. -->
+    <string name="explore_also_heading">%1$s also hang in %2$s</string>
+    <!-- A row, after its count: %1$s is the other room. -->
+    <string name="explore_also_in">also hang in %1$s</string>
+    <!-- Under it: the other room's subject, then a few of the shared topics. -->
+    <string name="explore_also_detail">%1$s · %2$s</string>
+    <string name="explore_ways_on">Ways on</string>
+    <string name="explore_way_anywhere">Anywhere in this room</string>
+    <string name="explore_way_subject">The whole subject</string>
 </resources>

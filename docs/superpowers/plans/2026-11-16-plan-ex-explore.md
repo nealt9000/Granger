@@ -498,3 +498,18 @@ Branch `ex-build` (off main at 40e4fe31). Nothing is wired into a screen yet; D3
 - **TalkBack:** each plate is one button with its title (and dates); numbers and seams aren't read; a door reads "The room before, The internet"; rooms seen reads as one line.
 - **Shots:** `./gradlew :app:testDebugUnitTest --tests '*ThemeShots.spread*' -PthemeShots` writes `spread-pieces` and `spread-thin` in Field and Night. With `GRANGER_SHOT_PICTURES` set to a folder of pictures they use those; otherwise flat stand-ins.
 - **Left for D3:** which plates are emblems. `Plate.whole` has to be set from the picture's source (a drawing by `data-file-type`, or an emblem by name), which `ExploreArticle` doesn't carry yet.
+
+### D3 done (2026-11-17)
+On `ex-build`. A sub-category's listing is now a room (`RoomScreen.kt`, `Room.kt`); the whole-subject listing ("See all") keeps the old mosaic until D2.
+
+- **Head:** the trail (Explore › subject › room); "A room in …" ("A small room in …" under 30 topics); a standfirst of the description, the count, the oldest dated topic, and the share of dated topics in their busiest century. The share is said only with eight or more dated topics and a century from AD 100 on, as "about three in four", in the nearest of eight plain fractions.
+- **The room in N plates:** each era's best-known dated topic, the first of the era's best four that has a picture.
+- **Views:** Plates (best known first), Through time (oldest first; only when the room has dates), A–Z (with the letter rail). Narrow shows the era chips.
+- **Mosaic:** `plateRows` over 24 at a time, then "Show the next 24 of 882". No auto-loading, so the foot stays in reach.
+- **Where these also hang:** the four other rooms sharing the most topics (three or more), each with its three best-known shared topics; the heading states the largest as a share when it is about one in ten or more, else as a count. A line opens that room.
+- **Ways on:** Wander in this room; the whole subject.
+- **Doors bar:** pinned at the foot (the mockup had it scroll). The ends meet, so the last room's door leads to the first. Through a door the next room takes this one's place on the back stack; a link from "also hang" opens on top.
+- **Emblems:** a thumbnail of a drawing or of a picture named as a flag, seal, map and so on is saved as `.w.jpg`; `ExploreArticle.whole` reads that, and the plate shows it whole.
+- **Descriptions:** read from an app asset, `assets/explore/rooms.json`, written from `lenses.json` by `tools/subjects/room_descriptions.py`. A test holds the two word for word. This replaces the plan's metadata-only index rebuild; nothing in the index or the catalog changed.
+- **Speed (desk, real Top index):** a room's finding, plates and overlaps are ready in 60 to 160 ms. Not measured on a phone or on Top 1M.
+- **Not done here:** rooms seen (R). The Spanish strings have had no second reader.
