@@ -196,6 +196,9 @@ internal fun LibraryRoute.noticeText(): UiText? = notice?.let { UiText.Res(it.te
 /** The full-screen Timeline, opened from Home's glance on the article its lens was on (Plan H5b). */
 @Serializable data class TimelineRoute(val packId: String? = null, val path: String? = null)
 /** The Games screen (Plan H5c): both games on the time index, opened from Home's Play. */
+/** How long after the app opens Explore's counts are read in the background: after the first screen has drawn. */
+private const val EXPLORE_WARM_AFTER = 1_500L
+
 @Serializable data object GamesRoute
 
 /** Onboarding (Plan H3): five screens over Home on a first run, or from Settings. */
@@ -701,11 +704,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         app.granger.explore.ExploreSources(
             qids = { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { container.referenceLinks.qidIndexes() } },
             times = { timeIndexes() },
-            picture = { packId, path ->
-                container.library.archive(packId)?.let { archive ->
-                    archive.read(path)?.let { thumbs.thumbnail(archive, path, String(it.bytes, Charsets.UTF_8)) }
-                }
-            },
+            picture = { packId, path -> container.library.archive(packId)?.let { archive -> container.articleCards.card(archive, path)?.thumbnail } },
             packs = kotlinx.coroutines.flow.combine(
                 container.library.packs, container.catalog.state, container.downloads.records,
             ) { packs, state, records ->
@@ -743,18 +742,18 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             }.flowOn(kotlinx.coroutines.Dispatchers.Default),
             look = { packId, path ->
                 container.library.archive(packId)?.let { archive ->
-                    archive.resolvePath(path)?.let { resolved ->
-                        archive.read(resolved)?.takeIf { it.mimeType.startsWith("text/html") }?.let { item ->
-                            val html = String(item.bytes, Charsets.UTF_8)
-                            app.granger.explore.ArticleLook(
-                                thumbs.thumbnail(archive, resolved, html, targetPx = 800),
-                                app.granger.home.LeadLinks.parse(html, resolved).summary.takeIf { it.isNotBlank() },
-                            )
-                        }
-                    }
+                    app.granger.Perf.time("look $path") { container.articleCards.card(archive, path, targetPx = 800) }
+                        ?.let { app.granger.explore.ArticleLook(it.thumbnail, it.summary.takeIf { s -> s.isNotBlank() }) }
                 }
             },
         )
+    }
+    // What Explore's landing counts is read a moment after the app opens, so the landing doesn't wait for it (the performance pass).
+    androidx.compose.runtime.LaunchedEffect(exploreSources) {
+        kotlinx.coroutines.delay(EXPLORE_WARM_AFTER)
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            app.granger.Perf.time("explore.warm") { runCatching { app.granger.explore.ExploreViewModel.warm(exploreSources) } }
+        }
     }
     val exploreActions = app.granger.explore.ExploreActions(
         onOpenSubject = { nav.navigate(SubjectRoute(it.id)) },

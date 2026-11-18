@@ -4,6 +4,9 @@ import android.database.sqlite.SQLiteDatabase
 import java.io.Closeable
 import java.io.File
 
+/** The longest best-known list [QidIndexes.topIn] keeps. */
+private const val TOP_KEPT = 400
+
 /** The parts that make a broad topic lead to an item: a kind, a linked article, a person. */
 private const val HELD = "${TopicParts.KIND}, ${TopicParts.LINK}, ${TopicParts.PERSON}"
 
@@ -274,6 +277,15 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
         return (mine + others).flatMap { it.articlesOf(qid) }
     }
 
+    /**
+     * The first place the item can be read, [language]'s packs first: [articlesOf]'s first, without asking the packs
+     * after the one that has it (a broad topic resolves hundreds of items, and each asked every pack).
+     */
+    fun firstArticleOf(qid: Long, language: String? = null): QidArticle? {
+        val order = if (language == null) indexes else indexes.filter { it.language == language } + indexes.filter { it.language != language }
+        return order.firstNotNullOfOrNull { it.articlesOf(qid).firstOrNull() }
+    }
+
     fun otherTitle(packId: String, path: String): String? = indexes.firstOrNull { it.packId == packId }?.otherTitle(path)
 
     /** The item's values of [prop], from the first pack that has the item. */
@@ -295,22 +307,35 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
      * packs' qid lists are merged in order, never held in memory. Explore's subject doors.
      */
     fun subjectCounts(subjects: Collection<String>): Map<String, Int> =
-        subjects.associateWith { s -> countDistinct(indexes.mapNotNull { it.qidsWith(s) }) }
+        subjects.associateWith { s -> counted.computeIfAbsent("subject:$s") { countDistinct(indexes.mapNotNull { it.qidsWith(s) }) } }
+
+    /**
+     * Counts already made (the performance pass). These indexes never change once opened (new files make a new
+     * [QidIndexes]), and Explore's landing asked for the same counts on every return to it, a second each time. Each is
+     * made once: a second asker waits for the first rather than counting again.
+     */
+    private val counted = java.util.concurrent.ConcurrentHashMap<String, Int>()
 
     /** How many items the packs hold in all, each once. */
-    fun itemCount(): Int = countDistinct(indexes.map { it.allQids() })
+    fun itemCount(): Int = counted.computeIfAbsent("items") { countDistinct(indexes.map { it.allQids() }) }
 
     /**
      * The articles with [subject], main subject first, then most-linked, each item once, in the first pack (in preference
      * order: the library's main language first) that has it. [limit] past [offset].
      */
     fun topIn(subject: String, limit: Int, offset: Int = 0, mainOnly: Boolean = false): List<QidArticle> {
-        val want = offset + limit
-        val best = LinkedHashMap<Long, QidArticle>()
-        for (index in indexes) for (a in index.topIn(subject, want, mainOnly = mainOnly)) best.putIfAbsent(a.qid, a)
-        return best.values.sortedWith(compareByDescending<QidArticle> { it.mainSubject }.thenByDescending { it.rank }.thenBy { it.qid })
-            .drop(offset).take(limit)
+        fun read(): List<QidArticle> {
+            val want = offset + limit
+            val best = LinkedHashMap<Long, QidArticle>()
+            for (index in indexes) for (a in index.topIn(subject, want, mainOnly = mainOnly)) best.putIfAbsent(a.qid, a)
+            return best.values.sortedWith(compareByDescending<QidArticle> { it.mainSubject }.thenByDescending { it.rank }.thenBy { it.qid })
+                .drop(offset).take(limit)
+        }
+        // A subject's best known from the top are asked for again and again (the landing's doors, on every return to it).
+        return if (offset == 0 && limit <= TOP_KEPT) tops.computeIfAbsent("$subject|$limit|$mainOnly") { read() } else read()
     }
+
+    private val tops = java.util.concurrent.ConcurrentHashMap<String, List<QidArticle>>()
 
     /**
      * Every item with [subject] across the packs, each once, as a sorted set (Plan EX Task 3: a subject's eras, its quiz).
@@ -388,11 +413,14 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
     fun facetOf(qid: Long, subject: String): Facet? = facets(subject).firstOrNull { f -> indexes.any { it.inFacet(f.key, qid) } }
 
     /** [subject]'s sub-categories, in their curated order, with their names; empty without any. */
-    fun facets(subject: String): List<Facet> = indexes.firstNotNullOfOrNull { it.facetList }?.let { Facet.parse(it, subject) }.orEmpty()
+    fun facets(subject: String): List<Facet> =
+        parsed.computeIfAbsent(subject) { indexes.firstNotNullOfOrNull { it.facetList }?.let { Facet.parse(it, subject) }.orEmpty() }
+
+    private val parsed = java.util.concurrent.ConcurrentHashMap<String, List<Facet>>()
 
     /** How many items each of [subject]'s sub-categories holds across the packs, each item once. */
     fun facetCounts(subject: String): Map<String, Int> =
-        facets(subject).associate { f -> f.id to countDistinct(indexes.mapNotNull { it.qidsInFacet(f.key) }) }
+        facets(subject).associate { f -> f.id to counted.computeIfAbsent("room:${f.key}") { countDistinct(indexes.mapNotNull { it.qidsInFacet(f.key) }) } }
 
     /** The articles in [facet] (`subject.facet`), most-linked first, each item once, in the first pack that has it. */
     fun topInFacet(facet: String, limit: Int, offset: Int = 0): List<QidArticle> {

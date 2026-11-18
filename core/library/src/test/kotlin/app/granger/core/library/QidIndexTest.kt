@@ -120,6 +120,12 @@ class QidIndexTest {
         // An item's rooms, in their order.
         assertThat(all.roomsOf(11446L).map { it.id }).containsExactly("weapons", "transport").inOrder()
         assertThat(all.roomsOf(42861L)).isEmpty()
+        // The first place an item can be read, without asking the packs after it; counts are made once and kept.
+        assertThat(all.firstArticleOf(197L)?.path).isEqualTo("Airplane")
+        assertThat(all.firstArticleOf(84L)?.packId).isEqualTo("old")
+        assertThat(all.firstArticleOf(999_999L)).isNull()
+        assertThat(all.subjectCounts(listOf("technology"))).isEqualTo(all.subjectCounts(listOf("technology")))
+        assertThat(all.topIn("technology", 2, mainOnly = true)).isSameInstanceAs(all.topIn("technology", 2, mainOnly = true))
     }
 
     private val top = listOf(

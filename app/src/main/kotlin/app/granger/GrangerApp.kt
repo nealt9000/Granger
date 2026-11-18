@@ -977,20 +977,24 @@ class AppContainer(context: Context) {
     /** An article's title, opening lines and picture, read out of its pack for a link's card. Blocking. */
     private fun articleLead(packId: String, path: String, thumbs: app.granger.home.ArticleThumbnails): app.granger.ebook.ArticleLead? {
         val archive = library.archive(packId) ?: return null
-        val resolved = archive.resolvePath(path) ?: return null
-        val item = archive.read(resolved)?.takeIf { it.mimeType.startsWith("text/html") } ?: return null
-        val html = String(item.bytes, Charsets.UTF_8)
-        val lead = app.granger.home.LeadLinks.parse(html, resolved)
-        val title = lead.title.ifBlank { resolved.substringAfterLast('/').replace('_', ' ') }
-        return app.granger.ebook.ArticleLead(
-            app.granger.core.library.PageTitles.clean(title), lead.summary, runCatching { thumbs.thumbnail(archive, resolved, html) }.getOrNull(),
-        )
+        val card = Perf.time("lead $path") { articleCards.card(archive, path) } ?: return null
+        val title = card.title.ifBlank { path.substringAfterLast('/').replace('_', ' ') }
+        return app.granger.ebook.ArticleLead(app.granger.core.library.PageTitles.clean(title), card.summary, card.thumbnail)
+    }
+
+    /** Article cards, remembered (the performance pass, Plan EX): what the topic pages, Explore and the quilt show of an article. */
+    val articleCards: app.granger.home.ArticleCards by lazy {
+        app.granger.home.ArticleCards(File(context.cacheDir, "article-cards.db"), app.granger.home.ArticleThumbnails(File(context.cacheDir, "home-thumbs")))
     }
 
     private val timeIndexCache = app.granger.core.library.TimeIndexCache()
 
     /** The phone's time indexes in Wander's pack order (Plan H5b), opened once and reopened when the packs or files change. */
-    suspend fun timeIndexes(): app.granger.core.library.TimeIndexes {
+    suspend fun timeIndexes(): app.granger.core.library.TimeIndexes = timeIndexesNow.get { listedTimeIndexes() }
+
+    private val timeIndexesNow = Briefly<app.granger.core.library.TimeIndexes>()
+
+    private suspend fun listedTimeIndexes(): app.granger.core.library.TimeIndexes {
         // Downloaded with each pack from the catalog (Plan H5b Task 3); files pushed for development fill any gap.
         val installed = installedTimeIndexes()
         val listed = app.granger.core.library.TimeIndexDirectory.listed(File(appContext.getExternalFilesDir(null), "timeindex"))
@@ -1033,7 +1037,7 @@ class AppContainer(context: Context) {
             bookOf = { id -> bookshelf.book(id)?.takeIf { it.status == app.granger.core.library.PackStatus.OK }?.let { app.granger.ebook.LibraryBook(it.id, it.title, it.coverPath) } },
             libraryLanguages = { knowledgeNow.value.toSet() },
             sentence = { bookId, mention -> kotlinx.coroutines.withContext(io) { bookSentence(bookId, mention) } },
-            figure = { packId, image -> kotlinx.coroutines.withContext(io) { library.archive(packId)?.let { thumbs.picture(it, image, TOPIC_PICTURE_PX) } } },
+            figure = { packId, image -> kotlinx.coroutines.withContext(io) { Perf.time("figure") { library.archive(packId)?.let { thumbs.picture(it, image, TOPIC_PICTURE_PX) } } } },
         )
     }
 
@@ -1051,16 +1055,10 @@ class AppContainer(context: Context) {
     /** A topic page's header: the article's title, its lead's first sentences, and its picture at header size. Blocking. */
     private fun topicHeader(packId: String, path: String, thumbs: app.granger.home.ArticleThumbnails): app.granger.topic.TopicHeader? {
         val archive = library.archive(packId) ?: return null
-        val resolved = archive.resolvePath(path) ?: return null
-        val item = archive.read(resolved)?.takeIf { it.mimeType.startsWith("text/html") } ?: return null
-        val html = String(item.bytes, Charsets.UTF_8)
-        val lead = app.granger.home.LeadLinks.parse(html, resolved, sentences = 3, maxChars = TOPIC_LEAD_CHARS)
-        val title = lead.title.ifBlank { resolved.substringAfterLast('/').replace('_', ' ') }
-        return app.granger.topic.TopicHeader(
-            // The lead without its bracketed asides (birth names, dates and pronunciations the page shows already).
-            app.granger.core.library.PageTitles.clean(title), app.granger.topic.TopicSource.blurb(lead.summary),
-            runCatching { thumbs.thumbnail(archive, resolved, html, TOPIC_PICTURE_PX) }.getOrNull(),
-        )
+        val card = articleCards.card(archive, path, TOPIC_PICTURE_PX, sentences = 3, maxChars = TOPIC_LEAD_CHARS) ?: return null
+        val title = card.title.ifBlank { path.substringAfterLast('/').replace('_', ' ') }
+        // The lead without its bracketed asides (birth names, dates and pronunciations the page shows already).
+        return app.granger.topic.TopicHeader(app.granger.core.library.PageTitles.clean(title), app.granger.topic.TopicSource.blurb(card.summary), card.thumbnail)
     }
 
     private suspend fun installedVectors(): List<ListedVectors> {

@@ -9,6 +9,7 @@ import app.granger.ebook.ArticleFooter
 import app.granger.ebook.ArticleFooterSource
 import app.granger.ebook.ArticleLead
 import app.granger.ebook.LibraryBook
+import app.granger.side
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -98,7 +99,7 @@ class TopicSource(
     private val times: suspend () -> TimeIndexes,
     private val qids: suspend () -> QidIndexes,
     /** The pack's Wikipedia language (`en`), or null for a pack that isn't a Wikipedia. */
-    private val languageOf: suspend (packId: String) -> String?,
+    languageOf: suspend (packId: String) -> String?,
     /** The installed packs' ids by ZIM name: vectors are keyed by name. */
     private val packIds: suspend () -> Map<String, String>,
     private val footer: ArticleFooterSource?,
@@ -115,6 +116,10 @@ class TopicSource(
     /** One of a pack's pictures by its path in the ZIM (a broad topic's figures), cached; null when it has none. */
     private val figure: (suspend (packId: String, image: String) -> String?)? = null,
 ) : TopicProvider {
+    /** A pack's language doesn't change: asked once (each ask read the packs from the database, and a page asks many times). */
+    private val packLanguages = java.util.concurrent.ConcurrentHashMap<String, String>()
+    private val languageOf: suspend (String) -> String? = { packId -> packLanguages[packId] ?: languageOf(packId)?.also { packLanguages[packId] = it } }
+
     private val lock = Mutex()
     private val cache = object : LinkedHashMap<Pair<String, String>, Topic>(CACHED, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Pair<String, String>, Topic>?) = size > CACHED
@@ -132,11 +137,11 @@ class TopicSource(
             val parts = async { attempt { qid.await()?.let { q -> qids().topicParts(q, packId, languageOf(packId)) } } }
             var broadRead = false    // changed and read only inside update, one at a time
             launch {
-                val h = header(packId, path) ?: TopicHeader(titleOf(path), "", null)
+                val h = app.granger.Perf.time("topic.header $path") { header(packId, path) } ?: TopicHeader(titleOf(path), "", null)
                 val pending = parts.await() != null
                 update { it.copy(header = h, broadPending = pending && !broadRead) }
             }
-            launch { val t = attempt { timeOf(packId, path) }; update { it.copy(time = t) } }
+            launch { val t = app.granger.Perf.time("topic.time $path") { attempt { timeOf(packId, path) } }; update { it.copy(time = t) } }
             launch { val o = attempt { otherOf(packId, qid.await()) }; update { it.copy(other = o) } }
             launch {
                 val language = languageOf(packId)
@@ -150,15 +155,15 @@ class TopicSource(
                 if (quotes.isNotEmpty()) update { it.copy(quotes = quotes) }
             }
             launch {
-                val (articles, books) = attempt { relatedOf(packId, path, qid.await()) } ?: (emptyList<TopicArticle>() to emptyList())
+                val (articles, books) = app.granger.Perf.time("topic.related $path") { attempt { relatedOf(packId, path, qid.await()) } } ?: (emptyList<TopicArticle>() to emptyList())
                 update { it.copy(related = articles, relatedBooks = books) }
             }
             launch {
                 val p = parts.await()
-                val b = p?.let { attempt { broadOf(packId, it) } }
+                val b = p?.let { app.granger.Perf.time("topic.broad $path") { attempt { broadOf(packId, it) } } }
                 update { broadRead = true; it.copy(broad = b, broadPending = false) }
                 // Where it hangs and what stands beside it come after the page's own parts.
-                if (b != null && p != null) attempt { placed(b, p, packId, path) }?.let { full -> update { it.copy(broad = full) } }
+                if (b != null && p != null) app.granger.Perf.time("topic.placed $path") { attempt { placed(b, p, packId, path) } }?.let { full -> update { it.copy(broad = full) } }
             }
         }
         update { it.copy(done = true) }
@@ -177,7 +182,7 @@ class TopicSource(
         val times = attempt { times() }
         return BroadTopics.build(
             parts,
-            resolve = { q -> all.articlesOf(q, language).firstOrNull()?.let { it.packId to it.path } },
+            resolve = { q -> all.firstArticleOf(q, language)?.let { it.packId to it.path } },
             card = { p, path -> cardOf(p, path) },
             figure = { image -> figure?.let { f -> attempt { f(packId, image) } ?: attempt { f(parts.packId, image) } } },
             markOf = { p, path -> runCatching { times?.find(p, path) }.getOrNull() },
@@ -188,18 +193,28 @@ class TopicSource(
 
     override suspend fun card(packId: String, path: String): TopicArticle? = attempt { cardOf(packId, path) }
 
-    override suspend fun around(packId: String, path: String, plates: List<Pair<String, String>>): QuiltAround {
+    override suspend fun around(packId: String, path: String, plates: List<Pair<String, String>>): QuiltAround = app.granger.Perf.time("quilt.around $path (${plates.size})") { aroundOf(packId, path, plates) }
+
+    private suspend fun aroundOf(packId: String, path: String, plates: List<Pair<String, String>>): QuiltAround {
         val all = attempt { qids() } ?: return QuiltAround()
-        val language = languageOf(packId)
         val qid = attempt { qidOf(packId, path) }
-        fun plain(a: app.granger.core.library.QidArticle) = TopicArticle(a.packId, a.path, titleOf(a.path), "", null)
-        val leads = qid?.let { q -> attempt { all.holders(q, LEADS, language) } }.orEmpty().map(::plain)
-        val rooms = qid?.let { q -> attempt { all.roomsOf(q) } }.orEmpty()
+        // What leads to it, its rooms, its card and its dates don't depend on the plates asked about: read once, kept.
+        val base = lock.withLock { rounds[packId to path] } ?: run {
+            val language = languageOf(packId)
+            fun plain(a: app.granger.core.library.QidArticle) = TopicArticle(a.packId, a.path, titleOf(a.path), "", null)
+            val leads = qid?.let { q -> attempt { all.holders(q, LEADS, language) } }.orEmpty().map(::plain)
+            val rooms = qid?.let { q -> attempt { all.roomsOf(q) } }.orEmpty()
+            val mark = attempt { times().takeIf { !it.isEmpty }?.find(packId, path) }
+            QuiltAround(leads, rooms, emptyMap(), card(packId, path), mark).also { lock.withLock { rounds[packId to path] = it } }
+        }
+        if (plates.isEmpty()) return base
         val byQid = plates.mapNotNull { (p, at) -> attempt { all.qidOf(p, at) }?.let { it to Quilts.key(p, at) } }
         val held = attempt { all.heldBy(byQid.map { it.first }.distinct(), qid) }.orEmpty()
-        val more = byQid.mapNotNull { (q, key) -> held[q]?.let { key to it } }.toMap()
-        val mark = attempt { times().takeIf { !it.isEmpty }?.find(packId, path) }
-        return QuiltAround(leads, rooms, more, card(packId, path), mark)
+        return base.copy(more = byQid.mapNotNull { (q, key) -> held[q]?.let { key to it } }.toMap())
+    }
+
+    private val rounds = object : LinkedHashMap<Pair<String, String>, QuiltAround>(ROUNDS, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Pair<String, String>, QuiltAround>?) = size > ROUNDS
     }
 
     private suspend fun cardOf(packId: String, path: String): TopicArticle =
@@ -222,10 +237,10 @@ class TopicSource(
             a, if (b.hasKinds) b.under else 0, b.groups.sortedByDescending { it.count }.take(BroadTopics.FAMILIES).map { it.name },
             b.people.take(COLUMN_PEOPLE).map { it.article.title }, b.chapters.size + (if (b.story != null) 1 else 0), b.inlinks,
         )
-        val others = all.broadInFacet(room.key, BESIDE + 1, language).filter { it.qid != parts.qid }.take(BESIDE).mapNotNull { o ->
-            val theirs = all.topicParts(o.qid, o.packId, language) ?: return@mapNotNull null
+        val others = all.broadInFacet(room.key, BESIDE + 1, language).filter { it.qid != parts.qid }.take(BESIDE).side { o ->
+            val theirs = all.topicParts(o.qid, o.packId, language) ?: return@side null
             broadOf(o.packId, theirs, pictures = false)?.let { column(cardOf(o.packId, o.path), it) }
-        }
+        }.filterNotNull()
         val mine = TopicArticle(packId, path, titleOf(path), "", null)
         return broad.copy(place = place, beside = if (others.isEmpty()) emptyList() else listOf(column(mine, broad)) + others)
     }
@@ -238,7 +253,7 @@ class TopicSource(
         val window = TopicTime.window(mark, year)
         val around = index.marks(window.first, window.last, emptySet(), AROUND, year, prefer = mark.packId)
         val people = TopicTime.contemporaries(mark, around, year)
-        val pictures = (listOf(mark) + people).mapNotNull { p -> lead(p.packId, p.path)?.thumbnail?.let { p.path to it } }.toMap()
+        val pictures = (listOf(mark) + people).side { p -> lead(p.packId, p.path)?.thumbnail?.let { p.path to it } }.filterNotNull().toMap()
         return TopicTimeView(mark, people, TopicTime.events(mark, around, year), pictures)
     }
 
@@ -263,11 +278,11 @@ class TopicSource(
         // The same subject under another title: a redirect's target, or the article in another pack.
         val r = find(name, path) { packName, key -> qid != null && ids[packName]?.let { all.qidOf(it, key) } == qid }
         val times = attempt { times() }
-        val articles = r.articles.take(SHOWN).mapNotNull { h ->
-            val id = ids[h.target] ?: return@mapNotNull null
+        val articles = r.articles.take(SHOWN).side { h ->
+            val id = ids[h.target] ?: return@side null
             val l = lead(id, h.key)
             TopicArticle(id, h.key, l?.title ?: titleOf(h.key), blurb(l?.sentence.orEmpty()), l?.thumbnail, kindOf(id, h.key, times, all))
-        }
+        }.filterNotNull()
         val books = r.books.mapNotNull { h -> bookOf(h.target)?.let { TopicBook(it, h.key) } }
         return articles to books
     }
@@ -298,6 +313,9 @@ class TopicSource(
     }
 
     companion object {
+        /** Topics whose surroundings are kept, for the quilt's walk and its labels. */
+        private const val ROUNDS = 48
+
         /** The broad topics that lead to a topic, as its quilt and a held plate's label show them. */
         private const val LEADS = 12
 

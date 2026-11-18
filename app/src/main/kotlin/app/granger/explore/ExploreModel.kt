@@ -10,9 +10,11 @@ import app.granger.core.library.QidIndexes
 import app.granger.core.library.SubjectTime
 import app.granger.core.library.TimeIndexes
 import app.granger.core.library.TimeMark
+import app.granger.side
 import kotlin.random.Random
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +22,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
@@ -368,6 +371,7 @@ class ExploreViewModel(
 
     private var packs: List<Pair<Pack, String?>>? = null
     private var collections: Map<String, List<ExploreCollection>> = emptyMap()
+    private val building = kotlinx.coroutines.sync.Mutex()
     /** Spreads asked for past today's ([another]): each is the next day's. */
     private var skipped = 0
     private var filling: Job? = null
@@ -395,7 +399,10 @@ class ExploreViewModel(
     }
 
     private suspend fun rebuild(list: List<Pair<Pack, String?>>) {
-        val built = withContext(Dispatchers.IO) { build(list) }
+        val started = app.granger.Perf.now()
+        // One build at a time: a second asked for meanwhile finds the first's counts already made.
+        val built = building.withLock { withContext(Dispatchers.IO) { build(list) } }
+        app.granger.Perf.mark("landing.build", started)
         // Unchanged since last time (pictures aside): keep what's on screen, pictures and all.
         if (state.value?.let { shown -> withoutPictures(shown) == built } == true) return
         state.value = built
@@ -478,7 +485,7 @@ class ExploreViewModel(
             runCatching {
                 app.granger.topic.BroadTopics.build(
                     p,
-                    resolve = { q -> qids.articlesOf(q).firstOrNull()?.let { it.packId to it.path } },
+                    resolve = { q -> qids.firstArticleOf(q)?.let { it.packId to it.path } },
                     card = { packId, path -> app.granger.topic.TopicArticle(packId, path, titleOf(path), "", null) },
                     figure = { null },
                     markOf = { packId, path -> runCatching { times?.find(packId, path) }.getOrNull() },
@@ -495,23 +502,36 @@ class ExploreViewModel(
         shown(f)
     }
 
-    private suspend fun build(packs: List<Pair<Pack, String?>>): ExploreUi {
+    private suspend fun build(packs: List<Pair<Pack, String?>>): ExploreUi = kotlinx.coroutines.coroutineScope {
         val qids = sources.qids()
-        val counts = if (qids.hasSubjects) qids.subjectCounts(Subject.entries.map { it.id }) else emptyMap()
-        val articles = if (qids.hasSubjects) qids.itemCount() else 0
-        val others = packs.filterNot { sources.isWikipedia(it.first) }
+        val subjects = qids.hasSubjects
+        // The counts, the doors' examples and the eras are read side by side: each is its own pass over the indexes, and
+        // one after another they were a second and a half on a cold start.
+        val counting = async { app.granger.Perf.time("build.counts") { if (subjects) Subject.entries.side(SUBJECTS_AT_ONCE) { it.id to qids.subjectCounts(listOf(it.id)).getValue(it.id) }.toMap() else emptyMap() } }
+        val items = async { app.granger.Perf.time("build.items") { if (subjects) qids.itemCount() else 0 } }
         // The subject's own article (History in History) stands for the door already; examples are what it holds.
-        val doors = subjectDoors(counts, { s ->
-            qids.topIn(s.id, EXAMPLES + s.namesakes.size, mainOnly = true).filter { it.qid !in s.namesakes }.take(EXAMPLES).map { it.toExplore() }
-        }, others, collections)
+        val examples = async {
+            app.granger.Perf.time("build.examples") {
+                if (!subjects) emptyMap() else Subject.entries.side(SUBJECTS_AT_ONCE) { s ->
+                    s to qids.topIn(s.id, EXAMPLES + s.namesakes.size, mainOnly = true).filter { it.qid !in s.namesakes }.take(EXAMPLES).map { it.toExplore() }
+                }.toMap()
+            }
+        }
+        val dated = async {
+            val times = sources.times()
+            app.granger.Perf.time("build.eras") {
+                if (times.isEmpty) emptyList() else Era.entries.side { era ->
+                    EraRow(era, times.countActive(era.from, era.to), eraExamples(times.topActive(era.from, era.to, ERA_POOL), qids::subjectsOf))
+                }.filter { it.count > 0 }
+            }
+        }
+        val others = packs.filterNot { sources.isWikipedia(it.first) }
+        val found = examples.await()
+        val doors = subjectDoors(counting.await(), { s -> found[s].orEmpty() }, others, collections)
         val featured = featuredOf(today() + skipped, doors, qids)
-        val times = sources.times()
-        val eras = if (times.isEmpty) emptyList() else Era.entries.map { era ->
-            EraRow(era, times.countActive(era.from, era.to), eraExamples(times.topActive(era.from, era.to, ERA_POOL), qids::subjectsOf))
-        }.filter { it.count > 0 }
         val roomKeys = doors.flatMapTo(HashSet()) { d -> qids.facets(d.subject.id).map { it.key } }
-        return ExploreUi(
-            articles, doors, eras, packs.map { it.first.title }.sortedBy { it.lowercase() }, featured, roomKeys.size, skipped,
+        ExploreUi(
+            items.await(), doors, dated.await(), packs.map { it.first.title }.sortedBy { it.lowercase() }, featured, roomKeys.size, skipped,
             roomKeys, sources.seen.state.value.ids(SeenKind.ROOM),
         )
     }
@@ -536,15 +556,30 @@ class ExploreViewModel(
             .mapNotNull { q -> qids.articlesOf(q).firstOrNull() }
             .mapNotNull { a -> runCatching { sources.look(a.packId, a.path) }.getOrNull() }
             .firstOrNull { it.picture != null }
+        val started = app.granger.Perf.now()
         var ui = start
-        // Today's spread first: its picture, large, with its opening sentence, then its figures and its counts.
-        ui.featured?.let { f -> spread(f) { ui = ui.copy(featured = it); shown(ui) } }
-        // Then the subjects, in the mosaic's order. (Through time is bars now: the eras' pictures aren't read.)
-        for (i in ui.doors.indices) {
-            val d = ui.doors[i]
-            val l = own(d.subject.namesakes)
-            ui = ui.copy(doors = ui.doors.toMutableList().also { it[i] = d.copy(picture = l?.picture ?: first(d.examples), lead = l?.sentence?.let(::firstSentence)) })
-            shown(ui)
+        val lock = Any()
+        fun change(with: (ExploreUi) -> ExploreUi) = synchronized(lock) { ui = with(ui); shown(ui) }
+        // Today's spread (its picture, large, with its opening sentence, then its figures and its counts) and the
+        // subjects' pictures are read at the same time: neither waits for the other.
+        kotlinx.coroutines.coroutineScope {
+            launch {
+                start.featured?.let { f -> spread(f) { read -> change { it.copy(featured = read) } } }
+                app.granger.Perf.mark("landing.spread", started)
+            }
+            launch {
+                // The subjects, in the mosaic's order, a row or two at a time, read side by side. (Through time is bars
+                // now: the eras' pictures aren't read.)
+                for (some in start.doors.indices.chunked(DOORS_AT_ONCE)) {
+                    val read = some.side { i ->
+                        val d = start.doors[i]
+                        val l = own(d.subject.namesakes)
+                        d.copy(picture = l?.picture ?: first(d.examples), lead = l?.sentence?.let(::firstSentence))
+                    }
+                    change { now -> now.copy(doors = now.doors.toMutableList().also { all -> some.forEachIndexed { at, i -> all[i] = read[at] } }) }
+                }
+                app.granger.Perf.mark("landing.doors", started)
+            }
         }
     }
 
@@ -585,6 +620,29 @@ class ExploreViewModel(
 
         /** Today's spread comes from this many of the subject's best-known broad topics. */
         const val BROAD_POOL = 12
+
+        /**
+         * Reads what the landing counts (each subject's size and best known, the library's size, each era's) so the
+         * index snapshots hold them before Explore is first opened: on a cold start the counting was a second of the
+         * landing's wait. Run once, a moment after the app starts, off the main thread.
+         */
+        suspend fun warm(sources: ExploreSources) = kotlinx.coroutines.coroutineScope {
+            val qids = sources.qids()
+            if (!qids.hasSubjects) return@coroutineScope
+            launch { Subject.entries.side(SUBJECTS_AT_ONCE) { qids.subjectCounts(listOf(it.id)) } }
+            launch { qids.itemCount() }
+            launch { Subject.entries.side(SUBJECTS_AT_ONCE) { s -> qids.topIn(s.id, EXAMPLES + s.namesakes.size, mainOnly = true) } }
+            launch {
+                val times = sources.times()
+                if (!times.isEmpty) Era.entries.side { era -> times.countActive(era.from, era.to); times.topActive(era.from, era.to, ERA_POOL) }
+            }
+        }
+
+        /** Subjects counted, and read for their examples, together. */
+        const val SUBJECTS_AT_ONCE = 6
+
+        /** Doors whose pictures are read together. */
+        const val DOORS_AT_ONCE = 5
 
         /** A spread's small plates, and how many of the topic's figures are tried for them. */
         const val FIGURES = 2
@@ -808,7 +866,7 @@ class SubjectViewModel(
                     sources.times().marksOf(t, best).map { it.toExplore() }.takeIf { it.isNotEmpty() }
                 }
             }
-            val story = withContext(Dispatchers.IO) { eras.map { marks -> marks.asSequence().map { withPicture(it) }.firstOrNull { it.picture != null } ?: marks.first() } }
+            val story = withContext(Dispatchers.IO) { eras.side { marks -> marks.asSequence().map { withPicture(it) }.firstOrNull { it.picture != null } ?: marks.first() } }
             update { it.copy(story = story, storyPending = false) }
         } else update { it.copy(storyPending = false) }
         val overlaps = withContext(Dispatchers.IO) {
@@ -839,6 +897,7 @@ class SubjectViewModel(
      * with its count and best-known few, then their pictures, one by one.
      */
     private suspend fun page() {
+        val started = app.granger.Perf.now()
         val own = withContext(Dispatchers.IO) {
             val qids = sources.qids()
             subject.namesakes.asSequence().mapNotNull { q -> qids.articlesOf(q).firstOrNull() }
@@ -853,11 +912,13 @@ class SubjectViewModel(
         val opening = withContext(Dispatchers.IO) {
             val qids = sources.qids()
             if (!qids.hasSubjects) return@withContext listOfNotNull(lead)
-            listOfNotNull(lead) + qids.topIn(subject.id, OPENING_TRIES + subject.namesakes.size, mainOnly = true).asSequence()
-                .filter { it.qid !in subject.namesakes }.map { withPicture(it.toExplore()) }.filter { it.picture != null && !it.whole }
-                .take(OPENING - (if (lead != null) 1 else 0)).toList()
+            // The best known are read together; the first few with a photograph stand.
+            listOfNotNull(lead) + qids.topIn(subject.id, OPENING_TRIES + subject.namesakes.size, mainOnly = true)
+                .filter { it.qid !in subject.namesakes }.side { withPicture(it.toExplore()) }.filter { it.picture != null && !it.whole }
+                .take(OPENING - (if (lead != null) 1 else 0))
         }
         state.value = state.value?.copy(opening = opening, openingPending = false)
+        app.granger.Perf.mark("subject.opening", started)
         var cards = withContext(Dispatchers.IO) {
             val qids = sources.qids()
             if (!qids.hasFacets) return@withContext emptyList()
@@ -868,6 +929,10 @@ class SubjectViewModel(
             }
         }
         state.value = state.value?.copy(facets = cards, roomsPending = false)
+        app.granger.Perf.mark("subject.rooms", started)
+        // Read ahead, side by side: the rooms take their pictures one after another below (each avoids the ones before
+        // it), and find these already read.
+        withContext(Dispatchers.IO) { cards.flatMap { it.examples }.distinctBy { it.packId to it.path }.side { a -> runCatching { sources.look(a.packId, a.path) } } }
         // Rooms overlap (Napoleon leads Rulers and Wars): each card's picture comes from an article no earlier card, and
         // no opening plate, used. Then the room's sentence, from its dates, as its own page says it.
         val used = opening.mapTo(HashSet()) { it.path }
@@ -881,12 +946,15 @@ class SubjectViewModel(
             cards = cards.toMutableList().also { it[i] = it[i].copy(picture = picture) }
             state.value = state.value?.copy(facets = cards)
             val finding = withContext(Dispatchers.IO) {
-                val times = sources.times()
-                if (times.isEmpty) null else times.datedIn(sources.qids().facetSet(cards[i].facet.key))
-            }?.let { findingOf(it) }
+                val times = app.granger.Perf.time("told.times") { sources.times() }
+                val q = app.granger.Perf.time("told.qids") { sources.qids() }
+                val set = app.granger.Perf.time("told.set") { q.facetSet(cards[i].facet.key) }
+                if (times.isEmpty) null else app.granger.Perf.time("told.dated") { times.datedIn(set) }
+            }?.let { app.granger.Perf.time("told.finding") { findingOf(it) } }
             cards = cards.toMutableList().also { it[i] = it[i].copy(finding = finding, told = true) }
             state.value = state.value?.copy(facets = cards)
         }
+        app.granger.Perf.mark("subject.told", started)
     }
 
     /**
@@ -896,7 +964,7 @@ class SubjectViewModel(
     private suspend fun appendWithPictures(next: List<ExploreArticle>, total: Int, replace: Boolean = false) {
         if (replace) state.value = state.value?.copy(articles = emptyList())
         for (chunk in next.chunked(PICTURE_CHUNK)) {
-            val shown = withContext(Dispatchers.IO) { chunk.map { a -> withPicture(a) } }
+            val shown = withContext(Dispatchers.IO) { chunk.side { a -> withPicture(a) } }
             val all = (state.value?.articles ?: emptyList()) + shown
             state.value = state.value?.copy(articles = all, loading = false)
         }

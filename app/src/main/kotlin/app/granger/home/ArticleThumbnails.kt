@@ -169,6 +169,54 @@ class ArticleThumbnails(private val dir: File) {
          */
         fun isWhole(thumbnail: String?): Boolean = thumbnail?.endsWith(WHOLE_SUFFIX) == true
 
+        /**
+         * The top of an article's HTML that a card needs (the performance pass): through its lead (to the first `<h2`) and
+         * far enough to hold every picture the rule looks at. Parsing a long article whole, twice, was most of a card's
+         * tenth of a second; its top gives the same summary and the same picture. The whole of [html] when it is short,
+         * has no heading, or has few pictures. The pictures are counted here from the tags alone, with the rule's own
+         * tests and a few to spare, so the cut never falls short of what [ranked] would reach.
+         */
+        fun head(html: String): String {
+            val lead = html.indexOf("<h2")
+            if (lead < 0 || html.length < SHORT_HTML) return html
+            var kept = 0
+            var at = html.indexOf("<img")
+            while (at >= 0) {
+                val end = html.indexOf('>', at)
+                if (end < 0) return html
+                if (mayCount(html.substring(at, end + 1)) && ++kept == CONSIDERED + SPARE) return html.substring(0, maxOf(end + 1, lead))
+                at = html.indexOf("<img", end)
+            }
+            return html
+        }
+
+        /**
+         * Whether an `<img>` tag is one [ranked] surely counts. A tag this can't read for certain (an attribute not in
+         * double quotes, no `src`) says no: counting too few only makes the cut later.
+         */
+        private fun mayCount(tag: String): Boolean {
+            if (LOOSE.containsMatchIn(tag)) return false
+            val src = SRC.find(tag)?.groupValues?.get(1)?.trim() ?: return false
+            if (src.isEmpty() || src.startsWith("data:")) return false
+            if (src.substringAfterLast('.', "").substringBefore('?').lowercase() in SKIPPED_EXTENSIONS) return false
+            val cls = CLASS.find(tag)?.groupValues?.get(1)?.lowercase().orEmpty()
+            if ("icon" in cls || "mwe-math" in cls || "noviewer" in cls) return false
+            val w = WIDTH.find(tag)?.groupValues?.get(1)?.toIntOrNull()
+            val h = HEIGHT.find(tag)?.groupValues?.get(1)?.toIntOrNull()
+            return !((w != null && w < MIN_SIDE) || (h != null && h < MIN_SIDE))
+        }
+
+        /** An attribute whose value doesn't open with a double quote. */
+        private val LOOSE = Regex("=\\s*[^\"\\s]")
+        private val SRC = Regex("(?<![-\\w])src\\s*=\\s*\"([^\"]*)\"")
+        private val CLASS = Regex("(?<![-\\w])class\\s*=\\s*\"([^\"]*)\"")
+        private val WIDTH = Regex("(?<![-\\w])width\\s*=\\s*\"(\\d+)\"")
+        private val HEIGHT = Regex("(?<![-\\w])height\\s*=\\s*\"(\\d+)\"")
+        /** Pictures counted past the rule's eight before the cut, in case a tag here counts one the rule skips. */
+        private const val SPARE = 4
+        /** An article shorter than this is parsed whole: there is little to save. */
+        private const val SHORT_HTML = 40_000
+
         /** [candidates], each with whether it is a drawing or an emblem. */
         private fun ranked(html: String, articlePath: String): List<Pair<String, Boolean>> {
             val doc = Jsoup.parse(html)

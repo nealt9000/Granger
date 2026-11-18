@@ -100,8 +100,39 @@ class TimeIndex private constructor(
 
     /** The mark for the article at [path], if this pack has it dated. */
     fun find(path: String): TimeMark? {
-        val quoted = DatabaseUtils.sqlEscapeString(path)
-        return query("path = $quoted", 1).firstOrNull()
+        val (hashes, rows) = byPath
+        val want = hashOf(path)
+        var at = hashes.binarySearch(want)
+        if (at < 0) return null
+        while (at > 0 && hashes[at - 1] == want) at--
+        // Two paths may share a hash: the row is read and its path checked.
+        while (at < hashes.size && hashes[at] == want) {
+            query("rowid = ${rows[at]}", 1).firstOrNull { it.path == path }?.let { return it }
+            at++
+        }
+        return null
+    }
+
+    /**
+     * Every mark's row by a hash of its path, sorted (the performance pass): the file has no index on `path`, so each
+     * [find] was a pass over the whole table, and a broad topic asks for hundreds of its links. Read once, on first
+     * use: twelve bytes a mark.
+     */
+    private val byPath: Pair<LongArray, LongArray> by lazy {
+        val hashes = LongArrayList()
+        val rows = LongArrayList()
+        db.rawQuery("SELECT rowid, path FROM marks", null).use { c -> while (c.moveToNext()) { rows.add(c.getLong(0)); hashes.add(hashOf(c.getString(1))) } }
+        val h = hashes.toArray()
+        val r = rows.toArray()
+        val order = (0 until h.size).sortedBy { h[it] }
+        LongArray(h.size) { h[order[it]] } to LongArray(r.size) { r[order[it]] }
+    }
+
+    /** FNV-1a over the path's characters. */
+    private fun hashOf(path: String): Long {
+        var hash = -0x340d631b7bdddcdbL
+        for (ch in path) { hash = hash xor ch.code.toLong(); hash *= 0x100000001b3L }
+        return hash
     }
 
     /** Marks whose title contains [text] (any case), best known first: the Timeline's search. */
@@ -272,11 +303,15 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
      * How many items fall in [from]..[to] by [TimeIndex.ACTIVE] (a life at about forty, anything else at its start), each
      * once however many packs date it: Explore's eras.
      */
-    fun countActive(from: Long, to: Long): Int = countDistinct(indexes.map { it.qidsActive(from, to) })
+    fun countActive(from: Long, to: Long): Int = counted.computeIfAbsent(from to to) { countDistinct(indexes.map { it.qidsActive(from, to) }) }
+
+    /** Counts and best-known marks already read: these indexes never change once opened, and Explore asks again on every return. */
+    private val counted = java.util.concurrent.ConcurrentHashMap<Pair<Long, Long>, Int>()
+    private val tops = java.util.concurrent.ConcurrentHashMap<Triple<Long, Long, Int>, List<TimeMark>>()
 
     /** The [k] best-known marks falling in [from]..[to] by [TimeIndex.ACTIVE], across packs. */
     fun topActive(from: Long, to: Long, k: Int): List<TimeMark> =
-        merge(indexes.map { it.topActive(from, to, k) }).sortedByDescending { it.rank }.take(k)
+        tops.computeIfAbsent(Triple(from, to, k)) { merge(indexes.map { it.topActive(from, to, k) }).sortedByDescending { it.rank }.take(k) }
 
     /** These indexes seen through [keep] (see [TimeIndex.only]): a subject's quiz draws only its articles. */
     fun only(keep: (Long) -> Boolean): TimeIndexes = TimeIndexes(indexes.map { it.only(keep) })
@@ -293,19 +328,38 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
         val qid = LongArrayList()
         val year = LongArrayList()
         val rank = IntArrayList()
-        indexes.forEachIndexed { p, index ->
-            index.activeRows().use { c ->
-                while (c.moveToNext()) {
-                    val q = c.getLong(1)
-                    val i = set.indexOf(q)
-                    if (i < 0 || seen.get(i)) continue
-                    seen.set(i)
-                    pack.add(p); row.add(c.getLong(0)); qid.add(q); year.add(c.getLong(2)); rank.add(c.getInt(3))
-                }
-            }
+        val all = active
+        for (at in 0 until all.qid.size) {
+            val q = all.qid[at]
+            val i = set.indexOf(q)
+            if (i < 0 || seen.get(i)) continue
+            seen.set(i)
+            pack.add(all.pack[at]); row.add(all.row[at]); qid.add(q); year.add(all.year[at]); rank.add(all.rank[at])
         }
         val n = qid.size
         return SubjectTime(pack.toArray(), row.toArray(), qid.toArray(), year.toArray(), rank.toArray(), BooleanArray(n) { set.isMain(qid[it]) })
+    }
+
+    /** Every pack's marks as (pack, rowid, qid, year, rank), pack by pack in preference order. */
+    private class Active(val pack: IntArray, val row: LongArray, val qid: LongArray, val year: LongArray, val rank: IntArray)
+
+    /**
+     * Read once and kept (the performance pass): a subject page asks [datedIn] for each of its rooms, and each was a pass
+     * over every pack's marks in the database, a third of a second on a phone. A few primitive arrays: Top 1M's marks
+     * are a few MB.
+     */
+    private val active: Active by lazy {
+        val pack = IntArrayList()
+        val row = LongArrayList()
+        val qid = LongArrayList()
+        val year = LongArrayList()
+        val rank = IntArrayList()
+        indexes.forEachIndexed { p, index ->
+            index.activeRows().use { c ->
+                while (c.moveToNext()) { pack.add(p); row.add(c.getLong(0)); qid.add(c.getLong(1)); year.add(c.getLong(2)); rank.add(c.getInt(3)) }
+            }
+        }
+        Active(pack.toArray(), row.toArray(), qid.toArray(), year.toArray(), rank.toArray())
     }
 
     /** The marks of [items] (indexes into [time]), in that order. */

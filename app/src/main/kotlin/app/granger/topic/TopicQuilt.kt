@@ -151,11 +151,12 @@ fun TopicQuilt(
     val groups = remember(topic, base, language) { Quilts.groups(topic, base, language) { words.of(it) } }
     val cells = remember(groups) { Quilts.cells(groups) }
     val asked = remember(cells) { cells.mapNotNull { c -> c.plate.packId?.let { p -> c.plate.path?.let { p to it } } } }
-    val more by produceState(emptyMap<String, Int>(), here, asked, topic.done) {
-        value = if (topic.done && asked.isNotEmpty()) around(here.packId, here.path, asked).more else emptyMap()
+    // Ready once the page's own parts are in: its closest in meaning come from a slower search and join when they arrive.
+    val ready = base != null && (topic.done || (topic.header != null && !topic.broadPending))
+    val more by produceState(emptyMap<String, Int>(), here, asked, ready) {
+        value = if (ready && asked.isNotEmpty()) around(here.packId, here.path, asked).more else emptyMap()
     }
     val shared = last?.second.orEmpty()
-    val ready = topic.done && base != null
 
     fun touch(p: QuiltPlate) {
         held = null

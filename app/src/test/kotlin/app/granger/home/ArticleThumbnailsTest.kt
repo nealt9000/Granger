@@ -62,4 +62,25 @@ class ArticleThumbnailsTest {
             dir.deleteRecursively()
         }
     }
+
+    @Test fun theTopOfALongArticleGivesTheSamePictureAndTheSameSummaryAsTheWhole() {
+        fun img(name: String, w: Int = 220, h: Int = 160, extra: String = "") = "<figure><img src=\"../I/$name\" width=\"$w\" height=\"$h\" $extra></figure>"
+        val lead = "<html><head><title>Airplane</title></head><body><p>An airplane is a fixed-wing aircraft. It flies. It lands.</p>" +
+            "<table class=\"sidebar\"><tr><td><img src=\"../I/Symbol.svg.png\" width=\"100\" height=\"100\" data-file-type=\"drawing\"></td></tr></table>"
+        val icons = (1..6).joinToString("") { "<img src=\"../I/icon$it.png\" width=\"20\" height=\"20\">" } + "<img class=\"mwe-math-fallback\" src=\"../I/f.svg\">"
+        val sections = (1..40).joinToString("") { "<h2>Section $it</h2><p>${"Words about section $it. ".repeat(60)}</p>" + img("Photo$it.jpg") + icons }
+        val html = lead + sections + "</body></html>"
+        val top = ArticleThumbnails.head(html)
+        assertThat(top.length).isLessThan(html.length / 2)
+        assertThat(ArticleThumbnails.candidates(top, "A/Airplane")).isEqualTo(ArticleThumbnails.candidates(html, "A/Airplane"))
+        assertThat(LeadLinks.parse(top, "A/Airplane").summary).isEqualTo(LeadLinks.parse(html, "A/Airplane").summary)
+        assertThat(LeadLinks.parse(top, "A/Airplane").title).isEqualTo("Airplane")
+        // Short, without a heading, or with few pictures: the whole of it.
+        assertThat(ArticleThumbnails.head(lead)).isEqualTo(lead)
+        val few = lead + "<h2>One</h2>" + "<p>${"Long. ".repeat(10_000)}</p>" + img("Only.jpg")
+        assertThat(ArticleThumbnails.head(few)).isEqualTo(few)
+        // A tag it can't read for certain isn't counted, so the cut only comes later.
+        val loose = lead + (1..40).joinToString("") { "<h2>S$it</h2><p>${"Words. ".repeat(300)}</p><img src='../I/P$it.jpg' width=220 height=160>" }
+        assertThat(ArticleThumbnails.head(loose)).isEqualTo(loose)
+    }
 }

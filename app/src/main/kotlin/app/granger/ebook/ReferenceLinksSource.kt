@@ -84,7 +84,10 @@ class ReferenceLinksSource(
     private var opened: Pair<List<Pair<String, InstalledSidecar>>, QidIndexes>? = null
 
     /** The QID indexes now installed, opened once and again whenever the set changes (the topic page reads them too). */
-    suspend fun qidIndexes(): QidIndexes = indexes()
+    suspend fun qidIndexes(): QidIndexes = indexesNow.get { indexes() }
+
+    /** Kept for a moment: a page asks many times as it loads, and each ask listed the index files again. */
+    private val indexesNow = app.granger.Briefly<QidIndexes>()
 
     private suspend fun indexes(): QidIndexes = lock.withLock {
         val files = qidFiles()

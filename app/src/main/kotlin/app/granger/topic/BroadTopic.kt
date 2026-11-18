@@ -2,6 +2,7 @@ package app.granger.topic
 
 import app.granger.core.library.TimeMark
 import app.granger.core.library.TopicParts
+import app.granger.side
 
 /**
  * A broad topic's page (Plan EX round 2, D5: a spread), built by rule from the QID index's parts (tools/topics/parts.py)
@@ -89,10 +90,12 @@ object BroadTopics {
         val named = parts.groups.withIndex().sortedByDescending { it.value.count }.take(FAMILIES).map { it.index }
         val byGroup = LinkedHashMap<Int, ArrayList<TopicArticle>>()
         for (k in parts.kinds) resolve(k.qid)?.let { at -> byGroup.getOrPut(if (k.group in named) k.group else -1) { ArrayList() } += plain(at) }
-        suspend fun plates(all: List<TopicArticle>, n: Int) = if (!pictures) emptyList() else all.take(n).map { card(it.packId, it.path) }
+        suspend fun plates(all: List<TopicArticle>, n: Int) = if (!pictures) emptyList() else all.take(n).side { card(it.packId, it.path) }
         val families = named.mapNotNull { g -> byGroup[g]?.let { all -> BroadFamily(parts.groups[g].name, plates(all, FAMILY_PLATES), all) } } +
             listOfNotNull(byGroup[-1]?.let { all -> BroadFamily(null, plates(all, if (named.isEmpty()) FAMILY_PLATES * 2 else FAMILY_PLATES), all) })
-        val people = parts.people.mapNotNull { q -> resolve(q)?.let { (p, path) -> BroadPerson(if (pictures) card(p, path) else plain(p to path), markOf(p, path)) } }
+        // The page shows a few people as plates: those are read as cards; the rest stand by name (the quilt reads a picture when it shows one).
+        val people = parts.people.mapNotNull { q -> resolve(q) }.withIndex().toList()
+            .side { (i, at) -> BroadPerson(if (pictures && i < PEOPLE_CARDS) card(at.first, at.second) else plain(at), markOf(at.first, at.second)) }
 
         // Each section's dated links and dated figures; the story is the section with most (at least STORY_MIN).
         val linksBySection = parts.links.groupBy { it.section }
@@ -122,7 +125,7 @@ object BroadTopics {
                 .distinctBy { it.year to it.text }.distinctBy { it.text }
             val kept = if (steps.size <= STORY_MAX) steps else spread(steps, STORY_MAX)
             // A linked step gets its own picture when it has one.
-            BroadStory(parts.sections[s].title, kept.map { e -> if (pictures && e.picture == null && e.opens != null) e.copy(picture = card(e.opens.packId, e.opens.path).picture) else e })
+            BroadStory(parts.sections[s].title, kept.side { e -> if (pictures && e.picture == null && e.opens != null) e.copy(picture = card(e.opens.packId, e.opens.path).picture) else e })
         }
 
         val chapters = parts.sections.indices.filter { it != storyAt }.mapNotNull { s ->
@@ -164,6 +167,8 @@ object BroadTopics {
     /** Whether a figure's file is a drawing (a diagram, a map, a logo) rather than a photograph: anything but a JPEG. */
     fun isDrawing(image: String): Boolean = image.lowercase().removeSuffix(".webp").substringAfterLast('.', "") !in setOf("jpg", "jpeg")
 
+    /** The people read as cards (the page's plates). */
+    const val PEOPLE_CARDS = 6
     /** The named families shown, and the plates in each. */
     const val FAMILIES = 3
     const val FAMILY_PLATES = 3

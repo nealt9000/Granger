@@ -595,3 +595,44 @@ On `ex-build`. Rooms seen: the quiet game layer.
 ### Still to do
 - **A performance pass (Neal, 2026-11-18):** things take too long to load for being local on the phone. Known waits, warm: a broad topic's parts about five seconds (they arrive together), the landing's pictures about four, a subject's room lines about two, the quilt's corner numbers a few seconds. Nothing has been timed cold.
 - The walkthrough on the Pixel in Field and Night, with TalkBack, then Spanish.
+
+### Performance pass (2026-11-18)
+On `ex-build`. Measured first, on the Pixel 6, with debug-only timings (`Perf`, tag `GrangerPerf`; a release build logs nothing).
+
+**Where the time went**
+- **Article cards.** Every plate's card read its article and parsed the HTML twice (once for the summary, once to find the picture), about 100 ms each, over 200 ms for a long article. The picture was already kept as a file; finding which file still took the parse. A broad topic asked for 36 to 40, a subject 44, the landing 18 to 36.
+- **Fetching the indexes.** Each ask for the QID or time indexes re-listed the files on the phone, 50 to 165 ms, and a page asked dozens of times as it loaded.
+- **The landing built three times** on opening (packs, collections, the resume), about a second each: subject counts, the library's size, each subject's best known, each era's count.
+- **A room's dates** were a pass over every pack's marks in the database, a third of a second a room, eight rooms to a subject.
+- **A topic's date by its path** scanned the whole time index each time (it has no index on `path`), and a broad topic asks for hundreds of its links.
+- **Resolving an item** asked every pack even after the first had it.
+
+**What changed**
+- `ArticleCards`: a card (title, summary, picture file) is made once and remembered, in memory and in a small database under the app's cache. Topic headers, article leads, Explore's looks and pictures all go through it.
+- A card is made from the top of the article only (`ArticleThumbnails.head`): through the lead and as far as the picture rule looks, counted from the tags with the rule's own tests and four to spare. Tested to give the same picture and summary as the whole.
+- Independent reads run side by side (`side`, four at a time): a broad topic's cards, the landing's doors, a subject's opening and room pictures, a room's wall and story strip, the side-by-side columns.
+- The index lists are kept for three seconds (`Briefly`); a new download shows within that.
+- Counts, room lists and best-known lists are kept inside the index snapshots (which never change once opened), each made once. The landing's are read a second and a half after the app opens, in the background, so the landing doesn't wait for them.
+- The time index keeps its marks' rows in memory (a few primitive arrays) and a hash of each path, so a room's dates and a topic's date no longer touch the whole table.
+- `firstArticleOf` stops at the first pack that has an item. A pack's language is asked once. What stands round a topic is kept for the quilt's walk, and the quilt no longer waits for the page's slowest part.
+- The landing loads its spread and its doors together, and builds once at a time.
+
+**Before and after (Pixel 6, debug build)**
+
+| | Before | After |
+|---|---|---|
+| Landing, first open after the app starts: counts | 1.1 to 1.4 s, three times | 0.3 s |
+| Landing: the subjects' pictures | 2.3 to 2.6 s | 0.04 s remembered |
+| A subject: every room's line | 4.4 s | 0.6 s |
+| A broad topic's parts, not opened before | 4.2 s | 0.9 s |
+| A broad topic's parts, opened before | 4.2 s | 0.3 s |
+| Its side-by-side columns | 1.6 s | 0.2 to 0.3 s |
+| The quilt: what stands round the topic | 0.6 s, three times | 0.2 to 0.3 s, once |
+
+**Not changed**
+- **Closest in meaning** (the vector search behind a topic's close kin) still takes 4 to 6 s on this phone. It is LL2's `RelatedFinder`, measured at under a second in its spike; the phone holds more packs now. Nothing on the page waits for it any more, but the quilt's Close kin group and the spread's "Close in meaning" way on arrive late.
+- **A topic's time** (lives and events of its years) is 0.2 to 0.5 s.
+- The first card ever made for an article still costs its parse (about 80 ms now); a first visit to a screen of forty unseen articles is about a second.
+- Not measured: a release build (it will be faster), the Timeline, Home, search.
+
+**Checks:** app 1,941 and core/library 525 tests pass.
