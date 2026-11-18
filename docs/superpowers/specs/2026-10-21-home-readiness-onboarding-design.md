@@ -2,6 +2,9 @@
 
 2026-10-21 · Neal Thompson (decisions) · written up by Claude · folded into the repo 2026-10-22
 
+**Superseded in part (2026-11-18):** §3–§4 (readiness as the measure) and §6 step 3 give way to
+`2026-11-18-online-offline-design.md` (Outfitting; the nine domains stay as one of its views). §5 Home stands.
+
 Status: approved in its decisions (Neal, 2026-10-21; see §10). This is the project between the voice (project 3) and Actions (project 4) in the roadmap. Three plans build it: H1 the readiness model, H2 Home, H3 Onboarding. Slim and Park (S1) get their own spec if Neal chooses to build them; the voice has `2026-10-21-voice-design.md`.
 
 ## 1. Why
