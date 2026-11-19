@@ -155,6 +155,8 @@ class RailViewModel(
     private val stopVoice: () -> Unit = {},
     /** Ask's chats are listed; false while Ask is off ([app.granger.Features.RESEARCH]), when a pinned chat stays pinned, unshown. */
     private val showChats: Boolean = true,
+    /** The packs and the online sources (Plan O1 Task 4): an online article's tab names "Wikipedia", not a removed pack. */
+    knownPacks: Flow<List<Pack>>? = null,
 ) : ViewModel() {
     private class Shelf(val packs: Map<String, Pack>, val books: Map<String, Book>, val positions: Map<String, BookPosition>)
 
@@ -196,7 +198,7 @@ class RailViewModel(
         viewModelScope.launch { live.collect { if (it == null) stopping.value = emptySet() } }
     }
 
-    private val shelf = combine(library.packs, bookshelf.books, bookshelf.positions) { packs, books, positions ->
+    private val shelf = combine((knownPacks ?: library.packs), bookshelf.books, bookshelf.positions) { packs, books, positions ->
         Shelf(packs.associateBy { it.id }, books.associateBy { it.id }, positions)
     }
 

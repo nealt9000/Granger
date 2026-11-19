@@ -47,6 +47,11 @@ sealed interface LinkAction {
 class ZimResolver(
     private val archiveFor: (packId: String) -> ZimArchive?,
     private val cachedArchiveFor: (packId: String) -> ZimArchive? = archiveFor,
+    /**
+     * A web address the reader opens itself instead of leaving the app: a Wikipedia article while Wikipedia online is
+     * on (Plan O1 Task 3), as its reader URL. Null leaves the address external. Must not block.
+     */
+    private val inApp: (url: String) -> String? = { null },
 ) {
     /** [rangeHeader] is the request's `Range` header, if any; only a streamed entry answers it. */
     fun response(url: String, rangeHeader: String? = null): ZimResponse {
@@ -90,13 +95,15 @@ class ZimResolver(
     fun linkAction(url: String): LinkAction {
         val zim = ZimUrls.parse(url)
             ?: return if (url.substringBefore(':', "").lowercase() in EXTERNAL_SCHEMES) {
-                LinkAction.External(url)
+                inApp(url)?.let { LinkAction.Redirect(it) } ?: LinkAction.External(url)
             } else {
                 LinkAction.Ignore
             }
         // Runs on the main thread: only an already-open archive is consulted. On a miss the WebView
         // loads the URL and shouldInterceptRequest serves it from a background thread.
         val archive = cachedArchiveFor(zim.packId) ?: return LinkAction.Load
+        // An online source's pages are articles, and asking it more would mean a fetch (Plan O1 Task 3).
+        if (archive.remote) return LinkAction.Load
         val target = archive.resolvePath(zim.path) ?: return LinkAction.Load
         val mimeType = archive.entry(target)?.mimeType
         if (isPdf(mimeType) || isEpub(mimeType)) return LinkAction.OpenDocument(zim.packId, target)

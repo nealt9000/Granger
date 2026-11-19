@@ -1,0 +1,54 @@
+/* Wikipedia read online (Plan O1 Task 3): Wikipedia's article look in Granger's reader colours. The page declares
+   `color-scheme: light dark`, so the WebView's algorithmic darkening leaves it alone and these rules colour it:
+   Field by day, Night when the reader's theme is dark (prefers-color-scheme follows it). */
+:root {
+  color-scheme: light dark;
+  --g-paper: #F3EEE4; --g-ink: #1F1813; --g-ink2: #4A453F; --g-line: #D3C9B6; --g-link: #2E4A45; --g-rail: #E8E1D3;
+  --color-base: var(--g-ink); --background-color-base: var(--g-paper);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --g-paper: #12211E; --g-ink: #EFE4D0; --g-ink2: #C9C2B6; --g-line: #2E4540; --g-link: #F0A35E; --g-rail: #1A2E2A;
+  }
+  img:not([src$=".svg"]):not(.mw-file-element[data-file-type="drawing"]) { filter: brightness(.9); }
+  .mw-file-element[data-file-type="drawing"], img[src*=".svg"], .mwe-math-fallback-image-inline, .mwe-math-fallback-image-display {
+    background: #F3EEE4; border-radius: 2px;
+  }
+}
+html, body { background: var(--g-paper); color: var(--g-ink); }
+body {
+  font-family: sans-serif; line-height: 1.6; margin: 0 16px 48px; word-wrap: break-word; overflow-wrap: break-word;
+  font-size: 100%;
+}
+h1, h2, h3, h4 { font-family: serif; font-weight: normal; line-height: 1.25; }
+h1 { font-size: 1.8em; margin: .6em 0 .4em; }
+h2 { font-size: 1.45em; border-bottom: 1px solid var(--g-line); padding-bottom: .15em; margin-top: 1.4em; }
+h3 { font-size: 1.2em; font-weight: bold; }
+a, a:visited { color: var(--g-link); text-decoration: none; }
+a.new { opacity: .7; }
+p { margin: .5em 0 .8em; }
+img { max-width: 100%; height: auto; }
+figure, .thumb { margin: 12px 0; }
+figure[typeof~="mw:File/Thumb"], figure[typeof~="mw:File/Frame"] { display: table; max-width: 100%; }
+figcaption { display: table-caption; caption-side: bottom; font-size: .85em; color: var(--g-ink2); line-height: 1.4; padding-top: 4px; }
+table { display: block; overflow-x: auto; max-width: 100%; border-collapse: collapse; }
+td, th { border-color: var(--g-line); }
+.wikitable { background: var(--g-paper); color: var(--g-ink); }
+.wikitable > tr > th, .wikitable > * > tr > th { background: var(--g-rail); }
+.wikitable td, .wikitable th { border: 1px solid var(--g-line); padding: .2em .4em; }
+.infobox {
+  font-size: .88em; width: 100% !important; float: none !important; margin: 0 0 1em; border: 1px solid var(--g-line);
+  background: var(--g-rail) !important; color: var(--g-ink) !important;
+}
+.infobox th, .infobox td { padding: .25em .4em; vertical-align: top; background: transparent !important; color: inherit !important; }
+.infobox-above, .infobox-title { font-size: 1.15em; font-weight: bold; text-align: center; }
+.hatnote, .dablink { font-style: italic; color: var(--g-ink2); font-size: .92em; padding-left: 1.2em; margin-bottom: .6em; }
+.navbox, .navbox-styles, .vertical-navbox, .sistersitebox, .metadata, .ambox, .noprint, .mw-empty-elt, .portalbox,
+.side-box, .mw-editsection, .mw-cite-backlink, .reference-text .mw-cite-backlink { display: none !important; }
+.mw-references-wrap, .reflist, ol.references { font-size: .82em; color: var(--g-ink2); }
+sup.reference { font-size: .7em; line-height: 0; }
+blockquote { border-left: 3px solid var(--g-line); margin: .8em 0; padding: 0 .9em; color: var(--g-ink2); }
+.gallery { padding: 0; }
+li.gallerybox { display: inline-block; vertical-align: top; max-width: 46%; margin: 4px; }
+pre, code { white-space: pre-wrap; background: var(--g-rail); }
+section > details > summary { cursor: pointer; }

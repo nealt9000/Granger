@@ -64,7 +64,11 @@ class ZimWebViewClient(
 
     private fun appAsset(view: WebView, name: String): WebResourceResponse {
         if (name !in appFiles) return notFound(view)
-        val mimeType = if (name.endsWith(".js")) "application/javascript" else "application/octet-stream"
+        val mimeType = when {
+            name.endsWith(".js") -> "application/javascript"
+            name.endsWith(".css") -> "text/css"   // online.css, Wikipedia online's look (Plan O1 Task 3)
+            else -> "application/octet-stream"
+        }
         return WebResourceResponse(mimeType, "UTF-8", assets.open("$ASSET_DIR/$name"))
     }
 

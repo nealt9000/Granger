@@ -547,7 +547,7 @@ private class CurrentTab : ViewModel() {
 }
 
 @Composable
-fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerRequests: Int = 0, openDownloadsRequests: Int = 0) {
+fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerRequests: Int = 0, openDownloadsRequests: Int = 0, openOnlineTitle: String? = null) {
     val nav = rememberNavController()
     val shell = rememberShellState()
     // True only for the first resume navigation; read when that navigation's transitions are chosen.
@@ -564,6 +564,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             showChats = container.askOn,
             voice = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub.ui.map { it.now as? NowPlaying.Voice } else flowOf(null),
             stopVoice = { if (Features.PLAYER) container.playerHub.stopVoice() },
+            knownPacks = container.knownPacks,
         )
     }
     val rail by railViewModel.ui.collectAsStateWithLifecycle()
@@ -635,6 +636,12 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     LaunchedEffect(openPlayerRequests) { if (openPlayerRequests > 0 && Features.PLAYER) { player?.resetTab(); nav.showPlayer() } }
     // A download notification's tap: Downloads, over whatever the launch opened.
     LaunchedEffect(openDownloadsRequests) { if (openDownloadsRequests > 0) nav.navigate(DownloadsRoute) { launchSingleTop = true } }
+    // Debug only (Plan O1): open a live Wikipedia article (`--es online_title Moon`).
+    LaunchedEffect(openOnlineTitle) {
+        val title = openOnlineTitle ?: return@LaunchedEffect
+        val pack = app.granger.online.OnlineWikipediaArchive.packName("en")
+        container.sessions.tab(container.sessions.openTab(pack, title.replace(' ', '_'), title))?.let { nav.showTab(it, keepCurrent = true) }
+    }
     // The Library header's badge: what's coming or stopped.
     val downloadsBadge by remember { container.downloads.records.map(DownloadsModel::badge) }
         .collectAsStateWithLifecycle(0)
@@ -1486,6 +1493,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             forgetPlays = container.playback::deleteRecentPlays,
                             readingAloud = { if (Features.PLAYER) (container.playerHub.ui.value.now as? NowPlaying.Voice)?.sourceKey else null },
                             stopVoice = { if (Features.PLAYER) container.playerHub.stopVoice() },
+                            knownPacks = container.knownPacks,
                         )
                     },
                     onOpenTab = ::showTab,
@@ -1674,7 +1682,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             wanderOf = { scope ->
                                 WanderModel(
                                     scope = scope,
-                                    encyclopedias = { WanderModel.encyclopediasOf(container.library.packs.first(), container.knowledgeNow.value) },
+                                    encyclopedias = { WanderModel.encyclopediasOf(container.knownPacks.first(), container.knowledgeNow.value) },
                                     archiveOf = { container.library.archive(it.id) },
                                     thumbnail = homeThumbs::thumbnail,
                                     titles = { container.search.titles(it).hits },

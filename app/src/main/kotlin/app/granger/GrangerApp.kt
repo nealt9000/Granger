@@ -66,7 +66,6 @@ import app.granger.settings.AppLanguages
 import app.granger.settings.KnowledgeLanguages
 import app.granger.settings.AppearancePrefs
 import app.granger.settings.SharedAppearancePrefs
-import app.granger.archive.ArchiveUserAgent
 import app.granger.core.archive.ArchiveOrgClient
 import app.granger.core.archive.ArchiveQuery
 import app.granger.core.library.Bookshelf
@@ -355,9 +354,30 @@ class AppContainer(context: Context) {
         context.getExternalFilesDirs(null).filterNotNull().map { File(it, "books").apply { mkdirs() } }
     }
 
+    private val archiveUserAgent = app.granger.archive.GrangerUserAgent.of(BuildConfig.VERSION_NAME)
+
+    /** Online, Local only or Never (online/offline spec §7, §9); the gate below reads it on every request. */
+    val networkPolicy = app.granger.online.NetworkPolicy(context)
+    val networkGate = app.granger.core.downloads.NetworkGate(networkPolicy::now)
+
+    /**
+     * The app's one HTTP client: every feature that goes online goes through it (Plan O1 Task 1; NetworkAuditTest keeps
+     * it so). The gate comes first, so Local only refuses before any connection.
+     */
+    private val http = OkHttpClient.Builder()
+        .connectTimeout(20, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        // Finds an HTTP/2 connection the network dropped before a request hangs on it (archive.org, 2026-10-30).
+        .pingInterval(30, TimeUnit.SECONDS)
+        .addInterceptor(networkGate)
+        // A network interceptor sees each redirect hop, so file downloads carry the agent to the file's server.
+        .addNetworkInterceptor(app.granger.archive.GrangerUserAgent(archiveUserAgent))
+        .build()
+
     private val libraryDb = LibraryDatabase.create(context)
     // A removed pack takes its PDFs (pack documents, Plan P2) with it; a new snapshot of it keeps them (Plan KB2).
     val library: Library = RoomLibrary(libraryDb, KiwixZimOpener(context), packDirs, onRemoved = { bookshelf.removePackDocuments(it.id, it.name) })
+        .let { room -> if (!Features.ONLINE) room else app.granger.online.OnlineLibrary(room) { onlineSources.archives() } }
     val bookshelf: Bookshelf = RoomBookshelf(
         libraryDb, bookDirs,
         importDir = { File(context.getExternalFilesDir(null) ?: context.filesDir, "books/imports") },
@@ -624,7 +644,7 @@ class AppContainer(context: Context) {
     /** Each installed pack's set and rank from the catalog, for Search and Ask's slice dedupe (Plan WF Decision 6). */
     val packSlices: app.granger.core.library.PackSlices = app.granger.sources.CatalogPackSlices { catalog.state.value.catalog }
     val search: LibrarySearch = ZimLibrarySearch(library, bookIndex, bookshelf = bookshelf, slices = packSlices, languages = { knowledgeNow.value.toSet() })
-    val resolver = ZimResolver(library::archive, library::cachedArchive)
+    val resolver = ZimResolver(library::archive, library::cachedArchive, inApp = { onlineSources.inApp(it) })
 
     val totalRamBytes: Long = BuildConfig.FAKE_RAM_BYTES.takeIf { it > 0 } ?: ActivityManager.MemoryInfo()
         .also { context.getSystemService(ActivityManager::class.java).getMemoryInfo(it) }
@@ -643,16 +663,6 @@ class AppContainer(context: Context) {
     private val appContext: Context = context.applicationContext
     val phoneCountry: String get() = app.granger.device.PhoneCountry.of(appContext)
 
-    private val archiveUserAgent = "Granger/${BuildConfig.VERSION_NAME} (+https://github.com/nealt9000/Granger)"
-
-    private val http = OkHttpClient.Builder()
-        .connectTimeout(20, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
-        // Finds an HTTP/2 connection the network dropped before a request hangs on it (archive.org, 2026-10-30).
-        .pingInterval(30, TimeUnit.SECONDS)
-        // A network interceptor sees each redirect hop, so archive.org file downloads carry it to the item's server.
-        .addNetworkInterceptor(ArchiveUserAgent(archiveUserAgent))
-        .build()
 
     val catalog: CatalogSource = CatalogRepository(
         client = http,
@@ -701,6 +711,30 @@ class AppContainer(context: Context) {
     val knowledgeLanguages: KnowledgeLanguages = KnowledgeLanguages.create(
         context, appLanguages.code, catalog.state.map { it.catalog?.languages.orEmpty() }.distinctUntilChanged(),
     )
+
+    /**
+     * Wikipedia online (Plan O1): its own client derived from the shared one (the gate and the agent hold), with an
+     * interim 50 MB cache so Back and a second visit don't fetch again (builder's call 3; O2's Saved for now replaces it).
+     */
+    val wikimedia: app.granger.online.WikimediaClient by lazy {
+        val cached = http.newBuilder()
+            .cache(okhttp3.Cache(File(appContext.cacheDir, "wikimedia"), 50L * 1024 * 1024))
+            // Wikimedia marks its pages no-cache (revalidate each time); an hour's reuse is what a reading session wants.
+            .addNetworkInterceptor { chain ->
+                val r = chain.proceed(chain.request())
+                if (r.isSuccessful && chain.request().cacheControl.noCache.not()) r.newBuilder().header("Cache-Control", "max-age=3600").removeHeader("Pragma").build() else r
+            }
+            .build()
+        app.granger.online.WikimediaClient(cached, onMainThread = { BuildConfig.DEBUG && android.os.Looper.myLooper() == android.os.Looper.getMainLooper() })
+    }
+
+    /** Wikipedia online in each knowledge language, while [Features.ONLINE] is on (Plan O1 Task 4). */
+    val onlineSources: app.granger.online.OnlineSources by lazy {
+        app.granger.online.OnlineSources(wikimedia, knowledgeLanguages.languages, { knowledgeNow.value }, { Features.ONLINE })
+    }
+
+    /** The packs on the phone, then the online sources: for the places that name or pick a source of articles. */
+    val knownPacks: kotlinx.coroutines.flow.Flow<List<app.granger.core.library.Pack>> by lazy { onlineSources.known(library.packs) }
 
     /** [knowledgeLanguages] now, for code that reads it at a moment (an archive.org search, LibriVox's list). */
     val knowledgeNow: StateFlow<List<String>> by lazy {
@@ -970,7 +1004,7 @@ class AppContainer(context: Context) {
             linksFiles = { installedBookSidecars(SidecarKind.LINKS) },
             qidFiles = {
                 val installed = installedSidecars(SidecarKind.QID_INDEX)
-                app.granger.home.WanderModel.encyclopediasOf(library.packs.first(), knowledgeNow.value)
+                app.granger.home.WanderModel.encyclopediasOf(knownPacks.first(), knowledgeNow.value)
                     .mapNotNull { pack -> installed[pack.id]?.let { pack.id to it } }
             },
             lead = { packId, path -> articleLead(packId, path, thumbs) },
@@ -978,7 +1012,7 @@ class AppContainer(context: Context) {
             index = app.granger.core.library.MentionIndex(File(context.filesDir, "linked-library/mentions.sqlite")),
             background = appScope,
             wikipediaLanguage = { id ->
-                library.packs.first().firstOrNull { it.id == id }?.name?.let { WIKIPEDIA_LANGUAGE.find(it)?.groupValues?.get(1) }
+                knownPacks.first().firstOrNull { it.id == id }?.name?.let { WIKIPEDIA_LANGUAGE.find(it)?.groupValues?.get(1) }
             },
             bookLanguage = { id -> bookLanguages[id] ?: bookshelf.book(id)?.language?.let(::twoLetter)?.also { bookLanguages[id] = it } },
             contentFilter = contentFilter,
@@ -1009,7 +1043,7 @@ class AppContainer(context: Context) {
         // Downloaded with each pack from the catalog (Plan H5b Task 3); files pushed for development fill any gap.
         val installed = installedTimeIndexes()
         val listed = app.granger.core.library.TimeIndexDirectory.listed(File(appContext.getExternalFilesDir(null), "timeindex"))
-        val packs = app.granger.home.WanderModel.encyclopediasOf(library.packs.first(), knowledgeNow.value)
+        val packs = app.granger.home.WanderModel.encyclopediasOf(knownPacks.first(), knowledgeNow.value)
         val files = packs.mapNotNull { pack -> (installed[pack.id] ?: listed[pack.name])?.let { pack to it } }
         return timeIndexCache.get(files.map { (p, f) -> "${p.id}|${f.path}|${f.lastModified()}" }) {
             app.granger.core.library.TimeIndexes(files.mapNotNull { (pack, file) -> app.granger.core.library.TimeIndex.open(file, pack.id) })
@@ -1045,8 +1079,8 @@ class AppContainer(context: Context) {
             },
             times = { kotlinx.coroutines.withContext(io) { timeIndexes() } },
             qids = { kotlinx.coroutines.withContext(io) { referenceLinks.qidIndexes() } },
-            languageOf = { id -> library.packs.first().firstOrNull { it.id == id }?.name?.let { WIKIPEDIA_LANGUAGE.find(it)?.groupValues?.get(1) } },
-            packIds = { library.packs.first().filter { it.name.isNotBlank() }.associate { it.name to it.id } },
+            languageOf = { id -> knownPacks.first().firstOrNull { it.id == id }?.name?.let { WIKIPEDIA_LANGUAGE.find(it)?.groupValues?.get(1) } },
+            packIds = { knownPacks.first().filter { it.name.isNotBlank() }.associate { it.name to it.id } },
             footer = if (Features.LINKED_CLASSICS) referenceLinks else null,
             related = { name, path, same -> relatedFinder.related(name, path, same) },
             bookOf = { id -> bookshelf.book(id)?.takeIf { it.status == app.granger.core.library.PackStatus.OK }?.let { app.granger.ebook.LibraryBook(it.id, it.title, it.coverPath) } },

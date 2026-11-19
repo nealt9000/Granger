@@ -44,6 +44,19 @@ class FileDownloaderTest {
         assertThat(server.rangesRequested(a)).containsExactly(null)
     }
 
+    @Test fun localOnlyIsAFailureWorthRetryingNeverPermanent() = runTest {
+        // Plan O1 Task 1: the network gate refuses before any connection; the bytes so far stay for a resume.
+        server.files[a] = content
+        partWith(content.copyOf(1_000))
+        val gated = okhttp3.OkHttpClient.Builder().addInterceptor(NetworkGate { NetworkMode.LOCAL_ONLY }).addInterceptor(server).build()
+        val result = FileDownloader(gated, freeBytes = { Long.MAX_VALUE / 2 }, reserveBytes = 1_000).download(request(a), part)
+        assertThat(result).isInstanceOf(DownloadResult.Failed::class.java)
+        assertThat((result as DownloadResult.Failed).permanent).isFalse()
+        assertThat(result.gone).isFalse()
+        assertThat(part.length()).isEqualTo(1_000L)
+        assertThat(server.rangesRequested(a)).isEmpty()
+    }
+
     @Test fun resumesFromPartFile() = runTest {
         server.files[a] = content
         partWith(content.copyOf(40_000))

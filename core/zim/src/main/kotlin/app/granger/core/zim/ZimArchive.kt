@@ -75,6 +75,12 @@ interface ZimArchive : Closeable {
     val mainPath: String?
     val hasFulltextIndex: Boolean
 
+    /**
+     * Read over the network rather than from a file (Plan O1: Wikipedia online). Asking what a path is must then cost
+     * nothing ([entry] answers from the path alone), so the reader's link check never fetches on the main thread.
+     */
+    val remote: Boolean get() = false
+
     /** The path [path] ends up at after following redirects, or null when there is no such entry. */
     fun resolvePath(path: String): String?
 

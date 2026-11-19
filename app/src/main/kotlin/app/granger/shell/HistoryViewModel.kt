@@ -9,6 +9,7 @@ import app.granger.core.library.BookIds
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.Library
 import app.granger.core.library.Pack
+import kotlinx.coroutines.flow.Flow
 import app.granger.core.library.PackStatus
 import app.granger.core.library.RailPins
 import app.granger.core.library.ReadingSessions
@@ -34,6 +35,8 @@ class HistoryViewModel(
     private val readingAloud: () -> String? = { null },
     /** Stops the voice (not music). */
     private val stopVoice: () -> Unit = {},
+    /** The packs and the online sources (Plan O1 Task 4): an online article's tab names "Wikipedia", not a removed pack. */
+    knownPacks: Flow<List<Pack>>? = null,
 ) : ViewModel() {
     /** [packTitle] is the pack's title or the book's author (content), or "Removed pack" or "Removed book". */
     data class Row(val packId: String, val path: String, val title: String, val packTitle: UiText, val available: Boolean)
@@ -43,7 +46,7 @@ class HistoryViewModel(
     private val filter = MutableStateFlow("")
 
     /** Null until loaded. Rows in missing, damaged or removed packs stay listed but disabled. */
-    val ui: StateFlow<Ui?> = combine(sessions.history, library.bookmarks, library.packs, bookshelf.books, filter) { history, bookmarks, packs, books, filter ->
+    val ui: StateFlow<Ui?> = combine(sessions.history, library.bookmarks, (knownPacks ?: library.packs), bookshelf.books, filter) { history, bookmarks, packs, books, filter ->
         val byId = packs.associateBy { it.id }
         val booksById = books.associateBy { it.id }
         val needle = filter.trim()

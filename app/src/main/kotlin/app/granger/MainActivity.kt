@@ -56,6 +56,11 @@ class MainActivity : FragmentActivity() {
 
     /** Counts requests to show Downloads (a download notification's tap); each new one opens it. */
     private val openDownloads = mutableIntStateOf(0)
+    /**
+     * Debug only (Plan O1): `--es online_title Moon` opens an article online; `--es local_only on|off|never` sets the
+     * network mode until O3's switch exists.
+     */
+    private val openOnline = androidx.compose.runtime.mutableStateOf<String?>(null)
 
     /** Null while the launch decision reads Room; the screen stays blank (background colour) meanwhile. */
     private val start = mutableStateOf<StartScreen?>(null)
@@ -104,6 +109,8 @@ class MainActivity : FragmentActivity() {
         // Not on a re-creation: the intent that started this activity was already handled then.
         if (savedInstanceState == null && opensPlayer(intent)) openPlayer.intValue++
         if (savedInstanceState == null && opensDownloads(intent)) openDownloads.intValue++
+        if (BuildConfig.DEBUG) intent?.getStringExtra("local_only")?.let { debugNetwork(it) }
+        if (BuildConfig.DEBUG) intent?.getStringExtra("online_title")?.let { openOnline.value = it }
         if (savedInstanceState != null) {
             // Rotation, or the OS restoring a reclaimed app: the navigation back stack restores itself.
             start.value = StartScreen.Library()
@@ -140,6 +147,7 @@ class MainActivity : FragmentActivity() {
                     CompositionLocalProvider(LocalPackCovers provides container.gutenbergCovers::thumbnail) {
                         GrangerNavHost(
                             container, decided, openPlayerRequests = openPlayer.intValue, openDownloadsRequests = openDownloads.intValue,
+                            openOnlineTitle = openOnline.value,
                         )
                     }
                 }
@@ -168,6 +176,17 @@ class MainActivity : FragmentActivity() {
         setIntent(intent)
         if (opensPlayer(intent)) openPlayer.intValue++
         if (opensDownloads(intent)) openDownloads.intValue++
+        if (BuildConfig.DEBUG) intent.getStringExtra("local_only")?.let { debugNetwork(it) }
+        if (BuildConfig.DEBUG) intent.getStringExtra("online_title")?.let { openOnline.value = it }
+    }
+
+    private fun debugNetwork(value: String) {
+        val mode = when (value) {
+            "on" -> app.granger.core.downloads.NetworkMode.LOCAL_ONLY
+            "never" -> app.granger.core.downloads.NetworkMode.NEVER
+            else -> app.granger.core.downloads.NetworkMode.ONLINE
+        }
+        (application as GrangerApp).container.networkPolicy.set(mode)
     }
 
     override fun onStart() {
