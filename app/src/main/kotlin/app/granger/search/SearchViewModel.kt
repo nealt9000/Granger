@@ -105,6 +105,8 @@ class SearchViewModel(
     private val define: WordEntry? = null,
     /** Wikipedia online's titles and pages for a query (Plan O1 Task 7); null leaves Search to the phone. */
     private val online: OnlineSearch? = null,
+    /** Whether Granger can reach the internet (Plan O3's Reach); coming back online searches the query again. */
+    private val reachOnline: Flow<Boolean> = emptyFlow(),
 ) : ViewModel() {
     data class State(
         val query: String = "",
@@ -256,6 +258,14 @@ class SearchViewModel(
         // The embedder loads while the query is typed, not after it (Plan SQ: 2.6 s on the Pixel 6's first query).
         best?.let { source -> viewModelScope.launch(matching) { source.warm() } }
         viewModelScope.launch(matching) { search.warm() }
+        viewModelScope.launch {
+            // Local only turned off, or the signal back: the open query gets its online results (O5 Pixel 7 finding).
+            var was: Boolean? = null
+            reachOnline.distinctUntilChanged().collect { now ->
+                if (was == false && now) refresh()
+                was = now
+            }
+        }
         viewModelScope.launch {
             sessions.recentSearches().collect { recent -> _state.update { it.copy(recent = recent) } }
         }

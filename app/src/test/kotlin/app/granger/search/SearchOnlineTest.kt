@@ -66,4 +66,17 @@ class SearchOnlineTest {
         assertThat(vm.state.value.nothingFound).isFalse()
         assertThat(vm.state.value.titlesFiltered.single().title).isEqualTo("Knowth")
     }
+
+    @Test fun comingBackOnlineSearchesTheOpenQueryAgain() = runTest(main.dispatcher) {
+        val reach = kotlinx.coroutines.flow.MutableStateFlow(false)
+        var online = false
+        val source = OnlineSearch { if (!online) throw java.io.IOException("Local only") else listOf(web("Moon landing")) to emptyList() }
+        val vm = SearchViewModel(search, FakeReadingSessions(), "moon", matching = main.dispatcher, online = source, reachOnline = reach)
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.onlineTitles).isEmpty()
+        online = true
+        reach.value = true
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.state.value.titlesFiltered.map { it.title }).containsExactly("Moon", "Moon landing").inOrder()
+    }
 }
