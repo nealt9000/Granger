@@ -222,3 +222,31 @@ Branch `o2-marks-keeping` from main (`c44b858c`), in worktree `.claude/worktrees
 4. 7 is a copy pass at any point.
 5. 9 is small.
 6. Then the Pixel pass.
+
+## Results (2026-11-19, branch `o2-marks-keeping`)
+
+Tasks 1–8 built with tests, Task 9's search interleave in; commits 2bd8be3b → the Pixel fixes. Full suite green.
+
+**Pixel 6 pass** (debug 1518+, DB migrated 16 → 17 on first open, no crash; preview: no Wikipedia on the phone):
+
+| Check | Result |
+|---|---|
+| Saved for now | an article read online gets the ring; with Local only on it opens from the phone with the pictures that were shown |
+| Keep (topic page) | "Keep · 556 KB" once saved; Kept → filled dot, "Kept · Remove"; opens with pictures in Local only |
+| Marks | dot (kept) and ring (saved) on topic headers, Continue cards and room plates; online unmarked |
+| Settings → Online | "8 of 300 MB used", the cap's choices, Clear |
+| Keep this room | sheet with a covering pack and the 60 best-known articles; "Keeping · n of 60" with Cancel; 26 kept in about 40 s; Cancel stops it |
+
+**Fixed in the pass:** pictures kept 4 at a time (a long article took 13 s one by one); a page saved for now refreshes the
+marks and the Keep size; the room estimate is now 1.9 MB an article with pictures, 250 KB as text (it was 5× low); the
+covering pack is a Wikipedia subject pack first (WikiMed, not NHS Medicines A to Z); a debug `--es kept_clear all`.
+
+**Deviations from the plan:**
+- A room's progress shows on the room page, not in Downloads.
+- Keep on a book read without keeping is the ordinary download (fetched again, ~0.22 MB), taking over the same book id.
+
+**Not checked on the phone:** Read now for books (every catalog book is already on Neal's Pixel; covered by unit tests),
+Spanish UI, TalkBack by ear. Home feeds still don't draw from Wikipedia online (Task 9, left for O3/O4).
+
+**Noticed:** an article in a language that isn't a knowledge language (Alhambra, es) shows "Removed pack" in Continue;
+the Home downloads card says "0 of 0" for the online index set.

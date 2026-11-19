@@ -121,6 +121,7 @@ class OnlineWikipediaArchive(
         }
         stores?.saved?.put(SavedStore.pageKey(lang, title), SavedStore.Kind.PAGE, bytes, HTML)
         stores?.trimmed()
+        stores?.pageSaved?.invoke()
         return html(title, bytes)
     }
 
@@ -146,8 +147,16 @@ class OnlineWikipediaArchive(
     fun keepContent(title: String, withPictures: Boolean): KeepContent? {
         val page = stores?.saved?.get(SavedStore.pageKey(lang, title))?.bytes ?: fetch(title)?.bytes ?: return null
         val pictures = LinkedHashMap<String, ByteArray>()
-        if (withPictures) for (src in picturesOf(String(page))) {
-            picture(src, "https://" + src.removePrefix(IMG))?.let { pictures[src] = it.bytes }
+        if (withPictures) {
+            // Several at once (the client keeps to its few per host): one by one, a long article took 13 s on the Pixel.
+            val srcs = picturesOf(String(page))
+            val pool = java.util.concurrent.Executors.newFixedThreadPool(KEEP_THREADS)
+            try {
+                val found = pool.invokeAll(srcs.map { src -> java.util.concurrent.Callable { src to picture(src, "https://" + src.removePrefix(IMG))?.bytes } })
+                for (f in found) runCatching { f.get() }.getOrNull()?.let { (src, bytes) -> if (bytes != null) pictures[src] = bytes }
+            } finally {
+                pool.shutdown()
+            }
         }
         return KeepContent(page, pictures)
     }
@@ -172,6 +181,8 @@ class OnlineWikipediaArchive(
         private const val SUFFIX = "_online"
 
         private const val HTML = "text/html; charset=utf-8"
+        /** Pictures fetched at once while keeping an article. */
+        private const val KEEP_THREADS = 4
 
         fun packName(lang: String) = "$PREFIX$lang$SUFFIX"
 
@@ -295,6 +306,8 @@ class OfflineStores(
     /** Saved for now's cap, in bytes. */
     private val capBytes: () -> Long,
     val clock: () -> Long = System::currentTimeMillis,
+    /** A page was saved for now: its marks are worked out again. */
+    val pageSaved: () -> Unit = {},
 ) {
     /** Keeps Saved for now under its cap (each put adds a little; a trim only works when it's over). */
     fun trimmed() = saved.trim(capBytes())

@@ -740,6 +740,7 @@ class AppContainer(context: Context) {
             savedStore, keptStore,
             savePictures = { onlinePrefs.offlinePictures.value == app.granger.online.OnlinePrefs.OfflinePictures.SAVE },
             capBytes = { onlinePrefs.savedCapMb.value * 1024L * 1024 },
+            pageSaved = { markVersion.value++ },
         )
     }
 
@@ -891,6 +892,11 @@ class AppContainer(context: Context) {
         val root = kotlinx.coroutines.withContext(Dispatchers.IO) { volumes.list().firstOrNull()?.root } ?: return false
         downloads.enqueue(entry, root, downloadPrefs.wifiOnly)
         return true
+    }
+
+    /** Debug only (Plan O2 Pixel pass): removes every kept article (`--es kept_clear all`). */
+    fun debugClearKept() {
+        appScope.launch { for (a in libraryDb.keptArticleDao().all()) keeper.remove(a.lang, a.title) }
     }
 
     /** Where each article can be read from (Plan O1 Task 9): what O2's marks will read. */

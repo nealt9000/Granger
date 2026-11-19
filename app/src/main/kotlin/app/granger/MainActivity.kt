@@ -111,6 +111,7 @@ class MainActivity : FragmentActivity() {
         if (savedInstanceState == null && opensDownloads(intent)) openDownloads.intValue++
         if (BuildConfig.DEBUG) intent?.getStringExtra("local_only")?.let { debugNetwork(it) }
         if (BuildConfig.DEBUG) intent?.getStringExtra("online_title")?.let { openOnline.value = it }
+        if (BuildConfig.DEBUG && intent?.getStringExtra("kept_clear") == "all") (application as GrangerApp).container.debugClearKept()
         if (BuildConfig.DEBUG) intent?.getStringExtra("preview_no_wikipedia")?.let { (application as GrangerApp).container.networkPolicy.setPreviewNoWikipedia(it == "on") }
         if (savedInstanceState != null) {
             // Rotation, or the OS restoring a reclaimed app: the navigation back stack restores itself.
@@ -179,6 +180,7 @@ class MainActivity : FragmentActivity() {
         if (opensDownloads(intent)) openDownloads.intValue++
         if (BuildConfig.DEBUG) intent.getStringExtra("local_only")?.let { debugNetwork(it) }
         if (BuildConfig.DEBUG) intent.getStringExtra("online_title")?.let { openOnline.value = it }
+        if (BuildConfig.DEBUG && intent.getStringExtra("kept_clear") == "all") (application as GrangerApp).container.debugClearKept()
         if (BuildConfig.DEBUG) intent.getStringExtra("preview_no_wikipedia")?.let { (application as GrangerApp).container.networkPolicy.setPreviewNoWikipedia(it == "on") }
     }
 

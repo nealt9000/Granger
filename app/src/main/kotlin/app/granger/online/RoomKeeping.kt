@@ -49,9 +49,12 @@ data class PackOffer(val id: String, val title: String, val sizeBytes: Long)
 
 /** A room's offer, worked out (pure, for tests). */
 object RoomOffers {
-    /** About what keeping one article takes: its page, and its pictures under Save pictures. */
-    const val EACH_WITH_PICTURES = 450_000L
-    const val EACH_TEXT = 70_000L
+    /**
+     * About what keeping one article takes: its page, and its pictures under Save pictures. Measured on the Pixel
+     * (2026-11-19, 27 kept articles): 1.9 MB a mean with pictures; the prepared page alone about a quarter of a megabyte.
+     */
+    const val EACH_WITH_PICTURES = 1_900_000L
+    const val EACH_TEXT = 250_000L
 
     /**
      * From the room's [ranked] articles (pack id, path), best known first: the online ones not yet kept, their estimated
@@ -64,7 +67,10 @@ object RoomOffers {
     ): RoomOffer? {
         val online = ranked.mapNotNull { (packId, path) -> OnlineWikipediaArchive.languageOf(packId)?.let { it to path } }
             .filter { (l, t) -> !isKept(l, t) }.distinct()
-        val pack = packs.filter { it.second == subjectId }.minByOrNull { it.first.third }?.first?.let { PackOffer(it.first, it.second, it.third) }
+        // A Wikipedia subject pack (WikiMed for health) covers a room best; else the smallest pack on the subject.
+        val onSubject = packs.filter { it.second == subjectId }.map { it.first }
+        val pack = (onSubject.filter { it.first.startsWith("wikipedia_") }.minByOrNull { it.third } ?: onSubject.minByOrNull { it.third })
+            ?.let { PackOffer(it.first, it.second, it.third) }
         if (online.isEmpty() && pack == null) return null
         return RoomOffer(online, online.size * (if (keepsPictures) EACH_WITH_PICTURES else EACH_TEXT), pack)
     }
