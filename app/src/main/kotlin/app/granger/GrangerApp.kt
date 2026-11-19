@@ -792,8 +792,10 @@ class AppContainer(context: Context) {
 
     /** Wikipedia online in each knowledge language, while [Features.ONLINE] is on (Plan O1 Task 4). */
     val onlineSources: app.granger.online.OnlineSources by lazy {
+        // Every language Granger supports, not only the knowledge languages: a Spanish tab names and opens itself (Plan O3
+        // builder's call 8). The index set and Search keep to the knowledge languages.
         app.granger.online.OnlineSources(
-            wikimedia, knowledgeLanguages.languages, { knowledgeNow.value }, { Features.ONLINE },
+            wikimedia, knowledgeLanguages.languages.map { (it + ONLINE_LANGUAGES).distinct() }, { (knowledgeNow.value + ONLINE_LANGUAGES).distinct() }, { Features.ONLINE },
             // No signal or Local only: the article from a kept copy instead (spec §4, Plan O1 Task 5).
             fallback = { lang, title ->
                 val copies = kotlinx.coroutines.runBlocking {
@@ -1522,6 +1524,9 @@ private val WIKIPEDIA_LANGUAGE = Regex("^wikipedia_([a-z]{2,3})_")
 /** A topic page's lead and header picture (Plan LL2). */
 private const val TOPIC_LEAD_CHARS = 420
 private const val TOPIC_PICTURE_PX = 900
+
+/** The Wikipedias online Granger reads, whatever the knowledge languages (Plan O3 builder's call 8). */
+private val ONLINE_LANGUAGES = listOf("en", "es")
 
 /** A room's best-known articles offered to keep (Plan O2 Task 6). */
 private const val ROOM_KEEP = 60

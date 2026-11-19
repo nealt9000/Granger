@@ -565,6 +565,10 @@ fun homeDownloadsText(res: Resources, card: DownloadsCard.Active): UiText {
     if (card.paused) return UiText.Res(R.string.home_downloads_paused_waiting, card.waiting)
     val done = app.granger.formatBytes(card.bytesDone)
     val total = app.granger.formatBytes(card.bytes)
+    // Only companion files under way (Wikipedia online's index set, a pack's sidecars): no file count to give (Plan O3).
+    if (card.files == 0) return card.timeLeftMillis?.let {
+        UiText.Res(R.string.home_downloads_bytes_left, done, total, app.granger.core.downloads.QueueText.timeLeft(res, it))
+    } ?: UiText.Res(R.string.home_downloads_bytes, done, total)
     return card.timeLeftMillis?.let {
         UiText.Res(R.string.home_downloads_progress_left, card.filesDone, card.files, done, total, app.granger.core.downloads.QueueText.timeLeft(res, it))
     } ?: UiText.Res(R.string.home_downloads_progress, card.filesDone, card.files, done, total)

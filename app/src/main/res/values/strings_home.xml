@@ -227,4 +227,6 @@
     <string name="home_arrange_hint">Drag a section by its handle to move it. Switch one off to hide it from Home.</string>
     <string name="home_arrange_shown">Shown on Home</string>
     <string name="home_arrange_hidden">Hidden</string>
+    <string name="home_downloads_bytes">%1$s of %2$s</string>
+    <string name="home_downloads_bytes_left">%1$s of %2$s · %3$s left</string>
 </resources>

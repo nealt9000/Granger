@@ -210,4 +210,6 @@
     <string name="home_arrange_hint">Arrastra una sección por su asa para moverla. Desactívala para ocultarla de Inicio.</string>
     <string name="home_arrange_shown">Visible en Inicio</string>
     <string name="home_arrange_hidden">Oculta</string>
+    <string name="home_downloads_bytes">%1$s de %2$s</string>
+    <string name="home_downloads_bytes_left">%1$s de %2$s · faltan %3$s</string>
 </resources>
