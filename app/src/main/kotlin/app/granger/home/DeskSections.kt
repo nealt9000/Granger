@@ -46,7 +46,10 @@ import app.granger.shell.RailEntry
  */
 @Composable
 internal fun ContinueDesk(entries: List<RailEntry>, onOpenTab: (Long) -> Unit, onPlay: (RailEntry.Play) -> Unit) {
-    val lead = entries.firstOrNull() ?: return
+    if (entries.isEmpty()) return
+    // The lead is the last article (or book) read: plays, which have no picture of their own, go in the list (direction A).
+    val lead = entries.firstOrNull { it is RailEntry.Tab } ?: entries.first()
+    val rest = entries.filter { it !== lead }
     Column(Modifier.testTag(DeskTags.CONTINUE)) {
         Eyebrow(stringResource(R.string.home_continue), Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 10.dp))
         when (lead) {
@@ -54,7 +57,7 @@ internal fun ContinueDesk(entries: List<RailEntry>, onOpenTab: (Long) -> Unit, o
             is RailEntry.Play -> ContinueRow(lead.title, stringResource(lead.kindRes), null, null) { onPlay(lead) }
             else -> {}
         }
-        for (entry in entries.drop(1).take(REST)) when (entry) {
+        for (entry in rest.take(REST)) when (entry) {
             is RailEntry.Tab -> ContinueRow(entry.tab.title, entry.tab.subtitle.resolve(), entry.tab.packId.takeIf { entry.tab.path.isNotEmpty() }, entry.tab.path) { onOpenTab(entry.tab.tabId) }
             is RailEntry.Play -> ContinueRow(entry.title, stringResource(entry.kindRes), null, null) { onPlay(entry) }
             else -> {}

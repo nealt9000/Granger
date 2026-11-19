@@ -212,7 +212,7 @@ fun PlateView(
                 app.granger.online.AvailabilityMark(packId, path, Modifier.align(Alignment.TopEnd).padding(6.dp))
             }
         }
-        if (greyed) app.granger.online.NeedsInternetLabel(Modifier.align(Alignment.TopStart).padding(6.dp))
+        if (greyed) app.granger.online.NeedsInternetLabel(Modifier.align(Alignment.TopEnd).padding(6.dp))
         Box(Modifier.fillMaxSize().clearAndSetSemantics {}) {
             if (number != null) {
                 Box(Modifier.size(18.dp).background(MaterialTheme.colorScheme.background).testTag(PlateTags.NUMBER), contentAlignment = Alignment.Center) {
