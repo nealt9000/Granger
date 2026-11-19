@@ -136,6 +136,7 @@ dependencies {
     implementation(libs.androidx.compose.material.icons)
     // Installs the Baseline Profile (src/main/baseline-prof.txt) on phones that didn't get it from Play (Plan E1).
     implementation(libs.androidx.profileinstaller)
+    implementation(libs.androidx.work.runtime)   // Keeping a room in the background (Plan O2 Task 6)
     implementation(libs.jsoup)   // Home's "On this day": the day article's sections (Plan H2)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.room.runtime)

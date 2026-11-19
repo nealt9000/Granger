@@ -158,4 +158,11 @@
     <string name="keep_failed">No se pudo guardar. Prueba de nuevo con conexión.</string>
     <string name="keep_kept_remove">Guardado · Quitar</string>
     <string name="keep_kept_text_remove">Texto guardado · Quitar</string>
+    <string name="keep_room">Guardar esta sala</string>
+    <string name="keep_room_title">Guardar %1$s en este teléfono</string>
+    <string name="keep_room_pack">%1$s · %2$s</string>
+    <string name="keep_room_pack_summary">Un paquete entero sobre este tema, con todos sus artículos.</string>
+    <string name="keep_room_articles">Sus %1$d artículos más conocidos · unos %2$s</string>
+    <string name="keep_room_articles_summary">Se guardan uno a uno en segundo plano, con sus imágenes salvo que Imágenes sin conexión sea Solo texto.</string>
+    <string name="keep_room_progress">Guardando · %1$d de %2$d</string>
 </resources>

@@ -172,6 +172,8 @@ fun RoomContent(ui: SubjectUi?, actions: ExploreActions, subject: SubjectActions
                         else stringResource(if (loaded.count in 1 until SMALL_ROOM) R.string.explore_room_small_in else R.string.explore_room_in, subjectName),
                         name, Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp), standfirst = standfirst(loaded, words), large = true,
                     )
+                    // Keep the room, or the whole subject, on this phone (Plan O2 Task 6).
+                    app.granger.online.KeepRoomRow(loaded.subject.id, loaded.facet?.id, name, Modifier.padding(start = 16.dp, top = 10.dp))
                 }
                 val story = loaded.room?.story.orEmpty()
                 if (loaded.room?.storyPending == true) {

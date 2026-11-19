@@ -826,6 +826,32 @@ class AppContainer(context: Context) {
         }
     }
 
+    /** Keep a room or subject (Plan O2 Task 6): its online articles in the background, or a pack that covers it. */
+    val roomKeep: app.granger.online.RoomKeepSource? = if (!Features.ONLINE) null else object : app.granger.online.RoomKeepSource {
+        override suspend fun offer(subjectId: String, facetId: String?): app.granger.online.RoomOffer? {
+            val qids = referenceLinks.qidIndexes()
+            val ranked = if (facetId != null) qids.topInFacet("$subjectId.$facetId", ROOM_KEEP) else qids.topIn(subjectId, ROOM_KEEP, mainOnly = true)
+            val installed = library.packs.first().mapTo(HashSet()) { it.name }
+            return app.granger.online.RoomOffers.build(
+                ranked.map { it.packId to it.path }, isKept = { l, t -> keptStore.get(l, t) != null },
+                keepsPictures = onlinePrefs.offlinePictures.value == app.granger.online.OnlinePrefs.OfflinePictures.SAVE,
+                packs = catalog.state.value.catalog?.packs.orEmpty().filter { it.zimName !in installed }
+                    .map { Triple(it.id, it.title, it.sizeBytes) to app.granger.explore.Subject.ofDomain(it.domain)?.id },
+                subjectId = subjectId,
+            )
+        }
+        override fun keep(roomKey: String, name: String, articles: List<Pair<String, String>>) = app.granger.online.KeepWorker.start(appContext, roomKey, articles)
+        override fun cancel(roomKey: String) { app.granger.online.KeepWorker.cancel(appContext, roomKey) }
+        override fun getPack(id: String) {
+            appScope.launch {
+                val item = catalog.state.value.catalog?.packs?.firstOrNull { it.id == id } ?: return@launch
+                val root = volumes.list().firstOrNull()?.root ?: return@launch
+                downloads.enqueue(item, root, downloadPrefs.wifiOnly)
+            }
+        }
+        override fun progress(roomKey: String) = app.granger.online.KeepWorker.progress(appContext, roomKey)
+    }
+
     /** Where each article can be read from (Plan O1 Task 9): what O2's marks will read. */
     val availability: app.granger.online.ArticleAvailability by lazy { app.granger.online.ArticleAvailability(articleCopies, { knownPacks.first() }) { lang, title ->
             Features.ONLINE && savedStore.has(app.granger.online.SavedStore.pageKey(lang, title))
@@ -1400,6 +1426,9 @@ private val WIKIPEDIA_LANGUAGE = Regex("^wikipedia_([a-z]{2,3})_")
 /** A topic page's lead and header picture (Plan LL2). */
 private const val TOPIC_LEAD_CHARS = 420
 private const val TOPIC_PICTURE_PX = 900
+
+/** A room's best-known articles offered to keep (Plan O2 Task 6). */
+private const val ROOM_KEEP = 60
 
 /** Wikipedia online's hits per group and language in Search (Plan O1 Task 7). */
 private const val ONLINE_HITS = 8
