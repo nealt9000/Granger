@@ -80,6 +80,9 @@ interface Bookshelf {
     /** Puts removed pack books ([Book.hidden]) back on the shelves, still to be copied out when opened. */
     suspend fun unhide(ids: Collection<String>) {}
 
+    /** Takes books off the shelf without removing them: a book opened without keeping (Plan O2 Task 8) reads but isn't listed. */
+    suspend fun hide(ids: Collection<String>) {}
+
     /**
      * The PDF the ebook [bookId] was made from (Plan IA), as a hidden book to open ([BookOrigin.PAGES]); null when it
      * has none (it wasn't made from one, or its original pages were removed).
@@ -478,6 +481,12 @@ class RoomBookshelf(
             }
         }
         true
+    }
+
+    override suspend fun hide(ids: Collection<String>): Unit = withContext(io) {
+        db.withTransaction {
+            for (id in ids) dao.get(id)?.takeIf { !it.hidden }?.let { dao.upsert(it.copy(hidden = true)) }
+        }
     }
 
     override suspend fun unhide(ids: Collection<String>): Unit = withContext(io) {

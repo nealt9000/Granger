@@ -67,6 +67,11 @@ class OnlineWikipediaTest {
         assertThat(resolver.linkAction(ZimUrls.forEntry("wikipedia_en_online", "Newgrange"))).isEqualTo(LinkAction.Load)
     }
 
+    @Test fun twoLanguagesHitsAreInterleaved() {
+        assertThat(interleave(listOf(listOf("a1", "a2", "a3"), listOf("b1")))).containsExactly("a1", "b1", "a2", "a3").inOrder()
+        assertThat(interleave(listOf(emptyList<String>()))).isEmpty()
+    }
+
     @Test fun onlineSourceIdsCarryTheirLanguage() {
         assertThat(OnlineWikipediaArchive.languageOf("wikipedia_es_online")).isEqualTo("es")
         assertThat(OnlineWikipediaArchive.languageOf("wikipedia_en_top_mini")).isNull()

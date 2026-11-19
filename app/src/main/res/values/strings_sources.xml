@@ -311,4 +311,5 @@
     <string name="sources_all_languages">All languages</string>
     <string name="sources_preview">Preview</string>
     <string name="sources_no_browser">There\'s no web browser on this phone to open it in.</string>
+    <string name="sources_read_now">Read</string>
 </resources>

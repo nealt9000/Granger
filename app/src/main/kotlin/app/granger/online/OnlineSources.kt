@@ -74,3 +74,11 @@ class OnlineSources(
         fun isOnline(packId: String) = OnlineWikipediaArchive.languageOf(packId) != null
     }
 }
+
+/** The first of each list, then the second of each, and so on: [[a1, a2], [b1]] → [a1, b1, a2]. */
+fun <T> interleave(lists: List<List<T>>): List<T> {
+    val out = ArrayList<T>(lists.sumOf { it.size })
+    var i = 0
+    while (lists.any { i < it.size }) { for (l in lists) if (i < l.size) out += l[i]; i++ }
+    return out
+}

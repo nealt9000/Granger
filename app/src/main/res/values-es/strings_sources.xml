@@ -249,4 +249,5 @@
     <string name="sources_all_languages">Todos los idiomas</string>
     <string name="sources_preview">Vista previa</string>
     <string name="sources_no_browser">No hay un navegador web en este teléfono para abrirlo.</string>
+    <string name="sources_read_now">Leer</string>
 </resources>

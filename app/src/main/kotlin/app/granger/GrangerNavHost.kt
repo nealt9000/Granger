@@ -1378,6 +1378,13 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             composable<BookRoute> { backStackEntry ->
                 val route = backStackEntry.toRoute<BookRoute>()
                 val target = route.target()
+                // A book opened without keeping it (Plan O2 Task 8): off the shelf, from the catalog; ⋯ offers Keep.
+                var keepRef by remember(route.tabId) { mutableStateOf<String?>(null) }
+                LaunchedEffect(route.tabId) {
+                    if (!Features.ONLINE) return@LaunchedEffect
+                    val bookId = container.sessions.tab(route.tabId)?.packId ?: return@LaunchedEffect
+                    keepRef = container.bookshelf.book(bookId)?.takeIf { it.hidden && it.origin == app.granger.core.library.BookOrigin.GRANGER }?.sourceRef
+                }
                 EbookReaderScreen(
                     viewModel = viewModel {
                         EbookReaderViewModel(
@@ -1415,6 +1422,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             showTab(route.tabId)
                         }
                     },
+                    onKeep = keepRef?.let { ref -> { scope.launch { if (container.keepBook(ref)) keepRef = null } } },
                 )
             }
             composable<SearchRoute> { backStackEntry ->
@@ -1825,6 +1833,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         onOpenPack = ::openPackOrCollection,
                         onOpenBook = { bookId, title -> scope.launch { showTab(container.sessions.openTab(bookId, "", title)) } },
                         onArchive = { nav.navigate(ArchiveRoute(ArchiveKind.TEXTS)) },
+                        onReadNow = if (!Features.ONLINE) null else { id, title ->
+                            scope.launch { container.readWithoutKeeping(id)?.let { bookId -> showTab(container.sessions.openTab(bookId, "", title)) } }
+                        },
+                        canReadNow = { id -> container.catalog.state.value.catalog?.books?.any { it.id == id } == true },
                         onImport = if (Features.IMPORT) nav::importIntoLibrary else null,
                         onOpenSet = { id -> nav.navigate(SourceRoute(CatalogScope.BOOK_SET, set = id)) },
                     )

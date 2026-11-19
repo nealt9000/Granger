@@ -129,4 +129,5 @@
     <!-- Define found the word in a Wiktionary that is neither the library's main language's nor the book's (Plan L3). %1$s
          is that Wiktionary's language, named in the app's language: "Defined in English Wiktionary". -->
     <string name="ebook_defined_in">Defined in %1$s Wiktionary</string>
+    <string name="ebook_keep_on_phone">Keep on this phone</string>
 </resources>

@@ -788,7 +788,8 @@ class AppContainer(context: Context) {
                 val scope = this
                 val titles = langs.map { l -> scope.async { wikimedia.titles(l, query, ONLINE_HITS).map { hit(l, it, false) } } }
                 val pages = langs.map { l -> scope.async { wikimedia.pages(l, query, ONLINE_HITS).map { hit(l, it, true) } } }
-                titles.map { it.await() }.flatten() to pages.map { it.await() }.flatten()
+                // Interleaved, so a second language's hits aren't all behind Show all (Plan O2 Task 9).
+                app.granger.online.interleave(titles.map { it.await() }) to app.granger.online.interleave(pages.map { it.await() })
             }
         }
 
@@ -850,6 +851,46 @@ class AppContainer(context: Context) {
             }
         }
         override fun progress(roomKey: String) = app.granger.online.KeepWorker.progress(appContext, roomKey)
+    }
+
+    /**
+     * Opens a Granger Classics or Gutenberg book without keeping it (Plan O2 Task 8; builder's call 8): its EPUB is fetched
+     * into Saved for now (checked against the catalog's hash) and registered off the shelf, under the id a download would
+     * give it, so Keep (an ordinary download) takes over the same book with its place and highlights. Returns the book's
+     * id, or null when it can't be had.
+     */
+    suspend fun readWithoutKeeping(itemId: String): String? = kotlinx.coroutines.withContext(Dispatchers.IO) {
+        val id = app.granger.core.library.BookIds.of(app.granger.core.library.BookOrigin.GRANGER, itemId)
+        bookshelf.book(id)?.takeIf { it.status == app.granger.core.library.PackStatus.OK && File(it.filePath).isFile }?.let { return@withContext it.id }
+        val entry = catalog.state.value.catalog?.books?.firstOrNull { it.id == itemId } ?: return@withContext null
+        val key = app.granger.online.SavedStore.bookKey(itemId)
+        val file = savedStore.file(key) ?: run {
+            val tmp = File(appContext.cacheDir, "reading-$itemId.part")
+            val ok = entry.urls.any { url ->
+                runCatching {
+                    http.newCall(okhttp3.Request.Builder().url(url).build()).execute().use { r ->
+                        if (!r.isSuccessful) return@use false
+                        tmp.outputStream().use { out -> r.body.byteStream().copyTo(out) }
+                        java.security.MessageDigest.getInstance("SHA-256").digest(tmp.readBytes()).joinToString("") { "%02x".format(it) }.equals(entry.sha256, ignoreCase = true)
+                    }
+                }.getOrDefault(false)
+            }
+            if (!ok) { tmp.delete(); return@withContext null }
+            if (!savedStore.putFile(key, app.granger.online.SavedStore.Kind.BOOK, tmp, "application/epub+zip")) return@withContext null
+            savedStore.trim(onlinePrefs.savedCapMb.value * 1024L * 1024)
+            savedStore.file(key) ?: return@withContext null
+        }
+        val book = bookshelf.addDownloaded(file, app.granger.core.library.BookOrigin.GRANGER, itemId) ?: return@withContext null
+        bookshelf.hide(listOf(book.id))
+        book.id
+    }
+
+    /** Keeps a book opened without keeping: the ordinary download, which takes over the same book (Plan O2 Task 8). */
+    suspend fun keepBook(itemId: String): Boolean {
+        val entry = catalog.state.value.catalog?.books?.firstOrNull { it.id == itemId } ?: return false
+        val root = kotlinx.coroutines.withContext(Dispatchers.IO) { volumes.list().firstOrNull()?.root } ?: return false
+        downloads.enqueue(entry, root, downloadPrefs.wifiOnly)
+        return true
     }
 
     /** Where each article can be read from (Plan O1 Task 9): what O2's marks will read. */

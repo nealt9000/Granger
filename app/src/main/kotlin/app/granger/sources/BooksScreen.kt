@@ -86,6 +86,10 @@ fun BooksScreen(
     onImport: (() -> Unit)? = null,
     /** A catalog book set's screen (Plan KB2 Task 3.2: African Storybook · English). */
     onOpenSet: (setId: String) -> Unit = {},
+    /** Opens a book without keeping it (Plan O2 Task 8); null leaves Read out. */
+    onReadNow: ((itemId: String, title: String) -> Unit)? = null,
+    /** Whether a row is a catalog book that can be read without keeping. */
+    canReadNow: (itemId: String) -> Boolean = { false },
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
@@ -143,6 +147,12 @@ fun BooksScreen(
                 }
             },
             trailing = {
+                // Read it now, saved for now, before choosing to keep it (Plan O2 Task 8).
+                if (onReadNow != null && row.status == ItemStatus.NotInstalled && canReadNow(row.id)) {
+                    androidx.compose.material3.TextButton(onClick = { onReadNow(row.id, row.title) }, modifier = Modifier.testTag("read_now_${row.id}")) {
+                        Text(stringResource(R.string.sources_read_now))
+                    }
+                }
                 RowActions(
                     row,
                     onGet = {

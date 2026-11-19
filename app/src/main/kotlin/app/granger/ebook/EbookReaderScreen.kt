@@ -129,6 +129,8 @@ fun EbookReaderScreen(
     onOpenArticle: (packId: String, path: String, title: String) -> Unit = { _, _, _ -> },
     /** Opens another book on the phone (a linked work's, Plan LL1 Task 9) at its saved place. */
     onOpenBook: (bookId: String) -> Unit = {},
+    /** The book is saved for now, not kept (Plan O2 Task 8): ⋯ offers Keep on this phone. Null leaves it out. */
+    onKeep: (() -> Unit)? = null,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var navigator by remember { mutableStateOf<VisualNavigator?>(null) }
@@ -332,6 +334,7 @@ fun EbookReaderScreen(
             ReaderMenuItem(UiText.Res(R.string.ebook_remove_original_pages, app.granger.formatBytes(it))) { confirmRemovePages = true }
         },
         ReaderMenuItem(R.string.ebook_read_as_ebook) { viewModel.readAsEbook(onReopen) }.takeIf { state.canReadAsEbook && !state.makingEbook },
+        onKeep?.let { ReaderMenuItem(R.string.ebook_keep_on_phone, it) },
     )
 
     val bars = bookBarActions(

@@ -328,6 +328,20 @@ class BookshelfTest {
     private fun mark(bookId: String) =
         BookAnnotation(0, bookId, MarkKind.HIGHLIGHT, "{\"href\":\"c1\"}", "It is a truth", "yellow", "", 1L, 1L)
 
+    @Test fun aBookReadWithoutKeepingIsOffTheShelfUntilItsDownloadTakesOver() = test {
+        // Plan O2 Task 8: registered hidden (opened from Saved for now), then the ordinary download re-registers it.
+        val saved = TestEpubs.build(importDir.apply { mkdirs() }, "saved.epub", title = "Pride and Prejudice", authors = listOf("Jane Austen"))
+        val book = shelf.addDownloaded(saved, BookOrigin.GRANGER, "pride")!!
+        shelf.hide(listOf(book.id))
+        assertThat(shelf.book(book.id)!!.hidden).isTrue()
+        assertThat(shelf.book(book.id)!!.onShelf).isFalse()
+        val kept = TestEpubs.build(grangerDir, "pride_2026-10-01.epub", title = "Pride and Prejudice", authors = listOf("Jane Austen"))
+        val again = shelf.addDownloaded(kept, BookOrigin.GRANGER, "pride")!!
+        assertThat(again.id).isEqualTo(book.id)
+        assertThat(again.hidden).isFalse()
+        assertThat(again.filePath).isEqualTo(kept.absolutePath)
+    }
+
     @Test fun downloadedBookIsFiledUnderGrangerClassics() = test {
         val file = TestEpubs.build(grangerDir, "pride_2026-10-01.epub", title = "Pride and Prejudice",
             authors = listOf("Jane Austen"), cover = TestEpubs.CoverStyle.EPUB3_PROPERTY)
