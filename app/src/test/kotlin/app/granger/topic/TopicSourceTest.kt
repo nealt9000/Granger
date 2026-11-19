@@ -184,6 +184,30 @@ class TopicSourceTest {
         assertThat(last.header).isNotNull()
     }
 
+    @Test fun aTopicThatIsntASpreadGetsItsRoomAndMoreInItFromItsRecord() = runBlocking<Unit> {
+        // Plan O6 (Neal: "Add a room line"): Lake Turkana isn't in the Top index; its record names its room, and the Top
+        // index fills "More in Lakes" with the room's best-known articles.
+        val f = gqid("wikipedia_en_top_maxi_2026-09-14.zim", "Lake_Victoria" to 1L, "Lake_Chad" to 2L)
+        SQLiteDatabase.openDatabase(f.path, null, SQLiteDatabase.OPEN_READWRITE).use { db ->
+            db.execSQL("INSERT INTO meta VALUES ('facets', ?)", arrayOf("""{"places":[{"id":"lakes","en":"Lakes","es":"Lagos","code":0}]}"""))
+            db.execSQL("CREATE TABLE subjects(qid INTEGER NOT NULL, ord INTEGER NOT NULL, subject TEXT NOT NULL, PRIMARY KEY(qid, ord)) WITHOUT ROWID")
+            db.execSQL("CREATE TABLE facets(facet INTEGER NOT NULL, qid INTEGER NOT NULL, PRIMARY KEY(facet, qid)) WITHOUT ROWID")
+            db.execSQL("INSERT INTO subjects VALUES (1, 0, 'places'), (2, 0, 'places')")
+            db.execSQL("INSERT INTO facets VALUES (0, 1), (0, 2)")
+            db.execSQL("UPDATE articles SET rank = 50 WHERE qid = 2")
+        }
+        val top = QidIndexes(listOf(QidIndex.open(f, "en-top")!!))
+        val record = airplaneRecord().copy(qid = 3, path = "Lake_Turkana", subjects = listOf("places"), rooms = listOf("places.lakes"), parts = null, items = emptyMap(), holders = emptyList())
+        val last = source(qids = top, onlineQid = { _, _ -> 3L }, records = { _, _, q -> if (q == 3L) record else null })
+            .topic("wikipedia_en_online", "Lake_Turkana").toList().last()
+        val place = last.place!!
+        assertThat(place.subject).isEqualTo("places")
+        assertThat(place.room!!.id).isEqualTo("lakes")
+        assertThat(place.more.map { it.path }).containsExactly("Lake_Chad", "Lake_Victoria").inOrder()
+        // A spread has its own place: none here.
+        assertThat(last.broad).isNull()
+    }
+
     @Test fun aFinishedTopicIsCachedForBack() = runBlocking<Unit> {
         val headers = mutableListOf<String>()
         val s = source(headers = headers)

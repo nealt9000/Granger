@@ -32,6 +32,12 @@ data class TopicTimeView(
     val pictures: Map<String, String> = emptyMap(),
 )
 
+/**
+ * Where a topic that isn't a spread sits in Explore (Plan O6, Neal 2026-11-19): its subject, its room, and the room's
+ * best-known articles. From the phone's index, or from the article's topic record when no index holds it.
+ */
+data class TopicPlace(val subject: String, val room: app.granger.core.library.Facet?, val more: List<TopicArticle> = emptyList())
+
 /** The same subject in the other language, in an installed pack. */
 data class TopicOther(val language: String, val packId: String, val path: String, val title: String)
 
@@ -66,6 +72,8 @@ data class Topic(
     val relatedBooks: List<TopicBook>? = null,
     /** The whole sentence each shown book's first mention sits in, by book id; a book missing here shows the link's words. */
     val quotes: Map<String, String> = emptyMap(),
+    /** Its subject and room, for a topic that isn't a spread (a spread has its own place); null without either. */
+    val place: TopicPlace? = null,
     /** A broad topic's editorial parts (Plan EX); null for any other topic, or until they arrive. */
     val broad: BroadTopic? = null,
     /** It is a broad topic whose parts are still being read: the page is laid out as a spread from the start. */
@@ -170,6 +178,12 @@ class TopicSource(
                 if (quotes.isNotEmpty()) update { it.copy(quotes = quotes) }
             }
             launch {
+                // Its place, for a topic that isn't a spread: the room line and "More in this room".
+                if (parts.await() != null) return@launch
+                val p = app.granger.Perf.time("topic.place $path") { attempt { placeOf(packId, qid.await(), record.await()) } }
+                if (p != null) update { it.copy(place = p) }
+            }
+            launch {
                 val (articles, books) = app.granger.Perf.time("topic.related $path") { attempt { relatedOf(packId, path, qid.await()) } } ?: (emptyList<TopicArticle>() to emptyList())
                 update { it.copy(related = articles, relatedBooks = books) }
             }
@@ -209,6 +223,17 @@ class TopicSource(
         val all = qids()
         if (all.articlesOf(qid, language).any { languageOf(it.packId) == language }) return null
         return app.granger.Perf.time("topic.record $qid") { read(packId, language, qid) }?.also { recordCache[packId to qid] = it }
+    }
+
+    /** Its subject, its room and the room's best-known other articles; null when neither index nor record gives a subject. */
+    private suspend fun placeOf(packId: String, qid: Long?, record: app.granger.core.library.TopicRecord?): TopicPlace? {
+        val all = qids()
+        val subject = qid?.let { q -> all.subjectsOf(q).firstOrNull() } ?: record?.subjects?.firstOrNull() ?: return null
+        val room = qid?.let { q -> all.facetOf(q, subject) }
+            ?: record?.rooms?.firstOrNull { it.startsWith("$subject.") }?.let { key -> all.facets(subject).firstOrNull { it.key == key } }
+        val more = room?.let { r -> all.topInFacet(r.key, ROOM_MORE + 1).filter { it.qid != qid }.take(ROOM_MORE) }.orEmpty()
+            .side { a -> attempt { cardOf(a.packId, a.path) } }.filterNotNull()
+        return TopicPlace(subject, room, more)
     }
 
     /** "Read in …" from a record's other-language title, for an online article (the other language's Wikipedia online). */
@@ -406,6 +431,9 @@ class TopicSource(
         private const val PREFETCH_FIGURES = 16
         /** Cards asked for together for an online broad topic (its plates are spread through its kinds): ten batches at most. */
         private const val PREFETCH_CARDS = 200
+
+        /** A room's best-known articles shown under a topic that isn't a spread. */
+        const val ROOM_MORE = 6
 
         /** How long the header waits for a record to say whether the page is a spread (Plan O6): the layout, not the words. */
         private const val RECORD_WAIT_MS = 600L

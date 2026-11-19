@@ -70,6 +70,8 @@ import app.granger.shell.rememberRailCover
 import app.granger.theme.Spectral
 
 object TopicPageTags {
+    const val TRAIL = "topic_trail"
+    const val ROOM = "topic_room"
     const val PAGE = "topic_page"
     const val READ_FULL = "topic_read_full"
     const val OTHER = "topic_other_language"
@@ -123,6 +125,20 @@ fun TopicPage(
                 Row(Modifier.fillMaxWidth().height(52.dp).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.common_back)) }
                     Text(packTitle.orEmpty(), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
+            // Where it sits in Explore (Plan O6): Explore › its subject › its room, each a way in.
+            val place = topic.place
+            val subject = place?.let { app.granger.explore.Subject.of(it.subject) }
+            if (place != null && subject != null && onOpenPlace != null) {
+                item(key = "trail") {
+                    val language = androidx.compose.ui.platform.LocalConfiguration.current.locales[0].language
+                    val steps = buildList {
+                        add(app.granger.explore.TrailStep(stringResource(R.string.explore_title)) { onOpenPlace(null, null) })
+                        add(app.granger.explore.TrailStep(stringResource(subject.label)) { onOpenPlace(place.subject, null) })
+                        place.room?.let { room -> add(app.granger.explore.TrailStep(room.name(language)) { onOpenPlace(place.subject, room.id) }) }
+                    }
+                    Box(Modifier.testTag(TopicPageTags.TRAIL)) { app.granger.explore.Trail(steps, here = header?.title ?: TopicSource.titleOf(topic.path)) }
                 }
             }
             item {
@@ -185,6 +201,9 @@ fun TopicPage(
             }
             topic.time?.takeIf { it.people.isNotEmpty() || it.events.isNotEmpty() }?.let { time ->
                 item { TimeCard(time, words, onOpenArticle, onShowInTime) }
+            }
+            topic.place?.takeIf { it.room != null && it.more.isNotEmpty() }?.let { p ->
+                item(key = "room") { RoomCard(p, onOpenArticle, onOpenPlace) }
             }
             topic.books?.takeIf { it.inBooks.isNotEmpty() }?.let { books ->
                 item { BooksCard(books, topic.quotes, onOpenPassage, onAllBooks) }
@@ -366,6 +385,30 @@ private fun RelatedCard(
                         if (cover != null) Image(cover, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                     }
                     Text(b.book.title, style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                }
+            }
+        }
+    }
+}
+
+/** "More in Rivers & lakes" (Plan O6): the room's best-known other articles, and All to open the room in Explore. */
+@Composable
+private fun RoomCard(place: TopicPlace, onOpenArticle: (packId: String, path: String, title: String) -> Unit, onOpenPlace: ((String?, String?) -> Unit)?) {
+    val room = place.room ?: return
+    val language = androidx.compose.ui.platform.LocalConfiguration.current.locales[0].language
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerLowest, shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(top = 14.dp).testTag(TopicPageTags.ROOM),
+    ) {
+        Column(Modifier.padding(horizontal = 14.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.topic_more_in_room, room.name(language)), style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f).semantics { heading() })
+                if (onOpenPlace != null) TextButton(onClick = { onOpenPlace(place.subject, room.id) }) { Text(stringResource(R.string.topic_room_all)) }
+            }
+            for (pair in place.more.chunked(2)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    for (a in pair) RelatedTile(a, Modifier.weight(1f)) { onOpenArticle(a.packId, a.path, a.title) }
+                    if (pair.size == 1) Spacer(Modifier.weight(1f))
                 }
             }
         }

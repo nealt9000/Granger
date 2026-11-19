@@ -218,3 +218,22 @@ there were no records. It now loads the catalog first.
   The subject and room appear nowhere else for a non-broad topic.
 - **So as built, O6 adds little a reader would notice.** The value would need new UI on the topic page: the article's
   room (breadcrumb, "more in this room" from the Top index), or room lists from records.
+
+## The room line (Neal 2026-11-19: "Add a room line")
+
+**What it adds:** a topic that isn't a spread now shows where it sits in Explore. Both parts come from the phone's index,
+or from the topic record for the long tail.
+- **The trail at the top:** Explore › subject › room, each step opening that place.
+- **"More in [room]"**, with All: the room's six best-known articles from the Top index, as tiles with pictures.
+
+This covers every non-spread topic, not only the long tail. Records make it reach about 78% of English and 70% of
+Spanish long-tail articles.
+
+**Pixel 6:**
+- **Lake Turkana** (long tail, Q182719):
+  - the trail reads "Explore › … › Rivers, mountains & seas › Lake Turkana";
+  - "More in Rivers, mountains & seas" shows River, Sea, Mediterranean Sea, Atlantic Ocean, Pacific Ocean and Ocean;
+  - All opens the room.
+- **Timing (cold start):** the record took 0.69 s and the place 0.62 s; the header (Wikipedia's summary) came first.
+
+The full suite passes.

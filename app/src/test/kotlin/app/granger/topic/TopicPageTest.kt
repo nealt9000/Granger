@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import app.granger.core.library.BookMention
 import app.granger.core.library.Lane
@@ -60,6 +61,7 @@ class TopicPageTest {
                 onOpenBookAt = { id, ch -> events += "book:$id:$ch" },
                 onAllBooks = { events += "all" },
                 onShowInTime = if (inTime) ({ events += "time" }) else null,
+                onOpenPlace = { subject, room -> events += "place:$subject:$room" },
             )
         }
     }
@@ -94,5 +96,18 @@ class TopicPageTest {
         show(Topic("w", "Jane_Austen"))
         compose.onNodeWithText("Jane Austen").assertExists()
         compose.onNodeWithTag(TopicPageTags.READ_FULL).assertExists()
+    }
+
+    @Test fun aTopicsRoomShowsAsATrailAndMoreInIt() {
+        // Plan O6: Explore › Places › Lakes at the top, and "More in Lakes" with All.
+        val lakes = app.granger.core.library.Facet("places", "lakes", "Lakes", "Lagos")
+        val more = listOf(TopicArticle("en-top", "Lake_Chad", "Lake Chad", "A lake.", null), TopicArticle("en-top", "Lake_Victoria", "Lake Victoria", "", null))
+        show(Topic("wikipedia_en_online", "Lake_Turkana", header = TopicHeader("Lake Turkana", "A lake.", null), place = TopicPlace("places", lakes, more), done = true))
+        compose.onNodeWithTag(TopicPageTags.TRAIL).assertExists()
+        compose.onNodeWithText("Lakes").performClick()
+        compose.onNodeWithText("More in Lakes").performScrollTo().assertExists()
+        compose.onNodeWithText("Lake Chad").performClick()
+        compose.onNodeWithText("All").performClick()
+        assertThat(events).containsExactly("place:places:lakes", "article:Lake_Chad", "place:places:lakes").inOrder()
     }
 }

@@ -241,4 +241,7 @@
     <!-- Plan OB call 3 -->
     <string name="explore_outfitting_line">Downloading %1$s for offline</string>
     <string name="explore_outfitting_see">See progress</string>
+    <!-- Plan O6: a topic\'s room -->
+    <string name="topic_more_in_room">More in %1$s</string>
+    <string name="topic_room_all">All</string>
 </resources>

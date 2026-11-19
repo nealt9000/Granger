@@ -210,4 +210,7 @@
     <!-- Plan OB call 3 -->
     <string name="explore_outfitting_line">Descargando %1$s para sin conexión</string>
     <string name="explore_outfitting_see">Ver progreso</string>
+    <!-- Plan O6: a topic\'s room -->
+    <string name="topic_more_in_room">Más en %1$s</string>
+    <string name="topic_room_all">Todo</string>
 </resources>
