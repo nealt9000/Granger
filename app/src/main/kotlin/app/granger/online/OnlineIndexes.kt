@@ -29,7 +29,14 @@ class OnlineIndexes(
     /** Set by [startNow]: the set no longer waits for Wi-Fi. */
     @Volatile private var now = false
 
-    suspend fun reconcile(catalog: Catalog?, records: List<DownloadRecord>, languages: List<String>, enabled: Boolean, online: Boolean) = mutex.withLock {
+    /**
+     * [packFiles] are the files of the packs the library lists (all of them, except under the debug preview that hides
+     * the Wikipedias): only their sidecars stand in for the online set.
+     */
+    suspend fun reconcile(
+        catalog: Catalog?, records: List<DownloadRecord>, languages: List<String>, enabled: Boolean, online: Boolean,
+        packFiles: Set<String>? = null,
+    ) = mutex.withLock {
         val byItem = records.groupBy { it.itemId }
         val wanted = if (enabled) languages.toSet() else emptySet()
         // The index set of a language that's gone.
@@ -38,8 +45,11 @@ class OnlineIndexes(
             if (OnlineWikipediaArchive.languageOf(source) !in wanted) downloads.remove(r.itemId)
         }
         if (catalog == null) return@withLock
-        val installedHashes = records.filter { it.state == DownloadState.INSTALLED && !OnlineSources.isOnline(SidecarKind.parentOf(it.itemId) ?: it.itemId) }
-            .mapTo(HashSet()) { it.hash }
+        val installedHashes = records.filter { r ->
+            val parent = SidecarKind.parentOf(r.itemId)
+            r.state == DownloadState.INSTALLED && parent != null && !OnlineSources.isOnline(parent) &&
+                (packFiles == null || byItem[parent].orEmpty().any { it.filePath in packFiles })
+        }.mapTo(HashSet()) { it.hash }
         for (lang in wanted) {
             val item = catalog.packs.firstOrNull { it.id == topOf(lang) } ?: continue
             val source = OnlineWikipediaArchive.packName(lang)

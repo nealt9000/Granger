@@ -49,13 +49,23 @@ class OnlineIndexesTest {
 
     @Test fun aPackWithTheSameFileServesForIt() = runTest {
         downloads.list.value = listOf(
-            record("wikipedia_en_top_mini", DownloadState.INSTALLED),
+            record("wikipedia_en_top_mini", DownloadState.INSTALLED),  // its file: /internal/packs/wikipedia_en_top_mini.zim
             record("wikipedia_en_top_mini.gqid", DownloadState.INSTALLED, sha256 = gqid, kind = ItemKind.SIDECAR),
             record("wikipedia_en_online.gqid", DownloadState.INSTALLED, sha256 = gqid, kind = ItemKind.SIDECAR),
         )
         reconcile()
         assertThat(downloads.calls).contains("removeVersion:wikipedia_en_online.gqid:$gqid")
         assertThat(downloads.enqueuedSpecs.map { it.itemId }).containsExactly("wikipedia_en_online.timeindex")
+    }
+
+    @Test fun aHiddenPackDoesntServeForIt() = runTest {
+        // Preview: no Wikipedia on the phone hides the pack, so the online set is wanted after all.
+        downloads.list.value = listOf(
+            record("wikipedia_en_top_mini", DownloadState.INSTALLED),
+            record("wikipedia_en_top_mini.gqid", DownloadState.INSTALLED, sha256 = gqid, kind = ItemKind.SIDECAR),
+        )
+        indexes.reconcile(catalog, downloads.list.value, listOf("en"), enabled = true, online = true, packFiles = emptySet())
+        assertThat(downloads.enqueuedSpecs.map { it.itemId }).containsExactly("wikipedia_en_online.gqid", "wikipedia_en_online.timeindex")
     }
 
     @Test fun aLanguageDroppedTakesItsSet() = runTest {

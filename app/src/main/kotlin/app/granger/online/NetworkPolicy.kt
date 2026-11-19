@@ -21,6 +21,19 @@ class NetworkPolicy(context: Context) {
     /** Read on every request, from any thread. */
     fun now(): NetworkMode = state.value
 
+    private val preview = MutableStateFlow(prefs.getBoolean(PREVIEW, false))
+
+    /**
+     * Debug only (Plan O1 Task 10): Preview: no Wikipedia on the phone. The installed Wikipedia packs are hidden from
+     * the library, so the phone shows what a fresh install sees online, without removing anything.
+     */
+    val previewNoWikipedia: StateFlow<Boolean> = preview.asStateFlow()
+
+    fun setPreviewNoWikipedia(on: Boolean) {
+        prefs.edit().putBoolean(PREVIEW, on).apply()
+        preview.value = on
+    }
+
     fun set(mode: NetworkMode) {
         prefs.edit().putString(KEY, mode.name).apply()
         state.value = mode
@@ -28,5 +41,6 @@ class NetworkPolicy(context: Context) {
 
     private companion object {
         const val KEY = "mode"
+        const val PREVIEW = "preview_no_wikipedia"
     }
 }

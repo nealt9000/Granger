@@ -378,7 +378,10 @@ class AppContainer(context: Context) {
     private val libraryDb = LibraryDatabase.create(context)
     // A removed pack takes its PDFs (pack documents, Plan P2) with it; a new snapshot of it keeps them (Plan KB2).
     val library: Library = RoomLibrary(libraryDb, KiwixZimOpener(context), packDirs, onRemoved = { bookshelf.removePackDocuments(it.id, it.name) })
-        .let { room -> if (!Features.ONLINE) room else app.granger.online.OnlineLibrary(room) { onlineSources.archives() } }
+        .let { room ->
+            if (!Features.ONLINE) room
+            else app.granger.online.OnlineLibrary(room, if (BuildConfig.DEBUG) networkPolicy.previewNoWikipedia else kotlinx.coroutines.flow.flowOf(false)) { onlineSources.archives() }
+        }
     val bookshelf: Bookshelf = RoomBookshelf(
         libraryDb, bookDirs,
         importDir = { File(context.getExternalFilesDir(null) ?: context.filesDir, "books/imports") },
@@ -1000,7 +1003,7 @@ class AppContainer(context: Context) {
             ) { c, r, langs, mode -> Triple(c, r, langs) to (mode == app.granger.core.downloads.NetworkMode.ONLINE) }
                 .collectLatest { (t, online) ->
                     try {
-                        onlineIndexes.reconcile(t.first, t.second, t.third, Features.ONLINE, online)
+                        onlineIndexes.reconcile(t.first, t.second, t.third, Features.ONLINE, online, library.packs.first().mapTo(HashSet()) { it.filePath })
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
