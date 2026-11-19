@@ -160,6 +160,18 @@ Branch `o3-local-only-home` from main (`b186bae6`), in worktree `.claude/worktre
   - one bookshelf direction (builder's call 7).
 - **Neal picks;** the brief and the pick go in this plan, then Task 8 builds Home.
 
+**Interview (Neal, 2026-11-19):**
+- **Home is your desk:** personal and short. Continue first, then a few things picked for you today. Explore holds the
+  browsing.
+- **Sections that stay:** Continue and the Timeline glance. Play and Wander leave Home. Games get their own rail icon
+  once they're designed and fleshed out (later work).
+- **A re-envisioned Readiness on Home** that flows into the online/offline design: a clear breakdown of what Granger has
+  offline, and suggestions that make it easy to fill the gaps by getting packs. This is Outfitting's (O4) view, which
+  Home shows. The mockups draw it now; O4 builds its full screen.
+- **Feeds:** keep add-your-own feeds but show at most two, styled as Explore plates.
+- **The bookshelf is your reading shelf:** books and collections you read, as covers, in Explore's style. Storage and
+  file details move to Outfitting.
+
 ### Task 8: Home, built
 
 - **The picked direction,** in Explore's components:
