@@ -4,11 +4,11 @@
     <string name="librivox_footer">Las grabaciones de LibriVox son de dominio público. Los archivos los sirve Internet Archive.</string>
     <string name="librivox_search_placeholder">Buscar en LibriVox por título o autor</string>
     <string name="librivox_tab_browse">Explorar</string>
-    <string name="librivox_tab_installed">Descargado</string>
+    <string name="librivox_tab_installed">En este teléfono</string>
     <string name="librivox_empty_installed">Aún no has descargado nada de LibriVox.</string>
     <string name="librivox_empty_search">Nada coincide con esa búsqueda.</string>
     <string name="librivox_load_more">Cargar más</string>
-    <string name="librivox_get_the_rest">Descargar el resto</string>
+    <string name="librivox_get_the_rest">Guardar el resto</string>
     <string name="librivox_remove_title">¿Quitar %1$s?</string>
     <string name="librivox_remove_this_book">¿Quitar este libro?</string>
     <string name="librivox_remove_body">Se eliminarán sus archivos. Se conservan tu lugar y tus marcadores.</string>

@@ -6,12 +6,12 @@
     <string name="librivox_search_placeholder">Search LibriVox by title or author</string>
     <!-- Tabs: LibriVox's books, and what's been downloaded from it. -->
     <string name="librivox_tab_browse">Browse</string>
-    <string name="librivox_tab_installed">Installed</string>
+    <string name="librivox_tab_installed">On this phone</string>
     <string name="librivox_empty_installed">Nothing downloaded from LibriVox yet.</string>
     <string name="librivox_empty_search">Nothing matches that search.</string>
     <string name="librivox_load_more">Load more</string>
     <!-- Gets the chapters still missing from a partly downloaded book. -->
-    <string name="librivox_get_the_rest">Get the rest</string>
+    <string name="librivox_get_the_rest">Keep the rest</string>
     <!-- %1$s is the book's title. -->
     <string name="librivox_remove_title">Remove %1$s?</string>
     <string name="librivox_remove_this_book">Remove this book?</string>

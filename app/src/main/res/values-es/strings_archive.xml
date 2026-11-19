@@ -10,7 +10,7 @@
     <string name="archive_search_audiobooks">Buscar audiolibros en archive.org</string>
     <string name="archive_search_music">Buscar música en archive.org</string>
     <string name="archive_tab_browse">Explorar</string>
-    <string name="archive_tab_installed">Descargado</string>
+    <string name="archive_tab_installed">En este teléfono</string>
     <string name="archive_librivox">LibriVox</string>
     <string name="archive_show_everything">Mostrar todo</string>
     <string name="archive_empty_installed">Aún no has descargado nada de archive.org.</string>
@@ -22,8 +22,8 @@
     <string name="archive_large_pdf">Este PDF pesa %1$s. ¿Descargarlo?</string>
     <string name="archive_large_download">Esta descarga pesa %1$s. ¿Descargarla?</string>
     <string name="archive_dont_ask_again">No volver a preguntar</string>
-    <string name="archive_download">Descargar</string>
-    <string name="archive_get_the_rest">Descargar el resto</string>
+    <string name="archive_download">Guardar</string>
+    <string name="archive_get_the_rest">Guardar el resto</string>
 
     <string name="archive_offer_plain_text">Texto plano</string>
     <string name="archive_offer_ocr">Texto OCR: puede tener errores</string>
@@ -38,14 +38,14 @@
     </plurals>
 
     <string name="archive_downloading_files">Descargando: %1$d de %2$d</string>
-    <string name="archive_get_pdf">Descargar PDF · %1$s</string>
+    <string name="archive_get_pdf">Guardar PDF · %1$s</string>
     <string name="archive_pdf_in_library">PDF en tu biblioteca</string>
     <string name="archive_pdf_queued">PDF: en cola</string>
     <string name="archive_pdf_downloading">PDF: descargando, %1$d%%</string>
     <string name="archive_pdf_failed">PDF: falló</string>
     <string name="archive_pdf_other">"PDF: "</string>
     <string name="archive_view_on_site">Ver en archive.org</string>
-    <string name="archive_get_size">Descargar · %1$s</string>
+    <string name="archive_get_size">Guardar · %1$s</string>
 
     <string name="archive_waiver_title">¿Mostrar todo lo de archive.org?</string>
     <string name="archive_waiver_body">Granger es un navegador para archive.org. No aloja, revisa ni responde por nada de lo que hay allí, y mucho de eso todavía tiene derechos de autor. Tú eres responsable de tener derecho a descargar y usar lo que tomes.</string>
@@ -70,8 +70,8 @@
     </plurals>
     <string name="archive_label_size">%1$s · %2$s</string>
     <string name="archive_choose_parts">Elegir partes</string>
-    <string name="archive_get_all">Descargar todo</string>
-    <string name="archive_get_all_size">Descargar todo · %1$s</string>
+    <string name="archive_get_all">Guardar todo</string>
+    <string name="archive_get_all_size">Guardar todo · %1$s</string>
     <plurals name="archive_parts">
         <item quantity="one">%d parte</item>
         <item quantity="many">%d partes</item>

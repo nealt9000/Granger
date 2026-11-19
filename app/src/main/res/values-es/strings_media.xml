@@ -56,7 +56,7 @@
         <item quantity="other">Descarga parcial: %1$d de %2$d capítulos</item>
     </plurals>
 
-    <string name="media_remove_download">Quitar la descarga</string>
+    <string name="media_remove_download">Quitar del teléfono</string>
     <string name="media_remove_title">¿Quitar %1$s?</string>
     <string name="media_remove_message">Se eliminarán los archivos descargados. Se conservan tu lugar y tus marcadores.</string>
 

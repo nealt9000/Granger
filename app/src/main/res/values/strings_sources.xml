@@ -75,7 +75,7 @@
     <!-- The category chip that shows every category. -->
     <string name="sources_all">All</string>
     <string name="sources_tab_browse">Browse</string>
-    <string name="sources_tab_installed">Installed</string>
+    <string name="sources_tab_installed">On this phone</string>
     <string name="sources_tab_updates">Updates</string>
     <!-- %1$s is the free space, %2$s the storage (such as Internal storage), %3$s what Granger uses there. -->
     <string name="sources_storage_summary">%1$s free on %2$s · Granger uses %3$s</string>
@@ -132,8 +132,8 @@
     <string name="sources_remove_document_pack_body">This deletes the pack and its documents. Your places, bookmarks and highlights are kept.</string>
     <!-- A preset (a ready-made set of downloads); %1$s is its name, such as Granger Classics. -->
     <string name="sources_preset_title">%1$s set</string>
-    <string name="sources_get_all">Get all</string>
-    <string name="sources_get_all_named">Get all of %1$s</string>
+    <string name="sources_get_all">Keep all</string>
+    <string name="sources_get_all_named">Keep all of %1$s</string>
     <!-- Counts in a preset's line: "12 packs and 347 books · 17.7 GB". -->
     <plurals name="sources_packs">
         <item quantity="one">%d pack</item>
@@ -170,9 +170,9 @@
     <string name="sources_size_check_free_phone">You have %1$s free on this phone.</string>
     <string name="sources_size_check_no_room">That isn\'t enough room for it.</string>
     <!-- Gets the pack's smaller flavour instead: %1$s is the flavour (lower case, such as "no pictures"), %2$s its size. -->
-    <string name="sources_get_smaller">Get %1$s, %2$s</string>
+    <string name="sources_get_smaller">Keep %1$s, %2$s</string>
     <!-- Gets it anyway; %1$s is its size. -->
-    <string name="sources_get_size">Get %1$s</string>
+    <string name="sources_get_size">Keep %1$s</string>
 
     <!-- A pack's flavours. -->
     <string name="sources_flavour_with_pictures">With pictures</string>
@@ -185,8 +185,8 @@
     <string name="sources_pictures">Pictures</string>
     <string name="sources_add_subject">Add a subject</string>
     <!-- Lower case, read out after a choice by a screen reader: "With pictures, 7.0 GB, installed". -->
-    <string name="sources_installed_lower">installed</string>
-    <string name="sources_installed">Installed</string>
+    <string name="sources_installed_lower">on this phone</string>
+    <string name="sources_installed">On this phone</string>
     <!-- %1$s is the bigger slice on the phone, such as Top 1 million. -->
     <string name="sources_inside_your">Inside your %1$s</string>
     <!-- A slice and its pictures: "Best 50,000 articles, No pictures". -->
@@ -205,7 +205,7 @@
     <!-- The overflow menu of a row; %1$s is its title. -->
     <string name="sources_more_for">More for %1$s</string>
     <!-- What TalkBack says for a row's button, with the row's name: "Get Military Medicine". -->
-    <string name="sources_get_named">Get %1$s</string>
+    <string name="sources_get_named">Keep %1$s</string>
     <string name="sources_open_named">Open %1$s</string>
     <string name="sources_update_named">Update %1$s</string>
     <string name="sources_cancel_named">Cancel %1$s</string>

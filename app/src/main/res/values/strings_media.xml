@@ -47,7 +47,7 @@
         <item quantity="other">Partly downloaded: %1$d of %2$d chapters</item>
     </plurals>
 
-    <string name="media_remove_download">Remove download</string>
+    <string name="media_remove_download">Remove from phone</string>
     <!-- A confirmation's title. %1$s is the album's or book's title. -->
     <string name="media_remove_title">Remove %1$s?</string>
     <string name="media_remove_message">This deletes the downloaded files. Your place and bookmarks are kept.</string>

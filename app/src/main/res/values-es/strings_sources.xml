@@ -60,7 +60,7 @@
     <string name="sources_all">Todas</string>
     <string name="sources_tab_browse">Explorar</string>
     <!-- "Installed" is "Descargado", as on Archive.org and LibriVox's tabs. -->
-    <string name="sources_tab_installed">Descargado</string>
+    <string name="sources_tab_installed">En este teléfono</string>
     <string name="sources_tab_updates">Actualizar</string>
     <string name="sources_storage_summary">%1$s libres en %2$s · Granger usa %3$s</string>
     <string name="sources_no_match">Nada coincide con esa búsqueda.</string>
@@ -110,8 +110,8 @@
     <string name="sources_remove_document_pack_body">Se eliminarán el paquete y sus documentos. Se conservan tus lugares, marcadores y resaltados.</string>
     <!-- A preset ("Granger Classics set") is a "conjunto": "paquete" is taken by packs. -->
     <string name="sources_preset_title">Conjunto %1$s</string>
-    <string name="sources_get_all">Descargar todo</string>
-    <string name="sources_get_all_named">Descargar todo: %1$s</string>
+    <string name="sources_get_all">Guardar todo</string>
+    <string name="sources_get_all_named">Guardar todo: %1$s</string>
     <plurals name="sources_packs">
         <item quantity="one">%d paquete</item>
         <item quantity="many">%d paquetes</item>
@@ -141,8 +141,8 @@
     <string name="sources_size_check_free_phone">Tienes %1$s libres en este teléfono.</string>
     <string name="sources_size_check_no_room">No hay espacio suficiente para descargarlo.</string>
     <!-- %1$s is the flavour in lower case, such as "sin imágenes". -->
-    <string name="sources_get_smaller">Descargar la versión %1$s, %2$s</string>
-    <string name="sources_get_size">Descargar %1$s</string>
+    <string name="sources_get_smaller">Guardar la versión %1$s, %2$s</string>
+    <string name="sources_get_size">Guardar %1$s</string>
 
     <string name="sources_flavour_with_pictures">Con imágenes</string>
     <string name="sources_flavour_no_pictures">Sin imágenes</string>
@@ -151,8 +151,8 @@
     <string name="sources_how_much">Cuánto</string>
     <string name="sources_pictures">Imágenes</string>
     <string name="sources_add_subject">Agregar un tema</string>
-    <string name="sources_installed_lower">descargado</string>
-    <string name="sources_installed">Descargado</string>
+    <string name="sources_installed_lower">en este teléfono</string>
+    <string name="sources_installed">En este teléfono</string>
     <string name="sources_inside_your">Incluido en tu %1$s</string>
     <string name="sources_slice_and_pictures">%1$s, %2$s</string>
     <!-- English "With pictures only"; "Solo Con imágenes" would read badly, so the Spanish puts it after. -->
@@ -164,7 +164,7 @@
     <string name="sources_switch_text">¿Cambiar %1$s de %2$s (%3$s) a %4$s (%5$s)? La versión %2$s se quita cuando la nueva termine de descargarse. Tus lugares y marcadores se conservan.</string>
     <string name="sources_update">Actualizar</string>
     <string name="sources_more_for">Más opciones de %1$s</string>
-    <string name="sources_get_named">Descargar %1$s</string>
+    <string name="sources_get_named">Guardar %1$s</string>
     <string name="sources_open_named">Abrir %1$s</string>
     <string name="sources_update_named">Actualizar %1$s</string>
     <string name="sources_cancel_named">Cancelar %1$s</string>

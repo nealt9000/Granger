@@ -41,7 +41,7 @@ class ArchiveSetSheetTest {
         var got = 0
         compose.setContent { ArchiveItemSheet(sheet(4), null, { got++ }, {}, {}, {}, {}, {}) }
         compose.onNodeWithText("Comic: its pages, to zoom · 4 parts · ${formatBytes(200_000_000L)}").assertExists()
-        compose.onNodeWithText("Get all · ${formatBytes(200_000_000L)}").performClick()
+        compose.onNodeWithText("Keep all · ${formatBytes(200_000_000L)}").performClick()
         assertThat(got).isEqualTo(1)
     }
 
@@ -62,7 +62,7 @@ class ArchiveSetSheetTest {
         compose.onNodeWithTag(ArchiveSheetTags.PART_FILTER).assertDoesNotExist()      // 4 parts need no filter
         compose.onNodeWithText("Remove").performClick()
         assertThat(removed).containsExactly(2)
-        compose.onAllNodesWithTextGet("Get").first().performClick()
+        compose.onAllNodesWithTextGet("Keep").first().performClick()
         assertThat(gotParts).containsExactly(1)
     }
 

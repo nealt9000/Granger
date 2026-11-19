@@ -16,7 +16,7 @@
     <string name="common_search">Buscar</string>
     <string name="common_settings">Ajustes</string>
     <string name="common_done">Listo</string>
-    <string name="common_get">Descargar</string>
+    <string name="common_get">Guardar</string>
     <string name="common_downloading">Descargando</string>
     <string name="common_downloading_named">Descargando %1$s</string>
 

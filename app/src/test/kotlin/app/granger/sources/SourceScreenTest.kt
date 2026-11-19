@@ -49,7 +49,7 @@ class SourceScreenTest {
         compose.onNodeWithContentDescription("With pictures, 7.0 GB").assertIsDisplayed().assertIsSelected()
         compose.onNodeWithText("English, Russian · Updated March 2026 · CC BY-SA").assertIsDisplayed()
         compose.onNodeWithContentDescription("No pictures, 2.8 GB").assertIsNotSelected().performClick()
-        compose.onNodeWithText("Get").performClick()
+        compose.onNodeWithText("Keep").performClick()
         assertThat(chosen).containsExactly("wikipedia_en_top_nopic")
         assertThat(got).containsExactly("wikipedia_en_top_maxi")
         // The full licence is a tap away.
@@ -93,7 +93,7 @@ class SourceScreenTest {
             )
         }
         // TalkBack reads the choice, its size and that it's the one on the phone.
-        compose.onNodeWithContentDescription("No pictures, 2.8 GB, installed").assertIsDisplayed()
+        compose.onNodeWithContentDescription("No pictures, 2.8 GB, on this phone").assertIsDisplayed()
         compose.onNodeWithContentDescription("With pictures, 7.0 GB").assertIsSelected()
         compose.onNodeWithText("Open").performClick()
         // Switch names what it trades, and asks first (Plan KB walkthrough 2).
@@ -123,7 +123,7 @@ class SourceScreenTest {
                 onGet = { calls += "get" }, onCancel = {}, onRetry = {}, onRemove = {}, onOpen = { calls += "open" },
             )
         }
-        compose.onNodeWithContentDescription("No pictures, 2.8 GB, installed").assertIsSelected()
+        compose.onNodeWithContentDescription("No pictures, 2.8 GB, on this phone").assertIsSelected()
         compose.onNodeWithText("Switch").assertIsNotEnabled().performClick()
         compose.onNodeWithText("Open").performClick()
         assertThat(calls).containsExactly("open")
@@ -162,7 +162,7 @@ class SourceScreenTest {
         assertThat(actions.top).isAtLeast(choices[2].getBoundsInRoot().bottom)
         assertThat(compose.onNodeWithText("Switch to With pictures").getBoundsInRoot().top).isAtLeast(actions.top)
         assertThat(compose.onNodeWithText("Open").getBoundsInRoot().top).isAtLeast(titleBounds.bottom)
-        compose.onNodeWithContentDescription("No pictures, 2.8 GB, installed").assertIsDisplayed()
+        compose.onNodeWithContentDescription("No pictures, 2.8 GB, on this phone").assertIsDisplayed()
     }
 
     @Test fun aSingleFlavourRowStaysCompact() {
@@ -171,7 +171,7 @@ class SourceScreenTest {
         compose.onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.RadioButton)).assertCountEquals(0)
         // Get sits beside the title, as before.
         val title = compose.onNodeWithText("Knots").getBoundsInRoot()
-        val get = compose.onNodeWithText("Get").getBoundsInRoot()
+        val get = compose.onNodeWithText("Keep").getBoundsInRoot()
         assertThat(get.top).isLessThan(title.bottom)
         compose.onNodeWithText("60 MB · English · Updated 2025 · CC BY").assertIsDisplayed()
     }
@@ -187,8 +187,8 @@ class SourceScreenTest {
         compose.onNodeWithText("Wikipedia is 110 GB").assertIsDisplayed()
         compose.onNodeWithText("You have 41 GB free on Phone.").assertIsDisplayed()
         compose.onNodeWithText("That isn't enough room for it.").assertIsDisplayed()
-        compose.onNodeWithText("Get no pictures, 48 GB").performClick()
-        compose.onNodeWithText("Get 110 GB").performClick()
+        compose.onNodeWithText("Keep no pictures, 48 GB").performClick()
+        compose.onNodeWithText("Keep 110 GB").performClick()
         compose.onNodeWithText("Cancel").performClick()
         assertThat(got).containsExactly("wikipedia_en_all_nopic", "wikipedia_en_all_maxi").inOrder()
         assertThat(dismissed).isTrue()
@@ -199,7 +199,7 @@ class SourceScreenTest {
             SizeCheckDialog(SizeCheck("survivor", "Survivor Library", 220_000_000_000, 41_000_000_000, "Phone"), onGet = {}, onDismiss = {})
         }
         compose.onNodeWithText("Survivor Library is 220 GB").assertIsDisplayed()
-        compose.onNodeWithText("Get 220 GB").assertIsDisplayed()
+        compose.onNodeWithText("Keep 220 GB").assertIsDisplayed()
         compose.onNodeWithText("Cancel").assertIsDisplayed()
     }
 
@@ -247,7 +247,7 @@ class SourceScreenTest {
         compose.onNodeWithContentDescription("Top 1 million articles, 49 GB").assertIsNotSelected().performClick()
         compose.onNodeWithContentDescription("No pictures").performClick()
         compose.onNodeWithText("Add a subject").performClick()
-        compose.onNodeWithText("Get").performClick()
+        compose.onNodeWithText("Keep").performClick()
         assertThat(calls).containsExactly("slice wikipedia_en_top1m", "pictures nopic", "subjects", "get").inOrder()
     }
 
@@ -285,8 +285,8 @@ class SourceScreenTest {
             )
         }
         compose.onNodeWithContentDescription("Best 50,000 articles, 7.0 GB, Inside your Top 1 million").assertIsSelected()
-        compose.onNodeWithContentDescription("Top 1 million articles, 49 GB, installed").assertIsDisplayed()
-        compose.onNodeWithText("Get").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Top 1 million articles, 49 GB, on this phone").assertIsDisplayed()
+        compose.onNodeWithText("Keep").assertDoesNotExist()
         compose.onNodeWithText("Open").performClick()
         assertThat(calls).containsExactly("open")
     }

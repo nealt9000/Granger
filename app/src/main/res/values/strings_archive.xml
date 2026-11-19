@@ -14,7 +14,7 @@
     <string name="archive_search_music">Search archive.org music</string>
     <!-- Tabs: archive.org's results, and what's been downloaded from it. -->
     <string name="archive_tab_browse">Browse</string>
-    <string name="archive_tab_installed">Installed</string>
+    <string name="archive_tab_installed">On this phone</string>
     <!-- The button to LibriVox, the free audiobook site; its name. -->
     <string name="archive_librivox">LibriVox</string>
     <!-- Opens the waiver to turn off the public-domain filter. -->
@@ -30,9 +30,9 @@
     <string name="archive_large_pdf">This PDF is %1$s. Download it?</string>
     <string name="archive_large_download">This download is %1$s. Download it?</string>
     <string name="archive_dont_ask_again">Don\'t ask again</string>
-    <string name="archive_download">Download</string>
+    <string name="archive_download">Keep</string>
     <!-- Gets what's left of a partly downloaded item. -->
-    <string name="archive_get_the_rest">Get the rest</string>
+    <string name="archive_get_the_rest">Keep the rest</string>
 
     <!-- What an item offers. -->
     <string name="archive_offer_plain_text">Plain text</string>
@@ -52,7 +52,7 @@
     <!-- The item sheet. %1$d of %2$d files are in. -->
     <string name="archive_downloading_files">Downloading: %1$d of %2$d</string>
     <!-- %1$s is the PDF's size. -->
-    <string name="archive_get_pdf">Get PDF · %1$s</string>
+    <string name="archive_get_pdf">Keep PDF · %1$s</string>
     <string name="archive_pdf_in_library">PDF in your library</string>
     <!-- Where the PDF's own download stands. -->
     <string name="archive_pdf_queued">PDF: queued</string>
@@ -63,7 +63,7 @@
     <string name="archive_pdf_other">"PDF: "</string>
     <string name="archive_view_on_site">View on archive.org</string>
     <!-- Get, with the download's size. -->
-    <string name="archive_get_size">Get · %1$s</string>
+    <string name="archive_get_size">Keep · %1$s</string>
 
     <!-- The waiver that turns off the public-domain filter. -->
     <string name="archive_waiver_title">Show everything on archive.org?</string>
@@ -98,8 +98,8 @@
     <!-- Opens the list of a set's parts, to get some of them. -->
     <string name="archive_choose_parts">Choose parts</string>
     <!-- Gets every part of a set; with the size: Get all · 234 MB. -->
-    <string name="archive_get_all">Get all</string>
-    <string name="archive_get_all_size">Get all · %1$s</string>
+    <string name="archive_get_all">Keep all</string>
+    <string name="archive_get_all_size">Keep all · %1$s</string>
     <!-- The parts list's heading. -->
     <plurals name="archive_parts">
         <item quantity="one">%d part</item>

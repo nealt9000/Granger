@@ -22,7 +22,7 @@ class LargeDownloadDialogTest {
             LargeDownloadDialog(ConfirmLarge("id", pdf = true, bytes = 109_000_000, what = LargeWhat.PDF), onDownload = { answer = it }, onDismiss = {})
         }
         compose.onNodeWithText("Don't ask again").performClick()
-        compose.onNodeWithText("Download").performClick()
+        compose.onNodeWithText("Keep").performClick()
         assertThat(answer).isTrue()
     }
 
@@ -31,7 +31,7 @@ class LargeDownloadDialogTest {
         compose.setContent {
             LargeDownloadDialog(ConfirmLarge("id", pdf = true, bytes = 109_000_000, what = LargeWhat.PDF), onDownload = { answer = it }, onDismiss = {})
         }
-        compose.onNodeWithText("Download").performClick()
+        compose.onNodeWithText("Keep").performClick()
         assertThat(answer).isFalse()
     }
 }
