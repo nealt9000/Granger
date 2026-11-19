@@ -136,3 +136,18 @@ Branch `o4-outfitting-shelf` from main (`e412f106`), in worktree `.claude/worktr
 2. Task 5, the shelf.
 3. Task 4, updates; it's small and can slip to O5 if needed.
 4. Then the Pixel pass.
+
+## Results (2026-11-19, branch `o4-outfitting-shelf`)
+
+Tasks 1–3 and 5 built with tests (suite green). Task 4 (updates for kept articles) not built: moved to O5 as the plan
+allowed.
+
+**Pixel 6 (debug, DB 17):**
+- **The shelf:** Reading now (Bride wealth large with its progress, Breakfast and First Aid beside it, three more in a
+  row), Collections as fanned stacks (A Library of Knots · 11 books, African Storybook · English · 151, Archive.org),
+  and the footer. No Finished row: none of Neal's books is past 98%.
+- **Outfitting from the footer:** Try Local only, Ready offline over the last 21 reads with all 8 subjects, This phone,
+  Ready for anything (domains and signals), On this phone (no kept articles), then storage and files. No suggestions,
+  since all 21 recent reads already work offline.
+
+**Not checked on the phone:** a suggestion row (needs online-only reads), Spanish, Field, TalkBack by ear.
