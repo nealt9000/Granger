@@ -133,3 +133,38 @@ Tasks 1–5 built with tests (suite green).
 
 **Noticed:** Welcome still says "all working with no signal". The spec leaves copy for later; worth a line now that
 reading online is the default start.
+
+### Task 6: Pixel 7 fresh install (2026-11-19, Neal's OK; Play 1309 and its 13 GB uninstalled)
+
+Release build, Night theme.
+
+**Timings:**
+- Cold start to Welcome: 0.36–0.54 s.
+- Start reading now to a full Explore (today's spread, 17 subjects, 108 rooms): about 5 s.
+- Keep (558 KB) to Kept: about 2 s.
+
+**Passed:**
+- First run, both paths:
+  - Start reading now lands on Explore.
+  - Outfit for offline goes through Pick a start (Starter 9.4 GB), Region, Uses and Review (9.6 GB, Wi-Fi only). Stopped
+    before Start; nothing downloaded.
+- Skip from Welcome lands on Home. It shows the privacy card ("Granger now reads online too"), and nothing online loads
+  until OK.
+  - Change from the plan: Skip goes to Home, not Explore. Explore would sit empty behind the gate, because the line is
+    only on Home.
+- Topic page, Keep, Local only (banner, greyed results, "Online results appear when you're connected"), Outfitting
+  (domains at "Nothing yet" with essentials sizes).
+- Settings → Online, in order. Never go online locks Local only on, and the banner loses "Turn off".
+
+**Found and fixed:**
+- Turning Local only off didn't re-ask an open search (`ff370286`). Search now refreshes when reach comes back.
+- Home's timeline never appeared on a new install: the time index lands seconds after Home first shows, and the model
+  never looked again. It now retries each time Home is shown (`6d282cb4`).
+- Ready offline's empty line left a stray card strip (`6d282cb4`).
+
+**Left:**
+- The privacy card's title, "Granger now reads online too", is written for updates; a fresh install that skips sees it
+  too.
+- The timeline lens can show a letter instead of a picture when its first mark loaded before OK.
+- The Pixel 7 now holds a locally signed release build. Installing from Play needs an uninstall first (different signing
+  key).
