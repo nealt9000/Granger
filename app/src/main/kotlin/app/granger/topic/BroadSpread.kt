@@ -152,6 +152,7 @@ internal fun BroadSpread(
                             standfirst = header?.lead?.takeIf { it.isNotBlank() }?.let { firstSentence(it, 240) }, large = true,
                         )
                         if (plates.size > 1) Captions(plates.map { it.title })
+                        app.granger.online.KeepHint(topic.packId, topic.path)
                         FlowRow(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(
                                 onClick = onReadFull, shape = RoundedCornerShape(2.dp), modifier = Modifier.heightIn(min = 48.dp).testTag(TopicPageTags.READ_FULL),

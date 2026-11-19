@@ -59,7 +59,7 @@
     <string name="onboarding_larger_areas">Zonas más grandes</string>
     <string name="onboarding_region_in">%1$s · en %2$s · %3$s</string>
 
-    <string name="onboarding_uses_intro">Agrega paquetes según para qué usarás Granger. Puedes cambiarlo después en Ajustes.</string>
+    <string name="onboarding_uses_intro">Agrega paquetes según para qué usarás Granger. Puedes cambiarlo después en Equipamiento.</string>
     <string name="onboarding_see">Ver</string>
     <string name="onboarding_use_covered">%1$s Ya está cubierto con lo que elegiste.</string>
     <string name="onboarding_use_adds">%1$s Agrega %2$s · %3$s.</string>
@@ -101,4 +101,6 @@
     <string name="onboarding_region_none_row">Sin región</string>
     <string name="onboarding_region_done">Listo</string>
     <string name="onboarding_review">Revisar</string>
+    <string name="onboarding_region_add">Agregar</string>
+    <string name="onboarding_region_other">Otra</string>
 </resources>

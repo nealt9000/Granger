@@ -149,7 +149,7 @@ fun OnboardingContent(ui: OnboardingUi, actions: OnboardingActions) {
                 actions = {
                     when {
                         welcomeOnline -> Unit   // Start reading now is the skip
-                        ui.step == Step.OUTFIT && ui.online -> TextButton(onClick = actions.onNotNow, modifier = Modifier.testTag("onboarding-not-now")) { Text(stringResource(R.string.onboarding_not_now)) }
+                        ui.step != Step.WELCOME && ui.online -> TextButton(onClick = actions.onNotNow, modifier = Modifier.testTag("onboarding-not-now")) { Text(stringResource(R.string.onboarding_not_now)) }
                         else -> TextButton(onClick = actions.onSkip) { Text(stringResource(R.string.onboarding_skip)) }
                     }
                 },
@@ -269,9 +269,16 @@ private fun androidx.compose.foundation.lazy.LazyListScope.outfit(ui: Onboarding
             androidx.compose.material3.Surface(shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.fillMaxWidth()) {
                 Row(Modifier.padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                     val region = ui.region
-                    val text = region?.let { stringResource(R.string.onboarding_title_size, it.title, formatBytes(it.bytes)) } ?: stringResource(R.string.onboarding_region_none_row)
-                    Text(if (region?.installed == true) stringResource(R.string.onboarding_on_the_phone, text) else text, Modifier.weight(1f))
-                    TextButton(onClick = { setRegionOpen(true) }, modifier = Modifier.testTag("region-choose")) { Text(stringResource(R.string.onboarding_region_choose_another)) }
+                    // A suggestion too big to tick by default is still offered, with Add (Pixel 7 walkthrough).
+                    val offer = ui.suggestion?.takeIf { region == null && !ui.regionSuggested }
+                    val shown = region ?: offer
+                    val text = shown?.let { stringResource(R.string.onboarding_title_size, it.title, formatBytes(it.bytes)) } ?: stringResource(R.string.onboarding_region_none_row)
+                    Text(if (shown?.installed == true) stringResource(R.string.onboarding_on_the_phone, text) else text, Modifier.weight(1f),
+                        color = if (offer != null) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface)
+                    if (offer != null) TextButton(onClick = { actions.onChooseRegion(offer.pack.id) }, modifier = Modifier.testTag("region-add")) { Text(stringResource(R.string.onboarding_region_add)) }
+                    TextButton(onClick = { setRegionOpen(true) }, modifier = Modifier.testTag("region-choose")) {
+                        Text(stringResource(if (offer != null) R.string.onboarding_region_other else R.string.onboarding_region_choose_another))
+                    }
                 }
             }
         }

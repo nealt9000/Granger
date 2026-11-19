@@ -87,7 +87,7 @@
     <string name="onboarding_region_in">%1$s · in %2$s · %3$s</string>
 
     <!-- What you'll use it for. -->
-    <string name="onboarding_uses_intro">Add packs for what you\'ll use Granger for. You can change this later in Settings.</string>
+    <string name="onboarding_uses_intro">Add packs for what you\'ll use Granger for. Outfitting can change this later.</string>
     <!-- Opens the packs of a use case's subject. -->
     <string name="onboarding_see">See</string>
     <!-- %1$s is the use case's description, a sentence. -->
@@ -140,4 +140,6 @@
     <string name="onboarding_region_none_row">No region</string>
     <string name="onboarding_region_done">Done</string>
     <string name="onboarding_review">Review</string>
+    <string name="onboarding_region_add">Add</string>
+    <string name="onboarding_region_other">Other</string>
 </resources>
