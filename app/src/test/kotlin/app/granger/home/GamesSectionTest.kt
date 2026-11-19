@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -64,34 +66,19 @@ class GamesSectionTest {
         },
     )
 
+    /** The game card on its own: it has left Home (Plan O3), and lives on in the Games screen. */
     private fun home(h: Harness) {
-        val tab = RailEntry.Tab(RailTabUi(1L, "Owls", app.granger.UiText.Raw("Birds"), 'O', available = true, current = false), at = 5L)
-        val feed = FeedUi(
-            HomeFeed(1, "family:wikipedia", FeedKind.RANDOM, "", 0, 0), app.granger.UiText.Raw("Wikipedia"), app.granger.UiText.Raw("Random"),
-            Drawn(listOf(Card("Owl", "", CardTarget.Article("top", "Owl")))),
-        )
         compose.setContent {
-            HomeContent(
-                HomeUi(strip = ReadinessReport.EMPTY, continueCards = listOf(tab), feeds = listOf(feed)),
-                onReadiness = {}, onOpenTab = {}, onPlay = {},
-                onOpenCard = { opened += (it.target as CardTarget.Article).path },
-                timeline = TimelineUi(loading = false, marks = listOf(hastings), selected = hastings, now = 2026), timelineActions = TimelineActions(),
-                wander = WanderUi(centre = WanderNode("top", "Istanbul", "Istanbul")), wanderActions = WanderActions(),
-                game = h.ui, gameActions = actions(h), onOpenGames = { calls += "more" },
-            )
+            androidx.compose.foundation.layout.Column(Modifier.testTag("play-section")) {
+                PlaySection(h.ui, actions(h), onOpen = { opened += it.path }, onMore = { calls += "more" })
+            }
         }
     }
 
-    private fun top(tag: String) = compose.onNodeWithTag(tag).fetchSemanticsNode().boundsInRoot.top
+    private val newtonLife = TimeMark(3, "top", "Isaac_Newton", "Isaac Newton", TimeKind.LIFE, 1643, 0, 1727, 0, 9, setOf(Lane.PEOPLE), 10)
+    private val bach = TimeMark(4, "top", "J._S._Bach", "J. S. Bach", TimeKind.LIFE, 1685, 0, 1750, 0, 9, setOf(Lane.PEOPLE), 10)
 
-    @Test fun homeGoesContinueTimelinePlayWanderThenFeedsAndReadinessLast() {
-        home(Harness(GameUi(loading = false, round = Round.Order(listOf(magna, hastings)), now = 2026)))
-        assertThat(top("continue-section")).isLessThan(top("timeline-section"))
-        assertThat(top("timeline-section")).isLessThan(top("play-section"))
-        assertThat(top("play-section")).isLessThan(top("wander-section"))
-        compose.onNodeWithTag("home-list").performScrollToKey("strip")
-        assertThat(top("feed-section-1")).isLessThan(top("readiness-section"))
-    }
+    private fun top(tag: String) = compose.onNodeWithTag(tag).fetchSemanticsNode().boundsInRoot.top
 
     @Test fun whichCameFirstTapRevealsTheOrderAndEachAnswerOpens() {
         val h = Harness(GameUi(loading = false, round = Round.Order(listOf(magna, hastings)), now = 2026))
@@ -130,14 +117,6 @@ class GamesSectionTest {
         assertThat(opened).containsExactly("Isaac_Newton")
     }
 
-    @Test fun playIsHiddenWithoutAnIndex() {
-        home(Harness(GameUi(available = false)))
-        compose.onNodeWithTag("play-section").assertDoesNotExist()
-    }
-
-    private val newtonLife = TimeMark(3, "top", "Isaac_Newton", "Isaac Newton", TimeKind.LIFE, 1643, 0, 1727, 0, 9, setOf(Lane.PEOPLE), 10)
-    private val bach = TimeMark(4, "top", "J._S._Bach", "J. S. Bach", TimeKind.LIFE, 1685, 0, 1750, 0, 9, setOf(Lane.PEOPLE), 10)
-
     @Test fun theMoreLinkSaysMoreGames() {
         home(Harness(GameUi(loading = false, round = Round.Order(listOf(magna, hastings)), now = 2026)))
         compose.onNodeWithText("More games").assertExists()
@@ -169,7 +148,7 @@ class GamesSectionTest {
         val wright = mark(5, "Wright Flyer", 1903)
         val h = Harness(GameUi(loading = false, round = Round.OddOneOut(listOf(hastings, magna, newton, wright), odd = 5), now = 2026))
         val actions = GameActions(onPick = { qid -> h.ui = h.ui.copy(round = (h.ui.round as Round.OddOneOut).copy(picked = qid)) })
-        compose.setContent { HomeContent(HomeUi(), onReadiness = {}, onOpenTab = {}, onPlay = {}, game = h.ui, gameActions = actions) }
+        compose.setContent { PlaySection(h.ui, actions, onOpen = {}, onMore = {}) }
         compose.onNodeWithTag("game-card-2").performClick()
         compose.onNodeWithText("Not quite").assertExists()
         assertThat(compose.onNodeWithTag("game-answer-5").fetchSemanticsNode().config[SemanticsProperties.StateDescription]).isEqualTo("The odd one out")

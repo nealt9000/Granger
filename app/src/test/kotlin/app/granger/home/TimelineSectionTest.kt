@@ -53,7 +53,14 @@ class TimelineSectionTest {
         )
         compose.setContent {
             HomeContent(
-                HomeUi(strip = ReadinessReport.EMPTY), onReadiness = {}, onOpenTab = {}, onPlay = {},
+                // Two feeds under the timeline, so Home is longer than the screen and scrolls.
+                HomeUi(strip = ReadinessReport.EMPTY, feeds = (1L..2L).map { id ->
+                    FeedUi(
+                        app.granger.core.library.HomeFeed(id, "family:wikipedia", app.granger.core.library.FeedKind.RANDOM, "", 0, 0),
+                        app.granger.UiText.Raw("Wikipedia"), app.granger.UiText.Raw("Random $id"),
+                        Drawn((1..6).map { Card("Owl $id.$it", "", CardTarget.Article("top", "Owl_$it")) }),
+                    )
+                }), onReadiness = {}, onOpenTab = {}, onPlay = {},
                 onOpenCard = { opened += (it.target as CardTarget.Article).path },
                 timeline = h.ui, timelineActions = actions, onOpenTimeline = { expanded += it },
                 wander = WanderUi(centre = WanderNode("top", "Istanbul", "Istanbul")), wanderActions = WanderActions(),
@@ -116,15 +123,12 @@ class TimelineSectionTest {
         assertThat(back).isTrue()
     }
 
-    @Test fun theTimelineSitsAboveWanderAndAVerticalSwipeOnTheRiverScrollsHome() {
+    @Test fun aVerticalSwipeOnTheRiverScrollsHome() {
         show(Harness(ui()))
         val timelineTop = compose.onNodeWithTag("timeline-section").fetchSemanticsNode().boundsInRoot.top
-        val wanderTop = compose.onNodeWithTag("wander-section").fetchSemanticsNode().boundsInRoot.top
-        assertThat(timelineTop).isLessThan(wanderTop)
         compose.onNodeWithTag("timeline-river").performTouchInput { swipeUp() }
         compose.waitForIdle()
         assertThat(compose.onNodeWithTag("timeline-section").fetchSemanticsNode().boundsInRoot.top).isLessThan(timelineTop)
-        compose.onNodeWithTag("home-list").performScrollToKey("strip")
     }
 
     @Test fun theTimelineIsHiddenWithoutAnIndex() {

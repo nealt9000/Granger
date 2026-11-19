@@ -55,21 +55,21 @@ class HomeArrangeTest {
         show(h, saved)
         compose.onNodeWithContentDescription("Arrange Home").performClick()
         compose.onNodeWithTag("arrange-switch-timeline").performClick()
-        // TalkBack's Move up, twice: Play above Continue.
-        repeat(2) {
-            val node = compose.onNodeWithTag("arrange-row-play").fetchSemanticsNode()
+        // TalkBack's Move up, twice: the feed above Continue.
+        repeat(3) {
+            val node = compose.onNodeWithTag("arrange-row-feed:4").fetchSemanticsNode()
             compose.runOnUiThread { node.config[SemanticsActions.CustomActions].first { it.label == "Move up" }.action() }
         }
         compose.onNodeWithTag("arrange-done").performClick()
         val layout = saved.single()
         assertThat(layout.hidden).containsExactly("timeline")
-        assertThat(layout.visible(listOf(4)).map { it.token }).containsExactly("play", "continue", "wander", "feed:4", "readiness").inOrder()
+        assertThat(layout.visible(listOf(4)).map { it.token }).containsExactly("feed:4", "continue", "readiness").inOrder()
         compose.onNodeWithTag("timeline-section").assertDoesNotExist()
-        assertThat(top("play-section")).isLessThan(top("continue-section"))
+        assertThat(top("feed-section-4")).isLessThan(top("continue-section"))
     }
 
     @Test fun resetPutsBackTheDefaultAndCancelSavesNothing() {
-        val h = Harness(HomeUi(continueCards = listOf(tab), layout = HomeLayout(listOf("play", "continue", "timeline", "wander", "feeds", "readiness"), setOf("timeline"))))
+        val h = Harness(HomeUi(continueCards = listOf(tab), layout = HomeLayout(listOf("timeline", "continue", "readiness", "feeds"), setOf("timeline"))))
         val saved = mutableListOf<HomeLayout>()
         show(h, saved)
         compose.onNodeWithTag("home-arrange").performClick()

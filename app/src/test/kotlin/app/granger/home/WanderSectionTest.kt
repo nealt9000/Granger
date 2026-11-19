@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -46,7 +47,10 @@ class WanderSectionTest {
             onPick = { hit -> picked += hit.path; h.ui = h.ui.copy(query = "", hits = emptyList()) },
         )
         compose.setContent {
-            HomeContent(HomeUi(strip = ReadinessReport.EMPTY), onReadiness = {}, onOpenTab = {}, onPlay = {}, onOpenCard = { opened += (it.target as CardTarget.Article).path }, wander = h.ui, wanderActions = actions)
+            // The Wander card on its own, in a list as before: it has left Home (Plan O3); Explore's Ways on opens it.
+            androidx.compose.foundation.lazy.LazyColumn(androidx.compose.ui.Modifier.testTag("home-list")) {
+                item { WanderSection(h.ui, actions) { node -> opened += node.path } }
+            }
         }
     }
 
@@ -86,11 +90,6 @@ class WanderSectionTest {
         compose.onNodeWithText("Ada Lovelace").assertIsDisplayed().performClick()
         assertThat(picked).containsExactly("Ada_Lovelace")
         assertThat(h.ui.query).isEmpty()
-    }
-
-    @Test fun wanderIsHiddenWithoutAnEncyclopedia() {
-        show(Harness(WanderUi(available = false)))
-        compose.onNodeWithTag("wander").assertDoesNotExist()
     }
 
     @Test fun initialsSkipBracketsAndKeepTwoLetters() {

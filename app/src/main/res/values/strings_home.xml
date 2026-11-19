@@ -229,4 +229,23 @@
     <string name="home_arrange_hidden">Hidden</string>
     <string name="home_downloads_bytes">%1$s of %2$s</string>
     <string name="home_downloads_bytes_left">%1$s of %2$s · %3$s left</string>
+    <string name="home_ready_online">Online</string>
+    <string name="home_ready_see_all">See everything on this phone</string>
+    <string name="home_ready_bar">%1$s: %2$d on this phone, %3$d saved for now, %4$d online</string>
+    <plurals name="home_ready_eyebrow">
+        <item quantity="one">Ready offline · your last read</item>
+        <item quantity="other">Ready offline · your last %1$d reads</item>
+    </plurals>
+    <plurals name="home_ready_headline">
+        <item quantity="one">%1$d of your %2$d recent read works offline</item>
+        <item quantity="other">%1$d of your %2$d recent reads work offline</item>
+    </plurals>
+    <plurals name="home_ready_keep">
+        <item quantity="one">Keep the one you read · %2$s</item>
+        <item quantity="other">Keep the %1$d you read · %2$s</item>
+    </plurals>
+    <plurals name="home_ready_pack">
+        <item quantity="one">Get %1$s · %2$s · covers %3$d of them</item>
+        <item quantity="other">Get %1$s · %2$s · covers %3$d of them</item>
+    </plurals>
 </resources>

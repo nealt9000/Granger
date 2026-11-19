@@ -237,10 +237,10 @@ class HomeViewModelTest {
         testScheduler.advanceUntilIdle()
         assertThat(vm.ui.value.layout.visible(listOf(search, library)).filterIsInstance<HomePart.Feed>().map { it.id }).containsExactly(library, search).inOrder()
         assertThat(prefs.layout).isEqualTo(vm.ui.value.layout)
-        vm.moveFeed(library, up = true)   // above the feeds: past Wander
+        vm.moveFeed(library, up = true)   // above the feeds: past the Timeline
         testScheduler.advanceUntilIdle()
         assertThat(vm.ui.value.layout.visible(listOf(search, library)).map { it.token }.indexOf("feed:$library"))
-            .isLessThan(vm.ui.value.layout.visible(listOf(search, library)).map { it.token }.indexOf("wander"))
+            .isLessThan(vm.ui.value.layout.visible(listOf(search, library)).map { it.token }.indexOf("timeline"))
         vm.removeFeed(library)
         testScheduler.advanceUntilIdle()
         assertThat(vm.ui.value.feeds.map { it.feed.scope }).containsExactly("pack:wikipedia_en_all")

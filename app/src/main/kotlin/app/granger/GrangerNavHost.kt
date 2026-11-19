@@ -1696,6 +1696,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 )
             }
             composable<HomeRoute> {
+                // Ready offline (Plan O3 Task 8): worked out when Home shows, and again when the internet comes or goes.
+                val reachNow = container.reachControl?.state?.collectAsStateWithLifecycle()?.value
+                val readyOffline by androidx.compose.runtime.produceState<app.granger.online.ReadyOfflineUi?>(null, reachNow) {
+                    value = if (Features.ONLINE) runCatching { container.readyOffline() }.getOrNull() else null
+                }
                 val homeThumbs = remember {
                     ArticleThumbnails(File(appContext.cacheDir, "home-thumbs")).also { thumbs ->
                         // Once per Home: the cache trimmed to its cap, in the background.
@@ -1754,6 +1759,10 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onPlay = ::resumePlay,
                     onOpenTimeline = { mark -> nav.navigate(TimelineRoute(mark?.packId, mark?.path)) { launchSingleTop = true } },
                     onOpenGames = { nav.navigate(GamesRoute) { launchSingleTop = true } },
+                    readyOffline = readyOffline,
+                    readyActions = app.granger.home.ReadyActions(
+                        onKeepTheRead = container::keepTheRead, onGetPack = { container.getPack(it) }, onSeeAll = { nav.navigate(ReadinessRoute) },
+                    ),
                     onOpenCard = { card ->
                         when (val target = card.target) {
                             is CardTarget.Article -> scope.launch {

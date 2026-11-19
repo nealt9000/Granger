@@ -12,7 +12,11 @@ sealed interface HomePart {
     data class Feed(val id: Long) : HomePart { override val token = "feed:$id" }
 
     companion object {
-        val BUILT_IN: List<HomePart> = listOf(Continue, Timeline, Play, Wander, Readiness)
+        /**
+         * Home as your desk (Plan O3, Neal 2026-11-19: A + B): Continue, Ready offline, the Timeline, and up to two feeds.
+         * Play and Wander have left Home (Explore's Ways on has them; games get their own rail place later).
+         */
+        val BUILT_IN: List<HomePart> = listOf(Continue, Readiness, Timeline)
     }
 }
 
@@ -46,8 +50,11 @@ data class HomeLayout(val order: List<String> = DEFAULT, val hidden: Set<String>
         return out.distinct()
     }
 
-    /** What Home shows, in order. */
-    fun visible(feedIds: List<Long>): List<HomePart> = parts(feedIds).filter { it.token !in hidden }
+    /** What Home shows, in order: at most [MAX_FEEDS] feeds (Plan O3). */
+    fun visible(feedIds: List<Long>): List<HomePart> {
+        var feeds = 0
+        return parts(feedIds).filter { it.token !in hidden }.filter { it !is HomePart.Feed || feeds++ < MAX_FEEDS }
+    }
 
     /** Moves [token] one place up or down among the shown parts. */
     fun move(token: String, up: Boolean, feedIds: List<Long>): HomeLayout {
@@ -63,7 +70,11 @@ data class HomeLayout(val order: List<String> = DEFAULT, val hidden: Set<String>
 
     companion object {
         const val FEEDS = "feeds"
-        val DEFAULT = listOf("continue", "timeline", "play", "wander", FEEDS, "readiness")
+        val DEFAULT = listOf("continue", "readiness", "timeline", FEEDS)
+        /** Feeds Home shows at most (Neal, 2026-11-19). */
+        const val MAX_FEEDS = 2
+        /** Tokens of sections that have left Home: an order saved with them is from before Plan O3's Home. */
+        private val RETIRED = setOf("play", "wander")
 
         /** The layout for [parts] as arranged, the feeds marker after the last feed (or where feeds were by default). */
         fun arranged(parts: List<HomePart>, hidden: Set<String>): HomeLayout {
@@ -76,7 +87,11 @@ data class HomeLayout(val order: List<String> = DEFAULT, val hidden: Set<String>
 
         fun encode(layout: HomeLayout): Pair<String, Set<String>> = layout.order.joinToString(",") to layout.hidden
 
-        fun decode(order: String?, hidden: Set<String>?): HomeLayout =
-            HomeLayout(order?.split(',')?.filter { it.isNotBlank() }?.takeIf { it.isNotEmpty() } ?: DEFAULT, hidden.orEmpty())
+        /** A saved layout; one from before Plan O3's Home (it still names Play or Wander) starts from the new default. */
+        fun decode(order: String?, hidden: Set<String>?): HomeLayout {
+            val saved = order?.split(',')?.filter { it.isNotBlank() }?.takeIf { it.isNotEmpty() }
+            if (saved == null || saved.any { it in RETIRED }) return HomeLayout(DEFAULT, hidden.orEmpty().filterTo(HashSet()) { it !in RETIRED && it != "readiness" })
+            return HomeLayout(saved, hidden.orEmpty())
+        }
     }
 }

@@ -104,6 +104,9 @@ fun HomeScreen(
     crashNotice: CrashNotice? = null,
     onOpenTimeline: (app.granger.core.library.TimeMark?) -> Unit = {},
     onOpenGames: () -> Unit = {},
+    /** Ready offline (Plan O3 Task 8); null shows the Readiness strip as before. */
+    readyOffline: app.granger.online.ReadyOfflineUi? = null,
+    readyActions: ReadyActions = ReadyActions(),
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -137,6 +140,7 @@ fun HomeScreen(
         onOpenTimeline = onOpenTimeline, game = game, gameActions = gameActions, onOpenGames = onOpenGames,
         arrangeActions = remember(viewModel) { ArrangeActions(viewModel::arrange) },
         wanderJump = viewModel.wanderJumps.collectAsStateWithLifecycle().value,
+        readyOffline = readyOffline, readyActions = readyActions,
     )
 }
 
@@ -171,6 +175,8 @@ fun HomeContent(
     gameActions: GameActions = GameActions(),
     onOpenGames: () -> Unit = {},
     arrangeActions: ArrangeActions = ArrangeActions(),
+    readyOffline: app.granger.online.ReadyOfflineUi? = null,
+    readyActions: ReadyActions = ReadyActions(),
 ) {
     var adding by rememberSaveable { mutableStateOf(false) }
     var arranging by rememberSaveable { mutableStateOf(false) }
@@ -255,16 +261,8 @@ fun HomeContent(
             for ((i, part) in parts.withIndex()) {
                 when (part) {
                     HomePart.Continue -> if (ui.continueCards.isNotEmpty()) item(key = "continue") {
-                        HomeSection("continue-section") {
-                            Heading(stringResource(R.string.home_continue))
-                            CardRow(ui.continueCards, key = { it.key }, tag = "continue-row") { entry ->
-                                when (entry) {
-                                    is RailEntry.Tab -> TabCard(entry) { onOpenTab(entry.tab.tabId) }
-                                    is RailEntry.Play -> PlayCard(entry) { onPlay(entry) }
-                                    else -> {}
-                                }
-                            }
-                        }
+                        // Your desk opens with what you were reading (Plan O3: direction A's lead plate).
+                        HomeSection("continue-section") { ContinueDesk(ui.continueCards, onOpenTab, onPlay) }
                     }
                     HomePart.Timeline -> if (timeline != null && timeline.available) item(key = "timeline") {
                         HomeSection("timeline-section") { TimelineSection(timeline, timelineActions, onOpen = openMark, onExpand = onOpenTimeline) }
@@ -277,7 +275,10 @@ fun HomeContent(
                             WanderSection(wander, wanderActions) { node -> onOpenCard(Card(node.title, "", CardTarget.Article(node.packId, node.path))) }
                         }
                     }
-                    HomePart.Readiness -> item(key = "strip") {
+                    HomePart.Readiness -> if (readyOffline != null) item(key = "ready") {
+                        // What works offline, and what would fill the gaps (Plan O3: direction B's Ready offline).
+                        HomeSection("ready-section") { ReadyOfflineSection(readyOffline, readyActions) }
+                    } else item(key = "strip") {
                         HomeSection("readiness-section", bottom = 0.dp) {
                             SectionHeading(
                                 stringResource(R.string.readiness_title),

@@ -96,7 +96,7 @@ class HomeScreenTest {
 
     @Test fun continueShowsTabsAndPlaysAndOpensThem() {
         show(HomeUi(strip = report, continueCards = listOf(owls, blue)))
-        compose.onNodeWithText("Continue").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Continue").assertIsDisplayed()
         compose.onNodeWithText("Owls").performClick()
         compose.onNodeWithText("Blue").performClick()
         assertThat(calls).containsExactly("tab:1", "play:album:Blue").inOrder()

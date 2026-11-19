@@ -212,4 +212,23 @@
     <string name="home_arrange_hidden">Oculta</string>
     <string name="home_downloads_bytes">%1$s de %2$s</string>
     <string name="home_downloads_bytes_left">%1$s de %2$s · faltan %3$s</string>
+    <string name="home_ready_online">En línea</string>
+    <string name="home_ready_see_all">Ver todo lo que hay en este teléfono</string>
+    <string name="home_ready_bar">%1$s: %2$d en este teléfono, %3$d guardados por ahora, %4$d en línea</string>
+    <plurals name="home_ready_eyebrow">
+        <item quantity="one">Sin conexión · tu última lectura</item>
+        <item quantity="other">Sin conexión · tus últimas %1$d lecturas</item>
+    </plurals>
+    <plurals name="home_ready_headline">
+        <item quantity="one">%1$d de tu %2$d lectura reciente funciona sin conexión</item>
+        <item quantity="other">%1$d de tus %2$d lecturas recientes funcionan sin conexión</item>
+    </plurals>
+    <plurals name="home_ready_keep">
+        <item quantity="one">Guardar la que leíste · %2$s</item>
+        <item quantity="other">Guardar las %1$d que leíste · %2$s</item>
+    </plurals>
+    <plurals name="home_ready_pack">
+        <item quantity="one">Conseguir %1$s · %2$s · cubre %3$d de ellas</item>
+        <item quantity="other">Conseguir %1$s · %2$s · cubre %3$d de ellas</item>
+    </plurals>
 </resources>

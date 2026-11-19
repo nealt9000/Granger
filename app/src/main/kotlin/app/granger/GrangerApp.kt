@@ -772,6 +772,40 @@ class AppContainer(context: Context) {
     /** Gets a catalog pack (the sheet's and Keep this room's offer). */
     fun getPack(id: String) = roomKeep?.getPack(id)
 
+    /**
+     * Home's Ready offline (Plan O3 Task 8): the articles read in the last 30 days (history never leaves the phone), where
+     * each can be read from, its subject, and what would fill the gaps. Null with nothing read lately.
+     */
+    suspend fun readyOffline(): app.granger.online.ReadyOfflineUi? = kotlinx.coroutines.withContext(Dispatchers.IO) {
+        val since = System.currentTimeMillis() - 30L * 24 * 3600 * 1000
+        val recent = sessions.history.first().filter { it.openedAt >= since && it.path.isNotEmpty() && !app.granger.core.library.BookIds.isBook(it.packId) }
+            .distinctBy { it.packId to it.path }.take(READY_RECENT)
+        if (recent.isEmpty()) return@withContext null
+        val qids = runCatching { referenceLinks.qidIndexes() }.getOrNull()
+        val packs = knownPacks.first()
+        val reads = recent.mapNotNull { h ->
+            val pack = packs.firstOrNull { it.id == h.packId } ?: return@mapNotNull null
+            if (!pack.name.startsWith("wikipedia_")) return@mapNotNull null
+            val lang = app.granger.online.ArticleCopies.languageOf(h.packId, pack)
+            val qid = qids?.let { q -> q.qidOf(h.packId, h.path) ?: lang?.let { q.qidOfTitle(h.path, it) } }
+            app.granger.online.RecentRead(
+                h.packId, h.path, availability.of(h.packId, h.path), qid?.let { qids.subjectsOf(it).firstOrNull() },
+                inPack = app.granger.online.OnlineSources.isOnline(h.packId) && qids?.qidOf(h.packId, h.path) != null,
+            )
+        }
+        if (reads.isEmpty()) return@withContext null
+        val each = if (onlinePrefs.offlinePictures.value == app.granger.online.OnlinePrefs.OfflinePictures.SAVE) app.granger.online.RoomOffers.EACH_WITH_PICTURES else app.granger.online.RoomOffers.EACH_TEXT
+        val lang = knowledgeNow.value.firstOrNull() ?: "en"
+        val installed = library.packs.first().mapTo(HashSet()) { it.name }
+        val top = catalog.state.value.catalog?.packs.orEmpty()
+            .filter { it.id.startsWith("wikipedia_${lang}_top_") && it.zimName !in installed }
+            .minByOrNull { it.sizeBytes }?.let { app.granger.online.PackOffer(it.id, it.title, it.sizeBytes) }
+        app.granger.online.ReadyOffline.of(reads, each, top)
+    }
+
+    /** Keeps the online-only articles you read lately (Ready offline's suggestion): one background job. */
+    fun keepTheRead(articles: List<Pair<String, String>>) = app.granger.online.KeepWorker.start(appContext, "recent-reads", articles)
+
     /** Offline pictures and Saved for now's cap (Plan O2 Task 2). */
     val onlinePrefs = app.granger.online.OnlinePrefs(context)
 
@@ -1527,6 +1561,9 @@ private const val TOPIC_PICTURE_PX = 900
 
 /** The Wikipedias online Granger reads, whatever the knowledge languages (Plan O3 builder's call 8). */
 private val ONLINE_LANGUAGES = listOf("en", "es")
+
+/** Recent reads Ready offline looks at, at most (Plan O3 Task 8). */
+private const val READY_RECENT = 60
 
 /** A room's best-known articles offered to keep (Plan O2 Task 6). */
 private const val ROOM_KEEP = 60
