@@ -222,3 +222,21 @@ Play and Wander leave Home. Both stay reachable from Explore's Ways on.
 3. Then 4–6, the grey-outs and the sheet.
 4. Then 8 once Neal has picked.
 5. Then the Pixel pass.
+
+## Results so far (2026-11-19, branch `o3-local-only-home`)
+
+Tasks 1–6 and 8 built with tests (suite green; two player tests flaky on a full run, pass alone). Pixel 6 (debug, DB 17):
+
+| Check | Result |
+|---|---|
+| Home (A + B) | Continue's lead plate (Anime, large, with its dot), the rest listed with marks; Ready offline "21 of your 21 recent reads work offline" with subject bars; Timeline; feeds |
+| The switch | Home's cloud button turns on Local only; the banner shows under the mini player with Turn off; the button lights |
+| Explore in Local only | the spread shows from saved pictures; a room's online-only plates fade with "Needs internet" |
+| The sheet | tapping Tuberculosis: "Keep it next time you're online · about 1.9 MB" and "Get Wikipedia: Best 50,000 articles · 297 MB" |
+| Queued keep | kept by itself ~10 s after Turn off; its plate then carries the dot |
+
+**Fixed in the pass:** Continue's lead is the last article read (a play has no picture, so it goes in the list); the
+"Needs internet" label sits top right, clear of a word plate's title.
+
+**Not yet checked on the phone:** real no signal (airplane mode, needs Neal's OK), Spanish, Field, TalkBack by ear, the
+quick settings tile. The topic page's Related cards don't grey yet (tapping one still gives the sheet).
