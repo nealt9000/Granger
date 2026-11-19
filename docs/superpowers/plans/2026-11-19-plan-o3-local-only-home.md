@@ -172,6 +172,19 @@ Branch `o3-local-only-home` from main (`b186bae6`), in worktree `.claude/worktre
 - **The bookshelf is your reading shelf:** books and collections you read, as covers, in Explore's style. Storage and
   file details move to Outfitting.
 
+**Canvas:** https://claude.ai/artifact/WwYDrBRKUzjb9Q1QQd27bD, with three Home directions (A The lead plate, B Outfitted
+desk, C Today's page), each shown online and in Local only, and one shelf direction.
+
+**Neal's pick (2026-11-19):** Home is **a combination of A and B**, and the shelf is headed the right way (S1, built with O4).
+The build's reading of A + B, from the top:
+1. **A's lead plate:** the article last read, large, then the rest of Continue as a short list with marks.
+2. **B's Ready offline:** a bar for each subject (on this phone / saved for now / online) over your recent reads, with
+   suggestions ("Keep the N you read", the pack that covers most of them).
+3. **Today's pick and the Timeline glance** in one plate row (B).
+4. **Two feeds as plates.**
+
+Play and Wander leave Home. Both stay reachable from Explore's Ways on.
+
 ### Task 8: Home, built
 
 - **The picked direction,** in Explore's components:
