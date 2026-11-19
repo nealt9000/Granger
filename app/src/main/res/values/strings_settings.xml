@@ -15,7 +15,7 @@
     <string name="settings_archive_everything">Archive.org: show everything</string>
     <string name="settings_archive_everything_on">On: everything archive.org serves openly. Turning it off keeps downloaded files.</string>
     <string name="settings_archive_everything_off">Only public-domain texts, published 1930 or earlier, are shown. Downloaded files stay. Turning it on asks you to accept responsibility.</string>
-    <string name="settings_set_up_again">Set up suggestions again</string>
+    <string name="settings_set_up_again">Outfit for offline</string>
     <string name="settings_set_up_again_summary">Pick a start, your region and what you\'ll use Granger for</string>
     <string name="settings_voice">Voice</string>
     <!-- The Voice row's summary when no voice is named. -->

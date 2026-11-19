@@ -1,6 +1,7 @@
 package app.granger.onboarding
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,6 +48,9 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -80,6 +84,7 @@ class OnboardingActions(
     val onClearNotice: () -> Unit = {},
     val onReadNow: () -> Unit = {},
     val onOutfit: () -> Unit = {},
+    val onNotNow: () -> Unit = {},
 )
 
 /** [onDone] leaves the flow (Start or Skip finished); [onSeeDomain] opens the Kiwix screen filtered to a domain. */
@@ -107,7 +112,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel, onDone: () -> Unit, onSeeDo
             onRegionQuery = viewModel::setRegionQuery, onChooseRegion = viewModel::chooseRegion, onToggleUseCase = viewModel::toggleUseCase,
             onSeeDomain = onSeeDomain, onWifiOnly = viewModel::setWifiOnly, onChooseVolume = viewModel::chooseVolume,
             onClearNotice = viewModel::clearNotice,
-            onReadNow = viewModel::startReadingNow, onOutfit = viewModel::outfit,
+            onReadNow = viewModel::startReadingNow, onOutfit = viewModel::outfit, onNotNow = viewModel::notNow,
         ),
     )
 }
@@ -116,11 +121,7 @@ private val Step.title: String
     @Composable get() = stringResource(
         when (this) {
             Step.WELCOME -> R.string.onboarding_step_welcome
-            Step.PHONE -> R.string.onboarding_step_phone
-            Step.CHOOSE -> R.string.onboarding_step_choose
-            Step.START -> R.string.onboarding_step_start
-            Step.REGION -> R.string.onboarding_your_region
-            Step.USES -> R.string.onboarding_uses
+            Step.OUTFIT -> R.string.onboarding_outfit
             Step.REVIEW -> R.string.onboarding_step_review
         },
     )
@@ -128,35 +129,53 @@ private val Step.title: String
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OnboardingContent(ui: OnboardingUi, actions: OnboardingActions) {
+    // The region list opens in place on the Outfit page; picking one folds it back (Plan OB call 2).
+    var regionOpen by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+    val welcomeOnline = ui.step == Step.WELCOME && ui.online
     Scaffold(
-        // The region search opens the keyboard: the list and Next stay above it (Plan U3c walkthrough).
+        // The region search opens the keyboard: the list and the footer stay above it (Plan U3c walkthrough).
         modifier = Modifier.imePadding(),
         topBar = {
             TopAppBar(
-                title = { Text(ui.step.title) },
-                actions = { TextButton(onClick = actions.onSkip) { Text(stringResource(R.string.onboarding_skip)) } },
+                // Welcome online is the owl and its choice, no bar title (Plan OB call 1).
+                title = { if (!welcomeOnline) Text(ui.step.title) },
+                navigationIcon = {
+                    if (ui.step == Step.OUTFIT) {
+                        androidx.compose.material3.IconButton(onClick = actions.onBack) {
+                            androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back))
+                        }
+                    }
+                },
+                actions = {
+                    when {
+                        welcomeOnline -> Unit   // Start reading now is the skip
+                        ui.step == Step.OUTFIT && ui.online -> TextButton(onClick = actions.onNotNow, modifier = Modifier.testTag("onboarding-not-now")) { Text(stringResource(R.string.onboarding_not_now)) }
+                        else -> TextButton(onClick = actions.onSkip) { Text(stringResource(R.string.onboarding_skip)) }
+                    }
+                },
             )
         },
         bottomBar = {
-            Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                if (ui.step != Step.WELCOME) OutlinedButton(onClick = actions.onBack) { Text(stringResource(R.string.common_back)) } else Spacer(Modifier)
-                when (ui.step) {
-                    Step.WELCOME -> Button(onClick = actions.onNext) { Text(stringResource(R.string.onboarding_get_started)) }
-                    // Its two choices are the way on (Plan O5).
-                    Step.CHOOSE -> Spacer(Modifier)
-                    Step.REVIEW -> Button(onClick = actions.onStart, enabled = !ui.starting) {
-                        if (ui.starting) {
-                            CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                            Spacer(Modifier.width(8.dp))
+            when {
+                welcomeOnline -> WelcomeChoice(actions)
+                ui.step == Step.OUTFIT -> OutfitFooter(ui, actions)
+                else -> Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                    if (ui.step != Step.WELCOME) OutlinedButton(onClick = actions.onBack) { Text(stringResource(R.string.common_back)) } else Spacer(Modifier)
+                    when (ui.step) {
+                        Step.REVIEW -> Button(onClick = actions.onStart, enabled = !ui.starting) {
+                            if (ui.starting) {
+                                CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                                Spacer(Modifier.width(8.dp))
+                            }
+                            Text(
+                                stringResource(
+                                    if (ui.review.isEmpty) R.string.onboarding_finish
+                                    else if (ui.starting) R.string.onboarding_starting else R.string.onboarding_start,
+                                ),
+                            )
                         }
-                        Text(
-                            stringResource(
-                                if (ui.review.isEmpty) R.string.onboarding_finish
-                                else if (ui.starting) R.string.onboarding_starting else R.string.onboarding_start,
-                            ),
-                        )
+                        else -> Button(onClick = actions.onNext) { Text(stringResource(R.string.onboarding_get_started)) }
                     }
-                    else -> Button(onClick = actions.onNext) { Text(stringResource(R.string.onboarding_next)) }
                 }
             }
         },
@@ -175,16 +194,103 @@ fun OnboardingContent(ui: OnboardingUi, actions: OnboardingActions) {
             ) {
                 when (ui.step) {
                     Step.WELCOME -> welcome(ui, actions)
-                    Step.PHONE -> phone(ui)
-                    Step.CHOOSE -> choose(actions)
-                    Step.START -> start(ui, actions)
-                    Step.REGION -> region(ui, actions)
-                    Step.USES -> uses(ui, actions)
+                    Step.OUTFIT -> outfit(ui, actions, regionOpen) { regionOpen = it }
                     Step.REVIEW -> review(ui, actions)
                 }
             }
         }
     }
+}
+
+/** Welcome's choice, pinned at the bottom (Plan OB call 1): Start reading now, Outfit for offline, the privacy line under both. */
+@Composable
+private fun WelcomeChoice(actions: OnboardingActions) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Button(onClick = actions.onReadNow, modifier = Modifier.fillMaxWidth().height(56.dp).testTag("choose-read-now")) {
+            Text(stringResource(R.string.onboarding_read_now), style = MaterialTheme.typography.titleMedium)
+        }
+        TextButton(onClick = actions.onOutfit, modifier = Modifier.padding(top = 4.dp).testTag("choose-outfit")) {
+            Text(stringResource(R.string.onboarding_outfit) + " \u203A", style = MaterialTheme.typography.titleMedium)
+        }
+        Text(
+            stringResource(R.string.onboarding_privacy_line),
+            Modifier.padding(top = 8.dp).testTag("privacy-line"),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+/** The Outfit page's footer (Plan OB call 2): the total against the space, and Review. */
+@Composable
+private fun OutfitFooter(ui: OnboardingUi, actions: OnboardingActions) {
+    Column {
+        HorizontalDivider()
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f).testTag("outfit-total")) {
+                if (!ui.review.isEmpty) {
+                    Text(
+                        formatBytes(ui.review.bytes), style = MaterialTheme.typography.titleMedium,
+                        color = if (ui.review.fits) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error,
+                    )
+                    Text(
+                        stringResource(R.string.onboarding_of_free, "", formatBytes(ui.review.freeBytes)).trimStart(),
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            Button(onClick = actions.onNext, modifier = Modifier.testTag("outfit-review")) { Text(stringResource(R.string.onboarding_review)) }
+        }
+    }
+}
+
+/**
+ * Outfit for offline, one page (Plan OB call 2): the phone's space, a start, the region (folded to one row), what you'll
+ * use Granger for. The footer holds the total and Review.
+ */
+private fun androidx.compose.foundation.lazy.LazyListScope.outfit(ui: OnboardingUi, actions: OnboardingActions, regionOpen: Boolean, setRegionOpen: (Boolean) -> Unit) {
+    ui.chosenVolume?.let { volume ->
+        item(key = "free") {
+            Text(
+                if (ui.phone.volumes.size > 1) stringResource(R.string.onboarding_free_on_volume, formatBytes(volume.freeBytes), volume.label)
+                else stringResource(R.string.onboarding_free_on_phone, formatBytes(volume.freeBytes)),
+                style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+    ui.phone.researchLine?.let { line -> item(key = "research") { Text(line.resolve(), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.bodyMedium) } }
+    item(key = "h-start") { Section(stringResource(R.string.onboarding_section_start)) }
+    start(ui, actions)
+    if (ui.noCatalog) return
+    item(key = "h-region") { Section(stringResource(R.string.onboarding_section_region)) }
+    if (!regionOpen) {
+        item(key = "region-row") {
+            androidx.compose.material3.Surface(shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.fillMaxWidth()) {
+                Row(Modifier.padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                    val region = ui.region
+                    val text = region?.let { stringResource(R.string.onboarding_title_size, it.title, formatBytes(it.bytes)) } ?: stringResource(R.string.onboarding_region_none_row)
+                    Text(if (region?.installed == true) stringResource(R.string.onboarding_on_the_phone, text) else text, Modifier.weight(1f))
+                    TextButton(onClick = { setRegionOpen(true) }, modifier = Modifier.testTag("region-choose")) { Text(stringResource(R.string.onboarding_region_choose_another)) }
+                }
+            }
+        }
+    } else {
+        region(ui, actions) { setRegionOpen(false) }
+        item(key = "region-done") {
+            TextButton(onClick = { setRegionOpen(false) }) { Text(stringResource(R.string.onboarding_region_done)) }
+        }
+    }
+    item(key = "h-for") { Section(stringResource(R.string.onboarding_section_for)) }
+    uses(ui, actions)
+}
+
+@Composable
+private fun Section(title: String) {
+    Text(
+        title.uppercase(), Modifier.padding(top = 24.dp, bottom = 4.dp).semantics { heading() },
+        style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary,
+    )
 }
 
 private fun androidx.compose.foundation.lazy.LazyListScope.welcome(ui: OnboardingUi, actions: OnboardingActions) {
@@ -209,24 +315,6 @@ private fun androidx.compose.foundation.lazy.LazyListScope.welcome(ui: Onboardin
             Box(Modifier.padding(top = 32.dp)) {
                 Extra(stringResource(R.string.onboarding_also_language, name), stringResource(R.string.onboarding_also_language_blurb), ui.alsoOn, actions.onToggleAlso)
             }
-        }
-    }
-}
-
-private fun androidx.compose.foundation.lazy.LazyListScope.phone(ui: OnboardingUi) {
-    item { Text(ui.phone.tierLine.resolve(), style = MaterialTheme.typography.bodyLarge) }
-    ui.phone.researchLine?.let { line -> item { Text(line.resolve(), Modifier.padding(top = 12.dp), style = MaterialTheme.typography.bodyMedium) } }
-    item { Text(stringResource(R.string.onboarding_storage), Modifier.padding(top = 20.dp), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary) }
-    items(ui.phone.volumes, key = { it.root.path }) { volume ->
-        Text(stringResource(R.string.onboarding_volume_free_of, volume.label, formatBytes(volume.freeBytes), formatBytes(volume.totalBytes)), Modifier.padding(top = 4.dp))
-    }
-    if (ui.phone.smallestBytes > 0L) {
-        item {
-            Text(
-                stringResource(R.string.onboarding_start_sizes, ui.phone.smallestTitle, formatBytes(ui.phone.smallestBytes), formatBytes(ui.phone.comprehensiveBytes)),
-                Modifier.padding(top = 20.dp),
-                style = MaterialTheme.typography.bodyMedium,
-            )
         }
     }
 }
@@ -294,7 +382,8 @@ private fun androidx.compose.foundation.lazy.LazyListScope.start(ui: OnboardingU
             )
         }
     }
-    val start = ui.start ?: return
+    if (ui.start == null) return
+    val start = ui.start!!
     item(key = "save-space") {
         Row(
             Modifier.fillMaxWidth().padding(top = 8.dp).toggleable(value = ui.saveSpace, role = Role.Switch) { actions.onToggleSaveSpace() },
@@ -330,18 +419,9 @@ private fun androidx.compose.foundation.lazy.LazyListScope.start(ui: OnboardingU
             }
         }
     }
-    item {
-        val free = ui.chosenVolume?.freeBytes ?: 0L
-        val total = start.bytes(ui.unticked)
-        Text(
-            stringResource(R.string.onboarding_of_free, formatBytes(total), formatBytes(free)),
-            Modifier.padding(top = 12.dp),
-            color = if (total > free) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
-        )
-    }
 }
 
-private fun androidx.compose.foundation.lazy.LazyListScope.region(ui: OnboardingUi, actions: OnboardingActions) {
+private fun androidx.compose.foundation.lazy.LazyListScope.region(ui: OnboardingUi, actions: OnboardingActions, picked: () -> Unit = {}) {
     item { Text(stringResource(R.string.onboarding_region_intro), style = MaterialTheme.typography.bodyMedium) }
     item {
         val keyboard = closeKeyboard()
@@ -366,19 +446,19 @@ private fun androidx.compose.foundation.lazy.LazyListScope.region(ui: Onboarding
         }
         item {
             val keyboard = closeKeyboard()
-            TextButton(onClick = { keyboard(); actions.onChooseRegion(null) }) { Text(stringResource(R.string.onboarding_no_region)) }
+            TextButton(onClick = { keyboard(); actions.onChooseRegion(null); picked() }) { Text(stringResource(R.string.onboarding_no_region)) }
         }
     }
     val offered = ui.suggestion?.takeIf { ui.region == null && ui.regionQuery.isBlank() }
     offered?.let { suggestion ->
         item { Text(stringResource(R.string.onboarding_region_suggested), Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }
-        item(key = "suggested") { RegionRow(suggestion, ui, actions) }
+        item(key = "suggested") { RegionRow(suggestion, ui, actions, picked) }
         item { Text(stringResource(R.string.onboarding_other_countries), Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }
     }
     val shown = if (ui.regionQuery.isBlank() && ui.region != null) Regions(emptyList(), emptyList()) else ui.regions
-    items(shown.countries.take(if (ui.regionQuery.isBlank()) 12 else 40), key = { "c-${it.pack.id}" }) { RegionRow(it, ui, actions) }
+    items(shown.countries.take(if (ui.regionQuery.isBlank()) 12 else 40), key = { "c-${it.pack.id}" }) { RegionRow(it, ui, actions, picked) }
     if (shown.larger.isNotEmpty()) item { Text(stringResource(R.string.onboarding_larger_areas), Modifier.padding(top = 12.dp), style = MaterialTheme.typography.labelLarge) }
-    items(shown.larger, key = { "l-${it.pack.id}" }) { RegionRow(it, ui, actions) }
+    items(shown.larger, key = { "l-${it.pack.id}" }) { RegionRow(it, ui, actions, picked) }
 }
 
 private fun androidx.compose.foundation.lazy.LazyListScope.uses(ui: OnboardingUi, actions: OnboardingActions) {
@@ -422,12 +502,13 @@ private fun closeKeyboard(): () -> Unit {
 
 /** One map to pick; picking it closes the keyboard. */
 @Composable
-private fun RegionRow(region: Region, ui: OnboardingUi, actions: OnboardingActions) {
+private fun RegionRow(region: Region, ui: OnboardingUi, actions: OnboardingActions, picked: () -> Unit = {}) {
     val keyboard = closeKeyboard()
     Row(
         Modifier.fillMaxWidth().selectable(selected = region.pack.id == ui.region?.pack?.id, role = Role.RadioButton) {
             keyboard()
             actions.onChooseRegion(region.pack.id)
+            picked()
         }.padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -523,33 +604,6 @@ private fun Choice(title: String, blurb: String, selected: Boolean, onClick: () 
         Column(Modifier.padding(start = 8.dp)) {
             Text(title)
             Text(blurb, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-}
-
-/**
- * How do you want to start? (Plan O5 builder's call 1): read now, online, or outfit the phone for offline; the privacy line
- * under both (spec §9, word for word).
- */
-private fun androidx.compose.foundation.lazy.LazyListScope.choose(actions: OnboardingActions) {
-    item(key = "choose") {
-        androidx.compose.foundation.layout.Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            ChoiceCard(stringResource(R.string.onboarding_read_now), stringResource(R.string.onboarding_read_now_summary), "choose-read-now", primary = true, onClick = actions.onReadNow)
-            ChoiceCard(stringResource(R.string.onboarding_outfit), stringResource(R.string.onboarding_outfit_summary), "choose-outfit", primary = false, onClick = actions.onOutfit)
-            Text(stringResource(R.string.onboarding_privacy_line), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 8.dp).testTag("privacy-line"))
-        }
-    }
-}
-
-@Composable
-private fun ChoiceCard(title: String, summary: String, tag: String, primary: Boolean, onClick: () -> Unit) {
-    val colors = if (primary) androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-        else androidx.compose.material3.CardDefaults.outlinedCardColors()
-    androidx.compose.material3.Card(onClick = onClick, colors = colors, modifier = Modifier.fillMaxWidth().testTag(tag)) {
-        androidx.compose.foundation.layout.Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(title, style = MaterialTheme.typography.titleLarge)
-            Text(summary, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

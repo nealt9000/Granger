@@ -47,14 +47,14 @@
     <!-- Pick a start. -->
     <string name="onboarding_catalog_failed">Couldn\'t reach the catalog. Check the connection and try again.</string>
     <string name="onboarding_try_again">Try again</string>
-    <string name="onboarding_catalog_failed_next">Or tap Next: Home and the Library are yours either way.</string>
+    <string name="onboarding_catalog_failed_next">Or tap Not now: you can read online and outfit later.</string>
     <string name="onboarding_catalog_loading">Getting the list of packs…</string>
     <string name="onboarding_blurb_starter">The most-read Wikipedia, a medical encyclopedia and the classic books: a good library in little space.</string>
-    <string name="onboarding_blurb_efficient">The essentials of every domain: enough to answer most questions, in the least space.</string>
-    <string name="onboarding_blurb_comprehensive">Everything the readiness model counts, for a phone that can hold it.</string>
+    <string name="onboarding_blurb_efficient">The essentials of every domain Outfitting counts, in the least space.</string>
+    <string name="onboarding_blurb_comprehensive">Everything Outfitting counts, for a phone that can hold it.</string>
     <!-- The third choice, beside the Efficient and Comprehensive starts. -->
-    <string name="onboarding_neither">None, I\'ll choose later</string>
-    <string name="onboarding_neither_blurb">Home and the Library are yours either way.</string>
+    <string name="onboarding_neither">None</string>
+    <string name="onboarding_neither_blurb">Read online, and keep things as you go.</string>
     <!-- The line that gets Ask's AI models. -->
     <string name="onboarding_ask_line">Ask (Preview)</string>
     <string name="onboarding_ask_blurb">The librarian answers questions from your library, on this phone. It\'s a preview: it can be wrong.</string>
@@ -100,7 +100,7 @@
     </plurals>
 
     <!-- Review and start. -->
-    <string name="onboarding_review_empty">Nothing to download yet. Home and the Library are ready; the Kiwix screen has everything else.</string>
+    <string name="onboarding_review_empty">Nothing to download yet. Read online, and keep what you like as you go; Outfitting has everything else.</string>
     <string name="onboarding_quick_voice_classics">Quick ones first: the voice and the Classics land in a few minutes.</string>
     <string name="onboarding_quick_voice">Quick ones first: the voice lands in a few minutes.</string>
     <string name="onboarding_quick_classics">Quick ones first: the Classics land in a few minutes.</string>
@@ -128,4 +128,16 @@
     <string name="onboarding_outfit">Outfit for offline</string>
     <string name="onboarding_outfit_summary">Choose what to keep on this phone now, for when there\'s no signal.</string>
     <string name="onboarding_privacy_line">Reading online asks Wikipedia (and other free libraries) for each page, so they see what you open. Granger itself never sees it. You can keep things offline or switch online off any time.</string>
+    <!-- Plan OB: Welcome holds the choice; one Outfit page. -->
+    <string name="onboarding_intro_online">An encyclopedia to wander, built from Wikipedia and Kiwix: topic pages, a timeline of everything, and links between people, places and books. Read online now, and keep what you like for when there\'s no signal.</string>
+    <string name="onboarding_not_now">Not now</string>
+    <string name="onboarding_free_on_phone">%1$s free on this phone</string>
+    <string name="onboarding_free_on_volume">%1$s free on %2$s</string>
+    <string name="onboarding_section_start">A start</string>
+    <string name="onboarding_section_region">Your region</string>
+    <string name="onboarding_section_for">For</string>
+    <string name="onboarding_region_choose_another">Choose another</string>
+    <string name="onboarding_region_none_row">No region</string>
+    <string name="onboarding_region_done">Done</string>
+    <string name="onboarding_review">Review</string>
 </resources>

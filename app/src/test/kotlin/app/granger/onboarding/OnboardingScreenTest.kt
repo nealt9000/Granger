@@ -59,51 +59,65 @@ class OnboardingScreenTest {
         assertThat(calls).containsExactly("next", "skip").inOrder()
     }
 
-    @Test fun thisPhoneShowsTheTierStorageAndSizes() {
-        show(OnboardingUi(step = Step.PHONE, phone = phone))
-        compose.onNodeWithText("A library phone, with about 7 GB of memory.").assertIsDisplayed()
-        compose.onNodeWithText("Ask needs 6 GB.").assertIsDisplayed()
-        compose.onNodeWithText("Internal storage: 10 KB free of 64 KB").assertIsDisplayed()
-        compose.onNodeWithText("Back").performClick()
-        assertThat(calls).containsExactly("back")
+    @Test fun onlineWelcomeHoldsTheChoiceAndThePrivacyLine() {
+        // Plan OB call 1: no Skip; the two choices, the privacy line under them.
+        val acts = OnboardingActions(onReadNow = { calls += "read" }, onOutfit = { calls += "outfit" })
+        compose.setContent { OnboardingContent(OnboardingUi(step = Step.WELCOME, online = true, intro = UiText.Res(app.granger.R.string.onboarding_intro_online)), acts) }
+        compose.onNodeWithText("Skip").assertDoesNotExist()
+        compose.onNodeWithTag("privacy-line").assertIsDisplayed()
+        compose.onNodeWithText("An encyclopedia to wander", substring = true).assertIsDisplayed()
+        compose.onNodeWithTag("choose-read-now").performClick()
+        compose.onNodeWithTag("choose-outfit").performClick()
+        assertThat(calls).containsExactly("read", "outfit").inOrder()
+    }
+
+    @Test fun outfitPageShowsTheSpaceSectionsAndReview() {
+        val acts = OnboardingActions(onBack = { calls += "back" }, onNext = { calls += "next" }, onNotNow = { calls += "notnow" })
+        compose.setContent { OnboardingContent(OnboardingUi(step = Step.OUTFIT, online = true, noCatalog = false, phone = phone, starts = listOf(efficient), startId = "efficient"), acts) }
+        compose.onNodeWithText("10 KB free on this phone").assertIsDisplayed()
+        compose.onNodeWithText("A START").assertIsDisplayed()
+        compose.onNodeWithText("Not now").performClick()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithTag("outfit-review").performClick()
+        assertThat(calls).containsExactly("notnow", "back", "next").inOrder()
     }
 
     @Test fun pickAStartOffersAskUnderTheChoices() {
         val ask = Line(OnboardingModel.ASK, UiText.Res(app.granger.R.string.onboarding_ask_line), listOf(app.granger.modelEntry("e2b", size = 2_200_000_000)), installed = false)
-        show(OnboardingUi(step = Step.START, noCatalog = false, startId = null, askLine = ask, askChosen = true))
+        show(OnboardingUi(step = Step.OUTFIT, noCatalog = false, startId = null, askLine = ask, askChosen = true))
         compose.onNodeWithText("Ask (Preview) · 2.2 GB").assertIsDisplayed().assertIsOn().performClick()
         compose.onNodeWithText("The librarian answers questions from your library, on this phone. It's a preview: it can be wrong.").assertIsDisplayed()
         assertThat(calls).containsExactly("ask")
     }
 
     @Test fun pickAStartShowsTheFetchWhileTheCatalogArrives() {
-        show(OnboardingUi(step = Step.START, noCatalog = true, refreshing = true))
+        show(OnboardingUi(step = Step.OUTFIT, noCatalog = true, refreshing = true))
         compose.onNodeWithText("Getting the list of packs…").assertIsDisplayed()
         compose.onNodeWithText("Refresh the catalog to see the choices.").assertDoesNotExist()
     }
 
     @Test fun pickAStartOffersTryAgainWhenTheFetchFailed() {
-        show(OnboardingUi(step = Step.START, noCatalog = true, catalogFailed = true))
+        show(OnboardingUi(step = Step.OUTFIT, noCatalog = true, catalogFailed = true))
         compose.onNodeWithText("Couldn't reach the catalog. Check the connection and try again.").assertIsDisplayed()
         compose.onNodeWithText("Try again").performClick()
         assertThat(calls).containsExactly("refresh")
     }
 
     @Test fun pickAStartListsChoicesAndLinesWithTheTotal() {
-        show(OnboardingUi(step = Step.START, noCatalog = false, phone = phone, starts = listOf(efficient), startId = "efficient"))
+        show(OnboardingUi(step = Step.OUTFIT, noCatalog = false, phone = phone, starts = listOf(efficient), startId = "efficient"))
         compose.onNodeWithText("Efficient start · 1.0 KB").assertIsSelected()
-        compose.onNodeWithText("None, I'll choose later").performClick()
+        compose.onNodeWithText("None").performClick()
         compose.onNodeWithText("WikiMed (no pictures)").performClick()
-        compose.onNodeWithText("1.0 KB of 10 KB free").assertIsDisplayed()
         assertThat(calls).containsExactly("start:null", "line:wikipedia_en_medicine_nopic").inOrder()
     }
 
     @Test fun yourRegionSearchesAndPicks() {
         val regions = Regions(listOf(Region(peru, installed = false)), emptyList())
         // The query is held as the view model holds it, so the field shows what was typed when picking takes its focus.
-        var ui by mutableStateOf(OnboardingUi(step = Step.REGION, noCatalog = false, regions = regions))
+        var ui by mutableStateOf(OnboardingUi(step = Step.OUTFIT, noCatalog = false, regions = regions))
         val typing = OnboardingActions(onRegionQuery = { calls += "query:$it"; ui = ui.copy(regionQuery = it) }, onChooseRegion = actions.onChooseRegion)
         compose.setContent { OnboardingContent(ui, typing) }
+        compose.onNodeWithTag("region-choose").performClick()
         compose.onNodeWithText("Country or area").performTextInput("pe")
         compose.onNodeWithText("Peru · 500 B").performClick()
         compose.onNodeWithText("Medical work").assertDoesNotExist()
@@ -113,19 +127,25 @@ class OnboardingScreenTest {
     /** Plan U3c walkthrough: the keyboard covered the result and Next; picking one puts it away. */
     @Test fun pickingARegionTakesFocusOffTheSearch() {
         val regions = Regions(listOf(Region(peru, installed = false)), emptyList())
-        show(OnboardingUi(step = Step.REGION, noCatalog = false, regions = regions, regionQuery = "pe"))
+        show(OnboardingUi(step = Step.OUTFIT, noCatalog = false, regions = regions, regionQuery = "pe"))
+        compose.onNodeWithTag("region-choose").performClick()
         val field = compose.onNodeWithText("Country or area")
         field.performClick()
         field.assertIsFocused()
         compose.onNodeWithText("Peru · 500 B").performClick()
-        field.assertIsNotFocused()
-        compose.onNodeWithText("Next").assertIsDisplayed()
+        // Picking folds the field away with the list, so nothing keeps the keyboard up.
+        field.assertDoesNotExist()
+        // Picking folds the list back into its row; Review stays in view (Plan OB call 2).
+        compose.onNodeWithTag("region-choose").assertIsDisplayed()
+        compose.onNodeWithText("Review").assertIsDisplayed()
         assertThat(calls).containsExactly("region:maps_en_peru")
     }
 
     @Test fun yourRegionShowsTheSuggestionAndNoRegionClearsIt() {
         val regions = Regions(listOf(Region(peru, installed = false)), emptyList())
-        show(OnboardingUi(step = Step.REGION, noCatalog = false, regions = regions, region = Region(peru, installed = false), regionSuggested = true))
+        show(OnboardingUi(step = Step.OUTFIT, noCatalog = false, regions = regions, region = Region(peru, installed = false), regionSuggested = true))
+        compose.onNodeWithText("Peru · 500 B").assertIsDisplayed()
+        compose.onNodeWithTag("region-choose").performClick()
         compose.onNodeWithText("Suggested from this phone").assertIsDisplayed()
         compose.onNodeWithText("Peru · 500 B").assertIsDisplayed()
         compose.onNodeWithText("No region").performClick()
@@ -134,7 +154,8 @@ class OnboardingScreenTest {
 
     @Test fun yourRegionOffersABigSuggestionFirstUnpicked() {
         val regions = Regions(listOf(Region(peru, installed = false)), emptyList())
-        show(OnboardingUi(step = Step.REGION, noCatalog = false, regions = regions, suggestion = Region(peru, installed = false)))
+        show(OnboardingUi(step = Step.OUTFIT, noCatalog = false, regions = regions, suggestion = Region(peru, installed = false)))
+        compose.onNodeWithTag("region-choose").performClick()
         compose.onNodeWithText("Suggested from this phone").assertIsDisplayed()
         compose.onNodeWithText("Other countries").assertIsDisplayed()
         compose.onAllNodesWithText("Peru · 500 B")[0].performClick()
@@ -143,7 +164,7 @@ class OnboardingScreenTest {
 
     @Test fun usesTogglesChipsOnItsOwnScreen() {
         val addition = Addition(UseCase("medical", "Medical work", "Clinical.", listOf("x")), listOf(line))
-        show(OnboardingUi(step = Step.USES, noCatalog = false, additions = listOf(addition)))
+        show(OnboardingUi(step = Step.OUTFIT, noCatalog = false, additions = listOf(addition)))
         compose.onNodeWithText("Country or area").assertDoesNotExist()
         compose.onNodeWithText("Medical work").performClick()
         compose.onNodeWithText("Clinical. Adds 1.0 KB · 1 item.").assertIsDisplayed()
@@ -153,14 +174,13 @@ class OnboardingScreenTest {
 
     @Test fun everyStepOpensAtItsTop() {
         val many = (1..40).map { Region(packEntry("maps_en_c$it", size = 100).copy(family = "maps", title = "Country $it"), installed = false) }
-        var ui by mutableStateOf(OnboardingUi(step = Step.START, noCatalog = false, starts = listOf(efficient), startId = "efficient", regions = Regions(many, many.take(10)), regionQuery = "Country"))
+        var ui by mutableStateOf(OnboardingUi(step = Step.OUTFIT, noCatalog = false, phone = phone, starts = listOf(efficient), startId = "efficient", regions = Regions(many, many.take(10))))
         compose.setContent { OnboardingContent(ui, actions) }
-        compose.onNodeWithTag("onboarding-list").performScrollToIndex(2)
-        ui = ui.copy(step = Step.REGION)
-        compose.onNodeWithText("A map of where you are, for finding your way with no signal.").assertIsDisplayed()
-        compose.onNodeWithTag("onboarding-list").performScrollToIndex(30)
-        ui = ui.copy(step = Step.USES)
-        compose.onNodeWithText("Add packs for what you'll use Granger for. You can change this later in Settings.").assertIsDisplayed()
+        compose.onNodeWithTag("onboarding-list").performScrollToIndex(6)
+        ui = ui.copy(step = Step.REVIEW)
+        compose.onNodeWithText("Nothing to download yet", substring = true).assertIsDisplayed()
+        ui = ui.copy(step = Step.OUTFIT)
+        compose.onNodeWithText("10 KB free on this phone").assertIsDisplayed()
     }
 
     @Test fun reviewListsGroupsTheTotalWifiAndStart() {
@@ -176,7 +196,7 @@ class OnboardingScreenTest {
 
     @Test fun anEmptyReviewFinishesAndANoticeShows() {
         show(OnboardingUi(step = Step.REVIEW, noCatalog = false, phone = phone, notice = UiText.Res(app.granger.R.string.onboarding_no_space, "Internal storage", "5 KB")))
-        compose.onNodeWithText("Nothing to download yet. Home and the Library are ready; the Kiwix screen has everything else.").assertIsDisplayed()
+        compose.onNodeWithText("Nothing to download yet. Read online, and keep what you like as you go; Outfitting has everything else.").assertIsDisplayed()
         compose.onNodeWithText("Not enough space on Internal storage: free up 5 KB or untick something.").assertIsDisplayed()
         compose.onNodeWithText("Finish").performClick()
         assertThat(calls).containsExactly("start")

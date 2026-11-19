@@ -66,13 +66,13 @@ class OnboardingViewModelTest {
 
     private var privacySeen = false
 
-    private fun TestScope.viewModel(tier: DeviceTier = DeviceTier.ASK, country: String = "", offerVoice: Boolean = true, online: Boolean = false): OnboardingViewModel {
+    private fun TestScope.viewModel(tier: DeviceTier = DeviceTier.ASK, country: String = "", offerVoice: Boolean = true, online: Boolean = false, startAt: Step = Step.WELCOME): OnboardingViewModel {
         val vm = OnboardingViewModel(
             catalog, library, downloads, volumes, prefs, tier, totalRamBytes = 7_974_752_256, onboardingPrefs,
             countryCode = country, offerVoice = offerVoice, io = main.dispatcher, now = { 42 },
             enqueue = { group, items: List<CatalogItem>, _: Volume, wifi -> enqueued += Triple(group, items.map { it.id }, wifi); enqueueResult },
             knowledge = knowledge, setKnowledge = { knowledge.value = it }, phoneLocales = { phone },
-            chooseOnline = online, onPrivacySeen = { privacySeen = true },
+            chooseOnline = online, onPrivacySeen = { privacySeen = true }, startAt = startAt,
         )
         backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()
@@ -81,30 +81,49 @@ class OnboardingViewModelTest {
 
     private fun TestScope.settle() = testScheduler.advanceUntilIdle()
 
-    @Test fun onlineHowDoYouWantToStartComesAfterThisPhone() = runTest(main.dispatcher) {
-        // Plan O5 Task 1.
+    @Test fun welcomeHoldsTheChoiceAndOutfitIsOnePage() = runTest(main.dispatcher) {
+        // Plan OB call 1–2: Welcome → Outfit → Review; both choices have seen the privacy line.
         val vm = viewModel(online = true)
-        vm.next(); settle()
-        vm.next(); settle()
-        assertThat(vm.ui.value.step).isEqualTo(Step.CHOOSE)
         vm.outfit(); settle()
-        assertThat(vm.ui.value.step).isEqualTo(Step.START)
+        assertThat(vm.ui.value.step).isEqualTo(Step.OUTFIT)
         assertThat(privacySeen).isTrue()
+        vm.next(); settle()
+        assertThat(vm.ui.value.step).isEqualTo(Step.REVIEW)
         vm.back(); settle()
-        assertThat(vm.ui.value.step).isEqualTo(Step.CHOOSE)
-        vm.startReadingNow(); settle()
+        assertThat(vm.ui.value.step).isEqualTo(Step.OUTFIT)
+        vm.notNow(); settle()
         assertThat(vm.readingNow.value).isTrue()
         assertThat(vm.finished.value).isTrue()
         assertThat(onboardingPrefs.done).isTrue()
     }
 
-    @Test fun withoutOnlineThePhoneLeadsStraightToStart() = runTest(main.dispatcher) {
+    @Test fun startReadingNowSeesThePrivacyLineAndEndsOnExplore() = runTest(main.dispatcher) {
+        val vm = viewModel(online = true)
+        vm.startReadingNow(); settle()
+        assertThat(privacySeen).isTrue()
+        assertThat(vm.readingNow.value).isTrue()
+        assertThat(vm.finished.value).isTrue()
+    }
+
+    @Test fun fromSettingsTheFlowOpensAtOutfitAndBackLeaves() = runTest(main.dispatcher) {
+        // Plan OB call 4: Not now and Back return to Settings, never to Welcome or Explore.
+        val vm = viewModel(online = true, startAt = Step.OUTFIT)
+        assertThat(vm.ui.value.step).isEqualTo(Step.OUTFIT)
+        vm.back(); settle()
+        assertThat(vm.finished.value).isTrue()
+        assertThat(vm.readingNow.value).isFalse()
+        val again = viewModel(online = true, startAt = Step.OUTFIT)
+        again.notNow(); settle()
+        assertThat(again.readingNow.value).isFalse()
+    }
+
+    @Test fun withoutOnlineGetStartedLeadsToOutfit() = runTest(main.dispatcher) {
         val vm = viewModel(online = false)
         vm.next(); settle()
-        vm.next(); settle()
-        assertThat(vm.ui.value.step).isEqualTo(Step.START)
-        vm.back(); settle()
-        assertThat(vm.ui.value.step).isEqualTo(Step.PHONE)
+        assertThat(vm.ui.value.step).isEqualTo(Step.OUTFIT)
+        vm.notNow(); settle()
+        assertThat(vm.readingNow.value).isFalse()
+        assertThat(vm.finished.value).isTrue()
     }
 
     @Test fun aFreshInstallFetchesTheCatalogOnce() = runTest(main.dispatcher) {
@@ -266,7 +285,7 @@ class OnboardingViewModelTest {
     @Test fun stepsGoForwardAndBackAndBackOnWelcomeIsSkip() = runTest(main.dispatcher) {
         val vm = viewModel()
         vm.next(); settle()
-        assertThat(vm.ui.value.step).isEqualTo(Step.PHONE)
+        assertThat(vm.ui.value.step).isEqualTo(Step.OUTFIT)
         vm.back(); settle()
         assertThat(vm.ui.value.step).isEqualTo(Step.WELCOME)
         assertThat(vm.finished.value).isFalse()

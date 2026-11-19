@@ -12,7 +12,7 @@
     <string name="settings_archive_everything">Archive.org: mostrar todo</string>
     <string name="settings_archive_everything_on">Activado: todo lo que archive.org ofrece abiertamente. Si lo desactivas, se conservan los archivos descargados.</string>
     <string name="settings_archive_everything_off">Solo se muestran textos de dominio público, publicados en 1930 o antes. Los archivos descargados se quedan. Para activarlo, tendrás que aceptar la responsabilidad.</string>
-    <string name="settings_set_up_again">Volver a configurar las sugerencias</string>
+    <string name="settings_set_up_again">Equipar para sin conexión</string>
     <string name="settings_set_up_again_summary">Elige un comienzo, tu región y para qué usarás Granger</string>
     <string name="settings_voice">Voz</string>
     <string name="settings_voice_summary_default">Leer en voz alta</string>

@@ -202,7 +202,8 @@ private const val EXPLORE_WARM_AFTER = 1_500L
 @Serializable data object GamesRoute
 
 /** Onboarding (Plan H3): five screens over Home on a first run, or from Settings. */
-@Serializable object OnboardingRoute
+/** First run; [outfit] opens straight at Outfit for offline, from Settings (Plan OB call 4). */
+@Serializable data class OnboardingRoute(val outfit: Boolean = false)
 @Serializable data class CollectionRoute(val collectionId: String)
 
 /** Music's tabs for one Music collection; null is "All music" (not scoped). */
@@ -642,7 +643,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 // Home, then the flow over it: Start and Skip pop back to Home (Plan H3, Decision 1).
                 skipTransition = true
                 nav.navigate(HomeRoute)
-                nav.navigate(OnboardingRoute)
+                nav.navigate(OnboardingRoute())
             }
         }
     }
@@ -1616,7 +1617,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     content = container.contentPrefs,
                     online = if (Features.ONLINE) app.granger.online.OnlineSettingsSource(container.onlinePrefs, container.savedStore, container.reachControl) else null,
                     onModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },
-                    onSetUpAgain = { nav.navigate(OnboardingRoute) { launchSingleTop = true } },
+                    onSetUpAgain = { nav.navigate(OnboardingRoute(outfit = true)) { launchSingleTop = true } },
                     onBack = { nav.popBackStack() },
                     onVoice = if (Features.PLAYER && Features.READ_ALOUD) ({ nav.navigate(VoiceRoute) }) else null,
                     voiceSummary = container.installedVoices.voices.collectAsStateWithLifecycle().value
@@ -1831,7 +1832,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onBack = { nav.popBackStack() },
                 )
             }
-            composable<OnboardingRoute> {
+            composable<OnboardingRoute> { entry ->
+                val outfitOnly = entry.toRoute<OnboardingRoute>().outfit
                 OnboardingScreen(
                     viewModel = viewModel {
                         OnboardingViewModel(
@@ -1844,6 +1846,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             countryCode = container.phoneCountry,
                             chooseOnline = Features.ONLINE,
                             onPrivacySeen = container.networkPolicy::setPrivacySeen,
+                            startAt = if (outfitOnly) app.granger.onboarding.Step.OUTFIT else app.granger.onboarding.Step.WELCOME,
                         )
                     },
                     onDone = { nav.popBackStack() },

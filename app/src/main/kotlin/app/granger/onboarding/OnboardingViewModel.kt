@@ -35,7 +35,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** The six screens (spec §6; Region and Uses split in Plan U3a). */
-enum class Step { WELCOME, PHONE, CHOOSE, START, REGION, USES, REVIEW }
+/** Plan OB: Welcome holds the choice; Outfit for offline is one page, then Review. */
+enum class Step { WELCOME, OUTFIT, REVIEW }
 
 /** This phone (step 2). */
 data class PhoneUi(
@@ -51,6 +52,8 @@ data class PhoneUi(
 
 data class OnboardingUi(
     val step: Step = Step.WELCOME,
+    /** Wikipedia online is on (Plan OB): Welcome holds Start reading now and Outfit for offline. */
+    val online: Boolean = false,
     /** Welcome's line: a phone too small for Ask isn't promised a librarian (Plan E1 phone check). */
     val intro: UiText = UiText.Res(R.string.onboarding_intro),
     /** No catalog yet: Pick a start shows the fetch (fresh install) or why it failed. */
@@ -133,12 +136,14 @@ class OnboardingViewModel(
     private val appLanguage: () -> String = { ENGLISH },
     private val enqueue: suspend (groupId: String, items: List<app.granger.core.catalog.CatalogItem>, volume: Volume, wifiOnly: Boolean) -> EnqueueResult =
         { group, items, volume, wifi -> downloads.enqueueGroup(group, items.map { downloadSpecOf(it, group) }, volume.root, wifi) },
-    /** Wikipedia online is on (Plan O5): How do you want to start? comes after This phone. Off, it's passed over. */
+    /** Wikipedia online is on (Plan O5): Welcome offers Start reading now beside Outfit for offline. Off, it's Get started. */
     private val chooseOnline: Boolean = false,
-    /** The privacy line has been shown and Start reading now chosen (Plan O5 builder's call 2). */
+    /** The privacy line has been shown (Plan O5 builder's call 2): both of Welcome's choices sit over it (Plan OB). */
     private val onPrivacySeen: () -> Unit = {},
+    /** Where the flow opens: Welcome on first run, the Outfit page from Settings (Plan OB call 4), Back from it leaving. */
+    private val startAt: Step = Step.WELCOME,
 ) : ViewModel() {
-    private val step = MutableStateFlow(Step.WELCOME)
+    private val step = MutableStateFlow(startAt)
 
     /** Start reading now was chosen: onboarding ends on Explore (Plan O5 Task 1). */
     private val readNow = MutableStateFlow(false)
@@ -259,6 +264,7 @@ class OnboardingViewModel(
             secondLine = secondLine,
             secondChosen = c.secondChosen,
             step = c.step,
+            online = chooseOnline,
             noCatalog = catalog == null,
             refreshing = f.refreshing,
             catalogFailed = f.failed,
@@ -294,8 +300,13 @@ class OnboardingViewModel(
     }
 
     /** Memory as Readiness words it ([formatBytes]), so the two never disagree. */
-    private fun intro(): UiText =
-        UiText.Res(if (askOn) R.string.onboarding_intro else R.string.onboarding_intro_library)
+    private fun intro(): UiText = UiText.Res(
+        when {
+            chooseOnline -> R.string.onboarding_intro_online
+            askOn -> R.string.onboarding_intro
+            else -> R.string.onboarding_intro_library
+        },
+    )
 
     private fun tierLine(): UiText =
         if (askOn) UiText.Res(R.string.onboarding_tier_ask, formatBytes(totalRamBytes))
@@ -316,11 +327,11 @@ class OnboardingViewModel(
         viewModelScope.launch { catalog.refresh() }
     }
 
-    fun next() = step.update { (Step.entries.getOrNull(it.ordinal + 1) ?: it).let { n -> if (n == Step.CHOOSE && !chooseOnline) Step.START else n } }
+    fun next() = step.update { Step.entries.getOrNull(it.ordinal + 1) ?: it }
 
-    /** Back on the first step is Skip (Decision 1). */
+    /** Back on the step the flow opened at leaves it (Decision 1; from Settings, back to Settings). */
     fun back() {
-        if (step.value == Step.WELCOME) skip() else step.update { Step.entries[it.ordinal - 1].let { b -> if (b == Step.CHOOSE && !chooseOnline) Step.PHONE else b } }
+        if (step.value == startAt) skip() else step.update { Step.entries[it.ordinal - 1] }
     }
 
     /**
@@ -333,11 +344,14 @@ class OnboardingViewModel(
         skip()
     }
 
-    /** Outfit for offline: today's steps, from Start. The privacy line under it has been seen too. */
+    /** Outfit for offline: the one Outfit page (Plan OB). The privacy line under it has been seen too. */
     fun outfit() {
         onPrivacySeen()
-        step.value = Step.START
+        step.value = Step.OUTFIT
     }
+
+    /** The Outfit page's Not now: reading now on first run with online on (Plan OB call 2); from Settings, back there. */
+    fun notNow() = if (chooseOnline && startAt == Step.WELCOME) startReadingNow() else skip()
 
     fun goTo(target: Step) { step.value = target }
 
@@ -414,6 +428,11 @@ class OnboardingViewModel(
                 return@launch
             }
             onboardingPrefs.done = true
+            // Plan OB call 3: Start ends on Explore, reading online while the packs come down, which its line follows.
+            if (chooseOnline) {
+                onboardingPrefs.outfitGroup = group
+                readNow.value = true
+            }
             done.value = true
         }
     }

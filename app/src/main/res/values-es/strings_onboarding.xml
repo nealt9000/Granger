@@ -31,13 +31,13 @@
 
     <string name="onboarding_catalog_failed">No se pudo conectar con el catálogo. Revisa la conexión e inténtalo de nuevo.</string>
     <string name="onboarding_try_again">Intentar de nuevo</string>
-    <string name="onboarding_catalog_failed_next">O toca Siguiente: Inicio y la Biblioteca son tuyos de todos modos.</string>
+    <string name="onboarding_catalog_failed_next">O toca Ahora no: puedes leer en línea y equiparte después.</string>
     <string name="onboarding_catalog_loading">Obteniendo la lista de paquetes…</string>
     <string name="onboarding_blurb_starter">La Wikipedia más leída, una enciclopedia médica y los libros clásicos: una buena biblioteca en poco espacio.</string>
-    <string name="onboarding_blurb_efficient">Lo esencial de cada área: suficiente para responder a la mayoría de las preguntas, en el menor espacio.</string>
-    <string name="onboarding_blurb_comprehensive">Todo lo que cuenta el modelo de preparación, para un teléfono que pueda guardarlo.</string>
-    <string name="onboarding_neither">Ninguno, elegiré después</string>
-    <string name="onboarding_neither_blurb">Inicio y la Biblioteca son tuyos de todos modos.</string>
+    <string name="onboarding_blurb_efficient">Lo esencial de cada área que cuenta Equipamiento, en el menor espacio.</string>
+    <string name="onboarding_blurb_comprehensive">Todo lo que cuenta Equipamiento, para un teléfono que pueda guardarlo.</string>
+    <string name="onboarding_neither">Ninguno</string>
+    <string name="onboarding_neither_blurb">Lee en línea y guarda lo que quieras sobre la marcha.</string>
     <string name="onboarding_ask_line">Preguntar (versión preliminar)</string>
     <string name="onboarding_ask_blurb">El bibliotecario responde preguntas a partir de tu biblioteca, en este teléfono. Es una versión preliminar: puede equivocarse.</string>
     <string name="onboarding_the_librarian">El bibliotecario</string>
@@ -69,7 +69,7 @@
         <item quantity="other">%d elementos</item>
     </plurals>
 
-    <string name="onboarding_review_empty">Aún no hay nada que descargar. Inicio y la Biblioteca están listos; la pantalla de Kiwix tiene todo lo demás.</string>
+    <string name="onboarding_review_empty">Aún no hay nada que descargar. Lee en línea y guarda lo que quieras sobre la marcha; Equipamiento tiene todo lo demás.</string>
     <string name="onboarding_quick_voice_classics">Primero lo rápido: la voz y los Clásicos llegan en unos minutos.</string>
     <string name="onboarding_quick_voice">Primero lo rápido: la voz llega en unos minutos.</string>
     <string name="onboarding_quick_classics">Primero lo rápido: los Clásicos llegan en unos minutos.</string>
@@ -89,4 +89,16 @@
     <string name="onboarding_outfit">Equipar para sin conexión</string>
     <string name="onboarding_outfit_summary">Elige qué guardar ahora en este teléfono, para cuando no haya señal.</string>
     <string name="onboarding_privacy_line">Leer en línea pide cada página a Wikipedia (y a otras bibliotecas libres), así que ven lo que abres. Granger nunca lo ve. Puedes guardar cosas sin conexión o desactivar el acceso en línea cuando quieras.</string>
+    <!-- Plan OB -->
+    <string name="onboarding_intro_online">Una enciclopedia para recorrer, hecha con Wikipedia y Kiwix: páginas de tema, una línea de tiempo de todo y enlaces entre personas, lugares y libros. Lee en línea ya y guarda lo que quieras para cuando no haya señal.</string>
+    <string name="onboarding_not_now">Ahora no</string>
+    <string name="onboarding_free_on_phone">%1$s libres en este teléfono</string>
+    <string name="onboarding_free_on_volume">%1$s libres en %2$s</string>
+    <string name="onboarding_section_start">Un comienzo</string>
+    <string name="onboarding_section_region">Tu región</string>
+    <string name="onboarding_section_for">Para</string>
+    <string name="onboarding_region_choose_another">Elegir otra</string>
+    <string name="onboarding_region_none_row">Sin región</string>
+    <string name="onboarding_region_done">Listo</string>
+    <string name="onboarding_review">Revisar</string>
 </resources>
