@@ -22,7 +22,15 @@ import java.net.URLDecoder
  *   ([filePathUrl]; builder's call 6).
  * It never fetches to say what a path is ([entry], [remote]), so a link tap on the main thread costs nothing.
  */
-class OnlineWikipediaArchive(val lang: String, private val wiki: WikimediaClient) : ZimArchive {
+class OnlineWikipediaArchive(
+    val lang: String,
+    private val wiki: WikimediaClient,
+    /**
+     * A kept copy's page, for an article that can't be fetched (no signal, Local only): spec §4's "any kept copy" after
+     * online. Blocking; null when none is on the phone.
+     */
+    private val fallback: (lang: String, title: String) -> ZimItem? = { _, _ -> null },
+) : ZimArchive {
     override val uuid: String = "online-wikipedia-$lang"
     override val metadata = ZimMetadata(
         title = "Wikipedia", description = "Read live from Wikipedia", language = lang, date = "", name = packName(lang),
@@ -52,7 +60,7 @@ class OnlineWikipediaArchive(val lang: String, private val wiki: WikimediaClient
 
     private fun article(title: String): ZimItem? {
         val t0 = System.nanoTime()
-        val page = wiki.html(lang, title) ?: return null
+        val page = wiki.html(lang, title) ?: return fallback(lang, title)?.let { ZimItem(title, it.mimeType, it.bytes) }
         val t1 = System.nanoTime()
         val html = transform(page.html, page.title)
         if (app.granger.BuildConfig.DEBUG) {

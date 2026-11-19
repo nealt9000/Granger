@@ -781,7 +781,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         onGetIndexNow = { scope.launch { container.onlineIndexes.startNow(container.downloads.records.first()) } },
         onOpenSubject = { nav.navigate(SubjectRoute(it.id)) },
         onOpenArticle = { packId, path, title ->
-            scope.launch { container.sessions.tab(container.sessions.openTab(packId, path, title))?.let { nav.showTab(it, keepCurrent = true) } }
+            scope.launch { container.sessions.tab(container.openArticle(packId, path, title))?.let { nav.showTab(it, keepCurrent = true) } }
         },
         onOpenTimeline = { packId, path -> nav.navigate(TimelineRoute(packId, path)) },
         onOpenSources = { nav.navigate(BrowseRoute) { launchSingleTop = true } },
@@ -1202,7 +1202,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     title = stringResource(R.string.explore_subject_quiz_title, stringResource(subject.label)),
                     onOpen = { mark ->
                         scope.launch {
-                            val tabId = container.sessions.openTab(mark.packId, mark.path, mark.title)
+                            val tabId = container.openArticle(mark.packId, mark.path, mark.title)
                             container.sessions.tab(tabId)?.let { nav.showTab(it) }
                         }
                     },
@@ -1353,7 +1353,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     // From a topic page (Plan LL2): a new tab, which opens at its own topic page; Back returns here.
                     onOpenArticle = { packId, path, title ->
                         scope.launch {
-                            container.sessions.tab(container.sessions.openTab(packId, path, title))?.let { nav.showTab(it, keepCurrent = true) }
+                            container.sessions.tab(container.openArticle(packId, path, title))?.let { nav.showTab(it, keepCurrent = true) }
                         }
                     },
                     onWander = { packId, path ->
@@ -1402,7 +1402,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     // A reference link's article opens over the book, as Define's entry does; Back comes back to the page.
                     onOpenArticle = { packId, path, title ->
                         scope.launch {
-                            container.sessions.tab(container.sessions.openTab(packId, path, title))?.let { nav.showTab(it, keepCurrent = true) }
+                            container.sessions.tab(container.openArticle(packId, path, title))?.let { nav.showTab(it, keepCurrent = true) }
                         }
                     },
                     // Made an ebook (Plan IA): this reader closes and the tab opens again, as the ebook. Only if it is
@@ -1714,7 +1714,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onOpenCard = { card ->
                         when (val target = card.target) {
                             is CardTarget.Article -> scope.launch {
-                                val tabId = container.sessions.openTab(target.packId, target.path, card.title)
+                                val tabId = container.openArticle(target.packId, target.path, card.title)
                                 container.sessions.tab(tabId)?.let { nav.showTab(it, fragment = target.fragment) }
                             }
                             is CardTarget.Book -> scope.launch {
@@ -1738,7 +1738,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     ui, remember(model) { timelineActions(model) },
                     onOpen = { mark ->
                         scope.launch {
-                            val tabId = container.sessions.openTab(mark.packId, mark.path, mark.title)
+                            val tabId = container.openArticle(mark.packId, mark.path, mark.title)
                             container.sessions.tab(tabId)?.let { nav.showTab(it) }
                         }
                     },
@@ -1764,7 +1764,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     onOpen = { mark ->
                         scope.launch {
-                            val tabId = container.sessions.openTab(mark.packId, mark.path, mark.title)
+                            val tabId = container.openArticle(mark.packId, mark.path, mark.title)
                             container.sessions.tab(tabId)?.let { nav.showTab(it) }
                         }
                     },

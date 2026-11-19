@@ -730,7 +730,40 @@ class AppContainer(context: Context) {
 
     /** Wikipedia online in each knowledge language, while [Features.ONLINE] is on (Plan O1 Task 4). */
     val onlineSources: app.granger.online.OnlineSources by lazy {
-        app.granger.online.OnlineSources(wikimedia, knowledgeLanguages.languages, { knowledgeNow.value }, { Features.ONLINE })
+        app.granger.online.OnlineSources(
+            wikimedia, knowledgeLanguages.languages, { knowledgeNow.value }, { Features.ONLINE },
+            // No signal or Local only: the article from a kept copy instead (spec §4, Plan O1 Task 5).
+            fallback = { lang, title ->
+                val copies = kotlinx.coroutines.runBlocking {
+                    runCatching { articleCopies.copies(app.granger.online.OnlineWikipediaArchive.packName(lang), title, lang, knownPacks.first()) }.getOrNull()
+                }
+                copies?.filter { it.kind != app.granger.online.ArticleCopy.Kind.ONLINE }?.sortedBy { it.kind }
+                    ?.firstNotNullOfOrNull { c -> library.archive(c.packId)?.let { a -> a.resolvePath(c.path)?.let(a::read) } }
+                    ?.takeIf { it.mimeType.startsWith("text/html") }
+            },
+        )
+    }
+
+    /** Which copy of an article opens when it's opened by its topic (Plan O1 Task 5). */
+    val articleCopies: app.granger.online.ArticleCopies by lazy {
+        app.granger.online.ArticleCopies(
+            qids = { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { referenceLinks.qidIndexes() } },
+            packs = { knownPacks.first() },
+            online = { Features.ONLINE && networkGate.open },
+            onlineLanguages = { if (Features.ONLINE) knowledgeNow.value.toSet() else emptySet() },
+        )
+    }
+
+    /** Where each article can be read from (Plan O1 Task 9): what O2's marks will read. */
+    val availability: app.granger.online.ArticleAvailability by lazy { app.granger.online.ArticleAvailability(articleCopies) { knownPacks.first() } }
+
+    /**
+     * Opens an article chosen by its topic (an Explore plate, a topic page's links, Wander, the Timeline, a game, a Home
+     * card) in a new tab, in the copy [articleCopies] picks; returns the tab's id.
+     */
+    suspend fun openArticle(packId: String, path: String, title: String): Long {
+        val copy = runCatching { articleCopies.choose(packId, path) }.getOrNull()
+        return sessions.openTab(copy?.packId ?: packId, copy?.path ?: path, title)
     }
 
     /** The packs on the phone, then the online sources: for the places that name or pick a source of articles. */

@@ -18,13 +18,15 @@ class OnlineSources(
     private val languages: Flow<List<String>>,
     private val languagesNow: () -> List<String>,
     private val enabled: () -> Boolean,
+    /** A kept copy's page when an online article can't be fetched ([OnlineWikipediaArchive]'s fallback). */
+    private val fallback: (lang: String, title: String) -> app.granger.core.zim.ZimItem? = { _, _ -> null },
 ) {
     private val archives = ConcurrentHashMap<String, OnlineWikipediaArchive>()
 
     /** The online archives by source id, for the library's `archive()`. Never blocks. */
     fun archives(): Map<String, OnlineWikipediaArchive> =
         if (!enabled()) emptyMap() else languagesNow().associate { lang ->
-            OnlineWikipediaArchive.packName(lang) to archives.getOrPut(lang) { OnlineWikipediaArchive(lang, wiki) }
+            OnlineWikipediaArchive.packName(lang) to archives.getOrPut(lang) { OnlineWikipediaArchive(lang, wiki, fallback) }
         }
 
     fun archive(lang: String): OnlineWikipediaArchive? = archives()[OnlineWikipediaArchive.packName(lang)]
