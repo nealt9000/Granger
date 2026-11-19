@@ -890,6 +890,21 @@ class AppContainer(context: Context) {
             }
         }
 
+    /** Updates for kept articles (Plan O5 Task 4): checked once a day while online, when Outfitting shows. */
+    val keptUpdates by lazy {
+        val prefs = appContext.getSharedPreferences("online", Context.MODE_PRIVATE)
+        app.granger.online.KeptUpdates(
+            revisions = { lang, titles -> wikimedia.revisions(lang, titles) },
+            lastCheck = { prefs.getLong("kept_updates_checked", 0L) },
+            setLastCheck = { prefs.edit().putLong("kept_updates_checked", it).apply() },
+        )
+    }
+
+    /** Re-keeps the kept articles that have a newer version (Outfitting's Update / Update all). */
+    suspend fun updateKept(articles: List<app.granger.core.library.KeptArticle>) {
+        for (a in articles) if (keeper.keep(a.lang, a.title) != null) keptUpdates.done(a.lang, a.title)
+    }
+
     /** Keeps and removes online articles (Plan O2 Tasks 3 and 5). */
     val keeper by lazy {
         app.granger.online.Keeper(

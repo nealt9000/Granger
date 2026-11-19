@@ -30,6 +30,8 @@ class OutfittingState(
     val kept: List<KeptArticle>,
     val savedBytes: Long,
     val savedCapBytes: Long,
+    /** Kept articles with a newer version online (Plan O5 Task 4). */
+    val updates: List<KeptArticle> = emptyList(),
 )
 
 class OutfittingActions(
@@ -38,6 +40,7 @@ class OutfittingActions(
     val onOpenKept: (KeptArticle) -> Unit = {},
     val onRemoveKept: (KeptArticle) -> Unit = {},
     val onClearSaved: () -> Unit = {},
+    val onUpdate: (List<KeptArticle>) -> Unit = {},
 )
 
 /**
@@ -99,6 +102,14 @@ private fun LazyListScope.onPhone(state: OutfittingState, actions: OutfittingAct
             Text(stringResource(R.string.outfitting_kept_articles), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 6.dp))
         }
     }
+    if (state.updates.isNotEmpty()) item(key = "kept-updates") {
+        ListItem(
+            headlineContent = { Text(androidx.compose.ui.res.pluralStringResource(R.plurals.outfitting_updates, state.updates.size, state.updates.size)) },
+            supportingContent = { Text(state.updates.joinToString(", ") { WikimediaClient.titleOfKey(it.title) }, maxLines = 2) },
+            trailingContent = { TextButton(onClick = { actions.onUpdate(state.updates) }) { Text(stringResource(R.string.outfitting_update_all)) } },
+            modifier = Modifier.testTag(OutfittingTags.UPDATES),
+        )
+    }
     if (state.kept.isEmpty()) item(key = "kept-none") {
         Text(stringResource(R.string.outfitting_nothing_kept), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
@@ -126,4 +137,5 @@ object OutfittingTags {
     const val SUGGESTION = "outfitting_suggestion"
     const val KEPT = "outfitting_kept"
     const val SAVED = "outfitting_saved"
+    const val UPDATES = "outfitting_updates"
 }

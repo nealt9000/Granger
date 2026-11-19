@@ -73,6 +73,22 @@ class WikimediaClient(
         return out
     }
 
+    /**
+     * The live revision of up to [BATCH] articles a request, by the asked title (Plan O5 Task 4: updates for kept
+     * articles). A missing page is left out.
+     */
+    fun revisions(lang: String, titles: List<String>): Map<String, Long> {
+        val out = HashMap<String, Long>()
+        for (chunk in titles.distinct().chunked(BATCH)) {
+            val url = "https://$lang.wikipedia.org/w/api.php".toHttpUrl().newBuilder()
+                .addQueryParameter("action", "query").addQueryParameter("format", "json").addQueryParameter("formatversion", "2")
+                .addQueryParameter("redirects", "1").addQueryParameter("prop", "revisions").addQueryParameter("rvprop", "ids")
+                .addQueryParameter("titles", chunk.joinToString("|") { it.replace('_', ' ') }).build()
+            call(url) { r -> revisionsOf(r.body.string(), chunk) }?.let(out::putAll)
+        }
+        return out
+    }
+
     /** A random article's summary (Wander's fallback when no index is on the phone). */
     fun random(lang: String): Summary? =
         call(restUrl(lang, "api/rest_v1/page/random/summary"), noCache = true) { r -> summaryOf(JSONObject(r.body.string())) }
@@ -175,6 +191,25 @@ class WikimediaClient(
                     qid = qidOf(p.optJSONObject("pageprops")?.optString("wikibase_item").orEmpty()), revision = null,
                 )
             }
+            return chunk.mapNotNull { asked ->
+                val spaced = asked.replace('_', ' ')
+                val n = normalized[spaced] ?: normalized[asked] ?: spaced
+                byTitle[redirects[n] ?: n]?.let { asked to it }
+            }.toMap()
+        }
+
+        internal fun revisionsOf(json: String, chunk: List<String>): Map<String, Long> {
+            val q = JSONObject(json).optJSONObject("query") ?: return emptyMap()
+            fun moves(name: String): Map<String, String> {
+                val a = q.optJSONArray(name) ?: return emptyMap()
+                return (0 until a.length()).map { a.getJSONObject(it) }.associate { it.getString("from") to it.getString("to") }
+            }
+            val normalized = moves("normalized")
+            val redirects = moves("redirects")
+            val pages = q.optJSONArray("pages") ?: return emptyMap()
+            val byTitle = (0 until pages.length()).map { pages.getJSONObject(it) }.filter { !it.optBoolean("missing") }.mapNotNull { p ->
+                p.optJSONArray("revisions")?.optJSONObject(0)?.optLong("revid")?.takeIf { it > 0 }?.let { p.getString("title") to it }
+            }.toMap()
             return chunk.mapNotNull { asked ->
                 val spaced = asked.replace('_', ' ')
                 val n = normalized[spaced] ?: normalized[asked] ?: spaced

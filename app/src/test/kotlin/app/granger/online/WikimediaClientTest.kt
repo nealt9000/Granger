@@ -94,6 +94,13 @@ class WikimediaClientTest {
         assertThat(s.getValue("Knowth").extract).startsWith("Knowth (Irish: ")
     }
 
+    @Test fun revisionsInOneRequestByTheTitlesAsked() {
+        val c = client(mapOf("prop=revisions" to (200 to fixture("batch-revisions.json"))))
+        val r = c.revisions("en", listOf("Moon", "Knowth", "Earth's_moon", "Nonexistent_zzqx"))
+        assertThat(asked).hasSize(1)
+        assertThat(r).containsExactly("Moon", 1386478275L, "Knowth", 1373019904L, "Earth's_moon", 1386478275L)
+    }
+
     @Test fun moreThanTwentyTitlesGoInSeveralRequests() {
         client(emptyMap()).summaries("en", (1..45).map { "T$it" })
         assertThat(asked).hasSize(3)

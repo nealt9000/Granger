@@ -105,4 +105,9 @@
     <string name="outfitting_suggest_pack_about">%1$s · %2$s · covers about %3$d of them</string>
     <string name="outfitting_remove">Remove</string>
     <string name="outfitting_nothing_kept">No articles kept yet. Keep one from its topic page.</string>
+    <string name="outfitting_update_all">Update all</string>
+    <plurals name="outfitting_updates">
+        <item quantity="one">%1$d kept article has a newer version</item>
+        <item quantity="other">%1$d kept articles have a newer version</item>
+    </plurals>
 </resources>

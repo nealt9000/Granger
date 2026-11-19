@@ -1911,14 +1911,20 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     value = kotlinx.coroutines.withContext(Dispatchers.IO) { container.savedStore.size() }
                 }
                 // Outfitting for everyone (builder's call 1); its online sections only while Wikipedia online is on.
+                // Updates for kept articles: checked here, once a day while online (Plan O5 Task 4).
+                val updates by container.keptUpdates.updates.collectAsStateWithLifecycle()
+                LaunchedEffect(kept.size) {
+                    if (Features.ONLINE) kotlinx.coroutines.withContext(Dispatchers.IO) { runCatching { container.keptUpdates.check(kept, container.reach.now.online) } }
+                }
                 val outfitting = if (!Features.ONLINE) app.granger.readiness.OutfittingSlots({}, {}) else app.granger.online.outfittingSlots(
-                    app.granger.online.OutfittingState(ready, kept, savedBytes, container.onlinePrefs.savedCapMb.value * 1024L * 1024),
+                    app.granger.online.OutfittingState(ready, kept, savedBytes, container.onlinePrefs.savedCapMb.value * 1024L * 1024, updates),
                     app.granger.online.OutfittingActions(
                         onKeepTheRead = container::keepTheRead,
                         onGetPack = { container.getPack(it) },
                         onOpenKept = { a -> scope.launch { openTopic(app.granger.online.OnlineWikipediaArchive.packName(a.lang), a.title, app.granger.online.WikimediaClient.titleOfKey(a.title))?.let { container.sessions.tab(it) }?.let { nav.showTab(it) } } },
                         onRemoveKept = { a -> scope.launch { container.keeper.remove(a.lang, a.title); outfitVersion++ } },
                         onClearSaved = { scope.launch(Dispatchers.IO) { container.savedStore.clear(); outfitVersion++ } },
+                        onUpdate = { list -> scope.launch { container.updateKept(list) } },
                     ),
                 )
                 ReadinessScreen(

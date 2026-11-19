@@ -78,4 +78,9 @@
     <string name="outfitting_suggest_pack_about">%1$s · %2$s · cubre unos %3$d de ellos</string>
     <string name="outfitting_remove">Quitar</string>
     <string name="outfitting_nothing_kept">Aún no hay artículos guardados. Guarda uno desde su página.</string>
+    <string name="outfitting_update_all">Actualizar todo</string>
+    <plurals name="outfitting_updates">
+        <item quantity="one">%1$d artículo guardado tiene una versión más reciente</item>
+        <item quantity="other">%1$d artículos guardados tienen una versión más reciente</item>
+    </plurals>
 </resources>
