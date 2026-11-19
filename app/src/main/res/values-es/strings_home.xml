@@ -231,4 +231,5 @@
         <item quantity="one">Conseguir %1$s · %2$s · cubre %3$d de ellas</item>
         <item quantity="other">Conseguir %1$s · %2$s · cubre %3$d de ellas</item>
     </plurals>
+    <string name="home_ready_nothing_yet">Todo en línea, nada guardado aún</string>
 </resources>

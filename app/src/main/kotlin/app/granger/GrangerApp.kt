@@ -776,7 +776,7 @@ class AppContainer(context: Context) {
      * Home's Ready offline (Plan O3 Task 8): the articles read in the last 30 days (history never leaves the phone), where
      * each can be read from, its subject, and what would fill the gaps. Null with nothing read lately.
      */
-    suspend fun readyOffline(): app.granger.online.ReadyOfflineUi? = kotlinx.coroutines.withContext(Dispatchers.IO) {
+    suspend fun readyOffline(subjects: Int = app.granger.online.ReadyOffline.SUBJECTS): app.granger.online.ReadyOfflineUi? = kotlinx.coroutines.withContext(Dispatchers.IO) {
         val since = System.currentTimeMillis() - 30L * 24 * 3600 * 1000
         val recent = sessions.history.first().filter { it.openedAt >= since && it.path.isNotEmpty() && !app.granger.core.library.BookIds.isBook(it.packId) }
             .distinctBy { it.packId to it.path }.take(READY_RECENT)
@@ -800,7 +800,13 @@ class AppContainer(context: Context) {
         val top = catalog.state.value.catalog?.packs.orEmpty()
             .filter { it.id.startsWith("wikipedia_${lang}_top_") && it.zimName !in installed }
             .minByOrNull { it.sizeBytes }?.let { app.granger.online.PackOffer(it.id, it.title, it.sizeBytes) }
-        app.granger.online.ReadyOffline.of(reads, each, top)
+        // Subject packs the catalog has and the phone hasn't, for Outfitting's suggestions (Plan O4 builder's call 3).
+        val subjectPacks = catalog.state.value.catalog?.packs.orEmpty()
+            .filter { it.zimName !in installed && !it.id.startsWith("wikipedia_${lang}_top") }
+            .mapNotNull { e -> app.granger.explore.Subject.ofDomain(e.domain)?.let { e to it.id } }
+            .groupBy { it.second }.mapNotNull { (_, es) -> es.minByOrNull { it.first.sizeBytes } }
+            .map { (e, subject) -> app.granger.online.PackOffer(e.id, e.title, e.sizeBytes) to subject }
+        app.granger.online.ReadyOffline.of(reads, each, top, subjects, subjectPacks)
     }
 
     /** Keeps the online-only articles you read lately (Ready offline's suggestion): one background job. */

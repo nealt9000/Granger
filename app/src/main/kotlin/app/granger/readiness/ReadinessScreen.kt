@@ -83,14 +83,25 @@ fun ReadinessScreen(
     /** Why Ask is off on this phone (its model failed the self-check), or null. */
     askCheck: CheckFailure? = null,
     onRetryAsk: () -> Unit = {},
+    /** Outfitting (Plan O4): its title, and its sections above the domains and above storage. Null title is Readiness. */
+    outfitting: OutfittingSlots? = null,
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
         onPauseOrDispose {}
     }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
-    ReadinessContent(ui, onBack, onOpenKiwix, viewModel::verify, viewModel::repair, askCheck, onRetryAsk)
+    ReadinessContent(ui, onBack, onOpenKiwix, viewModel::verify, viewModel::repair, askCheck, onRetryAsk, outfitting)
 }
+
+/**
+ * What Outfitting adds to Readiness's screen (Plan O4 builder's calls 1–2): Try Local only and Your use above the domains
+ * (which it heads "Ready for anything"), and On this phone above storage and files.
+ */
+class OutfittingSlots(
+    val head: androidx.compose.foundation.lazy.LazyListScope.() -> Unit,
+    val onPhone: androidx.compose.foundation.lazy.LazyListScope.() -> Unit,
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,13 +113,14 @@ fun ReadinessContent(
     onRepair: (String) -> Unit,
     askCheck: CheckFailure? = null,
     onRetryAsk: () -> Unit = {},
+    outfitting: OutfittingSlots? = null,
 ) {
     var showAllSignals by rememberSaveable { mutableStateOf(false) }
     var expanded by rememberSaveable { mutableStateOf(emptyList<String>()) }
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.readiness_title)) },
+                title = { Text(stringResource(if (outfitting != null) R.string.outfitting_title else R.string.readiness_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back)) }
                 },
@@ -116,6 +128,7 @@ fun ReadinessContent(
         },
     ) { padding ->
         LazyColumn(Modifier.padding(padding).fillMaxSize().testTag("readiness-list")) {
+            outfitting?.head?.invoke(this)
             item(key = "device") {
                 Heading(stringResource(R.string.readiness_this_phone))
                 ListItem(
@@ -130,7 +143,7 @@ fun ReadinessContent(
                 }
             }
 
-            item(key = "coverage") { Heading(stringResource(R.string.readiness_what_you_hold)) }
+            item(key = "coverage") { Heading(stringResource(if (outfitting != null) R.string.outfitting_ready_for_anything else R.string.readiness_what_you_hold)) }
             if (ui.report.needsCatalogRefresh) item(key = "coverage-refresh") { Empty(stringResource(R.string.readiness_refresh_catalog)) }
             items(ui.report.domains, key = { "domain-${it.id}" }) { domain ->
                 ListItem(
@@ -171,6 +184,7 @@ fun ReadinessContent(
                 }
             }
 
+            outfitting?.onPhone?.invoke(this)
             item(key = "storage") { Heading(stringResource(R.string.readiness_storage)) }
             items(ui.volumes, key = { "volume-${it.path}" }) { volume ->
                 ListItem(

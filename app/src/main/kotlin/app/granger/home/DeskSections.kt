@@ -115,7 +115,7 @@ class ReadyActions(
  * split into on this phone / saved for now / online, then what would fill the gaps.
  */
 @Composable
-internal fun ReadyOfflineSection(ui: ReadyOfflineUi, actions: ReadyActions) {
+fun ReadyOfflineSection(ui: ReadyOfflineUi, actions: ReadyActions, seeAll: Boolean = true) {
     Column(Modifier.padding(horizontal = 16.dp).testTag(DeskTags.READY), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Eyebrow(pluralStringResource(R.plurals.home_ready_eyebrow, ui.recent, ui.recent))
         Text(
@@ -137,7 +137,7 @@ internal fun ReadyOfflineSection(ui: ReadyOfflineUi, actions: ReadyActions) {
                 }
             }
         }
-        TextButton(onClick = actions.onSeeAll, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
+        if (seeAll) TextButton(onClick = actions.onSeeAll, contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
             Text(stringResource(R.string.home_ready_see_all), color = SpreadColors.accent, style = SpreadType.uiMedium)
         }
     }

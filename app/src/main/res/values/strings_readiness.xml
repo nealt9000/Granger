@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="readiness_title">Readiness</string>
+    <string name="readiness_title">Outfitting</string>
     <!-- Section headings on the Readiness screen. -->
     <string name="readiness_this_phone">This phone</string>
     <string name="readiness_what_you_hold">What you hold offline</string>
@@ -91,4 +91,18 @@
     <string name="readiness_no_packs_in">No %1$s packs for this area yet</string>
     <!-- As above, with more than one library language. -->
     <string name="readiness_no_packs_in_yours">No packs in your library\'s languages for this area yet</string>
+    <string name="outfitting_title">Outfitting</string>
+    <string name="outfitting_ready_for_anything">Ready for anything</string>
+    <string name="outfitting_ready_for_anything_summary">What a phone needs when nothing else is there.</string>
+    <string name="outfitting_your_use">Your use</string>
+    <string name="outfitting_on_phone">On this phone</string>
+    <string name="outfitting_kept_articles">Kept articles</string>
+    <string name="outfitting_saved">Saved for now · %1$s of %2$s</string>
+    <string name="outfitting_try_local">Try Local only</string>
+    <string name="outfitting_try_local_summary">See exactly what this phone holds, as with no signal.</string>
+    <string name="outfitting_keep_read">Keep the %1$d you read · %2$s</string>
+    <string name="outfitting_suggest_pack">%1$s · %2$s · covers %3$d of them</string>
+    <string name="outfitting_suggest_pack_about">%1$s · %2$s · covers about %3$d of them</string>
+    <string name="outfitting_remove">Remove</string>
+    <string name="outfitting_nothing_kept">No articles kept yet. Keep one from its topic page.</string>
 </resources>

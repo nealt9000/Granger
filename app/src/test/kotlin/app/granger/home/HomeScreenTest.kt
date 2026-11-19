@@ -90,7 +90,7 @@ class HomeScreenTest {
         show(HomeUi(strip = report))
         ids.forEach { compose.onAllNodes(hasTestTag("strip-dot-$it"), useUnmergedTree = true).assertCountEquals(1) }
         compose.onNodeWithText("Owls can't be searched: the pack has no index.").assertIsDisplayed()
-        compose.onNodeWithContentDescription("Readiness").performClick()
+        compose.onNodeWithContentDescription("Outfitting").performClick()
         assertThat(calls).containsExactly("readiness")
     }
 

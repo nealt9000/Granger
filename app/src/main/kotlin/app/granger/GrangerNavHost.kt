@@ -1890,6 +1890,26 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 )
             }
             composable<ReadinessRoute> {
+                // Outfitting (Plan O4): Readiness's screen with its own sections, worked out each time it shows.
+                var outfitVersion by remember { mutableStateOf(0) }
+                val kept by container.keptStore.articles.collectAsStateWithLifecycle(emptyList())
+                val ready by androidx.compose.runtime.produceState<app.granger.online.ReadyOfflineUi?>(null, outfitVersion, kept.size) {
+                    value = if (Features.ONLINE) runCatching { container.readyOffline(subjects = 17) }.getOrNull() else null
+                }
+                val savedBytes by androidx.compose.runtime.produceState(0L, outfitVersion, kept.size) {
+                    value = kotlinx.coroutines.withContext(Dispatchers.IO) { container.savedStore.size() }
+                }
+                // Outfitting for everyone (builder's call 1); its online sections only while Wikipedia online is on.
+                val outfitting = if (!Features.ONLINE) app.granger.readiness.OutfittingSlots({}, {}) else app.granger.online.outfittingSlots(
+                    app.granger.online.OutfittingState(ready, kept, savedBytes, container.onlinePrefs.savedCapMb.value * 1024L * 1024),
+                    app.granger.online.OutfittingActions(
+                        onKeepTheRead = container::keepTheRead,
+                        onGetPack = { container.getPack(it) },
+                        onOpenKept = { a -> scope.launch { openTopic(app.granger.online.OnlineWikipediaArchive.packName(a.lang), a.title, app.granger.online.WikimediaClient.titleOfKey(a.title))?.let { container.sessions.tab(it) }?.let { nav.showTab(it) } } },
+                        onRemoveKept = { a -> scope.launch { container.keeper.remove(a.lang, a.title); outfitVersion++ } },
+                        onClearSaved = { scope.launch(Dispatchers.IO) { container.savedStore.clear(); outfitVersion++ } },
+                    ),
+                )
                 ReadinessScreen(
                     viewModel = viewModel {
                         ReadinessViewModel(
@@ -1902,6 +1922,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onOpenKiwix = { domain -> nav.navigate(SourceRoute(CatalogScope.KIWIX, domain)) },
                     askCheck = container.modelManager.checkFailure.collectAsStateWithLifecycle().value.takeIf { container.askOn },
                     onRetryAsk = { container.appScope.launch { container.modelManager.retryCheck() } },
+                    outfitting = outfitting,
                 )
             }
         }

@@ -140,7 +140,7 @@ fun HomeScreen(
         onOpenTimeline = onOpenTimeline, game = game, gameActions = gameActions, onOpenGames = onOpenGames,
         arrangeActions = remember(viewModel) { ArrangeActions(viewModel::arrange) },
         wanderJump = viewModel.wanderJumps.collectAsStateWithLifecycle().value,
-        readyOffline = readyOffline, readyActions = readyActions,
+        readyOffline = readyOffline, readyActions = readyActions, onlineOn = app.granger.Features.ONLINE,
     )
 }
 
@@ -177,6 +177,8 @@ fun HomeContent(
     arrangeActions: ArrangeActions = ArrangeActions(),
     readyOffline: app.granger.online.ReadyOfflineUi? = null,
     readyActions: ReadyActions = ReadyActions(),
+    /** Wikipedia online is on: with nothing read yet, a line to Outfitting stands where the old strip did. */
+    onlineOn: Boolean = false,
 ) {
     var adding by rememberSaveable { mutableStateOf(false) }
     var arranging by rememberSaveable { mutableStateOf(false) }
@@ -278,6 +280,15 @@ fun HomeContent(
                     HomePart.Readiness -> if (readyOffline != null) item(key = "ready") {
                         // What works offline, and what would fill the gaps (Plan O3: direction B's Ready offline).
                         HomeSection("ready-section") { ReadyOfflineSection(readyOffline, readyActions) }
+                    } else if (onlineOn) item(key = "ready-empty") {
+                        // Nothing read lately: the spec's one line to Outfitting (§8 Home strip).
+                        HomeSection("ready-section") {
+                            androidx.compose.material3.ListItem(
+                                headlineContent = { Text(stringResource(R.string.home_ready_nothing_yet)) },
+                                trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                                modifier = Modifier.clickable(onClick = onReadiness).testTag("ready-empty"),
+                            )
+                        }
                     } else item(key = "strip") {
                         HomeSection("readiness-section", bottom = 0.dp) {
                             SectionHeading(

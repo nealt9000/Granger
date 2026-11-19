@@ -248,4 +248,5 @@
         <item quantity="one">Get %1$s · %2$s · covers %3$d of them</item>
         <item quantity="other">Get %1$s · %2$s · covers %3$d of them</item>
     </plurals>
+    <string name="home_ready_nothing_yet">Everything online, nothing kept yet</string>
 </resources>
