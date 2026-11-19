@@ -113,6 +113,22 @@ class TimelineModelTest {
         assertThat(m.ui.value.available).isFalse()
     }
 
+    @Test fun anIndexArrivingLaterIsPickedUpWhenShownAgain() = runTest {
+        val io = StandardTestDispatcher(testScheduler)
+        var file: File? = null
+        val m = TimelineModel(
+            scope = this,
+            indexes = { TimeIndexes(listOfNotNull(file?.let { TimeIndex.open(it, "top") })) },
+            picture = { _, _ -> null }, io = io, random = Random(2), now = 2026, debounceMillis = 10,
+        )
+        m.ensureStarted(); advanceUntilIdle()
+        assertThat(m.ui.value.available).isFalse()
+        file = gtimeFile(tmp.root, "top", rows)
+        m.ensureStarted(); advanceUntilIdle()
+        assertThat(m.ui.value.available).isTrue()
+        assertThat(m.ui.value.lanes).isNotEmpty()
+    }
+
     @Test fun lanesFilterTheMarks() = runTest {
         val m = model()
         m.ensureStarted(); advanceUntilIdle()

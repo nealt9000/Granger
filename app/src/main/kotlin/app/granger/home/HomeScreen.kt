@@ -132,6 +132,8 @@ fun HomeScreen(
     val timelineModel = viewModel.timeline
     val timeline = timelineModel?.ui?.collectAsStateWithLifecycle()?.value
     val timelineActions = remember(timelineModel) { timelineModel?.let(::timelineActions) ?: TimelineActions() }
+    // Hidden while there's no time index yet; each time Home is shown it looks again (O5).
+    if (timeline?.available == false) LaunchedEffect(Unit) { timelineActions.onShown() }
     val gameModel = viewModel.games
     val game = gameModel?.ui?.collectAsStateWithLifecycle()?.value
     val gameActions = remember(gameModel) { gameModel?.let(::gameActions) ?: GameActions() }
@@ -293,6 +295,8 @@ fun HomeContent(
                                 headlineContent = { Text(stringResource(R.string.home_ready_nothing_yet)) },
                                 trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
                                 modifier = Modifier.clickable(onClick = onReadiness).testTag("ready-empty"),
+                                // The section's card is the background (a ListItem's own left a strip below it, O5).
+                                colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                             )
                         }
                     } else item(key = "strip") {

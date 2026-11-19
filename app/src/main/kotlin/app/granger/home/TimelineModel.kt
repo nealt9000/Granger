@@ -79,8 +79,12 @@ class TimelineModel(
             index = idx
             if (idx.isEmpty) {
                 state.update { it.copy(available = false, loading = false) }
+                // No time index yet (a new install's arrives seconds after Home first shows): Home asks again when
+                // it's next shown (O5 Pixel 7 finding).
+                started = false
                 return@launch
             }
+            state.update { it.copy(available = true) }
             val (density, latest) = withContext(io) { idx.histogram() to (idx.latestYear() ?: now).coerceAtMost(now) }   // never past today
             val counts = density.laneCounts()
             state.update {
