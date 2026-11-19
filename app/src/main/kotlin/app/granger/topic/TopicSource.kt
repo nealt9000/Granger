@@ -116,6 +116,8 @@ class TopicSource(
     private val languages: List<String> = listOf("en", "es"),
     /** One of a pack's pictures by its path in the ZIM (a broad topic's figures), cached; null when it has none. */
     private val figure: (suspend (packId: String, image: String) -> String?)? = null,
+    /** Many articles' cards asked for at once before they're made one by one (Wikipedia online's batched summaries). */
+    private val prefetch: (suspend (packId: String, paths: List<String>) -> Unit)? = null,
 ) : TopicProvider {
     /** A pack's language doesn't change: asked once (each ask read the packs from the database, and a page asks many times). */
     private val packLanguages = java.util.concurrent.ConcurrentHashMap<String, String>()
@@ -161,8 +163,13 @@ class TopicSource(
             }
             launch {
                 val p = parts.await()
+                // Online, the page's words first (no request: titles and parts from the index), its pictures after.
+                if (p != null && app.granger.online.OnlineSources.isOnline(packId)) {
+                    app.granger.Perf.time("topic.broad.words $path") { attempt { broadOf(packId, p, pictures = false) } }
+                        ?.let { words -> update { broadRead = true; it.copy(broad = words, broadPending = false) } }
+                }
                 val b = p?.let { app.granger.Perf.time("topic.broad $path") { attempt { broadOf(packId, it) } } }
-                update { broadRead = true; it.copy(broad = b, broadPending = false) }
+                update { broadRead = true; it.copy(broad = b ?: it.broad, broadPending = false) }
                 // Where it hangs and what stands beside it come after the page's own parts.
                 if (b != null && p != null) app.granger.Perf.time("topic.placed $path") { attempt { placed(b, p, packId, path) } }?.let { full -> update { it.copy(broad = full) } }
             }
@@ -182,11 +189,21 @@ class TopicSource(
         val language = languageOf(packId)
         val times = attempt { times() }
         suspend fun fetch(image: String) = figure?.let { f -> attempt { f(packId, image) } ?: attempt { f(parts.packId, image) } }
-        // Online, each figure is a round trip to Commons (~0.8 s): the ones the page may read are asked for together
-        // rather than one by one (Plan O1 Pixel pass: 13 in a row took 9 s of a broad topic's 11).
-        val early: Map<String, String?> = if (pictures && app.granger.online.OnlineSources.isOnline(packId)) {
-            coroutineScope { parts.figures.map { it.image }.distinct().take(PREFETCH_FIGURES).map { image -> async { image to fetch(image) } }.awaitAll() }.toMap()
-        } else emptyMap()
+        // Online (Plan O1 Pixel pass), what the page will read is asked for together rather than one by one, figures and
+        // cards at the same time: each figure is a round trip to Commons (13 in a row took 9 s of a broad topic's 11), and
+        // the cards (its kinds' plates, its people) come in batched summaries of 20.
+        val online = pictures && app.granger.online.OnlineSources.isOnline(packId)
+        val early: Map<String, String?> = if (!online) emptyMap() else coroutineScope {
+            val cards = launch {
+                val find = prefetch ?: return@launch
+                val items = (parts.kinds.map { it.qid } + parts.people).asSequence()
+                    .mapNotNull { q -> all.firstArticleOf(q, language) }.filter { it.packId == packId }.map { it.path }.distinct().take(PREFETCH_CARDS).toList()
+                items.chunked(20).map { chunk -> async { attempt { find(packId, chunk) } } }.awaitAll()
+            }
+            val figures = parts.figures.map { it.image }.distinct().take(PREFETCH_FIGURES).map { image -> async { image to fetch(image) } }.awaitAll().toMap()
+            cards.join()
+            figures
+        }
         return BroadTopics.build(
             parts,
             resolve = { q -> all.firstArticleOf(q, language)?.let { it.packId to it.path } },
@@ -336,6 +353,8 @@ class TopicSource(
 
         /** Figures asked for together for an online broad topic: about what its story, figures and diagram read. */
         private const val PREFETCH_FIGURES = 16
+        /** Cards asked for together for an online broad topic (its plates are spread through its kinds): ten batches at most. */
+        private const val PREFETCH_CARDS = 200
 
         /** Topics kept, so Back to a topic page is instant. */
         private const val CACHED = 16

@@ -80,6 +80,25 @@ class WikimediaClientTest {
         assertThat(r.map { it.key }).contains("Brú_na_Bóinne")
     }
 
+    @Test fun summariesInOneRequestByTheTitlesAsked() {
+        val c = client(mapOf("prop=extracts" to (200 to fixture("batch-summaries.json"))))
+        val s = c.summaries("en", listOf("Moon", "Earth's_moon", "Knowth", "Nonexistent_zzqx", "Dowth"))
+        assertThat(asked).hasSize(1)
+        // A redirect answers for its target; a missing page is left out.
+        assertThat(s.keys).containsExactly("Moon", "Earth's_moon", "Knowth", "Dowth")
+        assertThat(s.getValue("Earth's_moon").title).isEqualTo("Moon")
+        assertThat(s.getValue("Moon").qid).isEqualTo(405L)
+        assertThat(s.getValue("Dowth").thumbnail).startsWith("https://")
+        assertThat(s.getValue("Dowth").thumbnail).doesNotContain("utm_")
+        // The removed pronunciation's husk goes.
+        assertThat(s.getValue("Knowth").extract).startsWith("Knowth (Irish: ")
+    }
+
+    @Test fun moreThanTwentyTitlesGoInSeveralRequests() {
+        client(emptyMap()).summaries("en", (1..45).map { "T$it" })
+        assertThat(asked).hasSize(3)
+    }
+
     @Test fun picturesOnlyFromWikimedia() {
         val c = client(mapOf("upload.wikimedia.org" to (200 to "img")))
         assertThat(c.picture("https://upload.wikimedia.org/x.jpg")).isNotNull()

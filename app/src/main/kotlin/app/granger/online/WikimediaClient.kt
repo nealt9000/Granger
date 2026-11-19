@@ -51,6 +51,26 @@ class WikimediaClient(
     fun summary(lang: String, title: String): Summary? =
         call(restUrl(lang, "api/rest_v1/page/summary/${enc(title)}")) { r -> summaryOf(JSONObject(r.body.string())) }
 
+    /**
+     * Summaries of up to [BATCH] articles in one request (`action=query`, extracts + page images + QIDs), by the asked
+     * title: a broad topic's cards in one round trip instead of one each (Plan O1 Pixel pass). Redirects resolve to their
+     * target; a missing page is left out. The extract is the plain lead, as the summary endpoint's.
+     */
+    fun summaries(lang: String, titles: List<String>): Map<String, Summary> {
+        val out = HashMap<String, Summary>()
+        for (chunk in titles.distinct().chunked(BATCH)) {
+            val url = "https://$lang.wikipedia.org/w/api.php".toHttpUrl().newBuilder()
+                .addQueryParameter("action", "query").addQueryParameter("format", "json").addQueryParameter("formatversion", "2")
+                .addQueryParameter("redirects", "1").addQueryParameter("prop", "extracts|pageimages|pageprops")
+                .addQueryParameter("exintro", "1").addQueryParameter("explaintext", "1").addQueryParameter("exlimit", "max")
+                .addQueryParameter("piprop", "thumbnail").addQueryParameter("pithumbsize", "330").addQueryParameter("pilimit", "max")
+                .addQueryParameter("ppprop", "wikibase_item").addQueryParameter("titles", chunk.joinToString("|") { it.replace('_', ' ') })
+                .build()
+            call(url) { r -> batchOf(r.body.string(), chunk) }?.let(out::putAll)
+        }
+        return out
+    }
+
     /** A random article's summary (Wander's fallback when no index is on the phone). */
     fun random(lang: String): Summary? =
         call(restUrl(lang, "api/rest_v1/page/random/summary"), noCache = true) { r -> summaryOf(JSONObject(r.body.string())) }
@@ -103,6 +123,8 @@ class WikimediaClient(
 
     companion object {
         const val PER_HOST = 4
+        /** Titles per batched summaries request: the extracts module's limit with exintro. */
+        const val BATCH = 20
 
         /** Wikimedia's own hosts: the sites, `upload.`, `thumb.` and Commons. */
         fun isWikimedia(host: String) = host.endsWith(".wikipedia.org") || host.endsWith(".wikimedia.org")
@@ -131,6 +153,35 @@ class WikimediaClient(
                 revision = o.optString("revision").toLongOrNull(),
             )
         }
+
+        /** A batch answer as summaries by the titles asked for ([chunk]), through its normalisations and redirects. */
+        internal fun batchOf(json: String, chunk: List<String>): Map<String, Summary> {
+            val q = JSONObject(json).optJSONObject("query") ?: return emptyMap()
+            fun moves(name: String): Map<String, String> {
+                val a = q.optJSONArray(name) ?: return emptyMap()
+                return (0 until a.length()).map { a.getJSONObject(it) }.associate { it.getString("from") to it.getString("to") }
+            }
+            val normalized = moves("normalized")
+            val redirects = moves("redirects")
+            val pages = q.optJSONArray("pages") ?: return emptyMap()
+            val byTitle = (0 until pages.length()).map { pages.getJSONObject(it) }.filter { !it.optBoolean("missing") && !it.has("invalid") }.associate { p ->
+                val title = p.getString("title")
+                title to Summary(
+                    title = title, key = title.replace(' ', '_'), extract = tidy(p.optString("extract")), description = null,
+                    thumbnail = p.optJSONObject("thumbnail")?.optString("source")?.takeIf { it.isNotBlank() }?.let(::withoutQuery),
+                    qid = qidOf(p.optJSONObject("pageprops")?.optString("wikibase_item").orEmpty()), revision = null,
+                )
+            }
+            return chunk.mapNotNull { asked ->
+                val spaced = asked.replace('_', ' ')
+                val n = normalized[spaced] ?: normalized[asked] ?: spaced
+                byTitle[redirects[n] ?: n]?.let { asked to it }
+            }.toMap()
+        }
+
+        /** A plain-text lead without the husks its removed pronunciations leave: "Knowth (; Irish: …)" → "Knowth (Irish: …)". */
+        internal fun tidy(text: String): String =
+            text.replace(Regex("\\(\\s*[;,]\\s*"), "(").replace(Regex("\\s*\\(\\s*\\)"), "").replace(Regex("\\n+"), " ").trim()
 
         internal fun hitsOf(json: String): List<Hit> {
             val pages = JSONObject(json).optJSONArray("pages") ?: return emptyList()

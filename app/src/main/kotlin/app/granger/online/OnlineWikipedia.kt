@@ -59,8 +59,19 @@ class OnlineWikipediaArchive(
         null
     }
 
+    /** Summaries asked for together ([prefetch]), kept for the cards that follow (a card may be made at more than one size). */
+    private val early = java.util.concurrent.ConcurrentHashMap<String, WikimediaClient.Summary>()
+
     /** The article's summary (header, card, plate): one small request instead of the whole article. */
-    fun summary(path: String): WikimediaClient.Summary? = wiki.summary(lang, path)
+    fun summary(path: String): WikimediaClient.Summary? = early[path] ?: wiki.summary(lang, path)
+
+    /** Asks for many articles' summaries in a few batched requests, so the cards made next don't each ask (a broad topic's). */
+    fun prefetch(paths: List<String>) {
+        val wanted = paths.filter { !early.containsKey(it) }.distinct()
+        if (wanted.isEmpty()) return
+        if (early.size > EARLY_MAX) early.clear()
+        early.putAll(wiki.summaries(lang, wanted))
+    }
 
     private fun article(title: String): ZimItem? {
         val t0 = System.nanoTime()
@@ -89,6 +100,8 @@ class OnlineWikipediaArchive(
     companion object {
         const val TAG = "GrangerOnline"
         const val IMG = "_img/"
+        /** Summaries kept from a prefetch at most; past it they're dropped (a card not made after all). */
+        private const val EARLY_MAX = 400
         private const val FIGURE_PX = 960   // one of Wikimedia's standard thumbnail widths
         private const val PREFIX = "wikipedia_"
         private const val SUFFIX = "_online"

@@ -1187,6 +1187,9 @@ class AppContainer(context: Context) {
             libraryLanguages = { knowledgeNow.value.toSet() },
             sentence = { bookId, mention -> kotlinx.coroutines.withContext(io) { bookSentence(bookId, mention) } },
             figure = { packId, image -> kotlinx.coroutines.withContext(io) { Perf.time("figure") { library.archive(packId)?.let { thumbs.picture(it, image, TOPIC_PICTURE_PX) } } } },
+            prefetch = { packId, paths ->
+                kotlinx.coroutines.withContext(io) { Perf.time("prefetch ${paths.size}") { (library.archive(packId) as? app.granger.online.OnlineWikipediaArchive)?.prefetch(paths) } }
+            },
         )
     }
 

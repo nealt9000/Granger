@@ -311,10 +311,17 @@ preview), 11a2ab63 (Pixel pass fixes).
 Related ≤ 3 s holds alone (1.9–2.5 s) and slips to 4.3 s while a broad topic's figures share the host. The broad parts
 miss their 2 s (5.1 s): the item cards are one summary request each.
 
-**Left for O1's tail or O2:**
-- Broad topics: cards in one batched request (`action=query&prop=extracts|pageimages|pageprops`, 20 titles a call).
-- Spanish online and read aloud not checked on the phone (Spanish isn't a knowledge language there; read aloud would
-  take the mini-player from Neal's audiobook).
+**After the pass (Neal: batch summaries, then merge):**
+- Broad topics: the cards' summaries in batches of 20 (`action=query&prop=extracts|pageimages|pageprops`), together with
+  the figures; online, the page's words show first (titles and parts need no request) and its pictures follow. Anime:
+  words at 0.4 s from opening, pictures by 4.6 s.
+- Spanish online (Spanish added as a knowledge language for the check, then removed): its index set came on its own
+  (18 MB), Search lists "Wikipedia · Español", the Spanish topic page (Alhambra) has its Spanish lead and its date from the
+  Spanish time index, the article reads in Field with its infobox.
+- Read aloud on an online page: reads and highlights sentence by sentence. Spanish text goes to the English Owl voice
+  (no Spanish voice yet: the voices plan, not O1).
+
+**Left for O2/O3:**
 - Local only on volunteered screens: Wander waits on "Finding somewhere to start…", Continue loses its pictures (O3).
 - Home's feeds (On this day…) still draw from packs only.
 - TalkBack not checked.
