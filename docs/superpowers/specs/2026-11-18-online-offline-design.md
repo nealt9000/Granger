@@ -128,6 +128,10 @@ Spanish 287 MB; time index ~2.3 MB.
   from the GitHub release with HTTP range requests, fetching only the pages a query touches (a read-only SQLite VFS over
   HTTP), with no server, the same data and nearly the same queries. If it is fast enough on a phone, Top 1M (en) and
   all Spanish give full topic pages for ~1M articles without a download.
+- **O0 finding (2026-11-18): Phase 2 is topic records, not SQLite over HTTP.** SQLite read remotely costs ~80
+  sequential reads for a broad topic, its room and "leads here" queries scan whole tables, and Android's SQLite takes no
+  custom VFS. Instead a build step pre-joins each article's page data into a compressed record (Top 1M: 86 MB file, 93 KB
+  directory fetched once, one ~10 KB range read per page). See `docs/superpowers/plans/2026-11-18-plan-o0-online-spike.md`.
 - **The O0 bar**: topic page header ≤ 1 s and Related ≤ 3 s on the Pixel 6 over Wi-Fi, page reads cached on the phone
   (part of Saved for now). If it misses, Phase 2 is a "Keep the big index" offer instead.
 
@@ -178,8 +182,9 @@ Same place on the rail and in Settings; Home's strip changes from nine dots to o
   - Local only (the switch)
   - Big downloads on Wi-Fi only (moved here)
   - Saved for now: size cap, Clear
-  - Pictures online: always / Wi-Fi only / never
-- **Metered networks**: pictures follow the setting; articles and summaries always load (small).
+  - **Offline pictures** (Neal, 2026-11-18): whether what you keep and what's saved for now carries its pictures.
+    *Save pictures* (default) or *Text only* (smaller). Keep sheets show the size for the choice in force.
+- **Metered networks**: online pages load with their pictures, sized to the screen; only big downloads wait for Wi-Fi.
 - **Store listing and site**: "works offline" becomes "works offline, and online before you've downloaded anything".
   Copy is later work, not this project.
 
