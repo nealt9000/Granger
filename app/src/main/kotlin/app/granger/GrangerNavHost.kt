@@ -1578,6 +1578,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     seen = container.seen,
                     content = container.contentPrefs,
+                    online = if (Features.ONLINE) app.granger.online.OnlineSettingsSource(container.onlinePrefs, container.savedStore) else null,
                     onModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },
                     onSetUpAgain = { nav.navigate(OnboardingRoute) { launchSingleTop = true } },
                     onBack = { nav.popBackStack() },

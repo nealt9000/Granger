@@ -136,4 +136,16 @@
     <string name="settings_seen_clear_title">¿Borrar lo que has visto?</string>
     <string name="settings_seen_clear_text">Explorar volverá a contar tus salas desde cero. Nada más cambia.</string>
     <string name="settings_seen_clear_confirm">Borrar</string>
+    <string name="settings_section_online">En línea</string>
+    <string name="settings_offline_pictures">Imágenes sin conexión</string>
+    <string name="settings_offline_pictures_summary">Si lo que guardas, y lo guardado por ahora, lleva sus imágenes.</string>
+    <string name="settings_offline_pictures_save">Guardar imágenes</string>
+    <string name="settings_offline_pictures_text">Solo texto (ocupa menos)</string>
+    <string name="settings_saved_for_now">Guardado por ahora</string>
+    <string name="settings_saved_for_now_summary">Lo que lees en línea, guardado para que vuelva a abrirse sin internet. Pasado el límite, se va lo más antiguo. %1$d de %2$d MB usados.</string>
+    <string name="settings_saved_cap">%1$d MB</string>
+    <string name="settings_saved_clear">Borrar lo guardado por ahora</string>
+    <string name="settings_saved_clear_title">¿Borrar lo guardado por ahora?</string>
+    <string name="settings_saved_clear_text">Lo que leíste en línea se va de este teléfono. Lo que guardaste se queda.</string>
+    <string name="settings_saved_clear_confirm">Borrar</string>
 </resources>

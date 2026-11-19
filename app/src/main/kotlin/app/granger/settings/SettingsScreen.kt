@@ -84,6 +84,8 @@ fun SettingsScreen(
     seen: app.granger.explore.SeenStore? = null,
     /** The switch that keeps adult topics and pictures off the screens Granger fills by itself; null leaves it out. */
     content: ContentPrefs? = null,
+    /** Settings → Online's first rows (Plan O2 Task 2); null leaves the section out. */
+    online: app.granger.online.OnlineSettingsSource? = null,
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
@@ -161,6 +163,7 @@ fun SettingsScreen(
             if (voiceInput != null) item(key = "voice_input") {
                 app.granger.voiceinput.VoiceInputSettingsSection(voiceInput)
             }
+            if (online != null) item(key = "online") { app.granger.online.OnlineSettingsSection(online) { SettingsHeader(it) } }
             if (seen != null) item(key = "explore") { ExploreSection(seen, content) }
             item(key = "appearance") {
                 AppearanceSection(railSide, viewModel::setRailSide, openTo, viewModel::setOpenTo, theme, viewModel::setTheme)

@@ -172,4 +172,16 @@
     <string name="settings_seen_clear_title">Clear what you\'ve seen?</string>
     <string name="settings_seen_clear_text">Explore will count your rooms from none again. Nothing else changes.</string>
     <string name="settings_seen_clear_confirm">Clear</string>
+    <string name="settings_section_online">Online</string>
+    <string name="settings_offline_pictures">Offline pictures</string>
+    <string name="settings_offline_pictures_summary">Whether what you keep, and what\'s saved for now, carries its pictures.</string>
+    <string name="settings_offline_pictures_save">Save pictures</string>
+    <string name="settings_offline_pictures_text">Text only (smaller)</string>
+    <string name="settings_saved_for_now">Saved for now</string>
+    <string name="settings_saved_for_now_summary">What you read online, kept so it opens again without the internet. The oldest goes first past the limit. %1$d of %2$d MB used.</string>
+    <string name="settings_saved_cap">%1$d MB</string>
+    <string name="settings_saved_clear">Clear saved for now</string>
+    <string name="settings_saved_clear_title">Clear saved for now?</string>
+    <string name="settings_saved_clear_text">What you read online goes from this phone. What you kept stays.</string>
+    <string name="settings_saved_clear_confirm">Clear</string>
 </resources>
