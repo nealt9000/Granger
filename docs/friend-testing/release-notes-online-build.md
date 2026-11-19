@@ -1,6 +1,6 @@
 # Release notes: the online build (draft, Neal approves)
 
-Candidate 1553, from main `84373cee`: `~/Desktop/granger-play/granger-1553.aab` (144 MB), mapping beside it. (It replaces 1545, which predated the onboarding refresh.) It's the
+Candidate 1561, from main `58c789c6`: `~/Desktop/granger-play/granger-1561.aab` (144 MB), mapping beside it. (It replaces 1553 and 1545; it adds O6's room line.) It's the
 first build since 1495, and it brings Plans O1–O5:
 - Wikipedia online
 - keeping and saved for now
@@ -9,6 +9,8 @@ first build since 1495, and it brings Plans O1–O5:
 - Outfitting and the reading shelf
 - the new first run, Settings → Online, and updates for kept articles
 - Plan OB's onboarding refresh: Welcome holds Start reading now and Outfit for offline; one Outfit page; one-time hints
+- Plan O6: every topic page that isn't a spread shows its place in Explore (subject › room) and "More in" its room, for
+  about 3 million more Wikipedia articles online (topic records read by range)
 
 ## Play "What's new"
 
