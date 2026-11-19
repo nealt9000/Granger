@@ -171,3 +171,50 @@ topic fields the local index fills (call 7), with pictures from batched summarie
 
 Tasks 1 and 3 together (the format is shared), then 2, then 4 and 5, then the bar. Task 6's measurement decides
 whether Task 7 ships records or the fallback.
+
+## Results so far (2026-11-19): built and fast, but the long tail gains little
+
+Tasks 1–5 are built (branch `o6-topic-records`) and the full suite passes. The records are published (release
+`records-2026-11-19`) and the catalog on the branch is signed; neither is merged or pushed.
+
+**Sizes:**
+
+| | English (Top 1M) | Spanish (all) |
+|---|---|---|
+| Records | 994,325 | 2,131,364 |
+| `.grec` | 100 MB | 201 MB |
+| Directory | 155 KB | 333 KB |
+| Build time | 15 s | 30 s |
+| Median block | 12.3 KB | 11.8 KB |
+| p99 block | 28.5 KB | 21.2 KB |
+
+**Speed (Pixel 6, debug build, Wi-Fi), eight long-tail English articles, each from a cold app start:**
+- **A record:** 0.47–2.4 s after the QID is known. That includes the catalog load, the redirect and one range read; the
+  first read also fetched the directory.
+- **A kept block:** 85 ms.
+- **The header:** never held up; it came at 0.35–2.5 s, which is Wikipedia's summary request on a cold start.
+- **Related:** unaffected (`morelike:`).
+- **Local only:** a kept block reads from Saved for now; an unseen article asks for nothing.
+
+**Fixed on the phone:** a topic page opened straight after a cold start came before anything had loaded the catalog, so
+there were no records. It now loads the catalog first.
+
+**The finding: the long tail doesn't get what the plan promised.**
+- All 1,890 English broad topics and all Spanish ones are already in the small Top index, and broad topics' parts only
+  name Top articles.
+- So no long-tail article is a spread, and none has "leads here".
+- **What its record carries:**
+
+  | | English long tail (944k articles) | Spanish long tail (2.08M) |
+  |---|---|---|
+  | Subject | 83% | 83% |
+  | Room | 78% | 70% |
+  | Other-language title | 56% | 67% |
+
+- **What today's topic page shows from that:**
+  - room plates on the Connections map;
+  - "Read in …", which Wikipedia online already gives through its language links.
+
+  The subject and room appear nowhere else for a non-broad topic.
+- **So as built, O6 adds little a reader would notice.** The value would need new UI on the topic page: the article's
+  room (breadcrumb, "more in this room" from the Top index), or room lists from records.

@@ -1450,7 +1450,11 @@ class AppContainer(context: Context) {
             },
             onlineQid = { packId, path -> kotlinx.coroutines.withContext(io) { (library.archive(packId) as? app.granger.online.OnlineWikipediaArchive)?.summary(path)?.qid } },
             records = if (!Features.ONLINE) null else { packId, lang, qid ->
-                kotlinx.coroutines.withContext(io) { remoteRecords.record(lang, qid, packId)?.withoutHidden(contentFilter.isOn) }
+                kotlinx.coroutines.withContext(io) {
+                    // A topic page opened straight after a cold start comes before any screen has read the catalog (Pixel 6, Plan O6).
+                    if (catalog.state.value.catalog == null) catalog.load()
+                    remoteRecords.record(lang, qid, packId)?.withoutHidden(contentFilter.isOn)
+                }
             },
         )
     }

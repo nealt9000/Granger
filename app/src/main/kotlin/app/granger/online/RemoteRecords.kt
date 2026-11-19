@@ -48,8 +48,8 @@ class RemoteRecords(
     private val noRedirects: OkHttpClient by lazy { http.newBuilder().followRedirects(false).followSslRedirects(false).build() }
 
     override fun record(language: String, qid: Long, packId: String): TopicRecord? {
-        val entry = entryFor(language) ?: return null
-        val directory = directory(language, entry) ?: return null
+        val entry = entryFor(language) ?: return null.also { debug("no records for $language") }
+        val directory = directory(language, entry) ?: return null.also { debug("no directory for $language (canFetch ${canFetch()})") }
         val block = directory.blockFor(qid) ?: return null
         val key = blockKey(entry, block.index)
         saved?.get(key)?.bytes?.let { bytes ->
@@ -81,7 +81,7 @@ class RemoteRecords(
         val bytes = if (file.isFile) file.readBytes() else {
             if (!canFetch()) return null
             val fetched = get(entry.dirUrl) ?: return null
-            if (sha256(fetched) != entry.dirSha256) return null
+            if (sha256(fetched) != entry.dirSha256) return null.also { debug("directory checksum mismatch (${fetched.size} bytes)") }
             dirFolder.mkdirs()
             val tmp = File(dirFolder, file.name + ".part")
             runCatching { tmp.writeBytes(fetched); if (!tmp.renameTo(file)) tmp.delete() }
@@ -95,8 +95,12 @@ class RemoteRecords(
     }
 
     private fun get(url: String): ByteArray? = runCatching {
-        http.newCall(Request.Builder().url(url).build()).execute().use { r -> if (r.isSuccessful) r.body.bytes() else null }
-    }.getOrNull()
+        http.newCall(Request.Builder().url(url).build()).execute().use { r -> if (r.isSuccessful) r.body.bytes() else null.also { debug("GET $url: ${r.code}") } }
+    }.onFailure { debug("GET $url failed: $it") }.getOrNull()
+
+    private fun debug(message: String) {
+        if (app.granger.BuildConfig.DEBUG) android.util.Log.d("GrangerRecords", message)
+    }
 
     /**
      * [length] bytes of [url] from [offset], or null. Only a 206 of exactly that length counts: a server that ignores
