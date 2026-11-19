@@ -68,4 +68,6 @@
     </plurals>
     <string name="reader_footer_read">Leer</string>
     <string name="reader_needs_internet">Necesita internet. Este artículo se lee en línea y no está guardado en este teléfono.</string>
+    <string name="reader_keep">Guardar en este teléfono</string>
+    <string name="reader_remove_kept">Quitar de este teléfono</string>
 </resources>

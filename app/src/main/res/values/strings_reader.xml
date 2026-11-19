@@ -83,4 +83,6 @@
     </plurals>
     <string name="reader_footer_read">Read</string>
     <string name="reader_needs_internet">Needs internet. This article is read online and isn\'t kept on this phone.</string>
+    <string name="reader_keep">Keep on this phone</string>
+    <string name="reader_remove_kept">Remove from this phone</string>
 </resources>

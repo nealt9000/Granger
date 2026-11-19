@@ -57,6 +57,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -227,6 +228,17 @@ fun ReaderScreen(
         val pack = viewModel.packId
         value = datedPage != null && pack != null && runCatching { isDated(pack, datedPage) }.getOrDefault(false)
     }
+    // Keep or Remove an online article from ⋯ (Plan O2 Task 5), as the topic page's button does.
+    val marks = app.granger.online.LocalMarks.current
+    val markVersion = marks?.version?.collectAsState()?.value ?: 0
+    val keepItem = run {
+        val pack = viewModel.packId ?: return@run null
+        val path = state.page?.path ?: return@run null
+        if (marks == null || !app.granger.online.OnlineSources.isOnline(pack)) return@run null
+        val kept = remember(pack, path, markVersion) { marks.kept(pack, path) }
+        if (kept != null) ReaderMenuItem(R.string.reader_remove_kept) { scope.launch { marks.remove(pack, path) } }
+        else ReaderMenuItem(R.string.reader_keep) { scope.launch { marks.keep(pack, path) } }
+    }
     val bars = wikiBarActions(
         packTitle = state.packTitle,
         hasPack = state.error == null,
@@ -249,6 +261,7 @@ fun ReaderScreen(
         onTextSettings = { viewModel.open(ReaderViewModel.Panel.TEXT) },
         onToggleBookmark = viewModel::toggleBookmark,
         voice = state.voice,
+        keep = keepItem,
         onListen = if (!Features.READ_ALOUD || !Features.PLAYER) null else ({
             val view = webView
             if (view == null) viewModel.readAloud(null)
@@ -570,6 +583,8 @@ internal fun wikiBarActions(
     onListen: (() -> Unit)? = null,
     /** Whether the voice is on this page: then Listen leaves the bar, for the mini player's controls (Plan U3c walkthrough). */
     voice: VoiceButton = VoiceButton.IDLE,
+    /** Keep or Remove for an online article (Plan O2 Task 5); null leaves it out. */
+    keep: ReaderMenuItem? = null,
 ): ReaderBarActions =
     ReaderBarActions(
         onBack = onBack,
@@ -580,6 +595,7 @@ internal fun wikiBarActions(
             ReaderMenuItem(R.string.reader_find_in_page, onFind).takeIf { hasPage },
             onShowInTime?.let { ReaderMenuItem(R.string.reader_show_in_time, it) }?.takeIf { hasPage },
             onTopic?.let { ReaderMenuItem(R.string.topic_menu, it) }?.takeIf { hasPage },
+            keep?.takeIf { hasPage },
         ),
         onContents = onContents.takeIf { hasPage },
         onSearch = onSearchPack.takeIf { hasPack },
