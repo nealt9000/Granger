@@ -745,6 +745,7 @@ class AppContainer(context: Context) {
                     ?.firstNotNullOfOrNull { c -> library.archive(c.packId)?.let { a -> a.resolvePath(c.path)?.let(a::read) } }
                     ?.takeIf { it.mimeType.startsWith("text/html") }
             },
+            indexRandom = { id -> kotlinx.coroutines.runBlocking { runCatching { referenceLinks.qidIndexes().randomPath(id) }.getOrNull() } },
         )
     }
 

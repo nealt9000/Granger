@@ -701,6 +701,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     fun volunteeredThumbnail(thumbs: ArticleThumbnails, packId: String, path: String): String? {
         if (container.contentFilter.noPicture(packId, path)) return null
         val archive = container.library.archive(packId) ?: return null
+        // Online, the summary's picture: one small request, not the whole article (Plan O1 Pixel pass).
+        if (archive.remote) return container.articleCards.card(archive, path)?.thumbnail
         return archive.read(path)?.let { thumbs.thumbnail(archive, path, String(it.bytes, Charsets.UTF_8)) }
     }
 
@@ -1699,7 +1701,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             gamesOf = { scope -> gameModel(scope, homeThumbs, mixed = true).also { homeGames[0] = it } },
                             tabPicture = { packId, path ->
                                 container.library.archive(packId)?.let { archive ->
-                                    archive.read(path)?.let { homeThumbs.thumbnail(archive, path, String(it.bytes, Charsets.UTF_8)) }
+                                    if (archive.remote) container.articleCards.card(archive, path)?.thumbnail
+                                    else archive.read(path)?.let { homeThumbs.thumbnail(archive, path, String(it.bytes, Charsets.UTF_8)) }
                                 }
                             },
                             wanderFrom = container.wanderFrom,

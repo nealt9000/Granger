@@ -47,6 +47,11 @@ class OnlineWikipediaTest {
         assertThat(OnlineWikipediaArchive.fileName(a + "Placid_death.JPG")).isEqualTo("Placid_death.JPG")
         assertThat(OnlineWikipediaArchive.filePathUrl("en", a + "Wiertz_burial.jpg", 800))
             .isEqualTo("https://en.wikipedia.org/wiki/Special:FilePath/Wiertz_burial.jpg?width=800")
+        // Commons' own thumbnail address (MD5 folders; an SVG's thumbnail is a PNG), checked against the live site 2026-11-19.
+        assertThat(OnlineWikipediaArchive.commonsThumbUrl(a + "Wiertz_burial.jpg", 960)).matches(
+            "https://upload\\.wikimedia\\.org/wikipedia/commons/thumb/[0-9a-f]/[0-9a-f]{2}/Wiertz_burial\\.jpg/960px-Wiertz_burial\\.jpg",
+        )
+        assertThat(OnlineWikipediaArchive.commonsThumbUrl(a + "Crude_death_rate%252C_World%252C_2023_(cropped).svg.png", 960)).endsWith(".svg.png")
         assertThat(OnlineWikipediaArchive.isIndexPicture(a + "Wiertz_burial.jpg")).isTrue()
         assertThat(OnlineWikipediaArchive.isIndexPicture("I/O")).isFalse()
         assertThat(OnlineWikipediaArchive.isIndexPicture("Moon")).isFalse()

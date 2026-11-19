@@ -73,6 +73,11 @@ class QidIndex private constructor(private val db: SQLiteDatabase, val packId: S
      * The articles with [subject]: those whose main subject it is first, then the rest, each most-linked first (France
      * has History too, but History's page opens on World War II). [mainOnly]: only the first kind (a door's examples).
      */
+    /** A random article's path (Wander's start for Wikipedia online, Plan O1: the index's well-known articles, not any stub). */
+    fun randomPath(): String? = runCatching {
+        db.rawQuery("SELECT path FROM articles ORDER BY random() LIMIT 1", null).use { c -> if (c.moveToFirst()) c.getString(0) else null }
+    }.getOrNull()
+
     fun topIn(subject: String, limit: Int, offset: Int = 0, mainOnly: Boolean = false): List<QidArticle> = if (!hasSubjects) emptyList() else
         db.rawQuery(
             "SELECT a.qid, a.path, a.rank, s.ord FROM subjects s JOIN articles a ON a.qid = s.qid WHERE s.subject = ? " +
@@ -298,6 +303,9 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
 
     /** Whether [packId] has an index of its own here. */
     fun has(packId: String): Boolean = indexes.any { it.packId == packId }
+
+    /** A random article of [packId]'s index; null when it has none. */
+    fun randomPath(packId: String): String? = indexes.firstOrNull { it.packId == packId }?.randomPath()
 
     /**
      * The item of the page titled [path] in any index of [language]: for a Wikipedia pack with no index of its own (an

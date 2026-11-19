@@ -67,4 +67,5 @@
         <item quantity="other">y %d libros más tuyos</item>
     </plurals>
     <string name="reader_footer_read">Leer</string>
+    <string name="reader_needs_internet">Necesita internet. Este artículo se lee en línea y no está guardado en este teléfono.</string>
 </resources>

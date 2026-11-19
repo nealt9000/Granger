@@ -30,6 +30,8 @@ class OnlineWikipediaArchive(
      * online. Blocking; null when none is on the phone.
      */
     private val fallback: (lang: String, title: String) -> ZimItem? = { _, _ -> null },
+    /** A random article from the index bound to this source (well known), before Wikipedia's own random (any stub). */
+    private val indexRandom: () -> String? = { null },
 ) : ZimArchive {
     override val uuid: String = "online-wikipedia-$lang"
     override val metadata = ZimMetadata(
@@ -47,7 +49,9 @@ class OnlineWikipediaArchive(
     override fun read(path: String): ZimItem? = try {
         when {
             path.startsWith(IMG) -> picture(path, "https://" + path.removePrefix(IMG))
-            isIndexPicture(path) -> picture(path, filePathUrl(lang, path, FIGURE_PX))
+            // Commons' own thumbnail address first (one request, to the image servers); the wiki's FilePath, which also
+            // finds a file kept on the wiki alone, when Commons hasn't it.
+            isIndexPicture(path) -> picture(path, commonsThumbUrl(path, FIGURE_PX)) ?: picture(path, filePathUrl(lang, path, FIGURE_PX))
             else -> article(path)
         }
     } catch (e: Exception) {
@@ -72,7 +76,7 @@ class OnlineWikipediaArchive(
     private fun picture(path: String, url: String): ZimItem? =
         wiki.picture(url)?.let { (bytes, type) -> ZimItem(path, type, bytes) }
 
-    override fun randomPath(): String? = wiki.random(lang)?.key
+    override fun randomPath(): String? = indexRandom() ?: wiki.random(lang)?.key
 
     override fun suggest(query: String, limit: Int): List<ZimHit> =
         wiki.titles(lang, query, limit).map { ZimHit(it.key, it.title) }
@@ -85,7 +89,7 @@ class OnlineWikipediaArchive(
     companion object {
         const val TAG = "GrangerOnline"
         const val IMG = "_img/"
-        private const val FIGURE_PX = 800
+        private const val FIGURE_PX = 960   // one of Wikimedia's standard thumbnail widths
         private const val PREFIX = "wikipedia_"
         private const val SUFFIX = "_online"
 
@@ -127,6 +131,18 @@ class OnlineWikipediaArchive(
          */
         fun filePathUrl(lang: String, path: String, px: Int): String =
             "https://$lang.wikipedia.org/wiki/Special:FilePath/${WikimediaClient.enc(fileName(path))}?width=$px"
+
+        /**
+         * [path]'s file as a Commons thumbnail [px] wide, at the address Commons keeps it under (the MD5 of its name picks
+         * the folders); an SVG's thumbnail is a PNG. Asking the image servers directly skips FilePath's redirect.
+         */
+        fun commonsThumbUrl(path: String, px: Int): String {
+            val name = fileName(path)
+            val md5 = java.security.MessageDigest.getInstance("MD5").digest(name.toByteArray()).joinToString("") { "%02x".format(it) }
+            val enc = WikimediaClient.enc(name)
+            val thumb = if (name.endsWith(".svg", ignoreCase = true)) "$enc.png" else enc
+            return "https://upload.wikimedia.org/wikipedia/commons/thumb/${md5[0]}/${md5.substring(0, 2)}/$enc/${px}px-$thumb"
+        }
 
         private val STYLESHEET = ZimUrls.forEntry("_granger", "online.css")
 

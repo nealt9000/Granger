@@ -56,7 +56,7 @@ class ZimWebViewClient(
             } catch (e: java.io.IOException) {
                 notFound(view)   // the pack went away (SD card out) between the lookup and the open
             }
-            ZimResponse.NotFound -> notFound(view)
+            ZimResponse.NotFound -> notFound(view, url)
             ZimResponse.Blocked ->
                 WebResourceResponse("text/plain", "UTF-8", 403, "Forbidden", emptyMap(), ByteArrayInputStream(ByteArray(0)))
         }
@@ -119,7 +119,20 @@ class ZimWebViewClient(
         if (!isReload) onVisited(url)
     }
 
-    private fun notFound(view: WebView): WebResourceResponse {
+    private fun notFound(view: WebView, url: String? = null): WebResourceResponse {
+        // An online article that couldn't be fetched (no signal, Local only): it needs the internet, and keeps its own
+        // title, so its tab stays named for it (Plan O1 Pixel pass). O3 adds what keeping it would take.
+        val online = url?.let(ZimUrls::parse)?.takeIf {
+            app.granger.online.OnlineSources.isOnline(it.packId) && !app.granger.online.OnlineWikipediaArchive.isIndexPicture(it.path) &&
+                !it.path.startsWith(app.granger.online.OnlineWikipediaArchive.IMG)
+        }
+        if (online != null) {
+            val title = TextUtils.htmlEncode(app.granger.online.WikimediaClient.titleOfKey(online.path))
+            val line = TextUtils.htmlEncode(view.context.getString(R.string.reader_needs_internet))
+            val page = "<html><head><title>$title</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head>" +
+                "<body style=\"font-family:sans-serif;margin:24px 16px\"><h1 style=\"font-family:serif;font-weight:normal\">$title</h1><p>$line</p></body></html>"
+            return WebResourceResponse("text/html", "UTF-8", 404, "Not Found", emptyMap(), ByteArrayInputStream(page.toByteArray()))
+        }
         val page = "<html><body><p>${TextUtils.htmlEncode(view.context.getString(R.string.reader_page_not_in_pack))}</p></body></html>"
         return WebResourceResponse("text/html", "UTF-8", 404, "Not Found", emptyMap(), ByteArrayInputStream(page.toByteArray()))
     }

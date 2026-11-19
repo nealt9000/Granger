@@ -12,6 +12,7 @@ import app.granger.ebook.LibraryBook
 import app.granger.side
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
@@ -180,11 +181,17 @@ class TopicSource(
         val all = qids()
         val language = languageOf(packId)
         val times = attempt { times() }
+        suspend fun fetch(image: String) = figure?.let { f -> attempt { f(packId, image) } ?: attempt { f(parts.packId, image) } }
+        // Online, each figure is a round trip to Commons (~0.8 s): the ones the page may read are asked for together
+        // rather than one by one (Plan O1 Pixel pass: 13 in a row took 9 s of a broad topic's 11).
+        val early: Map<String, String?> = if (pictures && app.granger.online.OnlineSources.isOnline(packId)) {
+            coroutineScope { parts.figures.map { it.image }.distinct().take(PREFETCH_FIGURES).map { image -> async { image to fetch(image) } }.awaitAll() }.toMap()
+        } else emptyMap()
         return BroadTopics.build(
             parts,
             resolve = { q -> all.firstArticleOf(q, language)?.let { it.packId to it.path } },
             card = { p, path -> cardOf(p, path) },
-            figure = { image -> figure?.let { f -> attempt { f(packId, image) } ?: attempt { f(parts.packId, image) } } },
+            figure = { image -> if (image in early) early[image] else fetch(image) },
             markOf = { p, path -> runCatching { times?.find(p, path) }.getOrNull() },
             now = now(),
             pictures = pictures,
@@ -326,6 +333,9 @@ class TopicSource(
         /** The other broad topics set beside one, and the people named in each column. */
         private const val BESIDE = 2
         private const val COLUMN_PEOPLE = 3
+
+        /** Figures asked for together for an online broad topic: about what its story, figures and diagram read. */
+        private const val PREFETCH_FIGURES = 16
 
         /** Topics kept, so Back to a topic page is instant. */
         private const val CACHED = 16
