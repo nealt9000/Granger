@@ -4,7 +4,7 @@
     <string name="library_title">Library</string>
     <string name="library_downloads">Downloads</string>
     <!-- The overflow menu: how ready the phone is, by subject. -->
-    <string name="library_readiness">Readiness</string>
+    <string name="library_readiness">Outfitting</string>
     <string name="library_import_books">Import books…</string>
     <string name="library_no_books">No books yet</string>
     <string name="library_import_own">Import your own EPUB, PDF, TXT or Markdown books</string>
@@ -169,4 +169,13 @@
     <string name="library_collection_other">Other</string>
     <!-- Music and audiobooks found on the phone, not downloaded by Granger. -->
     <string name="library_collection_on_this_phone">On this phone</string>
+    <string name="shelf_reading_now">Reading now</string>
+    <string name="shelf_collections">Collections</string>
+    <string name="shelf_finished">Finished</string>
+    <string name="shelf_footer">Sizes, files and sources are in Outfitting</string>
+    <string name="shelf_read_percent">%1$s, %2$d%% read</string>
+    <plurals name="shelf_books">
+        <item quantity="one">%1$d book</item>
+        <item quantity="other">%1$d books</item>
+    </plurals>
 </resources>

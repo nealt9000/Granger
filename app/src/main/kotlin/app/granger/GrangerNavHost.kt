@@ -1152,6 +1152,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             ),
                             container.appScope,
                             catalog = container.catalog,
+                            bookshelf = container.bookshelf,
                         )
                     },
                     notice = backStackEntry.toRoute<LibraryRoute>().noticeText(),
@@ -1164,6 +1165,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onOpenSource = nav::openGetMore,
                     importAsked = importAsked,
                     onImportAsked = { backStackEntry.savedStateHandle[IMPORT_ASKED] = false },
+                    // The reading shelf opens a book where it was left (Plan O4 Task 5).
+                    onOpenBook = { book -> scope.launch { showTab(container.sessions.openTab(book.id, "", book.title)) } },
                 )
             }
             composable<ExploreRoute> {

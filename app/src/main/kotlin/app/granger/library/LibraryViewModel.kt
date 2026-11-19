@@ -52,6 +52,8 @@ data class LibraryUi(
     val manifests: Map<String, app.granger.core.library.ManifestCollection> = emptyMap(),
     /** Each Kiwix book pack collection's provider by default key, from the catalog (Plan KB2): when its manifest names none. */
     val providers: Map<String, String> = emptyMap(),
+    /** The reading shelf (Plan O4 Task 5): reading now and finished. */
+    val shelf: ReadingShelfUi = ReadingShelfUi(emptyList(), emptyList()),
 )
 
 const val BOOKS_KIND = "books"
@@ -104,6 +106,8 @@ class LibraryViewModel(
     private val io: kotlinx.coroutines.CoroutineDispatcher = kotlinx.coroutines.Dispatchers.IO,
     /** Where a book pack's provider comes from when its manifest names none (Plan KB2); null leaves it out. */
     private val catalog: app.granger.core.catalog.CatalogSource? = null,
+    /** The books and their positions, for the reading shelf (Plan O4 Task 5); null leaves it out. */
+    private val bookshelf: app.granger.core.library.Bookshelf? = null,
 ) : ViewModel() {
     private val _notice = MutableStateFlow<app.granger.UiText?>(null)
 
@@ -123,10 +127,13 @@ class LibraryViewModel(
     }
 
     /** Null until the first load finishes. */
-    val ui: StateFlow<LibraryUi?> = kotlinx.coroutines.flow.combine(shelves.shelves, manifests(), providers()) { shelves, manifests, providers ->
+    val ui: StateFlow<LibraryUi?> = kotlinx.coroutines.flow.combine(shelves.shelves, manifests(), providers(), reading()) { shelves, manifests, providers, shelf ->
         // Empty means no books: packs alone fill Browse, and music alone fills Listen.
-        libraryKinds(shelves).let { LibraryUi(it, emptyLibrary = it.isEmpty(), manifests = manifests, providers = providers) }
+        libraryKinds(shelves).let { LibraryUi(it, emptyLibrary = it.isEmpty(), manifests = manifests, providers = providers, shelf = shelf) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    private fun reading() = bookshelf?.let { b -> kotlinx.coroutines.flow.combine(b.books, b.positions) { books, positions -> ReadingShelf.of(books, positions) } }
+        ?: kotlinx.coroutines.flow.flowOf(ReadingShelfUi(emptyList(), emptyList()))
 
     /** The catalog's book pack providers by their collections' default key (Plan KB2): `kiwixbooks-<ZIM name>`. */
     private fun providers() = (catalog?.state ?: kotlinx.coroutines.flow.flowOf(null))

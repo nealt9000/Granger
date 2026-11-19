@@ -7,7 +7,7 @@
     <string name="browse_downloads">Downloads</string>
     <!-- The Downloads menu item with how many are in progress. %1$d is the count. -->
     <string name="browse_downloads_count">Downloads (%1$d)</string>
-    <string name="browse_readiness">Readiness</string>
+    <string name="browse_readiness">Outfitting</string>
     <string name="browse_nothing_yet">Nothing to browse yet</string>
     <!-- A suggested first pack. %1$s is its size, such as 1.2 GB. -->
     <string name="browse_suggest_map">A map of your region · %1$s</string>

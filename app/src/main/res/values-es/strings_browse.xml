@@ -4,7 +4,7 @@
     <string name="browse_get_more">Conseguir más</string>
     <string name="browse_downloads">Descargas</string>
     <string name="browse_downloads_count">Descargas (%1$d)</string>
-    <string name="browse_readiness">Preparación</string>
+    <string name="browse_readiness">Equipamiento</string>
     <string name="browse_nothing_yet">Aún no hay nada para explorar</string>
     <string name="browse_suggest_map">Un mapa de tu región · %1$s</string>
     <string name="browse_suggest_encyclopedia">Una enciclopedia · %1$s</string>

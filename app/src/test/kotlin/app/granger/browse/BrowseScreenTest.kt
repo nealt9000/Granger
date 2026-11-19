@@ -102,7 +102,7 @@ class BrowseScreenTest {
         compose.onNodeWithContentDescription("More").performClick()
         compose.onNodeWithText("Downloads").performClick()
         compose.onNodeWithContentDescription("More").performClick()
-        compose.onNodeWithText("Readiness").performClick()
+        compose.onNodeWithText("Outfitting").performClick()
         assertThat(calls).containsExactly("get:null", "downloads", "readiness").inOrder()
     }
 

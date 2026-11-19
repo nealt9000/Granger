@@ -48,7 +48,7 @@
     <string name="research_interrupted">Stopped before an answer.</string>
     <string name="research_source_gone">That source is no longer in your library.</string>
     <!-- Opens the Readiness screen. -->
-    <string name="research_readiness">Readiness</string>
+    <string name="research_readiness">Outfitting</string>
     <!-- A button: run a plain library search for the question. -->
     <string name="research_search_instead">Search instead</string>
     <!-- A button: show the model's answer anyway, marked as a guess. -->

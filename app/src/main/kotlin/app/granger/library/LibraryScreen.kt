@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -80,6 +83,7 @@ fun LibraryScreen(
     /** Get books' Import your own asked for the file picker; [onImportAsked] says it has opened. */
     importAsked: Boolean = false,
     onImportAsked: () -> Unit = {},
+    onOpenBook: (app.granger.core.library.Book) -> Unit = NO_BOOK,
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -112,6 +116,7 @@ fun LibraryScreen(
     LibraryContent(
         ui, snackbar, onOpenCollection, onSearch, onReadiness,
         downloadsBadge, onDownloads, onGetMore, onImport = { picker.launch(IMPORT_TYPES) }, onOpenSource = onOpenSource,
+        onOpenBook = onOpenBook,
     )
 }
 
@@ -133,6 +138,8 @@ fun LibraryContent(
     onGetMore: () -> Unit,
     onImport: () -> Unit,
     onOpenSource: (GetMoreLink) -> Unit = {},
+    /** Opens a book from the shelf (Plan O4); [NO_BOOK] keeps the old rows (tests, callers without a reader). */
+    onOpenBook: (app.granger.core.library.Book) -> Unit = NO_BOOK,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     // Kind row ids the user has collapsed; all start expanded.
@@ -199,11 +206,28 @@ fun LibraryContent(
                     }
                 }
             }
+            // The reading shelf (Plan O4, S1): reading now, the books' collections as stacks, finished, then the rest.
+            item(key = "reading-now") { ReadingNow(loaded.shelf.now) { onOpenBook(it) } }
             for (kind in loaded.kinds) {
+                if (kind.id == BOOKS_KIND && onOpenBook != NO_BOOK) {
+                    item(key = "stacks") {
+                        Column(Modifier.padding(top = 18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            app.granger.explore.Eyebrow(stringResource(R.string.shelf_collections), Modifier.padding(horizontal = 16.dp))
+                            androidx.compose.foundation.lazy.LazyRow(contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                                items(kind.collections, key = { it.collection.id }) { row ->
+                                    CollectionStack(row, row.collection.shownName().resolve()) { onOpenCollection(row.collection.id) }
+                                }
+                            }
+                        }
+                    }
+                    continue
+                }
                 kindRows(kind, open = kind.id !in collapsed, onToggle = { open ->
                     collapsed = if (open) collapsed + kind.id else collapsed - kind.id
                 }, onOpenCollection = onOpenCollection, manifests = loaded.manifests, providers = loaded.providers)
             }
+            item(key = "finished") { Finished(loaded.shelf.finished) { onOpenBook(it) } }
+            if (!loaded.emptyLibrary) item(key = "footer") { ShelfFooter(onReadiness) }
         }
     }
 }
@@ -348,3 +372,6 @@ fun displayNameOf(context: Context, uri: Uri): String {
     }
     return queried?.takeIf { it.isNotBlank() } ?: uri.lastPathSegment.orEmpty()
 }
+
+/** No reader to open a book in: the Library keeps its old rows (Plan O4). */
+val NO_BOOK: (app.granger.core.library.Book) -> Unit = {}

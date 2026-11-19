@@ -46,10 +46,10 @@ class LibraryScreenTest {
         assertThat(lefts).isInStrictOrder()
         // History is the rail's; Readiness is in the overflow, so the title fits at 360 dp.
         compose.onNodeWithContentDescription("History").assertDoesNotExist()
-        compose.onNodeWithContentDescription("Readiness").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Outfitting").assertDoesNotExist()
         for (d in listOf("Search", "Downloads", "Get more")) compose.onNodeWithContentDescription(d).performClick()
         compose.onNodeWithContentDescription("More").performClick()
-        compose.onNodeWithText("Readiness").performClick()
+        compose.onNodeWithText("Outfitting").performClick()
         assertThat(calls).containsExactly("search", "downloads", "more", "readiness").inOrder()
     }
 

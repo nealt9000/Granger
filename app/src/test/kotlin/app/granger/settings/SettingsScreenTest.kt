@@ -104,7 +104,7 @@ class SettingsScreenTest {
             .isInStrictOrder()
         assertThat((listOf("Reading & listening", "Voice", "Music & audiobooks") + ask + listOf("Models", "Appearance")).map(::top)).isInStrictOrder()
         // Readiness is reached from Home and the Library now.
-        compose.onNodeWithText("Readiness").assertDoesNotExist()
+        compose.onNodeWithText("Outfitting").assertDoesNotExist()
         for (row in listOf("Set up suggestions again", "Voice", "Music & audiobooks", "Models")) compose.onNodeWithText(row).performClick()
         assertThat(calls).containsExactly("setup", "voice", "media", "models").inOrder()
     }

@@ -2,7 +2,7 @@
 <resources>
     <string name="library_title">Biblioteca</string>
     <string name="library_downloads">Descargas</string>
-    <string name="library_readiness">Preparación</string>
+    <string name="library_readiness">Equipamiento</string>
     <string name="library_import_books">Importar libros…</string>
     <string name="library_no_books">Aún no hay libros</string>
     <string name="library_import_own">Importa tus propios libros EPUB, PDF, TXT o Markdown</string>
@@ -141,4 +141,13 @@
     <string name="library_collection_my_books">Mis libros</string>
     <string name="library_collection_other">Otros</string>
     <string name="library_collection_on_this_phone">En este teléfono</string>
+    <string name="shelf_reading_now">Leyendo ahora</string>
+    <string name="shelf_collections">Colecciones</string>
+    <string name="shelf_finished">Terminados</string>
+    <string name="shelf_footer">Tamaños, archivos y fuentes están en Equipamiento</string>
+    <string name="shelf_read_percent">%1$s, leído al %2$d%%</string>
+    <plurals name="shelf_books">
+        <item quantity="one">%1$d libro</item>
+        <item quantity="other">%1$d libros</item>
+    </plurals>
 </resources>
