@@ -180,6 +180,8 @@ fun SearchScreen(
             )
         },
     ) { padding ->
+        // Offline (Plan O3): a line under the phone's results; only then, so the list is unchanged online.
+        val offlineNow = !app.granger.online.isOnlineNow()
         val nothingFound = state.nothingFound
         Box(Modifier.padding(padding).fillMaxSize()) {
             if (state.searching) LinearProgressIndicator(Modifier.fillMaxWidth())
@@ -310,7 +312,7 @@ fun SearchScreen(
                     )
                 }
                 // Offline: the phone's results above, and a line that online ones come with a connection (Plan O3).
-                if (state.query.isNotBlank()) item(key = "offline-line") { app.granger.online.OfflineSearchLine() }
+                if (offlineNow && state.query.isNotBlank()) item(key = "offline-line") { app.granger.online.OfflineSearchLine() }
                 val books = if (state.showing(SearchFilter.BOOKS)) state.books else emptyList()
                 if (books.isNotEmpty()) item { SectionHeader(stringResource(R.string.search_books)) }
                 results(state, SearchGroup.BOOKS, books, { _, hit -> "b:${hit.bookId}" }, ::toggle) { hit ->
