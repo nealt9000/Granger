@@ -238,4 +238,7 @@
     <string name="explore_online_index_wifi">Explore needs a 19 MB index for Wikipedia online. It\'s waiting for Wi-Fi.</string>
     <string name="explore_online_index_now">Get it now</string>
     <string name="online_index_title">Wikipedia online index</string>
+    <!-- Plan OB call 3 -->
+    <string name="explore_outfitting_line">Downloading %1$s for offline</string>
+    <string name="explore_outfitting_see">See progress</string>
 </resources>

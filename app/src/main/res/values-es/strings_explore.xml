@@ -207,4 +207,7 @@
     <string name="explore_online_index_wifi">Explorar necesita un índice de 19 MB para Wikipedia en línea. Está esperando wifi.</string>
     <string name="explore_online_index_now">Descargarlo ahora</string>
     <string name="online_index_title">Índice de Wikipedia en línea</string>
+    <!-- Plan OB call 3 -->
+    <string name="explore_outfitting_line">Descargando %1$s para sin conexión</string>
+    <string name="explore_outfitting_see">Ver progreso</string>
 </resources>

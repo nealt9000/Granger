@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -63,6 +64,8 @@ fun ExploreContent(
     onEra: (Era) -> Unit = {},
     /** Wikipedia online's index set on its way (Plan O1 Task 8). */
     onlineIndex: app.granger.online.IndexWait = app.granger.online.IndexWait.NONE,
+    /** What Outfit for offline queued, still coming down (Plan OB call 3): one line at the top until done or dismissed. */
+    outfitting: OutfitProgress? = null,
 ) {
     Scaffold(
         topBar = {
@@ -84,6 +87,7 @@ fun ExploreContent(
         val doors = loaded.doors
         val rows = remember(doors.size) { doorRows(doors.size) }
         LazyColumn(Modifier.padding(padding).fillMaxSize(), contentPadding = PaddingValues(bottom = 28.dp)) {
+            outfitting?.let { progress -> item(key = "outfitting") { OutfittingLine(progress) } }
             if (loaded.noSubjects) {
                 item(key = "no-subjects") {
                     Column(Modifier.padding(16.dp).testTag(ExploreTags.NO_SUBJECTS)) {
@@ -325,6 +329,30 @@ private fun EraBar(row: EraRow, most: Int, onOpen: () -> Unit) {
                 count(row.count), style = SpreadType.ui.copy(fontSize = 11.5.sp, fontFeatureSettings = "tnum"), color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = androidx.compose.ui.text.style.TextAlign.End, modifier = Modifier.width(48.dp).clearAndSetSemantics {},
             )
+        }
+    }
+}
+
+
+/** Outfit for offline's downloads (Plan OB call 3): how much, how far, See progress (Outfitting) and dismiss. */
+class OutfitProgress(val totalBytes: Long, val doneBytes: Long, val onSee: () -> Unit, val onDismiss: () -> Unit)
+
+@Composable
+private fun OutfittingLine(progress: OutfitProgress) {
+    androidx.compose.material3.Surface(
+        shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).testTag(ExploreTags.OUTFITTING),
+    ) {
+        Row(Modifier.padding(start = 14.dp, end = 2.dp, top = 6.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.explore_outfitting_line, app.granger.formatBytes(progress.totalBytes)), style = SpreadType.serif.copy(fontSize = 16.sp))
+                androidx.compose.material3.LinearProgressIndicator(
+                    progress = { if (progress.totalBytes > 0) (progress.doneBytes.toFloat() / progress.totalBytes).coerceIn(0f, 1f) else 0f },
+                    modifier = Modifier.fillMaxWidth().padding(top = 6.dp).height(3.dp),
+                )
+            }
+            androidx.compose.material3.TextButton(onClick = progress.onSee) { Text(stringResource(R.string.explore_outfitting_see)) }
+            IconButton(onClick = progress.onDismiss) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_close)) }
         }
     }
 }

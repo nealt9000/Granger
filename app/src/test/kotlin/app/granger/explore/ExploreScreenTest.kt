@@ -8,6 +8,7 @@ import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -135,6 +136,16 @@ class ExploreScreenTest {
         compose.onNodeWithText("Wander").assertDoesNotExist()
         compose.onNodeWithText("Your sources").performClick()
         assertThat(calls).containsExactly("get", "sources").inOrder()
+    }
+
+    @Test fun outfitForOfflinesDownloadsShowAsOneLineWithSeeAndDismiss() {
+        // Plan OB call 3: Start lands on Explore; the packs' progress is one line, See opens Outfitting.
+        val progress = OutfitProgress(26_500_000_000, 1_000_000_000, onSee = { calls += "see" }, onDismiss = { calls += "dismiss" })
+        compose.setContent { ExploreContent(ExploreUi(0, emptyList(), emptyList(), emptyList()), actions, outfitting = progress) }
+        compose.onNodeWithText("Downloading ${app.granger.formatBytes(26_500_000_000)} for offline").assertIsDisplayed()
+        compose.onNodeWithText("See progress").performClick()
+        compose.onNodeWithContentDescription("Close").performClick()
+        assertThat(calls).containsExactly("see", "dismiss").inOrder()
     }
 
     @Test fun roomsSeenAreCountedOnTheLandingAndInASubjectAndNotShownWhenTheyArentKept() {

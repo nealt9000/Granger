@@ -1171,7 +1171,23 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 )
             }
             composable<ExploreRoute> {
-                ExploreScreen(viewModel { ExploreViewModel(exploreSources) }, exploreActions)
+                // Outfit for offline's downloads, until they're in or the line is dismissed (Plan OB call 3).
+                var outfitGroup by remember { mutableStateOf(container.onboardingPrefs.outfitGroup) }
+                val records by container.downloads.records.collectAsStateWithLifecycle(emptyList())
+                val outfitting = outfitGroup?.let { group ->
+                    val mine = records.filter { it.groupId == group }
+                    val dismiss = { container.onboardingPrefs.outfitGroup = null; outfitGroup = null }
+                    if (mine.isEmpty() || mine.all { it.state == app.granger.core.downloads.DownloadState.INSTALLED }) {
+                        if (mine.isNotEmpty()) LaunchedEffect(group) { dismiss() }
+                        null
+                    } else app.granger.explore.OutfitProgress(
+                        totalBytes = mine.sumOf { it.sizeBytes },
+                        doneBytes = mine.sumOf { if (it.state == app.granger.core.downloads.DownloadState.INSTALLED) it.sizeBytes else it.bytesDone },
+                        onSee = { nav.navigate(ReadinessRoute) },
+                        onDismiss = dismiss,
+                    )
+                }
+                ExploreScreen(viewModel { ExploreViewModel(exploreSources) }, exploreActions, outfitting)
             }
             composable<SubjectRoute> { backStackEntry ->
                 val id = backStackEntry.toRoute<SubjectRoute>().subject

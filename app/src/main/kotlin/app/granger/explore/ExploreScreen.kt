@@ -85,6 +85,8 @@ class ExploreActions(
 )
 
 object ExploreTags {
+    /** Outfit for offline's downloads line (Plan OB). */
+    const val OUTFITTING = "explore_outfitting"
     /** A subject's plate in the landing's mosaic. */
     fun door(subject: Subject) = PlateTags.plate("door:${subject.id}")
     fun era(era: Era) = "explore_era_${era.name.lowercase()}"
@@ -100,7 +102,7 @@ object ExploreTags {
 internal fun count(n: Int): String = NumberFormat.getIntegerInstance().format(n)
 
 @Composable
-fun ExploreScreen(viewModel: ExploreViewModel, actions: ExploreActions) {
+fun ExploreScreen(viewModel: ExploreViewModel, actions: ExploreActions, outfitting: OutfitProgress? = null) {
     androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
         viewModel.refresh()
         onPauseOrDispose {}
@@ -113,6 +115,7 @@ fun ExploreScreen(viewModel: ExploreViewModel, actions: ExploreActions) {
         onWander = { scope.launch { viewModel.wanderStart()?.let { actions.onWanderAt(it.packId, it.path) } } },
         onEra = viewModel::sawEra,
         onlineIndex = onlineIndex,
+        outfitting = outfitting,
     )
 }
 
