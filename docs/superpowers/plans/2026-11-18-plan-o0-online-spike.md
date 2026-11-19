@@ -78,18 +78,50 @@ is fetched once and cached.
   summary, not the index.
 - **Go**: the index stays the source for structure (sections, kinds, people, rooms); live Wikimedia for text and pictures.
 
-## Task 4: online article in the reader (Pixel 6) — NEXT
+## Task 4: online article in the reader (Pixel 6) — DONE 2026-11-18, go
 
-Debug-only: open an article by title from Wikimedia (Parsoid HTML + the Task 1 transform) in `ReaderWebView` through
-`ZimWebViewClient`'s interceptor, pictures from `upload.wikimedia.org`. Check: Contents (sections), read aloud (blocks,
-highlight), links open the next article online, pictures load, Night/Field styles, the topic page in front. Measure on
-Wi-Fi: summary, HTML fetch, first paint.
+Branch `o0-online-spike` (debug only): `app/.../online/OnlineWikipedia.kt` implements `ZimArchive` from Wikimedia
+(Parsoid HTML + the Task 1 transform; pictures rewritten to `_img/<host>/…` so the WebView asks the reader's interceptor);
+`OnlineLibrary` returns it for the pack id `wikipedia_en_online`; `adb shell am start -n app.granger/.MainActivity --es
+online_title Moon` opens a title. Debug 1498 on the Pixel 6 (Wi-Fi).
 
-## Task 5: one network gate (Pixel 6) — after Task 4
+- **The reader ran unchanged**: the topic page in front (live gist, "c. 4.5 billion years ago" from the time index by
+  title), Read the full article, the infobox, pictures, Contents (all ten sections), a jump to a section, and a link
+  (Moon → Knowth) opening the next article online.
+- Timings: Moon (1.8 MB Parsoid) fetch 0.38–0.47 s + transform 0.47–0.6 s warm (3.9 s the first time after an install);
+  Knowth (116 KB) fetch 0.26 s + transform 0.06 s.
+- Wikimedia now serves thumbnails from `thumb.wikimedia.org` with tracking parameters; the rewrite takes any
+  `*.wikimedia.org` host and drops the query.
+- **For O1** (found here):
+  1. The reader's link check (`ZimResolver.linkAction`) reads the entry on the main thread: online, that's a network call
+     Android refuses (`NetworkOnMainThreadException`, caught; the page still loaded). An online archive must answer it
+     without fetching.
+  2. Online articles show as "Removed pack" in Home's Continue and keep a rail tab: online needs to be a source the
+     library knows, not a missing pack.
+  3. The topic page fetched the whole article twice for its gist: use the summary endpoint (one 3 KB call, ~0.4 s).
+  4. No Wikipedia styling and no Night darkening on online pages: ship an article stylesheet in `assets/reader/`.
+  5. Transform cost on big pages: trim (references, navboxes) before parsing, or parse once and cache.
+- Not tested: read aloud (left alone so as not to touch the audiobook paused in the miniplayer). It reads the same blocks
+  Contents does, so expected to work; check in O1.
 
-An OkHttp interceptor on the shared client that refuses every request when a debug Local only flag is on; check that
-nothing else in the app opens its own connection (WebView loads go through the interceptor in Task 4; libzim, the
-catalog, downloads, archive.org, LibriVox). List anything that bypasses the client.
+## Task 5: one network gate (Pixel 6) — DONE 2026-11-18, go
+
+`online/NetworkGate.kt`: an application interceptor on the shared OkHttp client that throws `LocalOnly` when a flag is
+on (`--es local_only on|off` in debug). The online archive now uses the shared client.
+- On the phone: with Local only on, opening Mars and the Knowth tab were refused at the client ("Local only: not asking
+  en.wikipedia.org"), before any connection.
+- Inventory of the app's network paths: **one shared `OkHttpClient`** (catalog, `FileDownloader`, archive.org, LibriVox,
+  now online Wikipedia); no `HttpURLConnection`/`openStream`; no image loader library; the only WebView client
+  (`ZimWebViewClient`) already blocks everything it doesn't serve. The player plays local files only today: when
+  LibriVox streaming comes, it must use an OkHttp data source on the shared client, or it bypasses the gate. LiteRT
+  models are downloaded by `FileDownloader`, not natively.
+- **Go**: Local only is honest by construction with this one interceptor.
+
+## Verdict
+
+All four questions go. Changes to the spec: §6 Phase 2 is topic records (Task 2); the reader needs the five O1 items
+above. O1 can start: online sources on the shared client + gate, Parsoid transform, summary header, online as a known
+source, the small index set on first run.
 
 ## Bar (spec §6)
 
