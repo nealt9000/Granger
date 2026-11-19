@@ -32,8 +32,13 @@ fills the gaps. Two taps get a new user reading, and outfitting is one page with
 One screen, top to bottom:
 - **The owl and wordmark:** BrandLockup, as now.
 - **The tagline:** "Your door to knowledge. Always open." (unchanged).
-- **A new intro:** "Wikipedia, the classics, maps, manuals and your own music, with a reader and search. Read online
-  now, and keep what you like on this phone for when there's no signal."
+- **A new intro**, leading with the differentiator (Neal, 2026-11-19: the Encarta-like experience, powered by Wikipedia
+  and Kiwix): "An encyclopedia to wander, built from Wikipedia and Kiwix: topic pages, a timeline of everything, and
+  links between people, places and books. Read online now, and keep what you like for when there's no signal."
+  - Spanish: "Una enciclopedia para recorrer, hecha con Wikipedia y Kiwix: páginas de tema, una línea de tiempo de
+    todo y enlaces entre personas, lugares y libros. Lee en línea ya y guarda lo que quieras para cuando no haya
+    señal."
+  - The word "Encarta" stays out of app copy (Microsoft's trademark); the copy describes the feel instead.
 - **Start reading now:** the filled primary button. It ends onboarding on Explore.
 - **Outfit for offline ›:** a text button. It goes to the Outfit screen.
 - **The privacy line,** small, under the buttons. Its wording is the spec's, unchanged.
