@@ -75,6 +75,8 @@ class ExploreActions(
     val onOpenPack: (packId: String) -> Unit = {},
     /** Get more: the catalog's packs. */
     val onGetMore: () -> Unit = {},
+    /** Wikipedia online's index set, waiting for Wi-Fi, starts now (Plan O1 Task 8). */
+    val onGetIndexNow: () -> Unit = {},
     val onBack: () -> Unit = {},
     /** Wander from an article: Home's Wander, started there. */
     val onWanderAt: (packId: String, path: String) -> Unit = { _, _ -> },
@@ -104,11 +106,13 @@ fun ExploreScreen(viewModel: ExploreViewModel, actions: ExploreActions) {
         onPauseOrDispose {}
     }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
+    val onlineIndex by viewModel.onlineIndex.collectAsStateWithLifecycle()
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     ExploreContent(
         ui, actions, onAnother = viewModel::another,
         onWander = { scope.launch { viewModel.wanderStart()?.let { actions.onWanderAt(it.packId, it.path) } } },
         onEra = viewModel::sawEra,
+        onlineIndex = onlineIndex,
     )
 }
 

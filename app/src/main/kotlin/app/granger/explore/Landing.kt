@@ -61,6 +61,8 @@ fun ExploreContent(
     ui: ExploreUi?, actions: ExploreActions, onAnother: () -> Unit = {}, onWander: () -> Unit = {}, day: Long = java.time.LocalDate.now().toEpochDay(),
     /** An era's line was opened. */
     onEra: (Era) -> Unit = {},
+    /** Wikipedia online's index set on its way (Plan O1 Task 8). */
+    onlineIndex: app.granger.online.IndexWait = app.granger.online.IndexWait.NONE,
 ) {
     Scaffold(
         topBar = {
@@ -84,9 +86,22 @@ fun ExploreContent(
             if (loaded.noSubjects) {
                 item(key = "no-subjects") {
                     Column(Modifier.padding(16.dp).testTag(ExploreTags.NO_SUBJECTS)) {
-                        Text(stringResource(R.string.explore_no_subjects), style = SpreadType.serif.copy(fontSize = 17.sp, lineHeight = 25.sp))
-                        Button(onClick = actions.onGetMore, shape = RoundedCornerShape(2.dp), modifier = Modifier.padding(top = 8.dp).heightIn(min = 48.dp)) {
-                            Text(stringResource(R.string.explore_get_wikipedia))
+                        when (onlineIndex) {
+                            // Wikipedia online's index set is coming: Explore fills when it's here (Plan O1 Task 8).
+                            app.granger.online.IndexWait.COMING ->
+                                Text(stringResource(R.string.explore_online_index_coming), style = SpreadType.serif.copy(fontSize = 17.sp, lineHeight = 25.sp))
+                            app.granger.online.IndexWait.WAITING_FOR_WIFI -> {
+                                Text(stringResource(R.string.explore_online_index_wifi), style = SpreadType.serif.copy(fontSize = 17.sp, lineHeight = 25.sp))
+                                Button(onClick = actions.onGetIndexNow, shape = RoundedCornerShape(2.dp), modifier = Modifier.padding(top = 8.dp).heightIn(min = 48.dp)) {
+                                    Text(stringResource(R.string.explore_online_index_now))
+                                }
+                            }
+                            app.granger.online.IndexWait.NONE -> {
+                                Text(stringResource(R.string.explore_no_subjects), style = SpreadType.serif.copy(fontSize = 17.sp, lineHeight = 25.sp))
+                                Button(onClick = actions.onGetMore, shape = RoundedCornerShape(2.dp), modifier = Modifier.padding(top = 8.dp).heightIn(min = 48.dp)) {
+                                    Text(stringResource(R.string.explore_get_wikipedia))
+                                }
+                            }
                         }
                     }
                 }

@@ -18,6 +18,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -332,6 +333,8 @@ class ExploreSources(
     val figure: (packId: String, image: String) -> String? = { _, _ -> null },
     /** Where the reader has been (rooms, subjects, eras), kept on this phone. */
     val seen: SeenStore = SeenStore.Memory(),
+    /** Wikipedia online's index set on its way (Plan O1 Task 8): what the landing says while it comes. */
+    val onlineIndex: Flow<app.granger.online.IndexWait> = kotlinx.coroutines.flow.flowOf(app.granger.online.IndexWait.NONE),
 )
 
 /** An article as a feature shows it: its lead picture, larger than a thumbnail, and its opening sentence. */
@@ -369,6 +372,10 @@ class ExploreViewModel(
     private val state = MutableStateFlow<ExploreUi?>(null)
     val ui: StateFlow<ExploreUi?> = state.asStateFlow()
 
+    /** Wikipedia online's index set on its way; the landing builds again once it has come. */
+    val onlineIndex: StateFlow<app.granger.online.IndexWait> =
+        sources.onlineIndex.stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.Eagerly, app.granger.online.IndexWait.NONE)
+
     private var packs: List<Pair<Pack, String?>>? = null
     private var collections: Map<String, List<ExploreCollection>> = emptyMap()
     private val building = kotlinx.coroutines.sync.Mutex()
@@ -388,6 +395,16 @@ class ExploreViewModel(
                 packs = list
                 collections = c
                 rebuild(list)
+            }
+        }
+    }
+
+    init {
+        viewModelScope.launch {
+            var before = app.granger.online.IndexWait.NONE
+            onlineIndex.collect { now ->
+                if (before != app.granger.online.IndexWait.NONE && now == app.granger.online.IndexWait.NONE) packs?.let { rebuild(it) }
+                before = now
             }
         }
     }

@@ -76,6 +76,8 @@ class Sidecars(
     private val downloads: Downloads,
     private val wifiOnly: () -> Boolean,
     private val wanted: (SidecarKind) -> Boolean = { true },
+    /** A parent whose sidecars stay without a download record of its own (Wikipedia online's index set, Plan O1 Task 8). */
+    private val keepParent: (String) -> Boolean = { false },
 ) {
     private val mutex = Mutex()
 
@@ -83,7 +85,7 @@ class Sidecars(
         val byItem = records.groupBy { it.itemId }
         for (itemId in records.filter { it.kind.isCompanion }.mapTo(LinkedHashSet()) { it.itemId }) {
             val parent = SidecarKind.parentOf(itemId) ?: continue
-            if (byItem[parent].isNullOrEmpty()) downloads.remove(itemId)
+            if (byItem[parent].isNullOrEmpty() && !keepParent(parent)) downloads.remove(itemId)
         }
         if (catalog == null) return@withLock
         for (item in catalog.packs + catalog.books) {

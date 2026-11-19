@@ -203,4 +203,7 @@
         <item quantity="many">%1$d juegos con fechas</item>
         <item quantity="other">%1$d juegos con fechas</item>
     </plurals>
+    <string name="explore_online_index_coming">Explorar está descargando su índice para Wikipedia en línea (19 MB). Los temas, las salas y las épocas aparecen cuando llegue.</string>
+    <string name="explore_online_index_wifi">Explorar necesita un índice de 19 MB para Wikipedia en línea. Está esperando wifi.</string>
+    <string name="explore_online_index_now">Descargarlo ahora</string>
 </resources>

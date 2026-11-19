@@ -95,7 +95,7 @@ class ReferenceLinksSource(
         val files = qidFiles()
         opened?.takeIf { it.first == files }?.let { return it.second }
         opened?.second?.close()
-        val fresh = QidIndexes(files.mapNotNull { (packId, s) -> QidIndex.open(s.file, packId, s.packSha256, s.packName) })
+        val fresh = QidIndexes(files.mapNotNull { (packId, s) -> QidIndex.open(s.file, packId, s.packSha256.ifEmpty { null }, s.packName) })
         contentFilter?.let { f ->
             fresh.hide = { f.hides(it) }
             fresh.noPicture = { f.noPicture(it) }

@@ -768,6 +768,9 @@ class AppContainer(context: Context) {
         )
     }
 
+    /** Whether the network now is unmetered (Wi-Fi), as the download queue sees it. */
+    val unmetered: kotlinx.coroutines.flow.Flow<Boolean> by lazy { unmeteredFlow(appContext) }
+
     val downloads: Downloads = DownloadManager(
         dao = downloadDao,
         scheduler = WorkManagerScheduler(context) { downloadQueue },
@@ -874,7 +877,14 @@ class AppContainer(context: Context) {
     val passageFinder = LibraryPassageFinder(library, bookIndex, bookshelf, shelves, media = mediaIndex, slices = packSlices)
 
     /** Sidecars (search vectors, the time index, the QID index…) follow their pack or book: queued when it installs, removed with it. */
-    private val sidecars = Sidecars(downloads, wifiOnly = { downloadPrefs.wifiOnly }, wanted = ::sidecarWanted)
+    private val sidecars = Sidecars(
+        downloads, wifiOnly = { downloadPrefs.wifiOnly }, wanted = ::sidecarWanted,
+        // Wikipedia online's index set has no pack record to follow (Plan O1 Task 8); OnlineIndexes keeps it.
+        keepParent = app.granger.online.OnlineSources::isOnline,
+    )
+
+    /** Wikipedia online's small index set: queued once per knowledge language, kept while its source is on (Plan O1 Task 8). */
+    val onlineIndexes = app.granger.online.OnlineIndexes(downloads, volumeRoot = { volumes.list().firstOrNull()?.root }, wifiOnly = { downloadPrefs.wifiOnly })
 
     /** A sidecar kind downloads only once a feature reads it (Linked Library spec §5.8). */
     private fun sidecarWanted(kind: SidecarKind): Boolean = when (kind) {
@@ -927,6 +937,23 @@ class AppContainer(context: Context) {
                     }
                 }
         }
+        // Wikipedia online's small index set (Plan O1 Task 8): follows the catalog, the records, the knowledge languages
+        // and whether the app may go online.
+        if (Features.ONLINE) appScope.launch {
+            combine(
+                catalog.state.map { it.catalog }.distinctUntilChanged(), downloads.records,
+                knowledgeLanguages.languages.distinctUntilChanged(), networkPolicy.mode,
+            ) { c, r, langs, mode -> Triple(c, r, langs) to (mode == app.granger.core.downloads.NetworkMode.ONLINE) }
+                .collectLatest { (t, online) ->
+                    try {
+                        onlineIndexes.reconcile(t.first, t.second, t.third, Features.ONLINE, online)
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Log.w("Granger", "Couldn't update Wikipedia online's indexes", e)
+                    }
+                }
+        }
     }
 
     /**
@@ -975,12 +1002,24 @@ class AppContainer(context: Context) {
         val records = downloads.records.first().filter { it.state == DownloadState.INSTALLED }
         val byItem = records.groupBy { it.itemId }
         val packsByPath = library.packs.first().associateBy { it.filePath }
-        return records.filter { it.kind == kind.itemKind && kind.parentOf(it.itemId) != null }.groupBy { it.itemId }.mapNotNull { (itemId, versions) ->
+        val ofKind = records.filter { it.kind == kind.itemKind && kind.parentOf(it.itemId) != null }.groupBy { it.itemId }
+        val packs = ofKind.mapNotNull { (itemId, versions) ->
             val parentId = kind.parentOf(itemId) ?: return@mapNotNull null
             val parent = byItem[parentId]?.maxByOrNull { it.createdAt } ?: return@mapNotNull null
             val pack = packsByPath[parent.filePath] ?: return@mapNotNull null
-            pack.id to InstalledSidecar(versions.maxBy { it.createdAt }.file, parent.hash, File(pack.filePath).name)
-        }.toMap()
+            val newest = versions.maxBy { it.createdAt }
+            Triple(pack.id, InstalledSidecar(newest.file, parent.hash, File(pack.filePath).name), newest.hash)
+        }
+        // Wikipedia online's small index set (Plan O1 Task 8), bound to its source; not when a pack already holds the
+        // same file, whose copy then speaks for it (one topic, one set of marks on the Timeline).
+        val inPacks = packs.mapTo(HashSet()) { it.third }
+        val online = if (!Features.ONLINE) emptyList() else ofKind.mapNotNull { (itemId, versions) ->
+            val source = kind.parentOf(itemId)?.takeIf(app.granger.online.OnlineSources::isOnline) ?: return@mapNotNull null
+            if (source !in onlineSources.archives()) return@mapNotNull null
+            val newest = versions.maxBy { it.createdAt }
+            if (newest.hash in inPacks) null else source to InstalledSidecar(newest.file, "", null)
+        }
+        return packs.associate { it.first to it.second } + online
     }
 
     /**
@@ -1082,12 +1121,34 @@ class AppContainer(context: Context) {
             languageOf = { id -> knownPacks.first().firstOrNull { it.id == id }?.name?.let { WIKIPEDIA_LANGUAGE.find(it)?.groupValues?.get(1) } },
             packIds = { knownPacks.first().filter { it.name.isNotBlank() }.associate { it.name to it.id } },
             footer = if (Features.LINKED_CLASSICS) referenceLinks else null,
-            related = { name, path, same -> relatedFinder.related(name, path, same) },
+            related = { name, path, same -> relatedFor(name, path, same) },
             bookOf = { id -> bookshelf.book(id)?.takeIf { it.status == app.granger.core.library.PackStatus.OK }?.let { app.granger.ebook.LibraryBook(it.id, it.title, it.coverPath) } },
             libraryLanguages = { knowledgeNow.value.toSet() },
             sentence = { bookId, mention -> kotlinx.coroutines.withContext(io) { bookSentence(bookId, mention) } },
             figure = { packId, image -> kotlinx.coroutines.withContext(io) { Perf.time("figure") { library.archive(packId)?.let { thumbs.picture(it, image, TOPIC_PICTURE_PX) } } } },
         )
+    }
+
+    /**
+     * Related for a topic page (Plan O1 builder's call 4): an online page's from Wikipedia's `morelike:`; a pack page's
+     * from the vectors, as before, or from `morelike:` when it has none and Wikipedia online is on.
+     */
+    private suspend fun relatedFor(name: String, path: String, same: (String, String) -> Boolean): app.granger.core.library.Related {
+        app.granger.online.OnlineWikipediaArchive.languageOf(name)?.let { return onlineRelated(it, path) }
+        val local = relatedFinder.related(name, path, same)
+        if (local.articles.isNotEmpty() || !Features.ONLINE) return local
+        val lang = WIKIPEDIA_LANGUAGE.find(name)?.groupValues?.get(1) ?: return local
+        if (onlineSources.archive(lang) == null) return local
+        return onlineRelated(lang, path.substringAfterLast('/')).copy(books = local.books)
+    }
+
+    private suspend fun onlineRelated(lang: String, title: String): app.granger.core.library.Related = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        val source = app.granger.online.OnlineWikipediaArchive.packName(lang)
+        val hits = wikimedia.related(lang, title, app.granger.topic.TopicSource.SHOWN * 2)
+            // Related is volunteered: an article the adult-content filter hides isn't offered.
+            .filterNot { r -> r.qid?.let(contentFilter::hides) == true }
+            .mapIndexed { i, r -> app.granger.core.library.RelatedHit(app.granger.core.research.SourceKind.ARTICLE, source, r.key, 1f - i / 100f) }
+        app.granger.core.library.Related(hits, emptyList())
     }
 
     /** The sentence a mention sits in, read from its chapter in the EPUB (Plan LL2). Blocking. */

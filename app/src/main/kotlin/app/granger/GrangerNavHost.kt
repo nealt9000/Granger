@@ -735,6 +735,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             roomDescription = app.granger.explore.RoomDescriptions(appContext.assets)::of,
             figure = { packId, image -> container.library.archive(packId)?.let { thumbs.picture(it, image, 800) } },
             seen = container.seen,
+            onlineIndex = if (!Features.ONLINE) kotlinx.coroutines.flow.flowOf(app.granger.online.IndexWait.NONE) else kotlinx.coroutines.flow.combine(
+                container.downloads.records, container.unmetered,
+            ) { records, unmetered -> app.granger.online.OnlineIndexes.waitOf(records, unmetered) },
             // Book collections join subjects by the catalog's own `subjects` (KB2): book packs, Classics and book sets.
             collections = kotlinx.coroutines.flow.combine(
                 container.library.packs, container.bookshelf.books, container.catalog.state, container.downloads.records,
@@ -775,6 +778,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         }
     }
     val exploreActions = app.granger.explore.ExploreActions(
+        onGetIndexNow = { scope.launch { container.onlineIndexes.startNow(container.downloads.records.first()) } },
         onOpenSubject = { nav.navigate(SubjectRoute(it.id)) },
         onOpenArticle = { packId, path, title ->
             scope.launch { container.sessions.tab(container.sessions.openTab(packId, path, title))?.let { nav.showTab(it, keepCurrent = true) } }

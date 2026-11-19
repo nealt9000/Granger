@@ -112,8 +112,12 @@ object LeadLinks {
     )
 
     /** The lead's first [count] sentences, plain, at most [max] characters, cut at a word. */
-    internal fun summary(paragraphs: List<Element>, count: Int = 2, max: Int = MAX_SUMMARY): String {
-        val text = paragraphs.joinToString(" ") { it.text() }
+    internal fun summary(paragraphs: List<Element>, count: Int = 2, max: Int = MAX_SUMMARY): String =
+        summaryOf(paragraphs.joinToString(" ") { it.text() }, count, max)
+
+    /** Plain lead text (Wikimedia's summary extract, Plan O1 Task 6) cut as [summary] cuts a pack article's lead. */
+    fun summaryOf(lead: String, count: Int = 2, max: Int = MAX_SUMMARY): String {
+        val text = lead
             .replace(SAID, "")
             .replace(Regex("\\s+"), " ")
             .replace(Regex("\\s+([,.;:!?)])"), "$1")
