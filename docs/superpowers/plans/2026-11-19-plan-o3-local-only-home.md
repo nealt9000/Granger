@@ -238,5 +238,9 @@ Tasks 1–6 and 8 built with tests (suite green; two player tests flaky on a ful
 **Fixed in the pass:** Continue's lead is the last article read (a play has no picture, so it goes in the list); the
 "Needs internet" label sits top right, clear of a word plate's title.
 
-**Not yet checked on the phone:** real no signal (airplane mode, needs Neal's OK), Spanish, Field, TalkBack by ear, the
-quick settings tile. The topic page's Related cards don't grey yet (tapping one still gives the sheet).
+**Real no signal (Neal OK'd, 2026-11-19):** airplane mode alone keeps a Pixel's Wi-Fi, so the connection stayed and no
+banner showed (correct). With Wi-Fi and data both off (a script on the phone that turned them back on), the banner read
+"No connection. Showing what this phone holds." with no Turn off, the cloud button stayed unlit, and Explore and Search
+worked from the packs.
+
+**Not checked on the phone:** Spanish, Field, TalkBack by ear, the quick settings tile. The topic page's Related cards don't grey yet (tapping one still gives the sheet).
