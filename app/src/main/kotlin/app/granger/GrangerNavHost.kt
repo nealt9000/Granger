@@ -1431,6 +1431,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             define = WordEntry { word ->
                                 container.passageFinder.entry(word, app.granger.core.research.ResearchLanguage.of(word))
                             },
+                            online = if (Features.ONLINE) app.granger.search.OnlineSearch(container::searchOnline) else null,
                         )
                     },
                     onOpenMatch = { match ->

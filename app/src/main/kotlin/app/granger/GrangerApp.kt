@@ -146,6 +146,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.SharingStarted
@@ -754,6 +755,26 @@ class AppContainer(context: Context) {
         )
     }
 
+    /**
+     * Wikipedia online's titles and full-text hits for a query, in each knowledge language (Plan O1 Task 7). Nothing when
+     * the gate is shut or there's no signal.
+     */
+    suspend fun searchOnline(query: String): Pair<List<app.granger.core.library.SearchHit>, List<app.granger.core.library.SearchHit>> =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val langs = knowledgeNow.value.filter { onlineSources.archive(it) != null }
+            if (langs.isEmpty() || !networkGate.open) return@withContext emptyList<app.granger.core.library.SearchHit>() to emptyList()
+            fun hit(lang: String, h: app.granger.online.WikimediaClient.Hit, snippet: Boolean) = app.granger.core.library.SearchHit(
+                app.granger.online.OnlineWikipediaArchive.packName(lang), if (langs.size > 1) "Wikipedia · ${java.util.Locale(lang).getDisplayLanguage(java.util.Locale(lang)).replaceFirstChar { it.uppercase() }}" else "Wikipedia",
+                h.key, h.title, snippet = if (snippet) h.excerpt else null,
+            )
+            kotlinx.coroutines.coroutineScope {
+                val scope = this
+                val titles = langs.map { l -> scope.async { wikimedia.titles(l, query, ONLINE_HITS).map { hit(l, it, false) } } }
+                val pages = langs.map { l -> scope.async { wikimedia.pages(l, query, ONLINE_HITS).map { hit(l, it, true) } } }
+                titles.map { it.await() }.flatten() to pages.map { it.await() }.flatten()
+            }
+        }
+
     /** Where each article can be read from (Plan O1 Task 9): what O2's marks will read. */
     val availability: app.granger.online.ArticleAvailability by lazy { app.granger.online.ArticleAvailability(articleCopies) { knownPacks.first() } }
 
@@ -1320,6 +1341,9 @@ private val WIKIPEDIA_LANGUAGE = Regex("^wikipedia_([a-z]{2,3})_")
 /** A topic page's lead and header picture (Plan LL2). */
 private const val TOPIC_LEAD_CHARS = 420
 private const val TOPIC_PICTURE_PX = 900
+
+/** Wikipedia online's hits per group and language in Search (Plan O1 Task 7). */
+private const val ONLINE_HITS = 8
 
 /** A book's language as two letters: `en` from `en`, `eng` or `en-GB`; `es` from `spa`. */
 internal fun twoLetter(language: String): String? {

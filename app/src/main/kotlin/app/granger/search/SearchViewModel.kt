@@ -55,6 +55,9 @@ enum class SearchFilter { ALL, ARTICLES, BOOKS, MEDIA }
 /** The music and audiobooks matching a query ([app.granger.core.library.MediaIndex.search] in the app). */
 fun interface MediaSearch { suspend fun search(query: String): MediaResults }
 
+/** Wikipedia online's search for a query (Plan O1 Task 7): its titles, then its full-text hits. */
+fun interface OnlineSearch { suspend fun search(query: String): Pair<List<SearchHit>, List<SearchHit>> }
+
 /**
  * A run of results under one heading (Music has three). Each shows its first [preview] rows, and Show all for the rest;
  * [fetch] is how many are asked for, so a group that fills it may have more than Search knows of.
@@ -100,6 +103,8 @@ class SearchViewModel(
     private val best: BestMatchSearch? = null,
     /** The Define card's lookup (Plan SQ Task 5.4); null leaves Search without it. */
     private val define: WordEntry? = null,
+    /** Wikipedia online's titles and pages for a query (Plan O1 Task 7); null leaves Search to the phone. */
+    private val online: OnlineSearch? = null,
 ) : ViewModel() {
     data class State(
         val query: String = "",
@@ -138,12 +143,31 @@ class SearchViewModel(
         val filter: SearchFilter = SearchFilter.ALL,
         /** [didYouMean] came from a typed search that found nothing, not a spoken one. */
         val typedSuggestion: Boolean = false,
+        /** Wikipedia online's titles for the query (Plan O1 Task 7), shown under the phone's in Titles. */
+        val onlineTitles: List<SearchHit> = emptyList(),
+        /** Wikipedia online's full-text hits, shown under the phone's in Articles. */
+        val onlinePages: List<SearchHit> = emptyList(),
     ) {
+        /** The phone's titles, in words, so an online hit for an article already listed is dropped (the local copy wins). */
+        private val localWords: Set<String>
+            get() = (titles.flatMap { listOf(it) + it.also } + fullText).mapTo(HashSet()) { SearchRows.titleKey(it.title) }
+
+        /** Online titles not already listed. */
+        val onlineTitlesShown: List<SearchHit>
+            get() = localWords.let { seen -> onlineTitles.filter { SearchRows.titleKey(it.title) !in seen } }
+
+        /** Articles: the phone's full-text hits, then Wikipedia online's not already listed above. */
+        val articles: List<SearchHit>
+            get() {
+                val seen = localWords + onlineTitles.map { SearchRows.titleKey(it.title) }
+                return fullText + onlinePages.filter { SearchRows.titleKey(it.title) !in seen }
+            }
+
         /** The kinds of result the query found, for the filter chips: shown when it found more than one. */
         val kinds: Set<SearchFilter>
             get() = buildSet {
                 val titleBooks = titles.count { row -> rowPart(row, book = true) != null }
-                if (titles.any { row -> rowPart(row, book = false) != null } || fullText.isNotEmpty() || best.any { it.passage.kind != app.granger.core.research.SourceKind.BOOK }) add(SearchFilter.ARTICLES)
+                if (titles.any { row -> rowPart(row, book = false) != null } || fullText.isNotEmpty() || onlineTitles.isNotEmpty() || onlinePages.isNotEmpty() || best.any { it.passage.kind != app.granger.core.research.SourceKind.BOOK }) add(SearchFilter.ARTICLES)
                 if (titleBooks > 0 || books.isNotEmpty() || best.any { it.passage.kind == app.granger.core.research.SourceKind.BOOK }) add(SearchFilter.BOOKS)
                 if (!media.isEmpty) add(SearchFilter.MEDIA)
             }
@@ -166,9 +190,9 @@ class SearchViewModel(
          */
         val titlesFiltered: List<SearchHit>
             get() = when (filter) {
-                SearchFilter.ALL -> titles
+                SearchFilter.ALL -> titles + onlineTitlesShown
                 SearchFilter.BOOKS -> titles.mapNotNull { rowPart(it, book = true) }
-                SearchFilter.ARTICLES -> titles.mapNotNull { rowPart(it, book = false) }
+                SearchFilter.ARTICLES -> titles.mapNotNull { rowPart(it, book = false) } + onlineTitlesShown
                 SearchFilter.MEDIA -> emptyList()
             }
 
@@ -182,11 +206,12 @@ class SearchViewModel(
         /** The search has finished and found nothing at all: the empty state's one plain line shows. */
         val nothingFound: Boolean
             get() = query.isNotBlank() && !searching && !bestLoading && titles.isEmpty() && media.isEmpty &&
-                fullText.isEmpty() && books.isEmpty() && best.isEmpty() && define == null
+                fullText.isEmpty() && books.isEmpty() && best.isEmpty() && define == null && onlineTitles.isEmpty() && onlinePages.isEmpty()
 
         /** The keyword groups found nothing (Best matches by meaning may still list something): a typo is likely. */
         val keywordsFoundNothing: Boolean
-            get() = query.isNotBlank() && !searching && titles.isEmpty() && media.isEmpty && fullText.isEmpty() && books.isEmpty()
+            get() = query.isNotBlank() && !searching && titles.isEmpty() && media.isEmpty && fullText.isEmpty() && books.isEmpty() &&
+                onlineTitles.isEmpty() && onlinePages.isEmpty()
 
         /** The rows of [group] on screen: its preview, or all of [all] once expanded. */
         fun <T> shown(group: SearchGroup, all: List<T>): List<T> = if (group in expanded) all else all.take(group.preview)
@@ -199,6 +224,8 @@ class SearchViewModel(
 
     /** The running search for titles a slip away ([LibrarySearch.nearTitles]); a new query cancels it. */
     private var nearJob: kotlinx.coroutines.Job? = null
+    /** Wikipedia online's search for the current query (Plan O1 Task 7). */
+    private var onlineJob: kotlinx.coroutines.Job? = null
 
     /** The running Best matches search; a new query cancels it. */
     private var bestJob: kotlinx.coroutines.Job? = null
@@ -247,6 +274,7 @@ class SearchViewModel(
                 nearJob?.cancel()
                 bestJob?.cancel()
                 defineJob?.cancel()
+                onlineJob?.cancel()
                 // A refresh keeps the groups opened with Show all.
                 val again = q == lastText
                 lastText = q
@@ -255,7 +283,7 @@ class SearchViewModel(
                         it.copy(
                             titles = emptyList(), media = MediaResults(), fullText = emptyList(), books = emptyList(), searching = false,
                             best = emptyList(), bestLoading = false, bestWords = emptyList(), define = null, medical = false,
-                            expanded = emptySet(), capped = emptySet(),
+                            expanded = emptySet(), capped = emptySet(), onlineTitles = emptyList(), onlinePages = emptyList(),
                         )
                     }
                     return@collectLatest
@@ -268,6 +296,15 @@ class SearchViewModel(
                         didYouMean = if (it.typedSuggestion) null else it.didYouMean, typedSuggestion = false,
                         define = if (again) it.define else null,
                     )
+                }
+                // Wikipedia online (Plan O1 Task 7): asked beside the phone's search, never waited for. No signal or
+                // Local only answers nothing, and nothing is said (O3 adds its line).
+                if (!again) _state.update { it.copy(onlineTitles = emptyList(), onlinePages = emptyList()) }
+                online?.let { source ->
+                    onlineJob = viewModelScope.launch {
+                        val found = try { source.search(q) } catch (e: CancellationException) { throw e } catch (e: Exception) { null }
+                        if (found != null && query.value.text == q) _state.update { it.copy(onlineTitles = found.first, onlinePages = found.second) }
+                    }
                 }
                 // A single word may have a dictionary entry: a small Define card above the results (Plan SQ Task 5.4).
                 define?.takeIf { isOneWord(q) }?.let { lookup ->

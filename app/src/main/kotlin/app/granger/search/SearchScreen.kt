@@ -292,7 +292,7 @@ fun SearchScreen(
                         },
                     )
                 }
-                val fullText = if (state.showing(SearchFilter.ARTICLES)) state.fullText else emptyList()
+                val fullText = if (state.showing(SearchFilter.ARTICLES)) state.articles else emptyList()
                 if (fullText.isNotEmpty()) item { SectionHeader(stringResource(R.string.search_articles)) }
                 results(state, SearchGroup.FULL_TEXT, fullText, { _, hit -> "f:${hit.packId}/${hit.path}" }, ::toggle) { hit ->
                     ListItem(
@@ -405,6 +405,9 @@ private fun <T> LazyListScope.results(
 
 /** The second line of each music and audiobook result (the copy is fixed by plan M3), and the Show all row. */
 internal object SearchRows {
+    /** A title as words, to tell the same article in two places (online and on the phone). */
+    fun titleKey(title: String): String = title.lowercase().replace('_', ' ').replace(Regex("\\s+"), " ").trim()
+
     fun artist(a: ArtistHit): UiText = UiText.Plural(R.plurals.search_artist_line, a.albumCount, a.albumCount)
     fun album(a: AlbumSummary): UiText = UiText.Res(R.string.search_album_line, app.granger.music.shownNameText(a.albumArtist))
     fun song(t: Track): UiText = UiText.Res(
