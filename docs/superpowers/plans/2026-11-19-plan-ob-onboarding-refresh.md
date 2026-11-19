@@ -154,3 +154,33 @@ Storage is a small `HintPrefs`, one boolean per hint, cleared by "Show tips agai
 ## Order
 
 Tasks 1–3 first, then 4, then 5, then the walkthrough.
+
+## Results (2026-11-19)
+
+Built as planned; the full suite passes. Pixel 7 walkthrough: release build, `pm clear`, Night theme.
+
+**What the walkthrough covered:**
+- **Welcome:** matches the mockup: the new intro, Start reading now, Outfit for offline ›, and the privacy line, with no
+  Skip. Cold start was 0.31 s.
+- **The Outfit page:**
+  - 60 GB free; the starts with the new descriptions; Read aloud; Save space.
+  - The region row: Choose another opens the list in place, and picking Andorra folds it back (the total went from 9.6
+    to 9.8 GB).
+  - The uses chips, and the footer with the total and Review.
+- **Review,** and Back from it.
+- **Not now** lands on Explore, filled online.
+- **The Keep hint** shows on the spread view; Keep puts it away for good.
+- **Local only:** the offline hint sits under the banner, and its Outfitting link opens Outfitting; × dismisses it.
+- **Settings:** "Outfit for offline" opens the Outfit page directly, and Back returns to Settings. "Show tips again" is
+  in Reading & listening.
+
+**Fixed during the walkthrough:**
+- The Keep hint was missing from the spread view (`BroadSpread`); it was only on the plain topic page.
+- A suggested region too big to preselect (the US at 17 GB) showed as "No region". The row now offers it with Add and
+  Other.
+- Review's top-right button said Skip; it's Not now when online.
+- The uses intro said "change this later in Settings"; it now says "Outfitting can change this later".
+
+**Not walked on the phone:**
+- **Start from Review:** it would queue 9.6 GB. Its Explore line is covered by tests.
+- **Spanish and Field:** the strings and theme tokens are in place but weren't walked on the phone.
