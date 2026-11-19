@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -191,10 +192,14 @@ fun PlateMosaic(rows: List<PlateRow>, onOpen: (Plate) -> Unit, modifier: Modifie
 fun PlateView(
     plate: Plate, size: TextUnit, number: Int?, modifier: Modifier = Modifier, short: Boolean = false, wordSize: TextUnit = 17.sp, onOpen: () -> Unit,
 ) {
-    val label = listOfNotNull(plate.title, plate.sub).joinToString(", ")
+    // Offline, an article that can't open keeps its place, faded, with "Needs internet" (Plan O3 Task 4).
+    val opens = plate.article?.let { (p, a) -> app.granger.online.rememberOpenable(p, a) } ?: true
+    val greyed = opens == false
+    val needs = if (greyed) androidx.compose.ui.res.stringResource(app.granger.R.string.needs_internet) else null
+    val label = listOfNotNull(plate.title, plate.sub, needs).joinToString(", ")
     Box(modifier.testTag(PlateTags.plate(plate.key)).clickable(role = Role.Button, onClick = onOpen).semantics { contentDescription = label }) {
         // Everything drawn is the button's own: TalkBack reads the label above, once.
-        Box(Modifier.fillMaxSize().clearAndSetSemantics {}) {
+        Box(Modifier.fillMaxSize().clearAndSetSemantics {}.then(if (greyed) Modifier.alpha(0.38f) else Modifier)) {
             when {
                 plate.picture == null -> WordPlate(plate, if (short) 15.sp else wordSize, blurb = !short && number == null)
                 plate.whole -> WholePlate(plate, size, titled = number == null)
@@ -206,6 +211,9 @@ fun PlateView(
             plate.article?.let { (packId, path) ->
                 app.granger.online.AvailabilityMark(packId, path, Modifier.align(Alignment.TopEnd).padding(6.dp))
             }
+        }
+        if (greyed) app.granger.online.NeedsInternetLabel(Modifier.align(Alignment.TopStart).padding(6.dp))
+        Box(Modifier.fillMaxSize().clearAndSetSemantics {}) {
             if (number != null) {
                 Box(Modifier.size(18.dp).background(MaterialTheme.colorScheme.background).testTag(PlateTags.NUMBER), contentAlignment = Alignment.Center) {
                     Text(number.toString(), style = SpreadType.uiMedium.copy(fontSize = 11.sp), color = MaterialTheme.colorScheme.onBackground)

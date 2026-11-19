@@ -261,6 +261,13 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
     val isEmpty: Boolean get() = indexes.isEmpty()
 
     /**
+     * The same indexes without [packIds]' (Plan O3: offline, the volunteered screens keep to what opens), sharing them,
+     * with the same [hide]; nothing is closed through it.
+     */
+    fun without(packIds: Set<String>): TimeIndexes =
+        if (packIds.isEmpty()) this else TimeIndexes(indexes.filterNot { it.packId in packIds }).also { it.hide = hide }
+
+    /**
      * Items the volunteered lists leave out ([ContentFilter.hides], set by the app): [marks], [around], [spread], [top],
      * [topActive], [datedIn] and [marksOf]. [find] and [search] (an opened article, a typed search) never filter.
      */

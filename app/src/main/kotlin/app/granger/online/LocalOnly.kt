@@ -88,4 +88,25 @@ object LocalOnlyTags {
     const val SWITCH = "local_only_switch"
     const val BANNER = "reach_banner"
     const val TURN_OFF = "reach_banner_turn_off"
+    const val SEARCH_LINE = "search_online_when_connected"
+}
+
+/** Search's line while offline (spec §7, Plan O3 Task 4): the phone's results show; online ones come with a connection. */
+@Composable
+fun OfflineSearchLine(modifier: Modifier = Modifier) {
+    val control = LocalReach.current ?: return
+    val state by control.state.collectAsState()
+    if (state.online) return
+    Text(
+        stringResource(R.string.search_online_when_connected), style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = modifier.padding(horizontal = 16.dp, vertical = 12.dp).testTag(LocalOnlyTags.SEARCH_LINE),
+    )
+}
+
+/** Whether the internet can be reached now, for screens that hide what needs it (Get books' Read). True without [LocalReach]. */
+@Composable
+fun isOnlineNow(): Boolean {
+    val control = LocalReach.current ?: return true
+    val state by control.state.collectAsState()
+    return state.online
 }

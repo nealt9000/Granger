@@ -170,7 +170,9 @@ class KeepWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
 
         fun start(context: Context, roomKey: String, articles: List<Pair<String, String>>) {
             val data = Data.Builder().putStringArray(ARTICLES, articles.map { (l, t) -> "$l\t$t" }.toTypedArray()).build()
-            val request = OneTimeWorkRequestBuilder<KeepWorker>().setInputData(data).addTag("keep-room").build()
+            // Tried again soon after the internet is back, not on a growing backoff (Plan O3: a keep queued in Local only).
+            val request = OneTimeWorkRequestBuilder<KeepWorker>().setInputData(data).addTag("keep-room")
+                .setBackoffCriteria(androidx.work.BackoffPolicy.LINEAR, 30, java.util.concurrent.TimeUnit.SECONDS).build()
             WorkManager.getInstance(context).enqueueUniqueWork(nameOf(roomKey), ExistingWorkPolicy.KEEP, request)
         }
 

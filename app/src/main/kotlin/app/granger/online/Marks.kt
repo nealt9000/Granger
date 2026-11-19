@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -44,6 +45,9 @@ interface MarkSource {
 
     /** Whether the setting in force keeps pictures (the button says "Keep" or "Keep text"). */
     fun keepsPictures(): Boolean = true
+
+    /** Whether a keep of this article is queued for when the internet is back (Plan O3 Task 6). */
+    fun queued(packId: String, path: String): kotlinx.coroutines.flow.Flow<Boolean> = kotlinx.coroutines.flow.flowOf(false)
 }
 
 /** The app's mark source, provided once at the top; null (tests, release before O5) draws no marks. */
@@ -85,6 +89,7 @@ fun Mark(state: Availability?, modifier: Modifier = Modifier) {
 object MarkTags {
     const val ON_PHONE = "mark_on_phone"
     const val SAVED = "mark_saved"
+    const val NEEDS_INTERNET = "needs_internet"
 }
 
 private val SIZE = 12.dp
@@ -99,6 +104,7 @@ fun KeepButton(packId: String, path: String, modifier: Modifier = Modifier) {
     val source = LocalMarks.current ?: return
     val version by source.version.collectAsState()
     val kept = androidx.compose.runtime.remember(packId, path, version) { source.kept(packId, path) }
+    val queued by androidx.compose.runtime.remember(packId, path) { source.queued(packId, path) }.collectAsState(false)
     val size by produceState<Long?>(null, packId, path, version) { value = withContext(Dispatchers.IO) { runCatching { source.keepSize(packId, path) }.getOrNull() } }
     var working by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     var failed by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
@@ -120,6 +126,7 @@ fun KeepButton(packId: String, path: String, modifier: Modifier = Modifier) {
         ) {
             androidx.compose.material3.Text(
                 when {
+                    queued -> stringResource(R.string.keep_queued)
                     working -> stringResource(R.string.keep_working)
                     failed -> stringResource(R.string.keep_failed)
                     size != null -> stringResource(R.string.keep_with_size, words, app.granger.formatBytes(size!!))
@@ -133,4 +140,32 @@ fun KeepButton(packId: String, path: String, modifier: Modifier = Modifier) {
 object KeepTags {
     const val KEEP = "keep_article"
     const val REMOVE = "keep_remove"
+}
+
+/**
+ * Whether an article opens now (Plan O3 Task 4): on the phone or saved for now, or anything while online. Null until
+ * known; true without [LocalMarks] or [LocalReach] (nothing is greyed then).
+ */
+@Composable
+fun rememberOpenable(packId: String, path: String): Boolean? {
+    val source = LocalMarks.current ?: return true
+    val reach = LocalReach.current ?: return true
+    val state by reach.state.collectAsState()
+    if (state.online) return true
+    val version by source.version.collectAsState()
+    val availability by produceState<Availability?>(null, packId, path, version) {
+        value = withContext(Dispatchers.IO) { runCatching { source.of(packId, path) }.getOrNull() }
+    }
+    return availability?.let { openable(it, state) }
+}
+
+/** The small label on a greyed item (Plan O3 Task 4; builder's call 3). */
+@Composable
+fun NeedsInternetLabel(modifier: Modifier = Modifier) {
+    androidx.compose.material3.Text(
+        stringResource(R.string.needs_internet), style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = modifier.background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f), androidx.compose.foundation.shape.RoundedCornerShape(2.dp))
+            .padding(horizontal = 6.dp, vertical = 2.dp).testTag(MarkTags.NEEDS_INTERNET),
+    )
 }

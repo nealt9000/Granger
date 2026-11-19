@@ -172,4 +172,12 @@
     <string name="reach_banner_no_signal">Sin conexión. Se muestra lo que hay en este teléfono.</string>
     <string name="reach_banner_turn_off">Desactivar</string>
     <string name="local_only_setting_summary">Funciona igual que sin señal: muestra solo lo que hay en este teléfono.</string>
+    <string name="would_take_title">%1$s solo está en línea</string>
+    <string name="would_take_keep">Guardarlo la próxima vez que haya conexión · unos %1$s</string>
+    <string name="would_take_keep_summary">Granger lo guarda en cuanto vuelva internet.</string>
+    <string name="would_take_pack">Conseguir %1$s · %2$s</string>
+    <string name="would_take_pack_summary">Un paquete entero que lo contiene, y mucho más.</string>
+    <string name="keep_queued">Se guarda con conexión</string>
+    <string name="needs_internet">Necesita internet</string>
+    <string name="search_online_when_connected">Los resultados en línea aparecen cuando hay conexión.</string>
 </resources>

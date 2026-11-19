@@ -148,7 +148,7 @@ fun BooksScreen(
             },
             trailing = {
                 // Read it now, saved for now, before choosing to keep it (Plan O2 Task 8).
-                if (onReadNow != null && row.status == ItemStatus.NotInstalled && canReadNow(row.id)) {
+                if (onReadNow != null && row.status == ItemStatus.NotInstalled && canReadNow(row.id) && app.granger.online.isOnlineNow()) {
                     androidx.compose.material3.TextButton(onClick = { onReadNow(row.id, row.title) }, modifier = Modifier.testTag("read_now_${row.id}")) {
                         Text(stringResource(R.string.sources_read_now))
                     }

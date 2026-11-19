@@ -133,6 +133,10 @@ class HomeViewModel(
     private val tabPicture: (packId: String, path: String) -> String? = { _, _ -> null },
     /** A topic page's Wander from here (Plan LL2): an article to start Wander at, taken once. */
     private val wanderFrom: kotlinx.coroutines.flow.MutableStateFlow<Pair<String, String>?>? = null,
+    /** Whether an article tab opens now (Plan O3 Task 5): offline, Continue lists only what does. Blocking. */
+    private val opens: (packId: String, path: String) -> Boolean = { _, _ -> true },
+    /** Moves when the internet comes or goes, so Continue is worked out again. */
+    private val reachChanges: Flow<Any?> = kotlinx.coroutines.flow.flowOf(Unit),
 ) : ViewModel() {
     /** Wander (Plan H5a): its own state, started when Home first shows it. */
     val wander: WanderModel? = wanderOf?.invoke(viewModelScope)
@@ -219,8 +223,8 @@ class HomeViewModel(
      * Continue, with each article tab's lead image as its cover, so a card shows a picture rather than its title twice
      * (Neal, 2026-11-08). Books keep their own covers.
      */
-    private val continuing = combine(rail, mainPaths) { railUi, mains ->
-        continueCards(railUi, mains).map { entry ->
+    private val continuing = combine(rail, mainPaths, reachChanges) { railUi, mains, _ ->
+        continueCards(railUi, mains).filter { e -> e !is RailEntry.Tab || e.tab.path.isEmpty() || opens(e.tab.packId, e.tab.path) }.map { entry ->
             if (entry !is RailEntry.Tab || entry.tab.coverPath != null || entry.tab.path.isEmpty()) return@map entry
             val key = "${entry.tab.packId}/${entry.tab.path}"
             val picture = tabPictures.getOrPut(key) {

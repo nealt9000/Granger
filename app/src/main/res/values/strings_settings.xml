@@ -208,4 +208,12 @@
     <string name="reach_banner_no_signal">No connection. Showing what this phone holds.</string>
     <string name="reach_banner_turn_off">Turn off</string>
     <string name="local_only_setting_summary">Behave exactly as with no signal: show only what this phone holds.</string>
+    <string name="would_take_title">%1$s is online only</string>
+    <string name="would_take_keep">Keep it next time you\'re online · about %1$s</string>
+    <string name="would_take_keep_summary">Granger keeps it as soon as the internet is back.</string>
+    <string name="would_take_pack">Get %1$s · %2$s</string>
+    <string name="would_take_pack_summary">A whole pack that holds it, and much more.</string>
+    <string name="keep_queued">Keeps when online</string>
+    <string name="needs_internet">Needs internet</string>
+    <string name="search_online_when_connected">Online results appear when you\'re connected.</string>
 </resources>

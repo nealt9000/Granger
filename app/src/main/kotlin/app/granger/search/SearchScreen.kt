@@ -309,6 +309,8 @@ fun SearchScreen(
                         },
                     )
                 }
+                // Offline: the phone's results above, and a line that online ones come with a connection (Plan O3).
+                if (state.query.isNotBlank()) item(key = "offline-line") { app.granger.online.OfflineSearchLine() }
                 val books = if (state.showing(SearchFilter.BOOKS)) state.books else emptyList()
                 if (books.isNotEmpty()) item { SectionHeader(stringResource(R.string.search_books)) }
                 results(state, SearchGroup.BOOKS, books, { _, hit -> "b:${hit.bookId}" }, ::toggle) { hit ->

@@ -736,6 +736,42 @@ class AppContainer(context: Context) {
             networkPolicy.set(if (on) app.granger.core.downloads.NetworkMode.LOCAL_ONLY else app.granger.core.downloads.NetworkMode.ONLINE)
     }
 
+    /**
+     * The online sources while the internet can't be reached: what the volunteered screens (Wander, games, the Timeline,
+     * Continue) leave out, since their articles wouldn't open (Plan O3 Task 5). Empty while online.
+     */
+    fun offlineSources(): Set<String> =
+        if (!Features.ONLINE || reach.now.online) emptySet() else onlineSources.archives().keys
+
+    /** Whether an article opens now: on the phone, kept, saved for now, or online while online (Plan O3). */
+    fun opensNow(packId: String, path: String): Boolean {
+        val lang = app.granger.online.OnlineWikipediaArchive.languageOf(packId) ?: return true
+        if (reach.now.online) return true
+        return keptStore.get(lang, path) != null || savedStore.has(app.granger.online.SavedStore.pageKey(lang, path))
+    }
+
+    /** What it would take to have [path] when it can't open now (Plan O3 Task 6): its keep, and the pack that holds it. */
+    suspend fun wouldTake(packId: String, path: String, title: String): app.granger.online.WouldTake {
+        val each = if (onlinePrefs.offlinePictures.value == app.granger.online.OnlinePrefs.OfflinePictures.SAVE) app.granger.online.RoomOffers.EACH_WITH_PICTURES else app.granger.online.RoomOffers.EACH_TEXT
+        val lang = app.granger.online.OnlineWikipediaArchive.languageOf(packId)
+        // The online source's index set is Top's: an article it holds is in the Top pack (its smallest flavour offered).
+        val inTop = lang != null && runCatching { referenceLinks.qidIndexes().qidOf(packId, path) != null }.getOrDefault(false)
+        val installed = library.packs.first().mapTo(HashSet()) { it.name }
+        val pack = if (!inTop) null else catalog.state.value.catalog?.packs.orEmpty()
+            .filter { it.id.startsWith("wikipedia_${lang}_top_") && !it.id.startsWith("wikipedia_${lang}_top1m") && it.zimName !in installed }
+            .minByOrNull { it.sizeBytes }?.let { app.granger.online.PackOffer(it.id, it.title, it.sizeBytes) }
+        return app.granger.online.WouldTake(packId, path, title, each, pack)
+    }
+
+    /** Keeps an article as soon as the internet is back (Plan O3 Task 6): the keep job, which waits while offline. */
+    fun keepLater(packId: String, path: String) {
+        val lang = app.granger.online.OnlineWikipediaArchive.languageOf(packId) ?: return
+        app.granger.online.KeepWorker.start(appContext, "article:$lang:$path", listOf(lang to path))
+    }
+
+    /** Gets a catalog pack (the sheet's and Keep this room's offer). */
+    fun getPack(id: String) = roomKeep?.getPack(id)
+
     /** Offline pictures and Saved for now's cap (Plan O2 Task 2). */
     val onlinePrefs = app.granger.online.OnlinePrefs(context)
 
@@ -836,6 +872,9 @@ class AppContainer(context: Context) {
         override suspend fun remove(packId: String, path: String) {
             app.granger.online.OnlineWikipediaArchive.languageOf(packId)?.let { keeper.remove(it, path) }
         }
+        override fun queued(packId: String, path: String) = app.granger.online.KeepWorker.progress(
+            appContext, "article:${app.granger.online.OnlineWikipediaArchive.languageOf(packId)}:$path",
+        ).map { it?.running == true }
     }
 
     /** Keep a room or subject (Plan O2 Task 6): its online articles in the background, or a pack that covers it. */

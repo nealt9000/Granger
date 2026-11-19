@@ -596,6 +596,20 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         player?.notices?.collect { Toast.makeText(noticeContext, it.resolve(noticeContext), Toast.LENGTH_LONG).show() }
     }
     val playerUi by (player?.ui ?: remember { MutableStateFlow(PlayerUi.IDLE) }).collectAsStateWithLifecycle()
+    // An article opened by its topic that can't open now: what it would take, instead (Plan O3 Task 6).
+    var wouldTake by remember { mutableStateOf<app.granger.online.WouldTake?>(null) }
+    suspend fun openTopic(packId: String, path: String, title: String): Long? {
+        if (!container.opensNow(packId, path)) {
+            wouldTake = container.wouldTake(packId, path, title)
+            return null
+        }
+        return container.openArticle(packId, path, title)
+    }
+    wouldTake?.let { take ->
+        app.granger.online.WouldTakeSheet(
+            take, onKeepLater = { container.keepLater(take.packId, take.path) }, onGetPack = { container.getPack(it) }, onDismiss = { wouldTake = null },
+        )
+    }
     val miniUi by (player?.mini ?: remember { MutableStateFlow(PlayerUi.IDLE) }).collectAsStateWithLifecycle()
     // The internet can't be reached (Local only or no connection): the banner shows under the mini player (Plan O3).
     val offline = container.reachControl?.state?.collectAsStateWithLifecycle()?.value?.online == false
@@ -696,6 +710,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     /** The phone's time indexes, shared with the topic page (the container keeps them open). */
     suspend fun timeIndexes(): TimeIndexes = container.timeIndexes()
 
+    /** The time indexes the volunteered screens deal from: offline, without Wikipedia online's (Plan O3 Task 5). */
+    suspend fun volunteeredTimeIndexes(): TimeIndexes = container.timeIndexes().without(container.offlineSources())
+
     /**
      * An article's picture for a screen Granger fills by itself (Timeline, games, a subject's quiz): none for an item the
      * adult-content filter flags. Blocking.
@@ -710,7 +727,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
 
     fun timelineModel(scope: kotlinx.coroutines.CoroutineScope, thumbs: ArticleThumbnails, startAt: Pair<String, String>? = null) = TimelineModel(
         scope = scope,
-        indexes = { timeIndexes() },
+        indexes = { volunteeredTimeIndexes() },
         picture = { packId, path -> volunteeredThumbnail(thumbs, packId, path) },
         startAt = startAt,
     )
@@ -785,7 +802,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         onGetIndexNow = { scope.launch { container.onlineIndexes.startNow(container.downloads.records.first()) } },
         onOpenSubject = { nav.navigate(SubjectRoute(it.id)) },
         onOpenArticle = { packId, path, title ->
-            scope.launch { container.sessions.tab(container.openArticle(packId, path, title))?.let { nav.showTab(it, keepCurrent = true) } }
+            scope.launch { openTopic(packId, path, title)?.let { container.sessions.tab(it) }?.let { nav.showTab(it, keepCurrent = true) } }
         },
         onOpenTimeline = { packId, path -> nav.navigate(TimelineRoute(packId, path)) },
         onOpenSources = { nav.navigate(BrowseRoute) { launchSingleTop = true } },
@@ -805,7 +822,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     val homeGames = remember { arrayOfNulls<GameModel>(1) }
     fun gameModel(scope: kotlinx.coroutines.CoroutineScope, thumbs: ArticleThumbnails, mixed: Boolean, start: GameKind? = null) = GameModel(
         scope = scope,
-        indexes = { timeIndexes() },
+        indexes = { volunteeredTimeIndexes() },
         picture = { packId, path -> volunteeredThumbnail(thumbs, packId, path) },
         store = gameStore,
         mixed = mixed,
@@ -1211,7 +1228,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     title = stringResource(R.string.explore_subject_quiz_title, stringResource(subject.label)),
                     onOpen = { mark ->
                         scope.launch {
-                            val tabId = container.openArticle(mark.packId, mark.path, mark.title)
+                            val tabId = openTopic(mark.packId, mark.path, mark.title) ?: return@launch
                             container.sessions.tab(tabId)?.let { nav.showTab(it) }
                         }
                     },
@@ -1362,7 +1379,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     // From a topic page (Plan LL2): a new tab, which opens at its own topic page; Back returns here.
                     onOpenArticle = { packId, path, title ->
                         scope.launch {
-                            container.sessions.tab(container.openArticle(packId, path, title))?.let { nav.showTab(it, keepCurrent = true) }
+                            openTopic(packId, path, title)?.let { container.sessions.tab(it) }?.let { nav.showTab(it, keepCurrent = true) }
                         }
                     },
                     onWander = { packId, path ->
@@ -1418,7 +1435,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     // A reference link's article opens over the book, as Define's entry does; Back comes back to the page.
                     onOpenArticle = { packId, path, title ->
                         scope.launch {
-                            container.sessions.tab(container.openArticle(packId, path, title))?.let { nav.showTab(it, keepCurrent = true) }
+                            openTopic(packId, path, title)?.let { container.sessions.tab(it) }?.let { nav.showTab(it, keepCurrent = true) }
                         }
                     },
                     // Made an ebook (Plan IA): this reader closes and the tab opens again, as the ebook. Only if it is
@@ -1705,7 +1722,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             wanderOf = { scope ->
                                 WanderModel(
                                     scope = scope,
-                                    encyclopedias = { WanderModel.encyclopediasOf(container.knownPacks.first(), container.knowledgeNow.value) },
+                                    encyclopedias = {
+                                        // Offline, Wander walks only what opens (Plan O3 Task 5).
+                                        val off = container.offlineSources()
+                                        WanderModel.encyclopediasOf(container.knownPacks.first(), container.knowledgeNow.value).filterNot { it.id in off }
+                                    },
                                     archiveOf = { container.library.archive(it.id) },
                                     thumbnail = homeThumbs::thumbnail,
                                     titles = { container.search.titles(it).hits },
@@ -1722,6 +1743,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                                 }
                             },
                             wanderFrom = container.wanderFrom,
+                            opens = container::opensNow,
+                            reachChanges = container.reach.state,
                         )
                     },
                     onReadiness = { nav.navigate(ReadinessRoute) { launchSingleTop = true } },
@@ -1734,7 +1757,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onOpenCard = { card ->
                         when (val target = card.target) {
                             is CardTarget.Article -> scope.launch {
-                                val tabId = container.openArticle(target.packId, target.path, card.title)
+                                val tabId = openTopic(target.packId, target.path, card.title) ?: return@launch
                                 container.sessions.tab(tabId)?.let { nav.showTab(it, fragment = target.fragment) }
                             }
                             is CardTarget.Book -> scope.launch {
@@ -1758,7 +1781,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     ui, remember(model) { timelineActions(model) },
                     onOpen = { mark ->
                         scope.launch {
-                            val tabId = container.openArticle(mark.packId, mark.path, mark.title)
+                            val tabId = openTopic(mark.packId, mark.path, mark.title) ?: return@launch
                             container.sessions.tab(tabId)?.let { nav.showTab(it) }
                         }
                     },
@@ -1784,7 +1807,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     onOpen = { mark ->
                         scope.launch {
-                            val tabId = container.openArticle(mark.packId, mark.path, mark.title)
+                            val tabId = openTopic(mark.packId, mark.path, mark.title) ?: return@launch
                             container.sessions.tab(tabId)?.let { nav.showTab(it) }
                         }
                     },
