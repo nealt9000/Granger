@@ -1,6 +1,6 @@
 # Release notes: the online build (draft, Neal approves)
 
-Candidate 1545, from main `f4d1aeac`: `~/Desktop/granger-play/granger-1545.aab` (144 MB), mapping beside it. It's the
+Candidate 1553, from main `84373cee`: `~/Desktop/granger-play/granger-1553.aab` (144 MB), mapping beside it. (It replaces 1545, which predated the onboarding refresh.) It's the
 first build since 1495, and it brings Plans O1–O5:
 - Wikipedia online
 - keeping and saved for now
@@ -8,6 +8,7 @@ first build since 1495, and it brings Plans O1–O5:
 - Home as the desk
 - Outfitting and the reading shelf
 - the new first run, Settings → Online, and updates for kept articles
+- Plan OB's onboarding refresh: Welcome holds Start reading now and Outfit for offline; one Outfit page; one-time hints
 
 ## Play "What's new"
 
@@ -34,3 +35,5 @@ Español (es-419, ≤500; 488):
   on mobile data.
 - **Updates from 1495:** downloaded packs stay as they are. Each Wikipedia's small index set (Explore, topics, timeline)
   comes down on its own when there's none yet.
+- **First run:** Welcome offers Start reading now (online, nothing to download) or Outfit for offline (one page, then
+  Review). Tips about Keep and Local only show once each; Settings → Reading & listening → Show tips again.
