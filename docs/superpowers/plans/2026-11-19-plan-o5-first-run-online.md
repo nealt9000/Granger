@@ -110,3 +110,26 @@ Branch `o5-first-run-online` from main (`2d96e530`), in worktree `.claude/worktr
 3. Then Task 5.
 4. Then the Pixel 7 fresh install.
 5. Then the candidate.
+
+## Results (2026-11-19, branch `o5-first-run-online`)
+
+Tasks 1–5 built with tests (suite green).
+- **Task 1:** How do you want to start? after This phone; Start reading now ends on Explore, Outfit goes on to Start.
+- **Task 2:** the privacy line in first run, and once on Home for an install that had Granger before; `WikimediaClient`
+  asks nothing until it's seen.
+- **Task 3:** Settings → Online: Never go online (locks the switch, tile and Outfitting's switch), Local only, Wi-Fi only
+  (moved), Offline pictures, Saved for now.
+- **Task 4:** updates for kept articles. Live revisions are fetched 20 a request, checked when Outfitting shows and at
+  most once a day, rather than by a background job (no network while the app isn't in use). Update all re-keeps.
+- **Task 5:** `Features.ONLINE = true`. The release APK (R8) was smoke-tested on a fresh, read-only copy of the emulator
+  image: Welcome → This phone → How do you want to start? → Start reading now → Explore filled online within 30 s
+  (today's spread, 17 subjects, 108 rooms) → topic page → the article in the reader with its pictures. No crash; no keep
+  rules needed.
+
+**Not done:**
+- **Task 6:** the Pixel 7 fresh install. The phone isn't connected, and Neal's OK is needed to uninstall there.
+- **The Pixel 6:** it can't take the release build without losing its data (different signing key); it stays on debug
+  builds.
+
+**Noticed:** Welcome still says "all working with no signal". The spec leaves copy for later; worth a line now that
+reading online is the default start.
