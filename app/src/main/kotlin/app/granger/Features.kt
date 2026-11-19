@@ -54,7 +54,7 @@ object Features {
 
     /**
      * Wikipedia online (Plan O1): articles, pictures, search and Related read live from Wikimedia through the one network
-     * gate. On in debug; release turns it on in O5, with the first-run choice and the privacy line (Decision 3).
+     * gate. On for everyone from Plan O5, with the first-run choice and the privacy line before any online read (Decision 3).
      */
-    val ONLINE = BuildConfig.DEBUG
+    val ONLINE = true
 }
