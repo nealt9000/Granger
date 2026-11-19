@@ -237,4 +237,5 @@
     <string name="explore_online_index_coming">Explore is getting its index for Wikipedia online (19 MB). Subjects, rooms and eras appear when it\'s here.</string>
     <string name="explore_online_index_wifi">Explore needs a 19 MB index for Wikipedia online. It\'s waiting for Wi-Fi.</string>
     <string name="explore_online_index_now">Get it now</string>
+    <string name="online_index_title">Wikipedia online index</string>
 </resources>

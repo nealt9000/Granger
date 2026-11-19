@@ -33,7 +33,7 @@ class OnlineWikipediaArchive(
 ) : ZimArchive {
     override val uuid: String = "online-wikipedia-$lang"
     override val metadata = ZimMetadata(
-        title = "Wikipedia", description = "Read live from Wikipedia", language = lang, date = "", name = packName(lang),
+        title = "Wikipedia", description = "", language = lang, date = "", name = packName(lang), // l10n-ignore: a brand
     )
     override val mainPath: String? = null
     override val hasFulltextIndex: Boolean = true

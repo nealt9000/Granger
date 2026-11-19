@@ -62,7 +62,7 @@ class OnlineSources(
         )
 
         fun row(lang: String) = Pack(
-            id = OnlineWikipediaArchive.packName(lang), filePath = "", title = "Wikipedia", description = "Read live from Wikipedia",
+            id = OnlineWikipediaArchive.packName(lang), filePath = "", title = "Wikipedia", description = "", // l10n-ignore: the source's name, a brand
             language = lang, date = "", sizeBytes = 0, hasFulltextIndex = true, status = PackStatus.OK, addedAt = 0,
             name = OnlineWikipediaArchive.packName(lang),
         )

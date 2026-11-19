@@ -206,4 +206,5 @@
     <string name="explore_online_index_coming">Explorar está descargando su índice para Wikipedia en línea (19 MB). Los temas, las salas y las épocas aparecen cuando llegue.</string>
     <string name="explore_online_index_wifi">Explorar necesita un índice de 19 MB para Wikipedia en línea. Está esperando wifi.</string>
     <string name="explore_online_index_now">Descargarlo ahora</string>
+    <string name="online_index_title">Índice de Wikipedia en línea</string>
 </resources>

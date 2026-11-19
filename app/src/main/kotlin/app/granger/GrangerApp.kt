@@ -941,7 +941,10 @@ class AppContainer(context: Context) {
     )
 
     /** Wikipedia online's small index set: queued once per knowledge language, kept while its source is on (Plan O1 Task 8). */
-    val onlineIndexes = app.granger.online.OnlineIndexes(downloads, volumeRoot = { volumes.list().firstOrNull()?.root }, wifiOnly = { downloadPrefs.wifiOnly })
+    val onlineIndexes = app.granger.online.OnlineIndexes(
+        downloads, volumeRoot = { volumes.list().firstOrNull()?.root }, wifiOnly = { downloadPrefs.wifiOnly },
+        title = { appContext.getString(R.string.online_index_title) },
+    )
 
     /** A sidecar kind downloads only once a feature reads it (Linked Library spec §5.8). */
     private fun sidecarWanted(kind: SidecarKind): Boolean = when (kind) {

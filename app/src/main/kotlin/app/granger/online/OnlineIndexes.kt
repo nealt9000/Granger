@@ -24,6 +24,8 @@ class OnlineIndexes(
     private val downloads: Downloads,
     private val volumeRoot: () -> File?,
     private val wifiOnly: () -> Boolean,
+    /** The set's name in Downloads, in the app's language. */
+    private val title: () -> String = { "" },
 ) {
     private val mutex = Mutex()
     /** Set by [startNow]: the set no longer waits for Wi-Fi. */
@@ -69,7 +71,7 @@ class OnlineIndexes(
                 if (!online || versions.any { it.hash == file.sha256 || it.isActive }) continue
                 val root = volumeRoot() ?: continue
                 val spec = kind.specOf(item, file)
-                downloads.enqueue(spec.copy(itemId = itemId, title = "Wikipedia online index", relativePath = spec.relativePath.replace(item.id, source)), root, wifiOnly() && !now)
+                downloads.enqueue(spec.copy(itemId = itemId, title = title(), relativePath = spec.relativePath.replace(item.id, source)), root, wifiOnly() && !now)
             }
         }
     }
