@@ -83,4 +83,10 @@
     <string name="onboarding_held">%1$s incluye %2$s, así que no se pone en cola.</string>
     <string name="onboarding_second_encyclopedia">Enciclopedia en %1$s</string>
     <string name="onboarding_second_blurb">La enciclopedia de tu segundo idioma, junto al comienzo.</string>
+    <string name="onboarding_step_choose">¿Cómo quieres empezar?</string>
+    <string name="onboarding_read_now">Empezar a leer ya</string>
+    <string name="onboarding_read_now_summary">Lee Wikipedia y los clásicos en línea, sin descargar nada antes. Guarda lo que te guste para sin conexión sobre la marcha.</string>
+    <string name="onboarding_outfit">Equipar para sin conexión</string>
+    <string name="onboarding_outfit_summary">Elige qué guardar ahora en este teléfono, para cuando no haya señal.</string>
+    <string name="onboarding_privacy_line">Leer en línea pide cada página a Wikipedia (y a otras bibliotecas libres), así que ven lo que abres. Granger nunca lo ve. Puedes guardar cosas sin conexión o desactivar el acceso en línea cuando quieras.</string>
 </resources>

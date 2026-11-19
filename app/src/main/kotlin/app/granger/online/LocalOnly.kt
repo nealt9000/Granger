@@ -33,6 +33,8 @@ import kotlinx.coroutines.flow.StateFlow
 interface ReachControl {
     val state: StateFlow<ReachState>
     fun setLocalOnly(on: Boolean)
+    /** Never go online (Plan O5): Local only that the switch, the tile and Outfitting can't turn off. */
+    fun setNever(on: Boolean) {}
 }
 
 /** The app's reach control, provided at the top; null (release before O5, tests) leaves the switch and banner out. */

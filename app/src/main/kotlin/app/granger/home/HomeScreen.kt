@@ -107,6 +107,7 @@ fun HomeScreen(
     /** Ready offline (Plan O3 Task 8); null shows the Readiness strip as before. */
     readyOffline: app.granger.online.ReadyOfflineUi? = null,
     readyActions: ReadyActions = ReadyActions(),
+    privacyNotice: PrivacyNotice? = null,
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -140,12 +141,15 @@ fun HomeScreen(
         onOpenTimeline = onOpenTimeline, game = game, gameActions = gameActions, onOpenGames = onOpenGames,
         arrangeActions = remember(viewModel) { ArrangeActions(viewModel::arrange) },
         wanderJump = viewModel.wanderJumps.collectAsStateWithLifecycle().value,
-        readyOffline = readyOffline, readyActions = readyActions, onlineOn = app.granger.Features.ONLINE,
+        readyOffline = readyOffline, readyActions = readyActions, onlineOn = app.granger.Features.ONLINE, privacyNotice = privacyNotice,
     )
 }
 
 /** After a crash, Home asks once (Plan F1 part 2 Decision 3): Send report opens Send feedback; Not now lets it be. */
 class CrashNotice(val onSend: () -> Unit, val onDismiss: () -> Unit)
+
+/** The privacy line, once, for an install that had Granger before online came (Plan O5 builder's call 2). */
+class PrivacyNotice(val onOk: () -> Unit, val onSettings: () -> Unit)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -179,6 +183,7 @@ fun HomeContent(
     readyActions: ReadyActions = ReadyActions(),
     /** Wikipedia online is on: with nothing read yet, a line to Outfitting stands where the old strip did. */
     onlineOn: Boolean = false,
+    privacyNotice: PrivacyNotice? = null,
 ) {
     var adding by rememberSaveable { mutableStateOf(false) }
     var arranging by rememberSaveable { mutableStateOf(false) }
@@ -250,6 +255,7 @@ fun HomeContent(
             }
             // What needs acting on stays at the top; everything else comes in the order the user arranged (Plan HY),
             // by default Continue, Timeline, Play, Wander, the feeds and Readiness (Neal, 2026-11-08).
+            privacyNotice?.let { notice -> item(key = "privacy") { HomeSection("privacy-section", bottom = 0.dp) { PrivacyNoticeCard(notice) } } }
             crashNotice?.let { notice -> item(key = "crash") { HomeSection("crash-section", bottom = 0.dp) { CrashNoticeRow(notice) } } }
             ui.downloads?.let { card ->
                 item(key = "downloads") { HomeSection("downloads-section", bottom = 0.dp) { DownloadsCardView(card, onOpenDownloads, downloadsActions) } }
@@ -584,6 +590,18 @@ fun homeDownloadsText(res: Resources, card: DownloadsCard.Active): UiText {
     return card.timeLeftMillis?.let {
         UiText.Res(R.string.home_downloads_progress_left, card.filesDone, card.files, done, total, app.granger.core.downloads.QueueText.timeLeft(res, it))
     } ?: UiText.Res(R.string.home_downloads_progress, card.filesDone, card.files, done, total)
+}
+
+@Composable
+private fun PrivacyNoticeCard(notice: PrivacyNotice) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).testTag("privacy-notice"), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(stringResource(R.string.home_privacy_title), style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.onboarding_privacy_line), style = MaterialTheme.typography.bodyMedium)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            TextButton(onClick = notice.onSettings) { Text(stringResource(R.string.home_privacy_settings)) }
+            TextButton(onClick = notice.onOk, modifier = Modifier.testTag("privacy-ok")) { Text(stringResource(R.string.common_ok)) }
+        }
+    }
 }
 
 @Composable

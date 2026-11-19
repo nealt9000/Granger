@@ -249,4 +249,6 @@
         <item quantity="other">Get %1$s · %2$s · covers %3$d of them</item>
     </plurals>
     <string name="home_ready_nothing_yet">Everything online, nothing kept yet</string>
+    <string name="home_privacy_title">Granger now reads online too</string>
+    <string name="home_privacy_settings">Settings</string>
 </resources>

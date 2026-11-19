@@ -216,4 +216,6 @@
     <string name="keep_queued">Keeps when online</string>
     <string name="needs_internet">Needs internet</string>
     <string name="search_online_when_connected">Online results appear when you\'re connected.</string>
+    <string name="settings_never_online">Never go online</string>
+    <string name="settings_never_online_summary">Granger uses only what this phone holds. Local only stays on and can\'t be turned off elsewhere.</string>
 </resources>

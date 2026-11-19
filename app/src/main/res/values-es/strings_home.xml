@@ -232,4 +232,6 @@
         <item quantity="other">Conseguir %1$s · %2$s · cubre %3$d de ellas</item>
     </plurals>
     <string name="home_ready_nothing_yet">Todo en línea, nada guardado aún</string>
+    <string name="home_privacy_title">Granger ahora también lee en línea</string>
+    <string name="home_privacy_settings">Ajustes</string>
 </resources>

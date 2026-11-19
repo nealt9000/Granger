@@ -39,7 +39,7 @@ class OnlineSettingsSource(val prefs: OnlinePrefs, val saved: SavedStore, val re
  * cap with the cap's choices, and Clear (asked once). O5 adds Use the internet, Never go online and Local only.
  */
 @Composable
-fun OnlineSettingsSection(source: OnlineSettingsSource, header: @Composable (String) -> Unit) {
+fun OnlineSettingsSection(source: OnlineSettingsSource, header: @Composable (String) -> Unit, wifiRow: @Composable () -> Unit = {}) {
     val pictures by source.prefs.offlinePictures.collectAsStateWithLifecycle()
     val cap by source.prefs.savedCapMb.collectAsStateWithLifecycle()
     var cleared by rememberSaveable { mutableIntStateOf(0) }
@@ -50,6 +50,16 @@ fun OnlineSettingsSection(source: OnlineSettingsSource, header: @Composable (Str
     header(stringResource(R.string.settings_section_online))
     source.reach?.let { control ->
         val state by control.state.collectAsStateWithLifecycle()
+        // Use the internet (Plan O5 builder's call 3): on, or Never go online.
+        ListItem(
+            headlineContent = { Text(stringResource(R.string.settings_never_online)) },
+            supportingContent = { Text(stringResource(R.string.settings_never_online_summary)) },
+            trailingContent = {
+                androidx.compose.material3.Switch(
+                    checked = state == ReachState.NEVER, onCheckedChange = control::setNever, modifier = Modifier.testTag(OnlineSettingsTags.NEVER),
+                )
+            },
+        )
         ListItem(
             headlineContent = { Text(stringResource(R.string.local_only)) },
             supportingContent = { Text(stringResource(R.string.local_only_setting_summary)) },
@@ -61,6 +71,7 @@ fun OnlineSettingsSection(source: OnlineSettingsSource, header: @Composable (Str
             },
         )
     }
+    wifiRow()
     ListItem(
         headlineContent = { Text(stringResource(R.string.settings_offline_pictures)) },
         supportingContent = {
@@ -132,4 +143,5 @@ object OnlineSettingsTags {
     const val CAP = "settings_saved_cap"
     const val CLEAR = "settings_saved_clear"
     const val LOCAL_ONLY = "settings_local_only"
+    const val NEVER = "settings_never_online"
 }

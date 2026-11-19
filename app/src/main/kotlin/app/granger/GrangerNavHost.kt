@@ -1699,6 +1699,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 )
             }
             composable<HomeRoute> {
+                val privacySeen by container.networkPolicy.privacySeen.collectAsStateWithLifecycle()
                 // Ready offline (Plan O3 Task 8): worked out when Home shows, and again when the internet comes or goes.
                 val reachNow = container.reachControl?.state?.collectAsStateWithLifecycle()?.value
                 val readyOffline by androidx.compose.runtime.produceState<app.granger.online.ReadyOfflineUi?>(null, reachNow) {
@@ -1763,6 +1764,9 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onOpenTimeline = { mark -> nav.navigate(TimelineRoute(mark?.packId, mark?.path)) { launchSingleTop = true } },
                     onOpenGames = { nav.navigate(GamesRoute) { launchSingleTop = true } },
                     readyOffline = readyOffline,
+                    privacyNotice = if (Features.ONLINE && !privacySeen) app.granger.home.PrivacyNotice(
+                        onOk = container.networkPolicy::setPrivacySeen, onSettings = { nav.navigate(SettingsRoute) { launchSingleTop = true } },
+                    ) else null,
                     readyActions = app.granger.home.ReadyActions(
                         onKeepTheRead = container::keepTheRead, onGetPack = { container.getPack(it) }, onSeeAll = { nav.navigate(ReadinessRoute) },
                     ),
@@ -1837,9 +1841,13 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             phoneLocales = container.appLanguages::phoneLocales,
                             appLanguage = container.appLanguages::currentCode,
                             countryCode = container.phoneCountry,
+                            chooseOnline = Features.ONLINE,
+                            onPrivacySeen = container.networkPolicy::setPrivacySeen,
                         )
                     },
                     onDone = { nav.popBackStack() },
+                    // Start reading now (Plan O5): onboarding ends on Explore.
+                    onReadNow = { nav.popBackStack(); nav.navigate(ExploreRoute) { launchSingleTop = true } },
                     onSeeDomain = { domain -> nav.navigate(SourceRoute(CatalogScope.KIWIX, domain)) },
                 )
             }

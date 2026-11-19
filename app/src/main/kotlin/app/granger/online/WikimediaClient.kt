@@ -21,6 +21,8 @@ import java.util.concurrent.Semaphore
 class WikimediaClient(
     private val http: OkHttpClient,
     private val onMainThread: () -> Boolean = { false },
+    /** The privacy line has been seen (Plan O5): until then nothing is asked of Wikimedia. */
+    private val allowed: () -> Boolean = { true },
 ) {
     data class Page(val title: String, val html: String)
 
@@ -107,6 +109,7 @@ class WikimediaClient(
 
     private fun <T> call(url: HttpUrl, noCache: Boolean = false, read: (Response) -> T?): T? {
         check(!onMainThread()) { "Wikimedia called on the main thread: $url" }
+        if (!allowed()) return null
         val gate = gates.computeIfAbsent(url.host) { Semaphore(PER_HOST) }
         gate.acquire()
         return try {

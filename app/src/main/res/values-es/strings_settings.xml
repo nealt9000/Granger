@@ -180,4 +180,6 @@
     <string name="keep_queued">Se guarda con conexión</string>
     <string name="needs_internet">Necesita internet</string>
     <string name="search_online_when_connected">Los resultados en línea aparecen cuando hay conexión.</string>
+    <string name="settings_never_online">No conectarse nunca</string>
+    <string name="settings_never_online_summary">Granger usa solo lo que hay en este teléfono. Solo local queda activado y no se puede desactivar en otro sitio.</string>
 </resources>

@@ -119,7 +119,8 @@ fun SettingsScreen(
             item(key = "library") {
                 SettingsHeader(stringResource(R.string.settings_section_library))
                 StorageSection(ui, viewModel::selectVolume)
-                ListItem(
+                // With Settings → Online, Wi-Fi only is one of its rows (Plan O5 builder's call 3).
+                if (online == null) ListItem(
                     headlineContent = { Text(stringResource(R.string.settings_wifi_only)) },
                     supportingContent = { Text(stringResource(R.string.settings_wifi_only_summary)) },
                     trailingContent = { Switch(checked = ui.wifiOnly, onCheckedChange = viewModel::setWifiOnly) },
@@ -163,7 +164,15 @@ fun SettingsScreen(
             if (voiceInput != null) item(key = "voice_input") {
                 app.granger.voiceinput.VoiceInputSettingsSection(voiceInput)
             }
-            if (online != null) item(key = "online") { app.granger.online.OnlineSettingsSection(online) { SettingsHeader(it) } }
+            if (online != null) item(key = "online") {
+                app.granger.online.OnlineSettingsSection(online, header = { SettingsHeader(it) }) {
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.settings_wifi_only)) },
+                        supportingContent = { Text(stringResource(R.string.settings_wifi_only_summary)) },
+                        trailingContent = { Switch(checked = ui.wifiOnly, onCheckedChange = viewModel::setWifiOnly) },
+                    )
+                }
+            }
             if (seen != null) item(key = "explore") { ExploreSection(seen, content) }
             item(key = "appearance") {
                 AppearanceSection(railSide, viewModel::setRailSide, openTo, viewModel::setOpenTo, theme, viewModel::setTheme)

@@ -78,18 +78,21 @@ class OnboardingActions(
     val onWifiOnly: (Boolean) -> Unit = {},
     val onChooseVolume: (String) -> Unit = {},
     val onClearNotice: () -> Unit = {},
+    val onReadNow: () -> Unit = {},
+    val onOutfit: () -> Unit = {},
 )
 
 /** [onDone] leaves the flow (Start or Skip finished); [onSeeDomain] opens the Kiwix screen filtered to a domain. */
 @Composable
-fun OnboardingScreen(viewModel: OnboardingViewModel, onDone: () -> Unit, onSeeDomain: (String) -> Unit) {
+fun OnboardingScreen(viewModel: OnboardingViewModel, onDone: () -> Unit, onSeeDomain: (String) -> Unit, onReadNow: () -> Unit = onDone) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
         onPauseOrDispose {}
     }
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val finished by viewModel.finished.collectAsStateWithLifecycle()
-    LaunchedEffect(finished) { if (finished) onDone() }
+    val readingNow by viewModel.readingNow.collectAsStateWithLifecycle()
+    LaunchedEffect(finished) { if (finished) { if (readingNow) onReadNow() else onDone() } }
     BackHandler(onBack = viewModel::back)
     OnboardingContent(
         ui,
@@ -104,6 +107,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel, onDone: () -> Unit, onSeeDo
             onRegionQuery = viewModel::setRegionQuery, onChooseRegion = viewModel::chooseRegion, onToggleUseCase = viewModel::toggleUseCase,
             onSeeDomain = onSeeDomain, onWifiOnly = viewModel::setWifiOnly, onChooseVolume = viewModel::chooseVolume,
             onClearNotice = viewModel::clearNotice,
+            onReadNow = viewModel::startReadingNow, onOutfit = viewModel::outfit,
         ),
     )
 }
@@ -113,6 +117,7 @@ private val Step.title: String
         when (this) {
             Step.WELCOME -> R.string.onboarding_step_welcome
             Step.PHONE -> R.string.onboarding_step_phone
+            Step.CHOOSE -> R.string.onboarding_step_choose
             Step.START -> R.string.onboarding_step_start
             Step.REGION -> R.string.onboarding_your_region
             Step.USES -> R.string.onboarding_uses
@@ -137,6 +142,8 @@ fun OnboardingContent(ui: OnboardingUi, actions: OnboardingActions) {
                 if (ui.step != Step.WELCOME) OutlinedButton(onClick = actions.onBack) { Text(stringResource(R.string.common_back)) } else Spacer(Modifier)
                 when (ui.step) {
                     Step.WELCOME -> Button(onClick = actions.onNext) { Text(stringResource(R.string.onboarding_get_started)) }
+                    // Its two choices are the way on (Plan O5).
+                    Step.CHOOSE -> Spacer(Modifier)
                     Step.REVIEW -> Button(onClick = actions.onStart, enabled = !ui.starting) {
                         if (ui.starting) {
                             CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
@@ -169,6 +176,7 @@ fun OnboardingContent(ui: OnboardingUi, actions: OnboardingActions) {
                 when (ui.step) {
                     Step.WELCOME -> welcome(ui, actions)
                     Step.PHONE -> phone(ui)
+                    Step.CHOOSE -> choose(actions)
                     Step.START -> start(ui, actions)
                     Step.REGION -> region(ui, actions)
                     Step.USES -> uses(ui, actions)
@@ -515,6 +523,33 @@ private fun Choice(title: String, blurb: String, selected: Boolean, onClick: () 
         Column(Modifier.padding(start = 8.dp)) {
             Text(title)
             Text(blurb, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+/**
+ * How do you want to start? (Plan O5 builder's call 1): read now, online, or outfit the phone for offline; the privacy line
+ * under both (spec §9, word for word).
+ */
+private fun androidx.compose.foundation.lazy.LazyListScope.choose(actions: OnboardingActions) {
+    item(key = "choose") {
+        androidx.compose.foundation.layout.Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            ChoiceCard(stringResource(R.string.onboarding_read_now), stringResource(R.string.onboarding_read_now_summary), "choose-read-now", primary = true, onClick = actions.onReadNow)
+            ChoiceCard(stringResource(R.string.onboarding_outfit), stringResource(R.string.onboarding_outfit_summary), "choose-outfit", primary = false, onClick = actions.onOutfit)
+            Text(stringResource(R.string.onboarding_privacy_line), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp).testTag("privacy-line"))
+        }
+    }
+}
+
+@Composable
+private fun ChoiceCard(title: String, summary: String, tag: String, primary: Boolean, onClick: () -> Unit) {
+    val colors = if (primary) androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        else androidx.compose.material3.CardDefaults.outlinedCardColors()
+    androidx.compose.material3.Card(onClick = onClick, colors = colors, modifier = Modifier.fillMaxWidth().testTag(tag)) {
+        androidx.compose.foundation.layout.Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(title, style = MaterialTheme.typography.titleLarge)
+            Text(summary, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

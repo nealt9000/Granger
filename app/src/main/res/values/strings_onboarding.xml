@@ -122,4 +122,10 @@
          language named in the app's language: "Encyclopedia in Spanish". -->
     <string name="onboarding_second_encyclopedia">Encyclopedia in %1$s</string>
     <string name="onboarding_second_blurb">Your second language\'s encyclopedia, beside the start.</string>
+    <string name="onboarding_step_choose">How do you want to start?</string>
+    <string name="onboarding_read_now">Start reading now</string>
+    <string name="onboarding_read_now_summary">Read Wikipedia and the classics online, with nothing to download first. Keep what you like for offline as you go.</string>
+    <string name="onboarding_outfit">Outfit for offline</string>
+    <string name="onboarding_outfit_summary">Choose what to keep on this phone now, for when there\'s no signal.</string>
+    <string name="onboarding_privacy_line">Reading online asks Wikipedia (and other free libraries) for each page, so they see what you open. Granger itself never sees it. You can keep things offline or switch online off any time.</string>
 </resources>

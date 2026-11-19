@@ -34,6 +34,19 @@ class NetworkPolicy(context: Context) {
         preview.value = on
     }
 
+    private val privacy = MutableStateFlow(prefs.getBoolean(PRIVACY, false))
+
+    /**
+     * The privacy line has been seen (Plan O5 builder's call 2): in first run, or on Home's one-time card for an existing
+     * install. Until it has, nothing is read online.
+     */
+    val privacySeen: StateFlow<Boolean> = privacy.asStateFlow()
+
+    fun setPrivacySeen() {
+        prefs.edit().putBoolean(PRIVACY, true).apply()
+        privacy.value = true
+    }
+
     fun set(mode: NetworkMode) {
         prefs.edit().putString(KEY, mode.name).apply()
         state.value = mode
@@ -42,5 +55,6 @@ class NetworkPolicy(context: Context) {
     private companion object {
         const val KEY = "mode"
         const val PREVIEW = "preview_no_wikipedia"
+        const val PRIVACY = "privacy_seen"
     }
 }

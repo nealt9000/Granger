@@ -64,12 +64,15 @@ class OnboardingViewModelTest {
     private val knowledge = kotlinx.coroutines.flow.MutableStateFlow(listOf("en"))
     private var phone = listOf(java.util.Locale.US)
 
-    private fun TestScope.viewModel(tier: DeviceTier = DeviceTier.ASK, country: String = "", offerVoice: Boolean = true): OnboardingViewModel {
+    private var privacySeen = false
+
+    private fun TestScope.viewModel(tier: DeviceTier = DeviceTier.ASK, country: String = "", offerVoice: Boolean = true, online: Boolean = false): OnboardingViewModel {
         val vm = OnboardingViewModel(
             catalog, library, downloads, volumes, prefs, tier, totalRamBytes = 7_974_752_256, onboardingPrefs,
             countryCode = country, offerVoice = offerVoice, io = main.dispatcher, now = { 42 },
             enqueue = { group, items: List<CatalogItem>, _: Volume, wifi -> enqueued += Triple(group, items.map { it.id }, wifi); enqueueResult },
             knowledge = knowledge, setKnowledge = { knowledge.value = it }, phoneLocales = { phone },
+            chooseOnline = online, onPrivacySeen = { privacySeen = true },
         )
         backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()
@@ -77,6 +80,32 @@ class OnboardingViewModelTest {
     }
 
     private fun TestScope.settle() = testScheduler.advanceUntilIdle()
+
+    @Test fun onlineHowDoYouWantToStartComesAfterThisPhone() = runTest(main.dispatcher) {
+        // Plan O5 Task 1.
+        val vm = viewModel(online = true)
+        vm.next(); settle()
+        vm.next(); settle()
+        assertThat(vm.ui.value.step).isEqualTo(Step.CHOOSE)
+        vm.outfit(); settle()
+        assertThat(vm.ui.value.step).isEqualTo(Step.START)
+        assertThat(privacySeen).isTrue()
+        vm.back(); settle()
+        assertThat(vm.ui.value.step).isEqualTo(Step.CHOOSE)
+        vm.startReadingNow(); settle()
+        assertThat(vm.readingNow.value).isTrue()
+        assertThat(vm.finished.value).isTrue()
+        assertThat(onboardingPrefs.done).isTrue()
+    }
+
+    @Test fun withoutOnlineThePhoneLeadsStraightToStart() = runTest(main.dispatcher) {
+        val vm = viewModel(online = false)
+        vm.next(); settle()
+        vm.next(); settle()
+        assertThat(vm.ui.value.step).isEqualTo(Step.START)
+        vm.back(); settle()
+        assertThat(vm.ui.value.step).isEqualTo(Step.PHONE)
+    }
 
     @Test fun aFreshInstallFetchesTheCatalogOnce() = runTest(main.dispatcher) {
         val vm = viewModel()

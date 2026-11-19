@@ -114,6 +114,16 @@ class WikimediaClientTest {
         assertThat(asked).isEmpty()
     }
 
+    @Test fun nothingIsAskedBeforeThePrivacyLineIsSeen() {
+        var seen = false
+        val server = Interceptor { chain -> asked += chain.request().url.toString(); Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).message("").code(200).body(fixture("moon-summary.json").toResponseBody("application/json".toMediaType())).build() }
+        val c = WikimediaClient(OkHttpClient.Builder().addInterceptor(server).build(), allowed = { seen })
+        assertThat(c.summary("en", "Moon")).isNull()
+        assertThat(asked).isEmpty()
+        seen = true
+        assertThat(c.summary("en", "Moon")!!.qid).isEqualTo(405L)
+    }
+
     @Test fun neverOnTheMainThread() {
         val c = WikimediaClient(OkHttpClient(), onMainThread = { true })
         assertThrows(IllegalStateException::class.java) { c.summary("en", "Moon") }

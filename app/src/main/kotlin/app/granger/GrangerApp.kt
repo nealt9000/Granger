@@ -723,7 +723,10 @@ class AppContainer(context: Context) {
     val wikimedia: app.granger.online.WikimediaClient by lazy {
         // O1's interim HTTP cache is gone: Saved for now holds what was read (Plan O2 Task 1). Its folder goes once.
         File(appContext.cacheDir, "wikimedia").takeIf { it.exists() }?.let { old -> appScope.launch(Dispatchers.IO) { old.deleteRecursively() } }
-        app.granger.online.WikimediaClient(http, onMainThread = { BuildConfig.DEBUG && android.os.Looper.myLooper() == android.os.Looper.getMainLooper() })
+        app.granger.online.WikimediaClient(
+            http, onMainThread = { BuildConfig.DEBUG && android.os.Looper.myLooper() == android.os.Looper.getMainLooper() },
+            allowed = { networkPolicy.privacySeen.value },
+        )
     }
 
     /** Whether the internet can be reached now: the policy and Android's connection (Plan O3 Task 1). */
@@ -732,8 +735,13 @@ class AppContainer(context: Context) {
     /** The Local only switch's and banner's control (Plan O3); null while Wikipedia online is off. */
     val reachControl: app.granger.online.ReachControl? = if (!Features.ONLINE) null else object : app.granger.online.ReachControl {
         override val state get() = reach.state
-        override fun setLocalOnly(on: Boolean) =
+        override fun setLocalOnly(on: Boolean) {
+            // Never go online can't be turned off from here (Plan O5).
+            if (networkPolicy.now() == app.granger.core.downloads.NetworkMode.NEVER) return
             networkPolicy.set(if (on) app.granger.core.downloads.NetworkMode.LOCAL_ONLY else app.granger.core.downloads.NetworkMode.ONLINE)
+        }
+        override fun setNever(on: Boolean) =
+            networkPolicy.set(if (on) app.granger.core.downloads.NetworkMode.NEVER else app.granger.core.downloads.NetworkMode.ONLINE)
     }
 
     /**

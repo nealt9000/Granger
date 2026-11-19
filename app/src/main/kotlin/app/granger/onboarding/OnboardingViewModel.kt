@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** The six screens (spec §6; Region and Uses split in Plan U3a). */
-enum class Step { WELCOME, PHONE, START, REGION, USES, REVIEW }
+enum class Step { WELCOME, PHONE, CHOOSE, START, REGION, USES, REVIEW }
 
 /** This phone (step 2). */
 data class PhoneUi(
@@ -133,8 +133,16 @@ class OnboardingViewModel(
     private val appLanguage: () -> String = { ENGLISH },
     private val enqueue: suspend (groupId: String, items: List<app.granger.core.catalog.CatalogItem>, volume: Volume, wifiOnly: Boolean) -> EnqueueResult =
         { group, items, volume, wifi -> downloads.enqueueGroup(group, items.map { downloadSpecOf(it, group) }, volume.root, wifi) },
+    /** Wikipedia online is on (Plan O5): How do you want to start? comes after This phone. Off, it's passed over. */
+    private val chooseOnline: Boolean = false,
+    /** The privacy line has been shown and Start reading now chosen (Plan O5 builder's call 2). */
+    private val onPrivacySeen: () -> Unit = {},
 ) : ViewModel() {
     private val step = MutableStateFlow(Step.WELCOME)
+
+    /** Start reading now was chosen: onboarding ends on Explore (Plan O5 Task 1). */
+    private val readNow = MutableStateFlow(false)
+    val readingNow: kotlinx.coroutines.flow.StateFlow<Boolean> = readNow
     private val startId = MutableStateFlow<String?>(OnboardingModel.DEFAULT_START)
     private val unticked = MutableStateFlow<Set<String>>(emptySet())
     private val regionQuery = MutableStateFlow("")
@@ -308,11 +316,27 @@ class OnboardingViewModel(
         viewModelScope.launch { catalog.refresh() }
     }
 
-    fun next() = step.update { Step.entries.getOrNull(it.ordinal + 1) ?: it }
+    fun next() = step.update { (Step.entries.getOrNull(it.ordinal + 1) ?: it).let { n -> if (n == Step.CHOOSE && !chooseOnline) Step.START else n } }
 
     /** Back on the first step is Skip (Decision 1). */
     fun back() {
-        if (step.value == Step.WELCOME) skip() else step.update { Step.entries[it.ordinal - 1] }
+        if (step.value == Step.WELCOME) skip() else step.update { Step.entries[it.ordinal - 1].let { b -> if (b == Step.CHOOSE && !chooseOnline) Step.PHONE else b } }
+    }
+
+    /**
+     * How do you want to start? (Plan O5 builder's call 1): Start reading now ends onboarding online, nothing downloaded
+     * beyond the small index set (which follows on its own), on Explore; the privacy line under it has been seen.
+     */
+    fun startReadingNow() {
+        onPrivacySeen()
+        readNow.value = true
+        skip()
+    }
+
+    /** Outfit for offline: today's steps, from Start. The privacy line under it has been seen too. */
+    fun outfit() {
+        onPrivacySeen()
+        step.value = Step.START
     }
 
     fun goTo(target: Step) { step.value = target }
