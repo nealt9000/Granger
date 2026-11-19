@@ -32,6 +32,8 @@ class OnlineWikipediaArchive(
     private val fallback: (lang: String, title: String) -> ZimItem? = { _, _ -> null },
     /** A random article from the index bound to this source (well known), before Wikipedia's own random (any stub). */
     private val indexRandom: () -> String? = { null },
+    /** Kept articles and Saved for now (Plan O2); null reads straight from Wikimedia, as O1 did. */
+    private val stores: OfflineStores? = null,
 ) : ZimArchive {
     override val uuid: String = "online-wikipedia-$lang"
     override val metadata = ZimMetadata(
@@ -62,8 +64,24 @@ class OnlineWikipediaArchive(
     /** Summaries asked for together ([prefetch]), kept for the cards that follow (a card may be made at more than one size). */
     private val early = java.util.concurrent.ConcurrentHashMap<String, WikimediaClient.Summary>()
 
-    /** The article's summary (header, card, plate): one small request instead of the whole article. */
-    fun summary(path: String): WikimediaClient.Summary? = early[path] ?: wiki.summary(lang, path)
+    /**
+     * The article's summary (header, card, plate): one small request instead of the whole article. Saved for now, so a
+     * card still shows with no signal (Plan O2 Task 1).
+     */
+    fun summary(path: String): WikimediaClient.Summary? {
+        early[path]?.let { return it }
+        val saved = stores?.saved
+        val key = SavedStore.summaryKey(lang, path)
+        val kept = saved?.get(key)
+        if (kept != null && stores.clock() - kept.savedAt < SavedStore.FRESH_MS) WikimediaClient.summaryFromJson(String(kept.bytes))?.let { return it }
+        val live = wiki.summary(lang, path)
+        if (live != null) {
+            saved?.put(key, SavedStore.Kind.SUMMARY, WikimediaClient.summaryToJson(live).toByteArray(), "application/json")
+            stores?.trimmed()
+            return live
+        }
+        return kept?.let { WikimediaClient.summaryFromJson(String(it.bytes)) }
+    }
 
     /** Asks for many articles' summaries in a few batched requests, so the cards made next don't each ask (a broad topic's). */
     fun prefetch(paths: List<String>) {
@@ -73,19 +91,66 @@ class OnlineWikipediaArchive(
         early.putAll(wiki.summaries(lang, wanted))
     }
 
+    /**
+     * An article, in spec §4's order (Plan O2 Task 1):
+     * 1. kept with its pictures (a full copy beats online);
+     * 2. saved for now within the hour (Back is instant);
+     * 3. online, saved as it comes;
+     * 4. saved for now of any age, then kept as text only (shorter copies, when online can't be had);
+     * 5. a pack's shorter copy (O1's fallback).
+     */
     private fun article(title: String): ZimItem? {
+        val kept = stores?.kept?.get(lang, title)
+        if (kept != null && kept.withPictures) stores.kept.page(lang, title)?.let { return html(title, it) }
+        val saved = stores?.saved?.get(SavedStore.pageKey(lang, title))
+        if (saved != null && stores.clock() - saved.savedAt < SavedStore.FRESH_MS) return html(title, saved.bytes)
+        fetch(title)?.let { return it }
+        saved?.let { return html(title, it.bytes) }
+        if (kept != null) stores.kept.page(lang, title)?.let { return html(title, it) }
+        return fallback(lang, title)?.let { ZimItem(title, it.mimeType, it.bytes) }
+    }
+
+    /** The article fetched and prepared, saved for now; null when it can't be had. */
+    private fun fetch(title: String): ZimItem? {
         val t0 = System.nanoTime()
-        val page = wiki.html(lang, title) ?: return fallback(lang, title)?.let { ZimItem(title, it.mimeType, it.bytes) }
+        val page = wiki.html(lang, title) ?: return null
         val t1 = System.nanoTime()
-        val html = transform(page.html, page.title)
+        val bytes = transform(page.html, page.title).toByteArray()
         if (app.granger.BuildConfig.DEBUG) {
             Log.i(TAG, "article '$title': fetch ${(t1 - t0) / 1_000_000} ms (${page.html.length / 1024} KB), transform ${(System.nanoTime() - t1) / 1_000_000} ms")
         }
-        return ZimItem(title, "text/html; charset=utf-8", html.toByteArray())
+        stores?.saved?.put(SavedStore.pageKey(lang, title), SavedStore.Kind.PAGE, bytes, HTML)
+        stores?.trimmed()
+        return html(title, bytes)
     }
 
-    private fun picture(path: String, url: String): ZimItem? =
-        wiki.picture(url)?.let { (bytes, type) -> ZimItem(path, type, bytes) }
+    private fun html(title: String, bytes: ByteArray) = ZimItem(title, HTML, bytes)
+
+    /** A picture: kept, saved for now, then online (saved as it comes, unless Offline pictures is Text only). */
+    private fun picture(path: String, url: String): ZimItem? {
+        stores?.kept?.picture(path)?.let { return ZimItem(path, mimeOf(path), it) }
+        val key = SavedStore.pictureKey(path)
+        stores?.saved?.get(key)?.let { return ZimItem(path, it.mime, it.bytes) }
+        val (bytes, type) = wiki.picture(url) ?: return null
+        if (stores?.savePictures?.invoke() == true) {
+            stores.saved.put(key, SavedStore.Kind.PICTURE, bytes, type)
+            stores.trimmed()
+        }
+        return ZimItem(path, type, bytes)
+    }
+
+    /**
+     * What keeping [title] stores (Plan O2 Task 3): its prepared page, from Saved for now when it's there, else fetched,
+     * and, [withPictures], every picture the page shows, saved or fetched. Null when the page can't be had. Blocking.
+     */
+    fun keepContent(title: String, withPictures: Boolean): KeepContent? {
+        val page = stores?.saved?.get(SavedStore.pageKey(lang, title))?.bytes ?: fetch(title)?.bytes ?: return null
+        val pictures = LinkedHashMap<String, ByteArray>()
+        if (withPictures) for (src in picturesOf(String(page))) {
+            picture(src, "https://" + src.removePrefix(IMG))?.let { pictures[src] = it.bytes }
+        }
+        return KeepContent(page, pictures)
+    }
 
     override fun randomPath(): String? = indexRandom() ?: wiki.random(lang)?.key
 
@@ -106,7 +171,13 @@ class OnlineWikipediaArchive(
         private const val PREFIX = "wikipedia_"
         private const val SUFFIX = "_online"
 
+        private const val HTML = "text/html; charset=utf-8"
+
         fun packName(lang: String) = "$PREFIX$lang$SUFFIX"
+
+        /** The reader paths of the pictures a prepared page shows (`_img/<host>/<path>`), in order, once each. */
+        fun picturesOf(html: String): List<String> =
+            Jsoup.parse(html).select("img[src]").map { it.attr("src") }.filter { it.startsWith(IMG) }.distinct()
 
         /** The language of an online source's id (`wikipedia_es_online` → `es`); null for any other id. */
         fun languageOf(packId: String): String? =
@@ -210,4 +281,21 @@ class OnlineLibrary(
 
     override fun archive(packId: String): ZimArchive? = online()[packId] ?: base.archive(packId)
     override fun cachedArchive(packId: String): ZimArchive? = online()[packId] ?: base.cachedArchive(packId)
+}
+
+/** A kept article's files before they're written: its page and its pictures by reader path. */
+class KeepContent(val page: ByteArray, val pictures: Map<String, ByteArray>)
+
+/** Plan O2's stores, as Wikipedia online reads through them. */
+class OfflineStores(
+    val saved: SavedStore,
+    val kept: KeptStore,
+    /** Offline pictures: true for Save pictures (the default), false for Text only. */
+    val savePictures: () -> Boolean,
+    /** Saved for now's cap, in bytes. */
+    private val capBytes: () -> Long,
+    val clock: () -> Long = System::currentTimeMillis,
+) {
+    /** Keeps Saved for now under its cap (each put adds a little; a trim only works when it's over). */
+    fun trimmed() = saved.trim(capBytes())
 }

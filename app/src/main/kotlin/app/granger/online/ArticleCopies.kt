@@ -27,6 +27,8 @@ class ArticleCopies(
     private val online: () -> Boolean,
     /** The languages Wikipedia online reads now. */
     private val onlineLanguages: () -> Set<String>,
+    /** Whether an online article is kept, and with its pictures (Plan O2 Task 3): null when it isn't kept. */
+    private val kept: (lang: String, title: String) -> Boolean? = { _, _ -> null },
 ) {
     /** The copy to open for [packId]/[path]: itself unless the rule picks another. */
     suspend fun choose(packId: String, path: String): ArticleCopy {
@@ -46,9 +48,12 @@ class ArticleCopies(
             index.articlesOf(qid, lang).mapNotNull { a -> byId[a.packId]?.takeIf { !OnlineSources.isOnline(it.id) }?.let { ArticleCopy(a.packId, a.path, kindOf(it)) } }
         } else emptyList()
         val title = (kept.firstOrNull()?.path ?: path).substringAfterLast('/')
-        val onlineCopy = if (lang in onlineLanguages()) ArticleCopy(OnlineWikipediaArchive.packName(lang), title, ArticleCopy.Kind.ONLINE) else null
-        val asked = byId[packId]?.let { ArticleCopy(packId, path, kindOf(it)) }
-        return (listOfNotNull(asked) + kept + listOfNotNull(onlineCopy)).distinctBy { it.packId }
+        val source = OnlineWikipediaArchive.packName(lang)
+        val onlineCopy = if (lang in onlineLanguages()) ArticleCopy(source, title, ArticleCopy.Kind.ONLINE) else null
+        // A kept article is read through its online source, which serves the kept files first (Plan O2).
+        val keptCopy = kept(lang, title)?.let { full -> ArticleCopy(source, title, if (full) ArticleCopy.Kind.FULL else ArticleCopy.Kind.SHORT) }
+        val asked = byId[packId]?.takeIf { !OnlineSources.isOnline(it.id) }?.let { ArticleCopy(packId, path, kindOf(it)) }
+        return (listOfNotNull(asked) + kept + listOfNotNull(keptCopy, onlineCopy)).distinctBy { it.packId to it.kind }
     }
 
     companion object {

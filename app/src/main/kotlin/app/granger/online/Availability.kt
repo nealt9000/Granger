@@ -15,10 +15,14 @@ sealed interface Availability {
     data object Nowhere : Availability
 
     companion object {
-        /** From an article's copies ([ArticleCopies.copies]). Whether the network is up now doesn't change the answer. */
-        fun of(copies: List<ArticleCopy>): Availability = when {
+        /**
+         * From an article's copies ([ArticleCopies.copies]) and whether it's [saved] for now. Whether the network is up
+         * doesn't change the answer.
+         */
+        fun of(copies: List<ArticleCopy>, saved: Boolean = false): Availability = when {
             copies.any { it.kind == ArticleCopy.Kind.FULL } -> OnPhone(full = true)
             copies.any { it.kind == ArticleCopy.Kind.SHORT } -> OnPhone(full = false)
+            saved -> Saved
             copies.any { it.kind == ArticleCopy.Kind.ONLINE } -> Online
             else -> Nowhere
         }
@@ -26,17 +30,17 @@ sealed interface Availability {
 }
 
 /** [Availability] for articles, one at a time or a screen's worth, remembered for the screen's life. */
-class ArticleAvailability(private val copies: ArticleCopies, private val packs: suspend () -> List<app.granger.core.library.Pack>) {
-    private val known = java.util.concurrent.ConcurrentHashMap<Pair<String, String>, Availability>()
-
-    @Volatile private var lastPacks: List<app.granger.core.library.Pack>? = null
-
-    suspend fun of(packId: String, path: String): Availability {
-        val all = packs()
-        // A pack came or went, or an online source: worked out again.
-        if (all != lastPacks) { known.clear(); lastPacks = all }
-        return known.getOrPut(packId to path) { compute(packId, path, all) }
-    }
+class ArticleAvailability(
+    private val copies: ArticleCopies,
+    private val packs: suspend () -> List<app.granger.core.library.Pack>,
+    /** Whether an online article is saved for now (Plan O2 Task 1). */
+    private val saved: (lang: String, title: String) -> Boolean = { _, _ -> false },
+) {
+    /**
+     * Not remembered: what's saved for now changes with every article read, and the answer is a few local lookups (the
+     * indexes, the kept and saved indexes).
+     */
+    suspend fun of(packId: String, path: String): Availability = compute(packId, path, packs())
 
     private suspend fun compute(packId: String, path: String, all: List<app.granger.core.library.Pack>): Availability {
         val lang = ArticleCopies.languageOf(packId, all.firstOrNull { it.id == packId })
@@ -44,10 +48,15 @@ class ArticleAvailability(private val copies: ArticleCopies, private val packs: 
             // Not a Wikipedia: the pack's own copy or nothing.
             all.firstOrNull { it.id == packId && !OnlineSources.isOnline(it.id) }?.let { Availability.OnPhone(ArticleCopies.kindOf(it) == ArticleCopy.Kind.FULL) } ?: Availability.Nowhere
         } else {
-            Availability.of(copies.copies(packId, path, lang, all).filter { c -> c.kind == ArticleCopy.Kind.ONLINE || all.any { it.id == c.packId } })
+            val found = copies.copies(packId, path, lang, all)
+            val title = (found.firstOrNull { OnlineSources.isOnline(it.packId) }?.path ?: path).substringAfterLast('/')
+            Availability.of(found.filter { c -> OnlineSources.isOnline(c.packId) || all.any { it.id == c.packId } }, saved(lang, title))
         }
         return answer
     }
 
-    suspend fun of(articles: List<Pair<String, String>>): Map<Pair<String, String>, Availability> = articles.associateWith { (p, a) -> of(p, a) }
+    suspend fun of(articles: List<Pair<String, String>>): Map<Pair<String, String>, Availability> {
+        val all = packs()
+        return articles.associateWith { (p, a) -> compute(p, a, all) }
+    }
 }

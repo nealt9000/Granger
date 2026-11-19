@@ -60,9 +60,9 @@ class ArticleCopiesTest {
         assertThat(Availability.of(listOf(web))).isEqualTo(Availability.Online)
         assertThat(Availability.of(emptyList())).isEqualTo(Availability.Nowhere)
         val mini = pack("mini", "wikipedia_en_top_mini_2026-09.zim", "wikipedia_en_top")
-        val knowth = ArticleAvailability(ArticleCopies({ QidIndexes(emptyList()) }, { listOf(mini, OnlineSources.row("en")) }, { true }, { setOf("en") })) { listOf(OnlineSources.row("en")) }
+        val knowth = ArticleAvailability(ArticleCopies({ QidIndexes(emptyList()) }, { listOf(mini, OnlineSources.row("en")) }, { true }, { setOf("en") }), { listOf(OnlineSources.row("en")) })
         assertThat(knowth.of("wikipedia_en_online", "Knowth")).isEqualTo(Availability.Online)
-        val off = ArticleAvailability(ArticleCopies({ QidIndexes(emptyList()) }, { emptyList() }, { false }, { emptySet() })) { emptyList() }
+        val off = ArticleAvailability(ArticleCopies({ QidIndexes(emptyList()) }, { emptyList() }, { false }, { emptySet() }), { emptyList() })
         assertThat(off.of("wikipedia_en_online", "Knowth")).isEqualTo(Availability.Nowhere)
     }
 }

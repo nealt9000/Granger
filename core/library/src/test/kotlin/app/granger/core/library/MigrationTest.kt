@@ -25,6 +25,23 @@ class MigrationTest {
     }
 
     /** Plan KB2: packs gain a nullable book manifest, books their section, order and parts; every row is kept, all null. */
+    @Test fun migration16To17AddsKeptArticlesAndKeepsEveryRow() {
+        helper.createDatabase("migrate17.db", 16).apply {
+            insertPack("u-t", "wikipedia_en_top", "Wikipedia Top", "")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("migrate17.db", 17, true, LibraryDatabase.MIGRATION_16_17)
+        db.query("SELECT COUNT(*) FROM packs").use { it.moveToFirst(); assertThat(it.getInt(0)).isEqualTo(1) }
+        db.execSQL("INSERT INTO kept_articles (lang, title, qid, path, bytes, withPictures, keptAt, revision) VALUES ('en', 'Knowth', 1482124, 'en/ab', 120000, 1, 5, NULL)")
+        db.query("SELECT title, qid, withPictures, revision FROM kept_articles").use {
+            it.moveToFirst()
+            assertThat(it.getString(0)).isEqualTo("Knowth")
+            assertThat(it.getLong(1)).isEqualTo(1482124L)
+            assertThat(it.getInt(2)).isEqualTo(1)
+            assertThat(it.isNull(3)).isTrue()
+        }
+    }
+
     @Test fun migration15To16AddsBookManifestsAndCollectionPlacesAndKeepsEveryRow() {
         helper.createDatabase("migrate16.db", 15).apply {
             insertPack("u-m", "irp.fas.org_en_military-medicine", "Military Medicine", "Field manuals")

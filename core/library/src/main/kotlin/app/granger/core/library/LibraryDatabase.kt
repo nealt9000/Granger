@@ -20,8 +20,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         VoiceState::class,
         AlbumNote::class, RailPin::class,
         HomeFeed::class, HomeDraw::class,
+        KeptArticle::class,
     ],
-    version = 16,
+    version = 17,
     exportSchema = true,
     autoMigrations = [AutoMigration(from = 1, to = 2)],
 )
@@ -37,6 +38,7 @@ abstract class LibraryDatabase : RoomDatabase() {
     abstract fun playbackDao(): PlaybackDao
     abstract fun homeDao(): HomeDao
     abstract fun libraryNameDao(): LibraryNameDao
+    abstract fun keptArticleDao(): KeptArticleDao
 
     companion object {
         /** Adds media types, collections, placements, reading tabs, history and recent searches. */
@@ -244,6 +246,17 @@ abstract class LibraryDatabase : RoomDatabase() {
             }
         }
 
+        /** Plan O2: articles kept from Wikipedia online, outside any pack. */
+        val MIGRATION_16_17 = object : Migration(16, 17) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `kept_articles` (`lang` TEXT NOT NULL, `title` TEXT NOT NULL, `qid` INTEGER, " +
+                        "`path` TEXT NOT NULL, `bytes` INTEGER NOT NULL, `withPictures` INTEGER NOT NULL, `keptAt` INTEGER NOT NULL, " +
+                        "`revision` INTEGER, PRIMARY KEY(`lang`, `title`))",
+                )
+            }
+        }
+
         /**
          * The v9 collections that go in the Kiwix folder: app-made, in Literature, and filed for a Kiwix pack. That
          * leaves out the book collections, Other, Maps, the folder itself and the media ones (`music:on-this-phone`
@@ -290,7 +303,7 @@ abstract class LibraryDatabase : RoomDatabase() {
                 .addMigrations(
                     MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
                     MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14,
-                    MIGRATION_14_15, MIGRATION_15_16,
+                    MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17,
                 )
                 .addCallback(SeedCallback)
                 .build()

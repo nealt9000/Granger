@@ -721,15 +721,26 @@ class AppContainer(context: Context) {
      * interim 50 MB cache so Back and a second visit don't fetch again (builder's call 3; O2's Saved for now replaces it).
      */
     val wikimedia: app.granger.online.WikimediaClient by lazy {
-        val cached = http.newBuilder()
-            .cache(okhttp3.Cache(File(appContext.cacheDir, "wikimedia"), 50L * 1024 * 1024))
-            // Wikimedia marks its pages no-cache (revalidate each time); an hour's reuse is what a reading session wants.
-            .addNetworkInterceptor { chain ->
-                val r = chain.proceed(chain.request())
-                if (r.isSuccessful && chain.request().cacheControl.noCache.not()) r.newBuilder().header("Cache-Control", "max-age=3600").removeHeader("Pragma").build() else r
-            }
-            .build()
-        app.granger.online.WikimediaClient(cached, onMainThread = { BuildConfig.DEBUG && android.os.Looper.myLooper() == android.os.Looper.getMainLooper() })
+        // O1's interim HTTP cache is gone: Saved for now holds what was read (Plan O2 Task 1). Its folder goes once.
+        File(appContext.cacheDir, "wikimedia").takeIf { it.exists() }?.let { old -> appScope.launch(Dispatchers.IO) { old.deleteRecursively() } }
+        app.granger.online.WikimediaClient(http, onMainThread = { BuildConfig.DEBUG && android.os.Looper.myLooper() == android.os.Looper.getMainLooper() })
+    }
+
+    /** Offline pictures and Saved for now's cap (Plan O2 Task 2). */
+    val onlinePrefs = app.granger.online.OnlinePrefs(context)
+
+    /** Saved for now (Plan O2 Task 1): what was read online, oldest-opened out first past the cap. */
+    val savedStore by lazy { app.granger.online.SavedStore(File(appContext.filesDir, "saved")) }
+
+    /** Articles kept from Wikipedia online (Plan O2 Task 3). */
+    val keptStore by lazy { app.granger.online.KeptStore(File(appContext.filesDir, "kept"), libraryDb.keptArticleDao(), appScope) }
+
+    private val offlineStores by lazy {
+        app.granger.online.OfflineStores(
+            savedStore, keptStore,
+            savePictures = { onlinePrefs.offlinePictures.value == app.granger.online.OnlinePrefs.OfflinePictures.SAVE },
+            capBytes = { onlinePrefs.savedCapMb.value * 1024L * 1024 },
+        )
     }
 
     /** Wikipedia online in each knowledge language, while [Features.ONLINE] is on (Plan O1 Task 4). */
@@ -746,6 +757,7 @@ class AppContainer(context: Context) {
                     ?.takeIf { it.mimeType.startsWith("text/html") }
             },
             indexRandom = { id -> kotlinx.coroutines.runBlocking { runCatching { referenceLinks.qidIndexes().randomPath(id) }.getOrNull() } },
+            stores = offlineStores,
         )
     }
 
@@ -756,6 +768,7 @@ class AppContainer(context: Context) {
             packs = { knownPacks.first() },
             online = { Features.ONLINE && networkGate.open },
             onlineLanguages = { if (Features.ONLINE) knowledgeNow.value.toSet() else emptySet() },
+            kept = { lang, title -> if (Features.ONLINE) keptStore.get(lang, title)?.withPictures else null },
         )
     }
 
@@ -779,8 +792,18 @@ class AppContainer(context: Context) {
             }
         }
 
+    /** Keeps and removes online articles (Plan O2 Tasks 3 and 5). */
+    val keeper by lazy {
+        app.granger.online.Keeper(
+            { lang -> onlineSources.archive(lang) }, keptStore,
+            withPictures = { onlinePrefs.offlinePictures.value == app.granger.online.OnlinePrefs.OfflinePictures.SAVE },
+        )
+    }
+
     /** Where each article can be read from (Plan O1 Task 9): what O2's marks will read. */
-    val availability: app.granger.online.ArticleAvailability by lazy { app.granger.online.ArticleAvailability(articleCopies) { knownPacks.first() } }
+    val availability: app.granger.online.ArticleAvailability by lazy { app.granger.online.ArticleAvailability(articleCopies, { knownPacks.first() }) { lang, title ->
+            Features.ONLINE && savedStore.has(app.granger.online.SavedStore.pageKey(lang, title))
+        } }
 
     /**
      * Opens an article chosen by its topic (an Explore plate, a topic page's links, Wander, the Timeline, a game, a Home

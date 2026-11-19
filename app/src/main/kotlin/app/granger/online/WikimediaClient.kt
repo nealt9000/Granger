@@ -183,6 +183,21 @@ class WikimediaClient(
         internal fun tidy(text: String): String =
             text.replace(Regex("\\(\\s*[;,]\\s*"), "(").replace(Regex("\\s*\\(\\s*\\)"), "").replace(Regex("\\n+"), " ").trim()
 
+        /** A summary as it's saved for now (Plan O2 Task 1), and back. */
+        fun summaryToJson(s: Summary): String = JSONObject().apply {
+            put("title", s.title); put("key", s.key); put("extract", s.extract)
+            s.description?.let { put("description", it) }; s.thumbnail?.let { put("thumbnail", it) }
+            s.qid?.let { put("qid", it) }; s.revision?.let { put("revision", it) }
+        }.toString()
+
+        fun summaryFromJson(json: String): Summary? = runCatching {
+            val o = JSONObject(json)
+            Summary(
+                o.getString("title"), o.getString("key"), o.optString("extract"), o.optString("description").takeIf { it.isNotBlank() },
+                o.optString("thumbnail").takeIf { it.isNotBlank() }, o.optLong("qid", 0).takeIf { it > 0 }, o.optLong("revision", 0).takeIf { it > 0 },
+            )
+        }.getOrNull()
+
         internal fun hitsOf(json: String): List<Hit> {
             val pages = JSONObject(json).optJSONArray("pages") ?: return emptyList()
             return (0 until pages.length()).map { pages.getJSONObject(it) }.map { p ->
