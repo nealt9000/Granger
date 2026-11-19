@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-11-18T18:00:50Z",
+  "generatedAt": "2026-11-19T19:01:53Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -1071,7 +1071,15 @@
           "sizeBytes": 286638080,
           "schemaVersion": 1
         }
-      ]
+      ],
+      "records": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/records-2026-11-19/wikipedia_es_all_mini_2026-10.grec",
+        "dirUrl": "https://github.com/nealt9000/Granger/releases/download/records-2026-11-19/wikipedia_es_all_mini_2026-10.grdir",
+        "dirSha256": "bdd098e34251ebd447ce64d8cf18751f22f40028c3cdc6863a2eae017fa9fab8",
+        "dirSizeBytes": 333088,
+        "sizeBytes": 200831886,
+        "version": 2
+      }
     },
     {
       "id": "wikipedia_es_all_maxi",
@@ -1119,7 +1127,15 @@
           "sizeBytes": 286638080,
           "schemaVersion": 1
         }
-      ]
+      ],
+      "records": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/records-2026-11-19/wikipedia_es_all_mini_2026-10.grec",
+        "dirUrl": "https://github.com/nealt9000/Granger/releases/download/records-2026-11-19/wikipedia_es_all_mini_2026-10.grdir",
+        "dirSha256": "bdd098e34251ebd447ce64d8cf18751f22f40028c3cdc6863a2eae017fa9fab8",
+        "dirSizeBytes": 333088,
+        "sizeBytes": 200831886,
+        "version": 2
+      }
     },
     {
       "id": "wiktionary_es_all_nopic",
@@ -24495,7 +24511,15 @@
           "sizeBytes": 286638080,
           "schemaVersion": 1
         }
-      ]
+      ],
+      "records": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/records-2026-11-19/wikipedia_es_all_mini_2026-10.grec",
+        "dirUrl": "https://github.com/nealt9000/Granger/releases/download/records-2026-11-19/wikipedia_es_all_mini_2026-10.grdir",
+        "dirSha256": "bdd098e34251ebd447ce64d8cf18751f22f40028c3cdc6863a2eae017fa9fab8",
+        "dirSizeBytes": 333088,
+        "sizeBytes": 200831886,
+        "version": 2
+      }
     },
     {
       "id": "wikipedia_en-simple_all_maxi",
@@ -24610,7 +24634,15 @@
           "sizeBytes": 142491648,
           "schemaVersion": 1
         }
-      ]
+      ],
+      "records": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/records-2026-11-19/wikipedia_en_top1m_mini_2026-04.grec",
+        "dirUrl": "https://github.com/nealt9000/Granger/releases/download/records-2026-11-19/wikipedia_en_top1m_mini_2026-04.grdir",
+        "dirSha256": "944bbc121ae0f494a9ba24378c073d7fc311254d4ecd371a9ab2d27a0f80462c",
+        "dirSizeBytes": 155428,
+        "sizeBytes": 100035981,
+        "version": 2
+      }
     },
     {
       "id": "wikipedia_en_top1m_mini",
@@ -24650,7 +24682,15 @@
           "sizeBytes": 142491648,
           "schemaVersion": 1
         }
-      ]
+      ],
+      "records": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/records-2026-11-19/wikipedia_en_top1m_mini_2026-04.grec",
+        "dirUrl": "https://github.com/nealt9000/Granger/releases/download/records-2026-11-19/wikipedia_en_top1m_mini_2026-04.grdir",
+        "dirSha256": "944bbc121ae0f494a9ba24378c073d7fc311254d4ecd371a9ab2d27a0f80462c",
+        "dirSizeBytes": 155428,
+        "sizeBytes": 100035981,
+        "version": 2
+      }
     },
     {
       "id": "wikipedia_en_top1m_nopic",
@@ -24690,7 +24730,15 @@
           "sizeBytes": 142491648,
           "schemaVersion": 1
         }
-      ]
+      ],
+      "records": {
+        "url": "https://github.com/nealt9000/Granger/releases/download/records-2026-11-19/wikipedia_en_top1m_mini_2026-04.grec",
+        "dirUrl": "https://github.com/nealt9000/Granger/releases/download/records-2026-11-19/wikipedia_en_top1m_mini_2026-04.grdir",
+        "dirSha256": "944bbc121ae0f494a9ba24378c073d7fc311254d4ecd371a9ab2d27a0f80462c",
+        "dirSizeBytes": 155428,
+        "sizeBytes": 100035981,
+        "version": 2
+      }
     },
     {
       "id": "wikiversity_es_all_maxi",

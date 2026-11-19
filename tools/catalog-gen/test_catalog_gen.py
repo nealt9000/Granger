@@ -1670,6 +1670,29 @@ def test_sidecars_go_on_every_flavour_one_per_kind_and_books_by_exact_file():
     assert len(used) == 4
 
 
+def test_records_go_on_every_pack_built_on_their_qid_index_and_add_no_size():
+    # Plan O6: topic records are read online by range; they follow the .gqid they were built from.
+    catalog = {"packs": [
+        {"id": "top1m_mini", "zimName": "t", "sizeBytes": 100, "sidecars": [{"kind": "gqid", "sha256": "g" * 64, "sizeBytes": 5, "url": "https://s/g"}]},
+        {"id": "top1m_maxi", "zimName": "t", "sizeBytes": 200, "sidecars": [{"kind": "gqid", "sha256": "g" * 64, "sizeBytes": 5, "url": "https://s/g"}]},
+        {"id": "other", "zimName": "o", "sizeBytes": 10, "records": {"url": "https://old"}},
+    ], "books": [], "readiness": {"domains": [{"id": "d", "essential": ["top1m_mini"], "comprehensive": ["top1m_mini"]}]}}
+    d = {"id": "top1m_mini", "fileName": "t.grec", "dirFileName": "t.grdir", "sizeBytes": 1000, "dirSizeBytes": 9,
+         "dirSha256": "a" * 64, "gqidSha256": "g" * 64, "version": 2}
+    gone = dict(d, id="gone", gqidSha256="0" * 64)
+    used, lines = cg.attach_records(catalog, [d, gone], release_url="https://github.com/x/releases/download/records-1")
+    mini, maxi, other = catalog["packs"]
+    assert mini["records"] == {"url": "https://github.com/x/releases/download/records-1/t.grec",
+                               "dirUrl": "https://github.com/x/releases/download/records-1/t.grdir",
+                               "dirSha256": "a" * 64, "dirSizeBytes": 9, "sizeBytes": 1000, "version": 2}
+    assert maxi["records"] == mini["records"]
+    assert "records" not in other
+    assert used == [d] and len(lines) == 1 and "no longer lists" in lines[0]
+    assert cg.tier_sizes(catalog)["d"] == (105, 105)
+    urls = cg.catalog_urls(catalog)
+    assert "https://github.com/x/releases/download/records-1/t.grec" in urls and "https://github.com/x/releases/download/records-1/t.grdir" in urls
+
+
 def test_sidecar_sizes_and_urls_count():
     catalog = {"packs": [{"id": "med", "zimName": "med", "sizeBytes": 1000,
                           "sidecars": [{"kind": "gqid", "sizeBytes": 30, "url": "https://s/m.gqid"}]}],

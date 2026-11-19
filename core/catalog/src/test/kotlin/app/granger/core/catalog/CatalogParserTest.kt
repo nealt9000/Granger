@@ -515,6 +515,30 @@ class CatalogParserTest {
         assertThat(c.packs.single().sidecars).isEmpty()
     }
 
+    // --- Plan O6: topic records ---
+
+    private fun recordsCatalog(records: String) = """
+        {"formatVersion": 1, "generatedAt": "2026-11-19T00:00:00Z",
+         "packs": [${pack("med", "wikipedia", "medicine").dropLast(1)}, "records": $records}]}
+    """.trimIndent().toByteArray()
+
+    private fun records(version: Int = 2, url: String = "https://github.com/x/releases/download/records-1/med.grec", dirSha: String = SHA_A) =
+        """{"url": "$url", "dirUrl": "https://github.com/x/releases/download/records-1/med.grdir", "dirSha256": "$dirSha",
+            "dirSizeBytes": 9, "sizeBytes": 1000, "version": $version}"""
+
+    @Test fun aPackCarriesItsTopicRecordsWhichAddNothingToItsSize() {
+        val med = ok(parse(recordsCatalog(records()))).packs.single()
+        assertThat(med.records!!.dirUrl).endsWith("med.grdir")
+        assertThat(med.downloadBytes).isEqualTo(1000)
+    }
+
+    @Test fun recordsOfANewerFormatOrBadAreDroppedAndKeepThePack() {
+        for (bad in listOf(records(version = 3), records(url = "http://x/med.grec"), records(dirSha = "nope"), "\"lots\"")) {
+            val med = ok(parse(recordsCatalog(bad))).packs.single()
+            assertThat(med.records).isNull()
+        }
+    }
+
     // --- Plan L3: languages ---
 
     private fun esPack(id: String, domain: String) = pack(id, "wikipedia", domain).replace("\"language\": \"eng\"", "\"language\": \"spa\"")

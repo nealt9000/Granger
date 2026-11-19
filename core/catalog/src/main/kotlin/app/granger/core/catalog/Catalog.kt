@@ -176,6 +176,8 @@ data class PackEntry(
     val timeIndex: TimeIndexEntry? = null,
     /** The pack's other sidecars (Linked Library spec §5.1), downloaded with it; empty in older catalogs. */
     val sidecars: List<SidecarEntry> = emptyList(),
+    /** Topic records (Plan O6), read online by range for full topic pages; never downloaded. Null without, and in older catalogs. */
+    val records: RecordsEntry? = null,
     /**
      * The set this pack is a slice of (Plan WF Decision 2): "wikipedia_en", "wikivoyage_en"; blank for any other pack,
      * and in older catalogs. A slice of higher [setRank] holds the smaller ones' articles.
@@ -341,6 +343,20 @@ data class TimeIndexEntry(
  * vectors and the time index stay in their own fields until the catalog moves them here (after Plan SQ). Every field has
  * a default so a malformed object decodes; the parser drops one that doesn't validate.
  */
+/**
+ * A pack's topic records (Plan O6; tools/topicrecords): the `.grec` read by HTTP range, block by block, and its small
+ * directory, fetched once and checked against [dirSha256]. They add nothing to a pack's size: nothing downloads them whole.
+ */
+@Serializable
+data class RecordsEntry(
+    val url: String = "",
+    val dirUrl: String = "",
+    val dirSha256: String = "",
+    val dirSizeBytes: Long = 0,
+    val sizeBytes: Long = 0,
+    val version: Int = 0,
+)
+
 @Serializable
 data class SidecarEntry(
     val kind: String = "",

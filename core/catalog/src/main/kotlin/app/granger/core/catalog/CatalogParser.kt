@@ -41,12 +41,13 @@ object CatalogParser {
         if (generatedAt == null || runCatching { Instant.parse(generatedAt) }.isFailure) {
             return ParseResult.Invalid(CatalogError.MALFORMED)
         }
-        val packs = entries<PackEntry>(root, "packs", retryWithout = listOf(VECTORS, TIME_INDEX, SIDECARS))
+        val packs = entries<PackEntry>(root, "packs", retryWithout = listOf(VECTORS, TIME_INDEX, SIDECARS, RECORDS))
             .filter { valid(it) && DATE.matches(it.snapshotDate) }
             .distinctBy { it.id }
             .map { if (it.vectors == null || valid(it.vectors)) it else it.copy(vectors = null) }
             .map { if (it.timeIndex == null || valid(it.timeIndex)) it else it.copy(timeIndex = null) }
             .map { it.copy(sidecars = sidecars(it.sidecars)) }
+            .map { if (it.records == null || valid(it.records)) it else it.copy(records = null) }
             .map(::family)
             .map { it.copy(language = Languages.normalise(it.language), i18n = i18n(it.i18n)) }
         val books = books(root["books"] as? JsonArray)
@@ -210,6 +211,8 @@ object CatalogParser {
     private const val VECTORS = "vectors"
     private const val TIME_INDEX = "timeIndex"
     private const val SIDECARS = "sidecars"
+    private const val RECORDS = "records"
+    private const val RECORDS_VERSION = 2
 
     /** The `.gtime` layout this app reads (core/library `TimeIndex.FORMAT`); a newer one is left for a newer app. */
     const val TIME_INDEX_FORMAT = 1
@@ -246,6 +249,11 @@ object CatalogParser {
             s.schemaVersion in 1..newest && s.url.startsWith("https://") && SHA256.matches(s.sha256) && s.sizeBytes > 0
         }
         .distinctBy { it.kind }
+
+    /** Topic records this app reads (Plan O6): format v2, both files over https, the directory with its checksum. */
+    private fun valid(r: RecordsEntry): Boolean =
+        r.version == RECORDS_VERSION && r.url.startsWith("https://") && r.dirUrl.startsWith("https://") &&
+            SHA256.matches(r.dirSha256) && r.dirSizeBytes > 0 && r.sizeBytes > 0
 
     /** A time index the app can fetch, check and read: an https file with a checksum, in the format this app reads. */
     private fun valid(t: TimeIndexEntry): Boolean =

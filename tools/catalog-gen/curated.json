@@ -1033,5 +1033,9 @@
   "sidecars": {
     "releases": "tools/sidecar/releases",
     "releaseUrl": "https://github.com/nealt9000/Granger/releases/download/sidecars-2026-11-18/"
+  },
+  "records": {
+    "releases": "tools/topicrecords/releases",
+    "releaseUrl": "https://github.com/nealt9000/Granger/releases/download/records-2026-11-19/"
   }
 }

@@ -5,9 +5,10 @@ Each article's topic-page data is pre-joined into one zlib-compressed JSON recor
 records. A small directory says where each block starts. The app fetches the directory once and then reads one block
 (~10 KB) for a page. Design and numbers: docs/superpowers/plans/2026-11-18-plan-o0-online-spike.md, Task 2b.
 
-  build.py GQID OUT_DIR
+  build.py GQID OUT_DIR [--id PACK_ID]
 
-Writes OUT_DIR/<gqid stem>.grec and .grdir and prints a size report.
+Writes OUT_DIR/<gqid stem>.grec and .grdir and prints a size report. With --id, also writes the catalog's descriptor
+tools/topicrecords/releases/<PACK_ID>.records.json (catalog_gen.py attaches it to every pack built on that .gqid).
 
 Format v2 (all little-endian):
 
@@ -174,7 +175,33 @@ class Reader:
         return None
 
 
+def descriptor(base, gqid, pack_id, out_dir=None):
+    """The catalog's record of one records pair (catalog_gen.py RECORD_KEYS); written as releases/<pack_id>.records.json."""
+    d = {
+        "id": pack_id,
+        "fileName": os.path.basename(base) + ".grec",
+        "dirFileName": os.path.basename(base) + ".grdir",
+        "sizeBytes": os.path.getsize(base + ".grec"),
+        "dirSizeBytes": os.path.getsize(base + ".grdir"),
+        "dirSha256": sha256(base + ".grdir").hex(),
+        "gqidSha256": sha256(gqid).hex(),
+        "version": VERSION,
+    }
+    out_dir = out_dir or os.path.join(os.path.dirname(os.path.abspath(__file__)), "releases")
+    os.makedirs(out_dir, exist_ok=True)
+    with open(os.path.join(out_dir, f"{pack_id}.records.json"), "w") as f:
+        json.dump(d, f, indent=1)
+        f.write("\n")
+    return d
+
+
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    args = sys.argv[1:]
+    pack_id = None
+    if "--id" in args:
+        i = args.index("--id"); pack_id = args[i + 1]; del args[i:i + 2]
+    if len(args) != 2:
         sys.exit(__doc__)
-    build(sys.argv[1], sys.argv[2])
+    base = build(args[0], args[1])
+    if pack_id:
+        print(descriptor(base, args[0], pack_id))

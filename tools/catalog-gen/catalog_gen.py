@@ -911,6 +911,12 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
                                            sc.get("releaseUrl"))
         if report is not None:
             report += ["", "Sidecars left out:"] + (sidecar_lines or ["  none"])
+    if "records" in curated:
+        rc = curated["records"]
+        _, record_lines = attach_records({"packs": packs}, vector_descriptors(pathlib.Path(root or REPO_ROOT) / rc["releases"], RECORD_KEYS),
+                                         rc.get("releaseUrl"))
+        if report is not None:
+            report += ["", "Topic records left out:"] + (record_lines or ["  none"])
     if "sets" in curated:
         missing = apply_sets(packs, load_sets(pathlib.Path(root or REPO_ROOT) / curated["sets"]), curated["packs"])
         if missing:
@@ -947,6 +953,7 @@ VECTOR_KEYS = ("id", "kind", "fileName", "sizeBytes", "sha256", "dims", "dtype",
 TIMEINDEX_KEYS = ("id", "kind", "fileName", "sizeBytes", "sha256", "count", "format", "lanesVersion", "sourceSha256")
 # Linked Library spec §5.1: one descriptor shape for every later sidecar kind ("gqid", "glink"); `tools/sidecar/meta.py` writes it.
 SIDECAR_KEYS = ("id", "kind", "sidecar", "fileName", "sizeBytes", "sha256", "schemaVersion", "sourceSha256")
+RECORD_KEYS = ("id", "fileName", "dirFileName", "sizeBytes", "dirSizeBytes", "dirSha256", "gqidSha256", "version")
 
 
 FLAVOUR_WORDS = re.compile(r"\s*\(((no|with) pictures|(sin|con) imágenes)\)\s*$", re.IGNORECASE)  # Spanish: Plan L3
@@ -1153,6 +1160,34 @@ def attach_sidecars(catalog, descriptors, release_url=None):
                    "schemaVersion": d["schemaVersion"]}
         for entry in targets:
             entry["sidecars"] = [s for s in entry.get("sidecars", []) if s["kind"] != d["sidecar"]] + [dict(sidecar)]
+        used.append(d)
+    return used, lines
+
+
+def attach_records(catalog, descriptors, release_url=None):
+    """
+    Plan O6: puts each topic-records pair (tools/topicrecords) on every pack whose QID index it was built from (its
+    .gqid sidecar's sha256), as `records: {url, dirUrl, dirSha256, dirSizeBytes, sizeBytes, version}`. Records are read
+    online by range, never downloaded whole: they add nothing to a pack's size. Must run after [attach_sidecars].
+    Returns (the uploads, report lines), as [attach_sidecars] does.
+    """
+    packs = catalog["packs"]
+    for entry in packs:
+        entry.pop("records", None)
+    used, lines = [], []
+    for d in descriptors:
+        base = release_url.rstrip("/") + "/" if release_url else None
+        if not base or not base.startswith("https://"):
+            lines.append(f"  {d['id']} records: no https URL, left out")
+            continue
+        targets = [p for p in packs if any(s["kind"] == "gqid" and s["sha256"] == d["gqidSha256"] for s in p.get("sidecars", []))]
+        if not targets:
+            lines.append(f"  {d['id']} records: built from a QID index the catalog no longer lists; rebuild them")
+            continue
+        records = {"url": base + d["fileName"], "dirUrl": base + d["dirFileName"], "dirSha256": d["dirSha256"],
+                   "dirSizeBytes": d["dirSizeBytes"], "sizeBytes": d["sizeBytes"], "version": d["version"]}
+        for entry in targets:
+            entry["records"] = dict(records)
         used.append(d)
     return used, lines
 
@@ -1442,6 +1477,8 @@ def catalog_urls(catalog):
             if entry.get("timeIndex", {}).get("url"):
                 urls.append(entry["timeIndex"]["url"])
             urls += [s["url"] for s in entry.get("sidecars", []) if s.get("url")]
+            if entry.get("records"):
+                urls += [entry["records"]["url"], entry["records"]["dirUrl"]]
     for book_set_ in catalog.get("bookSets", []):  # Plan KB2: a set's books are downloads too
         for entry in book_set_.get("books", []):
             urls += entry.get("urls", [])
@@ -1566,6 +1603,8 @@ def main(argv):
     p.add_argument("file")
     p = sub.add_parser("sidecars"); p.add_argument("--releases", required=True); p.add_argument("--release-url")
     p.add_argument("file")
+    p = sub.add_parser("records"); p.add_argument("--releases", required=True); p.add_argument("--release-url", required=True)
+    p.add_argument("file")
     p = sub.add_parser("shelves"); p.add_argument("file")
     p = sub.add_parser("booksets"); p.add_argument("file")
     p.add_argument("--curated", default=str(REPO_ROOT / "tools/catalog-gen/curated.json"))
@@ -1638,6 +1677,16 @@ def main(argv):
         entries = sum(1 for e in catalog["packs"] + catalog.get("books", []) if e.get("sidecars"))
         print(f"{path}: sidecars on {entries} entries from {len(used)} files, "
               f"{sum(d['sizeBytes'] for d in used) / 1e6:.1f} MB to upload")
+        for line in lines:
+            print(line)
+    elif args.command == "records":  # Plan O6: topic records on the packs built on their QID index
+        path = pathlib.Path(args.file)
+        catalog = json.loads(path.read_text(encoding="utf-8"))
+        used, lines = attach_records(catalog, vector_descriptors(args.releases, RECORD_KEYS), args.release_url)
+        catalog["generatedAt"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        path.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        print(f"{path}: records on {sum(1 for e in catalog['packs'] if e.get('records'))} packs from {len(used)} pairs, "
+              f"{sum(d['sizeBytes'] + d['dirSizeBytes'] for d in used) / 1e6:.1f} MB to upload")
         for line in lines:
             print(line)
     elif args.command == "shelves":  # Plan KB2: stamp each book pack's Books shelf and provider on a built catalog
