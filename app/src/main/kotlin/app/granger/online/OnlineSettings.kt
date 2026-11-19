@@ -32,7 +32,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** What Settings → Online works on (Plan O2 Task 2): the prefs and Saved for now. */
-class OnlineSettingsSource(val prefs: OnlinePrefs, val saved: SavedStore)
+class OnlineSettingsSource(val prefs: OnlinePrefs, val saved: SavedStore, val reach: ReachControl? = null)
 
 /**
  * Settings → Online, its first rows (Plan O2 Task 2, builder's call 5): Offline pictures, Saved for now's size against its
@@ -48,6 +48,19 @@ fun OnlineSettingsSection(source: OnlineSettingsSource, header: @Composable (Str
     val scope = rememberCoroutineScope()
 
     header(stringResource(R.string.settings_section_online))
+    source.reach?.let { control ->
+        val state by control.state.collectAsStateWithLifecycle()
+        ListItem(
+            headlineContent = { Text(stringResource(R.string.local_only)) },
+            supportingContent = { Text(stringResource(R.string.local_only_setting_summary)) },
+            trailingContent = {
+                androidx.compose.material3.Switch(
+                    checked = state == ReachState.LOCAL_ONLY || state == ReachState.NEVER, enabled = state != ReachState.NEVER,
+                    onCheckedChange = control::setLocalOnly, modifier = Modifier.testTag(OnlineSettingsTags.LOCAL_ONLY),
+                )
+            },
+        )
+    }
     ListItem(
         headlineContent = { Text(stringResource(R.string.settings_offline_pictures)) },
         supportingContent = {
@@ -118,4 +131,5 @@ object OnlineSettingsTags {
     const val PICTURES = "settings_offline_pictures"
     const val CAP = "settings_saved_cap"
     const val CLEAR = "settings_saved_clear"
+    const val LOCAL_ONLY = "settings_local_only"
 }

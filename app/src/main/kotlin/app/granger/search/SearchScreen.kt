@@ -176,6 +176,7 @@ fun SearchScreen(
                         modifier = Modifier.fillMaxWidth().focusRequester(focus),
                     )
                 },
+                actions = { app.granger.online.LocalOnlyButton() },
             )
         },
     ) { padding ->

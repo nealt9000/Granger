@@ -89,5 +89,16 @@
             android:grantUriPermissions="true">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/report_paths" />
         </provider>
+        <!-- Local only, from quick settings (Plan O3 Task 2). -->
+        <service
+            android:name=".online.LocalOnlyTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_cloud_off"
+            android:label="@string/local_only"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>

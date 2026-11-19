@@ -75,6 +75,7 @@ fun ExploreContent(
                     stringResource(R.string.explore_title), style = SpreadType.display.copy(fontSize = 26.sp, lineHeight = 30.sp), color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).semantics { heading() },
                 )
+                app.granger.online.LocalOnlyButton()
                 IconButton(onClick = actions.onGetMore, modifier = Modifier.testTag(ExploreTags.GET_MORE)) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.explore_get_more)) }
             }
         },

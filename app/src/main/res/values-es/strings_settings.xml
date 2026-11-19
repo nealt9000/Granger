@@ -165,4 +165,11 @@
     <string name="keep_room_articles">Sus %1$d artículos más conocidos · unos %2$s</string>
     <string name="keep_room_articles_summary">Se guardan uno a uno en segundo plano, con sus imágenes salvo que Imágenes sin conexión sea Solo texto.</string>
     <string name="keep_room_progress">Guardando · %1$d de %2$d</string>
+    <string name="local_only">Solo local</string>
+    <string name="local_only_on">Activado</string>
+    <string name="local_only_off">Desactivado</string>
+    <string name="reach_banner_local_only">Solo local. Se muestra lo que hay en este teléfono.</string>
+    <string name="reach_banner_no_signal">Sin conexión. Se muestra lo que hay en este teléfono.</string>
+    <string name="reach_banner_turn_off">Desactivar</string>
+    <string name="local_only_setting_summary">Funciona igual que sin señal: muestra solo lo que hay en este teléfono.</string>
 </resources>

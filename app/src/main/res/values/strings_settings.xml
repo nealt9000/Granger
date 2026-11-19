@@ -201,4 +201,11 @@
     <string name="keep_room_articles">Its %1$d best-known articles · about %2$s</string>
     <string name="keep_room_articles_summary">Kept one by one in the background, with their pictures unless Offline pictures is Text only.</string>
     <string name="keep_room_progress">Keeping · %1$d of %2$d</string>
+    <string name="local_only">Local only</string>
+    <string name="local_only_on">On</string>
+    <string name="local_only_off">Off</string>
+    <string name="reach_banner_local_only">Local only. Showing what this phone holds.</string>
+    <string name="reach_banner_no_signal">No connection. Showing what this phone holds.</string>
+    <string name="reach_banner_turn_off">Turn off</string>
+    <string name="local_only_setting_summary">Behave exactly as with no signal: show only what this phone holds.</string>
 </resources>

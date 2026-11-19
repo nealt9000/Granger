@@ -597,6 +597,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     }
     val playerUi by (player?.ui ?: remember { MutableStateFlow(PlayerUi.IDLE) }).collectAsStateWithLifecycle()
     val miniUi by (player?.mini ?: remember { MutableStateFlow(PlayerUi.IDLE) }).collectAsStateWithLifecycle()
+    // The internet can't be reached (Local only or no connection): the banner shows under the mini player (Plan O3).
+    val offline = container.reachControl?.state?.collectAsStateWithLifecycle()?.value?.online == false
 
     val entry by nav.currentBackStackEntryAsState()
     val destination = entry?.destination
@@ -1090,17 +1092,22 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         reading = readerTabId != null,
         // The wiki keeps its rail while the chrome is away (Plan U3c walkthrough); e-books and PDFs read edge to edge.
         railStays = destination?.hasRoute<ReaderRoute>() == true,
-        miniPlayer = if (player == null || miniPlacement == MiniPlayerPlacement.HIDDEN) {
-            null
-        } else {
-            {
-                MiniPlayer(
-                    miniUi,
-                    onPlayPause = player::miniPlayPause,
-                    onSecondary = player::secondary,
-                    onOpen = { nav.togglePlayer(player) },
-                    skipBackS = player.skipBackS(),
-                )
+        // The mini player's place at the top, and under it the Local only / no connection banner (Plan O3 Task 3).
+        miniPlayer = run {
+            val showPlayer = player != null && miniPlacement != MiniPlayerPlacement.HIDDEN
+            if (!showPlayer && !offline) null else {
+                {
+                    androidx.compose.foundation.layout.Column {
+                        if (showPlayer) MiniPlayer(
+                            miniUi,
+                            onPlayPause = player!!::miniPlayPause,
+                            onSecondary = player::secondary,
+                            onOpen = { nav.togglePlayer(player) },
+                            skipBackS = player.skipBackS(),
+                        )
+                        app.granger.online.ReachBanner()
+                    }
+                }
             }
         },
     ) {
@@ -1586,7 +1593,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     },
                     seen = container.seen,
                     content = container.contentPrefs,
-                    online = if (Features.ONLINE) app.granger.online.OnlineSettingsSource(container.onlinePrefs, container.savedStore) else null,
+                    online = if (Features.ONLINE) app.granger.online.OnlineSettingsSource(container.onlinePrefs, container.savedStore, container.reachControl) else null,
                     onModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },
                     onSetUpAgain = { nav.navigate(OnboardingRoute) { launchSingleTop = true } },
                     onBack = { nav.popBackStack() },

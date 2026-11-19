@@ -221,6 +221,7 @@ fun HomeContent(
                     IconButton(onClick = { arranging = true }, modifier = Modifier.testTag("home-arrange")) {
                         Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.home_arrange))
                     }
+                    app.granger.online.LocalOnlyButton()
                     IconButton(onClick = { adding = true }) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.home_add_feed)) }
                 },
             )

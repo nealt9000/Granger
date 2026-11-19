@@ -726,6 +726,16 @@ class AppContainer(context: Context) {
         app.granger.online.WikimediaClient(http, onMainThread = { BuildConfig.DEBUG && android.os.Looper.myLooper() == android.os.Looper.getMainLooper() })
     }
 
+    /** Whether the internet can be reached now: the policy and Android's connection (Plan O3 Task 1). */
+    val reach by lazy { app.granger.online.Reach(appContext, networkPolicy.mode, appScope) }
+
+    /** The Local only switch's and banner's control (Plan O3); null while Wikipedia online is off. */
+    val reachControl: app.granger.online.ReachControl? = if (!Features.ONLINE) null else object : app.granger.online.ReachControl {
+        override val state get() = reach.state
+        override fun setLocalOnly(on: Boolean) =
+            networkPolicy.set(if (on) app.granger.core.downloads.NetworkMode.LOCAL_ONLY else app.granger.core.downloads.NetworkMode.ONLINE)
+    }
+
     /** Offline pictures and Saved for now's cap (Plan O2 Task 2). */
     val onlinePrefs = app.granger.online.OnlinePrefs(context)
 
