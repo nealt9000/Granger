@@ -415,6 +415,10 @@ private fun TabCard(entry: RailEntry.Tab, onClick: () -> Unit) {
                 tab.path.isNotEmpty() -> IconTile(painterResource(R.drawable.ic_library))
                 else -> MediaTile(tab.title, tab.mediaKind())
             }
+            // On this phone or saved for now (Plan O2 Task 4); an online article shows none.
+            if (tab.path.isNotEmpty() && tab.packId.isNotEmpty()) {
+                app.granger.online.AvailabilityMark(tab.packId, tab.path, Modifier.align(Alignment.TopEnd).padding(8.dp))
+            }
         }
     }
 }

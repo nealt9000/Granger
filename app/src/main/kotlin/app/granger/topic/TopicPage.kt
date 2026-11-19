@@ -144,7 +144,10 @@ fun TopicPage(
                         )
                     }
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Text(header?.title ?: TopicSource.titleOf(topic.path), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Text(header?.title ?: TopicSource.titleOf(topic.path), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f, fill = false).semantics { heading() })
+                            app.granger.online.AvailabilityMark(topic.packId, topic.path)
+                        }
                         topic.time?.mark?.let { Span(it, words.of(it)) }
                     }
                 }
@@ -156,6 +159,7 @@ fun TopicPage(
                         Button(onClick = onReadFull, modifier = Modifier.heightIn(min = 48.dp).testTag(TopicPageTags.READ_FULL)) {
                             Text(stringResource(R.string.topic_read_full))
                         }
+                        app.granger.online.KeepButton(topic.packId, topic.path)
                         topic.other?.let { other ->
                             OutlinedButton(onClick = { onOther(other) }, modifier = Modifier.heightIn(min = 48.dp).testTag(TopicPageTags.OTHER)) {
                                 Text(stringResource(if (other.language == "es") R.string.topic_read_in_spanish else R.string.topic_read_in_english))

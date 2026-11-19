@@ -797,7 +797,33 @@ class AppContainer(context: Context) {
         app.granger.online.Keeper(
             { lang -> onlineSources.archive(lang) }, keptStore,
             withPictures = { onlinePrefs.offlinePictures.value == app.granger.online.OnlinePrefs.OfflinePictures.SAVE },
+            changed = { markVersion.value++ },
         )
+    }
+
+    private val markVersion = kotlinx.coroutines.flow.MutableStateFlow(0)
+
+    /** What every mark asks (Plan O2 Task 4); null while Wikipedia online is off, so no marks draw. */
+    val marks: app.granger.online.MarkSource? = if (!Features.ONLINE) null else object : app.granger.online.MarkSource {
+        override suspend fun of(packId: String, path: String) = availability.of(packId, path)
+        override val version = markVersion
+        override fun kept(packId: String, path: String) =
+            app.granger.online.OnlineWikipediaArchive.languageOf(packId)?.let { keptStore.get(it, path)?.withPictures }
+        override fun keepsPictures() = onlinePrefs.offlinePictures.value == app.granger.online.OnlinePrefs.OfflinePictures.SAVE
+        override suspend fun keepSize(packId: String, path: String): Long? {
+            val lang = app.granger.online.OnlineWikipediaArchive.languageOf(packId) ?: return null
+            // What's saved for now says it: the page, and under Save pictures the pictures it shows that are saved too.
+            val key = app.granger.online.SavedStore.pageKey(lang, path)
+            val page = savedStore.bytesOf(key) ?: return null
+            if (!keepsPictures()) return page
+            val html = savedStore.get(key)?.bytes?.let { String(it) } ?: return page
+            return page + app.granger.online.OnlineWikipediaArchive.picturesOf(html).sumOf { savedStore.bytesOf(app.granger.online.SavedStore.pictureKey(it)) ?: 0L }
+        }
+        override suspend fun keep(packId: String, path: String): Boolean =
+            app.granger.online.OnlineWikipediaArchive.languageOf(packId)?.let { keeper.keep(it, path) } != null
+        override suspend fun remove(packId: String, path: String) {
+            app.granger.online.OnlineWikipediaArchive.languageOf(packId)?.let { keeper.remove(it, path) }
+        }
     }
 
     /** Where each article can be read from (Plan O1 Task 9): what O2's marks will read. */

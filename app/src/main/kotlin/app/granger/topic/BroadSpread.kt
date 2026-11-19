@@ -166,6 +166,8 @@ internal fun BroadSpread(
                             topic.other?.let { other ->
                                 DoButton(stringResource(if (other.language == "es") R.string.topic_read_in_spanish else R.string.topic_read_in_english), TopicPageTags.OTHER) { onOther(other) }
                             }
+                            app.granger.online.KeepButton(topic.packId, topic.path)
+                            app.granger.online.AvailabilityMark(topic.packId, topic.path, Modifier.align(Alignment.CenterVertically))
                         }
                     }
                 }
@@ -279,7 +281,7 @@ private fun Family(family: BroadFamily, index: Int, named: Boolean, open: (Topic
         for (row in family.plates.chunked(BroadTopics.FAMILY_PLATES)) {
             Row(Modifier.fillMaxWidth().padding(bottom = 2.dp).aspectRatio(334f / 82f), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                 for (a in row) {
-                    val plate = Plate("kind:${a.packId}/${a.path}", a.title, a.picture, whole = ArticleThumbnails.isWhole(a.picture))
+                    val plate = Plate("kind:${a.packId}/${a.path}", a.title, a.picture, whole = ArticleThumbnails.isWhole(a.picture), article = a.packId to a.path)
                     PlateView(plate, 12.sp, null, Modifier.weight(1f).fillMaxHeight(), short = true) { open(a) }
                 }
                 repeat(BroadTopics.FAMILY_PLATES - row.size) { Spacer(Modifier.weight(1f)) }
@@ -341,7 +343,7 @@ private fun People(people: List<BroadPerson>, words: app.granger.home.YearWords,
             Row(Modifier.fillMaxWidth().padding(bottom = 2.dp).aspectRatio(PlateRowKind.THREE_TALL.ratio), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                 for (p in row) {
                     val a = p.article
-                    val plate = Plate("person:${a.packId}/${a.path}", a.title, a.picture, whole = ArticleThumbnails.isWhole(a.picture), sub = p.mark?.let { words.of(it) })
+                    val plate = Plate("person:${a.packId}/${a.path}", a.title, a.picture, whole = ArticleThumbnails.isWhole(a.picture), sub = p.mark?.let { words.of(it) }, article = a.packId to a.path)
                     PlateView(plate, 12.5.sp, null, Modifier.weight(1f).fillMaxHeight(), short = true) { open(a) }
                 }
                 repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }

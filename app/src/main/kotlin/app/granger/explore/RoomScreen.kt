@@ -120,7 +120,7 @@ internal fun RoomFinding.sentences(words: app.granger.home.YearWords, oldest: Bo
     return parts
 }
 
-private fun ExploreArticle.plate(dates: String?) = Plate("$packId/$path", title, picture, ratio, whole, sub = dates)
+private fun ExploreArticle.plate(dates: String?) = Plate("$packId/$path", title, picture, ratio, whole, sub = dates, article = packId to path)
 
 /**
  * A room (Plan EX round 2, D3): the trail at the head; its name over a standfirst that teaches before a tap; the room

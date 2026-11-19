@@ -48,6 +48,8 @@ data class Plate(
     val sub: String? = null,
     /** A word plate's opening line. */
     val blurb: String? = null,
+    /** The article the plate opens (pack id, path), for its mark (Plan O2 Task 4); null for a figure, a door or a room. */
+    val article: Pair<String, String>? = null,
 )
 
 /** How a row of the mosaic is cut. In [LEAD], [LEAD_MIRROR] and [OPENING] the first plate is the large one. */
@@ -200,6 +202,9 @@ fun PlateView(
                     FramedPicture(plate.picture, 240.dp, Modifier.fillMaxSize())
                     if (number == null) Foot(plate, size)
                 }
+            }
+            plate.article?.let { (packId, path) ->
+                app.granger.online.AvailabilityMark(packId, path, Modifier.align(Alignment.TopEnd).padding(6.dp))
             }
             if (number != null) {
                 Box(Modifier.size(18.dp).background(MaterialTheme.colorScheme.background).testTag(PlateTags.NUMBER), contentAlignment = Alignment.Center) {

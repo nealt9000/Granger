@@ -282,7 +282,7 @@ fun SearchScreen(
                                 }
                             }
                         },
-                        headlineContent = { Text(hit.title) },
+                        headlineContent = { HitTitle(hit) },
                         // A book reads "J. M. Barrie · Granger Classics".
                         supportingContent = {
                             Column {
@@ -297,7 +297,7 @@ fun SearchScreen(
                 results(state, SearchGroup.FULL_TEXT, fullText, { _, hit -> "f:${hit.packId}/${hit.path}" }, ::toggle) { hit ->
                     ListItem(
                         modifier = Modifier.clickable { open(hit) },
-                        headlineContent = { Text(hit.title) },
+                        headlineContent = { HitTitle(hit) },
                         supportingContent = {
                             Column {
                                 hit.snippet?.let {
@@ -671,5 +671,14 @@ private fun DefineCard(entry: app.granger.core.research.Passage, onOpen: () -> U
             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 4.dp),
         )
+    }
+}
+
+/** A result's title with its mark: on this phone or saved for now (Plan O2 Task 4); a book's title alone. */
+@Composable
+private fun HitTitle(hit: SearchHit) {
+    androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)) {
+        Text(hit.title, Modifier.weight(1f, fill = false))
+        if (!app.granger.core.library.BookIds.isBook(hit.packId)) app.granger.online.AvailabilityMark(hit.packId, hit.path)
     }
 }

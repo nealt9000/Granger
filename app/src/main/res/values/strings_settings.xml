@@ -184,4 +184,14 @@
     <string name="settings_saved_clear_title">Clear saved for now?</string>
     <string name="settings_saved_clear_text">What you read online goes from this phone. What you kept stays.</string>
     <string name="settings_saved_clear_confirm">Clear</string>
+    <string name="mark_on_phone">On this phone</string>
+    <string name="mark_on_phone_shorter">On this phone (shorter)</string>
+    <string name="mark_saved">Saved for now</string>
+    <string name="keep_article">Keep</string>
+    <string name="keep_article_text">Keep text</string>
+    <string name="keep_with_size">%1$s · %2$s</string>
+    <string name="keep_working">Keeping…</string>
+    <string name="keep_failed">Couldn\'t keep it. Try again when online.</string>
+    <string name="keep_kept_remove">Kept · Remove</string>
+    <string name="keep_kept_text_remove">Kept text · Remove</string>
 </resources>

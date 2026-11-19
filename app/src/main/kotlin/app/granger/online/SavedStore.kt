@@ -74,6 +74,11 @@ class SavedStore(private val dir: File, private val clock: () -> Long = System::
         fileOf(key).takeIf { it.isFile }
     }
 
+    /** The saved size of [key] in bytes; null when it isn't saved. */
+    fun bytesOf(key: String): Long? = synchronized(lock) {
+        db?.rawQuery("SELECT bytes FROM saved WHERE k = ?", arrayOf(key))?.use { if (it.moveToFirst()) it.getLong(0) else null }
+    }
+
     fun has(key: String): Boolean = synchronized(lock) {
         db?.rawQuery("SELECT 1 FROM saved WHERE k = ?", arrayOf(key))?.use { it.moveToFirst() } == true
     }

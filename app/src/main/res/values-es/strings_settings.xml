@@ -148,4 +148,14 @@
     <string name="settings_saved_clear_title">¿Borrar lo guardado por ahora?</string>
     <string name="settings_saved_clear_text">Lo que leíste en línea se va de este teléfono. Lo que guardaste se queda.</string>
     <string name="settings_saved_clear_confirm">Borrar</string>
+    <string name="mark_on_phone">En este teléfono</string>
+    <string name="mark_on_phone_shorter">En este teléfono (más breve)</string>
+    <string name="mark_saved">Guardado por ahora</string>
+    <string name="keep_article">Guardar</string>
+    <string name="keep_article_text">Guardar texto</string>
+    <string name="keep_with_size">%1$s · %2$s</string>
+    <string name="keep_working">Guardando…</string>
+    <string name="keep_failed">No se pudo guardar. Prueba de nuevo con conexión.</string>
+    <string name="keep_kept_remove">Guardado · Quitar</string>
+    <string name="keep_kept_text_remove">Texto guardado · Quitar</string>
 </resources>
