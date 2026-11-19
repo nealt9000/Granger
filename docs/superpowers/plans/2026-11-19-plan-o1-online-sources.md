@@ -286,3 +286,35 @@ Task 8 can run beside 5–7.
 Task 9 is small.
 
 Then the Pixel pass.
+
+## Results (2026-11-19, branch `o1-online-sources`)
+
+Tasks 0–9 built, each with unit tests. Commits: bd94a32c (0–4), 2aadfcaf (6, 8), 3d6d798d (5, 9), Search (7), 00d8a8d9 (the
+preview), 11a2ab63 (Pixel pass fixes).
+
+**Pixel 6 pass (Task 10, debug 1506+, DB 16, "no Wikipedia on the phone" preview on; English):**
+
+| Check | Result |
+|---|---|
+| Online index set | Top .gqid + .gtime (19.3 MB) downloaded on its own; English only, as the phone's knowledge languages |
+| Explore landing | today's spread with Commons figures, 17 subjects / 108 rooms from the online index; door pictures 0.15–0.5 s each (summary) |
+| Topic page, plain article (Knowth, outside the index) | header 1.08 s (with its 960 px picture), Related by `morelike:` 1.9 s, pictures |
+| Topic page, broad (University / Capital city / Genocide) | header 0.3–0.5 s; Related 2.5–4.3 s; the broad parts 11.4 s → 7.3 s (figures together) → **5.1 s** (figures straight from Commons' thumbnail servers) |
+| Reader | Field and Night styles (online.css), infobox, pictures at 2x, Contents, section jump, link tap 0.6 s, no main-thread fetch |
+| Search | Wikipedia's titles and pages under the phone's, "Wikipedia" source line, Knowth first |
+| Continue / rail | "Wikipedia", not "Removed pack"; pictures from the summary |
+| Games, Timeline, Wander | from the online index, pictures online; Wander now starts from the index (well-known articles) |
+| Local only (debug) | nothing crashes; refused before any connection; an online article says "Needs internet" under its own title |
+| Packs back (preview off) | Explore opens the maxi pack's copy, no online fetch; broad page 1.3 s |
+
+**Bars:** header ≤ 1 s holds for broad topics (0.3–0.5 s) and is just over for a plain article with a big picture (1.08 s).
+Related ≤ 3 s holds alone (1.9–2.5 s) and slips to 4.3 s while a broad topic's figures share the host. The broad parts
+miss their 2 s (5.1 s): the item cards are one summary request each.
+
+**Left for O1's tail or O2:**
+- Broad topics: cards in one batched request (`action=query&prop=extracts|pageimages|pageprops`, 20 titles a call).
+- Spanish online and read aloud not checked on the phone (Spanish isn't a knowledge language there; read aloud would
+  take the mini-player from Neal's audiobook).
+- Local only on volunteered screens: Wander waits on "Finding somewhere to start…", Continue loses its pictures (O3).
+- Home's feeds (On this day…) still draw from packs only.
+- TalkBack not checked.
