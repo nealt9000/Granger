@@ -68,6 +68,8 @@ fun SettingsScreen(
     voiceSummary: String = "",
     /** Settings → Music & audiobooks. */
     onMediaSettings: (() -> Unit)? = null,
+    /** Settings → Reading & listening → Show tips again (Plan OB call 5); null leaves the row out. */
+    onShowTips: (() -> Unit)? = null,
     /** The phone holds an audiobook: the row reads "Music & audiobooks", else "Music" (Plan U2 Decision 7). */
     audiobooks: Boolean = false,
     /** Settings → Appearance → Language (Plan L2 Task 3); null leaves the row out. */
@@ -149,10 +151,18 @@ fun SettingsScreen(
                 LinkRow(stringResource(R.string.settings_set_up_again), stringResource(R.string.settings_set_up_again_summary), onSetUpAgain)
                 HorizontalDivider()
             }
-            if (onVoice != null || onMediaSettings != null) item(key = "listening") {
+            if (onVoice != null || onMediaSettings != null || onShowTips != null) item(key = "listening") {
                 SettingsHeader(stringResource(R.string.settings_section_listening))
                 if (onVoice != null) LinkRow(stringResource(R.string.settings_voice), voiceSummary.ifBlank { stringResource(R.string.settings_voice_summary_default) }, onVoice)
                 if (onMediaSettings != null) LinkRow(mediaSettingsTitle(audiobooks), stringResource(R.string.settings_media_summary), onMediaSettings)
+                if (onShowTips != null) {
+                    var shown by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.settings_show_tips)) },
+                        supportingContent = { Text(stringResource(if (shown) R.string.settings_show_tips_done else R.string.settings_show_tips_summary)) },
+                        modifier = Modifier.selectable(selected = false) { onShowTips(); shown = true }.testTag("settings_show_tips"),
+                    )
+                }
                 HorizontalDivider()
             }
             item(key = "ask") {

@@ -182,4 +182,11 @@
     <string name="search_online_when_connected">Los resultados en línea aparecen cuando hay conexión.</string>
     <string name="settings_never_online">No conectarse nunca</string>
     <string name="settings_never_online_summary">Granger usa solo lo que hay en este teléfono. Solo local queda activado y no se puede desactivar en otro sitio.</string>
+    <!-- Plan OB call 5: hints -->
+    <string name="hint_keep">Guardar pone este artículo en tu teléfono (●). Lo que lees queda guardado por ahora (○) hasta que falte espacio.</string>
+    <string name="hint_offline">Lo gris necesita internet. Equipamiento muestra qué guardar.</string>
+    <string name="hint_offline_link">Equipamiento</string>
+    <string name="settings_show_tips">Mostrar los consejos otra vez</string>
+    <string name="settings_show_tips_summary">Los consejos de una sola vez sobre Guardar y Solo local</string>
+    <string name="settings_show_tips_done">Volverán a aparecer donde corresponde</string>
 </resources>

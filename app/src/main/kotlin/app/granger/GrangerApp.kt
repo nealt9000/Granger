@@ -732,6 +732,9 @@ class AppContainer(context: Context) {
     /** Whether the internet can be reached now: the policy and Android's connection (Plan O3 Task 1). */
     val reach by lazy { app.granger.online.Reach(appContext, networkPolicy.mode, appScope) }
 
+    /** One-line hints shown once each (Plan OB call 5): Keep and the marks, Local only. */
+    val hints by lazy { app.granger.online.Hints(app.granger.online.SharedHintStore(appContext)) }
+
     /** The Local only switch's and banner's control (Plan O3); null while Wikipedia online is off. */
     val reachControl: app.granger.online.ReachControl? = if (!Features.ONLINE) null else object : app.granger.online.ReachControl {
         override val state get() = reach.state

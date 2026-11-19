@@ -1,5 +1,7 @@
 package app.granger.online
 
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -67,12 +69,13 @@ fun LocalOnlyButton(modifier: Modifier = Modifier) {
  * holds." with Turn off, or "No connection. Showing what this phone holds." Nothing while online.
  */
 @Composable
-fun ReachBanner(modifier: Modifier = Modifier) {
+fun ReachBanner(modifier: Modifier = Modifier, onOutfitting: () -> Unit = {}) {
     val control = LocalReach.current ?: return
     val state by control.state.collectAsState()
     if (state.online) return
+    androidx.compose.foundation.layout.Column(modifier.fillMaxWidth().background(MaterialTheme.colorScheme.secondaryContainer)) {
     Row(
-        modifier.fillMaxWidth().heightIn(min = 40.dp).background(MaterialTheme.colorScheme.secondaryContainer)
+        Modifier.fillMaxWidth().heightIn(min = 40.dp)
             .padding(start = 16.dp, end = 4.dp).testTag(LocalOnlyTags.BANNER),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
     ) {
@@ -83,6 +86,18 @@ fun ReachBanner(modifier: Modifier = Modifier) {
         if (state == ReachState.LOCAL_ONLY) {
             TextButton(onClick = { control.setLocalOnly(false) }, modifier = Modifier.testTag(LocalOnlyTags.TURN_OFF)) { Text(stringResource(R.string.reach_banner_turn_off)) }
         }
+    }
+    // The first time offline (Plan OB call 5): what the grey means, and where to keep things. Once, with ×.
+    val hints = LocalHints.current
+    if (hints != null && hints.offline.collectAsState().value) {
+        Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp).testTag(HintTags.OFFLINE).semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite }, verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.hint_offline), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.weight(1f))
+            TextButton(onClick = onOutfitting) { Text(stringResource(R.string.hint_offline_link)) }
+            androidx.compose.material3.IconButton(onClick = hints::offlineDone) {
+                androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Filled.Close, contentDescription = stringResource(R.string.common_close), tint = MaterialTheme.colorScheme.onSecondaryContainer)
+            }
+        }
+    }
     }
 }
 

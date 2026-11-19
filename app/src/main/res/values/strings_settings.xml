@@ -218,4 +218,11 @@
     <string name="search_online_when_connected">Online results appear when you\'re connected.</string>
     <string name="settings_never_online">Never go online</string>
     <string name="settings_never_online_summary">Granger uses only what this phone holds. Local only stays on and can\'t be turned off elsewhere.</string>
+    <!-- Plan OB call 5: hints -->
+    <string name="hint_keep">Keep puts this article on your phone (●). What you read is saved for now (○) until space runs short.</string>
+    <string name="hint_offline">Greyed things need the internet. Outfitting shows what to keep.</string>
+    <string name="hint_offline_link">Outfitting</string>
+    <string name="settings_show_tips">Show tips again</string>
+    <string name="settings_show_tips_summary">The one-time tips about Keep and Local only</string>
+    <string name="settings_show_tips_done">They\'ll show again where they belong</string>
 </resources>

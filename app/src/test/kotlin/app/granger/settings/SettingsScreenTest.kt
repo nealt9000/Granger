@@ -100,12 +100,12 @@ class SettingsScreenTest {
         val sections = listOf("Library & storage", "Reading & listening") + ask + listOf("Appearance", "About")
         assertThat(sections.map(::top)).isInStrictOrder()
         // Each row under its heading.
-        assertThat(listOf("Library & storage", "Download on Wi-Fi only", "Archive.org: show everything", "Set up suggestions again", "Reading & listening").map(::top))
+        assertThat(listOf("Library & storage", "Download on Wi-Fi only", "Archive.org: show everything", "Outfit for offline", "Reading & listening").map(::top))
             .isInStrictOrder()
         assertThat((listOf("Reading & listening", "Voice", "Music & audiobooks") + ask + listOf("Models", "Appearance")).map(::top)).isInStrictOrder()
         // Readiness is reached from Home and the Library now.
         compose.onNodeWithText("Outfitting").assertDoesNotExist()
-        for (row in listOf("Set up suggestions again", "Voice", "Music & audiobooks", "Models")) compose.onNodeWithText(row).performClick()
+        for (row in listOf("Outfit for offline", "Voice", "Music & audiobooks", "Models")) compose.onNodeWithText(row).performClick()
         assertThat(calls).containsExactly("setup", "voice", "media", "models").inOrder()
     }
 

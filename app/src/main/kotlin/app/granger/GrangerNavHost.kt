@@ -1123,7 +1123,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             onOpen = { nav.togglePlayer(player) },
                             skipBackS = player.skipBackS(),
                         )
-                        app.granger.online.ReachBanner()
+                        app.granger.online.ReachBanner(onOutfitting = { nav.navigate(ReadinessRoute) { launchSingleTop = true } })
                     }
                 }
             }
@@ -1634,6 +1634,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     online = if (Features.ONLINE) app.granger.online.OnlineSettingsSource(container.onlinePrefs, container.savedStore, container.reachControl) else null,
                     onModels = { nav.navigate(SourceRoute(CatalogScope.MODELS)) },
                     onSetUpAgain = { nav.navigate(OnboardingRoute(outfit = true)) { launchSingleTop = true } },
+                    onShowTips = if (Features.ONLINE) container.hints::reset else null,
                     onBack = { nav.popBackStack() },
                     onVoice = if (Features.PLAYER && Features.READ_ALOUD) ({ nav.navigate(VoiceRoute) }) else null,
                     voiceSummary = container.installedVoices.voices.collectAsStateWithLifecycle().value

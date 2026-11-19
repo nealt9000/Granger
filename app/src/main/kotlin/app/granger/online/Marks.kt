@@ -109,6 +109,7 @@ fun KeepButton(packId: String, path: String, modifier: Modifier = Modifier) {
     var working by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     var failed by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val hints = LocalHints.current
     val min = modifier.heightIn(min = 48.dp)
     if (kept != null) {
         androidx.compose.material3.OutlinedButton(
@@ -121,7 +122,7 @@ fun KeepButton(packId: String, path: String, modifier: Modifier = Modifier) {
         val pictures = source.keepsPictures()
         val words = stringResource(if (pictures) R.string.keep_article else R.string.keep_article_text)
         androidx.compose.material3.OutlinedButton(
-            onClick = { scope.launch { working = true; failed = !source.keep(packId, path); working = false } }, enabled = !working,
+            onClick = { scope.launch { working = true; failed = !source.keep(packId, path); working = false; if (!failed) hints?.keepDone() } }, enabled = !working,
             modifier = min.testTag(KeepTags.KEEP),
         ) {
             androidx.compose.material3.Text(

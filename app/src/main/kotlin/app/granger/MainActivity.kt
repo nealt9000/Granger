@@ -146,7 +146,7 @@ class MainActivity : FragmentActivity() {
                 if (decided == null) {
                     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
                 } else {
-                    CompositionLocalProvider(LocalPackCovers provides container.gutenbergCovers::thumbnail, app.granger.online.LocalMarks provides container.marks, app.granger.online.LocalRoomKeep provides container.roomKeep, app.granger.online.LocalReach provides container.reachControl) {
+                    CompositionLocalProvider(LocalPackCovers provides container.gutenbergCovers::thumbnail, app.granger.online.LocalMarks provides container.marks, app.granger.online.LocalRoomKeep provides container.roomKeep, app.granger.online.LocalReach provides container.reachControl, app.granger.online.LocalHints provides container.hints) {
                         GrangerNavHost(
                             container, decided, openPlayerRequests = openPlayer.intValue, openDownloadsRequests = openDownloads.intValue,
                             openOnlineTitle = openOnline.value,

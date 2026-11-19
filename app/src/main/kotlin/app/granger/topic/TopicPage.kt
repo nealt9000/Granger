@@ -155,6 +155,7 @@ fun TopicPage(
             item {
                 Column(Modifier.padding(horizontal = 16.dp).padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     if (!header?.lead.isNullOrBlank()) Text(header!!.lead, style = MaterialTheme.typography.bodyLarge)
+                    app.granger.online.KeepHint(topic.packId, topic.path)
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(onClick = onReadFull, modifier = Modifier.heightIn(min = 48.dp).testTag(TopicPageTags.READ_FULL)) {
                             Text(stringResource(R.string.topic_read_full))
