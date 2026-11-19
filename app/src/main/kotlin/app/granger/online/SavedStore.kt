@@ -14,7 +14,7 @@ import java.security.MessageDigest
  * so Android doesn't clear it behind the reader's back (builder's call 2). Blocking; safe from several threads.
  */
 class SavedStore(private val dir: File, private val clock: () -> Long = System::currentTimeMillis) {
-    enum class Kind { PAGE, PICTURE, SUMMARY, BOOK }
+    enum class Kind { PAGE, PICTURE, SUMMARY, BOOK, RECORDS }
 
     class Saved(val bytes: ByteArray, val mime: String, val savedAt: Long)
 
