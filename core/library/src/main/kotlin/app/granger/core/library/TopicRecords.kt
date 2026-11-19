@@ -93,6 +93,23 @@ data class TopicRecord(
     val holderCount: Int,
 )
 
+/**
+ * The record as volunteered screens show it (the adult filter, Plan AF): items flagged [ContentFlags.TOPIC] left out of
+ * its parts and its "leads here", and its figures gone when it's flagged itself. The flags come in the record, so this
+ * works for articles no local index holds.
+ */
+fun TopicRecord.withoutHidden(filterOn: Boolean): TopicRecord {
+    if (!filterOn) return this
+    fun hidden(q: Long) = (items[q]?.flags ?: 0) and ContentFlags.TOPIC != 0
+    val p = parts?.let { p ->
+        p.copy(
+            kinds = p.kinds.filterNot { hidden(it.qid) }, links = p.links.filterNot { hidden(it.qid) }, people = p.people.filterNot(::hidden),
+            figures = if (flags != 0) emptyList() else p.figures,
+        )
+    }
+    return copy(parts = p, holders = holders.filterNot { it.flags and ContentFlags.TOPIC != 0 })
+}
+
 object TopicRecords {
     /** [qid]'s record in [block] (the bytes the directory's [entry] names), or null when the block doesn't hold it. */
     fun find(block: ByteArray, entry: RecordsDirectory.Block, qid: Long, packId: String): TopicRecord? {

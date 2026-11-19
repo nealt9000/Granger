@@ -67,6 +67,14 @@ class TopicRecordsTest {
         assertThat(get(10)!!.items[20]).isEqualTo(RecordRef(20, "A20", 20, 1))
     }
 
+    @Test fun theAdultFilterTakesFlaggedItemsOutOfARecordOnlyWhileOn() {
+        // Q20 carries flag 1 (TOPIC) in the fixture: Q10's kind Q20 goes when the filter is on.
+        val q10 = get(10)!!
+        assertThat(q10.withoutHidden(filterOn = false).parts!!.kinds.map { it.qid }).containsExactly(20L)
+        assertThat(q10.withoutHidden(filterOn = true).parts!!.kinds).isEmpty()
+        assertThat(q10.withoutHidden(filterOn = true).parts!!.links.map { it.qid }).containsExactly(21L)
+    }
+
     @Test fun aCorruptBlockIsRefused() {
         val entry = directory.blockFor(130)!!
         val bad = grec.copyOfRange(entry.offset.toInt(), entry.offset.toInt() + entry.length).also { it[40] = (it[40].toInt() xor 0xFF).toByte() }

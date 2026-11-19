@@ -64,7 +64,7 @@ class TopicSourceTest {
 
     private val people = 1L shl 8
 
-    private val languages = mapOf("en-top" to "en", "en-history" to "en", "es-top" to "es")
+    private val languages = mapOf("en-top" to "en", "en-history" to "en", "es-top" to "es", "wikipedia_en_online" to "en")
     private val names = mapOf("wikipedia_en_top_maxi" to "en-top", "wikipedia_es_top_maxi" to "es-top")
 
     private fun source(
@@ -73,6 +73,8 @@ class TopicSourceTest {
         related: (suspend (String, String, (String, String) -> Boolean) -> Related)? = null,
         headers: MutableList<String> = mutableListOf(),
         footer: ArticleFooter = ArticleFooter.NONE,
+        onlineQid: (suspend (String, String) -> Long?)? = null,
+        records: (suspend (String, String, Long) -> app.granger.core.library.TopicRecord?)? = null,
     ) = TopicSource(
         header = { _, path -> headers += path; TopicHeader(path.replace('_', ' '), "Lead of $path.", "/pic/$path.jpg") },
         lead = { _, path -> ArticleLead(path.replace('_', ' '), "About $path.", null) },
@@ -84,6 +86,8 @@ class TopicSourceTest {
         related = related,
         bookOf = { id -> LibraryBook(id, "Title of $id", null) },
         now = { 2026 },
+        onlineQid = onlineQid,
+        records = records,
     )
 
     @Test fun theHeaderArrivesFirstAndTheTopicFinishesWithEveryPart() = runBlocking<Unit> {
@@ -135,6 +139,49 @@ class TopicSourceTest {
         val engine = source(qids = qids).topic("en-top", "Engine").toList()
         assertThat(engine.last().broad).isNull()
         assertThat(engine.none { it.broadPending }).isTrue()
+    }
+
+    /** Plan O6: Airplane (Q197) as a topic record, its kinds F-16 (in the Top index) and Wright Flyer (only in the record). */
+    private fun airplaneRecord() = app.granger.core.library.TopicRecord(
+        qid = 197, path = "Airplane", rank = 300, other = "Avión", subjects = listOf("technology"), rooms = emptyList(),
+        coordinates = null, links = emptyList(), flags = 0,
+        parts = app.granger.core.library.TopicParts(
+            197, "wikipedia_en_online", 72, emptyList(),
+            listOf(app.granger.core.library.TopicParts.Kind(101, -1), app.granger.core.library.TopicParts.Kind(999, -1)),
+            emptyList(), emptyList(), emptyList(), emptyList(), 86,
+        ),
+        items = mapOf(101L to app.granger.core.library.RecordRef(101, "F-16", 50, 0), 999L to app.granger.core.library.RecordRef(999, "Wright_Flyer", 40, 0)),
+        holders = listOf(app.granger.core.library.RecordRef(500, "Aviation", 200, 0)), holderCount = 1,
+    )
+
+    @Test fun anOnlineArticleNoIndexHoldsGetsItsFullPageFromItsRecord() = runBlocking<Unit> {
+        val top = QidIndexes(listOf(QidIndex.open(gqid("wikipedia_en_top_maxi_2026-09-14.zim", "F-16" to 101L), "en-top")!!))
+        val asked = mutableListOf<Long>()
+        val src = source(qids = top, onlineQid = { _, path -> if (path == "Airplane") 197L else null },
+            records = { _, lang, qid -> asked += qid; assertThat(lang).isEqualTo("en"); if (qid == 197L) airplaneRecord() else null })
+        val states = src.topic("wikipedia_en_online", "Airplane").toList()
+        val broad = states.last().broad!!
+        // F-16 resolves in the Top pack; Wright Flyer, which no index holds, in Wikipedia online by the record's path.
+        assertThat(broad.families.single().all.map { it.packId to it.path })
+            .containsExactly("en-top" to "F-16", "wikipedia_en_online" to "Wright_Flyer")
+        assertThat(states.last().other).isEqualTo(TopicOther("es", "wikipedia_es_online", "Avión", "Avión"))
+        assertThat(src.around("wikipedia_en_online", "Airplane").leads.map { it.path }).containsExactly("Aviation")
+        assertThat(asked.distinct()).containsExactly(197L)
+    }
+
+    @Test fun aLocalIndexBeatsRecordsAndAFailedReadLeavesTheLighterPage() = runBlocking<Unit> {
+        val top = QidIndexes(listOf(QidIndex.open(gqid("wikipedia_en_top_maxi_2026-09-14.zim", "Airplane" to 197L), "en-top")!!))
+        var asked = 0
+        // The Top index holds Q197: no record is asked for.
+        source(qids = top, onlineQid = { _, _ -> 197L }, records = { _, _, _ -> asked++; airplaneRecord() })
+            .topic("wikipedia_en_online", "Airplane").toList()
+        assertThat(asked).isEqualTo(0)
+        // No index holds it and the read fails: the page still finishes, without parts.
+        val last = source(onlineQid = { _, _ -> 197L }, records = { _, _, _ -> throw java.io.IOException("offline") })
+            .topic("wikipedia_en_online", "Airplane").toList().last()
+        assertThat(last.done).isTrue()
+        assertThat(last.broad).isNull()
+        assertThat(last.header).isNotNull()
     }
 
     @Test fun aFinishedTopicIsCachedForBack() = runBlocking<Unit> {

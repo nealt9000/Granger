@@ -54,6 +54,7 @@ import app.granger.reader.PackDocuments
 import app.granger.settings.SharedVoicePrefs
 import app.granger.settings.VoicePrefs
 import android.util.Log
+import app.granger.core.library.withoutHidden
 import app.granger.core.library.Book
 import app.granger.core.library.BookIndex
 import app.granger.core.library.BookDetails
@@ -842,6 +843,24 @@ class AppContainer(context: Context) {
     }
 
     /** Wikipedia online in each knowledge language, while [Features.ONLINE] is on (Plan O1 Task 4). */
+    /**
+     * Topic records read online (Plan O6): full topic pages for articles the phone's indexes don't hold, from the catalog's
+     * records for the language. Fetches only while online, Local only off and the privacy line seen; blocks it reads are
+     * Saved for now.
+     */
+    val remoteRecords: app.granger.online.RemoteRecords by lazy {
+        app.granger.online.RemoteRecords(
+            http,
+            entryFor = { lang ->
+                catalog.state.value.catalog?.packs.orEmpty().firstOrNull { it.records != null && app.granger.core.catalog.Languages.codes(it.language).firstOrNull() == lang }?.records
+            },
+            dirFolder = File(appContext.filesDir, "records"),
+            saved = savedStore,
+            canFetch = { reach.now.online && networkPolicy.privacySeen.value },
+            trim = { savedStore.trim(onlinePrefs.savedCapMb.value * 1024L * 1024) },
+        )
+    }
+
     val onlineSources: app.granger.online.OnlineSources by lazy {
         // Every language Granger supports, not only the knowledge languages: a Spanish tab names and opens itself (Plan O3
         // builder's call 8). The index set and Search keep to the knowledge languages.
@@ -1428,6 +1447,10 @@ class AppContainer(context: Context) {
             figure = { packId, image -> kotlinx.coroutines.withContext(io) { Perf.time("figure") { library.archive(packId)?.let { thumbs.picture(it, image, TOPIC_PICTURE_PX) } } } },
             prefetch = { packId, paths ->
                 kotlinx.coroutines.withContext(io) { Perf.time("prefetch ${paths.size}") { (library.archive(packId) as? app.granger.online.OnlineWikipediaArchive)?.prefetch(paths) } }
+            },
+            onlineQid = { packId, path -> kotlinx.coroutines.withContext(io) { (library.archive(packId) as? app.granger.online.OnlineWikipediaArchive)?.summary(path)?.qid } },
+            records = if (!Features.ONLINE) null else { packId, lang, qid ->
+                kotlinx.coroutines.withContext(io) { remoteRecords.record(lang, qid, packId)?.withoutHidden(contentFilter.isOn) }
             },
         )
     }

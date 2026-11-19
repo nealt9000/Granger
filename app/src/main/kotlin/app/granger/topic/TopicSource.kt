@@ -16,6 +16,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -118,6 +119,13 @@ class TopicSource(
     private val figure: (suspend (packId: String, image: String) -> String?)? = null,
     /** Many articles' cards asked for at once before they're made one by one (Wikipedia online's batched summaries). */
     private val prefetch: (suspend (packId: String, paths: List<String>) -> Unit)? = null,
+    /** An online article's QID from its summary, for articles no local index holds (Plan O6 builder's call 8). */
+    private val onlineQid: (suspend (packId: String, path: String) -> Long?)? = null,
+    /**
+     * The article's topic record (Plan O6), read online by range, for an online article whose QID no local index holds:
+     * its parts, what leads to it, its subjects and rooms, its other-language title. Null without records.
+     */
+    private val records: (suspend (packId: String, language: String, qid: Long) -> app.granger.core.library.TopicRecord?)? = null,
 ) : TopicProvider {
     /** A pack's language doesn't change: asked once (each ask read the packs from the database, and a page asks many times). */
     private val packLanguages = java.util.concurrent.ConcurrentHashMap<String, String>()
@@ -136,16 +144,20 @@ class TopicSource(
 
         coroutineScope {
             val qid = async { attempt { qidOf(packId, path) } }
-            // Whether it is a broad topic is known before its header shows, so the page never changes its layout.
-            val parts = async { attempt { qid.await()?.let { q -> qids().topicParts(q, packId, languageOf(packId)) } } }
+            // Plan O6: a record when no local index holds the article; it never holds up the header.
+            val record = async { attempt { recordOf(packId, qid.await()) } }
+            val localParts = async { attempt { qid.await()?.let { q -> qids().topicParts(q, packId, languageOf(packId)) } } }
+            val parts = async { localParts.await() ?: record.await()?.parts }
             var broadRead = false    // changed and read only inside update, one at a time
             launch {
                 val h = app.granger.Perf.time("topic.header $path") { header(packId, path) } ?: TopicHeader(titleOf(path), "", null)
-                val pending = parts.await() != null
+                // Whether it is a broad topic is known before its header shows, so the page never changes its layout; a
+                // record gets a short wait for that, then the header goes ahead.
+                val pending = localParts.await() != null || withTimeoutOrNull(RECORD_WAIT_MS) { record.await() }?.parts != null
                 update { it.copy(header = h, broadPending = pending && !broadRead) }
             }
             launch { val t = app.granger.Perf.time("topic.time $path") { attempt { timeOf(packId, path) } }; update { it.copy(time = t) } }
-            launch { val o = attempt { otherOf(packId, qid.await()) }; update { it.copy(other = o) } }
+            launch { val o = attempt { otherOf(packId, qid.await()) ?: otherOfRecord(packId, record.await()) }; update { it.copy(other = o) } }
             launch {
                 val language = languageOf(packId)
                 val b = footer?.let { f -> attempt { f.footer(packId, path, libraryLanguages(), language) } } ?: ArticleFooter.NONE
@@ -164,14 +176,15 @@ class TopicSource(
             launch {
                 val p = parts.await()
                 // Online, the page's words first (no request: titles and parts from the index), its pictures after.
+                val items = if (localParts.await() == null) record.await()?.items.orEmpty() else emptyMap()
                 if (p != null && app.granger.online.OnlineSources.isOnline(packId)) {
-                    app.granger.Perf.time("topic.broad.words $path") { attempt { broadOf(packId, p, pictures = false) } }
+                    app.granger.Perf.time("topic.broad.words $path") { attempt { broadOf(packId, p, pictures = false, items = items) } }
                         ?.let { words -> update { broadRead = true; it.copy(broad = words, broadPending = false) } }
                 }
-                val b = p?.let { app.granger.Perf.time("topic.broad $path") { attempt { broadOf(packId, it) } } }
+                val b = p?.let { app.granger.Perf.time("topic.broad $path") { attempt { broadOf(packId, it, items = items) } } }
                 update { broadRead = true; it.copy(broad = b ?: it.broad, broadPending = false) }
                 // Where it hangs and what stands beside it come after the page's own parts.
-                if (b != null && p != null) app.granger.Perf.time("topic.placed $path") { attempt { placed(b, p, packId, path) } }?.let { full -> update { it.copy(broad = full) } }
+                if (b != null && p != null) app.granger.Perf.time("topic.placed $path") { attempt { placed(b, p, packId, path, record.await()) } }?.let { full -> update { it.copy(broad = full) } }
             }
         }
         update { it.copy(done = true) }
@@ -180,13 +193,43 @@ class TopicSource(
 
     private suspend fun qidOf(packId: String, path: String): Long? {
         val all = qids()
-        return all.qidOf(packId, path) ?: if (all.has(packId)) null else languageOf(packId)?.let { all.qidOfTitle(path, it) }
+        return all.qidOf(packId, path) ?: (if (all.has(packId)) null else languageOf(packId)?.let { all.qidOfTitle(path, it) })
+            ?: onlineQid?.takeIf { app.granger.online.OnlineSources.isOnline(packId) }?.let { find -> attempt { find(packId, path) } }
+    }
+
+    /** Records are for what the phone's indexes don't hold (builder's call 7): an online article whose QID none of them has. */
+    private val recordCache = java.util.concurrent.ConcurrentHashMap<Pair<String, Long>, app.granger.core.library.TopicRecord>()
+
+    private suspend fun recordOf(packId: String, qid: Long?): app.granger.core.library.TopicRecord? {
+        val read = records ?: return null
+        qid ?: return null
+        if (!app.granger.online.OnlineSources.isOnline(packId)) return null
+        val language = languageOf(packId) ?: return null
+        recordCache[packId to qid]?.let { return it }
+        val all = qids()
+        if (all.articlesOf(qid, language).any { languageOf(it.packId) == language }) return null
+        return app.granger.Perf.time("topic.record $qid") { read(packId, language, qid) }?.also { recordCache[packId to qid] = it }
+    }
+
+    /** "Read in …" from a record's other-language title, for an online article (the other language's Wikipedia online). */
+    private suspend fun otherOfRecord(packId: String, record: app.granger.core.library.TopicRecord?): TopicOther? {
+        val title = record?.other ?: return null
+        val language = languageOf(packId) ?: return null
+        val other = languages.firstOrNull { it != language } ?: return null
+        val path = title.replace(' ', '_')
+        return TopicOther(other, app.granger.online.OnlineWikipediaArchive.packName(other), path, titleOf(path))
     }
 
     /** A broad topic's parts (Plan EX T1), each item resolved in the installed packs, the page's language first. */
-    private suspend fun broadOf(packId: String, parts: app.granger.core.library.TopicParts, pictures: Boolean = true): BroadTopic? {
+    private suspend fun broadOf(
+        packId: String, parts: app.granger.core.library.TopicParts, pictures: Boolean = true,
+        /** A record's items (Plan O6): what no local index can resolve, it names by path in this online source. */
+        items: Map<Long, app.granger.core.library.RecordRef> = emptyMap(),
+    ): BroadTopic? {
         val all = qids()
         val language = languageOf(packId)
+        fun resolved(q: Long): Pair<String, String>? = all.firstArticleOf(q, language)?.let { it.packId to it.path }
+            ?: items[q]?.path?.takeIf { app.granger.online.OnlineSources.isOnline(packId) }?.let { packId to it }
         val times = attempt { times() }
         suspend fun fetch(image: String) = figure?.let { f -> attempt { f(packId, image) } ?: attempt { f(parts.packId, image) } }
         // Online (Plan O1 Pixel pass), what the page will read is asked for together rather than one by one, figures and
@@ -197,7 +240,7 @@ class TopicSource(
             val cards = launch {
                 val find = prefetch ?: return@launch
                 val items = (parts.kinds.map { it.qid } + parts.people).asSequence()
-                    .mapNotNull { q -> all.firstArticleOf(q, language) }.filter { it.packId == packId }.map { it.path }.distinct().take(PREFETCH_CARDS).toList()
+                    .mapNotNull(::resolved).filter { it.first == packId }.map { it.second }.distinct().take(PREFETCH_CARDS).toList()
                 items.chunked(20).map { chunk -> async { attempt { find(packId, chunk) } } }.awaitAll()
             }
             val figures = parts.figures.map { it.image }.distinct().take(PREFETCH_FIGURES).map { image -> async { image to fetch(image) } }.awaitAll().toMap()
@@ -206,7 +249,7 @@ class TopicSource(
         }
         return BroadTopics.build(
             parts,
-            resolve = { q -> all.firstArticleOf(q, language)?.let { it.packId to it.path } },
+            resolve = ::resolved,
             card = { p, path -> cardOf(p, path) },
             figure = { image -> if (image in early) early[image] else fetch(image) },
             markOf = { p, path -> runCatching { times?.find(p, path) }.getOrNull() },
@@ -226,8 +269,11 @@ class TopicSource(
         val base = lock.withLock { rounds[packId to path] } ?: run {
             val language = languageOf(packId)
             fun plain(a: app.granger.core.library.QidArticle) = TopicArticle(a.packId, a.path, titleOf(a.path), "", null)
-            val leads = qid?.let { q -> attempt { all.holders(q, LEADS, language) } }.orEmpty().map(::plain)
-            val rooms = qid?.let { q -> attempt { all.roomsOf(q) } }.orEmpty()
+            val record = attempt { recordOf(packId, qid) }
+            val leads = (qid?.let { q -> attempt { all.holders(q, LEADS, language) } }.orEmpty().takeIf { it.isNotEmpty() }
+                ?: record?.holders?.mapNotNull { h -> h.path?.let { app.granger.core.library.QidArticle(h.qid, packId, it, h.rank) } }.orEmpty()).map(::plain)
+            val rooms = (qid?.let { q -> attempt { all.roomsOf(q) } }.orEmpty().takeIf { it.isNotEmpty() }
+                ?: record?.let { r -> r.rooms.mapNotNull { key -> all.facets(key.substringBefore('.')).firstOrNull { it.key == key } } }.orEmpty())
             val mark = attempt { times().takeIf { !it.isEmpty }?.find(packId, path) }
             QuiltAround(leads, rooms, emptyMap(), card(packId, path), mark).also { lock.withLock { rounds[packId to path] = it } }
         }
@@ -248,11 +294,16 @@ class TopicSource(
      * [broad] with its place (its subject, its room, the topics before and after it there, best known first) and the
      * room's two best-known other broad topics set beside it, each counted by its own page's rule.
      */
-    private suspend fun placed(broad: BroadTopic, parts: app.granger.core.library.TopicParts, packId: String, path: String): BroadTopic {
+    private suspend fun placed(
+        broad: BroadTopic, parts: app.granger.core.library.TopicParts, packId: String, path: String,
+        record: app.granger.core.library.TopicRecord? = null,
+    ): BroadTopic {
         val all = qids()
         val language = languageOf(packId)
-        val subject = all.subjectsOf(parts.qid).firstOrNull() ?: return broad
-        val room = all.facetOf(parts.qid, subject) ?: return broad.copy(place = BroadPlace(subject))
+        val subject = all.subjectsOf(parts.qid).firstOrNull() ?: record?.subjects?.firstOrNull() ?: return broad
+        val room = all.facetOf(parts.qid, subject)
+            ?: record?.rooms?.firstOrNull { it.startsWith("$subject.") }?.let { key -> all.facets(subject).firstOrNull { it.key == key } }
+            ?: return broad.copy(place = BroadPlace(subject))
         fun plain(a: app.granger.core.library.QidArticle) = TopicArticle(a.packId, a.path, titleOf(a.path), "", null)
         val ranked = all.topInFacet(room.key, ROOM_MAX)
         val (before, at, after) = app.granger.explore.neighbours(ranked) { it.qid == parts.qid }
@@ -355,6 +406,9 @@ class TopicSource(
         private const val PREFETCH_FIGURES = 16
         /** Cards asked for together for an online broad topic (its plates are spread through its kinds): ten batches at most. */
         private const val PREFETCH_CARDS = 200
+
+        /** How long the header waits for a record to say whether the page is a spread (Plan O6): the layout, not the words. */
+        private const val RECORD_WAIT_MS = 600L
 
         /** Topics kept, so Back to a topic page is instant. */
         private const val CACHED = 16
