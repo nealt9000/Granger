@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-11-19T19:01:53Z",
+  "generatedAt": "2026-11-20T15:11:01Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -2215,6 +2215,15 @@
       "shelf": "manuals",
       "subjects": [
         "sports"
+      ],
+      "sidecars": [
+        {
+          "kind": "gbooks",
+          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-20/zimgit-knots_en_2024-08.gbooks",
+          "sha256": "5d22c2fb4a10ab6a39fbb0cfe1002d3717831eb131cd3fb7f56aa612a194cce6",
+          "sizeBytes": 36864,
+          "schemaVersion": 1
+        }
       ]
     },
     {
@@ -2398,6 +2407,15 @@
       "shelf": "manuals",
       "subjects": [
         "food"
+      ],
+      "sidecars": [
+        {
+          "kind": "gbooks",
+          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-20/zimgit-food-preparation_en_2025-04.gbooks",
+          "sha256": "4eeee17fb0536fc3903a1d064158136a91b2bf68b99f49726cb1101c3230f48e",
+          "sizeBytes": 45056,
+          "schemaVersion": 1
+        }
       ]
     },
     {
@@ -2585,6 +2603,15 @@
       "subjects": [
         "technology",
         "health"
+      ],
+      "sidecars": [
+        {
+          "kind": "gbooks",
+          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-20/zimgit-post-disaster_en_2024-05.gbooks",
+          "sha256": "1eb9a552959723044d8d76bc1d80ffcd9729f926ef141a4469cf5a013f71daec",
+          "sizeBytes": 65536,
+          "schemaVersion": 1
+        }
       ]
     },
     {
@@ -2758,9 +2785,9 @@
       "sidecars": [
         {
           "kind": "gbooks",
-          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-16/survivorlibrary.com_en_all_2026-09.gbooks",
-          "sha256": "23e6c61ab812375419073e1c5cd257a51731a52f90111715dd17fa48a2ecf72a",
-          "sizeBytes": 4251648,
+          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-20/survivorlibrary.com_en_all_2026-09.gbooks",
+          "sha256": "16e5ef68e9dfc683a947a8f6d6683bc3748a425dea9e657f8aecc79be047f7d7",
+          "sizeBytes": 4366336,
           "schemaVersion": 1
         }
       ]
@@ -2837,6 +2864,15 @@
       "provider": "USDA",
       "subjects": [
         "food"
+      ],
+      "sidecars": [
+        {
+          "kind": "gbooks",
+          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-20/usda-2015_en_2025-04.gbooks",
+          "sha256": "51ce803ceeff678f40e37e33477cf137aad74eb195e66d4c996ab2fdc970c5e4",
+          "sizeBytes": 36864,
+          "schemaVersion": 1
+        }
       ]
     },
     {
@@ -2865,6 +2901,15 @@
       "subjects": [
         "food",
         "health"
+      ],
+      "sidecars": [
+        {
+          "kind": "gbooks",
+          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-20/zimgit-water_en_2024-08.gbooks",
+          "sha256": "297fe2c5b08d5caa3737324f5d8f68e33a6a156faaf8cb50ce3c14086ba0c660",
+          "sizeBytes": 36864,
+          "schemaVersion": 1
+        }
       ]
     },
     {
@@ -3123,6 +3168,15 @@
       "subjects": [
         "literature",
         "languages"
+      ],
+      "sidecars": [
+        {
+          "kind": "gbooks",
+          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-20/prunelle_en_budding-authors_2025-02.gbooks",
+          "sha256": "59264d7919ec9f896070d1462a735f6dbe30b696b260f4bb3763b07046a0fa2e",
+          "sizeBytes": 45056,
+          "schemaVersion": 1
+        }
       ]
     },
     {
@@ -3200,6 +3254,15 @@
       "subjects": [
         "literature",
         "languages"
+      ],
+      "sidecars": [
+        {
+          "kind": "gbooks",
+          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-20/prunelle_en_draw-your-african-story_2025-02.gbooks",
+          "sha256": "5f48cc655e423303082d37918c88d04a397431929382a57a631129a8f9a25be9",
+          "sizeBytes": 45056,
+          "schemaVersion": 1
+        }
       ]
     },
     {
@@ -4039,6 +4102,15 @@
       "subjects": [
         "literature",
         "languages"
+      ],
+      "sidecars": [
+        {
+          "kind": "gbooks",
+          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-20/prunelle_en_interactive-books_2025-02.gbooks",
+          "sha256": "1c37db98c9e58541e7823b1c69c446f1e1cbb91a9886bd09d49706bf644090f3",
+          "sizeBytes": 36864,
+          "schemaVersion": 1
+        }
       ]
     },
     {
@@ -4158,8 +4230,8 @@
       "sidecars": [
         {
           "kind": "gbooks",
-          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-16/smbc-comics.com_en_all_2026-10.gbooks",
-          "sha256": "20c66020533ecfc56a89c0d6e633e180b26ef6899073fa956e29fef60401468c",
+          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-20/smbc-comics.com_en_all_2026-10.gbooks",
+          "sha256": "2e29b9ebaf651e0a746920d1b86b8290b57d64d31d2aa87593f68c4dde69bdf1",
           "sizeBytes": 36864,
           "schemaVersion": 1
         }
@@ -9137,6 +9209,15 @@
       "shelf": "manuals",
       "subjects": [
         "health"
+      ],
+      "sidecars": [
+        {
+          "kind": "gbooks",
+          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-20/zimgit-medicine_en_2024-08.gbooks",
+          "sha256": "139a281bd6f3c6f7cd2c9593cf8819b596d94895ea7879ee5c9c8d9efa728f1a",
+          "sizeBytes": 36864,
+          "schemaVersion": 1
+        }
       ]
     },
     {
@@ -9215,8 +9296,8 @@
       "sidecars": [
         {
           "kind": "gbooks",
-          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-16/irp.fas.org_en_military-medicine_2026-10.gbooks",
-          "sha256": "0c42c9cac2be27d4dff9897b69d2270e0ea5e5234d7546e2dc2fc473aecd528a",
+          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-20/irp.fas.org_en_military-medicine_2026-10.gbooks",
+          "sha256": "0b70e0b6ad3723cfdaf5cf74eda668559b3b278b16f56355f7d4d1b65123b7ad",
           "sizeBytes": 45056,
           "schemaVersion": 1
         }
@@ -23336,8 +23417,8 @@
       "sidecars": [
         {
           "kind": "gbooks",
-          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-16/milneopentextbooks.org_en_all_2026-08.gbooks",
-          "sha256": "65b64714b464bdb8ba2c467e82cebb6a6b94bc586ebe2928b8bf8b7f10bcec7c",
+          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-20/milneopentextbooks.org_en_all_2026-08.gbooks",
+          "sha256": "cb5e93f819f543208c981eb936a72a813a04e4356315950c5e95798dfbb0f7c0",
           "sizeBytes": 45056,
           "schemaVersion": 1
         }
@@ -25142,9 +25223,9 @@
       "sidecars": [
         {
           "kind": "gbooks",
-          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-16b/jeffe.cs.illinois.edu_en_all_2026-09.gbooks",
-          "sha256": "9f2ce6fb7377cf4c03ca6186a28c67b9db263353fbd0315f07a2924a78682fc9",
-          "sizeBytes": 237568,
+          "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-20/jeffe.cs.illinois.edu_en_all_2026-09.gbooks",
+          "sha256": "b7c1c9141aa2918b68691116c4abfe3d6f826b4505c20fd6d8d93d5da659592d",
+          "sizeBytes": 290816,
           "schemaVersion": 1
         }
       ]
@@ -81555,6 +81636,79 @@
           "title": "African Storybook · suajili"
         }
       }
+    },
+    {
+      "id": "granger-reading-editions",
+      "title": "Granger reading editions",
+      "language": "en",
+      "shelf": "manuals",
+      "provider": "Granger",
+      "license": "Public domain (US government works)",
+      "description": "Whole works rebuilt to read on a phone: chapters, a contents page, pictures sized to the screen, and tables checked against the printed page.",
+      "subjects": [
+        "technology",
+        "food"
+      ],
+      "books": [
+        {
+          "id": "re-rigging-fm5-125",
+          "title": "Rigging Techniques, Procedures, and Applications",
+          "author": "US Army (FM 5-125, with Change 1)",
+          "description": "The Army's manual on rope and rigging: choosing and caring for rope; knots, hitches, lashings and splices, every one with its drawing; hoists, anchors, guy lines and scaffolds.",
+          "category": "Manuals",
+          "language": "en",
+          "sizeBytes": 4847260,
+          "sha256": "33bcadb470c026748caa392be78e4b356e120fbedeabe47af9aef23b62730221",
+          "urls": [
+            "https://github.com/nealt9000/Granger/releases/download/editions-2026-11-20/re-rigging-fm5-125.epub"
+          ],
+          "releaseDate": "2026-11-20",
+          "license": "Public domain (US government work)",
+          "collection": "granger-reading-editions",
+          "published": 2001,
+          "replaces": [
+            "zimgit-knots_en/Knots (6).pdf"
+          ]
+        },
+        {
+          "id": "re-usda-home-canning-2015",
+          "title": "Complete Guide to Home Canning",
+          "author": "US Department of Agriculture (2015)",
+          "description": "The USDA's tested guide to canning at home: what keeps canned food safe, then recipes for fruit, tomatoes, vegetables, meat and seafood, pickles, jams and jellies. Process times are checked against the printed tables.",
+          "category": "Manuals",
+          "language": "en",
+          "sizeBytes": 4272237,
+          "sha256": "91297dfd41c10cb00b8adb81966a705241f29151c4ebc82c301249c3cf07c0b3",
+          "urls": [
+            "https://github.com/nealt9000/Granger/releases/download/editions-2026-11-20/re-usda-home-canning-2015.epub"
+          ],
+          "releaseDate": "2026-11-20",
+          "license": "Public domain (US government work)",
+          "collection": "granger-reading-editions",
+          "published": 2015,
+          "replaces": [
+            "zimgit-food-preparation_en/Food Preparation (12).pdf",
+            "usda-2015_en/INTRO_HomeCanrev0715.pdf",
+            "usda-2015_en/GUIDE01_HomeCan_rev0715.pdf",
+            "usda-2015_en/GUIDE02_HomeCan_rev0715.pdf",
+            "usda-2015_en/GUIDE03_HomeCan_rev0715.pdf",
+            "usda-2015_en/GUIDE04_HomeCan_rev0715.pdf",
+            "usda-2015_en/GUIDE05_HomeCan_rev0715.pdf",
+            "usda-2015_en/GUIDE06_HomeCan_rev0715.pdf",
+            "usda-2015_en/GUIDE07_HomeCan_rev0715.pdf"
+          ]
+        }
+      ],
+      "presets": [
+        {
+          "id": "granger-reading-editions",
+          "title": "Granger reading editions",
+          "items": [
+            "re-rigging-fm5-125",
+            "re-usda-home-canning-2015"
+          ]
+        }
+      ]
     }
   ]
 }
