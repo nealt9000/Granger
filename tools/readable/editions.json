@@ -93,6 +93,22 @@
      "key": "Knots (5).pdf"
     }
    ]
+  },
+  {
+   "id": "re-old-virginia-recipes-1935",
+   "file": "old-virginia.epub",
+   "category": "Manuals",
+   "title": "Famous Recipes from Old Virginia",
+   "author": "The Ginter Park Woman's Club, Richmond (1935)",
+   "description": "A Richmond women's club cookbook of 1935, from early Virginia recipes to the club's own. Shown as printed, with a note at the front on its racist caricatures.",
+   "license": "Public domain (published 1935 without a copyright notice)",
+   "published": 1935,
+   "items": [
+    {
+     "zimName": "zimgit-food-preparation_en",
+     "key": "Food Preparation (6).pdf"
+    }
+   ]
   }
  ]
 }
