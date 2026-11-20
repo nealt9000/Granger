@@ -198,7 +198,19 @@ data class Book(
      * is in each one's collection, though it's one row filed by its [sourceRef]'s pack. Null for any other book.
      */
     val memberOf: String? = null,
+    /**
+     * A pack book held without its pack (Plan BK, version 18): [Loose.SAVED] when it was read online and its file is in
+     * Saved for now, [Loose.KEPT] when it was kept on its own. A pack's sync leaves such a row (and its file) alone when
+     * the pack isn't installed, and removing the pack spares a kept one. Null for every other book.
+     */
+    val loose: String? = null,
 )
+
+/** The values of [Book.loose] (Plan BK). */
+object Loose {
+    const val SAVED = "saved"
+    const val KEPT = "kept"
+}
 
 /** Where the reader left off in a book. [locatorJson] is opaque to the library. */
 @Entity(tableName = "book_positions")

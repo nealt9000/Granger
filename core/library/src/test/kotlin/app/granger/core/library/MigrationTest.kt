@@ -24,6 +24,25 @@ class MigrationTest {
         buildMap { while (it.moveToNext()) put(it.getString(0), it.getString(1)) }
     }
 
+    /** Plan BK: books gain `loose`, null on every existing row. */
+    @Test fun migration17To18AddsLooseAndKeepsEveryBook() {
+        helper.createDatabase("migrate18.db", 17).apply {
+            execSQL(
+                "INSERT INTO books (id, origin, sourceRef, filePath, title, author, translator, date, language, subjects, " +
+                    "description, coverPath, sizeBytes, status, indexedAt, addedAt, format, searchable, hidden) VALUES " +
+                    "('book:nautilus:zimgit-water_en/w.pdf', 'NAUTILUS', 'zimgit-water_en/files/w.pdf', '/b/w.pdf', 'Water', '', '', '', " +
+                    "'eng', '', '', NULL, 10, 'OK', NULL, 1, 'PDF', 1, 0)",
+            )
+            close()
+        }
+        val db = helper.runMigrationsAndValidate("migrate18.db", 18, true, LibraryDatabase.MIGRATION_17_18)
+        db.query("SELECT title, loose FROM books").use {
+            it.moveToFirst()
+            assertThat(it.getString(0)).isEqualTo("Water")
+            assertThat(it.isNull(1)).isTrue()
+        }
+    }
+
     /** Plan KB2: packs gain a nullable book manifest, books their section, order and parts; every row is kept, all null. */
     @Test fun migration16To17AddsKeptArticlesAndKeepsEveryRow() {
         helper.createDatabase("migrate17.db", 16).apply {
