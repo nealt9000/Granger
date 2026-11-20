@@ -22,6 +22,7 @@
 		83E90F2F900D9DF69287B976 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D5F373DED5327DC509AEA8 /* Theme.swift */; };
 		86F28AA0E11BDD43201F0381 /* ReaderScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC46457CA3D262762A1F6DB4 /* ReaderScreen.swift */; };
 		986CD1464DCB7DD384D06C83 /* SearchScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B58EB0526BF3953E06E97BB /* SearchScreen.swift */; };
+		A43B194A4C42B8FF1721640F /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 121EB01691142EB7DA202FBB /* SettingsScreen.swift */; };
 		B78DD468E4905CAD3B53C072 /* ArticleWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BED3609E3254C4F1A860F2E /* ArticleWebView.swift */; };
 		B9F1FDCE26442AE3F6A3645E /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4E0D95A9828108F9ABF60D /* SmokeTests.swift */; };
 		BE470A0D6EB34BD5D96BF8D6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6654812DC545BDF69A9B7931 /* Assets.xcassets */; };
@@ -51,6 +52,7 @@
 
 /* Begin PBXFileReference section */
 		115B8EB413BD65B781604711 /* ZimSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZimSchemeHandler.swift; sourceTree = "<group>"; };
+		121EB01691142EB7DA202FBB /* SettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsScreen.swift; sourceTree = "<group>"; };
 		1BA2587DFAACB90883863228 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		1EDFCCCB9DFC1E76B1696659 /* Core.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core.swift; sourceTree = "<group>"; };
 		2610592677DE14DFF1A87D2B /* TopicScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopicScreen.swift; sourceTree = "<group>"; };
@@ -98,6 +100,14 @@
 				3F9135543A15FAD4A5F44C03 /* ReaderHostTests.swift */,
 			);
 			path = Tests;
+			sourceTree = "<group>";
+		};
+		0E93352BBC86098134FA0BD8 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				121EB01691142EB7DA202FBB /* SettingsScreen.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 		1287FE8C27BD3B9A3A24DE3A = {
@@ -184,6 +194,7 @@
 				BD7B291EE96597757E5EF6A4 /* Home */,
 				9C9D69453334EE2623FA1C1A /* Reader */,
 				DCC7CCC55520AE82044197B5 /* Search */,
+				0E93352BBC86098134FA0BD8 /* Settings */,
 				E1ECAE4BC87AE8691FB435C8 /* Topic */,
 			);
 			path = Sources;
@@ -382,6 +393,7 @@
 				FACF839114C639E9B056C5D7 /* Palette.swift in Sources */,
 				86F28AA0E11BDD43201F0381 /* ReaderScreen.swift in Sources */,
 				986CD1464DCB7DD384D06C83 /* SearchScreen.swift in Sources */,
+				A43B194A4C42B8FF1721640F /* SettingsScreen.swift in Sources */,
 				83E90F2F900D9DF69287B976 /* Theme.swift in Sources */,
 				D133214D01E3E09DFA4D0D83 /* TopicScreen.swift in Sources */,
 				EEA786A258038C318B5E9C30 /* ZimSchemeHandler.swift in Sources */,

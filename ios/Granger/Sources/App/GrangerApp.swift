@@ -10,6 +10,12 @@ struct GrangerApp: App {
     init() {
         GrangerCoreKit.start()
         core = Core(version: Core.version)
+        // Navigation titles in Spectral, as Android's top bars (Plan T1), scaled with Dynamic Type.
+        let metrics = UIFontMetrics(forTextStyle: .largeTitle)
+        if let large = UIFont(name: "Spectral-SemiBold", size: 34), let inline = UIFont(name: "Spectral-Medium", size: 18) {
+            UINavigationBar.appearance().largeTitleTextAttributes = [.font: metrics.scaledFont(for: large)]
+            UINavigationBar.appearance().titleTextAttributes = [.font: UIFontMetrics(forTextStyle: .headline).scaledFont(for: inline)]
+        }
     }
 
     var body: some Scene {

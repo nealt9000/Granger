@@ -12,9 +12,9 @@ final class AppSettings {
     /// The reader's text size, as a share of normal (Android's Aa: 80–200 %).
     var textScale: Double { didSet { defaults.set(textScale, forKey: Keys.textScale) } }
     /// Local only (Plan O3): nothing goes out while it's on.
-    var localOnly: Bool { didSet { defaults.set(localOnly, forKey: Keys.localOnly) } }
+    var localOnly: Bool { didSet { defaults.set(localOnly, forKey: Keys.localOnly); NetworkGate.shared.open = canFetch } }
     /// The privacy line has been seen (Plan O5): until then nothing is asked of Wikimedia.
-    var privacySeen: Bool { didSet { defaults.set(privacySeen, forKey: Keys.privacySeen) } }
+    var privacySeen: Bool { didSet { defaults.set(privacySeen, forKey: Keys.privacySeen); NetworkGate.shared.open = canFetch } }
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -23,6 +23,7 @@ final class AppSettings {
         textScale = defaults.object(forKey: Keys.textScale) as? Double ?? 1.0
         localOnly = defaults.bool(forKey: Keys.localOnly)
         privacySeen = defaults.bool(forKey: Keys.privacySeen)
+        NetworkGate.shared.open = canFetch
     }
 
     /// Whether a request may go out now.
@@ -45,5 +46,18 @@ final class AppSettings {
         static let textScale = "textScale"
         static let localOnly = "localOnly"
         static let privacySeen = "privacySeen"
+    }
+}
+
+/// The one gate every request passes (Android's NetworkGate, Plan O3): open only after the privacy line and with
+/// Local only off. AppSettings keeps it current; the core reads it from any thread.
+final class NetworkGate: @unchecked Sendable {
+    static let shared = NetworkGate()
+    private let lock = NSLock()
+    private var _open = false
+
+    var open: Bool {
+        get { lock.lock(); defer { lock.unlock() }; return _open }
+        set { lock.lock(); _open = newValue; lock.unlock() }
     }
 }

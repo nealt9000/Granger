@@ -10,10 +10,8 @@ final class Core: PageSource {
 
     init(version: String) {
         GrangerCoreEntry.shared.setZimBase(base: ZimSchemeHandler.base)
-        // The gate (Plan O5/O3): read straight from UserDefaults, since the core asks from any thread.
-        client = GrangerCoreEntry.shared.wikimedia(version: version) {
-            KotlinBoolean(value: UserDefaults.standard.bool(forKey: "privacySeen") && !UserDefaults.standard.bool(forKey: "localOnly"))
-        }
+        // The gate (Plan O5/O3), which AppSettings keeps current; the core asks it from any thread.
+        client = GrangerCoreEntry.shared.wikimedia(version: version) { KotlinBoolean(value: NetworkGate.shared.open) }
     }
 
     /// The online source's pack id for [lang] (`wikipedia_en_online`).

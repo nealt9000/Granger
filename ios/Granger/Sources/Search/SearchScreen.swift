@@ -40,7 +40,10 @@ struct SearchScreen: View {
             guard let core else { return }
             await model.search(query, lang: settings.wikiLanguage, core: core, allowed: settings.canFetch)
         }
-        .onAppear { if query.isEmpty { focused = true } }
+        .onAppear {
+            model.reloadRecent()
+            if query.isEmpty { focused = true }
+        }
     }
 
     @ViewBuilder private var recent: some View {
@@ -136,6 +139,10 @@ final class SearchModel {
         recent.insert(q, at: 0)
         if recent.count > 10 { recent.removeLast(recent.count - 10) }
         defaults.set(recent, forKey: Self.key)
+    }
+
+    func reloadRecent() {
+        recent = defaults.stringArray(forKey: Self.key) ?? []
     }
 
     func clearRecent() {

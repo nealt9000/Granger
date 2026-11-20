@@ -102,10 +102,11 @@
 
 **Files:** `ios/Granger/Sources/Home/HomeScreen.swift`, `ios/Granger/Sources/FirstRun/PrivacyLine.swift`, `ios/Granger/Sources/Settings/SettingsScreen.swift`.
 
-- [ ] **Home:** the Granger header with Settings; **Today's featured article** as a plate (picture, title, first sentence; builder's call 2), or the **Picture of the day** where the wiki's feed has no featured article; **Recently read**; nothing else in I2.
-- [ ] **First run:** before anything is fetched, the privacy line Android shows (O5: "Granger now reads online too", what's sent to whom, Local only), with **OK** and **Settings**; the Wikipedia language picked from the phone's languages (English or Español), changeable later.
-- [ ] **Settings:** Wikipedia language; Appearance (System, Field, Night); Text size; Local only (off by default; when on, nothing goes out and screens say so); Clear recently read and recent searches; About (version and build, GPLv3 and AETHERBOUND LLC, the source on GitHub, feedback@opengranger.org).
-- [ ] Commit.
+- [x] **Home:** the Granger header with Settings; **Today's featured article** as a plate (picture, title, first sentence; builder's call 2), or the **Picture of the day** where the wiki's feed has no featured article; **Recently read**; nothing else in I2.
+- [x] **First run:** before anything is fetched, the privacy line Android shows (O5: "Granger now reads online too", what's sent to whom, Local only), with **OK** and **Settings**; the Wikipedia language picked from the phone's languages (English or Español), changeable later.
+- [x] **Settings:** Wikipedia language; Appearance (System, Field, Night); Text size; Local only (off by default; when on, nothing goes out and screens say so); Clear recently read and recent searches; About (version and build, GPLv3 and AETHERBOUND LLC, the source on GitHub, feedback@opengranger.org).
+- [x] Commit.
+- *Done 2026-11-20: Home (privacy card until OK; today's featured article plate, or the Picture of the day for Spanish; Continue = Recently read), Settings (Theme with Android's three labels, Text size, Wikipedia English/Español, Local only with Android's summary, clear history and searches, About with tagline, motto, version, GPLv3 link, © AETHERBOUND LLC, feedback address). The language is first picked from the phone's languages rather than asked (Android asks in onboarding; that comes with onboarding in I4). `NetworkGate`: one flag the settings keep current and the core reads (found by the UI test: launch arguments shadowed UserDefaults). Navigation titles in Spectral app-wide; portrait plate pictures shown whole, wide ones as an overlay so they can't widen the column. UI test: privacy line → OK → featured → Settings → Local only → Search says it needs the connection, passes.*
 
 ### Task 7: Simulator check and parity rows
 

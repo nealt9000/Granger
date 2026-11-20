@@ -60,4 +60,29 @@ final class SmokeTests: XCTestCase {
         field.buttons["Clear text"].firstMatch.tap()
         XCTAssertTrue(app.staticTexts["Recent"].waitForExistence(timeout: 5), "remembered under Recent")
     }
+
+    /// First run: nothing is fetched until the privacy line's OK; Settings' Local only stops Search going online.
+    func testPrivacyLineAndLocalOnly() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-privacySeen", "NO", "-localOnly", "NO", "-wikiLanguage", "en"]
+        app.launch()
+        let ok = app.buttons["privacy-ok"]
+        XCTAssertTrue(ok.waitForExistence(timeout: 10), "the privacy line on first run")
+        XCTAssertFalse(app.buttons["featured"].exists, "nothing fetched before OK")
+        ok.tap()
+        XCTAssertTrue(app.buttons["featured"].waitForExistence(timeout: 20), "today's featured article after OK")
+
+        app.buttons["Settings"].firstMatch.tap()
+        let toggle = app.switches["Local only"]
+        XCTAssertTrue(toggle.waitForExistence(timeout: 5))
+        toggle.switches.firstMatch.tap()
+        app.buttons["Done"].tap()
+
+        app.tabBars.buttons["Search"].tap()
+        let field = app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText("Moon")
+        XCTAssertTrue(app.staticTexts["Online results appear when you're connected."].waitForExistence(timeout: 5), "Local only")
+    }
 }
