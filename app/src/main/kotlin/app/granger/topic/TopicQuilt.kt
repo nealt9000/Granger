@@ -160,18 +160,23 @@ fun TopicQuilt(
 
     fun touch(p: QuiltPlate) {
         held = null
+        val packId = p.packId
+        val path = p.path
+        val room = p.room
+        val bookId = p.bookId
+        val mention = p.mention
         when {
-            p.packId != null && p.path != null -> {
-                if (p.packId == here.packId && p.path == here.path) return
+            packId != null && path != null -> {
+                if (packId == here.packId && path == here.path) return
                 last = title to cells.mapTo(HashSet()) { it.plate.key }
                 open = null
                 // The step being left keeps the name and picture its page gave it.
                 walk[walk.lastIndex] = here.copy(title = title, picture = picture ?: here.picture)
-                walk += Step(p.packId, p.path, p.title, p.picture)
+                walk += Step(packId, path, p.title, p.picture)
             }
-            p.room != null -> actions.onOpenPlace?.invoke(p.room.subject, p.room.id)
-            p.bookId != null && p.mention != null -> actions.onOpenPassage(p.bookId, p.mention)
-            p.bookId != null -> actions.onOpenBookAt(p.bookId, p.chapter.orEmpty())
+            room != null -> actions.onOpenPlace?.invoke(room.subject, room.id)
+            bookId != null && mention != null -> actions.onOpenPassage(bookId, mention)
+            bookId != null -> actions.onOpenBookAt(bookId, p.chapter.orEmpty())
         }
     }
 
@@ -354,7 +359,9 @@ private fun Tile(
     // Read for this plate alone: when the quilt re-forms, a place's next plate never keeps the last one's picture.
     val read by androidx.compose.runtime.key(plate.key) {
         produceState<String?>(null, plate.key) {
-            if (plate.picture == null && plate.packId != null && plate.path != null) value = cardOf(plate.packId, plate.path)?.picture
+            val packId = plate.packId
+            val path = plate.path
+            if (plate.picture == null && packId != null && path != null) value = cardOf(packId, path)?.picture
         }
     }
     val picture = plate.picture ?: read
@@ -497,7 +504,9 @@ private fun Label(
 ) {
     val words = yearWords()
     val read by produceState<QuiltAround?>(null, plate.key) {
-        value = if (plate.packId != null && plate.path != null) around(plate.packId, plate.path, emptyList()) else QuiltAround()
+        val packId = plate.packId
+        val path = plate.path
+        value = if (packId != null && path != null) around(packId, path, emptyList()) else QuiltAround()
     }
     val ground = MaterialTheme.colorScheme.inverseSurface
     val ink = MaterialTheme.colorScheme.inverseOnSurface

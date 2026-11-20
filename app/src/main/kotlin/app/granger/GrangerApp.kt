@@ -726,7 +726,10 @@ class AppContainer(context: Context) {
      */
     val wikimedia: app.granger.core.online.WikimediaClient by lazy {
         // Shared timings (Plan I3) log in debug builds only, as Perf did before it moved.
-        if (BuildConfig.DEBUG) app.granger.Perf.log = { android.util.Log.d(app.granger.Perf.TAG, it) }
+        if (BuildConfig.DEBUG) {
+            app.granger.Perf.log = { android.util.Log.d(app.granger.Perf.TAG, it) }
+            app.granger.Perf.warn = { message, e -> android.util.Log.w("GrangerTopic", message, e) }
+        }
         // The shared online code (Plan I1) logs as the app's did: warnings always, timings in debug builds.
         app.granger.core.online.OnlineLog.warn = { android.util.Log.w(app.granger.core.online.OnlineWikipediaArchive.TAG, it) }
         app.granger.core.online.OnlineLog.info = { if (BuildConfig.DEBUG) android.util.Log.i(app.granger.core.online.OnlineWikipediaArchive.TAG, it) }

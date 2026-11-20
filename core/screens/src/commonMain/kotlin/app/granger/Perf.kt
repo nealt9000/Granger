@@ -15,6 +15,9 @@ object Perf {
     /** Where timings go; null (the default, and in release) runs blocks untimed. */
     var log: ((String) -> Unit)? = null
 
+    /** Where a shared model reports a part that failed and was left out (debug builds only; null drops it). */
+    var warn: ((String, Throwable) -> Unit)? = null
+
     private val clock = TimeSource.Monotonic.markNow()
 
     inline fun <T> time(label: String, block: () -> T): T {

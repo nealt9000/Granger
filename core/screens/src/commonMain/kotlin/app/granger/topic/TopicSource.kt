@@ -103,7 +103,7 @@ class TopicSource(
     /** Related for an article (pack name, path), with a test for "the same subject under another title". */
     private val related: (suspend (packName: String, path: String, sameItem: (String, String) -> Boolean) -> Related)?,
     private val bookOf: suspend (bookId: String) -> LibraryBook?,
-    private val now: () -> Int = { java.time.Year.now().value },
+    private val now: () -> Int = { app.granger.screens.currentYear() },
     /** The library's languages (Settings): only their books are listed. Null lists every book. */
     private val libraryLanguages: suspend () -> Set<String>? = { null },
     /** The sentence a book's mention sits in, read from the book; null when it can't be. */
@@ -123,13 +123,11 @@ class TopicSource(
     private val records: (suspend (packId: String, language: String, qid: Long) -> app.granger.core.library.TopicRecord?)? = null,
 ) : TopicProvider {
     /** A pack's language doesn't change: asked once (each ask read the packs from the database, and a page asks many times). */
-    private val packLanguages = java.util.concurrent.ConcurrentHashMap<String, String>()
+    private val packLanguages = app.granger.core.library.ConcurrentCache<String, String>()
     private val languageOf: suspend (String) -> String? = { packId -> packLanguages[packId] ?: languageOf(packId)?.also { packLanguages[packId] = it } }
 
     private val lock = Mutex()
-    private val cache = object : LinkedHashMap<Pair<String, String>, Topic>(CACHED, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Pair<String, String>, Topic>?) = size > CACHED
-    }
+    private val cache = app.granger.core.library.Lru<Pair<String, String>, Topic>(CACHED)
 
     override fun topic(packId: String, path: String): Flow<Topic> = channelFlow {
         lock.withLock { cache[packId to path] }?.let { send(it); return@channelFlow }
@@ -178,7 +176,7 @@ class TopicSource(
                 val p = parts.await()
                 // Online, the page's words first (no request: titles and parts from the index), its pictures after.
                 val items = if (localParts.await() == null) record.await()?.items.orEmpty() else emptyMap()
-                if (p != null && app.granger.online.OnlineSources.isOnline(packId)) {
+                if (p != null && (app.granger.core.online.OnlineWikipediaArchive.languageOf(packId) != null)) {
                     app.granger.Perf.time("topic.broad.words $path") { attempt { broadOf(packId, p, pictures = false, items = items) } }
                         ?.let { words -> update { broadRead = true; it.copy(broad = words, broadPending = false) } }
                 }
@@ -195,16 +193,16 @@ class TopicSource(
     private suspend fun qidOf(packId: String, path: String): Long? {
         val all = qids()
         return all.qidOf(packId, path) ?: (if (all.has(packId)) null else languageOf(packId)?.let { all.qidOfTitle(path, it) })
-            ?: onlineQid?.takeIf { app.granger.online.OnlineSources.isOnline(packId) }?.let { find -> attempt { find(packId, path) } }
+            ?: onlineQid?.takeIf { (app.granger.core.online.OnlineWikipediaArchive.languageOf(packId) != null) }?.let { find -> attempt { find(packId, path) } }
     }
 
     /** Records are for what the phone's indexes don't hold (builder's call 7): an online article whose QID none of them has. */
-    private val recordCache = java.util.concurrent.ConcurrentHashMap<Pair<String, Long>, app.granger.core.library.TopicRecord>()
+    private val recordCache = app.granger.core.library.ConcurrentCache<Pair<String, Long>, app.granger.core.library.TopicRecord>()
 
     private suspend fun recordOf(packId: String, qid: Long?): app.granger.core.library.TopicRecord? {
         val read = records ?: return null
         qid ?: return null
-        if (!app.granger.online.OnlineSources.isOnline(packId)) return null
+        if (!(app.granger.core.online.OnlineWikipediaArchive.languageOf(packId) != null)) return null
         val language = languageOf(packId) ?: return null
         recordCache[packId to qid]?.let { return it }
         val all = qids()
@@ -241,13 +239,13 @@ class TopicSource(
         val all = qids()
         val language = languageOf(packId)
         fun resolved(q: Long): Pair<String, String>? = all.firstArticleOf(q, language)?.let { it.packId to it.path }
-            ?: items[q]?.path?.takeIf { app.granger.online.OnlineSources.isOnline(packId) }?.let { packId to it }
+            ?: items[q]?.path?.takeIf { (app.granger.core.online.OnlineWikipediaArchive.languageOf(packId) != null) }?.let { packId to it }
         val times = attempt { times() }
         suspend fun fetch(image: String) = figure?.let { f -> attempt { f(packId, image) } ?: attempt { f(parts.packId, image) } }
         // Online (Plan O1 Pixel pass), what the page will read is asked for together rather than one by one, figures and
         // cards at the same time: each figure is a round trip to Commons (13 in a row took 9 s of a broad topic's 11), and
         // the cards (its kinds' plates, its people) come in batched summaries of 20.
-        val online = pictures && app.granger.online.OnlineSources.isOnline(packId)
+        val online = pictures && (app.granger.core.online.OnlineWikipediaArchive.languageOf(packId) != null)
         val early: Map<String, String?> = if (!online) emptyMap() else coroutineScope {
             val cards = launch {
                 val find = prefetch ?: return@launch
@@ -295,9 +293,7 @@ class TopicSource(
         return base.copy(more = byQid.mapNotNull { (q, key) -> held[q]?.let { key to it } }.toMap())
     }
 
-    private val rounds = object : LinkedHashMap<Pair<String, String>, QuiltAround>(ROUNDS, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Pair<String, String>, QuiltAround>?) = size > ROUNDS
-    }
+    private val rounds = app.granger.core.library.Lru<Pair<String, String>, QuiltAround>(ROUNDS)
 
     private suspend fun cardOf(packId: String, path: String): TopicArticle =
         lead(packId, path).let { l -> TopicArticle(packId, path, l?.title ?: titleOf(path), blurb(l?.sentence.orEmpty()), l?.thumbnail) }
@@ -397,7 +393,7 @@ class TopicSource(
     } catch (e: kotlinx.coroutines.CancellationException) {
         throw e
     } catch (e: Exception) {
-        if (app.granger.BuildConfig.DEBUG) android.util.Log.w("GrangerTopic", "a topic part failed", e)
+        app.granger.Perf.warn?.invoke("a topic part failed", e)
         null
     }
 
