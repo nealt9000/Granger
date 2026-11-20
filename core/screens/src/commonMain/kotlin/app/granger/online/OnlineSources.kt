@@ -7,7 +7,8 @@ import app.granger.core.library.PackStatus
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import java.util.concurrent.ConcurrentHashMap
+import app.granger.core.library.ConcurrentCache
+import app.granger.core.text.percentDecoded
 
 /**
  * The online sources (Plan O1 Task 4, builder's calls 1 and 2): Wikipedia online in each knowledge language, while
@@ -26,13 +27,15 @@ class OnlineSources(
     private val indexRandom: (packId: String) -> String? = { null },
     /** Kept articles and Saved for now (Plan O2). */
     private val stores: OfflineStores? = null,
+    /** Timings in the log (debug builds). */
+    private val timings: Boolean = false,
 ) {
-    private val archives = ConcurrentHashMap<String, OnlineWikipediaArchive>()
+    private val archives = ConcurrentCache<String, OnlineWikipediaArchive>()
 
     /** The online archives by source id, for the library's `archive()`. Never blocks. */
     fun archives(): Map<String, OnlineWikipediaArchive> =
         if (!enabled()) emptyMap() else languagesNow().associate { lang ->
-            OnlineWikipediaArchive.packName(lang) to archives.getOrPut(lang) { OnlineWikipediaArchive(lang, wiki, fallback, indexRandom = { indexRandom(OnlineWikipediaArchive.packName(lang)) }, stores = stores, timings = app.granger.BuildConfig.DEBUG) }
+            OnlineWikipediaArchive.packName(lang) to archives.computeIfAbsent(lang) { OnlineWikipediaArchive(lang, wiki, fallback, indexRandom = { indexRandom(OnlineWikipediaArchive.packName(lang)) }, stores = stores, timings = timings) }
         }
 
     fun archive(lang: String): OnlineWikipediaArchive? = archives()[OnlineWikipediaArchive.packName(lang)]
@@ -52,7 +55,7 @@ class OnlineSources(
         val m = WIKI_URL.matchEntire(url) ?: return null
         val lang = m.groupValues[1]
         if (lang !in languagesNow()) return null
-        val title = runCatching { java.net.URLDecoder.decode(m.groupValues[2].replace("+", "%2B"), "UTF-8") }.getOrNull() ?: return null
+        val title = percentDecoded(m.groupValues[2]) ?: return null
         if (title.isBlank() || NAMESPACE.containsMatchIn(title)) return null
         val fragment = m.groupValues[3].takeIf { it.isNotEmpty() }
         return app.granger.core.zim.ZimUrls.forEntry(OnlineWikipediaArchive.packName(lang), title.replace(' ', '_'), fragment)

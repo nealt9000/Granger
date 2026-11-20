@@ -149,7 +149,7 @@ class OfflineStoresTest {
         val st = stores(this)
         val s = WikimediaClient.Summary("Moon", "Moon", "The Moon is…", null, "https://upload.wikimedia.org/x.jpg", 405, 7)
         assertThat(WikimediaClient.summaryFromJson(WikimediaClient.summaryToJson(s))).isEqualTo(s)
-        st.saved.put(SavedStore.summaryKey("en", "Moon"), SavedStore.Kind.SUMMARY, WikimediaClient.summaryToJson(s).toByteArray(), "application/json")
+        st.saved.put(SavedStore.summaryKey("en", "Moon"), SavedStore.Kind.SUMMARY.name, WikimediaClient.summaryToJson(s).toByteArray(), "application/json")
         mode = NetworkMode.LOCAL_ONLY
         assertThat(OnlineWikipediaArchive("en", wiki(), stores = st).summary("Moon")).isEqualTo(s)
     }

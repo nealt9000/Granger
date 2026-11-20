@@ -904,6 +904,7 @@ class AppContainer(context: Context) {
             },
             indexRandom = { id -> kotlinx.coroutines.runBlocking { runCatching { referenceLinks.qidIndexes().randomPath(id) }.getOrNull() } },
             stores = offlineStores,
+            timings = BuildConfig.DEBUG,
         )
     }
 

@@ -1,7 +1,6 @@
 package app.granger.online
 
-import android.content.ContentValues
-import android.database.sqlite.SQLiteDatabase
+import app.granger.core.library.SavedForNow
 import java.io.File
 import java.security.MessageDigest
 
@@ -10,117 +9,44 @@ import java.security.MessageDigest
  * summaries, books opened without keeping), kept so Back is instant and it still opens with no signal, removed oldest-
  * opened first once the store passes its cap. Never counted as offline coverage: it's a cache, not a choice.
  *
- * Files under [dir] by the SHA-1 of their key, with a small SQLite index beside them. In the app's files, not its cache,
- * so Android doesn't clear it behind the reader's back (builder's call 2). Blocking; safe from several threads.
+ * Since Plan I3 a thin wrapper over the shared [SavedForNow] (the iPhone's store too), with the same files and index
+ * as before: files under [dir] by the SHA-1 of their key, beside `index.db`. In the app's files, not its cache, so
+ * Android doesn't clear it behind the reader's back (builder's call 2). Blocking; safe from several threads.
  */
-class SavedStore(private val dir: File, private val clock: () -> Long = System::currentTimeMillis) {
+class SavedStore(private val dir: File, clock: () -> Long = System::currentTimeMillis) {
     enum class Kind { PAGE, PICTURE, SUMMARY, BOOK, RECORDS }
 
     class Saved(val bytes: ByteArray, val mime: String, val savedAt: Long)
 
-    private val lock = Any()
-    private val db: SQLiteDatabase? by lazy { open() }
-    /** Bytes in the store, kept in step so a put needn't sum the index. */
-    @Volatile private var total: Long = -1
+    /** The shared store underneath, for code in `:core:screens`. */
+    val shared = SavedForNow(dir.path, clock)
 
-    private fun open(): SQLiteDatabase? = runCatching {
-        dir.mkdirs()
-        SQLiteDatabase.openOrCreateDatabase(File(dir, "index.db"), null).also {
-            it.execSQL("CREATE TABLE IF NOT EXISTS saved(k TEXT PRIMARY KEY, kind TEXT NOT NULL, mime TEXT NOT NULL, bytes INTEGER NOT NULL, savedAt INTEGER NOT NULL, openedAt INTEGER NOT NULL)")
-            it.execSQL("CREATE INDEX IF NOT EXISTS saved_opened ON saved(openedAt)")
-        }
-    }.getOrNull()
-
-    fun put(key: String, kind: Kind, bytes: ByteArray, mime: String) = synchronized(lock) {
-        val d = db ?: return@synchronized
-        val file = fileOf(key)
-        runCatching { file.writeBytes(bytes) }.onFailure { return@synchronized }
-        val old = sizeOf(key)
-        val now = clock()
-        d.insertWithOnConflict("saved", null, ContentValues().apply {
-            put("k", key); put("kind", kind.name); put("mime", mime); put("bytes", bytes.size.toLong()); put("savedAt", now); put("openedAt", now)
-        }, SQLiteDatabase.CONFLICT_REPLACE)
-        if (total >= 0) total += bytes.size - old
-    }
+    fun put(key: String, kind: Kind, bytes: ByteArray, mime: String) = shared.put(key, kind.name, bytes, mime)
 
     /** [file] moved into the store under [key] (a book opened without keeping); true when it's in. */
-    fun putFile(key: String, kind: Kind, file: File, mime: String): Boolean = synchronized(lock) {
-        val d = db ?: return@synchronized false
-        val to = fileOf(key)
-        if (!file.renameTo(to) && runCatching { file.copyTo(to, overwrite = true); file.delete() }.isFailure) return@synchronized false
-        val old = sizeOf(key)
-        val now = clock()
-        d.insertWithOnConflict("saved", null, ContentValues().apply {
-            put("k", key); put("kind", kind.name); put("mime", mime); put("bytes", to.length()); put("savedAt", now); put("openedAt", now)
-        }, SQLiteDatabase.CONFLICT_REPLACE)
-        if (total >= 0) total += to.length() - old
-        true
-    }
+    fun putFile(key: String, kind: Kind, file: File, mime: String): Boolean = shared.putFile(key, kind.name, file.path, mime)
 
     /** The saved bytes for [key], marked as opened now; null when there are none. */
-    fun get(key: String): Saved? = synchronized(lock) {
-        val d = db ?: return@synchronized null
-        val row = d.rawQuery("SELECT mime, savedAt FROM saved WHERE k = ?", arrayOf(key)).use { c -> if (c.moveToFirst()) c.getString(0) to c.getLong(1) else null }
-            ?: return@synchronized null
-        val bytes = runCatching { fileOf(key).readBytes() }.getOrNull() ?: run { forget(key); return@synchronized null }
-        d.execSQL("UPDATE saved SET openedAt = ? WHERE k = ?", arrayOf<Any>(clock(), key))
-        Saved(bytes, row.first, row.second)
-    }
+    fun get(key: String): Saved? = shared.get(key)?.let { Saved(it.bytes, it.mime, it.savedAt) }
 
     /** The file behind [key] (a saved book, opened in place), marked as opened now; null when it isn't saved. */
-    fun file(key: String): File? = synchronized(lock) {
-        if (!has(key)) return@synchronized null
-        db?.execSQL("UPDATE saved SET openedAt = ? WHERE k = ?", arrayOf<Any>(clock(), key))
-        fileOf(key).takeIf { it.isFile }
-    }
+    fun file(key: String): File? = shared.file(key)?.let(::File)
 
     /** The saved size of [key] in bytes; null when it isn't saved. */
-    fun bytesOf(key: String): Long? = synchronized(lock) {
-        db?.rawQuery("SELECT bytes FROM saved WHERE k = ?", arrayOf(key))?.use { if (it.moveToFirst()) it.getLong(0) else null }
-    }
+    fun bytesOf(key: String): Long? = shared.bytesOf(key)
 
-    fun has(key: String): Boolean = synchronized(lock) {
-        db?.rawQuery("SELECT 1 FROM saved WHERE k = ?", arrayOf(key))?.use { it.moveToFirst() } == true
-    }
+    fun has(key: String): Boolean = shared.has(key)
 
     /** Takes [key] out of the store, its file with it (Keep moves a saved book onto the shelf). */
-    fun remove(key: String) = synchronized(lock) { forget(key) }
+    fun remove(key: String) = shared.remove(key)
 
     /** Bytes in the store. */
-    fun size(): Long = synchronized(lock) {
-        if (total < 0) total = db?.rawQuery("SELECT COALESCE(SUM(bytes), 0) FROM saved", null)?.use { if (it.moveToFirst()) it.getLong(0) else 0L } ?: 0L
-        total
-    }
+    fun size(): Long = shared.size()
 
     /** Removes the oldest-opened until the store is at most [capBytes]. */
-    fun trim(capBytes: Long) = synchronized(lock) {
-        val d = db ?: return@synchronized
-        if (size() <= capBytes) return@synchronized
-        val gone = ArrayList<String>()
-        var left = size()
-        d.rawQuery("SELECT k, bytes FROM saved ORDER BY openedAt ASC", null).use { c ->
-            while (left > capBytes && c.moveToNext()) { gone += c.getString(0); left -= c.getLong(1) }
-        }
-        for (k in gone) forget(k)
-    }
+    fun trim(capBytes: Long) = shared.trim(capBytes)
 
-    fun clear() = synchronized(lock) {
-        db?.execSQL("DELETE FROM saved")
-        dir.listFiles()?.filter { it.name != "index.db" && !it.name.startsWith("index.db-") }?.forEach { it.delete() }
-        total = 0
-    }
-
-    private fun forget(key: String) {
-        val old = sizeOf(key)
-        db?.execSQL("DELETE FROM saved WHERE k = ?", arrayOf(key))
-        fileOf(key).delete()
-        if (total >= 0) total -= old
-    }
-
-    private fun sizeOf(key: String): Long =
-        db?.rawQuery("SELECT bytes FROM saved WHERE k = ?", arrayOf(key))?.use { if (it.moveToFirst()) it.getLong(0) else 0L } ?: 0L
-
-    private fun fileOf(key: String) = File(dir, sha1(key))
+    fun clear() = shared.clear()
 
     companion object {
         /** A saved page under this age opens at once even online (builder's call 2); older ones are fetched fresh. */

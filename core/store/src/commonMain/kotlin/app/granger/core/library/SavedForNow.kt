@@ -15,7 +15,7 @@ import kotlinx.io.readByteArray
  *
  * The same layout as Android's `SavedStore` (files under [dir] named by the SHA-1 of their key, beside an `index.db`
  * with one `saved` table), so Android can move onto this class without touching what's on the phone. The iPhone uses
- * it from I3; Android's switch waits for another branch that edits SavedStore (BK). Blocking; safe from several threads.
+ * it from I3, and Android's `SavedStore` is a thin wrapper over it. Blocking; safe from several threads.
  */
 class SavedForNow(private val dir: String, private val clock: () -> Long) {
     class Saved(val bytes: ByteArray, val mime: String, val savedAt: Long)
@@ -67,6 +67,42 @@ class SavedForNow(private val dir: String, private val clock: () -> Long) {
             ?: run { forget(d, key); return@locked null }
         d.prepare("UPDATE saved SET openedAt = ? WHERE k = ?").use { it.bindLong(1, clock()); it.bindText(2, key); it.step() }
         Saved(bytes, row.first, row.second)
+    }
+
+    /** [from] moved into the store under [key] (a book opened without keeping); true when it's in. */
+    fun putFile(key: String, kind: String, from: String, mime: String): Boolean = locked {
+        val d = db() ?: return@locked false
+        val src = Path(from)
+        val to = fileOf(key)
+        val moved = runCatching { SystemFileSystem.atomicMove(src, to) }.isSuccess || runCatching {
+            SystemFileSystem.source(src).buffered().use { i -> SystemFileSystem.sink(to).buffered().use { o -> i.transferTo(o) } }
+            SystemFileSystem.delete(src, mustExist = false)
+        }.isSuccess
+        if (!moved) return@locked false
+        val size = SystemFileSystem.metadataOrNull(to)?.size ?: 0L
+        val old = sizeOf(d, key)
+        val now = clock()
+        d.prepare("INSERT OR REPLACE INTO saved(k, kind, mime, bytes, savedAt, openedAt) VALUES (?, ?, ?, ?, ?, ?)").use {
+            it.bindText(1, key); it.bindText(2, kind); it.bindText(3, mime); it.bindLong(4, size)
+            it.bindLong(5, now); it.bindLong(6, now); it.step()
+        }
+        if (total >= 0) total += size - old
+        true
+    }
+
+    /** The path of the file behind [key] (a saved book, opened in place), marked as opened now; null when it isn't saved. */
+    fun file(key: String): String? = locked {
+        val d = db() ?: return@locked null
+        val there = d.prepare("SELECT 1 FROM saved WHERE k = ?").use { it.bindText(1, key); it.step() }
+        if (!there) return@locked null
+        d.prepare("UPDATE saved SET openedAt = ? WHERE k = ?").use { it.bindLong(1, clock()); it.bindText(2, key); it.step() }
+        fileOf(key).takeIf { SystemFileSystem.metadataOrNull(it)?.isRegularFile == true }?.toString()
+    }
+
+    /** The saved size of [key] in bytes; null when it isn't saved. */
+    fun bytesOf(key: String): Long? = locked {
+        val d = db() ?: return@locked null
+        d.prepare("SELECT bytes FROM saved WHERE k = ?").use { it.bindText(1, key); if (it.step()) it.getLong(0) else null }
     }
 
     fun has(key: String): Boolean = locked {
