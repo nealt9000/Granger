@@ -1,0 +1,5 @@
+// Copy to ios/Local.xcconfig (git-ignored) and fill in your own Apple team to install on your iPhone.
+// The Simulator needs neither line.
+DEVELOPMENT_TEAM = ABCDE12345
+// Your own prefix, so the bundle ID doesn't clash with Granger's (app.granger) on your team.
+GRANGER_BUNDLE_PREFIX = com.example

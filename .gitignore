@@ -26,3 +26,10 @@ tools/asr/audio/
 tools/asr/out/
 # Plan F1/release: testers' feedback mail stays off GitHub
 tools/feedback/inbox/
+
+# iPhone (Plan I1): the locally built core and each developer's signing.
+/ios/GrangerCore/Local/
+/ios/Local.xcconfig
+/ios/**/xcuserdata/
+/ios/**/.build/
+/ios/**/.swiftpm/
