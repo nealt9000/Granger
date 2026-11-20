@@ -22,6 +22,7 @@ kotlin {
             api(libs.kotlinx.coroutines.core)
             implementation(project(":core:text"))
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.ksoup)
         }
         commonTest.dependencies { implementation(kotlin("test")) }
     }

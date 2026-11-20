@@ -1,5 +1,6 @@
 package app.granger.home
 
+import app.granger.core.text.ZimPaths
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import app.granger.core.zim.ZimArchive

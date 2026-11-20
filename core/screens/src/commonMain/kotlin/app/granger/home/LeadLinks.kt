@@ -1,7 +1,8 @@
 package app.granger.home
 
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Element
+import app.granger.core.text.ZimPaths
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.nodes.Element
 
 /** An article's opening (Plan H5a, Decisions 2 and 5): its `<title>`, a short plain summary, and the links Wander orbits. */
 data class Lead(val title: String, val summary: String, val links: List<String>)
@@ -39,7 +40,7 @@ object LeadLinks {
 
     /** [sentences] and [maxChars] size the summary: a link's card takes two, the topic page's lead more (Plan LL2). */
     fun parse(html: String, articlePath: String, sentences: Int = 2, maxChars: Int = MAX_SUMMARY): Lead {
-        val doc = Jsoup.parse(html)
+        val doc = Ksoup.parse(html)
         val title = doc.title().ifBlank { doc.selectFirst("h1")?.text().orEmpty() }.trim()
         doc.select("sup, .reference, .mw-editsection, style, script, table, figure, .hatnote, .thumb, .infobox, .navbox, .metadata").remove()
         val paragraphs = ArrayList<Element>()
@@ -64,7 +65,7 @@ object LeadLinks {
     }
 
     /** [href] as a ZIM article path, or null for a link Wander shouldn't orbit. */
-    internal fun linkPath(href: String, articlePath: String): String? {
+    fun linkPath(href: String, articlePath: String): String? {
         val h = href.trim()
         if (h.isEmpty() || h.startsWith("#") || h.startsWith("//") || SCHEME.containsMatchIn(h)) return null
         val path = ZimPaths.resolve(h, articlePath).ifBlank { return null }
@@ -93,7 +94,7 @@ object LeadLinks {
      * [text] in sentences: split after a full stop and before a capital, except after an abbreviation ("322 a. C.",
      * "St. Paul", "J. R. R. Tolkien"), a word of one or two letters or one of [ABBREVIATIONS].
      */
-    internal fun sentences(text: String): List<String> {
+    fun sentences(text: String): List<String> {
         val out = ArrayList<String>()
         var start = 0
         for (m in SENTENCE_END.findAll(text)) {
@@ -112,7 +113,7 @@ object LeadLinks {
     )
 
     /** The lead's first [count] sentences, plain, at most [max] characters, cut at a word. */
-    internal fun summary(paragraphs: List<Element>, count: Int = 2, max: Int = MAX_SUMMARY): String =
+    fun summary(paragraphs: List<Element>, count: Int = 2, max: Int = MAX_SUMMARY): String =
         summaryOf(paragraphs.joinToString(" ") { it.text() }, count, max)
 
     /** Plain lead text (Wikimedia's summary extract, Plan O1 Task 6) cut as [summary] cuts a pack article's lead. */

@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jsoup.parser.Parser
+import com.fleeksoft.ksoup.parser.Parser
 
 /** One article in Wander. [onPhone] is false for a link no pack here holds (shown dashed; Plan H5a Decision 3). */
 data class WanderNode(val packId: String, val path: String, val title: String, val imagePath: String? = null, val onPhone: Boolean = true)
@@ -52,7 +52,7 @@ class WanderModel(
     private val hides: (packId: String, path: String) -> Boolean = { _, _ -> false },
     /** An article whose picture the adult-content filter leaves out. */
     private val noPicture: (packId: String, path: String) -> Boolean = { _, _ -> false },
-    private val io: CoroutineDispatcher = Dispatchers.IO,
+    private val io: CoroutineDispatcher = app.granger.screens.ioDispatcher,
     private val random: Random = Random.Default,
     private val debounceMillis: Long = 250L,
 ) {
@@ -164,7 +164,7 @@ class WanderModel(
                 val filled = withContext(io) {
                     val pack = packs[node.packId] ?: return@withContext null
                     val archive = archiveOf(pack) ?: return@withContext null
-                    val html = archive.read(node.path)?.let { String(it.bytes, Charsets.UTF_8) } ?: return@withContext null
+                    val html = archive.read(node.path)?.let { it.bytes.decodeToString() } ?: return@withContext null
                     node.copy(title = titleOf(html, pack, node.path), imagePath = picture(pack, archive, node.path, html, packs.values))
                 } ?: continue
                 state.update { s -> if (s.centre?.path != loaded.centre.path) s else s.copy(orbit = s.orbit.map { if (it.path == node.path && it.packId == node.packId) filled else it }) }
@@ -179,7 +179,7 @@ class WanderModel(
         val resolved = archive.resolvePath(path) ?: return null
         val item = archive.read(resolved) ?: return null
         if (!item.mimeType.startsWith("text/html")) return null
-        val html = String(item.bytes, Charsets.UTF_8)
+        val html = item.bytes.decodeToString()
         val lead = LeadLinks.parse(html, resolved)
         val centre = WanderNode(pack.id, resolved, cleanTitle(lead.title, pack, resolved), picture(pack, archive, resolved, html, packs))
         val others = listOf(pack) + packs.filter { it.id != pack.id }
@@ -217,7 +217,7 @@ class WanderModel(
             if (other.id == pack.id) continue
             val a = archiveOf(other) ?: continue
             val p = a.resolvePath(path) ?: a.resolvePath(name) ?: a.resolvePath("A/$name") ?: continue
-            val page = a.read(p)?.let { String(it.bytes, Charsets.UTF_8) } ?: continue
+            val page = a.read(p)?.let { it.bytes.decodeToString() } ?: continue
             runCatching { thumbnail(a, p, page) }.getOrNull()?.let { return it }
         }
         return null
