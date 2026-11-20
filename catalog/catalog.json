@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-11-20T15:11:01Z",
+  "generatedAt": "2026-11-20T16:20:11Z",
   "packs": [
     {
       "id": "wikipedia_en_medicine_nopic",
@@ -2220,7 +2220,7 @@
         {
           "kind": "gbooks",
           "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-20/zimgit-knots_en_2024-08.gbooks",
-          "sha256": "5d22c2fb4a10ab6a39fbb0cfe1002d3717831eb131cd3fb7f56aa612a194cce6",
+          "sha256": "b68afa63c17c04ce356c269de428e120165f9bdaa51a96798894651aa2d9ef38",
           "sizeBytes": 36864,
           "schemaVersion": 1
         }
@@ -2412,7 +2412,7 @@
         {
           "kind": "gbooks",
           "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-20/zimgit-food-preparation_en_2025-04.gbooks",
-          "sha256": "4eeee17fb0536fc3903a1d064158136a91b2bf68b99f49726cb1101c3230f48e",
+          "sha256": "1f3531f1192ad1fcc8e702cf05e8f501f237cbc3861ae97da79c9495b4852021",
           "sizeBytes": 45056,
           "schemaVersion": 1
         }
@@ -2869,7 +2869,7 @@
         {
           "kind": "gbooks",
           "url": "https://github.com/nealt9000/Granger/releases/download/bookpacks-2026-11-20/usda-2015_en_2025-04.gbooks",
-          "sha256": "51ce803ceeff678f40e37e33477cf137aad74eb195e66d4c996ab2fdc970c5e4",
+          "sha256": "b75a670ae8fd0c198d114ea5e3d6c55bcc97ca3d6980ac1f26c07d8e3df874a5",
           "sizeBytes": 36864,
           "schemaVersion": 1
         }
@@ -81643,7 +81643,7 @@
       "language": "en",
       "shelf": "manuals",
       "provider": "Granger",
-      "license": "Public domain (US government works)",
+      "license": "Public domain",
       "description": "Whole works rebuilt to read on a phone: chapters, a contents page, pictures sized to the screen, and tables checked against the printed page.",
       "subjects": [
         "technology",
@@ -81697,6 +81697,46 @@
             "usda-2015_en/GUIDE06_HomeCan_rev0715.pdf",
             "usda-2015_en/GUIDE07_HomeCan_rev0715.pdf"
           ]
+        },
+        {
+          "id": "re-verrill-knots-1912",
+          "title": "Knots, Splices and Rope Work",
+          "author": "A. Hyatt Verrill (1912)",
+          "description": "A practical treatise on the useful and ornamental knots in common use, with chapters on splicing, pointing, seizing and serving: the whole text of the 1917 printing, with its drawings.",
+          "category": "Manuals",
+          "language": "en",
+          "sizeBytes": 1909315,
+          "sha256": "a3c1848f744d262600b2de77656475e7f5a26f283736feeeb325b18f665cb983",
+          "urls": [
+            "https://github.com/nealt9000/Granger/releases/download/editions-2026-11-20/re-verrill-knots-1912.epub"
+          ],
+          "releaseDate": "2026-11-20",
+          "license": "Public domain",
+          "collection": "granger-reading-editions",
+          "published": 1912,
+          "replaces": [
+            "zimgit-knots_en/Knots (5).pdf"
+          ]
+        },
+        {
+          "id": "re-old-virginia-recipes-1935",
+          "title": "Famous Recipes from Old Virginia",
+          "author": "The Ginter Park Woman's Club, Richmond (1935)",
+          "description": "A Richmond women's club cookbook of 1935, from early Virginia recipes to the club's own. Shown as printed, with a note at the front on its racist caricatures.",
+          "category": "Manuals",
+          "language": "en",
+          "sizeBytes": 954067,
+          "sha256": "d953f68adda0f4d7b45f72128cd90b9423686f6894a03dec7199ce4cd3f7667e",
+          "urls": [
+            "https://github.com/nealt9000/Granger/releases/download/editions-2026-11-20/re-old-virginia-recipes-1935.epub"
+          ],
+          "releaseDate": "2026-11-20",
+          "license": "Public domain (published 1935 without a copyright notice)",
+          "collection": "granger-reading-editions",
+          "published": 1935,
+          "replaces": [
+            "zimgit-food-preparation_en/Food Preparation (6).pdf"
+          ]
         }
       ],
       "presets": [
@@ -81705,7 +81745,9 @@
           "title": "Granger reading editions",
           "items": [
             "re-rigging-fm5-125",
-            "re-usda-home-canning-2015"
+            "re-usda-home-canning-2015",
+            "re-verrill-knots-1912",
+            "re-old-virginia-recipes-1935"
           ]
         }
       ]
