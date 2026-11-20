@@ -1,5 +1,6 @@
 package app.granger
 
+import app.granger.explore.Prefs
 import app.granger.core.library.open
 import app.granger.core.library.create
 import android.app.ActivityManager
@@ -724,6 +725,8 @@ class AppContainer(context: Context) {
      * interim 50 MB cache so Back and a second visit don't fetch again (builder's call 3; O2's Saved for now replaces it).
      */
     val wikimedia: app.granger.core.online.WikimediaClient by lazy {
+        // Shared timings (Plan I3) log in debug builds only, as Perf did before it moved.
+        if (BuildConfig.DEBUG) app.granger.Perf.log = { android.util.Log.d(app.granger.Perf.TAG, it) }
         // The shared online code (Plan I1) logs as the app's did: warnings always, timings in debug builds.
         app.granger.core.online.OnlineLog.warn = { android.util.Log.w(app.granger.core.online.OnlineWikipediaArchive.TAG, it) }
         app.granger.core.online.OnlineLog.info = { if (BuildConfig.DEBUG) android.util.Log.i(app.granger.core.online.OnlineWikipediaArchive.TAG, it) }

@@ -124,6 +124,7 @@ dependencies {
     implementation(project(":core:archive"))
     implementation(project(":core:catalog"))
     implementation(project(":core:online"))
+    implementation(project(":core:screens"))
     implementation(project(":core:downloads"))
     implementation(project(":core:books"))
     implementation(project(":core:research"))

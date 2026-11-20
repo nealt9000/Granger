@@ -1,5 +1,6 @@
 package app.granger.topic
 
+import app.granger.explore.label
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -313,7 +314,7 @@ private fun Story(story: BroadStory, words: app.granger.home.YearWords, open: (T
             val year = words.year(e.year)
             Row(
                 Modifier.fillMaxWidth().heightIn(min = 48.dp)
-                    .then(if (e.opens != null) Modifier.clickable(role = Role.Button) { open(e.opens) } else Modifier)
+                    .then(e.opens?.let { opens -> Modifier.clickable(role = Role.Button) { open(opens) } } ?: Modifier)
                     .semantics(mergeDescendants = true) {},
                 horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top,
             ) {

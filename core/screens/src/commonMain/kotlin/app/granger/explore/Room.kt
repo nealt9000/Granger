@@ -1,6 +1,7 @@
 package app.granger.explore
 
 import app.granger.core.library.Facet
+import kotlinx.serialization.json.contentOrNull
 
 /**
  * A room's own parts (Plan EX round 2, D3; a room is a lens): its one-line [description]; its [finding], drawn from its
@@ -56,7 +57,7 @@ fun shareOf(part: Int, whole: Int): Share? {
 fun busiestCentury(years: LongArray): Pair<Long, Int>? {
     if (years.isEmpty()) return null
     val counts = HashMap<Long, Int>()
-    for (y in years) counts.merge(Math.floorDiv(y, 100L) * 100L, 1, Int::plus)
+    for (y in years) { val c = y.floorDiv(100L) * 100L; counts[c] = (counts[c] ?: 0) + 1 }
     return counts.entries.sortedWith(compareByDescending<Map.Entry<Long, Int>> { it.value }.thenByDescending { it.key }).first().let { it.key to it.value }
 }
 
@@ -84,13 +85,17 @@ fun romanCentury(centuryStart: Long): String {
  * tools/subjects/room_descriptions.py): read once, on first use.
  */
 class RoomDescriptions(private val read: () -> String) {
-    constructor(assets: android.content.res.AssetManager) : this({ assets.open(ASSET).bufferedReader().use { it.readText() } })
+    private val all: kotlinx.serialization.json.JsonObject by lazy {
+        runCatching { kotlinx.serialization.json.Json.parseToJsonElement(read()) as kotlinx.serialization.json.JsonObject }
+            .getOrDefault(kotlinx.serialization.json.JsonObject(emptyMap()))
+    }
 
-    private val all: org.json.JSONObject by lazy { runCatching { org.json.JSONObject(read()) }.getOrDefault(org.json.JSONObject()) }
+    private fun kotlinx.serialization.json.JsonObject.text(k: String): String =
+        (this[k] as? kotlinx.serialization.json.JsonPrimitive)?.contentOrNull.orEmpty()
 
     /** The room [key]'s (`subject.lens`) description in [language] ("es" for Spanish, else English); null when it has none. */
     fun of(key: String, language: String): String? =
-        all.optJSONObject(key)?.let { o -> o.optString(if (language == "es") "es" else "en").ifBlank { o.optString("en") }.ifBlank { null } }
+        (all[key] as? kotlinx.serialization.json.JsonObject)?.let { o -> o.text(if (language == "es") "es" else "en").ifBlank { o.text("en") }.ifBlank { null } }
 
     companion object {
         const val ASSET = "explore/rooms.json"

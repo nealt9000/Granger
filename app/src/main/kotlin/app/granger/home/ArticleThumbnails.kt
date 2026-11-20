@@ -161,7 +161,7 @@ class ArticleThumbnails(private val dir: File) {
          */
         fun candidates(html: String, articlePath: String): List<String> = ranked(html, articlePath).map { it.first }
 
-        private const val WHOLE_SUFFIX = ".w.jpg"
+        private const val WHOLE_SUFFIX = app.granger.explore.ThumbnailNames.WHOLE_SUFFIX
 
         /**
          * Whether a thumbnail made by [thumbnail] is of a drawing or an emblem (a flag, a seal, a logo, a map, a diagram):

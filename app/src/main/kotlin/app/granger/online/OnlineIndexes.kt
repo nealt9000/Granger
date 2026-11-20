@@ -107,5 +107,3 @@ class OnlineIndexes(
             records.filter { r -> r.isActive && SidecarKind.parentOf(r.itemId)?.let(OnlineSources::isOnline) == true }
     }
 }
-
-enum class IndexWait { NONE, COMING, WAITING_FOR_WIFI }

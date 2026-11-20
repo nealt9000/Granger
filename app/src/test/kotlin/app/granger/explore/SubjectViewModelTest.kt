@@ -225,7 +225,7 @@ class SubjectViewModelTest {
         assertThat(railLetter("Œdipus")).isEqualTo("O")
         assertThat(railLetter("1984 (novel)")).isEqualTo("#")
         assertThat(railLetter("\"Weird Al\" Yankovic")).isEqualTo("W")
-        val es = alphabetical(listOf("Zaragoza", "Ávila", "Bilbao", "avión").map { ExploreArticle("p", it, it) }, java.util.Locale("es"))
+        val es = alphabetical(listOf("Zaragoza", "Ávila", "Bilbao", "avión").map { ExploreArticle("p", it, it) }, "es")
         assertThat(es.map { it.title }).containsExactly("Ávila", "avión", "Bilbao", "Zaragoza").inOrder()
     }
 

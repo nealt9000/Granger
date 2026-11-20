@@ -111,6 +111,7 @@ internal fun RoomFinding.sentences(words: app.granger.home.YearWords, oldest: Bo
     // [short]: under a room's plate, one of several side by side, the oldest is a label and not a sentence.
     if (oldest) this.oldest?.let { o -> o.mark?.let { m -> parts += stringResource(if (short) R.string.explore_room_oldest_short else R.string.explore_room_oldest, o.title, words.of(m)) } }
     val share = share
+    val centuryStart = centuryStart
     if (share != null && centuryStart != null) {
         // English names a century by its years (the 1900s); Spanish counts it (el siglo XX).
         val spanish = LocalConfiguration.current.locales[0].language == "es"

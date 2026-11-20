@@ -1,9 +1,7 @@
 package app.granger.explore
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.granger.R
 import app.granger.core.library.Pack
 import app.granger.core.library.QidArticle
 import app.granger.core.library.QidIndexes
@@ -32,30 +30,31 @@ import kotlinx.coroutines.withContext
  */
 enum class Subject(
     val id: String,
-    @StringRes val label: Int,
+    /** The label's string resource name (Android maps it to `R.string`, `ExploreLabels.kt`; iOS's String Catalog keys). */
+    val labelKey: String,
     /**
      * The subject's own articles (subjects.json `namesakes`): their lead picture and opening sentence stand for the whole
      * subject on the landing (Neal, 2026-11-16: pictures chosen to represent the whole subject), first that the phone has.
      */
     val namesakes: List<Long> = emptyList(),
 ) {
-    HISTORY("history", R.string.explore_subject_history, listOf(309L)),
-    SOCIETY("society", R.string.explore_subject_society, listOf(8425L, 7163L)),
-    SCIENCE("science", R.string.explore_subject_science, listOf(336L, 395L)),
-    PLACES("places", R.string.explore_subject_places, listOf(1071L)),
-    NATURE("nature", R.string.explore_subject_nature, listOf(7860L)),
-    HEALTH("health", R.string.explore_subject_health, listOf(11190L, 12147L)),
-    TECHNOLOGY("technology", R.string.explore_subject_technology, listOf(11016L)),
-    BUSINESS("business", R.string.explore_subject_business, listOf(8134L, 159810L)),
-    ART("art", R.string.explore_subject_art, listOf(735L, 12271L)),
-    LITERATURE("literature", R.string.explore_subject_literature, listOf(8242L)),
-    MUSIC("music", R.string.explore_subject_music, listOf(638L)),
-    FILM("film", R.string.explore_subject_film, listOf(11424L, 289L)),
-    SPORTS("sports", R.string.explore_subject_sports, listOf(349L)),
-    GAMES("games", R.string.explore_subject_games, listOf(11410L)),
-    RELIGION("religion", R.string.explore_subject_religion, listOf(9174L, 5891L)),
-    LANGUAGES("languages", R.string.explore_subject_languages, listOf(315L)),
-    FOOD("food", R.string.explore_subject_food, listOf(2095L, 11451L)),
+    HISTORY("history", "explore_subject_history", listOf(309L)),
+    SOCIETY("society", "explore_subject_society", listOf(8425L, 7163L)),
+    SCIENCE("science", "explore_subject_science", listOf(336L, 395L)),
+    PLACES("places", "explore_subject_places", listOf(1071L)),
+    NATURE("nature", "explore_subject_nature", listOf(7860L)),
+    HEALTH("health", "explore_subject_health", listOf(11190L, 12147L)),
+    TECHNOLOGY("technology", "explore_subject_technology", listOf(11016L)),
+    BUSINESS("business", "explore_subject_business", listOf(8134L, 159810L)),
+    ART("art", "explore_subject_art", listOf(735L, 12271L)),
+    LITERATURE("literature", "explore_subject_literature", listOf(8242L)),
+    MUSIC("music", "explore_subject_music", listOf(638L)),
+    FILM("film", "explore_subject_film", listOf(11424L, 289L)),
+    SPORTS("sports", "explore_subject_sports", listOf(349L)),
+    GAMES("games", "explore_subject_games", listOf(11410L)),
+    RELIGION("religion", "explore_subject_religion", listOf(9174L, 5891L)),
+    LANGUAGES("languages", "explore_subject_languages", listOf(315L)),
+    FOOD("food", "explore_subject_food", listOf(2095L, 11451L)),
     ;
 
     companion object {
@@ -87,18 +86,19 @@ enum class Subject(
 enum class Era(
     val from: Long,
     val to: Long,
-    @StringRes val label: Int,
-    @StringRes val span: Int,
+    /** The name's and the span's string resource names (see [Subject.labelKey]). */
+    val labelKey: String,
+    val spanKey: String,
     /** The era's own articles (Middle Ages, 19th century…), whose picture stands for it, first that the phone has. */
     val articles: List<Long> = emptyList(),
 ) {
-    PREHISTORY(Long.MIN_VALUE / 2, -3001, R.string.explore_era_prehistory, R.string.explore_era_prehistory_span, listOf(11756L)),
-    ANCIENT(-3000, 499, R.string.explore_era_ancient, R.string.explore_era_ancient_span, listOf(41493L)),
-    MIDDLE_AGES(500, 1499, R.string.explore_era_middle_ages, R.string.explore_era_middle_ages_span, listOf(12554L)),
-    EARLY_MODERN(1500, 1799, R.string.explore_era_early_modern, R.string.explore_era_early_modern_span, listOf(5308718L)),
-    C19(1800, 1899, R.string.explore_era_c19, R.string.explore_era_c19_span, listOf(6955L)),
-    WARS(1900, 1945, R.string.explore_era_wars, R.string.explore_era_wars_span, listOf(361L, 362L)),
-    RECENT(1946, Long.MAX_VALUE / 2, R.string.explore_era_recent, R.string.explore_era_recent_span, listOf(186075L)),
+    PREHISTORY(Long.MIN_VALUE / 2, -3001, "explore_era_prehistory", "explore_era_prehistory_span", listOf(11756L)),
+    ANCIENT(-3000, 499, "explore_era_ancient", "explore_era_ancient_span", listOf(41493L)),
+    MIDDLE_AGES(500, 1499, "explore_era_middle_ages", "explore_era_middle_ages_span", listOf(12554L)),
+    EARLY_MODERN(1500, 1799, "explore_era_early_modern", "explore_era_early_modern_span", listOf(5308718L)),
+    C19(1800, 1899, "explore_era_c19", "explore_era_c19_span", listOf(6955L)),
+    WARS(1900, 1945, "explore_era_wars", "explore_era_wars_span", listOf(361L, 362L)),
+    RECENT(1946, Long.MAX_VALUE / 2, "explore_era_recent", "explore_era_recent_span", listOf(186075L)),
 }
 
 /**
@@ -223,8 +223,8 @@ fun busiestEra(eras: List<EraRow>): Pair<EraRow, Share>? {
  */
 fun featuredCandidates(day: Long, doors: Int, pool: List<ExploreArticle>, keep: Int = 8, rotation: Int = 8): List<ExploreArticle> {
     if (pool.isEmpty() || doors <= 0) return emptyList()
-    val turn = Math.floorDiv(day, minOf(doors, rotation).toLong())
-    val start = Math.floorMod(turn, pool.size.toLong()).toInt()
+    val turn = day.floorDiv(minOf(doors, rotation).toLong())
+    val start = turn.mod(pool.size.toLong()).toInt()
     return (0 until minOf(keep, pool.size)).map { pool[(start + it) % pool.size] }
 }
 
@@ -342,9 +342,8 @@ data class ArticleLook(val picture: String?, val sentence: String?)
 
 /** A picture file's width over its height, from its header only; 0 when it won't read. */
 fun ratioOf(path: String): Float = runCatching {
-    val o = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
-    android.graphics.BitmapFactory.decodeFile(path, o)
-    if (o.outWidth > 0 && o.outHeight > 0) o.outWidth.toFloat() / o.outHeight else 0f
+    val (w, h) = app.granger.screens.imageSize(path) ?: return@runCatching 0f
+    if (w > 0 && h > 0) w.toFloat() / h else 0f
 }.getOrDefault(0f)
 
 /** The first sentence of [text], at most about [max] characters (cut at a word, with an ellipsis). */
@@ -359,15 +358,15 @@ fun firstSentence(text: String, max: Int = 180): String {
 }
 
 /** Which door the landing features today: a different one of the biggest [pool] each day, the same all day. */
-fun featuredIndex(day: Long, doors: Int, pool: Int = 8): Int = if (doors <= 0) -1 else Math.floorMod(day, minOf(doors, pool).toLong()).toInt()
+fun featuredIndex(day: Long, doors: Int, pool: Int = 8): Int = if (doors <= 0) -1 else day.mod(minOf(doors, pool).toLong()).toInt()
 
 /** Explore's landing, built off the main thread whenever the packs change; null until the first build. */
 class ExploreViewModel(
     private val sources: ExploreSources,
     /** Today, as days since 1970: today's subject and topic follow it. */
-    private val today: () -> Long = { java.time.LocalDate.now().toEpochDay() },
+    private val today: () -> Long = { app.granger.screens.todayEpochDay() },
     /** The reader's language: today's spread comes from its packs when they have one. */
-    private val language: () -> String = { java.util.Locale.getDefault().language },
+    private val language: () -> String = { app.granger.screens.phoneLanguage() },
 ) : ViewModel() {
     private val state = MutableStateFlow<ExploreUi?>(null)
     val ui: StateFlow<ExploreUi?> = state.asStateFlow()
@@ -418,7 +417,7 @@ class ExploreViewModel(
     private suspend fun rebuild(list: List<Pair<Pack, String?>>) {
         val started = app.granger.Perf.now()
         // One build at a time: a second asked for meanwhile finds the first's counts already made.
-        val built = building.withLock { withContext(Dispatchers.IO) { build(list) } }
+        val built = building.withLock { withContext(app.granger.screens.ioDispatcher) { build(list) } }
         app.granger.Perf.mark("landing.build", started)
         // Unchanged since last time (pictures aside): keep what's on screen, pictures and all.
         if (state.value?.let { shown -> withoutPictures(shown) == built } == true) return
@@ -426,7 +425,7 @@ class ExploreViewModel(
         // Pictures second: the doors and eras show at once, then fill in one by one, the page's top first (all at once
         // took 10–14 s on a cold Pixel).
         filling?.cancel()
-        withContext(Dispatchers.IO) {
+        withContext(app.granger.screens.ioDispatcher) {
             withPictures(built) { ui ->
                 // Another spread asked for meanwhile stays: only the rest of the page is this pass's to fill.
                 val now = state.value
@@ -441,14 +440,14 @@ class ExploreViewModel(
         filling?.cancel()
         filling = viewModelScope.launch {
             skipped++
-            val next = withContext(Dispatchers.IO) { featuredOf(today() + skipped, shown.doors, sources.qids()) } ?: return@launch
+            val next = withContext(app.granger.screens.ioDispatcher) { featuredOf(today() + skipped, shown.doors, sources.qids()) } ?: return@launch
             state.value = (state.value ?: shown).copy(featured = next, skipped = skipped)
-            withContext(Dispatchers.IO) { spread(next) { f -> state.value?.let { ui -> if (ui.featured?.candidates == f.candidates) state.value = ui.copy(featured = f) } } }
+            withContext(app.granger.screens.ioDispatcher) { spread(next) { f -> state.value?.let { ui -> if (ui.featured?.candidates == f.candidates) state.value = ui.copy(featured = f) } } }
         }
     }
 
     /** A well-known article from anywhere in the library, at random, for Wander to start at; null without any. */
-    suspend fun wanderStart(random: Random = Random.Default): ExploreArticle? = withContext(Dispatchers.IO) {
+    suspend fun wanderStart(random: Random = Random.Default): ExploreArticle? = withContext(app.granger.screens.ioDispatcher) {
         val door = state.value?.doors?.filter { it.count > 0 }?.takeIf { it.isNotEmpty() }?.random(random) ?: return@withContext null
         sources.qids().topIn(door.subject.id, SubjectViewModel.WANDER_POOL, mainOnly = true).takeIf { it.isNotEmpty() }?.random(random)?.toExplore()
     }
@@ -478,7 +477,7 @@ class ExploreViewModel(
         if (pick != null) {
             val p = pick.second.picture
             f = f.copy(
-                article = pick.first.copy(picture = p, ratio = p?.let(::ratioOf) ?: 0f, whole = app.granger.home.ArticleThumbnails.isWhole(p)),
+                article = pick.first.copy(picture = p, ratio = p?.let(::ratioOf) ?: 0f, whole = ThumbnailNames.isWhole(p)),
                 sentence = pick.second.sentence?.let(::firstSentence),
             )
             shown(f)
@@ -506,7 +505,7 @@ class ExploreViewModel(
                     card = { packId, path -> app.granger.topic.TopicArticle(packId, path, titleOf(path), "", null) },
                     figure = { null },
                     markOf = { packId, path -> runCatching { times?.find(packId, path) }.getOrNull() },
-                    now = java.time.Year.now().value, pictures = false,
+                    now = app.granger.screens.currentYear(), pictures = false,
                 )
             }.getOrNull()
         }
@@ -575,8 +574,11 @@ class ExploreViewModel(
             .firstOrNull { it.picture != null }
         val started = app.granger.Perf.now()
         var ui = start
-        val lock = Any()
-        fun change(with: (ExploreUi) -> ExploreUi) = synchronized(lock) { ui = with(ui); shown(ui) }
+        val lock = app.granger.core.library.TryLock()
+        fun change(with: (ExploreUi) -> ExploreUi) {
+            lock.lock()
+            try { ui = with(ui); shown(ui) } finally { lock.unlock() }
+        }
         // Today's spread (its picture, large, with its opening sentence, then its figures and its counts) and the
         // subjects' pictures are read at the same time: neither waits for the other.
         kotlinx.coroutines.coroutineScope {
@@ -604,7 +606,7 @@ class ExploreViewModel(
      * The library map's ring inside [centre] (Plan EX Task 5): a subject's or an era's best-known articles, as its examples
      * are chosen, with their pictures.
      */
-    suspend fun inside(centre: MapCentre): List<ExploreArticle> = withContext(Dispatchers.IO) {
+    suspend fun inside(centre: MapCentre): List<ExploreArticle> = withContext(app.granger.screens.ioDispatcher) {
         val qids = sources.qids()
         val found = when (centre) {
             is MapCentre.OfSubject -> qids.topIn(centre.subject.id, MAP_RING + centre.subject.namesakes.size, mainOnly = true)
@@ -678,17 +680,16 @@ enum class SubjectSort { LINKED, OLDEST, AZ }
  * A, "Œdipus" is O); "#" for a digit or symbol.
  */
 fun railLetter(title: String): String {
-    val c = java.text.Normalizer.normalize(title.trimStart().take(2), java.text.Normalizer.Form.NFD)
+    val c = app.granger.core.text.decompose(title.trimStart().take(2), compat = false)
         .firstOrNull { it.isLetterOrDigit() } ?: return "#"
     if (!c.isLetter()) return "#"
     return when (val u = c.uppercaseChar()) { 'Œ' -> "O"; 'Æ' -> "A"; 'Ø' -> "O"; 'ß' -> "S"; else -> u.toString() }
 }
 
 /** [articles] in A–Z order by title, for [locale]'s alphabet, accents and case set aside (ties: path). */
-fun alphabetical(articles: List<ExploreArticle>, locale: java.util.Locale): List<ExploreArticle> {
-    val c = java.text.Collator.getInstance(locale).apply { strength = java.text.Collator.PRIMARY }
-    val keys = articles.associateWith { c.getCollationKey(it.title) }
-    return articles.sortedWith(compareBy<ExploreArticle> { keys.getValue(it) }.thenBy { it.path })
+fun alphabetical(articles: List<ExploreArticle>, language: String): List<ExploreArticle> {
+    val c = app.granger.screens.titleComparator(language)
+    return articles.sortedWith(Comparator<ExploreArticle> { a, b -> c.compare(a.title, b.title) }.thenBy { it.path })
 }
 
 /**
@@ -775,7 +776,7 @@ class SubjectViewModel(
     private val facetId: String? = null,
     private val listing: Boolean = facetId != null,
     /** The alphabet A–Z follows (the app's language). */
-    private val locale: java.util.Locale = java.util.Locale.getDefault(),
+    private val language: String = app.granger.screens.phoneLanguage(),
 ) : ViewModel() {
     private val state = MutableStateFlow<SubjectUi?>(null)
     val ui: StateFlow<SubjectUi?> = state.asStateFlow()
@@ -802,7 +803,7 @@ class SubjectViewModel(
                 val shelved = c[subject.id].orEmpty()
                 val others = packs.filterNot { sources.isWikipedia(it.first) }
                     .filter { Subject.ofDomain(it.second) == subject }.map { it.first }.sortedBy { it.title.lowercase() }
-                val first = withContext(Dispatchers.IO) {
+                val first = withContext(app.granger.screens.ioDispatcher) {
                     val qids = sources.qids()
                     val facet = facetId?.let { id -> qids.facets(subject.id).firstOrNull { it.id == id } }
                     val count = when {
@@ -814,7 +815,7 @@ class SubjectViewModel(
                     val room = if (listing && facet != null) {
                         val counts = qids.facetCounts(subject.id)
                         val (before, at, after) = neighbours(qids.facets(subject.id).filter { (counts[it.id] ?: 0) > 0 }) { it.id == facet.id }
-                        RoomUi(sources.roomDescription(facet.key, locale.language), before = before, after = after, position = at, total = counts.count { it.value > 0 }, storyPending = true)
+                        RoomUi(sources.roomDescription(facet.key, language), before = before, after = after, position = at, total = counts.count { it.value > 0 }, storyPending = true)
                     } else null
                     // The doors run in the landing's order: the subjects with anything on them, the largest first.
                     val doors = if (!listing && qids.hasSubjects) {
@@ -848,7 +849,7 @@ class SubjectViewModel(
     /** The eras (one pass over the time indexes) and In your books, after the first page shows. */
     private suspend fun details() {
         val facet = state.value?.facet
-        val (t, eras) = withContext(Dispatchers.IO) {
+        val (t, eras) = withContext(app.granger.screens.ioDispatcher) {
             val qids = sources.qids()
             val times = sources.times()
             if (!qids.hasSubjects || times.isEmpty) return@withContext null to emptyList()
@@ -862,7 +863,7 @@ class SubjectViewModel(
             return
         }
         if (t != null) findingOf(t)?.let { f -> state.value = state.value?.copy(finding = f) }
-        val shelf = withContext(Dispatchers.IO) { runCatching { inYourBooks() }.getOrDefault(emptyList()) }
+        val shelf = withContext(app.granger.screens.ioDispatcher) { runCatching { inYourBooks() }.getOrDefault(emptyList()) }
         state.value = state.value?.copy(books = shelf)
     }
 
@@ -877,16 +878,16 @@ class SubjectViewModel(
             val finding = findingOf(t)
             update { it.copy(finding = finding) }
             // Each era's best few, then its plate: the best known of them with a picture, else the best known.
-            val eras = withContext(Dispatchers.IO) {
+            val eras = withContext(app.granger.screens.ioDispatcher) {
                 Era.entries.mapNotNull { era ->
                     val best = (0 until t.size).filter { t.year[it] in era.from..era.to }.sortedWith(compareByDescending<Int> { t.rank[it] }.thenBy { t.qid[it] }).take(STORY_TRIES)
                     sources.times().marksOf(t, best).map { it.toExplore() }.takeIf { it.isNotEmpty() }
                 }
             }
-            val story = withContext(Dispatchers.IO) { eras.side { marks -> marks.asSequence().map { withPicture(it) }.firstOrNull { it.picture != null } ?: marks.first() } }
+            val story = withContext(app.granger.screens.ioDispatcher) { eras.side { marks -> marks.asSequence().map { withPicture(it) }.firstOrNull { it.picture != null } ?: marks.first() } }
             update { it.copy(story = story, storyPending = false) }
         } else update { it.copy(storyPending = false) }
-        val overlaps = withContext(Dispatchers.IO) {
+        val overlaps = withContext(app.granger.screens.ioDispatcher) {
             val qids = sources.qids()
             val mine = qids.facetSet(facet.key)
             val top = Subject.entries.flatMap { s -> qids.facets(s.id).filter { it.key != facet.key }.map { s to it } }
@@ -903,7 +904,7 @@ class SubjectViewModel(
     }
 
     /** What [t]'s dates say: the oldest dated topic and the busiest century; null with nothing dated. */
-    private suspend fun findingOf(t: SubjectTime): RoomFinding? = if (t.size == 0) null else withContext(Dispatchers.IO) {
+    private suspend fun findingOf(t: SubjectTime): RoomFinding? = if (t.size == 0) null else withContext(app.granger.screens.ioDispatcher) {
         val oldest = (0 until t.size).minWithOrNull(compareBy<Int> { t.year[it] }.thenByDescending { t.rank[it] })
         val busiest = busiestCentury(t.year)
         RoomFinding(oldest?.let { sources.times().marksOf(t, listOf(it)).firstOrNull()?.toExplore() }, t.size, busiest?.first, busiest?.second ?: 0)
@@ -915,18 +916,18 @@ class SubjectViewModel(
      */
     private suspend fun page() {
         val started = app.granger.Perf.now()
-        val own = withContext(Dispatchers.IO) {
+        val own = withContext(app.granger.screens.ioDispatcher) {
             val qids = sources.qids()
             subject.namesakes.asSequence().mapNotNull { q -> qids.articlesOf(q).firstOrNull() }
                 .mapNotNull { a -> runCatching { sources.look(a.packId, a.path) }.getOrNull()?.let { a to it } }.firstOrNull { it.second.picture != null }
         }
         // The opening plates: the subject's own picture leads, then its best known that have a photograph.
         val lead = own?.let { (a, look) ->
-            a.toExplore().copy(picture = look.picture, ratio = look.picture?.let(::ratioOf) ?: 0f, whole = app.granger.home.ArticleThumbnails.isWhole(look.picture))
+            a.toExplore().copy(picture = look.picture, ratio = look.picture?.let(::ratioOf) ?: 0f, whole = ThumbnailNames.isWhole(look.picture))
         }
         // The plates show together, once: a group that grew from one plate to three would change shape under the reader.
         state.value = state.value?.copy(hero = own?.second)
-        val opening = withContext(Dispatchers.IO) {
+        val opening = withContext(app.granger.screens.ioDispatcher) {
             val qids = sources.qids()
             if (!qids.hasSubjects) return@withContext listOfNotNull(lead)
             // The best known are read together; the first few with a photograph stand.
@@ -936,25 +937,25 @@ class SubjectViewModel(
         }
         state.value = state.value?.copy(opening = opening, openingPending = false)
         app.granger.Perf.mark("subject.opening", started)
-        var cards = withContext(Dispatchers.IO) {
+        var cards = withContext(app.granger.screens.ioDispatcher) {
             val qids = sources.qids()
             if (!qids.hasFacets) return@withContext emptyList()
             val counts = qids.facetCounts(subject.id)
             qids.facets(subject.id).mapNotNull { f ->
                 val n = counts[f.id] ?: 0
-                if (n == 0) null else FacetCard(f, n, qids.topInFacet(f.key, FACET_EXAMPLES).map { it.toExplore() }, description = sources.roomDescription(f.key, locale.language))
+                if (n == 0) null else FacetCard(f, n, qids.topInFacet(f.key, FACET_EXAMPLES).map { it.toExplore() }, description = sources.roomDescription(f.key, language))
             }
         }
         state.value = state.value?.copy(facets = cards, roomsPending = false)
         app.granger.Perf.mark("subject.rooms", started)
         // Read ahead, side by side: the rooms take their pictures one after another below (each avoids the ones before
         // it), and find these already read.
-        withContext(Dispatchers.IO) { cards.flatMap { it.examples }.distinctBy { it.packId to it.path }.side { a -> runCatching { sources.look(a.packId, a.path) } } }
+        withContext(app.granger.screens.ioDispatcher) { cards.flatMap { it.examples }.distinctBy { it.packId to it.path }.side { a -> runCatching { sources.look(a.packId, a.path) } } }
         // Rooms overlap (Napoleon leads Rulers and Wars): each card's picture comes from an article no earlier card, and
         // no opening plate, used. Then the room's sentence, from its dates, as its own page says it.
         val used = opening.mapTo(HashSet()) { it.path }
         for (i in cards.indices) {
-            val picture = withContext(Dispatchers.IO) {
+            val picture = withContext(app.granger.screens.ioDispatcher) {
                 val looks = cards[i].examples.asSequence().mapNotNull { a ->
                     runCatching { sources.look(a.packId, a.path) }.getOrNull()?.picture?.let { a.path to it }
                 }
@@ -962,7 +963,7 @@ class SubjectViewModel(
             }
             cards = cards.toMutableList().also { it[i] = it[i].copy(picture = picture) }
             state.value = state.value?.copy(facets = cards)
-            val finding = withContext(Dispatchers.IO) {
+            val finding = withContext(app.granger.screens.ioDispatcher) {
                 val times = app.granger.Perf.time("told.times") { sources.times() }
                 val q = app.granger.Perf.time("told.qids") { sources.qids() }
                 val set = app.granger.Perf.time("told.set") { q.facetSet(cards[i].facet.key) }
@@ -981,7 +982,7 @@ class SubjectViewModel(
     private suspend fun appendWithPictures(next: List<ExploreArticle>, total: Int, replace: Boolean = false) {
         if (replace) state.value = state.value?.copy(articles = emptyList())
         for (chunk in next.chunked(PICTURE_CHUNK)) {
-            val shown = withContext(Dispatchers.IO) { chunk.side { a -> withPicture(a) } }
+            val shown = withContext(app.granger.screens.ioDispatcher) { chunk.side { a -> withPicture(a) } }
             val all = (state.value?.articles ?: emptyList()) + shown
             state.value = state.value?.copy(articles = all, loading = false)
         }
@@ -992,7 +993,7 @@ class SubjectViewModel(
     /** [a] with its picture and that picture's shape. Blocking. */
     private fun withPicture(a: ExploreArticle): ExploreArticle {
         val p = runCatching { sources.picture(a.packId, a.path) }.getOrNull() ?: return a
-        return a.copy(picture = p, ratio = ratioOf(p), whole = app.granger.home.ArticleThumbnails.isWhole(p))
+        return a.copy(picture = p, ratio = ratioOf(p), whole = ThumbnailNames.isWhole(p))
     }
 
     /** The shelf's books whose work has this subject, best-known work first. */
@@ -1038,10 +1039,10 @@ class SubjectViewModel(
         viewing?.cancel()
         viewing = viewModelScope.launch {
             if (toAz) {
-                val all = az ?: withContext(Dispatchers.IO) {
+                val all = az ?: withContext(app.granger.screens.ioDispatcher) {
                     val qids = sources.qids()
                     val every = if (now.facet != null) qids.topInFacet(now.facet.key, now.count) else qids.topIn(subject.id, now.count)
-                    alphabetical(every.map { it.toExplore() }, locale)
+                    alphabetical(every.map { it.toExplore() }, language)
                 }.also { az = it }
                 order = null
                 azStart = 0
@@ -1051,7 +1052,7 @@ class SubjectViewModel(
                 else state.value = state.value?.copy(articles = page, more = page.size < all.size, loading = false)
                 return@launch
             }
-            val (list, page, total) = withContext(Dispatchers.IO) {
+            val (list, page, total) = withContext(app.granger.screens.ioDispatcher) {
                 val t = time
                 if (era == null && sort == SubjectSort.LINKED || t == null) {
                     Triple(null, linked(now.facet, 0), now.count)
@@ -1075,7 +1076,7 @@ class SubjectViewModel(
             val o = order
             val t = time
             val all = az.takeIf { now.sort == SubjectSort.AZ }
-            val next = withContext(Dispatchers.IO) {
+            val next = withContext(app.granger.screens.ioDispatcher) {
                 when {
                     all != null -> all.drop(azStart + now.articles.size).take(pageSize)
                     o != null && t != null -> sources.times().marksOf(t, o.drop(now.articles.size).take(pageSize)).map { it.toExplore() }
@@ -1099,7 +1100,7 @@ class SubjectViewModel(
     }
 
     /** A well-known article of this subject, at random, for Wander to start at; null without any. */
-    suspend fun wanderStart(random: Random = Random.Default): ExploreArticle? = withContext(Dispatchers.IO) {
+    suspend fun wanderStart(random: Random = Random.Default): ExploreArticle? = withContext(app.granger.screens.ioDispatcher) {
         val facet = state.value?.facet
         val pool = if (facet != null) sources.qids().topInFacet(facet.key, WANDER_POOL) else sources.qids().topIn(subject.id, WANDER_POOL, mainOnly = true)
         pool.takeIf { it.isNotEmpty() }?.random(random)?.toExplore()

@@ -85,7 +85,7 @@ object BroadTopics {
         now: Int,
         pictures: Boolean = true,
     ): BroadTopic? {
-        fun plain(at: Pair<String, String>) = TopicArticle(at.first, at.second, TopicSource.titleOf(at.second), "", null)
+        fun plain(at: Pair<String, String>) = TopicArticle(at.first, at.second, TopicTitles.titleOf(at.second), "", null)
         // The families: the largest groups, each with its kinds in order; then the kinds in no shown group.
         val named = parts.groups.withIndex().sortedByDescending { it.value.count }.take(FAMILIES).map { it.index }
         val byGroup = LinkedHashMap<Int, ArrayList<TopicArticle>>()
@@ -114,7 +114,7 @@ object BroadTopics {
                 val (p, path) = at(l.qid) ?: continue
                 val m = markOf(p, path) ?: continue
                 if (m.kind == app.granger.core.library.TimeKind.LIFE || m.y0 > now) continue
-                entries += StoryEntry(m.y0, TopicSource.titleOf(path), null, TopicArticle(p, path, TopicSource.titleOf(path), "", null))
+                entries += StoryEntry(m.y0, TopicTitles.titleOf(path), null, TopicArticle(p, path, TopicTitles.titleOf(path), "", null))
             }
             if (entries.size >= STORY_MIN) dated[s] = entries
         }
@@ -129,7 +129,7 @@ object BroadTopics {
         }
 
         val chapters = parts.sections.indices.filter { it != storyAt }.mapNotNull { s ->
-            val links = linksBySection[s].orEmpty().mapNotNull { l -> at(l.qid)?.let { (p, path) -> TopicArticle(p, path, TopicSource.titleOf(path), "", null) } }
+            val links = linksBySection[s].orEmpty().mapNotNull { l -> at(l.qid)?.let { (p, path) -> TopicArticle(p, path, TopicTitles.titleOf(path), "", null) } }
                 .take(CHAPTER_LINKS)
             if (links.size < CHAPTER_MIN) return@mapNotNull null
             val f = figuresBySection[s].orEmpty().firstNotNullOfOrNull { f -> shown(f.image)?.let { it to f.caption } }

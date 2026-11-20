@@ -41,19 +41,6 @@ data class TopicPlace(val subject: String, val room: app.granger.core.library.Fa
 /** The same subject in the other language, in an installed pack. */
 data class TopicOther(val language: String, val packId: String, val path: String, val title: String)
 
-/** What a node on the connections map is (Plan LL2 Task 5), for its colour and its filter. */
-enum class NodeKind { PERSON, EVENT, PLACE, TOPIC, BOOK }
-
-/** One closest article, as its card shows it; [kind] from the time index (a life, an event) or a place's coordinates. */
-data class TopicArticle(
-    val packId: String,
-    val path: String,
-    val title: String,
-    val blurb: String,
-    val picture: String?,
-    val kind: NodeKind = NodeKind.TOPIC,
-)
-
 /** One book near in meaning, opened at [chapter]. */
 data class TopicBook(val book: LibraryBook, val chapter: String)
 
@@ -454,6 +441,6 @@ class TopicSource(
             return s.replace(Regex("\\s+([,.;:])"), "$1").replace(Regex("\\s{2,}"), " ").trim()
         }
 
-        fun titleOf(path: String): String = app.granger.core.library.PageTitles.clean(path.substringAfterLast('/').replace('_', ' '))
+        fun titleOf(path: String): String = TopicTitles.titleOf(path)
     }
 }
