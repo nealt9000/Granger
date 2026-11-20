@@ -99,6 +99,7 @@
 ### Task 7: The topic page whole
 
 - [ ] Records: parts, rooms ("More in …"), "leads here", their time and the same time; broad topics with the quilt; Related (morelike, filtered by the records' and index's adult flags); Explore connections; Wander from here.
+- *Done 2026-11-20 for an article's page; the broad-topic spread and the quilt come with Explore (Task 9), Wander from here with Home's Wander (Task 8). `IosLibrary.topics` is the shared `TopicSource`, wired as Android's for online articles: headers and cards from the summary (pictures cached as files), the time and QID indexes, topic records by HTTP range (`RemoteRecords`, blocks in Saved for now, the catalog handed over by Swift), Related from `morelike:` without what the adult flags hide, the shared `ContentFilter`. `YearWords` and `ageOf` moved to `:core:screens` (Android passes its locale's number formats). `make_text_ids.py` now also writes `ScreenText.swift`, the English words for every string key the shared code names (subject and era labels, UiText keys). The iPhone page: trail, picture beside or above the title, mark, "287 BC – 212 BC · aged 75" with its bar, lead, Read, Keep, the other language, Their time (people with life bars, events), More in the room, Closest topics. UI test `testTopicPageWhole` (Archimedes); Android home + topic tests 181/181.*
 
 ### Task 8: Home whole
 

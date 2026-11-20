@@ -26,6 +26,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import app.granger.core.library.withoutHidden
+import app.granger.core.text.hex
+import app.granger.core.text.sha1
+import kotlinx.io.buffered
 
 /**
  * The iPhone's library (Plan I3 Task 6), wired as `GrangerApp` wires Android's: the library database, Saved for now,
@@ -45,6 +49,12 @@ class IosLibrary(
     private val savePictures: () -> Boolean,
     /** Saved for now's cap, in megabytes. */
     private val savedCapMb: () -> Long,
+    /** Keep adult topics out of suggestions (Plan AF; on by default). */
+    private val keepAdultOff: () -> Boolean = { true },
+    /** Where pictures for cards are cached (Caches/granger). */
+    private val cacheDir: String = "$dir/cache",
+    /** The app's version, for the User-Agent of the records' requests. */
+    private val appVersion: String = "ios",
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -91,6 +101,7 @@ class IosLibrary(
         val q = files.filter { it.kind == IndexKind.QID }.mapNotNull { QidIndex.open(it.path, it.source) }
         val t = files.filter { it.kind == IndexKind.TIME }.mapNotNull { TimeIndex.open(it.path, it.source) }
         indexes = if (q.isEmpty()) null else QidIndexes(q)
+        contentFilter.indexes = indexes
         times = if (t.isEmpty()) null else TimeIndexes(t)
         _version.value++
         return q.isNotEmpty() || t.isNotEmpty()
@@ -152,7 +163,86 @@ class IosLibrary(
     fun clearSaved() { saved.clear(); _version.value++ }
     /** Holds Saved for now to the cap (after the cap is lowered). */
     fun trimSaved() { saved.trim(savedCapMb() * 1024L * 1024); _version.value++ }
+
+    // ---- Topic pages (Plan I3 Task 7), wired as GrangerApp wires Android's TopicSource for online articles.
+
+    /** The adult flags as the volunteered screens apply them (Related, Explore, Home, games). */
+    val contentFilter = app.granger.core.library.ContentFilter(keepAdultOff)
+
+    /** The verified catalog, once Swift has it: the topic records' entries come from it. */
+    var catalog: Catalog? = null
+
+    private val remoteRecords = app.granger.core.online.RemoteRecords(
+        app.granger.core.online.UrlSessionFetch(userAgent = GrangerCoreEntry.userAgent(appVersion)),
+        entryFor = { lang ->
+            catalog?.packs.orEmpty().firstOrNull { it.records != null && app.granger.core.catalog.Languages.codes(it.language).firstOrNull() == lang }?.records
+        },
+        dirFolder = "$dir/records",
+        saved = object : app.granger.core.online.SavedBlocks {
+            override fun get(key: String) = saved.get(key)?.bytes
+            override fun put(key: String, bytes: ByteArray) { saved.put(key, "RECORDS", bytes, "application/octet-stream"); trimSaved() }
+            override fun remove(key: String) = saved.remove(key)
+        },
+        canFetch = gateOpen,
+    )
+
+    /** A picture of an online article cached as a file (Android's ArticleThumbnails.picture, without the resize). */
+    fun picture(lang: String, url: String): String? {
+        val name = sha1(url.encodeToByteArray()).hex()
+        val path = kotlinx.io.files.Path(cacheDir, "pictures", name)
+        if (kotlinx.io.files.SystemFileSystem.metadataOrNull(path)?.isRegularFile == true) return path.toString()
+        val item = wikipedia(lang).read(OnlineWikipediaArchive.IMG + url.substringAfter("://")) ?: return null
+        return runCatching {
+            kotlinx.io.files.SystemFileSystem.createDirectories(kotlinx.io.files.Path(cacheDir, "pictures"))
+            kotlinx.io.files.SystemFileSystem.sink(path).buffered().use { it.write(item.bytes) }
+            path.toString()
+        }.getOrNull()
+    }
+
+    private fun langOf(packId: String) = OnlineWikipediaArchive.languageOf(packId)
+
+    val topics: app.granger.topic.TopicSource = app.granger.topic.TopicSource(
+        header = { packId, path ->
+            val lang = langOf(packId) ?: return@TopicSource null
+            val s = wikipedia(lang).summary(path) ?: return@TopicSource null
+            app.granger.topic.TopicHeader(
+                app.granger.core.library.PageTitles.clean(s.title),
+                app.granger.topic.TopicSource.blurb(app.granger.home.LeadLinks.summaryOf(s.extract, 3, TOPIC_LEAD_CHARS)),
+                s.thumbnail?.let { picture(lang, it) },
+            )
+        },
+        lead = { packId, path ->
+            val lang = langOf(packId) ?: return@TopicSource null
+            val s = wikipedia(lang).summary(path) ?: return@TopicSource null
+            val thumb = if (contentFilter.noPicture(packId, path) || (s.qid?.let(contentFilter::noPicture) == true)) null else s.thumbnail?.let { picture(lang, it) }
+            app.granger.ebook.ArticleLead(app.granger.core.library.PageTitles.clean(s.title), app.granger.home.LeadLinks.summaryOf(s.extract), thumb)
+        },
+        times = { times ?: TimeIndexes(emptyList()) },
+        qids = { indexes ?: QidIndexes(emptyList()) },
+        languageOf = { id -> langOf(id) },
+        packIds = { languages().associate { OnlineWikipediaArchive.packName(it) to OnlineWikipediaArchive.packName(it) } },
+        footer = null,
+        related = { name, path, _ ->
+            val lang = langOf(name)
+            if (lang == null) app.granger.core.library.Related(emptyList(), emptyList()) else {
+                val source = OnlineWikipediaArchive.packName(lang)
+                val hits = client.related(lang, path.substringAfterLast('/'), app.granger.topic.TopicSource.SHOWN * 2)
+                    // Related is volunteered: an article the adult-content filter hides isn't offered.
+                    .filterNot { r -> r.qid?.let(contentFilter::hides) == true }
+                    .mapIndexed { i, r -> app.granger.core.library.RelatedHit(app.granger.core.research.SourceKind.ARTICLE, source, r.key, 1f - i / 100f) }
+                app.granger.core.library.Related(hits, emptyList())
+            }
+        },
+        bookOf = { null },
+        libraryLanguages = { languages().toSet() },
+        prefetch = { packId, paths -> langOf(packId)?.let { wikipedia(it).prefetch(paths) } },
+        onlineQid = { packId, path -> langOf(packId)?.let { wikipedia(it).summary(path)?.qid } },
+        records = { packId, lang, qid -> remoteRecords.record(lang, qid, packId)?.withoutHidden(contentFilter.isOn) },
+    )
 }
+
+/** Topic pages, Explore and Home read through this (Plan I3 Tasks 7–9). */
+private const val TOPIC_LEAD_CHARS = 420
 
 enum class Mark { ON_PHONE, ON_PHONE_SHORTER, SAVED, NONE }
 enum class IndexKind { QID, TIME }

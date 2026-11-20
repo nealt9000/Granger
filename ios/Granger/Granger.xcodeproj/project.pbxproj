@@ -16,6 +16,7 @@
 		3A14C67A4ADC44BAECECC538 /* Core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EDFCCCB9DFC1E76B1696659 /* Core.swift */; };
 		4E0AB676333916B0E39497E4 /* ReaderHostTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9135543A15FAD4A5F44C03 /* ReaderHostTests.swift */; };
 		5D41AC1AC37D9BD306DE6818 /* GrangerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CC01381BEC958CC5134EC02 /* GrangerApp.swift */; };
+		5F34AE2BC40DB71B6A082A54 /* ScreenText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 158BC7B9A64875C539254D15 /* ScreenText.swift */; };
 		6BB8CA554BD06FFA34ADA69C /* PageBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 637D8F7666B0ACD3B15A137A /* PageBridge.swift */; };
 		711103A9DB383DCAD57C4811 /* Navigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F52092A31F49258FD75CDE1 /* Navigation.swift */; };
 		7EA68110BD41341E41AC4485 /* spectral_medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5BB0D5B0B1CFDF9D94B1CDA8 /* spectral_medium.ttf */; };
@@ -55,6 +56,7 @@
 /* Begin PBXFileReference section */
 		115B8EB413BD65B781604711 /* ZimSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZimSchemeHandler.swift; sourceTree = "<group>"; };
 		121EB01691142EB7DA202FBB /* SettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsScreen.swift; sourceTree = "<group>"; };
+		158BC7B9A64875C539254D15 /* ScreenText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenText.swift; sourceTree = "<group>"; };
 		1BA2587DFAACB90883863228 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		1EDFCCCB9DFC1E76B1696659 /* Core.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core.swift; sourceTree = "<group>"; };
 		2610592677DE14DFF1A87D2B /* TopicScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopicScreen.swift; sourceTree = "<group>"; };
@@ -137,6 +139,7 @@
 				2CF1F83534B602BD903DEF86 /* Library.swift */,
 				7F52092A31F49258FD75CDE1 /* Navigation.swift */,
 				C4D2722559AB140D5CDEAF7A /* Palette.swift */,
+				158BC7B9A64875C539254D15 /* ScreenText.swift */,
 				63D5F373DED5327DC509AEA8 /* Theme.swift */,
 			);
 			path = App;
@@ -408,6 +411,7 @@
 				6BB8CA554BD06FFA34ADA69C /* PageBridge.swift in Sources */,
 				FACF839114C639E9B056C5D7 /* Palette.swift in Sources */,
 				86F28AA0E11BDD43201F0381 /* ReaderScreen.swift in Sources */,
+				5F34AE2BC40DB71B6A082A54 /* ScreenText.swift in Sources */,
 				986CD1464DCB7DD384D06C83 /* SearchScreen.swift in Sources */,
 				A43B194A4C42B8FF1721640F /* SettingsScreen.swift in Sources */,
 				83E90F2F900D9DF69287B976 /* Theme.swift in Sources */,

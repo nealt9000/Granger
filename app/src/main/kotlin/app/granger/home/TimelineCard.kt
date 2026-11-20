@@ -594,63 +594,6 @@ internal fun laneColour(lane: Lane): Color {
     return Color(if (night) dark else day)
 }
 
-/** Year wording for marks, the ruler and TalkBack, in the app's language. */
-internal class YearWords(
-    private val bc: String,
-    private val circa: String,
-    private val millionAgo: String,
-    private val billionAgo: String,
-    private val rangeText: String,
-    private val living: String,
-) {
-    private fun num(n: Long) = String.format(Locale.getDefault(), "%,d", n)
-
-    /** One year: 1066, 500 BC, 10,000 BC, 65 million years ago. Years are astronomical (500 BC = -499). */
-    fun year(y: Long): String = when {
-        y > 0 -> y.toString()
-        y > -9_999 -> bc.format((1 - y).toString())     // 1500 BC, written like 1500
-        y > -999_999 -> bc.format(num(1 - y))             // 10,000 BC
-        y > -1_000_000_000 -> millionAgo.format(trim((1 - y) / 1e6))
-        else -> billionAgo.format(trim((1 - y) / 1e9))
-    }
-
-    fun tick(y: Long): String = year(y)
-
-    /** A mark's dates: a point's year, a span or lifetime's two ends, "c." for anything coarser than a year. */
-    fun of(m: TimeMark): String {
-        val a = year(rounded(m.y0, m.prec))
-        val text = when {
-            m.kind == TimeKind.POINT -> a
-            m.y1 != null -> "$a – ${year(rounded(m.y1!!, m.prec))}"
-            m.kind == TimeKind.LIFE -> living.format(a)
-            else -> a
-        }
-        return if (m.prec < 9) circa.format(text) else text
-    }
-
-    /**
-     * A year rounded to what its precision supports, as people write it: Wikidata stores "the 4th century" as 301, which
-     * reads as c. 300; 1450s as c. 1450; 1500 BC (astronomical -1499) stays 1500 BC.
-     */
-    private fun rounded(y: Long, prec: Int): Long {
-        val unit = when (prec) { 8 -> 10; 7 -> 100; 6 -> 1000; else -> return y }
-        val written = if (y > 0) y else 1L - y
-        val r = written / unit * unit
-        val w = if (r == 0L) written else r
-        return if (y > 0) w else 1 - w
-    }
-
-    fun range(from: Int, to: Int): String = rangeText.format(year(from.toLong()), year(to.toLong()))
-
-    /** 66 and 230 stay whole; 13.8 and 2.5 keep their decimal. */
-    private fun trim(v: Double): String {
-        val tenths = kotlin.math.round(v * 10) / 10
-        return if (v >= 100 || tenths == kotlin.math.floor(tenths)) num(v.roundToLong()) else String.format(Locale.getDefault(), "%.1f", tenths)
-    }
-
-    private fun Double.roundToLong(): Long = kotlin.math.round(this).toLong()
-}
-
 @Composable
 internal fun yearWords(): YearWords = YearWords(
     bc = stringResource(R.string.home_timeline_bc),
@@ -659,4 +602,6 @@ internal fun yearWords(): YearWords = YearWords(
     billionAgo = stringResource(R.string.home_timeline_billion_ago),
     rangeText = stringResource(R.string.home_timeline_range),
     living = stringResource(R.string.home_timeline_living),
+    num = { n -> String.format(Locale.getDefault(), "%,d", n) },
+    decimal = { v -> String.format(Locale.getDefault(), "%.1f", v) },
 )

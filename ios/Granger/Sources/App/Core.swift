@@ -21,7 +21,10 @@ final class Core: PageSource {
             languages: { LibraryGate.shared.languages },
             gateOpen: { KotlinBoolean(value: NetworkGate.shared.open) },
             savePictures: { KotlinBoolean(value: LibraryGate.shared.savePictures) },
-            savedCapMb: { KotlinLong(value: Int64(LibraryGate.shared.savedCapMb)) }
+            savedCapMb: { KotlinLong(value: Int64(LibraryGate.shared.savedCapMb)) },
+            keepAdultOff: { KotlinBoolean(value: LibraryGate.shared.keepAdultOff) },
+            cacheDir: FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("granger").path,
+            appVersion: version
         )
     }
 

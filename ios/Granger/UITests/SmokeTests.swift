@@ -118,6 +118,36 @@ final class SmokeTests: XCTestCase {
         XCTAssertTrue(app.buttons["keep"].waitForExistence(timeout: 10), "removed")
     }
 
+    /// The whole topic page (Plan I3 Task 7): trail, years, their time, more in the room, closest topics.
+    func testTopicPageWhole() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-debugOpen", "en:Archimedes"]
+        app.launch()
+        XCTAssertTrue(app.staticTexts["287 BC – 212 BC · aged 75"].waitForExistence(timeout: 30), "years from the time index")
+        shot(app, "topic-1")
+        let time = app.staticTexts["Their time"]
+        for _ in 0..<10 where !time.isHittable { app.scrollViews.firstMatch.swipeUp(velocity: .slow) }
+        XCTAssertTrue(time.waitForExistence(timeout: 20), "their time")
+        shot(app, "topic-2")
+        let more = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'More in '")).firstMatch
+        for _ in 0..<14 where !(more.exists && more.isHittable) { app.scrollViews.firstMatch.swipeUp(velocity: .slow) }
+        XCTAssertTrue(more.waitForExistence(timeout: 20), "more in the room")
+        shot(app, "topic-3")
+        let closest = app.staticTexts["Closest topics"]
+        for _ in 0..<14 where !(closest.exists && closest.isHittable) { app.scrollViews.firstMatch.swipeUp(velocity: .slow) }
+        XCTAssertTrue(closest.waitForExistence(timeout: 20), "closest topics")
+        app.swipeUp()
+        shot(app, "topic-4")
+    }
+
+    private func shot(_ app: XCUIApplication, _ name: String) {
+        // TEST_RUNNER_GRANGER_SHOTS=<dir> on the xcodebuild line saves the walkthrough's screenshots.
+        if let dir = ProcessInfo.processInfo.environment["GRANGER_SHOTS"] {
+            try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+            try? app.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir + "/\(name).png"))
+        }
+    }
+
     /// Landscape: the topic page and the reader lay out and stay usable sideways.
     func testLandscape() {
         let app = XCUIApplication()

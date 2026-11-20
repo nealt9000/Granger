@@ -15,7 +15,7 @@ final class AppSettings {
     var savedCapMb: Int { didSet { defaults.set(savedCapMb, forKey: Keys.savedCapMb); LibraryGate.shared.savedCapMb = savedCapMb } }
     static let capChoices = [100, 300, 1000]
     /// Keep adult topics out of suggestions (Plan AF; on by default): Explore, Home, Timeline and games leave them out.
-    var keepAdultOff: Bool { didSet { defaults.set(keepAdultOff, forKey: Keys.keepAdultOff) } }
+    var keepAdultOff: Bool { didSet { defaults.set(keepAdultOff, forKey: Keys.keepAdultOff); LibraryGate.shared.keepAdultOff = keepAdultOff } }
     /// The reader's text size, as a share of normal (Android's Aa: 80–200 %).
     var textScale: Double { didSet { defaults.set(textScale, forKey: Keys.textScale) } }
     /// Local only (Plan O3): nothing goes out while it's on.
@@ -37,6 +37,7 @@ final class AppSettings {
         LibraryGate.shared.languages = [wikiLanguage]
         LibraryGate.shared.savePictures = savePictures
         LibraryGate.shared.savedCapMb = savedCapMb
+        LibraryGate.shared.keepAdultOff = keepAdultOff
     }
 
     /// Whether a request may go out now.
@@ -86,6 +87,7 @@ final class LibraryGate: @unchecked Sendable {
     private var _languages = ["en"]
     private var _savePictures = true
     private var _savedCapMb = 300
+    private var _keepAdultOff = true
 
     var languages: [String] {
         get { lock.lock(); defer { lock.unlock() }; return _languages }
@@ -98,5 +100,9 @@ final class LibraryGate: @unchecked Sendable {
     var savedCapMb: Int {
         get { lock.lock(); defer { lock.unlock() }; return _savedCapMb }
         set { lock.lock(); _savedCapMb = newValue; lock.unlock() }
+    }
+    var keepAdultOff: Bool {
+        get { lock.lock(); defer { lock.unlock() }; return _keepAdultOff }
+        set { lock.lock(); _keepAdultOff = newValue; lock.unlock() }
     }
 }

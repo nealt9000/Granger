@@ -49,6 +49,8 @@ final class LibraryModel {
         if opened { index = .ready }
         guard allowed else { if !opened { index = .none }; return }
         guard let catalog = await loadCatalog() else { if !opened { index = .failed }; return }
+        // Topic records (Plan O6) are named by the catalog.
+        core.library.catalog = catalog
         let wanted = core.library.indexFiles(catalog: catalog, lang: lang)
         let missing = wanted.filter { w in !manifest.files.contains { $0.source == w.source && $0.sha256 == w.sha256 && $0.kind == w.kind.name } }
         guard !missing.isEmpty else { return }
