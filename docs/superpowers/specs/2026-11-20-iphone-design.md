@@ -84,8 +84,9 @@ I1 comes first and is the only plan that touches Android. I2 can start as soon a
 | A second UI kept in step with Android | all | The sharing rule (§3); iPhone builds track Android's online build, not every Android experiment |
 | The shared Mac (other sessions' Gradle and voice work) | all | One Gradle or Kotlin/Native build at a time; `-Pkotlin.compiler.execution.strategy=in-process` |
 
-## 9. Neal's calls still open
+## 9. Neal's calls (answered 2026-11-20)
 
-1. **Who holds Granger's copyright** (Neal or AETHERBOUND LLC). That decides who grants the GPLv3 §7 App Store permission (I6) and whose name goes in the licence headers.
-2. **The builder's calls above:** the tab bar (§5), a prebuilt `GrangerCore` from GitHub releases (§4), the committed Xcode project (§4), and the plan order (§6).
-3. **Bundle ID:** `app.granger` to match Android (builder's suggestion), registered under the LLC's team.
+1. **Copyright holder: AETHERBOUND LLC.** The LLC grants the GPLv3 §7 App Store permission (I6) and is the name in the licence headers and on the store listing. Neal signs for the LLC.
+2. **The builder's calls stand:** the tab bar (§5), a prebuilt `GrangerCore` from GitHub releases (§4), the committed Xcode project (§4), and the plan order (§6).
+3. **Bundle ID `app.granger`**, matching Android, registered under the LLC's team.
+4. **Apple enrolment:** organisation, AETHERBOUND LLC (D-U-N-S 150087064), Neal signing. The company website is opengranger.org if Apple accepts it, otherwise a separate LLC site Neal sets up.
