@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -59,6 +60,11 @@ class TimelineModel(
     private val debounceMillis: Long = 60L,
     /** The article to open on (packId, path), as the full screen does from Home's lens; else a random century's best known. */
     private val startAt: Pair<String, String>? = null,
+    /**
+     * Whether pictures can be fetched now (online, the privacy line seen). When it turns true, a lens with no picture asks
+     * again: a mark selected before the privacy line was OK'd showed its letter until a restart (Plan O7 call 3).
+     */
+    canFetch: kotlinx.coroutines.flow.Flow<Boolean> = kotlinx.coroutines.flow.emptyFlow(),
 ) {
     private val state = MutableStateFlow(TimelineUi(window = TimeScale.history(now), bounds = TimeScale.all(now), now = now))
     val ui: StateFlow<TimelineUi> = state.asStateFlow()
@@ -68,6 +74,25 @@ class TimelineModel(
     private var query: Job? = null
     private var pictureJob: Job? = null
     private var searchJob: Job? = null
+
+    init {
+        scope.launch {
+            var was: Boolean? = null
+            canFetch.distinctUntilChanged().collect { now ->
+                if (was == false && now) pictureAgain()
+                was = now
+            }
+        }
+    }
+
+    private fun pictureAgain() {
+        val mark = state.value.selected ?: return
+        if (state.value.picture != null) return
+        scope.launch {
+            val pic = withContext(io) { runCatching { picture(mark.packId, mark.path) }.getOrNull() } ?: return@launch
+            state.update { if (it.selected?.qid == mark.qid && it.picture == null) it.copy(picture = pic) else it }
+        }
+    }
 
     /** Loads on the first composition of the section, not at app start. */
     fun ensureStarted() {

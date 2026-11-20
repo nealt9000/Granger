@@ -130,6 +130,25 @@ class TimelineModelTest {
         assertThat(m.ui.value.lanes).isNotEmpty()
     }
 
+    @Test fun aLensWithoutAPictureGetsOneOnceThePrivacyLineIsSeen() = runTest {
+        // Plan O7 call 3: the first mark loads before OK, so its picture can't be fetched; OK brings it, no restart.
+        val io = StandardTestDispatcher(testScheduler)
+        val canFetch = kotlinx.coroutines.flow.MutableStateFlow(false)
+        val f = gtimeFile(tmp.root, "top", rows)
+        val m = TimelineModel(
+            scope = this,
+            indexes = { TimeIndexes(listOf(TimeIndex.open(f, "top")!!)) },
+            picture = { _, path -> if (canFetch.value) "/pics/$path.jpg" else null },
+            io = io, now = 2026, debounceMillis = 10, canFetch = canFetch, startAt = "top" to "United_Nations",
+        )
+        m.ensureStarted(); advanceUntilIdle()
+        val selected = m.ui.value.selected!!
+        assertThat(m.ui.value.picture).isNull()
+        canFetch.value = true; advanceUntilIdle()
+        assertThat(m.ui.value.picture).isEqualTo("/pics/${selected.path}.jpg")
+        coroutineContext[kotlinx.coroutines.Job]!!.children.forEach { it.cancel() }   // the canFetch collector never ends
+    }
+
     @Test fun lanesFilterTheMarks() = runTest {
         val m = model()
         m.ensureStarted(); advanceUntilIdle()

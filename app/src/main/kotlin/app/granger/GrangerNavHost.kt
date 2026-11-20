@@ -740,6 +740,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
         indexes = { volunteeredTimeIndexes() },
         picture = { packId, path -> volunteeredThumbnail(thumbs, packId, path) },
         startAt = startAt,
+        canFetch = kotlinx.coroutines.flow.combine(container.reach.state, container.networkPolicy.privacySeen) { r, seen -> r.online && seen },
     )
 
     // Explore (Plan EX): the QID indexes' subjects, the time indexes' eras and the packs, as Browse lists them.
