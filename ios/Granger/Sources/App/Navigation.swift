@@ -6,6 +6,8 @@ enum Route: Hashable {
     case topic(lang: String, path: String)
     /// The full article in the reader.
     case reader(lang: String, path: String, fragment: String?)
+    /// The full timeline, opened at an article when given (Show in time, Plan H5b).
+    case timeline(packId: String?, path: String?)
 }
 
 /// What the user has read lately (Android's Continue / history): the last 50 articles, newest first.

@@ -97,6 +97,7 @@ struct RootView: View {
                     switch route {
                     case let .topic(lang, p): TopicScreen(lang: lang, path: p)
                     case let .reader(lang, p, fragment): ReaderScreen(lang: lang, path: p, fragment: fragment)
+                    case let .timeline(packId, p): TimelineScreen(packId: packId, path: p)
                     }
                 }
         }

@@ -239,6 +239,109 @@ class IosLibrary(
         onlineQid = { packId, path -> langOf(packId)?.let { wikipedia(it).summary(path)?.qid } },
         records = { packId, lang, qid -> remoteRecords.record(lang, qid, packId)?.withoutHidden(contentFilter.isOn) },
     )
+
+    // ---- Home (Plan I3 Task 8): Wander, the timeline and the games, wired as GrangerNavHost wires Android's.
+
+    /** The online sources as pack rows, while they can be read (offline, Wander and the timeline walk only what opens). */
+    private fun openSources(): List<app.granger.core.library.Pack> = if (gateOpen()) languages().map(OnlineSources::row) else emptyList()
+
+    /** The time indexes a volunteered screen may use: none of an online source while the gate is shut. */
+    suspend fun volunteeredTimes(): TimeIndexes {
+        val t = times ?: return TimeIndexes(emptyList())
+        return if (gateOpen()) t else t.without(languages().map(OnlineWikipediaArchive::packName).toSet())
+    }
+
+    /** One of an archive's pictures, cached as a file; a drawing or emblem ([whole]) is named so screens don't crop it. */
+    fun archivePicture(archive: app.granger.core.zim.ZimArchive, imagePath: String, whole: Boolean): String? = runCatching {
+        val name = sha1("${archive.uuid}/$imagePath".encodeToByteArray()).hex() + if (whole) app.granger.explore.ThumbnailNames.WHOLE_SUFFIX else ".jpg"
+        val path = kotlinx.io.files.Path(cacheDir, "thumbs", name)
+        if (kotlinx.io.files.SystemFileSystem.metadataOrNull(path)?.isRegularFile == true) return@runCatching path.toString()
+        val item = archive.read(imagePath) ?: return@runCatching null
+        kotlinx.io.files.SystemFileSystem.createDirectories(kotlinx.io.files.Path(cacheDir, "thumbs"))
+        kotlinx.io.files.SystemFileSystem.sink(path).buffered().use { it.write(item.bytes) }
+        path.toString()
+    }.getOrNull()
+
+    /** An article's plate picture by the picture rule (Plan EX P0), as Android's ArticleThumbnails.thumbnail. */
+    fun thumbnail(archive: app.granger.core.zim.ZimArchive, articlePath: String, html: String): String? = runCatching {
+        app.granger.home.PlateRule.ranked(html, articlePath).asSequence()
+            .mapNotNull { (path, whole) -> archive.resolvePath(path)?.let { it to whole } }.distinctBy { it.first }
+            .take(app.granger.home.PlateRule.MAX_TRIED)
+            .firstNotNullOfOrNull { (path, whole) -> archivePicture(archive, path, whole) }
+    }.getOrNull()
+
+    /** An article's picture for a screen Granger fills by itself: the summary's online; none the adult flags leave out. */
+    fun volunteeredPicture(packId: String, path: String): String? {
+        if (contentFilter.noPicture(packId, path)) return null
+        val lang = langOf(packId) ?: return null
+        return wikipedia(lang).summary(path)?.thumbnail?.let { picture(lang, it) }
+    }
+
+    /** Title search in the online Wikipedias (Wander's start search). */
+    private fun titles(query: String): List<app.granger.core.library.SearchHit> = languages().flatMap { lang ->
+        runCatching { client.titles(lang, query, 10) }.getOrDefault(emptyList()).map {
+            app.granger.core.library.SearchHit(OnlineWikipediaArchive.packName(lang), "Wikipedia", it.key, it.title)
+        }
+    }
+
+    fun wander(): Owned<app.granger.home.WanderModel> = owned { scope ->
+        app.granger.home.WanderModel(
+            scope = scope,
+            encyclopedias = { openSources() },
+            archiveOf = { wikipedia(OnlineWikipediaArchive.languageOf(it.id) ?: "en") },
+            thumbnail = ::thumbnail,
+            titles = { titles(it) },
+            hides = contentFilter::hides,
+            noPicture = contentFilter::noPicture,
+        )
+    }
+
+    /** The timeline, opened at [packId]/[path] when given (Show in time), else a random century's best known. */
+    fun timeline(packId: String?, path: String?): Owned<app.granger.home.TimelineModel> = owned { scope ->
+        app.granger.home.TimelineModel(
+            scope = scope,
+            indexes = { volunteeredTimes() },
+            picture = { p, a -> volunteeredPicture(p, a) },
+            startAt = if (packId != null && path != null) packId to path else null,
+        )
+    }
+
+    /** Home's mixed games ([mixed]) or the Games screen's runs of one game. */
+    fun games(mixed: Boolean, start: app.granger.home.GameKind?): Owned<app.granger.home.GameModel> = owned { scope ->
+        app.granger.home.GameModel(
+            scope = scope,
+            indexes = { volunteeredTimes() },
+            picture = { p, a -> volunteeredPicture(p, a) },
+            store = gameStore,
+            mixed = mixed,
+            start = start,
+        )
+    }
+
+    private val gameStore: app.granger.home.GameStore = DefaultsGameStore("games")
+
+    private fun <T : Any> owned(make: (CoroutineScope) -> T): Owned<T> {
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+        return Owned(make(scope), scope)
+    }
+}
+
+/** A model with the scope it runs in: Swift closes it when its screen goes. */
+class Owned<T : Any>(val model: T, private val scope: CoroutineScope) {
+    fun close() = scope.coroutineContext[kotlinx.coroutines.Job]?.cancel() ?: Unit
+}
+
+/** Rounds played, the level and best runs in NSUserDefaults (Android keeps them in its prefs). */
+class DefaultsGameStore(private val prefix: String) : app.granger.home.GameStore {
+    private val d = platform.Foundation.NSUserDefaults.standardUserDefaults
+    override var played: Int
+        get() = d.integerForKey("$prefix.played").toInt()
+        set(v) = d.setInteger(v.toLong(), "$prefix.played")
+    override var level: Int
+        get() = d.integerForKey("$prefix.level").toInt()
+        set(v) = d.setInteger(v.toLong(), "$prefix.level")
+    override fun best(kind: app.granger.home.GameKind): Int = d.integerForKey("$prefix.best.${kind.name}").toInt()
+    override fun setBest(kind: app.granger.home.GameKind, score: Int) = d.setInteger(score.toLong(), "$prefix.best.${kind.name}")
 }
 
 /** Topic pages, Explore and Home read through this (Plan I3 Tasks 7–9). */

@@ -66,13 +66,12 @@ final class SmokeTests: XCTestCase {
     /// First run: nothing is fetched until the privacy line's OK; Settings' Local only stops Search going online.
     func testPrivacyLineAndLocalOnly() {
         let app = XCUIApplication()
-        app.launchArguments = ["-privacySeen", "NO", "-localOnly", "NO", "-wikiLanguage", "en"]
+        app.launchArguments = ["-privacySeen", "NO", "-localOnly", "NO", "-wikiLanguage", "en", "-homeOrder", "continue,readiness,timeline,feeds", "-homeHidden", "()"]
         app.launch()
         let ok = app.buttons["privacy-ok"]
         XCTAssertTrue(ok.waitForExistence(timeout: 10), "the privacy line on first run")
-        XCTAssertFalse(app.buttons["featured"].exists, "nothing fetched before OK")
         ok.tap()
-        XCTAssertTrue(app.buttons["featured"].waitForExistence(timeout: 20), "today's featured article after OK")
+        XCTAssertTrue(app.buttons["full-timeline"].waitForExistence(timeout: 60), "Home's timeline after OK")
 
         app.buttons["Settings"].firstMatch.tap()
         let toggle = app.switches["Local only"]
@@ -138,6 +137,28 @@ final class SmokeTests: XCTestCase {
         XCTAssertTrue(closest.waitForExistence(timeout: 20), "closest topics")
         app.swipeUp()
         shot(app, "topic-4")
+    }
+
+    /// Home (Plan I3 Task 8): the timeline card, a tap on the river selects a mark, Full timeline, Arrange Home hides it.
+    func testHomeTimelineAndArrange() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-homeOrder", "continue,readiness,timeline,feeds", "-homeHidden", "()"]
+        app.launch()
+        let full = app.buttons["full-timeline"]
+        XCTAssertTrue(full.waitForExistence(timeout: 60), "the timeline card")
+        XCTAssertTrue(app.buttons["timeline-caption"].waitForExistence(timeout: 30), "a mark selected under the river")
+        shot(app, "home-1")
+        full.tap()
+        XCTAssertTrue(app.otherElements["timeline-river"].waitForExistence(timeout: 30) || app.descendants(matching: .any)["timeline-river"].exists, "the full timeline")
+        sleep(3)
+        shot(app, "timeline-full")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["Arrange Home"].tap()
+        let toggle = app.switches["arrange-timeline"]
+        XCTAssertTrue(toggle.waitForExistence(timeout: 5))
+        toggle.switches.firstMatch.tap()
+        app.buttons["arrange-done"].tap()
+        XCTAssertFalse(app.buttons["full-timeline"].waitForExistence(timeout: 3), "hidden from Home")
     }
 
     private func shot(_ app: XCUIApplication, _ name: String) {

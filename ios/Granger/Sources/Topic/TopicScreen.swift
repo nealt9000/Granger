@@ -187,6 +187,10 @@ private struct TimeCard: View {
         let to = max(mark.end(now: now), time.people.map { $0.end(now: now) }.max() ?? mark.y0)
         let span = max(1, to - from)
         Card(title: mark.kind == .life ? "Their time" : "At the same time") {
+            NavigationLink(value: Route.timeline(packId: mark.packId, path: mark.path)) {
+                Text("Open in Timeline").font(Spectral.medium(17)).foregroundStyle(palette.tertiary)
+            }
+            .accessibilityIdentifier("open-in-timeline")
             if !time.people.isEmpty {
                 Text("People whose lives overlapped").font(.subheadline).foregroundStyle(palette.onSurfaceVariant)
                 ForEach(time.people, id: \.qid) { p in

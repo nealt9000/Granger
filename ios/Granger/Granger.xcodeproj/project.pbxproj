@@ -13,6 +13,7 @@
 		2185F9611730D67D6F637BA0 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B47F986BFCA85901970F72F /* AppSettings.swift */; };
 		3178201C506534DA959D94C0 /* spectral_italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5D1EA7F9943A3EBAA55DB8EC /* spectral_italic.ttf */; };
 		3268BF9C98C507338AA3AE11 /* GrangerCoreBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7ACEC15F49FA3F03A769C7A6 /* GrangerCoreBridge.swift */; };
+		37CB475CA851E38824A30F9F /* Timeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5097D7F74D147D51E78904EE /* Timeline.swift */; };
 		3A14C67A4ADC44BAECECC538 /* Core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EDFCCCB9DFC1E76B1696659 /* Core.swift */; };
 		4E0AB676333916B0E39497E4 /* ReaderHostTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9135543A15FAD4A5F44C03 /* ReaderHostTests.swift */; };
 		5D41AC1AC37D9BD306DE6818 /* GrangerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CC01381BEC958CC5134EC02 /* GrangerApp.swift */; };
@@ -65,6 +66,7 @@
 		3CFEBB439F6DD4F3AB823245 /* Marks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Marks.swift; sourceTree = "<group>"; };
 		3F9135543A15FAD4A5F44C03 /* ReaderHostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderHostTests.swift; sourceTree = "<group>"; };
 		46D66C3FE2FAC95BCFDB9655 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
+		5097D7F74D147D51E78904EE /* Timeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timeline.swift; sourceTree = "<group>"; };
 		5BB0D5B0B1CFDF9D94B1CDA8 /* spectral_medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = spectral_medium.ttf; sourceTree = "<group>"; };
 		5BED3609E3254C4F1A860F2E /* ArticleWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticleWebView.swift; sourceTree = "<group>"; };
 		5D1EA7F9943A3EBAA55DB8EC /* spectral_italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = spectral_italic.ttf; sourceTree = "<group>"; };
@@ -213,6 +215,7 @@
 			isa = PBXGroup;
 			children = (
 				46D66C3FE2FAC95BCFDB9655 /* HomeScreen.swift */,
+				5097D7F74D147D51E78904EE /* Timeline.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -415,6 +418,7 @@
 				986CD1464DCB7DD384D06C83 /* SearchScreen.swift in Sources */,
 				A43B194A4C42B8FF1721640F /* SettingsScreen.swift in Sources */,
 				83E90F2F900D9DF69287B976 /* Theme.swift in Sources */,
+				37CB475CA851E38824A30F9F /* Timeline.swift in Sources */,
 				D133214D01E3E09DFA4D0D83 /* TopicScreen.swift in Sources */,
 				EEA786A258038C318B5E9C30 /* ZimSchemeHandler.swift in Sources */,
 			);

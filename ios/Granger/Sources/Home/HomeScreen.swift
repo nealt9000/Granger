@@ -2,16 +2,19 @@ import GrangerCoreKit
 import SafariServices
 import SwiftUI
 
-/// Home (interim, Plan I2 builder's call 2): the privacy line until it's seen, today's featured article (or the
-/// Picture of the day where the wiki's feed has no featured article), and Continue. I3 brings Android's feeds and Wander.
+/// Home as your desk (Android's Plan O3 Home): the privacy line until it's seen, the index card while the index set
+/// comes, then Continue and the Timeline in the order Arrange Home keeps (the same tokens as Android's `HomeLayout`).
+/// Ready offline and feeds join with packs (I4); Wander and the games are in Explore's Ways on, as on Android.
 struct HomeScreen: View {
     @Environment(\.core) private var core
     @Environment(\.palette) private var palette
     @Environment(AppSettings.self) private var settings
     @Environment(RecentStore.self) private var recent
     @Environment(LibraryModel.self) private var library
-    @State private var model = HomeModel()
+    @State private var arrangement = HomeArrangement()
+    @State private var timeline = TimelineHolder()
     @State private var showSettings = false
+    @State private var arranging = false
 
     var body: some View {
         ScrollView {
@@ -19,8 +22,13 @@ struct HomeScreen: View {
                 LocalOnlyBanner()
                 if !settings.privacySeen { PrivacyCard(onSettings: { showSettings = true }) }
                 if library.index == .coming { IndexCard() }
-                featured
-                if !recent.entries.isEmpty { continueSection }
+                ForEach(arrangement.shown, id: \.self) { token in
+                    switch token {
+                    case "continue": if !recent.entries.isEmpty { continueSection }
+                    case "timeline": TimelineCard(holder: timeline)
+                    default: EmptyView()
+                    }
+                }
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 32)
@@ -28,34 +36,18 @@ struct HomeScreen: View {
         .background(palette.background)
         .navigationTitle("Granger")
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button { arranging = true } label: { Image(systemName: "pencil") }.accessibilityLabel("Arrange Home")
                 Button { showSettings = true } label: { Image(systemName: "gearshape") }.accessibilityLabel("Settings")
             }
         }
         .sheet(isPresented: $showSettings) { NavigationStack { SettingsScreen() } }
-        .task(id: "\(settings.wikiLanguage)|\(settings.canFetch)") {
-            if let core { await model.load(core: core, lang: settings.wikiLanguage, allowed: settings.canFetch) }
-        }
-    }
-
-    @ViewBuilder private var featured: some View {
-        if let article = model.featured?.article {
-            NavigationLink(value: Route.topic(lang: settings.wikiLanguage, path: article.key)) {
-                Plate(eyebrow: "Today's featured article", title: article.title, text: HomeModel.firstSentence(article.extract), image: model.image)
-            }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("featured")
-        } else if let picture = model.featured?.picture {
-            Button {
-                if let page = picture.filePage.flatMap(URL.init(string:)) { ArticleWebView.Coordinator.present(SFSafariViewController(url: page)) }
-            } label: {
-                Plate(eyebrow: "Picture of the day", title: picture.description_ ?? picture.title,
-                      text: picture.artist.map { "Picture: \($0)" } ?? "", image: model.image)
-            }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("featured")
-        } else if model.loading {
-            ProgressView().frame(maxWidth: .infinity, minHeight: 200)
+        .sheet(isPresented: $arranging) { NavigationStack { ArrangeHomeScreen(arrangement: arrangement) } }
+        .task(id: "\(library.index)|\(settings.canFetch)") {
+            // The timeline starts once the index set is open (a new model then reads it).
+            guard let core, library.index == .ready else { return }
+            if timeline.model == nil || timeline.ui?.available == false { timeline = TimelineHolder() }
+            timeline.start(core: core)
         }
     }
 
@@ -79,6 +71,92 @@ struct HomeScreen: View {
                 .buttonStyle(.plain)
                 Divider()
             }
+        }
+        .accessibilityIdentifier("continue")
+    }
+}
+
+/// Home's order and what's hidden, kept as Android's `HomeLayout` tokens (UserDefaults), so sections the iPhone doesn't
+/// draw yet (Ready offline, feeds) keep their places for when it does.
+@Observable
+final class HomeArrangement {
+    /// The sections the iPhone draws today.
+    static let supported: [String] = ["continue", "timeline"]
+    private let defaults = UserDefaults.standard
+    private(set) var layout: HomeLayout
+
+    init() {
+        let order = UserDefaults.standard.string(forKey: "homeOrder")
+        let hidden = (UserDefaults.standard.stringArray(forKey: "homeHidden")).map(Set.init)
+        layout = HomeLayout.companion.decode(order: order, hidden: hidden)
+    }
+
+    /// Every drawn section in order, hidden ones included.
+    var all: [String] { layout.parts(feedIds: []).map(\.token).filter { Self.supported.contains($0) } }
+    /// What Home shows, in order.
+    var shown: [String] { layout.visible(feedIds: []).map(\.token).filter { Self.supported.contains($0) } }
+    func isHidden(_ token: String) -> Bool { layout.hidden.contains(token) }
+
+    /// Saves [order] (the drawn sections, as arranged) and [hidden]; other tokens keep their places.
+    func save(order: [String], hidden: Set<String>) {
+        var next = order.makeIterator()
+        let merged = layout.order.map { Self.supported.contains($0) ? (next.next() ?? $0) : $0 }
+        layout = HomeLayout(order: merged, hidden: hidden.union(layout.hidden.subtracting(Self.supported)))
+        defaults.set(layout.order.joined(separator: ","), forKey: "homeOrder")
+        defaults.set(Array(layout.hidden), forKey: "homeHidden")
+    }
+
+    func reset() {
+        layout = HomeLayout(order: HomeLayout.companion.DEFAULT, hidden: [])
+        defaults.removeObject(forKey: "homeOrder")
+        defaults.removeObject(forKey: "homeHidden")
+    }
+}
+
+/// Arrange Home (Plan HY): every section as a row, dragged by its handle and switched off to hide it. Nothing is saved
+/// until Done; Reset puts back the default.
+struct ArrangeHomeScreen: View {
+    let arrangement: HomeArrangement
+    @Environment(\.dismiss) private var dismiss
+    @State private var order: [String] = []
+    @State private var hidden: Set<String> = []
+
+    var body: some View {
+        List {
+            Section {
+                ForEach(order, id: \.self) { token in
+                    Toggle(isOn: Binding(get: { !hidden.contains(token) }, set: { on in if on { hidden.remove(token) } else { hidden.insert(token) } })) {
+                        Text(Self.name(token)).font(Spectral.regular(18))
+                    }
+                    .accessibilityIdentifier("arrange-\(token)")
+                }
+                .onMove { order.move(fromOffsets: $0, toOffset: $1) }
+            } footer: {
+                Text("Drag a section by its handle to move it. Switch one off to hide it from Home.")
+            }
+        }
+        .environment(\.editMode, .constant(.active))
+        .navigationTitle("Arrange Home")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) { Button("Reset") { arrangement.reset(); load() } }
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Done") { arrangement.save(order: order, hidden: hidden); dismiss() }.accessibilityIdentifier("arrange-done")
+            }
+        }
+        .onAppear(perform: load)
+    }
+
+    private func load() {
+        order = arrangement.all
+        hidden = Set(order.filter(arrangement.isHidden))
+    }
+
+    static func name(_ token: String) -> String {
+        switch token {
+        case "continue": "Continue"
+        case "timeline": "Timeline"
+        default: token
         }
     }
 }
@@ -138,35 +216,6 @@ struct PrivacyCard: View {
         .padding(16)
         .background(palette.surfaceContainer, in: RoundedRectangle(cornerRadius: 12))
         .padding(.top, 8)
-    }
-}
-
-@Observable
-final class HomeModel {
-    var featured: WikimediaClient.Featured?
-    var image: UIImage?
-    var loading = false
-
-    @MainActor
-    func load(core: Core, lang: String, allowed: Bool) async {
-        guard allowed else { featured = nil; image = nil; return }
-        loading = true
-        defer { loading = false }
-        let c = Calendar.current.dateComponents([.year, .month, .day], from: Date())
-        let client = core.client
-        let got = await background { client.featured(lang: lang, year: Int32(c.year!), month: Int32(c.month!), day: Int32(c.day!)) }
-        featured = got
-        let thumb = got?.article?.thumbnail ?? got?.picture?.thumbnail
-        image = await background {
-            guard let thumb, let p = client.picture(url: thumb) else { return nil }
-            return UIImage(data: GrangerCoreEntry.shared.bytes(of: p.first!))
-        }
-    }
-
-    /// The extract's first sentence (a plate's line).
-    static func firstSentence(_ text: String) -> String {
-        guard let r = text.range(of: #"[.!?](\s|$)"#, options: .regularExpression) else { return text }
-        return String(text[..<r.lowerBound]) + String(text[r.lowerBound])
     }
 }
 
