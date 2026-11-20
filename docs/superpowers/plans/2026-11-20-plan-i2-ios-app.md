@@ -66,7 +66,7 @@
 - [x] `WikimediaClient.featured(lang, date)`: today's featured article (`/api/rest_v1/feed/featured/YYYY/MM/DD`, its `tfa`) as a `Summary`, and the Picture of the day (`image`: thumbnail, description, Commons page) for wikis whose feed has no `tfa` (Spanish, checked 2026-11-20). `languageLinks(lang, title, to)`: the other language's title (`action=query&prop=langlinks`). Parser tests from saved JSON on both platforms.
 - [x] `GrangerCoreEntry` additions: `setZimBase`, `onlineSources(version, allowed: () -> Bool)` giving the client with a gate (nothing fetched until the privacy line is seen, nothing in Local only), `pageScript`, `onlineCss`, `headings(html)` (ids and titles of h2/h3, through `ArticleText`).
 - [ ] Android unchanged: whole JVM suite passes; debug build on the Pixel 6 opens an online article (styled, pictures, links) and a pack article. Cut a new `GrangerCore` release (`tools/ios/release-core.sh --publish`) with Neal's OK; pin it. Commit.
-- *Done 2026-11-20 except the Pixel check and the release: `ReaderPage` (`ONLINE_CSS`, `TAP_SCRIPT`, `APP_PACK`) in `:core:online`; Android serves the CSS and runs the script from it (asset file removed). `ZimUrls.base` settable (Android `ANDROID_BASE`; tested with `granger-zim://zim/`); the transform's stylesheet link reads it each time. `featured` (article + `DayPicture`) and `languageLink`. `GrangerCoreEntry`: gated `wikimedia(version, allowed)`, `setZimBase`, `zimUrl`/`parseZimUrl`, `onlineCss`, `tapScript`, `onlinePackId`/`languageOfPack`, `headings` (h2/h3 from `ArticleText`), `titleOfKey`. JVM 3,846 tests, 0 failures; `:core:online` 8 and `:core:zim-api` 11 on the Simulator. **Pixel check pending:** the Pixel 6's wireless debugging dropped mid-check (2026-11-20 10:3x). **Release:** the iPhone builds against a local core while I2 runs (`GRANGER_CORE_LOCAL`, `core-local.sh`); one release is cut at the end of I2, before the merge, so the pinned framework matches main.*
+- *Done 2026-11-20 except the Pixel check and the release: `ReaderPage` (`ONLINE_CSS`, `TAP_SCRIPT`, `APP_PACK`) in `:core:online`; Android serves the CSS and runs the script from it (asset file removed). `ZimUrls.base` settable (Android `ANDROID_BASE`; tested with `granger-zim://zim/`); the transform's stylesheet link reads it each time. `featured` (article + `DayPicture`) and `languageLink`. `GrangerCoreEntry`: gated `wikimedia(version, allowed)`, `setZimBase`, `zimUrl`/`parseZimUrl`, `onlineCss`, `tapScript`, `onlinePackId`/`languageOfPack`, `headings` (h2/h3 from `ArticleText`), `titleOfKey`. JVM 3,846 tests, 0 failures; `:core:online` 8 and `:core:zim-api` 11 on the Simulator. **Pixel check passed 2026-11-20 11:13** (debug 1591): an online article fetched fresh (Kirov Oblast, 303 ms + 240 ms transform) renders fully styled with the core's online.css; online search results and a pack topic page as before. **Release:** the iPhone builds against a local core while I2 runs (`GRANGER_CORE_LOCAL`, `core-local.sh`); one release is cut at the end of I2, before the merge, so the pinned framework matches main.*
 
 ### Task 3: The web host
 
@@ -122,8 +122,8 @@
 
 ### Task 8: Close and carry on
 
-- [ ] Roadmap I1+ row (I2 done, I3 next) and the spec if anything moved.
-- [ ] Merge `i2-ios-app` to main (fast-forward after a rebase) and push (noreply check first), under Neal's standing OK for green plans (asked 2026-11-20).
+- [x] Roadmap I1+ row (I2 done, I3 next) and the spec if anything moved.
+- [x] Merge `i2-ios-app` to main (fast-forward after a rebase) and push (noreply check first), under Neal's standing OK for green plans (asked 2026-11-20).
 - [ ] Write Plan I3 and bring its builder's calls to Neal; nothing goes to friends.
 
 ## Order and size
