@@ -109,9 +109,10 @@
 
 **Files:** create `shared/` (KMP, iOS targets only); `settings.gradle.kts`.
 
-- [ ] `:shared` exports `:core:text`, `:core:research`, `:core:vectors`, `:core:catalog`, `:core:zim`, `:core:online` as the `GrangerCore` XCFramework (`iosArm64` + `iosSimulatorArm64`), static, bundle ID `app.granger.core`, minimum iOS 26.0 (spec §8.3).
-- [ ] SKIE on if Task 1 found it compatible. A small `GrangerCoreEntry` object gives Swift one place to start: build the Wikimedia client with a user agent, open the online Wikipedia archive for a language, parse and verify a catalog.
-- [ ] `./gradlew :shared:assembleGrangerCoreReleaseXCFramework` builds. Record the zipped size and the link time. Commit.
+- [x] `:shared` exports `:core:text`, `:core:research`, `:core:vectors`, `:core:catalog`, `:core:zim`, `:core:online` as the `GrangerCore` XCFramework (`iosArm64` + `iosSimulatorArm64`), static, bundle ID `app.granger.core`, minimum iOS 26.0 (spec §8.3).
+- [x] SKIE on if Task 1 found it compatible. A small `GrangerCoreEntry` object gives Swift one place to start: build the Wikimedia client with a user agent, open the online Wikipedia archive for a language, parse and verify a catalog.
+- [x] `./gradlew :shared:assembleGrangerCoreReleaseXCFramework` builds. Record the zipped size and the link time. Commit.
+- *Done 2026-11-20: `:shared` (iOS only, SKIE 0.10.16) exports `:core:text`, `:core:research`, `:core:vectors`, `:core:zim-api`, `:core:catalog-api`, `:core:online` as `GrangerCore.xcframework` (static, `app.granger.core`, MinimumOSVersion 26.0). `GrangerCoreEntry` (iosMain): `userAgent`, `wikimedia(version)` over NSURLSession, `onlineWikipedia(lang, client)`, `setCatalogVerifier` (NSData in, for CryptoKit), `parseCatalog`, `bytes`. Release build 2 min 23 s on the M2 Max; 22 MB per slice, **11.4 MB zipped**. Kotlin renames `description` properties to `description_` in Swift (NSObject clash).*
 
 ### Task 8: The link test and the dev-friend route
 
