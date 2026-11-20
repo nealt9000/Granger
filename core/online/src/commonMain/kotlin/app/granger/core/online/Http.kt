@@ -1,10 +1,29 @@
 package app.granger.core.online
 
-/** One HTTP answer: its status, body, the URL it ended at (after redirects) and its content type. */
-class HttpReply(val code: Int, val body: ByteArray, val url: String, val contentType: String?) {
+/** One HTTP answer: its status, body, the URL it ended at (after redirects), its content type and its headers. */
+class HttpReply(
+    val code: Int,
+    val body: ByteArray,
+    val url: String,
+    val contentType: String?,
+    val headers: Map<String, String> = emptyMap(),
+) {
     val ok: Boolean get() = code in 200..299
+    val isRedirect: Boolean get() = code in 300..399
     fun text(): String = body.decodeToString()
+
+    /** A header by name, any case. */
+    fun header(name: String): String? = headers.entries.firstOrNull { it.key.equals(name, ignoreCase = true) }?.value
 }
+
+/** A request beyond a plain GET (Plan I3: the topic records' Range reads and HEAD, without following redirects). */
+class HttpRequest(
+    val url: String,
+    val method: String = "GET",
+    val headers: Map<String, String> = emptyMap(),
+    val followRedirects: Boolean = true,
+    val noCache: Boolean = false,
+)
 
 /**
  * A blocking GET (Plan I1). Android passes the app's shared `OkHttpClient` ([okHttpFetch]), so its network gate (Local
@@ -13,6 +32,10 @@ class HttpReply(val code: Int, val body: ByteArray, val url: String, val content
  */
 fun interface HttpFetch {
     fun get(url: String, noCache: Boolean): HttpReply?
+
+    /** Any request; the default handles a plain GET only (both phones' fetches handle the rest). */
+    fun send(request: HttpRequest): HttpReply? =
+        if (request.method == "GET" && request.headers.isEmpty() && request.followRedirects) get(request.url, request.noCache) else null
 }
 
 /** At most [permits] calls through [through] at once per host (Wikimedia's etiquette: a few per host). */

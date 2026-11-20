@@ -29,3 +29,5 @@ actual class TryLock actual constructor() {
 
 internal actual fun openReadOnlyConnection(path: String): androidx.sqlite.SQLiteConnection =
     BundledSQLiteDriver().open(path, androidx.sqlite.driver.bundled.SQLITE_OPEN_READONLY)
+
+internal actual fun openWritableConnection(path: String): androidx.sqlite.SQLiteConnection = BundledSQLiteDriver().open(path)

@@ -68,9 +68,10 @@
 
 **Files:** `core/online` (`TopicRecords`, `RemoteRecords`, `HttpFetch` headers/HEAD/no-redirect, `SavedStore`), `core/library` (`TopicParts`, `ContentFlags` stay; records import them).
 
-- [ ] `HttpFetch.get(url, noCache, headers, followRedirects)` plus `head`; `okHttpFetch` and `UrlSessionFetch` implement them (a no-redirect `OkHttpClient` derived once; a URLSession delegate that refuses redirects).
-- [ ] `TopicRecords` (zlib and CRC32 through `expect`: `java.util.zip` / `platform.zlib`) and `RemoteRecords` (the release-URL resolution and Range reads, blocks into Saved for now) move; the app's `RecordsSource` wiring is unchanged.
-- [ ] `SavedStore` on `androidx.sqlite` and the core's file helpers; Android's `OfflineStores` keeps working. Tests move with the classes. Commit.
+- [x] `HttpFetch.get(url, noCache, headers, followRedirects)` plus `head`; `okHttpFetch` and `UrlSessionFetch` implement them (a no-redirect `OkHttpClient` derived once; a URLSession delegate that refuses redirects).
+- [x] `TopicRecords` (zlib and CRC32 through `expect`: `java.util.zip` / `platform.zlib`) and `RemoteRecords` (the release-URL resolution and Range reads, blocks into Saved for now) move; the app's `RecordsSource` wiring is unchanged.
+- [x] `SavedStore` on `androidx.sqlite` and the core's file helpers; Android's `OfflineStores` keeps working. Tests move with the classes. Commit.
+- *Done 2026-11-20, with two changes. (1) **A new `:core:records` module (JVM + iOS)** holds `TopicParts`, `ContentFlags` and the records format (`TopicRecords`, `RecordsDirectory`, `TopicRecord`), because `:core:online` (JVM) can't depend on `:core:store` (Android target); both depend on `:core:records`. zlib and CRC32 are `expect` (`java.util.zip` / iOS `platform.zlib`), `org.json` → kotlinx.serialization. `RemoteRecords` is in `:core:online` (`HttpFetch.send(HttpRequest)` with headers, HEAD, no-redirect: OkHttp's derived client on Android, a second `NSURLSession` refusing redirects on iOS; files through kotlinx-io; blocks through a `SavedBlocks` interface); the app keeps a factory with the old signature, so `GrangerApp` and `RemoteRecordsTest` are unchanged. (2) **Android's `SavedStore` doesn't move yet:** BK (another session) is editing it. The shared `SavedForNow` in `:core:store` has the identical table and file layout, used by the iPhone now; Android switches once BK lands (carried forward). Tests: records 7 JVM (moved off Robolectric) + 1 iOS over the same fixture (inflate, CRC, a corrupt block caught); `SavedForNow` on iOS (put/get/trim oldest-opened/reopen/clear); app `RemoteRecordsTest` and topic tests 36/36. Whole suite 3,846, 0 failures.*
 
 ### Task 4: `:core:screens`
 

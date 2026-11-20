@@ -3,16 +3,11 @@ package app.granger.core.library
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
 /**
  * Plan O6 Task 3: the records reader against the fixture tools/topicrecords builds (300 articles in three blocks; Q10 a
  * broad topic holding Q20, Q21 and Q22; Q30 holding Q20; Q20 with a subject, a room, coordinates, a link and a flag).
  */
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [35])
 class TopicRecordsTest {
     private fun bytes(ext: String) = javaClass.classLoader!!.getResourceAsStream("records/wikipedia_xx_test_2026-11.$ext")!!.readBytes()
     private val grec = bytes("grec")

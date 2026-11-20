@@ -32,3 +32,6 @@ internal actual fun openReadOnlyConnection(path: String): androidx.sqlite.SQLite
         prepare("PRAGMA query_only = 1").use { it.step() }
     }
 }
+
+internal actual fun openWritableConnection(path: String): androidx.sqlite.SQLiteConnection =
+    androidx.sqlite.driver.AndroidSQLiteDriver().open(path)

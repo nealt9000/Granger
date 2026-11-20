@@ -853,7 +853,7 @@ class AppContainer(context: Context) {
      * records for the language. Fetches only while online, Local only off and the privacy line seen; blocks it reads are
      * Saved for now.
      */
-    val remoteRecords: app.granger.online.RemoteRecords by lazy {
+    val remoteRecords: app.granger.core.online.RemoteRecords by lazy {
         app.granger.online.RemoteRecords(
             http,
             entryFor = { lang ->

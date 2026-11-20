@@ -17,4 +17,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Granger"
-include(":app", ":core:ai", ":core:zim", ":core:library", ":core:catalog", ":core:downloads", ":core:books", ":core:archive", ":core:research", ":core:taglib", ":core:media", ":core:player", ":core:speech", ":core:text", ":core:vectors", ":core:zim-api", ":core:catalog-api", ":core:online", ":core:store", ":shared", ":tools:chunker", ":baselineprofile")
+include(":app", ":core:ai", ":core:zim", ":core:library", ":core:catalog", ":core:downloads", ":core:books", ":core:archive", ":core:research", ":core:taglib", ":core:media", ":core:player", ":core:speech", ":core:text", ":core:vectors", ":core:zim-api", ":core:catalog-api", ":core:online", ":core:records", ":core:store", ":shared", ":tools:chunker", ":baselineprofile")

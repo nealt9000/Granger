@@ -18,6 +18,10 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(project(":core:zim-api"))
+            api(project(":core:records"))
+            api(project(":core:catalog-api"))
+            implementation(project(":core:text"))
+            implementation(libs.kotlinx.io.core)
             implementation(libs.ksoup)
             implementation(libs.kotlinx.serialization.json)
         }

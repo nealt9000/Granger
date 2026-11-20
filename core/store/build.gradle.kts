@@ -19,9 +19,11 @@ kotlin {
         commonMain.dependencies {
             api(project(":core:zim-api"))
             api(project(":core:research"))
+            api(project(":core:records"))
             api(libs.androidx.room.runtime)
             api(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.io.core)
         }
         androidMain.dependencies {
             // Sidecar files through the framework SQLite, the same engine Android used before Plan I3.

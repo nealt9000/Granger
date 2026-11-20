@@ -41,10 +41,22 @@ internal actual fun nowMillis(): Long = System.currentTimeMillis()
  * Android's [HttpFetch]: the app's one `OkHttpClient`, so its network gate (Local only), cache and User-Agent apply as
  * before Plan I1. [noCache] forces the network (a random article).
  */
-fun okHttpFetch(http: OkHttpClient): HttpFetch = HttpFetch { url, noCache ->
-    val request = Request.Builder().url(url).apply { if (noCache) cacheControl(CacheControl.FORCE_NETWORK) }.build()
-    http.newCall(request).execute().use { r ->
-        HttpReply(r.code, if (r.isSuccessful) r.body.bytes() else ByteArray(0), r.request.url.toString(), r.header("Content-Type"))
+fun okHttpFetch(http: OkHttpClient): HttpFetch = object : HttpFetch {
+    /** The same client without following redirects, for the records' signed-URL resolution; made once. */
+    private val noRedirects: OkHttpClient by lazy { http.newBuilder().followRedirects(false).followSslRedirects(false).build() }
+
+    override fun get(url: String, noCache: Boolean): HttpReply? = send(HttpRequest(url, noCache = noCache))
+
+    override fun send(request: HttpRequest): HttpReply? {
+        val builder = Request.Builder().url(request.url)
+        if (request.noCache) builder.cacheControl(CacheControl.FORCE_NETWORK)
+        request.headers.forEach { (k, v) -> builder.header(k, v) }
+        if (request.method == "HEAD") builder.head()
+        val client = if (request.followRedirects) http else noRedirects
+        return client.newCall(builder.build()).execute().use { r ->
+            val body = if (r.isSuccessful && request.method != "HEAD") r.body.bytes() else ByteArray(0)
+            HttpReply(r.code, body, r.request.url.toString(), r.header("Content-Type"), r.headers.toMap())
+        }
     }
 }
 

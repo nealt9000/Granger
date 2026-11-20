@@ -13,6 +13,12 @@ import platform.Foundation.NSMutableURLRequest
 import platform.Foundation.NSURL
 import platform.Foundation.NSURLRequestReloadIgnoringLocalCacheData
 import platform.Foundation.NSURLSession
+import platform.Foundation.NSURLSessionConfiguration
+import platform.Foundation.NSURLSessionTask
+import platform.Foundation.NSURLSessionTaskDelegateProtocol
+import platform.Foundation.NSURLRequest
+import platform.Foundation.setHTTPMethod
+import platform.darwin.NSObject
 import platform.Foundation.dataTaskWithRequest
 import platform.Foundation.timeIntervalSince1970
 import platform.Foundation.setValue
@@ -69,28 +75,49 @@ internal actual fun nowMillis(): Long = (NSDate().timeIntervalSince1970 * 1000).
 
 /**
  * iOS's [HttpFetch]: a blocking `NSURLSession` request (callers are off the main thread, as on Android). The app sets
- * the session's User-Agent; [noCache] skips the URL cache.
+ * the session's User-Agent; [noCache] skips the URL cache. Requests that mustn't follow redirects go through a second
+ * session whose delegate refuses them.
  */
 @OptIn(ExperimentalForeignApi::class)
 class UrlSessionFetch(private val session: NSURLSession = NSURLSession.sharedSession, private val userAgent: String? = null) : HttpFetch {
-    override fun get(url: String, noCache: Boolean): HttpReply? {
-        val nsUrl = NSURL.URLWithString(url) ?: return null
-        val request = NSMutableURLRequest.requestWithURL(nsUrl)
-        if (noCache) request.setCachePolicy(NSURLRequestReloadIgnoringLocalCacheData)
-        userAgent?.let { request.setValue(it, forHTTPHeaderField = "User-Agent") }
+    private val noRedirects: NSURLSession by lazy {
+        NSURLSession.sessionWithConfiguration(NSURLSessionConfiguration.defaultSessionConfiguration, NoRedirects(), null)
+    }
+
+    override fun get(url: String, noCache: Boolean): HttpReply? = send(HttpRequest(url, noCache = noCache))
+
+    override fun send(request: HttpRequest): HttpReply? {
+        val nsUrl = NSURL.URLWithString(request.url) ?: return null
+        val r = NSMutableURLRequest.requestWithURL(nsUrl)
+        r.setHTTPMethod(request.method)
+        if (request.noCache) r.setCachePolicy(NSURLRequestReloadIgnoringLocalCacheData)
+        userAgent?.let { r.setValue(it, forHTTPHeaderField = "User-Agent") }
+        request.headers.forEach { (k, v) -> r.setValue(v, forHTTPHeaderField = k) }
         var reply: HttpReply? = null
         val done = dispatch_group_create()
         dispatch_group_enter(done)
-        session.dataTaskWithRequest(request) { data, response, error ->
+        (if (request.followRedirects) session else noRedirects).dataTaskWithRequest(r) { data, response, error ->
             val http = response as? NSHTTPURLResponse
             if (error == null && http != null) {
                 val body = ByteArray(data?.length?.toInt() ?: 0)
                 if (body.isNotEmpty()) body.usePinned { memcpy(it.addressOf(0), data!!.bytes, data.length) }
-                reply = HttpReply(http.statusCode.toInt(), body, http.URL?.absoluteString ?: url, http.valueForHTTPHeaderField("Content-Type"))
+                val headers = http.allHeaderFields.entries.associate { (k, v) -> k.toString() to v.toString() }
+                reply = HttpReply(http.statusCode.toInt(), body, http.URL?.absoluteString ?: request.url, http.valueForHTTPHeaderField("Content-Type"), headers)
             }
             dispatch_group_leave(done)
         }.resume()
         dispatch_group_wait(done, DISPATCH_TIME_FOREVER)
         return reply
     }
+}
+
+/** Refuses every redirect, so the reply carries the 3xx and its Location. */
+private class NoRedirects : NSObject(), NSURLSessionTaskDelegateProtocol {
+    override fun URLSession(
+        session: NSURLSession,
+        task: NSURLSessionTask,
+        willPerformHTTPRedirection: NSHTTPURLResponse,
+        newRequest: NSURLRequest,
+        completionHandler: (NSURLRequest?) -> Unit,
+    ) = completionHandler(null)
 }
