@@ -122,6 +122,24 @@ and offering the user the option of making packs or books within packs available
 8. **Reading editions are opt-out, not opt-in.** The edition opens first; "Original scan" is one tap away.
    - Editions ship only for titles the rights pass marks safe (US government, pre-1931 or open-licence).
 
+### Neal's answers (2026-11-20)
+
+All eight are OK'd:
+- Call 1: "fine, but wondering if needed".
+- Call 5: "part of UX trouble in testing was in finding where to add things; this puts it all in front of the user, and
+  they choose what to keep vs view online".
+- Call 8: "fine for now".
+
+On the rights pass (vectors-work/readable-2026-11-17/rights.json):
+- **Superseded manuals get no reading edition.** The pack's original stays readable the traditional way, as the
+  fallback.
+- **Editions of old works with racist content carry a disclaimer before the text, and are not cut.** The first case is
+  Food (6), *Famous Recipes from Old Virginia* (1935). The disclaimer follows the practice for old films: "We don't
+  condone, nor do we censor."
+- **No editions for:**
+  - FM 21-11 (restricted-distribution page, AHA material, superseded);
+  - Military Dermatology and War Psychiatry (material reprinted with permission inside).
+
 ## 4. Tasks
 
 ### Task 0: branch and coordination
