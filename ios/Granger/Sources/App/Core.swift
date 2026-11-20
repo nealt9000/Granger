@@ -3,13 +3,26 @@ import GrangerCoreKit
 
 /// The shared Kotlin core, as the app uses it: one Wikimedia client and one online Wikipedia per language. Every call
 /// into it blocks, so screens call it through [background].
-final class Core {
+final class Core: PageSource {
     let client: WikimediaClient
     private var archives: [String: OnlineWikipediaArchive] = [:]
     private let lock = NSLock()
 
     init(version: String) {
-        client = GrangerCoreEntry.shared.wikimedia(version: version)
+        GrangerCoreEntry.shared.setZimBase(base: ZimSchemeHandler.base)
+        // The gate (Plan O5/O3): read straight from UserDefaults, since the core asks from any thread.
+        client = GrangerCoreEntry.shared.wikimedia(version: version) {
+            KotlinBoolean(value: UserDefaults.standard.bool(forKey: "privacySeen") && !UserDefaults.standard.bool(forKey: "localOnly"))
+        }
+    }
+
+    /// The online source's pack id for [lang] (`wikipedia_en_online`).
+    func pack(for lang: String) -> String { GrangerCoreEntry.shared.onlinePackId(lang: lang) }
+
+    func item(pack: String, path: String) -> (data: Data, mimeType: String)? {
+        guard let lang = GrangerCoreEntry.shared.languageOfPack(packId: pack),
+              let item = wikipedia(lang).read(path: path) else { return nil }
+        return (GrangerCoreEntry.shared.bytes(of: item.bytes), item.mimeType)
     }
 
     /// Wikipedia in [lang], read online.
