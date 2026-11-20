@@ -89,18 +89,6 @@ import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-/** What the timeline's controls do; [onShown] starts it the first time Home shows it. */
-class TimelineActions(
-    val onShown: () -> Unit = {},
-    val onToggle: (Lane) -> Unit = {},
-    val onAll: () -> Unit = {},
-    val onWindow: (TimeScale.Window) -> Unit = {},
-    val onLens: (Double) -> Unit = {},
-    val onStep: (Int) -> Unit = {},
-    val onSelect: (TimeMark) -> Unit = {},
-    val onSearch: (String) -> Unit = {},
-)
-
 private val RowHeight = 72.dp
 private val SingleRowHeight = 152.dp
 private val FullRowHeight = 120.dp

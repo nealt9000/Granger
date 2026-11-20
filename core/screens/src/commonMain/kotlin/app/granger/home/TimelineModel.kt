@@ -5,7 +5,6 @@ import app.granger.core.library.Lane
 import app.granger.core.library.TimeHistogram
 import app.granger.core.library.TimeIndexes
 import app.granger.core.library.TimeMark
-import java.time.Year
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlinx.coroutines.CoroutineDispatcher
@@ -29,14 +28,14 @@ data class TimelineUi(
     val lanes: List<Lane> = emptyList(),
     /** Lanes switched on; empty means All. */
     val on: Set<Lane> = emptySet(),
-    val window: TimeScale.Window = TimeScale.history(Year.now().value),
-    val bounds: TimeScale.Window = TimeScale.all(Year.now().value),
+    val window: TimeScale.Window = TimeScale.history(app.granger.screens.currentYear()),
+    val bounds: TimeScale.Window = TimeScale.all(app.granger.screens.currentYear()),
     /** The marks to draw: the best known from each slice of the window, plus everything near the lens. */
     val marks: List<TimeMark> = emptyList(),
     /** Every mark's start year by lane, for shading where articles are even where no dot is drawn. */
     val density: TimeHistogram = TimeHistogram.EMPTY,
     /** The latest year the phone has an article for: the river's right edge, labelled. */
-    val latest: Int = Year.now().value,
+    val latest: Int = app.granger.screens.currentYear(),
     /** The full screen's search: titles containing every word light up on the river; others dim (spec §5.2). */
     val query: String = "",
     val matches: List<TimeMark> = emptyList(),
@@ -45,7 +44,7 @@ data class TimelineUi(
     val nearby: List<TimeMark> = emptyList(),
     /** The selected article's cached thumbnail, when it has one. */
     val picture: String? = null,
-    val now: Int = Year.now().value,
+    val now: Int = app.granger.screens.currentYear(),
 )
 
 class TimelineModel(
@@ -54,9 +53,9 @@ class TimelineModel(
     private val indexes: suspend () -> TimeIndexes,
     /** A cached thumbnail for an article, or null. */
     private val picture: suspend (packId: String, path: String) -> String?,
-    private val io: CoroutineDispatcher = Dispatchers.IO,
+    private val io: CoroutineDispatcher = app.granger.screens.ioDispatcher,
     private val random: Random = Random.Default,
-    private val now: Int = Year.now().value,
+    private val now: Int = app.granger.screens.currentYear(),
     private val debounceMillis: Long = 60L,
     /** The article to open on (packId, path), as the full screen does from Home's lens; else a random century's best known. */
     private val startAt: Pair<String, String>? = null,
@@ -258,3 +257,15 @@ fun timelineActions(model: TimelineModel) = TimelineActions(
 class TimelineViewModel(make: (kotlinx.coroutines.CoroutineScope) -> TimelineModel) : androidx.lifecycle.ViewModel() {
     val model: TimelineModel = make(viewModelScope)
 }
+
+/** What the timeline's controls do; [onShown] starts it the first time Home shows it. */
+class TimelineActions(
+    val onShown: () -> Unit = {},
+    val onToggle: (Lane) -> Unit = {},
+    val onAll: () -> Unit = {},
+    val onWindow: (TimeScale.Window) -> Unit = {},
+    val onLens: (Double) -> Unit = {},
+    val onStep: (Int) -> Unit = {},
+    val onSelect: (TimeMark) -> Unit = {},
+    val onSearch: (String) -> Unit = {},
+)

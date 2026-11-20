@@ -1,11 +1,9 @@
 package app.granger.home
 
-import android.content.SharedPreferences
 import androidx.lifecycle.viewModelScope
 import app.granger.core.library.TimeIndexes
 import app.granger.core.library.TimeKind
 import app.granger.core.library.TimeMark
-import java.time.Year
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlinx.coroutines.CoroutineDispatcher
@@ -59,7 +57,7 @@ sealed interface Round {
     }
 
     /** Alive at the same time?: two lifetimes; [said] is the answer given (true = yes). */
-    data class Overlap(val a: TimeMark, val b: TimeMark, val said: Boolean? = null, val now: Int = Year.now().value) : Round {
+    data class Overlap(val a: TimeMark, val b: TimeMark, val said: Boolean? = null, val now: Int = app.granger.screens.currentYear()) : Round {
         override val kind get() = GameKind.OVERLAP
         override val marks get() = listOf(a, b)
         override val revealed get() = said != null
@@ -90,7 +88,7 @@ sealed interface Round {
  * A year's century as an index: 0 is the 1st century AD (1–100), 18 the 19th, −1 the 1st century BC, −5 the 5th BC.
  * Years are astronomical (1 BC = 0).
  */
-fun centuryOf(year: Int): Int = Math.floorDiv(year - 1, 100)
+fun centuryOf(year: Int): Int = (year - 1).floorDiv(100)
 
 /** A mark's start year as an Int: exact for the games, which deal only marks in recorded history ([GameModel.playable]). */
 val TimeMark.year: Int get() = y0.coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong()).toInt()
@@ -139,8 +137,8 @@ data class GameUi(
     val played: Int = 0,
     /** Which came first?'s level: higher is a narrower gap. */
     val level: Int = 0,
-    val latest: Int = Year.now().value,
-    val now: Int = Year.now().value,
+    val latest: Int = app.granger.screens.currentYear(),
+    val now: Int = app.granger.screens.currentYear(),
     /** The run being played on the Games screen; null on Home and on the Games screen's list. */
     val run: GameRun? = null,
     /** Each game's best run, out of [GameModel.RUN]. */
@@ -160,16 +158,9 @@ interface GameStore {
         override fun setBest(kind: GameKind, score: Int) { bests[kind] = score }
     }
 
-    class Prefs(private val prefs: SharedPreferences) : GameStore {
-        override var played: Int
-            get() = prefs.getInt("played", 0)
-            set(v) = prefs.edit().putInt("played", v).apply()
-        override var level: Int
-            get() = prefs.getInt("order_level", 0)
-            set(v) = prefs.edit().putInt("order_level", v).apply()
-        override fun best(kind: GameKind) = prefs.getInt("best_${kind.name.lowercase()}", 0)
-        override fun setBest(kind: GameKind, score: Int) = prefs.edit().putInt("best_${kind.name.lowercase()}", score).apply()
-    }
+
+
+    companion object
 }
 
 /**
@@ -183,9 +174,9 @@ class GameModel(
     private val store: GameStore = GameStore.Memory(),
     private val mixed: Boolean = true,
     start: GameKind? = null,
-    private val io: CoroutineDispatcher = Dispatchers.IO,
+    private val io: CoroutineDispatcher = app.granger.screens.ioDispatcher,
     private val random: Random = Random.Default,
-    private val now: Int = Year.now().value,
+    private val now: Int = app.granger.screens.currentYear(),
 ) {
     private val state = MutableStateFlow(
         GameUi(
