@@ -401,7 +401,7 @@ class AppContainer(context: Context) {
     val library: Library = RoomLibrary(libraryDb, KiwixZimOpener(context), packDirs, onRemoved = { bookshelf.removePackDocuments(it.id, it.name) })
         .let { room ->
             if (!Features.ONLINE) room
-            else app.granger.online.OnlineLibrary(room, if (BuildConfig.DEBUG) networkPolicy.previewNoWikipedia else kotlinx.coroutines.flow.flowOf(false)) { onlineSources.archives() }
+            else app.granger.online.OnlineLibrary(room, if (BuildConfig.DEBUG) networkPolicy.previewNoWikipedia else kotlinx.coroutines.flow.flowOf(false), online = { onlineSources.archives() }, other = { onlineSources.anyArchive(it) })
         }
     val bookshelf: Bookshelf = RoomBookshelf(
         libraryDb, bookDirs,
@@ -1158,6 +1158,9 @@ class AppContainer(context: Context) {
 
     /** The packs on the phone, then the online sources: for the places that name or pick a source of articles. */
     val knownPacks: kotlinx.coroutines.flow.Flow<List<app.granger.core.library.Pack>> by lazy { onlineSources.known(library.packs) }
+
+    /** [knownPacks], plus Granger's other online Wikipedias: what names the sources in history and Continue (Plan O7). */
+    val namedPacks: kotlinx.coroutines.flow.Flow<List<app.granger.core.library.Pack>> by lazy { onlineSources.named(library.packs) }
 
     /** [knowledgeLanguages] now, for code that reads it at a moment (an archive.org search, LibriVox's list). */
     val knowledgeNow: StateFlow<List<String>> by lazy {

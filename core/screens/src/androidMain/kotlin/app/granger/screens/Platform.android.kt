@@ -6,6 +6,8 @@ import java.util.Locale
 actual fun todayEpochDay(): Long = java.time.LocalDate.now().toEpochDay()
 actual fun currentYear(): Int = java.time.Year.now().value
 actual fun phoneLanguage(): String = Locale.getDefault().language
+actual fun languageName(language: String, inLanguage: String): String =
+    Locale.forLanguageTag(language).getDisplayLanguage(Locale.forLanguageTag(inLanguage))
 actual fun nowMillis(): Long = System.currentTimeMillis()
 
 actual fun titleComparator(language: String): Comparator<String> {

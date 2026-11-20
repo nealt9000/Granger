@@ -11,6 +11,9 @@ expect fun currentYear(): Int
 /** The phone's language ("en", "es"). */
 expect fun phoneLanguage(): String
 
+/** [language]'s name in [inLanguage] ("en" in "es" → "inglés"), as the phone names languages. */
+expect fun languageName(language: String, inLanguage: String): String
+
 /** Milliseconds since 1970. */
 expect fun nowMillis(): Long
 

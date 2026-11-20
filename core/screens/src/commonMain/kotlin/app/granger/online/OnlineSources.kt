@@ -34,9 +34,26 @@ class OnlineSources(
 
     /** The online archives by source id, for the library's `archive()`. Never blocks. */
     fun archives(): Map<String, OnlineWikipediaArchive> =
-        if (!enabled()) emptyMap() else languagesNow().associate { lang ->
-            OnlineWikipediaArchive.packName(lang) to archives.computeIfAbsent(lang) { OnlineWikipediaArchive(lang, wiki, fallback, indexRandom = { indexRandom(OnlineWikipediaArchive.packName(lang)) }, stores = stores, timings = timings) }
-        }
+        if (!enabled()) emptyMap() else languagesNow().associate { lang -> OnlineWikipediaArchive.packName(lang) to make(lang) }
+
+    private fun make(lang: String) =
+        archives.computeIfAbsent(lang) { OnlineWikipediaArchive(lang, wiki, fallback, indexRandom = { indexRandom(OnlineWikipediaArchive.packName(lang)) }, stores = stores, timings = timings) }
+
+    /**
+     * An online source's archive by id, in a knowledge language or another Wikipedia Granger reads ([LANGUAGES]): an
+     * article history or Continue holds still opens after its language stops being a knowledge language (Plan O7 call 4).
+     * Search, Explore and the index set stay with [archives].
+     */
+    fun anyArchive(packId: String): OnlineWikipediaArchive? {
+        if (!enabled()) return null
+        val lang = OnlineWikipediaArchive.languageOf(packId)?.takeIf { it in LANGUAGES || it in languagesNow() } ?: return null
+        return make(lang)
+    }
+
+    /** The packs on the phone and every online source Granger reads, for naming what history and Continue hold. */
+    fun named(installed: Flow<List<Pack>>): Flow<List<Pack>> = combine(installed, languages) { a, langs ->
+        if (!enabled()) a else a + (langs + LANGUAGES.filterNot { it in langs }).map(::row)
+    }
 
     fun archive(lang: String): OnlineWikipediaArchive? = archives()[OnlineWikipediaArchive.packName(lang)]
 
@@ -70,8 +87,18 @@ class OnlineSources(
             RegexOption.IGNORE_CASE,
         )
 
+        /** Wikipedias Granger reads online whatever the knowledge languages (Plan O7 call 4). */
+        val LANGUAGES = listOf("en", "es")
+
+        /** "Wikipedia" in the app's language; "Wikipedia (Spanish)", "Wikipedia (inglés)" in another (Plan O7 call 4). */
+        fun titleOf(lang: String, appLanguage: String = app.granger.screens.phoneLanguage()): String =
+            if (lang == appLanguage) WIKIPEDIA
+            else "$WIKIPEDIA (${app.granger.screens.languageName(lang, appLanguage)})"
+
+        private const val WIKIPEDIA = "Wikipedia" // l10n-ignore: the source's name, a brand
+
         fun row(lang: String) = Pack(
-            id = OnlineWikipediaArchive.packName(lang), filePath = "", title = "Wikipedia", description = "", // l10n-ignore: the source's name, a brand
+            id = OnlineWikipediaArchive.packName(lang), filePath = "", title = titleOf(lang), description = "",
             language = lang, date = "", sizeBytes = 0, hasFulltextIndex = true, status = PackStatus.OK, addedAt = 0,
             name = OnlineWikipediaArchive.packName(lang),
         )

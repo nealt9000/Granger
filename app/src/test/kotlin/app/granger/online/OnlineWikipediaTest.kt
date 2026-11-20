@@ -6,6 +6,7 @@ import app.granger.core.zim.LinkAction
 import app.granger.core.zim.ZimResolver
 import app.granger.core.zim.ZimUrls
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import okhttp3.OkHttpClient
 import org.jsoup.Jsoup
@@ -107,8 +108,23 @@ class OnlineWikipediaTest {
         assertThat(sources().archives().keys).containsExactly("wikipedia_en_online", "wikipedia_es_online")
         assertThat(sources(enabled = false).archives()).isEmpty()
         val row = OnlineSources.row("es")
-        assertThat(row.title).isEqualTo("Wikipedia")
+        assertThat(OnlineSources.row("en").title).isEqualTo("Wikipedia")
+        assertThat(row.title).isEqualTo("Wikipedia (Spanish)")
         assertThat(row.filePath).isEmpty()
         assertThat(app.granger.home.WanderModel.encyclopediasOf(listOf(row), listOf("es"))).containsExactly(row)
+    }
+
+    @Test fun anotherWikipediaGrangerReadsOpensAndIsNamedButStaysOutOfTheKnowledgeSources() = kotlinx.coroutines.test.runTest {
+        // Plan O7 call 4: English only as a knowledge language; an es article from history still opens online.
+        val s = sources(langs = listOf("en"))
+        assertThat(s.archives().keys).containsExactly("wikipedia_en_online")
+        assertThat(s.anyArchive("wikipedia_es_online")?.lang).isEqualTo("es")
+        assertThat(s.anyArchive("wikipedia_de_online")).isNull()
+        assertThat(sources(enabled = false, langs = listOf("en")).anyArchive("wikipedia_es_online")).isNull()
+        val named = s.named(flowOf(emptyList())).first()
+        assertThat(named.map { it.id to it.title }).containsExactly("wikipedia_en_online" to "Wikipedia", "wikipedia_es_online" to "Wikipedia (Spanish)").inOrder()
+        assertThat(s.known(flowOf(emptyList())).first().map { it.id }).containsExactly("wikipedia_en_online")
+        // In Spanish: "Wikipedia (inglés)".
+        assertThat(OnlineSources.titleOf("en", "es")).isEqualTo("Wikipedia (inglés)")
     }
 }

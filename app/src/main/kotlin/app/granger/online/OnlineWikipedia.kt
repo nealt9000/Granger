@@ -9,12 +9,14 @@ class OnlineLibrary(
     /** Debug only: hide the installed Wikipedia packs (Preview: no Wikipedia on the phone, Plan O1 Task 10). */
     hideWikipedia: kotlinx.coroutines.flow.Flow<Boolean> = kotlinx.coroutines.flow.flowOf(false),
     private val online: () -> Map<String, ZimArchive>,
+    /** An online source outside [online]: another Wikipedia Granger reads, for history and Continue (Plan O7 call 4). */
+    private val other: (packId: String) -> ZimArchive? = { null },
 ) : Library by base {
     override val packs: kotlinx.coroutines.flow.Flow<List<app.granger.core.library.Pack>> =
         kotlinx.coroutines.flow.combine(base.packs, hideWikipedia) { packs, hide -> if (hide) packs.filterNot { it.name.startsWith("wikipedia_") } else packs }
 
-    override fun archive(packId: String): ZimArchive? = online()[packId] ?: base.archive(packId)
-    override fun cachedArchive(packId: String): ZimArchive? = online()[packId] ?: base.cachedArchive(packId)
+    override fun archive(packId: String): ZimArchive? = online()[packId] ?: base.archive(packId) ?: other(packId)
+    override fun cachedArchive(packId: String): ZimArchive? = online()[packId] ?: base.cachedArchive(packId) ?: other(packId)
 }
 
 /** Plan O2's stores over the app's [SavedStore] (the shared [OfflineStores] takes the store underneath). */

@@ -574,7 +574,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
             showChats = container.askOn,
             voice = if (Features.PLAYER && Features.READ_ALOUD) container.playerHub.ui.map { it.now as? NowPlaying.Voice } else flowOf(null),
             stopVoice = { if (Features.PLAYER) container.playerHub.stopVoice() },
-            knownPacks = container.knownPacks,
+            knownPacks = container.namedPacks,
         )
     }
     val rail by railViewModel.ui.collectAsStateWithLifecycle()
@@ -1624,7 +1624,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             forgetPlays = container.playback::deleteRecentPlays,
                             readingAloud = { if (Features.PLAYER) (container.playerHub.ui.value.now as? NowPlaying.Voice)?.sourceKey else null },
                             stopVoice = { if (Features.PLAYER) container.playerHub.stopVoice() },
-                            knownPacks = container.knownPacks,
+                            knownPacks = container.namedPacks,
                         )
                     },
                     onOpenTab = ::showTab,

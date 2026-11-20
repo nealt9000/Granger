@@ -26,6 +26,9 @@ actual fun currentYear(): Int = NSCalendar.currentCalendar.component(NSCalendarU
 
 actual fun phoneLanguage(): String = NSLocale.currentLocale.languageCode
 
+actual fun languageName(language: String, inLanguage: String): String =
+    NSLocale(localeIdentifier = inLanguage).localizedStringForLanguageCode(language) ?: language
+
 actual fun nowMillis(): Long = (NSDate().timeIntervalSince1970 * 1000).toLong()
 
 @Suppress("CAST_NEVER_SUCCEEDS")
