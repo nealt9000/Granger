@@ -308,6 +308,19 @@ class HomeViewModelTest {
         assertThat((HomeViewModel.downloadsCard(summary, emptySet()) as DownloadsCard.Stopped).retriable).containsExactly("wikem", "knots")
     }
 
+    @Test fun theOnlineIndexSetStaysOffTheCard() = runTest(main.dispatcher) {
+        // Plan O7 call 5: only the index set coming down: no card; a pack too: the card counts the pack alone.
+        prefs.seeded = true
+        val indexSet = record("wikipedia_en_online.gqid", DownloadState.RUNNING)
+        downloads.list.value = listOf(indexSet)
+        val vm = viewModel()
+        testScheduler.advanceUntilIdle()
+        assertThat(vm.ui.value.downloads).isNull()
+        downloads.list.value = listOf(indexSet, record("knots", DownloadState.QUEUED))
+        testScheduler.advanceUntilIdle()
+        assertThat((vm.ui.value.downloads as DownloadsCard.Active).files).isEqualTo(1)
+    }
+
     @Test fun theCardIsGoneWhenThereIsNothingToShow() = runTest(main.dispatcher) {
         prefs.seeded = true
         downloads.list.value = listOf(record("done", DownloadState.INSTALLED))

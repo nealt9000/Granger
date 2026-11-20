@@ -183,7 +183,7 @@ class HomeViewModel(
     private val catalogIds = catalog.state.map { s -> s.catalog?.let { c -> c.items.mapTo(HashSet()) { it.id } } }
 
     private val downloadsCard = combine(downloads.records, downloads.live, dismissed, catalogIds) { records, live, closed, ids ->
-        downloadsCard(DownloadQueueSummary.of(records, live, clock()), closed, ids)
+        downloadsCard(DownloadQueueSummary.of(chosen(records), live, clock()), closed, ids)
     }.flowOn(io)
 
     /** Each OK pack's main entry, for Continue to leave out (opening an archive reads its file, so on [io]). */
@@ -313,6 +313,13 @@ class HomeViewModel(
                 .map { it.itemId }.distinct()
             return DownloadsCard.Stopped(summary.stopped.map { it.itemId }.distinct().size, retriable, keys)
         }
+
+        /**
+         * What the card counts: what was chosen to download. Wikipedia online's index set comes down quietly (spec §6) and
+         * shows in Downloads and Outfitting only (Plan O7 call 5): it made the card say "0 of 0".
+         */
+        fun chosen(records: List<app.granger.core.downloads.DownloadRecord>) =
+            records.filterNot { r -> app.granger.core.downloads.SidecarKind.parentOf(r.itemId)?.let(app.granger.online.OnlineSources::isOnline) == true }
 
         const val SETUP_GROUP = "onboarding:"
 
