@@ -116,7 +116,8 @@
 
 - [ ] The UI smoke test grows: Keep an article, Local only shows it kept, Home's Wander and timeline, Explore → room → subject → topic, a game round, Arrange Home.
 - [ ] Walkthrough with screenshots (Field, Night, Spanish, largest Dynamic Type, landscape, VoiceOver tree), side by side with the Android screens.
-- [ ] Tick the I3 rows in `ios-parity.md`; carry anything left into the roadmap. GrangerCore release if the core changed; merge and push (standing OK); write Plan I4.
+- [x] Tick the I3 rows in `ios-parity.md`; carry anything left into the roadmap. GrangerCore release if the core changed; merge and push (standing OK); write Plan I4.
+- *Done 2026-11-20. The smoke test now covers Keep and Local only, the whole topic page, Home's timeline and Arrange Home, and an Explore walk (landing, a subject, a room, Wander, a game round): 12/12 iPhone tests. Walkthrough at Night with the largest Dynamic Type found trails breaking words and a title split beside its picture; fixed (trails are one run of text; the picture goes above at accessibility sizes). Spanish Wikipedia reads (the app's own words stay English until I7). JVM suite green, bundleRelease with R8 builds. GrangerCore ios-core-2026-11-20-5 pinned; the app builds against it. Merged + pushed main f9c751f6. Parity rows ticked; what's left is named in each row (I4/I5). Plan I4 written: docs/superpowers/plans/2026-11-20-plan-i4-packs-downloads.md.*
 
 ## Order and size
 
