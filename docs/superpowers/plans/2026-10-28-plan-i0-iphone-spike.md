@@ -119,24 +119,26 @@
 
 **Files:** `spikes/i0/harness/` (a SwiftUI app, the route Neal picked in Task 5). Results §7.
 
-- [ ] **One button, "Run the tests".** It runs, in order: **libkiwix** (open a small ZIM, title search, full-text search), **EmbeddingGemma** (one query embed, cold and warm), **Piper** (the Granger voice: RTF on V0's passages, first audio), **E2B** (load, first words and tokens per second on one R5 question with its passages), then all three models loaded in turn. Each uses the runtime Task 2 picked. Plain-language progress on screen ("Step 3 of 6: the reading voice").
-- [ ] **Downloads its own test files** (models and the ZIM, about 4 GB) on first open, over Wi-Fi only, with a progress bar and resume. Nothing to copy in through Finder. Hashes checked before use. Hosted where the friend build's files come from.
-- [ ] **Records what a remote run needs:** iPhone model, iOS version, free memory and storage, `os_proc_available_memory` and peak footprint per step, thermal state, on power or not, Low Power Mode.
-- [ ] **Survives a memory kill.** Each step writes "started" before and its numbers after, to a file. If iOS kills the app, the next open says which step it died on and offers to carry on from the next one. A kill is a result, not a failure of the test.
-- [ ] **"Send results"** opens the share sheet with a short text summary and the full JSON attached, so the tester can send it by Messages or email. TestFlight's own crash reports and screenshot feedback are on as a backup.
-- [ ] **A one-page tester note** (what to do: plug in, Wi-Fi, keep the screen on, run twice, send), written for a non-developer.
-- [ ] Check the whole flow in the Simulator: downloads, every step, the kill-and-resume path (kill it mid-step with `simctl terminate`), and sending. Function only, never numbers; the Simulator has no memory limit and a different GPU path.
-- [ ] **Distribute (needs Neal's developer account):** archive, upload to App Store Connect, and add his dad as an **internal tester** (a user on Neal's team), which needs no Beta App Review. Neal OKs the upload.
-- [ ] **The run:** two runs from a freshly opened app, on power, screen on; decisions on the second run (Plan 1's rules). The tester sends both.
-- [ ] **Adopt against these rules** (the Pixel 6's bar from the friend build): E2B first words ≤ 12 s on the R5 question, Piper RTF ≤ 0.5 screen on, and no memory kill with E2B, EmbeddingGemma and Piper loaded in turn. An iPhone that misses the E2B rule is READ-tier.
+- [~] **One button, "Run the tests".** It runs, in order: **libkiwix** (open a small ZIM, title search, full-text search), **EmbeddingGemma** (one query embed, cold and warm), **Piper** (the Granger voice: RTF on V0's passages, first audio), **E2B** (load, first words and tokens per second on one R5 question with its passages), then all three models loaded in turn. Each uses the runtime Task 2 picked. Plain-language progress on screen ("Step 3 of 6: the reading voice").
+- [~] **Downloads its own test files** (models and the ZIM, about 4 GB) on first open, over Wi-Fi only, with a progress bar and resume. Nothing to copy in through Finder. Hashes checked before use. Hosted where the friend build's files come from.
+- [~] **Records what a remote run needs:** iPhone model, iOS version, free memory and storage, `os_proc_available_memory` and peak footprint per step, thermal state, on power or not, Low Power Mode.
+- [~] **Survives a memory kill.** Each step writes "started" before and its numbers after, to a file. If iOS kills the app, the next open says which step it died on and offers to carry on from the next one. A kill is a result, not a failure of the test.
+- [~] **"Send results"** opens the share sheet with a short text summary and the full JSON attached, so the tester can send it by Messages or email. TestFlight's own crash reports and screenshot feedback are on as a backup.
+- [~] **A one-page tester note** (what to do: plug in, Wi-Fi, keep the screen on, run twice, send), written for a non-developer.
+- [~] Check the whole flow in the Simulator: downloads, every step, the kill-and-resume path (kill it mid-step with `simctl terminate`), and sending. Function only, never numbers; the Simulator has no memory limit and a different GPU path.
+- [~] **Distribute (needs Neal's developer account):** archive, upload to App Store Connect, and add his dad as an **internal tester** (a user on Neal's team), which needs no Beta App Review. Neal OKs the upload.
+- [~] **The run:** two runs from a freshly opened app, on power, screen on; decisions on the second run (Plan 1's rules). The tester sends both.
+- [~] **Adopt against these rules** (the Pixel 6's bar from the friend build): E2B first words ≤ 12 s on the R5 question, Piper RTF ≤ 0.5 screen on, and no memory kill with E2B, EmbeddingGemma and Piper loaded in turn. An iPhone that misses the E2B rule is READ-tier.
+- *Dropped 2026-11-20 (Neal): Ask is off since SQ, so the harness had little left to measure; the first builds of the real app stand in. Results §7.*
 
 ### Task 8: Results and decisions
 
 **Files:** finish the results doc; modify the roadmap (the I0 row, and the I1+ row's delivers line).
 
-- [ ] Write a summary up front: the architecture recommended (A, B or C) and why, the dependencies that are drop-in, wrap or rewrite, the hardest three, the minimum iPhone and iOS, the Apple costs and review risks, and a rough size of I1+ in plans.
-- [ ] List the decisions for Neal: the architecture, the App Store / GPL answer, enrolment timing, the iPhone tiers, and what's in the first iPhone friend build versus later (CarPlay, widget, phone media, A1).
-- [ ] Once Neal decides, write the I1+ spec and split it into plans (likely I1 shared core + storage + catalog, I2 the readers, I3 Ask and the voice, I4 Listen + downloads + TestFlight). Update the roadmap rows. Then commit: `I0: the iPhone spike, results and decisions`.
+- [x] Write a summary up front: the architecture recommended (A, B or C) and why, the dependencies that are drop-in, wrap or rewrite, the hardest three, the minimum iPhone and iOS, the Apple costs and review risks, and a rough size of I1+ in plans.
+- [x] List the decisions for Neal: the architecture, the App Store / GPL answer, enrolment timing, the iPhone tiers, and what's in the first iPhone friend build versus later (CarPlay, widget, phone media, A1).
+- [x] Once Neal decides, write the I1+ spec and split it into plans (likely I1 shared core + storage + catalog, I2 the readers, I3 Ask and the voice, I4 Listen + downloads + TestFlight). Update the roadmap rows. Then commit: `I0: the iPhone spike, results and decisions`.
+- *Done 2026-11-20: results §8 (Neal: SwiftUI over a shared core; first build = online Granger plus Kiwix packs; dev friends build from GitHub; Apple side under AETHERBOUND LLC). Spec `docs/superpowers/specs/2026-11-20-iphone-design.md` with six plans I1–I6; each plan written when the one before is underway.*
 
 ## Order and size
 

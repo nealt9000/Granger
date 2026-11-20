@@ -1,6 +1,6 @@
 # I0: the iPhone spike — results
 
-Plan: `docs/superpowers/plans/2026-10-28-plan-i0-iphone-spike.md`. Desk research read 2026-10-28; every claim links its source. Sections 4 (shared core trial), 5 (UI route trial) and 7 (iPhone numbers) are pending Xcode and the iPhone 16 Plus. The summary and decisions (Task 8) are written once those land.
+Plan: `docs/superpowers/plans/2026-10-28-plan-i0-iphone-spike.md`. Desk research read 2026-10-28; every claim links its source. Sections 4 and 5 ran 2026-10-28/29; §7 was dropped and §8 holds the summary and Neal's decisions (2026-11-20).
 
 ## Desk findings at a glance (2026-10-28)
 
@@ -1132,8 +1132,43 @@ Two shells with the same content: a Library list in Field colours with Spectral,
 
 ## 7. iPhone numbers
 
-*Pending the iPhone 16 Plus.*
+**Dropped (Neal, 2026-11-20).** The harness existed mainly to time Ask (E2B) on a real iPhone, and Ask is off in the app since SQ (2026-11-10). The first iPhone builds of the real app stand in for it: the reading voice's speed, memory under the reader, and libkiwix search are watched there, on the testers' own iPhones. The ASK-tier line in §3.5 stays a desk figure until Ask comes back.
 
-## 8. Summary and decisions
+## 8. Summary and decisions (2026-11-20)
 
-*Written after Tasks 4, 5 and 7.*
+### 8.1 What changed between the spike and the decisions
+
+The spike's desk work and trials ran 2026-10-28/29. By 2026-11-20 the app had moved under it:
+
+- **Online by default (Plan O, O0–O7).** Wikipedia, Gutenberg, archive.org and LibriVox load straight from their own sites; offline means what you keep. An iPhone build is useful the moment it opens, before any pack is downloaded.
+- **Ask is off; Search comes first (SQ).** E2B, EmbeddingGemma and LiteRT-LM leave the first iPhone build. That removes §2a.3's riskiest item (LiteRT-LM's iOS backend is an early preview) and the memory tiers.
+- **`:app` grew from 25,572 to about 56,000 lines** (Explore, the topic page, Home arrange and games, the online layer, Outfitting). Under SwiftUI that's UI to redraw, so the first build's scope is the lever on cost.
+- **An LLC exists:** AETHERBOUND LLC (D-U-N-S 150087064). The App Store and TestFlight seller can be the company, not Neal's legal name (§6.1).
+
+### 8.2 Decisions (Neal, 2026-11-20)
+
+| Decision | Answer |
+| --- | --- |
+| UI route | **A: SwiftUI over a shared Kotlin core.** Neal's pick on feel (§5). The core holds the logic and as much screen state as is pure; SwiftUI draws |
+| First iPhone build | **Online Granger plus Kiwix packs:** Home, Explore, Search, the online Wikipedia reader and topic page, books (Classics, Gutenberg) in the e-book reader, read-aloud with the Granger voice, keeping articles and books for offline, and downloadable Kiwix packs read through libkiwix. Not in it: Ask, music, audiobooks and podcasts, CarPlay, the widget, speech input, games |
+| First testers | **App-developer friends who build a debug copy themselves from the public GitHub repo** (Xcode, their own Apple team). No TestFlight needed for round one |
+| App Store / TestFlight | **Neal starts the Apple side now under AETHERBOUND LLC** (organisation enrolment with the D-U-N-S number). TestFlight for the wider family follows once the build is steady |
+| Task 7 harness | **Dropped** (§7) |
+
+### 8.3 Summary
+
+- **Architecture:** a Kotlin Multiplatform core, exported as one `GrangerCore` XCFramework (SKIE for Swift-friendly enums, sealed classes, `suspend` and `Flow`), under a SwiftUI app. Android keeps using the same modules as JVM/Android targets; nothing forks.
+- **Shared (wrap or convert):** `:core:text`, `:core:research`, `:core:vectors` (proven in §4, ~160 lines of platform code); `:core:catalog` (parser, model, Ed25519 check through CryptoKit); the online layer, today in `:app/online` and `:app/topic` (~2,600 + 2,300 lines; Wikimedia client, topic records, keeping rules), moved into a new core module on Ktor; `:core:library` on **Room KMP** (one schema, one set of migrations for both phones); the download rules and readiness/Outfitting model.
+- **Native on iOS (rewrite):** the screens (SwiftUI), the web reader host (`WKWebView` + a `WKURLSchemeHandler` for `zim:` and online pages, with the same page scripts), the e-book reader over **Readium Swift**, the player over **AVFoundation** with lock-screen controls, background downloads over **URLSession**, libkiwix through **CoreKiwix.xcframework** called from Swift (Kotlin/Native can't call C++; the ZIM layer sits behind a Kotlin interface that Swift implements).
+- **Hardest three:** (1) Room KMP for the 10k-line `:core:library` with its 15 migrations (schema 17) and raw FTS4 queries; (2) the readers: Readium Swift glue (~4,300 lines of `ebook/` on Android) and the web reader's scripts and transforms under `WKWebView`; (3) background downloads of multi-GB packs (URLSession dies on a force-quit; resume needs ETag/Range, §2b.2).
+- **Minimum iPhone and iOS:** **iOS 26.0**, which reaches every iPhone from the 11 and the SE (2nd gen) (§3.5). With Ask out there is one tier; the 3 GB SE sets the memory budget (voice engine freed after a pause, one `WKWebView` at a time).
+- **Apple:** US$99 a year, organisation enrolment under AETHERBOUND LLC (the listing shows the company as seller); privacy manifest and "Data not collected" (§6.4); review risks in §6.3, of which large post-install downloads (data, not code) and the GPL question matter most.
+- **GPL:** the dev-friend round is plain GPL distribution (public source, people build it themselves), so no question arises. Before TestFlight to non-developers or the App Store: Granger's own code gets a GPLv3 §7 App Store permission from its copyright holder, and Neal asks Kiwix about CoreKiwix (and notes espeak-ng in sherpa-onnx) (§2a.1, §6.5).
+- **Size of I1+:** about six plans, sketched in the spec `docs/superpowers/specs/2026-11-20-iphone-design.md`. The first useful dev-friend build (online reader, Search, topic page) lands at the end of the second.
+
+### 8.4 Open questions carried into the spec
+
+- Navigation: Android's rail becomes an iPhone tab bar (builder's call in the spec).
+- How much screen state is shared: the spec's rule is "pure state and rules in Kotlin, Android ViewModels stay Android".
+- Whether dev friends build `GrangerCore` themselves (needs a JDK) or Xcode fetches a prebuilt one from a GitHub release (builder's call: prebuilt by default).
+- Copyright holder of Granger's code (Neal or the LLC), which decides who grants the §7 App Store permission.
