@@ -23,6 +23,7 @@
     <string name="bk_needs_internet">Necesita internet para abrir sus libros.</string>
     <string name="bk_reading_edition">Edición de lectura</string>
     <string name="bk_original_scan">Escaneo original</string>
+    <string name="bk_open_collection">Abrir la colección</string>
     <plurals name="bk_books_kept">
         <item quantity="one">%1$d de %2$s guardado</item>
         <item quantity="many">%1$d de %2$s guardados</item>

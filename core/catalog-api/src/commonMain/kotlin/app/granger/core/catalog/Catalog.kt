@@ -37,6 +37,14 @@ data class Catalog(
 
     fun item(id: String): CatalogItem? = byId[id]
 
+    /** Reading editions by the pack book each replaces (Plan BK Task 6), built once. */
+    private val editions: Map<String, BookEntry> by lazy {
+        HashMap<String, BookEntry>().apply { setBooks.forEach { b -> b.replaces.forEach { if (it !in this) put(it, b) } } }
+    }
+
+    /** The reading edition that replaces the pack book with ref [packRef] (`<pack ZIM name>/<key>`); null when none does. */
+    fun editionOf(packRef: String): BookEntry? = editions[packRef]
+
     /** The set with [id]; null when the catalog has none. */
     fun bookSet(id: String): BookSet? = bookSets.firstOrNull { it.id == id }
 
@@ -263,6 +271,12 @@ data class BookEntry(
      * `["health"]`. Empty for an untagged entry and in older catalogs. See [bookCollectionsBySubject].
      */
     val subjects: List<String> = emptyList(),
+    /**
+     * A reading edition's originals (Plan BK Task 6): the pack books it replaces, each `<pack ZIM name>/<key>`, the ref
+     * of the book's library id (`book:nautilus:zimgit-knots_en/Knots (6).pdf`). Empty for any other book, and in older
+     * catalogs.
+     */
+    val replaces: List<String> = emptyList(),
     /**
      * The [BookSet] this book is in (Plan KB2 Task 3.2), set by the parser from where the book was listed, never read
      * from the catalog; blank for a book of the top-level [Catalog.books] (Granger Classics, Clásicos Granger).

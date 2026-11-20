@@ -76,6 +76,8 @@ class CollectionViewModel(
     private val languageName: (String) -> String = app.granger.sources.KiwixList::languageName,
     /** A book set's level as its section is headed, in the app's language ("Level 2", "Nivel 2"; Plan KB2 Task 3.2). */
     private val levelName: (Int) -> String = { "Level $it" },
+    /** Plan BK: opens a reading edition (a catalog book) without keeping it; its library id, or null. */
+    private val readEdition: suspend (editionId: String) -> String? = { null },
 ) : ViewModel() {
     /** Null until loaded, and again if the collection goes away (emptied or deleted). */
     val ui: StateFlow<CollectionRow?> =
@@ -264,10 +266,28 @@ class CollectionViewModel(
     val targets: StateFlow<List<Shelf>> =
         shelves.shelves.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    /** Opens [book] in its rail tab (one per book) and returns the tab id; null, and nothing happens, unless it is readable. */
+    /**
+     * Opens [book] in its rail tab (one per book) and returns the tab id; null, and nothing happens, unless it is readable.
+     * A pack book Granger made a reading edition of opens the edition (Plan BK Task 6); [openOriginal] opens the book.
+     */
     suspend fun openBook(book: Book): Long? {
+        editionOf(book)?.let { edition ->
+            val id = readEdition(edition.id) ?: return@let
+            return sessions.openTab(id, "", edition.title)
+        }
+        return openOriginal(book)
+    }
+
+    /** Opens [book] itself, even when it has a reading edition ("Original scan"). */
+    suspend fun openOriginal(book: Book): Long? {
         if (book.status != PackStatus.OK) return null
         return sessions.openTab(book.id, "", book.title)
+    }
+
+    /** The reading edition of the pack book [book] (Plan BK Task 6), from the catalog; null for any other book. */
+    fun editionOf(book: Book): app.granger.core.catalog.BookEntry? {
+        if (book.origin != app.granger.core.library.BookOrigin.NAUTILUS && book.origin != app.granger.core.library.BookOrigin.KIWIX) return null
+        return catalog?.state?.value?.catalog?.editionOf(app.granger.core.library.PackBooks.refOf(book))
     }
 
     fun moveBook(book: Book, toCollectionId: String) {

@@ -1218,10 +1218,20 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             },
                             capBytes = { container.onlinePrefs.savedCapMb.value * 1024L * 1024 },
                             online = { container.canFetchOnline() },
+                            packHere = container.library.packs.map { packs ->
+                                val zim = container.catalog.state.value.catalog?.packs?.firstOrNull { it.id == packId }?.zimName
+                                zim != null && packs.any { it.name == zim && it.status == app.granger.core.library.PackStatus.OK }
+                            },
                         )
                     },
                     onBack = { nav.popBackStack() },
                     onOpenBook = { bookId, title -> scope.launch { showTab(container.sessions.openTab(bookId, "", title)) } },
+                    onOpenInstalled = {
+                        scope.launch {
+                            val zim = container.catalog.state.value.catalog?.packs?.firstOrNull { it.id == packId }?.zimName
+                            container.library.packs.first().firstOrNull { it.name == zim }?.let { openPackOrCollection(it.id) }
+                        }
+                    },
                 )
             }
             composable<ExploreRoute> {
@@ -1347,6 +1357,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             container.catalog, createSavedStateHandle(), container.libraryViews,
                             gutenberg = container.gutenbergShelf,
                             levelName = { appContext.getString(R.string.sources_level, it) },
+                            readEdition = { id -> container.readWithoutKeeping(id) },
                         )
                     },
                     onOpened = ::showTab,

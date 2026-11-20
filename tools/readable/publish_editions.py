@@ -79,7 +79,8 @@ def put_set(catalog, cfg, eds, today=None):
     books = [{"id": e["id"], "title": e["title"], "author": e["author"], "description": e["description"],
               "category": e["category"], "language": cfg["set"]["language"], "sizeBytes": e["sizeBytes"],
               "sha256": e["sha256"], "urls": [e["url"]], "releaseDate": today, "license": e["license"],
-              "collection": cfg["set"]["id"], "published": e.get("published", 0)} for e in eds]
+              "collection": cfg["set"]["id"], "published": e.get("published", 0),
+              "replaces": [f"{i['zimName']}/{i['key']}" for i in e["items"]]} for e in eds]
     s = dict(cfg["set"], books=books, presets=[{"id": cfg["set"]["id"], "title": cfg["set"]["title"],
                                                   "items": [b["id"] for b in books]}])
     sets = [x for x in catalog.get("bookSets", []) if x["id"] != s["id"]]

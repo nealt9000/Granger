@@ -77,6 +77,8 @@ fun RemoteCollectionScreen(
     viewModel: RemoteCollectionViewModel,
     onBack: () -> Unit,
     onOpenBook: (bookId: String, title: String) -> Unit,
+    /** The installed pack's own collection screen, once the whole collection is on this phone. */
+    onOpenInstalled: () -> Unit = {},
 ) {
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
@@ -102,7 +104,7 @@ fun RemoteCollectionScreen(
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
         LazyColumn(Modifier.padding(padding).fillMaxSize()) {
-            item(key = "head") { Head(ui) { confirmPack = true } }
+            item(key = "head") { Head(ui, onOpenInstalled) { confirmPack = true } }
             if (ui.loading) {
                 item(key = "loading") { Box(Modifier.fillMaxWidth().padding(32.dp), Alignment.Center) { CircularProgressIndicator() } }
             }
@@ -176,7 +178,7 @@ fun RemoteCollectionScreen(
 }
 
 @Composable
-private fun Head(ui: RemoteCollectionUi, onKeepPack: () -> Unit) {
+private fun Head(ui: RemoteCollectionUi, onOpenInstalled: () -> Unit, onKeepPack: () -> Unit) {
     Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         val meta = listOfNotNull(
             ui.provider.takeIf { it.isNotBlank() }?.let { stringResource(R.string.library_from_kiwix_by, it) } ?: stringResource(R.string.library_from_kiwix),
@@ -184,7 +186,10 @@ private fun Head(ui: RemoteCollectionUi, onKeepPack: () -> Unit) {
         ).joinToString(" · ")
         Text(meta, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         if (!ui.online) Text(stringResource(R.string.bk_needs_internet), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        if (ui.packQueued) {
+        if (ui.packHere) {
+            Text(stringResource(R.string.mark_on_phone), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            TextButton(onClick = onOpenInstalled) { Text(stringResource(R.string.bk_open_collection)) }
+        } else if (ui.packQueued) {
             Text(stringResource(R.string.bk_keep_collection_queued), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
         } else if (ui.packBytes > 0) {
             Button(onClick = onKeepPack, modifier = Modifier.testTag(RemoteTags.KEEP_COLLECTION)) {

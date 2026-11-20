@@ -280,6 +280,7 @@ class NautilusBooksTest {
         val rows = db.bookDao().byOrigin(BookOrigin.NAUTILUS).associateBy { it.id }
         val a = rows.getValue("book:nautilus:zimgit-water_en/a.pdf")
         assertThat(a.loose).isNull()
+        assertThat(a.hidden).isFalse()  // on the shelf with the rest of its pack
         assertThat(a.filePath).startsWith(File(booksRoot, "nautilus").absolutePath)  // its copy now comes from the pack
         assertThat(a.title).isEqualTo("Wells")
         val b = rows.getValue("book:nautilus:zimgit-water_en/b.pdf")

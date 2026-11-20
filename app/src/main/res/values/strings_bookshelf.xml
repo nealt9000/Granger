@@ -24,6 +24,7 @@
     <string name="bk_needs_internet">Needs internet to open its books.</string>
     <string name="bk_reading_edition">Reading edition</string>
     <string name="bk_original_scan">Original scan</string>
+    <string name="bk_open_collection">Open the collection</string>
     <plurals name="bk_books_kept">
         <item quantity="one">%1$d of %2$s kept</item>
         <item quantity="other">%1$d of %2$s kept</item>

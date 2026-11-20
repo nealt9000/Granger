@@ -68,6 +68,8 @@ data class RemoteCollectionUi(
     val bigAsk: BigAsk? = null,
     /** The whole collection is queued to come to this phone. */
     val packQueued: Boolean = false,
+    /** The whole collection is on this phone: its own screen is the one to read it from. */
+    val packHere: Boolean = false,
     val online: Boolean = true,
 )
 
@@ -96,6 +98,8 @@ class RemoteCollectionViewModel(
     private val capBytes: () -> Long,
     private val online: () -> Boolean,
     private val io: CoroutineDispatcher = Dispatchers.IO,
+    /** Whether the pack is installed (Plan BK: then every book is on this phone). */
+    packHere: Flow<Boolean> = kotlinx.coroutines.flow.flowOf(false),
 ) : ViewModel() {
     private val remote = MutableStateFlow<RemoteCollection?>(null)
     private val state = MutableStateFlow(RemoteCollectionUi(online = online()))
@@ -113,11 +117,15 @@ class RemoteCollectionViewModel(
         }
     }.flowOn(io)
 
-    val ui: StateFlow<RemoteCollectionUi> = combine(state, remote, held, packQueued) { s, r, marks, queued ->
-        if (r == null) return@combine s.copy(packQueued = queued)
+    private val pack = combine(packQueued, packHere) { queued, here -> queued to here }
+
+    val ui: StateFlow<RemoteCollectionUi> = combine(state, remote, held, pack) { s, r, marks, (queued, here) ->
+        if (r == null) return@combine s.copy(packQueued = queued && !here, packHere = here)
+        val onPhone = Availability.OnPhone(full = true)
         val rows = r.items.filter { it.partOf == null }.map { item ->
             val editionId = item.edition?.id?.takeIf(String::isNotBlank)
-            rowOf(r, item, if (editionId != null) marks[editionBookId(editionId)] else marks[r.bookId(item)])
+            val mark = if (editionId != null) marks[editionBookId(editionId)] else marks[r.bookId(item)]
+            rowOf(r, item, if (here && editionId == null) onPhone else mark)
         }
         val shown = if (s.filter.isBlank()) rows else rows.filter { it.title.contains(s.filter, true) || it.author.contains(s.filter, true) }
         val order = r.collection.groups
@@ -128,7 +136,7 @@ class RemoteCollectionViewModel(
         s.copy(
             loading = false, title = r.collection.title.ifBlank { r.pack.title }, provider = r.collection.provider.ifBlank { r.pack.provider },
             packBytes = r.pack.sizeBytes, total = rows.size, kept = rows.count { it.mark is Availability.OnPhone },
-            sections = sections, packQueued = queued,
+            sections = sections, packQueued = queued && !here, packHere = here,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RemoteCollectionUi(online = online()))
 

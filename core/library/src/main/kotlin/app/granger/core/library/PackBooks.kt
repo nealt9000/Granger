@@ -122,7 +122,7 @@ open class PackBooks(
                 val (pack, item) = holding.firstOrNull { old != null && packNameOf(old) == it.first.name } ?: holding.first()
                 // A book read online (Plan BK) is the pack's own once the pack is here: its copy comes from the pack.
                 val base = if (old?.loose == Loose.SAVED) {
-                    old.copy(loose = null, filePath = File(dirFile, source.fileName(ref, item.format)).absolutePath)
+                    old.copy(loose = null, hidden = false, filePath = File(dirFile, source.fileName(ref, item.format)).absolutePath)
                 } else {
                     old ?: newRow(id, ref, item.format, dirFile)
                 }
