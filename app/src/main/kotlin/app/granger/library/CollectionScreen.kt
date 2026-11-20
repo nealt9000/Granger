@@ -128,7 +128,7 @@ fun CollectionScreen(
                             overflow = TextOverflow.Ellipsis,
                         )
                     } else {
-                        Text(loaded?.collection?.shownName()?.resolve().orEmpty())
+                        Text(loaded?.collection?.let { viewModel.titleFor(it, it.shownName().resolve()) }.orEmpty())
                     }
                 },
                 navigationIcon = {

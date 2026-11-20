@@ -177,7 +177,7 @@ private fun Head(ui: RemoteCollectionUi, onKeepPack: () -> Unit) {
     Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         val meta = listOfNotNull(
             ui.provider.takeIf { it.isNotBlank() }?.let { stringResource(R.string.library_from_kiwix_by, it) } ?: stringResource(R.string.library_from_kiwix),
-            if (ui.total > 0) pluralStringResource(R.plurals.bk_books_kept, ui.kept, ui.kept, ui.total.toString()) else null,
+            if (ui.total > 0) pluralStringResource(R.plurals.bk_books_kept, ui.kept, ui.kept, java.text.NumberFormat.getIntegerInstance().format(ui.total)) else null,
         ).joinToString(" · ")
         Text(meta, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         if (!ui.online) Text(stringResource(R.string.bk_needs_internet), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

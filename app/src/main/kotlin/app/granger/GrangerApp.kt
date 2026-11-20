@@ -372,6 +372,7 @@ class AppContainer(context: Context) {
         // Finds an HTTP/2 connection the network dropped before a request hangs on it (archive.org, 2026-10-30).
         .pingInterval(30, TimeUnit.SECONDS)
         .addInterceptor(networkGate)
+        .apply { if (BuildConfig.DEBUG && BuildConfig.DEV_FILES_URL.isNotEmpty()) addInterceptor(app.granger.online.DevFiles(BuildConfig.DEV_FILES_URL)) }
         // A network interceptor sees each redirect hop, so file downloads carry the agent to the file's server.
         .addNetworkInterceptor(app.granger.archive.GrangerUserAgent(archiveUserAgent))
         .build()

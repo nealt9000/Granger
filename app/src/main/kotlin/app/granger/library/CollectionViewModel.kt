@@ -114,6 +114,16 @@ class CollectionViewModel(
 
     private data class CatalogFacts(val categories: Map<String, String>, val levels: Map<String, Int>)
 
+    /**
+     * Plan BK: [collection]'s name as shown: one made by a book kept without its pack is still named by the pack's ZIM
+     * name, so it takes the catalog's title.
+     */
+    fun titleFor(collection: app.granger.core.library.ShelfCollection, shown: String): String {
+        val key = collection.defaultKey ?: return shown
+        if (!Filing.isKiwixBooksCollection(key) || collection.name != key.substringAfter("kiwixbooks-")) return shown
+        return bookPackTitles(catalog?.state?.value?.catalog)[key] ?: shown
+    }
+
     /** The catalog's book pack providers by collection key (Plan KB2), for a header whose manifest names no one. */
     private val providers: Map<String, String> get() = bookPackProviders(catalog?.state?.value?.catalog)
 

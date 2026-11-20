@@ -218,7 +218,7 @@ fun LibraryContent(
                             app.granger.explore.Eyebrow(stringResource(R.string.shelf_collections), Modifier.padding(horizontal = 16.dp))
                             androidx.compose.foundation.lazy.LazyRow(contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                                 items(kind.collections, key = { it.collection.id }) { row ->
-                                    CollectionStack(row, row.collection.shownName().resolve()) { onOpenCollection(row.collection.id) }
+                                    CollectionStack(row, loaded.nameOf(row, row.collection.shownName().resolve())) { onOpenCollection(row.collection.id) }
                                 }
                             }
                         }
