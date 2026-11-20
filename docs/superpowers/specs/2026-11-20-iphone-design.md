@@ -4,21 +4,11 @@ Written 2026-11-20 from the I0 spike (`../spikes/2026-10-iphone-spike-results.md
 
 ## 1. Why now, and for whom
 
-Most of the family and friends who want to try Granger use iPhones. The first iPhone testers are **friends who make apps**: they clone the public GitHub repo, open the Xcode project and install a debug build on their own iPhone with their own Apple team. Wider family follows on **TestFlight under AETHERBOUND LLC** once the build is steady, then the App Store.
+Most of the family and friends who want to try Granger use iPhones. **Neal, 2026-11-20: the iPhone app is built straight through until it matches the Android app 1:1.** Then it's handed to Neal, who tests it himself on the Mac's Simulator, and only after that does it go to friends: app-developer friends who build from the repo first, then the family on **TestFlight under AETHERBOUND LLC**, then the App Store.
 
-## 2. What the first iPhone build does
+## 2. What the iPhone app does
 
-The same app as Android's online build, drawn in SwiftUI:
-
-- **Home** (the feeds, Continue, the downloads card), **Explore** (rooms, plates, the quilt, the timeline) and **Search** (online Wikipedia, titles, packs and books on the phone).
-- **The online Wikipedia reader and the topic page**, with pictures from Commons, Contents, links and Related, in Field and Night.
-- **Keeping:** keep an article or a book for offline; the marks (on phone, saved); **Local only** turns the network off honestly.
-- **Kiwix packs:** Get more from the signed catalog, background downloads with resume and a hash check, reading and search through libkiwix. Packs show in the Files app.
-- **Books:** Granger Classics and Gutenberg in the e-book reader (Readium Swift), kept or read online.
-- **Read-aloud** with the Granger voice (Owl, Piper through sherpa-onnx): a full player with chapters, speed and sleep, the lock screen and the mini player.
-- **English and Spanish** for the app's own text (Spanish is a release requirement, L0).
-
-**Not in the first build:** Ask (off on Android too), music, audiobooks, podcasts, games, CarPlay, the widget, speech input, phone media import, archive.org sets and text-PDF conversion. Each keeps its iOS path in the results (§2) for later.
+Everything Android's release build does (`Features.kt`: Ask off, the rest on), the iOS way where the platforms differ. The row-by-row list, with the plan that builds each row, is **`docs/superpowers/ios-parity.md`**; "1:1" means every row is ticked or has an agreed reason. It supersedes this section's earlier first-build cut (music, audiobooks, games, CarPlay, the widget and speech input are now in).
 
 ## 3. Architecture
 
@@ -55,16 +45,20 @@ The same app as Android's online build, drawn in SwiftUI:
 
 ## 6. Plans
 
-| Plan | Delivers | Ends with |
-| --- | --- | --- |
-| **I1 Shared core** | The three cores, `:core:catalog` and a new `:core:online` converted to KMP in place (from I0's trial); `:shared` + SKIE exporting `GrangerCore`; the `GrangerCore` release script; Ksoup checked against real `.gvec` builds (chunk hashes match). Android's whole JVM suite and a Pixel smoke test pass | Android unchanged on the phone; the framework links into an empty iOS app |
-| **I2 iOS app + online reading** | `ios/` project, signing, theme, tab bar; the online Wikipedia reader (`WKWebView`, `online.css`, Commons pictures, Contents, links), Search (online), the topic page (summary and Related; records-backed parts come in I3), the first-run privacy line, Local only, Settings basics; `ios/README.md` | **Dev-friend build 1** |
-| **I3 Library store, Home, Explore** | `:core:library` on Room KMP (Android migrates on its own schema chain, no data loss); keeping and marks; Home (feed engine shared); Explore with the `.gqid`/`.gtime` indexes; topic records (`TopicRecords`, `RemoteRecords`, moved here from I1 with `:core:library`) | Dev-friend build 2 |
-| **I4 Kiwix packs + downloads** | CoreKiwix.xcframework; the Swift `ZimArchive`; `zim:` pages through `WKURLSchemeHandler`; pack search in Search; Get more from the signed catalog; URLSession background downloads (resume by Range + ETag, sha256 after, Wi-Fi rule); packs in Files | Dev-friend build 3 |
-| **I5 Books + the voice** | Readium Swift for EPUB (place, Contents, the content iterator for sentence marks); Classics and Gutenberg; sherpa-onnx Piper (Owl) with AVAudioSession, the lock screen, sleep and speed; the mini player and the full player | Dev-friend build 4 |
-| **I6 Family build** | Spanish (String Catalog generated from Android's `strings.xml`), Send feedback (mail compose with the device, build and log), crash records (MetricKit), the privacy manifest, the tester note; the GPL §7 App Store permission and Kiwix's answer; TestFlight under AETHERBOUND LLC (internal first, then external with one Beta App Review) | **TestFlight for family** |
+Rebuilt 2026-11-20 for parity (Neal): no friend builds along the way; each plan ends with its own Simulator check and ticks its rows in `ios-parity.md`; the hand-off to Neal comes at the end.
 
-I1 comes first and is the only plan that touches Android. I2 can start as soon as I1's framework links. Each plan is written when the previous one is underway, with its own builder's calls for Neal.
+| Plan | Delivers (parity areas) |
+| --- | --- |
+| **I1 Shared core** (done) | KMP cores, `:core:zim-api`, `:core:catalog-api`, `:core:online`, `GrangerCore` via SKIE, the release route |
+| **I2 App + online reading** | The app shell (tabs, theme, icon), the web host, online articles, the topic page (picture, summary, other language), Search online, an interim Home (featured article, Recently read), privacy line, Settings basics |
+| **I3 Library store, keeping, Home, Explore** | `:core:library` on Room KMP; Keep, Saved for now, marks, Local only greying; online indexes; topic records, broad topics, quilt, Related with adult flags; Home's feeds, Wander, timeline, games, Arrange; Explore whole; Outfitting (online half) |
+| **I4 Packs and downloads** | CoreKiwix, the pack reader and search, Get more and the catalog, background downloads, pack import and Files, book packs, onboarding's sets, Outfitting (packs) |
+| **I5 Books, Library, read-aloud, Listen** | Readium Swift and PDFKit, Library and collections, Classics and reference links, archive.org, Gutenberg, importing books, Piper voices and system voices, Listen's Reading tab, Now Playing |
+| **I6 Audio and the system** | Music (Files + Music library), audiobooks and LibriVox, the players and mini player, CarPlay, the widget, the Local only control, voice input, Share extension |
+| **I7 Languages, feedback, the audit and hand-off** | Spanish app text, app and knowledge languages, Send feedback, MetricKit, privacy manifest; the parity audit; **hand-off to Neal for his Simulator test** |
+| **I8 Friends** (after Neal's test) | The GPLv3 §7 App Store permission and Kiwix's answer, TestFlight under AETHERBOUND LLC, the dev-friend note, then family |
+
+Each plan is written when the one before is underway, with its own builder's calls for Neal.
 
 ## 7. Rules carried from Android
 

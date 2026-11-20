@@ -1,8 +1,8 @@
-# Plan I2: The iPhone app and online reading — dev-friend build 1
+# Plan I2: The iPhone app and online reading
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** A real Granger app on the iPhone that a developer friend can clone, open in Xcode and install. It reads Wikipedia online the way the Android app does: you search, land on an article's topic page, read the full article in Granger's own look, and follow its links. Home has today's featured article and what you read lately. Settings has the Wikipedia language, appearance, text size and Local only. Nothing is kept offline yet: that's I3.
+**Goal:** The real Granger app on the iPhone, the first stretch of the road to 1:1 with Android (`docs/superpowers/ios-parity.md`; Neal, 2026-11-20: build straight through to parity, hand off to Neal for his Simulator test, friends after). It reads Wikipedia online the way the Android app does: you search, land on an article's topic page, read the full article in Granger's own look, and follow its links. Home has today's featured article and what you read lately. Settings has the Wikipedia language, appearance, text size and Local only. Nothing is kept offline yet: that's I3.
 
 **Spec:** `docs/superpowers/specs/2026-11-20-iphone-design.md` §2–§6 (I2). **Builds on:** I1 (`2026-11-20-plan-i1-shared-core.md`): `GrangerCore` (shared Kotlin over SKIE) and `ios/GrangerCore` (the Swift package). **Roadmap:** the I1+ row.
 
@@ -18,9 +18,10 @@
 
 - SwiftUI over the shared core; tab bar; prebuilt `GrangerCore` from GitHub releases; committed Xcode project; bundle ID `app.granger`; copyright AETHERBOUND LLC (spec §9).
 - First testers are app-developer friends building from the repo; TestFlight comes in I6.
-- I2 is the first dev-friend build: online reading, Search, the topic page (spec §6). Topic records (parts, rooms, "leads here") come in I3 with `:core:library` (I1 Task 6).
+- **Parity is the target, not a friend build** (Neal, 2026-11-20): plans run straight through I2–I7; each ends with a Simulator check and its rows ticked in `ios-parity.md`; Neal tests the whole app on the Simulator at the hand-off (I7); friends come after (I8). Topic records (parts, rooms, "leads here") come in I3 with `:core:library` (I1 Task 6).
+- All eight builder's calls below OK'd by Neal, 2026-11-20. Calls 2 and 3 are interim: I3 brings Wander and the filtered Related, which the parity list requires.
 
-## Builder's calls in this plan (for Neal's review)
+## Builder's calls in this plan (all eight OK'd by Neal, 2026-11-20)
 
 1. **Two tabs in I2 (Home, Search), not four with placeholders.** An empty "coming soon" tab tells a tester nothing; the tab bar grows as Explore (I3) and Library (I4/I5) land.
 2. **Home shows today's featured article, not Wander's random article.** Android's Wander draws from the well-known articles in the downloaded index and filters adult topics by its flags (Plan AF). I2 has no index, and Wikipedia's own random can land anywhere. So Home shows Wikipedia's **featured article of the day** (curated by its editors; `/feed/featured`'s `tfa`, a new `WikimediaClient.featured` call in the core), plus **Recently read**. Checked 2026-11-20: the English feed has a featured article and the Spanish one doesn't, but both carry Wikimedia's curated **Picture of the day** (`image`), so a Spanish Home shows that instead. Wander comes in I3 with the index.
@@ -29,7 +30,7 @@
 5. **The page scripts and `online.css` move into the core** (`:core:online` resources as Kotlin string constants) and Android reads them from there. That's one copy for both phones. Android's behaviour doesn't change, and its tests prove it.
 6. **A `granger-zim:` scheme on iOS.** `WKWebView` can't intercept `https`, so iOS pages load from `granger-zim://zim/<pack>/<path>`. `ZimUrls` gains the base as a setting; Android keeps `https://zim.granger.invalid/`.
 7. **The app icon is traced from the Android launcher's owl mark** (`app/src/main/res/drawable/ic_launcher_foreground.xml`, rendered at 1024 px on the Field background), not redrawn ("Marks: trace, don't draw"). Neal checks it in Task 1.
-8. **Checks are on the Simulator.** Neal has no iPhone at hand, so the walkthrough runs on the iOS 27.1 Simulator with screenshots and an XCUITest smoke test. A dev friend's first install on a real iPhone is the device check, and their notes come back as issues or email.
+8. **Checks are on the Simulator.** The builder's walkthrough runs on the iOS 27.1 Simulator with screenshots and an XCUITest smoke test, as Neal's own test will at the hand-off. Real iPhones come with friends, after the hand-off.
 
 ## Global Constraints
 
@@ -101,21 +102,22 @@
 - [ ] **Settings:** Wikipedia language; Appearance (System, Field, Night); Text size; Local only (off by default; when on, nothing goes out and screens say so); Clear recently read and recent searches; About (version and build, GPLv3 and AETHERBOUND LLC, the source on GitHub, feedback@opengranger.org).
 - [ ] Commit.
 
-### Task 7: Walkthrough and the dev-friend build
+### Task 7: Simulator check and parity rows
 
-**Files:** `ios/Granger/UITests/SmokeTests.swift`; `docs/friend-testing/ios-dev-friends.md`; `ios/README.md`.
+**Files:** `ios/Granger/UITests/SmokeTests.swift`; `docs/superpowers/ios-parity.md`.
 
-- [ ] XCUITest smoke test: first run → OK → search "Moon" → open the topic page → Read the full article → Contents → a link → back twice; Night appearance; Spanish Wikipedia.
-- [ ] Walkthrough on the iPhone 17 Simulator with screenshots: Field and Night, Dynamic Type at the largest size, VoiceOver by the accessibility tree (every control labelled), landscape, Local only on, airplane mode (the Simulator's network off), a very long article (Moon) and a short one, an article with tables and an infobox, Spanish.
-- [ ] Fix what the walkthrough finds; list the rest under "Carried forward from I2" in the roadmap.
-- [ ] A one-page note for dev friends (`docs/friend-testing/ios-dev-friends.md`): what to clone, the three steps in `ios/README.md`, what works and what doesn't yet, how to send feedback.
+- [ ] XCUITest smoke test: first run → OK → search "Moon" → open the topic page → Read the full article → Contents → a link → back twice; Night appearance; Spanish Wikipedia. It stays in the project and grows with each plan, so every later plan reruns it.
+- [ ] Walkthrough on the iPhone 17 Simulator with screenshots: Field and Night, Dynamic Type at the largest size, VoiceOver by the accessibility tree (every control labelled), landscape, Local only on, the Simulator's network off, a very long article (Moon) and a short one, an article with tables and an infobox, Spanish.
+- [ ] Fix what the walkthrough finds. Anything left goes under "Carried forward from I2" in the roadmap, and into the parity list if it's a parity gap.
+- [ ] Tick I2's rows in `ios-parity.md` (compare each with the Android screen side by side).
 - [ ] Commit.
 
-### Task 8: Close
+### Task 8: Close and carry on
 
 - [ ] Roadmap I1+ row (I2 done, I3 next) and the spec if anything moved.
-- [ ] With Neal's OK: merge `i2-ios-app` to main (fast-forward after a rebase), push (noreply check first). Neal sends the note to the first dev friends.
+- [ ] Merge `i2-ios-app` to main (fast-forward after a rebase) and push (noreply check first), under Neal's standing OK for green plans (asked 2026-11-20).
+- [ ] Write Plan I3 and bring its builder's calls to Neal; nothing goes to friends.
 
 ## Order and size
 
-Task 1 is a day; Task 2 half a day plus the Pixel check; Task 3 a day (the scheme handler and links are the fiddly part); Tasks 4–6 two to three days; Task 7 a day. **About a week.** Task 2 can run alongside Task 1, since it's mostly Kotlin. The first thing a dev friend can install exists after Task 4; Tasks 5–7 make it worth sending.
+Task 1 is a day; Task 2 half a day plus the Pixel check; Task 3 a day (the scheme handler and links are the fiddly part); Tasks 4–6 two to three days; Task 7 a day. **About a week.** Task 2 can run alongside Task 1, since it's mostly Kotlin. Nothing is shared at the end of I2: I3 starts as soon as its calls are answered.
