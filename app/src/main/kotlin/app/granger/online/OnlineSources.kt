@@ -1,5 +1,7 @@
 package app.granger.online
 
+import app.granger.core.online.WikimediaClient
+import app.granger.core.online.OnlineWikipediaArchive
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
 import kotlinx.coroutines.flow.Flow
@@ -30,7 +32,7 @@ class OnlineSources(
     /** The online archives by source id, for the library's `archive()`. Never blocks. */
     fun archives(): Map<String, OnlineWikipediaArchive> =
         if (!enabled()) emptyMap() else languagesNow().associate { lang ->
-            OnlineWikipediaArchive.packName(lang) to archives.getOrPut(lang) { OnlineWikipediaArchive(lang, wiki, fallback, indexRandom = { indexRandom(OnlineWikipediaArchive.packName(lang)) }, stores = stores) }
+            OnlineWikipediaArchive.packName(lang) to archives.getOrPut(lang) { OnlineWikipediaArchive(lang, wiki, fallback, indexRandom = { indexRandom(OnlineWikipediaArchive.packName(lang)) }, stores = stores, timings = app.granger.BuildConfig.DEBUG) }
         }
 
     fun archive(lang: String): OnlineWikipediaArchive? = archives()[OnlineWikipediaArchive.packName(lang)]

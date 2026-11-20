@@ -1,5 +1,6 @@
 package app.granger.online
 
+import app.granger.core.online.OnlineWikipediaArchive
 import app.granger.core.catalog.Catalog
 import app.granger.core.downloads.DownloadRecord
 import app.granger.core.downloads.DownloadState

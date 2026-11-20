@@ -123,6 +123,7 @@ dependencies {
     implementation(project(":core:library"))
     implementation(project(":core:archive"))
     implementation(project(":core:catalog"))
+    implementation(project(":core:online"))
     implementation(project(":core:downloads"))
     implementation(project(":core:books"))
     implementation(project(":core:research"))

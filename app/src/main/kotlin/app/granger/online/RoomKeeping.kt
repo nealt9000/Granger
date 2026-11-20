@@ -1,5 +1,6 @@
 package app.granger.online
 
+import app.granger.core.online.OnlineWikipediaArchive
 import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

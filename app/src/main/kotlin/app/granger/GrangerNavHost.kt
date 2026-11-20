@@ -656,7 +656,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
     // Debug only (Plan O1): open a live Wikipedia article (`--es online_title Moon`).
     LaunchedEffect(openOnlineTitle) {
         val title = openOnlineTitle ?: return@LaunchedEffect
-        val pack = app.granger.online.OnlineWikipediaArchive.packName("en")
+        val pack = app.granger.core.online.OnlineWikipediaArchive.packName("en")
         container.sessions.tab(container.sessions.openTab(pack, title.replace(' ', '_'), title))?.let { nav.showTab(it, keepCurrent = true) }
     }
     // The Library header's badge: what's coming or stopped.
@@ -1942,7 +1942,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     app.granger.online.OutfittingActions(
                         onKeepTheRead = container::keepTheRead,
                         onGetPack = { container.getPack(it) },
-                        onOpenKept = { a -> scope.launch { openTopic(app.granger.online.OnlineWikipediaArchive.packName(a.lang), a.title, app.granger.online.WikimediaClient.titleOfKey(a.title))?.let { container.sessions.tab(it) }?.let { nav.showTab(it) } } },
+                        onOpenKept = { a -> scope.launch { openTopic(app.granger.core.online.OnlineWikipediaArchive.packName(a.lang), a.title, app.granger.core.online.WikimediaClient.titleOfKey(a.title))?.let { container.sessions.tab(it) }?.let { nav.showTab(it) } } },
                         onRemoveKept = { a -> scope.launch { container.keeper.remove(a.lang, a.title); outfitVersion++ } },
                         onClearSaved = { scope.launch(Dispatchers.IO) { container.savedStore.clear(); outfitVersion++ } },
                         onUpdate = { list -> scope.launch { container.updateKept(list) } },

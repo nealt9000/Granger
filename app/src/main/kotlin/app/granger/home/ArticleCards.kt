@@ -42,7 +42,7 @@ class ArticleCards(private val file: File, private val thumbs: ArticleThumbnails
             card.thumbnail?.let { File(it).setLastModified(System.currentTimeMillis()) }
             return card
         }
-        if (archive is app.granger.online.OnlineWikipediaArchive) return online(archive, path, key, targetPx, sentences, maxChars)
+        if (archive is app.granger.core.online.OnlineWikipediaArchive) return online(archive, path, key, targetPx, sentences, maxChars)
         val resolved = archive.resolvePath(path) ?: return null
         val item = archive.read(resolved)?.takeIf { it.mimeType.startsWith("text/html") } ?: return null
         // Only the top of the article: its lead, and as far as the picture rule looks.
@@ -56,10 +56,10 @@ class ArticleCards(private val file: File, private val thumbs: ArticleThumbnails
      * An online article's card from Wikimedia's summary (Plan O1 Task 6): one small request, never the whole article
      * (O0 found the topic page fetching it twice for its header). The picture is the summary's, asked at [targetPx].
      */
-    private fun online(archive: app.granger.online.OnlineWikipediaArchive, path: String, key: String, targetPx: Int, sentences: Int, maxChars: Int): Card? {
+    private fun online(archive: app.granger.core.online.OnlineWikipediaArchive, path: String, key: String, targetPx: Int, sentences: Int, maxChars: Int): Card? {
         val s = archive.summary(path) ?: return null
         val picture = s.thumbnail?.let { sized(it, targetPx) }?.let { url ->
-            runCatching { thumbs.picture(archive, app.granger.online.OnlineWikipediaArchive.IMG + url.substringAfter("://"), targetPx) }.getOrNull()
+            runCatching { thumbs.picture(archive, app.granger.core.online.OnlineWikipediaArchive.IMG + url.substringAfter("://"), targetPx) }.getOrNull()
         }
         return kept(key, Card(s.title, LeadLinks.summaryOf(s.extract, sentences, maxChars), picture))
     }

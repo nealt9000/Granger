@@ -1,5 +1,6 @@
 package app.granger.online
 
+import app.granger.core.online.WikimediaClient
 import com.google.common.truth.Truth.assertThat
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType

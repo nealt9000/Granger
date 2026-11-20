@@ -1,5 +1,6 @@
 package app.granger.online
 
+import app.granger.core.online.OnlineWikipediaArchive
 import app.granger.core.library.KeptArticle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

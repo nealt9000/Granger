@@ -1,5 +1,6 @@
 package app.granger.online
 
+import app.granger.core.online.OnlineWikipediaArchive
 import app.granger.core.library.Pack
 import app.granger.core.library.QidIndexes
 

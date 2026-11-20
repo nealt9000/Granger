@@ -721,10 +721,13 @@ class AppContainer(context: Context) {
      * Wikipedia online (Plan O1): its own client derived from the shared one (the gate and the agent hold), with an
      * interim 50 MB cache so Back and a second visit don't fetch again (builder's call 3; O2's Saved for now replaces it).
      */
-    val wikimedia: app.granger.online.WikimediaClient by lazy {
+    val wikimedia: app.granger.core.online.WikimediaClient by lazy {
+        // The shared online code (Plan I1) logs as the app's did: warnings always, timings in debug builds.
+        app.granger.core.online.OnlineLog.warn = { android.util.Log.w(app.granger.core.online.OnlineWikipediaArchive.TAG, it) }
+        app.granger.core.online.OnlineLog.info = { if (BuildConfig.DEBUG) android.util.Log.i(app.granger.core.online.OnlineWikipediaArchive.TAG, it) }
         // O1's interim HTTP cache is gone: Saved for now holds what was read (Plan O2 Task 1). Its folder goes once.
         File(appContext.cacheDir, "wikimedia").takeIf { it.exists() }?.let { old -> appScope.launch(Dispatchers.IO) { old.deleteRecursively() } }
-        app.granger.online.WikimediaClient(
+        app.granger.core.online.WikimediaClient(
             http, onMainThread = { BuildConfig.DEBUG && android.os.Looper.myLooper() == android.os.Looper.getMainLooper() },
             allowed = { networkPolicy.privacySeen.value },
         )
@@ -757,7 +760,7 @@ class AppContainer(context: Context) {
 
     /** Whether an article opens now: on the phone, kept, saved for now, or online while online (Plan O3). */
     fun opensNow(packId: String, path: String): Boolean {
-        val lang = app.granger.online.OnlineWikipediaArchive.languageOf(packId) ?: return true
+        val lang = app.granger.core.online.OnlineWikipediaArchive.languageOf(packId) ?: return true
         if (reach.now.online) return true
         return keptStore.get(lang, path) != null || savedStore.has(app.granger.online.SavedStore.pageKey(lang, path))
     }
@@ -765,7 +768,7 @@ class AppContainer(context: Context) {
     /** What it would take to have [path] when it can't open now (Plan O3 Task 6): its keep, and the pack that holds it. */
     suspend fun wouldTake(packId: String, path: String, title: String): app.granger.online.WouldTake {
         val each = if (onlinePrefs.offlinePictures.value == app.granger.online.OnlinePrefs.OfflinePictures.SAVE) app.granger.online.RoomOffers.EACH_WITH_PICTURES else app.granger.online.RoomOffers.EACH_TEXT
-        val lang = app.granger.online.OnlineWikipediaArchive.languageOf(packId)
+        val lang = app.granger.core.online.OnlineWikipediaArchive.languageOf(packId)
         // The online source's index set is Top's: an article it holds is in the Top pack (its smallest flavour offered).
         val inTop = lang != null && runCatching { referenceLinks.qidIndexes().qidOf(packId, path) != null }.getOrDefault(false)
         val installed = library.packs.first().mapTo(HashSet()) { it.name }
@@ -777,7 +780,7 @@ class AppContainer(context: Context) {
 
     /** Keeps an article as soon as the internet is back (Plan O3 Task 6): the keep job, which waits while offline. */
     fun keepLater(packId: String, path: String) {
-        val lang = app.granger.online.OnlineWikipediaArchive.languageOf(packId) ?: return
+        val lang = app.granger.core.online.OnlineWikipediaArchive.languageOf(packId) ?: return
         app.granger.online.KeepWorker.start(appContext, "article:$lang:$path", listOf(lang to path))
     }
 
@@ -869,7 +872,7 @@ class AppContainer(context: Context) {
             // No signal or Local only: the article from a kept copy instead (spec §4, Plan O1 Task 5).
             fallback = { lang, title ->
                 val copies = kotlinx.coroutines.runBlocking {
-                    runCatching { articleCopies.copies(app.granger.online.OnlineWikipediaArchive.packName(lang), title, lang, knownPacks.first()) }.getOrNull()
+                    runCatching { articleCopies.copies(app.granger.core.online.OnlineWikipediaArchive.packName(lang), title, lang, knownPacks.first()) }.getOrNull()
                 }
                 copies?.filter { it.kind != app.granger.online.ArticleCopy.Kind.ONLINE }?.sortedBy { it.kind }
                     ?.firstNotNullOfOrNull { c -> library.archive(c.packId)?.let { a -> a.resolvePath(c.path)?.let(a::read) } }
@@ -899,8 +902,8 @@ class AppContainer(context: Context) {
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             val langs = knowledgeNow.value.filter { onlineSources.archive(it) != null }
             if (langs.isEmpty() || !networkGate.open) return@withContext emptyList<app.granger.core.library.SearchHit>() to emptyList()
-            fun hit(lang: String, h: app.granger.online.WikimediaClient.Hit, snippet: Boolean) = app.granger.core.library.SearchHit(
-                app.granger.online.OnlineWikipediaArchive.packName(lang), if (langs.size > 1) "Wikipedia · ${java.util.Locale(lang).getDisplayLanguage(java.util.Locale(lang)).replaceFirstChar { it.uppercase() }}" else "Wikipedia",
+            fun hit(lang: String, h: app.granger.core.online.WikimediaClient.Hit, snippet: Boolean) = app.granger.core.library.SearchHit(
+                app.granger.core.online.OnlineWikipediaArchive.packName(lang), if (langs.size > 1) "Wikipedia · ${java.util.Locale(lang).getDisplayLanguage(java.util.Locale(lang)).replaceFirstChar { it.uppercase() }}" else "Wikipedia",
                 h.key, h.title, snippet = if (snippet) h.excerpt else null,
             )
             kotlinx.coroutines.coroutineScope {
@@ -943,24 +946,24 @@ class AppContainer(context: Context) {
         override suspend fun of(packId: String, path: String) = availability.of(packId, path)
         override val version = markVersion
         override fun kept(packId: String, path: String) =
-            app.granger.online.OnlineWikipediaArchive.languageOf(packId)?.let { keptStore.get(it, path)?.withPictures }
+            app.granger.core.online.OnlineWikipediaArchive.languageOf(packId)?.let { keptStore.get(it, path)?.withPictures }
         override fun keepsPictures() = onlinePrefs.offlinePictures.value == app.granger.online.OnlinePrefs.OfflinePictures.SAVE
         override suspend fun keepSize(packId: String, path: String): Long? {
-            val lang = app.granger.online.OnlineWikipediaArchive.languageOf(packId) ?: return null
+            val lang = app.granger.core.online.OnlineWikipediaArchive.languageOf(packId) ?: return null
             // What's saved for now says it: the page, and under Save pictures the pictures it shows that are saved too.
             val key = app.granger.online.SavedStore.pageKey(lang, path)
             val page = savedStore.bytesOf(key) ?: return null
             if (!keepsPictures()) return page
             val html = savedStore.get(key)?.bytes?.let { String(it) } ?: return page
-            return page + app.granger.online.OnlineWikipediaArchive.picturesOf(html).sumOf { savedStore.bytesOf(app.granger.online.SavedStore.pictureKey(it)) ?: 0L }
+            return page + app.granger.core.online.OnlineWikipediaArchive.picturesOf(html).sumOf { savedStore.bytesOf(app.granger.online.SavedStore.pictureKey(it)) ?: 0L }
         }
         override suspend fun keep(packId: String, path: String): Boolean =
-            app.granger.online.OnlineWikipediaArchive.languageOf(packId)?.let { keeper.keep(it, path) } != null
+            app.granger.core.online.OnlineWikipediaArchive.languageOf(packId)?.let { keeper.keep(it, path) } != null
         override suspend fun remove(packId: String, path: String) {
-            app.granger.online.OnlineWikipediaArchive.languageOf(packId)?.let { keeper.remove(it, path) }
+            app.granger.core.online.OnlineWikipediaArchive.languageOf(packId)?.let { keeper.remove(it, path) }
         }
         override fun queued(packId: String, path: String) = app.granger.online.KeepWorker.progress(
-            appContext, "article:${app.granger.online.OnlineWikipediaArchive.languageOf(packId)}:$path",
+            appContext, "article:${app.granger.core.online.OnlineWikipediaArchive.languageOf(packId)}:$path",
         ).map { it?.running == true }
     }
 
@@ -1446,9 +1449,9 @@ class AppContainer(context: Context) {
             sentence = { bookId, mention -> kotlinx.coroutines.withContext(io) { bookSentence(bookId, mention) } },
             figure = { packId, image -> kotlinx.coroutines.withContext(io) { Perf.time("figure") { library.archive(packId)?.let { thumbs.picture(it, image, TOPIC_PICTURE_PX) } } } },
             prefetch = { packId, paths ->
-                kotlinx.coroutines.withContext(io) { Perf.time("prefetch ${paths.size}") { (library.archive(packId) as? app.granger.online.OnlineWikipediaArchive)?.prefetch(paths) } }
+                kotlinx.coroutines.withContext(io) { Perf.time("prefetch ${paths.size}") { (library.archive(packId) as? app.granger.core.online.OnlineWikipediaArchive)?.prefetch(paths) } }
             },
-            onlineQid = { packId, path -> kotlinx.coroutines.withContext(io) { (library.archive(packId) as? app.granger.online.OnlineWikipediaArchive)?.summary(path)?.qid } },
+            onlineQid = { packId, path -> kotlinx.coroutines.withContext(io) { (library.archive(packId) as? app.granger.core.online.OnlineWikipediaArchive)?.summary(path)?.qid } },
             records = if (!Features.ONLINE) null else { packId, lang, qid ->
                 kotlinx.coroutines.withContext(io) {
                     // A topic page opened straight after a cold start comes before any screen has read the catalog (Pixel 6, Plan O6).
@@ -1464,7 +1467,7 @@ class AppContainer(context: Context) {
      * from the vectors, as before, or from `morelike:` when it has none and Wikipedia online is on.
      */
     private suspend fun relatedFor(name: String, path: String, same: (String, String) -> Boolean): app.granger.core.library.Related {
-        app.granger.online.OnlineWikipediaArchive.languageOf(name)?.let { return onlineRelated(it, path) }
+        app.granger.core.online.OnlineWikipediaArchive.languageOf(name)?.let { return onlineRelated(it, path) }
         val local = relatedFinder.related(name, path, same)
         if (local.articles.isNotEmpty() || !Features.ONLINE) return local
         val lang = WIKIPEDIA_LANGUAGE.find(name)?.groupValues?.get(1) ?: return local
@@ -1473,7 +1476,7 @@ class AppContainer(context: Context) {
     }
 
     private suspend fun onlineRelated(lang: String, title: String): app.granger.core.library.Related = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-        val source = app.granger.online.OnlineWikipediaArchive.packName(lang)
+        val source = app.granger.core.online.OnlineWikipediaArchive.packName(lang)
         val hits = wikimedia.related(lang, title, app.granger.topic.TopicSource.SHOWN * 2)
             // Related is volunteered: an article the adult-content filter hides isn't offered.
             .filterNot { r -> r.qid?.let(contentFilter::hides) == true }

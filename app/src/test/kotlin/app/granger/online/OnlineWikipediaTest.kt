@@ -1,5 +1,7 @@
 package app.granger.online
 
+import app.granger.core.online.WikimediaClient
+import app.granger.core.online.OnlineWikipediaArchive
 import app.granger.core.zim.LinkAction
 import app.granger.core.zim.ZimResolver
 import app.granger.core.zim.ZimUrls

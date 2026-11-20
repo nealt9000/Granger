@@ -1,5 +1,7 @@
 package app.granger.online
 
+import app.granger.core.online.WikimediaClient
+import app.granger.core.online.OnlineWikipediaArchive
 import app.granger.core.downloads.LocalOnly
 import app.granger.core.downloads.NetworkMode
 import app.granger.core.library.KeptArticle

@@ -242,7 +242,7 @@ class TopicSource(
         val language = languageOf(packId) ?: return null
         val other = languages.firstOrNull { it != language } ?: return null
         val path = title.replace(' ', '_')
-        return TopicOther(other, app.granger.online.OnlineWikipediaArchive.packName(other), path, titleOf(path))
+        return TopicOther(other, app.granger.core.online.OnlineWikipediaArchive.packName(other), path, titleOf(path))
     }
 
     /** A broad topic's parts (Plan EX T1), each item resolved in the installed packs, the page's language first. */
