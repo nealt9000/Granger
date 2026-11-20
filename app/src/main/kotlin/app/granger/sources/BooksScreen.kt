@@ -90,6 +90,10 @@ fun BooksScreen(
     onReadNow: ((itemId: String, title: String) -> Unit)? = null,
     /** Whether a row is a catalog book that can be read without keeping. */
     canReadNow: (itemId: String) -> Boolean = { false },
+    /** Plan BK: opens a book pack's collection online, before the pack; null leaves rows as they were. */
+    onBrowse: ((packId: String) -> Unit)? = null,
+    /** Whether a row is a book pack whose collection can be read online. */
+    canBrowse: (itemId: String) -> Boolean = { false },
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refreshVolumes()
@@ -121,53 +125,14 @@ fun BooksScreen(
     }
     BackHandler(enabled = searching) { stopSearching() }
 
+    val actions = BookSourceActions(
+        viewModel = viewModel, onOpenScope = onOpenScope, onOpenPack = onOpenPack, onOpenBook = onOpenBook, onOpenSet = onOpenSet,
+        onReadNow = onReadNow, canReadNow = canReadNow, onBrowse = onBrowse, canBrowse = canBrowse,
+        beforeDownload = ::beforeDownload, onRemove = { row -> scope.launch { confirmRemove = row to viewModel.removeKind(row.id) } },
+    )
+
     @Composable
-    fun ItemLine(row: ItemRow) {
-        val scopeOpened = row.opensScope
-        if (scopeOpened != null) {
-            GroupedRow(row.title, row.meta?.resolve(), onClick = { onOpenScope(scopeOpened) })
-            return
-        }
-        val setOpened = row.opensSet
-        if (setOpened != null) {
-            GroupedRow(row.title, row.meta?.resolve(), onClick = { onOpenSet(setOpened) })
-            return
-        }
-        val open = { row.packId?.let(onOpenPack) ?: row.bookId?.let { onOpenBook(it, row.title) } ?: Unit }
-        GroupedRow(
-            title = row.title,
-            meta = (row.meta ?: row.details).resolve(),
-            onClick = if (row.opens) open else null,
-            // Installed is said by Open; a download's progress, trouble or an update is said here.
-            below = if (row.status == ItemStatus.Installed || row.status == ItemStatus.NotInstalled) null else {
-                {
-                    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant) {
-                        Column { ItemStatusText(row.status) }
-                    }
-                }
-            },
-            trailing = {
-                // Read it now, saved for now, before choosing to keep it (Plan O2 Task 8).
-                if (onReadNow != null && row.status == ItemStatus.NotInstalled && canReadNow(row.id) && app.granger.online.isOnlineNow()) {
-                    androidx.compose.material3.TextButton(onClick = { onReadNow(row.id, row.title) }, modifier = Modifier.testTag("read_now_${row.id}")) {
-                        Text(stringResource(R.string.sources_read_now))
-                    }
-                }
-                RowActions(
-                    row,
-                    onGet = {
-                        beforeDownload()
-                        viewModel.get(row.id)
-                    },
-                    onCancel = { viewModel.cancel(row.id) },
-                    onRetry = { viewModel.retry(row.id) },
-                    onRemove = { scope.launch { confirmRemove = row to viewModel.removeKind(row.id) } },
-                    onOpen = open,
-                    preview = false,
-                )
-            },
-        )
-    }
+    fun ItemLine(row: ItemRow) = BookSourceLine(row, actions)
 
     Scaffold(
         topBar = {
@@ -241,18 +206,7 @@ fun BooksScreen(
                     }
                 }
             } else {
-                for (section in ui.sections) {
-                    val presets = if (section.title == Shelves.LITERATURE) ui.presets else emptyList()
-                    if (section.rows.isEmpty() && presets.isEmpty()) continue
-                    item(key = "label-${section.title}") { GroupLabel(section.heading.resolve()) }
-                    item(key = "block-${section.title}") {
-                        GroupedRows(
-                            presets.map { p ->
-                                @Composable { GroupedRow(BookShelves.presetName(p), BookShelves.presetMeta(p).resolve(), onClick = { onOpenScope(CatalogScope.GRANGER) }) }
-                            } + section.rows.map { r -> @Composable { ItemLine(r) } },
-                        )
-                    }
-                }
+                bookSourceShelves(ui, actions)
                 item(key = "find-header") { SectionHeader(stringResource(R.string.sources_books_find)) }
                 item(key = "find") {
                     GroupedRows(
@@ -295,4 +249,140 @@ fun BooksScreen(
     confirmRemove?.let { (row, kind) ->
         RemoveDialog(row, kind, onRemove = { viewModel.remove(row.id) }, onDismiss = { confirmRemove = null })
     }
+}
+
+/** What a book source row can do (Get books, and the Library's Every collection, Plan BK). */
+class BookSourceActions(
+    val viewModel: SourceViewModel,
+    val onOpenScope: (CatalogScope) -> Unit,
+    val onOpenPack: (packId: String) -> Unit,
+    val onOpenBook: (bookId: String, title: String) -> Unit,
+    val onOpenSet: (setId: String) -> Unit,
+    val onReadNow: ((itemId: String, title: String) -> Unit)?,
+    val canReadNow: (itemId: String) -> Boolean,
+    val onBrowse: ((packId: String) -> Unit)?,
+    val canBrowse: (itemId: String) -> Boolean,
+    val beforeDownload: () -> Unit,
+    val onRemove: (ItemRow) -> Unit,
+)
+
+/**
+ * One book source row: a folded list (Granger Classics, Project Gutenberg's subjects), a book set, or a pack or book
+ * with its action. A book pack not on the phone whose collection can be read online opens it (Plan BK); Get stays
+ * beside it as the whole pack's download.
+ */
+@Composable
+fun BookSourceLine(row: ItemRow, a: BookSourceActions) {
+    val scopeOpened = row.opensScope
+    if (scopeOpened != null) {
+        GroupedRow(row.title, row.meta?.resolve(), onClick = { a.onOpenScope(scopeOpened) })
+        return
+    }
+    val setOpened = row.opensSet
+    if (setOpened != null) {
+        GroupedRow(row.title, row.meta?.resolve(), onClick = { a.onOpenSet(setOpened) })
+        return
+    }
+    val browse = a.onBrowse?.takeIf { row.status == ItemStatus.NotInstalled && a.canBrowse(row.id) }
+    val open = { row.packId?.let(a.onOpenPack) ?: row.bookId?.let { a.onOpenBook(it, row.title) } ?: Unit }
+    GroupedRow(
+        title = row.title,
+        meta = (row.meta ?: row.details).resolve(),
+        onClick = when {
+            browse != null -> ({ browse(row.id) })
+            row.opens -> open
+            else -> null
+        },
+        modifier = Modifier.testTag("book_source_${row.id}"),
+        // Installed is said by Open; a download's progress, trouble or an update is said here.
+        below = if (row.status == ItemStatus.Installed || row.status == ItemStatus.NotInstalled) null else {
+            {
+                CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant) {
+                    Column { ItemStatusText(row.status) }
+                }
+            }
+        },
+        trailing = {
+            // Read it now, saved for now, before choosing to keep it (Plan O2 Task 8).
+            if (a.onReadNow != null && row.status == ItemStatus.NotInstalled && a.canReadNow(row.id) && app.granger.online.isOnlineNow()) {
+                androidx.compose.material3.TextButton(onClick = { a.onReadNow.invoke(row.id, row.title) }, modifier = Modifier.testTag("read_now_${row.id}")) {
+                    Text(stringResource(R.string.sources_read_now))
+                }
+            }
+            RowActions(
+                row,
+                onGet = {
+                    a.beforeDownload()
+                    a.viewModel.get(row.id)
+                },
+                onCancel = { a.viewModel.cancel(row.id) },
+                onRetry = { a.viewModel.retry(row.id) },
+                onRemove = { a.onRemove(row) },
+                onOpen = open,
+                preview = false,
+            )
+        },
+    )
+}
+
+/**
+ * The shelves of book sources (Literature, Children's books, Manuals & references, Learning), each a label and a block
+ * of rows, Granger's sets first under Literature: Get books' body, and the Library's Every collection (Plan BK).
+ */
+fun androidx.compose.foundation.lazy.LazyListScope.bookSourceShelves(ui: SourceUi, a: BookSourceActions, keyPrefix: String = "") {
+    for (section in ui.sections) {
+        if (section.title == SourceViewModel.BOOK_RESULTS) continue
+        val presets = if (section.title == Shelves.LITERATURE) ui.presets else emptyList()
+        if (section.rows.isEmpty() && presets.isEmpty()) continue
+        item(key = "${keyPrefix}label-${section.title}") { GroupLabel(section.heading.resolve()) }
+        item(key = "${keyPrefix}block-${section.title}") {
+            GroupedRows(
+                presets.map { p ->
+                    @Composable { GroupedRow(BookShelves.presetName(p), BookShelves.presetMeta(p).resolve(), onClick = { a.onOpenScope(CatalogScope.GRANGER) }) }
+                } + section.rows.map { r -> @Composable { BookSourceLine(r, a) } },
+            )
+        }
+    }
+}
+
+
+/**
+ * Book source rows' actions for a screen other than Get books (the Library's Every collection, Plan BK), with the
+ * dialogs they open (a big download's size check, Remove) and the one-time notifications ask before a download.
+ */
+@Composable
+fun rememberBookSourceActions(
+    viewModel: SourceViewModel,
+    onOpenScope: (CatalogScope) -> Unit,
+    onOpenPack: (packId: String) -> Unit,
+    onOpenBook: (bookId: String, title: String) -> Unit,
+    onOpenSet: (setId: String) -> Unit,
+    onReadNow: ((itemId: String, title: String) -> Unit)?,
+    canReadNow: (itemId: String) -> Boolean,
+    onBrowse: ((packId: String) -> Unit)?,
+    canBrowse: (itemId: String) -> Boolean,
+): BookSourceActions {
+    val ui by viewModel.ui.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    var askedForNotifications by rememberSaveable { mutableStateOf(false) }
+    val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
+    fun beforeDownload() {
+        if (askedForNotifications || Build.VERSION.SDK_INT < 33) return
+        if (context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) return
+        askedForNotifications = true
+        notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
+    var confirmRemove by remember { mutableStateOf<Pair<ItemRow, RemoveKind>?>(null) }
+    val scope = rememberCoroutineScope()
+    ui.sizeCheck?.let { check ->
+        SizeCheckDialog(check, onGet = { id -> beforeDownload(); viewModel.confirmGet(id) }, onDismiss = viewModel::dismissSizeCheck)
+    }
+    confirmRemove?.let { (row, kind) ->
+        RemoveDialog(row, kind, onRemove = { viewModel.remove(row.id) }, onDismiss = { confirmRemove = null })
+    }
+    return BookSourceActions(
+        viewModel = viewModel, onOpenScope = onOpenScope, onOpenPack = onOpenPack, onOpenBook = onOpenBook, onOpenSet = onOpenSet,
+        onReadNow = onReadNow, canReadNow = canReadNow, onBrowse = onBrowse, canBrowse = canBrowse,
+        beforeDownload = ::beforeDownload, onRemove = { row -> scope.launch { confirmRemove = row to viewModel.removeKind(row.id) } },
+    )
 }

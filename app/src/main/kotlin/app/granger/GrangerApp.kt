@@ -443,8 +443,23 @@ class AppContainer(context: Context) {
      */
     suspend fun restoreBook(book: Book): Boolean =
         packDocuments.restore(book) ||
-            (gutenbergBooks.restore(book) || nautilusBooks.restore(book) || manifestBooks.restore(book))
+            (gutenbergBooks.restore(book) || nautilusBooks.restore(book) || manifestBooks.restore(book) || restoreOnline(book))
                 .also { if (it) appScope.launch { bookIndex.indexPending() } }
+
+    /**
+     * Plan BK: a pack book read online whose saved copy has gone (Saved for now trimmed it) comes down again from the
+     * pack file, when online. False for any other book, or offline.
+     */
+    private suspend fun restoreOnline(book: Book): Boolean {
+        if (book.loose != app.granger.core.library.Loose.SAVED || File(book.filePath).isFile) return false
+        val zimName = app.granger.core.library.PackBooks.packNameOf(book)
+        val entry = catalog.state.value.catalog?.packs?.firstOrNull { p ->
+            p.zimName == zimName && p.sidecars.any { it.kind == app.granger.core.catalog.SidecarEntry.GBOOKS }
+        } ?: return false
+        val remote = packBookReads.collection(entry, canFetchOnline()) ?: return false
+        val item = remote.itemOf(book.id) ?: return false
+        return readPackBookOnline(entry.id, item.key) != null
+    }
 
     /**
      * Keeps the Gutenberg books' rows following the installed Gutenberg packs (Plan GB Decision 3): synced on start, on
@@ -1031,6 +1046,71 @@ class AppContainer(context: Context) {
         val root = kotlinx.coroutines.withContext(Dispatchers.IO) { volumes.list().firstOrNull()?.root } ?: return false
         downloads.enqueue(entry, root, downloadPrefs.wifiOnly)
         return true
+    }
+
+    /** Plan BK: book packs' books read one at a time from the pack file on Kiwix's mirrors. */
+    val packBookReads by lazy {
+        app.granger.online.PackBookReads(http, savedStore, File(appContext.cacheDir, "reading"), trim = { savedStore.trim(onlinePrefs.savedCapMb.value * 1024L * 1024) })
+    }
+
+    /** Whether something may be fetched now: online, Local only off, the privacy line seen. */
+    fun canFetchOnline(): Boolean = reach.now.online && networkPolicy.privacySeen.value
+
+    /** Plan BK: the catalog pack [packEntryId]'s collection, read online (or from Saved for now); null without one. */
+    suspend fun remoteCollection(packEntryId: String): app.granger.online.RemoteCollection? {
+        val entry = catalog.state.value.catalog?.packs?.firstOrNull { it.id == packEntryId } ?: return null
+        return packBookReads.collection(entry, canFetchOnline())
+    }
+
+    /**
+     * Plan BK: opens the book [key] of the catalog pack [packEntryId] without the pack: read from the pack file by range
+     * into Saved for now, as the row the pack would give it (hidden: read, not kept). Its id, or null when it can't be
+     * had. A book already here (kept, or its pack installed and copied out) opens as it is.
+     */
+    suspend fun readPackBookOnline(packEntryId: String, key: String, progress: (Long, Long) -> Unit = { _, _ -> }): String? {
+        val remote = remoteCollection(packEntryId) ?: return null
+        val item = remote.items.firstOrNull { it.key == key } ?: return null
+        val id = remote.bookId(item)
+        bookshelf.book(id)?.takeIf { it.status == app.granger.core.library.PackStatus.OK && File(it.filePath).isFile }?.let { return it.id }
+        val file = packBookReads.book(remote, item, canFetchOnline(), progress) ?: return null
+        val pack = remote.pack
+        val details = app.granger.core.library.BookDetails(
+            title = item.title, author = item.author, date = "", subjects = emptyList(), description = item.description,
+            language = item.language.ifBlank { pack.language },
+        )
+        val place = app.granger.core.library.PackItem(
+            ref = remote.ref(item), path = item.path, title = item.title, author = item.author, format = item.format,
+            sizeBytes = item.bytes, groupName = item.groupName, ord = item.ord,
+            workKey = item.partOf ?: item.workKey, workTitle = item.workTitle, partNo = item.partNo,
+        )
+        return bookshelf.addLoose(id, remote.origin, "${pack.zimName}/${item.path}", file, details, place)?.id
+    }
+
+    /**
+     * Plan BK: keeps a pack book read online on its own, without its pack: its file moves out of Saved for now into
+     * `books/kept`, and it joins the shelf in its pack's collection. True when it's kept (or already was).
+     */
+    suspend fun keepPackBook(bookId: String): Boolean {
+        val book = bookshelf.book(bookId) ?: return false
+        if (book.loose == app.granger.core.library.Loose.KEPT) return true
+        if (book.loose != app.granger.core.library.Loose.SAVED) return false
+        val ext = if (book.format == app.granger.core.library.BookFormat.PDF) "pdf" else "epub"
+        val dir = kotlinx.coroutines.withContext(Dispatchers.IO) { File(bookDirs().first(), "kept") }
+        val name = java.security.MessageDigest.getInstance("SHA-1").digest(bookId.toByteArray()).joinToString("") { "%02x".format(it) }
+        bookshelf.keepLoose(bookId, File(dir, "$name.$ext")) ?: return false
+        savedStore.remove(app.granger.online.SavedStore.bookKey(bookId))
+        return true
+    }
+
+    /** Plan BK: keeps a whole book pack (the ordinary download). True when it's queued, coming or already here. */
+    suspend fun keepPack(packEntryId: String): Boolean {
+        val entry = catalog.state.value.catalog?.packs?.firstOrNull { it.id == packEntryId } ?: return false
+        val root = kotlinx.coroutines.withContext(Dispatchers.IO) { volumes.list().firstOrNull()?.root } ?: return false
+        return when (downloads.enqueue(entry, root, downloadPrefs.wifiOnly)) {
+            app.granger.core.downloads.EnqueueResult.Queued, app.granger.core.downloads.EnqueueResult.AlreadyActive,
+            app.granger.core.downloads.EnqueueResult.AlreadyInstalled -> true
+            is app.granger.core.downloads.EnqueueResult.NoSpace -> false
+        }
     }
 
     /** Debug only (Plan O2 Pixel pass): removes every kept article (`--es kept_clear all`). */

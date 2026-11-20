@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Plan BK: the online bookshelf (every collection browseable online; books read from the pack; Keep a book or the pack). -->
+<resources>
+    <string name="bk_every_collection">Every collection</string>
+    <string name="bk_every_collection_sub">Open any book online. Keep what you want on this phone.</string>
+    <string name="bk_keep_collection">Keep the whole collection · %1$s</string>
+    <string name="bk_keep_collection_queued">Coming to this phone</string>
+    <string name="bk_keep_book">Keep this book</string>
+    <string name="bk_kept">Kept on this phone</string>
+    <string name="bk_book_meta_online">%1$s · online</string>
+    <string name="bk_opening">Opening %1$s…</string>
+    <string name="bk_opening_progress">%1$s of %2$s</string>
+    <string name="bk_cancel">Cancel</string>
+    <string name="bk_couldnt_open">Couldn\'t open that book just now.</string>
+    <string name="bk_couldnt_keep">Couldn\'t keep that book.</string>
+    <string name="bk_kept_notice">Kept. It\'s on your shelf now.</string>
+    <string name="bk_big_title">This book is %1$s</string>
+    <string name="bk_big_body">Reading it online saves it for now; keep it to have it offline for good.</string>
+    <string name="bk_big_over_cap">It\'s bigger than Saved for now, so it goes when you close it unless you keep it.</string>
+    <string name="bk_read_now">Read now</string>
+    <string name="bk_keep">Keep</string>
+    <string name="bk_filter">Find in this collection</string>
+    <string name="bk_no_list">This collection\'s list isn\'t online. Keep the whole collection to read it.</string>
+    <string name="bk_needs_internet">Needs internet to open its books.</string>
+    <string name="bk_reading_edition">Reading edition</string>
+    <plurals name="bk_books_kept">
+        <item quantity="one">%1$d of %2$s kept</item>
+        <item quantity="other">%1$d of %2$s kept</item>
+    </plurals>
+</resources>

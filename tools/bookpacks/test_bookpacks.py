@@ -283,3 +283,22 @@ def test_nautilus_records_read_as_the_app_reads_them():
     rs = build.nautilus_records(js)
     assert [r["title"] for r in rs] == ["Encyclopedia of Knots", "Sailor's Knots"]
     assert rs[0]["author"] == "" and rs[1]["files"] == ["a.pdf", "b.epub"]
+
+
+def test_attach_replaces_only_the_gbooks_sidecar_of_every_flavour_of_its_source(tmp_path):
+    import attach
+    out = tmp_path / "example.org_en_all_2026-10.gbooks"
+    build.write_gbooks(build.build("example.org_en_all", ZIMIT, ZIMIT_CFG), out, "example.org_en_all_2026-10.zim", meta.sha256(ZIMIT))
+    sha = meta.sha256(ZIMIT)
+    catalog = {"packs": [
+        {"zimName": "example.org_en_all", "snapshotDate": "2026-10", "sha256": sha,
+         "sidecars": [{"kind": "gqid", "url": "https://x/q"}, {"kind": "gbooks", "url": "https://x/old"}]},
+        {"zimName": "example.org_en_all", "snapshotDate": "2026-10", "sha256": "other-flavour", "sidecars": []},
+        {"zimName": "else", "snapshotDate": "2026-10", "sha256": "e", "sidecars": []}]}
+    n, lines = attach.attach(catalog, [out], "https://github.com/x/releases/download/bookpacks-1/")
+    assert n == 2
+    first = catalog["packs"][0]["sidecars"]
+    assert [s["kind"] for s in first] == ["gqid", "gbooks"]
+    assert first[1]["url"] == "https://github.com/x/releases/download/bookpacks-1/" + out.name
+    assert catalog["packs"][1]["sidecars"][0]["sha256"] == first[1]["sha256"]
+    assert catalog["packs"][2]["sidecars"] == []

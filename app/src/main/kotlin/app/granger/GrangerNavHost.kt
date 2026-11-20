@@ -169,6 +169,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import app.granger.sources.bookSourceShelves
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -433,6 +434,9 @@ internal fun railToolOf(
 @Serializable object BrowseRoute
 /** Files in this pack (Plan KB2 Task 4.6): a website pack's PDFs and EPUBs. */
 @Serializable data class PackFilesRoute(val packId: String)
+
+/** Plan BK: a book pack's collection read online, before (or without) the pack; [packId] is its catalog id. */
+@Serializable data class RemoteCollectionRoute(val packId: String)
 
 /** Explore (Plan EX, with [Features.EXPLORE]): the rail's Browse tool lands here; Your sources leads on to [BrowseRoute]. */
 @Serializable object ExploreRoute
@@ -935,6 +939,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
      * Opens an installed pack: a book pack's Library collection of its books (Plan GB Decision 4, Plan KB Decision 6),
      * any other pack in the reader.
      */
+    /** Plan BK: whether catalog pack [id] is a book pack whose collection can be read online (it has a list). */
+    fun canBrowseOnline(id: String): Boolean =
+        Features.ONLINE && container.catalog.state.value.catalog?.packs?.firstOrNull { it.id == id }
+            ?.sidecars?.any { it.kind == app.granger.core.catalog.SidecarEntry.GBOOKS } == true
+
     fun openPackOrCollection(packId: String) {
         scope.launch {
             val pack = container.library.packs.first().firstOrNull { it.id == packId }
@@ -1168,6 +1177,49 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     onImportAsked = { backStackEntry.savedStateHandle[IMPORT_ASKED] = false },
                     // The reading shelf opens a book where it was left (Plan O4 Task 5).
                     onOpenBook = { book -> scope.launch { showTab(container.sessions.openTab(book.id, "", book.title)) } },
+                    everyCollection = if (!Features.ONLINE || !app.granger.online.isOnlineNow()) null else {
+                        val books = viewModel(key = "every-collection") {
+                            SourceViewModel(
+                                CatalogScope.BOOKS, container.catalog, container.downloads, container.library, container.bookshelf, container.volumes,
+                                container.downloadPrefs, container.deviceTier, container.appScope, askOn = container.askOn, meaningSearch = container.meaningSearch,
+                                knowledge = container.knowledgeLanguages.languages,
+                            )
+                        }
+                        val booksUi by books.ui.collectAsStateWithLifecycle()
+                        val actions = app.granger.sources.rememberBookSourceActions(
+                            books,
+                            onOpenScope = { s -> nav.navigate(SourceRoute(s)) },
+                            onOpenPack = ::openPackOrCollection,
+                            onOpenBook = { bookId, title -> scope.launch { showTab(container.sessions.openTab(bookId, "", title)) } },
+                            onOpenSet = { id -> nav.navigate(SourceRoute(CatalogScope.BOOK_SET, set = id)) },
+                            onReadNow = { id, title -> scope.launch { container.readWithoutKeeping(id)?.let { bookId -> showTab(container.sessions.openTab(bookId, "", title)) } } },
+                            canReadNow = { id -> container.catalog.state.value.catalog?.books?.any { it.id == id } == true },
+                            onBrowse = { id -> nav.navigate(RemoteCollectionRoute(id)) },
+                            canBrowse = ::canBrowseOnline,
+                        );
+                        { bookSourceShelves(booksUi, actions, keyPrefix = "every-") }
+                    },
+                )
+            }
+            composable<RemoteCollectionRoute> { backStackEntry ->
+                val packId = backStackEntry.toRoute<RemoteCollectionRoute>().packId
+                app.granger.library.RemoteCollectionScreen(
+                    viewModel = viewModel(key = "remote:$packId") {
+                        app.granger.library.RemoteCollectionViewModel(
+                            load = { container.remoteCollection(packId) },
+                            books = container.bookshelf.books,
+                            read = { key, progress -> container.readPackBookOnline(packId, key, progress) },
+                            keepBook = { id -> container.keepPackBook(id) },
+                            keepPack = { container.keepPack(packId) },
+                            packQueued = container.downloads.records.map { list ->
+                                list.any { it.itemId == packId && it.state != app.granger.core.downloads.DownloadState.FAILED }
+                            },
+                            capBytes = { container.onlinePrefs.savedCapMb.value * 1024L * 1024 },
+                            online = { container.canFetchOnline() },
+                        )
+                    },
+                    onBack = { nav.popBackStack() },
+                    onOpenBook = { bookId, title -> scope.launch { showTab(container.sessions.openTab(bookId, "", title)) } },
                 )
             }
             composable<ExploreRoute> {
@@ -1424,10 +1476,14 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                 val target = route.target()
                 // A book opened without keeping it (Plan O2 Task 8): off the shelf, from the catalog; ⋯ offers Keep.
                 var keepRef by remember(route.tabId) { mutableStateOf<String?>(null) }
+                // A pack book read online (Plan BK): ⋯ Keep keeps it on its own, without the pack.
+                var keepLooseId by remember(route.tabId) { mutableStateOf<String?>(null) }
                 LaunchedEffect(route.tabId) {
                     if (!Features.ONLINE) return@LaunchedEffect
                     val bookId = container.sessions.tab(route.tabId)?.packId ?: return@LaunchedEffect
-                    keepRef = container.bookshelf.book(bookId)?.takeIf { it.hidden && it.origin == app.granger.core.library.BookOrigin.GRANGER }?.sourceRef
+                    val book = container.bookshelf.book(bookId)
+                    keepRef = book?.takeIf { it.hidden && it.origin == app.granger.core.library.BookOrigin.GRANGER }?.sourceRef
+                    keepLooseId = book?.takeIf { it.loose == app.granger.core.library.Loose.SAVED }?.id
                 }
                 EbookReaderScreen(
                     viewModel = viewModel {
@@ -1466,7 +1522,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             showTab(route.tabId)
                         }
                     },
-                    onKeep = keepRef?.let { ref -> { scope.launch { if (container.keepBook(ref)) keepRef = null } } },
+                    onKeep = keepRef?.let { ref -> { scope.launch { if (container.keepBook(ref)) keepRef = null } } }
+                        ?: keepLooseId?.let { id -> { scope.launch { if (container.keepPackBook(id)) keepLooseId = null } } },
                 )
             }
             composable<SearchRoute> { backStackEntry ->
@@ -1910,6 +1967,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                         canReadNow = { id -> container.catalog.state.value.catalog?.books?.any { it.id == id } == true },
                         onImport = if (Features.IMPORT) nav::importIntoLibrary else null,
                         onOpenSet = { id -> nav.navigate(SourceRoute(CatalogScope.BOOK_SET, set = id)) },
+                        onBrowse = if (!Features.ONLINE) null else { id -> nav.navigate(RemoteCollectionRoute(id)) },
+                        canBrowse = ::canBrowseOnline,
                     )
                     return@composable
                 }
