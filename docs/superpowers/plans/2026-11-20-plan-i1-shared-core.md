@@ -134,9 +134,10 @@
 
 ### Task 10: Close
 
-- [ ] Delete `spikes/i0/` (its findings live in the results doc; the git history keeps the code).
-- [ ] Update the roadmap I1+ row and the spec if anything moved. Write `ios/README.md`'s first section: what's there today (CoreSmoke) and the GrangerCore switch.
-- [ ] Merge `i0-iphone-spike` into main (fast-forward after a rebase), with Neal's OK; push with Neal's OK.
+- [x] Delete `spikes/i0/` (its findings live in the results doc; the git history keeps the code).
+- [x] Update the roadmap I1+ row and the spec if anything moved. Write `ios/README.md`'s first section: what's there today (CoreSmoke) and the GrangerCore switch.
+- [x] Merge `i0-iphone-spike` into main (fast-forward after a rebase), with Neal's OK; push with Neal's OK.
+- *Done 2026-11-20: `spikes/i0/` deleted (the results doc and git history keep it); roadmap and spec updated; `ios/README.md` written in Task 8. Merged to main and pushed with Neal's OK.*
 
 ## Order and size
 

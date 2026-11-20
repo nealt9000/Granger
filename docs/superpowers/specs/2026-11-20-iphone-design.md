@@ -27,11 +27,11 @@ The same app as Android's online build, drawn in SwiftUI:
 | Layer | Android today | Both phones after I1–I3 |
 | --- | --- | --- |
 | Text, research, vectors | `:core:text`, `:core:research`, `:core:vectors` (JVM) | Same modules, KMP (`commonMain` + `jvm`/`android` + `iosArm64`/`iosSimulatorArm64`), as proven in I0 §4 |
-| Catalog | `:core:catalog` (BouncyCastle Ed25519) | KMP; the signature check is `expect`/`actual` (BouncyCastle / CryptoKit `Curve25519.Signing`) |
-| Online sources | `:app/online`, `:app/topic` (OkHttp) | New `:core:online` on Ktor (OkHttp engine on Android, Darwin on iOS) behind the same `NetworkGate` rule; page transforms and `online.css` as shared resources |
+| Catalog | `:core:catalog` (BouncyCastle Ed25519) | `:core:catalog-api` (I1); the signature check is BouncyCastle on Android, CryptoKit injected by the app on iOS |
+| Online sources | `:app/online`, `:app/topic` (OkHttp) | `:core:online` (I1): blocking over `HttpFetch`, the app's `OkHttpClient` on Android (same `NetworkGate`), `NSURLSession` on iOS; no Ktor |
 | Library store | `:core:library` on Room | Room KMP, one schema and one migration chain for both phones (bundled SQLite with FTS4) |
 | Download rules, Outfitting | `:core:downloads`, `:app/online/Outfitting` | Rules and model shared; transport native (WorkManager / URLSession) |
-| ZIM | `:core:zim` (java-libkiwix) | A Kotlin `ZimArchive` interface in common code; Android implements it with java-libkiwix, iOS in Swift over CoreKiwix.xcframework (Kotlin/Native can't call C++) |
+| ZIM | `:core:zim` (java-libkiwix) | A Kotlin `ZimArchive` interface in common code (`:core:zim-api`, I1); Android implements it with java-libkiwix, iOS in Swift over CoreKiwix.xcframework (Kotlin/Native can't call C++) |
 | Screens | Compose in `:app` | SwiftUI in `ios/`; Android unchanged |
 | Readers, player, downloads, system | WebView, Readium Kotlin, Media3, WorkManager | `WKWebView` + `WKURLSchemeHandler`, Readium Swift, AVFoundation + MPNowPlayingInfoCenter, URLSession background sessions |
 
@@ -58,8 +58,8 @@ The same app as Android's online build, drawn in SwiftUI:
 | Plan | Delivers | Ends with |
 | --- | --- | --- |
 | **I1 Shared core** | The three cores, `:core:catalog` and a new `:core:online` converted to KMP in place (from I0's trial); `:shared` + SKIE exporting `GrangerCore`; the `GrangerCore` release script; Ksoup checked against real `.gvec` builds (chunk hashes match). Android's whole JVM suite and a Pixel smoke test pass | Android unchanged on the phone; the framework links into an empty iOS app |
-| **I2 iOS app + online reading** | `ios/` project, signing, theme, tab bar; the online Wikipedia reader (`WKWebView`, `online.css`, Commons pictures, Contents, links), Search (online), the topic page, the first-run privacy line, Local only, Settings basics; `ios/README.md` | **Dev-friend build 1** |
-| **I3 Library store, Home, Explore** | `:core:library` on Room KMP (Android migrates on its own schema chain, no data loss); keeping and marks; Home (feed engine shared); Explore with the `.gqid`/`.gtime` indexes and topic records | Dev-friend build 2 |
+| **I2 iOS app + online reading** | `ios/` project, signing, theme, tab bar; the online Wikipedia reader (`WKWebView`, `online.css`, Commons pictures, Contents, links), Search (online), the topic page (summary and Related; records-backed parts come in I3), the first-run privacy line, Local only, Settings basics; `ios/README.md` | **Dev-friend build 1** |
+| **I3 Library store, Home, Explore** | `:core:library` on Room KMP (Android migrates on its own schema chain, no data loss); keeping and marks; Home (feed engine shared); Explore with the `.gqid`/`.gtime` indexes; topic records (`TopicRecords`, `RemoteRecords`, moved here from I1 with `:core:library`) | Dev-friend build 2 |
 | **I4 Kiwix packs + downloads** | CoreKiwix.xcframework; the Swift `ZimArchive`; `zim:` pages through `WKURLSchemeHandler`; pack search in Search; Get more from the signed catalog; URLSession background downloads (resume by Range + ETag, sha256 after, Wi-Fi rule); packs in Files | Dev-friend build 3 |
 | **I5 Books + the voice** | Readium Swift for EPUB (place, Contents, the content iterator for sentence marks); Classics and Gutenberg; sherpa-onnx Piper (Owl) with AVAudioSession, the lock screen, sleep and speed; the mini player and the full player | Dev-friend build 4 |
 | **I6 Family build** | Spanish (String Catalog generated from Android's `strings.xml`), Send feedback (mail compose with the device, build and log), crash records (MetricKit), the privacy manifest, the tester note; the GPL §7 App Store permission and Kiwix's answer; TestFlight under AETHERBOUND LLC (internal first, then external with one Beta App Review) | **TestFlight for family** |
