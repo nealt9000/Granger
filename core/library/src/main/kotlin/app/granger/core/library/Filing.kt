@@ -57,9 +57,9 @@ object Filing {
     fun defaultMediaType(pack: Pack): String = if (pack.name.startsWith("maps_")) "maps" else "literature"
 
     /** The `defaultKey` of the app-made Kiwix folder (`c:kiwix`, "Kiwix", in Literature). */
-    const val FOLDER_KEY = "kiwix"
+    const val FOLDER_KEY = FilingKeys.FOLDER_KEY
 
-    const val FOLDER_NAME = "Kiwix"
+    const val FOLDER_NAME = FilingKeys.FOLDER_NAME
 
     /**
      * Whether [pack] is Kiwix's: every named ZIM except Granger's own. Packs have no origin field, so this covers

@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.ksp)
 }
 
 android {
@@ -12,7 +11,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     sourceSets {
-        getByName("test") { assets.directories.add("$projectDir/schemas") }
+        getByName("test") { assets.directories.add(rootProject.file("core/store/schemas").path) }
     }
     testOptions {
         unitTests.isIncludeAndroidResources = true
@@ -21,11 +20,9 @@ android {
     }
 }
 
-ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
-}
-
 dependencies {
+    // The Room database, entities and DAOs, shared with the iPhone (Plan I3).
+    api(project(":core:store"))
     api(project(":core:zim"))
     // Public: ImportResult.Protected exposes DrmKind.
     api(project(":core:books"))
@@ -36,7 +33,6 @@ dependencies {
     implementation(libs.jsoup)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)

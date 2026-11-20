@@ -562,7 +562,7 @@ class RoomBookshelf(
     }
 
     /** The key a pack document's row is filed under: its pack's ZIM name, or its UUID when it has none (or isn't here). */
-    private fun packKey(zimId: String): String = db.packDao().get(zimId)?.name?.takeIf { it.isNotBlank() } ?: zimId
+    private fun packKey(zimId: String): String = db.packDao().getBlocking(zimId)?.name?.takeIf { it.isNotBlank() } ?: zimId
 
     /**
      * Files the pack document [old] under [ref] (`<name>/<path>`): the row keyed by it takes [old]'s place, marks, tabs

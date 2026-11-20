@@ -49,11 +49,12 @@
 
 **Files:** `core/library/build.gradle.kts` (Android-KMP plugin, iOS targets, KSP per target), `src/main` → `commonMain`/`androidMain`, `LibraryDatabase.kt` (`@ConstructedBy`, driver per platform), the migrations, `Daos.kt` (the one blocking DAO), tests → `androidHostTest`.
 
-- [ ] Read Room 2.8.5's KMP setup on the day and note anything that differs from the plan.
-- [ ] Convert the module: entities, DAOs and the database class in `commonMain`; `RoomLibrary` and anything `Context`-bound in `androidMain`; a `LibraryDatabase.build(path)` per platform (Android: framework driver and the existing file; iOS: bundled driver).
-- [ ] Migrations 1→17 rewritten from `SupportSQLiteDatabase` to `SQLiteConnection` (same SQL). The schema JSON files stay the source of truth. Room's migration tests pass on Android; an iOS test opens a version-1 database built from `schemas/` and migrates it to 17.
-- [ ] `BookIndex`'s raw FTS4 queries move to the connection API.
-- [ ] The whole JVM/Robolectric suite passes unchanged in count. Commit.
+- [x] Read Room 2.8.5's KMP setup on the day and note anything that differs from the plan.
+- [x] Convert the module: entities, DAOs and the database class in `commonMain`; `RoomLibrary` and anything `Context`-bound in `androidMain`; a `LibraryDatabase.build(path)` per platform (Android: framework driver and the existing file; iOS: bundled driver).
+- [x] Migrations 1→17 rewritten from `SupportSQLiteDatabase` to `SQLiteConnection` (same SQL). The schema JSON files stay the source of truth. Room's migration tests pass on Android; an iOS test opens a version-1 database built from `schemas/` and migrates it to 17.
+- [x] `BookIndex`'s raw FTS4 queries move to the connection API.
+- [x] The whole JVM/Robolectric suite passes unchanged in count. Commit.
+- *Done 2026-11-20, as a split like I1's (not an in-place conversion): a new KMP module **`:core:store`** (Android-KMP + iOS, KSP per target) holds `LibraryDatabase` (`@ConstructedBy`), the entities, the DAOs, `BookIds`, `BookPacks`, `GutenbergNames`, `FilingKeys` and `schemas/`; `:core:library` stays an Android library re-exporting it, so its 538 Robolectric tests and the migration tests run as before. Migrations and the seed callback are written once against `SQLiteConnection`; on Android, Room's framework-SQLite mode hands them a wrapped connection, and **all 538 library tests including MigrationTest pass**. `PackDao.get` is now `suspend`; Android's blocking callers use `getBlocking`. `inTransaction` (Android: `withTransaction`; iOS: `useWriterConnection { immediateTransaction }`) for shared code. `@RawQuery` takes `RoomRawQuery`. `Pack.from`/`unreadable` take a path and size (File overloads in `:core:library`). iOS tests (bundled SQLite): a version-1 database built from `schemas/1.json` migrates to 17 through Room; a fresh one is seeded with the five media types and `book_text`. Whole suite 3,846 tests; the only failures were two timing-sensitive `PlayerEngineTest` cases that pass on rerun (one was flaky in the I1 baseline).*
 
 ### Task 2: The sidecar readers on `androidx.sqlite`
 

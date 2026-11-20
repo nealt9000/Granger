@@ -177,7 +177,7 @@ class RoomLibrary(
 
     override fun archive(packId: String): ZimArchive? {
         synchronized(openArchives) { openArchives[packId]?.let { return it } }
-        val pack = packDao.get(packId)?.takeIf { it.status == PackStatus.OK } ?: return null
+        val pack = packDao.getBlocking(packId)?.takeIf { it.status == PackStatus.OK } ?: return null
         val opened = (opener.open(File(pack.filePath)) as? ZimOpenResult.Opened)?.archive ?: return null
         if (opened.uuid != packId) {
             // The file was replaced (e.g. a new snapshot) since the last refresh; it isn't this pack.

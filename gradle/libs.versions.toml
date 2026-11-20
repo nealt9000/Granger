@@ -37,6 +37,7 @@ desugarJdkLibs = "2.1.5"
 media3 = "1.11.1"
 glance = "1.2.0"
 ndk = "30.0.16248370"
+sqlite = "2.6.2"
 ksoup = "0.2.6"
 ktor = "3.6.1"
 skie = "0.10.16"
@@ -95,6 +96,8 @@ media3-test-utils = { module = "androidx.media3:media3-test-utils", version.ref 
 media3-test-utils-robolectric = { module = "androidx.media3:media3-test-utils-robolectric", version.ref = "media3" }
 androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
 androidx-glance-appwidget-testing = { module = "androidx.glance:glance-appwidget-testing", version.ref = "glance" }
+androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
+androidx-sqlite-framework = { module = "androidx.sqlite:sqlite-framework", version.ref = "sqlite" }
 ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }

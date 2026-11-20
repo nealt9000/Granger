@@ -7,7 +7,7 @@ import androidx.room.Query
 import androidx.room.RawQuery
 import androidx.room.Update
 import androidx.room.Upsert
-import androidx.sqlite.db.SupportSQLiteQuery
+import androidx.room.RoomRawQuery
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -18,9 +18,9 @@ interface PackDao {
     @Query("SELECT * FROM packs")
     suspend fun getAll(): List<Pack>
 
-    /** Blocking; never call on the main thread. */
+    /** Android's blocking callers use `getBlocking` (`:core:library`); never on the main thread. */
     @Query("SELECT * FROM packs WHERE id = :id")
-    fun get(id: String): Pack?
+    suspend fun get(id: String): Pack?
 
     @Upsert
     suspend fun upsert(pack: Pack)
@@ -330,7 +330,7 @@ interface BookDao {
 
     /** For queries over `book_text`, which Room doesn't know about; they must select `book_chunks` columns. */
     @RawQuery
-    suspend fun chunksMatching(query: SupportSQLiteQuery): List<BookChunk>
+    suspend fun chunksMatching(query: RoomRawQuery): List<BookChunk>
 }
 
 @Dao

@@ -273,7 +273,7 @@ class BookIndex(
         for (ids in ranked.chunked(200)) {
             if (chunks.size >= limit) break
             val rows = try {
-                dao.chunksMatching(SimpleSQLiteQuery("SELECT * FROM book_chunks WHERE id IN (${ids.joinToString(",")})"))
+                dao.chunksMatching(androidx.room.RoomRawQuery("SELECT * FROM book_chunks WHERE id IN (${ids.joinToString(",")})"))
             } catch (_: SQLException) {
                 break
             }.associateBy { it.id }
@@ -296,7 +296,7 @@ class BookIndex(
         db.withTransaction {
             val sql = db.openHelper.writableDatabase
             sql.execSQL("DROP TABLE IF EXISTS book_text")
-            LibraryDatabase.createBookText(sql)
+            sql.execSQL(LibraryDatabase.BOOK_TEXT_SQL)
             sql.execSQL("DELETE FROM book_chunks")
             // Safe now that book_text is empty, and without it the orphan count would never fall.
             sql.execSQL("DELETE FROM sqlite_sequence WHERE name = 'book_chunks'")

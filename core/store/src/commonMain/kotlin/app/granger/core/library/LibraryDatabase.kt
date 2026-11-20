@@ -1,12 +1,13 @@
 package app.granger.core.library
 
-import android.content.Context
 import androidx.room.AutoMigration
+import androidx.room.ConstructedBy
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.RoomDatabaseConstructor
 import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
 
 @Database(
     entities = [
@@ -26,6 +27,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
     exportSchema = true,
     autoMigrations = [AutoMigration(from = 1, to = 2)],
 )
+@ConstructedBy(LibraryDatabaseConstructor::class)
 abstract class LibraryDatabase : RoomDatabase() {
     abstract fun packDao(): PackDao
     abstract fun bookmarkDao(): BookmarkDao
@@ -43,7 +45,8 @@ abstract class LibraryDatabase : RoomDatabase() {
     companion object {
         /** Adds media types, collections, placements, reading tabs, history and recent searches. */
         val MIGRATION_2_3 = object : Migration(2, 3) {
-            override fun migrate(db: SupportSQLiteDatabase) {
+            override fun migrate(connection: SQLiteConnection) {
+                val db = connection
                 db.execSQL("CREATE TABLE IF NOT EXISTS `media_types` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `builtIn` INTEGER NOT NULL, `sortOrder` INTEGER NOT NULL, PRIMARY KEY(`id`))")
                 db.execSQL("CREATE TABLE IF NOT EXISTS `collections` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `mediaTypeId` TEXT NOT NULL, `userCreated` INTEGER NOT NULL, `defaultKey` TEXT, PRIMARY KEY(`id`))")
                 db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_collections_defaultKey` ON `collections` (`defaultKey`)")
@@ -58,7 +61,8 @@ abstract class LibraryDatabase : RoomDatabase() {
 
         /** Adds books, positions, marks and text chunks, and the `book_text` search index. */
         val MIGRATION_3_4 = object : Migration(3, 4) {
-            override fun migrate(db: SupportSQLiteDatabase) {
+            override fun migrate(connection: SQLiteConnection) {
+                val db = connection
                 db.execSQL("CREATE TABLE IF NOT EXISTS `books` (`id` TEXT NOT NULL, `origin` TEXT NOT NULL, `sourceRef` TEXT NOT NULL, `filePath` TEXT NOT NULL, `title` TEXT NOT NULL, `author` TEXT NOT NULL, `translator` TEXT NOT NULL, `date` TEXT NOT NULL, `language` TEXT NOT NULL, `subjects` TEXT NOT NULL, `description` TEXT NOT NULL, `coverPath` TEXT, `sizeBytes` INTEGER NOT NULL, `status` TEXT NOT NULL, `indexedAt` INTEGER, `addedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
                 db.execSQL("CREATE TABLE IF NOT EXISTS `book_positions` (`bookId` TEXT NOT NULL, `locatorJson` TEXT NOT NULL, `totalProgression` REAL NOT NULL, `chapterTitle` TEXT NOT NULL, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`bookId`))")
                 db.execSQL("CREATE TABLE IF NOT EXISTS `book_marks` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookId` TEXT NOT NULL, `kind` TEXT NOT NULL, `locatorJson` TEXT NOT NULL, `text` TEXT NOT NULL, `color` TEXT NOT NULL, `note` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)")
@@ -71,7 +75,8 @@ abstract class LibraryDatabase : RoomDatabase() {
 
         /** Adds kept Research chats, their turns and cited passages. */
         val MIGRATION_4_5 = object : Migration(4, 5) {
-            override fun migrate(db: SupportSQLiteDatabase) {
+            override fun migrate(connection: SQLiteConnection) {
+                val db = connection
                 db.execSQL("CREATE TABLE IF NOT EXISTS `research_chats` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)")
                 db.execSQL("CREATE TABLE IF NOT EXISTS `research_turns` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `chatId` INTEGER NOT NULL, `question` TEXT NOT NULL, `outcome` TEXT NOT NULL, `answer` TEXT NOT NULL, `medical` INTEGER NOT NULL, `usedLarge` INTEGER NOT NULL, `askedDeeper` INTEGER NOT NULL, `keywords` TEXT NOT NULL, `createdAt` INTEGER NOT NULL)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_research_turns_chatId` ON `research_turns` (`chatId`)")
@@ -81,7 +86,8 @@ abstract class LibraryDatabase : RoomDatabase() {
 
         /** Adds the model's best guess to a turn: blank text, and whether the large model wrote it or fell back. */
         val MIGRATION_5_6 = object : Migration(5, 6) {
-            override fun migrate(db: SupportSQLiteDatabase) {
+            override fun migrate(connection: SQLiteConnection) {
+                val db = connection
                 db.execSQL("ALTER TABLE `research_turns` ADD COLUMN `guess` TEXT NOT NULL DEFAULT ''")
                 db.execSQL("ALTER TABLE `research_turns` ADD COLUMN `guessLarge` INTEGER NOT NULL DEFAULT 0")
                 db.execSQL("ALTER TABLE `research_turns` ADD COLUMN `guessFellBack` INTEGER NOT NULL DEFAULT 0")
@@ -93,7 +99,8 @@ abstract class LibraryDatabase : RoomDatabase() {
          * and the scan cache. Only creates tables: nothing existing is altered or dropped.
          */
         val MIGRATION_6_7 = object : Migration(6, 7) {
-            override fun migrate(db: SupportSQLiteDatabase) {
+            override fun migrate(connection: SQLiteConnection) {
+                val db = connection
                 db.execSQL("CREATE TABLE IF NOT EXISTS `tracks` (`id` TEXT NOT NULL, `origin` TEXT NOT NULL, `uri` TEXT NOT NULL, `folder` TEXT NOT NULL, `title` TEXT NOT NULL, `album` TEXT NOT NULL, `albumKey` TEXT NOT NULL, `albumArtists` TEXT NOT NULL, `artists` TEXT NOT NULL, `composers` TEXT NOT NULL, `genres` TEXT NOT NULL, `disc` INTEGER, `trackNo` INTEGER, `date` TEXT NOT NULL, `originalDate` TEXT NOT NULL, `releaseType` TEXT NOT NULL, `sortTitle` TEXT NOT NULL, `sortAlbum` TEXT NOT NULL, `sortArtist` TEXT NOT NULL, `sortAlbumArtist` TEXT NOT NULL, `durationMs` INTEGER NOT NULL, `rgTrackGain` REAL, `rgTrackPeak` REAL, `rgAlbumGain` REAL, `rgAlbumPeak` REAL, `coverPath` TEXT, `audiobookId` TEXT, `status` TEXT NOT NULL, `addedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_tracks_albumKey` ON `tracks` (`albumKey`)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_tracks_audiobookId` ON `tracks` (`audiobookId`)")
@@ -114,7 +121,8 @@ abstract class LibraryDatabase : RoomDatabase() {
 
         /** Adds album notes (a downloaded album's description). Only creates a table. */
         val MIGRATION_7_8 = object : Migration(7, 8) {
-            override fun migrate(db: SupportSQLiteDatabase) {
+            override fun migrate(connection: SQLiteConnection) {
+                val db = connection
                 db.execSQL("CREATE TABLE IF NOT EXISTS `album_notes` (`albumKey` TEXT NOT NULL, `description` TEXT NOT NULL, PRIMARY KEY(`albumKey`))")
             }
         }
@@ -124,7 +132,8 @@ abstract class LibraryDatabase : RoomDatabase() {
          * empty and fill from the next page shown.
          */
         val MIGRATION_8_9 = object : Migration(8, 9) {
-            override fun migrate(db: SupportSQLiteDatabase) {
+            override fun migrate(connection: SQLiteConnection) {
+                val db = connection
                 db.execSQL("CREATE TABLE IF NOT EXISTS `rail_pins` (`key` TEXT NOT NULL, `pinnedAt` INTEGER NOT NULL, PRIMARY KEY(`key`))")
                 db.execSQL("ALTER TABLE `reading_tabs` ADD COLUMN `backStack` TEXT NOT NULL DEFAULT ''")
             }
@@ -137,7 +146,8 @@ abstract class LibraryDatabase : RoomDatabase() {
          * Literature. Nothing the user made or moved is touched, and no placement changes.
          */
         val MIGRATION_9_10 = object : Migration(9, 10) {
-            override fun migrate(db: SupportSQLiteDatabase) {
+            override fun migrate(connection: SQLiteConnection) {
+                val db = connection
                 db.execSQL("ALTER TABLE `collections` ADD COLUMN `parentId` TEXT")
                 // Maps takes the next free place: a type the user made may already hold 4 (Neal's "Reference" does).
                 db.execSQL(
@@ -146,10 +156,10 @@ abstract class LibraryDatabase : RoomDatabase() {
                 )
                 db.execSQL(
                     "INSERT OR IGNORE INTO collections (id, name, mediaTypeId, userCreated, defaultKey, parentId) " +
-                        "SELECT 'c:${Filing.FOLDER_KEY}', '${Filing.FOLDER_NAME}', 'literature', 0, '${Filing.FOLDER_KEY}', NULL " +
+                        "SELECT 'c:${FilingKeys.FOLDER_KEY}', '${FilingKeys.FOLDER_NAME}', 'literature', 0, '${FilingKeys.FOLDER_KEY}', NULL " +
                         "WHERE EXISTS (SELECT 1 FROM collections WHERE $IN_KIWIX_FOLDER)",
                 )
-                db.execSQL("UPDATE collections SET parentId = 'c:${Filing.FOLDER_KEY}' WHERE $IN_KIWIX_FOLDER")
+                db.execSQL("UPDATE collections SET parentId = 'c:${FilingKeys.FOLDER_KEY}' WHERE $IN_KIWIX_FOLDER")
                 db.execSQL(
                     "UPDATE collections SET mediaTypeId = 'maps', name = 'OpenStreetMap' " +
                         "WHERE id = 'c:maps' AND userCreated = 0 AND mediaTypeId = 'literature'",
@@ -159,7 +169,8 @@ abstract class LibraryDatabase : RoomDatabase() {
 
         /** Plan V1: the voice's saved place per source. */
         val MIGRATION_10_11 = object : Migration(10, 11) {
-            override fun migrate(db: SupportSQLiteDatabase) {
+            override fun migrate(connection: SQLiteConnection) {
+                val db = connection
                 db.execSQL(
                     "CREATE TABLE IF NOT EXISTS `voice_states` (`sourceKey` TEXT NOT NULL, `address` TEXT NOT NULL, " +
                         "`speed` REAL NOT NULL, `title` TEXT NOT NULL, `section` TEXT, `voiceId` TEXT NOT NULL, " +
@@ -170,7 +181,8 @@ abstract class LibraryDatabase : RoomDatabase() {
 
         /** Plan H2: Home's feeds and their daily draws. Only creates tables. */
         val MIGRATION_11_12 = object : Migration(11, 12) {
-            override fun migrate(db: SupportSQLiteDatabase) {
+            override fun migrate(connection: SQLiteConnection) {
+                val db = connection
                 db.execSQL(
                     "CREATE TABLE IF NOT EXISTS `home_feeds` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `scope` TEXT NOT NULL, " +
                         "`kind` TEXT NOT NULL, `query` TEXT NOT NULL, `ordinal` INTEGER NOT NULL, `addedAt` INTEGER NOT NULL)",
@@ -184,7 +196,8 @@ abstract class LibraryDatabase : RoomDatabase() {
 
         /** Plan P2: a book's format (`EPUB` for every book so far) and whether its text could be indexed. */
         val MIGRATION_12_13 = object : Migration(12, 13) {
-            override fun migrate(db: SupportSQLiteDatabase) {
+            override fun migrate(connection: SQLiteConnection) {
+                val db = connection
                 db.execSQL("ALTER TABLE books ADD COLUMN format TEXT NOT NULL DEFAULT 'EPUB'")
                 db.execSQL("ALTER TABLE books ADD COLUMN searchable INTEGER NOT NULL DEFAULT 1")
             }
@@ -200,7 +213,8 @@ abstract class LibraryDatabase : RoomDatabase() {
         // Plan L3: no Spanish here. A migration renames what was installed when it ran; `gutenberg_es_all` takes its
         // name from GutenbergNames when it's installed.
         val MIGRATION_13_14 = object : Migration(13, 14) {
-            override fun migrate(db: SupportSQLiteDatabase) {
+            override fun migrate(connection: SQLiteConnection) {
+                val db = connection
                 val provider = GutenbergNames.PROVIDER
                 db.execSQL(
                     "UPDATE packs SET title = CASE name " +
@@ -223,7 +237,8 @@ abstract class LibraryDatabase : RoomDatabase() {
          * until the library's next refresh reads it from the file ([RoomLibrary.refresh] rewrites a row that differs).
          */
         val MIGRATION_14_15 = object : Migration(14, 15) {
-            override fun migrate(db: SupportSQLiteDatabase) {
+            override fun migrate(connection: SQLiteConnection) {
+                val db = connection
                 db.execSQL("ALTER TABLE packs ADD COLUMN scraper TEXT")
             }
         }
@@ -234,7 +249,8 @@ abstract class LibraryDatabase : RoomDatabase() {
          * for every row until the manifests are read; nothing else changes.
          */
         val MIGRATION_15_16 = object : Migration(15, 16) {
-            override fun migrate(db: SupportSQLiteDatabase) {
+            override fun migrate(connection: SQLiteConnection) {
+                val db = connection
                 db.execSQL("ALTER TABLE packs ADD COLUMN bookManifest TEXT")
                 db.execSQL("ALTER TABLE books ADD COLUMN groupName TEXT")
                 db.execSQL("ALTER TABLE books ADD COLUMN ord INTEGER")
@@ -248,7 +264,8 @@ abstract class LibraryDatabase : RoomDatabase() {
 
         /** Plan O2: articles kept from Wikipedia online, outside any pack. */
         val MIGRATION_16_17 = object : Migration(16, 17) {
-            override fun migrate(db: SupportSQLiteDatabase) {
+            override fun migrate(connection: SQLiteConnection) {
+                val db = connection
                 db.execSQL(
                     "CREATE TABLE IF NOT EXISTS `kept_articles` (`lang` TEXT NOT NULL, `title` TEXT NOT NULL, `qid` INTEGER, " +
                         "`path` TEXT NOT NULL, `bytes` INTEGER NOT NULL, `withPictures` INTEGER NOT NULL, `keptAt` INTEGER NOT NULL, " +
@@ -264,7 +281,7 @@ abstract class LibraryDatabase : RoomDatabase() {
          */
         private val IN_KIWIX_FOLDER =
             "userCreated = 0 AND mediaTypeId = 'literature' AND defaultKey IS NOT NULL " +
-                "AND defaultKey NOT IN ('granger-classics', 'clasicos-granger', 'my-books', 'archive-org', 'other', 'maps', '${Filing.FOLDER_KEY}') " +
+                "AND defaultKey NOT IN ('granger-classics', 'clasicos-granger', 'my-books', 'archive-org', 'other', 'maps', '${FilingKeys.FOLDER_KEY}') " +
                 "AND (defaultKey LIKE 'pack:%' OR defaultKey NOT LIKE '%:%')"
 
         /**
@@ -272,16 +289,19 @@ abstract class LibraryDatabase : RoomDatabase() {
          * must add this: Room doesn't manage `book_text`, so only this callback and [MIGRATION_3_4] create it.
          */
         val SeedCallback = object : Callback() {
-            override fun onCreate(db: SupportSQLiteDatabase) {
-                seedBuiltIns(db, BUILT_INS)
-                createBookText(db)
+            override fun onCreate(connection: SQLiteConnection) {
+                seedBuiltIns(connection, BUILT_INS)
+                createBookText(connection)
             }
         }
 
         /** Contentless FTS4 index of book text; a row's `docid` is its `BookChunk.id`. Room doesn't manage it. */
-        internal fun createBookText(db: SupportSQLiteDatabase) {
-            db.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS book_text USING fts4(content=\"\", text, tokenize=unicode61)")
+        fun createBookText(db: SQLiteConnection) {
+            db.execSQL(BOOK_TEXT_SQL)
         }
+
+        /** The statement that creates `book_text` (Android's BookIndex runs it on its own connection). */
+        const val BOOK_TEXT_SQL = "CREATE VIRTUAL TABLE IF NOT EXISTS book_text USING fts4(content=\"\", text, tokenize=unicode61)"
 
         /**
          * The built-in media types in sort order (each one's index). Version 3 brought the first four; [MIGRATION_9_10]
@@ -291,21 +311,24 @@ abstract class LibraryDatabase : RoomDatabase() {
             "literature" to "Literature", "audiobooks" to "Audiobooks", "music" to "Music", "video" to "Video", "maps" to "Maps",
         )
 
-        private fun seedBuiltIns(db: SupportSQLiteDatabase, types: List<Pair<String, String>>) {
+        private fun seedBuiltIns(db: SQLiteConnection, types: List<Pair<String, String>>) {
             for ((id, name) in types) {
                 val sortOrder = BUILT_INS.indexOf(id to name)
                 db.execSQL("INSERT OR IGNORE INTO media_types (id, name, builtIn, sortOrder) VALUES ('$id', '$name', 1, $sortOrder)")
             }
         }
 
-        fun create(context: Context): LibraryDatabase =
-            Room.databaseBuilder(context, LibraryDatabase::class.java, "library.db")
-                .addMigrations(
-                    MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
-                    MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14,
-                    MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17,
-                )
-                .addCallback(SeedCallback)
-                .build()
+        /** Every migration, oldest first, for each platform's builder. */
+        val MIGRATIONS: Array<Migration> get() = arrayOf(
+            MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
+            MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14,
+            MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17,
+        )
     }
+}
+
+/** Room's generated constructor for non-Android targets (Plan I3 Task 1). */
+@Suppress("NO_ACTUAL_FOR_EXPECT", "KotlinNoActualForExpect")
+expect object LibraryDatabaseConstructor : RoomDatabaseConstructor<LibraryDatabase> {
+    override fun initialize(): LibraryDatabase
 }

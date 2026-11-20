@@ -357,7 +357,7 @@ class MigrationTest {
                     "VALUES (1, 1, 'Why?', 'ANSWERED', 'Because.', 0, 1, 0, '', 3, '', 0, 0)",
             )
             // As on a real install: book_text exists beside the Room tables and must come through untouched.
-            LibraryDatabase.createBookText(this)
+            execSQL(LibraryDatabase.BOOK_TEXT_SQL)
             execSQL("INSERT INTO book_text (docid, text) VALUES (7, 'the quick brown fox')")
             close()
         }
@@ -403,7 +403,7 @@ class MigrationTest {
                     "'', '', '', '', 1000, NULL, NULL, NULL, NULL, NULL, NULL, 'OK', 9)",
             )
             execSQL("INSERT INTO audiobook_states (audiobookId, trackId, positionMs, speed, skipSilence, volumeBoostMb, finished, updatedAt) VALUES ('b', 't', 42, 1.0, 0, 0, 0, 1)")
-            LibraryDatabase.createBookText(this)
+            execSQL(LibraryDatabase.BOOK_TEXT_SQL)
             execSQL("INSERT INTO book_text (docid, text) VALUES (7, 'the quick brown fox')")
             close()
         }
@@ -437,7 +437,7 @@ class MigrationTest {
             execSQL("INSERT INTO reading_tabs (id, packId, path, title, openedAt, onRail) VALUES (2, 'u-a', 'Dog', 'Dog', 7, 1)")
             execSQL("INSERT INTO reading_tabs (id, packId, path, title, openedAt, onRail) VALUES (3, 'u-a', 'Eel', 'Eel', 9, 0)")
             execSQL("INSERT INTO recent_searches (query, searchedAt) VALUES ('cats', 3)")
-            LibraryDatabase.createBookText(this)
+            execSQL(LibraryDatabase.BOOK_TEXT_SQL)
             execSQL("INSERT INTO book_text (docid, text) VALUES (7, 'the quick brown fox')")
             close()
         }

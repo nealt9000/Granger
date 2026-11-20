@@ -6,7 +6,6 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import app.granger.core.research.SourceKind
 import app.granger.core.zim.ZimArchive
-import java.io.File
 
 enum class PackStatus {
     OK,
@@ -47,9 +46,10 @@ data class Pack(
         /** [bookManifest] for a pack listed by its files' names, with no manifest (Plan KB2 Task 2.2). */
         const val BOOK_FILES = "files"
 
-        fun from(archive: ZimArchive, file: File, addedAt: Long) = Pack(
+        /** A pack opened from the `.zim` at [filePath] ([sizeBytes] long). Android has a `File` overload (`PackFiles.kt`). */
+        fun from(archive: ZimArchive, filePath: String, sizeBytes: Long, addedAt: Long) = Pack(
             id = archive.uuid,
-            filePath = file.absolutePath,
+            filePath = filePath,
             // A Gutenberg pack is named for its subject, not "Project Gutenberg Library" (Plan GB).
             title = if (GutenbergNames.isGutenberg(archive.metadata.name)) {
                 GutenbergNames.packTitle(archive.metadata.name, archive.metadata.description)
@@ -59,7 +59,7 @@ data class Pack(
             description = archive.metadata.description,
             language = archive.metadata.language,
             date = archive.metadata.date,
-            sizeBytes = file.length(),
+            sizeBytes = sizeBytes,
             hasFulltextIndex = archive.hasFulltextIndex,
             status = PackStatus.OK,
             addedAt = addedAt,
@@ -67,14 +67,14 @@ data class Pack(
             scraper = archive.metadata.scraper,
         )
 
-        fun unreadable(file: File, addedAt: Long) = Pack(
-            id = "file:${file.absolutePath}",
-            filePath = file.absolutePath,
-            title = file.nameWithoutExtension,
+        fun unreadable(filePath: String, sizeBytes: Long, addedAt: Long) = Pack(
+            id = "file:$filePath",
+            filePath = filePath,
+            title = filePath.substringAfterLast('/').substringBeforeLast('.'),
             description = "",
             language = "",
             date = "",
-            sizeBytes = file.length(),
+            sizeBytes = sizeBytes,
             hasFulltextIndex = false,
             status = PackStatus.CORRUPT,
             addedAt = addedAt,
