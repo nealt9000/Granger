@@ -194,4 +194,23 @@ class HomeScreenTest {
         compose.onNodeWithText("Add").assertIsEnabled().performClick()
         assertThat(calls).containsExactly("add:pack:wikipedia_en_all:SEARCH:owls")
     }
+
+    private fun showPrivacy(updated: Boolean) = compose.setContent {
+        HomeContent(
+            HomeUi(strip = report), onReadiness = {}, onOpenTab = {}, onPlay = {},
+            privacyNotice = PrivacyNotice(onOk = { calls += "ok" }, onSettings = {}, updated = updated),
+        )
+    }
+
+    /** Plan O7 call 2: an older install hears "now reads online too"; a fresh one that skipped Welcome, "Before you read online". */
+    @Test fun thePrivacyCardsTitleDependsOnTheInstall() {
+        showPrivacy(updated = false)
+        compose.onNodeWithText("Before you read online").assertExists()
+        compose.onNodeWithText("Granger now reads online too").assertDoesNotExist()
+    }
+
+    @Test fun anOlderInstallKeepsTheUpdateTitle() {
+        showPrivacy(updated = true)
+        compose.onNodeWithText("Granger now reads online too").assertExists()
+    }
 }

@@ -233,5 +233,6 @@
     </plurals>
     <string name="home_ready_nothing_yet">Todo en línea, nada guardado aún</string>
     <string name="home_privacy_title">Granger ahora también lee en línea</string>
+    <string name="home_privacy_title_fresh">Antes de leer en línea</string>
     <string name="home_privacy_settings">Ajustes</string>
 </resources>

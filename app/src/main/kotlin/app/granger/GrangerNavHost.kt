@@ -1855,6 +1855,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                     readyOffline = readyOffline,
                     privacyNotice = if (Features.ONLINE && !privacySeen) app.granger.home.PrivacyNotice(
                         onOk = container.networkPolicy::setPrivacySeen, onSettings = { nav.navigate(SettingsRoute) { launchSingleTop = true } },
+                        updated = container.networkPolicy.hadGrangerBefore,
                     ) else null,
                     readyActions = app.granger.home.ReadyActions(
                         onKeepTheRead = container::keepTheRead, onGetPack = { container.getPack(it) }, onSeeAll = { nav.navigate(ReadinessRoute) },

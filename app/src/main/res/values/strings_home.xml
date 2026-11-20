@@ -250,5 +250,6 @@
     </plurals>
     <string name="home_ready_nothing_yet">Everything online, nothing kept yet</string>
     <string name="home_privacy_title">Granger now reads online too</string>
+    <string name="home_privacy_title_fresh">Before you read online</string>
     <string name="home_privacy_settings">Settings</string>
 </resources>

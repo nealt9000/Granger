@@ -153,7 +153,8 @@ fun HomeScreen(
 class CrashNotice(val onSend: () -> Unit, val onDismiss: () -> Unit)
 
 /** The privacy line, once, for an install that had Granger before online came (Plan O5 builder's call 2). */
-class PrivacyNotice(val onOk: () -> Unit, val onSettings: () -> Unit)
+/** Home's one-time privacy card; [updated] for an install that had Granger before it read online (Plan O7 call 2). */
+class PrivacyNotice(val onOk: () -> Unit, val onSettings: () -> Unit, val updated: Boolean = true)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -601,7 +602,7 @@ fun homeDownloadsText(res: Resources, card: DownloadsCard.Active): UiText {
 @Composable
 private fun PrivacyNoticeCard(notice: PrivacyNotice) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).testTag("privacy-notice"), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(stringResource(R.string.home_privacy_title), style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(if (notice.updated) R.string.home_privacy_title else R.string.home_privacy_title_fresh), style = MaterialTheme.typography.titleMedium)
         Text(stringResource(R.string.onboarding_privacy_line), style = MaterialTheme.typography.bodyMedium)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             TextButton(onClick = notice.onSettings) { Text(stringResource(R.string.home_privacy_settings)) }

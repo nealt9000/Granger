@@ -16,5 +16,6 @@ class TestGrangerApp : GrangerApp() {
     override fun startCrashLog() = Unit
     override fun startVectorDownloads() = Unit
     override fun startGutenbergSync() = Unit
+    override fun markInstall() = Unit
     override fun resumeDownloads() = Unit
 }

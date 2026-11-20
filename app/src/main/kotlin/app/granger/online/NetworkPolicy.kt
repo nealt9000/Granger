@@ -47,6 +47,18 @@ class NetworkPolicy(context: Context) {
         privacy.value = true
     }
 
+    /**
+     * Whether this install had Granger before the privacy line existed (Plan O7 builder's call 2), so Home's card can say
+     * "Granger now reads online too" to it and "Before you read online" to a fresh install that skipped Welcome. Fixed at
+     * the first start that asks ([markInstall], from the app's start): an install that finished onboarding by then is an
+     * older one.
+     */
+    val hadGrangerBefore: Boolean get() = prefs.getBoolean(BEFORE, false)
+
+    fun markInstall(onboardingDone: () -> Boolean) {
+        if (!prefs.contains(BEFORE)) prefs.edit().putBoolean(BEFORE, !privacy.value && onboardingDone()).apply()
+    }
+
     fun set(mode: NetworkMode) {
         prefs.edit().putString(KEY, mode.name).apply()
         state.value = mode
@@ -56,5 +68,6 @@ class NetworkPolicy(context: Context) {
         const val KEY = "mode"
         const val PREVIEW = "preview_no_wikipedia"
         const val PRIVACY = "privacy_seen"
+        const val BEFORE = "had_granger_before"
     }
 }

@@ -233,6 +233,7 @@ open class GrangerApp : Application(), DownloadsHost {
     override fun onCreate() {
         super.onCreate()
         startCrashLog()
+        markInstall()
         // Only keeps the context: PdfBox reads its font metrics from assets on the first PDF.
         PdfSupport.init(this)
         if (Features.PLAYER) startMedia()
@@ -249,6 +250,12 @@ open class GrangerApp : Application(), DownloadsHost {
         Thread.setDefaultUncaughtExceptionHandler(crashLog.handler(Thread.getDefaultUncaughtExceptionHandler()))
         Thread({ runCatching { crashLog.recordExits(CrashLog.pastExits(this)) } }, "crash-log").start()
     }
+
+    /**
+     * Before anything can finish onboarding: whether this is an older install, for Home's privacy card (Plan O7). JVM
+     * tests swap this out (`TestGrangerApp`).
+     */
+    protected open fun markInstall() = container.networkPolicy.markInstall { container.onboardingPrefs.done }
 
     /** Gutenberg packs' books follow their packs (Plan GB). JVM tests swap this out (`TestGrangerApp`). */
     protected open fun startGutenbergSync() = container.followGutenberg()
