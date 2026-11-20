@@ -10,8 +10,8 @@ Legend: **[ ]** to do · **[x]** done on the iPhone · **≈** done with the iOS
 
 | Android | iPhone | Plan | |
 | --- | --- | --- | --- |
-| Rail: Home, Search, Explore, Library, Listen; Settings | Tab bar with the same five; Settings from Home's header (spec §5) | I2 (Home, Search), I3 (Explore), I5 (Library, Listen) | [ ] I2 part ✓ (Home, Search, Settings) |
-| Open items on the rail (up to 4 articles/books, pin, remove) | ≈ Recently open, from each tab's toolbar | I3 | [ ] |
+| Rail: Home, Search, Explore, Library, Listen; Settings | Tab bar with the same five; Settings from Home's header (spec §5) | I2 (Home, Search), I3 (Explore), I5 (Library, Listen) | [ ] I2 + I3 part ✓ (Home, Search, Explore, Settings) |
+| Open items on the rail (up to 4 articles/books, pin, remove) | ≈ Recently open, from each tab's toolbar | I3 (articles), I5 (books, reading place) | [ ] I3 part ✓ (last four articles in Home, Search, Explore) |
 | Field and Night palettes, System; Spectral titles | Colour assets from `GrangerTheme.kt` (tested equal), Spectral | I2 | [x] |
 | Launcher icon (owl mark), themed icon | AppIcon traced from the launcher mark; ≈ iOS tinted/dark icon variants | I2 | [ ] I2 part ✓ (icon; tinted/dark variants to do) |
 | Mini player above the content | Mini player above the tab bar | I6 | [ ] |
@@ -23,7 +23,7 @@ Legend: **[ ]** to do · **[x]** done on the iPhone · **≈** done with the iOS
 | --- | --- | --- | --- |
 | Privacy line before any online read (O5) | Same words, same rule | I2 | [x] |
 | Onboarding: brand, language, "Pick a start" sets (Starter/Efficient/Comprehensive), the Granger voice, quick wins first | Same flow | I4 (sets, downloads), I5 (voice) | [ ] |
-| Settings: appearance, text, content (adult flags), Local only, offline pictures, Saved for now cap and Clear | Same | I2 (basics), I3 (content, keeping) | [ ] I2 part ✓ (appearance, text, Local only) |
+| Settings: appearance, text, content (adult flags), Local only, offline pictures, Saved for now cap and Clear | Same | I2 (basics), I3 (content, keeping) | [x] |
 | App language (English/Español) and knowledge languages | Per-app language, knowledge languages | I7 | [ ] |
 | Voice settings (voice, pace, downloads) | Same | I5 | [ ] |
 | Media settings (music folders, scans) | ≈ Files imports and the Music library | I6 | [ ] |
@@ -35,30 +35,30 @@ Legend: **[ ]** to do · **[x]** done on the iPhone · **≈** done with the iOS
 | --- | --- | --- | --- |
 | Online articles in Granger's look (`online.css`), pictures from Commons, links | `WKWebView` + `granger-zim:` scheme, shared CSS and scripts | I2 | [x] |
 | Topic page in front of the article: picture, summary, Read the full article, Read in other language | Same | I2 | [x] |
-| Topic page: records (parts, rooms, "leads here"), broad topics, quilt, Related (filtered) | Same | I3 | [ ] |
-| Keep (with/without pictures), Saved for now, marks (dot, ring), kept-article updates | Same | I3 | [ ] |
-| Local only (one gate), greyed tiles, hints | Same | I2 (gate), I3 (greying, hints) | [ ] I2 part ✓ (the gate) |
-| Online indexes (Top `.gqid`/`.gtime`) fetched at first run | Same | I3 | [ ] |
+| Topic page: records (parts, rooms, "leads here"), broad topics, quilt, Related (filtered) | Same | I3 | [x] (a broad topic's figures come from packs, I4, as on Android online) |
+| Keep (with/without pictures), Saved for now, marks (dot, ring), kept-article updates | Same | I3 (keeping), I4 (updates, with Outfitting) | [ ] I3 part ✓ (Keep, Saved for now, marks) |
+| Local only (one gate), greyed tiles, hints | Same | I2 (gate), I3 (banner, hints), I4 (greyed pack tiles) | [ ] I2 + I3 part ✓ (gate, banner, hints; kept copies read offline) |
+| Online indexes (Top `.gqid`/`.gtime`) fetched at first run | Same | I3 | [x] |
 | Outfitting (your use + nine domains), would-take sizes | Same | I3 (online), I4 (packs) | [ ] |
-| Reader: Contents, text size, tap to hide bars, find in page, Listen | Same | I2 (Contents, size, bars), I3 (find), I5 (Listen) | [ ] I2 part ✓ (Contents, size, bars) |
-| Reader footer (In your books, article footer views), quotes | Same | I3 | [ ] |
-| Adult flags on default screens (Plan AF) | Same | I3 | [ ] |
+| Reader: Contents, text size, tap to hide bars, find in page, Listen | Same | I2 (Contents, size, bars), I3 (find), I5 (Listen) | [ ] I2 + I3 part ✓ (Contents, size, bars, find) |
+| Reader footer (In your books, article footer views), quotes | Same | I5 (books) | [ ] |
+| Adult flags on default screens (Plan AF) | Same | I3 | [x] |
 
 ## Home
 
 | Android | iPhone | Plan | |
 | --- | --- | --- | --- |
-| Feeds (Continue, featured, readiness strip, downloads card), Add feed, scopes | Same | I2 (featured + Recently read, interim), I3 (feeds) | [ ] I2 part ✓ (interim: featured, Continue) |
-| Wander (well-known articles from the index) | Same (replaces I2's featured-only Home) | I3 | [ ] |
-| Timeline card, Day page, time scale, Show in time | Same | I3 | [ ] |
-| Games (6, random on Home, Games hub, runs of 10) | Same | I3 | [ ] |
-| Arrange Home | Same | I3 | [ ] |
+| Home as your desk (Plan O3): Continue, Ready offline, the Timeline, up to two feeds, Add feed, scopes, Day page | Same | I3 (Continue, Timeline, Arrange), I4 (Ready offline, feeds, Day page) | [ ] I3 part ✓ (Continue, Timeline; featured plate gone as on Android) |
+| Wander (well-known articles from the index; in Explore's Ways on since Plan O3) | Same | I3 | [x] ≈ lead links as a grid, not an orbit |
+| Timeline card, full timeline, time scale, Show in time | Same | I3 | [x] |
+| Games (6, Games hub in Explore's Ways on, runs of 10, a subject's quiz) | Same | I3 | [x] |
+| Arrange Home | Same (SwiftUI list editing, Android's tokens) | I3 | [x] |
 
 ## Explore
 
 | Android | iPhone | Plan | |
 | --- | --- | --- | --- |
-| Landing (editorial, doors), rooms, room screen, subject spreads, broad topic spread, plates, A–Z, quilt map, Through time, Your sources, seen rooms | Same | I3 | [ ] |
+| Landing (editorial, doors), rooms, room screen, subject spreads, broad topic spread, plates, A–Z, quilt map, Through time, Your sources, seen rooms | Same | I3 (Your sources lists packs: I4) | [ ] I3 part ✓ (all but Your sources) |
 | Browse a pack's files | Same | I4 | [ ] |
 
 ## Search

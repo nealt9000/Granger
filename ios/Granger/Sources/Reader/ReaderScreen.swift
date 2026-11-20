@@ -45,6 +45,8 @@ struct ReaderScreen: View {
                 Button { showContents = true } label: { Image(systemName: "list.bullet") }
                     .accessibilityLabel("Contents")
                     .disabled(model.headings.isEmpty)
+                Button { controller.find() } label: { Image(systemName: "magnifyingglass") }
+                    .accessibilityLabel("Find in page")
                 Button { showText = true } label: { Image(systemName: "textformat.size") }
                     .accessibilityLabel("Text settings")
                 ReaderKeepMenu(lang: lang, title: path)

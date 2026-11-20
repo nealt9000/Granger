@@ -1,0 +1,434 @@
+{
+ "art.architecture": {
+  "en": "Building styles and traditions, and the architects who designed them.",
+  "es": "Estilos y tradiciones de construcción, y los arquitectos que los diseñaron."
+ },
+ "art.comics": {
+  "en": "Comics, cartoons and their characters, and the artists who drew them.",
+  "es": "Cómics, dibujos animados y sus personajes, y los artistas que los dibujaron."
+ },
+ "art.design": {
+  "en": "Photographers, fashion designers and graphic designers, and their work.",
+  "es": "Fotógrafos, diseñadores de moda y diseñadores gráficos, y su obra."
+ },
+ "art.movements": {
+  "en": "Styles and movements in art, architecture, writing and music.",
+  "es": "Estilos y movimientos del arte, la arquitectura, las letras y la música."
+ },
+ "art.painting": {
+  "en": "Painters and sculptors, and the subjects they returned to.",
+  "es": "Pintores y escultores, y los temas a los que volvieron."
+ },
+ "art.works": {
+  "en": "Paintings, sculptures, carvings and coins, one work at a time.",
+  "es": "Pinturas, esculturas, tallas y monedas, una obra a la vez."
+ },
+ "business.companies": {
+  "en": "Companies, brands, shops and restaurants.",
+  "es": "Empresas, marcas, tiendas y restaurantes."
+ },
+ "business.founders": {
+  "en": "Founders, executives, investors and owners.",
+  "es": "Fundadores, ejecutivos, inversionistas y dueños."
+ },
+ "business.industry": {
+  "en": "Economies, industries, trade and work, and the economists who study them.",
+  "es": "Economías, industrias, comercio y trabajo, y los economistas que los estudian."
+ },
+ "business.money": {
+  "en": "Coins, banknotes, currencies, banks and stock exchanges.",
+  "es": "Monedas, billetes, divisas, bancos y bolsas de valores."
+ },
+ "film.actors": {
+  "en": "Actors, comedians and presenters of screen and stage.",
+  "es": "Actores, comediantes y presentadores de la pantalla y el escenario."
+ },
+ "film.animation": {
+  "en": "Animated films and series, anime, cartoons and the animators who made them.",
+  "es": "Películas y series animadas, anime, caricaturas y los animadores que las hicieron."
+ },
+ "film.characters": {
+  "en": "Characters from films, television, books and games.",
+  "es": "Personajes del cine, la televisión, los libros y los juegos."
+ },
+ "film.directors": {
+  "en": "Directors, producers and screenwriters.",
+  "es": "Directores, productores y guionistas."
+ },
+ "film.films": {
+  "en": "Feature films and film series.",
+  "es": "Largometrajes y series de películas."
+ },
+ "film.tv": {
+  "en": "Television series, episodes and channels.",
+  "es": "Series, episodios y canales de televisión."
+ },
+ "food.dishes": {
+  "en": "Dishes and the cuisines they come from.",
+  "es": "Platos y las cocinas de donde vienen."
+ },
+ "food.drinks": {
+  "en": "Wine, beer, spirits, cocktails, tea and coffee.",
+  "es": "Vino, cerveza, licores, cócteles, té y café."
+ },
+ "food.farming": {
+  "en": "Crops, grains, livestock and the business of growing food.",
+  "es": "Cultivos, cereales, ganado y el oficio de producir alimentos."
+ },
+ "food.fruitveg": {
+  "en": "Fruit, berries, nuts, roots and leafy vegetables.",
+  "es": "Frutas, bayas, frutos secos, raíces y verduras de hoja."
+ },
+ "food.ingredients": {
+  "en": "Spices, herbs, sauces and other things cooks reach for.",
+  "es": "Especias, hierbas, salsas y otras cosas que usan los cocineros."
+ },
+ "food.sweet": {
+  "en": "Cakes, biscuits, desserts and confectionery.",
+  "es": "Pasteles, galletas, postres y golosinas."
+ },
+ "games.chars": {
+  "en": "Video game characters and the studios that made them.",
+  "es": "Personajes de videojuegos y los estudios que los crearon."
+ },
+ "games.table": {
+  "en": "Board games, card games, role-playing games and quiz shows.",
+  "es": "Juegos de mesa, de cartas y de rol, y concursos de preguntas."
+ },
+ "games.video": {
+  "en": "Video games, their series and the worlds inside them.",
+  "es": "Videojuegos, sus series y los mundos que contienen."
+ },
+ "health.body": {
+  "en": "Organs, muscles, bones, nerves and senses.",
+  "es": "Órganos, músculos, huesos, nervios y sentidos."
+ },
+ "health.diseases": {
+  "en": "Illnesses, injuries and disorders, and how they are told apart.",
+  "es": "Enfermedades, lesiones y trastornos, y cómo se distinguen."
+ },
+ "health.history": {
+  "en": "Physicians, surgeons and nurses, and the practice of medicine.",
+  "es": "Médicos, cirujanos y enfermeras, y el ejercicio de la medicina."
+ },
+ "health.infection": {
+  "en": "Viruses, bacterial diseases, epidemics and pandemics.",
+  "es": "Virus, enfermedades bacterianas, epidemias y pandemias."
+ },
+ "health.medicines": {
+  "en": "Drugs, vaccines, surgery and other treatments.",
+  "es": "Medicamentos, vacunas, cirugía y otros tratamientos."
+ },
+ "health.mind": {
+  "en": "Mental disorders, addiction and anxiety.",
+  "es": "Trastornos mentales, adicción y ansiedad."
+ },
+ "health.symptoms": {
+  "en": "Pain, rashes, bleeding, shortness of breath and other signs that something is wrong.",
+  "es": "Dolor, erupciones, sangrado, falta de aire y otras señales de que algo anda mal."
+ },
+ "history.ancient": {
+  "en": "Peoples, places and objects from before the year 500.",
+  "es": "Pueblos, lugares y objetos anteriores al año 500."
+ },
+ "history.disasters": {
+  "en": "Disasters, massacres, bombings, shootings and other dark days.",
+  "es": "Desastres, masacres, atentados, tiroteos y otros días oscuros."
+ },
+ "history.empires": {
+  "en": "Empires, kingdoms, dynasties, caliphates and city-states.",
+  "es": "Imperios, reinos, dinastías, califatos y ciudades-estado."
+ },
+ "history.exploration": {
+  "en": "Explorers, navigators and map-makers, and the journeys they made.",
+  "es": "Exploradores, navegantes y cartógrafos, y los viajes que hicieron."
+ },
+ "history.medieval": {
+  "en": "Events, institutions and works from the years 500 to 1500.",
+  "es": "Hechos, instituciones y obras de los años 500 a 1500."
+ },
+ "history.modern": {
+  "en": "Events and movements since 1900.",
+  "es": "Hechos y movimientos desde 1900."
+ },
+ "history.revolutions": {
+  "en": "Revolutions, civil wars, coups, rebellions and protests.",
+  "es": "Revoluciones, guerras civiles, golpes de Estado, rebeliones y protestas."
+ },
+ "history.rulers": {
+  "en": "Kings, queens, emperors, pharaohs and sultans, and their families.",
+  "es": "Reyes, reinas, emperadores, faraones y sultanes, y sus familias."
+ },
+ "history.war": {
+  "en": "Wars, campaigns and battles, and the soldiers and commanders who fought them.",
+  "es": "Guerras, campañas y batallas, y los soldados y comandantes que las libraron."
+ },
+ "languages.langs": {
+  "en": "Languages, dialects, accents and names.",
+  "es": "Lenguas, dialectos, acentos y nombres."
+ },
+ "languages.scripts": {
+  "en": "Alphabets, scripts, spelling and shorthand.",
+  "es": "Alfabetos, escrituras, ortografía y taquigrafía."
+ },
+ "languages.words": {
+  "en": "Grammar and the parts of speech, and the linguists who described them.",
+  "es": "La gramática y las clases de palabras, y los lingüistas que las describieron."
+ },
+ "literature.books": {
+  "en": "Novels, poems, plays and other books, and the lists of what authors wrote.",
+  "es": "Novelas, poemas, obras de teatro y otros libros, y las listas de lo que escribió cada autor."
+ },
+ "literature.characters": {
+  "en": "People of fiction: literary characters, screen characters and superheroes.",
+  "es": "Gente de ficción: personajes literarios, de pantalla y superhéroes."
+ },
+ "literature.kinds": {
+  "en": "Genres and forms of writing, with the prizes and publishers around them.",
+  "es": "Géneros y formas de escritura, con los premios y editoriales que los rodean."
+ },
+ "literature.myths": {
+  "en": "Myths, legends, epics, folk tales and fairy tales.",
+  "es": "Mitos, leyendas, epopeyas, cuentos populares y cuentos de hadas."
+ },
+ "literature.novelists": {
+  "en": "Novelists, essayists, short-story writers and other authors.",
+  "es": "Novelistas, ensayistas, cuentistas y otros autores."
+ },
+ "literature.poets": {
+  "en": "Poets and playwrights, and the verse and drama they wrote.",
+  "es": "Poetas y dramaturgos, y los versos y dramas que escribieron."
+ },
+ "music.anthems": {
+  "en": "National anthems and hymns.",
+  "es": "Himnos nacionales e himnos religiosos."
+ },
+ "music.classical": {
+  "en": "Composers, conductors and players, and their operas, symphonies and sonatas.",
+  "es": "Compositores, directores e intérpretes, y sus óperas, sinfonías y sonatas."
+ },
+ "music.genres": {
+  "en": "Kinds of music, from jazz to hip hop, and the scenes around them.",
+  "es": "Tipos de música, del jazz al hip hop, y las escenas que los rodean."
+ },
+ "music.instruments": {
+  "en": "Strings, winds, keyboards, drums and electronic instruments.",
+  "es": "Cuerdas, vientos, teclados, tambores e instrumentos electrónicos."
+ },
+ "music.pop": {
+  "en": "Singers, bands and other performers.",
+  "es": "Cantantes, bandas y otros intérpretes."
+ },
+ "music.songs": {
+  "en": "Albums, songs and the lists of what artists recorded.",
+  "es": "Álbumes, canciones y las listas de lo que grabaron los artistas."
+ },
+ "nature.animals": {
+  "en": "Mammals, birds, reptiles, insects and the rest, with the breeds people have raised.",
+  "es": "Mamíferos, aves, reptiles, insectos y los demás, con las razas que la gente ha criado."
+ },
+ "nature.environment": {
+  "en": "Pollution, climate change, extinction and the work of conservation.",
+  "es": "Contaminación, cambio climático, extinción y el trabajo de conservación."
+ },
+ "nature.evolution": {
+  "en": "How living things change and inherit, and the naturalists who worked it out.",
+  "es": "Cómo cambian y heredan los seres vivos, y los naturalistas que lo descifraron."
+ },
+ "nature.farm": {
+  "en": "Dogs, cats, horses, cattle, sheep and poultry, breed by breed.",
+  "es": "Perros, gatos, caballos, vacas, ovejas y aves de corral, raza por raza."
+ },
+ "nature.habitats": {
+  "en": "Forests, deserts, reefs, wetlands and grasslands, and the parks that protect them.",
+  "es": "Bosques, desiertos, arrecifes, humedales y praderas, y los parques que los protegen."
+ },
+ "nature.plants": {
+  "en": "Trees, flowers, crops, mosses, mushrooms and lichens.",
+  "es": "Árboles, flores, cultivos, musgos, setas y líquenes."
+ },
+ "nature.prehistoric": {
+  "en": "Dinosaurs, early mammals and other creatures known only from fossils.",
+  "es": "Dinosaurios, primeros mamíferos y otras criaturas conocidas solo por sus fósiles."
+ },
+ "nature.sea": {
+  "en": "Fish, whales, shellfish, corals and jellyfish.",
+  "es": "Peces, ballenas, mariscos, corales y medusas."
+ },
+ "places.cities": {
+  "en": "Cities, towns and neighbourhoods.",
+  "es": "Ciudades, pueblos y barrios."
+ },
+ "places.countries": {
+  "en": "The world's countries, past and present.",
+  "es": "Los países del mundo, de ayer y de hoy."
+ },
+ "places.landmarks": {
+  "en": "Castles, cathedrals, bridges, monuments and ancient sites.",
+  "es": "Castillos, catedrales, puentes, monumentos y sitios antiguos."
+ },
+ "places.nature": {
+  "en": "Rivers, lakes, mountains, islands, glaciers and seas.",
+  "es": "Ríos, lagos, montañas, islas, glaciares y mares."
+ },
+ "places.regions": {
+  "en": "Continents, regions, states and provinces.",
+  "es": "Continentes, regiones, estados y provincias."
+ },
+ "places.travel": {
+  "en": "Roads, railways, stations, airports and transit systems.",
+  "es": "Carreteras, ferrocarriles, estaciones, aeropuertos y sistemas de transporte."
+ },
+ "places.wonders": {
+  "en": "Places on the World Heritage list.",
+  "es": "Lugares de la lista del Patrimonio Mundial."
+ },
+ "religion.faiths": {
+  "en": "The world's religions, their branches and their churches.",
+  "es": "Las religiones del mundo, sus ramas y sus iglesias."
+ },
+ "religion.figures": {
+  "en": "Prophets, saints, priests, bishops, rabbis, imams and monks.",
+  "es": "Profetas, santos, sacerdotes, obispos, rabinos, imanes y monjes."
+ },
+ "religion.myths": {
+  "en": "Gods, goddesses and the mythologies they belong to.",
+  "es": "Dioses, diosas y las mitologías a las que pertenecen."
+ },
+ "religion.philosophy": {
+  "en": "Philosophers and their ideas about knowledge, right and wrong, and how to live.",
+  "es": "Filósofos y sus ideas sobre el conocimiento, el bien y el mal, y cómo vivir."
+ },
+ "religion.places": {
+  "en": "Cathedrals, mosques, temples, monasteries, shrines and holy cities.",
+  "es": "Catedrales, mezquitas, templos, monasterios, santuarios y ciudades santas."
+ },
+ "religion.scripture": {
+  "en": "Holy books, prayers, rituals and holy days.",
+  "es": "Libros sagrados, oraciones, rituales y días santos."
+ },
+ "science.chem": {
+  "en": "The elements, compounds and reactions, and the chemists who studied them.",
+  "es": "Los elementos, los compuestos y las reacciones, y los químicos que los estudiaron."
+ },
+ "science.discoveries": {
+  "en": "Theories and laws of science, and the scientists and inventors who found them.",
+  "es": "Teorías y leyes de la ciencia, y los científicos e inventores que las hallaron."
+ },
+ "science.earth": {
+  "en": "Rocks, minerals, volcanoes, earthquakes, storms and climate.",
+  "es": "Rocas, minerales, volcanes, terremotos, tormentas y clima."
+ },
+ "science.life": {
+  "en": "Cells, organs and the workings of living bodies.",
+  "es": "Células, órganos y el funcionamiento de los cuerpos vivos."
+ },
+ "science.maths": {
+  "en": "Arithmetic, geometry, statistics and proof, and the mathematicians who shaped them.",
+  "es": "Aritmética, geometría, estadística y demostración, y los matemáticos que les dieron forma."
+ },
+ "science.mind": {
+  "en": "Emotion, memory and behaviour, and the psychologists who study them.",
+  "es": "Emoción, memoria y conducta, y los psicólogos que las estudian."
+ },
+ "science.physics": {
+  "en": "Forces, particles, heat, light and electricity, and the physicists behind them.",
+  "es": "Fuerzas, partículas, calor, luz y electricidad, y los físicos detrás de ellas."
+ },
+ "science.space": {
+  "en": "Planets, stars, galaxies and the people who study the sky.",
+  "es": "Planetas, estrellas, galaxias y quienes estudian el cielo."
+ },
+ "society.crime": {
+  "en": "Crimes and trials, outlaws, gangsters and spies.",
+  "es": "Crímenes y juicios, forajidos, gánsteres y espías."
+ },
+ "society.government": {
+  "en": "Offices, parliaments, courts, parties and elections.",
+  "es": "Cargos, parlamentos, tribunales, partidos y elecciones."
+ },
+ "society.law": {
+  "en": "Laws, court cases and legal ideas, and the judges and lawyers behind them.",
+  "es": "Leyes, casos judiciales e ideas jurídicas, y los jueces y abogados detrás de ellos."
+ },
+ "society.leaders": {
+  "en": "Presidents, prime ministers, monarchs, politicians and diplomats.",
+  "es": "Presidentes, primeros ministros, monarcas, políticos y diplomáticos."
+ },
+ "society.media": {
+  "en": "Newspapers, broadcasters and schools, and the journalists and teachers in them.",
+  "es": "Periódicos, emisoras y escuelas, y los periodistas y maestros que trabajan en ellos."
+ },
+ "society.peoples": {
+  "en": "Peoples and communities, their festivals, holidays and traditions.",
+  "es": "Pueblos y comunidades, sus fiestas, días festivos y tradiciones."
+ },
+ "society.rights": {
+  "en": "Campaigns for rights and reform, and the activists who led them.",
+  "es": "Campañas por los derechos y la reforma, y los activistas que las encabezaron."
+ },
+ "society.world": {
+  "en": "World bodies, alliances and agreements, national flags and visa rules.",
+  "es": "Organismos mundiales, alianzas y acuerdos, banderas nacionales y reglas de visado."
+ },
+ "sports.cups": {
+  "en": "Leagues, championships, seasons and cups.",
+  "es": "Ligas, campeonatos, temporadas y copas."
+ },
+ "sports.football": {
+  "en": "Clubs, players, managers and competitions of football.",
+  "es": "Clubes, jugadores, entrenadores y competiciones de fútbol."
+ },
+ "sports.motorsport": {
+  "en": "Drivers, races and circuits.",
+  "es": "Pilotos, carreras y circuitos."
+ },
+ "sports.olympics": {
+  "en": "The Summer and Winter Games, edition by edition.",
+  "es": "Los Juegos de verano y de invierno, edición por edición."
+ },
+ "sports.sports": {
+  "en": "The sports themselves, their rules and their techniques.",
+  "es": "Los deportes en sí, sus reglas y sus técnicas."
+ },
+ "sports.stars": {
+  "en": "Athletes of every sport: footballers, boxers, swimmers, drivers and more.",
+  "es": "Atletas de todos los deportes: futbolistas, boxeadores, nadadores, pilotos y más."
+ },
+ "sports.venues": {
+  "en": "Stadiums, arenas and grounds.",
+  "es": "Estadios, arenas y campos."
+ },
+ "technology.computers": {
+  "en": "Computers, chips, operating systems, programming languages and software.",
+  "es": "Computadoras, chips, sistemas operativos, lenguajes de programación y software."
+ },
+ "technology.energy": {
+  "en": "Electricity, fuels, engines, batteries and power stations.",
+  "es": "Electricidad, combustibles, motores, baterías y centrales eléctricas."
+ },
+ "technology.internet": {
+  "en": "Websites, networks, protocols and online media.",
+  "es": "Sitios web, redes, protocolos y medios en línea."
+ },
+ "technology.inventions": {
+  "en": "Inventions and standards, and the inventors and engineers who made them.",
+  "es": "Inventos y estándares, y los inventores e ingenieros que los crearon."
+ },
+ "technology.machines": {
+  "en": "Engines, tools, phones, consoles and other devices.",
+  "es": "Motores, herramientas, teléfonos, consolas y otros aparatos."
+ },
+ "technology.space": {
+  "en": "Rockets, spacecraft and missions, and the astronauts and engineers who flew them.",
+  "es": "Cohetes, naves y misiones, y los astronautas e ingenieros que las hicieron volar."
+ },
+ "technology.vehicles": {
+  "en": "Cars, trains, aircraft, ships and bicycles.",
+  "es": "Autos, trenes, aviones, barcos y bicicletas."
+ },
+ "technology.weapons": {
+  "en": "Firearms, tanks, warships, military aircraft, missiles and bombs.",
+  "es": "Armas de fuego, tanques, buques de guerra, aviones militares, misiles y bombas."
+ }
+}

@@ -8,6 +8,17 @@ enum Route: Hashable {
     case reader(lang: String, path: String, fragment: String?)
     /// The full timeline, opened at an article when given (Show in time, Plan H5b).
     case timeline(packId: String?, path: String?)
+    /// Explore (Plan I3 Task 9): a subject's page, a room (facet nil: the whole subject's listing).
+    case subject(id: String)
+    case room(subject: String, facet: String?)
+    /// Wander from an article, or anywhere with nil; inside a subject or room.
+    case wander(packId: String?, path: String?)
+    case wanderIn(subject: String, facet: String?)
+    /// The Games screen, and a subject's quiz.
+    case games
+    case quiz(subject: String)
+    /// The connections quilt round a topic.
+    case quilt(lang: String, path: String)
 }
 
 /// What the user has read lately (Android's Continue / history): the last 50 articles, newest first.
@@ -45,5 +56,30 @@ final class RecentStore {
 
     private func save() {
         defaults.set(try? JSONEncoder().encode(entries), forKey: Self.key)
+    }
+}
+
+import SwiftUI
+
+/// Recently open (Plan I3 builder's call 8; Android's open items on the rail): the last four articles, from each
+/// tab's toolbar.
+struct RecentlyOpenMenu: View {
+    @Environment(RecentStore.self) private var recent
+    @Environment(\.openRoute) private var openRoute
+
+    var body: some View {
+        if !recent.entries.isEmpty {
+            Menu {
+                Section("Recently open") {
+                    ForEach(recent.entries.prefix(4)) { e in
+                        Button(e.title) { openRoute(.reader(lang: e.lang, path: e.path, fragment: nil)) }
+                    }
+                }
+            } label: {
+                Image(systemName: "clock.arrow.circlepath")
+            }
+            .accessibilityLabel("Recently open")
+            .accessibilityIdentifier("recently-open")
+        }
     }
 }

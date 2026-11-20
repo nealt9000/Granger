@@ -18,7 +18,9 @@ struct TopicScreen: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                if let topic = model.topic, topic.header != nil {
+                if let topic = model.topic, topic.header != nil, let broad = topic.broad {
+                    BroadSpreadView(topic: topic, broad: broad, lang: lang, path: path).padding(.horizontal, -16)
+                } else if let topic = model.topic, topic.header != nil, !topic.broadPending || topic.done {
                     content(topic)
                 } else if model.failed {
                     unavailable
@@ -55,6 +57,11 @@ struct TopicScreen: View {
         if let related = topic.related, !related.isEmpty {
             ArticleGrid(title: "Closest topics", articles: related, lang: lang)
         }
+        NavigationLink(value: Route.wander(packId: packId, path: path)) {
+            Text("Wander from here").font(Spectral.medium(17)).frame(maxWidth: .infinity).padding(.vertical, 4)
+        }
+        .buttonStyle(.bordered)
+        .accessibilityIdentifier("wander-here")
     }
 
     @ViewBuilder private func actions(_ topic: Topic) -> some View {
@@ -66,6 +73,13 @@ struct TopicScreen: View {
             .accessibilityIdentifier("read-full")
             HintCard(id: "keep", text: "Keep puts this article on your phone (●). What you read is saved for now (○) until space runs short.")
             KeepButton(lang: lang, title: path)
+            if topic.done && ((topic.related?.count ?? 0) + (topic.time?.people.count ?? 0) + (topic.place?.more.count ?? 0)) >= 3 {
+                NavigationLink(value: Route.quilt(lang: lang, path: path)) {
+                    Text("Explore connections").font(Spectral.medium(17)).frame(maxWidth: .infinity).padding(.vertical, 4)
+                }
+                .buttonStyle(.bordered)
+                .accessibilityIdentifier("connections")
+            }
             if let other = model.other {
                 NavigationLink(value: Route.topic(lang: other.lang, path: other.path)) {
                     // The other language's name in its own words, as on Android (topic_read_in_spanish / _english).

@@ -161,6 +161,49 @@ final class SmokeTests: XCTestCase {
         XCTAssertFalse(app.buttons["full-timeline"].waitForExistence(timeout: 3), "hidden from Home")
     }
 
+    /// Explore (Plan I3 Task 9): the landing, a subject, a room, a topic; Wander; a round of a game.
+    func testExploreWalk() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en"]
+        app.launch()
+        app.tabBars.buttons["Explore"].tap()
+        let spread = app.buttons["open-spread"]
+        XCTAssertTrue(spread.waitForExistence(timeout: 60), "today's spread")
+        shot(app, "explore-1")
+        let door = app.buttons["door-science"]
+        for _ in 0..<8 where !(door.exists && door.isHittable) { app.swipeUp() }
+        shot(app, "explore-2")
+        door.tap()
+        let room = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'room-'")).firstMatch
+        XCTAssertTrue(room.waitForExistence(timeout: 30), "the subject's rooms")
+        shot(app, "subject-1")
+        for _ in 0..<6 where !room.isHittable { app.swipeUp() }
+        room.tap()
+        XCTAssertTrue(app.buttons["view-Plates"].waitForExistence(timeout: 30), "the room")
+        sleep(3)
+        shot(app, "room-1")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        // Ways on: Wander, then Games.
+        let wander = app.buttons["way-Wander"]
+        for _ in 0..<12 where !(wander.exists && wander.isHittable) { app.swipeUp() }
+        shot(app, "explore-3")
+        wander.tap()
+        XCTAssertTrue(app.buttons["wander-open"].waitForExistence(timeout: 90), "Wander's centre")
+        shot(app, "wander-1")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["way-Games"].tap()
+        let game = app.buttons["game-BEFORE_AFTER"]
+        XCTAssertTrue(game.waitForExistence(timeout: 20), "the games")
+        game.tap()
+        let before = app.buttons["Before"]
+        XCTAssertTrue(before.waitForExistence(timeout: 30), "a round")
+        shot(app, "game-1")
+        before.tap()
+        XCTAssertTrue(app.buttons["game-next"].waitForExistence(timeout: 5), "revealed")
+        shot(app, "game-2")
+    }
+
     private func shot(_ app: XCUIApplication, _ name: String) {
         // TEST_RUNNER_GRANGER_SHOTS=<dir> on the xcodebuild line saves the walkthrough's screenshots.
         if let dir = ProcessInfo.processInfo.environment["GRANGER_SHOTS"] {

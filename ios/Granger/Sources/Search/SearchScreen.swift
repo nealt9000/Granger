@@ -33,6 +33,7 @@ struct SearchScreen: View {
         .scrollContentBackground(.hidden)
         .background(palette.background)
         .navigationTitle("Search")
+        .toolbar { ToolbarItem(placement: .topBarTrailing) { RecentlyOpenMenu() } }
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search your library")
         .searchFocused($focused)
         .onSubmit(of: .search) { model.remember(query) }

@@ -320,6 +320,80 @@ class IosLibrary(
 
     private val gameStore: app.granger.home.GameStore = DefaultsGameStore("games")
 
+    // ---- Explore (Plan I3 Task 9), wired as GrangerNavHost wires Android's ExploreSources for Wikipedia online.
+
+    /** The rooms' one-line descriptions: the bundled `rooms.json`, read by Swift. */
+    var roomsJson: () -> String = { "{}" }
+    private val roomDescriptions by lazy { app.granger.explore.RoomDescriptions { roomsJson() } }
+
+    /** Wikipedia online's index set on its way, as Swift sees it (Explore says so while it comes). */
+    val indexWait = MutableStateFlow(app.granger.online.IndexWait.NONE)
+    fun setIndexComing(coming: Boolean) {
+        indexWait.value = if (coming) app.granger.online.IndexWait.COMING else app.granger.online.IndexWait.NONE
+    }
+
+    val seen: app.granger.explore.SeenStore = DefaultsSeenStore("explore.seen")
+
+    val exploreSources = app.granger.explore.ExploreSources(
+        qids = { indexes ?: QidIndexes(emptyList()) },
+        times = { times ?: TimeIndexes(emptyList()) },
+        picture = { packId, path -> volunteeredPicture(packId, path) },
+        packs = kotlinx.coroutines.flow.flow { emit(languages().map { OnlineSources.row(it) to "general" }) },
+        isWikipedia = { it.name.startsWith("wikipedia_") },
+        look = { packId, path ->
+            val lang = langOf(packId)
+            val s = lang?.let { wikipedia(it).summary(path) }
+            if (s == null) null else app.granger.explore.ArticleLook(
+                if (contentFilter.noPicture(packId, path)) null else s.thumbnail?.let { picture(lang, it) },
+                app.granger.explore.firstSentence(s.extract),
+            )
+        },
+        roomDescription = { key, language -> roomDescriptions.of(key, language) },
+        seen = seen,
+        onlineIndex = indexWait,
+    )
+
+    /** Explore's landing model; [close] clears it. */
+    fun explore(): OwnedViewModel<app.granger.explore.ExploreViewModel> =
+        OwnedViewModel { app.granger.explore.ExploreViewModel(exploreSources, language = { languages().firstOrNull() ?: "en" }) }
+
+    /** A subject's page ([facetId] null, [listing] false), a room ([facetId]), or a whole-subject listing. */
+    fun subject(subjectId: String, facetId: String?, listing: Boolean): OwnedViewModel<app.granger.explore.SubjectViewModel>? {
+        val subject = app.granger.explore.Subject.of(subjectId) ?: return null
+        return OwnedViewModel {
+            app.granger.explore.SubjectViewModel(subject, exploreSources, facetId = facetId, listing = listing || facetId != null, language = languages().firstOrNull() ?: "en")
+        }
+    }
+
+    /**
+     * A subject's quiz (Plan EX Task 3): the same games, dealt only from the dated articles whose main subject it is; its
+     * own count and best runs.
+     */
+    fun subjectGames(subjectId: String): Owned<app.granger.home.GameModel> = owned { scope ->
+        var set: app.granger.core.library.SubjectSet? = null
+        app.granger.home.GameModel(
+            scope = scope,
+            indexes = {
+                val s = set ?: (indexes ?: QidIndexes(emptyList())).subjectSet(subjectId).also { set = it }
+                volunteeredTimes().only { s.isMain(it) }
+            },
+            picture = { p, a -> volunteeredPicture(p, a) },
+            store = DefaultsGameStore("games_$subjectId"),
+            mixed = false,
+        )
+    }
+
+    /** Where Wander starts in a subject, or in one of its rooms ([facetId]): one of its articles at random. */
+    suspend fun wanderStart(subjectId: String, facetId: String?): app.granger.explore.ExploreArticle? {
+        val q = indexes ?: return null
+        val pool = if (facetId != null) q.topInFacet("$subjectId.$facetId", WANDER_POOL) else q.topIn(subjectId, WANDER_POOL, mainOnly = true)
+        return pool.filterNot { contentFilter.hides(it.packId, it.path) }.takeIf { it.isNotEmpty() }?.random()?.let { app.granger.explore.ExploreArticle(it.packId, it.path, app.granger.explore.titleOf(it.path)) }
+    }
+
+    /** Explore's broad topics and the quilt read through the topic source. */
+    suspend fun around(packId: String, path: String, plates: List<String>): app.granger.topic.QuiltAround =
+        topics.around(packId, path, plates.map { packId to it })
+
     private fun <T : Any> owned(make: (CoroutineScope) -> T): Owned<T> {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
         return Owned(make(scope), scope)
@@ -329,6 +403,43 @@ class IosLibrary(
 /** A model with the scope it runs in: Swift closes it when its screen goes. */
 class Owned<T : Any>(val model: T, private val scope: CoroutineScope) {
     fun close() = scope.coroutineContext[kotlinx.coroutines.Job]?.cancel() ?: Unit
+}
+
+/** A view model kept in its own store, so Swift can clear it (its scope ends) when its screen goes. */
+class OwnedViewModel<T : androidx.lifecycle.ViewModel>(make: () -> T) {
+    private val store = androidx.lifecycle.ViewModelStore()
+    val model: T = make().also { store.put("model", it) }
+    fun close() = store.clear()
+}
+
+/** Where the reader has been in Explore, in NSUserDefaults as JSON (Android keeps it in a prefs file). */
+class DefaultsSeenStore(private val key: String) : app.granger.explore.SeenStore {
+    private val d = platform.Foundation.NSUserDefaults.standardUserDefaults
+    private val flow = MutableStateFlow(load())
+    override val state: StateFlow<app.granger.explore.Seen> get() = flow
+
+    private fun load(): app.granger.explore.Seen = runCatching {
+        val o = kotlinx.serialization.json.Json.parseToJsonElement(d.stringForKey(key) ?: return app.granger.explore.Seen()) as kotlinx.serialization.json.JsonObject
+        val on = (o["on"] as? kotlinx.serialization.json.JsonPrimitive)?.content != "false"
+        val first = (o["first"] as? kotlinx.serialization.json.JsonObject).orEmpty().mapValues { (it.value as kotlinx.serialization.json.JsonPrimitive).content.toLong() }
+        app.granger.explore.Seen(on, first)
+    }.getOrDefault(app.granger.explore.Seen())
+
+    private fun save(s: app.granger.explore.Seen) {
+        flow.value = s
+        val json = kotlinx.serialization.json.buildJsonObject {
+            put("on", kotlinx.serialization.json.JsonPrimitive(s.on))
+            put("first", kotlinx.serialization.json.buildJsonObject { s.first.forEach { (k, v) -> put(k, kotlinx.serialization.json.JsonPrimitive(v)) } })
+        }
+        d.setObject(json.toString(), key)
+    }
+
+    override fun mark(kind: app.granger.explore.SeenKind, id: String) {
+        val s = flow.value
+        if (s.on && !s.has(kind, id)) save(s.copy(first = s.first + (app.granger.explore.Seen.key(kind, id) to app.granger.screens.nowMillis())))
+    }
+    override fun setOn(on: Boolean) = save(flow.value.copy(on = on))
+    override fun clear() = save(flow.value.copy(first = emptyMap()))
 }
 
 /** Rounds played, the level and best runs in NSUserDefaults (Android keeps them in its prefs). */
@@ -346,6 +457,8 @@ class DefaultsGameStore(private val prefix: String) : app.granger.home.GameStore
 
 /** Topic pages, Explore and Home read through this (Plan I3 Tasks 7–9). */
 private const val TOPIC_LEAD_CHARS = 420
+/** Wander's start pool in a subject or room (Android's SubjectViewModel.WANDER_POOL). */
+private const val WANDER_POOL = 300
 
 enum class Mark { ON_PHONE, ON_PHONE_SHORTER, SAVED, NONE }
 enum class IndexKind { QID, TIME }

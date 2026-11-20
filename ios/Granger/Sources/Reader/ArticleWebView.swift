@@ -14,6 +14,11 @@ final class PageController {
     func setTextScale(_ scale: Double) {
         webView?.evaluateJavaScript(PageBridge.textScaleScript(scale))
     }
+
+    /// Find in page (Android's reader search): the system's find bar over the page.
+    func find() {
+        webView?.findInteraction?.presentFindNavigator(showingReplace: false)
+    }
 }
 
 /// One reader page in a `WKWebView`, served by the `granger-zim:` scheme with the shared CSS and scripts (Plan I2
@@ -40,6 +45,7 @@ struct ArticleWebView: UIViewRepresentable {
         config.userContentController.add(WeakMessageHandler(context.coordinator), name: PageBridge.handlerName)
         config.dataDetectorTypes = []
         let web = WKWebView(frame: .zero, configuration: config)
+        web.isFindInteractionEnabled = true
         web.navigationDelegate = context.coordinator
         web.allowsBackForwardNavigationGestures = false   // Back is the navigation stack's swipe
         web.isOpaque = false

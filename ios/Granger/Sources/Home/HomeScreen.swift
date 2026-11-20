@@ -37,6 +37,7 @@ struct HomeScreen: View {
         .navigationTitle("Granger")
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
+                RecentlyOpenMenu()
                 Button { arranging = true } label: { Image(systemName: "pencil") }.accessibilityLabel("Arrange Home")
                 Button { showSettings = true } label: { Image(systemName: "gearshape") }.accessibilityLabel("Settings")
             }
