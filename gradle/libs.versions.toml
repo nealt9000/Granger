@@ -37,6 +37,10 @@ desugarJdkLibs = "2.1.5"
 media3 = "1.11.1"
 glance = "1.2.0"
 ndk = "30.0.16248370"
+ksoup = "0.2.6"
+ktor = "3.6.1"
+skie = "0.10.16"
+kotlinxIo = "0.9.3"
 sherpaOnnx = "1.13.8"   # vendored AAR in core/speech/libs (no Maven artifact); see core/speech/NOTICE.md
 
 [libraries]
@@ -91,8 +95,17 @@ media3-test-utils = { module = "androidx.media3:media3-test-utils", version.ref 
 media3-test-utils-robolectric = { module = "androidx.media3:media3-test-utils-robolectric", version.ref = "media3" }
 androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
 androidx-glance-appwidget-testing = { module = "androidx.glance:glance-appwidget-testing", version.ref = "glance" }
+ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+kotlinx-io-core = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinxIo" }
 
 [plugins]
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+android-kmp-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+skie = { id = "co.touchlab.skie", version.ref = "skie" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 android-test = { id = "com.android.test", version.ref = "agp" }
