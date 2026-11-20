@@ -10,20 +10,20 @@ Legend: **[ ]** to do · **[x]** done on the iPhone · **≈** done with the iOS
 
 | Android | iPhone | Plan | |
 | --- | --- | --- | --- |
-| Rail: Home, Search, Explore, Library, Listen; Settings | Tab bar with the same five; Settings from Home's header (spec §5) | I2 (Home, Search), I3 (Explore), I5 (Library, Listen) | [ ] |
+| Rail: Home, Search, Explore, Library, Listen; Settings | Tab bar with the same five; Settings from Home's header (spec §5) | I2 (Home, Search), I3 (Explore), I5 (Library, Listen) | [ ] I2 part ✓ (Home, Search, Settings) |
 | Open items on the rail (up to 4 articles/books, pin, remove) | ≈ Recently open, from each tab's toolbar | I3 | [ ] |
-| Field and Night palettes, System; Spectral titles | Colour assets from `GrangerTheme.kt` (tested equal), Spectral | I2 | [ ] |
-| Launcher icon (owl mark), themed icon | AppIcon traced from the launcher mark; ≈ iOS tinted/dark icon variants | I2 | [ ] |
+| Field and Night palettes, System; Spectral titles | Colour assets from `GrangerTheme.kt` (tested equal), Spectral | I2 | [x] |
+| Launcher icon (owl mark), themed icon | AppIcon traced from the launcher mark; ≈ iOS tinted/dark icon variants | I2 | [ ] I2 part ✓ (icon; tinted/dark variants to do) |
 | Mini player above the content | Mini player above the tab bar | I6 | [ ] |
-| TalkBack, font scale, landscape | VoiceOver, Dynamic Type, landscape | every plan | [ ] |
+| TalkBack, font scale, landscape | VoiceOver, Dynamic Type, landscape | every plan | [ ] I2 ✓ for its screens |
 
 ## First run, onboarding and settings
 
 | Android | iPhone | Plan | |
 | --- | --- | --- | --- |
-| Privacy line before any online read (O5) | Same words, same rule | I2 | [ ] |
+| Privacy line before any online read (O5) | Same words, same rule | I2 | [x] |
 | Onboarding: brand, language, "Pick a start" sets (Starter/Efficient/Comprehensive), the Granger voice, quick wins first | Same flow | I4 (sets, downloads), I5 (voice) | [ ] |
-| Settings: appearance, text, content (adult flags), Local only, offline pictures, Saved for now cap and Clear | Same | I2 (basics), I3 (content, keeping) | [ ] |
+| Settings: appearance, text, content (adult flags), Local only, offline pictures, Saved for now cap and Clear | Same | I2 (basics), I3 (content, keeping) | [ ] I2 part ✓ (appearance, text, Local only) |
 | App language (English/Español) and knowledge languages | Per-app language, knowledge languages | I7 | [ ] |
 | Voice settings (voice, pace, downloads) | Same | I5 | [ ] |
 | Media settings (music folders, scans) | ≈ Files imports and the Music library | I6 | [ ] |
@@ -33,14 +33,14 @@ Legend: **[ ]** to do · **[x]** done on the iPhone · **≈** done with the iOS
 
 | Android | iPhone | Plan | |
 | --- | --- | --- | --- |
-| Online articles in Granger's look (`online.css`), pictures from Commons, links | `WKWebView` + `granger-zim:` scheme, shared CSS and scripts | I2 | [ ] |
-| Topic page in front of the article: picture, summary, Read the full article, Read in other language | Same | I2 | [ ] |
+| Online articles in Granger's look (`online.css`), pictures from Commons, links | `WKWebView` + `granger-zim:` scheme, shared CSS and scripts | I2 | [x] |
+| Topic page in front of the article: picture, summary, Read the full article, Read in other language | Same | I2 | [x] |
 | Topic page: records (parts, rooms, "leads here"), broad topics, quilt, Related (filtered) | Same | I3 | [ ] |
 | Keep (with/without pictures), Saved for now, marks (dot, ring), kept-article updates | Same | I3 | [ ] |
-| Local only (one gate), greyed tiles, hints | Same | I2 (gate), I3 (greying, hints) | [ ] |
+| Local only (one gate), greyed tiles, hints | Same | I2 (gate), I3 (greying, hints) | [ ] I2 part ✓ (the gate) |
 | Online indexes (Top `.gqid`/`.gtime`) fetched at first run | Same | I3 | [ ] |
 | Outfitting (your use + nine domains), would-take sizes | Same | I3 (online), I4 (packs) | [ ] |
-| Reader: Contents, text size, tap to hide bars, find in page, Listen | Same | I2 (Contents, size, bars), I3 (find), I5 (Listen) | [ ] |
+| Reader: Contents, text size, tap to hide bars, find in page, Listen | Same | I2 (Contents, size, bars), I3 (find), I5 (Listen) | [ ] I2 part ✓ (Contents, size, bars) |
 | Reader footer (In your books, article footer views), quotes | Same | I3 | [ ] |
 | Adult flags on default screens (Plan AF) | Same | I3 | [ ] |
 
@@ -48,7 +48,7 @@ Legend: **[ ]** to do · **[x]** done on the iPhone · **≈** done with the iOS
 
 | Android | iPhone | Plan | |
 | --- | --- | --- | --- |
-| Feeds (Continue, featured, readiness strip, downloads card), Add feed, scopes | Same | I2 (featured + Recently read, interim), I3 (feeds) | [ ] |
+| Feeds (Continue, featured, readiness strip, downloads card), Add feed, scopes | Same | I2 (featured + Recently read, interim), I3 (feeds) | [ ] I2 part ✓ (interim: featured, Continue) |
 | Wander (well-known articles from the index) | Same (replaces I2's featured-only Home) | I3 | [ ] |
 | Timeline card, Day page, time scale, Show in time | Same | I3 | [ ] |
 | Games (6, random on Home, Games hub, runs of 10) | Same | I3 | [ ] |
@@ -65,7 +65,7 @@ Legend: **[ ]** to do · **[x]** done on the iPhone · **≈** done with the iOS
 
 | Android | iPhone | Plan | |
 | --- | --- | --- | --- |
-| Online titles and articles, recent searches | Same | I2 | [ ] |
+| Online titles and articles, recent searches | Same | I2 | [x] |
 | Best matches across packs and books, Titles, Articles, Books, By kind filters, Show all / fewer | Same | I4 (packs), I5 (books) | [ ] |
 | Mic (on-device dictation, title matcher, Did you mean) | `SFSpeechRecognizer` on device / `SpeechAnalyzer`, the same matcher (core) | I6 | [ ] |
 | Selected text → Search in Granger (`PROCESS_TEXT`) | ≈ a Share extension | I6 | [ ] |

@@ -1,11 +1,13 @@
 import XCTest
 
 /// The walkthrough the app must always pass (Plan I2 Task 7 grows it with each plan). Needs the internet (Wikipedia).
+/// Each test pins the settings it relies on through launch arguments (they shadow what a previous test saved).
 final class SmokeTests: XCTestCase {
     override func setUp() { continueAfterFailure = false }
 
     func testLaunchesWithTabs() {
         let app = XCUIApplication()
+        app.launchArguments = ["-localOnly", "NO"]
         app.launch()
         XCTAssertTrue(app.tabBars.buttons["Home"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.tabBars.buttons["Search"].exists)
@@ -14,7 +16,7 @@ final class SmokeTests: XCTestCase {
     /// Topic page → full article → Contents → a section → a link in the page → its topic page → back twice.
     func testTopicReaderContentsAndLinks() {
         let app = XCUIApplication()
-        app.launchArguments = ["-privacySeen", "YES", "-debugOpen", "en:Moon"]
+        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-debugOpen", "en:Moon"]
         app.launch()
         let read = app.buttons["read-full"]
         XCTAssertTrue(read.waitForExistence(timeout: 20), "topic page")
@@ -45,7 +47,7 @@ final class SmokeTests: XCTestCase {
     /// Search online: type, see Titles and Articles, open a result's topic page, find the search under Recent.
     func testSearchOpensATopic() {
         let app = XCUIApplication()
-        app.launchArguments = ["-privacySeen", "YES"]
+        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en"]
         app.launch()
         app.tabBars.buttons["Search"].tap()
         let field = app.searchFields.firstMatch
@@ -84,5 +86,25 @@ final class SmokeTests: XCTestCase {
         field.tap()
         field.typeText("Moon")
         XCTAssertTrue(app.staticTexts["Online results appear when you're connected."].waitForExistence(timeout: 5), "Local only")
+    }
+
+    /// Landscape: the topic page and the reader lay out and stay usable sideways.
+    func testLandscape() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-debugOpen", "en:Moon"]
+        app.launch()
+        XCUIDevice.shared.orientation = .landscapeLeft
+        defer { XCUIDevice.shared.orientation = .portrait }
+        let read = app.buttons["read-full"]
+        XCTAssertTrue(read.waitForExistence(timeout: 20))
+        if let dir = ProcessInfo.processInfo.environment["GRANGER_SHOTS"] {
+            try? app.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir + "/landscape-topic.png"))
+        }
+        read.tap()
+        XCTAssertTrue(app.buttons["Contents"].waitForExistence(timeout: 10))
+        sleep(UInt32(ProcessInfo.processInfo.environment["GRANGER_HOLD"].flatMap(UInt32.init) ?? 3))
+        if let dir = ProcessInfo.processInfo.environment["GRANGER_SHOTS"] {
+            try? app.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir + "/landscape-reader.png"))
+        }
     }
 }

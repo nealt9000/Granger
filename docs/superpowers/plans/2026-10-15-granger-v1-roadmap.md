@@ -149,6 +149,8 @@ Neal's calls from the review: **feature freeze** until the closed test is runnin
 - **Maggie & Martin retired:** out of the catalog (`cl-cleanup` 1498ae85); phones that have the voice keep it.
 - **Park is out.** In its place, **Preview**: a Kiwix pack not on the phone opens on library.kiwix.org in the phone's browser before Get (`cl-cleanup`).
 
+**Carried forward from I2 (iPhone):** the tinted and dark app-icon variants (iOS 18+); the Simulator's network switched fully off (Local only covers the same gate); the app's own text in Spanish (I7); onboarding's language question (Android asks; the iPhone picks from the phone's languages until I4); Wander and the filtered Related (I3, needing the index's adult flags).
+
 **Parked during the freeze:** `a0-asr-spike` stays parked (`i0-iphone-spike` resumed 2026-11-20), not merged; V4 voices that are already shipping are unaffected.
 
 Development moved to Neal's Mac Studio with M1 (setup: `tools/dev/MAC-SETUP.md`).

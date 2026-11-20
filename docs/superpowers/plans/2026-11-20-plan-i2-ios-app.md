@@ -112,11 +112,13 @@
 
 **Files:** `ios/Granger/UITests/SmokeTests.swift`; `docs/superpowers/ios-parity.md`.
 
-- [ ] XCUITest smoke test: first run → OK → search "Moon" → open the topic page → Read the full article → Contents → a link → back twice; Night appearance; Spanish Wikipedia. It stays in the project and grows with each plan, so every later plan reruns it.
-- [ ] Walkthrough on the iPhone 17 Simulator with screenshots: Field and Night, Dynamic Type at the largest size, VoiceOver by the accessibility tree (every control labelled), landscape, Local only on, the Simulator's network off, a very long article (Moon) and a short one, an article with tables and an infobox, Spanish.
-- [ ] Fix what the walkthrough finds. Anything left goes under "Carried forward from I2" in the roadmap, and into the parity list if it's a parity gap.
-- [ ] Tick I2's rows in `ios-parity.md` (compare each with the Android screen side by side).
-- [ ] Commit.
+- [x] XCUITest smoke test: first run → OK → search "Moon" → open the topic page → Read the full article → Contents → a link → back twice; Night appearance; Spanish Wikipedia. It stays in the project and grows with each plan, so every later plan reruns it.
+- [x] Walkthrough on the iPhone 17 Simulator with screenshots: Field and Night, Dynamic Type at the largest size, VoiceOver by the accessibility tree (every control labelled), landscape, Local only on, the Simulator's network off, a very long article (Moon) and a short one, an article with tables and an infobox, Spanish.
+- [x] Fix what the walkthrough finds. Anything left goes under "Carried forward from I2" in the roadmap, and into the parity list if it's a parity gap.
+- [x] Tick I2's rows in `ios-parity.md` (compare each with the Android screen side by side).
+- [x] Commit.
+- *Done 2026-11-20 on the iPhone 17 Simulator (iOS 27.1). UI tests (all pass): launch + tabs; topic → reader → Contents → section → in-page link → linked topic → back twice; Search → groups → topic → Recent; privacy line → OK → featured → Settings → Local only → Search blocked; landscape topic and reader. Each test pins its settings by launch argument (a saved Local only from one test had leaked into the next). Screenshots checked: Field and Night (reader in Night: lantern links, night page, symbols on paper), Spanish Home (Picture of the day) and topic (Luna), largest Dynamic Type (Home, topic), landscape reader, Local only (topic says Needs internet, no Retry). VoiceOver by the tree: tabs, toolbar buttons (Contents, Text settings, Settings) and plates labelled. Parity rows ticked: 5 whole, 7 partly.*
+- *Not checked on the Simulator: the network switched off (no simctl control for it); Local only takes the same gate. Carried forward under "Carried forward from I2" in the roadmap.*
 
 ### Task 8: Close and carry on
 
