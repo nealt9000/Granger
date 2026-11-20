@@ -54,6 +54,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.granger.R
 import app.granger.core.catalog.Shelves
+import app.granger.theme.Chevron
 import app.granger.theme.GroupLabel
 import app.granger.theme.GroupedRow
 import app.granger.theme.GroupedRows
@@ -324,6 +325,8 @@ fun BookSourceLine(row: ItemRow, a: BookSourceActions) {
                 onOpen = open,
                 preview = false,
             )
+            // The row itself opens the collection online: the arrow says so beside Keep.
+            if (browse != null) Chevron()
         },
     )
 }
