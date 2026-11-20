@@ -32,15 +32,18 @@ data class ManifestItem(
     val edition: ManifestEdition? = null,
 )
 
-/** A reading edition of a manifest item (Plan BK): an EPUB on Granger's release. */
-data class ManifestEdition(val url: String, val sha256: String, val bytes: Long, val title: String) {
+/**
+ * A reading edition of a manifest item (Plan BK): an EPUB on Granger's release, and [id], the catalog book (in the
+ * "Granger reading editions" set) the app reads it as, so Read now and Keep work as for any Granger book.
+ */
+data class ManifestEdition(val url: String, val sha256: String, val bytes: Long, val title: String, val id: String = "") {
     companion object {
         /** From the manifest's `edition` JSON; null when it's missing or malformed. */
         fun parse(json: String?): ManifestEdition? {
             if (json.isNullOrBlank()) return null
             return runCatching {
                 val o = org.json.JSONObject(json)
-                ManifestEdition(o.getString("url"), o.optString("sha256"), o.optLong("bytes"), o.optString("title"))
+                ManifestEdition(o.getString("url"), o.optString("sha256"), o.optLong("bytes"), o.optString("title"), o.optString("id"))
             }.getOrNull()?.takeIf { it.url.startsWith("https://") }
         }
     }

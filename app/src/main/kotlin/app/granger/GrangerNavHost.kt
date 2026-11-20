@@ -1211,6 +1211,8 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             read = { key, progress -> container.readPackBookOnline(packId, key, progress) },
                             keepBook = { id -> container.keepPackBook(id) },
                             keepPack = { container.keepPack(packId) },
+                            readEdition = { id -> container.readWithoutKeeping(id) },
+                            keepEdition = { id -> container.keepBook(id) },
                             packQueued = container.downloads.records.map { list ->
                                 list.any { it.itemId == packId && it.state != app.granger.core.downloads.DownloadState.FAILED }
                             },

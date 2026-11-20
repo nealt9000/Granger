@@ -1018,7 +1018,7 @@ class AppContainer(context: Context) {
     suspend fun readWithoutKeeping(itemId: String): String? = kotlinx.coroutines.withContext(Dispatchers.IO) {
         val id = app.granger.core.library.BookIds.of(app.granger.core.library.BookOrigin.GRANGER, itemId)
         bookshelf.book(id)?.takeIf { it.status == app.granger.core.library.PackStatus.OK && File(it.filePath).isFile }?.let { return@withContext it.id }
-        val entry = catalog.state.value.catalog?.books?.firstOrNull { it.id == itemId } ?: return@withContext null
+        val entry = catalogBook(itemId) ?: return@withContext null
         val key = app.granger.online.SavedStore.bookKey(itemId)
         val file = savedStore.file(key) ?: run {
             val tmp = File(appContext.cacheDir, "reading-$itemId.part")
@@ -1043,10 +1043,16 @@ class AppContainer(context: Context) {
 
     /** Keeps a book opened without keeping: the ordinary download, which takes over the same book (Plan O2 Task 8). */
     suspend fun keepBook(itemId: String): Boolean {
-        val entry = catalog.state.value.catalog?.books?.firstOrNull { it.id == itemId } ?: return false
+        val entry = catalogBook(itemId) ?: return false
         val root = kotlinx.coroutines.withContext(Dispatchers.IO) { volumes.list().firstOrNull()?.root } ?: return false
         downloads.enqueue(entry, root, downloadPrefs.wifiOnly)
         return true
+    }
+
+    /** A catalog book by id: Granger's own, or one in a set (Plan BK: the reading editions are a set). */
+    fun catalogBook(itemId: String): app.granger.core.catalog.BookEntry? {
+        val c = catalog.state.value.catalog ?: return null
+        return c.books.firstOrNull { it.id == itemId } ?: c.setBooks.firstOrNull { it.id == itemId }
     }
 
     /** Plan BK: book packs' books read one at a time from the pack file on Kiwix's mirrors. */

@@ -125,7 +125,10 @@ fun RemoteCollectionScreen(
                 if (section.name.isNotBlank()) item(key = "label:${section.name}") { GroupLabel(section.name) }
                 itemsIndexed(section.rows, key = { _, r -> "row:${r.key}" }) { i, row ->
                     GroupedItem(i, section.rows.size) {
-                        BookLine(row, enabled = ui.online || row.mark != null, onOpen = { viewModel.open(row) }, onKeep = { viewModel.keep(row) })
+                        BookLine(
+                            row, enabled = ui.online || row.mark != null, onOpen = { viewModel.open(row) }, onKeep = { viewModel.keep(row) },
+                            onOriginal = { viewModel.openOriginal(row) },
+                        )
                     }
                 }
             }
@@ -193,27 +196,34 @@ private fun Head(ui: RemoteCollectionUi, onKeepPack: () -> Unit) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun BookLine(row: RemoteBookRow, enabled: Boolean, onOpen: () -> Unit, onKeep: () -> Unit) {
+private fun BookLine(row: RemoteBookRow, enabled: Boolean, onOpen: () -> Unit, onKeep: () -> Unit, onOriginal: () -> Unit) {
     var menu by remember { mutableStateOf(false) }
     Box {
         Row(
             Modifier.fillMaxWidth().heightIn(min = 56.dp)
-                .combinedClickable(enabled = enabled && (row.readable || row.mark != null), onClick = onOpen, onLongClick = { menu = true })
+                .combinedClickable(enabled = enabled && (row.readable || row.mark != null || row.editionId != null), onClick = onOpen, onLongClick = { menu = true })
                 .padding(start = 16.dp, end = 12.dp, top = 8.dp, bottom = 8.dp)
                 .testTag(RemoteTags.row(row.key)),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Column(Modifier.weight(1f)) {
-                Text(row.title, style = MaterialTheme.typography.bodyLarge, maxLines = 2, overflow = TextOverflow.Ellipsis,
+                Text(row.edition ?: row.title, style = MaterialTheme.typography.bodyLarge, maxLines = 2, overflow = TextOverflow.Ellipsis,
                     color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant)
-                val meta = listOfNotNull(row.author.takeIf { it.isNotBlank() }, formatBytes(row.bytes),
-                    row.edition?.let { stringResource(R.string.bk_reading_edition) }).joinToString(" · ")
+                // A reading edition says so, with its own size; the scan's maker and size are the original's.
+                val meta = if (row.edition != null) {
+                    listOfNotNull(stringResource(R.string.bk_reading_edition), row.editionBytes.takeIf { it > 0 }?.let(::formatBytes)).joinToString(" · ")
+                } else {
+                    listOfNotNull(row.author.takeIf { it.isNotBlank() }, formatBytes(row.bytes)).joinToString(" · ")
+                }
                 Text(meta, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             Mark(row.mark)
         }
         DropdownMenu(menu, { menu = false }) {
+            if (row.editionId != null) {
+                DropdownMenuItem(text = { Text(stringResource(R.string.bk_original_scan)) }, onClick = { menu = false; onOriginal() }, enabled = enabled && row.readable)
+            }
             if (row.mark is Availability.OnPhone) {
                 DropdownMenuItem(text = { Text(stringResource(R.string.bk_kept)) }, onClick = { menu = false }, enabled = false)
             } else {
