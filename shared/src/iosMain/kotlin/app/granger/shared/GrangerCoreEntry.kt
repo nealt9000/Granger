@@ -7,7 +7,11 @@ import app.granger.core.catalog.Ed25519Verifier
 import app.granger.core.catalog.ParseResult
 import app.granger.core.online.OnlineWikipediaArchive
 import app.granger.core.online.UrlSessionFetch
+import app.granger.core.online.ReaderPage
 import app.granger.core.online.WikimediaClient
+import app.granger.core.research.ArticleText
+import app.granger.core.zim.ZimUrl
+import app.granger.core.zim.ZimUrls
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
@@ -25,6 +29,39 @@ object GrangerCoreEntry {
 
     /** The Wikimedia client over `NSURLSession`, sending Granger's User-Agent. */
     fun wikimedia(version: String): WikimediaClient = WikimediaClient(UrlSessionFetch(userAgent = userAgent(version)))
+
+    /**
+     * The client with the app's gate (Plan O5/O3's rule): nothing is asked of Wikimedia while [allowed] says no (before
+     * the privacy line is seen, or in Local only).
+     */
+    fun wikimedia(version: String, allowed: () -> Boolean): WikimediaClient =
+        WikimediaClient(UrlSessionFetch(userAgent = userAgent(version)), allowed = allowed)
+
+    /** Where reader URLs start on this phone (`granger-zim://zim/`): set once at start, before any page. */
+    fun setZimBase(base: String) {
+        ZimUrls.base = base
+    }
+
+    /** The reader URL of [path] in [packId] (`granger-zim://zim/<pack>/<path>`), and back. */
+    fun zimUrl(packId: String, path: String, fragment: String?): String = ZimUrls.forEntry(packId, path, fragment)
+    fun parseZimUrl(url: String): ZimUrl? = ZimUrls.parse(url)
+
+    /** Wikipedia online's stylesheet and the reader's tap/link script, the same as Android's (Plan I2 Task 2). */
+    val onlineCss: String get() = ReaderPage.ONLINE_CSS
+    val tapScript: String get() = ReaderPage.TAP_SCRIPT
+    val appPack: String get() = ReaderPage.APP_PACK
+    val cssName: String get() = ReaderPage.CSS_NAME
+
+    /** The online source's pack id for [lang] (`wikipedia_en_online`) and back. */
+    fun onlinePackId(lang: String): String = OnlineWikipediaArchive.packName(lang)
+    fun languageOfPack(packId: String): String? = OnlineWikipediaArchive.languageOf(packId)
+
+    /** The article's sections for Contents: its h2 and h3 headings with their anchors, in order. */
+    fun headings(html: String): List<Heading> =
+        ArticleText.blocks(html).filter { it.tag == "h2" || it.tag == "h3" }.map { Heading(it.id, it.text, if (it.tag == "h2") 2 else 3) }
+
+    /** A key back to the words its title shows ("Albert_Einstein" → "Albert Einstein"). */
+    fun titleOfKey(key: String): String = WikimediaClient.titleOfKey(key)
 
     /** Wikipedia in [lang] read online, as the reader reads a pack (no stores yet: I3 adds keeping). */
     fun onlineWikipedia(lang: String, client: WikimediaClient): OnlineWikipediaArchive = OnlineWikipediaArchive(lang, client)
@@ -55,3 +92,6 @@ internal fun NSData.toByteArray(): ByteArray {
     if (out.isNotEmpty()) out.usePinned { memcpy(it.addressOf(0), bytes, length) }
     return out
 }
+
+/** One section of an article for Contents: its anchor, its title and its level (2 or 3). */
+data class Heading(val anchor: String, val title: String, val level: Int)

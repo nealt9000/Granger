@@ -10,7 +10,20 @@ data class ZimUrl(val packId: String, val path: String, val fragment: String? = 
  */
 object ZimUrls {
     const val HOST = "zim.granger.invalid"
-    private const val PREFIX = "https://$HOST/"
+    /** Android's base. The iPhone loads pages through a custom scheme instead (`WKWebView` can't intercept https). */
+    const val ANDROID_BASE = "https://$HOST/"
+
+    /**
+     * Where reader URLs start: [ANDROID_BASE] unless the app sets another once at start (the iPhone sets
+     * `granger-zim://zim/`; Plan I2 Task 2). Ends with a slash.
+     */
+    var base: String = ANDROID_BASE
+        set(value) {
+            require(value.endsWith("/")) { "the base ends with a slash" }
+            field = value
+        }
+
+    private val PREFIX: String get() = base
     private const val UNRESERVED = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
     private const val HEX = "0123456789ABCDEF"
 

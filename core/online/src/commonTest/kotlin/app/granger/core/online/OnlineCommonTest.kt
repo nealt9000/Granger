@@ -58,4 +58,29 @@ class OnlineCommonTest {
         assertTrue("<h1>Moon</h1>" in out, out)
         assertEquals(listOf("_img/upload.wikimedia.org/a/Moon2x.jpg"), OnlineWikipediaArchive.picturesOf(out))
     }
+
+    @Test fun featuredReadsTheArticleAndThePicture() {
+        val en = """{"tfa":{"type":"standard","title":"Tôn Thất Đính","titles":{"canonical":"T%C3%B4n_Th%E1%BA%A5t_%C4%90%C3%ADnh","normalized":"Tôn Thất Đính"},
+            "extract":"Tôn Thất Đính was a general.","thumbnail":{"source":"https://upload.wikimedia.org/a.jpg?x=1"},"wikibase_item":"Q1"},
+            "image":{"title":"File:Moon_over_sea.jpg","thumbnail":{"source":"https://upload.wikimedia.org/thumb/m.jpg"},
+            "description":{"text":"The Moon over the sea","html":"<p>x</p>"},"artist":{"text":"A. Photographer"},"file_page":"https://commons.wikimedia.org/wiki/File:Moon_over_sea.jpg"}}"""
+        val f = WikimediaClient.featuredOf(en)!!
+        assertEquals("Tôn Thất Đính", f.article!!.title)
+        assertEquals("Moon over sea", f.picture!!.title)
+        assertEquals("The Moon over the sea", f.picture!!.description)
+        val es = """{"image":{"title":"File:X.png","thumbnail":{"source":"https://upload.wikimedia.org/x.png"}},"mostread":{}}"""
+        assertNull(WikimediaClient.featuredOf(es)!!.article)
+        assertNull(WikimediaClient.featuredOf("""{"news":[]}"""))
+    }
+
+    @Test fun languageLinkReadsTheOtherTitle() {
+        assertEquals("Luna", WikimediaClient.languageLinkOf("""{"query":{"pages":[{"title":"Moon","langlinks":[{"lang":"es","title":"Luna"}]}]}}"""))
+        assertEquals("Monte_Everest", WikimediaClient.languageLinkOf("""{"query":{"pages":[{"title":"Mount Everest","langlinks":[{"lang":"es","title":"Monte Everest"}]}]}}"""))
+        assertNull(WikimediaClient.languageLinkOf("""{"query":{"pages":[{"title":"Obscure"}]}}"""))
+    }
+
+    @Test fun pagePiecesAreThere() {
+        assertTrue("color-scheme: light dark" in ReaderPage.ONLINE_CSS)
+        assertTrue("GrangerBridge.noteLink" in ReaderPage.TAP_SCRIPT && "toggleChrome" in ReaderPage.TAP_SCRIPT)
+    }
 }

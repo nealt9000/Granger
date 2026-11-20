@@ -63,6 +63,10 @@ class ZimWebViewClient(
     }
 
     private fun appAsset(view: WebView, name: String): WebResourceResponse {
+        // Wikipedia online's stylesheet is shared with the iPhone and lives in the core (Plan I2 Task 2).
+        if (name == app.granger.core.online.ReaderPage.CSS_NAME) {
+            return WebResourceResponse("text/css", "UTF-8", ByteArrayInputStream(app.granger.core.online.ReaderPage.ONLINE_CSS.toByteArray()))
+        }
         if (name !in appFiles) return notFound(view)
         val mimeType = when {
             name.endsWith(".js") -> "application/javascript"
@@ -138,8 +142,8 @@ class ZimWebViewClient(
     }
 
     companion object {
-        /** `https://zim.granger.invalid/_granger/<file>` serves `assets/reader/<file>`. */
-        const val APP_PACK = "_granger"
+        /** `https://zim.granger.invalid/_granger/<file>` serves `assets/reader/<file>` (and the core's online.css). */
+        const val APP_PACK = app.granger.core.online.ReaderPage.APP_PACK
         private const val ASSET_DIR = "reader"
     }
 }

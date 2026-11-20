@@ -33,6 +33,12 @@ class WikimediaClient(
 
     data class RelatedPage(val key: String, val title: String, val qid: Long?)
 
+    /** Wikimedia's Picture of the day: a curated Commons image (the feed's `image`). */
+    data class DayPicture(val title: String, val thumbnail: String, val description: String?, val artist: String?, val filePage: String?)
+
+    /** A day's front page (`/feed/featured`): the featured article where the wiki has one, and the picture of the day. */
+    data class Featured(val article: Summary?, val picture: DayPicture?)
+
     private val gates = HostGates(PER_HOST)
 
     /** The article's Parsoid HTML (O0 Task 1's pick), following a redirect to its target's title. */
@@ -81,6 +87,25 @@ class WikimediaClient(
             call(url) { r -> revisionsOf(r.text(), chunk) }?.let(out::putAll)
         }
         return out
+    }
+
+    /**
+     * The featured article and the picture of the day for [year]-[month]-[day] (Plan I2 Task 2). English Wikipedia has
+     * a featured article in its feed; Spanish doesn't (checked 2026-11-20), so its Home shows the picture.
+     */
+    fun featured(lang: String, year: Int, month: Int, day: Int): Featured? {
+        val date = year.toString().padStart(4, '0') + "/" + month.toString().padStart(2, '0') + "/" + day.toString().padStart(2, '0')
+        return call(restUrl(lang, "api/rest_v1/feed/featured/$date")) { r -> featuredOf(r.text()) }
+    }
+
+    /** [title]'s title in the [to] Wikipedia ("Read in Español"), following redirects; null when it has none. */
+    fun languageLink(lang: String, title: String, to: String): String? {
+        val url = UrlCodec.withQuery(
+            "https://$lang.wikipedia.org/w/api.php",
+            "action" to "query", "format" to "json", "formatversion" to "2", "redirects" to "1",
+            "prop" to "langlinks", "lllang" to to, "titles" to title.replace('_', ' '),
+        )
+        return call(url) { r -> languageLinkOf(r.text()) }
     }
 
     /** A random article's summary (Wander's fallback when no index is on the phone). */
@@ -243,6 +268,28 @@ class WikimediaClient(
                     val title = p.str("title")
                     RelatedPage(title.replace(' ', '_'), title, qidOf(p.obj("pageprops")?.str("wikibase_item").orEmpty()))
                 }
+        }
+
+        internal fun featuredOf(json: String): Featured? {
+            val o = parseObject(json) ?: return null
+            val article = o.obj("tfa")?.let(::summaryOf)
+            val picture = o.obj("image")?.let { i ->
+                val thumb = i.obj("thumbnail")?.str("source")?.takeIf { it.isNotBlank() } ?: return@let null
+                DayPicture(
+                    title = i.str("title").removePrefix("File:").substringBeforeLast('.').replace('_', ' '),
+                    thumbnail = withoutQuery(thumb),
+                    description = i.obj("description")?.str("text")?.takeIf { it.isNotBlank() },
+                    artist = i.obj("artist")?.str("text")?.takeIf { it.isNotBlank() },
+                    filePage = i.str("file_page").takeIf { it.isNotBlank() },
+                )
+            }
+            return if (article == null && picture == null) null else Featured(article, picture)
+        }
+
+        internal fun languageLinkOf(json: String): String? {
+            val page = parseObject(json)?.obj("query")?.arr("pages")?.objects()?.firstOrNull() ?: return null
+            return (page.arr("langlinks")?.firstOrNull() as? kotlinx.serialization.json.JsonObject)?.str("title")
+                ?.takeIf { it.isNotBlank() }?.replace(' ', '_')
         }
 
         fun qidOf(item: String): Long? = item.takeIf { it.startsWith("Q") }?.drop(1)?.toLongOrNull()

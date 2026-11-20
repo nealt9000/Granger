@@ -15,25 +15,7 @@ import android.webkit.JavascriptInterface
 object ReaderPageScript {
     const val BRIDGE_NAME = "GrangerBridge"
 
-    val SOURCE = """
-        (function () {
-          if (window.__grangerTap) return;
-          window.__grangerTap = true;
-          document.addEventListener('click', function (e) {
-            var target = e.target;
-            var link = target && target.closest && target.closest('a[href]');
-            if (link && window.$BRIDGE_NAME) {
-              var img = link.querySelector('img[alt]');
-              $BRIDGE_NAME.noteLink(link.href, link.innerText || link.textContent || link.getAttribute('title') || (img && img.alt) || '');
-            }
-            if (e.defaultPrevented) return;
-            if (target && target.closest && target.closest('a, button, input, summary, [onclick], h1, h2, h3, h4, h5, h6, [role=button]')) return;
-            var width = window.innerWidth;
-            if (e.clientX < width * 0.2 || e.clientX > width * 0.8) return;
-            if (window.$BRIDGE_NAME) $BRIDGE_NAME.toggleChrome();
-          }, true);
-        })();
-    """.trimIndent()
+    val SOURCE = app.granger.core.online.ReaderPage.TAP_SCRIPT
 }
 
 /**

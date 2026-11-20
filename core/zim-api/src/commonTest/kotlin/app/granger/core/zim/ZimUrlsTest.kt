@@ -64,4 +64,16 @@ class ZimUrlsTest {
         assertNull(ZimUrls.parse("https://zim.granger.invalid/onlypack"))
         assertNull(ZimUrls.parse("javascript:alert(1)"))
     }
+
+    @kotlin.test.Test fun aSchemeBaseForTheIphone() {
+        try {
+            ZimUrls.base = "granger-zim://zim/"
+            val url = ZimUrls.forEntry("wikipedia_en_online", "C++", "Early life")
+            assertEquals("granger-zim://zim/wikipedia_en_online/C%2B%2B#Early%20life", url)
+            assertEquals(ZimUrl("wikipedia_en_online", "C++", "Early life"), ZimUrls.parse(url))
+            assertNull(ZimUrls.parse("https://zim.granger.invalid/p/x"))
+        } finally {
+            ZimUrls.base = ZimUrls.ANDROID_BASE
+        }
+    }
 }

@@ -229,7 +229,8 @@ class OnlineWikipediaArchive(
             return "https://upload.wikimedia.org/wikipedia/commons/thumb/${md5[0]}/${md5.substring(0, 2)}/$enc/${px}px-$thumb"
         }
 
-        private val STYLESHEET = ZimUrls.forEntry("_granger", "online.css")
+        /** Read each time: the app may set [ZimUrls.base] at start (the iPhone does). */
+        private val STYLESHEET: String get() = ZimUrls.forEntry(ReaderPage.APP_PACK, ReaderPage.CSS_NAME)
 
         /**
          * Parsoid HTML → a page the reader treats like a pack's (O0 Task 1). Pure, so it's tested at the desk:

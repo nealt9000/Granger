@@ -1,4 +1,18 @@
-/* Wikipedia read online (Plan O1 Task 3): Wikipedia's article look in Granger's reader colours. The page declares
+package app.granger.core.online
+
+/**
+ * The reader's page pieces both phones load (Plan I2 Task 2, builder's call 5): Wikipedia online's stylesheet and the
+ * tap/link script. Android serves the stylesheet at `<ZimUrls.base>_granger/online.css` and runs the script after each
+ * page; iOS does the same through its `granger-zim:` scheme handler, with a shim that gives the script the
+ * `GrangerBridge` object Android's WebView provides.
+ */
+object ReaderPage {
+    /** The pseudo-pack Granger's own files are served from: `<ZimUrls.base>_granger/<file>`. */
+    const val APP_PACK = "_granger"
+    const val CSS_NAME = "online.css"
+
+    /** Wikipedia online's look in Granger's reader colours (Plan O1 Task 3); Field by day, Night when the page is dark. */
+    val ONLINE_CSS: String = """/* Wikipedia read online (Plan O1 Task 3): Wikipedia's article look in Granger's reader colours. The page declares
    `color-scheme: light dark`, so the WebView's algorithmic darkening leaves it alone and these rules colour it:
    Field by day, Night when the reader's theme is dark (prefers-color-scheme follows it). */
 :root {
@@ -10,7 +24,7 @@
   :root {
     --g-paper: #12211E; --g-ink: #EFE4D0; --g-ink2: #C9C2B6; --g-line: #2E4540; --g-link: #F0A35E; --g-rail: #1A2E2A;
   }
-  img:not([src$=".svg"]):not(.mw-file-element[data-file-type="drawing"]) { filter: brightness(.9); }
+  img:not([src${"$"}=".svg"]):not(.mw-file-element[data-file-type="drawing"]) { filter: brightness(.9); }
   .mw-file-element[data-file-type="drawing"], img[src*=".svg"], .mwe-math-fallback-image-inline, .mwe-math-fallback-image-display {
     background: #F3EEE4; border-radius: 2px;
   }
@@ -52,3 +66,30 @@ blockquote { border-left: 3px solid var(--g-line); margin: .8em 0; padding: 0 .9
 li.gallerybox { display: inline-block; vertical-align: top; max-width: 46%; margin: 4px; }
 pre, code { white-space: pre-wrap; background: var(--g-rail); }
 section > details > summary { cursor: pointer; }
+"""
+
+    /**
+     * Run in every page after it loads. A tap that lands on plain content in the middle 60 % of the width shows or hides
+     * the reader's chrome; taps on links, controls, headings and anything the page already handled, and near the edges,
+     * don't. A tapped link's address and words go to `GrangerBridge.noteLink` first.
+     */
+    val TAP_SCRIPT: String = """
+        (function () {
+          if (window.__grangerTap) return;
+          window.__grangerTap = true;
+          document.addEventListener('click', function (e) {
+            var target = e.target;
+            var link = target && target.closest && target.closest('a[href]');
+            if (link && window.GrangerBridge) {
+              var img = link.querySelector('img[alt]');
+              GrangerBridge.noteLink(link.href, link.innerText || link.textContent || link.getAttribute('title') || (img && img.alt) || '');
+            }
+            if (e.defaultPrevented) return;
+            if (target && target.closest && target.closest('a, button, input, summary, [onclick], h1, h2, h3, h4, h5, h6, [role=button]')) return;
+            var width = window.innerWidth;
+            if (e.clientX < width * 0.2 || e.clientX > width * 0.8) return;
+            if (window.GrangerBridge) GrangerBridge.toggleChrome();
+          }, true);
+        })();
+    """.trimIndent()
+}
