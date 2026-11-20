@@ -83,8 +83,9 @@
 
 ### Task 5: I3a check and merge
 
-- [ ] Whole JVM suite; `:app:bundleRelease` with R8 (keep rules for Room's generated code if needed); the Pixel 6 walkthrough in the Global Constraints, on the phone's own data.
-- [ ] Cut a GrangerCore release with `:core:library` and `:core:screens` exported; pin it. Merge and push (standing OK).
+- [x] Whole JVM suite; `:app:bundleRelease` with R8 (keep rules for Room's generated code if needed); the Pixel 6 walkthrough in the Global Constraints, on the phone's own data.
+- [x] Cut a GrangerCore release with `:core:library` and `:core:screens` exported; pin it. Merge and push (standing OK).
+- *Done 2026-11-20. Main (BK, migration 18) merged in first; `MIGRATION_17_18` ported to the `SQLiteConnection` form; the iOS store test now expects 18 and the `loose` column. Whole suite 3,867 JVM + 8 iOS, 0 failures; `bundleRelease` with R8 builds. GrangerCore **ios-core-2026-11-20-4** published and pinned; the iPhone app builds against it. **Pixel 6 walkthrough** (debug 1634 over the phone's own data, DB 18; it had BK's 1619): Home (readiness, timeline, Continue), Explore landing, broad topic spread (Through time, people, marks), a room (description, plates, A–Z rail with Spanish titles in order), a pack topic page (Archimedes: Their time, More in the room, In your books), an online-only topic page (RegioJet from Search's Wikipedia results), Keep → Kept · Remove → Remove, Local only on (banner, hints) and off. No crash in the crash buffer. **Findings, none from the move** (the moved keeping code is line-for-line equivalent; these are in app code that didn't move): (1) after Keep then Remove, RegioJet's Keep size reads 2.0 MB where it read 399 KB, and Continue shows it with no ring; (2) a blank white tile among the rail's open items; (3) tapping A–Z adds the letter rail, which reflows the room and can move a tap onto a card. Logged for O7/later; the iPhone copies Android's behaviour once fixed there.*
 
 ## I3b — the iPhone screens
 
