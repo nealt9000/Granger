@@ -782,7 +782,8 @@ def build(name, src, cfg, previous=None, hash_docs=False, editions=None):
             "sourceDate": md.get("Date", ""), "entryCount": pack.z.entry_count, "zimUuid": pack.z.uuid,
             "collection": {"title": cfg.get("title") or md.get("Title", name), "noun": cfg.get("noun", "books"),
                            **({"origin": "nautilus"} if cfg["extractor"] == "nautilus" else {}),
-                           "provider": cfg.get("provider", md.get("Creator", "")),
+                           # A nautilus pack's Creator is its uploader's word ("Various"), not who made the books.
+                           "provider": cfg.get("provider", "" if cfg["extractor"] == "nautilus" else md.get("Creator", "")),
                            "licence": cfg.get("licence", ""), "shelf": cfg.get("shelf", "")},
             "stats": {"docsInPack": len(pack.docs), "items": len(items), "keysKept": kept,
                       "located": sum("zimOffset" in i for i in items), "hashed": sum("sha256" in i for i in items),
