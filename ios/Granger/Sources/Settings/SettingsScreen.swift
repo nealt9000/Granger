@@ -5,7 +5,11 @@ struct SettingsScreen: View {
     @Environment(AppSettings.self) private var settings
     @Environment(RecentStore.self) private var recent
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.core) private var core
+    @Environment(LibraryModel.self) private var library
     @State private var clearedSearches = false
+    @State private var savedBytes: Int64 = 0
+    @State private var confirmClear = false
 
     var body: some View {
         @Bindable var settings = settings
@@ -33,6 +37,37 @@ struct SettingsScreen: View {
             } footer: {
                 Text("Behave exactly as with no signal: show only what this phone holds.")
             }
+            Section {
+                Picker("Offline pictures", selection: $settings.savePictures) {
+                    Text("Save pictures").tag(true)
+                    Text("Text only (smaller)").tag(false)
+                }
+            } footer: {
+                Text("Whether what you keep, and what's saved for now, carries its pictures.")
+            }
+            Section {
+                Picker("Saved for now", selection: $settings.savedCapMb) {
+                    ForEach(AppSettings.capChoices, id: \.self) { Text("\($0) MB").tag($0) }
+                }
+                .onChange(of: settings.savedCapMb) { core?.library.trimSaved(); refreshSaved() }
+                Button("Clear saved for now", role: .destructive) { confirmClear = true }
+                    .disabled(savedBytes == 0)
+                    .accessibilityIdentifier("clear-saved")
+            } footer: {
+                Text("What you read online, kept so it opens again without the internet. The oldest goes first past the limit. \(savedBytes / 1_048_576) of \(settings.savedCapMb) MB used.")
+            }
+            .confirmationDialog("Clear saved for now?", isPresented: $confirmClear, titleVisibility: .visible) {
+                Button("Clear", role: .destructive) { core?.library.clearSaved(); refreshSaved() }
+            } message: {
+                Text("What you read online goes from this phone. What you kept stays.")
+            }
+            Section {
+                Toggle("Keep adult topics out of suggestions", isOn: $settings.keepAdultOff)
+            } header: {
+                Text("Explore")
+            } footer: {
+                Text("Explore, Home, Timeline and games leave out sexual topics and explicit pictures. Search and the articles you open aren't affected.")
+            }
             Section("History") {
                 Button("Clear what you've read", role: .destructive) { recent.clear() }
                     .disabled(recent.entries.isEmpty)
@@ -54,8 +89,11 @@ struct SettingsScreen: View {
                 Link("feedback@opengranger.org", destination: URL(string: "mailto:feedback@opengranger.org")!)
             }
         }
+        .task(id: library.version) { refreshSaved() }
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
     }
+
+    private func refreshSaved() { savedBytes = core?.library.savedBytes() ?? 0 }
 }

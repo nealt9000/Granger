@@ -5,6 +5,7 @@ import SwiftUI
 struct GrangerApp: App {
     @State private var settings = AppSettings()
     @State private var recent = RecentStore()
+    @State private var library = LibraryModel()
     private let core: Core
 
     init() {
@@ -23,7 +24,12 @@ struct GrangerApp: App {
             RootView()
                 .environment(settings)
                 .environment(recent)
+                .environment(library)
                 .environment(\.core, core)
+                .task(id: "\(settings.wikiLanguage)|\(settings.canFetch)") {
+                    library.watch(core)
+                    await library.prepareIndexes(core: core, lang: settings.wikiLanguage, allowed: settings.canFetch)
+                }
                 .preferredColorScheme(settings.appearance.colorScheme)
                 .themed()
         }

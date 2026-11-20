@@ -68,7 +68,10 @@ struct SearchScreen: View {
                     openRoute(.topic(lang: settings.wikiLanguage, path: hit.key))
                 } label: {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(hit.title).font(Spectral.regular(19)).foregroundStyle(palette.onBackground)
+                        HStack(spacing: 8) {
+                            Text(hit.title).font(Spectral.regular(19)).foregroundStyle(palette.onBackground)
+                            MarkView(lang: settings.wikiLanguage, title: hit.key)
+                        }
                         if excerpts, let e = hit.excerpt {
                             Text(e).font(.subheadline).foregroundStyle(palette.onSurfaceVariant).lineLimit(3)
                         } else if let d = hit.description_ {

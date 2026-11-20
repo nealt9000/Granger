@@ -47,6 +47,7 @@ struct ReaderScreen: View {
                     .disabled(model.headings.isEmpty)
                 Button { showText = true } label: { Image(systemName: "textformat.size") }
                     .accessibilityLabel("Text settings")
+                ReaderKeepMenu(lang: lang, title: path)
             }
         }
         .sheet(isPresented: $showContents) {

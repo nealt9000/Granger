@@ -1,17 +1,28 @@
 import Foundation
 import GrangerCoreKit
 
-/// The shared Kotlin core, as the app uses it: one Wikimedia client and one online Wikipedia per language. Every call
-/// into it blocks, so screens call it through [background].
+/// The shared Kotlin core, as the app uses it: one Wikimedia client, and the library (Plan I3 Task 6) that reads
+/// Wikipedia online through Saved for now and the kept copies. Every call into it blocks, so screens call it through
+/// [background].
 final class Core: PageSource {
     let client: WikimediaClient
-    private var archives: [String: OnlineWikipediaArchive] = [:]
-    private let lock = NSLock()
+    let library: IosLibrary
+    /// Where the library keeps its files: Application Support/granger (Android's files folder).
+    let folder: URL
 
     init(version: String) {
         GrangerCoreEntry.shared.setZimBase(base: ZimSchemeHandler.base)
         // The gate (Plan O5/O3), which AppSettings keeps current; the core asks it from any thread.
         client = GrangerCoreEntry.shared.wikimedia(version: version) { KotlinBoolean(value: NetworkGate.shared.open) }
+        folder = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("granger", isDirectory: true)
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        library = IosLibrary(
+            dir: folder.path, client: client,
+            languages: { LibraryGate.shared.languages },
+            gateOpen: { KotlinBoolean(value: NetworkGate.shared.open) },
+            savePictures: { KotlinBoolean(value: LibraryGate.shared.savePictures) },
+            savedCapMb: { KotlinLong(value: Int64(LibraryGate.shared.savedCapMb)) }
+        )
     }
 
     /// The online source's pack id for [lang] (`wikipedia_en_online`).
@@ -23,14 +34,8 @@ final class Core: PageSource {
         return (GrangerCoreEntry.shared.bytes(of: item.bytes), item.mimeType)
     }
 
-    /// Wikipedia in [lang], read online.
-    func wikipedia(_ lang: String) -> OnlineWikipediaArchive {
-        lock.lock(); defer { lock.unlock() }
-        if let a = archives[lang] { return a }
-        let a = GrangerCoreEntry.shared.onlineWikipedia(lang: lang, client: client)
-        archives[lang] = a
-        return a
-    }
+    /// Wikipedia in [lang], read online through Saved for now and the kept copies.
+    func wikipedia(_ lang: String) -> OnlineWikipediaArchive { library.wikipedia(lang: lang) }
 
     /// The app's version and build, for the User-Agent and About.
     static var version: String {

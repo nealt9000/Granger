@@ -88,6 +88,36 @@ final class SmokeTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Online results appear when you're connected."].waitForExistence(timeout: 5), "Local only")
     }
 
+    /// Keep (Plan I3 Task 6): read an article, keep it, see it marked on this phone; with Local only on it still opens,
+    /// summary and page, from the phone; Remove takes it off again.
+    func testKeepAndLocalOnly() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-debugOpen", "en:Moon"]
+        app.launch()
+        if app.buttons["keep-remove"].waitForExistence(timeout: 20) { app.buttons["keep-remove"].tap() }
+        let keep = app.buttons["keep"]
+        XCTAssertTrue(keep.waitForExistence(timeout: 20), "the Keep button")
+        keep.tap()
+        XCTAssertTrue(app.buttons["keep-remove"].waitForExistence(timeout: 60), "kept")
+        XCTAssertTrue(app.otherElements["mark-on-phone"].waitForExistence(timeout: 10) || app.images["mark-on-phone"].exists
+            || app.descendants(matching: .any)["mark-on-phone"].exists, "marked on this phone")
+
+        app.terminate()
+        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en", "-debugOpen", "en:Moon"]
+        app.launch()
+        let read = app.buttons["read-full"]
+        XCTAssertTrue(read.waitForExistence(timeout: 20), "the topic page opens with Local only on")
+        XCTAssertTrue(app.buttons["keep-remove"].exists, "still kept")
+        read.tap()
+        XCTAssertTrue(app.webViews.staticTexts["Moon"].firstMatch.waitForExistence(timeout: 20), "the kept page reads offline")
+        if let dir = ProcessInfo.processInfo.environment["GRANGER_SHOTS"] {
+            try? app.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir + "/kept-offline.png"))
+        }
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["keep-remove"].tap()
+        XCTAssertTrue(app.buttons["keep"].waitForExistence(timeout: 10), "removed")
+    }
+
     /// Landscape: the topic page and the reader lay out and stay usable sideways.
     func testLandscape() {
         let app = XCUIApplication()

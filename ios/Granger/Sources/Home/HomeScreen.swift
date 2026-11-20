@@ -9,13 +9,16 @@ struct HomeScreen: View {
     @Environment(\.palette) private var palette
     @Environment(AppSettings.self) private var settings
     @Environment(RecentStore.self) private var recent
+    @Environment(LibraryModel.self) private var library
     @State private var model = HomeModel()
     @State private var showSettings = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
+                LocalOnlyBanner()
                 if !settings.privacySeen { PrivacyCard(onSettings: { showSettings = true }) }
+                if library.index == .coming { IndexCard() }
                 featured
                 if !recent.entries.isEmpty { continueSection }
             }
@@ -68,6 +71,7 @@ struct HomeScreen: View {
                             Text(e.lang == "es" ? "Wikipedia · Español" : "Wikipedia").font(.caption).foregroundStyle(palette.outline)
                         }
                         Spacer()
+                        MarkView(lang: e.lang, title: e.path)
                         Image(systemName: "chevron.right").font(.footnote).foregroundStyle(palette.outline)
                     }
                     .padding(.vertical, 6)
@@ -163,5 +167,23 @@ final class HomeModel {
     static func firstSentence(_ text: String) -> String {
         guard let r = text.range(of: #"[.!?](\s|$)"#, options: .regularExpression) else { return text }
         return String(text[..<r.lowerBound]) + String(text[r.lowerBound])
+    }
+}
+
+/// The online index set on its way (Android's index card on Home and Explore, Plan O1 Task 8).
+struct IndexCard: View {
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            ProgressView()
+            Text("Explore is getting its index for Wikipedia online (19 MB). Subjects, rooms and eras appear when it's here.")
+                .font(.callout).foregroundStyle(palette.onSurfaceVariant)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(palette.surfaceContainer, in: RoundedRectangle(cornerRadius: 12))
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("index-card")
     }
 }

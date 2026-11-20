@@ -42,10 +42,13 @@ struct TopicScreen: View {
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .accessibilityLabel(s.title)
         }
-        Text(s.title)
-            .font(Spectral.medium(34, relativeTo: .largeTitle))
-            .foregroundStyle(palette.onBackground)
-            .accessibilityAddTraits(.isHeader)
+        HStack(alignment: .center, spacing: 10) {
+            Text(s.title)
+                .font(Spectral.medium(34, relativeTo: .largeTitle))
+                .foregroundStyle(palette.onBackground)
+                .accessibilityAddTraits(.isHeader)
+            MarkView(lang: lang, title: s.key)
+        }
         if let description = s.description_ {
             Text(description).font(.subheadline).foregroundStyle(palette.onSurfaceVariant)
         }
@@ -58,6 +61,8 @@ struct TopicScreen: View {
         }
         .buttonStyle(.borderedProminent)
         .accessibilityIdentifier("read-full")
+        HintCard(id: "keep", text: "Keep puts this article on your phone (●). What you read is saved for now (○) until space runs short.")
+        KeepButton(lang: lang, title: s.key)
         if let other = model.other {
             NavigationLink(value: Route.topic(lang: other.lang, path: other.path)) {
                 // The other language's name in its own words, as on Android (topic_read_in_spanish / _english).
@@ -97,7 +102,8 @@ final class TopicModel {
         picture = nil
         other = nil
         let client = core.client
-        guard let summary = await background({ client.summary(lang: lang, title: path) }) else {
+        let wiki = core.wikipedia(lang)
+        guard let summary = await background({ wiki.summary(path: path) }) else {
             state = .failed
             return
         }
