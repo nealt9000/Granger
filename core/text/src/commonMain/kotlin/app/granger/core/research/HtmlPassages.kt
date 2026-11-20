@@ -1,8 +1,8 @@
 package app.granger.core.research
 
 import app.granger.core.text.Chunkers
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Element
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.nodes.Element
 
 /** [section] is the last top heading (`h2`) above the passage: a dictionary entry's language ("English", "Español"). */
 data class HtmlPassage(val heading: String, val anchor: String?, val text: String, val section: String = "")
@@ -17,7 +17,7 @@ object HtmlPassages {
     private val WHITESPACE = Regex("[${Chunkers.SPACE}]+")
 
     fun split(html: String, targetWords: Int = 200, maxWords: Int = 300): List<HtmlPassage> {
-        val doc = Jsoup.parse(html)
+        val doc = Ksoup.parse(html)
         doc.select(NOISE).remove()
 
         val out = mutableListOf<HtmlPassage>()

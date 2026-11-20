@@ -57,7 +57,7 @@ object Ranking {
         return sorted.filter { p ->
             val isMedia = p.kind == SourceKind.MEDIA
             if ((if (isMedia) media else others) >= config.preselect) return@filter false
-            val seen = perDocument.merge(p.sourceId to p.location, 1, Int::plus)!!
+            val seen = perDocument.bump(p.sourceId to p.location)
             (seen <= config.perDocument).also { kept -> if (kept) { if (isMedia) media++ else others++ } }
         }
     }
@@ -173,7 +173,7 @@ object Ranking {
         return scored.sortedByDescending { it.second }
             .map { it.first }
             .filter { seen.add(textKey(it)) }
-            .filter { perDocument.merge(it.sourceId to it.location, 1, Int::plus)!! <= config.perDocument }
+            .filter { perDocument.bump(it.sourceId to it.location) <= config.perDocument }
     }
 
     private val SPACES = Regex("[${Chunkers.SPACE}]+")
@@ -200,3 +200,6 @@ object Ranking {
             .map { it.first }
     }
 }
+
+/** Adds one to [key]'s count and returns the new count (`Map.merge(key, 1, Int::plus)`, which common Kotlin lacks). */
+private fun <K> MutableMap<K, Int>.bump(key: K): Int = ((this[key] ?: 0) + 1).also { this[key] = it }

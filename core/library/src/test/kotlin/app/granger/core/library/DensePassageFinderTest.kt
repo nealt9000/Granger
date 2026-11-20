@@ -1,5 +1,7 @@
 package app.granger.core.library
 
+import app.granger.core.vectors.open
+import app.granger.core.vectors.write
 import app.granger.core.books.TestEpubs
 import app.granger.core.books.XhtmlText
 import app.granger.core.research.HtmlPassages

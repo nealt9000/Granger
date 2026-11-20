@@ -1,5 +1,7 @@
 package app.granger.core.library
 
+import app.granger.core.vectors.open
+import app.granger.core.vectors.write
 import app.granger.core.books.EpubInspector
 import app.granger.core.books.Inspection
 import app.granger.core.books.PdfText

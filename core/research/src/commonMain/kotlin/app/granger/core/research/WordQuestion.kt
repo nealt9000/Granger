@@ -38,7 +38,7 @@ object WordQuestion {
         val folded = ResearchLanguage.fold(question)
         // fold keeps every character's place (it drops combining marks after decomposing, which composes back to one
         // character per letter for Spanish), so a match's range in the folded text is the word's range as typed.
-        val typed = java.text.Normalizer.normalize(question, java.text.Normalizer.Form.NFC)
+        val typed = app.granger.core.text.compose(question)
         val patterns = (if (ResearchLanguage.ES in languages) SPANISH else emptyList()) +
             (if (ResearchLanguage.EN in languages) ENGLISH else emptyList())
         for (pattern in patterns) {

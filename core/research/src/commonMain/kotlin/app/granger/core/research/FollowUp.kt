@@ -1,6 +1,5 @@
 package app.granger.core.research
 
-import java.util.Locale
 
 /**
  * Whether a question in a chat leans on the one before it. The app sends every question after the first with its prior
@@ -34,7 +33,7 @@ object FollowUp {
      * [refersBackEs]. [languages] are the question's ([ResearchLanguage.of]).
      */
     fun refersBack(question: String, languages: List<ResearchLanguage> = ResearchLanguage.of(question)): Boolean {
-        val words = WORD.findAll(question.lowercase(Locale.ROOT)).map { it.value }.toList()
+        val words = WORD.findAll(question.lowercase()).map { it.value }.toList()
         if (ResearchLanguage.EN in languages &&
             (words.any { it.substringBefore('\'') in BACK } || OPENERS.any { words.take(it.size) == it })
         ) return true

@@ -1,7 +1,6 @@
 package app.granger.core.research
 
-import java.text.Normalizer
-import java.util.Locale
+import app.granger.core.text.decompose
 
 /** Whether a question asks about music or audiobooks, which lets more than one media passage reach the answer. */
 object MediaCues {
@@ -36,7 +35,7 @@ object MediaCues {
      * [PHRASES_ES], or [tengo]. [languages] are the question's ([ResearchLanguage.of]).
      */
     fun asked(question: String, languages: List<ResearchLanguage> = ResearchLanguage.of(question)): Boolean {
-        val folded = MARKS.replace(Normalizer.normalize(question, Normalizer.Form.NFKD), "").lowercase(Locale.ROOT)
+        val folded = MARKS.replace(decompose(question, compat = true), "").lowercase()
         val words = WORD.findAll(folded).map { it.value }.toList()
         if (ResearchLanguage.EN in languages && (words.any { it in CUES } || PHRASES.any { p -> words.windowed(p.size).any { it == p } })) {
             return true

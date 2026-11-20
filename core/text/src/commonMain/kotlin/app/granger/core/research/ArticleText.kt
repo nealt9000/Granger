@@ -1,7 +1,7 @@
 package app.granger.core.research
 
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Element
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.nodes.Element
 
 /** One block of an article's readable text, in document order. [id] is the element's own id, else `g<n>` where `n` is its index among [ArticleText.BLOCKS] (the page script counts the same way). */
 data class ArticleBlock(val id: String, val tag: String, val text: String) {
@@ -28,7 +28,7 @@ object ArticleText {
 
     /** The readable blocks of [html], in order, with their ids. Empty and punctuation-only blocks are left out. */
     fun blocks(html: String): List<ArticleBlock> {
-        val doc = Jsoup.parse(html)
+        val doc = Ksoup.parse(html)
         // Indices are taken over every block element before any removal, so the browser's querySelectorAll agrees.
         val all = doc.select(BLOCKS)
         val noise = doc.select(NOISE)
@@ -65,7 +65,7 @@ object ArticleText {
     private fun isDetached(el: Element): Boolean {
         var e: Element? = el
         while (e != null) {
-            if (e is org.jsoup.nodes.Document) return false
+            if (e is com.fleeksoft.ksoup.nodes.Document) return false
             e = e.parent()
         }
         return true

@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.last
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.TimeSource
 
 /**
  * Search's Best matches (Plan SQ Phase 4): the articles and book chapters that best answer a query, each with the passage
@@ -116,9 +117,9 @@ class BestMatches(
                 }
             }
         }
-        val keywordStart = System.nanoTime()
+        val keywordStart = TimeSource.Monotonic.markNow()
         val words = finder.find(Keywords.searchTerms(keywords), languages).filter(inLanguage)
-        val keywordMs = (System.nanoTime() - keywordStart) / 1_000_000
+        val keywordMs = keywordStart.elapsedNow().inWholeMilliseconds
         keywordDone.complete(Unit)
         val hits = meaning.await()
         val weight = sourceWeight?.of(query, keywords, words + hits.orEmpty()) ?: Ranking.NO_WEIGHT
@@ -163,8 +164,8 @@ class BestMatches(
             emptyList()
         }
 
-    @Volatile private var lastEmbedMs = 0L
-    @Volatile private var lastDenseMs = 0L
+    @kotlin.concurrent.Volatile private var lastEmbedMs = 0L
+    @kotlin.concurrent.Volatile private var lastDenseMs = 0L
 
     private suspend fun byMeaning(query: String): List<Passage>? {
         lastEmbedMs = 0
@@ -172,11 +173,11 @@ class BestMatches(
         val finder = dense ?: return null
         val embedder = embed ?: return null
         return try {
-            val start = System.nanoTime()
+            val start = TimeSource.Monotonic.markNow()
             val vector = embedder(query)
-            val embedded = System.nanoTime()
-            lastEmbedMs = (embedded - start) / 1_000_000
-            vector?.let { finder.find(it) }.also { lastDenseMs = (System.nanoTime() - embedded) / 1_000_000 }?.takeIf { it.isNotEmpty() }
+            val embedded = TimeSource.Monotonic.markNow()
+            lastEmbedMs = (embedded - start).inWholeMilliseconds
+            vector?.let { finder.find(it) }.also { lastDenseMs = embedded.elapsedNow().inWholeMilliseconds }?.takeIf { it.isNotEmpty() }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {

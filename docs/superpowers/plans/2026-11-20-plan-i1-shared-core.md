@@ -21,7 +21,7 @@
 - The first iPhone build is online Granger plus Kiwix packs; dev friends build from the public repo with a **prebuilt `GrangerCore` from a GitHub release**; the Xcode project is committed (spec §4).
 - Copyright holder AETHERBOUND LLC; bundle ID `app.granger` (spec §9). Neither touches I1's code.
 
-## Builder's calls in this plan (for Neal's review)
+## Builder's calls in this plan (all seven OK'd by Neal, 2026-11-20)
 
 1. **Ksoup replaces jsoup on Android too**, in the converted modules, rather than keeping jsoup behind an `expect`. One parser for both phones is what makes chunk hashes match; Task 3 proves it on real `.gvec` builds before anything ships. If Task 3 finds a mismatch Ksoup can't be fixed for, jsoup stays on the JVM side behind an `expect` and the iPhone accepts rebuilt hashes for its own added books only.
 2. **`:tools:chunker` (the Mac's vector builds) follows the cores onto Ksoup.** Published `.gvec` files are not rebuilt; Task 3 is the check that they needn't be.
@@ -47,20 +47,22 @@
 
 **Files:** `gradle/libs.versions.toml`, root `build.gradle.kts`, `gradle.properties`.
 
-- [ ] Read on the day and record in the plan: the newest **Ksoup**, **Ktor**, **SKIE** and **kotlinx-io** releases, and which Kotlin each supports. SKIE must support Kotlin 2.4.21; if it doesn't yet, `GrangerCore` ships on the plain Objective-C export (it worked in I0 §5) and SKIE comes in when it catches up.
-- [ ] Add the plugins to the catalog: `kotlin-multiplatform`, `android-kotlin-multiplatform-library`, `skie`; libraries `ksoup`, `ktor-client-core`, `ktor-client-okhttp`, `ktor-client-darwin`, `ktor-client-mock` (tests), and whatever Task 5 needs.
-- [ ] `gradle.properties`: `kotlin.native.ignoreDisabledTargets=true` so a Linux CI or a Mac without Xcode still builds Android; Kotlin/Native caches in the default place.
-- [ ] Prove the skeleton: an empty KMP module builds for all three targets and `:app:assembleDebug` is untouched. Delete the empty module. Commit.
+- [x] Read on the day and record in the plan: the newest **Ksoup**, **Ktor**, **SKIE** and **kotlinx-io** releases, and which Kotlin each supports. SKIE must support Kotlin 2.4.21; if it doesn't yet, `GrangerCore` ships on the plain Objective-C export (it worked in I0 §5) and SKIE comes in when it catches up.
+- [x] Add the plugins to the catalog: `kotlin-multiplatform`, `android-kotlin-multiplatform-library`, `skie`; libraries `ksoup`, `ktor-client-core`, `ktor-client-okhttp`, `ktor-client-darwin`, `ktor-client-mock` (tests), and whatever Task 5 needs.
+- [x] `gradle.properties`: `kotlin.native.ignoreDisabledTargets=true` so a Linux CI or a Mac without Xcode still builds Android; Kotlin/Native caches in the default place.
+- [x] Prove the skeleton: an empty KMP module builds for all three targets and `:app:assembleDebug` is untouched. Delete the empty module. Commit.
+- *Done 2026-11-20: Ksoup 0.2.6, Ktor 3.6.1, SKIE 0.10.16 (supports Kotlin 2.4.21, released 2026-11-10), kotlinx-io 0.9.3. AGP 9.4.1's `com.android.kotlin.multiplatform.library` with `jvm()` and iOS targets compiled in a probe module (deleted). Baseline before any change: 3,824 JVM tests, 1 failure (`PlayerEngineTest.audiobookPositionSavedOnPauseAndEveryFiveSeconds`, timing; passed on the next run).*
 
 ### Task 2: `:core:text`, `:core:research`, `:core:vectors` to KMP
 
 **Files:** the three modules' `build.gradle.kts`; `src/main` → `src/commonMain` (+ `jvmMain`, `iosMain`); `src/test` → `src/jvmTest` (+ `commonTest` / `iosTest` for the ported tests).
 
-- [ ] Move sources with `git mv` so history follows. Apply I0's fixes to today's code: `MappedFile` (JVM `FileChannel.map`, iOS `mmap`), `writeFileAtomically`, `TopK`, `suspend top(…, dispatcher)` beside the JVM `ExecutorService` form, `decompose`, `sha1` + `hex()`, `bump()`, `Char.isHighSurrogate()`, `lowercase()` for `lowercase(Locale.ROOT)`. Check each file changed since 58cdc78 for new JVM-only calls (`git diff 58cdc78 main -- core/{text,research,vectors}/src/main`).
-- [ ] jsoup → Ksoup (builder's call 1). Sentence breaks → one common splitter (builder's call 3), with the existing `CitedQuoteTest` cases plus "Dr." and "U.S." cases.
-- [ ] `:core:research`'s callers in `:app` and `:core:library` compile unchanged (they consume the `jvm` variant). If an Android module can't resolve the `jvm` variant, add `android` targets via the Android-KMP plugin instead and note it.
-- [ ] Port I0's `ParityTest` into `commonTest` so the fingerprint runs on both targets on every build. Port `VectorFile` tests to `kotlin.test` in `commonTest`; the 70,000-row search test in `iosTest`.
-- [ ] `./gradlew :core:text:allTests :core:research:allTests :core:vectors:allTests test` passes. Record counts (JVM before/after must match: same tests, same results). Commit per module.
+- [x] Move sources with `git mv` so history follows. Apply I0's fixes to today's code: `MappedFile` (JVM `FileChannel.map`, iOS `mmap`), `writeFileAtomically`, `TopK`, `suspend top(…, dispatcher)` beside the JVM `ExecutorService` form, `decompose`, `sha1` + `hex()`, `bump()`, `Char.isHighSurrogate()`, `lowercase()` for `lowercase(Locale.ROOT)`. Check each file changed since 58cdc78 for new JVM-only calls (`git diff 58cdc78 main -- core/{text,research,vectors}/src/main`).
+- [x] jsoup → Ksoup (builder's call 1). Sentence breaks → one common splitter (builder's call 3), with the existing `CitedQuoteTest` cases plus "Dr." and "U.S." cases.
+- [x] `:core:research`'s callers in `:app` and `:core:library` compile unchanged (they consume the `jvm` variant). If an Android module can't resolve the `jvm` variant, add `android` targets via the Android-KMP plugin instead and note it.
+- [x] Port I0's `ParityTest` into `commonTest` so the fingerprint runs on both targets on every build. Port `VectorFile` tests to `kotlin.test` in `commonTest`; the 70,000-row search test in `iosTest`.
+- [x] `./gradlew :core:text:allTests :core:research:allTests :core:vectors:allTests test` passes. Record counts (JVM before/after must match: same tests, same results). Commit per module.
+- *Done 2026-11-20: all three compile for jvm, iosArm64, iosSimulatorArm64. New since I0: `LanguageGuess` (ISO codes → `iso639Alpha2` expect), `WordQuestion` (NFC → `compose`), `BestMatches` (`TimeSource`, `kotlin.concurrent.Volatile`), `OwlLines` (`mod`), v2 IVF lists in `VectorFile`/`VectorSearch` (generic `TopK`). `MappedFile` reads ints/floats as members so the JVM keeps `ByteBuffer` speed. Android callers import the jvmMain `File` overloads and the blocking `ExecutorService` `top`. JVM: text 39, research 347, vectors 10 (baseline 32/345/10 plus 9 new common tests), all pass; Simulator: text 7, research 2 (parity fingerprint identical, same quote sentence), vectors 6. `./gradlew test` runs `jvmTest` in these modules (aliased). Whole suite 3,833 tests, 0 failures; `:app:assembleDebug` builds.*
 
 ### Task 3: Ksoup against the published vectors
 

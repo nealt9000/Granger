@@ -1,7 +1,6 @@
 package app.granger.core.research
 
-import java.text.Normalizer
-import java.util.Locale
+import app.granger.core.text.decompose
 
 /**
  * The languages Research knows (languages spec §6.2). English is today's lists unchanged; Spanish is new.
@@ -42,7 +41,7 @@ enum class ResearchLanguage(val tag: String) {
 
         /** Lower case, accents off, ’ as ': how every Spanish list here is written and matched. */
         fun fold(text: String): String =
-            MARKS.replace(Normalizer.normalize(text, Normalizer.Form.NFD), "").lowercase(Locale.ROOT).replace('’', '\'')
+            MARKS.replace(decompose(text, compat = false), "").lowercase().replace('’', '\'')
 
         /**
          * The languages [question] is in, the main one first. Signs are function words only one language uses (¿ and ¡

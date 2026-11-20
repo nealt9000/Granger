@@ -1,5 +1,7 @@
 package app.granger.core.library
 
+import app.granger.core.vectors.top
+import app.granger.core.vectors.file
 import app.granger.core.books.PdfText
 import app.granger.core.books.TextChunk
 import app.granger.core.books.XhtmlText

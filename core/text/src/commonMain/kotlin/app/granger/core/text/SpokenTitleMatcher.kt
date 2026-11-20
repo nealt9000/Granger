@@ -1,6 +1,5 @@
 package app.granger.core.text
 
-import java.text.Normalizer
 
 /**
  * The library name a spoken phrase most likely meant (Plan A1). The phone's recognizer gets questions right but
@@ -56,7 +55,7 @@ object SpokenTitleMatcher {
 
     /** Lowercase letters and digits, accents folded, single spaces. */
     fun normalize(s: String): String =
-        Normalizer.normalize(s.lowercase(), Normalizer.Form.NFD)
+        decompose(s.lowercase(), compat = false)
             .replace(Regex("\\p{Mn}+"), "")
             .replace(Regex("[^\\p{L}\\p{N} ]"), " ")
             .replace(Regex("\\s+"), " ")

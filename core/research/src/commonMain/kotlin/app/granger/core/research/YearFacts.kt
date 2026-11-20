@@ -1,7 +1,6 @@
 package app.granger.core.research
 
-import java.text.Normalizer
-import java.util.Locale
+import app.granger.core.text.decompose
 
 /**
  * Plan R5, Task 4: year arithmetic in code. E2B reads the right dates out of the passages but gets the sums wrong
@@ -676,5 +675,5 @@ object YearFacts {
     }
 
     private fun fold(s: String): String =
-        MARKS.replace(Normalizer.normalize(s, Normalizer.Form.NFKD), "").lowercase(Locale.ROOT).replace('’', '\'').replace(SPACES, " ")
+        MARKS.replace(decompose(s, compat = true), "").lowercase().replace('’', '\'').replace(SPACES, " ")
 }

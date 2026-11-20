@@ -1,6 +1,5 @@
 package app.granger.core.text
 
-import java.util.Locale
 
 /**
  * A text's language for its EPUB's `dc:language` (Plan L3 Task 9): the declared one when it names a language, else a
@@ -34,12 +33,10 @@ object LanguageGuess {
 
     /** "en" or "es" for a declared ISO 639-1/2/3 code or an English name; null for a blank or unknown one. */
     fun declared(language: String?): String? {
-        val first = language?.split(',', ';')?.firstOrNull()?.trim()?.lowercase(Locale.ROOT)?.substringBefore('-')?.substringBefore('_')
+        val first = language?.split(',', ';')?.firstOrNull()?.trim()?.lowercase()?.substringBefore('-')?.substringBefore('_')
         if (first.isNullOrEmpty()) return null
         NAMES[first]?.let { return it }
-        if (first.length == 2 && first in Locale.getISOLanguages()) return first
-        if (first.length == 3) return Locale.getISOLanguages().firstOrNull { Locale(it).isO3Language == first }
-        return null
+        return iso639Alpha2(first)
     }
 
     private val NAMES = mapOf("english" to "en", "spanish" to "es", "español" to "es", "castellano" to "es", "inglés" to "en")
@@ -53,7 +50,7 @@ object LanguageGuess {
         var es = 0
         for ((n, match) in WORD.findAll(text).withIndex()) {
             if (n >= WORDS) break
-            val word = match.value.lowercase(Locale.ROOT)
+            val word = match.value.lowercase()
             if (word in ENGLISH && word !in SPANISH) en++
             if (word in SPANISH && word !in ENGLISH) es++
         }

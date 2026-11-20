@@ -178,10 +178,10 @@ object OwlLines {
     )
 
     /** [turnId]'s decline line: the same one every time the turn is shown. */
-    fun decline(turnId: Long): String = DECLINES[Math.floorMod(turnId, DECLINES.size)]
+    fun decline(turnId: Long): String = DECLINES[turnId.mod(DECLINES.size)]
 
     /** [turnId]'s best-guess label, steady as [decline]. */
-    fun guessLabel(turnId: Long): String = GUESS_LABELS[Math.floorMod(turnId, GUESS_LABELS.size)]
+    fun guessLabel(turnId: Long): String = GUESS_LABELS[turnId.mod(GUESS_LABELS.size)]
 
     /** Where the owl is looking (section B), once the search by meaning is back; `{titles}` is the titles joined. */
     val LOOKING_IN: List<String> = listOf(

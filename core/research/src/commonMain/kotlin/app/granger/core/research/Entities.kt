@@ -1,7 +1,6 @@
 package app.granger.core.research
 
-import java.text.Normalizer
-import java.util.Locale
+import app.granger.core.text.decompose
 
 /**
  * Plan R5, Task 4: a question that compares dates ("How old was Mary Shelley when Frankenstein came out?") needs a fact
@@ -183,6 +182,6 @@ object Entities {
     private fun opens(p: Passage): Boolean = p.heading.isBlank() || fold(p.heading) == fold(p.sourceTitle)
 
     private fun fold(s: String): String =
-        MARKS.replace(Normalizer.normalize(s, Normalizer.Form.NFKD), "").lowercase(Locale.ROOT).replace('_', ' ')
+        MARKS.replace(decompose(s, compat = true), "").lowercase().replace('_', ' ')
             .replace(SPACES, " ").trim()
 }

@@ -1,26 +1,37 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.multiplatform)
 }
 
-// No toolchain: only JDK 21 is installed here, so target Java 17 bytecode (like the Android modules) with whatever JDK runs the build.
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
+// Plan I1: one module for Android (the jvm target, Java 17 bytecode as before) and iOS.
 kotlin {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        // The JDK 17 API only, so nothing newer than Android's desugared library slips in.
-        freeCompilerArgs.add("-Xjdk-release=17")
+    jvm {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+            // The JDK 17 API only, so nothing newer than Android's desugared library slips in.
+            freeCompilerArgs.add("-Xjdk-release=17")
+        }
+    }
+    iosArm64()
+    iosSimulatorArm64()
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(libs.ksoup)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+        jvmTest.dependencies {
+            implementation(libs.junit)
+            implementation(libs.truth)
+
+        }
     }
 }
 
 tasks.withType<JavaCompile>().configureEach { options.release.set(17) }
 
-dependencies {
-    implementation(libs.jsoup)
 
-    testImplementation(libs.junit)
-    testImplementation(libs.truth)
-}
+// `./gradlew test` (Android's habit) runs the JVM tests here too; KMP names them jvmTest.
+tasks.matching { it.name == "test" }.configureEach { dependsOn("jvmTest") }
+if (tasks.findByName("test") == null) tasks.register("test") { dependsOn("jvmTest") }

@@ -1,8 +1,7 @@
 package app.granger.core.research
 
-import java.text.BreakIterator
-import java.text.Normalizer
-import java.util.Locale
+import app.granger.core.text.Sentences
+import app.granger.core.text.decompose
 import kotlin.math.sqrt
 
 /**
@@ -28,7 +27,6 @@ object CitedQuote {
     private val group = Regex("\\[(\\d+(?:\\s*,\\s*\\d+)*)]")
     private val word = Regex("[\\p{L}\\p{N}]+")
     private val marks = Regex("\\p{M}+")
-    private val SPANISH = Locale.forLanguageTag("es")
 
     /**
      * Null when [text] has no words at all. [languages] are the question's ([ResearchLanguage.of]), English alone by
@@ -84,25 +82,21 @@ object CitedQuote {
     internal fun contentWords(s: String, languages: List<ResearchLanguage> = Keywords.ENGLISH): Set<String> =
         word.findAll(fold(s)).map { it.value }.filter { it.length >= 3 && !Keywords.isStopword(it, languages) }.toSet()
 
-    internal fun fold(s: String): String = marks.replace(Normalizer.normalize(s, Normalizer.Form.NFD), "").lowercase(Locale.ROOT)
+    internal fun fold(s: String): String = marks.replace(decompose(s, compat = false), "").lowercase()
 
     /** Sentence ranges in [text], paragraph by paragraph: a sentence never runs across a `\n`. Breaks by [language]'s rules. */
     internal fun sentences(text: String, language: ResearchLanguage = ResearchLanguage.EN): List<IntRange> {
         val out = mutableListOf<IntRange>()
-        val it = BreakIterator.getSentenceInstance(if (language == ResearchLanguage.ES) SPANISH else Locale.ENGLISH)
         var from = 0
         while (from <= text.length) {
             val to = text.indexOf('\n', from).let { i -> if (i < 0) text.length else i }
             val paragraph = text.substring(from, to)
-            it.setText(paragraph)
-            var start = it.first()
-            var end = it.next()
-            while (end != BreakIterator.DONE) {
+            val breaks = Sentences.breaks(paragraph)
+            for (b in 0 until breaks.size - 1) {
                 // Trailing whitespace stays out, so a range ends on the sentence's last character.
-                val piece = paragraph.substring(start, end)
+                val start = breaks[b]
+                val piece = paragraph.substring(start, breaks[b + 1])
                 if (piece.isNotBlank()) out += (from + start) until (from + start + piece.trimEnd().length)
-                start = end
-                end = it.next()
             }
             from = to + 1
         }

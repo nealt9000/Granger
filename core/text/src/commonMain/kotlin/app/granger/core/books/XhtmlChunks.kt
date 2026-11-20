@@ -1,10 +1,10 @@
 package app.granger.core.books
 
 import app.granger.core.text.Chunkers
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Element
-import org.jsoup.nodes.TextNode
-import org.jsoup.parser.Parser
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.nodes.Element
+import com.fleeksoft.ksoup.nodes.TextNode
+import com.fleeksoft.ksoup.parser.Parser
 
 data class TextChunk(val href: String, val ordinal: Int, val progression: Double, val text: String)
 
@@ -20,7 +20,7 @@ object XhtmlChunks {
     private val WHITESPACE = Regex("[${Chunkers.SPACE}]+")
 
     fun of(href: String, bytes: ByteArray): List<TextChunk> {
-        val doc = Jsoup.parse(bytes.inputStream(), "UTF-8", "", Parser.xmlParser())
+        val doc = Ksoup.parse(html = bytes.decodeToString(), parser = Parser.xmlParser())
 
         val texts = ArrayList<String>()
         var buffer = ""

@@ -1,5 +1,7 @@
 package app.granger.core.library
 
+import app.granger.core.vectors.top
+import app.granger.core.vectors.file
 import app.granger.core.research.SourceKind
 import app.granger.core.vectors.VectorHit
 import app.granger.core.vectors.VectorSearch

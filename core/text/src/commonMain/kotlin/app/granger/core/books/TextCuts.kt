@@ -9,7 +9,7 @@ fun cutAtSpaces(text: String, max: Int): List<String> {
         var end = text.lastIndexOf(' ', start + max)
         if (end <= start + max / 2) {
             end = start + max
-            if (Character.isHighSurrogate(text[end - 1])) end--
+            if (text[end - 1].isHighSurrogate()) end--
         }
         out.add(text.substring(start, end).trim())
         start = end

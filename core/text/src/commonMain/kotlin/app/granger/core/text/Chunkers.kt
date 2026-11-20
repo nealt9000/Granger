@@ -1,7 +1,5 @@
 package app.granger.core.text
 
-import java.security.MessageDigest
-
 /** What pack-time vectors are tied to: the chunkers' output version and each chunk's text hash. */
 object Chunkers {
     /**
@@ -19,7 +17,6 @@ object Chunkers {
 
     /** The first 8 bytes of the SHA-1 of [text]'s UTF-8, big-endian, as 16 lowercase hex digits. */
     fun hash(text: String): String {
-        val digest = MessageDigest.getInstance("SHA-1").digest(text.toByteArray(Charsets.UTF_8))
-        return digest.copyOf(8).joinToString("") { "%02x".format(it) }
+        return sha1(text.encodeToByteArray()).copyOf(8).hex()
     }
 }

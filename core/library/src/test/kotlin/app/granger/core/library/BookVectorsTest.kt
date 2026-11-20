@@ -1,5 +1,6 @@
 package app.granger.core.library
 
+import app.granger.core.vectors.open
 import app.granger.core.books.PdfFixtures
 import app.granger.core.books.TestEpubs
 import app.granger.core.research.SourceKind

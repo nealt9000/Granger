@@ -1,5 +1,7 @@
 package app.granger.core.library
 
+import app.granger.core.vectors.open
+import app.granger.core.vectors.write
 import app.granger.core.research.SourceKind
 import app.granger.core.text.Chunkers
 import app.granger.core.vectors.ChunkKey
