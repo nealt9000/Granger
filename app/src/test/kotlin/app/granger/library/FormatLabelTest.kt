@@ -1,5 +1,6 @@
 package app.granger.library
 
+import app.granger.resolve
 import app.granger.book
 import app.granger.core.library.BookFormat
 import com.google.common.truth.Truth.assertThat

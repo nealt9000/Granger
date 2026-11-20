@@ -1,5 +1,7 @@
 package app.granger.widget
 
+import app.granger.invoke
+import app.granger.resolve
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap

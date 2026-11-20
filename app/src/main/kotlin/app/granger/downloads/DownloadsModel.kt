@@ -1,5 +1,7 @@
 package app.granger.downloads
 
+import app.granger.invoke
+import app.granger.resolve
 import android.content.Context
 import android.content.res.Resources
 import app.granger.R

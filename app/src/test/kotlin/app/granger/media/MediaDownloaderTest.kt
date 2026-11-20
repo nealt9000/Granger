@@ -1,5 +1,6 @@
 package app.granger.media
 
+import app.granger.resolve
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import app.granger.FakeBookshelf

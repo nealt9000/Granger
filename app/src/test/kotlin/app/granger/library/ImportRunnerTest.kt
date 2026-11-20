@@ -1,5 +1,6 @@
 package app.granger.library
 
+import app.granger.resolve
 import android.net.Uri
 import app.granger.FakeBookshelf
 import app.granger.core.books.DrmKind

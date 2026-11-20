@@ -1,5 +1,6 @@
 package app.granger.onboarding
 
+import app.granger.resolve
 import app.granger.FakeCatalogSource
 import app.granger.FakeDownloads
 import app.granger.FakeLibrary

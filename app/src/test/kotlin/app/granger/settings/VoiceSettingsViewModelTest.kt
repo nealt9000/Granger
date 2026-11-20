@@ -1,5 +1,6 @@
 package app.granger.settings
 
+import app.granger.invoke
 import app.granger.FakeCatalogSource
 import app.granger.FakeDownloads
 import app.granger.FakeVolumes

@@ -1,5 +1,6 @@
 package app.granger.search
 
+import app.granger.resolve
 import app.granger.core.library.ArtistHit
 import app.granger.core.library.Audiobook
 import app.granger.core.library.BookHit

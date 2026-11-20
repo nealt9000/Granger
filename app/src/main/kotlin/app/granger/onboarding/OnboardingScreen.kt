@@ -1,5 +1,6 @@
 package app.granger.onboarding
 
+import app.granger.resolve
 import androidx.activity.compose.BackHandler
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.layout.Arrangement

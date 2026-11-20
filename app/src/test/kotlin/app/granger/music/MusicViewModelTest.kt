@@ -1,5 +1,6 @@
 package app.granger.music
 
+import app.granger.invoke
 import app.granger.FakeShelves
 import app.granger.MainDispatcherRule
 import app.granger.R

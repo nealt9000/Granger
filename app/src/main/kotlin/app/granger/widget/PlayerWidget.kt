@@ -1,5 +1,6 @@
 package app.granger.widget
 
+import app.granger.resolve
 import app.granger.player.PlayerViewModel
 import app.granger.core.player.PlayerSettingsKeys
 import android.content.Context

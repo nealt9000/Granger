@@ -1,5 +1,6 @@
 package app.granger.ebook
 
+import app.granger.resolve
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.asPaddingValues

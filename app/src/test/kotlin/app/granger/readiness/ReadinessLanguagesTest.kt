@@ -1,5 +1,6 @@
 package app.granger.readiness
 
+import app.granger.resolve
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import app.granger.SHA_A

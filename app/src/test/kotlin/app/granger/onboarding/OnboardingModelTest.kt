@@ -1,5 +1,6 @@
 package app.granger.onboarding
 
+import app.granger.resolve
 import androidx.test.core.app.ApplicationProvider
 import app.granger.UiText
 import app.granger.bookEntry

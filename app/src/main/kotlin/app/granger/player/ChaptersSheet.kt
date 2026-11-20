@@ -1,5 +1,6 @@
 package app.granger.player
 
+import app.granger.resolve
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

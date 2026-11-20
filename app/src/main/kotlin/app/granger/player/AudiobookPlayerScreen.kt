@@ -1,5 +1,6 @@
 package app.granger.player
 
+import app.granger.resolve
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column

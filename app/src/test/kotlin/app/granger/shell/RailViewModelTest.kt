@@ -1,5 +1,6 @@
 package app.granger.shell
 
+import app.granger.invoke
 import app.granger.FakeBookshelf
 import app.granger.FakeLibrary
 import app.granger.FakeRailHidden

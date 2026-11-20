@@ -1,5 +1,7 @@
 package app.granger.readiness
 
+import app.granger.invoke
+import app.granger.resolve
 import app.granger.core.ai.CheckFailure
 import app.granger.research.checkText
 

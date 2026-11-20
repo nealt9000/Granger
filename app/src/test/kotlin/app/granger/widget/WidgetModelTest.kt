@@ -1,5 +1,6 @@
 package app.granger.widget
 
+import app.granger.resolve
 import app.granger.core.player.PlayerMode
 import app.granger.core.player.PlayerUi
 import app.granger.core.player.SavedBook

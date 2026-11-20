@@ -1,5 +1,6 @@
 package app.granger.sources
 
+import app.granger.resolve
 import app.granger.DENSE_RETRIEVAL
 import app.granger.FakeBookshelf
 import app.granger.FakeCatalogSource

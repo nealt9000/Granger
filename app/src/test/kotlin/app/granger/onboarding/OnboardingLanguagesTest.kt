@@ -1,5 +1,6 @@
 package app.granger.onboarding
 
+import app.granger.resolve
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import app.granger.UiText

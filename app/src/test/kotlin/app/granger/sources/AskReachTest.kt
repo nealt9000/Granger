@@ -1,5 +1,6 @@
 package app.granger.sources
 
+import app.granger.invoke
 import app.granger.core.catalog.VectorsEntry
 import app.granger.packEntry
 import com.google.common.truth.Truth.assertThat

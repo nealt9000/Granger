@@ -1,5 +1,6 @@
 package app.granger.downloads
 
+import app.granger.resolve
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.clickable

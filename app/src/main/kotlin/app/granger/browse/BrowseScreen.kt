@@ -1,5 +1,6 @@
 package app.granger.browse
 
+import app.granger.resolve
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts

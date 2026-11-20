@@ -1,5 +1,6 @@
 package app.granger.listen
 
+import app.granger.resolve
 import androidx.compose.ui.res.stringResource
 import app.granger.R
 import androidx.compose.foundation.clickable
