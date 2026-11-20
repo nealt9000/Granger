@@ -1,5 +1,6 @@
 package app.granger.ebook
 
+import app.granger.core.library.open
 import app.granger.InstalledSidecar
 import app.granger.core.library.BookLinks
 import app.granger.core.library.BookMention

@@ -1,5 +1,6 @@
 package app.granger.topic
 
+import app.granger.core.library.open
 import android.database.sqlite.SQLiteDatabase
 import app.granger.core.library.QidIndex
 import app.granger.core.library.QidIndexes

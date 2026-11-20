@@ -60,8 +60,9 @@
 
 **Files:** `QidIndex.kt`, `TimeIndex.kt`, `MentionIndex.kt`, `BookLinks.kt`, `ManifestBooks.kt`, `NautilusDatabase.kt`.
 
-- [ ] Each opens its file through `androidx.sqlite` (read-only), with the same queries. Their tests pass on the JVM and run on the iOS Simulator over the same fixture files.
-- [ ] A real Top `.gqid` and `.gtime` from the release are opened on the iOS Simulator: a subject's rooms, a person's years. Commit.
+- [x] Each opens its file through `androidx.sqlite` (read-only), with the same queries. Their tests pass on the JVM and run on the iOS Simulator over the same fixture files.
+- [x] A real Top `.gqid` and `.gtime` from the release are opened on the iOS Simulator: a subject's rooms, a person's years. Commit.
+- *Done 2026-11-20 for what I3 needs: `QidIndex` and `TimeIndex` (with `ContentFlags`, `SidecarMeta`, `SubjectSet`) moved into `:core:store` over a new `SqlFile`/`Rows` (Android `Cursor` calls on `androidx.sqlite`; a pool of 3 connections per file, each behind its own lock, since Explore reads in parallel; Android opens through the framework driver with `query_only`, as read-only as before; iOS through the bundled driver read-only). `org.json` → kotlinx.serialization; `ConcurrentHashMap` → `ConcurrentCache`; `BitSet` → `Bits`; `File` overloads of `open` and `TimeIndexDirectory` stay in `:core:library` (`SidecarFiles.kt`). `MentionIndex`, `BookLinks`, `ManifestBooks` and `NautilusDatabase` move with books (I5) and packs (I4). JVM suite 3,846, only the known timing-flaky player test failed (6,990 ms vs 7,000). iOS: the release Top `.gqid` (v6) finds Moon = Q405 with its subjects and a random path; the Top `.gtime` dates the Battle of Hastings 1066 and gives a decade's top ten (`-PgqidTest`/`-PgtimeTest`, skipped without them).*
 
 ### Task 3: Topic records and Saved for now in the core
 

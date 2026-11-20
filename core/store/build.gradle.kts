@@ -21,6 +21,11 @@ kotlin {
             api(project(":core:research"))
             api(libs.androidx.room.runtime)
             api(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.serialization.json)
+        }
+        androidMain.dependencies {
+            // Sidecar files through the framework SQLite, the same engine Android used before Plan I3.
+            implementation(libs.androidx.sqlite.framework)
         }
         iosMain.dependencies {
             implementation(libs.androidx.sqlite.bundled)
@@ -43,4 +48,7 @@ dependencies {
 // The iOS tests read the exported schemas by absolute path (the Simulator sees the Mac's disk).
 tasks.withType<org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeSimulatorTest>().configureEach {
     environment("SIMCTL_CHILD_GRANGER_REPO", rootProject.projectDir.absolutePath)
+    // Real release sidecars, for a local check only (SidecarIosTest skips without them).
+    environment("SIMCTL_CHILD_GRANGER_TEST_GQID", (project.findProperty("gqidTest") as String?).orEmpty())
+    environment("SIMCTL_CHILD_GRANGER_TEST_GTIME", (project.findProperty("gtimeTest") as String?).orEmpty())
 }

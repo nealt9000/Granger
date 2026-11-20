@@ -1,5 +1,6 @@
 package app.granger
 
+import app.granger.core.library.open
 import app.granger.core.library.create
 import android.app.ActivityManager
 import android.app.Application

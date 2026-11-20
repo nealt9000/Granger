@@ -1,9 +1,5 @@
 package app.granger.core.library
 
-import android.database.DatabaseUtils
-import android.database.sqlite.SQLiteDatabase
-import java.io.Closeable
-import java.io.File
 
 /** The Timeline's subject lanes (spec §9.4), as named in a `.gtime` file's meta. */
 enum class Lane(val id: String) {
@@ -48,12 +44,12 @@ data class TimeMark(
  * file's meta, so a file built with other lanes still reads correctly, and lanes it lacks simply match nothing.
  */
 class TimeIndex private constructor(
-    private val db: SQLiteDatabase,
+    private val db: SqlFile,
     val packId: String,
     private val bits: Map<Lane, Int>,
     /** Only marks of these items (see [only]); null for all. */
     private val keep: ((Long) -> Boolean)? = null,
-) : Closeable {
+) : AutoCloseable {
 
     /**
      * This index seen through [keep]: every list (marks, top, around, search…) holds only the items it accepts (a subject's
@@ -85,14 +81,14 @@ class TimeIndex private constructor(
     }
 
     /** The items whose mark falls in [from]..[to] by [ACTIVE], in qid order, for [TimeIndexes.countActive]. */
-    internal fun qidsActive(from: Long, to: Long): android.database.Cursor =
+    internal fun qidsActive(from: Long, to: Long): Rows =
         db.rawQuery("SELECT DISTINCT qid FROM marks WHERE $ACTIVE >= $from AND $ACTIVE <= $to ORDER BY qid", null)
 
     /** The best-known [k] marks falling in [from]..[to] by [ACTIVE], highest ranked first. */
     fun topActive(from: Long, to: Long, k: Int): List<TimeMark> = query("$ACTIVE >= $from AND $ACTIVE <= $to ORDER BY rank DESC", k)
 
     /** Every mark's (rowid, qid, [ACTIVE] year, rank), for [TimeIndexes.datedIn]. */
-    internal fun activeRows(): android.database.Cursor = db.rawQuery("SELECT rowid, qid, $ACTIVE, rank FROM marks", null)
+    internal fun activeRows(): Rows = db.rawQuery("SELECT rowid, qid, $ACTIVE, rank FROM marks", null)
 
     /** The marks with these rowids (from [activeRows]), in no particular order. */
     internal fun atRows(rows: Collection<Long>): List<TimeMark> =
@@ -102,7 +98,7 @@ class TimeIndex private constructor(
     fun find(path: String): TimeMark? {
         val (hashes, rows) = byPath
         val want = hashOf(path)
-        var at = hashes.binarySearch(want)
+        var at = hashes.binarySearchCommon(want)
         if (at < 0) return null
         while (at > 0 && hashes[at - 1] == want) at--
         // Two paths may share a hash: the row is read and its path checked.
@@ -142,7 +138,7 @@ class TimeIndex private constructor(
         if (words.isEmpty()) return emptyList()
         val like = words.joinToString(" AND ") { w ->
             val pattern = "%" + w.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
-            "title LIKE ${DatabaseUtils.sqlEscapeString(pattern)} ESCAPE '\\'"
+            "title LIKE ${SqlFile.escape(pattern)} ESCAPE '\\'"
         }
         return query("$like$lane ORDER BY rank DESC", limit)
     }
@@ -217,9 +213,9 @@ class TimeIndex private constructor(
         const val FORMAT = 1
 
         /** Opens [file] read-only for [packId]; null if it's missing, unreadable or a format this app doesn't read. */
-        fun open(file: File, packId: String): TimeIndex? {
-            if (!file.isFile) return null
-            val db = runCatching { SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READONLY) }.getOrNull() ?: return null
+        /** Opens the `.gtime` at [path]; Android has a `File` overload (`SidecarFiles.kt`). */
+        fun open(path: String, packId: String): TimeIndex? {
+            val db = SqlFile.openReadOnly(path) ?: return null
             val meta = runCatching {
                 db.rawQuery("SELECT key, value FROM meta", null).use { c -> buildMap { while (c.moveToNext()) put(c.getString(0), c.getString(1)) } }
             }.getOrNull()
@@ -234,21 +230,6 @@ class TimeIndex private constructor(
     }
 }
 
-/** Time index files pushed for development (tools/timeindex/push.py): `index.tsv` lines of `<file>\t<ZIM Name>`. */
-object TimeIndexDirectory {
-    /** ZIM Name to file, for files that exist; the first line for a name wins. */
-    fun listed(dir: File): Map<String, File> {
-        val index = File(dir, "index.tsv")
-        if (!index.isFile) return emptyMap()
-        val out = LinkedHashMap<String, File>()
-        for (line in runCatching { index.readLines() }.getOrDefault(emptyList())) {
-            val (file, name) = line.split('\t').takeIf { it.size >= 2 } ?: continue
-            val f = File(dir, file)
-            if (f.isFile && name !in out) out[name] = f
-        }
-        return out
-    }
-}
 
 /**
  * Every pack's time index as one: [indexes] in preference order (Wander's: whole encyclopedias in the main language
@@ -271,7 +252,7 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
      * Items the volunteered lists leave out ([ContentFilter.hides], set by the app): [marks], [around], [spread], [top],
      * [topActive], [datedIn] and [marksOf]. [find] and [search] (an opened article, a typed search) never filter.
      */
-    @Volatile var hide: (Long) -> Boolean = { false }
+    @kotlin.concurrent.Volatile var hide: (Long) -> Boolean = { false }
 
     private fun List<TimeMark>.shown(): List<TimeMark> = filterNot { hide(it.qid) }
 
@@ -324,8 +305,8 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
     fun countActive(from: Long, to: Long): Int = counted.computeIfAbsent(from to to) { countDistinct(indexes.map { it.qidsActive(from, to) }) }
 
     /** Counts and best-known marks already read: these indexes never change once opened, and Explore asks again on every return. */
-    private val counted = java.util.concurrent.ConcurrentHashMap<Pair<Long, Long>, Int>()
-    private val tops = java.util.concurrent.ConcurrentHashMap<Triple<Long, Long, Int>, List<TimeMark>>()
+    private val counted = ConcurrentCache<Pair<Long, Long>, Int>()
+    private val tops = ConcurrentCache<Triple<Long, Long, Int>, List<TimeMark>>()
 
     /** The [k] best-known marks falling in [from]..[to] by [TimeIndex.ACTIVE], across packs. */
     fun topActive(from: Long, to: Long, k: Int): List<TimeMark> =
@@ -342,7 +323,7 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
      * a few primitive arrays, so Top 1M's History (~150k dated) stays a couple of MB.
      */
     fun datedIn(set: SubjectSet): SubjectTime {
-        val seen = java.util.BitSet(set.size)
+        val seen = BooleanArray(set.size)
         val pack = IntArrayList()
         val row = LongArrayList()
         val qid = LongArrayList()
@@ -352,8 +333,8 @@ class TimeIndexes(private val indexes: List<TimeIndex>) {
         for (at in 0 until all.qid.size) {
             val q = all.qid[at]
             val i = set.indexOf(q)
-            if (i < 0 || seen.get(i)) continue
-            seen.set(i)
+            if (i < 0 || seen[i]) continue
+            seen[i] = true
             if (hide(q)) continue
             pack.add(all.pack[at]); row.add(all.row[at]); qid.add(q); year.add(all.year[at]); rank.add(all.rank[at])
         }
@@ -503,10 +484,15 @@ class TimeHistogram private constructor(private val years: LongArray, private va
 class TimeIndexCache {
     private var key: List<String>? = null
     private var value: TimeIndexes? = null
+    private val lock = TryLock()
 
-    @Synchronized
     fun get(key: List<String>, open: () -> TimeIndexes): TimeIndexes {
-        value?.takeIf { this.key == key }?.let { return it }
-        return open().also { this.key = key; value = it }
+        lock.lock()
+        try {
+            value?.takeIf { this.key == key }?.let { return it }
+            return open().also { this.key = key; value = it }
+        } finally {
+            lock.unlock()
+        }
     }
 }

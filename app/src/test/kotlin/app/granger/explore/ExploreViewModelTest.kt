@@ -1,5 +1,6 @@
 package app.granger.explore
 
+import app.granger.core.library.open
 import android.database.sqlite.SQLiteDatabase
 import app.granger.MainDispatcherRule
 import app.granger.core.library.QidIndex

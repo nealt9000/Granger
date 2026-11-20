@@ -23,7 +23,7 @@ class ContentFlags(private val topics: Set<Long>, private val pictures: Set<Long
  * never ask.
  */
 class ContentFilter(private val on: () -> Boolean) {
-    @Volatile var indexes: QidIndexes? = null
+    @kotlin.concurrent.Volatile var indexes: QidIndexes? = null
 
     /** Settings' switch: flags that come with their item (topic records, Plan O6) are applied only while it's on. */
     val isOn: Boolean get() = on()

@@ -19,3 +19,13 @@ fun openLibraryDatabase(path: String): LibraryDatabase =
         .addMigrations(*LibraryDatabase.MIGRATIONS)
         .addCallback(LibraryDatabase.SeedCallback)
         .build()
+
+actual class TryLock actual constructor() {
+    private val lock = platform.Foundation.NSLock()
+    actual fun tryLock(): Boolean = lock.tryLock()
+    actual fun lock() = lock.lock()
+    actual fun unlock() = lock.unlock()
+}
+
+internal actual fun openReadOnlyConnection(path: String): androidx.sqlite.SQLiteConnection =
+    BundledSQLiteDriver().open(path, androidx.sqlite.driver.bundled.SQLITE_OPEN_READONLY)

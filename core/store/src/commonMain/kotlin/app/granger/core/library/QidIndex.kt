@@ -1,8 +1,9 @@
 package app.granger.core.library
 
-import android.database.sqlite.SQLiteDatabase
-import java.io.Closeable
-import java.io.File
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 /** The longest best-known list [QidIndexes.topIn] keeps. */
 private const val TOP_KEPT = 400
@@ -21,7 +22,7 @@ data class QidArticle(val qid: Long, val packId: String, val path: String, val r
  * the other language, and the item's join properties (author P50, Gutenberg P2034, MusicBrainz P434…). The Linked
  * Library joins on QIDs only (spec §5.3), so a link from a book, a recording or another pack resolves here.
  */
-class QidIndex private constructor(private val db: SQLiteDatabase, val packId: String, val language: String? = null) : Closeable {
+class QidIndex private constructor(private val db: SqlFile, val packId: String, val language: String? = null) : AutoCloseable {
     fun qidOf(path: String): Long? =
         db.rawQuery("SELECT qid FROM articles WHERE path = ?", arrayOf(path)).use { if (it.moveToFirst()) it.getLong(0) else null }
 
@@ -54,7 +55,7 @@ class QidIndex private constructor(private val db: SQLiteDatabase, val packId: S
         val has = db.rawQuery("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'flags'", null).use { it.moveToFirst() }
         if (!has) return emptyMap()
         return db.rawQuery("SELECT qid, kind FROM flags", null).use { c ->
-            HashMap<Long, Int>(c.count * 2).apply { while (c.moveToNext()) put(c.getLong(0), c.getInt(1)) }
+            HashMap<Long, Int>(1024).apply { while (c.moveToNext()) put(c.getLong(0), c.getInt(1)) }
         }
     }
 
@@ -86,15 +87,15 @@ class QidIndex private constructor(private val db: SQLiteDatabase, val packId: S
         ).use { c -> buildList { while (c.moveToNext()) add(QidArticle(c.getLong(0), packId, c.getString(1), c.getInt(2), c.getInt(3) == 0)) } }
 
     /** The items with [subject], in qid order, as a cursor for [countDistinct]; null without subjects. */
-    internal fun qidsWith(subject: String): android.database.Cursor? = if (!hasSubjects) null else
+    internal fun qidsWith(subject: String): Rows? = if (!hasSubjects) null else
         db.rawQuery("SELECT DISTINCT qid FROM subjects WHERE subject = ? ORDER BY qid", arrayOf(subject))
 
     /** The items with [subject] and whether it's their main one (ord 0), in qid order, for [QidIndexes.subjectSet]. */
-    internal fun qidsAndMain(subject: String): android.database.Cursor? = if (!hasSubjects) null else
+    internal fun qidsAndMain(subject: String): Rows? = if (!hasSubjects) null else
         db.rawQuery("SELECT qid, MIN(ord) FROM subjects WHERE subject = ? GROUP BY qid ORDER BY qid", arrayOf(subject))
 
     /** Every item here, in qid order. */
-    internal fun allQids(): android.database.Cursor = db.rawQuery("SELECT DISTINCT qid FROM articles ORDER BY qid", null)
+    internal fun allQids(): Rows = db.rawQuery("SELECT DISTINCT qid FROM articles ORDER BY qid", null)
 
     /** Whether the index carries sub-categories (Plan EX editorial pass; files built before it don't). */
     val hasFacets: Boolean by lazy {
@@ -195,11 +196,13 @@ class QidIndex private constructor(private val db: SQLiteDatabase, val packId: S
     private val codes: Map<String, Int> by lazy {
         val json = facetList ?: return@lazy emptyMap()
         runCatching {
-            val o = org.json.JSONObject(json)
+            val o = kotlinx.serialization.json.Json.parseToJsonElement(json).jsonObject
             buildMap {
-                for (subject in o.keys()) {
-                    val arr = o.getJSONArray(subject)
-                    for (i in 0 until arr.length()) arr.getJSONObject(i).let { f -> if (f.has("code")) put("$subject.${f.getString("id")}", f.getInt("code")) }
+                for ((subject, list) in o) {
+                    for (f in list.jsonArray.map { it.jsonObject }) {
+                        val code = f["code"]?.jsonPrimitive?.intOrNull ?: continue
+                        put("$subject.${f.getValue("id").jsonPrimitive.content}", code)
+                    }
                 }
             }
         }.getOrDefault(emptyMap())
@@ -215,7 +218,7 @@ class QidIndex private constructor(private val db: SQLiteDatabase, val packId: S
     }
 
     /** The items in [facet], in qid order, each with 0 (its main subject's), for [countDistinct] and [QidIndexes.facetSet]. */
-    internal fun qidsInFacet(facet: String): android.database.Cursor? {
+    internal fun qidsInFacet(facet: String): Rows? {
         val code = codes[facet] ?: return null
         return db.rawQuery("SELECT qid, 0 FROM facets WHERE facet = ? ORDER BY qid", arrayOf(code.toString()))
     }
@@ -233,9 +236,9 @@ class QidIndex private constructor(private val db: SQLiteDatabase, val packId: S
          * the nopic build to maxi and mini too), so with [sourceName], the installed pack's file name, an index built
          * from the same edition in another flavour is accepted as well.
          */
-        fun open(file: File, packId: String, sourceSha256: String? = null, sourceName: String? = null): QidIndex? {
-            if (!file.isFile) return null
-            val db = runCatching { SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READONLY) }.getOrNull() ?: return null
+        /** Opens the `.gqid` at [path]; Android has a `File` overload (`SidecarFiles.kt`). */
+        fun open(path: String, packId: String, sourceSha256: String? = null, sourceName: String? = null): QidIndex? {
+            val db = SqlFile.openReadOnly(path) ?: return null
             val meta = SidecarMeta.read(db)
             val ok = meta != null && meta.kind == KIND && meta.schemaVersion in 1..SCHEMA_VERSION &&
                 (sourceSha256 == null || meta.sourceSha256 == sourceSha256 || sameEdition(meta.values["sourceZim"], sourceName))
@@ -269,7 +272,7 @@ class QidIndex private constructor(private val db: SQLiteDatabase, val packId: S
  * Every pack's QID index as one, in preference order (Wander's: whole encyclopedias in the main language first), so an
  * item resolves to the fullest copy on the phone (plan Decision 6).
  */
-class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
+class QidIndexes(private val indexes: List<QidIndex>) : AutoCloseable {
     val isEmpty: Boolean get() = indexes.isEmpty()
 
     /** Every pack's adult-content flags as one (a topic in any pack is a topic everywhere: flags are per item). */
@@ -283,10 +286,10 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
      * Items the ranked lists leave out ([ContentFilter.hides], set by the app): [topIn], [topInFacet], [broadIn],
      * [broadInFacet], [holders] and a broad topic's parts. Lookups ([qidOf], [articlesOf]…) never filter.
      */
-    @Volatile var hide: (Long) -> Boolean = { false }
+    @kotlin.concurrent.Volatile var hide: (Long) -> Boolean = { false }
 
     /** Items whose pictures volunteered screens leave out ([ContentFilter.noPicture]): a broad topic's own figures. */
-    @Volatile var noPicture: (Long) -> Boolean = { false }
+    @kotlin.concurrent.Volatile var noPicture: (Long) -> Boolean = { false }
 
     /** [want] articles [fetch]ed past the hidden ones, asking for more when hidden ones left it short. */
     private fun kept(want: Int, fetch: (Int) -> List<QidArticle>): List<QidArticle> {
@@ -361,7 +364,7 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
      * [QidIndexes]), and Explore's landing asked for the same counts on every return to it, a second each time. Each is
      * made once: a second asker waits for the first rather than counting again.
      */
-    private val counted = java.util.concurrent.ConcurrentHashMap<String, Int>()
+    private val counted = ConcurrentCache<String, Int>()
 
     /** How many items the packs hold in all, each once. */
     fun itemCount(): Int = counted.computeIfAbsent("items") { countDistinct(indexes.map { it.allQids() }) }
@@ -373,7 +376,7 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
     fun topIn(subject: String, limit: Int, offset: Int = 0, mainOnly: Boolean = false): List<QidArticle> {
         fun read(want: Int): List<QidArticle> {
             val best = LinkedHashMap<Long, QidArticle>()
-            for (index in indexes) for (a in index.topIn(subject, want, mainOnly = mainOnly)) best.putIfAbsent(a.qid, a)
+            for (index in indexes) for (a in index.topIn(subject, want, mainOnly = mainOnly)) best.putIfMissing(a.qid, a)
             return best.values.sortedWith(compareByDescending<QidArticle> { it.mainSubject }.thenByDescending { it.rank }.thenBy { it.qid })
                 .take(want)
         }
@@ -388,7 +391,7 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
         return kept(want, ::read).drop(offset).take(limit)
     }
 
-    private val tops = java.util.concurrent.ConcurrentHashMap<String, List<QidArticle>>()
+    private val tops = ConcurrentCache<String, List<QidArticle>>()
 
     /**
      * Every item with [subject] across the packs, each once, as a sorted set (Plan EX Task 3: a subject's eras, its quiz).
@@ -427,7 +430,7 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
             val best = LinkedHashMap<Long, QidArticle>()
             return kept(limit) { n ->
                 best.clear()
-                for (index in some) for (a in index.broadIn(subject, minKinds, minFigures, n)) best.putIfAbsent(a.qid, a)
+                for (index in some) for (a in index.broadIn(subject, minKinds, minFigures, n)) best.putIfMissing(a.qid, a)
                 best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).take(n)
             }.take(limit)
         }
@@ -444,7 +447,7 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
             val best = LinkedHashMap<Long, QidArticle>()
             return kept(limit) { n ->
                 best.clear()
-                for (index in some) for (a in index.broadInFacet(facet, n)) best.putIfAbsent(a.qid, a)
+                for (index in some) for (a in index.broadInFacet(facet, n)) best.putIfMissing(a.qid, a)
                 best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).take(n)
             }.take(limit)
         }
@@ -458,7 +461,7 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
             val best = LinkedHashMap<Long, QidArticle>()
             return kept(limit) { n ->
                 best.clear()
-                for (index in some) for (a in index.holders(item, n)) best.putIfAbsent(a.qid, a)
+                for (index in some) for (a in index.holders(item, n)) best.putIfMissing(a.qid, a)
                 best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).take(n)
             }.take(limit)
         }
@@ -469,14 +472,14 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
     /** For each of [items], how many broad topics other than [except] lead to it: the most any one pack counts (packs share their topics). */
     fun heldBy(items: Collection<Long>, except: Long?): Map<Long, Int> {
         val out = HashMap<Long, Int>()
-        for (index in indexes) for ((item, n) in index.heldBy(items, except)) out.merge(item, n, ::maxOf)
+        for (index in indexes) for ((item, n) in index.heldBy(items, except)) out[item] = maxOf(out[item] ?: n, n)
         return out
     }
 
     /** Every room that holds the item [qid], in the subjects' own order and each subject's curated order. */
     fun roomsOf(qid: Long): List<Facet> {
         val json = indexes.firstNotNullOfOrNull { it.facetList } ?: return emptyList()
-        val subjects = runCatching { org.json.JSONObject(json).keys().asSequence().toList() }.getOrDefault(emptyList())
+        val subjects = runCatching { kotlinx.serialization.json.Json.parseToJsonElement(json).jsonObject.keys.toList() }.getOrDefault(emptyList())
         return subjects.flatMap { Facet.parse(json, it) }.filter { f -> indexes.any { it.inFacet(f.key, qid) } }
     }
 
@@ -487,7 +490,7 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
     fun facets(subject: String): List<Facet> =
         parsed.computeIfAbsent(subject) { indexes.firstNotNullOfOrNull { it.facetList }?.let { Facet.parse(it, subject) }.orEmpty() }
 
-    private val parsed = java.util.concurrent.ConcurrentHashMap<String, List<Facet>>()
+    private val parsed = ConcurrentCache<String, List<Facet>>()
 
     /** How many items each of [subject]'s sub-categories holds across the packs, each item once. */
     fun facetCounts(subject: String): Map<String, Int> =
@@ -497,7 +500,7 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
     fun topInFacet(facet: String, limit: Int, offset: Int = 0): List<QidArticle> =
         kept(offset + limit) { n ->
             val best = LinkedHashMap<Long, QidArticle>()
-            for (index in indexes) for (a in index.topInFacet(facet, n)) best.putIfAbsent(a.qid, a)
+            for (index in indexes) for (a in index.topInFacet(facet, n)) best.putIfMissing(a.qid, a)
             best.values.sortedWith(compareByDescending<QidArticle> { it.rank }.thenBy { it.qid }).take(n)
         }.drop(offset).take(limit)
 
@@ -505,10 +508,10 @@ class QidIndexes(private val indexes: List<QidIndex>) : Closeable {
     fun facetSet(facet: String): SubjectSet = merged(indexes.mapNotNull { it.qidsInFacet(facet) })
 
     /** The qid-sorted (qid, ord) [cursors] merged into one set, each item once, main when any pack has ord 0; closes them. */
-    private fun merged(all: List<android.database.Cursor>): SubjectSet {
+    private fun merged(all: List<Rows>): SubjectSet {
         val cursors = all.filter { c -> c.moveToFirst().also { if (!it) c.close() } }.toMutableList()
         val qids = LongArrayList()
-        val main = java.util.BitSet()
+        val main = Bits()
         while (cursors.isNotEmpty()) {
             val low = cursors.minOf { it.getLong(0) }
             var isMain = false
@@ -541,25 +544,25 @@ data class Facet(val subject: String, val id: String, val en: String, val es: St
     companion object {
         /** [subject]'s facets from the index's JSON list, in order; empty when it has none or the list won't read. */
         fun parse(json: String, subject: String): List<Facet> = runCatching {
-            val arr = org.json.JSONObject(json).optJSONArray(subject) ?: return emptyList()
-            (0 until arr.length()).map { i ->
-                val o = arr.getJSONObject(i)
-                Facet(subject, o.getString("id"), o.optString("en"), o.optString("es"))
+            val arr = kotlinx.serialization.json.Json.parseToJsonElement(json).jsonObject[subject] as? kotlinx.serialization.json.JsonArray
+                ?: return emptyList()
+            arr.map { it.jsonObject }.map { o ->
+                Facet(subject, o.getValue("id").jsonPrimitive.content, o["en"]?.jsonPrimitive?.content.orEmpty(), o["es"]?.jsonPrimitive?.content.orEmpty())
             }
         }.getOrDefault(emptyList())
     }
 }
 
 /** A subject's items ([QidIndexes.subjectSet]), sorted, with which have it as their main subject. */
-class SubjectSet internal constructor(private val qids: LongArray, private val main: java.util.BitSet) {
+class SubjectSet(private val qids: LongArray, private val main: Bits) {
     val size: Int get() = qids.size
 
     /** The item's place in the set, or a negative number when it isn't in it. */
-    fun indexOf(qid: Long): Int = java.util.Arrays.binarySearch(qids, qid)
+    fun indexOf(qid: Long): Int = qids.binarySearchCommon(qid)
 
     operator fun contains(qid: Long): Boolean = indexOf(qid) >= 0
 
-    fun isMain(qid: Long): Boolean = indexOf(qid).let { it >= 0 && main.get(it) }
+    fun isMain(qid: Long): Boolean = indexOf(qid).let { it >= 0 && main[it] }
 
     /** How many items this set and [other] both hold (one pass over the two sorted lists). */
     fun shared(other: SubjectSet): Int {
@@ -579,14 +582,14 @@ class SubjectSet internal constructor(private val qids: LongArray, private val m
     }
 
     companion object {
-        val EMPTY = SubjectSet(LongArray(0), java.util.BitSet())
+        val EMPTY = SubjectSet(LongArray(0), Bits())
     }
 }
 
 /** The meta table every sidecar keeps (Linked Library spec §5.1; tools/sidecar/meta.py writes it). */
 data class SidecarMeta(val kind: String, val schemaVersion: Int, val sourceSha256: String, val values: Map<String, String>) {
     companion object {
-        fun read(db: SQLiteDatabase): SidecarMeta? = runCatching {
+        fun read(db: SqlFile): SidecarMeta? = runCatching {
             val m = db.rawQuery("SELECT key, value FROM meta", null).use { c -> buildMap { while (c.moveToNext()) put(c.getString(0), c.getString(1)) } }
             SidecarMeta(m["kind"].orEmpty(), m["schemaVersion"]?.toIntOrNull() ?: 0, m["sourceSha256"].orEmpty(), m)
         }.getOrNull()
@@ -597,7 +600,7 @@ data class SidecarMeta(val kind: String, val schemaVersion: Int, val sourceSha25
  * The number of distinct longs over [cursors], each sorted ascending on column 0 (one pack's qids each), merged in step so
  * no list is held in memory; closes them. Explore counts an item once however many packs hold it.
  */
-internal fun countDistinct(cursors: List<android.database.Cursor>): Int {
+internal fun countDistinct(cursors: List<Rows>): Int {
     val open = cursors.filter { it.moveToFirst() }.toMutableList()
     cursors.filterNot { it in open }.forEach { it.close() }
     var n = 0

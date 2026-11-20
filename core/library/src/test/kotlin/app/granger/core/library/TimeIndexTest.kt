@@ -158,7 +158,7 @@ class TimeIndexTest {
         val history = listOf(listOf(83224L, "Battle_of_Hastings", 0, 1066, null, bit(Lane.WARS), 80), listOf(42L, "Domesday_Book", 0, 1086, null, 0L, 40))
         val all = TimeIndexes(listOf(TimeIndex.open(gtime("top", top), "top")!!, TimeIndex.open(gtime("history", history), "history")!!))
         // History: Hastings (main, in both packs), Domesday (main), Rome (second); Aristotle and Ada aren't History.
-        val bits = java.util.BitSet().apply { set(0); set(2) }
+        val bits = Bits().apply { set(0); set(2) }
         val set = SubjectSet(longArrayOf(42L, 2277L, 83224L), bits)
         val time = all.datedIn(set)
         assertThat(time.size).isEqualTo(3)
