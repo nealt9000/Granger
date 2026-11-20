@@ -1,0 +1,19 @@
+[
+ {"id": "fm5-125", "pdf": "zimgit-knots_en/files__Knots (6).pdf",
+  "title": "Knots, Splices, Attachments, and Ladders", "author": "US Army (FM 5-125, chapter 2)", "language": "en",
+  "source": "files/Knots (6).pdf", "pack": "A Library of Knots (zimgit-knots_en)",
+  "rights": "A work of the US government, in the public domain."},
+ {"id": "usda6", "pdf": "zimgit-food-preparation_en/files__Food Preparation (12).pdf",
+  "title": "Preparing and Canning Fermented Foods and Pickled Vegetables",
+  "author": "US Department of Agriculture (Complete Guide to Home Canning, Guide 6)", "language": "en",
+  "source": "files/Food Preparation (12).pdf", "pack": "Food for Preppers (zimgit-food-preparation_en)",
+  "rights": "A work of the US government, in the public domain."},
+ {"id": "fm8-50", "pdf": "irp.fas.org_en_military-medicine/irp.fas.org__doddir__milmed__bandage.pdf",
+  "title": "Bandaging and Splinting", "author": "US Army (FM 8-50, 1957)", "language": "en",
+  "source": "irp.fas.org/doddir/milmed/bandage.pdf", "pack": "Military Medicine (irp.fas.org_en_military-medicine)",
+  "rights": "A work of the US government, in the public domain."},
+ {"id": "fm4-25", "pdf": "irp.fas.org_en_military-medicine/irp.fas.org__doddir__milmed__first.pdf",
+  "title": "First Aid", "author": "US Army (FM 4-25.11)", "language": "en",
+  "source": "irp.fas.org/doddir/milmed/first.pdf", "pack": "Military Medicine (irp.fas.org_en_military-medicine)",
+  "rights": "A work of the US government, in the public domain."}
+]
