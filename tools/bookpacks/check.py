@@ -2,7 +2,11 @@
 """
 Checks a `.gbooks` book manifest (Plan KB2, schema.md).
 
-  check.py FILE [--source ZIM_FILE_OR_URL] [--previous FILE]
+  check.py FILE [--source ZIM_FILE_OR_URL] [--previous FILE] [--online URL [--sample N]]
+
+--online reads N random books from the pack's URL (a Kiwix mirror) by their byte ranges, as a phone would (Plan BK):
+the ZIM header's UUID must match the manifest's, each book must start as a PDF/EPUB does, and match its sha256 when
+the manifest has one.
 
 Exit 0: it keeps the contract and nothing drifted. Exit 1: a problem (the meta contract, a duplicate or empty title,
 an unknown format, a path the source ZIM doesn't hold as a PDF/EPUB). Exit 2: no problem, but it drifted from
@@ -53,6 +57,41 @@ def problems_of(manifest, source=None):
     return out
 
 
+MAGIC = {"pdf": b"%PDF", "epub": b"PK\x03\x04"}
+
+
+def online_problems(manifest, url, sample=20, seed=20):
+    """Reads [sample] located books from [url] by range, as the phone does."""
+    import hashlib
+    import random
+    import zim_probe as zp  # on build's path
+    r = zp.Reader(url, budget=1 << 34)
+    out = []
+    try:
+        uuid = r.raw(0, 24)[8:24].hex()
+        if manifest.get("zimUuid") and uuid != manifest["zimUuid"]:
+            return [f"the file at {url} has UUID {uuid}, the manifest {manifest['zimUuid']}"]
+        located = [i for i in manifest["items"] if "zimOffset" in i]
+        if len(located) < len(manifest["items"]):
+            out.append(f"{len(manifest['items']) - len(located)} items have no byte range")
+        for i in random.Random(seed).sample(located, min(sample, len(located))):
+            if i.get("sha256"):
+                h = hashlib.sha256()
+                head = b""
+                for chunk in r.stream(i["zimOffset"], i["zimOffset"] + i["bytes"], chunk=1 << 20):
+                    head = head or chunk[:4]
+                    h.update(chunk)
+                if h.hexdigest() != i["sha256"]:
+                    out.append(f"{i['key']}: sha256 differs online")
+            else:
+                head = r.raw(i["zimOffset"], 4)
+            if head != MAGIC[i["format"]]:
+                out.append(f"{i['key']}: starts {head!r} online, not a {i['format']}")
+    finally:
+        r.close()
+    return out
+
+
 def drift_of(manifest, previous):
     if previous is None:
         return []
@@ -80,6 +119,8 @@ def main(argv=None):
     ap.add_argument("file")
     ap.add_argument("--source")
     ap.add_argument("--previous")
+    ap.add_argument("--online", help="the pack's URL: read a sample of books by range, as a phone does")
+    ap.add_argument("--sample", type=int, default=20)
     ap.add_argument("--catalog", help="a catalog.json: its published .gbooks for this pack is --previous")
     a = ap.parse_args(argv)
     if a.catalog and not a.previous:
@@ -95,6 +136,8 @@ def main(argv=None):
         problems += meta.check(a.file, a.source if a.source and not a.source.startswith("http") else None)
     manifest = build.read_gbooks(a.file)
     problems += problems_of(manifest, a.source)
+    if a.online:
+        problems += online_problems(manifest, a.online, a.sample)
     drift = drift_of(manifest, build.read_gbooks(a.previous) if a.previous else None)
     for line in problems:
         print(f"problem: {line}")
