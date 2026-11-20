@@ -10,6 +10,7 @@ import platform.Foundation.NSString
 import platform.Foundation.NSTimeZone
 import platform.Foundation.currentLocale
 import platform.Foundation.languageCode
+import platform.Foundation.localizedStringForLanguageCode
 import platform.Foundation.localTimeZone
 import platform.Foundation.timeIntervalSince1970
 import platform.Foundation.compare
