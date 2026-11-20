@@ -47,6 +47,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
@@ -82,6 +83,9 @@ object TopicPageTags {
     const val FOUND = "topic_found"
     const val WANDER = "topic_wander"
     const val EXPLORE = "topic_explore"
+    /** A time-card row or event that won't open offline (Plan O7). */
+    const val GREYED = "topic_greyed"
+    fun tile(path: String) = "topic_tile:$path"
 }
 
 /**
@@ -275,9 +279,12 @@ private fun TimeCard(
             val to = rows.maxOf { it.end(now) }.coerceAtLeast(from + 1)
             for (p in rows) {
                 val me = p.qid == time.mark.qid
-                val label = "${TopicSource.titleOf(p.path)}, ${words.of(p)}"
+                val greyed = !me && app.granger.online.rememberOpenable(p.packId, p.path) == false
+                val needs = if (greyed) ", " + stringResource(R.string.needs_internet) else ""
+                val label = "${TopicSource.titleOf(p.path)}, ${words.of(p)}$needs"
                 Row(
                     Modifier.fillMaxWidth().heightIn(min = 40.dp).clickable(enabled = !me) { onOpenArticle(p.packId, p.path, p.title) }
+                        .then(if (greyed) Modifier.alpha(GREYED).testTag(TopicPageTags.GREYED) else Modifier)
                         .semantics(mergeDescendants = true) { contentDescription = label },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -303,13 +310,18 @@ private fun TimeCard(
             Text(stringResource(R.string.topic_events), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 for (e in time.events) {
+                    val greyed = app.granger.online.rememberOpenable(e.packId, e.path) == false
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.heightIn(min = 44.dp).clip(RoundedCornerShape(10.dp)).clickable { onOpenArticle(e.packId, e.path, e.title) },
+                        modifier = Modifier.heightIn(min = 44.dp).clip(RoundedCornerShape(10.dp)).clickable { onOpenArticle(e.packId, e.path, e.title) }
+                            .then(if (greyed) Modifier.testTag(TopicPageTags.GREYED) else Modifier),
                     ) {
-                        Column(Modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
+                        Column(Modifier.padding(horizontal = 12.dp, vertical = 6.dp).then(if (greyed) Modifier.alpha(GREYED) else Modifier)) {
                             Text(TopicSource.titleOf(e.path), style = MaterialTheme.typography.labelLarge)
-                            Text(words.of(e), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(
+                                if (greyed) words.of(e) + " · " + stringResource(R.string.needs_internet) else words.of(e),
+                                style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                         }
                     }
                 }
@@ -418,18 +430,32 @@ private fun RoomCard(place: TopicPlace, onOpenArticle: (packId: String, path: St
 
 @Composable
 private fun RelatedTile(a: TopicArticle, modifier: Modifier, onOpen: () -> Unit) {
-    Column(modifier.clip(RoundedCornerShape(10.dp)).clickable(onClick = onOpen).padding(bottom = 4.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    // Offline, an article that won't open keeps its place, faded, with "Needs internet"; a tap says what it would take
+    // (Plan O7 call 1, as Explore's plates).
+    val greyed = app.granger.online.rememberOpenable(a.packId, a.path) == false
+    Column(
+        modifier.clip(RoundedCornerShape(10.dp)).clickable(onClick = onOpen).padding(bottom = 4.dp).testTag(TopicPageTags.tile(a.path)),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
         val picture = rememberRailCover(a.picture, 160.dp)
         Box(Modifier.fillMaxWidth().height(84.dp).clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh), contentAlignment = Alignment.Center) {
-            if (picture != null) Image(picture, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-            else Text(a.title.take(1), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Box(Modifier.fillMaxSize().then(if (greyed) Modifier.alpha(GREYED) else Modifier), contentAlignment = Alignment.Center) {
+                if (picture != null) Image(picture, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                else Text(a.title.take(1), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            if (greyed) app.granger.online.NeedsInternetLabel(Modifier.align(Alignment.TopEnd).padding(6.dp))
         }
-        Text(a.title, style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
-        if (a.blurb.isNotBlank()) {
-            Text(a.blurb, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 3, overflow = TextOverflow.Ellipsis)
+        Column(Modifier.then(if (greyed) Modifier.alpha(GREYED) else Modifier), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(a.title, style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            if (a.blurb.isNotBlank()) {
+                Text(a.blurb, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 3, overflow = TextOverflow.Ellipsis)
+            }
         }
     }
 }
+
+/** How faded an item that won't open offline is (Explore's plates use the same). */
+private const val GREYED = 0.38f
 
 private const val PICTURE_RATIO = 1.15f
 /** The map needs a few circles to be worth opening. */

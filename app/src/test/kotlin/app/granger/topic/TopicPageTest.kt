@@ -110,4 +110,64 @@ class TopicPageTest {
         compose.onNodeWithText("All").performClick()
         assertThat(events).containsExactly("place:places:lakes", "article:Lake_Chad", "place:places:lakes").inOrder()
     }
+
+    private class Marks(val states: Map<String, app.granger.online.Availability>) : app.granger.online.MarkSource {
+        override val version = kotlinx.coroutines.flow.MutableStateFlow(0)
+        override suspend fun of(packId: String, path: String) = states[path] ?: app.granger.online.Availability.Online
+    }
+
+    private class Reach(start: app.granger.online.ReachState) : app.granger.online.ReachControl {
+        override val state = kotlinx.coroutines.flow.MutableStateFlow(start)
+        override fun setLocalOnly(on: Boolean) {}
+    }
+
+    private fun showWithReach(topic: Topic, reach: app.granger.online.ReachState) = compose.setContent {
+        GrangerTheme {
+            androidx.compose.runtime.CompositionLocalProvider(
+                app.granger.online.LocalMarks provides Marks(mapOf("Lake_Victoria" to app.granger.online.Availability.Saved, "Goethe" to app.granger.online.Availability.OnPhone(true))),
+                app.granger.online.LocalReach provides Reach(reach),
+            ) {
+                TopicPage(
+                    topic = topic, packTitle = "Wikipedia", onBack = {}, onReadFull = {}, onOther = {},
+                    onOpenArticle = { _, path, _ -> events += "article:$path" },
+                    onOpenPassage = { _, _ -> }, onOpenBookAt = { _, _ -> }, onAllBooks = {}, onShowInTime = null, onOpenPlace = { _, _ -> },
+                )
+            }
+        }
+    }
+
+    private val lakePage = Topic(
+        "wikipedia_en_online", "Lake_Turkana", header = TopicHeader("Lake Turkana", "A lake.", null),
+        place = TopicPlace("places", app.granger.core.library.Facet("places", "lakes", "Lakes", "Lagos"), listOf(
+            TopicArticle("wikipedia_en_online", "Lake_Chad", "Lake Chad", "A lake.", null),
+            TopicArticle("wikipedia_en_online", "Lake_Victoria", "Lake Victoria", "", null),
+        )),
+        related = listOf(TopicArticle("wikipedia_en_online", "Rift_Valley", "Rift Valley", "", null)),
+        time = full.time, relatedBooks = emptyList(), books = ArticleFooter.NONE, done = true,
+    )
+
+    @Test fun offlineTilesThatWontOpenAreGreyedAndStillTapThrough() {
+        // Plan O7 call 1: Lake Chad and Rift Valley are online only; Lake Victoria is saved, Goethe on the phone.
+        showWithReach(lakePage, app.granger.online.ReachState.LOCAL_ONLY)
+        compose.waitForIdle()
+        val list = compose.onNode(androidx.compose.ui.test.hasScrollAction())
+        list.performScrollToNode(hasTestTag(TopicPageTags.tile("Lake_Chad")))
+        compose.onNode(hasTestTag(app.granger.online.MarkTags.NEEDS_INTERNET) and androidx.compose.ui.test.hasAnyAncestor(hasTestTag(TopicPageTags.tile("Lake_Chad"))), useUnmergedTree = true).assertExists()
+        compose.onAllNodes(hasTestTag(app.granger.online.MarkTags.NEEDS_INTERNET) and androidx.compose.ui.test.hasAnyAncestor(hasTestTag(TopicPageTags.tile("Lake_Victoria"))), useUnmergedTree = true).assertCountEquals(0)
+        compose.onNodeWithTag(TopicPageTags.tile("Lake_Chad")).performClick()
+        list.performScrollToNode(hasTestTag(TopicPageTags.tile("Rift_Valley")))
+        compose.onNode(hasTestTag(app.granger.online.MarkTags.NEEDS_INTERNET) and androidx.compose.ui.test.hasAnyAncestor(hasTestTag(TopicPageTags.tile("Rift_Valley"))), useUnmergedTree = true).assertExists()
+        // The time card: French Revolution (an event) greys; Goethe (on the phone) doesn't.
+        list.performScrollToNode(hasTestTag(TopicPageTags.TIME))
+        compose.onAllNodes(hasTestTag(TopicPageTags.GREYED), useUnmergedTree = true).assertCountEquals(1)
+        compose.onNodeWithText("Needs internet", substring = true, useUnmergedTree = true).assertExists()
+        assertThat(events).containsExactly("article:Lake_Chad")
+    }
+
+    @Test fun onlineNoTileGreys() {
+        showWithReach(lakePage, app.granger.online.ReachState.ONLINE)
+        compose.waitForIdle()
+        compose.onAllNodes(hasTestTag(app.granger.online.MarkTags.NEEDS_INTERNET), useUnmergedTree = true).assertCountEquals(0)
+        compose.onAllNodes(hasTestTag(TopicPageTags.GREYED), useUnmergedTree = true).assertCountEquals(0)
+    }
 }
