@@ -81,6 +81,9 @@ class Source:
     title: str | None = None       # set, this PDF is one chapter of the book, so titled
     probe: str | None = None       # its Docling document's folder under WORK/probe; default <book id>/<n>
     skip_pages: list[int] = field(default_factory=list)
+    # The contents, given: [[level, title, PDF page], …] in place of the PDF's outline, for a printed contents page too
+    # odd to read (a cookbook's lists every page a subject appears on). Titles are matched to headings by their words.
+    contents: list[list] = field(default_factory=list)
 
 
 @dataclass
@@ -102,6 +105,7 @@ class Book:
     sources: list[Source]
     made_from: str                 # the colophon's sentence on where the PDFs came from
     about: str = ""                # the opening page's few words on what the book is and when to reach for it
+    notice: str = ""               # a content notice shown first, in a box (Plan BK: old works shown as printed, not cut)
     start_here: list[str] = field(default_factory=list)  # headings to read first, by their words
     index: Index | None = None
     picture_first: bool = False    # an index entry's first figure moves up under its heading
@@ -328,13 +332,14 @@ def table_html(item, doc, layer: "TextLayer", problems: list[str], images: dict[
     return f'<div class="wide"><table>{rebuilt}</table></div>'
 
 
-def outline_of(pdf: Path, as_chapter: bool) -> Outline:
+def outline_of(pdf: Path, as_chapter: bool, contents: list | None = None) -> Outline:
     """From the PDF's outline, else its printed contents page. `as_chapter`: the PDF is one chapter, so its
     entries sit one level down."""
     doc = pymupdf.open(pdf)
     out = Outline()
-    toc = [(lv, t.strip()) for lv, t, _ in doc.get_toc() if t.strip()]
-    pages = [(lv, t.strip(), pg) for lv, t, pg in doc.get_toc() if t.strip()]
+    given = [tuple(e) for e in contents] if contents else doc.get_toc()
+    toc = [(lv, t.strip()) for lv, t, _ in given if t.strip()]
+    pages = [(lv, t.strip(), pg) for lv, t, pg in given if t.strip()]
     if toc:
         for lv, t in toc:
             if FURNITURE.match(t):
@@ -366,6 +371,41 @@ def outline_of(pdf: Path, as_chapter: bool) -> Outline:
         out.depth.setdefault(norm(t), indents.index(x) + 1 + as_chapter)
         out.titles.setdefault(key(t), t)
     return out
+
+
+PARA = re.compile(r"<p>(.*?)</p>", re.S)
+
+
+def drop_repeats(page_html: str) -> str:
+    """
+    A paragraph that starts by repeating the end of the one before (a page break the text layer read twice, the same
+    words in two boxes) loses the repeat, and what is left joins the paragraph before. Paragraphs only: tables are
+    checked against the page as they are.
+    """
+    out, prev = [], None  # prev: index in out of the last <p>, with its text
+    pos = 0
+    for m in PARA.finditer(page_html):
+        out.append(page_html[pos:m.start()])
+        text = m.group(1)
+        if prev is not None and page_html[prev[1]:m.start()].strip() == "":
+            before = out[prev[0]]
+            head = text[:40]
+            i = before.find(head) if len(head) >= 30 else -1
+            if i >= 0 and text.startswith(before[i:]):
+                rest = text[len(before) - i:].strip()
+                if rest:
+                    out[prev[0]] = before + " " + rest
+                pos = m.end()
+                prev = (prev[0], m.end())
+                continue
+        out.append(text)
+        out[-1] = text
+        out.insert(len(out) - 1, "<p>")
+        out.append("</p>")
+        prev = (len(out) - 2, m.end())
+        pos = m.end()
+    out.append(page_html[pos:])
+    return "".join(out)
 
 
 def figure_bytes(image: Image.Image) -> tuple[bytes, str]:
@@ -419,7 +459,7 @@ def blocks_of(doc, source: Source, pdf: Path, book: Book, images: dict[str, tupl
     or ("fig", markup, words, image name, figure number)."""
     from docling_core.types.doc.labels import DocItemLabel as L
 
-    outline = outline_of(pdf, as_chapter=bool(source.title))
+    outline = outline_of(pdf, as_chapter=bool(source.title), contents=source.contents)
     layer = TextLayer(pdf, doc)
     words_of = lambda it: clean(layer.text(it))  # noqa: E731
     caption_refs = {ref.cref for item, _ in doc.iterate_items() for ref in (getattr(item, "captions", []) or [])}
@@ -726,6 +766,8 @@ def opening(book: Book, chapters: list[Chapter]) -> str:
             where.setdefault(norm(title), (f"c{i:03d}.xhtml#{anchor}", title, level, i))
     body = [f'<div class="opening"><h1>{html.escape(book.title)}</h1>',
             f'<p class="byline">{html.escape(book.author)}</p>']
+    if book.notice:
+        body.append(f'<div class="warn notice"><p>{html.escape(book.notice)}</p></div>')
     if book.about:
         body.append(f'<p class="about">{html.escape(book.about)}</p>')
     starts = [where[norm(t)] for t in book.start_here if norm(t) in where]
@@ -765,6 +807,8 @@ def opening(book: Book, chapters: list[Chapter]) -> str:
                 entries = [(a, t) for k, (a, t, lv) in enumerate(heads)
                            if lv >= ix.level and (k + 1 == len(heads) or heads[k + 1][2] <= lv)
                            and not re.fullmatch(r"general|introduction", t, re.I)]
+                seen: set[str] = set()  # a heading the book prints twice ("SALADS" over two pages) is listed once
+                entries = [(a, t) for a, t in entries if not (norm(t) in seen or seen.add(norm(t)))]
                 if not entries:
                     continue
                 body.append(f'<h3><a href="c{i:03d}.xhtml">{html.escape(ch.title)}</a></h3><ul class="entries">')
@@ -831,12 +875,12 @@ def build(book: Book, work: Path, out: Path) -> dict:
     files: list[tuple[str, bytes, str, str]] = []  # (href, data, media type, properties)
     files.append(("cover.jpg", covers.cover_jpeg(book.title, book.author, None, "manuals", "Granger Manuals",
                                                  language=book.language), "image/jpeg", "cover-image"))
-    opens = bool(book.about or book.start_here or book.index)
+    opens = bool(book.notice or book.about or book.start_here or book.index)
     if opens:
         files.append(("text/c000.xhtml", page(book.title, book.language, opening(book, chapters)).encode(),
                       "application/xhtml+xml", ""))
     for i, ch in enumerate(chapters, 1):
-        files.append((f"text/c{i:03d}.xhtml", page(ch.title, book.language, "".join(ch.parts)).encode(),
+        files.append((f"text/c{i:03d}.xhtml", page(ch.title, book.language, drop_repeats("".join(ch.parts))).encode(),
                       "application/xhtml+xml", ""))
     colophon = (f"<h1>About this edition</h1><p>{html.escape(book.title)}, {html.escape(book.author)}.</p>"
                 f"<p>Granger made this reading edition from {html.escape(book.made_from)}. The text was reflowed "

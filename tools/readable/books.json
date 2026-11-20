@@ -1,34 +1,210 @@
 [
- {"id": "rigging",
+ {
+  "id": "rigging",
   "title": "Rigging Techniques, Procedures, and Applications",
   "author": "US Army (FM 5-125, with Change 1)",
   "language": "en",
   "rights": "A work of the US government, in the public domain.",
-  "sources": [{"pdf": "sources/fm5-125/MCRP_3-17.7J_FM5-125_ch1.pdf"}],
+  "sources": [
+   {
+    "pdf": "sources/fm5-125/MCRP_3-17.7J_FM5-125_ch1.pdf"
+   }
+  ],
   "made_from": "the Army field manual FM 5-125 (3 October 1995, with Change 1 of 23 February 2001), as published by the US Marine Corps as MCRP 3-17.7J at marines.mil. Chapter 2 is also in the Kiwix pack A Library of Knots",
   "about": "The Army's manual on rope and rigging. It covers choosing and caring for rope, and tying knots, hitches, lashings and splices. It also covers rigging hoists, anchors, guy lines and scaffolds to lift, pull and hold loads. Find the knot you need in the pictures below, or start with rope itself.",
-  "start_here": ["Section I. Fiber Rope", "Care of Fiber Rope", "Section I. Knots, Hitches, and Lashings"],
-  "index": {"title": "Knots, hitches, lashings and splices", "level": 4, "within": ["Chapter 2"],
-            "pictures": true, "group_level": 3},
-  "picture_first": true},
- {"id": "canning",
+  "start_here": [
+   "Section I. Fiber Rope",
+   "Care of Fiber Rope",
+   "Section I. Knots, Hitches, and Lashings"
+  ],
+  "index": {
+   "title": "Knots, hitches, lashings and splices",
+   "level": 4,
+   "within": [
+    "Chapter 2"
+   ],
+   "pictures": true,
+   "group_level": 3
+  },
+  "picture_first": true
+ },
+ {
+  "id": "canning",
   "title": "Complete Guide to Home Canning",
   "author": "US Department of Agriculture (Agriculture Information Bulletin 539, revised 2015)",
   "language": "en",
   "rights": "A work of the US government, in the public domain.",
   "sources": [
-   {"pdf": "sources/usda/INTRO_HomeCanrev0715.pdf", "title": "Introduction"},
-   {"pdf": "sources/usda/GUIDE01_HomeCan_rev0715.pdf", "title": "Guide 1. Principles of Home Canning"},
-   {"pdf": "sources/usda/GUIDE02_HomeCan_rev0715.pdf", "title": "Guide 2. Fruit and Fruit Products"},
-   {"pdf": "sources/usda/GUIDE03_HomeCan_rev0715.pdf", "title": "Guide 3. Tomatoes and Tomato Products"},
-   {"pdf": "sources/usda/GUIDE04_HomeCan_rev0715.pdf", "title": "Guide 4. Vegetables and Vegetable Products"},
-   {"pdf": "sources/usda/GUIDE05_HomeCan_rev0715.pdf", "title": "Guide 5. Poultry, Red Meats, and Seafoods"},
-   {"pdf": "sources/usda/GUIDE06_HomeCan_rev0715.pdf", "title": "Guide 6. Fermented Foods and Pickled Vegetables"},
-   {"pdf": "sources/usda/GUIDE07_HomeCan_rev0715.pdf", "title": "Guide 7. Jams and Jellies"}],
+   {
+    "pdf": "sources/usda/INTRO_HomeCanrev0715.pdf",
+    "title": "Introduction"
+   },
+   {
+    "pdf": "sources/usda/GUIDE01_HomeCan_rev0715.pdf",
+    "title": "Guide 1. Principles of Home Canning"
+   },
+   {
+    "pdf": "sources/usda/GUIDE02_HomeCan_rev0715.pdf",
+    "title": "Guide 2. Fruit and Fruit Products"
+   },
+   {
+    "pdf": "sources/usda/GUIDE03_HomeCan_rev0715.pdf",
+    "title": "Guide 3. Tomatoes and Tomato Products"
+   },
+   {
+    "pdf": "sources/usda/GUIDE04_HomeCan_rev0715.pdf",
+    "title": "Guide 4. Vegetables and Vegetable Products"
+   },
+   {
+    "pdf": "sources/usda/GUIDE05_HomeCan_rev0715.pdf",
+    "title": "Guide 5. Poultry, Red Meats, and Seafoods"
+   },
+   {
+    "pdf": "sources/usda/GUIDE06_HomeCan_rev0715.pdf",
+    "title": "Guide 6. Fermented Foods and Pickled Vegetables"
+   },
+   {
+    "pdf": "sources/usda/GUIDE07_HomeCan_rev0715.pdf",
+    "title": "Guide 7. Jams and Jellies"
+   }
+  ],
   "made_from": "the eight PDFs of the USDA Complete Guide to Home Canning (2015) published by the National Center for Home Food Preservation at nchfp.uga.edu. Guide 6 is also in the Kiwix pack Food for Preppers",
   "about": "The US Department of Agriculture's tested guide to canning food at home. It begins with what keeps canned food safe, then gives recipes for fruit, tomatoes, vegetables, meat and seafood, pickles, and jams and jellies. Follow a recipe's method and times exactly: they were tested to prevent botulism.",
-  "start_here": ["For Safety’s Sake", "Determining Your Altitude Above Sea Level", "Ensuring safe canned foods",
-                 "Food acidity and processing methods", "Selecting the correct processing time",
-                 "Identifying and handling spoiled canned food"],
-  "index": {"title": "Recipes", "level": 2, "within": ["Guide 2", "Guide 3", "Guide 4", "Guide 5", "Guide 6", "Guide 7"]}}
+  "start_here": [
+   "For Safety’s Sake",
+   "Determining Your Altitude Above Sea Level",
+   "Ensuring safe canned foods",
+   "Food acidity and processing methods",
+   "Selecting the correct processing time",
+   "Identifying and handling spoiled canned food"
+  ],
+  "index": {
+   "title": "Recipes",
+   "level": 2,
+   "within": [
+    "Guide 2",
+    "Guide 3",
+    "Guide 4",
+    "Guide 5",
+    "Guide 6",
+    "Guide 7"
+   ]
+  }
+ },
+ {
+  "id": "old-virginia",
+  "title": "Famous Recipes from Old Virginia",
+  "author": "The Ginter Park Woman's Club, Richmond, Virginia (1935)",
+  "language": "en",
+  "rights": "Published in 1935 with no copyright notice: in the public domain in the United States.",
+  "sources": [
+   {
+    "pdf": "pdfs/zimgit-food-preparation_en/files__Food Preparation (6).pdf",
+    "probe": "old-virginia/0",
+    "contents": [
+     [
+      1,
+      "Recipes Popular in Early Virginia",
+      13
+     ],
+     [
+      1,
+      "Recipes That Were Popular When the Club Was Founded",
+      17
+     ],
+     [
+      1,
+      "Favorite Recipes from Interesting People",
+      26
+     ],
+     [
+      1,
+      "Recipes Popular in Virginia Today",
+      62
+     ],
+     [
+      2,
+      "Needful Knowledge",
+      62
+     ],
+     [
+      2,
+      "Household Hints",
+      65
+     ],
+     [
+      2,
+      "Beverages",
+      66
+     ],
+     [
+      2,
+      "Soup and Fish",
+      73
+     ],
+     [
+      2,
+      "Poultry and Meats",
+      87
+     ],
+     [
+      2,
+      "Vegetables",
+      108
+     ],
+     [
+      2,
+      "Breads",
+      121
+     ],
+     [
+      2,
+      "Salads",
+      137
+     ],
+     [
+      2,
+      "Desserts",
+      154
+     ],
+     [
+      2,
+      "Cakes",
+      181
+     ],
+     [
+      2,
+      "Cookies",
+      186
+     ],
+     [
+      2,
+      "Jams, Jellies, Pickles and Preserves",
+      206
+     ],
+     [
+      2,
+      "Miscellaneous",
+      213
+     ]
+    ]
+   }
+  ],
+  "made_from": "the scan of the 1935 cookbook in the Kiwix pack Food for Preppers",
+  "notice": "This book was published in 1935, and it includes racist caricatures in its dialect verse, sayings and drawings. They were wrong then and are wrong now. Granger presents the book as it was printed, because cutting them would pretend this history did not happen. We don't condone it, and we don't censor it.",
+  "about": "A Richmond women's club cookbook of 1935: recipes popular in early Virginia, then the club's own, from drinks and soups to breads, preserves, cakes and candies. Start with a section below, or use the contents.",
+  "start_here": [
+   "Recipes Popular in Early Virginia",
+   "Recipes That Were Popular When the Club Was Founded",
+   "Favorite Recipes from Interesting People",
+   "Recipes Popular in Virginia Today"
+  ],
+  "index": {
+   "title": "Sections",
+   "level": 2,
+   "within": [
+    "Recipes Popular in Virginia Today"
+   ]
+  }
+ }
 ]
