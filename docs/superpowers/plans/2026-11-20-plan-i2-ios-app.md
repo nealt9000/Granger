@@ -48,13 +48,14 @@
 
 **Files:** `ios/Granger/project.yml`, `ios/Granger/Config.xcconfig`, `ios/Granger/Sources/App/…`, `ios/Granger/Resources/` (fonts, `Assets.xcassets` with AppIcon and colours, `Localizable.xcstrings`); remove `ios/CoreSmoke`; `ios/README.md`.
 
-- [ ] XcodeGen project: target `Granger`, bundle `$(GRANGER_BUNDLE_PREFIX)` defaulting to `app.granger`, iOS 26, Swift 6, arm64-only Simulator (as CoreSmoke), `GrangerCoreKit` from `ios/GrangerCore`, display name "Granger", version from `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION`.
-- [ ] Fonts: Spectral (regular, medium, semibold, italic) from `app/src/main/res/font`, registered with `UIAppFonts`. Titles in Spectral; body text and lists in the system font, so Dynamic Type and VoiceOver behave (spec §5).
-- [ ] Theme: Field (light) and Night (dark) as colour assets from `GrangerTheme.kt`'s values (Enamel, Paper, Ink, Lantern, Night, Gunmetal…), plus a `Theme` enum (System, Field, Night) applied with `preferredColorScheme`. A unit test reads `GrangerTheme.kt` and checks each asset's hex matches, so the two phones can't drift apart unnoticed.
-- [ ] App icon (builder's call 7): render `ic_launcher_foreground.xml` (Android vector) to a 1024 px PNG on the Field background with the same inset as the adaptive icon; show Neal the PNG before committing it.
-- [ ] `GrangerApp`: `GrangerCoreKit.start()`, a `TabView` with Home and Search (builder's call 1), each in its own `NavigationStack`; an `AppModel` holding the core's client and archives (one `OnlineWikipediaArchive` per Wikipedia language), the settings, and the recent list.
-- [ ] Remove `ios/CoreSmoke` (I1's smoke app); update `ios/README.md` to open `ios/Granger/Granger.xcodeproj`.
-- [ ] Builds and launches on the iOS 27.1 Simulator in Field and Night. Commit.
+- [x] XcodeGen project: target `Granger`, bundle `$(GRANGER_BUNDLE_PREFIX)` defaulting to `app.granger`, iOS 26, Swift 6, arm64-only Simulator (as CoreSmoke), `GrangerCoreKit` from `ios/GrangerCore`, display name "Granger", version from `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION`.
+- [x] Fonts: Spectral (regular, medium, semibold, italic) from `app/src/main/res/font`, registered with `UIAppFonts`. Titles in Spectral; body text and lists in the system font, so Dynamic Type and VoiceOver behave (spec §5).
+- [x] Theme: Field (light) and Night (dark) as colour assets from `GrangerTheme.kt`'s values (Enamel, Paper, Ink, Lantern, Night, Gunmetal…), plus a `Theme` enum (System, Field, Night) applied with `preferredColorScheme`. A unit test reads `GrangerTheme.kt` and checks each asset's hex matches, so the two phones can't drift apart unnoticed.
+- [x] App icon (builder's call 7): render `ic_launcher_foreground.xml` (Android vector) to a 1024 px PNG on the Field background with the same inset as the adaptive icon; show Neal the PNG before committing it.
+- [x] `GrangerApp`: `GrangerCoreKit.start()`, a `TabView` with Home and Search (builder's call 1), each in its own `NavigationStack`; an `AppModel` holding the core's client and archives (one `OnlineWikipediaArchive` per Wikipedia language), the settings, and the recent list.
+- [x] Remove `ios/CoreSmoke` (I1's smoke app); update `ios/README.md` to open `ios/Granger/Granger.xcodeproj`.
+- [x] Builds and launches on the iOS 27.1 Simulator in Field and Night. Commit.
+- *Done 2026-11-20: `ios/Granger` (XcodeGen; app, unit-test and UI-test targets; arm64-only Simulator), Spectral registered through an XcodeGen-written `Info.plist` (no `INFOPLIST_KEY_` exists for fonts), `Palette.swift` generated from `GrangerTheme.kt` by `tools/ios/make_palette.py` (36 scheme colours + 6 extras; `--check` in place of a Swift test reading Kotlin), AppIcon from `tools/ios/make_appicon.py` (granger-mark.svg's three layers in the launcher's colours on enamel, rim at 58/72 of the side, alpha flattened), `AppSettings`, `Core` (client + one archive per language, `background {}` for blocking calls), tabs Home and Search. Swift 6 toolchain in language mode 5 (Kotlin types aren't Sendable). CoreSmoke removed. Builds against the published GrangerCore; `PaletteTests` and the UI smoke test pass on the iPhone 17 Simulator, Field and Night checked by screenshot.*
 
 ### Task 2: The shared page pieces (the only task touching Android)
 

@@ -1,4 +1,0 @@
-// Defaults; ios/Local.xcconfig (git-ignored, see Local.xcconfig.example) sets your team and bundle prefix.
-GRANGER_BUNDLE_PREFIX = app.granger
-CODE_SIGN_STYLE = Automatic
-#include? "../Local.xcconfig"

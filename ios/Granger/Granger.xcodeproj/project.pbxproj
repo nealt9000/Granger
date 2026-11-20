@@ -1,0 +1,654 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		03D55B9BC49ADC8D2CA8633C /* PaletteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B44830ECED20666BE9CE2F47 /* PaletteTests.swift */; };
+		066796D0E486FD8180F2CE11 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46D66C3FE2FAC95BCFDB9655 /* HomeScreen.swift */; };
+		1686027DD9EB27E19DDF74D4 /* spectral_regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63249671AC1CC4288F670ABF /* spectral_regular.ttf */; };
+		2185F9611730D67D6F637BA0 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B47F986BFCA85901970F72F /* AppSettings.swift */; };
+		3178201C506534DA959D94C0 /* spectral_italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5D1EA7F9943A3EBAA55DB8EC /* spectral_italic.ttf */; };
+		3A14C67A4ADC44BAECECC538 /* Core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EDFCCCB9DFC1E76B1696659 /* Core.swift */; };
+		5D41AC1AC37D9BD306DE6818 /* GrangerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CC01381BEC958CC5134EC02 /* GrangerApp.swift */; };
+		7EA68110BD41341E41AC4485 /* spectral_medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5BB0D5B0B1CFDF9D94B1CDA8 /* spectral_medium.ttf */; };
+		83E90F2F900D9DF69287B976 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D5F373DED5327DC509AEA8 /* Theme.swift */; };
+		986CD1464DCB7DD384D06C83 /* SearchScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B58EB0526BF3953E06E97BB /* SearchScreen.swift */; };
+		B9F1FDCE26442AE3F6A3645E /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4E0D95A9828108F9ABF60D /* SmokeTests.swift */; };
+		BE470A0D6EB34BD5D96BF8D6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6654812DC545BDF69A9B7931 /* Assets.xcassets */; };
+		C58825C9A4EB3A96EEC0B6D9 /* spectral_semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5E3500F27AA34AA7774ECA00 /* spectral_semibold.ttf */; };
+		CC6D823FAB90DA5CEE291CBA /* GrangerCoreKit in Frameworks */ = {isa = PBXBuildFile; productRef = 681EB1E1CC7FEB0AA3916B17 /* GrangerCoreKit */; };
+		FACF839114C639E9B056C5D7 /* Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D2722559AB140D5CDEAF7A /* Palette.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		3F1A2CABAA1765D368C7EBF0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8CFA5DFC8EB0E370FC06ACCA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 48A4F35F7F83CB45170EA029;
+			remoteInfo = Granger;
+		};
+		5BE20775B1BD4AE80F2B4400 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8CFA5DFC8EB0E370FC06ACCA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 48A4F35F7F83CB45170EA029;
+			remoteInfo = Granger;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		1BA2587DFAACB90883863228 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		1EDFCCCB9DFC1E76B1696659 /* Core.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core.swift; sourceTree = "<group>"; };
+		2B47F986BFCA85901970F72F /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		46D66C3FE2FAC95BCFDB9655 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
+		5BB0D5B0B1CFDF9D94B1CDA8 /* spectral_medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = spectral_medium.ttf; sourceTree = "<group>"; };
+		5D1EA7F9943A3EBAA55DB8EC /* spectral_italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = spectral_italic.ttf; sourceTree = "<group>"; };
+		5E3500F27AA34AA7774ECA00 /* spectral_semibold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = spectral_semibold.ttf; sourceTree = "<group>"; };
+		63249671AC1CC4288F670ABF /* spectral_regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = spectral_regular.ttf; sourceTree = "<group>"; };
+		63D5F373DED5327DC509AEA8 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		6654812DC545BDF69A9B7931 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		6B58EB0526BF3953E06E97BB /* SearchScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchScreen.swift; sourceTree = "<group>"; };
+		7CC01381BEC958CC5134EC02 /* GrangerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrangerApp.swift; sourceTree = "<group>"; };
+		85551793AE689984ABF44FAE /* Granger.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Granger.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B44830ECED20666BE9CE2F47 /* PaletteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaletteTests.swift; sourceTree = "<group>"; };
+		C4D2722559AB140D5CDEAF7A /* Palette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Palette.swift; sourceTree = "<group>"; };
+		C7332503206668946FE9E710 /* GrangerCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = GrangerCore; path = ../GrangerCore; sourceTree = SOURCE_ROOT; };
+		CB232453FDA28614FBE166F0 /* GrangerTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = GrangerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DD4E0D95A9828108F9ABF60D /* SmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeTests.swift; sourceTree = "<group>"; };
+		E292BFB40CBDEA8F0A9C1151 /* GrangerUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = GrangerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		08CF3EFF0F46D38DEBCAD4F3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CC6D823FAB90DA5CEE291CBA /* GrangerCoreKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0E6B494E573153560DA0D469 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				B44830ECED20666BE9CE2F47 /* PaletteTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		1287FE8C27BD3B9A3A24DE3A = {
+			isa = PBXGroup;
+			children = (
+				5E328B08356B6CBB6540C53C /* Fonts */,
+				C725A3A5B6031CCDC08975A9 /* Granger */,
+				C530C58EAB06D02B98C77A48 /* Packages */,
+				54C6E4E175463E735044740A /* Resources */,
+				B64E022698104377BB5F90A8 /* Sources */,
+				0E6B494E573153560DA0D469 /* Tests */,
+				AB4C0ACE382625949B448E6F /* UITests */,
+				A42055D4DF7B61768499981C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		527AC6B7376A41B115A42D21 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				2B47F986BFCA85901970F72F /* AppSettings.swift */,
+				1EDFCCCB9DFC1E76B1696659 /* Core.swift */,
+				7CC01381BEC958CC5134EC02 /* GrangerApp.swift */,
+				C4D2722559AB140D5CDEAF7A /* Palette.swift */,
+				63D5F373DED5327DC509AEA8 /* Theme.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		54C6E4E175463E735044740A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				6654812DC545BDF69A9B7931 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		5E328B08356B6CBB6540C53C /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				5D1EA7F9943A3EBAA55DB8EC /* spectral_italic.ttf */,
+				5BB0D5B0B1CFDF9D94B1CDA8 /* spectral_medium.ttf */,
+				63249671AC1CC4288F670ABF /* spectral_regular.ttf */,
+				5E3500F27AA34AA7774ECA00 /* spectral_semibold.ttf */,
+			);
+			name = Fonts;
+			path = Resources/Fonts;
+			sourceTree = "<group>";
+		};
+		A42055D4DF7B61768499981C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				85551793AE689984ABF44FAE /* Granger.app */,
+				CB232453FDA28614FBE166F0 /* GrangerTests.xctest */,
+				E292BFB40CBDEA8F0A9C1151 /* GrangerUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		AB4C0ACE382625949B448E6F /* UITests */ = {
+			isa = PBXGroup;
+			children = (
+				DD4E0D95A9828108F9ABF60D /* SmokeTests.swift */,
+			);
+			path = UITests;
+			sourceTree = "<group>";
+		};
+		B64E022698104377BB5F90A8 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				527AC6B7376A41B115A42D21 /* App */,
+				BD7B291EE96597757E5EF6A4 /* Home */,
+				DCC7CCC55520AE82044197B5 /* Search */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		BD7B291EE96597757E5EF6A4 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				46D66C3FE2FAC95BCFDB9655 /* HomeScreen.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		C530C58EAB06D02B98C77A48 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				C7332503206668946FE9E710 /* GrangerCore */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		C725A3A5B6031CCDC08975A9 /* Granger */ = {
+			isa = PBXGroup;
+			children = (
+				1BA2587DFAACB90883863228 /* Config.xcconfig */,
+			);
+			name = Granger;
+			path = .;
+			sourceTree = "<group>";
+		};
+		DCC7CCC55520AE82044197B5 /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				6B58EB0526BF3953E06E97BB /* SearchScreen.swift */,
+			);
+			path = Search;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3C8584C282EB9898AEB4FEE6 /* GrangerUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 38F5A54A260F2355548E3CCC /* Build configuration list for PBXNativeTarget "GrangerUITests" */;
+			buildPhases = (
+				792AE5CF321C2E735D99BB36 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CAA04A522AADE48EF655A0CB /* PBXTargetDependency */,
+			);
+			name = GrangerUITests;
+			packageProductDependencies = (
+			);
+			productName = GrangerUITests;
+			productReference = E292BFB40CBDEA8F0A9C1151 /* GrangerUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		48A4F35F7F83CB45170EA029 /* Granger */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E07F53F207290F94AE46CD60 /* Build configuration list for PBXNativeTarget "Granger" */;
+			buildPhases = (
+				CDC97CD2DD2DA0DBEAEB5951 /* Sources */,
+				F2C6F0226C6D2EC33D6FFBC5 /* Resources */,
+				08CF3EFF0F46D38DEBCAD4F3 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Granger;
+			packageProductDependencies = (
+				681EB1E1CC7FEB0AA3916B17 /* GrangerCoreKit */,
+			);
+			productName = Granger;
+			productReference = 85551793AE689984ABF44FAE /* Granger.app */;
+			productType = "com.apple.product-type.application";
+		};
+		61EB2BF74ED691C3544A85DE /* GrangerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 38CA9D4E2B34B047150610F0 /* Build configuration list for PBXNativeTarget "GrangerTests" */;
+			buildPhases = (
+				C1565EABB3125AB8BD0C3290 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B7B4F7C9F10B1386EE568C6E /* PBXTargetDependency */,
+			);
+			name = GrangerTests;
+			packageProductDependencies = (
+			);
+			productName = GrangerTests;
+			productReference = CB232453FDA28614FBE166F0 /* GrangerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		8CFA5DFC8EB0E370FC06ACCA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					3C8584C282EB9898AEB4FEE6 = {
+						ProvisioningStyle = Automatic;
+						TestTargetID = 48A4F35F7F83CB45170EA029;
+					};
+					48A4F35F7F83CB45170EA029 = {
+						ProvisioningStyle = Automatic;
+					};
+					61EB2BF74ED691C3544A85DE = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = BA60F813788D8020D06FFAE7 /* Build configuration list for PBXProject "Granger" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 1287FE8C27BD3B9A3A24DE3A;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				4F2DDEE3DC987F7C521F337E /* XCLocalSwiftPackageReference "../GrangerCore" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = A42055D4DF7B61768499981C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				48A4F35F7F83CB45170EA029 /* Granger */,
+				61EB2BF74ED691C3544A85DE /* GrangerTests */,
+				3C8584C282EB9898AEB4FEE6 /* GrangerUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F2C6F0226C6D2EC33D6FFBC5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BE470A0D6EB34BD5D96BF8D6 /* Assets.xcassets in Resources */,
+				3178201C506534DA959D94C0 /* spectral_italic.ttf in Resources */,
+				7EA68110BD41341E41AC4485 /* spectral_medium.ttf in Resources */,
+				1686027DD9EB27E19DDF74D4 /* spectral_regular.ttf in Resources */,
+				C58825C9A4EB3A96EEC0B6D9 /* spectral_semibold.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		792AE5CF321C2E735D99BB36 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B9F1FDCE26442AE3F6A3645E /* SmokeTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1565EABB3125AB8BD0C3290 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				03D55B9BC49ADC8D2CA8633C /* PaletteTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CDC97CD2DD2DA0DBEAEB5951 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2185F9611730D67D6F637BA0 /* AppSettings.swift in Sources */,
+				3A14C67A4ADC44BAECECC538 /* Core.swift in Sources */,
+				5D41AC1AC37D9BD306DE6818 /* GrangerApp.swift in Sources */,
+				066796D0E486FD8180F2CE11 /* HomeScreen.swift in Sources */,
+				FACF839114C639E9B056C5D7 /* Palette.swift in Sources */,
+				986CD1464DCB7DD384D06C83 /* SearchScreen.swift in Sources */,
+				83E90F2F900D9DF69287B976 /* Theme.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B7B4F7C9F10B1386EE568C6E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 48A4F35F7F83CB45170EA029 /* Granger */;
+			targetProxy = 5BE20775B1BD4AE80F2B4400 /* PBXContainerItemProxy */;
+		};
+		CAA04A522AADE48EF655A0CB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 48A4F35F7F83CB45170EA029 /* Granger */;
+			targetProxy = 3F1A2CABAA1765D368C7EBF0 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		043171BE5C410D176945C90D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(GRANGER_BUNDLE_PREFIX).tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Granger.app/Granger";
+			};
+			name = Release;
+		};
+		30A921F40CD764A37C27B65C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(GRANGER_BUNDLE_PREFIX).uitests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Granger;
+			};
+			name = Debug;
+		};
+		48ACE14C169AF93EE7D3491E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(GRANGER_BUNDLE_PREFIX).uitests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Granger;
+			};
+			name = Release;
+		};
+		56B3209C57C479EF8C2FB605 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(GRANGER_BUNDLE_PREFIX).tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Granger.app/Granger";
+			};
+			name = Debug;
+		};
+		736F9968D7FC96C5F3E48ED6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1BA2587DFAACB90883863228 /* Config.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		89BC728D5AACBE8D5974DB8D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1BA2587DFAACB90883863228 /* Config.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		97404B303ED126708EF0DC21 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Granger;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(GRANGER_BUNDLE_PREFIX)";
+				PRODUCT_NAME = Granger;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		9921C9848A50EB9B38DE0801 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Granger;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(GRANGER_BUNDLE_PREFIX)";
+				PRODUCT_NAME = Granger;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		38CA9D4E2B34B047150610F0 /* Build configuration list for PBXNativeTarget "GrangerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				56B3209C57C479EF8C2FB605 /* Debug */,
+				043171BE5C410D176945C90D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		38F5A54A260F2355548E3CCC /* Build configuration list for PBXNativeTarget "GrangerUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				30A921F40CD764A37C27B65C /* Debug */,
+				48ACE14C169AF93EE7D3491E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BA60F813788D8020D06FFAE7 /* Build configuration list for PBXProject "Granger" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				89BC728D5AACBE8D5974DB8D /* Debug */,
+				736F9968D7FC96C5F3E48ED6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E07F53F207290F94AE46CD60 /* Build configuration list for PBXNativeTarget "Granger" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				97404B303ED126708EF0DC21 /* Debug */,
+				9921C9848A50EB9B38DE0801 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		4F2DDEE3DC987F7C521F337E /* XCLocalSwiftPackageReference "../GrangerCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../GrangerCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		681EB1E1CC7FEB0AA3916B17 /* GrangerCoreKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = GrangerCoreKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 8CFA5DFC8EB0E370FC06ACCA /* Project object */;
+}

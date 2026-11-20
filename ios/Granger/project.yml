@@ -1,0 +1,79 @@
+# Granger for iPhone (spec docs/superpowers/specs/2026-11-20-iphone-design.md). Regenerate with `xcodegen` in this
+# folder after changing this file; the generated project is committed so a clone needs only Xcode.
+name: Granger
+options:
+  deploymentTarget: { iOS: "26.0" }
+  bundleIdPrefix: app.granger
+configFiles:
+  Debug: Config.xcconfig
+  Release: Config.xcconfig
+packages:
+  GrangerCore:
+    path: ../GrangerCore
+settings:
+  base:
+    # The Swift 6 toolchain in language mode 5: Kotlin's exported types aren't Sendable.
+    SWIFT_VERSION: "5.0"
+    # GrangerCore ships arm64 slices only (Apple-silicon Macs and iPhones).
+    "EXCLUDED_ARCHS[sdk=iphonesimulator*]": x86_64
+targets:
+  Granger:
+    type: application
+    platform: iOS
+    sources:
+      - Sources
+      - path: Resources
+        excludes: ["Fonts"]
+      - path: Resources/Fonts
+        buildPhase: resources
+    dependencies:
+      - package: GrangerCore
+        product: GrangerCoreKit
+    info:
+      path: Info.plist
+      properties:
+        # Xcode has no generated-plist key for fonts; the rest of the plist is generated from INFOPLIST_KEY_*.
+        UIAppFonts: [spectral_regular.ttf, spectral_medium.ttf, spectral_semibold.ttf, spectral_italic.ttf]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(GRANGER_BUNDLE_PREFIX)
+        PRODUCT_NAME: Granger
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Granger
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        MARKETING_VERSION: "0.1"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1"
+  GrangerTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [Tests]
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: $(GRANGER_BUNDLE_PREFIX).tests
+    dependencies:
+      - target: Granger
+  GrangerUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [UITests]
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: $(GRANGER_BUNDLE_PREFIX).uitests
+        TEST_TARGET_NAME: Granger
+    dependencies:
+      - target: Granger
+schemes:
+  Granger:
+    build:
+      targets:
+        Granger: all
+        GrangerTests: [test]
+        GrangerUITests: [test]
+    test:
+      targets: [GrangerTests, GrangerUITests]
