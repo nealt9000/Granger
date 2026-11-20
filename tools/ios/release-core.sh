@@ -11,8 +11,12 @@ ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 export JAVA_HOME
 PUBLISH=0
 [ "${1:-}" = "--publish" ] && PUBLISH=1
-TAG="ios-core-$(date +%Y-%m-%d)"
 REPO=$(cd "$ROOT" && gh repo view --json nameWithOwner -q .nameWithOwner)
+# ios-core-<date>, or -2, -3… when a release already went out that day.
+BASE="ios-core-$(date +%Y-%m-%d)"
+TAG=$BASE
+N=1
+while (cd "$ROOT" && gh release view "$TAG" >/dev/null 2>&1); do N=$((N + 1)); TAG="$BASE-$N"; done
 OUT=$(mktemp -d)
 
 (cd "$ROOT" && ./gradlew -q :shared:assembleGrangerCoreReleaseXCFramework)

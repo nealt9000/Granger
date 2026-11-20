@@ -6,8 +6,8 @@ import Foundation
 import PackageDescription
 
 // Written by tools/ios/release-core.sh; empty until the first release.
-let releaseURL = "https://github.com/nealt9000/Granger/releases/download/ios-core-2026-11-20/GrangerCore.xcframework.zip"
-let releaseChecksum = "c9c8b87e4ccea995cbbc3598c0a6d6b1bd589613ce1bdbda0a9cbde59889123f"
+let releaseURL = "https://github.com/nealt9000/Granger/releases/download/ios-core-2026-11-20-2/GrangerCore.xcframework.zip"
+let releaseChecksum = "d37948a7b587895990f0bcc20b6531d142af46f529a0d121d2581f6279dadc08"
 
 let useLocal = ProcessInfo.processInfo.environment["GRANGER_CORE_LOCAL"] == "1" || releaseURL.isEmpty
 
