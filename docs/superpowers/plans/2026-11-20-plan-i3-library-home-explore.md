@@ -22,7 +22,7 @@
 - Standing OK: merge and push each green plan (noreply check first), and publish a GrangerCore release whenever the core changes.
 - I2's interim choices end here: Wander replaces the featured-only Home, and Related appears, filtered by the index's adult flags (I2 builder's calls 2 and 3).
 
-## Builder's calls in this plan (for Neal's review)
+## Builder's calls in this plan (all eight OK'd by Neal, 2026-11-20)
 
 1. **Room KMP, not a second store on the iPhone.** One schema, one migration chain, and the DAOs' tests run once. The alternative was GRDB or SwiftData on the iPhone with its own schema, which means two stores to keep in step for every Android change.
 2. **Android keeps its own SQLite through Room's framework driver.** The phone's database file, its SQLite version and its FTS4 behaviour stay exactly as today. Only the iPhone bundles SQLite.
