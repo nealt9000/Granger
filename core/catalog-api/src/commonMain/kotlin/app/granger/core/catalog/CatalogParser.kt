@@ -7,7 +7,8 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.intOrNull
-import java.time.Instant
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 enum class CatalogError { NETWORK, BAD_SIGNATURE, UNSUPPORTED_FORMAT, MALFORMED, OLDER_THAN_CACHED }
 
@@ -38,7 +39,7 @@ object CatalogParser {
             ?: return ParseResult.Invalid(CatalogError.MALFORMED)
         if (version != FORMAT_VERSION) return ParseResult.Invalid(CatalogError.UNSUPPORTED_FORMAT)
         val generatedAt = (root["generatedAt"] as? JsonPrimitive)?.contentOrNull
-        if (generatedAt == null || runCatching { Instant.parse(generatedAt) }.isFailure) {
+        if (generatedAt == null || runCatching { @OptIn(ExperimentalTime::class) Instant.parse(generatedAt) }.isFailure) {
             return ParseResult.Invalid(CatalogError.MALFORMED)
         }
         val packs = entries<PackEntry>(root, "packs", retryWithout = listOf(VECTORS, TIME_INDEX, SIDECARS, RECORDS))

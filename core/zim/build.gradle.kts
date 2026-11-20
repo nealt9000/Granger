@@ -19,6 +19,7 @@ android {
 }
 
 dependencies {
+    api(project(":core:zim-api"))
     implementation(libs.libkiwix)
 
     testImplementation(libs.junit)

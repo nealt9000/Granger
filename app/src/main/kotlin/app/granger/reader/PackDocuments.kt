@@ -1,5 +1,6 @@
 package app.granger.reader
 
+import app.granger.core.zim.copyTo
 import androidx.annotation.StringRes
 import app.granger.R
 import app.granger.core.library.Book

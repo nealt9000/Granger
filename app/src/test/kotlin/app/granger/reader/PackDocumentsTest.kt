@@ -1,5 +1,6 @@
 package app.granger.reader
 
+import app.granger.core.zim.FileZimArchive
 import app.granger.FakeBookshelf
 import app.granger.core.library.BookFormat
 import app.granger.core.library.BookOrigin
@@ -23,7 +24,7 @@ class PackDocumentsTest {
      * One PDF entry, [pdfPath]; [copies] counts copies out, and [failCopy] makes them fail. [database], when set, is
      * the pack's `database.js` (a nautilus pack's list of documents), and [databaseReads] counts its reads.
      */
-    private class PdfPack(private val pdfPath: String = PATH) : ZimArchive {
+    private class PdfPack(private val pdfPath: String = PATH) : FileZimArchive {
         var copies = 0
         var failCopy = false
         var database: String? = null

@@ -1,7 +1,5 @@
 package app.granger.core.zim
 
-import java.io.ByteArrayOutputStream
-
 /** A reader URL split into its pack and the ZIM entry path inside it. `fragment` is percent-decoded (it is encoded in [forEntry]). */
 data class ZimUrl(val packId: String, val path: String, val fragment: String? = null)
 
@@ -31,7 +29,7 @@ object ZimUrls {
     }
 
     private fun encode(segment: String): String = buildString {
-        for (byte in segment.toByteArray(Charsets.UTF_8)) {
+        for (byte in segment.encodeToByteArray()) {
             val b = byte.toInt() and 0xFF
             if (b < 0x80 && UNRESERVED.indexOf(b.toChar()) >= 0) {
                 append(b.toChar())
@@ -43,22 +41,23 @@ object ZimUrls {
 
     private fun decode(s: String): String {
         if ('%' !in s) return s
-        val out = ByteArrayOutputStream()
+        val out = ArrayList<Byte>(s.length)
         var i = 0
         while (i < s.length) {
             if (s[i] == '%' && i + 2 < s.length) {
-                val hi = Character.digit(s[i + 1], 16)
-                val lo = Character.digit(s[i + 2], 16)
+                val hi = s[i + 1].digitToIntOrNull(16) ?: -1
+                val lo = s[i + 2].digitToIntOrNull(16) ?: -1
                 if (hi >= 0 && lo >= 0) {
-                    out.write(hi * 16 + lo)
+                    out += (hi * 16 + lo).toByte()
                     i += 3
                     continue
                 }
             }
-            val codePoint = s.codePointAt(i)
-            out.write(String(Character.toChars(codePoint)).toByteArray(Charsets.UTF_8))
-            i += Character.charCount(codePoint)
+            // One character (a surrogate pair kept whole) as its UTF-8 bytes.
+            val n = if (s[i].isHighSurrogate() && i + 1 < s.length && s[i + 1].isLowSurrogate()) 2 else 1
+            for (b in s.substring(i, i + n).encodeToByteArray()) out += b
+            i += n
         }
-        return out.toString(Charsets.UTF_8.name())
+        return out.toByteArray().decodeToString()
     }
 }

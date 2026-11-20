@@ -16,7 +16,7 @@ import kotlin.concurrent.write
  * so native objects are never used after they are disposed. Searchers are not thread-safe, so
  * searches are serialized on [searchLock].
  */
-internal class KiwixZimArchive(private val archive: Archive, fallbackTitle: String) : ZimArchive {
+internal class KiwixZimArchive(private val archive: Archive, fallbackTitle: String) : FileZimArchive {
     private val lock = ReentrantReadWriteLock()
     private var closed = false
     private val searchLock = Any()

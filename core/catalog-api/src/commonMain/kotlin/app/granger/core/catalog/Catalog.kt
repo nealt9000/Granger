@@ -32,7 +32,7 @@ data class Catalog(
 
     /** Items by id, the first of each id winning, built once: with the sets, lists hold thousands of entries. */
     private val byId: Map<String, CatalogItem> by lazy {
-        HashMap<String, CatalogItem>().apply { items.forEach { putIfAbsent(it.id, it) } }
+        HashMap<String, CatalogItem>().apply { items.forEach { if (it.id !in this) put(it.id, it) } }
     }
 
     fun item(id: String): CatalogItem? = byId[id]

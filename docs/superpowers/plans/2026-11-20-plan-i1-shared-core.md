@@ -77,17 +77,19 @@
 
 **Files:** `core/zim/build.gradle.kts` (Android-KMP + iOS targets); `ZimArchive.kt`, `ZimUrls.kt`, `ZimResolver.kt` → `commonMain`; `KiwixZimArchive.kt`, `KiwixZimOpener.kt`, `FileRangeInputStream`, `ZimRange` → `androidMain`.
 
-- [ ] Common `ZimArchive` without `java.io` (builder's call 5): `Closeable` → `AutoCloseable` (Kotlin common), `ByteArrayOutputStream` in `ZimUrls` → a `ByteArray` builder. Add `FileZimArchive : ZimArchive` in `androidMain` with `copyTo` and `storedRange`; `KiwixZimArchive` implements it.
-- [ ] Update the `:app` callers of `copyTo` / `storedRange` (find them with grep) to check for `FileZimArchive`. The online archive never offered either, so behaviour is unchanged.
-- [ ] `ZimResolver`'s tests move to `commonTest` where they don't need libkiwix. All tests pass. Commit.
+- [x] Common `ZimArchive` without `java.io` (builder's call 5): `Closeable` → `AutoCloseable` (Kotlin common), `ByteArrayOutputStream` in `ZimUrls` → a `ByteArray` builder. Add `FileZimArchive : ZimArchive` in `androidMain` with `copyTo` and `storedRange`; `KiwixZimArchive` implements it.
+- [x] Update the `:app` callers of `copyTo` / `storedRange` (find them with grep) to check for `FileZimArchive`. The online archive never offered either, so behaviour is unchanged.
+- [x] `ZimResolver`'s tests move to `commonTest` where they don't need libkiwix. All tests pass. Commit.
+- *Done 2026-11-20, as a split rather than an in-place conversion: a new KMP module `:core:zim-api` (jvm + iOS) holds `ZimArchive`, its data types and `ZimUrls` (made common); `:core:zim` stays an Android library and re-exports it with `api(...)`, so callers and the instrumented tests are untouched. `storedRange`/`copyTo` moved to an Android `FileZimArchive` plus `ZimArchive` extensions that fall back to `read()`. JVM: zim 21 + zim-api 10 (was 31).*
 
 ### Task 5: `:core:catalog` split
 
 **Files:** `core/catalog/build.gradle.kts`; `Catalog.kt`, `CatalogParser.kt`, `Subjects.kt`, `Languages.kt` → `commonMain`; `CatalogSignature.kt` → `expect` in common with `actual`s; `CatalogRepository.kt` (OkHttp, files, `Dispatchers.IO`) → `androidMain`.
 
-- [ ] Replace `java.time` / `java.util` uses in the moved files with `kotlinx-datetime` or plain strings, whichever the code needs (look at each use; the catalog's dates are ISO strings).
-- [ ] Signature (builder's call 4): JVM/Android keeps BouncyCastle. For iOS, check the newest pure-Kotlin multiplatform Ed25519 libraries on the day (maintenance, audits, downloads); if none is clearly maintained, make `CatalogSignature` take an injected `verify(message, signature, publicKey): Boolean` on iOS, which the Swift app implements with CryptoKit `Curve25519.Signing.PublicKey.isValidSignature` in I2. Either way a common test verifies the real `catalog/catalog.json` against `catalog.json.sig` with the published key (JVM now; iOS in Task 8's link test when injected).
-- [ ] `PublishedCatalogTest` and every catalog test pass on the JVM; the parser's tests also run on `iosSimulatorArm64Test` over the real `catalog.json` (copied in as a test resource). Commit.
+- [x] Replace `java.time` / `java.util` uses in the moved files with `kotlinx-datetime` or plain strings, whichever the code needs (look at each use; the catalog's dates are ISO strings).
+- [x] Signature (builder's call 4): JVM/Android keeps BouncyCastle. For iOS, check the newest pure-Kotlin multiplatform Ed25519 libraries on the day (maintenance, audits, downloads); if none is clearly maintained, make `CatalogSignature` take an injected `verify(message, signature, publicKey): Boolean` on iOS, which the Swift app implements with CryptoKit `Curve25519.Signing.PublicKey.isValidSignature` in I2. Either way a common test verifies the real `catalog/catalog.json` against `catalog.json.sig` with the published key (JVM now; iOS in Task 8's link test when injected).
+- [x] `PublishedCatalogTest` and every catalog test pass on the JVM; the parser's tests also run on `iosSimulatorArm64Test` over the real `catalog.json` (copied in as a test resource). Commit.
+- *Done 2026-11-20, the same way: new KMP `:core:catalog-api` (model, parser, subjects, languages, signature); `:core:catalog` keeps `CatalogRepository` and re-exports it. Signature: `CatalogSignature.verifier` (BouncyCastle on the JVM; on iOS it fails closed until the app sets a CryptoKit one). `Instant` → `kotlin.time.Instant`; languages through `iso639Alpha2` (cached on the JVM). JVM: catalog-api 73 + catalog 13 (was 86); iOS Simulator: the published catalog parses, and fails closed without a verifier. Whole suite 3,833, 0 failures; debug APK builds.*
 
 ### Task 6: `:core:online`
 

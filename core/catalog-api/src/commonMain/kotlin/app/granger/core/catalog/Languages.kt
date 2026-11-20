@@ -1,23 +1,15 @@
 package app.granger.core.catalog
 
-import java.util.Locale
+import app.granger.core.text.iso639Alpha2
 
 /**
  * Language codes as the catalog writes them (Plan L3): BCP-47 primary subtags, comma-separated for a multilingual pack
  * ("en", "es", "en,es"). Older catalogs and installed packs' ZIM metadata say "eng" or "eng,spa"; [normalise] makes both
- * compare equal. Pure JVM.
+ * compare equal. Common to Android and iOS (the ISO table is the platform's, `iso639Alpha2`).
  */
 object Languages {
     /** The JVM's legacy two-letter codes, in their current form. */
     private val LEGACY = mapOf("iw" to "he", "in" to "id", "ji" to "yi")
-
-    /** ISO 639-2/3 (terminology) → ISO 639-1, from the JVM's own table. */
-    private val TWO_LETTER: Map<String, String> by lazy {
-        Locale.getISOLanguages().associate { code ->
-            @Suppress("DEPRECATION")
-            Locale(code).isO3Language to (LEGACY[code] ?: code)
-        }
-    }
 
     /**
      * [code] as BCP-47 primary subtags: "eng" → "en", "eng,spa" → "en,es", "en-US" → "en"; order kept, duplicates
@@ -33,7 +25,7 @@ object Languages {
     fun has(entryLanguage: String, code: String): Boolean = normalise(code).let { it.isNotEmpty() && it in codes(entryLanguage) }
 
     private fun one(code: String): String {
-        val primary = code.trim().substringBefore('-').substringBefore('_').lowercase(Locale.ROOT)
-        return if (primary.length == 3) TWO_LETTER[primary] ?: primary else LEGACY[primary] ?: primary
+        val primary = code.trim().substringBefore('-').substringBefore('_').lowercase()
+        return if (primary.length == 3) iso639Alpha2(primary)?.let { LEGACY[it] ?: it } ?: primary else LEGACY[primary] ?: primary
     }
 }

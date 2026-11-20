@@ -1,5 +1,6 @@
 package app.granger.core.library
 
+import app.granger.core.zim.copyTo
 import androidx.room.withTransaction
 import app.granger.core.books.EpubInspector
 import app.granger.core.books.Inspection

@@ -11,7 +11,7 @@ class FakeZimArchive(
     var random: String? = null,
     /** Entries stored uncompressed, by path: what [storedRange] gives (the entry must also be in [entries]). */
     private val stored: Map<String, ZimRange> = emptyMap(),
-) : ZimArchive {
+) : FileZimArchive {
     override fun resolvePath(path: String): String? = (redirects[path] ?: path).takeIf { it in entries }
 
     override fun storedRange(path: String): ZimRange? = resolvePath(path)?.let { stored[it] }

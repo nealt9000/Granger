@@ -15,10 +15,11 @@ android {
 
 dependencies {
     api(libs.okhttp)
-    implementation(libs.bouncycastle)
+    api(project(":core:catalog-api"))
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
 
+    testImplementation(libs.bouncycastle)
     testImplementation(libs.junit)
     testImplementation(libs.truth)
     testImplementation(libs.kotlinx.coroutines.test)
