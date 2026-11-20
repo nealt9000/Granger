@@ -41,4 +41,23 @@ final class SmokeTests: XCTestCase {
         app.navigationBars.buttons.element(boundBy: 0).tap()
         XCTAssertTrue(app.buttons["read-full"].waitForExistence(timeout: 5), "back on the topic page")
     }
+
+    /// Search online: type, see Titles and Articles, open a result's topic page, find the search under Recent.
+    func testSearchOpensATopic() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-privacySeen", "YES"]
+        app.launch()
+        app.tabBars.buttons["Search"].tap()
+        let field = app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 10))
+        field.tap()
+        field.typeText("Mount Everest")
+        XCTAssertTrue(app.staticTexts["Titles"].waitForExistence(timeout: 20), "the Titles group")
+        XCTAssertTrue(app.staticTexts["Articles"].exists, "the Articles group")
+        app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Mount Everest'")).firstMatch.tap()
+        XCTAssertTrue(app.buttons["read-full"].waitForExistence(timeout: 20), "its topic page")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        field.buttons["Clear text"].firstMatch.tap()
+        XCTAssertTrue(app.staticTexts["Recent"].waitForExistence(timeout: 5), "remembered under Recent")
+    }
 }

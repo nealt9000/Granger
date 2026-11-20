@@ -92,10 +92,11 @@
 
 **Files:** `ios/Granger/Sources/Search/SearchScreen.swift`, `SearchModel.swift`.
 
-- [ ] A search field at the top (focused when the tab opens), results as you type after a short pause: **Titles** (`WikimediaClient.titles`) and **Articles** (`pages`, with the excerpt), each showing a few with **Show all**. Android's group names and order.
-- [ ] Recent searches under an empty field (the last 10, Clear in Settings). Search follows the Wikipedia language setting.
-- [ ] Empty, offline and Local only states in Android's words. A result opens the topic page.
-- [ ] Commit.
+- [x] A search field at the top (focused when the tab opens), results as you type after a short pause: **Titles** (`WikimediaClient.titles`) and **Articles** (`pages`, with the excerpt), each showing a few with **Show all**. Android's group names and order.
+- [x] Recent searches under an empty field (the last 10, Clear in Settings). Search follows the Wikipedia language setting.
+- [x] Empty, offline and Local only states in Android's words. A result opens the topic page.
+- [x] Commit.
+- *Done 2026-11-20: iOS search field (focused on open), Titles and Articles (5 each, Show all N / Show fewer, Android's words), 300 ms pause, Recent (10), "Online results appear when you're connected." and "Nothing in your library…" states. UI test: type → both groups → open → back → Recent, passes.*
 
 ### Task 6: Home, first run and Settings
 
