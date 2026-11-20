@@ -72,19 +72,21 @@
 
 **Files:** `ios/Granger/Sources/Reader/ArticleWebView.swift`, `ZimSchemeHandler.swift`, `PageBridge.swift`.
 
-- [ ] `ZimSchemeHandler` (`WKURLSchemeHandler`, scheme `granger-zim`): parses the URL with the core's `ZimUrls`, reads the entry from the right archive off the main thread (`OnlineWikipediaArchive.read`), answers with its MIME type and bytes; `_granger/online.css` from the core's constant; anything else 404. Cancelled tasks are dropped cleanly (a fast swipe-back mustn't crash).
-- [ ] `ArticleWebView` (`UIViewRepresentable`): one `WKWebView` with the scheme handler, the shim (`window.GrangerBridge = { noteLink, toggleChrome, … }` posting to `webkit.messageHandlers.granger`) and the core's page script injected at document end; `color-scheme` follows the app's theme; text size through `-webkit-text-size-adjust` from the setting.
-- [ ] Links (Android's `linkAction` rules, same outcomes): an article link in the same wiki pushes that article's topic page; a `#fragment` scrolls; an outside link opens in `SFSafariViewController`; `mailto:`/`tel:` go to the system; `javascript:`, `file:` and anything unknown are ignored.
-- [ ] XCTest for the scheme handler's routing (page, picture, stylesheet, unknown, cancelled) with a fake archive. Commit.
+- [x] `ZimSchemeHandler` (`WKURLSchemeHandler`, scheme `granger-zim`): parses the URL with the core's `ZimUrls`, reads the entry from the right archive off the main thread (`OnlineWikipediaArchive.read`), answers with its MIME type and bytes; `_granger/online.css` from the core's constant; anything else 404. Cancelled tasks are dropped cleanly (a fast swipe-back mustn't crash).
+- [x] `ArticleWebView` (`UIViewRepresentable`): one `WKWebView` with the scheme handler, the shim (`window.GrangerBridge = { noteLink, toggleChrome, … }` posting to `webkit.messageHandlers.granger`) and the core's page script injected at document end; `color-scheme` follows the app's theme; text size through `-webkit-text-size-adjust` from the setting.
+- [x] Links (Android's `linkAction` rules, same outcomes): an article link in the same wiki pushes that article's topic page; a `#fragment` scrolls; an outside link opens in `SFSafariViewController`; `mailto:`/`tel:` go to the system; `javascript:`, `file:` and anything unknown are ignored.
+- [x] XCTest for the scheme handler's routing (page, picture, stylesheet, unknown, cancelled) with a fake archive. Commit.
+- *Done 2026-11-20: `ZimSchemeHandler` (drops answers to stopped tasks), `PageBridge` (shim + core tap script, text size via `-webkit-text-size-adjust`, scroll to anchor), `ArticleWebView`, `LinkAction` (Android's rules; `javascript:`/`file:`/other packs ignored). `ReaderHostTests` cover links and MIME with a fake parser.*
 
 ### Task 4: The reader and the topic page
 
 **Files:** `ios/Granger/Sources/Reader/ReaderScreen.swift`, `ContentsSheet.swift`, `ios/Granger/Sources/Topic/TopicScreen.swift`.
 
-- [ ] **Topic page** (in front of the article, as on Android since LL2): the lead picture (Commons thumbnail through the archive), the title in Spectral, the summary, **Read the full article**, and **Read in Español / English** when the other wiki has it (`languageLinks`). A failed load says so and offers Try again; with Local only on it says the article needs the internet (Android's words).
-- [ ] **Reader:** the full article in `ArticleWebView`; the navigation bar with the title, **Contents** (a sheet listing the article's sections from `headings`, tap to scroll), and **Aa** (text size); a tap in the middle of the page hides or shows the bars (the shared script's `toggleChrome`); the place in the article is kept while the app runs.
-- [ ] Every article opened goes into **Recently read** (title, language, time; the last 50, in `UserDefaults`; Clear in Settings).
-- [ ] Commit.
+- [x] **Topic page** (in front of the article, as on Android since LL2): the lead picture (Commons thumbnail through the archive), the title in Spectral, the summary, **Read the full article**, and **Read in Español / English** when the other wiki has it (`languageLinks`). A failed load says so and offers Try again; with Local only on it says the article needs the internet (Android's words).
+- [x] **Reader:** the full article in `ArticleWebView`; the navigation bar with the title, **Contents** (a sheet listing the article's sections from `headings`, tap to scroll), and **Aa** (text size); a tap in the middle of the page hides or shows the bars (the shared script's `toggleChrome`); the place in the article is kept while the app runs.
+- [x] Every article opened goes into **Recently read** (title, language, time; the last 50, in `UserDefaults`; Clear in Settings).
+- [x] Commit.
+- *Done 2026-11-20: `TopicScreen` (picture through the gated client, Spectral title, description, summary, Read the full article, Leer en español / Read in English via `languageLink`, Needs internet + Retry), `ReaderScreen` (Contents from the served page's headings, no second fetch; text size sheet; tap toggles nav and tab bars), `RecentStore` (50, UserDefaults), per-tab `NavigationStack`s with `openRoute`. Debug launch argument `-debugOpen en:Moon` (+ `-debugReader YES`). UI test: topic → reader → Contents → section → in-page link → linked topic → back twice, passes on the iPhone 17 Simulator.*
 
 ### Task 5: Search
 
