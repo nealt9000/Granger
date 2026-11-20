@@ -126,9 +126,11 @@
 
 ### Task 9: Android unchanged
 
-- [ ] `./gradlew test` (whole JVM + Robolectric suite): the count matches main's plus the moved and new tests, with none removed. Record both counts.
-- [ ] `./gradlew :app:bundleRelease` builds; R8 keeps what Ktor, Ksoup and kotlinx.serialization need (`app/proguard-rules.pro`); install the release-signed universal APK from the bundle on the Pixel 6 (following the shared-phone rules) and smoke it: open an online Wikipedia article with pictures, its topic page and Related, Search online, a kept article in Local only, a Kiwix pack article and pack search, the catalog loads (Get more lists packs), a Classics book opens. Then restore the debug build the phone had.
-- [ ] Note anything that changed. Fix before merge.
+- [x] `./gradlew test` (whole JVM + Robolectric suite): the count matches main's plus the moved and new tests, with none removed. Record both counts.
+- [x] `./gradlew :app:bundleRelease` builds; R8 keeps what Ktor, Ksoup and kotlinx.serialization need (`app/proguard-rules.pro`); install the release-signed universal APK from the bundle on the Pixel 6 (following the shared-phone rules) and smoke it: open an online Wikipedia article with pictures, its topic page and Related, Search online, a kept article in Local only, a Kiwix pack article and pack search, the catalog loads (Get more lists packs), a Classics book opens. Then restore the debug build the phone had.
+- [x] Note anything that changed. Fix before merge.
+- *Done 2026-11-20. Whole suite 3,842 JVM tests, 0 failures (baseline 3,824 + 18 new; the baseline's one flaky player test passed). `:app:bundleRelease` builds and R8 passes. Pixel 6 smoke on the R8 release build (1583), installed over the phone's debug build without wiping its 14 GB: the universal APK from the bundle was signed with the debug key instead of the upload key (R8 is what's under test, the key isn't), so `install -r` kept the data. Passed: opens to the open e-book, online Search (Wikipedia titles), an online article's topic page (summary, Commons picture, saved for now, Keep 276 KB) and full page (online.css, `_img/` figures, links), a Best of Wikipedia pack article's topic page, the Library, Get books (catalog). No crash, ClassNotFound, NoSuchMethod or serialization error in logcat. No `proguard-rules.pro` change was needed.*
+- *First GrangerCore release published (Neal's OK): `ios-core-2026-11-20`, pinned in `ios/GrangerCore/Package.swift` (ac982f81).*
 
 ### Task 10: Close
 
