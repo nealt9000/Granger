@@ -22,7 +22,7 @@ data class ArticleCopy(val packId: String, val path: String, val kind: Kind) {
  */
 class ArticleCopies(
     private val qids: suspend () -> QidIndexes,
-    /** The packs on the phone and the online sources ([OnlineSources.known]). */
+    /** The packs on the phone and the online sources (`OnlineSources.known`). */
     private val packs: suspend () -> List<Pack>,
     /** Wikipedia online is on and the gate is open. */
     private val online: () -> Boolean,
@@ -46,14 +46,14 @@ class ArticleCopies(
         val index = runCatching { qids() }.getOrNull()
         val qid = index?.let { q -> q.qidOf(packId, path) ?: q.qidOfTitle(path, lang) }
         val kept = if (qid != null && index != null) {
-            index.articlesOf(qid, lang).mapNotNull { a -> byId[a.packId]?.takeIf { !OnlineSources.isOnline(it.id) }?.let { ArticleCopy(a.packId, a.path, kindOf(it)) } }
+            index.articlesOf(qid, lang).mapNotNull { a -> byId[a.packId]?.takeIf { !(OnlineWikipediaArchive.languageOf(it.id) != null) }?.let { ArticleCopy(a.packId, a.path, kindOf(it)) } }
         } else emptyList()
         val title = (kept.firstOrNull()?.path ?: path).substringAfterLast('/')
         val source = OnlineWikipediaArchive.packName(lang)
         val onlineCopy = if (lang in onlineLanguages()) ArticleCopy(source, title, ArticleCopy.Kind.ONLINE) else null
         // A kept article is read through its online source, which serves the kept files first (Plan O2).
         val keptCopy = kept(lang, title)?.let { full -> ArticleCopy(source, title, if (full) ArticleCopy.Kind.FULL else ArticleCopy.Kind.SHORT) }
-        val asked = byId[packId]?.takeIf { !OnlineSources.isOnline(it.id) }?.let { ArticleCopy(packId, path, kindOf(it)) }
+        val asked = byId[packId]?.takeIf { !(OnlineWikipediaArchive.languageOf(it.id) != null) }?.let { ArticleCopy(packId, path, kindOf(it)) }
         return (listOfNotNull(asked) + kept + listOfNotNull(keptCopy, onlineCopy)).distinctBy { it.packId to it.kind }
     }
 
@@ -72,7 +72,7 @@ class ArticleCopies(
         /** Full means a maxi pack (all its pictures); mini and no-picture packs are shorter; online is online. */
         fun kindOf(pack: Pack?): ArticleCopy.Kind = when {
             pack == null -> ArticleCopy.Kind.SHORT
-            OnlineSources.isOnline(pack.id) -> ArticleCopy.Kind.ONLINE
+            (OnlineWikipediaArchive.languageOf(pack.id) != null) -> ArticleCopy.Kind.ONLINE
             !pack.name.startsWith("wikipedia_") -> ArticleCopy.Kind.FULL
             "_maxi" in pack.filePath.substringAfterLast('/') || pack.name.endsWith("_maxi") -> ArticleCopy.Kind.FULL
             else -> ArticleCopy.Kind.SHORT

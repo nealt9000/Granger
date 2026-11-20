@@ -16,5 +16,7 @@ class ConcurrentCache<K, V : Any> {
     operator fun get(key: K): V? { lock.lock(); try { return map[key] } finally { lock.unlock() } }
     operator fun set(key: K, value: V) { lock.lock(); try { map[key] = value } finally { lock.unlock() } }
     fun remove(key: K): V? { lock.lock(); try { return map.remove(key) } finally { lock.unlock() } }
+    /** Makes the map exactly [entries], in one step. */
+    fun replaceAll(entries: Map<K, V>) { lock.lock(); try { map.clear(); map.putAll(entries) } finally { lock.unlock() } }
     fun clear() { lock.lock(); try { map.clear() } finally { lock.unlock() } }
 }

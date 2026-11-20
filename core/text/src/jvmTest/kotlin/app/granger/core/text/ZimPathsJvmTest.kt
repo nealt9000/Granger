@@ -34,3 +34,14 @@ class ZimPathsJvmTest {
         assertEquals(emptyList(), wrong, wrong.joinToString("\n"))
     }
 }
+
+/** [percentDecoded] gives what `URLDecoder` gave the picture rule (with "+" escaped first). */
+class PercentDecodedJvmTest {
+    @Test fun matchesUrlDecoder() {
+        val cases = listOf("Cat.jpg", "Caf%C3%A9.jpg", "a+b.png", "100%", "%zz", "%E2%80%93x", "%C3", "x%2Fy", "%25", "%2520", "Ünï", "")
+        for (s in cases) {
+            val want = runCatching { java.net.URLDecoder.decode(s.replace("+", "%2B"), "UTF-8") }.getOrDefault(s)
+            assertEquals(want, percentDecoded(s) ?: s, s)
+        }
+    }
+}

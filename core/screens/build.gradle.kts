@@ -20,9 +20,10 @@ kotlin {
             api(project(":core:online"))
             api(libs.androidx.lifecycle.viewmodel)
             api(libs.kotlinx.coroutines.core)
-            implementation(project(":core:text"))
+            api(project(":core:text"))
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.ksoup)
+            implementation(libs.kotlinx.io.core)
         }
         commonTest.dependencies { implementation(kotlin("test")) }
     }

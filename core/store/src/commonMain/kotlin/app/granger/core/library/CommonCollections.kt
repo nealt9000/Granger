@@ -13,7 +13,7 @@ class Bits(capacity: Int = 64) {
 }
 
 /** `Map.putIfAbsent`: puts [value] unless [key] has one; returns the old value. */
-internal fun <K, V> MutableMap<K, V>.putIfMissing(key: K, value: V): V? {
+fun <K, V> MutableMap<K, V>.putIfMissing(key: K, value: V): V? {
     val old = this[key]
     if (old == null) this[key] = value
     return old

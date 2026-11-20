@@ -2,7 +2,6 @@ package app.granger.online
 
 import app.granger.core.online.OnlineWikipediaArchive
 import app.granger.core.library.KeptArticle
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
@@ -18,7 +17,7 @@ class Keeper(
     private val changed: () -> Unit = {},
 ) {
     /** Keeps [title]; null when its page can't be had (no signal and nothing saved). */
-    suspend fun keep(lang: String, title: String): KeptArticle? = withContext(Dispatchers.IO) {
+    suspend fun keep(lang: String, title: String): KeptArticle? = withContext(app.granger.screens.ioDispatcher) {
         val a = archive(lang) ?: return@withContext null
         val pictures = withPictures()
         val content = a.keepContent(title, pictures) ?: return@withContext null
@@ -26,7 +25,7 @@ class Keeper(
         kept.keep(lang, title, content.page, content.pictures, pictures, summary?.qid, summary?.revision).also { changed() }
     }
 
-    suspend fun remove(lang: String, title: String) = withContext(Dispatchers.IO) { kept.remove(lang, title); changed() }
+    suspend fun remove(lang: String, title: String) = withContext(app.granger.screens.ioDispatcher) { kept.remove(lang, title); changed() }
 
     fun isKept(lang: String, title: String): KeptArticle? = kept.get(lang, title)
 }

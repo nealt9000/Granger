@@ -86,26 +86,33 @@ object ZimPaths {
         }
     }
 
-    /** %XX escapes decoded as UTF-8, as `URI.getPath` does; null for a broken escape. */
-    private fun decode(s: String): String? {
-        if ('%' !in s) return s
-        val out = StringBuilder()
-        var i = 0
-        while (i < s.length) {
-            if (s[i] != '%') { out.append(s[i]); i++; continue }
-            val bytes = ArrayList<Byte>()
-            while (i < s.length && s[i] == '%') {
-                if (i + 2 >= s.length || !s[i + 1].isHex() || !s[i + 2].isHex()) return null
-                bytes += s.substring(i + 1, i + 3).toInt(16).toByte()
-                i += 3
-            }
-            out.append(bytes.toByteArray().decodeToString())
-        }
-        return out.toString()
-    }
+    private fun decode(s: String): String? = percentDecoded(s)
 
-    private fun Char.isHex() = this in '0'..'9' || this in 'a'..'f' || this in 'A'..'F'
+    private fun Char.isHex() = isHexDigit()
     private fun Char.isAsciiLetter() = this in 'a'..'z' || this in 'A'..'Z'
     private fun Char.isAsciiDigitChar() = this in '0'..'9'
     private const val HEX = "0123456789ABCDEF"
 }
+
+/**
+ * %XX escapes decoded as UTF-8 (`+` stays `+`), as `URI.getPath` does, and `URLDecoder` on text whose "+" was escaped
+ * first; null for a broken escape.
+ */
+fun percentDecoded(s: String): String? {
+    if ('%' !in s) return s
+    val out = StringBuilder()
+    var i = 0
+    while (i < s.length) {
+        if (s[i] != '%') { out.append(s[i]); i++; continue }
+        val bytes = ArrayList<Byte>()
+        while (i < s.length && s[i] == '%') {
+            if (i + 2 >= s.length || !s[i + 1].isHexDigit() || !s[i + 2].isHexDigit()) return null
+            bytes += s.substring(i + 1, i + 3).toInt(16).toByte()
+            i += 3
+        }
+        out.append(bytes.toByteArray().decodeToString())
+    }
+    return out.toString()
+}
+
+private fun Char.isHexDigit() = this in '0'..'9' || this in 'a'..'f' || this in 'A'..'F'
