@@ -308,14 +308,8 @@ struct TrailLine: View {
     @Environment(\.palette) private var palette
 
     var body: some View {
-        HStack(spacing: 6) {
-            ForEach(Array(steps.enumerated()), id: \.offset) { _, s in
-                Text(s).foregroundStyle(palette.primary).lineLimit(1)
-                Text("›").foregroundStyle(palette.outline)
-            }
-            Text(here).foregroundStyle(palette.onBackground).lineLimit(1)
-        }
-        .font(.subheadline)
+        trailText(steps: steps, here: here, palette: palette)
+            .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("You are here: \((steps + [here]).joined(separator: ", "))")
     }
@@ -386,4 +380,16 @@ struct DoLabel: View {
             .overlay(RoundedRectangle(cornerRadius: 2).stroke(palette.outline))
             .foregroundStyle(palette.onSurface)
     }
+}
+
+/// A trail as one run of text, so it wraps between words at any text size: steps in the accent, then where you are.
+func trailText(steps: [String], here: String, palette: Palette) -> Text {
+    var out = Text("")
+    for step in steps {
+        let name: Text = Text(step).foregroundColor(palette.primary)
+        let sep: Text = Text("  ›  ").foregroundColor(palette.outline)
+        out = out + name + sep
+    }
+    let last: Text = Text(here).foregroundColor(palette.onBackground)
+    return (out + last).font(.subheadline)
 }

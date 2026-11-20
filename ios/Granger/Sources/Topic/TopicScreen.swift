@@ -117,17 +117,11 @@ private struct Trail: View {
     var body: some View {
         let subject = ScreenText.strings[Subject.companion.of(id: place.subject)?.labelKey ?? ""] ?? place.subject
         let steps = ["Explore", subject] + (place.room.map { [$0.name(language: lang)] } ?? [])
-        HStack(spacing: 6) {
-            ForEach(Array(steps.enumerated()), id: \.offset) { _, step in
-                Text(step).foregroundStyle(palette.primary)
-                Text("›").foregroundStyle(palette.outline)
-            }
-            Text(title).foregroundStyle(palette.onBackground).lineLimit(1)
-        }
-        .font(.subheadline)
+        trailText(steps: steps, here: title, palette: palette)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("You are here: \(steps.joined(separator: ", ")), \(title)")
         .padding(.top, 4)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -138,10 +132,12 @@ private struct TopicHeaderView: View {
     let lang: String
     let path: String
     @Environment(\.palette) private var palette
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         let image = header.picture.flatMap { UIImage(contentsOfFile: $0) }
-        let wide = (image?.size.width ?? 0) >= (image?.size.height ?? 1) * 1.15
+        // At the accessibility sizes the picture goes above, so the title has the width.
+        let wide = typeSize.isAccessibilitySize || (image?.size.width ?? 0) >= (image?.size.height ?? 1) * 1.15
         VStack(alignment: .leading, spacing: 12) {
             if let image, wide {
                 Image(uiImage: image).resizable().scaledToFit()
