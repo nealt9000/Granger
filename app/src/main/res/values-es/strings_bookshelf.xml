@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bk_every_collection">Todas las colecciones</string>
+    <string name="bk_every_collection_sub">Abre cualquier libro en línea. Guarda en este teléfono lo que quieras.</string>
+    <string name="bk_keep_collection">Guardar toda la colección · %1$s</string>
+    <string name="bk_keep_collection_queued">En camino a este teléfono</string>
+    <string name="bk_keep_book">Guardar este libro</string>
+    <string name="bk_kept">Guardado en este teléfono</string>
+    <string name="bk_book_meta_online">%1$s · en línea</string>
+    <string name="bk_opening">Abriendo %1$s…</string>
+    <string name="bk_opening_progress">%1$s de %2$s</string>
+    <string name="bk_cancel">Cancelar</string>
+    <string name="bk_couldnt_open">No se pudo abrir ese libro ahora.</string>
+    <string name="bk_couldnt_keep">No se pudo guardar ese libro.</string>
+    <string name="bk_kept_notice">Guardado. Ya está en tu estante.</string>
+    <string name="bk_big_title">Este libro ocupa %1$s</string>
+    <string name="bk_big_body">Leerlo en línea lo guarda por ahora; guárdalo para tenerlo sin conexión para siempre.</string>
+    <string name="bk_big_over_cap">Es más grande que Guardado por ahora, así que se va al cerrarlo, salvo que lo guardes.</string>
+    <string name="bk_read_now">Leer ahora</string>
+    <string name="bk_keep">Guardar</string>
+    <string name="bk_filter">Buscar en esta colección</string>
+    <string name="bk_no_list">La lista de esta colección no está en línea. Guarda toda la colección para leerla.</string>
+    <string name="bk_needs_internet">Necesita internet para abrir sus libros.</string>
+    <string name="bk_reading_edition">Edición de lectura</string>
+    <string name="bk_original_scan">Escaneo original</string>
+    <string name="bk_open_collection">Abrir la colección</string>
+    <plurals name="bk_books_kept">
+        <item quantity="one">%1$d de %2$s guardado</item>
+        <item quantity="many">%1$d de %2$s guardados</item>
+        <item quantity="other">%1$d de %2$s guardados</item>
+    </plurals>
+</resources>

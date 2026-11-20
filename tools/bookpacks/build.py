@@ -34,7 +34,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "sidecar"))
 import meta as sidecar_meta  # noqa: E402
 import zim_probe as zp  # noqa: E402
 
-VERSION = 1          # builderVersion: bump when a builder fix changes what it writes
+VERSION = 2          # builderVersion: bump when a builder fix changes what it writes
 SCHEMA_VERSION = 1   # the file layout (schema.md); the app's SidecarEntry.KNOWN["gbooks"]
 BUILDER = "tools/bookpacks/build.py"
 DOC_MIMES = {"application/pdf": "pdf", "application/epub+zip": "epub"}
@@ -125,6 +125,35 @@ class Pack:
         fmt = "<2Q" if size == 8 else "<2I"
         o0, o1 = struct.unpack(fmt, self.r.read(a + 1 + size * blob, 2 * size))
         return o1 - o0
+
+    def locate(self, docs, workers=12):
+        """
+        Sets each doc's `offset` (absolute, in the ZIM file) and exact `bytes` when it sits in a stored
+        (uncompressed) cluster: one HTTP range read then fetches it whole (Plan BK). A doc in a compressed cluster
+        gets `offset` None.
+        """
+        def one(d):
+            a = self.cluster_ptrs[d["cluster"]]
+            info = self.r.raw(a, 1)[0]
+            if info & 0x0F not in (0, 1):
+                return None, None
+            size = 8 if info & 0x10 else 4
+            fmt = "<2Q" if size == 8 else "<2I"
+            o0, o1 = struct.unpack(fmt, self.r.raw(a + 1 + size * d["blob"], 2 * size))
+            return a + 1 + o0, o1 - o0
+        with concurrent.futures.ThreadPoolExecutor(workers) as pool:
+            for d, (off, n) in zip(docs, pool.map(one, docs)):
+                d["offset"] = off
+                if n is not None:
+                    d["bytes"] = n
+
+    def sha256_of(self, d):
+        """The sha256 of a located doc's bytes, read in chunks."""
+        import hashlib
+        h = hashlib.sha256()
+        for chunk in self.r.stream(d["offset"], d["offset"] + d["bytes"], chunk=1 << 20):
+            h.update(chunk)
+        return h.hexdigest()
 
     def follow(self, e, hops=5):
         while e["redirect"] is not None and hops:
@@ -660,7 +689,48 @@ def fold_parts(items, cfg):
             i["parts"].sort(key=order.get)
 
 
-EXTRACTORS = {"kolibri": extract_kolibri, "zimit-index": extract_zimit_index}
+# ---------- extractor: nautilus ----------
+
+def nautilus_records(text):
+    """The records of a nautilus `database.js` (`var DATABASE = [{'_id': …, 'ti': …, 'fp': […]}, …];`), as the app's
+    NautilusDatabase reads them: a record needs a title and a file; an author of `-` is none."""
+    import ast
+    body = text[text.index("["):text.rindex("]") + 1]
+    out = []
+    for r in ast.literal_eval(body):
+        title, files = (r.get("ti") or "").strip(), [f for f in r.get("fp") or [] if f.strip()]
+        if title and files:
+            aut = (r.get("aut") or "").strip()
+            out.append({"id": (r.get("_id") or "").strip(), "title": title, "description": (r.get("dsc") or "").strip(),
+                        "author": "" if aut == "-" else aut, "files": files})
+    return out
+
+
+def extract_nautilus(pack, cfg):
+    """
+    A nautilus pack (zimgit-*, prunelle_*): its own list, `database.js`, names each file at `files/<fp>`. The key is the
+    `fp`, so the phone's id is the one an installed pack gives (`book:nautilus:<pack name>/<fp>`, NautilusSource), and
+    a record with several files is titled "Title (2 of 3)", as there.
+    """
+    js = pack.lookup("database.js")
+    if js is None:
+        raise SystemExit("no database.js: not a nautilus pack")
+    (_, text), = pack.contents([js])
+    items = []
+    for r in nautilus_records(text.decode("utf-8", "replace")):
+        for n, fp in enumerate(r["files"]):
+            e = pack.lookup("files/" + fp)
+            if e is None or e["mimeType"] not in DOC_MIMES:
+                continue
+            count = len(r["files"])
+            items.append({"key": fp, "path": e["path"], "format": DOC_MIMES[e["mimeType"]],
+                          "title": f'{r["title"]} ({n + 1} of {count})' if count > 1 else r["title"],
+                          "titleSource": "page", "author": r["author"], "description": r["description"],
+                          "group": "", "bytes": e["bytes"] if "bytes" in e else 0})
+    return items
+
+
+EXTRACTORS = {"kolibri": extract_kolibri, "zimit-index": extract_zimit_index, "nautilus": extract_nautilus}
 
 
 def keep_keys(items, previous):
@@ -678,19 +748,45 @@ def keep_keys(items, previous):
     return kept
 
 
-def build(name, src, cfg, previous=None):
+def build(name, src, cfg, previous=None, hash_docs=False, editions=None):
+    """[hash_docs]: read every book whole for its sha256 (cheap for a local file or a small pack). [editions]:
+    {item key: {url, sha256, bytes, title}} for the reading editions Granger made of items in this pack."""
     pack = Pack(src)
     try:
         items = EXTRACTORS[cfg["extractor"]](pack, cfg)
+        docs = {d["path"]: d for d in pack.docs}
+        wanted = [docs[i["path"]] for i in items if i["path"] in docs]
+        pack.locate(wanted)
+        compressed = [d["path"] for d in wanted if d["offset"] is None]
+        if compressed:
+            print(f"warning: {len(compressed)} books sit in compressed clusters (no online read): "
+                  f"{compressed[:5]}", file=sys.stderr)
+        for i in items:
+            d = docs.get(i["path"])
+            if d is not None and d.get("offset") is not None:
+                i["zimOffset"], i["bytes"] = d["offset"], d["bytes"]
+        if hash_docs:
+            located = [i for i in items if "zimOffset" in i]
+            with concurrent.futures.ThreadPoolExecutor(6) as pool:
+                for i, h in zip(located, pool.map(lambda i: pack.sha256_of(docs[i["path"]]), located)):
+                    i["sha256"] = h
+        for key, ed in (editions or {}).items():
+            match = [i for i in items if i["key"] == key]
+            if not match:
+                raise SystemExit(f"edition for {key!r}: no such item")
+            match[0]["edition"] = ed
         md = pack.z.metadata(("Title", "Date", "Language", "Creator", "Publisher"))
         kept = keep_keys(items, previous)
         return {
             "kind": "gbooks", "version": VERSION, "zimName": name, "source": src,
-            "sourceDate": md.get("Date", ""), "entryCount": pack.z.entry_count,
+            "sourceDate": md.get("Date", ""), "entryCount": pack.z.entry_count, "zimUuid": pack.z.uuid,
             "collection": {"title": cfg.get("title") or md.get("Title", name), "noun": cfg.get("noun", "books"),
-                           "provider": cfg.get("provider", md.get("Creator", "")),
+                           **({"origin": "nautilus"} if cfg["extractor"] == "nautilus" else {}),
+                           # A nautilus pack's Creator is its uploader's word ("Various"), not who made the books.
+                           "provider": cfg.get("provider", "" if cfg["extractor"] == "nautilus" else md.get("Creator", "")),
                            "licence": cfg.get("licence", ""), "shelf": cfg.get("shelf", "")},
             "stats": {"docsInPack": len(pack.docs), "items": len(items), "keysKept": kept,
+                      "located": sum("zimOffset" in i for i in items), "hashed": sum("sha256" in i for i in items),
                       "titleSources": dict(collections.Counter(i["titleSource"] for i in items)),
                       "fetchedBytes": pack.r.fetched, "requests": pack.r.requests},
             "items": items,
@@ -700,7 +796,8 @@ def build(name, src, cfg, previous=None):
 
 
 ITEM_COLUMNS = ("key", "path", "format", "title", "title_source", "author", "description", "licence", "language",
-                "group_name", "ord", "bytes", "pdf_kind", "part_of", "work_key", "work_title", "part_no", "qid")
+                "group_name", "ord", "bytes", "pdf_kind", "part_of", "work_key", "work_title", "part_no", "qid",
+                "zim_offset", "sha256", "edition")
 
 
 def write_gbooks(manifest, out, source_name, source_sha256, now=None):
@@ -713,7 +810,8 @@ def write_gbooks(manifest, out, source_name, source_sha256, now=None):
         sidecar_meta.write_meta(db, "gbooks", SCHEMA_VERSION, pathlib.Path(source_name), BUILDER, VERSION,
                                 source_sha256=source_sha256, now=now)
         db.execute("CREATE TABLE collection(key TEXT PRIMARY KEY, value TEXT NOT NULL)")
-        coll = dict(manifest["collection"], sourceDate=manifest.get("sourceDate", ""), zimName=manifest["zimName"])
+        coll = dict(manifest["collection"], sourceDate=manifest.get("sourceDate", ""), zimName=manifest["zimName"],
+                    zimUuid=manifest.get("zimUuid"))
         db.executemany("INSERT INTO collection VALUES (?, ?)", [(k, str(v)) for k, v in coll.items() if v is not None])
         db.execute("CREATE TABLE groups(name TEXT PRIMARY KEY, ord INTEGER NOT NULL)")
         groups = list(dict.fromkeys(i.get("group", "") for i in manifest["items"] if i.get("group")))
@@ -721,14 +819,17 @@ def write_gbooks(manifest, out, source_name, source_sha256, now=None):
         db.execute(f"""CREATE TABLE items(key TEXT PRIMARY KEY, path TEXT NOT NULL, format TEXT NOT NULL,
             title TEXT NOT NULL, title_source TEXT NOT NULL, author TEXT, description TEXT, licence TEXT,
             language TEXT, group_name TEXT NOT NULL DEFAULT '', ord INTEGER NOT NULL, bytes INTEGER NOT NULL,
-            pdf_kind TEXT, part_of TEXT, work_key TEXT, work_title TEXT, part_no INTEGER, qid TEXT)""")
+            pdf_kind TEXT, part_of TEXT, work_key TEXT, work_title TEXT, part_no INTEGER, qid TEXT,
+            zim_offset INTEGER, sha256 TEXT, edition TEXT)""")
         rows = []
         for n, i in enumerate(manifest["items"]):
             work = i.get("work") or {}
             rows.append((i["key"], i["path"], i["format"], i["title"], i["titleSource"], i.get("author") or None,
                          i.get("description") or None, i.get("licence") or None, i.get("language") or None,
                          i.get("group", ""), n, i["bytes"], i.get("pdfKind"), i.get("partOf"), work.get("key"),
-                         work.get("title"), i.get("order") if (work or i.get("partOf")) else None, i.get("qid")))
+                         work.get("title"), i.get("order") if (work or i.get("partOf")) else None, i.get("qid"),
+                         i.get("zimOffset"), i.get("sha256"),
+                         json.dumps(i["edition"], ensure_ascii=False, sort_keys=True) if i.get("edition") else None))
         db.executemany(f"INSERT INTO items VALUES ({','.join('?' * len(ITEM_COLUMNS))})", rows)
         db.commit()
         db.execute("VACUUM")
@@ -747,8 +848,11 @@ def read_gbooks(path):
         meta = dict(db.execute("SELECT key, value FROM meta"))
         coll = dict(db.execute("SELECT key, value FROM collection"))
         items = []
-        for row in db.execute(f"SELECT {', '.join(ITEM_COLUMNS)} FROM items ORDER BY ord"):
-            r = dict(zip(ITEM_COLUMNS, row))
+        have = {r[1] for r in db.execute("PRAGMA table_info(items)")}
+        cols = [c for c in ITEM_COLUMNS if c in have]
+        for row in db.execute(f"SELECT {', '.join(cols)} FROM items ORDER BY ord"):
+            r = dict.fromkeys(ITEM_COLUMNS)
+            r.update(zip(cols, row))
             item = {"key": r["key"], "path": r["path"], "format": r["format"], "title": r["title"],
                     "titleSource": r["title_source"], "group": r["group_name"], "bytes": r["bytes"]}
             for k, col in (("author", "author"), ("description", "description"), ("licence", "licence"),
@@ -759,8 +863,15 @@ def read_gbooks(path):
                 item["work"] = {"key": r["work_key"], "title": r["work_title"]}
             if r["part_no"] is not None:
                 item["order"] = r["part_no"]
+            if r["zim_offset"] is not None:
+                item["zimOffset"] = r["zim_offset"]
+            if r["sha256"]:
+                item["sha256"] = r["sha256"]
+            if r["edition"]:
+                item["edition"] = json.loads(r["edition"])
             items.append(item)
         return {"meta": meta, "zimName": coll.pop("zimName", ""), "sourceDate": coll.pop("sourceDate", ""),
+                "zimUuid": coll.pop("zimUuid", None),
                 "collection": coll, "items": items}
     finally:
         db.close()
@@ -813,6 +924,8 @@ def main(argv):
     ap.add_argument("--source-sha256", help="the ZIM's sha256 (from the catalog), needed when SRC is a URL")
     ap.add_argument("--config", default=str(pathlib.Path(__file__).with_name("book_packs.json")))
     ap.add_argument("--previous", help="the pack's previous .gbooks (or .json): keys of moved files are kept")
+    ap.add_argument("--hash", action="store_true", help="read every book whole for its sha256 (local or small packs)")
+    ap.add_argument("--editions", help="a JSON file {item key: {url, sha256, bytes, title}} of reading editions")
     ap.add_argument("--sample", type=int, default=0, help="print N random items for grading")
     a = ap.parse_args(argv)
     name = zim_name_of(a.src) if a.name == "auto" else a.name
@@ -827,7 +940,8 @@ def main(argv):
             import tempfile
             a.previous = str(fetch(published, tempfile.mkdtemp(prefix="gbooks-")))
     prev = read_gbooks(a.previous) if a.previous else None
-    m = build(name, a.src, cfg, prev)
+    editions = json.loads(pathlib.Path(a.editions).read_text(encoding="utf-8")) if a.editions else None
+    m = build(name, a.src, cfg, prev, hash_docs=a.hash, editions=editions)
     out = pathlib.Path(a.out)
     if out.suffix == ".json":
         out.write_text(json.dumps(m, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")

@@ -84,6 +84,20 @@ interface Bookshelf {
     suspend fun hide(ids: Collection<String>) {}
 
     /**
+     * Plan BK: [file], a pack book read online from a pack that isn't installed, as row [id] of [origin] (the id the
+     * pack would give it), its `sourceRef` [sourceRef] (`<pack name>/<entry path>`), filed with [place]'s collection
+     * fields and in the pack's collection by name. [Loose.SAVED] rows are hidden (read, not kept); a row kept on its own
+     * ([Loose.KEPT]) or the pack's own row with its copy is left as it is. Null if the file isn't a readable PDF/EPUB.
+     */
+    suspend fun addLoose(id: String, origin: BookOrigin, sourceRef: String, file: File, details: BookDetails, place: PackItem? = null): Book? = null
+
+    /**
+     * Plan BK: keeps the book [id], read online ([Loose.SAVED]), on its own: its file moves to [to], and it joins the
+     * shelf ([Loose.KEPT], not hidden). Null when there's no such row, or the file can't be moved.
+     */
+    suspend fun keepLoose(id: String, to: File): Book? = null
+
+    /**
      * The PDF the ebook [bookId] was made from (Plan IA), as a hidden book to open ([BookOrigin.PAGES]); null when it
      * has none (it wasn't made from one, or its original pages were removed).
      */
@@ -487,6 +501,47 @@ class RoomBookshelf(
         db.withTransaction {
             for (id in ids) dao.get(id)?.takeIf { !it.hidden }?.let { dao.upsert(it.copy(hidden = true)) }
         }
+    }
+
+    override suspend fun addLoose(
+        id: String, origin: BookOrigin, sourceRef: String, file: File, details: BookDetails, place: PackItem?,
+    ): Book? = withContext(io) {
+        dao.get(id)?.let { old ->
+            // Kept on its own, or the installed pack's own copy: that's the book, not this read.
+            if ((old.loose == Loose.KEPT || old.loose == null) && File(old.filePath).isFile) return@withContext old
+        }
+        val format = formatOf(file).let { if (place != null) place.format else it }
+        val meta = (if (format == BookFormat.PDF) PdfInspector.inspect(file) else EpubInspector.inspect(file)) as? Inspection.Ok
+            ?: return@withContext null
+        val book = register(id, origin, sourceRef, file, meta.meta, details, format)
+        val packName = sourceRef.substringBefore('/')
+        val row = book.copy(
+            loose = Loose.SAVED, hidden = true, memberOf = packName,
+            groupName = place?.groupName, ord = place?.ord, workKey = place?.workKey, workTitle = place?.workTitle,
+            partNo = place?.partNo,
+        )
+        dao.upsert(row)
+        row
+    }
+
+    override suspend fun keepLoose(id: String, to: File): Book? = withContext(io) {
+        val book = dao.get(id) ?: return@withContext null
+        if (book.loose == Loose.KEPT) return@withContext book
+        val from = File(book.filePath)
+        if (!from.isFile) return@withContext null
+        to.parentFile?.mkdirs()
+        val partial = File(to.parentFile, ".incoming-${to.name}")
+        val moved = runCatching {
+            from.copyTo(partial, overwrite = true)
+            partial.renameTo(to)
+        }.getOrDefault(false)
+        if (!moved) {
+            partial.delete()
+            return@withContext null
+        }
+        val kept = book.copy(filePath = to.absolutePath, sizeBytes = to.length(), loose = Loose.KEPT, hidden = false)
+        dao.upsert(kept)
+        kept
     }
 
     override suspend fun unhide(ids: Collection<String>): Unit = withContext(io) {

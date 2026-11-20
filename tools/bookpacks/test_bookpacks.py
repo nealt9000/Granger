@@ -225,3 +225,80 @@ def test_configured_groups_keep_their_order_and_path_order_keeps_the_sites():
     assert groups.index("Manuals") < groups.index("Library") and groups[0] == ""
     manuals = [i["key"].rsplit("/", 1)[-1] for i in m["items"] if i["group"] == "Manuals"]
     assert manuals == sorted(manuals)
+
+
+# ---------- online reads (Plan BK) ----------
+
+def test_every_book_is_located_by_its_byte_range_in_the_zim(zimit):
+    raw = pathlib.Path(ZIMIT).read_bytes()
+    located = [i for i in zimit["items"] if "zimOffset" in i]
+    assert located and len(located) == len(zimit["items"])  # the fixture's PDFs sit in stored clusters
+    for i in located:
+        assert raw[i["zimOffset"]:i["zimOffset"] + 4] == b"%PDF"
+    assert zimit["zimUuid"] and len(zimit["zimUuid"]) == 32
+
+
+def test_hashes_and_editions_round_trip_through_the_sidecar(tmp_path):
+    import hashlib
+    key = "www.example.org/manuals/files/knots.pdf"
+    ed = {"url": "https://example.org/knots.epub", "sha256": "ab" * 32, "bytes": 1234, "title": "Knots"}
+    m = build.build("example.org_en_all", ZIMIT, ZIMIT_CFG, hash_docs=True, editions={key: ed})
+    raw = pathlib.Path(ZIMIT).read_bytes()
+    for i in m["items"]:
+        assert i["sha256"] == hashlib.sha256(raw[i["zimOffset"]:i["zimOffset"] + i["bytes"]]).hexdigest()
+    out = tmp_path / "example.org_en_all_2026-10.gbooks"
+    build.write_gbooks(m, out, "example.org_en_all_2026-10.zim", meta.sha256(ZIMIT))
+    back = build.read_gbooks(out)
+    assert back["meta"]["schemaVersion"] == "1"  # added columns: old phones ignore them
+    assert back["zimUuid"] == m["zimUuid"]
+    items = by_key(back)
+    assert items[key]["edition"] == ed
+    assert all(items[i["key"]]["zimOffset"] == i["zimOffset"] and items[i["key"]]["sha256"] == i["sha256"]
+               for i in m["items"])
+
+
+def test_an_edition_for_a_missing_item_fails():
+    with pytest.raises(SystemExit):
+        build.build("example.org_en_all", ZIMIT, ZIMIT_CFG, editions={"nope": {"url": "x"}})
+
+
+def test_the_online_check_reads_books_by_range_and_catches_a_wrong_offset(tmp_path):
+    m = build.build("example.org_en_all", ZIMIT, ZIMIT_CFG, hash_docs=True)
+    assert check.online_problems(m, ZIMIT) == []
+    bad = copy.deepcopy(m)
+    bad["items"][0]["zimOffset"] += 7
+    assert any("sha256 differs" in p or "starts" in p for p in check.online_problems(bad, ZIMIT, sample=50))
+    bad = copy.deepcopy(m)
+    bad["zimUuid"] = "0" * 32
+    assert "UUID" in check.online_problems(bad, ZIMIT)[0]
+
+
+def test_nautilus_records_read_as_the_app_reads_them():
+    js = """var DATABASE = [
+{'_id': '00000', 'ti': 'Encyclopedia of Knots', 'dsc': 'Knots and sutures', 'aut': '-', 'fp': ['Knots (1).pdf']},
+{'_id': '00001', 'ti': "Sailor's Knots", 'dsc': '', 'aut': 'Various', 'fp': ['a.pdf', 'b.epub']},
+{'_id': '00002', 'ti': '', 'dsc': 'no title', 'aut': 'x', 'fp': ['c.pdf']},
+{'_id': '00003', 'ti': 'No files', 'dsc': '', 'aut': 'x', 'fp': []},
+];"""
+    rs = build.nautilus_records(js)
+    assert [r["title"] for r in rs] == ["Encyclopedia of Knots", "Sailor's Knots"]
+    assert rs[0]["author"] == "" and rs[1]["files"] == ["a.pdf", "b.epub"]
+
+
+def test_attach_replaces_only_the_gbooks_sidecar_of_every_flavour_of_its_source(tmp_path):
+    import attach
+    out = tmp_path / "example.org_en_all_2026-10.gbooks"
+    build.write_gbooks(build.build("example.org_en_all", ZIMIT, ZIMIT_CFG), out, "example.org_en_all_2026-10.zim", meta.sha256(ZIMIT))
+    sha = meta.sha256(ZIMIT)
+    catalog = {"packs": [
+        {"zimName": "example.org_en_all", "snapshotDate": "2026-10", "sha256": sha,
+         "sidecars": [{"kind": "gqid", "url": "https://x/q"}, {"kind": "gbooks", "url": "https://x/old"}]},
+        {"zimName": "example.org_en_all", "snapshotDate": "2026-10", "sha256": "other-flavour", "sidecars": []},
+        {"zimName": "else", "snapshotDate": "2026-10", "sha256": "e", "sidecars": []}]}
+    n, lines = attach.attach(catalog, [out], "https://github.com/x/releases/download/bookpacks-1/")
+    assert n == 2
+    first = catalog["packs"][0]["sidecars"]
+    assert [s["kind"] for s in first] == ["gqid", "gbooks"]
+    assert first[1]["url"] == "https://github.com/x/releases/download/bookpacks-1/" + out.name
+    assert catalog["packs"][1]["sidecars"][0]["sha256"] == first[1]["sha256"]
+    assert catalog["packs"][2]["sidecars"] == []

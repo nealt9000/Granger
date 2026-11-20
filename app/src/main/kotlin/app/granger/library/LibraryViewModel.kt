@@ -55,7 +55,15 @@ data class LibraryUi(
     val providers: Map<String, String> = emptyMap(),
     /** The reading shelf (Plan O4 Task 5): reading now and finished. */
     val shelf: ReadingShelfUi = ReadingShelfUi(emptyList(), emptyList()),
-)
+    /** Plan BK: each book pack collection's catalog title by default key, for one made by a book kept without its pack. */
+    val titles: Map<String, String> = emptyMap(),
+) {
+    /** [row]'s name as shown: a collection still named by its pack's ZIM name (no pack here) takes the catalog's title. */
+    fun nameOf(row: CollectionRow, shown: String): String {
+        val key = row.collection.defaultKey ?: return shown
+        return titles[key]?.takeIf { Filing.isKiwixBooksCollection(key) && row.collection.name == key.substringAfter("kiwixbooks-") } ?: shown
+    }
+}
 
 const val BOOKS_KIND = "books"
 
@@ -130,7 +138,7 @@ class LibraryViewModel(
     /** Null until the first load finishes. */
     val ui: StateFlow<LibraryUi?> = kotlinx.coroutines.flow.combine(shelves.shelves, manifests(), providers(), reading()) { shelves, manifests, providers, shelf ->
         // Empty means no books: packs alone fill Browse, and music alone fills Listen.
-        libraryKinds(shelves).let { LibraryUi(it, emptyLibrary = it.isEmpty(), manifests = manifests, providers = providers, shelf = shelf) }
+        libraryKinds(shelves).let { LibraryUi(it, emptyLibrary = it.isEmpty(), manifests = manifests, providers = providers.first, shelf = shelf, titles = providers.second) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     private fun reading() = bookshelf?.let { b -> kotlinx.coroutines.flow.combine(b.books, b.positions) { books, positions -> ReadingShelf.of(books, positions) } }
@@ -138,7 +146,7 @@ class LibraryViewModel(
 
     /** The catalog's book pack providers by their collections' default key (Plan KB2): `kiwixbooks-<ZIM name>`. */
     private fun providers() = (catalog?.state ?: kotlinx.coroutines.flow.flowOf(null))
-        .map { state -> bookPackProviders(state?.catalog) }
+        .map { state -> bookPackProviders(state?.catalog) to bookPackTitles(state?.catalog) }
         .distinctUntilChanged()
 
     /** The manifests of the Kiwix book packs on the phone, by their collection's default key. */
@@ -154,6 +162,11 @@ class LibraryViewModel(
         viewModelScope.launch { library.refresh() }
     }
 }
+
+/** Plan BK: the catalog's title of each Kiwix book pack, by its collection's default key (`kiwixbooks-<ZIM name>`). */
+fun bookPackTitles(catalog: app.granger.core.catalog.Catalog?): Map<String, String> =
+    catalog?.packs.orEmpty().filter { it.isBookPack && it.zimName.isNotBlank() && it.title.isNotBlank() }
+        .associate { Filing.kiwixBooksKey(it.zimName) to it.title }
 
 /**
  * The catalog's provider of each Kiwix book pack (Plan KB2), by its collection's default key (`kiwixbooks-<ZIM name>`):

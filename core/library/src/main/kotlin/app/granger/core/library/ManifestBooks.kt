@@ -24,7 +24,30 @@ data class ManifestItem(
     val workKey: String?,
     val workTitle: String?,
     val partNo: Int?,
+    /** Plan BK: where its bytes start in the pack file (a stored cluster), [bytes] then exact; null when unknown. */
+    val zimOffset: Long? = null,
+    /** Plan BK: the sha256 of those bytes, when the builder read them. */
+    val sha256: String? = null,
+    /** Plan BK: the reading edition Granger made of it, when there is one. */
+    val edition: ManifestEdition? = null,
 )
+
+/**
+ * A reading edition of a manifest item (Plan BK): an EPUB on Granger's release, and [id], the catalog book (in the
+ * "Granger reading editions" set) the app reads it as, so Read now and Keep work as for any Granger book.
+ */
+data class ManifestEdition(val url: String, val sha256: String, val bytes: Long, val title: String, val id: String = "") {
+    companion object {
+        /** From the manifest's `edition` JSON; null when it's missing or malformed. */
+        fun parse(json: String?): ManifestEdition? {
+            if (json.isNullOrBlank()) return null
+            return runCatching {
+                val o = org.json.JSONObject(json)
+                ManifestEdition(o.getString("url"), o.optString("sha256"), o.optLong("bytes"), o.optString("title"), o.optString("id"))
+            }.getOrNull()?.takeIf { it.url.startsWith("https://") }
+        }
+    }
+}
 
 /**
  * What a book collection says about itself: its [title], what it holds ([noun], "books" or "documents"), who made it
@@ -37,6 +60,12 @@ data class ManifestCollection(
     val provider: String,
     val groups: List<String>,
     val fromFileNames: Boolean = false,
+    /** Plan BK: "nautilus" when its keys are a nautilus pack's `fp`s (phone ids `book:nautilus:…`); blank otherwise. */
+    val origin: String = "",
+    /** Plan BK: the UUID of the ZIM it was built from, checked before reading books from the pack file by range. */
+    val zimUuid: String = "",
+    /** The pack's ZIM name, from the manifest. */
+    val zimName: String = "",
 ) {
     /** Whether it counts documents rather than books. */
     val documents: Boolean get() = noun == NOUN_DOCUMENTS
@@ -71,9 +100,13 @@ object BookManifest {
 
     /** [file]'s items in its order; null when it can't be read. */
     fun items(file: File): List<ManifestItem>? = open(file) { db ->
+        val have = db.rawQuery("PRAGMA table_info(items)", null).use { c ->
+            buildSet { while (c.moveToNext()) add(c.getString(1)) }
+        }
+        val extra = listOf("zim_offset", "sha256", "edition").joinToString("") { if (it in have) ", $it" else ", NULL" }
         db.rawQuery(
             "SELECT key, path, format, title, author, description, language, group_name, ord, bytes, part_of, work_key, " +
-                "work_title, part_no FROM items ORDER BY ord, key",
+                "work_title, part_no$extra FROM items ORDER BY ord, key",
             null,
         ).use { c ->
             buildList {
@@ -91,6 +124,9 @@ object BookManifest {
                             bytes = c.getLong(9), partOf = c.getString(10)?.ifBlank { null },
                             workKey = c.getString(11)?.ifBlank { null }, workTitle = c.getString(12)?.ifBlank { null },
                             partNo = if (c.isNull(13)) null else c.getInt(13),
+                            zimOffset = if (c.isNull(14)) null else c.getLong(14),
+                            sha256 = c.getString(15)?.ifBlank { null },
+                            edition = ManifestEdition.parse(c.getString(16)),
                         ),
                     )
                 }
@@ -106,7 +142,10 @@ object BookManifest {
         val groups = db.rawQuery("SELECT name FROM groups ORDER BY ord, name", null).use { c ->
             buildList { while (c.moveToNext()) c.getString(0)?.takeIf { it.isNotBlank() }?.let(::add) }
         }
-        ManifestCollection(values["title"].orEmpty(), values["noun"].orEmpty().ifBlank { "books" }, values["provider"].orEmpty(), groups)
+        ManifestCollection(
+            values["title"].orEmpty(), values["noun"].orEmpty().ifBlank { "books" }, values["provider"].orEmpty(), groups,
+            origin = values["origin"].orEmpty(), zimUuid = values["zimUuid"].orEmpty(), zimName = values["zimName"].orEmpty(),
+        )
     }
 
     /** The key of the item at entry [path] (or whose key is [path], or [path] without its query); null when none is. */

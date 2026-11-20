@@ -17,7 +17,9 @@ CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT NOT NULL);
 
 CREATE TABLE collection(key TEXT PRIMARY KEY, value TEXT NOT NULL);
 -- title, noun ("books" | "documents"), provider, licence, shelf ("literature" | "children" | "manuals" | "learning"),
--- sourceDate (the ZIM's Date), zimName
+-- sourceDate (the ZIM's Date), zimName, zimUuid (the ZIM header's UUID: a phone reading books by range checks it
+-- first, Plan BK), origin ("nautilus" for a nautilus pack, whose keys are its `fp`s and whose phone ids stay
+-- `book:nautilus:<pack name>/<fp>`)
 
 CREATE TABLE groups(name TEXT PRIMARY KEY, ord INTEGER NOT NULL);
 -- section headers in order ("Level 1", "Firearms Manuals", "The book"); items with group_name '' come first
@@ -36,7 +38,14 @@ CREATE TABLE items(
   pdf_kind TEXT,             -- text | scan | unknown; null for an EPUB. The phone's PdfOrigin decides when unknown
   part_of TEXT,              -- key of the whole file this one is a part of
   work_key TEXT, work_title TEXT, part_no INTEGER,  -- parts of a work with no whole file: one row with parts
-  qid TEXT                   -- the work's Wikidata QID, when known (Linked Library: "In your books", Related)
+  qid TEXT,                  -- the work's Wikidata QID, when known (Linked Library: "In your books", Related)
+  zim_offset INTEGER,        -- Plan BK: where the file's bytes start in the ZIM (a stored cluster); `bytes` is then
+                             -- exact, and one HTTP range read [zim_offset, zim_offset + bytes) fetches the book.
+                             -- Null when it sits in a compressed cluster (none found in any book pack, 2026-11-20)
+  sha256 TEXT,               -- Plan BK: of those bytes, when the builder read them (--hash); null for packs too big
+                             -- to read whole (Survivor Library): the phone then checks zimUuid, length and magic bytes
+  edition TEXT               -- Plan BK: JSON {url, sha256, bytes, title} of the reading edition Granger made of this
+                             -- book (an EPUB on our release), or null
 );
 ```
 

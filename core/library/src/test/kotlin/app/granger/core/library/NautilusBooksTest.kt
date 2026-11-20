@@ -248,6 +248,51 @@ class NautilusBooksTest {
         assertThat(db.bookDao().byOrigin(BookOrigin.NAUTILUS)).isEmpty()
     }
 
+    /** Plan BK: a book read online, or kept on its own, has a row its pack's sync leaves alone while the pack isn't here. */
+    private suspend fun looseRow(id: String, loose: String, file: File) = Book(
+        id = id, origin = BookOrigin.NAUTILUS, sourceRef = "zimgit-water_en/files/${id.substringAfterLast('/')}",
+        filePath = file.absolutePath, title = "Loose", author = "", translator = "", date = "", language = "eng",
+        subjects = "", description = "", coverPath = null, sizeBytes = file.length(), status = PackStatus.OK,
+        indexedAt = null, addedAt = 1L, format = BookFormat.PDF, hidden = loose == Loose.SAVED, loose = loose,
+    ).also { db.bookDao().upsert(it) }
+
+    @Test fun booksReadOnlineOrKeptOnTheirOwnSurviveASyncWithoutTheirPack() = test {
+        val saved = File(tmp.root, "saved/abc").apply { parentFile!!.mkdirs(); writeBytes(byteArrayOf(1, 2)) }
+        val kept = File(tmp.root, "kept/k.pdf").apply { parentFile!!.mkdirs(); writeBytes(byteArrayOf(3)) }
+        looseRow("book:nautilus:zimgit-water_en/a.pdf", Loose.SAVED, saved)
+        looseRow("book:nautilus:zimgit-water_en/b.pdf", Loose.KEPT, kept)
+        books.sync(emptyList())
+        assertThat(db.bookDao().byOrigin(BookOrigin.NAUTILUS).map { it.loose }).containsExactly(Loose.SAVED, Loose.KEPT)
+        assertThat(saved.isFile && kept.isFile).isTrue()
+    }
+
+    @Test fun whenThePackArrivesABookReadOnlineBecomesItsOwnAndAKeptOneStaysKept() = test {
+        val js = """var DATABASE = [
+            {'_id': '0', 'ti': 'Wells', 'dsc': '', 'aut': '-', 'fp': ['a.pdf']},
+            {'_id': '1', 'ti': 'Pumps', 'dsc': '', 'aut': '-', 'fp': ['b.pdf']},
+            ];"""
+        val saved = File(tmp.root, "saved/abc").apply { parentFile!!.mkdirs(); writeBytes(byteArrayOf(1, 2)) }
+        val kept = File(tmp.root, "kept/k.pdf").apply { parentFile!!.mkdirs(); writeBytes(byteArrayOf(3)) }
+        looseRow("book:nautilus:zimgit-water_en/a.pdf", Loose.SAVED, saved)
+        looseRow("book:nautilus:zimgit-water_en/b.pdf", Loose.KEPT, kept)
+        val pack = install("u-w", "zimgit-water_en", js, listOf("a.pdf", "b.pdf"))
+        books.sync(listOf(pack))
+        val rows = db.bookDao().byOrigin(BookOrigin.NAUTILUS).associateBy { it.id }
+        val a = rows.getValue("book:nautilus:zimgit-water_en/a.pdf")
+        assertThat(a.loose).isNull()
+        assertThat(a.hidden).isFalse()  // on the shelf with the rest of its pack
+        assertThat(a.filePath).startsWith(File(booksRoot, "nautilus").absolutePath)  // its copy now comes from the pack
+        assertThat(a.title).isEqualTo("Wells")
+        val b = rows.getValue("book:nautilus:zimgit-water_en/b.pdf")
+        assertThat(b.loose).isEqualTo(Loose.KEPT)
+        assertThat(b.filePath).isEqualTo(kept.absolutePath)
+        // Removing the pack spares the book kept on its own, and only it.
+        db.packDao().delete(pack.id)
+        books.sync(emptyList())
+        assertThat(db.bookDao().byOrigin(BookOrigin.NAUTILUS).map { it.id }).containsExactly("book:nautilus:zimgit-water_en/b.pdf")
+        assertThat(kept.isFile).isTrue()
+    }
+
     /**
      * Design §4.4 (Plan KB2 Task 0.1): "Read as ebook" on a nautilus PDF repoints its row at `x.pdf.epub`. When that
      * copy is gone (storage cleared, or the book removed), [PackBooks.restore] has to bring back a readable book; today

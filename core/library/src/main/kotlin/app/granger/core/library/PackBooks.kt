@@ -120,13 +120,19 @@ open class PackBooks(
                 val id = BookIds.of(origin, ref)
                 val old = existing[id]
                 val (pack, item) = holding.firstOrNull { old != null && packNameOf(old) == it.first.name } ?: holding.first()
-                val row = (old ?: newRow(id, ref, item.format, dirFile)).copy(
+                // A book read online (Plan BK) is the pack's own once the pack is here: its copy comes from the pack.
+                val base = if (old?.loose == Loose.SAVED) {
+                    old.copy(loose = null, hidden = false, filePath = File(dirFile, source.fileName(ref, item.format)).absolutePath)
+                } else {
+                    old ?: newRow(id, ref, item.format, dirFile)
+                }
+                val row = base.copy(
                     sourceRef = "${pack.name}/${item.path}",
                     title = item.title,
                     author = item.author,
                     description = item.description ?: old?.description.orEmpty(),
                     language = item.language?.takeIf { it.isNotBlank() } ?: old?.language?.takeIf { it.isNotBlank() } ?: pack.language,
-                    sizeBytes = if (old != null && File(old.filePath).isFile) old.sizeBytes else item.sizeBytes,
+                    sizeBytes = if (File(base.filePath).isFile) base.sizeBytes else item.sizeBytes,
                     status = PackStatus.OK,
                     groupName = item.groupName,
                     ord = item.ord,
@@ -143,6 +149,9 @@ open class PackBooks(
             for (book in existing.values) {
                 if (refOf(book) in holders) continue
                 val packName = packNameOf(book)
+                // Kept on its own (Plan BK): never removed by a pack's sync. Read online: it doesn't need its pack, unless
+                // the pack is here and no longer lists it.
+                if (book.loose == Loose.KEPT || (book.loose == Loose.SAVED && packName !in readableNames)) continue
                 when {
                     // Its pack is there and readable but doesn't list it, or no pack of that name is installed.
                     packName in readableNames || packName !in installedNames -> gone += book

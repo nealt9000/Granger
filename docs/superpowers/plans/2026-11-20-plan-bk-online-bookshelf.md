@@ -212,3 +212,31 @@ collection's look.
   - pictures from the same or nearby clusters.
 - This is feasible, but it's a bigger piece. It also raises the Kiwix question more sharply, since it would read whole
   sites page by page.
+
+## Results (2026-11-20, branch `bk-online-bookshelf`)
+
+- **Task 1:** 14 `.gbooks` lists with `zim_offset`, `sha256` and `edition` columns, plus `zimUuid` (schema stays 1). Every book in every book pack sits in a stored cluster: 11,802 of 11,802 in Survivor Library. A nautilus extractor gives the zimgit, USDA and Prunelle packs lists keyed by their `fp`, so their phone ids don't change. `check.py --online` reads a sample of books by range, as a phone would. Release `bookpacks-2026-11-20`.
+- **Tasks 2–5:**
+  - Migration 17→18 adds `books.loose` (saved | kept). A pack's sync spares those rows. A book read online that its pack takes over joins the shelf.
+  - `PackBookReads`: one range GET per book, after a check of the header UUID. Each book is checked by length, its first bytes and its sha256.
+  - Every collection sits under the shelf, sharing Get books' shelves.
+  - `RemoteCollectionScreen`: sections, marks, a find field, progress, the 50 MB question, Keep this book, Keep the whole collection, and "On this phone" once the pack is in.
+  - The reader's ⋯ Keep works for a pack book read online.
+- **Task 6:** the catalog set `granger-reading-editions` holds 4 books on release `editions-2026-11-20`:
+  - rigging (FM 5-125);
+  - USDA home canning 2015;
+  - Verrill's *Knots, Splices and Rope Work*, built from Project Gutenberg's transcription with every mention of Gutenberg's name removed;
+  - *Famous Recipes from Old Virginia*, with its notice first.
+
+  `BookEntry.replaces` names the pack books each one replaces. Installed and online collections show the edition, and a tap opens it. ⋯ Original scan opens the pack's own file. Military Medicine gets no editions: they're out of date (Neal).
+- **Catalog:** signed by Neal with the 4 editions. check-links: 4,363 links answer.
+- **Checks:**
+  - emulator-5580, with a local catalog: Survivor Library online, a 1917 book read by range, Keep, Keep the pack, editions in installed and online collections.
+  - Pixel 6, debug 1609 on the signed catalog: the 17→18 upgrade kept its data; Food's canning edition from the release; a Survivor book from the mirror in 14 s.
+  - Not checked: Spanish, and TalkBack by ear.
+  - Tests: app 2,041, core:library 541, PublishedCatalogTest 10, all green.
+- **Known:**
+  - Scans with a blank first page get a blank cover.
+  - Progress shows 0 B during the mirror's redirect and the UUID check.
+  - The Old Virginia OCR has slips ("Yeal Loaf").
+  - Rigging and canning were built before the repeat-dropping pass.

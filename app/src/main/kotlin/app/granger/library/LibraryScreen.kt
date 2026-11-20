@@ -86,6 +86,8 @@ fun LibraryScreen(
     importAsked: Boolean = false,
     onImportAsked: () -> Unit = {},
     onOpenBook: (app.granger.core.library.Book) -> Unit = NO_BOOK,
+    /** Plan BK: every book collection in the catalog, under the shelf, while online; null leaves it out. */
+    everyCollection: (LazyListScope.() -> Unit)? = null,
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -118,7 +120,7 @@ fun LibraryScreen(
     LibraryContent(
         ui, snackbar, onOpenCollection, onSearch, onReadiness,
         downloadsBadge, onDownloads, onGetMore, onImport = { picker.launch(IMPORT_TYPES) }, onOpenSource = onOpenSource,
-        onOpenBook = onOpenBook,
+        onOpenBook = onOpenBook, everyCollection = everyCollection,
     )
 }
 
@@ -142,6 +144,7 @@ fun LibraryContent(
     onOpenSource: (GetMoreLink) -> Unit = {},
     /** Opens a book from the shelf (Plan O4); [NO_BOOK] keeps the old rows (tests, callers without a reader). */
     onOpenBook: (app.granger.core.library.Book) -> Unit = NO_BOOK,
+    everyCollection: (LazyListScope.() -> Unit)? = null,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     // Kind row ids the user has collapsed; all start expanded.
@@ -183,7 +186,7 @@ fun LibraryContent(
     ) { padding ->
         val loaded = ui ?: return@Scaffold
         LazyColumn(Modifier.padding(padding).fillMaxSize()) {
-            if (loaded.emptyLibrary) {
+            if (loaded.emptyLibrary && everyCollection == null) {
                 item(key = "empty") {
                     Text(
                         stringResource(R.string.library_no_books),
@@ -217,7 +220,7 @@ fun LibraryContent(
                             app.granger.explore.Eyebrow(stringResource(R.string.shelf_collections), Modifier.padding(horizontal = 16.dp))
                             androidx.compose.foundation.lazy.LazyRow(contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                                 items(kind.collections, key = { it.collection.id }) { row ->
-                                    CollectionStack(row, row.collection.shownName().resolve()) { onOpenCollection(row.collection.id) }
+                                    CollectionStack(row, loaded.nameOf(row, row.collection.shownName().resolve())) { onOpenCollection(row.collection.id) }
                                 }
                             }
                         }
@@ -229,6 +232,21 @@ fun LibraryContent(
                 }, onOpenCollection = onOpenCollection, manifests = loaded.manifests, providers = loaded.providers)
             }
             item(key = "finished") { Finished(loaded.shelf.finished) { onOpenBook(it) } }
+            if (everyCollection != null) {
+                // Plan BK: everything the catalog has, to open online and keep what you want (builder's call 5).
+                item(key = "every-head") {
+                    Column(Modifier.padding(top = 18.dp)) {
+                        app.granger.theme.SectionHeader(stringResource(R.string.bk_every_collection))
+                        Text(
+                            stringResource(R.string.bk_every_collection_sub),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                        )
+                    }
+                }
+                everyCollection()
+            }
             if (!loaded.emptyLibrary) item(key = "footer") { ShelfFooter(onReadiness) }
         }
     }

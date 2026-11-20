@@ -61,10 +61,11 @@ class StoreIosTest {
         val path = tmp()
         createAt(1, path)
         val db = openLibraryDatabase(path)
-        // Touching a table opens the database and runs every migration (2 by auto-migration, 3..17 by hand).
+        // Touching a table opens the database and runs every migration (2 by auto-migration, 3..18 by hand).
         assertEquals(0, db.packDao().getAll().size)
         db.close()
-        assertEquals(17L, count(path, "PRAGMA user_version"))
+        assertEquals(18L, count(path, "PRAGMA user_version"))
+        assertEquals(1L, count(path, "SELECT count(*) FROM pragma_table_info('books') WHERE name = 'loose'"))
         assertEquals(1L, count(path, "SELECT count(*) FROM sqlite_master WHERE name = 'book_text'"))
         assertTrue(count(path, "SELECT count(*) FROM media_types WHERE builtIn = 1") >= 4)
     }

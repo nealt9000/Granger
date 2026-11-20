@@ -129,7 +129,7 @@ fun CollectionScreen(
                             overflow = TextOverflow.Ellipsis,
                         )
                     } else {
-                        Text(loaded?.collection?.shownName()?.resolve().orEmpty())
+                        Text(loaded?.collection?.let { viewModel.titleFor(it, it.shownName().resolve()) }.orEmpty())
                     }
                 },
                 navigationIcon = {
@@ -302,8 +302,12 @@ fun CollectionScreen(
                         is SectionRow.Item -> Box(if (entry.part) Modifier.padding(start = 24.dp) else Modifier) {
                             val book = entry.book
                             var bookMenu by remember { mutableStateOf(false) }
-                            BookRow(book, positions[book.id]?.totalProgression, onClick = { open(book) }, onLongClick = { bookMenu = true })
-                            BookMenu(book, bookMenu, { bookMenu = false }, onMove = { dialog = CollectionDialog.MoveBook(book) }, onRemove = { dialog = CollectionDialog.RemoveBook(book) })
+                            val edition = viewModel.editionOf(book)
+                            BookRow(book, positions[book.id]?.totalProgression, onClick = { open(book) }, onLongClick = { bookMenu = true }, edition = edition?.title)
+                            BookMenu(
+                                book, bookMenu, { bookMenu = false }, onMove = { dialog = CollectionDialog.MoveBook(book) }, onRemove = { dialog = CollectionDialog.RemoveBook(book) },
+                                onOriginal = if (edition == null) null else ({ scope.launch { viewModel.openOriginal(book)?.let(onOpened) } }),
+                            )
                         }
                     }
                 }
@@ -326,7 +330,10 @@ fun CollectionScreen(
                         Box(Modifier.padding(horizontal = 8.dp)) {
                             var bookMenu by remember { mutableStateOf(false) }
                             BookCell(book, positions[book.id]?.totalProgression, onClick = { open(book) }, onLongClick = { bookMenu = true })
-                            BookMenu(book, bookMenu, { bookMenu = false }, onMove = { dialog = CollectionDialog.MoveBook(book) }, onRemove = { dialog = CollectionDialog.RemoveBook(book) })
+                            BookMenu(
+                                book, bookMenu, { bookMenu = false }, onMove = { dialog = CollectionDialog.MoveBook(book) }, onRemove = { dialog = CollectionDialog.RemoveBook(book) },
+                                onOriginal = viewModel.editionOf(book)?.let { { scope.launch { viewModel.openOriginal(book)?.let(onOpened) } } },
+                            )
                         }
                     }
                 }
@@ -338,8 +345,12 @@ fun CollectionScreen(
             ) { book ->
                 Box {
                     var bookMenu by remember { mutableStateOf(false) }
-                    BookRow(book, positions[book.id]?.totalProgression, onClick = { open(book) }, onLongClick = { bookMenu = true })
-                    BookMenu(book, bookMenu, { bookMenu = false }, onMove = { dialog = CollectionDialog.MoveBook(book) }, onRemove = { dialog = CollectionDialog.RemoveBook(book) })
+                    val edition = viewModel.editionOf(book)
+                    BookRow(book, positions[book.id]?.totalProgression, onClick = { open(book) }, onLongClick = { bookMenu = true }, edition = edition?.title)
+                    BookMenu(
+                        book, bookMenu, { bookMenu = false }, onMove = { dialog = CollectionDialog.MoveBook(book) }, onRemove = { dialog = CollectionDialog.RemoveBook(book) },
+                        onOriginal = if (edition == null) null else ({ scope.launch { viewModel.openOriginal(book)?.let(onOpened) } }),
+                    )
                 }
             } else ShelfGrid(
                 shown.sections,
@@ -353,7 +364,10 @@ fun CollectionScreen(
                 Box(Modifier.padding(horizontal = 8.dp)) {
                     var bookMenu by remember { mutableStateOf(false) }
                     BookCell(book, positions[book.id]?.totalProgression, onClick = { open(book) }, onLongClick = { bookMenu = true })
-                    BookMenu(book, bookMenu, { bookMenu = false }, onMove = { dialog = CollectionDialog.MoveBook(book) }, onRemove = { dialog = CollectionDialog.RemoveBook(book) })
+                    BookMenu(
+                                book, bookMenu, { bookMenu = false }, onMove = { dialog = CollectionDialog.MoveBook(book) }, onRemove = { dialog = CollectionDialog.RemoveBook(book) },
+                                onOriginal = viewModel.editionOf(book)?.let { { scope.launch { viewModel.openOriginal(book)?.let(onOpened) } } },
+                            )
                 }
             }
         }
@@ -437,8 +451,10 @@ private class HeadItem(val key: String, val contentType: String, val content: @C
  * only the exceptions: a pack book not yet opened, a scan). Every book has Remove (Plan KB2 Task 4.3): a pack book's copy goes and its row is hidden.
  */
 @Composable
-private fun BookMenu(book: Book, open: Boolean, onClose: () -> Unit, onMove: () -> Unit, onRemove: () -> Unit) {
+private fun BookMenu(book: Book, open: Boolean, onClose: () -> Unit, onMove: () -> Unit, onRemove: () -> Unit, onOriginal: (() -> Unit)? = null) {
     DropdownMenu(open, onClose) {
+        // Plan BK Task 6: a book with a reading edition opens the edition; its own pages are here.
+        if (onOriginal != null) DropdownMenuItem(text = { Text(stringResource(R.string.bk_original_scan)) }, onClick = { onClose(); onOriginal() })
         // Searchable in full is the default and isn't said; only an exception is (Plan KB2 Task 4.5).
         val exception = when {
             book.scanTitleOnly -> R.string.library_title_only_scan
@@ -660,17 +676,18 @@ private fun PackRow(pack: Pack, replaced: Boolean, onClick: () -> Unit, onLongCl
  * reader is once started. A missing or damaged book is dimmed and says so.
  */
 @Composable
-internal fun BookRow(book: Book, progress: Double?, onClick: () -> Unit, onLongClick: () -> Unit) {
+internal fun BookRow(book: Book, progress: Double?, onClick: () -> Unit, onLongClick: () -> Unit, edition: String? = null) {
     val readable = book.status == PackStatus.OK
     val problem = when (book.status) {
         PackStatus.OK -> null
         PackStatus.MISSING -> stringResource(R.string.library_file_not_found)
         PackStatus.CORRUPT -> stringResource(R.string.library_damaged)
     }
-    val label = formatLabel(book)?.resolve()
+    // Plan BK Task 6: a pack book with a reading edition is shown as the edition, which a tap opens.
+    val label = if (edition != null) stringResource(R.string.bk_reading_edition) else formatLabel(book)?.resolve()
     ShelfRow(
-        title = book.title,
-        subtitle = book.author,
+        title = edition ?: book.title,
+        subtitle = if (edition != null) "" else book.author,
         cover = { BookCover(book, Modifier.height(ShelfCoverSize)) },
         onClick = { if (readable) onClick() },
         onLongClick = onLongClick,

@@ -210,6 +210,96 @@
         "food",
         "health"
       ]
+    },
+    "zimgit-knots_en": {
+      "extractor": "nautilus",
+      "title": "A Library of Knots",
+      "noun": "books",
+      "shelf": "manuals",
+      "subjects": [
+        "sports"
+      ]
+    },
+    "zimgit-food-preparation_en": {
+      "extractor": "nautilus",
+      "title": "Food for Preppers",
+      "noun": "books",
+      "shelf": "manuals",
+      "subjects": [
+        "food"
+      ]
+    },
+    "zimgit-post-disaster_en": {
+      "extractor": "nautilus",
+      "title": "Post Disaster Resource Library",
+      "noun": "books",
+      "shelf": "manuals",
+      "subjects": [
+        "technology",
+        "health"
+      ]
+    },
+    "usda-2015_en": {
+      "extractor": "nautilus",
+      "title": "USDA Guide to Home Canning",
+      "noun": "books",
+      "shelf": "manuals",
+      "provider": "USDA",
+      "subjects": [
+        "food"
+      ]
+    },
+    "zimgit-water_en": {
+      "extractor": "nautilus",
+      "title": "Water Treatment Library",
+      "noun": "books",
+      "shelf": "manuals",
+      "subjects": [
+        "food",
+        "health"
+      ]
+    },
+    "prunelle_en_budding-authors": {
+      "extractor": "nautilus",
+      "title": "Budding authors",
+      "noun": "books",
+      "shelf": "children",
+      "provider": "Prunelle",
+      "subjects": [
+        "literature",
+        "languages"
+      ]
+    },
+    "prunelle_en_draw-your-african-story": {
+      "extractor": "nautilus",
+      "title": "Draw your African story",
+      "noun": "books",
+      "shelf": "children",
+      "provider": "Prunelle",
+      "subjects": [
+        "literature",
+        "languages"
+      ]
+    },
+    "prunelle_en_interactive-books": {
+      "extractor": "nautilus",
+      "title": "Prunelle books",
+      "noun": "books",
+      "shelf": "children",
+      "provider": "Prunelle",
+      "subjects": [
+        "literature",
+        "languages"
+      ]
+    },
+    "zimgit-medicine_en": {
+      "extractor": "nautilus",
+      "title": "Medical Library",
+      "noun": "books",
+      "shelf": "manuals",
+      "subjects": [
+        "health"
+      ]
     }
   }
 }

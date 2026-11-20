@@ -36,9 +36,13 @@ android {
         // Settings → Send feedback writes here (Plan F1 part 2; Neal, 2026-10-31).
         buildConfigField("long", "FAKE_RAM_BYTES", "0L")
         buildConfigField("String", "FEEDBACK_EMAIL", "\"feedback@opengranger.org\"")
+        // -PdevFilesUrl=http://localhost:8767/ (debug only): https://granger-dev.invalid/<file> in a local catalog is fetched
+        // from there, for sidecars before they're on a release (the catalog only takes https files).
+        buildConfigField("String", "DEV_FILES_URL", "\"${findProperty("devFilesUrl") ?: ""}\"")
+        // -PcatalogPublicKey=<base64> pairs a local catalog signed with a throwaway key (an emulator pass before Neal signs).
         buildConfigField(
             "String", "CATALOG_PUBLIC_KEY",
-            "\"${rootProject.file("catalog/public-key.txt").readText().trim()}\"",
+            "\"${findProperty("catalogPublicKey") ?: rootProject.file("catalog/public-key.txt").readText().trim()}\"",
         )
     }
     signingConfigs {

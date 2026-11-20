@@ -23,7 +23,7 @@ import androidx.sqlite.execSQL
         HomeFeed::class, HomeDraw::class,
         KeptArticle::class,
     ],
-    version = 17,
+    version = 18,
     exportSchema = true,
     autoMigrations = [AutoMigration(from = 1, to = 2)],
 )
@@ -274,6 +274,13 @@ abstract class LibraryDatabase : RoomDatabase() {
             }
         }
 
+        /** Plan BK: a pack book read online or kept without its pack ([Book.loose]). */
+        val MIGRATION_17_18 = object : Migration(17, 18) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE books ADD COLUMN loose TEXT")
+            }
+        }
+
         /**
          * The v9 collections that go in the Kiwix folder: app-made, in Literature, and filed for a Kiwix pack. That
          * leaves out the book collections, Other, Maps, the folder itself and the media ones (`music:on-this-phone`
@@ -322,7 +329,7 @@ abstract class LibraryDatabase : RoomDatabase() {
         val MIGRATIONS: Array<Migration> get() = arrayOf(
             MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
             MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14,
-            MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17,
+            MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18,
         )
     }
 }

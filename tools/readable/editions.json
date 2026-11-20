@@ -1,0 +1,114 @@
+{
+ "about": "Plan BK Task 6: the reading editions Granger publishes, each a book in the catalog set granger-reading-editions and named by the pack items it replaces (`items`: zimName + manifest key). publish_editions.py copies the EPUBs to an upload folder as <id>.epub, writes the `edition` column of those packs' .gbooks, and puts the set in a catalog. Only titles the rights pass cleared and that aren't out of date (Neal 2026-11-20).",
+ "set": {
+  "id": "granger-reading-editions",
+  "title": "Granger reading editions",
+  "language": "en",
+  "shelf": "manuals",
+  "provider": "Granger",
+  "license": "Public domain",
+  "description": "Whole works rebuilt to read on a phone: chapters, a contents page, pictures sized to the screen, and tables checked against the printed page.",
+  "subjects": [
+   "technology",
+   "food"
+  ]
+ },
+ "editions": [
+  {
+   "id": "re-rigging-fm5-125",
+   "file": "rigging.epub",
+   "category": "Manuals",
+   "title": "Rigging Techniques, Procedures, and Applications",
+   "author": "US Army (FM 5-125, with Change 1)",
+   "description": "The Army's manual on rope and rigging: choosing and caring for rope; knots, hitches, lashings and splices, every one with its drawing; hoists, anchors, guy lines and scaffolds.",
+   "license": "Public domain (US government work)",
+   "published": 2001,
+   "items": [
+    {
+     "zimName": "zimgit-knots_en",
+     "key": "Knots (6).pdf"
+    }
+   ]
+  },
+  {
+   "id": "re-usda-home-canning-2015",
+   "file": "canning.epub",
+   "category": "Manuals",
+   "title": "Complete Guide to Home Canning",
+   "author": "US Department of Agriculture (2015)",
+   "description": "The USDA's tested guide to canning at home: what keeps canned food safe, then recipes for fruit, tomatoes, vegetables, meat and seafood, pickles, jams and jellies. Process times are checked against the printed tables.",
+   "license": "Public domain (US government work)",
+   "published": 2015,
+   "items": [
+    {
+     "zimName": "zimgit-food-preparation_en",
+     "key": "Food Preparation (12).pdf"
+    },
+    {
+     "zimName": "usda-2015_en",
+     "key": "INTRO_HomeCanrev0715.pdf"
+    },
+    {
+     "zimName": "usda-2015_en",
+     "key": "GUIDE01_HomeCan_rev0715.pdf"
+    },
+    {
+     "zimName": "usda-2015_en",
+     "key": "GUIDE02_HomeCan_rev0715.pdf"
+    },
+    {
+     "zimName": "usda-2015_en",
+     "key": "GUIDE03_HomeCan_rev0715.pdf"
+    },
+    {
+     "zimName": "usda-2015_en",
+     "key": "GUIDE04_HomeCan_rev0715.pdf"
+    },
+    {
+     "zimName": "usda-2015_en",
+     "key": "GUIDE05_HomeCan_rev0715.pdf"
+    },
+    {
+     "zimName": "usda-2015_en",
+     "key": "GUIDE06_HomeCan_rev0715.pdf"
+    },
+    {
+     "zimName": "usda-2015_en",
+     "key": "GUIDE07_HomeCan_rev0715.pdf"
+    }
+   ]
+  },
+  {
+   "id": "re-verrill-knots-1912",
+   "file": "verrill.epub",
+   "category": "Manuals",
+   "title": "Knots, Splices and Rope Work",
+   "author": "A. Hyatt Verrill (1912)",
+   "description": "A practical treatise on the useful and ornamental knots in common use, with chapters on splicing, pointing, seizing and serving: the whole text of the 1917 printing, with its drawings.",
+   "license": "Public domain",
+   "published": 1912,
+   "items": [
+    {
+     "zimName": "zimgit-knots_en",
+     "key": "Knots (5).pdf"
+    }
+   ]
+  },
+  {
+   "id": "re-old-virginia-recipes-1935",
+   "file": "old-virginia.epub",
+   "category": "Manuals",
+   "title": "Famous Recipes from Old Virginia",
+   "author": "The Ginter Park Woman's Club, Richmond (1935)",
+   "description": "A Richmond women's club cookbook of 1935, from early Virginia recipes to the club's own. Shown as printed, with a note at the front on its racist caricatures.",
+   "license": "Public domain (published 1935 without a copyright notice)",
+   "published": 1935,
+   "items": [
+    {
+     "zimName": "zimgit-food-preparation_en",
+     "key": "Food Preparation (6).pdf"
+    }
+   ]
+  }
+ ]
+}
