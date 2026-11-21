@@ -43,9 +43,18 @@ object ScreenTextIds {
         "archive_spoken_word_get" -> R.string.archive_spoken_word_get
         "archive_tab_browse" -> R.string.archive_tab_browse
         "archive_tab_installed" -> R.string.archive_tab_installed
+        "audiobooks_all" -> R.string.audiobooks_all
+        "audiobooks_missing" -> R.string.audiobooks_missing
+        "audiobooks_play_from_start" -> R.string.audiobooks_play_from_start
+        "audiobooks_resume" -> R.string.audiobooks_resume
+        "audiobooks_sort_author" -> R.string.audiobooks_sort_author
+        "audiobooks_sort_recent" -> R.string.audiobooks_sort_recent
+        "audiobooks_sort_title" -> R.string.audiobooks_sort_title
         "bk_couldnt_keep" -> R.string.bk_couldnt_keep
         "bk_couldnt_open" -> R.string.bk_couldnt_open
         "bk_kept_notice" -> R.string.bk_kept_notice
+        "common_pause" -> R.string.common_pause
+        "common_play" -> R.string.common_play
         "ebook_defined_in" -> R.string.ebook_defined_in
         "ebook_your_highlight" -> R.string.ebook_your_highlight
         "ebook_your_highlight_in" -> R.string.ebook_your_highlight_in

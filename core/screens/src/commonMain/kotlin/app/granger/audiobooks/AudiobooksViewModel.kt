@@ -1,10 +1,7 @@
 package app.granger.audiobooks
 
-import app.granger.invoke
-import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.granger.R
 import app.granger.UiText
 import app.granger.core.library.AudioBookmark
 import app.granger.core.library.Audiobook
@@ -25,7 +22,7 @@ import app.granger.media.MediaDownloads
 import app.granger.core.library.SearchText
 import app.granger.core.library.ShelfKey
 import app.granger.library.authorKey
-import app.granger.library.shelf.LibraryViewPrefs
+import app.granger.library.shelf.ShelfChoices
 import app.granger.library.shelf.ShelfKind
 import app.granger.library.shelf.ShelfSections
 import app.granger.library.shelf.ShelfView
@@ -33,8 +30,9 @@ import app.granger.library.shelf.sortNamed
 import app.granger.library.shelf.sortedByShelfKey
 import app.granger.library.shelf.toggled
 import app.granger.sources.ItemStatus
-import java.util.Locale
-import java.util.concurrent.ConcurrentHashMap
+import app.granger.core.library.ConcurrentCache
+import app.granger.screens.logWarn
+import app.granger.screens.nowMillis
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -49,6 +47,8 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
+// Shared since Plan I6 Task 2: the audiobook shelf and book page on both phones. Android's screens draw it as before.
 
 /** The listener's audiobook rows: positions and bookmarks ([PlaybackDao] in the app). */
 interface AudiobookListening {
@@ -81,8 +81,8 @@ data class ShelfBook(val book: Audiobook, val listening: Listening, val progress
 }
 
 /** How the audiobook shelf is ordered (Plan LV Decision 5); Recent is by last played, with no letters. */
-enum class AudiobookSort(@StringRes val label: Int) {
-    TITLE(R.string.audiobooks_sort_title), AUTHOR(R.string.audiobooks_sort_author), RECENT(R.string.audiobooks_sort_recent),
+enum class AudiobookSort(val label: UiText.Res) {
+    TITLE(UiText.Res("audiobooks_sort_title")), AUTHOR(UiText.Res("audiobooks_sort_author")), RECENT(UiText.Res("audiobooks_sort_recent")),
 }
 
 /**
@@ -122,13 +122,12 @@ data class AudiobookPage(
     val missing: Boolean get() = book.status != PackStatus.OK
     val playable: Boolean get() = !missing && chapters.isNotEmpty()
     val fraction: Float get() = fractionOf(progress)
-    @get:StringRes
-    val playLabel: Int get() = when {
-        missing -> R.string.audiobooks_missing
-        inPlayer && playing -> R.string.common_pause
-        listening == Listening.FINISHED -> R.string.audiobooks_play_from_start
-        listening == Listening.IN_PROGRESS || inPlayer -> R.string.audiobooks_resume
-        else -> R.string.common_play
+    val playLabel: UiText.Res get() = when {
+        missing -> UiText.Res("audiobooks_missing")
+        inPlayer && playing -> UiText.Res("common_pause")
+        listening == Listening.FINISHED -> UiText.Res("audiobooks_play_from_start")
+        listening == Listening.IN_PROGRESS || inPlayer -> UiText.Res("audiobooks_resume")
+        else -> UiText.Res("common_play")
     }
 }
 
@@ -151,7 +150,7 @@ object AudiobookShelf {
     const val CONTINUE_MAX = 4
 
     private fun titleKey(b: ShelfBook) = ShelfKey.of(b.book.title)
-    private val byTitle = compareBy<ShelfBook>({ it.book.title.lowercase(Locale.ROOT) }, { it.book.id })
+    private val byTitle = compareBy<ShelfBook>({ it.book.title.lowercase() }, { it.book.id })
     private val byLastPlayed = compareByDescending<ShelfBook> { it.lastPlayedAt ?: 0L }.thenBy(::titleKey).then(byTitle)
 
     /**
@@ -212,24 +211,24 @@ class AudiobooksViewModel(
     shelves: Shelves,
     private val listening: AudiobookListening,
     private val hub: PlayerHub,
-    private val now: () -> Long = System::currentTimeMillis,
+    private val now: () -> Long = ::nowMillis,
     private val compute: CoroutineDispatcher = Dispatchers.Default,
     /** The downloads ledger: a downloaded book's progress. */
     private val downloads: Flow<List<DownloadRecord>> = flowOf(emptyList()),
     /** Removes a downloaded book's files by its group (`MediaDownloader.remove`, run in the app scope). */
     private val remover: (groupId: String) -> Unit = {},
     /** The shelf's remembered sort and view (Plan LV). */
-    private val viewPrefs: LibraryViewPrefs = LibraryViewPrefs(),
+    private val viewPrefs: ShelfChoices = ShelfChoices(),
 ) : ViewModel() {
     /** Groups' file counts from their manifests, read once (on [compute]). */
-    private val fileCounts = ConcurrentHashMap<String, Int>()
+    private val fileCounts = ConcurrentCache<String, Int>()
 
     private val mediaRecords: Flow<List<DownloadRecord>> =
         downloads.map { all -> all.filter { it.groupId?.startsWith(MediaDownloads.PREFIX) == true } }.distinctUntilChanged()
 
     private val scope: Flow<Pair<UiText, List<Audiobook>>> =
         if (collectionId == null) {
-            media.audiobooks.map { UiText.Res(R.string.audiobooks_all) to it }
+            media.audiobooks.map { UiText.Res("audiobooks_all") to it }
         } else {
             combine(media.audiobooks, shelves.collection(collectionId)) { books, row ->
                 val ids = row?.audiobooks.orEmpty().mapTo(HashSet()) { it.id }
@@ -362,7 +361,7 @@ class AudiobooksViewModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                android.util.Log.w("Granger", "Couldn't $what", e)
+                logWarn("Couldn't $what", e)
             }
         }
     }

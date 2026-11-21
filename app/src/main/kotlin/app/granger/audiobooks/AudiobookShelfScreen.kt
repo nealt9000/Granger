@@ -118,7 +118,7 @@ fun AudiobookShelfScreen(
         // The grid already pads its edges by 12 dp; the row lines up with the list's 16 either way.
         val continueRow: @Composable (inset: Dp) -> Unit = { inset -> ContinueRow(ui.continueRow, inset, onBook) }
         val header: @Composable () -> Unit = {
-            val sorts = AudiobookSort.entries.associateWith { stringResource(it.label) }
+            val sorts = AudiobookSort.entries.associateWith { it.label.resolve() }
             ShelfHeader(ui.sort, AudiobookSort.entries, { sorts.getValue(it) }, vm::setSort, view = view, onToggleView = vm::toggleView)
         }
         if (view == ShelfView.LIST) {

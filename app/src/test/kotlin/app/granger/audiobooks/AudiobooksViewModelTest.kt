@@ -113,7 +113,7 @@ class AudiobooksViewModelTest {
         )
 
         val shelf = vm().shelf.filterNotNull().filter { it.books.size == 6 }.first()
-        assertThat(shelf.title).isEqualTo(UiText.Res(R.string.audiobooks_all))
+        assertThat(shelf.title).isEqualTo(UiText.Res("audiobooks_all"))
         assertThat(shelf.sort).isEqualTo(AudiobookSort.TITLE)
         // Every book A–Z, finished ones in their place and The Yak under Y (Plan LV Decision 7).
         assertThat(shelf.books.map { it.book.sourceRef })
@@ -193,7 +193,7 @@ class AudiobooksViewModelTest {
         val page = vm.book(b.id).filterNotNull().first()
         assertThat(page.progress.positionMs).isEqualTo(110_000L)
         assertThat(page.currentChapter).isEqualTo(2)
-        assertThat(page.playLabel).isEqualTo(R.string.audiobooks_resume)
+        assertThat(page.playLabel).isEqualTo(UiText.Res("audiobooks_resume"))
     }
 
     @Test fun theBookInThePlayerPausesAndCarriesOnInPlace() = runTest(main.dispatcher) {
@@ -205,14 +205,14 @@ class AudiobooksViewModelTest {
         hub.ui.value = playingBook
         val vm = vm()
 
-        assertThat(vm.book(b.id).filterNotNull().first().playLabel).isEqualTo(R.string.common_pause)
+        assertThat(vm.book(b.id).filterNotNull().first().playLabel).isEqualTo(UiText.Res("common_pause"))
         vm.play(b.id)
         advanceUntilIdle()
         // No reload from the saved position (20 s, behind the player's 30 s): only a pause.
         assertThat(hub.calls).containsExactly("playPause")
 
         hub.ui.value = playingBook.copy(playing = false)
-        assertThat(vm.book(b.id).filterNotNull().first { !it.playing }.playLabel).isEqualTo(R.string.audiobooks_resume)
+        assertThat(vm.book(b.id).filterNotNull().first { !it.playing }.playLabel).isEqualTo(UiText.Res("audiobooks_resume"))
         vm.play(b.id)
         advanceUntilIdle()
         assertThat(hub.calls).containsExactly("playPause", "playPause")
@@ -245,7 +245,7 @@ class AudiobooksViewModelTest {
 
         val page = vm.book(b.id).filterNotNull().first { it.listening == Listening.FINISHED }
         assertThat(page.fraction).isEqualTo(1f)
-        assertThat(page.playLabel).isEqualTo(R.string.audiobooks_play_from_start)
+        assertThat(page.playLabel).isEqualTo(UiText.Res("audiobooks_play_from_start"))
 
         vm.play(b.id)
         advanceUntilIdle()
@@ -322,7 +322,7 @@ class AudiobooksViewModelTest {
         val page = vm.book(b.id).filterNotNull().first { it.bookmarks.isNotEmpty() }
         assertThat(page.missing).isTrue()
         assertThat(page.playable).isFalse()
-        assertThat(page.playLabel).isEqualTo(R.string.audiobooks_missing)
+        assertThat(page.playLabel).isEqualTo(UiText.Res("audiobooks_missing"))
         assertThat(page.bookmarks).containsExactly(mark)
         assertThat(page.progress.positionMs).isEqualTo(125_000L)
 

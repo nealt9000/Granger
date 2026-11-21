@@ -116,7 +116,7 @@ fun AudiobookScreen(vm: AudiobooksViewModel, audiobookId: String, onBack: () -> 
             }
             item {
                 Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Button(onClick = { vm.play(book.id) }, enabled = loaded.playable) { Text(stringResource(loaded.playLabel)) }
+                    Button(onClick = { vm.play(book.id) }, enabled = loaded.playable) { Text(loaded.playLabel.resolve()) }
                     val finished = loaded.listening == Listening.FINISHED
                     OutlinedButton(onClick = { vm.setFinished(book.id, !finished) }, enabled = loaded.chapters.isNotEmpty()) {
                         Text(stringResource(if (finished) R.string.audiobooks_mark_unfinished else R.string.audiobooks_mark_finished))
