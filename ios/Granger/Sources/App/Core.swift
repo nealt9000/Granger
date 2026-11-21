@@ -28,6 +28,8 @@ final class Core: PageSource {
         booksFolder = Core.makeBooksFolder()
         // PDFKit for the shared book rules (import, covers, outlines).
         PdfKitEngine.install()
+        // libarchive and UIGraphicsPDFRenderer for comics (CBZ, CBR) imported as books (Plan I5 Task 6).
+        ComicNatives.install()
         #if DEBUG
         // UI tests and checks: `-debugPack <path on the Mac>` copies that pack in (the Simulator reads the Mac's disk).
         if let from = UserDefaults.standard.string(forKey: "debugPack"), FileManager.default.fileExists(atPath: from) {
