@@ -41,3 +41,8 @@ actual fun englishCountryName(code: String): String = Locale("", code).getDispla
 actual fun logWarn(message: String, error: Throwable?) {
     if (error == null) android.util.Log.w("Granger", message) else android.util.Log.w("Granger", message, error)
 }
+
+actual fun languageNameIn(language: String, inLanguage: String): String {
+    val locale = Locale.forLanguageTag(inLanguage)
+    return Locale.forLanguageTag(language).getDisplayLanguage(locale).replaceFirstChar { it.titlecase(locale) }
+}

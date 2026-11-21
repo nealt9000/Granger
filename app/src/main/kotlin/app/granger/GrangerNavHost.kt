@@ -67,6 +67,7 @@ import app.granger.downloads.DownloadsModel
 import app.granger.downloads.DownloadsScreen
 import app.granger.downloads.DownloadsViewModel
 import app.granger.ebook.Dictionary
+import app.granger.ebook.hasProcessTextHandler
 import app.granger.ebook.DictionaryChoice
 import app.granger.ebook.EbookReaderScreen
 import app.granger.ebook.EbookReaderViewModel
@@ -963,17 +964,11 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
      * (Plan L3: the Wiktionary [Dictionary.choose] picks for a book in [bookLanguage]; [packId] when it picks none).
      */
     suspend fun lookUpInWiktionary(packId: String, word: String, bookLanguage: String?): app.granger.ebook.LookUp {
-        val definer = Dictionary.choose(container.library.packs.first(), bookLanguage, container.knowledgeNow.value)
-        val id = definer?.packId ?: packId
-        val hit = withContext(Dispatchers.IO) { container.library.archive(id)?.suggest(word, 5) }
-            ?.let { Dictionary.pick(it, word) } ?: return app.granger.ebook.LookUp.NotFound
-        val tab = container.sessions.openTab(id, hit.path, hit.title).let { container.sessions.tab(it) } ?: return app.granger.ebook.LookUp.NotFound
-        nav.showTab(tab, keepCurrent = true, fragment = definer?.anchor)
-        return app.granger.ebook.LookUp.Found(
-            definer?.takeIf { it.fallback }?.let {
-                UiText.Res(R.string.ebook_defined_in, app.granger.sources.KiwixList.languageName(it.wiktionaryLanguage))
-            },
-        )
+        val found = Dictionary.entry(container.library, packId, word, bookLanguage, container.knowledgeNow.value)
+            ?: return app.granger.ebook.LookUp.NotFound
+        val tab = container.sessions.openTab(found.packId, found.path, found.title).let { container.sessions.tab(it) } ?: return app.granger.ebook.LookUp.NotFound
+        nav.showTab(tab, keepCurrent = true, fragment = found.anchor)
+        return app.granger.ebook.LookUp.Found(found.note)
     }
 
     val selected = entry?.let { e ->

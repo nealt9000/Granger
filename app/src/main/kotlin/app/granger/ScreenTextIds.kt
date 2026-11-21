@@ -46,6 +46,11 @@ object ScreenTextIds {
         "bk_couldnt_keep" -> R.string.bk_couldnt_keep
         "bk_couldnt_open" -> R.string.bk_couldnt_open
         "bk_kept_notice" -> R.string.bk_kept_notice
+        "ebook_defined_in" -> R.string.ebook_defined_in
+        "ebook_your_highlight" -> R.string.ebook_your_highlight
+        "ebook_your_highlight_in" -> R.string.ebook_your_highlight_in
+        "ebook_your_note" -> R.string.ebook_your_note
+        "ebook_your_note_in" -> R.string.ebook_your_note_in
         "explore_era_ancient" -> R.string.explore_era_ancient
         "explore_era_ancient_span" -> R.string.explore_era_ancient_span
         "explore_era_c19" -> R.string.explore_era_c19
@@ -113,6 +118,11 @@ object ScreenTextIds {
         "library_sort_recent" -> R.string.library_sort_recent
         "library_sort_title" -> R.string.library_sort_title
         "library_titles_from_file_names" -> R.string.library_titles_from_file_names
+        "listen_last_played" -> R.string.listen_last_played
+        "listen_last_read" -> R.string.listen_last_read
+        "listen_now_playing" -> R.string.listen_now_playing
+        "listen_paused" -> R.string.listen_paused
+        "listen_reading_aloud" -> R.string.listen_reading_aloud
         "onboarding_ask_line" -> R.string.onboarding_ask_line
         "onboarding_blurb_comprehensive" -> R.string.onboarding_blurb_comprehensive
         "onboarding_blurb_efficient" -> R.string.onboarding_blurb_efficient

@@ -51,3 +51,9 @@ expect fun englishCountryName(code: String): String
 
 /** A warning in the phone's log under "Granger" (Android: `Log.w`; Plan I5). */
 expect fun logWarn(message: String, error: Throwable? = null)
+
+/**
+ * [language]'s name in [inLanguage], its first letter a capital as a heading has it ("es" in "en" → "Spanish", in "es"
+ * → "Español"): Wiktionary's section for a book's language (Plan I5 Task 2). The code itself when nothing names it.
+ */
+expect fun languageNameIn(language: String, inLanguage: String): String

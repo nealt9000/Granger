@@ -77,7 +77,7 @@ class EbookReaderViewModelTest {
         fileExists: Boolean = true,
         target: BookTarget? = null,
         appScope: CoroutineScope = this,
-        searcher: BookSearcher = FakeBookSearcher(),
+        searcher: PublicationSearcher = FakeBookSearcher(),
         savedState: SavedStateHandle = SavedStateHandle(),
         pdfOutline: (java.io.File) -> List<app.granger.core.books.OutlineEntry> = { emptyList() },
         pdfLinks: (java.io.File) -> List<app.granger.core.books.PdfLink> = { emptyList() },
@@ -1014,7 +1014,7 @@ class EbookReaderViewModelTest {
     }
 }
 
-class FakeBookSearcher : BookSearcher {
+class FakeBookSearcher : PublicationSearcher {
     val results = mutableMapOf<String, List<Locator>>()
     val gates = mutableMapOf<String, CompletableDeferred<List<Locator>>>()
     val calls = mutableListOf<String>()

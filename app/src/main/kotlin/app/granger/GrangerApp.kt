@@ -1480,6 +1480,7 @@ class AppContainer(context: Context) {
             },
             bookLanguage = { id -> bookLanguages[id] ?: bookshelf.book(id)?.language?.let(::twoLetter)?.also { bookLanguages[id] = it } },
             contentFilter = contentFilter,
+            debugLog = { if (BuildConfig.DEBUG) android.util.Log.d("GrangerLinks", it) },
         )
     }
 
@@ -1714,8 +1715,11 @@ class AppContainer(context: Context) {
     )
 }
 
-/** A sidecar file on the phone and the sha256 of the pack file it must have been built from (and that file's name). */
-data class InstalledSidecar(val file: File, val packSha256: String, val packName: String? = null)
+/** A sidecar [file] on the phone ([InstalledSidecar] is shared, by path: Plan I5 Task 2). */
+fun InstalledSidecar(file: File, packSha256: String, packName: String? = null): InstalledSidecar = InstalledSidecar(file.path, packSha256, packName)
+
+/** The sidecar's file. */
+val InstalledSidecar.file: File get() = File(path)
 
 /** `wikipedia_en_history_maxi_2026-09.zim` -> `en`: a Wikipedia pack's language, as its QID index names it. */
 private val WIKIPEDIA_LANGUAGE = Regex("^wikipedia_([a-z]{2,3})_")

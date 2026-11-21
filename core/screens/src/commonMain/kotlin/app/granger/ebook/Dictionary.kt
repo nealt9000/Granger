@@ -1,24 +1,43 @@
 package app.granger.ebook
 
-import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
+import app.granger.UiText
+import app.granger.core.catalog.Languages
+import app.granger.core.library.Library
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
-import app.granger.core.catalog.Languages
 import app.granger.core.zim.ZimHit
-import java.util.Locale
+import app.granger.screens.ioDispatcher
+import app.granger.screens.languageNameIn
+import app.granger.sources.KiwixList
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 
 /** What "Define" does for the selected word. */
 sealed interface DictionaryChoice {
     /** Look the word up in this installed Wiktionary pack. */
     data class Wiktionary(val packId: String) : DictionaryChoice
 
-    /** Hand the word to an app on the phone that handles ACTION_PROCESS_TEXT. */
+    /**
+     * Hand the word to the phone's own dictionary ([SystemDictionary]): on Android an app that handles
+     * ACTION_PROCESS_TEXT, on the iPhone the system dictionary (Plan I5 call 8).
+     */
     data object ProcessText : DictionaryChoice
 
     /** Nothing can define a word; the menu hides Define. */
     data object None : DictionaryChoice
+}
+
+/**
+ * The phone's own dictionary, for when no Wiktionary is installed (Plan I5 call 8): Android hands the word to an app
+ * that handles ACTION_PROCESS_TEXT (found through the PackageManager); the iPhone shows `UIReferenceLibraryViewController`.
+ */
+interface SystemDictionary {
+    /** Whether something on the phone can define a word. May ask the system: call off the main thread. */
+    fun available(): Boolean
+
+    /** Shows [text]'s definition; false when nothing could take it. */
+    fun define(text: String): Boolean
 }
 
 /**
@@ -30,11 +49,19 @@ data class Definer(val packId: String, val wiktionaryLanguage: String, val ancho
 
 /** What Define found: the entry is open ([note] to show with it, or null), or there is none. */
 sealed interface LookUp {
-    data class Found(val note: app.granger.UiText? = null) : LookUp
+    data class Found(val note: UiText? = null) : LookUp
 
     data object NotFound : LookUp
 }
 
+/**
+ * A word's Wiktionary entry, to open over the book: the page [path] titled [title] in [packId], at [anchor] (the book
+ * language's section; null when no Wiktionary was chosen for it). [note] says which Wiktionary it was when it's a
+ * fallback ("Defined in French Wiktionary").
+ */
+data class DictionaryEntry(val packId: String, val path: String, val title: String, val anchor: String?, val note: UiText?)
+
+/** Define in the e-book reader: which dictionary, and the Wiktionary lookup. Shared since Plan I5 Task 2. */
 object Dictionary {
     /**
      * Which installed Wiktionary defines a word in a book in [bookLanguage] (Plan L3), for a library in
@@ -67,12 +94,10 @@ object Dictionary {
      * The section of a word's entry for [bookLanguage] in a Wiktionary in [wiktionaryLanguage]: the language's name in
      * that Wiktionary's language, as its headings say it ("Spanish" in English Wiktionary, "Español" in Spanish).
      */
-    fun anchor(bookLanguage: String, wiktionaryLanguage: String): String {
-        val locale = Locale.forLanguageTag(wiktionaryLanguage)
-        return Locale.forLanguageTag(bookLanguage).getDisplayLanguage(locale).replaceFirstChar { it.titlecase(locale) }.replace(' ', '_')
-    }
+    fun anchor(bookLanguage: String, wiktionaryLanguage: String): String =
+        languageNameIn(bookLanguage, wiktionaryLanguage).replace(' ', '_')
 
-    /** An OK `wiktionary_*` pack (the newest snapshot), else an app that handles process-text, else nothing. */
+    /** An OK `wiktionary_*` pack (the newest snapshot), else the phone's own dictionary ([SystemDictionary]), else nothing. */
     fun choose(packs: List<Pack>, hasProcessTextHandler: Boolean): DictionaryChoice {
         val wiktionary = packs
             .filter { it.status == PackStatus.OK && it.name.startsWith("wiktionary_") }
@@ -86,7 +111,7 @@ object Dictionary {
 
     /** The first word of [selection], lower-cased and stripped of surrounding punctuation; empty if there is none. */
     fun normalise(selection: String): String =
-        selection.trim().split(Regex("\\s+")).firstOrNull().orEmpty()
+        selection.trim().split(WHITESPACE).firstOrNull().orEmpty()
             .trim { !it.isLetterOrDigit() }
             .lowercase()
 
@@ -94,22 +119,20 @@ object Dictionary {
     fun pick(hits: List<ZimHit>, word: String): ZimHit? =
         hits.firstOrNull { it.title.equals(word, ignoreCase = true) } ?: hits.firstOrNull()
 
-    private fun processTextIntent(): Intent = Intent(Intent.ACTION_PROCESS_TEXT).setType("text/plain")
-
-    /** Whether some app handles process-text. Queries the package manager: call off the main thread. */
-    fun hasProcessTextHandler(context: Context): Boolean =
-        context.packageManager.queryIntentActivities(processTextIntent(), PackageManager.MATCH_DEFAULT_ONLY).isNotEmpty()
-
-    /** Hands [text] to the process-text app, read-only. Returns false when none can take it. */
-    fun startProcessText(context: Context, text: String): Boolean = try {
-        context.startActivity(
-            processTextIntent()
-                .putExtra(Intent.EXTRA_PROCESS_TEXT, text)
-                .putExtra(Intent.EXTRA_PROCESS_TEXT_READONLY, true)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-        )
-        true
-    } catch (e: android.content.ActivityNotFoundException) {
-        false
+    /**
+     * [word]'s entry for a book in [bookLanguage] (Plan L3): in the Wiktionary [choose] picks for it, or [packId] when it
+     * picks none; null when the pack has no such word. The pack's titles are read on [io].
+     */
+    suspend fun entry(
+        library: Library, packId: String, word: String, bookLanguage: String?, knowledgeLanguages: List<String>,
+        io: CoroutineDispatcher = ioDispatcher,
+    ): DictionaryEntry? {
+        val definer = choose(library.packs.first(), bookLanguage, knowledgeLanguages)
+        val id = definer?.packId ?: packId
+        val hit = withContext(io) { library.archive(id)?.suggest(word, 5) }?.let { pick(it, word) } ?: return null
+        val note = definer?.takeIf { it.fallback }?.let { UiText.Res("ebook_defined_in", KiwixList.languageName(it.wiktionaryLanguage)) }
+        return DictionaryEntry(id, hit.path, hit.title, definer?.anchor, note)
     }
+
+    private val WHITESPACE = Regex("\\s+")
 }

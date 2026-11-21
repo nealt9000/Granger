@@ -91,3 +91,8 @@ actual fun englishCountryName(code: String): String =
 actual fun logWarn(message: String, error: Throwable?) {
     platform.Foundation.NSLog("Granger: %@", if (error == null) message else "$message ($error)")
 }
+
+actual fun languageNameIn(language: String, inLanguage: String): String {
+    val name = NSLocale(localeIdentifier = inLanguage).displayNameForKey(platform.Foundation.NSLocaleLanguageCode, value = language)
+    return name?.ifEmpty { null }?.replaceFirstChar { it.titlecase() } ?: language
+}

@@ -137,10 +137,6 @@ data class EbookUi(
 /** The voice's sentence in this book: its locator (the element's, with the sentence as text), its paragraph, and whether the page follows it. */
 data class BookReading(val locator: Locator, val paragraph: Int, val following: Boolean)
 
-data class TocRow(val title: String, val href: String, val depth: Int)
-
-enum class Panel { CONTENTS, SETTINGS, SEARCH }
-
 /** "Chapter · p. 120 of 410", or "Chapter · 29%" while the pages are uncounted. */
 object ProgressLabel {
     fun of(locator: Locator, positionsCount: Int): UiText {
@@ -158,6 +154,10 @@ object ProgressLabel {
 /**
  * One book in a reading tab. The publication is opened once and lives as long as this view model, so rotation
  * doesn't reopen it. Saved places go to [appScope], debounced, so the last one lands even after the screen is gone.
+ *
+ * The marks, search in the book and the text settings are the shared [EbookReaderModel]'s (Plan I5 Task 2), which this
+ * extends; what it shows goes into [EbookUi] through the model's hooks. The navigator, the publication, locators and
+ * decorations, read aloud and PDFs stay here: they are Readium's.
  */
 class EbookReaderViewModel(
     private val tabId: Long,
@@ -168,7 +168,7 @@ class EbookReaderViewModel(
     private val prefsStore: ReadingPrefsStore,
     private val appScope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
-    private val searcher: BookSearcher = ReadiumBookSearcher(),
+    private val searcher: PublicationSearcher = ReadiumBookSearcher(),
     /** Survives process death with the route; remembers that the route's [target] was already used. */
     private val savedState: SavedStateHandle = SavedStateHandle(),
     /** The player, for read-aloud (Plan V1); null leaves the voice out of this reader. */
@@ -186,7 +186,7 @@ class EbookReaderViewModel(
     private val pdfColour: (File) -> Boolean = { false },
     /** A Classic's reference links and what a tapped one opens (Plan LL1); null leaves links out of this reader. */
     private val links: BookLinkSource? = null,
-) : ViewModel() {
+) : EbookReaderModel(bookshelf, prefsStore, appScope, io) {
     /** The open PDF is in colour ([pdfColour]): Night doesn't invert it. */
     @Volatile private var colour = false
 
@@ -213,16 +213,8 @@ class EbookReaderViewModel(
     val selectionActions: Flow<SelectionRequest> = _selectionActions.receiveAsFlow()
     private val selectionSink: (SelectionRequest) -> Unit = { _selectionActions.trySend(it) }
 
-    private val bookmarkLock = Mutex()
-    private val highlightLock = Mutex()
-    private var searchJob: Job? = null
-
     /** Builds the navigator fragment; set with the publication, before the state shows it. */
     var navigatorFactory: BookNavigator? = null
-        private set
-
-    /** The open book's id; set with [navigatorFactory]. */
-    var bookId: String? = null
         private set
 
     /** The open PDF's file, for PdfBox; null for an EPUB. */
@@ -299,6 +291,7 @@ class EbookReaderViewModel(
                 BookNavigator.Epub(EpubNavigatorFactory(opened))
             }
             bookId = book.id
+            bookSearcher = searcher.bind(opened)
             if (pdf) pdfFile = file
             navigatorFactory = factory
             OpenBooks.current = book.id to factory
@@ -507,11 +500,12 @@ class EbookReaderViewModel(
         links.flatMap { listOf(TocRow(it.title.orEmpty().trim(), it.href.toString(), depth)) + flatten(it.children, depth + 1) }
 
     private fun onMarks(marks: List<BookAnnotation>) {
+        val split = ReaderMarks.of(marks)
         _state.update {
-            val highlights = marks.filter { m -> m.kind == MarkKind.HIGHLIGHT }
+            val highlights = split.highlights
             val placed = place(it.publication, highlights)
             it.copy(
-                bookmarks = marks.filter { m -> m.kind == MarkKind.BOOKMARK }.sortedWith(compareByDescending<BookAnnotation> { m -> m.createdAt }.thenByDescending { m -> m.id }),
+                bookmarks = split.bookmarks,
                 highlights = highlights,
                 decorations = placed.decorations,
                 unplaceable = placed.unplaceable,
@@ -539,23 +533,8 @@ class EbookReaderViewModel(
      * marks rather than the screen's copy, so a double tap can't add twice.
      */
     fun toggleBookmark() {
-        val id = bookId ?: return
         val here = _state.value.locator ?: return
-        appScope.launch {
-            bookmarkLock.withLock {
-                val existing = bookshelf.marks(id).first().filter { m ->
-                    m.kind == MarkKind.BOOKMARK && parse(m.locatorJson)?.let { isSamePlace(it, here) } == true
-                }
-                if (existing.isNotEmpty()) {
-                    existing.forEach { bookshelf.deleteMark(it.id) }
-                } else {
-                    val now = System.currentTimeMillis()
-                    bookshelf.addMark(
-                        BookAnnotation(0, id, MarkKind.BOOKMARK, here.toJSON().toString(), bookmarkText(here), "", "", now, now),
-                    )
-                }
-            }
-        }
+        toggleBookmark(here.toJSON().toString(), { bookmarkText(here) }) { json -> parse(json)?.let { isSamePlace(it, here) } == true }
     }
 
     /** A contents row: the chapter file it points into, with its #fragment. Not in the reading order: ignored. */
@@ -622,67 +601,34 @@ class EbookReaderViewModel(
         viewModelScope.launch { StartLocator.repair(opened, stored)?.let(::jump) }
     }
 
-    /**
-     * Saves the selection as a highlight and returns its new id. Serialised with the other highlight writes, and
-     * run on [appScope], so leaving the screen mid-write doesn't lose it.
-     */
-    suspend fun highlight(locator: Locator, text: String, color: String = "yellow"): Long {
-        val id = bookId ?: return -1L
-        return appScope.async {
-            highlightLock.withLock {
-                val now = System.currentTimeMillis()
-                bookshelf.addMark(
-                    BookAnnotation(0, id, MarkKind.HIGHLIGHT, locator.toJSON().toString(), text, color, "", now, now),
-                )
-            }
-        }.await()
-    }
+    /** Saves the selection as a highlight and returns its new id ([EbookReaderModel.highlight]). */
+    suspend fun highlight(locator: Locator, text: String, color: String = "yellow"): Long = highlight(locator.toJSON().toString(), text, color)
 
     /** A yellow highlight with its note editor open. */
     suspend fun note(locator: Locator, text: String) {
-        val id = highlight(locator, text)
-        if (id >= 0) _state.update { it.copy(editingHighlight = id, focusNote = true) }
+        note(locator.toJSON().toString(), text)
     }
 
-    /** Opens (or closes, with null) the sheet for a highlight drawn on the page. */
-    fun editHighlight(id: Long?) {
-        _state.update { it.copy(editingHighlight = id, focusNote = false) }
+    override fun showEditing(id: Long?, focusNote: Boolean) {
+        _state.update { it.copy(editingHighlight = id, focusNote = focusNote) }
     }
 
-    /** Saves a changed colour or note. */
-    fun updateHighlight(mark: BookAnnotation) {
-        appScope.launch {
-            highlightLock.withLock { bookshelf.updateMark(mark.copy(updatedAt = System.currentTimeMillis())) }
-        }
-    }
-
-    fun deleteHighlight(id: Long) {
+    override fun highlightDeleted(id: Long) {
         _state.update { if (it.editingHighlight == id) it.copy(editingHighlight = null) else it }
-        appScope.launch { highlightLock.withLock { bookshelf.deleteMark(id) } }
     }
 
-    /** Searches the book for [query]; any search still running is dropped. A blank query clears the results. */
-    fun search(query: String) {
-        searchJob?.cancel()
-        val trimmed = query.trim()
-        _state.update { it.copy(search = BookSearchUi(query = query), searchHit = null) }
-        val opened = _state.value.publication
-        if (trimmed.isEmpty() || opened == null) return
-        _state.update { it.copy(search = it.search.copy(running = true)) }
-        searchJob = viewModelScope.launch {
-            val hits = try {
-                withContext(io) { searcher.search(opened, trimmed) }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Log.w("Granger", "Searching the book failed", e)
-                emptyList()
-            }
-            _state.update {
-                it.copy(search = BookSearchUi(query, SearchRows.build(trimmed, it.highlights, hits, it.toc), running = false))
-            }
-        }
+    // Search in the book is the shared model's ([EbookReaderModel.search]); its results show here.
+    override fun currentSearch(): BookSearchUi = _state.value.search
+
+    override fun showSearch(ui: BookSearchUi, started: Boolean) {
+        _state.update { if (started) it.copy(search = ui, searchHit = null) else it.copy(search = ui) }
     }
+
+    override fun currentHighlights(): List<BookAnnotation> = _state.value.highlights
+
+    override fun currentToc(): List<TocRow> = _state.value.toc
+
+    override fun sameFile(a: String, b: String): Boolean = sameHrefFile(a, b)
 
     /** A search result: jump there and mark the match on the page, with the panel and the chrome out of the way ([jump]). */
     fun goToHit(row: BookSearchRow) {
@@ -701,11 +647,9 @@ class EbookReaderViewModel(
         _navigation.trySend(locator)
     }
 
-    fun open(panel: Panel?) {
+    override fun open(panel: Panel?) {
         _state.update { it.copy(panel = panel, searchHit = null) }
     }
-
-    fun updatePrefs(prefs: ReadingPrefs) = prefsStore.update(prefs)
 
     /** Draws the book's reference links at the chosen level, again whenever the level changes. */
     private suspend fun followLinks(links: BookLinkSource, bookId: String, opened: Publication) {
@@ -895,21 +839,4 @@ class EbookReaderViewModel(
         /** After the title of an ebook's original pages, on their tab. */
         const val ORIGINAL_PAGES_TITLE = " (original pages)"
     }
-}
-
-/** The PDF page a contents row opens at (its `#page=n`); null if it names none. */
-internal fun pdfPageOf(href: String): Int? = href.substringAfter("#page=", "").takeIf { it.isNotEmpty() }?.toIntOrNull()
-
-/** The last contents row at or before [page] in a PDF's outline; null when the page comes before them all. */
-internal fun pdfTocIndex(toc: List<TocRow>, page: Int): Int? {
-    var best: Int? = null
-    var bestPage = 0
-    toc.forEachIndexed { i, row ->
-        val p = pdfPageOf(row.href) ?: return@forEachIndexed
-        if (p <= page && p >= bestPage) {
-            best = i
-            bestPage = p
-        }
-    }
-    return best
 }

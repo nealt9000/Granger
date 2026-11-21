@@ -11,29 +11,7 @@ import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.util.Url
 import org.readium.r2.shared.util.mediatype.MediaType
 
-/** Reference links in the Classics (Plan LL1 Decision 5): none, the Light set (the default), or More. */
-enum class LinkLevel(val maxTier: Int) { OFF(0), LIGHT(1), MORE(2) }
-
-/**
- * What a tapped link opens (plan Decision 7): the article's title, first sentence and picture, and where it is; [book]
- * when the link is a work whose book is on the phone ("In your library").
- */
-data class LinkPeek(
-    val qid: Long, val packId: String, val path: String, val title: String, val sentence: String, val thumbnail: String?,
-    val book: LibraryBook? = null,
-)
-
-/** Where the reader gets a Classic's links and what a tapped one opens; the app's is [app.granger.ReferenceLinksSource]. */
-interface BookLinkSource {
-    /** The open book's mentions up to [level]'s tier that an installed Wikipedia can open; empty when it has no links file. */
-    suspend fun mentions(bookId: String, level: LinkLevel): List<BookMention>
-
-    /**
-     * The peek card for [qid]; null when no installed pack has the article any more. With the book's [language], an
-     * article in that language comes first (Task 10: Don Quijote's Aristóteles opened the English article).
-     */
-    suspend fun peek(qid: Long, language: String? = null): LinkPeek?
-}
+// LinkLevel, LinkPeek, BookLinkSource and the links' ids are shared (core:screens, LinkMentions; Plan I5 Task 2).
 
 /** The group of decorations drawn for the reference links, apart from the highlights, the search hit and the voice. */
 const val LINKS_GROUP = "links"
@@ -74,7 +52,7 @@ fun readerDecorationTemplates(): HtmlDecorationTemplates =
 
 internal object LinkDecorations {
     /** How much of the words before a mention Readium gets to tell it from the same name earlier (as its own quotes keep). */
-    const val CONTEXT = 32
+    const val CONTEXT = LinkMentions.CONTEXT
 
     /**
      * The mentions as decorations, found in the page by their quote and the words before it in the same paragraph (the
@@ -96,10 +74,10 @@ internal object LinkDecorations {
         }
     }
 
-    fun contextOf(before: String): String? = before.substringAfterLast('\n').takeLast(CONTEXT).ifEmpty { null }
+    fun contextOf(before: String): String? = LinkMentions.contextOf(before)
 
-    fun idOf(m: BookMention) = "${m.qid}@${m.href}#${m.start}"
+    fun idOf(m: BookMention) = LinkMentions.idOf(m)
 
     /** The item a link decoration points at; null for any other id. */
-    fun qidOf(decorationId: String): Long? = decorationId.substringBefore('@').toLongOrNull()
+    fun qidOf(decorationId: String): Long? = LinkMentions.qidOf(decorationId)
 }

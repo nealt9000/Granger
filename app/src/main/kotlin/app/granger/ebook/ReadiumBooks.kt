@@ -66,15 +66,25 @@ fun readerConfiguration(): EpubNavigatorFragment.Configuration {
     )
 }
 
-/** Finds a phrase in the book's text. */
-interface BookSearcher {
+/** Finds a phrase in an opened publication's text (the shared reader asks a [BookSearcher], made with [bind]). */
+interface PublicationSearcher {
     /** Up to [max] places where [query] occurs, in book order; empty when the book can't be searched. */
     suspend fun search(publication: Publication, query: String, max: Int = 200): List<Locator>
 }
 
+/** [publication]'s search, as the shared reader asks it: each hit's locator as JSON, with its chapter and words. */
+fun PublicationSearcher.bind(publication: Publication): BookSearcher = object : BookSearcher {
+    override suspend fun search(query: String, max: Int): List<BookTextHit> =
+        search(publication, query, max).map { it.toTextHit() }
+}
+
+/** A Readium search hit for the shared search panel. */
+internal fun Locator.toTextHit(): BookTextHit =
+    BookTextHit(toJSON().toString(), href.toString(), title, text.before, text.highlight, text.after)
+
 /** Readium's search service, read page by page until it runs dry or [max] hits are in. */
 @OptIn(ExperimentalReadiumApi::class)
-class ReadiumBookSearcher : BookSearcher {
+class ReadiumBookSearcher : PublicationSearcher {
     override suspend fun search(publication: Publication, query: String, max: Int): List<Locator> {
         if (!publication.isSearchable) return emptyList()
         return withContext(Dispatchers.IO) {

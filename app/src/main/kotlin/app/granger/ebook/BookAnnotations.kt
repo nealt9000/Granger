@@ -1,7 +1,5 @@
 package app.granger.ebook
 
-import app.granger.invoke
-import app.granger.R
 import app.granger.UiText
 import app.granger.core.library.BookAnnotation
 import org.json.JSONObject
@@ -10,17 +8,7 @@ import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.util.Url
 
-/** The four highlight colours: muted tints that read on the Day, Sepia and Night pages alike. */
-object HighlightColors {
-    val names = listOf("yellow", "green", "blue", "pink")
-
-    fun argb(name: String): Int = when (name) {
-        "green" -> 0xFF7BC47F.toInt()
-        "blue" -> 0xFF6FA8DC.toInt()
-        "pink" -> 0xFFE88FB4.toInt()
-        else -> 0xFFE8C94A.toInt()
-    }
-}
+// HighlightColors, the search panel's rows and the marks' split are shared (core:screens BookSearch, Plan I5 Task 2).
 
 /** The group of decorations drawn for the saved highlights, the one for the search hit being shown, and the voice's sentence. */
 const val HIGHLIGHT_GROUP = "highlights"
@@ -57,57 +45,20 @@ internal fun place(publication: Publication?, highlights: List<BookAnnotation>):
     return Placed(decorations, lost)
 }
 
-/** One line in the search panel: a hit in context, or one of the reader's own marks. */
-data class BookSearchRow(
-    val locator: Locator?,
-    /** The chapter, or for the reader's own mark "Your highlight · chapter". */
-    val chapter: UiText,
-    val before: String,
-    val match: String,
-    val after: String,
-    val markId: Long?,
-)
+/** Where the row opens, as Readium's locator. */
+val BookSearchRow.locator: Locator? get() = locatorJson?.let(::parseLocator)
 
-data class BookSearchUi(
-    val query: String = "",
-    val results: List<BookSearchRow> = emptyList(),
-    val running: Boolean = false,
-)
+/** A search panel row at [locator] (Android's readers and tests make them from Readium's locators). */
+fun BookSearchRow(locator: Locator?, chapter: UiText, before: String, match: String, after: String, markId: Long?): BookSearchRow =
+    BookSearchRow(locator?.toJSON()?.toString(), chapter, before, match, after, markId)
 
-internal object SearchRows {
-    /** Marks whose text or note holds [query] (ignoring case) first, then the text [hits]. */
-    fun build(query: String, marks: List<BookAnnotation>, hits: List<Locator>, toc: List<TocRow>): List<BookSearchRow> {
-        val own = marks.mapNotNull { mark ->
-            val inNote = mark.note.contains(query, ignoreCase = true)
-            val inText = mark.text.contains(query, ignoreCase = true)
-            if (!inNote && !inText) return@mapNotNull null
-            val locator = parseLocator(mark.locatorJson)
-            val where = locator?.title?.trim().orEmpty()
-            BookSearchRow(
-                locator = locator,
-                chapter = when {
-                    where.isEmpty() -> UiText.Res(if (inText) R.string.ebook_your_highlight else R.string.ebook_your_note)
-                    else -> UiText.Res(if (inText) R.string.ebook_your_highlight_in else R.string.ebook_your_note_in, where)
-                },
-                before = "",
-                match = if (inText) mark.text else mark.note,
-                after = "",
-                markId = mark.id,
-            )
-        }
-        val text = hits.map { hit ->
-            BookSearchRow(
-                locator = hit,
-                chapter = UiText.Raw(hit.title?.trim().orEmpty().ifEmpty { chapterTitle(hit.href, toc) }),
-                before = hit.text.before.orEmpty(),
-                match = hit.text.highlight.orEmpty(),
-                after = hit.text.after.orEmpty(),
-                markId = null,
-            )
-        }
-        return own + text
-    }
+/** Marks whose text or note holds [query] first, then the text [hits] ([SearchRows] is shared; Readium's files compared). */
+internal fun SearchRows.build(query: String, marks: List<BookAnnotation>, hits: List<Locator>, toc: List<TocRow>): List<BookSearchRow> =
+    build(query, marks, hits.map { it.toTextHit() }, toc, ::sameHrefFile)
 
-    private fun chapterTitle(href: Url, toc: List<TocRow>): String =
-        toc.lastOrNull { row -> Url(row.href)?.let { sameFile(it, href) } == true }?.title.orEmpty()
+/** Whether two hrefs name the same file, as Readium's Urls. */
+internal fun sameHrefFile(a: String, b: String): Boolean {
+    val ua = Url(a) ?: return false
+    val ub = Url(b) ?: return false
+    return sameFile(ua, ub)
 }

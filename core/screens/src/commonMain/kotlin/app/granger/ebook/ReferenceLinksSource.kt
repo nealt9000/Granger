@@ -1,6 +1,5 @@
 package app.granger.ebook
 
-import app.granger.core.library.open
 import app.granger.InstalledSidecar
 import app.granger.core.library.BookLinks
 import app.granger.core.library.BookMention
@@ -9,7 +8,7 @@ import app.granger.core.library.MentionIndex
 import app.granger.core.library.QidIndex
 import app.granger.core.library.QidIndexes
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import app.granger.screens.ioDispatcher
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -19,7 +18,7 @@ import kotlinx.coroutines.sync.withLock
  * together. A book's link is drawn only when an installed Wikipedia has its article, found through the QID indexes in
  * Wander's order, whole encyclopedias in the library's languages first (Decision 6), so every link drawn opens. The
  * other way round, an article's footer asks [index], every installed Classic's links in one file, kept in step with
- * the installed books. Blocking reads; called on IO.
+ * the installed books. Blocking reads; called on IO. Shared since Plan I5 Task 2 (the iPhone's reader reads the same files).
  */
 class ReferenceLinksSource(
     /** Each installed Classic's links file by bookshelf id, with the sha256 of the EPUB it must be built from. */
@@ -43,6 +42,8 @@ class ReferenceLinksSource(
     private val bookLanguage: suspend (bookId: String) -> String? = { null },
     /** The adult-content filter, pointed at each fresh set of indexes, whose ranked lists then leave its hidden items out. */
     private val contentFilter: app.granger.core.library.ContentFilter? = null,
+    /** A debug line about the mention index's copying (Android: Log.d under GrangerLinks in debug builds); dropped by default. */
+    private val debugLog: (String) -> Unit = {},
 ) : BookLinkSource, ArticleFooterSource {
     private val lock = Mutex()
     private var opened: Pair<List<Pair<String, InstalledSidecar>>, QidIndexes>? = null
@@ -57,7 +58,7 @@ class ReferenceLinksSource(
         val files = qidFiles()
         opened?.takeIf { it.first == files }?.let { return it.second }
         opened?.second?.close()
-        val fresh = QidIndexes(files.mapNotNull { (packId, s) -> QidIndex.open(s.file, packId, s.packSha256.ifEmpty { null }, s.packName) })
+        val fresh = QidIndexes(files.mapNotNull { (packId, s) -> QidIndex.open(s.path, packId, s.packSha256.ifEmpty { null }, s.packName) })
         contentFilter?.let { f ->
             fresh.hide = { f.hides(it) }
             fresh.noPicture = { f.noPicture(it) }
@@ -73,19 +74,17 @@ class ReferenceLinksSource(
 
     /** [index] brought into step with the installed links files (a no-op when they haven't changed). */
     private suspend fun synced(): MentionIndex {
-        val t0 = System.nanoTime()
-        val copied = index.sync(linksFiles().mapValues { (_, s) -> LinksFile(s.file, s.packSha256) })
-        if (copied > 0 && app.granger.BuildConfig.DEBUG) {
-            android.util.Log.d("GrangerLinks", "mention index: copied $copied books in ${(System.nanoTime() - t0) / 1_000_000} ms")
-        }
+        val t0 = app.granger.Perf.now()
+        val copied = index.sync(linksFiles().mapValues { (_, s) -> LinksFile(s.path, s.packSha256) })
+        if (copied > 0) debugLog("mention index: copied $copied books in ${app.granger.Perf.now() - t0} ms")
         return index
     }
 
     override suspend fun mentions(bookId: String, level: LinkLevel): List<BookMention> {
         if (level == LinkLevel.OFF) return emptyList()
-        background?.launch(Dispatchers.IO) { synced() }
+        background?.launch(ioDispatcher) { synced() }
         val file = linksFiles()[bookId] ?: return emptyList()
-        val all = BookLinks.open(file.file, file.packSha256)?.use { it.mentions(level.maxTier) } ?: return emptyList()
+        val all = BookLinks.open(file.path, file.packSha256)?.use { it.mentions(level.maxTier) } ?: return emptyList()
         if (all.isEmpty()) return all
         val qids = indexes()
         if (qids.isEmpty) return emptyList()
