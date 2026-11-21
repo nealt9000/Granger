@@ -115,6 +115,10 @@ When I5 merges, every parity row marked I5 is ticked or carries an agreed reason
 
 ### Task 5: Readium Swift and the readers
 - [ ] **Spike, one hour; stop and report if it fails:** the Readium Swift toolkit (the 3.x release nearest Kotlin 3.4) as a Swift package. Open a Classics EPUB, go to a stored Android locator, draw a highlight decoration, and get one search result.
+  - Spike passed 2026-11-21 (1db559c5).
+    - Readium Swift 3.11.1 (Shared, Streamer, Navigator; no HTTP server needed in 3.x), pinned in `Package.resolved`.
+    - `ReadiumSpikeTests` (GRANGER_TEST_EPUB): Pride and Prejudice opens. The Pixel 6's stored locator decodes, and the navigator lands in its chapter (position 22 vs 23). A highlight decoration is accepted. Search finds "Netherfield" with context, and the hit's locator JSON round-trips. 5.3 s including layout.
+    - Found on the way: CoreKiwix ships zlib.h/zconf.h, which Xcode copies into the shared build include folder. They shadowed the SDK's, and Readium's Minizip clashed with the SDK zlib module. `fetch-corekiwix.sh` now drops them (layout 2).
 - [ ] Build the e-book reader:
   - pages and scrolling, contents, text settings (the shared prefs values), tap to hide bars;
   - highlights and notes (the shared annotations; the selection menu as Android's), search in the book, link peek, the dictionary (per call 8);
