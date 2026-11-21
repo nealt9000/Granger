@@ -33,3 +33,4 @@ tools/feedback/inbox/
 /ios/**/xcuserdata/
 /ios/**/.build/
 /ios/**/.swiftpm/
+/ios/Vendor/

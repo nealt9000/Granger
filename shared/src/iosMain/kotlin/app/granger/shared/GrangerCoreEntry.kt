@@ -80,6 +80,13 @@ object GrangerCoreEntry {
 
     /** An item's bytes (a page or a picture) for the web view. */
     fun bytes(of: ByteArray): NSData = of.toNSData()
+
+    /** [data] as Kotlin bytes, copied in one go (Plan I4: CoreKiwix's reads, for shared code). */
+    fun byteArray(of: NSData): ByteArray = of.toByteArray()
+
+    /** A pack entry read by CoreKiwix, for the shared [app.granger.core.zim.ZimArchive] (Plan I4 Task 5). */
+    fun zimItem(path: String, mimeType: String, data: NSData): app.granger.core.zim.ZimItem =
+        app.granger.core.zim.ZimItem(path, mimeType, data.toByteArray())
 }
 
 @OptIn(ExperimentalForeignApi::class)

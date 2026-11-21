@@ -29,6 +29,11 @@ targets:
     dependencies:
       - package: GrangerCore
         product: GrangerCoreKit
+      # Kiwix's libkiwix 14.2.1 (Plan I4 Task 5): static, fetched by tools/ios/fetch-corekiwix.sh, not in git.
+      - framework: ../Vendor/CoreKiwix.xcframework
+        embed: false
+      - sdk: libc++.tbd
+      - sdk: libz.tbd
     info:
       path: Info.plist
       properties:
@@ -47,6 +52,8 @@ targets:
         MARKETING_VERSION: "0.1"
         CURRENT_PROJECT_VERSION: "1"
         TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_OBJC_BRIDGING_HEADER: Sources/Kiwix/Granger-Bridging-Header.h
+        CLANG_CXX_LANGUAGE_STANDARD: c++17
   GrangerTests:
     type: bundle.unit-test
     platform: iOS
