@@ -1,6 +1,5 @@
 package app.granger.core.library
 
-import androidx.room.withTransaction
 import app.granger.core.books.BookMeta
 import app.granger.core.books.ComicToPdf
 import app.granger.core.books.DrmKind
@@ -10,19 +9,15 @@ import app.granger.core.books.PdfInspector
 import app.granger.core.books.PdfToEpub
 import app.granger.core.books.TextDecoding
 import app.granger.core.books.TextToEpub
-import app.granger.core.books.convert
-import app.granger.core.books.inspect
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
-import java.security.MessageDigest
-import java.util.UUID
+import app.granger.core.books.outputTo
+import app.granger.core.text.hex
+import app.granger.core.text.sha1
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.io.IOException
+import kotlinx.io.Source
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -48,7 +43,10 @@ data class BookDetails(
     val language: String,
 )
 
-/** The e-books on the device, where each reader left off, and its bookmarks and highlights. */
+/**
+ * The e-books on the device, where each reader left off, and its bookmarks and highlights. Shared by both phones since
+ * Plan I5: files are paths; Android keeps its `File` and `InputStream` forms as extensions (`BookshelfFiles.kt`).
+ */
 interface Bookshelf {
     val books: Flow<List<Book>>
     val positions: Flow<Map<String, BookPosition>>
@@ -63,14 +61,15 @@ interface Bookshelf {
      * A `.txt` file is converted to an EPUB beside it (null if it is over the size limit), and a comic (`.cbz`,
      * `.cbr`) to a PDF of its pages. Non-blank [details] fields win over the book's own metadata.
      */
-    suspend fun addDownloaded(file: File, origin: BookOrigin, ref: String, details: BookDetails? = null): Book?
+    suspend fun addDownloaded(file: String, origin: BookOrigin, ref: String, details: BookDetails? = null): Book?
 
     /**
      * Copies a user's file into the library, converting TXT and Markdown to EPUB. A file whose book is already here
      * and readable is [ImportResult.AlreadyThere]; one whose book is missing or damaged is imported again. Failing to
      * read [open] gives [ImportResult.Damaged]; other exceptions propagate. No partial file is left behind either way.
+     * The source is closed when read. (Android's `import` takes an `InputStream`, as before Plan I5.)
      */
-    suspend fun import(displayName: String, open: () -> InputStream): ImportResult
+    suspend fun importFrom(displayName: String, open: () -> Source): ImportResult
 
     /**
      * Deletes the file, cover and search text; the position and marks are kept. A pack book's row stays while its
@@ -91,13 +90,13 @@ interface Bookshelf {
      * fields and in the pack's collection by name. [Loose.SAVED] rows are hidden (read, not kept); a row kept on its own
      * ([Loose.KEPT]) or the pack's own row with its copy is left as it is. Null if the file isn't a readable PDF/EPUB.
      */
-    suspend fun addLoose(id: String, origin: BookOrigin, sourceRef: String, file: File, details: BookDetails, place: PackItem? = null): Book? = null
+    suspend fun addLoose(id: String, origin: BookOrigin, sourceRef: String, file: String, details: BookDetails, place: PackItem? = null): Book? = null
 
     /**
      * Plan BK: keeps the book [id], read online ([Loose.SAVED]), on its own: its file moves to [to], and it joins the
      * shelf ([Loose.KEPT], not hidden). Null when there's no such row, or the file can't be moved.
      */
-    suspend fun keepLoose(id: String, to: File): Book? = null
+    suspend fun keepLoose(id: String, to: String): Book? = null
 
     /**
      * The PDF the ebook [bookId] was made from (Plan IA), as a hidden book to open ([BookOrigin.PAGES]); null when it
@@ -129,7 +128,7 @@ interface Bookshelf {
      * snapshot of the pack finds the same row, with its place and marks (Plan KB2 Task 2.4).
      */
     suspend fun registerPackDocument(
-        zimId: String, path: String, title: String, file: File, linkText: String = "", listedTitle: String = "",
+        zimId: String, path: String, title: String, file: String, linkText: String = "", listedTitle: String = "",
     ): Book?
 
     /**
@@ -157,19 +156,22 @@ interface Bookshelf {
 }
 
 /**
+ * The [Bookshelf] in the library database, on both phones (Plan I5 Task 1; was Android's RoomBookshelf, which now only
+ * adapts its `File`s). Paths are absolute.
+ *
  * @param bookDirs each volume's `books/` folder; downloads live in `granger/` and imports in `imports/` under it.
  * @param importDir where imports are copied (the internal volume's `books/imports`).
  * @param maxTextBytes the largest TXT or Markdown file imported; conversion holds the whole text in memory.
  */
-class RoomBookshelf(
+open class BookshelfStore(
     private val db: LibraryDatabase,
-    private val bookDirs: () -> List<File>,
-    private val importDir: () -> File,
-    private val coversDir: File,
+    private val bookDirs: () -> List<String>,
+    private val importDir: () -> String,
+    private val coversDir: String,
     private val io: CoroutineDispatcher = Dispatchers.IO,
-    private val now: () -> Long = System::currentTimeMillis,
+    private val now: () -> Long = ::epochMillis,
     private val maxTextBytes: Long = 20L * 1024 * 1024,
-    private val pdfCovers: PdfCovers = PlatformPdfCovers,
+    private val pdfCovers: PdfCovers = PdfCovers.NONE,
 ) : Bookshelf {
     private val dao = db.bookDao()
 
@@ -180,11 +182,11 @@ class RoomBookshelf(
 
     override suspend fun book(id: String): Book? = dao.get(id)
 
-    override suspend fun addDownloaded(file: File, origin: BookOrigin, ref: String, details: BookDetails?): Book? =
+    override suspend fun addDownloaded(file: String, origin: BookOrigin, ref: String, details: BookDetails?): Book? =
         withContext(io) {
-            val comic = ComicToPdf.isComicName(file.name)
+            val comic = ComicToPdf.isComicName(nameOf(file))
             val pdf = if (comic) convertComic(file) ?: return@withContext null else file
-            if (isPdfName(pdf.name)) {
+            if (isPdfName(nameOf(pdf))) {
                 val meta = (PdfInspector.inspect(pdf) as? Inspection.Ok)?.meta ?: return@withContext null
                 // An archive.org upload made on a computer is read as an ebook, its PDF kept as its pages (Plan IA); not a
                 // comic's pages, and not the PDF got beside a text ("#pdf"), which was asked for as a PDF.
@@ -195,14 +197,14 @@ class RoomBookshelf(
                 }
                 return@withContext register(BookIds.of(origin, ref), origin, ref, pdf, meta, details, BookFormat.PDF)
             }
-            val epub = if (file.extension.equals("txt", ignoreCase = true)) {
+            val epub = if (extensionOf(file).equals("txt", ignoreCase = true)) {
                 convertText(file, details?.title?.takeIf { it.isNotBlank() }, details?.language) ?: return@withContext null
             } else {
                 file
             }
             val meta = (EpubInspector.inspect(epub) as? Inspection.Ok)?.meta
             if (meta == null) {
-                if (epub != file) epub.delete()
+                if (epub != file) Disk.delete(epub)
                 return@withContext null
             }
             register(BookIds.of(origin, ref), origin, ref, epub, meta, details)
@@ -212,19 +214,19 @@ class RoomBookshelf(
      * Converts the text file [txt] to `<name>.epub` beside it (via a `.incoming-` partial); null if it is too large
      * or can't be read or written. Leaves the text file in place.
      */
-    private fun convertText(txt: File, title: String?, language: String? = null): File? {
-        val target = File(txt.parentFile, txt.nameWithoutExtension + ".epub")
-        val partial = File(txt.parentFile, ".incoming-${UUID.randomUUID()}.epub")
+    private fun convertText(txt: String, title: String?, language: String? = null): String? {
+        val target = besides(txt, stemOf(txt) + ".epub")
+        val partial = besides(txt, ".incoming-${randomId()}.epub")
         return try {
-            if (txt.length() > maxTextBytes) return null
-            val text = TextDecoding.decode(txt.readBytes())
-            partial.outputStream().use { TextToEpub.convert(text, title ?: txt.nameWithoutExtension, false, it, language = language) }
-            Files.move(partial.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            if (Disk.length(txt) > maxTextBytes) return null
+            val text = TextDecoding.decode(Disk.readBytes(txt))
+            outputTo(partial).use { TextToEpub.convert(text, title ?: stemOf(txt), false, it, language = language) }
+            Disk.replace(partial, target)
             target
         } catch (_: IOException) {
             null
         } finally {
-            partial.delete()
+            Disk.delete(partial)
         }
     }
 
@@ -232,31 +234,31 @@ class RoomBookshelf(
      * Converts [pdf] to `<name>.pdf.epub` beside it when it passes [PdfToEpub]'s gate; null (with the reason logged) when
      * it doesn't, or isn't born-digital. The PDF stays: it is the book's original pages.
      */
-    private fun ebookFrom(pdf: File, title: String, author: String, language: String): Pair<File, BookMeta>? {
-        val target = File(pdf.parentFile, pdf.name + ".epub")
+    private fun ebookFrom(pdf: String, title: String, author: String, language: String): Pair<String, BookMeta>? {
+        val target = besides(pdf, nameOf(pdf) + ".epub")
         val report = try {
             PdfToEpub.convert(pdf, target, title, author, language)
         } catch (e: OutOfMemoryError) {
-            android.util.Log.w("Granger", "Making ${pdf.name} an ebook ran out of memory")
-            target.delete()
+            logWarn("Making ${nameOf(pdf)} an ebook ran out of memory")
+            Disk.delete(target)
             return null
         }
-        android.util.Log.i("Granger", "Ebook from ${pdf.name}: ${report.why} (${report.origin}, ${report.pages} pages, " +
+        logInfo("Ebook from ${nameOf(pdf)}: ${report.why} (${report.origin}, ${report.pages} pages, " +
             "${report.chapters} chapters from ${report.chapterSource}, kept ${(report.keptShare * 100).toInt()}%)")
         if (!report.passes) return null
         val meta = (EpubInspector.inspect(target) as? Inspection.Ok)?.meta
-        if (meta == null) target.delete()
+        if (meta == null) Disk.delete(target)
         return meta?.let { target to it }
     }
 
     /** The PDF [ebook] was made from: `x.pdf` for `x.pdf.epub`; null for an ebook that wasn't. */
-    private fun pagesFile(ebook: File): File? = PdfEbooks.pagesOf(ebook)
+    private fun pagesFile(ebook: String): String? = PdfEbooks.pagesOf(ebook)
 
     override suspend fun originalPages(bookId: String): Book? = withContext(io) {
         val book = dao.get(bookId) ?: return@withContext null
-        val pdf = pagesFile(File(book.filePath))?.takeIf { it.isFile } ?: return@withContext null
+        val pdf = pagesFile(book.filePath)?.takeIf { Disk.isFile(it) } ?: return@withContext null
         val id = BookIds.pagesOf(bookId)
-        dao.get(id)?.takeIf { File(it.filePath) == pdf && it.status == PackStatus.OK }?.let { return@withContext it }
+        dao.get(id)?.takeIf { sameFile(it.filePath, pdf) && it.status == PackStatus.OK }?.let { return@withContext it }
         val meta = (PdfInspector.inspect(pdf) as? Inspection.Ok)?.meta ?: return@withContext null
         register(id, BookOrigin.PAGES, bookId.removePrefix("book:"), pdf, meta,
             BookDetails(book.title, book.author, book.date, emptyList(), "", book.language), BookFormat.PDF)
@@ -264,13 +266,13 @@ class RoomBookshelf(
 
     override suspend fun originalPagesBytes(bookId: String): Long? = withContext(io) {
         val book = dao.get(bookId) ?: return@withContext null
-        pagesFile(File(book.filePath))?.takeIf { it.isFile }?.length()
+        pagesFile(book.filePath)?.takeIf { Disk.isFile(it) }?.let { Disk.length(it) }
     }
 
     override suspend fun removeOriginalPages(bookId: String): Boolean = withContext(io) {
         val book = dao.get(bookId) ?: return@withContext false
-        val pdf = pagesFile(File(book.filePath)) ?: return@withContext false
-        if (pdf.exists() && !pdf.delete()) return@withContext false
+        val pdf = pagesFile(book.filePath) ?: return@withContext false
+        if (Disk.exists(pdf) && !Disk.delete(pdf)) return@withContext false
         dropPages(bookId)
         true
     }
@@ -278,8 +280,8 @@ class RoomBookshelf(
     /** Forgets [bookId]'s original pages' row, cover and, unless [keepMarks], place and marks. */
     private suspend fun dropPages(bookId: String, keepMarks: Boolean = false) {
         val id = BookIds.pagesOf(bookId)
-        dao.get(id)?.coverPath?.let { File(it).delete() }
-        db.withTransaction {
+        dao.get(id)?.coverPath?.let { Disk.delete(it) }
+        db.inTransaction {
             dao.delete(id)
             dao.deleteChunks(id)
             if (!keepMarks) {
@@ -293,13 +295,13 @@ class RoomBookshelf(
         val book = dao.get(bookId) ?: return@withContext null
         // A shelf book's PDF, or a pack document's (Plan KB2 Task 4.4): every text PDF can be read as an ebook.
         if (book.format != BookFormat.PDF || !(book.onShelf || book.origin == BookOrigin.PACK)) return@withContext null
-        val pdf = File(book.filePath).takeIf { it.isFile } ?: return@withContext null
+        val pdf = book.filePath.takeIf { Disk.isFile(it) } ?: return@withContext null
         val target = PdfEbooks.ebookOf(pdf)
         val (report, made) = PdfEbooks.make(pdf, book.title, book.author, book.language)
         val meta = made ?: return@withContext report
         // The PDF's place, bookmarks and highlights are on its pages: they go with them.
         val pages = BookIds.pagesOf(bookId)
-        db.withTransaction {
+        db.inTransaction {
             dao.movePosition(bookId, pages)
             dao.moveMarks(bookId, pages)
             dao.deleteChunks(bookId)
@@ -311,47 +313,45 @@ class RoomBookshelf(
     }
 
     /** Converts the comic [archive] to `<name>.pdf` beside it; null if it can't be read. Leaves the archive in place. */
-    private fun convertComic(archive: File): File? {
-        val target = File(archive.parentFile, archive.nameWithoutExtension + ".pdf")
+    private fun convertComic(archive: String): String? {
+        val target = besides(archive, stemOf(archive) + ".pdf")
         return target.takeIf { ComicToPdf.convert(archive, it) }
     }
 
-    override suspend fun import(displayName: String, open: () -> InputStream): ImportResult = withContext(io) {
-        val dir = importDir().apply { mkdirs() }
-        val incoming = File(dir, ".incoming-${UUID.randomUUID()}")
-        val converted = File(dir, "${incoming.name}.epub")
+    override suspend fun importFrom(displayName: String, open: () -> Source): ImportResult = withContext(io) {
+        val dir = importDir().also { Disk.mkdirs(it) }
+        val incoming = Disk.child(dir, ".incoming-${randomId()}")
+        val converted = Disk.child(dir, "${nameOf(incoming)}.epub")
         try {
             val sha = try {
-                open().use { input -> incoming.outputStream().use { out -> sha256(input, out) } }
+                open().use { input -> Disk.sink(incoming).use { out -> sha256(input, out) } }
             } catch (_: IOException) {
                 return@withContext ImportResult.Damaged("Couldn't read the file")
             }
             val id = BookIds.of(BookOrigin.IMPORT, sha)
             val existing = dao.get(id)
-            if (existing != null && existing.status == PackStatus.OK && File(existing.filePath).exists()) {
+            if (existing != null && existing.status == PackStatus.OK && Disk.exists(existing.filePath)) {
                 return@withContext ImportResult.AlreadyThere(id)
             }
-            if (incoming.length() == 0L) return@withContext ImportResult.Damaged("Empty file")
+            if (Disk.length(incoming) == 0L) return@withContext ImportResult.Damaged("Empty file")
 
             val title = titleOf(displayName)
             val textName = isTextName(displayName)
-            val head = incoming.inputStream().use { input ->
-                ByteArray(SNIFF_BYTES).let { buf -> buf.copyOf(input.read(buf).coerceAtLeast(0)) }
-            }
+            val head = Disk.readHead(incoming, SNIFF_BYTES)
             if (head.startsWith(PDF_MAGIC)) {
                 val meta = when (val inspection = PdfInspector.inspect(incoming, title)) {
                     is Inspection.Ok -> inspection.meta
                     is Inspection.Protected -> return@withContext ImportResult.Protected(inspection.kind)
                     is Inspection.Invalid -> return@withContext ImportResult.Damaged(inspection.reason)
                 }
-                val target = File(dir, "${sha.take(12)}-${sanitise(meta.title)}.pdf")
+                val target = Disk.child(dir, "${sha.take(12)}-${sanitise(meta.title)}.pdf")
                 return@withContext place(incoming, target, id, sha, meta, BookFormat.PDF, existing)
             }
             val zip = head.startsWith(ZIP_MAGIC)
             // Not a zip: only a text name, or no extension at all, is worth reading as text (a .epub, .pdf, .html isn't).
             if (!zip && !textName && hasExtension(displayName)) return@withContext ImportResult.Unsupported
 
-            var epub: File? = null
+            var epub: String? = null
             var meta: BookMeta? = null
             if (zip) {
                 when (val inspection = EpubInspector.inspect(incoming, title)) {
@@ -363,12 +363,12 @@ class RoomBookshelf(
             }
             if (epub == null || meta == null) {
                 if (!zip && !textName && head.any { it == 0.toByte() }) return@withContext ImportResult.Unsupported
-                if (incoming.length() > maxTextBytes) return@withContext ImportResult.Damaged("Too large")
+                if (Disk.length(incoming) > maxTextBytes) return@withContext ImportResult.Damaged("Too large")
                 val markdown = displayName.lowercase().let { it.endsWith(".md") || it.endsWith(".markdown") }
-                val text = TextDecoding.decode(incoming.readBytes())
+                val text = TextDecoding.decode(Disk.readBytes(incoming))
                 // The text's own title when it names one ("Title: Walden", "# Field notes"); else the file name.
                 val textTitle = TextToEpub.titleOf(text, markdown) ?: title
-                converted.outputStream().use { TextToEpub.convert(text, textTitle, markdown, it) }
+                outputTo(converted).use { TextToEpub.convert(text, textTitle, markdown, it) }
                 epub = converted
                 meta = when (val inspection = EpubInspector.inspect(converted, textTitle)) {
                     is Inspection.Ok -> inspection.meta
@@ -377,26 +377,26 @@ class RoomBookshelf(
                 }
             }
 
-            place(epub, File(dir, "${sha.take(12)}-${sanitise(title)}.epub"), id, sha, meta, BookFormat.EPUB, existing)
+            place(epub, Disk.child(dir, "${sha.take(12)}-${sanitise(title)}.epub"), id, sha, meta, BookFormat.EPUB, existing)
         } finally {
-            incoming.delete()
-            converted.delete()
+            Disk.delete(incoming)
+            Disk.delete(converted)
         }
     }
 
     /** Moves an inspected import to [target] and registers it. */
     private suspend fun place(
-        file: File, target: File, id: String, sha: String, meta: BookMeta, format: BookFormat, existing: Book?,
+        file: String, target: String, id: String, sha: String, meta: BookMeta, format: BookFormat, existing: Book?,
     ): ImportResult {
-        Files.move(file.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        Disk.replace(file, target)
         try {
             register(id, BookOrigin.IMPORT, sha, target, meta, format = format)
         } catch (e: Throwable) {
-            target.delete()
+            Disk.delete(target)
             throw e
         }
         // A re-import replaces a damaged or misplaced copy; don't leave the old one as a stray.
-        if (existing != null && existing.filePath != target.absolutePath) File(existing.filePath).delete()
+        if (existing != null && existing.filePath != Disk.absolute(target)) Disk.delete(existing.filePath)
         return ImportResult.Imported(id)
     }
 
@@ -407,58 +407,58 @@ class RoomBookshelf(
         for (book in known) {
             val status = when {
                 // A pack book is copied out of its pack only when opened; its pack decides ([PackBooks.sync]).
-                book.origin.isPackBook && !File(book.filePath).exists() -> book.status
-                !File(book.filePath).exists() -> PackStatus.MISSING
+                book.origin.isPackBook && !Disk.exists(book.filePath) -> book.status
+                !Disk.exists(book.filePath) -> PackStatus.MISSING
                 // A damaged file stays damaged until it inspects cleanly; a returning file is otherwise OK.
-                book.status == PackStatus.CORRUPT && inspect(File(book.filePath)) !is Inspection.Ok ->
+                book.status == PackStatus.CORRUPT && inspect(book.filePath) !is Inspection.Ok ->
                     PackStatus.CORRUPT
                 else -> PackStatus.OK
             }
             if (status != book.status) dao.setStatus(book.id, status)
         }
 
-        val knownPaths = known.map { File(it.filePath).absolutePath }.toSet()
+        val knownPaths = known.map { Disk.absolute(it.filePath) }.toSet()
         val dirs = bookDirs()
-        val grangerFiles = dirs.flatMap { strays(File(it, "granger"), knownPaths) }
-        val importFiles = (dirs.map { File(it, "imports") } + importDir())
-            .distinctBy { it.absolutePath }
+        val grangerFiles = dirs.flatMap { strays(Disk.child(it, "granger"), knownPaths) }
+        val importFiles = (dirs.map { Disk.child(it, "imports") } + importDir())
+            .distinctBy { Disk.absolute(it) }
             .flatMap { strays(it, knownPaths) }
-        val archiveDirs = dirs.map { File(it, "archive-org") }
+        val archiveDirs = dirs.map { Disk.child(it, "archive-org") }
         // A verified text or comic download whose conversion never happened (the process died) is converted now.
         for (dir in archiveDirs) {
-            for (txt in dir.listFiles().orEmpty()) {
-                if (!txt.isFile || txt.name.startsWith(".incoming-")) continue
-                val comic = ComicToPdf.isComicName(txt.name)
-                if (!comic && !txt.extension.equals("txt", ignoreCase = true)) continue
-                if (File(dir, txt.nameWithoutExtension + if (comic) ".pdf" else ".epub").exists()) continue
+            for (txt in Disk.list(dir)) {
+                if (!Disk.isFile(txt) || nameOf(txt).startsWith(".incoming-")) continue
+                val comic = ComicToPdf.isComicName(nameOf(txt))
+                if (!comic && !extensionOf(txt).equals("txt", ignoreCase = true)) continue
+                if (Disk.exists(Disk.child(dir, stemOf(txt) + if (comic) ".pdf" else ".epub"))) continue
                 try {
                     if (comic) convertComic(txt) else convertText(txt, null)
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
-                    android.util.Log.w("Granger", "Converting ${txt.name} failed", e)
+                    logWarn("Converting ${nameOf(txt)} failed", e)
                 }
             }
         }
         val archiveFiles = archiveDirs.flatMap { strays(it, knownPaths) }
         val candidates =
-            grangerFiles.map { Triple(BookOrigin.GRANGER, it.nameWithoutExtension.substringBeforeLast('_'), it) } +
-                archiveFiles.map { Triple(BookOrigin.ARCHIVE_ORG, it.name.removeSuffix(EBOOK_FROM_PDF).let { n -> if (n == it.name) it.nameWithoutExtension else n }, it) } +
-                importFiles.map { file -> Triple(BookOrigin.IMPORT, file.inputStream().use { sha256(it) }, file) }
+            grangerFiles.map { Triple(BookOrigin.GRANGER, stemOf(it).substringBeforeLast('_'), it) } +
+                archiveFiles.map { Triple(BookOrigin.ARCHIVE_ORG, nameOf(it).removeSuffix(EBOOK_FROM_PDF).let { n -> if (n == nameOf(it)) stemOf(it) else n }, it) } +
+                importFiles.map { file -> Triple(BookOrigin.IMPORT, sha256Of(file), file) }
 
         for ((key, group) in candidates.groupBy { (origin, ref, _) -> origin to ref }) {
             val (origin, ref) = key
             val id = BookIds.of(origin, ref)
             val existing = dao.get(id)
             // Older snapshots of a download can be left behind: keep a row whose file is still there, else take the newest.
-            if (existing != null && File(existing.filePath).exists()) continue
+            if (existing != null && Disk.exists(existing.filePath)) continue
             // An ebook made from a PDF wins over the PDF beside it (its original pages).
-            val file = (group.filter { it.third.name.endsWith(EBOOK_FROM_PDF, ignoreCase = true) }.ifEmpty { group }).maxBy { it.third.name }.third
+            val file = (group.filter { nameOf(it.third).endsWith(EBOOK_FROM_PDF, ignoreCase = true) }.ifEmpty { group }).maxBy { nameOf(it.third) }.third
             when (val inspection = inspect(file)) {
                 is Inspection.Ok -> register(id, origin, ref, file, inspection.meta, format = formatOf(file))
                 else -> dao.upsert(
                     (existing ?: unreadable(id, origin, ref, file)).copy(
-                        filePath = file.absolutePath, sizeBytes = file.length(), status = PackStatus.CORRUPT,
+                        filePath = Disk.absolute(file), sizeBytes = Disk.length(file), status = PackStatus.CORRUPT,
                     ),
                 )
             }
@@ -467,24 +467,24 @@ class RoomBookshelf(
 
     override suspend fun remove(id: String): Boolean = withContext(io) {
         val book = dao.get(id) ?: return@withContext true
-        val file = File(book.filePath)
-        if (file.exists() && !file.delete()) return@withContext false
+        val file = book.filePath
+        if (Disk.exists(file) && !Disk.delete(file)) return@withContext false
         // An ebook made from a PDF takes its original pages with it; a pack book's pages keep their place and marks for
         // when it's copied out again, as its pack's removal leaves them (Plan KB2 Task 2.5).
         pagesFile(file)?.let { pdf ->
-            if (pdf.exists() && !pdf.delete()) return@withContext false
+            if (Disk.exists(pdf) && !Disk.delete(pdf)) return@withContext false
             dropPages(id, keepMarks = book.origin.isPackBook)
         }
         // A converted text or comic book's source stays beside it; left alone, the next refresh() would convert it again.
-        if (book.origin == BookOrigin.ARCHIVE_ORG && !file.name.endsWith(EBOOK_FROM_PDF, ignoreCase = true)) {
+        if (book.origin == BookOrigin.ARCHIVE_ORG && !nameOf(file).endsWith(EBOOK_FROM_PDF, ignoreCase = true)) {
             val sources = if (book.format == BookFormat.EPUB) listOf("txt") else listOf("cbz", "cbr")
             for (extension in sources) {
-                val source = File(file.parentFile, file.nameWithoutExtension + ".$extension")
-                if (source.exists() && !source.delete()) return@withContext false
+                val source = besides(file, stemOf(file) + ".$extension")
+                if (Disk.exists(source) && !Disk.delete(source)) return@withContext false
             }
         }
-        book.coverPath?.let { File(it).delete() }
-        db.withTransaction {
+        book.coverPath?.let { Disk.delete(it) }
+        db.inTransaction {
             dao.deleteChunks(id)
             // A pack book stays listed while its pack is installed, hidden (Plan KB2 Task 4.3): only the copy and its
             // search text go, and its tabs, which would otherwise say "Removed book" on the rail.
@@ -500,17 +500,17 @@ class RoomBookshelf(
     }
 
     override suspend fun hide(ids: Collection<String>): Unit = withContext(io) {
-        db.withTransaction {
+        db.inTransaction {
             for (id in ids) dao.get(id)?.takeIf { !it.hidden }?.let { dao.upsert(it.copy(hidden = true)) }
         }
     }
 
     override suspend fun addLoose(
-        id: String, origin: BookOrigin, sourceRef: String, file: File, details: BookDetails, place: PackItem?,
+        id: String, origin: BookOrigin, sourceRef: String, file: String, details: BookDetails, place: PackItem?,
     ): Book? = withContext(io) {
         dao.get(id)?.let { old ->
             // Kept on its own, or the installed pack's own copy: that's the book, not this read.
-            if ((old.loose == Loose.KEPT || old.loose == null) && File(old.filePath).isFile) return@withContext old
+            if ((old.loose == Loose.KEPT || old.loose == null) && Disk.isFile(old.filePath)) return@withContext old
         }
         val format = formatOf(file).let { if (place != null) place.format else it }
         val meta = (if (format == BookFormat.PDF) PdfInspector.inspect(file) else EpubInspector.inspect(file)) as? Inspection.Ok
@@ -526,34 +526,34 @@ class RoomBookshelf(
         row
     }
 
-    override suspend fun keepLoose(id: String, to: File): Book? = withContext(io) {
+    override suspend fun keepLoose(id: String, to: String): Book? = withContext(io) {
         val book = dao.get(id) ?: return@withContext null
         if (book.loose == Loose.KEPT) return@withContext book
-        val from = File(book.filePath)
-        if (!from.isFile) return@withContext null
-        to.parentFile?.mkdirs()
-        val partial = File(to.parentFile, ".incoming-${to.name}")
+        val from = book.filePath
+        if (!Disk.isFile(from)) return@withContext null
+        Disk.parent(to)?.let { Disk.mkdirs(it) }
+        val partial = besides(to, ".incoming-${nameOf(to)}")
         val moved = runCatching {
-            from.copyTo(partial, overwrite = true)
-            partial.renameTo(to)
+            Disk.copyOver(from, partial)
+            Disk.renameTo(partial, to)
         }.getOrDefault(false)
         if (!moved) {
-            partial.delete()
+            Disk.delete(partial)
             return@withContext null
         }
-        val kept = book.copy(filePath = to.absolutePath, sizeBytes = to.length(), loose = Loose.KEPT, hidden = false)
+        val kept = book.copy(filePath = Disk.absolute(to), sizeBytes = Disk.length(to), loose = Loose.KEPT, hidden = false)
         dao.upsert(kept)
         kept
     }
 
     override suspend fun unhide(ids: Collection<String>): Unit = withContext(io) {
-        db.withTransaction {
+        db.inTransaction {
             for (id in ids) dao.get(id)?.takeIf { it.hidden }?.let { dao.upsert(it.copy(hidden = false)) }
         }
     }
 
     override suspend fun registerPackDocument(
-        zimId: String, path: String, title: String, file: File, linkText: String, listedTitle: String,
+        zimId: String, path: String, title: String, file: String, linkText: String, listedTitle: String,
     ): Book? =
         withContext(io) {
             // zimit packs title a PDF entry with its path, and a PDF's own title is often its maker's junk
@@ -568,23 +568,23 @@ class RoomBookshelf(
             val before = dao.get(id)
             // Read as an ebook (Plan KB2 Task 4.4): it stays one, made again from this copy when the copy is new.
             // `pages`: the PDF its ebook was made from, when it is one.
-            val pages = before?.takeIf { it.format == BookFormat.EPUB }?.let { PdfEbooks.pagesOf(File(it.filePath)) }
+            val pages = before?.takeIf { it.format == BookFormat.EPUB }?.let { PdfEbooks.pagesOf(it.filePath) }
             if (before != null && pages != null) packEbookAgain(before, ref, file)?.let { return@withContext it }
             val details = BookDetails(PackDocumentTitle.choose(title, meta.title, linkText, path, listedTitle), "", "", emptyList(), "", "")
             if (before != null && pages != null) {
                 // It couldn't be made again: the PDF is the book once more, with the place and marks its pages had.
                 val pagesId = BookIds.pagesOf(id)
-                db.withTransaction {
+                db.inTransaction {
                     if (dao.position(pagesId) != null) dao.movePosition(pagesId, id)
                     dao.moveMarks(pagesId, id)
                     dao.deleteChunks(id)
                 }
                 dropPages(id, keepMarks = true)
-                pages.takeIf { it.absoluteFile != file.absoluteFile }?.delete()
+                pages.takeIf { !Disk.same(it, file) }?.let { Disk.delete(it) }
             }
             val book = register(id, BookOrigin.PACK, ref, file, meta, details, BookFormat.PDF)
             // Opened again from a new snapshot, it was copied out beside that pack: the earlier copy is stale.
-            if (before != null && before.filePath != book.filePath) File(before.filePath).delete()
+            if (before != null && before.filePath != book.filePath) Disk.delete(before.filePath)
             book
         }
 
@@ -593,10 +593,10 @@ class RoomBookshelf(
      * its ebook; a new one (a new snapshot, or storage cleared) is made an ebook again, the old copy and ebook deleted.
      * Its original pages' row follows the PDF, keeping their place and marks (same id). Null when the ebook can't be made.
      */
-    private suspend fun packEbookAgain(before: Book, ref: String, pdf: File): Book? {
-        val ebook = File(before.filePath)
+    private suspend fun packEbookAgain(before: Book, ref: String, pdf: String): Book? {
+        val ebook = before.filePath
         val oldPdf = PdfEbooks.pagesOf(ebook)
-        if (oldPdf?.absoluteFile == pdf.absoluteFile && ebook.isFile) {
+        if (oldPdf != null && Disk.same(oldPdf, pdf) && Disk.isFile(ebook)) {
             val kept = before.copy(sourceRef = ref)
             if (kept != before) dao.upsert(kept)
             originalPages(before.id)
@@ -605,21 +605,21 @@ class RoomBookshelf(
         val meta = try {
             PdfEbooks.make(pdf, before.title, before.author, before.language).second
         } catch (_: OutOfMemoryError) {
-            PdfEbooks.ebookOf(pdf).delete()
+            Disk.delete(PdfEbooks.ebookOf(pdf))
             null
         } ?: return null
         val details = BookDetails(before.title, before.author, before.date, before.subjects.split("; ").filter { it.isNotBlank() }, before.description, before.language)
         val book = register(before.id, BookOrigin.PACK, ref, PdfEbooks.ebookOf(pdf), meta, details)
-        if (ebook.absoluteFile != File(book.filePath).absoluteFile) {
-            ebook.delete()
-            oldPdf?.takeIf { it.absoluteFile != pdf.absoluteFile }?.delete()
+        if (!Disk.same(ebook, book.filePath)) {
+            Disk.delete(ebook)
+            oldPdf?.takeIf { !Disk.same(it, pdf) }?.let { Disk.delete(it) }
         }
         originalPages(before.id)
         return book
     }
 
     /** The key a pack document's row is filed under: its pack's ZIM name, or its UUID when it has none (or isn't here). */
-    private fun packKey(zimId: String): String = db.packDao().getBlocking(zimId)?.name?.takeIf { it.isNotBlank() } ?: zimId
+    private suspend fun packKey(zimId: String): String = db.packDao().get(zimId)?.name?.takeIf { it.isNotBlank() } ?: zimId
 
     /**
      * Files the pack document [old] under [ref] (`<name>/<path>`): the row keyed by it takes [old]'s place, marks, tabs
@@ -629,13 +629,13 @@ class RoomBookshelf(
         val id = BookIds.of(BookOrigin.PACK, ref)
         if (id == old.id) return
         val existing = dao.get(id)
-        db.withTransaction {
+        db.inTransaction {
             if (existing == null) dao.upsert(old.copy(id = id, sourceRef = ref))
             handOverBook(db, old.id, id)
         }
         if (existing != null) {
-            if (existing.filePath != old.filePath) File(old.filePath).delete()
-            old.coverPath?.takeIf { it != existing.coverPath }?.let { File(it).delete() }
+            if (existing.filePath != old.filePath) Disk.delete(old.filePath)
+            old.coverPath?.takeIf { it != existing.coverPath }?.let { Disk.delete(it) }
         }
     }
 
@@ -674,13 +674,13 @@ class RoomBookshelf(
                 if (key == zimId) rekey(book, "$zimName/${book.sourceRef.substringAfter('/', "")}")
                 continue
             }
-            File(book.filePath).delete()
-            book.coverPath?.let { File(it).delete() }
+            Disk.delete(book.filePath)
+            book.coverPath?.let { Disk.delete(it) }
             // Read as an ebook (Plan KB2 Task 4.4): its PDF, the original pages, goes too.
-            PdfEbooks.pagesOf(File(book.filePath))?.delete()
+            PdfEbooks.pagesOf(book.filePath)?.let { Disk.delete(it) }
             dropPages(book.id)
             sessions.deleteTabsForPack(BookIds.pagesOf(book.id))
-            db.withTransaction {
+            db.inTransaction {
                 sessions.deleteTabsForPack(book.id)
                 sessions.deleteHistoryForPack(book.id)
                 dao.deletePosition(book.id)
@@ -698,7 +698,7 @@ class RoomBookshelf(
     private suspend fun forgetRemovedPackDocuments() {
         val prefix = BookIds.of(BookOrigin.PACK, "")
         val sessions = db.sessionDao()
-        db.withTransaction {
+        db.inTransaction {
             sessions.deleteOrphanTabs(prefix)
             sessions.deleteOrphanHistory(prefix)
             dao.deleteOrphanPositions(prefix)
@@ -722,7 +722,7 @@ class RoomBookshelf(
 
     /** Upserts the book with fresh metadata and cover; an existing row keeps its id and `addedAt`, and is re-indexed. */
     private suspend fun register(
-        id: String, origin: BookOrigin, ref: String, file: File, meta: BookMeta, details: BookDetails? = null,
+        id: String, origin: BookOrigin, ref: String, file: String, meta: BookMeta, details: BookDetails? = null,
         format: BookFormat = BookFormat.EPUB,
     ): Book {
         val existing = dao.get(id)
@@ -730,7 +730,7 @@ class RoomBookshelf(
             id = id,
             origin = origin,
             sourceRef = ref,
-            filePath = file.absolutePath,
+            filePath = Disk.absolute(file),
             title = details?.title.orElse(meta.title),
             author = details?.author.orElse(meta.authors.joinToString(", ")),
             translator = meta.translators.joinToString(", "),
@@ -741,7 +741,7 @@ class RoomBookshelf(
             description = details?.description.orElse(meta.description),
             coverPath = writeCover(id, if (format == BookFormat.PDF) pdfCover(file) else meta.cover,
                 if (format == BookFormat.PDF) "png" else meta.coverExtension, existing?.coverPath),
-            sizeBytes = file.length(),
+            sizeBytes = Disk.length(file),
             status = PackStatus.OK,
             indexedAt = null,
             addedAt = existing?.addedAt ?: now(),
@@ -751,49 +751,58 @@ class RoomBookshelf(
         return book
     }
 
-    private fun pdfCover(file: File): ByteArray? = pdfCovers.firstPage(file, COVER_HEIGHT_PX)
+    private fun pdfCover(file: String): ByteArray? = pdfCovers.firstPage(file, COVER_HEIGHT_PX)
 
     /** The inspector for [file]'s format, by its name. */
-    private fun inspect(file: File): Inspection =
-        if (isPdfName(file.name)) PdfInspector.inspect(file) else EpubInspector.inspect(file)
+    private fun inspect(file: String): Inspection =
+        if (isPdfName(nameOf(file))) PdfInspector.inspect(file) else EpubInspector.inspect(file)
 
-    private fun formatOf(file: File) = if (isPdfName(file.name)) BookFormat.PDF else BookFormat.EPUB
+    private fun formatOf(file: String) = if (isPdfName(nameOf(file))) BookFormat.PDF else BookFormat.EPUB
+
+    /** `File(a) == File(b)`, as the shelf compared a row's file with one on disk before Plan I5. */
+    private fun sameFile(a: String, b: String): Boolean = Disk.same(a, b)
+
+    /** `File(file.parentFile, name)`. */
+    private fun besides(file: String, name: String): String = Disk.parent(file)?.let { Disk.child(it, name) } ?: name
+
+    /** [file]'s sha256 in hex, read to the end. */
+    private fun sha256Of(file: String): String = Disk.source(file).use { sha256(it) }
 
     /** Writes the cover's raw bytes to `coversDir/<sha1 of id>.<ext>` and removes any older cover; null if none. */
     private fun writeCover(id: String, bytes: ByteArray?, coverExtension: String?, oldPath: String?): String? {
         val extension = coverExtension?.lowercase()?.takeIf { SAFE_EXTENSION.matches(it) } ?: "img"
-        val target = bytes?.let { File(coversDir, "${sha1(id)}.$extension") }
-        if (oldPath != null && oldPath != target?.absolutePath) File(oldPath).delete()
+        val target = bytes?.let { Disk.child(coversDir, "${sha1(id)}.$extension") }
+        if (oldPath != null && oldPath != target?.let { Disk.absolute(it) }) Disk.delete(oldPath)
         if (target == null) return null
         return try {
-            coversDir.mkdirs()
-            target.writeBytes(bytes)
-            target.absolutePath
+            Disk.mkdirs(coversDir)
+            Disk.writeBytes(target, bytes)
+            Disk.absolute(target)
         } catch (_: IOException) {
-            target.delete()
+            Disk.delete(target)
             null
         }
     }
 
-    private fun unreadable(id: String, origin: BookOrigin, ref: String, file: File) = Book(
-        id = id, origin = origin, sourceRef = ref, filePath = file.absolutePath, title = file.nameWithoutExtension,
+    private fun unreadable(id: String, origin: BookOrigin, ref: String, file: String) = Book(
+        id = id, origin = origin, sourceRef = ref, filePath = Disk.absolute(file), title = stemOf(file),
         author = "", translator = "", date = "", language = "", subjects = "", description = "", coverPath = null,
-        sizeBytes = file.length(), status = PackStatus.CORRUPT, indexedAt = null, addedAt = now(),
+        sizeBytes = Disk.length(file), status = PackStatus.CORRUPT, indexedAt = null, addedAt = now(),
     )
 
     /** `.epub` and `.pdf` files in [dir] that no row points at; partial `.incoming-*` files are skipped. */
-    private fun strays(dir: File, knownPaths: Set<String>): List<File> =
-        dir.listFiles().orEmpty().filter {
-            it.isFile && (it.name.endsWith(".epub", ignoreCase = true) || isPdfName(it.name)) &&
-                !it.name.startsWith(".incoming-") &&
-                it.absolutePath !in knownPaths
+    private fun strays(dir: String, knownPaths: Set<String>): List<String> =
+        Disk.list(dir).filter {
+            Disk.isFile(it) && (nameOf(it).endsWith(".epub", ignoreCase = true) || isPdfName(nameOf(it))) &&
+                !nameOf(it).startsWith(".incoming-") &&
+                Disk.absolute(it) !in knownPaths
         }
 
     private companion object {
         const val SNIFF_BYTES = 4096
         val TEXT_EXTENSIONS = listOf(".txt", ".md", ".markdown", ".text")
-        val ZIP_MAGIC = "PK".toByteArray()
-        val PDF_MAGIC = "%PDF".toByteArray()
+        val ZIP_MAGIC = "PK".encodeToByteArray()
+        val PDF_MAGIC = "%PDF".encodeToByteArray()
         val UNSAFE = Regex("[^A-Za-z0-9._-]+")
         val SAFE_EXTENSION = Regex("[a-z0-9]{1,5}")
         const val COVER_HEIGHT_PX = 600
@@ -819,22 +828,7 @@ class RoomBookshelf(
         /** A filename-safe stem: runs of other characters become `-`, at most 60 characters, `book` if empty. */
         fun sanitise(title: String): String = title.replace(UNSAFE, "-").take(60).ifEmpty { "book" }
 
-        /** Reads [input] to the end, copying it to [out] if given; returns its sha256 in hex. */
-        fun sha256(input: InputStream, out: OutputStream? = null): String {
-            val digest = MessageDigest.getInstance("SHA-256")
-            val buffer = ByteArray(64 * 1024)
-            while (true) {
-                val n = input.read(buffer)
-                if (n < 0) break
-                digest.update(buffer, 0, n)
-                out?.write(buffer, 0, n)
-            }
-            return digest.digest().toHex()
-        }
-
-        fun sha1(text: String): String = MessageDigest.getInstance("SHA-1").digest(text.toByteArray()).toHex()
-
-        private fun ByteArray.toHex() = joinToString("") { "%02x".format(it) }
+        fun sha1(text: String): String = sha1(text.encodeToByteArray()).hex()
     }
 }
 
@@ -842,10 +836,10 @@ class RoomBookshelf(
  * Hands book [from]'s place (unless [to] has one), bookmarks, highlights, reading tabs and history to book [to], and
  * removes [from]'s row (Plan KB Decision 5, Plan KB2 Task 2.4). Its files are the caller's.
  */
-internal suspend fun handOverBook(db: LibraryDatabase, from: String, to: String) {
+suspend fun handOverBook(db: LibraryDatabase, from: String, to: String) {
     val dao = db.bookDao()
     val sessions = db.sessionDao()
-    db.withTransaction {
+    db.inTransaction {
         val position = dao.position(from)
         if (position != null && dao.position(to) == null) dao.upsertPosition(position.copy(bookId = to))
         dao.deletePosition(from)
@@ -864,7 +858,7 @@ internal suspend fun handOverBook(db: LibraryDatabase, from: String, to: String)
  * pack book (Gutenberg, nautilus) becoming indexed, or no longer, is a change: its shelf marks the books searchable in
  * full (Plan GB, Plan KB).
  */
-internal fun Flow<List<Book>>.ignoringIndexedAt(): Flow<List<Book>> =
+fun Flow<List<Book>>.ignoringIndexedAt(): Flow<List<Book>> =
     distinctUntilChanged { old, new -> old.size == new.size && old.indices.all { sameButIndexedAt(old[it], new[it]) } }
 
 private fun sameButIndexedAt(old: Book, new: Book): Boolean =

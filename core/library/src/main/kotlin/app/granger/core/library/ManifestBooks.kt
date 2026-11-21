@@ -17,34 +17,6 @@ fun BookManifest.collection(file: File): ManifestCollection? = collection(file.p
 fun BookManifest.keyOf(file: File, path: String): String? = keyOf(file.path, path)
 
 /**
- * Kiwix packs made book collections by a manifest, or listed by their files' names (Plan KB2), as a [PackBookSource]:
- * each item is a [BookOrigin.KIWIX] row, `book:kiwix:<pack name>/<key>`, with its section, order and parts. The manifest
- * was checked against this exact pack file before [Pack.bookManifest] named it ([BookManifests]), so its items are
- * trusted without looking each one up in the pack.
- */
-object ManifestSource : PackBookSource {
-    override val origin = BookOrigin.KIWIX
-
-    override val packOrder: Comparator<Pack> = compareBy<Pack>({ it.name }, { it.id })
-
-    override fun list(pack: Pack, archive: ZimArchive): List<PackItem>? = PackBookList.manifest(pack, archive)
-
-    override fun refOf(pack: Pack, path: String): String? {
-        val manifest = pack.bookManifest ?: return null
-        val p = path.removePrefix("/")
-        if (manifest == Pack.BOOK_FILES) {
-            val name = p.substringBefore('?')
-            return p.takeIf { name.endsWith(".pdf", ignoreCase = true) || name.endsWith(".epub", ignoreCase = true) }
-                ?.let { "${pack.name}/$it" }
-        }
-        return BookManifest.keyOf(manifest, p)?.let { "${pack.name}/$it" }
-    }
-
-    override fun fileName(ref: String, format: BookFormat): String =
-        PackBooks.sha1(ref) + if (format == BookFormat.EPUB) ".epub" else ".pdf"
-}
-
-/**
  * The books of the installed manifest packs (Plan KB2) as shelf rows: [PackBooks] over [ManifestSource], copied out to
  * [dir] (`books/kiwix`) when first opened, read with the inspector of their format.
  */
@@ -56,7 +28,7 @@ class ManifestBooks(
     io: CoroutineDispatcher = Dispatchers.IO,
     now: () -> Long = System::currentTimeMillis,
     pdfCovers: PdfCovers = PlatformPdfCovers,
-) : PackBooks(db, ManifestSource, archiveOf, dir, coversDir, io, now, pdfCovers)
+) : PackBooks(db, ManifestSource, archiveOf, { dir().absolutePath }, coversDir.absolutePath, io, now, pdfCovers, ::copyOutOfPack)
 
 /** An installed `.gbooks` and the sha256 of the pack file it must have been built from. */
 data class ManifestFile(val file: File, val packSha256: String)

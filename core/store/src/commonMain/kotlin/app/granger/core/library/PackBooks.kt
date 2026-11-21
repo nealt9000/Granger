@@ -1,18 +1,15 @@
 package app.granger.core.library
 
-import app.granger.core.zim.copyTo
-import androidx.room.withTransaction
 import app.granger.core.books.EpubInspector
 import app.granger.core.books.Inspection
 import app.granger.core.books.PdfInspector
-import app.granger.core.books.inspect
+import app.granger.core.text.hex
+import app.granger.core.text.sha1
 import app.granger.core.zim.ZimArchive
-import java.io.File
-import java.io.IOException
-import java.security.MessageDigest
-import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.io.IOException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -46,17 +43,21 @@ interface PackBookSource {
  *
  * A row's `sourceRef` is `<pack name>/<entry path>`: the ZIM name, not its UUID, so a new snapshot keeps the row, and
  * with it the place and marks. Its `filePath` is in [dir], there only once it has been opened.
+ *
+ * Shared by both phones since Plan I5 (Android's GutenbergBooks, ManifestBooks and NautilusBooks adapt their `File`s).
  */
 open class PackBooks(
     protected val db: LibraryDatabase,
     val source: PackBookSource,
     private val archiveOf: (packId: String) -> ZimArchive?,
     /** Where opened books are copied: the internal volume's `books/<source>`. */
-    private val dir: () -> File,
-    protected val coversDir: File,
+    private val dir: () -> String,
+    protected val coversDir: String,
     private val io: CoroutineDispatcher = Dispatchers.IO,
-    private val now: () -> Long = System::currentTimeMillis,
-    protected val pdfCovers: PdfCovers = PlatformPdfCovers,
+    private val now: () -> Long = ::epochMillis,
+    protected val pdfCovers: PdfCovers = PdfCovers.NONE,
+    /** Copies the entry [path] of [archive] to the file [to]; false when it can't (Android: libkiwix's own copy). */
+    private val copyOut: (archive: ZimArchive, path: String, to: String) -> Boolean = ::copyEntry,
 ) {
     protected val dao = db.bookDao()
     private val mutex = Mutex()
@@ -66,7 +67,7 @@ open class PackBooks(
      * Each pack's books, by pack id (a UUID names one snapshot, whose contents never change) and book manifest (which can
      * arrive after the pack, Plan KB2); read once.
      */
-    private val listed = ConcurrentHashMap<String, List<PackItem>>()
+    private val listed = ConcurrentCache<String, List<PackItem>>()
 
     private fun mine(pack: Pack) = pack.bookSource == origin
 
@@ -101,7 +102,7 @@ open class PackBooks(
                 val (pack, item) = holding.firstOrNull { old != null && packNameOf(old) == it.first.name } ?: holding.first()
                 // A book read online (Plan BK) is the pack's own once the pack is here: its copy comes from the pack.
                 val base = if (old?.loose == Loose.SAVED) {
-                    old.copy(loose = null, hidden = false, filePath = File(dirFile, source.fileName(ref, item.format)).absolutePath)
+                    old.copy(loose = null, hidden = false, filePath = Disk.absolute(Disk.child(dirFile, source.fileName(ref, item.format))))
                 } else {
                     old ?: newRow(id, ref, item.format, dirFile)
                 }
@@ -111,7 +112,7 @@ open class PackBooks(
                     author = item.author,
                     description = item.description ?: old?.description.orEmpty(),
                     language = item.language?.takeIf { it.isNotBlank() } ?: old?.language?.takeIf { it.isNotBlank() } ?: pack.language,
-                    sizeBytes = if (File(base.filePath).isFile) base.sizeBytes else item.sizeBytes,
+                    sizeBytes = if (Disk.isFile(base.filePath)) base.sizeBytes else item.sizeBytes,
                     status = PackStatus.OK,
                     groupName = item.groupName,
                     ord = item.ord,
@@ -136,7 +137,7 @@ open class PackBooks(
                     packName in readableNames || packName !in installedNames -> gone += book
                     // Its pack is missing or damaged: a copy still reads; one never opened can't.
                     else -> {
-                        val status = if (File(book.filePath).isFile) PackStatus.OK else PackStatus.MISSING
+                        val status = if (Disk.isFile(book.filePath)) PackStatus.OK else PackStatus.MISSING
                         if (status != book.status) writes += book.copy(status = status)
                     }
                 }
@@ -145,7 +146,7 @@ open class PackBooks(
                 // A book read as an ebook goes with its original pages: the PDF beside it and its hidden PAGES row,
                 // whose place and marks stay for a reinstall as the book's do.
                 val goneCovers = gone.mapNotNull { dao.get(BookIds.pagesOf(it.id))?.coverPath }
-                db.withTransaction {
+                db.inTransaction {
                     if (writes.isNotEmpty()) dao.upsertAll(writes)
                     for (book in gone) {
                         dao.deleteChunks(book.id)
@@ -159,11 +160,11 @@ open class PackBooks(
                     }
                 }
                 for (book in gone) {
-                    File(book.filePath).delete()
-                    PdfEbooks.pagesOf(File(book.filePath))?.delete()
-                    book.coverPath?.let { File(it).delete() }
+                    Disk.delete(book.filePath)
+                    PdfEbooks.pagesOf(book.filePath)?.let { Disk.delete(it) }
+                    book.coverPath?.let { Disk.delete(it) }
                 }
-                for (cover in goneCovers) File(cover).delete()
+                for (cover in goneCovers) Disk.delete(cover)
             }
             afterSync(readable.map { it.first })
             writes
@@ -182,8 +183,8 @@ open class PackBooks(
      */
     suspend fun restore(book: Book): Boolean = withContext(io) {
         if (book.origin != origin) return@withContext false
-        val target = File(book.filePath)
-        if (target.isFile) return@withContext true
+        val target = book.filePath
+        if (Disk.isFile(target)) return@withContext true
         val path = book.sourceRef.substringAfter('/', "")
         if (path.isEmpty()) return@withContext false
         val packName = packNameOf(book)
@@ -191,7 +192,7 @@ open class PackBooks(
         // `x.pdf`, its original pages, and the ebook is made from it again (Plan KB2 Task 2.5).
         val pages = PdfEbooks.pagesOf(target)
             ?.takeIf { book.format == BookFormat.EPUB && path.endsWith(".pdf", ignoreCase = true) }
-        if (pages != null && pages.isFile && PdfInspector.inspect(pages, book.title) is Inspection.Ok) {
+        if (pages != null && Disk.isFile(pages) && PdfInspector.inspect(pages, book.title) is Inspection.Ok) {
             return@withContext ebookAgain(dao.get(book.id) ?: book, pages, "$packName/$path")
         }
         val copyTo = pages ?: target
@@ -201,17 +202,17 @@ open class PackBooks(
         for (pack in candidates) {
             val archive = archiveOf(pack.id) ?: continue
             val entry = archive.entry(path) ?: continue
-            val parent = copyTo.parentFile?.apply { mkdirs() } ?: return@withContext false
-            if (parent.usableSpace < entry.sizeBytes) return@withContext false
-            val partial = File(parent, ".incoming-${copyTo.name}")
-            if (!archive.copyTo(entry.path, partial) || !partial.renameTo(copyTo)) {
-                partial.delete()
+            val parent = Disk.parent(copyTo)?.also { Disk.mkdirs(it) } ?: return@withContext false
+            if (Disk.freeBytes(parent) < entry.sizeBytes) return@withContext false
+            val partial = Disk.child(parent, ".incoming-${nameOf(copyTo)}")
+            if (!copyOut(archive, entry.path, partial) || !Disk.renameTo(partial, copyTo)) {
+                Disk.delete(partial)
                 continue
             }
             val current = dao.get(book.id) ?: book
             if (pages != null) {
                 if (PdfInspector.inspect(pages, book.title) !is Inspection.Ok) {
-                    pages.delete()
+                    Disk.delete(pages)
                     return@withContext false
                 }
                 return@withContext ebookAgain(current, pages, "${pack.name}/$path")
@@ -223,14 +224,14 @@ open class PackBooks(
                     ?.let { Cover(pdfCovers.firstPage(target, COVER_HEIGHT_PX), "png") }
             }
             if (cover == null) {
-                target.delete()
+                Disk.delete(target)
                 return@withContext false
             }
             // Opening a removed book brings it back to the shelf (Plan KB2 Task 4.3).
             dao.upsert(
                 current.copy(
                     sourceRef = "${pack.name}/$path",
-                    sizeBytes = target.length(),
+                    sizeBytes = Disk.length(target),
                     coverPath = writeCover(book.id, cover.bytes, cover.extension) ?: current.coverPath,
                     status = PackStatus.OK,
                     indexedAt = null,
@@ -247,11 +248,11 @@ open class PackBooks(
      * longer passes, the book goes back to being the PDF rather than a row that won't open: the PDF's place and marks,
      * kept on its original pages, come back to it, and the pages' row goes.
      */
-    private suspend fun ebookAgain(book: Book, pdf: File, sourceRef: String): Boolean {
+    private suspend fun ebookAgain(book: Book, pdf: String, sourceRef: String): Boolean {
         val (report, meta) = try {
             PdfEbooks.make(pdf, book.title, book.author, book.language)
         } catch (_: OutOfMemoryError) {
-            PdfEbooks.ebookOf(pdf).delete()
+            Disk.delete(PdfEbooks.ebookOf(pdf))
             null to null
         }
         if (meta != null) {
@@ -259,8 +260,8 @@ open class PackBooks(
             dao.upsert(
                 book.copy(
                     sourceRef = sourceRef,
-                    filePath = ebook.absolutePath,
-                    sizeBytes = ebook.length(),
+                    filePath = Disk.absolute(ebook),
+                    sizeBytes = Disk.length(ebook),
                     coverPath = writeCover(book.id, meta.cover, meta.coverExtension) ?: book.coverPath,
                     status = PackStatus.OK,
                     indexedAt = null,
@@ -269,11 +270,11 @@ open class PackBooks(
             )
             return true
         }
-        android.util.Log.w("Granger", "Making ${book.id} an ebook again failed (${report?.why ?: "out of memory"}); reading its PDF")
+        logWarn("Making ${book.id} an ebook again failed (${report?.why ?: "out of memory"}); reading its PDF")
         val pagesId = BookIds.pagesOf(book.id)
         val pagesCover = dao.get(pagesId)?.coverPath
         val cover = writeCover(book.id, pdfCovers.firstPage(pdf, COVER_HEIGHT_PX), "png")
-        db.withTransaction {
+        db.inTransaction {
             if (dao.position(pagesId) != null) dao.movePosition(pagesId, book.id)
             dao.moveMarks(pagesId, book.id)
             dao.deleteChunks(book.id)
@@ -281,9 +282,9 @@ open class PackBooks(
             dao.upsert(
                 book.copy(
                     sourceRef = sourceRef,
-                    filePath = pdf.absolutePath,
+                    filePath = Disk.absolute(pdf),
                     format = BookFormat.PDF,
-                    sizeBytes = pdf.length(),
+                    sizeBytes = Disk.length(pdf),
                     coverPath = cover ?: book.coverPath,
                     status = PackStatus.OK,
                     indexedAt = null,
@@ -291,7 +292,7 @@ open class PackBooks(
                 ),
             )
         }
-        pagesCover?.takeIf { it != cover }?.let { File(it).delete() }
+        pagesCover?.takeIf { it != cover }?.let { Disk.delete(it) }
         return true
     }
 
@@ -318,8 +319,8 @@ open class PackBooks(
         return items
     }
 
-    private fun newRow(id: String, ref: String, format: BookFormat, dir: File) = Book(
-        id = id, origin = origin, sourceRef = "", filePath = File(dir, source.fileName(ref, format)).absolutePath,
+    private fun newRow(id: String, ref: String, format: BookFormat, dir: String) = Book(
+        id = id, origin = origin, sourceRef = "", filePath = Disk.absolute(Disk.child(dir, source.fileName(ref, format))),
         title = "", author = "", translator = "", date = "", language = "", subjects = "", description = "",
         coverPath = null, sizeBytes = 0L, status = PackStatus.OK, indexedAt = null, addedAt = now(), format = format,
     )
@@ -330,13 +331,13 @@ open class PackBooks(
     protected fun writeCover(id: String, bytes: ByteArray?, extension: String?): String? {
         if (bytes == null) return null
         val ext = extension?.lowercase()?.takeIf { SAFE_EXTENSION.matches(it) } ?: "img"
-        val target = File(coversDir, "${sha1(id)}.$ext")
+        val target = Disk.child(coversDir, "${sha1(id)}.$ext")
         return try {
-            coversDir.mkdirs()
-            target.writeBytes(bytes)
-            target.absolutePath
+            Disk.mkdirs(coversDir)
+            Disk.writeBytes(target, bytes)
+            Disk.absolute(target)
         } catch (_: IOException) {
-            target.delete()
+            Disk.delete(target)
             null
         }
     }
@@ -349,11 +350,19 @@ open class PackBooks(
         fun refOf(book: Book): String = book.id.removePrefix(BookIds.of(book.origin, ""))
 
         /** A PDF's first-page cover, as tall as the shelf's other PDF covers ([RoomBookshelf]). */
-        internal const val COVER_HEIGHT_PX = 600
+        const val COVER_HEIGHT_PX = 600
 
         private val SAFE_EXTENSION = Regex("[a-z0-9]{1,5}")
 
-        internal fun sha1(text: String): String =
-            MessageDigest.getInstance("SHA-1").digest(text.toByteArray()).joinToString("") { "%02x".format(it) }
+        /** SHA-1 of [text]'s UTF-8 in lower-case hex: covers and copies are named by it. */
+        fun sha1(text: String): String = sha1(text.encodeToByteArray()).hex()
     }
+}
+
+/** [PackBooks]' copy of a pack entry when the phone has none of its own: the entry's bytes, written out. */
+internal fun copyEntry(archive: ZimArchive, path: String, to: String): Boolean = try {
+    val item = archive.read(path)
+    if (item == null) false else { Disk.writeBytes(to, item.bytes); true }
+} catch (_: IOException) {
+    false
 }

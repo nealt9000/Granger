@@ -30,6 +30,7 @@ import org.robolectric.annotation.Config
 import java.io.InputStream
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.launch
+import kotlinx.io.Source
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -39,7 +40,7 @@ class LibraryViewModelTest {
     private val shelves = FakeShelves()
 
     private class ImportingShelf : Bookshelf by FakeBookshelf() {
-        override suspend fun import(displayName: String, open: () -> InputStream): ImportResult =
+        override suspend fun importFrom(displayName: String, open: () -> Source): ImportResult =
             if (displayName == "bad.epub") ImportResult.Unsupported else ImportResult.Imported(displayName)
     }
 

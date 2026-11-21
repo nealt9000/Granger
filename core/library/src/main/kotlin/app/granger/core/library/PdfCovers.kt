@@ -7,16 +7,10 @@ import android.os.ParcelFileDescriptor
 import java.io.ByteArrayOutputStream
 import java.io.File
 
-/** A PDF has no cover entry; its first page stands in. */
-fun interface PdfCovers {
-    /** Page 1 as a PNG [heightPx] tall; null if the file can't be rendered. */
-    fun firstPage(file: File, heightPx: Int): ByteArray?
-}
-
 /** The platform's renderer: a cover shouldn't need the reader's engine, and this one is always there. */
 object PlatformPdfCovers : PdfCovers {
-    override fun firstPage(file: File, heightPx: Int): ByteArray? = try {
-        ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY).use { fd ->
+    override fun firstPage(path: String, heightPx: Int): ByteArray? = try {
+        ParcelFileDescriptor.open(File(path), ParcelFileDescriptor.MODE_READ_ONLY).use { fd ->
             PdfRenderer(fd).use { renderer ->
                 if (renderer.pageCount == 0) return null
                 renderer.openPage(0).use { page ->

@@ -28,7 +28,7 @@ class BookInstalledTest {
     /** Records every filing it is asked for. */
     private class Recording : Bookshelf by FakeBookshelf() {
         val filed = mutableListOf<Triple<BookOrigin, String, BookDetails?>>()
-        override suspend fun addDownloaded(file: File, origin: BookOrigin, ref: String, details: BookDetails?): Book? {
+        override suspend fun addDownloaded(file: String, origin: BookOrigin, ref: String, details: BookDetails?): Book? {
             filed += Triple(origin, ref, details)
             return app.granger.book("book:${origin.name}:$ref")
         }
@@ -99,7 +99,7 @@ class BookInstalledTest {
     }
 
     private class Shelf(val result: () -> Book?) : Bookshelf by FakeBookshelf() {
-        override suspend fun addDownloaded(file: File, origin: BookOrigin, ref: String, details: BookDetails?): Book? = result()
+        override suspend fun addDownloaded(file: String, origin: BookOrigin, ref: String, details: BookDetails?): Book? = result()
     }
 
     @Test fun aThrowingBookshelfDoesNotFailTheInstall() = runTest {
@@ -118,7 +118,7 @@ class BookInstalledTest {
         val details = BookDetails(title = "T", author = "A", date = "1881", subjects = listOf("s"), description = "D", language = "eng")
         var filed: Triple<BookOrigin, String, BookDetails?>? = null
         val shelf = object : Bookshelf by FakeBookshelf() {
-            override suspend fun addDownloaded(file: File, origin: BookOrigin, ref: String, details: BookDetails?): Book? {
+            override suspend fun addDownloaded(file: String, origin: BookOrigin, ref: String, details: BookDetails?): Book? {
                 filed = Triple(origin, ref, details)
                 return book("book:archive-org:x")
             }

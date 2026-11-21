@@ -15,6 +15,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.io.ByteArrayInputStream
 import java.io.InputStream
+import kotlinx.io.Source
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -22,7 +23,7 @@ class ImportRunnerTest {
     /** Answers each imported display name from [results]; a Throwable in the map is thrown instead. */
     private class ScriptedShelf(private val results: Map<String, Any>) : Bookshelf by FakeBookshelf() {
         val seen = mutableListOf<String>()
-        override suspend fun import(displayName: String, open: () -> InputStream): ImportResult {
+        override suspend fun importFrom(displayName: String, open: () -> Source): ImportResult {
             seen += displayName
             open().close()
             return when (val r = results.getValue(displayName)) {

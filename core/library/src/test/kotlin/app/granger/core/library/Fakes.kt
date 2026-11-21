@@ -7,7 +7,7 @@ import app.granger.core.zim.ZimMetadata
 import app.granger.core.zim.ZimOpenResult
 import app.granger.core.zim.ZimOpener
 import java.io.File
-import java.io.InputStream
+import kotlinx.io.Source
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -109,11 +109,11 @@ class StubBookshelf(initial: List<Book> = emptyList()) : Bookshelf {
     override val positions: Flow<Map<String, BookPosition>> = MutableStateFlow(emptyMap())
     override suspend fun book(id: String): Book? = state.value.firstOrNull { it.id == id }
     override suspend fun refresh() = Unit
-    override suspend fun addDownloaded(file: File, origin: BookOrigin, ref: String, details: BookDetails?): Book? = null
-    override suspend fun import(displayName: String, open: () -> InputStream): ImportResult = ImportResult.Unsupported
+    override suspend fun addDownloaded(file: String, origin: BookOrigin, ref: String, details: BookDetails?): Book? = null
+    override suspend fun importFrom(displayName: String, open: () -> Source): ImportResult = ImportResult.Unsupported
     override suspend fun remove(id: String): Boolean = true
     override suspend fun registerPackDocument(
-        zimId: String, path: String, title: String, file: File, linkText: String, listedTitle: String,
+        zimId: String, path: String, title: String, file: String, linkText: String, listedTitle: String,
     ): Book? = null
     override suspend fun removePackDocuments(zimId: String, zimName: String) = Unit
     override suspend fun savePosition(bookId: String, locatorJson: String, totalProgression: Double, chapterTitle: String) = Unit

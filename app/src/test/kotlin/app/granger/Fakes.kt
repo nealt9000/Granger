@@ -64,7 +64,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import java.io.File
-import java.io.InputStream
+import kotlinx.io.Source
 
 fun pack(id: String, title: String = id, status: PackStatus = PackStatus.OK) =
     Pack(id, "/packs/$id.zim", title, "", "eng", "2026-10-15", 1_000L, true, status, 0L)
@@ -301,8 +301,8 @@ class FakeBookshelf : Bookshelf {
     override val positions: Flow<Map<String, BookPosition>> = positionMap
     override suspend fun book(id: String): Book? = bookList.value.firstOrNull { it.id == id }
     override suspend fun refresh() { refreshes++ }
-    override suspend fun addDownloaded(file: File, origin: BookOrigin, ref: String, details: BookDetails?): Book? = null
-    override suspend fun import(displayName: String, open: () -> InputStream): ImportResult = ImportResult.Unsupported
+    override suspend fun addDownloaded(file: String, origin: BookOrigin, ref: String, details: BookDetails?): Book? = null
+    override suspend fun importFrom(displayName: String, open: () -> Source): ImportResult = ImportResult.Unsupported
     override suspend fun remove(id: String): Boolean {
         removed += id
         bookList.update { list -> list.filterNot { it.id == id } }
@@ -339,13 +339,13 @@ class FakeBookshelf : Bookshelf {
     /** The pack's listed title each registration in [packDocuments] was given. */
     val packDocumentListedTitles = mutableListOf<String>()
     override suspend fun registerPackDocument(
-        zimId: String, path: String, title: String, file: File, linkText: String, listedTitle: String,
+        zimId: String, path: String, title: String, file: String, linkText: String, listedTitle: String,
     ): Book {
         packDocuments += Triple(zimId, path, title)
         packDocumentLinkTexts += linkText
         packDocumentListedTitles += listedTitle
         val book = book(BookIds.of(BookOrigin.PACK, "$zimId/$path"), title).copy(
-            origin = BookOrigin.PACK, sourceRef = "$zimId/$path", filePath = file.absolutePath, format = BookFormat.PDF,
+            origin = BookOrigin.PACK, sourceRef = "$zimId/$path", filePath = File(file).absolutePath, format = BookFormat.PDF,
         )
         bookList.update { list -> list.filterNot { it.id == book.id } + book }
         return book

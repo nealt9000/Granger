@@ -1,7 +1,5 @@
 package app.granger.core.library
 
-import java.net.URLDecoder
-
 /**
  * What a pack document (a PDF opened from a Kiwix pack, Plan P2) is called on the reader's bar, the rail and Continue.
  * The PDF's own title is often junk: whatever the tool that made it saw, such as `file://C:\WINDOWS\Desktop\water.htm`,
@@ -64,9 +62,32 @@ object PackDocumentTitle {
      */
     fun fromFileName(path: String): String {
         val last = path.trimEnd('/').substringAfterLast('/')
-        val decoded = try { URLDecoder.decode(last.replace("+", "%2B"), "UTF-8") } catch (_: IllegalArgumentException) { last }
+        val decoded = percentDecoded(last) ?: last
         val bare = decoded.substringBeforeLast('.').ifEmpty { decoded }
         return bare.replace('_', ' ').replace('-', ' ').replace(SPACES, " ").trim().ifEmpty { "PDF" }
+    }
+
+    /**
+     * [text] with its `%xx` escapes decoded as UTF-8, a `+` kept (as `URLDecoder.decode` read it once `+` was escaped,
+     * before Plan I5); null for a broken escape, which `URLDecoder` refused.
+     */
+    private fun percentDecoded(text: String): String? {
+        if ('%' !in text) return text
+        val out = ArrayList<Byte>(text.length)
+        var i = 0
+        while (i < text.length) {
+            val ch = text[i]
+            if (ch == '%') {
+                if (i + 2 >= text.length) return null
+                val byte = text.substring(i + 1, i + 3).toIntOrNull(16)?.takeIf { it >= 0 } ?: return null
+                out.add(byte.toByte())
+                i += 3
+            } else {
+                ch.toString().encodeToByteArray().forEach { out.add(it) }
+                i++
+            }
+        }
+        return out.toByteArray().decodeToString()
     }
 
     /** [text] on one line, single-spaced, without a link's trailing "(PDF, 2 MB)". */

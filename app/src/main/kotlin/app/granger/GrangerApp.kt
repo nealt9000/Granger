@@ -1,5 +1,8 @@
 package app.granger
 
+import app.granger.core.library.addDownloaded
+import app.granger.core.library.addLoose
+import app.granger.core.library.keepLoose
 import app.granger.explore.Prefs
 import app.granger.core.library.open
 import app.granger.core.library.create

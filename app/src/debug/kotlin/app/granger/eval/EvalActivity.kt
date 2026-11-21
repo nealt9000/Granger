@@ -23,6 +23,7 @@ import app.granger.core.ai.LiteRtLlmEngine
 import app.granger.core.ai.LlmBackend
 import app.granger.core.ai.RssMemorySampler
 import app.granger.core.library.ImportResult
+import app.granger.core.library.import
 import app.granger.core.research.FictionWeight
 import app.granger.core.research.ResearchPipeline
 import app.granger.research.ModelsAdapter
