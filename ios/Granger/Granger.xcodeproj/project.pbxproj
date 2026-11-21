@@ -14,11 +14,13 @@
 		1BE4CF46B8D83410F915E442 /* GetMoreScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C03090F336FA65931D0A18DE /* GetMoreScreen.swift */; };
 		2185F9611730D67D6F637BA0 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B47F986BFCA85901970F72F /* AppSettings.swift */; };
 		29E1C8E3A75EB297D1C74CEB /* DownloadsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39CAFF7225F8B97582B68D3A /* DownloadsScreen.swift */; };
+		2BE945B019A09E218293613F /* PackImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1B6079F1F1428E9AFB791C4 /* PackImportTests.swift */; };
 		3178201C506534DA959D94C0 /* spectral_italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5D1EA7F9943A3EBAA55DB8EC /* spectral_italic.ttf */; };
 		3268BF9C98C507338AA3AE11 /* GrangerCoreBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7ACEC15F49FA3F03A769C7A6 /* GrangerCoreBridge.swift */; };
 		372D0C7A92F31AC0E4017564 /* KiwixArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 244FA2D697CE5DE736633EAE /* KiwixArchive.swift */; };
 		37CB475CA851E38824A30F9F /* Timeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5097D7F74D147D51E78904EE /* Timeline.swift */; };
 		3A14C67A4ADC44BAECECC538 /* Core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EDFCCCB9DFC1E76B1696659 /* Core.swift */; };
+		3D55A87817244AB3D9BE38E9 /* YourSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C3FF10249E3C56B933C031 /* YourSources.swift */; };
 		4464B57976D673C32FD0E17D /* GZimBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = D4D2362C7FF79325E7EA0D49 /* GZimBridge.mm */; };
 		4E0AB676333916B0E39497E4 /* ReaderHostTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9135543A15FAD4A5F44C03 /* ReaderHostTests.swift */; };
 		536C52D33EBE10BE0DAC1B49 /* Wander.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B8BCA170A7DD61E455BF4A /* Wander.swift */; };
@@ -110,6 +112,7 @@
 		7CC01381BEC958CC5134EC02 /* GrangerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrangerApp.swift; sourceTree = "<group>"; };
 		7F52092A31F49258FD75CDE1 /* Navigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Navigation.swift; sourceTree = "<group>"; };
 		85551793AE689984ABF44FAE /* Granger.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Granger.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		93C3FF10249E3C56B933C031 /* YourSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YourSources.swift; sourceTree = "<group>"; };
 		9A9A6B4F16D83F391D47CB26 /* KiwixArchiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KiwixArchiveTests.swift; sourceTree = "<group>"; };
 		A6A503B5D655BB52449F2EA8 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		B44830ECED20666BE9CE2F47 /* PaletteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaletteTests.swift; sourceTree = "<group>"; };
@@ -120,6 +123,7 @@
 		D4D2362C7FF79325E7EA0D49 /* GZimBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = GZimBridge.mm; sourceTree = "<group>"; };
 		DBE5F06445A1835AEC2AFC4F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DD4E0D95A9828108F9ABF60D /* SmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeTests.swift; sourceTree = "<group>"; };
+		E1B6079F1F1428E9AFB791C4 /* PackImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackImportTests.swift; sourceTree = "<group>"; };
 		E1D3058117A3F244CE32A088 /* SubjectScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubjectScreen.swift; sourceTree = "<group>"; };
 		E292BFB40CBDEA8F0A9C1151 /* GrangerUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = GrangerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3B8BCA170A7DD61E455BF4A /* Wander.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wander.swift; sourceTree = "<group>"; };
@@ -146,6 +150,7 @@
 			isa = PBXGroup;
 			children = (
 				9A9A6B4F16D83F391D47CB26 /* KiwixArchiveTests.swift */,
+				E1B6079F1F1428E9AFB791C4 /* PackImportTests.swift */,
 				B44830ECED20666BE9CE2F47 /* PaletteTests.swift */,
 				3F9135543A15FAD4A5F44C03 /* ReaderHostTests.swift */,
 			);
@@ -260,6 +265,7 @@
 				7A0C0C1C906AB109E2FCDA1A /* Games.swift */,
 				E1D3058117A3F244CE32A088 /* SubjectScreen.swift */,
 				E3B8BCA170A7DD61E455BF4A /* Wander.swift */,
+				93C3FF10249E3C56B933C031 /* YourSources.swift */,
 			);
 			path = Explore;
 			sourceTree = "<group>";
@@ -488,6 +494,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A6570A3E5D1D452C8684AA55 /* KiwixArchiveTests.swift in Sources */,
+				2BE945B019A09E218293613F /* PackImportTests.swift in Sources */,
 				03D55B9BC49ADC8D2CA8633C /* PaletteTests.swift in Sources */,
 				4E0AB676333916B0E39497E4 /* ReaderHostTests.swift in Sources */,
 			);
@@ -528,6 +535,7 @@
 				D133214D01E3E09DFA4D0D83 /* TopicScreen.swift in Sources */,
 				68042C3C8872455E02B18A13 /* UiTextWords.swift in Sources */,
 				536C52D33EBE10BE0DAC1B49 /* Wander.swift in Sources */,
+				3D55A87817244AB3D9BE38E9 /* YourSources.swift in Sources */,
 				EEA786A258038C318B5E9C30 /* ZimSchemeHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

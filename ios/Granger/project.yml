@@ -39,6 +39,9 @@ targets:
       properties:
         # Xcode has no generated-plist key for fonts; the rest of the plist is generated from INFOPLIST_KEY_*.
         UIAppFonts: [spectral_regular.ttf, spectral_medium.ttf, spectral_semibold.ttf, spectral_italic.ttf]
+        # Documents shows in the Files app (On My iPhone › Granger): packs are yours to see, copy and delete (Plan I4).
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(GRANGER_BUNDLE_PREFIX)

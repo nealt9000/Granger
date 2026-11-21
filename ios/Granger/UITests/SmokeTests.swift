@@ -331,4 +331,21 @@ final class SmokeTests: XCTestCase {
         XCTAssertTrue(app.segmentedControls.buttons.count >= 2, "with or without pictures")
         shot(app, "getmore-wikipedia")
     }
+
+    /// Plan I4 Task 7: Explore → Your sources lists the pack (copied in by -debugPack) and Wikipedia online, greyed with
+    /// Local only on.
+    func testYourSources() throws {
+        guard let zim = ProcessInfo.processInfo.environment["GRANGER_TEST_ZIM"], !zim.isEmpty else { throw XCTSkip("no GRANGER_TEST_ZIM") }
+        let app = XCUIApplication()
+        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en", "-debugPack", zim]
+        app.launch()
+        app.tabBars.buttons["Explore"].tap()
+        let sources = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Your sources'")).firstMatch
+        for _ in 0..<12 where !sources.isHittable { app.swipeUp() }
+        XCTAssertTrue(sources.waitForExistence(timeout: 10), "Ways on: Your sources")
+        sources.tap()
+        XCTAssertTrue(app.staticTexts["based.cooking LukeSmith"].waitForExistence(timeout: 20), "the pack")
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Local only is on'")).firstMatch.exists, "Wikipedia online greyed")
+        shot(app, "your-sources")
+    }
 }

@@ -208,6 +208,39 @@ class IosLibrary(
 
     private val scope_: CoroutineScope get() = scope
 
+    // ---- Your sources (Plan I4 Task 7): Explore's list of what the library reads, as Android's Browse lists it.
+
+    /**
+     * The packs by knowledge area (the catalog entry's readiness domain, in the catalog's order), then Other, then map
+     * files last; book packs are left out (their way in is their books). Each with how many PDFs and EPUBs it holds.
+     * Blocking: opens each pack to read its counts.
+     */
+    fun yourSources(): List<SourceGroup> {
+        val packs = kotlinx.coroutines.runBlocking { packLibrary.packs.first() }.filterNot { it.isBookPack }
+        val c = catalog
+        val domains = c?.readiness?.domains.orEmpty()
+        fun domainOf(p: app.granger.core.library.Pack): String? =
+            (c?.packs?.firstOrNull { it.zimUuid == p.id } ?: c?.packs?.firstOrNull { p.name.isNotBlank() && it.zimName == p.name })?.domain?.ifBlank { null }
+        fun row(p: app.granger.core.library.Pack) = SourceRow(
+            p, files = if (p.status == app.granger.core.library.PackStatus.OK) packLibrary.archive(p.id)?.metadata?.counter?.let(app.granger.core.library.PackFiles::count) ?: 0 else 0,
+            map = p.name.startsWith("maps_"),
+        )
+        val (maps, rest) = packs.partition { it.name.startsWith("maps_") }
+        val known = domains.mapTo(HashSet()) { it.id }
+        val language = languages().firstOrNull() ?: "en"
+        val byDomain = rest.groupBy { domainOf(it)?.takeIf { d -> d in known } ?: "other" }
+        return (domains.map { d -> SourceGroup(d.id, d.title(language), byDomain[d.id].orEmpty().sortedBy { it.title.lowercase() }.map(::row)) } +
+            SourceGroup("other", "Other", byDomain["other"].orEmpty().sortedBy { it.title.lowercase() }.map(::row)) +
+            SourceGroup("map-files", "Maps", maps.sortedBy { it.title.lowercase() }.map(::row))
+            ).filter { it.rows.isNotEmpty() }
+    }
+
+    /** A pack's PDFs and EPUBs, A–Z (Files in this pack); null when it can't be listed. Blocking: walks the whole ZIM. */
+    fun packFiles(packId: String): List<app.granger.core.library.PackFile>? = packLibrary.archive(packId)?.let(app.granger.core.library.PackFiles::list)
+
+    /** Removes a pack: its file, row, bookmarks and places (Android's Remove in Browse). */
+    suspend fun removePack(packId: String): Boolean = packLibrary.remove(packId)
+
     /** Search over the packs (titles, near titles, full text), in the library's languages, as Android's. */
     val packSearch = app.granger.core.library.PackSearch(packLibrary, languages = { languages().toSet() })
 
@@ -614,6 +647,12 @@ class IosCatalogSource : app.granger.core.catalog.CatalogSource {
         fetch(true)
     }
 }
+
+/** One of Your sources' sections: a knowledge area, Other, or Maps. */
+data class SourceGroup(val id: String, val title: String, val rows: List<SourceRow>)
+
+/** A pack in Your sources, with how many PDFs and EPUBs it holds (Files in this pack). */
+data class SourceRow(val pack: app.granger.core.library.Pack, val files: Int, val map: Boolean)
 
 /** Get more's settings in UserDefaults: Wi-Fi only (Settings' own key), the volume (one on the iPhone), ask before large. */
 class DefaultsDownloadPrefs(prefix: String) : app.granger.sources.DownloadPrefs, app.granger.core.downloads.QueuePrefs by DefaultsQueuePrefs(prefix) {

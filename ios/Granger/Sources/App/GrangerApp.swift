@@ -4,6 +4,7 @@ import SwiftUI
 @main
 struct GrangerApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    @Environment(\.scenePhase) private var scenePhase
     @State private var settings = AppSettings()
     @State private var recent = RecentStore()
     @State private var library = LibraryModel()
@@ -42,6 +43,10 @@ struct GrangerApp: App {
                     await library.prepareIndexes(core: core, lang: settings.wikiLanguage, allowed: settings.canFetch)
                     // The packs in Documents/Packs, opened and listed (Plan I4 Task 5).
                     try? await core.library.refreshPacks()
+                }
+                .onChange(of: scenePhase) { _, phase in
+                    // Packs put in or taken out of Granger's folder in the Files app while away.
+                    if phase == .active { Task { try? await core.library.refreshPacks() } }
                 }
                 .preferredColorScheme(settings.appearance.colorScheme)
                 .themed()
@@ -121,6 +126,8 @@ struct RootView: View {
                     case let .timeline(packId, p): TimelineScreen(packId: packId, path: p)
                     case .downloads: DownloadsScreen()
                     case .getMore: GetMoreScreen()
+                    case .yourSources: YourSourcesScreen()
+                    case let .packFiles(pack): PackFilesScreen(pack: pack)
                     case let .source(scope, domain, family, bookSet):
                         SourceScreen(scope: CatalogScope.allCases.first { $0.name == scope } ?? .kiwix, domain: domain, family: family, bookSet: bookSet)
                     case let .subject(id): SubjectScreen(subjectId: id)

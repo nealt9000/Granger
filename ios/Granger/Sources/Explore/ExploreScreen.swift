@@ -189,6 +189,7 @@ struct ExploreScreen: View {
         let ways: [(String, String, Route)] = [
             ui.noSubjects ? nil : ("Anywhere in your library", "Wander", Route.wander(packId: nil, path: nil)),
             ui.eras.isEmpty ? nil : ("\(games) games with the dates in your library", "Games", Route.games),
+            ("Wikipedia and your packs", "Your sources", Route.yourSources),
         ].compactMap { $0 }
         if !ways.isEmpty { WaysOn(title: "Ways on", ways: ways).padding(.top, 30) }
     }

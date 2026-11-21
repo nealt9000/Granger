@@ -59,6 +59,8 @@ Spec: `docs/superpowers/specs/2026-11-20-iphone-design.md` (§ I4 Packs and down
 
 ### Task 7: Packs in Files, import, Browse
 - [ ] Packs visible in Files; Import a pack (Files picker, copied in); Your sources and Browse a pack's files; greyed pack tiles under Local only.
+  - Done: Documents shows in the Files app (`UIFileSharingEnabled`, `LSSupportsOpeningDocumentsInPlace`): packs in On My iPhone › Granger › Packs, their sidecars hidden under `.granger/`. Import a pack: the picked .zim is opened (a pack? already here? room?) and copied into Documents/Packs; a .zim put there from Files is listed when Granger next comes to the front (no download record: the library lists the folder, and Readiness counts it as Android counts a hand-pushed pack). Your sources (Explore's Ways on): Wikipedia online (greyed with Local only on), then the packs by knowledge area, Other, Maps; each opens its main page, Files in this pack (PDFs and EPUBs, `BookFiles`/`PackFiles` now shared; a file opens in Quick Look), Remove. Tests: `PackImportTests`, `testYourSources`; library 535/535.
+  - Left: the iPhone keeps no catalog between launches (Android caches the last good one), so offline a pack's knowledge area is unknown and it sits under Other; cache it (Task 8 needs it for Outfitting too).
 
 ### Task 8: Onboarding's sets, Outfitting, Ready offline, feeds
 - [ ] The first run's Pick a start with quick wins; Outfitting (your use and the nine domains, would-take sizes, kept-article updates); Ready offline on Home; feeds, Add feed, scopes and the Day page; book packs as collections (reading waits for I5); a broad topic's figures from packs.

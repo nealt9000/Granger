@@ -18,6 +18,8 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 	<key>UIAppFonts</key>
 	<array>
 		<string>spectral_regular.ttf</string>
@@ -25,5 +27,7 @@
 		<string>spectral_semibold.ttf</string>
 		<string>spectral_italic.ttf</string>
 	</array>
+	<key>UIFileSharingEnabled</key>
+	<true/>
 </dict>
 </plist>

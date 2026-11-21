@@ -1,15 +1,28 @@
 import GrangerCoreKit
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// Get more (Android's, Plan U3b Decision 2): where packs and books come from. On the iPhone in I4: Kiwix's knowledge
 /// packs and Books by kind; archive.org, LibriVox and voices join with Listen and the library (I5).
 struct GetMoreScreen: View {
+    @Environment(\.core) private var core
     @Environment(\.palette) private var palette
+    @State private var importing = false
+    @State private var importNote: String?
 
     var body: some View {
         List {
             Section(header: heading("Knowledge packs")) {
                 link(.kiwix, "Kiwix", "Wikipedia, Stack Exchange, medicine, how-to and more, offline")
+                Button { importing = true } label: {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Import a pack").font(Spectral.regular(20)).foregroundStyle(palette.onSurface)
+                        Text("A .zim file from Files, copied onto this iPhone").font(.callout).foregroundStyle(palette.onSurfaceVariant)
+                    }
+                    .padding(.vertical, 4)
+                }
+                .accessibilityIdentifier("import-pack")
+                if let importNote { Text(importNote).font(.callout).foregroundStyle(palette.tertiary) }
             }
             Section(header: heading("Books")) {
                 link(.books, "Books by kind", "Literature, children's books, manuals and learning")
@@ -22,6 +35,11 @@ struct GetMoreScreen: View {
         .background(palette.background)
         .navigationTitle("Get more")
         .navigationBarTitleDisplayMode(.inline)
+        .fileImporter(isPresented: $importing, allowedContentTypes: [UTType(filenameExtension: "zim") ?? .data]) { result in
+            guard case let .success(url) = result, let core else { return }
+            importNote = "Copying \(url.lastPathComponent)…"
+            Task { importNote = await PackImport.copy(url, core: core) }
+        }
     }
 
     private func heading(_ s: String) -> some View { Text(s).font(Spectral.medium(16)).foregroundStyle(palette.tertiary) }
@@ -292,5 +310,34 @@ private extension ItemStatus {
         case .queued, .downloading: true
         default: false
         }
+    }
+}
+
+/// Import a pack (Plan I4 builder's call 6): the picked .zim is opened to check it's a pack and not one already here,
+/// then copied into Documents/Packs, where the library finds it. A file put in that folder from the Files app is found
+/// the same way the next time Granger comes to the front.
+enum PackImport {
+    static func copy(_ url: URL, core: Core) async -> String {
+        await Task.detached(priority: .userInitiated) { () -> String in
+            let scoped = url.startAccessingSecurityScopedResource()
+            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+            guard case let .success(archive) = KiwixArchive.open(url.path) else { return "\(url.lastPathComponent) isn't a pack Granger can read." }
+            let uuid = archive.uuid
+            let title = archive.metadata.title
+            archive.close()
+            let packs = (try? await core.library.packs.first(where: { _ in true })) ?? []
+            if packs.contains(where: { $0.id.caseInsensitiveCompare(uuid) == .orderedSame && $0.status == .ok }) { return "\(title) is on this iPhone already." }
+            let to = core.packsFolder.appendingPathComponent(url.lastPathComponent)
+            let size = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize).map(Int64.init) ?? 0
+            if size > core.library.freeBytes() { return "Not enough room: \(title) needs \(QueueWords.bytes(size))." }
+            do {
+                if FileManager.default.fileExists(atPath: to.path) { try FileManager.default.removeItem(at: to) }
+                try FileManager.default.copyItem(at: url, to: to)
+            } catch {
+                return "Couldn't copy \(url.lastPathComponent)."
+            }
+            try? await core.library.refreshPacks()
+            return "\(title) is on this iPhone."
+        }.value
     }
 }
