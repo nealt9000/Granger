@@ -182,7 +182,7 @@ class LibriVoxViewModelTest {
         assertThat(ui.rows.first().id).isEqualTo("817")
         assertThat(ui.rows.first().title).isEqualTo("Time Machine")
         assertThat(ui.rows.first().details).isEqualTo(
-            UiText.Res(R.string.librivox_row_details, "H. G. Wells", UiText.Res(R.string.librivox_duration_hours_minutes, 4, 9)),
+            UiText.Res("librivox_row_details", "H. G. Wells", UiText.Res("librivox_duration_hours_minutes", 4, 9)),
         )
         // Clearing the box goes back to Recently added.
         vm.setQuery("")
@@ -204,7 +204,7 @@ class LibriVoxViewModelTest {
     @Test fun busyShowsTheMessageWithRetry() = runTest(main.dispatcher) {
         librivoxStatus = 429
         val vm = viewModel()
-        assertThat(vm.ui.value.error).isEqualTo(UiText.Res(app.granger.core.archive.LibriVoxProblem.BUSY.text))
+        assertThat(vm.ui.value.error).isEqualTo(UiText.Res(app.granger.core.archive.LibriVoxProblem.BUSY.key))
         assertThat(vm.ui.value.rows).isEmpty()
         assertThat(vm.ui.value.loading).isFalse()
         librivoxStatus = null
@@ -286,7 +286,7 @@ class LibriVoxViewModelTest {
         assertThat(vm.ui.value.sheet!!.sizeBytes).isNull()
         vm.get("817")
         settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res(R.string.librivox_incomplete))
+        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res("librivox_incomplete"))
         assertThat(downloads.enqueuedGroups).isEmpty()
         assertThat(File(mediaRoot, "audiobooks/librivox/817").exists()).isFalse()
     }
@@ -304,7 +304,7 @@ class LibriVoxViewModelTest {
         assertThat(requests.none { it.host == "archive.org" }).isTrue()
         vm.get("817")
         settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res(R.string.librivox_not_on_archive))
+        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res("librivox_not_on_archive"))
         assertThat(downloads.enqueuedGroups).isEmpty()
     }
 
@@ -312,7 +312,7 @@ class LibriVoxViewModelTest {
         offline = true
         downloads.list.value = installed(13) + record("med", DownloadState.INSTALLED)
         val vm = viewModel()
-        assertThat(vm.ui.value.error).isEqualTo(UiText.Res(R.string.librivox_offline))
+        assertThat(vm.ui.value.error).isEqualTo(UiText.Res("librivox_offline"))
         vm.setTab(LibriVoxTab.INSTALLED)
         testScheduler.advanceUntilIdle()
         val row = vm.ui.value.rows.single()

@@ -127,6 +127,16 @@ object ScreenTextIds {
         "library_sort_recent" -> R.string.library_sort_recent
         "library_sort_title" -> R.string.library_sort_title
         "library_titles_from_file_names" -> R.string.library_titles_from_file_names
+        "librivox_duration_hours" -> R.string.librivox_duration_hours
+        "librivox_duration_hours_minutes" -> R.string.librivox_duration_hours_minutes
+        "librivox_duration_minutes" -> R.string.librivox_duration_minutes
+        "librivox_incomplete" -> R.string.librivox_incomplete
+        "librivox_not_found" -> R.string.librivox_not_found
+        "librivox_not_on_archive" -> R.string.librivox_not_on_archive
+        "librivox_offline" -> R.string.librivox_offline
+        "librivox_row_details" -> R.string.librivox_row_details
+        "librivox_tab_browse" -> R.string.librivox_tab_browse
+        "librivox_tab_installed" -> R.string.librivox_tab_installed
         "listen_last_played" -> R.string.listen_last_played
         "listen_last_read" -> R.string.listen_last_read
         "listen_now_playing" -> R.string.listen_now_playing

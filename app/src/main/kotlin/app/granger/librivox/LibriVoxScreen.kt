@@ -121,7 +121,7 @@ fun LibriVoxScreen(viewModel: LibriVoxViewModel, onBack: () -> Unit) {
             item(key = "tabs") {
                 PrimaryTabRow(selectedTabIndex = ui.tab.ordinal) {
                     for (tab in LibriVoxTab.entries) {
-                        Tab(selected = ui.tab == tab, onClick = { viewModel.setTab(tab) }, text = { Text(stringResource(tab.title)) })
+                        Tab(selected = ui.tab == tab, onClick = { viewModel.setTab(tab) }, text = { Text(tab.title.resolve()) })
                     }
                 }
             }

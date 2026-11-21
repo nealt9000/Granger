@@ -86,7 +86,7 @@ internal fun LibriVoxBookSheet(
             )
             when {
                 sheet.loading -> Box(Modifier.fillMaxWidth().padding(24.dp), Alignment.Center) { CircularProgressIndicator() }
-                sheet.error != null -> Text(sheet.error.resolve(), color = MaterialTheme.colorScheme.error)
+                sheet.error != null -> Text(sheet.error!!.resolve(), color = MaterialTheme.colorScheme.error)
             }
             if (book != null) {
                 if (book.authors.isNotEmpty()) {
