@@ -146,19 +146,26 @@ class TopicPageTest {
         time = full.time, relatedBooks = emptyList(), books = ArticleFooter.NONE, done = true,
     )
 
+    /** The marks are read on Dispatchers.IO, which waitForIdle doesn't wait for: wait for the node itself. */
+    private fun waitFor(matcher: androidx.compose.ui.test.SemanticsMatcher, count: Int = 1) =
+        compose.waitUntil(5_000) { compose.onAllNodes(matcher, useUnmergedTree = true).fetchSemanticsNodes().size == count }
+
     @Test fun offlineTilesThatWontOpenAreGreyedAndStillTapThrough() {
         // Plan O7 call 1: Lake Chad and Rift Valley are online only; Lake Victoria is saved, Goethe on the phone.
         showWithReach(lakePage, app.granger.online.ReachState.LOCAL_ONLY)
         compose.waitForIdle()
         val list = compose.onNode(androidx.compose.ui.test.hasScrollAction())
         list.performScrollToNode(hasTestTag(TopicPageTags.tile("Lake_Chad")))
+        waitFor(hasTestTag(app.granger.online.MarkTags.NEEDS_INTERNET) and androidx.compose.ui.test.hasAnyAncestor(hasTestTag(TopicPageTags.tile("Lake_Chad"))))
         compose.onNode(hasTestTag(app.granger.online.MarkTags.NEEDS_INTERNET) and androidx.compose.ui.test.hasAnyAncestor(hasTestTag(TopicPageTags.tile("Lake_Chad"))), useUnmergedTree = true).assertExists()
         compose.onAllNodes(hasTestTag(app.granger.online.MarkTags.NEEDS_INTERNET) and androidx.compose.ui.test.hasAnyAncestor(hasTestTag(TopicPageTags.tile("Lake_Victoria"))), useUnmergedTree = true).assertCountEquals(0)
         compose.onNodeWithTag(TopicPageTags.tile("Lake_Chad")).performClick()
         list.performScrollToNode(hasTestTag(TopicPageTags.tile("Rift_Valley")))
+        waitFor(hasTestTag(app.granger.online.MarkTags.NEEDS_INTERNET) and androidx.compose.ui.test.hasAnyAncestor(hasTestTag(TopicPageTags.tile("Rift_Valley"))))
         compose.onNode(hasTestTag(app.granger.online.MarkTags.NEEDS_INTERNET) and androidx.compose.ui.test.hasAnyAncestor(hasTestTag(TopicPageTags.tile("Rift_Valley"))), useUnmergedTree = true).assertExists()
         // The time card: French Revolution (an event) greys; Goethe (on the phone) doesn't.
         list.performScrollToNode(hasTestTag(TopicPageTags.TIME))
+        waitFor(hasTestTag(TopicPageTags.GREYED))
         compose.onAllNodes(hasTestTag(TopicPageTags.GREYED), useUnmergedTree = true).assertCountEquals(1)
         compose.onNodeWithText("Needs internet", substring = true, useUnmergedTree = true).assertExists()
         assertThat(events).containsExactly("article:Lake_Chad")
