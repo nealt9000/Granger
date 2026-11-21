@@ -1,5 +1,6 @@
 package app.granger
 
+import app.granger.archive.writeSidecar
 import app.granger.core.library.Book
 import app.granger.core.library.BookDetails
 import app.granger.core.library.BookOrigin

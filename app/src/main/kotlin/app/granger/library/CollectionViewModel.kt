@@ -1,5 +1,6 @@
 package app.granger.library
 
+import app.granger.archive.deleteSidecar
 import app.granger.invoke
 import app.granger.R
 import app.granger.UiText

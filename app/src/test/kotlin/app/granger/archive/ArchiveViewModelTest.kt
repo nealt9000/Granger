@@ -515,7 +515,7 @@ class ArchiveViewModelTest {
         val vm = viewModel()
         vm.get(MODERN)
         settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res(R.string.archive_not_public_domain))
+        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res("archive_not_public_domain"))
         assertThat(downloads.enqueuedSpecs).isEmpty()
         assertThat(File(sidecars, "$MODERN.json").exists()).isFalse()
         vm.dismissNotice()
@@ -530,7 +530,7 @@ class ArchiveViewModelTest {
         val vm = viewModel()
         vm.get(TAGGED)
         settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res(R.string.archive_not_public_domain))
+        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res("archive_not_public_domain"))
         assertThat(downloads.enqueuedSpecs).isEmpty()
     }
 
@@ -549,7 +549,7 @@ class ArchiveViewModelTest {
         prefs.withdraw()
         vm.get(MODERN)
         settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res(R.string.archive_not_public_domain))
+        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res("archive_not_public_domain"))
         assertThat(downloads.enqueuedSpecs).isEmpty()
     }
 
@@ -557,7 +557,7 @@ class ArchiveViewModelTest {
         val vm = viewModel()
         vm.get(lendingId)
         settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res(R.string.archive_nothing_to_download))
+        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res("archive_nothing_to_download"))
         assertThat(downloads.enqueuedSpecs).isEmpty()
         assertThat(sidecars.listFiles()!!.toList()).isEmpty()
     }
@@ -568,7 +568,7 @@ class ArchiveViewModelTest {
         vm.get(epubId)
         settle { vm.ui.value.notice != null }
         val notice = vm.ui.value.notice as UiText.Res
-        assertThat(notice.id).isEqualTo(R.string.archive_no_space)
+        assertThat(notice.key).isEqualTo("archive_no_space")
         assertThat(notice.args.first()).isEqualTo("Internal storage")
         assertThat(notice.args.last()).isEqualTo("2.0 GB")
         assertThat(File(sidecars, "$epubId.json").exists()).isFalse()
@@ -634,7 +634,7 @@ class ArchiveViewModelTest {
             record("med", DownloadState.INSTALLED),
         )
         val vm = viewModel()
-        assertThat(vm.ui.value.error).isEqualTo(UiText.Res(R.string.archive_offline))
+        assertThat(vm.ui.value.error).isEqualTo(UiText.Res("archive_offline"))
         assertThat(vm.ui.value.rows).isEmpty()
         assertThat(vm.ui.value.loading).isFalse()
         vm.setTab(ArchiveTab.INSTALLED)
@@ -675,7 +675,7 @@ class ArchiveViewModelTest {
         offline = true
         vm.openItem(epubId)
         settle { vm.ui.value.sheet?.loading == false }
-        assertThat(vm.ui.value.sheet!!.error).isEqualTo(UiText.Res(R.string.archive_offline))
+        assertThat(vm.ui.value.sheet!!.error).isEqualTo(UiText.Res("archive_offline"))
         assertThat(vm.ui.value.sheet!!.item).isNull()
     }
 
@@ -796,7 +796,7 @@ class ArchiveViewModelTest {
         val vm = audioViewModel(ArchiveKind.MUSIC)
         vm.get(HOLST)
         settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res(R.string.archive_recording_too_new, 1926))
+        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res("archive_recording_too_new", 1926))
         assertThat(downloads.enqueuedGroups).isEmpty()
         assertThat(File(mediaRoot, "music/archive-org/$HOLST").exists()).isFalse()
     }
@@ -811,7 +811,7 @@ class ArchiveViewModelTest {
         prefs.withdraw()
         vm.get(HOLST)
         settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res(R.string.archive_recording_too_new, 1926))
+        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res("archive_recording_too_new", 1926))
         assertThat(downloads.enqueuedGroups).isEmpty()
     }
 
@@ -876,7 +876,7 @@ class ArchiveViewModelTest {
         val sent = requests.size
         vm.get(id)
         settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res(R.string.archive_spoken_word_get))
+        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res("archive_spoken_word_get"))
         assertThat(requests).hasSize(sent)
         assertThat(itemFetches()).isEqualTo(0)
         assertThat(downloads.enqueuedGroups).isEmpty()
@@ -906,7 +906,7 @@ class ArchiveViewModelTest {
         assertThat(vm.ui.value.sheet!!.offer).isNull()
         vm.get(AUDIO_LENDING)
         settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res(R.string.archive_nothing_to_download))
+        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res("archive_nothing_to_download"))
         assertThat(downloads.enqueuedGroups).isEmpty()
     }
 
@@ -981,7 +981,7 @@ class ArchiveViewModelTest {
 
         vm.get(HOLST)
         settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res(R.string.archive_already_in_music))
+        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res("archive_already_in_music"))
         assertThat(downloads.enqueuedGroups).isEmpty()
         assertThat(File(mediaRoot, "audiobooks/archive-org/$HOLST").exists()).isFalse()
         // The Installed tab still lists only this view's own downloads.
@@ -1005,7 +1005,7 @@ class ArchiveViewModelTest {
         assertThat(vm.ui.value.rows.single().status).isEqualTo(ItemStatus.InLibrary(app.granger.sources.LibraryShelf.AUDIOBOOKS))
         vm.get(HOLST)
         settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res(R.string.archive_already_in_audiobooks))
+        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res("archive_already_in_audiobooks"))
         assertThat(downloads.enqueuedGroups).isEmpty()
         assertThat(File(mediaRoot, "music/archive-org/$HOLST").exists()).isFalse()
     }
@@ -1018,7 +1018,7 @@ class ArchiveViewModelTest {
         val vm = audioViewModel(ArchiveKind.SPOKEN_WORD)
         vm.get(HOLST)
         settle { vm.ui.value.notice != null }
-        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res(R.string.archive_already_in_music))
+        assertThat(vm.ui.value.notice).isEqualTo(UiText.Res("archive_already_in_music"))
         assertThat(downloads.enqueuedGroups).isEmpty()
     }
 

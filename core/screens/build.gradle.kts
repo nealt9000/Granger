@@ -20,6 +20,8 @@ kotlin {
             api(project(":core:store"))
             api(project(":core:online"))
             api(project(":core:downloads-api"))
+            // Plan I5 Task 2: archive.org's model.
+            api(project(":core:archive"))
             api(libs.androidx.lifecycle.viewmodel)
             api(libs.kotlinx.coroutines.core)
             api(project(":core:text"))

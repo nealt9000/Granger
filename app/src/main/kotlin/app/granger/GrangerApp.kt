@@ -1,5 +1,7 @@
 package app.granger
 
+import app.granger.archive.readSidecar
+import app.granger.archive.sidecarFile
 import app.granger.core.library.addDownloaded
 import app.granger.core.library.addLoose
 import app.granger.core.library.keepLoose

@@ -114,7 +114,7 @@ internal fun ArchiveItemSheet(
             Text(item?.title?.ifBlank { null } ?: sheet.identifier, style = MaterialTheme.typography.titleLarge)
             when {
                 sheet.loading -> Box(Modifier.fillMaxWidth().padding(24.dp), Alignment.Center) { CircularProgressIndicator() }
-                sheet.error != null -> Text(sheet.error.resolve(), color = MaterialTheme.colorScheme.error)
+                sheet.error != null -> Text(sheet.error!!.resolve(), color = MaterialTheme.colorScheme.error)
             }
             if (item != null) {
                 val byline = listOf(item.creator, item.date).filter { it.isNotBlank() }.joinToString(" · ")
@@ -142,7 +142,7 @@ internal fun ArchiveItemSheet(
                 // The PDF beside the text, side by side with Get: its own download, and its own book once in.
                 if (sheet.pdfSizeBytes != null && sheet.status !is ItemStatus.InLibrary) {
                     when (sheet.pdfStatus) {
-                        ItemStatus.NotInstalled -> OutlinedButton(onClick = onGetPdf) { Text(stringResource(R.string.archive_get_pdf, formatBytes(sheet.pdfSizeBytes))) }
+                        ItemStatus.NotInstalled -> OutlinedButton(onClick = onGetPdf) { Text(stringResource(R.string.archive_get_pdf, formatBytes(sheet.pdfSizeBytes!!))) }
                         ItemStatus.Installed, ItemStatus.UpdateAvailable ->
                             Text(stringResource(R.string.archive_pdf_in_library), style = MaterialTheme.typography.bodySmall)
                         else -> Text(

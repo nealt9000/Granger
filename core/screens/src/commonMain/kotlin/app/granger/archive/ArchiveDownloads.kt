@@ -10,11 +10,18 @@ import app.granger.core.downloads.DownloadSpec
 import app.granger.core.downloads.HashAlgorithm
 import app.granger.core.downloads.ItemKind
 import app.granger.core.library.BookDetails
-import java.io.File
+import kotlinx.io.buffered
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
+import kotlinx.io.readString
+import kotlinx.io.writeString
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-/** Builds archive.org download specs and keeps the item metadata that the finished download is filed with. */
+/**
+ * Builds archive.org download specs and keeps the item metadata that the finished download is filed with. Shared since
+ * Plan I5: the sidecars go by path here; Android's `File` forms are in the app (ArchiveSidecarFiles.kt).
+ */
 object ArchiveDownloads {
     const val PREFIX = "archive-org:"
     /**
@@ -131,32 +138,40 @@ object ArchiveDownloads {
         val kind: String,
     )
 
-    /** Writes `<dir>/<identifier>.json`, or a [part]'s `<dir>/<identifier>~03.json` titled for it, and returns it. */
-    fun writeSidecar(dir: File, item: ArchiveItem, kind: TextKind, part: Part? = null, partCount: Int = 0): File {
+    /** Writes `<dir>/<identifier>.json`, or a [part]'s `<dir>/<identifier>~03.json` titled for it, and returns its path. */
+    fun writeSidecar(dir: String, item: ArchiveItem, kind: TextKind, part: Part? = null, partCount: Int = 0): String {
         require(ArchiveQuery.isValidIdentifier(item.identifier)) { "Bad archive.org identifier" }
-        dir.mkdirs()
+        SystemFileSystem.createDirectories(Path(dir))
         val base = details(item, kind)
         val d = if (part == null) base else base.copy(title = base.title.ifBlank { item.identifier } + PART_TITLE_SEPARATOR + part.title)
-        val file = sidecarFile(dir, part?.let { partKey(item.identifier, it.number, partCount) } ?: item.identifier)
-        file.writeText(json.encodeToString(Sidecar.serializer(),
-            Sidecar(d.title, d.author, d.date, d.subjects, d.description, d.language, kind.name)))
-        return file
+        val path = sidecarPath(dir, part?.let { partKey(item.identifier, it.number, partCount) } ?: item.identifier)
+        val text = json.encodeToString(Sidecar.serializer(), Sidecar(d.title, d.author, d.date, d.subjects, d.description, d.language, kind.name))
+        SystemFileSystem.sink(Path(path)).buffered().use { it.writeString(text) }
+        return path
     }
 
-    /** [key] is an identifier or a part's key. */
-    fun sidecarFile(dir: File, key: String): File = File(dir, "$key.json")
+    /** [key] is an identifier or a part's key: `<dir>/<key>.json`. */
+    fun sidecarPath(dir: String, key: String): String = dir.trimEnd('/') + "/" + key + ".json"
 
     /**
      * Deletes `<dir>/<key>.json`. A sidecar stays for as long as its book does (a repair re-files with it),
      * so this runs only when the item (or the part) is removed or cancelled, or its enqueue is refused.
      */
-    fun deleteSidecar(dir: File, key: String) {
-        if (ArchiveQuery.isValidIdentifier(key.substringBefore(PART_SEPARATOR))) sidecarFile(dir, key).delete()
+    fun deleteSidecar(dir: String, key: String) {
+        if (ArchiveQuery.isValidIdentifier(key.substringBefore(PART_SEPARATOR))) deletePath(sidecarPath(dir, key))
     }
 
+    /** Deletes the file at [path], if it's there. */
+    fun deletePath(path: String) {
+        runCatching { SystemFileSystem.delete(Path(path), mustExist = false) }
+    }
+
+    /** Whether there's a file at [path]. */
+    fun exists(path: String): Boolean = SystemFileSystem.exists(Path(path))
+
     /** Null when the file is missing or unreadable. */
-    fun readSidecar(file: File): Pair<BookDetails, TextKind>? = try {
-        val s = json.decodeFromString(Sidecar.serializer(), file.readText())
+    fun readSidecar(path: String): Pair<BookDetails, TextKind>? = try {
+        val s = json.decodeFromString(Sidecar.serializer(), SystemFileSystem.source(Path(path)).buffered().use { it.readString() })
         BookDetails(s.title, s.creator, s.date, s.subjects, s.description, s.language) to TextKind.valueOf(s.kind)
     } catch (e: Exception) {
         null

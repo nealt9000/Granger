@@ -5,6 +5,8 @@ import Foundation
 /// fills them.
 enum ScreenText {
     static let strings: [String: String] = [
+        "archive_already_in_audiobooks": "This is already in your Audiobooks.",
+        "archive_already_in_music": "This is already in your Music.",
         "archive_error_answered": "archive.org answered %1$d",
         "archive_error_not_found": "Not found on archive.org",
         "archive_error_unreachable": "Couldn't reach archive.org",
@@ -21,6 +23,12 @@ enum ScreenText {
         "archive_librivox_shelf_poetry": "Poetry",
         "archive_librivox_shelf_recent": "Recently added",
         "archive_librivox_shelf_science_fiction": "Science fiction",
+        "archive_no_space": "Not enough space on %1$s for %2$s: free up %3$s.",
+        "archive_no_storage": "No storage is available right now.",
+        "archive_not_public_domain": "This item wasn't published in 1930 or earlier. Show everything to download it.",
+        "archive_nothing_to_download": "Nothing on this item can be downloaded.",
+        "archive_offline": "Couldn't reach archive.org. Check your connection and try again.",
+        "archive_recording_too_new": "This recording wasn't published before %1$d. Show everything to download it.",
         "archive_shelf_78": "78 rpm records",
         "archive_shelf_classical": "Classical",
         "archive_shelf_drama": "Drama",
@@ -30,6 +38,9 @@ enum ScreenText {
         "archive_shelf_most_downloaded": "Most downloaded",
         "archive_shelf_poetry": "Poetry",
         "archive_shelf_science": "Science & engineering",
+        "archive_spoken_word_get": "Show everything to download archive.org spoken word.",
+        "archive_tab_browse": "Browse",
+        "archive_tab_installed": "On this phone",
         "explore_era_ancient": "Ancient world",
         "explore_era_ancient_span": "3000 BC – AD 500",
         "explore_era_c19": "The 1800s",
