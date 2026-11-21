@@ -585,6 +585,8 @@ class IosLibrary(
         },
         bookOf = { null },
         libraryLanguages = { languages().toSet() },
+        // A broad topic's figures (Plan EX D5) from a pack's own pictures, cached as files (Plan I4 Task 8).
+        figure = { packId, image -> if (langOf(packId) != null) null else packLibrary.archive(packId)?.let { archivePicture(it, image, whole = false) } },
         prefetch = { packId, paths -> langOf(packId)?.let { wikipedia(it).prefetch(paths) } },
         onlineQid = { packId, path -> langOf(packId)?.let { wikipedia(it).summary(path)?.qid } },
         records = { packId, lang, qid -> remoteRecords.record(lang, qid, packId)?.withoutHidden(contentFilter.isOn) },
