@@ -1,26 +1,26 @@
 package app.granger.core.library
 
-import android.database.SQLException
-import androidx.room.withTransaction
-import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.room.RoomRawQuery
+import androidx.room.execSQL
+import androidx.room.useReaderConnection
+import androidx.room.useWriterConnection
+import androidx.sqlite.SQLiteException
 import app.granger.core.books.EpubInspector
 import app.granger.core.books.Inspection
 import app.granger.core.books.PdfText
 import app.granger.core.books.Snippets
 import app.granger.core.books.TextChunk
-import app.granger.core.books.TextQuote
 import app.granger.core.books.XhtmlText
-import app.granger.core.books.all
-import app.granger.core.books.inspect
-import app.granger.core.books.open
+import app.granger.core.books.openBookZip
 import app.granger.core.research.Keywords
 import app.granger.core.text.Spellings
-import java.io.File
-import java.io.IOException
-import java.util.zip.ZipFile
+import kotlin.math.ln
+import kotlin.time.TimeSource
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.io.IOException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -30,19 +30,22 @@ import kotlinx.coroutines.withContext
  * the text isn't stored, so snippets re-read the book. `book_text` is contentless and can't delete rows: a
  * re-indexed or removed book leaves orphans that the join drops, and [compactIfNeeded] clears them out.
  *
+ * Shared by both phones since Plan I5: `book_text` is read and written through Room's connections (Android's framework
+ * SQLite in Room's compatibility mode, as before; the bundled SQLite on the iPhone), inside the same transactions.
+ *
  * @param compactThreshold the fewest orphans that trigger a rebuild, if they also outnumber the live chunks.
  */
 class BookIndex(
     private val db: LibraryDatabase,
     private val io: CoroutineDispatcher = Dispatchers.IO,
-    private val now: () -> Long = System::currentTimeMillis,
+    private val now: () -> Long = ::epochMillis,
     private val compactThreshold: Int = 50_000,
 ) {
     private val dao = db.bookDao()
     private val mutex = Mutex()
 
-    /** Test hook: runs inside each book's transaction just before it commits. */
-    internal var beforeCommit: (bookId: String) -> Unit = {}
+    /** Test hook: runs inside each book's transaction just before it commits. Public for Android's tests in :core:library. */
+    var beforeCommit: (bookId: String) -> Unit = {}
 
     /** A book's indexed chunks, in reading order; empty until the book is indexed. */
     suspend fun chunks(bookId: String): List<BookChunk> = dao.chunksOf(bookId)
@@ -83,7 +86,7 @@ class BookIndex(
             val kept = topChunks(ranked, limit, perBook)
             val ids = kept.map { it.bookId }.distinct()
             val counts = HashMap<String, Int>()
-            for (apart in aparts) matchCounts(apart, ids).forEach { (id, n) -> counts.merge(id, n, ::maxOf) }
+            for (apart in aparts) matchCounts(apart, ids).forEach { (id, n) -> counts.mergeWith(id, n, ::maxOf) }
             kept.groupBy { it.bookId }.flatMap { (bookId, hits) ->
                 val book = dao.get(bookId) ?: return@flatMap emptyList()
                 val texts = chunkTexts(book, hits)
@@ -117,11 +120,13 @@ class BookIndex(
         val phrases = forms.map { f -> "\"${f.joinToString(" ")}\"" }
         val nears = forms.map { f -> f.joinToString(" NEAR/$NEAR ") { "\"$it\"" } }
         return withContext(io) {
-            val found = listOf(phrases, nears).asSequence()
-                .map { bestScores(it) }
-                .firstOrNull { it.isNotEmpty() }
-                ?.takeIf { it.size <= QUOTE_CHUNKS }
-                ?: return@withContext emptyList()
+            // The near form is only scored when the phrase finds nothing.
+            var first: Map<Long, Double>? = null
+            for (form in listOf(phrases, nears)) {
+                first = bestScores(form).takeIf { it.isNotEmpty() } ?: continue
+                break
+            }
+            val found = first?.takeIf { it.size <= QUOTE_CHUNKS } ?: return@withContext emptyList()
             val ranked = found.entries.sortedWith(compareByDescending<Map.Entry<Long, Double>> { it.value }.thenBy { it.key })
             // The oldest book first: famous lines are quoted by later books ("Alas, poor Yorick" is in Tristram Shandy,
             // Hard Times and The Brothers Karamazov too, each once, so BM25 can't tell them from Hamlet).
@@ -143,20 +148,23 @@ class BookIndex(
     private fun year(date: String?): Int? = date?.let { YEAR.find(it)?.value?.toIntOrNull() }
 
     /** How many chunks of each of [bookIds] match [match]; empty for a bad query. */
-    private fun matchCounts(match: String, bookIds: List<String>): Map<String, Int> {
+    private suspend fun matchCounts(match: String, bookIds: List<String>): Map<String, Int> {
         if (bookIds.isEmpty()) return emptyMap()
         val counts = HashMap<String, Int>()
         try {
             // CROSS JOIN keeps book_text first, so the match runs once. With a plain JOIN SQLite may walk the books'
             // chunks and re-run the whole match for each one: minutes for a quote of common words ("does not in").
-            db.openHelper.readableDatabase.query(
-                SimpleSQLiteQuery(
+            db.useReaderConnection { connection ->
+                connection.usePrepared(
                     "SELECT c.bookId, COUNT(*) FROM book_text t CROSS JOIN book_chunks c ON c.id = t.docid " +
                         "WHERE book_text MATCH ? AND c.bookId IN (${bookIds.joinToString(",") { "?" }}) GROUP BY c.bookId",
-                    arrayOf<Any>(match, *bookIds.toTypedArray()),
-                ),
-            ).use { c -> while (c.moveToNext()) counts[c.getString(0)] = c.getInt(1) }
-        } catch (_: SQLException) {
+                ) { st ->
+                    st.bindText(1, match)
+                    bookIds.forEachIndexed { i, id -> st.bindText(i + 2, id) }
+                    while (st.step()) counts[st.getText(0)] = st.getLong(1).toInt()
+                }
+            }
+        } catch (_: SQLiteException) {
             // No counts; each hit counts its own book's listed chunks.
         }
         return counts
@@ -206,22 +214,22 @@ class BookIndex(
      * Each chunk matching any of [matches] (FTS4 queries), scored by the sum of its BM25 over the ones it matches;
      * within [bookId] when it's set. A bad query adds nothing.
      */
-    private fun scores(matches: List<String>, bookId: String?): Map<Long, Double> {
+    private suspend fun scores(matches: List<String>, bookId: String?): Map<Long, Double> {
         val scores = HashMap<Long, Double>()
-        val sql = db.openHelper.readableDatabase
         val scope = if (bookId == null) "" else " AND docid IN (SELECT id FROM book_chunks WHERE bookId = ?)"
         for (match in matches) {
             try {
                 // Rows come in docid order, so a word matching more than 3000 chunks scores only its first 3000.
-                sql.query(
-                    SimpleSQLiteQuery(
+                db.useReaderConnection { connection ->
+                    connection.usePrepared(
                         "SELECT docid, matchinfo(book_text, 'pcnx') FROM book_text WHERE book_text MATCH ?$scope LIMIT 3000",
-                        if (bookId == null) arrayOf<Any>(match) else arrayOf<Any>(match, bookId),
-                    ),
-                ).use { c ->
-                    while (c.moveToNext()) scores.merge(c.getLong(0), bm25(c.getBlob(1)), Double::plus)
+                    ) { st ->
+                        st.bindText(1, match)
+                        if (bookId != null) st.bindText(2, bookId)
+                        while (st.step()) scores.mergeWith(st.getLong(0), bm25(st.getBlob(1)), Double::plus)
+                    }
                 }
-            } catch (_: SQLException) {
+            } catch (_: SQLiteException) {
                 // No candidates for this query.
             }
         }
@@ -229,10 +237,10 @@ class BookIndex(
     }
 
     /** Each chunk matching any of [matches], scored by its best BM25 among them (the spellings of one query). */
-    private fun bestScores(matches: List<String>): Map<Long, Double> {
+    private suspend fun bestScores(matches: List<String>): Map<Long, Double> {
         if (matches.size == 1) return scores(matches, bookId = null)
         val best = HashMap<Long, Double>()
-        for (match in matches) scores(listOf(match), bookId = null).forEach { (id, s) -> best.merge(id, s, ::maxOf) }
+        for (match in matches) scores(listOf(match), bookId = null).forEach { (id, s) -> best.mergeWith(id, s, ::maxOf) }
         return best
     }
 
@@ -251,33 +259,34 @@ class BookIndex(
         for (ids in ranked.chunked(200)) {
             if (chunks.size >= limit) break
             val rows = try {
-                dao.chunksMatching(androidx.room.RoomRawQuery("SELECT * FROM book_chunks WHERE id IN (${ids.joinToString(",")})"))
-            } catch (_: SQLException) {
+                dao.chunksMatching(RoomRawQuery("SELECT * FROM book_chunks WHERE id IN (${ids.joinToString(",")})"))
+            } catch (_: SQLiteException) {
                 break
             }.associateBy { it.id }
             for (id in ids) {
                 if (chunks.size >= limit) break
                 val chunk = rows[id] ?: continue
-                if (perBookCount.merge(chunk.bookId, 1, Int::plus)!! <= perBook) chunks.add(chunk)
+                if (perBookCount.mergeWith(chunk.bookId, 1, Int::plus) <= perBook) chunks.add(chunk)
             }
         }
         return chunks
     }
 
-    /** Clears out `book_text` when orphaned rows dominate it, then re-indexes every book. */
-    internal suspend fun compactIfNeeded() = mutex.withLock { withContext(io) { compact() } }
+    /** Clears out `book_text` when orphaned rows dominate it, then re-indexes every book. Public for Android's tests. */
+    suspend fun compactIfNeeded() = mutex.withLock { withContext(io) { compact() } }
 
     private suspend fun compact() {
         val count = dao.chunkCount()
         val orphans = chunkSequence() - count
         if (orphans <= maxOf(count, compactThreshold)) return
-        db.withTransaction {
-            val sql = db.openHelper.writableDatabase
-            sql.execSQL("DROP TABLE IF EXISTS book_text")
-            sql.execSQL(LibraryDatabase.BOOK_TEXT_SQL)
-            sql.execSQL("DELETE FROM book_chunks")
-            // Safe now that book_text is empty, and without it the orphan count would never fall.
-            sql.execSQL("DELETE FROM sqlite_sequence WHERE name = 'book_chunks'")
+        db.inTransaction {
+            db.useWriterConnection { sql ->
+                sql.execSQL("DROP TABLE IF EXISTS book_text")
+                sql.execSQL(LibraryDatabase.BOOK_TEXT_SQL)
+                sql.execSQL("DELETE FROM book_chunks")
+                // Safe now that book_text is empty, and without it the orphan count would never fall.
+                sql.execSQL("DELETE FROM sqlite_sequence WHERE name = 'book_chunks'")
+            }
             dao.clearIndexed()
         }
         indexAll()
@@ -286,7 +295,7 @@ class BookIndex(
     private suspend fun indexAll() {
         for (book in dao.notIndexed()) {
             // A Gutenberg book is a row long before it's a file (Plan GB): its text joins once it's been opened.
-            if (!File(book.filePath).isFile) continue
+            if (!Disk.isFile(book.filePath)) continue
             try {
                 index(book)
             } catch (e: CancellationException) {
@@ -302,8 +311,8 @@ class BookIndex(
      * if the row is unchanged since [book] was read.
      */
     private suspend fun index(book: Book) {
-        val file = File(book.filePath)
-        if (!file.isFile) return
+        val file = book.filePath
+        if (!Disk.isFile(file)) return
         if (book.format == BookFormat.PDF) return indexPdf(book, file)
         val spine = (EpubInspector.inspect(file) as? Inspection.Ok)?.meta?.spine ?: return
         write(book, XhtmlText.all(file, spine), searchable = true)
@@ -313,8 +322,8 @@ class BookIndex(
      * A PDF's text is read before the transaction: a long scan takes tens of seconds to extract, and holding the
      * write lock that long would stall every save of a reading place. A PDF with no text layer is marked unsearchable.
      */
-    private suspend fun indexPdf(book: Book, file: File) {
-        val started = System.nanoTime()
+    private suspend fun indexPdf(book: Book, file: String) {
+        val started = TimeSource.Monotonic.markNow()
         var pages = 0
         val chunks = PdfText.open(file)?.use { reader ->
             pages = reader.pageCount
@@ -325,21 +334,27 @@ class BookIndex(
             }
         } ?: return
         write(book, chunks.asSequence(), searchable = chunks.isNotEmpty())
-        val ms = (System.nanoTime() - started) / 1_000_000
-        runCatching { android.util.Log.i("Granger", "Indexed PDF ${book.id}: $pages pages, ${chunks.size} chunks in $ms ms") }
+        val ms = started.elapsedNow().inWholeMilliseconds
+        logInfo("Indexed PDF ${book.id}: $pages pages, ${chunks.size} chunks in $ms ms")
     }
 
     private suspend fun write(book: Book, chunks: Sequence<TextChunk>, searchable: Boolean) {
-        db.withTransaction {
+        db.inTransaction {
             dao.deleteChunks(book.id)
-            val insert = db.openHelper.writableDatabase.compileStatement("INSERT INTO book_text(docid, text) VALUES(?, ?)")
-            insert.use { statement ->
-                for (chunk in chunks) {
-                    val id = dao.insertChunk(BookChunk(0, book.id, chunk.href, chunk.ordinal, chunk.progression))
-                    statement.clearBindings()
-                    statement.bindLong(1, id)
-                    statement.bindString(2, chunk.text)
-                    statement.executeInsert()
+            // Each batch's chunks go in as rows, then their text into book_text under the same ids, on the transaction's
+            // connection (a statement's block can't call the DAO, so they can't alternate one by one).
+            for (batch in chunks.chunked(TEXT_BATCH)) {
+                val ids = batch.map { chunk -> dao.insertChunk(BookChunk(0, book.id, chunk.href, chunk.ordinal, chunk.progression)) }
+                db.useWriterConnection { connection ->
+                    connection.usePrepared("INSERT INTO book_text(docid, text) VALUES(?, ?)") { statement ->
+                        batch.forEachIndexed { i, chunk ->
+                            statement.reset()
+                            statement.clearBindings()
+                            statement.bindLong(1, ids[i])
+                            statement.bindText(2, chunk.text)
+                            statement.step()
+                        }
+                    }
                 }
             }
             beforeCommit(book.id)
@@ -349,21 +364,20 @@ class BookIndex(
     }
 
     /** The highest `book_chunks` id ever handed out. */
-    private fun chunkSequence(): Long =
-        db.query("SELECT seq FROM sqlite_sequence WHERE name = 'book_chunks'", null).use {
-            if (it.moveToFirst()) it.getLong(0) else 0L
-        }
+    private suspend fun chunkSequence(): Long = db.useReaderConnection { connection ->
+        connection.usePrepared("SELECT seq FROM sqlite_sequence WHERE name = 'book_chunks'") { if (it.step()) it.getLong(0) else 0L }
+    }
 
     /** Re-extracts the text of [hits], opening the book's file once; a missing file or chunk gives no entry. */
     private fun chunkTexts(book: Book, hits: List<BookChunk>): Map<Long, String> {
         if (book.format == BookFormat.PDF) {
-            val reader = PdfText.open(File(book.filePath)) ?: return emptyMap()
+            val reader = PdfText.open(book.filePath) ?: return emptyMap()
             return reader.use {
                 val byHref = hits.map { it.href }.distinct().associateWith { href -> reader.chunks(href) }
                 hits.mapNotNull { chunk -> byHref[chunk.href]?.getOrNull(chunk.ordinal)?.let { chunk.id to it.text } }.toMap()
             }
         }
-        val zip = try { ZipFile(book.filePath) } catch (_: IOException) { return emptyMap() }
+        val zip = try { openBookZip(book.filePath) } catch (_: IOException) { return emptyMap() }
         return zip.use {
             val byHref = hits.map { it.href }.distinct().associateWith { href -> XhtmlText.chunks(zip, href) }
             hits.mapNotNull { chunk -> byHref[chunk.href]?.getOrNull(chunk.ordinal)?.let { chunk.id to it.text } }.toMap()
@@ -379,14 +393,24 @@ class BookIndex(
         const val QUOTE_CHUNKS = 20
         private val WHITESPACE = Regex("\\s+")
         private val YEAR = Regex("^-?\\d{1,4}")
+
+        /** How many chunks go in between switches from the DAO to `book_text`'s statement. */
+        private const val TEXT_BATCH = 256
     }
+}
+
+/** `HashMap.merge` (JVM only): [value] if [key] has none, else [combine] of the two; returns what's stored. */
+private inline fun <K, V : Any> MutableMap<K, V>.mergeWith(key: K, value: V, combine: (V, V) -> V): V {
+    val merged = get(key)?.let { combine(it, value) } ?: value
+    put(key, merged)
+    return merged
 }
 
 /**
  * BM25 (k1 = 1.2, no length normalisation) of one row from FTS4 `matchinfo(..., 'pcnx')`: unsigned little-endian ints
  * `p c n`, then `hits-in-row, hits-in-all-rows, rows-with-hits` per phrase and column. Sums the phrases (one column).
  */
-internal fun bm25(matchinfo: ByteArray): Double {
+fun bm25(matchinfo: ByteArray): Double {
     val ints = IntArray(matchinfo.size / 4) { i ->
         (matchinfo[4 * i].toInt() and 0xFF) or ((matchinfo[4 * i + 1].toInt() and 0xFF) shl 8) or
             ((matchinfo[4 * i + 2].toInt() and 0xFF) shl 16) or ((matchinfo[4 * i + 3].toInt() and 0xFF) shl 24)
@@ -399,7 +423,7 @@ internal fun bm25(matchinfo: ByteArray): Double {
         if (3 + 3 * i + 2 >= ints.size) break
         val tf = (ints[3 + 3 * i].toLong() and 0xFFFFFFFFL).toDouble()
         val df = (ints[3 + 3 * i + 2].toLong() and 0xFFFFFFFFL).toDouble()
-        val idf = Math.log((n - df + 0.5) / (df + 0.5) + 1)
+        val idf = ln((n - df + 0.5) / (df + 0.5) + 1)
         score += idf * tf * 2.2 / (tf + 1.2)
     }
     return score
