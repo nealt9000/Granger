@@ -266,7 +266,7 @@ final class SmokeTests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-wifiOnly", "NO"]
         app.launch()
-        let getMore = app.buttons["Get more"]
+        let getMore = app.buttons["Get more"].firstMatch
         XCTAssertTrue(getMore.waitForExistence(timeout: 10))
         getMore.tap()
         app.buttons["getmore-books"].tap()
@@ -319,7 +319,7 @@ final class SmokeTests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en"]
         app.launch()
-        let getMore = app.buttons["Get more"]
+        let getMore = app.buttons["Get more"].firstMatch
         XCTAssertTrue(getMore.waitForExistence(timeout: 10))
         getMore.tap()
         app.buttons["getmore-kiwix"].tap()
@@ -368,5 +368,28 @@ final class SmokeTests: XCTestCase {
         all.tap()
         XCTAssertTrue(app.staticTexts["Ready for anything"].waitForExistence(timeout: 30), "Outfitting's domains")
         shot(app, "outfitting")
+    }
+
+    /// Plan I4 Task 8: with a pack on the phone, Home draws its feeds; Add feed opens with the library's scopes.
+    func testHomeFeeds() throws {
+        guard let zim = ProcessInfo.processInfo.environment["GRANGER_TEST_ZIM"], !zim.isEmpty else { throw XCTSkip("no GRANGER_TEST_ZIM") }
+        let app = XCUIApplication()
+        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en", "-debugPack", zim,
+                               "-homeOrder", "feeds,continue,readiness,timeline", "-homeHidden", "()"]
+        app.launch()
+        // The defaults (Wikipedia, Classics, Wikiquote) wait for their packs; a feed over the pack on the phone draws.
+        let add = app.buttons["add-feed"]
+        XCTAssertTrue(add.waitForExistence(timeout: 20))
+        add.tap()
+        XCTAssertTrue(app.navigationBars["Add feed"].waitForExistence(timeout: 10), "Add feed")
+        let pack = app.buttons.matching(NSPredicate(format: "label CONTAINS 'based.cooking'")).firstMatch
+        XCTAssertTrue(pack.waitForExistence(timeout: 10), "the pack as a scope")
+        pack.tap()
+        shot(app, "add-feed")
+        app.navigationBars["Add feed"].buttons["Add"].tap()
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'based.cooking'")).firstMatch.waitForExistence(timeout: 30), "the new feed on Home")
+        shot(app, "home-feeds")
+        let more = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'More for'")).firstMatch
+        if more.exists { more.tap(); app.buttons["Remove this feed"].tap() }
     }
 }

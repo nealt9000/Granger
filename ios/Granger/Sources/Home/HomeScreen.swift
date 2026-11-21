@@ -17,6 +17,8 @@ struct HomeScreen: View {
     @State private var arranging = false
     @State private var downloads = DownloadsHolder()
     @State private var ready = ReadyOfflineHolder()
+    @State private var feeds = FeedsHolder()
+    @State private var addingFeed = false
 
     var body: some View {
         ScrollView {
@@ -25,11 +27,13 @@ struct HomeScreen: View {
                 if !settings.privacySeen { PrivacyCard(onSettings: { showSettings = true }) }
                 if library.index == .coming { IndexCard() }
                 if let s = downloads.summary, s.isActive { DownloadsCard(summary: s) }
-                ForEach(arrangement.shown, id: \.self) { token in
+                ForEach(arrangement.shown(feedIds: (feeds.ui?.feeds ?? []).map(\.feed.id)), id: \.self) { token in
                     switch token {
                     case "continue": if !recent.entries.isEmpty { continueSection }
                     case "timeline": TimelineCard(holder: timeline)
                     case "readiness": if let ui = ready.ui { ReadyOfflineCard(ui: ui) }
+                    case let t where t.hasPrefix("feed:"):
+                        if let f = feeds.ui?.feeds.first(where: { "feed:\($0.feed.id)" == t }) { FeedRow(f: f, holder: feeds) }
                     default: EmptyView()
                     }
                 }
@@ -42,14 +46,16 @@ struct HomeScreen: View {
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 RecentlyOpenMenu()
-                NavigationLink(value: Route.getMore) { Image(systemName: "plus") }.accessibilityLabel("Get more")
+                NavigationLink(value: Route.getMore) { Image(systemName: "arrow.down.circle") }.accessibilityLabel("Get more")
+                Button { addingFeed = true } label: { Image(systemName: "plus") }.accessibilityLabel("Add feed").accessibilityIdentifier("add-feed")
                 Button { arranging = true } label: { Image(systemName: "pencil") }.accessibilityLabel("Arrange Home")
                 Button { showSettings = true } label: { Image(systemName: "gearshape") }.accessibilityLabel("Settings")
             }
         }
         .sheet(isPresented: $showSettings) { NavigationStack { SettingsScreen() } }
+        .sheet(isPresented: $addingFeed) { NavigationStack { AddFeedSheet(holder: feeds) } }
         .sheet(isPresented: $arranging) { NavigationStack { ArrangeHomeScreen(arrangement: arrangement) } }
-        .task { if let core { downloads.watch(core) } }
+        .task { if let core { downloads.watch(core); feeds.start(core) } }
         .task(id: "\(recent.entries.count)|\(library.version)|\(library.index)") { if let core { await ready.load(core, recent: recent) } }
         .task(id: "\(library.index)|\(settings.canFetch)") {
             // The timeline starts once the index set is open (a new model then reads it).
@@ -89,7 +95,7 @@ struct HomeScreen: View {
 @Observable
 final class HomeArrangement {
     /// The sections the iPhone draws today.
-    static let supported: [String] = ["continue", "readiness", "timeline"]
+    static let supported: [String] = ["continue", "readiness", "timeline", "feeds"]
     private let defaults = UserDefaults.standard
     private(set) var layout: HomeLayout
 
@@ -102,7 +108,12 @@ final class HomeArrangement {
     /// Every drawn section in order, hidden ones included.
     var all: [String] { layout.parts(feedIds: []).map(\.token).filter { Self.supported.contains($0) } }
     /// What Home shows, in order.
-    var shown: [String] { layout.visible(feedIds: []).map(\.token).filter { Self.supported.contains($0) } }
+    var shown: [String] { shown(feedIds: []) }
+
+    /// What Home shows, in order, with the feeds where Arrange Home put them (each `feed:<id>`; at most two, as Android).
+    func shown(feedIds: [Int64]) -> [String] {
+        layout.visible(feedIds: feedIds.map { KotlinLong(value: $0) }).map(\.token).filter { Self.supported.contains($0) || $0.hasPrefix("feed:") }
+    }
     func isHidden(_ token: String) -> Bool { layout.hidden.contains(token) }
 
     /// Saves [order] (the drawn sections, as arranged) and [hidden]; other tokens keep their places.

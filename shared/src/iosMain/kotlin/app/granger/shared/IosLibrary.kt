@@ -28,6 +28,7 @@ import app.granger.core.library.isBookPack
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import app.granger.core.library.withoutHidden
 import app.granger.core.text.hex
 import app.granger.core.text.sha1
@@ -401,6 +402,40 @@ class IosLibrary(
 
     /** The articles you kept, newest first. */
     val keptArticles: kotlinx.coroutines.flow.Flow<List<app.granger.core.library.KeptArticle>> get() = kept.articles
+
+        // ---- Home's feeds (Plan I4 Task 8): the shared feed engine over the packs (books join in I5).
+
+    private val homeFeedsStore = app.granger.core.library.RoomHomeFeeds(database)
+
+    private val feedDrawer by lazy {
+        app.granger.home.FeedDrawer(
+        archiveOf = { packLibrary.archive(it.id) },
+        chunksOf = { emptyList() },
+        bookSearch = { emptyList() },
+        librarySearch = packSearch,
+        languages = { languages() },
+        hides = contentFilter::hides,
+        noPicture = contentFilter::noPicture,
+        thumbnail = { archive, path, html -> thumbnail(archive, path, html) },
+        )
+    }
+
+    private val feedSnapshot = packLibrary.packs.map { packs ->
+        app.granger.home.LibrarySnapshot(
+            packs.filter { it.status == app.granger.core.library.PackStatus.OK }, emptyList(), emptyList(), emptyList(), emptyList(), catalog,
+        )
+    }
+
+    /** Home's feeds: each feed's cards, Add feed's scopes; the defaults are added once, the first time. */
+    fun homeFeeds(): Owned<app.granger.home.HomeFeedsModel> = owned { scope ->
+        app.granger.home.HomeFeedsModel(scope, homeFeedsStore, feedDrawer, feedSnapshot, app.granger.screens.ioDispatcher, { app.granger.screens.CivilDate.today() })
+            .also { model ->
+                val d = platform.Foundation.NSUserDefaults.standardUserDefaults
+                scope.launch {
+                    model.seedDefaults({ d.boolForKey("home.feedsSeeded") }, { d.setBool(true, "home.feedsSeeded") }, { languages() })
+                }
+            }
+    }
 
         /** Gets a catalog pack (Ready offline's and Outfitting's offers): queued on this iPhone, under the Wi-Fi rule. */
     suspend fun getPack(id: String): app.granger.core.downloads.EnqueueResult? {
