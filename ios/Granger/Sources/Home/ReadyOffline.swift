@@ -137,6 +137,7 @@ struct OutfittingScreen: View {
     @State private var ready = ReadyOfflineHolder()
     @State private var report: ReadinessReport?
     @State private var kept: [KeptArticle] = []
+    @State private var updates: [KeptArticle] = []
     @State private var savedBytes: Int64 = 0
 
     var body: some View {
@@ -152,6 +153,14 @@ struct OutfittingScreen: View {
             }
             if let ui = ready.ui { Section { ReadyOfflineBody(ui: ui).padding(.vertical, 6) } }
             Section(header: heading("Kept articles")) {
+                if !updates.isEmpty {
+                    HStack {
+                        Text(updates.count == 1 ? "1 kept article has a newer version" : "\(updates.count) kept articles have a newer version").foregroundStyle(palette.onSurface)
+                        Spacer()
+                        Button("Update all") { let u = updates; Task { try? await core?.library.updateKept(articles: u) } }
+                            .buttonStyle(.bordered).accessibilityIdentifier("kept-update-all")
+                    }
+                }
                 if kept.isEmpty { Text("No articles kept yet. Keep one from its topic page.").foregroundStyle(palette.onSurfaceVariant) }
                 ForEach(kept, id: \.title) { k in
                     Button { openRoute(.topic(lang: k.lang, path: k.title)) } label: {
@@ -195,6 +204,11 @@ struct OutfittingScreen: View {
         .task {
             guard let core else { return }
             for await k in core.library.keptArticles { kept = k }
+        }
+        .task {
+            guard let core else { return }
+            try? await core.library.checkKeptUpdates()
+            for await u in core.library.keptUpdates.updates { updates = u }
         }
     }
 

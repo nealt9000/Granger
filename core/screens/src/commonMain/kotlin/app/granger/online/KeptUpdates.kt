@@ -13,7 +13,7 @@ class KeptUpdates(
     private val revisions: (lang: String, titles: List<String>) -> Map<String, Long>,
     private val lastCheck: () -> Long,
     private val setLastCheck: (Long) -> Unit,
-    private val clock: () -> Long = System::currentTimeMillis,
+    private val clock: () -> Long = { app.granger.screens.nowMillis() },
 ) {
     private val behind = MutableStateFlow<List<KeptArticle>>(emptyList())
     val updates: StateFlow<List<KeptArticle>> = behind.asStateFlow()

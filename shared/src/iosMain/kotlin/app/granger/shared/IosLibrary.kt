@@ -400,6 +400,24 @@ class IosLibrary(
         languages(), app.granger.screens.phoneLanguage(),
     )
 
+    /** Updates for kept articles (Plan O5 Task 4): checked once a day while online, when Outfitting shows. */
+    val keptUpdates = app.granger.online.KeptUpdates(
+        revisions = { lang, titles -> client.revisions(lang, titles) },
+        lastCheck = { platform.Foundation.NSUserDefaults.standardUserDefaults.doubleForKey("online.keptUpdatesChecked").toLong() },
+        setLastCheck = { platform.Foundation.NSUserDefaults.standardUserDefaults.setDouble(it.toDouble(), "online.keptUpdatesChecked") },
+    )
+
+    /** Checks the kept articles for newer versions when a day has passed (blocking; off the main thread). */
+    suspend fun checkKeptUpdates() {
+        val all = database.keptArticleDao().all()
+        kotlinx.coroutines.withContext(app.granger.screens.ioDispatcher) { keptUpdates.check(all, gateOpen()) }
+    }
+
+    /** Re-keeps the kept articles that have a newer version (Outfitting's Update / Update all). */
+    suspend fun updateKept(articles: List<app.granger.core.library.KeptArticle>) {
+        for (a in articles) if (keeper.keep(a.lang, a.title) != null) keptUpdates.done(a.lang, a.title)
+    }
+
     /** The articles you kept, newest first. */
     val keptArticles: kotlinx.coroutines.flow.Flow<List<app.granger.core.library.KeptArticle>> get() = kept.articles
 
