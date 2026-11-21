@@ -61,6 +61,7 @@ When I5 merges, every parity row marked I5 is ticked or carries an agreed reason
   - `MentionIndex` and `BookLinks` (Android SQLite → `SqlFile`, read-only, as I4 did for the sidecars).
 - [ ] Android's classes stay as thin subclasses or factories keeping their constructors. The tests move with the code.
 - [ ] Simulator tests: import an EPUB into a shelf, find it by its words, and read a `.gqid` mention and a `.glink` link.
+  - Done (488abb14..ba4f92da). `Bookshelf`/`BookshelfStore`, `BookIndex` (same FTS table, raw SQL through Room KMP's connections inside the store's transaction), `BookLinks`, `MentionIndex`/`LinksFile` (read-only `SqlFile`; `SidecarReadOnlyTest` passes), `Filing`, `ReadingSessions`, `Shelves`, `PdfEbooks`/`PdfCovers`, and the `PackBooks` family (Gutenberg, manifest, nautilus sources) are in `:core:store` commonMain. Android keeps `File` constructors (`RoomBookshelf`, `GutenbergBooks`, `ManifestBooks`, `NautilusBooks`; `BookshelfFiles.kt`, `SidecarFiles.kt`). Import takes `() -> kotlinx.io.Source`. New shared `Disk`, streaming `Sha256`, `randomId`. Digests unchanged. `BookshelfIosTest` on the Simulator. Left for I5b: PDF covers (PDFKit), a streaming CoreKiwix pack copy, `BookManifests` still Android.
 
 ### Task 2: Library, reader and archive.org models to the core
 - [ ] Move to `:core:screens`:
@@ -70,6 +71,13 @@ When I5 merges, every parity row marked I5 is ticked or carries an agreed reason
 - [ ] Move `core/archive` to KMP on Ktor (OkHttp engine on Android, Darwin on the iPhone), along with `PublicDomain` and the 1930 rule.
 - [ ] Search's Books and By kind join the shared `TitleSearch` with `BookIndex`.
 - [ ] String keys go through ScreenTextIds and ScreenText (`make_text_ids.py`).
+  - Done (d8d98763, ccc0e656, eb768807, 004b7de8, cc18ae97, 181877e5).
+    - `core/archive` is KMP behind `ArchiveHttp`: Android keeps its OkHttp code unchanged (`:core:online` never used Ktor), and the iPhone uses Ktor on Darwin. The App Store's no-waiver prefs are `FixedFilterArchivePrefs`.
+    - In `:core:screens`: `LibraryModel`, `CollectionModel`, `RemoteCollectionViewModel`, `ReadingShelfModel`, `GutenbergShelf`, `FileImports`/`PickedFile`, `ShelfChoices`, `ArchiveModel`/`ArchiveDownloads`/`ArchiveAudio`, `EbookReaderModel` (highlights, notes, bookmarks, search through `BookSearcher`, prefs through `ReadingPrefsStore`, `TocPlace`, reference links, `Dictionary.entry` + `SystemDictionary`), `ListenModel`, and `SearchKinds`.
+    - `PackSearch` takes a `BookIndex` for Books.
+    - Android keeps thin subclasses (`LibraryViewModel`, `CollectionViewModel`, `ArchiveViewModel`, `EbookReaderViewModel`, `ListenViewModel`, `ImportRunner`). Readium-bound parts stay Android: opening, navigator, place saving, decorations, the PDF outline/links.
+    - JVM 3878/3878 with R8; Simulator `LibraryIosTest`, `EbookReaderIosTest`, archive tests.
+    - Gotcha: same-named files with top-level functions in `:app` and a shared module clash as JVM file classes. Android files were renamed (`ReadiumTocPlace.kt`, …).
 
 ### Task 3: Speech and converting to the core
 - [ ] Move `:core:speech`'s rules to KMP: Sentences (ICU on both, per call 4), SpokenText, SpokenWords, QuoteSpans, Pronunciations, Utterance, ReadSource, StreamingTextReadSource, VoiceTitles, InstalledVoices.
@@ -77,6 +85,14 @@ When I5 merges, every parity row marked I5 is ticked or carries an agreed reason
 - [ ] Voice downloads (left Android in I4) join the shared queue.
 - [ ] Move `core/books`' conversion rules (PdfToEpub, TextToEpub, ComicToPdf, EpubInspector, BookMeta, Chunking, XhtmlText) behind `PdfText` and `ComicPages` (per call 6).
 - [ ] Test: the same paragraphs give the same sentence breaks on JVM and on the Simulator.
+  - Speech part done (7ab0ae14..c9828d85).
+    - `:core:speech` is KMP: the rules are in commonMain, plus the new `PiperVoices` (voice folder rules). Sherpa, SystemSpeech and Wav stay Android.
+    - The new `:core:playback` (Android + iOS) holds ReadAloudEngine, SpeechOutput, SleepTimer, ChapterMap, PositionSaver and AutoRewind. `:core:player` keeps media3 and `AudioTrackSpeechOutput`.
+    - Voice downloads use the shared `VoiceDownloads` in `:core:downloads-api`. GrangerCore exports speech and playback.
+    - `HardcodedStringsTest` now scans the KMP source sets.
+    - JVM 3885/3885 with R8.
+    - Sentence breaks: 12 paragraphs (English and Spanish), with Android's ICU as the reference. The iPhone's `CFStringTokenizer` never breaks after Mr./Dr./Mrs./St./Sr./Dra., or after "a.m." before a capital. Only "…at 10 a.m. They talked…" sounds different (one sentence on the iPhone). La Dra. reads better on the iPhone. The test pins the recorded differences. I5b adds an a.m./p.m. rule on the iPhone so the voice pauses there too.
+  - Books part done (276c8dc7..61082ed0). `:core:books` is KMP. The rules are in commonMain behind `BookEngines { pdf: PdfOpener; comics: ComicPages; markdown: MarkdownChapters }`, and Android keeps PDFBox, junrar and commonmark. ksoup replaces jsoup in EpubInspector/DrmCheck. Zips use `BookZip`/`EpubZip`: java.util.zip on Android, a zlib reader/writer on the iPhone. CBZ works on the iPhone. PDF, Markdown and CBR on the iPhone are I5b. Test fixtures are in `:core:books-fixtures`.
 
 ### Task 4: I5a check and merge
 - [ ] Run the JVM suite and `bundleRelease` with R8.
