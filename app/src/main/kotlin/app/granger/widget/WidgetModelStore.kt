@@ -4,6 +4,7 @@ import app.granger.invoke
 import android.content.SharedPreferences
 import app.granger.R
 import app.granger.UiText
+import app.granger.resId
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -61,7 +62,9 @@ class WidgetModelStore(private val prefs: SharedPreferences) {
         internal fun encode(text: UiText): String? = when (text) {
             is UiText.Raw -> JSONObject().put("raw", text.text).toString()
             is UiText.Res -> {
-                val name = RESOURCES.entries.firstOrNull { it.value == text.id }?.key
+                // By id, whether the text named it by id or by its shared key (the shared models' texts, Plan I6).
+                val id = runCatching { text.resId }.getOrNull()
+                val name = RESOURCES.entries.firstOrNull { it.value == id }?.key
                 val args = text.args.takeIf { a -> a.all { it is Int || it is String } }
                 if (name == null || args == null) null else JSONObject().put("res", name).put("args", JSONArray(args)).toString()
             }

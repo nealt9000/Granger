@@ -177,10 +177,11 @@ fun PlayerWidgetContent(model: WidgetModel, cover: ImageProvider?) {
                     )
                 }
             }
-            if (large && model.progress != null) {
+            val progress = model.progress
+            if (large && progress != null) {
                 Spacer(GlanceModifier.height(8.dp))
                 LinearProgressIndicator(
-                    progress = model.progress,
+                    progress = progress,
                     modifier = GlanceModifier.fillMaxWidth().height(3.dp).semantics { testTag = PlayerWidgetTags.PROGRESS },
                     color = Accent,
                     backgroundColor = Track,

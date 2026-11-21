@@ -44,6 +44,15 @@ class WidgetCacheTest {
         assertThat(store.load()).isEqualTo(WidgetModel.EMPTY)
     }
 
+    @Test fun sharedModelsTextIsKeptByItsKeyToo() {
+        // The shared models name a resource by key (chapterName, voiceState: Plan I6); the store keeps those the same way.
+        val store = WidgetModelStore(context.getSharedPreferences("widget-test-keys", Context.MODE_PRIVATE))
+        store.save(WidgetModel(app.granger.player.chapterName("", 2), app.granger.player.voiceState("Act I", ended = false), null, playing = false, Secondary.NONE, null, empty = false))
+        val back = store.load()!!
+        assertThat(back.title.resolve(context)).isEqualTo(UiText.Res(R.string.player_chapter_number, 3).resolve(context))
+        assertThat(back.subtitle.resolve(context)).isEqualTo("Reading · Act I")
+    }
+
     @Test fun savedTextKeepsItsResourceNotItsWords() {
         val store = WidgetModelStore(context.getSharedPreferences("widget-test-res", Context.MODE_PRIVATE))
         val chapter = UiText.Res(R.string.player_chapter_number, 3)

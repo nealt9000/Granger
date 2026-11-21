@@ -9,6 +9,8 @@ import app.granger.player.chapterName
 import app.granger.player.fraction
 import app.granger.player.voiceState
 
+// Shared since Plan I6 Task 2: the player widget's model (the iPhone's widget reads a snapshot of it, I6b).
+
 /** The widget's second button: next track for music, skip back for books (as the mini-player); none when nothing is loaded. */
 enum class Secondary { NEXT, BACK, NONE }
 

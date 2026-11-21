@@ -65,19 +65,6 @@ internal fun nowInfo(now: NowPlaying): NowInfo? = when (now) {
     NowPlaying.Idle -> null
 }
 
-/** "Reading", with the section when the source has one; "Finished reading" once the voice ran out. */
-internal fun voiceState(voice: NowPlaying.Voice): UiText = voiceState(voice.section, voice.ended)
-
-internal fun voiceState(section: String?, ended: Boolean): UiText {
-    val named = section?.takeIf { it.isNotBlank() }
-    return when {
-        named == null -> UiText.Res(if (ended) R.string.player_finished_reading else R.string.player_reading)
-        else -> UiText.Res(if (ended) R.string.player_finished_reading_section else R.string.player_reading_section, named)
-    }
-}
-
-internal fun fraction(positionMs: Long, durationMs: Long): Float =
-    if (durationMs <= 0L) 0f else (positionMs.toFloat() / durationMs).coerceIn(0f, 1f)
 
 /**
  * A square cover from [path], or the themed tile (Plan U3c Decision 6) with [title] and a music note (headphones for a

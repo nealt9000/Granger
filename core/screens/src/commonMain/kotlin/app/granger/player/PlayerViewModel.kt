@@ -440,3 +440,18 @@ fun chapterName(title: String, ordinal: Int): UiText =
     if (title.isBlank()) UiText.Res("player_chapter_number", ordinal + 1) else UiText.Raw(title)
 
 fun chapterName(book: NowPlaying.Book): UiText = chapterName(book.chapter.title, book.chapter.ordinal)
+
+/** "Reading", with the section when the source has one; "Finished reading" once the voice ran out. */
+fun voiceState(voice: NowPlaying.Voice): UiText = voiceState(voice.section, voice.ended)
+
+fun voiceState(section: String?, ended: Boolean): UiText {
+    val named = section?.takeIf { it.isNotBlank() }
+    return when {
+        named == null -> UiText.Res(if (ended) "player_finished_reading" else "player_reading")
+        else -> UiText.Res(if (ended) "player_finished_reading_section" else "player_reading_section", named)
+    }
+}
+
+/** [positionMs] as a share of [durationMs], 0 to 1; 0 with no duration. */
+fun fraction(positionMs: Long, durationMs: Long): Float =
+    if (durationMs <= 0L) 0f else (positionMs.toFloat() / durationMs).coerceIn(0f, 1f)

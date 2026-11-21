@@ -197,10 +197,14 @@ object ScreenTextIds {
         "player_bookmark_title" -> R.string.player_bookmark_title
         "player_bookmarked" -> R.string.player_bookmarked
         "player_chapter_number" -> R.string.player_chapter_number
+        "player_finished_reading" -> R.string.player_finished_reading
+        "player_finished_reading_section" -> R.string.player_finished_reading_section
         "player_notice_book_failed" -> R.string.player_notice_book_failed
         "player_notice_place_lost" -> R.string.player_notice_place_lost
         "player_notice_queue_failed" -> R.string.player_notice_queue_failed
         "player_notice_song_failed" -> R.string.player_notice_song_failed
+        "player_reading" -> R.string.player_reading
+        "player_reading_section" -> R.string.player_reading_section
         "player_voice_failed" -> R.string.player_voice_failed
         "player_voice_none" -> R.string.player_voice_none
         "readiness_covers" -> R.string.readiness_covers
