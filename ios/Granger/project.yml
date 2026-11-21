@@ -45,6 +45,10 @@ targets:
       # libarchive 3.8.1's RAR reader for CBR comics (Plan I5 call 6): static, built by tools/ios/fetch-libarchive.sh, not in git.
       - framework: ../Vendor/libarchive.xcframework
         embed: false
+      # sherpa-onnx 1.13.8 with onnxruntime inside, for the Piper voices (Plan I5 call 3): dynamic, fetched by
+      # tools/ios/fetch-sherpa-onnx.sh, not in git.
+      - framework: ../Vendor/SherpaOnnxC.xcframework
+        embed: true
       - sdk: libc++.tbd
       - sdk: libz.tbd
     info:

@@ -161,6 +161,9 @@ When I5 merges, every parity row marked I5 is ticked or carries an agreed reason
 
 ### Task 8: Voices, read aloud and Listen
 - [ ] **Spike, one hour; stop and report if it fails:** sherpa-onnx 1.13.8 for iOS. Speak one sentence with the Owl voice through `AVAudioEngine` on the Simulator, and time it.
+  - Spike passed 2026-11-21 (about 15 minutes).
+    - sherpa-onnx publishes prebuilt Apple frameworks under its `xcframework` release tag (not in the v1.13.8 release itself), so nothing is built: `tools/ios/fetch-sherpa-onnx.sh` fetches `sherpa-onnx-v1.13.8-ios-shared-onnxruntime-static.xcframework.zip` (sha256-pinned) into `ios/Vendor/SherpaOnnxC.xcframework`. One dynamic framework with onnxruntime linked in (56 MB a slice, device arm64 and Simulator arm64/x86_64), its C API as the Clang module `SherpaOnnxC`; the app embeds it.
+    - `PiperEngine` (Swift, over the C API, Android's `SherpaTts`: one sentence per call, the engine freed only after a sentence in flight). `SherpaSpikeTests` (GRANGER_TEST_VOICE, the catalog's Owl zip unpacked): on the Simulator the Owl loads in 0.7 s and makes "The owl keeps the door to knowledge open, always." in 186 ms for 3.1 s of audio (real-time factor 0.06), played through `AVAudioEngine` in 3.15 s.
 - [ ] The voices:
   - Piper voices from the catalog through the shared queue (in Get more and Voice settings);
   - system voices through `AVSpeechSynthesizer`;
