@@ -18,6 +18,8 @@ import pathlib, re, sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SHARED = ROOT / "core/screens/src/commonMain/kotlin"
+# Plan I5: core/archive's shelves and errors name their words by key too.
+SHARED_DIRS = [SHARED, ROOT / "core/archive/src/commonMain/kotlin"]
 OUT = ROOT / "app/src/main/kotlin/app/granger/ScreenTextIds.kt"
 SWIFT = ROOT / "ios/Granger/Sources/App/ScreenText.swift"
 VALUES = ROOT / "app/src/main/res/values"
@@ -26,9 +28,13 @@ RES = re.compile(r'UiText\.Res\(\s*"([a-z0-9_]+)"')
 PLURAL = re.compile(r'UiText\.Plural\(\s*"([a-z0-9_]+)"')
 
 
+def shared_files():
+    return [f for d in SHARED_DIRS for f in sorted(d.rglob("*.kt"))]
+
+
 def keys():
     strings, plurals = set(), set()
-    for f in sorted(SHARED.rglob("*.kt")):
+    for f in shared_files():
         t = f.read_text()
         strings |= set(RES.findall(t))
         plurals |= set(PLURAL.findall(t))
@@ -79,7 +85,7 @@ def english():
 
 def swift_keys(strings, plurals, en_strings, en_plurals):
     found = set(strings) - set(en_plurals)
-    for f in sorted(SHARED.rglob("*.kt")):
+    for f in shared_files():
         found |= {k for k in LITERAL.findall(f.read_text()) if k in en_strings}
     return sorted(found), sorted(plurals)
 
@@ -114,7 +120,7 @@ enum ScreenText {{
 def literal_keys(en_strings, en_plurals):
     """Keys the shared code names as plain literals and passes on (KiwixList's flavour labels, a Folded noun): Plan I4."""
     found_s, found_p = set(), set()
-    for f in sorted(SHARED.rglob("*.kt")):
+    for f in shared_files():
         for k in LITERAL.findall(f.read_text()):
             if k in en_strings:
                 found_s.add(k)

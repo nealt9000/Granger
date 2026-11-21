@@ -7,6 +7,31 @@ package app.granger
  */
 object ScreenTextIds {
     fun string(key: String): Int = when (key) {
+        "archive_error_answered" -> R.string.archive_error_answered
+        "archive_error_not_found" -> R.string.archive_error_not_found
+        "archive_error_unreachable" -> R.string.archive_error_unreachable
+        "archive_error_unreadable" -> R.string.archive_error_unreadable
+        "archive_librivox_error_answered" -> R.string.archive_librivox_error_answered
+        "archive_librivox_error_busy" -> R.string.archive_librivox_error_busy
+        "archive_librivox_error_not_found" -> R.string.archive_librivox_error_not_found
+        "archive_librivox_error_unreachable" -> R.string.archive_librivox_error_unreachable
+        "archive_librivox_error_unreadable" -> R.string.archive_librivox_error_unreadable
+        "archive_librivox_shelf_children" -> R.string.archive_librivox_shelf_children
+        "archive_librivox_shelf_detective" -> R.string.archive_librivox_shelf_detective
+        "archive_librivox_shelf_fiction" -> R.string.archive_librivox_shelf_fiction
+        "archive_librivox_shelf_philosophy" -> R.string.archive_librivox_shelf_philosophy
+        "archive_librivox_shelf_poetry" -> R.string.archive_librivox_shelf_poetry
+        "archive_librivox_shelf_recent" -> R.string.archive_librivox_shelf_recent
+        "archive_librivox_shelf_science_fiction" -> R.string.archive_librivox_shelf_science_fiction
+        "archive_shelf_78" -> R.string.archive_shelf_78
+        "archive_shelf_classical" -> R.string.archive_shelf_classical
+        "archive_shelf_drama" -> R.string.archive_shelf_drama
+        "archive_shelf_folk" -> R.string.archive_shelf_folk
+        "archive_shelf_literature" -> R.string.archive_shelf_literature
+        "archive_shelf_manuals" -> R.string.archive_shelf_manuals
+        "archive_shelf_most_downloaded" -> R.string.archive_shelf_most_downloaded
+        "archive_shelf_poetry" -> R.string.archive_shelf_poetry
+        "archive_shelf_science" -> R.string.archive_shelf_science
         "explore_era_ancient" -> R.string.explore_era_ancient
         "explore_era_ancient_span" -> R.string.explore_era_ancient_span
         "explore_era_c19" -> R.string.explore_era_c19

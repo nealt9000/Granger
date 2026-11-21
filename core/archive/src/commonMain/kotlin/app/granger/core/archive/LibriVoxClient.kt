@@ -1,0 +1,163 @@
+package app.granger.core.archive
+
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
+
+/**
+ * The LibriVox catalog API (`/api/feed/audiobooks/`). Requests go out one at a time, at least [minGapMs] apart
+ * (spec §12); [clock] and [sleep] are injected so tests never wait. LibriVox's "no results" is HTTP 404 with an error
+ * body, which reads as an empty page; a 429 is "busy". Shared since Plan I5: Android builds it on the app's
+ * `OkHttpClient` (`LibriVoxClient(http, userAgent)`, androidMain).
+ */
+class LibriVoxClient(
+    private val http: ArchiveHttp,
+    private val userAgent: String,
+    private val baseUrl: String = "https://librivox.org",
+    private val minGapMs: Long = 1_000,
+    private val clock: () -> Long = ::nowMillis,
+    private val sleep: suspend (Long) -> Unit = { delay(it) },
+) {
+    private val json = Json { ignoreUnknownKeys = true }
+    private val pace = Mutex()
+    private var lastSentAt: Long? = null
+
+    suspend fun search(query: LibriVoxQuery, offset: Int, limit: Int = 50): LibriVoxPage = when (query) {
+        is LibriVoxQuery.Text -> {
+            val text = query.text.trim()
+            val title = text.replace(LEADING_ARTICLE, "").ifBlank { text }
+            val byTitle = list(offset, limit) { add("title" to title) }
+            val byAuthor = text.split(SPACES).lastOrNull { it.isNotBlank() }
+                ?.let { lastWord -> list(offset, limit) { add("author" to lastWord) } }
+                .orEmpty()
+            LibriVoxPage(
+                books = (byTitle + byAuthor).distinctBy { it.id },
+                hasMore = byTitle.size >= limit || byAuthor.size >= limit,
+            )
+        }
+        is LibriVoxQuery.Genre -> page(limit, list(offset, limit) { add("genre" to query.name) })
+        LibriVoxQuery.Recent -> page(limit, list(offset, limit) {
+            add("sort_field" to "id")
+            add("sort_order" to "desc")
+        })
+    }
+
+    /** One book with its sections, readers and genres (`extended=1`). */
+    suspend fun book(id: String): LibriVoxBook {
+        if (!isValidId(id)) throw LibriVoxError(LibriVoxProblem.NOT_FOUND, NOT_FOUND)
+        val books = fetch(url {
+            add("id" to id)
+            add("extended" to "1")
+            add("coverart" to "1")
+        })
+        return books.firstOrNull { it.id == id } ?: throw LibriVoxError(LibriVoxProblem.NOT_FOUND, NOT_FOUND)
+    }
+
+    private fun page(limit: Int, books: List<LibriVoxBook>) = LibriVoxPage(books, hasMore = books.size >= limit)
+
+    private suspend fun list(offset: Int, limit: Int, params: MutableList<Pair<String, String>>.() -> Unit): List<LibriVoxBook> = fetch(url {
+        params()
+        add("fields" to SEARCH_FIELDS)
+        add("limit" to limit.toString())
+        add("offset" to offset.toString())
+    })
+
+    private fun url(params: MutableList<Pair<String, String>>.() -> Unit): String =
+        urlWithQuery("$baseUrl/api/feed/audiobooks/", buildList { params(); add("format" to "json") })
+
+    private suspend fun fetch(url: String): List<LibriVoxBook> {
+        val reply = pace.withLock {
+            lastSentAt?.let { last ->
+                val wait = last + minGapMs - clock()
+                if (wait > 0) sleep(wait)
+            }
+            lastSentAt = clock()
+            http.getText(url, userAgent) { LibriVoxError(LibriVoxProblem.UNREACHABLE, "Couldn't reach LibriVox") }
+        }
+        when {
+            reply.code == 404 && NO_RESULTS in reply.body -> return emptyList()
+            reply.code == 429 -> throw LibriVoxError(LibriVoxProblem.BUSY, BUSY)
+            !reply.isSuccessful -> throw LibriVoxError(LibriVoxProblem.ANSWERED, "LibriVox answered ${reply.code}", reply.code)
+        }
+        return parse {
+            val root = json.parseToJsonElement(reply.body).jsonObject
+            (root["books"] as? JsonArray).orEmpty().map { it.jsonObject.toBook() }
+        }
+    }
+
+    private inline fun <T> parse(block: () -> T): T = try {
+        block()
+    } catch (e: LibriVoxError) {
+        throw e
+    } catch (e: Exception) {
+        throw LibriVoxError(LibriVoxProblem.UNREADABLE, "LibriVox sent something Granger couldn't read")
+    }
+
+    private fun JsonObject.toBook(): LibriVoxBook {
+        val seconds = this["totaltimesecs"]?.asLong()?.takeIf { it > 0 }
+        return LibriVoxBook(
+            id = this["id"]!!.firstString().orEmpty(),
+            title = this["title"]?.firstString().orEmpty().trim(),
+            authors = (this["authors"] as? JsonArray).orEmpty().mapNotNull { author ->
+                val a = author as? JsonObject ?: return@mapNotNull null
+                listOfNotNull(a["first_name"]?.firstString(), a["last_name"]?.firstString())
+                    .joinToString(" ") { it.trim() }.trim().ifEmpty { null }
+            },
+            description = stripHtml(this["description"]?.firstString().orEmpty()),
+            language = this["language"]?.firstString().orEmpty(),
+            genres = (this["genres"] as? JsonArray).orEmpty()
+                .mapNotNull { (it as? JsonObject)?.get("name")?.firstString()?.trim()?.ifEmpty { null } },
+            totalTimeMs = (seconds ?: clockSeconds(this["totaltime"]?.firstString().orEmpty()) ?: 0L) * 1000,
+            copyrightYear = this["copyright_year"]?.firstString().orEmpty(),
+            archiveIdentifier = archiveIdentifierOf(this["url_iarchive"]?.firstString().orEmpty()),
+            pageUrl = this["url_librivox"]?.firstString().orEmpty(),
+            sections = (this["sections"] as? JsonArray).orEmpty()
+                .mapIndexed { index, section -> section.jsonObject.toSection(index) }
+                .sortedBy { it.number },
+        )
+    }
+
+    private fun JsonObject.toSection(index: Int) = LibriVoxSection(
+        id = this["id"]!!.firstString().orEmpty(),
+        number = this["section_number"]?.asInt() ?: index,
+        title = this["title"]?.firstString().orEmpty().trim(),
+        listenUrl = this["listen_url"]?.firstString().orEmpty(),
+        playtimeMs = (this["playtime"]?.asLong() ?: 0L) * 1000,
+        readers = (this["readers"] as? JsonArray).orEmpty()
+            .mapNotNull { (it as? JsonObject)?.get("display_name")?.firstString()?.trim()?.ifEmpty { null } },
+    )
+
+    companion object {
+        private val ID = Regex("[0-9]+")
+        /** A leading article a title search drops: English, and Spanish beside it (Plan L3). */
+        private val LEADING_ARTICLE = Regex("^(the|a|an|el|la|los|las|un|una)\\s+", RegexOption.IGNORE_CASE)
+        private val SPACES = Regex("\\s+")
+        private const val SEARCH_FIELDS = "{id,title,authors,language,totaltime,totaltimesecs,num_sections}"
+        private const val NO_RESULTS = "could not be found"
+        private const val NOT_FOUND = "Not found on LibriVox"
+        private const val BUSY = "LibriVox is busy right now. Try again in a minute."
+
+        fun isValidId(id: String): Boolean = ID.matches(id)
+
+        /** `https://www.archive.org/details/<identifier>` → the identifier, if it's a valid one on an archive.org host. */
+        internal fun archiveIdentifierOf(url: String): String? {
+            val parsed = WebUrl.parse(url.trim()) ?: return null
+            val host = parsed.host
+            if (host != "archive.org" && !host.endsWith(".archive.org")) return null
+            val segments = parsed.pathSegments.filter { it.isNotEmpty() }
+            if (segments.size != 2 || segments[0] != "details") return null
+            return segments[1].takeIf(ArchiveQuery::isValidIdentifier)
+        }
+
+        /** "4:09:29" → 14 969; "" or anything else → null. */
+        private fun clockSeconds(text: String): Long? {
+            val parts = text.trim().split(':')
+            if (parts.size !in 2..3 || parts.any { p -> p.isEmpty() || !p.all(Char::isDigit) }) return null
+            return parts.fold(0L) { total, part -> total * 60 + part.toLong() }.takeIf { it > 0 }
+        }
+    }
+}
