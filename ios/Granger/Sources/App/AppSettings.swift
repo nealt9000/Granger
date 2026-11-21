@@ -20,6 +20,8 @@ final class AppSettings {
     var textScale: Double { didSet { defaults.set(textScale, forKey: Keys.textScale) } }
     /// Local only (Plan O3): nothing goes out while it's on.
     var localOnly: Bool { didSet { defaults.set(localOnly, forKey: Keys.localOnly); NetworkGate.shared.open = canFetch } }
+    /// Big downloads on Wi-Fi only (Android's Downloads setting, on by default): a waiting pack never uses mobile data.
+    var wifiOnly: Bool { didSet { defaults.set(wifiOnly, forKey: Keys.wifiOnly); LibraryGate.shared.wifiOnly = wifiOnly } }
     /// The privacy line has been seen (Plan O5): until then nothing is asked of Wikimedia.
     var privacySeen: Bool { didSet { defaults.set(privacySeen, forKey: Keys.privacySeen); NetworkGate.shared.open = canFetch } }
 
@@ -33,7 +35,9 @@ final class AppSettings {
         savePictures = defaults.object(forKey: Keys.savePictures) as? Bool ?? true
         savedCapMb = defaults.object(forKey: Keys.savedCapMb) as? Int ?? 300
         keepAdultOff = defaults.object(forKey: Keys.keepAdultOff) as? Bool ?? true
+        wifiOnly = defaults.object(forKey: Keys.wifiOnly) as? Bool ?? true
         NetworkGate.shared.open = canFetch
+        LibraryGate.shared.wifiOnly = wifiOnly
         LibraryGate.shared.languages = [wikiLanguage]
         LibraryGate.shared.savePictures = savePictures
         LibraryGate.shared.savedCapMb = savedCapMb
@@ -63,6 +67,7 @@ final class AppSettings {
         static let savePictures = "savePictures"
         static let savedCapMb = "savedCapMb"
         static let keepAdultOff = "keepAdultOff"
+        static let wifiOnly = "wifiOnly"
     }
 }
 
@@ -88,6 +93,7 @@ final class LibraryGate: @unchecked Sendable {
     private var _savePictures = true
     private var _savedCapMb = 300
     private var _keepAdultOff = true
+    private var _wifiOnly = true
 
     var languages: [String] {
         get { lock.lock(); defer { lock.unlock() }; return _languages }
@@ -104,5 +110,9 @@ final class LibraryGate: @unchecked Sendable {
     var keepAdultOff: Bool {
         get { lock.lock(); defer { lock.unlock() }; return _keepAdultOff }
         set { lock.lock(); _keepAdultOff = newValue; lock.unlock() }
+    }
+    var wifiOnly: Bool {
+        get { lock.lock(); defer { lock.unlock() }; return _wifiOnly }
+        set { lock.lock(); _wifiOnly = newValue; lock.unlock() }
     }
 }

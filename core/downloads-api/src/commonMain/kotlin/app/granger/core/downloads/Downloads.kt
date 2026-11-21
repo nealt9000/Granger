@@ -435,7 +435,7 @@ val DownloadRecord.isFromCatalog: Boolean
 fun downloadSpecOf(item: CatalogItem, groupId: String? = null): DownloadSpec = when (item) {
     is PackEntry -> DownloadSpec(
         item.id, ItemKind.PACK, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
-        "packs/${item.id}_${item.snapshotDate}.zim", item.snapshotDate, groupId = groupId,
+        "${DownloadLayout.packs}/${item.id}_${item.snapshotDate}.zim", item.snapshotDate, groupId = groupId,
     )
     is BookEntry -> DownloadSpec(
         item.id, ItemKind.BOOK, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
@@ -449,4 +449,15 @@ fun downloadSpecOf(item: CatalogItem, groupId: String? = null): DownloadSpec = w
         item.id, ItemKind.VOICE, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
         "voices/${item.id}.zip", "", groupId = groupId,
     )
+}
+
+/**
+ * Where downloads go under a volume root, per phone (Plan I4 builder's call 2). Android keeps `packs/`, `vectors/`… in
+ * its files folder. The iPhone's root is Documents, which the Files app shows: packs in `Packs/`, and the files that
+ * follow them (indexes, vectors) under a hidden `.granger/`, so Files shows only the packs. Set once, at start.
+ */
+object DownloadLayout {
+    var packs: String = "packs"
+    /** Put before a companion's folder (`vectors/…`); empty on Android. */
+    var companions: String = ""
 }

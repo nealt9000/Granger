@@ -61,6 +61,12 @@ struct SettingsScreen: View {
             } message: {
                 Text("What you read online goes from this phone. What you kept stays.")
             }
+            Section("Downloads") {
+                Toggle("Download on Wi-Fi only", isOn: $settings.wifiOnly)
+                    .onChange(of: settings.wifiOnly) { _, on in
+                        Task { try? await core?.library.downloads.setWifiOnly(wifiOnly: on) }
+                    }
+            }
             Section {
                 Toggle("Keep adult topics out of suggestions", isOn: $settings.keepAdultOff)
             } header: {

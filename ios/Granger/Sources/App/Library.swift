@@ -78,6 +78,9 @@ final class LibraryModel {
 
     /// The catalog from main (Android's CATALOG_URL), verified against the app's public key; nil when it doesn't verify.
     @MainActor
+    /// The next loadCatalog fetches afresh (Get more's refresh).
+    func forgetCatalog() { catalog = nil }
+
     func loadCatalog() async -> Catalog? {
         if let catalog { return catalog }
         guard let json = try? await URLSession.shared.data(from: Self.catalogURL).0,

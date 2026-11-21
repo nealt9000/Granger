@@ -259,4 +259,58 @@ final class SmokeTests: XCTestCase {
         XCTAssertTrue(app.webViews.staticTexts.matching(NSPredicate(format: "label CONTAINS[c] 'bread'")).firstMatch.waitForExistence(timeout: 20), "the article's text from the pack")
         shot(app, "pack-reader")
     }
+
+    /// Plan I4 Task 6: Get more → Books → a small pack (43 MB) → Keep; in Downloads, Pause all and Resume; it installs,
+    /// opens from its row, and is removed again. Real network: the signed catalog and Kiwix's mirror.
+    func testGetMoreDownloadPauseResume() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-wifiOnly", "NO"]
+        app.launch()
+        let getMore = app.buttons["Get more"]
+        XCTAssertTrue(getMore.waitForExistence(timeout: 10))
+        getMore.tap()
+        app.buttons["getmore-books"].tap()
+        let field = app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 10))
+        field.tap()
+        field.typeText("Draw your African")
+        let get = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'get-'")).firstMatch
+        XCTAssertTrue(get.waitForExistence(timeout: 60), "the pack's Keep button (catalog loaded)")
+        shot(app, "getmore-books")
+        get.tap()
+
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        if app.navigationBars.buttons.element(boundBy: 0).exists && !app.buttons["Downloads"].exists { app.navigationBars.buttons.element(boundBy: 0).tap() }
+        let downloads = app.buttons["Downloads"]
+        XCTAssertTrue(downloads.waitForExistence(timeout: 10))
+        downloads.tap()
+        sleep(3)
+        shot(app, "downloads-open")
+        let pause = app.buttons["downloads-pause"]
+        if pause.waitForExistence(timeout: 30) {
+            shot(app, "downloads-running")
+            pause.tap()
+            let resume = app.buttons["downloads-resume"]
+            XCTAssertTrue(resume.waitForExistence(timeout: 10), "paused")
+            shot(app, "downloads-paused")
+            resume.tap()
+        }
+        XCTAssertTrue(app.staticTexts["Done today"].waitForExistence(timeout: 300), "installed")
+        shot(app, "downloads-done")
+
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["getmore-books"].tap()
+        let field2 = app.searchFields.firstMatch
+        XCTAssertTrue(field2.waitForExistence(timeout: 10))
+        field2.tap()
+        field2.typeText("Draw your African")
+        let more = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'More for'")).firstMatch
+        XCTAssertTrue(more.waitForExistence(timeout: 30), "the installed row")
+        more.tap()
+        app.buttons["Remove"].firstMatch.tap()
+        let confirm = app.alerts.buttons["Remove"]
+        XCTAssertTrue(confirm.waitForExistence(timeout: 10))
+        confirm.tap()
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'get-'")).firstMatch.waitForExistence(timeout: 20), "removed")
+    }
 }

@@ -23,6 +23,8 @@ import app.granger.online.OnlineSources
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import app.granger.core.library.isBookPack
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -59,6 +61,11 @@ class IosLibrary(
     private val opener: (path: String) -> app.granger.core.zim.ZimOpenResult = { app.granger.core.zim.ZimOpenResult.Failed("no pack reader") },
     /** Where packs live: Documents/Packs, shown in the Files app (Plan I4 builder's call 2). */
     private val packsDir: String = "$dir/Packs",
+    /** Whether the network now is Wi-Fi (unmetered), and whether any is up: the download queue's network rule. */
+    private val unmetered: () -> Boolean = { true },
+    private val connected: () -> Boolean = { true },
+    /** Big downloads on Wi-Fi only (Settings; on by default, as Android's). */
+    private val wifiOnly: () -> Boolean = { true },
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -83,6 +90,123 @@ class IosLibrary(
 
     /** Looks at Documents/Packs again: new files are opened and listed, gone ones marked missing. */
     suspend fun refreshPacks() = packLibrary.refresh()
+
+    // ---- Downloads (Plan I4 Task 6): the shared queue, records and manager; the transfer is a URLSession background session.
+
+    /** Where downloads go: Documents, with packs in Packs/ and what follows them under a hidden .granger/ (builder's call 2). */
+    val downloadRoot: String = packsDir.trimEnd('/').substringBeforeLast('/')
+
+    init {
+        app.granger.core.downloads.DownloadLayout.packs = packsDir.trimEnd('/').substringAfterLast('/')
+        app.granger.core.downloads.DownloadLayout.companions = ".granger/"
+    }
+
+    private val downloadDb = app.granger.core.downloads.openDownloadDatabase("$dir/downloads.db")
+    private val downloadDao = downloadDb.downloadDao()
+
+    /** The app's completion handler for the background session's events (UIApplication hands one to the app delegate). */
+    var backgroundEventsDone: (() -> Unit)? = null
+
+    val transfer = app.granger.core.downloads.UrlSessionTransfer(eventsDone = {
+        val done = backgroundEventsDone
+        backgroundEventsDone = null
+        if (done != null) kotlinx.coroutines.MainScope().launch { done() }
+    })
+
+    private val queuePrefs = DefaultsQueuePrefs("downloads")
+
+    private val runner = app.granger.core.downloads.DownloadRunner(downloadDao, transfer, onInstalled = { record ->
+        packLibrary.fileReplaced(record.filePath)
+        packLibrary.refresh()
+    })
+
+    private val queue = app.granger.core.downloads.DownloadQueue(downloadDao, runner, queuePrefs, unmetered, connected = connected)
+
+    private val scheduler = object : app.granger.core.downloads.DownloadScheduler {
+        private var job: kotlinx.coroutines.Job? = null
+        override fun ensure(unmeteredOnly: Boolean, offline: Boolean) {
+            if (!queue.wake()) return
+            if (job?.isActive == true) return
+            job = scope.launch {
+                // While the app runs, the queue works through its records, looking again when a retry or Wi-Fi is due.
+                while (true) {
+                    when (val rest = queue.drain()) {
+                        is app.granger.core.downloads.QueueRest.Later -> kotlinx.coroutines.delay(rest.delayMillis.coerceIn(2_000, 60_000))
+                        else -> break
+                    }
+                }
+            }
+        }
+        override suspend fun stopRun(itemId: String) = queue.stopRun(itemId)
+        override suspend fun stopQueue() = queue.stopRun(null)
+        override fun isRunning(itemId: String) = queue.isRunning(itemId)
+    }
+
+    private val unmeteredNow = MutableStateFlow(unmetered())
+
+    /** The download manager the screens use (Get more, the downloads card, Outfitting), as Android's DownloadManager. */
+    val downloads: app.granger.core.downloads.Downloads = app.granger.core.downloads.DownloadManager(
+        downloadDao, scheduler, queuePrefs, queue.progress, unmeteredNow,
+    )
+
+    private val sidecars = app.granger.core.downloads.Sidecars(downloads, wifiOnly)
+
+    /** The queue as the downloads card shows it: what downloads now, what waits, how much, how fast and how long. */
+    val queueSummary: kotlinx.coroutines.flow.Flow<app.granger.core.downloads.QueueSummary> =
+        kotlinx.coroutines.flow.combine(downloads.records, downloads.live) { records, live ->
+            app.granger.core.downloads.DownloadQueueSummary.of(records, live, app.granger.screens.nowMillis(), mapOf(downloadRoot to app.granger.core.downloads.freeBytesAt(downloadRoot)))
+        }
+
+    /** Free bytes where downloads go. */
+    fun freeBytes(): Long = app.granger.core.downloads.freeBytesAt(downloadRoot)
+
+    /** Swift tells the queue the network changed (NWPathMonitor). */
+    fun networkChanged() {
+        unmeteredNow.value = unmetered()
+        scheduler.ensure(false)
+    }
+
+    /**
+     * At start: the background session reconnected (tasks the system finished while the app was gone deliver now),
+     * records left running go back to waiting and the queue starts; sidecars follow the packs whenever the records change.
+     */
+    fun startDownloads() {
+        transfer.connect()
+        scope.launch { runCatching { downloads.recover() } }
+        scope.launch { downloads.records.collect { records -> runCatching { sidecars.reconcile(catalog, records) } } }
+    }
+
+    private val downloadPrefs = DefaultsDownloadPrefs("downloads")
+
+    /** The one place downloads go on the iPhone: Documents (its free space and Granger's share of it). */
+    @OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
+    private val volumes = app.granger.core.downloads.DownloadVolumes {
+        val fm = platform.Foundation.NSFileManager.defaultManager
+        val attrs = fm.attributesOfFileSystemForPath(downloadRoot, null)
+        val total = (attrs?.get(platform.Foundation.NSFileSystemSize) as? platform.Foundation.NSNumber)?.longLongValue ?: 0L
+        val granger = kotlinx.coroutines.runBlocking { downloads.records.first() }
+            .filter { it.state == app.granger.core.downloads.DownloadState.INSTALLED }.sumOf { it.sizeBytes }
+        listOf(app.granger.core.downloads.DownloadVolume(downloadRoot, "This iPhone", false, freeBytes(), total, granger))
+    }
+
+    /**
+     * Get more's source screen for [scope] (Plan I4 Task 6): the shared SourceViewModel Android's Get more runs, over the
+     * iPhone's catalog, queue, packs and Documents. [domain] and [family] narrow it as Android's links do.
+     */
+    fun source(scope: app.granger.sources.CatalogScope, domain: String?, family: String?, bookSet: String?): OwnedViewModel<app.granger.sources.SourceViewModel> =
+        OwnedViewModel {
+            app.granger.sources.SourceViewModel(
+                scope = scope, catalog = catalogSource, downloads = downloads, library = packLibrary, volumes = volumes,
+                prefs = downloadPrefs, appScope = scope_, removeBook = { },
+                // The iPhone runs no on-device model yet (Ask is off in every build; voices come in I5).
+                canRun = { false }, askOn = false, meaningSearch = false,
+                countsDocuments = { pack -> pack.isBookPack },
+                io = app.granger.screens.ioDispatcher, domain = domain, family = family,
+                knowledge = kotlinx.coroutines.flow.flowOf(languages()), voiceTitle = null, bookSet = bookSet,
+            )
+        }
+
+    private val scope_: CoroutineScope get() = scope
 
     /** Search over the packs (titles, near titles, full text), in the library's languages, as Android's. */
     val packSearch = app.granger.core.library.PackSearch(packLibrary, languages = { languages().toSet() })
@@ -208,8 +332,15 @@ class IosLibrary(
     /** The adult flags as the volunteered screens apply them (Related, Explore, Home, games). */
     val contentFilter = app.granger.core.library.ContentFilter(keepAdultOff)
 
-    /** The verified catalog, once Swift has it: the topic records' entries come from it. */
+    /** The verified catalog, once Swift has it: the topic records' entries come from it, and Get more lists it. */
     var catalog: Catalog? = null
+        set(value) {
+            field = value
+            catalogSource.publish(value)
+        }
+
+    /** The catalog as Get more's shared model reads it (Android's CatalogRepository); Swift fetches and verifies it. */
+    val catalogSource = IosCatalogSource()
 
     private val remoteRecords = app.granger.core.online.RemoteRecords(
         app.granger.core.online.UrlSessionFetch(userAgent = GrangerCoreEntry.userAgent(appVersion)),
@@ -459,6 +590,55 @@ class OwnedViewModel<T : androidx.lifecycle.ViewModel>(make: () -> T) {
 }
 
 /** Where the reader has been in Explore, in NSUserDefaults as JSON (Android keeps it in a prefs file). */
+/**
+ * The catalog for the shared screens (Plan I4 Task 6). Swift downloads and verifies it (CryptoKit) and hands it over
+ * through [publish]; [load] and [refresh] ask Swift for it through [fetch]. As a release build without Ask on Android
+ * lists it: only evaluated models, no search vectors (the iPhone runs neither yet).
+ */
+class IosCatalogSource : app.granger.core.catalog.CatalogSource {
+    private val _state = MutableStateFlow(app.granger.core.catalog.CatalogState())
+    override val state: StateFlow<app.granger.core.catalog.CatalogState> get() = _state
+
+    /** Swift's fetch (LibraryModel.loadCatalog), started on its own task; it calls [publish] when done. */
+    var fetch: (refresh: Boolean) -> Unit = {}
+
+    fun publish(catalog: Catalog?) {
+        _state.value = if (catalog == null) _state.value.copy(refreshing = false)
+        else app.granger.core.catalog.CatalogState(catalog.forBuild(includeUnevaluatedModels = false, includeVectors = false), app.granger.screens.nowMillis())
+    }
+
+    override suspend fun load() { if (_state.value.catalog == null) fetch(false) }
+
+    override suspend fun refresh() {
+        _state.value = _state.value.copy(refreshing = true)
+        fetch(true)
+    }
+}
+
+/** Get more's settings in UserDefaults: Wi-Fi only (Settings' own key), the volume (one on the iPhone), ask before large. */
+class DefaultsDownloadPrefs(prefix: String) : app.granger.sources.DownloadPrefs, app.granger.core.downloads.QueuePrefs by DefaultsQueuePrefs(prefix) {
+    private val d = platform.Foundation.NSUserDefaults.standardUserDefaults
+    private val askKey = "$prefix.askBeforeLarge"
+    override var wifiOnly: Boolean
+        get() = d.objectForKey("wifiOnly")?.let { d.boolForKey("wifiOnly") } ?: true
+        set(value) = d.setBool(value, "wifiOnly")
+    override var volumePath: String? = null
+    override var askBeforeLarge: Boolean
+        get() = d.objectForKey(askKey)?.let { d.boolForKey(askKey) } ?: true
+        set(value) = d.setBool(value, askKey)
+}
+
+/** The queue's own settings (Pause all, where this round began) in UserDefaults, as Android's DownloadPrefs. */
+class DefaultsQueuePrefs(private val prefix: String) : app.granger.core.downloads.QueuePrefs {
+    private val d = platform.Foundation.NSUserDefaults.standardUserDefaults
+    override var paused: Boolean
+        get() = d.boolForKey("$prefix.paused")
+        set(value) = d.setBool(value, "$prefix.paused")
+    override var batchStartedAt: Long
+        get() = d.doubleForKey("$prefix.batchStartedAt").toLong()
+        set(value) = d.setDouble(value.toDouble(), "$prefix.batchStartedAt")
+}
+
 class DefaultsSeenStore(private val key: String) : app.granger.explore.SeenStore {
     private val d = platform.Foundation.NSUserDefaults.standardUserDefaults
     private val flow = MutableStateFlow(load())

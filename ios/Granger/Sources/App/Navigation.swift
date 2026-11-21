@@ -21,6 +21,11 @@ enum Route: Hashable {
     case wanderIn(subject: String, facet: String?)
     /// The Games screen, and a subject's quiz.
     case games
+    /// The download queue (Plan I4 Task 6).
+    case downloads
+    /// Get more's hub, and one source's screen (CatalogScope by name) narrowed to a domain, family or book set.
+    case getMore
+    case source(scope: String, domain: String?, family: String?, bookSet: String?)
     case quiz(subject: String)
     /// The connections quilt round a topic.
     case quilt(lang: String, path: String)

@@ -55,7 +55,7 @@ class DownloadRunner(
                 val started = dao.setActiveState(itemId, hash, DownloadState.RUNNING, null, Files.size(part), hashFailures, now())
                 if (started == 0) return RunOutcome.GONE
                 var lastWrite = 0L
-                val request = DownloadRequest(record.urls, record.sizeBytes, hash, record.hashAlgorithm)
+                val request = DownloadRequest(record.urls, record.sizeBytes, hash, record.hashAlgorithm, wifiOnly = record.needsWifi)
                 val result = downloader.download(request, part) { done ->
                     onProgress(done, record.sizeBytes)
                     val t = now()

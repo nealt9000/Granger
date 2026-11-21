@@ -15,6 +15,7 @@ struct HomeScreen: View {
     @State private var timeline = TimelineHolder()
     @State private var showSettings = false
     @State private var arranging = false
+    @State private var downloads = DownloadsHolder()
 
     var body: some View {
         ScrollView {
@@ -22,6 +23,7 @@ struct HomeScreen: View {
                 LocalOnlyBanner()
                 if !settings.privacySeen { PrivacyCard(onSettings: { showSettings = true }) }
                 if library.index == .coming { IndexCard() }
+                if let s = downloads.summary, s.isActive { DownloadsCard(summary: s) }
                 ForEach(arrangement.shown, id: \.self) { token in
                     switch token {
                     case "continue": if !recent.entries.isEmpty { continueSection }
@@ -38,12 +40,14 @@ struct HomeScreen: View {
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 RecentlyOpenMenu()
+                NavigationLink(value: Route.getMore) { Image(systemName: "plus") }.accessibilityLabel("Get more")
                 Button { arranging = true } label: { Image(systemName: "pencil") }.accessibilityLabel("Arrange Home")
                 Button { showSettings = true } label: { Image(systemName: "gearshape") }.accessibilityLabel("Settings")
             }
         }
         .sheet(isPresented: $showSettings) { NavigationStack { SettingsScreen() } }
         .sheet(isPresented: $arranging) { NavigationStack { ArrangeHomeScreen(arrangement: arrangement) } }
+        .task { if let core { downloads.watch(core) } }
         .task(id: "\(library.index)|\(settings.canFetch)") {
             // The timeline starts once the index set is open (a new model then reads it).
             guard let core, library.index == .ready else { return }

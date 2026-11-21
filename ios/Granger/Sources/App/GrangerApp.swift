@@ -3,6 +3,7 @@ import SwiftUI
 
 @main
 struct GrangerApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var settings = AppSettings()
     @State private var recent = RecentStore()
     @State private var library = LibraryModel()
@@ -30,6 +31,14 @@ struct GrangerApp: App {
                 .environment(\.core, core)
                 .task(id: "\(settings.wikiLanguage)|\(settings.canFetch)") {
                     library.watch(core)
+                    // Get more's catalog: the shared source asks, Swift fetches and verifies (Plan I4 Task 6).
+                    core.library.catalogSource.fetch = { [library] refresh in
+                        Task { @MainActor in
+                            if refresh.boolValue { library.forgetCatalog() }
+                            let c = await library.loadCatalog()
+                            if let c { core.library.catalog = c } else { core.library.catalogSource.publish(catalog: nil) }
+                        }
+                    }
                     await library.prepareIndexes(core: core, lang: settings.wikiLanguage, allowed: settings.canFetch)
                     // The packs in Documents/Packs, opened and listed (Plan I4 Task 5).
                     try? await core.library.refreshPacks()
@@ -110,6 +119,10 @@ struct RootView: View {
                     case let .packTopic(pack, p): TopicScreen(lang: core?.library.languageOf(packId: pack) ?? "en", path: p, pack: pack)
                     case let .packReader(pack, p, fragment): ReaderScreen(lang: core?.library.languageOf(packId: pack) ?? "en", path: p, fragment: fragment, pack: pack)
                     case let .timeline(packId, p): TimelineScreen(packId: packId, path: p)
+                    case .downloads: DownloadsScreen()
+                    case .getMore: GetMoreScreen()
+                    case let .source(scope, domain, family, bookSet):
+                        SourceScreen(scope: CatalogScope.allCases.first { $0.name == scope } ?? .kiwix, domain: domain, family: family, bookSet: bookSet)
                     case let .subject(id): SubjectScreen(subjectId: id)
                     case let .room(subject, facet): RoomScreen(subjectId: subject, facetId: facet)
                     case let .wander(packId, p): WanderScreen(packId: packId, path: p)

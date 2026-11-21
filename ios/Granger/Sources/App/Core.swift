@@ -5,6 +5,8 @@ import GrangerCoreKit
 /// Wikipedia online through Saved for now and the kept copies. Every call into it blocks, so screens call it through
 /// [background].
 final class Core: PageSource {
+    /// The one Core, for the app delegate (the background download session's events arrive there).
+    nonisolated(unsafe) static weak var shared: Core?
     let client: WikimediaClient
     let library: IosLibrary
     /// Where the library keeps its files: Application Support/granger (Android's files folder).
@@ -42,8 +44,15 @@ final class Core: PageSource {
                 case let .failure(why): ZimOpenResultFailed(reason: why.reason)
                 }
             },
-            packsDir: packsFolder.path
+            packsDir: packsFolder.path,
+            // Downloads go when the gate is open (Local only stops them, as Android's NetworkGate does).
+            unmetered: { KotlinBoolean(value: NetworkPath.shared.unmetered) },
+            connected: { KotlinBoolean(value: NetworkPath.shared.connected && NetworkGate.shared.open) },
+            wifiOnly: { KotlinBoolean(value: LibraryGate.shared.wifiOnly) }
         )
+        Core.shared = self
+        NetworkPath.shared.changed = { [weak self] in self?.library.networkChanged() }
+        library.startDownloads()
     }
 
     private static func makePacksFolder() -> URL {

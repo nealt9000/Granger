@@ -1,6 +1,13 @@
 package app.granger.core.downloads
 
-data class DownloadRequest(val urls: List<String>, val sizeBytes: Long, val hash: String, val algorithm: HashAlgorithm = HashAlgorithm.SHA256)
+data class DownloadRequest(
+    val urls: List<String>,
+    val sizeBytes: Long,
+    val hash: String,
+    val algorithm: HashAlgorithm = HashAlgorithm.SHA256,
+    /** Wi-Fi only (Plan I4): the iPhone's transfer then never uses mobile data; Android's NetworkGate checks it itself. */
+    val wifiOnly: Boolean = false,
+)
 
 sealed interface DownloadResult {
     data object Done : DownloadResult

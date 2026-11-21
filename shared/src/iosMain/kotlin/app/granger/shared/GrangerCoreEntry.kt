@@ -81,6 +81,9 @@ object GrangerCoreEntry {
     /** An item's bytes (a page or a picture) for the web view. */
     fun bytes(of: ByteArray): NSData = of.toNSData()
 
+    /** "2.0 GB", "350 MB": a size as the shared screens word it (Android's formatBytes). */
+    fun bytesText(bytes: Long): String = app.granger.screens.bytesText(bytes)
+
     /** [data] as Kotlin bytes, copied in one go (Plan I4: CoreKiwix's reads, for shared code). */
     fun byteArray(of: NSData): ByteArray = of.toByteArray()
 

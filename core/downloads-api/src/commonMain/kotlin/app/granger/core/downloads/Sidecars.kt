@@ -32,7 +32,7 @@ enum class SidecarKind(val id: String, val itemKind: ItemKind, private val suffi
     /** One file per version (its sha256 in the name), so a new one never overwrites the one in use. */
     fun specOf(item: CatalogItem, file: SidecarFile): DownloadSpec = DownloadSpec(
         itemIdOf(item.id), itemKind, item.title, listOf(file.url), file.sizeBytes, file.sha256,
-        HashAlgorithm.SHA256, "$folder/${item.id}_${file.sha256.take(12)}.$ext", downloadSpecOf(item).snapshotDate,
+        HashAlgorithm.SHA256, "${DownloadLayout.companions}$folder/${item.id}_${file.sha256.take(12)}.$ext", downloadSpecOf(item).snapshotDate,
     )
 
     /** What the catalog names as [item]'s file of this kind; null when it has none. */
