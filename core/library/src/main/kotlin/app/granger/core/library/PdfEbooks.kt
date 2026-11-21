@@ -4,6 +4,8 @@ import app.granger.core.books.BookMeta
 import app.granger.core.books.EpubInspector
 import app.granger.core.books.Inspection
 import app.granger.core.books.PdfToEpub
+import app.granger.core.books.convert
+import app.granger.core.books.inspect
 import java.io.File
 
 /**

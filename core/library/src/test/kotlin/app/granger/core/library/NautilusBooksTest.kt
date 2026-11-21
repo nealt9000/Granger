@@ -5,6 +5,7 @@ import app.granger.core.books.Inspection
 import app.granger.core.books.PdfFixtures
 import app.granger.core.books.TestEpubs
 import app.granger.core.books.TextPdfFixtures
+import app.granger.core.books.inspect
 import com.google.common.truth.Truth.assertThat
 import java.io.File
 import kotlinx.coroutines.flow.first

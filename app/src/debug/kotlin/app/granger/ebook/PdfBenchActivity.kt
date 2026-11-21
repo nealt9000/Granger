@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import app.granger.core.books.PdfSupport
 import app.granger.core.books.PdfToEpub
+import app.granger.core.books.convert
 import java.io.File
 import kotlin.concurrent.thread
 

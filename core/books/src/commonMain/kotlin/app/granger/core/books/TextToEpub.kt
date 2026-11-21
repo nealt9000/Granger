@@ -1,22 +1,6 @@
 package app.granger.core.books
 
 import app.granger.core.text.LanguageGuess
-import java.io.OutputStream
-import java.time.Instant
-import java.time.temporal.ChronoUnit
-import java.util.UUID
-import java.util.zip.CRC32
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
-import org.commonmark.node.AbstractVisitor
-import org.commonmark.node.Heading
-import org.commonmark.node.Image
-import org.commonmark.node.Node
-import org.commonmark.parser.Parser
-import org.commonmark.renderer.html.HtmlRenderer
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import org.jsoup.nodes.Entities
 
 /** Converts plain text or Markdown into an EPUB 3 laid out like the pack builder's (mimetype, container, OPF, nav, cNNN.xhtml). */
 object TextToEpub {
@@ -29,9 +13,9 @@ object TextToEpub {
      * [language] is the book's declared language (archive.org's metadata); blank or unknown, the text's own is guessed,
      * Spanish or English (Plan L3, [LanguageGuess]).
      */
-    fun convert(text: String, title: String, markdown: Boolean, out: OutputStream, maxChapterChars: Int = 100_000, language: String? = null) {
+    fun convert(text: String, title: String, markdown: Boolean, out: BookOutput, maxChapterChars: Int = 100_000, language: String? = null) {
         val clean = stripInvalidXml(text)
-        val chapters = (if (markdown) markdownChapters(clean) else txtChapters(clean, maxChapterChars))
+        val chapters = (if (markdown) BookEngines.markdown.chapters(clean).map { (t, body) -> Chapter(t, body) } else txtChapters(clean, maxChapterChars))
             .ifEmpty { listOf(Chapter("Part 1", "")) }
         write(chapters, stripInvalidXml(title), clean, out, LanguageGuess.tag(language, clean))
     }
@@ -118,56 +102,12 @@ object TextToEpub {
         return sb.toString()
     }
 
-    // ---- Markdown ----
-
-    private fun markdownChapters(text: String): List<Chapter> {
-        val doc = Parser.builder().build().parse(text)
-        doc.accept(object : AbstractVisitor() {
-            override fun visit(image: Image) = image.unlink()
-        })
-        val counts = HashMap<Int, Int>()
-        var n: Node? = doc.firstChild
-        while (n != null) {
-            if (n is Heading) counts.merge(n.level, 1, Int::plus)
-            n = n.next
-        }
-        val level = counts.filterValues { it >= 2 }.keys.minOrNull()
-
-        val html = HtmlRenderer.builder().escapeHtml(true).sanitizeUrls(true).build().render(doc)
-        val nodes = Jsoup.parseBodyFragment(html).body().children()
-        val result = ArrayList<Chapter>()
-        var title: String? = null
-        val current = ArrayList<org.jsoup.nodes.Element>()
-        fun flush() {
-            if (current.isEmpty()) return
-            val t = title ?: current.firstOrNull { it.tagName().matches(Regex("h[1-6]")) }?.text()?.takeIf { it.isNotBlank() }
-            result.add(Chapter(t ?: "Part ${result.size + 1}", xhtml(current)))
-            current.clear()
-            title = null
-        }
-        for (el in nodes) {
-            if (level != null && el.tagName() == "h$level") {
-                flush()
-                title = el.text().takeIf { it.isNotBlank() }
-            }
-            current.add(el)
-        }
-        flush()
-        return result
-    }
-
-    private fun xhtml(elements: List<org.jsoup.nodes.Element>): String {
-        val doc: Document = Jsoup.parseBodyFragment(elements.joinToString("") { it.outerHtml() })
-        doc.outputSettings().syntax(Document.OutputSettings.Syntax.xml).escapeMode(Entities.EscapeMode.xhtml)
-        return doc.body().html()
-    }
-
     // ---- EPUB package ----
 
-    private fun write(chapters: List<Chapter>, title: String, source: String, out: OutputStream, lang: String) {
-        val id = "urn:uuid:" + UUID.nameUUIDFromBytes(source.toByteArray(Charsets.UTF_8))
-        val modified = Instant.now().truncatedTo(ChronoUnit.SECONDS).toString()
-        fun href(i: Int) = "c%03d.xhtml".format(i + 1)
+    private fun write(chapters: List<Chapter>, title: String, source: String, out: BookOutput, lang: String) {
+        val id = "urn:uuid:" + nameUuid(source.encodeToByteArray())
+        val modified = nowIsoSeconds()
+        fun href(i: Int) = "c" + (i + 1).toString().padStart(3, '0') + ".xhtml"
 
         val manifest = StringBuilder("<item id=\"nav\" href=\"nav.xhtml\" media-type=\"application/xhtml+xml\" properties=\"nav\"/>")
         val spine = StringBuilder()
@@ -182,21 +122,9 @@ object TextToEpub {
         val contents = if (lang == "es") "Índice" else "Contents"
         val nav = page(title, "<nav epub:type=\"toc\" id=\"toc\"><h1>$contents</h1><ol>$items</ol></nav>", lang)
 
-        ZipOutputStream(out).use { z ->
-            val mime = "application/epub+zip".toByteArray()
-            z.putNextEntry(ZipEntry("mimetype").apply {
-                method = ZipEntry.STORED
-                size = mime.size.toLong()
-                compressedSize = mime.size.toLong()
-                crc = CRC32().also { it.update(mime) }.value
-            })
-            z.write(mime)
-            z.closeEntry()
-            fun put(path: String, content: String) {
-                z.putNextEntry(ZipEntry(path))
-                z.write(content.toByteArray(Charsets.UTF_8))
-                z.closeEntry()
-            }
+        EpubZip(out).use { z ->
+            z.stored("mimetype", "application/epub+zip".encodeToByteArray())
+            fun put(path: String, content: String) = z.put(path, content.encodeToByteArray())
             put("META-INF/container.xml", """<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>""")
             put("OEBPS/content.opf", opf)
             put("OEBPS/nav.xhtml", nav)

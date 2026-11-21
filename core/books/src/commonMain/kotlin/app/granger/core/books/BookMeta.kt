@@ -24,6 +24,8 @@ class BookMeta(
 /** A PDF outline entry, the 1-based page it opens at, and how deep it sits in the outline (0 at the top). */
 data class OutlineEntry(val title: String, val page: Int, val depth: Int = 0)
 
+enum class DrmKind { LCP, ADOBE, OTHER, PDF_ENCRYPTED }
+
 sealed interface Inspection {
     data class Ok(val meta: BookMeta) : Inspection
     data class Protected(val kind: DrmKind) : Inspection

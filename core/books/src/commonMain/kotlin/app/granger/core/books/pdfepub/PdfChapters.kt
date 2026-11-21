@@ -1,6 +1,7 @@
 package app.granger.core.books.pdfepub
 
 import app.granger.core.books.OutlineEntry
+import kotlin.math.roundToInt
 
 /** Where a converted book's chapters came from, best first. */
 enum class ChapterSource { OUTLINE, HEADINGS, PAGES }
@@ -17,7 +18,7 @@ internal object PdfChapters {
     const val OPENING = "Opening pages"
 
     fun split(items: List<Item>, outline: List<OutlineEntry>, pageCount: Int): Pair<List<Chapter>, ChapterSource> {
-        fromOutline(items, outline)?.let { return it to ChapterSource.OUTLINE }
+        fromOutline(items, outline, Normals())?.let { return it to ChapterSource.OUTLINE }
         fromHeadings(items)?.let { return it to ChapterSource.HEADINGS }
         return byPages(items, pageCount) to ChapterSource.PAGES
     }
@@ -27,7 +28,7 @@ internal object PdfChapters {
      * below starts sections. Each starts at the item on its page that reads as its title, else at the page's first item.
      * Null when the outline has fewer than two usable entries.
      */
-    private fun fromOutline(items: List<Item>, outline: List<OutlineEntry>): List<Chapter>? {
+    private fun fromOutline(items: List<Item>, outline: List<OutlineEntry>, normal: Normals): List<Chapter>? {
         if (items.isEmpty()) return null
         val usable = outline.filter { it.page >= 1 && it.title.isNotBlank() }
         if (usable.size < 2) return null
@@ -42,7 +43,7 @@ internal object PdfChapters {
         val starts = mutableListOf<Pair<OutlineEntry, Pair<Int, Boolean>>>()
         var from = 0
         for (entry in tops) {
-            val at = (if (byTitle) findTitle(items, entry.title, from)?.let { it to true } else place(items, entry, from)) ?: continue
+            val at = (if (byTitle) findTitle(items, entry.title, from, normal)?.let { it to true } else place(items, entry, from, normal)) ?: continue
             starts += entry to at
             from = at.first + if (byTitle) 1 else 0
         }
@@ -57,7 +58,7 @@ internal object PdfChapters {
             if (end <= at.first) continue
             val slice = items.subList(at.first, end)
             val sections = sectionEntries.filter { it.page - 1 in slice.first().page..slice.last().page }
-                .mapNotNull { s -> place(slice, s, 0)?.first?.takeIf { it > 0 }?.let { s.title.trim() to it } }
+                .mapNotNull { s -> place(slice, s, 0, normal)?.first?.takeIf { it > 0 }?.let { s.title.trim() to it } }
             chapters += Chapter(entry.title.trim(), slice, if (at.second) 0 else null, sections)
         }
         return chapters
@@ -93,7 +94,7 @@ internal object PdfChapters {
     private val LABEL = Regex("^(section|chapter|part|book)?\\s*[0-9ivxlc]+\\.?$", RegexOption.IGNORE_CASE)
 
     /** The item [entry] starts at (from [from] on), and whether it reads as the entry's title. */
-    private fun place(items: List<Item>, entry: OutlineEntry, from: Int): Pair<Int, Boolean>? {
+    private fun place(items: List<Item>, entry: OutlineEntry, from: Int, normal: Normals): Pair<Int, Boolean>? {
         val page = entry.page - 1
         val want = normal(entry.title)
         for (i in from until items.size) {
@@ -113,7 +114,7 @@ internal object PdfChapters {
     }
 
     /** The first heading (else paragraph) from [from] on that starts with [title]'s words (its first 40 letters). */
-    private fun findTitle(items: List<Item>, title: String, from: Int): Int? {
+    private fun findTitle(items: List<Item>, title: String, from: Int, normal: Normals): Int? {
         val want = normal(title).take(40)
         if (want.length < 3) return null
         fun text(item: Item) = when (item) {
@@ -127,10 +128,15 @@ internal object PdfChapters {
 
     private val NOT_WORD = Regex("[^\\p{L}\\p{N}]+")
 
-    /** [text] lower-cased with only its letters and digits; cached for a heading or paragraph, which are matched many times. */
-    private val normals = java.util.Collections.synchronizedMap(java.util.WeakHashMap<String, String>())
+    /**
+     * A text lower-cased with only its letters and digits; cached for a heading or paragraph, which are matched many
+     * times. One per book, so the cache goes with it.
+     */
+    private class Normals {
+        private val seen = HashMap<String, String>()
 
-    private fun normal(text: String): String = normals.getOrPut(text) { text.lowercase().replace(NOT_WORD, "") }
+        operator fun invoke(text: String): String = seen.getOrPut(text) { text.lowercase().replace(NOT_WORD, "") }
+    }
 
     /**
      * Chapters at the biggest headings that come at least twice and no more than once a page, and leave no chapter over
@@ -145,7 +151,7 @@ internal object PdfChapters {
         val last = items.last().page
         val pages = (last - first + 1).coerceAtLeast(1)
         val limit = maxOf(MAX_CHAPTER_PAGES, (pages * MAX_CHAPTER_SHARE).toInt())
-        val levels = headings.map { Math.round((it.value as Heading).size * 2f) / 2f }.distinct().sortedDescending()
+        val levels = headings.map { roundHalfUp((it.value as Heading).size * 2f) / 2f }.distinct().sortedDescending()
         val found = levels.asSequence().map { level ->
             headings.filter { (it.value as Heading).size >= level - 0.25f }.map { it.index }
         }.firstOrNull { starts ->
@@ -171,7 +177,7 @@ internal object PdfChapters {
     /** "Pages 1–20", "Pages 21–40"…, by the pages the items are on. */
     private fun byPages(items: List<Item>, pageCount: Int): List<Chapter> {
         if (items.isEmpty()) return emptyList()
-        return items.groupBy { it.page / PAGES_PER }.toSortedMap().map { (block, list) ->
+        return items.groupBy { it.page / PAGES_PER }.entries.sortedBy { it.key }.map { (block, list) ->
             val first = block * PAGES_PER + 1
             val last = minOf(first + PAGES_PER - 1, pageCount)
             Chapter("Pages $first–$last", list, null, emptyList())
@@ -186,3 +192,6 @@ internal object PdfChapters {
         return Chapter(OPENING, before, null, emptyList())
     }
 }
+
+/** Java's `Math.round(Float)`: halves up, NaN to 0, clamped to Int. */
+private fun roundHalfUp(x: Float): Int = if (x.isNaN()) 0 else x.roundToInt()

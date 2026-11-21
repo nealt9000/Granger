@@ -14,6 +14,9 @@ import app.granger.core.books.OutlineEntry
 import app.granger.core.books.PdfInspector
 import app.granger.core.books.PdfLink
 import app.granger.core.books.PdfLinks
+import app.granger.core.books.of
+import app.granger.core.books.outline
+import app.granger.core.books.read
 import app.granger.core.library.Book
 import app.granger.core.library.BookAnnotation
 import app.granger.core.library.Bookshelf
@@ -176,9 +179,9 @@ class EbookReaderViewModel(
     /** A text's saved place (Plan U2): Listen goes on from it when the page is at or before it ([listenStart]). */
     private val savedPlace: suspend (sourceKey: String) -> ReadAddress? = { null },
     /** A PDF's outline as PdfBox reads it, for when PDFium's has nothing to show (called on [io]). */
-    private val pdfOutline: (File) -> List<OutlineEntry> = PdfInspector::outline,
+    private val pdfOutline: (File) -> List<OutlineEntry> = { PdfInspector.outline(it) },
     /** A PDF's links within itself as PdfBox reads them, for a link PDFium found but couldn't place (called on [io]). */
-    private val pdfLinks: (File) -> List<PdfLink> = PdfLinks::read,
+    private val pdfLinks: (File) -> List<PdfLink> = { PdfLinks.read(it) },
     /** Whether a PDF is in colour, which Night leaves in its own colours (called on [io]; the app passes PdfColour). */
     private val pdfColour: (File) -> Boolean = { false },
     /** A Classic's reference links and what a tapped one opens (Plan LL1); null leaves links out of this reader. */

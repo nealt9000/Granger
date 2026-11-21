@@ -102,7 +102,7 @@ internal object PdfLayout {
     /** The size most characters are set in, to the half point. */
     internal fun bodySize(lines: List<TextLine>): Float {
         val weights = HashMap<Float, Int>()
-        for (l in lines) weights.merge((l.size * 2f).roundToInt() / 2f, l.text.length, Int::plus)
+        for (l in lines) weights.add((l.size * 2f).roundToInt() / 2f, l.text.length)
         return weights.maxByOrNull { it.value }?.key ?: 11f
     }
 
@@ -116,7 +116,7 @@ internal object PdfLayout {
         val counts = HashMap<String, Int>()
         for (page in pages) {
             page.lines.filter { inBand(page, it) }.map { key(it.text) }.filter { it.isNotEmpty() }.distinct()
-                .forEach { counts.merge(it, 1, Int::plus) }
+                .forEach { counts.add(it, 1) }
         }
         val threshold = maxOf(3, pages.size / 5)
         var dropped = 0
@@ -429,4 +429,9 @@ internal object PdfLayout {
         }
         return out
     }
+}
+
+/** Adds [by] to [key]'s count (Java's `merge(key, by, Int::plus)`). */
+internal fun <K> MutableMap<K, Int>.add(key: K, by: Int) {
+    this[key] = (this[key] ?: 0) + by
 }

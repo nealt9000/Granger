@@ -21,6 +21,8 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(project(":core:text"))
+            implementation(libs.ksoup)
+            implementation(libs.kotlinx.io.core)
         }
         androidMain.dependencies {
             implementation(libs.jsoup)

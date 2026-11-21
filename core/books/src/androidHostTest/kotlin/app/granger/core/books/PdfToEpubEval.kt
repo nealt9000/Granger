@@ -36,9 +36,9 @@ class PdfToEpubEval {
         for (pdf in pdfs) {
             val epub = File(out, pdf.nameWithoutExtension + ".epub").apply { delete() }
             if (System.getenv("PDF_EVAL_HEADINGS") != null) {
-                loadPdf(pdf).use { doc ->
+                PdfBoxFile(loadPdf(pdf)).use { doc ->
                     val scratch = kotlin.io.path.createTempDirectory().toFile()
-                    val pages = app.granger.core.books.pdfepub.PdfPages.readAll(doc, scratch)
+                    val pages = app.granger.core.books.pdfepub.PdfPages.readAll(doc, scratch.path)
                     val layout = app.granger.core.books.pdfepub.PdfLayout.build(pages)
                     println("BODY ${pdf.name}: ${layout.bodySize}")
                     layout.items.filterIsInstance<app.granger.core.books.pdfepub.Heading>().take(40)

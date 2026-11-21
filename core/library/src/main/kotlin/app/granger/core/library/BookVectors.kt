@@ -7,6 +7,9 @@ import app.granger.core.books.Inspection
 import app.granger.core.books.PdfText
 import app.granger.core.books.TextChunk
 import app.granger.core.books.XhtmlText
+import app.granger.core.books.all
+import app.granger.core.books.inspect
+import app.granger.core.books.open
 import app.granger.core.research.SourceKind
 import app.granger.core.text.Chunkers
 import app.granger.core.vectors.ChunkKey

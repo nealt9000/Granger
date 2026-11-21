@@ -5,6 +5,7 @@ import androidx.room.withTransaction
 import app.granger.core.books.EpubInspector
 import app.granger.core.books.Inspection
 import app.granger.core.books.PdfInspector
+import app.granger.core.books.inspect
 import app.granger.core.zim.ZimArchive
 import java.io.File
 import java.io.IOException

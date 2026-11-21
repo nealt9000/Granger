@@ -1,10 +1,6 @@
 package app.granger.core.books
 
-import com.tom_roush.pdfbox.pdmodel.PDDocument
-import com.tom_roush.pdfbox.text.PDFTextStripper
-import java.io.Closeable
-import java.io.File
-import java.io.IOException
+import kotlinx.io.IOException
 
 /**
  * Splits a PDF's text layer into search-sized chunks keyed by page: `href = "page/<n>"` (1-based), [TextChunk.ordinal]
@@ -15,20 +11,20 @@ import java.io.IOException
  */
 object PdfText {
     /** Empty for a missing, password-locked or corrupt file, or an href that names no page. */
-    fun chunks(file: File, href: String): List<TextChunk> = open(file)?.use { it.chunks(href) }.orEmpty()
+    fun chunks(path: String, href: String): List<TextChunk> = open(path)?.use { it.chunks(href) }.orEmpty()
 
     /** Every page's chunks, in order. */
-    fun all(file: File): Sequence<TextChunk> = sequence {
-        val reader = open(file) ?: return@sequence
+    fun all(path: String): Sequence<TextChunk> = sequence {
+        val reader = open(path) ?: return@sequence
         reader.use { for (n in 1..it.pageCount) yieldAll(it.chunks(href(n))) }
     }
 
     /** True when the first 20 pages hold 200 or more characters of text; false for a scan with no text layer. */
-    fun hasTextLayer(file: File): Boolean = open(file)?.use { it.hasTextLayer() } ?: false
+    fun hasTextLayer(path: String): Boolean = open(path)?.use { it.hasTextLayer() } ?: false
 
     /** An owner-password PDF opens like any other (see [PdfInspector]); one that needs a password to open doesn't. */
-    fun open(file: File): Reader? = try {
-        Reader(loadPdf(file))
+    fun open(path: String): Reader? = try {
+        Reader(BookEngines.pdf.open(path))
     } catch (_: IOException) {
         null
     } catch (_: RuntimeException) {
@@ -41,8 +37,8 @@ object PdfText {
     fun pageOf(href: String): Int? = href.removePrefix("page/").takeIf { it != href }?.toIntOrNull()
 
     /** One open PDF; caches page text, so several chunks from one book read each page once. */
-    class Reader internal constructor(private val doc: PDDocument) : Closeable {
-        val pageCount: Int get() = doc.numberOfPages
+    class Reader internal constructor(private val doc: PdfFile) : AutoCloseable {
+        val pageCount: Int get() = doc.pageCount
         private val lines = HashMap<Int, List<String>>()
 
         fun chunks(href: String): List<TextChunk> {
@@ -80,16 +76,7 @@ object PdfText {
         }
 
         private fun pageLines(page: Int): List<String> = lines.getOrPut(page) {
-            val stripper = PDFTextStripper().apply {
-                sortByPosition = true
-                startPage = page
-                endPage = page
-                lineSeparator = "\n"
-                // PdfBox's paragraph guess marks nearly every line; blank lines in the page's own text split instead.
-                paragraphStart = ""
-                paragraphEnd = ""
-            }
-            stripper.getText(doc).split('\n').map { it.trim() }
+            doc.pageText(page).split('\n').map { it.trim() }
         }
 
         private fun edges(lines: List<String>): List<String> = edgeIndexes(lines).map { normalise(lines[it]) }
@@ -120,7 +107,7 @@ object PdfText {
                 line.first().isLowerCase()
             when {
                 current.isEmpty() -> current.append(line)
-                hyphenated -> current.deleteCharAt(current.length - 1).append(line)
+                hyphenated -> current.deleteAt(current.length - 1).append(line)
                 else -> current.append(' ').append(line)
             }
         }

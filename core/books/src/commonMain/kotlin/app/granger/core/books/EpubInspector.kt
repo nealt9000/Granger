@@ -1,27 +1,25 @@
 package app.granger.core.books
 
-import java.io.File
-import java.net.URI
-import java.util.zip.ZipException
-import java.util.zip.ZipFile
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
-import org.jsoup.parser.Parser
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.nodes.Document
+import com.fleeksoft.ksoup.nodes.Element
+import com.fleeksoft.ksoup.parser.Parser
+import kotlinx.io.IOException
 
 object EpubInspector {
-    fun inspect(file: File, fallbackTitle: String = file.nameWithoutExtension): Inspection {
+    /** The EPUB at [path]; [fallbackTitle] when it names none. */
+    fun inspect(path: String, fallbackTitle: String = stemOf(path)): Inspection {
         val zip = try {
-            ZipFile(file)
-        } catch (e: ZipException) {
+            openBookZip(path)
+        } catch (e: NotAZipException) {
             return Inspection.Invalid("Not a zip file")
-        } catch (e: java.io.IOException) {
+        } catch (e: IOException) {
             return Inspection.Invalid("Cannot read file: ${e.message}")
         }
         return zip.use {
             try {
                 inspect(it, fallbackTitle)
-            } catch (e: java.io.IOException) {
+            } catch (e: IOException) {
                 Inspection.Invalid("Corrupt EPUB: ${e.message}")
             } catch (e: RuntimeException) {
                 Inspection.Invalid("Corrupt EPUB: ${e.message}")
@@ -29,9 +27,9 @@ object EpubInspector {
         }
     }
 
-    private fun inspect(zip: ZipFile, fallbackTitle: String): Inspection {
+    private fun inspect(zip: BookZip, fallbackTitle: String): Inspection {
         DrmCheck.check(zip)?.let { return Inspection.Protected(it) }
-        val mime = zip.getEntry("mimetype")?.let { readCapped(zip, it, MIMETYPE_LIMIT).toString(Charsets.UTF_8).trim() }
+        val mime = zip.readCapped("mimetype", MIMETYPE_LIMIT)?.decodeToString()?.trim()
         if (mime != "application/epub+zip") return Inspection.Invalid("Missing EPUB mimetype")
         val container = xml(zip, "META-INF/container.xml") ?: return Inspection.Invalid("Missing container.xml")
         val opfPath = container.getElementsByTag("rootfile").firstOrNull()?.attr("full-path")?.takeIf { it.isNotBlank() }
@@ -47,9 +45,7 @@ object EpubInspector {
             ?: opf.getElementsByTag("meta").firstOrNull { it.attr("name") == "cover" }
                 ?.let { manifest[it.attr("content")] }
         val coverPath = coverItem?.attr("href")?.let { resolve(opfPath, it) }
-        val cover = coverPath?.let { p ->
-            zip.getEntry(p)?.let { e -> try { readCapped(zip, e, COVER_LIMIT) } catch (_: java.io.IOException) { null } }
-        }
+        val cover = coverPath?.let { p -> try { zip.readCapped(p, COVER_LIMIT) } catch (_: IOException) { null } }
 
         fun texts(tag: String) = opf.getElementsByTag(tag).map { it.text().trim() }.filter { it.isNotEmpty() }
         // A creator's or contributor's MARC relator: EPUB 2's opf:role, else an EPUB 3 <meta refines="#id" property="role">.
@@ -88,14 +84,14 @@ object EpubInspector {
         )
     }
 
-    private fun xml(zip: ZipFile, path: String): Document? {
-        val entry = zip.getEntry(path) ?: return null
-        return Jsoup.parse(readCapped(zip, entry, XML_LIMIT).inputStream(), "UTF-8", "", Parser.xmlParser())
+    private fun xml(zip: BookZip, path: String): Document? {
+        val bytes = zip.readCapped(path, XML_LIMIT) ?: return null
+        return Ksoup.parse(html = xmlText(bytes), parser = Parser.xmlParser(), baseUri = "")
     }
 
     /** Resolves a manifest href against the package document's folder into a zip path. */
     private fun resolve(opfPath: String, href: String): String {
-        val decoded = try { URI(href).path ?: href } catch (_: Exception) { href }
+        val decoded = uriPath(href)
         val parts = ArrayDeque(opfPath.substringBeforeLast('/', "").split('/').filter { it.isNotEmpty() })
         for (seg in decoded.split('/')) {
             when (seg) {

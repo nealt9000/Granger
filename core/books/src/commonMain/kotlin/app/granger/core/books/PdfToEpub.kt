@@ -19,10 +19,8 @@ import app.granger.core.books.pdfepub.PdfTimings
 import app.granger.core.books.pdfepub.Picture
 import app.granger.core.books.pdfepub.Span
 import app.granger.core.books.pdfepub.Verse
-import com.tom_roush.pdfbox.pdmodel.PDDocument
-import java.io.File
-import java.io.IOException
-import java.util.UUID
+import kotlinx.io.IOException
+import kotlin.time.TimeSource
 
 /**
  * Turns a born-digital PDF into an EPUB (Plan IA): flowing text in the reader's own typeface and size, chapters from
@@ -56,17 +54,17 @@ object PdfToEpub {
     }
 
     /**
-     * Converts [pdf] into [out] (through a `.incoming-` partial beside it), named [title] by [author] in [language]
+     * Converts the PDF at [pdf] into [out] (through a `.incoming-` partial beside it), named [title] by [author] in [language]
      * when given (an archive.org sidecar's), else as the PDF's own information says. [out] is written only when the
      * report [Report.passes].
      */
     fun convert(
-        pdf: File, out: File, title: String = "", author: String = "", language: String = "",
+        pdf: String, out: String, title: String = "", author: String = "", language: String = "",
         /** Told each stage's name and milliseconds (the phone bench). */
         trace: ((String, Long) -> Unit)? = null,
     ): Report {
         val doc = try {
-            loadPdf(pdf)
+            BookEngines.pdf.open(pdf)
         } catch (e: IOException) {
             return failed("unreadable: ${e.message}")
         } catch (e: RuntimeException) {
@@ -75,27 +73,28 @@ object PdfToEpub {
         return doc.use { convert(it, pdf, out, title, author, language, trace) }
     }
 
-    private fun convert(doc: PDDocument, pdf: File, out: File, title: String, author: String, language: String, trace: ((String, Long) -> Unit)?): Report {
-        var mark = System.nanoTime()
+    private fun convert(doc: PdfFile, pdf: String, out: String, title: String, author: String, language: String, trace: ((String, Long) -> Unit)?): Report {
+        var mark = TimeSource.Monotonic.markNow()
         fun stage(name: String) {
-            val now = System.nanoTime()
-            trace?.invoke(name, (now - mark) / 1_000_000)
+            val now = TimeSource.Monotonic.markNow()
+            trace?.invoke(name, (now - mark).inWholeMilliseconds)
             mark = now
         }
         val origin = PdfOrigin.of(doc)
         stage("origin")
-        if (origin != PdfOrigin.BORN_DIGITAL) return failed("not born-digital: $origin", origin, doc.numberOfPages)
+        if (origin != PdfOrigin.BORN_DIGITAL) return failed("not born-digital: $origin", origin, doc.pageCount)
         // The pictures wait here until the EPUB is written.
-        val scratch = File(out.absoluteFile.parentFile, ".incoming-${UUID.randomUUID()}").apply { mkdirs() }
+        val scratch = parentFolder(out) + "/.incoming-${randomUuid()}"
+        makeFolders(scratch)
         try {
             return convert(doc, pdf, out, title, author, language, origin, scratch, ::stage, trace)
         } finally {
-            scratch.deleteRecursively()
+            deleteAll(scratch)
         }
     }
 
     private fun convert(
-        doc: PDDocument, pdf: File, out: File, title: String, author: String, language: String, origin: PdfOrigin, scratch: File,
+        doc: PdfFile, pdf: String, out: String, title: String, author: String, language: String, origin: PdfOrigin, scratch: String,
         stage: (String) -> Unit, trace: ((String, Long) -> Unit)?,
     ): Report {
         val timings = if (trace != null) PdfTimings() else null
@@ -106,17 +105,18 @@ object PdfToEpub {
         stage("layout")
         // The outline counts PDF pages; a spread is two of the book's, so its entries go to the first of them.
         val firstOf = pages.groupBy { it.pdfPage }.mapValues { (_, ps) -> ps.minOf { it.index } }
-        val outline = (try { PdfInspector.outline(doc) } catch (_: IOException) { emptyList() })
+        val outline = (try { doc.outline() } catch (_: IOException) { emptyList() })
             .mapNotNull { e -> firstOf[e.page - 1]?.let { e.copy(page = it + 1) } }
         val (chapters, source) = PdfChapters.split(layout.items, outline, pages.size)
         stage("chapters")
-        val info = doc.documentInformation
-        val bookTitle = title.ifBlank { info.title?.trim().orEmpty() }.ifBlank { pdf.nameWithoutExtension }
+        val info = doc.info()
+        val bookTitle = title.ifBlank { info.title?.trim().orEmpty() }.ifBlank { stemOf(pdf) }
         val bookAuthor = author.ifBlank { info.author?.trim().orEmpty() }
-        val bookLanguage = language.ifBlank { doc.documentCatalog.language.orEmpty() }
+        val bookLanguage = language.ifBlank { info.language.orEmpty() }
 
         val images = mutableListOf<EpubImage>()
-        val pictureNames = java.util.IdentityHashMap<PagePicture, String>()
+        // PagePicture has no equals of its own: by identity, as before.
+        val pictureNames = HashMap<PagePicture, String>()
         fun nameOf(p: PagePicture): String = pictureNames.getOrPut(p) {
             val ext = if (p.mediaType == "image/png") "png" else "jpg"
             "images/p${p.page + 1}-${pictureNames.size + 1}.$ext".also { images += EpubImage(it, p.mediaType, p.file) }
@@ -151,17 +151,17 @@ object PdfToEpub {
         val final = report.copy(passes = verdict == null, why = verdict ?: "passes")
         if (!final.passes) return final
 
-        val partial = File(out.absoluteFile.parentFile, ".incoming-${UUID.randomUUID()}.epub")
+        val partial = parentFolder(out) + "/.incoming-${randomUuid()}.epub"
         try {
-            partial.outputStream().use {
-                EpubPackage.write(EpubBook(bookTitle, bookAuthor, bookLanguage, pdf.name + ":" + pdf.length(), rendered, images, CSS, cover), it)
+            outputTo(partial).use {
+                EpubPackage.write(EpubBook(bookTitle, bookAuthor, bookLanguage, nameOf(pdf) + ":" + fileLength(pdf), rendered, images, CSS, cover), it)
             }
-            if (!partial.renameTo(out)) partial.copyTo(out, overwrite = true)
+            moveOrCopy(partial, out)
             stage("write")
         } catch (e: IOException) {
             return final.copy(passes = false, why = "couldn't write: ${e.message}")
         } finally {
-            partial.delete()
+            deleteAll(partial)
         }
         return final
     }

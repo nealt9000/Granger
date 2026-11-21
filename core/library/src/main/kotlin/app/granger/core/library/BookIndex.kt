@@ -10,6 +10,9 @@ import app.granger.core.books.Snippets
 import app.granger.core.books.TextChunk
 import app.granger.core.books.TextQuote
 import app.granger.core.books.XhtmlText
+import app.granger.core.books.all
+import app.granger.core.books.inspect
+import app.granger.core.books.open
 import app.granger.core.research.Keywords
 import app.granger.core.text.Spellings
 import java.io.File

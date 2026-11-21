@@ -5,6 +5,7 @@ import app.granger.core.vectors.file
 import app.granger.core.books.PdfText
 import app.granger.core.books.TextChunk
 import app.granger.core.books.XhtmlText
+import app.granger.core.books.open
 import app.granger.core.research.DenseFinder
 import app.granger.core.research.HtmlPassages
 import app.granger.core.research.Passage

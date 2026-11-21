@@ -1,12 +1,9 @@
 package app.granger.core.books.pdfepub
 
-import java.io.OutputStream
-import java.time.Instant
-import java.time.temporal.ChronoUnit
-import java.util.UUID
-import java.util.zip.CRC32
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
+import app.granger.core.books.BookOutput
+import app.granger.core.books.EpubZip
+import app.granger.core.books.nameUuid
+import app.granger.core.books.nowIsoSeconds
 
 /** An EPUB 3's parts: chapters with nested contents, pictures, a stylesheet and a cover (Plan IA converter stage 9). */
 internal class EpubBook(
@@ -25,8 +22,8 @@ internal class EpubBook(
 /** A chapter's XHTML [body], and its [sections] (title, element id) for the contents. */
 internal class EpubChapter(val title: String, val body: String, val sections: List<Pair<String, String>>)
 
-/** [path] is inside `OEBPS/`, such as `images/p12-1.jpg`; [file] holds its bytes. */
-internal class EpubImage(val path: String, val mediaType: String, val file: java.io.File)
+/** [path] is inside `OEBPS/`, such as `images/p12-1.jpg`; the file at [file] holds its bytes. */
+internal class EpubImage(val path: String, val mediaType: String, val file: String)
 
 internal object EpubPackage {
     private val TAG = Regex("<[^>]+>")
@@ -34,11 +31,11 @@ internal object EpubPackage {
     /** Enough of the text for [app.granger.core.text.LanguageGuess.WORDS] words. */
     private const val GUESS_CHARS = 40_000
 
-    fun href(i: Int) = "c%03d.xhtml".format(i + 1)
+    fun href(i: Int) = "c" + (i + 1).toString().padStart(3, '0') + ".xhtml"
 
-    fun write(book: EpubBook, out: OutputStream) {
-        val id = "urn:uuid:" + UUID.nameUUIDFromBytes(book.source.toByteArray(Charsets.UTF_8))
-        val modified = Instant.now().truncatedTo(ChronoUnit.SECONDS).toString()
+    fun write(book: EpubBook, out: BookOutput) {
+        val id = "urn:uuid:" + nameUuid(book.source.encodeToByteArray())
+        val modified = nowIsoSeconds()
         // The declared language, else the text's own (Plan L3): Spanish or English by stopwords.
         val lang = app.granger.core.text.LanguageGuess.tag(
             book.language, book.chapters.joinToString(" ") { it.body.replace(TAG, " ") }.take(GUESS_CHARS),
@@ -66,32 +63,15 @@ internal object EpubPackage {
         }
         val nav = page(book.title, "<nav epub:type=\"toc\" id=\"toc\"><h1>Contents</h1><ol>$items</ol></nav>", lang)
 
-        ZipOutputStream(out).use { z ->
-            val mime = "application/epub+zip".toByteArray()
-            z.putNextEntry(ZipEntry("mimetype").apply {
-                method = ZipEntry.STORED
-                size = mime.size.toLong()
-                compressedSize = mime.size.toLong()
-                crc = CRC32().also { it.update(mime) }.value
-            })
-            z.write(mime)
-            z.closeEntry()
-            fun put(path: String, bytes: ByteArray) {
-                z.putNextEntry(ZipEntry(path))
-                z.write(bytes)
-                z.closeEntry()
-            }
-            fun put(path: String, content: String) = put(path, content.toByteArray(Charsets.UTF_8))
+        EpubZip(out).use { z ->
+            z.stored("mimetype", "application/epub+zip".encodeToByteArray())
+            fun put(path: String, content: String) = z.put(path, content.encodeToByteArray())
             put("META-INF/container.xml", """<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>""")
             put("OEBPS/content.opf", opf)
             put("OEBPS/nav.xhtml", nav)
             put("OEBPS/book.css", book.css)
             book.chapters.forEachIndexed { i, c -> put("OEBPS/${href(i)}", page(c.title, c.body, lang)) }
-            book.images.forEach { image ->
-                z.putNextEntry(ZipEntry("OEBPS/${image.path}"))
-                image.file.inputStream().use { it.copyTo(z) }
-                z.closeEntry()
-            }
+            book.images.forEach { image -> z.putFile("OEBPS/${image.path}", image.file) }
         }
     }
 

@@ -10,6 +10,8 @@ import app.granger.core.books.PdfInspector
 import app.granger.core.books.PdfToEpub
 import app.granger.core.books.TextDecoding
 import app.granger.core.books.TextToEpub
+import app.granger.core.books.convert
+import app.granger.core.books.inspect
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
