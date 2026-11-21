@@ -104,6 +104,12 @@ When I5 merges, every parity row marked I5 is ticked or carries an agreed reason
   - Listen's Reading tab (speed, sleep, saved place) and the notification controls;
   - archive.org search and a small item, importing an EPUB and a CBR, and Search's Books.
 - [ ] Publish a GrangerCore release and pin it. Merge and push.
+  - Done 2026-11-21.
+    - JVM 3887/3887; `bundleRelease` with R8 builds; iPhone Simulator suite 24/24 on the new core (one fix: Swift's `Dictionary` is shadowed by the core's exported `Dictionary`, so use `Swift.Dictionary`). Release `ios-core-2026-11-21-3` is pinned.
+    - Pixel 6 on debug 1699 (DB 18) over its data, no crash. Walked: Library (Reading now, collections); an EPUB (reopens at its place, search with your own highlight first, highlight + note + delete, text settings, contents with the current chapter coloured); read aloud with Owl (sentence marks) and an en-GB system voice; Listen's card and player; the sleep timer; Search's Books (39 matches) and By kind; archive.org and Books by kind; In your books on Napoleon (74 books) into War and Peace with a reference link peek (Paris); a PDF at its saved page; Define (the system chooser, as no Wiktionary pack is installed).
+    - Fixed on the way (the same on main): search-in-book rows cut the text before a hit, so the match never showed. Now they show a short lead (`SearchRows.lead`, c7ed1cd5).
+    - Noted, not fixed (the same on main): the rail covers a PDF page's left edge while the bars show; Contents opens at the top (the current chapter is coloured, not scrolled to).
+    - Not walked: importing a book (Android's file picker). `FileImports` tests cover it.
 
 ## I5b: the iPhone
 
