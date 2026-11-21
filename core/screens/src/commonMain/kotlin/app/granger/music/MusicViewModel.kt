@@ -233,7 +233,7 @@ object MusicCatalog {
 
     private fun albumTitleKeys(albums: List<AlbumSummary>, tracks: List<Track>): Map<String, String> {
         val tags = HashMap<String, String>()
-        for (t in tracks) if (t.sortAlbum.isNotBlank()) tags.putIfAbsent(t.albumKey, t.sortAlbum)
+        for (t in tracks) if (t.sortAlbum.isNotBlank()) tags.getOrPut(t.albumKey) { t.sortAlbum }
         return albums.associate { it.key to ShelfKey.of(it.title, tags[it.key]) }
     }
 
@@ -251,7 +251,7 @@ object MusicCatalog {
             }
             AlbumSort.ARTIST -> {
                 val tags = HashMap<String, String>()
-                for (t in tracks) if (t.sortAlbumArtist.isNotBlank()) tags.putIfAbsent(t.albumKey, t.sortAlbumArtist)
+                for (t in tracks) if (t.sortAlbumArtist.isNotBlank()) tags.getOrPut(t.albumKey) { t.sortAlbumArtist }
                 val artistKeys = albums.associate { it.key to ShelfKey.of(it.albumArtist, tags[it.key]) }
                 val sorted = albums.sortedByShelfKey({ artistKeys.getValue(it.key) }, compareBy<AlbumSummary> { it.year.ifEmpty { "\uFFFF" } }.then(title))
                 ShelfSections.of(sorted, true, key = { it.key }) { ShelfKey.letter(artistKeys.getValue(it.key)) }
