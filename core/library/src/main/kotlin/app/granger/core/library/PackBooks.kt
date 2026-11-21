@@ -17,28 +17,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
- * One book a book pack lists. [ref] is its id within [PackBookSource.origin] (`book:<origin>:<ref>`), [path] its entry
- * in the pack. [description] null leaves a row's description as it is.
- */
-data class PackItem(
-    val ref: String,
-    val path: String,
-    val title: String,
-    val author: String,
-    val format: BookFormat,
-    val sizeBytes: Long,
-    val description: String? = null,
-    /** Its language, when the pack's list says; null takes the row's own, else the pack's. */
-    val language: String? = null,
-    /** Where it sits in a manifest collection (Plan KB2): see [Book.groupName] and the fields after it. */
-    val groupName: String? = null,
-    val ord: Int? = null,
-    val workKey: String? = null,
-    val workTitle: String? = null,
-    val partNo: Int? = null,
-)
-
-/**
  * What [PackBooks] needs to know about one kind of book pack (Plan KB Decision 4): which packs are its, how to list a
  * pack's books, and where an opened book's copy goes.
  */

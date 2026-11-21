@@ -8,6 +8,9 @@ import app.granger.core.library.BookManifest
 import app.granger.core.library.BookOrigin
 import app.granger.core.library.ManifestCollection
 import app.granger.core.library.ManifestItem
+import app.granger.core.library.collection
+import app.granger.core.library.items
+import app.granger.core.library.verify
 import java.io.File
 import java.security.MessageDigest
 import java.util.concurrent.ConcurrentHashMap

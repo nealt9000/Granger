@@ -1,6 +1,5 @@
 package app.granger.core.library
 
-import android.database.sqlite.SQLiteDatabase
 import app.granger.core.zim.ZimArchive
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
@@ -8,189 +7,14 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/** One item of a `.gbooks` manifest (`tools/bookpacks/schema.md`). */
-data class ManifestItem(
-    val key: String,
-    val path: String,
-    val format: BookFormat,
-    val title: String,
-    val author: String,
-    val description: String,
-    val language: String,
-    val groupName: String,
-    val ord: Int,
-    val bytes: Long,
-    val partOf: String?,
-    val workKey: String?,
-    val workTitle: String?,
-    val partNo: Int?,
-    /** Plan BK: where its bytes start in the pack file (a stored cluster), [bytes] then exact; null when unknown. */
-    val zimOffset: Long? = null,
-    /** Plan BK: the sha256 of those bytes, when the builder read them. */
-    val sha256: String? = null,
-    /** Plan BK: the reading edition Granger made of it, when there is one. */
-    val edition: ManifestEdition? = null,
-)
+/** Android's `File` forms of the shared [BookManifest] (Plan I4b Task 8: the reader takes a path on both phones). */
+fun BookManifest.verify(file: File, packSha256: String): Boolean = verify(file.path, packSha256)
 
-/**
- * A reading edition of a manifest item (Plan BK): an EPUB on Granger's release, and [id], the catalog book (in the
- * "Granger reading editions" set) the app reads it as, so Read now and Keep work as for any Granger book.
- */
-data class ManifestEdition(val url: String, val sha256: String, val bytes: Long, val title: String, val id: String = "") {
-    companion object {
-        /** From the manifest's `edition` JSON; null when it's missing or malformed. */
-        fun parse(json: String?): ManifestEdition? {
-            if (json.isNullOrBlank()) return null
-            return runCatching {
-                val o = org.json.JSONObject(json)
-                ManifestEdition(o.getString("url"), o.optString("sha256"), o.optLong("bytes"), o.optString("title"), o.optString("id"))
-            }.getOrNull()?.takeIf { it.url.startsWith("https://") }
-        }
-    }
-}
+fun BookManifest.items(file: File): List<ManifestItem>? = items(file.path)
 
-/**
- * What a book collection says about itself: its [title], what it holds ([noun], "books" or "documents"), who made it
- * ([provider]), its sections in order ([groups]), and whether its titles are only its files' names ([fromFileNames],
- * Plan KB2 Task 2.2).
- */
-data class ManifestCollection(
-    val title: String,
-    val noun: String,
-    val provider: String,
-    val groups: List<String>,
-    val fromFileNames: Boolean = false,
-    /** Plan BK: "nautilus" when its keys are a nautilus pack's `fp`s (phone ids `book:nautilus:…`); blank otherwise. */
-    val origin: String = "",
-    /** Plan BK: the UUID of the ZIM it was built from, checked before reading books from the pack file by range. */
-    val zimUuid: String = "",
-    /** The pack's ZIM name, from the manifest. */
-    val zimName: String = "",
-) {
-    /** Whether it counts documents rather than books. */
-    val documents: Boolean get() = noun == NOUN_DOCUMENTS
+fun BookManifest.collection(file: File): ManifestCollection? = collection(file.path)
 
-    companion object {
-        const val NOUN_DOCUMENTS = "documents"
-    }
-}
-
-/**
- * A Kiwix pack's book manifest, the `.gbooks` sidecar (Plan KB2, `tools/bookpacks/schema.md`): a read-only SQLite file
- * valid for the exact ZIM whose sha256 is its `meta.sourceSha256` (Linked Library spec §5.2).
- */
-object BookManifest {
-    const val KIND = "gbooks"
-    const val SCHEMA_VERSION = 1
-
-    private val verified = ConcurrentHashMap<String, Boolean>()
-    private val titles = ConcurrentHashMap<String, String>()
-
-    /**
-     * Whether [file] is a book manifest this app reads, built from the pack file with sha256 [packSha256]. A sidecar's
-     * file is named by its own sha256, so the answer is kept per file.
-     */
-    fun verify(file: File, packSha256: String): Boolean = verified.getOrPut("${file.path}|$packSha256") {
-        open(file) { db ->
-            val meta = SidecarMeta.read(db)
-            meta != null && meta.kind == KIND && meta.schemaVersion in 1..SCHEMA_VERSION &&
-                meta.sourceSha256.isNotEmpty() && meta.sourceSha256.equals(packSha256, ignoreCase = true)
-        } ?: false
-    }
-
-    /** [file]'s items in its order; null when it can't be read. */
-    fun items(file: File): List<ManifestItem>? = open(file) { db ->
-        val have = db.rawQuery("PRAGMA table_info(items)", null).use { c ->
-            buildSet { while (c.moveToNext()) add(c.getString(1)) }
-        }
-        val extra = listOf("zim_offset", "sha256", "edition").joinToString("") { if (it in have) ", $it" else ", NULL" }
-        db.rawQuery(
-            "SELECT key, path, format, title, author, description, language, group_name, ord, bytes, part_of, work_key, " +
-                "work_title, part_no$extra FROM items ORDER BY ord, key",
-            null,
-        ).use { c ->
-            buildList {
-                while (c.moveToNext()) {
-                    val format = when (c.getString(2)?.lowercase()) {
-                        "pdf" -> BookFormat.PDF
-                        "epub" -> BookFormat.EPUB
-                        else -> null
-                    } ?: continue
-                    add(
-                        ManifestItem(
-                            key = c.getString(0), path = c.getString(1), format = format, title = c.getString(3).orEmpty(),
-                            author = c.getString(4).orEmpty(), description = c.getString(5).orEmpty(),
-                            language = c.getString(6).orEmpty(), groupName = c.getString(7).orEmpty(), ord = c.getInt(8),
-                            bytes = c.getLong(9), partOf = c.getString(10)?.ifBlank { null },
-                            workKey = c.getString(11)?.ifBlank { null }, workTitle = c.getString(12)?.ifBlank { null },
-                            partNo = if (c.isNull(13)) null else c.getInt(13),
-                            zimOffset = if (c.isNull(14)) null else c.getLong(14),
-                            sha256 = c.getString(15)?.ifBlank { null },
-                            edition = ManifestEdition.parse(c.getString(16)),
-                        ),
-                    )
-                }
-            }
-        }
-    }
-
-    /** [file]'s collection: title, noun, provider and sections; null when it can't be read. */
-    fun collection(file: File): ManifestCollection? = open(file) { db ->
-        val values = db.rawQuery("SELECT key, value FROM collection", null).use { c ->
-            buildMap { while (c.moveToNext()) put(c.getString(0), c.getString(1).orEmpty()) }
-        }
-        val groups = db.rawQuery("SELECT name FROM groups ORDER BY ord, name", null).use { c ->
-            buildList { while (c.moveToNext()) c.getString(0)?.takeIf { it.isNotBlank() }?.let(::add) }
-        }
-        ManifestCollection(
-            values["title"].orEmpty(), values["noun"].orEmpty().ifBlank { "books" }, values["provider"].orEmpty(), groups,
-            origin = values["origin"].orEmpty(), zimUuid = values["zimUuid"].orEmpty(), zimName = values["zimName"].orEmpty(),
-        )
-    }
-
-    /** The key of the item at entry [path] (or whose key is [path], or [path] without its query); null when none is. */
-    fun keyOf(file: File, path: String): String? = open(file) { db ->
-        val bare = path.substringBefore('?')
-        db.rawQuery(
-            "SELECT key FROM items WHERE path = ? OR key = ? OR key = ? ORDER BY path = ? DESC LIMIT 1",
-            arrayOf(path, path, bare, path),
-        ).use { c -> if (c.moveToFirst()) c.getString(0) else null }
-    }
-
-    /** [collection] of the manifest at [path], kept per file (a verified manifest never changes; a new one has a new path). */
-    fun collectionOf(path: String): ManifestCollection? {
-        collections[path]?.let { return it }
-        val read = collection(File(path)) ?: return null
-        collections[path] = read
-        return read
-    }
-
-    private val collections = ConcurrentHashMap<String, ManifestCollection>()
-
-    /** The collection title of [pack]'s manifest, when it has one ([Pack.bookManifest]); kept per file. */
-    fun titleOf(pack: Pack): String? {
-        val path = pack.bookManifest?.takeIf { it != Pack.BOOK_FILES } ?: return null
-        titles[path]?.let { return it.ifBlank { null } }
-        val title = collection(File(path))?.title ?: return null
-        titles[path] = title
-        return title.ifBlank { null }
-    }
-
-    private fun <T> open(file: File, read: (SQLiteDatabase) -> T): T? {
-        if (!file.isFile) return null
-        val db = runCatching { SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READONLY) }.getOrNull() ?: return null
-        return try {
-            read(db)
-        } catch (e: Exception) {
-            android.util.Log.w("Granger", "Couldn't read the book manifest ${file.name}", e)
-            null
-        } finally {
-            db.close()
-        }
-    }
-}
-
-
+fun BookManifest.keyOf(file: File, path: String): String? = keyOf(file.path, path)
 
 /**
  * Kiwix packs made book collections by a manifest, or listed by their files' names (Plan KB2), as a [PackBookSource]:
@@ -203,43 +27,7 @@ object ManifestSource : PackBookSource {
 
     override val packOrder: Comparator<Pack> = compareBy<Pack>({ it.name }, { it.id })
 
-    override fun list(pack: Pack, archive: ZimArchive): List<PackItem>? {
-        val manifest = pack.bookManifest ?: return null
-        if (manifest == Pack.BOOK_FILES) {
-            val items = ArrayList<PackItem>()
-            val walked = archive.list(BookFiles.MIMES) { e ->
-                val format = BookFiles.formatOf(e.mimeType)
-                if (format != null) {
-                    items += PackItem(
-                        ref = "${pack.name}/${e.path}", path = e.path, title = BookFiles.titleOf(e.path), author = "",
-                        format = format, sizeBytes = e.sizeBytes, ord = items.size,
-                    )
-                }
-                true
-            }
-            return items.takeIf { walked }
-        }
-        val items = BookManifest.items(File(manifest)) ?: return null
-        // A whole file with parts is marked as the head of its own work, so its parts fold under it.
-        val wholes = items.mapNotNullTo(HashSet()) { it.partOf }
-        return items.map { item ->
-            PackItem(
-                ref = "${pack.name}/${item.key}",
-                path = item.path,
-                title = item.title.ifBlank { BookFiles.titleOf(item.path) },
-                author = item.author,
-                format = item.format,
-                sizeBytes = item.bytes,
-                description = item.description,
-                language = item.language.ifBlank { null },
-                groupName = item.groupName,
-                ord = item.ord,
-                workKey = item.partOf ?: item.workKey ?: item.key.takeIf { it in wholes },
-                workTitle = item.workTitle,
-                partNo = item.partNo,
-            )
-        }
-    }
+    override fun list(pack: Pack, archive: ZimArchive): List<PackItem>? = PackBookList.manifest(pack, archive)
 
     override fun refOf(pack: Pack, path: String): String? {
         val manifest = pack.bookManifest ?: return null
@@ -249,7 +37,7 @@ object ManifestSource : PackBookSource {
             return p.takeIf { name.endsWith(".pdf", ignoreCase = true) || name.endsWith(".epub", ignoreCase = true) }
                 ?.let { "${pack.name}/$it" }
         }
-        return BookManifest.keyOf(File(manifest), p)?.let { "${pack.name}/$it" }
+        return BookManifest.keyOf(manifest, p)?.let { "${pack.name}/$it" }
     }
 
     override fun fileName(ref: String, format: BookFormat): String =

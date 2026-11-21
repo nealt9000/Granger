@@ -17,28 +17,7 @@ object NautilusSource : PackBookSource {
 
     override val packOrder: Comparator<Pack> = compareBy<Pack>({ it.name }, { it.id })
 
-    override fun list(pack: Pack, archive: ZimArchive): List<PackItem>? {
-        val js = archive.read(NautilusDatabase.PATH)?.bytes ?: return null
-        val items = ArrayList<PackItem>()
-        for (record in NautilusDatabase.records(String(js, Charsets.UTF_8))) {
-            val count = record.files.size
-            for ((i, fp) in record.files.withIndex()) {
-                val format = formatOf(fp) ?: continue
-                val path = NautilusDatabase.FILES + fp
-                val entry = archive.entry(path) ?: continue
-                items += PackItem(
-                    ref = "${pack.name}/$fp",
-                    path = entry.path,
-                    title = if (count > 1) "${record.title} (${i + 1} of $count)" else record.title,
-                    author = record.author,
-                    format = format,
-                    sizeBytes = entry.sizeBytes,
-                    description = record.description,
-                )
-            }
-        }
-        return items
-    }
+    override fun list(pack: Pack, archive: ZimArchive): List<PackItem>? = PackBookList.nautilus(pack, archive)
 
     override fun refOf(pack: Pack, path: String): String? =
         path.removePrefix("/").takeIf { it.startsWith(NautilusDatabase.FILES) && formatOf(it) != null }
@@ -48,11 +27,7 @@ object NautilusSource : PackBookSource {
         PackBooks.sha1(ref) + if (format == BookFormat.EPUB) ".epub" else ".pdf"
 
     /** A listed file's format by its name; null for a file the reader can't open. */
-    fun formatOf(fp: String): BookFormat? = when {
-        fp.endsWith(".pdf", ignoreCase = true) -> BookFormat.PDF
-        fp.endsWith(".epub", ignoreCase = true) -> BookFormat.EPUB
-        else -> null
-    }
+    fun formatOf(fp: String): BookFormat? = PackBookList.formatOfName(fp)
 }
 
 /**

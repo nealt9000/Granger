@@ -24,7 +24,7 @@ object TimeIndexDirectory {
     }
 }
 
-/** [SidecarMeta.read] for the readers still on Android's own SQLite (book links, manifests: I4/I5 move them). */
+/** [SidecarMeta.read] for the readers still on Android's own SQLite (book links: I5 moves them). */
 fun SidecarMeta.Companion.read(db: android.database.sqlite.SQLiteDatabase): SidecarMeta? = runCatching {
     val m = db.rawQuery("SELECT key, value FROM meta", null).use { c -> buildMap { while (c.moveToNext()) put(c.getString(0), c.getString(1)) } }
     SidecarMeta(m["kind"].orEmpty(), m["schemaVersion"]?.toIntOrNull() ?: 0, m["sourceSha256"].orEmpty(), m)
