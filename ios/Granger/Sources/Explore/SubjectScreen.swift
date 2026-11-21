@@ -297,7 +297,7 @@ struct RoomScreen: View {
     }
 
     private func route(_ a: ExploreArticle) -> Route {
-        .topic(lang: OnlineWikipediaArchive.companion.languageOf(packId: a.packId) ?? "en", path: a.path)
+        Route.article(packId: a.packId, path: a.path)
     }
 }
 
@@ -359,7 +359,7 @@ struct ArticleLine: View {
     @Environment(\.palette) private var palette
 
     var body: some View {
-        NavigationLink(value: Route.topic(lang: OnlineWikipediaArchive.companion.languageOf(packId: article.packId) ?? "en", path: article.path)) {
+        NavigationLink(value: Route.article(packId: article.packId, path: article.path)) {
             HStack(spacing: 12) {
                 Avatar(path: article.picture, size: 44)
                 Text(article.title).font(Spectral.regular(18)).foregroundStyle(palette.onSurface)

@@ -143,6 +143,6 @@ struct BroadSpreadView: View {
     }
 
     private func route(_ a: TopicArticle) -> Route {
-        .topic(lang: OnlineWikipediaArchive.companion.languageOf(packId: a.packId) ?? lang, path: a.path)
+        Route.article(packId: a.packId, path: a.path)
     }
 }

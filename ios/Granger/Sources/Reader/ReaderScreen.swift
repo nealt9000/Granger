@@ -7,6 +7,8 @@ struct ReaderScreen: View {
     let lang: String
     let path: String
     let fragment: String?
+    /// A pack's id for a pack article (Plan I4 Task 5); nil for Wikipedia online in [lang].
+    var pack: String? = nil
 
     @Environment(\.core) private var core
     @Environment(\.palette) private var palette
@@ -20,23 +22,31 @@ struct ReaderScreen: View {
     @State private var showContents = false
     @State private var showText = false
 
-    private var title: String { GrangerCoreEntry.shared.titleOfKey(key: path) }
+    /// A pack article's title from its entry (its path is no title: `based.cooking/bread.html`).
+    @State private var packTitle: String?
+    private var title: String { packTitle ?? GrangerCoreEntry.shared.titleOfKey(key: path) }
 
     var body: some View {
         Group {
             if let core {
                 ArticleWebView(
-                    pack: core.pack(for: lang), path: path, fragment: fragment,
+                    pack: pack ?? core.pack(for: lang), path: path, fragment: fragment,
                     source: model.tracking(core), textScale: settings.textScale, dark: scheme == .dark, controller: controller,
                     onToggleChrome: { withAnimation(.easeInOut(duration: 0.2)) { chrome.toggle() } },
-                    onOpenArticle: { _, p, _ in openRoute(.topic(lang: lang, path: p)) },
-                    onLoaded: { recent.add(lang: lang, path: path, title: title) }
+                    onOpenArticle: { linkPack, p, _ in openRoute(pack == nil ? .topic(lang: lang, path: p) : .article(packId: linkPack, path: p)) },
+                    // Recently open lists Wikipedia online's articles (a pack article's place there comes with the shelf, I5).
+                    onLoaded: { if pack == nil { recent.add(lang: lang, path: path, title: title) } }
                 )
                 .ignoresSafeArea(edges: chrome ? [] : .all)
             }
         }
         .background(palette.background)
         .navigationTitle(title)
+        .task(id: pack) {
+            guard let core, let pack else { return }
+            let p = path
+            packTitle = await Task.detached { core.library.archive(packId: pack)?.entry(path: p)?.title }.value.flatMap { $0.isEmpty ? nil : $0 }
+        }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(chrome ? .visible : .hidden, for: .navigationBar, .tabBar)
         .statusBarHidden(!chrome)
@@ -49,7 +59,7 @@ struct ReaderScreen: View {
                     .accessibilityLabel("Find in page")
                 Button { showText = true } label: { Image(systemName: "textformat.size") }
                     .accessibilityLabel("Text settings")
-                ReaderKeepMenu(lang: lang, title: path)
+                if pack == nil { ReaderKeepMenu(lang: lang, title: path) }
             }
         }
         .sheet(isPresented: $showContents) {

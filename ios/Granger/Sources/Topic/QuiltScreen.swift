@@ -86,7 +86,7 @@ struct QuiltScreen: View {
     }
 
     private func middle(_ header: TopicHeader) -> some View {
-        NavigationLink(value: Route.topic(lang: OnlineWikipediaArchive.companion.languageOf(packId: here.packId) ?? lang, path: here.path)) {
+        NavigationLink(value: Route.article(packId: here.packId, path: here.path)) {
             PlateTile(plate: PlateItem(id: "middle", title: header.title, picture: header.picture), showTitle: true, titleSize: 22)
                 .overlay(RoundedRectangle(cornerRadius: 0).stroke(palette.tertiary, lineWidth: 3))
         }

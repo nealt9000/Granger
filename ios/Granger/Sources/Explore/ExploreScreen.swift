@@ -194,7 +194,7 @@ struct ExploreScreen: View {
     }
 
     private func route(_ a: ExploreArticle) -> Route {
-        .topic(lang: OnlineWikipediaArchive.companion.languageOf(packId: a.packId) ?? "en", path: a.path)
+        Route.article(packId: a.packId, path: a.path)
     }
 }
 

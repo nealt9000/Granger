@@ -7,13 +7,17 @@ import SwiftUI
 struct TopicScreen: View {
     let lang: String
     let path: String
+    /// A pack's id for a pack article (Plan I4 Task 5); nil for Wikipedia online in [lang].
+    var pack: String? = nil
 
     @Environment(\.core) private var core
     @Environment(\.palette) private var palette
     @Environment(AppSettings.self) private var settings
+    @Environment(LibraryModel.self) private var library
     @State private var model = TopicModel()
+    @State private var packTitle: String?
 
-    private var packId: String { GrangerCoreEntry.shared.onlinePackId(lang: lang) }
+    private var packId: String { pack ?? GrangerCoreEntry.shared.onlinePackId(lang: lang) }
 
     var body: some View {
         ScrollView {
@@ -32,10 +36,16 @@ struct TopicScreen: View {
             .padding(.bottom, 32)
         }
         .background(palette.background)
-        .navigationTitle("Wikipedia")
+        .navigationTitle(packTitle ?? "Wikipedia")
         .navigationBarTitleDisplayMode(.inline)
-        .task(id: "\(path)|\(settings.canFetch)") {
+        // Again once the online index set opens: the trail, the years and the room come from it (a topic opened at launch
+        // can come before it).
+        .task(id: "\(path)|\(settings.canFetch)|\(library.index == .ready)") {
             if let core { await model.load(core: core, lang: lang, path: path, packId: packId) }
+        }
+        .task(id: pack) {
+            guard let core, let pack else { return }
+            packTitle = await Task.detached { core.library.packTitle(packId: pack) }.value
         }
     }
 
@@ -66,13 +76,14 @@ struct TopicScreen: View {
 
     @ViewBuilder private func actions(_ topic: Topic) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            NavigationLink(value: Route.reader(lang: lang, path: path, fragment: nil)) {
+            NavigationLink(value: Route.read(packId: packId, path: path)) {
                 Text("Read the full article").font(Spectral.medium(18)).frame(maxWidth: .infinity).padding(.vertical, 6)
             }
             .buttonStyle(.borderedProminent)
             .accessibilityIdentifier("read-full")
-            HintCard(id: "keep", text: "Keep puts this article on your phone (●). What you read is saved for now (○) until space runs short.")
-            KeepButton(lang: lang, title: path)
+            if pack == nil { HintCard(id: "keep", text: "Keep puts this article on your phone (●). What you read is saved for now (○) until space runs short.") }
+            // Keeping is for Wikipedia online: a pack's article is on this phone already.
+            if pack == nil { KeepButton(lang: lang, title: path) }
             if topic.done && ((topic.related?.count ?? 0) + (topic.time?.people.count ?? 0) + (topic.place?.more.count ?? 0)) >= 3 {
                 NavigationLink(value: Route.quilt(lang: lang, path: path)) {
                     Text("Explore connections").font(Spectral.medium(17)).frame(maxWidth: .infinity).padding(.vertical, 4)
@@ -204,7 +215,7 @@ private struct TimeCard: View {
             if !time.people.isEmpty {
                 Text("People whose lives overlapped").font(.subheadline).foregroundStyle(palette.onSurfaceVariant)
                 ForEach(time.people, id: \.qid) { p in
-                    NavigationLink(value: Route.topic(lang: OnlineWikipediaArchive.companion.languageOf(packId: p.packId) ?? "en", path: p.path)) {
+                    NavigationLink(value: Route.article(packId: p.packId, path: p.path)) {
                         HStack(spacing: 10) {
                             Avatar(path: time.pictures[p.path])
                             Text(p.title).font(Spectral.regular(17)).foregroundStyle(palette.onSurface)
@@ -229,7 +240,7 @@ private struct TimeCard: View {
                 Text("What happened in those years").font(.subheadline).foregroundStyle(palette.onSurfaceVariant).padding(.top, 6)
                 FlowLayout(spacing: 8) {
                     ForEach(time.events, id: \.qid) { e in
-                        NavigationLink(value: Route.topic(lang: OnlineWikipediaArchive.companion.languageOf(packId: e.packId) ?? "en", path: e.path)) {
+                        NavigationLink(value: Route.article(packId: e.packId, path: e.path)) {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(e.title).font(Spectral.medium(16)).foregroundStyle(palette.onSurface)
                                 Text(words.of(m: e)).font(.caption).foregroundStyle(palette.onSurfaceVariant)
@@ -304,7 +315,7 @@ struct ArticleTile: View {
     @Environment(\.palette) private var palette
 
     var body: some View {
-        NavigationLink(value: Route.topic(lang: OnlineWikipediaArchive.companion.languageOf(packId: article.packId) ?? lang, path: article.path)) {
+        NavigationLink(value: Route.article(packId: article.packId, path: article.path)) {
             VStack(alignment: .leading, spacing: 6) {
                 Color.clear.frame(height: 110)
                     .overlay {

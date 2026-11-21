@@ -83,8 +83,10 @@ final class SmokeTests: XCTestCase {
         let field = app.searchFields.firstMatch
         XCTAssertTrue(field.waitForExistence(timeout: 5))
         field.tap()
-        field.typeText("Moon")
-        XCTAssertTrue(app.staticTexts["Online results appear when you're connected."].waitForExistence(timeout: 5), "Local only")
+        // Words no test pack holds (the pack test leaves a cooking pack in Documents/Packs).
+        field.typeText("Jovian magnetosphere")
+        // Packs still answer with Local only on (Plan I4); online results wait for a connection.
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "Online results appear when you're connected")).firstMatch.waitForExistence(timeout: 10), "Local only")
     }
 
     /// Keep (Plan I3 Task 6): read an article, keep it, see it marked on this phone; with Local only on it still opens,
@@ -230,5 +232,31 @@ final class SmokeTests: XCTestCase {
         if let dir = ProcessInfo.processInfo.environment["GRANGER_SHOTS"] {
             try? app.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir + "/landscape-reader.png"))
         }
+    }
+
+    /// Plan I4 Task 5: a pack in Documents/Packs (copied in by `-debugPack`) is searched by title and full text with
+    /// no signal, its article opens on a topic page and in the reader. Skipped without TEST_RUNNER_GRANGER_TEST_ZIM.
+    func testPackSearchTopicAndReader() throws {
+        guard let zim = ProcessInfo.processInfo.environment["GRANGER_TEST_ZIM"], !zim.isEmpty else { throw XCTSkip("no GRANGER_TEST_ZIM") }
+        let app = XCUIApplication()
+        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en", "-debugPack", zim]
+        app.launch()
+        app.tabBars.buttons["Search"].tap()
+        let field = app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 10))
+        field.tap()
+        field.typeText("bread")
+        XCTAssertTrue(app.staticTexts["Titles"].waitForExistence(timeout: 20), "pack titles with Local only on")
+        XCTAssertTrue(app.staticTexts["Articles"].waitForExistence(timeout: 20), "pack full text")
+        shot(app, "pack-search")
+        app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Bread'")).firstMatch.tap()
+        let read = app.buttons["read-full"]
+        XCTAssertTrue(read.waitForExistence(timeout: 20), "the pack article's topic page")
+        XCTAssertFalse(app.buttons["keep"].exists, "no Keep for a pack article")
+        shot(app, "pack-topic")
+        read.tap()
+        XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 20), "the reader")
+        XCTAssertTrue(app.webViews.staticTexts.matching(NSPredicate(format: "label CONTAINS[c] 'bread'")).firstMatch.waitForExistence(timeout: 20), "the article's text from the pack")
+        shot(app, "pack-reader")
     }
 }

@@ -1,11 +1,16 @@
 import Foundation
+import GrangerCoreKit
 
 /// A place on a tab's navigation stack.
 enum Route: Hashable {
     /// An article's topic page (in front of the article, as on Android since LL2).
     case topic(lang: String, path: String)
+    /// A pack article's topic page (Plan I4 Task 5); Wikipedia online's go by language, `topic`.
+    case packTopic(pack: String, path: String)
     /// The full article in the reader.
     case reader(lang: String, path: String, fragment: String?)
+    /// A pack article in the reader.
+    case packReader(pack: String, path: String, fragment: String?)
     /// The full timeline, opened at an article when given (Show in time, Plan H5b).
     case timeline(packId: String?, path: String?)
     /// Explore (Plan I3 Task 9): a subject's page, a room (facet nil: the whole subject's listing).
@@ -81,5 +86,19 @@ struct RecentlyOpenMenu: View {
             .accessibilityLabel("Recently open")
             .accessibilityIdentifier("recently-open")
         }
+    }
+}
+
+extension Route {
+    /// An article's topic page wherever it lives: Wikipedia online by its language, a pack by its id.
+    static func article(packId: String, path: String) -> Route {
+        if let lang = OnlineWikipediaArchive.companion.languageOf(packId: packId) { return .topic(lang: lang, path: path) }
+        return .packTopic(pack: packId, path: path)
+    }
+
+    /// An article in the reader wherever it lives.
+    static func read(packId: String, path: String, fragment: String? = nil) -> Route {
+        if let lang = OnlineWikipediaArchive.companion.languageOf(packId: packId) { return .reader(lang: lang, path: path, fragment: fragment) }
+        return .packReader(pack: packId, path: path, fragment: fragment)
     }
 }

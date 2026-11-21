@@ -9,6 +9,9 @@ final class Core: PageSource {
     let library: IosLibrary
     /// Where the library keeps its files: Application Support/granger (Android's files folder).
     let folder: URL
+    /// Where packs live: Documents/Packs, which the Files app shows as On My iPhone › Granger › Packs (Plan I4
+    /// builder's call 2). Left out of iCloud backup: packs are big and can be fetched again.
+    let packsFolder: URL
 
     init(version: String) {
         GrangerCoreEntry.shared.setZimBase(base: ZimSchemeHandler.base)
@@ -16,6 +19,14 @@ final class Core: PageSource {
         client = GrangerCoreEntry.shared.wikimedia(version: version) { KotlinBoolean(value: NetworkGate.shared.open) }
         folder = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("granger", isDirectory: true)
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        packsFolder = Core.makePacksFolder()
+        #if DEBUG
+        // UI tests and checks: `-debugPack <path on the Mac>` copies that pack in (the Simulator reads the Mac's disk).
+        if let from = UserDefaults.standard.string(forKey: "debugPack"), FileManager.default.fileExists(atPath: from) {
+            let to = packsFolder.appendingPathComponent((from as NSString).lastPathComponent)
+            if !FileManager.default.fileExists(atPath: to.path) { try? FileManager.default.copyItem(atPath: from, toPath: to.path) }
+        }
+        #endif
         library = IosLibrary(
             dir: folder.path, client: client,
             languages: { LibraryGate.shared.languages },
@@ -24,16 +35,33 @@ final class Core: PageSource {
             savedCapMb: { KotlinLong(value: Int64(LibraryGate.shared.savedCapMb)) },
             keepAdultOff: { KotlinBoolean(value: LibraryGate.shared.keepAdultOff) },
             cacheDir: FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("granger").path,
-            appVersion: version
+            appVersion: version,
+            opener: { path in
+                switch KiwixArchive.open(path) {
+                case let .success(archive): ZimOpenResultOpened(archive: archive)
+                case let .failure(why): ZimOpenResultFailed(reason: why.reason)
+                }
+            },
+            packsDir: packsFolder.path
         )
+    }
+
+    private static func makePacksFolder() -> URL {
+        var url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("Packs", isDirectory: true)
+        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        var values = URLResourceValues()
+        values.isExcludedFromBackup = true
+        try? url.setResourceValues(values)
+        return url
     }
 
     /// The online source's pack id for [lang] (`wikipedia_en_online`).
     func pack(for lang: String) -> String { GrangerCoreEntry.shared.onlinePackId(lang: lang) }
 
+    /// A page or picture for the reader: Wikipedia online's by language, a pack's from its archive (Plan I4 Task 5).
     func item(pack: String, path: String) -> (data: Data, mimeType: String)? {
-        guard let lang = GrangerCoreEntry.shared.languageOfPack(packId: pack),
-              let item = wikipedia(lang).read(path: path) else { return nil }
+        let source: ZimArchive? = GrangerCoreEntry.shared.languageOfPack(packId: pack).map { wikipedia($0) } ?? library.archive(packId: pack)
+        guard let item = source?.read(path: path) else { return nil }
         return (GrangerCoreEntry.shared.bytes(of: item.bytes), item.mimeType)
     }
 

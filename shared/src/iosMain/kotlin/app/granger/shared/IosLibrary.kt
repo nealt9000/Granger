@@ -55,6 +55,10 @@ class IosLibrary(
     private val cacheDir: String = "$dir/cache",
     /** The app's version, for the User-Agent of the records' requests. */
     private val appVersion: String = "ios",
+    /** Opens a pack file by its path: CoreKiwix through Swift's KiwixArchive (Plan I4 Task 5). */
+    private val opener: (path: String) -> app.granger.core.zim.ZimOpenResult = { app.granger.core.zim.ZimOpenResult.Failed("no pack reader") },
+    /** Where packs live: Documents/Packs, shown in the Files app (Plan I4 builder's call 2). */
+    private val packsDir: String = "$dir/Packs",
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -69,6 +73,41 @@ class IosLibrary(
     private val stores = OfflineStores(
         saved, kept, savePictures = savePictures, capBytes = { savedCapMb() * 1024L * 1024 }, pageSaved = { _version.value++ },
     )
+
+    // ---- Packs (Plan I4 Task 5): the shared PackLibrary over Documents/Packs, as Android's RoomLibrary over its folders.
+
+    val packLibrary = app.granger.core.library.PackLibrary(database, opener, { listOf(packsDir) }, now = { app.granger.screens.nowMillis() })
+
+    /** The library's packs, every status, by title. */
+    val packs: kotlinx.coroutines.flow.Flow<List<app.granger.core.library.Pack>> get() = packLibrary.packs
+
+    /** Looks at Documents/Packs again: new files are opened and listed, gone ones marked missing. */
+    suspend fun refreshPacks() = packLibrary.refresh()
+
+    /** Search over the packs (titles, near titles, full text), in the library's languages, as Android's. */
+    val packSearch = app.granger.core.library.PackSearch(packLibrary, languages = { languages().toSet() })
+
+    /** Any source's archive: Wikipedia online by its language, else an installed pack. Blocking. */
+    fun archive(packId: String): app.granger.core.zim.ZimArchive? = langOf(packId)?.let { wikipedia(it) } ?: packLibrary.archive(packId)
+
+    /** A pack's Wikipedia language (`wikipedia_en_top_maxi` → `en`), or an online source's; null for another pack. */
+    fun languageOf(packId: String): String? = langOf(packId) ?: runBlockingPack(packId)?.name?.let { WIKIPEDIA_LANGUAGE.find(it)?.groupValues?.get(1) }
+
+    /** A pack's title for a screen's bar (Wikipedia online's sources are "Wikipedia"). Blocking. */
+    fun packTitle(packId: String): String = if (langOf(packId) != null) "Wikipedia" else runBlockingPack(packId)?.title.orEmpty().ifBlank { "Wikipedia" }
+
+    private fun runBlockingPack(packId: String) = kotlinx.coroutines.runBlocking { packLibrary.packs.first().firstOrNull { it.id == packId } }
+
+    /** A pack article's card from its HTML (Android's ArticleCards.card for a pack): title, lead and plate picture. */
+    private fun packCard(packId: String, path: String, sentences: Int, maxChars: Int): Triple<String, String, String?>? {
+        val archive = packLibrary.archive(packId) ?: return null
+        val resolved = archive.resolvePath(path) ?: return null
+        val item = archive.read(resolved)?.takeIf { it.mimeType.startsWith("text/html") } ?: return null
+        val html = app.granger.home.PlateRule.head(item.bytes.decodeToString())
+        val lead = app.granger.home.LeadLinks.parse(html, resolved, sentences, maxChars)
+        val picture = if (contentFilter.noPicture(packId, resolved)) null else thumbnail(archive, resolved, html)
+        return Triple(lead.title.ifBlank { resolved.substringAfterLast('/').replace('_', ' ') }, lead.summary, picture)
+    }
 
     private val sources = OnlineSources(
         client, kotlinx.coroutines.flow.flowOf(emptyList()), languages, { true },
@@ -203,7 +242,9 @@ class IosLibrary(
 
     val topics: app.granger.topic.TopicSource = app.granger.topic.TopicSource(
         header = { packId, path ->
-            val lang = langOf(packId) ?: return@TopicSource null
+            val lang = langOf(packId) ?: return@TopicSource packCard(packId, path, 3, TOPIC_LEAD_CHARS)?.let { (title, summary, picture) ->
+                app.granger.topic.TopicHeader(app.granger.core.library.PageTitles.clean(title), app.granger.topic.TopicSource.blurb(summary), picture)
+            }
             val s = wikipedia(lang).summary(path) ?: return@TopicSource null
             app.granger.topic.TopicHeader(
                 app.granger.core.library.PageTitles.clean(s.title),
@@ -212,15 +253,20 @@ class IosLibrary(
             )
         },
         lead = { packId, path ->
-            val lang = langOf(packId) ?: return@TopicSource null
+            val lang = langOf(packId) ?: return@TopicSource packCard(packId, path, 2, app.granger.home.LeadLinks.MAX_SUMMARY)?.let { (title, summary, picture) ->
+                app.granger.ebook.ArticleLead(app.granger.core.library.PageTitles.clean(title), summary, picture)
+            }
             val s = wikipedia(lang).summary(path) ?: return@TopicSource null
             val thumb = if (contentFilter.noPicture(packId, path) || (s.qid?.let(contentFilter::noPicture) == true)) null else s.thumbnail?.let { picture(lang, it) }
             app.granger.ebook.ArticleLead(app.granger.core.library.PageTitles.clean(s.title), app.granger.home.LeadLinks.summaryOf(s.extract), thumb)
         },
         times = { times ?: TimeIndexes(emptyList()) },
         qids = { indexes ?: QidIndexes(emptyList()) },
-        languageOf = { id -> langOf(id) },
-        packIds = { languages().associate { OnlineWikipediaArchive.packName(it) to OnlineWikipediaArchive.packName(it) } },
+        languageOf = { id -> languageOf(id) },
+        packIds = {
+            languages().associate { OnlineWikipediaArchive.packName(it) to OnlineWikipediaArchive.packName(it) } +
+                packLibrary.packs.first().filter { it.name.isNotBlank() }.associate { it.name to it.id }
+        },
         footer = null,
         related = { name, path, _ ->
             val lang = langOf(name)
@@ -459,6 +505,9 @@ class DefaultsGameStore(private val prefix: String) : app.granger.home.GameStore
 private const val TOPIC_LEAD_CHARS = 420
 /** Wander's start pool in a subject or room (Android's SubjectViewModel.WANDER_POOL). */
 private const val WANDER_POOL = 300
+
+/** A Wikipedia pack's language in its ZIM name (`wikipedia_en_top_maxi`), as Android's GrangerApp reads it. */
+private val WIKIPEDIA_LANGUAGE = Regex("^wikipedia_([a-z]{2,3})_")
 
 enum class Mark { ON_PHONE, ON_PHONE_SHORTER, SAVED, NONE }
 enum class IndexKind { QID, TIME }

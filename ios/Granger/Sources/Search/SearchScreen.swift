@@ -2,7 +2,7 @@ import GrangerCoreKit
 import SwiftUI
 
 /// Search (Android's Search for online Wikipedia): Titles and Articles as you type, recent searches under an empty field.
-/// Packs and books join the results in I4 and I5.
+/// Packs' results lead (Plan I4 Task 5); books join in I5.
 struct SearchScreen: View {
     @Environment(\.core) private var core
     @Environment(\.palette) private var palette
@@ -16,17 +16,16 @@ struct SearchScreen: View {
         List {
             if query.trimmingCharacters(in: .whitespaces).isEmpty {
                 recent
-            } else if !settings.canFetch {
-                Text("Online results appear when you're connected.").foregroundStyle(palette.onSurfaceVariant)
             } else if model.searching && model.titles.isEmpty && model.pages.isEmpty {
                 HStack { Spacer(); ProgressView(); Spacer() }
             } else if model.done && model.titles.isEmpty && model.pages.isEmpty {
-                Text("Nothing in your library for that. Try fewer words.").foregroundStyle(palette.onSurfaceVariant)
+                Text(settings.canFetch ? "Nothing in your library for that. Try fewer words." : "Nothing on this phone for that. Online results appear when you're connected.")
+                    .foregroundStyle(palette.onSurfaceVariant)
             } else {
                 group("Titles", hits: model.titles, all: $model.allTitles, showAll: { "Show all \($0) title\($0 == 1 ? "" : "s")" },
-                      fewer: "Show fewer titles", excerpts: false)
+                      fewer: "Show fewer titles")
                 group("Articles", hits: model.pages, all: $model.allPages, showAll: { "Show all \($0) article match\($0 == 1 ? "" : "es")" },
-                      fewer: "Show fewer article matches", excerpts: true)
+                      fewer: "Show fewer article matches")
             }
         }
         .listStyle(.plain)
@@ -39,7 +38,7 @@ struct SearchScreen: View {
         .onSubmit(of: .search) { model.remember(query) }
         .task(id: "\(query)|\(settings.wikiLanguage)|\(settings.canFetch)") {
             guard let core else { return }
-            await model.search(query, lang: settings.wikiLanguage, core: core, allowed: settings.canFetch)
+            await model.search(query, lang: settings.wikiLanguage, core: core, online: settings.canFetch)
         }
         .onAppear {
             model.reloadRecent()
@@ -59,29 +58,27 @@ struct SearchScreen: View {
         }
     }
 
-    private func group(_ title: String, hits: [WikimediaClient.Hit], all: Binding<Bool>, showAll: (Int) -> String, fewer: String,
-                       excerpts: Bool) -> some View {
+    private func group(_ title: String, hits: [SearchRow], all: Binding<Bool>, showAll: (Int) -> String, fewer: String) -> some View {
         let shown = all.wrappedValue ? hits : Array(hits.prefix(SearchModel.preview))
         return Section {
-            ForEach(shown, id: \.key) { hit in
+            ForEach(shown) { hit in
                 Button {
                     model.remember(query)
-                    openRoute(.topic(lang: settings.wikiLanguage, path: hit.key))
+                    openRoute(.article(packId: hit.packId, path: hit.path))
                 } label: {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: 8) {
                             Text(hit.title).font(Spectral.regular(19)).foregroundStyle(palette.onBackground)
-                            MarkView(lang: settings.wikiLanguage, title: hit.key)
+                            if let lang = hit.onlineLang { MarkView(lang: lang, title: hit.path) }
                         }
-                        if excerpts, let e = hit.excerpt {
-                            Text(e).font(.subheadline).foregroundStyle(palette.onSurfaceVariant).lineLimit(3)
-                        } else if let d = hit.description_ {
-                            Text(d).font(.subheadline).foregroundStyle(palette.onSurfaceVariant).lineLimit(2)
+                        if let d = hit.detail {
+                            Text(d).font(.subheadline).foregroundStyle(palette.onSurfaceVariant).lineLimit(3)
                         }
-                        Text("Wikipedia").font(.caption).foregroundStyle(palette.outline)
+                        Text(hit.source).font(.caption).foregroundStyle(palette.outline)
                     }
                     .padding(.vertical, 2)
                 }
+                .accessibilityIdentifier("search-hit")
             }
             if hits.count > SearchModel.preview {
                 Button(all.wrappedValue ? fewer : showAll(hits.count)) { all.wrappedValue.toggle() }
@@ -94,12 +91,30 @@ struct SearchScreen: View {
     }
 }
 
+/// One search result, from a pack or Wikipedia online: where it opens, its title, a line under it, and its source.
+struct SearchRow: Identifiable, Hashable {
+    let packId: String
+    let path: String
+    let title: String
+    let detail: String?
+    let source: String
+    /// Wikipedia online's language, for its mark; nil for a pack's article (on this phone already).
+    let onlineLang: String?
+    var id: String { "\(packId)|\(path)" }
+
+    /// A snippet's words without its `<b>` highlights.
+    static func plain(_ html: String?) -> String? {
+        guard let html, !html.isEmpty else { return nil }
+        return html.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
+    }
+}
+
 @Observable
 final class SearchModel {
     static let preview = 5
     static let limit = 20
-    var titles: [WikimediaClient.Hit] = []
-    var pages: [WikimediaClient.Hit] = []
+    var titles: [SearchRow] = []
+    var pages: [SearchRow] = []
     var allTitles = false
     var allPages = false
     var searching = false
@@ -113,26 +128,48 @@ final class SearchModel {
         recent = defaults.stringArray(forKey: Self.key) ?? []
     }
 
+    /// The packs' titles and articles (Plan I4 Task 5), then Wikipedia online's when [online]; an article in both is listed
+    /// once, the pack's first (it opens with no signal).
     @MainActor
-    func search(_ raw: String, lang: String, core: Core, allowed: Bool) async {
+    func search(_ raw: String, lang: String, core: Core, online: Bool) async {
         let q = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         done = false
         allTitles = false
         allPages = false
-        guard !q.isEmpty, allowed else { titles = []; pages = []; return }
+        guard !q.isEmpty else { titles = []; pages = []; return }
         // A short pause, so typing doesn't send a request a letter.
         try? await Task.sleep(for: .milliseconds(300))
         if Task.isCancelled { return }
         searching = true
         let client = core.client
-        async let t = background { client.titles(lang: lang, query: q, limit: Int32(Self.limit)) }
-        async let p = background { client.pages(lang: lang, query: q, limit: Int32(Self.limit)) }
-        let (tt, pp) = await (t, p)
+        let packs = core.library.packSearch
+        let onlinePack = core.pack(for: lang)
+        async let pt: [SearchRow] = (try? await packs.titles(query: q))?.hits.map(Self.row) ?? []
+        async let pp: [SearchRow] = (try? await packs.fullText(query: q))?.map(Self.row) ?? []
+        async let ot: [SearchRow] = online ? background { client.titles(lang: lang, query: q, limit: Int32(Self.limit)) }
+            .map { SearchRow(packId: onlinePack, path: $0.key, title: $0.title, detail: $0.description_, source: "Wikipedia", onlineLang: lang) } : []
+        async let op: [SearchRow] = online ? background { client.pages(lang: lang, query: q, limit: Int32(Self.limit)) }
+            .map { SearchRow(packId: onlinePack, path: $0.key, title: $0.title, detail: $0.excerpt, source: "Wikipedia", onlineLang: lang) } : []
+        let (packTitles, packPages, onlineTitles, onlinePages) = await (pt, pp, ot, op)
         if Task.isCancelled { return }
-        titles = tt
-        pages = pp
+        titles = Self.merged(packTitles, onlineTitles)
+        pages = Self.merged(packPages, onlinePages)
         searching = false
         done = true
+    }
+
+    private static func row(_ h: SearchHit) -> SearchRow {
+        SearchRow(packId: h.packId, path: h.path, title: h.title, detail: SearchRow.plain(h.snippet), source: h.packTitle, onlineLang: nil)
+    }
+
+    /// [first] then those of [then] whose title isn't already listed.
+    static func merged(_ first: [SearchRow], _ then: [SearchRow]) -> [SearchRow] {
+        var ids = Set<String>()
+        var out: [SearchRow] = []
+        for r in first where ids.insert(r.id).inserted { out.append(r) }
+        var seen = Set(out.map { $0.title.lowercased() })
+        for r in then where seen.insert(r.title.lowercased()).inserted && ids.insert(r.id).inserted { out.append(r) }
+        return out
     }
 
     /// Remembers a search (the last 10, newest first).

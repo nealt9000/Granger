@@ -85,7 +85,7 @@ struct WanderScreen: View {
             }
             Text(c.title).font(Spectral.medium(32)).foregroundStyle(palette.onBackground).accessibilityAddTraits(.isHeader)
             if !summary.isEmpty { Text(summary).font(Spectral.regular(18)).foregroundStyle(palette.onBackground).lineSpacing(3) }
-            NavigationLink(value: Route.topic(lang: OnlineWikipediaArchive.companion.languageOf(packId: c.packId) ?? "en", path: c.path)) {
+            NavigationLink(value: Route.article(packId: c.packId, path: c.path)) {
                 Text("Open").font(Spectral.medium(18)).padding(.horizontal, 20).padding(.vertical, 8)
             }
             .buttonStyle(.borderedProminent)

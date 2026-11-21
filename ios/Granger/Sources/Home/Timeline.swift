@@ -253,7 +253,7 @@ struct TimelineCaption: View {
             HStack(spacing: 10) {
                 Button { model.step(by: -1) } label: { Image(systemName: "chevron.left") }
                     .accessibilityLabel("Earlier")
-                NavigationLink(value: Route.topic(lang: OnlineWikipediaArchive.companion.languageOf(packId: s.packId) ?? "en", path: s.path)) {
+                NavigationLink(value: Route.article(packId: s.packId, path: s.path)) {
                     HStack(spacing: 12) {
                         Color.clear.frame(width: 64, height: 64)
                             .overlay {
@@ -383,7 +383,7 @@ struct TimelineScreen: View {
                     if !ui.nearby.isEmpty {
                         Text("Nearby").font(Spectral.medium(22)).foregroundStyle(palette.onBackground).accessibilityAddTraits(.isHeader)
                         ForEach(ui.nearby, id: \.qid) { m in
-                            NavigationLink(value: Route.topic(lang: OnlineWikipediaArchive.companion.languageOf(packId: m.packId) ?? "en", path: m.path)) {
+                            NavigationLink(value: Route.article(packId: m.packId, path: m.path)) {
                                 HStack {
                                     Text(YearWords.english.of(m: m)).font(.callout).foregroundStyle(palette.primary).frame(width: 120, alignment: .leading)
                                     Text(m.title).font(Spectral.regular(18)).foregroundStyle(palette.onBackground)
