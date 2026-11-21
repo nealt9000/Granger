@@ -25,7 +25,7 @@ When I6 merges, every parity row marked I6 is ticked or carries an agreed reason
 - `:core:library`'s media logic: `RoomMediaLibrary`, `Playlists`, `MediaIndex` and names.
 - The app's view models for music, audiobooks, LibriVox and the player; `MediaDownloader`; the Auto browse tree; the Glance widget; the tile; and the mic's `VoiceInput`.
 
-## Builder's calls in this plan (await Neal)
+## Builder's calls in this plan (all 10 OK, Neal 2026-11-21)
 
 1. **One iPhone audio engine on `AVAudioEngine`, behind the shared `PlayerHub`.**
    - The voice already plays through `AVAudioEngine` (I5). Music and audiobooks join it as `AVAudioPlayerNode`s:
