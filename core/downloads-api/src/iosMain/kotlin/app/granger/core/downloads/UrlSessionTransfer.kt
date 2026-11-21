@@ -228,21 +228,25 @@ class UrlSessionTransfer(
 }
 
 /** A file's sha256 as lower-case hex, read in 1 MB pieces; null when it can't be read. */
+internal fun sha256Of(path: String): String? = runCatching { sha256File(path) {} }.getOrNull()
+
 @OptIn(ExperimentalForeignApi::class)
-internal fun sha256Of(path: String): String? = runCatching {
+internal actual fun sha256File(path: String, onBytes: (Long) -> Unit): String =
     memScoped {
         val ctx = alloc<CC_SHA256_CTX>()
         CC_SHA256_Init(ctx.ptr)
         SystemFileSystem.source(Path(path)).buffered().use { source ->
             val buffer = ByteArray(1 shl 20)
+            var read = 0L
             while (true) {
                 val n = source.readAtMostTo(buffer, 0, buffer.size)
                 if (n <= 0) break
                 buffer.usePinned { CC_SHA256_Update(ctx.ptr, it.addressOf(0), n.convert()) }
+                read += n
+                onBytes(read)
             }
         }
         val out = UByteArray(CC_SHA256_DIGEST_LENGTH)
         out.usePinned { CC_SHA256_Final(it.addressOf(0), ctx.ptr) }
         out.joinToString("") { it.toString(16).padStart(2, '0') }
     }
-}.getOrNull()

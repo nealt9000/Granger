@@ -447,7 +447,7 @@ fun downloadSpecOf(item: CatalogItem, groupId: String? = null): DownloadSpec = w
     )
     is VoiceEntry -> DownloadSpec(
         item.id, ItemKind.VOICE, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
-        "voices/${item.id}.zip", "", groupId = groupId,
+        VoiceDownloads.zipPath(item.id), "", groupId = groupId,
     )
 }
 

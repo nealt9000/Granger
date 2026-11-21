@@ -23,6 +23,8 @@ kotlin {
             api(libs.androidx.room.runtime)
             api(libs.kotlinx.coroutines.core)
             api(libs.kotlinx.io.core)
+            // A voice's manifest.json (VoiceDownloads).
+            implementation(libs.kotlinx.serialization.json)
         }
         androidMain.dependencies {
             implementation(libs.androidx.room.ktx)
@@ -30,7 +32,10 @@ kotlin {
         iosMain.dependencies {
             implementation(libs.androidx.sqlite.bundled)
         }
-        commonTest.dependencies { implementation(kotlin("test")) }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
+        }
     }
 }
 

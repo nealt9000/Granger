@@ -7,10 +7,8 @@ import java.security.MessageDigest
 
 /** Readiness checks: a size check always, a full checksum re-hash on request (spec "Readiness"). */
 object IntegrityChecker {
-    fun quick(record: DownloadRecord): Integrity {
-        if (record.kind == ItemKind.VOICE) return VoiceUnpacker.quick(record)
-        return Integrity.quickFile(record)
-    }
+    /** The size check, a voice's unpacked folder included ([Integrity.quick], shared with the iPhone). */
+    fun quick(record: DownloadRecord): Integrity = Integrity.quick(record)
 
     suspend fun full(
         record: DownloadRecord,

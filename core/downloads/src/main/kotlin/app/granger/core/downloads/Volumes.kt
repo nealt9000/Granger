@@ -20,7 +20,7 @@ data class Volume(
     val booksDir: File get() = File(root, "books")
     val musicDir: File get() = File(root, "music")
     val audiobooksDir: File get() = File(root, "audiobooks")
-    val voicesDir: File get() = File(root, "voices")
+    val voicesDir: File get() = File(root, VoiceDownloads.FOLDER)
 }
 
 fun interface VolumeSource {

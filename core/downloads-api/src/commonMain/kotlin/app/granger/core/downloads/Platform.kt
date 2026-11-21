@@ -23,6 +23,7 @@ object Files {
 
     fun size(path: String): Long = runCatching { SystemFileSystem.metadataOrNull(Path(path))?.takeIf { it.isRegularFile }?.size }.getOrNull() ?: 0L
     fun isFile(path: String): Boolean = runCatching { SystemFileSystem.metadataOrNull(Path(path))?.isRegularFile == true }.getOrDefault(false)
+    fun isDirectory(path: String): Boolean = runCatching { SystemFileSystem.metadataOrNull(Path(path))?.isDirectory == true }.getOrDefault(false)
     fun exists(path: String): Boolean = runCatching { SystemFileSystem.exists(Path(path)) }.getOrDefault(false)
     fun delete(path: String): Boolean = runCatching { SystemFileSystem.delete(Path(path), mustExist = false); true }.getOrDefault(false)
 
