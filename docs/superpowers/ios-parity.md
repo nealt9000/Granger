@@ -10,8 +10,8 @@ Legend: **[ ]** to do · **[x]** done on the iPhone · **≈** done with the iOS
 
 | Android | iPhone | Plan | |
 | --- | --- | --- | --- |
-| Rail: Home, Search, Explore, Library, Listen; Settings | Tab bar with the same five; Settings from Home's header (spec §5) | I2 (Home, Search), I3 (Explore), I5 (Library, Listen) | [ ] I2 + I3 part ✓ (Home, Search, Explore, Settings) |
-| Open items on the rail (up to 4 articles/books, pin, remove) | ≈ Recently open, from each tab's toolbar | I3 (articles), I5 (books, reading place) | [ ] I3 part ✓ (last four articles in Home, Search, Explore) |
+| Rail: Home, Search, Explore, Library, Listen; Settings | Tab bar with the same five; Settings from Home's header (spec §5) | I2 (Home, Search), I3 (Explore), I5 (Library, Listen) | [ ] I2 + I3 + I5 Task 6 part ✓ (Home, Search, Explore, Library, Settings; Listen in Task 8) |
+| Open items on the rail (up to 4 articles/books, pin, remove) | ≈ Recently open, from each tab's toolbar | I3 (articles), I5 (books, reading place) | ≈ [x] (the last four articles and books, newest first, in Home, Search, Explore and Library; a book's row says its place, "Chapter · 42%", and reopens there; no pin/remove, as the iPhone has no rail) |
 | Field and Night palettes, System; Spectral titles | Colour assets from `GrangerTheme.kt` (tested equal), Spectral | I2 | [x] |
 | Launcher icon (owl mark), themed icon | AppIcon traced from the launcher mark; ≈ iOS tinted/dark icon variants | I2 | [ ] I2 part ✓ (icon; tinted/dark variants to do) |
 | Mini player above the content | Mini player above the tab bar | I6 | [ ] |
@@ -78,18 +78,18 @@ Legend: **[ ]** to do · **[x]** done on the iPhone · **≈** done with the iOS
 | Downloads: one queue, order, Pause all, speed and time left, Home card, Wi-Fi rule, sha256 check | URLSession background sessions, resume by Range/ETag | I4 | [x] (resume after the app is killed checked in the Simulator) |
 | Pack reader and pack search (libkiwix), redirects, pack documents (PDF/EPUB in packs) | Same | I4 | [x] (since I5 Task 5 a pack's PDF or listed book opens in Granger's readers, copied out of the pack in chunks) |
 | Import a pack from storage | ≈ Files import, packs visible in Files | I4 | [x] |
-| Book packs as collections (Gutenberg, nautilus, African Storybook), manifests | Same | I4 (packs), I5 (reading) | [ ] I4 part ✓ (book packs listed as their books in Your sources; reading in I5) |
+| Book packs as collections (Gutenberg, nautilus, African Storybook), manifests | Same | I4 (packs), I5 (reading) | [x] (I5 Task 6: a book pack opens as its Library collection, with provenance, manifest sections and works in parts; its books open in the reader) |
 
 ## Books
 
 | Android | iPhone | Plan | |
 | --- | --- | --- | --- |
-| Library: reading shelf, collections, Classics shelf, list/grid views, letter strip, organize, covers | Same | I5 | [ ] |
+| Library: reading shelf, collections, Classics shelf, list/grid views, letter strip, organize, covers | Same | I5 | [x] (Task 6 over the shared LibraryModel/CollectionModel; touch and hold for a book's menu, Android's long press. Every collection online (BK) waits for Task 7) |
 | E-book reader: pages, contents, search in book, highlights and notes, dictionary, text settings, link peek, fixed layout, PDF | Readium Swift (+ PDFKit) | I5 | [ ] (Task 5 built all but link peek, which comes with the Classics' links in Task 7) |
 | Granger Classics, Clásicos Granger, reference links (Linked Classics), In your books | Same | I5 | [ ] |
 | archive.org: search, item sheet, sets, text PDF → ebook, 1930 filter (Play) | Same (App Store rules as Play's) | I5 | [ ] |
-| Gutenberg shelf and covers | Same | I5 | [ ] |
-| Import your own books (EPUB, PDF, CBR) | ≈ Files import | I5 | [ ] |
+| Gutenberg shelf and covers | Same | I5 | [x] (Task 6: covers from the pack before first open, Make all searchable…, Open the pack's own pages, Show removed) |
+| Import your own books (EPUB, PDF, CBR) | ≈ Files import | I5 | ≈ [x] (Task 6: EPUB, PDF, TXT, Markdown, CBZ and CBR from Files through the shared FileImports; CBR by libarchive 3.8.1, Markdown by the shared PlainMarkdown; a comic is a PDF of its pages before it's imported, where Android's import takes comics only from archive.org) |
 
 ## Listen and audio
 
