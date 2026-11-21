@@ -18,7 +18,7 @@ class MusicTabTest {
 
     @Test fun eachShelfsSortsAndWhichOnesFileUnderLetters() {
         assertThat(SongSort.entries.filter { it.byName }).containsExactly(SongSort.TITLE, SongSort.ARTIST, SongSort.ALBUM).inOrder()
-        assertThat(AlbumSort.entries.map { it.label }).containsExactly(R.string.music_sort_title, R.string.music_sort_artist, R.string.music_sort_year).inOrder()
+        assertThat(AlbumSort.entries.map { it.label }).containsExactly(app.granger.UiText.Res("music_sort_title"), app.granger.UiText.Res("music_sort_artist"), app.granger.UiText.Res("music_sort_year")).inOrder()
         assertThat(AlbumSort.entries.filter { it.byName }).containsExactly(AlbumSort.TITLE, AlbumSort.ARTIST).inOrder()
     }
 

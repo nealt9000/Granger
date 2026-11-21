@@ -1,5 +1,7 @@
 package app.granger.music
 
+import app.granger.resolve
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -50,7 +52,7 @@ fun ArtistScreen(vm: MusicViewModel, name: String, nav: MusicNav) {
         val source = MusicSources.artist(loaded.name)
         AlbumsAndSongs(
             Modifier.padding(padding),
-            sections = loaded.sections.map { stringResource(it.group.label) to it.albums } +
+            sections = loaded.sections.map { it.group.label.resolve() to it.albums } +
                 listOfNotNull(loaded.appearsOn.takeIf { it.isNotEmpty() }?.let { stringResource(R.string.music_appears_on) to it }),
             songs = loaded.songs,
             vm = vm, dialogs = dialogs, nav = nav,

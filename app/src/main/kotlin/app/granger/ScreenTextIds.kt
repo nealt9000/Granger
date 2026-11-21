@@ -133,6 +133,19 @@ object ScreenTextIds {
         "listen_paused" -> R.string.listen_paused
         "listen_reading_aloud" -> R.string.listen_reading_aloud
         "media_unmounted" -> R.string.media_unmounted
+        "music_all" -> R.string.music_all
+        "music_release_albums" -> R.string.music_release_albums
+        "music_release_compilations" -> R.string.music_release_compilations
+        "music_release_eps" -> R.string.music_release_eps
+        "music_release_live" -> R.string.music_release_live
+        "music_release_others" -> R.string.music_release_others
+        "music_release_singles" -> R.string.music_release_singles
+        "music_release_soundtracks" -> R.string.music_release_soundtracks
+        "music_sort_album" -> R.string.music_sort_album
+        "music_sort_artist" -> R.string.music_sort_artist
+        "music_sort_date_added" -> R.string.music_sort_date_added
+        "music_sort_title" -> R.string.music_sort_title
+        "music_sort_year" -> R.string.music_sort_year
         "onboarding_ask_line" -> R.string.onboarding_ask_line
         "onboarding_blurb_comprehensive" -> R.string.onboarding_blurb_comprehensive
         "onboarding_blurb_efficient" -> R.string.onboarding_blurb_efficient

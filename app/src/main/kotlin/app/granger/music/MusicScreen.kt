@@ -163,7 +163,7 @@ private fun SongsTab(ui: MusicUi, vm: MusicViewModel, dialogs: MusicDialogs, nav
     val songs = ui.songs
     // A tap plays the list as shown, from the tapped song.
     val index = remember(songs) { songs.withIndex().associate { it.value.id to it.index } }
-    val songSorts = SongSort.entries.associateWith { stringResource(it.label) }
+    val songSorts = SongSort.entries.associateWith { it.label.resolve() }
     ShelfList(
         ui.songSections,
         Modifier.fillMaxSize(),
@@ -189,7 +189,7 @@ private fun AlbumsTab(ui: MusicUi, vm: MusicViewModel, dialogs: MusicDialogs, na
         return
     }
     val view by vm.albumView.collectAsStateWithLifecycle()
-    val albumSorts = AlbumSort.entries.associateWith { stringResource(it.label) }
+    val albumSorts = AlbumSort.entries.associateWith { it.label.resolve() }
     val header: @Composable () -> Unit = {
         ShelfHeader(ui.albumSort, AlbumSort.entries, { albumSorts.getValue(it) }, vm::setAlbumSort, view = view, onToggleView = vm::toggleAlbumView)
     }

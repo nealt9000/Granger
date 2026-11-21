@@ -91,8 +91,7 @@ internal fun shownNameText(name: String): UiText = when (name) {
     else -> UiText.Raw(name)
 }
 
-/** Display names, with the "Unknown …" fallbacks applied here rather than stored. */
-internal fun trackTitle(t: Track) = t.title.ifBlank { t.uri.substringAfterLast('/') }
+/** Display names, with the "Unknown …" fallbacks applied here rather than stored ([trackTitle] is shared). */
 @Composable internal fun trackArtist(t: Track) = MusicCatalog.trackArtistsOf(t).map { shownName(it) }.joinToString(", ")
 @Composable internal fun trackAlbum(t: Track) = shownName(Albums.title(t))
 internal fun albumArtistNames(a: AlbumSummary): List<String> =

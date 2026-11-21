@@ -65,7 +65,7 @@ class MusicViewModelTest {
         val mix = playlists.create("Mix", listOf("track:phone:j1", "track:phone:r1"))
 
         val all = vm(null).ui.filterNotNull().first()
-        assertThat(all.title).isEqualTo(UiText.Res(R.string.music_all))
+        assertThat(all.title).isEqualTo(UiText.Res("music_all"))
         assertThat(all.songs.map { it.id }).containsExactly("track:phone:j1", "track:phone:r1", "track:phone:r2")
         assertThat(all.albums.map { it.title }).containsExactly("Kind of Blue", "Abbey Road")
         assertThat(all.playlists.map { it.id }).containsExactly(mix)
