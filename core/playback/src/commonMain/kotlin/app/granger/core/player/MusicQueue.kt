@@ -1,6 +1,7 @@
 package app.granger.core.player
 
 import app.granger.core.library.MusicState
+import kotlin.jvm.JvmName
 import kotlin.random.Random
 
 /**

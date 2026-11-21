@@ -1,6 +1,5 @@
 package app.granger.core.player
 
-import android.content.SharedPreferences
 import app.granger.core.library.AudiobookState
 import app.granger.core.library.MediaLibrary
 import app.granger.core.library.MusicState
@@ -21,14 +20,25 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 
+/**
+ * The player's own string prefs (Plan I6 Task 2): the engine's last mode, book and voice ([PlayerSettingsKeys]).
+ * Android's is its SharedPreferences file "player"; the iPhone's is UserDefaults.
+ */
+interface PlayerPrefs {
+    fun getString(key: String): String?
+
+    /** Calls [onChange] with each changed key until the returned function is called. */
+    fun listen(onChange: (key: String?) -> Unit): () -> Unit
+}
+
 /** A saved queue rebuilt against the library: the queue and its tracks by id. */
-internal class RestoredQueue(val queue: MusicQueue, val tracks: Map<String, Track>)
+class RestoredQueue(val queue: MusicQueue, val tracks: Map<String, Track>)
 
 /**
  * Rebuilds [state]'s queue with its tracks, or null when none of them is left. A row the queue names that has gone
  * (rows aren't deleted, so this is a damaged state) is dropped, and the queue then starts over at its first track.
  */
-internal suspend fun restoreQueue(state: MusicState, random: Random, track: suspend (String) -> Track?): RestoredQueue? {
+suspend fun restoreQueue(state: MusicState, random: Random, track: suspend (String) -> Track?): RestoredQueue? {
     var q = MusicQueue.fromState(state, random)
     val found = q.ids.distinct().associateWith { track(it) }
     if (found.values.any { it == null }) {
@@ -45,15 +55,15 @@ internal suspend fun restoreQueue(state: MusicState, random: Random, track: susp
  * The book the audiobook mode would resume: [PlayerSettingsKeys.LAST_AUDIOBOOK], else the most recently saved
  * [states] row; the first of them the library still holds with chapters.
  */
-internal suspend fun lastAudiobookId(prefs: SharedPreferences, states: List<AudiobookState>, media: MediaLibrary): String? {
-    val candidates = (listOfNotNull(prefs.getString(PlayerSettingsKeys.LAST_AUDIOBOOK, null)) +
+suspend fun lastAudiobookId(prefs: PlayerPrefs, states: List<AudiobookState>, media: MediaLibrary): String? {
+    val candidates = (listOfNotNull(prefs.getString(PlayerSettingsKeys.LAST_AUDIOBOOK)) +
         states.sortedByDescending { it.updatedAt }.map { it.audiobookId }).distinct()
     return candidates.firstOrNull { media.audiobook(it) != null && media.chapters(it).first().isNotEmpty() }
 }
 
 /** The voice's last place: [PlayerSettingsKeys.LAST_VOICE]'s row, else the most recently saved one. */
-internal fun lastVoice(prefs: SharedPreferences, states: List<VoiceState>): SavedVoice? {
-    val last = prefs.getString(PlayerSettingsKeys.LAST_VOICE, null)
+fun lastVoice(prefs: PlayerPrefs, states: List<VoiceState>): SavedVoice? {
+    val last = prefs.getString(PlayerSettingsKeys.LAST_VOICE)
     val row = states.firstOrNull { it.sourceKey == last } ?: states.maxByOrNull { it.updatedAt } ?: return null
     val address = ReadAddress.decode(row.address) ?: return null
     return SavedVoice(row.sourceKey, row.title, row.section, address, row.speed, VoiceId.decode(row.voiceId))
@@ -64,10 +74,10 @@ internal fun lastVoice(prefs: SharedPreferences, states: List<VoiceState>): Save
  * the engine writes (and the book page's finished mark) re-emits, as do the engine's last-mode prefs.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-internal class SavedModesReader(
+class SavedModesReader(
     private val media: MediaLibrary,
     private val playback: PlaybackDao,
-    private val prefs: SharedPreferences,
+    private val prefs: PlayerPrefs,
 ) {
     // The last queue read, so a position-only save (every 15 s while music plays) doesn't re-read every track.
     private var cachedQueue: String? = null
@@ -82,7 +92,7 @@ internal class SavedModesReader(
         val voice = combine(prefChanges(), playback.observeVoiceStates()) { _, states -> lastVoice(prefs, states) }
             .distinctUntilChanged()
         val lastMode = prefChanges()
-            .map { prefs.getString(PlayerSettingsKeys.LAST_MODE, null) to prefs.getString(PlayerSettingsKeys.LAST_MEDIA, null) }
+            .map { prefs.getString(PlayerSettingsKeys.LAST_MODE) to prefs.getString(PlayerSettingsKeys.LAST_MEDIA) }
             .distinctUntilChanged()
         return combine(music, book, voice, lastMode) { m, b, v, (last, media) ->
             SavedModes(
@@ -140,15 +150,14 @@ internal class SavedModesReader(
 
     /** Emits once now, then whenever the engine's last-mode, last-book or last-voice pref changes. */
     private fun prefChanges(): Flow<Unit> = callbackFlow {
-        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        val stop = prefs.listen { key ->
             if (key == PlayerSettingsKeys.LAST_MODE || key == PlayerSettingsKeys.LAST_MEDIA || key == PlayerSettingsKeys.LAST_AUDIOBOOK || key == PlayerSettingsKeys.LAST_VOICE) trySend(Unit)
         }
-        prefs.registerOnSharedPreferenceChangeListener(listener)
         trySend(Unit)
-        awaitClose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
+        awaitClose { stop() }
     }.conflate()
 
-    internal companion object {
+    companion object {
         // As the engine writes them.
         const val MODE_MUSIC = "music"
         const val MODE_BOOK = "audiobook"

@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.android.kmp.library)
 }
 
+// Plan I6 Task 2 adds the player's pure rules: PlayerHub and its states, MusicQueue, ReplayGainMath, PlayerNotices and
+// the saved-modes reader (behind PlayerPrefs).
 // Plan I5 Task 3 (call 4): what the player decides without media3 or AudioTrack, on both phones: the read-aloud engine
 // (ReadAloudEngine over a Speech and a SpeechOutput), the sleep timer, an audiobook's chapter map, when the place is
 // saved and how far a resume steps back. :core:player (Android) keeps ExoPlayer, the media session and AudioTrack and
@@ -30,6 +32,11 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
+        }
+        // Plan I6 Task 2: MusicQueueTest and ReplayGainMathTest moved with their code, unchanged (JUnit + Truth).
+        getByName("androidHostTest").dependencies {
+            implementation(libs.junit)
+            implementation(libs.truth)
         }
     }
 }

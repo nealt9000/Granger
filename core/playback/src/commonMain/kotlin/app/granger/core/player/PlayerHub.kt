@@ -203,7 +203,7 @@ interface PlayerHub {
     suspend fun addBookmark(title: String): Long
 }
 
-/** SharedPreferences (file [PREFS]) shared by the player and the media settings screen. */
+/** The player's prefs (Android: the SharedPreferences file [PREFS]) shared by the player and the media settings screen. */
 object PlayerSettingsKeys {
     const val PREFS = "player"
 
@@ -222,10 +222,11 @@ object PlayerSettingsKeys {
     const val DEFAULT_MIX = 0.3f
 
     // Kept by the engine, not settings: which player to restore and when it was paused (survive process death).
-    internal const val LAST_MODE = "last_mode"
+    // Public since Plan I6 (the saved-modes reader is shared; Android's engine writes them).
+    const val LAST_MODE = "last_mode"
     /** The media mode last loaded ([LAST_MODE] without the voice): music or audiobook. */
-    internal const val LAST_MEDIA = "last_media"
-    internal const val LAST_AUDIOBOOK = "last_audiobook"
-    internal const val LAST_VOICE = "last_voice"
-    internal const val PAUSED_AT = "paused_at"
+    const val LAST_MEDIA = "last_media"
+    const val LAST_AUDIOBOOK = "last_audiobook"
+    const val LAST_VOICE = "last_voice"
+    const val PAUSED_AT = "paused_at"
 }
