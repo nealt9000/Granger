@@ -41,7 +41,7 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.room.testing)
-    testImplementation(testFixtures(project(":core:books")))
+    testImplementation(project(":core:books-fixtures"))
     // TextPdfFixtures draws its lines in PdfBox's standard fonts.
     testImplementation(libs.pdfbox.android) { exclude(group = "org.bouncycastle") }
 }

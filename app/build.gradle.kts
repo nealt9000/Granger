@@ -166,7 +166,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.robolectric)
     // Real PDFs for the reader's "Read as ebook" gate (Plan KB2 Task 4.4), as core/library's tests build them.
-    testImplementation(testFixtures(project(":core:books")))
+    testImplementation(project(":core:books-fixtures"))
     testImplementation(libs.pdfbox.android) { exclude(group = "org.bouncycastle") }
     testImplementation(libs.androidx.test.core)
     testImplementation(platform(libs.androidx.compose.bom))
