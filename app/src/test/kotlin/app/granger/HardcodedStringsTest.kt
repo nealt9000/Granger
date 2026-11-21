@@ -70,11 +70,16 @@ class HardcodedStringsTest {
             }
         }
 
-        /** Hits per file in the main Kotlin of app and each core module, keyed by path from the repo root, sorted. */
+        /**
+         * Hits per file in the main Kotlin of app and each core module, keyed by path from the repo root, sorted. A
+         * multiplatform module's main code is in its `<target>Main` source sets (commonMain, androidMain, iosMain, …).
+         */
         fun scan(root: File): Map<String, Int> {
             val dirs = listOf(File(root, "app/src/main/kotlin")) +
                 // :core:books-fixtures is test code (it was :core:books' testFixtures before Plan I5).
-                File(root, "core").listFiles().orEmpty().filter { it.name != "books-fixtures" }.map { File(it, "src/main/kotlin") }
+                File(root, "core").listFiles().orEmpty().filter { it.name != "books-fixtures" }.flatMap { module ->
+                    File(module, "src").listFiles().orEmpty().filter { it.name == "main" || it.name.endsWith("Main") }.map { File(it, "kotlin") }
+                }
             return dirs.filter { it.isDirectory }
                 .flatMap { dir -> dir.walk().filter { it.isFile && it.extension == "kt" }.toList() }
                 .filterNot { "Spike" in it.name || "Debug" in it.name }
