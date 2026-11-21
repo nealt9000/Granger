@@ -55,6 +55,7 @@
 		EA4CF2525A8BB18149344B90 /* QuiltScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CC7FC3DD665D3B12DAF6714 /* QuiltScreen.swift */; };
 		EC761328122E5C1E52BE3ADC /* Feeds.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20B4289D629E86BD5D806A8 /* Feeds.swift */; };
 		EEA786A258038C318B5E9C30 /* ZimSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 115B8EB413BD65B781604711 /* ZimSchemeHandler.swift */; };
+		F020D630954A94C6040458F6 /* Onboarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9E70202E4CDAF003BAEA59E /* Onboarding.swift */; };
 		F8CC55DC0FEEFAEA8E7862F4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBE5F06445A1835AEC2AFC4F /* AppDelegate.swift */; };
 		FACF839114C639E9B056C5D7 /* Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D2722559AB140D5CDEAF7A /* Palette.swift */; };
 /* End PBXBuildFile section */
@@ -125,6 +126,7 @@
 		CB232453FDA28614FBE166F0 /* GrangerTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = GrangerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D20B4289D629E86BD5D806A8 /* Feeds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Feeds.swift; sourceTree = "<group>"; };
 		D4D2362C7FF79325E7EA0D49 /* GZimBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = GZimBridge.mm; sourceTree = "<group>"; };
+		D9E70202E4CDAF003BAEA59E /* Onboarding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Onboarding.swift; sourceTree = "<group>"; };
 		DBE5F06445A1835AEC2AFC4F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DD4E0D95A9828108F9ABF60D /* SmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeTests.swift; sourceTree = "<group>"; };
 		E1B6079F1F1428E9AFB791C4 /* PackImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackImportTests.swift; sourceTree = "<group>"; };
@@ -203,6 +205,7 @@
 				7CC01381BEC958CC5134EC02 /* GrangerApp.swift */,
 				2CF1F83534B602BD903DEF86 /* Library.swift */,
 				7F52092A31F49258FD75CDE1 /* Navigation.swift */,
+				D9E70202E4CDAF003BAEA59E /* Onboarding.swift */,
 				C4D2722559AB140D5CDEAF7A /* Palette.swift */,
 				158BC7B9A64875C539254D15 /* ScreenText.swift */,
 				63D5F373DED5327DC509AEA8 /* Theme.swift */,
@@ -529,6 +532,7 @@
 				898853DEC429D1C6F2F5D106 /* Marks.swift in Sources */,
 				711103A9DB383DCAD57C4811 /* Navigation.swift in Sources */,
 				1424EFEE57F6296E47E2BB70 /* NetworkPath.swift in Sources */,
+				F020D630954A94C6040458F6 /* Onboarding.swift in Sources */,
 				6BB8CA554BD06FFA34ADA69C /* PageBridge.swift in Sources */,
 				FACF839114C639E9B056C5D7 /* Palette.swift in Sources */,
 				EA4CF2525A8BB18149344B90 /* QuiltScreen.swift in Sources */,

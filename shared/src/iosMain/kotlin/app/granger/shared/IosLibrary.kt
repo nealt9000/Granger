@@ -403,7 +403,37 @@ class IosLibrary(
     /** The articles you kept, newest first. */
     val keptArticles: kotlinx.coroutines.flow.Flow<List<app.granger.core.library.KeptArticle>> get() = kept.articles
 
-        // ---- Home's feeds (Plan I4 Task 8): the shared feed engine over the packs (books join in I5).
+        // ---- Onboarding (Plan I4 Task 8): the shared first run, Pick a start and quick wins; the voice step waits for voices (I5).
+
+    /** Whether the first run was finished or skipped once. */
+    val onboardingPrefs = DefaultsOnboardingPrefs()
+
+    /**
+     * The first run's model, from [startAt] (WELCOME on a first start; OUTFIT from Settings' Outfit for offline). Swift
+     * keeps the knowledge language ([setKnowledge]) and the privacy line ([onPrivacySeen]).
+     */
+    fun onboarding(
+        startAt: app.granger.onboarding.Step, phoneLanguages: List<String>, countryCode: String,
+        setKnowledge: (List<String>) -> Unit, onPrivacySeen: () -> Unit,
+    ): OwnedViewModel<app.granger.onboarding.OnboardingViewModel> {
+        val knowledge = MutableStateFlow(languages())
+        return OwnedViewModel {
+            app.granger.onboarding.OnboardingViewModel(
+                catalog = catalogSource, library = packLibrary, downloads = downloads, volumes = volumes, prefs = downloadPrefs,
+                askTier = false, canRun = { false }, totalRamBytes = platform.Foundation.NSProcessInfo.processInfo.physicalMemory.toLong(),
+                onboardingPrefs = onboardingPrefs, askOn = false, research = false, dense = false, countryCode = countryCode,
+                offerVoice = false, io = app.granger.screens.ioDispatcher, now = { app.granger.screens.nowMillis() },
+                knowledge = knowledge, setKnowledge = { langs -> knowledge.value = langs; setKnowledge(langs) },
+                phoneLanguages = { phoneLanguages }, appLanguage = { app.granger.screens.phoneLanguage() },
+                enqueue = { group, items, volume, wifi ->
+                    downloads.enqueueGroup(group, items.map { app.granger.core.downloads.downloadSpecOf(it, group) }, volume.root, wifi)
+                },
+                chooseOnline = true, onPrivacySeen = onPrivacySeen, startAt = startAt,
+            )
+        }
+    }
+
+    // ---- Home's feeds (Plan I4 Task 8): the shared feed engine over the packs (books join in I5).
 
     private val homeFeedsStore = app.granger.core.library.RoomHomeFeeds(database)
 
@@ -745,6 +775,17 @@ data class SourceGroup(val id: String, val title: String, val rows: List<SourceR
 
 /** A pack in Your sources, with how many PDFs and EPUBs it holds (Files in this pack). */
 data class SourceRow(val pack: app.granger.core.library.Pack, val files: Int, val map: Boolean)
+
+/** Onboarding's marks in UserDefaults (Android's SharedPreferences "onboarding"). */
+class DefaultsOnboardingPrefs : app.granger.onboarding.OnboardingPrefs {
+    private val d = platform.Foundation.NSUserDefaults.standardUserDefaults
+    override var done: Boolean
+        get() = d.boolForKey("onboarding.done")
+        set(value) = d.setBool(value, "onboarding.done")
+    override var outfitGroup: String?
+        get() = d.stringForKey("onboarding.outfitGroup")
+        set(value) { if (value == null) d.removeObjectForKey("onboarding.outfitGroup") else d.setObject(value, "onboarding.outfitGroup") }
+}
 
 /** Get more's settings in UserDefaults: Wi-Fi only (Settings' own key), the volume (one on the iPhone), ask before large. */
 class DefaultsDownloadPrefs(prefix: String) : app.granger.sources.DownloadPrefs, app.granger.core.downloads.QueuePrefs by DefaultsQueuePrefs(prefix) {

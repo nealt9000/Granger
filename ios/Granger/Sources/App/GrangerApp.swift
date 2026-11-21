@@ -86,8 +86,21 @@ struct RootView: View {
     @State private var homePath: [Route] = []
     @State private var searchPath: [Route] = []
     @State private var explorePath: [Route] = []
+    @Environment(AppSettings.self) private var settings
+    /// The first run (Plan I4 Task 8): once, before the privacy line is seen; finished or skipped, it doesn't come back.
+    @State private var onboarding = !UserDefaults.standard.bool(forKey: "onboarding.done") && !UserDefaults.standard.bool(forKey: "privacySeen")
 
     var body: some View {
+        tabs
+            .fullScreenCover(isPresented: $onboarding) {
+                OnboardingScreen { readNow in
+                    onboarding = false
+                    if readNow { tab = .explore }
+                }
+            }
+    }
+
+    private var tabs: some View {
         TabView(selection: $tab) {
             stack($homePath) { HomeScreen() }
                 .tabItem { Label("Home", systemImage: "house") }

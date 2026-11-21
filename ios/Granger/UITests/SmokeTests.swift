@@ -66,7 +66,7 @@ final class SmokeTests: XCTestCase {
     /// First run: nothing is fetched until the privacy line's OK; Settings' Local only stops Search going online.
     func testPrivacyLineAndLocalOnly() {
         let app = XCUIApplication()
-        app.launchArguments = ["-privacySeen", "NO", "-localOnly", "NO", "-wikiLanguage", "en", "-homeOrder", "continue,readiness,timeline,feeds", "-homeHidden", "()"]
+        app.launchArguments = ["-onboarding.done", "YES", "-privacySeen", "NO", "-localOnly", "NO", "-wikiLanguage", "en", "-homeOrder", "continue,readiness,timeline,feeds", "-homeHidden", "()"]
         app.launch()
         let ok = app.buttons["privacy-ok"]
         XCTAssertTrue(ok.waitForExistence(timeout: 10), "the privacy line on first run")
@@ -391,5 +391,27 @@ final class SmokeTests: XCTestCase {
         shot(app, "home-feeds")
         let more = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'More for'")).firstMatch
         if more.exists { more.tap(); app.buttons["Remove this feed"].tap() }
+    }
+
+    /// Plan I4 Task 8: the first run: Welcome → Outfit for offline → Pick a start (Starter by default) → Review → Start;
+    /// the quick wins queue and Home follows.
+    func testOnboardingPickAStart() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-onboarding.done", "NO", "-privacySeen", "NO", "-localOnly", "NO", "-wikiLanguage", "en"]
+        app.launch()
+        let outfit = app.buttons["onboarding-outfit"]
+        XCTAssertTrue(outfit.waitForExistence(timeout: 15), "Welcome")
+        shot(app, "onboarding-welcome")
+        outfit.tap()
+        XCTAssertTrue(app.buttons["start-starter"].waitForExistence(timeout: 60), "Pick a start, from the catalog")
+        shot(app, "onboarding-start")
+        let next = app.buttons["onboarding-next"]
+        for _ in 0..<15 where !(next.exists && next.isHittable) { app.swipeUp() }
+        next.tap()
+        let start = app.buttons["onboarding-start"]
+        XCTAssertTrue(start.waitForExistence(timeout: 10), "Review")
+        shot(app, "onboarding-review")
+        app.buttons["onboarding-skip"].tap()
+        XCTAssertTrue(app.tabBars.buttons["Home"].waitForExistence(timeout: 10), "skipped to the app")
     }
 }
