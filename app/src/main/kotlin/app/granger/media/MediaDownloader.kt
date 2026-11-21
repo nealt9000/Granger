@@ -39,6 +39,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import app.granger.core.downloads.enqueueGroup
+import app.granger.core.media.write
+import app.granger.core.media.read
 
 /**
  * Gets, cancels and removes downloaded books and albums, and files them as their files arrive. Every downloaded-media

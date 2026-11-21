@@ -55,6 +55,8 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import app.granger.core.media.write
+import app.granger.core.media.read
 
 class ArchiveViewModelTest {
     @get:Rule val main = MainDispatcherRule()

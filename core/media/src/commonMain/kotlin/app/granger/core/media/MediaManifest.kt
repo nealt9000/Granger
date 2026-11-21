@@ -1,7 +1,5 @@
 package app.granger.core.media
 
-import java.io.File
-import java.io.FileOutputStream
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -79,8 +77,8 @@ object MediaManifests {
         encodeDefaults = true
     }
 
-    /** null when missing or unreadable (torn, not JSON, not a manifest). */
-    fun read(dir: File): MediaManifest? = (parse(dir) as? Parsed.Ok)?.manifest
+    /** The manifest in the item folder [dir]; null when missing or unreadable (torn, not JSON, not a manifest). */
+    fun read(dir: String): MediaManifest? = (parse(dir) as? Parsed.Ok)?.manifest
 
     internal sealed interface Parsed {
         data object Missing : Parsed
@@ -88,29 +86,19 @@ object MediaManifests {
         data class Ok(val manifest: MediaManifest) : Parsed
     }
 
-    internal fun parse(dir: File): Parsed {
-        val file = File(dir, FILE_NAME)
-        if (!file.isFile) return Parsed.Missing
+    internal fun parse(dir: String): Parsed {
+        val file = MediaDisk.child(dir, FILE_NAME)
+        if (!MediaDisk.isFile(file)) return Parsed.Missing
         return try {
-            Parsed.Ok(json.decodeFromString(MediaManifest.serializer(), file.readText()))
+            Parsed.Ok(json.decodeFromString(MediaManifest.serializer(), MediaDisk.readText(file)))
         } catch (e: Exception) {
             Parsed.Unreadable
         }
     }
 
     /** Writes a temp file in [dir], syncs it, then renames it over the manifest: a reader sees the old one or the new one. */
-    fun write(dir: File, manifest: MediaManifest) {
-        dir.mkdirs()
-        val tmp = File.createTempFile("$FILE_NAME.", ".tmp", dir)
-        try {
-            FileOutputStream(tmp).use { out ->
-                out.write(json.encodeToString(MediaManifest.serializer(), manifest).toByteArray(Charsets.UTF_8))
-                out.fd.sync()
-            }
-            if (!tmp.renameTo(File(dir, FILE_NAME))) throw java.io.IOException("Couldn't replace ${File(dir, FILE_NAME)}")
-        } finally {
-            tmp.delete()
-        }
+    fun write(dir: String, manifest: MediaManifest) {
+        MediaDisk.writeReplacing(dir, FILE_NAME, json.encodeToString(MediaManifest.serializer(), manifest).encodeToByteArray())
     }
 
     /** "audiobooks/librivox/<id>", "audiobooks/archive-org/<identifier>", "music/archive-org/<identifier>". */
@@ -130,7 +118,7 @@ object MediaManifests {
         val stem = if (dot > 0) remote.substring(0, dot) else remote
         val ext = if (dot > 0) safe(remote.substring(dot + 1)).trim(*TRIM.toCharArray()).take(10) else ""
         val suffix = if (ext.isEmpty()) "" else ".$ext"
-        val prefix = "%02d - ".format(ordinal + 1)
+        val prefix = "${(ordinal + 1).toString().padStart(2, '0')} - "
         val body = safe(title.trim().ifEmpty { stem })
             .take(MAX_NAME - prefix.length - suffix.length)
             .trim(*TRIM.toCharArray())

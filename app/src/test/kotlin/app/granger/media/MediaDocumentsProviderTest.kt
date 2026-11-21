@@ -24,6 +24,8 @@ import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import app.granger.core.media.write
+import app.granger.core.media.read
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])

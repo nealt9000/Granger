@@ -1,7 +1,8 @@
 package app.granger.core.media
 
 import app.granger.core.library.MediaOrigin
-import java.security.MessageDigest
+import app.granger.core.text.hex
+import app.granger.core.text.sha1
 
 /** Library ids of downloaded media (spec §10). None contains "@", so `MediaAddress` works on them unchanged. */
 object DownloadedIds {
@@ -19,10 +20,9 @@ object DownloadedIds {
      * without a section id falls back to the archive.org form's hash.
      */
     fun trackId(m: MediaManifest, f: ManifestFile): String {
-        val part = f.sectionId?.takeIf { m.source == MediaManifest.LIBRIVOX && it.isNotBlank() } ?: sha1(f.remoteName)
+        val part = f.sectionId?.takeIf { m.source == MediaManifest.LIBRIVOX && it.isNotBlank() } ?: hash16(f.remoteName)
         return "track:${m.source}:${m.ref}:$part"
     }
 
-    private fun sha1(s: String) =
-        MessageDigest.getInstance("SHA-1").digest(s.toByteArray()).joinToString("") { "%02x".format(it) }.take(16)
+    private fun hash16(s: String) = sha1(s.encodeToByteArray()).hex().take(16)
 }

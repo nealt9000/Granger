@@ -1,7 +1,5 @@
 package app.granger.core.media
 
-import android.net.Uri
-import android.os.ParcelFileDescriptor
 import app.granger.core.library.AlbumNote
 import app.granger.core.library.Albums
 import app.granger.core.library.Audiobook
@@ -13,10 +11,12 @@ import app.granger.core.library.ScannedAudiobook
 import app.granger.core.library.ScannedChapter
 import app.granger.core.library.Track
 import app.granger.core.taglib.RawTags
-import java.io.File
-import java.security.MessageDigest
+import app.granger.core.text.hex
+import app.granger.core.text.sha1
+import kotlin.concurrent.Volatile
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.completeWith
 import kotlinx.coroutines.sync.Mutex
@@ -36,18 +36,21 @@ import kotlinx.coroutines.withContext
  * - A manifest that can't be read (torn, not JSON, or naming another folder or unsafe file names) skips only its
  *   item, and is listed in [lastUnreadable]: its rows are left exactly as they are. An item on an unmounted volume
  *   is absent, so its rows go MISSING with their state kept.
+ *
+ * Shared since Plan I6 (paths as strings, files through [MediaDisk]); Android's `DownloadedMediaScanner` keeps its
+ * `File` constructor over this.
  */
-class DownloadedMediaScanner(
-    private val roots: () -> List<File>,
+open class DownloadedMediaScan(
+    private val roots: () -> List<String>,
     private val media: MediaLibrary,
-    private val tagReader: TagReader = NativeTagReader,
+    private val tagReader: PathTagReader,
     private val tagGuard: TagReadGuard = TagReadGuard.NONE,
 ) {
     private val lock = Mutex()
     private var running: CompletableDeferred<Int>? = null
 
     /** Item folders whose manifest couldn't be read at the last scan (skipped, rows untouched). */
-    @Volatile var lastUnreadable: List<File> = emptyList()
+    @Volatile var lastUnreadablePaths: List<String> = emptyList()
         private set
 
     /**
@@ -70,24 +73,24 @@ class DownloadedMediaScanner(
     }
 
     /** Every item folder with a readable manifest, on every mounted volume. */
-    suspend fun items(): List<Pair<File, MediaManifest>> = withContext(Dispatchers.IO) { survey(roots()).items }
+    suspend fun itemPaths(): List<Pair<String, MediaManifest>> = withContext(Dispatchers.IO) { survey(roots()).items }
 
-    private class Survey(val items: List<Pair<File, MediaManifest>>, val unreadable: List<File>, val unlisted: List<File>)
+    private class Survey(val items: List<Pair<String, MediaManifest>>, val unreadable: List<String>, val unlisted: List<String>)
 
-    private fun survey(volumes: List<File>): Survey {
-        val items = mutableListOf<Pair<File, MediaManifest>>()
-        val unreadable = mutableListOf<File>()
-        val unlisted = mutableListOf<File>()
+    private fun survey(volumes: List<String>): Survey {
+        val items = mutableListOf<Pair<String, MediaManifest>>()
+        val unreadable = mutableListOf<String>()
+        val unlisted = mutableListOf<String>()
         val seen = HashSet<String>()
         for (root in volumes) for (parent in PARENTS) {
-            val dir = File(root, parent)
-            if (!dir.exists()) continue
-            val children = dir.listFiles()
+            val dir = MediaDisk.child(root, parent)
+            if (!MediaDisk.exists(dir)) continue
+            val children = MediaDisk.list(dir)
             if (children == null) {
                 unlisted += dir
                 continue
             }
-            for (child in children.filter { it.isDirectory && !it.name.startsWith(".") }.sortedBy { it.name }) {
+            for (child in children.filter { MediaDisk.isDirectory(it) && !MediaDisk.nameOf(it).startsWith(".") }.sortedBy { MediaDisk.nameOf(it) }) {
                 when (val parsed = MediaManifests.parse(child)) {
                     MediaManifests.Parsed.Missing -> Unit   // not (or no longer) an item
                     MediaManifests.Parsed.Unreadable -> unreadable += child
@@ -106,7 +109,7 @@ class DownloadedMediaScanner(
     }
 
     /** Known source and kind, a well-formed ref naming [dir] itself, and file names that stay inside it. */
-    private fun valid(root: File, dir: File, m: MediaManifest): Boolean = try {
+    private fun valid(root: String, dir: String, m: MediaManifest): Boolean = try {
         m.version <= MANIFEST_VERSION &&
             m.kind in KINDS &&
             when (m.source) {
@@ -114,14 +117,14 @@ class DownloadedMediaScanner(
                 MediaManifest.ARCHIVE_ORG -> IDENTIFIER.matches(m.ref) && !m.ref.startsWith(".")
                 else -> false
             } &&
-            File(root, MediaManifests.relativeDir(m)).canonicalFile == dir.canonicalFile &&
+            MediaDisk.canonical(MediaDisk.child(root, MediaManifests.relativeDir(m))) == MediaDisk.canonical(dir) &&
             (m.files + listOfNotNull(m.cover)).let { all -> all.all { isSafeName(it.name) } && all.map { it.name }.toSet().size == all.size }
     } catch (e: Exception) {
         false
     }
 
     private fun isSafeName(name: String) =
-        name.isNotEmpty() && !name.startsWith(".") && '/' !in name && '\\' !in name && '\u0000' !in name && File(name).name == name
+        name.isNotEmpty() && !name.startsWith(".") && '/' !in name && '\\' !in name && '\u0000' !in name && MediaDisk.nameOf(name) == name
 
     private suspend fun runScan(): Int {
         val volumes = try {
@@ -130,9 +133,9 @@ class DownloadedMediaScanner(
             return 0   // unknown, not empty: nothing changes
         }
         val survey = survey(volumes)
-        lastUnreadable = survey.unreadable
+        lastUnreadablePaths = survey.unreadable
         if (survey.unreadable.isNotEmpty()) {
-            runCatching { android.util.Log.w(TAG, "Skipped unreadable media manifests: ${survey.unreadable.joinToString()}") }
+            MediaDisk.logWarn("Skipped unreadable media manifests: ${survey.unreadable.joinToString()}")
         }
         val skipTags = tagGuard.skipped()
 
@@ -150,7 +153,7 @@ class DownloadedMediaScanner(
         }
 
         // Rows under a folder that couldn't be read or listed are unknown, not gone.
-        val unknown = (survey.unreadable + survey.unlisted).map { Uri.fromFile(it).toString() + "/" }
+        val unknown = (survey.unreadable + survey.unlisted).map { MediaDisk.fileUri(it) + "/" }
         for (origin in ORIGINS) {
             val result = ScanResult(tracks[origin].orEmpty(), books[origin].orEmpty(), notes[origin].orEmpty())
             media.sync(origin, result) { uri -> unknown.any { uri.startsWith(it) } }
@@ -160,11 +163,11 @@ class DownloadedMediaScanner(
 
     private class Filed(val tracks: List<Track>, val book: ScannedAudiobook?, val note: AlbumNote?, val read: Int)
 
-    private fun file(dir: File, original: MediaManifest, skipTags: Set<String>): Filed {
+    private fun file(dir: String, original: MediaManifest, skipTags: Set<String>): Filed {
         val folder = MediaManifests.relativeDir(original) + "/"
         val present = original.files.indices.filter { i ->
             val f = original.files[i]
-            File(dir, f.name).let { it.isFile && it.length() == f.sizeBytes }
+            MediaDisk.child(dir, f.name).let { MediaDisk.isFile(it) && MediaDisk.length(it) == f.sizeBytes }
         }
 
         // Tags for present files not yet cached: read once, then kept in the manifest.
@@ -182,7 +185,7 @@ class DownloadedMediaScanner(
         val m = original.copy(files = files)
         if (changed) writeBack(dir, original, files)
 
-        val coverFile = m.cover?.let { c -> File(dir, c.name).takeIf { it.isFile && it.length() == c.sizeBytes } }
+        val coverFile = m.cover?.let { c -> MediaDisk.child(dir, c.name).takeIf { MediaDisk.isFile(it) && MediaDisk.length(it) == c.sizeBytes } }
         val audiobookId = if (m.kind == MediaManifest.AUDIOBOOK) DownloadedIds.audiobookId(m) else null
         val album = MediaManifests.displayTitle(m)
         val tracks = present.map { i -> track(dir, folder, m, i, album, coverFile, audiobookId) }
@@ -192,7 +195,7 @@ class DownloadedMediaScanner(
                 book = Audiobook(
                     id = id, origin = DownloadedIds.origin(m), sourceRef = m.ref, title = album,
                     author = m.creators.joinToString(JOIN), narrator = readers.joinToString(JOIN), description = m.description,
-                    coverPath = coverFile?.path ?: tracks.firstNotNullOfOrNull { it.coverPath },
+                    coverPath = coverFile ?: tracks.firstNotNullOfOrNull { it.coverPath },
                     durationMs = tracks.sumOf { it.durationMs }, status = PackStatus.OK, addedAt = 0L,
                 ),
                 trackIds = tracks.map { it.id },
@@ -205,13 +208,13 @@ class DownloadedMediaScanner(
         return Filed(tracks, book, note, read)
     }
 
-    private fun track(dir: File, folder: String, m: MediaManifest, index: Int, album: String, coverFile: File?, audiobookId: String?): Track {
+    private fun track(dir: String, folder: String, m: MediaManifest, index: Int, album: String, coverFile: String?, audiobookId: String?): Track {
         val f = m.files[index]
         val tags = f.tags
-        val file = File(dir, f.name)
-        val embedded = tags?.embeddedCover?.takeIf { EMBEDDED_COVER.matches(it) }?.let { File(dir, it) }?.takeIf { it.isFile }
+        val file = MediaDisk.child(dir, f.name)
+        val embedded = tags?.embeddedCover?.takeIf { EMBEDDED_COVER.matches(it) }?.let { MediaDisk.child(dir, it) }?.takeIf { MediaDisk.isFile(it) }
         return Track(
-            id = DownloadedIds.trackId(m, f), origin = DownloadedIds.origin(m), uri = Uri.fromFile(file).toString(), folder = folder,
+            id = DownloadedIds.trackId(m, f), origin = DownloadedIds.origin(m), uri = MediaDisk.fileUri(file), folder = folder,
             title = f.title.trim().ifEmpty { tags?.title?.trim().orEmpty() }.ifEmpty { stem(f.remoteName) },
             album = album, albumKey = Albums.itemKey(m.source, m.ref), albumArtists = m.creators.joinToString(JOIN),
             artists = f.readers.ifEmpty { m.creators }.joinToString(JOIN), composers = "", genres = m.genres.joinToString(JOIN),
@@ -219,7 +222,7 @@ class DownloadedMediaScanner(
             sortTitle = "", sortAlbum = "", sortArtist = "", sortAlbumArtist = "",
             durationMs = tags?.durationMs?.takeIf { it > 0 } ?: f.durationMs ?: 0L,
             rgTrackGain = tags?.rgTrackGain, rgTrackPeak = tags?.rgTrackPeak, rgAlbumGain = tags?.rgAlbumGain, rgAlbumPeak = tags?.rgAlbumPeak,
-            coverPath = coverFile?.path ?: embedded?.path, audiobookId = audiobookId, status = PackStatus.OK, addedAt = 0L,
+            coverPath = coverFile ?: embedded, audiobookId = audiobookId, status = PackStatus.OK, addedAt = 0L,
         )
     }
 
@@ -229,30 +232,20 @@ class DownloadedMediaScanner(
      * The file's uri is marked in [tagGuard] while TagLib reads; only a return or an exception clears it, so a crash
      * leaves it for the next scan to skip.
      */
-    private fun readTags(dir: File, folder: String, f: ManifestFile, skipTags: Set<String>): Pair<CachedTags, Boolean>? {
-        val file = File(dir, f.name)
-        val uri = Uri.fromFile(file).toString()
+    private fun readTags(dir: String, folder: String, f: ManifestFile, skipTags: Set<String>): Pair<CachedTags, Boolean>? {
+        val file = MediaDisk.child(dir, f.name)
+        val uri = MediaDisk.fileUri(file)
         if (uri in skipTags) return NO_TAGS to false
-        val found = FoundFile(uri, f.name, folder, f.sizeBytes, file.lastModified(), 0L, systemAudiobook = false, inAudiobookFolder = false)
+        val found = FoundFile(uri, f.name, folder, f.sizeBytes, MediaDisk.lastModified(file), 0L, systemAudiobook = false, inAudiobookFolder = false)
         val raw = try {
-            ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY).use { pfd ->
-                tagGuard.begin(uri)
-                val tags = try {
-                    tagReader.read(pfd, found)
-                } catch (e: Exception) {
-                    tagGuard.end()
-                    throw e
-                }
-                tagGuard.end()
-                tags.raw
-            }
+            tagReader.read(file, found, tagGuard).raw
         } catch (e: Exception) {
             return null
         }
         return cached(dir, raw, f.name) to true
     }
 
-    private fun cached(dir: File, raw: RawTags?, name: String): CachedTags {
+    private fun cached(dir: String, raw: RawTags?, name: String): CachedTags {
         val title = raw?.properties?.get("TITLE")?.firstOrNull { it.isNotBlank() }?.trim().orEmpty()
         val rg = TagParser.parse(raw, name, 0L).replayGain
         return CachedTags(
@@ -263,15 +256,15 @@ class DownloadedMediaScanner(
     }
 
     /** `.cover-<sha1 of the image>.jpg` in the item folder: art embedded in every track is stored once. Its name, or null. */
-    private fun saveCover(dir: File, bytes: ByteArray): String? = try {
-        val name = ".cover-${sha1(bytes)}.jpg"
-        val target = File(dir, name)
-        if (!target.exists()) {
-            val tmp = File(dir, "$name.tmp")
-            tmp.writeBytes(bytes)
-            if (!tmp.renameTo(target)) tmp.delete()
+    private fun saveCover(dir: String, bytes: ByteArray): String? = try {
+        val name = ".cover-${hash16(bytes)}.jpg"
+        val target = MediaDisk.child(dir, name)
+        if (!MediaDisk.exists(target)) {
+            val tmp = MediaDisk.child(dir, "$name.tmp")
+            MediaDisk.writeBytes(tmp, bytes)
+            if (!MediaDisk.renameTo(tmp, target)) MediaDisk.delete(tmp)
         }
-        name.takeIf { target.isFile }
+        name.takeIf { MediaDisk.isFile(target) }
     } catch (e: Exception) {
         null
     }
@@ -281,7 +274,7 @@ class DownloadedMediaScanner(
      * the same item): only files with the same name and hash, still without tags, take them. Failing to write only
      * means the tags are read again next time.
      */
-    private fun writeBack(dir: File, original: MediaManifest, files: List<ManifestFile>) {
+    private fun writeBack(dir: String, original: MediaManifest, files: List<ManifestFile>) {
         try {
             val current = (MediaManifests.parse(dir) as? MediaManifests.Parsed.Ok)?.manifest ?: return
             if (current.source != original.source || current.ref != original.ref) return
@@ -299,11 +292,9 @@ class DownloadedMediaScanner(
         return if (dot > 0) name.substring(0, dot) else name
     }
 
-    private fun sha1(bytes: ByteArray) =
-        MessageDigest.getInstance("SHA-1").digest(bytes).joinToString("") { "%02x".format(it) }.take(16)
+    private fun hash16(bytes: ByteArray) = sha1(bytes).hex().take(16)
 
     private companion object {
-        const val TAG = "Granger"
         const val JOIN = "; "
         const val MANIFEST_VERSION = 1
         val PARENTS = listOf("music/archive-org", "audiobooks/archive-org", "audiobooks/librivox")

@@ -22,6 +22,7 @@ import app.granger.core.media.MediaManifest
 import app.granger.core.media.MediaManifests
 import app.granger.sources.ItemStatus
 import java.io.File
+import app.granger.core.media.read
 
 /**
  * Media downloads as download groups: one group per book or album, `media:<source>:<ref>`, its files `<groupId>/<NNN>`

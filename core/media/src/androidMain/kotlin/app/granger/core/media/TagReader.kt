@@ -1,12 +1,8 @@
 package app.granger.core.media
 
 import android.os.ParcelFileDescriptor
-import app.granger.core.taglib.RawTags
 import app.granger.core.taglib.TagLib
 import java.io.FileInputStream
-
-/** What one file's bytes say: TagLib's tags (null if TagLib can't parse the file) and its chapters. */
-data class FileTags(val raw: RawTags?, val chapters: List<Chapter>)
 
 /** Reads one opened file's tags. Throws only when the bytes can't be read at all; the scanner then skips the file. */
 fun interface TagReader {

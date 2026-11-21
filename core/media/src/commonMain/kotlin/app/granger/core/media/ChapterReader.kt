@@ -1,9 +1,5 @@
 package app.granger.core.media
 
-import java.io.RandomAccessFile
-import java.nio.ByteBuffer
-import java.nio.channels.FileChannel
-
 /** One chapter: its title ("" if the file has none) and start time. Durations follow from the next start. */
 data class Chapter(val title: String, val startMs: Long)
 
@@ -13,8 +9,8 @@ data class Chapter(val title: String, val startMs: Long)
  *
  * Defensive by design: it never throws, never reads past the end of the file, and never trusts a
  * declared size for an allocation (every read is capped). A malformed file gives the chapters
- * parsed before the damage, or an empty list. It only reads [RandomAccessFile]; the caller opens it
- * read-only and closes it.
+ * parsed before the damage, or an empty list. It only reads [ChapterBytes]; the caller opens the file
+ * read-only and closes it (Android's `RandomAccessFile` and `FileChannel` forms are in androidMain).
  */
 object ChapterReader {
 
@@ -27,13 +23,8 @@ object ChapterReader {
     private const val MAX_TEXT_SAMPLE_BYTES = 4 shl 10
     private const val MAX_BOXES_PER_LEVEL = 100_000
 
-    fun read(file: RandomAccessFile): List<Chapter> = read { FileSource(file) }
-
-    /**
-     * The same, from a channel (e.g. `FileInputStream(pfd.fileDescriptor).channel` for a file opened read-only through
-     * a content resolver). Reads are positional, so the channel's position is neither used nor changed.
-     */
-    fun read(channel: FileChannel): List<Chapter> = read { ChannelSource(channel) }
+    /** The chapters of [bytes]: positional reads only. */
+    fun read(bytes: ChapterBytes): List<Chapter> = read { Wrapped(bytes) }
 
     private fun read(open: () -> Source): List<Chapter> = try {
         val src = open()
@@ -41,7 +32,7 @@ object ChapterReader {
         when {
             head.size >= 3 && head[0] == 'I'.code.toByte() && head[1] == 'D'.code.toByte() && head[2] == '3'.code.toByte() ->
                 Id3.read(src)
-            head.size >= 8 && String(head, 4, 4, Charsets.ISO_8859_1) in MP4_FIRST_BOXES -> Mp4.read(src)
+            head.size >= 8 && head.latin1(4, 4) in MP4_FIRST_BOXES -> Mp4.read(src)
             else -> emptyList()
         }
     } catch (e: Exception) {
@@ -58,26 +49,11 @@ object ChapterReader {
         fun read(pos: Long, n: Int): ByteArray
     }
 
-    private class FileSource(private val file: RandomAccessFile) : Source {
-        override val length = file.length()
+    private class Wrapped(private val bytes: ChapterBytes) : Source {
+        override val length = bytes.length
         override fun read(pos: Long, n: Int): ByteArray {
             if (pos < 0 || pos >= length || n <= 0) return ByteArray(0)
-            val out = ByteArray(minOf(n.toLong(), length - pos).toInt())
-            file.seek(pos)
-            file.readFully(out)
-            return out
-        }
-    }
-
-    private class ChannelSource(private val channel: FileChannel) : Source {
-        override val length = channel.size()
-        override fun read(pos: Long, n: Int): ByteArray {
-            if (pos < 0 || pos >= length || n <= 0) return ByteArray(0)
-            val out = ByteBuffer.allocate(minOf(n.toLong(), length - pos).toInt())
-            while (out.hasRemaining()) {
-                if (channel.read(out, pos + out.position()) < 0) break
-            }
-            return if (out.hasRemaining()) out.array().copyOf(out.position()) else out.array()
+            return bytes.read(pos, minOf(n.toLong(), length - pos).toInt())
         }
     }
 
@@ -93,7 +69,7 @@ object ChapterReader {
     private fun ByteArray.u16(i: Int): Int = (u8(i) shl 8) or u8(i + 1)
     private fun ByteArray.u32(i: Int): Long = (u16(i).toLong() shl 16) or u16(i + 2).toLong()
     private fun ByteArray.u64(i: Int): Long = (u32(i) shl 32) or u32(i + 4)
-    private fun ByteArray.text(from: Int, n: Int): String = String(this, from, n, Charsets.ISO_8859_1)
+    private fun ByteArray.text(from: Int, n: Int): String = latin1(from, n)
 
     // --- ID3v2 ---
 
@@ -185,13 +161,13 @@ object ChapterReader {
         /** A text frame's first value. */
         private fun text(b: ByteArray): String {
             if (b.isEmpty()) return ""
-            val charset = when (b[0].toInt()) {
-                0 -> Charsets.ISO_8859_1
-                1 -> Charsets.UTF_16
-                2 -> Charsets.UTF_16BE
-                else -> Charsets.UTF_8
+            val text = when (b[0].toInt()) {
+                0 -> b.latin1(1, b.size - 1)
+                1 -> b.utf16(1, b.size - 1, bom = true)
+                2 -> b.utf16(1, b.size - 1, bom = false)
+                else -> b.decodeToString(1, b.size)
             }
-            return String(b, 1, b.size - 1, charset).substringBefore('\u0000').trim()
+            return text.substringBefore('\u0000').trim()
         }
 
         private fun syncsafe(b: ByteArray, i: Int): Long =
@@ -280,7 +256,7 @@ object ChapterReader {
             while (out.size < minOf(count, MAX_CHAPTERS.toLong()) && p + 9 <= b.size) {
                 val start = b.u64(p)
                 val len = minOf(b.u8(p + 8), b.size - p - 9)
-                val title = String(b, p + 9, len, Charsets.UTF_8).trim()
+                val title = b.decodeToString(p + 9, p + 9 + len).trim()
                 if (start >= 0) out += Chapter(title, start / 10_000)
                 p += 9 + len
             }
@@ -389,7 +365,63 @@ object ChapterReader {
             if (b.size < 2) return ""
             val len = minOf(b.u16(0), b.size - 2)
             val utf16 = len >= 2 && b.u8(2) == 0xFE && b.u8(3) == 0xFF
-            return String(b, 2, len, if (utf16) Charsets.UTF_16 else Charsets.UTF_8).trim()
+            return (if (utf16) b.utf16(2, len, bom = true) else b.decodeToString(2, 2 + len)).trim()
         }
     }
+}
+
+/**
+ * The bytes [ChapterReader] reads: positional, never past [length]. Android reads a `RandomAccessFile` or a
+ * `FileChannel`; the iPhone a file handle.
+ */
+interface ChapterBytes {
+    val length: Long
+
+    /** Exactly [n] bytes from [pos] when they're there (the reader never asks past [length]); fewer only when the file is shorter than it said. */
+    fun read(pos: Long, n: Int): ByteArray
+}
+
+/** ISO-8859-1: each byte is its own character. */
+internal fun ByteArray.latin1(from: Int, n: Int): String {
+    val chars = CharArray(n) { (this[from + it].toInt() and 0xFF).toChar() }
+    return chars.concatToString()
+}
+
+/**
+ * UTF-16 as `java.nio`'s decoders read it: [bom] true is Java's "UTF-16" (a leading byte-order mark picks the order and
+ * is dropped; big-endian without one), false is "UTF-16BE" (a leading FE FF stays, as U+FEFF). An odd last byte and an
+ * unpaired surrogate become U+FFFD.
+ */
+internal fun ByteArray.utf16(from: Int, n: Int, bom: Boolean): String {
+    var i = from
+    val end = from + n
+    var little = false
+    if (bom && n >= 2) {
+        val a = this[i].toInt() and 0xFF
+        val b = this[i + 1].toInt() and 0xFF
+        if (a == 0xFE && b == 0xFF) i += 2
+        else if (a == 0xFF && b == 0xFE) { little = true; i += 2 }
+    }
+    val out = StringBuilder((end - i) / 2 + 1)
+    while (i + 1 < end) {
+        val hi = this[i].toInt() and 0xFF
+        val lo = this[i + 1].toInt() and 0xFF
+        out.append((if (little) (lo shl 8) or hi else (hi shl 8) or lo).toChar())
+        i += 2
+    }
+    if (i < end) out.append('\uFFFD')
+    // Unpaired surrogates, as Java's decoder replaces them.
+    val s = out
+    var k = 0
+    while (k < s.length) {
+        val c = s[k]
+        if (c.isHighSurrogate()) {
+            if (k + 1 < s.length && s[k + 1].isLowSurrogate()) { k += 2; continue }
+            s[k] = '\uFFFD'
+        } else if (c.isLowSurrogate()) {
+            s[k] = '\uFFFD'
+        }
+        k++
+    }
+    return s.toString()
 }

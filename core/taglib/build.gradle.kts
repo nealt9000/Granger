@@ -27,6 +27,8 @@ android {
 }
 
 dependencies {
+    // Plan I6 Task 1: TagLib's Kotlin side (and RawTags) moved to :core:media, which ships this native library.
+    androidTestImplementation(project(":core:media"))
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.truth)
