@@ -280,3 +280,23 @@ private class Bytes {
 private fun ByteArray.u16(at: Int): Int = (this[at].toInt() and 0xFF) or ((this[at + 1].toInt() and 0xFF) shl 8)
 
 private fun ByteArray.u32(at: Int): Long = (u16(at).toLong()) or (u16(at + 2).toLong() shl 16)
+
+/**
+ * Unpacks every file of the zip at [zipPath] into [dir] (Plan I5 Task 8: a Granger voice), one entry at a time; an entry
+ * [accept] refuses throws before anything of it is written. Returns the names written, in the archive's order.
+ */
+fun unzipInto(zipPath: String, dir: String, accept: (String) -> Boolean): List<String> = openBookZip(zipPath).use { zip ->
+    val written = ArrayList<String>()
+    for (name in zip.names) {
+        if (name.endsWith("/")) continue
+        if (!accept(name)) throw IOException("Refusing $name: outside the folder")
+        val e = zip.entry(name) ?: continue
+        if (e.size > Int.MAX_VALUE) throw IOException("zip: $name is too big")
+        val bytes = zip.readCapped(name, e.size.toInt()) ?: throw IOException("zip: can't read $name")
+        val out = Path(dir, name)
+        out.parent?.let { SystemFileSystem.createDirectories(it) }
+        SystemFileSystem.sink(out).buffered().use { it.write(bytes) }
+        written += name
+    }
+    written
+}

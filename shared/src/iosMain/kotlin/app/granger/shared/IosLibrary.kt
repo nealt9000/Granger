@@ -131,10 +131,17 @@ class IosLibrary(
 
     private val queuePrefs = DefaultsQueuePrefs("downloads")
 
+    /** Moves when a voice has been unpacked (Plan I5 Task 8), so the voice list looks again. */
+    val voicesChanged = MutableStateFlow(0)
+
     private val runner = app.granger.core.downloads.DownloadRunner(downloadDao, transfer, onInstalled = { record ->
         if (record.kind == app.granger.core.downloads.ItemKind.BOOK) {
             // A Granger Classic or an archive.org text joins the shelf (Android's fileBookRecord, Plan I5 Task 7).
             fileBookRecord(record)
+        } else if (record.kind == app.granger.core.downloads.ItemKind.VOICE) {
+            // The verified zip becomes .granger/voices/<id>/ and goes away (Android's VoiceUnpacker, Plan I5 Task 8).
+            IosVoiceUnpacker.unpack(record.filePath).onFailure { logLine("Couldn't unpack the voice ${record.itemId}: ${it.message}") }
+            voicesChanged.value++
         } else {
             packLibrary.fileReplaced(record.filePath)
             packLibrary.refresh()
@@ -184,6 +191,9 @@ class IosLibrary(
         kotlinx.coroutines.flow.combine(downloads.records, downloads.live) { records, live ->
             app.granger.core.downloads.DownloadQueueSummary.of(records, live, app.granger.screens.nowMillis(), mapOf(downloadRoot to app.granger.core.downloads.freeBytesAt(downloadRoot)))
         }
+
+    /** Big downloads on Wi-Fi only, as Settings has it now. */
+    fun wifiOnlyNow(): Boolean = wifiOnly()
 
     /** Free bytes where downloads go. */
     fun freeBytes(): Long = app.granger.core.downloads.freeBytesAt(downloadRoot)
@@ -793,7 +803,7 @@ class IosLibrary(
         return book.id
     }
 
-    private fun logLine(message: String) {
+    internal fun logLine(message: String) {
         platform.Foundation.NSLog("Granger: $message".replace("%", "%%"))
     }
 
@@ -1072,7 +1082,7 @@ class IosLibrary(
     /** The articles you kept, newest first. */
     val keptArticles: kotlinx.coroutines.flow.Flow<List<app.granger.core.library.KeptArticle>> get() = kept.articles
 
-        // ---- Onboarding (Plan I4 Task 8): the shared first run, Pick a start and quick wins; the voice step waits for voices (I5).
+    // ---- Onboarding (Plan I4 Task 8): the shared first run, Pick a start and quick wins, and the voice (Plan I5 Task 8).
 
     /** Whether the first run was finished or skipped once. */
     val onboardingPrefs = DefaultsOnboardingPrefs()
@@ -1091,7 +1101,7 @@ class IosLibrary(
                 catalog = catalogSource, library = packLibrary, downloads = downloads, volumes = volumes, prefs = downloadPrefs,
                 askTier = false, canRun = { false }, totalRamBytes = platform.Foundation.NSProcessInfo.processInfo.physicalMemory.toLong(),
                 onboardingPrefs = onboardingPrefs, askOn = false, research = false, dense = false, countryCode = countryCode,
-                offerVoice = false, io = app.granger.screens.ioDispatcher, now = { app.granger.screens.nowMillis() },
+                offerVoice = true, io = app.granger.screens.ioDispatcher, now = { app.granger.screens.nowMillis() },
                 knowledge = knowledge, setKnowledge = { langs -> knowledge.value = langs; setKnowledge(langs) },
                 phoneLanguages = { phoneLanguages }, appLanguage = { app.granger.screens.phoneLanguage() },
                 enqueue = { group, items, volume, wifi ->

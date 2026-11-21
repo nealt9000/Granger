@@ -6,21 +6,7 @@ import app.granger.core.speech.VoiceId
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-/** Settings → Voice (Plan V1). */
-interface VoicePrefs {
-    /** The voice to read with; null means the first installed (a Granger voice before the system's). */
-    val voiceId: StateFlow<VoiceId?>
-    /** 0.7–2.0; 1.0 by default. */
-    val speed: StateFlow<Float>
-    /** Mark the sentence being read on the page; on by default. */
-    val markSentence: StateFlow<Boolean>
-    /** Read a Research answer aloud as it arrives (Plan V2); off by default (spec decision 2). */
-    val speakAnswers: StateFlow<Boolean>
-    fun setVoice(id: VoiceId?)
-    fun setSpeed(speed: Float)
-    fun setMarkSentence(on: Boolean)
-    fun setSpeakAnswers(on: Boolean)
-}
+// The VoicePrefs interface is shared since Plan I5 Task 8 (core:screens).
 
 class SharedVoicePrefs(private val prefs: SharedPreferences) : VoicePrefs {
     constructor(context: Context) : this(context.getSharedPreferences("voice", Context.MODE_PRIVATE))
@@ -57,8 +43,8 @@ class SharedVoicePrefs(private val prefs: SharedPreferences) : VoicePrefs {
     }
 
     companion object {
-        const val MIN_SPEED = 0.7f
-        const val MAX_SPEED = 2.0f
+        const val MIN_SPEED = VoicePrefs.MIN_SPEED
+        const val MAX_SPEED = VoicePrefs.MAX_SPEED
         private const val KEY_VOICE = "voiceId"
         private const val KEY_SPEED = "speed"
         private const val KEY_MARK = "markSentence"

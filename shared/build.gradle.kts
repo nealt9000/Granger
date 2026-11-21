@@ -34,6 +34,8 @@ kotlin {
             exported.forEach { api(project(it)) }
             // Plan I5 Task 7: debug builds write a Classic's links and a QID index for the UI tests.
             implementation(libs.androidx.sqlite.bundled)
+            // Plan I5 Task 8: the read-aloud page's block references.
+            implementation(libs.kotlinx.serialization.json)
         }
     }
 }

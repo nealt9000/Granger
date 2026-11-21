@@ -148,6 +148,8 @@ object ScreenTextIds {
         "onboarding_voice_line" -> R.string.onboarding_voice_line
         "onboarding_your_picks" -> R.string.onboarding_your_picks
         "onboarding_your_region" -> R.string.onboarding_your_region
+        "player_voice_failed" -> R.string.player_voice_failed
+        "player_voice_none" -> R.string.player_voice_none
         "readiness_covers" -> R.string.readiness_covers
         "readiness_covers_slice" -> R.string.readiness_covers_slice
         "readiness_no_packs_in" -> R.string.readiness_no_packs_in
@@ -164,6 +166,8 @@ object ScreenTextIds {
         "readiness_source_my_books" -> R.string.readiness_source_my_books
         "readiness_source_phone_media" -> R.string.readiness_source_phone_media
         "readiness_source_voices" -> R.string.readiness_source_voices
+        "settings_voice_no_space" -> R.string.settings_voice_no_space
+        "settings_voice_no_storage" -> R.string.settings_voice_no_storage
         "sources_adds_inside" -> R.string.sources_adds_inside
         "sources_adds_inside_your" -> R.string.sources_adds_inside_your
         "sources_adds_to" -> R.string.sources_adds_to

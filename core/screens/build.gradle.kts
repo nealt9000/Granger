@@ -27,6 +27,9 @@ kotlin {
             api(libs.androidx.lifecycle.viewmodel.savedstate)
             api(libs.kotlinx.coroutines.core)
             api(project(":core:text"))
+            // Plan I5 Task 8: the read-aloud sources and the iPhone's voice player (ReadAloudEngine) are shared.
+            api(project(":core:speech"))
+            api(project(":core:playback"))
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.ksoup)
             implementation(libs.kotlinx.io.core)

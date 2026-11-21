@@ -39,8 +39,9 @@ object SentenceBreakCases {
         // today (the abbreviation list is English); it is kept as the reference, not fixed here.
         // The iPhone (Simulator, iOS 26) differs where noted: CFStringTokenizer's ICU uses the standard abbreviation
         // suppressions, so it never breaks after "Mr.", "Dr.", "Mrs.", "St.", "Sr." or "Dra.", nor after "a.m." before
-        // a capital. The first is invisible once Sentences joins titles; the voice hears two differences: "10 a.m. They
-        // talked…" stays one sentence, and "La Dra. López…" isn't split (better than Android).
+        // a capital. The first is invisible once Sentences joins titles. "10 a.m. They talked…" stayed one sentence until
+        // Plan I5 Task 8's a.m./p.m. rule (SentenceBreaks.ios.kt); the voice now hears one difference: "La Dra. López…"
+        // isn't split (better than Android).
         Case("Mr. Smith went to Washington. He arrived at 3.5 p.m. on Tuesday.", "en-US", listOf(0, 4, 30), listOf("Mr. Smith went to Washington.", "He arrived at 3.5 p.m. on Tuesday."),
             iosStarts = listOf(0, 30),
         ),
@@ -52,8 +53,8 @@ object SentenceBreakCases {
         Case("\"Wait,\" she said. \"Who's there?\" No answer came.", "en-US", listOf(0, 18, 33), listOf("\"Wait,\" she said.", "\"Who's there?\"", "No answer came.")),
         Case("He paused... then went on. (This is an aside.) The end.", "en-US", listOf(0, 27, 47), listOf("He paused... then went on.", "(This is an aside.)", "The end.")),
         Case("Mrs. Jones met St. John at 10 a.m. They talked for 2.5 hours. Then they parted.", "en-US", listOf(0, 5, 19, 35, 62), listOf("Mrs. Jones met St. John at 10 a.m.", "They talked for 2.5 hours.", "Then they parted."),
-            iosStarts = listOf(0, 19, 62),
-            iosSentences = listOf("Mrs. Jones met St. John at 10 a.m. They talked for 2.5 hours.", "Then they parted."),
+            // Plan I5 Task 8: the iPhone's a.m./p.m. rule puts back ICU's break after "a.m." before a capital.
+            iosStarts = listOf(0, 19, 35, 62),
         ),
         Case("It cost \$4.99, i.e. almost five dollars. That's all…", "en-US", listOf(0, 41), listOf("It cost \$4.99, i.e. almost five dollars.", "That's all…")),
         Case("El Sr. García llegó a las 3.5 horas. ¿Quién lo sabe? ¡Nadie!", "es-419", listOf(0, 7, 37, 53), listOf("El Sr. García llegó a las 3.5 horas.", "¿Quién lo sabe?", "¡Nadie!"),
