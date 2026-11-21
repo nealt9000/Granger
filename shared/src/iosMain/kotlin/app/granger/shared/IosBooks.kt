@@ -35,12 +35,12 @@ class IosBookSearcher(
  */
 interface StreamingCopy {
     /** Writes [path]'s content (after redirects) to the file [to]; false when there's no such entry or it failed. */
-    fun copyEntry(path: String, to: String): Boolean
+    fun writeEntry(path: String, to: String): Boolean
 }
 
 /** [path] of [archive] written to [to]: streamed when the archive can, else read whole and written (Android's rule). */
 fun copyOutOfPack(archive: ZimArchive, path: String, to: String): Boolean {
-    if (archive is StreamingCopy) return archive.copyEntry(path, to)
+    if (archive is StreamingCopy) return archive.writeEntry(path, to)
     return try {
         val item = archive.read(path) ?: return false
         SystemFileSystem.sink(Path(to)).buffered().use { it.write(item.bytes) }

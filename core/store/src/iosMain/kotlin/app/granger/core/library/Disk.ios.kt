@@ -150,10 +150,12 @@ actual fun epochMillis(): Long = (NSDate().timeIntervalSince1970 * 1000).toLong(
 
 actual fun randomId(): String = NSUUID().UUIDString.lowercase()
 
+// The text is NSLog's format, its % doubled: a Kotlin String passed through NSLog's C varargs as %@ isn't an NSString,
+// and NSLog crashed reading it (a book's index line on the Simulator, Plan I5 Task 5).
 internal actual fun logInfo(message: String) {
-    NSLog("Granger: %@", message)
+    NSLog("Granger: $message".replace("%", "%%"))
 }
 
 internal actual fun logWarn(message: String, error: Throwable?) {
-    NSLog("Granger: %@%@", message, error?.let { " ($it)" } ?: "")
+    NSLog("Granger: $message${error?.let { " ($it)" } ?: ""}".replace("%", "%%"))
 }
