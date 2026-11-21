@@ -10,11 +10,11 @@ Legend: **[ ]** to do · **[x]** done on the iPhone · **≈** done with the iOS
 
 | Android | iPhone | Plan | |
 | --- | --- | --- | --- |
-| Rail: Home, Search, Explore, Library, Listen; Settings | Tab bar with the same five; Settings from Home's header (spec §5) | I2 (Home, Search), I3 (Explore), I5 (Library, Listen) | [ ] I2 + I3 + I5 Task 6 part ✓ (Home, Search, Explore, Library, Settings; Listen in Task 8) |
+| Rail: Home, Search, Explore, Library, Listen; Settings | Tab bar with the same five; Settings from Home's header (spec §5) | I2 (Home, Search), I3 (Explore), I5 (Library, Listen) | [x] (Listen the fifth tab since I5 Task 8) |
 | Open items on the rail (up to 4 articles/books, pin, remove) | ≈ Recently open, from each tab's toolbar | I3 (articles), I5 (books, reading place) | ≈ [x] (the last four articles and books, newest first, in Home, Search, Explore and Library; a book's row says its place, "Chapter · 42%", and reopens there; no pin/remove, as the iPhone has no rail) |
 | Field and Night palettes, System; Spectral titles | Colour assets from `GrangerTheme.kt` (tested equal), Spectral | I2 | [x] |
 | Launcher icon (owl mark), themed icon | AppIcon traced from the launcher mark; ≈ iOS tinted/dark icon variants | I2 | [ ] I2 part ✓ (icon; tinted/dark variants to do) |
-| Mini player above the content | Mini player above the tab bar | I6 | [ ] |
+| Mini player above the content | Mini player above the tab bar | I5 (the voice), I6 (music, audiobooks) | [ ] I5 part ✓ (Task 8: iOS 26's tab bar accessory while the voice is loaded: title, Reading/Paused · section, play/pause, a tap opens Listen; music and audiobooks in I6) |
 | TalkBack, font scale, landscape | VoiceOver, Dynamic Type, landscape | every plan | [ ] I2 ✓ for its screens |
 
 ## First run, onboarding and settings
@@ -22,10 +22,10 @@ Legend: **[ ]** to do · **[x]** done on the iPhone · **≈** done with the iOS
 | Android | iPhone | Plan | |
 | --- | --- | --- | --- |
 | Privacy line before any online read (O5) | Same words, same rule | I2 | [x] |
-| Onboarding: brand, language, "Pick a start" sets (Starter/Efficient/Comprehensive), the Granger voice, quick wins first | Same flow | I4 (sets, downloads), I5 (voice) | [ ] I4 part ✓ (brand, language, Pick a start, region, quick wins, review; voice step with the voices, I5) |
+| Onboarding: brand, language, "Pick a start" sets (Starter/Efficient/Comprehensive), the Granger voice, quick wins first | Same flow | I4 (sets, downloads), I5 (voice) | [x] (I5 Task 8: the shared Read aloud line (the Owl) in Pick a start, downloaded first with the quick wins and unpacked on install) |
 | Settings: appearance, text, content (adult flags), Local only, offline pictures, Saved for now cap and Clear | Same | I2 (basics), I3 (content, keeping) | [x] |
 | App language (English/Español) and knowledge languages | Per-app language, knowledge languages | I7 | [ ] |
-| Voice settings (voice, pace, downloads) | Same | I5 | [ ] |
+| Voice settings (voice, pace, downloads) | Same | I5 | [x] (I5 Task 8: the shared VoiceSettingsModel: Reads with (Granger voices, the system voice in use, System voices (n)), Granger voices to Get/Cancel/Retry/Remove through the shared queue with licence and attribution, Speed 0.7–2.0×, Mark the sentence being read; also Get more › Models & voices) |
 | Media settings (music folders, scans) | ≈ Files imports and the Music library | I6 | [ ] |
 | Local only Quick Settings tile | ≈ Control Center control (iOS 18+ `ControlWidget`) | I6 | [ ] |
 
@@ -40,7 +40,7 @@ Legend: **[ ]** to do · **[x]** done on the iPhone · **≈** done with the iOS
 | Local only (one gate), greyed tiles, hints | Same | I2 (gate), I3 (banner, hints), I4 (greyed pack tiles) | [x] (Wikipedia online greyed in Your sources under Local only; packs always open) |
 | Online indexes (Top `.gqid`/`.gtime`) fetched at first run | Same | I3 | [x] |
 | Outfitting (your use + nine domains), would-take sizes | Same | I3 (online), I4 (packs) | [x] |
-| Reader: Contents, text size, tap to hide bars, find in page, Listen | Same | I2 (Contents, size, bars), I3 (find), I5 (Listen) | [ ] I2 + I3 part ✓ (Contents, size, bars, find) |
+| Reader: Contents, text size, tap to hide bars, find in page, Listen | Same | I2 (Contents, size, bars), I3 (find), I5 (Listen) | [x] (Listen since I5 Task 8, with Read from here in the selection menu) |
 | Reader footer (In your books, article footer views), quotes | Same | I5 (books) | ≈ [x] (I5 Task 7: the shared ReferenceLinksSource's footer under an article: In your library, the passages in your books opening the book there, the author's books; the topic page's quotes from the same source. ≈ the card rides with the bars, where Android shows it once the page is read to its end) |
 | Adult flags on default screens (Plan AF) | Same | I3 | [x] |
 
@@ -95,11 +95,11 @@ Legend: **[ ]** to do · **[x]** done on the iPhone · **≈** done with the iOS
 
 | Android | iPhone | Plan | |
 | --- | --- | --- | --- |
-| Read aloud in both readers (Piper voices: Owl, Nanny, Professor; system voices), sentence marks | sherpa-onnx Piper + AVSpeechSynthesizer | I5 | [ ] |
-| Listen: Reading tab (chapters, speed, sleep, saved place), music under it | Same | I5 | [ ] |
+| Read aloud in both readers (Piper voices: Owl, Nanny, Professor; system voices), sentence marks | sherpa-onnx Piper + AVSpeechSynthesizer | I5 | [x] (I5 Task 8: sherpa-onnx 1.13.8's iOS framework through the shared ReadAloudEngine into AVAudioEngine; system voices by AVSpeechSynthesizer's buffers; articles marked by Android's page script, books by a Readium decoration, both followed until a scroll or turn by hand; listen starts at the page's first words or the saved place; ≈ a book's sentences are walked from its XHTML by the shared EpubReadSource, where Android walks Readium Kotlin's content iterator; PDFs and fixed-layout books aren't read, as on Android) |
+| Listen: Reading tab (chapters, speed, sleep, saved place), music under it | Same | I5 | [ ] I5 part ✓ (Task 8: the sentence between its neighbours, paragraph/sentence transport, Stop, Open, Chapters, speed with presets, the voice, the sleep timer (5–60 min with the fade, End of chapter), Resume the last thing read at its sentence; music under the voice and the audio shelves with I6, said on the screen) |
 | Music: albums, artists, genres, folders, playlists, queue | ≈ Files imports + the Music library's non-DRM items | I6 | [ ] |
 | Audiobooks and LibriVox (passive until one is on the phone), bookmarks | Same | I6 | [ ] |
-| Lock screen / notification controls, media session | Now Playing + remote commands | I5 (reading), I6 (music) | [ ] |
+| Lock screen / notification controls, media session | Now Playing + remote commands | I5 (reading), I6 (music) | [ ] I5 part ✓ (Task 8: MPNowPlayingInfoCenter "Reading · title" with the section, play/pause/toggle/stop and next/previous sentence; background audio mode, AVAudioSession playback/spoken audio; a call or headphones out pauses) |
 | Android Auto | ≈ CarPlay audio (Apple entitlement requested in I6) | I6 | [ ] |
 | Player widget | ≈ WidgetKit widget | I6 | [ ] |
 | Show in other apps (documents provider) | ≈ Files visibility (`UIFileSharingEnabled`) | I4 | [x] |

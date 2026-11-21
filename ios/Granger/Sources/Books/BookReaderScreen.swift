@@ -18,6 +18,8 @@ struct BookReaderScreen: View {
     @Environment(RecentStore.self) private var recent
     @State private var model: BookReaderModel
     @State private var dragging: Double?
+    @Environment(\.voice) private var voice
+    private var readingThisBook: Bool { voice?.ui.now?.sourceKey == "book:\(bookId)" }
 
     init(bookId: String, passage: BookPassage? = nil) {
         self.bookId = bookId
@@ -31,6 +33,7 @@ struct BookReaderScreen: View {
             if let publication = model.publication, let prefs = model.prefs {
                 BookNavigatorView(
                     model: model, publication: publication, prefs: prefs, decorations: model.decorations, links: model.linkDecorations,
+                    voice: readingThisBook ? model.voiceDecorations : [],
                     searchHit: model.searchHit,
                     onSelection: { action, selection in select(action, selection) }
                 )
@@ -64,6 +67,8 @@ struct BookReaderScreen: View {
             if model.error == nil, !model.title.isEmpty { recent.addBook(id: bookId, title: model.title) }
         }
         .onChange(of: scheme) { _, s in core?.library.readingPrefs.setAppNight(night: s == .dark) }
+        // The voice's sentence decorated and followed while it reads this book (Plan I5 Task 8).
+        .task(id: readingThisBook ? voice?.progress : nil) { if readingThisBook, let voice { await model.voiceMoved(voice) } }
         .onChange(of: scenePhase) { _, phase in if phase != .active { model.flush() } }
         .onDisappear { model.flush() }
         .sheet(isPresented: panelBinding(.contents)) { ContentsPanel(model: model).presentationDetents([.large]) }
@@ -125,6 +130,18 @@ struct BookReaderScreen: View {
                         .accessibilityLabel("Text settings")
                     Spacer()
                 }
+                if model.canListen, let voice {
+                    if readingThisBook {
+                        Button { model.following = true; voice.voice.player.playPause() } label: { Image(systemName: voice.ui.playing ? "pause.circle" : "headphones.circle") }
+                            .accessibilityLabel(voice.ui.playing ? "Pause" : "Resume")
+                            .accessibilityIdentifier("book-listen")
+                    } else {
+                        Button { model.listen(voice) } label: { Image(systemName: "headphones") }
+                            .accessibilityLabel("Listen")
+                            .accessibilityIdentifier("book-listen")
+                    }
+                    Spacer()
+                }
                 Button { model.toggleBookmark() } label: { Image(systemName: model.isBookmarkedHere ? "star.fill" : "star") }
                     .accessibilityLabel(BookWords.bookmark)
                     .accessibilityValue(model.isBookmarkedHere ? "On" : "Off")
@@ -146,6 +163,7 @@ struct BookReaderScreen: View {
         case .highlight: Task { await model.highlight(selection) }
         case .note: Task { await model.note(selection) }
         case .search: openRoute(.search(query: String(text.prefix(200))))
+        case .readAloud: if let voice { model.readFromHere(voice, selection) }
         case .define:
             guard let core else { return }
             Task {

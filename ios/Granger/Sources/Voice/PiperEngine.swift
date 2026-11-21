@@ -1,4 +1,5 @@
 import Foundation
+import GrangerCoreKit
 import SherpaOnnxC
 
 /// One loaded Piper voice in sherpa-onnx (Plan I5 call 3): what Android's `SherpaTts` is over the AAR, here over the
@@ -64,4 +65,27 @@ final class PiperEngine: @unchecked Sendable {
     }
 
     deinit { close() }
+}
+
+/// The core's way into sherpa-onnx (`PiperNatives`): it decides which files and settings, this loads them.
+final class PiperNativesImpl: NSObject, PiperNatives {
+    func load(model: String, tokens: String, espeakData: String, noiseScale: Float, noiseScaleW: Float, lengthScale: Float) -> (any PiperHandle)? {
+        PiperEngine(model: model, tokens: tokens, espeakData: espeakData, noiseScale: noiseScale, noiseScaleW: noiseScaleW, lengthScale: lengthScale)
+            .map(PiperHandleImpl.init)
+    }
+}
+
+/// One loaded voice for the core: a sentence's samples as raw floats.
+final class PiperHandleImpl: NSObject, PiperHandle {
+    private let engine: PiperEngine
+    init(_ engine: PiperEngine) { self.engine = engine }
+
+    func sampleRate() -> Int32 { Int32(engine.sampleRate) }
+
+    func generate(text: String, speaker: Int32, speed: Float) -> Data? {
+        guard let samples = engine.generate(text, speaker: Int(speaker), speed: speed) else { return nil }
+        return samples.withUnsafeBufferPointer { Data(buffer: $0) }
+    }
+
+    func close() { engine.close() }
 }

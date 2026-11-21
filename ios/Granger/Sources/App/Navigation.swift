@@ -48,6 +48,8 @@ enum Route: Hashable {
     case remoteCollection(packId: String)
     /// archive.org's texts (Plan I5 Task 7).
     case archive
+    /// Settings › Voice, also Get more's Models & voices (Plan I5 Task 8).
+    case voiceSettings
 }
 
 /// What the user has read lately (Android's Continue / history): the last 50 articles, newest first.

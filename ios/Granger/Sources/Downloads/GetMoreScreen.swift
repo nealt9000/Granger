@@ -3,7 +3,8 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 /// Get more (Android's, Plan U3b Decision 2): where packs and books come from. On the iPhone in I4: Kiwix's knowledge
-/// packs and Books by kind; archive.org, LibriVox and voices join with Listen and the library (I5).
+/// packs, Books by kind, archive.org and (Plan I5 Task 8) Models & voices: the Granger voices; LibriVox and audio come
+/// with I6.
 struct GetMoreScreen: View {
     @Environment(\.core) private var core
     @Environment(\.palette) private var palette
@@ -34,6 +35,16 @@ struct GetMoreScreen: View {
                     .padding(.vertical, 4)
                 }
                 .accessibilityIdentifier("getmore-archive")
+            }
+            Section(header: heading("Models & voices")) {
+                NavigationLink(value: Route.voiceSettings) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Models and voices").font(Spectral.regular(20)).foregroundStyle(palette.onSurface)
+                        Text("What Read aloud runs on").font(.callout).foregroundStyle(palette.onSurfaceVariant)
+                    }
+                    .padding(.vertical, 4)
+                }
+                .accessibilityIdentifier("getmore-voices")
             }
             Section {
                 NavigationLink(value: Route.downloads) { Label("Downloads", systemImage: "arrow.down.circle") }

@@ -9,10 +9,14 @@ struct GrangerApp: App {
     @State private var recent = RecentStore()
     @State private var library = LibraryModel()
     private let core: Core
+    /// Read aloud and Listen (Plan I5 Task 8), for every screen.
+    @State private var voice: VoiceCenter
 
     init() {
         GrangerCoreKit.start()
-        core = Core(version: Core.version)
+        let core = Core(version: Core.version)
+        self.core = core
+        _voice = State(initialValue: VoiceCenter(core: core))
         // The rooms' one-line descriptions, bundled from Android's assets.
         core.library.roomsJson = { (Bundle.main.url(forResource: "rooms", withExtension: "json")).flatMap { try? String(contentsOf: $0, encoding: .utf8) } ?? "{}" }
         // Navigation titles in Spectral, as Android's top bars (Plan T1), scaled with Dynamic Type.
@@ -30,6 +34,7 @@ struct GrangerApp: App {
                 .environment(recent)
                 .environment(library)
                 .environment(\.core, core)
+                .environment(\.voice, voice)
                 .task(id: "\(settings.wikiLanguage)|\(settings.canFetch)") {
                     library.watch(core)
                     // Get more's catalog: the shared source asks, Swift fetches and verifies (Plan I4 Task 6).
@@ -77,17 +82,19 @@ extension EnvironmentValues {
     }
 }
 
-/// The tabs (spec §5; Plan I2 builder's call 1): Home, Search, Explore and Library (Plan I5 Task 6); Listen joins in
-/// Task 8.
+/// The tabs (spec §5; Plan I2 builder's call 1): Home, Search, Explore, Library (Plan I5 Task 6) and Listen (Task 8,
+/// call 7), with the mini player above the tab bar while the voice is loaded.
 /// Each tab keeps its own stack, so swipe-back works and switching tabs keeps your place.
 struct RootView: View {
     @Environment(\.core) private var core
-    enum Tab: Hashable { case home, search, explore, library }
+    @Environment(\.voice) private var voice
+    enum Tab: Hashable { case home, search, explore, library, listen }
     @State private var tab: Tab = .home
     @State private var homePath: [Route] = []
     @State private var searchPath: [Route] = []
     @State private var explorePath: [Route] = []
     @State private var libraryPath: [Route] = []
+    @State private var listenPath: [Route] = []
     @Environment(AppSettings.self) private var settings
     /// The first run (Plan I4 Task 8): once, before the privacy line is seen; finished or skipped, it doesn't come back.
     @State private var debugImported = false
@@ -123,6 +130,17 @@ struct RootView: View {
             stack($libraryPath) { LibraryScreen() }
                 .tabItem { Label("Library", systemImage: "books.vertical") }
                 .tag(Tab.library)
+            stack($listenPath) { ListenScreen() }
+                .tabItem { Label("Listen", systemImage: "headphones") }
+                .tag(Tab.listen)
+        }
+        .modifier(MiniPlayerAccessory(voice: voice) { listenPath = []; tab = .listen })
+        .overlay(alignment: .bottom) {
+            if let notice = voice?.notice {
+                Text(notice).font(.callout).padding(12).background(.thinMaterial, in: RoundedRectangle(cornerRadius: 8)).padding(.bottom, 120)
+                    .accessibilityIdentifier("voice-notice")
+                    .task { try? await Task.sleep(for: .seconds(4)); voice?.notice = nil }
+            }
         }
     }
 
@@ -186,6 +204,18 @@ struct RootView: View {
             return
         }
         if homePath.isEmpty, UserDefaults.standard.bool(forKey: "debugWander") { homePath = [.wander(packId: nil, path: nil)]; return }
+        // `-debugPackReader YES` with `-debugPack`: the pack's main page in the reader (Plan I5 Task 8's read-aloud tests).
+        if homePath.isEmpty, UserDefaults.standard.bool(forKey: "debugPackReader"), let core, !debugImported {
+            debugImported = true
+            Task { @MainActor in
+                try? await core.library.refreshPacks()
+                guard let packs = try? await core.library.packs.first(where: { !$0.isEmpty }),
+                      let pack = packs.first(where: { $0.status == .ok }),
+                      let main = core.library.archive(packId: pack.id)?.mainPath else { NSLog("debugPackReader: no pack"); return }
+                homePath = [.packReader(pack: pack.id, path: main, fragment: nil)]
+            }
+            return
+        }
         guard homePath.isEmpty, let spec = UserDefaults.standard.string(forKey: "debugOpen") else { return }
         let parts = spec.split(separator: ":", maxSplits: 1).map(String.init)
         guard parts.count == 2 else { return }
@@ -225,9 +255,32 @@ struct RootView: View {
                     case let .bookAt(id, passage): BookReaderScreen(bookId: id, passage: passage)
                     case let .remoteCollection(packId): RemoteCollectionScreen(packId: packId)
                     case .archive: ArchiveScreen()
+                    case .voiceSettings: VoiceSettingsScreen()
                     }
                 }
         }
         .environment(\.openRoute) { path.wrappedValue.append($0) }
     }
 }
+
+/// The mini player above the tab bar while the voice is loaded (iOS 26's bottom accessory; 26.0 has no isEnabled, so
+/// the accessory is left off there while nothing reads).
+private struct MiniPlayerAccessory: ViewModifier {
+    let voice: VoiceCenter?
+    let onOpen: () -> Void
+
+    func body(content: Content) -> some View {
+        if #available(iOS 26.1, *) {
+            content.tabViewBottomAccessory(isEnabled: voice?.reading ?? false) { mini }
+        } else if voice?.reading == true {
+            content.tabViewBottomAccessory { mini }
+        } else {
+            content
+        }
+    }
+
+    @ViewBuilder private var mini: some View {
+        if let voice { MiniPlayer(voice: voice, onOpen: onOpen) }
+    }
+}
+

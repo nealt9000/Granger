@@ -28,6 +28,13 @@ struct ReaderScreen: View {
     /// A pack article's title from its entry (its path is no title: `based.cooking/bread.html`).
     @State private var packTitle: String?
     @State private var problem: String?
+    @Environment(\.voice) private var voice
+    /// The page follows the voice's sentence until the reader scrolls it (Android's following).
+    @State private var following = true
+    /// The pack the article is read from: its own, or Wikipedia online's for [lang].
+    private var packId: String { pack ?? core?.pack(for: lang) ?? "" }
+    private var readKey: String { "pack:\(packId)/\(path)" }
+    private var readingThisPage: Bool { voice?.ui.now?.sourceKey == readKey }
     private var title: String { packTitle ?? GrangerCoreEntry.shared.titleOfKey(key: path) }
 
     var body: some View {
@@ -43,7 +50,12 @@ struct ReaderScreen: View {
                         openRoute(pack == nil ? .topic(lang: lang, path: p) : .article(packId: linkPack, path: p))
                     },
                     // Recently open lists Wikipedia online's articles (a pack article's place there comes with the shelf, I5).
-                    onLoaded: { if pack == nil { recent.add(lang: lang, path: path, title: title) } }
+                    onLoaded: {
+                        if pack == nil { recent.add(lang: lang, path: path, title: title) }
+                        markSentence()
+                    },
+                    onUserScroll: { if readingThisPage { following = false } },
+                    onReadFromHere: { readFromHere() }
                 )
                 .ignoresSafeArea(edges: chrome ? [] : .all)
             }
@@ -54,6 +66,9 @@ struct ReaderScreen: View {
         }
         .navigationTitle(title)
         .packDocumentProblem($problem)
+        // The sentence being read, marked on the page and followed (Android's ReadAloudScript mark).
+        .onChange(of: voice?.progress) { markSentence() }
+        .onChange(of: readingThisPage) { markSentence() }
         .task(id: path) {
             guard let core else { return }
             let found = try? await core.library.articleFooter(packId: pack ?? core.pack(for: lang), path: path)
@@ -81,6 +96,7 @@ struct ReaderScreen: View {
         .statusBarHidden(!chrome)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
+                listenButton
                 Button { showContents = true } label: { Image(systemName: "list.bullet") }
                     .accessibilityLabel("Contents")
                     .disabled(model.headings.isEmpty)
@@ -180,6 +196,51 @@ struct TextSizeSheet: View {
 }
 
 extension ReaderScreen {
+    /// Listen (Android's VoiceButton): start on this page, else pause or resume the voice reading it.
+    @ViewBuilder var listenButton: some View {
+        if readingThisPage, let voice {
+            Button { voice.voice.player.playPause() } label: { Image(systemName: voice.ui.playing ? "pause.circle" : "headphones.circle") }
+                .accessibilityLabel(voice.ui.playing ? "Pause" : "Resume")
+                .accessibilityIdentifier("reader-listen")
+        } else {
+            Button { listen() } label: { Image(systemName: "headphones") }
+                .accessibilityLabel("Listen")
+                .accessibilityIdentifier("reader-listen")
+        }
+    }
+
+    /// Starts the voice at the first block the page shows, or at the article's saved place when that is further on.
+    func listen() {
+        guard let voice else { return }
+        following = true
+        let (pack, p, t) = (packId, path, title)
+        controller.evaluate(GrangerCoreEntry.shared.readFirstVisible()) { json in
+            let ref = GrangerCoreEntry.shared.blockRef(json: json)
+            voice.voice.readArticle(packId: pack, path: p, title: t, blockId: ref?.id, offset: ref.flatMap { $0.offset >= 0 ? KotlinInt(value: $0.offset) : nil })
+        }
+    }
+
+    /// Read from here: the selection's sentence.
+    func readFromHere() {
+        guard let voice else { return }
+        following = true
+        let (pack, p, t) = (packId, path, title)
+        controller.evaluate(GrangerCoreEntry.shared.readSelectionBlock()) { json in
+            guard let ref = GrangerCoreEntry.shared.blockRef(json: json) else { return }
+            voice.voice.readArticleFrom(packId: pack, path: p, title: t, blockId: ref.id, offset: ref.offset >= 0 ? KotlinInt(value: ref.offset) : nil)
+        }
+    }
+
+    /// Marks the voice's sentence when it's on this page and Settings › Voice says to; clears it otherwise.
+    func markSentence() {
+        guard let voice, controller.ready else { return }
+        guard voice.voice.prefs.markSentence.value.boolValue, let mark = voice.voice.articleMark(packId: packId, path: path) else {
+            controller.evaluate(GrangerCoreEntry.shared.readClear())
+            return
+        }
+        controller.evaluate(GrangerCoreEntry.shared.readMark(blockId: mark.blockId, prefix: mark.prefix, start: mark.start, end: mark.end, scroll: following))
+    }
+
     static func isDocument(_ path: String) -> Bool {
         let p = path.lowercased().components(separatedBy: "?")[0]
         return p.hasSuffix(".pdf") || p.hasSuffix(".epub")

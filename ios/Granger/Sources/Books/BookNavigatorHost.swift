@@ -6,7 +6,7 @@ import UIKit
 
 /// What the selection menu offers, in Android's order (Copy, Highlight, Note, Define, Search). Ask and Read from here
 /// come with Research and the voices.
-enum SelectionAction { case copy, highlight, note, define, search }
+enum SelectionAction { case copy, highlight, note, define, search, readAloud }
 
 /// Readium's navigator for SwiftUI (Plan I5 call 1: the Readium views are wrapped, not rebuilt): the EPUB navigator,
 /// or the PDF navigator on PDFKit (call 2). It's built once per publication; prefs and decorations go to it as they
@@ -17,6 +17,8 @@ struct BookNavigatorView: UIViewControllerRepresentable {
     let prefs: ReadingPrefs
     let decorations: [Decoration]
     var links: [Decoration] = []
+    /// The sentence the voice reads (Plan I5 Task 8), its own group under the highlights.
+    var voice: [Decoration] = []
     let searchHit: Locator?
     let onSelection: (SelectionAction, Selection) -> Void
 
@@ -29,6 +31,7 @@ struct BookNavigatorView: UIViewControllerRepresentable {
         host.apply(prefs: prefs)
         host.apply(decorations: decorations, searchHit: searchHit)
         host.apply(links: links)
+        host.apply(voice: voice)
     }
 }
 
@@ -58,6 +61,10 @@ final class BookHostController: UIViewController, EPUBNavigatorDelegate, PDFNavi
         stylesheet: ".granger-ref { border-bottom: 1.5px dotted; box-sizing: border-box; pointer-events: none; }"
     )
     private var shownLinks: [Decoration] = []
+    private var shownVoice: [Decoration] = []
+    static let voiceGroup = "voice"
+    /// The voice's sentence (Android's reading decoration, the page script's orange).
+    static let voiceTint = UIColor(red: 232 / 255, green: 96 / 255, blue: 28 / 255, alpha: 1)
     /// The search hit's tint (Android's SEARCH_HIT_TINT).
     static let searchTint = UIColor(argb: Int32(bitPattern: 0xFFF28B30))
 
@@ -81,6 +88,7 @@ final class BookHostController: UIViewController, EPUBNavigatorDelegate, PDFNavi
                 EditingAction(title: "Note", action: #selector(grangerNote(_:))),
                 EditingAction(title: "Define", action: #selector(grangerDefine(_:))),
                 EditingAction(title: "Search", action: #selector(grangerSearch(_:))),
+                EditingAction(title: "Read from here", action: #selector(grangerReadAloud(_:))),
             ]
             var templates = HTMLDecorationTemplate.defaultTemplates()
             templates[Self.referenceStyle.id] = Self.referenceTemplate
@@ -155,6 +163,12 @@ final class BookHostController: UIViewController, EPUBNavigatorDelegate, PDFNavi
         }
     }
 
+    func apply(voice: [Decoration]) {
+        guard let epub, voice != shownVoice else { return }
+        shownVoice = voice
+        epub.apply(decorations: voice, in: Self.voiceGroup)
+    }
+
     func apply(links: [Decoration]) {
         guard let epub, links != shownLinks else { return }
         shownLinks = links
@@ -209,6 +223,7 @@ final class BookHostController: UIViewController, EPUBNavigatorDelegate, PDFNavi
     @objc func grangerNote(_ sender: Any?) { act(.note) }
     @objc func grangerDefine(_ sender: Any?) { act(.define) }
     @objc func grangerSearch(_ sender: Any?) { act(.search) }
+    @objc func grangerReadAloud(_ sender: Any?) { act(.readAloud) }
 
     private func act(_ action: SelectionAction) {
         guard let epub, let selection = epub.currentSelection else { return }

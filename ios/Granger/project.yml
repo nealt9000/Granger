@@ -59,6 +59,8 @@ targets:
         # Documents shows in the Files app (On My iPhone › Granger): packs are yours to see, copy and delete (Plan I4).
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
+        # Read aloud goes on with the screen locked (Plan I5 call 4).
+        UIBackgroundModes: [audio]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(GRANGER_BUNDLE_PREFIX)

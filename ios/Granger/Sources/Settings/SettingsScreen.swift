@@ -10,6 +10,14 @@ struct SettingsScreen: View {
     @State private var clearedSearches = false
     @State private var savedBytes: Int64 = 0
     @State private var confirmClear = false
+    @Environment(\.voice) private var voice
+
+    /// The voice that reads, or "Read aloud" (Android's Voice row summary).
+    private var voiceSummary: String {
+        guard let installed = voice?.voice.installed.voices.value, !installed.isEmpty else { return "Read aloud" }
+        let chosen = voice?.voice.prefs.voiceId.value
+        return (installed.first { $0.id.encode() == chosen?.encode() } ?? installed.first)?.title ?? "Read aloud"
+    }
 
     var body: some View {
         @Bindable var settings = settings
@@ -60,6 +68,14 @@ struct SettingsScreen: View {
                 Button("Clear", role: .destructive) { core?.library.clearSaved(); refreshSaved() }
             } message: {
                 Text("What you read online goes from this phone. What you kept stays.")
+            }
+            Section {
+                NavigationLink {
+                    VoiceSettingsScreen()
+                } label: {
+                    LabeledContent("Voice", value: voiceSummary)
+                }
+                .accessibilityIdentifier("settings-voice")
             }
             Section("Downloads") {
                 Toggle("Download on Wi-Fi only", isOn: $settings.wifiOnly)

@@ -123,6 +123,12 @@ final class BookReaderModel {
     private var linksLevel: LinkLevel?
     private var linksTask: Task<Void, Never>?
 
+    /// Read aloud (Plan I5 Task 8): the book as the voice reads it (an EPUB that flows), the file it's read from, the
+    /// sentence's decoration, and whether the page follows the voice (until a turn by hand).
+    private(set) var readSource: EpubReadSource?
+    private(set) var filePath: String?
+    private(set) var voiceDecorations: [Decoration] = []
+    var following = true
     private var owned: OwnedViewModel<EbookReaderModel>?
     private var watching: Task<Void, Never>?
     private var anchorStarts: [String: [String: KotlinDouble]] = [:]
@@ -167,6 +173,7 @@ final class BookReaderModel {
             return
         }
         title = book.title
+        filePath = book.filePath
         guard let opened = await ReadiumBooks.open(book.filePath) else {
             fail(BookWords.bookDamaged)
             return
@@ -309,6 +316,8 @@ final class BookReaderModel {
         let before = locator
         locator = l
         if let before, Date().timeIntervalSince(touchedAt) < 1, chrome, panel == nil, shared?.editingHighlight == nil, moved(before, l) { chrome = false }
+        // A turn by hand while the voice reads this book: the page stops following it (Android's onPageChanged).
+        if let before, Date().timeIntervalSince(touchedAt) < 1, moved(before, l), !voiceDecorations.isEmpty { following = false }
         unsaved = l
         saveTask?.cancel()
         saveTask = Task { @MainActor [weak self] in
@@ -368,6 +377,53 @@ final class BookReaderModel {
         guard let l = locator else { return nil }
         if isPdf { return l.locations.position.flatMap { GrangerCore.TocPlaceKt.pdfTocIndex(toc: toc, page: Int32($0))?.intValue } }
         return TocPlace.shared.index(toc: toc, href: l.href.string, progression: l.locations.progression.map { KotlinDouble(value: $0) }, anchorStarts: anchorStarts)?.intValue
+    }
+
+    // MARK: Read aloud (Plan I5 Task 8; Android's EbookReaderViewModel.readAloud and the reading decoration)
+
+    /// The voice's source for this book: an EPUB that flows (a PDF or a fixed-layout book has no sentences to read).
+    func readSource(_ voice: VoiceCenter) -> EpubReadSource? {
+        if let readSource { return readSource }
+        guard let publication, let filePath, !isPdf, !fixedLayout else { return nil }
+        let entries = toc.map { GrangerCoreEntry.shared.tocEntry(title: $0.title, href: $0.href, depth: $0.depth) }
+        let order = publication.readingOrder.map(\.href)
+        voice.voice.rememberToc(bookId: bookId, toc: entries, readingOrder: order)
+        let made = voice.voice.bookSource(bookId: bookId, title: title, path: filePath, toc: entries, readingOrder: order)
+        readSource = made
+        return made
+    }
+
+    var canListen: Bool { publication != nil && !isPdf && !fixedLayout }
+
+    /// Listen: the page's first words place the voice (Readium's first visible element), or the book's saved place.
+    func listen(_ voice: VoiceCenter) {
+        guard let source = readSource(voice) else { return }
+        following = true
+        Task { @MainActor in
+            let first = await (navigator as? EPUBNavigatorViewController)?.firstVisibleElementLocator()
+            let href = (first ?? locator)?.href.string
+            voice.voice.readBook(source: source, href: href, visibleText: first?.text.highlight)
+        }
+    }
+
+    /// Read from here: the selection's sentence.
+    func readFromHere(_ voice: VoiceCenter, _ selection: Selection) {
+        guard let source = readSource(voice), let text = selection.locator.text.highlight else { return }
+        following = true
+        voice.voice.readBookFrom(source: source, href: selection.locator.href.string, text: text)
+    }
+
+    /// The voice moved: its sentence is decorated, and the page goes to it while it follows.
+    func voiceMoved(_ voice: VoiceCenter) async {
+        guard let source = readSource(voice) else { return }
+        guard voice.voice.prefs.markSentence.value.boolValue || following,
+              let json = try? await voice.voice.bookMark(source: source), let l = try? Locator(jsonString: json) else {
+            voiceDecorations = []
+            return
+        }
+        voiceDecorations = voice.voice.prefs.markSentence.value.boolValue
+            ? [Decoration(id: "voice", locator: l, style: .highlight(tint: BookHostController.voiceTint))] : []
+        if following { _ = await navigator?.go(to: l, options: NavigatorGoOptions(animated: false)) }
     }
 
     // MARK: Moving
