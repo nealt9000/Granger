@@ -313,4 +313,22 @@ final class SmokeTests: XCTestCase {
         confirm.tap()
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'get-'")).firstMatch.waitForExistence(timeout: 20), "removed")
     }
+
+    /// Plan I4 Task 6: Kiwix's list draws the Wikipedia set as one row, with how much of it and with or without pictures.
+    func testGetMoreKiwixWikipediaRow() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en"]
+        app.launch()
+        let getMore = app.buttons["Get more"]
+        XCTAssertTrue(getMore.waitForExistence(timeout: 10))
+        getMore.tap()
+        app.buttons["getmore-kiwix"].tap()
+        let field = app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 10))
+        field.tap()
+        field.typeText("Wikipedia")
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Best 50,000'")).firstMatch.waitForExistence(timeout: 60), "the set's slices")
+        XCTAssertTrue(app.segmentedControls.buttons.count >= 2, "with or without pictures")
+        shot(app, "getmore-wikipedia")
+    }
 }

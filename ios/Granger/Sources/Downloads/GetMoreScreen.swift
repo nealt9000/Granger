@@ -187,12 +187,46 @@ struct SourceScreen: View {
                     .pickerStyle(.menu)
                     .font(.callout)
                 }
+                // A set's row (Plan WF): how much of it (its slices), then with or without pictures.
+                if let setId = row.setId, !row.slices.isEmpty, !row.status.isBusy {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(row.slices, id: \.zimName) { slice in sliceChoice(slice, setId: setId, model) }
+                        if row.pictures.count > 1 {
+                            Picker("Pictures", selection: Binding(get: { row.pictures.first(where: { $0.chosen })?.flavour ?? "" }, set: { model.choosePictures(setId: setId, flavour: $0) })) {
+                                ForEach(row.pictures, id: \.flavour) { p in Text(p.label.words).tag(p.flavour) }
+                            }
+                            .pickerStyle(.segmented)
+                            if let reason = row.pictures.first(where: { !$0.enabled })?.reason?.words {
+                                Text(reason).font(.caption).foregroundStyle(palette.onSurfaceVariant)
+                            }
+                        }
+                    }
+                }
+                if let inside = row.insideOf?.words { Text(inside).font(.caption).foregroundStyle(palette.tertiary) }
                 if case let .downloading(d) = onEnum(of: row.status) {
                     ProgressView(value: Double(d.fraction)).tint(palette.primary)
                 }
             }
             .accessibilityElement(children: .contain)
         }
+    }
+
+    /// One slice of a set: chosen or not, its size, and whether it's on the phone or inside a bigger one already.
+    private func sliceChoice(_ slice: SliceChoice, setId: String, _ model: SourceViewModel) -> some View {
+        Button { model.chooseSlice(setId: setId, zimName: slice.zimName) } label: {
+            HStack(alignment: .top, spacing: 10) {
+                Image(systemName: slice.chosen ? "largecircle.fill.circle" : "circle").foregroundStyle(palette.primary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("\(slice.label) · \(QueueWords.bytes(slice.sizeBytes))").foregroundStyle(palette.onSurface)
+                    if slice.installed { Text("On this phone").font(.caption).foregroundStyle(palette.tertiary) }
+                    if let inside = slice.inside?.words { Text(inside).font(.caption).foregroundStyle(palette.onSurfaceVariant) }
+                    if let note = slice.note?.words { Text(note).font(.caption).foregroundStyle(palette.onSurfaceVariant) }
+                }
+                Spacer()
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(slice.chosen ? .isSelected : [])
     }
 
     private func rowText(_ row: ItemRow) -> some View {
