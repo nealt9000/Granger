@@ -78,6 +78,16 @@ Spec: `docs/superpowers/specs/2026-11-20-iphone-design.md` (§ I4 Packs and down
 
 ### Task 9: Simulator check, parity rows, merge
 - [ ] The UI smoke test grows: get a small pack (a subject add-on), pause and resume, open an article from it, find it in Search, see it in Files, Outfitting's sizes. Walkthrough with screenshots (Field, Night, largest Dynamic Type, landscape, VoiceOver tree). Tick the I4 rows, GrangerCore release, merge and push, write Plan I5.
+  - **Done:**
+    - **Search and the reader:** Best matches over packs (keyword-only; the shared `PackPassageFinder`, moved by a subagent: library 535/535, search 63/63). A pack's PDF or EPUB link opens in Quick Look.
+    - **Downloads:** resume after the app is killed passes (`testDownloadSurvivesTheAppBeingKilled`).
+    - **Tests:** iPhone 24/24 (get, pause, resume, install and remove a live 43 MB pack; pack search, topic and reader; Files import; Your sources; book packs; Get more's Wikipedia set; first run; Ready offline and Outfitting; feeds). JVM 3864/3864, bundleRelease with R8.
+    - **Night and the largest Dynamic Type:** walked; text scales and wraps, no broken words. Three tests stop at their scroll limits at that size, which is test reach, not layout.
+    - **Parity:** I4 rows ticked.
+  - **Left, with reasons:**
+    - The online index set still comes by the iPhone's own sha256-checked fetch, not the queue; it works and the queue gains nothing the user sees but a line in Downloads.
+    - Books and By kind in Search, and search by meaning: I5 (books) and an embedder.
+    - VoiceOver: checked by tree only, as before.
 
 ## Order and size
 
