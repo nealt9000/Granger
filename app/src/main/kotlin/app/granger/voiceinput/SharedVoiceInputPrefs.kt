@@ -6,19 +6,7 @@ import app.granger.core.speech.RecognizerTags
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-/** Settings → Voice input (Plan A1). */
-interface VoiceInputPrefs {
-    /** The English the mic listens in: [RecognizerTags.ENGLISH_US] (default) or [RecognizerTags.ENGLISH_UK]. */
-    val englishTag: StateFlow<String>
-    /** "Ask as soon as I stop talking": a spoken question sends itself; off by default (Neal, 2026-11-02). */
-    val askWhenDone: StateFlow<Boolean>
-    /** Whether the microphone permission has been asked for before, to tell "not yet asked" from "refused for good". */
-    val micAsked: Boolean
-    fun setEnglishTag(tag: String)
-    fun setAskWhenDone(on: Boolean)
-    fun setMicAsked()
-}
-
+/** Android's [VoiceInputPrefs]: the "voice_input" SharedPreferences, as before Plan I6. */
 class SharedVoiceInputPrefs(private val prefs: SharedPreferences) : VoiceInputPrefs {
     constructor(context: Context) : this(context.getSharedPreferences("voice_input", Context.MODE_PRIVATE))
 

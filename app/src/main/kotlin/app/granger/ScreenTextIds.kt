@@ -327,6 +327,10 @@ object ScreenTextIds {
         "sources_two_kinds" -> R.string.sources_two_kinds
         "sources_updated" -> R.string.sources_updated
         "sources_voice" -> R.string.sources_voice
+        "voice_input_failed" -> R.string.voice_input_failed
+        "voice_input_no_match" -> R.string.voice_input_no_match
+        "voice_input_no_permission" -> R.string.voice_input_no_permission
+        "voice_input_unavailable" -> R.string.voice_input_unavailable
         else -> error("no Android string for the shared key '$key' (run tools/ios/make_text_ids.py)")
     }
 

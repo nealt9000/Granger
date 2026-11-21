@@ -325,6 +325,10 @@ enum ScreenText {
         "sources_two_kinds": "%1$s and %2$s",
         "sources_updated": "Updated %1$s",
         "sources_voice": "Read-aloud voice",
+        "voice_input_failed": "Voice input isn't working right now. Try again.",
+        "voice_input_no_match": "Didn't catch that",
+        "voice_input_no_permission": "Granger needs the microphone to hear you",
+        "voice_input_unavailable": "Voice input isn't available in this language",
     ]
 
     static let plurals: [String: [String: String]] = [

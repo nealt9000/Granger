@@ -81,7 +81,7 @@ class DictationTest {
         var final: String? = null
         dictation.start { final = it }
         s.speech.end(DictationEvent.Failed(DictationFailure.NO_MATCH))
-        assertThat(dictation.state.value).isEqualTo(Dictation.State.Failed(UiText.Res(R.string.voice_input_no_match)))
+        assertThat(dictation.state.value).isEqualTo(Dictation.State.Failed(UiText.Res("voice_input_no_match")))
         advanceTimeBy(3_001)
         assertThat(dictation.state.value).isEqualTo(Dictation.State.Idle)
         assertThat(final).isNull()
@@ -114,6 +114,6 @@ class DictationTest {
     }
 
     @Test fun everyFailureHasAMessage() {
-        DictationFailure.entries.forEach { assertThat(Dictation.messageFor(it)).isNotEqualTo(0) }
+        DictationFailure.entries.forEach { assertThat(Dictation.messageFor(it).key).isNotEmpty() }
     }
 }

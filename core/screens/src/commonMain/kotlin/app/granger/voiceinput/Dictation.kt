@@ -1,7 +1,5 @@
 package app.granger.voiceinput
 
-import app.granger.invoke
-import app.granger.R
 import app.granger.UiText
 import app.granger.core.speech.DictationEvent
 import app.granger.core.speech.DictationFailure
@@ -11,6 +9,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+
+// Shared since Plan I6 Task 2: the mic's rules on both phones, over the shared SpeechInput.
 
 /**
  * One screen's dictation (Plan A1): owned by its view model, it knows nothing about the screen. A take can be started
@@ -71,7 +71,7 @@ class Dictation(
     }
 
     private fun fail(reason: DictationFailure) {
-        _state.value = State.Failed(UiText.Res(messageFor(reason)))
+        _state.value = State.Failed(messageFor(reason))
         clear = scope.launch {
             delay(failureShownMs)
             if (_state.value is State.Failed) _state.value = State.Idle
@@ -79,11 +79,11 @@ class Dictation(
     }
 
     companion object {
-        fun messageFor(reason: DictationFailure): Int = when (reason) {
-            DictationFailure.NO_MATCH -> R.string.voice_input_no_match
-            DictationFailure.NO_PERMISSION -> R.string.voice_input_no_permission
-            DictationFailure.UNAVAILABLE -> R.string.voice_input_unavailable
-            DictationFailure.BUSY, DictationFailure.TIMEOUT, DictationFailure.OTHER -> R.string.voice_input_failed
+        fun messageFor(reason: DictationFailure): UiText.Res = when (reason) {
+            DictationFailure.NO_MATCH -> UiText.Res("voice_input_no_match")
+            DictationFailure.NO_PERMISSION -> UiText.Res("voice_input_no_permission")
+            DictationFailure.UNAVAILABLE -> UiText.Res("voice_input_unavailable")
+            DictationFailure.BUSY, DictationFailure.TIMEOUT, DictationFailure.OTHER -> UiText.Res("voice_input_failed")
         }
     }
 }
