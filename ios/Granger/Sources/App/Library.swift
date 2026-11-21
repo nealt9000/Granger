@@ -32,6 +32,7 @@ final class LibraryModel {
     func watch(_ core: Core) {
         guard !watching else { return }
         watching = true
+        catalogCache = core.folder.appendingPathComponent("catalog", isDirectory: true)
         let flow = core.library.version
         Task { @MainActor in
             for await v in flow { self.version = v.intValue }
@@ -47,6 +48,8 @@ final class LibraryModel {
         let source = GrangerCoreEntry.shared.onlinePackId(lang: lang)
         let opened = await open(core: core, folder: folder, files: manifest.files.filter { $0.source == source })
         if opened { index = .ready }
+        // Offline, the last good catalog still names the packs' areas and Get more's lists (Android's cache).
+        if !allowed, let cached = await loadCatalog() { core.library.catalog = cached }
         guard allowed else { if !opened { index = .none }; return }
         guard let catalog = await loadCatalog() else { if !opened { index = .failed }; return }
         // Topic records (Plan O6) are named by the catalog.
@@ -81,14 +84,35 @@ final class LibraryModel {
     /// The next loadCatalog fetches afresh (Get more's refresh).
     func forgetCatalog() { catalog = nil }
 
+    /// Where the last good catalog and its signature are kept (Android's catalog cache), set by [watch].
+    private var catalogCache: URL?
+
+    /// The verified catalog: fetched when the gate is open (and kept, with its signature, for next time), else the last
+    /// good one from the cache, verified again; nil when there's neither.
     func loadCatalog() async -> Catalog? {
         if let catalog { return catalog }
-        guard let json = try? await URLSession.shared.data(from: Self.catalogURL).0,
-              let sig = try? await URLSession.shared.data(from: Self.catalogURL.appendingPathExtension("sig")).0,
-              let key = Data(base64Encoded: Self.publicKey) else { return nil }
-        let parsed = await background { GrangerCoreEntry.shared.parseCatalog(json: json, signature: sig, publicKey: key) }
-        catalog = parsed
-        return parsed
+        guard let key = Data(base64Encoded: Self.publicKey) else { return nil }
+        if NetworkGate.shared.open,
+           let json = try? await URLSession.shared.data(from: Self.catalogURL).0,
+           let sig = try? await URLSession.shared.data(from: Self.catalogURL.appendingPathExtension("sig")).0,
+           let parsed = await background({ GrangerCoreEntry.shared.parseCatalog(json: json, signature: sig, publicKey: key) }) {
+            if let dir = catalogCache {
+                try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+                try? json.write(to: dir.appendingPathComponent("catalog.json"), options: .atomic)
+                try? sig.write(to: dir.appendingPathComponent("catalog.json.sig"), options: .atomic)
+            }
+            catalog = parsed
+            return parsed
+        }
+        catalog = await cachedCatalog(key: key)
+        return catalog
+    }
+
+    private func cachedCatalog(key: Data) async -> Catalog? {
+        guard let dir = catalogCache,
+              let json = try? Data(contentsOf: dir.appendingPathComponent("catalog.json")),
+              let sig = try? Data(contentsOf: dir.appendingPathComponent("catalog.json.sig")) else { return nil }
+        return await background { GrangerCoreEntry.shared.parseCatalog(json: json, signature: sig, publicKey: key) }
     }
 
     /// Downloads [file] into [folder] under a name that carries its hash, checking the sha256 before it's moved in.
