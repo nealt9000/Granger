@@ -1,9 +1,6 @@
 package app.granger.onboarding
 
-import app.granger.invoke
-import app.granger.R
 import app.granger.UiText
-import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.Catalog
 import app.granger.core.catalog.CatalogItem
@@ -16,7 +13,10 @@ import app.granger.core.catalog.UseCase
 import app.granger.core.catalog.VoiceEntry
 import app.granger.core.catalog.downloadBytes
 import app.granger.core.catalog.vectors
-import app.granger.research.Librarian
+import app.granger.core.downloads.DownloadVolume
+import app.granger.core.library.FilingKeys
+import app.granger.screens.englishCountryName
+import app.granger.sources.KiwixList
 
 /**
  * One row the user can untick: a pack, or a collection's books folded together ([count] > 1). [installed] rows are on
@@ -96,7 +96,10 @@ data class Review(
     val isEmpty: Boolean get() = items.isEmpty()
 }
 
-/** The onboarding flow's data, computed from the cached catalog and what is installed. Pure. */
+/**
+ * The onboarding flow's data, computed from the cached catalog and what is installed. Pure. Shared since Plan I4b Task 8:
+ * both phones run the same first run.
+ */
 object OnboardingModel {
     const val STARTER = "starter"
     const val EFFICIENT = "efficient"
@@ -123,9 +126,9 @@ object OnboardingModel {
         appLanguage: String = ENGLISH,
     ): List<StartChoice> {
         val blurbs = mapOf(
-            STARTER to UiText.Res(R.string.onboarding_blurb_starter),
-            EFFICIENT to UiText.Res(R.string.onboarding_blurb_efficient),
-            COMPREHENSIVE to UiText.Res(R.string.onboarding_blurb_comprehensive),
+            STARTER to UiText.Res("onboarding_blurb_starter"),
+            EFFICIENT to UiText.Res("onboarding_blurb_efficient"),
+            COMPREHENSIVE to UiText.Res("onboarding_blurb_comprehensive"),
         )
         // The main knowledge language's tier presets (Plan L3): `efficient-es` is still the Efficient choice.
         val code = Languages.normalise(language)
@@ -151,7 +154,7 @@ object OnboardingModel {
         val items = reference.essential(language).flatMap { resolve(catalog, it) }
             .map { if (saveSpace) withoutPictures(catalog, it) else it }.distinctBy { it.id }.filter { it.id !in installed }
         if (items.isEmpty()) return null
-        return Line(SECOND, UiText.Res(R.string.onboarding_second_encyclopedia, app.granger.sources.KiwixList.languageName(language)), items, installed = false)
+        return Line(SECOND, UiText.Res("onboarding_second_encyclopedia", KiwixList.languageName(language)), items, installed = false)
     }
 
     /** The readiness domain whose essential tier is a language's encyclopedia. */
@@ -159,13 +162,20 @@ object OnboardingModel {
 
     /**
      * Ask's models as one line (Plan U3a Decision 2): the answering model, plus the embedder when [dense] retrieval is on,
-     * less what's installed. Null on a phone that can't run Ask, in a catalog with no answering model (release builds
-     * today), or when everything is on the phone already.
+     * less what's installed. Null on a phone that can't run Ask ([askTier] is Android's `DeviceTier.ASK` and up), in
+     * a catalog with no answering model (release builds today), or when everything is on the phone already.
      */
-    fun askLine(catalog: Catalog, tier: DeviceTier, dense: Boolean, installed: Set<String>): Line? {
-        if (tier < DeviceTier.ASK) return null
-        val items = Librarian.models(catalog, dense).filter { it.id !in installed }
-        return if (items.isEmpty()) null else Line(ASK, UiText.Res(R.string.onboarding_ask_line), items, installed = false)
+    fun askLine(catalog: Catalog, askTier: Boolean, dense: Boolean, installed: Set<String>): Line? {
+        if (!askTier) return null
+        val items = askModels(catalog, dense).filter { it.id !in installed }
+        return if (items.isEmpty()) null else Line(ASK, UiText.Res("onboarding_ask_line"), items, installed = false)
+    }
+
+    /** Ask's models, as the app's `Librarian.models` lists them: the answering model, then the embedder when [dense]. */
+    fun askModels(catalog: Catalog, dense: Boolean): List<ModelEntry> {
+        val answerer = catalog.models.firstOrNull { it.role == ModelRole.SMALL } ?: return emptyList()
+        val embedder = if (dense) catalog.models.firstOrNull { it.role == ModelRole.EMBEDDER } else null
+        return listOfNotNull(answerer, embedder)
     }
 
     /**
@@ -175,7 +185,7 @@ object OnboardingModel {
     fun voiceLine(catalog: Catalog, installed: Set<String>): Line? {
         if (catalog.voices.any { it.id in installed }) return null
         val voice = catalog.voices.firstOrNull { it.id == VOICE_ID } ?: catalog.voices.firstOrNull() ?: return null
-        return Line(VOICE, UiText.Res(R.string.onboarding_voice_line), listOf(voice), installed = false)
+        return Line(VOICE, UiText.Res("onboarding_voice_line"), listOf(voice), installed = false)
     }
 
     /** [item]'s no-pictures flavour (`…_nopic`, same ZIM), or [item] itself. */
@@ -204,7 +214,7 @@ object OnboardingModel {
         val code = countryCode.uppercase()
         if (code.isBlank()) return null
         // English on purpose, whatever the phone's language: this matches the catalog's English map titles, not UI (L3).
-        val name = java.util.Locale("", code).getDisplayCountry(java.util.Locale.ENGLISH)
+        val name = englishCountryName(code)
         val titles = listOfNotNull(name.takeIf { it.isNotBlank() && it != code }, REGION_ALIASES[code])
         return titles.firstNotNullOfOrNull { t -> regions.countries.firstOrNull { it.place == null && it.pack.title.equals(t, ignoreCase = true) } }
     }
@@ -217,7 +227,7 @@ object OnboardingModel {
      * Where the start goes when nothing was chosen (Plan E1 item 5): a removable card with more free space than the
      * phone's own storage (a 64 GB phone with a big card), else the first volume, the phone's own storage.
      */
-    fun defaultVolume(volumes: List<app.granger.core.downloads.Volume>): app.granger.core.downloads.Volume? {
+    fun defaultVolume(volumes: List<DownloadVolume>): DownloadVolume? {
         val first = volumes.firstOrNull() ?: return null
         return volumes.filter { it.removable && it.freeBytes > first.freeBytes }.maxByOrNull { it.freeBytes } ?: first
     }
@@ -289,22 +299,22 @@ object OnboardingModel {
             start?.let { s ->
                 // The preset's name only while it is the preset: trimmed, it's the user's own (Plan U3a Decision 5).
                 val whole = s.lines.none { !it.installed && it.id in unticked }
-                s.chosen(unticked).fresh().takeIf { it.isNotEmpty() }?.let { add(ReviewGroup(if (whole) UiText.Raw(s.title) else UiText.Res(R.string.onboarding_your_picks), it)) }
+                s.chosen(unticked).fresh().takeIf { it.isNotEmpty() }?.let { add(ReviewGroup(if (whole) UiText.Raw(s.title) else UiText.Res("onboarding_your_picks"), it)) }
             }
             // Under its own heading the line is "The librarian", not "Ask (Preview)" twice.
             voice?.let { v -> listOf(v.copy(title = UiText.Raw(v.items.single().title))).fresh().takeIf { it.isNotEmpty() }?.let { add(ReviewGroup(v.title, it)) } }
-            ask?.let { listOf(it.copy(title = UiText.Res(R.string.onboarding_the_librarian))).fresh().takeIf { l -> l.isNotEmpty() }?.let { l -> add(ReviewGroup(it.title, l)) } }
+            ask?.let { listOf(it.copy(title = UiText.Res("onboarding_the_librarian"))).fresh().takeIf { l -> l.isNotEmpty() }?.let { l -> add(ReviewGroup(it.title, l)) } }
             // A second language's encyclopedia (Plan L3): its own group, each pack under its own title.
             second?.let { line ->
-                line.items.map { Line(it.id, UiText.Raw(app.granger.sources.KiwixList.title(it)), listOf(it), installed = false) }.fresh().takeIf { it.isNotEmpty() }
+                line.items.map { Line(it.id, UiText.Raw(KiwixList.title(it)), listOf(it), installed = false) }.fresh().takeIf { it.isNotEmpty() }
                     ?.let { add(ReviewGroup(line.title, it)) }
             }
             region?.takeUnless { it.installed }?.let { r ->
                 listOf(Line(r.pack.id, UiText.Raw(r.title), listOf(r.pack), installed = false)).fresh().takeIf { it.isNotEmpty() }
-                    ?.let { add(ReviewGroup(UiText.Res(R.string.onboarding_your_region), it)) }
+                    ?.let { add(ReviewGroup(UiText.Res("onboarding_your_region"), it)) }
             }
             val useCaseLines = additions.flatMap { it.lines }.fresh()
-            if (useCaseLines.isNotEmpty()) add(ReviewGroup(UiText.Res(R.string.onboarding_uses), useCaseLines))
+            if (useCaseLines.isNotEmpty()) add(ReviewGroup(UiText.Res("onboarding_uses"), useCaseLines))
         }
         return if (containment == null) Review(groups, freeBytes) else held(groups, freeBytes, containment)
     }
@@ -319,7 +329,7 @@ object OnboardingModel {
         val dropped = LinkedHashMap<String, PackEntry>() // held ZIM name -> the review's pack that holds it
         for (pack in packs) {
             val holder = containment.containers(pack.zimName).mapNotNull { byZim[it] }.maxByOrNull { it.setRank } ?: continue
-            dropped.putIfAbsent(pack.zimName, holder)
+            if (pack.zimName !in dropped) dropped[pack.zimName] = holder
         }
         if (dropped.isEmpty()) return Review(groups, freeBytes)
         val kept = groups.mapNotNull { g ->
@@ -336,18 +346,18 @@ object OnboardingModel {
     /** "Wikipedia Top 1 million covers Best 50,000, so only Top 1 million is queued." */
     fun heldText(holder: PackEntry, held: PackEntry): UiText =
         if (holder.isSlice && held.isSlice && holder.setId == held.setId) {
-            val big = app.granger.sources.KiwixList.shortLabel(holder)
-            val set = app.granger.sources.KiwixList.setTitle(holder.setId, listOf(holder))
-            UiText.Res(R.string.onboarding_held_slice, set, big, app.granger.sources.KiwixList.shortLabel(held))
+            val big = KiwixList.shortLabel(holder)
+            val set = KiwixList.setTitle(holder.setId, listOf(holder))
+            UiText.Res("onboarding_held_slice", set, big, KiwixList.shortLabel(held))
         } else {
-            UiText.Res(R.string.onboarding_held, app.granger.sources.KiwixList.title(holder), app.granger.sources.KiwixList.title(held))
+            UiText.Res("onboarding_held", KiwixList.title(holder), KiwixList.title(held))
         }
 
     /** The Granger Classics' collection id. */
-    const val CLASSICS = app.granger.core.library.Filing.GRANGER_CLASSICS
+    const val CLASSICS = FilingKeys.GRANGER_CLASSICS
 
     /** Granger's book collections, one per knowledge language (Plan L3): Granger Classics and Clásicos Granger. */
-    val GRANGER_COLLECTIONS: Set<String> = app.granger.core.library.Filing.GRANGER_COLLECTIONS.values.toSet()
+    val GRANGER_COLLECTIONS: Set<String> = FilingKeys.GRANGER_COLLECTIONS.values.toSet()
 
     /** Small packs land early (Plan DL Decision 5): 200 MB or less. */
     const val SMALL_PACK_BYTES = 200L * 1000 * 1000
@@ -385,9 +395,9 @@ object OnboardingModel {
         val voice = review.items.any { it is VoiceEntry }
         val classics = review.items.any { it is BookEntry && it.collection in GRANGER_COLLECTIONS }
         return when {
-            voice && classics -> UiText.Res(R.string.onboarding_quick_voice_classics)
-            voice -> UiText.Res(R.string.onboarding_quick_voice)
-            classics -> UiText.Res(R.string.onboarding_quick_classics)
+            voice && classics -> UiText.Res("onboarding_quick_voice_classics")
+            voice -> UiText.Res("onboarding_quick_voice")
+            classics -> UiText.Res("onboarding_quick_classics")
             else -> null
         }
     }
@@ -413,7 +423,7 @@ object OnboardingModel {
             if (item is PackEntry && item.zimName.isNotBlank() && largestFlavour[item.zimName] != item.id) continue
             when (item) {
                 is BookEntry -> bookLines.getOrPut(item.collection) { mutableListOf() }.also { if (it.isEmpty()) out += PLACEHOLDER }.add(item)
-                else -> out += Line(item.id, UiText.Raw(app.granger.sources.KiwixList.title(item)), listOf(item), installed = item.id in installed)
+                else -> out += Line(item.id, UiText.Raw(KiwixList.title(item)), listOf(item), installed = item.id in installed)
             }
         }
         var next = bookLines.entries.iterator()
@@ -426,9 +436,9 @@ object OnboardingModel {
     }
 
     private fun collectionTitle(collection: String): UiText = when (collection) {
-        CLASSICS -> UiText.Res(R.string.onboarding_granger_classics)
+        CLASSICS -> UiText.Res("onboarding_granger_classics")
         // Its own name in every language, like its catalog preset's.
-        app.granger.core.library.Filing.CLASICOS_GRANGER -> UiText.Raw(app.granger.core.library.Filing.CLASICOS_GRANGER_NAME)
+        FilingKeys.CLASICOS_GRANGER -> UiText.Raw(FilingKeys.CLASICOS_GRANGER_NAME)
         else -> UiText.Raw(collection.replace('-', ' ').replaceFirstChar { it.uppercase() })
     }
 

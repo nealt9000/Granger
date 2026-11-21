@@ -574,12 +574,12 @@ private fun androidx.compose.foundation.lazy.LazyListScope.review(ui: Onboarding
         }
         if (ui.phone.volumes.size > 1) {
             item { Text(stringResource(R.string.onboarding_store_on), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.labelLarge) }
-            items(ui.phone.volumes, key = { "v-${it.root.path}" }) { volume ->
+            items(ui.phone.volumes, key = { "v-${it.root}" }) { volume ->
                 Row(
-                    Modifier.fillMaxWidth().selectable(selected = volume.root.path == ui.volumePath, role = Role.RadioButton) { actions.onChooseVolume(volume.root.path) }.padding(vertical = 4.dp),
+                    Modifier.fillMaxWidth().selectable(selected = volume.root == ui.volumePath, role = Role.RadioButton) { actions.onChooseVolume(volume.root) }.padding(vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    RadioButton(selected = volume.root.path == ui.volumePath, onClick = null)
+                    RadioButton(selected = volume.root == ui.volumePath, onClick = null)
                     Text(stringResource(R.string.onboarding_volume_free, volume.label, formatBytes(volume.freeBytes)), Modifier.padding(start = 8.dp))
                 }
             }

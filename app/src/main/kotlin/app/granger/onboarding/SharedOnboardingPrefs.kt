@@ -3,16 +3,7 @@ package app.granger.onboarding
 import android.content.Context
 import android.content.SharedPreferences
 
-/** The one mark onboarding keeps (SharedPreferences `"onboarding"`): the flow was finished or skipped once. */
-interface OnboardingPrefs {
-    var done: Boolean
-
-    /** The group Outfit for offline queued (Plan OB call 3): Explore's downloads line follows it until dismissed. */
-    var outfitGroup: String?
-        get() = null
-        set(@Suppress("UNUSED_PARAMETER") value) {}
-}
-
+/** [OnboardingPrefs] (shared, Plan I4b Task 8) in SharedPreferences `"onboarding"`. */
 class SharedOnboardingPrefs(private val prefs: SharedPreferences) : OnboardingPrefs {
     constructor(context: Context) : this(context.getSharedPreferences("onboarding", Context.MODE_PRIVATE))
 

@@ -120,7 +120,7 @@ object Filing {
     const val CLASICOS_GRANGER = FilingKeys.CLASICOS_GRANGER
 
     /** Clásicos Granger's own name, the same in every language, as its catalog preset names it. */
-    const val CLASICOS_GRANGER_NAME = "Clásicos Granger"
+    const val CLASICOS_GRANGER_NAME = FilingKeys.CLASICOS_GRANGER_NAME
 
     /** The catalog id prefix of Clásicos Granger's books (the builder's `bookIdPrefix`, `gc-es-…`). */
     const val CLASICOS_ID_PREFIX = "gc-es-"

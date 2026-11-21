@@ -84,3 +84,6 @@ actual fun mediumDate(year: Int, month: Int, day: Int): String = platform.Founda
 actual fun monthName(month: Int): String = platform.Foundation.NSDateFormatter().apply {
     setLocalizedDateFormatFromTemplate("MMMM")
 }.monthSymbols.getOrNull(month - 1) as? String ?: ""
+
+actual fun englishCountryName(code: String): String =
+    NSLocale(localeIdentifier = "en_US").displayNameForKey(platform.Foundation.NSLocaleCountryCode, value = code).orEmpty()

@@ -1,29 +1,30 @@
 package app.granger.onboarding
 
-import app.granger.invoke
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.granger.R
 import app.granger.UiText
-import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.Catalog
+import app.granger.core.catalog.CatalogItem
 import app.granger.core.catalog.CatalogSource
 import app.granger.core.catalog.ENGLISH
+import app.granger.core.catalog.ModelRole
 import app.granger.core.downloads.DownloadRecord
+import app.granger.core.downloads.DownloadVolume
+import app.granger.core.downloads.DownloadVolumes
 import app.granger.core.downloads.Downloads
 import app.granger.core.downloads.EnqueueResult
-import app.granger.core.downloads.Volume
-import app.granger.core.downloads.VolumeSource
 import app.granger.core.downloads.downloadSpecOf
 import app.granger.core.library.Library
 import app.granger.core.library.Pack
-import app.granger.formatBytes
-import app.granger.settings.KnowledgeLanguages
+import app.granger.core.library.PackStatus
+import app.granger.screens.bytesText
+import app.granger.screens.ioDispatcher
+import app.granger.screens.nowMillis
+import app.granger.settings.LanguageOffers
 import app.granger.sources.DownloadPrefs
 import app.granger.sources.ItemStatus
 import app.granger.sources.statusOf
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -34,7 +35,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import app.granger.core.downloads.enqueueGroup
+
+// Shared since Plan I4b Task 8: the first run's model for both phones (Welcome, Pick a start, the region, quick wins,
+// Review). Android builds it through the app's `OnboardingViewModel(…, volumes, prefs, tier, …)` factory
+// (OnboardingViewModels.kt), which supplies the Android-only collaborators; the iPhone calls this constructor directly,
+// with `offerVoice` off (no Granger voices there yet), so Pick a start offers no voice line.
 
 /** The six screens (spec §6; Region and Uses split in Plan U3a). */
 /** Plan OB: Welcome holds the choice; Outfit for offline is one page, then Review. */
@@ -45,7 +50,7 @@ data class PhoneUi(
     val tierLine: UiText,
     /** Whether this phone can run Ask, and where to get it; null when there's nothing to say. */
     val researchLine: UiText?,
-    val volumes: List<Volume>,
+    val volumes: List<DownloadVolume>,
     /** The smallest start offered (Starter, or a language's Efficient start), and what it would download. */
     val smallestTitle: String,
     val smallestBytes: Long,
@@ -57,7 +62,7 @@ data class OnboardingUi(
     /** Wikipedia online is on (Plan OB): Welcome holds Start reading now and Outfit for offline. */
     val online: Boolean = false,
     /** Welcome's line: a phone too small for Ask isn't promised a librarian (Plan E1 phone check). */
-    val intro: UiText = UiText.Res(R.string.onboarding_intro),
+    val intro: UiText = UiText.Res("onboarding_intro"),
     /** No catalog yet: Pick a start shows the fetch (fresh install) or why it failed. */
     val noCatalog: Boolean = true,
     val refreshing: Boolean = false,
@@ -106,7 +111,7 @@ data class OnboardingUi(
     val alsoOn: Boolean get() = alsoLanguage != null && alsoLanguage in languages
 
     val start: StartChoice? get() = starts.firstOrNull { it.id == startId }
-    val chosenVolume: Volume? get() = phone.volumes.firstOrNull { it.root.path == volumePath } ?: phone.volumes.firstOrNull()
+    val chosenVolume: DownloadVolume? get() = phone.volumes.firstOrNull { it.root == volumePath } ?: phone.volumes.firstOrNull()
 }
 
 /**
@@ -117,26 +122,36 @@ class OnboardingViewModel(
     private val catalog: CatalogSource,
     library: Library,
     private val downloads: Downloads,
-    private val volumes: VolumeSource,
+    private val volumes: DownloadVolumes,
     private val prefs: DownloadPrefs,
-    private val tier: DeviceTier,
+    /** The phone has the memory for Ask and the Granger voices (Android: `DeviceTier.ASK` and up). */
+    private val askTier: Boolean,
+    /** Which catalog models this phone can run (Android: `DeviceTier.canRun`): what counts as installed follows it. */
+    private val canRun: (ModelRole) -> Boolean,
     private val totalRamBytes: Long,
     private val onboardingPrefs: OnboardingPrefs,
     /** Ask runs here (the app's `askOn`): off, onboarding words the phone as a library and offers no Ask line. */
-    private val askOn: Boolean = tier >= DeviceTier.ASK,
-    private val dense: Boolean = app.granger.DENSE_RETRIEVAL,
-    private val countryCode: String = java.util.Locale.getDefault().country,
-    private val offerVoice: Boolean = app.granger.Features.READ_ALOUD && app.granger.Features.PLAYER,
-    private val io: CoroutineDispatcher = Dispatchers.IO,
-    private val now: () -> Long = System::currentTimeMillis,
+    private val askOn: Boolean = askTier,
+    /** Ask is a feature of this build (Android: `Features.RESEARCH`): off with [askOn] off, nothing is said of it. */
+    private val research: Boolean = false,
+    private val dense: Boolean = false,
+    /** The phone's country ("PE"), for the suggested map; blank for none. */
+    private val countryCode: String = "",
+    /**
+     * Pick a start offers a Granger voice (Android: `Features.READ_ALOUD && Features.PLAYER`). Off on the iPhone until
+     * voices come there: no voice line, nothing of it in Review or the queue.
+     */
+    private val offerVoice: Boolean = false,
+    private val io: CoroutineDispatcher = ioDispatcher,
+    private val now: () -> Long = ::nowMillis,
     /** The library's languages (Plan L3), main first, and how Welcome's offer changes them. */
     knowledge: Flow<List<String>> = flowOf(listOf(ENGLISH)),
     private val setKnowledge: (List<String>) -> Unit = {},
-    /** The phone's languages in order, whatever the app is set to. */
-    private val phoneLocales: () -> List<java.util.Locale> = { emptyList() },
+    /** The phone's languages in order ("es", "en"), whatever the app is set to. */
+    private val phoneLanguages: () -> List<String> = { emptyList() },
     /** The app's language, for the catalog's copy (Plan L3). */
     private val appLanguage: () -> String = { ENGLISH },
-    private val enqueue: suspend (groupId: String, items: List<app.granger.core.catalog.CatalogItem>, volume: Volume, wifiOnly: Boolean) -> EnqueueResult =
+    private val enqueue: suspend (groupId: String, items: List<CatalogItem>, volume: DownloadVolume, wifiOnly: Boolean) -> EnqueueResult =
         { group, items, volume, wifi -> downloads.enqueueGroup(group, items.map { downloadSpecOf(it, group) }, volume.root, wifi) },
     /** Wikipedia online is on (Plan O5): Welcome offers Start reading now beside Outfit for offline. Off, it's Get started. */
     private val chooseOnline: Boolean = false,
@@ -149,7 +164,7 @@ class OnboardingViewModel(
 
     /** Start reading now was chosen: onboarding ends on Explore (Plan O5 Task 1). */
     private val readNow = MutableStateFlow(false)
-    val readingNow: kotlinx.coroutines.flow.StateFlow<Boolean> = readNow
+    val readingNow: StateFlow<Boolean> = readNow
     private val startId = MutableStateFlow<String?>(OnboardingModel.DEFAULT_START)
     private val unticked = MutableStateFlow<Set<String>>(emptySet())
     private val regionQuery = MutableStateFlow("")
@@ -165,14 +180,14 @@ class OnboardingViewModel(
     private val volumePath = MutableStateFlow(prefs.volumePath)
     private val notice = MutableStateFlow<UiText?>(null)
     private val starting = MutableStateFlow(false)
-    private val volumeList = MutableStateFlow<List<Volume>>(emptyList())
+    private val volumeList = MutableStateFlow<List<DownloadVolume>>(emptyList())
 
     /** Set once Start or Skip has finished; the screen then leaves. */
     val finished: StateFlow<Boolean> get() = done
     private val done = MutableStateFlow(false)
 
     private class Facts(
-        val catalog: Catalog?, val refreshing: Boolean, val failed: Boolean, val installed: Set<String>, val volumes: List<Volume>,
+        val catalog: Catalog?, val refreshing: Boolean, val failed: Boolean, val installed: Set<String>, val volumes: List<DownloadVolume>,
         val languages: List<String>,
     )
     private class Choices(val step: Step, val startId: String?, val unticked: Set<String>, val regionQuery: String, val regionId: String?, val useCaseIds: Set<String>, val askChosen: Boolean, val voiceChosen: Boolean, val saveSpace: Boolean?, val secondChosen: Boolean)
@@ -209,8 +224,8 @@ class OnboardingViewModel(
      * readiness model counts them.
      */
     private fun installedIds(catalog: Catalog, records: List<DownloadRecord>, packs: List<Pack>): Set<String> {
-        val ids = catalog.items.filter { statusOf(it, records, packs, tier) == ItemStatus.Installed }.mapTo(HashSet()) { it.id }
-        val names = packs.filter { it.status == app.granger.core.library.PackStatus.OK }.mapTo(HashSet()) { it.name }
+        val ids = catalog.items.filter { statusOf(it, records, packs, canRun) == ItemStatus.Installed }.mapTo(HashSet()) { it.id }
+        val names = packs.filter { it.status == PackStatus.OK }.mapTo(HashSet()) { it.name }
         catalog.packs.filter { it.zimName.isNotBlank() && it.zimName in names }.mapTo(ids) { it.id }
         // A pack whose articles an installed ZIM holds (Top inside Top 1M) is held too (Plan H4, Plan WF Decision 5).
         val containment = app.granger.core.catalog.Containment(catalog)
@@ -222,7 +237,7 @@ class OnboardingViewModel(
         val catalog = f.catalog
         val appLang = appLanguage()
         // The card when it has more room, unless a place was chosen (Plan E1 item 5).
-        val volume = f.volumes.firstOrNull { it.root.path == s.volumePath } ?: OnboardingModel.defaultVolume(f.volumes)
+        val volume = f.volumes.firstOrNull { it.root == s.volumePath } ?: OnboardingModel.defaultVolume(f.volumes)
         // Save space on by default when the start with pictures would leave little room and the one without fits.
         val saveSpace = c.saveSpace ?: catalog?.let { cat ->
             fun sized(save: Boolean) = OnboardingModel.startChoices(cat, f.installed, save, f.languages.first(), appLang)
@@ -246,9 +261,9 @@ class OnboardingViewModel(
         secondLine?.takeIf { c.secondChosen }?.items?.mapTo(chosen) { it.id }
         val additions = catalog?.let { OnboardingModel.additions(it, f.installed, chosen, f.languages, appLang) }.orEmpty()
         val picked = additions.filter { it.useCase.id in c.useCaseIds }
-        val askLine = catalog?.takeIf { askOn }?.let { OnboardingModel.askLine(it, tier, dense, f.installed) }
+        val askLine = catalog?.takeIf { askOn }?.let { OnboardingModel.askLine(it, askTier, dense, f.installed) }
         // Under 6 GB the Granger voices may stop mid-read (ONNX Runtime keeps ~420 MB): the phone's voice instead (Plan E1 item 2).
-        val voiceLine = catalog?.takeIf { offerVoice && tier >= DeviceTier.ASK }?.let { OnboardingModel.voiceLine(it, f.installed) }
+        val voiceLine = catalog?.takeIf { offerVoice && askTier }?.let { OnboardingModel.voiceLine(it, f.installed) }
         val review = OnboardingModel.review(
             start, c.unticked, region, picked, volume?.freeBytes ?: 0L, askLine?.takeIf { c.askChosen }, voiceLine?.takeIf { c.voiceChosen },
             containment = catalog?.let { app.granger.core.catalog.Containment(it) },
@@ -258,11 +273,11 @@ class OnboardingViewModel(
             val embedder = catalog?.models?.firstOrNull { it.role == app.granger.core.catalog.ModelRole.EMBEDDER }
             if (embedder == null || embedder.id in f.installed || r.items.any { it.id == embedder.id }) r else r.copy(embedderBytes = embedder.sizeBytes)
         }
-        val phoneLanguages = KnowledgeLanguages.phoneLanguages(phoneLocales(), catalog?.languages.orEmpty())
+        val phoneLanguages = LanguageOffers.phoneLanguages(phoneLanguages(), catalog?.languages.orEmpty())
         return OnboardingUi(
             intro = intro(),
             languages = f.languages,
-            alsoLanguage = KnowledgeLanguages.secondOffer(f.languages, phoneLanguages),
+            alsoLanguage = LanguageOffers.secondOffer(f.languages, phoneLanguages),
             secondLine = secondLine,
             secondChosen = c.secondChosen,
             step = c.step,
@@ -295,30 +310,29 @@ class OnboardingViewModel(
             voiceChosen = c.voiceChosen,
             review = review,
             wifiOnly = s.wifiOnly,
-            volumePath = volume?.root?.path,
+            volumePath = volume?.root,
             notice = s.notice,
             starting = s.starting,
         )
     }
 
-    /** Memory as Readiness words it ([formatBytes]), so the two never disagree. */
-    private fun intro(): UiText = UiText.Res(
-        when {
-            chooseOnline -> R.string.onboarding_intro_online
-            askOn -> R.string.onboarding_intro
-            else -> R.string.onboarding_intro_library
-        },
-    )
+    private fun intro(): UiText = when {
+        chooseOnline -> UiText.Res("onboarding_intro_online")
+        askOn -> UiText.Res("onboarding_intro")
+        else -> UiText.Res("onboarding_intro_library")
+    }
 
+    /** Memory as Readiness words it ([bytesText]), so the two never disagree. */
     private fun tierLine(): UiText =
-        if (askOn) UiText.Res(R.string.onboarding_tier_ask, formatBytes(totalRamBytes))
-        else UiText.Res(R.string.onboarding_tier_library, formatBytes(totalRamBytes))
+        if (askOn) UiText.Res("onboarding_tier_ask", bytesText(totalRamBytes))
+        else UiText.Res("onboarding_tier_library", bytesText(totalRamBytes))
 
     /** [offered]: Pick a start offers Ask's models. None while Ask is off: it isn't the phone's memory that stops it. */
     private fun researchLine(offered: Boolean): UiText? = when {
-        !askOn && !app.granger.Features.RESEARCH -> null
-        tier == DeviceTier.LIBRARY_ONLY -> UiText.Res(R.string.onboarding_research_needs_memory)
-        else -> UiText.Res(if (offered) R.string.onboarding_research_offered else R.string.onboarding_research_runs)
+        !askOn && !research -> null
+        !askTier -> UiText.Res("onboarding_research_needs_memory")
+        offered -> UiText.Res("onboarding_research_offered")
+        else -> UiText.Res("onboarding_research_runs")
     }
 
     fun refreshVolumes() {
@@ -408,7 +422,7 @@ class OnboardingViewModel(
         viewModelScope.launch {
             val review = ui.value.review
             // The setting flows, not the built UI: a tap on the switch right before Start must count.
-            val volume = volumeList.value.firstOrNull { it.root.path == volumePath.value } ?: OnboardingModel.defaultVolume(volumeList.value)
+            val volume = volumeList.value.firstOrNull { it.root == volumePath.value } ?: OnboardingModel.defaultVolume(volumeList.value)
             if (review.isEmpty || volume == null) {
                 skip()
                 return@launch
@@ -416,13 +430,13 @@ class OnboardingViewModel(
             val group = "onboarding:${now()}"
             starting.value = true
             // Later downloads go where the start went (the card, if it was the default).
-            if (prefs.volumePath == null) prefs.volumePath = volume.root.path
+            if (prefs.volumePath == null) prefs.volumePath = volume.root
             // Quick wins first (Plan DL Decision 5): the queue takes the group in this order.
             val domains = catalog.state.value.catalog?.readiness?.domains.orEmpty().map { it.id }
             val order = OnboardingModel.downloadOrder(review.items, domains, ui.value.region?.takeUnless { it.installed }?.pack?.id)
             val problem = when (val result = enqueue(group, order, volume, wifiOnly.value)) {
                 EnqueueResult.Queued, EnqueueResult.AlreadyActive, EnqueueResult.AlreadyInstalled -> null
-                is EnqueueResult.NoSpace -> UiText.Res(R.string.onboarding_no_space, volume.label, formatBytes(result.neededBytes))
+                is EnqueueResult.NoSpace -> UiText.Res("onboarding_no_space", volume.label, bytesText(result.neededBytes))
             }
             if (problem != null) {
                 starting.value = false

@@ -52,6 +52,31 @@ object ScreenTextIds {
         "home_scope_whole_library" -> R.string.home_scope_whole_library
         "library_from_kiwix" -> R.string.library_from_kiwix
         "library_from_kiwix_by" -> R.string.library_from_kiwix_by
+        "onboarding_ask_line" -> R.string.onboarding_ask_line
+        "onboarding_blurb_comprehensive" -> R.string.onboarding_blurb_comprehensive
+        "onboarding_blurb_efficient" -> R.string.onboarding_blurb_efficient
+        "onboarding_blurb_starter" -> R.string.onboarding_blurb_starter
+        "onboarding_granger_classics" -> R.string.onboarding_granger_classics
+        "onboarding_held" -> R.string.onboarding_held
+        "onboarding_held_slice" -> R.string.onboarding_held_slice
+        "onboarding_intro" -> R.string.onboarding_intro
+        "onboarding_intro_library" -> R.string.onboarding_intro_library
+        "onboarding_intro_online" -> R.string.onboarding_intro_online
+        "onboarding_no_space" -> R.string.onboarding_no_space
+        "onboarding_quick_classics" -> R.string.onboarding_quick_classics
+        "onboarding_quick_voice" -> R.string.onboarding_quick_voice
+        "onboarding_quick_voice_classics" -> R.string.onboarding_quick_voice_classics
+        "onboarding_research_needs_memory" -> R.string.onboarding_research_needs_memory
+        "onboarding_research_offered" -> R.string.onboarding_research_offered
+        "onboarding_research_runs" -> R.string.onboarding_research_runs
+        "onboarding_second_encyclopedia" -> R.string.onboarding_second_encyclopedia
+        "onboarding_the_librarian" -> R.string.onboarding_the_librarian
+        "onboarding_tier_ask" -> R.string.onboarding_tier_ask
+        "onboarding_tier_library" -> R.string.onboarding_tier_library
+        "onboarding_uses" -> R.string.onboarding_uses
+        "onboarding_voice_line" -> R.string.onboarding_voice_line
+        "onboarding_your_picks" -> R.string.onboarding_your_picks
+        "onboarding_your_region" -> R.string.onboarding_your_region
         "readiness_covers" -> R.string.readiness_covers
         "readiness_covers_slice" -> R.string.readiness_covers_slice
         "readiness_no_packs_in" -> R.string.readiness_no_packs_in

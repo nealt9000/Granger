@@ -45,3 +45,6 @@ expect fun mediumDate(year: Int, month: Int, day: Int): String
 
 /** [month]'s full name in the phone's language ("October", "octubre"), as a date says it (Home's day feed, Plan I4b). */
 expect fun monthName(month: Int): String
+
+/** A country code's name in English ("PE" → "Peru"), as onboarding matches the catalog's English map titles; blank or the code when unknown. */
+expect fun englishCountryName(code: String): String

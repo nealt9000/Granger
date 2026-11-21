@@ -67,14 +67,13 @@ class KnowledgeLanguages(
 
         /** The supported languages the phone lists, in the phone's order: [es, en] for a phone in Spanish then English. */
         fun phoneLanguages(phone: List<Locale>, supported: List<String>): List<String> =
-            phone.map { Languages.normalise(it.language) }.filter { it in supported }.distinct()
+            LanguageOffers.phoneLanguages(phone.map { it.language }, supported)
 
         /**
          * The second language onboarding offers (Neal's call 4): when the phone lists more than one language the catalog
          * supports, the first of them that isn't the main knowledge language. Null otherwise.
          */
-        fun secondOffer(knowledge: List<String>, phone: List<String>): String? =
-            if (phone.size < 2) null else phone.firstOrNull { it != knowledge.firstOrNull() }
+        fun secondOffer(knowledge: List<String>, phone: List<String>): String? = LanguageOffers.secondOffer(knowledge, phone)
 
         /** [current] with [code] turned on (added last) or off; the last one on stays on. */
         fun toggle(current: List<String>, code: String): List<String> = when {

@@ -21,6 +21,7 @@ import androidx.compose.ui.test.performTextInput
 import app.granger.core.catalog.UseCase
 import app.granger.packEntry
 import app.granger.volume
+import app.granger.sources.toDownloadVolume
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import app.granger.UiText
@@ -46,7 +47,7 @@ class OnboardingScreenTest {
     private val peru = packEntry("maps_en_peru", size = 500).copy(family = "maps", title = "Peru")
     private val line = Line(med.id, UiText.Raw(med.title), listOf(med), installed = false)
     private val efficient = StartChoice("efficient", "Efficient start", UiText.Raw("The essentials."), listOf(line))
-    private val internal = volume("/internal", "Internal storage", free = 10_000, total = 64_000)
+    private val internal = volume("/internal", "Internal storage", free = 10_000, total = 64_000).toDownloadVolume()
     private val phone = PhoneUi(UiText.Raw("A library phone, with about 7 GB of memory."), UiText.Raw("Ask needs 6 GB."), listOf(internal), "Efficient start", 1_000, 1_375)
 
     private fun show(ui: OnboardingUi) = compose.setContent { OnboardingContent(ui, actions) }

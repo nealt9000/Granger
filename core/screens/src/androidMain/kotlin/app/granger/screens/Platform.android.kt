@@ -35,3 +35,5 @@ actual fun mediumDate(year: Int, month: Int, day: Int): String =
 
 actual fun monthName(month: Int): String =
     java.time.Month.of(month).getDisplayName(java.time.format.TextStyle.FULL, Locale.getDefault())
+
+actual fun englishCountryName(code: String): String = Locale("", code).getDisplayCountry(Locale.ENGLISH)
