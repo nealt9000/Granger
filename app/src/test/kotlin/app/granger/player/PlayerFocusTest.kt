@@ -3,6 +3,7 @@ package app.granger.player
 import app.granger.MainDispatcherRule
 import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerUi
+import app.granger.listen.label
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test

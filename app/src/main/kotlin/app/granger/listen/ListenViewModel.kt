@@ -1,54 +1,27 @@
 package app.granger.listen
 
 import androidx.annotation.StringRes
-import app.granger.R
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import app.granger.ScreenTextIds
+import app.granger.UiText
 import app.granger.core.library.Shelves
 import app.granger.core.player.NowPlaying
 import app.granger.core.player.PlayerHub
 import app.granger.core.player.PlayerMode
 import app.granger.core.player.PlayerUi
 import app.granger.core.player.SavedModes
-import app.granger.library.KindRow
-import app.granger.library.listenKinds
 import app.granger.player.PlayerFocus
 import app.granger.player.oneSide
-import app.granger.UiText
 import app.granger.widget.WidgetModel
 import app.granger.widget.resumeMode
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.stateIn
 
-/** What the Now playing card holds: music, an audiobook, or the voice reading a text. */
-enum class CardKind { MUSIC, AUDIOBOOK, VOICE }
+// Listen's home is shared (core:screens ListenModel, Plan I5 Task 2); the card is made here from Android's player.
 
-/**
- * Listen's Now playing card: the live item, else the last one played, which its play button resumes. [label] says
- * which ("Now playing", "Paused", "Last played"); [title] and [subtitle] are the widget's lines.
- */
-data class NowPlayingCard(
-    @StringRes val label: Int,
-    val title: UiText,
-    val subtitle: UiText,
-    val coverPath: String?,
-    val kind: CardKind,
-    val live: Boolean,
-    val playing: Boolean,
-)
-
-/**
- * Listen's home (Plan U2 Decision 4): the Now playing card, then the audio shelves (Music, Audiobooks), each only when
- * it holds something. With no shelf at all, [empty]: the screen offers the audio sources and the phone's own music.
- */
-data class ListenUi(val nowPlaying: NowPlayingCard?, val shelves: List<KindRow>) {
-    val empty: Boolean get() = shelves.isEmpty()
-}
+/** The card's label as an Android resource. */
+@get:StringRes
+val NowPlayingCard.label: Int get() = ScreenTextIds.string(labelKey)
 
 /** The card for what [ui] has loaded, else what [saved] would resume; null with nothing ever played. */
 fun nowPlayingCard(ui: PlayerUi, saved: SavedModes): NowPlayingCard? {
@@ -67,27 +40,20 @@ fun nowPlayingCard(ui: PlayerUi, saved: SavedModes): NowPlayingCard? {
     }
     val live = now != NowPlaying.Idle
     val label = when {
-        !live -> if (kind == CardKind.VOICE) R.string.listen_last_read else R.string.listen_last_played
-        !ui.playing -> R.string.listen_paused
-        kind == CardKind.VOICE -> R.string.listen_reading_aloud
-        else -> R.string.listen_now_playing
+        !live -> if (kind == CardKind.VOICE) NowPlayingCard.LAST_READ else NowPlayingCard.LAST_PLAYED
+        !ui.playing -> NowPlayingCard.PAUSED
+        kind == CardKind.VOICE -> NowPlayingCard.READING_ALOUD
+        else -> NowPlayingCard.NOW_PLAYING
     }
     return NowPlayingCard(label, model.title, model.subtitle, model.coverPath, kind, live, playing = live && ui.playing)
 }
 
-/** Listen's home from the shelves (audio media types only) and the player's live and saved states. */
+/** Listen's home on Android: the shared [ListenModel], its card from the player's live and saved states. */
 class ListenViewModel(
     shelves: Shelves,
     player: Flow<PlayerUi> = flowOf(PlayerUi.IDLE),
     saved: Flow<SavedModes> = flowOf(SavedModes.UNKNOWN),
-) : ViewModel() {
+) : ListenModel(shelves, combine(player, saved, ::nowPlayingCard)) {
     constructor(shelves: Shelves, hub: PlayerHub, focus: PlayerFocus = PlayerFocus()) :
         this(shelves, combine(hub.ui, focus.prefersMusic, PlayerUi::oneSide), hub.saved)
-
-    // The card ignores the position, so the player's ticks don't redraw the screen.
-    private val card = combine(player, saved, ::nowPlayingCard).distinctUntilChanged()
-
-    /** Null until the shelves first load. */
-    val ui: StateFlow<ListenUi?> = combine(shelves.shelves, card) { list, now -> ListenUi(now, listenKinds(list)) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 }

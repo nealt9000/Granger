@@ -97,7 +97,7 @@ class ListenViewModelTest {
         val vm = vm()
         hub.ui.value = musicUi(track("a", "Blue in Green", artists = "Miles Davis"))
         val music = vm.ui.filterNotNull().first { it.nowPlaying != null }.nowPlaying!!
-        assertThat(music).isEqualTo(NowPlayingCard(app.granger.R.string.listen_now_playing, UiText.Raw("Blue in Green"), UiText.Raw("Miles Davis"), null, CardKind.MUSIC, live = true, playing = true))
+        assertThat(music).isEqualTo(NowPlayingCard(NowPlayingCard.NOW_PLAYING, UiText.Raw("Blue in Green"), UiText.Raw("Miles Davis"), null, CardKind.MUSIC, live = true, playing = true))
         // Only the position changing doesn't make a new card.
         hub.ui.value = musicUi(track("a", "Blue in Green", artists = "Miles Davis"), positionMs = 90_000L)
         assertThat(vm.ui.value!!.nowPlaying).isSameInstanceAs(music)
