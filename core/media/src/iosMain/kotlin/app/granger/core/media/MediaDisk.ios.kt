@@ -11,6 +11,8 @@ import kotlinx.io.readByteArray
 import platform.Foundation.NSDate
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSFileModificationDate
+import platform.Foundation.NSFileType
+import platform.Foundation.NSFileTypeSymbolicLink
 import platform.Foundation.NSLog
 import platform.Foundation.NSURL
 import platform.Foundation.timeIntervalSince1970
@@ -21,7 +23,7 @@ import platform.posix.O_RDONLY
 
 // The media rules' file calls on the iPhone (Plan I6 Task 1), through kotlinx-io and Foundation, as java.io.File
 // answers them on Android.
-internal actual object MediaDisk {
+actual object MediaDisk {
     private fun meta(path: String) = try { SystemFileSystem.metadataOrNull(Path(path)) } catch (_: IOException) { null }
 
     actual fun exists(path: String): Boolean = meta(path) != null
@@ -85,6 +87,33 @@ internal actual object MediaDisk {
     // The whole line is NSLog's format, its % doubled (a Kotlin String through C varargs as %@ crashes).
     actual fun logWarn(message: String) {
         NSLog("Granger: $message".replace("%", "%%"))
+    }
+
+    actual fun parent(path: String): String? {
+        val p = normal(path)
+        val at = p.lastIndexOf('/')
+        return when {
+            at > 0 -> p.substring(0, at)
+            at == 0 && p.length > 1 -> "/"
+            else -> null
+        }
+    }
+
+    actual fun isLink(path: String): Boolean =
+        NSFileManager.defaultManager.attributesOfItemAtPath(path, null)?.get(NSFileType) == NSFileTypeSymbolicLink
+
+    actual fun createNewFile(path: String): Boolean {
+        if (NSFileManager.defaultManager.fileExistsAtPath(path)) return false
+        if (!NSFileManager.defaultManager.createFileAtPath(path, null, null)) throw IOException("Couldn't create $path")
+        return true
+    }
+
+    actual fun deleteRecursively(path: String): Boolean =
+        !NSFileManager.defaultManager.fileExistsAtPath(path) || NSFileManager.defaultManager.removeItemAtPath(path, null)
+
+    // removeItemAtPath deletes a symlink as a link, never what it points to.
+    actual fun deleteTree(path: String) {
+        NSFileManager.defaultManager.removeItemAtPath(path, null)
     }
 
     /** As java.io.File normalises a path: no doubled or trailing '/'. */

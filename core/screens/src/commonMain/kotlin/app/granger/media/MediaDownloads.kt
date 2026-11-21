@@ -1,6 +1,7 @@
 package app.granger.media
 
 import app.granger.librivox.decodeEntities
+import app.granger.core.media.MediaDisk
 import app.granger.core.archive.ArchiveFile
 import app.granger.core.archive.ArchiveItem
 import app.granger.core.archive.ArchiveKind
@@ -21,13 +22,13 @@ import app.granger.core.media.ManifestFile
 import app.granger.core.media.MediaManifest
 import app.granger.core.media.MediaManifests
 import app.granger.sources.ItemStatus
-import java.io.File
-import app.granger.core.media.read
 
 /**
  * Media downloads as download groups: one group per book or album, `media:<source>:<ref>`, its files `<groupId>/<NNN>`
  * (the cover is always `000`, the audio files `001` on, so an id never shifts). None starts with `archive-org:`, so
  * Plan 7's archive book code never sees them.
+ *
+ * Shared since Plan I6 Task 3 (core:screens: the group's status is the screens' [ItemStatus]).
  */
 object MediaDownloads {
     const val PREFIX = "media:"
@@ -39,7 +40,7 @@ object MediaDownloads {
     fun refOf(groupId: String, source: String): String? =
         groupId.takeIf { it.startsWith("$PREFIX$source:") }?.removePrefix("$PREFIX$source:")?.takeIf { it.isNotEmpty() && '/' !in it }
 
-    fun fileItemId(groupId: String, ordinal: Int): String = "$groupId/%03d".format(ordinal)
+    fun fileItemId(groupId: String, ordinal: Int): String = "$groupId/${ordinal.toString().padStart(3, '0')}"
 
     fun groupId(m: MediaManifest): String = groupId(m.source, m.ref)
 
@@ -138,7 +139,7 @@ object MediaDownloads {
     }
 
     /** Whether [record] is the group's cover, not one of its [fileCount] audio files. */
-    fun isCover(record: DownloadRecord): Boolean = record.itemId.endsWith("/000") && File(record.filePath).name == COVER_NAME
+    fun isCover(record: DownloadRecord): Boolean = record.itemId.endsWith("/000") && record.filePath.trimEnd('/').substringAfterLast('/') == COVER_NAME
 
     /**
      * Active → Queued/Downloading(bytes done / total)/Failed; all files installed → Installed; some installed, none
@@ -194,7 +195,7 @@ object MediaDownloads {
     /** The number of audio files [groupId]'s manifest lists, read beside its records; null when none can be read. Reads the disk. */
     fun manifestFileCount(groupId: String, records: List<DownloadRecord>): Int? = records.asSequence()
         .filter { it.groupId == groupId }
-        .firstNotNullOfOrNull { r -> File(r.filePath).parentFile?.let(MediaManifests::read)?.files?.size }
+        .firstNotNullOfOrNull { r -> MediaDisk.parent(r.filePath)?.let(MediaManifests::read)?.files?.size }
 
     /**
      * How far [groupId] is, out of [fileCount] audio files (from [manifestFileCount]: the ledger drops a cancelled

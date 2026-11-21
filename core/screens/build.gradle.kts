@@ -11,6 +11,11 @@ kotlin {
         namespace = "app.granger.core.screens"
         compileSdk = 37
         minSdk = 29
+        // Plan I6 Task 3: the common tests run on the JVM host too (Robolectric for Android's file uris).
+        withHostTestBuilder {}.configure {
+            isIncludeAndroidResources = true
+            isReturnDefaultValues = true
+        }
     }
     iosArm64()
     iosSimulatorArm64()
@@ -22,6 +27,8 @@ kotlin {
             api(project(":core:downloads-api"))
             // Plan I5 Task 2: archive.org's model.
             api(project(":core:archive"))
+            // Plan I6 Task 3: LibriVox and archive.org audio as group downloads with a manifest (MediaDownloads).
+            api(project(":core:media"))
             api(libs.androidx.lifecycle.viewmodel)
             // Plan I5 Task 2: a collection screen keeps its Find text and open sections in a SavedStateHandle.
             api(libs.androidx.lifecycle.viewmodel.savedstate)
@@ -44,5 +51,13 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
         }
         iosTest.dependencies { implementation(libs.ktor.client.mock) }
+        getByName("androidHostTest").dependencies {
+            implementation(libs.junit)
+            implementation(libs.robolectric)
+            implementation(libs.androidx.test.core)
+        }
     }
 }
+
+// `./gradlew testDebugUnitTest` (the app's habit) runs the host tests here too.
+tasks.register("testDebugUnitTest") { dependsOn("testAndroidHostTest") }

@@ -121,6 +121,7 @@ enum ScreenText {
         "listen_now_playing": "Now playing",
         "listen_paused": "Paused",
         "listen_reading_aloud": "Reading aloud",
+        "media_unmounted": "%1$s is on storage that isn't available right now. Put it back to finish it, or remove it first.",
         "onboarding_ask_line": "Ask (Preview)",
         "onboarding_blurb_comprehensive": "Everything Outfitting counts, for a phone that can hold it.",
         "onboarding_blurb_efficient": "The essentials of every domain Outfitting counts, in the least space.",

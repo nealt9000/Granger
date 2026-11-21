@@ -123,6 +123,7 @@ object ScreenTextIds {
         "listen_now_playing" -> R.string.listen_now_playing
         "listen_paused" -> R.string.listen_paused
         "listen_reading_aloud" -> R.string.listen_reading_aloud
+        "media_unmounted" -> R.string.media_unmounted
         "onboarding_ask_line" -> R.string.onboarding_ask_line
         "onboarding_blurb_comprehensive" -> R.string.onboarding_blurb_comprehensive
         "onboarding_blurb_efficient" -> R.string.onboarding_blurb_efficient

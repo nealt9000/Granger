@@ -3,9 +3,10 @@ package app.granger.core.media
 /*
  * What the shared media rules need from each phone's files (Plan I6 Task 1). Android's are the java.io calls the
  * downloaded-media scanner and the manifests made before they were shared, one for one, so nothing changes on the phone;
- * the iPhone's go through kotlinx-io and Foundation. Paths are absolute strings with '/' between folders.
+ * the iPhone's go through kotlinx-io and Foundation. Paths are absolute strings with '/' between folders. Public for the
+ * media downloader in core:screens (its item folders, Plan I6 Task 3).
  */
-internal expect object MediaDisk {
+expect object MediaDisk {
     /** `File(path).exists()`. */
     fun exists(path: String): Boolean
 
@@ -53,6 +54,24 @@ internal expect object MediaDisk {
 
     /** A line in the phone's log under "Granger". */
     fun logWarn(message: String)
+
+    /** `File(path).parent`. */
+    fun parent(path: String): String?
+
+    /** `Files.isSymbolicLink`. */
+    fun isLink(path: String): Boolean
+
+    /** `File(path).createNewFile()`: an empty file, when none is there. Throws `IOException`. */
+    fun createNewFile(path: String): Boolean
+
+    /** `File(path).deleteRecursively()`. */
+    fun deleteRecursively(path: String): Boolean
+
+    /**
+     * Deletes [path] and what's in it, best effort (what can't be deleted stays); a symlink, [path] included, is deleted
+     * as a link, never followed.
+     */
+    fun deleteTree(path: String)
 }
 
 /** The file's name, as `java.io.File.name` gives it. */
