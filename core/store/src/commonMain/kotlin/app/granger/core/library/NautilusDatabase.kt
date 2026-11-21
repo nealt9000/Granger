@@ -34,7 +34,7 @@ object NautilusDatabase {
      */
     fun parse(text: String): Map<String, String> {
         val titles = HashMap<String, String>()
-        for (record in records(text)) record.files.forEach { titles.putIfAbsent(it, record.title) }
+        for (record in records(text)) record.files.forEach { if (it !in titles) titles[it] = record.title }
         return titles
     }
 
@@ -60,7 +60,7 @@ object NautilusDatabase {
                     when {
                         inFiles -> files += s
                         depth == 1 && expectingValue -> {
-                            key?.let { fields.putIfAbsent(it, s) }
+                            key?.let { if (it !in fields) fields[it] = s }
                             expectingValue = false
                             key = null
                         }
