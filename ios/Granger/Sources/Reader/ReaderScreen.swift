@@ -1,4 +1,5 @@
 import GrangerCoreKit
+import QuickLook
 import SwiftUI
 
 /// The full article (Android's reader for an online Wikipedia page): the page in Granger's look, Contents, text size,
@@ -24,6 +25,7 @@ struct ReaderScreen: View {
 
     /// A pack article's title from its entry (its path is no title: `based.cooking/bread.html`).
     @State private var packTitle: String?
+    @State private var document: URL?
     private var title: String { packTitle ?? GrangerCoreEntry.shared.titleOfKey(key: path) }
 
     var body: some View {
@@ -33,7 +35,11 @@ struct ReaderScreen: View {
                     pack: pack ?? core.pack(for: lang), path: path, fragment: fragment,
                     source: model.tracking(core), textScale: settings.textScale, dark: scheme == .dark, controller: controller,
                     onToggleChrome: { withAnimation(.easeInOut(duration: 0.2)) { chrome.toggle() } },
-                    onOpenArticle: { linkPack, p, _ in openRoute(pack == nil ? .topic(lang: lang, path: p) : .article(packId: linkPack, path: p)) },
+                    onOpenArticle: { linkPack, p, _ in
+                        // A pack's PDF or EPUB (Plan I4): handed on to Quick Look, not opened as an article.
+                        if pack != nil, Self.isDocument(p) { openDocument(pack: linkPack, path: p); return }
+                        openRoute(pack == nil ? .topic(lang: lang, path: p) : .article(packId: linkPack, path: p))
+                    },
                     // Recently open lists Wikipedia online's articles (a pack article's place there comes with the shelf, I5).
                     onLoaded: { if pack == nil { recent.add(lang: lang, path: path, title: title) } }
                 )
@@ -42,6 +48,7 @@ struct ReaderScreen: View {
         }
         .background(palette.background)
         .navigationTitle(title)
+        .quickLookPreview($document)
         .task(id: pack) {
             guard let core, let pack else { return }
             let p = path
@@ -147,5 +154,28 @@ struct TextSizeSheet: View {
             Text("\(Int((settings.textScale * 100).rounded())) %").font(.footnote).foregroundStyle(.secondary)
         }
         .padding(24)
+    }
+}
+
+extension ReaderScreen {
+    static func isDocument(_ path: String) -> Bool {
+        let p = path.lowercased().components(separatedBy: "?")[0]
+        return p.hasSuffix(".pdf") || p.hasSuffix(".epub")
+    }
+
+    /// The document out of its pack into Caches, then shown.
+    func openDocument(pack: String, path: String) {
+        guard let core else { return }
+        Task {
+            let url: URL? = await Task.detached {
+                guard let item = core.library.archive(packId: pack)?.read(path: path) else { return nil }
+                let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("pack-files", isDirectory: true)
+                try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+                let name = (path.components(separatedBy: "?")[0] as NSString).lastPathComponent.removingPercentEncoding ?? "document"
+                let to = dir.appendingPathComponent(name)
+                return (try? GrangerCoreEntry.shared.bytes(of: item.bytes).write(to: to)) != nil ? to : nil
+            }.value
+            document = url
+        }
     }
 }
