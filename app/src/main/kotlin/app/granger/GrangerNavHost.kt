@@ -1,5 +1,6 @@
 package app.granger
 
+import app.granger.core.speech.of
 import app.granger.home.Prefs
 import app.granger.explore.label
 import app.granger.feedback.FeedbackFacts

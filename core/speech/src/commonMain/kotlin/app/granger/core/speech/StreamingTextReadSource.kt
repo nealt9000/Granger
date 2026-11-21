@@ -1,5 +1,6 @@
 package app.granger.core.speech
 
+import kotlin.concurrent.Volatile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 
@@ -20,6 +21,7 @@ class StreamingTextReadSource(
     @Volatile private var complete = false
     @Volatile private var ready: List<Utterance> = emptyList()
     private val version = MutableStateFlow(0)
+    private val lock = SpeechLock()
 
     val size: Int get() = ready.size
     val isComplete: Boolean get() = complete
@@ -35,8 +37,7 @@ class StreamingTextReadSource(
         rebuild()
     }
 
-    @Synchronized
-    private fun rebuild() {
+    private fun rebuild() = lock.with {
         val whole = listOfNotNull(preface?.takeIf { it.isNotBlank() }, text).joinToString("\n\n")
         val blocks = whole.split(Regex("\\n\\s*\\n")).mapIndexed { i, para -> Block(i.toString(), BlockKind.PARAGRAPH, para) }.filter { it.text.isNotBlank() }
         val made = Utterances.fromBlocks(blocks) { blockId, n -> ReadAddress.Text(key, blockId.toInt(), n) }

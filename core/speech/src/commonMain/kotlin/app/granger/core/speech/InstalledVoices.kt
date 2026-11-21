@@ -1,8 +1,8 @@
 package app.granger.core.speech
 
-import java.io.File
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,28 +12,31 @@ import kotlinx.coroutines.withContext
  * What can speak now, offline: the Granger voices unpacked under each volume's `voices/`, then the system engine's
  * offline English voices. [refresh] after a voice is downloaded or removed. The preferred voice is the one Settings
  * names if it is still here, else the first Granger voice by [rank], else the first system voice.
+ *
+ * Shared by both phones (Plan I5 Task 3): [voicesDirs] are absolute paths, read with [PiperVoices.list].
  */
 class InstalledVoices(
-    private val voicesDirs: () -> List<File>,
+    private val voicesDirs: () -> List<String>,
     private val systemVoices: suspend () -> List<Voice>,
     private val granger: SpeechFactory,
     private val system: SpeechFactory,
     private val io: CoroutineDispatcher = Dispatchers.IO,
-    /** How the Granger voices are named: the app passes [VoiceTitles.of]. */
+    /** How the Granger voices are named: Android passes `VoiceTitles.of(context)`. */
     private val titles: VoiceTitles = VoiceTitles.BARE,
 ) {
     private val _voices = MutableStateFlow<List<Voice>>(emptyList())
     val voices: StateFlow<List<Voice>> = _voices.asStateFlow()
 
     suspend fun refresh(): List<Voice> {
-        val local = withContext(io) { voicesDirs().flatMap { SherpaVoice.list(it) } }
-            .distinctBy { it.id }
-            .sortedWith(compareBy<SherpaVoice> { rank(it.id) }.thenBy { it.id })
-            .flatMap { voice ->
-                val names = SherpaVoice.speakerNames(voice)
-                if (names.isEmpty()) listOf(Voice(VoiceId.Granger(voice.id), SherpaSpeech.title(voice.id, titles), "en-US"))
-                else names.mapIndexed { i, name -> Voice(VoiceId.Granger(voice.id, i), SherpaSpeech.speakerTitle(name, titles), "en-US", speakers = names.size) }
-            }
+        val local = withContext(io) {
+            voicesDirs().flatMap { PiperVoices.list(it) }
+                .distinctBy { it.id }
+                .sortedWith(compareBy<PiperVoices.Found> { rank(it.id) }.thenBy { it.id })
+                .map { it to PiperVoices.speakerNames(it) }
+        }.flatMap { (voice, names) ->
+            if (names.isEmpty()) listOf(Voice(VoiceId.Granger(voice.id), PiperVoices.title(voice.id, titles), "en-US"))
+            else names.mapIndexed { i, name -> Voice(VoiceId.Granger(voice.id, i), PiperVoices.speakerTitle(name, titles), "en-US", speakers = names.size) }
+        }
         val remote = runCatching { systemVoices() }.getOrDefault(emptyList())
         return (local + remote).also { _voices.value = it }
     }

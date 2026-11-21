@@ -62,11 +62,6 @@ object Wav {
         throw IOException("No data chunk")
     }
 
-    /** Joins chunks into one array. */
-    fun concat(chunks: List<FloatArray>): FloatArray {
-        val out = FloatArray(chunks.sumOf { it.size })
-        var at = 0
-        for (c in chunks) { c.copyInto(out, at); at += c.size }
-        return out
-    }
+    /** Joins chunks into one array ([Pcm.concat]). */
+    fun concat(chunks: List<FloatArray>): FloatArray = Pcm.concat(chunks)
 }

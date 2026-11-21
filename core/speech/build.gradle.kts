@@ -25,6 +25,8 @@ kotlin {
         commonMain.dependencies {
             // Public: Speech hands out Flows and StateFlows.
             api(libs.kotlinx.coroutines.core)
+            // The voice directories are listed and read through kotlinx-io on both phones (PiperVoices).
+            implementation(libs.kotlinx.io.core)
         }
         androidMain.dependencies {
             api(libs.kotlinx.coroutines.android)

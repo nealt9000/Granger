@@ -37,86 +37,40 @@ sealed interface SherpaVoice {
     ) : SherpaVoice
 
     companion object {
-        /** The voice in [dir], or null when it holds no recognisable voice. */
+        /** The voice in [dir], or null when it holds no recognisable voice ([PiperVoices.detect]'s rules). */
         fun detect(dir: File): SherpaVoice? {
             if (!dir.isDirectory) return null
             val files = dir.listFiles().orEmpty()
-            val tokens = files.firstOrNull { it.name == "tokens.txt" } ?: return null
-            val espeak = files.firstOrNull { it.isDirectory && it.name == "espeak-ng-data" } ?: return null
-            val voices = files.firstOrNull { it.name == "voices.bin" }
-            val models = files.filter { it.isFile && it.name.endsWith(".onnx") }
-            if (voices != null) {
-                // Prefer the int8 model when a directory holds both; it is the smaller one.
-                val model = models.firstOrNull { "int8" in it.name } ?: models.firstOrNull() ?: return null
-                return Kokoro(
+            val layout = PiperVoices.detect(files.map { PiperVoices.Entry(it.name, it.isDirectory, it.isFile) }) ?: return null
+            return when (layout) {
+                is PiperVoices.Layout.Piper -> Piper(dir, File(dir, layout.model), File(dir, layout.tokens), File(dir, layout.espeakData))
+                is PiperVoices.Layout.Kokoro -> Kokoro(
                     dir = dir,
-                    model = model,
-                    voices = voices,
-                    tokens = tokens,
-                    espeakData = espeak,
-                    lexicons = lexicons(files),
-                    dictDir = files.firstOrNull { it.isDirectory && it.name == "dict" },
+                    model = File(dir, layout.model),
+                    voices = File(dir, layout.voices),
+                    tokens = File(dir, layout.tokens),
+                    espeakData = File(dir, layout.espeakData),
+                    lexicons = layout.lexicons.map { File(dir, it) },
+                    dictDir = layout.dictDir?.let { File(dir, it) },
                 )
             }
-            val model = models.singleOrNull() ?: return null
-            return Piper(dir, model, tokens, espeak)
         }
 
-        /**
-         * The lexicons a Kokoro build ships, one per language, US English preferred over British when both are
-         * there (sherpa-onnx takes one English lexicon; the multi-language builds carry `lexicon-us-en.txt`,
-         * `lexicon-gb-en.txt` and `lexicon-zh.txt`).
-         */
-        private fun lexicons(files: Array<out File>): List<File> {
-            val all = files.filter { it.isFile && it.name.startsWith("lexicon") && it.name.endsWith(".txt") }.sortedBy { it.name }
-            return if (all.any { it.name == "lexicon-us-en.txt" }) all.filterNot { it.name == "lexicon-gb-en.txt" } else all
-        }
-
-        /**
-         * The speakers' names by speaker id, from the Piper config beside the model (`<model>.onnx.json`'s
-         * `speaker_id_map`), or empty when the voice has one speaker or its speakers are only reader numbers (a
-         * LibriTTS voice as trained): those are listed once, as speaker 0.
-         */
-        fun speakerNames(voice: SherpaVoice): List<String> {
-            if (voice !is Piper) return emptyList()
-            val config = File(voice.model.path + ".json").takeIf { it.isFile } ?: return emptyList()
-            val map = Regex("\"speaker_id_map\"\\s*:\\s*\\{([^}]*)\\}").find(config.readText())?.groupValues?.get(1) ?: return emptyList()
-            val byId = Regex("\"([^\"]+)\"\\s*:\\s*(\\d+)").findAll(map).associate { it.groupValues[2].toInt() to it.groupValues[1] }
-            if (byId.size < 2 || byId.values.any { name -> name.all { it.isDigit() } }) return emptyList()
-            val names = (0 until byId.size).map { byId[it] ?: return emptyList() }
-            // A dialogue slot is the same reader, not a speaker to pick; it comes last, so the others keep their ids.
-            val dialogue = dialogueSpeaker(voice) ?: return names
-            return if (dialogue == names.lastIndex && names.size > 2) names.dropLast(1) else emptyList()
-        }
-
-        /**
-         * The speaker id a voice reads quoted speech with, from its config's `granger` block (`"dialogue_speaker": 1`,
-         * V4b), or null when it reads everything with one speaker.
-         */
-        fun dialogueSpeaker(voice: SherpaVoice): Int? {
+        /** A Piper voice's config text (`<model>.onnx.json`), or null. */
+        private fun config(voice: SherpaVoice): String? {
             if (voice !is Piper) return null
-            val config = File(voice.model.path + ".json").takeIf { it.isFile } ?: return null
-            val block = Regex("\"granger\"\\s*:\\s*\\{([^}]*)\\}").find(config.readText())?.groupValues?.get(1) ?: return null
-            return Regex("\"dialogue_speaker\"\\s*:\\s*(\\d+)").find(block)?.groupValues?.get(1)?.toIntOrNull()
+            return File(voice.model.path + ".json").takeIf { it.isFile }?.readText()
         }
 
-        /**
-         * How a Piper voice wants to be sampled, from its config's `inference` block (`noise_scale`, `noise_w`,
-         * `length_scale`, Piper's standard keys), so each voice ships its own settings (V4: Neal's pick for the
-         * Granger British voices is 0.75 / 1.0). sherpa-onnx's defaults, which are Piper's, fill in what is missing.
-         */
-        fun inference(voice: SherpaVoice): Inference {
-            if (voice !is Piper) return Inference()
-            val config = File(voice.model.path + ".json").takeIf { it.isFile } ?: return Inference()
-            val block = Regex("\"inference\"\\s*:\\s*\\{([^}]*)\\}").find(config.readText())?.groupValues?.get(1) ?: return Inference()
-            fun value(key: String) = Regex("\"$key\"\\s*:\\s*([0-9.]+)").find(block)?.groupValues?.get(1)?.toFloatOrNull()
-            val default = Inference()
-            return Inference(
-                noiseScale = value("noise_scale") ?: default.noiseScale,
-                noiseScaleW = value("noise_w") ?: default.noiseScaleW,
-                lengthScale = value("length_scale") ?: default.lengthScale,
-            )
-        }
+        /** The speakers' names by speaker id ([PiperVoices.speakerNames]). */
+        fun speakerNames(voice: SherpaVoice): List<String> = PiperVoices.speakerNames(config(voice))
+
+        /** The speaker id a voice reads quoted speech with ([PiperVoices.dialogueSpeaker]), or null. */
+        fun dialogueSpeaker(voice: SherpaVoice): Int? = PiperVoices.dialogueSpeaker(config(voice))
+
+        /** How a Piper voice wants to be sampled ([PiperVoices.inference]). */
+        fun inference(voice: SherpaVoice): Inference =
+            PiperVoices.inference(config(voice)).let { Inference(it.noiseScale, it.noiseScaleW, it.lengthScale) }
 
         /** Every voice directly under [root], by id. */
         fun list(root: File): List<SherpaVoice> =

@@ -56,20 +56,13 @@ class SherpaSpeech internal constructor(
     }
 
     companion object {
-        /** "vits-piper-en_US-ljspeech-medium" → "ljspeech"; anything unexpected stays whole. */
-        fun shortName(dir: String): String {
-            val parts = dir.split('-')
-            val locale = parts.indexOfFirst { it.matches(Regex("[a-z]{2}_[A-Z]{2}")) }
-            return if (locale >= 0 && locale + 1 < parts.size) parts[locale + 1] else dir
-        }
+        /** "vits-piper-en_US-ljspeech-medium" → "ljspeech" ([PiperVoices.shortName]). */
+        fun shortName(dir: String): String = PiperVoices.shortName(dir)
 
-        /** "Granger voice (ljspeech)"; Granger's own voices drop the prefix: `…-granger_nanny-medium` → "Granger voice (Nanny)". */
-        fun title(dir: String, titles: VoiceTitles): String {
-            val name = shortName(dir)
-            return titles.granger(if (name.startsWith("granger_")) name.removePrefix("granger_").replaceFirstChar { it.uppercase() } else name)
-        }
+        /** "Granger voice (ljspeech)" ([PiperVoices.title]). */
+        fun title(dir: String, titles: VoiceTitles): String = PiperVoices.title(dir, titles)
 
         /** A named speaker's title: "Granger voice (Maggie)". */
-        fun speakerTitle(name: String, titles: VoiceTitles): String = titles.granger(name)
+        fun speakerTitle(name: String, titles: VoiceTitles): String = PiperVoices.speakerTitle(name, titles)
     }
 }

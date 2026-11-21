@@ -1,5 +1,6 @@
 package app.granger.core.speech
 
+import kotlin.time.TimeSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -25,7 +26,7 @@ import kotlinx.coroutines.withContext
 class OnDeviceSpeechInput(
     private val backend: RecognizerBackend,
     private val main: CoroutineDispatcher = Dispatchers.Main,
-    private val now: () -> Long = { System.nanoTime() / 1_000_000 },
+    private val now: () -> Long = { CLOCK.elapsedNow().inWholeMilliseconds },
     private val readyTimeoutMs: Long = 25_000,
     private val gapMs: Long = 500,
     private val retryDelayMs: Long = 1_000,
@@ -150,3 +151,6 @@ interface RecognizerSession {
     /** Free the recognizer after the take has ended. */
     fun release()
 }
+
+/** A monotonic clock in milliseconds (`System.nanoTime` on Android, as before). */
+private val CLOCK = TimeSource.Monotonic.markNow()

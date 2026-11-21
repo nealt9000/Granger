@@ -68,7 +68,7 @@ class VoiceSettingsViewModelTest {
     @Test fun listsTheInstalledVoicesAndTheCatalogsAndGetsAndRemoves() = runTest(main.dispatcher) {
         val root = tmp.newFolder("internal")
         voiceDir(root, entry.id)
-        val installed = InstalledVoices({ listOf(File(root, "voices")) }, { listOf(systemVoice) }, noFactory, noFactory, main.dispatcher)
+        val installed = InstalledVoices({ listOf(File(root, "voices").path) }, { listOf(systemVoice) }, noFactory, noFactory, main.dispatcher)
         val vm = VoiceSettingsViewModel(prefs, installed, catalog, downloads, FakeVolumes(listOf(volume(root.path, "Internal storage"))), downloadPrefs, this, main.dispatcher)
         backgroundScope.launch { vm.ui.collect {} }
         testScheduler.advanceUntilIdle()

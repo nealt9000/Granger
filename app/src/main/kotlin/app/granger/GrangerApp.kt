@@ -5,6 +5,7 @@ import app.granger.archive.sidecarFile
 import app.granger.core.library.addDownloaded
 import app.granger.core.library.addLoose
 import app.granger.core.library.keepLoose
+import app.granger.core.speech.of
 import app.granger.explore.Prefs
 import app.granger.core.library.open
 import app.granger.core.library.create
@@ -572,7 +573,7 @@ class AppContainer(context: Context) {
     val installedVoices: InstalledVoices by lazy {
         val dirs = { context.getExternalFilesDirs(null).filterNotNull().map { File(it, "voices") } }
         val system = SystemSpeech.Factory(context)
-        InstalledVoices(dirs, { system.voices() }, SherpaSpeech.Factory(dirs), system, titles = app.granger.core.speech.VoiceTitles.of(context))
+        InstalledVoices({ dirs().map { it.path } }, { system.voices() }, SherpaSpeech.Factory(dirs), system, titles = app.granger.core.speech.VoiceTitles.of(context))
     }
 
     /**
