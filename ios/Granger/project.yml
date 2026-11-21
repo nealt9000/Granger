@@ -10,6 +10,10 @@ configFiles:
 packages:
   GrangerCore:
     path: ../GrangerCore
+  # E-books (Plan I5 call 1): Readium's Swift toolkit, the same family as Android's Kotlin toolkit. BSD-3.
+  Readium:
+    url: https://github.com/readium/swift-toolkit
+    exactVersion: 3.11.1
 settings:
   base:
     # The Swift 6 toolchain in language mode 5: Kotlin's exported types aren't Sendable.
@@ -29,6 +33,12 @@ targets:
     dependencies:
       - package: GrangerCore
         product: GrangerCoreKit
+      - package: Readium
+        product: ReadiumShared
+      - package: Readium
+        product: ReadiumStreamer
+      - package: Readium
+        product: ReadiumNavigator
       # Kiwix's libkiwix 14.2.1 (Plan I4 Task 5): static, fetched by tools/ios/fetch-corekiwix.sh, not in git.
       - framework: ../Vendor/CoreKiwix.xcframework
         embed: false
