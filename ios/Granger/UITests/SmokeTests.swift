@@ -414,4 +414,21 @@ final class SmokeTests: XCTestCase {
         app.buttons["onboarding-skip"].tap()
         XCTAssertTrue(app.tabBars.buttons["Home"].waitForExistence(timeout: 10), "skipped to the app")
     }
+
+    /// Plan I4 Task 8: a book pack (nautilus: A Library of Knots) shows in Your sources as a collection of its books.
+    func testBookPackCollection() throws {
+        guard let zim = ProcessInfo.processInfo.environment["GRANGER_TEST_BOOKPACK"], !zim.isEmpty else { throw XCTSkip("no GRANGER_TEST_BOOKPACK") }
+        let app = XCUIApplication()
+        app.launchArguments = ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en", "-debugPack", zim]
+        app.launch()
+        app.tabBars.buttons["Explore"].tap()
+        let sources = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Your sources'")).firstMatch
+        for _ in 0..<12 where !sources.isHittable { app.swipeUp() }
+        sources.tap()
+        let pack = app.buttons["source-book-pack"].firstMatch
+        XCTAssertTrue(pack.waitForExistence(timeout: 20), "the book pack under Books")
+        pack.tap()
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'PDF'")).firstMatch.waitForExistence(timeout: 20), "its books")
+        shot(app, "book-pack")
+    }
 }

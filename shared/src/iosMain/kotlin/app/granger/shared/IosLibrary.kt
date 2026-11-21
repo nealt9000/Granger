@@ -90,7 +90,10 @@ class IosLibrary(
     val packs: kotlinx.coroutines.flow.Flow<List<app.granger.core.library.Pack>> get() = packLibrary.packs
 
     /** Looks at Documents/Packs again: new files are opened and listed, gone ones marked missing. */
-    suspend fun refreshPacks() = packLibrary.refresh()
+    suspend fun refreshPacks() {
+        packLibrary.refresh()
+        runCatching { attachBookManifests(downloads.records.first()) }
+    }
 
     // ---- Downloads (Plan I4 Task 6): the shared queue, records and manager; the transfer is a URLSession background session.
 
@@ -174,7 +177,12 @@ class IosLibrary(
     fun startDownloads() {
         transfer.connect()
         scope.launch { runCatching { downloads.recover() } }
-        scope.launch { downloads.records.collect { records -> runCatching { sidecars.reconcile(catalog, records) } } }
+        scope.launch {
+            downloads.records.collect { records ->
+                runCatching { sidecars.reconcile(catalog, records) }
+                runCatching { attachBookManifests(records) }
+            }
+        }
     }
 
     private val downloadPrefs = DefaultsDownloadPrefs("downloads")
@@ -241,6 +249,42 @@ class IosLibrary(
 
     /** Removes a pack: its file, row, bookmarks and places (Android's Remove in Browse). */
     suspend fun removePack(packId: String): Boolean = packLibrary.remove(packId)
+
+    /**
+     * Which packs are book collections (Android's BookManifests.attach, Plan KB2): a pack whose installed `.gbooks`
+     * sidecar passes its check against the pack's checksum gets that manifest; a pack with none that is plainly a
+     * container of PDFs and EPUBs is listed by its files; any other keeps none.
+     */
+    suspend fun attachBookManifests(records: List<app.granger.core.downloads.DownloadRecord>) {
+        val installed = records.filter { it.state == app.granger.core.downloads.DownloadState.INSTALLED }
+        val byItem = installed.associateBy { it.itemId }
+        val manifests = installed.filter { app.granger.core.downloads.SidecarKind.ofItem(it.itemId) == app.granger.core.downloads.SidecarKind.BOOK_MANIFEST }
+            .mapNotNull { m ->
+                val parent = app.granger.core.downloads.SidecarKind.BOOK_MANIFEST.parentOf(m.itemId)?.let(byItem::get) ?: return@mapNotNull null
+                if (!app.granger.core.library.BookManifest.verify(m.filePath, parent.hash)) return@mapNotNull null
+                parent.filePath to m.filePath
+            }.toMap()
+        val dao = database.packDao()
+        for (pack in packLibrary.packs.first()) {
+            val want = manifests[pack.filePath] ?: run {
+                if (pack.status != app.granger.core.library.PackStatus.OK) return@run pack.bookManifest
+                val counter = packLibrary.archive(pack.id)?.metadata?.counter.orEmpty()
+                if (app.granger.core.library.BookFiles.isContainer(counter)) app.granger.core.library.Pack.BOOK_FILES else null
+            }
+            if (want != pack.bookManifest) dao.setBookManifest(pack.id, want)
+        }
+    }
+
+    /** A book pack's books (Gutenberg, nautilus, a manifest's or a container's files), in its own order; null otherwise. */
+    fun packBooks(packId: String): List<app.granger.core.library.PackBookEntry>? {
+        val pack = kotlinx.coroutines.runBlocking { packLibrary.packs.first() }.firstOrNull { it.id == packId } ?: return null
+        val archive = packLibrary.archive(packId) ?: return null
+        return app.granger.core.library.PackBookList.list(pack, archive)
+    }
+
+    /** The book packs on this iPhone (shown as collections of their books; reading them comes with the Library, I5). */
+    fun bookPacks(): List<app.granger.core.library.Pack> =
+        kotlinx.coroutines.runBlocking { packLibrary.packs.first() }.filter { it.isBookPack && it.status == app.granger.core.library.PackStatus.OK }.sortedBy { it.title.lowercase() }
 
     /** Search over the packs (titles, near titles, full text), in the library's languages, as Android's. */
     val packSearch = app.granger.core.library.PackSearch(packLibrary, languages = { languages().toSet() })

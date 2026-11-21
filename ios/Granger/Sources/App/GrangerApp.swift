@@ -142,6 +142,7 @@ struct RootView: View {
                     case .outfitting: OutfittingScreen()
                     case .yourSources: YourSourcesScreen()
                     case let .packFiles(pack): PackFilesScreen(pack: pack)
+                    case let .bookPack(pack): BookPackScreen(pack: pack)
                     case let .source(scope, domain, family, bookSet):
                         SourceScreen(scope: CatalogScope.allCases.first { $0.name == scope } ?? .kiwix, domain: domain, family: family, bookSet: bookSet)
                     case let .subject(id): SubjectScreen(subjectId: id)

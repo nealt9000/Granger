@@ -58,12 +58,23 @@ Spec: `docs/superpowers/specs/2026-11-20-iphone-design.md` (§ I4 Packs and down
   - Left: the Wikipedia set row's slice and picture choices drawn on the iPhone, the online index set joining the queue, a force-quit resume check by hand.
 
 ### Task 7: Packs in Files, import, Browse
-- [ ] Packs visible in Files; Import a pack (Files picker, copied in); Your sources and Browse a pack's files; greyed pack tiles under Local only.
+- [x] Packs visible in Files; Import a pack (Files picker, copied in); Your sources and Browse a pack's files; greyed pack tiles under Local only.
   - Done: Documents shows in the Files app (`UIFileSharingEnabled`, `LSSupportsOpeningDocumentsInPlace`): packs in On My iPhone › Granger › Packs, their sidecars hidden under `.granger/`. Import a pack: the picked .zim is opened (a pack? already here? room?) and copied into Documents/Packs; a .zim put there from Files is listed when Granger next comes to the front (no download record: the library lists the folder, and Readiness counts it as Android counts a hand-pushed pack). Your sources (Explore's Ways on): Wikipedia online (greyed with Local only on), then the packs by knowledge area, Other, Maps; each opens its main page, Files in this pack (PDFs and EPUBs, `BookFiles`/`PackFiles` now shared; a file opens in Quick Look), Remove. Tests: `PackImportTests`, `testYourSources`; library 535/535.
   - The last good catalog (and its signature) is now kept in Application Support/granger/catalog and verified again when read, as Android's cache; offline it names the packs' areas and Get more's lists. Found on the way: Swift's catalog fetch didn't ask the gate (Get more's refresh could go out under Local only); it does now.
 
 ### Task 8: Onboarding's sets, Outfitting, Ready offline, feeds
-- [ ] The first run's Pick a start with quick wins; Outfitting (your use and the nine domains, would-take sizes, kept-article updates); Ready offline on Home; feeds, Add feed, scopes and the Day page; book packs as collections (reading waits for I5); a broad topic's figures from packs.
+- [x] The first run's Pick a start with quick wins; Outfitting (your use and the nine domains, would-take sizes, kept-article updates); Ready offline on Home; feeds, Add feed, scopes and the Day page; book packs as collections (reading waits for I5); a broad topic's figures from packs.
+  - Done (models moved by subagents with Android unchanged: `OnboardingViewModel` 220/220, Home feeds/Add feed/Day page 152/152 + HomeFeeds 4/4; `KeptUpdates` moved here):
+    - **First run:** full-screen before the privacy line. Start reading now (to Explore) or Outfit for offline; Pick a start (Starter by default); a second language, the region map and quick wins; Review with free space and the Wi-Fi rule; Start or Skip. The voice step stays off until I5.
+    - **Ready offline on Home:** in Arrange Home's readiness slot.
+    - **Outfitting:** Try Local only, Your use, kept articles with "N have a newer version · Update all", Saved for now, the knowledge domains from the shared ReadinessModel (Get the missing essential), and storage by source.
+    - **Feeds:** drawn where Arrange Home places them (at most two); the defaults wait for their packs. Home's + is Add feed, as on Android's header, and Get more moves to the download icon. The Day page model feeds the "On this day" feed.
+    - **Broad topics:** figures come from a pack's own pictures.
+    - **Book packs as collections:**
+      - `BookManifest`, `GutenbergList` and the new `PackBookList` were moved by a subagent, Android unchanged: library 535/535, app library 103/103, store iOS 9/9.
+      - The iPhone attaches verified `.gbooks` manifests (and pure containers) to their packs as Android's BookManifests does.
+      - Your sources has a Books section; each book pack opens as its books by section, and a book opens in Quick Look (Granger's readers are I5).
+    - Tests: `testReadyOfflineAndOutfitting`, `testHomeFeeds`, `testOnboardingPickAStart`, `testBookPackCollection`.
 
 ### Task 9: Simulator check, parity rows, merge
 - [ ] The UI smoke test grows: get a small pack (a subject add-on), pause and resume, open an article from it, find it in Search, see it in Files, Outfitting's sizes. Walkthrough with screenshots (Field, Night, largest Dynamic Type, landscape, VoiceOver tree). Tick the I4 rows, GrangerCore release, merge and push, write Plan I5.

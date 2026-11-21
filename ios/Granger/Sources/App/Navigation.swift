@@ -30,6 +30,8 @@ enum Route: Hashable {
     /// Explore's Your sources, and one pack's PDFs and EPUBs (Plan I4 Task 7).
     case yourSources
     case packFiles(pack: String)
+    /// A book pack as a collection of its books.
+    case bookPack(pack: String)
     case source(scope: String, domain: String?, family: String?, bookSet: String?)
     case quiz(subject: String)
     /// The connections quilt round a topic.
