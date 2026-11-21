@@ -142,6 +142,10 @@ object ScreenTextIds {
         "listen_now_playing" -> R.string.listen_now_playing
         "listen_paused" -> R.string.listen_paused
         "listen_reading_aloud" -> R.string.listen_reading_aloud
+        "media_auto_audiobooks" -> R.string.media_auto_audiobooks
+        "media_auto_music" -> R.string.media_auto_music
+        "media_auto_nothing" -> R.string.media_auto_nothing
+        "media_auto_recent" -> R.string.media_auto_recent
         "media_unmounted" -> R.string.media_unmounted
         "music_all" -> R.string.music_all
         "music_release_albums" -> R.string.music_release_albums
@@ -156,6 +160,11 @@ object ScreenTextIds {
         "music_sort_date_added" -> R.string.music_sort_date_added
         "music_sort_title" -> R.string.music_sort_title
         "music_sort_year" -> R.string.music_sort_year
+        "music_tab_albums" -> R.string.music_tab_albums
+        "music_tab_artists" -> R.string.music_tab_artists
+        "music_tab_playlists" -> R.string.music_tab_playlists
+        "music_unknown_album" -> R.string.music_unknown_album
+        "music_unknown_artist" -> R.string.music_unknown_artist
         "onboarding_ask_line" -> R.string.onboarding_ask_line
         "onboarding_blurb_comprehensive" -> R.string.onboarding_blurb_comprehensive
         "onboarding_blurb_efficient" -> R.string.onboarding_blurb_efficient
