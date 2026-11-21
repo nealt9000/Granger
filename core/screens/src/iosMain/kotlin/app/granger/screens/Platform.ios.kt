@@ -87,3 +87,7 @@ actual fun monthName(month: Int): String = platform.Foundation.NSDateFormatter()
 
 actual fun englishCountryName(code: String): String =
     NSLocale(localeIdentifier = "en_US").displayNameForKey(platform.Foundation.NSLocaleCountryCode, value = code).orEmpty()
+
+actual fun logWarn(message: String, error: Throwable?) {
+    platform.Foundation.NSLog("Granger: %@", if (error == null) message else "$message ($error)")
+}

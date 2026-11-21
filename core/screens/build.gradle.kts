@@ -23,12 +23,17 @@ kotlin {
             // Plan I5 Task 2: archive.org's model.
             api(project(":core:archive"))
             api(libs.androidx.lifecycle.viewmodel)
+            // Plan I5 Task 2: a collection screen keeps its Find text and open sections in a SavedStateHandle.
+            api(libs.androidx.lifecycle.viewmodel.savedstate)
             api(libs.kotlinx.coroutines.core)
             api(project(":core:text"))
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.ksoup)
             implementation(libs.kotlinx.io.core)
         }
-        commonTest.dependencies { implementation(kotlin("test")) }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
+        }
     }
 }

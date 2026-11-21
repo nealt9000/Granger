@@ -1,6 +1,5 @@
 package app.granger.library
 
-import app.granger.invoke
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.UiText
@@ -10,9 +9,10 @@ import app.granger.core.library.Loose
 import app.granger.core.library.ManifestItem
 import app.granger.online.Availability
 import app.granger.online.RemoteCollection
-import java.io.File
+import app.granger.screens.ioDispatcher
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -83,7 +83,7 @@ sealed interface RemoteEvent {
 /**
  * A book pack's collection before (or without) the pack (Plan BK Task 4): its list, read online and kept in Saved for
  * now; each book's mark from the library's rows; opening one reads it from the pack by range; Keep this book keeps it on
- * its own; Keep the whole collection is the pack's download.
+ * its own; Keep the whole collection is the pack's download. Shared since Plan I5 Task 2.
  */
 class RemoteCollectionViewModel(
     private val load: suspend () -> RemoteCollection?,
@@ -98,7 +98,7 @@ class RemoteCollectionViewModel(
     packQueued: Flow<Boolean>,
     private val capBytes: () -> Long,
     private val online: () -> Boolean,
-    private val io: CoroutineDispatcher = Dispatchers.IO,
+    private val io: CoroutineDispatcher = ioDispatcher,
     /** Whether the pack is installed (Plan BK: then every book is on this phone). */
     packHere: Flow<Boolean> = kotlinx.coroutines.flow.flowOf(false),
 ) : ViewModel() {
@@ -243,19 +243,19 @@ class RemoteCollectionViewModel(
         /** Builder's call 7: a book over this asks before it comes down. */
         const val BIG_BYTES = 50L * 1024 * 1024
 
-        private val KEPT = UiText.Res(app.granger.R.string.bk_kept_notice)
-        private val COULDNT_KEEP = UiText.Res(app.granger.R.string.bk_couldnt_keep)
-        private val COULDNT_OPEN = UiText.Res(app.granger.R.string.bk_couldnt_open)
+        private val KEPT = UiText.Res("bk_kept_notice")
+        private val COULDNT_KEEP = UiText.Res("bk_couldnt_keep")
+        private val COULDNT_OPEN = UiText.Res("bk_couldnt_open")
 
         /** A reading edition's library id: the Granger book its catalog id names. */
-        internal fun editionBookId(editionId: String) = app.granger.core.library.BookIds.of(app.granger.core.library.BookOrigin.GRANGER, editionId)
+        fun editionBookId(editionId: String) = app.granger.core.library.BookIds.of(app.granger.core.library.BookOrigin.GRANGER, editionId)
 
         /**
          * A library row's mark: kept, or the pack's own copy, is on this phone; read online is saved for now (a pack
          * book read online, or a Granger book opened without keeping, which is hidden).
          */
-        internal fun markOf(book: Book): Availability? {
-            if (!File(book.filePath).isFile) return null
+        fun markOf(book: Book): Availability? {
+            if (SystemFileSystem.metadataOrNull(Path(book.filePath))?.isRegularFile != true) return null
             return when {
                 book.loose == Loose.SAVED -> Availability.Saved
                 book.origin == app.granger.core.library.BookOrigin.GRANGER && book.hidden -> Availability.Saved

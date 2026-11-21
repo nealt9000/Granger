@@ -1,17 +1,11 @@
 package app.granger.library
 
-import app.granger.archive.deleteSidecar
-import app.granger.invoke
-import app.granger.R
 import app.granger.UiText
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.archive.ArchiveDownloads
-import app.granger.library.shelf.LibraryViewPrefs
+import app.granger.library.shelf.ShelfChoices
 import app.granger.library.shelf.ShelfKind
 import app.granger.library.shelf.ShelfView
 import app.granger.library.shelf.sortNamed
@@ -52,8 +46,11 @@ import kotlinx.coroutines.launch
  * One collection's packs and books, or a folder's collections (`ui.children`). Rename and Delete are offered only
  * when `ui.collection.userCreated`; a folder offers nothing. The books can be found, sorted and, for Granger
  * Classics, browsed by catalog category ([books]); the choices are kept in [savedState], one per collection screen.
+ *
+ * Shared since Plan I5 Task 2. Android's `CollectionViewModel` is a thin subclass keeping its constructor (a `File`
+ * sidecar folder, `LibraryViewPrefs`) and the Find field's Compose state.
  */
-class CollectionViewModel(
+open class CollectionModel(
     private val collectionId: String,
     private val shelves: Shelves,
     private val library: Library,
@@ -62,12 +59,12 @@ class CollectionViewModel(
     private val downloads: Downloads,
     private val appScope: CoroutineScope,
     /** Where archive.org sidecars live (R2); null leaves them alone. */
-    private val archiveSidecarDir: java.io.File? = null,
+    private val archiveSidecarPath: String? = null,
     /** Where a Granger book's category comes from; null offers no category chips. */
     private val catalog: CatalogSource? = null,
     private val savedState: SavedStateHandle = SavedStateHandle(),
     /** The books shelf's remembered sort and view. */
-    private val viewPrefs: LibraryViewPrefs = LibraryViewPrefs(),
+    private val viewPrefs: ShelfChoices = ShelfChoices(),
     /** Where the books are filtered and sorted, off the main thread. */
     private val compute: CoroutineDispatcher = Dispatchers.Default,
     /** "Make all searchable…" for a Gutenberg collection (Plan GB); null offers it nowhere. */
@@ -89,9 +86,9 @@ class CollectionViewModel(
     val positions: StateFlow<Map<String, BookPosition>> =
         bookshelf.positions.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
-    /** The Find field's text, held as Compose state so typing never waits on a flow. */
-    var findText by mutableStateOf(savedState[QUERY] ?: "")
-        private set
+    /** The Find field's text, written at once so typing never waits on a flow (Android: Compose state). */
+    open var findText: String = savedState[QUERY] ?: ""
+        protected set
     /** The Find text: a title or author, matched from the start of a word. */
     val query: StateFlow<String> = savedState.getStateFlow(QUERY, "")
     val sort: StateFlow<BookSort> = viewPrefs.sort(ShelfKind.BOOKS)
@@ -320,7 +317,7 @@ class CollectionViewModel(
                 else -> Unit
             }
             bookshelf.remove(book.id)
-            if (book.origin == BookOrigin.ARCHIVE_ORG) archiveSidecarDir?.let { ArchiveDownloads.deleteSidecar(it, book.sourceRef) }
+            if (book.origin == BookOrigin.ARCHIVE_ORG) archiveSidecarPath?.let { ArchiveDownloads.deleteSidecar(it, book.sourceRef) }
         }
     }
 
@@ -374,7 +371,7 @@ class CollectionViewModel(
  * African Storybook collection shows "Level 1" … "Level 5", lowest first, as a manifest collection shows its sections.
  * Done as they're shown, not stored, so a level reads in the app's language ([levelName]) and needs no new column.
  */
-internal fun withLevels(books: List<Book>, levels: Map<String, Int>, levelName: (Int) -> String): List<Book> =
+fun withLevels(books: List<Book>, levels: Map<String, Int>, levelName: (Int) -> String): List<Book> =
     if (levels.isEmpty()) books else books.map { book ->
         val level = if (book.origin == BookOrigin.GRANGER) levels[book.sourceRef] else null
         if (level == null) book else book.copy(groupName = levelName(level), ord = level)
@@ -436,19 +433,18 @@ data class GutenbergHeader(
      * "From Kiwix · Federation of American Scientists", or "From Kiwix" when the manifest names no one.
      */
     val provider: UiText get() = when (kind) {
-        HeaderKind.GUTENBERG -> UiText.Res(R.string.library_from_kiwix_by, app.granger.core.library.GutenbergNames.PROVIDER)
-        HeaderKind.KIWIX_LIBRARY -> providerName?.let { UiText.Res(R.string.library_from_kiwix_by, it) } ?: UiText.Res(R.string.library_from_kiwix)
+        HeaderKind.GUTENBERG -> UiText.Res("library_from_kiwix_by", app.granger.core.library.GutenbergNames.PROVIDER)
+        HeaderKind.KIWIX_LIBRARY -> providerName?.let { UiText.Res("library_from_kiwix_by", it) } ?: UiText.Res("library_from_kiwix")
         // Granger publishes a set's books: the maker alone, no "From Kiwix".
         HeaderKind.BOOK_SET -> UiText.Raw(providerName.orEmpty())
     }
 
     /** "1,284 books", "17 documents". */
-    val count: UiText get() = UiText.Plural(
-        if (countsDocuments) R.plurals.library_documents else R.plurals.library_books_counted, books, number(books),
-    )
+    val count: UiText get() =
+        if (countsDocuments) UiText.Plural("library_documents", books, number(books)) else UiText.Plural("library_books_counted", books, number(books))
 
     /** "1,284 books · From Kiwix · Project Gutenberg", "17 documents · From Kiwix". */
-    val provenance: UiText get() = UiText.Res(R.string.library_dotted, count, provider)
+    val provenance: UiText get() = UiText.Res("library_dotted", count, provider)
 
     /**
      * The exceptions to "searchable in full", the default, which isn't said (Plan KB2 Task 4.5): "12 titles only until
@@ -458,22 +454,22 @@ data class GutenbergHeader(
     val exceptionText: UiText? get() = listOfNotNull<UiText>(
         when {
             unopened <= 0 -> null
-            unopened >= books -> UiText.Res(R.string.library_all_titles_only_until_opened)
-            else -> UiText.Plural(R.plurals.library_titles_only_until_opened, unopened, number(unopened))
+            unopened >= books -> UiText.Res("library_all_titles_only_until_opened")
+            else -> UiText.Plural("library_titles_only_until_opened", unopened, number(unopened))
         },
         when {
             scans <= 0 -> null
-            scans >= books -> UiText.Res(R.string.library_all_scans_titles_only)
-            else -> UiText.Plural(R.plurals.library_scans_titles_only, scans, number(scans))
+            scans >= books -> UiText.Res("library_all_scans_titles_only")
+            else -> UiText.Plural("library_scans_titles_only", scans, number(scans))
         },
-    ).reduceOrNull { line, part -> UiText.Res(R.string.library_dotted, line, part) }
+    ).reduceOrNull { line, part -> UiText.Res("library_dotted", line, part) }
 
     /** "Titles from file names", for a collection listed with no manifest; null otherwise. */
-    val fileNamesText: UiText? get() = if (fromFileNames) UiText.Res(R.string.library_titles_from_file_names) else null
+    val fileNamesText: UiText? get() = if (fromFileNames) UiText.Res("library_titles_from_file_names") else null
 
     /** "1,284 books · From Kiwix · Project Gutenberg · 1,247 titles only until opened", and "Titles from file names" when it applies. */
     val text: UiText get() = listOfNotNull<UiText>(provenance, exceptionText, fileNamesText)
-        .reduce { line, part -> UiText.Res(R.string.library_dotted, line, part) }
+        .reduce { line, part -> UiText.Res("library_dotted", line, part) }
 
-    private fun number(n: Int) = java.text.NumberFormat.getIntegerInstance().format(n)
+    private fun number(n: Int) = app.granger.screens.formatInteger(n.toLong())
 }

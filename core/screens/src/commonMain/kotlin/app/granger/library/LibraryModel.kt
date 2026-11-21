@@ -1,6 +1,5 @@
 package app.granger.library
 
-import app.granger.invoke
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.granger.audiobooks.AUDIOBOOKS_TYPE_ID
@@ -10,7 +9,6 @@ import app.granger.core.library.Library
 import app.granger.core.library.Shelf
 import app.granger.core.library.Shelves
 import app.granger.music.MUSIC_TYPE_ID
-import android.net.Uri
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,12 +24,12 @@ import kotlinx.coroutines.launch
 
 /**
  * An archive source the empty Music and Audiobooks screens (and an empty Listen) link to. The three archive.org links are its texts,
- * spoken-word and music views.
+ * spoken-word and music views. [titleKey] names it (Android: `title`).
  */
-enum class SourceLink(@androidx.annotation.StringRes val title: Int) {
-    GRANGER(app.granger.R.string.library_link_granger), KIWIX(app.granger.R.string.library_link_kiwix),
-    ARCHIVE_ORG(app.granger.R.string.library_link_archive), LIBRIVOX(app.granger.R.string.library_link_librivox),
-    ARCHIVE_ORG_SPOKEN(app.granger.R.string.library_link_archive), ARCHIVE_ORG_MUSIC(app.granger.R.string.library_link_archive),
+enum class SourceLink(val titleKey: String) {
+    GRANGER("library_link_granger"), KIWIX("library_link_kiwix"),
+    ARCHIVE_ORG("library_link_archive"), LIBRIVOX("library_link_librivox"),
+    ARCHIVE_ORG_SPOKEN("library_link_archive"), ARCHIVE_ORG_MUSIC("library_link_archive"),
 }
 
 /**
@@ -80,7 +78,7 @@ fun libraryKinds(shelves: List<Shelf>): List<KindRow> {
     val literature = shelves.firstOrNull { it.mediaType.id == LITERATURE }
     val rest = shelves.filter { it.mediaType.id != LITERATURE && it.mediaType.id !in AUDIO_TYPE_IDS }
     return (
-        listOfNotNull(literature?.let { KindRow(BOOKS_KIND, app.granger.UiText.Res(app.granger.R.string.library_books), LITERATURE, it.bookCollections()) }) +
+        listOfNotNull(literature?.let { KindRow(BOOKS_KIND, app.granger.UiText.Res("library_books"), LITERATURE, it.bookCollections()) }) +
             // A media type's name is saved in library.db (the defaults in English): translating it is L2's.
             rest.map { KindRow(it.mediaType.id, app.granger.UiText.Raw(it.mediaType.name), it.mediaType.id, it.bookCollections()) }
         ).filter { it.collections.isNotEmpty() }
@@ -105,14 +103,18 @@ private const val LITERATURE = "literature"
 /** The media types Listen holds rather than the Library, in Listen's order. */
 private val AUDIO_TYPE_IDS = listOf(MUSIC_TYPE_ID, AUDIOBOOKS_TYPE_ID)
 
-class LibraryViewModel(
+/**
+ * The Library tab's model (shared since Plan I5 Task 2). Android's `LibraryViewModel` is a thin subclass that imports
+ * content URIs through its `ImportRunner`.
+ */
+open class LibraryModel(
     shelves: Shelves,
     private val library: Library,
-    private val importer: ImportRunner,
+    private val importer: FileImports,
     private val appScope: CoroutineScope,
     /** What a Kiwix book pack's manifest says of its collection; read off the main thread. */
     private val manifestOf: (app.granger.core.library.Pack) -> app.granger.core.library.ManifestCollection? = ::manifestCollectionOf,
-    private val io: kotlinx.coroutines.CoroutineDispatcher = kotlinx.coroutines.Dispatchers.IO,
+    private val io: kotlinx.coroutines.CoroutineDispatcher = app.granger.screens.ioDispatcher,
     /** Where a book pack's provider comes from when its manifest names none (Plan KB2); null leaves it out. */
     private val catalog: app.granger.core.catalog.CatalogSource? = null,
     /** The books and their positions, for the reading shelf (Plan O4 Task 5); null leaves it out. */
@@ -128,10 +130,10 @@ class LibraryViewModel(
     }
 
     /** Imports the chosen files one by one. Runs in the app scope so leaving the screen doesn't stop it. */
-    fun import(uris: List<Uri>) {
-        if (uris.isEmpty()) return
+    fun importFiles(files: List<PickedFile>) {
+        if (files.isEmpty()) return
         appScope.launch {
-            _notice.value = importer.run(uris).text()
+            _notice.value = importer.importAll(files).text()
         }
     }
 

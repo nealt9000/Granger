@@ -17,6 +17,12 @@ val uploadProps = Properties().apply {
 val gitCommitCount: Int = providers.exec { commandLine("git", "rev-list", "--count", "HEAD") }
     .standardOutput.asText.get().trim().toInt()
 
+
+// Plan I5 Task 2: types that moved to the shared core keep the stability Compose gave them in the app.
+composeCompiler {
+    stabilityConfigurationFiles.add(project.layout.projectDirectory.file("compose-stability.conf"))
+}
+
 android {
     namespace = "app.granger"
     compileSdk = 37

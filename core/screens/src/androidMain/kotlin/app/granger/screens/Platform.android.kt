@@ -37,3 +37,7 @@ actual fun monthName(month: Int): String =
     java.time.Month.of(month).getDisplayName(java.time.format.TextStyle.FULL, Locale.getDefault())
 
 actual fun englishCountryName(code: String): String = Locale("", code).getDisplayCountry(Locale.ENGLISH)
+
+actual fun logWarn(message: String, error: Throwable?) {
+    if (error == null) android.util.Log.w("Granger", message) else android.util.Log.w("Granger", message, error)
+}

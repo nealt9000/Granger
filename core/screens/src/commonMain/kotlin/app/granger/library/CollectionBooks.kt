@@ -8,9 +8,9 @@ import app.granger.core.library.ShelfKey
 import app.granger.library.shelf.ShelfSections
 import app.granger.library.shelf.sortedByShelfKey
 
-/** How a collection's books are ordered (Plan U2 Decision 3). */
-enum class BookSort(@androidx.annotation.StringRes val label: Int) {
-    TITLE(app.granger.R.string.library_sort_title), AUTHOR(app.granger.R.string.library_sort_author), RECENT(app.granger.R.string.library_sort_recent),
+/** How a collection's books are ordered (Plan U2 Decision 3). [labelKey] names it (Android: `label`). */
+enum class BookSort(val labelKey: String) {
+    TITLE("library_sort_title"), AUTHOR("library_sort_author"), RECENT("library_sort_recent"),
 }
 
 /**
@@ -104,13 +104,13 @@ fun collectionBooks(
 }
 
 /** A book's lazy-list key, the same in every sort and view. */
-internal fun bookKey(book: Book) = "book:${book.id}"
+fun bookKey(book: Book) = "book:${book.id}"
 
 /**
  * The surname an author is filed under: the last word of the first full name given, so "J. M. Barrie" files under
  * B, "Jacob and Wilhelm Grimm" under G and "Alfred, Lord Tennyson" under T; a single name ("Homer") is its own.
  */
-internal fun authorKey(author: String): String {
+fun authorKey(author: String): String {
     val names = author.split(" and ", ",").map(SearchText::words).filter { it.isNotEmpty() }
     return (names.firstOrNull { it.size > 1 } ?: names.firstOrNull())?.last().orEmpty()
 }

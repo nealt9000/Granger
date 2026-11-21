@@ -1,14 +1,13 @@
 package app.granger.library.shelf
 
-import androidx.compose.runtime.Immutable
+// Shared since Plan I5 Task 2 (immutable; Android's Compose reads them as stable through app/compose-stability.conf).
+
 import app.granger.core.library.ShelfKey
 
 /** One item on a shelf: [key] is its stable lazy-list key, [letter] the header it files under ("A"…"Z", "#"). */
-@Immutable
 data class ShelfItem<out T>(val key: String, val letter: String, val value: T)
 
 /** The items under one letter header. */
-@Immutable
 data class ShelfSection<out T>(val letter: String, val items: List<ShelfItem<T>>)
 
 /**
@@ -20,7 +19,6 @@ data class ShelfSection<out T>(val letter: String, val items: List<ShelfItem<T>>
  * The lazy list or grid shows, after any header items of the screen's own, each section's header (when [lettered])
  * then its items; [headerIndex] is where each letter's header falls in that run, which the strip scrolls to.
  */
-@Immutable
 class ShelfSections<out T> private constructor(val sections: List<ShelfSection<T>>, val lettered: Boolean) {
     /** Every item, in the order shown: what a tap plays or opens from. */
     val items: List<ShelfItem<T>> = sections.flatMap { it.items }

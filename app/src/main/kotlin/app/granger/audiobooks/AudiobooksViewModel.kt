@@ -50,9 +50,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/** The Audiobooks media type's id (seeded). */
-const val AUDIOBOOKS_TYPE_ID = "audiobooks"
-
 /** The listener's audiobook rows: positions and bookmarks ([PlaybackDao] in the app). */
 interface AudiobookListening {
     val states: Flow<List<AudiobookState>>

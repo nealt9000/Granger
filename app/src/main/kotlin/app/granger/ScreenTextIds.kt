@@ -43,6 +43,9 @@ object ScreenTextIds {
         "archive_spoken_word_get" -> R.string.archive_spoken_word_get
         "archive_tab_browse" -> R.string.archive_tab_browse
         "archive_tab_installed" -> R.string.archive_tab_installed
+        "bk_couldnt_keep" -> R.string.bk_couldnt_keep
+        "bk_couldnt_open" -> R.string.bk_couldnt_open
+        "bk_kept_notice" -> R.string.bk_kept_notice
         "explore_era_ancient" -> R.string.explore_era_ancient
         "explore_era_ancient_span" -> R.string.explore_era_ancient_span
         "explore_era_c19" -> R.string.explore_era_c19
@@ -86,8 +89,30 @@ object ScreenTextIds {
         "home_scope_music" -> R.string.home_scope_music
         "home_scope_the_library" -> R.string.home_scope_the_library
         "home_scope_whole_library" -> R.string.home_scope_whole_library
+        "library_a_file" -> R.string.library_a_file
+        "library_all_scans_titles_only" -> R.string.library_all_scans_titles_only
+        "library_all_titles_only_until_opened" -> R.string.library_all_titles_only_until_opened
+        "library_books" -> R.string.library_books
+        "library_collection_my_books" -> R.string.library_collection_my_books
+        "library_collection_on_this_phone" -> R.string.library_collection_on_this_phone
+        "library_collection_other" -> R.string.library_collection_other
+        "library_dotted" -> R.string.library_dotted
         "library_from_kiwix" -> R.string.library_from_kiwix
         "library_from_kiwix_by" -> R.string.library_from_kiwix_by
+        "library_import_damaged" -> R.string.library_import_damaged
+        "library_import_drm" -> R.string.library_import_drm
+        "library_import_encrypted" -> R.string.library_import_encrypted
+        "library_import_unsupported" -> R.string.library_import_unsupported
+        "library_link_archive" -> R.string.library_link_archive
+        "library_link_granger" -> R.string.library_link_granger
+        "library_link_kiwix" -> R.string.library_link_kiwix
+        "library_link_librivox" -> R.string.library_link_librivox
+        "library_nothing_imported" -> R.string.library_nothing_imported
+        "library_sentences" -> R.string.library_sentences
+        "library_sort_author" -> R.string.library_sort_author
+        "library_sort_recent" -> R.string.library_sort_recent
+        "library_sort_title" -> R.string.library_sort_title
+        "library_titles_from_file_names" -> R.string.library_titles_from_file_names
         "onboarding_ask_line" -> R.string.onboarding_ask_line
         "onboarding_blurb_comprehensive" -> R.string.onboarding_blurb_comprehensive
         "onboarding_blurb_efficient" -> R.string.onboarding_blurb_efficient
@@ -231,6 +256,12 @@ object ScreenTextIds {
 
     fun plural(key: String): Int = when (key) {
         "common_books" -> R.plurals.common_books
+        "library_already_there" -> R.plurals.library_already_there
+        "library_books_counted" -> R.plurals.library_books_counted
+        "library_documents" -> R.plurals.library_documents
+        "library_imported" -> R.plurals.library_imported
+        "library_scans_titles_only" -> R.plurals.library_scans_titles_only
+        "library_titles_only_until_opened" -> R.plurals.library_titles_only_until_opened
         "sources_adds_about" -> R.plurals.sources_adds_about
         "sources_adds_about_your" -> R.plurals.sources_adds_about_your
         "sources_languages_more" -> R.plurals.sources_languages_more

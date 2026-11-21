@@ -360,9 +360,6 @@ fun ViewToggle(view: ShelfView, onToggle: () -> Unit) {
     }
 }
 
-/** The other view. */
-fun ShelfView.toggled(): ShelfView = if (this == ShelfView.LIST) ShelfView.GRID else ShelfView.LIST
-
 /**
  * A list row (Plan LV Decision 2): a [ShelfCoverSize] [cover], the [title] on two lines at most, [subtitle] and an
  * optional [detail] line, and [trailing]. [dimmed] (a missing file) fades it; it still takes its long-press.

@@ -21,27 +21,9 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
-/**
- * A book pack's collection read online, before (or without) the pack (Plan BK): its `.gbooks` list, checked against the
- * catalog, and the items in it.
- */
-class RemoteCollection(val pack: PackEntry, val file: File, val collection: ManifestCollection, val items: List<ManifestItem>) {
-    /** The origin of its books' rows: the ids an installed pack would give them. */
-    val origin: BookOrigin get() = if (collection.origin == NAUTILUS) BookOrigin.NAUTILUS else BookOrigin.KIWIX
-
-    /** The library id of [item]: `book:nautilus:<pack name>/<fp>` or `book:kiwix:<pack name>/<key>`. */
-    fun bookId(item: ManifestItem): String = BookIds.of(origin, ref(item))
-
-    /** [item]'s ref within its origin. */
-    fun ref(item: ManifestItem): String = "${pack.zimName}/${item.key}"
-
-    /** The item whose library id is [bookId], or null. */
-    fun itemOf(bookId: String): ManifestItem? = items.firstOrNull { bookId(it) == bookId }
-
-    companion object {
-        const val NAUTILUS = "nautilus"
-    }
-}
+/** [RemoteCollection] (shared since Plan I5) on Android's `File`. */
+fun RemoteCollection(pack: PackEntry, file: File, collection: ManifestCollection, items: List<ManifestItem>): RemoteCollection =
+    RemoteCollection(pack, file.path, collection, items)
 
 /**
  * Reads book packs' books one at a time from the pack file on Kiwix's mirrors (Plan BK; spike 2026-11-20): every book

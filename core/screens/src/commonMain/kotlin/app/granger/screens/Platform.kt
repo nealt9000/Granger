@@ -48,3 +48,6 @@ expect fun monthName(month: Int): String
 
 /** A country code's name in English ("PE" → "Peru"), as onboarding matches the catalog's English map titles; blank or the code when unknown. */
 expect fun englishCountryName(code: String): String
+
+/** A warning in the phone's log under "Granger" (Android: `Log.w`; Plan I5). */
+expect fun logWarn(message: String, error: Throwable? = null)

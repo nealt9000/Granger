@@ -48,9 +48,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/** The Music media type's id (seeded). */
-const val MUSIC_TYPE_ID = "music"
-
 const val UNKNOWN_GENRE = MediaNames.UNKNOWN_GENRE
 
 /** How the Songs tab is ordered; [byName] sorts file under letters (Plan LV Decision 4). */
