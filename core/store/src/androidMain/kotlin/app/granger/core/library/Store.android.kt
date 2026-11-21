@@ -22,15 +22,16 @@ actual class TryLock actual constructor() {
 }
 
 /**
- * The framework SQLite (as before Plan I3). This driver version takes no open flags, so the file is opened read-write
- * (sidecars live in the app's own storage) and `query_only` makes SQLite refuse any write, as a read-only open did.
+ * The framework SQLite, opened read-only as before Plan I3: `OPEN_READONLY` so nothing can write, and
+ * `NO_LOCALIZED_COLLATORS` so the framework doesn't create its `android_metadata` table on open. Opening read-write
+ * (as Plan I3 first did, with `query_only` after) let that table be written into every sidecar on first read: the
+ * file grew a page, left a journal and no longer matched its checksum, so Outfitting called the pack incomplete.
  * A missing file isn't created: it's checked first.
  */
 internal actual fun openReadOnlyConnection(path: String): androidx.sqlite.SQLiteConnection {
     require(java.io.File(path).isFile) { "no such file: $path" }
-    return androidx.sqlite.driver.AndroidSQLiteDriver().open(path).apply {
-        prepare("PRAGMA query_only = 1").use { it.step() }
-    }
+    val flags = android.database.sqlite.SQLiteDatabase.OPEN_READONLY or android.database.sqlite.SQLiteDatabase.NO_LOCALIZED_COLLATORS
+    return androidx.sqlite.driver.AndroidSQLiteConnection(android.database.sqlite.SQLiteDatabase.openDatabase(path, null, flags))
 }
 
 internal actual fun openWritableConnection(path: String): androidx.sqlite.SQLiteConnection =
