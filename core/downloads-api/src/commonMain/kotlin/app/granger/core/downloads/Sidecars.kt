@@ -8,7 +8,6 @@ import app.granger.core.catalog.timeIndex
 import app.granger.core.catalog.vectors
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.io.File
 
 /**
  * One kind of file built offline for a pack or book and downloaded with it (Linked Library spec §5.1). Search vectors
@@ -98,9 +97,9 @@ class Sidecars(
                 }
                 if (installed == null || !wanted(kind) || versions.any { it.hash == file.sha256 || it.isActive }) continue
                 val relative = downloadSpecOf(item).relativePath
-                val root = installed.filePath.removeSuffix(File.separator + relative).takeIf { it != installed.filePath } ?: continue
+                val root = installed.filePath.removeSuffix(Files.SEP + relative).takeIf { it != installed.filePath } ?: continue
                 // Not enough space is a quiet no: the next change to the records tries again.
-                downloads.enqueue(kind.specOf(item, file), File(root), wifiOnly())
+                downloads.enqueue(kind.specOf(item, file), root, wifiOnly())
             }
         }
     }

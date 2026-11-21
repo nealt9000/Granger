@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.ksp)
 }
 
 android {
@@ -12,7 +11,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     sourceSets {
-        getByName("test") { assets.directories.add("$projectDir/schemas") }
+        getByName("test") { assets.directories.add(rootProject.file("core/downloads-api/schemas").path) }
     }
     testOptions {
         unitTests.isIncludeAndroidResources = true
@@ -21,16 +20,13 @@ android {
     }
 }
 
-ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
-}
-
 dependencies {
     api(project(":core:catalog"))
+    // The records table, queue rules and manager, shared with the iPhone (Plan I4).
+    api(project(":core:downloads-api"))
     api(libs.okhttp)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.work.runtime)
     implementation(libs.kotlinx.coroutines.android)
 

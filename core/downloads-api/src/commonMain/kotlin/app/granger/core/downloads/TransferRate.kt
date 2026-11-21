@@ -8,31 +8,29 @@ package app.granger.core.downloads
 class TransferRate(private val windowMillis: Long = 20_000, private val warmUpMillis: Long = 10_000) {
     private val samples = ArrayDeque<Pair<Long, Long>>()
     private var startedAt: Long? = null
+    private val lock = QueueLock()
 
     /** The first report only starts the clock: when its bytes began arriving isn't known. */
-    @Synchronized
-    fun add(bytes: Long, at: Long) {
-        if (bytes <= 0) return
+    fun add(bytes: Long, at: Long) = lock.with {
+        if (bytes <= 0) return@with
         if (startedAt == null) {
             startedAt = at
-            return
+            return@with
         }
         samples.addLast(at to bytes)
         trim(at)
     }
 
-    @Synchronized
-    fun bytesPerSecond(at: Long): Long? {
-        val start = startedAt ?: return null
-        if (at - start < warmUpMillis) return null
+    fun bytesPerSecond(at: Long): Long? = lock.with {
+        val start = startedAt ?: return@with null
+        if (at - start < warmUpMillis) return@with null
         trim(at)
         val span = minOf(windowMillis, at - start)
-        return samples.sumOf { it.second } * 1000 / span
+        samples.sumOf { it.second } * 1000 / span
     }
 
     /** Forgets everything: after a pause or once the queue is idle, the next speed is measured afresh. */
-    @Synchronized
-    fun reset() {
+    fun reset() = lock.with {
         samples.clear()
         startedAt = null
     }

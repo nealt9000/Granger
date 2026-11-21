@@ -134,7 +134,8 @@ class FakeDownloads : Downloads {
     /** Runs as a spec is enqueued, before the result is decided. */
     var onEnqueue: (DownloadSpec) -> Unit = {}
 
-    override suspend fun enqueue(spec: DownloadSpec, volumeRoot: File, wifiOnly: Boolean): EnqueueResult {
+    override suspend fun enqueue(spec: DownloadSpec, volumeRoot: String, wifiOnly: Boolean): EnqueueResult {
+        val volumeRoot = File(volumeRoot)
         onEnqueue(spec)
         enqueuedSpecs += spec
         enqueued += spec.itemId to volumeRoot
@@ -151,7 +152,8 @@ class FakeDownloads : Downloads {
         return result
     }
 
-    override suspend fun enqueue(item: CatalogItem, volumeRoot: File, wifiOnly: Boolean): EnqueueResult {
+    override suspend fun enqueue(item: CatalogItem, volumeRoot: String, wifiOnly: Boolean): EnqueueResult {
+        val volumeRoot = File(volumeRoot)
         enqueued += item.id to volumeRoot
         val result = nextResult
         if (result == EnqueueResult.Queued) {
@@ -192,8 +194,9 @@ class FakeDownloads : Downloads {
     val groupsNext = mutableListOf<String>()
 
     override suspend fun enqueueGroup(
-        groupId: String, specs: List<DownloadSpec>, volumeRoot: File, wifiOnly: Boolean, next: Boolean,
+        groupId: String, specs: List<DownloadSpec>, volumeRoot: String, wifiOnly: Boolean, next: Boolean,
     ): EnqueueResult {
+        val volumeRoot = File(volumeRoot)
         specs.forEach(onEnqueue)
         enqueuedGroups += Triple(groupId, specs, volumeRoot)
         calls += "enqueueGroup:$groupId"

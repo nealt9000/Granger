@@ -59,6 +59,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import app.granger.core.downloads.enqueue
 
 /** Archive.org has no versions, so there's no Updates tab (spec §5). */
 enum class ArchiveTab(@StringRes val title: Int) { BROWSE(R.string.archive_tab_browse), INSTALLED(R.string.archive_tab_installed) }

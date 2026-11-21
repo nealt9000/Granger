@@ -16,25 +16,6 @@ import java.io.InputStream
 import java.io.RandomAccessFile
 import java.security.MessageDigest
 
-data class DownloadRequest(val urls: List<String>, val sizeBytes: Long, val hash: String, val algorithm: HashAlgorithm = HashAlgorithm.SHA256)
-
-sealed interface DownloadResult {
-    data object Done : DownloadResult
-
-    /** The bytes didn't match the expected checksum. The part file has been deleted. */
-    data object HashMismatch : DownloadResult
-
-    /** Writing on would leave less than the reserve free. The bytes so far are kept. */
-    data class NoSpace(val neededBytes: Long) : DownloadResult
-
-    /**
-     * Every URL failed; [reason] is the last error. The bytes so far are kept for a resume.
-     * [permanent] means every URL failed in a way retrying won't fix (gone, a different file, a bad address).
-     * [gone] means every URL answered 404 or 410: the file has been withdrawn (Plan DL Decision 10).
-     */
-    data class Failed(val reason: String, val permanent: Boolean = false, val gone: Boolean = false) : DownloadResult
-}
-
 /**
  * Downloads one file into a `.part` file with HTTP Range resume, mirror fallback, a streaming
  * checksum and a free-space check before every write. It never renames or registers anything.
@@ -46,7 +27,10 @@ class FileDownloader(
     private val io: CoroutineDispatcher = Dispatchers.IO,
     /** Opens a [LOCAL_SCHEME] address at a byte offset (Plan E1 item 4); null where nothing local can be read. */
     private val openLocal: ((url: String, offset: Long) -> InputStream)? = null,
-) {
+) : FileTransfer {
+    override suspend fun download(request: DownloadRequest, partPath: String, onProgress: (Long) -> Unit): DownloadResult =
+        download(request, File(partPath), onProgress)
+
     suspend fun download(request: DownloadRequest, part: File, onProgress: (Long) -> Unit = {}): DownloadResult =
         withContext(io) {
             val dir = part.absoluteFile.parentFile
@@ -212,7 +196,7 @@ class FileDownloader(
 
     companion object {
         /** Never fill a volume past this, whatever the queue check allowed. */
-        const val DEFAULT_RESERVE_BYTES = 64L * 1024 * 1024
+        const val DEFAULT_RESERVE_BYTES = FileTransfer.DEFAULT_RESERVE_BYTES
         private const val PROGRESS_STEP = 256L * 1024
     }
 }

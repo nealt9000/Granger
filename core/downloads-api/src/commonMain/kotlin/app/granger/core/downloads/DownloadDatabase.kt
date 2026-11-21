@@ -1,19 +1,20 @@
 package app.granger.core.downloads
 
-import android.content.Context
 import androidx.room.AutoMigration
+import androidx.room.ConstructedBy
 import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Query
 import androidx.room.RenameColumn
-import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 import androidx.room.Upsert
 import androidx.room.migration.AutoMigrationSpec
 import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -85,12 +86,11 @@ interface DownloadDao {
     )
     suspend fun markInstalled(itemId: String, hash: String, now: Long): Int
 
-    /** Blocking: called from the download thread's progress callback. */
     @Query(
         "UPDATE downloads SET bytesDone = :bytesDone, updatedAt = :now " +
             "WHERE itemId = :itemId AND hash = :hash AND state = 'RUNNING'",
     )
-    fun setProgress(itemId: String, hash: String, bytesDone: Long, now: Long)
+    suspend fun setProgress(itemId: String, hash: String, bytesDone: Long, now: Long)
 
     @Query(
         "UPDATE downloads SET state = 'QUEUED', updatedAt = :now " +
@@ -124,6 +124,7 @@ class Converters {
     ],
 )
 @TypeConverters(Converters::class)
+@ConstructedBy(DownloadDatabaseConstructor::class)
 abstract class DownloadDatabase : RoomDatabase() {
     abstract fun downloadDao(): DownloadDao
 
@@ -131,16 +132,14 @@ abstract class DownloadDatabase : RoomDatabase() {
     class Rename1To2 : AutoMigrationSpec
 
     companion object {
-        fun create(context: Context): DownloadDatabase =
-            Room.databaseBuilder(context, DownloadDatabase::class.java, "downloads.db").addMigrations(MIGRATION_3_4).build()
-
         /**
          * Plan DL Decision 2: the queue's stored order, the tries so far and when to try again. Every record gets its
          * place from when it was queued, then its id (a group's files share one createdAt, so their list order wasn't
          * stored); nothing is retrying yet.
          */
         val MIGRATION_3_4 = object : Migration(3, 4) {
-            override fun migrate(db: SupportSQLiteDatabase) {
+            override fun migrate(connection: SQLiteConnection) {
+                val db = connection
                 db.execSQL("ALTER TABLE downloads ADD COLUMN queueOrder INTEGER NOT NULL DEFAULT 0")
                 db.execSQL("ALTER TABLE downloads ADD COLUMN attempts INTEGER NOT NULL DEFAULT 0")
                 db.execSQL("ALTER TABLE downloads ADD COLUMN retryAt INTEGER")
@@ -152,4 +151,10 @@ abstract class DownloadDatabase : RoomDatabase() {
             }
         }
     }
+}
+
+/** Room's generated constructor for non-Android targets (Plan I4 Task 1). */
+@Suppress("NO_ACTUAL_FOR_EXPECT", "KotlinNoActualForExpect")
+expect object DownloadDatabaseConstructor : RoomDatabaseConstructor<DownloadDatabase> {
+    override fun initialize(): DownloadDatabase
 }

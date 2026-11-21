@@ -18,6 +18,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import app.granger.core.downloads.enqueue
 
 /** What adding a pack from a file did (Plan E1 item 4). */
 sealed interface PackImportResult {

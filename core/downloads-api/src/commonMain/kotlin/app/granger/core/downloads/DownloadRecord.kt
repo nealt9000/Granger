@@ -2,7 +2,6 @@ package app.granger.core.downloads
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import java.io.File
 
 /** How a download is verified; archive.org offers sha1 or md5, the catalog uses sha256. */
 enum class HashAlgorithm(val jcaName: String) { SHA256("SHA-256"), SHA1("SHA-1"), MD5("MD5") }
@@ -83,12 +82,12 @@ val DownloadRecord.needsWifi: Boolean get() = wifiOnly && !isLocal
 
 /**
  * The hash of an imported file that matches no catalog entry starts with this: there is no checksum to check it
- * against, so [FileDownloader] skips the check (the library still opens the file before it lists it).
+ * against, so the transfer skips the check (the library still opens the file before it lists it).
  */
 const val UNVERIFIED_PREFIX = "unverified-"
 
-val DownloadRecord.file: File get() = File(filePath)
-val DownloadRecord.partFile: File get() = File("$filePath.part")
+/** Where the record downloads to before its checksum passes (`file` and `partFile` on Android). */
+val DownloadRecord.partPath: String get() = "$filePath.part"
 val DownloadRecord.isActive: Boolean get() = state != DownloadState.INSTALLED
 
 /**

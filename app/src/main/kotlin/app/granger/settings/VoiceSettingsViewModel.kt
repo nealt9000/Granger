@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import app.granger.core.downloads.enqueue
 
 /** A catalog voice as the screen lists it: installed, downloading (with progress), or available to get. */
 data class CatalogVoiceRow(

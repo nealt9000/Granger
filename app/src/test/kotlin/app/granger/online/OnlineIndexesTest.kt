@@ -24,7 +24,7 @@ class OnlineIndexesTest {
     private val catalog = catalogOf(packs = listOf(top("en"), top("es")))
     private val downloads = FakeDownloads()
     private var wifiOnly = true
-    private val indexes = OnlineIndexes(downloads, { File("/internal") }, { wifiOnly })
+    private val indexes = OnlineIndexes(downloads, { "/internal" }, { wifiOnly })
 
     private suspend fun reconcile(langs: List<String> = listOf("en"), enabled: Boolean = true, online: Boolean = true) =
         indexes.reconcile(catalog, downloads.list.value, langs, enabled, online)

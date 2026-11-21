@@ -4,7 +4,6 @@ import app.granger.core.catalog.Catalog
 import app.granger.core.catalog.ModelRole
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.io.File
 
 /**
  * The embedder follows the first search vectors, once (Plan SQ Phase 6): vectors are no use to Search without it, and
@@ -29,7 +28,7 @@ class EmbedderDownloads(
         }
         val vectors = records.firstOrNull { it.kind == ItemKind.VECTORS } ?: return@withLock
         // A vectors file is <volume>/vectors/<name>.gvec.
-        val root = File(vectors.filePath).parentFile?.parentFile ?: return@withLock
+        val root = Files.parent(vectors.filePath)?.let(Files::parent) ?: return@withLock
         when (downloads.enqueue(downloadSpecOf(model), root, wifiOnly())) {
             // Not enough space is a quiet no, as for the vectors: the next change to the records tries again.
             is EnqueueResult.NoSpace -> Unit

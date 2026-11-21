@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.concurrent.Volatile
 
 /** What the queue runs one record with: [DownloadRunner] in the app, a fake in tests. */
 interface RecordRunner {
@@ -60,7 +61,7 @@ class DownloadQueue(
     private val prefs: QueuePrefs,
     /** Whether the network now is unmetered (Wi-Fi). */
     private val unmetered: () -> Boolean,
-    private val now: () -> Long = System::currentTimeMillis,
+    private val now: () -> Long = ::nowMillis,
     /** How often a run checks it may still use this network. */
     private val networkCheckMillis: Long = 5_000,
     /** How often [progress] is brought up to date while a file downloads. */
@@ -77,7 +78,7 @@ class DownloadQueue(
     /** The file downloading now, how far and how fast (Plan DL Decision 6); empty when nothing runs in this process. */
     val progress: StateFlow<QueueProgress> = _progress.asStateFlow()
 
-    private val lock = Any()
+    private val lock = QueueLock()
     private var draining = false
     private var dirty = false
     private var run: Job? = null
@@ -91,7 +92,7 @@ class DownloadQueue(
      * Called whenever there may be something new to run. True when the caller must start the worker; false when a
      * [drain] is under way in this process, which will look again before it stops.
      */
-    fun wake(): Boolean = synchronized(lock) {
+    fun wake(): Boolean = lock.with {
         if (draining) dirty = true
         !draining
     }
@@ -103,7 +104,7 @@ class DownloadQueue(
      * with its part file. A [drain] carries on with the next record.
      */
     suspend fun stopRun(itemId: String? = null) {
-        val job = synchronized(lock) { run?.takeIf { itemId == null || isRunning(itemId) } } ?: return
+        val job = lock.with { run?.takeIf { itemId == null || isRunning(itemId) } } ?: return
         job.cancel()
         job.join()
     }
@@ -114,7 +115,7 @@ class DownloadQueue(
 
     /** Works through the runnable records until none is left, then says why it stopped. */
     suspend fun drain(onProgress: (DownloadRecord, done: Long, total: Long) -> Unit = { _, _, _ -> }): QueueRest {
-        synchronized(lock) {
+        lock.with {
             draining = true
             dirty = false
         }
@@ -133,7 +134,7 @@ class DownloadQueue(
                     continue
                 }
                 // Something queued while we looked is seen on the next pass rather than lost.
-                val stop = synchronized(lock) {
+                val stop = lock.with {
                     if (dirty) {
                         dirty = false
                         false
@@ -145,7 +146,7 @@ class DownloadQueue(
                 if (stop) return restOf(waiting, t, metered)
             }
         } finally {
-            synchronized(lock) { draining = false }
+            lock.with { draining = false }
             _current.value = null
             _progress.value = QueueProgress()
             rate.reset()
@@ -206,7 +207,7 @@ class DownloadQueue(
                         delay(progressEveryMillis)
                     }
                 }
-                synchronized(lock) { run = job }
+                lock.with { run = job }
                 // Wi-Fi lost, or Wi-Fi only turned on, while on mobile data: the file goes back to waiting. So does a big
                 // file while a small one waits: it resumes from its part file once the small ones are through.
                 val watch = launch {
@@ -228,7 +229,7 @@ class DownloadQueue(
                 }
             }
         } finally {
-            synchronized(lock) { run = null }
+            lock.with { run = null }
             _current.value = null
         }
         if (outcome == RunOutcome.RETRY) {

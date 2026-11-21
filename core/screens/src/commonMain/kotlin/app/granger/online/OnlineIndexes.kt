@@ -9,7 +9,7 @@ import app.granger.core.downloads.SidecarKind
 import app.granger.core.downloads.isActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.io.File
+import kotlin.concurrent.Volatile
 
 /**
  * Wikipedia online's small index set (spec §6 Phase 1, Plan O1 Task 8): each knowledge language's Top QID index and
@@ -23,7 +23,8 @@ import java.io.File
  */
 class OnlineIndexes(
     private val downloads: Downloads,
-    private val volumeRoot: () -> File?,
+    /** The volume the set goes on, as a path. */
+    private val volumeRoot: () -> String?,
     private val wifiOnly: () -> Boolean,
     /** The set's name in Downloads, in the app's language. */
     private val title: () -> String = { "" },

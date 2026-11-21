@@ -28,7 +28,7 @@ class DownloadManagerTest {
     private val sd by lazy { tmp.newFolder("sd") }
     private val manager = DownloadManager(
         dao, scheduler,
-        freeBytes = { free[it.path] ?: Long.MAX_VALUE / 2 },
+        freeBytes = { free[it] ?: Long.MAX_VALUE / 2 },
         io = dispatcher,
         now = { 7L },
     )

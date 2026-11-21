@@ -5,21 +5,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.security.MessageDigest
 
-enum class Integrity { VERIFIED, SIZE_OK, INCOMPLETE, CORRUPTED, MISSING }
-
 /** Readiness checks: a size check always, a full checksum re-hash on request (spec "Readiness"). */
 object IntegrityChecker {
     fun quick(record: DownloadRecord): Integrity {
         if (record.kind == ItemKind.VOICE) return VoiceUnpacker.quick(record)
-        val file = record.file
-        return when {
-            !file.isFile -> Integrity.MISSING
-            file.length() != record.sizeBytes -> Integrity.INCOMPLETE
-            // A pack added from a file the catalog doesn't list has no checksum to pass (Plan E1 item 4).
-            record.hash.startsWith(UNVERIFIED_PREFIX) -> Integrity.SIZE_OK
-            record.verifiedAt != null -> Integrity.VERIFIED
-            else -> Integrity.SIZE_OK
-        }
+        return Integrity.quickFile(record)
     }
 
     suspend fun full(

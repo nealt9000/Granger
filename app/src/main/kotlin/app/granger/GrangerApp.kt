@@ -192,6 +192,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import app.granger.core.research.FictionWeight
 import java.util.concurrent.Executors
+import app.granger.core.downloads.enqueue
+import app.granger.core.downloads.create
 
 open class GrangerApp : Application(), DownloadsHost {
     val container: AppContainer by lazy { AppContainer(this) }
@@ -1300,7 +1302,7 @@ class AppContainer(context: Context) {
 
     /** Wikipedia online's small index set: queued once per knowledge language, kept while its source is on (Plan O1 Task 8). */
     val onlineIndexes = app.granger.online.OnlineIndexes(
-        downloads, volumeRoot = { volumes.list().firstOrNull()?.root }, wifiOnly = { downloadPrefs.wifiOnly },
+        downloads, volumeRoot = { volumes.list().firstOrNull()?.root?.absolutePath }, wifiOnly = { downloadPrefs.wifiOnly },
         title = { appContext.getString(R.string.online_index_title) },
     )
 

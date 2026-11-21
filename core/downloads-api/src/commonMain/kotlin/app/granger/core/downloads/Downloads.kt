@@ -7,6 +7,7 @@ import app.granger.core.catalog.PackEntry
 import app.granger.core.catalog.VoiceEntry
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +17,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.io.File
 
 /**
  * One file to download, whether or not it is in the catalog. [relativePath] is under the volume root,
@@ -47,10 +47,10 @@ interface Downloads {
     val live: Flow<DownloadLive>
 
     /** Checks the cap and free space on [volumeRoot], then queues [item]. */
-    suspend fun enqueue(item: CatalogItem, volumeRoot: File, wifiOnly: Boolean): EnqueueResult
+    suspend fun enqueue(item: CatalogItem, volumeRoot: String, wifiOnly: Boolean): EnqueueResult
 
     /** Checks the cap and free space on [volumeRoot], then queues [spec], which needn't be in the catalog. */
-    suspend fun enqueue(spec: DownloadSpec, volumeRoot: File, wifiOnly: Boolean): EnqueueResult
+    suspend fun enqueue(spec: DownloadSpec, volumeRoot: String, wifiOnly: Boolean): EnqueueResult
 
     /** Queues a failed download again, with a fresh checksum retry. */
     suspend fun retry(itemId: String)
@@ -95,7 +95,7 @@ interface Downloads {
      * everything is queued or nothing. There's no cap: only free space on [volumeRoot] is checked.
      */
     suspend fun enqueueGroup(
-        groupId: String, specs: List<DownloadSpec>, volumeRoot: File, wifiOnly: Boolean, next: Boolean = false,
+        groupId: String, specs: List<DownloadSpec>, volumeRoot: String, wifiOnly: Boolean, next: Boolean = false,
     ): EnqueueResult
 
     /** Stops the group's unfinished files and deletes their parts; installed files and their records stay. */
@@ -136,9 +136,9 @@ class DownloadManager(
     progress: Flow<QueueProgress> = flowOf(QueueProgress()),
     unmetered: Flow<Boolean> = flowOf(true),
     meteredWifi: Flow<Boolean> = flowOf(false),
-    private val freeBytes: (File) -> Long = { it.usableSpace },
+    private val freeBytes: (String) -> Long = ::freeBytesAt,
     private val io: CoroutineDispatcher = Dispatchers.IO,
-    private val now: () -> Long = System::currentTimeMillis,
+    private val now: () -> Long = ::nowMillis,
 ) : Downloads {
     private val mutex = Mutex()
 
@@ -185,20 +185,20 @@ class DownloadManager(
     /** The first place after everything already queued. */
     private suspend fun backOrder(): Long = (dao.maxQueueOrder() ?: -1) + 1
 
-    override suspend fun enqueue(item: CatalogItem, volumeRoot: File, wifiOnly: Boolean): EnqueueResult =
+    override suspend fun enqueue(item: CatalogItem, volumeRoot: String, wifiOnly: Boolean): EnqueueResult =
         enqueue(specOf(item), volumeRoot, wifiOnly)
 
-    override suspend fun enqueue(spec: DownloadSpec, volumeRoot: File, wifiOnly: Boolean): EnqueueResult = mutex.withLock {
+    override suspend fun enqueue(spec: DownloadSpec, volumeRoot: String, wifiOnly: Boolean): EnqueueResult = mutex.withLock {
         val versions = dao.forItem(spec.itemId)
         if (versions.any { it.isActive }) return@withLock EnqueueResult.AlreadyActive
         if (versions.any { it.hash == spec.hash }) return@withLock EnqueueResult.AlreadyInstalled
-        val root = volumeRoot.absoluteFile
+        val root = volumeRoot.trimEnd('/')
         val active = dao.getAll().filter { it.isActive }
         val verdict = QueuePolicy.check(
             itemBytes = spec.sizeBytes,
             freeBytes = withContext(io) { freeBytes(root) },
             queuedOnVolumeBytes = active
-                .filter { it.filePath.startsWith(root.path + File.separator) }
+                .filter { it.filePath.startsWith(root + Files.SEP) }
                 .sumOf { it.sizeBytes - it.bytesDone },
         )
         if (verdict != EnqueueResult.Queued) return@withLock verdict
@@ -211,7 +211,7 @@ class DownloadManager(
             title = spec.title,
             urls = spec.urls,
             sizeBytes = spec.sizeBytes,
-            filePath = File(root, spec.relativePath).path,
+            filePath = Files.join(root, spec.relativePath),
             snapshotDate = spec.snapshotDate,
             groupId = spec.groupId,
             wifiOnly = wifiOnly,
@@ -228,10 +228,10 @@ class DownloadManager(
     }
 
     override suspend fun enqueueGroup(
-        groupId: String, specs: List<DownloadSpec>, volumeRoot: File, wifiOnly: Boolean, next: Boolean,
+        groupId: String, specs: List<DownloadSpec>, volumeRoot: String, wifiOnly: Boolean, next: Boolean,
     ): EnqueueResult = mutex.withLock {
         require(specs.all { it.groupId == groupId }) { "Every spec in group $groupId must carry its groupId" }
-        val root = volumeRoot.absoluteFile
+        val root = volumeRoot.trimEnd('/')
         var anyActive = false
         // One read for the whole ledger, not one per spec: an onboarding group can be hundreds of items (Plan U3a).
         val all = dao.getAll()
@@ -253,7 +253,7 @@ class DownloadManager(
             itemBytes = toFetch.sumOf { it.sizeBytes },
             freeBytes = withContext(io) { freeBytes(root) },
             queuedOnVolumeBytes = active
-                .filter { it.filePath.startsWith(root.path + File.separator) }
+                .filter { it.filePath.startsWith(root + Files.SEP) }
                 .sumOf { it.sizeBytes - it.bytesDone },
         )
         if (verdict != EnqueueResult.Queued) return@withLock verdict
@@ -268,7 +268,7 @@ class DownloadManager(
                 title = spec.title,
                 urls = spec.urls,
                 sizeBytes = spec.sizeBytes,
-                filePath = File(root, spec.relativePath).path,
+                filePath = Files.join(root, spec.relativePath),
                 snapshotDate = spec.snapshotDate,
                 groupId = groupId,
                 wifiOnly = wifiOnly,
@@ -326,7 +326,7 @@ class DownloadManager(
         val hasInstalledVersion = versions.any { !it.isActive }
         val active = versions.filter { it.isActive }
         for (record in active) {
-            val fileExists = withContext(io) { record.file.exists() }
+            val fileExists = withContext(io) { Files.exists(record.filePath) }
             if (fileExists && !hasInstalledVersion) {
                 // A cancelled repair: the verified file is still there, so keep its ledger row.
                 // (With another installed version, a file at this path belongs to that version.)
@@ -341,7 +341,7 @@ class DownloadManager(
             }
         }
         scheduler.stopRun(itemId)
-        withContext(io) { active.forEach { it.partFile.delete() } }
+        withContext(io) { active.forEach { Files.delete(it.partPath) } }
     }
 
     override suspend fun remove(itemId: String) = mutex.withLock { removeLocked(itemId) }
@@ -351,7 +351,7 @@ class DownloadManager(
         // Another version saved at the same path owns the file now.
         val shared = dao.forItem(itemId).any { it.hash != hash && it.filePath == record.filePath }
         dao.delete(itemId, hash)
-        if (!shared) withContext(io) { record.file.delete() }
+        if (!shared) withContext(io) { Files.delete(record.filePath) }
     }
 
     private suspend fun removeLocked(itemId: String) {
@@ -360,8 +360,8 @@ class DownloadManager(
         scheduler.stopRun(itemId)
         withContext(io) {
             for (record in versions) {
-                record.partFile.delete()
-                record.file.delete()
+                Files.delete(record.partPath)
+                Files.delete(record.filePath)
             }
         }
     }
@@ -424,7 +424,7 @@ val DownloadRecord.isFromCatalog: Boolean
         // A pack added from a file that the catalog doesn't list (Plan E1 item 4) never was a catalog item.
         ItemKind.PACK -> !hash.startsWith(UNVERIFIED_PREFIX)
         ItemKind.MODEL, ItemKind.VOICE -> true
-        ItemKind.BOOK -> filePath.contains("${File.separator}books${File.separator}granger${File.separator}")
+        ItemKind.BOOK -> filePath.contains("/books/granger/")
         ItemKind.AUDIO, ItemKind.VECTORS, ItemKind.TIME_INDEX, ItemKind.SIDECAR -> false
     }
 

@@ -28,7 +28,8 @@ Spec: `docs/superpowers/specs/2026-11-20-iphone-design.md` (§ I4 Packs and down
 ## I4a: the shared rules
 
 ### Task 1: Downloads to the core
-- [ ] A KMP `:core:downloads-api` (Android + iOS): records, queue order, QueuePolicy, the sidecar rules, OnlineIndexes, integrity (sha256 via the shared `sha256`), TransferRate. `:core:downloads` keeps the Android runner and re-exports the API. The tests move with the code.
+- [x] A KMP `:core:downloads-api` (Android + iOS): records, queue order, QueuePolicy, the sidecar rules, OnlineIndexes, integrity (sha256 via the shared `sha256`), TransferRate. `:core:downloads` keeps the Android runner and re-exports the API. The tests move with the code.
+  - Done. `:core:downloads-api` holds the Room `downloads` table (DB 4, schemas moved, no migration), `DownloadManager`, `DownloadQueue`, `DownloadRunner`, `QueuePolicy`, `TransferRate`, `Sidecars`, `EmbedderDownloads`, the queue summary and `Integrity.quickFile`. Paths are strings; Android's `file`/`partFile` and File-taking `enqueue`/`enqueueGroup` live in `:core:downloads` (`DownloadFiles.kt`). The transfer is the new `FileTransfer` interface: Android's OkHttp `FileDownloader` implements it, the iPhone's URLSession transfer will (Task 6). `QueueText` (Android wording), the WorkManager worker, voices, volumes and the local-file copy stay Android. `OnlineIndexes` moved to `:core:screens`. The DAO's progress write is now `suspend` (the runner calls it with `runBlocking` from the transfer's thread, as before). The JVM tests stay in `:core:downloads` (159/159, migrations included) and app download tests pass (458/458); `QueueIosTest` runs the manager, queue and runner on the Simulator (2/2).
 
 ### Task 2: Catalog lists and readiness to the core
 - [ ] KiwixList, CatalogScope, PackOffer, WouldTake, ReadinessModel, ReadyOffline and Outfitting's model to `:core:screens`; string keys through ScreenTextIds and ScreenText.

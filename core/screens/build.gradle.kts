@@ -18,6 +18,7 @@ kotlin {
         commonMain.dependencies {
             api(project(":core:store"))
             api(project(":core:online"))
+            api(project(":core:downloads-api"))
             api(libs.androidx.lifecycle.viewmodel)
             api(libs.kotlinx.coroutines.core)
             api(project(":core:text"))
