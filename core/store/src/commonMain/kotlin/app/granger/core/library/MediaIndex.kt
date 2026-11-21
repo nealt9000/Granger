@@ -1,6 +1,6 @@
 package app.granger.core.library
 
-import java.util.Locale
+import kotlin.concurrent.Volatile
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -127,7 +127,7 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, private val compute
 
     private class Doc<T>(val id: String, val title: String, val fields: List<Field>, val value: T) {
         val titleWords = MediaText.words(title).joinToString(" ")
-        val sortTitle = title.lowercase(Locale.ROOT)
+        val sortTitle = title.lowercase()
     }
 
     private class Snapshot(
@@ -247,7 +247,7 @@ class MediaIndex(media: MediaLibrary, scope: CoroutineScope, private val compute
         val EMPTY = Snapshot(emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyMap())
 
         fun warn(e: Throwable) {
-            runCatching { android.util.Log.w("Granger", "Media index build failed", e) }
+            logWarn("Media index build failed", e)
         }
         fun field(weight: Double, text: String) = Field(MediaText.words(text).toSet(), weight)
         fun field(weight: Double, texts: List<String>) = Field(texts.flatMapTo(HashSet()) { MediaText.words(it) }, weight)

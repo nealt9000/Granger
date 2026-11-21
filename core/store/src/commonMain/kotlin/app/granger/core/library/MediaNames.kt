@@ -1,7 +1,5 @@
 package app.granger.core.library
 
-import java.util.Locale
-
 /**
  * The artist and genre name rules: how a track's `"; "`-joined tags become names, so the music screens, the media
  * index and Android Auto agree.
@@ -25,7 +23,7 @@ object MediaNames {
     fun genresOf(t: Track): List<String> = split(t.genres).ifEmpty { listOf(UNKNOWN_GENRE) }
 
     /** Artists are matched without regard to case or surrounding space. */
-    fun nameKey(name: String): String = name.trim().lowercase(Locale.ROOT)
+    fun nameKey(name: String): String = name.trim().lowercase()
 
     /** Albums as [Albums.summaries] builds them, with the track artists named where no album artist is tagged. */
     fun albums(tracks: List<Track>): List<AlbumSummary> {

@@ -11,6 +11,8 @@ kotlin {
         namespace = "app.granger.core.store"
         compileSdk = 37
         minSdk = 29
+        // Plan I6 Task 1: the common tests (the media index on the shared fold) run on the JVM host too.
+        withHostTestBuilder {}.configure { isReturnDefaultValues = true }
     }
     iosArm64()
     iosSimulatorArm64()
@@ -35,7 +37,10 @@ kotlin {
         iosMain.dependencies {
             implementation(libs.androidx.sqlite.bundled)
         }
-        commonTest.dependencies { implementation(kotlin("test")) }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
+        }
         iosTest.dependencies { implementation(libs.kotlinx.serialization.json) }
     }
 }
@@ -57,3 +62,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeSimu
     environment("SIMCTL_CHILD_GRANGER_TEST_GQID", (project.findProperty("gqidTest") as String?).orEmpty())
     environment("SIMCTL_CHILD_GRANGER_TEST_GTIME", (project.findProperty("gtimeTest") as String?).orEmpty())
 }
+
+// `./gradlew testDebugUnitTest` (the app's habit) runs the host tests here too.
+tasks.register("testDebugUnitTest") { dependsOn("testAndroidHostTest") }

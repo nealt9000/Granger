@@ -1,6 +1,5 @@
 package app.granger.core.library
 
-import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
@@ -37,7 +36,7 @@ interface Playlists {
  * `playlist_entries` is keyed by (playlistId, ordinal), so a reorder can't renumber rows in place without colliding:
  * [move] and [remove] rewrite the playlist's entries (delete, then insert renumbered) inside one transaction.
  */
-class RoomPlaylists(private val db: LibraryDatabase, private val now: () -> Long = System::currentTimeMillis) : Playlists {
+class RoomPlaylists(private val db: LibraryDatabase, private val now: () -> Long = ::epochMillis) : Playlists {
     private val dao = db.playbackDao()
 
     override val all: Flow<List<Playlist>> = dao.observePlaylists()
@@ -51,7 +50,7 @@ class RoomPlaylists(private val db: LibraryDatabase, private val now: () -> Long
             entries.mapNotNull { entry -> byId[entry.trackId]?.let { PlaylistItem(entry.ordinal, it) } }
         }
 
-    override suspend fun create(name: String, trackIds: List<String>): Long = db.withTransaction {
+    override suspend fun create(name: String, trackIds: List<String>): Long = db.inTransaction {
         val at = now()
         val id = dao.insertPlaylist(Playlist(0, name.trim(), createdAt = at, updatedAt = at))
         dao.insertEntries(trackIds.mapIndexed { i, trackId -> PlaylistEntry(id, i, trackId) })
@@ -63,7 +62,7 @@ class RoomPlaylists(private val db: LibraryDatabase, private val now: () -> Long
     }
 
     override suspend fun delete(id: Long) {
-        db.withTransaction {
+        db.inTransaction {
             dao.deleteEntries(id)
             dao.deletePlaylist(id)
         }
@@ -71,8 +70,8 @@ class RoomPlaylists(private val db: LibraryDatabase, private val now: () -> Long
 
     override suspend fun add(id: Long, trackIds: List<String>) {
         if (trackIds.isEmpty()) return
-        db.withTransaction {
-            if (dao.playlist(id) == null) return@withTransaction
+        db.inTransaction {
+            if (dao.playlist(id) == null) return@inTransaction
             val next = dao.entries(id).size
             dao.insertEntries(trackIds.mapIndexed { i, trackId -> PlaylistEntry(id, next + i, trackId) })
             dao.touchPlaylist(id, now())
@@ -92,9 +91,9 @@ class RoomPlaylists(private val db: LibraryDatabase, private val now: () -> Long
 
     /** Replaces the playlist's entries with [change] of its track ids, renumbered 0..n-1; null from [change] leaves it alone. */
     private suspend fun rewrite(id: Long, change: (List<String>) -> List<String>?) {
-        db.withTransaction {
+        db.inTransaction {
             val ids = dao.entries(id).map { it.trackId }
-            val changed = change(ids) ?: return@withTransaction
+            val changed = change(ids) ?: return@inTransaction
             dao.deleteEntries(id)
             dao.insertEntries(changed.mapIndexed { i, trackId -> PlaylistEntry(id, i, trackId) })
             dao.touchPlaylist(id, now())

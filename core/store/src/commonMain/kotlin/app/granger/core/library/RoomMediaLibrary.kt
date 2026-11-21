@@ -1,6 +1,5 @@
 package app.granger.core.library
 
-import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -8,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
  * chapters are replaced (they come from the files). Otherwise [sync] deletes nothing, for any origin; only [forget]
  * deletes catalog rows, and only downloaded ones.
  */
-class RoomMediaLibrary(private val db: LibraryDatabase, private val now: () -> Long = System::currentTimeMillis) : MediaLibrary {
+class RoomMediaLibrary(private val db: LibraryDatabase, private val now: () -> Long = ::epochMillis) : MediaLibrary {
     private val dao = db.mediaDao()
 
     override val tracks: Flow<List<Track>> = dao.observeMusic()
@@ -25,7 +24,7 @@ class RoomMediaLibrary(private val db: LibraryDatabase, private val now: () -> L
         require(result.audiobooks.all { it.book.origin == origin }) { "Scan for $origin holds audiobooks of another origin" }
         val scannedAlbums = result.tracks.filter { it.audiobookId == null }.mapTo(HashSet()) { it.albumKey }
         require(result.albumNotes.all { it.albumKey in scannedAlbums }) { "Scan for $origin holds notes for albums it didn't scan" }
-        db.withTransaction {
+        db.inTransaction {
             val at = now()
 
             val oldTracks = dao.tracksOf(origin).associateBy { it.id }
@@ -70,7 +69,7 @@ class RoomMediaLibrary(private val db: LibraryDatabase, private val now: () -> L
 
     override suspend fun forget(trackIds: Collection<String>, audiobookIds: Collection<String>) {
         if (trackIds.isEmpty() && audiobookIds.isEmpty()) return
-        db.withTransaction {
+        db.inTransaction {
             for (ids in audiobookIds.distinct().chunked(MAX_IDS)) {
                 dao.deleteChaptersOf(ids)
                 dao.deleteAudiobooks(ids)
