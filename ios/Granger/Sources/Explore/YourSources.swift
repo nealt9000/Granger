@@ -181,7 +181,7 @@ struct BookPackScreen: View {
         List {
             if let books {
                 if books.isEmpty { Text("This pack's list of books can't be read.").foregroundStyle(palette.onSurfaceVariant) }
-                let sections = Dictionary(grouping: books, by: { $0.group ?? "" })
+                let sections = Swift.Dictionary(grouping: books, by: { $0.group ?? "" })
                 let order = books.reduce(into: [String]()) { acc, b in let g = b.group ?? ""; if !acc.contains(g) { acc.append(g) } }
                 ForEach(order, id: \.self) { g in
                     Section(header: g.isEmpty ? nil : Text(g).font(Spectral.medium(16)).foregroundStyle(palette.tertiary)) {
