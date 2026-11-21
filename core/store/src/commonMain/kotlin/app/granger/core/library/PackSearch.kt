@@ -15,7 +15,10 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 
-/** Search over every OK pack, on both phones (Plan I4 Task 3). Android's `LibrarySearch` adds the text inside books. */
+/**
+ * Search over every OK pack, on both phones (Plan I4 Task 3), and the text inside books (Search's Books, Plan I5 Task 2:
+ * [BookIndex] is shared now).
+ */
 interface TitleSearch {
     suspend fun titles(query: String): TitleResults
 
@@ -34,6 +37,9 @@ interface TitleSearch {
      * A Library of Knots; the fresh-install walkthrough, 2026-11-02). Maps are left out: nobody searches a map's text.
      */
     suspend fun titleOnly(): List<String> = emptyList()
+
+    /** Full-text hits inside books (Search's Books), best first; empty where books aren't searchable. */
+    suspend fun books(query: String): List<BookHit> = emptyList()
 }
 
 /** The Gutenberg id in a Gutenberg pack's page paths (shared with Android's `GutenbergList`). */
@@ -67,6 +73,8 @@ open class PackSearch(
      * the languages chosen show up). A pack or book with no language, or several ("mul"), is always searched. Null: all.
      */
     private val languages: suspend () -> Set<String>? = { null },
+    /** The text inside the shelf's books, for Search's Books (Plan I5 Task 2); none when null. */
+    private val bookIndex: BookIndex? = null,
 ) : TitleSearch {
     // The packs take turns, each in its own order, so a big pack can't push the others below the first few or past the limit.
     // Then a title that is the query comes first, and one that starts with it next (Plan U3b Decision 10). Books on the
@@ -206,6 +214,10 @@ open class PackSearch(
         val keywords = keywordQuery(query) ?: return typed
         return (typed + run(keywords)).distinctBy(key)
     }
+
+    /** The book index's hits for [query], relaxed to its keywords when it finds few ([relaxed]), each place once. */
+    override suspend fun books(query: String): List<BookHit> =
+        bookIndex?.let { index -> relaxed(query, { it.bookId to it.href }) { index.search(it) } } ?: emptyList()
 
     override suspend fun titleOnly(): List<String> = library.packs.first()
         .filter { it.status == PackStatus.OK && !it.hasFulltextIndex && !it.name.startsWith("maps_") }

@@ -49,9 +49,6 @@ fun interface BestMatchSearch {
 /** A single word's dictionary entry ([app.granger.core.research.PassageFinder.entry] in the app), or null. */
 fun interface WordEntry { suspend fun entry(word: String): app.granger.core.research.Passage? }
 
-/** What the results are narrowed to (Plan SQ Task 5.3): everything, or one kind. */
-enum class SearchFilter { ALL, ARTICLES, BOOKS, MEDIA }
-
 /** The music and audiobooks matching a query ([app.granger.core.library.MediaIndex.search] in the app). */
 fun interface MediaSearch { suspend fun search(query: String): MediaResults }
 
@@ -165,45 +162,35 @@ class SearchViewModel(
                 return fullText + onlinePages.filter { SearchRows.titleKey(it.title) !in seen }
             }
 
+        // By kind is shared (core:screens SearchKinds, Plan I5 Task 2).
+
         /** The kinds of result the query found, for the filter chips: shown when it found more than one. */
         val kinds: Set<SearchFilter>
-            get() = buildSet {
-                val titleBooks = titles.count { row -> rowPart(row, book = true) != null }
-                if (titles.any { row -> rowPart(row, book = false) != null } || fullText.isNotEmpty() || onlineTitles.isNotEmpty() || onlinePages.isNotEmpty() || best.any { it.passage.kind != app.granger.core.research.SourceKind.BOOK }) add(SearchFilter.ARTICLES)
-                if (titleBooks > 0 || books.isNotEmpty() || best.any { it.passage.kind == app.granger.core.research.SourceKind.BOOK }) add(SearchFilter.BOOKS)
-                if (!media.isEmpty) add(SearchFilter.MEDIA)
-            }
+            get() = SearchKinds.found(
+                titles,
+                articleText = fullText.isNotEmpty() || onlineTitles.isNotEmpty() || onlinePages.isNotEmpty(),
+                bookText = books.isNotEmpty(),
+                media = !media.isEmpty,
+                bestArticles = best.any { !it.isBook },
+                bestBooks = best.any { it.isBook },
+            )
 
         /** Whether the [filter] shows results of [kind]. */
-        fun showing(kind: SearchFilter): Boolean = filter == SearchFilter.ALL || filter == kind
+        fun showing(kind: SearchFilter): Boolean = SearchKinds.showing(filter, kind)
 
         /** Best matches under the [filter]. */
         val bestFiltered: List<app.granger.core.research.BestMatches.Match>
-            get() = when (filter) {
-                SearchFilter.ALL -> best
-                SearchFilter.BOOKS -> best.filter { it.passage.kind == app.granger.core.research.SourceKind.BOOK }
-                SearchFilter.ARTICLES -> best.filter { it.passage.kind != app.granger.core.research.SourceKind.BOOK }
-                SearchFilter.MEDIA -> emptyList()
-            }
+            get() = SearchKinds.best(filter, best) { it.isBook }
 
         /**
          * Titles under the [filter]: articles are pack titles, books the shelf's. A row holding both (Pride and Prejudice
          * the article, with the book under it) keeps the part the filter wants, led by it.
          */
         val titlesFiltered: List<SearchHit>
-            get() = when (filter) {
-                SearchFilter.ALL -> titles + onlineTitlesShown
-                SearchFilter.BOOKS -> titles.mapNotNull { rowPart(it, book = true) }
-                SearchFilter.ARTICLES -> titles.mapNotNull { rowPart(it, book = false) } + onlineTitlesShown
-                SearchFilter.MEDIA -> emptyList()
-            }
+            get() = SearchKinds.titles(filter, titles, onlineTitlesShown)
 
-        /** [row]'s books (or its articles), the first leading the rest; null when it has none. */
-        private fun rowPart(row: SearchHit, book: Boolean): SearchHit? {
-            val keep = (listOf(row.copy(also = emptyList())) + row.also).filter { app.granger.core.library.BookIds.isBook(it.packId) == book }
-            if (keep.size == 1 + row.also.size) return row
-            return keep.firstOrNull()?.copy(also = keep.drop(1))
-        }
+        private val app.granger.core.research.BestMatches.Match.isBook: Boolean
+            get() = passage.kind == app.granger.core.research.SourceKind.BOOK
 
         /** The search has finished and found nothing at all: the empty state's one plain line shows. */
         val nothingFound: Boolean
