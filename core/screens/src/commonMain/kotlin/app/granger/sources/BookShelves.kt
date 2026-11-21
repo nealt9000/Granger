@@ -1,8 +1,5 @@
 package app.granger.sources
 
-import app.granger.invoke
-import androidx.annotation.StringRes
-import app.granger.R
 import app.granger.UiText
 import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.BookSet
@@ -10,7 +7,7 @@ import app.granger.core.catalog.CatalogItem
 import app.granger.core.catalog.PackEntry
 import app.granger.core.catalog.Shelves
 import app.granger.core.library.GutenbergNames
-import app.granger.formatBytes
+import app.granger.screens.bytesText
 
 /**
  * Get more → Books by kind (Plan KB2 Task 4.1, Decision 4): the catalog's `shelf` groups every book source, Granger's
@@ -45,19 +42,20 @@ object BookShelves {
      */
     fun setMeta(set: BookSet, onPhone: Int): UiText = KiwixList.dotted(
         listOfNotNull(
-            UiText.Plural(R.plurals.common_books, set.books.size, set.books.size),
-            UiText.Raw(formatBytes(set.books.sumOf { it.sizeBytes })),
+            UiText.Plural("common_books", set.books.size, set.books.size),
+            UiText.Raw(bytesText(set.books.sumOf { it.sizeBytes })),
             set.provider.takeIf { it.isNotBlank() }?.let(UiText::Raw),
-            if (onPhone > 0) UiText.Plural(R.plurals.sources_on_this_phone, onPhone, onPhone) else null,
+            if (onPhone > 0) UiText.Plural("sources_on_this_phone", onPhone, onPhone) else null,
         ),
     )
 
-    @StringRes fun heading(shelf: String): Int = when (shelf) {
-        Shelves.LITERATURE -> R.string.sources_shelf_literature
-        Shelves.CHILDREN -> R.string.sources_shelf_children
-        Shelves.MANUALS -> R.string.sources_shelf_manuals
-        Shelves.LEARNING -> R.string.sources_shelf_learning
-        else -> R.string.sources_shelf_other
+    /** [shelf]'s heading, as a string key (Android's `BookShelves.heading` gives its resource id). */
+    fun headingKey(shelf: String): String = when (shelf) {
+        Shelves.LITERATURE -> "sources_shelf_literature"
+        Shelves.CHILDREN -> "sources_shelf_children"
+        Shelves.MANUALS -> "sources_shelf_manuals"
+        Shelves.LEARNING -> "sources_shelf_learning"
+        else -> "sources_shelf_other"
     }
 
     /**
@@ -75,22 +73,22 @@ object BookShelves {
 
     /** "From Kiwix · Project Gutenberg", or "From Kiwix" alone (Task 4.2's pattern). */
     fun fromKiwix(pack: PackEntry): UiText =
-        provider(pack)?.let { UiText.Res(R.string.library_from_kiwix_by, it) } ?: UiText.Res(R.string.library_from_kiwix)
+        provider(pack)?.let { UiText.Res("library_from_kiwix_by", it) } ?: UiText.Res("library_from_kiwix")
 
     /** A book pack's one meta line: "65 MB · From Kiwix · irp.fas.org". */
     fun packMeta(pack: PackEntry, sizeBytes: Long = pack.sizeBytes): UiText =
-        KiwixList.dotted(listOf(UiText.Raw(formatBytes(sizeBytes)), fromKiwix(pack)))
+        KiwixList.dotted(listOf(UiText.Raw(bytesText(sizeBytes)), fromKiwix(pack)))
 
     /** A Granger book's: "Jane Austen · 1.2 MB". */
     fun bookMeta(book: BookEntry): UiText =
-        KiwixList.dotted(listOfNotNull(book.author.takeIf { it.isNotBlank() }?.let(UiText::Raw), UiText.Raw(formatBytes(book.sizeBytes))))
+        KiwixList.dotted(listOfNotNull(book.author.takeIf { it.isNotBlank() }?.let(UiText::Raw), UiText.Raw(bytesText(book.sizeBytes))))
 
     /** Project Gutenberg's folded row: "41 subjects · From Kiwix", and "· 2 on this phone" when some are. */
     fun gutenbergMeta(subjects: Int, onPhone: Int): UiText = KiwixList.dotted(
         listOfNotNull(
-            UiText.Plural(R.plurals.sources_subjects, subjects, subjects),
-            UiText.Res(R.string.library_from_kiwix),
-            if (onPhone > 0) UiText.Plural(R.plurals.sources_on_this_phone, onPhone, onPhone) else null,
+            UiText.Plural("sources_subjects", subjects, subjects),
+            UiText.Res("library_from_kiwix"),
+            if (onPhone > 0) UiText.Plural("sources_on_this_phone", onPhone, onPhone) else null,
         ),
     )
 

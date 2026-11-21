@@ -1,9 +1,6 @@
 package app.granger.sources
 
-import app.granger.invoke
-import app.granger.R
 import app.granger.UiText
-import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.CatalogItem
 import app.granger.core.catalog.ModelEntry
@@ -45,7 +42,11 @@ sealed interface ItemStatus {
 /** The two audio shelves an archive.org item can be in: [ItemStatus.InLibrary]. */
 enum class LibraryShelf { MUSIC, AUDIOBOOKS }
 
-fun statusOf(item: CatalogItem, records: List<DownloadRecord>, packs: List<Pack>, tier: DeviceTier): ItemStatus {
+/**
+ * [item]'s status from its download [records] and the library's [packs]; [canRun] says whether this phone can run a
+ * model of a role (Android: `DeviceTier.canRun`), else the model is [ItemStatus.NeedsMoreMemory].
+ */
+fun statusOf(item: CatalogItem, records: List<DownloadRecord>, packs: List<Pack>, canRun: (ModelRole) -> Boolean): ItemStatus {
     val versions = records.filter { it.itemId == item.id }
     versions.firstOrNull { it.isActive }?.let { active ->
         return when (active.state) {
@@ -63,7 +64,7 @@ fun statusOf(item: CatalogItem, records: List<DownloadRecord>, packs: List<Pack>
     return when {
         currentInstalled -> ItemStatus.Installed
         versions.isNotEmpty() -> ItemStatus.UpdateAvailable
-        item is ModelEntry && !tier.canRun(item.role) -> ItemStatus.NeedsMoreMemory
+        item is ModelEntry && !canRun(item.role) -> ItemStatus.NeedsMoreMemory
         else -> ItemStatus.NotInstalled
     }
 }
@@ -74,21 +75,11 @@ fun installedPackId(entry: PackEntry, records: List<DownloadRecord>, packs: List
         ?: records.filter { it.itemId == entry.id && it.state == DownloadState.INSTALLED }
             .firstNotNullOfOrNull { record -> packs.firstOrNull { it.filePath == record.filePath }?.id }
 
-fun DeviceTier.canRun(role: ModelRole): Boolean = when (role) {
-    // Ask's model isn't offered at all while Ask rests (Plan SQ): a preset or a start leaves it out like a phone too small.
-    ModelRole.SMALL -> app.granger.Features.RESEARCH && this >= DeviceTier.ASK
-    ModelRole.EMBEDDER -> this >= DeviceTier.ASK
-    // Gemma 4 E4B: too slow and too big on the phones measured (Plan R5 Task 8), and nothing uses it.
-    ModelRole.LARGE -> false
-}
-
 /** A failed download's line: the downloader's own reason, else "Download failed". */
-fun failedText(status: ItemStatus.Failed): UiText = status.reason?.let { UiText.Raw(it) } ?: UiText.Res(R.string.sources_download_failed)
+fun failedText(status: ItemStatus.Failed): UiText = status.reason?.let { UiText.Raw(it) } ?: UiText.Res("sources_download_failed")
 
 /** Where an item got from the other audio view is: "In your Music", "In your Audiobooks". */
-fun inLibraryText(status: ItemStatus.InLibrary): UiText = UiText.Res(
-    when (status.shelf) {
-        LibraryShelf.MUSIC -> R.string.sources_in_your_music
-        LibraryShelf.AUDIOBOOKS -> R.string.sources_in_your_audiobooks
-    },
-)
+fun inLibraryText(status: ItemStatus.InLibrary): UiText = when (status.shelf) {
+    LibraryShelf.MUSIC -> UiText.Res("sources_in_your_music")
+    LibraryShelf.AUDIOBOOKS -> UiText.Res("sources_in_your_audiobooks")
+}

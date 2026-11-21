@@ -398,7 +398,7 @@ class SourceViewModelTest {
     @Test fun theSearchFieldTextUpdatesSynchronously() = runTest(main.dispatcher) {
         val vm = viewModel()
         vm.setQuery("f"); vm.setQuery("fi")
-        assertThat(vm.searchText).isEqualTo("fi")
+        assertThat(vm.searchText.value).isEqualTo("fi")
     }
 
     @Test fun queryFiltersTitleAndDescription() = runTest(main.dispatcher) {

@@ -1,6 +1,5 @@
 package app.granger.sources
 
-import app.granger.invoke
 import app.granger.core.catalog.VectorsEntry
 import app.granger.packEntry
 import com.google.common.truth.Truth.assertThat
@@ -12,17 +11,17 @@ class AskReachTest {
     @Test fun vectorsInTheCatalogOrOnThePhoneSearchByMeaning() {
         assertThat(askReach(withVectors, emptySet())).isEqualTo(AskReach.MEANING)
         assertThat(askReach(packEntry("se"), setOf("se"))).isEqualTo(AskReach.MEANING)
-        assertThat(AskReach.MEANING.text).isEqualTo(app.granger.UiText.Res(app.granger.R.string.sources_ask_meaning))
+        assertThat(AskReach.MEANING.text).isEqualTo(app.granger.UiText.Res("sources_ask_meaning"))
     }
 
     @Test fun aFullTextIndexAloneIsKeywordsOnly() {
         assertThat(askReach(packEntry("se"), setOf("other"))).isEqualTo(AskReach.KEYWORDS)
-        assertThat(AskReach.KEYWORDS.text).isEqualTo(app.granger.UiText.Res(app.granger.R.string.sources_ask_keywords))
+        assertThat(AskReach.KEYWORDS.text).isEqualTo(app.granger.UiText.Res("sources_ask_keywords"))
     }
 
     @Test fun neitherMeansAskCantSearchIt() {
         assertThat(askReach(packEntry("bare").copy(hasFulltextIndex = false), emptySet())).isEqualTo(AskReach.NONE)
-        assertThat(AskReach.NONE.text).isEqualTo(app.granger.UiText.Res(app.granger.R.string.sources_ask_none))
+        assertThat(AskReach.NONE.text).isEqualTo(app.granger.UiText.Res("sources_ask_none"))
     }
 
     @Test fun mapsSayNothing() {

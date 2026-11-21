@@ -119,9 +119,11 @@ fun BooksScreen(
     }
     var confirmRemove by remember { mutableStateOf<Pair<ItemRow, RemoveKind>?>(null) }
     val scope = rememberCoroutineScope()
-    var searching by rememberSaveable { mutableStateOf(viewModel.searchText.isNotEmpty()) }
+    var searchText by rememberSearchField(viewModel)
+    var searching by rememberSaveable { mutableStateOf(viewModel.searchText.value.isNotEmpty()) }
     fun stopSearching() {
         searching = false
+        searchText = ""
         viewModel.setQuery("")
     }
     BackHandler(enabled = searching) { stopSearching() }
@@ -159,8 +161,8 @@ fun BooksScreen(
                     val focus = remember { FocusRequester() }
                     LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
                     OutlinedTextField(
-                        value = viewModel.searchText,
-                        onValueChange = viewModel::setQuery,
+                        value = searchText,
+                        onValueChange = { searchText = it; viewModel.setQuery(it) },
                         placeholder = { Text(stringResource(R.string.sources_search_all_books)) },
                         leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                         trailingIcon = {

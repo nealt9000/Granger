@@ -114,10 +114,10 @@ object Filing {
     private const val KIWIX_BOOKS_PREFIX = "kiwixbooks-"
 
     /** Granger Classics' collection key: Granger's English books. */
-    const val GRANGER_CLASSICS = "granger-classics"
+    const val GRANGER_CLASSICS = FilingKeys.GRANGER_CLASSICS
 
     /** Clásicos Granger's collection key: Granger's Spanish books (Plan L3), a collection of their own. */
-    const val CLASICOS_GRANGER = "clasicos-granger"
+    const val CLASICOS_GRANGER = FilingKeys.CLASICOS_GRANGER
 
     /** Clásicos Granger's own name, the same in every language, as its catalog preset names it. */
     const val CLASICOS_GRANGER_NAME = "Clásicos Granger"
@@ -126,7 +126,7 @@ object Filing {
     const val CLASICOS_ID_PREFIX = "gc-es-"
 
     /** Granger's book collections by knowledge language (Plan L3); the catalog's `collection` of each one's books. */
-    val GRANGER_COLLECTIONS = mapOf("en" to GRANGER_CLASSICS, "es" to CLASICOS_GRANGER)
+    val GRANGER_COLLECTIONS = FilingKeys.GRANGER_COLLECTIONS
 
     /** The Granger collection of knowledge language [language]; Granger Classics for a language without one. */
     fun grangerCollection(language: String): String = GRANGER_COLLECTIONS[language] ?: GRANGER_CLASSICS

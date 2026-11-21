@@ -66,6 +66,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -130,6 +131,7 @@ fun SourceScreen(
 
     // The row and what its dialog says goes with it (Plan KB2 Task 4.2).
     var confirmRemove by remember { mutableStateOf<Pair<ItemRow, RemoveKind>?>(null) }
+    var searchText by rememberSearchField(viewModel)
     val list = rememberLazyListState()
     val scope = rememberCoroutineScope()
     /** Show all or Show fewer; folding a section the list has scrolled into brings its heading back. */
@@ -163,8 +165,8 @@ fun SourceScreen(
         val header: LazyListScope.() -> Unit = {
             item(key = "search") {
                 OutlinedTextField(
-                    value = viewModel.searchText,
-                    onValueChange = viewModel::setQuery,
+                    value = searchText,
+                    onValueChange = { searchText = it; viewModel.setQuery(it) },
                     placeholder = { Text(stringResource(R.string.sources_search, (ui.familyTitle ?: ui.screenTitle)?.resolve() ?: title)) },
                     leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                     singleLine = true,
@@ -259,8 +261,9 @@ fun SourceScreen(
             }
         }
         val rowItem: @Composable (ItemRow) -> Unit = { row ->
-            if (row.opensFamily != null) {
-                FamilyRow(row) { onOpenFamily(row.opensFamily) }
+            val opensFamily = row.opensFamily
+            if (opensFamily != null) {
+                FamilyRow(row) { onOpenFamily(opensFamily) }
             } else {
                 CatalogItemRow(
                     row,
@@ -806,7 +809,7 @@ internal fun ItemStatusText(status: ItemStatus) {
     when (status) {
         is ItemStatus.Queued -> Text(
             when {
-                status.lastError != null -> stringResource(R.string.sources_retrying, status.lastError)
+                status.lastError != null -> stringResource(R.string.sources_retrying, status.lastError.orEmpty())
                 status.wifiOnly && !isUnmetered(LocalContext.current) -> stringResource(R.string.sources_waiting_wifi)
                 else -> stringResource(R.string.sources_queued_status)
             },
@@ -827,3 +830,12 @@ internal fun ItemStatusText(status: ItemStatus) {
         ItemStatus.NotInstalled -> Unit
     }
 }
+
+/**
+ * The search field's own text, written on every keystroke beside [SourceViewModel.setQuery] and seeded from the model's
+ * [SourceViewModel.searchText] when the screen comes back. The field never shows a value collected from a flow, which
+ * lags a dispatch behind the keyboard and scrambles fast typing (Pixel 6, 2026-10-17).
+ */
+@Composable
+internal fun rememberSearchField(viewModel: SourceViewModel): MutableState<String> =
+    remember(viewModel) { mutableStateOf(viewModel.searchText.value) }

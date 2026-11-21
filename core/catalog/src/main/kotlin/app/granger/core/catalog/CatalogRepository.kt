@@ -15,26 +15,6 @@ import java.io.File
 import java.io.IOException
 import java.time.Instant
 
-data class CatalogState(
-    /** The catalog to show, already filtered for this build; null until one has been verified. */
-    val catalog: Catalog? = null,
-    /** When [catalog] was downloaded (epoch ms). */
-    val fetchedAt: Long? = null,
-    val refreshing: Boolean = false,
-    /** Why the last refresh kept the old catalog; null after a successful refresh. */
-    val error: CatalogError? = null,
-)
-
-interface CatalogSource {
-    val state: StateFlow<CatalogState>
-
-    /** Shows the last good catalog from the cache. No network. */
-    suspend fun load()
-
-    /** Downloads, verifies and caches the catalog. On any failure the shown catalog stays and [CatalogState.error] says why. */
-    suspend fun refresh()
-}
-
 class CatalogRepository(
     private val client: OkHttpClient,
     private val url: String,

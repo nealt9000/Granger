@@ -38,6 +38,8 @@ object ScreenTextIds {
         "explore_subject_society" -> R.string.explore_subject_society
         "explore_subject_sports" -> R.string.explore_subject_sports
         "explore_subject_technology" -> R.string.explore_subject_technology
+        "library_from_kiwix" -> R.string.library_from_kiwix
+        "library_from_kiwix_by" -> R.string.library_from_kiwix_by
         "readiness_covers" -> R.string.readiness_covers
         "readiness_covers_slice" -> R.string.readiness_covers_slice
         "readiness_no_packs_in" -> R.string.readiness_no_packs_in
@@ -58,6 +60,14 @@ object ScreenTextIds {
         "sources_adds_inside_your" -> R.string.sources_adds_inside_your
         "sources_adds_to" -> R.string.sources_adds_to
         "sources_adds_to_your" -> R.string.sources_adds_to_your
+        "sources_ask_keywords" -> R.string.sources_ask_keywords
+        "sources_ask_meaning" -> R.string.sources_ask_meaning
+        "sources_ask_none" -> R.string.sources_ask_none
+        "sources_catalog_bad_signature" -> R.string.sources_catalog_bad_signature
+        "sources_catalog_malformed" -> R.string.sources_catalog_malformed
+        "sources_catalog_offline" -> R.string.sources_catalog_offline
+        "sources_catalog_unloaded" -> R.string.sources_catalog_unloaded
+        "sources_catalog_unsupported" -> R.string.sources_catalog_unsupported
         "sources_category_drama" -> R.string.sources_category_drama
         "sources_category_games" -> R.string.sources_category_games
         "sources_category_howto" -> R.string.sources_category_howto
@@ -76,7 +86,9 @@ object ScreenTextIds {
         "sources_category_religion" -> R.string.sources_category_religion
         "sources_category_science" -> R.string.sources_category_science
         "sources_category_scripture" -> R.string.sources_category_scripture
+        "sources_couldnt_delete" -> R.string.sources_couldnt_delete
         "sources_dotted" -> R.string.sources_dotted
+        "sources_download_failed" -> R.string.sources_download_failed
         "sources_family_devdocs" -> R.string.sources_family_devdocs
         "sources_family_maps" -> R.string.sources_family_maps
         "sources_family_stack_exchange" -> R.string.sources_family_stack_exchange
@@ -85,6 +97,11 @@ object ScreenTextIds {
         "sources_flavour_standard" -> R.string.sources_flavour_standard
         "sources_flavour_with_pictures" -> R.string.sources_flavour_with_pictures
         "sources_get_books" -> R.string.sources_get_books
+        "sources_group_books" -> R.string.sources_group_books
+        "sources_in_your_audiobooks" -> R.string.sources_in_your_audiobooks
+        "sources_in_your_music" -> R.string.sources_in_your_music
+        "sources_inside_your" -> R.string.sources_inside_your
+        "sources_level" -> R.string.sources_level
         "sources_licence_cc" -> R.string.sources_licence_cc
         "sources_licence_kiwix" -> R.string.sources_licence_kiwix
         "sources_licence_not_stated" -> R.string.sources_licence_not_stated
@@ -92,23 +109,65 @@ object ScreenTextIds {
         "sources_licence_public_domain" -> R.string.sources_licence_public_domain
         "sources_licence_public_domain_us" -> R.string.sources_licence_public_domain_us
         "sources_licence_see" -> R.string.sources_licence_see
+        "sources_model_ask_resting" -> R.string.sources_model_ask_resting
+        "sources_model_not_used" -> R.string.sources_model_not_used
+        "sources_model_not_used_yet" -> R.string.sources_model_not_used_yet
+        "sources_model_used_by_search" -> R.string.sources_model_used_by_search
+        "sources_no_space" -> R.string.sources_no_space
+        "sources_no_storage" -> R.string.sources_no_storage
+        "sources_not_offered_for" -> R.string.sources_not_offered_for
+        "sources_pictures_only" -> R.string.sources_pictures_only
+        "sources_preset_all_here" -> R.string.sources_preset_all_here
+        "sources_preset_already" -> R.string.sources_preset_already
+        "sources_preset_downloading" -> R.string.sources_preset_downloading
+        "sources_preset_to_get" -> R.string.sources_preset_to_get
+        "sources_preset_to_update" -> R.string.sources_preset_to_update
+        "sources_remove_body" -> R.string.sources_remove_body
+        "sources_remove_book_body" -> R.string.sources_remove_book_body
+        "sources_remove_book_pack_body" -> R.string.sources_remove_book_pack_body
+        "sources_remove_document_pack_body" -> R.string.sources_remove_document_pack_body
+        "sources_remove_pack_body" -> R.string.sources_remove_pack_body
         "sources_scope_granger" -> R.string.sources_scope_granger
         "sources_scope_gutenberg" -> R.string.sources_scope_gutenberg
         "sources_scope_kiwix" -> R.string.sources_scope_kiwix
         "sources_scope_kiwix_books" -> R.string.sources_scope_kiwix_books
         "sources_scope_models" -> R.string.sources_scope_models
+        "sources_section_everything" -> R.string.sources_section_everything
+        "sources_section_libraries" -> R.string.sources_section_libraries
+        "sources_section_models" -> R.string.sources_section_models
+        "sources_section_recommended" -> R.string.sources_section_recommended
+        "sources_section_subjects" -> R.string.sources_section_subjects
+        "sources_set_subjects" -> R.string.sources_set_subjects
         "sources_set_wikipedia" -> R.string.sources_set_wikipedia
         "sources_set_wikivoyage" -> R.string.sources_set_wikivoyage
+        "sources_shelf_children" -> R.string.sources_shelf_children
+        "sources_shelf_learning" -> R.string.sources_shelf_learning
+        "sources_shelf_literature" -> R.string.sources_shelf_literature
+        "sources_shelf_manuals" -> R.string.sources_shelf_manuals
+        "sources_shelf_other" -> R.string.sources_shelf_other
+        "sources_slice_and_pictures" -> R.string.sources_slice_and_pictures
+        "sources_tab_browse" -> R.string.sources_tab_browse
+        "sources_tab_installed" -> R.string.sources_tab_installed
+        "sources_tab_updates" -> R.string.sources_tab_updates
+        "sources_three_kinds" -> R.string.sources_three_kinds
+        "sources_two_kinds" -> R.string.sources_two_kinds
         "sources_updated" -> R.string.sources_updated
+        "sources_voice" -> R.string.sources_voice
         else -> error("no Android string for the shared key '$key' (run tools/ios/make_text_ids.py)")
     }
 
     fun plural(key: String): Int = when (key) {
+        "common_books" -> R.plurals.common_books
         "sources_adds_about" -> R.plurals.sources_adds_about
         "sources_adds_about_your" -> R.plurals.sources_adds_about_your
         "sources_languages_more" -> R.plurals.sources_languages_more
+        "sources_models" -> R.plurals.sources_models
+        "sources_on_this_phone" -> R.plurals.sources_on_this_phone
         "sources_packs" -> R.plurals.sources_packs
+        "sources_queued" -> R.plurals.sources_queued
+        "sources_queued_before" -> R.plurals.sources_queued_before
         "sources_regions" -> R.plurals.sources_regions
+        "sources_subjects" -> R.plurals.sources_subjects
         else -> error("no Android plural for the shared key '$key' (run tools/ios/make_text_ids.py)")
     }
 }
