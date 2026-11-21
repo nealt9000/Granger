@@ -18,6 +18,7 @@ import app.granger.core.library.BookOrigin
 import app.granger.core.ai.DeviceTier
 import app.granger.core.catalog.CatalogError
 import app.granger.core.catalog.CatalogState
+import app.granger.core.catalog.Copy
 import app.granger.core.catalog.Domain
 import app.granger.core.catalog.downloadBytes
 import app.granger.core.catalog.Preset
@@ -555,6 +556,39 @@ class SourceViewModelTest {
             ),
         )
         assertThat(viewModel().ui.value.presets.map { it.id }).containsExactly("granger-classics", "tragedies").inOrder()
+    }
+
+    /**
+     * Classics volumes (spec 2026-11-21): on Granger's screen each volume sits right under its collection, named by its
+     * own part ("Drama", in the app language), with its own Get all; under Books only the collection shows.
+     */
+    @Test fun volumesSitUnderTheirCollectionOnGrangersScreenOnly() = runTest(main.dispatcher) {
+        catalog.mutable.value = CatalogState(
+            catalog = catalogOf(
+                books = listOf(bookEntry("hamlet", category = "Drama"), bookEntry("alice", category = "Children's classics")),
+                presets = listOf(
+                    Preset("granger-classics", "Granger Classics: all books", listOf("hamlet", "alice")),
+                    Preset("granger-classics-drama", "Granger Classics: Drama", listOf("hamlet"), setOf = "granger-classics",
+                        i18n = mapOf("es" to Copy(title = "Granger Classics: Teatro"))),
+                    Preset("granger-classics-children", "Granger Classics: Children's classics", listOf("alice"), setOf = "granger-classics"),
+                ),
+            ),
+        )
+        val granger = viewModel(CatalogScope.GRANGER).ui.value.presets
+        assertThat(granger.map { it.id }).containsExactly("granger-classics", "granger-classics-drama", "granger-classics-children").inOrder()
+        assertThat(granger.map { it.title }).containsExactly("Granger Classics: all books", "Drama", "Children's classics").inOrder()
+        assertThat(granger.map { it.setOf }).containsExactly("", "granger-classics", "granger-classics").inOrder()
+        assertThat(granger[1].itemCount).isEqualTo(1)
+        assertThat(viewModel(CatalogScope.BOOKS).ui.value.presets.map { it.id }).containsExactly("granger-classics")
+    }
+
+    @Test fun nestVolumesKeepsAVolumeWhoseCollectionIsMissing() {
+        val all = Preset("granger-classics", "All", listOf("a", "b"))
+        val drama = Preset("granger-classics-drama", "Drama", listOf("a"), setOf = "granger-classics")
+        val orphan = Preset("clasicos-granger-teatro", "Teatro", listOf("c"), setOf = "clasicos-granger")
+        val other = Preset("tragedies", "Tragedies", listOf("a"))
+        assertThat(SourceViewModel.nestVolumes(listOf(drama, all, other, orphan), withVolumes = true)).containsExactly(all, drama, other, orphan).inOrder()
+        assertThat(SourceViewModel.nestVolumes(listOf(drama, all, other, orphan), withVolumes = false)).containsExactly(all, other, orphan).inOrder()
     }
 
     /**

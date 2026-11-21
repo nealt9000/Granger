@@ -16,7 +16,9 @@
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-a-first-spanish-reader_2026-11-09.epub"
       ],
       "domain": "literature",
-      "learner": true
+      "learner": true,
+      "volume": "Lecturas fáciles e infantiles",
+      "volumeId": "lecturas"
     },
     {
       "id": "gc-es-libro-segundo-de-lectura",
@@ -32,7 +34,9 @@
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-libro-segundo-de-lectura_2026-11-09.epub"
       ],
       "domain": "literature",
-      "learner": true
+      "learner": true,
+      "volume": "Lecturas fáciles e infantiles",
+      "volumeId": "lecturas"
     },
     {
       "id": "gc-es-paginas-sudamericanas",
@@ -47,7 +51,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-paginas-sudamericanas_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Lecturas fáciles e infantiles",
+      "volumeId": "lecturas"
     },
     {
       "id": "gc-es-legends-tales-and-poems",
@@ -63,7 +69,9 @@
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-legends-tales-and-poems_2026-11-09.epub"
       ],
       "domain": "literature",
-      "learner": true
+      "learner": true,
+      "volume": "Lecturas fáciles e infantiles",
+      "volumeId": "lecturas"
     },
     {
       "id": "gc-es-mas-vale-mana-que-fuerza",
@@ -79,7 +87,9 @@
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-mas-vale-mana-que-fuerza_2026-11-09.epub"
       ],
       "domain": "literature",
-      "learner": true
+      "learner": true,
+      "volume": "Lecturas fáciles e infantiles",
+      "volumeId": "lecturas"
     },
     {
       "id": "gc-es-fabulas",
@@ -95,7 +105,9 @@
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-fabulas_2026-11-09.epub"
       ],
       "domain": "literature",
-      "learner": true
+      "learner": true,
+      "volume": "Lecturas fáciles e infantiles",
+      "volumeId": "lecturas"
     },
     {
       "id": "gc-es-fabulas-literarias",
@@ -111,7 +123,9 @@
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-fabulas-literarias_2026-11-09.epub"
       ],
       "domain": "literature",
-      "learner": true
+      "learner": true,
+      "volume": "Lecturas fáciles e infantiles",
+      "volumeId": "lecturas"
     },
     {
       "id": "gc-es-la-edad-de-oro",
@@ -127,7 +141,9 @@
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-edad-de-oro_2026-11-09.epub"
       ],
       "domain": "literature",
-      "learner": true
+      "learner": true,
+      "volume": "Lecturas fáciles e infantiles",
+      "volumeId": "lecturas"
     },
     {
       "id": "gc-es-raton-perez",
@@ -143,7 +159,9 @@
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-raton-perez_2026-11-09.epub"
       ],
       "domain": "literature",
-      "learner": true
+      "learner": true,
+      "volume": "Lecturas fáciles e infantiles",
+      "volumeId": "lecturas"
     },
     {
       "id": "gc-es-corazon-diario-de-un-nino",
@@ -159,7 +177,9 @@
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-corazon-diario-de-un-nino_2026-11-09.epub"
       ],
       "domain": "literature",
-      "learner": true
+      "learner": true,
+      "volume": "Lecturas fáciles e infantiles",
+      "volumeId": "lecturas"
     },
     {
       "id": "gc-es-la-isla-del-tesoro",
@@ -174,7 +194,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-isla-del-tesoro_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Lecturas fáciles e infantiles",
+      "volumeId": "lecturas"
     },
     {
       "id": "gc-es-cuentos-chilenos-de-nunca-acabar",
@@ -189,7 +211,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-chilenos-de-nunca-acabar_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Lecturas fáciles e infantiles",
+      "volumeId": "lecturas"
     },
     {
       "id": "gc-es-cuentos-populares-en-chile",
@@ -204,7 +228,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-populares-en-chile_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Lecturas fáciles e infantiles",
+      "volumeId": "lecturas"
     },
     {
       "id": "gc-es-cuentos-de-amor",
@@ -220,7 +246,9 @@
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-de-amor_2026-11-09.epub"
       ],
       "domain": "literature",
-      "learner": true
+      "learner": true,
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-cuentos-de-amor-de-locura-y-de-muerte",
@@ -235,7 +263,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-de-amor-de-locura-y-de-muerte_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-novelas-ejemplares",
@@ -250,7 +280,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-novelas-ejemplares_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-el-sombrero-de-tres-picos",
@@ -265,7 +297,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-sombrero-de-tres-picos_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-el-clavo",
@@ -280,7 +314,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-clavo_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-tradiciones-peruanas",
@@ -295,7 +331,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-tradiciones-peruanas_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-cuentos-de-navidad-y-reyes-cuentos-de-la-patria-cuentos-antiguos",
@@ -310,7 +348,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-de-navidad-y-reyes-cuentos-de-la-patria-cuentos-antiguos_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-en-tranvia",
@@ -325,7 +365,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-en-tranvia_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-el-espejo-de-la-muerte",
@@ -340,7 +382,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-espejo-de-la-muerte_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-tres-novelas-ejemplares-y-un-prologo",
@@ -355,7 +399,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-tres-novelas-ejemplares-y-un-prologo_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-cuentos-y-dialogos",
@@ -370,7 +416,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-y-dialogos_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-el-senor-y-lo-demas-son-cuentos",
@@ -385,7 +433,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-senor-y-lo-demas-son-cuentos_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-doctor-sutilis",
@@ -400,7 +450,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-doctor-sutilis_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-cuentos-de-fray-mocho",
@@ -415,7 +467,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-de-fray-mocho_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-las-fuerzas-extranas",
@@ -430,7 +484,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-las-fuerzas-extranas_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-la-condenada",
@@ -445,7 +501,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-condenada_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-cuentos-valencianos",
@@ -460,7 +518,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-valencianos_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-la-novela-en-el-tranvia",
@@ -475,7 +535,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-novela-en-el-tranvia_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-novelas-y-cuentos",
@@ -490,7 +552,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-novelas-y-cuentos_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-thespis",
@@ -505,7 +569,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-thespis_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-cuentos-ingenuos",
@@ -520,7 +586,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-ingenuos_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-antano-i-ogano",
@@ -535,7 +603,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-antano-i-ogano_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-cuentos-de-poeta",
@@ -550,7 +620,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-de-poeta_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-el-diablo-cojuelo",
@@ -565,7 +637,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-diablo-cojuelo_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-el-anacronopete-viaje-a-china-metempsicosis",
@@ -580,7 +654,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-anacronopete-viaje-a-china-metempsicosis_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-novelas-ejemplares-y-amorosas",
@@ -595,472 +671,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-novelas-ejemplares-y-amorosas_2026-11-09.epub"
       ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-obras-escogidas",
-      "title": "Obras escogidas",
-      "author": "Gustavo Adolfo Bécquer",
-      "translator": null,
-      "published": 1912,
-      "section": "Poesía",
-      "language": "es",
-      "sizeBytes": 306313,
-      "sha256": "bd8f1c6cda66149f5c505e05e8d5aada4032babfacbed5a9d9f73228fae5d784",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-obras-escogidas_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-azul",
-      "title": "Azul...",
-      "author": "Rubén Darío",
-      "translator": null,
-      "published": 1888,
-      "section": "Poesía",
-      "language": "es",
-      "sizeBytes": 148228,
-      "sha256": "a30d7c6f19e05e8671dcd913f8c2103492a6bf5619b1c82fe1ffed8528cbf31a",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-azul_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-prosas-profanas",
-      "title": "Prosas profanas",
-      "author": "Rubén Darío",
-      "translator": null,
-      "published": 1896,
-      "section": "Poesía",
-      "language": "es",
-      "sizeBytes": 90877,
-      "sha256": "c061d1cf609b44b6ffa2771cba92b1a839069b703a4c43377b5479262e64849a",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-prosas-profanas_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-cantos-de-vida-y-esperanza",
-      "title": "Cantos de vida y esperanza",
-      "author": "Rubén Darío",
-      "translator": null,
-      "published": 1905,
-      "section": "Poesía",
-      "language": "es",
-      "sizeBytes": 87030,
-      "sha256": "fceccca7782f9a8923e217bc835f151988832b378bcfeaf471d98f33ccd3dc70",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cantos-de-vida-y-esperanza_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-poesias-completas",
-      "title": "Poesías completas",
-      "author": "Antonio Machado",
-      "translator": null,
-      "published": 1917,
-      "section": "Poesía",
-      "language": "es",
-      "sizeBytes": 136411,
-      "sha256": "4ed9b4a4ec2a04973e3fedfa37f0d40a2902003a53302768ac5e47b9333fe1ed",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-poesias-completas_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-paginas-escogidas",
-      "title": "Páginas escogidas",
-      "author": "Antonio Machado",
-      "translator": null,
-      "published": 1917,
-      "section": "Poesía",
-      "language": "es",
-      "sizeBytes": 92650,
-      "sha256": "7c4d9d9fdb0b9472efe18e3c1d0c383b02ee265441d3799254d760d4a830bac0",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-paginas-escogidas_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-romancero-gitano",
-      "title": "Romancero gitano",
-      "author": "Federico García Lorca",
-      "translator": null,
-      "published": 1928,
-      "section": "Poesía",
-      "language": "es",
-      "sizeBytes": 70893,
-      "sha256": "a2f85445c30e5717c7f61da7c7514c366b197187eca0a84ad1763af7ac0a6e20",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-romancero-gitano_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-libro-de-poemas",
-      "title": "Libro de poemas",
-      "author": "Federico García Lorca",
-      "translator": null,
-      "published": 1921,
-      "section": "Poesía",
-      "language": "es",
-      "sizeBytes": 127487,
-      "sha256": "674d8206dcf8df504bfe35932d1495063d6ef6ef82d037bafc1238c834dcc831",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-libro-de-poemas_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-el-gaucho-martin-fierro",
-      "title": "El gaucho Martín Fierro",
-      "author": "José Hernández",
-      "translator": null,
-      "published": 1872,
-      "section": "Poesía",
-      "language": "es",
-      "sizeBytes": 72949,
-      "sha256": "c08961ae0c35c4493a37194d9201e7778a259a3c76bd87f800d40b91374ebfb1",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-gaucho-martin-fierro_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-la-vuelta-de-martin-fierro",
-      "title": "La vuelta de Martín Fierro",
-      "author": "José Hernández",
-      "translator": null,
-      "published": 1879,
-      "section": "Poesía",
-      "language": "es",
-      "sizeBytes": 132076,
-      "sha256": "40c580228db9e76bce05f6822d3e03bdc628c26f61c21e8b642eb44c28325215",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-vuelta-de-martin-fierro_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-mi-ultimo-adios",
-      "title": "Mi último adiós",
-      "author": "José Rizal",
-      "translator": null,
-      "published": 1896,
-      "section": "Poesía",
-      "language": "es",
-      "sizeBytes": 40724,
-      "sha256": "b863398168584ee97f6de23084f420eaede671b12660f2a047e4710b77b1cea1",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-mi-ultimo-adios_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-coplas-por-la-muerte-de-su-padre",
-      "title": "Coplas por la muerte de su padre",
-      "author": "Jorge Manrique",
-      "translator": null,
-      "published": 1476,
-      "section": "Poesía",
-      "language": "es",
-      "sizeBytes": 88974,
-      "sha256": "d8e01c150581ead1100795e4a80b37437eefaae22b9365845612f54c2a85ae00",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-coplas-por-la-muerte-de-su-padre_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-obras-selectas-de-sor-juana-ines-de-la-cruz",
-      "title": "Obras selectas de sor Juana Inés de la Cruz",
-      "author": "Sor Juana Inés de la Cruz",
-      "translator": null,
-      "published": 1873,
-      "section": "Poesía",
-      "language": "es",
-      "sizeBytes": 293201,
-      "sha256": "e1e13b0e17e9a46bb91b0f638a1a8e110b7f22bffa7ff703524d36d0fe1f8c9c",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-obras-selectas-de-sor-juana-ines-de-la-cruz_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-libro-de-buen-amor",
-      "title": "Libro de buen amor",
-      "author": "Juan Ruiz, Arcipreste de Hita",
-      "translator": null,
-      "published": 1330,
-      "section": "Poesía",
-      "language": "es",
-      "sizeBytes": 643879,
-      "sha256": "5bd3f468c6cc70db83071bd1a052023ee005b644df53c348ca308c405142bcec",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-libro-de-buen-amor_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-romancero-selecto-del-cid",
-      "title": "Romancero selecto del Cid",
-      "author": "Anónimo",
-      "translator": null,
-      "published": 1884,
-      "section": "Poesía",
-      "language": "es",
-      "sizeBytes": 208887,
-      "sha256": "5b4a4933a7456395bc8d2eceb9916215c53b1f4f84aa6d5b89d0c0dbf6a52617",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-romancero-selecto-del-cid_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-las-cien-mejores-poesias-liricas-de-la-lengua-castellana",
-      "title": "Las cien mejores poesías (líricas) de la lengua castellana",
-      "author": "",
-      "translator": null,
-      "published": 1908,
-      "section": "Poesía",
-      "language": "es",
-      "sizeBytes": 268293,
-      "sha256": "f690da5703908fb98c0bd62fcec2480415028e2419f649ad0b138cd6605da7d8",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-las-cien-mejores-poesias-liricas-de-la-lengua-castellana_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-en-las-orillas-del-sar",
-      "title": "En las orillas del Sar",
-      "author": "Rosalía de Castro",
-      "translator": null,
-      "published": 1884,
-      "section": "Poesía",
-      "language": "es",
-      "sizeBytes": 152087,
-      "sha256": "f4ef1b1562ab29cfed54176c479111ecab4a2fa9a77e4e026ebe6f55b9b190fe",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-en-las-orillas-del-sar_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-teatro-selecto-tomo-1-de-4",
-      "title": "Teatro selecto (tomo 1 de 4)",
-      "author": "Pedro Calderón de la Barca",
-      "translator": null,
-      "published": 1881,
-      "section": "Teatro",
-      "language": "es",
-      "sizeBytes": 289379,
-      "sha256": "646a62a3440f063fbb2a70792f80cf0230c4cb51f78219e1f84df6d2bcaf94aa",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-teatro-selecto-tomo-1-de-4_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-teatro-selecto-tomo-2-de-4",
-      "title": "Teatro selecto (tomo 2 de 4)",
-      "author": "Pedro Calderón de la Barca",
-      "translator": null,
-      "published": 1881,
-      "section": "Teatro",
-      "language": "es",
-      "sizeBytes": 303022,
-      "sha256": "8035ebf75dc8bb9c10260c6ff83ea480728c6999f25cb017205bfce28c20da8f",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-teatro-selecto-tomo-2-de-4_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-teatro-selecto-tomo-3-de-4",
-      "title": "Teatro selecto (tomo 3 de 4)",
-      "author": "Pedro Calderón de la Barca",
-      "translator": null,
-      "published": 1881,
-      "section": "Teatro",
-      "language": "es",
-      "sizeBytes": 244432,
-      "sha256": "e994c550e7d2a5f2338267b5d70a53283facf70044ace5a5ccb32884a3385efb",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-teatro-selecto-tomo-3-de-4_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-teatro-selecto-tomo-4-de-4",
-      "title": "Teatro selecto (tomo 4 de 4)",
-      "author": "Pedro Calderón de la Barca",
-      "translator": null,
-      "published": 1881,
-      "section": "Teatro",
-      "language": "es",
-      "sizeBytes": 300095,
-      "sha256": "9844b7e708518203d5de9c1cb947965f40c75d7a3fcc5daff7c9afe6e941bfd4",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-teatro-selecto-tomo-4-de-4_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-el-si-de-las-ninas",
-      "title": "El sí de las niñas",
-      "author": "Leandro Fernández de Moratín",
-      "translator": null,
-      "published": 1806,
-      "section": "Teatro",
-      "language": "es",
-      "sizeBytes": 92652,
-      "sha256": "61646048138fc6261175eb9e57261181d5ac7292e4efa11f267d9ce994ec0f7f",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-si-de-las-ninas_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-don-alvaro-o-la-fuerza-del-sino",
-      "title": "Don Álvaro o la fuerza del sino",
-      "author": "Duque de Rivas",
-      "translator": null,
-      "published": 1835,
-      "section": "Teatro",
-      "language": "es",
-      "sizeBytes": 117899,
-      "sha256": "4bbe390e7cae79f51d8a9be48ff7e7fba44b15b7cf8c77f59bad8a61389c72ab",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-don-alvaro-o-la-fuerza-del-sino_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-los-entremeses",
-      "title": "Los entremeses",
-      "author": "Miguel de Cervantes",
-      "translator": null,
-      "published": 1615,
-      "section": "Teatro",
-      "language": "es",
-      "sizeBytes": 151810,
-      "sha256": "923823af9f6983a0b7ef39abb3de621302cfff61f292fd3ab53371bb42a0070b",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-los-entremeses_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-viaje-al-parnaso-la-numancia-el-trato-de-argel",
-      "title": "Viaje al Parnaso; La Numancia; El trato de Argel",
-      "author": "Miguel de Cervantes",
-      "translator": null,
-      "published": 1614,
-      "section": "Teatro",
-      "language": "es",
-      "sizeBytes": 221472,
-      "sha256": "b791311091884859dde0f2654bc8027aaf1641be5e96017718a59b69a576d19b",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-viaje-al-parnaso-la-numancia-el-trato-de-argel_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-la-venganza-de-don-mendo",
-      "title": "La venganza de don Mendo",
-      "author": "Pedro Muñoz Seca",
-      "translator": null,
-      "published": 1918,
-      "section": "Teatro",
-      "language": "es",
-      "sizeBytes": 111678,
-      "sha256": "edb015af8870b751073b092c9172a7fb32b5fa7f0a737c1f166d4e1dcee539f6",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-venganza-de-don-mendo_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-luces-de-bohemia",
-      "title": "Luces de bohemia",
-      "author": "Ramón del Valle-Inclán",
-      "translator": null,
-      "published": 1924,
-      "section": "Teatro",
-      "language": "es",
-      "sizeBytes": 110532,
-      "sha256": "a0725cb3a345717812e9e58549827b65efd27d7031be2aaeefd5dbbfba2a6a0b",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-luces-de-bohemia_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-divinas-palabras",
-      "title": "Divinas palabras",
-      "author": "Ramón del Valle-Inclán",
-      "translator": null,
-      "published": 1920,
-      "section": "Teatro",
-      "language": "es",
-      "sizeBytes": 95670,
-      "sha256": "56af7fd90033e696b11f67a0724aa438e9b6b124cf72e550e7a26b9b9c85a092",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-divinas-palabras_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-romance-de-lobos",
-      "title": "Romance de lobos",
-      "author": "Ramón del Valle-Inclán",
-      "translator": null,
-      "published": 1908,
-      "section": "Teatro",
-      "language": "es",
-      "sizeBytes": 118099,
-      "sha256": "790157e9776570ffed02927700e7044a343db2615678128fb0c96dd4c1691874",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-romance-de-lobos_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-la-senorita-de-trevelez",
-      "title": "La señorita de Trevélez",
-      "author": "Carlos Arniches",
-      "translator": null,
-      "published": 1916,
-      "section": "Teatro",
-      "language": "es",
-      "sizeBytes": 107686,
-      "sha256": "8d32a07cc0fa9d7f8f89fe0bd7b06ef406ccaa3003583a4654f9100a069a4247",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-senorita-de-trevelez_2026-11-09.epub"
-      ],
-      "domain": "literature"
-    },
-    {
-      "id": "gc-es-o-locura-o-santidad",
-      "title": "O locura o santidad",
-      "author": "José Echegaray",
-      "translator": null,
-      "published": 1877,
-      "section": "Teatro",
-      "language": "es",
-      "sizeBytes": 101243,
-      "sha256": "c9cf34cf68851901eb393fdf4009b56b542b7d8d95f1d374110492e6b0f69363",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-o-locura-o-santidad_2026-11-09.epub"
-      ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Cuentos y novelas cortas",
+      "volumeId": "cuentos"
     },
     {
       "id": "gc-es-don-quijote",
@@ -1075,7 +688,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-don-quijote_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-lazarillo-de-tormes",
@@ -1090,7 +705,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-lazarillo-de-tormes_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-historia-de-la-vida-del-buscon",
@@ -1105,7 +722,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-la-vida-del-buscon_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-fortunata-y-jacinta",
@@ -1120,7 +739,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-fortunata-y-jacinta_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-marianela",
@@ -1136,7 +757,9 @@
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-marianela_2026-11-09.epub"
       ],
       "domain": "literature",
-      "learner": true
+      "learner": true,
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-misericordia",
@@ -1151,7 +774,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-misericordia_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-miau",
@@ -1166,7 +791,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-miau_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-el-amigo-manso",
@@ -1181,7 +808,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-amigo-manso_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-la-desheredada",
@@ -1196,7 +825,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-desheredada_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-tristana",
@@ -1211,7 +842,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-tristana_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-trafalgar",
@@ -1226,7 +859,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-trafalgar_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-bailen",
@@ -1241,7 +876,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-bailen_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-la-regenta",
@@ -1256,7 +893,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-regenta_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-su-unico-hijo",
@@ -1271,7 +910,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-su-unico-hijo_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-los-pazos-de-ulloa",
@@ -1286,7 +927,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-los-pazos-de-ulloa_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-la-madre-naturaleza",
@@ -1301,7 +944,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-madre-naturaleza_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-insolacion-y-morrina",
@@ -1316,7 +961,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-insolacion-y-morrina_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-la-tribuna",
@@ -1331,7 +978,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-tribuna_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-pepita-jimenez",
@@ -1346,7 +995,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-pepita-jimenez_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-la-hermana-san-sulpicio",
@@ -1361,7 +1012,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-hermana-san-sulpicio_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-los-cuatro-jinetes-del-apocalipsis",
@@ -1376,7 +1029,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-los-cuatro-jinetes-del-apocalipsis_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-la-barraca",
@@ -1391,7 +1046,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-barraca_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-canas-y-barro",
@@ -1406,7 +1063,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-canas-y-barro_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-sangre-y-arena",
@@ -1421,7 +1080,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-sangre-y-arena_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-los-argonautas",
@@ -1436,7 +1097,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-los-argonautas_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-mare-nostrum",
@@ -1451,7 +1114,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-mare-nostrum_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-niebla",
@@ -1466,7 +1131,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-niebla_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-abel-sanchez",
@@ -1481,7 +1148,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-abel-sanchez_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-la-tia-tula",
@@ -1496,7 +1165,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-tia-tula_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-amor-y-pedagogia",
@@ -1511,7 +1182,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-amor-y-pedagogia_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-sonata-de-primavera",
@@ -1526,7 +1199,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-sonata-de-primavera_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-sonata-de-estio",
@@ -1541,7 +1216,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-sonata-de-estio_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-sonata-de-otono-sonata-de-invierno",
@@ -1556,7 +1233,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-sonata-de-otono-sonata-de-invierno_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-tirano-banderas",
@@ -1571,7 +1250,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-tirano-banderas_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-la-gaviota",
@@ -1586,7 +1267,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-gaviota_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-la-puchera",
@@ -1601,7 +1284,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-puchera_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-sotileza",
@@ -1616,7 +1301,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-sotileza_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-el-senor-de-bembibre",
@@ -1631,7 +1318,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-senor-de-bembibre_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-cecilia-valdes",
@@ -1646,7 +1335,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cecilia-valdes_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-noli-me-tangere",
@@ -1661,7 +1352,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-noli-me-tangere_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-el-filibusterismo",
@@ -1676,7 +1369,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-filibusterismo_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-la-gran-aldea",
@@ -1691,7 +1386,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-gran-aldea_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
     },
     {
       "id": "gc-es-pequeneces",
@@ -1706,7 +1403,536 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-pequeneces_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Novelas",
+      "volumeId": "novelas"
+    },
+    {
+      "id": "gc-es-obras-escogidas",
+      "title": "Obras escogidas",
+      "author": "Gustavo Adolfo Bécquer",
+      "translator": null,
+      "published": 1912,
+      "section": "Poesía",
+      "language": "es",
+      "sizeBytes": 306313,
+      "sha256": "bd8f1c6cda66149f5c505e05e8d5aada4032babfacbed5a9d9f73228fae5d784",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-obras-escogidas_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Poesía",
+      "volumeId": "poesia"
+    },
+    {
+      "id": "gc-es-azul",
+      "title": "Azul...",
+      "author": "Rubén Darío",
+      "translator": null,
+      "published": 1888,
+      "section": "Poesía",
+      "language": "es",
+      "sizeBytes": 148228,
+      "sha256": "a30d7c6f19e05e8671dcd913f8c2103492a6bf5619b1c82fe1ffed8528cbf31a",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-azul_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Poesía",
+      "volumeId": "poesia"
+    },
+    {
+      "id": "gc-es-prosas-profanas",
+      "title": "Prosas profanas",
+      "author": "Rubén Darío",
+      "translator": null,
+      "published": 1896,
+      "section": "Poesía",
+      "language": "es",
+      "sizeBytes": 90877,
+      "sha256": "c061d1cf609b44b6ffa2771cba92b1a839069b703a4c43377b5479262e64849a",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-prosas-profanas_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Poesía",
+      "volumeId": "poesia"
+    },
+    {
+      "id": "gc-es-cantos-de-vida-y-esperanza",
+      "title": "Cantos de vida y esperanza",
+      "author": "Rubén Darío",
+      "translator": null,
+      "published": 1905,
+      "section": "Poesía",
+      "language": "es",
+      "sizeBytes": 87030,
+      "sha256": "fceccca7782f9a8923e217bc835f151988832b378bcfeaf471d98f33ccd3dc70",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cantos-de-vida-y-esperanza_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Poesía",
+      "volumeId": "poesia"
+    },
+    {
+      "id": "gc-es-poesias-completas",
+      "title": "Poesías completas",
+      "author": "Antonio Machado",
+      "translator": null,
+      "published": 1917,
+      "section": "Poesía",
+      "language": "es",
+      "sizeBytes": 136411,
+      "sha256": "4ed9b4a4ec2a04973e3fedfa37f0d40a2902003a53302768ac5e47b9333fe1ed",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-poesias-completas_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Poesía",
+      "volumeId": "poesia"
+    },
+    {
+      "id": "gc-es-paginas-escogidas",
+      "title": "Páginas escogidas",
+      "author": "Antonio Machado",
+      "translator": null,
+      "published": 1917,
+      "section": "Poesía",
+      "language": "es",
+      "sizeBytes": 92650,
+      "sha256": "7c4d9d9fdb0b9472efe18e3c1d0c383b02ee265441d3799254d760d4a830bac0",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-paginas-escogidas_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Poesía",
+      "volumeId": "poesia"
+    },
+    {
+      "id": "gc-es-romancero-gitano",
+      "title": "Romancero gitano",
+      "author": "Federico García Lorca",
+      "translator": null,
+      "published": 1928,
+      "section": "Poesía",
+      "language": "es",
+      "sizeBytes": 70893,
+      "sha256": "a2f85445c30e5717c7f61da7c7514c366b197187eca0a84ad1763af7ac0a6e20",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-romancero-gitano_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Poesía",
+      "volumeId": "poesia"
+    },
+    {
+      "id": "gc-es-libro-de-poemas",
+      "title": "Libro de poemas",
+      "author": "Federico García Lorca",
+      "translator": null,
+      "published": 1921,
+      "section": "Poesía",
+      "language": "es",
+      "sizeBytes": 127487,
+      "sha256": "674d8206dcf8df504bfe35932d1495063d6ef6ef82d037bafc1238c834dcc831",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-libro-de-poemas_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Poesía",
+      "volumeId": "poesia"
+    },
+    {
+      "id": "gc-es-el-gaucho-martin-fierro",
+      "title": "El gaucho Martín Fierro",
+      "author": "José Hernández",
+      "translator": null,
+      "published": 1872,
+      "section": "Poesía",
+      "language": "es",
+      "sizeBytes": 72949,
+      "sha256": "c08961ae0c35c4493a37194d9201e7778a259a3c76bd87f800d40b91374ebfb1",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-gaucho-martin-fierro_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Poesía",
+      "volumeId": "poesia"
+    },
+    {
+      "id": "gc-es-la-vuelta-de-martin-fierro",
+      "title": "La vuelta de Martín Fierro",
+      "author": "José Hernández",
+      "translator": null,
+      "published": 1879,
+      "section": "Poesía",
+      "language": "es",
+      "sizeBytes": 132076,
+      "sha256": "40c580228db9e76bce05f6822d3e03bdc628c26f61c21e8b642eb44c28325215",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-vuelta-de-martin-fierro_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Poesía",
+      "volumeId": "poesia"
+    },
+    {
+      "id": "gc-es-mi-ultimo-adios",
+      "title": "Mi último adiós",
+      "author": "José Rizal",
+      "translator": null,
+      "published": 1896,
+      "section": "Poesía",
+      "language": "es",
+      "sizeBytes": 40724,
+      "sha256": "b863398168584ee97f6de23084f420eaede671b12660f2a047e4710b77b1cea1",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-mi-ultimo-adios_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Poesía",
+      "volumeId": "poesia"
+    },
+    {
+      "id": "gc-es-coplas-por-la-muerte-de-su-padre",
+      "title": "Coplas por la muerte de su padre",
+      "author": "Jorge Manrique",
+      "translator": null,
+      "published": 1476,
+      "section": "Poesía",
+      "language": "es",
+      "sizeBytes": 88974,
+      "sha256": "d8e01c150581ead1100795e4a80b37437eefaae22b9365845612f54c2a85ae00",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-coplas-por-la-muerte-de-su-padre_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Poesía",
+      "volumeId": "poesia"
+    },
+    {
+      "id": "gc-es-obras-selectas-de-sor-juana-ines-de-la-cruz",
+      "title": "Obras selectas de sor Juana Inés de la Cruz",
+      "author": "Sor Juana Inés de la Cruz",
+      "translator": null,
+      "published": 1873,
+      "section": "Poesía",
+      "language": "es",
+      "sizeBytes": 293201,
+      "sha256": "e1e13b0e17e9a46bb91b0f638a1a8e110b7f22bffa7ff703524d36d0fe1f8c9c",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-obras-selectas-de-sor-juana-ines-de-la-cruz_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Poesía",
+      "volumeId": "poesia"
+    },
+    {
+      "id": "gc-es-libro-de-buen-amor",
+      "title": "Libro de buen amor",
+      "author": "Juan Ruiz, Arcipreste de Hita",
+      "translator": null,
+      "published": 1330,
+      "section": "Poesía",
+      "language": "es",
+      "sizeBytes": 643879,
+      "sha256": "5bd3f468c6cc70db83071bd1a052023ee005b644df53c348ca308c405142bcec",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-libro-de-buen-amor_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Poesía",
+      "volumeId": "poesia"
+    },
+    {
+      "id": "gc-es-romancero-selecto-del-cid",
+      "title": "Romancero selecto del Cid",
+      "author": "Anónimo",
+      "translator": null,
+      "published": 1884,
+      "section": "Poesía",
+      "language": "es",
+      "sizeBytes": 208887,
+      "sha256": "5b4a4933a7456395bc8d2eceb9916215c53b1f4f84aa6d5b89d0c0dbf6a52617",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-romancero-selecto-del-cid_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Poesía",
+      "volumeId": "poesia"
+    },
+    {
+      "id": "gc-es-las-cien-mejores-poesias-liricas-de-la-lengua-castellana",
+      "title": "Las cien mejores poesías (líricas) de la lengua castellana",
+      "author": "",
+      "translator": null,
+      "published": 1908,
+      "section": "Poesía",
+      "language": "es",
+      "sizeBytes": 268293,
+      "sha256": "f690da5703908fb98c0bd62fcec2480415028e2419f649ad0b138cd6605da7d8",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-las-cien-mejores-poesias-liricas-de-la-lengua-castellana_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Poesía",
+      "volumeId": "poesia"
+    },
+    {
+      "id": "gc-es-en-las-orillas-del-sar",
+      "title": "En las orillas del Sar",
+      "author": "Rosalía de Castro",
+      "translator": null,
+      "published": 1884,
+      "section": "Poesía",
+      "language": "es",
+      "sizeBytes": 152087,
+      "sha256": "f4ef1b1562ab29cfed54176c479111ecab4a2fa9a77e4e026ebe6f55b9b190fe",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-en-las-orillas-del-sar_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Poesía",
+      "volumeId": "poesia"
+    },
+    {
+      "id": "gc-es-teatro-selecto-tomo-1-de-4",
+      "title": "Teatro selecto (tomo 1 de 4)",
+      "author": "Pedro Calderón de la Barca",
+      "translator": null,
+      "published": 1881,
+      "section": "Teatro",
+      "language": "es",
+      "sizeBytes": 289379,
+      "sha256": "646a62a3440f063fbb2a70792f80cf0230c4cb51f78219e1f84df6d2bcaf94aa",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-teatro-selecto-tomo-1-de-4_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Teatro",
+      "volumeId": "teatro"
+    },
+    {
+      "id": "gc-es-teatro-selecto-tomo-2-de-4",
+      "title": "Teatro selecto (tomo 2 de 4)",
+      "author": "Pedro Calderón de la Barca",
+      "translator": null,
+      "published": 1881,
+      "section": "Teatro",
+      "language": "es",
+      "sizeBytes": 303022,
+      "sha256": "8035ebf75dc8bb9c10260c6ff83ea480728c6999f25cb017205bfce28c20da8f",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-teatro-selecto-tomo-2-de-4_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Teatro",
+      "volumeId": "teatro"
+    },
+    {
+      "id": "gc-es-teatro-selecto-tomo-3-de-4",
+      "title": "Teatro selecto (tomo 3 de 4)",
+      "author": "Pedro Calderón de la Barca",
+      "translator": null,
+      "published": 1881,
+      "section": "Teatro",
+      "language": "es",
+      "sizeBytes": 244432,
+      "sha256": "e994c550e7d2a5f2338267b5d70a53283facf70044ace5a5ccb32884a3385efb",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-teatro-selecto-tomo-3-de-4_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Teatro",
+      "volumeId": "teatro"
+    },
+    {
+      "id": "gc-es-teatro-selecto-tomo-4-de-4",
+      "title": "Teatro selecto (tomo 4 de 4)",
+      "author": "Pedro Calderón de la Barca",
+      "translator": null,
+      "published": 1881,
+      "section": "Teatro",
+      "language": "es",
+      "sizeBytes": 300095,
+      "sha256": "9844b7e708518203d5de9c1cb947965f40c75d7a3fcc5daff7c9afe6e941bfd4",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-teatro-selecto-tomo-4-de-4_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Teatro",
+      "volumeId": "teatro"
+    },
+    {
+      "id": "gc-es-el-si-de-las-ninas",
+      "title": "El sí de las niñas",
+      "author": "Leandro Fernández de Moratín",
+      "translator": null,
+      "published": 1806,
+      "section": "Teatro",
+      "language": "es",
+      "sizeBytes": 92652,
+      "sha256": "61646048138fc6261175eb9e57261181d5ac7292e4efa11f267d9ce994ec0f7f",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-si-de-las-ninas_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Teatro",
+      "volumeId": "teatro"
+    },
+    {
+      "id": "gc-es-don-alvaro-o-la-fuerza-del-sino",
+      "title": "Don Álvaro o la fuerza del sino",
+      "author": "Duque de Rivas",
+      "translator": null,
+      "published": 1835,
+      "section": "Teatro",
+      "language": "es",
+      "sizeBytes": 117899,
+      "sha256": "4bbe390e7cae79f51d8a9be48ff7e7fba44b15b7cf8c77f59bad8a61389c72ab",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-don-alvaro-o-la-fuerza-del-sino_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Teatro",
+      "volumeId": "teatro"
+    },
+    {
+      "id": "gc-es-los-entremeses",
+      "title": "Los entremeses",
+      "author": "Miguel de Cervantes",
+      "translator": null,
+      "published": 1615,
+      "section": "Teatro",
+      "language": "es",
+      "sizeBytes": 151810,
+      "sha256": "923823af9f6983a0b7ef39abb3de621302cfff61f292fd3ab53371bb42a0070b",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-los-entremeses_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Teatro",
+      "volumeId": "teatro"
+    },
+    {
+      "id": "gc-es-viaje-al-parnaso-la-numancia-el-trato-de-argel",
+      "title": "Viaje al Parnaso; La Numancia; El trato de Argel",
+      "author": "Miguel de Cervantes",
+      "translator": null,
+      "published": 1614,
+      "section": "Teatro",
+      "language": "es",
+      "sizeBytes": 221472,
+      "sha256": "b791311091884859dde0f2654bc8027aaf1641be5e96017718a59b69a576d19b",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-viaje-al-parnaso-la-numancia-el-trato-de-argel_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Teatro",
+      "volumeId": "teatro"
+    },
+    {
+      "id": "gc-es-la-venganza-de-don-mendo",
+      "title": "La venganza de don Mendo",
+      "author": "Pedro Muñoz Seca",
+      "translator": null,
+      "published": 1918,
+      "section": "Teatro",
+      "language": "es",
+      "sizeBytes": 111678,
+      "sha256": "edb015af8870b751073b092c9172a7fb32b5fa7f0a737c1f166d4e1dcee539f6",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-venganza-de-don-mendo_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Teatro",
+      "volumeId": "teatro"
+    },
+    {
+      "id": "gc-es-luces-de-bohemia",
+      "title": "Luces de bohemia",
+      "author": "Ramón del Valle-Inclán",
+      "translator": null,
+      "published": 1924,
+      "section": "Teatro",
+      "language": "es",
+      "sizeBytes": 110532,
+      "sha256": "a0725cb3a345717812e9e58549827b65efd27d7031be2aaeefd5dbbfba2a6a0b",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-luces-de-bohemia_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Teatro",
+      "volumeId": "teatro"
+    },
+    {
+      "id": "gc-es-divinas-palabras",
+      "title": "Divinas palabras",
+      "author": "Ramón del Valle-Inclán",
+      "translator": null,
+      "published": 1920,
+      "section": "Teatro",
+      "language": "es",
+      "sizeBytes": 95670,
+      "sha256": "56af7fd90033e696b11f67a0724aa438e9b6b124cf72e550e7a26b9b9c85a092",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-divinas-palabras_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Teatro",
+      "volumeId": "teatro"
+    },
+    {
+      "id": "gc-es-romance-de-lobos",
+      "title": "Romance de lobos",
+      "author": "Ramón del Valle-Inclán",
+      "translator": null,
+      "published": 1908,
+      "section": "Teatro",
+      "language": "es",
+      "sizeBytes": 118099,
+      "sha256": "790157e9776570ffed02927700e7044a343db2615678128fb0c96dd4c1691874",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-romance-de-lobos_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Teatro",
+      "volumeId": "teatro"
+    },
+    {
+      "id": "gc-es-la-senorita-de-trevelez",
+      "title": "La señorita de Trevélez",
+      "author": "Carlos Arniches",
+      "translator": null,
+      "published": 1916,
+      "section": "Teatro",
+      "language": "es",
+      "sizeBytes": 107686,
+      "sha256": "8d32a07cc0fa9d7f8f89fe0bd7b06ef406ccaa3003583a4654f9100a069a4247",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-senorita-de-trevelez_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Teatro",
+      "volumeId": "teatro"
+    },
+    {
+      "id": "gc-es-o-locura-o-santidad",
+      "title": "O locura o santidad",
+      "author": "José Echegaray",
+      "translator": null,
+      "published": 1877,
+      "section": "Teatro",
+      "language": "es",
+      "sizeBytes": 101243,
+      "sha256": "c9cf34cf68851901eb393fdf4009b56b542b7d8d95f1d374110492e6b0f69363",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-o-locura-o-santidad_2026-11-09.epub"
+      ],
+      "domain": "literature",
+      "volume": "Teatro",
+      "volumeId": "teatro"
     },
     {
       "id": "gc-es-la-odisea",
@@ -1721,7 +1947,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-odisea_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-la-iliada",
@@ -1736,7 +1964,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-iliada_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-la-divina-comedia",
@@ -1751,7 +1981,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-divina-comedia_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-el-paraiso-perdido",
@@ -1766,7 +1998,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-paraiso-perdido_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-los-lusiadas",
@@ -1781,7 +2015,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-los-lusiadas_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-orlando-furioso-tomo-1-de-2",
@@ -1796,7 +2032,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-orlando-furioso-tomo-1-de-2_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-orlando-furioso-tomo-2-de-2",
@@ -1811,7 +2049,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-orlando-furioso-tomo-2-de-2_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-fausto-primera-parte",
@@ -1826,7 +2066,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-fausto-primera-parte_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-metamorfoseos-tomo-1-de-4",
@@ -1841,7 +2083,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-metamorfoseos-tomo-1-de-4_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-metamorfoseos-tomo-2-de-4",
@@ -1856,7 +2100,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-metamorfoseos-tomo-2-de-4_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-metamorfoseos-tomo-3-de-4",
@@ -1871,7 +2117,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-metamorfoseos-tomo-3-de-4_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-metamorfoseos-tomo-4-de-4",
@@ -1886,7 +2134,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-metamorfoseos-tomo-4-de-4_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-el-arte-de-amar",
@@ -1901,7 +2151,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-arte-de-amar_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-el-asno-de-oro",
@@ -1916,7 +2168,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-asno-de-oro_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-hamlet",
@@ -1931,7 +2185,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-hamlet_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-dramas-de-shakespeare-tomo-1",
@@ -1946,7 +2202,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-dramas-de-shakespeare-tomo-1_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-obras-dramaticas-de-euripides-tomo-1-de-3",
@@ -1961,7 +2219,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-obras-dramaticas-de-euripides-tomo-1-de-3_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-obras-dramaticas-de-euripides-tomo-2-de-3",
@@ -1976,7 +2236,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-obras-dramaticas-de-euripides-tomo-2-de-3_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-obras-dramaticas-de-euripides-tomo-3-de-3",
@@ -1991,7 +2253,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-obras-dramaticas-de-euripides-tomo-3-de-3_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-comedias-de-aristofanes-tomo-1-de-3",
@@ -2006,7 +2270,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-comedias-de-aristofanes-tomo-1-de-3_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-comedias-de-aristofanes-tomo-2-de-3",
@@ -2021,7 +2287,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-comedias-de-aristofanes-tomo-2-de-3_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-comedias-de-aristofanes-tomo-3-de-3",
@@ -2036,7 +2304,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-comedias-de-aristofanes-tomo-3-de-3_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-la-letra-escarlata",
@@ -2051,7 +2321,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-letra-escarlata_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-silas-marner",
@@ -2066,7 +2338,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-silas-marner_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-el-prisionero-de-zenda",
@@ -2081,7 +2355,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-prisionero-de-zenda_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-la-dama-de-las-camelias-una-familia-corsa",
@@ -2096,7 +2372,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-dama-de-las-camelias-una-familia-corsa_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-gil-blas-de-santillana-tomo-1-de-3",
@@ -2111,7 +2389,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-gil-blas-de-santillana-tomo-1-de-3_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-gil-blas-de-santillana-tomo-2-de-3",
@@ -2126,7 +2406,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-gil-blas-de-santillana-tomo-2-de-3_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-gil-blas-de-santillana-tomo-3-de-3",
@@ -2141,7 +2423,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-gil-blas-de-santillana-tomo-3-de-3_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-cuentos-clasicos-del-norte",
@@ -2156,7 +2440,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-clasicos-del-norte_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-cuentos-de-la-alhambra",
@@ -2171,7 +2457,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-de-la-alhambra_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-cuentos-escogidos",
@@ -2186,7 +2474,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cuentos-escogidos_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-cartas-de-mi-molino",
@@ -2201,7 +2491,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-cartas-de-mi-molino_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-el-caso-extrano-del-doctor-jekyll",
@@ -2216,7 +2508,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-caso-extrano-del-doctor-jekyll_2026-11-09.epub"
       ],
-      "domain": "literature"
+      "domain": "literature",
+      "volume": "Clásicos universales en español",
+      "volumeId": "universales"
     },
     {
       "id": "gc-es-andanzas-y-visiones-espanolas",
@@ -2231,7 +2525,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-andanzas-y-visiones-espanolas_2026-11-09.epub"
       ],
-      "domain": "thought"
+      "domain": "thought",
+      "volume": "Ensayo, pensamiento y religión",
+      "volumeId": "ensayo"
     },
     {
       "id": "gc-es-del-sentimiento-tragico-de-la-vida",
@@ -2246,7 +2542,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-del-sentimiento-tragico-de-la-vida_2026-11-09.epub"
       ],
-      "domain": "thought"
+      "domain": "thought",
+      "volume": "Ensayo, pensamiento y religión",
+      "volumeId": "ensayo"
     },
     {
       "id": "gc-es-vida-de-don-quijote-y-sancho",
@@ -2261,7 +2559,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-vida-de-don-quijote-y-sancho_2026-11-09.epub"
       ],
-      "domain": "thought"
+      "domain": "thought",
+      "volume": "Ensayo, pensamiento y religión",
+      "volumeId": "ensayo"
     },
     {
       "id": "gc-es-ariel",
@@ -2276,7 +2576,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-ariel_2026-11-09.epub"
       ],
-      "domain": "thought"
+      "domain": "thought",
+      "volume": "Ensayo, pensamiento y religión",
+      "volumeId": "ensayo"
     },
     {
       "id": "gc-es-el-hombre-mediocre",
@@ -2291,7 +2593,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-hombre-mediocre_2026-11-09.epub"
       ],
-      "domain": "thought"
+      "domain": "thought",
+      "volume": "Ensayo, pensamiento y religión",
+      "volumeId": "ensayo"
     },
     {
       "id": "gc-es-el-criticon-tomo-1-de-2",
@@ -2306,7 +2610,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-criticon-tomo-1-de-2_2026-11-09.epub"
       ],
-      "domain": "thought"
+      "domain": "thought",
+      "volume": "Ensayo, pensamiento y religión",
+      "volumeId": "ensayo"
     },
     {
       "id": "gc-es-el-criticon-tomo-2-de-2",
@@ -2321,7 +2627,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-criticon-tomo-2-de-2_2026-11-09.epub"
       ],
-      "domain": "thought"
+      "domain": "thought",
+      "volume": "Ensayo, pensamiento y religión",
+      "volumeId": "ensayo"
     },
     {
       "id": "gc-es-figaro-articulos-selectos",
@@ -2336,7 +2644,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-figaro-articulos-selectos_2026-11-09.epub"
       ],
-      "domain": "thought"
+      "domain": "thought",
+      "volume": "Ensayo, pensamiento y religión",
+      "volumeId": "ensayo"
     },
     {
       "id": "gc-es-el-criterio",
@@ -2351,7 +2661,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-criterio_2026-11-09.epub"
       ],
-      "domain": "thought"
+      "domain": "thought",
+      "volume": "Ensayo, pensamiento y religión",
+      "volumeId": "ensayo"
     },
     {
       "id": "gc-es-reglas-y-consejos-sobre-investigacion-cientifica",
@@ -2366,7 +2678,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-reglas-y-consejos-sobre-investigacion-cientifica_2026-11-09.epub"
       ],
-      "domain": "thought"
+      "domain": "thought",
+      "volume": "Ensayo, pensamiento y religión",
+      "volumeId": "ensayo"
     },
     {
       "id": "gc-es-recuerdos-de-mi-vida-tomo-1-de-2",
@@ -2381,7 +2695,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-recuerdos-de-mi-vida-tomo-1-de-2_2026-11-09.epub"
       ],
-      "domain": "thought"
+      "domain": "thought",
+      "volume": "Ensayo, pensamiento y religión",
+      "volumeId": "ensayo"
     },
     {
       "id": "gc-es-recuerdos-de-mi-vida-tomo-2-de-2",
@@ -2396,7 +2712,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-recuerdos-de-mi-vida-tomo-2-de-2_2026-11-09.epub"
       ],
-      "domain": "thought"
+      "domain": "thought",
+      "volume": "Ensayo, pensamiento y religión",
+      "volumeId": "ensayo"
     },
     {
       "id": "gc-es-la-perfecta-casada",
@@ -2411,7 +2729,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-perfecta-casada_2026-11-09.epub"
       ],
-      "domain": "thought"
+      "domain": "thought",
+      "volume": "Ensayo, pensamiento y religión",
+      "volumeId": "ensayo"
     },
     {
       "id": "gc-es-el-tratado-de-la-pintura",
@@ -2426,7 +2746,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-tratado-de-la-pintura_2026-11-09.epub"
       ],
-      "domain": "thought"
+      "domain": "thought",
+      "volume": "Ensayo, pensamiento y religión",
+      "volumeId": "ensayo"
     },
     {
       "id": "gc-es-naturaleza-de-las-cosas",
@@ -2441,322 +2763,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-naturaleza-de-las-cosas_2026-11-09.epub"
       ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-1-de-3",
-      "title": "Verdadera historia de la conquista de la Nueva España (tomo 1 de 3)",
-      "author": "Bernal Díaz del Castillo",
-      "translator": null,
-      "published": 1632,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 447081,
-      "sha256": "791dd164b17648008b9324d59989c66150b91827395d835a941187c705aab2a9",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-1-de-3_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-2-de-3",
-      "title": "Verdadera historia de la conquista de la Nueva España (tomo 2 de 3)",
-      "author": "Bernal Díaz del Castillo",
-      "translator": null,
-      "published": 1632,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 409090,
-      "sha256": "3b81b993faf124033f05286e1d4c593d474b79a40c099a31fed4e269f9bce148",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-2-de-3_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-3-de-3",
-      "title": "Verdadera historia de la conquista de la Nueva España (tomo 3 de 3)",
-      "author": "Bernal Díaz del Castillo",
-      "translator": null,
-      "published": 1632,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 315936,
-      "sha256": "b4c135260eb2324ba5fcd3177af41f29638f79b9006e2eb2b928c73852463cfa",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-3-de-3_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-naufragios",
-      "title": "Naufragios",
-      "author": "Álvar Núñez Cabeza de Vaca",
-      "translator": null,
-      "published": 1542,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 194050,
-      "sha256": "6fffc93af7a4398842eb2928479a6614a6d89141f38efa7dad7a925ac445b047",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-naufragios_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-historia-de-las-indias-tomo-1-de-5",
-      "title": "Historia de las Indias (tomo 1 de 5)",
-      "author": "Bartolomé de las Casas",
-      "translator": null,
-      "published": 1875,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 538022,
-      "sha256": "ed9e7d48442d50ea860c50e2e34ca3f1555e90753daa62922fb12774fc0ba8d8",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-las-indias-tomo-1-de-5_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-historia-de-las-indias-tomo-2-de-5",
-      "title": "Historia de las Indias (tomo 2 de 5)",
-      "author": "Bartolomé de las Casas",
-      "translator": null,
-      "published": 1875,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 539530,
-      "sha256": "2f33fd6058c11865b561d56bf4f42976a7f3654fe8d59b5c658662d97a7c8bba",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-las-indias-tomo-2-de-5_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-historia-de-las-indias-tomo-3-de-5",
-      "title": "Historia de las Indias (tomo 3 de 5)",
-      "author": "Bartolomé de las Casas",
-      "translator": null,
-      "published": 1875,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 509109,
-      "sha256": "29592ebcad5a972df05022559af2c96798d04ba204f74feba6e43ad51d0e0165",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-las-indias-tomo-3-de-5_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-historia-de-las-indias-tomo-4-de-5",
-      "title": "Historia de las Indias (tomo 4 de 5)",
-      "author": "Bartolomé de las Casas",
-      "translator": null,
-      "published": 1876,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 516329,
-      "sha256": "46dc3586fcea2d6b866f04d417ab8f83e3c16228b850d6b54e22fc62deba950e",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-las-indias-tomo-4-de-5_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-historia-de-las-indias-tomo-5-de-5",
-      "title": "Historia de las Indias (tomo 5 de 5)",
-      "author": "Bartolomé de las Casas",
-      "translator": null,
-      "published": 1876,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 540191,
-      "sha256": "8c4a3c689580ed230d85942398bf334ad80f8079091de0a0b5d97aeae8edc55d",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-las-indias-tomo-5-de-5_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-historia-natural-y-moral-de-las-indias-tomo-1-de-2",
-      "title": "Historia natural y moral de las Indias (tomo 1 de 2)",
-      "author": "José de Acosta",
-      "translator": null,
-      "published": 1590,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 391636,
-      "sha256": "3e9521488361a817d995d342b100558997ad41978ec983e86563c94159938396",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-natural-y-moral-de-las-indias-tomo-1-de-2_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-historia-natural-y-moral-de-las-indias-tomo-2-de-2",
-      "title": "Historia natural y moral de las Indias (tomo 2 de 2)",
-      "author": "José de Acosta",
-      "translator": null,
-      "published": 1590,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 327530,
-      "sha256": "b41dced8a81a907c43f08fb7128d3439ffbe7121702e94b33a741ee5632eb003",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-natural-y-moral-de-las-indias-tomo-2-de-2_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-el-senorio-de-los-incas-cronica-del-peru-segunda-parte",
-      "title": "El señorío de los incas (Crónica del Perú, segunda parte)",
-      "author": "Pedro de Cieza de León",
-      "translator": null,
-      "published": 1880,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 296589,
-      "sha256": "6e9dc47a9dead3ce15f11f9c0449ad72d233af13b361ba3ca7f5c5bee1a8954c",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-senorio-de-los-incas-cronica-del-peru-segunda-parte_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-suma-y-narracion-de-los-incas",
-      "title": "Suma y narración de los incas",
-      "author": "Juan de Betanzos",
-      "translator": null,
-      "published": 1880,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 130702,
-      "sha256": "1f221e2233712ba1624e51afa6cbc1febf56c795a521defb8f8efdb7eb82cbe2",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-suma-y-narracion-de-los-incas_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-los-nueve-libros-de-la-historia-tomo-1-de-2",
-      "title": "Los nueve libros de la historia (tomo 1 de 2)",
-      "author": "Heródoto",
-      "translator": "Bartolomé Pou",
-      "published": 1878,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 465618,
-      "sha256": "3645e6aa8939a9e7452be891f2be42df698d1a369c7614218c86216755e1fdd9",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-los-nueve-libros-de-la-historia-tomo-1-de-2_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-los-nueve-libros-de-la-historia-tomo-2-de-2",
-      "title": "Los nueve libros de la historia (tomo 2 de 2)",
-      "author": "Heródoto",
-      "translator": "Bartolomé Pou",
-      "published": 1884,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 433212,
-      "sha256": "18b886841241b87c49fdbf1ea835e6b731200e298f637197b205284cd0b18664",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-los-nueve-libros-de-la-historia-tomo-2-de-2_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-historia-de-la-guerra-del-peloponeso-tomo-1-de-2",
-      "title": "Historia de la guerra del Peloponeso (tomo 1 de 2)",
-      "author": "Tucídides",
-      "translator": "Diego Gracián",
-      "published": 1564,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 421948,
-      "sha256": "34bb9ed0b9a8440088ad3b1ad12f9b7600f0646950ec2bf8077aaff5209f04d7",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-la-guerra-del-peloponeso-tomo-1-de-2_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-historia-de-la-guerra-del-peloponeso-tomo-2-de-2",
-      "title": "Historia de la guerra del Peloponeso (tomo 2 de 2)",
-      "author": "Tucídides",
-      "translator": "Diego Gracián",
-      "published": 1564,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 368281,
-      "sha256": "276cc4413ce5f3720f56a190339511f7be103589d3388910c9053d755a12660d",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-la-guerra-del-peloponeso-tomo-2-de-2_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-las-helenicas",
-      "title": "Las Helénicas",
-      "author": "Jenofonte",
-      "translator": "Enrique Soms y Castelín",
-      "published": 1888,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 279892,
-      "sha256": "4532760721a8ca1fa3f6da3f6c37ec3d202c4481288b038376683807768e38c3",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-las-helenicas_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-la-biblia-en-espana-tomo-1-de-3",
-      "title": "La Biblia en España (tomo 1 de 3)",
-      "author": "George Borrow",
-      "translator": "Manuel Azaña",
-      "published": 1921,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 273698,
-      "sha256": "d9687f5d111f92454c46832e34d74b96b2e39e18e26686269984d36dc06b01a8",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-biblia-en-espana-tomo-1-de-3_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-la-biblia-en-espana-tomo-2-de-3",
-      "title": "La Biblia en España (tomo 2 de 3)",
-      "author": "George Borrow",
-      "translator": "Manuel Azaña",
-      "published": 1921,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 236701,
-      "sha256": "508e7b2ad12c0d66689c92db2e362c5c5695d1f62349a1d617cedcddeb25c1b3",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-biblia-en-espana-tomo-2-de-3_2026-11-09.epub"
-      ],
-      "domain": "thought"
-    },
-    {
-      "id": "gc-es-la-biblia-en-espana-tomo-3-de-3",
-      "title": "La Biblia en España (tomo 3 de 3)",
-      "author": "George Borrow",
-      "translator": "Manuel Azaña",
-      "published": 1921,
-      "section": "Historia y crónicas",
-      "language": "es",
-      "sizeBytes": 269200,
-      "sha256": "c899036f02c82293e54ec842714b00ecc7bcaa9419143cd83bf27e90d1414673",
-      "urls": [
-        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-biblia-en-espana-tomo-3-de-3_2026-11-09.epub"
-      ],
-      "domain": "thought"
+      "domain": "thought",
+      "volume": "Ensayo, pensamiento y religión",
+      "volumeId": "ensayo"
     },
     {
       "id": "gc-es-epistola-de-san-pablo-a-los-romanos",
@@ -2771,7 +2780,9 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-epistola-de-san-pablo-a-los-romanos_2026-11-09.epub"
       ],
-      "domain": "thought"
+      "domain": "thought",
+      "volume": "Ensayo, pensamiento y religión",
+      "volumeId": "ensayo"
     },
     {
       "id": "gc-es-vida-de-jesus",
@@ -2786,7 +2797,441 @@
       "urls": [
         "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-vida-de-jesus_2026-11-09.epub"
       ],
-      "domain": "thought"
+      "domain": "thought",
+      "volume": "Ensayo, pensamiento y religión",
+      "volumeId": "ensayo"
+    },
+    {
+      "id": "gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-1-de-3",
+      "title": "Verdadera historia de la conquista de la Nueva España (tomo 1 de 3)",
+      "author": "Bernal Díaz del Castillo",
+      "translator": null,
+      "published": 1632,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 447081,
+      "sha256": "791dd164b17648008b9324d59989c66150b91827395d835a941187c705aab2a9",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-1-de-3_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-2-de-3",
+      "title": "Verdadera historia de la conquista de la Nueva España (tomo 2 de 3)",
+      "author": "Bernal Díaz del Castillo",
+      "translator": null,
+      "published": 1632,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 409090,
+      "sha256": "3b81b993faf124033f05286e1d4c593d474b79a40c099a31fed4e269f9bce148",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-2-de-3_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-3-de-3",
+      "title": "Verdadera historia de la conquista de la Nueva España (tomo 3 de 3)",
+      "author": "Bernal Díaz del Castillo",
+      "translator": null,
+      "published": 1632,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 315936,
+      "sha256": "b4c135260eb2324ba5fcd3177af41f29638f79b9006e2eb2b928c73852463cfa",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-verdadera-historia-de-la-conquista-de-la-nueva-espana-tomo-3-de-3_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-naufragios",
+      "title": "Naufragios",
+      "author": "Álvar Núñez Cabeza de Vaca",
+      "translator": null,
+      "published": 1542,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 194050,
+      "sha256": "6fffc93af7a4398842eb2928479a6614a6d89141f38efa7dad7a925ac445b047",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-naufragios_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-historia-de-las-indias-tomo-1-de-5",
+      "title": "Historia de las Indias (tomo 1 de 5)",
+      "author": "Bartolomé de las Casas",
+      "translator": null,
+      "published": 1875,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 538022,
+      "sha256": "ed9e7d48442d50ea860c50e2e34ca3f1555e90753daa62922fb12774fc0ba8d8",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-las-indias-tomo-1-de-5_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-historia-de-las-indias-tomo-2-de-5",
+      "title": "Historia de las Indias (tomo 2 de 5)",
+      "author": "Bartolomé de las Casas",
+      "translator": null,
+      "published": 1875,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 539530,
+      "sha256": "2f33fd6058c11865b561d56bf4f42976a7f3654fe8d59b5c658662d97a7c8bba",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-las-indias-tomo-2-de-5_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-historia-de-las-indias-tomo-3-de-5",
+      "title": "Historia de las Indias (tomo 3 de 5)",
+      "author": "Bartolomé de las Casas",
+      "translator": null,
+      "published": 1875,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 509109,
+      "sha256": "29592ebcad5a972df05022559af2c96798d04ba204f74feba6e43ad51d0e0165",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-las-indias-tomo-3-de-5_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-historia-de-las-indias-tomo-4-de-5",
+      "title": "Historia de las Indias (tomo 4 de 5)",
+      "author": "Bartolomé de las Casas",
+      "translator": null,
+      "published": 1876,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 516329,
+      "sha256": "46dc3586fcea2d6b866f04d417ab8f83e3c16228b850d6b54e22fc62deba950e",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-las-indias-tomo-4-de-5_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-historia-de-las-indias-tomo-5-de-5",
+      "title": "Historia de las Indias (tomo 5 de 5)",
+      "author": "Bartolomé de las Casas",
+      "translator": null,
+      "published": 1876,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 540191,
+      "sha256": "8c4a3c689580ed230d85942398bf334ad80f8079091de0a0b5d97aeae8edc55d",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-las-indias-tomo-5-de-5_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-historia-natural-y-moral-de-las-indias-tomo-1-de-2",
+      "title": "Historia natural y moral de las Indias (tomo 1 de 2)",
+      "author": "José de Acosta",
+      "translator": null,
+      "published": 1590,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 391636,
+      "sha256": "3e9521488361a817d995d342b100558997ad41978ec983e86563c94159938396",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-natural-y-moral-de-las-indias-tomo-1-de-2_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-historia-natural-y-moral-de-las-indias-tomo-2-de-2",
+      "title": "Historia natural y moral de las Indias (tomo 2 de 2)",
+      "author": "José de Acosta",
+      "translator": null,
+      "published": 1590,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 327530,
+      "sha256": "b41dced8a81a907c43f08fb7128d3439ffbe7121702e94b33a741ee5632eb003",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-natural-y-moral-de-las-indias-tomo-2-de-2_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-el-senorio-de-los-incas-cronica-del-peru-segunda-parte",
+      "title": "El señorío de los incas (Crónica del Perú, segunda parte)",
+      "author": "Pedro de Cieza de León",
+      "translator": null,
+      "published": 1880,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 296589,
+      "sha256": "6e9dc47a9dead3ce15f11f9c0449ad72d233af13b361ba3ca7f5c5bee1a8954c",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-el-senorio-de-los-incas-cronica-del-peru-segunda-parte_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-suma-y-narracion-de-los-incas",
+      "title": "Suma y narración de los incas",
+      "author": "Juan de Betanzos",
+      "translator": null,
+      "published": 1880,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 130702,
+      "sha256": "1f221e2233712ba1624e51afa6cbc1febf56c795a521defb8f8efdb7eb82cbe2",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-suma-y-narracion-de-los-incas_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-los-nueve-libros-de-la-historia-tomo-1-de-2",
+      "title": "Los nueve libros de la historia (tomo 1 de 2)",
+      "author": "Heródoto",
+      "translator": "Bartolomé Pou",
+      "published": 1878,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 465618,
+      "sha256": "3645e6aa8939a9e7452be891f2be42df698d1a369c7614218c86216755e1fdd9",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-los-nueve-libros-de-la-historia-tomo-1-de-2_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-los-nueve-libros-de-la-historia-tomo-2-de-2",
+      "title": "Los nueve libros de la historia (tomo 2 de 2)",
+      "author": "Heródoto",
+      "translator": "Bartolomé Pou",
+      "published": 1884,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 433212,
+      "sha256": "18b886841241b87c49fdbf1ea835e6b731200e298f637197b205284cd0b18664",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-los-nueve-libros-de-la-historia-tomo-2-de-2_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-historia-de-la-guerra-del-peloponeso-tomo-1-de-2",
+      "title": "Historia de la guerra del Peloponeso (tomo 1 de 2)",
+      "author": "Tucídides",
+      "translator": "Diego Gracián",
+      "published": 1564,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 421948,
+      "sha256": "34bb9ed0b9a8440088ad3b1ad12f9b7600f0646950ec2bf8077aaff5209f04d7",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-la-guerra-del-peloponeso-tomo-1-de-2_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-historia-de-la-guerra-del-peloponeso-tomo-2-de-2",
+      "title": "Historia de la guerra del Peloponeso (tomo 2 de 2)",
+      "author": "Tucídides",
+      "translator": "Diego Gracián",
+      "published": 1564,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 368281,
+      "sha256": "276cc4413ce5f3720f56a190339511f7be103589d3388910c9053d755a12660d",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-historia-de-la-guerra-del-peloponeso-tomo-2-de-2_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-las-helenicas",
+      "title": "Las Helénicas",
+      "author": "Jenofonte",
+      "translator": "Enrique Soms y Castelín",
+      "published": 1888,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 279892,
+      "sha256": "4532760721a8ca1fa3f6da3f6c37ec3d202c4481288b038376683807768e38c3",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-las-helenicas_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-la-biblia-en-espana-tomo-1-de-3",
+      "title": "La Biblia en España (tomo 1 de 3)",
+      "author": "George Borrow",
+      "translator": "Manuel Azaña",
+      "published": 1921,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 273698,
+      "sha256": "d9687f5d111f92454c46832e34d74b96b2e39e18e26686269984d36dc06b01a8",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-biblia-en-espana-tomo-1-de-3_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-la-biblia-en-espana-tomo-2-de-3",
+      "title": "La Biblia en España (tomo 2 de 3)",
+      "author": "George Borrow",
+      "translator": "Manuel Azaña",
+      "published": 1921,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 236701,
+      "sha256": "508e7b2ad12c0d66689c92db2e362c5c5695d1f62349a1d617cedcddeb25c1b3",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-biblia-en-espana-tomo-2-de-3_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    },
+    {
+      "id": "gc-es-la-biblia-en-espana-tomo-3-de-3",
+      "title": "La Biblia en España (tomo 3 de 3)",
+      "author": "George Borrow",
+      "translator": "Manuel Azaña",
+      "published": 1921,
+      "section": "Historia y crónicas",
+      "language": "es",
+      "sizeBytes": 269200,
+      "sha256": "c899036f02c82293e54ec842714b00ecc7bcaa9419143cd83bf27e90d1414673",
+      "urls": [
+        "https://github.com/nealt9000/Granger/releases/download/clasicos-es-2026-11-09/gc-es-la-biblia-en-espana-tomo-3-de-3_2026-11-09.epub"
+      ],
+      "domain": "thought",
+      "volume": "Historia y crónicas",
+      "volumeId": "historia"
+    }
+  ],
+  "title": "Clásicos Granger",
+  "volumes": [
+    {
+      "id": "lecturas",
+      "title": "Lecturas fáciles e infantiles",
+      "i18n": {
+        "en": {
+          "title": "Easy and children's reading"
+        }
+      }
+    },
+    {
+      "id": "cuentos",
+      "title": "Cuentos y novelas cortas",
+      "i18n": {
+        "en": {
+          "title": "Short stories and novellas"
+        }
+      }
+    },
+    {
+      "id": "novelas",
+      "title": "Novelas",
+      "i18n": {
+        "en": {
+          "title": "Novels"
+        }
+      }
+    },
+    {
+      "id": "poesia",
+      "title": "Poesía",
+      "i18n": {
+        "en": {
+          "title": "Poetry"
+        }
+      }
+    },
+    {
+      "id": "teatro",
+      "title": "Teatro",
+      "i18n": {
+        "en": {
+          "title": "Drama"
+        }
+      }
+    },
+    {
+      "id": "universales",
+      "title": "Clásicos universales en español",
+      "i18n": {
+        "en": {
+          "title": "World classics in Spanish"
+        }
+      }
+    },
+    {
+      "id": "ensayo",
+      "title": "Ensayo, pensamiento y religión",
+      "i18n": {
+        "en": {
+          "title": "Essays, thought and religion"
+        }
+      }
+    },
+    {
+      "id": "historia",
+      "title": "Historia y crónicas",
+      "i18n": {
+        "en": {
+          "title": "History and chronicles"
+        }
+      }
     }
   ]
 }

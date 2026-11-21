@@ -23,6 +23,13 @@ of an e-book collection (`pack_builder.py describe-epubs`): every book becomes a
 collection gets a preset. "@<collection>" in a preset's items expands to that collection's book ids. A book's
 `description` and `level` come from its descriptor.
 
+Volumes (classics volumes spec, 2026-11-21): a books row whose descriptor lists `volumes` (Granger Classics, Clásicos
+Granger) files each book under its volume: its `category` is the volume's title, while `domain` and `subjects` still
+follow its section. Each volume gets a preset after the collection's, `<collection>-<volume id>`, titled
+"<collection title>: <volume title>", with `setOf: <collection>`; released apps list it as one more set of books.
+"@<collection>/<volume id>" in a curated preset or an onboarding use case expands to that volume's book ids, so older
+apps read plain ids; readiness refuses it (its "@<collection>" already means the domain's books).
+
 Book sets (Plan KB2 Task 3.2, African Storybook): a "bookSets" row names a descriptor as a books row does, plus `title`,
 `language`, `shelf`, `license`, optional `provider` (else the descriptor's), `i18n` and `levelSets` ({"label": "Level
 {n}", "i18n": {"es": "Nivel {n}"}}). Each becomes one entry of the top-level `bookSets` array, holding its own presets
@@ -617,7 +624,9 @@ def book_entries(curated, head=http_head, root=None):
         entry = {
             "id": book["id"], "title": book["title"], "author": book["author"],
             "description": book.get("description") or "",
-            "category": book["section"], "language": bcp47(book["language"]), "sizeBytes": book["sizeBytes"],
+            # Classics volumes: the book is filed under its volume; domain and subjects stay with its section.
+            "category": book.get("volume") or book["section"], "language": bcp47(book["language"]),
+            "sizeBytes": book["sizeBytes"],
             "sha256": book["sha256"], "urls": book["urls"], "releaseDate": descriptor["releaseDate"],
             "license": curated["license"], "collection": descriptor["collection"],
             "published": book["published"],
@@ -657,6 +666,41 @@ def level_presets(name, row, entries):
                 for code, copy in (row.get("i18n") or {}).items() if copy.get("title")}
         presets.append(with_i18n(preset, check_i18n(f"books {name} level {n}", i18n or None)))
     return presets
+
+
+def volume_presets(name, row, descriptor, entries):
+    """
+    Classics volumes: one preset per volume of a descriptor that lists `volumes`, in its order, after the collection's
+    all-books preset: `<collection>-<volume id>`, "<descriptor title>: <volume title>", `setOf: <collection>`, the row's
+    language and the volume's copy in each of its languages. The volumes must hold every book exactly once.
+    Returns (presets, {"<collection>/<volume id>": [book ids]}).
+    """
+    volumes = descriptor.get("volumes")
+    if not volumes:
+        return [], {}
+    title = descriptor.get("title") or row.get("title") or name
+    known = {b["id"]: b.get("volumeId") for b in descriptor["books"]}
+    by_volume = {v["id"]: [] for v in volumes}
+    if len(by_volume) != len(volumes):
+        raise SystemExit(f"books {name}: a volume is listed twice")
+    for e in entries:
+        vid = known.get(e["id"])
+        if vid not in by_volume:
+            raise SystemExit(f"books {name}: {e['id']} is in no listed volume ({vid!r})")
+        by_volume[vid].append(e["id"])
+    presets, tokens = [], {}
+    for v in volumes:
+        items = by_volume[v["id"]]
+        if not items:
+            raise SystemExit(f"books {name}: volume {v['id']!r} holds no books")
+        preset = {"id": f"{name}-{v['id']}", "title": f"{title}: {v['title']}", "items": items, "setOf": name}
+        if row.get("language"):
+            preset["language"] = bcp47(row["language"])
+        i18n = {code: {"title": f"{title}: {copy['title']}"} for code, copy in (v.get("i18n") or {}).items()
+                if copy.get("title")}
+        presets.append(with_i18n(preset, check_i18n(f"books {name} volume {v['id']}", i18n or None)))
+        tokens[f"{name}/{v['id']}"] = items
+    return presets, tokens
 
 
 SET_ROW_KEYS = ("bookRelease", "license", "title", "language", "shelf")
@@ -856,12 +900,13 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
             report += ["", "Newer snapshots held back:"] + ([h["text"] for h in held] or ["  none"])
     models = curated["models"]
     voices = curated.get("voices", [])       # Plan V1: one zip per voice, hand-written like models
-    books, collections, collection_rows, collection_entries = [], {}, {}, {}
+    books, collections, collection_rows, collection_entries, descriptors = [], {}, {}, {}, {}
     for row in curated.get("books", []):
         if row.get("levelSets") or row.get("shelf"):
             # Plan KB2 Task 3.2: released apps file every `books` entry into Granger Classics.
             raise SystemExit(f"books {row['bookRelease']}: a set with a shelf or levels goes under bookSets, not books")
         collection, entries = book_entries(row, head)
+        descriptors[collection] = json.loads((pathlib.Path(root or REPO_ROOT) / row["bookRelease"]).read_text(encoding="utf-8"))
         books += entries
         collections[collection] = [e["id"] for e in entries]
         collection_rows[collection] = row
@@ -877,10 +922,14 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
     if len(ids) != len(set(ids)):
         raise SystemExit(f"duplicate ids in {ids}")
     book_sets = book_sets_of(curated, ids, head)
-    # "@<collection>" in a preset stands for every book of that collection.
+    volume_sets, volumes = {}, {}
+    for name, row in collection_rows.items():
+        volume_sets[name], found = volume_presets(name, row, descriptors[name], collection_entries[name])
+        volumes.update(found)
+    # "@<collection>" in a preset stands for every book of that collection, "@<collection>/<volume>" for a volume's.
     presets = [with_i18n({**{k: v for k, v in p.items() if k != "i18n"},
                           "items": [i for item in p["items"] for i in
-                                    (collections.get(item[1:], [item]) if item.startswith("@") else [item])]},
+                                    ({**collections, **volumes}.get(item[1:], [item]) if item.startswith("@") else [item])]},
                          check_i18n(f"preset {p['id']}", p.get("i18n")))
                for p in curated["presets"]]
     # A collection's preset takes its books row's `title`, `language` and `i18n` when given (Plan L3: Clásicos Granger).
@@ -891,6 +940,7 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
             preset["language"] = bcp47(row["language"])
         presets.append(with_i18n(preset, check_i18n(f"books {name}", row.get("i18n"))))
         presets += level_presets(name, row, collection_entries[name])
+        presets += volume_sets[name]
     vector_lines = []
     if "vectors" in curated:
         v = curated["vectors"]
@@ -925,7 +975,7 @@ def build(curated, fetch=http_get, now=None, head=http_head, report=None, root=N
     if "readiness" in curated:
         readiness, tier_presets = readiness_block(curated["readiness"], packs, books, collections)
         presets += tier_presets
-    onboarding = onboarding_block(curated["onboarding"], packs, books, collections) if "onboarding" in curated else None
+    onboarding = onboarding_block(curated["onboarding"], packs, books, collections, volumes) if "onboarding" in curated else None
     for preset in presets:
         unknown = set(preset["items"]) - set(ids)
         if unknown:
@@ -1238,6 +1288,8 @@ def language_lists(scope, languages, keys):
 def check_token(scope, token, pack_ids, book_ids, families, collections):
     """A readiness-style token names a catalog item, "@<collection>" or "family:<name>"; anything else fails the build."""
     if token.startswith("@"):
+        if "/" in token:
+            raise SystemExit(f"{scope}: a volume ({token}) goes in a preset or a use case, which name its books")
         if token[1:] not in collections:
             raise SystemExit(f"{scope}: unknown collection {token}")
     elif token.startswith("family:"):
@@ -1247,11 +1299,25 @@ def check_token(scope, token, pack_ids, book_ids, families, collections):
         raise SystemExit(f"{scope}: unknown item {token}")
 
 
-def onboarding_block(block, packs, books, collections):
+def onboarding_block(block, packs, books, collections, volumes=None):
     """
     The catalog's `onboarding` object (Plan H3, spec §6): the use cases with their items (readiness tokens) and the
     maps packs that are continents or multi-country areas (`larger`), so the region picker lists countries first.
+    A "@<collection>/<volume id>" item becomes that volume's book ids ([volumes]), which every app version reads.
     """
+    volumes = volumes or {}
+
+    def expanded(scope, items):
+        out = []
+        for token in items:
+            if token.startswith("@") and "/" in token:
+                if token[1:] not in volumes:
+                    raise SystemExit(f"{scope}: unknown volume {token}")
+                out += volumes[token[1:]]
+            else:
+                out.append(token)
+        return list(dict.fromkeys(out))
+
     pack_ids = {p["id"] for p in packs}
     book_ids = {b["id"] for b in books}
     families = {p["family"] for p in packs if p.get("family")}
@@ -1262,7 +1328,7 @@ def onboarding_block(block, packs, books, collections):
         if not uid or not title or uid in ids:
             raise SystemExit(f"onboarding: bad or duplicate use case id {uid!r}")
         ids.add(uid)
-        items = list(dict.fromkeys(u.get("items", [])))
+        items = expanded(f"onboarding {uid}", u.get("items", []))
         if not items:
             raise SystemExit(f"onboarding {uid}: no items")
         for token in items:
@@ -1271,7 +1337,7 @@ def onboarding_block(block, packs, books, collections):
         # Plan L3: the use case's items in other languages; one with no items in a language isn't offered in it.
         languages = {}
         for code, lists in language_lists(f"onboarding {uid}", u.get("languages"), ("items",)).items():
-            lang_items = list(dict.fromkeys(lists["items"]))
+            lang_items = expanded(f"onboarding {uid} ({code})", lists["items"])
             for token in lang_items:
                 check_token(f"onboarding {uid} ({code})", token, pack_ids, book_ids, families, collections)
             if lang_items:

@@ -67,6 +67,7 @@
     <string name="onboarding_save_space_blurb">Encyclopedias without their pictures: the same articles, a poorer read.</string>
     <!-- The name of Granger's own collection of English public-domain books. Plan L3: Spanish keeps "Granger Classics", since "Clásicos Granger" is now the Spanish books' own collection. -->
     <string name="onboarding_granger_classics">Granger Classics</string>
+    <string name="onboarding_collection_volumes">%1$s: %2$s</string>
     <!-- A title and its size: "Peru · 500 MB". -->
     <string name="onboarding_title_size">%1$s · %2$s</string>
     <!-- After an item's title and size: it is installed already. -->

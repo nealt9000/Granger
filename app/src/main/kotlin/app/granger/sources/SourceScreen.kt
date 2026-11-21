@@ -371,6 +371,8 @@ internal fun storageSummary(ui: SourceUi): UiText? {
 @Composable
 private fun PresetItem(preset: PresetRow, onGet: () -> Unit) {
     ListItem(
+        // A collection's volume (classics volumes spec) sits indented under it.
+        modifier = if (preset.setOf.isNotEmpty()) Modifier.padding(start = 24.dp) else Modifier,
         headlineContent = { Text(stringResource(R.string.sources_preset_title, preset.title)) },
         supportingContent = {
             Column {

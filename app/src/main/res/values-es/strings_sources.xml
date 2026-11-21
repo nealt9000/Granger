@@ -89,6 +89,11 @@
     <string name="sources_category_philosophy">Filosofía</string>
     <string name="sources_category_scripture">Escritura y religión</string>
     <string name="sources_category_opera">Libretos de ópera</string>
+    <string name="sources_category_children">Clásicos infantiles</string>
+    <string name="sources_category_mystery">Misterio, aventura y fantasía</string>
+    <string name="sources_category_novels_britain">Novelas: Gran Bretaña e Irlanda</string>
+    <string name="sources_category_novels_america">Novelas: Estados Unidos</string>
+    <string name="sources_category_novels_world">Novelas: Europa y el mundo</string>
     <plurals name="sources_show_all_packs">
         <item quantity="one">Mostrar %d paquete</item>
         <item quantity="many">Mostrar los %d paquetes</item>

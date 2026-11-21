@@ -107,6 +107,11 @@
     <string name="sources_category_philosophy">Philosophy</string>
     <string name="sources_category_scripture">Scripture &amp; religion</string>
     <string name="sources_category_opera">Opera libretti</string>
+    <string name="sources_category_children">Children\'s classics</string>
+    <string name="sources_category_mystery">Mystery, adventure &amp; the fantastic</string>
+    <string name="sources_category_novels_britain">Novels: Britain &amp; Ireland</string>
+    <string name="sources_category_novels_america">Novels: America</string>
+    <string name="sources_category_novels_world">Novels: Europe &amp; the world</string>
     <!-- Unfolds a long section: "Show all 40 packs". -->
     <plurals name="sources_show_all_packs">
         <item quantity="one">Show all %d pack</item>

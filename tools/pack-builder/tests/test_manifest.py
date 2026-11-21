@@ -365,3 +365,56 @@ def test_compiled_rows_refuse_a_copyrighted_part_an_unlicensed_text_and_no_parts
     assert any("US government" in e for e in errors([{"title": "A", "html": "<p>x</p>", "licence": "mine"}]))
     assert any("needs parts" in e for e in errors([]))
     assert any("needs a title" in e for e in errors([{"gutenberg": 7}]))
+
+
+def volumed(tmp_path, volumes, *works):
+    data = {"name": "granger_test", "title": "Granger Test", "language": "eng", "description": "Test pack",
+            "sections": [{"id": "scripture", "title": "Scripture & religion"}, {"id": "novels", "title": "Novels & stories"}],
+            "works": [{"gutenberg": 2800 + i, "slug": slug, "title": "The Koran", "author": "", "translator": None,
+                       "published": 1861, "section": section, **({"volume": volume} if volume else {})}
+                      for i, (slug, section, volume) in enumerate(works)]}
+    if volumes is not None:
+        data["volumes"] = volumes
+    path = tmp_path / "manifest.json"
+    path.write_text(json.dumps(data))
+    return load(path)
+
+
+def test_volumes_load_and_a_work_without_one_takes_its_sections(tmp_path):
+
+    from manifest import volume_errors
+
+    m = volumed(tmp_path, [{"id": "scripture", "title": "Scripture & religion"},
+                           {"id": "children", "title": "Children's classics", "i18n": {"es": {"title": "Clásicos infantiles"}}}],
+                ("koran", "scripture", None), ("alice", "novels", "children"))
+    assert m.volumes == [("scripture", "Scripture & religion"), ("children", "Children's classics")]
+    assert m.volume_i18n == {"children": {"es": {"title": "Clásicos infantiles"}}}
+    assert [w.volume_id for w in m.works] == ["scripture", "children"]
+    assert volume_errors(m) == []
+
+
+def test_a_manifest_without_volumes_has_none_and_no_volume_errors(tmp_path):
+    from manifest import volume_errors
+    m = manifest(tmp_path)
+    assert m.volumes is None and volume_errors(m) == []
+
+
+def test_volume_errors(tmp_path):
+    from manifest import volume_errors
+    m = volumed(tmp_path, [{"id": "scripture", "title": "Scripture"}, {"id": "scripture", "title": "Again"},
+                           {"id": "Bad Id", "title": ""}, {"id": "empty", "title": "Empty"}],
+                ("koran", "scripture", None), ("alice", "novels", None), ("oz", "novels", "nowhere"))
+    errors = volume_errors(m)
+    assert "volume 'scripture' is listed twice" in errors
+    assert any("'Bad Id'" in e and "hyphens" in e for e in errors)
+    assert "volume 'Bad Id' has no title" in errors
+    assert "volume 'empty' holds no works" in errors
+    assert "alice: not in a listed volume ('novels')" in errors
+    assert "oz: not in a listed volume ('nowhere')" in errors
+    assert any("volume 'scripture'" in e for e in validate(m, rdf_ok))  # validate reports them too
+
+
+def test_a_volume_without_a_volumes_list_is_an_error(tmp_path):
+    from manifest import volume_errors
+    m = volumed(tmp_path, None, ("alice", "novels", "children"))
+    assert volume_errors(m) == ["alice: volume 'children' but the manifest lists no volumes"]

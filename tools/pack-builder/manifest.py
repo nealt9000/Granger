@@ -38,6 +38,11 @@ outside the drama and libretti sections with `true`, or tunes it (`{"labels": "t
 (textfix.py); `textfix: false` turns its paragraph repair off; `verseRefs: "split"` starts each "36:16"
 verse on a line of its own; `noteMarkers` ("letters" or "digits") sets apart note marks glued to words.
 
+Volumes (classics volumes spec, 2026-11-21): a manifest may list `volumes` ([{"id", "title", "i18n"?}], screen order),
+each a part of the collection people can get on its own. A work's `volume` names one; a work without one is in the
+volume whose id is its section's. Every work must land in a listed volume and every volume must hold a work. A volume
+lives only in the descriptor and the catalog, never in the EPUB, so moving a work between volumes rebuilds nothing.
+
 Granger's own editions (editions.py): `rename` applies a name map from classics/names/ between two headings
 (`{"names": "homer-greek", "from": "Book I", "to": "Footnotes"}`), and `editorNote` says so at the front and in the
 colophon.
@@ -129,6 +134,12 @@ class WorkSpec:
     textfix: bool = True
     verse_refs: str | None = None
     note_markers: str | None = None
+    volume: str | None = None
+
+    @property
+    def volume_id(self) -> str:
+        """The volume the work is in: its own `volume`, else its section's id."""
+        return self.volume or self.section
 
     @property
     def is_drama(self) -> bool:
@@ -166,6 +177,8 @@ class Manifest:
     book_id_prefix: str = "gc-"
     domains: dict[str, str] | None = None  # section id -> readiness domain, when the manifest names one
     check_deaths: bool = False
+    volumes: list[tuple[str, str]] | None = None  # (id, title) in screen order, when the manifest has volumes
+    volume_i18n: dict[str, dict] = field(default_factory=dict)  # volume id -> {"es": {"title": ...}}
 
     @property
     def code(self) -> str:
@@ -213,7 +226,7 @@ def load(path: Path) -> Manifest:
                       learner=w.get("learner", False), people=_people(w.get("people")), note=w.get("note", ""),
                       drama=w.get("drama"), labels=w.get("labels"), textfix=w.get("textfix", True),
                       verse_refs=w.get("verseRefs"), note_markers=w.get("noteMarkers"),
-                      rename=w.get("rename"), editor_note=w.get("editorNote", ""),
+                      rename=w.get("rename"), editor_note=w.get("editorNote", ""), volume=w.get("volume"),
                       se=w.get("se"), wikisource=w.get("wikisource"), ws_skip=w.get("wsSkip", []),
                       parts=[_part(p) for p in w["parts"]] if w.get("parts") is not None else None)
              for w in data["works"]]
@@ -222,7 +235,32 @@ def load(path: Path) -> Manifest:
                     language=data["language"], sections=[(s["id"], s["title"]) for s in data["sections"]],
                     works=works, collection=data.get("collection", "granger-classics"),
                     book_id_prefix=data.get("bookIdPrefix", "gc-"), domains=domains or None,
-                    check_deaths=data.get("checkDeaths", False))
+                    check_deaths=data.get("checkDeaths", False),
+                    volumes=[(v["id"], v["title"]) for v in data["volumes"]] if data.get("volumes") is not None else None,
+                    volume_i18n={v["id"]: v["i18n"] for v in data.get("volumes") or [] if v.get("i18n")})
+
+
+def volume_errors(m: Manifest) -> list[str]:
+    """A manifest's volumes: safe unique ids with titles, each holding a work, and every work in one of them."""
+    if m.volumes is None:
+        return [f"{w.slug}: volume {w.volume!r} but the manifest lists no volumes" for w in m.works if w.volume]
+    errors = []
+    ids = [vid for vid, _ in m.volumes]
+    for vid, title in m.volumes:
+        if not SLUG.match(vid or ""):
+            errors.append(f"volume id {vid!r} must be lowercase words joined by hyphens")
+        if not (title or "").strip():
+            errors.append(f"volume {vid!r} has no title")
+    for vid in sorted({v for v in ids if ids.count(v) > 1}):
+        errors.append(f"volume {vid!r} is listed twice")
+    held = Counter(w.volume_id for w in m.works)
+    for w in m.works:
+        if w.volume_id not in ids:
+            errors.append(f"{w.slug}: not in a listed volume ({w.volume_id!r})")
+    for vid in ids:
+        if not held[vid]:
+            errors.append(f"volume {vid!r} holds no works")
+    return errors
 
 
 def parse_rdf(data: bytes) -> Rdf:
@@ -258,6 +296,7 @@ def validate(m: Manifest, rdf_for: Callable[[int], Rdf],
     """`ws_licence_for` gives a Wikisource page's US public-domain licence (with a `government` flag), or None."""
     errors = []
     sections = {section_id for section_id, _ in m.sections}
+    errors += volume_errors(m)
     slugs = Counter(w.slug for w in m.works)
     ids = Counter(w.gutenberg for w in m.works if w.source == "gutenberg")
     ebibles = Counter(w.ebible for w in m.works if w.source == "ebible")

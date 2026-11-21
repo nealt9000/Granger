@@ -270,8 +270,16 @@ def build_epubs(m: Manifest, source: GutenbergSource, out: Path, date: str,
 
 
 def describe_epubs(directory: Path, url_base: str, m: Manifest) -> dict:
-    """The release descriptor for the EPUBs `build_epubs` wrote into `directory`."""
+    """
+    The release descriptor for the EPUBs `build_epubs` wrote into `directory`. With volumes (classics volumes spec), each
+    book carries its `volume` title and `volumeId`, the books come in volume order (manifest order within one), and the
+    descriptor lists the `volumes` and the collection's `title`; the EPUBs are only hashed, never rebuilt.
+    """
+    errors = manifests.volume_errors(m)
+    if errors:
+        raise SystemExit("; ".join(errors))
     sections = dict(m.sections)
+    volumes = dict(m.volumes or [])
     books, dates = [], set()
     for spec in m.works:
         book = epubpack.book_id(spec.slug, m.book_id_prefix)
@@ -291,10 +299,19 @@ def describe_epubs(directory: Path, url_base: str, m: Manifest) -> dict:
             entry["domain"] = m.domains[spec.section]
         if spec.learner:
             entry["learner"] = True
+        if m.volumes is not None:
+            entry["volume"], entry["volumeId"] = volumes[spec.volume_id], spec.volume_id
         books.append(entry)
     if len(dates) != 1:
         raise SystemExit(f"EPUBs from several build dates: {sorted(dates)}")
-    return {"releaseDate": dates.pop(), "collection": m.collection, "books": books}
+    descriptor = {"releaseDate": dates.pop(), "collection": m.collection, "books": books}
+    if m.volumes is not None:
+        order = {vid: i for i, (vid, _) in enumerate(m.volumes)}
+        books.sort(key=lambda b: order[b["volumeId"]])  # stable: manifest order within a volume
+        descriptor["title"] = m.title
+        descriptor["volumes"] = [{"id": vid, "title": title, **({"i18n": m.volume_i18n[vid]} if vid in m.volume_i18n else {})}
+                                 for vid, title in m.volumes]
+    return descriptor
 
 
 def describe(zim: Path, url: str) -> dict:

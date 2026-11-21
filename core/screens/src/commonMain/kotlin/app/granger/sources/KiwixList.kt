@@ -377,6 +377,12 @@ object KiwixList {
         "Philosophy" to "sources_category_philosophy",
         "Scripture & religion" to "sources_category_scripture",
         "Opera libretti" to "sources_category_opera",
+        // Granger Classics' volumes (classics volumes spec, 2026-11-21); the five above are volumes too.
+        "Children's classics" to "sources_category_children",
+        "Mystery, adventure & the fantastic" to "sources_category_mystery",
+        "Novels: Britain & Ireland" to "sources_category_novels_britain",
+        "Novels: America" to "sources_category_novels_america",
+        "Novels: Europe & the world" to "sources_category_novels_world",
     )
 
     /** A book's licence for its row: Granger Classics' "Public domain (US)" in the app language, anything else as is. */

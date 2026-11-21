@@ -1,3 +1,4 @@
+import dataclasses
 import hashlib
 import json
 
@@ -293,3 +294,42 @@ def test_only_builds_the_named_works(tmp_path):
     out.mkdir()
     [path] = build_epubs(two_works(tmp_path), FakeSource(), out, "2026-11-09", only={"koran-rodwell"})
     assert path.name == "gc-koran-rodwell_2026-11-09.epub"
+
+
+def test_describe_epubs_with_volumes_orders_by_volume_and_lists_them(tmp_path):
+    from pack_builder import build_epubs, describe_epubs
+    m = two_works(tmp_path)  # modern-book (novels), then koran-rodwell (scripture)
+    m = dataclasses.replace(m, volumes=[("scripture", "Scripture & religion"), ("britain", "Novels: Britain & Ireland")],
+                            volume_i18n={"britain": {"es": {"title": "Novelas: Gran Bretaña e Irlanda"}}},
+                            works=[dataclasses.replace(m.works[0], volume="britain"), m.works[1]])
+    build_epubs(m, FakeSource(), tmp_path, "2026-10-17")
+    before = {p.name: p.read_bytes() for p in tmp_path.glob("*.epub")}
+    d = describe_epubs(tmp_path, "https://example.org/r", m)
+    assert [b["id"] for b in d["books"]] == ["gc-koran-rodwell", "gc-modern-book"]
+    koran, modern = d["books"]
+    assert (koran["volume"], koran["volumeId"], koran["section"]) == ("Scripture & religion", "scripture", "Scripture & religion")
+    assert (modern["volume"], modern["volumeId"]) == ("Novels: Britain & Ireland", "britain")
+    assert d["title"] == m.title
+    assert d["volumes"] == [{"id": "scripture", "title": "Scripture & religion"},
+                            {"id": "britain", "title": "Novels: Britain & Ireland",
+                             "i18n": {"es": {"title": "Novelas: Gran Bretaña e Irlanda"}}}]
+    assert {p.name: p.read_bytes() for p in tmp_path.glob("*.epub")} == before  # described, not rebuilt
+
+
+def test_describe_epubs_refuses_a_work_outside_the_volumes(tmp_path):
+    from pack_builder import build_epubs, describe_epubs
+    m = two_works(tmp_path)
+    build_epubs(m, FakeSource(), tmp_path, "2026-10-17")
+    m = dataclasses.replace(m, volumes=[("scripture", "Scripture & religion")])
+    with pytest.raises(SystemExit) as caught:
+        describe_epubs(tmp_path, "https://example.org/r", m)
+    assert "modern-book: not in a listed volume" in str(caught.value)
+
+
+def test_describe_epubs_without_volumes_is_unchanged(tmp_path):
+    from pack_builder import build_epubs, describe_epubs
+    m = two_works(tmp_path)
+    build_epubs(m, FakeSource(), tmp_path, "2026-10-17")
+    d = describe_epubs(tmp_path, "https://example.org/r", m)
+    assert set(d) == {"releaseDate", "collection", "books"}
+    assert all("volume" not in b and "volumeId" not in b for b in d["books"])

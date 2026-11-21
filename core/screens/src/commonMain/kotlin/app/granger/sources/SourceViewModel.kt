@@ -197,6 +197,8 @@ data class PresetRow(
     val downloading: Int = 0,
     /** On the phone in an older version than the catalog's: not "to get". */
     val updates: Int = 0,
+    /** The collection preset this row is a volume of (classics volumes spec), shown under it; blank for a collection. */
+    val setOf: String = "",
 )
 
 /** A preset's lines (Plan U3b Decision 13). */
@@ -953,7 +955,7 @@ class SourceViewModel(
         // Granger's screen is Get more's Granger Classics, under Books: only a set of books is offered there. Starter,
         // Efficient and Comprehensive bring Kiwix's wikis and the models, which aren't books (Plan GB walkthrough).
         val presetList = if (setScope) theSet?.presets.orEmpty()
-        else if (scope != CatalogScope.GRANGER && scope != CatalogScope.BOOKS) emptyList() else current?.presets.orEmpty().filter { preset ->
+        else if (scope != CatalogScope.GRANGER && scope != CatalogScope.BOOKS) emptyList() else nestVolumes(current?.presets.orEmpty().filter { preset ->
             preset.items.isNotEmpty() && preset.items.all { current?.item(it) is BookEntry } &&
                 // A collection in another language (Clásicos Granger for an English library) waits for All languages (Plan L3).
                 (lang.all || app.granger.core.catalog.Languages.normalise(preset.language) in lang.languages)
@@ -963,20 +965,22 @@ class SourceViewModel(
                 { it.id !in GRANGER_PRESETS },
                 { lang.languages.indexOf(app.granger.core.catalog.Languages.normalise(it.language)).let { i -> if (i < 0) Int.MAX_VALUE else i } },
             ),
-        )
+        ), withVolumes = scope == CatalogScope.GRANGER)
         val presets = presetList.map { preset ->
             val items = preset.items.mapNotNull { current?.item(it) }
             val statuses = items.map(::status)
             val todo = items.filterIndexed { i, _ -> wanted(statuses[i]) }
             PresetRow(
-                // On a set's own screen a level's set is just "Level 2" (its catalog title repeats the set's name).
-                preset.id, preset.title(phoneLanguage()).let { if (setScope) it.substringAfter(": ", it) else it },
+                // On a set's own screen a level's set is just "Level 2", and under its collection a volume is just "Drama"
+                // (their catalog titles repeat the set's or collection's name).
+                preset.id, preset.title(phoneLanguage()).let { if (setScope || preset.setOf.isNotEmpty()) it.substringAfter(": ", it) else it },
                 items.size, todo.size, todo.sumOf { it.downloadBytes },
                 packs = items.count { it is PackEntry }, books = items.count { it is BookEntry },
                 others = items.count { it !is PackEntry && it !is BookEntry }, totalBytes = items.sumOf { it.downloadBytes },
                 onPhone = statuses.count { it == ItemStatus.Installed },
                 downloading = statuses.count { it is ItemStatus.Queued || it is ItemStatus.Downloading },
                 updates = statuses.count { it == ItemStatus.UpdateAvailable },
+                setOf = preset.setOf,
             )
         }
         return SourceUi(
@@ -1123,6 +1127,19 @@ class SourceViewModel(
         private const val MULTILINGUAL = "mul"
         private val PICTURES = listOf("maxi", "nopic", "mini")
         private const val GUTENBERG_SUFFIX = " · Project Gutenberg"
+        /**
+         * Classics volumes (spec 2026-11-21): [presets] with each collection's volumes ([Preset.setOf]) right after it in
+         * catalog order, or ([withVolumes] false, Get more → Books) without them. A volume whose collection isn't in
+         * [presets] stays where it is.
+         */
+        fun nestVolumes(presets: List<app.granger.core.catalog.Preset>, withVolumes: Boolean): List<app.granger.core.catalog.Preset> {
+            val ids = presets.mapTo(HashSet()) { it.id }
+            val (volumes, tops) = presets.partition { it.setOf.isNotEmpty() && it.setOf in ids }
+            if (!withVolumes) return tops
+            val bySet = volumes.groupBy { it.setOf }
+            return tops.flatMap { listOf(it) + bySet[it.id].orEmpty() }
+        }
+
         /** Granger's collection presets, one per knowledge language (Plan L3). */
         private val GRANGER_PRESETS = app.granger.core.library.FilingKeys.GRANGER_COLLECTIONS.values.toSet()
 

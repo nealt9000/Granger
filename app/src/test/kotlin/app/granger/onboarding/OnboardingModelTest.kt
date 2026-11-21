@@ -66,6 +66,24 @@ class OnboardingModelTest {
         assertThat(OnboardingModel.startChoices(withStarter, emptySet(), language = "es").map { it.id }).doesNotContain("starter")
     }
 
+    /**
+     * Classics volumes (spec 2026-11-21): the catalog expands "@granger-classics/scripture" into its book ids, and a line
+     * holding only some of the collection is named by its one or two volumes; the whole collection keeps its own name.
+     */
+    @Test fun aLineOfSomeVolumesIsNamedByThem() {
+        val plato = bookEntry("gc-republic", category = "Philosophy").copy(sizeBytes = 5, collection = "granger-classics")
+        val threeBooks = catalog.copy(books = listOf(bible, plato, hamlet))
+        fun title(vararg ids: String) = OnboardingModel.lines(ids.map { threeBooks.item(it)!! }, emptySet(), mapOf("granger-classics" to 3)).single().title.en()
+        assertThat(title("gc-bible")).isEqualTo("Granger Classics: Scripture & religion")
+        assertThat(title("gc-bible", "gc-republic")).isEqualTo("Granger Classics: Scripture & religion and Philosophy")
+        assertThat(title("gc-bible", "gc-republic", "gc-hamlet")).isEqualTo("Granger Classics")
+        // Without the collection's size (an older caller) the line keeps the collection's name.
+        assertThat(OnboardingModel.lines(listOf(bible), emptySet()).single().title.en()).isEqualTo("Granger Classics")
+        val faith = threeBooks.copy(onboarding = threeBooks.onboarding!!.copy(useCases = listOf(UseCase("faith", "Faith & philosophy", "", listOf("gc-bible", "gc-republic")))))
+        assertThat(OnboardingModel.additions(faith, emptySet(), emptySet()).single().lines.single().title.en())
+            .isEqualTo("Granger Classics: Scripture & religion and Philosophy")
+    }
+
     @Test fun startChoicesFoldBooksIntoOneLineAndSkipInstalledOnes() {
         val choices = OnboardingModel.startChoices(catalog, installed = setOf("medlineplus.gov_en_all"))
         assertThat(choices.map { it.id }).containsExactly("efficient", "comprehensive").inOrder()

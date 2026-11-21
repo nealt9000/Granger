@@ -127,6 +127,7 @@ object ScreenTextIds {
         "onboarding_blurb_comprehensive" -> R.string.onboarding_blurb_comprehensive
         "onboarding_blurb_efficient" -> R.string.onboarding_blurb_efficient
         "onboarding_blurb_starter" -> R.string.onboarding_blurb_starter
+        "onboarding_collection_volumes" -> R.string.onboarding_collection_volumes
         "onboarding_granger_classics" -> R.string.onboarding_granger_classics
         "onboarding_held" -> R.string.onboarding_held
         "onboarding_held_slice" -> R.string.onboarding_held_slice
@@ -176,13 +177,18 @@ object ScreenTextIds {
         "sources_catalog_offline" -> R.string.sources_catalog_offline
         "sources_catalog_unloaded" -> R.string.sources_catalog_unloaded
         "sources_catalog_unsupported" -> R.string.sources_catalog_unsupported
+        "sources_category_children" -> R.string.sources_category_children
         "sources_category_drama" -> R.string.sources_category_drama
         "sources_category_games" -> R.string.sources_category_games
         "sources_category_howto" -> R.string.sources_category_howto
         "sources_category_literature" -> R.string.sources_category_literature
         "sources_category_maps" -> R.string.sources_category_maps
         "sources_category_medical" -> R.string.sources_category_medical
+        "sources_category_mystery" -> R.string.sources_category_mystery
         "sources_category_novels" -> R.string.sources_category_novels
+        "sources_category_novels_america" -> R.string.sources_category_novels_america
+        "sources_category_novels_britain" -> R.string.sources_category_novels_britain
+        "sources_category_novels_world" -> R.string.sources_category_novels_world
         "sources_category_opera" -> R.string.sources_category_opera
         "sources_category_other" -> R.string.sources_category_other
         "sources_category_philosophy" -> R.string.sources_category_philosophy

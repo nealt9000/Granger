@@ -959,7 +959,8 @@
         "title": "Faith & philosophy",
         "blurb": "Scripture, philosophy and history, and the questions people ask about them.",
         "items": [
-          "@granger-classics",
+          "@granger-classics/scripture",
+          "@granger-classics/philosophy",
           "wikipedia_en_history_maxi",
           "philosophy.stackexchange.com_en_all",
           "christianity.stackexchange.com_en_all",
@@ -977,7 +978,8 @@
         "languages": {
           "es": {
             "items": [
-              "@clasicos-granger",
+              "@clasicos-granger/ensayo",
+              "@clasicos-granger/historia",
               "wikipedia_es_history_maxi"
             ]
           }

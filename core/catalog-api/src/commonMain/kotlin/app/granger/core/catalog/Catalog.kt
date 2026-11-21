@@ -471,6 +471,11 @@ data class Preset(
     /** The knowledge language of a tier or collection preset (Plan L3); English in older catalogs. */
     val language: String = ENGLISH,
     val i18n: Map<String, Copy> = emptyMap(),
+    /**
+     * The collection preset this one is a volume of (classics volumes spec, 2026-11-21): `granger-classics` for
+     * `granger-classics-drama`. Blank for any other preset, and in older catalogs.
+     */
+    val setOf: String = "",
 ) {
     /** The title in app language [appLang], else English. */
     fun title(appLang: String): String = localised(i18n, appLang, title)

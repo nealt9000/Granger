@@ -1884,3 +1884,77 @@ def test_shelves_command_stamps_subjects_on_packs_books_and_sets(tmp_path):
     assert catalog["books"][0]["subjects"] == ["literature"]
     assert catalog["bookSets"][0]["subjects"] == ["literature", "languages"]
     assert catalog["bookSets"][0]["books"][0]["subjects"] == ["literature", "languages"]
+
+
+# Classics volumes (spec 2026-11-21)
+VOLUMED = {**BOOKS, "title": "Granger Classics",
+           "volumes": [{"id": "drama", "title": "Drama", "i18n": {"es": {"title": "Teatro"}}},
+                       {"id": "children", "title": "Children's classics"}],
+           "books": [{**BOOKS["books"][0], "volume": "Drama", "volumeId": "drama"},
+                     {**BOOKS["books"][1], "id": "gc-alice", "section": "Novels & stories",
+                      "volume": "Children's classics", "volumeId": "children"}]}
+
+
+def volumed_build(tmp_path, monkeypatch, descriptor=VOLUMED, **curated):
+    (tmp_path / "books.json").write_text(json.dumps(descriptor))
+    monkeypatch.setattr(cg, "REPO_ROOT", tmp_path)
+    sizes = {b["urls"][0]: b["sizeBytes"] for b in descriptor["books"]}
+    return cg.build({"packs": [], "models": [], "books": [BOOK_ROW], "presets": [], **curated}, fake_fetch(ROUTES),
+                    head=lambda url: sizes[url])
+
+
+def test_a_volumed_book_is_filed_under_its_volume_but_keeps_its_sections_domain_and_subjects(tmp_path, monkeypatch):
+    catalog = volumed_build(tmp_path, monkeypatch)
+    alice = next(b for b in catalog["books"] if b["id"] == "gc-alice")
+    assert alice["category"] == "Children's classics"
+    assert alice["domain"] == "literature" and alice["subjects"] == ["literature"]
+    assert "volume" not in alice and "volumeId" not in alice
+
+
+def test_each_volume_gets_a_preset_after_the_collections(tmp_path, monkeypatch):
+    catalog = volumed_build(tmp_path, monkeypatch)
+    ids = [p["id"] for p in catalog["presets"]]
+    assert ids == ["granger-classics", "granger-classics-drama", "granger-classics-children"]
+    drama, children = catalog["presets"][1:]
+    assert drama == {"id": "granger-classics-drama", "title": "Granger Classics: Drama", "items": ["gc-hamlet"],
+                     "setOf": "granger-classics", "i18n": {"es": {"title": "Granger Classics: Teatro"}}}
+    assert children["items"] == ["gc-alice"] and "i18n" not in children
+
+
+def test_a_book_outside_the_volumes_or_an_empty_volume_fails(tmp_path, monkeypatch):
+    stray = {**VOLUMED, "books": [VOLUMED["books"][0], {**VOLUMED["books"][1], "volumeId": "nowhere"}]}
+    with pytest.raises(SystemExit, match="gc-alice is in no listed volume"):
+        volumed_build(tmp_path, monkeypatch, stray)
+    empty = {**VOLUMED, "volumes": VOLUMED["volumes"] + [{"id": "poetry", "title": "Epic & poetry"}]}
+    with pytest.raises(SystemExit, match="volume 'poetry' holds no books"):
+        volumed_build(tmp_path, monkeypatch, empty)
+
+
+def test_a_volume_token_expands_in_presets_and_use_cases_but_not_readiness(tmp_path, monkeypatch):
+    catalog = volumed_build(tmp_path, monkeypatch,
+                            presets=[{"id": "starter", "title": "Starter", "items": ["@granger-classics/children"]}],
+                            onboarding={"useCases": [{"id": "kids", "title": "Kids", "items": ["@granger-classics/children"],
+                                                      "languages": {"es": {"items": ["@granger-classics/drama"]}}}]})
+    assert next(p for p in catalog["presets"] if p["id"] == "starter")["items"] == ["gc-alice"]
+    kids = catalog["onboarding"]["useCases"][0]
+    assert kids["items"] == ["gc-alice"] and kids["languages"]["es"]["items"] == ["gc-hamlet"]
+    with pytest.raises(SystemExit, match="unknown volume @granger-classics/poetry"):
+        volumed_build(tmp_path, monkeypatch, onboarding={"useCases": [{"id": "k", "title": "K", "items": ["@granger-classics/poetry"]}]})
+    with pytest.raises(SystemExit, match="goes in a preset or a use case"):
+        cg.check_token("readiness thought", "@granger-classics/drama", set(), set(), set(), {"granger-classics"})
+
+
+def test_the_real_classics_descriptors_partition_into_their_volumes():
+    for name, count in (("granger_classics_books.json", 10), ("clasicos_granger_es_books.json", 8)):
+        d = json.loads((cg.REPO_ROOT / "tools/pack-builder/releases" / name).read_text())
+        entries = [{"id": b["id"]} for b in d["books"]]
+        presets, tokens = cg.volume_presets(d["collection"], {}, d, entries)
+        assert len(presets) == count
+        assert sorted(i for p in presets for i in p["items"]) == sorted(e["id"] for e in entries)
+
+
+def test_faith_and_philosophy_takes_the_scripture_and_philosophy_volumes():
+    curated = json.loads((cg.REPO_ROOT / "tools/catalog-gen/curated.json").read_text())
+    faith = next(u for u in curated["onboarding"]["useCases"] if u["id"] == "faith")
+    assert faith["items"][:2] == ["@granger-classics/scripture", "@granger-classics/philosophy"]
+    assert faith["languages"]["es"]["items"][:2] == ["@clasicos-granger/ensayo", "@clasicos-granger/historia"]

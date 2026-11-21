@@ -137,7 +137,7 @@ object OnboardingModel {
         return (listOfNotNull(starter) + catalog.tierPresets(language)).mapNotNull { preset ->
             val id = (listOf(STARTER) + Catalog.TIER_PRESETS).firstOrNull { preset.id == it || preset.id.startsWith("$it-") } ?: return@mapNotNull null
             val items = preset.items.mapNotNull { catalog.item(it) }.filter { it !is ModelEntry }.map { if (saveSpace) withoutPictures(catalog, it) else it }.distinctBy { it.id }
-            StartChoice(id, preset.title(appLanguage), blurbs.getValue(id), lines(items, installed))
+            StartChoice(id, preset.title(appLanguage), blurbs.getValue(id), lines(items, installed, collectionSizes(catalog)))
         }
     }
 
@@ -273,7 +273,7 @@ object OnboardingModel {
             val tokens = languages.flatMap { useCase.items(it) }.distinct()
             if (tokens.isEmpty() && useCase.items.isNotEmpty()) return@mapNotNull null
             val items = tokens.flatMap { resolve(catalog, it) }.distinctBy { it.id }.filter { it.id !in chosen }
-            Addition(useCase, lines(items, installed).filterNot { it.installed }, useCase.title(appLanguage), useCase.blurb(appLanguage))
+            Addition(useCase, lines(items, installed, collectionSizes(catalog)).filterNot { it.installed }, useCase.title(appLanguage), useCase.blurb(appLanguage))
         }
 
     /**
@@ -412,9 +412,11 @@ object OnboardingModel {
     /**
      * Packs one per line in catalog order; a collection's books as one line, placed where its first book was. Of two
      * flavours of one ZIM (WikiMed with and without pictures) only the larger is listed: the other would be a duplicate
-     * of what the phone gets or already holds (Neal, 2026-10-22).
+     * of what the phone gets or already holds (Neal, 2026-10-22). A collection line holding only some of its books
+     * ([collectionSizes] gives each collection's whole count) from one or two volumes is named by them: "Granger
+     * Classics: Scripture & religion and Philosophy" (classics volumes spec).
      */
-    fun lines(items: List<CatalogItem>, installed: Set<String>): List<Line> {
+    fun lines(items: List<CatalogItem>, installed: Set<String>, collectionSizes: Map<String, Int> = emptyMap()): List<Line> {
         val out = ArrayList<Line>()
         val bookLines = LinkedHashMap<String, MutableList<BookEntry>>()
         val largestFlavour = items.filterIsInstance<PackEntry>().filter { it.zimName.isNotBlank() }
@@ -430,9 +432,23 @@ object OnboardingModel {
         return out.map { line ->
             if (line !== PLACEHOLDER) line else {
                 val (collection, books) = next.next()
-                Line("collection:$collection", collectionTitle(collection), books, installed = books.all { it.id in installed })
+                Line("collection:$collection", lineTitle(collection, books, collectionSizes[collection]), books, installed = books.all { it.id in installed })
             }
         }
+    }
+
+    /** Each collection's book count in [catalog]. */
+    private fun collectionSizes(catalog: Catalog): Map<String, Int> = catalog.books.groupingBy { it.collection }.eachCount()
+
+    private fun lineTitle(collection: String, books: List<BookEntry>, whole: Int?): UiText {
+        val volumes = books.map { it.category }.distinct()
+        val named = when {
+            whole == null || books.size >= whole -> null
+            volumes.size == 1 -> KiwixList.category(volumes[0])
+            volumes.size == 2 -> UiText.Res("sources_two_kinds", KiwixList.category(volumes[0]), KiwixList.category(volumes[1]))
+            else -> null
+        }
+        return named?.let { UiText.Res("onboarding_collection_volumes", collectionTitle(collection), it) } ?: collectionTitle(collection)
     }
 
     private fun collectionTitle(collection: String): UiText = when (collection) {
