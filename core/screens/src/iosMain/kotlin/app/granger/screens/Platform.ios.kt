@@ -80,3 +80,7 @@ actual fun mediumDate(year: Int, month: Int, day: Int): String = platform.Founda
     dateStyle = platform.Foundation.NSDateFormatterMediumStyle
     timeStyle = platform.Foundation.NSDateFormatterNoStyle
 }.stringFromDate(dateOf(year, month, day) ?: NSDate())
+
+actual fun monthName(month: Int): String = platform.Foundation.NSDateFormatter().apply {
+    setLocalizedDateFormatFromTemplate("MMMM")
+}.monthSymbols.getOrNull(month - 1) as? String ?: ""

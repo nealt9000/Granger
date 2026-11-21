@@ -1,9 +1,6 @@
 package app.granger.home
 
-import app.granger.invoke
-import app.granger.R
 import app.granger.UiText
-import app.granger.library.shownName
 import app.granger.core.catalog.Catalog
 import app.granger.core.library.AlbumSummary
 import app.granger.core.library.Audiobook
@@ -11,6 +8,7 @@ import app.granger.core.library.Book
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
 import app.granger.core.library.Shelf
+import app.granger.core.library.ShelfCollection
 
 /**
  * What a feed draws from (Plan H2, Decision 3), parsed from `HomeFeed.scope`: `library`, `pack:<zimName>`,
@@ -44,7 +42,10 @@ sealed interface FeedScope {
     }
 }
 
-/** What's on the phone, for resolving scopes. */
+/**
+ * What's on the phone, for resolving scopes. [collectionName] is what a collection is called on screen: Android passes
+ * its `shownName()` (the app's own words for an app-made collection); without it, the stored name.
+ */
 class LibrarySnapshot(
     val packs: List<Pack>,
     val books: List<Book>,
@@ -52,6 +53,7 @@ class LibrarySnapshot(
     val albums: List<AlbumSummary>,
     val audiobooks: List<Audiobook>,
     val catalog: Catalog?,
+    val collectionName: (ShelfCollection) -> UiText = { UiText.Raw(it.name) },
 )
 
 /** A scope resolved against the phone: the whole items a feed can draw from, and what to call it. */
@@ -66,7 +68,7 @@ data class Resolved(
 }
 
 /** The whole library's name inside a feed's title: "cats · the library". */
-val LIBRARY_NAME: UiText = UiText.Res(R.string.home_scope_the_library)
+val LIBRARY_NAME: UiText = UiText.Res("home_scope_the_library")
 
 /** The scope's items on this phone, or null when it names nothing (the feed is hidden). Only whole items count. */
 fun FeedScope.resolve(snapshot: LibrarySnapshot): Resolved? {
@@ -79,15 +81,15 @@ fun FeedScope.resolve(snapshot: LibrarySnapshot): Resolved? {
         is FeedScope.Collection -> snapshot.shelves.asSequence().flatMap { it.allCollections }.firstOrNull { it.collection.id == id }
             ?.let { row ->
                 Resolved(
-                    row.collection.shownName(),
+                    snapshot.collectionName(row.collection),
                     packs = row.packs.filter { it.status == PackStatus.OK },
                     books = row.books.filter { it.status == PackStatus.OK },
                     albums = row.albums.filter { it.status == PackStatus.OK },
                     audiobooks = row.audiobooks.filter { it.status == PackStatus.OK },
                 )
             }
-        FeedScope.Music -> Resolved(UiText.Res(R.string.home_scope_music), albums = snapshot.albums.filter { it.status == PackStatus.OK })
-        FeedScope.Audiobooks -> Resolved(UiText.Res(R.string.home_scope_audiobooks), audiobooks = snapshot.audiobooks.filter { it.status == PackStatus.OK })
+        FeedScope.Music -> Resolved(UiText.Res("home_scope_music"), albums = snapshot.albums.filter { it.status == PackStatus.OK })
+        FeedScope.Audiobooks -> Resolved(UiText.Res("home_scope_audiobooks"), audiobooks = snapshot.audiobooks.filter { it.status == PackStatus.OK })
     }
     return resolved?.takeUnless { it.isEmpty }
 }

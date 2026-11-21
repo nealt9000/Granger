@@ -1,9 +1,6 @@
 package app.granger.home
 
-import app.granger.invoke
 import androidx.lifecycle.ViewModel
-import app.granger.R
-import app.granger.UiText
 import app.granger.library.shownName
 import androidx.lifecycle.viewModelScope
 import app.granger.core.catalog.CatalogSource
@@ -16,8 +13,6 @@ import app.granger.core.library.onShelf
 import app.granger.core.library.Albums
 import app.granger.core.library.Bookshelf
 import app.granger.core.library.FeedKind
-import app.granger.core.library.HomeDraw
-import app.granger.core.library.HomeFeed
 import app.granger.core.library.HomeFeeds
 import app.granger.core.library.IndexPages
 import app.granger.core.library.Library
@@ -28,6 +23,7 @@ import app.granger.readiness.ReadinessModel
 import app.granger.readiness.ReadinessReport
 import app.granger.shell.RailEntry
 import app.granger.shell.RailUi
+import app.granger.screens.CivilDate
 import java.time.LocalDate
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -42,15 +38,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-
-/** A feed's row: [title] once drawn ([FeedDrawer.title]); [drawn] is null while its cards are being drawn. */
-data class FeedUi(val feed: HomeFeed, val scopeName: UiText, val title: UiText, val drawn: Drawn?)
-
-/** A scope the Add feed dialog offers. */
-data class ScopeChoice(val scope: FeedScope, val label: UiText)
 
 /** Home (spec §5): the readiness strip, where you left off, then the feeds. */
 data class HomeUi(
@@ -102,8 +90,8 @@ interface HomePrefs {
 
 /**
  * Home's data: the readiness report over the same four flows the Readiness screen uses, Continue from the rail's list
- * (no second query, no second cover loader), and the feeds, each drawn once a day and cached in `home_draws`
- * (Decision 5). Drawing runs on [io]; cached rows show at once and missing ones fill in as they are drawn.
+ * (no second query, no second cover loader), and the feeds ([HomeFeedsModel], shared with the iPhone since Plan I4b
+ * Task 8), each drawn once a day and cached in `home_draws` (Decision 5).
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel(
@@ -112,8 +100,8 @@ class HomeViewModel(
     bookshelf: Bookshelf,
     private val downloads: Downloads,
     rail: StateFlow<RailUi>,
-    private val homeFeeds: HomeFeeds,
-    private val drawer: FeedDrawer,
+    homeFeeds: HomeFeeds,
+    drawer: FeedDrawer,
     shelves: Shelves,
     media: MediaLibrary,
     private val prefs: HomePrefs,
@@ -181,28 +169,14 @@ class HomeViewModel(
     private val snapshot: Flow<LibrarySnapshot> =
         combine(library.packs, bookshelf.books, shelves.shelves, mediaItems, catalog.state) { packs, books, shelfList, (albums, audiobooks), c ->
             // Pack documents (Plan P2) belong to their packs: no feed draws them as books.
-            LibrarySnapshot(packs, books.filter { it.onShelf }, shelfList, albums, audiobooks, c.catalog)
+            LibrarySnapshot(packs, books.filter { it.onShelf }, shelfList, albums, audiobooks, c.catalog) { it.shownName() }
         }
 
-    private class Planned(val feed: HomeFeed, val scope: Resolved)
+    /** The feeds (shared with the iPhone): drawn on [io], for the same day as the strip. */
+    private val feeds = HomeFeedsModel(viewModelScope, homeFeeds, drawer, snapshot, io) { today().toCivilDate() }
 
     /** Every feed that resolves, with its cards: cached ones first, then the rest as they are drawn. */
-    private val feedRows: Flow<List<FeedUi>> = combine(homeFeeds.feeds, snapshot, day) { feeds, snap, d ->
-        Triple(feeds.mapNotNull { feed -> FeedScope.parse(feed.scope)?.resolve(snap)?.let { Planned(feed, it) } }, snap, d)
-    }.transformLatest { (planned, snap, d) ->
-        val rows = planned.map { cached(it, snap, d).let { drawn -> FeedUi(it.feed, it.scope.name, FeedDrawer.title(it.feed, it.scope, d, drawn?.mentions == true), drawn) } }.toMutableList()
-        emit(rows.toList())
-        for ((i, plan) in planned.withIndex()) {
-            if (rows[i].drawn != null) continue
-            val drawn = withContext(io) { runCatching { drawer.draw(plan.feed, plan.scope, d) }.getOrNull() }
-            if (drawn != null) homeFeeds.saveDraw(HomeDraw(plan.feed.id, d.toString(), Cards.encode(drawn)))
-            rows[i] = rows[i].copy(
-                title = FeedDrawer.title(plan.feed, plan.scope, d, drawn?.mentions == true),
-                drawn = drawn ?: Drawn(emptyList()),
-            )
-            emit(rows.toList())
-        }
-    }
+    private val feedRows: Flow<List<FeedUi>> = feeds.rows
 
     private val dismissed = MutableStateFlow(prefs.dismissedFailures)
 
@@ -243,7 +217,7 @@ class HomeViewModel(
 
     val ui: StateFlow<HomeUi> = combine(strip, continuing, feedRows, snapshot, combine(downloadsCard, tidyOffers, layout, ::Triple)) { report, cards, rows, snap, (card, tidy, order) ->
         HomeUi(
-            strip = report, continueCards = cards, feeds = rows.filter { it.drawn?.cards?.isEmpty() != true },
+            strip = report, continueCards = cards, feeds = HomeFeedsModel.shown(rows),
             scopeChoices = scopeChoices(snap), downloads = card, tidy = tidy, layout = order,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUi())
@@ -254,20 +228,6 @@ class HomeViewModel(
         viewModelScope.launch { seedDefaults() }
     }
 
-    /** The day's cached cards, pruned of targets that are gone; null when there is no usable draw for today. */
-    private suspend fun cached(plan: Planned, snap: LibrarySnapshot, d: LocalDate): Drawn? {
-        val draw = homeFeeds.draw(plan.feed.id) ?: return null
-        if (draw.day != d.toString()) return null
-        val drawn = Cards.decode(draw.cardsJson) ?: return null
-        val kept = drawn.cards.filter { it.target.exists(snap) }
-        if (kept.isEmpty()) {
-            homeFeeds.clearDraw(plan.feed.id)
-            return null
-        }
-        return drawn.copy(cards = kept)
-    }
-
-    /** A new look at Home (resume): the date may have turned. */
     fun pauseDownloads() {
         viewModelScope.launch { downloads.pause() }
     }
@@ -297,21 +257,19 @@ class HomeViewModel(
         dismissed.value = card.keys
     }
 
+    /** A new look at Home (resume): the date may have turned. */
     fun refresh() {
         day.value = today()
+        feeds.refresh()
     }
 
-    fun addFeed(scope: FeedScope, kind: FeedKind, query: String = "") {
-        viewModelScope.launch { homeFeeds.add(scope.text, kind, query) }
-    }
+    fun addFeed(scope: FeedScope, kind: FeedKind, query: String = "") = feeds.add(scope, kind, query)
 
-    fun removeFeed(id: Long) {
-        viewModelScope.launch { homeFeeds.remove(id) }
-    }
+    fun removeFeed(id: Long) = feeds.remove(id)
 
     /** Moves a feed one place up or down among everything Home shows (Plan HY: feeds and sections share one order). */
     fun moveFeed(id: Long, up: Boolean) {
-        arrange(layout.value.move("feed:$id", up, ui.value.feeds.map { it.feed.id }))
+        arrange(HomeFeedsModel.moved(layout.value, id, up, ui.value.feeds))
     }
 
     /** Saves Home's order and hidden sections from Arrange. */
@@ -320,34 +278,20 @@ class HomeViewModel(
         layout.value = arranged
     }
 
-    /** The first-run feeds (Decision 4), once; a Quotes feed sits dormant until a Wikiquote pack is installed. */
-    private suspend fun seedDefaults() {
-        if (prefs.seeded) return
-        if (homeFeeds.feeds().isEmpty()) {
-            // The library's languages, then the app's: a Spanish phone seeded before the catalog loads still gets Clásicos.
-            val langs = (knowledgeFlow.first() + appLanguageFlow.first()).distinct()
-            for ((scope, kind) in defaults(langs)) homeFeeds.add(scope.text, kind)
-        }
-        prefs.seeded = true
-    }
+    /**
+     * The first-run feeds (Decision 4), once. The library's languages, then the app's: a Spanish phone seeded before the
+     * catalog loads still gets Clásicos.
+     */
+    private suspend fun seedDefaults() =
+        feeds.seedDefaults({ prefs.seeded }, { prefs.seeded = true }) { knowledgeFlow.first() + appLanguageFlow.first() }
 
     companion object {
         const val CONTINUE = 8
 
-        val DEFAULTS: List<Pair<FeedScope, FeedKind>> get() = defaults(listOf(app.granger.core.catalog.ENGLISH))
+        val DEFAULTS: List<Pair<FeedScope, FeedKind>> get() = HomeFeedsModel.DEFAULTS
 
-        /**
-         * The first-run feeds for the library's [languages], main first (Plan L3): a Random feed for each language's
-         * Granger collection (Granger Classics, Clásicos Granger), in that order. A collection not on the phone stays
-         * dormant, like Quotes.
-         */
-        fun defaults(languages: List<String>): List<Pair<FeedScope, FeedKind>> = buildList {
-            add(FeedScope.Family("wikipedia") to FeedKind.ON_THIS_DAY)
-            add(FeedScope.Family("wikipedia") to FeedKind.RANDOM)
-            languages.mapNotNull { app.granger.core.library.Filing.GRANGER_COLLECTIONS[it] }.distinct()
-                .forEach { add(FeedScope.Collection("c:$it") to FeedKind.RANDOM) }
-            add(FeedScope.Family("wikiquote") to FeedKind.RANDOM)
-        }
+        /** The first-run feeds for the library's [languages], main first (Plan L3); see [HomeFeedsModel.defaults]. */
+        fun defaults(languages: List<String>): List<Pair<FeedScope, FeedKind>> = HomeFeedsModel.defaults(languages)
 
         /**
          * The round while anything waits or runs, for every download, not just setup. With nothing to come, the stopped
@@ -387,28 +331,13 @@ class HomeViewModel(
                 }
             }.take(CONTINUE)
 
-        /** What the Add feed dialog offers: the library, each whole pack, each collection, music and audiobooks when there are any. */
-        fun scopeChoices(snap: LibrarySnapshot): List<ScopeChoice> {
-            val choices = mutableListOf(ScopeChoice(FeedScope.Library, UiText.Res(R.string.home_scope_whole_library)))
-            snap.packs.filter { it.status == PackStatus.OK && it.name.isNotBlank() }.sortedBy { it.title.lowercase() }
-                .mapTo(choices) { ScopeChoice(FeedScope.Pack(it.name), UiText.Raw(it.title)) }
-            snap.shelves.flatMap { it.allCollections }.filterNot { it.isFolder || it.isEmpty }
-                .mapTo(choices) { ScopeChoice(FeedScope.Collection(it.collection.id), it.collection.shownName()) }
-            if (snap.albums.any { it.status == PackStatus.OK }) choices += ScopeChoice(FeedScope.Music, UiText.Res(R.string.home_scope_music))
-            if (snap.audiobooks.any { it.status == PackStatus.OK }) choices += ScopeChoice(FeedScope.Audiobooks, UiText.Res(R.string.home_scope_audiobooks))
-            return choices
-        }
+        /** What the Add feed dialog offers; see [HomeFeedsModel.scopeChoices]. */
+        fun scopeChoices(snap: LibrarySnapshot): List<ScopeChoice> = HomeFeedsModel.scopeChoices(snap)
     }
 }
 
-/** Whether what the card opens is still on the phone and whole. */
-fun CardTarget.exists(snap: LibrarySnapshot): Boolean = when (this) {
-    is CardTarget.Article -> snap.packs.any { it.id == packId && it.status == PackStatus.OK }
-    is CardTarget.Book -> snap.books.any { it.id == bookId && it.status == PackStatus.OK }
-    is CardTarget.Album -> snap.albums.any { it.key == albumKey && it.status == PackStatus.OK }
-    is CardTarget.Audiobook -> snap.audiobooks.any { it.id == audiobookId && it.status == PackStatus.OK }
-    is CardTarget.Search -> true
-}
+/** A java.time date as the shared models take it. */
+fun LocalDate.toCivilDate(): CivilDate = CivilDate(year, monthValue, dayOfMonth)
 
 class SharedHomePrefs(private val prefs: android.content.SharedPreferences) : HomePrefs {
     constructor(context: android.content.Context) : this(context.getSharedPreferences("home", android.content.Context.MODE_PRIVATE))

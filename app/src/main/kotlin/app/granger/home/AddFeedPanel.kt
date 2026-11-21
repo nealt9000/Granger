@@ -31,13 +31,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import app.granger.core.library.FeedKind
 
-/** What a feed kind is called on Home. */
+/** What a feed kind is called on Home (the shared [labelKey] as an Android resource). */
 val FeedKind.label: Int
-    @StringRes get() = when (this) {
-        FeedKind.RANDOM -> R.string.home_kind_random
-        FeedKind.ON_THIS_DAY -> R.string.home_kind_on_this_day
-        FeedKind.SEARCH -> R.string.home_kind_search
-    }
+    @StringRes get() = app.granger.ScreenTextIds.string(labelKey)
 
 /** Adding a feed is a scope, a kind and (for Search) a query: no per-widget code (spec §5). Sits at the top of Home. */
 @Composable

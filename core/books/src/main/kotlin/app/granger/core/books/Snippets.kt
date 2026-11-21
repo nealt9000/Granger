@@ -1,8 +1,5 @@
 package app.granger.core.books
 
-/** A passage to find on the page: [highlight] as it appears in the text, with a little of what comes before and after. */
-data class TextQuote(val before: String, val highlight: String, val after: String)
-
 object Snippets {
     /**
      * Where [query] occurs in [text], for the reader to find on the page: the whole query as a phrase (any spacing,

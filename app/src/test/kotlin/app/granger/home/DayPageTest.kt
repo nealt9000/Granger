@@ -1,7 +1,7 @@
 package app.granger.home
 
 import com.google.common.truth.Truth.assertThat
-import java.time.LocalDate
+import app.granger.screens.CivilDate
 import org.junit.Test
 
 class DayPageTest {
@@ -57,22 +57,22 @@ class DayPageTest {
     }
 
     @Test fun theTitleAndPathsFollowWikipedia() {
-        val day = LocalDate.of(2026, 10, 22)
+        val day = CivilDate(2026, 10, 22)
         assertThat(DayPage.title(day)).isEqualTo("October 22")
         assertThat(DayPage.paths(day)).containsExactly("October_22", "A/October_22", "October 22").inOrder()
-        assertThat(DayPage.title(LocalDate.of(2026, 3, 1))).isEqualTo("March 1")
+        assertThat(DayPage.title(CivilDate(2026, 3, 1))).isEqualTo("March 1")
     }
 
     // Plan L3: Spanish Wikipedia's day articles.
     private val spanish = javaClass.classLoader!!.getResourceAsStream("home/22_de_octubre.html")!!.readBytes().decodeToString()
 
     @Test fun theSpanishTitleIsDayDeMonth() {
-        assertThat(DayPage.title(LocalDate.of(2026, 10, 22), "es")).isEqualTo("22 de octubre")
-        assertThat(DayPage.title(LocalDate.of(2026, 1, 1), "es")).isEqualTo("1 de enero")
-        assertThat(DayPage.title(LocalDate.of(2026, 9, 5), "es")).isEqualTo("5 de septiembre")
-        assertThat(DayPage.paths(LocalDate.of(2026, 10, 22), "es")).containsExactly("22_de_octubre", "A/22_de_octubre", "22 de octubre").inOrder()
+        assertThat(DayPage.title(CivilDate(2026, 10, 22), "es")).isEqualTo("22 de octubre")
+        assertThat(DayPage.title(CivilDate(2026, 1, 1), "es")).isEqualTo("1 de enero")
+        assertThat(DayPage.title(CivilDate(2026, 9, 5), "es")).isEqualTo("5 de septiembre")
+        assertThat(DayPage.paths(CivilDate(2026, 10, 22), "es")).containsExactly("22_de_octubre", "A/22_de_octubre", "22 de octubre").inOrder()
         // English is unchanged, and a language without day articles here reads as English.
-        assertThat(DayPage.title(LocalDate.of(2026, 10, 22), "en")).isEqualTo("October 22")
+        assertThat(DayPage.title(CivilDate(2026, 10, 22), "en")).isEqualTo("October 22")
         assertThat(DayPage.sections("fr")).containsExactly("Events", "Births", "Deaths").inOrder()
     }
 

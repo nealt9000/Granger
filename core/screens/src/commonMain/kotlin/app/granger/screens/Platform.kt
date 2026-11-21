@@ -42,3 +42,6 @@ expect fun monthYear(year: Int, month: Int): String
 
 /** A date in the phone's medium style ("5 Mar 2026", "Mar 5, 2026"). */
 expect fun mediumDate(year: Int, month: Int, day: Int): String
+
+/** [month]'s full name in the phone's language ("October", "octubre"), as a date says it (Home's day feed, Plan I4b). */
+expect fun monthName(month: Int): String

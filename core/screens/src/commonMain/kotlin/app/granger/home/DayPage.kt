@@ -1,11 +1,9 @@
 package app.granger.home
 
-import java.time.LocalDate
-import java.time.format.TextStyle
-import java.util.Locale
-import org.jsoup.Jsoup
+import app.granger.screens.CivilDate
+import com.fleeksoft.ksoup.Ksoup
 
-/** The day article's lists (Plan H2, Decision 7): what happened, who was born and who died on this day. */
+/** The day article's lists (Plan H2, Decision 7; shared since Plan I4b Task 8): what happened, who was born and who died on this day. */
 data class DayPage(val events: List<String>, val births: List<String>, val deaths: List<String>) {
     val isEmpty: Boolean get() = events.isEmpty() && births.isEmpty() && deaths.isEmpty()
 
@@ -18,7 +16,12 @@ data class DayPage(val events: List<String>, val births: List<String>, val death
             "es" to listOf("Acontecimientos", "Nacimientos", "Fallecimientos"),
         )
 
-        /** Spanish's month names, as its Wikipedia's day articles write them (lower case), whatever the JVM's data says. */
+        /** English's month names, as its Wikipedia's day articles are titled. */
+        private val ENGLISH_MONTHS = listOf(
+            "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
+        )
+
+        /** Spanish's month names, as its Wikipedia's day articles write them (lower case), whatever the phone's data says. */
         private val SPANISH_MONTHS = listOf(
             "enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
         )
@@ -31,16 +34,16 @@ data class DayPage(val events: List<String>, val births: List<String>, val death
 
         /**
          * The day article's title in [lang]'s Wikipedia (Plan L3): "October 22" in English; "22 de octubre" in Spanish,
-         * the month in lower case and no leading zero. Locale.ENGLISH and a fixed Spanish list on purpose: these match
+         * the month in lower case and no leading zero. Fixed English and Spanish lists on purpose: these match
          * page titles (data, not UI). The feed's shown title is FeedDrawer.title.
          */
-        fun title(day: LocalDate, lang: String = "en"): String = when (lang) {
-            "es" -> "${day.dayOfMonth} de ${SPANISH_MONTHS[day.monthValue - 1]}"
-            else -> "${day.month.getDisplayName(TextStyle.FULL, Locale.ENGLISH)} ${day.dayOfMonth}"
+        fun title(day: CivilDate, lang: String = "en"): String = when (lang) {
+            "es" -> "${day.day} de ${SPANISH_MONTHS[day.month - 1]}"
+            else -> "${ENGLISH_MONTHS[day.month - 1]} ${day.day}"
         }
 
         /** The paths to try, in order, for the day article in a Wikipedia pack in [lang]. */
-        fun paths(day: LocalDate, lang: String = "en"): List<String> {
+        fun paths(day: CivilDate, lang: String = "en"): List<String> {
             val underscored = title(day, lang).replace(' ', '_')
             return listOf(underscored, "A/$underscored", title(day, lang))
         }
@@ -69,7 +72,7 @@ data class DayPage(val events: List<String>, val births: List<String>, val death
          */
         fun parse(html: String, lang: String = "en"): DayPage {
             val names = sections(lang)
-            val doc = Jsoup.parse(html)
+            val doc = Ksoup.parse(html)
             doc.select("sup, .mw-editsection, .reference, style, script").remove()
             val lists = names.associateWith { mutableListOf<String>() }
             var current: String? = null

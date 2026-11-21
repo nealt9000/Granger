@@ -1,7 +1,5 @@
 package app.granger.home
 
-import app.granger.invoke
-import app.granger.R
 import app.granger.UiText
 import app.granger.core.library.Book
 import app.granger.core.library.BookChunk
@@ -10,39 +8,40 @@ import app.granger.core.library.chunkLabel
 import app.granger.core.library.FeedKind
 import app.granger.core.library.HomeFeed
 import app.granger.core.library.IndexPages
-import app.granger.core.library.LibrarySearch
+import app.granger.core.library.TitleSearch
 import app.granger.core.library.Pack
 import app.granger.core.library.PageTitles
 import app.granger.core.zim.ZimArchive
-import java.time.LocalDate
-import java.time.format.TextStyle
-import java.util.Locale
+import app.granger.screens.CivilDate
+import app.granger.screens.monthName
+import com.fleeksoft.ksoup.Ksoup
 import kotlin.random.Random
-import org.jsoup.Jsoup
 
 /**
  * Draws a feed's cards for a day (Plan H2, Decisions 5 and 7–9). The day and the feed id seed the choices, so a
  * redraw on the same day gives the same cards; a new day gives new ones. Reads archives and the book index only;
- * no network. Call on an I/O dispatcher.
+ * no network. Call on an I/O dispatcher. Shared since Plan I4b Task 8: each phone passes its own archives, book
+ * index and thumbnails.
  */
 class FeedDrawer(
     private val archiveOf: (Pack) -> ZimArchive?,
     /** A book's chunks (spine items) in order; empty until it is indexed. */
     private val chunksOf: suspend (bookId: String) -> List<BookChunk>,
-    /** Full-text hits inside books. */
+    /** Full-text hits inside books (none where books aren't searchable). */
     private val bookSearch: suspend (query: String) -> List<BookHit>,
-    private val librarySearch: LibrarySearch,
+    /** Full-text search across every pack (Android's `LibrarySearch`, the shared `PackSearch`). */
+    private val librarySearch: TitleSearch,
     /** The library's languages, main first (Plan L3): On this day reads the first one's encyclopedia. */
     private val languages: () -> List<String> = { listOf("en") },
     /** An article the adult-content filter keeps off volunteered screens: never a Random card. */
     private val hides: (packId: String, path: String) -> Boolean = { _, _ -> false },
     /** An article whose picture the adult-content filter leaves out of its card. */
     private val noPicture: (packId: String, path: String) -> Boolean = { _, _ -> false },
-    /** A cached thumbnail for an article (its lead image), or null; see [ArticleThumbnails]. Last, for a trailing lambda. */
+    /** A cached thumbnail for an article (its lead image), or null; Android's `ArticleThumbnails`. Last, for a trailing lambda. */
     private val thumbnail: (archive: ZimArchive, path: String, html: String) -> String? = { _, _, _ -> null },
 ) {
     /** The feed's row for the day, or null when it has nothing to show. */
-    suspend fun draw(feed: HomeFeed, scope: Resolved, day: LocalDate): Drawn? {
+    suspend fun draw(feed: HomeFeed, scope: Resolved, day: CivilDate): Drawn? {
         val random = Random(seed(day, feed.id))
         val drawn = when (feed.kind) {
             FeedKind.RANDOM -> Drawn(random(scope, random))
@@ -83,7 +82,7 @@ class FeedDrawer(
                 if (IndexPages.isIndex(path) || hides(pack.id, path)) return@repeat
                 val key = "${pack.id}/$path"
                 if (key in good || key in plain) return@repeat
-                val html = archive.read(path)?.let { String(it.bytes, Charsets.UTF_8) } ?: return@repeat
+                val html = archive.read(path)?.let { it.bytes.decodeToString() } ?: return@repeat
                 val card = articleCard(archive, pack, path, html)
                 if (isList(card.title)) return@repeat
                 if (card.imagePath != null && hasLead(html)) good[key] = card else plain[key] = card
@@ -107,7 +106,7 @@ class FeedDrawer(
         archive: ZimArchive,
         pack: Pack,
         path: String,
-        html: String? = archive.read(path)?.let { String(it.bytes, Charsets.UTF_8) },
+        html: String? = archive.read(path)?.let { it.bytes.decodeToString() },
     ): Card {
         return Card(
             title = html?.let { pageTitle(it, pack.title) } ?: pathTitle(path),
@@ -123,7 +122,7 @@ class FeedDrawer(
      * mention the date, marked [Drawn.mentions] so the row says so rather than passing them off as the day's own page;
      * books only search their text the same way.
      */
-    private suspend fun onThisDay(scope: Resolved, day: LocalDate, random: Random): Drawn {
+    private suspend fun onThisDay(scope: Resolved, day: CivilDate, random: Random): Drawn {
         val langs = languages().ifEmpty { listOf("en") }
         val candidates = encyclopedias(scope.packs, langs)
         if (candidates.isEmpty()) {
@@ -134,7 +133,7 @@ class FeedDrawer(
         for ((pack, lang) in candidates) {
             val archive = archiveOf(pack) ?: continue
             val path = DayPage.paths(day, lang).firstNotNullOfOrNull { archive.resolvePath(it) } ?: continue
-            val page = archive.read(path)?.let { DayPage.parse(String(it.bytes, Charsets.UTF_8), lang) } ?: continue
+            val page = archive.read(path)?.let { DayPage.parse(it.bytes.decodeToString(), lang) } ?: continue
             if (page.isEmpty) continue
             fun pick(lines: List<String>, n: Int, section: String) =
                 lines.shuffled(random).take(n).map { Card(it, section, CardTarget.Article(pack.id, path, fragment = section)) }
@@ -160,9 +159,9 @@ class FeedDrawer(
         val ordered = packs.sortedBy { !GENERAL.containsMatchIn(it.name) }
         val chosen = LinkedHashMap<Pack, String>()
         for (lang in langs) {
-            ordered.filter { app.granger.core.catalog.Languages.has(it.language, lang) }.forEach { chosen.putIfAbsent(it, dayLanguage(lang)) }
+            ordered.filter { app.granger.core.catalog.Languages.has(it.language, lang) }.forEach { chosen.getOrPut(it) { dayLanguage(lang) } }
         }
-        ordered.forEach { chosen.putIfAbsent(it, dayLanguage(app.granger.core.catalog.Languages.codes(it.language).firstOrNull() ?: "en")) }
+        ordered.forEach { chosen.getOrPut(it) { dayLanguage(app.granger.core.catalog.Languages.codes(it.language).firstOrNull() ?: "en") } }
         return chosen.toList()
     }
 
@@ -192,7 +191,7 @@ class FeedDrawer(
             val target = card.target as? CardTarget.Article ?: return@map card
             val pack = packsById[target.packId] ?: return@map card
             val archive = archiveOf(pack) ?: return@map card
-            val html = archive.read(target.path)?.let { String(it.bytes, Charsets.UTF_8) } ?: return@map card
+            val html = archive.read(target.path)?.let { it.bytes.decodeToString() } ?: return@map card
             card.copy(imagePath = if (noPicture(pack.id, target.path)) null else thumbnail(archive, target.path, html))
         }
     }
@@ -215,13 +214,13 @@ class FeedDrawer(
 
     /** The page's `<title>` without its site ([PageTitles]), else null. */
     private fun pageTitle(html: String, packTitle: String): String? {
-        val doc = Jsoup.parse(html)
+        val doc = Ksoup.parse(html)
         return doc.title().ifBlank { doc.selectFirst("h1")?.text().orEmpty() }.trim().ifBlank { null }?.let { PageTitles.clean(it, packTitle) }
     }
 
     private fun pathTitle(path: String) = path.substringAfterLast('/').replace('_', ' ')
 
-    private fun plain(html: String): String = if (html.isBlank()) "" else Jsoup.parse(html).text().trim()
+    private fun plain(html: String): String = if (html.isBlank()) "" else Ksoup.parse(html).text().trim()
 
     companion object {
         const val CARDS = 5
@@ -235,11 +234,11 @@ class FeedDrawer(
         /** "List of …", "Lists of …", "Index of …": a list, not an article to suggest. */
         private val LIST_TITLE = Regex("^(lists? of|index of|outline of|glossary of) ", RegexOption.IGNORE_CASE)
 
-        internal fun isList(title: String) = LIST_TITLE.containsMatchIn(title)
+        fun isList(title: String) = LIST_TITLE.containsMatchIn(title)
 
         /** The page's first paragraph with enough words in it. */
-        internal fun hasLead(html: String): Boolean =
-            Jsoup.parse(html).select("p").firstOrNull { it.text().isNotBlank() }?.text()?.length?.let { it >= LEAD_CHARS } == true
+        fun hasLead(html: String): Boolean =
+            Ksoup.parse(html).select("p").firstOrNull { it.text().isNotBlank() }?.text()?.length?.let { it >= LEAD_CHARS } == true
         private const val SEARCH_LIMIT = 30
 
         /** A whole encyclopedia's ZIM name, not a subject's: `wikipedia_es_all`, `wikipedia_en_top`. */
@@ -252,18 +251,17 @@ class FeedDrawer(
          * A feed's row title for [day]: "Random from Wikipedia", "October 22", "cats · Wikipedia"; "Mentions October 22"
          * when the day's cards are only [mentions] of it.
          */
-        fun title(feed: HomeFeed, scope: Resolved, day: LocalDate, mentions: Boolean = false): UiText = when (feed.kind) {
+        fun title(feed: HomeFeed, scope: Resolved, day: CivilDate, mentions: Boolean = false): UiText = when (feed.kind) {
             FeedKind.RANDOM ->
-                if (scope.name == LIBRARY_NAME) UiText.Res(R.string.home_feed_random_from_library) else UiText.Res(R.string.home_feed_random_from, scope.name)
+                if (scope.name == LIBRARY_NAME) UiText.Res("home_feed_random_from_library") else UiText.Res("home_feed_random_from", scope.name)
             // In the app's language; DayPage.title is the English page title it looks up.
-            FeedKind.ON_THIS_DAY -> UiText.Res(
-                if (mentions) R.string.home_feed_day_mentions else R.string.home_feed_day,
-                day.month.getDisplayName(TextStyle.FULL, Locale.getDefault()), day.dayOfMonth,
-            )
-            FeedKind.SEARCH -> UiText.Res(R.string.home_feed_search, feed.query.trim(), scope.name)
+            FeedKind.ON_THIS_DAY ->
+                if (mentions) UiText.Res("home_feed_day_mentions", monthName(day.month), day.day)
+                else UiText.Res("home_feed_day", monthName(day.month), day.day)
+            FeedKind.SEARCH -> UiText.Res("home_feed_search", feed.query.trim(), scope.name)
         }
 
         /** The same day and feed draw the same cards; another day draws others. */
-        fun seed(day: LocalDate, feedId: Long): Long = day.toEpochDay() xor (feedId * 0x9E3779B97F4A7C15uL.toLong())
+        fun seed(day: CivilDate, feedId: Long): Long = day.epochDay xor (feedId * 0x9E3779B97F4A7C15uL.toLong())
     }
 }

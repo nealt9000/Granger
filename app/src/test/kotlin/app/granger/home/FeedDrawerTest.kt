@@ -1,8 +1,7 @@
 package app.granger.home
 
-import app.granger.invoke
-import app.granger.R
 import app.granger.UiText
+import app.granger.screens.CivilDate
 import java.time.Month
 import java.time.format.TextStyle
 import java.util.Locale
@@ -20,12 +19,11 @@ import app.granger.core.library.TitleResults
 import app.granger.core.zim.ZimHit
 import app.granger.pack
 import com.google.common.truth.Truth.assertThat
-import java.time.LocalDate
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 class FeedDrawerTest {
-    private val day = LocalDate.of(2026, 10, 22)
+    private val day = CivilDate(2026, 10, 22)
     private val wikipedia = pack("u1", "Wikipedia").copy(name = "wikipedia_en_all")
     private val hamlet = book("book:granger:1", "Hamlet", author = "Shakespeare").copy(subjects = "Drama")
     private val odyssey = book("book:granger:2", "The Odyssey", author = "Homer").copy(subjects = "Epic & poetry")
@@ -66,7 +64,7 @@ class FeedDrawerTest {
     @Test fun randomFromAPackReadsTheTitleAndDropsWikipediasSuffix() = runTest {
         val drawn = drawer.draw(feed(FeedKind.RANDOM), Resolved(UiText.Raw("Wikipedia"), packs = listOf(wikipedia)), day)!!
         assertThat(FeedDrawer.title(feed(FeedKind.RANDOM), Resolved(UiText.Raw("Wikipedia")), day))
-            .isEqualTo(UiText.Res(R.string.home_feed_random_from, UiText.Raw("Wikipedia")))
+            .isEqualTo(UiText.Res("home_feed_random_from", UiText.Raw("Wikipedia")))
         // One random path from the fake, so one distinct card.
         assertThat(drawn.cards).containsExactly(Card("Cat", "Wikipedia", CardTarget.Article("u1", "Cat")))
     }
@@ -97,9 +95,9 @@ class FeedDrawerTest {
     @Test fun onThisDayReadsTheDayArticlesSections() = runTest {
         val drawn = drawer.draw(feed(FeedKind.ON_THIS_DAY), Resolved(UiText.Raw("Wikipedia"), packs = listOf(wikipedia)), day)!!
         assertThat(FeedDrawer.title(feed(FeedKind.ON_THIS_DAY), Resolved(UiText.Raw("Wikipedia")), day))
-            .isEqualTo(UiText.Res(R.string.home_feed_day, Month.OCTOBER.getDisplayName(TextStyle.FULL, Locale.getDefault()), 22))
+            .isEqualTo(UiText.Res("home_feed_day", Month.OCTOBER.getDisplayName(TextStyle.FULL, Locale.getDefault()), 22))
         assertThat(FeedDrawer.title(feed(FeedKind.ON_THIS_DAY), Resolved(UiText.Raw("Wikipedia")), day, mentions = true))
-            .isEqualTo(UiText.Res(R.string.home_feed_day_mentions, Month.OCTOBER.getDisplayName(TextStyle.FULL, Locale.getDefault()), 22))
+            .isEqualTo(UiText.Res("home_feed_day_mentions", Month.OCTOBER.getDisplayName(TextStyle.FULL, Locale.getDefault()), 22))
         assertThat(drawn.cards.map { it.subtitle }).containsExactly("Events", "Events", "Events", "Births", "Deaths").inOrder()
         assertThat(drawn.cards.map { it.title }.distinct()).hasSize(5)
         assertThat(drawn.cards.first().target).isEqualTo(CardTarget.Article("u1", "October_22", fragment = "Events"))
@@ -157,7 +155,7 @@ class FeedDrawerTest {
         val scope = Resolved(UiText.Raw("Wikipedia"), packs = listOf(wikipedia))
         val today = drawer.draw(feed(FeedKind.SEARCH, "stoicism"), scope, day)!!
         assertThat(FeedDrawer.title(feed(FeedKind.SEARCH, "stoicism"), scope, day))
-            .isEqualTo(UiText.Res(R.string.home_feed_search, "stoicism", UiText.Raw("Wikipedia")))
+            .isEqualTo(UiText.Res("home_feed_search", "stoicism", UiText.Raw("Wikipedia")))
         assertThat(today.cards).hasSize(FeedDrawer.CARDS)
         val tomorrow = drawer.draw(feed(FeedKind.SEARCH, "stoicism"), scope, day.plusDays(1))!!
         assertThat(tomorrow.cards).isNotEqualTo(today.cards)

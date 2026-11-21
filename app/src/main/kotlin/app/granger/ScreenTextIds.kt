@@ -38,6 +38,18 @@ object ScreenTextIds {
         "explore_subject_society" -> R.string.explore_subject_society
         "explore_subject_sports" -> R.string.explore_subject_sports
         "explore_subject_technology" -> R.string.explore_subject_technology
+        "home_feed_day" -> R.string.home_feed_day
+        "home_feed_day_mentions" -> R.string.home_feed_day_mentions
+        "home_feed_random_from" -> R.string.home_feed_random_from
+        "home_feed_random_from_library" -> R.string.home_feed_random_from_library
+        "home_feed_search" -> R.string.home_feed_search
+        "home_kind_on_this_day" -> R.string.home_kind_on_this_day
+        "home_kind_random" -> R.string.home_kind_random
+        "home_kind_search" -> R.string.home_kind_search
+        "home_scope_audiobooks" -> R.string.home_scope_audiobooks
+        "home_scope_music" -> R.string.home_scope_music
+        "home_scope_the_library" -> R.string.home_scope_the_library
+        "home_scope_whole_library" -> R.string.home_scope_whole_library
         "library_from_kiwix" -> R.string.library_from_kiwix
         "library_from_kiwix_by" -> R.string.library_from_kiwix_by
         "readiness_covers" -> R.string.readiness_covers

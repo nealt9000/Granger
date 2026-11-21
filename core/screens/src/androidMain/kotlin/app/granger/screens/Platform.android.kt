@@ -32,3 +32,6 @@ actual fun monthYear(year: Int, month: Int): String =
 
 actual fun mediumDate(year: Int, month: Int, day: Int): String =
     java.time.LocalDate.of(year, month, day).format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM))
+
+actual fun monthName(month: Int): String =
+    java.time.Month.of(month).getDisplayName(java.time.format.TextStyle.FULL, Locale.getDefault())

@@ -1,9 +1,8 @@
 package app.granger.core.library
 
-import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 
-/** Home's feeds (Plan H2): the rows the app draws cards from, in their order, and each feed's cards for the day. */
+/** Home's feeds (Plan H2; shared since Plan I4b Task 8): the rows the app draws cards from, in their order, and each feed's cards for the day. */
 interface HomeFeeds {
     /** In Home order. */
     val feeds: Flow<List<HomeFeed>>
@@ -30,7 +29,7 @@ interface HomeFeeds {
 
 class RoomHomeFeeds(
     private val db: LibraryDatabase,
-    private val now: () -> Long = System::currentTimeMillis,
+    private val now: () -> Long = { kotlin.time.Clock.System.now().toEpochMilliseconds() },
 ) : HomeFeeds {
     private val dao = db.homeDao()
 
@@ -38,21 +37,21 @@ class RoomHomeFeeds(
 
     override suspend fun feeds(): List<HomeFeed> = dao.feeds()
 
-    override suspend fun add(scope: String, kind: FeedKind, query: String): Long = db.withTransaction {
+    override suspend fun add(scope: String, kind: FeedKind, query: String): Long = db.inTransaction {
         dao.insertFeed(HomeFeed(0, scope, kind, query.trim(), dao.maxOrdinal() + 1, now()))
     }
 
-    override suspend fun remove(id: Long) = db.withTransaction {
+    override suspend fun remove(id: Long) = db.inTransaction {
         dao.deleteFeed(id)
         dao.deleteDraw(id)
         renumber(dao.feeds())
     }
 
-    override suspend fun move(id: Long, up: Boolean) = db.withTransaction {
+    override suspend fun move(id: Long, up: Boolean) = db.inTransaction {
         val feeds = dao.feeds().toMutableList()
         val at = feeds.indexOfFirst { it.id == id }
         val to = if (up) at - 1 else at + 1
-        if (at < 0 || to !in feeds.indices) return@withTransaction
+        if (at < 0 || to !in feeds.indices) return@inTransaction
         feeds[at] = feeds[to].also { feeds[to] = feeds[at] }
         renumber(feeds)
     }
