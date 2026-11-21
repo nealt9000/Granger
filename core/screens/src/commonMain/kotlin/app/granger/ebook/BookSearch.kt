@@ -102,7 +102,7 @@ object SearchRows {
             BookSearchRow(
                 locatorJson = hit.locatorJson,
                 chapter = UiText.Raw(hit.title?.trim().orEmpty().ifEmpty { chapterTitle(hit.href, toc, sameFile) }),
-                before = hit.before.orEmpty(),
+                before = lead(hit.before.orEmpty()),
                 match = hit.highlight.orEmpty(),
                 after = hit.after.orEmpty(),
                 markId = null,
@@ -112,6 +112,20 @@ object SearchRows {
     }
 
     private fun parse(json: String) = runCatching { Json.parseToJsonElement(json).jsonObject }.getOrNull()
+
+    /**
+     * The words before a hit, cut to about [LEAD_CHARS] at a word break: the reader's search gives a long run of text
+     * before the match, and the row's four lines then ended before the match was shown (Pixel check, I5a).
+     */
+    fun lead(before: String): String {
+        if (before.length <= LEAD_CHARS) return before
+        val tail = before.takeLast(LEAD_CHARS)
+        val space = tail.indexOf(' ')
+        val words = if (space in 0 until tail.length - 1) tail.substring(space + 1) else tail
+        return "…$words"
+    }
+
+    const val LEAD_CHARS = 60
 
     private fun chapterTitle(href: String, toc: List<TocRow>, sameFile: (String, String) -> Boolean): String =
         toc.lastOrNull { row -> sameFile(row.href, href) }?.title.orEmpty()
