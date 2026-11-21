@@ -25,6 +25,8 @@ enum Route: Hashable {
     case downloads
     /// Get more's hub, and one source's screen (CatalogScope by name) narrowed to a domain, family or book set.
     case getMore
+    /// Outfitting: Ready offline, kept articles, the knowledge domains, storage (Plan I4 Task 8).
+    case outfitting
     /// Explore's Your sources, and one pack's PDFs and EPUBs (Plan I4 Task 7).
     case yourSources
     case packFiles(pack: String)

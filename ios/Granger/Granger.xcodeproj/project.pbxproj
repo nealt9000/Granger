@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		03D55B9BC49ADC8D2CA8633C /* PaletteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B44830ECED20666BE9CE2F47 /* PaletteTests.swift */; };
 		066796D0E486FD8180F2CE11 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46D66C3FE2FAC95BCFDB9655 /* HomeScreen.swift */; };
+		0C01B3F83EA075BB4A4F2D48 /* ReadyOffline.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB73E96EABD47541EEBCB973 /* ReadyOffline.swift */; };
 		1424EFEE57F6296E47E2BB70 /* NetworkPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D30AA717E22E6D144A61AB /* NetworkPath.swift */; };
 		1686027DD9EB27E19DDF74D4 /* spectral_regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63249671AC1CC4288F670ABF /* spectral_regular.ttf */; };
 		1BE4CF46B8D83410F915E442 /* GetMoreScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C03090F336FA65931D0A18DE /* GetMoreScreen.swift */; };
@@ -115,6 +116,7 @@
 		93C3FF10249E3C56B933C031 /* YourSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YourSources.swift; sourceTree = "<group>"; };
 		9A9A6B4F16D83F391D47CB26 /* KiwixArchiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KiwixArchiveTests.swift; sourceTree = "<group>"; };
 		A6A503B5D655BB52449F2EA8 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		AB73E96EABD47541EEBCB973 /* ReadyOffline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadyOffline.swift; sourceTree = "<group>"; };
 		B44830ECED20666BE9CE2F47 /* PaletteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaletteTests.swift; sourceTree = "<group>"; };
 		C03090F336FA65931D0A18DE /* GetMoreScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetMoreScreen.swift; sourceTree = "<group>"; };
 		C4D2722559AB140D5CDEAF7A /* Palette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Palette.swift; sourceTree = "<group>"; };
@@ -291,6 +293,7 @@
 			isa = PBXGroup;
 			children = (
 				46D66C3FE2FAC95BCFDB9655 /* HomeScreen.swift */,
+				AB73E96EABD47541EEBCB973 /* ReadyOffline.swift */,
 				5097D7F74D147D51E78904EE /* Timeline.swift */,
 			);
 			path = Home;
@@ -526,6 +529,7 @@
 				FACF839114C639E9B056C5D7 /* Palette.swift in Sources */,
 				EA4CF2525A8BB18149344B90 /* QuiltScreen.swift in Sources */,
 				86F28AA0E11BDD43201F0381 /* ReaderScreen.swift in Sources */,
+				0C01B3F83EA075BB4A4F2D48 /* ReadyOffline.swift in Sources */,
 				5F34AE2BC40DB71B6A082A54 /* ScreenText.swift in Sources */,
 				986CD1464DCB7DD384D06C83 /* SearchScreen.swift in Sources */,
 				A43B194A4C42B8FF1721640F /* SettingsScreen.swift in Sources */,

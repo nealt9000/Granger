@@ -126,6 +126,7 @@ struct RootView: View {
                     case let .timeline(packId, p): TimelineScreen(packId: packId, path: p)
                     case .downloads: DownloadsScreen()
                     case .getMore: GetMoreScreen()
+                    case .outfitting: OutfittingScreen()
                     case .yourSources: YourSourcesScreen()
                     case let .packFiles(pack): PackFilesScreen(pack: pack)
                     case let .source(scope, domain, family, bookSet):

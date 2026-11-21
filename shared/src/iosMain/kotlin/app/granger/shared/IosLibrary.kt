@@ -351,6 +351,63 @@ class IosLibrary(
 
     suspend fun remove(lang: String, title: String) = keeper.remove(lang, title)
 
+    // ---- Ready offline (Plan I4 Task 8), as Android's GrangerApp.readyOffline: the last month's reads, where each can be
+    // read from, its subject, and what would fill the gaps.
+
+    /**
+     * Ready offline for [reads] (pack id, path; newest first, the last 30 days, history never leaves the phone): null
+     * with nothing read lately. Each keep is costed at Save pictures' or Text only's size; the Top pack and one subject
+     * pack per subject the phone lacks are the offers.
+     */
+    suspend fun readyOffline(reads: List<ArticleRef>): app.granger.online.ReadyOfflineUi? {
+        val recent = reads.distinctBy { it.packId to it.path }.take(READY_RECENT)
+        if (recent.isEmpty()) return null
+        val q = indexes
+        val counted = recent.mapNotNull { r ->
+            val lang = langOf(r.packId) ?: return@mapNotNull null
+            val qid = q?.let { it.qidOf(r.packId, r.path) ?: it.qidOfTitle(r.path, lang) }
+            app.granger.online.RecentRead(
+                r.packId, r.path, availability.of(r.packId, r.path), qid?.let { q.subjectsOf(it).firstOrNull() },
+                inPack = q?.qidOf(r.packId, r.path) != null,
+            )
+        }
+        if (counted.isEmpty()) return null
+        val each = if (savePictures()) app.granger.online.RoomOffers.EACH_WITH_PICTURES else app.granger.online.RoomOffers.EACH_TEXT
+        val lang = languages().firstOrNull() ?: "en"
+        val installed = packLibrary.packs.first().mapTo(HashSet()) { it.name }
+        val packs = catalog?.packs.orEmpty()
+        val top = packs.filter { it.id.startsWith("wikipedia_${lang}_top_") && it.zimName !in installed }
+            .minByOrNull { it.sizeBytes }?.let { app.granger.online.PackOffer(it.id, it.title, it.sizeBytes) }
+        val subjectPacks = packs.filter { it.zimName !in installed && !it.id.startsWith("wikipedia_${lang}_top") }
+            .mapNotNull { e -> app.granger.explore.Subject.ofDomain(e.domain)?.let { e to it.id } }
+            .groupBy { it.second }.mapNotNull { (_, es) -> es.minByOrNull { it.first.sizeBytes } }
+            .map { (e, subject) -> app.granger.online.PackOffer(e.id, e.title, e.sizeBytes) to subject }
+        return app.granger.online.ReadyOffline.of(counted, each, top, app.granger.online.ReadyOffline.SUBJECTS, subjectPacks)
+    }
+
+    /** Keeps the online-only articles you read lately (Ready offline's suggestion: language and title), one after another. */
+    fun keepTheRead(articles: List<ArticleRef>) {
+        scope.launch { for (a in articles) runCatching { keeper.keep(a.packId, a.path) } }
+    }
+
+    // ---- Outfitting (Plan I4 Task 8): Readiness's report (the knowledge domains, gaps, storage by source) over the
+    // catalog, the packs and the download ledger, as Android's ReadinessViewModel computes it; books join in I5.
+
+    /** The readiness report now. Blocking reads of the packs and records. */
+    suspend fun readinessReport(): app.granger.readiness.ReadinessReport = app.granger.readiness.ReadinessModel.report(
+        catalog, packLibrary.packs.first(), emptyList(), downloads.records.first(), app.granger.screens.todayEpochDay(),
+        languages(), app.granger.screens.phoneLanguage(),
+    )
+
+    /** The articles you kept, newest first. */
+    val keptArticles: kotlinx.coroutines.flow.Flow<List<app.granger.core.library.KeptArticle>> get() = kept.articles
+
+        /** Gets a catalog pack (Ready offline's and Outfitting's offers): queued on this iPhone, under the Wi-Fi rule. */
+    suspend fun getPack(id: String): app.granger.core.downloads.EnqueueResult? {
+        val item = catalog?.let { c -> (c.packs + c.books).firstOrNull { it.id == id } } ?: return null
+        return downloads.enqueue(item, downloadRoot, wifiOnly())
+    }
+
     /** Everything kept, newest first (Outfitting's list, Settings' count). */
     suspend fun keptArticles(): List<KeptArticle> = database.keptArticleDao().observeAll().first()
 
@@ -725,6 +782,9 @@ private const val TOPIC_LEAD_CHARS = 420
 /** Wander's start pool in a subject or room (Android's SubjectViewModel.WANDER_POOL). */
 private const val WANDER_POOL = 300
 
+/** The recent reads Ready offline counts at most (Android's READY_RECENT). */
+private const val READY_RECENT = 60
+
 /** A Wikipedia pack's language in its ZIM name (`wikipedia_en_top_maxi`), as Android's GrangerApp reads it. */
 private val WIKIPEDIA_LANGUAGE = Regex("^wikipedia_([a-z]{2,3})_")
 
@@ -735,4 +795,7 @@ enum class IndexKind { QID, TIME }
 data class IndexFile(val kind: IndexKind, val source: String, val url: String, val sha256: String, val sizeBytes: Long, val fileName: String)
 
 /** An index file on the phone, to open. */
+/** An article by its source and path (for Ready offline's keeps: language and title). */
+data class ArticleRef(val packId: String, val path: String)
+
 data class OpenIndex(val kind: IndexKind, val source: String, val path: String)

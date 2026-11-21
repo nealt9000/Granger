@@ -348,4 +348,25 @@ final class SmokeTests: XCTestCase {
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Local only is on'")).firstMatch.exists, "Wikipedia online greyed")
         shot(app, "your-sources")
     }
+
+    /// Plan I4 Task 8: after a read, Home's Ready offline counts it; See everything opens Outfitting with the domains.
+    func testReadyOfflineAndOutfitting() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-debugOpen", "en:Moon",
+                               "-homeOrder", "readiness,continue,timeline,feeds", "-homeHidden", "()"]
+        app.launch()
+        XCTAssertTrue(app.buttons["read-full"].waitForExistence(timeout: 20), "topic page")
+        app.buttons["read-full"].tap()
+        sleep(3)
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        let headline = app.staticTexts["ready-headline"]
+        XCTAssertTrue(headline.waitForExistence(timeout: 30), "Ready offline on Home")
+        shot(app, "ready-offline")
+        let all = app.buttons["ready-see-all"]
+        for _ in 0..<8 where !all.isHittable { app.swipeUp() }
+        all.tap()
+        XCTAssertTrue(app.staticTexts["Ready for anything"].waitForExistence(timeout: 30), "Outfitting's domains")
+        shot(app, "outfitting")
+    }
 }

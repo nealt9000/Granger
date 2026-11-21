@@ -16,6 +16,7 @@ struct HomeScreen: View {
     @State private var showSettings = false
     @State private var arranging = false
     @State private var downloads = DownloadsHolder()
+    @State private var ready = ReadyOfflineHolder()
 
     var body: some View {
         ScrollView {
@@ -28,6 +29,7 @@ struct HomeScreen: View {
                     switch token {
                     case "continue": if !recent.entries.isEmpty { continueSection }
                     case "timeline": TimelineCard(holder: timeline)
+                    case "readiness": if let ui = ready.ui { ReadyOfflineCard(ui: ui) }
                     default: EmptyView()
                     }
                 }
@@ -48,6 +50,7 @@ struct HomeScreen: View {
         .sheet(isPresented: $showSettings) { NavigationStack { SettingsScreen() } }
         .sheet(isPresented: $arranging) { NavigationStack { ArrangeHomeScreen(arrangement: arrangement) } }
         .task { if let core { downloads.watch(core) } }
+        .task(id: "\(recent.entries.count)|\(library.version)|\(library.index)") { if let core { await ready.load(core, recent: recent) } }
         .task(id: "\(library.index)|\(settings.canFetch)") {
             // The timeline starts once the index set is open (a new model then reads it).
             guard let core, library.index == .ready else { return }
@@ -86,7 +89,7 @@ struct HomeScreen: View {
 @Observable
 final class HomeArrangement {
     /// The sections the iPhone draws today.
-    static let supported: [String] = ["continue", "timeline"]
+    static let supported: [String] = ["continue", "readiness", "timeline"]
     private let defaults = UserDefaults.standard
     private(set) var layout: HomeLayout
 
