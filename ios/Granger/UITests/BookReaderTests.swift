@@ -29,8 +29,12 @@ final class BookReaderTests: XCTestCase {
     private func showBars(_ app: XCUIApplication) {
         let label = app.staticTexts["book-progress"]
         if label.exists && label.isHittable { return }
-        app.windows.firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.45)).tap()
-        XCTAssertTrue(label.waitForExistence(timeout: 5), "the bars come back")
+        // A tap while a sheet is still going away can be lost: tried again.
+        for _ in 0..<3 {
+            app.windows.firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.45)).tap()
+            if label.waitForExistence(timeout: 3) { return }
+        }
+        XCTFail("the bars come back")
     }
 
     private func progress(_ app: XCUIApplication) -> String {

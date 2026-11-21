@@ -76,7 +76,7 @@ Legend: **[ ]** to do · **[x]** done on the iPhone · **≈** done with the iOS
 | --- | --- | --- | --- |
 | Get more: Kiwix list (flavours, sizes, plain words), Wikipedia family (how much × pictures), subjects add-ons, signed catalog | Same, CoreKiwix for reading | I4 | [x] (the shared SourceViewModel: Kiwix list, flavours, the Wikipedia set by slice × pictures, subject add-ons, presets) |
 | Downloads: one queue, order, Pause all, speed and time left, Home card, Wi-Fi rule, sha256 check | URLSession background sessions, resume by Range/ETag | I4 | [x] (resume after the app is killed checked in the Simulator) |
-| Pack reader and pack search (libkiwix), redirects, pack documents (PDF/EPUB in packs) | Same | I4 | [x] (a pack's PDF or EPUB opens in Quick Look until Granger's readers, I5) |
+| Pack reader and pack search (libkiwix), redirects, pack documents (PDF/EPUB in packs) | Same | I4 | [x] (since I5 Task 5 a pack's PDF or listed book opens in Granger's readers, copied out of the pack in chunks) |
 | Import a pack from storage | ≈ Files import, packs visible in Files | I4 | [x] |
 | Book packs as collections (Gutenberg, nautilus, African Storybook), manifests | Same | I4 (packs), I5 (reading) | [ ] I4 part ✓ (book packs listed as their books in Your sources; reading in I5) |
 
@@ -85,7 +85,7 @@ Legend: **[ ]** to do · **[x]** done on the iPhone · **≈** done with the iOS
 | Android | iPhone | Plan | |
 | --- | --- | --- | --- |
 | Library: reading shelf, collections, Classics shelf, list/grid views, letter strip, organize, covers | Same | I5 | [ ] |
-| E-book reader: pages, contents, search in book, highlights and notes, dictionary, text settings, link peek, fixed layout, PDF | Readium Swift (+ PDFKit) | I5 | [ ] |
+| E-book reader: pages, contents, search in book, highlights and notes, dictionary, text settings, link peek, fixed layout, PDF | Readium Swift (+ PDFKit) | I5 | [ ] (Task 5 built all but link peek, which comes with the Classics' links in Task 7) |
 | Granger Classics, Clásicos Granger, reference links (Linked Classics), In your books | Same | I5 | [ ] |
 | archive.org: search, item sheet, sets, text PDF → ebook, 1930 filter (Play) | Same (App Store rules as Play's) | I5 | [ ] |
 | Gutenberg shelf and covers | Same | I5 | [ ] |
