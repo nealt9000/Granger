@@ -424,7 +424,7 @@ val DownloadRecord.isFromCatalog: Boolean
         // A pack added from a file that the catalog doesn't list (Plan E1 item 4) never was a catalog item.
         ItemKind.PACK -> !hash.startsWith(UNVERIFIED_PREFIX)
         ItemKind.MODEL, ItemKind.VOICE -> true
-        ItemKind.BOOK -> filePath.contains("/books/granger/")
+        ItemKind.BOOK -> filePath.contains("/${DownloadLayout.books}/granger/")
         ItemKind.AUDIO, ItemKind.VECTORS, ItemKind.TIME_INDEX, ItemKind.SIDECAR -> false
     }
 
@@ -439,7 +439,7 @@ fun downloadSpecOf(item: CatalogItem, groupId: String? = null): DownloadSpec = w
     )
     is BookEntry -> DownloadSpec(
         item.id, ItemKind.BOOK, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
-        "books/granger/${item.id}_${item.releaseDate}.epub", item.releaseDate, groupId = groupId,
+        "${DownloadLayout.books}/granger/${item.id}_${item.releaseDate}.epub", item.releaseDate, groupId = groupId,
     )
     is ModelEntry -> DownloadSpec(
         item.id, ItemKind.MODEL, item.title, item.urls, item.sizeBytes, item.sha256, HashAlgorithm.SHA256,
@@ -460,4 +460,6 @@ object DownloadLayout {
     var packs: String = "packs"
     /** Put before a companion's folder (`vectors/…`); empty on Android. */
     var companions: String = ""
+    /** Where downloaded books go (`books/granger/…`, `books/archive-org/…`): the iPhone's are under Documents/Books (Plan I5 Task 7). */
+    var books: String = "books"
 }

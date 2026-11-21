@@ -31,9 +31,15 @@ kotlin {
             implementation(libs.ksoup)
             implementation(libs.kotlinx.io.core)
         }
+        // Plan I5 Task 7: the online bookshelf's range reads on the iPhone (Android sends them on the app's OkHttp).
+        iosMain.dependencies {
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.darwin)
+        }
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
         }
+        iosTest.dependencies { implementation(libs.ktor.client.mock) }
     }
 }
