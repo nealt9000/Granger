@@ -12,24 +12,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
-/**
- * The voice's own output, beside ExoPlayer: one streaming track for speech. Writes are cooperative (they suspend
- * while the track's buffer is full and stop at cancellation), so Stop is immediate and nothing plays after it.
- * [volume] is the sleep timer's fade now and the mix's lever in V2.
- */
-interface SpeechOutput : AutoCloseable {
-    /** Readies the track for [sampleRate]; a different rate rebuilds it. Mono. */
-    fun open(sampleRate: Int)
-    suspend fun write(pcm: Pcm)
-    fun play()
-    fun pause()
-    /** Drops everything written but not yet heard. */
-    fun flush()
-    var volume: Float
-    /** Milliseconds of audio heard since the last [flush] or [open]. */
-    val playedMs: Long
-}
-
+/** [SpeechOutput] on Android: one streaming AudioTrack for speech, beside ExoPlayer. */
 class AudioTrackSpeechOutput(
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val bufferMs: Int = 1_000,

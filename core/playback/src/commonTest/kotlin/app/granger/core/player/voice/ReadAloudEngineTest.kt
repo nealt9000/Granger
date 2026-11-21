@@ -7,7 +7,6 @@ import app.granger.core.speech.SpeechException
 import app.granger.core.speech.TextReadSource
 import app.granger.core.speech.Voice
 import app.granger.core.speech.VoiceId
-import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -17,14 +16,16 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
-/** ICU (for the sentence split) comes from the framework, so Robolectric; the engine itself is plain coroutines. */
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [35])
+/**
+ * The engine on every phone (Plan I5): plain coroutines over a fake voice and a fake output. The text's sentences break
+ * the same with ICU (Android, the iPhone) and with the plain JVM fallback.
+ */
 class ReadAloudEngineTest {
     /** Runs the engine's background work: `advanceUntilIdle` skips background-scope tasks in this coroutines version. */
     private fun TestScope.settle() { advanceTimeBy(60_000); runCurrent() }
@@ -70,12 +71,12 @@ class ReadAloudEngineTest {
         engine.start(TextReadSource("text:t", "T", text), speech, from = null, speed = 1f)
         out.release(100)
         settle()
-        assertThat(speech.spoken).containsExactly("One two.", "Three four five.", "Six.", "Seven eight.", "Nine.", "Ten.").inOrder()
+        assertEquals(listOf("One two.", "Three four five.", "Six.", "Seven eight.", "Nine.", "Ten."), (speech.spoken).toList())
         // sentence, pause, sentence, pause …: the pause after a paragraph's last sentence is the long one
-        assertThat(out.written.filterIndexed { i, _ -> i % 2 == 1 }).containsExactly(350L, 350L, 700L, 350L, 700L, 700L).inOrder()
-        assertThat(out.events.first()).isEqualTo("flush")
-        assertThat(out.events).contains("open:22050")
-        assertThat(engine.playing.value).isFalse()     // ended
+        assertEquals(listOf(350L, 350L, 700L, 350L, 700L, 700L), (out.written.filterIndexed { i, _ -> i % 2 == 1 }).toList())
+        assertEquals("flush", out.events.first())
+        assertTrue((out.events).contains("open:22050"))
+        assertFalse(engine.playing.value)     // ended
     }
 
     @Test
@@ -88,17 +89,17 @@ class ReadAloudEngineTest {
         engine.start(TextReadSource("text:t", "T", text), speech, null, 1f)
         out.release(100); settle()
         // Everything up to "Six." and its pause went out; nothing of "Seven eight." did.
-        assertThat(out.written).hasSize(6)
-        assertThat(held).isEqualTo(1)
-        assertThat(engine.playing.value).isFalse()
-        assertThat(engine.progress.value?.utterance?.text).isEqualTo("Seven eight.")
-        assertThat(out.events.takeLast(2)).containsExactly("pause", "flush").inOrder()
+        assertEquals(6, (out.written).size)
+        assertEquals(1, held)
+        assertFalse(engine.playing.value)
+        assertEquals("Seven eight.", engine.progress.value?.utterance?.text)
+        assertEquals(listOf("pause", "flush"), (out.events.takeLast(2)).toList())
 
         engine.holdBefore = null
         engine.play()
         settle()
-        assertThat(out.written).hasSize(12)
-        assertThat(engine.progress.value?.utterance?.text).isEqualTo("Ten.")
+        assertEquals(12, (out.written).size)
+        assertEquals("Ten.", engine.progress.value?.utterance?.text)
     }
 
     @Test
@@ -108,10 +109,10 @@ class ReadAloudEngineTest {
         engine.start(TextReadSource("text:t", "T", text), speech, null, 1f)
         advanceTimeBy(10_000); runCurrent()
         // Nothing has been heard (the gate is shut): the producer may finish the sentence being written plus one more.
-        assertThat(speech.spoken.size).isAtMost(3)
+        assertTrue((speech.spoken.size) <= 3, "speech.spoken.size <= 3")
         out.release(2)                                  // first sentence and its pause go out
         advanceTimeBy(10_000); runCurrent()
-        assertThat(speech.spoken.size).isAtMost(4)
+        assertTrue((speech.spoken.size) <= 4, "speech.spoken.size <= 4")
     }
 
     @Test
@@ -120,7 +121,7 @@ class ReadAloudEngineTest {
         val engine = ReadAloudEngine(out, backgroundScope, lookAheadSentences = 10, lookAheadMs = 30_000)
         engine.start(TextReadSource("text:t", "T", text), speech, null, 1f)
         advanceTimeBy(60_000); runCurrent()
-        assertThat(speech.spoken.size).isAtMost(2)      // 16 s + 32 s crosses the cap; the third waits
+        assertTrue((speech.spoken.size) <= 2, "speech.spoken.size <= 2")      // 16 s + 32 s crosses the cap; the third waits
     }
 
     @Test
@@ -129,15 +130,15 @@ class ReadAloudEngineTest {
         val engine = ReadAloudEngine(out, backgroundScope)
         engine.start(TextReadSource("text:t", "T", text), speech, null, 1f)
         out.release(2); settle()              // "One two." heard; "Three four five." is being written
-        assertThat(engine.progress.value?.utterance?.text).isEqualTo("Three four five.")
+        assertEquals("Three four five.", engine.progress.value?.utterance?.text)
         engine.pause()
-        assertThat(engine.playing.value).isFalse()
-        assertThat(out.events.takeLast(2)).containsExactly("pause", "flush").inOrder()
+        assertFalse(engine.playing.value)
+        assertEquals(listOf("pause", "flush"), (out.events.takeLast(2)).toList())
         engine.play()
         out.release(2); settle()
         // The second sentence starts over (from the cache, not re-synthesized) and the next one follows.
-        assertThat(speech.spoken.count { it == "Three four five." }).isEqualTo(1)
-        assertThat(engine.progress.value?.utterance?.text).isEqualTo("Six.")
+        assertEquals(1, speech.spoken.count { it == "Three four five." })
+        assertEquals("Six.", engine.progress.value?.utterance?.text)
     }
 
     @Test
@@ -148,10 +149,10 @@ class ReadAloudEngineTest {
         out.release(1); settle()
         engine.nextParagraph()
         out.release(1); settle()
-        assertThat(engine.progress.value?.utterance?.text).isEqualTo("Seven eight.")
+        assertEquals("Seven eight.", engine.progress.value?.utterance?.text)
         engine.previousParagraph()                       // at the paragraph's first sentence: the previous paragraph
         settle()
-        assertThat(engine.progress.value?.utterance?.text).isEqualTo("One two.")
+        assertEquals("One two.", engine.progress.value?.utterance?.text)
     }
 
     @Test
@@ -162,8 +163,8 @@ class ReadAloudEngineTest {
         settle()
         engine.previousSentence()
         settle()
-        assertThat(engine.progress.value?.index).isEqualTo(0)
-        assertThat(engine.playing.value).isTrue()
+        assertEquals(0, engine.progress.value?.index)
+        assertTrue(engine.playing.value)
     }
 
     @Test
@@ -175,11 +176,11 @@ class ReadAloudEngineTest {
         engine.stop()
         val writes = out.written.size
         out.release(50); advanceTimeBy(5_000); runCurrent()
-        assertThat(out.written.size).isEqualTo(writes)
-        assertThat(engine.progress.value).isNull()
-        assertThat(speech.closed).isEqualTo(0)
+        assertEquals(writes, out.written.size)
+        assertNull(engine.progress.value)
+        assertEquals(0, speech.closed)
         advanceTimeBy(120_001); runCurrent()
-        assertThat(speech.closed).isEqualTo(1)
+        assertEquals(1, speech.closed)
     }
 
     @Test
@@ -190,8 +191,8 @@ class ReadAloudEngineTest {
         backgroundScope.launch { engine.errors.collect { errors += it } }
         engine.start(TextReadSource("text:t", "T", "Fine one. Then boom. Fine two."), speech, null, 1f)
         out.release(100); settle()
-        assertThat(speech.spoken).containsExactly("Fine one.", "Fine two.").inOrder()
-        assertThat(errors).hasSize(1)
+        assertEquals(listOf("Fine one.", "Fine two."), (speech.spoken).toList())
+        assertEquals(1, (errors).size)
     }
 
     @Test
@@ -201,8 +202,8 @@ class ReadAloudEngineTest {
         val engine = ReadAloudEngine(out, backgroundScope, batch = 5)
         engine.start(TextReadSource("text:t", "T", long), speech, null, 1f)
         out.release(1000); settle()
-        assertThat(speech.spoken).hasSize(30)
-        assertThat(speech.spoken.last()).isEqualTo("Sentence number 30.")
+        assertEquals(30, (speech.spoken).size)
+        assertEquals("Sentence number 30.", speech.spoken.last())
     }
 
     @Test
@@ -213,9 +214,9 @@ class ReadAloudEngineTest {
         backgroundScope.launch { engine.ended.collect { ended++ } }
         engine.start(TextReadSource("text:t", "T", text), speech, from = ReadAddress.Text("text:t", 1, 1), speed = 1.5f)
         out.release(100); settle()
-        assertThat(speech.spoken).containsExactly("Nine.", "Ten.").inOrder()
-        assertThat(speech.speeds).containsExactly(1.5f, 1.5f)
-        assertThat(ended).isEqualTo(1)
+        assertEquals(listOf("Nine.", "Ten."), (speech.spoken).toList())
+        assertEquals(listOf(1.5f, 1.5f), (speech.speeds).toList())
+        assertEquals(1, ended)
     }
 
     @Test
@@ -226,8 +227,8 @@ class ReadAloudEngineTest {
         out.release(2); settle()
         engine.setSpeed(2f)
         out.release(100); settle()
-        assertThat(speech.speeds.first()).isEqualTo(1f)
-        assertThat(speech.speeds.last()).isEqualTo(2f)
+        assertEquals(1f, speech.speeds.first())
+        assertEquals(2f, speech.speeds.last())
     }
 
     @Test
@@ -239,11 +240,11 @@ class ReadAloudEngineTest {
         val madeAtOne = speech.spoken.count { it == "One two." }
         engine.setSpeed(2f)
         engine.previousSentence(); out.release(2); settle()        // again at 2×: a new synthesis
-        assertThat(speech.spoken.count { it == "One two." }).isEqualTo(madeAtOne + 1)
+        assertEquals(madeAtOne + 1, speech.spoken.count { it == "One two." })
         engine.setSpeed(1f)
         engine.previousSentence(); out.release(2); settle()        // back at 1×: from the cache
-        assertThat(speech.spoken.count { it == "One two." }).isEqualTo(madeAtOne + 1)
-        assertThat(speech.speeds.last()).isEqualTo(2f)
+        assertEquals(madeAtOne + 1, speech.spoken.count { it == "One two." })
+        assertEquals(2f, speech.speeds.last())
     }
 
     @Test
@@ -268,12 +269,12 @@ class ReadAloudEngineTest {
         val fast = FakeSpeech()
         engine.start(TextReadSource("text:t", "T", text), fast, null, 1f)
         runCurrent()
-        assertThat(slow.closed).isEqualTo(0)                       // not while its sentence is in flight
+        assertEquals(0, slow.closed)                       // not while its sentence is in flight
         advanceTimeBy(1_000); runCurrent()
-        assertThat(slow.closed).isEqualTo(1)
-        assertThat(slow.madeAfterClose).isEqualTo(0)
+        assertEquals(1, slow.closed)
+        assertEquals(0, slow.madeAfterClose)
         out.release(100); settle()
-        assertThat(fast.spoken.first()).isEqualTo("One two.")
+        assertEquals("One two.", fast.spoken.first())
     }
 
     @Test
@@ -284,7 +285,7 @@ class ReadAloudEngineTest {
         out.release(1); settle()
         engine.jumpTo(ReadAddress.Text("text:t", 2, 0))
         out.release(100); settle()
-        assertThat(speech.spoken.last()).isEqualTo("Ten.")
-        assertThat(engine.playing.value).isFalse()
+        assertEquals("Ten.", speech.spoken.last())
+        assertFalse(engine.playing.value)
     }
 }

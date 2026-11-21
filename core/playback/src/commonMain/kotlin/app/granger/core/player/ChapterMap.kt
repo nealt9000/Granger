@@ -6,9 +6,9 @@ import app.granger.core.library.AudiobookChapter
  * An audiobook's chapters against its player playlist. Every file of the book is one playlist item, in the order its
  * chapters first name it ([files]); a chapter is (file, startMs within that file). All chapter lookups (seek to
  * chapter, the chapter shown, previous/next chapter, end of chapter for the sleep timer, bookmarks and addresses) go
- * through here. [chapters] must be non-empty, in ordinal order.
+ * through here. [chapters] must be non-empty, in ordinal order. Public since Plan I5 (shared with the iPhone's player).
  */
-internal class ChapterMap(val chapters: List<AudiobookChapter>) {
+class ChapterMap(val chapters: List<AudiobookChapter>) {
     init { require(chapters.isNotEmpty()) { "An audiobook needs at least one chapter" } }
 
     data class At(val fileIndex: Int, val positionMs: Long)

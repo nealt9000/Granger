@@ -30,6 +30,8 @@ dependencies {
     api(project(":core:library"))
     // Public: PlayerHub reads aloud through Speech, ReadSource and VoiceId.
     api(project(":core:speech"))
+    // Public: the read-aloud engine, the sleep timer, the chapter map and the place saver are shared (Plan I5).
+    api(project(":core:playback"))
     // Public: PlayerHub exposes StateFlows and suspend functions.
     api(libs.kotlinx.coroutines.android)
     implementation(libs.media3.exoplayer)

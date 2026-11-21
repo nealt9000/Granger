@@ -7,7 +7,7 @@ import app.granger.core.speech.Speech
 import app.granger.core.speech.SpeechException
 import app.granger.core.speech.Utterance
 import app.granger.core.speech.UtteranceKind
-import app.granger.core.speech.Wav
+import kotlin.time.TimeSource
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -87,9 +87,7 @@ class ReadAloudEngine(
     private var idleClose: Job? = null
     // The last few sentences' audio, by address and the speed they were made at, so a step back (or a speed change
     // and back) replays without a second synthesis.
-    private val recent = object : LinkedHashMap<Pair<ReadAddress, Float>, Pcm>(8, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Pair<ReadAddress, Float>, Pcm>?) = size > 6
-    }
+    private val recent = RecentAudio(6)
 
     val current: Utterance? get() = buffer.getOrNull(index)
 
@@ -297,10 +295,10 @@ class ReadAloudEngine(
     private suspend fun synthesize(s: Speech, u: Utterance): Pcm? {
         if (u.kind == UtteranceKind.CODE_OMITTED && u.text.isEmpty()) return null
         return try {
-            val start = System.nanoTime()
+            val start = TimeSource.Monotonic.markNow()
             val chunks = s.synthesize(u.text, speed, u.quoteOpen).toList()
-            val pcm = if (chunks.isEmpty()) null else Pcm(Wav.concat(chunks.map { it.samples }), chunks.first().sampleRate)
-            _stats.tryEmit(SentenceStat(u.address, u.text.length, (System.nanoTime() - start) / 1_000_000, pcm?.durationMs ?: 0))
+            val pcm = if (chunks.isEmpty()) null else Pcm(Pcm.concat(chunks.map { it.samples }), chunks.first().sampleRate)
+            _stats.tryEmit(SentenceStat(u.address, u.text.length, start.elapsedNow().inWholeMilliseconds, pcm?.durationMs ?: 0))
             pcm
         } catch (e: CancellationException) {
             throw e
@@ -314,4 +312,26 @@ class ReadAloudEngine(
         const val DRAIN_POLL_MS = 50L
         const val DRAIN_SLACK_MS = 1_000L
     }
+}
+
+/**
+ * The last [capacity] sentences' audio by address and speed, least recently used dropped first: what Android's
+ * access-ordered `LinkedHashMap` with `removeEldestEntry` did, in common Kotlin.
+ */
+internal class RecentAudio(private val capacity: Int) {
+    private val map = LinkedHashMap<Pair<ReadAddress, Float>, Pcm>()
+
+    operator fun get(key: Pair<ReadAddress, Float>): Pcm? {
+        val value = map.remove(key) ?: return null
+        map[key] = value
+        return value
+    }
+
+    operator fun set(key: Pair<ReadAddress, Float>, value: Pcm) {
+        map.remove(key)
+        map[key] = value
+        if (map.size > capacity) map.remove(map.keys.first())
+    }
+
+    fun clear() = map.clear()
 }
