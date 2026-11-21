@@ -146,8 +146,8 @@ class PlayerViewModelTest {
         testScheduler.advanceUntilIdle()
         assertThat(hub.calls).containsExactly("bookmark:The Storm · 2:05")
         // It says so (clean-up list: adding a bookmark gave no feedback).
-        assertThat(notice.await()).isEqualTo(UiText.Res(R.string.player_bookmarked, "The Storm · 2:05"))
-        assertThat(resolved).containsExactly(UiText.Res(R.string.player_bookmark_title, UiText.Raw("The Storm"), "2:05"))
+        assertThat(notice.await()).isEqualTo(UiText.Res("player_bookmarked", "The Storm · 2:05"))
+        assertThat(resolved).containsExactly(UiText.Res("player_bookmark_title", UiText.Raw("The Storm"), "2:05"))
     }
 
     @Test fun theFullPlayerAddsTheSongThatsOnToAPlaylist() = runTest(main.dispatcher) {
@@ -169,7 +169,7 @@ class PlayerViewModelTest {
     }
 
     @Test fun thePlayersOwnLinesAreShownInTheUsersLanguage() {
-        assertThat(playerNotice(app.granger.core.player.PlayerNotices.BOOK_FAILED)).isEqualTo(UiText.Res(R.string.player_notice_book_failed))
+        assertThat(playerNotice(app.granger.core.player.PlayerNotices.BOOK_FAILED)).isEqualTo(UiText.Res("player_notice_book_failed"))
         assertThat(playerNotice("Something else")).isEqualTo(UiText.Raw("Something else"))
     }
 

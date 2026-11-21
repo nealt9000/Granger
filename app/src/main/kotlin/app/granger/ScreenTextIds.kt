@@ -149,6 +149,16 @@ object ScreenTextIds {
         "onboarding_voice_line" -> R.string.onboarding_voice_line
         "onboarding_your_picks" -> R.string.onboarding_your_picks
         "onboarding_your_region" -> R.string.onboarding_your_region
+        "player_added_to" -> R.string.player_added_to
+        "player_added_to_playlist" -> R.string.player_added_to_playlist
+        "player_bookmark_failed" -> R.string.player_bookmark_failed
+        "player_bookmark_title" -> R.string.player_bookmark_title
+        "player_bookmarked" -> R.string.player_bookmarked
+        "player_chapter_number" -> R.string.player_chapter_number
+        "player_notice_book_failed" -> R.string.player_notice_book_failed
+        "player_notice_place_lost" -> R.string.player_notice_place_lost
+        "player_notice_queue_failed" -> R.string.player_notice_queue_failed
+        "player_notice_song_failed" -> R.string.player_notice_song_failed
         "player_voice_failed" -> R.string.player_voice_failed
         "player_voice_none" -> R.string.player_voice_none
         "readiness_covers" -> R.string.readiness_covers

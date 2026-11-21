@@ -1,13 +1,11 @@
 package app.granger.player
 
-import app.granger.invoke
 import app.granger.core.library.Playlist
 import app.granger.core.library.Playlists
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.MutableSharedFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.granger.R
 import app.granger.UiText
 import app.granger.core.library.AudioBookmark
 import app.granger.core.library.AudiobookChapter
@@ -37,6 +35,10 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import app.granger.screens.logWarn
+
+// Shared since Plan I6 Task 2: the mini-player's and the full player's model, on both phones. Android's screens draw it
+// as before; the iPhone's draw it in I6b.
 
 /** Where the listener is in the whole book: the earlier chapters' durations plus the position in this one. */
 data class BookProgress(val positionMs: Long, val durationMs: Long)
@@ -173,7 +175,7 @@ class PlayerViewModel(
         viewModelScope.launch {
             lists.add(playlistId, listOf(track.id))
             val name = allPlaylists.value.firstOrNull { it.id == playlistId }?.name
-            ownNotices.tryEmit(if (name != null) UiText.Res(R.string.player_added_to, name) else UiText.Res(R.string.player_added_to_playlist))
+            ownNotices.tryEmit(if (name != null) UiText.Res("player_added_to", name) else UiText.Res("player_added_to_playlist"))
         }
     }
 
@@ -184,7 +186,7 @@ class PlayerViewModel(
         if (name.isBlank()) return
         viewModelScope.launch {
             lists.create(name.trim(), listOf(track.id))
-            ownNotices.tryEmit(UiText.Res(R.string.player_added_to, name.trim()))
+            ownNotices.tryEmit(UiText.Res("player_added_to", name.trim()))
         }
     }
 
@@ -368,17 +370,17 @@ class PlayerViewModel(
     fun addBookmark(resolve: (UiText) -> String) {
         val ui = hub.ui.value
         val book = ui.now as? NowPlaying.Book ?: return
-        val title = resolve(UiText.Res(R.string.player_bookmark_title, chapterName(book), formatTime(ui.positionMs)))
+        val title = resolve(UiText.Res("player_bookmark_title", chapterName(book), formatTime(ui.positionMs)))
         viewModelScope.launch {
             val id = try {
                 hub.addBookmark(title)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                android.util.Log.w("Granger", "Couldn't add bookmark", e)
+                logWarn("Couldn't add bookmark", e)
                 -1L
             }
-            ownNotices.tryEmit(if (id > 0) UiText.Res(R.string.player_bookmarked, title) else UiText.Res(R.string.player_bookmark_failed))
+            ownNotices.tryEmit(if (id > 0) UiText.Res("player_bookmarked", title) else UiText.Res("player_bookmark_failed"))
         }
     }
 
@@ -391,7 +393,7 @@ class PlayerViewModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                android.util.Log.w("Granger", "Couldn't delete bookmark ${bookmark.id}", e)
+                logWarn("Couldn't delete bookmark ${bookmark.id}", e)
             }
         }
     }
@@ -420,14 +422,21 @@ fun formatTime(ms: Long): String {
     val h = s / 3600
     val m = (s % 3600) / 60
     val sec = s % 60
-    return if (h > 0) "%d:%02d:%02d".format(h, m, sec) else "%d:%02d".format(m, sec)
+    fun two(n: Long) = n.toString().padStart(2, '0')
+    return if (h > 0) "$h:${two(m)}:${two(sec)}" else "$m:${two(sec)}"
 }
 
 /** One of the player's own lines ([PlayerNotices]) in the user's language; anything else as it came. */
-internal fun playerNotice(line: String): UiText = when (line) {
-    PlayerNotices.QUEUE_FAILED -> UiText.Res(R.string.player_notice_queue_failed)
-    PlayerNotices.SONG_FAILED -> UiText.Res(R.string.player_notice_song_failed)
-    PlayerNotices.BOOK_FAILED -> UiText.Res(R.string.player_notice_book_failed)
-    PlayerNotices.PLACE_LOST -> UiText.Res(R.string.player_notice_place_lost)
+fun playerNotice(line: String): UiText = when (line) {
+    PlayerNotices.QUEUE_FAILED -> UiText.Res("player_notice_queue_failed")
+    PlayerNotices.SONG_FAILED -> UiText.Res("player_notice_song_failed")
+    PlayerNotices.BOOK_FAILED -> UiText.Res("player_notice_book_failed")
+    PlayerNotices.PLACE_LOST -> UiText.Res("player_notice_place_lost")
     else -> UiText.Raw(line)
 }
+
+/** A chapter's own title, or "Chapter 3" when it has none ([ordinal] counts from 0). */
+fun chapterName(title: String, ordinal: Int): UiText =
+    if (title.isBlank()) UiText.Res("player_chapter_number", ordinal + 1) else UiText.Raw(title)
+
+fun chapterName(book: NowPlaying.Book): UiText = chapterName(book.chapter.title, book.chapter.ordinal)

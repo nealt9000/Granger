@@ -76,12 +76,6 @@ internal fun voiceState(section: String?, ended: Boolean): UiText {
     }
 }
 
-/** A chapter's own title, or "Chapter 3" when it has none ([ordinal] counts from 0). */
-internal fun chapterName(title: String, ordinal: Int): UiText =
-    if (title.isBlank()) UiText.Res(R.string.player_chapter_number, ordinal + 1) else UiText.Raw(title)
-
-internal fun chapterName(book: NowPlaying.Book): UiText = chapterName(book.chapter.title, book.chapter.ordinal)
-
 internal fun fraction(positionMs: Long, durationMs: Long): Float =
     if (durationMs <= 0L) 0f else (positionMs.toFloat() / durationMs).coerceIn(0f, 1f)
 
