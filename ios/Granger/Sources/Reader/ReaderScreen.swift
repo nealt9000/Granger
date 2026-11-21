@@ -21,6 +21,9 @@ struct ReaderScreen: View {
     @State private var chrome = true
     @State private var showContents = false
     @State private var showText = false
+    /// What the library holds about the article (Plan LL1 Task 9): its book, In your books, the author's books.
+    @State private var footer: ArticleFooter?
+    @State private var showFooter = false
 
     /// A pack article's title from its entry (its path is no title: `based.cooking/bread.html`).
     @State private var packTitle: String?
@@ -46,8 +49,28 @@ struct ReaderScreen: View {
             }
         }
         .background(palette.background)
+        .overlay(alignment: .bottom) {
+            if chrome, let footer { ArticleFooterCard(footer: footer) { showFooter = true }.transition(.opacity) }
+        }
         .navigationTitle(title)
         .packDocumentProblem($problem)
+        .task(id: path) {
+            guard let core else { return }
+            let found = try? await core.library.articleFooter(packId: pack ?? core.pack(for: lang), path: path)
+            footer = (found?.isEmpty ?? true) ? nil : found
+        }
+        .sheet(isPresented: $showFooter) {
+            if let footer {
+                ArticleFooterSheet(footer: footer) { id in
+                    showFooter = false
+                    openRoute(.book(id: id))
+                } onOpenPassage: { id, m in
+                    showFooter = false
+                    openRoute(.bookAt(id: id, passage: BookPassage(href: m.href, quote: m.quote, before: m.before)))
+                }
+                .presentationDetents([.medium, .large])
+            }
+        }
         .task(id: pack) {
             guard let core, let pack else { return }
             let p = path

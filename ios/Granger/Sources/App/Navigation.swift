@@ -42,6 +42,12 @@ enum Route: Hashable {
     case book(id: String)
     /// Search with words already typed (the e-book reader's selection menu, as Android's SearchRoute(text)).
     case search(query: String)
+    /// A book opened at a passage (an article's In your books, Plan LL1 Task 9).
+    case bookAt(id: String, passage: BookPassage)
+    /// A catalog book pack's collection read online before (or without) the pack (Plan BK), by its catalog id.
+    case remoteCollection(packId: String)
+    /// archive.org's texts (Plan I5 Task 7).
+    case archive
 }
 
 /// What the user has read lately (Android's Continue / history): the last 50 articles, newest first.

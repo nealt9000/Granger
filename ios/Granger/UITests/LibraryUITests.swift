@@ -54,7 +54,21 @@ final class LibraryUITests: XCTestCase {
         let stack = app.buttons.matching(id("stack-", label: name)).firstMatch
         for _ in 0..<6 where !stack.waitForExistence(timeout: 2) { app.swipeUp() }
         XCTAssertTrue(stack.waitForExistence(timeout: 10), "the \(name) collection")
+        bringIntoView(stack, app)
         stack.tap()
+    }
+
+    /// The stacks scroll sideways: one past the screen's edge is dragged into view (other tests leave more collections).
+    private func bringIntoView(_ stack: XCUIElement, _ app: XCUIApplication) {
+        let window = app.windows.firstMatch
+        for _ in 0..<10 where stack.frame.maxX > window.frame.maxX {
+            let y = stack.frame.midY / max(window.frame.height, 1)
+            window.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: y)).press(forDuration: 0.05, thenDragTo: window.coordinate(withNormalizedOffset: CGVector(dx: 0.25, dy: y)))
+        }
+        for _ in 0..<10 where stack.frame.minX < window.frame.minX {
+            let y = stack.frame.midY / max(window.frame.height, 1)
+            window.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: y)).press(forDuration: 0.05, thenDragTo: window.coordinate(withNormalizedOffset: CGVector(dx: 0.75, dy: y)))
+        }
     }
 
     /// Opens whichever collection holds a book titled with [title] (a run cut short may have left it in another) and
@@ -67,6 +81,7 @@ final class LibraryUITests: XCTestCase {
         for label in labels.sorted(by: { a, _ in a.contains("My books") }) {
             let stack = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'stack-' AND label == %@", label)).firstMatch
             guard stack.exists else { continue }
+            bringIntoView(stack, app)
             stack.tap()
             let find = app.textFields["collection-find"]
             if find.waitForExistence(timeout: 10) {

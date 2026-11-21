@@ -55,6 +55,11 @@ enum BookWords {
     }
 
     static let notInPackList = "Couldn't open this book: it isn't in this pack's list."
+    static let referenceLinks = "Reference links"
+    static let linkOpen = "Open article"
+    static func linkInLibrary(_ title: String) -> String { "In your library: \(title)" }
+    static let linkRead = "Read the book"
+    static let linkGone = "That article isn’t on your phone any more"
 }
 
 /// The system dictionary for Define when no Wiktionary pack is installed (Plan I5 call 8): `UIReferenceLibraryViewController`,
@@ -109,6 +114,14 @@ final class BookReaderModel {
     var notice: String?
     /// The book's language (its first), for Define.
     private(set) var language: String?
+    /// The book has reference links (a Classic with its `.glink`, Plan LL1): the text settings offer their level.
+    private(set) var hasLinks = false
+    /// The reference links drawn at the chosen level, as decorations in their own group.
+    private(set) var linkDecorations: [Decoration] = []
+    /// A tapped link's card.
+    var peek: LinkPeek?
+    private var linksLevel: LinkLevel?
+    private var linksTask: Task<Void, Never>?
 
     private var owned: OwnedViewModel<EbookReaderModel>?
     private var watching: Task<Void, Never>?
@@ -122,7 +135,13 @@ final class BookReaderModel {
     /// turn by hand, which hides the bars; any other (opening, a jump, the slider, new text settings) leaves them.
     private var touchedAt = Date.distantPast
 
-    init(bookId: String) { self.bookId = bookId }
+    /// A passage to open at in place of the saved place (In your books).
+    let passage: BookPassage?
+
+    init(bookId: String, passage: BookPassage? = nil) {
+        self.bookId = bookId
+        self.passage = passage
+    }
 
     var model: EbookReaderModel? { owned?.model }
     var prefs: ReadingPrefs? { shared?.prefs }
@@ -155,6 +174,12 @@ final class BookReaderModel {
         let pdf = opened.conforms(to: .pdf)
         let saved = try? await core.library.position(bookId: id)
         initial = await StartPlace.choose(opened, savedJson: saved?.locatorJson)
+        // A passage from an article's footer opens there (Android's StartLocator with a mention).
+        if let passage, let url = AnyURL(string: passage.href),
+           let link = opened.readingOrder.first(where: { $0.url().removingFragment().isEquivalentTo(url.removingFragment()) }) {
+            initial = Locator(href: link.url(), mediaType: link.mediaType ?? .xhtml,
+                              text: Locator.Text(before: LinkMentions.shared.contextOf(before: passage.before), highlight: passage.quote))
+        }
         isPdf = pdf
         fixedLayout = !pdf && opened.metadata.layout == .fixed
         language = opened.metadata.languages.first.map { String($0.prefix { $0 != "-" }).lowercased() }
@@ -169,6 +194,7 @@ final class BookReaderModel {
         }
         if !pdf { await readAnchorStarts(opened) }
         positionsCount = (try? await opened.positions().get().count) ?? 0
+        if !pdf { await findLinks(core) }
     }
 
     private func fail(_ message: String) {
@@ -181,6 +207,66 @@ final class BookReaderModel {
         let wasSearching = shared?.search.query
         shared = s
         if s.search.query != wasSearching && s.search.running { searchHit = nil }
+        if hasLinks, s.prefs.referenceLinks != linksLevel { placeLinks(s.prefs.referenceLinks) }
+    }
+
+    // MARK: Reference links (Plan LL1 Task 8; Android's followLinks and openLink)
+
+    /// Whether the book has links an installed Wikipedia can open at all; then they're drawn at the chosen level.
+    private func findLinks(_ core: Core) async {
+        let all = (try? await core.library.bookMentions(bookId: bookId, level: .more)) ?? []
+        guard !all.isEmpty else { return }
+        hasLinks = true
+        placeLinks(prefs?.referenceLinks ?? .light)
+    }
+
+    /// The mentions up to [level] as decorations, found on the page by their quote and the words before it in the same
+    /// paragraph. A mention in a chapter this edition doesn't have is left out.
+    private func placeLinks(_ level: LinkLevel) {
+        guard let core, let publication else { return }
+        linksLevel = level
+        linksTask?.cancel()
+        let id = bookId
+        linksTask = Task { @MainActor [weak self] in
+            let mentions = (try? await core.library.bookMentions(bookId: id, level: level)) ?? []
+            guard !Task.isCancelled else { return }
+            var chapters: [String: ReadiumShared.Link?] = [:]
+            let placed: [Decoration] = mentions.compactMap { m in
+                let link: ReadiumShared.Link? = chapters[m.href] ?? {
+                    let found = AnyURL(string: m.href).flatMap { url in
+                        publication.readingOrder.first { $0.url().removingFragment().isEquivalentTo(url.removingFragment()) }
+                    }
+                    chapters[m.href] = .some(found)
+                    return found
+                }()
+                guard let link else { return nil }
+                let locator = Locator(href: link.url(), mediaType: link.mediaType ?? .xhtml,
+                                      text: Locator.Text(before: LinkMentions.shared.contextOf(before: m.before), highlight: m.quote))
+                return Decoration(id: LinkMentions.shared.idOf(m: m), locator: locator, style: BookHostController.referenceStyle)
+            }
+            self?.linkDecorations = placed
+            #if DEBUG
+            // UI tests can't tap one word inside the page: `-debugTapFirstLink YES` taps the first link drawn, as Readium
+            // reports a finger's tap on it.
+            if UserDefaults.standard.bool(forKey: "debugTapFirstLink"), let first = placed.first, self?.peek == nil {
+                // After the reader has settled on screen: a sheet asked for while the screen is still being pushed is dropped.
+                try? await Task.sleep(for: .seconds(3))
+                self?.openLink(first.id)
+            }
+            #endif
+        }
+    }
+
+    /// A drawn link was tapped: its card opens, or a note says the article has gone from the phone.
+    func openLink(_ decorationId: String) {
+        guard let core, let qid = LinkMentions.shared.qidOf(decorationId: decorationId)?.int64Value else { return }
+        let lang = language
+        Task { @MainActor in
+            if let found = try? await core.library.linkPeek(qid: qid, language: lang) { peek = found } else {
+                NSLog("Granger: no card for the link %lld", qid)
+                notice = BookWords.linkGone
+            }
+        }
     }
 
     func close() {

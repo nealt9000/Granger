@@ -117,6 +117,8 @@ struct LibraryScreen: View {
             }
         }
         FinishedView(books: ui.shelf.finished) { openRoute(.book(id: $0.id)) }
+        // Plan BK: everything the catalog has, to open online and keep what you want (Android shows it while online).
+        if core?.library.canFetchOnline() == true { EveryCollectionView() }
         if !ui.emptyLibrary {
             NavigationLink(value: Route.outfitting) {
                 Text("Sizes, files and sources are in Outfitting").font(.subheadline.weight(.medium)).foregroundStyle(palette.primary)

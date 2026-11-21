@@ -8,6 +8,8 @@ import SwiftUI
 /// through the book, then Contents, Search in book (an EPUB with words), Aa (not for a picture book) and the star.
 struct BookReaderScreen: View {
     let bookId: String
+    /// A passage to open at (In your books, Plan LL1 Task 9) in place of the saved place.
+    var passage: BookPassage? = nil
     @Environment(\.core) private var core
     @Environment(\.palette) private var palette
     @Environment(\.colorScheme) private var scheme
@@ -17,9 +19,10 @@ struct BookReaderScreen: View {
     @State private var model: BookReaderModel
     @State private var dragging: Double?
 
-    init(bookId: String) {
+    init(bookId: String, passage: BookPassage? = nil) {
         self.bookId = bookId
-        _model = State(initialValue: BookReaderModel(bookId: bookId))
+        self.passage = passage
+        _model = State(initialValue: BookReaderModel(bookId: bookId, passage: passage))
     }
 
     var body: some View {
@@ -27,7 +30,8 @@ struct BookReaderScreen: View {
             Color(BookHostController.pageColor(model.prefs ?? Self.defaultPrefs)).ignoresSafeArea()
             if let publication = model.publication, let prefs = model.prefs {
                 BookNavigatorView(
-                    model: model, publication: publication, prefs: prefs, decorations: model.decorations, searchHit: model.searchHit,
+                    model: model, publication: publication, prefs: prefs, decorations: model.decorations, links: model.linkDecorations,
+                    searchHit: model.searchHit,
                     onSelection: { action, selection in select(action, selection) }
                 )
                 .ignoresSafeArea()
@@ -66,9 +70,19 @@ struct BookReaderScreen: View {
         .sheet(isPresented: panelBinding(.search)) { BookSearchPanel(model: model).presentationDetents([.large]) }
         .sheet(isPresented: panelBinding(.settings)) {
             if let prefs = model.prefs {
-                TextSettingsSheet(prefs: prefs, isPdf: model.isPdf) { model.model?.updatePrefs(prefs: $0) }
+                TextSettingsSheet(prefs: prefs, isPdf: model.isPdf, hasLinks: model.hasLinks) { model.model?.updatePrefs(prefs: $0) }
                     .presentationDetents([.medium, .large])
             }
+        }
+        .sheet(item: Binding(get: { model.peek.map(PeekItem.init) }, set: { if $0 == nil { model.peek = nil } })) { item in
+            LinkPeekSheet(peek: item.peek) {
+                model.peek = nil
+                openRoute(.article(packId: item.peek.packId, path: item.peek.path))
+            } onReadBook: { id in
+                model.peek = nil
+                openRoute(.book(id: id))
+            }
+            .presentationDetents([.medium])
         }
         .sheet(item: editingBinding) { mark in
             HighlightSheet(mark: mark.mark, focusNote: model.shared?.focusNote ?? false, model: model)
@@ -295,6 +309,7 @@ struct BookSearchPanel: View {
 struct TextSettingsSheet: View {
     let prefs: ReadingPrefs
     let isPdf: Bool
+    var hasLinks = false
     let onChange: (ReadingPrefs) -> Void
     @State private var lineHeight: Double?
     @State private var margins: Double?
@@ -346,6 +361,12 @@ struct TextSettingsSheet: View {
                     setting("Theme") {
                         chips([(ReadingTheme.app, "Match app"), (.day, "Day"), (.sepia, "Sepia"), (.night, "Night")], prefs.theme) { v in onChange(change(prefs) { $0.theme = v }) }
                     }
+                    // Only a book with links offers their level (Android's hasLinks).
+                    if hasLinks {
+                        setting(BookWords.referenceLinks) {
+                            chips([(LinkLevel.off, "Off"), (.light, "Light"), (.more, "More")], prefs.referenceLinks) { v in onChange(change(prefs) { $0.referenceLinks = v }) }
+                        }
+                    }
                 }
             }
             .padding(24)
@@ -381,15 +402,16 @@ struct PrefsDraft {
     var theme: ReadingTheme
     var pdfScroll: Bool
     var pdfFitWidth: Bool
+    var referenceLinks: LinkLevel
 }
 
 func change(_ p: ReadingPrefs, _ edit: (inout PrefsDraft) -> Void) -> ReadingPrefs {
     var d = PrefsDraft(typeface: p.typeface, fontScale: p.fontScale, lineHeight: p.lineHeight, margins: p.margins, align: p.align, theme: p.theme,
-                       pdfScroll: p.pdfScroll, pdfFitWidth: p.pdfFitWidth)
+                       pdfScroll: p.pdfScroll, pdfFitWidth: p.pdfFitWidth, referenceLinks: p.referenceLinks)
     edit(&d)
     return ReadingPrefs(typeface: d.typeface, fontScale: d.fontScale, lineHeight: d.lineHeight, margins: d.margins, align: d.align, theme: d.theme,
                         appNight: p.appNight, pdfScroll: d.pdfScroll, pdfFitWidth: d.pdfFitWidth, wikiTextZoom: p.wikiTextZoom,
-                        referenceLinks: p.referenceLinks, topicFirst: p.topicFirst)
+                        referenceLinks: d.referenceLinks, topicFirst: p.topicFirst)
 }
 
 /// One highlight's colour, note and Delete (Android's HighlightSheet): a colour tap saves at once; the note when the
@@ -447,5 +469,56 @@ struct HighlightSheet: View {
     private func edited() -> BookAnnotation {
         BookAnnotation(id: mark.id, bookId: mark.bookId, kind: mark.kind, locatorJson: mark.locatorJson, text: mark.text, color: color, note: note,
                        createdAt: mark.createdAt, updatedAt: mark.updatedAt)
+    }
+}
+
+/// A passage in a book to open at (In your books): its chapter, the words and the words before them.
+struct BookPassage: Hashable {
+    let href: String
+    let quote: String
+    let before: String
+}
+
+struct PeekItem: Identifiable {
+    let peek: LinkPeek
+    var id: Int64 { peek.qid }
+}
+
+/// A tapped reference link's card (Android's LinkPeekSheet, Plan LL1 Decision 7): the article's picture, title and
+/// first sentence, and Open article; a work whose book is on the phone offers Read the book. The book stays where it is.
+struct LinkPeekSheet: View {
+    let peek: LinkPeek
+    let onOpen: () -> Void
+    var onReadBook: (String) -> Void = { _ in }
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 16) {
+                if let thumb = peek.thumbnail, let image = UIImage(contentsOfFile: thumb) {
+                    Image(uiImage: image).resizable().scaledToFill().frame(width: 88, height: 88).clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(peek.title).font(Spectral.medium(22)).lineLimit(2).foregroundStyle(palette.onSurface)
+                    if !peek.sentence.isEmpty {
+                        Text(peek.sentence).font(.callout).foregroundStyle(palette.onSurfaceVariant).lineLimit(6)
+                    }
+                }
+            }
+            if let book = peek.book {
+                HStack {
+                    Text(BookWords.linkInLibrary(book.title)).font(.callout).lineLimit(2)
+                    Spacer()
+                    Button(BookWords.linkRead) { onReadBook(book.bookId) }
+                }
+            }
+            Button(action: onOpen) { Text(BookWords.linkOpen).frame(maxWidth: .infinity) }
+                .buttonStyle(.borderedProminent)
+                .accessibilityIdentifier("link-open-article")
+            Spacer(minLength: 0)
+        }
+        .padding(24)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("link-peek")
     }
 }

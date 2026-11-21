@@ -702,8 +702,9 @@ class IosLibrary(
             },
             lead = { packId, path -> linkLead(packId, path) },
             bookOf = { id -> libraryBook(id) },
-            index = app.granger.core.library.MentionIndex("$dir/linked-library/mentions.sqlite").also {
+            index = run {
                 SystemFileSystem.createDirectories(kotlinx.io.files.Path("$dir/linked-library"))
+                app.granger.core.library.MentionIndex("$dir/linked-library/mentions.sqlite")
             },
             background = scope,
             wikipediaLanguage = { id -> languageOf(id) },
@@ -730,7 +731,9 @@ class IosLibrary(
 
     /** A tapped link's card; null when no installed pack has the article any more. */
     suspend fun linkPeek(qid: Long, language: String?): app.granger.ebook.LinkPeek? =
-        kotlinx.coroutines.withContext(app.granger.screens.ioDispatcher) { runCatching { referenceLinks.peek(qid, language) }.getOrNull() }
+        kotlinx.coroutines.withContext(app.granger.screens.ioDispatcher) {
+            runCatching { referenceLinks.peek(qid, language) }.onFailure { logLine("A link's card failed: $it") }.getOrNull()
+        }
 
     /** What the library holds about an article (the reader's footer); empty with the feature off. */
     suspend fun articleFooter(packId: String, path: String): app.granger.ebook.ArticleFooter =

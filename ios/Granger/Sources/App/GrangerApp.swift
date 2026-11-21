@@ -126,6 +126,19 @@ struct RootView: View {
         }
     }
 
+    #if DEBUG
+    private func debugLinks(_ core: Core, bookId: String) async {
+        try? await core.library.refreshPacks()
+        guard let packs = try? await core.library.packs.first(where: { !$0.isEmpty }),
+              let pack = packs.first(where: { $0.status == .ok }),
+              let main = core.library.archive(packId: pack.id)?.mainPath,
+              let book = try? await core.library.book(id: bookId) else { NSLog("debugLinks: no pack or book"); return }
+        let ok = core.library.debugLinks(bookId: bookId, epubPath: book.filePath, href: "OEBPS/c001.xhtml", quote: "Netherfield",
+                                         qid: 1_234_567, packId: pack.id, articlePath: main)
+        NSLog("debugLinks: %@", ok ? "written" : "failed")
+    }
+    #endif
+
     /// Debug builds: `-debugOpen en:Moon` opens that topic page at launch (UI tests and checks use it).
     private func debugOpen() {
         #if DEBUG
@@ -141,15 +154,34 @@ struct RootView: View {
             }
             return
         }
+        // `-debugArchiveSample YES`: a born-digital text PDF, made here, filed as a finished archive.org download would be
+        // (Plan I5 Task 7: text PDF → e-book), then opened from the shelf. The notice says which the shelf made of it.
+        if homePath.isEmpty, UserDefaults.standard.bool(forKey: "debugArchiveSample"), let core, !debugImported {
+            debugImported = true
+            Task { @MainActor in
+                let url = FileManager.default.temporaryDirectory.appendingPathComponent("archive-sample.pdf")
+                SampleTextPdf.write(to: url)
+                guard let id = try? await core.library.debugArchiveText(pdfPath: url.path, identifier: "fieldbookofropes00hawt",
+                                                                        title: SampleTextPdf.title, author: SampleTextPdf.author),
+                      let book = try? await core.library.book(id: id) else { debugNotice = "archive: failed"; return }
+                debugNotice = "archive: \(book.format == .epub ? "epub" : "pdf")"
+                homePath = [.book(id: id)]
+            }
+            return
+        }
         // `-debugBook <path on the Mac>`: that EPUB or PDF is imported into the shelf and opened (Plan I5 Task 5).
         if homePath.isEmpty, let path = UserDefaults.standard.string(forKey: "debugBook"), let core {
             Task { @MainActor in
                 guard let result = try? await core.library.importBook(path: path, displayName: (path as NSString).lastPathComponent) else { return }
-                switch onEnum(of: result) {
-                case let .imported(r): homePath = [.book(id: r.bookId)]
-                case let .alreadyThere(r): homePath = [.book(id: r.bookId)]
-                default: break
+                let opened: String? = switch onEnum(of: result) {
+                case let .imported(r): r.bookId
+                case let .alreadyThere(r): r.bookId
+                default: nil
                 }
+                // `-debugLinks YES` with `-debugPack`: a reference link in chapter 1 ("Netherfield") to the pack's main
+                // page, as a Classic's `.glink` and a QID index would give it (Plan I5 Task 7).
+                if let id = opened, UserDefaults.standard.bool(forKey: "debugLinks") { await debugLinks(core, bookId: id) }
+                if let opened { homePath = [.book(id: opened)] }
             }
             return
         }
@@ -190,6 +222,9 @@ struct RootView: View {
                     case let .book(id): BookReaderScreen(bookId: id)
                     case let .collection(id): CollectionScreen(collectionId: id)
                     case let .search(query): SearchScreen(initial: query)
+                    case let .bookAt(id, passage): BookReaderScreen(bookId: id, passage: passage)
+                    case let .remoteCollection(packId): RemoteCollectionScreen(packId: packId)
+                    case .archive: ArchiveScreen()
                     }
                 }
         }

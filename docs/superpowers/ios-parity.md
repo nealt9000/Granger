@@ -41,7 +41,7 @@ Legend: **[ ]** to do · **[x]** done on the iPhone · **≈** done with the iOS
 | Online indexes (Top `.gqid`/`.gtime`) fetched at first run | Same | I3 | [x] |
 | Outfitting (your use + nine domains), would-take sizes | Same | I3 (online), I4 (packs) | [x] |
 | Reader: Contents, text size, tap to hide bars, find in page, Listen | Same | I2 (Contents, size, bars), I3 (find), I5 (Listen) | [ ] I2 + I3 part ✓ (Contents, size, bars, find) |
-| Reader footer (In your books, article footer views), quotes | Same | I5 (books) | [ ] |
+| Reader footer (In your books, article footer views), quotes | Same | I5 (books) | ≈ [x] (I5 Task 7: the shared ReferenceLinksSource's footer under an article: In your library, the passages in your books opening the book there, the author's books; the topic page's quotes from the same source. ≈ the card rides with the bars, where Android shows it once the page is read to its end) |
 | Adult flags on default screens (Plan AF) | Same | I3 | [x] |
 
 ## Home
@@ -84,10 +84,10 @@ Legend: **[ ]** to do · **[x]** done on the iPhone · **≈** done with the iOS
 
 | Android | iPhone | Plan | |
 | --- | --- | --- | --- |
-| Library: reading shelf, collections, Classics shelf, list/grid views, letter strip, organize, covers | Same | I5 | [x] (Task 6 over the shared LibraryModel/CollectionModel; touch and hold for a book's menu, Android's long press. Every collection online (BK) waits for Task 7) |
-| E-book reader: pages, contents, search in book, highlights and notes, dictionary, text settings, link peek, fixed layout, PDF | Readium Swift (+ PDFKit) | I5 | [ ] (Task 5 built all but link peek, which comes with the Classics' links in Task 7) |
-| Granger Classics, Clásicos Granger, reference links (Linked Classics), In your books | Same | I5 | [ ] |
-| archive.org: search, item sheet, sets, text PDF → ebook, 1930 filter (Play) | Same (App Store rules as Play's) | I5 | [ ] |
+| Library: reading shelf, collections, Classics shelf, list/grid views, letter strip, organize, covers | Same | I5 | [x] (Task 6 over the shared LibraryModel/CollectionModel; touch and hold for a book's menu, Android's long press. Task 7: Every collection under the shelf while online, a book pack's collection read online over its `.gbooks` (range reads from Kiwix's mirrors in the shared RemoteBookReads, on Ktor), Keep this book, Keep the whole collection, reading editions with Original scan) |
+| E-book reader: pages, contents, search in book, highlights and notes, dictionary, text settings, link peek, fixed layout, PDF | Readium Swift (+ PDFKit) | I5 | [x] (Task 5; link peek in Task 7: reference links drawn as a Readium decoration group with Android's dotted underline, the card with Open article and Read the book, Reference links Off/Light/More in Aa for a book with links) |
+| Granger Classics, Clásicos Granger, reference links (Linked Classics), In your books | Same | I5 | [x] (I5 Task 7: the catalog's Classics in Books by kind with Keep through the shared queue (the download is filed onto the shelf), Read now without keeping (Saved for now, checked against the catalog's hash) and Open; the `.glink` and `.gqid` sidecars follow under IosFeatures.LINKED_CLASSICS (on, as Android's Features); MentionIndex and BookLinks behind the shared ReferenceLinksSource, Wikipedia online's Top index included) |
+| archive.org: search, item sheet, sets, text PDF → ebook, 1930 filter (Play) | Same (App Store rules as Play's) | I5 | [x] (I5 Task 7: the shared ArchiveModel on Ktor with FixedFilterArchivePrefs: texts only before 1930, no Show everything (call 9); search, shelves, Browse / On this phone, the item sheet with its PDF beside it, a set's parts in order, Open as a book or the set's collection; a finished download is filed by the shared shelf, a born-digital PDF becoming an EPUB through PDFKit's glyphs, pictures and the CGPDFScanner born-digital check. archive.org's audio views come with Listen in I6) |
 | Gutenberg shelf and covers | Same | I5 | [x] (Task 6: covers from the pack before first open, Make all searchable…, Open the pack's own pages, Show removed) |
 | Import your own books (EPUB, PDF, CBR) | ≈ Files import | I5 | ≈ [x] (Task 6: EPUB, PDF, TXT, Markdown, CBZ and CBR from Files through the shared FileImports; CBR by libarchive 3.8.1, Markdown by the shared PlainMarkdown; a comic is a PDF of its pages before it's imported, where Android's import takes comics only from archive.org) |
 

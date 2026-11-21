@@ -16,6 +16,7 @@ struct BookNavigatorView: UIViewControllerRepresentable {
     let publication: Publication
     let prefs: ReadingPrefs
     let decorations: [Decoration]
+    var links: [Decoration] = []
     let searchHit: Locator?
     let onSelection: (SelectionAction, Selection) -> Void
 
@@ -27,6 +28,7 @@ struct BookNavigatorView: UIViewControllerRepresentable {
         host.onSelection = onSelection
         host.apply(prefs: prefs)
         host.apply(decorations: decorations, searchHit: searchHit)
+        host.apply(links: links)
     }
 }
 
@@ -45,6 +47,17 @@ final class BookHostController: UIViewController, EPUBNavigatorDelegate, PDFNavi
 
     static let highlightGroup = "highlights"
     static let searchGroup = "search"
+    /// The reference links' group, apart from the highlights and the search hit (Android's LINKS_GROUP).
+    static let linksGroup = "links"
+    /// A reference link's look (Plan LL1 Decision 7): a thin dotted underline in the book's link tone (Android's
+    /// ReferenceLinkStyle), under the words only, so highlights draw over it unchanged.
+    static let referenceStyle = Decoration.Style(id: "granger-reference")
+    static let referenceTemplate = HTMLDecorationTemplate(
+        layout: .boxes, width: .wrap,
+        element: { _ in #"<div class="granger-ref" style="border-bottom-color: rgba(184, 102, 42, 1.00)"></div>"# },
+        stylesheet: ".granger-ref { border-bottom: 1.5px dotted; box-sizing: border-box; pointer-events: none; }"
+    )
+    private var shownLinks: [Decoration] = []
     /// The search hit's tint (Android's SEARCH_HIT_TINT).
     static let searchTint = UIColor(argb: Int32(bitPattern: 0xFFF28B30))
 
@@ -69,12 +82,19 @@ final class BookHostController: UIViewController, EPUBNavigatorDelegate, PDFNavi
                 EditingAction(title: "Define", action: #selector(grangerDefine(_:))),
                 EditingAction(title: "Search", action: #selector(grangerSearch(_:))),
             ]
-            let config = EPUBNavigatorViewController.Configuration(preferences: Self.epubPreferences(prefs, fixed: model.fixedLayout), editingActions: actions)
+            var templates = HTMLDecorationTemplate.defaultTemplates()
+            templates[Self.referenceStyle.id] = Self.referenceTemplate
+            let config = EPUBNavigatorViewController.Configuration(
+                preferences: Self.epubPreferences(prefs, fixed: model.fixedLayout), editingActions: actions, decorationTemplates: templates
+            )
             let e = try! EPUBNavigatorViewController(publication: publication, initialLocation: model.initial, config: config)
             e.delegate = self
             e.observeDecorationInteractions(inGroup: Self.highlightGroup) { [weak self] event in
                 guard let id = Int64(event.decoration.id) else { return }
                 self?.model.model?.editHighlight(id: KotlinLong(value: id))
+            }
+            e.observeDecorationInteractions(inGroup: Self.linksGroup) { [weak self] event in
+                self?.model.openLink(event.decoration.id)
             }
             epub = e
             navigator = e
@@ -133,6 +153,12 @@ final class BookHostController: UIViewController, EPUBNavigatorDelegate, PDFNavi
             shownHit = searchHit
             epub.apply(decorations: searchHit.map { [Decoration(id: "search-hit", locator: $0, style: .highlight(tint: Self.searchTint))] } ?? [], in: Self.searchGroup)
         }
+    }
+
+    func apply(links: [Decoration]) {
+        guard let epub, links != shownLinks else { return }
+        shownLinks = links
+        epub.apply(decorations: links, in: Self.linksGroup)
     }
 
     /// Readium's EPUB preferences from the shared values (Android's `toEpub`): publisher styles off so the reader's

@@ -26,6 +26,14 @@ struct GetMoreScreen: View {
             }
             Section(header: heading("Books")) {
                 link(.books, "Books by kind", "Literature, children's books, manuals and learning")
+                NavigationLink(value: Route.archive) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("archive.org").font(Spectral.regular(20)).foregroundStyle(palette.onSurface)
+                        Text("Public-domain books published before 1930").font(.callout).foregroundStyle(palette.onSurfaceVariant)
+                    }
+                    .padding(.vertical, 4)
+                }
+                .accessibilityIdentifier("getmore-archive")
             }
             Section {
                 NavigationLink(value: Route.downloads) { Label("Downloads", systemImage: "arrow.down.circle") }
@@ -91,6 +99,9 @@ struct SourceScreen: View {
     @State private var query = ""
     @State private var removing: ItemRow?
     @State private var removeBody = ""
+    /// The catalog book being read without keeping, while it comes down.
+    @State private var reading: String?
+    @State private var readFailed = false
 
     var body: some View {
         List {
@@ -147,10 +158,27 @@ struct SourceScreen: View {
                 Text("You have \(QueueWords.bytes(check.freeBytes)) free on this iPhone." + (check.sizeBytes >= check.freeBytes ? " That isn't enough room for it." : ""))
             }
         }
+        .alert(BkWords.couldntOpen, isPresented: $readFailed) { Button("OK", role: .cancel) {} }
         .alert("Remove \(removing?.title ?? "")?", isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } })) {
             Button("Remove", role: .destructive) { if let r = removing { holder.model?.remove(itemId: r.id) }; removing = nil }
             Button("Keep", role: .cancel) { removing = nil }
         } message: { Text(removeBody) }
+    }
+
+    private func canBrowse(_ row: ItemRow) -> Bool {
+        guard case .notInstalled = onEnum(of: row.status) else { return false }
+        return core?.library.canBrowseOnline(packEntryId: row.id) == true
+    }
+
+    /// Read now: the Classic fetched into Saved for now and opened, off the shelf until it's kept.
+    private func readNow(_ row: ItemRow) {
+        guard let core else { return }
+        reading = row.id
+        Task {
+            let id = try? await core.library.readWithoutKeeping(itemId: row.id)
+            reading = nil
+            if let id { openRoute(.book(id: id)) } else { readFailed = true }
+        }
     }
 
     private func volumeLine(_ v: VolumeRow, wifiOnly: Bool) -> some View {
@@ -194,8 +222,18 @@ struct SourceScreen: View {
         } else {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(alignment: .top) {
-                    rowText(row)
-                    Spacer()
+                    // A book pack not on the phone whose list is online opens as its collection (Plan BK); Keep stays
+                    // beside it as the whole pack's download.
+                    if canBrowse(row) {
+                        Button { openRoute(.remoteCollection(packId: row.id)) } label: {
+                            HStack(alignment: .top) { rowText(row); Spacer(); Image(systemName: "chevron.right").foregroundStyle(palette.onSurfaceVariant) }
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("browse-\(row.id)")
+                    } else {
+                        rowText(row)
+                        Spacer()
+                    }
                     action(row, model)
                 }
                 if row.flavours.count > 1 && !row.status.isBusy {
@@ -275,7 +313,14 @@ struct SourceScreen: View {
     @ViewBuilder private func action(_ row: ItemRow, _ model: SourceViewModel) -> some View {
         switch onEnum(of: row.status) {
         case .notInstalled, .partial:
-            Button("Keep") { model.get(itemId: row.id) }.buttonStyle(.bordered).accessibilityIdentifier("get-\(row.id)")
+            HStack(spacing: 6) {
+                // Read it now, saved for now, before choosing to keep it (Plan O2 Task 8).
+                if case .notInstalled = onEnum(of: row.status), core?.library.canReadNow(itemId: row.id) == true {
+                    Button(reading == row.id ? "Opening…" : BkWords.readNow) { readNow(row) }
+                        .buttonStyle(.borderless).disabled(reading != nil).accessibilityIdentifier("read-now-\(row.id)")
+                }
+                Button("Keep") { model.get(itemId: row.id) }.buttonStyle(.bordered).accessibilityIdentifier("get-\(row.id)")
+            }
         case .queued, .downloading:
             Button("Cancel") { model.cancel(itemId: row.id) }.buttonStyle(.bordered).accessibilityIdentifier("cancel-\(row.id)")
         case .failed:
@@ -284,7 +329,9 @@ struct SourceScreen: View {
             Button("Update") { model.get(itemId: row.id) }.buttonStyle(.bordered)
         case .installed:
             HStack(spacing: 4) {
-                if let pack = row.packId, let path = core?.library.archive(packId: pack)?.mainPath {
+                if let book = row.bookId {
+                    Button("Open") { openRoute(.book(id: book)) }.buttonStyle(.bordered).accessibilityIdentifier("open-\(row.id)")
+                } else if let pack = row.packId, let path = core?.library.archive(packId: pack)?.mainPath {
                     Button("Open") { openRoute(.packReader(pack: pack, path: path, fragment: nil)) }.buttonStyle(.bordered)
                 }
                 Menu {
