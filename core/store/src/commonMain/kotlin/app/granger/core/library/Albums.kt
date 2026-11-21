@@ -1,7 +1,7 @@
 package app.granger.core.library
 
-import java.text.Normalizer
-import java.util.Locale
+import app.granger.core.text.compose
+import app.granger.core.text.decompose
 
 /** Album identity, grouping and track order. */
 object Albums {
@@ -14,7 +14,8 @@ object Albums {
 
     /** NFKC, internal whitespace runs collapsed to one space, trimmed, lower-cased. */
     private fun normalise(s: String): String =
-        Normalizer.normalize(s, Normalizer.Form.NFKC).replace(WHITESPACE, " ").trim().lowercase(Locale.ROOT)
+        // NFKC is NFC of NFKD (java.text.Normalizer on Android, NSString on the iPhone).
+        compose(decompose(s, compat = true)).replace(WHITESPACE, " ").trim().lowercase()
 
     /**
      * "<normalised album artist>|<normalised album>"; untitled albums: "|unknown|<folder>". Normalised = trimmed, lower-cased, NFKC.
@@ -77,7 +78,7 @@ object Albums {
             { it.id },
         ))
 
-    private fun sortName(sort: String, name: String) = sort.ifBlank { name }.lowercase(Locale.ROOT)
+    private fun sortName(sort: String, name: String) = sort.ifBlank { name }.lowercase()
 
     /** The summary, paired with the first track (which holds the album's sort tags). */
     private fun summary(key: String, ordered: List<Track>): Pair<AlbumSummary, Track> {

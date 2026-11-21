@@ -1,6 +1,6 @@
 package app.granger.core.library
 
-import androidx.room.withTransaction
+
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -68,7 +68,7 @@ interface ReadingSessions {
 
 class RoomReadingSessions(
     private val db: LibraryDatabase,
-    private val now: () -> Long = System::currentTimeMillis,
+    private val now: () -> Long = ::epochMillis,
 ) : ReadingSessions {
     private val dao = db.sessionDao()
 
@@ -81,7 +81,7 @@ class RoomReadingSessions(
 
     override fun recentSearchRows(limit: Int): Flow<List<RecentSearch>> = dao.observeRecentSearches(limit)
 
-    override suspend fun openTab(packId: String, path: String, title: String): Long = db.withTransaction {
+    override suspend fun openTab(packId: String, path: String, title: String): Long = db.inTransaction {
         val time = now()
         dao.upsertHistory(HistoryEntry(packId, path, title, time))
         val existing = dao.railTabShowing(packId, path)
@@ -93,25 +93,25 @@ class RoomReadingSessions(
         }
     }
 
-    override suspend fun newTab(packId: String, path: String, title: String): Long = db.withTransaction {
+    override suspend fun newTab(packId: String, path: String, title: String): Long = db.inTransaction {
         val time = now()
         dao.upsertHistory(HistoryEntry(packId, path, title, time))
         dao.insertTab(ReadingTab(0, packId, path, title, time, onRail = true, backStack = stackOf(listOf(path))))
     }
 
     override suspend fun showInTab(tabId: Long, packId: String, path: String, title: String) {
-        db.withTransaction {
+        db.inTransaction {
             val time = now()
-            val tab = dao.tab(tabId) ?: return@withTransaction
+            val tab = dao.tab(tabId) ?: return@inTransaction
             dao.updateTab(tab.copy(packId = packId, path = path, title = title, openedAt = time))
             dao.upsertHistory(HistoryEntry(packId, path, title, time))
         }
     }
 
     override suspend fun pushPath(tabId: Long, path: String, title: String) {
-        db.withTransaction {
+        db.inTransaction {
             val time = now()
-            val tab = dao.tab(tabId) ?: return@withTransaction
+            val tab = dao.tab(tabId) ?: return@inTransaction
             val stack = pathsOf(tab.backStack)
             val pushed = if (stack.lastOrNull() == path) stack else (stack + path).takeLast(MAX_BACK_STACK)
             dao.updateTab(tab.copy(path = path, title = title, openedAt = time, backStack = stackOf(pushed)))
@@ -119,10 +119,10 @@ class RoomReadingSessions(
         }
     }
 
-    override suspend fun popPath(tabId: Long): String? = db.withTransaction {
-        val tab = dao.tab(tabId) ?: return@withTransaction null
+    override suspend fun popPath(tabId: Long): String? = db.inTransaction {
+        val tab = dao.tab(tabId) ?: return@inTransaction null
         val stack = pathsOf(tab.backStack)
-        if (stack.size < 2) return@withTransaction null
+        if (stack.size < 2) return@inTransaction null
         val left = stack.dropLast(1)
         dao.updateTab(tab.copy(backStack = stackOf(left)))
         left.last()
@@ -140,7 +140,7 @@ class RoomReadingSessions(
     override suspend fun recordSearch(query: String) {
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return
-        db.withTransaction {
+        db.inTransaction {
             dao.upsertRecentSearch(RecentSearch(trimmed, now()))
             dao.trimRecentSearches(MAX_RECENT_SEARCHES)
         }
@@ -149,7 +149,7 @@ class RoomReadingSessions(
     override suspend fun forgetSearch(query: String) = dao.deleteRecentSearch(query.trim())
 
     override suspend fun clearHistory(keepTabIds: Set<Long>, keepSearches: Set<String>) {
-        db.withTransaction {
+        db.inTransaction {
             dao.deleteAllHistory()
             dao.deleteAllRecentSearches(keepSearches)
             dao.closeTabsExcept(keepTabIds)

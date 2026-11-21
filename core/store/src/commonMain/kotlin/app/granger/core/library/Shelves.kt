@@ -1,7 +1,6 @@
 package app.granger.core.library
 
-import androidx.room.withTransaction
-import java.util.UUID
+
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -79,7 +78,7 @@ class RoomShelves(
     private val library: Library,
     private val bookshelf: Bookshelf,
     private val media: MediaLibrary,
-    private val newId: () -> String = { UUID.randomUUID().toString() },
+    private val newId: () -> String = { randomId() },
 ) : Shelves {
     private val dao = db.shelfDao()
 
@@ -148,7 +147,7 @@ class RoomShelves(
      * state. Idempotent: a second pass writes nothing.
      */
     private suspend fun settled(items: List<Filable>, collectionsFor: List<Filable> = emptyList()): Settled =
-        db.withTransaction {
+        db.inTransaction {
             val all = dao.getPlacements()
             var placements = all.associate { it.packKey to it.collectionId }
             val collections = dao.getCollections()
@@ -202,7 +201,7 @@ class RoomShelves(
     private fun trigger(): Flow<Items> {
         val items = combine(library.packs, bookshelf.books, media.tracks, media.audiobooks) { packs, books, tracks, audiobooks ->
             val origins = HashMap<String, MediaOrigin>()
-            tracks.forEach { origins.putIfAbsent(it.albumKey, it.origin) }
+            tracks.forEach { origins.getOrPut(it.albumKey) { it.origin } }
             val (bookPacks, shelved) = packs.partition { it.isBookPack }
             Items(shelved, books.filter { it.onShelf }, Albums.summaries(tracks), audiobooks, origins, bookPacks)
         }
@@ -283,25 +282,25 @@ class RoomShelves(
     }
 
     override suspend fun moveCollection(collectionId: String, toMediaTypeId: String) {
-        db.withTransaction {
+        db.inTransaction {
             dao.collection(collectionId)?.let { dao.upsertCollection(it.copy(mediaTypeId = toMediaTypeId, parentId = null)) }
         }
     }
 
     override suspend fun createMediaType(name: String): String {
         val id = newId()
-        db.withTransaction {
+        db.inTransaction {
             val next = (dao.getMediaTypes().maxOfOrNull { it.sortOrder } ?: -1) + 1
             dao.upsertMediaType(MediaType(id, name.trim(), builtIn = false, sortOrder = next))
         }
         return id
     }
 
-    override suspend fun deleteMediaType(id: String): Boolean = db.withTransaction {
+    override suspend fun deleteMediaType(id: String): Boolean = db.inTransaction {
         val type = dao.getMediaTypes().firstOrNull { it.id == id }
-        if (type == null || type.builtIn) return@withTransaction false
+        if (type == null || type.builtIn) return@inTransaction false
         val inType = dao.getCollections().filter { it.mediaTypeId == id }
-        if (inType.any { dao.placementsIn(it.id).isNotEmpty() }) return@withTransaction false
+        if (inType.any { dao.placementsIn(it.id).isNotEmpty() }) return@inTransaction false
         inType.forEach { dao.deleteCollection(it.id) }
         dao.deleteMediaType(id)
         true
@@ -314,13 +313,13 @@ class RoomShelves(
     }
 
     override suspend fun renameCollection(id: String, name: String) {
-        db.withTransaction {
+        db.inTransaction {
             dao.collection(id)?.let { dao.upsertCollection(it.copy(name = name.trim())) }
         }
     }
 
     override suspend fun deleteCollection(id: String) {
-        db.withTransaction {
+        db.inTransaction {
             dao.placementsIn(id).forEach { dao.deletePlacement(it.packKey) }
             dao.deleteCollection(id)
         }
