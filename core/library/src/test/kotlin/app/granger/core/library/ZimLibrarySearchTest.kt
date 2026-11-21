@@ -212,6 +212,9 @@ class ZimLibrarySearchTest {
         val titles = withBooks.titles("bach").hits
         assertThat(titles.map { it.packId }).doesNotContain("u-music")
         assertThat(titles.map { it.packId }).contains(bach.id)
+        // A pack book's title row names its pack by title, not by the pack's file name (Pixel check, I4b).
+        val waterRow = withBooks.titles("water treatment").hits.first { it.packId == water.id }
+        assertThat(waterRow.packTitle).isEqualTo("Water")
         // With no shelf, a book pack's hits all go.
         assertThat(search.fullText("fugue").map { it.packId }).containsNoneOf("u-music", "u-water")
     }

@@ -163,8 +163,11 @@ open class PackSearch(
     private suspend fun bookTitles(query: String): List<Pair<BookTitleSearch.Rank?, SearchHit>> {
         val allowed = languages()
         val shelf = shelf?.invoke()?.filter { allowed == null || inLanguages(it.language, allowed) } ?: return emptyList()
-        return BookTitleSearch.search(shelf, query).map { (rank, book) ->
-            rank to SearchHit(book.id, collectionOf(book, emptyList()), "", book.title, author = book.author)
+        val found = BookTitleSearch.search(shelf, query)
+        // The packs name a pack book's collection ("A Library of Knots", not "zimgit-knots_en").
+        val packs = if (found.any { it.second.origin.isPackBook }) library.packs.first() else emptyList()
+        return found.map { (rank, book) ->
+            rank to SearchHit(book.id, collectionOf(book, packs), "", book.title, author = book.author)
         }
     }
 
