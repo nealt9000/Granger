@@ -24,8 +24,11 @@ object TimeIndexDirectory {
     }
 }
 
-/** [SidecarMeta.read] for the readers still on Android's own SQLite (book links: I5 moves them). */
-fun SidecarMeta.Companion.read(db: android.database.sqlite.SQLiteDatabase): SidecarMeta? = runCatching {
-    val m = db.rawQuery("SELECT key, value FROM meta", null).use { c -> buildMap { while (c.moveToNext()) put(c.getString(0), c.getString(1)) } }
-    SidecarMeta(m["kind"].orEmpty(), m["schemaVersion"]?.toIntOrNull() ?: 0, m["sourceSha256"].orEmpty(), m)
-}.getOrNull()
+/** Android's `File` form of [BookLinks.open] (the shared one takes a path; Plan I5). */
+fun BookLinks.Companion.open(file: File, sourceSha256: String? = null): BookLinks? = open(file.path, sourceSha256)
+
+/** The links index in [file] (the shared [MentionIndex] takes a path; Plan I5). */
+fun MentionIndex(file: File): MentionIndex = MentionIndex(file.path)
+
+/** An installed Classic's links [file] (the shared [LinksFile] holds its path; Plan I5). */
+fun LinksFile(file: File, sourceSha256: String): LinksFile = LinksFile(file.path, sourceSha256)

@@ -1,13 +1,11 @@
 package app.granger.core.library
 
-import android.database.sqlite.SQLiteDatabase
-import java.io.Closeable
-import java.io.File
-
 /**
  * A Classic's reference links (`.glink`, Plan LL1 Task 7): the book's own work and year, and its mentions. Read on IO.
+ * Opened read-only as a [SqlFile] on both phones since Plan I5 (Android: the framework SQLite, `OPEN_READONLY` and
+ * `NO_LOCALIZED_COLLATORS`, so nothing is ever written into the file).
  */
-class BookLinks private constructor(private val db: SQLiteDatabase) : Closeable {
+class BookLinks private constructor(private val db: SqlFile) : AutoCloseable {
     /** The Classic's catalog id, its Wikidata work (null when none matched) and the year it was written. */
     val bookId: String
     val workQid: Long?
@@ -55,12 +53,13 @@ class BookLinks private constructor(private val db: SQLiteDatabase) : Closeable 
         const val SCHEMA_VERSION = 1
 
         /**
-         * Opens [file] read-only; null if it's missing, unreadable, not a links file, a schema this app doesn't read, or
+         * Opens [path] read-only; null if it's missing, unreadable, not a links file, a schema this app doesn't read, or
          * (with [sourceSha256]) built from another EPUB than the installed book (spec §5.2: links hide, nothing breaks).
+         * One connection: a book's links are read by one caller at a time.
          */
-        fun open(file: File, sourceSha256: String? = null): BookLinks? {
-            if (!file.isFile) return null
-            val db = runCatching { SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READONLY) }.getOrNull() ?: return null
+        fun open(path: String, sourceSha256: String? = null): BookLinks? {
+            if (!Disk.isFile(path)) return null
+            val db = SqlFile.openReadOnly(path, connections = 1) ?: return null
             val meta = SidecarMeta.read(db)
             val ok = meta != null && meta.kind == KIND && meta.schemaVersion in 1..SCHEMA_VERSION &&
                 (sourceSha256 == null || meta.sourceSha256 == sourceSha256)
