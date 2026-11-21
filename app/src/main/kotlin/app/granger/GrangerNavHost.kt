@@ -162,6 +162,7 @@ import app.granger.shell.RailTool
 import app.granger.shell.RailViewModel
 import app.granger.shell.rememberShellState
 import app.granger.sources.CatalogScope
+import app.granger.sources.title
 import app.granger.sources.GetMoreFor
 import app.granger.sources.GetMoreLink
 import app.granger.sources.GetMoreScreen

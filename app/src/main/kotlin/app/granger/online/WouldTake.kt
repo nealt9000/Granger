@@ -16,11 +16,6 @@ import androidx.compose.ui.unit.dp
 import app.granger.R
 import app.granger.formatBytes
 
-/**
- * What it would take to have an article that can't open now (spec §7, Plan O3 Task 6; builder's call 5): keep it next time
- * online (about [keepBytes]), or get the [pack] that holds it.
- */
-data class WouldTake(val packId: String, val path: String, val title: String, val keepBytes: Long, val pack: PackOffer?)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

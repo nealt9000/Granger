@@ -25,25 +25,6 @@ import app.granger.explore.Eyebrow
 import app.granger.formatBytes
 import app.granger.readiness.OutfittingSlots
 
-/** What Outfitting works on (Plan O4 Tasks 1–2). */
-class OutfittingState(
-    val ready: ReadyOfflineUi?,
-    val kept: List<KeptArticle>,
-    val savedBytes: Long,
-    val savedCapBytes: Long,
-    /** Kept articles with a newer version online (Plan O5 Task 4). */
-    val updates: List<KeptArticle> = emptyList(),
-)
-
-class OutfittingActions(
-    val onKeepTheRead: (List<Pair<String, String>>) -> Unit = {},
-    val onGetPack: (String) -> Unit = {},
-    val onOpenKept: (KeptArticle) -> Unit = {},
-    val onRemoveKept: (KeptArticle) -> Unit = {},
-    val onClearSaved: () -> Unit = {},
-    val onUpdate: (List<KeptArticle>) -> Unit = {},
-)
-
 /**
  * Outfitting's own sections (spec §8, Plan O4 builder's call 2), around Readiness's domains and files: Try Local only and
  * Your use above, On this phone (kept articles, Saved for now) above storage.
@@ -89,7 +70,7 @@ private fun YourUse(ui: ReadyOfflineUi, actions: OutfittingActions) {
                     )
                 },
                 modifier = Modifier.testTag(OutfittingTags.SUGGESTION).clickable {
-                    if (s.packId == null) actions.onKeepTheRead(s.articles) else actions.onGetPack(s.packId)
+                    s.packId.let { id -> if (id == null) actions.onKeepTheRead(s.articles) else actions.onGetPack(id) }
                 },
             )
         }

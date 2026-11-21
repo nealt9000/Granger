@@ -20,3 +20,15 @@ actual fun imageSize(path: String): Pair<Int, Int>? {
 }
 
 actual val ioDispatcher: kotlinx.coroutines.CoroutineDispatcher = kotlinx.coroutines.Dispatchers.IO
+
+actual fun formatFixed(value: Double, decimals: Int): String = String.format(Locale.getDefault(), "%.${decimals}f", value)
+
+actual fun formatInteger(n: Long): String = java.text.NumberFormat.getIntegerInstance(Locale.getDefault()).format(n)
+
+actual fun languageDisplayName(code: String): String = Locale(code).getDisplayLanguage(Locale.getDefault())
+
+actual fun monthYear(year: Int, month: Int): String =
+    java.time.LocalDate.of(year, month, 1).format(java.time.format.DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault()))
+
+actual fun mediumDate(year: Int, month: Int, day: Int): String =
+    java.time.LocalDate.of(year, month, day).format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM))

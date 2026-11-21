@@ -174,7 +174,7 @@ class HomeViewModel(
     private val appLanguageFlow = appLanguage
 
     private val strip = combine(catalog.state, library.packs, bookshelf.books, downloads.records, languages) { c, packs, books, records, (langs, app) ->
-        ReadinessModel.report(c.catalog, packs, books, records, day.value, langs, app)
+        ReadinessModel.report(c.catalog, packs, books, records, day.value.toEpochDay(), langs, app)
     }.flowOn(io)
 
     private val mediaItems = combine(media.tracks, media.audiobooks) { tracks, audiobooks -> Albums.summaries(tracks) to audiobooks }

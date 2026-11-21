@@ -63,7 +63,7 @@ class ReadinessLanguagesTest {
         pack(e.zimUuid, e.title, PackStatus.OK).copy(filePath = "/p/${e.id}.zim", name = e.zimName, sizeBytes = e.sizeBytes, hasFulltextIndex = true)
 
     private fun report(langs: List<String>, vararg packs: PackEntry, app: String = "en") =
-        ReadinessModel.report(catalog, packs.map(::installed), emptyList(), emptyList(), today, langs, app)
+        ReadinessModel.report(catalog, packs.map(::installed), emptyList(), emptyList(), today.toEpochDay(), langs, app)
 
     private fun ReadinessReport.domain(id: String) = domains.single { it.id == id }
 

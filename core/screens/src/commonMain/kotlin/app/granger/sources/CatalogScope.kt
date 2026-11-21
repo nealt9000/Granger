@@ -1,32 +1,30 @@
 package app.granger.sources
 
-import androidx.annotation.StringRes
-import app.granger.R
 import app.granger.core.catalog.BookEntry
 import app.granger.core.catalog.CatalogItem
 import app.granger.core.catalog.ModelEntry
 import app.granger.core.catalog.PackEntry
 import app.granger.core.catalog.VoiceEntry
 import app.granger.core.library.GutenbergNames
-import java.net.URI
 
 /** Where packs can be fetched from; each has its own source screen. */
-enum class CatalogScope(@StringRes val title: Int) {
-    GRANGER(R.string.sources_scope_granger), KIWIX(R.string.sources_scope_kiwix), MODELS(R.string.sources_scope_models),
+/** [titleKey] names its title (Android's `title` resolves it). */
+enum class CatalogScope(val titleKey: String) {
+    GRANGER("sources_scope_granger"), KIWIX("sources_scope_kiwix"), MODELS("sources_scope_models"),
     /** Kiwix's Project Gutenberg packs, offered as books (Plan GB Decision 7). */
-    GUTENBERG(R.string.sources_scope_gutenberg),
+    GUTENBERG("sources_scope_gutenberg"),
     /** Kiwix's other book packs, the nautilus libraries (Food for Preppers, Water, Prunelle), offered as books (Plan KB). */
-    KIWIX_BOOKS(R.string.sources_scope_kiwix_books),
+    KIWIX_BOOKS("sources_scope_kiwix_books"),
     /**
      * Get more → Books (Plan KB2 Task 4.1): every book source at once, by shelf. A view, not a home: [scopeOf] never
      * returns it, each item stays in its own scope.
      */
-    BOOKS(R.string.sources_get_books),
+    BOOKS("sources_get_books"),
     /**
      * One catalog book set (Plan KB2 Task 3.2: African Storybook · English), its screen opened from Books' shelf row: the
      * set's own presets (every book, each level) and its books by level. The screen is titled by the set.
      */
-    BOOK_SET(R.string.sources_get_books),
+    BOOK_SET("sources_get_books"),
 }
 
 /** The scopes a pack can be in: where Readiness's domain views and the other cross-scope lists look (Plan KB Decision 6). */
@@ -54,6 +52,13 @@ fun scopeOf(item: CatalogItem): CatalogScope = when (item) {
 fun isGutenberg(pack: PackEntry): Boolean = pack.family == "gutenberg" || GutenbergNames.isGutenberg(pack.zimName)
 
 private fun isKiwixUrl(url: String): Boolean {
-    val host = runCatching { URI(url).host }.getOrNull()?.lowercase() ?: return false
+    val host = hostOf(url) ?: return false
     return host == "kiwix.org" || host.endsWith(".kiwix.org")
+}
+
+/** The host of an http(s) address, lower case; null when it has none. */
+fun hostOf(url: String): String? {
+    val rest = url.substringAfter("://", "").takeIf { it.isNotEmpty() } ?: return null
+    val host = rest.substringBefore('/').substringBefore('?').substringBefore('#').substringAfterLast('@').substringBefore(':')
+    return host.lowercase().takeIf { it.isNotEmpty() }
 }

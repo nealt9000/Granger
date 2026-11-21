@@ -1,8 +1,5 @@
 package app.granger.readiness
 
-import app.granger.invoke
-import androidx.annotation.StringRes
-import app.granger.R
 import app.granger.UiText
 import app.granger.core.catalog.downloadBytes
 import app.granger.core.catalog.BookEntry
@@ -20,13 +17,11 @@ import app.granger.core.library.Book
 import app.granger.core.library.BookOrigin
 import app.granger.core.library.Pack
 import app.granger.core.library.PackStatus
-import app.granger.formatBytes
 import app.granger.sources.CatalogScope
 import app.granger.sources.scopeOf
-import java.net.URI
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
+import app.granger.sources.hostOf
+import app.granger.screens.CivilDate
+import app.granger.screens.bytesText
 
 /** How much of a knowledge domain the phone holds (spec §3.4). */
 enum class Coverage { NONE, BASIC, COMPREHENSIVE }
@@ -63,15 +58,16 @@ sealed interface Signal {
     data class Unsearchable(val packId: String, override val text: UiText) : Signal
 }
 
-enum class Source(@StringRes val title: Int) {
-    KIWIX(R.string.readiness_source_kiwix),
-    GRANGER(R.string.readiness_source_granger),
-    ARCHIVE_ORG(R.string.readiness_source_archive_org),
-    LIBRIVOX(R.string.readiness_source_librivox),
-    MY_BOOKS(R.string.readiness_source_my_books),
-    MODELS(R.string.readiness_source_models),
-    VOICES(R.string.readiness_source_voices),
-    PHONE_MEDIA(R.string.readiness_source_phone_media),
+/** [titleKey] names its title (Android's `title` resolves it). */
+enum class Source(val titleKey: String) {
+    KIWIX("readiness_source_kiwix"),
+    GRANGER("readiness_source_granger"),
+    ARCHIVE_ORG("readiness_source_archive_org"),
+    LIBRIVOX("readiness_source_librivox"),
+    MY_BOOKS("readiness_source_my_books"),
+    MODELS("readiness_source_models"),
+    VOICES("readiness_source_voices"),
+    PHONE_MEDIA("readiness_source_phone_media"),
 }
 
 data class StorageRow(
@@ -111,7 +107,8 @@ object ReadinessModel {
         packs: List<Pack>,
         books: List<Book>,
         records: List<DownloadRecord>,
-        today: LocalDate,
+        /** Days since 1970-01-01. */
+        today: Long,
         languages: List<String> = listOf(ENGLISH),
         appLanguage: String = ENGLISH,
     ): ReadinessReport {
@@ -123,7 +120,7 @@ object ReadinessModel {
         val domains = catalog?.readiness?.domains.orEmpty().map { resolved.coverage(it, langs, appLanguage) }
         return ReadinessReport(
             domains = domains,
-            signals = signals(domains, resolved, wholePacks, installed, today),
+            signals = signals(domains, resolved, wholePacks, installed, CivilDate.ofEpochDay(today)),
             storage = storage(resolved, packs, books, installed),
             needsCatalogRefresh = catalog?.readiness == null,
         )
@@ -158,11 +155,11 @@ object ReadinessModel {
             if (container.isSlice && item.isSlice && container.setId == item.setId) {
                 val set = app.granger.sources.KiwixList.setTitle(container.setId, listOf(container))
                 UiText.Res(
-                    R.string.readiness_covers_slice, set,
+                    "readiness_covers_slice", set,
                     app.granger.sources.KiwixList.shortLabel(container), app.granger.sources.KiwixList.shortLabel(item),
                 )
             } else {
-                UiText.Res(R.string.readiness_covers, app.granger.sources.KiwixList.title(container), app.granger.sources.KiwixList.title(item))
+                UiText.Res("readiness_covers", app.granger.sources.KiwixList.title(container), app.granger.sources.KiwixList.title(item))
             }
 
         /** Granger books that are whole, with their entries. */
@@ -215,8 +212,8 @@ object ReadinessModel {
 
         /** "No Spanish packs for this area yet", the language named in the app's; several languages in one line. */
         private fun emptyNote(languages: List<String>): UiText = when (languages.size) {
-            1 -> UiText.Res(R.string.readiness_no_packs_in, app.granger.sources.KiwixList.languageName(languages.single()))
-            else -> UiText.Res(R.string.readiness_no_packs_in_yours)
+            1 -> UiText.Res("readiness_no_packs_in", app.granger.sources.KiwixList.languageName(languages.single()))
+            else -> UiText.Res("readiness_no_packs_in_yours")
         }
 
         /** What a tier token stands for and whether it's installed; [zimName] for a pack token. */
@@ -266,13 +263,13 @@ object ReadinessModel {
         resolved: Resolved,
         packs: List<Pack>,
         installed: List<DownloadRecord>,
-        today: LocalDate,
+        today: CivilDate,
     ): List<Signal> {
         val empty = domains.filter { it.coverage == Coverage.NONE && it.missingEssential.isNotEmpty() }.map { d ->
             val item = d.missingEssential.first()
             // A domain can hold packs outside its tiers (Stack Overflow in Technology): its bar isn't empty, only its essentials.
-            val text = if (d.installedBytes > 0L) R.string.readiness_signal_no_essentials_for else R.string.readiness_signal_nothing_for
-            Signal.EmptyDomain(d.id, item, UiText.Res(text, d.title, app.granger.sources.KiwixList.title(item), formatBytes(item.downloadBytes)))
+            val text = if (d.installedBytes > 0L) "readiness_signal_no_essentials_for" else "readiness_signal_nothing_for"
+            Signal.EmptyDomain(d.id, item, UiText.Res(text, d.title, app.granger.sources.KiwixList.title(item), bytesText(item.downloadBytes)))
         }
         val recordByPath = installed.associateBy { it.filePath }
         val stale = packs.sortedBy { it.title.lowercase() }.mapNotNull { pack ->
@@ -282,7 +279,7 @@ object ReadinessModel {
             if (installedDate.plusDays(STALE_AFTER_DAYS) < today && newest > installedDate) {
                 Signal.Stale(
                     entry.domain.ifBlank { null }, entry.id,
-                    UiText.Res(R.string.readiness_signal_stale, pack.title, installedDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))),
+                    UiText.Res("readiness_signal_stale", pack.title, installedDate.medium()),
                 )
             } else {
                 null
@@ -290,12 +287,12 @@ object ReadinessModel {
         }
         // A map has nothing to search by text: its missing index isn't a gap (Neal, U3a walkthrough).
         val unsearchable = packs.filterNot { it.hasFulltextIndex || resolved.entryOf(it)?.family == "maps" }.sortedBy { it.title.lowercase() }.map { pack ->
-            Signal.Unsearchable(pack.id, UiText.Res(R.string.readiness_signal_unsearchable, pack.title))
+            Signal.Unsearchable(pack.id, UiText.Res("readiness_signal_unsearchable", pack.title))
         }
         return empty + stale + unsearchable
     }
 
-    private fun parseDate(text: String): LocalDate? = runCatching { LocalDate.parse(text.take(10)) }.getOrNull()
+    private fun parseDate(text: String): CivilDate? = CivilDate.parse(text)
 
     private fun storage(resolved: Resolved, packs: List<Pack>, books: List<Book>, installed: List<DownloadRecord>): List<StorageRow> {
         val bytes = LongArray(Source.entries.size)
@@ -340,7 +337,7 @@ object ReadinessModel {
     }
 
     fun sourceOf(record: DownloadRecord): Source {
-        val host = record.urls.firstOrNull()?.let { runCatching { URI(it).host }.getOrNull() }?.lowercase().orEmpty()
+        val host = record.urls.firstOrNull()?.let(::hostOf).orEmpty()
         return when {
             record.kind == ItemKind.MODEL -> Source.MODELS
             record.kind == ItemKind.VOICE -> Source.VOICES

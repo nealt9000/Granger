@@ -260,7 +260,7 @@ class ReadinessViewModel(
             voices = rows.filter { it.key in voiceKeys },
             packs = rows.filterNot { it.isModel || it.key in voiceKeys } + byHand,
             media = media.sortedBy { it.title.lowercase() },
-            report = ReadinessModel.report(src.catalog, packs, src.books, records, today(), src.languages, src.appLanguage),
+            report = ReadinessModel.report(src.catalog, packs, src.books, records, today().toEpochDay(), src.languages, src.appLanguage),
         )
     }
 

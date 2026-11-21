@@ -25,3 +25,20 @@ expect fun imageSize(path: String): Pair<Int, Int>?
 
 /** Where blocking reads run (`Dispatchers.IO` on both phones; common code can't name it). */
 expect val ioDispatcher: kotlinx.coroutines.CoroutineDispatcher
+
+// Plan I4 Task 2: the phone's own number, language and date words, for Get more, Outfitting and Readiness.
+
+/** [value] with exactly [decimals] places and the phone's decimal separator ("2.0", "2,0"); half rounds up. */
+expect fun formatFixed(value: Double, decimals: Int): String
+
+/** [n] with the phone's grouping ("69,600", "69.600"). */
+expect fun formatInteger(n: Long): String
+
+/** A language code's name in the phone's language ("en" → "English"); blank when nothing names it. */
+expect fun languageDisplayName(code: String): String
+
+/** "March 2026" in the phone's language. */
+expect fun monthYear(year: Int, month: Int): String
+
+/** A date in the phone's medium style ("5 Mar 2026", "Mar 5, 2026"). */
+expect fun mediumDate(year: Int, month: Int, day: Int): String

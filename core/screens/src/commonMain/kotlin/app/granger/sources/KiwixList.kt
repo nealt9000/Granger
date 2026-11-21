@@ -1,17 +1,13 @@
 package app.granger.sources
 
-import app.granger.invoke
-import androidx.annotation.PluralsRes
-import androidx.annotation.StringRes
-import app.granger.R
 import app.granger.UiText
 import app.granger.core.catalog.PackEntry
 import app.granger.core.library.SearchText
-import java.text.NumberFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
-import java.util.Locale
+import app.granger.screens.CivilDate
+import app.granger.screens.formatInteger
+import app.granger.screens.languageDisplayName
+import app.granger.screens.monthYear
+import app.granger.screens.phoneLanguage
 import kotlin.math.ceil
 import kotlin.math.roundToLong
 
@@ -60,10 +56,10 @@ object KiwixList {
     /** What a flavour is called on a row: With pictures, No pictures, Mini; Standard for an unflavoured ZIM. */
     fun flavourLabel(flavour: String): UiText = UiText.Res(
         when (flavour) {
-            "maxi" -> R.string.sources_flavour_with_pictures
-            "nopic" -> R.string.sources_flavour_no_pictures
-            "mini" -> R.string.sources_flavour_mini
-            else -> R.string.sources_flavour_standard
+            "maxi" -> "sources_flavour_with_pictures"
+            "nopic" -> "sources_flavour_no_pictures"
+            "mini" -> "sources_flavour_mini"
+            else -> "sources_flavour_standard"
         },
     )
 
@@ -91,7 +87,7 @@ object KiwixList {
     }
 
     /** Two parts of a line with a dot between: "No pictures · March 2026". */
-    fun dotted(a: Any, b: Any): UiText = UiText.Res(R.string.sources_dotted, a, b)
+    fun dotted(a: Any, b: Any): UiText = UiText.Res("sources_dotted", a, b)
 
     /** [parts] in a line, a dot between each; blank parts left out. */
     fun dotted(parts: List<UiText>): UiText {
@@ -135,12 +131,12 @@ object KiwixList {
      * for an English set). A set this doesn't know takes its catalog copy (Plan L3).
      */
     private val SET_TEXT = mapOf(
-        "wikipedia_en" to ("Wikipedia" to R.string.sources_set_wikipedia),
-        "wikivoyage_en" to ("Wikivoyage" to R.string.sources_set_wikivoyage),
+        "wikipedia_en" to ("Wikipedia" to "sources_set_wikipedia"),
+        "wikivoyage_en" to ("Wikivoyage" to "sources_set_wikivoyage"),
     )
 
     /** The app's language: catalog copy is picked by it (Plan L3), as [languageName] names languages in it. */
-    private fun appLanguage(): String = Locale.getDefault().language
+    private fun appLanguage(): String = phoneLanguage()
 
     /** [entry]'s copy in the app's language, when the catalog has one. */
     private fun copy(entry: PackEntry): app.granger.core.catalog.Copy? = entry.i18n[app.granger.core.catalog.Languages.normalise(appLanguage())]
@@ -204,7 +200,7 @@ object KiwixList {
         val name = shortLabel(slice)
         if (covers(slice, subject, topRank)) {
             return Adds(
-                if (installed) UiText.Res(R.string.sources_adds_inside_your, setTitle) else UiText.Res(R.string.sources_adds_inside, name),
+                if (installed) UiText.Res("sources_adds_inside_your", setTitle) else UiText.Res("sources_adds_inside", name),
                 covered = installed,
             )
         }
@@ -212,13 +208,13 @@ object KiwixList {
         // Half rounds down: the shares are stored to three places, so 0.955 is a 95.499 % measured.
         val percent = ceil(share * 100 - 0.5).toInt().coerceIn(1, 100)
         if (subject.articles <= 0) {
-            return Adds(UiText.Res(if (installed) R.string.sources_adds_to_your else R.string.sources_adds_to, name, percent), false)
+            return Adds(UiText.Res(if (installed) "sources_adds_to_your" else "sources_adds_to", name, percent), false)
         }
         val n = roundCount((subject.articles * share).roundToLong())
-        val count = NumberFormat.getIntegerInstance(Locale.getDefault()).format(n)
+        val count = formatInteger(n)
         val plural = n.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
         return Adds(
-            UiText.Plural(if (installed) R.plurals.sources_adds_about_your else R.plurals.sources_adds_about, plural, count, name, percent),
+            UiText.Plural(if (installed) "sources_adds_about_your" else "sources_adds_about", plural, count, name, percent),
             false,
         )
     }
@@ -270,13 +266,13 @@ object KiwixList {
      * A big family the Kiwix list shows as one row, "[label] · 243 [noun]", opening its own A–Z list. [words] are what a
      * search finds it by, in English like the catalog's own words (L3).
      */
-    data class Folded(val family: String, @StringRes val label: Int, @PluralsRes val noun: Int, val words: String)
+    data class Folded(val family: String, val label: String, val noun: String, val words: String)
 
     /** The families folded away; a new row here folds another (Plan KB Decision 10). */
     val FOLDED = listOf(
-        Folded("devdocs", R.string.sources_family_devdocs, R.plurals.sources_packs, "Developer docs"),
-        Folded("stack_exchange", R.string.sources_family_stack_exchange, R.plurals.sources_packs, "Q&A sites"),
-        Folded("maps", R.string.sources_family_maps, R.plurals.sources_regions, "Maps"),
+        Folded("devdocs", "sources_family_devdocs", "sources_packs", "Developer docs"),
+        Folded("stack_exchange", "sources_family_stack_exchange", "sources_packs", "Q&A sites"),
+        Folded("maps", "sources_family_maps", "sources_regions", "Maps"),
     )
 
     fun folded(family: String): Folded? = FOLDED.firstOrNull { it.family == family }
@@ -334,7 +330,7 @@ object KiwixList {
     fun languageName(code: String): String {
         val c = code.trim().lowercase()
         if (c.isEmpty()) return ""
-        val name = Locale(LANGUAGE_CODES[c] ?: c).getDisplayLanguage(Locale.getDefault())
+        val name = languageDisplayName(LANGUAGE_CODES[c] ?: c)
         return if (name.isBlank() || name.equals(c, ignoreCase = true)) c else name
     }
 
@@ -342,14 +338,17 @@ object KiwixList {
     fun languages(codes: String): UiText {
         val names = codes.split(',').map(::languageName).filter { it.isNotEmpty() }.distinct()
         return if (names.size <= 3) UiText.Raw(names.joinToString(", "))
-        else UiText.Plural(R.plurals.sources_languages_more, names.size - 3, names.take(3).joinToString(", "), names.size - 3)
+        else UiText.Plural("sources_languages_more", names.size - 3, names.take(3).joinToString(", "), names.size - 3)
     }
 
     /** "Updated March 2026" from a snapshot date ("2026-03-05"); the date as it is when it won't parse; null when blank. */
-    fun updated(snapshotDate: String): UiText? = try {
-        UiText.Res(R.string.sources_updated, LocalDate.parse(snapshotDate.take(10)).format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())))
-    } catch (_: DateTimeParseException) {
-        if (snapshotDate.isBlank()) null else UiText.Res(R.string.sources_updated, snapshotDate)
+    fun updated(snapshotDate: String): UiText? {
+        val date = CivilDate.parse(snapshotDate)
+        return when {
+            date != null -> UiText.Res("sources_updated", monthYear(date.year, date.month))
+            snapshotDate.isBlank() -> null
+            else -> UiText.Res("sources_updated", snapshotDate)
+        }
     }
 
     /**
@@ -360,29 +359,29 @@ object KiwixList {
     fun category(name: String): UiText = CATEGORIES[name]?.let { UiText.Res(it) } ?: UiText.Raw(name)
 
     private val CATEGORIES = mapOf(
-        "Medical" to R.string.sources_category_medical,
-        "Reference" to R.string.sources_category_reference,
-        "Religion & Philosophy" to R.string.sources_category_religion,
-        "Literature & Drama" to R.string.sources_category_literature,
-        "Science & Math" to R.string.sources_category_science,
-        "How-to" to R.string.sources_category_howto,
-        "Regional" to R.string.sources_category_regional,
-        "Q&A" to R.string.sources_category_qa,
-        "Maps" to R.string.sources_category_maps,
-        "Programming" to R.string.sources_category_programming,
-        "Games & Hobbies" to R.string.sources_category_games,
-        "Other" to R.string.sources_category_other,
-        "Novels & stories" to R.string.sources_category_novels,
-        "Epic & poetry" to R.string.sources_category_poetry,
-        "Drama" to R.string.sources_category_drama,
-        "Philosophy" to R.string.sources_category_philosophy,
-        "Scripture & religion" to R.string.sources_category_scripture,
-        "Opera libretti" to R.string.sources_category_opera,
+        "Medical" to "sources_category_medical",
+        "Reference" to "sources_category_reference",
+        "Religion & Philosophy" to "sources_category_religion",
+        "Literature & Drama" to "sources_category_literature",
+        "Science & Math" to "sources_category_science",
+        "How-to" to "sources_category_howto",
+        "Regional" to "sources_category_regional",
+        "Q&A" to "sources_category_qa",
+        "Maps" to "sources_category_maps",
+        "Programming" to "sources_category_programming",
+        "Games & Hobbies" to "sources_category_games",
+        "Other" to "sources_category_other",
+        "Novels & stories" to "sources_category_novels",
+        "Epic & poetry" to "sources_category_poetry",
+        "Drama" to "sources_category_drama",
+        "Philosophy" to "sources_category_philosophy",
+        "Scripture & religion" to "sources_category_scripture",
+        "Opera libretti" to "sources_category_opera",
     )
 
     /** A book's licence for its row: Granger Classics' "Public domain (US)" in the app language, anything else as is. */
     fun bookLicence(full: String): UiText =
-        if (full.trim().equals("Public domain (US)", ignoreCase = true)) UiText.Res(R.string.sources_licence_public_domain_us) else UiText.Raw(full)
+        if (full.trim().equals("Public domain (US)", ignoreCase = true)) UiText.Res("sources_licence_public_domain_us") else UiText.Raw(full)
 
     private val CC = Regex("^(CC BY(?:-(?:SA|NC|ND))*)(?:\\s+[\\d.]+)?$", RegexOption.IGNORE_CASE)
 
@@ -396,15 +395,15 @@ object KiwixList {
         // The licences' own names (CC BY-SA, CC0, ODbL, GFDL) are the same in every language.
         CC.matchEntire(text)?.let { return UiText.Raw(it.groupValues[1].uppercase()) }
         return when {
-            text.isEmpty() || lower.startsWith("not stated") -> UiText.Res(R.string.sources_licence_not_stated)
-            lower.startsWith("public domain") || lower.startsWith("public information") -> UiText.Res(R.string.sources_licence_public_domain)
-            lower.startsWith("open licen") || lower.startsWith("mixed open licen") -> UiText.Res(R.string.sources_licence_open)
+            text.isEmpty() || lower.startsWith("not stated") -> UiText.Res("sources_licence_not_stated")
+            lower.startsWith("public domain") || lower.startsWith("public information") -> UiText.Res("sources_licence_public_domain")
+            lower.startsWith("open licen") || lower.startsWith("mixed open licen") -> UiText.Res("sources_licence_open")
             lower.startsWith("cc0") -> UiText.Raw("CC0")
             lower.startsWith("odbl") -> UiText.Raw("ODbL")
             lower.startsWith("gfdl") -> UiText.Raw("GFDL")
-            lower.startsWith("cc by") -> UiText.Res(R.string.sources_licence_cc)
+            lower.startsWith("cc by") -> UiText.Res("sources_licence_cc")
             text.length <= 24 -> UiText.Raw(text)
-            else -> UiText.Res(R.string.sources_licence_see)
+            else -> UiText.Res("sources_licence_see")
         }
     }
 
@@ -426,7 +425,7 @@ object KiwixList {
     fun details(entry: PackEntry): UiText = dotted(
         listOfNotNull(
             languages(entry.language), updated(entry.snapshotDate),
-            licence(entry.license).let { if (entry.nonCommercial) UiText.Res(R.string.sources_licence_kiwix, it) else it },
+            licence(entry.license).let { if (entry.nonCommercial) UiText.Res("sources_licence_kiwix", it) else it },
         ),
     )
 }

@@ -46,3 +46,37 @@ actual fun imageSize(path: String): Pair<Int, Int>? {
 }
 
 actual val ioDispatcher: kotlinx.coroutines.CoroutineDispatcher = kotlinx.coroutines.Dispatchers.IO
+
+private fun fixedFormatter(decimals: Int) = platform.Foundation.NSNumberFormatter().apply {
+    numberStyle = platform.Foundation.NSNumberFormatterDecimalStyle
+    usesGroupingSeparator = false
+    minimumFractionDigits = decimals.toULong()
+    maximumFractionDigits = decimals.toULong()
+    roundingMode = platform.Foundation.NSNumberFormatterRoundHalfUp
+}
+
+actual fun formatFixed(value: Double, decimals: Int): String =
+    fixedFormatter(decimals).stringFromNumber(platform.Foundation.NSNumber(value)) ?: value.toString()
+
+actual fun formatInteger(n: Long): String = platform.Foundation.NSNumberFormatter().apply {
+    numberStyle = platform.Foundation.NSNumberFormatterDecimalStyle
+}.stringFromNumber(platform.Foundation.NSNumber(longLong = n)) ?: n.toString()
+
+actual fun languageDisplayName(code: String): String =
+    NSLocale.currentLocale.displayNameForKey(platform.Foundation.NSLocaleLanguageCode, value = code).orEmpty()
+
+private fun dateOf(year: Int, month: Int, day: Int): NSDate? {
+    val c = platform.Foundation.NSDateComponents().apply {
+        this.year = year.toLong(); this.month = month.toLong(); this.day = day.toLong(); this.hour = 12
+    }
+    return NSCalendar.currentCalendar.dateFromComponents(c)
+}
+
+actual fun monthYear(year: Int, month: Int): String = platform.Foundation.NSDateFormatter().apply {
+    setLocalizedDateFormatFromTemplate("MMMMyyyy")
+}.stringFromDate(dateOf(year, month, 1) ?: NSDate())
+
+actual fun mediumDate(year: Int, month: Int, day: Int): String = platform.Foundation.NSDateFormatter().apply {
+    dateStyle = platform.Foundation.NSDateFormatterMediumStyle
+    timeStyle = platform.Foundation.NSDateFormatterNoStyle
+}.stringFromDate(dateOf(year, month, day) ?: NSDate())

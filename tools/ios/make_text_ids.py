@@ -78,7 +78,7 @@ def english():
 
 
 def swift_keys(strings, plurals, en_strings, en_plurals):
-    found = set(strings)
+    found = set(strings) - set(en_plurals)
     for f in sorted(SHARED.rglob("*.kt")):
         found |= {k for k in LITERAL.findall(f.read_text()) if k in en_strings}
     return sorted(found), sorted(plurals)
@@ -111,10 +111,24 @@ enum ScreenText {{
 """
 
 
+def literal_keys(en_strings, en_plurals):
+    """Keys the shared code names as plain literals and passes on (KiwixList's flavour labels, a Folded noun): Plan I4."""
+    found_s, found_p = set(), set()
+    for f in sorted(SHARED.rglob("*.kt")):
+        for k in LITERAL.findall(f.read_text()):
+            if k in en_strings:
+                found_s.add(k)
+            elif k in en_plurals:
+                found_p.add(k)
+    return found_s, found_p
+
+
 if __name__ == "__main__":
     strings, plurals = keys()
-    text = render(strings, plurals)
     en_strings, en_plurals = english()
+    lit_s, lit_p = literal_keys(en_strings, en_plurals)
+    strings, plurals = sorted(set(strings) | lit_s), sorted(set(plurals) | lit_p)
+    text = render(strings, plurals)
     swift = render_swift(*swift_keys(strings, plurals, en_strings, en_plurals), en_strings, en_plurals)
     if "--check" in sys.argv:
         sys.exit(0 if OUT.exists() and OUT.read_text() == text and SWIFT.exists() and SWIFT.read_text() == swift else 1)

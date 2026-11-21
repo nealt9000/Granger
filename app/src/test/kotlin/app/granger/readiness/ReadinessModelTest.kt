@@ -74,7 +74,7 @@ class ReadinessModelTest {
         pack(entry.zimUuid, entry.title, status).copy(filePath = "/internal/packs/${entry.id}.zim", name = entry.zimName, sizeBytes = size, hasFulltextIndex = entry.hasFulltextIndex, date = date)
 
     private fun report(packs: List<app.granger.core.library.Pack> = emptyList(), books: List<app.granger.core.library.Book> = emptyList(), records: List<app.granger.core.downloads.DownloadRecord> = emptyList(), cat: Catalog? = catalog) =
-        ReadinessModel.report(cat, packs, books, records, today)
+        ReadinessModel.report(cat, packs, books, records, today.toEpochDay())
 
     private fun domain(r: ReadinessReport, id: String) = r.domains.single { it.id == id }
 
