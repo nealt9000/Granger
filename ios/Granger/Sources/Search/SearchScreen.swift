@@ -4,6 +4,8 @@ import SwiftUI
 /// Search (Android's Search for online Wikipedia): Titles and Articles as you type, recent searches under an empty field.
 /// Packs' results lead (Plan I4 Task 5); books join in I5.
 struct SearchScreen: View {
+    /// Words already typed (a book's selection menu); nil for the Search tab.
+    var initial: String? = nil
     @Environment(\.core) private var core
     @Environment(\.palette) private var palette
     @Environment(AppSettings.self) private var settings
@@ -44,6 +46,7 @@ struct SearchScreen: View {
         }
         .onAppear {
             model.reloadRecent()
+            if let initial, query.isEmpty { query = initial }
             if query.isEmpty { focused = true }
         }
     }

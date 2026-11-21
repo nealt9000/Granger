@@ -1,5 +1,4 @@
 import GrangerCoreKit
-import QuickLook
 import SwiftUI
 
 /// Your sources (Android's Browse from Explore, Plan U3c Decision 1 / I4 Task 7): Wikipedia online, then the packs by
@@ -114,13 +113,14 @@ struct YourSourcesScreen: View {
 }
 
 /// Files in this pack (Android's PackFilesScreen, Plan KB2 Task 4.6): the PDFs and EPUBs a website pack holds, A–Z;
-/// one opens in Quick Look (Granger's own EPUB reader comes with the Library, I5).
+/// one opens in Granger's reader as a pack document (Plan I5 Task 5), as a link to it in the pack would.
 struct PackFilesScreen: View {
     let pack: String
     @Environment(\.core) private var core
     @Environment(\.palette) private var palette
+    @Environment(\.openRoute) private var openRoute
     @State private var files: [PackFile]?
-    @State private var preview: URL?
+    @State private var problem: String?
 
     var body: some View {
         List {
@@ -142,40 +142,29 @@ struct PackFilesScreen: View {
         .background(palette.background)
         .navigationTitle("Files in this pack")
         .navigationBarTitleDisplayMode(.inline)
-        .quickLookPreview($preview)
+        .packDocumentProblem($problem)
         .task {
             guard let core else { return }
             files = await Task.detached { core.library.packFiles(packId: pack) ?? [] }.value
         }
     }
 
-    /// The file out of the pack into Caches, named by its title, then shown.
     private func open(_ f: PackFile) {
         guard let core else { return }
-        Task {
-            let url: URL? = await Task.detached {
-                guard let item = core.library.archive(packId: pack)?.read(path: f.path) else { return nil }
-                let ext = f.mimeType == "application/pdf" ? "pdf" : "epub"
-                let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("pack-files", isDirectory: true)
-                try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-                let to = dir.appendingPathComponent("\(f.title.replacingOccurrences(of: "/", with: "-")).\(ext)")
-                let data = GrangerCoreEntry.shared.bytes(of: item.bytes)
-                return (try? data.write(to: to)) != nil ? to : nil
-            }.value
-            preview = url
-        }
+        Task { problem = await PackDocumentOpener.open(core: core, pack: pack, path: f.path, linkText: f.title, openRoute: openRoute) }
     }
 }
 
-/// A book pack as a collection (Plan I4 Task 8): its books in the pack's own order, by section; one opens in Quick Look
-/// (Granger's own readers come with the Library, I5).
+/// A book pack as a collection (Plan I4 Task 8): its books in the pack's own order, by section; one opens in Granger's
+/// reader as the pack's row for it (Plan I5 Task 5; the Library's collection view comes in Task 6).
 struct BookPackScreen: View {
     let pack: String
     @Environment(\.core) private var core
     @Environment(\.palette) private var palette
+    @Environment(\.openRoute) private var openRoute
     @State private var books: [PackBookEntry]?
     @State private var title = ""
-    @State private var preview: URL?
+    @State private var problem: String?
 
     var body: some View {
         List {
@@ -204,7 +193,7 @@ struct BookPackScreen: View {
         .background(palette.background)
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
-        .quickLookPreview($preview)
+        .packDocumentProblem($problem)
         .task {
             guard let core else { return }
             title = await Task.detached { core.library.packTitle(packId: pack) }.value
@@ -214,15 +203,27 @@ struct BookPackScreen: View {
 
     private func open(_ b: PackBookEntry) {
         guard let core else { return }
-        Task {
-            let url: URL? = await Task.detached {
-                guard let item = core.library.archive(packId: pack)?.read(path: b.path) else { return nil }
-                let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("pack-files", isDirectory: true)
-                try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-                let to = dir.appendingPathComponent("\(b.title.replacingOccurrences(of: "/", with: "-")).\(b.format == .pdf ? "pdf" : "epub")")
-                return (try? GrangerCoreEntry.shared.bytes(of: item.bytes).write(to: to)) != nil ? to : nil
-            }.value
-            preview = url
+        Task { problem = await PackDocumentOpener.open(core: core, pack: pack, path: b.path, linkText: b.title, openRoute: openRoute) }
+    }
+}
+
+/// A pack's PDF or EPUB into the shelf and the reader (Android's openPackDocument, Plan P2/KB): a book pack's file is its
+/// listed row; a PDF elsewhere is copied out as a pack document. What went wrong, to say, or nil.
+enum PackDocumentOpener {
+    @MainActor
+    static func open(core: Core, pack: String, path: String, linkText: String, openRoute: (Route) -> Void) async -> String? {
+        guard let r = try? await core.library.openPackDocument(packId: pack, path: path, linkText: linkText) else { return BookWords.packProblem(.copyFailed) }
+        if let book = r.book { openRoute(.book(id: book.id)); return nil }
+        if r.notListed { return BookWords.notInPackList }
+        return BookWords.packProblem(r.problem ?? .copyFailed)
+    }
+}
+
+extension View {
+    /// Says why a pack's document didn't open (Android's toast), as an alert.
+    func packDocumentProblem(_ problem: Binding<String?>) -> some View {
+        alert(problem.wrappedValue ?? "", isPresented: Binding(get: { problem.wrappedValue != nil }, set: { if !$0 { problem.wrappedValue = nil } })) {
+            Button("OK", role: .cancel) { problem.wrappedValue = nil }
         }
     }
 }

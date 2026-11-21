@@ -36,6 +36,10 @@ enum Route: Hashable {
     case quiz(subject: String)
     /// The connections quilt round a topic.
     case quilt(lang: String, path: String)
+    /// A book on the shelf in the e-book or PDF reader, at its saved place (Plan I5 Task 5).
+    case book(id: String)
+    /// Search with words already typed (the e-book reader's selection menu, as Android's SearchRoute(text)).
+    case search(query: String)
 }
 
 /// What the user has read lately (Android's Continue / history): the last 50 articles, newest first.
@@ -104,6 +108,8 @@ struct RecentlyOpenMenu: View {
 extension Route {
     /// An article's topic page wherever it lives: Wikipedia online by its language, a pack by its id.
     static func article(packId: String, path: String) -> Route {
+        // A book on the shelf (Search's Books and titles): its reader.
+        if packId.hasPrefix("book:") { return .book(id: packId) }
         if let lang = OnlineWikipediaArchive.companion.languageOf(packId: packId) { return .topic(lang: lang, path: path) }
         return .packTopic(pack: packId, path: path)
     }

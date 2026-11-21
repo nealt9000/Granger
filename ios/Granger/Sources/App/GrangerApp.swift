@@ -118,6 +118,18 @@ struct RootView: View {
     /// Debug builds: `-debugOpen en:Moon` opens that topic page at launch (UI tests and checks use it).
     private func debugOpen() {
         #if DEBUG
+        // `-debugBook <path on the Mac>`: that EPUB or PDF is imported into the shelf and opened (Plan I5 Task 5).
+        if homePath.isEmpty, let path = UserDefaults.standard.string(forKey: "debugBook"), let core {
+            Task { @MainActor in
+                guard let result = try? await core.library.importBook(path: path, displayName: (path as NSString).lastPathComponent) else { return }
+                switch onEnum(of: result) {
+                case let .imported(r): homePath = [.book(id: r.bookId)]
+                case let .alreadyThere(r): homePath = [.book(id: r.bookId)]
+                default: break
+                }
+            }
+            return
+        }
         if homePath.isEmpty, UserDefaults.standard.bool(forKey: "debugWander") { homePath = [.wander(packId: nil, path: nil)]; return }
         guard homePath.isEmpty, let spec = UserDefaults.standard.string(forKey: "debugOpen") else { return }
         let parts = spec.split(separator: ":", maxSplits: 1).map(String.init)
@@ -152,6 +164,8 @@ struct RootView: View {
                     case .games: GamesScreen()
                     case let .quiz(subject): GamesScreen(subject: subject)
                     case let .quilt(lang, p): QuiltScreen(lang: lang, path: p)
+                    case let .book(id): BookReaderScreen(bookId: id)
+                    case let .search(query): SearchScreen(initial: query)
                     }
                 }
         }

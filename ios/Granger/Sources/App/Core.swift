@@ -14,6 +14,9 @@ final class Core: PageSource {
     /// Where packs live: Documents/Packs, which the Files app shows as On My iPhone › Granger › Packs (Plan I4
     /// builder's call 2). Left out of iCloud backup: packs are big and can be fetched again.
     let packsFolder: URL
+    /// Where books live: Documents/Books, beside Packs in the Files app (Plan I5 Task 5): imports, and the PDFs and EPUBs
+    /// copied out of packs (`packs/`, `gutenberg/`, `nautilus/`, `kiwix/`; those copies are left out of iCloud backup).
+    let booksFolder: URL
 
     init(version: String) {
         GrangerCoreEntry.shared.setZimBase(base: ZimSchemeHandler.base)
@@ -22,6 +25,9 @@ final class Core: PageSource {
         folder = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("granger", isDirectory: true)
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         packsFolder = Core.makePacksFolder()
+        booksFolder = Core.makeBooksFolder()
+        // PDFKit for the shared book rules (import, covers, outlines).
+        PdfKitEngine.install()
         #if DEBUG
         // UI tests and checks: `-debugPack <path on the Mac>` copies that pack in (the Simulator reads the Mac's disk).
         if let from = UserDefaults.standard.string(forKey: "debugPack"), FileManager.default.fileExists(atPath: from) {
@@ -48,11 +54,14 @@ final class Core: PageSource {
             // Downloads go when the gate is open (Local only stops them, as Android's NetworkGate does).
             unmetered: { KotlinBoolean(value: NetworkPath.shared.unmetered) },
             connected: { KotlinBoolean(value: NetworkPath.shared.connected && NetworkGate.shared.open) },
-            wifiOnly: { KotlinBoolean(value: LibraryGate.shared.wifiOnly) }
+            wifiOnly: { KotlinBoolean(value: LibraryGate.shared.wifiOnly) },
+            booksDir: booksFolder.path,
+            pdfCovers: PdfKitCovers()
         )
         Core.shared = self
         NetworkPath.shared.changed = { [weak self] in self?.library.networkChanged() }
         library.startDownloads()
+        library.startBooks()
     }
 
     private static func makePacksFolder() -> URL {
@@ -61,6 +70,20 @@ final class Core: PageSource {
         var values = URLResourceValues()
         values.isExcludedFromBackup = true
         try? url.setResourceValues(values)
+        return url
+    }
+
+    private static func makeBooksFolder() -> URL {
+        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("Books", isDirectory: true)
+        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        // Copies out of packs can be made again from the pack; imports are the reader's own and are backed up.
+        for name in ["packs", "gutenberg", "nautilus", "kiwix"] {
+            var sub = url.appendingPathComponent(name, isDirectory: true)
+            try? FileManager.default.createDirectory(at: sub, withIntermediateDirectories: true)
+            var values = URLResourceValues()
+            values.isExcludedFromBackup = true
+            try? sub.setResourceValues(values)
+        }
         return url
     }
 
