@@ -187,6 +187,11 @@ When I5 merges, every parity row marked I5 is ticked or carries an agreed reason
 - [ ] Walk it in Night and at the largest text size. VoiceOver is checked by tree, as before.
 - [ ] Tick the I5 rows in `ios-parity.md`, with reasons where they differ.
 - [ ] Publish a GrangerCore release and pin it. Merge and push. Tell the peer sessions what moved.
+  - Done 2026-11-21.
+    - Simulator: the whole suite 53/53 on the local core (with GRANGER_TEST_VOICE), no new crash reports; the app builds against release ios-core-2026-11-21-4. JVM suite green, 0 failures; `bundleRelease` built in Task 8.
+    - Pixel 6 walk on debug 1719 over the phone's data (DB 18/4, unchanged): read aloud in an article (Napoleon) and a book (The Gift of Fire) with the sentence mark, pause from the mini player, Voice settings (the stored 0.9× speed kept, voices with licences), Listen. No crashes. Side effect: The Gift of Fire's read-aloud place moved into Chapter 22.
+    - Night and the largest text size (accessibility XXXL), through the UI tests' screenshots: Night is right throughout. At XXXL screens scroll and stay usable, but 12 UI tests fail because they don't scroll to their controls (tests are written for the default size). Carried forward: the mini player covers the bottom of Listen's content at XXXL; the Library's titles under Reading now take most of the screen at XXXL.
+    - Parity rows were ticked in Tasks 5–8 with their ≈ reasons.
 
 ## Order and size
 
