@@ -20,10 +20,13 @@ kotlin {
             api(project(":core:zim-api"))
             api(project(":core:research"))
             api(project(":core:records"))
+            // Plan I5 Task 1: the shelf reads books with the shared book rules.
+            api(project(":core:books"))
             api(libs.androidx.room.runtime)
             api(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
-            implementation(libs.kotlinx.io.core)
+            // Public: Bookshelf.importFrom takes a kotlinx-io Source.
+            api(libs.kotlinx.io.core)
         }
         androidMain.dependencies {
             // Sidecar files through the framework SQLite, the same engine Android used before Plan I3.

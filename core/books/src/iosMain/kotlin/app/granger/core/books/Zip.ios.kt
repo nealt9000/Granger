@@ -80,7 +80,7 @@ actual class BookZip internal constructor(private val file: CPointer<FILE>, priv
     }
 }
 
-internal actual fun openBookZip(path: String): BookZip {
+actual fun openBookZip(path: String): BookZip {
     val file = fopen(path, "rb") ?: throw IOException("Cannot open $path")
     try {
         fseeko(file, 0, SEEK_END)

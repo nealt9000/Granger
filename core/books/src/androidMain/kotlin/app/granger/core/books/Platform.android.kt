@@ -21,7 +21,7 @@ actual typealias BookZip = ZipFile
 
 actual typealias BookOutput = java.io.OutputStream
 
-internal actual fun openBookZip(path: String): BookZip = try {
+actual fun openBookZip(path: String): BookZip = try {
     ZipFile(File(path))
 } catch (e: ZipException) {
     throw NotAZipException(e.message)
@@ -73,7 +73,7 @@ internal actual class EpubZip actual constructor(out: BookOutput) : AutoCloseabl
     override fun close() = z.close()
 }
 
-internal actual fun outputTo(path: String): BookOutput = FileOutputStream(File(path))
+actual fun outputTo(path: String): BookOutput = FileOutputStream(File(path))
 
 internal actual fun parentFolder(path: String): String = File(path).absoluteFile.parentFile!!.path
 

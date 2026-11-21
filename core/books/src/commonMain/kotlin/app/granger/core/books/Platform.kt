@@ -20,7 +20,7 @@ expect abstract class BookOutput : AutoCloseable {
 class NotAZipException(message: String?) : IOException(message)
 
 /** Opens the zip at [path]: [NotAZipException] when it isn't one, another [IOException] when it can't be read. */
-internal expect fun openBookZip(path: String): BookZip
+expect fun openBookZip(path: String): BookZip
 
 internal expect fun BookZip.has(name: String): Boolean
 
@@ -40,7 +40,7 @@ internal expect class EpubZip(out: BookOutput) : AutoCloseable {
 }
 
 /** A new file at [path] to write into (replacing any). */
-internal expect fun outputTo(path: String): BookOutput
+expect fun outputTo(path: String): BookOutput
 
 /** The folder holding [path], made absolute. */
 internal expect fun parentFolder(path: String): String

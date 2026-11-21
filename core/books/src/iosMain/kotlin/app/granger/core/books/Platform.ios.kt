@@ -36,7 +36,7 @@ class SinkOutput(private val sink: Sink) : BookOutput() {
     override fun close() = sink.close()
 }
 
-internal actual fun outputTo(path: String): BookOutput = SinkOutput(SystemFileSystem.sink(Path(path)).buffered())
+actual fun outputTo(path: String): BookOutput = SinkOutput(SystemFileSystem.sink(Path(path)).buffered())
 
 internal actual fun parentFolder(path: String): String {
     val absolute = if (path.startsWith("/")) path else NSFileManager.defaultManager.currentDirectoryPath.trimEnd('/') + "/" + path
