@@ -42,6 +42,9 @@ targets:
       # Kiwix's libkiwix 14.2.1 (Plan I4 Task 5): static, fetched by tools/ios/fetch-corekiwix.sh, not in git.
       - framework: ../Vendor/CoreKiwix.xcframework
         embed: false
+      # libarchive 3.8.1's RAR reader for CBR comics (Plan I5 call 6): static, built by tools/ios/fetch-libarchive.sh, not in git.
+      - framework: ../Vendor/libarchive.xcframework
+        embed: false
       - sdk: libc++.tbd
       - sdk: libz.tbd
     info:

@@ -77,21 +77,29 @@ extension EnvironmentValues {
     }
 }
 
-/// The tabs (spec §5; Plan I2 builder's call 1): Home and Search now; Explore, Library and Listen join as they're built.
+/// The tabs (spec §5; Plan I2 builder's call 1): Home, Search, Explore and Library (Plan I5 Task 6); Listen joins in
+/// Task 8.
 /// Each tab keeps its own stack, so swipe-back works and switching tabs keeps your place.
 struct RootView: View {
     @Environment(\.core) private var core
-    enum Tab: Hashable { case home, search, explore }
+    enum Tab: Hashable { case home, search, explore, library }
     @State private var tab: Tab = .home
     @State private var homePath: [Route] = []
     @State private var searchPath: [Route] = []
     @State private var explorePath: [Route] = []
+    @State private var libraryPath: [Route] = []
     @Environment(AppSettings.self) private var settings
     /// The first run (Plan I4 Task 8): once, before the privacy line is seen; finished or skipped, it doesn't come back.
+    @State private var debugImported = false
+    @State private var debugNotice: String?
     @State private var onboarding = !UserDefaults.standard.bool(forKey: "onboarding.done") && !UserDefaults.standard.bool(forKey: "privacySeen")
 
     var body: some View {
         tabs
+            .overlay(alignment: .top) {
+                if let debugNotice { Text(debugNotice).font(.caption).padding(6).background(.thinMaterial).accessibilityIdentifier("debug-import-notice")
+                    .task { try? await Task.sleep(for: .seconds(8)); self.debugNotice = nil } }
+            }
             .fullScreenCover(isPresented: $onboarding) {
                 OnboardingScreen { readNow in
                     onboarding = false
@@ -112,12 +120,27 @@ struct RootView: View {
             stack($explorePath) { ExploreScreen() }
                 .tabItem { Label("Explore", systemImage: "safari") }
                 .tag(Tab.explore)
+            stack($libraryPath) { LibraryScreen() }
+                .tabItem { Label("Library", systemImage: "books.vertical") }
+                .tag(Tab.library)
         }
     }
 
     /// Debug builds: `-debugOpen en:Moon` opens that topic page at launch (UI tests and checks use it).
     private func debugOpen() {
         #if DEBUG
+        // `-debugImport <path on the Mac>`: that file is imported as a pick from Files would be, then the Library shows
+        // (Plan I5 Task 6; UI tests can't drive the Files picker).
+        if let path = UserDefaults.standard.string(forKey: "debugImport"), let core, !debugImported {
+            debugImported = true
+            tab = .library
+            Task { @MainActor in
+                let words = await BookImport.runDebug(path: path, core: core)
+                NSLog("debugImport: %@", words)
+                debugNotice = words
+            }
+            return
+        }
         // `-debugBook <path on the Mac>`: that EPUB or PDF is imported into the shelf and opened (Plan I5 Task 5).
         if homePath.isEmpty, let path = UserDefaults.standard.string(forKey: "debugBook"), let core {
             Task { @MainActor in
@@ -154,7 +177,7 @@ struct RootView: View {
                     case .outfitting: OutfittingScreen()
                     case .yourSources: YourSourcesScreen()
                     case let .packFiles(pack): PackFilesScreen(pack: pack)
-                    case let .bookPack(pack): BookPackScreen(pack: pack)
+                    case let .bookPack(pack): BookPackCollection(pack: pack)
                     case let .source(scope, domain, family, bookSet):
                         SourceScreen(scope: CatalogScope.allCases.first { $0.name == scope } ?? .kiwix, domain: domain, family: family, bookSet: bookSet)
                     case let .subject(id): SubjectScreen(subjectId: id)
@@ -165,6 +188,7 @@ struct RootView: View {
                     case let .quiz(subject): GamesScreen(subject: subject)
                     case let .quilt(lang, p): QuiltScreen(lang: lang, path: p)
                     case let .book(id): BookReaderScreen(bookId: id)
+                    case let .collection(id): CollectionScreen(collectionId: id)
                     case let .search(query): SearchScreen(initial: query)
                     }
                 }

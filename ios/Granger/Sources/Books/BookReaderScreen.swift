@@ -13,6 +13,7 @@ struct BookReaderScreen: View {
     @Environment(\.colorScheme) private var scheme
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openRoute) private var openRoute
+    @Environment(RecentStore.self) private var recent
     @State private var model: BookReaderModel
     @State private var dragging: Double?
 
@@ -52,7 +53,11 @@ struct BookReaderScreen: View {
         .task {
             guard let core else { return }
             core.library.readingPrefs.setAppNight(night: scheme == .dark)
+            let id = bookId
+            model.onPlace = { [recent] place in recent.setPlace(bookId: id, place: place) }
             await model.open(core: core)
+            // The rail's open books on the iPhone: Recently open, at this place (Plan I5 Task 6).
+            if model.error == nil, !model.title.isEmpty { recent.addBook(id: bookId, title: model.title) }
         }
         .onChange(of: scheme) { _, s in core?.library.readingPrefs.setAppNight(night: s == .dark) }
         .onChange(of: scenePhase) { _, phase in if phase != .active { model.flush() } }

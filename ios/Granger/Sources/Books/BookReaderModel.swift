@@ -246,8 +246,15 @@ final class BookReaderModel {
     private func save(_ l: Locator) async {
         if unsaved == l { unsaved = nil }
         guard let core, let json = try? l.jsonString() else { return }
-        try? await core.library.savePosition(bookId: bookId, locatorJson: json, totalProgression: l.locations.totalProgression ?? 0, chapterTitle: placeTitle(l))
+        let chapter = placeTitle(l)
+        let progress = l.locations.totalProgression ?? 0
+        try? await core.library.savePosition(bookId: bookId, locatorJson: json, totalProgression: progress, chapterTitle: chapter)
+        let percent = "\(min(100, max(0, Int((progress * 100).rounded()))))%"
+        onPlace?(chapter.isEmpty ? percent : "\(chapter) · \(percent)")
     }
+
+    /// Told the reading place after each save ("Chapter 3 · 42%"), for Recently open.
+    var onPlace: ((String) -> Void)?
 
     /// What the rail and Continue call a place: the chapter, or in a PDF its outline entry, else "Page n".
     private func placeTitle(_ l: Locator) -> String {
