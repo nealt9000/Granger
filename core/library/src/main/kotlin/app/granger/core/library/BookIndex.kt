@@ -22,9 +22,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-/** A book chunk that matches some of the words asked about, with its text. */
-data class BookPassage(val book: Book, val href: String, val progression: Double, val text: String)
-
 /**
  * Full-text search over books. Each `book_chunks` row has a `book_text` row with the same id holding its text;
  * the text isn't stored, so snippets re-read the book. `book_text` is contentless and can't delete rows: a

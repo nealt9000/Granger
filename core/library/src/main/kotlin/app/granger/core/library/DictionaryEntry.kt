@@ -17,7 +17,7 @@ import org.jsoup.nodes.Element
  * dropped, or "betimes" is all quotation and its meaning never fits (l4-words-en-2).
  */
 internal object DictionaryEntry {
-    const val PACK_PREFIX = "wiktionary_"
+    const val PACK_PREFIX = PackPassageFinder.DICTIONARY_PREFIX
     private const val MAX_CHARS = 1_100
     private const val SEARCHED = 5
     /** Less room than this left, and the next part isn't started. */
