@@ -12,7 +12,7 @@ When I5 merges, every parity row marked I5 is ticked or carries an agreed reason
 
 **Shape (as I4).** I5a moves Android's book, library and read-aloud rules into the shared core with no change for the Android user. It's checked on the Pixel 6 and merges on its own. I5b builds the iPhone side and merges after the Simulator check. Two native pieces open with a one-hour spike each (Readium Swift in Task 5, sherpa-onnx in Task 8), and the plan stops to report if either fails.
 
-## Builder's calls in this plan (await Neal)
+## Builder's calls in this plan (all 10 OK, Neal 2026-11-21)
 
 1. **E-books in Readium's Swift toolkit, the same Readium family as Android's Kotlin 3.4.**
    - Android already stores a book's place and its highlights as Readium locator JSON in the shared store (`BookPosition.locatorJson`, `BookAnnotation.locatorJson`). Readium Swift reads the same format, so nothing is converted and a backup carries over.
