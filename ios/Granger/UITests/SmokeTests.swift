@@ -246,8 +246,15 @@ final class SmokeTests: XCTestCase {
         XCTAssertTrue(field.waitForExistence(timeout: 10))
         field.tap()
         field.typeText("bread")
-        XCTAssertTrue(app.staticTexts["Titles"].waitForExistence(timeout: 20), "pack titles with Local only on")
-        XCTAssertTrue(app.staticTexts["Articles"].waitForExistence(timeout: 20), "pack full text")
+        XCTAssertTrue(app.staticTexts["Best matches"].waitForExistence(timeout: 30), "Best matches from the pack, with Local only on")
+        // Titles and Articles come under them (the list builds what's on screen).
+        let titles = app.staticTexts["Titles"]
+        for _ in 0..<6 where !titles.exists { app.swipeUp() }
+        XCTAssertTrue(titles.waitForExistence(timeout: 10), "pack titles")
+        let articles = app.staticTexts["Articles"]
+        for _ in 0..<10 where !articles.exists { app.swipeUp() }
+        XCTAssertTrue(articles.waitForExistence(timeout: 10), "pack full text")
+        for _ in 0..<12 where !app.staticTexts["Best matches"].isHittable { app.swipeDown() }
         shot(app, "pack-search")
         app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Bread'")).firstMatch.tap()
         let read = app.buttons["read-full"]
@@ -430,5 +437,43 @@ final class SmokeTests: XCTestCase {
         pack.tap()
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'PDF'")).firstMatch.waitForExistence(timeout: 20), "its books")
         shot(app, "book-pack")
+    }
+
+    /// Plan I4 Task 6 (builder's call 3): a download under way when the app is killed carries on, or resumes from its
+    /// resume data, after the next start, and installs. Real network (the 43 MB pack); the pack is removed after.
+    func testDownloadSurvivesTheAppBeingKilled() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-wifiOnly", "NO"]
+        app.launch()
+        app.buttons["Get more"].firstMatch.tap()
+        app.buttons["getmore-books"].tap()
+        let field = app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 10))
+        field.tap()
+        field.typeText("Draw your African")
+        let get = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'get-'")).firstMatch
+        XCTAssertTrue(get.waitForExistence(timeout: 60), "the pack's Keep button")
+        get.tap()
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'cancel-'")).firstMatch.waitForExistence(timeout: 30), "downloading")
+        sleep(3)
+        app.terminate()
+
+        app.launch()
+        app.buttons["Get more"].firstMatch.tap()
+        app.buttons["Downloads"].tap()
+        XCTAssertTrue(app.staticTexts["Done today"].waitForExistence(timeout: 300), "installed after the restart")
+        shot(app, "downloads-after-kill")
+
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["getmore-books"].tap()
+        let field2 = app.searchFields.firstMatch
+        XCTAssertTrue(field2.waitForExistence(timeout: 10))
+        field2.tap()
+        field2.typeText("Draw your African")
+        let more = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'More for'")).firstMatch
+        XCTAssertTrue(more.waitForExistence(timeout: 30))
+        more.tap()
+        app.buttons["Remove"].firstMatch.tap()
+        app.alerts.buttons["Remove"].tap()
     }
 }

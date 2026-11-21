@@ -268,6 +268,8 @@ class IosLibrary(
         for (pack in packLibrary.packs.first()) {
             val want = manifests[pack.filePath] ?: run {
                 if (pack.status != app.granger.core.library.PackStatus.OK) return@run pack.bookManifest
+                // Gutenberg and nautilus packs are book packs by their scraper; only a plain Kiwix website can be a container.
+                if (pack.copy(bookManifest = null).isBookPack) return@run null
                 val counter = packLibrary.archive(pack.id)?.metadata?.counter.orEmpty()
                 if (app.granger.core.library.BookFiles.isContainer(counter)) app.granger.core.library.Pack.BOOK_FILES else null
             }
@@ -285,6 +287,28 @@ class IosLibrary(
     /** The book packs on this iPhone (shown as collections of their books; reading them comes with the Library, I5). */
     fun bookPacks(): List<app.granger.core.library.Pack> =
         kotlinx.coroutines.runBlocking { packLibrary.packs.first() }.filter { it.isBookPack && it.status == app.granger.core.library.PackStatus.OK }.sortedBy { it.title.lowercase() }
+
+    /**
+     * Search's Best matches over the packs (Plan SQ, I4 Task 9): Ask's keyword retrieval ranked as Android ranks it, one
+     * row per article (a pack family's copies are one row). Keyword-only: search by meaning waits for an embedder here.
+     */
+    private val bestMatches by lazy {
+        app.granger.core.research.BestMatches(
+            finder = app.granger.core.library.PackPassageFinder(library = packLibrary),
+            dense = null, embed = null,
+            articleKey = {
+                val families = packLibrary.packs.first().filter { it.name.isNotBlank() }.associate { it.id to app.granger.core.library.TitleMatch.family(it.name) }
+                ({ p: app.granger.core.research.Passage ->
+                    (if (p.kind == app.granger.core.research.SourceKind.ARTICLE) families[p.sourceId] ?: p.sourceId else p.sourceId) to p.location
+                })
+            },
+        )
+    }
+
+    /** The Best matches for [query] over the packs; empty with no pack. */
+    suspend fun best(query: String): List<app.granger.core.research.BestMatches.Match> =
+        if (packLibrary.packs.first().none { it.status == app.granger.core.library.PackStatus.OK }) emptyList()
+        else runCatching { bestMatches.find(query).matches }.getOrDefault(emptyList())
 
     /** Search over the packs (titles, near titles, full text), in the library's languages, as Android's. */
     val packSearch = app.granger.core.library.PackSearch(packLibrary, languages = { languages().toSet() })

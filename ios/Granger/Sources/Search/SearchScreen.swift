@@ -18,10 +18,12 @@ struct SearchScreen: View {
                 recent
             } else if model.searching && model.titles.isEmpty && model.pages.isEmpty {
                 HStack { Spacer(); ProgressView(); Spacer() }
-            } else if model.done && model.titles.isEmpty && model.pages.isEmpty {
+            } else if model.done && model.titles.isEmpty && model.pages.isEmpty && model.best.isEmpty {
                 Text(settings.canFetch ? "Nothing in your library for that. Try fewer words." : "Nothing on this phone for that. Online results appear when you're connected.")
                     .foregroundStyle(palette.onSurfaceVariant)
             } else {
+                group("Best matches", hits: model.best, all: $model.allBest, showAll: { "Show all \($0) best match\($0 == 1 ? "" : "es")" },
+                      fewer: "Show fewer best matches")
                 group("Titles", hits: model.titles, all: $model.allTitles, showAll: { "Show all \($0) title\($0 == 1 ? "" : "s")" },
                       fewer: "Show fewer titles")
                 group("Articles", hits: model.pages, all: $model.allPages, showAll: { "Show all \($0) article match\($0 == 1 ? "" : "es")" },
@@ -113,6 +115,8 @@ struct SearchRow: Identifiable, Hashable {
 final class SearchModel {
     static let preview = 5
     static let limit = 20
+    var best: [SearchRow] = []
+    var allBest = false
     var titles: [SearchRow] = []
     var pages: [SearchRow] = []
     var allTitles = false
@@ -135,8 +139,9 @@ final class SearchModel {
         let q = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         done = false
         allTitles = false
+        allBest = false
         allPages = false
-        guard !q.isEmpty else { titles = []; pages = []; return }
+        guard !q.isEmpty else { best = []; titles = []; pages = []; return }
         // A short pause, so typing doesn't send a request a letter.
         try? await Task.sleep(for: .milliseconds(300))
         if Task.isCancelled { return }
@@ -146,6 +151,11 @@ final class SearchModel {
         let onlinePack = core.pack(for: lang)
         async let pt: [SearchRow] = (try? await packs.titles(query: q))?.hits.map(Self.row) ?? []
         async let pp: [SearchRow] = (try? await packs.fullText(query: q))?.map(Self.row) ?? []
+        let library = core.library
+        async let bm: [SearchRow] = ((try? await library.best(query: q)) ?? []).map { m in
+            SearchRow(packId: m.passage.sourceId, path: m.passage.location, title: PageTitles.shared.clean(title: m.passage.sourceTitle, packTitle: m.passage.packTitle, mainPage: false), detail: m.quote(),
+                      source: m.passage.packTitle, onlineLang: nil)
+        }
         async let ot: [SearchRow] = online ? background { client.titles(lang: lang, query: q, limit: Int32(Self.limit)) }
             .map { SearchRow(packId: onlinePack, path: $0.key, title: $0.title, detail: $0.description_, source: "Wikipedia", onlineLang: lang) } : []
         async let op: [SearchRow] = online ? background { client.pages(lang: lang, query: q, limit: Int32(Self.limit)) }
@@ -156,6 +166,10 @@ final class SearchModel {
         pages = Self.merged(packPages, onlinePages)
         searching = false
         done = true
+        // Best matches rank passages, slower than titles: they join when ready (Android shows them as they come too).
+        let bestRows = await bm
+        if Task.isCancelled { return }
+        best = bestRows
     }
 
     private static func row(_ h: SearchHit) -> SearchRow {
