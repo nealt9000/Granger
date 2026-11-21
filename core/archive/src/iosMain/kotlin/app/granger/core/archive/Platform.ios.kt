@@ -18,7 +18,7 @@ internal actual fun nowMillis(): Long = (NSDate().timeIntervalSince1970 * 1000).
 internal actual fun currentYear(): Int = NSCalendar.currentCalendar.component(NSCalendarUnitYear, NSDate()).toInt()
 
 internal actual fun logWarn(message: String) {
-    NSLog("GrangerHttp: %@", message)
+    NSLog("GrangerHttp: $message".replace("%", "%%"))
 }
 
 /**

@@ -112,7 +112,7 @@ object ArchiveDownloads {
             sizeBytes = file.sizeBytes ?: 0L,
             hash = hash,
             hashAlgorithm = algorithm,
-            relativePath = "books/archive-org/$key.$extension",
+            relativePath = "${app.granger.core.downloads.DownloadLayout.books}/archive-org/$key.$extension",
             snapshotDate = "",
             groupId = part?.let { setGroupId(identifier) },
         )

@@ -25,7 +25,8 @@ final class OnboardingHolder {
 }
 
 /// The first run (Android's OnboardingScreen): Welcome (start reading now, or outfit for offline), Pick a start with the
-/// region and quick wins, then Review and Start. The voice step joins with the voices (I5).
+/// region and quick wins (the Granger voice among them since Plan I5 Task 8: the shared Read aloud line), then Review and
+/// Start.
 struct OnboardingScreen: View {
     var startAt: Step = .welcome
     let onDone: (_ readNow: Bool) -> Void

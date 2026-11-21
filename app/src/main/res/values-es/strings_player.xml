@@ -109,4 +109,8 @@
     <string name="player_notice_song_failed">No se pudo reproducir esto. Puede que el archivo falte o esté dañado.</string>
     <string name="player_notice_book_failed">No se pudo reproducir este capítulo. Puede que su archivo falte o esté dañado: Preparación puede revisarlo.</string>
     <string name="player_notice_place_lost">No se encontró dónde ibas en este libro, así que empieza desde el principio. Elige un capítulo para seguir.</string>
+    <!-- Read aloud asked for with no voice installed (Plan I5 Task 8, the iPhone's player). -->
+    <string name="player_voice_none">Ninguna voz de este teléfono puede leer en voz alta. Consigue una en Ajustes › Voz.</string>
+    <!-- The voice's engine wouldn't load (Plan I5 Task 8). -->
+    <string name="player_voice_failed">La voz no pudo empezar.</string>
 </resources>

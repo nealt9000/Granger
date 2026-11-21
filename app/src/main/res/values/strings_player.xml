@@ -140,4 +140,8 @@
     <string name="player_notice_song_failed">Couldn\'t play this. The file may be missing or damaged.</string>
     <string name="player_notice_book_failed">Couldn\'t play this chapter. Its file may be missing or damaged: Readiness can check it.</string>
     <string name="player_notice_place_lost">Couldn\'t find your place in this book, so it starts at the beginning. Pick a chapter to go on.</string>
+    <!-- Read aloud asked for with no voice installed (Plan I5 Task 8, the iPhone's player). -->
+    <string name="player_voice_none">No voice on this phone can read aloud. Get one in Settings › Voice.</string>
+    <!-- The voice's engine wouldn't load (Plan I5 Task 8). -->
+    <string name="player_voice_failed">The voice couldn\'t start.</string>
 </resources>

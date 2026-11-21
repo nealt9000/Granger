@@ -175,17 +175,6 @@ fun VoiceSettingsScreen(viewModel: VoiceSettingsViewModel, onBack: () -> Unit) {
     }
 }
 
-/**
- * The voices to list first and the ones behind "System voices": every Granger voice, plus the voice in use when it's a
- * system one ([chosen] if it's installed, else the first voice, which is what reads then); every other system voice
- * goes second.
- */
-internal fun splitVoices(voices: List<Voice>, chosen: VoiceId?): Pair<List<Voice>, List<Voice>> {
-    val inUse = voices.firstOrNull { it.id == chosen } ?: voices.firstOrNull()
-    val shown = voices.filter { it.id is VoiceId.Granger || it == inUse }
-    return shown to voices.filterNot { it in shown }
-}
-
 @Composable
 private fun Heading(text: String) {
     Text(

@@ -24,16 +24,22 @@ data class VoiceFile(val name: String, val sizeBytes: Long, val sha256: String)
  * voice never looks installed, and the zip goes. Every entry must stay inside the directory ([isSafeEntry]) and the zip
  * must carry a `manifest.json`, which Readiness checks the unpacked files against ([quick], [full]). The unpacked
  * directory is what the voice list counts (`PiperVoices` in `:core:speech`: `tokens.txt`, `espeak-ng-data/` and one
- * `.onnx` model). Android unpacks with `java.util.zip` (`VoiceUnpacker`); the iPhone's unzip comes with its voices
- * (Plan I5b).
+ * `.onnx` model). Android unpacks with `java.util.zip` (`VoiceUnpacker`), the iPhone with core:books' zip reader
+ * (Plan I5 Task 8).
  */
 object VoiceDownloads {
     /** The folder under each volume's root that holds the voices. */
     const val FOLDER = "voices"
     const val MANIFEST = "manifest.json"
 
-    /** Where the queue puts a voice's zip, relative to the volume's root. */
-    fun zipPath(id: String): String = "$FOLDER/$id.zip"
+    /**
+     * Where the queue puts a voice's zip, relative to the volume's root: `voices/<id>.zip` on Android; on the iPhone under
+     * the hidden companions folder ([DownloadLayout.companions], `.granger/voices/…`), so Files shows only packs and books.
+     */
+    fun zipPath(id: String): String = "${DownloadLayout.companions}$FOLDER/$id.zip"
+
+    /** Every voice folder under a volume [root]: what the voice list reads. */
+    fun voicesDir(root: String): String = Files.join(root, "${DownloadLayout.companions}$FOLDER")
 
     /** The directory a voice zip unpacks into: `voices/<id>/` beside the zip. */
     fun voiceDir(zipPath: String): String {

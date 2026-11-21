@@ -89,7 +89,7 @@ actual fun englishCountryName(code: String): String =
     NSLocale(localeIdentifier = "en_US").displayNameForKey(platform.Foundation.NSLocaleCountryCode, value = code).orEmpty()
 
 actual fun logWarn(message: String, error: Throwable?) {
-    platform.Foundation.NSLog("Granger: %@", if (error == null) message else "$message ($error)")
+    platform.Foundation.NSLog("Granger: ${if (error == null) message else "$message ($error)"}".replace("%", "%%"))
 }
 
 actual fun languageNameIn(language: String, inLanguage: String): String {

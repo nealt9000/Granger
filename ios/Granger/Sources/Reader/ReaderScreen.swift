@@ -1,5 +1,4 @@
 import GrangerCoreKit
-import QuickLook
 import SwiftUI
 
 /// The full article (Android's reader for an online Wikipedia page): the page in Granger's look, Contents, text size,
@@ -22,10 +21,20 @@ struct ReaderScreen: View {
     @State private var chrome = true
     @State private var showContents = false
     @State private var showText = false
+    /// What the library holds about the article (Plan LL1 Task 9): its book, In your books, the author's books.
+    @State private var footer: ArticleFooter?
+    @State private var showFooter = false
 
     /// A pack article's title from its entry (its path is no title: `based.cooking/bread.html`).
     @State private var packTitle: String?
-    @State private var document: URL?
+    @State private var problem: String?
+    @Environment(\.voice) private var voice
+    /// The page follows the voice's sentence until the reader scrolls it (Android's following).
+    @State private var following = true
+    /// The pack the article is read from: its own, or Wikipedia online's for [lang].
+    private var packId: String { pack ?? core?.pack(for: lang) ?? "" }
+    private var readKey: String { "pack:\(packId)/\(path)" }
+    private var readingThisPage: Bool { voice?.ui.now?.sourceKey == readKey }
     private var title: String { packTitle ?? GrangerCoreEntry.shared.titleOfKey(key: path) }
 
     var body: some View {
@@ -36,19 +45,47 @@ struct ReaderScreen: View {
                     source: model.tracking(core), textScale: settings.textScale, dark: scheme == .dark, controller: controller,
                     onToggleChrome: { withAnimation(.easeInOut(duration: 0.2)) { chrome.toggle() } },
                     onOpenArticle: { linkPack, p, _ in
-                        // A pack's PDF or EPUB (Plan I4): handed on to Quick Look, not opened as an article.
+                        // A pack's PDF or EPUB opens in Granger's reader (Plan I5 Task 5), not as an article.
                         if pack != nil, Self.isDocument(p) { openDocument(pack: linkPack, path: p); return }
                         openRoute(pack == nil ? .topic(lang: lang, path: p) : .article(packId: linkPack, path: p))
                     },
                     // Recently open lists Wikipedia online's articles (a pack article's place there comes with the shelf, I5).
-                    onLoaded: { if pack == nil { recent.add(lang: lang, path: path, title: title) } }
+                    onLoaded: {
+                        if pack == nil { recent.add(lang: lang, path: path, title: title) }
+                        markSentence()
+                    },
+                    onUserScroll: { if readingThisPage { following = false } },
+                    onReadFromHere: { readFromHere() }
                 )
                 .ignoresSafeArea(edges: chrome ? [] : .all)
             }
         }
         .background(palette.background)
+        .overlay(alignment: .bottom) {
+            if chrome, let footer { ArticleFooterCard(footer: footer) { showFooter = true }.transition(.opacity) }
+        }
         .navigationTitle(title)
-        .quickLookPreview($document)
+        .packDocumentProblem($problem)
+        // The sentence being read, marked on the page and followed (Android's ReadAloudScript mark).
+        .onChange(of: voice?.progress) { markSentence() }
+        .onChange(of: readingThisPage) { markSentence() }
+        .task(id: path) {
+            guard let core else { return }
+            let found = try? await core.library.articleFooter(packId: pack ?? core.pack(for: lang), path: path)
+            footer = (found?.isEmpty ?? true) ? nil : found
+        }
+        .sheet(isPresented: $showFooter) {
+            if let footer {
+                ArticleFooterSheet(footer: footer) { id in
+                    showFooter = false
+                    openRoute(.book(id: id))
+                } onOpenPassage: { id, m in
+                    showFooter = false
+                    openRoute(.bookAt(id: id, passage: BookPassage(href: m.href, quote: m.quote, before: m.before)))
+                }
+                .presentationDetents([.medium, .large])
+            }
+        }
         .task(id: pack) {
             guard let core, let pack else { return }
             let p = path
@@ -59,6 +96,7 @@ struct ReaderScreen: View {
         .statusBarHidden(!chrome)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
+                listenButton
                 Button { showContents = true } label: { Image(systemName: "list.bullet") }
                     .accessibilityLabel("Contents")
                     .disabled(model.headings.isEmpty)
@@ -158,24 +196,59 @@ struct TextSizeSheet: View {
 }
 
 extension ReaderScreen {
+    /// Listen (Android's VoiceButton): start on this page, else pause or resume the voice reading it.
+    @ViewBuilder var listenButton: some View {
+        if readingThisPage, let voice {
+            Button { voice.voice.player.playPause() } label: { Image(systemName: voice.ui.playing ? "pause.circle" : "headphones.circle") }
+                .accessibilityLabel(voice.ui.playing ? "Pause" : "Resume")
+                .accessibilityIdentifier("reader-listen")
+        } else {
+            Button { listen() } label: { Image(systemName: "headphones") }
+                .accessibilityLabel("Listen")
+                .accessibilityIdentifier("reader-listen")
+        }
+    }
+
+    /// Starts the voice at the first block the page shows, or at the article's saved place when that is further on.
+    func listen() {
+        guard let voice else { return }
+        following = true
+        let (pack, p, t) = (packId, path, title)
+        controller.evaluate(GrangerCoreEntry.shared.readFirstVisible()) { json in
+            let ref = GrangerCoreEntry.shared.blockRef(json: json)
+            voice.voice.readArticle(packId: pack, path: p, title: t, blockId: ref?.id, offset: ref.flatMap { $0.offset >= 0 ? KotlinInt(value: $0.offset) : nil })
+        }
+    }
+
+    /// Read from here: the selection's sentence.
+    func readFromHere() {
+        guard let voice else { return }
+        following = true
+        let (pack, p, t) = (packId, path, title)
+        controller.evaluate(GrangerCoreEntry.shared.readSelectionBlock()) { json in
+            guard let ref = GrangerCoreEntry.shared.blockRef(json: json) else { return }
+            voice.voice.readArticleFrom(packId: pack, path: p, title: t, blockId: ref.id, offset: ref.offset >= 0 ? KotlinInt(value: ref.offset) : nil)
+        }
+    }
+
+    /// Marks the voice's sentence when it's on this page and Settings › Voice says to; clears it otherwise.
+    func markSentence() {
+        guard let voice, controller.ready else { return }
+        guard voice.voice.prefs.markSentence.value.boolValue, let mark = voice.voice.articleMark(packId: packId, path: path) else {
+            controller.evaluate(GrangerCoreEntry.shared.readClear())
+            return
+        }
+        controller.evaluate(GrangerCoreEntry.shared.readMark(blockId: mark.blockId, prefix: mark.prefix, start: mark.start, end: mark.end, scroll: following))
+    }
+
     static func isDocument(_ path: String) -> Bool {
         let p = path.lowercased().components(separatedBy: "?")[0]
         return p.hasSuffix(".pdf") || p.hasSuffix(".epub")
     }
 
-    /// The document out of its pack into Caches, then shown.
+    /// The document into the shelf and the reader, over the article, so Back returns to the page (Android's Plan P2).
     func openDocument(pack: String, path: String) {
         guard let core else { return }
-        Task {
-            let url: URL? = await Task.detached {
-                guard let item = core.library.archive(packId: pack)?.read(path: path) else { return nil }
-                let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("pack-files", isDirectory: true)
-                try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-                let name = (path.components(separatedBy: "?")[0] as NSString).lastPathComponent.removingPercentEncoding ?? "document"
-                let to = dir.appendingPathComponent(name)
-                return (try? GrangerCoreEntry.shared.bytes(of: item.bytes).write(to: to)) != nil ? to : nil
-            }.value
-            document = url
-        }
+        Task { problem = await PackDocumentOpener.open(core: core, pack: pack, path: path, linkText: "", openRoute: openRoute) }
     }
 }

@@ -304,7 +304,7 @@ class ReaderViewModel(
     /** Where [quote] is on [path]'s page; null when the page can't be read or the quote isn't on it. */
     private fun citeIn(archive: ZimArchive, path: String, quote: String): CiteRange? = try {
         val item = archive.read(path)
-        val html = item?.let { String(it.bytes, ArticleReadSource.charsetOf(it.mimeType)) }.orEmpty()
+        val html = item?.let { ArticleReadSource.decode(it.bytes, it.mimeType) }.orEmpty()
         ArticleQuote.locate(ArticleText.blocks(html), fragment, quote)
     } catch (e: Exception) {
         null

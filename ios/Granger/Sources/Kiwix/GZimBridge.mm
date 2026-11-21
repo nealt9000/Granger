@@ -4,7 +4,10 @@
 #include <zim/item.h>
 #include <zim/search.h>
 #include <zim/suggestion.h>
+#include <algorithm>
+#include <cstdio>
 #include <memory>
+#include <unistd.h>
 #include <sstream>
 
 static NSString *S(const std::string &s) { return [[NSString alloc] initWithBytes:s.data() length:s.size() encoding:NSUTF8StringEncoding] ?: @""; }
@@ -99,6 +102,36 @@ static std::string C(NSString *s) { return std::string(s.UTF8String ?: ""); }
     } catch (...) {}
     [_lock unlock];
     return r;
+}
+
+- (BOOL)copyEntry:(NSString *)path toFile:(NSString *)to {
+    // The item is found under the lock; each 1 MB chunk is read under it too, so a close() between chunks stops the copy
+    // and other reads aren't held up for the whole file.
+    std::unique_ptr<zim::Item> item;
+    [_lock lock];
+    try { if (_archive) item.reset(new zim::Item(_archive->getEntryByPath(C(path)).getItem(true))); } catch (...) {}
+    [_lock unlock];
+    if (!item) return NO;
+    FILE *out = fopen(to.fileSystemRepresentation, "wb");
+    if (!out) return NO;
+    BOOL ok = YES;
+    const zim::size_type total = item->getSize();
+    const zim::size_type chunk = 1 << 20;
+    for (zim::size_type at = 0; ok && at < total; at += chunk) {
+        const zim::size_type n = std::min(chunk, total - at);
+        [_lock lock];
+        try {
+            if (!_archive) ok = NO;
+            else {
+                zim::Blob b = item->getData(zim::offset_type(at), n);
+                if (fwrite(b.data(), 1, b.size(), out) != b.size()) ok = NO;
+            }
+        } catch (...) { ok = NO; }
+        [_lock unlock];
+    }
+    if (fclose(out) != 0) ok = NO;
+    if (!ok) unlink(to.fileSystemRepresentation);
+    return ok;
 }
 
 - (NSString *)randomPath {

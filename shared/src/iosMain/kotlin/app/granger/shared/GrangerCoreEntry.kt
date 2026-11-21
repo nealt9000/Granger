@@ -52,6 +52,29 @@ object GrangerCoreEntry {
     val appPack: String get() = ReaderPage.APP_PACK
     val cssName: String get() = ReaderPage.CSS_NAME
 
+    // ---- the read-aloud page script (Plan I5 Task 8), Android's unchanged ----
+    val readAloudScript: String get() = app.granger.core.online.ReadAloudPage.SOURCE
+    fun readFirstVisible(): String = app.granger.core.online.ReadAloudPage.call("firstVisible")
+    fun readSelectionBlock(): String = app.granger.core.online.ReadAloudPage.call("selectionBlock")
+    fun readClear(): String = app.granger.core.online.ReadAloudPage.call("clear")
+    fun readMark(blockId: String, prefix: String, start: Int, end: Int, scroll: Boolean): String =
+        app.granger.core.online.ReadAloudPage.call("mark", blockId, prefix, start, end, scroll)
+
+    /** A block the page named (`{"id","prefix","offset"}`, as JSON), or null. */
+    fun blockRef(json: String?): BlockRef? {
+        if (json.isNullOrBlank() || json == "null") return null
+        return runCatching {
+            val o = kotlinx.serialization.json.Json.parseToJsonElement(json) as? kotlinx.serialization.json.JsonObject ?: return null
+            fun str(k: String) = (o[k] as? kotlinx.serialization.json.JsonPrimitive)?.takeIf { it.isString }?.content
+            val id = str("id")?.takeIf { it.isNotEmpty() } ?: return null
+            val offset = (o["offset"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.toIntOrNull()
+            BlockRef(id, str("prefix").orEmpty(), offset ?: -1)
+        }.getOrNull()
+    }
+
+    /** A book's contents entry for the read-aloud source, from Swift's Readium links. */
+    fun tocEntry(title: String, href: String, depth: Int): app.granger.readaloud.EpubTocEntry = app.granger.readaloud.EpubTocEntry(title, href, depth)
+
     /** The online source's pack id for [lang] (`wikipedia_en_online`) and back. */
     fun onlinePackId(lang: String): String = OnlineWikipediaArchive.packName(lang)
     fun languageOfPack(packId: String): String? = OnlineWikipediaArchive.languageOf(packId)
@@ -105,3 +128,7 @@ internal fun NSData.toByteArray(): ByteArray {
 
 /** One section of an article for Contents: its anchor, its title and its level (2 or 3). */
 data class Heading(val anchor: String, val title: String, val level: Int)
+
+/** A block the article page named: its id, the start of its text, and an offset into it (-1 for none). */
+data class BlockRef(val id: String, val prefix: String, val offset: Int)
+

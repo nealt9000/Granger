@@ -36,6 +36,20 @@ enum Route: Hashable {
     case quiz(subject: String)
     /// The connections quilt round a topic.
     case quilt(lang: String, path: String)
+    /// One of the Library's collections (Plan I5 Task 6), by the shelves' id (`c:<default key>` for an app-made one).
+    case collection(id: String)
+    /// A book on the shelf in the e-book or PDF reader, at its saved place (Plan I5 Task 5).
+    case book(id: String)
+    /// Search with words already typed (the e-book reader's selection menu, as Android's SearchRoute(text)).
+    case search(query: String)
+    /// A book opened at a passage (an article's In your books, Plan LL1 Task 9).
+    case bookAt(id: String, passage: BookPassage)
+    /// A catalog book pack's collection read online before (or without) the pack (Plan BK), by its catalog id.
+    case remoteCollection(packId: String)
+    /// archive.org's texts (Plan I5 Task 7).
+    case archive
+    /// Settings › Voice, also Get more's Models & voices (Plan I5 Task 8).
+    case voiceSettings
 }
 
 /// What the user has read lately (Android's Continue / history): the last 50 articles, newest first.
@@ -49,14 +63,55 @@ final class RecentStore {
         var id: String { "\(lang):\(path)" }
     }
 
+    /// A book open lately (Plan I5 Task 6: the rail's open books), with where the reader is in it.
+    struct BookEntry: Codable, Hashable, Identifiable {
+        let id: String
+        let title: String
+        /// "Chapter 3 · 42%", from the saved place; blank until the book has one.
+        var place: String
+        var at: Date
+    }
+
     private(set) var entries: [Entry]
+    /// Books, newest first; kept apart from [entries], which Home's Continue and Ready offline read as articles.
+    private(set) var books: [BookEntry]
     private let defaults: UserDefaults
     private static let key = "recentArticles"
+    private static let booksKey = "recentBooks"
     static let limit = 50
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         entries = (defaults.data(forKey: Self.key)).flatMap { try? JSONDecoder().decode([Entry].self, from: $0) } ?? []
+        books = (defaults.data(forKey: Self.booksKey)).flatMap { try? JSONDecoder().decode([BookEntry].self, from: $0) } ?? []
+    }
+
+    func addBook(id: String, title: String, at: Date = Date()) {
+        let place = books.first { $0.id == id }?.place ?? ""
+        books.removeAll { $0.id == id }
+        books.insert(BookEntry(id: id, title: title, place: place, at: at), at: 0)
+        if books.count > Self.limit { books.removeLast(books.count - Self.limit) }
+        defaults.set(try? JSONEncoder().encode(books), forKey: Self.booksKey)
+    }
+
+    /// The reading place of a book open lately, as the reader saves it.
+    func setPlace(bookId: String, place: String) {
+        guard let i = books.firstIndex(where: { $0.id == bookId }), books[i].place != place else { return }
+        books[i].place = place
+        defaults.set(try? JSONEncoder().encode(books), forKey: Self.booksKey)
+    }
+
+    /// One item open lately: an article or a book.
+    enum Item: Identifiable {
+        case article(Entry)
+        case book(BookEntry)
+        var id: String { switch self { case let .article(e): "a:\(e.id)"; case let .book(b): "b:\(b.id)" } }
+        var at: Date { switch self { case let .article(e): e.at; case let .book(b): b.at } }
+    }
+
+    /// Articles and books open lately, newest first: the rail's open items on the iPhone.
+    func recentlyOpen(_ count: Int) -> [Item] {
+        (entries.prefix(count).map(Item.article) + books.prefix(count).map(Item.book)).sorted { $0.at > $1.at }.prefix(count).map { $0 }
     }
 
     func add(lang: String, path: String, title: String, at: Date = Date()) {
@@ -68,7 +123,9 @@ final class RecentStore {
 
     func clear() {
         entries = []
+        books = []
         save()
+        defaults.removeObject(forKey: Self.booksKey)
     }
 
     private func save() {
@@ -78,18 +135,28 @@ final class RecentStore {
 
 import SwiftUI
 
-/// Recently open (Plan I3 builder's call 8; Android's open items on the rail): the last four articles, from each
-/// tab's toolbar.
+/// Recently open (Plan I3 builder's call 8; Android's open items on the rail): the last four articles and books, from
+/// each tab's toolbar; a book reopens at its place, which its row says (Plan I5 Task 6).
 struct RecentlyOpenMenu: View {
     @Environment(RecentStore.self) private var recent
     @Environment(\.openRoute) private var openRoute
 
     var body: some View {
-        if !recent.entries.isEmpty {
+        if !recent.entries.isEmpty || !recent.books.isEmpty {
             Menu {
                 Section("Recently open") {
-                    ForEach(recent.entries.prefix(4)) { e in
-                        Button(e.title) { openRoute(.reader(lang: e.lang, path: e.path, fragment: nil)) }
+                    ForEach(recent.recentlyOpen(4)) { item in
+                        switch item {
+                        case let .article(e):
+                            Button(e.title) { openRoute(.reader(lang: e.lang, path: e.path, fragment: nil)) }
+                        case let .book(b):
+                            Button { openRoute(.book(id: b.id)) } label: {
+                                Text(b.title)
+                                if !b.place.isEmpty { Text(b.place) }
+                                Image(systemName: "book.closed")
+                            }
+                            .accessibilityIdentifier("recent-book-\(b.id)")
+                        }
                     }
                 }
             } label: {
@@ -104,6 +171,8 @@ struct RecentlyOpenMenu: View {
 extension Route {
     /// An article's topic page wherever it lives: Wikipedia online by its language, a pack by its id.
     static func article(packId: String, path: String) -> Route {
+        // A book on the shelf (Search's Books and titles): its reader.
+        if packId.hasPrefix("book:") { return .book(id: packId) }
         if let lang = OnlineWikipediaArchive.companion.languageOf(packId: packId) { return .topic(lang: lang, path: path) }
         return .packTopic(pack: packId, path: path)
     }

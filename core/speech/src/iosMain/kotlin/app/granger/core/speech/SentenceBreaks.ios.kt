@@ -46,7 +46,7 @@ internal actual fun icuSentenceBreaks(text: String, languageTag: String): List<P
         }
         if (starts.isEmpty()) return listOf(0 to n)
         starts[0] = 0
-        return starts.mapIndexed { i, s -> s to (starts.getOrNull(i + 1) ?: n) }
+        return splitAfterMeridiem(text, starts.mapIndexed { i, s -> s to (starts.getOrNull(i + 1) ?: n) })
     } finally {
         tokenizer?.let { CFRelease(it) }
         locale?.let { CFRelease(it) }
@@ -54,3 +54,26 @@ internal actual fun icuSentenceBreaks(text: String, languageTag: String): List<P
         CFBridgingRelease(string)
     }
 }
+
+/**
+ * Android's ICU ends a sentence after "a.m." or "p.m." when a capital follows ("…at 10 a.m. They talked…"), so the
+ * voice pauses there; the iPhone's `CFStringTokenizer` suppresses the break (Plan I5 Task 8). This puts it back: a span
+ * is split after each "a.m."/"p.m." (either case) and its spaces where an upper-case letter comes next, as ICU does.
+ * "3.5 p.m. on Tuesday" stays whole on both.
+ */
+internal fun splitAfterMeridiem(text: String, spans: List<Pair<Int, Int>>): List<Pair<Int, Int>> {
+    if (MERIDIEM.find(text) == null) return spans
+    val out = ArrayList<Pair<Int, Int>>(spans.size + 1)
+    for ((start, end) in spans) {
+        var s = start
+        for (m in MERIDIEM.findAll(text.substring(start, end))) {
+            val cut = start + m.range.last + 1
+            if (cut in (s + 1) until end) { out += s to cut; s = cut }
+        }
+        out += s to end
+    }
+    return out
+}
+
+private val MERIDIEM = Regex("""(?<![\p{L}.])[aApP]\.[mM]\.\s+(?=\p{Lu})""")
+

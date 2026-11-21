@@ -10,6 +10,10 @@ configFiles:
 packages:
   GrangerCore:
     path: ../GrangerCore
+  # E-books (Plan I5 call 1): Readium's Swift toolkit, the same family as Android's Kotlin toolkit. BSD-3.
+  Readium:
+    url: https://github.com/readium/swift-toolkit
+    exactVersion: 3.11.1
 settings:
   base:
     # The Swift 6 toolchain in language mode 5: Kotlin's exported types aren't Sendable.
@@ -29,9 +33,22 @@ targets:
     dependencies:
       - package: GrangerCore
         product: GrangerCoreKit
+      - package: Readium
+        product: ReadiumShared
+      - package: Readium
+        product: ReadiumStreamer
+      - package: Readium
+        product: ReadiumNavigator
       # Kiwix's libkiwix 14.2.1 (Plan I4 Task 5): static, fetched by tools/ios/fetch-corekiwix.sh, not in git.
       - framework: ../Vendor/CoreKiwix.xcframework
         embed: false
+      # libarchive 3.8.1's RAR reader for CBR comics (Plan I5 call 6): static, built by tools/ios/fetch-libarchive.sh, not in git.
+      - framework: ../Vendor/libarchive.xcframework
+        embed: false
+      # sherpa-onnx 1.13.8 with onnxruntime inside, for the Piper voices (Plan I5 call 3): dynamic, fetched by
+      # tools/ios/fetch-sherpa-onnx.sh, not in git.
+      - framework: ../Vendor/SherpaOnnxC.xcframework
+        embed: true
       - sdk: libc++.tbd
       - sdk: libz.tbd
     info:
@@ -42,6 +59,8 @@ targets:
         # Documents shows in the Files app (On My iPhone › Granger): packs are yours to see, copy and delete (Plan I4).
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
+        # Read aloud goes on with the screen locked (Plan I5 call 4).
+        UIBackgroundModes: [audio]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(GRANGER_BUNDLE_PREFIX)

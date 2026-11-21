@@ -4,7 +4,7 @@ import GrangerCoreKit
 /// A Kiwix pack read with CoreKiwix (libkiwix 14.2.1, Plan I4 Task 5), as the shared Kotlin `ZimArchive`: the shared
 /// library, search and readers open a pack on the iPhone exactly as java-libkiwix's KiwixZimArchive does on Android.
 /// Safe from any thread (the bridge locks); answers nil or empty instead of throwing, also after `close()`.
-final class KiwixArchive: NSObject, ZimArchive {
+final class KiwixArchive: NSObject, ZimArchive, StreamingCopy {
     private let zim: GZimArchive
     let uuid: String
     let metadata: ZimMetadata
@@ -50,6 +50,9 @@ final class KiwixArchive: NSObject, ZimArchive {
     }
 
     func randomPath() -> String? { zim.randomPath() }
+
+    /// A pack's PDF or EPUB copied out to the shelf in chunks (Plan I5 Task 5), not read whole into memory.
+    func writeEntry(path: String, to: String) -> Bool { zim.copyEntry(path, toFile: to) }
 
     func suggest(query: String, limit: Int32) -> [ZimHit] {
         zim.suggest(query, limit: limit).map { ZimHit(path: $0.path, title: $0.title, snippet: nil, score: 0) }

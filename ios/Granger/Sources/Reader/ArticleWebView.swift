@@ -19,6 +19,27 @@ final class PageController {
     func find() {
         webView?.findInteraction?.presentFindNavigator(showingReplace: false)
     }
+
+    /// Runs a read-aloud page call and hands back its JSON answer (Plan I5 Task 8).
+    func evaluate(_ script: String, _ done: @escaping (String?) -> Void = { _ in }) {
+        guard let webView else { return done(nil) }
+        webView.evaluateJavaScript(script) { result, _ in done(result as? String) }
+    }
+
+    /// Whether a page is there to talk to.
+    var ready: Bool { webView != nil }
+}
+
+/// The reader's web view, with Read from here in its selection menu (Android's READ_ALOUD selection action).
+final class ReaderWebView: WKWebView {
+    var onReadFromHere: (() -> Void)?
+
+    override func buildMenu(with builder: any UIMenuBuilder) {
+        super.buildMenu(with: builder)
+        guard let onReadFromHere else { return }
+        let read = UIAction(title: "Read from here", image: UIImage(systemName: "headphones")) { _ in onReadFromHere() }
+        builder.insertChild(UIMenu(options: .displayInline, children: [read]), atStartOfMenu: .standardEdit)
+    }
 }
 
 /// One reader page in a `WKWebView`, served by the `granger-zim:` scheme with the shared CSS and scripts (Plan I2
@@ -34,6 +55,10 @@ struct ArticleWebView: UIViewRepresentable {
     var onToggleChrome: () -> Void = {}
     var onOpenArticle: (_ pack: String, _ path: String, _ fragment: String?) -> Void = { _, _, _ in }
     var onLoaded: () -> Void = {}
+    /// The page was scrolled by the reader, not by the voice (the read-aloud script's report): the page stops following.
+    var onUserScroll: () -> Void = {}
+    /// Read from here was picked on a selection; nil leaves it out of the menu.
+    var onReadFromHere: (() -> Void)? = nil
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
@@ -44,7 +69,8 @@ struct ArticleWebView: UIViewRepresentable {
         PageBridge.userScripts().forEach(config.userContentController.addUserScript)
         config.userContentController.add(WeakMessageHandler(context.coordinator), name: PageBridge.handlerName)
         config.dataDetectorTypes = []
-        let web = WKWebView(frame: .zero, configuration: config)
+        let web = ReaderWebView(frame: .zero, configuration: config)
+        web.onReadFromHere = onReadFromHere
         web.isFindInteractionEnabled = true
         web.navigationDelegate = context.coordinator
         web.allowsBackForwardNavigationGestures = false   // Back is the navigation stack's swipe
@@ -60,6 +86,7 @@ struct ArticleWebView: UIViewRepresentable {
 
     func updateUIView(_ web: WKWebView, context: Context) {
         context.coordinator.parent = self
+        (web as? ReaderWebView)?.onReadFromHere = onReadFromHere
         web.overrideUserInterfaceStyle = dark ? .dark : .light
         if context.coordinator.appliedScale != textScale, context.coordinator.loaded {
             context.coordinator.appliedScale = textScale
@@ -109,6 +136,7 @@ struct ArticleWebView: UIViewRepresentable {
         func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {
             guard let body = message.body as? [String: Any], let op = body["op"] as? String else { return }
             if op == "toggleChrome" { parent.onToggleChrome() }
+            if op == "userScroll" { parent.onUserScroll() }
         }
 
         @MainActor static func present(_ vc: UIViewController) {

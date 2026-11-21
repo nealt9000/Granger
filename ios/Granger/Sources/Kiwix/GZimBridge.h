@@ -36,6 +36,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSArray<GZimHit *> *)suggest:(NSString *)query limit:(int32_t)limit;
 - (NSArray<GZimHit *> *)search:(NSString *)query limit:(int32_t)limit snippets:(BOOL)snippets;
 /// Every entry whose MIME type is one of `mimes`, in path order, redirects skipped; `each` returns NO to stop. NO when it can't be listed.
+/// Writes the entry at `path` (after redirects) to the file `to`, in chunks: never whole in memory. NO when there's no
+/// such entry or the write failed (the file is then removed).
+- (BOOL)copyEntry:(NSString *)path toFile:(NSString *)to;
 - (BOOL)list:(NSSet<NSString *> *)mimes each:(BOOL (^)(GZimEntry *entry))each;
 - (void)close;
 @end

@@ -1,0 +1,192 @@
+# Plan I6: music, audiobooks and the system on the iPhone
+
+Spec: `docs/superpowers/specs/2026-11-20-iphone-design.md` (§6, I6). Parity list: `docs/superpowers/ios-parity.md`. Follows I5 (merged and pushed main d93ca251, release ios-core-2026-11-21-4).
+
+**Goal.** The iPhone plays and finds audio the way Android does:
+- music (albums, artists, genres, folders, playlists, the queue) from Files and the Music library;
+- audiobooks with chapters, bookmarks and the saved place, and LibriVox and archive.org's spoken word and music;
+- the full player: the mini player for music and audiobooks, music under the voice, Now Playing and remote commands for everything, and Media settings;
+- the system pieces: CarPlay, a player widget, the Local only control in Control Center, and the mic in Search with the spoken-title matcher.
+
+When I6 merges, every parity row marked I6 is ticked or carries an agreed reason.
+
+**Shape (as I4 and I5).** I6a moves Android's media rules into the shared core with no change for the Android user. It's checked on the Pixel 6 and merges on its own. I6b builds the iPhone side and merges after the Simulator check. Three native pieces each open with a one-hour spike: the player engine (Task 5), tags (Task 6) and speech recognition (Task 8). The plan stops to report if one fails.
+
+**What's already shared** (from the I6 survey, main d93ca251):
+- All 13 audio tables and their DAOs are in `:core:store` at DB 18 (`tracks`, `audiobooks`, `audiobook_chapters`, `audiobook_states`, `audio_bookmarks`, `playlists`, `playlist_entries`, `music_state`, `recent_plays`, `media_folders`, `scan_cache`, `album_notes`, `voice_states`), with `MediaLibrary`, `Albums`, `AudioShelves` and `TitleMatch`.
+- `:core:playback` holds the sleep timer, chapter map, place saver, auto-rewind and `ReadAloudEngine`. `VoicePlayer` (screens) is the player's voice mode.
+- `ArchiveModel` already handles spoken word and music behind an `ArchiveAudio` interface. The iPhone passes none, so it shows texts only.
+- `LibriVoxClient` and the archive.org audio offers are in `:core:archive`.
+- `SpeechInput`, `OnDeviceSpeechInput` (over a `RecognizerBackend`) and `SpokenTitleMatcher` are in commonMain.
+
+**Still Android-only:**
+- `:core:media`: the scanner, MediaStore and SAF sources, TagLib over JNI, the chapter reader and the audiobook grouper.
+- `:core:player`: `PlayerEngine`, 1,765 lines on Media3 ExoPlayer, and `PlaybackService`.
+- `:core:library`'s media logic: `RoomMediaLibrary`, `Playlists`, `MediaIndex` and names.
+- The app's view models for music, audiobooks, LibriVox and the player; `MediaDownloader`; the Auto browse tree; the Glance widget; the tile; and the mic's `VoiceInput`.
+
+## Builder's calls in this plan (await Neal)
+
+1. **One iPhone audio engine on `AVAudioEngine`, behind the shared `PlayerHub`.**
+   - The voice already plays through `AVAudioEngine` (I5). Music and audiobooks join it as `AVAudioPlayerNode`s:
+     - gapless, because the next file is scheduled back to back;
+     - music under the voice, as a second node at Android's `MIX_LEVEL`;
+     - ReplayGain and the audiobook volume boost as node gain (a boost above 1.0 is possible here and isn't with `AVPlayer`);
+     - speed with `AVAudioUnitTimePitch`.
+   - What stays shared: the queue, the shuffle order, the saved place, the modes and Now Playing's state (`PlayerHub`, `MusicQueue`, `SavedModes`, `ReplayGainMath`, `PlayerNotices`, moved to `:core:playback`).
+   - Android keeps ExoPlayer and is unchanged.
+   - The alternative, `AVQueuePlayer`, is simpler, but it can't boost, mixes badly with the voice's engine, and has small gaps.
+2. **Music comes from three places, as the parity row says:**
+   - files imported from Files, copied into `Documents/Music`, which is visible in the Files app as Books and Packs are;
+   - folders you pick in Files, read in place through security-scoped bookmarks (the iPhone form of Android's picked SAF folders);
+   - the Music library's own non-DRM songs (`MPMediaLibrary`; a song whose `assetURL` is nil is DRM or cloud-only and is left out, with a line saying why).
+   - Media settings gets phone access (Music library permission), the picked folders and Rescan now, as on Android.
+3. **Tags through `AVAsset` metadata, with TagLib only if the spike shows a gap.**
+   - The spike runs Android's tag fixtures (MP3 ID3v2, M4A/M4B, FLAC, Ogg/Opus) through `AVAsset` and compares them with what TagLib reads on Android: title, artist, album artist, album, disc and track, year, genre, ReplayGain, chapters and the cover.
+   - If a format misses a field Android uses, a script builds TagLib for iOS (as libarchive) for that format only.
+   - The pure readers move to commonMain: `TagParser`, `ChapterReader` (MP3 CHAP and M4B), `AudiobookGrouper`, `Fingerprint`, `MediaManifest` and the downloaded-media scanner.
+4. **The media library's rules move to the shared core, and each phone finds its files its own way.**
+   - `:core:media` becomes KMP. Its androidMain keeps MediaStore, SAF and TagLib; its iosMain gets the three sources from call 2.
+   - `RoomMediaLibrary`, `Playlists`, `MediaIndex`, `MediaNames`, `MediaText` and `MediaCards` move to commonMain:
+     - `withTransaction` becomes Room KMP's transaction;
+     - `Locale` and `Normalizer` become the shared text fold.
+   - The music, audiobook, LibriVox and player view models move to `:core:screens` (Compose state becomes `StateFlow`), as Library's did in I5.
+5. **LibriVox and archive.org audio download through the shared queue.**
+   - `MediaDownloader` and `MediaDownloads` move into downloads-api: a book's chapter MP3s are one group, `media:librivox:<id>`, as now.
+   - On the iPhone, the files land under `Documents/Audiobooks` and `Documents/Music` and are filed by the shared downloaded-media scanner.
+   - archive.org's spoken word and music then show on the iPhone, with the same rules as Android's release build: no waiver, and spoken word before 1930 only, as call 9 of I5 set for texts.
+6. **CarPlay audio, as Android Auto.**
+   - The browse tree (Recent; Music by albums, artists and playlists; Audiobooks) moves to commonMain from `AutoBrowseTree`, minus its Media3 types.
+   - CarPlay's list templates draw it, with Now Playing as CarPlay's own.
+   - It's built and checked in Xcode's CarPlay Simulator. Apple's CarPlay audio entitlement is requested under AETHERBOUND LLC before TestFlight (I8); Neal sends the request.
+7. **One widget extension holds the player widget and the Local only control.**
+   - The player widget uses WidgetKit (small and medium: the title, the cover, play/pause, and the next item through an `AppIntent`).
+   - The Local only control is iOS 18's `ControlWidget`, the iPhone form of Android's Quick Settings tile.
+   - Both read a small snapshot the app writes to the app group `group.app.granger`, as Android's `WidgetModelStore` does. The extension doesn't load the Kotlin framework (memory and size).
+   - `AppSettings.localOnly` moves into the app group's defaults so the control can flip it.
+8. **The mic in Search on Apple's on-device recognizer, behind the shared `RecognizerBackend`.**
+   - iOS 26 is the floor, so this is `SpeechAnalyzer`, on device only (`AssetInventory` installs the language model; no audio leaves the phone, as on Android).
+   - The shared `SpokenTitleMatcher` turns what was heard into a library title, and Did you mean stays the typed one.
+   - `VoiceInput` and `Dictation` move to commonMain. The mic shows only when the language is installed, as on Android.
+   - Mic and speech usage strings go in `Info.plist`.
+9. **The parity row "Selected text → Search in Granger" is dropped.**
+   - Android's build never receives `PROCESS_TEXT`. Its manifest only queries for it, so Define can send a word *to* a dictionary app, and the iPhone already covers that with the system dictionary (I5 call 8).
+   - The row becomes "— (Android has no such feature)" rather than a new Share extension.
+10. **Where Android's behaviour has no iPhone form, the row says so:**
+    - **Headset autoplay:** iOS doesn't let an app start itself when headphones connect.
+    - **External equalizer apps** (Android's audio-session broadcast): iOS has no such hook. The iPhone gets no equalizer of its own in I6, as Android ships none either.
+    - **Skip silence:** if the engine spike can't do it cleanly (Android's ExoPlayer does it), it becomes "≈ later" with that reason, not a blocker.
+
+## Global constraints
+
+- **Android must not change for the user (I6a).**
+  - The whole JVM suite passes and `:app:bundleRelease` builds with R8.
+  - A Pixel 6 walkthrough passes on a debug build installed over the phone's data. Check `lastUpdateTime` and the DB version first, use `adb -s` with the Pixel's serial, and start `app.granger/.MainActivity` explicitly.
+  - The walkthrough covers music (album, queue, playlist), an audiobook (chapter, bookmark, saved place), a LibriVox download, archive.org audio, music under the voice, the widget, the tile and the mic.
+  - `PlayerEngineTest` and the other player tests stay where they are. Only pure code moves out of `:core:player`.
+- **No migration.** The audio tables are already at DB 18.
+- The repo is on the X10, which must be mounted. One Gradle, Kotlin/Native or xcodebuild run at a time.
+- Pushing and GrangerCore releases have standing OK, after the noreply author check.
+- Branch `i6-audio` off main d93ca251, in worktree `.claude/worktrees/i0`.
+- **Test fixtures:**
+  - Audio test files are small and generated, or taken from Android's existing tag fixtures, never copyrighted music.
+  - LibriVox and archive.org tests use stubs, as in I5.
+- **Licences for I7's licence screen:** TagLib (LGPL-2.1/MPL-1.1) only if call 3 brings it in. CarPlay and WidgetKit are Apple's own.
+- **The extension targets** (widget, control) are new Xcode targets in `project.yml`, with the app group on the app and the extension.
+
+## I6a: the shared rules
+
+### Task 1: The media library to the core
+- [ ] Make `:core:media` KMP.
+  - commonMain gets `TagParser`, `ChapterReader`, `AudiobookGrouper`, `Fingerprint`, `MediaManifest` and `DownloadedMediaScanner`, on kotlinx-io where they used `java.io`.
+  - androidMain keeps `PhoneScanner`'s MediaStore and SAF sources, `TagReader` over `:core:taglib`, and `ScanTriggers`.
+- [ ] Move `RoomMediaLibrary`, `Playlists`, `MediaIndex`, `MediaNames`, `MediaText`, `MediaCards` and `MediaAddress` from `:core:library` to `:core:store` commonMain:
+  - Room KMP transactions;
+  - the shared text fold in place of `Locale` and `Normalizer`.
+- [ ] Android keeps its constructors through thin wrappers. Same-named top-level-function files in `:app` and the shared modules are renamed first (the JVM file-class clash).
+- [ ] Tests: the existing media and library tests run unchanged. Add a commonMain test for the fold-based index that matches Android's results on its fixtures.
+
+### Task 2: The player's rules, the screens' models and the mic to the core
+- [ ] Move `PlayerHub` (`NowPlaying`, `PlayerUi`, `SavedMusic`, `SavedBook`, `SavedModes`), `MusicQueue`, `ReplayGainMath` and `PlayerNotices` to `:core:playback` commonMain.
+  - `SavedModesReader` reads through a small prefs interface; Android's form is over `SharedPreferences`.
+- [ ] Move the browse tree's logic from `AutoBrowseTree` to commonMain as plain nodes. Android maps them to Media3 `MediaItem`s.
+- [ ] Move `WidgetModel` to commonMain.
+- [ ] Move the music, audiobook shelf and book, LibriVox, archive.org audio and player view models' rules to `:core:screens`:
+  - `UiText.Res` keys;
+  - `StateFlow` in place of Compose state.
+  - Android's view models become thin wrappers.
+- [ ] Move `VoiceInput`, `Dictation` and `VoiceInputPrefs`' rules to commonMain. `AndroidRecognizerBackend` stays.
+- [ ] Tests: `MusicQueueTest` moves with its code. `PlayerEngineTest`, `PlayerEngineVoiceTest` and `SessionPlayerTest` stay in `:core:player` and pass unchanged.
+
+### Task 3: Media downloads on the shared queue
+- [ ] Move `MediaDownloader` and `MediaDownloads` into downloads-api: group downloads with a manifest, filed by the shared `DownloadedMediaScanner`.
+- [ ] Move `MediaArchiveAudio` (Android's `ArchiveAudio`) to the shared code, so the iPhone's `archiveOrg()` can pass one.
+- [ ] Tests: a LibriVox book's group download files into `tracks` and `audiobooks` with origin `LIBRIVOX`, against a stub.
+
+### Task 4: I6a check and merge
+- [ ] JVM suite, `bundleRelease` with R8, and the iPhone suite (53 tests) still green.
+- [ ] The Pixel 6 walkthrough (see Global constraints).
+- [ ] Publish a GrangerCore release and pin it. Merge and push. Tell the peer sessions what moved.
+
+## I6b: the iPhone
+
+### Task 5: The audio engine
+- [ ] **Spike, one hour; stop and report if it fails.** On `AVAudioEngine` in the Simulator, show each of these:
+  - two tracks played gaplessly;
+  - a second node mixed under the I5 voice;
+  - gain above 1.0;
+  - speed through `AVAudioUnitTimePitch`;
+  - Now Playing with remote next/previous;
+  - playback going on in the background.
+  - Also time how long a 300 MB M4B takes to start.
+- [ ] Build `IosPlayerHub` over the engine: the music queue, an audiobook's chapters and place, the modes (shuffle, repeat, speed, boost, ReplayGain), the sleep timer, and auto-rewind. Skip silence per call 10.
+- [ ] Bring Now Playing and remote commands up to music and audiobooks, including skip ±30 s and chapter marks. A call or unplugged headphones pause playback, as with the voice.
+- [ ] Unit tests on the engine (gapless scheduling, the saved place, the mix level). Fixtures are generated tones.
+
+### Task 6: Music
+- [ ] **Spike, one hour.** Run Android's tag fixtures through `AVAsset`, comparing the fields listed in call 3. If a field Android uses is missing, the TagLib script goes in for that format and the spike says which.
+- [ ] Bring in the three sources from call 2:
+  - Files import into `Documents/Music`;
+  - picked folders through security-scoped bookmarks;
+  - the Music library's non-DRM songs.
+  - All three feed the shared scanner and `RoomMediaLibrary` (replacing I5's read-only `IosMediaLibrary`).
+- [ ] Build Listen's Music: albums, artists, genres, folders, playlists (make, add, reorder, remove), the album and artist screens, the queue sheet, covers, and the music player screen.
+- [ ] Build Media settings: Music library access, the picked folders, Rescan now and the player settings, in Android's words.
+- [ ] UI tests: import two tracks, play an album, add to a playlist, reorder the queue, and see Rescan find a new file.
+
+### Task 7: Audiobooks, LibriVox and archive.org audio
+- [ ] Build audiobooks: the shelf (Continue, Recent, finished), the book screen, chapters, bookmarks, speed and boost, and the saved place.
+  - Passive: no audiobooks, no mention, as Android.
+  - An M4B's chapters, or a folder of MP3s grouped as one book.
+- [ ] Build LibriVox: search and the book page, then download through the shared queue, and the book appears on the shelf.
+- [ ] Turn on archive.org's spoken word and music in `ArchiveScreen`, using the iPhone's `ArchiveAudio`.
+- [ ] Bring the mini player up to music and audiobooks, and add music under the voice (Listen's control, as Android).
+- [ ] Update Listen's shelves and remove the "later update" line.
+- [ ] UI tests:
+  - an audiobook opens at its saved place after a relaunch;
+  - a bookmark is set and returned to;
+  - a stubbed LibriVox download lands on the shelf;
+  - music plays under the voice.
+
+### Task 8: CarPlay, the widget, the Local only control and the mic
+- [ ] Build CarPlay: the shared browse tree in list templates, and Now Playing. Check it in the CarPlay Simulator; the entitlement is noted for I8 (call 6).
+- [ ] Add the widget extension with the app group (call 7):
+  - the player widget, small and medium, with play/pause and next through `AppIntent`s;
+  - the Local only `ControlWidget`;
+  - the app writes the snapshot when playback or Local only changes.
+- [ ] **Spike, one hour; stop the mic piece (not the task) if it fails.** `SpeechAnalyzer` recognises a recorded phrase on device in the Simulator, and the shared matcher turns it into a library title.
+- [ ] Build the mic in Search: the button only when the language is installed, live words, the matched title opened, and Voice input in Settings, as Android.
+- [ ] UI tests: the Local only control's intent flips the setting and the app follows it; the widget's snapshot updates when a track starts. The mic is tested with a recorded file through the backend, not the microphone.
+
+### Task 9: I6b check and merge
+- [ ] Run the whole Simulator suite and the JVM suite.
+- [ ] Walk it in Night and at the largest text size, including the two layout findings carried from I5 (the mini player over Listen's content, and the Library's huge titles). Fix them here, since Listen grows in this plan.
+- [ ] Tick the I6 rows in `ios-parity.md`, with reasons where they differ, and drop the `PROCESS_TEXT` row per call 9.
+- [ ] Publish a GrangerCore release and pin it. Merge and push. Tell the peer sessions what moved.
+
+## Order and size
+
+I6 moves about 6,000 lines of Android code (media, library, player rules and the view models), and builds about the same again on the iPhone. `PlayerEngine` itself doesn't move, because it's ExoPlayer through and through.
+- I6a is moving code, as I5a was. The scanner split and `RoomMediaLibrary`'s transactions are the riskiest parts, so each goes in its own commit with its tests.
+- I6b's risks are the three spikes (engine, tags, speech). Nothing is built on any of them until its spike passes.
+- If I6 runs long, it splits at Task 8: audio first (Tasks 5–7), then the system pieces (Task 8) as their own merge.

@@ -9,10 +9,14 @@ struct GrangerApp: App {
     @State private var recent = RecentStore()
     @State private var library = LibraryModel()
     private let core: Core
+    /// Read aloud and Listen (Plan I5 Task 8), for every screen.
+    @State private var voice: VoiceCenter
 
     init() {
         GrangerCoreKit.start()
-        core = Core(version: Core.version)
+        let core = Core(version: Core.version)
+        self.core = core
+        _voice = State(initialValue: VoiceCenter(core: core))
         // The rooms' one-line descriptions, bundled from Android's assets.
         core.library.roomsJson = { (Bundle.main.url(forResource: "rooms", withExtension: "json")).flatMap { try? String(contentsOf: $0, encoding: .utf8) } ?? "{}" }
         // Navigation titles in Spectral, as Android's top bars (Plan T1), scaled with Dynamic Type.
@@ -30,6 +34,7 @@ struct GrangerApp: App {
                 .environment(recent)
                 .environment(library)
                 .environment(\.core, core)
+                .environment(\.voice, voice)
                 .task(id: "\(settings.wikiLanguage)|\(settings.canFetch)") {
                     library.watch(core)
                     // Get more's catalog: the shared source asks, Swift fetches and verifies (Plan I4 Task 6).
@@ -77,21 +82,31 @@ extension EnvironmentValues {
     }
 }
 
-/// The tabs (spec §5; Plan I2 builder's call 1): Home and Search now; Explore, Library and Listen join as they're built.
+/// The tabs (spec §5; Plan I2 builder's call 1): Home, Search, Explore, Library (Plan I5 Task 6) and Listen (Task 8,
+/// call 7), with the mini player above the tab bar while the voice is loaded.
 /// Each tab keeps its own stack, so swipe-back works and switching tabs keeps your place.
 struct RootView: View {
     @Environment(\.core) private var core
-    enum Tab: Hashable { case home, search, explore }
+    @Environment(\.voice) private var voice
+    enum Tab: Hashable { case home, search, explore, library, listen }
     @State private var tab: Tab = .home
     @State private var homePath: [Route] = []
     @State private var searchPath: [Route] = []
     @State private var explorePath: [Route] = []
+    @State private var libraryPath: [Route] = []
+    @State private var listenPath: [Route] = []
     @Environment(AppSettings.self) private var settings
     /// The first run (Plan I4 Task 8): once, before the privacy line is seen; finished or skipped, it doesn't come back.
+    @State private var debugImported = false
+    @State private var debugNotice: String?
     @State private var onboarding = !UserDefaults.standard.bool(forKey: "onboarding.done") && !UserDefaults.standard.bool(forKey: "privacySeen")
 
     var body: some View {
         tabs
+            .overlay(alignment: .top) {
+                if let debugNotice { Text(debugNotice).font(.caption).padding(6).background(.thinMaterial).accessibilityIdentifier("debug-import-notice")
+                    .task { try? await Task.sleep(for: .seconds(8)); self.debugNotice = nil } }
+            }
             .fullScreenCover(isPresented: $onboarding) {
                 OnboardingScreen { readNow in
                     onboarding = false
@@ -112,13 +127,95 @@ struct RootView: View {
             stack($explorePath) { ExploreScreen() }
                 .tabItem { Label("Explore", systemImage: "safari") }
                 .tag(Tab.explore)
+            stack($libraryPath) { LibraryScreen() }
+                .tabItem { Label("Library", systemImage: "books.vertical") }
+                .tag(Tab.library)
+            stack($listenPath) { ListenScreen() }
+                .tabItem { Label("Listen", systemImage: "headphones") }
+                .tag(Tab.listen)
+        }
+        .modifier(MiniPlayerAccessory(voice: voice) { listenPath = []; tab = .listen })
+        .overlay(alignment: .bottom) {
+            if let notice = voice?.notice {
+                Text(notice).font(.callout).padding(12).background(.thinMaterial, in: RoundedRectangle(cornerRadius: 8)).padding(.bottom, 120)
+                    .accessibilityIdentifier("voice-notice")
+                    .task { try? await Task.sleep(for: .seconds(4)); voice?.notice = nil }
+            }
         }
     }
+
+    #if DEBUG
+    private func debugLinks(_ core: Core, bookId: String) async {
+        try? await core.library.refreshPacks()
+        guard let packs = try? await core.library.packs.first(where: { !$0.isEmpty }),
+              let pack = packs.first(where: { $0.status == .ok }),
+              let main = core.library.archive(packId: pack.id)?.mainPath,
+              let book = try? await core.library.book(id: bookId) else { NSLog("debugLinks: no pack or book"); return }
+        let ok = core.library.debugLinks(bookId: bookId, epubPath: book.filePath, href: "OEBPS/c001.xhtml", quote: "Netherfield",
+                                         qid: 1_234_567, packId: pack.id, articlePath: main)
+        NSLog("debugLinks: %@", ok ? "written" : "failed")
+    }
+    #endif
 
     /// Debug builds: `-debugOpen en:Moon` opens that topic page at launch (UI tests and checks use it).
     private func debugOpen() {
         #if DEBUG
+        // `-debugImport <path on the Mac>`: that file is imported as a pick from Files would be, then the Library shows
+        // (Plan I5 Task 6; UI tests can't drive the Files picker).
+        if let path = UserDefaults.standard.string(forKey: "debugImport"), let core, !debugImported {
+            debugImported = true
+            tab = .library
+            Task { @MainActor in
+                let words = await BookImport.runDebug(path: path, core: core)
+                NSLog("debugImport: %@", words)
+                debugNotice = words
+            }
+            return
+        }
+        // `-debugArchiveSample YES`: a born-digital text PDF, made here, filed as a finished archive.org download would be
+        // (Plan I5 Task 7: text PDF → e-book), then opened from the shelf. The notice says which the shelf made of it.
+        if homePath.isEmpty, UserDefaults.standard.bool(forKey: "debugArchiveSample"), let core, !debugImported {
+            debugImported = true
+            Task { @MainActor in
+                let url = FileManager.default.temporaryDirectory.appendingPathComponent("archive-sample.pdf")
+                SampleTextPdf.write(to: url)
+                guard let id = try? await core.library.debugArchiveText(pdfPath: url.path, identifier: "fieldbookofropes00hawt",
+                                                                        title: SampleTextPdf.title, author: SampleTextPdf.author),
+                      let book = try? await core.library.book(id: id) else { debugNotice = "archive: failed"; return }
+                debugNotice = "archive: \(book.format == .epub ? "epub" : "pdf")"
+                homePath = [.book(id: id)]
+            }
+            return
+        }
+        // `-debugBook <path on the Mac>`: that EPUB or PDF is imported into the shelf and opened (Plan I5 Task 5).
+        if homePath.isEmpty, let path = UserDefaults.standard.string(forKey: "debugBook"), let core {
+            Task { @MainActor in
+                guard let result = try? await core.library.importBook(path: path, displayName: (path as NSString).lastPathComponent) else { return }
+                let opened: String? = switch onEnum(of: result) {
+                case let .imported(r): r.bookId
+                case let .alreadyThere(r): r.bookId
+                default: nil
+                }
+                // `-debugLinks YES` with `-debugPack`: a reference link in chapter 1 ("Netherfield") to the pack's main
+                // page, as a Classic's `.glink` and a QID index would give it (Plan I5 Task 7).
+                if let id = opened, UserDefaults.standard.bool(forKey: "debugLinks") { await debugLinks(core, bookId: id) }
+                if let opened { homePath = [.book(id: opened)] }
+            }
+            return
+        }
         if homePath.isEmpty, UserDefaults.standard.bool(forKey: "debugWander") { homePath = [.wander(packId: nil, path: nil)]; return }
+        // `-debugPackReader YES` with `-debugPack`: the pack's main page in the reader (Plan I5 Task 8's read-aloud tests).
+        if homePath.isEmpty, UserDefaults.standard.bool(forKey: "debugPackReader"), let core, !debugImported {
+            debugImported = true
+            Task { @MainActor in
+                try? await core.library.refreshPacks()
+                guard let packs = try? await core.library.packs.first(where: { !$0.isEmpty }),
+                      let pack = packs.first(where: { $0.status == .ok }),
+                      let main = core.library.archive(packId: pack.id)?.mainPath else { NSLog("debugPackReader: no pack"); return }
+                homePath = [.packReader(pack: pack.id, path: main, fragment: nil)]
+            }
+            return
+        }
         guard homePath.isEmpty, let spec = UserDefaults.standard.string(forKey: "debugOpen") else { return }
         let parts = spec.split(separator: ":", maxSplits: 1).map(String.init)
         guard parts.count == 2 else { return }
@@ -142,7 +239,7 @@ struct RootView: View {
                     case .outfitting: OutfittingScreen()
                     case .yourSources: YourSourcesScreen()
                     case let .packFiles(pack): PackFilesScreen(pack: pack)
-                    case let .bookPack(pack): BookPackScreen(pack: pack)
+                    case let .bookPack(pack): BookPackCollection(pack: pack)
                     case let .source(scope, domain, family, bookSet):
                         SourceScreen(scope: CatalogScope.allCases.first { $0.name == scope } ?? .kiwix, domain: domain, family: family, bookSet: bookSet)
                     case let .subject(id): SubjectScreen(subjectId: id)
@@ -152,9 +249,38 @@ struct RootView: View {
                     case .games: GamesScreen()
                     case let .quiz(subject): GamesScreen(subject: subject)
                     case let .quilt(lang, p): QuiltScreen(lang: lang, path: p)
+                    case let .book(id): BookReaderScreen(bookId: id)
+                    case let .collection(id): CollectionScreen(collectionId: id)
+                    case let .search(query): SearchScreen(initial: query)
+                    case let .bookAt(id, passage): BookReaderScreen(bookId: id, passage: passage)
+                    case let .remoteCollection(packId): RemoteCollectionScreen(packId: packId)
+                    case .archive: ArchiveScreen()
+                    case .voiceSettings: VoiceSettingsScreen()
                     }
                 }
         }
         .environment(\.openRoute) { path.wrappedValue.append($0) }
     }
 }
+
+/// The mini player above the tab bar while the voice is loaded (iOS 26's bottom accessory; 26.0 has no isEnabled, so
+/// the accessory is left off there while nothing reads).
+private struct MiniPlayerAccessory: ViewModifier {
+    let voice: VoiceCenter?
+    let onOpen: () -> Void
+
+    func body(content: Content) -> some View {
+        if #available(iOS 26.1, *) {
+            content.tabViewBottomAccessory(isEnabled: voice?.reading ?? false) { mini }
+        } else if voice?.reading == true {
+            content.tabViewBottomAccessory { mini }
+        } else {
+            content
+        }
+    }
+
+    @ViewBuilder private var mini: some View {
+        if let voice { MiniPlayer(voice: voice, onOpen: onOpen) }
+    }
+}
+

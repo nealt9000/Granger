@@ -12,7 +12,7 @@ enum PageBridge {
         window.GrangerBridge = {
           noteLink: function (href, text) { window.webkit.messageHandlers.\(handlerName).postMessage({ op: 'noteLink', href: href, text: text }); },
           toggleChrome: function () { window.webkit.messageHandlers.\(handlerName).postMessage({ op: 'toggleChrome' }); },
-          onUserScroll: function (dy, byHand) {},
+          onUserScroll: function (dy, byHand) { window.webkit.messageHandlers.\(handlerName).postMessage({ op: 'userScroll', dy: dy, byHand: byHand }); },
           onBoxScroll: function (fraction) {}
         };
         """
@@ -22,6 +22,8 @@ enum PageBridge {
         [
             WKUserScript(source: shim, injectionTime: .atDocumentStart, forMainFrameOnly: true),
             WKUserScript(source: GrangerCoreEntry.shared.tapScript, injectionTime: .atDocumentEnd, forMainFrameOnly: true),
+            // Read aloud's side of the page (Plan I5 Task 8): Android's script, marks by the CSS Custom Highlight API.
+            WKUserScript(source: GrangerCoreEntry.shared.readAloudScript, injectionTime: .atDocumentEnd, forMainFrameOnly: true),
         ]
     }
 

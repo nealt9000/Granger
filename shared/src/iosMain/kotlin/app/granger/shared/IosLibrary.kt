@@ -33,6 +33,8 @@ import app.granger.core.library.withoutHidden
 import app.granger.core.text.hex
 import app.granger.core.text.sha1
 import kotlinx.io.buffered
+import kotlinx.io.files.SystemFileSystem
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 /**
  * The iPhone's library (Plan I3 Task 6), wired as `GrangerApp` wires Android's: the library database, Saved for now,
@@ -67,6 +69,14 @@ class IosLibrary(
     private val connected: () -> Boolean = { true },
     /** Big downloads on Wi-Fi only (Settings; on by default, as Android's). */
     private val wifiOnly: () -> Boolean = { true },
+    /**
+     * Where books live (Plan I5 Task 5): Documents/Books, shown in the Files app as packs are, since books are yours
+     * (Android keeps them in its files folder on each volume, `books/`). Imports go in `imports/`, pack copies in
+     * `packs/`, `gutenberg/`, `nautilus/` and `kiwix/`.
+     */
+    private val booksDir: String = "$dir/books",
+    /** Page 1 of a PDF as a PNG, for its cover (PDFKit from Swift). */
+    private val pdfCovers: app.granger.core.library.PdfCovers = app.granger.core.library.PdfCovers.NONE,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -103,6 +113,8 @@ class IosLibrary(
     init {
         app.granger.core.downloads.DownloadLayout.packs = packsDir.trimEnd('/').substringAfterLast('/')
         app.granger.core.downloads.DownloadLayout.companions = ".granger/"
+        // Catalog books and archive.org's under Documents/Books, with the reader's own (Plan I5 Task 7).
+        app.granger.core.downloads.DownloadLayout.books = booksDir.trimEnd('/').substringAfterLast('/')
     }
 
     private val downloadDb = app.granger.core.downloads.openDownloadDatabase("$dir/downloads.db")
@@ -119,9 +131,21 @@ class IosLibrary(
 
     private val queuePrefs = DefaultsQueuePrefs("downloads")
 
+    /** Moves when a voice has been unpacked (Plan I5 Task 8), so the voice list looks again. */
+    val voicesChanged = MutableStateFlow(0)
+
     private val runner = app.granger.core.downloads.DownloadRunner(downloadDao, transfer, onInstalled = { record ->
-        packLibrary.fileReplaced(record.filePath)
-        packLibrary.refresh()
+        if (record.kind == app.granger.core.downloads.ItemKind.BOOK) {
+            // A Granger Classic or an archive.org text joins the shelf (Android's fileBookRecord, Plan I5 Task 7).
+            fileBookRecord(record)
+        } else if (record.kind == app.granger.core.downloads.ItemKind.VOICE) {
+            // The verified zip becomes .granger/voices/<id>/ and goes away (Android's VoiceUnpacker, Plan I5 Task 8).
+            IosVoiceUnpacker.unpack(record.filePath).onFailure { logLine("Couldn't unpack the voice ${record.itemId}: ${it.message}") }
+            voicesChanged.value++
+        } else {
+            packLibrary.fileReplaced(record.filePath)
+            packLibrary.refresh()
+        }
     })
 
     private val queue = app.granger.core.downloads.DownloadQueue(downloadDao, runner, queuePrefs, unmetered, connected = connected)
@@ -153,13 +177,23 @@ class IosLibrary(
         downloadDao, scheduler, queuePrefs, queue.progress, unmeteredNow,
     )
 
-    private val sidecars = app.granger.core.downloads.Sidecars(downloads, wifiOnly)
+    // A sidecar kind downloads only once a feature reads it (Android's sidecarWanted): the Classics' links and the packs'
+    // QID indexes with the Linked Library.
+    private val sidecars = app.granger.core.downloads.Sidecars(downloads, wifiOnly, wanted = { kind ->
+        when (kind) {
+            app.granger.core.downloads.SidecarKind.QID_INDEX, app.granger.core.downloads.SidecarKind.LINKS -> IosFeatures.LINKED_CLASSICS
+            else -> true
+        }
+    })
 
     /** The queue as the downloads card shows it: what downloads now, what waits, how much, how fast and how long. */
     val queueSummary: kotlinx.coroutines.flow.Flow<app.granger.core.downloads.QueueSummary> =
         kotlinx.coroutines.flow.combine(downloads.records, downloads.live) { records, live ->
             app.granger.core.downloads.DownloadQueueSummary.of(records, live, app.granger.screens.nowMillis(), mapOf(downloadRoot to app.granger.core.downloads.freeBytesAt(downloadRoot)))
         }
+
+    /** Big downloads on Wi-Fi only, as Settings has it now. */
+    fun wifiOnlyNow(): Boolean = wifiOnly()
 
     /** Free bytes where downloads go. */
     fun freeBytes(): Long = app.granger.core.downloads.freeBytesAt(downloadRoot)
@@ -310,8 +344,566 @@ class IosLibrary(
         if (packLibrary.packs.first().none { it.status == app.granger.core.library.PackStatus.OK }) emptyList()
         else runCatching { bestMatches.find(query).matches }.getOrDefault(emptyList())
 
-    /** Search over the packs (titles, near titles, full text), in the library's languages, as Android's. */
-    val packSearch = app.granger.core.library.PackSearch(packLibrary, languages = { languages().toSet() })
+    /**
+     * Search over the packs (titles, near titles, full text) and the shelf's books (titles, authors and their words,
+     * Plan I5 Task 5), in the library's languages, as Android's.
+     */
+    val packSearch: app.granger.core.library.PackSearch by lazy {
+        app.granger.core.library.PackSearch(
+            packLibrary, shelf = { bookshelf.books.first() },
+            collectionOf = { book, packs -> app.granger.core.library.Filing.defaultName(app.granger.core.library.Filing.defaultKey(book), book, packs) },
+            languages = { languages().toSet() }, bookIndex = bookIndex,
+        )
+    }
+
+    // ---- Books (Plan I5 Task 5): the shared shelf over the iPhone's library database, as Android's GrangerApp wires it.
+
+    private val coversDir = "$dir/covers"
+
+    /** The shelf: imports, downloads, pack documents and book packs' books, with places and marks. */
+    val bookshelf: app.granger.core.library.BookshelfStore = app.granger.core.library.BookshelfStore(
+        database, { listOf(booksDir) }, { "$booksDir/imports" }, coversDir,
+        io = app.granger.screens.ioDispatcher, now = { app.granger.screens.nowMillis() }, pdfCovers = pdfCovers,
+    )
+
+    /** The books' words, for Search's Books and Ask's passages. */
+    val bookIndex = app.granger.core.library.BookIndex(database, app.granger.screens.ioDispatcher)
+
+    /** The rail's open items (books open as tabs, as on Android: the pack id is the book's id, the path empty). */
+    val sessions: app.granger.core.library.ReadingSessions = app.granger.core.library.RoomReadingSessions(database) { app.granger.screens.nowMillis() }
+
+    /** How books look (global), in UserDefaults; Swift tells it when the app's theme changes ([ReadingPrefsStore.setAppNight]). */
+    val readingPrefs: app.granger.ebook.ReadingPrefsStore = defaultsReadingPrefs()
+
+    private val packDocuments = IosPackDocuments(
+        bookshelf, { packLibrary.archive(it) }, { "$booksDir/packs" }, app.granger.screens.ioDispatcher, { app.granger.core.downloads.freeBytesAt(it) },
+    )
+
+    private val gutenbergBooks = app.granger.core.library.PackBooks(
+        database, app.granger.core.library.GutenbergSource, { packLibrary.archive(it) }, { "$booksDir/gutenberg" }, coversDir,
+        app.granger.screens.ioDispatcher, { app.granger.screens.nowMillis() }, pdfCovers, ::copyOutOfPack,
+    )
+    private val nautilusBooks = app.granger.core.library.NautilusPackBooks(
+        database, { packLibrary.archive(it) }, { "$booksDir/nautilus" }, coversDir,
+        app.granger.screens.ioDispatcher, { app.granger.screens.nowMillis() }, pdfCovers, ::copyOutOfPack,
+    )
+    private val manifestBooks = app.granger.core.library.PackBooks(
+        database, app.granger.core.library.ManifestSource, { packLibrary.archive(it) }, { "$booksDir/kiwix" }, coversDir,
+        app.granger.screens.ioDispatcher, { app.granger.screens.nowMillis() }, pdfCovers, ::copyOutOfPack,
+    )
+    private val packBookSources = listOf(gutenbergBooks, nautilusBooks, manifestBooks)
+
+    /** A link on a book pack's own page (or a row of its list) opens the pack's row for that book (Plan KB Decision 4). */
+    private val packBookLinks = app.granger.core.library.PackBookLinks({ packLibrary.packs.first() }, packBookSources)
+
+    /** The shelf's books, every one (hidden pack documents too), as the database has them. */
+    val books: kotlinx.coroutines.flow.Flow<List<app.granger.core.library.Book>> get() = bookshelf.books
+
+    suspend fun book(id: String): app.granger.core.library.Book? = bookshelf.book(id)
+
+    /**
+     * At start (Android's startBookWork and followGutenberg): the shelf looks at its folders again (files gone are
+     * marked, files dropped into Documents/Books/imports are added), the book packs' rows follow the packs, and new
+     * books' words are indexed. Off the main thread; a failure waits for the next launch.
+     */
+    fun startBooks() {
+        scope.launch {
+            runCatching { rebaseMovedBooks() }
+            runCatching { bookshelf.refresh() }
+            runCatching { bookIndex.indexPending() }
+        }
+        scope.launch {
+            packLibrary.packs.map { packs -> packs.map { Triple(it.id, it.status, it.bookManifest) } }.distinctUntilChanged().collect {
+                val all = packLibrary.packs.first()
+                for (source in packBookSources) runCatching { source.sync(all) }
+                if (nautilusBooks.adopted > 0) runCatching { bookIndex.indexPending() }
+            }
+        }
+    }
+
+    /**
+     * Imports the file at [path] (named [displayName] where it came from) into the shelf, copied in as Android does;
+     * its words are indexed after. What happened, for Swift to say.
+     */
+    suspend fun importBook(path: String, displayName: String): app.granger.core.library.ImportResult {
+        val result = bookshelf.importFrom(displayName) { SystemFileSystem.source(kotlinx.io.files.Path(path)).buffered() }
+        if (result is app.granger.core.library.ImportResult.Imported) scope.launch { runCatching { bookIndex.indexPending() } }
+        return result
+    }
+
+    /**
+     * The book [id] ready to open: its file there, or brought back (a pack document copied out of its pack again, a book
+     * pack's book copied out on its first open, then indexed); null when it can't be had.
+     */
+    suspend fun openableBook(id: String): app.granger.core.library.Book? {
+        val book = bookshelf.book(id)?.let { b -> MovedContainer.rebase(b, booksDir, coversDir)?.also { database.bookDao().upsert(it) } ?: b } ?: return null
+        if (kotlinx.io.files.SystemFileSystem.metadataOrNull(kotlinx.io.files.Path(book.filePath))?.isRegularFile == true) return book
+        val restored = packDocuments.restore(book) || packBookSources.any { runCatching { it.restore(book) }.getOrDefault(false) } ||
+            runCatching { restoreOnline(book) }.getOrDefault(false)
+        if (!restored) return null
+        scope.launch { runCatching { bookIndex.indexPending() } }
+        return bookshelf.book(id)
+    }
+
+    /**
+     * A PDF or EPUB in a pack, as Android's `openPackDocument`: a book pack's file is its listed row; an EPUB in another
+     * pack is a Gutenberg row when it is one; any PDF is copied out as a pack document. Null `book` with [problem] when it
+     * can't be opened (an EPUB a pack doesn't list: [notListed]).
+     */
+    suspend fun openPackDocument(packId: String, path: String, linkText: String): PackDocumentResult {
+        packBookLinks.bookFor(packId, path)?.let { return PackDocumentResult(it, null, false) }
+        if (path.substringBefore('?').endsWith(".epub", ignoreCase = true)) {
+            return gutenbergBooks.bookFor(packId, path)?.let { PackDocumentResult(it, null, false) } ?: PackDocumentResult(null, null, true)
+        }
+        return when (val opened = packDocuments.open(packId, path, linkText)) {
+            is PackDocumentOpened.Ready -> PackDocumentResult(opened.book, null, false)
+            is PackDocumentOpened.Failed -> PackDocumentResult(null, opened.problem, false)
+        }
+    }
+
+    /**
+     * The books whose files moved with the app's container (iOS gives a new container path on some installs and
+     * updates): their stored paths are pointed at the same files under today's Documents/Books and covers folder, so
+     * they aren't marked missing (Plan I5 Task 6). Before the shelf looks at its folders.
+     */
+    suspend fun rebaseMovedBooks(): Int {
+        val dao = database.bookDao()
+        var moved = 0
+        for (book in dao.getAll()) {
+            val rebased = MovedContainer.rebase(book, booksDir, coversDir) ?: continue
+            // The shelf's refresh after this marks it OK again, its file being there.
+            dao.upsert(rebased)
+            moved++
+        }
+        return moved
+    }
+
+    /** Points a book's stored path elsewhere, as an older container's would be (tests of [rebaseMovedBooks]). */
+    suspend fun setStoredPath(bookId: String, path: String) {
+        val dao = database.bookDao()
+        dao.get(bookId)?.let { dao.upsert(it.copy(filePath = path)) }
+    }
+
+    // ---- Classics from the catalog, the online bookshelf, reference links and archive.org (Plan I5 Task 7), as Android's
+    // GrangerApp wires them.
+
+    /** Where archive.org's sidecars (each text's title, author and kind) live, beside its downloads. */
+    private val archiveSidecarDir: String get() = "$booksDir/archive-org"
+
+    /** Whether something may be fetched now (Android's canFetchOnline): the gate open and a network up. */
+    fun canFetchOnline(): Boolean = gateOpen() && connected()
+
+    /** The online bookshelf's requests: Ktor on Darwin with Granger's User-Agent, refused while the gate is shut. */
+    private val bookHttp: app.granger.online.PackBookHttp by lazy {
+        app.granger.online.KtorPackBookHttp(GrangerCoreEntry.userAgent(appVersion), gateOpen)
+    }
+
+    /**
+     * Files a finished book download (Android's fileBookRecord): an archive.org text with its sidecar's details (a
+     * born-digital PDF becomes an e-book, its PDF kept as its pages), else a Granger book. Never throws: the runner would
+     * mark an installed download failed.
+     */
+    private suspend fun fileBookRecord(record: app.granger.core.downloads.DownloadRecord) {
+        try {
+            val identifier = app.granger.archive.ArchiveDownloads.identifierOf(record.itemId)
+            val sidecar = identifier?.takeIf { app.granger.core.archive.ArchiveQuery.isValidIdentifier(it) }
+                ?.let { app.granger.archive.ArchiveDownloads.sidecarPath(archiveSidecarDir, app.granger.archive.ArchiveDownloads.sidecarKeyOf(record.itemId) ?: it) }
+            val details = sidecar?.let { app.granger.archive.ArchiveDownloads.readSidecar(it)?.first }
+            val book = bookshelf.addDownloaded(
+                record.filePath,
+                if (identifier != null) app.granger.core.library.BookOrigin.ARCHIVE_ORG else app.granger.core.library.BookOrigin.GRANGER,
+                app.granger.archive.ArchiveDownloads.bookRefOf(record.itemId) ?: record.itemId,
+                if (app.granger.archive.ArchiveDownloads.isPdfCopy(record.itemId)) details?.let(app.granger.archive.ArchiveDownloads::pdfCopyDetails) else details,
+            )
+            if (book == null) logLine("Downloaded book ${record.itemId} is not a readable EPUB or PDF")
+            else scope.launch { runCatching { bookIndex.indexPending() } }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            logLine("Filing downloaded book ${record.itemId} failed: $e")
+        }
+    }
+
+    /** A catalog book by id: Granger's own, or one in a set (the reading editions are a set). */
+    fun catalogBook(itemId: String): app.granger.core.catalog.BookEntry? {
+        val c = catalog ?: return null
+        return c.books.firstOrNull { it.id == itemId } ?: c.setBooks.firstOrNull { it.id == itemId }
+    }
+
+    /** Whether a catalog row can be read now without keeping it (a Granger book, online). */
+    fun canReadNow(itemId: String): Boolean = canFetchOnline() && catalog?.books?.any { it.id == itemId } == true
+
+    /** Whether a catalog pack's collection can be opened online (it has a `.gbooks` list). */
+    fun canBrowseOnline(packEntryId: String): Boolean =
+        catalog?.packs?.firstOrNull { it.id == packEntryId }?.sidecars?.any { it.kind == app.granger.core.catalog.SidecarEntry.GBOOKS } == true
+
+    /**
+     * Opens a Granger Classics or Gutenberg book without keeping it (Android's readWithoutKeeping, Plan O2 Task 8): its
+     * EPUB is fetched into Saved for now (checked against the catalog's hash) and registered off the shelf, under the id
+     * a download would give it, so Keep takes over the same book with its place and highlights. Its id, or null.
+     */
+    suspend fun readWithoutKeeping(itemId: String): String? = kotlinx.coroutines.withContext(app.granger.screens.ioDispatcher) {
+        val id = app.granger.core.library.BookIds.of(app.granger.core.library.BookOrigin.GRANGER, itemId)
+        bookshelf.book(id)?.takeIf { it.status == app.granger.core.library.PackStatus.OK && isFile(it.filePath) }?.let { return@withContext it.id }
+        val entry = catalogBook(itemId) ?: return@withContext null
+        val key = app.granger.online.RemoteBookReads.bookKey(itemId)
+        val file = saved.file(key) ?: run {
+            SystemFileSystem.createDirectories(kotlinx.io.files.Path(cacheDir))
+            val tmp = "$cacheDir/reading-$itemId.part"
+            val ok = entry.urls.any { url ->
+                bookHttp.fetch(url, tmp) && runCatching { app.granger.core.library.FileHashes.sha256(tmp).equals(entry.sha256, ignoreCase = true) }.getOrDefault(false)
+            }
+            if (!ok) {
+                runCatching { SystemFileSystem.delete(kotlinx.io.files.Path(tmp), mustExist = false) }
+                return@withContext null
+            }
+            if (!saved.putFile(key, app.granger.online.RemoteBookReads.BOOK_KIND, tmp, "application/epub+zip")) return@withContext null
+            trimSaved()
+            saved.file(key) ?: return@withContext null
+        }
+        val book = bookshelf.addDownloaded(file, app.granger.core.library.BookOrigin.GRANGER, itemId) ?: return@withContext null
+        bookshelf.hide(listOf(book.id))
+        book.id
+    }
+
+    /** Keeps a book opened without keeping: the ordinary download, which takes over the same book. */
+    suspend fun keepBook(itemId: String): Boolean {
+        val entry = catalogBook(itemId) ?: return false
+        downloads.enqueue(entry, downloadRoot, wifiOnly())
+        return true
+    }
+
+    /** Book packs' books read one at a time from the pack file on Kiwix's mirrors (Plan BK), on Ktor. */
+    private val packBookReads by lazy {
+        app.granger.online.RemoteBookReads(bookHttp, saved, "$cacheDir/reading", trim = { trimSaved() })
+    }
+
+    /** The catalog pack [packEntryId]'s collection, read online (or from Saved for now); null without one. */
+    suspend fun remoteCollection(packEntryId: String): app.granger.online.RemoteCollection? {
+        val entry = catalog?.packs?.firstOrNull { it.id == packEntryId } ?: return null
+        return packBookReads.collection(entry, canFetchOnline())
+    }
+
+    /**
+     * Opens the book [key] of the catalog pack [packEntryId] without the pack: read by range into Saved for now, as the
+     * row the pack would give it (hidden: read, not kept). Its id, or null. A book already here opens as it is.
+     */
+    suspend fun readPackBookOnline(packEntryId: String, key: String, progress: (Long, Long) -> Unit): String? {
+        val remote = remoteCollection(packEntryId) ?: return null
+        val item = remote.items.firstOrNull { it.key == key } ?: return null
+        val id = remote.bookId(item)
+        bookshelf.book(id)?.takeIf { it.status == app.granger.core.library.PackStatus.OK && isFile(it.filePath) }?.let { return it.id }
+        val file = packBookReads.book(remote, item, canFetchOnline(), progress) ?: return null
+        val pack = remote.pack
+        val details = app.granger.core.library.BookDetails(
+            title = item.title, author = item.author, date = "", subjects = emptyList(), description = item.description,
+            language = item.language.ifBlank { pack.language },
+        )
+        val place = app.granger.core.library.PackItem(
+            ref = remote.ref(item), path = item.path, title = item.title, author = item.author, format = item.format,
+            sizeBytes = item.bytes, groupName = item.groupName, ord = item.ord,
+            workKey = item.partOf ?: item.workKey, workTitle = item.workTitle, partNo = item.partNo,
+        )
+        return bookshelf.addLoose(id, remote.origin, "${pack.zimName}/${item.path}", file, details, place)?.id
+    }
+
+    /** Keeps a pack book read online on its own: its file moves out of Saved for now into `Books/kept`. */
+    suspend fun keepPackBook(bookId: String): Boolean {
+        val book = bookshelf.book(bookId) ?: return false
+        if (book.loose == app.granger.core.library.Loose.KEPT) return true
+        if (book.loose != app.granger.core.library.Loose.SAVED) return false
+        val ext = if (book.format == app.granger.core.library.BookFormat.PDF) "pdf" else "epub"
+        SystemFileSystem.createDirectories(kotlinx.io.files.Path("$booksDir/kept"))
+        bookshelf.keepLoose(bookId, "$booksDir/kept/${sha1(bookId.encodeToByteArray()).hex()}.$ext") ?: return false
+        saved.remove(app.granger.online.RemoteBookReads.bookKey(bookId))
+        return true
+    }
+
+    /** Keeps a whole book pack (the ordinary download). True when it's queued, coming or already here. */
+    suspend fun keepPack(packEntryId: String): Boolean {
+        val entry = catalog?.packs?.firstOrNull { it.id == packEntryId } ?: return false
+        return downloads.enqueue(entry, downloadRoot, wifiOnly()) !is app.granger.core.downloads.EnqueueResult.NoSpace
+    }
+
+    /** A pack book read online whose saved copy has gone comes down again from the pack file, when online. */
+    private suspend fun restoreOnline(book: app.granger.core.library.Book): Boolean {
+        if (book.loose != app.granger.core.library.Loose.SAVED || isFile(book.filePath)) return false
+        val zimName = app.granger.core.library.PackBooks.packNameOf(book)
+        val entry = catalog?.packs?.firstOrNull { p -> p.zimName == zimName && p.sidecars.any { it.kind == app.granger.core.catalog.SidecarEntry.GBOOKS } }
+            ?: return false
+        val remote = packBookReads.collection(entry, canFetchOnline()) ?: return false
+        val item = remote.itemOf(book.id) ?: return false
+        return readPackBookOnline(entry.id, item.key) { _, _ -> } != null
+    }
+
+    /** A book pack's collection read online (Plan BK), as Android's RemoteCollectionRoute builds it. */
+    fun remoteCollectionModel(packEntryId: String): OwnedViewModel<app.granger.library.RemoteCollectionViewModel> = OwnedViewModel {
+        app.granger.library.RemoteCollectionViewModel(
+            load = { remoteCollection(packEntryId) },
+            books = bookshelf.books,
+            read = { key, progress -> readPackBookOnline(packEntryId, key, progress) },
+            keepBook = { id -> keepPackBook(id) },
+            keepPack = { keepPack(packEntryId) },
+            readEdition = { id -> readWithoutKeeping(id) },
+            keepEdition = { id -> keepBook(id) },
+            packQueued = downloads.records.map { list -> list.any { it.itemId == packEntryId && it.state != app.granger.core.downloads.DownloadState.FAILED } },
+            capBytes = { savedCapMb() * 1024L * 1024 },
+            online = { canFetchOnline() },
+            packHere = packLibrary.packs.map { packs ->
+                val zim = catalog?.packs?.firstOrNull { it.id == packEntryId }?.zimName
+                zim != null && packs.any { it.name == zim && it.status == app.granger.core.library.PackStatus.OK }
+            },
+        )
+    }
+
+    /** The installed pack of the catalog pack [packEntryId], once it's here (the remote collection's "Open the collection"). */
+    suspend fun installedPackOf(packEntryId: String): String? {
+        val zim = catalog?.packs?.firstOrNull { it.id == packEntryId }?.zimName ?: return null
+        return packLibrary.packs.first().firstOrNull { it.name == zim && it.status == app.granger.core.library.PackStatus.OK }?.id
+    }
+
+    private fun isFile(path: String) = SystemFileSystem.metadataOrNull(kotlinx.io.files.Path(path))?.isRegularFile == true
+
+    // Reference links (Plan LL1 Tasks 8–9): the Classics' `.glink` files and the QID indexes, behind IosFeatures.LINKED_CLASSICS.
+
+    /** The online index set's QID files (Wikipedia online's Top `.gqid`), as Swift opened them. */
+    private var onlineQidFiles: List<Pair<String, app.granger.InstalledSidecar>> = emptyList()
+
+    /** Debug builds' links and QID files for the UI tests ([debugLinks]), read beside the installed ones. */
+    private var debugLinksFiles: Map<String, app.granger.InstalledSidecar> = emptyMap()
+    private var debugQidFiles: List<Pair<String, app.granger.InstalledSidecar>> = emptyList()
+
+    /** Each installed pack's sidecar of [kind] by pack id, as Android's installedSidecars (without the online set). */
+    private suspend fun installedPackSidecars(kind: app.granger.core.downloads.SidecarKind): Map<String, app.granger.InstalledSidecar> {
+        val records = downloads.records.first().filter { it.state == app.granger.core.downloads.DownloadState.INSTALLED }
+        val byItem = records.groupBy { it.itemId }
+        val packsByPath = packLibrary.packs.first().associateBy { it.filePath }
+        return records.filter { it.kind == kind.itemKind && kind.parentOf(it.itemId) != null }.groupBy { it.itemId }.mapNotNull { (itemId, versions) ->
+            val parent = kind.parentOf(itemId)?.let(byItem::get)?.maxByOrNull { it.createdAt } ?: return@mapNotNull null
+            val pack = packsByPath[parent.filePath] ?: return@mapNotNull null
+            pack.id to app.granger.InstalledSidecar(versions.maxBy { it.createdAt }.filePath, parent.hash, pack.filePath.substringAfterLast('/'))
+        }.toMap()
+    }
+
+    /** Each installed Classic's sidecar of [kind] by bookshelf id, with the sha256 of the EPUB it was built from. */
+    private suspend fun installedBookSidecars(kind: app.granger.core.downloads.SidecarKind): Map<String, app.granger.InstalledSidecar> {
+        val records = downloads.records.first().filter { it.state == app.granger.core.downloads.DownloadState.INSTALLED }
+        val books = records.filter { it.kind == app.granger.core.downloads.ItemKind.BOOK && it.hash.isNotEmpty() }.groupBy { it.itemId }
+        return records.filter { it.kind == kind.itemKind }.groupBy { it.itemId }.mapNotNull { (itemId, versions) ->
+            val parentId = kind.parentOf(itemId) ?: return@mapNotNull null
+            val book = books[parentId]?.maxByOrNull { it.createdAt } ?: return@mapNotNull null
+            app.granger.core.library.BookIds.of(app.granger.core.library.BookOrigin.GRANGER, parentId) to
+                app.granger.InstalledSidecar(versions.maxBy { it.createdAt }.filePath, book.hash)
+        }.toMap()
+    }
+
+    /** A book on the shelves as the Linked Library shows it; null when it's gone. */
+    private suspend fun libraryBook(id: String): app.granger.ebook.LibraryBook? =
+        bookshelf.book(id)?.takeIf { it.status == app.granger.core.library.PackStatus.OK }?.let { app.granger.ebook.LibraryBook(it.id, it.title, it.coverPath) }
+
+    /** Reference links in the Classics, and the reverse view under an article (In your books). */
+    val referenceLinks: app.granger.ebook.ReferenceLinksSource by lazy {
+        app.granger.ebook.ReferenceLinksSource(
+            linksFiles = { installedBookSidecars(app.granger.core.downloads.SidecarKind.LINKS) + debugLinksFiles },
+            qidFiles = {
+                val installed = installedPackSidecars(app.granger.core.downloads.SidecarKind.QID_INDEX) + onlineQidFiles.toMap()
+                val packs = packLibrary.packs.first() + openSources()
+                app.granger.home.WanderModel.encyclopediasOf(packs, languages()).mapNotNull { p -> installed[p.id]?.let { p.id to it } } + debugQidFiles
+            },
+            lead = { packId, path -> linkLead(packId, path) },
+            bookOf = { id -> libraryBook(id) },
+            index = run {
+                SystemFileSystem.createDirectories(kotlinx.io.files.Path("$dir/linked-library"))
+                app.granger.core.library.MentionIndex("$dir/linked-library/mentions.sqlite")
+            },
+            background = scope,
+            wikipediaLanguage = { id -> languageOf(id) },
+            bookLanguage = { id -> bookshelf.book(id)?.language?.take(2)?.lowercase()?.ifBlank { null } },
+            contentFilter = contentFilter,
+        )
+    }
+
+    /** An article's title, opening lines and picture for a link's card: a pack's from its page, Wikipedia online's summary. */
+    private fun linkLead(packId: String, path: String): app.granger.ebook.ArticleLead? {
+        val lang = langOf(packId) ?: return packCard(packId, path, 2, app.granger.home.LeadLinks.MAX_SUMMARY)?.let { (title, summary, picture) ->
+            app.granger.ebook.ArticleLead(app.granger.core.library.PageTitles.clean(title), summary, picture)
+        }
+        if (!gateOpen()) return null
+        val s = wikipedia(lang).summary(path) ?: return null
+        val thumb = if (contentFilter.noPicture(packId, path)) null else s.thumbnail?.let { picture(lang, it) }
+        return app.granger.ebook.ArticleLead(app.granger.core.library.PageTitles.clean(s.title), app.granger.home.LeadLinks.summaryOf(s.extract), thumb)
+    }
+
+    /** The open book's links up to [level] that an installed Wikipedia can open; empty with the feature off or no links file. */
+    suspend fun bookMentions(bookId: String, level: app.granger.ebook.LinkLevel): List<app.granger.core.library.BookMention> =
+        if (!IosFeatures.LINKED_CLASSICS) emptyList()
+        else kotlinx.coroutines.withContext(app.granger.screens.ioDispatcher) { runCatching { referenceLinks.mentions(bookId, level) }.getOrDefault(emptyList()) }
+
+    /** A tapped link's card; null when no installed pack has the article any more. */
+    suspend fun linkPeek(qid: Long, language: String?): app.granger.ebook.LinkPeek? =
+        kotlinx.coroutines.withContext(app.granger.screens.ioDispatcher) {
+            runCatching { referenceLinks.peek(qid, language) }.onFailure { logLine("A link's card failed: $it") }.getOrNull()
+        }
+
+    /** What the library holds about an article (the reader's footer); empty with the feature off. */
+    suspend fun articleFooter(packId: String, path: String): app.granger.ebook.ArticleFooter =
+        if (!IosFeatures.LINKED_CLASSICS) app.granger.ebook.ArticleFooter.NONE
+        else kotlinx.coroutines.withContext(app.granger.screens.ioDispatcher) {
+            runCatching { referenceLinks.footer(packId, path) }.getOrDefault(app.granger.ebook.ArticleFooter.NONE)
+        }
+
+    /**
+     * Debug builds and UI tests (no Classic's links download in a test): a `.glink` for the book [bookId] at [epubPath],
+     * naming [quote] in the chapter [href] as the item [qid], and a `.gqid` giving [qid] the article [articlePath] in the
+     * pack [packId]. Both are read beside the installed ones from now on.
+     */
+    fun debugLinks(bookId: String, epubPath: String, href: String, quote: String, qid: Long, packId: String, articlePath: String): Boolean = runCatching {
+        val folder = "$dir/linked-library/debug"
+        SystemFileSystem.createDirectories(kotlinx.io.files.Path(folder))
+        val sha = app.granger.core.library.FileHashes.sha256(epubPath)
+        val links = "$folder/links.glink"
+        val qids = "$folder/index.gqid"
+        DebugSidecars.writeLinks(links, sha, bookId, href, quote, qid)
+        DebugSidecars.writeQids(qids, articlePath, qid)
+        debugLinksFiles = mapOf(bookId to app.granger.InstalledSidecar(links, sha))
+        debugQidFiles = listOf(packId to app.granger.InstalledSidecar(qids, ""))
+        true
+    }.getOrDefault(false)
+
+    // archive.org (Plan I5 Task 7; App Store rules, call 9: published before 1930 only, no waiver).
+
+    private val archiveClient by lazy {
+        app.granger.core.archive.ArchiveOrgClient(app.granger.core.archive.KtorArchiveHttp(allowed = gateOpen), GrangerCoreEntry.userAgent(appVersion))
+    }
+
+    /** archive.org's texts: search, shelves, an item's sheet, sets in parts, and Get through the shared queue. */
+    fun archiveOrg(): OwnedViewModel<app.granger.archive.ArchiveModel> = OwnedViewModel {
+        app.granger.archive.ArchiveModel(
+            client = archiveClient, downloads = downloads, bookshelf = bookshelf, prefs = app.granger.archive.FixedFilterArchivePrefs,
+            volumes = volumes, downloadPrefs = downloadPrefs, sidecarPath = { archiveSidecarDir }, appScope = scope,
+            languages = { languages() },
+        )
+    }
+
+    /** What Open on an installed archive.org text reads: one book, or a set's parts in their collection. */
+    suspend fun archiveOpenTarget(model: app.granger.archive.ArchiveModel, identifier: String): app.granger.archive.ArchiveOpen? = model.openTarget(identifier)
+
+    /**
+     * Debug builds and UI tests: the PDF at [pdfPath] filed as a finished archive.org download of [identifier] would be
+     * (its sidecar written first, then the shelf's own filing: a born-digital PDF becomes an e-book). The book's id.
+     */
+    suspend fun debugArchiveText(pdfPath: String, identifier: String, title: String, author: String): String? {
+        val folder = "$archiveSidecarDir"
+        SystemFileSystem.createDirectories(kotlinx.io.files.Path(folder))
+        val to = "$folder/$identifier.pdf"
+        SystemFileSystem.source(kotlinx.io.files.Path(pdfPath)).buffered().use { i -> SystemFileSystem.sink(kotlinx.io.files.Path(to)).buffered().use { o -> i.transferTo(o) } }
+        val details = app.granger.core.library.BookDetails(title, author, "1900", emptyList(), "", "en")
+        val book = bookshelf.addDownloaded(to, app.granger.core.library.BookOrigin.ARCHIVE_ORG, identifier, details) ?: return null
+        scope.launch { runCatching { bookIndex.indexPending() } }
+        return book.id
+    }
+
+    internal fun logLine(message: String) {
+        platform.Foundation.NSLog("Granger: $message".replace("%", "%%"))
+    }
+
+    // ---- The Library tab (Plan I5 Task 6): the shared models over the shelf, as Android's GrangerApp wires them.
+
+    /** The shelves: media types, collections and where each book, pack and album is filed. */
+    val shelves: app.granger.core.library.Shelves by lazy {
+        app.granger.core.library.RoomShelves(database, packLibrary, bookshelf, IosMediaLibrary(database))
+    }
+
+    /** Each shelf's view and sort (Android's "library_views" prefs), in UserDefaults under `library_views.`. */
+    private val shelfChoices by lazy {
+        val d = platform.Foundation.NSUserDefaults.standardUserDefaults
+        app.granger.library.shelf.ShelfChoices(read = { d.stringForKey("library_views.$it") }, write = { k, v -> d.setObject(v, "library_views.$k") })
+    }
+
+    /** Imports picked files; a batch that added a book has its words indexed straight after. */
+    private val fileImports by lazy {
+        app.granger.library.FileImports(bookshelf) { scope.launch { runCatching { bookIndex.indexPending() } } }
+    }
+
+    /** "Make all searchable…" for a book pack's collection: every book copied out of its pack and indexed. */
+    private val gutenbergShelf by lazy {
+        app.granger.library.GutenbergShelf(
+            { book -> packBookSources.any { runCatching { it.restore(book) }.getOrDefault(false) } }, bookIndex::indexPending,
+            { "$booksDir/gutenberg" }, { app.granger.core.downloads.freeBytesAt(it) }, scope,
+        )
+    }
+
+    /** The Library tab's model: the reading shelf, the books' collections, imports. */
+    fun libraryModel(): OwnedViewModel<app.granger.library.LibraryModel> = OwnedViewModel {
+        app.granger.library.LibraryModel(shelves, packLibrary, fileImports, scope, catalog = catalogSource, bookshelf = bookshelf)
+    }
+
+    /** One collection's model ([collectionId] as the shelves name it: `c:<default key>` for an app-made one). */
+    fun collection(collectionId: String): OwnedViewModel<app.granger.library.CollectionModel> = OwnedViewModel {
+        app.granger.library.CollectionModel(
+            collectionId, shelves, packLibrary, sessions, bookshelf, downloads, scope,
+            catalog = catalogSource, viewPrefs = shelfChoices, gutenberg = gutenbergShelf,
+        )
+    }
+
+    /** A file picked in Files, for [app.granger.library.LibraryModel.importFiles]; comics become PDFs on the way. */
+    fun pickedFile(path: String, name: String): app.granger.library.PickedFile = pickedBook(path, name, "$cacheDir/imports")
+
+    /** Imports picked files straight away (UI tests' `-debugImport`, through the same shared import as a pick). */
+    suspend fun importPicked(files: List<app.granger.library.PickedFile>): app.granger.library.ImportSummary = fileImports.importAll(files)
+
+    /** An installed book pack's Library collection id (Android's openPackOrCollection); null for any other pack. */
+    suspend fun bookPackCollection(packId: String): String? {
+        val pack = packLibrary.packs.first().firstOrNull { it.id == packId }?.takeIf { it.isBookPack } ?: return null
+        return "c:${app.granger.core.library.Filing.defaultKey(pack)}"
+    }
+
+    /**
+     * A Gutenberg book's cover before its first open (Android's GutenbergCovers, Plan GB Decision 3): the pack's own
+     * cover picture, kept as it is under Caches; Swift draws it scaled down. Null for any other book, or none in the pack.
+     */
+    suspend fun packCover(book: app.granger.core.library.Book): String? = kotlinx.coroutines.withContext(app.granger.screens.ioDispatcher) {
+        if (book.origin != app.granger.core.library.BookOrigin.GUTENBERG) return@withContext null
+        val id = book.id.removePrefix(app.granger.core.library.BookIds.of(app.granger.core.library.BookOrigin.GUTENBERG, ""))
+        val file = kotlinx.io.files.Path(cacheDir, "gutenberg-covers", sha1(id.encodeToByteArray()).hex())
+        if ((SystemFileSystem.metadataOrNull(file)?.size ?: 0L) > 0L) return@withContext file.toString()
+        runCatching {
+            val packName = book.sourceRef.substringBefore('/')
+            val pack = packLibrary.packs.first().firstOrNull { it.name == packName && it.status == app.granger.core.library.PackStatus.OK } ?: return@runCatching null
+            val archive = packLibrary.archive(pack.id) ?: return@runCatching null
+            val path = app.granger.core.library.GutenbergList.coverPath(archive, id) ?: return@runCatching null
+            val bytes = archive.read(path)?.bytes?.takeIf { it.isNotEmpty() } ?: return@runCatching null
+            SystemFileSystem.createDirectories(file.parent!!)
+            SystemFileSystem.sink(file).buffered().use { it.write(bytes) }
+            file.toString()
+        }.getOrNull()
+    }
+
+    /** The book is open (Android shows it in a rail tab): its tab is made or brought forward. */
+    suspend fun bookOpened(book: app.granger.core.library.Book) {
+        sessions.openTab(book.id, "", book.title)
+    }
+
+    /** The e-book reader's shared model ([EbookReaderModel.openBook] starts it); [close] clears it. */
+    fun ebookReader(): OwnedViewModel<app.granger.ebook.EbookReaderModel> =
+        OwnedViewModel { app.granger.ebook.EbookReaderModel(bookshelf, readingPrefs, scope) }
+
+    /** Saves the reader's place in [bookId]: Readium's locator JSON, as Android stores it. */
+    suspend fun savePosition(bookId: String, locatorJson: String, totalProgression: Double, chapterTitle: String) =
+        bookshelf.savePosition(bookId, locatorJson, totalProgression, chapterTitle)
+
+    suspend fun position(bookId: String): app.granger.core.library.BookPosition? = bookshelf.position(bookId)
+
+    /**
+     * What Define does for a word now (Plan I5 call 8): the newest Wiktionary pack, else the system dictionary when
+     * [systemDictionary] can define, else nothing.
+     */
+    suspend fun dictionaryChoice(systemDictionary: Boolean): app.granger.ebook.DictionaryChoice =
+        app.granger.ebook.Dictionary.choose(packLibrary.packs.first(), systemDictionary)
+
+    /** [word]'s Wiktionary entry for a book in [bookLanguage] (Plan L3), in [packId] when nothing better is installed. */
+    suspend fun define(packId: String, word: String, bookLanguage: String?): app.granger.ebook.DictionaryEntry? =
+        app.granger.ebook.Dictionary.entry(packLibrary, packId, app.granger.ebook.Dictionary.normalise(word), bookLanguage, languages())
 
     /** Any source's archive: Wikipedia online by its language, else an installed pack. Blocking. */
     fun archive(packId: String): app.granger.core.zim.ZimArchive? = langOf(packId)?.let { wikipedia(it) } ?: packLibrary.archive(packId)
@@ -363,6 +955,7 @@ class IosLibrary(
 
     /** Opens the index files at [paths] (pairs of kind and path); false when none of them opens. */
     fun openIndexes(files: List<OpenIndex>): Boolean {
+        onlineQidFiles = files.filter { it.kind == IndexKind.QID }.map { it.source to app.granger.InstalledSidecar(it.path, "") }
         val q = files.filter { it.kind == IndexKind.QID }.mapNotNull { QidIndex.open(it.path, it.source) }
         val t = files.filter { it.kind == IndexKind.TIME }.mapNotNull { TimeIndex.open(it.path, it.source) }
         indexes = if (q.isEmpty()) null else QidIndexes(q)
@@ -489,7 +1082,7 @@ class IosLibrary(
     /** The articles you kept, newest first. */
     val keptArticles: kotlinx.coroutines.flow.Flow<List<app.granger.core.library.KeptArticle>> get() = kept.articles
 
-        // ---- Onboarding (Plan I4 Task 8): the shared first run, Pick a start and quick wins; the voice step waits for voices (I5).
+    // ---- Onboarding (Plan I4 Task 8): the shared first run, Pick a start and quick wins, and the voice (Plan I5 Task 8).
 
     /** Whether the first run was finished or skipped once. */
     val onboardingPrefs = DefaultsOnboardingPrefs()
@@ -508,7 +1101,7 @@ class IosLibrary(
                 catalog = catalogSource, library = packLibrary, downloads = downloads, volumes = volumes, prefs = downloadPrefs,
                 askTier = false, canRun = { false }, totalRamBytes = platform.Foundation.NSProcessInfo.processInfo.physicalMemory.toLong(),
                 onboardingPrefs = onboardingPrefs, askOn = false, research = false, dense = false, countryCode = countryCode,
-                offerVoice = false, io = app.granger.screens.ioDispatcher, now = { app.granger.screens.nowMillis() },
+                offerVoice = true, io = app.granger.screens.ioDispatcher, now = { app.granger.screens.nowMillis() },
                 knowledge = knowledge, setKnowledge = { langs -> knowledge.value = langs; setKnowledge(langs) },
                 phoneLanguages = { phoneLanguages }, appLanguage = { app.granger.screens.phoneLanguage() },
                 enqueue = { group, items, volume, wifi ->
@@ -639,7 +1232,7 @@ class IosLibrary(
             languages().associate { OnlineWikipediaArchive.packName(it) to OnlineWikipediaArchive.packName(it) } +
                 packLibrary.packs.first().filter { it.name.isNotBlank() }.associate { it.name to it.id }
         },
-        footer = null,
+        footer = if (IosFeatures.LINKED_CLASSICS) referenceLinks else null,
         related = { name, path, _ ->
             val lang = langOf(name)
             if (lang == null) app.granger.core.library.Related(emptyList(), emptyList()) else {
@@ -651,7 +1244,7 @@ class IosLibrary(
                 app.granger.core.library.Related(hits, emptyList())
             }
         },
-        bookOf = { null },
+        bookOf = { id -> libraryBook(id) },
         libraryLanguages = { languages().toSet() },
         // A broad topic's figures (Plan EX D5) from a pack's own pictures, cached as files (Plan I4 Task 8).
         figure = { packId, image -> if (langOf(packId) != null) null else packLibrary.archive(packId)?.let { archivePicture(it, image, whole = false) } },
@@ -961,5 +1554,8 @@ data class IndexFile(val kind: IndexKind, val source: String, val url: String, v
 /** An index file on the phone, to open. */
 /** An article by its source and path (for Ready offline's keeps: language and title). */
 data class ArticleRef(val packId: String, val path: String)
+
+/** A pack's PDF or EPUB opened: its [book], or why not ([problem], or [notListed] for an EPUB its pack doesn't list). */
+data class PackDocumentResult(val book: app.granger.core.library.Book?, val problem: PackDocumentProblem?, val notListed: Boolean)
 
 data class OpenIndex(val kind: IndexKind, val source: String, val path: String)

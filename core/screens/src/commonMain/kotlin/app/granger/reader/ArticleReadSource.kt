@@ -11,9 +11,7 @@ import app.granger.core.speech.Utterance
 import app.granger.core.speech.UtteranceKind
 import app.granger.core.speech.Utterances
 import app.granger.core.zim.ZimArchive
-import java.nio.charset.Charset
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -24,14 +22,15 @@ data class ArticleSection(val title: String, val blockId: String, val prefix: St
 /**
  * An article as the voice reads it: the ZIM entry's HTML through [ArticleText]'s rules, split into sentences once and
  * kept. It never touches the WebView, so the player can reopen it after process death and the reader can start the
- * voice at any block the page names.
+ * voice at any block the page names. Shared since Plan I5 Task 8: the iPhone reads its articles (online and in packs)
+ * through the same source.
  */
 class ArticleReadSource(
     private val archive: ZimArchive,
     val packId: String,
     val path: String,
     override val title: String,
-    private val io: CoroutineDispatcher = Dispatchers.IO,
+    private val io: CoroutineDispatcher = app.granger.screens.ioDispatcher,
 ) : ReadSource {
     override val key: String = ReadSourceKey.article(packId, path)
     private val lock = Mutex()
@@ -44,7 +43,7 @@ class ArticleReadSource(
     private suspend fun all(): List<Utterance> = lock.withLock {
         loaded ?: withContext(io) {
             val item = archive.read(path)
-            val html = item?.let { String(it.bytes, charsetOf(it.mimeType)) }.orEmpty()
+            val html = item?.let { decode(it.bytes, it.mimeType) }.orEmpty()
             val article = ArticleText.blocks(html)
             val blocks = article.map {
                 Block(
@@ -148,10 +147,11 @@ class ArticleReadSource(
         return list.indexOfFirst { (it.address as ReadAddress.Article).blockId == a.blockId }.takeIf { it >= 0 }
     }
 
-    internal companion object {
-        fun charsetOf(mimeType: String): Charset {
-            val name = Regex("charset=([^;\\s]+)", RegexOption.IGNORE_CASE).find(mimeType)?.groupValues?.get(1) ?: return Charsets.UTF_8
-            return runCatching { Charset.forName(name.trim('"')) }.getOrDefault(Charsets.UTF_8)
-        }
+    companion object {
+        /** A page's bytes as text, in the charset its MIME type names (UTF-8 when it names none or one the phone lacks). */
+        fun decode(bytes: ByteArray, mimeType: String): String = decodeHtml(bytes, mimeType)
     }
 }
+
+/** [bytes] in the charset [mimeType] names, else UTF-8: Android's `Charset.forName`, the iPhone's UTF-8 or Latin-1. */
+internal expect fun decodeHtml(bytes: ByteArray, mimeType: String): String
