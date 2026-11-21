@@ -148,3 +148,69 @@ class IosPdfOpener(private val opening: (path: String) -> PdfOpening) : app.gran
 fun usePdfEngine(opener: app.granger.core.books.PdfOpener) {
     app.granger.core.books.BookEngines.pdf = opener
 }
+
+/**
+ * iOS can move the app's container between installs and updates (`…/Data/Application/<UUID>/` changes), so a book's
+ * stored absolute path can point into a folder that no longer exists (Plan I5 Task 6). A stored path that's gone is
+ * looked for again under the folder that holds it now: the same part after that folder's last two names
+ * (`Documents/Books/imports/x.epub` under the current Documents/Books). Android keeps its paths as they are.
+ */
+object MovedContainer {
+    /** [stored] under [currentDir], when [stored] is gone and the same file is there; else null. */
+    fun rebase(stored: String, currentDir: String, exists: (String) -> Boolean = ::isFile): String? {
+        if (stored.isBlank() || exists(stored)) return null
+        val dir = currentDir.trimEnd('/')
+        val tail = dir.split('/').filter { it.isNotEmpty() }.takeLast(2).joinToString("/")
+        if (tail.isEmpty()) return null
+        val at = stored.lastIndexOf("/$tail/")
+        if (at < 0) return null
+        val candidate = dir + stored.substring(at + tail.length + 1)
+        return candidate.takeIf { it != stored && exists(it) }
+    }
+
+    /** [book] with its file and cover found again under [booksDir] and [coversDir]; null when nothing moved. */
+    fun rebase(book: app.granger.core.library.Book, booksDir: String, coversDir: String, exists: (String) -> Boolean = ::isFile): app.granger.core.library.Book? {
+        val file = rebase(book.filePath, booksDir, exists)
+        val cover = book.coverPath?.let { rebase(it, coversDir, exists) }
+        if (file == null && cover == null) return null
+        return book.copy(filePath = file ?: book.filePath, coverPath = cover ?: book.coverPath)
+    }
+
+    fun isFile(path: String): Boolean = runCatching { SystemFileSystem.metadataOrNull(Path(path))?.isRegularFile == true }.getOrDefault(false)
+}
+
+/**
+ * The music and audiobook rows the shelves file (Plan I5 Task 6): read from the library database; the iPhone has no
+ * music library to scan until Plan I6, so [sync] and [forget] do nothing yet.
+ */
+class IosMediaLibrary(db: app.granger.core.library.LibraryDatabase) : app.granger.core.library.MediaLibrary {
+    private val dao = db.mediaDao()
+    override val tracks = dao.observeMusic()
+    override val audiobooks = dao.observeAudiobooks()
+    override fun chapters(audiobookId: String) = dao.observeChapters(audiobookId)
+    override val allChapters = dao.observeAllChapters()
+    override val albumNotes = dao.observeAlbumNotes()
+    override suspend fun track(id: String) = dao.track(id)
+    override suspend fun audiobook(id: String) = dao.audiobook(id)
+    override suspend fun coverPaths(): Set<String> = dao.coverPaths().toSet()
+    override suspend fun sync(origin: app.granger.core.library.MediaOrigin, result: app.granger.core.library.ScanResult, keep: (uri: String) -> Boolean) = Unit
+    override suspend fun forget(trackIds: Collection<String>, audiobookIds: Collection<String>) = Unit
+}
+
+/**
+ * A file picked in the Files app (Plan I5 Task 6), for the shared [app.granger.library.FileImports]: read from its
+ * [path] (the picker's copy) under the [name] it had. A comic book archive (CBZ, CBR) is turned into a PDF of its
+ * pictures first, in [scratch], as Android turns an archive.org comic into one; the shelf then imports that PDF. A
+ * comic that can't be read imports as nothing, with the damaged-file words.
+ */
+fun pickedBook(path: String, name: String, scratch: String): app.granger.library.PickedFile =
+    app.granger.library.PickedFile(name = { name }, fallbackName = path.substringAfterLast('/')) {
+        if (!app.granger.core.books.ComicToPdf.isComicName(name)) return@PickedFile SystemFileSystem.source(Path(path)).buffered()
+        SystemFileSystem.createDirectories(Path(scratch))
+        val pdf = "${scratch.trimEnd('/')}/${platform.Foundation.NSUUID().UUIDString}.pdf"
+        if (!app.granger.core.books.ComicToPdf.convert(path, pdf)) return@PickedFile null
+        // Opened, then unlinked: the open file reads on (as on any Unix) and nothing is left in scratch.
+        val source = SystemFileSystem.source(Path(pdf)).buffered()
+        runCatching { SystemFileSystem.delete(Path(pdf), mustExist = false) }
+        source
+    }

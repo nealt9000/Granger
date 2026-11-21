@@ -384,6 +384,7 @@ class IosLibrary(
      */
     fun startBooks() {
         scope.launch {
+            runCatching { rebaseMovedBooks() }
             runCatching { bookshelf.refresh() }
             runCatching { bookIndex.indexPending() }
         }
@@ -411,7 +412,7 @@ class IosLibrary(
      * pack's book copied out on its first open, then indexed); null when it can't be had.
      */
     suspend fun openableBook(id: String): app.granger.core.library.Book? {
-        val book = bookshelf.book(id) ?: return null
+        val book = bookshelf.book(id)?.let { b -> MovedContainer.rebase(b, booksDir, coversDir)?.also { database.bookDao().upsert(it) } ?: b } ?: return null
         if (kotlinx.io.files.SystemFileSystem.metadataOrNull(kotlinx.io.files.Path(book.filePath))?.isRegularFile == true) return book
         val restored = packDocuments.restore(book) || packBookSources.any { runCatching { it.restore(book) }.getOrDefault(false) }
         if (!restored) return null
@@ -433,6 +434,101 @@ class IosLibrary(
             is PackDocumentOpened.Ready -> PackDocumentResult(opened.book, null, false)
             is PackDocumentOpened.Failed -> PackDocumentResult(null, opened.problem, false)
         }
+    }
+
+    /**
+     * The books whose files moved with the app's container (iOS gives a new container path on some installs and
+     * updates): their stored paths are pointed at the same files under today's Documents/Books and covers folder, so
+     * they aren't marked missing (Plan I5 Task 6). Before the shelf looks at its folders.
+     */
+    suspend fun rebaseMovedBooks(): Int {
+        val dao = database.bookDao()
+        var moved = 0
+        for (book in dao.getAll()) {
+            val rebased = MovedContainer.rebase(book, booksDir, coversDir) ?: continue
+            // The shelf's refresh after this marks it OK again, its file being there.
+            dao.upsert(rebased)
+            moved++
+        }
+        return moved
+    }
+
+    /** Points a book's stored path elsewhere, as an older container's would be (tests of [rebaseMovedBooks]). */
+    suspend fun setStoredPath(bookId: String, path: String) {
+        val dao = database.bookDao()
+        dao.get(bookId)?.let { dao.upsert(it.copy(filePath = path)) }
+    }
+
+    // ---- The Library tab (Plan I5 Task 6): the shared models over the shelf, as Android's GrangerApp wires them.
+
+    /** The shelves: media types, collections and where each book, pack and album is filed. */
+    val shelves: app.granger.core.library.Shelves by lazy {
+        app.granger.core.library.RoomShelves(database, packLibrary, bookshelf, IosMediaLibrary(database))
+    }
+
+    /** Each shelf's view and sort (Android's "library_views" prefs), in UserDefaults under `library_views.`. */
+    private val shelfChoices by lazy {
+        val d = platform.Foundation.NSUserDefaults.standardUserDefaults
+        app.granger.library.shelf.ShelfChoices(read = { d.stringForKey("library_views.$it") }, write = { k, v -> d.setObject(v, "library_views.$k") })
+    }
+
+    /** Imports picked files; a batch that added a book has its words indexed straight after. */
+    private val fileImports by lazy {
+        app.granger.library.FileImports(bookshelf) { scope.launch { runCatching { bookIndex.indexPending() } } }
+    }
+
+    /** "Make all searchable…" for a book pack's collection: every book copied out of its pack and indexed. */
+    private val gutenbergShelf by lazy {
+        app.granger.library.GutenbergShelf(
+            { book -> packBookSources.any { runCatching { it.restore(book) }.getOrDefault(false) } }, bookIndex::indexPending,
+            { "$booksDir/gutenberg" }, { app.granger.core.downloads.freeBytesAt(it) }, scope,
+        )
+    }
+
+    /** The Library tab's model: the reading shelf, the books' collections, imports. */
+    fun libraryModel(): OwnedViewModel<app.granger.library.LibraryModel> = OwnedViewModel {
+        app.granger.library.LibraryModel(shelves, packLibrary, fileImports, scope, catalog = catalogSource, bookshelf = bookshelf)
+    }
+
+    /** One collection's model ([collectionId] as the shelves name it: `c:<default key>` for an app-made one). */
+    fun collection(collectionId: String): OwnedViewModel<app.granger.library.CollectionModel> = OwnedViewModel {
+        app.granger.library.CollectionModel(
+            collectionId, shelves, packLibrary, sessions, bookshelf, downloads, scope,
+            catalog = catalogSource, viewPrefs = shelfChoices, gutenberg = gutenbergShelf,
+        )
+    }
+
+    /** A file picked in Files, for [app.granger.library.LibraryModel.importFiles]; comics become PDFs on the way. */
+    fun pickedFile(path: String, name: String): app.granger.library.PickedFile = pickedBook(path, name, "$cacheDir/imports")
+
+    /** Imports picked files straight away (UI tests' `-debugImport`, through the same shared import as a pick). */
+    suspend fun importPicked(files: List<app.granger.library.PickedFile>): app.granger.library.ImportSummary = fileImports.importAll(files)
+
+    /** An installed book pack's Library collection id (Android's openPackOrCollection); null for any other pack. */
+    suspend fun bookPackCollection(packId: String): String? {
+        val pack = packLibrary.packs.first().firstOrNull { it.id == packId }?.takeIf { it.isBookPack } ?: return null
+        return "c:${app.granger.core.library.Filing.defaultKey(pack)}"
+    }
+
+    /**
+     * A Gutenberg book's cover before its first open (Android's GutenbergCovers, Plan GB Decision 3): the pack's own
+     * cover picture, kept as it is under Caches; Swift draws it scaled down. Null for any other book, or none in the pack.
+     */
+    suspend fun packCover(book: app.granger.core.library.Book): String? = kotlinx.coroutines.withContext(app.granger.screens.ioDispatcher) {
+        if (book.origin != app.granger.core.library.BookOrigin.GUTENBERG) return@withContext null
+        val id = book.id.removePrefix(app.granger.core.library.BookIds.of(app.granger.core.library.BookOrigin.GUTENBERG, ""))
+        val file = kotlinx.io.files.Path(cacheDir, "gutenberg-covers", sha1(id.encodeToByteArray()).hex())
+        if ((SystemFileSystem.metadataOrNull(file)?.size ?: 0L) > 0L) return@withContext file.toString()
+        runCatching {
+            val packName = book.sourceRef.substringBefore('/')
+            val pack = packLibrary.packs.first().firstOrNull { it.name == packName && it.status == app.granger.core.library.PackStatus.OK } ?: return@runCatching null
+            val archive = packLibrary.archive(pack.id) ?: return@runCatching null
+            val path = app.granger.core.library.GutenbergList.coverPath(archive, id) ?: return@runCatching null
+            val bytes = archive.read(path)?.bytes?.takeIf { it.isNotEmpty() } ?: return@runCatching null
+            SystemFileSystem.createDirectories(file.parent!!)
+            SystemFileSystem.sink(file).buffered().use { it.write(bytes) }
+            file.toString()
+        }.getOrNull()
     }
 
     /** The book is open (Android shows it in a rail tab): its tab is made or brought forward. */

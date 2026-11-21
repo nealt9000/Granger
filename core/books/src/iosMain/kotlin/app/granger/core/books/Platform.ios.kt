@@ -158,14 +158,36 @@ internal actual fun platformPdfOpener(): PdfOpener = PdfOpener {
     throw UnsupportedOperationException("I5b: the iPhone's PDF reader (PDFKit) isn't set; set BookEngines.pdf at launch")
 }
 
-internal actual fun platformMarkdown(): MarkdownChapters = MarkdownChapters {
-    throw UnsupportedOperationException("I5b: Markdown import isn't on the iPhone yet; set BookEngines.markdown at launch")
-}
+/** Markdown on the iPhone: the shared [PlainMarkdown], to Android's chapter rules (Plan I5 Task 6). */
+internal actual fun platformMarkdown(): MarkdownChapters = PlainMarkdown
 
 internal actual fun platformComicPages(): ComicPages = IosComicPages
 
-/** CBZ through the shared zip reader. CBR (libarchive) and writing the PDF (PDFKit) come in Plan I5b. */
-internal object IosComicPages : ComicPages {
+/**
+ * Comics on the iPhone (Plan I5 call 6): CBZ through the shared zip reader here; CBR (RAR 4) and writing the PDF are
+ * Swift's (libarchive and UIGraphicsPDFRenderer), handed over once at launch with [useNatives]. Until then a RAR
+ * archive or a PDF can't be made and the conversion fails as a damaged file does.
+ */
+object IosComicPages : ComicPages {
+    /** What Swift does for the comics: unpack a RAR archive, and draw pictures into a PDF. */
+    interface Natives {
+        /**
+         * Unpacks [archive] (a RAR archive) into [scratch], in the archive's own order, each kept entry ([keep]) as
+         * `<scratch>/<n>`; its name in the archive and the file's path, in pairs. Null when it can't be read.
+         */
+        fun unpackRar(archive: String, scratch: String, keep: (String) -> Boolean): List<String>?
+
+        /** As [ComicPages.writePdf]. */
+        fun writePdf(pictures: List<String>, out: String): Boolean
+    }
+
+    private var natives: Natives? = null
+
+    fun useNatives(natives: Natives) {
+        this.natives = natives
+        BookEngines.comics = this
+    }
+
     override fun unpack(archive: String, scratch: String, keep: (String) -> Boolean): List<Pair<String, String>>? {
         val head = SystemFileSystem.source(Path(archive)).buffered().use { it.readByteArray(minOf(4L, fileLength(archive)).toInt()) }
         if (head.size >= 2 && head[0] == 'P'.code.toByte() && head[1] == 'K'.code.toByte()) {
@@ -182,11 +204,12 @@ internal object IosComicPages : ComicPages {
             return named
         }
         if (head.size == 4 && head.decodeToString() == "Rar!") {
-            throw UnsupportedOperationException("I5b: CBR (RAR) needs libarchive on the iPhone")
+            val flat = natives?.unpackRar(archive, scratch, keep) ?: throw IOException("can't read the RAR archive $archive")
+            return flat.chunked(2).filter { it.size == 2 }.map { it[0] to it[1] }
         }
         return null
     }
 
     override fun writePdf(pictures: List<String>, out: String): Boolean =
-        throw UnsupportedOperationException("I5b: a comic's PDF is written with PDFKit; set BookEngines.comics at launch")
+        natives?.writePdf(pictures, out) ?: throw IOException("no PDF writer for comics on this iPhone yet")
 }
