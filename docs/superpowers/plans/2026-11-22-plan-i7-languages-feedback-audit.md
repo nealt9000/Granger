@@ -22,7 +22,7 @@ When I7 merges, the parity list has no open row except the ones that need a devi
 - **Icon.** The AppIcon is traced from the launcher mark (I2); no dark or tinted variants.
 - **Licences.** Android's About has a licence row. The iPhone links libraries Android doesn't (TagLib statically under the MPL, Readium, sherpa-onnx and onnxruntime, libarchive, CoreKiwix/libzim, SQLite.swift, Zip, DifferenceKit) and lists none of them.
 
-## Builder's calls in this plan (for Neal)
+## Builder's calls in this plan (all 10 OK, Neal 2026-11-22)
 
 1. **Android's `strings.xml` stays the one source of the words, in both languages.**
    - `make_text_ids.py` grows to write a String Catalog, `ios/Granger/Resources/Localizable.xcstrings`, with English and Spanish for every shared key and for every SwiftUI literal whose English matches an Android string (the screens were built "in Android's words", so most will).
