@@ -9,6 +9,8 @@ import app.granger.feedback.AskReport
 import app.granger.feedback.BuildFacts
 import app.granger.feedback.FeedbackMail
 import app.granger.feedback.ReportSheet
+import app.granger.feedback.intent
+import app.granger.feedback.ofThisPhone
 import app.granger.voiceinput.Dictation
 import app.granger.voiceinput.MicButton
 import androidx.compose.material.icons.filled.KeyboardArrowDown
