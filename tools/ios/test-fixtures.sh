@@ -33,8 +33,9 @@ get "$DIR/epub/gc-pride-and-prejudice_2026-11-09.epub" https://github.com/nealt9
 get "$DIR/voices/owl.zip" https://github.com/nealt9000/Granger/releases/download/voices-v1/vits-piper-en_GB-granger_owl-medium.zip 6c508d0a82fa4807011bd65f183f09b9376488b8b586fec41c1ea41c40065d28
 get "$DIR/embedder/embeddinggemma-2-text-270m.litertlm" https://huggingface.co/litert-community/embeddinggemma-2-text-270m-litert-lm/resolve/9be6e8b90982095dc05c2bd162e4b954ee4dbac7/embeddinggemma-2-text-270m.litertlm 2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb
 
-if [ ! -d "$DIR/voices/vits-piper-en_GB-granger_owl-medium" ]; then
-    unzip -q -o "$DIR/voices/owl.zip" -d "$DIR/voices"
+# The voice's zip holds its files with no folder of their own.
+if [ ! -f "$DIR/voices/vits-piper-en_GB-granger_owl-medium/tokens.txt" ]; then
+    unzip -q -o "$DIR/voices/owl.zip" -d "$DIR/voices/vits-piper-en_GB-granger_owl-medium"
 fi
 if [ ! -f "$DIR/pdf/field-notes.pdf" ]; then
     swift "$ROOT/tools/ios/fixtures/make-test-pdf.swift" "$DIR/pdf/field-notes.pdf"

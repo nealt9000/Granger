@@ -14,7 +14,7 @@ ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 SRC="$ROOT/core/taglib/src/main/cpp/taglib"
 OUT="$ROOT/ios/Vendor"
 STAMP="$OUT/taglib.version"
-[ -f "$SRC/CMakeLists.txt" ] || { echo "TagLib's submodule isn't checked out: git submodule update --init core/taglib/src/main/cpp/taglib" >&2; exit 1; }
+[ -f "$SRC/CMakeLists.txt" ] && [ -d "$SRC/3rdparty/utfcpp/source" ] || { echo "TagLib's submodule (and its utfcpp) isn't checked out: git submodule update --init --recursive core/taglib/src/main/cpp/taglib" >&2; exit 1; }
 VERSION=$(git -C "$SRC" rev-parse HEAD)
 # Bumped when what this script leaves in ios/Vendor changes, so an older build is redone.
 LAYOUT="2"

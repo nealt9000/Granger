@@ -22,7 +22,12 @@ how the tests and checks work, how a core release goes out, what to try, and wha
 ## What you need
 
 - A Mac with Apple silicon, Xcode 27 (27.1 used here), and its iOS 26 Simulator runtime.
-- JDK 17 (`java -version`), for building the Kotlin core.
+- For building the Kotlin core (`core-local`, below), which any working branch needs:
+  - JDK 17. `tools/ios/core-local.sh` looks for Homebrew's (`brew install openjdk@17`) unless `JAVA_HOME` is set.
+  - The Android SDK, because the shared modules also build for Android: Android Studio's, or the command-line tools.
+    Point Gradle at it with `ANDROID_HOME`, or a git-ignored `local.properties` at the repo's root holding
+    `sdk.dir=/path/to/Android/sdk`. Without it the build stops at once with "SDK location not found". Gradle fetches
+    the platform it needs on the first build once the SDK's licences are accepted (`sdkmanager --licenses`).
 - `cmake` (two of the vendor libraries are built from source) and `xcodegen`: `brew install cmake xcodegen`.
 - About 15 GB free: Gradle's and Kotlin/Native's caches, DerivedData and the vendor libraries.
 - To install on an iPhone: an Apple developer team. The Simulator needs none.
@@ -31,7 +36,7 @@ how the tests and checks work, how a core release goes out, what to try, and wha
 
 ```sh
 git clone https://github.com/nealt9000/Granger.git && cd Granger
-git submodule update --init core/taglib/src/main/cpp/taglib   # TagLib, shared with Android
+git submodule update --init --recursive core/taglib/src/main/cpp/taglib   # TagLib and its utfcpp, shared with Android
 
 sh tools/ios/fetch-corekiwix.sh     # Kiwix's CoreKiwix.xcframework (pack reading), ~130 MB
 sh tools/ios/fetch-sherpa-onnx.sh   # sherpa-onnx + onnxruntime (the Piper voices)
@@ -49,7 +54,9 @@ Then the core. There are two ways to get it:
   (`ios-core-<date>`) and its checksum, and Xcode downloads it. Nothing to build, but it only fits the Swift code of
   the commit that pinned it. Use it on `main` right after a release.
 - **This checkout's Kotlin** (`core-local`): `sh tools/ios/core-local.sh` builds `GrangerCore.xcframework` into
-  `ios/GrangerCore/Local/` (10–20 minutes the first time, with a cold Gradle cache), and every build then needs
+  `ios/GrangerCore/Local/` (about 6 minutes on an M-series Mac with Gradle's and Kotlin/Native's caches warm; the
+  first run on a new machine downloads Gradle, the Kotlin/Native toolchain and the dependencies, and takes much longer),
+  and every build then needs
   `GRANGER_CORE_LOCAL=1` in its environment. Use it on any branch whose Kotlin moved since the last release, which
   is any working branch. Run it again after every checkout of another commit, and after any change under `core/` or
   `shared/`.
@@ -67,13 +74,14 @@ xcrun simctl install "iPhone 17" ../../build/ios-dd/Build/Products/Debug-iphones
 xcrun simctl launch "iPhone 17" app.granger
 ```
 
-For your own iPhone: `cp ios/Local.xcconfig.example ios/Local.xcconfig`, set your team and a bundle prefix of your
+The first build also resolves the Swift packages (Readium, SQLite.swift and the rest) from GitHub; after that a clean
+build takes under a minute. For your own iPhone: `cp ios/Local.xcconfig.example ios/Local.xcconfig`, set your team and a bundle prefix of your
 own, and run on the device from Xcode.
 
 ## Tests
 
 ```sh
-sh tools/ios/test-fixtures.sh ~/granger-fixtures          # once: ~230 MB of catalog files, sha-checked
+sh tools/ios/test-fixtures.sh ~/granger-fixtures          # once: ~230 MB, about 2 minutes, sha-checked
 xcrun simctl uninstall "iPhone 17" app.granger            # before a full run
 sh tools/ios/test.sh ~/granger-fixtures "iPhone 17"       # the whole suite, about 35 minutes
 sh tools/ios/test.sh ~/granger-fixtures "iPhone 17" -only-testing:GrangerUITests/SmokeTests
@@ -97,6 +105,9 @@ sh tools/ios/test.sh ~/granger-fixtures "iPhone 17" -only-testing:GrangerUITests
 - **The JVM suite** (Android and the shared core), when Kotlin changed:
   `./gradlew test testAndroidHostTest jvmTest --continue` (plain `gradlew test` skips the multiplatform modules'
   Android-host tests). The Kotlin core's own iOS tests: `./gradlew iosSimulatorArm64Test`.
+
+- Tried from a fresh clone (Plan I7 Task 6): the fetch scripts, `core-local`, the build, a launch, the fixtures
+  script and a run of the fixture tests through `tools/ios/test.sh` all worked as written here.
 
 ## The checks
 

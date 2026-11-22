@@ -81,6 +81,7 @@ struct OnboardingScreen: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 Text("GRANGER").font(Spectral.semibold(44)).tracking(6).foregroundStyle(palette.onSurface)
+                    .lineLimit(1).minimumScaleFactor(0.5) // the wordmark whole, never "GRA-NGE-R" at the accessibility sizes
                 Text("Your door to knowledge. Always open.").font(Spectral.italic(20)).foregroundStyle(palette.onSurfaceVariant)
                 Text(ui.intro.words).font(Spectral.regular(19)).foregroundStyle(palette.onSurface)
                 Text("Reading online asks Wikimedia for the articles you open. Nothing about you goes with it, and nothing goes out with Local only on.")
