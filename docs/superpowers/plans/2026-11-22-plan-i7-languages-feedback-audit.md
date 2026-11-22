@@ -90,11 +90,138 @@ When I7 merges, the parity list has no open row except the ones that need a devi
 ## I7b: the iPhone
 
 ### Task 3: Spanish
-- [ ] Extend `make_text_ids.py` (call 1): the String Catalog with en and es from Android's resources, SwiftUI literals matched by English, `ios-only-strings.json` for the rest, `--check` for anything on screen without Spanish. Plurals from Android's `<plurals>`.
-- [ ] Turn literals that can't be matched as written (built from pieces, formatted numbers) into keys with arguments, as Android has them.
-- [ ] Add `es` to the project's localizations; Info.plist's usage strings and the widget's and CarPlay's words in both languages.
-- [ ] Walk every screen in Spanish (the Simulator's per-app language) and fix clipped or overflowing labels; Spanish runs longer.
-- [ ] UI tests: the app launched in Spanish shows Spanish on Home, Settings, a reader's bar and Listen; the catalog check is part of the unit tests.
+- [x] Extend `make_text_ids.py` (call 1): the String Catalog with en and es from Android's resources, SwiftUI literals matched by English, `ios-only-strings.json` for the rest, `--check` for anything on screen without Spanish. Plurals from Android's `<plurals>`.
+- [x] Turn literals that can't be matched as written (built from pieces, formatted numbers) into keys with arguments, as Android has them.
+- [x] Add `es` to the project's localizations; Info.plist's usage strings and the widget's and CarPlay's words in both languages.
+- [x] Walk every screen in Spanish (the Simulator's per-app language) and fix clipped or overflowing labels; Spanish runs longer.
+- [x] UI tests: the app launched in Spanish shows Spanish on Home, Settings, a reader's bar and Listen; the catalog check is part of the unit tests.
+
+  - Done 2026-11-22 (commits listed in the report). How it works:
+    - **The catalog.** `make_text_ids.py` reads the literals the Swift compiler extracts (`SWIFT_EMIT_LOC_STRINGS: YES`; the build's `.stringsdata` for the app and the widget extension), matches each by its English against Android's `values` (the app's, plus `core/speech`, `core/downloads`, `core/player`), placeholders compared as placeholders, and writes `ios/Granger/Resources/Localizable.xcstrings` (en + es) with Android's Spanish. Android's `%1$s`/`%1$d` become the Swift key's own types (`%@`, `%lld`, `%d`), positional when there are several, so a translation may reorder them; escapes (`\'`, `\n`, `\u00A0`, quotes, `&amp;`) are read as aapt reads them. A key with an integer count that is an Android `<plurals>` "other" form gets its one/many/other forms (a whole-string plural, or with other arguments one substitution of whole sentences keyed on the count). What doesn't match comes from `ios/Granger/Resources/ios-only-strings.json`; `"@key"` there picks Android's Spanish where one English has two (Off, Back, History, 1900 to 1945). Brand names, addresses and debug words are `null` (not translated). The catalog and the json are the only Spanish the iPhone has; nobody edits the catalog by hand.
+    - **The shared keys.** `ScreenText.swift` now carries `en` and `es` tables (and plural tables) from Android, and picks by `Bundle.main.preferredLocalizations` — the language iOS runs the app in (Settings › Granger › Language), the same choice the catalog follows. Chosen over `String(localized:)` for the keys because their templates keep Android's `%1$s` and `UiTextWords.fill` fills them with nested `UiText`, which the catalog's formatting can't. Swift can name an Android key itself (`ScreenText.word("game_close")`) and the script carries it: used for the timeline's years (`YearWords.app`, was `.english`), the centuries game (Roman numerals in Spanish, as Android's `game_century_numerals`), the voice names (`IosVoice` now takes `VoiceTitles` from Swift; it had English hard-coded) and two places where Android's English has two Spanish words.
+    - **The Swift side.** Every String-typed word on screen goes through `L("…")` (`Sources/Shared/Words.swift`, a `String.LocalizationValue` the compiler extracts), sentences whole: pieces glued into a sentence became alternatives of whole sentences, and `n == 1 ? "1 x" : "\(n) xs"` became one literal with the plural form (a pre-formatted count keeps two branches). About 530 literals in 45 files. English output is unchanged.
+    - **The check.** `--check` fails when an extracted literal has no Spanish, when the catalog, `ScreenText.swift`, `ScreenTextIds.kt` or `InfoPlist.xcstrings` is stale, or when a Swift literal that looks like English isn't extracted (a String the catalog never meets); `tools/ios/not-on-screen.txt` lists the 26 that are never shown (PDF operators, JS, debug, the widget gallery's sample) or are names. GrangerTests runs it as a pre-build script on every test build (`ENABLE_USER_SCRIPT_SANDBOXING: NO` for that target), so a test run fails on a word without Spanish. Tried: dropping one Spanish line fails the check with the key and its file.
+    - **Counts** (864 extracted keys): 672 matched to an Android string (4 of them by `@key`), 39 Android plurals, 115 iPhone-only translated, 38 not translated (no letters, names, debug), 0 missing; 209 keys carry arguments. Info.plist: the Music library prompt (`InfoPlist.xcstrings`). The project knows `en` and `es` (XcodeGen reads the catalog's languages; regeneration checked byte-identical twice); the widget extension builds the same catalog for its words (gallery description, Control Center's and the intents' names). CarPlay's words come from `ScreenText` and follow.
+    - **The walk** (`SpanishUITests.testWalkEveryScreenInSpanish`, `-AppleLanguages (es) -AppleLocale es_419`, screenshots `/private/tmp/claude-501/-Users-s-nealthompson-Developer-Granger/6431eb44-b9ce-47b0-83c7-b89afe8a8b13/scratchpad/shots-es/es-*.png`): onboarding (both pages of the outfitting path), Home, Get more (two pages and the audio one), Settings (5 pages, and Voice), Search and its results, Explore (two pages), Library, Listen, Music, Audiobooks, the mini player reading and paused, Listen's Reading part, the pack reader and its text settings, the e-book reader, its text settings and Contents. Fixed from what the pictures showed: Music's six tabs clipped ("Cancio…", "Carpet…": now at their own widths, scrolling sideways when they don't fit); Settings' "Historia" (now Android's Historial); the voice names in English (VoiceTitles from Swift); Listen's and Library's Music and Audiobooks headings (the seeded kinds kept their English names: `KindRow.shownTitle`); "Temas de 17" (a count now prefers Android's plural over a string with the same English); the highlight colours spoken in English. No other clipping seen; Spanish runs longer but the screens wrap.
+    - **Tests.** `LanguageTests` (6, unit): Android's Spanish, positional arguments, plurals, a plural beside another argument, iPhone-only words, the shared tables' keys. `SpanishUITests` (2, UI): Spanish on Home's tabs and buttons, Settings (Apariencia, Solo local), the pack reader's bar (Escuchar, Índice, Ajustes de texto) and Listen; and the walk. Full suite from an uninstalled app (core-local, all fixtures): 86 tests (78 + 8), 83 pass, 3 skipped (M4B, 2 speech spikes), 0 fail; the existing UI tests still find their English labels. No new Granger crash reports (only the known AppIntentsLiveEntityService ones). The voice catalog's own entries ("Granger voice (Owl)", the licence lines) are the catalog's English data, as on Android.
+    - Left for later: room names from `name(language: "en")` on Explore ("WARS & BATTLES") and the rooms' descriptions follow the knowledge language, Task 4; accessibility identifiers built from a label (`way-…`, `view-…`) differ in Spanish (English tests unchanged); stored words (a bookmark's "p. 12", an imported book's "Page 3" chapter title) keep the language they were written in, as on Android; the blank mini player over a `-debugPlay` tone is the debug engine's (it isn't a player item), not Spanish.
+    - **iPhone-only strings for Neal to read** (English → Spanish; plurals show the other form):
+      - "%@ are from %@" → "%1$@ son %2$@"
+      - "%@ are from the %llds." → "%1$@ son de los años %2$lld."
+      - "%@ free on this iPhone" → "%@ libres en este iPhone"
+      - "%@ free on this iPhone · Downloads on Wi-Fi only" → "%1$@ libres en este iPhone · Descarga solo con Wi-Fi"
+      - "%@ in line" → "%@ en la fila"
+      - "%@ is on its way: see Downloads." → "%@ ya viene: mira Descargas."
+      - "%@ is on this iPhone already." → "%@ ya está en este iPhone."
+      - "%@ is on this iPhone." → "%@ está en este iPhone."
+      - "%@ isn"t a pack Granger can read." → "%@ no es un paquete que Granger pueda leer."
+      - "%@ of %@ free on this iPhone" → "%1$@ de %2$@ libres en este iPhone"
+      - "%@ of %@ · %@" → "%1$@ de %2$@ · %3$@"
+      - "%@ of %@ · %@/s" → "%1$@ de %2$@ · %3$@/s"
+      - "%@ to go · %@ free on this iPhone" → "Faltan %1$@ · %2$@ libres en este iPhone"
+      - "%@ · On this phone" → "%@ · En este teléfono"
+      - "%@ · Saved for now" → "%@ · Guardado por ahora"
+      - "%@ · on this iPhone" → "%@ · en este iPhone"
+      - "%d chapters on this phone" → "%d capítulos en este teléfono" (one: "%d capítulo en este teléfono")
+      - "%d of %d chapters on this phone" → "%1$d de %2$d capítulos en este teléfono"
+      - "%d of %d in your library" → "%1$d de %2$d en tu biblioteca"
+      - "%d of %d on this phone" → "%1$d de %2$d en este teléfono"
+      - "%d of %d · %@ of %@ · %@" → "%1$d de %2$d · %3$@ de %4$@ · %5$@"
+      - "%lld families: %@" → "%lld familias: %@" (one: "%lld familia: %@")
+      - "%lld games with the dates in your library" → "%lld juegos con las fechas de tu biblioteca" (one: "%lld juego con las fechas de tu biblioteca")
+      - "%lld percent" → "%lld por ciento"
+      - "%lld songs in the Music library can"t play here: they"re protected or only in the cloud." → "%lld canciones de la biblioteca de Música no se pueden reproducir aquí: están protegidas o solo en la nube." (one: "%lld canción de la biblioteca de Música no se puede reproducir aquí: está protegida o solo en la nube.")
+      - "%lld sources" → "%lld fuentes" (one: "%lld fuente")
+      - "1 kept article has a newer version" → "1 artículo guardado tiene una versión más reciente"
+      - "1 room" → "1 sala"
+      - "1 topic" → "1 tema"
+      - "A .zim file from Files, copied onto this iPhone" → "Un archivo .zim de Archivos, copiado a este iPhone"
+      - "A map" → "Un mapa"
+      - "Add %@ · %@" → "Agregar %1$@ · %2$@"
+      - "Also read in %@" → "Leer también en %@"
+      - "Chapter" → "Capítulo"
+      - "Clear recent searches" → "Borrar las búsquedas recientes"
+      - "Clear what you"ve read" → "Borrar lo que has leído"
+      - "Copies songs into On My iPhone › Granger › Music, where Files shows them." → "Copia canciones a En mi iPhone › Granger › Music, donde Archivos las muestra."
+      - "Copying %@…" → "Copiando %@…"
+      - "Couldn"t copy %@." → "No se pudo copiar %@."
+      - "Couldn"t get the list of packs." → "No se pudo obtener la lista de paquetes."
+      - "Damaged: it can"t be read" → "Dañado: no se puede leer"
+      - "Downloading · %lld%%" → "Descargando · %lld %%"
+      - "Downloads waiting" → "Descargas en espera"
+      - "Downloads, %lld" → "Descargas, %lld"
+      - "Explore needs Wikipedia"s index. It comes when you"re online." → "Explorar necesita el índice de Wikipedia. Llega cuando tienes conexión."
+      - "Find music and audiobooks in the Music library" → "Buscar música y audiolibros en la biblioteca de Música"
+      - "For music in Files, on this iPhone or elsewhere. Granger only reads them." → "Para música en Archivos, en este iPhone o en otro lugar. Granger solo la lee."
+      - "Get" → "Descargar"
+      - "Get %@" → "Descargar %@"
+      - "Get %@ · %@ · covers about %d of them" → "Descargar %1$@ · %2$@ · cubre unos %3$d de ellos"
+      - "Get it" → "Descargarlo"
+      - "Get the Granger voice below, or add a voice in the iPhone"s Settings › Accessibility › Spoken Content." → "Descarga la voz de Granger abajo o agrega una voz en Ajustes del iPhone › Accesibilidad › Contenido leído."
+      - "Granger rescans on start and when the Music library changes." → "Granger vuelve a buscar al iniciarse y cuando cambia la biblioteca de Música."
+      - "Greyed things need the internet." → "Lo gris necesita internet."
+      - "Import a pack" → "Importar un paquete"
+      - "Import from Files" → "Importar de Archivos"
+      - "Imported %lld files." → "Se importaron %lld archivos." (one: "Se importó %lld archivo.")
+      - "Keep text · %@" → "Guardar texto · %@"
+      - "Keeping them: each is marked ● when it"s on this phone." → "Guardándolos: cada uno se marca con ● cuando está en este teléfono."
+      - "Kept" → "Guardado"
+      - "Local only is on: it opens again when you turn it off" → "Solo local está activado: se abre de nuevo cuando lo desactives"
+      - "Looking round…" → "Mirando alrededor…"
+      - "Missing: the file is gone" → "No encontrado: el archivo ya no está"
+      - "Next or back" → "Siguiente o anterior"
+      - "No PDFs or EPUBs in this pack." → "No hay PDF ni EPUB en este paquete."
+      - "No packs on this iPhone yet. Get more adds them; a .zim put in Granger"s folder in the Files app shows here too." → "Aún no hay paquetes en este iPhone. Conseguir más los agrega; un .zim que pongas en la carpeta de Granger en la app Archivos también aparece aquí."
+      - "No songs yet. Touch and hold a song or album to add it." → "Aún no hay canciones. Mantén presionada una canción o un álbum para agregarlo."
+      - "Not allowed. iOS won"t ask again: allow Media & Apple Music in Granger"s settings." → "Sin permiso. iOS no volverá a preguntar: permite Multimedia y Apple Music en los ajustes de Granger."
+      - "Not enough room for %@." → "No hay espacio suficiente para %@."
+      - "Not enough room: %@ needs %@." → "No hay espacio suficiente: %1$@ necesita %2$@."
+      - "Nothing downloading. Get more adds packs, and they download here one at a time." → "No se está descargando nada. Conseguir más agrega paquetes, que se descargan aquí de uno en uno."
+      - "Nothing on this phone for that. Online results appear when you"re connected." → "No hay nada sobre eso en este teléfono. Los resultados en línea aparecen cuando hay conexión."
+      - "Open Listen" → "Abrir Escuchar"
+      - "Opening…" → "Abriendo…"
+      - "PDF: %@" → "PDF: %@"
+      - "Page %lld" → "Página %lld"
+      - "Paused · %@" → "En pausa · %@"
+      - "Place in book" → "Lugar en el libro"
+      - "Play or pause" → "Reproducir o pausar"
+      - "Public-domain books published before 1930" → "Libros de dominio público publicados antes de 1930"
+      - "Quick wins" → "Para empezar"
+      - "Read online · what you read is saved for now" → "Lectura en línea · lo que lees se guarda por ahora"
+      - "Reading online asks Wikimedia for the articles you open. Nothing about you goes with it, and nothing goes out with Local only on." → "Leer en línea pide a Wikimedia los artículos que abres. No se envía nada sobre ti, y con Solo local activado no sale nada."
+      - "Recent searches cleared" → "Búsquedas recientes borradas"
+      - "Recently open" → "Abiertos recientemente"
+      - "Remove this feed" → "Quitar este feed"
+      - "Remove?" → "¿Quitar?"
+      - "Search index · %@" → "Índice de búsqueda · %@"
+      - "Seen" → "Visto"
+      - "Sets" → "Conjuntos"
+      - "Show all %lld best matches" → "Ver los %lld resultados principales" (one: "Ver %lld resultado principal")
+      - "Show fewer best matches" → "Ver menos resultados principales"
+      - "Sort" → "Ordenar"
+      - "Stopped: %@" → "Detenida: %@"
+      - "Story" → "Historia"
+      - "Tab" → "Pestaña"
+      - "This deletes the pack from this iPhone. Your places and bookmarks in it are kept." → "Se eliminará el paquete de este iPhone. Se conservan tus lugares y marcadores en él."
+      - "This pack"s list of books can"t be read." → "No se puede leer la lista de libros de este paquete."
+      - "Update available" → "Actualización disponible"
+      - "Version" → "Versión"
+      - "Waiting" → "En espera"
+      - "What its article covers" → "Lo que trata su artículo"
+      - "What"s playing: music, an audiobook or read aloud." → "Lo que se reproduce: música, un audiolibro o lectura en voz alta."
+      - "Wikipedia and your packs" → "Wikipedia y tus paquetes"
+      - "Words to find" → "Palabras para buscar"
+      - "You are here: %@, %@" → "Estás aquí: %1$@, %2$@"
+      - "You have %@ free on this iPhone." → "Tienes %@ libres en este iPhone."
+      - "You have %@ free on this iPhone. That isn"t enough room for it." → "Tienes %@ libres en este iPhone. No hay espacio suficiente para descargarlo."
+      - "about %lld days left" → "faltan unos %lld días" (one: "falta cerca de %lld día")
+      - "about %lld h left" → "faltan unas %lld h"
+      - "about %lld min left" → "faltan unos %lld min"
+      - "in %lld h" → "en %lld h"
+      - "in %lld min" → "en %lld min"
+      - "in %lld s" → "en %lld s"
+      - "less than a minute left" → "falta menos de un minuto"
+      - Info.plist, the Music library prompt → "Granger muestra las canciones de tu biblioteca de Música que puede reproducir, junto a la música que agregas desde Archivos. Nunca las modifica."
 
 ### Task 4: Languages, feedback, crashes, privacy
 - [ ] Settings › Language: the app language row (call 2) and the knowledge languages screen on the shared model; onboarding's language step as call 2 says.
