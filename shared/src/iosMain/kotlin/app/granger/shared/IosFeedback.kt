@@ -1,7 +1,11 @@
 package app.granger.shared
 
+import app.granger.feedback.CrashKind
+import app.granger.feedback.CrashRecords
 import app.granger.feedback.CrashStore
 import app.granger.settings.KnowledgePrefs
+import kotlin.native.ReportUnhandledExceptionHook
+import kotlin.native.setUnhandledExceptionHook
 import kotlinx.io.buffered
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
@@ -57,3 +61,26 @@ class DefaultsKnowledgePrefs : KnowledgePrefs {
         const val KEY = "knowledge.languages"
     }
 }
+
+/**
+ * Kotlin's crashes on the iPhone (Plan I7 Task 4, call 4): an exception no Kotlin code caught is written to [records] at
+ * once, as Android's Java handler writes it ("Thread: …", then the trace), before Kotlin/Native ends the process. Swift
+ * installs it at start, beside its own `NSException` handler.
+ */
+@OptIn(kotlin.experimental.ExperimentalNativeApi::class)
+fun installCrashHook(records: CrashRecords, afterRecord: () -> Unit) {
+    var previous: ReportUnhandledExceptionHook? = null
+    previous = setUnhandledExceptionHook { error ->
+        runCatching {
+            val thread = if (platform.Foundation.NSThread.isMainThread) "main" else "background"
+            records.record(CrashKind.JAVA, "Thread: $thread\n\n${error.stackTraceToString()}")
+        }
+        // Swift's say after the report is written: nothing in a release build; debug builds' forced test crash ends the
+        // process cleanly here, so XCTest doesn't count the app's crash against the test that asked for it.
+        afterRecord()
+        previous?.invoke(error)
+    }
+}
+
+/** Debug builds' forced crash (`-debugCrash kotlin`, the UI tests): an exception thrown through to Swift, uncaught. */
+fun debugCrash(): Unit = throw IllegalStateException("Granger debug crash (forced for a test)")

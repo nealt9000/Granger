@@ -19,11 +19,17 @@ struct HomeScreen: View {
     @State private var ready = ReadyOfflineHolder()
     @State private var feeds = FeedsHolder()
     @State private var addingFeed = false
+    @Environment(CrashLog.self) private var crashes
+    @State private var showFeedback = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 LocalOnlyBanner()
+                // After a crash in this build (Android's crash line, Plan F1 part 2 Decision 3).
+                if crashes.notice != nil {
+                    CrashNoticeRow(onSend: { showFeedback = true }, onDismiss: { crashes.acknowledge() })
+                }
                 if !settings.privacySeen { PrivacyCard(onSettings: { showSettings = true }) }
                 if library.index == .coming { IndexCard() }
                 if let s = downloads.summary, s.isActive { DownloadsCard(summary: s) }
@@ -53,6 +59,7 @@ struct HomeScreen: View {
             }
         }
         .sheet(isPresented: $showSettings) { NavigationStack { SettingsScreen() } }
+        .sheet(isPresented: $showFeedback) { NavigationStack { FeedbackSheet(log: crashes) } }
         .sheet(isPresented: $addingFeed) { NavigationStack { AddFeedSheet(holder: feeds) } }
         .sheet(isPresented: $arranging) { NavigationStack { ArrangeHomeScreen(arrangement: arrangement) } }
         .task { if let core { downloads.watch(core); feeds.start(core) } }

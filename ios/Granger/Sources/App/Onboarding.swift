@@ -64,7 +64,8 @@ struct OnboardingScreen: View {
                     startAt: startAt,
                     phoneLanguages: Locale.preferredLanguages.compactMap { Locale(identifier: $0).language.languageCode?.identifier },
                     countryCode: Locale.current.region?.identifier ?? "",
-                    setKnowledge: { langs in Task { @MainActor in if let first = langs.first { s.wikiLanguage = first } } },
+                    // The knowledge languages (Plan I7 call 2): the shared model keeps them; Settings follows ([followKnowledge]).
+                    setKnowledge: { langs in core.library.knowledgeLanguages.set(codes: langs) },
                     onPrivacySeen: { Task { @MainActor in s.privacySeen = true } }
                 )
             }
@@ -85,8 +86,17 @@ struct OnboardingScreen: View {
                 Text("Reading online asks Wikimedia for the articles you open. Nothing about you goes with it, and nothing goes out with Local only on.")
                     .font(.callout).foregroundStyle(palette.onSurfaceVariant)
                 if let also = ui.alsoLanguage {
-                    Toggle("Also read in \(languageName(also))", isOn: Binding(get: { ui.alsoOn }, set: { _ in model.toggleAlso() }))
+                    // A phone in two languages the catalog has (Plan L3): "Also Spanish?", named in the app's language.
+                    Toggle(isOn: Binding(get: { ui.alsoOn }, set: { _ in model.toggleAlso() })) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Also \(languageName(also))?")
+                            Text("Adds its encyclopedia to your start, and its packs to Get more.").font(.footnote).foregroundStyle(palette.onSurfaceVariant)
+                        }
+                    }
+                    .accessibilityIdentifier("onboarding-also")
                 }
+                // Which language iOS runs Granger in, with the way to change it (call 2).
+                AppLanguageRow()
                 Button { model.startReadingNow() } label: {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Start reading now").font(Spectral.medium(21))
@@ -107,7 +117,8 @@ struct OnboardingScreen: View {
         }
     }
 
-    private func languageName(_ code: String) -> String { Locale.current.localizedString(forLanguageCode: code) ?? code }
+    /// A language named in the app's language: "Spanish" here, "inglés" in Spanish (Android's onboarding_also_language).
+    private func languageName(_ code: String) -> String { Locale(identifier: AppLanguage.code).localizedString(forLanguageCode: code) ?? code }
 
     private func outfit(_ ui: OnboardingUi, _ model: OnboardingViewModel) -> some View {
         List {

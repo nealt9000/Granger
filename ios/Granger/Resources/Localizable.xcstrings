@@ -2265,6 +2265,16 @@
         }
       }
     },
+    "Adds its encyclopedia to your start, and its packs to Get more." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suma su enciclopedia a tu comienzo, y sus paquetes a Conseguir más."
+          }
+        }
+      }
+    },
     "After" : {
       "localizations" : {
         "es" : {
@@ -2415,12 +2425,68 @@
         }
       }
     },
-    "Also read in %@" : {
+    "Also %@?" : {
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Leer también en %@"
+            "value" : "¿También en %@?"
+          }
+        }
+      }
+    },
+    "An email from your mail app · %lld crash reports kept on this phone" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "An email from your mail app · %lld crash report kept on this phone"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "An email from your mail app · %lld crash reports kept on this phone"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Un correo desde tu app de correo · %lld informes de error guardados en este teléfono"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Un correo desde tu app de correo · %lld informe de error guardado en este teléfono"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Un correo desde tu app de correo · %lld informes de error guardados en este teléfono"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "An email from your mail app; you see what's included first" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un correo desde tu app de correo; antes ves lo que incluye"
           }
         }
       }
@@ -2441,6 +2507,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Otra lámina"
+          }
+        }
+      }
+    },
+    "Anything to add (optional)" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algo que añadir (opcional)"
           }
         }
       }
@@ -2471,6 +2547,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Por cualquier parte de tu biblioteca"
+          }
+        }
+      }
+    },
+    "App language" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Idioma de la app"
           }
         }
       }
@@ -2591,6 +2677,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "En la misma época"
+          }
+        }
+      }
+    },
+    "Attach crash reports" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adjuntar informes de error"
           }
         }
       }
@@ -2980,6 +3076,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Borrar"
+          }
+        }
+      }
+    },
+    "Clear crash reports" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar informes de error"
           }
         }
       }
@@ -3822,12 +3928,6 @@
         }
       }
     },
-    "English" : {
-      "shouldTranslate" : false
-    },
-    "Español" : {
-      "shouldTranslate" : false
-    },
     "Evens out loudness. Auto uses album gain when an album plays in order, else track gain." : {
       "localizations" : {
         "es" : {
@@ -4480,6 +4580,16 @@
     "Granger" : {
       "shouldTranslate" : false
     },
+    "Granger closed unexpectedly. Send a report?" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Granger se cerró inesperadamente. ¿Enviar un informe?"
+          }
+        }
+      }
+    },
     "Granger now reads online too" : {
       "localizations" : {
         "es" : {
@@ -4536,6 +4646,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Voces de Granger"
+          }
+        }
+      }
+    },
+    "Granger's version and your phone's model" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La versión de Granger y el modelo de tu teléfono"
           }
         }
       }
@@ -6541,6 +6661,16 @@
         }
       }
     },
+    "Offensive" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ofensiva"
+          }
+        }
+      }
+    },
     "Offline pictures" : {
       "localizations" : {
         "es" : {
@@ -6777,6 +6907,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Abriendo…"
+          }
+        }
+      }
+    },
+    "Opens Granger in the iPhone's Settings, where its Language row is" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre Granger en los Ajustes del iPhone, donde está su fila Idioma"
           }
         }
       }
@@ -7500,6 +7640,16 @@
         }
       }
     },
+    "Reading this phone…" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leyendo este teléfono…"
+          }
+        }
+      }
+    },
     "Reading · %@" : {
       "localizations" : {
         "es" : {
@@ -7806,6 +7956,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ReplayGain"
+          }
+        }
+      }
+    },
+    "Report this answer" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reportar esta respuesta"
+          }
+        }
+      }
+    },
+    "Report this best guess" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reportar esta mejor suposición"
           }
         }
       }
@@ -8182,6 +8352,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Visto"
+          }
+        }
+      }
+    },
+    "Send" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enviar"
+          }
+        }
+      }
+    },
+    "Send feedback" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enviar comentarios"
           }
         }
       }
@@ -8618,6 +8808,16 @@
         }
       }
     },
+    "Something else" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otra cosa"
+          }
+        }
+      }
+    },
     "Somewhere else" : {
       "localizations" : {
         "es" : {
@@ -8888,12 +9088,42 @@
         }
       }
     },
+    "The answer" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La respuesta"
+          }
+        }
+      }
+    },
+    "The best guess" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La mejor suposición"
+          }
+        }
+      }
+    },
     "The catalog lists no voices yet." : {
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "El catálogo aún no tiene voces."
+          }
+        }
+      }
+    },
+    "The email includes" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El correo incluye"
           }
         }
       }
@@ -9050,6 +9280,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "El tema anterior"
+          }
+        }
+      }
+    },
+    "The titles of its %lld sources" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "The title of its %lld source"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "The titles of its %lld sources"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "El título de su fuente"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Los títulos de sus %lld fuentes"
+                }
+              }
+            }
           }
         }
       }
@@ -9510,6 +9780,16 @@
         }
       }
     },
+    "Unsafe or harmful" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peligrosa o dañina"
+          }
+        }
+      }
+    },
     "Untitled" : {
       "localizations" : {
         "es" : {
@@ -9576,6 +9856,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Muy cerca"
+          }
+        }
+      }
+    },
+    "View" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver"
           }
         }
       }
@@ -9740,6 +10030,16 @@
         }
       }
     },
+    "What the app was doing when it closed. No titles or searches." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo que hacía la app cuando se cerró. Sin títulos ni búsquedas."
+          }
+        }
+      }
+    },
     "What you read online goes from this phone. What you kept stays." : {
       "localizations" : {
         "es" : {
@@ -9766,6 +10066,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lo que se reproduce: música, un audiolibro o lectura en voz alta."
+          }
+        }
+      }
+    },
+    "What's wrong?" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué está mal?"
           }
         }
       }
@@ -9916,6 +10226,26 @@
         }
       }
     },
+    "Write email" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escribir correo"
+          }
+        }
+      }
+    },
+    "Wrong or made up" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incorrecta o inventada"
+          }
+        }
+      }
+    },
     "Yes" : {
       "localizations" : {
         "es" : {
@@ -10006,12 +10336,42 @@
         }
       }
     },
+    "Your mail app opens with an email to %@. Say what you tried and what happened, then send it from there. Nothing leaves this phone until you do." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu app de correo se abre con un correo para %@. Cuenta qué intentaste y qué pasó, y envíalo desde ahí. Nada sale de este teléfono hasta que lo envíes."
+          }
+        }
+      }
+    },
+    "Your mail app opens with this email to %@. Nothing else from your chats is sent, and nothing leaves this phone until you send it." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu app de correo se abre con este correo a %@. No se envía nada más de tus chats, y nada sale de este teléfono hasta que lo envíes."
+          }
+        }
+      }
+    },
     "Your path:" : {
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tu camino:"
+          }
+        }
+      }
+    },
+    "Your question" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu pregunta"
           }
         }
       }
@@ -10178,15 +10538,22 @@
     "empty" : {
       "shouldTranslate" : false
     },
-    "feedback@opengranger.org" : {
-      "shouldTranslate" : false
-    },
     "green highlight" : {
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "resaltado verde"
+          }
+        }
+      }
+    },
+    "iOS keeps the app's language: Settings › Granger › Language." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS guarda el idioma de la app: Ajustes › Granger › Idioma."
           }
         }
       }
@@ -10295,6 +10662,9 @@
       }
     },
     "© AETHERBOUND LLC" : {
+      "shouldTranslate" : false
+    },
+    "• %@" : {
       "shouldTranslate" : false
     },
     "›" : {

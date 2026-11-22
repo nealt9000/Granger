@@ -11,6 +11,15 @@ struct SettingsScreen: View {
     @State private var savedBytes: Int64 = 0
     @State private var confirmClear = false
     @Environment(\.voice) private var voice
+    @Environment(\.palette) private var palette
+    @Environment(CrashLog.self) private var crashes
+    @State private var showFeedback = false
+
+    /// Android's summary: what the email is, and how many crash reports are kept.
+    private var feedbackSummary: String {
+        crashes.count == 0 ? L("An email from your mail app; you see what's included first")
+            : L("An email from your mail app · \(crashes.count) crash reports kept on this phone")
+    }
 
     /// The voice that reads, or "Read aloud" (Android's Voice row summary).
     private var voiceSummary: String {
@@ -33,12 +42,13 @@ struct SettingsScreen: View {
                     Slider(value: $settings.textScale, in: 0.8...2.0, step: 0.1)
                         .accessibilityValue("\(Int((settings.textScale * 100).rounded())) percent")
                 }
-            }
-            Section("Language") {
-                Picker("Wikipedia", selection: $settings.wikiLanguage) {
-                    Text("English").tag("en")
-                    Text("Español").tag("es")
+                // Settings › Appearance › Language (Android's row; Plan I7 call 2): the app language, then the library's.
+                NavigationLink {
+                    LanguageSettingsScreen()
+                } label: {
+                    LabeledContent("Language", value: AppLanguage.name(AppLanguage.code))
                 }
+                .accessibilityIdentifier("settings-language")
             }
             Section {
                 Toggle("Local only", isOn: $settings.localOnly)
@@ -114,10 +124,20 @@ struct SettingsScreen: View {
                 LabeledContent("Version", value: Core.version)
                 Link("GPLv3 · source on GitHub", destination: URL(string: "https://github.com/nealt9000/Granger")!)
                 Text("© AETHERBOUND LLC").font(.footnote).foregroundStyle(.secondary)
-                Link("feedback@opengranger.org", destination: URL(string: "mailto:feedback@opengranger.org")!)
+            }
+            Section {
+                // Send feedback (Plan I7 call 3): Android's sheet, then Mail's compose sheet or the share sheet.
+                Button { showFeedback = true } label: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Send feedback").foregroundStyle(palette.onSurface)
+                        Text(feedbackSummary).font(.footnote).foregroundStyle(palette.onSurfaceVariant)
+                    }
+                }
+                .accessibilityIdentifier("settings-feedback")
             }
         }
         .task(id: library.version) { refreshSaved() }
+        .sheet(isPresented: $showFeedback) { NavigationStack { FeedbackSheet(log: crashes) } }
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }

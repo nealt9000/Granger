@@ -90,12 +90,12 @@ private struct RoomCard: View {
     var body: some View {
         NavigationLink(value: Route.room(subject: card.facet.subject, facet: card.facet.id)) {
             VStack(alignment: .leading, spacing: 6) {
-                PlateTile(plate: PlateItem(id: card.facet.id, title: card.facet.name(language: "en"), picture: card.picture, whole: card.picture?.hasSuffix(".w.jpg") == true))
+                PlateTile(plate: PlateItem(id: card.facet.id, title: card.facet.name(language: AppLanguage.code), picture: card.picture, whole: card.picture?.hasSuffix(".w.jpg") == true))
                     .frame(height: 120)
                     .overlay(alignment: .topTrailing) {
                         if seen { Image(systemName: "checkmark.circle.fill").foregroundStyle(.white, palette.tertiary).padding(6).accessibilityLabel("Seen") }
                     }
-                Text(card.facet.name(language: "en")).font(Spectral.medium(19)).foregroundStyle(palette.onSurface)
+                Text(card.facet.name(language: AppLanguage.code)).font(Spectral.medium(19)).foregroundStyle(palette.onSurface)
                 Text(Words.topics(card.count)).font(.caption).foregroundStyle(palette.onSurfaceVariant)
                 if let line = sentence {
                     Text(line).font(Spectral.regular(15)).foregroundStyle(palette.onSurfaceVariant).lineLimit(3)
@@ -140,7 +140,7 @@ struct RoomScreen: View {
 
     private var title: String {
         guard let ui = holder.ui else { return "" }
-        return ui.facet?.name(language: "en") ?? L("All of \(Words.subject(ui.subject))")
+        return ui.facet?.name(language: AppLanguage.code) ?? L("All of \(Words.subject(ui.subject))")
     }
 
     @ViewBuilder private func content(_ ui: SubjectUi) -> some View {
@@ -226,11 +226,11 @@ struct RoomScreen: View {
         }
         if let overlaps = ui.room?.overlaps, let lead = overlaps.first {
             VStack(alignment: .leading, spacing: 10) {
-                SpreadHead(eyebrow: L("The same things, other rooms"), title: L("\(Words.topics(lead.shared)) also hang in \(lead.facet.name(language: "en"))"))
+                SpreadHead(eyebrow: L("The same things, other rooms"), title: L("\(Words.topics(lead.shared)) also hang in \(lead.facet.name(language: AppLanguage.code))"))
                 ForEach(overlaps, id: \.facet.key) { o in
                     NavigationLink(value: Route.room(subject: o.facet.subject, facet: o.facet.id)) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("also hang in \(o.facet.name(language: "en"))").font(.callout.weight(.medium)).foregroundStyle(palette.onSurface)
+                            Text("also hang in \(o.facet.name(language: AppLanguage.code))").font(.callout.weight(.medium)).foregroundStyle(palette.onSurface)
                             Text("\(Words.count(o.shared)) · \(o.examples.joined(separator: ", "))").font(.caption).foregroundStyle(palette.onSurfaceVariant).lineLimit(2)
                         }
                     }
@@ -247,8 +247,8 @@ struct RoomScreen: View {
             .padding(.top, 28)
         }
         if let room = ui.room, room.total > 0 {
-            Doors(before: room.before.map { ($0.name(language: "en"), Route.room(subject: $0.subject, facet: $0.id)) },
-                  after: room.after.map { ($0.name(language: "en"), Route.room(subject: $0.subject, facet: $0.id)) },
+            Doors(before: room.before.map { ($0.name(language: AppLanguage.code), Route.room(subject: $0.subject, facet: $0.id)) },
+                  after: room.after.map { ($0.name(language: AppLanguage.code), Route.room(subject: $0.subject, facet: $0.id)) },
                   middle: L("Room \(room.position) of \(room.total)"), beforeLabel: L("The room before"), afterLabel: L("The room after"))
                 .padding(.top, 24)
         }

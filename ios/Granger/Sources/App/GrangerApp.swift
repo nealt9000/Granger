@@ -13,11 +13,18 @@ struct GrangerApp: App {
     private let core: Core
     /// Read aloud and Listen (Plan I5 Task 8), for every screen.
     @State private var voice: VoiceCenter
+    /// The crash log (Plan I7 Task 4): its handlers go in first, so a crash while the rest starts is kept.
+    @State private var crashes: CrashLog
 
     init() {
         GrangerCoreKit.start()
         let core = Core(version: Core.version)
         self.core = core
+        let crashes = CrashLog(core: core)
+        _crashes = State(initialValue: crashes)
+        #if DEBUG
+        DebugFeedback.crashIfAsked()
+        #endif
         _voice = State(initialValue: VoiceCenter(core: core))
         // The rooms' one-line descriptions, bundled from Android's assets.
         core.library.roomsJson = { (Bundle.main.url(forResource: "rooms", withExtension: "json")).flatMap { try? String(contentsOf: $0, encoding: .utf8) } ?? "{}" }
@@ -37,9 +44,12 @@ struct GrangerApp: App {
                 .environment(library)
                 .environment(\.core, core)
                 .environment(\.voice, voice)
+                .environment(crashes)
+                // The knowledge languages (Settings › Language, onboarding) drive the library's.
+                .task { await settings.followKnowledge(core) }
                 // Local only flipped in Control Center (Plan I6 Task 8): the app follows.
                 .onAppear { settings.followLocalOnly() }
-                .task(id: "\(settings.wikiLanguage)|\(settings.canFetch)") {
+                .task(id: "\(settings.mainLanguage)|\(settings.canFetch)") {
                     library.watch(core)
                     // Get more's catalog: the shared source asks, Swift fetches and verifies (Plan I4 Task 6).
                     core.library.catalogSource.fetch = { [library] refresh in
@@ -49,7 +59,7 @@ struct GrangerApp: App {
                             if let c { core.library.catalog = c } else { core.library.catalogSource.publish(catalog: nil) }
                         }
                     }
-                    await library.prepareIndexes(core: core, lang: settings.wikiLanguage, allowed: settings.canFetch)
+                    await library.prepareIndexes(core: core, lang: settings.mainLanguage, allowed: settings.canFetch)
                     // The packs in Documents/Packs, opened and listed (Plan I4 Task 5).
                     try? await core.library.refreshPacks()
                 }
@@ -57,6 +67,7 @@ struct GrangerApp: App {
                     // Packs put in or taken out of Granger's folder in the Files app while away.
                     if phase == .active {
                         settings.refreshLocalOnly()
+                        crashes.refresh()
                         Task { try? await core.library.refreshPacks() }
                         voice.music.foregrounded()
                     }
@@ -107,6 +118,8 @@ struct RootView: View {
     /// The first run (Plan I4 Task 8): once, before the privacy line is seen; finished or skipped, it doesn't come back.
     @State private var debugImported = false
     @State private var debugNotice: String?
+    /// `-debugReportSheet YES`: the Report sheet over a made-up Ask reply (Ask is off on the iPhone, as in Android's release).
+    @State private var debugReport = UserDefaults.standard.bool(forKey: "debugReportSheet")
     @State private var onboarding = !UserDefaults.standard.bool(forKey: "onboarding.done") && !UserDefaults.standard.bool(forKey: "privacySeen")
 
     var body: some View {
@@ -118,6 +131,11 @@ struct RootView: View {
             #if DEBUG
             .overlay(alignment: .bottomLeading) { if DebugPlay.entries != nil { DebugPlayLabel() } }
             .overlay(alignment: .topLeading) { if DebugSystem.on { DebugSystemControls().padding(.top, 60) } }
+            #endif
+            #if DEBUG
+            .sheet(isPresented: $debugReport) {
+                ReportFlow(guess: false, sources: 2, report: DebugFeedback.sampleReport)
+            }
             #endif
             .fullScreenCover(isPresented: $onboarding) {
                 OnboardingScreen { readNow in

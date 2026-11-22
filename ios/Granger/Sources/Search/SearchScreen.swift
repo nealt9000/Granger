@@ -40,9 +40,9 @@ struct SearchScreen: View {
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search your library")
         .searchFocused($focused)
         .onSubmit(of: .search) { model.remember(query) }
-        .task(id: "\(query)|\(settings.wikiLanguage)|\(settings.canFetch)") {
+        .task(id: "\(query)|\(settings.knowledge.joined(separator: ","))|\(settings.canFetch)") {
             guard let core else { return }
-            await model.search(query, lang: settings.wikiLanguage, core: core, online: settings.canFetch)
+            await model.search(query, lang: settings.mainLanguage, core: core, online: settings.canFetch)
         }
         .onAppear {
             model.reloadRecent()

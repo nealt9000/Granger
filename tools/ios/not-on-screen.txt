@@ -28,3 +28,32 @@ Widgets/GrangerWidgets.swift: Gustav Holst
 Sources/Downloads/GetMoreScreen.swift: Kiwix
 Sources/Search/SearchScreen.swift: Wikipedia
 Sources/Topic/TopicScreen.swift: Wikipedia
+# Crash reports, MetricKit's diagnostics and the feedback email: English, read by the developer (as Android's); the phone's
+# model by name; the debug email view
+Sources/Feedback/CrashLog.swift: Exception type \(c.exceptionType?.stringValue ?? "?")
+Sources/Feedback/CrashLog.swift: Hang of \(h.hangDuration.formatted())
+Sources/Feedback/CrashLog.swift: iPhone 11 Pro
+Sources/Feedback/CrashLog.swift: iPhone 11 Pro Max
+Sources/Feedback/CrashLog.swift: iPhone 12 mini
+Sources/Feedback/CrashLog.swift: iPhone 12 Pro
+Sources/Feedback/CrashLog.swift: iPhone 12 Pro Max
+Sources/Feedback/CrashLog.swift: iPhone 13 mini
+Sources/Feedback/CrashLog.swift: iPhone 13 Pro
+Sources/Feedback/CrashLog.swift: iPhone 13 Pro Max
+Sources/Feedback/CrashLog.swift: iPhone 14 Plus
+Sources/Feedback/CrashLog.swift: iPhone 14 Pro
+Sources/Feedback/CrashLog.swift: iPhone 14 Pro Max
+Sources/Feedback/CrashLog.swift: iPhone 15 Plus
+Sources/Feedback/CrashLog.swift: iPhone 15 Pro
+Sources/Feedback/CrashLog.swift: iPhone 15 Pro Max
+Sources/Feedback/CrashLog.swift: iPhone 16 Plus
+Sources/Feedback/CrashLog.swift: iPhone 16 Pro
+Sources/Feedback/CrashLog.swift: iPhone 16 Pro Max
+Sources/Feedback/CrashLog.swift: iPhone 16e
+Sources/Feedback/CrashLog.swift: iPhone 17 Pro
+Sources/Feedback/CrashLog.swift: iPhone 17 Pro Max
+Sources/Feedback/CrashLog.swift: iPhone Air
+Sources/Feedback/CrashLog.swift: iPhone SE (2nd generation)
+Sources/Feedback/CrashLog.swift: iPhone SE (3rd generation)
+Sources/Feedback/CrashLog.swift: Writes of \(w.totalWritesCaused.formatted())
+Sources/Feedback/FeedbackSheet.swift: To: \(FeedbackAddress.email)\nSubject: \(subject)\n\n\(body)

@@ -98,6 +98,7 @@ struct TopicScreen: View {
                         .font(Spectral.medium(17)).frame(maxWidth: .infinity).padding(.vertical, 4)
                 }
                 .buttonStyle(.bordered)
+                .accessibilityIdentifier("read-other-language")
             }
         }
     }

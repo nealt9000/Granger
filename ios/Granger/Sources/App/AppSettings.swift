@@ -7,8 +7,12 @@ final class AppSettings {
     private let defaults: UserDefaults
 
     var appearance: Appearance { didSet { defaults.set(appearance.rawValue, forKey: Keys.appearance) } }
-    /// The Wikipedia read online: "en" or "es" (Android's knowledge language for online sources).
-    var wikiLanguage: String { didSet { defaults.set(wikiLanguage, forKey: Keys.wikiLanguage); LibraryGate.shared.languages = [wikiLanguage] } }
+    /// The knowledge languages, main first (Android's `KnowledgeLanguages`, Plan I7 Task 4): Wikipedia online in each,
+    /// Get more's packs, Explore, Home, the time index, topic records and Search. The shared model keeps the choice
+    /// (UserDefaults `knowledge.languages`); this mirrors it ([followKnowledge]) for SwiftUI and the library's gate.
+    private(set) var knowledge: [String] { didSet { LibraryGate.shared.languages = knowledge } }
+    /// The main knowledge language: the Wikipedia Search, Explore and the indexes read first.
+    var mainLanguage: String { knowledge.first ?? "en" }
     /// Offline pictures (Plan O2 Task 2): whether what you keep, and what's saved for now, carries its pictures.
     var savePictures: Bool { didSet { defaults.set(savePictures, forKey: Keys.savePictures); LibraryGate.shared.savePictures = savePictures } }
     /// Saved for now's cap in MB (Android's 100 / 300 / 1000, 300 by default).
@@ -38,7 +42,7 @@ final class AppSettings {
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         appearance = Appearance(rawValue: defaults.string(forKey: Keys.appearance) ?? "") ?? .system
-        wikiLanguage = defaults.string(forKey: Keys.wikiLanguage) ?? AppSettings.phoneWikiLanguage()
+        knowledge = AppSettings.startingKnowledge(defaults)
         textScale = defaults.object(forKey: Keys.textScale) as? Double ?? 1.0
         localOnly = AppSettings.sharedLocalOnly(defaults)
         privacySeen = defaults.bool(forKey: Keys.privacySeen)
@@ -48,7 +52,7 @@ final class AppSettings {
         wifiOnly = defaults.object(forKey: Keys.wifiOnly) as? Bool ?? true
         NetworkGate.shared.open = canFetch
         LibraryGate.shared.wifiOnly = wifiOnly
-        LibraryGate.shared.languages = [wikiLanguage]
+        LibraryGate.shared.languages = knowledge
         LibraryGate.shared.savePictures = savePictures
         LibraryGate.shared.savedCapMb = savedCapMb
         LibraryGate.shared.keepAdultOff = keepAdultOff
@@ -89,20 +93,35 @@ final class AppSettings {
     /// Whether a request may go out now.
     var canFetch: Bool { privacySeen && !localOnly }
 
-    /// Spanish when the phone lists Spanish before English, else English (Android: a second language is offered only
-    /// when the phone lists one).
-    static func phoneWikiLanguage() -> String {
-        for id in Locale.preferredLanguages {
-            let code = Locale(identifier: id).language.languageCode?.identifier ?? ""
-            if code == "es" { return "es" }
-            if code == "en" { return "en" }
+    /// The knowledge languages before the shared model has spoken: the stored choice, else the app's language when the
+    /// catalog has it (English or Spanish), as the model resolves it once the catalog is read. A choice from before Plan
+    /// I7 (Settings' Wikipedia picker, `wikiLanguage`; the UI tests' `-wikiLanguage`) becomes the knowledge language.
+    private static func startingKnowledge(_ defaults: UserDefaults) -> [String] {
+        if defaults.string(forKey: Keys.knowledge) == nil, let old = defaults.string(forKey: Keys.wikiLanguage), ["en", "es"].contains(old) {
+            defaults.set(old, forKey: Keys.knowledge)
+            defaults.removeObject(forKey: Keys.wikiLanguage)
         }
-        return "en"
+        if let stored = defaults.string(forKey: Keys.knowledge)?.split(separator: ",").map(String.init).filter({ !$0.isEmpty }), !stored.isEmpty {
+            return stored
+        }
+        return [AppLanguage.code == "es" ? "es" : "en"]
+    }
+
+    /// Follows the shared knowledge languages (Settings › Language, onboarding). Before the catalog is read and with
+    /// nothing chosen, the model can only say English; that guess is skipped so a Spanish phone doesn't fetch English.
+    @MainActor
+    func followKnowledge(_ core: Core) async {
+        for await langs in core.library.knowledgeLanguages.languages {
+            let chosen = defaults.string(forKey: Keys.knowledge) != nil
+            guard chosen || core.library.catalog != nil else { continue }
+            if langs != knowledge, !langs.isEmpty { knowledge = langs }
+        }
     }
 
     private enum Keys {
         static let appearance = "appearance"
         static let wikiLanguage = "wikiLanguage"
+        static let knowledge = "knowledge.languages"
         static let textScale = "textScale"
         static let localOnly = "localOnly"
         static let privacySeen = "privacySeen"

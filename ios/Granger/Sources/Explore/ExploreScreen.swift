@@ -116,7 +116,7 @@ struct ExploreScreen: View {
             .accessibilityIdentifier("open-spread-plates")
         VStack(alignment: .leading, spacing: 10) {
             let subject = Words.subject(topic.subject)
-            SpreadHead(eyebrow: topic.room.map { "\(subject) · \($0.name(language: "en"))" } ?? subject, title: a.title, standfirst: topic.sentence, large: true)
+            SpreadHead(eyebrow: topic.room.map { "\(subject) · \($0.name(language: AppLanguage.code))" } ?? subject, title: a.title, standfirst: topic.sentence, large: true)
             if !topic.figures.isEmpty { Captions(lines: [a.title] + topic.figures.map(\.caption)) }
             let holds = [topic.kinds > 0 ? L("\(topic.kinds) kinds") : nil, topic.people > 0 ? L("\(topic.people) people") : nil, topic.chapters > 0 ? L("\(topic.chapters) chapters") : nil].compactMap { $0 }
             if !holds.isEmpty { Text("On this spread: \(holds.joined(separator: ", ")).").font(.callout).foregroundStyle(palette.onSurfaceVariant) }

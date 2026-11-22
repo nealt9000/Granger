@@ -1162,6 +1162,22 @@ class IosLibrary(
     fun crashRecords(facts: app.granger.feedback.BuildFacts): app.granger.feedback.CrashRecords =
         app.granger.feedback.CrashRecords(IosCrashStore("$dir/crashes"), facts, { app.granger.screens.nowMillis() }, ::crashStamp)
 
+    /**
+     * What Send feedback's email carries (Android's `FeedbackMail.facts`): the build, the tier (Ask is off on the iPhone,
+     * as in Android's release), the free space, the packs and books counted, and the crash log's reports.
+     */
+    suspend fun feedbackFacts(records: app.granger.feedback.CrashRecords, build: app.granger.feedback.BuildFacts): app.granger.feedback.FeedbackFacts =
+        kotlinx.coroutines.withContext(app.granger.screens.ioDispatcher) {
+            app.granger.feedback.FeedbackFacts(
+                build = build,
+                tier = "Library (Ask off)",
+                freeBytes = runCatching { freeBytes() }.getOrNull(),
+                packs = packLibrary.packs.first().size,
+                books = app.granger.feedback.FeedbackReport.bookCount(bookshelf.books.first()),
+                crashes = records.list(),
+            )
+        }
+
     /** Whether the first run was finished or skipped once. */
     val onboardingPrefs = DefaultsOnboardingPrefs()
 
@@ -1452,7 +1468,8 @@ class IosLibrary(
     fun subject(subjectId: String, facetId: String?, listing: Boolean): OwnedViewModel<app.granger.explore.SubjectViewModel>? {
         val subject = app.granger.explore.Subject.of(subjectId) ?: return null
         return OwnedViewModel {
-            app.granger.explore.SubjectViewModel(subject, exploreSources, facetId = facetId, listing = listing || facetId != null, language = languages().firstOrNull() ?: "en")
+            // The rooms' descriptions and the A–Z follow the app's language, as Android's (phoneLanguage, the default).
+            app.granger.explore.SubjectViewModel(subject, exploreSources, facetId = facetId, listing = listing || facetId != null)
         }
     }
 
