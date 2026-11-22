@@ -17,6 +17,9 @@ Sources/Music/MusicNativesImpl.swift: MUSICBRAINZ ALBUM TYPE
 Sources/Music/MusicNativesImpl.swift: MUSICBRAINZ ALBUM ARTIST
 Sources/Reader/PageBridge.swift: document.documentElement.style.webkitTextSizeAdjust = '\(Int((scale * 100).rounded()))%';
 Sources/Reader/PageBridge.swift: var e = document.getElementById('\(escaped)'); if (e) { e.scrollIntoView({ block: 'start' }); }
+# EmbeddingGemma's prompts, read by the model (Plan I7 call 6)
+Sources/Search/LiteRtEmbedder.swift: task: search result | query: \(text)
+Sources/Search/LiteRtEmbedder.swift: title: \(named.isEmpty ? "none" : named) | text: \(text)
 # PDFKit's reasons go to the shared PdfOpening as data (a log line, not a screen)
 Sources/Books/PdfKitEngine.swift: PDFKit can't read \((path as NSString).lastPathComponent)
 Sources/Books/PdfKitEngine.swift: needs a password

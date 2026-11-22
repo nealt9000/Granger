@@ -58,6 +58,10 @@ targets:
       # tools/ios/fetch-sherpa-onnx.sh, not in git.
       - framework: ../Vendor/SherpaOnnxC.xcframework
         embed: true
+      # LiteRT-LM 0.18.0's embedding engine for search by meaning (Plan I7 call 6): dynamic, fetched by
+      # tools/ios/fetch-litertlm.sh, not in git.
+      - framework: ../Vendor/CLiteRTLM.xcframework
+        embed: true
       - sdk: libc++.tbd
       - sdk: libz.tbd
       # The player widget and the Local only control (Plan I6 Task 8, call 7).
