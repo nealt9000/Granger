@@ -64,7 +64,10 @@ class DefaultsPlayerPrefs(suiteName: String?) : PlayerPrefs {
     constructor() : this(null)
 
     private val d: NSUserDefaults = suiteName?.let { NSUserDefaults(suiteName = it) } ?: NSUserDefaults.standardUserDefaults
+    // Written from the player's coroutines and read by listeners on other threads: guarded, so a put while a listener
+    // comes or goes can't read the list mid-change (a crash in Music's playlist test, Plan I7 Task 6).
     private val listeners = ArrayList<(String?) -> Unit>()
+    private val lock = platform.Foundation.NSLock()
     private fun k(key: String) = "player.$key"
 
     override fun getString(key: String): String? = d.stringForKey(k(key))
@@ -81,11 +84,20 @@ class DefaultsPlayerPrefs(suiteName: String?) : PlayerPrefs {
     }
     fun getInt(key: String, default: Int): Int = getLong(key, default.toLong()).toInt()
 
-    private fun changed(key: String) { listeners.toList().forEach { it(key) } }
+    private fun changed(key: String) { snapshot().forEach { it(key) } }
+
+    private fun snapshot(): List<(String?) -> Unit> {
+        lock.lock()
+        try { return listeners.toList() } finally { lock.unlock() }
+    }
 
     override fun listen(onChange: (key: String?) -> Unit): () -> Unit {
-        listeners += onChange
-        return { listeners -= onChange }
+        lock.lock()
+        try { listeners += onChange } finally { lock.unlock() }
+        return {
+            lock.lock()
+            try { listeners -= onChange } finally { lock.unlock() }
+        }
     }
 }
 
