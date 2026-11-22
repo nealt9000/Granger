@@ -2,8 +2,8 @@
 import AVFAudio
 import SwiftUI
 
-/// Plan I6 Task 5's debug hook: `-debugPlay "<file>|<file>|tone:<seconds>"` plays those files as a queue at launch, so the
-/// UI tests can check playback without the music screens (Tasks 6 and 7). `tone:<seconds>` is a generated sine written to
+/// Plan I6 Task 5's debug hook: `-debugPlay "<file>|<file>|tone:<seconds>"` plays those files as a queue at launch (through
+/// the player hub, in VoiceCenter), so the UI tests can check playback without the music screens (Tasks 6 and 7). `tone:<seconds>` is a generated sine written to
 /// the app's temporary folder (never real music). A hidden label, `debug-play-position`, shows the seconds played.
 enum DebugPlay {
     static var entries: [String]? {
@@ -34,46 +34,13 @@ enum DebugPlay {
     }
 }
 
-/// The spike's raw engine (replaced by the player hub once built): the files back to back on one node.
-@MainActor final class DebugSpikePlayer {
-    static let shared = DebugSpikePlayer()
-    let engine = AVAudioEngine()
-    let node = AVAudioPlayerNode()
-    var started = false
-
-    func start() {
-        guard !started, let entries = DebugPlay.entries else { return }
-        let files = entries.enumerated().compactMap { DebugPlay.file($1, index: $0) }.compactMap { try? AVAudioFile(forReading: $0) }
-        guard let first = files.first else { return }
-        started = true
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-        try? AVAudioSession.sharedInstance().setActive(true)
-        engine.attach(node)
-        engine.connect(node, to: engine.mainMixerNode, format: first.processingFormat)
-        for f in files { node.scheduleFile(f, at: nil) }
-        try? engine.start()
-        node.play()
-    }
-
-    var playedSeconds: Double {
-        guard let t = node.lastRenderTime, let p = node.playerTime(forNodeTime: t) else { return 0 }
-        return Double(p.sampleTime) / p.sampleRate
-    }
-}
-
+/// The seconds played into what plays now, for the UI tests (hidden).
 struct DebugPlayLabel: View {
-    @State private var seconds = 0.0
+    @Environment(\.voice) private var voice
     var body: some View {
-        Text(String(format: "%.1f", seconds))
+        Text(String(format: "%.1f", Double(voice?.media.positionMs ?? 0) / 1000))
             .font(.caption2).opacity(0.01)
             .accessibilityIdentifier("debug-play-position")
-            .task {
-                DebugSpikePlayer.shared.start()
-                while !Task.isCancelled {
-                    seconds = DebugSpikePlayer.shared.playedSeconds
-                    try? await Task.sleep(for: .milliseconds(250))
-                }
-            }
     }
 }
 #endif

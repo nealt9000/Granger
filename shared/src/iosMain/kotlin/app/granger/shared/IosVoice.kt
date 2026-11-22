@@ -204,15 +204,16 @@ object IosSystemSpeech {
 // ---- the output: AVAudioEngine (call 4), Android's AudioTrack ----
 
 /**
- * The voice's output on the iPhone: one AVAudioPlayerNode on an AVAudioEngine. A write is cut into pieces of about a
+ * The voice's output on the iPhone: the voice node of the app's one [AudioGraph] (Plan I6), beside the media node. A write is cut into pieces of about a
  * tenth of a second and waits while more than [AHEAD_MS] is queued unheard, as AudioTrack's small buffer makes Android's
  * write wait, so the sentence marked is the sentence heard. [playedMs] counts what the node has played back since the
  * last flush; [volume] is the node's (the sleep timer's fade). The audio session is the app's (Swift).
  */
-class AvAudioSpeechOutput : SpeechOutput {
-    private val lock = NSRecursiveLock()
-    private val engine = AVAudioEngine()
-    private val node = AVAudioPlayerNode()
+class AvAudioSpeechOutput(private val graph: AudioGraph) : SpeechOutput {
+    /** A graph of its own (tests, and the voice alone). */
+    constructor() : this(AudioGraph())
+
+    private val node get() = graph.voice
     private var rate = 0
     private var format: AVAudioFormat? = null
     private val queued = AtomicLong(0)      // frames scheduled and not yet played back
@@ -221,24 +222,30 @@ class AvAudioSpeechOutput : SpeechOutput {
     private var playing = false
 
     init {
-        engine.attachNode(node)
+        // The engine stopped and started again (another rate's reconnect, a route change): what was queued is gone.
+        graph.onRestart(before = {}, after = {
+            graph.locked {
+                generation.incrementAndGet()
+                node.stop()
+                queued.value = 0
+                if (playing && format != null) node.play()
+            }
+        })
     }
 
-    private inline fun <T> locked(block: () -> T): T { lock.lock(); try { return block() } finally { lock.unlock() } }
+    private inline fun <T> locked(block: () -> T): T = graph.locked(block)
 
     override fun open(sampleRate: Int) = locked {
         if (sampleRate == rate && format != null) return@locked
         val f = AVAudioFormat(standardFormatWithSampleRate = sampleRate.toDouble(), channels = 1u)
-        val wasPlaying = playing
+        generation.incrementAndGet()
         node.stop()
-        if (engine.running) engine.stop()
-        engine.connect(node, engine.mainMixerNode, f)
-        engine.prepare()
+        graph.connectVoice(sampleRate)
         format = f
         rate = sampleRate
         queued.value = 0; played.value = 0
         generation.incrementAndGet()
-        if (wasPlaying) startEngine()
+        if (playing) startEngine()
     }
 
     override suspend fun write(pcm: Pcm) {
@@ -264,7 +271,7 @@ class AvAudioSpeechOutput : SpeechOutput {
     }
 
     private fun startEngine() {
-        if (!engine.running) engine.startAndReturnError(null)
+        graph.startEngine()
         node.play()
     }
 
@@ -291,9 +298,12 @@ class AvAudioSpeechOutput : SpeechOutput {
 
     override val playedMs: Long get() = if (rate <= 0) 0L else played.value * 1000 / rate
 
+    /** The voice node stops; the engine goes on for the music (Plan I6: one graph). */
     override fun close() = locked {
+        playing = false
+        generation.incrementAndGet()
         node.stop()
-        engine.stop()
+        queued.value = 0
     }
 
     private companion object {
@@ -385,10 +395,16 @@ class IosVoice(
         titles = titles,
     )
 
-    private val output = AvAudioSpeechOutput()
+    /** The app's one audio graph (Plan I6 call 1): the voice and the media node mix in it. */
+    val graph = AudioGraph()
+    private val output = AvAudioSpeechOutput(graph)
     private val playback = library.database.playbackDao()
 
     val player = VoicePlayer(output, installed, prefs, playback, ::source, scope, { app.granger.screens.nowMillis() }, audioSession)
+
+    /** Music, audiobooks and the voice behind the shared PlayerHub (Plan I6 Task 5). */
+    val hub = IosPlayerHub(graph, IosMediaLibrary(library.database), playback, DefaultsPlayerPrefs(), player, player.ui, scope,
+        { app.granger.screens.nowMillis() })
 
     // Books' contents for a restore with no reader open: remembered as the reader opens each book.
     private val tocs = HashMap<String, Pair<List<EpubTocEntry>, List<String>>>()

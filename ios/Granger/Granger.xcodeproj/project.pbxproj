@@ -93,6 +93,7 @@
 		F6BB2E6CF6F7A5E10176BCE2 /* BookReaderScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66B1E4DC5AE8F75EB511C8B2 /* BookReaderScreen.swift */; };
 		F75060270AEE1287DB670857 /* PdfKitEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 928EAD1A6D263227DB358965 /* PdfKitEngine.swift */; };
 		F8CC55DC0FEEFAEA8E7862F4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBE5F06445A1835AEC2AFC4F /* AppDelegate.swift */; };
+		F997BB8861130A31E0A948E0 /* PlayerEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469652AD912C027477FE90A0 /* PlayerEngineTests.swift */; };
 		FACF839114C639E9B056C5D7 /* Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D2722559AB140D5CDEAF7A /* Palette.swift */; };
 		FEE4C4EA6CD3AE57E16566C7 /* ReadiumStreamer in Frameworks */ = {isa = PBXBuildFile; productRef = D39A6A7E46FC8F2DCA5ABC33 /* ReadiumStreamer */; };
 		FEE82061083EC6AE33CE8800 /* ReadiumShared in Frameworks */ = {isa = PBXBuildFile; productRef = 6CC0D9E532FCC3F420C6C5A8 /* ReadiumShared */; };
@@ -157,6 +158,7 @@
 		3F836DFBA7941E1A0041B382 /* LibraryUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryUITests.swift; sourceTree = "<group>"; };
 		3F8A78AFDEDC1CB30DAC3AA3 /* rooms.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = rooms.json; sourceTree = "<group>"; };
 		3F9135543A15FAD4A5F44C03 /* ReaderHostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderHostTests.swift; sourceTree = "<group>"; };
+		469652AD912C027477FE90A0 /* PlayerEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerEngineTests.swift; sourceTree = "<group>"; };
 		46D66C3FE2FAC95BCFDB9655 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
 		47606CCEFB5363760F5EA2B4 /* VoiceSettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSettingsScreen.swift; sourceTree = "<group>"; };
 		498C58126A3A1626D62E5A67 /* Granger-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Granger-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -254,6 +256,7 @@
 				651B9AE752157C30B90B5208 /* LibraryTests.swift */,
 				E1B6079F1F1428E9AFB791C4 /* PackImportTests.swift */,
 				B44830ECED20666BE9CE2F47 /* PaletteTests.swift */,
+				469652AD912C027477FE90A0 /* PlayerEngineTests.swift */,
 				3F9135543A15FAD4A5F44C03 /* ReaderHostTests.swift */,
 				5A896CBCC324A443A77ABBBE /* ReadiumSpikeTests.swift */,
 				DE432CE0B5B26714EFA6EC60 /* SherpaSpikeTests.swift */,
@@ -678,6 +681,7 @@
 				0A2CB1AEC0F8553E87E02339 /* LibraryTests.swift in Sources */,
 				2BE945B019A09E218293613F /* PackImportTests.swift in Sources */,
 				03D55B9BC49ADC8D2CA8633C /* PaletteTests.swift in Sources */,
+				F997BB8861130A31E0A948E0 /* PlayerEngineTests.swift in Sources */,
 				4E0AB676333916B0E39497E4 /* ReaderHostTests.swift in Sources */,
 				5A417EAAFA5C5139F90D9BEE /* ReadiumSpikeTests.swift in Sources */,
 				4E97B24CB10A90715C4B035A /* SherpaSpikeTests.swift in Sources */,
