@@ -141,7 +141,8 @@ When I6 merges, every parity row marked I6 is ticked or carries an agreed reason
 ### Task 4: I6a check and merge
 - [ ] JVM suite, `bundleRelease` with R8, and the iPhone suite (53 tests) still green.
 - [ ] The Pixel 6 walkthrough (see Global constraints).
-- [ ] Publish a GrangerCore release and pin it. Merge and push. Tell the peer sessions what moved.
+- [x] Publish a GrangerCore release and pin it. Merge and push. Tell the peer sessions what moved.
+  - Lead's check 2026-11-22 on 2e3692fd: Simulator from an uninstalled app 78 tests, 75 passed, 3 skipped (M4B, 2 speech spikes), 0 failed; JVM `test testAndroidHostTest jvmTest` 3917, 0 failures; `:app:bundleRelease` OK; no Granger crash reports. Release ios-core-2026-11-22 pinned; the app builds against it. Merged to main (fast-forward) and pushed.
   - Done 2026-11-21, after rebasing onto main 4038b4f8 (Classics volumes; no conflicts, text ids unchanged on regeneration).
     - JVM: 3917 tests, 0 failures, run as `./gradlew test testAndroidHostTest jvmTest --continue`. Plain `./gradlew test` skips the Android-target KMP modules (store, media, playback, books, speech, archive…), which have no `test` task; earlier totals taken that way undercounted. `bundleRelease` builds with R8.
     - iPhone: 52/53 on the first full run. The read-aloud book test timed out once waiting for Pause, and the sleep timer test tapped its sheet before it appeared (fixed: it waits for each button). The read-aloud tests then passed twice in a row. The app builds against release ios-core-2026-11-21-5, which also carries Preset.setOf from the Classics volumes work.
